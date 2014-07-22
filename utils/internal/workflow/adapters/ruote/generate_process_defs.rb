@@ -94,7 +94,7 @@ module XYZ
       
       def participant_executable_single_action(name,task_input,context,opts={})
         override_node = opts[:override_node]
-        task = (opts[:override_node] ? task_input.modify_with_node?(override_node) : task_input)
+        task = (opts[:override_node] ? task_input.dup_with_new_node?(override_node) : task_input)
         top_task_idh = context.top_task_idh
         task_info =  {
           "action" => task[:executable_action],

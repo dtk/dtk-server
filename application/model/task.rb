@@ -6,10 +6,41 @@ module DTK
     r8_nested_require('task','template')
     extend CreateClassMixin
     include StatusMixin
+
+    def self.common_columns()
+      [
+       :id,
+       :display_name,
+       :group_id,
+       :status,
+       :result,
+       :updated_at,
+       :created_at,
+       :started_at,
+       :ended_at,
+       :task_id,
+       :temporal_order,
+       :position,
+       :executable_action_type,
+       :executable_action,
+       :commit_message,
+       :assembly_id,
+       :target_id
+      ]
+    end
+
+
+    # if node different than one associated with executable_action then returns new object with modified node
+    # otherwise returns self
+    def dup_with_new_node?(node)
+      new_ea,modified = executable_action().dup_with_new_node?(node)
+      modified ? update_executable_action(new_ea) : self
+    end
+
     # returns list (possibly empty) of subtask idhs that guard this
     def guarded_by(external_guards)
       ret = Array.new
-      ea = self[:executable_action]
+      ea = executable_action()
       return ret unless node_id = ea.respond_to?(:node_id) && ea.node_id
       task_ids = external_guards.select{|g|g[:guarded][:node][:id]}.map{|g|g[:guard][:task_id]}.uniq
       task_ids.map{|task_id|id_handle(:id => task_id)}
@@ -177,15 +208,13 @@ module DTK
     private :update_parents
 
     def update_input_attributes!()
-      task_action = self[:executable_action]
       # updates ruby task object
-      task_action.get_and_update_attributes!(self)
+      executable_action().get_and_update_attributes!(self)
     end
 
     def add_internal_guards!(guards)
-      task_action = self[:executable_action]
       # updates ruby task object
-      task_action.add_internal_guards!(guards)
+      executable_action().add_internal_guards!(guards)
     end
 
     def self.get_top_level_most_recent_task(model_handle,filter=nil)
@@ -302,7 +331,7 @@ module DTK
     end
 
     def get_config_agent_type(executable_action=nil)
-      executable_action ||= self[:executable_action]
+      executable_action ||= executable_action()
       # just takes one sample since assumes all component actions have same config agent
       ((executable_action[:component_actions]||[]).first||{})[:on_node_config_agent_type]
     end
@@ -358,28 +387,6 @@ module DTK
       top_task
     end
 
-    def self.common_columns()
-      [
-       :id,
-       :display_name,
-       :group_id,
-       :status,
-       :result,
-       :updated_at,
-       :created_at,
-       :started_at,
-       :ended_at,
-       :task_id,
-       :temporal_order,
-       :position,
-       :executable_action_type,
-       :executable_action,
-       :commit_message,
-       :assembly_id,
-       :target_id
-      ]
-    end
-
     def ret_command_and_control_adapter_info()
       # TODO: stub
       [:node_config,nil]
@@ -424,8 +431,8 @@ module DTK
 
     # for special tasks that have component actions
     def component_actions()
-      if self[:executable_action].kind_of?(Action::ConfigNode)
-        action = self[:executable_action]
+      if executable_action().kind_of?(Action::ConfigNode)
+        action = executable_action()
         (action[:component_actions]||[]).map{|ca| action[:node] ? ca.merge(:node => action[:node]) : ca}
       else
         subtasks.map{|obj|obj.component_actions()}.flatten
@@ -433,8 +440,8 @@ module DTK
     end
 
     def node_level_actions()
-      if self[:executable_action].kind_of?(Action::NodeLevel)
-        action = self[:executable_action]
+      if executable_action().kind_of?(Action::NodeLevel)
+        action = executable_action()
         return (action[:component_actions]||[]).map{|ca| action[:node] ? ca.merge(:node => action[:node]) : ca}
       else
         subtasks.map{|obj|obj.node_level_actions()}.flatten
@@ -488,7 +495,6 @@ module DTK
       # may be different forms; this is one that is organized by node_group, node, component, attribute
       task_list = render_form_flat(true)
       # TODO: not yet teating node_group
-      
       Task.render_group_by_node(task_list)
     end
 
@@ -496,11 +502,18 @@ module DTK
     # protected, not private, because of recursive call 
      def render_form_flat(top=false)
       # prune out all (sub)tasks except for top and  executable 
-      return render_executable_tasks() if self[:executable_action]
+      return render_executable_tasks() if executable_action(:no_error_if_nil=>true)
       (top ? [render_top_task()] : []) + subtasks.map{|e|e.render_form_flat()}.flatten
     end
 
    private
+     def executable_action(opts={})
+       unless @executable_action ||= self[:executable_action]
+         raise Error.new("executable_action should not be null") unless opts[:no_error_if_nil]
+       end
+       @executable_action
+     end
+
     def self.render_group_by_node(task_list)
       return task_list if task_list.size < 2
       ret = nil
@@ -539,7 +552,7 @@ module DTK
     end
 
     def render_executable_tasks()
-      executable_action = self[:executable_action]
+      executable_action = executable_action()
       sc = executable_action[:state_change_types]
       common_vals = {
         :task_id => id(),

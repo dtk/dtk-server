@@ -1,6 +1,17 @@
 lambda__matching_library_branches =
   lambda{|args|
-  parent_col = (args[:type] == :service_module ? :service_id : :component_id)
+  # parent_col = (args[:type] == :service_module ? :service_id : :component_id)
+  parent_col = 
+    case args[:type]
+      when :service_module
+        return :service_id
+      when :test_module
+        return :test_id
+      when :node_module
+        return :node_module
+      else
+        return :component_id
+      end
   {
     :type => :json, 
     :hidden => true,
@@ -78,6 +89,8 @@ lambda__matching_library_branches =
   :virtual_columns=>{
     :matching_component_library_branches=> lambda__matching_library_branches.call(:type => :component_module),
     :matching_service_library_branches=> lambda__matching_library_branches.call(:type => :service_module),
+    :matching_test_library_branches=> lambda__matching_library_branches.call(:type => :test_module),
+    :matching_node_library_branches=> lambda__matching_library_branches.call(:type => :node_module),
     :service_module=>{
       :type=>:json,
       :hidden=>true,
@@ -106,6 +119,20 @@ lambda__matching_library_branches =
          :convert => true,
          :join_type => :left_outer,
          :join_cond=>{:id => q(:module_branch,:component_id)},
+         :cols => [:id,:group_id,:display_name]
+       },
+       {
+         :model_name => :test_module,
+         :convert => true,
+         :join_type => :left_outer,
+         :join_cond=>{:id => q(:module_branch,:test_id)},
+         :cols => [:id,:group_id,:display_name]
+       },
+       {
+         :model_name => :node_module,
+         :convert => true,
+         :join_type => :left_outer,
+         :join_cond=>{:id => q(:module_branch,:node_id)},
          :cols => [:id,:group_id,:display_name]
        }]
     },
@@ -143,6 +170,6 @@ lambda__matching_library_branches =
        }]
     }
   },
-  :many_to_one=>[:component_module,:service_module,:test_module],
+  :many_to_one=>[:component_module,:service_module,:test_module,:node_module],
   :one_to_many=>[:component_module_ref]
 }

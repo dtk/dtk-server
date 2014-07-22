@@ -234,7 +234,21 @@ module DTK
     end
 
     def self.cols_for_matching_library_branches(type)
-      matching_lib_branches_col = (type.to_s == "component_module" ? :matching_component_library_branches : :matching_service_library_branches)
+      # matching_lib_branches_col = (type.to_s == "component_module" ? :matching_component_library_branches : :matching_service_library_branches)
+      matching_lib_branches_col = 
+        case type.to_s 
+          when 'component_module'
+            return :matching_component_library_branches 
+          when 'service_module'
+            reuturn :matching_service_library_branches
+          when 'test_module'
+            return :matching_test_library_branches
+          when 'node_module'
+            return :matching_node_library_branches
+          else
+            raise Error.new("Unexpected module type '#{type}'!")
+          end
+
       [:id,:repo_id,:version,:branch,module_id_col(type),matching_lib_branches_col]
     end
 

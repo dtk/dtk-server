@@ -30,5 +30,6 @@
    :component_module,#MOD_RESTRUCT: may remove
    :service_module, #MOD_RESTRUCT: may remove
    :test_module #MOD_RESTRUCT: may remove
+   :node_module #MOD_RESTRUCT: may remove
   ]
 }

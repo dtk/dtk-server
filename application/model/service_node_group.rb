@@ -1,11 +1,23 @@
 module DTK
   class ServiceNodeGroup < Node
     def get_node_members()
+      #if ndx_node_members is not empty then {id_handle-> [ng_el1,ng_el2,..]} will be returned
+      self.class.get_ndx_node_members([id_handle()]).values.first||[]
+    end
+
+    def self.get_ndx_node_members(node_group_idhs)
+      ret = Hash.new
+      return ret if node_group_idhs.empty?
       sp_hash = {
-        :cols => [:node_members]
+        :cols => [:id,:display_name,:node_members],
+        :filter => [:oneof,:id,node_group_idhs.map{|ng|ng.get_id()}]
       }
-      rows = get_objs(sp_hash)
-      rows.map{|r|r[:node_member]}
+      mh = node_group_idhs.first.createMH()
+      get_objs(mh,sp_hash).each do |ng|
+        ndx = ng[:id]
+        (ret[ndx] ||= Array.new) << ng[:node_member]
+      end
+      ret
     end
 
     def self.check_valid_id(model_handle,id)

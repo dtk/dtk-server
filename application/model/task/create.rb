@@ -44,7 +44,8 @@ module DTK; class Task
           else
           raise Error.new("Unexpected component_type (#{component_type})")
         end
-
+pp [:create_nodes_task,create_nodes_task]
+raise ErrorUsage.new('stop here')
       opts = {:component_type_filter => component_type}
       task_template_content = Template::ConfigComponents.get_or_generate_template_content([:assembly,:node_centric],assembly,opts)
       stages_config_nodes_task = task_template_content.create_subtask_instances(task_mh,assembly.id_handle())
@@ -128,6 +129,7 @@ module DTK; class Task
       running_node_task
     end
 
+    #This is is the 'inventory node groups', not the node groups in the service instances'
     def create_from_node_group(node_group_idh,commit_msg=nil)
       ret = nil
       target_idh = node_group_idh.get_parent_id_handle_with_auth_info()

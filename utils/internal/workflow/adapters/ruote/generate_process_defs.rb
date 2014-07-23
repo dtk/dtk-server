@@ -77,62 +77,21 @@ module XYZ
       end
 
       def participant_executable_action(name,task,context,opts={})
-        raise Error.new("unregistered participant name (#{name})") unless Ruote::ParticipantList.include?(name) 
-
-        nodes = nil
-        if decompose_in_ruote =  !ActionsHandlingNodeGroups.include?(name)
-          nodes = task[:executable_action].nodes
-          decompose_in_ruote = nodes.size > 1 
-        end
-        if decompose_in_ruote
-          decompose_node_group_in_ruote(nodes,name,task,context,opts)
-        else
-          participant_executable_single_action(name,task,context,opts)
-        end
-      end
-      ActionsHandlingNodeGroups = [:create_node]
-      
-      def participant_executable_single_action(name,task_input,context,opts={})
-        override_node = opts[:override_node]
-        task = (opts[:override_node] ? task_input.dup_with_new_node?(override_node) : task_input)
-        top_task_idh = context.top_task_idh
-        task_info =  {
-          "action" => task[:executable_action],
+        executable_action = task[:executable_action]
+        task_info = {
+          "action" => executable_action,
           "workflow" => self,
           "task" => task,
-          "top_task_idh" => top_task_idh
+          "top_task_idh" => context.top_task_idh
         }
-
-        task_info_opts = Hash.new
-        if task_type = opts[:task_type]
-          task_info_opts.merge!(:task_type => task_type)
-        end
-        if override_node
-          task_info_opts.merge!(:override_node_id => override_node.id())
-        end
+        
         task_id = task.id()
-        top_task_id = top_task_idh.get_id()
-        Ruote::TaskInfo.set(task_id,top_task_id,task_info,task_info_opts)
-
-        #TODO: figure exactly which of these from opts are needed
+        Ruote::TaskInfo.set(task_id,context.top_task_idh.get_id(),task_info,:task_type => opts[:task_type])
         participant_params = opts.merge(
           :task_id => task_id,
-          :top_task_id => top_task_id
+          :top_task_id => context.top_task_idh.get_id()
         )
-        if override_node
-          participant_param.merge!(:override_node_id => override_node.id())
-        end
         participant(name,participant_params)
-      end
-
-      # TODO: need to see if big performance improvement if rather than decomposing using ruote
-      # from ruote perspective node group is just item
-      def decompose_node_group_in_ruote(nodes,name,task,context,opts={})
-        unless context.guards.empty?
-          Log.error("Not implemented for guards since not generating new_context = context.new_concurrent_context(...)")
-        end
-        concurrence_body = nodes.map{|node|participant_executable_single_action(name,task,context,:override_node => node)}
-        concurrence(concurrence_body)
       end
 
       def ret_guards(guard_tasks)
@@ -182,7 +141,6 @@ module XYZ
         end
       end
 
-      #TODO: this is used for guards; if guards removed then can probably remove this
       class Context 
         def initialize(guards,top_task_idh,peer_tasks=nil)
           @guards = guards||[]
@@ -190,7 +148,7 @@ module XYZ
           @peer_tasks = peer_tasks||[]
         end
 
-        attr_reader :top_task_idh, :guards
+        attr_reader :top_task_idh
 
         def get_guard_tasks(action)
           ret = nil

@@ -24,8 +24,6 @@ module DTK; class Task
           else
             raise Error.new("Unexpected component_type (#{component_type})")
         end
-##pp [:create_nodes_task,create_nodes_task]
-##raise ErrorUsage.new('stop here')
       opts = {:component_type_filter => component_type}
       task_template_content = Template::ConfigComponents.get_or_generate_template_content([:assembly,:node_centric],assembly,opts)
       stages_config_nodes_task = task_template_content.create_subtask_instances(task_mh,assembly.id_handle())
@@ -58,7 +56,9 @@ module DTK; class Task
     end
 
     class CreateNodes < self
-      def self.create_subtask(task_mh,state_change_list)
+      def self.create_subtask(task_mh,state_change_list_x)
+        # prune out all node groups
+        state_change_list = state_change_list_x.reject{|sc|sc[:node].is_node_group?()}
         return nil unless state_change_list and not state_change_list.empty?
         ret = nil
         all_actions = Array.new

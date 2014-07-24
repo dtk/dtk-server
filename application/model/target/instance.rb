@@ -3,6 +3,10 @@ module DTK
     class Instance < self
       subclass_model :target_instance, :target, :print_form => 'target'
 
+      def iaas_properties()
+        IAASProperties.new(:target_instance => self)
+      end
+
       def self.create_target(project_idh,provider,region,opts={})
         properties = provider.get_field?(:iaas_properties).merge(:region => region)
         provider_type = provider.get_field?(:iaas_type)
@@ -12,7 +16,7 @@ module DTK
         end
 
         target_name = opts[:target_name]|| provider.default_target_name(:region => region)
-        iaas_properties = IAASProperties.new(target_name,properties)
+        iaas_properties = IAASProperties.new(:name => target_name, :iaas_properties => properties)
         create_targets?(project_idh,provider,[iaas_properties],:raise_error_if_exists=>true).first
       end
 

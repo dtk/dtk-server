@@ -10,9 +10,9 @@ module DTK
         super
         assembly_template_idh = model_handle.createIDH(:model_name => :component, :id => hash[:ancestor_id])
         sao_node_bindings = clone_proc.service_add_on_node_bindings()
-        target = hash[:target_idh].create_object()
+        target = hash[:target_idh].create_object(:model_name => :target_instance)
         matches = 
-          if target.get_field?(:iaas_type) == 'physical'
+          unless target.iaas_properties.supports_create_image?()
             find_node_target_ref_matches(target,assembly_template_idh)
           else
             # can either be node templates, meaning spinning up node, or

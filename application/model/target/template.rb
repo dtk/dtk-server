@@ -68,7 +68,7 @@ module DTK
         iaas_properties_list = regions.map do |region|
           name = default_target_name(:region => region)
           properties = common_iaas_properties.merge(:region => region)
-          IAASProperties.new(name,properties)
+          IAASProperties.new(:name => name, :iaas_properties => properties)
         end
         Instance.create_targets?(project_idh,self,iaas_properties_list)
       end

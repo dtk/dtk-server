@@ -17,11 +17,16 @@ module DTK
         ret_value?(:puppet_version)||R8::Config[:puppet][:version]
       end
 
-      def self.assembly_attribute_filter()
-        AssemblyAttributeFilter
+      def self.target_ref_attributes_filter()
+        TargetRefAttributeFilter
       end
-      NodeTemplateAttributes = ['host_addresses_ipv4','node_components','fqdn']
-      AssemblyAttributeFilter = [:and] + NodeTemplateAttributes.map{|a|[:neq,:display_name,a]}
+      def self.assembly_template_attribute_filter()
+        AssemblyTemplateAttributeFilter
+      end
+      TargetRefAttributes = ['host_addresses_ipv4','fqdn','node_components','puppet_version']
+      TargetRefAttributeFilter = [:oneof,:display_name,TargetRefAttributes]
+      NonTemplateAttributes = ['host_addresses_ipv4','node_components','fqdn']
+      AssemblyTemplateAttributeFilter = [:and] + NonTemplateAttributes.map{|a|[:neq,:display_name,a]}
 
       def self.cache_attribute_values!(nodes,name)
         nodes_to_query = nodes.reject{|node|Cache.attr_is_set?(node,name)}
@@ -102,10 +107,17 @@ module DTK
         NodeAttribute.cache_attribute_values!(nodes,name)
       end
 
-      # node_level_assembly_attributes are ones that are persited on assembly logical nodes, not node template
-      def get_node_level_assembly_attributes(node_idhs,opts={})
+      # target_ref_attributes are ones used on target refs and can also be on instances
+      def get_target_ref_attributes(node_idhs,opts={})
         cols = opts[:cols] || [:id,:display_name,:node_node_id,:attribute_value]
-        add_filter = NodeAttribute.assembly_attribute_filter()
+        add_filter = NodeAttribute.target_ref_attributes_filter()
+        get_node_level_attributes(node_idhs,:cols=>cols,:add_filter=>add_filter)
+      end
+
+      # node_level_assembly_template_attributes are ones that are persisted in service modules
+      def get_node_level_assembly_template_attributes(node_idhs,opts={})
+        cols = opts[:cols] || [:id,:display_name,:node_node_id,:attribute_value]
+        add_filter = NodeAttribute.assembly_template_attribute_filter()
         get_node_level_attributes(node_idhs,:cols=>cols,:add_filter=>add_filter)
       end
 

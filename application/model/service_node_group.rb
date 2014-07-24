@@ -19,6 +19,9 @@ module DTK
       end
       ret
     end
+    def self.get_attributes_to_copy_to_target_refs(node_group_idhs)
+      Node.get_target_ref_attributes(node_group_idhs,:cols=>Attribute.common_columns())
+    end
 
     def self.check_valid_id(model_handle,id)
       IdNameHelper.check_valid_id(model_handle,id)
@@ -36,6 +39,7 @@ module DTK
     def delete_object(opts={})
       get_node_members().map{|node|node.delete_object(opts)}
     end
+
 
    private
     module IdNameHelper

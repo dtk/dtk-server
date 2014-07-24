@@ -31,6 +31,7 @@ module DTK; class Node; class TargetRef
       # This creates if needed target refs and links nodes to them
       # returns new idhs indexed by node (id) they linked to
       # or if they exist their idhs
+      # for any node that is node group, this copies the node group's attributes to the target refs
       def self.create_linked_target_refs?(target,assembly,nodes)
         ret = Hash.new
         ndx_target_ref_idhs = TargetRef.ndx_matching_target_ref_idhs(:node_instance_idhs => nodes.map{|n|n.id_handle})
@@ -58,6 +59,7 @@ module DTK; class Node; class TargetRef
           all_idhs = Model.input_hash_content_into_model(target.id_handle(),create_objs_hash,:return_idhs => true)
           #all idhs have both nodes and node_group_rels
           ngr_idhs = all_idhs.select{|idh|idh[:model_name] == :node_group_relation}
+          copy_node_group_attrs_to_target_refs?(nodes,ngr_idhs)
           ret.merge!(TargetRef.ndx_matching_target_ref_idhs(:node_group_relation_idhs => ngr_idhs))
         end
         ret
@@ -80,6 +82,14 @@ module DTK; class Node; class TargetRef
         end
         Log.error("need to also update top.id_info since parent field is being updated")
         Model.update_from_rows(attr_mh,rows_to_update)
+      end
+
+      def self.copy_node_group_attrs_to_target_refs?(nodes,ngr_idhs)
+        node_groups = nodes.select{|n|n.is_node_group?()}
+        return if node_groups.empty?
+        ng_attrs = ServiceNodeGroup.get_attributes_to_copy_to_target_refs(node_groups.map{|ng|ng.id_handle()})
+        pp ng_attrs
+raise Error.new
       end
 
       # node_instance and target_ref can be ids or be uri paths

@@ -20,8 +20,9 @@ module DTK
       ret
     end
     def self.get_attributes_to_copy_to_target_refs(node_group_idhs)
-      Node.get_target_ref_attributes(node_group_idhs,:cols=>Attribute.common_columns())
+      Node.get_target_ref_attributes(node_group_idhs,:cols=>CopyToTargetRefAttrs)
     end
+    CopyToTargetRefAttrs = (Attribute.common_columns + [:ref,:node_node_id]).uniq - [:id]
 
     def self.check_valid_id(model_handle,id)
       IdNameHelper.check_valid_id(model_handle,id)

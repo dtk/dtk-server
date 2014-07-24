@@ -59,7 +59,7 @@ module DTK; class Node; class TargetRef
           all_idhs = Model.input_hash_content_into_model(target.id_handle(),create_objs_hash,:return_idhs => true)
           #all idhs have both nodes and node_group_rels
           ngr_idhs = all_idhs.select{|idh|idh[:model_name] == :node_group_relation}
-          copy_node_group_attrs_to_target_refs?(nodes,ngr_idhs)
+          copy_node_group_attrs_to_target_refs?(target,nodes,ngr_idhs)
           ret.merge!(TargetRef.ndx_matching_target_ref_idhs(:node_group_relation_idhs => ngr_idhs))
         end
         ret
@@ -84,12 +84,43 @@ module DTK; class Node; class TargetRef
         Model.update_from_rows(attr_mh,rows_to_update)
       end
 
-      def self.copy_node_group_attrs_to_target_refs?(nodes,ngr_idhs)
+      def self.copy_node_group_attrs_to_target_refs?(target,nodes,ngr_idhs)
         node_groups = nodes.select{|n|n.is_node_group?()}
         return if node_groups.empty?
-        ng_attrs = ServiceNodeGroup.get_attributes_to_copy_to_target_refs(node_groups.map{|ng|ng.id_handle()})
-        pp ng_attrs
-raise Error.new
+        
+        ng_idhs = node_groups.map{|ng|ng.id_handle()}
+        ndx_ng_attrs = Hash.new
+        ServiceNodeGroup.get_attributes_to_copy_to_target_refs(ng_idhs).each do |attr_x|
+          node_group_id = attr_x.delete(:node_node_id)
+
+          #remove nil fields
+          attr = Hash.new
+          attr_x.each do |field,val|
+            attr[field] = val unless val.nil?
+          end
+
+          (ndx_ng_attrs[node_group_id] ||= Array.new) << attr
+        end
+
+        sp_hash = {
+          :cols => [:node_id,:node_group_id],
+          :filter => [:oneof,:id,ngr_idhs.map{|idh|idh.get_id()}]
+        }
+        ngr_mh = target.model_handle(:node_group_relation)
+        create_rows = Array.new
+        Model.get_objs(ngr_mh,sp_hash).each do |ngr|
+          node_group_id = ngr[:node_group_id]
+          unless attrs = ndx_ng_attrs[ngr[:node_group_id]]
+            Log.error("Unexpected that node group id is not found in node_group_refs")
+            next
+          end
+          target_ref_id = ngr[:node_id]
+          attrs.each do |attr|
+            create_rows << attr.merge(:node_node_id => target_ref_id)
+          end
+        end
+        attr_mh = node_groups.first.model_handle.create_childMH(:attribute)
+        Model.create_from_rows(attr_mh,create_rows,:convert => true)
       end
 
       # node_instance and target_ref can be ids or be uri paths

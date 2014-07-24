@@ -128,12 +128,14 @@ module DTK
         if add_filter = opts[:add_filter]
           filter = [:and,filter,add_filter]
         end
+        cols = opts[:cols] || [:id,:group_id,:display_name,:required]
         sp_hash = {
-          :cols => opts[:cols] || [:id,:group_id,:display_name,:required],
+          :cols => cols,
           :filter => filter,
         }
         attr_mh = node_idhs.first.createMH(:attribute)
-        get_objs(attr_mh,sp_hash)
+        opts = (cols.include?(:ref) ? {:keep_ref_cols => true} : {})
+        get_objs(attr_mh,sp_hash,opts)
       end
 
       def get_virtual_attributes(attrs_to_get,cols,field_to_match=:display_name)

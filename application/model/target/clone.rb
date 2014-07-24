@@ -55,7 +55,7 @@ module DTK
 
         # The method create_target_refs_and_links?
         # - creates if needed target refs and links to them
-        # -  moves node attributes to the target refs
+        # - moves node attributes to the target refs
         # - creates if needed 'create node' state change objects
         create_target_refs_and_links?(target,assembly,nodes)
 
@@ -137,20 +137,35 @@ module DTK
 
         target_idh = target.id_handle()
         node_new_items = pruned_nodes.map{|node|{:new_item => node.id_handle(), :parent => target_idh}}
-        add_state_changes_for_node_group_members!(node_new_items,pruned_nodes)
-        StateChange.create_pending_change_items(node_new_items)
+        sc_hashes = create_state_change_objects(target_idh,node_new_items)
+        create_state_changes_for_node_group_members(target_idh,pruned_nodes,sc_hashes)
+        nil
       end
 
-      def self.add_state_changes_for_node_group_members!(node_new_items,nodes)
+      def self.create_state_changes_for_node_group_members(target_idh,nodes,sc_hashes)
+        ret = Array.new
         node_groups = nodes.select{|n|n.is_node_group?()}
-        return if node_groups.empty?
+        return ret if node_groups.empty?
         ng_mh =  node_groups.first.model_handle()
+        ndx_sc_ids = sc_hashes.inject(Hash.new){|h,sc|h.merge(sc[:node_id] => sc[:id])}
+        sc_mh = target_idh.createMH(:state_change)
+        new_items_hash = Array.new
         ServiceNodeGroup.get_ndx_node_members(node_groups.map{|ng|ng.id_handle()}).each do |ng_id,node_members|
-          parent = ng_mh.createIDH(:id => ng_id)
+          unless ng_state_change_id = ndx_sc_ids[ng_id]
+            Log.eror("Unexpected that ndx_sc_ihs[ng_id] is null")
+            next
+          end
+          ng_state_change_idh = sc_mh.createIDH(:id => ng_state_change_id)
           node_members.each do |node|
-            node_new_items << {:new_item => node.id_handle(), :parent => parent}
+            new_items_hash << {:new_item => node.id_handle(), :parent => ng_state_change_idh}
           end
         end
+        create_state_change_objects(target_idh,new_items_hash)
+      end
+
+      def self.create_state_change_objects(target_idh,new_items_hash)
+        opts_sc = {:target_idh => target_idh,:returning_sql_cols => [:id,:display_name,:group_id,:node_id]}
+        StateChange.create_pending_change_items(new_items_hash,opts_sc)
       end
 
       def self.create_add_on_port_and_attr_links?(target,clone_copy_output,opts)

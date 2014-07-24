@@ -90,6 +90,7 @@ module DTK
       end
      private
       def hash_subset_aux(seed,hash,keys,opts={},&block)
+        keys = [keys] unless keys.kind_of?(Array)
         keys.inject(seed) do |ret,k|
           index = k.kind_of?(Hash) ? k.keys.first : k
           if opts[:only_non_nil] and hash[index].nil?

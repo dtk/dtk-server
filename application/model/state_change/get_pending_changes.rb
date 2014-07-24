@@ -1,8 +1,5 @@
-# TODO: this file naem somewhat of a misnomer; both pending changes but also converging a 'region' such as asssembly, node group, target ..
+# TODO: this file name somewhat of a misnomer; both pending changes but also converging a 'region' such as asssembly, node group, target ..
 module DTK; class StateChange
-  r8_nested_require('get_pending_changes','assembly')
-  r8_nested_require('get_pending_changes','node_centric')
-
   module GetPendingChangesClassMixin
     def get_ndx_node_config_changes(target_idh)
       # TODO: there is probably more efficient info to get; this provides too much

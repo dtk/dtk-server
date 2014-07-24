@@ -4,6 +4,9 @@ module DTK
     r8_nested_require('task','status')
     r8_nested_require('task','action')
     r8_nested_require('task','template')
+    r8_nested_require('task','stage')
+
+
     extend CreateClassMixin
     include StatusMixin
 

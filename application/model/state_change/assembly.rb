@@ -41,28 +41,26 @@ module DTK; class StateChange
           sorted_ndx_ret << sorted_component_list.compact
         end
       rescue Exception => e
-        # pp "Sorting components failed. Returning random component order"
+        # Sorting components failed. Returning random component order
         return ndx_ret.values
       end
-      return sorted_ndx_ret
+      sorted_ndx_ret
     end
 
-    # no generate option needed for node state changes
     def self.node_state_changes(assembly,target_idh)
-      changes = Array.new
+      ret = Array.new
       assembly_nodes = assembly.get_nodes()
-      return changes if assembly_nodes.empty?
+      return ret if assembly_nodes.empty?
 
       added_state_change_filters = [[:oneof, :node_id, assembly_nodes.map{|r|r[:id]}]]
       target_mh = target_idh.createMH()
       last_level = pending_create_node(target_mh,[target_idh],:added_filters => added_state_change_filters)
       state_change_mh = target_mh.create_childMH(:state_change)
       while not last_level.empty?
-        changes += last_level
-        last_level = pending_create_node(state_change_mh,last_level.map{|obj|obj.id_handle()},:added_filters => added_state_change_filters)
+        ret += last_level
+        last_level = pending_create_node(state_change_mh,last_level.map{|obj|obj.id_handle()})
       end
-      ##group by node id (and using fact that each wil be unique id)
-      changes.map{|ch|[ch]}
+      ret
     end
   end
 end; end

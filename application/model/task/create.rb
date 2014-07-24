@@ -1,48 +1,28 @@
-r8_nested_require('stage','intra_node')
-r8_nested_require('stage','puppet_stage_generator')
+#TODO: clean this file up; much cut and patse. moving methods we want to keep towards the top
 module DTK; class Task
   module CreateClassMixin
-    def create_and_start_from_assembly_instance(assembly,opts={})
-      target_idh = target_idh_from_assembly(assembly)
-      task_mh = target_idh.create_childMH(:task)
-
-      component_type = opts[:component_type]||:service
-      commit_msg = opts[:commit_msg]
-      # TODO: not doing at this point puppet version per run; it just can be set when node is created
-      puppet_version = opts[:puppet_version]
-
-      ret = create_new_task(task_mh,:assembly_id => assembly[:id],:display_name => "assembly_converge", :temporal_order => "sequential",:commit_message => commit_msg)
-
-      create_node_tasks = task_when_nodes_created_and_started_from_assembly(assembly, :assembly, opts)
-      ret.add_subtask(create_node_tasks) if create_node_tasks
-
-      opts = {:component_type_filter => component_type}
-      task_template_content = Template::ConfigComponents.get_or_generate_template_content([:assembly,:node_centric],assembly,opts)
-      stages_config_nodes_task = task_template_content.create_subtask_instances(task_mh,assembly.id_handle())
-      ret.add_subtasks(stages_config_nodes_task) unless stages_config_nodes_task.empty?
-      ret
-    end
-
     def create_from_assembly_instance(assembly,opts={})
-      component_type = opts[:component_type]||:service
-      commit_msg = opts[:commit_msg]
-      # TODO: not doing at this point puppet version per run; it just can be set when node is created
-      puppet_version = opts[:puppet_version]
+      Create.create_from_assembly_instance(assembly,opts)
+    end
+  end
 
+  class Create
+    def self.create_from_assembly_instance(assembly,opts={})
+      component_type = opts[:component_type]||:service
       target_idh = target_idh_from_assembly(assembly)
       task_mh = target_idh.create_childMH(:task)
-
-      ret = create_new_task(task_mh,:assembly_id => assembly[:id],:display_name => "assembly_converge", :temporal_order => "sequential",:commit_message => commit_msg)
+      
+      ret = create_top_level_task(task_mh,assembly,Aux.hash_subset(opts,:commit_msg))
 
       create_nodes_task = 
         case component_type
           # smoketest should not create a node
           when :smoketest then nil
           when :service 
-            create_nodes_changes = StateChange::Assembly::node_state_changes(assembly,target_idh)
-            create_nodes_task(task_mh,create_nodes_changes)
+            create_nodes_changes = StateChange::Assembly.node_state_changes(assembly,target_idh)
+            CreateNodes.create_subtask(task_mh,create_nodes_changes)
           else
-          raise Error.new("Unexpected component_type (#{component_type})")
+            raise Error.new("Unexpected component_type (#{component_type})")
         end
 ##pp [:create_nodes_task,create_nodes_task]
 ##raise ErrorUsage.new('stop here')
@@ -52,6 +32,71 @@ module DTK; class Task
 
       opts.merge!(:allow_empty_task => true) unless create_nodes_task.nil? && task_template_content.empty?
       ret.add_subtask(create_nodes_task) if create_nodes_task
+      ret.add_subtasks(stages_config_nodes_task) unless stages_config_nodes_task.empty?
+      ret
+    end
+
+    #TODO: below will be private when finish refactoring this file
+    def self.target_idh_from_assembly(assembly)
+      assembly.get_target().id_handle()
+    end
+    def self.create_new_task(task_mh,hash)
+      Task.create_stub(task_mh,hash)
+    end
+
+    def self.create_top_level_task(task_mh,assembly,opts={})
+      task_info_hash = {
+        :assembly_id => assembly.id,
+        :display_name => "assembly_converge", 
+        :temporal_order => "sequential",
+      }
+      if commit_msg = opts[:commit_msg]
+        task_info_hash.mereg!(:commit_message => commit_msg)
+      end
+
+      create_new_task(task_mh,task_info_hash)
+    end
+
+    class CreateNodes < self
+      def self.create_subtask(task_mh,state_change_list)
+        return nil unless state_change_list and not state_change_list.empty?
+        ret = nil
+        all_actions = Array.new
+        if state_change_list.size == 1
+          executable_action = Action::CreateNode.create_from_state_change(state_change_list.first)
+          all_actions << executable_action
+          ret = create_new_task(task_mh,:executable_action => executable_action) 
+        else
+          ret = create_new_task(task_mh,:display_name => "create_node_stage", :temporal_order => "concurrent")
+          state_change_list.each do |sc|
+            executable_action = Action::CreateNode.create_from_state_change(sc)
+            all_actions << executable_action
+            ret.add_subtask_from_hash(:executable_action => executable_action)
+          end
+        end
+        attr_mh = task_mh.createMH(:attribute)
+        Action::CreateNode.add_attributes!(attr_mh,all_actions)
+        ret
+      end
+    end
+  end
+
+  #TODO: move from below when decide whether needed; looking to geenralize above so can subsume below 
+  module CreateClassMixin
+    def create_and_start_from_assembly_instance(assembly,opts={})
+      target_idh = target_idh_from_assembly(assembly)
+      task_mh = target_idh.create_childMH(:task)
+
+      component_type = opts[:component_type]||:service
+
+      ret = Create.create_top_level_task(task_mh,assembly,Aux.hash_subset(opts,:commit_msg))
+
+      create_node_tasks = task_when_nodes_created_and_started_from_assembly(assembly, :assembly, opts)
+      ret.add_subtask(create_node_tasks) if create_node_tasks
+
+      opts = {:component_type_filter => component_type}
+      task_template_content = Template::ConfigComponents.get_or_generate_template_content([:assembly,:node_centric],assembly,opts)
+      stages_config_nodes_task = task_template_content.create_subtask_instances(task_mh,assembly.id_handle())
       ret.add_subtasks(stages_config_nodes_task) unless stages_config_nodes_task.empty?
       ret
     end
@@ -282,7 +327,7 @@ module DTK; class Task
 
    private
     def target_idh_from_assembly(assembly)
-      assembly.get_target().id_handle()
+      Create.target_idh_from_assembly(assembly)
     end
 
     def create_nodes_task(task_mh,state_change_list)
@@ -484,7 +529,7 @@ module DTK; class Task
     end
 
     def create_new_task(task_mh,hash)
-      create_stub(task_mh,hash)
+      Create.create_new_task(task_mh,hash)
     end
   end
 end; end

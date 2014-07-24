@@ -89,17 +89,21 @@ module DTK; class Node; class TargetRef
         return if node_groups.empty?
         
         ng_idhs = node_groups.map{|ng|ng.id_handle()}
-        ndx_ng_attrs = Hash.new
-        ServiceNodeGroup.get_attributes_to_copy_to_target_refs(ng_idhs).each do |attr_x|
-          node_group_id = attr_x.delete(:node_node_id)
+        ndx_ng_target_ref_attrs = Hash.new
+        ServiceNodeGroup.get_attributes_to_copy_to_target_refs(ng_idhs).each do |ng_attr|
+          node_group_id = ng_attr.delete(:node_node_id)
 
-          #remove nil fields
-          attr = Hash.new
-          attr_x.each do |field,val|
-            attr[field] = val unless val.nil?
+          target_ref_attr = Hash.new
+          ng_attr.each do |field,val|
+            if field == :type
+              target_ref_attr[field] = Node::Type.target_ref
+            else
+              #remove nil fields
+              target_ref_attr[field] = val unless val.nil?
+            end
           end
 
-          (ndx_ng_attrs[node_group_id] ||= Array.new) << attr
+          (ndx_ng_target_ref_attrs[node_group_id] ||= Array.new) << target_ref_attr
         end
 
         sp_hash = {
@@ -110,12 +114,12 @@ module DTK; class Node; class TargetRef
         create_rows = Array.new
         Model.get_objs(ngr_mh,sp_hash).each do |ngr|
           node_group_id = ngr[:node_group_id]
-          unless attrs = ndx_ng_attrs[ngr[:node_group_id]]
+          unless target_ref_attrs = ndx_ng_target_ref_attrs[ngr[:node_group_id]]
             Log.error("Unexpected that node group id is not found in node_group_refs")
             next
           end
           target_ref_id = ngr[:node_id]
-          attrs.each do |attr|
+          target_ref_attrs.each do |attr|
             create_rows << attr.merge(:node_node_id => target_ref_id)
           end
         end

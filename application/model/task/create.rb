@@ -2,7 +2,9 @@
 module DTK; class Task
   module CreateClassMixin
     def create_from_assembly_instance(assembly,opts={})
-      Create.create_from_assembly_instance(assembly,opts)
+      task = Create.create_from_assembly_instance(assembly,opts)
+      #alters task if needed to decompose node groups into nodes
+      NodeGroupProcessing.decompose_node_groups!(task)
     end
   end
 

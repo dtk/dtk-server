@@ -49,14 +49,15 @@ module XYZ
 
       ####synactic processing
       def compute_process_body(task,context)
-        if task[:executable_action]
-          compute_process_executable_action(task,context)
-        elsif task[:temporal_order] == "sequential"
-          compute_process_body_sequential(task.subtasks,context)
-        elsif task[:temporal_order] == "concurrent"
-          compute_process_body_concurrent(task.subtasks,context)
-        else
-          Log.error("do not have rules to process task")
+        case task.temporal_type()
+          when :leaf
+            compute_process_executable_action(task,context)
+          when :sequential
+            compute_process_body_sequential(task.subtasks,context)
+          when :concurrent
+            compute_process_body_concurrent(task.subtasks,context)
+          else
+            Log.error("do not have rules to process task")
         end
       end
 

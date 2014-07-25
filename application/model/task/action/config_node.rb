@@ -6,6 +6,10 @@ module DTK; class Task
         new(:execution_blocks,exec_blocks,task_idh,assembly_idh)
       end
 
+      def create_node_group_member(node)
+        self.class.new(:hash,:node => node,:node_group_member => true)
+      end
+
       def set_intra_node_stages!(intra_node_stages)
         self[:intra_node_stages] = intra_node_stages
       end

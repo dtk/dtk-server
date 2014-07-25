@@ -5,7 +5,7 @@ module DTK
     r8_nested_require('task','action')
     r8_nested_require('task','template')
     r8_nested_require('task','stage')
-
+    r8_nested_require('task','node_group_processing')
 
     extend CreateClassMixin
     include StatusMixin
@@ -32,6 +32,25 @@ module DTK
       ]
     end
 
+    # can be :sequential, :concurrent, :executable_action, or :decomposed_node_group
+    def basic_type()
+      if ea = self[:executable_action]
+        ea[:decomposed_node_group] ? :decomposed_node_group : :executable_action
+      elsif self[:temporal_order] == "sequential"
+        :sequential
+      elsif self[:temporal_order] == "concurrent"
+        :concurrent
+      end 
+    end
+
+    # can be :sequential, :concurrent, or :leaf
+    def temporal_type()
+      case basic_type()
+        when :decomposed_node_group,:concurrent then :concurrent
+        when :sequential then :sequential
+        else :leaf
+      end
+    end
 
     # if node different than one associated with executable_action then returns new object with modified node
     # otherwise returns self

@@ -41,11 +41,21 @@ module DTK
     end
 
     def create_obj_optional_subclass()
-      is_node_group?() ? create_subclass_obj(node_group_model_name()) : self
+      is_node_group?() ? create_obj_subclass() : self
     end
+    def create_obj_subclass()
+      create_subclass_obj(node_group_model_name())
+    end
+    private :create_obj_subclass
+
     #This is overwritten by node group subclasses
     def get_node_members()
-      [self]
+      #in case this called on superclass that is actually a node group
+      if is_node_group?()
+        create_obj_subclass().get_node_members()
+      else
+        [self]
+      end
     end
 
     def self.create_from_model_handle(hash_scalar_values,model_handle,opts={})

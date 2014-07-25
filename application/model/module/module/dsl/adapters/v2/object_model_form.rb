@@ -123,7 +123,7 @@ module DTK; class ModuleDSL; class V2
         end
         type = input_hash.keys.first
         name_key = 
-          case type 
+          case type
             when "puppet_class" then "class_name" 
             when "puppet_definition" then "definition_name" 
             when "serverspec_test" then "test_name" 

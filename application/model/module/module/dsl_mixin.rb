@@ -42,8 +42,10 @@ module DTK; class BaseModule
     end
 
     def parse_dsl_and_update_model(impl_obj,module_branch_idh,version=nil,opts={})
+      klass = get_mixin_class(self)
       set_dsl_parsed!(false)
-      ModuleDSL.parse_and_update_model(self,impl_obj,module_branch_idh,version,opts)
+      # ModuleDSL.parse_and_update_model(self,impl_obj,module_branch_idh,version,opts)
+      klass.parse_and_update_model(self,impl_obj,module_branch_idh,version,opts)
       set_dsl_parsed!(true)
     end
 
@@ -179,6 +181,15 @@ module DTK; class BaseModule
       end
       raise parsing_error if parsing_error
       ret
+    end
+
+    def get_mixin_class(klass)
+      case klass
+        when NodeModule
+          return NodeModuleDSL
+        else
+          return ModuleDSL
+        end
     end
 
   end

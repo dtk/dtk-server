@@ -62,6 +62,7 @@ module DTK; module ModuleMixins
       # TODO: ModuleBranch::Location: ones that come from local can be omitted
       {:version => version_field, :module_name => module_name, :module_idh => module_idh,:module_branch_idh => module_branch.id_handle()}
     end
+
     # TODO: ModuleBranch::Location: deprecate below for aboce
     def create_ws_module_and_branch_obj?(project,repo_idh,module_name,input_version,ancestor_branch_idh=nil)
       project_idh = project.id_handle()

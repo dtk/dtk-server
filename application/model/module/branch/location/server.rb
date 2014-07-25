@@ -28,6 +28,8 @@ module DTK; class ModuleBranch
               return "sm-#{repo_name}"
             when :test
               return "tm-#{repo_name}"
+            when :node_module
+              return "nm-#{repo_name}"
             else
              repo_name
            end

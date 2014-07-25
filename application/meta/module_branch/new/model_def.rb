@@ -1,17 +1,16 @@
 lambda__matching_library_branches =
   lambda{|args|
-  # parent_col = (args[:type] == :service_module ? :service_id : :component_id)
-  parent_col =
-    case args[:type]
-      when :service_module
-        :service_id
-      when :test_module
-        :test_id
-      when :node_module
-        :node_id
-      else
-        :component_id
-      end
+    parent_col =
+      case args[:type]
+        when :service_module
+          :service_id
+        when :test_module
+          :test_id
+        when :node_module
+          :node_id
+        else
+          :component_id
+        end
   {
     :type => :json, 
     :hidden => true,

@@ -4,6 +4,7 @@ module DTK
   class BaseModule < Model
     r8_nested_require('module','dsl_mixin')
     r8_nested_require('module','dsl')
+    r8_nested_require('module','node_module_dsl')
 
     r8_nested_require('module','version_context_info')
     r8_nested_require('module','delete_mixin')
@@ -88,15 +89,15 @@ module DTK
       end
     end
 
-    def self.model_type()
-      :component_module
-    end
-    def self.component_type()
-      :puppet #hardwired
-    end
-    def component_type()
-      :puppet #hardwired
-    end
+    # def self.model_type()
+    #   :component_module
+    # end
+    # def self.component_type()
+    #   :puppet #hardwired
+    # end
+    # def component_type()
+    #   :puppet #hardwired
+    # end
 
     def self.module_specific_type(config_agent_type)
       config_agent_type

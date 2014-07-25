@@ -29,7 +29,7 @@ module DTK
       repo_idh = id_handle(repo_id,:repo)
       version = ret_version()
       scaffold = ret_request_params(:scaffold_if_no_dsl)
-      opts = {:scaffold_if_no_dsl => scaffold, :do_not_raise => true, :process_external_refs => true}
+      opts = {:scaffold_if_no_dsl => scaffold, :do_not_raise => true, :process_external_refs => false}
       rest_ok_response node_module.update_from_initial_create(commit_sha,repo_idh,version,opts)
     end
 

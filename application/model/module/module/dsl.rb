@@ -289,6 +289,7 @@ module DTK
            # Part of code to handle new serverspec type of module
            when "serverspec" then ConfigAgentTypes[:serverspec]
            when "test" then ConfigAgentTypes[:test]
+           when "node_module" then ConfigAgentTypes[:node_module]
            else 
              ParsingError.new("Unexpected module_type (#{type})")
           end
@@ -299,7 +300,8 @@ module DTK
       ConfigAgentTypes = {
         :puppet => :puppet,
         :serverspec => :serverspec,
-        :test => :test
+        :test => :test,
+        :node_module => :node_module
       }
       DefaultConfigAgentType = ConfigAgentTypes[:puppet]
 

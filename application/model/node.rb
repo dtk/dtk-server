@@ -35,6 +35,7 @@ module DTK
        :target_id,
        :ui,
        :external_ref,
+       :hostname_external_ref,
        :managed,
        :admin_op_status
       ]

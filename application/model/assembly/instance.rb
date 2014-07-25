@@ -185,6 +185,12 @@ module DTK; class  Assembly
       get_objs(node_mh,sp_hash)
     end
 
+    def get_nodes__expand_node_groups(opts={})
+      cols = opts[:cols]||Node.common_columns()
+      node_or_ngs = get_nodes(*cols)
+      ServiceNodeGroup.expand_with_node_group_members?(node_or_ngs)
+    end
+
     def get_augmented_components(opts=Opts.new)
       ret = Array.new
       rows = get_objs(:cols => [:instance_nodes_and_cmps_summary])

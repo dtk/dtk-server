@@ -85,7 +85,7 @@ module DTK; class  Assembly
           list_components(opts)
           
         when :nodes
-          nodes = get_nodes(:id,:display_name,:admin_op_status,:os_type,:external_ref,:type,:managed).sort{|a,b| a[:display_name] <=> b[:display_name] }
+          nodes = get_nodes__expand_node_groups().sort{|a,b| a[:display_name] <=> b[:display_name] }
           nodes.each do |node|
             if external_ref = node[:external_ref]
               external_ref[:dns_name] ||= external_ref[:routable_host_address] #TODO: should be cleaner place to put this

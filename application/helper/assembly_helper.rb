@@ -134,9 +134,7 @@ module Ramaze::Helper
     #   - filtered nodes by pattern (if pattern not nil)
     #   - error message in case it is not valid
     #
-    def nodes_valid_for_stop_or_start?(assembly_name, node_or_ngs, node_pattern, status_pattern)
-      nodes = DTK::ServiceNodeGroup.expand_with_node_group_members?(node_or_ngs)
-
+    def nodes_valid_for_stop_or_start?(assembly, nodes, node_pattern, status_pattern)
       # check for pattern
       unless node_pattern.nil? || node_pattern.empty?
         regex = Regexp.new(node_pattern)
@@ -153,6 +151,7 @@ module Ramaze::Helper
       # check if staged
       nodes.each do |node|
         if node.get_field?(:type) == ::DTK::Node::Type::Node.staged
+          assembly_name = ::DTK::Assembly::Instance.pretty_print_name(assembly)
           return nodes, false, "Nodes for assembly '#{assembly_name}' are 'staged' and as such cannot be started/stopped."
         end
       end
@@ -160,6 +159,7 @@ module Ramaze::Helper
       # check for status -> this will translate to /running|pending/ and /stopped|pending/ checks
       filtered_nodes = nodes.select { |node| node.get_field?(:admin_op_status) =~ Regexp.new("#{status_pattern.to_s}|pending") }
       if filtered_nodes.size == 0
+        assembly_name = ::DTK::Assembly::Instance.pretty_print_name(assembly)
         return nodes, false, "There are no #{status_pattern} nodes for assembly '#{assembly_name}'."
       end
       

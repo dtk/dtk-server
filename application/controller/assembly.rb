@@ -453,14 +453,10 @@ module DTK
         start_assembly = ret_request_params(:start_assembly)
         return rest_ok_response :confirmation_message=>true if start_assembly.nil?
         
-        assembly_idh = ret_request_param_id_handle(:assembly_id,Assembly::Instance)
         node_pattern = ret_request_params(:node_pattern)
-
+        nodes = assembly.get_nodes__expand_node_groups()
         # filters only stopped nodes for this assembly
-        nodes = assembly.get_nodes(:id,:display_name,:type,:external_ref,:hostname_external_ref, :admin_op_status)
-
-        assembly_name = Assembly::Instance.pretty_print_name(assembly)
-        nodes, is_valid, error_msg = nodes_valid_for_stop_or_start?(assembly_name, nodes, node_pattern, :stopped)
+        nodes, is_valid, error_msg = nodes_valid_for_stop_or_start?(assembly, nodes, node_pattern, :stopped)
         
         unless is_valid
           Log.info(error_msg)
@@ -539,14 +535,12 @@ module DTK
 
     def rest__start()
       assembly     = ret_assembly_instance_object()
-      assembly_idh = ret_request_param_id_handle(:assembly_id,Assembly::Instance)
       node_pattern = ret_request_params(:node_pattern)
       task         = nil
 
+      nodes = assembly.get_nodes__expand_node_groups()
       # filters only stopped nodes for this assembly
-      nodes = assembly.get_nodes(:id,:display_name,:type,:external_ref,:hostname_external_ref, :admin_op_status)
-      assembly_name = Assembly::Instance.pretty_print_name(assembly)
-      nodes, is_valid, error_msg = nodes_valid_for_stop_or_start?(assembly_name, nodes, node_pattern, :stopped)
+      nodes, is_valid, error_msg = nodes_valid_for_stop_or_start?(assembly, nodes, node_pattern, :stopped)
 
       unless is_valid
         Log.info(error_msg)
@@ -560,12 +554,12 @@ module DTK
         opts.merge!(:nodes => nodes)
       end
 
-      task = Task.task_when_nodes_ready_from_assembly(assembly_idh.create_object(),:assembly, opts)
+      task = Task.task_when_nodes_ready_from_assembly(assembly,:assembly, opts)
       task.save!()
 
       # queue = SimpleActionQueue.new
 
-      user_object  = ::DTK::CurrentSession.new.user_object()
+      user_object  = CurrentSession.new.user_object()
       CreateThread.defer_with_session(user_object) do
         # invoking command to start the nodes
         CommandAndControl.start_instances(nodes)
@@ -578,11 +572,9 @@ module DTK
     def rest__stop()
       assembly = ret_assembly_instance_object()
       node_pattern = ret_request_params(:node_pattern)
-      nodes =  assembly.get_nodes(:id,:display_name,:type, :external_ref,:admin_op_status)
-      assembly_idh = ret_request_param_id_handle(:assembly_id,Assembly::Instance)
+      nodes = assembly.get_nodes__expand_node_groups()
       
-      assembly_name = Assembly::Instance.pretty_print_name(assembly)
-      nodes, is_valid, error_msg = nodes_valid_for_stop_or_start?(assembly_name, nodes, node_pattern, :running)
+      nodes, is_valid, error_msg = nodes_valid_for_stop_or_start?(assembly, nodes, node_pattern, :running)
 
       unless is_valid
         Log.info(error_msg)

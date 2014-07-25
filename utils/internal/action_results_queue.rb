@@ -64,6 +64,7 @@ module DTK
     def push(index,el)
       @results[index] = el
     end
+
     def all_if_complete()
       # TODO: error message if @results.size > @indexes.size
       (@results.size >= @indexes.size) ? @results : nil

@@ -30,10 +30,7 @@ module DTK
               raise Error.new("Cannot find version context for #{test_cmp[:dispaly_name]}")
             end
             attrib_array = test_cmp[:attributes].map{|a|{a[:display_name].to_sym =>a[:attribute_value]}}
-            unless  test_name = (test_cmp[:external_ref]||{})[:test_name]
-              Log.error("deprecate: in external_ref put in test name")
-              test_name = "network_port_check_spec.rb"
-            end
+            test_name = (test_cmp[:external_ref]||{})[:test_name]
             {
               # :module_name =>"tm-#{version_context[:implementation]}",
               :module_name => version_context[:implementation],
@@ -45,36 +42,12 @@ module DTK
           end
 
           node_ids_with_tests = test_components.inject(Hash.new){|h,tc|h.merge(tc[:node_id] => true)}.keys
-          action_results_queue.set_indexes!(node_ids_with_tests)
           ndx_pbuilderid_to_node_info =  nodes.inject(Hash.new) do |h,n|
             h.merge(n.pbuilderid => {:id => n[:id].to_s, :display_name => n[:display_name]})
           end
-          callbacks = {
-            :on_msg_received => proc do |msg|
-              response = CommandAndControl.parse_response__execute_action(nodes,msg)  
-              if response and response[:pbuilderid] and response[:status] == :ok
-                node_info = ndx_pbuilderid_to_node_info[response[:pbuilderid]]
-                raw_data = response[:data].map{|r|node_info.merge(r)}
-                #TODO: find better place to put this
-                raw_data.each do |r|
-                  if r[:component_name]
-                    r[:component_name].gsub!(/__/,'::')
-                  end
-                  if r[:test_component_name]
-                    r[:test_component_name].gsub!(/__/,'::')
-                  end
-                end
-                #just for a safe side to filter out empty response, it causes further an error on the client side
-                unless response[:data].empty? or response[:data].nil?       
-                  packaged_data = DTK::ActionResultsQueue::Result.new(node_info[:display_name],raw_data)
-                  action_results_queue.push(node_info[:id], (type == :node) ? packaged_data.data : packaged_data)
-                end
-              end
-            end
-          }
 
-          #part of the code used to decide which components belong to which nodes.
-          #based on that fact, serverspec tests will be triggered on node only for components that actually belong to that specific node
+          # part of the code used to decide which components belong to which nodes.
+          # based on that fact, serverspec tests will be triggered on node only for components that actually belong to that specific node
           node_hash = {}
           components_including_node_name = []
           unless test_instances.empty?
@@ -89,6 +62,35 @@ module DTK
               node_hash[node[:id]] = {:components => components_array, :instance_id => node[:external_ref][:instance_id], :version_context => version_contexts}
             end
           end
+
+          # we send elements that are going to be used, due to bad design we need to send an array even
+          # if queue logic is only using size of that array.
+          action_results_queue.set_indexes!(node_hash.keys)
+
+          callbacks = {
+            :on_msg_received => proc do |msg|
+              response = CommandAndControl.parse_response__execute_action(nodes,msg)
+
+              if response and response[:pbuilderid] and response[:status] == :ok
+                node_info = ndx_pbuilderid_to_node_info[response[:pbuilderid]]
+                raw_data = response[:data].map{|r|node_info.merge(r)}
+                #TODO: find better place to put this
+                raw_data.each do |r|
+                  if r[:component_name]
+                    r[:component_name].gsub!(/__/,'::')
+                  end
+                  if r[:test_component_name]
+                    r[:test_component_name].gsub!(/__/,'::')
+                  end
+                end
+                #just for a safe side to filter out empty response, it causes further an error on the client side
+                unless response[:data].empty? or response[:data].nil?   
+                  packaged_data = DTK::ActionResultsQueue::Result.new(node_info[:display_name],raw_data)
+                  action_results_queue.push(node_info[:id], (type == :node) ? packaged_data.data : packaged_data)
+                end
+              end
+            end
+          }
 
           #components_including_node_name array will be empty if execute-test agent is triggered from specific node context
           if components_including_node_name.empty?
@@ -115,7 +117,7 @@ module DTK
             return ret
           end
 
-          #get info about each test component
+          # get info about each test component
           sp_hash = {
             :cols => [:id,:group_id,:display_name,:attributes,:component_type,:external_ref,:module_branch_id],
             :filter => [:and, 

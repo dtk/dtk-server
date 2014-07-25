@@ -1,5 +1,31 @@
 module DTK
   class Task < Model
+    module NodeGroupProcessingMixin
+      def node_group_member?()
+        (self[:executable_action]||{})[:node_group_member]
+      end
+
+      def set_node_group_member_component_actions!(parent)
+        ret = self
+        [self,parent].each do |task|
+          unless task[:executable_action]
+            Log.error("Unexpected that (#{task.inspect}) does not have field :executable_action")
+            return ret
+          end
+        end
+        unless component_actions = parent[:executable_action][:component_actions]
+          Log.error("Unexpected that parent does not have component_actions")
+          return ret
+        end
+        if self[:executable_action][:component_actions]
+          Log.error("Unexpected that self has component_actions")
+          return ret
+        end
+        self[:executable_action][:component_actions] = component_actions
+        self
+      end
+    end
+
     module NodeGroupProcessing
       #replaces node groups with theit elements
       def self.decompose_node_groups!(task)

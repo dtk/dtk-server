@@ -460,7 +460,7 @@ module DTK
         nodes = assembly.get_nodes(:id,:display_name,:type,:external_ref,:hostname_external_ref, :admin_op_status)
 
         assembly_name = Assembly::Instance.pretty_print_name(assembly)
-        nodes, is_valid, error_msg = nodes_valid_for_aws?(assembly_name, nodes, node_pattern, :stopped)
+        nodes, is_valid, error_msg = nodes_valid_for_stop_or_start?(assembly_name, nodes, node_pattern, :stopped)
         
         unless is_valid
           Log.info(error_msg)
@@ -546,7 +546,7 @@ module DTK
       # filters only stopped nodes for this assembly
       nodes = assembly.get_nodes(:id,:display_name,:type,:external_ref,:hostname_external_ref, :admin_op_status)
       assembly_name = Assembly::Instance.pretty_print_name(assembly)
-      nodes, is_valid, error_msg = nodes_valid_for_aws?(assembly_name, nodes, node_pattern, :stopped)
+      nodes, is_valid, error_msg = nodes_valid_for_stop_or_start?(assembly_name, nodes, node_pattern, :stopped)
 
       unless is_valid
         Log.info(error_msg)
@@ -582,7 +582,7 @@ module DTK
       assembly_idh = ret_request_param_id_handle(:assembly_id,Assembly::Instance)
       
       assembly_name = Assembly::Instance.pretty_print_name(assembly)
-      nodes, is_valid, error_msg = nodes_valid_for_aws?(assembly_name, nodes, node_pattern, :running)
+      nodes, is_valid, error_msg = nodes_valid_for_stop_or_start?(assembly_name, nodes, node_pattern, :running)
 
       unless is_valid
         Log.info(error_msg)
@@ -592,66 +592,6 @@ module DTK
       CommandAndControl.stop_instances(nodes)
 
       rest_ok_response :status => :ok
-    end
-
-    ##
-    # Method that will validate if nodes list is ready to started or stopped.
-    #
-    # * *Args*    :
-    #   - +assembly_id+     ->  assembly id
-    #   - +nodes+           ->  node list
-    #   - +node_pattern+    ->  match id regexp pattern
-    #   - +status_pattern+  ->  pattern to match node status
-    # * *Returns* :
-    #   - is valid flag
-    #   - filtered nodes by pattern (if pattern not nil)
-    #   - erorr message in case it is not valid
-    #
-    def nodes_valid_for_aws?(assembly_name, nodes, node_pattern, status_pattern)
-      # check for pattern
-      unless node_pattern.nil? || node_pattern.empty?
-        regex = Regexp.new(node_pattern)
-
-        # temp nodes_list
-        nodes_list = nodes
-
-        nodes = nodes.select { |node| regex =~ node.id.to_s}
-        if nodes.size == 0
-          nodes = nodes_list.select { |node| node_pattern.to_s.eql?(node.display_name.to_s)}
-          return nodes, false, "No nodes have been matched via ID ~ '#{node_pattern}'." if nodes.size == 0
-        end
-      end
-      # check if staged
-      nodes.each do |node|
-        if node[:type] == Node::Type::Node.staged
-          return nodes, false, "Nodes for assembly '#{assembly_name}' are 'staged' and as such cannot be started/stopped."
-        end
-      end
-
-      # check for status -> this will translate to /running|pending/ and /stopped|pending/ checks
-      filtered_nodes = nodes.select { |node| node[:admin_op_status] =~ Regexp.new("#{status_pattern.to_s}|pending") }
-      if filtered_nodes.size == 0
-        return nodes, false, "There are no #{status_pattern} nodes for assembly '#{assembly_name}'."
-      end
-      
-      return filtered_nodes, true, nil      
-    end
-
-    def nodes_are_up?(assembly_name, nodes, status_pattern)
-      # check if staged
-      nodes.each do |node|
-        if node[:type] == Node::Type::Node.staged
-          return nodes, false, "Serverspec tests cannot be executed on nodes that are 'staged'."
-        end
-      end
-
-      # check for status -> this will translate to /running|pending/ and /stopped|pending/ checks
-      filtered_nodes = nodes.select { |node| node[:admin_op_status] =~ Regexp.new("#{status_pattern.to_s}|pending") }
-      if filtered_nodes.size == 0
-        return nodes, false, "There are no #{status_pattern} nodes for assembly '#{assembly_name}'."
-      end
-      
-      return filtered_nodes, true, nil      
     end
 
     def rest__initiate_get_log()

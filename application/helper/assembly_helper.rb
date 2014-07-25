@@ -121,5 +121,65 @@ module Ramaze::Helper
       [assembly_template_name,service_module_name]
     end
 
+    ##
+    # Method that will validate if nodes list is ready to started or stopped.
+    #
+    # * *Args*    :
+    #   - +assembly_id+     ->  assembly id
+    #   - +nodes+           ->  node list
+    #   - +node_pattern+    ->  match id regexp pattern
+    #   - +status_pattern+  ->  pattern to match node status
+    # * *Returns* :
+    #   - is valid flag
+    #   - filtered nodes by pattern (if pattern not nil)
+    #   - erorr message in case it is not valid
+    #
+    def nodes_valid_for_stop_or_start?(assembly_name, nodes, node_pattern, status_pattern)
+      # check for pattern
+      unless node_pattern.nil? || node_pattern.empty?
+        regex = Regexp.new(node_pattern)
+
+        # temp nodes_list
+        nodes_list = nodes
+
+        nodes = nodes.select { |node| regex =~ node.id.to_s}
+        if nodes.size == 0
+          nodes = nodes_list.select { |node| node_pattern.to_s.eql?(node.display_name.to_s)}
+          return nodes, false, "No nodes have been matched via ID ~ '#{node_pattern}'." if nodes.size == 0
+        end
+      end
+      # check if staged
+      nodes.each do |node|
+        if node[:type] == ::DTK::Node::Type::Node.staged
+          return nodes, false, "Nodes for assembly '#{assembly_name}' are 'staged' and as such cannot be started/stopped."
+        end
+      end
+
+      # check for status -> this will translate to /running|pending/ and /stopped|pending/ checks
+      filtered_nodes = nodes.select { |node| node[:admin_op_status] =~ Regexp.new("#{status_pattern.to_s}|pending") }
+      if filtered_nodes.size == 0
+        return nodes, false, "There are no #{status_pattern} nodes for assembly '#{assembly_name}'."
+      end
+      
+      return filtered_nodes, true, nil      
+    end
+    #TODO: collapse above and below
+    def nodes_are_up?(assembly_name, nodes, status_pattern)
+      # check if staged
+      nodes.each do |node|
+        if node[:type] == ::DTK::Node::Type::Node.staged
+          return nodes, false, "Serverspec tests cannot be executed on nodes that are 'staged'."
+        end
+      end
+
+      # check for status -> this will translate to /running|pending/ and /stopped|pending/ checks
+      filtered_nodes = nodes.select { |node| node[:admin_op_status] =~ Regexp.new("#{status_pattern.to_s}|pending") }
+      if filtered_nodes.size == 0
+        return nodes, false, "There are no #{status_pattern} nodes for assembly '#{assembly_name}'."
+      end
+      
+      [filtered_nodes, true, nil]
+    end
+
   end
 end

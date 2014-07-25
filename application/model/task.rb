@@ -355,7 +355,7 @@ module DTK
     def get_config_agent_type(executable_action=nil)
       executable_action ||= executable_action()
       # just takes one sample since assumes all component actions have same config agent
-      ((executable_action[:component_actions]||[]).first||{})[:on_node_config_agent_type]
+      (executable_action.component_actions().first||{})[:on_node_config_agent_type]
     end
     def get_config_agent()
       ConfigAgent.load(get_config_agent_type())
@@ -455,7 +455,7 @@ module DTK
     def component_actions()
       if executable_action().kind_of?(Action::ConfigNode)
         action = executable_action()
-        (action[:component_actions]||[]).map{|ca| action[:node] ? ca.merge(:node => action[:node]) : ca}
+        action.component_actions().map{|ca| action[:node] ? ca.merge(:node => action[:node]) : ca}
       else
         subtasks.map{|obj|obj.component_actions()}.flatten
       end
@@ -464,7 +464,7 @@ module DTK
     def node_level_actions()
       if executable_action().kind_of?(Action::NodeLevel)
         action = executable_action()
-        return (action[:component_actions]||[]).map{|ca| action[:node] ? ca.merge(:node => action[:node]) : ca}
+        return action.component_actions().map{|ca| action[:node] ? ca.merge(:node => action[:node]) : ca}
       else
         subtasks.map{|obj|obj.node_level_actions()}.flatten
       end
@@ -613,7 +613,7 @@ module DTK
 
     def self.render_tasks_component_op(type,executable_action,common_vals)
       node = executable_action[:node]
-      (executable_action[:component_actions]||[]).map do |component_action|
+      executable_action.component_actions().map do |component_action|
         component = component_action[:component]
         cmp_attrs = {
           :component_id => component[:id],
@@ -634,7 +634,7 @@ module DTK
 
     def self.render_tasks_setting(executable_action,common_vals)
       node = executable_action[:node]
-      (executable_action[:component_actions]||[]).map do |component_action|
+      executable_action.component_actions().map do |component_action|
         component = component_action[:component]
         cmp_attrs = {
           :component_id => component[:id],

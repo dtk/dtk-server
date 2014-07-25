@@ -104,7 +104,7 @@ module XYZ
 
     class StartConfigNode < Event
       def initialize(action)
-        cmp_info = action[:component_actions].map do |cmp_attrs|
+        cmp_info = action.component_actions().map do |cmp_attrs|
           attr_info = attr_val_pairs(cmp_attrs[:attributes].reject{|a|a[:dynamic]})
           {:component_name => cmp_attrs[:component][:display_name]}.merge(attr_info)
         end
@@ -122,7 +122,7 @@ module XYZ
         hash = {
           :event => status.to_s,
           :node_name => action[:node][:display_name],
-          :components => action[:component_actions].map{|cmp_attrs| cmp_attrs[:component][:display_name]}
+          :components => action.component_actions().map{|cmp_attrs| cmp_attrs[:component][:display_name]}
         }
         if errors = (result[:data]||{})[:errors]
           hash.merge!(:errors => errors)

@@ -93,7 +93,7 @@ module DTK
       end
 
       def components_with_attributes(config_node)
-        cmp_actions = config_node[:component_actions]
+        cmp_actions = config_node.component_actions()
         node_components = cmp_actions.map{|ca|(component_external_ref(ca[:component])||{})["name"]}.compact
         ndx_cmps = cmp_actions.inject({}) do |h,cmp_action|
           cmp = cmp_action[:component]

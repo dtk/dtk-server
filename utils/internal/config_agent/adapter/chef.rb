@@ -42,7 +42,7 @@ module XYZ
         attr_reader :attributes
         def initialize(config_node)
           # TODO: need to preserve order; only complication is removing duplicates
-          @recipe_names = config_node[:component_actions].map{|cmp_action|recipe(cmp_action[:component])}.uniq
+          @recipe_names = config_node.component_actions().map{|cmp_action|recipe(cmp_action[:component])}.uniq
           @common_attr_index = Hash.new
           @attributes = Hash.new
           cmps_on_node = config_node[:node].get_children_objs(:component,{:cols=>[:id,:external_ref,:only_one_per_node]})

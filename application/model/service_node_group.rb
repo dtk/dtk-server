@@ -19,6 +19,25 @@ module DTK
       end
       ret
     end
+
+    def self.expand_with_node_group_members?(node_or_ngs)
+      ret = node_or_ngs
+      ng_idhs = node_or_ngs.select{|n|n.is_node_group?}.map{|n|n.id_handle()}
+      if ng_idhs.empty?
+        return ret
+      end
+      ndx_node_members = get_ndx_node_members(ng_idhs)
+      ret = Array.new
+      node_or_ngs.each do |n|
+        if n.is_node_group?
+          ret += ndx_node_members[n[:id]]
+        else
+          ret << n
+        end
+      end
+      ret
+    end
+
     def self.get_attributes_to_copy_to_target_refs(node_group_idhs)
       Node.get_target_ref_attributes(node_group_idhs,:cols=>CopyToTargetRefAttrs)
     end

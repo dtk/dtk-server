@@ -26,7 +26,7 @@
          :convert => true,
          :join_type => :left_outer,
          :join_cond=>{:id=>:node_group_relation__node_id},
-         :cols=>[:id,:group_id,:display_name,:type,:external_ref,:os_type]
+         :cols=>[:id,:group_id,:display_name,:type,:external_ref,:os_type,:admin_op_status]
        }]
     },
   }

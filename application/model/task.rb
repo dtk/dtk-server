@@ -407,7 +407,7 @@ module DTK
         parent_id = subtask[:task_id]
         parent = ndx_task_list[parent_id]
         if subtask.node_group_member?()
-          subtask.set_node_group_member_component_actions!(parent)
+          subtask.set_node_group_member_executable_action!(parent)
         end
         (parent[:subtasks] ||= Array.new(subtask_count[parent_id]))[subtask[:position]-1] = subtask
       end

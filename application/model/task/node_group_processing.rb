@@ -5,25 +5,20 @@ module DTK
         (self[:executable_action]||{})[:node_group_member]
       end
 
-      def set_node_group_member_component_actions!(parent)
+      def set_node_group_member_executable_action!(parent)
         ret = self
-        [self,parent].each do |task|
-          unless task[:executable_action]
-            Log.error("Unexpected that (#{task.inspect}) does not have field :executable_action")
-            return ret
-          end
-        end
-        unless component_actions = parent[:executable_action][:component_actions]
-          Log.error("Unexpected that parent does not have component_actions")
+        unless ea = self[:executable_action]
+          Log.error("Unexpected that self does not have field :executable_action")
           return ret
         end
-        if self[:executable_action][:component_actions]
-          Log.error("Unexpected that self has component_actions")
+        unless parent_ea = parent[:executable_action]
+          Log.error("Unexpected that parent does not have field :executable_action")
           return ret
         end
-        self[:executable_action][:component_actions] = component_actions
-        self
+        ExecuteActionFieldsToCopy.each{|field|ea[field] = parent_ea[field]}
+        ret
       end
+      ExecuteActionFieldsToCopy = [:component_actions,:state_change_types,:config_agent_type]
     end
 
     module NodeGroupProcessing

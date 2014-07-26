@@ -457,13 +457,18 @@ module DTK; class  Assembly
     end
 
     def add_component(node_idh,component_template,component_title)
-      # first check that node_idh belongs to this instance
+      # first check that node_idh is directly attached to the assembly instance
+      # one reason it may not be is if its a node group member
       sp_hash = {
         :cols => [:id, :display_name,:group_id, :ordered_component_ids],
         :filter => [:and, [:eq, :id, node_idh.get_id()], [:eq, :assembly_id, id()]]
       }
       unless node = Model.get_obj(model_handle(:node),sp_hash)
-        raise ErrorIdInvalid.new(node_idh.get_id(),:node)
+        if node_group = is_node_group_member?(node_idh)
+          raise ErrorUsage.new("Not implemented: adding a component to a node group member; a component can only be added to the node group (#{node_group[:display_name]}) itself") 
+        else
+          raise ErrorIdInvalid.new(node_idh.get_id(),:node)
+        end
       end
 
       opts = {:skip_if_not_found => true}
@@ -475,6 +480,17 @@ module DTK; class  Assembly
       end
       cmp_instance_idh
     end
+
+    #rturns a node group object if node_idh is a node group member of this assembly instance
+    def is_node_group_member?(node_idh)
+      sp_hash = {
+        :cols => [:id, :display_name,:group_id, :node_members],
+        :filter => [:eq, :assembly_id, id()]
+      }
+      node_id = node_idh.get_id()
+      Model.get_objs(model_handle(:node),sp_hash).find{|ng|ng[:node_member].id == node_id}
+    end
+    private :is_node_group_member?
 
     def add_assembly_template(assembly_template)
       target = get_target()

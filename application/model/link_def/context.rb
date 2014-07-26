@@ -16,8 +16,6 @@ module DTK
       @component_attr_index = Hash.new
       # TODO: add back in commented out parts
       # constraints.each{|cnstr|cnstr.get_context_refs!(ret)}
-      # TODO: this is making too many assumptions about form of link_defs_info
-      # and that self has field local_component_type
       link.attribute_mappings.each do |am|
         add_ref!(am[:input])
         add_ref!(am[:output])
@@ -71,7 +69,6 @@ module DTK
       end
     end
 
-
    protected
     def add_component_ref_and_value__node!(component_type,component)
       add_ref_component!(component_type).set_component_value!(component)
@@ -82,6 +79,7 @@ module DTK
     end
 
    private
+    #TODO: WasForInventoryNodeGroup; may deprecate
     def add_component_ref_and_value__node_group!(component_type,ng_component)
       # TODO: dont think needed add_ref_component!(component_type).set_component_value!(component) 
       # TODO: may be more efficient to do this in bulk
@@ -106,31 +104,37 @@ module DTK
 
       cmp_mappings = {:local => local_cmp, :remote => remote_cmp}
       @node_mappings = NodeMappings.create_from_cmp_mappings(cmp_mappings)
-      case @node_mappings.num_node_groups()
-       when 0 then set_values__node_to_node!(link,cmp_mappings)
-       when 1 then set_values__node_to_node_group!(link,cmp_mappings)
-       when 2 
-        if @node_mappings.is_internal?
-          set_values__internal!(link,cmp_mappings) 
-        else 
-          raise Error.new("Not treating port link between two node groups")
-        end
-      end
+      # TODO: WasForInventoryNodeGroup; may deprecate
+      # case @node_mappings.num_node_groups()
+      #   when 0 then set_values__node_to_node!(link,cmp_mappings)
+      #   when 1 then set_values__node_to_node_group!(link,cmp_mappings)
+      #   when 2 
+      #  if @node_mappings.is_internal?
+      #    set_values__internal!(link,cmp_mappings) 
+      #  else 
+      #    raise Error.new("Not treating port link between two node groups")
+      #  end
+      # end
+      # substituted below for above
+      set_values__node_to_node!(link,cmp_mappings)
     end
+
     def set_values__internal!(link,cmp_mappings)
       @type = :internal
       set_values__node_to_node!(link,cmp_mappings)
     end
-    def set_values__node_to_node_group!(link,cmp_mappings)
-      @type =  :node_to_node_group
-      # creates a link def context for each node to node member pair
-      @node_member_contexts = NodeGroupMember.create_node_member_contexts(link,@node_mappings,cmp_mappings)
 
-      # below is needed so that create can have ref to component
-      @term_mappings.values.each do |v| 
-        v.set_component_remote_and_local_value!(link,cmp_mappings)
-      end
-    end
+    # TODO: WasForInventoryNodeGroup; may deprecate
+    # def set_values__node_to_node_group!(link,cmp_mappings)
+    #  @type =  :node_to_node_group
+    #  # creates a link def context for each node to node member pair
+    #  @node_member_contexts = NodeGroupMember.create_node_member_contexts(link,@node_mappings,cmp_mappings)
+
+    #  # below is needed so that create can have ref to component
+    #  @term_mappings.values.each do |v| 
+    #    v.set_component_remote_and_local_value!(link,cmp_mappings)
+    #  end
+    # end
 
     def set_values__node_to_node!(link,cmp_mappings)
       @type ||= :node_to_node
@@ -153,10 +157,14 @@ module DTK
       attrs_to_get = Hash.new
       @term_mappings.each_value do |v|
         if v.kind_of?(Value::NodeAttribute)
-          node = @node_mappings[v.node_ref.to_sym]
-          unless node
+          unless node = @node_mappings[v.node_ref.to_sym]
             Log.error("cannot find node associated with node ref")
             next
+          end
+          if node.is_node_group?()
+            # TODO: put in logic to treat this case by getting attributes on node members and doing fan in mapping
+            # to input (which wil be restricted to by a non node group)
+            raise ErrorUsage.new("Not treating link from a node attribute (#{v.attribute_ref}) on a node group (#{node[:display_name]})")
           end
           a = (attrs_to_get[node[:id]] ||= {:node => node, :attribute_info => Array.new})[:attribute_info]
           a << {:attribute_name => v.attribute_ref.to_s, :value_object => v}

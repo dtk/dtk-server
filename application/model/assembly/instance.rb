@@ -188,7 +188,7 @@ module DTK; class  Assembly
     def get_nodes__expand_node_groups(opts={})
       cols = opts[:cols]||Node.common_columns()
       node_or_ngs = get_nodes(*cols)
-      ServiceNodeGroup.expand_with_node_group_members?(node_or_ngs)
+      ServiceNodeGroup.expand_with_node_group_members?(node_or_ngs,opts)
     end
 
     def get_augmented_components(opts=Opts.new)

@@ -20,7 +20,7 @@ module DTK
       ret
     end
 
-    def self.expand_with_node_group_members?(node_or_ngs)
+    def self.expand_with_node_group_members?(node_or_ngs,opts={})
       ret = node_or_ngs
       ng_idhs = node_or_ngs.select{|n|n.is_node_group?}.map{|n|n.id_handle()}
       if ng_idhs.empty?
@@ -28,11 +28,18 @@ module DTK
       end
       ndx_node_members = get_ndx_node_members(ng_idhs)
       ret = Array.new
-      node_or_ngs.each do |n|
-        if n.is_node_group?
-          ret += ndx_node_members[n[:id]]
-        else
+      if opts[:remove_node_groups]
+        node_or_ngs.each do |n|
+          if n.is_node_group?
+            ret += ndx_node_members[n[:id]]
+          else
+            ret << n
+          end
+        end
+      else
+        node_or_ngs.each do |n|
           ret << n
+          ret += ndx_node_members[n[:id]] if n.is_node_group?
         end
       end
       ret

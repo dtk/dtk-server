@@ -21,16 +21,17 @@ module DTK; class Node
               unless assembly_name = opts[:assembly] && opts[:assembly].get_field?(:display_name)
                 raise Error.new("assembly option not given")
               end
-              ret = "#{assembly_name}#{Delim}#{name}"
+              ret = "#{assembly_name}#{AssemblyDelim}#{name}"
               if index = opts[:index] 
-                ret << "#{Delim}#{index.to_s}"
+                ret << "#{IndexDelim}#{index.to_s}"
               end
               ret
             else 
               raise Error.new("Unexpected type (#{type})")
           end
         end
-        Delim = ':'
+        AssemblyDelim = '::'
+        IndexDelim = ':'
       end
     end
   end

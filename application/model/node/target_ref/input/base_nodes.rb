@@ -124,7 +124,16 @@ module DTK; class Node; class TargetRef
           end
         end
         attr_mh = node_groups.first.model_handle.create_childMH(:attribute)
-        Model.create_from_rows(attr_mh,create_rows,:convert => true)
+
+        # TODO: see why below is not working and need to iterate over attributes names when calling Model.create_from_rows
+        #Model.create_from_rows(attr_mh,create_rows,:convert => true)
+        ndx_create_rows = Hash.new
+        create_rows.each do |r|
+          ndx = r[:display_name]
+          (ndx_create_rows[ndx] ||= Array.new) << r
+        end
+        ndx_create_rows.values.each{|rows| Model.create_from_rows(attr_mh,rows,:convert => true)}
+        nil
       end
 
       # node_instance and target_ref can be ids or be uri paths

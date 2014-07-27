@@ -71,7 +71,7 @@ module DTK; module CommandAndControlAdapter
             Log.info("#{node_print_form()} with ec2 instance id #{instance_id}; waiting for it to be available")
             node_update_hash = {
               :external_ref => updated_external_ref,
-              :type => base_node.is_node_group? ? Node::Type::NodeGroup.instance : Node::Type::Node.instance,
+              :type => Node::Type.new_type_when_create_node(base_node),
               :is_deployed => true,
               # TODO: better unify these below
               :operational_status => "starting",

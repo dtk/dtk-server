@@ -27,19 +27,6 @@ module DTK; class Attribute
         end
       end
 
-      def self.ret_special_processing_info()
-        SpecialProcessingInfo
-      end
-      SpecialProcessingInfo = {
-        :memory_size => {
-          :filter => lambda{|a|a[:node_node_id]},
-          :legal_values => lambda{|a|Node::Template.legal_memory_sizes(a.model_handle(:node))}
-        },
-        :os_identifier =>{
-          :filter => lambda{|a|a[:node_node_id]},
-          :legal_values => lambda{|a|Node::Template.legal_os_identifiers(a.model_handle(:node))}
-        } 
-      }
     end
   end
 end; end

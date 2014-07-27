@@ -9,20 +9,6 @@ module DTK; class Attribute
           end
         end
       end
-     private
-      def self.ret_special_processing_info()
-        SpecialProcessingInfo
-      end
-      SpecialProcessingInfo = {
-        :memory_size => {
-          :filter => lambda{|a|a[:node_node_id]},
-          :proc => lambda{|a,v|MemorySize.process(a,v)}
-        },
-        :os_identifier =>{
-          :filter => lambda{|a|a[:node_node_id]},
-          :proc => lambda{|a,v|OsIdentifier.process(a,v)}
-        } 
-      }
       class OsIdentifier < self
         def self.process(attr,new_val)
           os_identifier = new_val

@@ -185,6 +185,9 @@ module DTK; class  Assembly
       get_objs(node_mh,sp_hash)
     end
 
+    def get_leaf_nodes(opts={})
+      get_nodes__expand_node_groups(opts.merge(:remove_node_groups=>true))
+    end
     def get_nodes__expand_node_groups(opts={})
       cols = opts[:cols]||Node.common_columns()
       node_or_ngs = get_nodes(*cols)

@@ -1,4 +1,6 @@
 # TODO: right now these are for mcollecetive actions; hard coding get_netstat based on get_logs, wil then making general so can add custom actions
+# TODO: replace call fragment nodes = nodes.select { |node| node[:id] == node_id.to_i } unless (node_id.nil? || node_id.empty?)
+# with a filter on action_get_leaf_nodes()
 module DTK
   class Assembly::Instance
     module Action
@@ -7,20 +9,20 @@ module DTK
 
     module ActionMixin
       def initiate_get_netstats(action_results_queue, node_id=nil)
-        nodes = get_nodes(:id,:display_name,:external_ref)
+        nodes = action_get_leaf_nodes()
         nodes = nodes.select { |node| node[:id] == node_id.to_i } unless (node_id.nil? || node_id.empty?)
         Action::GetNetstats.initiate(nodes,action_results_queue)
       end
 
       def initiate_get_log(action_results_queue,params)
         # start of get log functionality
-        nodes = get_nodes(:id,:display_name,:external_ref)
+        nodes =  action_get_leaf_nodes()
         Action::GetLog.initiate(nodes,action_results_queue,params)
       end
 
       def initiate_grep(action_results_queue,params)
         # start of get log functionality
-        nodes = get_nodes(:id,:display_name,:external_ref)
+        nodes =  action_get_leaf_nodes()
         Action::Grep.initiate(nodes,action_results_queue,params)
       end
 
@@ -29,13 +31,13 @@ module DTK
       end
 
       def initiate_get_ps(action_results_queue, node_id=nil)
-        nodes = get_nodes(:id,:display_name,:external_ref)
+        nodes =  action_get_leaf_nodes()
         nodes = nodes.select { |node| node[:id] == node_id.to_i } unless (node_id.nil? || node_id.empty?)
         Action::GetPs.initiate(nodes,action_results_queue, :assembly)
       end
 
       def initiate_execute_tests(action_results_queue, node_id=nil, components=nil)
-        nodes = get_nodes(:id,:display_name,:external_ref)
+        nodes =  action_get_leaf_nodes()
         nodes = nodes.select { |node| node[:id] == node_id.to_i } unless (node_id.nil? || node_id.empty?)
         
         # Special case filtering of nodes that are not running and executing agent only on those that are running
@@ -54,7 +56,7 @@ module DTK
 
       def initiate_execute_tests_v2(project,action_results_queue, node_id=nil, components=nil)
         
-        nodes = get_nodes(:id,:display_name,:external_ref)
+        nodes =  action_get_leaf_nodes()
         nodes = nodes.select { |node| node[:id] == node_id.to_i } unless (node_id.nil? || node_id.empty?)
         opts = {} 
 
@@ -69,6 +71,10 @@ module DTK
           opts.merge!(:filter => {:components => components})
         end
         Assembly::Instance::Action::ExecuteTestsV2.initiate(project,self,nodes,action_results_queue, :assembly, opts)
+      end
+
+      def action_get_leaf_nodes()
+        get_leaf_nodes(:cols => [:id,:display_name,:external_ref])
       end
 
       module Action

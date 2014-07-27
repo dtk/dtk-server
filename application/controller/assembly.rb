@@ -454,7 +454,7 @@ module DTK
         return rest_ok_response :confirmation_message=>true if start_assembly.nil?
         
         node_pattern = ret_request_params(:node_pattern)
-        nodes = assembly.get_nodes__expand_node_groups(:remove_node_groups=>true)
+        nodes = assembly.get_leaf_nodes()
         # filters only stopped nodes for this assembly
         nodes, is_valid, error_msg = nodes_valid_for_stop_or_start?(assembly, nodes, node_pattern, :stopped)
         
@@ -538,7 +538,7 @@ module DTK
       node_pattern = ret_request_params(:node_pattern)
       task         = nil
 
-      nodes = assembly.get_nodes__expand_node_groups(:remove_node_groups=>true)
+      nodes = assembly.get_leaf_nodes()
       # filters only stopped nodes for this assembly
       nodes, is_valid, error_msg = nodes_valid_for_stop_or_start?(assembly, nodes, node_pattern, :stopped)
 
@@ -572,7 +572,7 @@ module DTK
     def rest__stop()
       assembly = ret_assembly_instance_object()
       node_pattern = ret_request_params(:node_pattern)
-      nodes = assembly.get_nodes__expand_node_groups(:remove_node_groups=>true)
+      nodes = assembly.get_leaf_nodes()
       
       nodes, is_valid, error_msg = nodes_valid_for_stop_or_start?(assembly, nodes, node_pattern, :running)
 

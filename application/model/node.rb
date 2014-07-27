@@ -1,4 +1,3 @@
-#TODO: Now that we have Type::NodeGroup; see if theer are refernces to just Type::Node that also need Type::NodeGroup refs
 module DTK
   class Node < Model
     r8_nested_require('node','meta')
@@ -329,12 +328,10 @@ module DTK
       Model.delete_instance(component_idh)
     end
 
-    NodeTypeInAssembly = [Type::Node.instance,Type::Node.staged,Type::NodeGroup.instance,Type::NodeGroup.staged]
     def self.check_valid_id(model_handle,id,assembly_id=nil)
       filter =
         [:and,
          [:eq, :id, id],
-         [:oneof, :type, NodeTypeInAssembly],
          [:neq, :datacenter_datacenter_id, nil],
          assembly_id && [:eq, :assembly_id, assembly_id]
         ].compact
@@ -351,7 +348,6 @@ module DTK
         :cols => [:id,:assembly_id],
         :filter => [:and,
                     [:eq, :display_name, node_name],
-                    [:oneof, :type, NodeTypeInAssembly],
                     [:neq, :datacenter_datacenter_id, nil],
                     [:eq, :assembly_id, assembly_id]]
       }

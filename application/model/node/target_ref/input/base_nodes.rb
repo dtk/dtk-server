@@ -178,7 +178,8 @@ module DTK; class Node; class TargetRef
           end
           external_ref = @node.external_ref
           unless external_ref.references_image?(target)
-            raise ErrorUsage.new("Node (#{display_name}) is not in target that supports node creation or does not have needed info")
+#            raise ErrorUsage.new("Node (#{display_name}) is not in target that supports node creation or does not have needed info")
+            Log.error("Think this needs to be further contrsinaed: Node (#{display_name}) is not in target that supports node creation or does not have needed info")
           end
           (1..@num_needed).inject(Hash.new) do |h,index|
             hash = {

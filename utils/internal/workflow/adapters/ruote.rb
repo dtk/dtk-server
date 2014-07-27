@@ -49,7 +49,7 @@ module DTK
           # detect if wait for finished due to normal execution or errors 
           errors = Engine.errors(@wfid)
           if errors.nil? or errors.empty?
-            pp :normal_completion
+            Log.error_pp :normal_completion
           else
             Log.error "-------- intercepted errors ------"
             errors.each  do |e|
@@ -64,8 +64,8 @@ module DTK
             # Engine.cancel_process(@wfid)
           end
          rescue Exception => e
-          pp "error trap in ruote#execute"
-          pp [e,e.backtrace[0..50]]
+          Log.error_pp "error trap in ruote#execute"
+          Log.error_pp [e,e.backtrace[0..50]]
           # TODO: if do following Engine.cancel_process(@wfid), need to update task; somhow need to detrmine what task triggered this
          ensure
           TaskInfo.clean(top_task_id)

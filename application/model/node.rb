@@ -49,6 +49,10 @@ module DTK
     end
     private :create_obj_subclass
 
+    def is_target_ref?()
+      TargetRef.types().include?(get_field?(:type))
+    end
+
     #This is overwritten by node group subclasses
     def get_node_members()
       #in case this called on superclass that is actually a node group

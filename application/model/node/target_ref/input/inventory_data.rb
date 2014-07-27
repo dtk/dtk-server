@@ -42,7 +42,7 @@ module DTK; class Node; class TargetRef
           ret_hash = merge('display_name' => ret_display_name(name))
           
           external_ref = self['external_ref']||{}
-          ret_hash.merge!(:type => external_ref['type']||TargetRef.type())
+          ret_hash.merge!(:type => external_ref['type']||Type::Node.target_ref)
           
           host_address = nil
           if @type == :physical

@@ -24,8 +24,17 @@ module DTK
       def self.isa?(type)
         type and types().include?(type.to_sym)
       end
+
       class Node < self
-        Types = [:stub,:instance,:image,:target_ref,:staged]
+      Types = 
+        [
+         :stub,              # - in an assembly template
+         :image,             # - corresponds to an IAAS, hyperviser or container image
+         :instance,          # - in a service instance where it correspond to an actual node
+         :staged,            # - in a service instance before actual node correspond to it
+         :target_ref,        # - target_ref to actual node
+         :target_ref_staged  # - target_ref to node not created yet
+        ]
         Types.each do |type|
           class_eval("def self.#{type}(); '#{type}'; end")
         end
@@ -33,9 +42,16 @@ module DTK
           Types
         end
       end
+
       class NodeGroup < self
+        Types = 
+          [
+           :stub,     # - in an assembly template
+           :instance, # - in a service instance where actual nodes correspond to it
+           :staged    # - in a service instance before actual nodes correspond to it
+          ]
         def self.types()
-          @types ||= TypeNames.map{|r|type_from_name(r)}
+          @types ||= Types.map{|r|type_from_name(r)}
         end
 
         def self.model_name(type)
@@ -50,8 +66,7 @@ module DTK
         def self.type_from_name(type_name)
           "node_group_#{type_name}".to_sym
         end
-        TypeNames = [:stub,:instance,:staged]
-        TypeNames.each do |type_name|
+        Types.each do |type_name|
           class_eval("def self.#{type_name}(); '#{type_from_name(type_name)}'; end")
         end
       end

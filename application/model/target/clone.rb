@@ -109,7 +109,7 @@ module DTK
               :filter => [:oneof,:id,ndx_node_template__node.keys]
             }
             Model.get_objs(target.model_handle(:node),sp_hash).each do |nt|
-              if nt[:type] == Node::TargetRef.type()
+              if nt.is_target_ref?()
                 node_id = ndx_node_template__node[nt[:id]]
                 tr_link.merge!(node_id => nt)
                 ndx_needs_sc[node_id] = nil

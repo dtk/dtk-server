@@ -185,7 +185,7 @@ module DTK; class Node; class TargetRef
             hash = {
               :display_name => ret_display_name(display_name,:index => index,:assembly => assembly),
               :os_type => @node.get_field?(:os_type),
-              :type => TargetRef.type(),
+              :type => Type::Node.target_ref_staged,
               :external_ref => external_ref.hash() 
             }          
             ref = ret_ref(display_name,:index => index,:assembly => assembly)

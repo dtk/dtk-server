@@ -4,6 +4,14 @@ module DTK
     class TargetRef < self
       r8_nested_require('target_ref','input')
 
+      def is_target_ref?()
+        true
+      end
+      def self.types()
+        Types
+      end
+      Types = [Type::Node.target_ref,Type::Node.target_ref_staged]
+
       # returns hash of form {node_id => NodeWithTargetRefs,..}
       NodeWithTargetRefs = Struct.new(:node,:target_refs)
       def self.get_ndx_linked_target_refs(node_mh,node_ids)
@@ -41,7 +49,7 @@ module DTK
         sp_hash = {
           :cols => [:id, :display_name, :ref, :type, :assembly_id, :datacenter_datacenter_id, :managed],
           :filter => [:and,
-                        [:eq, :type, type()],
+                        [:eq, :type, Type::Node.target_ref],
                         [:eq, :datacenter_datacenter_id, target[:id]],
                         [:eq, :managed, true]]
         }
@@ -154,19 +162,14 @@ Log.error("see why this is using :canonical_template_node_id and not node_group_
         ret
       end
 
-      def self.type()
-        TypeField
-      end
-      TypeField = 'target_ref'
-
       def self.process_import_node_input!(input_node_hash)
         unless host_address = input_node_hash["external_ref"]["routable_host_address"]
           raise Error.new("Missing field input_node_hash['external_ref']['routable_host_address']")
         end
 
-        # for type use type from external_ref ('physical'), if not then use default type()
+        # for type use type from external_ref ('physical'), if not then use default 
         type = input_node_hash["external_ref"]["type"] if input_node_hash["external_ref"]
-        input_node_hash.merge!("type" => type||type())
+        input_node_hash.merge!("type" => type||Type::Node.target_ref)
         params = {"host_address" => host_address}
         input_node_hash.merge!(child_objects(params))
       end

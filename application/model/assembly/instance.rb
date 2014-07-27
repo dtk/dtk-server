@@ -541,11 +541,14 @@ module DTK; class  Assembly
     end
 
     def set_attributes(av_pairs,opts={})
-      attr_patterns = super
-      if opts[:update_meta]
-        created_cmp_level_attrs = attr_patterns.select{|r|r.type == :component_level and r.created?()}
-        unless created_cmp_level_attrs.empty?
-          AssemblyModule::Component::Attribute.update(self,created_cmp_level_attrs)
+      attr_patterns = nil
+      Transaction do
+        attr_patterns = super
+        if opts[:update_meta]
+          created_cmp_level_attrs = attr_patterns.select{|r|r.type == :component_level and r.created?()}
+          unless created_cmp_level_attrs.empty?
+            AssemblyModule::Component::Attribute.update(self,created_cmp_level_attrs)
+          end
         end
       end
       attr_patterns

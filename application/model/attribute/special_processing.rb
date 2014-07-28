@@ -53,16 +53,16 @@ module DTK; class Attribute
       :node => {
         :memory_size => {
           :legal_values => lambda{|a|Node::Template.legal_memory_sizes(a.model_handle(:node))},
-          :proc => lambda{|a,v|Update::MemorySize.process(a,v)}
+          :proc => lambda{|a,v|Update::MemorySize.new(a,v).process()}
         },
         :os_identifier =>{
           :legal_values => lambda{|a|Node::Template.legal_os_identifiers(a.model_handle(:node))},
-          :proc => lambda{|a,v|Update::OsIdentifier.process(a,v)}
+          :proc => lambda{|a,v|Update::OsIdentifier.new(a,v).process()}
         },
         :cardinality =>{
           :legal_value_fn => lambda{|v|v.kind_of?(Fixnum) or (v.kind_of?(String) and v =~ /^[0-9]+$/)},
           :legal_value_error_msg => "Value must be an integer",
-          :proc => lambda{|a,v|nil}
+          :proc => lambda{|a,v|Update::GroupCardinality.new(a,v).process()}
         } 
       },
       :component => {

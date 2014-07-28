@@ -32,18 +32,19 @@ module DTK; class Node; class TargetRef
       # returns new idhs indexed by node (id) they linked to
       # or if they exist their idhs
       # for any node that is node group, this copies the node group's attributes to the target refs
-      def self.create_linked_target_refs?(target,assembly,nodes)
+      def self.create_linked_target_refs?(target,assembly,nodes,opts={})
         ret = Hash.new
         ndx_target_ref_idhs = TargetRef.ndx_matching_target_ref_idhs(:node_instance_idhs => nodes.map{|n|n.id_handle})
 
         create_objs_hash = Hash.new
         nodes.each do |node|
           node_id = node[:id]
-          cardinality = node.attribute.cardinality
+          cardinality = opts[:new_cardinality]||node.attribute.cardinality
           target_ref_idhs = ndx_target_ref_idhs[node_id]||[]
-          num_needed = cardinality - target_ref_idhs.size
+          num_existing = target_ref_idhs.size
+          num_needed = cardinality - num_existing
           if num_needed > 0
-            el = Element.new(:node => node,:num_needed => num_needed)
+            el = Element.new(:node => node,:num_needed => num_needed,:offset => num_existing+1)
             el.add_target_ref_and_ngr!(create_objs_hash,target,assembly)
           elsif num_needed == 0
             if cardinality > 0
@@ -156,6 +157,7 @@ module DTK; class Node; class TargetRef
         def initialize(node_info)
           @node = node_info[:node]
           @num_needed = node_info[:num_needed]
+          @offset = node_info[:offset]||1
           @type = :base_node_link
         end
 
@@ -181,7 +183,7 @@ module DTK; class Node; class TargetRef
 #            raise ErrorUsage.new("Node (#{display_name}) is not in target that supports node creation or does not have needed info")
             Log.error("Think this needs to be further contrsinaed: Node (#{display_name}) is not in target that supports node creation or does not have needed info")
           end
-          (1..@num_needed).inject(Hash.new) do |h,index|
+          (@offset...(@offset+@num_needed)).inject(Hash.new) do |h,index|
             hash = {
               :display_name => ret_display_name(display_name,:index => index,:assembly => assembly),
               :os_type => @node.get_field?(:os_type),

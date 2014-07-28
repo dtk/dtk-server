@@ -1,5 +1,11 @@
 module DTK
   class ServiceNodeGroup < Node
+    def add_group_members(new_cardinality)
+      target = get_target()
+      assembly = get_assembly?() 
+      TargetRef::Input::BaseNodes.create_linked_target_refs?(target,assembly,[self],:new_cardinality => new_cardinality)
+    end
+
     def get_node_members()
       #if ndx_node_members is not empty then {id_handle-> [ng_el1,ng_el2,..]} will be returned
       self.class.get_ndx_node_members([id_handle()]).values.first||[]

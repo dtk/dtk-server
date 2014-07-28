@@ -95,8 +95,8 @@ module DTK; class Attribute
       ndx_new_vals = attribute_rows.inject(Hash.new){|h,r|h.merge(r[:id] => r[:value_asserted])}
       LegalValue.raise_usage_errors?(existing_attrs,ndx_new_vals)
 
-      Attribute.update_and_propagate_attributes(attr_mh,attribute_rows)
       SpecialProcessing::Update.handle_special_processing_attributes(existing_attrs,ndx_new_vals)
+      Attribute.update_and_propagate_attributes(attr_mh,attribute_rows)
       ret
     end
 

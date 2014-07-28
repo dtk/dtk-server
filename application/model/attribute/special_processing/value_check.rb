@@ -4,29 +4,21 @@ module DTK; class Attribute
       # returns [whether_special_processing,nil_or_value_check_error]
       def self.error_special_processing?(attr,new_val)
         error = nil
-        if special_processing = needs_special_processing?(attr)
-          error = error?(attr,new_val)
+        if attr_info = needs_special_processing?(attr)
+          error = error?(attr,attr_info,new_val)
         end
+        special_processing = (not attr_info.nil?)
         [special_processing,error]
       end
 
      private
-      def self.error?(attr,new_val)
-        if legal_values = legal_values(attr)
+      def self.error?(attr,attr_info,new_val)
+        if legal_values = LegalValues.create?(attr,attr_info)
           unless legal_values.include?(new_val)
-            LegalValue::Error.new(attr,new_val,:legal_values => legal_values)
+            LegalValue::Error.new(attr,new_val,:legal_values => legal_values.print_form)
           end
-        else
-          raise Error.new("Not implemented yet error checking for special cases when no legal values defined")
         end
       end
-
-      def self.legal_values(attr)
-        if legal_values_proc = (attr_info(attr)||{})[:legal_values]
-          legal_values_proc.call(attr)
-        end
-      end
-
     end
   end
 end; end

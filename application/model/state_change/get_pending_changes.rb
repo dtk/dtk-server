@@ -54,8 +54,36 @@ module DTK; class StateChange
         node_id = r[:node][:id]
         ndx_ret[node_id] ||= r
       end
-      ndx_ret.values
+      pending_scs = ndx_ret.values
+
+      # TODO: compensating for fact that a component a node group could have state pending, but
+      # no changes under it
+      node_group_scs = pending_scs.select{|sc|sc[:node].is_node_group?()}
+      return pending_scs if node_group_scs.empty?
+      sc_ids_to_remove = find_any_without_pending_children?(node_group_scs.map{|sc|sc.id_handle()})
+      #remove any sc in pending_scs that is in ndx_ng_sc_idhs but not in ndx_to_keep
+      return pending_scs if sc_ids_to_remove.empty? #shortcut
+      pending_scs.reject{|sc|sc_ids_to_remove.include?(sc.id)}
     end
+
+    #returns ids for all that do not pending children 
+    def find_any_without_pending_children?(sc_idhs)
+      ret = Array.new
+      return ret if sc_idhs.empty?
+      ndx_found = sc_idhs.inject(Hash.new){|sc|sc.id => nil} #initially setting evrything to nil and flipping if found
+      sp_hash = {
+        :cols => [:state_change_id],
+        :filter => [:and,
+                    [:oneof, :state_change_id, ndx_found.keys],
+                    [:eq, :type, "create_node"],
+                    [:eq, :status, "pending"]]
+      }
+      sc_mh = sc_idhs.first.createMH()
+      get_objs(sc_mh,sp_hash).each{|sc|ndx_found[r[:state_change_id]] ||= true}
+      ndx_found.each_pair{|sc_id,found|ret << sc_id unless found}
+      ret
+    end
+    private :ndx_find_if_has_pending_members?
 
     def pending_changed_component(parent_mh,idh_list,opts={})
       parent_field_name = DB.parent_field(parent_mh[:model_name],:state_change)

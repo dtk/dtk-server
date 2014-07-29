@@ -15,7 +15,7 @@ target.create_state_changes_for_create_node?(self)
       new_items_hash = new_tr_idhs.map{|idh|{:new_item => idh, :parent => target_idh}}
       StateChange.create_pending_change_items(new_items_hash)
 =end
-raise Error.new("Neither of these alternatives working yet")
+#raise Error.new("Neither of these alternatives working yet")
       new_tr_idhs
     end
 

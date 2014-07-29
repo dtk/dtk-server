@@ -75,6 +75,7 @@ module Ramaze::Helper
     # Returns: Returns array of node id handles
     #
     def ret_node_id_handles(node_name_param, assembly)
+      Log.error("check if works for node groups")
       # get nodes list (command seperated) from request
       target_nodes_str = ret_request_params(node_name_param)
       return [] unless target_nodes_str

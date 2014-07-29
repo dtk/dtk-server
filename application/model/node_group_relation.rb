@@ -1,5 +1,14 @@
 module DTK
   class NodeGroupRelation < Model
+    def self.get_node_member_assembly?(node_member_idh)
+      sp_hash = {
+        :cols => [:id,:node_member_assembly],
+        :filter => [:eq,:node_id,node_member_idh.get_id()]
+      }
+      ngr = get_obj(node_member_idh.createMH(:node_group_relation),sp_hash)
+      ngr && ngr[:assembly]
+    end
+
     def spans_target?()
       update_object!(:datacenter_datacenter_id,:node_id)
       if self[:node_id].nil? and self[:datacenter_datacenter_id]

@@ -50,6 +50,7 @@ module DTK
 
       # can be null; points to the canonical member (a node template in the library) which is used by default when do node_group add_node 
       foreign_key :canonical_template_node_id, :node, FK_SET_NULL_OPT
+
       virtual_column :canonical_template_node, :type => :json, :hidden => true,
         :remote_dependencies =>
         [{

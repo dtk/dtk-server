@@ -255,8 +255,8 @@ module Ramaze::Helper
       id_handle(id,ret_module_name_from_class(model_class))
     end
 
-    def ret_id_handle_from_value(id_or_name_value, model_class=nil, version=nil)
-      id = resolve_id_from_name_or_id(id_or_name_value, model_class, version)
+    def ret_id_handle_from_value(id_or_name_value, model_class=nil, extra_context=nil)
+      id = resolve_id_from_name_or_id(id_or_name_value, model_class, extra_context)
       id_handle(id,ret_module_name_from_class(model_class))
     end
     # TODO One part of cleanup is to have name_to_id and check_valid return the object with keys :id and :group id

@@ -333,14 +333,25 @@ module DTK
     end
 
     def self.check_valid_id(model_handle,id,assembly_id=nil)
+      # filter does not include node group members
       filter =
         [:and,
          [:eq, :id, id],
          [:neq, :datacenter_datacenter_id, nil],
          assembly_id && [:eq, :assembly_id, assembly_id]
         ].compact
-      check_valid_id_helper(model_handle,id,filter)
+      opts = (assembly_id ? {:no_error_if_no_match => true} : {})
+      check_valid_id_helper(model_handle,id,filter,opts) ||
+        check_valid_id__node_member(model_handle,id,assembly_id)
     end
+    def self.check_valid_id__node_member(model_handle,id,assembly_id)
+      assembly = NodeGroupRelation.get_node_member_assembly?(model_handle.createIDH(:id => id))
+      unless assembly and assembly.id == assembly_id
+        raise ErrorIdInvalid.new(id,pp_object_type()) 
+      end
+      id
+    end
+    private_class_method :check_valid_id__node_member
 
     def self.name_to_id(model_handle,name,assembly_id=nil)
       node_name, assembly_name = parse_user_friendly_name(name)

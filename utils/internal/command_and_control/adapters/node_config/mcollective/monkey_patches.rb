@@ -78,11 +78,14 @@ module MCollective
       target = make_target(agent, :request, collective)
       req = @security.encoderequest(@config.identity, msg, reqid, filter, agent, collective)
       topic = make_target(agent, :reply, collective)
-      Log.debug("Sending request #{reqid} to #{target}")
+      log_msg = "Sending request #{reqid} to topic #{target}"
+      if id_if_set = ((filter["fact"]||[]).first||{})[:value]
+        log_msg << " with filter on id: #{id_if_set}"
+      end
+      Log.debug(log_msg)
       @connection.subscribe_and_send(topic,target,req)
       reqid
     end
-
     private
     def make_target(agent, type, collective, target_node=nil)
       @connection.make_target(agent, type, collective, target_node)

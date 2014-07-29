@@ -8,14 +8,12 @@ module DTK
       unless new_tr_idhs = ndx_new_tr_idhs && ndx_new_tr_idhs[id()]
         raise Error.new("Unexpected that new_tr_idhs is empty")
       end
-target.create_state_changes_for_create_node?(self)
 
-=begin
-      target_idh = target.id_handle()
-      new_items_hash = new_tr_idhs.map{|idh|{:new_item => idh, :parent => target_idh}}
+      #find or add state change for node group and then add state change objects for new node members
+      node_group_sc = StateChange.create_pending_change_item?(:new_item => id_handle(), :parent => target.id_handle())
+      node_group_sc_idh = node_group_sc.id_handle()
+      new_items_hash = new_tr_idhs.map{|idh|{:new_item => idh, :parent => node_group_sc_idh}}
       StateChange.create_pending_change_items(new_items_hash)
-=end
-#raise Error.new("Neither of these alternatives working yet")
       new_tr_idhs
     end
 

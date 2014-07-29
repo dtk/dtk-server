@@ -5,6 +5,14 @@ module DTK
         target_idh = opts[:target_idh] || Create.target_idh(new_item_hash[:parent])
         Create.new(target_idh).pending_change_items([new_item_hash],opts).first
       end
+
+      # if pending change object exists, it returns it and updates its status to 'pending' if needed
+      # otherwise it creates a new one and returns it
+      def create_pending_change_item?(new_item_hash,opts={})
+        target_idh = opts[:target_idh] || Create.target_idh(new_item_hash[:parent])
+        Create.new(target_idh).pending_change_item?(new_item_hash,opts)
+      end
+
       # assumption is that all items belong to same target
       def create_pending_change_items(new_item_hashes,opts={})
         ret = Array.new
@@ -28,6 +36,29 @@ module DTK
 
       def self.target_idh(parent_idh)
         parent_idh.get_top_container_id_handle(:target)
+      end
+
+      def pending_change_item?(new_item_hash,opts={})
+        create_row = change_item_create_row(new_item_hash,opts)
+        cols = ([:id,:group_id,:display_name,:status,:node_id,:component_id] + (opts[:returning_sql_cols]||[])).uniq
+        sp_hash = {
+          :cols => cols,
+          :filter => [:and,
+                      [:eq,:ref,create_row[:ref]],
+                       [:eq,:datacenter_datacenter_id,create_row[:datacenter_datacenter_id]]]
+        }
+        
+        model_handle = @target_idh.createMH(:model_name => :state_change, :parent_model_name => :target)
+        if ret = Model.get_obj(model_handle,sp_hash)
+          unless ret[:status] == 'pending'
+            ret[:status] = 'pending'
+            ret.update(:status => 'pending')
+          end
+          ret
+        else
+          opts_create = {:convert => true}.merge(Aux.hash_subset(opts,:returning_sql_cols))
+          Model.create_from_rows(model_handle,create_rows,opts_create)
+        end
       end
 
       def pending_change_items(new_item_hashes,opts={})

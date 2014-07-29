@@ -112,7 +112,8 @@ module DTK; class Task
       def get_dynamic_attributes_with_retry(result,opts={})
         ret = get_dynamic_attributes(result)
         if non_null_attrs = opts[:non_null_attributes]
-          ret = retry_get_dynamic_attributes(ret,non_null_attrs) do
+          count=1
+          ret = retry_get_dynamic_attributes(ret,non_null_attrs,count) do
             get_dynamic_attributes(result)
           end
         end

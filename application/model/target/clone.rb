@@ -11,6 +11,11 @@ module DTK
         StateChange.create_pending_change_item(:new_item => new_id_handle, :parent => id_handle())
       end
     end
+
+    def create_state_changes_for_create_node?(node)
+      ClonePostCopyHook.create_state_changes_for_create_node?(self,[node])
+    end
+
    private
     module ClonePostCopyHook
       def self.node(target,clone_copy_output,opts)

@@ -22,11 +22,14 @@ module DTK; class Node; class TargetRef
           raise Error.new("Unexpected that ndx_node_target_ref_array.size not equal 1")
         end
         target_ref = target_ref_array.first.create_object()
-        #TODO: can be more efficienct and avoid calling below if create_linked_target_refs? finds as opposed to creates
+        # TODO: can be more efficienct and avoid calling below if create_linked_target_refs? finds as opposed to creates
         # target refs
         move_node_attributes_to_target_refs(target,[{:node_instance => node,:target_ref => target_ref}])
         target_ref
       end
+
+      # TODO: need better name for create_linked_target_ref? vs create_linked_target_refs?
+      # since diffeernt in what they do with node attributes
 
       # This creates if needed target refs and links nodes to them
       # returns new idhs indexed by node (id) they linked to

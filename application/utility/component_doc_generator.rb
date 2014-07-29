@@ -4,7 +4,7 @@ dtk_model_yaml_path = ARGV[0]
 module DTK
   module Utility
     def self.component_doc_generator(dtk_model_yaml_path)
-      server = R8Server.new("superuser","all")
+      server = R8Server.new("superuser",:groupname => "all")
       parsed_as_hash = server.parse_dtk_model_file(dtk_model_yaml_path)
       template = File.open(File.expand_path('component_doc_generator.md.erb',File.dirname(__FILE__))).read
       STDOUT << Erubis::Eruby.new(template).result(:cmp_module => ComponentModule.new(parsed_as_hash))

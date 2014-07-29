@@ -10,9 +10,10 @@ require Root + '/app'
 
 class R8Server
   include XYZ
-  def initialize(username,groupname="private")
+  def initialize(username,opts={})
+    groupname = opts[:groupname]||"private"
     @user_mh = model_handle(:user)
-    @user_obj = User.create_user_in_groups?(user_mh,username)
+    @user_obj = User.create_user_in_groups?(user_mh,username,opts)
     user_group_mh = user_mh.createMH(:user_group)
     group_obj =
       case groupname

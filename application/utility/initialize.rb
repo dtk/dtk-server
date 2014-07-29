@@ -11,7 +11,7 @@ OptionParser.new do|opts|
    end
 end.parse!
 
-server = R8Server.new("superuser","all")
+server = R8Server.new("superuser",:groupname => "all")
 server.create_repo_user_instance_admin?()
 server.create_public_library?(:include_default_nodes => true)
 

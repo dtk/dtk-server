@@ -154,10 +154,8 @@ module DTK
       el = hash_subset(:started_at,:ended_at)
       el[:status] = self[:status] unless self[:status] == 'created'
       el[:id] = self[:id]
-      type = (level == 1 ? self[:display_name] : self[:type]||self[:display_name])|| "top"
-      # type = self[:display_name]|| "top"
+      type = element_type(level,self)
       # putting idents in
-      
       el[:type] = "#{' '*(2*(level-1))}#{type}"
       ndx_errors ||= self.class.get_ndx_errors(hier_task_idhs())
       if ndx_errors[self[:id]]
@@ -167,27 +165,18 @@ module DTK
       if level == 1
         # no op
       else
+        ea = self[:executable_action]
         case self[:executable_action_type]
          when "ConfigNode" 
-          if ea = self[:executable_action]
-            el.merge!(Action::ConfigNode.status(ea,opts))
-          end
+          el.merge!(Action::ConfigNode.status(ea,opts)) if ea
          when "CreateNode" 
-          if ea = self[:executable_action]
-            el.merge!(Action::CreateNode.status(ea,opts))
-          end
+          el.merge!(Action::CreateNode.status(ea,opts)) if ea
          when "PowerOnNode"
-          if ea = self[:executable_action]
-            el.merge!(Action::CreateNode.status(ea,opts))
-          end
+          el.merge!(Action::CreateNode.status(ea,opts)) if ea
          when "InstallAgent"
-          if ea = self[:executable_action]
-            el.merge!(Action::InstallAgent.status(ea,opts))
-          end
+          el.merge!(Action::InstallAgent.status(ea,opts)) if ea
          when "ExecuteSmoketest"
-          if ea = self[:executable_action]
-            el.merge!(Action::ExecuteSmoketest.status(ea,opts))
-          end
+          el.merge!(Action::ExecuteSmoketest.status(ea,opts)) if ea
         end
       end
       ret << el
@@ -198,7 +187,21 @@ module DTK
       end
       ret
     end
-
+    def element_type(level,task)
+      if level == 1
+        self[:display_name] 
+      elsif type = self[:type]
+        if ['configure_node','create_node'].include?(type)
+          if node = (self[:executable_action]||{})[:node]
+            type = "#{type}group" if node.is_node_group?()
+          end
+        end
+        type
+      else
+        self[:display_name]|| "top"
+      end
+    end
+    private :element_type
 
     def status_table_form_format_errors(errors)
       ret = nil

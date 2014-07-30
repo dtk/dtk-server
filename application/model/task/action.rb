@@ -34,21 +34,6 @@ module DTK; class Task
         end
       end
 
-      # if node different than self[:node]then returns new object with modified node
-      # otherwise returns self; the exact form returned is
-      # [task_object,modified]
-      def dup_with_new_node?(node)
-        if node.id == self[:node].id
-          [self,false]
-        else
-          hash = inject(Hash.new) do |h,(k,v)|
-            h.merge(k => (k == :node ? node : v))
-          end
-          task_object = self.class.create_from_hash(task_action_type(),hash)
-          [task_object,true]
-        end
-      end
-
       def task_action_type()
         @task_action_type ||= self.class.to_s.split('::').last
       end
@@ -149,7 +134,7 @@ module DTK; class Task
       def self.node_status(object,opts)
         ret = PrettyPrintHash.new
         node = object[:node]||{}
-        if name = node[:display_name]
+        if name = node_status__name(node)
           ret[:name] = name
         end
         if id = node[:id]  
@@ -157,6 +142,11 @@ module DTK; class Task
         end
         ret
       end
+
+      def self.node_status__name(node)
+        node && Node.assembly_node_print_form?(node)
+      end
+
     end
 
     class NodeLevel < OnNode

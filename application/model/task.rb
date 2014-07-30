@@ -53,13 +53,6 @@ module DTK
       end
     end
 
-    # if node different than one associated with executable_action then returns new object with modified node
-    # otherwise returns self
-    def dup_with_new_node?(node)
-      new_ea,modified = executable_action().dup_with_new_node?(node)
-      modified ? update_executable_action(new_ea) : self
-    end
-
     # returns list (possibly empty) of subtask idhs that guard this
     def guarded_by(external_guards)
       ret = Array.new

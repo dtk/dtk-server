@@ -53,6 +53,23 @@ module DTK
       TargetRef.types().include?(get_field?(:type))
     end
 
+    def self.assembly_node_print_form?(obj)
+      if obj.kind_of?(Node)
+        if obj.get_field?(:display_name)
+          obj.assembly_node_print_form()
+        end
+      end
+    end
+
+    def assembly_node_print_form()
+      display_name = get_field?(:display_name)
+      if is_target_ref?()
+        TargetRef.print_form(display_name)
+      else
+        display_name
+      end
+    end
+
     #This is overwritten by node group subclasses
     def get_node_members()
       #in case this called on superclass that is actually a node group

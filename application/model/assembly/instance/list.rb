@@ -122,9 +122,7 @@ module DTK; class  Assembly
       end
       private :list_nodes
       def set_node_display_name!(node)
-        if node.is_target_ref?()
-          node[:display_name] = Node::TargetRef.print_form(node[:display_name])
-        end
+        node[:display_name] = node.assembly_node_print_form()
       end
       private :set_node_display_name!
 

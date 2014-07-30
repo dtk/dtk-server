@@ -19,7 +19,7 @@ os_attribute = 'os_identifier'
 memory_size = 't1.micro'
 memory_size_attribute = 'memory_size'
 node_name = 'node1'
-component_module_name = "test"
+component_module_name = "test_module"
 component_module_namespace = "dtk17"
 component_module_filesystem_location = "~/dtk/component_modules"
 

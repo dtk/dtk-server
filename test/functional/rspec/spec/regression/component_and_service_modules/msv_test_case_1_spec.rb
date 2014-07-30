@@ -16,7 +16,7 @@ assembly_name = 'bootstrap::node_with_params'
 os = 'precise'
 os_attribute = 'os_identifier'
 node_name = 'node1'
-component_module_name = "test"
+component_module_name = "test_module"
 component_module_namespace = "dtk17"
 component_module_filesystem_location = "~/dtk/component_modules"
 

@@ -18,7 +18,7 @@ service_module_name = "bakir_test1"
 component_module_filesystem_location = '~/dtk/component_modules'
 service_filesystem_location = '~/dtk/service_modules'
 component_module_namespace = "dtk17"
-component_module_name = "test"
+component_module_name = "test_module"
 
 dtk_common = DtkCommon.new('', '')
 

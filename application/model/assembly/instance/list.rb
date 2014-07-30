@@ -85,14 +85,7 @@ module DTK; class  Assembly
           list_components(opts)
           
         when :nodes
-          nodes = get_nodes__expand_node_groups().sort{|a,b| a[:display_name] <=> b[:display_name] }
-          nodes.each do |node|
-            if external_ref = node[:external_ref]
-              external_ref[:dns_name] ||= external_ref[:routable_host_address] #TODO: should be cleaner place to put this
-            end
-            node.sanitize!()
-          end
-          nodes
+          list_nodes(opts)
 
         when :modules
           component_modules_opts = Hash.new
@@ -115,6 +108,25 @@ module DTK; class  Assembly
           raise Error.new("TODO: not implemented yet: processing of info_about(#{about})")
         end
       end
+
+      def list_nodes(opts=Opts.new)
+        nodes = get_nodes__expand_node_groups()
+        nodes.each do |node|
+          set_node_display_name!(node)
+          if external_ref = node[:external_ref]
+            external_ref[:dns_name] ||= external_ref[:routable_host_address] #TODO: should be cleaner place to put this
+          end
+          node.sanitize!()
+        end
+        nodes.sort{|a,b| a[:display_name] <=> b[:display_name] }
+      end
+      private :list_nodes
+      def set_node_display_name!(node)
+        if node.is_target_ref?()
+          node[:display_name] = Node::TargetRef.print_form(node[:display_name])
+        end
+      end
+      private :set_node_display_name!
 
       def list_components(opts=Opts.new)
         aug_cmps = get_augmented_components(opts)

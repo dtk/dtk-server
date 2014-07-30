@@ -12,6 +12,37 @@ module DTK
       end
       Types = [Type::Node.target_ref,Type::Node.target_ref_staged]
 
+      def self.print_form(display_name)
+        if display_name =~ Regexp.new("^#{PhysicalNodePrefix}(.+$)")
+          $1
+        else
+          split = display_name.split(AssemblyDelim)
+          unless split.size == 2
+            Log.error("Display Name has unexpected form (#{display_name})")
+            return display_name
+          end
+          split[1]
+        end
+      end
+
+      def self.ret_display_name(type,target_ref_name,opts={})
+        case type
+          when :physical
+            "#{PhysicalNodePrefix}#{name}"
+          when :base_node_link
+            ret = "#{opts[:assembly_name]}#{AssemblyDelim}#{target_ref_name}"
+            if index = opts[:index]
+              ret << "#{IndexDelim}#{index.to_s}"
+            end
+            ret
+          else
+            raise Error.new("Unexpected type (#{type})")
+        end
+      end
+      AssemblyDelim = '::'
+      IndexDelim = ':'
+      PhysicalNodePrefix = 'physical--'
+
       # returns hash of form {node_id => NodeWithTargetRefs,..}
       NodeWithTargetRefs = Struct.new(:node,:target_refs)
       def self.get_ndx_linked_target_refs(node_mh,node_ids)
@@ -160,62 +191,6 @@ Log.error("see why this is using :canonical_template_node_id and not node_group_
           (ret[r[:canonical_template_node_id]] ||= Array.new) << r
         end
         ret
-      end
-
-      def self.process_import_node_input!(input_node_hash)
-        unless host_address = input_node_hash["external_ref"]["routable_host_address"]
-          raise Error.new("Missing field input_node_hash['external_ref']['routable_host_address']")
-        end
-
-        # for type use type from external_ref ('physical'), if not then use default 
-        type = input_node_hash["external_ref"]["type"] if input_node_hash["external_ref"]
-        input_node_hash.merge!("type" => type||Type::Node.target_ref)
-        params = {"host_address" => host_address}
-        input_node_hash.merge!(child_objects(params))
-      end
-
-      # TODO: collapse with application/utility/library_nodes - node_info
-      def self.child_objects(params={})
-        {
-          "attribute"=> {
-            "host_addresses_ipv4"=>{
-              "required"=>false,
-              "read_only"=>true,
-              "is_port"=>true,
-              "cannot_change"=>false,
-              "data_type"=>"json",
-              "value_derived"=>[params["host_address"]],
-              "semantic_type_summary"=>"host_address_ipv4",
-              "display_name"=>"host_addresses_ipv4",
-              "dynamic"=>true,
-              "hidden"=>true,
-              "semantic_type"=>{":array"=>"host_address_ipv4"}
-            },
-            "fqdn"=>{
-              "required"=>false,
-              "read_only"=>true,
-              "is_port"=>true,
-              "cannot_change"=>false,
-              "data_type"=>"string",
-              "display_name"=>"fqdn",
-              "dynamic"=>true,
-              "hidden"=>true,
-            },
-            "node_components"=>{
-              "required"=>false,
-              "read_only"=>true,
-              "is_port"=>true,
-              "cannot_change"=>false,
-              "data_type"=>"json",
-              "display_name"=>"node_components",
-              "dynamic"=>true,
-              "hidden"=>true,
-            }
-          },
-          "node_interface"=>{
-            "eth0"=>{"type"=>"ethernet", "display_name"=>"eth0"}
-          }
-        }
       end
     end
   end

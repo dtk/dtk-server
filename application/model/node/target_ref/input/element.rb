@@ -14,24 +14,18 @@ module DTK; class Node
           end
         end
         def ret_display_name(name,opts={})
-          case type
-            when :physical 
-              "physical--#{name}" #TODO: can we change this to be just name
-            when :base_node_link
-              unless assembly_name = opts[:assembly] && opts[:assembly].get_field?(:display_name)
-                raise Error.new("assembly option not given")
-              end
-              ret = "#{assembly_name}#{AssemblyDelim}#{name}"
-              if index = opts[:index] 
-                ret << "#{IndexDelim}#{index.to_s}"
-              end
-              ret
-            else 
-              raise Error.new("Unexpected type (#{type})")
+          opts_x = Hash.new
+          if type == :base_node_link
+            unless assembly_name = opts[:assembly] && opts[:assembly].get_field?(:display_name)
+              raise Error.new("assembly option not given")
+            end
+            opts_x.merge!(:assembly_name => assembly_name)
+            if index = opts[:index]
+              opts_x.merge!(:index => index)
+            end
+            TargetRef.ret_display_name(type,name,opts_x)
           end
         end
-        AssemblyDelim = '::'
-        IndexDelim = ':'
       end
     end
   end

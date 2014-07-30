@@ -9,12 +9,32 @@ module DTK
         raise Error.new("Unexpected that new_tr_idhs is empty")
       end
 
-      #find or add state change for node group and then add state change objects for new node members
+      # find or add state change for node group and then add state change objects for new node members
       node_group_sc = StateChange.create_pending_change_item?(:new_item => id_handle(), :parent => target.id_handle())
       node_group_sc_idh = node_group_sc.id_handle()
       new_items_hash = new_tr_idhs.map{|idh|{:new_item => idh, :parent => node_group_sc_idh}}
       StateChange.create_pending_change_items(new_items_hash)
       new_tr_idhs
+    end
+
+    def delete_group_members(new_cardinality)
+      node_members = get_node_members()
+      num_to_delete = node_members.size - new_cardinality
+      # to find ones to delete; 
+      # first look for  :admin_op_status == pending"
+      # then pick ones with highest index
+      #TODO: can be more efficient then needing to sort who thing 
+      sorted = node_members.sort do |a,b|
+        a_op = (a[:admin_op_status] ? 1 : 0)
+        b_op = (b[:admin_op_status] ? 1 : 0)
+        if b_op != a_op
+          b_op <=> a_op
+        else
+          (b[:index]||0) <=> (a[:index]||0)
+        end
+      end
+      to_delete = (0...num_to_delete).map{|i|sorted[i]}
+      to_delete.each{|node_group_member|node_group_member.destroy_and_delete()}
     end
 
     def get_node_members()
@@ -31,8 +51,12 @@ module DTK
       }
       mh = node_group_idhs.first.createMH()
       get_objs(mh,sp_hash).each do |ng|
+        node_member = ng[:node_member]
+        if index = TargetRef.node_member_index(node_member)
+          node_member.merge!(:index => index)
+        end
         ndx = ng[:id]
-        (ret[ndx] ||= Array.new) << ng[:node_member]
+        (ret[ndx] ||= Array.new) << node_member
       end
       ret
     end

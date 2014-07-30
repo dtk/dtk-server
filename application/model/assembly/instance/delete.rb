@@ -113,7 +113,7 @@ module DTK; class  Assembly
         nodes.map{|node|Delete.node(node,opts)}
       end
 
-      # TODO: double check if Transaction needed; if so look at whetehr for same reason put in destoy and reset
+      # TODO: double check if Transaction needed; if so look at whether for same reason put in destoy and reset
       def Delete.node(node,opts={})
         ret = nil
         Transaction do 

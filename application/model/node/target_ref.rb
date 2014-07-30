@@ -39,6 +39,19 @@ module DTK
             raise Error.new("Unexpected type (#{type})")
         end
       end
+      def self.node_member_index(target_ref)
+        ret = nil
+        if display_name = target_ref.get_field?(:display_name)
+          if display_name =~ Regexp.new("#{IndexDelim}([0-9]+$)")
+            ret = $1.to_i
+          end
+        end
+        unless ret 
+          Log.errror("Unexpected cannot find an index number")
+        end
+        ret
+      end
+
       AssemblyDelim = '::'
       IndexDelim = ':'
       PhysicalNodePrefix = 'physical--'

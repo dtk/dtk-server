@@ -22,13 +22,15 @@ module DTK; class Attribute
         def process()
           @attr.update_object!(:value_asserted,:node_node_id)
           existing_val = (@attr[:value_asserted]||0).to_i
-          if @new_val < existing_val
-            raise ErrorUsage.new("Use delete-node on individual members to reduce the size of the group")
-          elsif @new_val == existing_val
+          if @new_val == existing_val
             raise ErrorUsage.new("Value set equals existing value (#{existing_val.to_s})")
           end
           node_group = @attr.get_service_node_group(:cols => [:id,:group_id,:display_name,:datacenter_datacenter_id,:assembly_id])
-          node_group.add_group_members(@new_val)
+          if @new_val > existing_val
+            node_group.add_group_members(@new_val)
+          else @new_val < existing_val
+            node_group.delete_group_members(@new_val)
+          end
         end
       end
 

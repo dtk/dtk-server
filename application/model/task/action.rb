@@ -97,10 +97,7 @@ module DTK; class Task
       def get_dynamic_attributes_with_retry(result,opts={})
         ret = get_dynamic_attributes(result)
         if non_null_attrs = opts[:non_null_attributes]
-          count=1
-          ret = retry_get_dynamic_attributes(ret,non_null_attrs,count) do
-            get_dynamic_attributes(result)
-          end
+          ret = retry_get_dynamic_attributes(ret,non_null_attrs){get_dynamic_attributes(result)}
         end
         ret
       end
@@ -110,9 +107,11 @@ module DTK; class Task
           dyn_attr_val_info
         elsif count > RetryMaxCount
           raise Error.new("cannot get all attributes with keys (#{non_null_attrs.join(",")})")
+        elsif block.nil?
+          raise Error.new("Unexpected that block.nil?")
         else
           sleep(RetrySleep)
-          retry_get_dynamic_attributes(block.call(),non_null_attrs,count+1)
+          retry_get_dynamic_attributes(block.call(),non_null_attrs,count+1,&block)
         end
       end
       RetryMaxCount = 60

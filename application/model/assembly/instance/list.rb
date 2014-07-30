@@ -113,6 +113,7 @@ module DTK; class  Assembly
         nodes = get_nodes__expand_node_groups()
         nodes.each do |node|
           set_node_display_name!(node)
+          set_node_admin_op_status!(node)
           if external_ref = node[:external_ref]
             external_ref[:dns_name] ||= external_ref[:routable_host_address] #TODO: should be cleaner place to put this
           end
@@ -124,7 +125,12 @@ module DTK; class  Assembly
       def set_node_display_name!(node)
         node[:display_name] = node.assembly_node_print_form()
       end
-      private :set_node_display_name!
+      def set_node_admin_op_status!(node)
+        if node.is_node_group?()
+          node[:admin_op_status] = nil
+        end
+      end
+      private :set_node_display_name!,:set_node_admin_op_status!
 
       def list_components(opts=Opts.new)
         aug_cmps = get_augmented_components(opts)

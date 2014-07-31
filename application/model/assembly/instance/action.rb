@@ -5,8 +5,22 @@ module DTK
   class Assembly::Instance
     module Action
       r8_nested_require('action','execute_tests')
-      r8_nested_require('action','get_log')
-      r8_nested_require('action','grep')
+      module GetLog
+        def self.action_hash()
+          {
+            :agent => :tail,
+            :method => :get_log
+          }
+        end
+      end
+      module Grep
+        def self.action_hash()
+          {
+            :agent => :tail,
+            :method => :grep
+          }
+        end
+      end
     end
 
     module ActionMixin

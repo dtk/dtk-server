@@ -3,6 +3,28 @@ require 'iconv'
 module DTK
   # cross threads may eb seperate requests for new action results queue, but no locking on allocated instance
   class ActionResultsQueue
+    ##
+    # Initiates commmand on nodes 
+    def initiate(nodes,action,params)
+      indexes = nodes.map{|r|r[:id]}
+      set_indexes!(indexes)
+      ndx_pbuilderid_to_node_info =  nodes.inject(Hash.new) do |h,n|
+        h.merge(n.pbuilderid => {:id => n[:id], :display_name => n[:display_name]}) 
+      end
+        
+      callbacks = {
+        :on_msg_received => proc do |msg|
+          raw_response = CommandAndControl.parse_response__execute_action(nodes,msg)
+          response = Result.normalize_to_utf8_output(raw_response)
+            
+          if response and response[:pbuilderid] and response[:status] == :ok
+            node_info = ndx_pbuilderid_to_node_info[response[:pbuilderid]]
+            push(node_info[:id],response[:data])
+          end
+        end
+      }
+      CommandAndControl.request__execute_action(action[:agent],action[:method],nodes,callbacks,params)
+    end
 
     # returns :is_complete => is_complete, :results => results
     # since action result queue post processing is specific to netstats results, 

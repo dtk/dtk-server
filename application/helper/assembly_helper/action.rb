@@ -5,11 +5,11 @@ module Ramaze::Helper
     module ActionMixin
       # creates a queue object, initiates action that will push results on queue
       # if any errors, it wil just push error conditions on queue
-      def initiate_action(action_class, assembly, params, node_pattern)
+      def initiate_action(action_module, assembly, params, node_pattern)
         queue = ::DTK::ActionResultsQueue.new
         begin
           nodes = ret_matching_nodes(assembly, node_pattern)
-          action_class.initiate(nodes, queue, params)
+          queue.initiate(nodes,action_module.action_hash(),params)
         rescue ::DTK::ErrorUsage => e
           queue.push(:error,e.message)
         end

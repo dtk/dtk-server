@@ -581,17 +581,6 @@ module DTK
       rest_ok_response :status => :ok
     end
 
-    def rest__initiate_get_log()
-      assembly = ret_assembly_instance_object()
-      node_pattern = ret_params_hash(:node_identifier)
-      nodes = ret_matching_nodes(assembly, node_pattern)
-
-      queue = ActionResultsQueue.new
-      params = ret_params_hash(:log_path, :start_line)
-      Action::GetLog.initiate(nodes, queue, params)
-      rest_ok_response :action_results_id => queue.id
-    end
-
     def rest__initiate_ssh_pub_access()
       assembly = ret_assembly_instance_object()
       params   = ret_params_hash(:rsa_pub_name, :rsa_pub_key, :system_user)
@@ -626,14 +615,6 @@ module DTK
       rest_ok_response Component::Instance::Interpreted.list_ssh_access(assembly)
     end
 
-    def rest__initiate_grep()
-      assembly = ret_assembly_instance_object()
-      params   = ret_params_hash(:node_pattern, :log_path, :grep_pattern, :stop_on_first_match)
-      queue = ActionResultsQueue.new
-      assembly.initiate_grep(queue, params)
-      rest_ok_response :action_results_id => queue.id
-    end
-
     def rest__task_status()
       assembly_id = ret_request_param_id(:assembly_id,Assembly::Instance)
       format = (ret_request_params(:format)||:hash).to_sym
@@ -642,6 +623,32 @@ module DTK
     end
 
     ### command and control actions
+    include Assembly::Instance::Action
+
+    def rest__initiate_get_log()
+      assembly = ret_assembly_instance_object()
+      node_name = ret_non_null_request_params(:node_identifier)
+      queue = ActionResultsQueue.new
+      begin
+        nodes = ret_matching_nodes(assembly, :node_name => node_name)
+        params = ret_params_hash(:log_path, :start_line)
+        GetLog.initiate(nodes, queue, params)
+       rescue ErrorUsage => e
+        queue.push(:error,e.message)
+      end
+      rest_ok_response :action_results_id => queue.id
+    end
+
+    #TODO: refactor below and what is in action/instance/action using initiate_get_log as example form
+
+    def rest__initiate_grep()
+      assembly = ret_assembly_instance_object()
+      params   = ret_params_hash(:node_pattern, :log_path, :grep_pattern, :stop_on_first_match)
+      queue = ActionResultsQueue.new
+      assembly.initiate_grep(queue, params)
+      rest_ok_response :action_results_id => queue.id
+    end
+
     def rest__initiate_get_netstats()
       node_id = ret_non_null_request_params(:node_id)
       assembly = ret_assembly_instance_object()
@@ -722,7 +729,7 @@ module DTK
     end
     ### end: mcollective actions
 
-# TDODO: got here in cleanup of rest calls
+# TODO: got here in cleanup of rest calls
 
     def rest__list_smoketests()
       assembly = ret_assembly_object()

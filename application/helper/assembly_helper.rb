@@ -123,32 +123,33 @@ module Ramaze::Helper
     end
 
     def ret_matching_nodes(assembly, node_pattern)
-      raise ::DTK::ErrorUsage.new('trace flow so can use for warnings')
-=begin
--            # filters nodes based on requested node identifier
--            nodes = nodes.select { |node| node[:id] == params[:node_identifier].to_i || node[:display_name] == params[:node_ide
--
--            # if nodes empty return error message, case where more nodes are matches should not happen
--            if nodes.empty?
--              action_results_queue.push(:error, "No nodes have been mathed to node identifier: #{params[:node_identifier]}")
--              return
--            end
-=end
-      # check for pattern
-      unless node_pattern.nil? || node_pattern.empty?
-        regex = Regexp.new(node_pattern)
-
-        # temp nodes_list
-        nodes_list = nodes
-
-        nodes = nodes.select { |node| regex =~ node.id.to_s}
-        if nodes.size == 0
-          nodes = nodes_list.select { |node| node_pattern.to_s.eql?(node.display_name.to_s)}
-          return nodes, false, "No nodes have been matched via ID ~ '#{node_pattern}'." if nodes.size == 0
+      #TODO: can handle more efficiently than getting all nodes adn filtering
+      nodes = assembly.get_leaf_nodes()
+      if node_pattern.nil? or node_pattern.empty?
+        nodes
+      else
+        ret = nil
+        if node_pattern.kind_of?(Hash) and node_pattern.size == 1
+          case node_pattern.keys.first
+           when :node_name
+            node_name = node_pattern.values.first
+            ret = nodes.select{|n|n.assembly_node_print_form() == node_name}
+            if ret.empty?
+              raise ::DTK::ErrorUsage.new("No node matches name (#{node_name})")
+            end
+          when :node_id
+            node_id = node_pattern.values.first
+            ret = nodes.select{|n|n.id == node_id}
+            if ret.empty?
+              raise ::DTK::ErrorUsage.new("No node matches id (#{node_id})")
+            end
+          end
         end
+        ret || raise(::DTK::ErrorUsage.new("Unexpected form of node_pattern"))
       end
     end
 
+    # TODO: refactor below in terms of above
     ##
     # Method that will validate if nodes list is ready to started or stopped.
     #

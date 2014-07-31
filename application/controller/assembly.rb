@@ -614,10 +614,8 @@ module DTK
     end
 
     def rest__initiate_get_netstats()
-      node_id = ret_non_null_request_params(:node_id)
-      assembly = ret_assembly_instance_object()
-      queue = ActionResultsQueue.new
-      assembly.initiate_get_netstats(queue, node_id)
+      assembly     = ret_assembly_instance_object()
+      queue = initiate_action(GetNetstats, assembly)
       rest_ok_response :action_results_id => queue.id
     end
 

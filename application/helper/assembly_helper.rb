@@ -68,7 +68,7 @@ module Ramaze::Helper
       ret_request_param_id_handle(node_name_param,::DTK::Node,assembly.id())
     end
 
-    #
+    ##
     # Pass param name containing with comma seperated names or ids. Param name should
     # resolve to command seperated node id/names (String)
     #
@@ -122,6 +122,33 @@ module Ramaze::Helper
       [assembly_template_name,service_module_name]
     end
 
+    def ret_matching_nodes(assembly, node_pattern)
+      raise ::DTK::ErrorUsage.new('trace flow so can use for warnings')
+=begin
+-            # filters nodes based on requested node identifier
+-            nodes = nodes.select { |node| node[:id] == params[:node_identifier].to_i || node[:display_name] == params[:node_ide
+-
+-            # if nodes empty return error message, case where more nodes are matches should not happen
+-            if nodes.empty?
+-              action_results_queue.push(:error, "No nodes have been mathed to node identifier: #{params[:node_identifier]}")
+-              return
+-            end
+=end
+      # check for pattern
+      unless node_pattern.nil? || node_pattern.empty?
+        regex = Regexp.new(node_pattern)
+
+        # temp nodes_list
+        nodes_list = nodes
+
+        nodes = nodes.select { |node| regex =~ node.id.to_s}
+        if nodes.size == 0
+          nodes = nodes_list.select { |node| node_pattern.to_s.eql?(node.display_name.to_s)}
+          return nodes, false, "No nodes have been matched via ID ~ '#{node_pattern}'." if nodes.size == 0
+        end
+      end
+    end
+
     ##
     # Method that will validate if nodes list is ready to started or stopped.
     #
@@ -135,7 +162,8 @@ module Ramaze::Helper
     #   - filtered nodes by pattern (if pattern not nil)
     #   - error message in case it is not valid
     #
-    def nodes_valid_for_stop_or_start?(assembly, nodes, node_pattern, status_pattern)
+    def nodes_valid_for_stop_or_start?(assembly, node_pattern, status_pattern)
+      nodes = assembly.get_leaf_nodes()
       # check for pattern
       unless node_pattern.nil? || node_pattern.empty?
         regex = Regexp.new(node_pattern)

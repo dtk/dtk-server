@@ -14,12 +14,6 @@ module DTK
         Action::GetNetstats.initiate(nodes,action_results_queue)
       end
 
-      def initiate_get_log(action_results_queue,params)
-        # start of get log functionality
-        nodes =  action_get_leaf_nodes()
-        Action::GetLog.initiate(nodes,action_results_queue,params)
-      end
-
       def initiate_grep(action_results_queue,params)
         # start of get log functionality
         nodes =  action_get_leaf_nodes()
@@ -79,16 +73,11 @@ module DTK
 
       module Action
         class GetLog < ActionResultsQueue::Result
+          ##
+          # Initiates commmand on nodes to tail logs
+          #
+          # The parameter +params+ can have keys: :log_path, :start_line
           def self.initiate(nodes, action_results_queue, params)
-            # filters nodes based on requested node identifier
-            nodes = nodes.select { |node| node[:id] == params[:node_identifier].to_i || node[:display_name] == params[:node_identifier] }
-            
-            # if nodes empty return error message, case where more nodes are matches should not happen
-            if nodes.empty?
-              action_results_queue.push(:error, "No nodes have been mathed to node identifier: #{params[:node_identifier]}") 
-              return
-            end
-
             indexes = nodes.map{|r|r[:id]}
             action_results_queue.set_indexes!(indexes)
             ndx_pbuilderid_to_node_info =  nodes.inject(Hash.new) do |h,n|

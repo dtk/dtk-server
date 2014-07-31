@@ -460,9 +460,8 @@ module DTK
         return rest_ok_response :confirmation_message=>true if start_assembly.nil?
         
         node_pattern = ret_request_params(:node_pattern)
-        nodes = assembly.get_leaf_nodes()
         # filters only stopped nodes for this assembly
-        nodes, is_valid, error_msg = nodes_valid_for_stop_or_start?(assembly, nodes, node_pattern, :stopped)
+        nodes, is_valid, error_msg = nodes_valid_for_stop_or_start?(assembly, node_pattern, :stopped)
         
         unless is_valid
           Log.info(error_msg)
@@ -536,9 +535,8 @@ module DTK
       node_pattern = ret_request_params(:node_pattern)
       task         = nil
 
-      nodes = assembly.get_leaf_nodes()
       # filters only stopped nodes for this assembly
-      nodes, is_valid, error_msg = nodes_valid_for_stop_or_start?(assembly, nodes, node_pattern, :stopped)
+      nodes, is_valid, error_msg = nodes_valid_for_stop_or_start?(assembly, node_pattern, :stopped)
 
       unless is_valid
         Log.info(error_msg)
@@ -570,9 +568,8 @@ module DTK
     def rest__stop()
       assembly = ret_assembly_instance_object()
       node_pattern = ret_request_params(:node_pattern)
-      nodes = assembly.get_leaf_nodes()
-      
-      nodes, is_valid, error_msg = nodes_valid_for_stop_or_start?(assembly, nodes, node_pattern, :running)
+
+      nodes, is_valid, error_msg = nodes_valid_for_stop_or_start?(assembly, node_pattern, :running)
 
       unless is_valid
         Log.info(error_msg)
@@ -586,9 +583,12 @@ module DTK
 
     def rest__initiate_get_log()
       assembly = ret_assembly_instance_object()
-      params   = ret_params_hash(:node_identifier,:log_path, :start_line)
+      node_pattern = ret_params_hash(:node_identifier)
+      nodes = ret_matching_nodes(assembly, node_pattern)
+
       queue = ActionResultsQueue.new
-      assembly.initiate_get_log(queue, params)
+      params = ret_params_hash(:log_path, :start_line)
+      Action::GetLog.initiate(nodes, queue, params)
       rest_ok_response :action_results_id => queue.id
     end
 
@@ -641,7 +641,7 @@ module DTK
       rest_ok_response response
     end
 
-    ### mcollective actions
+    ### command and control actions
     def rest__initiate_get_netstats()
       node_id = ret_non_null_request_params(:node_id)
       assembly = ret_assembly_instance_object()

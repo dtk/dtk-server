@@ -329,6 +329,9 @@ module DTK
     end
 
     #### end: list and info actions ###
+
+    ##
+    # Sets or creates attributes
     # TODO: update what input can be
     # the body has an array each element of form
     # {:pattern => PAT, :value => VAL}
@@ -491,39 +494,6 @@ module DTK
       rest_ok_response :task_id => task.id
     end
 
-    # leaving this commented until we test out if methode above works properly
-    # def rest__create_task()
-    #   assembly = ret_assembly_instance_object()
-    #   if assembly.is_stopped?
-    #     validate_params = [
-    #       :action => :start, 
-    #       :params => {:assembly => assembly[:id]}, 
-    #       :wait_for_complete => {:type => :assembly, :id => assembly[:id]}
-    #     ]
-    #     return rest_validate_response("Assembly is stopped, you need to start it.", validate_params)
-    #   end
-
-    #   if assembly.are_nodes_running?
-    #     raise ErrorUsage, "Task is already running on requested nodes. Please wait until task is complete"
-    #   end
-
-    #   opts = ret_params_hash(:commit_msg,:puppet_version)
-    #   task = Task.create_from_assembly_instance(assembly,opts)
-    #   task.save!()
-    #   # TODO: this was called from gui commit window
-    #   # pp Attribute.augmented_attribute_list_from_task(task)
-    #   rest_ok_response :task_id => task.id
-    # end
-
-    # #TODO: replace or given options to specify specific smoketests to run
-    # def rest__create_smoketests_task()
-    #   assembly = ret_assembly_instance_object()
-    #   opts = ret_params_hash(:commit_msg).merge(:component_type => :smoketest)
-    #   task = Task.create_from_assembly_instance(assembly,opts)
-    #   task.save!()
-    #   rest_ok_response :task_id => task.id
-    # end
-
     def rest__clear_tasks()
       assembly = ret_assembly_instance_object()
       assembly.clear_tasks()
@@ -626,26 +596,20 @@ module DTK
     include Assembly::Instance::Action
 
     def rest__initiate_get_log()
-      assembly = ret_assembly_instance_object()
-      node_name = ret_non_null_request_params(:node_identifier)
-      queue = ActionResultsQueue.new
-      begin
-        nodes = ret_matching_nodes(assembly, :node_name => node_name)
-        params = ret_params_hash(:log_path, :start_line)
-        GetLog.initiate(nodes, queue, params)
-       rescue ErrorUsage => e
-        queue.push(:error,e.message)
-      end
+      assembly     = ret_assembly_instance_object()
+      params       = ret_params_hash(:log_path, :start_line)
+      node_pattern = ret_params_hash(:node_name)
+
+      queue = initiate_action(GetLog, assembly, params, node_pattern)
       rest_ok_response :action_results_id => queue.id
     end
 
-    #TODO: refactor below and what is in action/instance/action using initiate_get_log as example form
-
     def rest__initiate_grep()
-      assembly = ret_assembly_instance_object()
-      params   = ret_params_hash(:node_pattern, :log_path, :grep_pattern, :stop_on_first_match)
-      queue = ActionResultsQueue.new
-      assembly.initiate_grep(queue, params)
+      assembly     = ret_assembly_instance_object()
+      params       = ret_params_hash(:log_path, :grep_pattern, :stop_on_first_match)
+      node_pattern = ret_params_hash(:node_name)
+
+      queue = initiate_action(Grep, assembly, params, node_pattern)
       rest_ok_response :action_results_id => queue.id
     end
 

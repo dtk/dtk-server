@@ -1,11 +1,11 @@
 module DTK
   class Assembly::Instance
     module Action
-      class GetLog < ActionResultsQueue::Result
-        ##
-        # Initiates commmand on nodes to tail logs
-        #
-        # The parameter +params+ can have keys: :log_path, :start_line
+      ##
+      # Initiates commmand on nodes to tail logs
+      #
+      # The parameter +params+ can have keys: :log_path, :grep_pattern, :stop_on_first_match
+      class Grep < ActionResultsQueue::Result
         def self.initiate(nodes, action_results_queue, params)
           indexes = nodes.map{|r|r[:id]}
           action_results_queue.set_indexes!(indexes)
@@ -17,17 +17,16 @@ module DTK
             :on_msg_received => proc do |msg|
               raw_response = CommandAndControl.parse_response__execute_action(nodes,msg)
               response = ActionResultsQueue::Result.normalize_to_utf8_output(raw_response)
-              
               if response and response[:pbuilderid] and response[:status] == :ok
                 node_info = ndx_pbuilderid_to_node_info[response[:pbuilderid]]
                 action_results_queue.push(node_info[:id],response[:data])
               end
             end
           }
-          
-          CommandAndControl.request__execute_action(:tail,:get_log,nodes,callbacks,params)
+          CommandAndControl.request__execute_action(:tail,:grep,nodes,callbacks,params)
         end
       end
     end
   end
-end
+end        
+      

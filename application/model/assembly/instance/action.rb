@@ -6,6 +6,7 @@ module DTK
     module Action
       r8_nested_require('action','execute_tests')
       r8_nested_require('action','get_log')
+      r8_nested_require('action','grep')
     end
 
     module ActionMixin
@@ -13,12 +14,6 @@ module DTK
         nodes = action_get_leaf_nodes()
         nodes = nodes.select { |node| node[:id] == node_id.to_i } unless (node_id.nil? || node_id.empty?)
         Action::GetNetstats.initiate(nodes,action_results_queue)
-      end
-
-      def initiate_grep(action_results_queue,params)
-        # start of get log functionality
-        nodes =  action_get_leaf_nodes()
-        Action::Grep.initiate(nodes,action_results_queue,params)
       end
 
       def initiate_ssh_agent_action(agent_action, queue, params, nodes)
@@ -119,38 +114,6 @@ module DTK
           end
         end
 
-        class Grep < ActionResultsQueue::Result
-          def self.initiate(nodes, action_results_queue, params)
-            # filters nodes based on requested node identifier
-            nodes = nodes.select { |node| (node[:id].to_s.start_with?(params[:node_pattern].to_s)) || (node[:display_name].to_s.start_with?(params[:node_pattern].to_s)) }
-            
-            # if nodes empty return error message, case where more nodes are matches should not happen
-            if nodes.empty?
-              action_results_queue.push(:error, "No nodes have been mathed to node identifier: #{params[:node_pattern]}") 
-              return
-            end
-
-            indexes = nodes.map{|r|r[:id]}
-            action_results_queue.set_indexes!(indexes)
-            ndx_pbuilderid_to_node_info =  nodes.inject(Hash.new) do |h,n|
-              h.merge(n.pbuilderid => {:id => n[:id], :display_name => n[:display_name]}) 
-            end
-
-            callbacks = {
-              :on_msg_received => proc do |msg|
-                response = CommandAndControl.parse_response__execute_action(nodes,msg)
-
-                response = ActionResultsQueue::Result.normalize_to_utf8_output(response)
-
-                if response and response[:pbuilderid] and response[:status] == :ok
-                  node_info = ndx_pbuilderid_to_node_info[response[:pbuilderid]]
-                  action_results_queue.push(node_info[:id],response[:data])
-                end
-              end
-            }
-            CommandAndControl.request__execute_action(:tail,:grep,nodes,callbacks,params)
-          end
-        end        
         class GetNetstats < ActionResultsQueue::Result
           def self.initiate(nodes,action_results_queue)
             indexes = nodes.map{|r|r[:id]}

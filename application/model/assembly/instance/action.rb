@@ -25,8 +25,7 @@ module DTK
 
         def process_data!(data,node_info)
           ndx_ret = Hash.new
-          data.each{|r|node_info.merge!(r)}
-          raw_data.each do |r|
+          data.each do |r|
             next unless r[:state] == "LISTEN" || r[:protocol] == "udp"
             if r[:local] =~ /(^.+):([0-9]+$)/
               address = $1
@@ -39,7 +38,7 @@ module DTK
               }
               end
           end
-          ndx_ret.values
+          Result.new(node_info[:display_name],ndx_ret.values)
         end
       end
     end

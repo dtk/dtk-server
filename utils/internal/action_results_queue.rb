@@ -1,7 +1,7 @@
 require 'iconv'
 
 module DTK
-  # cross threads may eb seperate requests for new action results queue, but no locking on allocated instance
+  # cross threads may be seperate requests for new action results queue, but no locking on allocated instance
   class ActionResultsQueue
     ##
     # Initiates commmand on nodes 
@@ -9,7 +9,7 @@ module DTK
       indexes = nodes.map{|r|r[:id]}
       set_indexes!(indexes)
       ndx_pbuilderid_to_node_info =  nodes.inject(Hash.new) do |h,n|
-        h.merge(n.pbuilderid => {:id => n[:id], :display_name => n[:display_name]}) 
+        h.merge(n.pbuilderid => {:id => n[:id], :display_name => n.assembly_node_print_form()})
       end
         
       callbacks = { 

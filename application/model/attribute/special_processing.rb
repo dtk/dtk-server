@@ -60,8 +60,14 @@ module DTK; class Attribute
           :proc => lambda{|a,v|Update::OsIdentifier.new(a,v).process()}
         },
         :cardinality =>{
-          :legal_value_fn => lambda{|v|v.kind_of?(Fixnum) or (v.kind_of?(String) and v =~ /^[0-9]+$/)},
-          :legal_value_error_msg => "Value must be an integer",
+          :legal_value_fn => lambda do |v|
+            val = 
+              if v.kind_of?(Fixnum) then v 
+              elsif v.kind_of?(String) and v =~ /^[0-9]+$/ then v.to_i
+              end
+            val and val > 0
+          end,
+          :legal_value_error_msg => "Value must be a positive integer",
           :proc => lambda{|a,v|Update::GroupCardinality.new(a,v).process()}
         } 
       },

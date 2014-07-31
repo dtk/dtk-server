@@ -46,13 +46,12 @@ module DTK
       def self.decompose_executable_action!(task)
         # noop if this is not a node group that decomposes 
         ea = task[:executable_action]
-        nodes = ea.nodes
-        return unless nodes.size > 1 
+        return unless ea.node_is_node_group?()
         
         #modify task so that it is a concurrent decomposed task
         task[:temporal_order] = "concurrent"
         ea[:decomposed_node_group] = true
-        task[:subtasks] = nodes.map{|node|node_group_member(node,task)}
+        task[:subtasks] = ea.nodes.map{|node|node_group_member(node,task)}
       end
 
       def self.node_group_member(node,parent_task)

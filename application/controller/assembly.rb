@@ -449,7 +449,13 @@ module DTK
       assembly = ret_assembly_instance_object()
       task = nil
 
-      if assembly.is_stopped?
+      unless assembly.is_stopped?
+        if assembly.are_nodes_running?
+          raise ErrorUsage, "Task is already running on requested nodes. Please wait until task is complete" 
+        end
+        task = Task.create_from_assembly_instance(assembly,ret_params_hash(:commit_msg))
+      else
+        # TODO: clean up below
         start_assembly = ret_request_params(:start_assembly)
         return rest_ok_response :confirmation_message=>true if start_assembly.nil?
         
@@ -465,8 +471,7 @@ module DTK
 
         nodes_w_components = assembly.remove_empty_nodes(nodes, {:detail_level => 'nodes'})
 
-        # TODO: not doing at this point puppet version per run; it just can be set when node is created
-        opts = ret_params_hash(:commit_msg,:puppet_version)
+        opts = ret_params_hash(:commit_msg)
         if (nodes_w_components.size == 1)
           opts.merge!(:node => nodes_w_components.first)
         else
@@ -476,21 +481,14 @@ module DTK
         # opts.merge!(:node => nodes_w_components.first) if (nodes_w_components.size == 1)
         task = Task.create_and_start_from_assembly_instance(assembly,opts)
 
-        user_object = user_object  = ::DTK::CurrentSession.new.user_object()
+        user_object = user_object  = CurrentSession.new.user_object()
         CreateThread.defer_with_session(user_object) do
           # invoking command to start the nodes
           CommandAndControl.start_instances(nodes_w_components) unless nodes_w_components.empty?
         end
-      else
-        raise ErrorUsage, "Task is already running on requested nodes. Please wait until task is complete" if assembly.are_nodes_running?
-        # TODO: not doing at this point puppet version per run; it just can be set when node is created
-        opts = ret_params_hash(:commit_msg,:puppet_version)
-        task = Task.create_from_assembly_instance(assembly,opts)
       end
 
       task.save!()
-      # TODO: this was called from gui commit window
-      # pp Attribute.augmented_attribute_list_from_task(task)
       rest_ok_response :task_id => task.id
     end
 

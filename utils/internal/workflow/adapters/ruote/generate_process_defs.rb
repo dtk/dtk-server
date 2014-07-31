@@ -17,7 +17,6 @@ module DTK
 
      private
       ####semantic processing
-      # TODO: may make decomposition data driven
       def decomposition(task,context)
         action = task[:executable_action]
         if action.kind_of?(Task::Action::PowerOnNode)

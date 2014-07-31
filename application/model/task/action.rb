@@ -47,11 +47,16 @@ module DTK; class Task
 
 
       ###====== related to node(s); node can be a node group
+      def node_is_node_group?()
+        self[:node].is_node_group?()
+      end
+
       def nodes()
-        if self[:node].is_node_group?()
-          self[:node].get_node_members()
+        node_or_ng = self[:node]
+        if node_or_ng.is_node_group?()
+          node_or_ng.get_node_members()
         else
-          [self[:node]]
+          [node_or_ng]
         end
       end
 

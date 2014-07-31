@@ -20,7 +20,7 @@ module DTK
       class GetNetstats < ActionResultsQueue
        private
         def action_hash()
-          {:agent => :tail, :method => :grep}
+          {:agent => :netstat, :method => :get_tcp_udp}
         end
 
         def process_data!(data,node_info)

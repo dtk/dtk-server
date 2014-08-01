@@ -16,33 +16,51 @@ module Ramaze::Helper
         action_queue
       end
       
-      def ret_matching_nodes(assembly, node_pattern={})
+      def ret_matching_nodes(assembly, node_pattern_x={})
+        #removing and empty or nil filters
+        node_pattern = (node_pattern_x ? node_pattern_x.reject{|k,v|v.nil? or v.empty?} : {})
         #TODO: can handle more efficiently than getting all nodes and filtering
         nodes = assembly.get_leaf_nodes()
-        if node_pattern.nil? or node_pattern.empty?
+        if node_pattern.empty?
           nodes
         else
-          ret = nil
-          if node_pattern.kind_of?(Hash) and node_pattern.size == 1
-            case node_pattern.keys.first
-            when :node_name
-              node_name = node_pattern.values.first
-              ret = nodes.select{|n|n.assembly_node_print_form() == node_name}
-              if ret.empty?
-                raise ::DTK::ErrorUsage.new("No node matches name (#{node_name})")
-              end
-            when :node_id
-              node_id = node_pattern.values.first
-              ret = nodes.select{|n|n.id == node_id}
-              if ret.empty?
-                raise ::DTK::ErrorUsage.new("No node matches id (#{node_id})")
+          ret = 
+            if node_pattern.kind_of?(Hash) and node_pattern.size == 1
+              case node_pattern.keys.first
+              when :node_name
+                node_name = node_pattern.values.first
+                MatchingNodes.filter_by_name(nodes,node_name)
+              when :node_id
+                node_id = node_pattern.values.first
+                MatchingNodes.filter_by_id(nodes,node_id)
+              when :node_identifier
+                node_identifier = node_pattern.values.first
+                if node_identifier =~ /^[0-9]+$/
+                  MatchingNodes.filter_by_id(nodes,node_identifier)
+                else
+                  MatchingNodes.filter_by_name(nodes,node_identifier)
+                end
               end
             end
-          end
           ret || raise(::DTK::ErrorUsage.new("Unexpected form of node_pattern"))
         end
       end
       private :ret_matching_nodes
+      module MatchingNodes
+        def self.filter_by_id(nodes,node_id)
+          node_id = node_id.to_i
+          unless match = nodes.find{|n|n.id == node_id}
+            raise ::DTK::ErrorUsage.new("No node matches id (#{node_id})")
+          end
+          [match]
+        end
+        def self.filter_by_name(nodes,node_name)
+          unless match = nodes.find{|n|n.assembly_node_print_form() == node_name}
+            raise ::DTK::ErrorUsage.new("No node matches name (#{node_name})")
+          end
+          [match]
+        end 
+      end
       
       # TODO: refactor below in terms of above
       ##

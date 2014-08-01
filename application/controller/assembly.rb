@@ -598,7 +598,7 @@ module DTK
     def rest__initiate_get_log()
       assembly     = ret_assembly_instance_object()
       params       = ret_params_hash(:log_path, :start_line)
-      node_pattern = ret_params_hash(:node_name)
+      node_pattern = ret_params_hash(:node_identifier)
 
       queue = initiate_action(GetLog, assembly, params, node_pattern)
       rest_ok_response :action_results_id => queue.id
@@ -607,7 +607,7 @@ module DTK
     def rest__initiate_grep()
       assembly     = ret_assembly_instance_object()
       params       = ret_params_hash(:log_path, :grep_pattern, :stop_on_first_match)
-      node_pattern = ret_params_hash(:node_name)
+      node_pattern = ret_params_hash(:node_name,:node_id)
 
       queue = initiate_action(Grep, assembly, params, node_pattern)
       rest_ok_response :action_results_id => queue.id
@@ -615,7 +615,9 @@ module DTK
 
     def rest__initiate_get_netstats()
       assembly     = ret_assembly_instance_object()
-      queue = initiate_action(GetNetstats, assembly)
+      params       = Hash.new
+      node_pattern = ret_params_hash(:node_id,:node_name)
+      queue = initiate_action(GetNetstats, assembly, params, node_pattern)
       rest_ok_response :action_results_id => queue.id
     end
 

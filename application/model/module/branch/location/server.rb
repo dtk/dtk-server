@@ -15,12 +15,9 @@ module DTK; class ModuleBranch
         end
 
         def ret_private_user_repo_name()
-          # DEBUG SNIPPET >>> REMOVE <<<
-          require 'ap'
-          ap "Private user repo name called!!!"
-          ap caller[-1..1]
           username = CurrentSession.new.get_username()
-          repo_name = "#{username}-local-#{module_name()}"
+          namespace_name = module_namespace_name() || Namespace.default_namespace_name
+          repo_name = "#{username}-#{namespace_name}-#{module_name()}"
           # component_type can be :service_module, :puppet or :chef
           # @component_type == :service_module ? "sm-#{repo_name}" : repo_name
           case @component_type

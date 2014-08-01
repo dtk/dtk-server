@@ -31,7 +31,7 @@ module DTK
     def self.create_dsl_object(module_branch,dsl_integer_version,format_type=nil)
       input_hash = get_dsl_file_hash_content_info(module_branch,dsl_integer_version,format_type)[:hash_content]
       config_agent_type = ret_config_agent_type(input_hash)
-      new(config_agent_type,impl.id_handle(),module_branch.id_handle(),input_hash) 
+      new(config_agent_type,impl.id_handle(),module_branch.id_handle(),input_hash)
     end
 
     def self.create_dsl_object_from_impl(source_impl,opts={})
@@ -166,7 +166,7 @@ module DTK
     end
 
     def self.get_dsl_file_hash_content_info(impl_or_module_branch_obj,dsl_integer_version=nil,format_type=nil)
-      impl_obj = 
+      impl_obj =
         if impl_or_module_branch_obj.kind_of?(Implementation)
           impl_or_module_branch_obj
         elsif impl_or_module_branch_obj.kind_of?(ModuleBranch)
@@ -273,7 +273,7 @@ module DTK
         if filename =~ DSLFilenameRegexp[integer_version(dsl_integer_version)]
           file_extension = $1
           unless format_type = ExtensionToType[file_extension]
-            raise Error.new("illegal file extension #{file_extension}") 
+            raise Error.new("illegal file extension #{file_extension}")
           end
           {:format_type => format_type}
         else
@@ -289,7 +289,7 @@ module DTK
            # Part of code to handle new serverspec type of module
            when "serverspec" then ConfigAgentTypes[:serverspec]
            when "test" then ConfigAgentTypes[:test]
-           else 
+           else
              ParsingError.new("Unexpected module_type (#{type})")
           end
         else

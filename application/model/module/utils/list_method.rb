@@ -1,10 +1,11 @@
 module DTK
   module ModuleUtils
     class ListMethod
-      
+
       DEFAULT_VERSION = 'CURRENT'
 
       def self.aggregate_detail(branch_module_rows,project_idh,model_type,opts)
+
         project = project_idh.create_object()
         module_mh = project_idh.createMH(model_type)
         diff       = opts[:diff]
@@ -24,14 +25,14 @@ module DTK
           ndx_repo_remotes = r[:ndx_repo_remotes]
           ndx = r[:id]
           is_equal = nil
-          
+
           if diff
             if default_remote_repo = RepoRemote.ret_default_remote_repo((ndx_repo_remotes||{}).values)
               remote = default_remote_repo.remote_dtkn_location(project,model_type,module_name)
               is_equal = r[:repo].ret_local_remote_diff(module_branch,remote)
             end
           end
-                    
+
           unless mdl = ndx_ret[ndx]
             r.delete(:repo)
             r.delete(:module_branch)
@@ -56,20 +57,20 @@ module DTK
           if raw_va = mdl.delete(:version_array)
             unless raw_va.size == 1 and raw_va.first == DEFAULT_VERSION
               version_array = (raw_va.include?(DEFAULT_VERSION) ? [DEFAULT_VERSION] : []) + raw_va.reject{|v|v == DEFAULT_VERSION}.sort
-              mdl.merge!(:versions => version_array.join(", ")) 
+              mdl.merge!(:versions => version_array.join(", "))
             end
           end
           external_ref_source = mdl.delete(:external_ref_source)
           ndx_repo_remotes = mdl.delete(:ndx_repo_remotes)
 
-          if linked_remote = linked_remotes_print_form((ndx_repo_remotes||{}).values,external_ref_source,opts={}) 
+          if linked_remote = linked_remotes_print_form((ndx_repo_remotes||{}).values,external_ref_source,opts={})
             mdl.merge!(:linked_remotes => linked_remote)
           end
         end
         ndx_ret.values
       end
 
-     private 
+     private
 
       def self.augment_with_remotes_info!(branch_module_rows,module_mh)
         # index by repo_id
@@ -87,7 +88,7 @@ module DTK
 
       def self.linked_remotes_print_form(repo_remotes,external_ref_source,opts={})
         opts_pp = Opts.new(:dtkn_prefix => true)
-        array = 
+        array =
           if repo_remotes.empty?
             Array.new
           elsif repo_remotes.size == 1

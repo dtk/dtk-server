@@ -23,7 +23,7 @@ module DTK; class ComponentModule
       unless new_dsl_integer_version == 2
         raise Error.new("component_module.create_new_dsl_version only implemented when target version is 2")
       end
-      previous_dsl_version = new_dsl_integer_version-1 
+      previous_dsl_version = new_dsl_integer_version-1
       module_branch = get_module_branch_matching_version(module_version)
 
       # create in-memory dsl object using old version
@@ -90,10 +90,11 @@ Log.info_pp(["Using deprecate_create_needed_objects_and_dsl?; local =",local,cal
       ret = Hash.new
       module_name = local.module_name
       branch_name = local.branch_name
+      module_namespace = local.module_namespace_name
       version = local.version
       project = local.project
       config_agent_type = config_agent_type_default()
-      impl_obj = Implementation.create_workspace_impl?(project.id_handle(),repo,module_name,config_agent_type,branch_name,version)
+      impl_obj = Implementation.create_workspace_impl?(project.id_handle(),repo,module_name,config_agent_type,branch_name,version,module_namespace)
       impl_obj.create_file_assets_from_dir_els()
 
       module_and_branch_info = self.class.create_module_and_branch_obj?(project,repo.id_handle(),local,opts[:ancestor_branch_idh])
@@ -115,7 +116,7 @@ Log.info_pp(["Using deprecate_create_needed_objects_and_dsl?; local =",local,cal
         if e = ComponentDSL::ParsingError.trap{parse_dsl_and_update_model(impl_obj,module_branch_idh,version,opts)}
           ret.merge!(:dsl_parsed_info => e)
         end
-      elsif opts[:scaffold_if_no_dsl] 
+      elsif opts[:scaffold_if_no_dsl]
         opts = Hash.new
         if matching_branches
           opts.merge!(:include_module_branches => matching_branches)
@@ -171,7 +172,7 @@ Log.info_pp(["Using deprecate_create_needed_objects_and_dsl?; local =",local,cal
         Log.error_pp([:parsing_error,e,e.backtrace[0..10]])
         raise e
       end
-      if render_hash 
+      if render_hash
         format_type = ComponentDSL.default_format_type()
         content = render_hash.serialize(format_type)
         dsl_filename = ComponentDSL.dsl_filename(config_agent_type,format_type)

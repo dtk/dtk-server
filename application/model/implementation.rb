@@ -19,7 +19,7 @@ module XYZ
       unless files_to_delete.empty?
         Model.delete_instances(files_to_delete.map{|r|r.id_handle()})
       end
-      
+
       # add files not already added
       existing_paths = file_assets.map{|r|r[:path]}
       paths_to_add.reject!{|path|existing_paths.include?(path)}
@@ -38,7 +38,7 @@ module XYZ
       get_objs(impl_mh,sp_hash)
     end
 
-    def self.create_workspace_impl?(project_idh,repo_obj,module_name,config_agent_type,branch,version=nil)
+    def self.create_workspace_impl?(project_idh,repo_obj,module_name, config_agent_type,branch,version=nil,module_namespace=nil)
       repo_obj.update_object!(:repo_name)
       impl_ref = ref(config_agent_type,module_name,branch)
       impl_hash = {
@@ -50,7 +50,7 @@ module XYZ
         :version => version_field(version)
       }
       impl_mh = project_idh.create_childMH(:implementation)
-      impl_idh = create_from_row?(impl_mh,impl_ref,{:module_name => module_name, :branch => branch},impl_hash)
+      impl_idh = create_from_row?(impl_mh,impl_ref,{:module_name => module_name, :branch => branch, :module_namespace => module_namespace},impl_hash)
       impl_idh.create_object().merge(impl_hash)
     end
 
@@ -150,7 +150,7 @@ module XYZ
       ret_row = rows_with_cmps.first.reject{|k,v|k == :component}
       ret_row.merge!(:components => cmps)
       return [ret_row] unless opts[:include_file_assets]
-      
+
       indexed_asset_files = Implementation.get_indexed_asset_files([id_handle])
       ret_row.merge!(:file_assets => indexed_asset_files.values.first)
       [ret_row]
@@ -191,7 +191,7 @@ module XYZ
       file_asset_type = FileAssetType[self[:type].to_sym]
       FileAsset.add(self,file_asset_type,path,content)
     end
-    FileAssetType = { 
+    FileAssetType = {
       :chef_cookbook => "chef_file"
     }
 

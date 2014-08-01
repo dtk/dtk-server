@@ -2,9 +2,9 @@ module DTK
   class Model
     module NameAndIdClassMixin
       def name_to_id(model_handle,name)
-        return 
+        return
         if name.match(/^[0-9]+$/)
-          name.to_i 
+          name.to_i
         else
           name_to_id_default(model_handle,name)
         end

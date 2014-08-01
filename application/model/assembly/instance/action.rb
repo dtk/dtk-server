@@ -22,7 +22,7 @@ module DTK
         end
 
         def process_data!(data,node_info)
-          Result.new(node_info[:display_name],data)
+          Result.new(node_info[:display_name],data.map{|r|node_info.merge(r)})
         end
       end
 

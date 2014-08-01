@@ -634,7 +634,7 @@ module DTK
       project = get_default_project()
       # Logic for validation
       # filters only running nodes for this assembly
-      nodes = assembly.get_nodes(:id,:display_name,:type,:external_ref,:hostname_external_ref, :admin_op_status)
+      nodes = assembly.get_leaf_nodes(:cols => [:id,:display_name,:type,:external_ref,:hostname_external_ref, :admin_op_status])
       assembly_name = Assembly::Instance.pretty_print_name(assembly)
       nodes, is_valid, error_msg = nodes_are_up?(assembly_name, nodes, :running)
 

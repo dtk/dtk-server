@@ -1,6 +1,3 @@
-# TODO: right now these are for mcollecetive actions; hard coding get_netstat based on get_logs, wil then making general so can add custom actions
-# TODO: replace call fragment nodes = nodes.select { |node| node[:id] == node_id.to_i } unless (node_id.nil? || node_id.empty?)
-# with a filter on action_get_leaf_nodes()
 module DTK
   class Assembly::Instance
     module Action
@@ -17,6 +14,18 @@ module DTK
           {:agent => :tail, :method => :grep}
         end
       end
+
+      class GetPs < ActionResultsQueue
+       private
+        def action_hash()
+          {:agent => :ps, :method => :get_ps}
+        end
+
+        def process_data!(data,node_info)
+          Result.new(node_info[:display_name],data)
+        end
+      end
+
       class GetNetstats < ActionResultsQueue
        private
         def action_hash()
@@ -43,17 +52,8 @@ module DTK
       end
     end
 
+#TODO: cleanup everything below this
     module ActionMixin
-      def initiate_ssh_agent_action(agent_action, queue, params, nodes)
-        Action::SSHAccess.initiate(nodes, queue, params, agent_action)
-      end
-
-      def initiate_get_ps(action_results_queue, node_id=nil)
-        nodes =  action_get_leaf_nodes()
-        nodes = nodes.select { |node| node[:id] == node_id.to_i } unless (node_id.nil? || node_id.empty?)
-        Action::GetPs.initiate(nodes,action_results_queue, :assembly)
-      end
-
       def initiate_execute_tests(action_results_queue, node_id=nil, components=nil)
         nodes =  action_get_leaf_nodes()
         nodes = nodes.select { |node| node[:id] == node_id.to_i } unless (node_id.nil? || node_id.empty?)
@@ -139,28 +139,6 @@ module DTK
             }
 
             CommandAndControl.request__execute_action(:ssh_agent,agent_action,nodes,callbacks,params)
-          end
-        end
-
-        class GetPs < ActionResultsQueue::Result
-          def self.initiate(nodes,action_results_queue, type)
-            indexes = nodes.map{|r|r[:id]}
-            action_results_queue.set_indexes!(indexes)
-            ndx_pbuilderid_to_node_info =  nodes.inject(Hash.new) do |h,n|
-              h.merge(n.pbuilderid => {:id => n[:id].to_s, :display_name => n[:display_name]}) 
-            end
-            callbacks = {
-              :on_msg_received => proc do |msg|
-                response = CommandAndControl.parse_response__execute_action(nodes,msg)
-                if response and response[:pbuilderid] and response[:status] == :ok
-                  node_info = ndx_pbuilderid_to_node_info[response[:pbuilderid]]
-                  raw_data = response[:data].map{|r|node_info.merge(r)}
-                  packaged_data = new(node_info[:display_name],raw_data)
-                  action_results_queue.push(node_info[:id], (type == :node) ? packaged_data.data : packaged_data)
-                end
-              end
-            }
-            CommandAndControl.request__execute_action(:ps,:get_ps,nodes,callbacks)
           end
         end
       end

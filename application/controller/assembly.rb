@@ -3,6 +3,8 @@ module DTK
     helper :assembly_helper
     helper :task_helper
 
+    include Assembly::Instance::Action
+
     #### create and delete actions ###
     # TODO: rename to delete_and_destroy
     def rest__delete()
@@ -573,9 +575,7 @@ module DTK
       end
 
       queue    = ActionResultsQueue.new
-
-      assembly.initiate_ssh_agent_action(agent_action.to_sym, queue, params, nodes)
-
+      SSHAccess.initiate(nodes,queue,params,agent_action.to_sym)
       rest_ok_response :action_results_id => queue.id
     end
 
@@ -593,8 +593,6 @@ module DTK
     end
 
     ### command and control actions
-    include Assembly::Instance::Action
-
     def rest__initiate_get_log()
       assembly = ret_assembly_instance_object()
       params = ret_params_hash(:log_path, :start_line)
@@ -614,10 +612,9 @@ module DTK
     end
 
     def rest__initiate_get_netstats()
-      assembly     = ret_assembly_instance_object()
-      params       = Hash.new
+      assembly = ret_assembly_instance_object()
+      params = Hash.new
       node_pattern = ret_params_hash(:node_id)
-
       queue = initiate_action(GetNetstats, assembly, params, node_pattern)
       rest_ok_response :action_results_id => queue.id
     end
@@ -625,8 +622,9 @@ module DTK
     def rest__initiate_get_ps()
       node_id = ret_non_null_request_params(:node_id)
       assembly = ret_assembly_instance_object()
-      queue = ActionResultsQueue.new
-      assembly.initiate_get_ps(queue, node_id)
+      params = Hash.new
+      node_pattern = ret_params_hash(:node_id)
+      queue = initiate_action(GetPs, assembly, params, node_pattern)
       rest_ok_response :action_results_id => queue.id
     end
 

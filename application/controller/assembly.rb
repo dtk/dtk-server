@@ -553,38 +553,6 @@ module DTK
       rest_ok_response :status => :ok
     end
 
-    def rest__initiate_ssh_pub_access()
-      assembly = ret_assembly_instance_object()
-      params   = ret_params_hash(:rsa_pub_name, :rsa_pub_key, :system_user)
-      agent_action = ret_non_null_request_params(:agent_action)
-      target_nodes = ret_node_id_handles(:target_nodes, assembly)
-
-      # get models from idhs
-      target_nodes = target_nodes.collect { |t_node| t_node.create_object().update_object!(:id, :display_name, :external_ref) }
-      
-      # check existance of key and system user in database
-      system_user, key_name = params[:system_user], params[:rsa_pub_name]
-      nodes = Component::Instance::Interpreted.find_candidates(assembly, system_user, key_name, agent_action, target_nodes)
-      
-      if agent_action.to_sym == :revoke_access && nodes.empty?
-        raise ErrorUsage.new("Access #{target_nodes.empty? ? '' : 'on given nodes'} is not granted to system user '#{system_user}' with name '#{key_name}'")
-      end
-
-      if agent_action.to_sym == :grant_access && nodes.empty?
-        raise ErrorUsage.new("Nodes already have access to system user '#{system_user}' with name '#{key_name}'")
-      end
-
-      queue    = ActionResultsQueue.new
-      SSHAccess.initiate(nodes,queue,params,agent_action.to_sym)
-      rest_ok_response :action_results_id => queue.id
-    end
-
-    def rest__list_ssh_access()
-      assembly = ret_assembly_instance_object()
-
-      rest_ok_response Component::Instance::Interpreted.list_ssh_access(assembly)
-    end
-
     def rest__task_status()
       assembly_id = ret_request_param_id(:assembly_id,Assembly::Instance)
       format = (ret_request_params(:format)||:hash).to_sym
@@ -620,12 +588,44 @@ module DTK
     end
 
     def rest__initiate_get_ps()
-      node_id = ret_non_null_request_params(:node_id)
       assembly = ret_assembly_instance_object()
       params = Hash.new
       node_pattern = ret_params_hash(:node_id)
       queue = initiate_action(GetPs, assembly, params, node_pattern)
       rest_ok_response :action_results_id => queue.id
+    end
+
+    def rest__initiate_ssh_pub_access()
+      assembly = ret_assembly_instance_object()
+      params   = ret_params_hash(:rsa_pub_name, :rsa_pub_key, :system_user)
+      agent_action = ret_non_null_request_params(:agent_action).to_sym
+      target_nodes = ret_matching_nodes(assembly)
+      
+      # check existance of key and system user in database
+      system_user, key_name = params[:system_user], params[:rsa_pub_name]
+      nodes = Component::Instance::Interpreted.find_candidates(assembly, system_user, key_name, agent_action, target_nodes)
+
+      queue = initiate_action_with_nodes(SSHAccess,nodes,params.merge(:agent_action => agent_action)) do 
+        # need to put sanity checking in block under initiate_action_with_nodes
+        if target_nodes_option = ret_request_params(:target_nodes)
+          unless target_nodes_option.empty?
+            raise ErrorUsage.new("Not implemented when target nodes option given")
+          end
+        end
+
+        if agent_action == :revoke_access && nodes.empty?
+          raise ErrorUsage.new("Access #{target_nodes.empty? ? '' : 'on given nodes'} is not granted to system user '#{system_user}' with name '#{key_name}'")
+        end
+        if agent_action == :grant_access && nodes.empty?
+          raise ErrorUsage.new("Nodes already have access to system user '#{system_user}' with name '#{key_name}'")
+        end
+      end
+      rest_ok_response :action_results_id => queue.id
+    end
+
+    def rest__list_ssh_access()
+      assembly = ret_assembly_instance_object()
+      rest_ok_response Component::Instance::Interpreted.list_ssh_access(assembly)
     end
 
     def rest__initiate_execute_tests()

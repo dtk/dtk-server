@@ -6,14 +6,28 @@ module Ramaze::Helper
       # creates a queue object, initiates action that will push results on queue
       # if any errors, it wil just push error conditions on queue
       def initiate_action(action_queue_class, assembly, params={}, node_pattern={})
-        action_queue = action_queue_class.new()
-        begin
+        InitiateAction.block(action_queue_class,params) do |action_queue|
           nodes = ret_matching_nodes(assembly, node_pattern)
           action_queue.initiate(nodes,params)
-        rescue ::DTK::ErrorUsage => e
-          action_queue.push(:error,e.message)
         end
-        action_queue
+      end
+      def initiate_action_with_nodes(action_queue_class,nodes,params={},&block)
+        InitiateAction.block(action_queue_class,params) do |action_queue|
+          block.call if block
+          action_queue.initiate(nodes,params)
+        end
+      end
+      module InitiateAction
+        def self.block(action_queue_class,params,&block)
+          opts = ::DTK::Aux.hash_subset(params,:agent_action)
+          action_queue = action_queue_class.new(opts)
+          begin
+            block.call(action_queue)
+          rescue ::DTK::ErrorUsage => e
+            action_queue.push(:error,e.message)
+          end
+          action_queue
+        end
       end
       
       def ret_matching_nodes(assembly, node_pattern_x={})
@@ -45,7 +59,7 @@ module Ramaze::Helper
           ret || raise(::DTK::ErrorUsage.new("Unexpected form of node_pattern"))
         end
       end
-      private :ret_matching_nodes
+
       module MatchingNodes
         def self.filter_by_id(nodes,node_id)
           node_id = node_id.to_i

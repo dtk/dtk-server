@@ -3,6 +3,19 @@ require 'iconv'
 module DTK
   # cross threads may be seperate requests for new action results queue, but no locking on allocated instance
   class ActionResultsQueue
+    Lock = Mutex.new
+    Queues = Hash.new
+    @@count = 0
+    def initialize(opts={})
+      Lock.synchronize do
+        @indexes = []
+        @@count += 1
+        @id = @@count
+        @results = Hash.new
+        Queues[@id] = self
+      end
+    end
+
     ##
     # Initiates commmand on nodes 
     def initiate(nodes,params,opts={})
@@ -12,7 +25,7 @@ module DTK
         h.merge(n.pbuilderid => {:id => n[:id], :display_name => n.assembly_node_print_form()})
       end
         
-      callbacks = { 
+      callbacks = {
         :on_msg_received => proc do |msg|
           response = CommandAndControl.parse_response__execute_action(nodes,msg)
           if response and response[:pbuilderid] and response[:status] == :ok
@@ -63,21 +76,10 @@ module DTK
           disable_post_processing = true if v.is_a?(Hash)
         end
       end
-      ret = {:is_complete => is_complete, :results => (disable_post_processing ? results : Result.post_process(results, sort_key))}
-      return ret
-    end
-
-    Lock = Mutex.new
-    Queues = Hash.new
-    @@count = 0
-    def initialize(indexes=[])
-      Lock.synchronize do
-        @indexes = indexes
-        @@count += 1
-        @id = @@count
-        @results = Hash.new
-        Queues[@id] = self
-      end
+      {
+        :is_complete => is_complete, 
+        :results => (disable_post_processing ? results : Result.post_process(results, sort_key))
+      }
     end
 
     def set_indexes!(indexes)

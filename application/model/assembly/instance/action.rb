@@ -2,6 +2,7 @@ module DTK
   class Assembly::Instance
     module Action
       r8_nested_require('action','execute_tests')
+      r8_nested_require('action','ssh_access')
       class GetLog < ActionResultsQueue
        private
         def action_hash()
@@ -93,54 +94,6 @@ module DTK
 
       def action_get_leaf_nodes()
         get_leaf_nodes(:cols => [:id,:display_name,:external_ref])
-      end
-
-      module Action
-        class SSHAccess < ActionResultsQueue::Result
-
-          def self.initiate(nodes, action_results_queue, params, agent_action)
-            indexes = nodes.map{|r|r[:id]}
-            action_results_queue.set_indexes!(indexes)
-            ndx_pbuilderid_to_node_info =  nodes.inject(Hash.new) do |h,n|
-              h.merge(n.pbuilderid => {:id => n[:id], :display_name => n[:display_name]}) 
-            end
-
-            callbacks = {
-              :on_msg_received => proc do |msg|
-
-                response = CommandAndControl.parse_response__execute_action(nodes,msg)
-                response = ActionResultsQueue::Result.normalize_to_utf8_output(response)
-
-                if response and response[:pbuilderid] and response[:status] == :ok
-                  node_info = ndx_pbuilderid_to_node_info[response[:pbuilderid]]
-
-                  unless response[:data][:error]
-                    component_type = :authorized_ssh_public_key
-                    attr_hash = {
-                      :linux_user => params[:system_user],
-                      :key_name => params[:rsa_pub_name],
-                      :key_content => params[:rsa_pub_key]
-                    }
-                    node = nodes.find { |n| n[:id] == node_info[:id] }
-
-                    if (agent_action == :grant_access)
-                      DTK::Component::Instance::Interpreted.create_or_update?(node,component_type,attr_hash)
-                    else
-                      DTK::Component::Instance::Interpreted.delete(node, component_type, attr_hash)
-                    end
-                  end
-
-                  action_results_queue.push(node_info[:display_name],response[:data])
-                else
-                  Log.error("Agent '#{msg[:senderagent]}' error, Code: #{msg[:body][:statuscode]} - #{msg[:body][:statusmsg]}")
-                end
-
-              end
-            }
-
-            CommandAndControl.request__execute_action(:ssh_agent,agent_action,nodes,callbacks,params)
-          end
-        end
       end
     end
   end

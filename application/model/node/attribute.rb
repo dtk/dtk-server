@@ -23,7 +23,7 @@ module DTK
       def self.assembly_template_attribute_filter()
         AssemblyTemplateAttributeFilter
       end
-      TargetRefAttributes = ['host_addresses_ipv4','fqdn','node_components','puppet_version']
+      TargetRefAttributes = ['host_addresses_ipv4','fqdn','node_components','puppet_version','root_device_size']
       TargetRefAttributeFilter = [:oneof,:display_name,TargetRefAttributes]
       NonTemplateAttributes = ['host_addresses_ipv4','node_components','fqdn']
       AssemblyTemplateAttributeFilter = [:and] + NonTemplateAttributes.map{|a|[:neq,:display_name,a]}

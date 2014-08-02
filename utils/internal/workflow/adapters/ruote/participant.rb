@@ -152,6 +152,8 @@ module DTK
             event,errors = task.add_event_and_errors(:complete_failed,:server,[{:message => e.to_s}])
             log_participant.end(:execution_context_trap,:event => event, :errors => errors, :backtrace => e.backtrace)
             task.update_at_task_completion("failed",{:errors => errors})
+            cancel_upstream_subtasks(workitem)
+            delete_task_info(workitem)
             reply_to_engine(workitem)
           end
         end

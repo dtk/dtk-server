@@ -30,7 +30,19 @@ module DTK
     # Variables to enable cancelation of tasks. 
     # 'active_workflows' holds current active tasks executing on Ruote engine
     # Lock is needed in case of concurrent execution
-    @@active_workflows = Hash.new
+
+    class ActiveWorkflow < Hash
+      def delete(k)
+        super(k)
+      end
+      def [](k)
+        super(k)
+      end
+      def []=(k,v)
+        super(k,v)
+      end
+    end
+    @@active_workflows = ActiveWorkflow.new
     @@Lock = Mutex.new
  
     def defer_execution()

@@ -18,23 +18,20 @@ module DTK; class Task
 
       create_or_start_nodes_task = 
         case component_type
-          # smoketest should not create a node
-          when :smoketest then nil
-          when :service 
-            if opts[:start_nodes]
-              StartNodes.create_subtask(assembly,target_idh,component_type,opts)
-            else
-              create_nodes_changes = StateChange::Assembly.node_state_changes(assembly,target_idh)
-              CreateNodes.create_subtask(task_mh,create_nodes_changes)
-            end
-          else
-            raise Error.new("Unexpected component_type (#{component_type})")
+         when :smoketest then nil # smoketest should not create a node
+         when :service 
+          start_node = opts[:start_node_changes]
+          action_type = (start_node ? :power_on_node : :create_node)
+          action_class = (start_node ? Action::PowerOnNode : Action::CreateNode)
+          node_scs = StateChange::Assembly.node_state_changes(action_type,assembly,target_idh,:just_leaf_nodes => true)
+          NodesTask.create_subtask(action_class,task_mh,node_scs)
+         else
+          raise Error.new("Unexpected component_type (#{component_type})")
         end
-      opts = {:component_type_filter => component_type}
-      task_template_content = Template::ConfigComponents.get_or_generate_template_content([:assembly,:node_centric],assembly,opts)
+      opts_tt = {:component_type_filter => component_type}
+      task_template_content = Template::ConfigComponents.get_or_generate_template_content([:assembly,:node_centric],assembly,opts_tt)
       stages_config_nodes_task = task_template_content.create_subtask_instances(task_mh,assembly.id_handle())
 
-      opts.merge!(:allow_empty_task => true) unless create_or_start_nodes_task.nil? && task_template_content.empty?
       ret.add_subtask(create_or_start_nodes_task) if create_or_start_nodes_task
       ret.add_subtasks(stages_config_nodes_task) unless stages_config_nodes_task.empty?
       ret
@@ -61,27 +58,25 @@ module DTK; class Task
       create_new_task(task_mh,task_info_hash)
     end
 
-    class CreateNodes < self
-      def self.create_subtask(task_mh,state_change_list_x)
-        # prune out all node groups
-        state_change_list = state_change_list_x.reject{|sc|sc[:node].is_node_group?()}
+    class NodesTask < self
+      def self.create_subtask(action_class,task_mh,state_change_list)
         return nil unless state_change_list and not state_change_list.empty?
         ret = nil
         all_actions = Array.new
         if state_change_list.size == 1
-          executable_action = Action::CreateNode.create_from_state_change(state_change_list.first)
+          executable_action = action_class.create_from_state_change(state_change_list.first)
           all_actions << executable_action
           ret = create_new_task(task_mh,:executable_action => executable_action) 
         else
-          ret = create_new_task(task_mh,:display_name => "create_node_stage", :temporal_order => "concurrent")
+          ret = create_new_task(task_mh,:display_name => action_class.stage_display_name(), :temporal_order => "concurrent")
           state_change_list.each do |sc|
-            executable_action = Action::CreateNode.create_from_state_change(sc)
+            executable_action = action_class.create_from_state_change(sc)
             all_actions << executable_action
             ret.add_subtask_from_hash(:executable_action => executable_action)
           end
         end
         attr_mh = task_mh.createMH(:attribute)
-        Action::CreateNode.add_attributes!(attr_mh,all_actions)
+        action_class.add_attributes!(attr_mh,all_actions)
         ret
       end
     end

@@ -49,7 +49,7 @@ module DTK
           # detect if wait for finished due to normal execution or errors 
           errors = Engine.errors(@wfid)
           if errors.nil? or errors.empty?
-            Log.error_pp :normal_completion
+            Log.info_pp :normal_completion
           else
             Log.error "-------- intercepted errors ------"
             errors.each  do |e|

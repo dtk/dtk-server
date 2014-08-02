@@ -196,7 +196,7 @@ module DTK
     end
 
     ##############
-    # TODO: looks like callers dont need all teh detail; might just provide summarized info or instead pass arg that specifies sumamry level
+    # TODO: looks like callers dont need all the detail; might just provide summarized info or instead pass arg that specifies sumamry level
     # also make optional whether materialize
     def get_node_assembly_nested_objects()
       ndx_nodes = Hash.new

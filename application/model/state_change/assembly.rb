@@ -47,7 +47,20 @@ module DTK; class StateChange
       sorted_ndx_ret
     end
 
-    def self.node_state_changes(assembly,target_idh)
+    ##
+    # The method node_state_changes returns state changes related to nodes
+    def self.node_state_changes(task_action_type,assembly,target_idh,opts={})
+      case task_action_type
+       when :create_node
+        node_state_changes__create_nodes(assembly,target_idh,opts)
+       when :power_on_node
+        node_state_changes__power_on_nodes(assembly,target_idh)
+       else
+        raise Error.new("Unexpcted task_action_class (#{task_action_class})")
+      end
+    end
+   private
+    def self.node_state_changes__create_nodes(assembly,target_idh,opts={})
       ret = Array.new
       assembly_nodes = assembly.get_nodes()
       return ret if assembly_nodes.empty?
@@ -61,6 +74,13 @@ module DTK; class StateChange
         last_level = pending_create_node(state_change_mh,last_level.map{|obj|obj.id_handle()})
       end
       ret
+      if opts[:just_leaf_nodes]
+        ret.reject{|sc|sc[:node].is_node_group?()}
+      end
+    end
+
+    def self.node_state_changes__power_on_nodes(assembly,target_idh,opts={})
+      raise Error.new('got here')
     end
   end
 end; end

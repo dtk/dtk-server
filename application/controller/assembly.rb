@@ -510,7 +510,7 @@ module DTK
 
       opts = ret_params_hash(:commit_msg)
       if assembly_is_stopped
-        opts.merge!(:start_nodes => true)
+        opts.merge!(:start_node_changes => true)
       end
       task = Task.create_from_assembly_instance(assembly,opts)
       task.save!()

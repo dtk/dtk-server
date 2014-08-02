@@ -22,6 +22,10 @@ module DTK; class Task
       end
       private :initialize
 
+      def self.stage_display_name()
+        "create_node_stage"
+      end
+
       def self.status(object,opts)
         ret = PrettyPrintHash.new
         ret[:node] = node_status(object,opts)
@@ -132,6 +136,9 @@ module DTK; class Task
     ##
     # TODO: move common fns to NodeLevel and then have this inherit to NodeLevel
     class PowerOnNode < CreateNode
+      def self.stage_display_name()
+        "power_on_nodes"
+      end
     end
   end
 end; end

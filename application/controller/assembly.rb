@@ -496,6 +496,27 @@ module DTK
       rest_ok_response :task_id => task.id
     end
 
+    def rest__create_task()
+      assembly = ret_assembly_instance_object()
+      assembly_is_stopped = assembly.is_stopped?
+
+      if assembly_is_stopped and ret_request_params(:start_assembly).nil?
+        return rest_ok_response :confirmation_message=>true
+      end
+
+      if assembly.are_nodes_running?
+        raise ErrorUsage, "Task is already running on requested nodes. Please wait until task is complete" 
+      end
+
+      opts = ret_params_hash(:commit_msg)
+      if assembly_is_stopped
+        opts.merge!(:start_nodes => true)
+      end
+      task = Task.create_from_assembly_instance(assembly,opts)
+      task.save!()
+      rest_ok_response :task_id => task.id
+    end
+
     def rest__clear_tasks()
       assembly = ret_assembly_instance_object()
       assembly.clear_tasks()

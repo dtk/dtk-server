@@ -27,26 +27,30 @@ module DTK
       end
     end
 
+    # Making ActiveWorkflow a class to facilitate debuging
+    class ActiveWorkflow < Hash
+      def delete(task_id)
+        # pp [:delete,task_id,caller[0..5]]
+        super(task_id.to_i)
+      end
+      def [](task_id)
+        # pp [:get,task_id,caller[0..5]]
+        super(task_id.to_i)
+      end
+      def []=(task_id,wf)
+        # pp [:set,task_id,caller[0..5]]
+        super(task_id.to_i,wf)
+      end
+    end
+
     # Variables to enable cancelation of tasks. 
     # 'active_workflows' holds current active tasks executing on Ruote engine
     # Lock is needed in case of concurrent execution
-
-    class ActiveWorkflow < Hash
-      def delete(k)
-        super(k)
-      end
-      def [](k)
-        super(k)
-      end
-      def []=(k,v)
-        super(k,v)
-      end
-    end
     @@active_workflows = ActiveWorkflow.new
     @@Lock = Mutex.new
  
     def defer_execution()
-      user_object  = ::DTK::CurrentSession.new.user_object()
+      user_object  = CurrentSession.new.user_object()
       CreateThread.defer_with_session(user_object) do
       #  pp [:new_thread_from_defer, Thread.current, Thread.list]
         raise Error.new("not implemented: putting block in reactor loop when not using eventmachine web server") unless R8EM.reactor_running?
@@ -60,7 +64,7 @@ module DTK
         end
         pp "end of commit_changes defer"
         pp "----------------"
-        @@Lock.synchronize{ @@active_workflows.delete(@top_task.id.to_s) }
+        @@Lock.synchronize{ @@active_workflows.delete(@top_task.id) }
       end
     end
 
@@ -98,7 +102,7 @@ module DTK
 
     def self.create(top_task)
       ret = Adapter.klass(top_task).new(top_task)
-      @@Lock.synchronize{ @@active_workflows[top_task[:id].to_s] = ret }
+      @@Lock.synchronize{ @@active_workflows[top_task[:id]] = ret }
       ret
     end
 

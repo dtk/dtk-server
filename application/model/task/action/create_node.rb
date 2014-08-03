@@ -23,7 +23,10 @@ module DTK; class Task
       private :initialize
 
       def self.stage_display_name()
-        "create_node_stage"
+        "create_nodes_stage"
+      end
+      def self.task_display_name()
+        "create_node"
       end
 
       def self.status(object,opts)
@@ -137,7 +140,10 @@ module DTK; class Task
     # TODO: move common fns to NodeLevel and then have this inherit to NodeLevel
     class PowerOnNode < CreateNode
       def self.stage_display_name()
-        "power_on_nodes"
+        "power_on_nodes_stage"
+      end
+      def self.task_display_name()
+        "power_on_node"
       end
     end
   end

@@ -93,6 +93,7 @@ module DTK; class Task
       
       def self.subtask_hash(action_class,executable_action)
         {
+          :display_name => action_class.task_display_name(),
           :executable_action => executable_action
         }
       end

@@ -25,7 +25,7 @@ module DTK
       return config_agent_type if ModuleDSL::ParsingError.is_error?(config_agent_type)
 
       puts "-----------------------------------------------------"
-      puts input_hash.inspect
+      pp input_hash
       puts "-----------------------------------------------------"
 
       raise Error.new("For Rich. Need to implement mechanism that will create objects from 'input_hash'")
@@ -36,3 +36,4 @@ module DTK
 
   end
 end
+

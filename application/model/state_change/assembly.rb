@@ -85,11 +85,11 @@ module DTK; class StateChange
         raise Error.new("Only supporting option :just_leaf_nodes")
       end
       nodes = assembly.get_leaf_nodes(:cols => [:id,:display_name,:type,:external_ref,:admin_op_status])
-      stopped_nodes = nodes.select{|n|n[:admin_op_status] == "stopped"}
-      return ret if stopped_nodes.empty?
+      nodes_to_start = nodes.reject{|n|n[:admin_op_status] == "running"}
+      return ret if nodes_to_start.empty?
 
       state_change_mh = assembly.model_handle(:state_change)
-      stopped_nodes.map do |node|
+      nodes_to_start.map do |node|
         hash = {
           :type => "power_on_node",
           :node => node

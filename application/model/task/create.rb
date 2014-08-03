@@ -24,6 +24,9 @@ module DTK; class Task
           action_type = (start_node ? :power_on_node : :create_node)
           action_class = (start_node ? Action::PowerOnNode : Action::CreateNode)
           node_scs = StateChange::Assembly.node_state_changes(action_type,assembly,target_idh,:just_leaf_nodes => true)
+          if nodes = opts[:ret_nodes]
+            node_scs.each{|sc|nodes << sc[:node]}
+          end
           NodesTask.create_subtask(action_class,task_mh,node_scs)
          else
           raise Error.new("Unexpected component_type (#{component_type})")

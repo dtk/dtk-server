@@ -452,52 +452,6 @@ module DTK
 
     def rest__create_task()
       assembly = ret_assembly_instance_object()
-      task = nil
-
-      unless assembly.is_stopped?
-        if assembly.are_nodes_running?
-          raise ErrorUsage, "Task is already running on requested nodes. Please wait until task is complete" 
-        end
-        task = Task.create_from_assembly_instance(assembly,ret_params_hash(:commit_msg))
-      else
-        # TODO: clean up below
-        start_assembly = ret_request_params(:start_assembly)
-        return rest_ok_response :confirmation_message=>true if start_assembly.nil?
-        
-        node_pattern = ret_request_params(:node_pattern)
-        # filters only stopped nodes for this assembly
-        nodes, is_valid, error_msg = nodes_valid_for_stop_or_start?(assembly, node_pattern, :stopped)
-        
-        unless is_valid
-          Log.info(error_msg)
-          return rest_ok_response(:errors => [error_msg])
-        end
-
-        nodes_w_components = assembly.remove_empty_nodes(nodes, {:detail_level => 'nodes'})
-
-        opts = ret_params_hash(:commit_msg)
-        if (nodes_w_components.size == 1)
-          opts.merge!(:node => nodes_w_components.first)
-        else
-          opts.merge!(:nodes => nodes_w_components)
-        end
-
-        # opts.merge!(:node => nodes_w_components.first) if (nodes_w_components.size == 1)
-        task = Task.create_and_start_from_assembly_instance(assembly,opts)
-
-        user_object = user_object  = CurrentSession.new.user_object()
-        CreateThread.defer_with_session(user_object) do
-          # invoking command to start the nodes
-          CommandAndControl.start_instances(nodes_w_components) unless nodes_w_components.empty?
-        end
-      end
-
-      task.save!()
-      rest_ok_response :task_id => task.id
-    end
-
-    def rest__create_task()
-      assembly = ret_assembly_instance_object()
       assembly_is_stopped = assembly.is_stopped?
 
       if assembly_is_stopped and ret_request_params(:start_assembly).nil?
@@ -510,10 +464,20 @@ module DTK
 
       opts = ret_params_hash(:commit_msg)
       if assembly_is_stopped
-        opts.merge!(:start_node_changes => true)
+        opts.merge!(:start_node_changes => true, :ret_nodes => Array.new)
       end
       task = Task.create_from_assembly_instance(assembly,opts)
       task.save!()
+
+      # TODO: clean up this part since this is doing more than creating task
+      nodes_to_start =  (opts[:ret_nodes]||[]).reject{|n|n[:admin_op_status] == "running"}
+      unless nodes_to_start.empty?
+        CreateThread.defer_with_session(CurrentSession.new.user_object()) do
+          # invoking command to start the nodes
+          CommandAndControl.start_instances(nodes_to_start)
+        end
+      end
+
       rest_ok_response :task_id => task.id
     end
 

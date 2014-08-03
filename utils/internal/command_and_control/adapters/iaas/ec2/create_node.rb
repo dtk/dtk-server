@@ -171,12 +171,6 @@ module DTK; module CommandAndControlAdapter
           :tag => R8::Config[:ec2][:name_tag][:format]
         }
 
-        def get_ec2_credentials(iaas_credentials)
-          if iaas_credentials && (aws_key = iaas_credentials['key']) && (aws_secret = iaas_credentials['secret'])
-            return { :aws_access_key_id => aws_key, :aws_secret_access_key => aws_secret }
-          end
-        end
-
         def node_print_form()
           "#{node[:display_name]} (#{node[:id]}"
         end

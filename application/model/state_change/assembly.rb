@@ -54,7 +54,7 @@ module DTK; class StateChange
        when :create_node
         node_state_changes__create_nodes(assembly,target_idh,opts)
        when :power_on_node
-        node_state_changes__power_on_nodes(assembly,target_idh)
+        node_state_changes__power_on_nodes(assembly,target_idh,opts)
        else
         raise Error.new("Unexpcted task_action_class (#{task_action_class})")
       end
@@ -80,7 +80,22 @@ module DTK; class StateChange
     end
 
     def self.node_state_changes__power_on_nodes(assembly,target_idh,opts={})
-      raise Error.new('got here')
+      ret = Array.new()
+      unless opts[:just_leaf_nodes]
+        raise Error.new("Only supporting option :just_leaf_nodes")
+      end
+      nodes = assembly.get_leaf_nodes(:cols => [:id,:display_name,:type,:external_ref,:admin_op_status])
+      stopped_nodes = nodes.select{|n|n[:admin_op_status] == "stopped"}
+      return ret if stopped_nodes.empty?
+
+      state_change_mh = assembly.model_handle(:state_change)
+      stopped_nodes.map do |node|
+        hash = {
+          :type => "power_on_node",
+          :node => node
+        }
+        create_stub(state_change_mh,hash)
+      end
     end
   end
 end; end

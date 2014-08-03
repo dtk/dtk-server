@@ -69,98 +69,39 @@ module DTK; class Task
         if state_change_list.size == 1
           executable_action = action_class.create_from_state_change(state_change_list.first)
           all_actions << executable_action
-          ret = create_new_task(task_mh,:executable_action => executable_action) 
+          ret = create_new_task(task_mh,subtask_hash(action_class,executable_action))
         else
-          ret = create_new_task(task_mh,:display_name => action_class.stage_display_name(), :temporal_order => "concurrent")
+          ret = create_new_task(task_mh,concurrent_subtask(action_class))
           state_change_list.each do |sc|
             executable_action = action_class.create_from_state_change(sc)
             all_actions << executable_action
-            ret.add_subtask_from_hash(:executable_action => executable_action)
+            ret.add_subtask_from_hash(subtask_hash(action_class,executable_action))
           end
         end
         attr_mh = task_mh.createMH(:attribute)
         action_class.add_attributes!(attr_mh,all_actions)
         ret
       end
-    end
-
-    class StartNodes < self
-      def self.create_subtask(assembly,target_idh,component_type,opts={})
-        assembly_idh = assembly.id_handle()
-        task_mh      = target_idh.create_childMH(:task)
-        all_actions  = Array.new
-
-        main_task = create_new_task(task_mh,:assembly_id => assembly_idh.get_id(),:display_name => "power_on_nodes", :temporal_order => "concurrent",:commit_message => nil)
-        assembly_config_changes = StateChange::Assembly::component_state_changes(assembly,component_type)
-
-        ret = nil
-        # for powering on node with no components
-        unless assembly_config_changes and not assembly_config_changes.empty?
-          if node = opts[:node]
-            executable_action = Action::PowerOnNode.create_from_node(node)
-            all_actions << executable_action
-            ret = create_new_task(task_mh,:executable_action => executable_action)
-            main_task.add_subtask(ret)
-          elsif nodes = opts[:nodes]
-            nodes.each do |node|
-              executable_action = Action::PowerOnNode.create_from_node(node)
-              all_actions << executable_action
-              ret = create_new_task(task_mh,:executable_action => executable_action, :display_name => "power_on_node")
-              main_task.add_subtask(ret)
-            end
-          else
-            raise Error.new("Expected that :node of :nodes passed in as options")
-          end
-          
-          attr_mh = task_mh.createMH(:attribute)
-          Action::PowerOnNode.add_attributes!(attr_mh,all_actions)
-
-          return main_task
-        end
-
-        if assembly_config_changes.size == 1
-          executable_action = Action::PowerOnNode.create_from_state_change(assembly_config_changes.first.first)
-          all_actions << executable_action
-          ret = create_new_task(task_mh,:display_name => "power_on_node",:executable_action => executable_action) 
-          main_task.add_subtask(ret)
-        else
-          # ret = create_new_task(task_mh,:display_name => "power_on_node", :temporal_order => "concurrent")
-          assembly_config_changes.each do |sc|
-            executable_action = Action::PowerOnNode.create_from_state_change(sc.first)
-            all_actions << executable_action
-            ret = create_new_task(task_mh,:display_name => "power_on_node",:executable_action => executable_action) 
-            main_task.add_subtask(ret)
-            # main_task.add_subtask_from_hash(:display_name => "power_on_node",:executable_action => executable_action)
-          end
-        end
-        attr_mh = task_mh.createMH(:attribute)
-        Action::PowerOnNode.add_attributes!(attr_mh,all_actions)
-        
-        main_task
+      
+     private
+      def self.concurrent_subtask(action_class)
+        {
+          :display_name => action_class.stage_display_name(), 
+          :temporal_order => "concurrent"
+        }
+      end
+      
+      def self.subtask_hash(action_class,executable_action)
+        {
+          :executable_action => executable_action,
+          :executable_action_type => action_class.task_action_type()
+        }
       end
     end
   end
 
   #TODO: move from below when decide whether needed; looking to generalize above so can subsume below 
   module CreateClassMixin
-    def create_and_start_from_assembly_instance(assembly,opts={})
-      target_idh = target_idh_from_assembly(assembly)
-      task_mh = target_idh.create_childMH(:task)
-
-      component_type = opts[:component_type]||:service
-
-      ret = Create.create_top_level_task(task_mh,assembly,Aux.hash_subset(opts,:commit_msg))
-
-      create_node_tasks = task_when_nodes_created_and_started_from_assembly(assembly, :assembly, opts)
-      ret.add_subtask(create_node_tasks) if create_node_tasks
-
-      opts = {:component_type_filter => component_type}
-      task_template_content = Template::ConfigComponents.get_or_generate_template_content([:assembly,:node_centric],assembly,opts)
-      stages_config_nodes_task = task_template_content.create_subtask_instances(task_mh,assembly.id_handle())
-      ret.add_subtasks(stages_config_nodes_task) unless stages_config_nodes_task.empty?
-      ret
-    end
-
     def task_when_nodes_ready_from_assembly(assembly, component_type, opts)
       assembly_idh = assembly.id_handle()
       target_idh = target_idh_from_assembly(assembly)

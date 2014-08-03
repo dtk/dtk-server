@@ -487,6 +487,7 @@ module DTK
       rest_ok_response
     end
 
+    #TODO: cleanup
     def rest__start()
       assembly     = ret_assembly_instance_object()
       node_pattern = ret_request_params(:node_pattern)

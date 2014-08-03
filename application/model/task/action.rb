@@ -33,9 +33,11 @@ module DTK; class Task
           else raise Error.new("Unexpected task_action_type (#{task_action_type})")
         end
       end
-
+      def self.task_action_type()
+        @task_action_type ||= to_s.split('::').last
+      end
       def task_action_type()
-        @task_action_type ||= self.class.to_s.split('::').last
+        self.class.task_action_type()
       end
 
       def initialize(type,hash,task_idh=nil)
@@ -44,7 +46,6 @@ module DTK; class Task
         end
         super(hash)
       end
-
 
       ###====== related to node(s); node can be a node group
       def node_is_node_group?()

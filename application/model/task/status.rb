@@ -172,7 +172,7 @@ module DTK
          when "CreateNode" 
           el.merge!(Action::CreateNode.status(ea,opts)) if ea
          when "PowerOnNode"
-          el.merge!(Action::CreateNode.status(ea,opts)) if ea
+          el.merge!(Action::PowerOnNode.status(ea,opts)) if ea
          when "InstallAgent"
           el.merge!(Action::InstallAgent.status(ea,opts)) if ea
          when "ExecuteSmoketest"

@@ -1,14 +1,7 @@
 module DTK
   class NodeModuleDSL < ModuleDSL
-    # r8_nested_require('dsl','parsing_error')
-    # r8_nested_require('dsl','update_model')
-    # r8_nested_require('dsl','generate_from_impl')
-    # r8_nested_require('dsl','object_model_form')
-    # r8_nested_require('dsl','incremental_generator')
-    # TODO: this needs to be after object_model_form, because object_model_form loads errors; should move errors to parent and include first here
-    # r8_nested_require('dsl','ref_integrity')
-    # extend UpdateModelClassMixin
-    # include UpdateModelMixin
+    r8_nested_require('node_module_dsl','update_model')
+    include UpdateModelMixin
 
     def self.parse_and_update_model(node_module,impl_obj,module_branch_idh,version=nil,opts={})
       # get associated assembly templates before do any updates and use this to see if any referential integrity
@@ -33,19 +26,29 @@ module DTK
       input_hash = convert_to_hash(content,parsed_name[:format_type],opts)
       return input_hash if ParsingError.is_error?(input_hash)
       ParsingError.trap do
-        new(target_impl.id_handle(),module_branch_idh,input_hash,container_idh)
+        new(target_impl.id_handle(),input_hash,module_branch_idh,container_idh)
       end
     end
+
    private
-    def initialize(impl_idh,module_branch_idh,version_specific_input_hash,container_idh=nil)
+    def initialize(impl_idh,version_specific_input_hash,module_branch_idh,container_idh)
       @input_hash = version_parse_check_and_normalize(version_specific_input_hash)
       @impl_idh = impl_idh
-      @container_idh = container_idh||impl_idh.get_parent_id_handle_with_auth_info()
+      @module_branch_idh = module_branch_idh
+      @container_idh = container_idh
     end
-    
+
+    # There is just one version now for node modules
+    IntegerVersion = 1
     def version_parse_check_and_normalize(version_specific_input_hash)
-      super
-      raise Error.new
+      klass = self.class.load_and_return_version_adapter_class(IntegerVersion)
+      # parse_check raises errors if any errors found
+      klass.parse_check(version_specific_input_hash)
+      klass.normalize(version_specific_input_hash)
+    end
+    # Set for load_and_return_version_adapter_class
+    def self.adapter_type()
+      "NodeModuleDSL"
     end
   end
 end

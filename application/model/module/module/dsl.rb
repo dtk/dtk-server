@@ -102,9 +102,6 @@ module DTK
       @input_hash = version_parse_check_and_normalize(version_specific_input_hash)
       @impl_idh = impl_idh
       @container_idh = container_idh||impl_idh.get_parent_id_handle_with_auth_info()
-      unless [:project,:library].include?(@container_idh[:model_name])
-        raise Error.new("Unexpected parent type of implementation object (#{@container_idh[:model_name]})")
-      end
     end
 
     def migrate_processor(module_name,new_integer_version,input_hash)
@@ -249,7 +246,7 @@ module DTK
         return @cached_adapter_class[integer_version] if @cached_adapter_class[integer_version]
         adapter_name = "v#{integer_version.to_s}"
         opts = {
-          :class_name => {:adapter_type => "ModuleDSL"},
+          :class_name => {:adapter_type => adapter_type()},
           :subclass_adapter_name => true
         }
         @cached_adapter_class[integer_version] = DynamicLoader.load_and_return_adapter_class("dsl",adapter_name,opts)
@@ -260,6 +257,10 @@ module DTK
       end
 
      private
+      def adapter_type()
+        "ModuleDSL"
+      end
+
       def Transaction(*args,&block)
         Model.Transaction(*args,&block)
       end

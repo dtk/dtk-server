@@ -1,3 +1,5 @@
+#TODO: Aldin: think you want to replace cases where there is an instance function that uses ModuleDSL
+#with klass(self)
 module DTK; class BaseModule
   module DSLMixin
     r8_nested_require('dsl_mixin','external_refs')
@@ -42,10 +44,8 @@ module DTK; class BaseModule
     end
 
     def parse_dsl_and_update_model(impl_obj,module_branch_idh,version=nil,opts={})
-      klass = get_mixin_class(self)
       set_dsl_parsed!(false)
-      # ModuleDSL.parse_and_update_model(self,impl_obj,module_branch_idh,version,opts)
-      klass.parse_and_update_model(self,impl_obj,module_branch_idh,version,opts)
+      klass(self).parse_and_update_model(self,impl_obj,module_branch_idh,version,opts)
       set_dsl_parsed!(true)
     end
 
@@ -112,9 +112,9 @@ module DTK; class BaseModule
       end
 
       dsl_created_info = Hash.new()
-
-      if ModuleDSL.contains_dsl_file?(impl_obj)
-        if e = ModuleDSL::ParsingError.trap{parse_dsl_and_update_model(impl_obj,module_branch_idh,version,opts)}
+      klass = klass(self)
+      if klass.contains_dsl_file?(impl_obj)
+        if e = klass::ParsingError.trap{parse_dsl_and_update_model(impl_obj,module_branch_idh,version,opts)}
           ret.merge!(:dsl_parsed_info => e)
         end
       elsif opts[:scaffold_if_no_dsl] 
@@ -183,7 +183,7 @@ module DTK; class BaseModule
       ret
     end
 
-    def get_mixin_class(klass)
+    def klass(klass)
       case klass
         when NodeModule
           return NodeModuleDSL

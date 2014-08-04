@@ -50,6 +50,9 @@ module DTK
     def self.adapter_type()
       "NodeModuleDSL"
     end
+    def self.adapter_dir()
+      "node_module_dsl"
+    end
   end
 end
 

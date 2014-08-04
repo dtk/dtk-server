@@ -249,7 +249,7 @@ module DTK
           :class_name => {:adapter_type => adapter_type()},
           :subclass_adapter_name => true
         }
-        @cached_adapter_class[integer_version] = DynamicLoader.load_and_return_adapter_class("dsl",adapter_name,opts)
+        @cached_adapter_class[integer_version] = DynamicLoader.load_and_return_adapter_class(adapter_dir(),adapter_name,opts)
       end
 
       def isa_dsl_filename?(filename,dsl_integer_version=nil)
@@ -259,6 +259,9 @@ module DTK
      private
       def adapter_type()
         "ModuleDSL"
+      end
+      def adapter_dir()
+        "dsl"
       end
 
       def Transaction(*args,&block)

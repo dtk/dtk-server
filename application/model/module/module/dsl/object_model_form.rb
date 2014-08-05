@@ -6,7 +6,31 @@ module DTK; class ModuleDSL
       new.convert(input_hash)
     end
 
+    def convert_children(input_hash)
+      illegal_keys = input_hash.keys - all_keys() 
+      unless illegal_keys.empty?
+        raise ParsingError::IllegalKeys.new(illegal_keys)
+      end
+      input_hash.req(:foo)
+    end
+
    private
+    def all_keys()
+      self.class.all_keys()
+    end
+    def self.all_keys()
+      @all_keys ||= fields_cached().map{|(k,v)|v[:key]}
+    end
+    def self.fields_cached()
+      return @fields if @fields 
+      @fields = fields()
+      @fields.each_key{|k|@fields[k][:key]||=k.to_s}
+      @fields
+    end
+    def self.fields()
+      raise Error.new("field should be over-written")
+    end
+
     def convert_to_hash_form(hash_or_array,&block)
       self.class.convert_to_hash_form(hash_or_array,&block)
     end

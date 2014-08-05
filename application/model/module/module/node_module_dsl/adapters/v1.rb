@@ -1,15 +1,12 @@
 module DTK
   class NodeModuleDSL
     class V1 < self
+      r8_nested_require('v1','object_model_form')
       def self.parse_check(input_hash)
         # TODO: stub
       end
-      def self.normalize(input_hash_x)
-        pp [:hash_to_parse,input_hash_x]
-        #TODO: below puts it in more convenient form that facilitates parsing
-        input_hash = ObjectModelForm::InputHash.new(input_hash_x)
-        #code that parses here
-        input_hash #TODO: stub; no parsing
+      def self.normalize(input_hash)
+        ObjectModelForm.convert(ObjectModelForm::InputHash.new(input_hash))
       end
     end
   end

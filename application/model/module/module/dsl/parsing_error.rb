@@ -5,6 +5,7 @@ module DTK
       r8_nested_require('parsing_error','link_def')
       r8_nested_require('parsing_error','dependency')
       r8_nested_require('parsing_error','missing_key')
+      r8_nested_require('parsing_error','illegal_keys')
 
       def initialize(msg='',*args_x)
         args = Params.add_opts(args_x,:error_prefix => ErrorPrefix,:caller_info => true)

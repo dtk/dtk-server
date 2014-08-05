@@ -199,7 +199,11 @@ module DTK; class  Assembly
       rows = get_objs(:cols => [:instance_nodes_and_cmps_summary])
       if opts[:filter_proc]
         rows.reject!{|r|!opts[:filter_proc].call(r)}
+      elsif opts[:filter_component] != ""
+        opts[:filter_component].sub!(/::/, "__")
+        rows.reject!{|r| r[:nested_component][:display_name] != opts[:filter_component] }
       end
+
       return ret if rows.empty?
 
       components = Array.new

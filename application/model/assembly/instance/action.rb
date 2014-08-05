@@ -55,45 +55,10 @@ module DTK
 
 #TODO: cleanup everything below this
     module ActionMixin
-      def initiate_execute_tests(action_results_queue, node_id=nil, components=nil)
-        nodes =  action_get_leaf_nodes()
-        nodes = nodes.select { |node| node[:id] == node_id.to_i } unless (node_id.nil? || node_id.empty?)
-        
-        # Special case filtering of nodes that are not running and executing agent only on those that are running
-        component_nodes = Array.new
-        
-        unless components.empty? || components.nil?
-          components.each do |cmp|
-            if cmp.include? "/"
-              component_nodes << cmp.split("/").first
-            end
-          end
-        end
-        nodes = nodes.select { |node| component_nodes.include? node[:display_name] } if (node_id.nil? || node_id.empty?)
-        Assembly::Instance::Action::ExecuteTests.initiate(nodes,action_results_queue, :assembly, components)
-      end
-
-      def initiate_execute_tests_v2(project,action_results_queue, node_id=nil, components=nil)
-        
-        nodes =  action_get_leaf_nodes()
-        nodes = nodes.select { |node| node[:id] == node_id.to_i } unless (node_id.nil? || node_id.empty?)
+      def initiate_execute_tests(project,action_results_queue, nodes=nil, filter_component=nil)
         opts = {} 
-
-        # Special case filtering of nodes that are not running and executing agent only on those that are running
-        component_nodes = Array.new
-        unless components.empty? || components.nil?
-          components.each do |cmp|
-            if cmp.include? "/"
-              component_nodes << cmp.split("/").first
-            end
-          end
-          opts.merge!(:filter => {:components => components})
-        end
-        Assembly::Instance::Action::ExecuteTestsV2.initiate(project,self,nodes,action_results_queue, :assembly, opts)
-      end
-
-      def action_get_leaf_nodes()
-        get_leaf_nodes(:cols => [:id,:display_name,:external_ref])
+        opts.merge!(:filter => {:components => filter_component})
+        Assembly::Instance::Action::ExecuteTests.initiate(project,self,nodes,action_results_queue, :assembly, opts)
       end
     end
   end

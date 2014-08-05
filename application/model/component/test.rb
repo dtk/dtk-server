@@ -85,10 +85,11 @@ module DTK
       end
 
       # returns array of ComponentLinkedTests
-      def self.get_linked_tests(assembly_instance)
+      def self.get_linked_tests(assembly_instance, filter_component=nil)
         ret = Array.new
         opts = Opts.new(
-          :detail_to_include=>[:component_dependencies]
+          :detail_to_include=>[:component_dependencies],
+          :filter_component => filter_component
         )
 
         aug_cmps = assembly_instance.get_augmented_components(opts)

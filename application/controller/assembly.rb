@@ -615,9 +615,10 @@ module DTK
     end
 
     def rest__initiate_execute_tests()
-      node_id, components = ret_non_null_request_params(:node_id, :components)
+      node_id, component = ret_non_null_request_params(:node_id, :components)
       assembly = ret_assembly_instance_object()
       project = get_default_project()
+
       # Logic for validation
       # filters only running nodes for this assembly
       nodes = assembly.get_leaf_nodes(:cols => [:id,:display_name,:type,:external_ref,:hostname_external_ref, :admin_op_status])
@@ -629,30 +630,11 @@ module DTK
         return rest_ok_response(:errors => [error_msg])
       end
 
-      # Special case for preventing execution of agent on specific node that is not running
-      matching_nodes = nodes.select { |node| node[:id] == node_id.to_i }
-      if (!node_id.empty? && matching_nodes.empty?)
-        error_msg = "Serverspec tests cannot be executed on nodes that are not 'running'."
-        Log.info(error_msg)
-        return rest_ok_response(:errors => [error_msg])
-      end
-
-      # Special case filtering of components from nodes that are not running and passing only those components for the execution
-      node_names = Array.new
-      nodes.each do |x|
-        node_names << x[:display_name]
-      end
-      
-      unless components.empty?
-        components.reject! do |c|
-          if c.include? "/"
-            !node_names.include? c.split("/").first
-          end
-        end
-      end
+      # Logic for filtering node if execute tests is started from the specific node
+      nodes.select! { |node| node[:id] == node_id.to_i } unless node_id == ""
 
       queue = ActionResultsQueue.new
-      response = assembly.initiate_execute_tests_v2(project,queue, node_id, components)
+      response = assembly.initiate_execute_tests(project, queue, nodes, component)
 
       return rest_ok_response(:errors => [response[:error]]) if response[:error]
       rest_ok_response :action_results_id => queue.id

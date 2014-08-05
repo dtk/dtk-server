@@ -20,6 +20,7 @@ module DTK; class ModuleDSL
       input_hash_keys.each do |k|
         field_def = key_to_field_def(k)
         if input_val = (field_def[:required] ? input_hash.req(k) : input_hash[k])
+          next if field_def[:omit]
           subclass = field_def[:subclass]
           val = (subclass ? subclass.new.convert_children(input_val) : input_val)
           ret[field_def[:field_name]] = val

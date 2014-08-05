@@ -4,27 +4,21 @@ module DTK; class NodeModuleDSL; class V1
       NodeModule.new(input_hash.req(:module)).convert_children(input_hash)
     end
 
-=begin
-      InputFormToInternal = Fields.inject(Hash.new){|h,(k,v)|h.merge(v[:key] => k)}
-      Allkeys = Fields.values.map{|f|f[:key]}
-      RequiredKeys =  Fields.values.select{|f|f[:required]}.map{|f|f[:key]}
-
-      def convert(input_hash,context={})
-        input_hash.inject(OutputHash.new) do |h,(k,v)|
-          h.merge(key(k) => body(v,k,context))
-        end
-      end
-=end
-  private
     class NodeModule < self
       def initialize(module_name)
         @module_name = module_name
       end
       def self.fields()
         {
-          :module => {},
-          :module_type => {},
-          :dsl_version => {},
+          :module => {
+            :omit => true
+          },
+          :module_type => {
+            :omit => true
+          },
+          :dsl_version => {
+            :omit => true
+          },
           :node_images => {
             :key => 'node_images',
             :subclass => NodeImage
@@ -57,23 +51,34 @@ module DTK; class NodeModuleDSL; class V1
     end
   end
 end; end; end
+
 =begin
-{ "dsl_version"=>"0.9.1",
- "module_type"=>"node_module",
- "node_images"=>
-  {    {      {       "os_type"=>"centos",
-       "dist_release"=>6.4,
-       "architecture"=>"x86_64",
-    "kernel_version"=>"3.2.0"},
-     "mappings"=>
-  {"ec2"=>{"location"=>"us-west-1", "image"=>"ami-b21a20f7"},
-       "docker"=>
-    {"location"=>"https://registry.hub.docker.com",
-      "image"=>"centos/centos6.4"},
-    "vmware"=>nil}},
-"ubuntu12.04"=>nil},
- "components"=>{ "template_attributes"=>
-{"size"=>
-  {"small"=>
-    {"ec2"=>"m1.small", "docker"=>"m1.small", "vmware"=>"m1.small"}}}}
+example of a node module
+---
+module: test_node_module
+dsl_version: 0.9.1
+module_type: node_module
+node_images:
+  centos6.4:
+    properties: #these are provide independent properties
+      description:
+      os_type: centos #required; rest are optional
+      dist_release: 6.4
+      architecture: x86_64
+      kernel_version: 3.2.0
+    mappings:
+     ec2: #keys are provider types
+      location: us-east-1
+      image: ami-96e20efe
+      location: us-west-1
+      image: ami-b21a20f7
+     docker:
+      location: https://registry.hub.docker.com #this could also point to cache on a docker host
+      image: centos/centos6.4
+node_image_attributes:
+ size:
+   small:
+     ec2: m1.small
+     docker: m1.small
+     vmware: m1.small
 =end

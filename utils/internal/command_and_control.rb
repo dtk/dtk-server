@@ -4,11 +4,17 @@ module DTK
   class CommandAndControl
     r8_nested_require('command_and_control','install_script')
 
-    def initialize(task,top_task_idh)
-      @task_idh =  task.id_handle()
+    def self.create_without_task()
+      new()
+    end
+    def initialize(task=nil,top_task_idh=nil)
       @top_task_idh = top_task_idh
-      @task_action = task[:executable_action]
-      @klass = self.class.load_for(@task_action)
+      if task
+        @task_idh =  task.id_handle()
+        
+        @task_action = task[:executable_action]
+        @klass = self.class.load_for(@task_action)
+      end
     end
     attr_reader :task_idh,:top_task_idh,:task_action,:klass
 
@@ -218,7 +224,8 @@ module DTK
       begin
         r8_nested_require("command_and_control","adapters/#{adapter_type}/#{adapter_name}")
         klass = CommandAndControlAdapter.const_get adapter_name.to_s.capitalize
-        Adapters[adapter_type][adapter_name] =  (instance_style_adapter?(adapter_type,adapter_name) ? klass.new : klass)
+        klass_or_instance = (instance_style_adapter?(adapter_type,adapter_name) ? klass.create_without_task() : klass)
+        Adapters[adapter_type][adapter_name] =  klass_or_instance
        rescue LoadError => e
         raise ErrorUsage.new("IAAS type ('#{adapter_name}') not supported!")
        rescue Exception => e

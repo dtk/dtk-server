@@ -146,6 +146,8 @@ module DTK
     #### actions to interact with remote repos ###
     # TODO: rename; this is just called by install; import ops call create route
     def rest__import()
+
+
       rest_ok_response install_from_dtkn_helper(:component_module)
     end
 

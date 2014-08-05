@@ -37,7 +37,7 @@ module DTK
       namespace = self.find_by_name(namespace_mh, namespace_name)
 
       unless namespace
-        namespace = create(namespace_mh, namespace_name)
+        namespace = create_new(namespace_mh, namespace_name)
       end
 
       namespace

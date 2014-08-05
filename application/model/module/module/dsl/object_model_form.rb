@@ -6,29 +6,62 @@ module DTK; class ModuleDSL
       new.convert(input_hash)
     end
 
-    def convert_children(input_hash)
-      illegal_keys = input_hash.keys - all_keys() 
+    def convert_children(input_hash,opts={})
+      ret = OutputHash.new
+      if prefixed_by_unique_key?() and !opts[:nested]
+        return input_hash.inject(ret){|h,(k,v)|h.merge(k => convert_children(v,:nested=>true))}
+      end
+
+      input_hash_keys = input_hash.keys
+      illegal_keys = input_hash_keys - all_keys() 
       unless illegal_keys.empty?
         raise ParsingError::IllegalKeys.new(illegal_keys)
       end
-      input_hash.req(:foo)
+      input_hash_keys.each do |k|
+        field_def = key_to_field_def(k)
+        if input_val = (field_def[:required] ? input_hash.req(k) : input_hash[k])
+          subclass = field_def[:subclass]
+          val = (subclass ? subclass.new.convert_children(input_val) : input_val)
+          ret[field_def[:field_name]] = val
+        end
+      end
+      ret
     end
 
    private
+    # The class method fields() is overwritten
+    def self.fields()
+      raise Error.new("class method fields() should be over-written for class (#{self})")
+    end
+    # The method prefixed_by_unique_key?() can be overwritten
+    def self.prefixed_by_unique_key?()
+      false
+    end
+
+    def prefixed_by_unique_key?()
+      self.class.prefixed_by_unique_key?()
+    end
+    
     def all_keys()
       self.class.all_keys()
     end
     def self.all_keys()
       @all_keys ||= fields_cached().map{|(k,v)|v[:key]}
     end
+    def key_to_field_def(key)
+      self.class.key_to_field_def(key)
+    end
+    def self.key_to_field_def(key)
+      @key_to_field_def ||= fields_cached().inject(Hash.new) do |h,(f,v)|
+        h.merge(v[:key] => v.merge(:field_name => f))
+      end
+      @key_to_field_def[key]
+    end
     def self.fields_cached()
       return @fields if @fields 
       @fields = fields()
       @fields.each_key{|k|@fields[k][:key]||=k.to_s}
       @fields
-    end
-    def self.fields()
-      raise Error.new("field should be over-written")
     end
 
     def convert_to_hash_form(hash_or_array,&block)

@@ -35,38 +35,24 @@ module DTK; class NodeModuleDSL; class V1
           }
         }
       end
-     private
-      def key(input_key)
-         qualified_component(input_key)
-      end
-      def qualified_component(cmp)
-        if @module_name == cmp
-          cmp
-        else
-          "#{@module_name}#{ModCmpDelim}#{cmp}"
-        end
-      end
 
-      def body(input_hash,cmp,context={})
-        ret = OutputHash.new
-        cmp_type = ret["display_name"] = ret["component_type"] = qualified_component(cmp)
-        ret["basic_type"] = "service"
-        ret.set_if_not_nil("description",input_hash["description"])
-        external_ref = external_ref(input_hash.req(:external_ref),cmp)
-        ret["external_ref"] = external_ref
-        ret.set_if_not_nil("only_one_per_node",only_one_per_node(external_ref))
-        add_attributes!(ret,cmp_type,input_hash)
-        opts = Hash.new
-        add_dependent_components!(ret,input_hash,cmp_type,opts)
-        ret.set_if_not_nil("component_include_module",include_modules?(input_hash["include_modules"]))
-        if opts[:constants]
-          add_attributes!(ret,cmp_type,ret_input_hash_with_constants(opts[:constants]),:constant_attribute => true)
+      class NodeImage < ObjectModelForm
+        def self.prefixed_by_unique_key?()
+          true
         end
-        ret
+        def self.fields()
+          {
+            :properties => {},
+            :mappings => {}
+          }
+        end
       end
-      class NodeImage
-      end
-      class NodeImageAttribute
+      class NodeImageAttribute < ObjectModelForm
+        def self.fields()
+          {
+            :size => {}
+          }
+        end
       end
     end
   end

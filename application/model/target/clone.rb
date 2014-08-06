@@ -103,28 +103,6 @@ pp nodes
           ndx_needs_sc.merge!(node[:id] => node)
         end
 
-        unless tr_link_candidates.empty?
-          ndx_node_template__node = tr_link_candidates.inject(Hash.new) do |h,n|
-            n[:node_template_id] ? h.merge!(n[:node_template_id] => n[:id]) : h
-          end
-          unless ndx_node_template__node.empty?
-            sp_hash = {
-              :cols => [:id,:display_name,:type],
-              :filter => [:oneof,:id,ndx_node_template__node.keys]
-            }
-            Model.get_objs(target.model_handle(:node),sp_hash).each do |nt|
-              if nt.is_target_ref?()
-                node_id = ndx_node_template__node[nt[:id]]
-                tr_link.merge!(node_id => nt)
-                ndx_needs_sc[node_id] = nil
-              end
-            end
-          end 
-# if node :target_refs_to_link exists think has same info as in tr_link
-pp [:tr_link,tr_link]
-pp [:target_refs_to_link,nodes.map{|n|n[:target_refs_to_link]}]
-        end
-
         unless tr_link.empty? and tr_create.empty?
           annotated_nodes = Node::TargetRef::AnnotatedNodes.new(tr_link,tr_create)
           opts_target_ref = {:do_not_check_link_exists => true} #know that link does not exist since new node instances
@@ -133,6 +111,45 @@ pp [:target_refs_to_link,nodes.map{|n|n[:target_refs_to_link]}]
 
         needs_state_change = ndx_needs_sc.reject{|node,needs_sc|!needs_sc}.values
         create_state_changes_for_create_node?(target,needs_state_change)
+      end
+
+      # This method also updates ndx_needs_sc
+      def self.existing_target_refs_to_link(tr_link_candidates,ndx_needs_sc)
+        ret = Hash.new
+        return ret if tr_link_candidates.empty?
+        # See if nodes have target refs computed already; if so compute these
+        # TODO: convert so that always case target refs computed already
+        trs_that_need_processing = Array.new
+        ret = tr_link_candidates.each do |node|
+          trs = node[:target_refs_to_link]||[]
+          unless trs.empty?
+            node_id = node[:id]
+            trs.each{|target_ref|ret.merge!(node_id => target_ref)}
+          else
+            trs_that_need_processing << node
+          end
+        end
+
+        return ret if trs_that_need_processing.empty?
+
+        # TODO: after 'convert so that always case' can remove below 
+        ndx_node_template__node = trs_that_need_processing.inject(Hash.new) do |h,n|
+          n[:node_template_id] ? h.merge!(n[:node_template_id] => n[:id]) : h
+        end
+        unless ndx_node_template__node.empty?
+          sp_hash = {
+            :cols => [:id,:display_name,:type],
+            :filter => [:oneof,:id,ndx_node_template__node.keys]
+          }
+          Model.get_objs(target.model_handle(:node),sp_hash).each do |nt|
+            if nt.is_target_ref?()
+              node_id = ndx_node_template__node[nt[:id]]
+              ret.merge!(node_id => nt)
+              ndx_needs_sc[node_id] = nil
+            end
+          end
+        end 
+        ret
       end
 
       def self.create_state_changes_for_create_node?(target,nodes)

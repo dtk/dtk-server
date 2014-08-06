@@ -44,8 +44,9 @@ module DTK; module ModuleMixins
 
     def create_module_and_branch_obj?(project,repo_idh,local,ancestor_branch_idh=nil)
       project_idh = project.id_handle()
-      ref = module_name = local.module_name
+      module_name = local.module_name
       namespace = Namespace.find_or_create(project.model_handle(:namespace), local.module_namespace_name)
+      ref = "#{namespace}::#{module_name}"
       opts = Hash.new
       opts.merge!(:ancestor_branch_idh => ancestor_branch_idh) if ancestor_branch_idh
       mb_create_hash = ModuleBranch.ret_create_hash(repo_idh,local,opts)

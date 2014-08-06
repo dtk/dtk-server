@@ -64,7 +64,7 @@ module DTK; class ChildContext
           raise_error_need_more_nodes(num_free,num_needed)
         end
 
-        #sorting as heursitic to pick the needed target refs using when created as captured by id
+        #sorting as heuristic to pick the needed target refs using when created as captured by id
         needed_trs = 
           if is_node_group
             target_refs.sort{|a,b|a[:id] <=> b[:id]}[0...num_needed]
@@ -82,21 +82,13 @@ module DTK; class ChildContext
       end
 
       def hash_els(stub_node,target_refs)
-        if stub_node.is_node_group?()
-          # mapping to just one, and then appending rest
-          # safe to modify target_refs
-          first_target_ref = target_refs.shift
-          extra_fields = (target_refs.empty? ? {} : {:rest_target_refs => target_refs})
-          [hash_el(stub_node,first_target_ref,extra_fields)]
-        else
-          unless target_refs.size == 1
-            raise Error.new("Unexpected that a singleton node is mapped to more than one target refs")
-          end
-          [hash_el(stub_node,target_refs.first)]
-        end
+        # mapping to just one target ref, but passing all as a key :target_refs_to_link
+        sample_target_ref = target_refs.first
+        [hash_el(stub_node,sample_target_ref,:target_refs_to_link => target_refs)]
       end
+
       def hash_el(stub_node,target_ref,extra_fields={})
-        @parent.hash_el_when_match(stub_node,target_ref,extra_fields)
+        @parent.hash_el_when_match(stub_node,target_ref,{:target_refs_exist => true}.merge(extra_fields))
       end
     end
   end

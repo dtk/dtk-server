@@ -35,8 +35,8 @@ module DTK
       end
       clone_post_copy_hook(clone_copy_output,opts)
 #TODO: for debugging
-#stop = true
-#if stop then raise ErrorUsage.new('stop for testing'); end
+stop = true
+if stop then raise ErrorUsage.new('stop for testing'); end
 
       if clone_source_object.class == Component and target_id_handle[:model_name] == :node
         Violation.update_violations([target_id_handle])

@@ -66,10 +66,8 @@ module DTK
           ret.each do |r|
             display_name = r[:display_name]
             r[:node_template_id] = (ndx_mapping_rows[display_name]||{})[:node_template_id]
-            r[:donot_clone] = ndx_matches[display_name][:donot_clone]
-            if rest_target_refs = ndx_matches[display_name][:rest_target_refs]
-              r[:rest_target_refs] = rest_target_refs
-            end
+            match = ndx_matches[display_name]
+            r.merge!(Aux::hash_subset(match,[:donot_clone,:target_refs_to_link,:target_refs_exist]))
           end
         end
 

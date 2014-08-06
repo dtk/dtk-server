@@ -84,28 +84,27 @@ pp nodes
       #  if node has been designated as matched to an existing target ref, need to create links to these
       #  otherwise create a state change object
       def self.create_target_refs_and_links?(target,assembly,nodes)
-        tr_create = Array.new
-        tr_link = Hash.new
-        # ndx_needs_state_change is used to find nodes that need a state change object
+        tr_create = Array.new #node/node-groups that need target ref created
+        tr_link = Hash.new #node/node-groups that need to be linked to existing target refs
+        tr_link_candidates = Array.new
+
+        # ndx_needs_sc is used to find nodes that need a state change object
         # meaning model is annoatted so these when a task is run will cause a node to be created
         # initiallly set ndx_needs_state_change to have all nodes and then in loop below remove ones 
         # that are linked to existing nodes
-
-        # TODO: assuming that node groups need to be created; think node groups may be able to point to
-        # - all nodes that need to be created
-        # - all nodes that exist
-        # - mixture
         ndx_needs_sc = Hash.new
-
-        partition = [tr_create,Array.new]
         nodes.each do |node|
-          partition[node.is_node_group?() ? 0 : 1] << node
+          if node.is_node_group?() and !node[:target_refs_exist]
+            tr_create << node
+          else
+            tr_link_candidates << node
+          end
+          # initiallly set ndx_needs_state_change to have all nodes
           ndx_needs_sc.merge!(node[:id] => node)
         end
 
-        # partition[1] are non node groups; elements we want to see if point to a node_template that is a target ref
-        unless partition[1].empty?
-          ndx_node_template__node = partition[1].inject(Hash.new) do |h,n|
+        unless tr_link_candidates.empty?
+          ndx_node_template__node = tr_link_candidates.inject(Hash.new) do |h,n|
             n[:node_template_id] ? h.merge!(n[:node_template_id] => n[:id]) : h
           end
           unless ndx_node_template__node.empty?
@@ -121,6 +120,9 @@ pp nodes
               end
             end
           end 
+# if node :target_refs_to_link exists think has same info as in tr_link
+pp [:tr_link,tr_link]
+pp [:target_refs_to_link,nodes.map{|n|n[:target_refs_to_link]}]
         end
 
         unless tr_link.empty? and tr_create.empty?

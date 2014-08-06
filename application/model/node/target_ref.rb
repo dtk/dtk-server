@@ -10,7 +10,7 @@ module DTK
       def self.types()
         Types
       end
-      Types = [Type::Node.target_ref,Type::Node.target_ref_staged]
+      Types = [Type::Node.target_ref,Type::Node.target_ref_staged,Type::Node.physical]
 
       def self.print_form(display_name)
         if display_name =~ Regexp.new("^#{PhysicalNodePrefix}(.+$)")

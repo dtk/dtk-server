@@ -55,7 +55,7 @@ module DTK
         level = 1
         nodes = clone_copy_output.children_objects(level,:node,:cols=>[:display_name,:external_ref,:type])
         return if nodes.empty?
-
+pp nodes
         Node.cache_attribute_values!(nodes,:cardinality)
 
         # The method create_target_refs_and_links?

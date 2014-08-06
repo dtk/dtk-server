@@ -9,7 +9,7 @@ module DTK
         nil
       end
 
-      def self.references_image?(node_external_ref)
+      def references_image?(node_external_ref)
         nil
       end
 

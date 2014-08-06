@@ -88,23 +88,34 @@ module DTK
         end
       end
 
-      # these are nodes without any assembly on them
-      def self.get_free_nodes(target)
+      # The class method get_nodes(target) gets the target refs in the target taht are managed
+      def self.get_managed_nodes(target,opts={})
         sp_hash = {
-          :cols => [:id, :display_name, :ref, :type, :assembly_id, :datacenter_datacenter_id, :managed],
+          :cols => opts[:cols] || [:id, :display_name, :tags, :ref, :type, :assembly_id, :datacenter_datacenter_id, :managed],
           :filter => [:and,
-                        [:eq, :type, Type::Node.target_ref],
+                      [:oneof, :type, [Type::Node.target_ref,Type::Node.physical]],
                         [:eq, :datacenter_datacenter_id, target[:id]],
                         [:eq, :managed, true]]
         }
         node_mh = target.model_handle(:node)
-        ret_unpruned = get_objs(node_mh,sp_hash,:keep_ref_cols => true)
-
-        ndx_matched_target_refs = ndx_target_refs_to_their_instances(ret_unpruned.map{|r|r.id_handle})
-        if ndx_matched_target_refs.empty?
-          return ret_unpruned
+        ret = get_objs(node_mh,sp_hash,:keep_ref_cols => true)
+        if opts[:mark_free_nodes]
+          ndx_matched_target_refs = ndx_target_refs_to_their_instances(ret.map{|r|r.id_handle})
+          unless ndx_matched_target_refs.empty?
+            ret.each do |r|
+              unless ndx_matched_target_refs[r[:id]]
+                r.merge!(:free_node => true)
+              end
+            end
+          end
         end
-        ret_unpruned.reject{|r|ndx_matched_target_refs[r[:id]]}
+        ret
+      end
+
+      # The class method get_free_nodes returns  managed nodes without any assembly on them
+      def self.get_free_nodes(target)
+        ret = get_managed_nodes(target,:mark_free_nodes=>true)
+        ret.select{|r|r[:free_node]} 
       end
 
       def self.create_nodes_from_inventory_data(target, inventory_data)

@@ -9,9 +9,11 @@ module DTK
         ret_value?(:root_device_size)
       end
 
-      def cardinality()
-        ret_value?(:cardinality)||1
+      def cardinality(opts={})
+        ret = ret_value?(:cardinality)
+        (opts[:no_default] ? ret : ret||CardinalityDefault)
       end
+      CardinalityDefault = 1
 
       def puppet_version()
         ret_value?(:puppet_version)||R8::Config[:puppet][:version]

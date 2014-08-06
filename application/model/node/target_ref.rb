@@ -12,14 +12,18 @@ module DTK
       end
       Types = [Type::Node.target_ref,Type::Node.target_ref_staged,Type::Node.physical]
 
-      def self.print_form(display_name)
-        if display_name =~ Regexp.new("^#{PhysicalNodePrefix}(.+$)")
+      def self.assembly_node_print_form(target_ref)
+        target_ref.update_object!(:ref,:display_name)
+        unless name = target_ref[:display_name]||target_ref[:ref]
+          return 'NODE'
+        end
+        if name =~ Regexp.new("^#{PhysicalNodePrefix}(.+$)")
           $1
         else
-          split = display_name.split(AssemblyDelim)
+          split = name.split(AssemblyDelim)
           unless split.size == 2
-            Log.error("Display Name has unexpected form (#{display_name})")
-            return display_name
+            Log.error("Display Name has unexpected form (#{name})")
+            return name
           end
           split[1]
         end
@@ -40,6 +44,9 @@ module DTK
         end
       end
       def self.node_member_index(target_ref)
+        if Type::Node.physical == target_ref.get_field?(:type)
+          return nil
+        end
         ret = nil
         if display_name = target_ref.get_field?(:display_name)
           if display_name =~ Regexp.new("#{IndexDelim}([0-9]+$)")
@@ -47,7 +54,7 @@ module DTK
           end
         end
         unless ret 
-          Log.errror("Unexpected cannot find an index number")
+          Log.error("Unexpected cannot find an index number")
         end
         ret
       end

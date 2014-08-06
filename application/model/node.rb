@@ -62,11 +62,10 @@ module DTK
     end
 
     def assembly_node_print_form()
-      display_name = get_field?(:display_name)
       if is_target_ref?()
-        TargetRef.print_form(display_name)
+        TargetRef.assembly_node_print_form(self)
       else
-        display_name
+         get_field?(:display_name)
       end
     end
 

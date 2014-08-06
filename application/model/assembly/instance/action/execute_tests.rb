@@ -2,24 +2,24 @@
 module DTK
   class Assembly::Instance
     module Action
-      class ExecuteTests < ActionResultsQueue::Result
-        def self.initiate(project,assembly_instance,nodes,action_results_queue, type, opts={})
-          new(project,assembly_instance,nodes,action_results_queue, type, opts).initiate()
-        end
-
-        def initialize(project,assembly_instance,nodes,action_results_queue, type, opts={})
-          @project = project
-          @assembly_instance = assembly_instance
-          @nodes = nodes
-          @action_results_queue = action_results_queue
-          @type = type
-          @filter = opts[:filter]
+      class ExecuteTests < ActionResultsQueue
+        attr_reader :error
+        def initialize(params)
+          super()
+          @agent_action = params[:agent_action]
+          @project = params[:project]
+          @assembly_instance = params[:assembly_instance]
+          @nodes = params[:nodes]
+          @type = :assembly
+          @filter = params[:component]
+          @error = nil
         end
 
         def initiate()
           test_components = get_test_components_with_bindings()
           if test_components.empty?
-            return {:error => "Unable to execute tests. There are no links to test components!"}
+            @error = "Unable to execute tests. There are no links to test components!"
+            raise ::DTK::ErrorUsage
           end
 
           node_names = @nodes.map { |n| n[:display_name] }
@@ -68,7 +68,7 @@ module DTK
 
           # we send elements that are going to be used, due to bad design we need to send an array even
           # if queue logic is only using size of that array.
-          action_results_queue.set_indexes!(node_hash.keys)
+          set_indexes!(node_hash.keys)
 
           callbacks = {
             :on_msg_received => proc do |msg|
@@ -88,7 +88,7 @@ module DTK
                 #just for a safe side to filter out empty response, it causes further an error on the client side
                 unless response[:data].empty? or response[:data].nil?   
                   packaged_data = DTK::ActionResultsQueue::Result.new(node_info[:display_name],raw_data)
-                  action_results_queue.push(node_info[:id], (type == :node) ? packaged_data.data : packaged_data)
+                  push(node_info[:id], (type == :node) ? packaged_data.data : packaged_data)
                 end
               end
             end
@@ -145,7 +145,7 @@ module DTK
             unless test_cmp
               Log.error("Dangling reference to test components (#{test_component_name})")
             else
-              #substitue in values from test_cmp_attrs               
+              #substitute in values from test_cmp_attrs               
               ret << dup_and_substitute_attribute_values(test_cmp,r)
             end
           end
@@ -176,7 +176,7 @@ module DTK
         def get_test_component_attributes()
           ret = Array.new
 
-          linked_tests = Component::Test.get_linked_tests(assembly_instance, @filter[:components])
+          linked_tests = Component::Test.get_linked_tests(assembly_instance, @filter)
           if linked_tests.empty?
             return ret
           end

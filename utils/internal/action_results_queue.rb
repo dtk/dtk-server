@@ -123,6 +123,7 @@ module DTK
         unless results.kind_of?(Hash) #and results.values.first.kind_of?(self)
           return results
         end
+
         ret = Array.new
         # sort by node name and prune out keys with no results
         pruned_sorted_keys = results.reject{|k,v|v.nil?}.sort{|a,b|a[1].node_name <=> b[1].node_name}.map{|r|r.first}

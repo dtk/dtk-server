@@ -17,6 +17,11 @@ module Ramaze::Helper
           action_queue.initiate(nodes,params)
         end
       end
+      def initiate_execute_tests(action_queue_class, params={})
+        InitiateAction.execute_tests_block(action_queue_class,params) do |action_queue|
+          action_queue.initiate
+        end
+      end
       module InitiateAction
         def self.block(action_queue_class,params,&block)
           opts = ::DTK::Aux.hash_subset(params,:agent_action)
@@ -25,6 +30,16 @@ module Ramaze::Helper
             block.call(action_queue)
           rescue ::DTK::ErrorUsage => e
             action_queue.push(:error,e.message)
+          end
+          action_queue
+        end
+
+        def self.execute_tests_block(action_queue_class,params,&block)
+          action_queue = action_queue_class.new(params)
+          begin
+            block.call(action_queue)
+          rescue ::DTK::ErrorUsage => e
+            return action_queue
           end
           action_queue
         end

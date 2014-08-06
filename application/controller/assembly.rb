@@ -626,7 +626,7 @@ module DTK
 
       unless is_valid
         Log.info(error_msg)
-        return rest_ok_response(:errors => [error_msg])
+        return rest_ok_response(:errors => error_msg)
       end
 
       # Filter node if execute tests is started from the specific node

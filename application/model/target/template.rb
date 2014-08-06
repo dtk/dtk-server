@@ -100,7 +100,8 @@ module DTK
       end
      private
       def base_name()
-        get_field?(:display_name).gsub(Regexp.new("#{DisplayNameSufix}$"),'')
+        # get_field?(:display_name).gsub(Regexp.new("#{DisplayNameSufix}$"),'')
+        get_field?(:display_name)
       end
 
       def self.object_type_filter()
@@ -108,9 +109,11 @@ module DTK
       end
       
       def self.provider_display_name(provider_name)
-        "#{provider_name}#{DisplayNameSufix}" 
+        # "#{provider_name}#{DisplayNameSufix}"
+        provider_name
       end
-      DisplayNameSufix = '-template'
+      # removed '-template' from provider display_name (ticket DTK-1480)
+      # DisplayNameSufix = '-template'
 
       def self.provider_exists?(project_idh,provider_name)
         sp_hash = {

@@ -1,4 +1,4 @@
-# TODO: need to cleanup 
+# TODO: need to cleanup
 # This file contains your application, it requires dependencies and necessary
 # parts of the application.
 #
@@ -10,6 +10,7 @@ require 'bundler/setup'
 require 'ramaze'
 require 'json'
 require 'yaml'
+require 'looksee'
 
 # TODO: probably better way to do this; below makes sure that if program staretd in different directory than this, that still finds helpers
 helper_paths = Innate.options[:helpers_helper][:paths]||[]
@@ -33,7 +34,7 @@ LIB_DIR = "#{SYSTEM_ROOT_PATH}/lib"
 UTILS_BASE_DIR = "#{SYSTEM_ROOT_PATH}/utils"
 UTILS_DIR = "#{UTILS_BASE_DIR}/internal"
 
-# TODO: make that log  dont need config values 
+# TODO: make that log  dont need config values
 r8_require("#{UTILS_DIR}/log")
 r8_require("#{LIB_DIR}/error")
 r8_require("#{UTILS_DIR}/hash_object")

@@ -8,7 +8,7 @@ module XYZ
       # if model_naems check all are defined
       if model_names
         model_names.each do |model_name|
-          begin 
+          begin
             Model.model_class(model_name)
           rescue
             error_msg = "Model (#{model_name}) is not defined\n"
@@ -30,7 +30,7 @@ module XYZ
 
       # setup infra tables if they don't exist already
       setup_infrastructure_tables?(db)
-      
+
       # create the domain-related tables if tehy don't exist already
       dir = :up
       if model_names
@@ -40,11 +40,11 @@ module XYZ
       end
       # add the top level factorories if they don't exist
       # has to be done after db added to class and models been added
-      IDInfoTable.add_top_factories?() 
+      IDInfoTable.add_top_factories?()
     end
 
     # TODO: this is specific migration; will have this subsumed and removed
-    def migrate_data(db)
+    def migrate_data_new(opts)
       db = opts[:db]||DB.create(R8::Config[:database])
       puts "Migrating data ... "
 
@@ -54,6 +54,7 @@ module XYZ
 
       modules  = Model.get_objs(ModelHandle.new(c, :component_module), { :cols => columns})
       services = Model.get_objs(ModelHandle.new(c, :service_module), { :cols => columns})
+      services = Model.get_objs(ModelHandle.new(c, :test_module), { :cols => columns})
       components = modules + services
 
       raise "No data to migrate, exiting ..." if components.empty?
@@ -62,6 +63,9 @@ module XYZ
 
       components.each do |e|
 
+
+          # DEBUG SNIPPET >>> REMOVE <<<
+          require 'ap'
         # if remote records exists
         if e[:repo][:remote_repo_name]
 
@@ -69,12 +73,22 @@ module XYZ
           # we extract it from remote_repo_name
           remote_namespace = e[:repo][:remote_repo_namespace] || e[:repo][:remote_repo_name].match(/^(.*?)\-\-/)[1]
 
-          repo_data = RepoRemote.get_remote_repo(repo_remote_mh, e[:repo][:id], e[:display_name],remote_namespace)
+          repo_data = RepoRemote.get_remote_repo(repo_remote_mh, e[:repo][:id], e[:display_name], remote_namespace)
 
-          if repo_data.nil?
-            data = RepoRemote.create_repo_remote(repo_remote_mh, e[:display_name], e[:repo][:remote_repo_name], remote_namespace, e[:repo][:id])
-            puts "Remote Repo migrated for => '#{data[:display_name]}'"
-          end
+          ap ">>>>>>>>>>>>>>>>>>>>>>>>>>>"
+          ap e[:display_name]
+          ap remote_namespace
+          ap ">>>>>>>>>>>>>>>>>>>>>>>>>>>"
+          ap repo_data
+
+          # if repo_data.nil?
+          #   data = RepoRemote.create_repo_remote(repo_remote_mh, e[:display_name], e[:repo][:remote_repo_name], remote_namespace, e[:repo][:id])
+          #   puts "Remote Repo migrated for => '#{data[:display_name]}'"
+          # end
+        else
+          # DEBUG SNIPPET >>> REMOVE <<<
+          require (RUBY_VERSION.match(/1\.8\..*/) ? 'ruby-debug' : 'debugger');Debugger.start; debugger
+          ap "NO RECORD: #{e[:display_name]}"
         end
       end
 

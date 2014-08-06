@@ -11,7 +11,7 @@ module DTK
 
       def cardinality(opts={})
         ret = ret_value?(:cardinality)
-        (opts[:without_default] ? ret : ret||CardinalityDefault)
+        (opts[:no_default] ? ret : ret||CardinalityDefault)
       end
       CardinalityDefault = 1
 

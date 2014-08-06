@@ -1,6 +1,7 @@
 module DTK
   class ChildContext
     class AssemblyNode < self
+      r8_nested_require('assembly_node','match_target_refs')
      private
       def include_list()
         [:attribute,:attribute_link,:component,:component_ref,:node_interface,:port]
@@ -94,85 +95,6 @@ module DTK
         end
       end
 
-      class MatchTargetRefs
-        def initialize(parent)
-          @parent = parent
-        end
-        def matching_strategy(target,stub_nodes)
-          #TODO: stub
-          :match_tags
-        end
-        def match_tags(target,stub_nodes,assembly_template_idh)
-          ret = Array.new
-          target_refs = Node::TargetRef.get_managed_nodes(target)
-          ndx_tag_tr = Hash.new
-          target_refs.each do |tr|
-            (tr[:tags]||[]).each do |tag|
-              (ndx_tag_tr[tag] ||= Array.new) << tr
-            end
-          end
-          ndx_tag_stub_node = Hash.new
-          stub_nodes.each do |stub_node|
-            tag = stub_node[:display_name]
-            if tr_match = ndx_tag_tr[tag]
-              ndx_tag_stub_node[tag] = stub_node
-            else
-              raise ErrorUsage.new("There is no node in inventory with tag (#{tag})")
-            end
-          end
-          ndx_tag_stub_node.each do |tag,stub_node|
-            trs = ndx_tag_tr[tag].sort{|a,b|a[:display_name] <=> b[:display_name]}
-            ret += assign_by_group(stub_node,trs,:tag => tag)
-          end
-          ret
-pp ret
-raise ErrorUsage.new
-        end
-
-        def find_free_nodes(target,stub_nodes,assembly_template_idh)
-          ret = Array.new
-          free_nodes = Node::TargetRef.get_free_nodes(target)
-          # assuming the free nodes are interchangable; pick one for each match
-          num_free = free_nodes.size
-          if stub_nodes.find{|n|n.is_node_group?()}
-            raise Error.new("Not implemented: looking for free nodes with a node group")
-          end
-          num_needed = stub_nodes.size
-          if num_free < num_needed
-            raise_error_need_more_nodes(num_free,num_needed)
-          end
-          stub_nodes.each_with_index do |stub_node,i|
-            target_ref = free_nodes[i]
-            ret << hash_el(stub_node,target_ref)
-          end
-          ret
-        end
-        
-        private
-        def assign_by_group(stub_node,target_refs,context={})
-          ret = Array.new
-          num_free = target_refs.size
-          num_needed = (stub_node.is_node_group?() ? 
-                        stub_node.attribute.cardinality(:no_default=>true)||num_free :
-                        1)
-          if num_free < num_needed
-            raise_error_need_more_nodes(num_free,num_needed)
-          end
-          (0...num_needed).map{|i|hash_el(stub_node,target_refs[i])} 
-        end
-
-       private
-        def raise_error_need_more_nodes(num_free,num_needed)
-          num  = (num_needed == 1 ? '1 free node is' : "#{num_needed} free nodes are")
-          free = (num_free == 1 ? '1 is' : "#{num_free} are")
-          raise ErrorUsage.new("Cannot stage the assembly template because #{num} needed, but just #{free} available")
-        end
-
-        def hash_el(stub_node,target_ref)
-          @parent.hash_el_when_match(stub_node,target_ref)
-        end
-      end
-
       def find_matches_for_nodes(target,assembly_template_idh,sao_node_bindings=nil)
         # find the assembly's stub nodes and then use the node binding to find the node templates
         # as will as using, if non-empty, service_add_on_node_bindings to see what nodes mapping to existing ones and thus shoudl be omitted in clone
@@ -223,9 +145,8 @@ raise ErrorUsage.new
       end
 
       def hash_el_when_create(node,node_template)
-        instance_type = (node.is_node_group?() ? Node::Type::NodeGroup.staged : Node::Type::Node.staged)
         {
-          :instance_type         => instance_type,
+          :instance_type         => node_class(node).staged,
           :node_stub_idh         => node.id_handle, 
           :instance_display_name => node[:display_name],
           :instance_ref          => instance_ref(node[:display_name]),
@@ -234,7 +155,7 @@ raise ErrorUsage.new
       end
       def hash_el_when_match(node,target_ref)
         {
-          :instance_type         => Node::Type::Node.instance,
+          :instance_type         => node_class(node).instance,
           :node_stub_idh         => node.id_handle, 
           :instance_display_name => node[:display_name],
           :instance_ref          => instance_ref(node[:display_name]),
@@ -244,6 +165,10 @@ raise ErrorUsage.new
       end
       public :hash_el_when_match
       
+      def node_class(node)
+        node.is_node_group?() ? Node::Type::NodeGroup : Node::Type::Node
+      end
+
       def instance_ref(node_ref_part)
         "assembly--#{self[:assembly_obj_info][:display_name]}--#{node_ref_part}"
       end

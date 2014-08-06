@@ -103,6 +103,8 @@ pp nodes
           ndx_needs_sc.merge!(node[:id] => node)
         end
 
+        tr_link = existing_target_refs_to_link(tr_link_candidates,ndx_needs_sc)
+
         unless tr_link.empty? and tr_create.empty?
           annotated_nodes = Node::TargetRef::AnnotatedNodes.new(tr_link,tr_create)
           opts_target_ref = {:do_not_check_link_exists => true} #know that link does not exist since new node instances
@@ -120,7 +122,7 @@ pp nodes
         # See if nodes have target refs computed already; if so compute these
         # TODO: convert so that always case target refs computed already
         trs_that_need_processing = Array.new
-        ret = tr_link_candidates.each do |node|
+        tr_link_candidates.each do |node|
           trs = node[:target_refs_to_link]||[]
           unless trs.empty?
             node_id = node[:id]

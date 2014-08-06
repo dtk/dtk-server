@@ -176,7 +176,7 @@ module DTK
         def get_test_component_attributes()
           ret = Array.new
 
-          linked_tests = Component::Test.get_linked_tests(assembly_instance, @filter)
+          linked_tests = Component::Test.get_linked_tests(assembly_instance, @nodes, @filter)
           if linked_tests.empty?
             return ret
           end

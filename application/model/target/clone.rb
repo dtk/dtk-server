@@ -103,7 +103,7 @@ pp nodes
           ndx_needs_sc.merge!(node[:id] => node)
         end
 
-        tr_link = existing_target_refs_to_link(tr_link_candidates,ndx_needs_sc)
+        tr_link = existing_target_refs_to_link(target,tr_link_candidates,ndx_needs_sc)
 
         unless tr_link.empty? and tr_create.empty?
           annotated_nodes = Node::TargetRef::AnnotatedNodes.new(tr_link,tr_create)
@@ -116,7 +116,7 @@ pp nodes
       end
 
       # This method also updates ndx_needs_sc
-      def self.existing_target_refs_to_link(tr_link_candidates,ndx_needs_sc)
+      def self.existing_target_refs_to_link(target,tr_link_candidates,ndx_needs_sc)
         ret = Hash.new
         return ret if tr_link_candidates.empty?
         # See if nodes have target refs computed already; if so compute these

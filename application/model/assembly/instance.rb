@@ -6,7 +6,6 @@ module DTK; class  Assembly
     r8_nested_require('instance','update')
     r8_nested_require('instance','list')
     r8_nested_require('instance','delete')
-    include ActionMixin
     include ViolationMixin
     include ServiceLinkMixin
     include ListMixin

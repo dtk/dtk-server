@@ -28,12 +28,9 @@ module DTK; class ChildContext
             raise ErrorUsage.new("There is no node in inventory with tag (#{tag})")
           end
         end
-        ndx_tag_stub_node.each do |tag,stub_node|
-          # sorting is just leads to heursitic from which order target refs are selected
-          trs = ndx_tag_tr[tag].sort{|a,b|a[:ref] <=> b[:ref]}
-          ret += assign_by_group(stub_node,trs,:tag => tag)
+        ndx_tag_stub_node.inject(Array.new) do |ret,(tag,stub_node)|
+          ret + assign_by_group(stub_node,ndx_tag_tr[tag],:tag => tag)
         end
-        ret
       end
 
       def find_free_nodes(target,stub_nodes,assembly_template_idh)
@@ -58,14 +55,23 @@ module DTK; class ChildContext
       private
       def assign_by_group(stub_node,target_refs,context={})
         ret = Array.new
+        is_node_group = stub_node.is_node_group?()
         num_free = target_refs.size
-        num_needed = (stub_node.is_node_group?() ? 
+        num_needed = (is_node_group ? 
                       stub_node.attribute.cardinality(:no_default=>true)||num_free :
                       1)
         if num_free < num_needed
           raise_error_need_more_nodes(num_free,num_needed)
         end
-        (0...num_needed).map{|i|hash_el(stub_node,target_refs[i])} 
+
+        #sorting as heursitic to pick the needed target refs using when created as captured by id
+        needed_trs = 
+          if is_node_group
+            target_refs.sort{|a,b|a[:id] <=> b[:id]}[0...num_needed]
+          else
+            target_refs
+          end
+        hash_els(stub_node,needed_trs)
       end
 
       private
@@ -75,8 +81,22 @@ module DTK; class ChildContext
         raise ErrorUsage.new("Cannot stage the assembly template because #{num} needed, but just #{free} available")
       end
 
-      def hash_el(stub_node,target_ref)
-        @parent.hash_el_when_match(stub_node,target_ref)
+      def hash_els(stub_node,target_refs)
+        if stub_node.is_node_group?()
+          # mapping to just one, and then appending rest
+          # safe to modify target_refs
+          first_target_ref = target_refs.shift
+          extra_fields = (target_refs.empty? ? {} : {:rest_target_refs => target_refs})
+          [hash_el(stub_node,first_target_ref,extra_fields)]
+        else
+          unless target_refs.size == 1
+            raise Error.new("Unexpected that a singleton node is mapped to more than one target refs")
+          end
+          [hash_el(stub_node,target_refs.first)]
+        end
+      end
+      def hash_el(stub_node,target_ref,extra_fields={})
+        @parent.hash_el_when_match(stub_node,target_ref,extra_fields)
       end
     end
   end

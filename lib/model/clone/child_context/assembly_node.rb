@@ -67,6 +67,9 @@ module DTK
             display_name = r[:display_name]
             r[:node_template_id] = (ndx_mapping_rows[display_name]||{})[:node_template_id]
             r[:donot_clone] = ndx_matches[display_name][:donot_clone]
+            if rest_target_refs = ndx_matches[display_name][:rest_target_refs]
+              r[:rest_target_refs] = rest_target_refs
+            end
           end
         end
 
@@ -153,8 +156,8 @@ module DTK
           :node_template_idh     => node_template.id_handle()
         }
       end
-      def hash_el_when_match(node,target_ref)
-        {
+      def hash_el_when_match(node,target_ref,extra_fields={})
+        ret = {
           :instance_type         => node_class(node).instance,
           :node_stub_idh         => node.id_handle, 
           :instance_display_name => node[:display_name],
@@ -162,6 +165,8 @@ module DTK
           :node_template_idh     => target_ref.id_handle(),
           :donot_clone           => [:attribute]
         }
+        ret.merge!(extra_fields) unless extra_fields.empty?
+        ret
       end
       public :hash_el_when_match
       

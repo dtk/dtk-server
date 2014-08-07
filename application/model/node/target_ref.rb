@@ -3,6 +3,7 @@ module DTK
     # This refers to an object that is used to point to an existing node in a target; it is a peer of Node::Template
     class TargetRef < self
       r8_nested_require('target_ref','input')
+      r8_nested_require('target_ref','clone')
 
       def is_target_ref?()
         true
@@ -79,20 +80,6 @@ module DTK
           pntr.target_refs << target_ref if target_ref
         end
         ret
-      end
-
-      AnnotatedNodes = Struct.new(:to_link,:to_create)
-      def self.create_target_refs_and_links?(target,assembly,annotated_nodes,opts={})
-        unless annotated_nodes.to_create.empty?
-          Input::BaseNodes.create_linked_target_refs?(target,assembly,annotated_nodes.to_create)
-        end
-        unless annotated_nodes.to_link.empty?
-          if opts[:do_not_check_link_exists]
-            Input::BaseNodes.link_to_target_refs(target,annotated_nodes.to_link)
-          else
-            raise Error.new("Not support: create_target_refs_and_links? w/o {:do_not_check_link_exists => true}")
-          end
-        end
       end
 
       # The class method get_nodes(target) gets the target refs in the target taht are managed

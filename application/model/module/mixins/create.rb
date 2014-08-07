@@ -44,8 +44,9 @@ module DTK; module ModuleMixins
 
     def create_module_and_branch_obj?(project,repo_idh,local,ancestor_branch_idh=nil)
       project_idh = project.id_handle()
-      ref = module_name = local.module_name
+      module_name = local.module_name
       namespace = Namespace.find_or_create(project.model_handle(:namespace), local.module_namespace_name)
+      ref = local.module_name(:with_namespace=>true)
       opts = Hash.new
       opts.merge!(:ancestor_branch_idh => ancestor_branch_idh) if ancestor_branch_idh
       mb_create_hash = ModuleBranch.ret_create_hash(repo_idh,local,opts)
@@ -63,7 +64,7 @@ module DTK; module ModuleMixins
         }
       }
       input_hash_content_into_model(project_idh,create_hash)
-      module_branch = get_module_branch_from_local(local)
+      module_branch = get_module_branch_from_local(local,:with_namespace=>true)
       module_idh =  project_idh.createIDH(:model_name => model_name(),:id => module_branch[:module_id])
       # TODO: ModuleBranch::Location: see if after refactor version field needed
       # TODO: ModuleBranch::Location: ones that come from local can be omitted

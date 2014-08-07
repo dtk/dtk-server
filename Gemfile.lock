@@ -75,6 +75,7 @@ GEM
     ipaddress (0.8.0)
     json (1.5.2)
     json_pure (1.8.1)
+    looksee (2.1.1)
     mcollective-client (2.2.3)
       json
       stomp
@@ -199,6 +200,7 @@ DEPENDENCIES
   iconv
   innate (= 2012.03)
   json (= 1.5.2)
+  looksee
   mcollective-client (= 2.2.3)
   pg (= 0.14.1)
   puppet (= 3.1.0)

@@ -619,8 +619,7 @@ module DTK
       assembly = ret_assembly_instance_object()
       project = get_default_project()
 
-      # Logic for validation
-      # filters only running nodes for this assembly
+      # Filter only running nodes for this assembly
       nodes = assembly.get_leaf_nodes(:cols => [:id,:display_name,:type,:external_ref,:hostname_external_ref, :admin_op_status])
       assembly_name = Assembly::Instance.pretty_print_name(assembly)
       nodes, is_valid, error_msg = nodes_are_up?(assembly_name, nodes, :running)
@@ -630,13 +629,12 @@ module DTK
         return rest_ok_response(:errors => [error_msg])
       end
 
-      # Logic for filtering node if execute tests is started from the specific node
+      # Filter node if execute tests is started from the specific node
       nodes.select! { |node| node[:id] == node_id.to_i } unless node_id == ""
-
-      queue = ActionResultsQueue.new
-      response = assembly.initiate_execute_tests(project, queue, nodes, component)
-
-      return rest_ok_response(:errors => [response[:error]]) if response[:error]
+      
+      params = {:nodes => nodes, :component => component, :agent_action => :execute_tests, :project => project, :assembly_instance => assembly}
+      queue = initiate_execute_tests(ExecuteTests, params)
+      return rest_ok_response(:errors => queue.error) if queue.error
       rest_ok_response :action_results_id => queue.id
     end
     

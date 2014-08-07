@@ -52,14 +52,5 @@ module DTK
         end
       end
     end
-
-#TODO: cleanup everything below this
-    module ActionMixin
-      def initiate_execute_tests(project,action_results_queue, nodes=nil, filter_component=nil)
-        opts = {} 
-        opts.merge!(:filter => {:components => filter_component})
-        Assembly::Instance::Action::ExecuteTests.initiate(project,self,nodes,action_results_queue, :assembly, opts)
-      end
-    end
   end
 end

@@ -2,24 +2,24 @@
 module DTK
   class Assembly::Instance
     module Action
-      class ExecuteTests < ActionResultsQueue::Result
-        def self.initiate(project,assembly_instance,nodes,action_results_queue, type, opts={})
-          new(project,assembly_instance,nodes,action_results_queue, type, opts).initiate()
-        end
-
-        def initialize(project,assembly_instance,nodes,action_results_queue, type, opts={})
-          @project = project
-          @assembly_instance = assembly_instance
-          @nodes = nodes
-          @action_results_queue = action_results_queue
-          @type = type
-          @filter = opts[:filter]
+      class ExecuteTests < ActionResultsQueue
+        attr_reader :error
+        def initialize(params)
+          super()
+          @agent_action = params[:agent_action]
+          @project = params[:project]
+          @assembly_instance = params[:assembly_instance]
+          @nodes = params[:nodes]
+          @type = :assembly
+          @filter = params[:component]
+          @error = nil
         end
 
         def initiate()
           test_components = get_test_components_with_bindings()
           if test_components.empty?
-            return {:error => "Unable to execute tests. There are no links to test components!"}
+            @error = "Unable to execute tests. There are no links to test components!"
+            raise ::DTK::ErrorUsage
           end
 
           node_names = @nodes.map { |n| n[:display_name] }
@@ -68,7 +68,7 @@ module DTK
 
           # we send elements that are going to be used, due to bad design we need to send an array even
           # if queue logic is only using size of that array.
-          action_results_queue.set_indexes!(node_hash.keys)
+          set_indexes!(node_hash.keys)
 
           callbacks = {
             :on_msg_received => proc do |msg|
@@ -88,7 +88,7 @@ module DTK
                 #just for a safe side to filter out empty response, it causes further an error on the client side
                 unless response[:data].empty? or response[:data].nil?   
                   packaged_data = DTK::ActionResultsQueue::Result.new(node_info[:display_name],raw_data)
-                  action_results_queue.push(node_info[:id], (type == :node) ? packaged_data.data : packaged_data)
+                  push(node_info[:id], (type == :node) ? packaged_data.data : packaged_data)
                 end
               end
             end
@@ -112,41 +112,14 @@ module DTK
           if test_cmp_attrs.empty?
             return ret
           end
-
-          # get info about each test component
-          sp_hash = {
-            :cols => [:id,:group_id,:display_name,:attributes,:component_type,:external_ref,:module_branch_id],
-            :filter => [:and, 
-                        [:eq,:assembly_id,nil],
-                        [:eq,:project_project_id,project.id],
-                        [:oneof,:component_type,test_cmp_attrs.map{|t|t[:test_component_name]}]]
-          }
-          ndx_test_cmps = Hash.new #test cmps indexed by component type
-          Model.get_objs(assembly_instance.model_handle(:component),sp_hash).each do |r|
-          # added to check if component belongs to test module, if not then skip that component
-            sp_h = {
-              :cols => [:id,:display_name,:test_id],
-              :filter => [:eq,:id,r[:module_branch_id]]
-            }
-
-            m_branch = Model.get_obj(assembly_instance.model_handle(:module_branch),sp_h)
-            next unless m_branch[:test_id]
-
-            ndx = r[:component_type]
-            cmp = ndx_test_cmps[ndx] ||= r.hash_subset(:id,:group_id,:display_name,:component_type,:external_ref).merge(:attributes => Array.new)
-            cmp[:attributes] << r[:attribute]
-          end
-
           # for each binding return at top level the matching test component with attributes substituted with binding value
           # and augmented columns :node_name and component_name
           test_cmp_attrs.each do |r|
-            ndx = test_component_name = r[:test_component_name]
-            test_cmp = ndx_test_cmps[ndx]
-            unless test_cmp
-              Log.error("Dangling reference to test components (#{test_component_name})")
-            else
-              #substitue in values from test_cmp_attrs               
+            if test_cmp = r[:test_component]
+              #substitute in values from test_cmp_attrs               
               ret << dup_and_substitute_attribute_values(test_cmp,r)
+            else
+              Log.error("Dangling reference to test components (#{test_component_name})")
             end
           end
           ret
@@ -168,38 +141,34 @@ module DTK
 
         # returns array having test components that are linked to a component in assembly_instance
         # each element has form
-        # {:test_component_name=>String,
-        #  :test_component_id=>ID,
+        # {:test_component=>Cmp Obj
         #  :component_name=>String,
         #  :node_name=>String,
         #  :attributes=>[{:component_attribute_name=>String, :component_attribute_value=>String,:related_test_attribute=>String}
         def get_test_component_attributes()
           ret = Array.new
 
-          linked_tests = Component::Test.get_linked_tests(assembly_instance, @filter[:components])
+          linked_tests = Component::Test.get_linked_tests(assembly_instance, @project, @nodes, @filter)
           if linked_tests.empty?
             return ret
-          end
-
-          test_params = linked_tests.map do |t|
-            var_mappings = t.find_test_parameters.map { |test_param| test_param.var_mappings_hash } 
-            mappings = { :var_mappings => var_mappings }.merge!(:node_data => t.node, :component_data => t.component)
           end
 
           attr_mh = assembly_instance.model_handle(:attribute)
           all_test_params = []
 
-          test_params.each do |params|
-            params[:var_mappings].each do |par|
-              k, v = par.first
+          linked_tests.each do |t|
+            node = t.node
+            component = t.component
+            component_id = component.id
+            linked_test_array = t.find_relevant_linked_test_array()
+          
+            linked_test_array.each do |linked_test|
+              var_mappings_hash = linked_test.var_mappings_hash
+              k, v = var_mappings_hash.first
               related_test_attribute = v.map { |x| x.split(".").last }
-              test_component_name = v.map { |x| x.split(".").first }.first
               attribute_names = k.map { |x| x.split(".").last }
-
-              component_id = params[:component_data][:id]
+              test_component = linked_test.test_component
               # TODO: more efficient to get in bulk outside of test_params loop
-              # Bakir: left this here, know there could be many db queries instead of bulk query, will try to move it out of the loop
-              # Bakir: currently, we make db query for each attribute mapping group which contain one or more attributes
               sp_hash = {
                 :cols => [:display_name, :attribute_value],
                 :filter => [:and,
@@ -221,17 +190,17 @@ module DTK
                 end
               end
               hash = { 
-                :test_component_name => test_component_name, 
+                :test_component => test_component,
                 :attributes => attributes, 
-                :component_id => params[:component_data][:id],
-                :component_name => params[:component_data][:display_name], 
-                :node_id => params[:node_data][:id],
-                :node_name => params[:node_data][:display_name]
+                :component_id => component_id,
+                :component_name => component[:display_name], 
+                :node_id => node[:id],
+                :node_name => node[:display_name]
               }
               all_test_params << hash
             end
           end
-          return all_test_params
+          all_test_params
         end
 
         def get_version_contexts(test_components)

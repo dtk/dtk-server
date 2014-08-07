@@ -12,7 +12,7 @@ module DTK; class ChildContext
 
       def match_tags(target,stub_nodes,assembly_template_idh)
         ret = Array.new
-        target_refs = Node::TargetRef.get_managed_nodes(target)
+        target_refs = Node::TargetRef.get_nodes(target,:managed=>true)
         ndx_tag_tr = Hash.new
         target_refs.each do |tr|
           (tr[:tags]||[]).each do |tag|

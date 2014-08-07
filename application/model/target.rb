@@ -55,7 +55,7 @@ module DTK
          opts.merge!(:target_idh => id_handle())
          Assembly::Instance.list(model_handle(:component), opts)
        when :nodes
-         Node.list(model_handle(:node), :target_idh => id_handle())
+         Node::TargetRef.list(self)
       else
         raise Error.new("TODO: not implemented yet: processing of info_about(#{about})")
       end

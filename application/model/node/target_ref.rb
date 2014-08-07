@@ -82,14 +82,18 @@ module DTK
         ret
       end
 
-      # The class method get_nodes(target) gets the target refs in the target taht are managed
-      def self.get_managed_nodes(target,opts={})
+      # The class method get_nodes(target) gets the target refs 
+      # opts keys:
+      #  :managed
+      #  :mark_free_nodes
+      #  :cols
+      def self.get_nodes(target,opts={})
         sp_hash = {
           :cols => opts[:cols] || [:id, :display_name, :tags, :ref, :type, :assembly_id, :datacenter_datacenter_id, :managed],
           :filter => [:and,
                       [:oneof, :type, [Type::Node.target_ref,Type::Node.physical]],
                         [:eq, :datacenter_datacenter_id, target[:id]],
-                        [:eq, :managed, true]]
+                        opts[:managed] && [:eq, :managed, true]].compact
         }
         node_mh = target.model_handle(:node)
         ret = get_objs(node_mh,sp_hash,:keep_ref_cols => true)
@@ -108,8 +112,18 @@ module DTK
 
       # The class method get_free_nodes returns  managed nodes without any assembly on them
       def self.get_free_nodes(target)
-        ret = get_managed_nodes(target,:mark_free_nodes=>true)
+        ret = get_nodes(target,:mark_free_nodes=>true,:managed=>true)
         ret.select{|r|r[:free_node]} 
+      end
+
+      def self.list(target)
+        nodes = get_nodes(target, :cols => common_columns() + [:ref])
+        cols_except_name = common_columns() - [:display_name]
+        nodes.map do |n|
+          el = n.hash_subset(*cols_except_name)
+          #TODO: unify with the assembly print name
+          el.merge(:display_name => n[:display_name]||n[:ref])
+        end.sort{|a,b|a[:display_name] <=> b[:display_name]}
       end
 
       def self.create_nodes_from_inventory_data(target, inventory_data)

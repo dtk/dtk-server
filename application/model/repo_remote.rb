@@ -13,7 +13,7 @@ module DTK
     def self.repo_base()
       RemoteRepoBase
     end
-    
+
     def url_ssh_access()
       RepoManagerClient.repo_url_ssh_access(get_field?(:repo_name))
     end
@@ -23,7 +23,7 @@ module DTK
     end
 
     def self.create_repo_remote(repo_remote_mh, module_name, repo_name, repo_namespace, repo_id,opts=Opts.new)
-      is_default = 
+      is_default =
         if opts[:set_as_default]
           true
         elsif opts[:set_as_default_if_first]
@@ -31,11 +31,11 @@ module DTK
         else
           false
         end
-      remote_repo_create_hash = { 
-        :repo_name => repo_name, 
-        :display_name => "#{repo_namespace}/#{module_name}", 
-        :repo_namespace => repo_namespace, 
-        :repo_id => repo_id, 
+      remote_repo_create_hash = {
+        :repo_name => repo_name,
+        :display_name => "#{repo_namespace}/#{module_name}",
+        :repo_namespace => repo_namespace,
+        :repo_id => repo_id,
         :ref => module_name,
         :is_default => is_default
       }
@@ -56,11 +56,11 @@ module DTK
     end
     def self.get_matching_remote_repos(repo_remote_mh,repo_id, module_name, repo_namespace=nil)
       sp_hash = {
-        :cols   => [:id], 
-        :filter =>  
+        :cols   => [:id, :display_name, :repo_name],
+        :filter =>
           [:and,
            [:eq, :repo_id, repo_id],
-           repo_namespace && [:eq, :repo_namespace, repo_namespace], 
+           repo_namespace && [:eq, :repo_namespace, repo_namespace],
            [:eq, :ref, module_name]
           ].compact
       }
@@ -81,14 +81,14 @@ module DTK
 
 
     def remote_dtkn_location(project,module_type,module_name)
-      remote_params = ModuleBranch::Location::RemoteParams::DTKNCatalog.new( 
+      remote_params = ModuleBranch::Location::RemoteParams::DTKNCatalog.new(
         :module_type => module_type,
         :module_name => module_name,
         :namespace => get_field?(:repo_namespace),
         :remote_repo_base => self.class.repo_base()
       )
       remote_params.create_remote(project).set_repo_name!(get_field?(:repo_name))
-    
+
     end
     def self.ret_default_remote_repo(repo_remotes)
       # Making robust in case multiple ones marked default

@@ -194,12 +194,6 @@ module DTK; class  Assembly
     end
 
     def get_augmented_components(opts=Opts.new)
-
-      puts "Debug...."
-      # Bakir: Nodes info - needed for node groups to construct query....
-      pp opts[:nodes]
-      puts "Debug...."
-
       ret = Array.new
       rows = get_objs(:cols => [:instance_nodes_and_cmps_summary])
       if opts[:filter_proc]

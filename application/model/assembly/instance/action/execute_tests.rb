@@ -16,15 +16,31 @@ module DTK
         end
 
         def initiate()
-          test_components = get_test_components_with_bindings()
-          if test_components.empty?
+          test_cmps = get_test_components_with_bindings()
+          if test_cmps.empty?
             @error = "Unable to execute tests. There are no links to test components!"
             raise ::DTK::ErrorUsage
           end
 
-          node_names = @nodes.map { |n| n[:display_name] }
-          test_components.select! { |tc| node_names.include? tc[:node_name] }
+          # Recognize if nodes are part of node group and map test components to nodes appropriately
+          node_names = @nodes.map { |n| { :name => n[:display_name], :id => n[:id]} }
+          test_components = []
+          test_cmps.each do |tc|
+            node_names.each do |node|
+              if node[:name].split("::").last.split(":").first == tc[:node_name]
+                out = tc.dup
+                out[:node_name] = node[:name]
+                out[:node_id] = node[:id]
+                test_components << out
+              else
+                test_components << tc
+              end
+            end
+          end
+          test_components.uniq!
 
+          test_components.select! { |tc| node_names.map{|n| n[:name]}.include? tc[:node_name] }
+          
           ndx_version_contexts = get_version_contexts(test_components).inject(Hash.new){|h,vc|h.merge(vc[:id]=>vc)}
           version_contexts = ndx_version_contexts.values
 
@@ -147,8 +163,7 @@ module DTK
         #  :attributes=>[{:component_attribute_name=>String, :component_attribute_value=>String,:related_test_attribute=>String}
         def get_test_component_attributes()
           ret = Array.new
-
-          linked_tests = Component::Test.get_linked_tests(assembly_instance, @project, @nodes, @filter)
+          linked_tests = Component::Test.get_linked_tests(assembly_instance, @project, @filter)
           if linked_tests.empty?
             return ret
           end

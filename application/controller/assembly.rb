@@ -615,7 +615,8 @@ module DTK
     end
 
     def rest__initiate_execute_tests()
-      node_id, component = ret_non_null_request_params(:node_id, :components)
+      node_id = ret_request_params(:node_id)
+      component = ret_non_null_request_params(:components)
       assembly = ret_assembly_instance_object()
       project = get_default_project()
 
@@ -630,7 +631,7 @@ module DTK
       end
 
       # Filter node if execute tests is started from the specific node
-      nodes.select! { |node| node[:id] == node_id.to_i } unless node_id == ""
+      nodes.select! { |node| node[:id] == node_id.to_i } unless node_id.nil?
       
       params = {:nodes => nodes, :component => component, :agent_action => :execute_tests, :project => project, :assembly_instance => assembly}
       queue = initiate_execute_tests(ExecuteTests, params)

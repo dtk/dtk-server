@@ -35,7 +35,7 @@ module DTK
       end
       clone_post_copy_hook(clone_copy_output,opts)
 #TODO: for debugging
-stop = true
+stop = R8::Config[:stop_for_testing]
 if stop then raise ErrorUsage.new('stop for testing'); end
 
       if clone_source_object.class == Component and target_id_handle[:model_name] == :node

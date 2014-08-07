@@ -518,7 +518,11 @@ module DTK
     def get_module_branch_from_local(local,opts={})
       project = local.project()
       project_idh = project.id_handle()
-      filter = [:and, [:eq, :display_name, local.module_name], [:eq, :project_project_id, project_idh.get_id()]]
+      module_match_filter = 
+        (opts[:with_namespace] ? 
+         [:eq, :ref, local.module_name(:with_namespace=>true)] :
+         [:eq, :display_name, local.module_name])
+      filter = [:and, module_match_filter, [:eq, :project_project_id, project_idh.get_id()]]
       branch = local.branch_name()
       post_filter = proc{|mb|mb[:branch] == branch}
       matches = get_matching_module_branches(project_idh,filter,post_filter,opts)
@@ -526,7 +530,7 @@ module DTK
         nil
       elsif matches.size == 1
         matches.first
-      elsif matches.size > 2
+      elsif matches.size > 1
         raise Error.new("Matched rows has unexpected size (#{matches.size}) since its is >1")
       end
     end
@@ -541,7 +545,7 @@ module DTK
         nil
       elsif matches.size == 1
         matches.first
-      elsif matches.size > 2
+      elsif matches.size > 1
         raise Error.new("Matched rows has unexpected size (#{matches.size}) since its is >1")
       end
     end

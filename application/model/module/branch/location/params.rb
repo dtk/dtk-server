@@ -2,9 +2,18 @@ module DTK; class ModuleBranch
   class Location
     class Params < Hash
       # module_name, version, and namespace are common params for local and remote
-      def module_name()
-        self[:module_name]
+      def module_name(opts={})
+        ret = self[:module_name]
+        if opts[:with_namespace]
+          unless ns = module_namespace_name()
+            raise Error.new("Unexpected that self does not have namespace set")
+          end
+          ret = "#{ns}#{NamespaceDelim}#{ret}"
+        end
+        ret
       end
+      NamespaceDelim = '::'
+
       def module_namespace_name()
         self[:namespace]
       end

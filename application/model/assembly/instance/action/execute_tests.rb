@@ -112,31 +112,6 @@ module DTK
           if test_cmp_attrs.empty?
             return ret
           end
-
-          # get info about each test component
-          sp_hash = {
-            :cols => [:id,:group_id,:display_name,:attributes,:component_type,:external_ref,:module_branch_id],
-            :filter => [:and, 
-                        [:eq,:assembly_id,nil],
-                        [:eq,:project_project_id,project.id],
-                        [:oneof,:component_type,test_cmp_attrs.map{|t|t[:test_component_name]}]]
-          }
-          ndx_test_cmps = Hash.new #test cmps indexed by component type
-          Model.get_objs(assembly_instance.model_handle(:component),sp_hash).each do |r|
-          # added to check if component belongs to test module, if not then skip that component
-            sp_h = {
-              :cols => [:id,:display_name,:test_id],
-              :filter => [:eq,:id,r[:module_branch_id]]
-            }
-
-            m_branch = Model.get_obj(assembly_instance.model_handle(:module_branch),sp_h)
-            next unless m_branch[:test_id]
-
-            ndx = r[:component_type]
-            cmp = ndx_test_cmps[ndx] ||= r.hash_subset(:id,:group_id,:display_name,:component_type,:external_ref).merge(:attributes => Array.new)
-            cmp[:attributes] << r[:attribute]
-          end
-
           # for each binding return at top level the matching test component with attributes substituted with binding value
           # and augmented columns :node_name and component_name
           test_cmp_attrs.each do |r|
@@ -176,7 +151,7 @@ module DTK
         def get_test_component_attributes()
           ret = Array.new
 
-          linked_tests = Component::Test.get_linked_tests(assembly_instance, @nodes, @filter)
+          linked_tests = Component::Test.get_linked_tests(assembly_instance, @project, @nodes, @filter)
           if linked_tests.empty?
             return ret
           end

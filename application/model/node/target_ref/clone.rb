@@ -32,23 +32,21 @@ module DTK; class Node
           ndx_needs_sc.merge!(node[:id] => node)
         end
 
-        unless tr_create.empty?
-          Input::BaseNodes.create_linked_target_refs?(@target,@assembly,tr_create)
-        end
+        Input::BaseNodes.create_linked_target_refs?(@target,@assembly,tr_create)
 
-        tr_link = existing_target_refs_to_link(tr_link_candidates,ndx_needs_sc)
-        unless tr_link.empty?
-          Input::BaseNodes.link_to_target_refs(@target,tr_link)
-        end
+        to_link_array = existing_target_refs_to_link(tr_link_candidates,ndx_needs_sc)
+        link_to_target_refs(to_link_array)
 
         # needed target_ref state changes
         ndx_needs_sc.reject{|node,needs_sc|!needs_sc}.values
       end
 
      private
-      # This method also updates ndx_needs_sc
+      ToLinkElement = Struct.new(:node_instance_id,:target_ref)
+      # This method returns array of 
+      # and also updates ndx_needs_sc
       def existing_target_refs_to_link(tr_link_candidates,ndx_needs_sc)
-        ret = Hash.new
+        ret = Array.new
         return ret if tr_link_candidates.empty?
         # See if nodes have target refs computed already; if so compute these
         # TODO: convert so that always case target refs computed already
@@ -57,7 +55,7 @@ module DTK; class Node
           trs = node[:target_refs_to_link]||[]
           unless trs.empty?
             node_id = node[:id]
-            trs.each{|target_ref|ret.merge!(node_id => target_ref)}
+            ret += trs.map{|target_ref|ToLinkElement.new(node_id,target_ref)}
           else
             trs_that_need_processing << node
           end
@@ -77,12 +75,23 @@ module DTK; class Node
           Model.get_objs(@target.model_handle(:node),sp_hash).each do |nt|
             if nt.is_target_ref?()
               node_id = ndx_node_template__node[nt[:id]]
-              ret.merge!(node_id => nt)
+              ret << ToLinkElement.new(node_id,nt)
               ndx_needs_sc[node_id] = nil
             end
           end
         end 
         ret
+      end
+
+      # This creates links between node instances and target refs
+      # to_link_array is array of ToLinkElements
+      def link_to_target_refs(to_link_array)
+        return if to_link_array.empty?
+        create_ngrs_objs_hash = to_link_array.inject(Hash.new) do |h,to_link_el|
+          h.merge(Input::BaseNodes.target_ref_link_hash(to_link_el.node_instance_id,to_link_el.target_ref.id))
+        end
+        create_objs_hash = {:node_group_relation => create_ngrs_objs_hash}
+        Model.input_hash_content_into_model(@target.id_handle(),create_objs_hash)
       end
     end
   end

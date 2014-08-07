@@ -2,16 +2,6 @@ module DTK; class Node; class TargetRef
   class Input 
     class BaseNodes < self
 
-      # This creates links between node instances and target refs
-      # to_link_hash is of form {node_instance1_id => target_ref, ..}
-      def self.link_to_target_refs(target,to_link_hash)
-        create_ngrs_objs_hash = to_link_hash.inject(Hash.new) do |h,(node_instance_id,target_ref)|
-          h.merge(target_ref_link_hash(node_instance_id,target_ref.id))
-        end
-        create_objs_hash = {:node_group_relation => create_ngrs_objs_hash}
-        Model.input_hash_content_into_model(target.id_handle(),create_objs_hash)
-      end
-
       #This creates if needed a new target ref, links node to it and moves the node's attributes to the target ref
       def self.create_linked_target_ref?(target,node,assembly)
         ndx_node_target_ref_array = create_linked_target_refs?(target,assembly,[node])
@@ -37,6 +27,7 @@ module DTK; class Node; class TargetRef
       # for any node that is node group, this copies the node group's attributes to the target refs
       def self.create_linked_target_refs?(target,assembly,nodes,opts={})
         ret = Hash.new
+        return ret if nodes.empty?
         ndx_target_ref_idhs = TargetRef.ndx_matching_target_ref_idhs(:node_instance_idhs => nodes.map{|n|n.id_handle})
 
         create_objs_hash = Hash.new

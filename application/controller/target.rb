@@ -86,7 +86,7 @@ module DTK
       iaas_type,provider_name = ret_non_null_request_params(:iaas_type,:provider_name)
       selected_region = ret_request_params(:region)
       no_bootstrap = ret_request_param_boolean(:no_bootstrap)
-      params_hash  = ret_params_hash(:description,:iaas_properties, :security_group)
+      params_hash  = ret_params_hash(:description,:iaas_properties, :security_group, :security_group_set)
 
       # create provider (target template)
       project_idh  = get_default_project().id_handle()

@@ -155,8 +155,8 @@ module DTK
       get_iaas_properties()[:keypair]
     end
 
-    def get_security_group()
-      get_iaas_properties()[:security_group]
+    def get_security_group_set()
+      get_iaas_properties()[:security_group_set]
     end
 
     # returns aws params if pressent in iaas properties

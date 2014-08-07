@@ -70,19 +70,27 @@ module DTK
           Log.debug "Fetched needed R8 key pair (#{keypair_to_use}) for newly created target-template. (Default used: #{!iaas_properties['keypair_name'].nil?})"
 
           # security group
+          security_group_set_to_use = iaas_properties['security_group_set']
           security_group_to_use = iaas_properties['security_group'] || R8::Config[:ec2][:security_group]
           # TODO: WORKAROUND: DTK-1426; commented out
           # connection.check_for_security_group(security_group_to_use)
 
           Log.debug "Fetched needed security group (#{security_group_to_use})  for newly created target-template. (Default used: #{!iaas_properties['security_group'].nil?})"
-
-          return {
+          ret_hash = {
             :key            => iaas_properties['key'],
             :secret         => iaas_properties['secret'],
             :keypair        => keypair_to_use,
-            :security_group => security_group_to_use,
+            # :security_group => security_group_to_use,
             :region         => iaas_properties['region']
           }
+
+          if security_group_set_to_use
+            ret_hash.merge!(:security_group_set => security_group_set_to_use)
+          else
+            ret_hash.merge!(:security_group => security_group_to_use)
+          end
+
+          ret_hash
         rescue Fog::Compute::AWS::Error => e
           # probabably this will handle credentials failure
           raise ErrorUsage.new(e.message)

@@ -100,7 +100,8 @@ module DTK; module CommandAndControlAdapter
           # only add block_device_mapping if it was fully generated
           create_options.merge!({ :block_device_mapping => block_device_mapping_from_image }) if block_device_mapping_from_image
           # check priority for security group
-          security_group = target.get_security_group() || external_ref[:security_group_set]||[R8::Config[:ec2][:security_group]]||"default"
+
+          security_group = target.get_security_group() || target.get_security_group_set() || external_ref[:security_group_set]||[R8::Config[:ec2][:security_group]]||"default"
           create_options.merge!(:groups => security_group )
           
           create_options.merge!(:tags => {"Name" => ec2_name_tag()})

@@ -3,7 +3,7 @@ module DTK
     class Test < self
 
       class LinkedTest
-        attr_reader :var_mappings_hash
+        attr_reader :test_component,:var_mappings_hash
         def initialize(test_component,ams)
           @test_component = test_component
           @attribute_mappings = ams
@@ -67,7 +67,7 @@ module DTK
           @test_array << LinkedTest.new(test_component,ams)
         end
 
-        def find_test_parameters()
+        def find_relevant_linked_test_array()
           # find the relevant parameters on @test_component by looking at attribute mappings
           cmp_attribute_names = Array.new
           @test_array.each do |test|
@@ -166,7 +166,7 @@ module DTK
         end
         ret
       end
-      TestExternalRefTypes = ['serverspec_test"']
+      TestExternalRefTypes = ['serverspec_test']
 
       def self.each_link(aug_cmps,&block)
         aug_cmps.each do |cmp|

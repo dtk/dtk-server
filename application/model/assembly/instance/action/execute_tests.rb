@@ -115,13 +115,11 @@ module DTK
           # for each binding return at top level the matching test component with attributes substituted with binding value
           # and augmented columns :node_name and component_name
           test_cmp_attrs.each do |r|
-            ndx = test_component_name = r[:test_component_name]
-            test_cmp = ndx_test_cmps[ndx]
-            unless test_cmp
-              Log.error("Dangling reference to test components (#{test_component_name})")
-            else
+            if test_cmp = r[:test_component]
               #substitute in values from test_cmp_attrs               
               ret << dup_and_substitute_attribute_values(test_cmp,r)
+            else
+              Log.error("Dangling reference to test components (#{test_component_name})")
             end
           end
           ret
@@ -143,8 +141,7 @@ module DTK
 
         # returns array having test components that are linked to a component in assembly_instance
         # each element has form
-        # {:test_component_name=>String,
-        #  :test_component_id=>ID,
+        # {:test_component=>Cmp Obj
         #  :component_name=>String,
         #  :node_name=>String,
         #  :attributes=>[{:component_attribute_name=>String, :component_attribute_value=>String,:related_test_attribute=>String}
@@ -156,25 +153,22 @@ module DTK
             return ret
           end
 
-          test_params = linked_tests.map do |t|
-            var_mappings = t.find_test_parameters.map { |test_param| test_param.var_mappings_hash } 
-            mappings = { :var_mappings => var_mappings }.merge!(:node_data => t.node, :component_data => t.component)
-          end
-
           attr_mh = assembly_instance.model_handle(:attribute)
           all_test_params = []
 
-          test_params.each do |params|
-            params[:var_mappings].each do |par|
-              k, v = par.first
+          linked_tests.each do |t|
+            node = t.node
+            component = t.component
+            component_id = component.id
+            linked_test_array = t.find_relevant_linked_test_array()
+          
+            linked_test_array.each do |linked_test|
+              var_mappings_hash = linked_test.var_mappings_hash
+              k, v = var_mappings_hash.first
               related_test_attribute = v.map { |x| x.split(".").last }
-              test_component_name = v.map { |x| x.split(".").first }.first
               attribute_names = k.map { |x| x.split(".").last }
-
-              component_id = params[:component_data][:id]
+              test_component = linked_test.test_component
               # TODO: more efficient to get in bulk outside of test_params loop
-              # Bakir: left this here, know there could be many db queries instead of bulk query, will try to move it out of the loop
-              # Bakir: currently, we make db query for each attribute mapping group which contain one or more attributes
               sp_hash = {
                 :cols => [:display_name, :attribute_value],
                 :filter => [:and,
@@ -196,17 +190,17 @@ module DTK
                 end
               end
               hash = { 
-                :test_component_name => test_component_name, 
+                :test_component => test_component,
                 :attributes => attributes, 
-                :component_id => params[:component_data][:id],
-                :component_name => params[:component_data][:display_name], 
-                :node_id => params[:node_data][:id],
-                :node_name => params[:node_data][:display_name]
+                :component_id => component_id,
+                :component_name => component[:display_name], 
+                :node_id => node[:id],
+                :node_name => node[:display_name]
               }
               all_test_params << hash
             end
           end
-          return all_test_params
+          all_test_params
         end
 
         def get_version_contexts(test_components)

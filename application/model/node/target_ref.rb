@@ -18,7 +18,7 @@ module DTK
         unless name = target_ref[:display_name]||target_ref[:ref]
           return 'NODE'
         end
-        if name =~ Regexp.new("^#{PhysicalNodePrefix}(.+$)")
+        if name =~ Regexp.new("^#{physical_node_prefix()}(.+$)")
           $1
         else
           split = name.split(AssemblyDelim)
@@ -33,7 +33,7 @@ module DTK
       def self.ret_display_name(type,target_ref_name,opts={})
         case type
           when :physical
-            "#{PhysicalNodePrefix}#{name}"
+            "#{physical_node_prefix()}#{name}"
           when :base_node_link
             ret = "#{opts[:assembly_name]}#{AssemblyDelim}#{target_ref_name}"
             if index = opts[:index]
@@ -63,6 +63,9 @@ module DTK
       AssemblyDelim = '::'
       IndexDelim = ':'
       PhysicalNodePrefix = 'physical--'
+      def self.physical_node_prefix()
+        PhysicalNodePrefix
+      end
 
       # returns hash of form {node_id => NodeWithTargetRefs,..}
       NodeWithTargetRefs = Struct.new(:node,:target_refs)

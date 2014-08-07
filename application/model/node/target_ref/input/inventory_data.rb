@@ -12,6 +12,13 @@ module DTK; class Node; class TargetRef
         Model.import_objects_from_hash(target_idh, {:node => target_ref_hash}, :return_info => true)
       end
 
+      def self.pbuilderid?(node_external_ref)
+        node_external_ref ||= Hash.new
+        if host_address = node_external_ref[:routable_host_address]||node_external_ref['routable_host_address']
+          "#{TargetRef.physical_node_prefix()}#{host_address}"
+        end
+      end
+
      private
       def target_ref_hash()
         inject(Hash.new){|h,el|h.merge(el.target_ref_hash())}
@@ -27,14 +34,14 @@ module DTK; class Node; class TargetRef
         include ElementMixin
         def initialize(ref,hash)
           super()
-          if ref =~ /^physical--/
+          if ref =~ Regexp.new("^#{TargetRef.physical_node_prefix()}")
             replace(hash)
             @type = :physical
           else
             raise Error.new("Unexpected ref for inventory data ref: #{ref}")
           end
         end
-        
+
         def target_ref_hash()
           unless name = self['name']||self['display_name']
             raise Error.new("Unexpected that that element (#{inspect}) has no name field")

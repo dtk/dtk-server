@@ -2,7 +2,16 @@ module DTK
   module CommandAndControlAdapter
     class Physical < CommandAndControlIAAS
       def pbuilderid(node)
-        node.get_field?(:ref)
+        node.update_object!(:ref,:external_ref)
+        if node[:ref] =~ Regexp.new("^#{Node::TargetRef.physical_node_prefix()}")
+          node[:ref]
+        else 
+          if ret = Node::TargetRef::Input::InventoryData.pbuilderid?(node[:external_ref])
+            ret
+          else
+            raise Error.new("Cannot compute the communication id for physical node with id (#{node.id})")
+          end
+        end
       end
 
       def find_matching_node_binding_rule(node_binding_rules,target)

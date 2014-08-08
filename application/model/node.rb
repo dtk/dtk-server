@@ -49,8 +49,8 @@ module DTK
     end
     private :create_obj_subclass
 
-    def is_target_ref?()
-      TargetRef.types().include?(get_field?(:type))
+    def is_target_ref?(opts={})
+      TargetRef.types(opts).include?(get_field?(:type))
     end
 
     def self.assembly_node_print_form?(obj)

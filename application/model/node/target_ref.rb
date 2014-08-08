@@ -8,10 +8,17 @@ module DTK
       def is_target_ref?()
         true
       end
-      def self.types()
-        Types
-      end
+      # opts can have
+      # {:not_deletable => true}
+      def self.types(opts={})
+        if opts[:not_deletable]
+          TypesNotDeletable
+        else
+          Types
+        end 
+     end
       Types = [Type::Node.target_ref,Type::Node.target_ref_staged,Type::Node.physical]
+      TypesNotDeletable = [Type::Node.physical]
 
       def self.assembly_node_print_form(target_ref)
         target_ref.update_object!(:ref,:display_name)

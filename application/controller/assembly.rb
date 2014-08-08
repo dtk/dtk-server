@@ -627,11 +627,14 @@ module DTK
 
       unless is_valid
         Log.info(error_msg)
-        return rest_ok_response(:errors => [error_msg])
+        return rest_ok_response(:errors => error_msg)
       end
 
       # Filter node if execute tests is started from the specific node
       nodes.select! { |node| node[:id] == node_id.to_i } unless node_id.nil?
+      if nodes.empty?
+        return rest_ok_response(:errors => "Unable to execute tests. Provided node is not valid!")
+      end
       
       params = {:nodes => nodes, :component => component, :agent_action => :execute_tests, :project => project, :assembly_instance => assembly}
       queue = initiate_execute_tests(ExecuteTests, params)

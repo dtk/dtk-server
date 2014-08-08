@@ -4,29 +4,9 @@ module DTK
       def self.status(task_structure,opts)
         task_structure.status_table_form(opts)
       end
-      def self.format_errors(errors)
-        ret = nil
-        errors.each do |error|
-          if ret
-            ret[:message] << "\n\n"
-          else
-            ret = {:message => String.new}
-          end
-          
-          if error.is_a? String
-            error,temp = {},error
-            error[:message] = temp
-          end
-          
-          error_msg = (error[:component] ? "Component #{error[:component].gsub("__","::")}: " : "")
-          error_msg << (error[:message]||"error")
-          ret[:message] << error_msg
-          ret[:type] = error[:type]
-        end
-        ret
-      end
     end
   end
+
   class Task
     #TODO: may be cleaner to do this as mixin
     def status_table_form(opts,level=1,ndx_errors=nil)
@@ -85,4 +65,31 @@ module DTK
       end
     end
   end
+
+  class Task::Status
+    module TableForm
+      def self.format_errors(errors)
+        ret = nil
+        errors.each do |error|
+          if ret
+            ret[:message] << "\n\n"
+          else
+            ret = {:message => String.new}
+          end
+          
+          if error.is_a? String
+            error,temp = {},error
+            error[:message] = temp
+          end
+          
+          error_msg = (error[:component] ? "Component #{error[:component].gsub("__","::")}: " : "")
+          error_msg << (error[:message]||"error")
+          ret[:message] << error_msg
+          ret[:type] = error[:type]
+        end
+        ret
+      end
+    end
+  end
 end
+

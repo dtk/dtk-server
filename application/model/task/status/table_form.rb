@@ -1,6 +1,7 @@
 module DTK
   class Task::Status
     module TableForm
+      r8_nested_require('table_form','node_group_summary')
       def self.status(task_structure,opts)
         task_structure.status_table_form(opts)
       end
@@ -24,6 +25,7 @@ module DTK
         el[:errors] = Status::TableForm.format_errors(ndx_errors[self[:id]])
       end
 
+      ea = nil
       if level == 1
         # no op
       else
@@ -43,13 +45,19 @@ module DTK
       end
       ret << el
       num_subtasks = subtasks.size
-      # ret.add(self,:temporal_order) if num_subtasks > 1
       if num_subtasks > 0
-        ret += subtasks.sort{|a,b| (a[:position]||0) <=> (b[:position]||0)}.map{|st|st.status_table_form(opts,level+1,ndx_errors)}.flatten(1)
+        if opts[:summarize_node_groups] and (ea and ea[:node].is_node_group?())
+          Status::TableForm::NodeGroupSummary.new(subtasks).add_summary_info!(el) do
+            subtasks.map{|st|st.status_table_form(opts,level+1)}.flatten(1)
+          end
+        else
+          ret += subtasks.sort{|a,b| (a[:position]||0) <=> (b[:position]||0)}.map{|st|st.status_table_form(opts,level+1,ndx_errors)}.flatten(1)
+        end
       end
       ret
     end
-    private
+
+   private
     def element_type(level,task)
       if level == 1
         self[:display_name] 

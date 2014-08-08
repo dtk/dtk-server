@@ -540,9 +540,12 @@ module DTK
     end
 
     def rest__task_status()
-      assembly_id = ret_request_param_id(:assembly_id,Assembly::Instance)
+      assembly = ret_assembly_instance_object()
       format = (ret_request_params(:format)||:hash).to_sym
-      response = Task::Status::Assembly.get_status(id_handle(assembly_id),:format => format)
+      opts = {:format => format}
+      #TODO: should :summarize_node_groups be the default?
+      opts.merge!(:detail_level => {:summarize_node_groups => true})
+      response = Task::Status::Assembly.get_status(assembly.id_handle,opts)
       rest_ok_response response
     end
 

@@ -91,8 +91,8 @@ module DTK
       end
     end
    
- # TODO: move to own file
     module StatusMixin
+    # TODO: move to own file
       def status_hash_form(opts,level=1)
         set_and_return_types!()
         ret = PrettyPrintHash.new

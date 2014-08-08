@@ -84,9 +84,5 @@ module DTK
         self[:display_name]|| "top"
       end
     end
-    private :element_type
-
-
-
- class Status
-  module TableForm
+  end
+end

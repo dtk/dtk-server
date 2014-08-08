@@ -32,7 +32,8 @@ module DTK; class Task::Status
           "executing"
         else
           st_status_count.inject("") do |st,(status,count)|
-            "#{st},#{status_with_subtask_size(status,count)}"
+            status_string = status_with_subtask_size(status,count)
+            st.empty? ? status_string : "#{st},#{status_string}"
           end
         end
       end
@@ -44,11 +45,13 @@ module DTK; class Task::Status
         @subtasks.size
       end
       def subtask_status_count()
-        subtask_status =  (@block_for_subtasks && @block_for_subtasks.call())||[]
+        subtask_rows =  (@block_for_subtasks && @block_for_subtasks.call())||[]
         ret = Hash.new
-        subtask_status.each do |status|
-          ret[status] ||= 0
-          ret[status] += 1
+        subtask_rows.each do |subtask_table_el|
+          if status = subtask_table_el[:status]
+            ret[status] ||= 0
+            ret[status] += 1
+          end
         end
         ret
       end

@@ -145,7 +145,8 @@ module DTK
     end
 
     def set_attributes(av_pairs,opts={})
-      attr_patterns = Attribute::Pattern::Assembly.set_attributes(self,av_pairs,opts)
+      # return attr_patterns
+      Attribute::Pattern::Assembly.set_attributes(self,av_pairs,opts)
     end
 
     def self.ret_component_type(service_module_name,assembly_name)

@@ -1,3 +1,4 @@
+# TODO: better unify with code in model/attribute special processing
 module DTK
   class Node
     class NodeAttribute
@@ -30,26 +31,76 @@ module DTK
       NonTemplateAttributes = ['host_addresses_ipv4','node_components','fqdn']
       AssemblyTemplateAttributeFilter = [:and] + NonTemplateAttributes.map{|a|[:neq,:display_name,a]}
 
+      # for each node, one of following actions is taken
+      # - if attribute does not exist, it is created with the given value
+      # - if attribute exists but has vlaue differing from 'value' then it is updated
+      # - otherwise no-op
+      def self.create_or_set_attributes?(nodes,name,value)
+        node_idhs = nodes.map{|n|n.id_handle()}
+        ndx_attrs = get_ndx_attributes(node_idhs,name)
+        to_create_on_node = Array.new
+        to_change_attrs = Array.new
+        nodes.each do |node|
+          if attr = ndx_attrs[node[:id]]
+            if existing_val = attr[:attribute_value]
+              unless existing_val == value
+                to_change_attrs << node
+              end
+            end
+          else
+            to_create_on_node << node
+          end
+        end
+        to_change_attrs.each{|attr|attr.update(:value_asserted => val)}
+        
+        unless to_create_on_node.empty?
+          create_rows = to_create_on_node.map{|n|attribute_create_hash(n.id,name,value)}
+          attr_mh = to_create_on_node.first.model_handle().create_childMH(:attribute)
+          Model.create_from_rows(attr_mh,create_rows,:convert => true)
+        end
+      end
+
       def self.cache_attribute_values!(nodes,name)
         nodes_to_query = nodes.reject{|node|Cache.attr_is_set?(node,name)}
         return if nodes_to_query.empty?
-
-        cols = [:id,:node_node_id,:attribute_value]
-        field_info = field_info(name)
-        filter =  [:eq,:display_name,field_info[:name].to_s]
         node_idhs = nodes_to_query.map{|n|n.id_handle()}
-        ndx_attrs =  Node.get_node_level_attributes(node_idhs,:cols=>cols,:add_filter=>filter).inject(Hash.new) do |h,a|
-          h.merge(a[:node_node_id] => a[:attribute_value])
-        end
+        ndx_attrs = get_ndx_attributes(node_idhs,name)
 
+        field_info = field_info(name)
         nodes_to_query.each do |node|
-          if raw_val = ndx_attrs[node[:id]]
-            Cache.set!(node,raw_val,field_info)
+          if attr = ndx_attrs[node[:id]]
+            if val = attr[:attribute_value]
+              Cache.set!(node,val,field_info)
+            end
           end
         end
       end
 
      private
+      # attributes indexed by node id
+      def self.get_ndx_attributes(node_idhs,name)
+        cols = [:id,:node_node_id,:attribute_value]
+        field_info = field_info(name)
+        filter =  [:eq,:display_name,field_info[:name].to_s]
+        Node.get_node_level_attributes(node_idhs,:cols=>cols,:add_filter=>filter).inject(Hash.new) do |h,a|
+          h.merge(a[:node_node_id] => a)
+        end
+      end
+
+      # TODO: need to btter coordinate with code in model/attribute special processing and also the
+      # constants in FieldInfo
+      def self.attribute_create_hash(node_id,name,value,extra_fields={})
+        unless extra_fields.empty?
+          raise Error.new("extra_fields with args not treated yet")
+        end
+        name = name.to_s
+        {:ref => name,
+          :display_name => name,
+          :value_asserted => value,
+          :node_node_id => node_id
+        }
+      end
+
       FieldInfo = {
         :cardinality => {:name => :cardinality, :semantic_type => :integer},
         :root_device_size => {:name => :root_device_size, :semantic_type => :integer},

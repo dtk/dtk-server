@@ -55,7 +55,7 @@ module DTK
         level = 1
         nodes = clone_copy_output.children_objects(level,:node,:cols=>[:display_name,:external_ref,:type])
         return if nodes.empty?
-        Node.cache_attribute_values!(nodes,:cardinality)
+        process_cardinaility_attribute!(nodes)
 
         # The method create_target_refs_and_links?
         # - creates if needed target refs and links to them
@@ -77,6 +77,22 @@ module DTK
           {:new_item => child_hash[:id_handle], :parent => target.id_handle()}
         end
         StateChange.create_pending_change_items(component_new_items)
+      end
+
+      def self.process_cardinaility_attribute!(nodes)
+        # first set cardinality on node groups
+        ndx_cardinality = Hash.new
+         nodes.each do |n|
+          if n.is_node_group?()
+            if card =  n[:target_refs_to_link] && n[:target_refs_to_link].size
+              (ndx_cardinality[card] ||= Array.new) << n
+            end
+          end
+        end
+        ndx_cardinality.each_pair do |card,nodes_to_set_card|
+          Node::NodeAttribute.create_or_set_attributes?(nodes_to_set_card,:cardinality,card)
+        end
+        Node.cache_attribute_values!(nodes,:cardinality)
       end
 
       def self.create_state_changes_for_create_node?(target,nodes)

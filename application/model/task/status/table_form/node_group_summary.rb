@@ -15,7 +15,7 @@ module DTK; class Task::Status
            when "cancelled"
             # no op
            when "failed"
-            Log.error("write code for failed")
+            ng_table_el[:status] = status_when_failed()
            else
             Log.error("Unexpected status #{status}")
           end
@@ -26,10 +26,19 @@ module DTK; class Task::Status
       def status_when_succeeded()
         status_with_subtask_size("succeeded")
       end
+
       def status_when_executing()
+        status_when_aux("executing")
+      end
+
+      def status_when_failed()
+        status_when_aux("failed")
+      end
+
+      def status_when_aux(status)
         st_status_count = subtask_status_count()
         if st_status_count.empty?
-          "executing"
+          status
         else
           st_status_count.inject("") do |st,(status,count)|
             status_string = status_with_subtask_size(status,count)

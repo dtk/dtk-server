@@ -711,6 +711,12 @@ module DTK
         ret
       end
     end
+
+    def self.get_by_id(id, mh, sp_hash)
+      sp_hash.merge!(:filter => [:eq, :id, id])
+      get_objs(mh, sp_hash).first
+    end
+
     # TODO: remove below
     def self.get_objects_from_sp_hash(model_handle,sp_hash,opts={})
       model_name = model_handle[:model_name]

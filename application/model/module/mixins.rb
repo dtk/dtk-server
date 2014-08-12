@@ -252,6 +252,7 @@ module DTK
     def get_library_implementations()
       get_objs_uniq(:library_implementations)
     end
+
     def module_type()
       self.class.module_type()
     end
@@ -518,8 +519,8 @@ module DTK
     def get_module_branch_from_local(local,opts={})
       project = local.project()
       project_idh = project.id_handle()
-      module_match_filter = 
-        (opts[:with_namespace] ? 
+      module_match_filter =
+        (opts[:with_namespace] ?
          [:eq, :ref, local.module_name(:with_namespace=>true)] :
          [:eq, :display_name, local.module_name])
       filter = [:and, module_match_filter, [:eq, :project_project_id, project_idh.get_id()]]

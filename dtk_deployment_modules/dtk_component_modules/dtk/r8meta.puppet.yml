@@ -1,0 +1,22 @@
+--- !omap 
+- dtk: !omap 
+    - display_name: dtk
+    - description: Core utilities for dtk
+    - external_ref: 
+        class_name: dtk
+        type: puppet_class
+    - basic_type: service
+    - component_type: dtk
+    - dependency: 
+        stdlib: 
+          type: component
+          search_pattern: 
+            ":filter": 
+            - ":eq"
+            - ":component_type"
+            - stdlib
+          display_name: stdlib
+          description: stdlib is required for dtk
+          severity: warning
+
+

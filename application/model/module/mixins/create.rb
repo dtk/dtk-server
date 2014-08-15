@@ -5,10 +5,12 @@ module DTK; module ModuleMixins
     # TODO: ModuleBranch::Location: refactor like ModuleMixins::Remote::Class install
     # returns hash with keys :module_idh :module_branch_idh
     def create_module(project,module_name,opts={})
+      default_namespace = Namespace.default_namespace(project.model_handle(:namespace))
       # TODO: pass local_params in
       local_params = ModuleBranch::Location::LocalParams::Server.new(
         :module_type => module_type(),
         :module_name => module_name,
+        :namespace   => default_namespace[:display_name],
         :version => opts[:version]
       )
 
@@ -17,15 +19,13 @@ module DTK; module ModuleMixins
       project_idh = project.id_handle()
 
       is_parsed   = false
-      if module_exists = module_exists?(project_idh,module_name)
+      if module_exists = module_exists?(project_idh,module_name,Namespace.default_namespace_name)
         is_parsed = module_exists[:dsl_parsed]
       end
 
       if is_parsed and not opts[:no_error_if_exists]
         raise ErrorUsage.new("Module (#{module_name}) cannot be created since it exists already")
       end
-
-      default_namespace = Namespace.default_namespace(project.model_handle(:namespace))
 
       create_opts = {
         :create_branch => local.branch_name(),
@@ -52,18 +52,22 @@ module DTK; module ModuleMixins
       mb_create_hash = ModuleBranch.ret_create_hash(repo_idh,local,opts)
       version_field = mb_create_hash.values.first[:version]
 
-      fields = {
-        :display_name => module_name,
-        :module_branch => mb_create_hash,
-        :namespace_id => namespace.id()
-      }
-
-      create_hash = {
-        model_name.to_s() => {
-          ref => fields
+      unless is_there_module?(project, module_name, namespace.id)
+        fields = {
+          :display_name => module_name,
+          :module_branch => mb_create_hash,
+          :namespace_id => namespace.id()
         }
-      }
-      input_hash_content_into_model(project_idh,create_hash)
+
+        create_hash = {
+          model_name.to_s() => {
+            ref => fields
+          }
+        }
+        input_hash_content_into_model(project_idh,create_hash)
+      end
+
+
       module_branch = get_module_branch_from_local(local,:with_namespace=>true)
       module_idh =  project_idh.createIDH(:model_name => model_name(),:id => module_branch[:module_id])
       # TODO: ModuleBranch::Location: see if after refactor version field needed
@@ -95,9 +99,17 @@ module DTK; module ModuleMixins
 
       input_hash_content_into_model(project_idh,create_hash)
 
-      module_branch = get_workspace_module_branch(project,module_name,version)
+      module_branch = get_workspace_module_branch(project,module_name,version,namespace)
       module_idh =  project_idh.createIDH(:model_name => model_name(),:id => module_branch[:module_id])
+      module_idh.create_object().update(:ref => namespace.enrich_module_name(module_name))
       {:version => version, :module_name => module_name, :module_idh => module_idh,:module_branch_idh => module_branch.id_handle()}
+    end
+
+    def is_there_module?(project, module_name, namespace_id)
+      !Model.get_obj(project.model_handle(module_type), {
+        :cols => [:id],
+        :filter => [:and, [:eq, :display_name, module_name], [:eq, :namespace_id, namespace_id]]
+      }).nil?
     end
   end
 

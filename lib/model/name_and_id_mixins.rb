@@ -47,7 +47,7 @@ module DTK
           unless opts[:no_error_if_no_match]
             raise ErrorNameDoesNotExist.new(name,pp_object_type())
           end
-        elsif rows.size > 1
+        elsif rows.size > 2
           raise ErrorNameAmbiguous.new(name,rows.map{|r|r[:id]},pp_object_type())
         else
           rows.first[:id]

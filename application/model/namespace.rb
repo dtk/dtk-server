@@ -17,6 +17,10 @@ module DTK
       find_or_create(namespace_mh, R8::Config[:repo][:local][:default_namespace])
     end
 
+    def self.enrich_with_default_namespace(module_name)
+      module_name.include?('::') ? module_name : "#{default_namespace_name}::#{module_name}"
+    end
+
     def self.default_namespace_name
       R8::Config[:repo][:local][:default_namespace]
     end
@@ -59,6 +63,9 @@ module DTK
       idh.create_object()
     end
 
+    def enrich_module_name(module_name)
+      "#{self.display_name()}::#{module_name}"
+    end
 
     def method_missing(m, *args, &block)
       if self.keys.include?(m)

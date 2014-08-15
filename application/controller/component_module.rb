@@ -13,6 +13,7 @@ module DTK
     def rest__create()
       # setup needed data
       module_name = ret_non_null_request_params(:module_name)
+
       config_agent_type =  ret_config_agent_type()
       project = get_default_project()
       version = nil #TODO: stub

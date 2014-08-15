@@ -75,13 +75,15 @@ module DTK; class ComponentModule
     def deprecate_create_needed_objects_and_dsl?(repo,version,opts={})
       # TODO: used temporarily until get all callers to use local object
       local = deprecate_ret_local(version)
-Log.info_pp(["Using deprecate_create_needed_objects_and_dsl?; local =",local,caller[0..4]])
+      Log.info_pp(["Using deprecate_create_needed_objects_and_dsl?; local =",local,caller[0..4]])
       create_needed_objects_and_dsl?(repo,local,opts)
     end
+
     def deprecate_ret_local(version)
       local_params = ModuleBranch::Location::LocalParams::Server.new(
         :module_type => module_type(),
         :module_name => module_name(),
+        :namespace   => module_namespace(),
         :version => version
       )
       local_params.create_local(get_project())

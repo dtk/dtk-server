@@ -284,6 +284,10 @@ module DTK
       get_field?(:display_name)
     end
 
+    def module_namespace()
+      get_field?(:namespace)[:display_name]
+    end
+
     def pp_module_name(version=nil)
       self.class.pp_module_name(module_name(),version)
     end
@@ -536,9 +540,10 @@ module DTK
       end
     end
     # TODO: ModuleBranch::Location: deprecate below for above
-    def get_workspace_module_branch(project,module_name,version=nil,opts={})
+    def get_workspace_module_branch(project,module_name,version=nil,namespace=nil,opts={})
       project_idh = project.id_handle()
-      filter = [:and, [:eq, :display_name, module_name], [:eq, :project_project_id, project_idh.get_id()]]
+      filter  = [:and, [:eq, :display_name, module_name], [:eq, :project_project_id, project_idh.get_id()]]
+      filter = filter.push([:eq, :namespace_id, namespace.id()]) if namespace
       branch = ModuleBranch.workspace_branch_name(project,version)
       post_filter = proc{|mb|mb[:branch] == branch}
       matches = get_matching_module_branches(project_idh,filter,post_filter,opts)

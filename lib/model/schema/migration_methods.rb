@@ -98,7 +98,7 @@ module XYZ
       gitoliteMng = Gitolite::Manager.new("/home/#{tenant_name}/gitolite-admin", overriden_configuration)
 
       # GET ALL THE MODULES
-      columns = [ :id, :display_name, :repos, :remote_repos]
+      columns = [ :id, :display_name, :c, :group_id, :repos, :remote_repos]
       modules  = Model.get_objs(ModelHandle.new(c, :component_module), { :cols => columns})
       services = Model.get_objs(ModelHandle.new(c, :service_module), { :cols => columns})
       tests = Model.get_objs(ModelHandle.new(c, :test_module), { :cols => columns})
@@ -117,6 +117,9 @@ module XYZ
         end
 
         remote_namespace_obj = Namespace.find_or_create(ModelHandle.new(c, :namespace), remote_namespace)
+        # DEBUG SNIPPET >>> REMOVE <<<
+        require (RUBY_VERSION.match(/1\.8\..*/) ? 'ruby-debug' : 'debugger');Debugger.start; debugger
+        exit
 
         ref_name = "#{remote_namespace}::#{e[:display_name]}"
         e.update(:namespace_id => remote_namespace_obj.id(), :ref => ref_name)

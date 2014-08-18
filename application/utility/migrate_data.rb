@@ -18,4 +18,4 @@ system('read')
 root = File.expand_path('../', File.dirname(__FILE__))
 
 require root + '/app'
-XYZ::Model.migrate_data_new({ :db => DBinstance }, ARGV[0])
+XYZ::Model.migrate_data_new({ :db => DBinstance }, ARGV[0], ARGV[1])

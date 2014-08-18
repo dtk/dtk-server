@@ -78,7 +78,7 @@ module XYZ
     end
 
     # TODO: this is specific migration; will have this subsumed and removed
-    def migrate_data_new(opts, tenant_name)
+    def migrate_data_new(opts, tenant_name, c)
       ap "TENANT NAME" + tenant_name
       # PREP VARS
       repos_changes = {}
@@ -86,7 +86,6 @@ module XYZ
       match_username_regex = /^(sm|tm)?\-?(\w+)\-/
       admin_tenant_name     = "dtk-admin-#{tenant_name}"
       git_tenant_name = tenant_name.gsub('dtk','git')
-      c = 2
 
       # SETUP GITOLITE MANAGER
       puts "Migrating data ... "

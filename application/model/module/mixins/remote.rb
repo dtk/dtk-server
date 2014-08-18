@@ -57,6 +57,7 @@ module DTK; module ModuleMixins
           repo_user_acls = RepoUser.authorized_users_acls(project.id_handle())
           repo_with_branch = Repo::WithBranch.create_empty_workspace_repo(project.id_handle(),local,repo_user_acls,create_opts)
         end
+
         commit_sha = repo_with_branch.initial_sync_with_remote(remote,remote_repo_info)
         # create object in object model that corresponds to remote repo
         create_repo_remote_object(repo_with_branch,remote,remote_repo_info[:git_repo_name])
@@ -69,7 +70,7 @@ module DTK; module ModuleMixins
         module_branch.set_sha(commit_sha)
       end
 
-      response = module_repo_info(repo_with_branch,module_and_branch_info,version)
+      response = module_repo_info(repo_with_branch,module_and_branch_info,version,local_namespace)
 
       if ErrorUsage::Parsing.is_error?(parsed)
         response[:dsl_parsed_info] = parsed

@@ -69,8 +69,17 @@ module DTK
               end
             end
             target_idh = target_parent_mh.createIDH(:id => assembly_obj_info[:parent_id])
-            child_context = ChildContext.create_from_hash(self,{:model_handle => nested_mh, :clone_par_col => :assembly_id, :parent_rels => [parent_rel], :override_attrs => override_attrs, :create_opts => create_opts, :ancestor_id => ancestor_id, :target_idh => target_idh})
-            block.call(child_context)
+            child_hash = {
+              :assembly_obj_info => assembly_obj_info,
+              :model_handle => nested_mh, 
+              :clone_par_col => :assembly_id, 
+              :parent_rels => [parent_rel], 
+              :override_attrs => override_attrs, 
+              :create_opts => create_opts, 
+              :ancestor_id => ancestor_id, 
+              :target_idh => target_idh
+            }
+            block.call(ChildContext.create_from_hash(self,child_hash))
           end
         end
       end

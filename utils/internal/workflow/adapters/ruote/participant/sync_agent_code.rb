@@ -80,6 +80,7 @@ module DTK
                   if event
                     log_participant.end(:timeout,:task_id=>task_id,:event => event, :errors => errors)
                   end
+                  #TODO: check why this commented out
                   # cancel_upstream_subtasks(workitem)
                   set_result_timeout(workitem,result,task)
                   delete_task_info(workitem)

@@ -239,6 +239,11 @@ module DTK
       route = "/v1/users"
       body = user_params(username, rsa_pub_key, rsa_key_name)
 
+      #TODO: temp hack if missing email
+      unless body[:email]
+        body[:email] = "#{body[:username]}.#{body[:dtk_instance_name]}@reactor8.com"
+      end
+
       tenant_response = post_rest_request_data(route,body,:raise_error => true)
 
       # Create Client

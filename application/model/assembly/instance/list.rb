@@ -85,14 +85,7 @@ module DTK; class  Assembly
           list_components(opts)
           
         when :nodes
-          nodes = get_nodes(:id,:display_name,:admin_op_status,:os_type,:external_ref,:type,:managed).sort{|a,b| a[:display_name] <=> b[:display_name] }
-          nodes.each do |node|
-            if external_ref = node[:external_ref]
-              external_ref[:dns_name] ||= external_ref[:routable_host_address] #TODO: should be cleaner place to put this
-            end
-            node.sanitize!()
-          end
-          nodes
+          list_nodes(opts)
 
         when :modules
           component_modules_opts = Hash.new
@@ -115,6 +108,29 @@ module DTK; class  Assembly
           raise Error.new("TODO: not implemented yet: processing of info_about(#{about})")
         end
       end
+
+      def list_nodes(opts=Opts.new)
+        nodes = get_nodes__expand_node_groups()
+        nodes.each do |node|
+          set_node_display_name!(node)
+          set_node_admin_op_status!(node)
+          if external_ref = node[:external_ref]
+            external_ref[:dns_name] ||= external_ref[:routable_host_address] #TODO: should be cleaner place to put this
+          end
+          node.sanitize!()
+        end
+        nodes.sort{|a,b| a[:display_name] <=> b[:display_name] }
+      end
+      private :list_nodes
+      def set_node_display_name!(node)
+        node[:display_name] = node.assembly_node_print_form()
+      end
+      def set_node_admin_op_status!(node)
+        if node.is_node_group?()
+          node[:admin_op_status] = nil
+        end
+      end
+      private :set_node_display_name!,:set_node_admin_op_status!
 
       def list_components(opts=Opts.new)
         aug_cmps = get_augmented_components(opts)

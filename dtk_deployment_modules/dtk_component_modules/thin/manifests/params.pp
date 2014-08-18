@@ -1,0 +1,3 @@
+class thin::params()
+{
+}

@@ -150,7 +150,10 @@ module XYZ
     # returns nil if model_name given and top does not mactch it
     def get_top_container_id_handle(model_name=nil,opts={})
       model_name = :datacenter if model_name==:target #TODO: with change to Model.matching_models? in place of == may not need this
-      return self if model_name and Model.matching_models?(model_name,self[:model_name])
+      if model_name and Model.matching_models?(model_name,self[:model_name])
+        return update_group_id_if_needed!()
+      end
+
       uri = get_uri()
       top_model_name = RestURI.ret_top_container_relation_type(uri)
       return nil if model_name and not Model.matching_models?(model_name,top_model_name)
@@ -160,7 +163,16 @@ module XYZ
       if opts[:auth_info_from_self]
         hash_info.merge!(:group_id => self[:group_id]) if self[:group_id]
       end
-      IDHandle[hash_info]
+      IDHandle[hash_info].update_group_id_if_needed!()
+    end
+
+    def update_group_id_if_needed!()
+      unless self[:group_id] 
+        if group_id = get_field?(:group_id)
+          merge!(:group_id => group_id)
+        end
+      end
+      self
     end
 
     def get_parent_id_info()

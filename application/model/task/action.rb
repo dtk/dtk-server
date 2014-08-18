@@ -33,6 +33,13 @@ module DTK; class Task
           else raise Error.new("Unexpected task_action_type (#{task_action_type})")
         end
       end
+      def self.task_action_type()
+        @task_action_type ||= to_s.split('::').last
+      end
+      def task_action_type()
+        self.class.task_action_type()
+      end
+
       def initialize(type,hash,task_idh=nil)
         unless hash[:node].kind_of?(Node)
           hash[:node] &&= Node.create_from_model_handle(hash[:node],task_idh.createMH(:node),:subclass=>true)
@@ -40,13 +47,17 @@ module DTK; class Task
         super(hash)
       end
 
-
       ###====== related to node(s); node can be a node group
+      def node_is_node_group?()
+        self[:node].is_node_group?()
+      end
+
       def nodes()
-        if self[:node].is_node_group?()
-          self[:node].get_node_members()
+        node_or_ng = self[:node]
+        if node_or_ng.is_node_group?()
+          node_or_ng.get_node_members()
         else
-          [self[:node]]
+          [node_or_ng]
         end
       end
 
@@ -92,9 +103,7 @@ module DTK; class Task
       def get_dynamic_attributes_with_retry(result,opts={})
         ret = get_dynamic_attributes(result)
         if non_null_attrs = opts[:non_null_attributes]
-          ret = retry_get_dynamic_attributes(ret,non_null_attrs) do
-            get_dynamic_attributes(result)
-          end
+          ret = retry_get_dynamic_attributes(ret,non_null_attrs){get_dynamic_attributes(result)}
         end
         ret
       end
@@ -104,9 +113,11 @@ module DTK; class Task
           dyn_attr_val_info
         elsif count > RetryMaxCount
           raise Error.new("cannot get all attributes with keys (#{non_null_attrs.join(",")})")
+        elsif block.nil?
+          raise Error.new("Unexpected that block.nil?")
         else
           sleep(RetrySleep)
-          retry_get_dynamic_attributes(block.call(),non_null_attrs,count+1)
+          retry_get_dynamic_attributes(block.call(),non_null_attrs,count+1,&block)
         end
       end
       RetryMaxCount = 60
@@ -128,7 +139,7 @@ module DTK; class Task
       def self.node_status(object,opts)
         ret = PrettyPrintHash.new
         node = object[:node]||{}
-        if name = node[:display_name]
+        if name = node_status__name(node)
           ret[:name] = name
         end
         if id = node[:id]  
@@ -136,6 +147,11 @@ module DTK; class Task
         end
         ret
       end
+
+      def self.node_status__name(node)
+        node && Node.assembly_node_print_form?(node)
+      end
+
     end
 
     class NodeLevel < OnNode

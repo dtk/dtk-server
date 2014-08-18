@@ -35,14 +35,50 @@ module DTK
        :target_id,
        :ui,
        :external_ref,
+       :hostname_external_ref,
        :managed,
        :admin_op_status
       ]
     end
 
     def create_obj_optional_subclass()
-      is_node_group?() ? create_subclass_obj(node_group_model_name()) : self
+      is_node_group?() ? create_obj_subclass() : self
     end
+    def create_obj_subclass()
+      create_subclass_obj(node_group_model_name())
+    end
+    private :create_obj_subclass
+
+    def is_target_ref?(opts={})
+      TargetRef.types(opts).include?(get_field?(:type))
+    end
+
+    def self.assembly_node_print_form?(obj)
+      if obj.kind_of?(Node)
+        if obj.get_field?(:display_name)
+          obj.assembly_node_print_form()
+        end
+      end
+    end
+
+    def assembly_node_print_form()
+      if is_target_ref?()
+        TargetRef.assembly_node_print_form(self)
+      else
+         get_field?(:display_name)
+      end
+    end
+
+    #This is overwritten by node group subclasses
+    def get_node_members()
+      #in case this called on superclass that is actually a node group
+      if is_node_group?()
+        create_obj_subclass().get_node_members()
+      else
+        [self]
+      end
+    end
+
     def self.create_from_model_handle(hash_scalar_values,model_handle,opts={})
       ret = super(hash_scalar_values,model_handle)
       opts[:subclass] ? ret.create_obj_optional_subclass() : ret
@@ -159,7 +195,7 @@ module DTK
 
     def self.list(model_handle,opts={})
       target_filter = (opts[:target_idh] ? [:eq,:datacenter_datacenter_id,opts[:target_idh].get_id()] : [:neq,:datacenter_datacenter_id,nil])
-      filter = [:and, [:oneof, :type, [Type::Node.instance,Type::Node.staged,"physical"]], target_filter]
+      filter = [:and, [:oneof, :type, [Type::Node.instance,Type::Node.staged,Type::Node.physical]], target_filter]
       sp_hash = {
         :cols => common_columns() + [:assemblies],
         :filter => filter
@@ -313,15 +349,25 @@ module DTK
     end
 
     def self.check_valid_id(model_handle,id,assembly_id=nil)
+      # filter does not include node group members
       filter =
         [:and,
          [:eq, :id, id],
-         [:oneof, :type, [Type::Node.instance,Type::Node.staged]],
          [:neq, :datacenter_datacenter_id, nil],
          assembly_id && [:eq, :assembly_id, assembly_id]
         ].compact
-      check_valid_id_helper(model_handle,id,filter)
+      opts = (assembly_id ? {:no_error_if_no_match => true} : {})
+      check_valid_id_helper(model_handle,id,filter,opts) ||
+        check_valid_id__node_member(model_handle,id,assembly_id)
     end
+    def self.check_valid_id__node_member(model_handle,id,assembly_id)
+      assembly = NodeGroupRelation.get_node_member_assembly?(model_handle.createIDH(:id => id))
+      unless assembly and assembly.id == assembly_id
+        raise ErrorIdInvalid.new(id,pp_object_type()) 
+      end
+      id
+    end
+    private_class_method :check_valid_id__node_member
 
     def self.name_to_id(model_handle,name,assembly_id=nil)
       node_name, assembly_name = parse_user_friendly_name(name)
@@ -333,7 +379,6 @@ module DTK
         :cols => [:id,:assembly_id],
         :filter => [:and,
                     [:eq, :display_name, node_name],
-                    [:oneof, :type, [Type::Node.instance,Type::Node.staged]],
                     [:neq, :datacenter_datacenter_id, nil],
                     [:eq, :assembly_id, assembly_id]]
       }
@@ -433,33 +478,6 @@ module DTK
       eval(ordered_component_ids)[:order]
     end
 # end of these may be depracted
-
-
-    #### related to distinguishing bewteen nodes and node groups
-
-    def self.get_node_or_ng_summary(node_mh,node_ids)
-      ret = Hash.new
-      return ret if node_ids.empty?
-      sp_hash = {
-        :cols => [:id,:type,:node_or_ng_summary],
-        :filter => [:oneof, :id, node_ids]
-      }
-      get_objs(node_mh,sp_hash).inject({}) do |ret,n|
-        n.delete(:node_group_relation)
-        node_member = n.delete(:node_member)
-        node_id = n[:id]
-        if n.is_node_group?()
-          pntr = ret[node_id] ||= NodeGroup.create_as(n).merge(:node_group_members => Array.new)
-          pntr[:node_group_members] << node_member if node_member
-          ret
-        else
-          ret.merge(node_id => n)
-        end
-      end
-    end
-
-
-    #### end: related to distinguishing bewteen nodes and node groups
 
     def update_dangling_links()
       dangling_links_info_cmps = get_objs(:cols => [:dangling_input_links_from_components])

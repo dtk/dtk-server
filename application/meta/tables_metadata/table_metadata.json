@@ -3,13 +3,11 @@
     "order": [
       "id",
       "name",
-      "node_type",
       "instance_id",
       "size",
       "os",
       "op_status",
-      "dns_name",
-      "managed"
+      "dns_name"
     ],
     "mapping": {
       "name": "display_name",
@@ -17,7 +15,6 @@
       "dns_name": "external_ref.dns_name",
       "size": "external_ref.size",
       "instance_id": "external_ref.instance_id",
-      "node_type": "dtk_type",
       "zone": "external_ref.availability_zone",
       "os": "os_type",
       "op_status": "admin_op_status",

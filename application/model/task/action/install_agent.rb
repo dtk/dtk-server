@@ -116,9 +116,8 @@ class Action
       def self.node_status(object,opts)
         node = object[:node]||{}
         ext_ref = node[:external_ref]||{}
-        # TODO: want to include os type and instance id when tasks upadted with this
         kv_array = 
-          [{:name => node[:display_name]},
+          [{:name => node_status__name(node)},
            {:id => node[:id]},
            {:type => ext_ref[:type]},
            {:image_id => ext_ref[:image_id]},

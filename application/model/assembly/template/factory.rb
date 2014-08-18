@@ -106,7 +106,7 @@ module DTK
 
         # get node-level attributes
         ndx_node_level_attrs = Hash.new
-        Node.get_node_level_assembly_attributes(node_idhs).each do |r|
+        Node.get_node_level_assembly_template_attributes(node_idhs).each do |r|
           (ndx_node_level_attrs[r[:node_node_id]] ||= Array.new) << r
         end
 

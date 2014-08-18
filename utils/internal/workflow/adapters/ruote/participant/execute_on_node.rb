@@ -15,8 +15,7 @@ module DTK
           failed_tasks = ret_failed_precondition_tasks(task,workflow.guards[:external])
           unless failed_tasks.empty?
             set_task_to_failed_preconditions(task,failed_tasks)
-            # TODO: stub until
-            pp ["precondition_failure", task_id] #TODO: stub
+            log_participant.event("precondition_failure", :task_id => task_id)
             delete_task_info(workitem)
             return reply_to_engine(workitem)
           end
@@ -37,12 +36,14 @@ module DTK
                     result = msg[:body].merge("task_id" => task_id)
                     if errors_in_result = errors_in_result?(result)
                       event,errors = task.add_event_and_errors(:complete_failed,:config_agent,errors_in_result)
-                      pp ["task_complete_failed #{action.class.to_s}", task_id,event,{:errors => errors}] if event
+                      if event
+                        log_participant.end(:complete_failed,:task_id=>task_id,:event => event, :errors => errors)
+                      end
                       cancel_upstream_subtasks(workitem)
                       set_result_failed(workitem,result,task)
                     else
                       event = task.add_event(:complete_succeeded,result)
-                      pp ["task_complete_succeeded #{action.class.to_s}", task_id,event] if event
+                      log_participant.end(:complete_succeeded,:task_id=>task_id)
                       set_result_succeeded(workitem,result,task,action) if task_end 
                       action.get_and_propagate_dynamic_attributes(result)
                     end
@@ -53,10 +54,12 @@ module DTK
                 :on_timeout => proc do
                   CreateThread.defer_with_session(user_object) do
                     result = {
-                      :status => "timeout" 
+                      :status => "timeout"
                     }
                     event,errors = task.add_event_and_errors(:complete_timeout,:server,["timeout"])
-                    pp ["task_complete_timeout #{action.class.to_s}", task_id,event,{:errors => errors}] if event
+                    if event
+                      log_participant.end(:timeout,:task_id=>task_id,:event => event, :errors => errors)
+                    end
                     cancel_upstream_subtasks(workitem)
                     set_result_timeout(workitem,result,task)
                     delete_task_info(workitem)
@@ -65,7 +68,7 @@ module DTK
                 end,
                 :on_cancel => proc do 
                   CreateThread.defer_with_session(user_object) do
-                    pp ["task_complete_canceled #{action.class.to_s}", task_id]
+                    log_participant.canceled(task_id)
                     set_result_canceled(workitem, task)
                     delete_task_info(workitem)
                     reply_to_engine(workitem)

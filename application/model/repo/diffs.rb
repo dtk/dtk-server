@@ -36,8 +36,8 @@ module DTK; class Repo
       end
 
       def meta_file_changed?()
-        (self[:files_modified] and !!self[:files_modified].find{|r|ComponentDSL.isa_dsl_filename?(path(r))}) or
-        (self[:files_added] and !!self[:files_added].find{|r|ComponentDSL.isa_dsl_filename?(path(r))})
+        (self[:files_modified] and !!self[:files_modified].find{|r|ModuleDSL.isa_dsl_filename?(path(r))}) or
+        (self[:files_added] and !!self[:files_added].find{|r|ModuleDSL.isa_dsl_filename?(path(r))})
       end
 
       def file_changed?(path)

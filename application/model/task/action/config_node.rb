@@ -6,6 +6,17 @@ module DTK; class Task
         new(:execution_blocks,exec_blocks,task_idh,assembly_idh)
       end
 
+      def create_node_group_member(node)
+        self.class.new(:hash,:node => node,:node_group_member => true)
+      end
+
+      def self.component_actions(obj)
+        obj[:component_actions]||[]
+      end
+      def component_actions()
+        self.class.component_actions(self)
+      end
+
       def set_intra_node_stages!(intra_node_stages)
         self[:intra_node_stages] = intra_node_stages
       end
@@ -27,7 +38,7 @@ module DTK; class Task
         ret = PrettyPrintHash.new
         ret[:node] = node_status(object,opts)
         unless opts[:no_components]
-          ret[:components] = (object[:component_actions]||[]).map do |component_action|
+          ret[:components] = component_actions(object).map do |component_action|
             OnComponent.status(component_action,opts)
           end
         end
@@ -38,7 +49,7 @@ module DTK; class Task
       def self.pretty_print_hash(object)
         ret = PrettyPrintHash.new
         ret[:node] = (object[:node]||{})[:display_name]
-        ret[:component_actions] = (object[:component_actions]||[]).map do |component_action|
+        ret[:component_actions] = component_actions(object).map do |component_action|
           OnComponent.pretty_print_hash(component_action)
         end
         ret
@@ -59,7 +70,7 @@ module DTK; class Task
         # ndx_actions values is an array of actions to handel case wheer component on node group and multiple nodes refernce it
         ndx_actions = Hash.new
         action_list.each do |config_node_action|
-          (config_node_action[:component_actions]||[]).each do |a|
+          component_actions(config_node_action).each do |a|
             (ndx_actions[a[:component][:id]] ||= Array.new) << a
           end
         end
@@ -122,7 +133,7 @@ module DTK; class Task
         # find attributes that can be updated
         # TODO: right now being conservative in including attributes that may not need to be set
         indexed_attrs_to_update = Hash.new
-        (self[:component_actions]||[]).each do |action|
+        component_actions().each do |action|
           (action[:attributes]||[]).each do |attr|
             # TODO: more efficient to just get attributes that can be inputs; right now :is_port does not
             # reflect this in cases for a3 in example a1 -external -> a2 -internal -> a3
@@ -146,7 +157,7 @@ module DTK; class Task
         end
       end
       def update_bound_input_attrs!(task)
-        bound_input_attrs = (self[:component_actions]||[]).map do |action|
+        bound_input_attrs = component_actions().map do |action|
           (action[:attributes]||[]).map do |attr|
             {
               :component_display_name => action[:component][:display_name],
@@ -163,7 +174,7 @@ module DTK; class Task
       end
 
       def update_state_change_status(task_mh,status)
-        update_state_change_status_aux(task_mh,status,self[:component_actions].map{|x|x[:state_change_pointer_ids]}.compact.flatten)
+        update_state_change_status_aux(task_mh,status,component_actions().map{|x|x[:state_change_pointer_ids]}.compact.flatten)
       end
 
      private

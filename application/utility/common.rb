@@ -10,9 +10,10 @@ require Root + '/app'
 
 class R8Server
   include XYZ
-  def initialize(username,groupname="private")
+  def initialize(username,opts={})
+    groupname = opts[:groupname]||"private"
     @user_mh = model_handle(:user)
-    @user_obj = User.create_user_in_groups?(user_mh,username)
+    @user_obj = User.create_user_in_groups?(user_mh,username,opts)
     user_group_mh = user_mh.createMH(:user_group)
     group_obj =
       case groupname
@@ -164,9 +165,9 @@ eos
     end
     impl = impls.first
 
-    dsl = ComponentDSL.create_dsl_object_from_impl(impl)
+    dsl = ModuleDSL.create_dsl_object_from_impl(impl)
     new_integer_version = 2
-    hash_content = DTK::ComponentDSL::migrate_processor(module_name,new_integer_version,dsl.input_hash).generate_new_version_hash()
+    hash_content = DTK::ModuleDSL::migrate_processor(module_name,new_integer_version,dsl.input_hash).generate_new_version_hash()
     content = JSON.pretty_generate(hash_content)
     new_path = "dtk-meta.puppet.json"
     impl.add_file_and_push_to_repo(new_path,content,:is_meta_file => true)

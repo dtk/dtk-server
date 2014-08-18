@@ -55,7 +55,7 @@ module DTK
          opts.merge!(:target_idh => id_handle())
          Assembly::Instance.list(model_handle(:component), opts)
        when :nodes
-         Node.list(model_handle(:node), :target_idh => id_handle())
+         Node::TargetRef.list(self)
       else
         raise Error.new("TODO: not implemented yet: processing of info_about(#{about})")
       end
@@ -155,8 +155,8 @@ module DTK
       get_iaas_properties()[:keypair]
     end
 
-    def get_security_group()
-      get_iaas_properties()[:security_group]
+    def get_security_group_set()
+      get_iaas_properties()[:security_group_set]
     end
 
     # returns aws params if pressent in iaas properties

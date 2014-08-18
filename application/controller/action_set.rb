@@ -172,14 +172,15 @@ module DTK
       result = nil
       begin
        result = call_action(action,parent_model_name)
-      rescue DTK::SessionTimeout => e
+      rescue SessionTimeout => e
+        # TODO: see why dont have result = auth_forbidden_response(e.message)
         auth_forbidden_response(e.message)
-      rescue DTK::SessionError => e
+      rescue SessionError => e
+        # TODO: see why dont have result = auth_unauthorized_response(e.message)
         auth_unauthorized_response(e.message)
-        # TODO: Look into the code so we can return 401 HTTP status
-        # result = rest_notok_response(:message => e.message)
+      rescue ErrorUsage::Warning => e
+        result = rest_ok_response(:errors => [e.message])
       rescue Exception => e
-        # TODO: put bactrace info in response
         if e.kind_of?(ErrorUsage)
           # TODO: respond_to? is probably not needed
           unless e.respond_to?(:donot_log_error) and e.donot_log_error()

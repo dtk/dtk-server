@@ -257,7 +257,7 @@ module DTK
         node_idhs = ndx_nodes.values.map{|n|n.id_handle()}
         add_filter = [:eq,:required,true]
         cols = [:id,:group_id,:display_name,:node_node_id,:required,:value_derived,:value_asserted,:dynamic,:port_type_asserted,:is_port,:semantic_type_summary]
-        Node.get_node_level_attributes(node_idhs,cols,add_filter).each do |attr|
+        Node.get_node_level_attributes(node_idhs,:cols => cols,:add_filter => add_filter).each do |attr|
           ret << attr.merge(:node => ndx_nodes[attr[:node_node_id]],:task_id => task[:id])
         end
       end
@@ -295,6 +295,24 @@ module DTK
       internal_form = attr_def_to_internal_form(aug_hash)
       internal_form
 #      Model.update_from_hash_assignments(id_handle,internal_form,opts)
+    end
+
+    def get_node(opts={})
+      unless node_node_id = get_field?(:node_node_id)
+        raise Error.new("get_node should not be called if attribute not on a node")
+      end
+      sp_hash = {
+        :cols => opts[:cols]||[:id,:group_id,:display_name],
+        :filter => [:eq,:id,node_node_id]
+      }
+      ret = Node.get_obj(model_handle(:node),sp_hash)
+      if subclass_model_name = opts[:subclass_model_name]
+        ret = ret.create_subclass_obj(subclass_model_name)
+      end
+      ret
+    end
+    def get_service_node_group(opts={})
+      get_node(opts.merge(:subclass_model_name => :service_node_group))
     end
 
     def get_attribute_def()

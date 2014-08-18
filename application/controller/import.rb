@@ -209,7 +209,7 @@ Not reached
     def finish()
       meta_info_hash = JSON.parse(request.params["import_def"])
       pp meta_info_hash
-      ComponentDSL::GenerateFromImpl.save_dsl_info(meta_info_hash,model_handle(:implementation))
+      ModuleDSL::GenerateFromImpl.save_dsl_info(meta_info_hash,model_handle(:implementation))
       {:data => ''}
     end
   end

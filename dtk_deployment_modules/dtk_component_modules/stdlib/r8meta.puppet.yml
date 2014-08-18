@@ -1,0 +1,11 @@
+--- !omap 
+- stdlib: !omap 
+    - display_name: stdlib
+    - description: Installs stdlib
+    - external_ref: 
+        class_name: stdlib
+        type: puppet_class
+    - basic_type: service
+    - component_type: stdlib
+
+

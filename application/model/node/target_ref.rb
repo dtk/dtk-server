@@ -3,39 +3,137 @@ module DTK
     # This refers to an object that is used to point to an existing node in a target; it is a peer of Node::Template
     class TargetRef < self
       r8_nested_require('target_ref','input')
+      r8_nested_require('target_ref','clone')
 
-      AnnotatedNodes = Struct.new(:to_link,:to_create)
-      def self.create_target_refs_and_links?(target,assembly,annotated_nodes,opts={})
-pp [:annotated_nodes,annotated_nodes]
-        unless annotated_nodes.to_create.empty?
-          Input::BaseNodes.create_linked_target_refs?(target,assembly,annotated_nodes.to_create)
+      def is_target_ref?()
+        true
+      end
+      # opts can have
+      # {:not_deletable => true}
+      def self.types(opts={})
+        if opts[:not_deletable]
+          TypesNotDeletable
+        else
+          Types
+        end 
+     end
+      Types = [Type::Node.target_ref,Type::Node.target_ref_staged,Type::Node.physical]
+      TypesNotDeletable = [Type::Node.physical]
+
+      def self.assembly_node_print_form(target_ref)
+        target_ref.update_object!(:ref,:display_name)
+        unless name = target_ref[:display_name]||target_ref[:ref]
+          return 'NODE'
         end
-        unless annotated_nodes.to_link.empty?
-          if opts[:do_not_check_link_exists]
-            Input::BaseNodes.link_to_target_refs(target,annotated_nodes.to_link)
-          else
-            raise Error.new("Not support: create_target_refs_and_links? w/o {:do_not_check_link_exists => true}")
+        if name =~ Regexp.new("^#{physical_node_prefix()}(.+$)")
+          $1
+        else
+          split = name.split(AssemblyDelim)
+          unless split.size == 2
+            Log.error("Display Name has unexpected form (#{name})")
+            return name
           end
+          split[1]
         end
       end
 
-      # these are nodes without any assembly on them
-      def self.get_free_nodes(target)
+      def self.ret_display_name(type,target_ref_name,opts={})
+        case type
+          when :physical
+            "#{physical_node_prefix()}#{name}"
+          when :base_node_link
+            ret = "#{opts[:assembly_name]}#{AssemblyDelim}#{target_ref_name}"
+            if index = opts[:index]
+              ret << "#{IndexDelim}#{index.to_s}"
+            end
+            ret
+          else
+            raise Error.new("Unexpected type (#{type})")
+        end
+      end
+      def self.node_member_index(target_ref)
+        if Type::Node.physical == target_ref.get_field?(:type)
+          return nil
+        end
+        ret = nil
+        if display_name = target_ref.get_field?(:display_name)
+          if display_name =~ Regexp.new("#{IndexDelim}([0-9]+$)")
+            ret = $1.to_i
+          end
+        end
+        unless ret 
+          Log.error("Unexpected cannot find an index number")
+        end
+        ret
+      end
+
+      AssemblyDelim = '::'
+      IndexDelim = ':'
+      PhysicalNodePrefix = 'physical--'
+      def self.physical_node_prefix()
+        PhysicalNodePrefix
+      end
+
+      # returns hash of form {node_id => NodeWithTargetRefs,..}
+      NodeWithTargetRefs = Struct.new(:node,:target_refs)
+      def self.get_ndx_linked_target_refs(node_mh,node_ids)
+        ret = Hash.new
+        return ret if node_ids.empty?
         sp_hash = {
-          :cols => [:id, :display_name, :ref, :type, :assembly_id, :datacenter_datacenter_id, :managed],
+          :cols => [:id,:display_name,:type,:linked_target_refs],
+          :filter => [:oneof, :id, node_ids]
+        }
+        get_objs(node_mh,sp_hash).each do |n|
+          n.delete(:node_group_relation)
+          target_ref = n.delete(:target_ref)
+          pntr = ret[n[:id]] ||= NodeWithTargetRefs.new(n,Array.new)
+          pntr.target_refs << target_ref if target_ref
+        end
+        ret
+      end
+
+      # The class method get_nodes(target) gets the target refs 
+      # opts keys:
+      #  :managed
+      #  :mark_free_nodes
+      #  :cols
+      def self.get_nodes(target,opts={})
+        sp_hash = {
+          :cols => opts[:cols] || [:id, :display_name, :tags, :ref, :type, :assembly_id, :datacenter_datacenter_id, :managed],
           :filter => [:and,
-                        [:eq, :type, type()],
+                      [:oneof, :type, [Type::Node.target_ref,Type::Node.physical]],
                         [:eq, :datacenter_datacenter_id, target[:id]],
-                        [:eq, :managed, true]]
+                        opts[:managed] && [:eq, :managed, true]].compact
         }
         node_mh = target.model_handle(:node)
-        ret_unpruned = get_objs(node_mh,sp_hash,:keep_ref_cols => true)
-
-        ndx_matched_target_refs = ndx_target_refs_to_their_instances(ret_unpruned.map{|r|r.id_handle})
-        if ndx_matched_target_refs.empty?
-          return ret_unpruned
+        ret = get_objs(node_mh,sp_hash,:keep_ref_cols => true)
+        if opts[:mark_free_nodes]
+          ndx_matched_target_refs = ndx_target_refs_to_their_instances(ret.map{|r|r.id_handle})
+          unless ndx_matched_target_refs.empty?
+            ret.each do |r|
+              unless ndx_matched_target_refs[r[:id]]
+                r.merge!(:free_node => true)
+              end
+            end
+          end
         end
-        ret_unpruned.reject{|r|ndx_matched_target_refs[r[:id]]}
+        ret
+      end
+
+      # The class method get_free_nodes returns  managed nodes without any assembly on them
+      def self.get_free_nodes(target)
+        ret = get_nodes(target,:mark_free_nodes=>true,:managed=>true)
+        ret.select{|r|r[:free_node]} 
+      end
+
+      def self.list(target)
+        nodes = get_nodes(target, :cols => common_columns() + [:ref])
+        cols_except_name = common_columns() - [:display_name]
+        nodes.map do |n|
+          el = n.hash_subset(*cols_except_name)
+          #TODO: unify with the assembly print name
+          el.merge(:display_name => n[:display_name]||n[:ref])
+        end.sort{|a,b|a[:display_name] <=> b[:display_name]}
       end
 
       def self.create_nodes_from_inventory_data(target, inventory_data)
@@ -135,67 +233,6 @@ Log.error("see why this is using :canonical_template_node_id and not node_group_
           (ret[r[:canonical_template_node_id]] ||= Array.new) << r
         end
         ret
-      end
-
-      def self.type()
-        TypeField
-      end
-      TypeField = 'target_ref'
-
-      def self.process_import_node_input!(input_node_hash)
-        unless host_address = input_node_hash["external_ref"]["routable_host_address"]
-          raise Error.new("Missing field input_node_hash['external_ref']['routable_host_address']")
-        end
-
-        # for type use type from external_ref ('physical'), if not then use default type()
-        type = input_node_hash["external_ref"]["type"] if input_node_hash["external_ref"]
-        input_node_hash.merge!("type" => type||type())
-        params = {"host_address" => host_address}
-        input_node_hash.merge!(child_objects(params))
-      end
-
-      # TODO: collapse with application/utility/library_nodes - node_info
-      def self.child_objects(params={})
-        {
-          "attribute"=> {
-            "host_addresses_ipv4"=>{
-              "required"=>false,
-              "read_only"=>true,
-              "is_port"=>true,
-              "cannot_change"=>false,
-              "data_type"=>"json",
-              "value_derived"=>[params["host_address"]],
-              "semantic_type_summary"=>"host_address_ipv4",
-              "display_name"=>"host_addresses_ipv4",
-              "dynamic"=>true,
-              "hidden"=>true,
-              "semantic_type"=>{":array"=>"host_address_ipv4"}
-            },
-            "fqdn"=>{
-              "required"=>false,
-              "read_only"=>true,
-              "is_port"=>true,
-              "cannot_change"=>false,
-              "data_type"=>"string",
-              "display_name"=>"fqdn",
-              "dynamic"=>true,
-              "hidden"=>true,
-            },
-            "node_components"=>{
-              "required"=>false,
-              "read_only"=>true,
-              "is_port"=>true,
-              "cannot_change"=>false,
-              "data_type"=>"json",
-              "display_name"=>"node_components",
-              "dynamic"=>true,
-              "hidden"=>true,
-            }
-          },
-          "node_interface"=>{
-            "eth0"=>{"type"=>"ethernet", "display_name"=>"eth0"}
-          }
-        }
       end
     end
   end

@@ -22,6 +22,13 @@ module DTK; class Task
       end
       private :initialize
 
+      def self.stage_display_name()
+        "create_nodes_stage"
+      end
+      def self.task_display_name()
+        "create_node"
+      end
+
       def self.status(object,opts)
         ret = PrettyPrintHash.new
         ret[:node] = node_status(object,opts)
@@ -115,9 +122,8 @@ module DTK; class Task
       def self.node_status(object,opts)
         node = object[:node]||{}
         ext_ref = node[:external_ref]||{}
-        # TODO: want to include os type and instance id when tasks upadted with this
         kv_array = 
-          [{:name => node[:display_name]},
+          [{:name => node_status__name(node)},
            {:id => node[:id]},
            {:type => ext_ref[:type]},
            {:image_id => ext_ref[:image_id]},
@@ -133,6 +139,12 @@ module DTK; class Task
     ##
     # TODO: move common fns to NodeLevel and then have this inherit to NodeLevel
     class PowerOnNode < CreateNode
+      def self.stage_display_name()
+        "power_on_nodes_stage"
+      end
+      def self.task_display_name()
+        "power_on_node"
+      end
     end
   end
 end; end

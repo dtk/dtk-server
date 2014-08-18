@@ -24,14 +24,6 @@ module XYZ
       node = create_node_obj(:node_id)
       queue = ActionResultsQueue.new
       
-      Assembly::Instance::Action::ExecuteTests.initiate([node], queue, :node) 
-      rest_ok_response :action_results_id => queue.id
-    end
-
-    def rest__initiate_execute_tests_v2()
-      node = create_node_obj(:node_id)
-      queue = ActionResultsQueue.new
-      
       Assembly::Instance::Action::ExecuteTestsV2.initiate([node], queue, :node) 
       rest_ok_response :action_results_id => queue.id
     end

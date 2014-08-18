@@ -9,11 +9,14 @@ require 'awesome_print'
 require './lib/dtk_common'
 require './lib/assembly_and_service_operations_spec'
 require './lib/service_modules_spec'
+require './lib/component_modules_spec'
 
 assembly_name = 'test_apache'
 service_module_name = 'bakir_test_apache'
 service_module_namespace = 'r8'
 service_module_filesystem_location = '~/dtk/service_modules'
+component_module_filesystem_location = '~/dtk/component_modules'
+component_module_name = 'apache'
 
 dtk_common = DtkCommon.new('', '')
 
@@ -44,6 +47,14 @@ describe "(Modules, Services and Versioning) Test Case 20: Import service module
 
   context "Delete service module from local filesystem" do
     include_context "Delete service module from local filesystem", service_module_filesystem_location, service_module_name
+  end
+
+  context "Delete component module" do
+    include_context "Delete component module", dtk_common, component_module_name
+  end
+
+  context "Delete component module from local filesystem" do
+    include_context "Delete component module from local filesystem", component_module_filesystem_location, component_module_name
   end
 
   after(:all) do

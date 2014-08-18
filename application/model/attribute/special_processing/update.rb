@@ -10,23 +10,34 @@ module DTK; class Attribute
         end
       end
      private
-      def self.ret_special_processing_info()
-        SpecialProcessingInfo
+      def initialize(attr,new_val)
+        @attr = attr
+        @new_val = new_val
       end
-      SpecialProcessingInfo = {
-        :memory_size => {
-          :filter => lambda{|a|a[:node_node_id]},
-          :proc => lambda{|a,v|MemorySize.process(a,v)}
-        },
-        :os_identifier =>{
-          :filter => lambda{|a|a[:node_node_id]},
-          :proc => lambda{|a,v|OsIdentifier.process(a,v)}
-        } 
-      }
+
+      class GroupCardinality < self
+        def initialize(attr,new_val)
+          super(attr,new_val.to_i)
+        end
+        def process()
+          @attr.update_object!(:value_asserted,:node_node_id)
+          existing_val = (@attr[:value_asserted]||0).to_i
+          if @new_val == existing_val
+            raise ErrorUsage.new("Value set equals existing value (#{existing_val.to_s})")
+          end
+          node_group = @attr.get_service_node_group(:cols => [:id,:group_id,:display_name,:datacenter_datacenter_id,:assembly_id])
+          if @new_val > existing_val
+            node_group.add_group_members(@new_val)
+          else @new_val < existing_val
+            node_group.delete_group_members(@new_val)
+          end
+        end
+      end
+
       class OsIdentifier < self
-        def self.process(attr,new_val)
-          os_identifier = new_val
-          node, target = get_node_and_target(attr)
+        def process()
+          os_identifier = @new_val
+          node, target = get_node_and_target()
           image_id, os_type = Node::Template.find_image_id_and_os_type(os_identifier,target)
           unless image_id
             target.update_object!(:display_name,:iaas_type,:iaas_properties)
@@ -36,21 +47,17 @@ module DTK; class Attribute
           node.update(:os_type => os_type)
         end
        private
-        def self.get_node_and_target(attr)
-          node = get_node(attr)
+        def get_node_and_target()
+          node = @attr.get_node(:cols => [:id,:group_id,:display_name,:datacenter_datacenter_id])
           [node,node.get_target()]
         end
       end
 
       class MemorySize < self
-        def self.process(attr,new_val)
-          get_node(attr).update_external_ref_field(:size,new_val)
+        def process()
+          node = @attr.get_node(:cols => [:id,:group_id,:display_name,:external_ref])
+          node.update_external_ref_field(:size,@new_val)
         end
-      end
-
-      def self.get_node(attr)
-        node_idh = attr.model_handle(:node).createIDH(:id => attr[:node_node_id])
-        node_idh.create_object()
       end
     end
   end

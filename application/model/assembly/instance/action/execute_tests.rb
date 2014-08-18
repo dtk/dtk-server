@@ -2,26 +2,45 @@
 module DTK
   class Assembly::Instance
     module Action
-      class ExecuteTestsV2 < ActionResultsQueue::Result
-        def self.initiate(project,assembly_instance,nodes,action_results_queue, type, opts={})
-          new(project,assembly_instance,nodes,action_results_queue, type, opts).initiate()
-        end
-
-        def initialize(project,assembly_instance,nodes,action_results_queue, type, opts={})
-          @project = project
-          @assembly_instance = assembly_instance
-          @nodes = nodes
-          @action_results_queue = action_results_queue
-          @type = type
-          @filter = opts[:filter]
+      class ExecuteTests < ActionResultsQueue
+        attr_reader :error
+        def initialize(params)
+          super()
+          @agent_action = params[:agent_action]
+          @project = params[:project]
+          @assembly_instance = params[:assembly_instance]
+          @nodes = params[:nodes]
+          @type = :assembly
+          @filter = params[:component]
+          @error = nil
         end
 
         def initiate()
-          test_components = get_test_components_with_bindings()
-          if test_components.empty?
-            return {:error => "Unable to execute tests. There are no links to test components!"}
+          test_cmps = get_test_components_with_bindings()
+          if test_cmps.empty?
+            @error = "Unable to execute tests. There are no links to test components!"
+            raise ::DTK::ErrorUsage
           end
 
+          # Recognize if nodes are part of node group and map test components to nodes appropriately
+          node_names = @nodes.map { |n| { :name => n[:display_name], :id => n[:id]} }
+          test_components = []
+          test_cmps.each do |tc|
+            node_names.each do |node|
+              if node[:name].split("::").last.split(":").first == tc[:node_name]
+                out = tc.dup
+                out[:node_name] = node[:name]
+                out[:node_id] = node[:id]
+                test_components << out
+              else
+                test_components << tc
+              end
+            end
+          end
+          test_components.uniq!
+
+          test_components.select! { |tc| node_names.map{|n| n[:name]}.include? tc[:node_name] }
+          
           ndx_version_contexts = get_version_contexts(test_components).inject(Hash.new){|h,vc|h.merge(vc[:id]=>vc)}
           version_contexts = ndx_version_contexts.values
 
@@ -30,12 +49,8 @@ module DTK
               raise Error.new("Cannot find version context for #{test_cmp[:dispaly_name]}")
             end
             attrib_array = test_cmp[:attributes].map{|a|{a[:display_name].to_sym =>a[:attribute_value]}}
-            unless  test_name = (test_cmp[:external_ref]||{})[:test_name]
-              Log.error("deprecate: in external_ref put in test name")
-              test_name = "network_port_check_spec.rb"
-            end
+            test_name = (test_cmp[:external_ref]||{})[:test_name]
             {
-              # :module_name =>"tm-#{version_context[:implementation]}",
               :module_name => version_context[:implementation],
               :component => "#{test_cmp[:node_name]}/#{test_cmp[:component_name]}",
               :test_component => test_cmp[:display_name],
@@ -45,13 +60,35 @@ module DTK
           end
 
           node_ids_with_tests = test_components.inject(Hash.new){|h,tc|h.merge(tc[:node_id] => true)}.keys
-          action_results_queue.set_indexes!(node_ids_with_tests)
-          ndx_pbuilderid_to_node_info =  nodes.inject(Hash.new) do |h,n|
+          ndx_pbuilderid_to_node_info = nodes.inject(Hash.new) do |h,n|
             h.merge(n.pbuilderid => {:id => n[:id].to_s, :display_name => n[:display_name]})
           end
+
+          # filter nodes with tests
+          nodes.select! { |node| node_ids_with_tests.include? node[:id]}
+
+          # part of the code used to decide which components belong to which nodes.
+          # based on that fact, serverspec tests will be triggered on node only for components that actually belong to that specific node
+          node_hash = {}
+          unless test_instances.empty?
+            nodes.each do |node|
+              components_array = []
+              test_instances.each do |comp|
+                if comp[:component].include? node[:display_name]
+                  components_array << comp
+                end                
+              end
+              node_hash[node[:id]] = {:components => components_array, :instance_id => node[:external_ref][:instance_id], :version_context => version_contexts}
+            end
+          end
+
+          # we send elements that are going to be used, due to bad design we need to send an array even
+          # if queue logic is only using size of that array.
+          set_indexes!(node_hash.keys)
+
           callbacks = {
             :on_msg_received => proc do |msg|
-              response = CommandAndControl.parse_response__execute_action(nodes,msg)  
+              response = CommandAndControl.parse_response__execute_action(nodes,msg)
               if response and response[:pbuilderid] and response[:status] == :ok
                 node_info = ndx_pbuilderid_to_node_info[response[:pbuilderid]]
                 raw_data = response[:data].map{|r|node_info.merge(r)}
@@ -65,39 +102,16 @@ module DTK
                   end
                 end
                 #just for a safe side to filter out empty response, it causes further an error on the client side
-                unless response[:data].empty? or response[:data].nil?       
+                unless response[:data].empty? or response[:data].nil?   
                   packaged_data = DTK::ActionResultsQueue::Result.new(node_info[:display_name],raw_data)
-                  action_results_queue.push(node_info[:id], (type == :node) ? packaged_data.data : packaged_data)
+                  push(node_info[:id], (type == :node) ? packaged_data.data : packaged_data)
                 end
               end
             end
           }
 
-          #part of the code used to decide which components belong to which nodes.
-          #based on that fact, serverspec tests will be triggered on node only for components that actually belong to that specific node
-          node_hash = {}
-          components_including_node_name = []
-          unless test_instances.empty?
-            nodes.each do |node|
-              components_array = []
-              test_instances.each do |comp|
-                if comp[:component].include? "#{node[:display_name]}/"
-                  components_array << comp
-                  components_including_node_name << comp
-                end
-              end
-              node_hash[node[:id]] = {:components => components_array, :instance_id => node[:external_ref][:instance_id], :version_context => version_contexts}
-            end
-          end
-
-          #components_including_node_name array will be empty if execute-test agent is triggered from specific node context
-          if components_including_node_name.empty?
-            components = filter[:components] #TODO: temp
-            CommandAndControl.request__execute_action(:execute_tests_v2,:execute_tests_v2,nodes,callbacks, {:components => components, :version_context => version_contexts})
-          else
-            Log.info_pp(:execute_tests_v2 => node_hash)
-            CommandAndControl.request__execute_action_per_node(:execute_tests_v2,:execute_tests_v2,node_hash,callbacks)
-          end
+          Log.info_pp(:execute_tests_v2 => node_hash)
+          CommandAndControl.request__execute_action_per_node(:execute_tests_v2,:execute_tests_v2,node_hash,callbacks)
         end
        private
         attr_reader :project,:assembly_instance, :nodes, :action_results_queue, :type, :filter
@@ -114,41 +128,14 @@ module DTK
           if test_cmp_attrs.empty?
             return ret
           end
-
-          #get info about each test component
-          sp_hash = {
-            :cols => [:id,:group_id,:display_name,:attributes,:component_type,:external_ref,:module_branch_id],
-            :filter => [:and, 
-                        [:eq,:assembly_id,nil],
-                        [:eq,:project_project_id,project.id],
-                        [:oneof,:component_type,test_cmp_attrs.map{|t|t[:test_component_name]}]]
-          }
-          ndx_test_cmps = Hash.new #test cmps indexed by component type
-          Model.get_objs(assembly_instance.model_handle(:component),sp_hash).each do |r|
-          # added to check if component belongs to test module, if not then skip that component
-            sp_h = {
-              :cols => [:id,:display_name,:test_id],
-              :filter => [:eq,:id,r[:module_branch_id]]
-            }
-
-            m_branch = Model.get_obj(assembly_instance.model_handle(:module_branch),sp_h)
-            next unless m_branch[:test_id]
-
-            ndx = r[:component_type]
-            cmp = ndx_test_cmps[ndx] ||= r.hash_subset(:id,:group_id,:display_name,:component_type,:external_ref).merge(:attributes => Array.new)
-            cmp[:attributes] << r[:attribute]
-          end
-
           # for each binding return at top level the matching test component with attributes substituted with binding value
           # and augmented columns :node_name and component_name
           test_cmp_attrs.each do |r|
-            ndx = test_component_name = r[:test_component_name]
-            test_cmp = ndx_test_cmps[ndx]
-            unless test_cmp
-              Log.error("Dangling reference to test components (#{test_component_name})")
-            else
-              #substitue in values from test_cmp_attrs               
+            if test_cmp = r[:test_component]
+              #substitute in values from test_cmp_attrs               
               ret << dup_and_substitute_attribute_values(test_cmp,r)
+            else
+              Log.error("Dangling reference to test components (#{test_component_name})")
             end
           end
           ret
@@ -170,38 +157,33 @@ module DTK
 
         # returns array having test components that are linked to a component in assembly_instance
         # each element has form
-        # {:test_component_name=>String,
-        #  :test_component_id=>ID,
+        # {:test_component=>Cmp Obj
         #  :component_name=>String,
         #  :node_name=>String,
         #  :attributes=>[{:component_attribute_name=>String, :component_attribute_value=>String,:related_test_attribute=>String}
         def get_test_component_attributes()
           ret = Array.new
-
-          linked_tests = Component::Test.get_linked_tests(assembly_instance)
+          linked_tests = Component::Test.get_linked_tests(assembly_instance, @project, @filter)
           if linked_tests.empty?
             return ret
-          end
-
-          test_params = linked_tests.map do |t|
-            var_mappings = t.find_test_parameters.map { |test_param| test_param.var_mappings_hash } 
-            mappings = { :var_mappings => var_mappings }.merge!(:node_data => t.node, :component_data => t.component)
           end
 
           attr_mh = assembly_instance.model_handle(:attribute)
           all_test_params = []
 
-          test_params.each do |params|
-            params[:var_mappings].each do |par|
-              k, v = par.first
+          linked_tests.each do |t|
+            node = t.node
+            component = t.component
+            component_id = component.id
+            linked_test_array = t.find_relevant_linked_test_array()
+          
+            linked_test_array.each do |linked_test|
+              var_mappings_hash = linked_test.var_mappings_hash
+              k, v = var_mappings_hash.first
               related_test_attribute = v.map { |x| x.split(".").last }
-              test_component_name = v.map { |x| x.split(".").first }.first
               attribute_names = k.map { |x| x.split(".").last }
-
-              component_id = params[:component_data][:id]
+              test_component = linked_test.test_component
               # TODO: more efficient to get in bulk outside of test_params loop
-              # Bakir: left this here, know there could be many db queries instead of bulk query, will try to move it out of the loop
-              # Bakir: currently, we make db query for each attribute mapping group which contain one or more attributes
               sp_hash = {
                 :cols => [:display_name, :attribute_value],
                 :filter => [:and,
@@ -223,17 +205,17 @@ module DTK
                 end
               end
               hash = { 
-                :test_component_name => test_component_name, 
+                :test_component => test_component,
                 :attributes => attributes, 
-                :component_id => params[:component_data][:id],
-                :component_name => params[:component_data][:display_name], 
-                :node_id => params[:node_data][:id],
-                :node_name => params[:node_data][:display_name]
+                :component_id => component_id,
+                :component_name => component[:display_name], 
+                :node_id => node[:id],
+                :node_name => node[:display_name]
               }
               all_test_params << hash
             end
           end
-          return all_test_params
+          all_test_params
         end
 
         def get_version_contexts(test_components)
@@ -285,110 +267,6 @@ module DTK
           ret.select do |cmp_template|
             cmp_node_names.find do |r|
               r[:node_name] == ndx_node_names[cmp_template[:node_node_id]] and r[:component_name] == cmp_template[:display_name]
-            end
-          end
-        end
-
-      end
-
-      class ExecuteTests < ActionResultsQueue::Result
-        def self.initiate(nodes,action_results_queue, type, components)
-          #TODO: Rich: Put in logic here to get component instnces so can call an existing function used for converge to get all
-          cmp_templates = get_component_templates(nodes,components)
-          pp [:debug_cmp_templates,cmp_templates]
-          version_context =
-            unless cmp_templates.empty?
-              TestModule::VersionContextInfo.get_in_hash_form_from_templates(cmp_templates)
-            else
-              Log.error("Unexpected that cmp_instances is empty")
-              nil
-            end
-          pp [:debug_version_context,version_context]
-
-          indexes = nodes.map{|r|r[:id]}
-          action_results_queue.set_indexes!(indexes)
-          ndx_pbuilderid_to_node_info =  nodes.inject(Hash.new) do |h,n|
-            h.merge(n.pbuilderid => {:id => n[:id].to_s, :display_name => n[:display_name]})
-          end
-          callbacks = {
-            :on_msg_received => proc do |msg|
-              response = CommandAndControl.parse_response__execute_action(nodes,msg)
-              if response and response[:pbuilderid] and response[:status] == :ok
-                node_info = ndx_pbuilderid_to_node_info[response[:pbuilderid]]
-                raw_data = response[:data].map{|r|node_info.merge(r)}
-                packaged_data = new(node_info[:display_name],raw_data)
-                action_results_queue.push(node_info[:id], (type == :node) ? packaged_data.data : packaged_data)
-              elsif response[:status] != :ok
-                node_info = ndx_pbuilderid_to_node_info[response[:pbuilderid]]
-                action_results_queue.push(node_info[:id],response[:data])
-              end
-            end
-          }
-
-          #part of the code used to decide which components belong to which nodes.
-          #based on that fact, serverspec tests will be triggered on node only for components that actually belong to that specific node
-          node_hash = {}
-          components_including_node_name = []
-          unless components.empty?
-            nodes.each do |node|
-              puts "Components: #{components}"
-              components_array = []
-              components.each do |comp|
-                if comp.include? "#{node[:display_name]}/"
-                  components_array << comp
-                  components_including_node_name << comp
-                end
-              end
-              node_hash[node[:id]] = {:components => components_array, :instance_id => node[:external_ref][:instance_id], :version_context => version_context}
-            end
-          end
-
-          #components_including_node_name array will be empty if execute-test agent is triggered from specific node context
-          if components_including_node_name.empty?
-            CommandAndControl.request__execute_action(:execute_tests,:execute_tests,nodes,callbacks, {:components => components, :version_context => version_context})
-          else
-            CommandAndControl.request__execute_action_per_node(:execute_tests,:execute_tests,node_hash,callbacks)
-          end
-        end
-        private
-        #TODO: some of this logic can be leveraged by code below node_hash
-        #TODO: even more idea, but we can iterate to it have teh controller/helper methods convert to ids and objects, ratehr than passing
-        #strings in components
-        def self.get_component_templates(nodes,components)
-          ret = Array.new
-          if nodes.empty?
-            return ret
-          end
-          sp_hash = {
-            :cols => [:id,:group_id,:instance_component_template_parent,:node_node_id],
-            :filter => [:oneof,:node_node_id,nodes.map{|n|n.id()}]
-          }
-          ret = Model.get_objs(nodes.first.model_handle(:component),sp_hash).map do |r|
-            r[:component_template].merge(:node_node_id => r[:node_node_id])
-          end
-            if components.nil? or components.empty? or !components.include? "/"
-              return ret
-            end
-
-          cmp_node_names = components.map do |name_pairs|
-            if name_pairs.include? "/"
-              split = name_pairs.split('/')
-              if split.size == 2
-                {:node_name => split[0],:component_name => Component.display_name_from_user_friendly_name(split[1])}
-              else
-                  Log.error("unexpected component form: #{name_pairs}; skipping")
-                nil
-              end
-            else
-              {:component_name => Component.display_name_from_user_friendly_name(name_pairs)}
-            end
-          end.compact
-          ndx_node_names = nodes.inject(Hash.new){|h,n|h.merge(n[:id] => n[:display_name])}
-
-          #only keep matching ones
-          ret.select do |cmp_template|
-            cmp_node_names.find do |r|
-                r[:node_name] == ndx_node_names[cmp_template[:node_node_id]] and r[:component_name] == cmp_template[:display_name]
             end
           end
         end

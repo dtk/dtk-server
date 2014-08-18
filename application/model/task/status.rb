@@ -1,6 +1,8 @@
 module DTK
-  class Task; module StatusMixin
+  class Task 
     class Status
+      r8_nested_require('status','table_form')
+      r8_nested_require('status','list_form')
       def self.get_active_top_level_tasks(model_handle)
         # TODO: need protection so dont get stake tasks that never came out of executing mode
         filter = [:and, [:eq,:status,"executing"],[:or,[:neq,:assembly_id,nil],[:neq,:node_id,nil]]]
@@ -30,21 +32,21 @@ module DTK
           task_obj = task_obj_idh.create_object().update_object!(:display_name)
           raise ErrorUsage.new("No tasks found for #{task_obj_type} (#{task_obj[:display_name]})")
         end
-        task_structure = Task.get_hierarchical_structure(task_mh.createIDH(:id => task[:id]))
         
         status_opts = Opts.new
-        if status_opts[:detail_level]
-          # TODO: stub; treat passed in detail setting status_optss as function of detail_level
-          status_opts[:no_components] = false
-          status_opts[:no_attributes] = true
-        else
-          status_opts[:no_components] = false
-          status_opts[:no_attributes] = true
+        status_opts[:no_components] = false
+        status_opts[:no_attributes] = true
+        if detail_level_opts = opts[:detail_level]
+          if detail_level_opts[:summarize_node_groups]
+            status_opts[:summarize_node_groups] = true
+          end
         end
+        task_structure = Task.get_hierarchical_structure(task_mh.createIDH(:id => task[:id]))
+
         if opts[:format] == :table
-          task_structure.status_table_form(status_opts)
+          TableForm.status(task_structure,status_opts)
         elsif opts[:format] == :list
-          task_structure.status_list(task_obj_idh.createMH(:node))
+          ListForm.status(task_structure,task_obj_idh.createMH(:node))
         else
           task_structure.status(status_opts)
         end
@@ -88,235 +90,105 @@ module DTK
         end
       end
     end
-
-    # Amar
-    # This method will return task details in form of list. It is used when CLI list-task-info is invoked
-    def status_list(model_handle)
-      ret = Hash.new
-
-      ret[:task_id] = self[:id]
-      ret[:task_name] = self[:display_name]
-      ret[:temporal_order] = self[:temporal_order]
-      ret[:actions] = Array.new
-
-      level_1 = self[:subtasks]
-      level_1.each do |l1|
-        level_1_ret = Hash.new
-        level_1_ret[:temporal_order] = l1[:temporal_order]
-        level_1_ret[:task_name] = l1[:display_name]
-        level_2 = [l1]
-        level_2 = l1[:subtasks] if l1[:subtasks]
-        level_1_ret[:nodes] = Array.new
-        level_2.each do |l2|
-          level_2_ret = Hash.new
-          level_2_ret[:node_name] = l2[:executable_action][:node][:display_name]
-          if l2[:executable_action_type] == "CreateNode"
-            level_2_ret[:task_name] = "create_node"
-            level_2_ret[:node_id] = l2[:executable_action][:node][:id]
-            # Amar: Special case when 1 node present, to skip printing 'task1' on CLI for create_node_stage
-            level_1_ret[:task_name] = "create_node_stage" if l1[:subtasks].nil? && l1[:display_name].include?("task")
-          elsif l2[:executable_action_type] == "ConfigNode"
-            level_2_ret[:task_name] = "config_node"
-            level_2_ret[:components] = Array.new
-            level_3 = l2[:executable_action][:component_actions]            
-            level_3.each do |l3|
-              # Amar: Following condition block checks if 'node_node_id' from component is identical to node's 'id' 
-              #       If two values are different, it means component came from node_group, and not from assembly instance
-              #       Result is printing component source
-              #       Check DTK-738 ticket for more details
-              source = "instance"
-              unless l3[:component][:node_node_id] == l2[:executable_action][:node][:id]
-                node_group = NodeGroup.id_to_name(model_handle, l3[:component][:node_node_id])
-                source = "node_group"
-              end
-              level_2_ret[:components] << 
-              { :component => 
-                {
-                  :component_name => l3[:component][:display_name], 
-                  :source => source, 
-                  :node_group => node_group 
-                } 
-              }
-            end
-          end
-          level_1_ret[:nodes] << level_2_ret
+   
+    module StatusMixin
+    # TODO: move to own file
+      def status_hash_form(opts,level=1)
+        set_and_return_types!()
+        ret = PrettyPrintHash.new
+        if level == 1
+          ret.add(self,:type,:id,:status,:commit_message?)
+        else
+          ret.add(self,:type,:status)
         end
-        ret[:actions] << level_1_ret
-      end
-
-      return ret
-    end
-
-    def status_table_form(opts,level=1,ndx_errors=nil)
-      ret = Array.new
-      set_and_return_types!()
-
-      el = hash_subset(:started_at,:ended_at)
-      el[:status] = self[:status] unless self[:status] == 'created'
-      el[:id] = self[:id]
-      type = (level == 1 ? self[:display_name] : self[:type]||self[:display_name])|| "top"
-      # type = self[:display_name]|| "top"
-      # putting idents in
-      
-      el[:type] = "#{' '*(2*(level-1))}#{type}"
-      ndx_errors ||= self.class.get_ndx_errors(hier_task_idhs())
-      if ndx_errors[self[:id]]
-        el[:errors] = status_table_form_format_errors(ndx_errors[self[:id]])
-      end
-
-      if level == 1
-        # no op
-      else
+        ret.add(self,:started_at?)
+        ret.add(self,:ended_at?)
+        num_subtasks = subtasks.size
+        ret.add(self,:temporal_order) if num_subtasks > 1
+        if num_subtasks > 0
+          ret.add(self,:subtasks) do |subtasks|
+            subtasks.sort{|a,b| (a[:position]||0) <=> (b[:position]||0)}.map{|st|st.status_hash_form(opts,level+1)}
+          end
+        end
         case self[:executable_action_type]
-         when "ConfigNode" 
+        when "ConfigNode" 
           if ea = self[:executable_action]
-            el.merge!(Action::ConfigNode.status(ea,opts))
+            ret.merge!(Action::ConfigNode.status(ea,opts))
           end
-         when "CreateNode" 
+        when "CreateNode" 
           if ea = self[:executable_action]
-            el.merge!(Action::CreateNode.status(ea,opts))
-          end
-         when "PowerOnNode"
-          if ea = self[:executable_action]
-            el.merge!(Action::CreateNode.status(ea,opts))
-          end
-         when "InstallAgent"
-          if ea = self[:executable_action]
-            el.merge!(Action::InstallAgent.status(ea,opts))
-          end
-         when "ExecuteSmoketest"
-          if ea = self[:executable_action]
-            el.merge!(Action::ExecuteSmoketest.status(ea,opts))
+            ret.merge!(Action::CreateNode.status(ea,opts))
           end
         end
+        errors = get_errors()
+        ret[:errors] = errors unless errors.empty?
+        ret
       end
-      ret << el
-      num_subtasks = subtasks.size
-      # ret.add(self,:temporal_order) if num_subtasks > 1
-      if num_subtasks > 0
-        ret += subtasks.sort{|a,b| (a[:position]||0) <=> (b[:position]||0)}.map{|st|st.status_table_form(opts,level+1,ndx_errors)}.flatten(1)
+      
+      def hier_task_idhs()
+        [id_handle()] + subtasks.map{|r|r.hier_task_idhs()}.flatten
       end
-      ret
-    end
-
-
-    def status_table_form_format_errors(errors)
-      ret = nil
-      errors.each do |error|
-        if ret
-          ret[:message] << "\n\n"
-        else
-          ret = {:message => String.new}
-        end
-
-        if error.is_a? String
-          error,temp = {},error
-          error[:message] = temp
-        end
-        
-        error_msg = (error[:component] ? "Component #{error[:component].gsub("__","::")}: " : "")
-        error_msg << (error[:message]||"error")
-        ret[:message] << error_msg
-        ret[:type] = error[:type]
-      end
-      ret
-    end
-
-    def status_hash_form(opts,level=1)
-      set_and_return_types!()
-      ret = PrettyPrintHash.new
-      if level == 1
-        ret.add(self,:type,:id,:status,:commit_message?)
-      else
-        ret.add(self,:type,:status)
-      end
-      ret.add(self,:started_at?)
-      ret.add(self,:ended_at?)
-      num_subtasks = subtasks.size
-      ret.add(self,:temporal_order) if num_subtasks > 1
-      if num_subtasks > 0
-        ret.add(self,:subtasks) do |subtasks|
-          subtasks.sort{|a,b| (a[:position]||0) <=> (b[:position]||0)}.map{|st|st.status_hash_form(opts,level+1)}
-        end
-      end
-      case self[:executable_action_type]
-       when "ConfigNode" 
-        if ea = self[:executable_action]
-          ret.merge!(Action::ConfigNode.status(ea,opts))
-        end
-       when "CreateNode" 
-        if ea = self[:executable_action]
-          ret.merge!(Action::CreateNode.status(ea,opts))
-        end
-      end
-      errors = get_errors()
-      ret[:errors] = errors unless errors.empty?
-      ret
-    end
-
-    def hier_task_idhs()
-      [id_handle()] + subtasks.map{|r|r.hier_task_idhs()}.flatten
-    end
-
-    # TODO: probably better to set when creating
-    def set_and_return_types!()
-      type = 
-        if self[:task_id].nil?
+      
+      # TODO: probably better to set when creating
+      def set_and_return_types!()
+        type = 
+          if self[:task_id].nil?
           self[:display_name]||"commit_cfg_changes"
-        elsif action_type = self[:executable_action_type]
-          ActionTypeCodes[action_type.to_s]
-        elsif self[:display_name]
-          self[:display_name]
+          elsif action_type = self[:executable_action_type]
+            ActionTypeCodes[action_type.to_s]
+          elsif self[:display_name]
+            self[:display_name]
+          else
+            # TODO: probably deprecate below; it at least needs fixing up
+            # assumption that all subtypes some type
+            if sample_st = subtasks.first
+              if sample_st[:executable_action_type]
+                sample_type = ActionTypeCodes[sample_st[:executable_action_type]]
+                suffix = /config_node(\w.+)/.match(self[:display_name])[1] if sample_st[:executable_action_type] == "ConfigNode"
+                sample_type && "#{sample_type}s#{suffix}" #make plural
+              end
+            end 
+          end
+        
+        subtasks.each{|st|st.set_and_return_types!()}
+        self[:type] = type
+      end
+      protected :set_and_return_types!
+      ActionTypeCodes = {
+        "ConfigNode" => "configure_node",
+        "CreateNode" => "create_node"
+      }
+
+      def hier_task_idhs()
+        [id_handle()] + subtasks.map{|r|r.hier_task_idhs()}.flatten
+      end
+      protected :hier_task_idhs
+
+      # for debugging
+      def pretty_print_hash()
+        ret = PrettyPrintHash.new
+        ret.add(self,:id,:status)
+        num_subtasks = subtasks.size
+        # only include :temporal_order if more than 1 subtask
+        ret.add(self,:temporal_order) if num_subtasks > 1
+        if num_subtasks > 0
+          ret.add(self,:subtasks) do |subtasks|
+            subtasks.sort{|a,b| (a[:position]||0) <=> (b[:position]||0)}.map{|st|st.pretty_print_hash()}
+          end
+        end
+        action_type = self[:executable_action_type]
+        case action_type
+        when "ConfigNode" 
+          ret.add(self,:executable_action_type)
+          ret.add(self,:executable_action?){|ea|Action::ConfigNode.pretty_print_hash(ea)}
+        when "CreateNode" 
+          ret.add(self,:executable_action_type)
+          ret.add(self,:executable_action?){|ea|Action::CreateNode.pretty_print_hash(ea)}
         else
-          # TODO: probably deprecate below; it at least needs fixing up
-          # assumption that all subtypes some type
-          if sample_st = subtasks.first
-            if sample_st[:executable_action_type]
-              sample_type = ActionTypeCodes[sample_st[:executable_action_type]]
-              suffix = /config_node(\w.+)/.match(self[:display_name])[1] if sample_st[:executable_action_type] == "ConfigNode"
-              sample_type && "#{sample_type}s#{suffix}" #make plural
-            end
-          end 
+          ret.add(self,:executable_action_type?,:executable_action?)
         end
-
-      subtasks.each{|st|st.set_and_return_types!()}
-      self[:type] = type
-    end
-    protected :set_and_return_types!
-    ActionTypeCodes = {
-      "ConfigNode" => "configure_node",
-      "CreateNode" => "create_node"
-    }
-
-    def hier_task_idhs()
-      [id_handle()] + subtasks.map{|r|r.hier_task_idhs()}.flatten
-    end
-    protected :hier_task_idhs
-
-    # for debugging
-    def pretty_print_hash()
-      ret = PrettyPrintHash.new
-      ret.add(self,:id,:status)
-      num_subtasks = subtasks.size
-      # only include :temporal_order if more than 1 subtask
-      ret.add(self,:temporal_order) if num_subtasks > 1
-      if num_subtasks > 0
-        ret.add(self,:subtasks) do |subtasks|
-          subtasks.sort{|a,b| (a[:position]||0) <=> (b[:position]||0)}.map{|st|st.pretty_print_hash()}
-        end
+        ret
       end
-      action_type = self[:executable_action_type]
-      case action_type
-       when "ConfigNode" 
-        ret.add(self,:executable_action_type)
-        ret.add(self,:executable_action?){|ea|Action::ConfigNode.pretty_print_hash(ea)}
-       when "CreateNode" 
-        ret.add(self,:executable_action_type)
-        ret.add(self,:executable_action?){|ea|Action::CreateNode.pretty_print_hash(ea)}
-       else
-        ret.add(self,:executable_action_type?,:executable_action?)
-      end
-      ret
     end
-  end; end
+  end
 end

@@ -17,16 +17,25 @@ module DTK
       new_id_handles = clone_proc.add_new_children_objects(new_objs_info,clone_model_handle,clone_par_col,level)
       fk_info.add_id_mappings(clone_model_handle,new_objs_info)
       fk_info.add_id_handles(new_id_handles) #TODO: may be more efficient adding only id handles assciated with foreign keys
+
       # iterate all nested children
-      self.class.generate(clone_proc,clone_model_handle,new_objs_info,override_attrs) do |child_context|
+      opts_generate = Hash.new
+      if include_list = include_list()
+        opts_generate.merge!(:include_list => include_list)
+      end
+      self.class.generate(clone_proc,clone_model_handle,new_objs_info,override_attrs,opts_generate) do |child_context|
         child_context.clone_copy_child_objects(clone_proc,level+1)
       end
     end
 
-    def self.generate(clone_proc,model_handle,objs_info,recursive_override_attrs,opts={},&block)
+    def self.generate(clone_proc,model_handle,unpruned_objs_info,recursive_override_attrs,opts={},&block)
       ret = Array.new
       opts_generate = Aux.hash_subset(opts,[:include_list])
       get_children_model_handles(model_handle,opts_generate) do |child_mh|
+        child_mn = child_mh[:model_name]
+        objs_info = unpruned_objs_info.reject{|r|r[:donot_clone] and r[:donot_clone].include?(child_mn)}
+        next if objs_info.empty?
+
         override_attrs = clone_proc.ret_child_override_attrs(child_mh,recursive_override_attrs)
         parent_id_col = child_mh.parent_id_field_name()
         old_parent_rel_col = ret_old_parent_rel_col(clone_proc,child_mh)
@@ -78,6 +87,11 @@ module DTK
     end
 
    private
+    #this can be over-written
+    def include_list()
+      nil
+    end
+
     def self.ret_special_child_context?(clone_proc,parent_model_name,model_name)
       if match = (SpecialContext[clone_proc.clone_direction()][parent_model_name]||{})[model_name]
         if match.kind_of?(Proc) 

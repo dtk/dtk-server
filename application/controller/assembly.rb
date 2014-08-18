@@ -3,6 +3,8 @@ module DTK
     helper :assembly_helper
     helper :task_helper
 
+    include Assembly::Instance::Action
+
     #### create and delete actions ###
     # TODO: rename to delete_and_destroy
     def rest__delete()
@@ -329,6 +331,9 @@ module DTK
     end
 
     #### end: list and info actions ###
+
+    ##
+    # Sets or creates attributes
     # TODO: update what input can be
     # the body has an array each element of form
     # {:pattern => PAT, :value => VAL}
@@ -447,89 +452,34 @@ module DTK
 
     def rest__create_task()
       assembly = ret_assembly_instance_object()
-      task = nil
+      assembly_is_stopped = assembly.is_stopped?
 
-      if assembly.is_stopped?
-        start_assembly = ret_request_params(:start_assembly)
-        return rest_ok_response :confirmation_message=>true if start_assembly.nil?
-        
-        assembly_idh = ret_request_param_id_handle(:assembly_id,Assembly::Instance)
-        node_pattern = ret_request_params(:node_pattern)
-
-        # filters only stopped nodes for this assembly
-        nodes = assembly.get_nodes(:id,:display_name,:type,:external_ref,:hostname_external_ref, :admin_op_status)
-
-        assembly_name = Assembly::Instance.pretty_print_name(assembly)
-        nodes, is_valid, error_msg = nodes_valid_for_aws?(assembly_name, nodes, node_pattern, :stopped)
-        
-        unless is_valid
-          Log.info(error_msg)
-          return rest_ok_response(:errors => [error_msg])
-        end
-
-        nodes_w_components = assembly.remove_empty_nodes(nodes, {:detail_level => 'nodes'})
-
-        # TODO: not doing at this point puppet version per run; it just can be set when node is created
-        opts = ret_params_hash(:commit_msg,:puppet_version)
-        if (nodes_w_components.size == 1)
-          opts.merge!(:node => nodes_w_components.first)
-        else
-          opts.merge!(:nodes => nodes_w_components)
-        end
-
-        # opts.merge!(:node => nodes_w_components.first) if (nodes_w_components.size == 1)
-        task = Task.create_and_start_from_assembly_instance(assembly,opts)
-
-        user_object = user_object  = ::DTK::CurrentSession.new.user_object()
-        CreateThread.defer_with_session(user_object) do
-          # invoking command to start the nodes
-          CommandAndControl.start_instances(nodes_w_components) unless nodes_w_components.empty?
-        end
-      else
-        raise ErrorUsage, "Task is already running on requested nodes. Please wait until task is complete" if assembly.are_nodes_running?
-        # TODO: not doing at this point puppet version per run; it just can be set when node is created
-        opts = ret_params_hash(:commit_msg,:puppet_version)
-        task = Task.create_from_assembly_instance(assembly,opts)
+      if assembly_is_stopped and ret_request_params(:start_assembly).nil?
+        return rest_ok_response :confirmation_message=>true
       end
 
+      if assembly.are_nodes_running?
+        raise ErrorUsage, "Task is already running on requested nodes. Please wait until task is complete" 
+      end
+
+      opts = ret_params_hash(:commit_msg)
+      if assembly_is_stopped
+        opts.merge!(:start_node_changes => true, :ret_nodes => Array.new)
+      end
+      task = Task.create_from_assembly_instance(assembly,opts)
       task.save!()
-      # TODO: this was called from gui commit window
-      # pp Attribute.augmented_attribute_list_from_task(task)
+
+      # TODO: clean up this part since this is doing more than creating task
+      nodes_to_start =  (opts[:ret_nodes]||[]).reject{|n|n[:admin_op_status] == "running"}
+      unless nodes_to_start.empty?
+        CreateThread.defer_with_session(CurrentSession.new.user_object()) do
+          # invoking command to start the nodes
+          CommandAndControl.start_instances(nodes_to_start)
+        end
+      end
+
       rest_ok_response :task_id => task.id
     end
-
-    # leaving this commented until we test out if methode above works properly
-    # def rest__create_task()
-    #   assembly = ret_assembly_instance_object()
-    #   if assembly.is_stopped?
-    #     validate_params = [
-    #       :action => :start, 
-    #       :params => {:assembly => assembly[:id]}, 
-    #       :wait_for_complete => {:type => :assembly, :id => assembly[:id]}
-    #     ]
-    #     return rest_validate_response("Assembly is stopped, you need to start it.", validate_params)
-    #   end
-
-    #   if assembly.are_nodes_running?
-    #     raise ErrorUsage, "Task is already running on requested nodes. Please wait until task is complete"
-    #   end
-
-    #   opts = ret_params_hash(:commit_msg,:puppet_version)
-    #   task = Task.create_from_assembly_instance(assembly,opts)
-    #   task.save!()
-    #   # TODO: this was called from gui commit window
-    #   # pp Attribute.augmented_attribute_list_from_task(task)
-    #   rest_ok_response :task_id => task.id
-    # end
-
-    # #TODO: replace or given options to specify specific smoketests to run
-    # def rest__create_smoketests_task()
-    #   assembly = ret_assembly_instance_object()
-    #   opts = ret_params_hash(:commit_msg).merge(:component_type => :smoketest)
-    #   task = Task.create_from_assembly_instance(assembly,opts)
-    #   task.save!()
-    #   rest_ok_response :task_id => task.id
-    # end
 
     def rest__clear_tasks()
       assembly = ret_assembly_instance_object()
@@ -537,16 +487,14 @@ module DTK
       rest_ok_response
     end
 
+    #TODO: cleanup
     def rest__start()
       assembly     = ret_assembly_instance_object()
-      assembly_idh = ret_request_param_id_handle(:assembly_id,Assembly::Instance)
       node_pattern = ret_request_params(:node_pattern)
       task         = nil
 
       # filters only stopped nodes for this assembly
-      nodes = assembly.get_nodes(:id,:display_name,:type,:external_ref,:hostname_external_ref, :admin_op_status)
-      assembly_name = Assembly::Instance.pretty_print_name(assembly)
-      nodes, is_valid, error_msg = nodes_valid_for_aws?(assembly_name, nodes, node_pattern, :stopped)
+      nodes, is_valid, error_msg = nodes_valid_for_stop_or_start?(assembly, node_pattern, :stopped)
 
       unless is_valid
         Log.info(error_msg)
@@ -560,12 +508,12 @@ module DTK
         opts.merge!(:nodes => nodes)
       end
 
-      task = Task.task_when_nodes_ready_from_assembly(assembly_idh.create_object(),:assembly, opts)
+      task = Task.task_when_nodes_ready_from_assembly(assembly,:assembly, opts)
       task.save!()
 
       # queue = SimpleActionQueue.new
 
-      user_object  = ::DTK::CurrentSession.new.user_object()
+      user_object  = CurrentSession.new.user_object()
       CreateThread.defer_with_session(user_object) do
         # invoking command to start the nodes
         CommandAndControl.start_instances(nodes)
@@ -578,11 +526,8 @@ module DTK
     def rest__stop()
       assembly = ret_assembly_instance_object()
       node_pattern = ret_request_params(:node_pattern)
-      nodes =  assembly.get_nodes(:id,:display_name,:type, :external_ref,:admin_op_status)
-      assembly_idh = ret_request_param_id_handle(:assembly_id,Assembly::Instance)
-      
-      assembly_name = Assembly::Instance.pretty_print_name(assembly)
-      nodes, is_valid, error_msg = nodes_valid_for_aws?(assembly_name, nodes, node_pattern, :running)
+
+      nodes, is_valid, error_msg = nodes_valid_for_stop_or_start?(assembly, node_pattern, :running)
 
       unless is_valid
         Log.info(error_msg)
@@ -594,232 +539,109 @@ module DTK
       rest_ok_response :status => :ok
     end
 
-    ##
-    # Method that will validate if nodes list is ready to started or stopped.
-    #
-    # * *Args*    :
-    #   - +assembly_id+     ->  assembly id
-    #   - +nodes+           ->  node list
-    #   - +node_pattern+    ->  match id regexp pattern
-    #   - +status_pattern+  ->  pattern to match node status
-    # * *Returns* :
-    #   - is valid flag
-    #   - filtered nodes by pattern (if pattern not nil)
-    #   - erorr message in case it is not valid
-    #
-    def nodes_valid_for_aws?(assembly_name, nodes, node_pattern, status_pattern)
-      # check for pattern
-      unless node_pattern.nil? || node_pattern.empty?
-        regex = Regexp.new(node_pattern)
-
-        # temp nodes_list
-        nodes_list = nodes
-
-        nodes = nodes.select { |node| regex =~ node.id.to_s}
-        if nodes.size == 0
-          nodes = nodes_list.select { |node| node_pattern.to_s.eql?(node.display_name.to_s)}
-          return nodes, false, "No nodes have been matched via ID ~ '#{node_pattern}'." if nodes.size == 0
-        end
-      end
-      # check if staged
-      nodes.each do |node|
-        if node[:type] == Node::Type::Node.staged
-          return nodes, false, "Nodes for assembly '#{assembly_name}' are 'staged' and as such cannot be started/stopped."
-        end
-      end
-
-      # check for status -> this will translate to /running|pending/ and /stopped|pending/ checks
-      filtered_nodes = nodes.select { |node| node[:admin_op_status] =~ Regexp.new("#{status_pattern.to_s}|pending") }
-      if filtered_nodes.size == 0
-        return nodes, false, "There are no #{status_pattern} nodes for assembly '#{assembly_name}'."
-      end
-      
-      return filtered_nodes, true, nil      
+    def rest__task_status()
+      assembly = ret_assembly_instance_object()
+      format = (ret_request_params(:format)||:hash).to_sym
+      opts = {:format => format}
+      #TODO: should :summarize_node_groups be the default?
+      opts.merge!(:detail_level => {:summarize_node_groups => true})
+      response = Task::Status::Assembly.get_status(assembly.id_handle,opts)
+      rest_ok_response response
     end
 
-    def nodes_are_up?(assembly_name, nodes, status_pattern)
-      # check if staged
-      nodes.each do |node|
-        if node[:type] == Node::Type::Node.staged
-          return nodes, false, "Serverspec tests cannot be executed on nodes that are 'staged'."
-        end
-      end
-
-      # check for status -> this will translate to /running|pending/ and /stopped|pending/ checks
-      filtered_nodes = nodes.select { |node| node[:admin_op_status] =~ Regexp.new("#{status_pattern.to_s}|pending") }
-      if filtered_nodes.size == 0
-        return nodes, false, "There are no #{status_pattern} nodes for assembly '#{assembly_name}'."
-      end
-      
-      return filtered_nodes, true, nil      
-    end
-
+    ### command and control actions
     def rest__initiate_get_log()
       assembly = ret_assembly_instance_object()
-      params   = ret_params_hash(:node_identifier,:log_path, :start_line)
-      queue = ActionResultsQueue.new
-      assembly.initiate_get_log(queue, params)
+      params = ret_params_hash(:log_path, :start_line)
+      node_pattern = ret_params_hash(:node_identifier)
+      queue = initiate_action(GetLog, assembly, params, node_pattern)
+      rest_ok_response :action_results_id => queue.id
+    end
+
+    def rest__initiate_grep()
+      assembly = ret_assembly_instance_object()
+      params = ret_params_hash(:log_path, :grep_pattern, :stop_on_first_match)
+      #TODO: should use in rest call :node_identifier
+      np = ret_request_params(:node_pattern)
+      node_pattern = (np ? {:node_identifier => np} : {})
+      queue = initiate_action(Grep, assembly, params, node_pattern)
+      rest_ok_response :action_results_id => queue.id
+    end
+
+    def rest__initiate_get_netstats()
+      assembly = ret_assembly_instance_object()
+      params = Hash.new
+      node_pattern = ret_params_hash(:node_id)
+      queue = initiate_action(GetNetstats, assembly, params, node_pattern)
+      rest_ok_response :action_results_id => queue.id
+    end
+
+    def rest__initiate_get_ps()
+      assembly = ret_assembly_instance_object()
+      params = Hash.new
+      node_pattern = ret_params_hash(:node_id)
+      queue = initiate_action(GetPs, assembly, params, node_pattern)
       rest_ok_response :action_results_id => queue.id
     end
 
     def rest__initiate_ssh_pub_access()
       assembly = ret_assembly_instance_object()
       params   = ret_params_hash(:rsa_pub_name, :rsa_pub_key, :system_user)
-      agent_action = ret_non_null_request_params(:agent_action)
-      target_nodes = ret_node_id_handles(:target_nodes, assembly)
-
-      # get models from idhs
-      target_nodes = target_nodes.collect { |t_node| t_node.create_object().update_object!(:id, :display_name, :external_ref) }
+      agent_action = ret_non_null_request_params(:agent_action).to_sym
+      target_nodes = ret_matching_nodes(assembly)
       
       # check existance of key and system user in database
       system_user, key_name = params[:system_user], params[:rsa_pub_name]
       nodes = Component::Instance::Interpreted.find_candidates(assembly, system_user, key_name, agent_action, target_nodes)
-      
-      if agent_action.to_sym == :revoke_access && nodes.empty?
-        raise ErrorUsage.new("Access #{target_nodes.empty? ? '' : 'on given nodes'} is not granted to system user '#{system_user}' with name '#{key_name}'")
+
+      queue = initiate_action_with_nodes(SSHAccess,nodes,params.merge(:agent_action => agent_action)) do 
+        # need to put sanity checking in block under initiate_action_with_nodes
+        if target_nodes_option = ret_request_params(:target_nodes)
+          unless target_nodes_option.empty?
+            raise ErrorUsage.new("Not implemented when target nodes option given")
+          end
+        end
+
+        if agent_action == :revoke_access && nodes.empty?
+          raise ErrorUsage.new("Access #{target_nodes.empty? ? '' : 'on given nodes'} is not granted to system user '#{system_user}' with name '#{key_name}'")
+        end
+        if agent_action == :grant_access && nodes.empty?
+          raise ErrorUsage.new("Nodes already have access to system user '#{system_user}' with name '#{key_name}'")
+        end
       end
-
-      if agent_action.to_sym == :grant_access && nodes.empty?
-        raise ErrorUsage.new("Nodes already have access to system user '#{system_user}' with name '#{key_name}'")
-      end
-
-      queue    = ActionResultsQueue.new
-
-      assembly.initiate_ssh_agent_action(agent_action.to_sym, queue, params, nodes)
-
       rest_ok_response :action_results_id => queue.id
     end
 
     def rest__list_ssh_access()
       assembly = ret_assembly_instance_object()
-
       rest_ok_response Component::Instance::Interpreted.list_ssh_access(assembly)
     end
 
-    def rest__initiate_grep()
-      assembly = ret_assembly_instance_object()
-      params   = ret_params_hash(:node_pattern, :log_path, :grep_pattern, :stop_on_first_match)
-      queue = ActionResultsQueue.new
-      assembly.initiate_grep(queue, params)
-      rest_ok_response :action_results_id => queue.id
-    end
-
-    def rest__task_status()
-      assembly_id = ret_request_param_id(:assembly_id,Assembly::Instance)
-      format = (ret_request_params(:format)||:hash).to_sym
-      response = Task::Status::Assembly.get_status(id_handle(assembly_id),:format => format)
-      rest_ok_response response
-    end
-
-    ### mcollective actions
-    def rest__initiate_get_netstats()
-      node_id = ret_non_null_request_params(:node_id)
-      assembly = ret_assembly_instance_object()
-      queue = ActionResultsQueue.new
-      assembly.initiate_get_netstats(queue, node_id)
-      rest_ok_response :action_results_id => queue.id
-    end
-
-    def rest__initiate_get_ps()
-      node_id = ret_non_null_request_params(:node_id)
-      assembly = ret_assembly_instance_object()
-      queue = ActionResultsQueue.new
-      assembly.initiate_get_ps(queue, node_id)
-      rest_ok_response :action_results_id => queue.id
-    end
-
     def rest__initiate_execute_tests()
-      node_id, components = ret_non_null_request_params(:node_id, :components)
-      assembly = ret_assembly_instance_object()
-
-      # Logic for validation
-      # filters only running nodes for this assembly
-      nodes = assembly.get_nodes(:id,:display_name,:type,:external_ref,:hostname_external_ref, :admin_op_status)
-      assembly_name = Assembly::Instance.pretty_print_name(assembly)
-      nodes, is_valid, error_msg = nodes_are_up?(assembly_name, nodes, :running)
-
-      unless is_valid
-        Log.info(error_msg)
-        return rest_ok_response(:errors => [error_msg])
-      end
-
-      # Logic for validation
-      # restrict execution of execute-test if tasks are still executing
-      # Commenting out to check if we have other way to get to the bottom of DTK-1477 issue
-      # node_names = nodes.map { |node| node[:display_name] }
-      # tasks_status = Task::Status::Assembly.get_status(id_handle(assembly[:id]),:format => :table)
-      # tasks_status.each do |task_status|
-      #  return rest_ok_response(:errors => ["Tasks are still executing. Please wait until tasks are completed to use execute-test functionality"]) if task_status[:status] == "executing"
-      # end
-
-      # Special case for preventing execution of agent on specific node that is not running
-      matching_nodes = nodes.select { |node| node[:id] == node_id.to_i }
-      if (!node_id.empty? && matching_nodes.empty?)
-        error_msg = "Serverspec tests cannot be executed on nodes that are not 'running'."
-        Log.info(error_msg)
-        return rest_ok_response(:errors => [error_msg])
-      end
-
-      # Special case filtering of components from nodes that are not running and passing only those components for the execution
-      node_names = Array.new
-      nodes.each do |x|
-        node_names << x[:display_name]
-      end
-      
-      unless components.empty?
-        components.reject! do |c|
-          if c.include? "/"
-            !node_names.include? c.split("/").first
-          end
-        end
-      end
-
-      queue = ActionResultsQueue.new
-      assembly.initiate_execute_tests(queue, node_id, components)
-      rest_ok_response :action_results_id => queue.id
-    end
-
-    def rest__initiate_execute_tests_v2()
-      node_id, components = ret_non_null_request_params(:node_id, :components)
+      node_id = ret_request_params(:node_id)
+      component = ret_non_null_request_params(:components)
       assembly = ret_assembly_instance_object()
       project = get_default_project()
-      # Logic for validation
-      # filters only running nodes for this assembly
-      nodes = assembly.get_nodes(:id,:display_name,:type,:external_ref,:hostname_external_ref, :admin_op_status)
+
+      # Filter only running nodes for this assembly
+      nodes = assembly.get_leaf_nodes(:cols => [:id,:display_name,:type,:external_ref,:hostname_external_ref, :admin_op_status])
       assembly_name = Assembly::Instance.pretty_print_name(assembly)
       nodes, is_valid, error_msg = nodes_are_up?(assembly_name, nodes, :running)
 
       unless is_valid
         Log.info(error_msg)
-        return rest_ok_response(:errors => [error_msg])
+        return rest_ok_response(:errors => error_msg)
       end
 
-      # Special case for preventing execution of agent on specific node that is not running
-      matching_nodes = nodes.select { |node| node[:id] == node_id.to_i }
-      if (!node_id.empty? && matching_nodes.empty?)
-        error_msg = "Serverspec tests cannot be executed on nodes that are not 'running'."
-        Log.info(error_msg)
-        return rest_ok_response(:errors => [error_msg])
-      end
-
-      # Special case filtering of components from nodes that are not running and passing only those components for the execution
-      node_names = Array.new
-      nodes.each do |x|
-        node_names << x[:display_name]
+      # Filter node if execute tests is started from the specific node
+      nodes.select! { |node| node[:id] == node_id.to_i } unless node_id.nil?
+      if nodes.empty?
+        return rest_ok_response(:errors => "Unable to execute tests. Provided node is not valid!")
       end
       
-      unless components.empty?
-        components.reject! do |c|
-          if c.include? "/"
-            !node_names.include? c.split("/").first
-          end
-        end
-      end
-
-      queue = ActionResultsQueue.new
-      response = assembly.initiate_execute_tests_v2(project,queue, node_id, components)
-
-      return rest_ok_response(:errors => [response[:error]]) if response[:error]
+      params = {:nodes => nodes, :component => component, :agent_action => :execute_tests, :project => project, :assembly_instance => assembly}
+      queue = initiate_execute_tests(ExecuteTests, params)
+      return rest_ok_response(:errors => queue.error) if queue.error
       rest_ok_response :action_results_id => queue.id
     end
     
@@ -843,7 +665,7 @@ module DTK
     end
     ### end: mcollective actions
 
-# TDODO: got here in cleanup of rest calls
+# TODO: got here in cleanup of rest calls
 
     def rest__list_smoketests()
       assembly = ret_assembly_object()

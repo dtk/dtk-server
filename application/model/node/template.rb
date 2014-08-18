@@ -2,7 +2,6 @@ module DTK
   class Node
     class Template < self
       def self.list(model_handle,opts={})
-
         ret = Array.new
         node_bindings = nil
 
@@ -86,6 +85,11 @@ module DTK
       end
 
       def self.find_matching_node_template(target,opts={})
+        if node_target = opts[:node_target]
+          pp [:node_target,node_target]
+          raise Error.new("here need to write code that uses node_target to return results")
+        end
+
         node_binding_rs = opts[:node_binding_ruleset]
         ret = node_binding_rs && node_binding_rs.find_matching_node_template(target)
         ret || null_node_template(target.model_handle(:node))

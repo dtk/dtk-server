@@ -16,10 +16,9 @@ module DTK
       ds_column_defs :ds_attributes, :ds_key, :data_source, :ds_source_obj_type
       external_ref_column_defs()
       virtual_column :name, :type => :varchar, :local_dependencies => [:display_name]
-      column :tag, :varchar
+      column :tags, :json
       # TODO: may change types; by virtue of being in alibrary we know about item; may need to distingusih between backed images versus barbones one; also may only treat node constraints with search objects
       column :type, :varchar, :size => 25, :default => "instance" # Possible values are Node::Type.types
-      column :role, :varchar, :size => 50
       column :os_type, :varchar, :size => 25
       column :os_identifier, :varchar, :size => 50 #augments os_type to identify specifics about os. From os_identier given region one can find unique ami
       column :architecture, :varchar, :size => 10 #e.g., 'i386'
@@ -50,6 +49,7 @@ module DTK
 
       # can be null; points to the canonical member (a node template in the library) which is used by default when do node_group add_node 
       foreign_key :canonical_template_node_id, :node, FK_SET_NULL_OPT
+
       virtual_column :canonical_template_node, :type => :json, :hidden => true,
         :remote_dependencies =>
         [{
@@ -86,7 +86,7 @@ module DTK
            :cols => [:id,:display_name]
          }]
 
-      virtual_column :node_or_ng_summary, :type=>:json, :hidden=>true,
+      virtual_column :linked_target_refs, :type=>:json, :hidden=>true,
       :remote_dependencies=>
         [{
            :model_name=>:node_group_relation,
@@ -96,7 +96,7 @@ module DTK
        },
        {
            :model_name=>:node,
-           :alias => :node_member,
+           :alias => :target_ref,
            :convert => true,
            :join_type=>:left_outer,
            :join_cond=>{:id => q(:node_group_relation,:node_id)},

@@ -14,7 +14,7 @@ ActiveRecord::Base.establish_connection(dbconfig["dbconnection"])
 
 build_id = ARGV[0]
 suite_name = dbconfig["options"]["suite"]
-@query = "select * from test_runs tr, test_suites ts where ts.id = tr.test_suites_id and tr.build LIKE '#{build_id}' and ts.suite LIKE '#{suite_name}'"
+@query = "select * from test_runs tr, test_suites ts where ts.id = tr.test_suites_id and tr.build LIKE '#{build_id}' and ts.suite LIKE '#{suite_name}' order by tr.created_at desc limit 1"
 
 report = "Execution stats:\n"
 report << "----------------\n"

@@ -1,5 +1,8 @@
 module Ramaze::Helper
   module AssemblyHelper
+    r8_nested_require('assembly_helper','action')
+    include ActionMixin
+
     def ret_assembly_object()
       assembly_id,subtype = ret_assembly_params_id_and_subtype()
       id_handle(assembly_id,:component).create_object(:model_name => (subtype == :instance) ? :assembly_instance : :assembly_template) 
@@ -68,13 +71,14 @@ module Ramaze::Helper
       ret_request_param_id_handle(node_name_param,::DTK::Node,assembly.id())
     end
 
-    #
+    ##
     # Pass param name containing with comma seperated names or ids. Param name should
     # resolve to command seperated node id/names (String)
     #
     # Returns: Returns array of node id handles
     #
     def ret_node_id_handles(node_name_param, assembly)
+      Log.error("check if works for node groups")
       # get nodes list (command seperated) from request
       target_nodes_str = ret_request_params(node_name_param)
       return [] unless target_nodes_str
@@ -120,6 +124,5 @@ module Ramaze::Helper
       end
       [assembly_template_name,service_module_name]
     end
-
   end
 end

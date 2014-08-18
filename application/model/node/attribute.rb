@@ -1,3 +1,4 @@
+# TODO: better unify with code in model/attribute special processing
 module DTK
   class Node
     class NodeAttribute
@@ -9,40 +10,97 @@ module DTK
         ret_value?(:root_device_size)
       end
 
-      def cardinality()
-        ret_value?(:cardinality)||1
+      def cardinality(opts={})
+        ret = ret_value?(:cardinality)
+        (opts[:no_default] ? ret : ret||CardinalityDefault)
       end
+      CardinalityDefault = 1
 
       def puppet_version()
         ret_value?(:puppet_version)||R8::Config[:puppet][:version]
       end
 
-      def self.assembly_attribute_filter()
-        AssemblyAttributeFilter
+      def self.target_ref_attributes_filter()
+        TargetRefAttributeFilter
       end
-      NodeTemplateAttributes = ['host_addresses_ipv4','node_components','fqdn']
-      AssemblyAttributeFilter = [:and] + NodeTemplateAttributes.map{|a|[:neq,:display_name,a]}
+      def self.assembly_template_attribute_filter()
+        AssemblyTemplateAttributeFilter
+      end
+      TargetRefAttributes = ['host_addresses_ipv4','fqdn','node_components','puppet_version','root_device_size']
+      TargetRefAttributeFilter = [:oneof,:display_name,TargetRefAttributes]
+      NonTemplateAttributes = ['host_addresses_ipv4','node_components','fqdn']
+      AssemblyTemplateAttributeFilter = [:and] + NonTemplateAttributes.map{|a|[:neq,:display_name,a]}
+
+      # for each node, one of following actions is taken
+      # - if attribute does not exist, it is created with the given value
+      # - if attribute exists but has vlaue differing from 'value' then it is updated
+      # - otherwise no-op
+      def self.create_or_set_attributes?(nodes,name,value)
+        node_idhs = nodes.map{|n|n.id_handle()}
+        ndx_attrs = get_ndx_attributes(node_idhs,name)
+        to_create_on_node = Array.new
+        to_change_attrs = Array.new
+        nodes.each do |node|
+          if attr = ndx_attrs[node[:id]]
+            if existing_val = attr[:attribute_value]
+              unless existing_val == value
+                to_change_attrs << node
+              end
+            end
+          else
+            to_create_on_node << node
+          end
+        end
+        to_change_attrs.each{|attr|attr.update(:value_asserted => val)}
+        
+        unless to_create_on_node.empty?
+          create_rows = to_create_on_node.map{|n|attribute_create_hash(n.id,name,value)}
+          attr_mh = to_create_on_node.first.model_handle().create_childMH(:attribute)
+          Model.create_from_rows(attr_mh,create_rows,:convert => true)
+        end
+      end
 
       def self.cache_attribute_values!(nodes,name)
         nodes_to_query = nodes.reject{|node|Cache.attr_is_set?(node,name)}
         return if nodes_to_query.empty?
-
-        cols = [:id,:node_node_id,:attribute_value]
-        field_info = field_info(name)
-        filter =  [:eq,:display_name,field_info[:name].to_s]
         node_idhs = nodes_to_query.map{|n|n.id_handle()}
-        ndx_attrs =  Node.get_node_level_attributes(node_idhs,cols,filter).inject(Hash.new) do |h,a|
-          h.merge(a[:node_node_id] => a[:attribute_value])
-        end
+        ndx_attrs = get_ndx_attributes(node_idhs,name)
 
+        field_info = field_info(name)
         nodes_to_query.each do |node|
-          if raw_val = ndx_attrs[node[:id]]
-            Cache.set!(node,raw_val,field_info)
+          if attr = ndx_attrs[node[:id]]
+            if val = attr[:attribute_value]
+              Cache.set!(node,val,field_info)
+            end
           end
         end
       end
 
      private
+      # attributes indexed by node id
+      def self.get_ndx_attributes(node_idhs,name)
+        cols = [:id,:node_node_id,:attribute_value]
+        field_info = field_info(name)
+        filter =  [:eq,:display_name,field_info[:name].to_s]
+        Node.get_node_level_attributes(node_idhs,:cols=>cols,:add_filter=>filter).inject(Hash.new) do |h,a|
+          h.merge(a[:node_node_id] => a)
+        end
+      end
+
+      # TODO: need to btter coordinate with code in model/attribute special processing and also the
+      # constants in FieldInfo
+      def self.attribute_create_hash(node_id,name,value,extra_fields={})
+        unless extra_fields.empty?
+          raise Error.new("extra_fields with args not treated yet")
+        end
+        name = name.to_s
+        {:ref => name,
+          :display_name => name,
+          :value_asserted => value,
+          :node_node_id => node_id
+        }
+      end
+
       FieldInfo = {
         :cardinality => {:name => :cardinality, :semantic_type => :integer},
         :root_device_size => {:name => :root_device_size, :semantic_type => :integer},
@@ -102,26 +160,35 @@ module DTK
         NodeAttribute.cache_attribute_values!(nodes,name)
       end
 
-      # node_level_assembly_attributes are ones that are persited on assembly logical nodes, not node template
-      def get_node_level_assembly_attributes(node_idhs,cols=nil)
-        cols ||= [:id,:display_name,:node_node_id,:attribute_value]
-        add_filter = NodeAttribute.assembly_attribute_filter()
-        get_node_level_attributes(node_idhs,cols,add_filter)
+      # target_ref_attributes are ones used on target refs and can also be on instances
+      def get_target_ref_attributes(node_idhs,opts={})
+        cols = opts[:cols] || [:id,:display_name,:node_node_id,:attribute_value]
+        add_filter = NodeAttribute.target_ref_attributes_filter()
+        get_node_level_attributes(node_idhs,:cols=>cols,:add_filter=>add_filter)
       end
 
-      def get_node_level_attributes(node_idhs,cols=nil,add_filter=nil)
+      # node_level_assembly_template_attributes are ones that are persisted in service modules
+      def get_node_level_assembly_template_attributes(node_idhs,opts={})
+        cols = opts[:cols] || [:id,:display_name,:node_node_id,:attribute_value]
+        add_filter = NodeAttribute.assembly_template_attribute_filter()
+        get_node_level_attributes(node_idhs,:cols=>cols,:add_filter=>add_filter)
+      end
+
+      def get_node_level_attributes(node_idhs,opts={})
         ret = Array.new
         return ret if node_idhs.empty?()
         filter = [:oneof,:node_node_id,node_idhs.map{|idh|idh.get_id()}]
-        if add_filter
+        if add_filter = opts[:add_filter]
           filter = [:and,filter,add_filter]
         end
+        cols = opts[:cols] || [:id,:group_id,:display_name,:required]
         sp_hash = {
-          :cols => cols||[:id,:group_id,:display_name,:required],
+          :cols => cols,
           :filter => filter,
         }
         attr_mh = node_idhs.first.createMH(:attribute)
-        get_objs(attr_mh,sp_hash)
+        opts = (cols.include?(:ref) ? {:keep_ref_cols => true} : {})
+        get_objs(attr_mh,sp_hash,opts)
       end
 
       def get_virtual_attributes(attrs_to_get,cols,field_to_match=:display_name)
@@ -170,7 +237,7 @@ module DTK
         get_node_attributes(opts.merge(:filter => [:eq,:display_name,attribute_name])).first
       end
       def get_node_attributes(opts={})
-        Node.get_node_level_attributes([id_handle()],opts[:cols],opts[:filter])
+        Node.get_node_level_attributes([id_handle()],:cols=>opts[:cols],:add_filter=>opts[:filter])
       end
 
       # TODO: stub; see if can use get_node_attributes

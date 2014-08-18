@@ -68,7 +68,7 @@ module DTK
         iaas_properties_list = regions.map do |region|
           name = default_target_name(:region => region)
           properties = common_iaas_properties.merge(:region => region)
-          IAASProperties.new(name,properties)
+          IAASProperties.new(:name => name, :iaas_properties => properties)
         end
         Instance.create_targets?(project_idh,self,iaas_properties_list)
       end
@@ -100,7 +100,8 @@ module DTK
       end
      private
       def base_name()
-        get_field?(:display_name).gsub(Regexp.new("#{DisplayNameSufix}$"),'')
+        # get_field?(:display_name).gsub(Regexp.new("#{DisplayNameSufix}$"),'')
+        get_field?(:display_name)
       end
 
       def self.object_type_filter()
@@ -108,9 +109,11 @@ module DTK
       end
       
       def self.provider_display_name(provider_name)
-        "#{provider_name}#{DisplayNameSufix}" 
+        # "#{provider_name}#{DisplayNameSufix}"
+        provider_name
       end
-      DisplayNameSufix = '-template'
+      # removed '-template' from provider display_name (ticket DTK-1480)
+      # DisplayNameSufix = '-template'
 
       def self.provider_exists?(project_idh,provider_name)
         sp_hash = {

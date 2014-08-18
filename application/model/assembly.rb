@@ -145,7 +145,8 @@ module DTK
     end
 
     def set_attributes(av_pairs,opts={})
-      attr_patterns = Attribute::Pattern::Assembly.set_attributes(self,av_pairs,opts)
+      # return attr_patterns
+      Attribute::Pattern::Assembly.set_attributes(self,av_pairs,opts)
     end
 
     def self.ret_component_type(service_module_name,assembly_name)
@@ -196,7 +197,7 @@ module DTK
     end
 
     ##############
-    # TODO: looks like callers dont need all teh detail; might just provide summarized info or instead pass arg that specifies sumamry level
+    # TODO: looks like callers dont need all the detail; might just provide summarized info or instead pass arg that specifies sumamry level
     # also make optional whether materialize
     def get_node_assembly_nested_objects()
       ndx_nodes = Hash.new

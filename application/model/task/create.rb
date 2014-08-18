@@ -1,129 +1,107 @@
-r8_nested_require('stage','intra_node')
-r8_nested_require('stage','puppet_stage_generator')
-module DTK
+#TODO: clean this file up; much cut and patse. moving methods we want to keep towards the top
+module DTK; class Task
   module CreateClassMixin
-    def create_and_start_from_assembly_instance(assembly,opts={})
-      target_idh = target_idh_from_assembly(assembly)
-      task_mh = target_idh.create_childMH(:task)
-
-      component_type = opts[:component_type]||:service
-      commit_msg = opts[:commit_msg]
-      # TODO: not doing at this point puppet version per run; it just can be set when node is created
-      puppet_version = opts[:puppet_version]
-
-      ret = create_new_task(task_mh,:assembly_id => assembly[:id],:display_name => "assembly_converge", :temporal_order => "sequential",:commit_message => commit_msg)
-
-      create_node_tasks = task_when_nodes_created_and_started_from_assembly(assembly, :assembly, opts)
-      ret.add_subtask(create_node_tasks) if create_node_tasks
-
-      opts = {:component_type_filter => component_type}
-      task_template_content = Task::Template::ConfigComponents.get_or_generate_template_content([:assembly,:node_centric],assembly,opts)
-      stages_config_nodes_task = task_template_content.create_subtask_instances(task_mh,assembly.id_handle())
-      
-      pp "---encoding of task_template_content.serialization_form()"
-      serialization_hash = task_template_content.serialization_form()
-      STDOUT << Aux.serialize(serialization_hash,:yaml)
-      STDOUT << "\n\n"
-      pp "--- end: encodings of task_template_content.serialization_form()"
-      
-      ret.add_subtasks(stages_config_nodes_task) unless stages_config_nodes_task.empty?
-      ret
-    end
-
     def create_from_assembly_instance(assembly,opts={})
-      component_type = opts[:component_type]||:service
-      commit_msg = opts[:commit_msg]
-      # TODO: not doing at this point puppet version per run; it just can be set when node is created
-      puppet_version = opts[:puppet_version]
+      task = Create.create_from_assembly_instance(assembly,opts)
+      #alters task if needed to decompose node groups into nodes
+      NodeGroupProcessing.decompose_node_groups!(task)
+    end
+  end
 
+  class Create
+    def self.create_from_assembly_instance(assembly,opts={})
+      component_type = opts[:component_type]||:service
       target_idh = target_idh_from_assembly(assembly)
       task_mh = target_idh.create_childMH(:task)
+      
+      ret = create_top_level_task(task_mh,assembly,Aux.hash_subset(opts,:commit_msg))
 
-      ret = create_new_task(task_mh,:assembly_id => assembly[:id],:display_name => "assembly_converge", :temporal_order => "sequential",:commit_message => commit_msg)
-
-      create_nodes_task = 
+      create_or_start_nodes_task = 
         case component_type
-          # smoketest should not create a node
-          when :smoketest then nil
-          when :service 
-            create_nodes_changes = StateChange::Assembly::node_state_changes(assembly,target_idh)
-            create_nodes_task(task_mh,create_nodes_changes)
-          else
+         when :smoketest then nil # smoketest should not create a node
+         when :service 
+          start_node = opts[:start_node_changes]
+          action_type = (start_node ? :power_on_node : :create_node)
+          action_class = (start_node ? Action::PowerOnNode : Action::CreateNode)
+          node_scs = StateChange::Assembly.node_state_changes(action_type,assembly,target_idh,:just_leaf_nodes => true)
+          if nodes = opts[:ret_nodes]
+            node_scs.each{|sc|nodes << sc[:node]}
+          end
+          NodesTask.create_subtask(action_class,task_mh,node_scs)
+         else
           raise Error.new("Unexpected component_type (#{component_type})")
         end
-
-      opts = {:component_type_filter => component_type}
-      task_template_content = Task::Template::ConfigComponents.get_or_generate_template_content([:assembly,:node_centric],assembly,opts)
+      opts_tt = {:component_type_filter => component_type}
+      task_template_content = Template::ConfigComponents.get_or_generate_template_content([:assembly,:node_centric],assembly,opts_tt)
       stages_config_nodes_task = task_template_content.create_subtask_instances(task_mh,assembly.id_handle())
 
-      pp "---encoding of task_template_content.serialization_form()"
-      opts.merge!(:allow_empty_task => true) unless create_nodes_task.nil? && task_template_content.empty?
-      serialization_hash = task_template_content.serialization_form(opts)
-      STDOUT << Aux.serialize(serialization_hash,:yaml)
-      STDOUT << "\n\n"
-      pp "--- end: encodings of task_template_content.serialization_form()"
-
-      ret.add_subtask(create_nodes_task) if create_nodes_task
+      ret.add_subtask(create_or_start_nodes_task) if create_or_start_nodes_task
       ret.add_subtasks(stages_config_nodes_task) unless stages_config_nodes_task.empty?
       ret
     end
 
-    def task_when_nodes_created_and_started_from_assembly(assembly, component_type, opts={})
-      assembly_idh = assembly.id_handle()
-      target_idh   = target_idh_from_assembly(assembly)
-      task_mh      = target_idh.create_childMH(:task)
-      all_actions  = Array.new
-
-      main_task = create_new_task(task_mh,:assembly_id => assembly_idh.get_id(),:display_name => "power_on_nodes", :temporal_order => "concurrent",:commit_message => nil)
-      assembly_config_changes = StateChange::Assembly::component_state_changes(assembly,component_type)
-      # running_node_task = create_running_node_task(task_mh, assembly_config_changes)
-
-      ret = nil
-      # for powering on node with no components
-      unless assembly_config_changes and not assembly_config_changes.empty?
-        if node = opts[:node]
-          executable_action = Task::Action::PowerOnNode.create_from_node(node)
-          all_actions << executable_action
-          ret = create_new_task(task_mh,:executable_action => executable_action)
-          main_task.add_subtask(ret)
-        elsif nodes = opts[:nodes]
-          nodes.each do |node|
-            executable_action = Task::Action::PowerOnNode.create_from_node(node)
-            all_actions << executable_action
-            ret = create_new_task(task_mh,:executable_action => executable_action, :display_name => "power_on_node")
-            main_task.add_subtask(ret)
-          end
-        else
-          raise Error.new("Expected that :node of :nodes passed in as options")
-        end
-
-        attr_mh = task_mh.createMH(:attribute)
-        Task::Action::PowerOnNode.add_attributes!(attr_mh,all_actions)
-
-        return main_task
-      end
-
-      if assembly_config_changes.size == 1
-        executable_action = Task::Action::PowerOnNode.create_from_state_change(assembly_config_changes.first.first)
-        all_actions << executable_action
-        ret = create_new_task(task_mh,:display_name => "power_on_node",:executable_action => executable_action) 
-        main_task.add_subtask(ret)
-      else
-        # ret = create_new_task(task_mh,:display_name => "power_on_node", :temporal_order => "concurrent")
-        assembly_config_changes.each do |sc|
-          executable_action = Task::Action::PowerOnNode.create_from_state_change(sc.first)
-          all_actions << executable_action
-          ret = create_new_task(task_mh,:display_name => "power_on_node",:executable_action => executable_action) 
-          main_task.add_subtask(ret)
-          # main_task.add_subtask_from_hash(:display_name => "power_on_node",:executable_action => executable_action)
-          end
-      end
-      attr_mh = task_mh.createMH(:attribute)
-      Task::Action::PowerOnNode.add_attributes!(attr_mh,all_actions)
-
-      main_task
+    #TODO: below will be private when finish refactoring this file
+    def self.target_idh_from_assembly(assembly)
+      assembly.get_target().id_handle()
+    end
+    def self.create_new_task(task_mh,hash)
+      Task.create_stub(task_mh,hash)
     end
 
+    def self.create_top_level_task(task_mh,assembly,opts={})
+      task_info_hash = {
+        :assembly_id => assembly.id,
+        :display_name => "assembly_converge", 
+        :temporal_order => "sequential",
+      }
+      if commit_msg = opts[:commit_msg]
+        task_info_hash.mereg!(:commit_message => commit_msg)
+      end
+
+      create_new_task(task_mh,task_info_hash)
+    end
+
+    class NodesTask < self
+      def self.create_subtask(action_class,task_mh,state_change_list)
+        return nil unless state_change_list and not state_change_list.empty?
+        ret = nil
+        all_actions = Array.new
+        if state_change_list.size == 1
+          executable_action = action_class.create_from_state_change(state_change_list.first)
+          all_actions << executable_action
+          ret = create_new_task(task_mh,subtask_hash(action_class,executable_action))
+        else
+          ret = create_new_task(task_mh,concurrent_subtask(action_class))
+          state_change_list.each do |sc|
+            executable_action = action_class.create_from_state_change(sc)
+            all_actions << executable_action
+            ret.add_subtask_from_hash(subtask_hash(action_class,executable_action))
+          end
+        end
+        attr_mh = task_mh.createMH(:attribute)
+        action_class.add_attributes!(attr_mh,all_actions)
+        ret
+      end
+      
+     private
+      def self.concurrent_subtask(action_class)
+        {
+          :display_name => action_class.stage_display_name(), 
+          :temporal_order => "concurrent"
+        }
+      end
+      
+      def self.subtask_hash(action_class,executable_action)
+        {
+          :display_name => action_class.task_display_name(),
+          :executable_action => executable_action
+        }
+      end
+    end
+  end
+
+  #TODO: move from below when decide whether needed; looking to generalize above so can subsume below 
+  module CreateClassMixin
     def task_when_nodes_ready_from_assembly(assembly, component_type, opts)
       assembly_idh = assembly.id_handle()
       target_idh = target_idh_from_assembly(assembly)
@@ -141,6 +119,7 @@ module DTK
       running_node_task
     end
 
+    #This is is the 'inventory node groups', not the node groups in the service instances'
     def create_from_node_group(node_group_idh,commit_msg=nil)
       ret = nil
       target_idh = node_group_idh.get_parent_id_handle_with_auth_info()
@@ -220,15 +199,15 @@ module DTK
       task_mh = parent_idh.create_childMH(:task)
       grouped_state_changes = group_by_node_and_type(state_change_list)
       grouped_state_changes.each_key do |type|
-        unless [Task::Action::CreateNode,Task::Action::ConfigNode].include?(type)
+        unless [Action::CreateNode,Action::ConfigNode].include?(type)
           Log.error("treatment of task action type #{type.to_s} not yet treated; it will be ignored")
           grouped_state_changes.delete(type)
           next
         end
       end
       # if have both create_node and config node then top level has two stages create_node then config node
-      create_nodes_task = create_nodes_task(task_mh,grouped_state_changes[Task::Action::CreateNode])
-      config_nodes_task = config_nodes_task(task_mh,grouped_state_changes[Task::Action::ConfigNode])
+      create_nodes_task = create_nodes_task(task_mh,grouped_state_changes[Action::CreateNode])
+      config_nodes_task = config_nodes_task(task_mh,grouped_state_changes[Action::ConfigNode])
       if create_nodes_task and config_nodes_task
         ret = create_new_task(task_mh,:temporal_order => "sequential")
         ret.add_subtask(create_nodes_task)
@@ -276,11 +255,11 @@ module DTK
         if node = nodes.pop
           ret = create_new_task(task_mh, :executable_action_type => "InstallAgent", :target_id => target_idh.get_id(), :display_name => "install_agent", :temporal_order => "sequential")
 
-          executable_action = Task::Action::PhysicalNode.create_from_physical_nodes(target, node)
+          executable_action = Action::PhysicalNode.create_from_physical_nodes(target, node)
           subtask = create_new_task(task_mh, :executable_action_type => "InstallAgent", :executable_action => executable_action, :display_name => "install_agent_#{num.to_s}")#, :temporal_order => "sequential")
           ret.add_subtask(subtask)
 
-          executable_action = Task::Action::PhysicalNode.create_smoketest_from_physical_nodes(target, node)
+          executable_action = Action::PhysicalNode.create_smoketest_from_physical_nodes(target, node)
           subtask = create_new_task(task_mh, :executable_action_type => "ExecuteSmoketest", :executable_action => executable_action, :display_name => "execute_smoketest_#{num.to_s}")#, :temporal_order => "sequential")
           ret.add_subtask(subtask)
 
@@ -293,7 +272,7 @@ module DTK
 
    private
     def target_idh_from_assembly(assembly)
-      assembly.get_target().id_handle()
+      Create.target_idh_from_assembly(assembly)
     end
 
     def create_nodes_task(task_mh,state_change_list)
@@ -302,19 +281,19 @@ module DTK
       ret = nil
       all_actions = Array.new
       if state_change_list.size == 1
-        executable_action = Task::Action::CreateNode.create_from_state_change(state_change_list.first.first)
+        executable_action = Action::CreateNode.create_from_state_change(state_change_list.first.first)
         all_actions << executable_action
         ret = create_new_task(task_mh,:executable_action => executable_action) 
       else
         ret = create_new_task(task_mh,:display_name => "create_node_stage", :temporal_order => "concurrent")
         state_change_list.each do |sc|
-          executable_action = Task::Action::CreateNode.create_from_state_change(sc.first)
+          executable_action = Action::CreateNode.create_from_state_change(sc.first)
           all_actions << executable_action
           ret.add_subtask_from_hash(:executable_action => executable_action)
           end
       end
       attr_mh = task_mh.createMH(:attribute)
-      Task::Action::CreateNode.add_attributes!(attr_mh,all_actions)
+      Action::CreateNode.add_attributes!(attr_mh,all_actions)
       ret
     end
 
@@ -329,9 +308,9 @@ module DTK
           raise Error.new("Expected that :node passed in as options")
         end
 
-        executable_action = Task::Action::PowerOnNode.create_from_node(node)
+        executable_action = Action::PowerOnNode.create_from_node(node)
         attr_mh = task_mh.createMH(:attribute)
-        Task::Action::PowerOnNode.add_attributes!(attr_mh,[executable_action])
+        Action::PowerOnNode.add_attributes!(attr_mh,[executable_action])
         ret = create_new_task(task_mh,:executable_action => executable_action, :display_name => "power_on_node")
         main_task.add_subtask(ret)
 
@@ -356,28 +335,28 @@ module DTK
 
         # each element will be list with single element
         if state_change_list.size == 1
-          executable_action = Task::Action::PowerOnNode.create_from_state_change(state_change_list.first.first)
+          executable_action = Action::PowerOnNode.create_from_state_change(state_change_list.first.first)
           all_actions << executable_action
           ret = create_new_task(task_mh,:executable_action => executable_action,:display_name => "power_on_node")
           main_task.add_subtask(ret)
         else
           # ret = create_new_task(task_mh,:display_name => "power_on_nodes", :temporal_order => "concurrent")
           state_change_list.each do |sc|
-            executable_action = Task::Action::PowerOnNode.create_from_state_change(sc.first)
+            executable_action = Action::PowerOnNode.create_from_state_change(sc.first)
             all_actions << executable_action
             main_task.add_subtask_from_hash(:executable_action => executable_action,:display_name => "power_on_node")
           end
         end
       else
         nodes.each do |node|
-          executable_action = Task::Action::PowerOnNode.create_from_node(node)
+          executable_action = Action::PowerOnNode.create_from_node(node)
           all_actions << executable_action
           ret = create_new_task(task_mh,:executable_action => executable_action, :display_name => "power_on_node")
           main_task.add_subtask(ret)
         end
       end
       attr_mh = task_mh.createMH(:attribute)
-      Task::Action::PowerOnNode.add_attributes!(attr_mh,all_actions)
+      Action::PowerOnNode.add_attributes!(attr_mh,all_actions)
       main_task
     end
 
@@ -387,9 +366,9 @@ module DTK
         unless node = opts[:node]
           raise Error.new("Expected that :node passed in as options")
         end
-        executable_action = Task::Action::PowerOnNode.create_from_node(node)
+        executable_action = Action::PowerOnNode.create_from_node(node)
         attr_mh = task_mh.createMH(:attribute)
-        Task::Action::PowerOnNode.add_attributes!(attr_mh,[executable_action])
+        Action::PowerOnNode.add_attributes!(attr_mh,[executable_action])
         return create_new_task(task_mh,:executable_action => executable_action)
       end
 
@@ -397,19 +376,19 @@ module DTK
       ret = nil
       all_actions = Array.new
       if state_change_list.size == 1
-        executable_action = Task::Action::PowerOnNode.create_from_state_change(state_change_list.first.first)
+        executable_action = Action::PowerOnNode.create_from_state_change(state_change_list.first.first)
         all_actions << executable_action
         ret = create_new_task(task_mh,:executable_action => executable_action) 
       else
         ret = create_new_task(task_mh,:display_name => "create_node_stage", :temporal_order => "concurrent")
         state_change_list.each do |sc|
-          executable_action = Task::Action::PowerOnNode.create_from_state_change(sc.first)
+          executable_action = Action::PowerOnNode.create_from_state_change(sc.first)
           all_actions << executable_action
           ret.add_subtask_from_hash(:executable_action => executable_action)
           end
       end
       attr_mh = task_mh.createMH(:attribute)
-      Task::Action::PowerOnNode.add_attributes!(attr_mh,all_actions)
+      Action::PowerOnNode.add_attributes!(attr_mh,all_actions)
       ret
     end
 
@@ -440,7 +419,7 @@ module DTK
         raise ErrorUsage.new("\n" + all_errors.join("\n")) unless all_errors.empty?
       end
       attr_mh = task_mh.createMH(:attribute)
-      Task::Action::ConfigNode.add_attributes!(attr_mh,all_actions)
+      Action::ConfigNode.add_attributes!(attr_mh,all_actions)
       ret
     end
 
@@ -451,7 +430,7 @@ module DTK
       executable_action = nil
       error_msg = nil
       begin 
-        executable_action = Task::Action::ConfigNode.create_from_state_change(state_change, assembly_idh)
+        executable_action = Action::ConfigNode.create_from_state_change(state_change, assembly_idh)
         executable_action.set_inter_node_stage!(stage_index)
       rescue TSort::Cyclic => e
         node = state_change.first[:node]
@@ -485,20 +464,20 @@ module DTK
     
     def map_state_change_to_task_action(state_change)
       @mapping_sc_to_task_action ||= {
-        "create_node" => Task::Action::CreateNode,
-        "install_component" => Task::Action::ConfigNode,
-        "update_implementation" => Task::Action::ConfigNode,
-        "converge_component" => Task::Action::ConfigNode,
-        "setting" => Task::Action::ConfigNode
+        "create_node" => Action::CreateNode,
+        "install_component" => Action::ConfigNode,
+        "update_implementation" => Action::ConfigNode,
+        "converge_component" => Action::ConfigNode,
+        "setting" => Action::ConfigNode
       }
       @mapping_sc_to_task_action[state_change]
     end
 
     def create_new_task(task_mh,hash)
-      create_stub(task_mh,hash)
+      Create.create_new_task(task_mh,hash)
     end
   end
-end
+end; end
 
 
 

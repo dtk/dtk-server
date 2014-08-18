@@ -1,0 +1,44 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:          thin
+# Required-Start:    $local_fs $remote_fs
+# Required-Stop:     $local_fs $remote_fs
+# Default-Start:     2 3 4 5
+# Default-Stop:      S 0 1 6
+# Short-Description: thin initscript
+# Description:       thin
+### END INIT INFO
+
+# Original author: Forrest Robertson
+
+# Do NOT "set -e"
+
+# Source function library.
+
+DAEMON=/usr/local/rvm/wrappers/default/thin
+SCRIPT_NAME=<%= @thin_init_script %>
+CONFIG_PATH=<%= @thin_conf_dir %>
+
+# make sure HOME is set correctly due to https://tickets.puppetlabs.com/browse/FACT-190
+export HOME=<%= @daemon_home_dir %>
+
+# Exit if the package is not installed
+[ -x "$DAEMON" ] || exit 0
+
+case "$1" in
+  start)
+        <%= @daemon_user_sudo %> $DAEMON start --all $CONFIG_PATH
+        ;;
+  stop)
+        $DAEMON stop --all $CONFIG_PATH
+        ;;
+  restart)
+        $DAEMON restart --all $CONFIG_PATH
+        ;;
+  *)
+        echo "Usage: $SCRIPT_NAME {start|stop|restart}" >&2
+        exit 3
+        ;;
+esac
+
+:

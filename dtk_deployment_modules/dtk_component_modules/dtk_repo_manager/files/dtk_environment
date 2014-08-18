@@ -1,0 +1,2 @@
+export REPOMAN_HOOK_HOST=localhost
+export REPOMAN_HOOK_PORT=443

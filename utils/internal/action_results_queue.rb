@@ -1,8 +1,56 @@
 require 'iconv'
 
 module DTK
-  # cross threads may eb seperate requests for new action results queue, but no locking on allocated instance
+  # cross threads may be seperate requests for new action results queue, but no locking on allocated instance
   class ActionResultsQueue
+    Lock = Mutex.new
+    Queues = Hash.new
+    @@count = 0
+    def initialize(opts={})
+      Lock.synchronize do
+        @indexes = []
+        @@count += 1
+        @id = @@count
+        @results = Hash.new
+        Queues[@id] = self
+      end
+    end
+
+    ##
+    # Initiates commmand on nodes 
+    def initiate(nodes,params,opts={})
+      indexes = nodes.map{|r|r[:id]}
+      set_indexes!(indexes)
+      ndx_pbuilderid_to_node_info =  nodes.inject(Hash.new) do |h,n|
+        h.merge(n.pbuilderid => {:id => n[:id], :display_name => n.assembly_node_print_form()})
+      end
+        
+      callbacks = {
+        :on_msg_received => proc do |msg|
+          response = CommandAndControl.parse_response__execute_action(nodes,msg)
+          if response and response[:pbuilderid] and response[:status] == :ok
+            node_info = ndx_pbuilderid_to_node_info[response[:pbuilderid]]
+            data = response[:data]
+            data = process_data!(data,node_info)
+            push(node_info[:id],data)
+          end
+        end
+      }
+      action_hash = action_hash()
+      unless agent = action_hash[:agent]
+        raise Error.new("Unexpected that :agent is not in action_hash")
+      end
+      unless method = action_hash[:method]
+        raise Error.new("Unexpected that :method is not in action_hash")
+      end
+      CommandAndControl.request__execute_action(agent,method,nodes,callbacks,params)
+    end
+
+    # can be overwritten
+    def process_data!(data,node_info)
+      Result.normalize_data_to_utf8_output!(data)
+    end      
+    private :process_data!
 
     # returns :is_complete => is_complete, :results => results
     # since action result queue post processing is specific to netstats results, 
@@ -28,21 +76,10 @@ module DTK
           disable_post_processing = true if v.is_a?(Hash)
         end
       end
-      ret = {:is_complete => is_complete, :results => (disable_post_processing ? results : Result.post_process(results, sort_key))}
-      return ret
-    end
-
-    Lock = Mutex.new
-    Queues = Hash.new
-    @@count = 0
-    def initialize(indexes=[])
-      Lock.synchronize do
-        @indexes = indexes
-        @@count += 1
-        @id = @@count
-        @results = Hash.new
-        Queues[@id] = self
-      end
+      {
+        :is_complete => is_complete, 
+        :results => (disable_post_processing ? results : Result.post_process(results, sort_key))
+      }
     end
 
     def set_indexes!(indexes)
@@ -64,6 +101,7 @@ module DTK
     def push(index,el)
       @results[index] = el
     end
+
     def all_if_complete()
       # TODO: error message if @results.size > @indexes.size
       (@results.size >= @indexes.size) ? @results : nil
@@ -85,6 +123,7 @@ module DTK
         unless results.kind_of?(Hash) #and results.values.first.kind_of?(self)
           return results
         end
+
         ret = Array.new
         # sort by node name and prune out keys with no results
         pruned_sorted_keys = results.reject{|k,v|v.nil?}.sort{|a,b|a[1].node_name <=> b[1].node_name}.map{|r|r.first}
@@ -109,18 +148,17 @@ module DTK
       # Takes possible invalid UTF-8 output and ignores invalid bytes
       #
       # http://po-ru.com/diary/fixing-invalid-utf-8-in-ruby-revisited/
-      def self.normalize_to_utf8_output(response)
+      def self.normalize_data_to_utf8_output!(data)
 
-        if response[:data]
+        if data
           ic = Iconv.new('UTF-8//IGNORE', 'UTF-8')
-          output = response[:data][:output]||''
+          output = data[:output]||''
           valid_output = ic.iconv(output + ' ')[0..-2]
-          response[:data][:output] = valid_output
+          data[:output] = ic.iconv(output + ' ')[0..-2]
         else
-          Log.warn "Skipping UTF-8 normalization since provided output does not have :data element. Response #{response}"
+          Log.warn "Skipping UTF-8 normalization since provided output does not have :data element."
         end
-
-        response
+        data
       end
     end
   end

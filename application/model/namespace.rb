@@ -1,5 +1,8 @@
 module DTK
   class Namespace < Model
+
+    NAMESPACE_DELIMITER = '::'
+
     def self.common_columns()
       [
         :id,
@@ -18,11 +21,15 @@ module DTK
     end
 
     def self.enrich_with_default_namespace(module_name)
-      module_name.include?('::') ? module_name : "#{default_namespace_name}::#{module_name}"
+      module_name.include?(NAMESPACE_DELIMITER) ? module_name : "#{default_namespace_name}#{NAMESPACE_DELIMITER}#{module_name}"
     end
 
     def self.default_namespace_name
       R8::Config[:repo][:local][:default_namespace]
+    end
+
+    def self.join_namespace(namespace, name)
+      "#{namespace}#{NAMESPACE_DELIMITER}#{name}"
     end
 
     def self.find_by_name(namespace_mh, namespace_name)
@@ -64,7 +71,7 @@ module DTK
     end
 
     def enrich_module_name(module_name)
-      "#{self.display_name()}::#{module_name}"
+      "#{self.display_name()}#{NAMESPACE_DELIMITER}#{module_name}"
     end
 
     def method_missing(m, *args, &block)

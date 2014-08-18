@@ -8,15 +8,15 @@ module DTK; class ModuleBranch
           unless ns = module_namespace_name()
             raise Error.new("Unexpected that self does not have namespace set")
           end
-          ret = "#{ns}#{NamespaceDelimiter}#{ret}"
+          ret = Namespace.join_namespace(ns, ret)
         end
         ret
       end
-      NamespaceDelimiter = '::'
 
       def module_namespace_name()
         self[:namespace]
       end
+
       def module_type()
         self[:module_type]
       end

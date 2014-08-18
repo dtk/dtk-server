@@ -49,7 +49,7 @@ module DTK
       namespace   = get_field?(:namespace)
       module_name = get_field?(:display_name)
 
-      namespace ? "#{namespace[:display_name]}::#{module_name}" : module_name
+      namespace ? Namespace.join_namespace(namespace[:display_name], module_name) : module_name
     end
 
     #
@@ -440,7 +440,7 @@ module DTK
         r.merge!(:type => r.component_type()) if r.respond_to?(:component_type)
 
         if r[:namespace]
-          r[:display_name] = r[:namespace][:display_name] + "::" + r[:display_name]
+          r[:display_name] = Namespace.join_namespace(r[:namespace][:display_name], r[:display_name])
         end
       end
       if include_any_detail
@@ -507,10 +507,10 @@ module DTK
       end
     end
 
-    def module_repo_info(repo,module_and_branch_info,version)
+    def module_repo_info(repo,module_and_branch_info,version,module_namespace=nil)
       info = module_and_branch_info #for succinctness
       branch_obj = info[:module_branch_idh].create_object()
-      ModuleRepoInfo.new(repo,info[:module_name],info[:module_idh],branch_obj,version)
+      ModuleRepoInfo.new(repo,info[:module_name],info[:module_idh],branch_obj,version,module_namespace)
     end
 
     # can be overwritten
@@ -618,19 +618,21 @@ module DTK
     def initialize(repo,module_name,module_idh,branch_obj,version=nil,module_namespace=nil)
       super()
       repo_name = repo.get_field?(:repo_name)
+      full_module_name = module_namespace ? Namespace.join_namespace(module_namespace, module_name) : nil
       hash = {
         :repo_id => repo[:id],
         :repo_name => repo_name,
         :module_id => module_idh.get_id(),
         :module_name => module_name,
         :module_namespace => module_namespace,
+        :full_module_name => full_module_name,
         :module_branch_idh => branch_obj.id_handle(),
         :repo_url => RepoManager.repo_url(repo_name),
         :workspace_branch => branch_obj.get_field?(:branch),
         :branch_head_sha => RepoManager.branch_head_sha(branch_obj)
       }
       if version
-        hash.merge!(:version => version)
+        hash.merge!(:version => version, :full_module_name => version.module_name(:with_namespace))
         if assembly_name = version.respond_to?(:assembly_name) && version.assembly_name()
           hash.merge!(:assembly_name => assembly_name)
         end

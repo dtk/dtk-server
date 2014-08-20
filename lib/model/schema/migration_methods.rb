@@ -78,7 +78,7 @@ module XYZ
     end
 
     # TODO: this is specific migration; will have this subsumed and removed
-    def migrate_data_new(opts, tenant_name, c)
+    def migrate_data_new(opts, tenant_name, c=2)
       ap "TENANT NAME" + tenant_name
       # PREP VARS
       repos_changes = {}
@@ -97,11 +97,18 @@ module XYZ
       )
       gitoliteMng = Gitolite::Manager.new("/home/#{tenant_name}/gitolite-admin", overriden_configuration)
 
+      # PROJECT DATA
+      default_project = ::DTK::Project.get_all(ModelHandle.new(c, :project)).first
+
+      session = CurrentSession.new
+      session.set_user_object(default_project.get_field?(:user))
+      session.set_auth_filters(:c,:group_ids)
+
       # GET ALL THE MODULES
       columns = [ :id, :display_name, :c, :group_id, :repos, :remote_repos]
-      modules  = Model.get_objs(ModelHandle.new(c, :component_module), { :cols => columns})
-      services = Model.get_objs(ModelHandle.new(c, :service_module), { :cols => columns})
-      tests = Model.get_objs(ModelHandle.new(c, :test_module), { :cols => columns})
+      modules  = Model.get_objs(default_project.model_handle(:component_module), { :cols => columns})
+      services = Model.get_objs(default_project.model_handle(:service_module), { :cols => columns})
+      tests = Model.get_objs(default_project.model_handle(:test_module), { :cols => columns})
 
       components = modules + services + tests
       raise "No data to migrate, exiting ..." if components.empty?
@@ -116,10 +123,7 @@ module XYZ
           remote_namespace = Namespace.default_namespace_name
         end
 
-        remote_namespace_obj = Namespace.find_or_create(ModelHandle.new(c, :namespace), remote_namespace)
-        # DEBUG SNIPPET >>> REMOVE <<<
-        require (RUBY_VERSION.match(/1\.8\..*/) ? 'ruby-debug' : 'debugger');Debugger.start; debugger
-        exit
+        remote_namespace_obj = Namespace.find_or_create(default_project.model_handle(:namespace), remote_namespace)
 
         ref_name = "#{remote_namespace}::#{e[:display_name]}"
         e.update(:namespace_id => remote_namespace_obj.id(), :ref => ref_name)

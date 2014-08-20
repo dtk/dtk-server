@@ -9,12 +9,12 @@ module XYZ
         if id_handle.is_top?()
           id_handle
         end
-	id_info = IDInfoTable.get_row_from_id_handle id_handle, :raise_error => true 
+	id_info = IDInfoTable.get_row_from_id_handle id_handle, :raise_error => true
 
 	#check if instance or factory
         if id_info[:is_factory]
           factory_idh = id_handle.createIDH(:uri => id_info[:uri], :is_factory => true)
-	  create_from_hash_with_factory(factory_idh,hash,opts) 
+	  create_from_hash_with_factory(factory_idh,hash,opts)
         else
           hash.map{|relation_type,child_hash|
             factory_info = IDInfoTable.get_factory_id_handle(id_handle,relation_type)
@@ -29,7 +29,7 @@ module XYZ
 
         # TODO: temp for debugging; there are top level objects that can mistakenly trigger this
         unless model_handle[:parent_model_name]
-          unless  (not Model.has_group_id_col?(model_handle)) or 
+          unless  (not Model.has_group_id_col?(model_handle)) or
               [:repo,:datacenter,:library,:task,:repo_user,:repo_user_acl,:repo_remote].include?(model_handle[:model_name])
             Log.error_pp(["missing :parent_model_name in create_from_select", model_handle,caller[0..10]])
           end
@@ -41,7 +41,7 @@ module XYZ
         set_created_at!(overrides)
         # TODO: benchmark point pp [:create_from_select,duplicate_refs]
         user_info_assigns = DB.user_info_for_create_seleect(overrides,model_handle)
-        
+
         # modify ds and its columns in concert
         select_info = {:cols =>  field_set.cols, :ds => select_ds.sequel_ds.ungraphed.from_self} #ungraphed and from_self just to be safe
         # processing to take into account c
@@ -68,7 +68,7 @@ module XYZ
             # TODO: not right yet
             duplicate_count = select_info[:ds].join_table(:inner,ds,match_cols).count
             if duplicate_count > 0
-              # TODO: make this a specfic error 
+              # TODO: make this a specfic error
               raise Error.new("found #{duplicate_count.to_s} duplicates")
             end
            when :allow
@@ -85,7 +85,7 @@ module XYZ
         # TODO: may need a from self prefix instead of optional from_self post fix and in general try to remove unnecessay from selfs
         add_cols_to_select!(select_info,user_info_assigns.merge(overrides),{:from_self => [:beg]})
 
-        # final ones to select and add  
+        # final ones to select and add
         sequel_select_with_cols = select_info[:ds]
         columns = select_info[:cols]
 
@@ -93,25 +93,29 @@ module XYZ
         ret = nil
         if ds.respond_to?(:insert_returning_sql)
           returning_ids = Array.new
-          
+
           returning_sql_cols = [:id,:display_name]
           returning_sql_cols << parent_id_col.as(:parent_id) if parent_id_col
-          if opts[:returning_sql_cols] 
-            returning_sql_cols += opts[:returning_sql_cols] 
+          if opts[:returning_sql_cols]
+            returning_sql_cols += opts[:returning_sql_cols]
             returning_sql_cols.uniq!
           end
 
           sql = ds.insert_returning_sql(returning_sql_cols,columns,sequel_select_with_cols)
-          
+
+          if Model.debug_flag?
+            Model.pp_sql_debug(sql, "INSERT STATMENT")
+          end
+
           # TODO: benchmark point pp [:create_from_select,sql]
           fetch_raw_sql(sql){|row| returning_ids << row}
           IDInfoTable.update_instances(model_handle,returning_ids) unless opts[:do_not_update_info_table]
-          ret = opts[:returning_sql_cols] ? 
+          ret = opts[:returning_sql_cols] ?
             process_json_fields_in_returning_ids!(returning_ids,db_rel) :
             ret_id_handles_from_create_returning_ids(model_handle,returning_ids)
         else
           ds.import(columns,sequel_select_with_cols)
-          # TODO: need to get ids and set 
+          # TODO: need to get ids and set
           raise Error.new("have not implemented create_from_select when db adapter does not support insert_returning_sql  not set")
         end
         ret
@@ -128,22 +132,22 @@ module XYZ
         cols = field_set.cols
         select_info = {:cols =>  cols, :ds => select_ds.sequel_ds.ungraphed.from_self} #ungraphed and from_self just to be safe
         add_cols_to_select!(select_info,{:c => model_handle[:c]},{:from_self => [:end]})
-        
+
         db_rel = DB_REL_DEF[model_handle[:model_name]]
         ds = dataset(db_rel)
         # TODO: may need a from self prefix instead of optional from_self post fix and in general try to remove unnecessay from selfs
         add_cols_to_select!(select_info,{},{:from_self => [:beg]})
 
-        # final ones to select and add  
+        # final ones to select and add
         sequel_select_with_cols = select_info[:ds]
         columns = select_info[:cols]
-        
+
         # fn tries to return ids depending on whether db adater supports returning_id
         ret = nil
         unless ds.respond_to?(:insert_returning_sql)
           raise Error.new("Not supported")
         end
-        
+
         returning_sql_cols = [:id,:display_name,parent_id_col.as(:parent_id)]
         sql = ds.insert_returning_sql(returning_sql_cols,columns,sequel_select_with_cols)
         returning_ids = Array.new
@@ -189,7 +193,7 @@ module XYZ
              if col_info[:type] == :json
                row[k] = DB.ret_json_hash(v,col_info)
              end
-           end 
+           end
          end
          returning_ids
        end
@@ -216,9 +220,9 @@ module XYZ
      private
       def create_from_hash_with_factory(factory_idh,hash,opts={})
         ret = Array.new
-        hash.each do |ref,assignments| 
+        hash.each do |ref,assignments|
       	  new_item = create_instance(factory_idh,ref,assignments,opts)
-      	  Log.info("created new object: uri=#{new_item[:uri]}; id=#{new_item[:id]}")		   
+      	  Log.info("created new object: uri=#{new_item[:uri]}; id=#{new_item[:id]}")
       	  ret << new_item
               end
       	 ret
@@ -242,11 +246,11 @@ module XYZ
 	parent_relation_type = nil
         c = factory_idh[:c]
        	if parent_uri == "/" ## if top level object
-          ref_num = compute_ref_num(db_rel,ref,c)          	  
+          ref_num = compute_ref_num(db_rel,ref,c)
 	  #TBD check that the assignments are legal, or trap
 	  new_id = insert_into_db(factory_idh,db_rel,scalar_assignments.merge({:ref_num => ref_num}))
         else
-	  parent_id_info = IDInfoTable.get_row_from_uri parent_uri,c,:raise_error => true 
+	  parent_id_info = IDInfoTable.get_row_from_uri parent_uri,c,:raise_error => true
 	  parent_id = parent_id_info[:id]
 	  parent_relation_type = parent_id_info[:relation_type]
 
@@ -260,7 +264,7 @@ module XYZ
           end
 	  new_id = insert_into_db(factory_idh,db_rel,scalar_assignments.merge(merge_attrs))
 
-	end              
+	end
 
 	raise Error.new("error while inserting element") if new_id.nil?
 
@@ -271,7 +275,7 @@ module XYZ
 	############# processing scalar columns by inserting a row in db_rel
         container_idh = factory_idh.createIDH(:uri => new_uri, :c => c, :model_name => relation_type)
 	create_factory_uris_and_contained_objects(container_idh,new_id,obj_assignments,opts)
-	
+
 	{:uri => new_uri, :id => new_id}
       end
 

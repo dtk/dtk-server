@@ -105,6 +105,10 @@ module DTK
       end
     end
 
+    #
+    # Debug SQL methods (START)
+    #
+
     def self.enable_debug
       @@debug_dev_flag = true
     end
@@ -113,10 +117,22 @@ module DTK
       @@debug_dev_flag
     end
 
-
     def self.disable_debug
       @@debug_dev_flag = false
     end
+
+
+    def self.pp_sql_debug(sql, title=nil)
+      title ||= "Debugging SQL, generated SQL: "
+      puts "::::::: #{title} :: (START) => "
+      puts sql.gsub('"','').gsub('SELECT', "\nSELECT")
+      puts "< = (END) :::::::"
+    end
+
+    #
+    # Debug SQL methods (END)
+    #
+
 
     def get_obj_helper(virtual_attr,result_col=nil,opts={})
       result_col ||= virtual_attr
@@ -518,12 +534,11 @@ module DTK
 
       PerformanceService.start("PERF_SQL", search_object.object_id)
       dataset = search_object.create_dataset()
+
       # [Haris] DEBUG SQL DEBUG HERE
-      if @@debug_dev_flag
-        require 'ap'
-        ap "SQL OUTPUT: #{self}"
-        puts dataset.sequel_ds.sql.gsub('"','').gsub('SELECT', "\nSELECT") if dataset
-        ap "OUTPUT:"
+      if debug_flag?
+        pp_sql_debug(dataset.sequel_ds.sql, "SELECT STATMENTS") if dataset
+        ap "OUTPUT: "
         ap dataset.all(opts) if dataset
       end
 

@@ -123,10 +123,14 @@ module DTK
         project_idh = get_project.id_handle()
         module_name = module_name()
         module_branch_idh = module_branch.id_handle()
+
+        setting_files = check_if_settings_exist(module_branch)
+        new_structure = setting_files.empty? ? false : true
+
         assembly_import_helper = AssemblyImport.new(project_idh,module_branch,module_name,component_module_refs)
         #TODO: make more general than just aggregating DanglingComponentRefs
         dangling_errors = ParsingError::DanglingComponentRefs::Aggregate.new(:error_cleanup => proc{error_cleanup()})
-        assembly_meta_file_paths(module_branch) do |meta_file,default_assembly_name|
+        assembly_meta_file_paths(module_branch, new_structure) do |meta_file,default_assembly_name|
           dangling_errors.aggregate_errors!()  do
             file_content = RepoManager.get_file_content(meta_file,module_branch)
             format_type = meta_file_format_type(meta_file)
@@ -141,12 +145,94 @@ module DTK
         errors = dangling_errors.raise_error?(:do_not_raise => true)
         return errors if errors.is_a?(ParsingError::DanglingComponentRefs)
 
-        assembly_import_helper.import()
+        imported = assembly_import_helper.import()
+        create_setting_objects_from_dsl(module_branch, component_module_refs, imported, opts)
+
+        imported
       end
 
+      def create_setting_objects_from_dsl(module_branch, component_module_refs, imported, opts={})
+        project_idh        = get_project.id_handle()
+        module_name        = module_name()
+        module_branch_idh  = module_branch.id_handle()
+        hash_content, hash = {}, {}
+        display_name, type = nil, nil
+
+        imported.each do |k,v|
+          display_name = v["display_name"]
+          type = v["type"]
+        end
+
+        sp_hash = {
+          :cols => [:id],
+          :filter => [:and, [:eq, :display_name, display_name], [:eq, :type, type]]
+        }
+        cmp_mh = project_idh.createMH(:component)
+        cmp = Model.get_obj(cmp_mh,sp_hash)
+        cmp_idh = cmp_mh.createIDH(:id => cmp[:id])
+
+        dangling_errors = ParsingError::DanglingComponentRefs::Aggregate.new(:error_cleanup => proc{error_cleanup()})
+        setting_meta_file_paths(module_branch) do |meta_file,default_assembly_name|
+          dangling_errors.aggregate_errors!()  do
+            file_content = RepoManager.get_file_content(meta_file,module_branch)
+            format_type = meta_file_format_type(meta_file)
+            opts.merge!(:file_path => meta_file,:default_assembly_name => default_assembly_name)
+
+            hash_content = Aux.convert_to_hash(file_content,format_type,opts)||{}
+            return hash_content if ParsingError.is_error?(hash_content)
+
+            hash.merge!(add_settings_into_hash(hash_content, cmp))
+            Model.input_hash_content_into_model(cmp_idh, hash)
+          end
+        end
+
+        errors = dangling_errors.raise_error?(:do_not_raise => true)
+        return errors if errors.is_a?(ParsingError::DanglingComponentRefs)
+      end
+
+      def add_settings_into_hash(hash_content, cmp)
+        ref = hash_content['name']
+        {
+          "service_setting" => {
+            ref => {
+              :display_name => hash_content['name'],
+              :node_bindings => hash_content['node_bindings'],
+              :attribute_settings => hash_content['attribute_settings'],
+              :component_component_id => cmp[:id]
+            }
+          }
+        }
+      end
+
+      def check_if_settings_exist(module_branch)
+        ret = {}
+        setting_dsl_path_info = SettingFilenamePathInfo
+        depth = setting_dsl_path_info[:path_depth]
+        ret = RepoManager.ls_r(depth,{:file_only => true},module_branch)
+        regexp = setting_dsl_path_info[:regexp]
+        ret.reject!{|f|not (f =~ regexp)}
+        ret
+      end
+
+      def setting_meta_file_paths(module_branch,&block)
+        setting_dsl_path_info = SettingFilenamePathInfo
+        depth = setting_dsl_path_info[:path_depth]
+        ret = RepoManager.ls_r(depth,{:file_only => true},module_branch)
+        regexp = setting_dsl_path_info[:regexp]
+        ret.reject!{|f|not (f =~ regexp)}
+        ret_with_removed_variants(ret).each do |meta_file|
+          default_assembly_name = (if meta_file =~ regexp then $1; end)
+          block.call(meta_file,default_assembly_name)
+        end
+      end
+      SettingFilenamePathInfo = {
+        :regexp => Regexp.new("^assemblies/([^/]+)/(.*)\.settings\.(.*)\.(json|yaml)$"),
+        :path_depth => 4
+      }
+
       # signature is  assembly_meta_file_paths(module_branch) do |meta_file,default_assembly_name|
-      def assembly_meta_file_paths(module_branch,&block)
-        assembly_dsl_path_info = AssemblyFilenamePathInfo
+      def assembly_meta_file_paths(module_branch, new_structure, &block)
+        assembly_dsl_path_info = new_structure ? AssemblyFilenamePathInfoNew : AssemblyFilenamePathInfo
         depth = assembly_dsl_path_info[:path_depth]
         ret = RepoManager.ls_r(depth,{:file_only => true},module_branch)
         regexp = assembly_dsl_path_info[:regexp]
@@ -158,6 +244,10 @@ module DTK
       end
       AssemblyFilenamePathInfo = {
         :regexp => Regexp.new("^assemblies/([^/]+)/assembly\.(json|yaml)$"),
+        :path_depth => 3
+      }
+      AssemblyFilenamePathInfoNew = {
+        :regexp => Regexp.new("^assemblies/(.*)\.assembly\.(.*)\.(json|yaml)$"),
         :path_depth => 3
       }
 

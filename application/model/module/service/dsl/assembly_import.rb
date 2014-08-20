@@ -69,6 +69,7 @@ module DTK; class ServiceModule
       Model.input_hash_content_into_model(@container_idh,@db_updates_assemblies)
 
       add_port_and_port_links()
+      @db_updates_assemblies["component"]
     end
 
     def self.import_assembly_top(serialized_assembly_ref,assembly_hash,module_branch,module_name,opts={})

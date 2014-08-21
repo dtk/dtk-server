@@ -557,5 +557,15 @@
       "owner_email":"owner_email",
       "owner_type":"owner_type"
     }
+  },
+  "service_setting": {
+    "order": [
+      "id",
+      "name"
+    ],
+    "mapping": {
+      "id": "dtk_id",
+      "name": "display_name"
+    }
   }
-}
+  }

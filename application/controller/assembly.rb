@@ -428,7 +428,7 @@ module DTK
       assembly_name = ret_request_params(:name)
       param_settings = ret_request_params(:settings)
 
-      settings = assembly_template.get_settings(param_settings)
+      settings = assembly_template.get_and_validate_settings(param_settings)
       new_assembly_obj = assembly_template.stage(target, settings, assembly_name)
 
       response = {
@@ -438,6 +438,11 @@ module DTK
         }
       }
       rest_ok_response(response,:encode_into => :yaml)
+    end
+
+    def rest__list_settings()
+      assembly_template = ret_assembly_template_object()
+      rest_ok_response assembly_template.get_settings()
     end
 
     #### end: method(s) related to staging assembly template

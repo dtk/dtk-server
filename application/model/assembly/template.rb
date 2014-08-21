@@ -55,11 +55,28 @@ module DTK; class Assembly
       get_objs(node_mh,sp_hash)
     end
 
-    def get_settings(settings, opts={})
-      self.class.get_settings(id_handle(), settings, opts)
+    def get_settings(opts={})
+      self.class.get_settings(id_handle(), opts)
     end
 
-    def self.get_settings(assembly_idh, settings, opts={})
+    def self.get_settings(assembly_idh,opts={})
+      ret = Array.new
+      return ret unless assembly_idh
+
+      sp_hash = {
+        :cols => opts[:cols]||[:id, :group_id, :display_name, :assembly_id],
+        :filter => [:oneof, :assembly_id, assembly_idh.get_id()]
+      }
+
+      setting_mh = assembly_idh.createMH(:service_setting)
+      get_objs(setting_mh,sp_hash)
+    end
+
+    def get_and_validate_settings(settings, opts={})
+      self.class.get_and_validate_settings(id_handle(), settings, opts)
+    end
+
+    def self.get_and_validate_settings(assembly_idh, settings, opts={})
       ret = Array.new
       return ret unless assembly_idh
 

@@ -425,8 +425,12 @@ module DTK
       target_id = ret_request_param_id_optional(:target_id, ::DTK::Target::Instance)
       target = target_idh_with_default(target_id).create_object(:model_name => :target_instance)
       assembly_template = ret_assembly_template_object()
-      assembly_name = ret_request_params(:name) 
-      new_assembly_obj = assembly_template.stage(target,assembly_name)
+      assembly_name = ret_request_params(:name)
+      param_settings = ret_request_params(:settings)
+
+      settings = assembly_template.get_settings(param_settings)
+      new_assembly_obj = assembly_template.stage(target, settings, assembly_name)
+
       response = {
         :new_service_instance => {
           :name => new_assembly_obj.display_name_print_form, 

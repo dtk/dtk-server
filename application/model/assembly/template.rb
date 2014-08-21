@@ -17,7 +17,7 @@ module DTK; class Assembly
       idh.create_object(:model_name => :assembly_template)
     end
 
-    def stage(target,assembly_name=nil)
+    def stage(target, settings, assembly_name=nil)
       service_module = get_service_module()
       is_dsl_parsed = service_module.dsl_parsed?()
       raise ErrorUsage.new("You are not allowed to stage service from service-module ('#{service_module}') that has dsl parsing errors") unless is_dsl_parsed
@@ -53,6 +53,30 @@ module DTK; class Assembly
       }
       node_mh = assembly_idhs.first.createMH(:node)
       get_objs(node_mh,sp_hash)
+    end
+
+    def get_settings(settings, opts={})
+      self.class.get_settings(id_handle(), settings, opts)
+    end
+
+    def self.get_settings(assembly_idh, settings, opts={})
+      ret = Array.new
+      return ret unless assembly_idh
+
+      sp_hash = {
+        :cols => opts[:cols]||[:id, :group_id, :display_name, :assembly_id],
+        :filter => [:oneof, :assembly_id, assembly_idh.get_id()]
+      }
+      service_setting_mh = assembly_idh.createMH(:service_setting)
+      ret_settings = get_objs(service_setting_mh,sp_hash)
+
+      settings_array = settings.split(',')
+      setting_display_names = ret_settings.map{|x| x[:display_name]}
+
+      ret = settings_array.select{|s| !setting_display_names.include?(s)}
+      raise ErrorUsage.new("Provided service settings #{ret} are not available for this assembly template!") unless ret.empty?
+
+      ret_settings
     end
 
     def self.get_augmented_component_refs(mh,opts={})

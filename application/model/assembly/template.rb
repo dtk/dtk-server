@@ -28,7 +28,7 @@ module DTK; class Assembly
       clone_opts = {:ret_new_obj_with_cols => [:id,:type]}
       new_assembly_obj = nil
       Transaction do
-        new_assembly_obj = target.clone_into(self,override_attrs,clone_opts)
+        new_assembly_obj = target.clone_into(self,override_attrs,clone_opts,settings)
       end
       Assembly::Instance.create_subclass_object(new_assembly_obj)
     end

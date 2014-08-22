@@ -1,9 +1,9 @@
 module DTK
   module TargetCloneMixin
-    def clone_post_copy_hook(clone_copy_output,opts={})
+    def clone_post_copy_hook(clone_copy_output,opts={},settings={})
       case clone_copy_output.model_name()
        when :component
-        ClonePostCopyHook.component(self,clone_copy_output,opts)
+        ClonePostCopyHook.component(self,clone_copy_output,opts,settings)
        when :node
         ClonePostCopyHook.node(self,clone_copy_output,opts)
        else #TODO: catchall that will be expanded
@@ -35,15 +35,15 @@ module DTK
         StateChange.create_pending_change_item(:new_item => new_id_handle, :parent => target.id_handle())
       end
 
-      def self.component(target,clone_copy_output,opts)
+      def self.component(target,clone_copy_output,opts,settings={})
         if assembly = clone_copy_output.assembly?(:subclass_object=>true)
-          assembly(target,assembly,clone_copy_output,opts)
+          assembly(target,assembly,clone_copy_output,opts,settings)
         else
           raise Error.new("Not implemented clone of non assembly component to target")
         end
       end
 
-      def self.assembly(target,assembly,clone_copy_output,opts)
+      def self.assembly(target,assembly,clone_copy_output,opts,settings={})
         #clone_copy_output will be of form: assembly - node - component
 
         #adjust link_def_id on ports

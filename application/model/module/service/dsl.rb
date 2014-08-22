@@ -156,17 +156,19 @@ module DTK
         module_name        = module_name()
         module_branch_idh  = module_branch.id_handle()
         hash_content, hash = {}, {}
-        display_name, type = nil, nil
+        display_name, type, branch_id = nil, nil, nil
 
         imported.each do |k,v|
-          display_name = v["display_name"]
-          type = v["type"]
+          display_name = v['display_name']
+          type = v['type']
+          branch_id = v['module_branch_id']
         end
 
         sp_hash = {
           :cols => [:id],
-          :filter => [:and, [:eq, :display_name, display_name], [:eq, :type, type]]
+          :filter => [:and, [:eq, :display_name, display_name], [:eq, :type, type], [:eq, :module_branch_id, branch_id]]
         }
+
         cmp_mh = project_idh.createMH(:component)
         cmp = Model.get_obj(cmp_mh,sp_hash)
         cmp_idh = cmp_mh.createIDH(:id => cmp[:id])

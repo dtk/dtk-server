@@ -56,44 +56,12 @@ module DTK; class Assembly
     end
 
     def get_settings(opts={})
-      self.class.get_settings(id_handle(), opts)
-    end
-
-    def self.get_settings(assembly_idh,opts={})
-      ret = Array.new
-      return ret unless assembly_idh
-
       sp_hash = {
-        :cols => opts[:cols]||[:id, :group_id, :display_name, :assembly_id],
-        :filter => [:oneof, :assembly_id, assembly_idh.get_id()]
+        :cols => opts[:cols]||ServiceSetting.common_columns(),
+        :filter => [:eq, :component_component_id, id()]
       }
-
-      setting_mh = assembly_idh.createMH(:service_setting)
-      get_objs(setting_mh,sp_hash)
-    end
-
-    def get_and_validate_settings(settings, opts={})
-      self.class.get_and_validate_settings(id_handle(), settings, opts)
-    end
-
-    def self.get_and_validate_settings(assembly_idh, settings, opts={})
-      ret = Array.new
-      return ret unless assembly_idh
-
-      sp_hash = {
-        :cols => opts[:cols]||[:id, :group_id, :display_name, :assembly_id],
-        :filter => [:oneof, :assembly_id, assembly_idh.get_id()]
-      }
-      service_setting_mh = assembly_idh.createMH(:service_setting)
-      ret_settings = get_objs(service_setting_mh,sp_hash)
-
-      settings_array = settings.split(',')
-      setting_display_names = ret_settings.map{|x| x[:display_name]}
-
-      ret = settings_array.select{|s| !setting_display_names.include?(s)}
-      raise ErrorUsage.new("Provided service settings #{ret} are not available for this assembly template!") unless ret.empty?
-
-      ret_settings
+      service_setting_mh = model_handle(:service_setting)
+      Model.get_objs(service_setting_mh,sp_hash)
     end
 
     def self.get_augmented_component_refs(mh,opts={})

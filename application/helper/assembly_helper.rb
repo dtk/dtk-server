@@ -110,6 +110,30 @@ module Ramaze::Helper
       end
     end
 
+    # validates param_settings and returns array of setting objects
+    # order determines order it is applied
+    def ret_settings(assembly_template, settings_param_name)
+      ret = Array.new
+      param_settings = ret_request_params(settings_param_name)
+      return ret unless param_settings
+      # indexed by display_name
+      ndx_existing_settings = assembly_template.get_settings().inject(Hash.new) do |h,s|
+        h.merge(s[:display_name] => s)
+      end
+      bad_settings = Array.new
+      param_settings.split(',').each do |setting_name|
+        if setting = ndx_existing_settings[setting_name]
+          ret << setting
+        else
+          bad_settings << setting_name
+        end
+      end
+      unless bad_settings.empty?
+        raise ::DTK::ErrorUsage.new("Provided service settings (#{bad_settings.join(',')}) are not defined; legal settings are: #{ndx_existing_settings.keys.join(',')}")
+      end
+      ret
+    end
+
     # returns [assembly_template_name,service_module_name]; if cannot find one or both or these nil is returned in the associated element
     def get_template_and_service_names_params(assembly)
       assembly_template_name,service_module_name = ret_request_params(:assembly_template_name,:service_module_name)

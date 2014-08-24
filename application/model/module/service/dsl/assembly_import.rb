@@ -31,8 +31,9 @@ module DTK; class ServiceModule
             db_updates_cmp = version_proc_class.import_assembly_top(ref,assem,@module_branch,@module_name,opts)
             @db_updates_assemblies["component"].merge!(db_updates_cmp)
 
-            # parse_node_bindings_hash! removes elements of node_bindings_hash that are not of form: {node => node_template}
-            if db_updates_node_bindings = version_proc_class.parse_node_bindings_hash!(node_bindings_hash)
+            # parse_node_bindings_hash! with opts below 
+            # removes elements of node_bindings_hash that are not of form: {node => node_template}
+            if db_updates_node_bindings = version_proc_class.parse_node_bindings_hash!(node_bindings_hash,:remove_non_legacy=> true)
               db_updates_cmp.values.first.merge!("node_bindings" => db_updates_node_bindings.mark_as_complete())
             end
 
@@ -53,6 +54,12 @@ module DTK; class ServiceModule
         dangling_errors.raise_error?()
       end
     end
+
+    def self.process_node_binding_settings(node_bindings_hash)
+      version_proc_class = load_and_return_version_adapter_class(NodeBindingSettingsIntegerVersion)
+      version_proc_class.parse_node_bindings_hash!(node_bindings_hash)
+    end
+    NodeBindingSettingsIntegerVersion = 4 #TODO: stub
 
     def import()
       module_branch_id = @module_branch[:id]
@@ -177,6 +184,9 @@ module DTK; class ServiceModule
     end
 
     def load_and_return_version_adapter_class(integer_version)
+      self.class.load_and_return_version_adapter_class(integer_version)
+    end
+    def self.load_and_return_version_adapter_class(integer_version)
       return CachedAdapterClasses[integer_version] if CachedAdapterClasses[integer_version]
       adapter_name = "v#{integer_version.to_s}"
       opts = {
@@ -193,7 +203,7 @@ module DTK; class ServiceModule
     end
 
     
-    def self.parse_node_bindings_hash!(node_bindings_hash)      
+    def self.parse_node_bindings_hash!(node_bindings_hash,opts={})      
       nil
     end
 

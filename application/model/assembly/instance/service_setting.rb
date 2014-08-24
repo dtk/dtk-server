@@ -15,22 +15,23 @@ module DTK
     end
     
     def apply_setting(assembly)
-      reify!(assembly)
-      if settings = self[:attribute_settings]
+      reify!()
+      if settings = self[AttributeSettingsField]
         settings.apply_settings(assembly)
+      end
+      if node_bindings = self[NodeBindingsField]
+        node_bindings.set_node_bindings(assembly)
       end
     end
 
+    def reify!()
+      reify_field!(AttributeSettingsField,AttributeSettings)
+      reify_field!(NodeBindingsField,NodeBindings)      
+    end
+    AttributeSettingsField = :attribute_settings
+    NodeBindingsField = :node_bindings
    private
-    # opts can have :parse => true
-    def reify!(assembly)
-      reify_field!(:attribute_settings,AttributeSettings,assembly)
-pp self[:attribute_settings]
-      reify_field!(:node_bindings,NodeBindings,assembly)
-      self
-      end
-    
-    def reify_field!(field,klass,assembly)
+    def reify_field!(field,klass)
       if content = self[field]
         unless content.kind_of?(klass)
           reified = klass.new()

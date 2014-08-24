@@ -2,14 +2,8 @@
   :schema=>:service,
   :table=>:setting,
   :columns=>{
-    # :assembly_id=>{ #non-null if branch for an assembly instance
-    #   :type=>:bigint,
-    #   :foreign_key_rel_type=>:component,
-    #   :on_delete=>:cascade,
-    #   :on_update=>:cascade
-    # },
-    :node_bindings=>{:type => :json},
-    :attribute_settings=>{:type => :json}
+    :node_bindings=>{:type => :json, :ret_keys_as_symbols => false},
+    :attribute_settings=>{:type => :json, :ret_keys_as_symbols => false}
   },
   :virtual_columns=>{},
   :many_to_one => [:component] 

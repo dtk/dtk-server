@@ -78,7 +78,7 @@ module DTK
         end
 
         if settings = opts[:service_settings]
-          settings.apply_settings(assembly)
+          settings.apply_settings(self,assembly)
         end
 
         StateChange.create_pending_change_items(component_new_items)

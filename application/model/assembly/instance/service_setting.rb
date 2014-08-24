@@ -14,13 +14,13 @@ module DTK
       ]
     end
     
-    def apply_setting(assembly)
+    def apply_setting(target,assembly)
       reify!()
       if settings = self[AttributeSettingsField]
         settings.apply_settings(assembly)
       end
       if node_bindings = self[NodeBindingsField]
-        node_bindings.set_node_bindings(assembly)
+        node_bindings.set_node_bindings(target,assembly)
       end
     end
 

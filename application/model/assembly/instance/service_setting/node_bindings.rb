@@ -1,7 +1,7 @@
 module DTK
   class ServiceSetting
     class NodeBindings < Array
-      def set_node_bindings(assembly)
+      def set_node_bindings(target,assembly)
         hash_content = inject(Hash.new){|h,el|h.merge(el.hash_form)}
         ServiceModule::AssemblyImport.process_node_binding_settings(hash_content)
       end

@@ -1,6 +1,10 @@
 module DTK
   class ServiceSetting
     class AttributeSettings < Array
+      def apply_settings(assembly)
+        av_pairs = map{|el|el.av_pair_form()}
+        assembly.set_attributes(av_pairs)
+      end
       def self.each_element(content,attr_prefix=nil,&block)
         content.each_pair do |key,body|
           if key =~ Regexp.new("(^.+)#{ContextDelim}$")
@@ -17,14 +21,17 @@ module DTK
       ContextDelim = '/'
      private
       def self.compose_attr(attr_prefix,attr_part)
-        attr_prefix ? "#{attr_prefix}#{AttrPartDelim}#{attr_part}" : attr_part
+        attr_prefix ? "#{attr_prefix}#{AttrPartDelim}#{attr_part}" : attr_part.to_s
       end
       AttrPartDelim = '/'
 
       class Element
-        def initialize(attribute,value)
-          @attribute = attribute
+        def initialize(attribute_path,value)
+          @attribute_path = attribute_path
           @value = value
+        end
+        def av_pair_form()
+          {:pattern => @attribute_path,:value => @value}
         end
       end
     end

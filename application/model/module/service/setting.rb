@@ -16,7 +16,9 @@ module DTK
 
     def apply_setting(assembly)
       reify!(assembly)
-      Log.info("write code to apply settings")
+      if settings = self[:attribute_settings]
+        settings.apply_settings(assembly)
+      end
     end
    private
     # opts can have :parse => true

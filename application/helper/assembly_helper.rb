@@ -113,7 +113,7 @@ module Ramaze::Helper
     # validates param_settings and returns array of setting objects
     # order determines order it is applied
     def ret_settings(assembly_template, settings_param_name)
-      ret = Array.new
+      ret = ::DTK::ServiceSetting::Array.new(assembly_template)
       param_settings = ret_request_params(settings_param_name)
       return ret unless param_settings
       # indexed by display_name

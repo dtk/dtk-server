@@ -3,8 +3,8 @@ module DTK
     r8_nested_require('service','component_module_ref')
     r8_nested_require('service','component_module_refs')
     r8_nested_require('service','dsl')
+    r8_nested_require('service','setting')
     r8_nested_require('service','service_add_on')
-    r8_nested_require('service','service_setting')
 
     extend ModuleClassMixin
     include ModuleMixin

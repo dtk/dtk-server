@@ -17,18 +17,23 @@ module DTK; class Assembly
       idh.create_object(:model_name => :assembly_template)
     end
 
-    def stage(target, settings, assembly_name=nil)
+    def stage(target,opts={})
+      assembly_name = opts[:assembly_name]
       service_module = get_service_module()
       is_dsl_parsed = service_module.dsl_parsed?()
       raise ErrorUsage.new("You are not allowed to stage service from service-module ('#{service_module}') that has dsl parsing errors") unless is_dsl_parsed
 
-      # TODO: if name given and not unique either reject or generate a -n suffix
       override_attrs = Hash.new
-      override_attrs[:display_name] = assembly_name if assembly_name
+      if assembly_name
+        override_attrs[:display_name] = assembly_name 
+      end
       clone_opts = {:ret_new_obj_with_cols => [:id,:type]}
+      if opts[:service_setting]
+        clone_opts.merge!(:service_setting => opts[:service_setting])
+      end
       new_assembly_obj = nil
       Transaction do
-        new_assembly_obj = target.clone_into(self,override_attrs,clone_opts,settings)
+        new_assembly_obj = target.clone_into(self,override_attrs,clone_opts)
       end
       Assembly::Instance.create_subclass_object(new_assembly_obj)
     end

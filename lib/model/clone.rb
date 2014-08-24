@@ -16,7 +16,7 @@ module DTK
   end
 
   module CloneInstanceMixins
-    def clone_into(clone_source_object,override_attrs={},opts={},settings={})
+    def clone_into(clone_source_object,override_attrs={},opts={})
       unless opts[:ret_new_obj_with_cols]
         Log.error("TODO: may be error when :ret_new_obj_with_cols omitted in Model#clone_into")
       end
@@ -33,7 +33,7 @@ module DTK
       if service_add_on_proc = proc.service_add_on_proc?()
         opts.merge!(:service_add_on_proc => service_add_on_proc)
       end
-      clone_post_copy_hook(clone_copy_output,opts,settings)
+      clone_post_copy_hook(clone_copy_output,opts)
 #TODO: for debugging
 stop = R8::Config[:stop_for_testing]
 if stop then raise ErrorUsage.new('stop for testing'); end

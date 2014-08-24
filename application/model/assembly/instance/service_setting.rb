@@ -1,25 +1,26 @@
 module DTK
   class ServiceSetting < Model
-    r8_nested_require('setting','array')
-    r8_nested_require('setting','attribute_settings')
-    r8_nested_require('setting','node_bindings')
-
+    r8_nested_require('service_setting','array')
+    r8_nested_require('service_setting','attribute_settings')
+    r8_nested_require('service_setting','node_bindings')
+    
     def self.common_columns()
       [
-        :id,
-        :display_name,
-        :group_id,
-        :node_bindings,
-        :attribute_settings
+       :id,
+       :display_name,
+       :group_id,
+       :node_bindings,
+       :attribute_settings
       ]
     end
-
+    
     def apply_setting(assembly)
       reify!(assembly)
       if settings = self[:attribute_settings]
         settings.apply_settings(assembly)
       end
     end
+
    private
     # opts can have :parse => true
     def reify!(assembly)
@@ -27,14 +28,14 @@ module DTK
 pp self[:attribute_settings]
       reify_field!(:node_bindings,NodeBindings,assembly)
       self
-    end
-
+      end
+    
     def reify_field!(field,klass,assembly)
       if content = self[field]
         unless content.kind_of?(klass)
           reified = klass.new()
           klass.each_element(content){|el|reified << el}
-            self[field] = reified
+          self[field] = reified
         end
       end
     end

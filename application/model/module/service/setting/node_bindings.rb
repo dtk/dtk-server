@@ -1,11 +1,10 @@
 module DTK
   class ServiceSetting
-    class NodeBindings
-      def self.reify!(obj,assembly,opts={})
-        unless obj.kind_of?(AttributeSettings)
-          pp ['NodeBindings.reify!',obj,opts]
-          obj
-        end
+    class NodeBindings < Array
+      def self.each_element(content,&block)
+        pp [NodeBindings,content]
+      end
+      class Element
       end
     end
   end

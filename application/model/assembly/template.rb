@@ -28,8 +28,8 @@ module DTK; class Assembly
         override_attrs[:display_name] = assembly_name 
       end
       clone_opts = {:ret_new_obj_with_cols => [:id,:type]}
-      if opts[:service_setting]
-        clone_opts.merge!(:service_setting => opts[:service_setting])
+      if settings = opts[:service_settings]
+        clone_opts.merge!(:service_settings => settings)
       end
       new_assembly_obj = nil
       Transaction do

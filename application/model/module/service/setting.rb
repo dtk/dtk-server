@@ -14,15 +14,27 @@ module DTK
       ]
     end
 
+    def apply_setting(assembly)
+      reify!(assembly)
+      Log.info("write code to apply settings")
+    end
+   private
     # opts can have :parse => true
-    def reify!(assembly,opts)
-      if self[:attribute_settings]
-        AttributeSettings.reify!(self[:attribute_settings],assembly,opts)
-      end
-      if self[:node_bindings]
-        NodeBindings.reify!(self[:node_bindings],assembly,opts)
-      end
+    def reify!(assembly)
+      reify_field!(:attribute_settings,AttributeSettings,assembly)
+pp self[:attribute_settings]
+      reify_field!(:node_bindings,NodeBindings,assembly)
       self
+    end
+
+    def reify_field!(field,klass,assembly)
+      if content = self[field]
+        unless content.kind_of?(klass)
+          reified = klass.new()
+          klass.each_element(content){|el|reified << el}
+            self[field] = reified
+        end
+      end
     end
   end
 end

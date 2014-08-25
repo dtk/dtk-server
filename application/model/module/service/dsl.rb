@@ -228,7 +228,7 @@ module DTK
         end
       end
       SettingFilenamePathInfo = {
-        :regexp => Regexp.new("^assemblies/([^/]+)/(.*)\.settings\.(.*)\.(json|yaml)$"),
+        :regexp => Regexp.new("^assemblies/([^/]+)/(.*)\.dtk\.settings\.(json|yaml)$"),
         :path_depth => 4
       }
 
@@ -249,7 +249,7 @@ module DTK
         :path_depth => 3
       }
       AssemblyFilenamePathInfoNew = {
-        :regexp => Regexp.new("^assemblies/(.*)\.assembly\.(.*)\.(json|yaml)$"),
+        :regexp => Regexp.new("^assemblies/(.*)\.dtk\.assembly\.(json|yaml)$"),
         :path_depth => 3
       }
 

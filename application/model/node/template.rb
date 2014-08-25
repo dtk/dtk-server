@@ -41,18 +41,23 @@ module DTK
       end
 
       def self.legal_os_identifiers(model_handle)
-        # ALDIN: I will comment this return statement until we figure out if we need this,
-        # because it's causing issues when we add new OS it will return OS list that is already assigned to
-        # @legal_os_types variable which does not containe newly added OS
-        # return @legal_os_types if @legal_os_types
-
         public_library = Library.get_public_library(model_handle.createMH(:library))
         sp_hash = {
           :cols => [:id,:os_identifier],
           :filter => [:and,[:eq,:type,"image"],[:eq,:library_library_id,public_library[:id]]]
         }
-        @legal_os_types = get_objs(model_handle.createMH(:node),sp_hash).map{|r|r[:os_identifier]}.compact.uniq
+        get_images(model_handle).map{|r|r[:os_identifier]}.compact.uniq
       end
+
+      def self.get_images(model_handle)
+        public_library = Library.get_public_library(model_handle.createMH(:library))
+        sp_hash = {
+          :cols => [:id,:group_id,:os_identifier,:external_ref],
+          :filter => [:and,[:eq,:type,"image"],[:eq,:library_library_id,public_library[:id]]]
+        }
+        get_objs(model_handle.createMH(:node),sp_hash)
+      end
+      private_class_method :get_images
 
       # returns [image_id, os_type]
       def self.find_image_id_and_os_type(os_identifier,target)

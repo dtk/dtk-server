@@ -10,6 +10,7 @@ module DTK
     end
     def set_node_bindings(target,assembly)
       pp [:set_node_bindings, self]
+      pp ['map_local_term',NodeImage.map_local_term(target,'foo')]
     end
 
     def self.get_node_bindings(assembly_template_idh)

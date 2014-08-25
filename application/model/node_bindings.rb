@@ -9,12 +9,23 @@ module DTK
     def self.set_node_bindings(target,assembly,hash_content)
       create_from_hash(assembly,hash_content).set_node_bindings(target,assembly)
     end
+
     def set_node_bindings(target,assembly)
       # TODO: here or earlier check that bindings in this mention only logical nodes in the assembly
       content().find_target_specific_info(target).each_pair do |node,target_specific_info|
-        pp [node,target_specific_info,target_specific_info.node_target_image?()]
+        if image_val = target_specific_info.node_target_image?()
+          assembly.set_attribute(assembly_node_attribute(:image,node),image_val)
+        end
       end
     end
+
+    def assembly_node_attribute(type,node)
+      "#{node}/#{MappingToAssemblyAttr[type]}"
+    end
+    private :assembly_node_attribute
+    MappingToAssemblyAttr = {
+      :image => :os_identifier 
+    }
 
     def self.get_node_bindings(assembly_template_idh)
       sp_hash = {

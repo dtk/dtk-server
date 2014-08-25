@@ -544,6 +544,10 @@ module DTK; class  Assembly
       Assembly::Template.create_or_update_from_instance(project,node_idhs,template_name,service_module_name)
     end
 
+    def set_attribute(attribute,value,opts={})
+      set_attributes([{:pattern => attribute,:value => value}],opts)
+    end
+
     def set_attributes(av_pairs,opts={})
       attr_patterns = nil
       Transaction do

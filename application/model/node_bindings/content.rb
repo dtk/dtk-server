@@ -5,10 +5,10 @@ module DTK
         self[assembly_node_name.to_sym]
       end
 
-      def set_node_bindings(target)
-        each_pair do |node_name,node_target|
+      def find_target_specific_info(target)
+        inject(Hash.new) do |h,(assembly_node_name,node_target)|
           target_specific_info = node_target.find_target_specific_info(target)
-          # TODO: process this info
+          h.merge(assembly_node_name => node_target.find_target_specific_info(target))
         end
       end
 

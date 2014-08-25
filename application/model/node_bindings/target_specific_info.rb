@@ -1,6 +1,13 @@
 module DTK
   class NodeBindings
-    class TargetSpecficInfo < Hash
+    class TargetSpecificInfo
+      attr_accessor :image_id
+      def initialize(node_target)
+        @node_target = node_target
+      end
+      def node_target_image?()
+        @node_target.respond_to?(:image) && @node_target.image
+      end
     end
   end
 end

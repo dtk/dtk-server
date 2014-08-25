@@ -1,6 +1,7 @@
 module DTK; class NodeBindings
   class NodeTarget
     class Image < self
+      attr_reader :image
       def initialize(hash)
         super(Type)
         @image = hash[:image]
@@ -9,12 +10,13 @@ module DTK; class NodeBindings
 
       # returns a TargetSpecificObject
       def find_target_specific_info(target)
-        unless image_info = NodeImage.map_local_term(target,@image)
+        ret = TargetSpecificInfo.new(self)
+        unless image_id = NodeImage.find_iaas_image_id(target,@image)
           raise ErrorUsage.new("The image in the node binding (#{@image}) does not exist in the target (#{target.get_field?(:display_name)})")
         end
-        pp [self,image_info]
-          #find size info
-        
+        ret.image_id = image_id
+        #find size info
+        ret
       end
 
       def hash_form()

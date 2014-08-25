@@ -10,8 +10,10 @@ module DTK
       create_from_hash(assembly,hash_content).set_node_bindings(target,assembly)
     end
     def set_node_bindings(target,assembly)
-      # TODO: here or earlier check that bindings in this mention only logical nodes in teh assembly
-      content().set_node_bindings(target)
+      # TODO: here or earlier check that bindings in this mention only logical nodes in the assembly
+      content().find_target_specific_info(target).each_pair do |node,target_specific_info|
+        pp [node,target_specific_info,target_specific_info.node_target_image?()]
+      end
     end
 
     def self.get_node_bindings(assembly_template_idh)

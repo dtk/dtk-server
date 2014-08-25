@@ -43,13 +43,22 @@ module DTK; class Attribute
             target.update_object!(:display_name,:iaas_type,:iaas_properties)
             raise ErrorUsage.new("Cannot find image_id from os identifier (#{os_identifier}) in target (#{target[:display_name]})")
           end
-          node.update_external_ref_field(:image_id,image_id)
-          node.update(:os_type => os_type)
+          update_node!(node,image_id,os_type)
+          if node.is_node_group?()
+            ServiceNodeGroup.get_node_members(node.id_handle()).each do |target_ref_node|
+              update_node!(target_ref_node,image_id,os_type)
+            end
+          end
         end
        private
         def get_node_and_target()
-          node = @attr.get_node(:cols => [:id,:group_id,:display_name,:datacenter_datacenter_id])
+          node = @attr.get_node(:cols => [:id,:group_id,:display_name,:type,:datacenter_datacenter_id])
           [node,node.get_target()]
+        end
+
+        def update_node!(node,image_id,os_type)
+          node.update_external_ref_field(:image_id,image_id)
+          node.update(:os_type => os_type)
         end
       end
 

@@ -38,10 +38,11 @@ module DTK
     end
 
     def get_node_members()
-      #if ndx_node_members is not empty then {id_handle-> [ng_el1,ng_el2,..]} will be returned
-      self.class.get_ndx_node_members([id_handle()]).values.first||[]
+      self.class.get_node_members(id_handle())
     end
-
+    def self.get_node_members(node_group_idh) 
+      get_ndx_node_members([node_group_idh]).values.first||[]
+    end
     def self.get_ndx_node_members(node_group_idhs)
       ret = Hash.new
       return ret if node_group_idhs.empty?

@@ -4,13 +4,14 @@ module DTK
     r8_nested_require('node_bindings','parse_input')
     r8_nested_require('node_bindings','dsl')
     r8_nested_require('node_bindings','node_target')
+    r8_nested_require('node_bindings','target_specific_info')
 
     def self.set_node_bindings(target,assembly,hash_content)
       create_from_hash(assembly,hash_content).set_node_bindings(target,assembly)
     end
     def set_node_bindings(target,assembly)
-      pp [:set_node_bindings, self]
-      pp ['map_local_term',NodeImage.map_local_term(target,'foo')]
+      # TODO: here or earlier check that bindings in this mention only logical nodes in teh assembly
+      content().set_node_bindings(target)
     end
 
     def self.get_node_bindings(assembly_template_idh)

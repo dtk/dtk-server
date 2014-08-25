@@ -6,7 +6,17 @@ module DTK; class NodeBindings
         @image = hash[:image]
         @size = hash[:size]
       end
-      
+
+      # returns a TargetSpecificObject
+      def find_target_specific_info(target)
+        unless image_info = NodeImage.map_local_term(target,@image)
+          raise ErrorUsage.new("The image in the node binding (#{@image}) does not exist in the target (#{target.get_field?(:display_name)})")
+        end
+        pp [self,image_info]
+          #find size info
+        
+      end
+
       def hash_form()
         {:type => type().to_s, :image => @image, :size => @size} 
       end

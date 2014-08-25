@@ -1,8 +1,7 @@
 {
   :schema=>:node,
-  :table=>:image,
-  :image=>{:type => :varchar, :size => 40},
-  :properties=>{:type=>:json},
+  :table=>:image_attribute,
+  :attribute=>{:type => :varchar, :size => 40},
   :mappings=>{:type=>:json},
   :module_branch_id=>{    
     :type=>:bigint,

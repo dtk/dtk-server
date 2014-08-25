@@ -55,12 +55,6 @@ module DTK; class ServiceModule
       end
     end
 
-    def self.process_node_binding_settings(node_bindings_hash)
-      version_proc_class = load_and_return_version_adapter_class(NodeBindingSettingsIntegerVersion)
-      version_proc_class.parse_node_bindings_hash!(node_bindings_hash)
-    end
-    NodeBindingSettingsIntegerVersion = 4 #TODO: stub
-
     def import()
       module_branch_id = @module_branch[:id]
       mark_as_complete_cmp_constraint = {:module_branch_id=>module_branch_id} #so only delete extra components that belong to same module

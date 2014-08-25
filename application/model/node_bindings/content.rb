@@ -1,8 +1,8 @@
 module DTK
   class NodeBindings
     class Content < Hash
-      def has_node_target?(node)
-        self[node.get_field?(:display_name).to_sym]
+      def has_node_target?(assembly_node_name)
+        self[assembly_node_name.to_sym]
       end
 
       def hash_form()

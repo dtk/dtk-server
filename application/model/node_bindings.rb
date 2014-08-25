@@ -5,6 +5,13 @@ module DTK
     r8_nested_require('node_bindings','dsl')
     r8_nested_require('node_bindings','node_target')
 
+    def self.set_node_bindings(target,assembly,hash_content)
+      create_from_hash(assembly,hash_content).set_node_bindings(target,assembly)
+    end
+    def set_node_bindings(target,assembly)
+      pp [:set_node_bindings, self]
+    end
+
     def self.get_node_bindings(assembly_template_idh)
       sp_hash = {
         :cols => [:id,:content],
@@ -14,8 +21,8 @@ module DTK
       get_obj(nb_mh,sp_hash)
     end
 
-    def has_node_target?(node)
-      content().has_node_target?(node)
+    def has_node_target?(assembly_node_name)
+      content().has_node_target?(assembly_node_name)
     end
 
     def self.create_linked_target_ref?(target,node,node_target)
@@ -30,7 +37,7 @@ module DTK
       if self[:content].kind_of?(Content)
         self[:content]
       elsif content_hash = get_field?(:content)
-        Content.parse_and_reify(ParseInput.new(content_hash,:content_field=>true))
+        self[:content] = Content.parse_and_reify(ParseInput.new(content_hash,:content_field=>true))
       end
     end
 

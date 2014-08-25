@@ -98,7 +98,8 @@ module DTK
 
       def find_matches_for_nodes(target,assembly_template_idh,sao_node_bindings=nil)
         # find the assembly's stub nodes and then use the node binding to find the node templates
-        # as will as using, if non-empty, service_add_on_node_bindings to see what nodes mapping to existing ones and thus shoudl be omitted in clone
+        # as will as using, if non-empty, service_add_on_node_bindings to 
+        # see what nodes mapping to existing ones and thus shoudl be omitted in clone
         sp_hash = {
           :cols => [:id,:display_name,:type,:node_binding_ruleset],
           :filter => [:eq, :assembly_id, assembly_template_idh.get_id()]
@@ -115,7 +116,7 @@ module DTK
         node_mh = target.model_handle(:node)
         node_info.map do |node|
           nb_ruleset = node[:node_binding_ruleset]
-          node_target = node_bindings && node_bindings.has_node_target?(node)
+          node_target = node_bindings && node_bindings.has_node_target?(node.get_field?(:display_name))
           case match_or_create_node?(target,node,node_target,nb_ruleset)
             when :create 
               opts_fm = {:node_binding_ruleset => nb_ruleset, :node_target => node_target}

@@ -115,13 +115,19 @@ lambda__instance_nodes_components_assembly_template =
       :hidden=>true,
       :remote_dependencies=>
       [
-       lambda__segment_module_branch.call([:id,:group_id,:display_name,:branch,:repo_id,:version,:service_id]),
+       {
+         :model_name=>:module_branch,
+         :convert => true,
+         :join_type=>:inner,
+         :join_cond=>{:id => q(:component, :module_branch_id)},
+         :cols => [:id, :display_name, :service_id]
+       },
        {
          :model_name=>:service_module,
          :convert => true,
          :join_type=>:inner,
-         :join_cond=>{:id=>:module_branch__service_id},
-         :cols=>[:id,:group_id,:display_name]
+         :join_cond=>{:id=> q(:module_branch, :service_id)},
+         :cols=>[:id,:group_id,:display_name,:ref]
        }]
     },
     :augmented_ports=> {

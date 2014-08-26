@@ -1,6 +1,6 @@
 module DTK
   class NodeImage < Model
-    def self.find_iaas_image_id(target,logical_image_name)
+    def self.find_iaas_match(target,logical_image_name)
       legacy_bridge_to_node_template(target,logical_image_name)
     end
    private

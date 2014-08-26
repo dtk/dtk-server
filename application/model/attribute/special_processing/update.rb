@@ -64,8 +64,13 @@ module DTK; class Attribute
 
       class MemorySize < self
         def process()
-          node = @attr.get_node(:cols => [:id,:group_id,:display_name,:external_ref])
+          node = @attr.get_node(:cols => [:id,:group_id,:display_name,:type,:external_ref])
           node.update_external_ref_field(:size,@new_val)
+          if node.is_node_group?()
+            ServiceNodeGroup.get_node_members(node.id_handle()).each do |target_ref_node|
+              target_ref_node.update_external_ref_field(:size,@new_val)
+            end
+          end
         end
       end
     end

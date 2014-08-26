@@ -11,11 +11,18 @@ module DTK; class NodeBindings
       # returns a TargetSpecificObject
       def find_target_specific_info(target)
         ret = TargetSpecificInfo.new(self)
-        unless image_id = NodeImage.find_iaas_image_id(target,@image)
-          raise ErrorUsage.new("The image in the node binding (#{@image}) does not exist in the target (#{target.get_field?(:display_name)})")
+        if @image
+          unless image_id = NodeImage.find_iaas_match(target,@image)
+            raise ErrorUsage.new("The image (#{@image}) in the node binding does not exist in the target (#{target.get_field?(:display_name)})")
+          end
+          ret.image_id = image_id
         end
-        ret.image_id = image_id
-        #find size info
+        if @size
+          unless iaas_size = NodeImageAttribute::Size.find_iaas_match(target,@size)
+            raise ErrorUsage.new("The size (#{@size}) in the node binding is not valid in the target (#{target.get_field?(:display_name)})")
+          end
+          ret.size = iaas_size
+        end
         ret
       end
 

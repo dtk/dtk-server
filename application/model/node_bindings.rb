@@ -16,6 +16,9 @@ module DTK
         if image_val = target_specific_info.node_target_image?()
           assembly.set_attribute(assembly_node_attribute(:image,node),image_val)
         end
+        if size_val = target_specific_info.size()
+          assembly.set_attribute(assembly_node_attribute(:size,node),size_val)
+        end
       end
     end
 
@@ -24,7 +27,8 @@ module DTK
     end
     private :assembly_node_attribute
     MappingToAssemblyAttr = {
-      :image => :os_identifier 
+      :image => :os_identifier,
+      :size  => :memory_size
     }
 
     def self.get_node_bindings(assembly_template_idh)

@@ -61,13 +61,12 @@ module DTK
 
       # returns [image_id, os_type]
       def self.find_image_id_and_os_type(os_identifier,target)
-        public_library = Library.get_public_library(target.model_handle(:library))
-        sp_hash = {
-          :cols => [:id,:rules,:os_type],
-          :filter => [:and,[:eq,:os_identifier,os_identifier],[:eq,:library_library_id,public_library[:id]]]
+        opts_get = {
+          :cols => [:id,:group_id,:rules,:os_type],
+          :filter => [:eq,:os_identifier,os_identifier]
         }
         ret = nil
-        get_objs(target.model_handle(:node_binding_ruleset),sp_hash).find do |nb_rs|
+        get_node_binding_rulesets(target,opts_get).find do |nb_rs|
           if matching_rule = CommandAndControl.find_matching_node_binding_rule(nb_rs[:rules],target)
             ret = [matching_rule[:node_template][:image_id],nb_rs[:os_type]]
           end
@@ -75,14 +74,37 @@ module DTK
         ret
       end
 
+      def self.get_matching_node_binding_rules(target,opts={})
+        ret = Array.new
+        get_node_binding_rulesets(target,opts).each do |nb_rs|
+          if matching_rule = CommandAndControl.find_matching_node_binding_rule(nb_rs[:rules],target)
+            ret << nb_rs.merge(:matching_rule => matching_rule)
+          end
+        end
+        ret
+      end
+
+      def self.get_node_binding_rulesets(target,opts={})
+        public_library = Library.get_public_library(target.model_handle(:library))
+        filter = [:eq,:library_library_id,public_library.id()]
+        if opts[:filter]
+          filter = [:and,filter,opts[:filter]]
+        end
+        sp_hash = {
+          :cols => opts[:cols]||(NodeBindingRuleset.common_columns + [:ref]),
+          :filter => filter
+        }
+        get_objs(target.model_handle(:node_binding_ruleset),sp_hash,:keep_ref_cols => true)
+      end
+      private_class_method :get_node_binding_rulesets
+
       def self.legal_memory_sizes(model_handle)
-        return @legal_memory_sizes if @legal_memory_sizes
         public_library = Library.get_public_library(model_handle.createMH(:library))
         sp_hash = {
           :cols => [:id,:external_ref],
           :filter => [:and,[:eq,:type,"image"],[:eq,:library_library_id,public_library[:id]]]
         }
-        @legal_memory_sizes = get_objs(model_handle.createMH(:node),sp_hash).map do |r|
+        get_objs(model_handle.createMH(:node),sp_hash).map do |r|
           if external_ref = r[:external_ref]
             external_ref[:size]
           end

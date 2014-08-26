@@ -104,9 +104,13 @@ module DTK
 
     def destroy_and_delete(opts={})
       get_node_members().map{|node|node.destroy_and_delete(opts)}
+      delete_object(:members_are_deleted=>true)
     end
     def delete_object(opts={})
-      get_node_members().map{|node|node.delete_object(opts)}
+      unless opts[:members_are_deleted]
+        get_node_members().map{|node|node.delete_object(opts)}
+      end
+      super(opts)
     end
 
 

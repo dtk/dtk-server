@@ -18,6 +18,7 @@ os_attribute = 'os_identifier'
 node_name = 'node1'
 component_module_name = "test_module"
 component_module_namespace = "dtk17"
+local_component_module_name = "dtk17::test_module"
 component_module_filesystem_location = "~/dtk/component_modules"
 
 dtk_common = DtkCommon.new(service_name, assembly_name)
@@ -25,10 +26,7 @@ dtk_common = DtkCommon.new(service_name, assembly_name)
 describe "(Modules, Services and Versioning) Test Case 1: Import component module from remote and use this component in assembly" do
 
 	before(:all) do
-		puts "**********************************************************************************************************************"
-		puts "(Modules, Services and Versioning) Test Case 1: Import component module from remote and use this component in assembly"
-		puts "**********************************************************************************************************************"
-		puts ""
+		puts "**********************************************************************************************************************",""
 	end
 
 	context "Import component module function" do
@@ -36,11 +34,11 @@ describe "(Modules, Services and Versioning) Test Case 1: Import component modul
 	end
 
 	context "Get component module components list" do
-		include_context "Get component module components list", dtk_common, component_module_name
+		include_context "Get component module components list", dtk_common, local_component_module_name
 	end
 
 	context "Check if component module imported on local filesystem" do
-		include_context "Check component module imported on local filesystem", component_module_filesystem_location, component_module_name
+		include_context "Check component module imported on local filesystem", component_module_filesystem_location, local_component_module_name
 	end
 
 	context "Stage service on #{assembly_name} assembly" do
@@ -68,11 +66,11 @@ describe "(Modules, Services and Versioning) Test Case 1: Import component modul
 	end
 
 	context "Delete component module" do
-		include_context "Delete component module", dtk_common, component_module_name
+		include_context "Delete component module", dtk_common, local_component_module_name
 	end
 
 	context "Delete component module from local filesystem" do
-		include_context "Delete component module from local filesystem", component_module_filesystem_location, component_module_name
+		include_context "Delete component module from local filesystem", component_module_filesystem_location, local_component_module_name
 	end
 
 	after(:all) do

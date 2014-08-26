@@ -110,9 +110,9 @@ shared_context "List services after delete" do |dtk_common|
   end
 end
 
-shared_context "Delete assembly" do |dtk_common, assembly_name|
+shared_context "Delete assembly" do |dtk_common, assembly_name, namespace|
   it "deletes #{assembly_name} assembly" do
-    assembly_deleted = dtk_common.delete_assembly(assembly_name)
+    assembly_deleted = dtk_common.delete_assembly(assembly_name, namespace)
     assembly_deleted.should eq(true)
   end
 end

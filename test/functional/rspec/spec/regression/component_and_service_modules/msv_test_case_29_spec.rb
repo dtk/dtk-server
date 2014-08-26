@@ -13,8 +13,10 @@ require './lib/component_modules_spec'
 
 component_module_name_1 = "wget"
 git_ssh_repo_url_1 = "git@github.com:maestrodev/puppet-wget.git"
+local_component_module_name_1 = "local::wget"
 component_module_name_2 = "maven"
 git_ssh_repo_url_2 = "git@github.com:maestrodev/puppet-maven.git"
+local_component_module_name_2 = "local::maven"
 component_module_filesystem_location = "~/dtk/component_modules"
 
 dtk_common = DtkCommon.new('', '')
@@ -22,10 +24,7 @@ dtk_common = DtkCommon.new('', '')
 describe "(Modules, Services and Versioning) Test Case 29: Import component module A and then component module B when component module B has dependency on component module A" do
 
   before(:all) do
-    puts "*******************************************************************************************************************************************************************"
-    puts "(Modules, Services and Versioning) Test Case 29: Import component module A and then component module B when component module B has dependency on component module A"
-    puts "*******************************************************************************************************************************************************************"
-    puts ""
+    puts "*******************************************************************************************************************************************************************",""
   end
 
   context "Import component module from git repo" do
@@ -33,7 +32,7 @@ describe "(Modules, Services and Versioning) Test Case 29: Import component modu
   end
 
   context "Check if component module imported on local filesystem" do
-    include_context "Check component module imported on local filesystem", component_module_filesystem_location, component_module_name_1
+    include_context "Check component module imported on local filesystem", component_module_filesystem_location, local_component_module_name_1
   end
 
   context "Import component module from git repo" do
@@ -41,23 +40,23 @@ describe "(Modules, Services and Versioning) Test Case 29: Import component modu
   end
 
   context "Check if component module imported on local filesystem" do
-    include_context "Check component module imported on local filesystem", component_module_filesystem_location, component_module_name_2
+    include_context "Check component module imported on local filesystem", component_module_filesystem_location, local_component_module_name_2
   end
 
   context "Delete component module" do
-    include_context "Delete component module", dtk_common, component_module_name_1
+    include_context "Delete component module", dtk_common, local_component_module_name_1
   end
 
   context "Delete component module from local filesystem" do
-    include_context "Delete component module from local filesystem", component_module_filesystem_location, component_module_name_1
+    include_context "Delete component module from local filesystem", component_module_filesystem_location, local_component_module_name_1
   end
 
   context "Delete component module" do
-    include_context "Delete component module", dtk_common, component_module_name_2
+    include_context "Delete component module", dtk_common, local_component_module_name_2
   end
 
   context "Delete component module from local filesystem" do
-    include_context "Delete component module from local filesystem", component_module_filesystem_location, component_module_name_2
+    include_context "Delete component module from local filesystem", component_module_filesystem_location, local_component_module_name_2
   end
 
   after(:all) do

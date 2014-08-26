@@ -15,20 +15,15 @@ assembly_name = 'bootstrap::test1'
 new_assembly_name = 'msv_test_case_4_temp'
 service_module_filesystem_location = '~/dtk/service_modules'
 service_module_name = 'new_service'
+local_service_module_name = 'local::new_service'
+local_namespace = "local"
 
 dtk_common = DtkCommon.new(service_name, assembly_name)
 
 describe "(Modules, Services and Versioning) Test Case 4: Get list of all assemblies for particular service module" do
 
 	before(:all) do
-		puts "********************************************************************************************************"
-		puts "(Modules, Services and Versioning) Test Case 4: Get list of all assemblies for particular service module"
-		puts "********************************************************************************************************"
-    puts ""
-	end
-
-	context "Import new service module function" do
-		include_context "Import service module", dtk_common, service_module_name
+		puts "********************************************************************************************************",""
 	end
 
 	context "Stage service on #{assembly_name} assembly" do
@@ -43,12 +38,12 @@ describe "(Modules, Services and Versioning) Test Case 4: Get list of all assemb
 		include_context "Create assembly from service", dtk_common, service_module_name, new_assembly_name
 	end
 
-	context "Check if #{new_assembly_name} assembly belongs to #{service_module_name} service module" do
-		include_context "Check if assembly belongs to the service module", dtk_common, service_module_name, new_assembly_name
+	context "Check if #{new_assembly_name} assembly belongs to #{local_service_module_name} service module" do
+		include_context "Check if assembly belongs to the service module", dtk_common, local_service_module_name, new_assembly_name
 	end
 
 	context "Delete assembly" do
-		include_context "Delete assembly", dtk_common, "#{service_module_name}::#{new_assembly_name}"
+		include_context "Delete assembly", dtk_common, service_module_name + "::" + new_assembly_name, local_namespace
 	end
 
 	context "Delete and destroy service function" do
@@ -60,11 +55,11 @@ describe "(Modules, Services and Versioning) Test Case 4: Get list of all assemb
 	end
 
 	context "Delete service module function" do
-		include_context "Delete service module", dtk_common, service_module_name
+		include_context "Delete service module", dtk_common, local_service_module_name
 	end
 
 	context "Delete service module from local filesystem" do
-    	include_context "Delete service module from local filesystem", service_module_filesystem_location, service_module_name
+    	include_context "Delete service module from local filesystem", service_module_filesystem_location, local_service_module_name
   	end
 
 	after(:all) do

@@ -14,6 +14,7 @@ require './lib/component_modules_spec'
 namespace = "dtk17"
 component_module_name = "apache"
 component_module_namespace = "r8"
+imported_component_module_name = "r8::apache"
 component_module_filesystem_location = "~/dtk/component_modules"
 
 dtk_common = DtkCommon.new('', '')
@@ -21,10 +22,7 @@ dtk_common = DtkCommon.new('', '')
 describe "(Modules, Services and Versioning) Test Case 14: Import component module from r8 repo and export to default tenant namespace" do
 
   before(:all) do
-    puts "****************************************************************************************************************************"
-    puts "(Modules, Services and Versioning) Test Case 14: Import component module from r8 repo and export to default tenant namespace"
-    puts "****************************************************************************************************************************"
-    puts ""
+    puts "****************************************************************************************************************************",""
   end
 
   context "Import component module function" do
@@ -32,11 +30,11 @@ describe "(Modules, Services and Versioning) Test Case 14: Import component modu
   end
 
   context "Get component module components list" do
-    include_context "Get component module components list", dtk_common, component_module_name
+    include_context "Get component module components list", dtk_common, imported_component_module_name
   end
 
   context "Check if component module imported on local filesystem" do
-    include_context "Check component module imported on local filesystem", component_module_filesystem_location, component_module_name
+    include_context "Check component module imported on local filesystem", component_module_filesystem_location, imported_component_module_name
   end
 
   context "Export component module to default namespace" do
@@ -44,11 +42,11 @@ describe "(Modules, Services and Versioning) Test Case 14: Import component modu
   end
 
   context "Delete component module" do
-    include_context "Delete component module", dtk_common, component_module_name
+    include_context "Delete component module", dtk_common, imported_component_module_name
   end
 
   context "Delete component module from local filesystem" do
-    include_context "Delete component module from local filesystem", component_module_filesystem_location, component_module_name
+    include_context "Delete component module from local filesystem", component_module_filesystem_location, imported_component_module_name
   end
 
   context "Delete component module from remote" do

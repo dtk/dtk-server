@@ -6,6 +6,7 @@ module DTK
     r8_nested_require('node_bindings','node_target')
     r8_nested_require('node_bindings','target_specific_info')
 
+<<<<<<< HEAD
     def self.set_node_bindings(target,assembly,hash_content)
       create_from_hash(assembly,hash_content).set_node_bindings(target,assembly)
     end
@@ -44,6 +45,21 @@ module DTK
       content().has_node_target?(assembly_node_name)
     end
 
+=======
+    def self.get_node_bindings(assembly_template_idh)
+      sp_hash = {
+        :cols => [:id,:content],
+        :filter => [:eq,:component_component_id,assembly_template_idh.get_id()]
+      }
+      nb_mh = assembly_template_idh.createMH(:node_bindings)
+      get_obj(nb_mh,sp_hash)
+    end
+
+    def has_node_target?(node)
+      content().has_node_target?(node)
+    end
+
+>>>>>>> namespace_support_merged
     def self.create_linked_target_ref?(target,node,node_target)
       assembly_instance,node_instance = node_target && node_target.find_matching_instance_info(target,node)
       if node_instance

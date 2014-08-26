@@ -31,6 +31,7 @@ gem 'excon', '0.16.10'
 
 #TODO: moved back to 0.17.0.b7; looks like running into bug with 0.19.0 (7/27/13)
 gem 'rugged','0.17.0.b7'
+
 #case RUBY_VERSION
 #  when '1.8.7' then gem 'rugged','0.17.0.b7'
 #  when '1.9.3' then gem 'rugged','0.19.0'
@@ -45,7 +46,7 @@ end
 # required to successfully run it
 # Minor change
 
-# Version That will work, bumped it so we could 
+# Version That will work, bumped it so we could
 # bump fog as well.
 # gem 'chef','~>0.10.2' BuMP CHEF!!!!
 gem 'chef','10.16.2'
@@ -57,3 +58,7 @@ gem 'grit','2.5.0'
 gem 'innate','2012.03' #version compatible with ramaze','2012.04.14
 gem 'ruby_parser', '2.3.1' #found bug with ruote listen expression unless degrade to this version
 gem 'docile'
+
+gem 'looksee'
+
+

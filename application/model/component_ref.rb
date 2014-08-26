@@ -1,4 +1,4 @@
-module DTK 
+module DTK
   class ComponentRef < Model
     def self.common_cols()
       [:id,:group_id,:display_name,:component_template_id,:has_override_version,:version,:component_type,:template_id_synched]
@@ -14,7 +14,7 @@ module DTK
       if title = ComponentTitle.title?(self)||self[:ref_num]
         ret = ComponentTitle.print_form_with_title(ret,title)
       end
-      ret 
+      ret
     end
 
     def self.get_referenced_component_modules(project,component_refs)
@@ -32,7 +32,7 @@ module DTK
           template_ids_to_get << r[:component_template_id]
         end
       end
-      
+
       unless template_ids_to_get.empty?
         sp_hash = {
           :cols => [:component_type],
@@ -51,14 +51,15 @@ module DTK
       end
 
       sp_hash = {
-        :cols => [:id,:group_id,:display_name],
+        :cols => [:id,:group_id,:display_name, :namespace],
         :filter => [:and,[:eq,:project_project_id,project[:id]],[:oneof,:display_name,module_names]]
       }
-      
+
       response = get_objs(project.model_handle(:component_module),sp_hash)
       response.each do |element|
         # we take previusly saved version and return it to the map
         element.merge!( :version => component_versions[element[:display_name]])
+        element.merge!( :full_module_name => element[:namespace] ? "#{element[:namespace][:display_name]}::#{element[:display_name]}" : nil)
       end
 
       response

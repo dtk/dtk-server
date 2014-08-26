@@ -20,6 +20,8 @@ module Ramaze::Helper
 
     def get_remote_module_info_helper(module_obj)
       remote_module_name = module_obj.get_field?(:display_name)
+      namespace = module_obj.get_field?(:namespace)
+
       version = ret_version()
       remote_namespace = ret_request_params(:remote_namespace)||get_existing_default_namespace?(module_obj,version)
       remote_params = remote_params_dtkn(module_obj.module_type(),remote_namespace,remote_module_name,version)
@@ -199,7 +201,7 @@ module Ramaze::Helper
     private
 
     def module_class(module_type)
-      case module_type
+      case module_type.to_sym
         when :component_module then ComponentModule
         when :service_module then ServiceModule
         when :test_module then TestModule
@@ -233,6 +235,20 @@ module Ramaze::Helper
       remote_namespace
     end
 
+    NAMESPACE_NAME_SPLITER = "::"
+
+    # override to include namespace in given calculations
+    def create_obj(param, model_class=nil,extra_context=nil)
+      id_or_name = ret_non_null_request_params(param)
+
+      if id_or_name.include?(NAMESPACE_NAME_SPLITER)
+        namespace, id_or_name = id_or_name.split(NAMESPACE_NAME_SPLITER)
+      end
+
+      id_resolved = resolve_id_from_name_or_id(id_or_name, model_class, extra_context || namespace)
+
+      create_object_from_id(id_resolved, model_class)
+    end
 
   end
 end

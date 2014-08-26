@@ -64,10 +64,10 @@ lambda__segments_nodes_and_components =
        :cols => node_cols
      }]
 }
-lambda__nodes = 
+lambda__nodes =
   lambda{|node_cols|
   {
-    :type => :json, 
+    :type => :json,
     :hidden => true,
     :remote_dependencies =>
     [
@@ -75,22 +75,22 @@ lambda__nodes =
     ]
   }
 }
-lambda__instance_nodes_and_components = 
+lambda__instance_nodes_and_components =
   lambda{|node_cols,cmp_cols|
   {
-    :type => :json, 
+    :type => :json,
     :hidden => true,
-    :remote_dependencies => lambda__segments_nodes_and_components.call(node_cols,cmp_cols) 
+    :remote_dependencies => lambda__segments_nodes_and_components.call(node_cols,cmp_cols)
   }
 }
-lambda__segments_nodes_components_assembly_template = 
+lambda__segments_nodes_components_assembly_template =
   lambda{|node_cols,cmp_cols|
    lambda__segments_nodes_and_components.call(node_cols,cmp_cols) + [segment_assembly_template]
 }
-lambda__instance_nodes_components_assembly_template = 
+lambda__instance_nodes_components_assembly_template =
   lambda{|node_cols,cmp_cols|
   {
-    :type => :json, 
+    :type => :json,
     :hidden => true,
     :remote_dependencies => lambda__segments_nodes_and_components.call(node_cols,cmp_cols) + [segment_assembly_template]
   }
@@ -115,13 +115,19 @@ lambda__instance_nodes_components_assembly_template =
       :hidden=>true,
       :remote_dependencies=>
       [
-       lambda__segment_module_branch.call([:id,:group_id,:display_name,:branch,:repo_id,:version,:service_id]),
+       {
+         :model_name=>:module_branch,
+         :convert => true,
+         :join_type=>:inner,
+         :join_cond=>{:id => q(:component, :module_branch_id)},
+         :cols => [:id, :display_name, :service_id]
+       },
        {
          :model_name=>:service_module,
          :convert => true,
          :join_type=>:inner,
-         :join_cond=>{:id=>:module_branch__service_id},
-         :cols=>[:id,:group_id,:display_name]
+         :join_cond=>{:id=> q(:module_branch, :service_id)},
+         :cols=>[:id,:group_id,:display_name,:ref]
        }]
     },
     :augmented_ports=> {
@@ -142,7 +148,7 @@ lambda__instance_nodes_components_assembly_template =
          :join_type=>:left_outer,
          :join_cond=>{:component_component_id => :nested_component__id},
          :cols => ([:component_component_id]+LinkDef.common_columns()).uniq
-       }]         
+       }]
     },
     :augmented_port_links=> {
       :type=>:json,
@@ -214,7 +220,7 @@ lambda__instance_nodes_components_assembly_template =
     :instance_nodes_and_assembly_template=> {
       :type=>:json,
       :hidden=>true,
-      :remote_dependencies=> 
+      :remote_dependencies=>
       [lambda__segment_node.call([:id,:display_name,:os_type,:external_ref, :admin_op_status]),
        segment_assembly_template
       ]
@@ -223,7 +229,7 @@ lambda__instance_nodes_components_assembly_template =
     :instance_nodes_and_cmps_summary=> {
       :type=>:json,
       :hidden=>true,
-      :remote_dependencies=> 
+      :remote_dependencies=>
         lambda__segments_nodes_components_assembly_template.call(
           [:id,:display_name,:os_type,:admin_op_status,:external_ref],
           [:id,:display_name,:component_type,:basic_type,:extended_base,:description,:version,:module_branch_id]
@@ -276,7 +282,7 @@ lambda__instance_nodes_components_assembly_template =
     :nested_nodes_summary=> lambda__nodes.call([:id,:display_name,:type,:os_type,:admin_op_status,:external_ref]),
     :template_stub_nodes=>lambda__nodes.call([:id,:group_id,:display_name,:os_type,:external_ref]),
     :augmented_component_refs=>{
-      :type => :json, 
+      :type => :json,
       :hidden => true,
       :remote_dependencies =>
       [
@@ -287,7 +293,7 @@ lambda__instance_nodes_components_assembly_template =
     },
     # MOD_RESTRUCT: deprecate below for above
     :template_nodes_and_cmps_summary=> {
-      :type => :json, 
+      :type => :json,
       :hidden => true,
       :remote_dependencies =>
       [
@@ -308,7 +314,7 @@ lambda__instance_nodes_components_assembly_template =
        }]
     },
     :template_link_defs_info=> {
-      :type => :json, 
+      :type => :json,
       :hidden => true,
       :remote_dependencies =>
         [
@@ -331,8 +337,8 @@ lambda__instance_nodes_components_assembly_template =
          }]
     },
     # MOD_RESTRUCT: this must be removed or changed to reflect more advanced relationship between component ref and template
-    :component_templates=> { 
-      :type => :json, 
+    :component_templates=> {
+      :type => :json,
       :hidden => true,
       :remote_dependencies =>
         [
@@ -350,7 +356,7 @@ lambda__instance_nodes_components_assembly_template =
     :tasks=> {
       :type=>:json,
       :hidden=>true,
-      :remote_dependencies=> 
+      :remote_dependencies=>
       [{
          :model_name => :task,
          :convert => true,
@@ -362,7 +368,7 @@ lambda__instance_nodes_components_assembly_template =
     :node_templates=> {
       :type=>:json,
       :hidden=>true,
-      :remote_dependencies=> 
+      :remote_dependencies=>
       [lambda__segment_node.call([:id,:display_name,:os_type,:node_binding_rs_id]),
        {
          :model_name => :node_binding_ruleset,

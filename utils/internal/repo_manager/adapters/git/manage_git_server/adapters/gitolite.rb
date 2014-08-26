@@ -8,7 +8,7 @@ module DTK
           if opts[:delete_if_exists]
             delete_server_repo(repo_name)
           else
-            raise Error.new("trying to create a repo (#{repo_name}) that exists already on gitolite server") 
+            raise Error.new("trying to create a repo (#{repo_name}) that exists already on gitolite server")
           end
         end
 
@@ -34,7 +34,7 @@ module DTK
       def set_git_class(git_class)
         @git_class = git_class
       end
-      
+
       def delete_server_repo(repo_name,opts={})
         admin_repo.pull_changes() unless opts[:do_not_pull_changes]
         file_path = repo_config_file_relative_path(repo_name)
@@ -49,7 +49,7 @@ module DTK
           return
         end
         begin
-          `sudo rm -r -f #{bare_repo_dir(repo_name)}` 
+          `sudo rm -r -f #{bare_repo_dir(repo_name)}`
          rescue => e
           Log.error(e.inspect)
         end
@@ -68,7 +68,7 @@ module DTK
           elsif opts[:delete_if_exists]
             delete_user(username)
           else
-            raise Error.new("trying to create a user (#{username}) that exists already on gitolite server") 
+            raise Error.new("trying to create a user (#{username}) that exists already on gitolite server")
           end
         end
 
@@ -97,6 +97,7 @@ module DTK
       def set_user_rights_in_repos(username,repo_names,access_rights="R")
         repo_names = [repo_names] unless repo_names.kind_of?(Array)
         updated_repos = Array.new
+
         repo_names.each do |repo_name|
           repo_user_acls = get_existing_repo_user_acls(repo_name)
           match = repo_user_acls.find{|r|r[:repo_username] == username}
@@ -131,7 +132,7 @@ module DTK
 
      private
       def admin_directory()
-        @admin_directory ||= R8::Config[:repo][:git][:gitolite][:admin_directory] 
+        @admin_directory ||= R8::Config[:repo][:git][:gitolite][:admin_directory]
       end
       def admin_repo()
         @admin_repo ||= @git_class.create(admin_directory(),"master",{:absolute_path => true})
@@ -182,7 +183,10 @@ module DTK
         # expections is that has form given by ConfigFileTemplate)
         raw_content.each_line do |l|
           l.chomp!()
-          if l =~ /^[ ]*repo[ ]+([^ ]+)/
+
+          if l =~ /^[ ]*include[ ]+.*/
+            # we ignore this line
+          elsif l =~ /^[ ]*repo[ ]+([^ ]+)/
             unless $1 == repo_name
               raise Error.new("Parsing error: expected repo to be (${repo_name} in (#{l})")
             end

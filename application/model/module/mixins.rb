@@ -33,7 +33,8 @@ module DTK
     def get_workspace_branch_info(version=nil,opts={})
       if aug_branch = get_augmented_workspace_branch({:filter => {:version => version}}.merge(opts))
         module_name = aug_branch[:module_name]
-        ModuleRepoInfo.new(aug_branch[:repo],module_name,id_handle(),aug_branch,version)
+        module_namespace = aug_branch[:module_namespace]
+        ModuleRepoInfo.new(aug_branch[:repo],module_name,id_handle(),aug_branch,version, module_namespace)
       end
     end
 
@@ -42,9 +43,18 @@ module DTK
     end
 
     #
+    # Get full module name
+    #
+    def full_module_name
+      namespace   = get_field?(:namespace)
+      module_name = get_field?(:display_name)
+
+      namespace ? Namespace.join_namespace(namespace[:display_name], module_name) : module_name
+    end
+
+    #
     # returns Array with: name, namespace, version
     #
-
     def get_basic_info(opts=Opts.new)
       sp_hash = {
         :cols => [:id, :display_name, :version, :remote_repos],
@@ -135,7 +145,7 @@ module DTK
       version = (opts[:filter]||{})[:version]
       version_field = ModuleBranch.version_field(version) #version can be nil
       sp_hash = {
-        :cols => [:display_name,:workspace_info_full]
+        :cols => [:display_name,:workspace_info_full,:namespace]
       }
       module_rows = get_objs(sp_hash).select do |r|
         r[:module_branch][:version] == version_field
@@ -152,7 +162,8 @@ module DTK
       unless module_obj = aggregate_by_remote_namespace(module_rows,opts)
         raise ErrorUsage.new("There is no module (#{pp_module_name(version)}) with namespace '#{opts[:filter][:remote_namespace]}' registered on server")
       end
-      ret = module_obj[:module_branch].merge(:repo => module_obj[:repo],:module_name => module_obj[:display_name])
+
+      ret = module_obj[:module_branch].merge(:repo => module_obj[:repo],:module_name => module_obj[:display_name], :module_namespace => module_obj[:namespace][:display_name])
       if opts[:include_repo_remotes]
         ret.merge!(:repo_remotes => module_obj[:repo_remotes])
       end
@@ -241,6 +252,7 @@ module DTK
     def get_library_implementations()
       get_objs_uniq(:library_implementations)
     end
+
     def module_type()
       self.class.module_type()
     end
@@ -270,6 +282,10 @@ module DTK
 
     def module_name()
       get_field?(:display_name)
+    end
+
+    def module_namespace()
+      get_field?(:namespace)[:display_name]
     end
 
     def pp_module_name(version=nil)
@@ -351,8 +367,18 @@ module DTK
     def check_valid_id(model_handle,id)
       check_valid_id_default(model_handle,id)
     end
-    def name_to_id(model_handle,name)
-      name_to_id_default(model_handle,name)
+
+    def name_to_id(model_handle,name,namespace)
+      if namespace
+        namespace_obj = Namespace.find_by_name(model_handle.createMH(:namespace), namespace)
+        sp_hash =  {
+          :cols => [:id],
+          :filter => [:and,[:eq, :namespace_id, namespace_obj.id],[:eq, :display_name, name]]
+        }
+        name_to_id_helper(model_handle,name,sp_hash)
+      else
+        name_to_id_default(model_handle,name)
+      end
     end
 
     def info(target_mh, id, opts={})
@@ -408,10 +434,17 @@ module DTK
       include_versions   = opts.array(:detail_to_include).include?(:versions)
       include_any_detail = ((include_remotes or include_versions) ? true : nil)
 
-      cols = [:id, :display_name, :dsl_parsed, include_any_detail && :module_branches_with_repos].compact
+      cols = [:id, :display_name, :namespace_id, :dsl_parsed, :namespace, include_any_detail && :module_branches_with_repos].compact
       unsorted_ret = get_all(project_idh,cols)
+
       filter_list!(unsorted_ret) if respond_to?(:filter_list!)
-      unsorted_ret.each{|r|r.merge!(:type => r.component_type()) if r.respond_to?(:component_type)}
+      unsorted_ret.each do |r|
+        r.merge!(:type => r.component_type()) if r.respond_to?(:component_type)
+
+        if r[:namespace]
+          r[:display_name] = Namespace.join_namespace(r[:namespace][:display_name], r[:display_name])
+        end
+      end
       if include_any_detail
         opts_aggr = Opts.new(
           :include_remotes => include_remotes,
@@ -421,6 +454,7 @@ module DTK
         )
         unsorted_ret = ModuleUtils::ListMethod.aggregate_detail(unsorted_ret,project_idh,model_type(),opts_aggr)
       end
+
       unsorted_ret.sort{|a,b|a[:display_name] <=> b[:display_name]}
     end
 
@@ -475,10 +509,10 @@ module DTK
       end
     end
 
-    def module_repo_info(repo,module_and_branch_info,version)
+    def module_repo_info(repo,module_and_branch_info,version,module_namespace=nil)
       info = module_and_branch_info #for succinctness
       branch_obj = info[:module_branch_idh].create_object()
-      ModuleRepoInfo.new(repo,info[:module_name],info[:module_idh],branch_obj,version)
+      ModuleRepoInfo.new(repo,info[:module_name],info[:module_idh],branch_obj,version,module_namespace)
     end
 
     # can be overwritten
@@ -491,7 +525,11 @@ module DTK
     def get_module_branch_from_local(local,opts={})
       project = local.project()
       project_idh = project.id_handle()
-      filter = [:and, [:eq, :display_name, local.module_name], [:eq, :project_project_id, project_idh.get_id()]]
+      module_match_filter =
+        (opts[:with_namespace] ?
+         [:eq, :ref, local.module_name(:with_namespace=>true)] :
+         [:eq, :display_name, local.module_name])
+      filter = [:and, module_match_filter, [:eq, :project_project_id, project_idh.get_id()]]
       branch = local.branch_name()
       post_filter = proc{|mb|mb[:branch] == branch}
       matches = get_matching_module_branches(project_idh,filter,post_filter,opts)
@@ -499,14 +537,15 @@ module DTK
         nil
       elsif matches.size == 1
         matches.first
-      elsif matches.size > 2
+      elsif matches.size > 1
         raise Error.new("Matched rows has unexpected size (#{matches.size}) since its is >1")
       end
     end
     # TODO: ModuleBranch::Location: deprecate below for above
-    def get_workspace_module_branch(project,module_name,version=nil,opts={})
+    def get_workspace_module_branch(project,module_name,version=nil,namespace=nil,opts={})
       project_idh = project.id_handle()
-      filter = [:and, [:eq, :display_name, module_name], [:eq, :project_project_id, project_idh.get_id()]]
+      filter  = [:and, [:eq, :display_name, module_name], [:eq, :project_project_id, project_idh.get_id()]]
+      filter = filter.push([:eq, :namespace_id, namespace.id()]) if namespace
       branch = ModuleBranch.workspace_branch_name(project,version)
       post_filter = proc{|mb|mb[:branch] == branch}
       matches = get_matching_module_branches(project_idh,filter,post_filter,opts)
@@ -514,7 +553,7 @@ module DTK
         nil
       elsif matches.size == 1
         matches.first
-      elsif matches.size > 2
+      elsif matches.size > 1
         raise Error.new("Matched rows has unexpected size (#{matches.size}) since its is >1")
       end
     end
@@ -549,14 +588,20 @@ module DTK
       version ? "#{module_name} (#{version})" : module_name
     end
 
-    def module_exists?(project_idh,module_name)
+    def module_exists?(project_idh,module_name,module_namespace)
       unless project_idh[:model_name] == :project
         raise Error.new("MOD_RESTRUCT:  module_exists? should take a project, not a (#{project_idh[:model_name]})")
       end
+
+      namespace_obj = Namespace.find_or_create(project_idh.createMH(:namespace), module_namespace)
+
       sp_hash = {
         :cols => [:id, :display_name, :dsl_parsed],
-        :filter => [:and, [:eq, :project_project_id, project_idh.get_id()],
-                    [:eq, :display_name, module_name]]
+        :filter => [ :and,
+                     [:eq, :project_project_id, project_idh.get_id()],
+                     [:eq, :display_name, module_name],
+                     [:eq, :namespace_id, namespace_obj.id()]
+                   ]
       }
       get_obj(project_idh.createMH(model_name()),sp_hash)
     end
@@ -572,21 +617,24 @@ module DTK
   end
 
   class ModuleRepoInfo < Hash
-    def initialize(repo,module_name,module_idh,branch_obj,version=nil)
+    def initialize(repo,module_name,module_idh,branch_obj,version=nil,module_namespace=nil)
       super()
       repo_name = repo.get_field?(:repo_name)
+      full_module_name = module_namespace ? Namespace.join_namespace(module_namespace, module_name) : nil
       hash = {
         :repo_id => repo[:id],
         :repo_name => repo_name,
         :module_id => module_idh.get_id(),
         :module_name => module_name,
+        :module_namespace => module_namespace,
+        :full_module_name => full_module_name,
         :module_branch_idh => branch_obj.id_handle(),
         :repo_url => RepoManager.repo_url(repo_name),
         :workspace_branch => branch_obj.get_field?(:branch),
         :branch_head_sha => RepoManager.branch_head_sha(branch_obj)
       }
       if version
-        hash.merge!(:version => version)
+        hash.merge!(:version => version, :full_module_name => version.module_name(:with_namespace))
         if assembly_name = version.respond_to?(:assembly_name) && version.assembly_name()
           hash.merge!(:assembly_name => assembly_name)
         end

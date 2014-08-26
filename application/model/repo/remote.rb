@@ -91,7 +91,7 @@ module DTK
           ret = Aux.convert_keys_to_symbols(response_data)
         rescue
           if opts[:raise_error]
-            raise ErrorUsage.new("Remote module (#{remote.pp_module_name(:include_namespace=>true)}) does not exists or is not accessible")
+            raise ErrorUsage.new("Remote module (#{remote.pp_module_name()}) does not exists or is not accessible")
           else
             return nil
           end
@@ -104,7 +104,7 @@ module DTK
           raise Error.new("Not versions not implemented")
           versions = branch_names_to_versions_stripped(ret[:branches])
           unless versions and versions.include?(remote.version)
-            raise ErrorUsage.new("Remote module (#{remote.pp_module_name(:include_namespace=>true)}}) does not have version (#{remote.version||"CURRENT"})")
+            raise ErrorUsage.new("Remote module (#{remote.pp_module_name()}}) does not have version (#{remote.version||"CURRENT"})")
           end
         end
         ret

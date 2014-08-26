@@ -189,6 +189,7 @@ module DTK
     CachedRepoObjects = Hash.new
     def self.ret_repo_dir_and_branch(context)
       repo_dir = branch = nil
+
       if context.kind_of?(ModuleBranch)
         repo_dir,branch = context.repo_and_branch()
       elsif context.kind_of?(Repo)

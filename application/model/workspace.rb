@@ -51,7 +51,7 @@ module DTK
     ServiceModuleFields = {
       :display_name => '.workspace'
     }
-    
+
     class Factory < self
       def self.create?(target_idh,project_idh)
         factory = new(target_idh,project_idh)
@@ -83,12 +83,13 @@ module DTK
         module_and_branch_info = create_service_and_module_branch?(project_idh)
         @module_branch_idh = create_service_and_module_branch?(project_idh)
       end
-      
+
       def create_service_and_module_branch?(project_idh)
         project = project_idh.create_object()
         service_module_name = ServiceModuleFields[:display_name]
         version = nil
-        if service_module_branch = ServiceModule.get_workspace_module_branch(project,service_module_name,version,:no_error_if_does_not_exist=>true)
+        # TODO: Here namespace object is set to nil maybe this needs to be changed
+        if service_module_branch = ServiceModule.get_workspace_module_branch(project,service_module_name,version,nil,:no_error_if_does_not_exist=>true)
           service_module_branch.id_handle()
         else
           opts_create = {:config_agent_type => ConfigAgentType}

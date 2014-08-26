@@ -1,3 +1,5 @@
+
+
 {
   :schema=>:project,
   :table=>:project,
@@ -6,6 +8,19 @@
   },                   #TODO: should :implementation,:component be here?  
   :one_to_many=> [:task,:implementation,:component,:node,:component_module,:service_module,:test_module,:node_module,:port_link,:node_image,:node_image_attribute],
   :virtual_columns=>{
+    :user=>{
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>
+      [{
+         :model_name=>:user,
+         :alias => :user,
+         :convert => true,
+         :join_type=>:inner,
+         :join_cond=>{:id=>:project__owner_id},
+         :cols=>[:id,:display_name,:username,:c,:user_groups]
+       }]
+    },
     :targets=>{
       :type=>:json,
       :hidden=>true,

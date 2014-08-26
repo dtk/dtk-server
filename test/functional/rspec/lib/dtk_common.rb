@@ -619,14 +619,14 @@ class DtkCommon
 		return service_deleted
 	end
 
-	def delete_assembly(assembly_name)
+	def delete_assembly(assembly_name, namespace=nil)
 		#Cleanup step - Delete assembly
 		puts "Delete assembly:", "----------------"
 		assembly_deleted = false
-		assembly_list = send_request('/rest/assembly/list', {:detail_level=>"nodes", :subtype=>"template"})
-		if (assembly_list['data'].select { |x| x['display_name'] == assembly_name }.first)
+		assembly_list = send_request('/rest/assembly/list', {:subtype=>"template"})
+		if (id = assembly_list['data'].select { |x| x['display_name'] == assembly_name && x['namespace'] == namespace }.first)
 			puts "Assembly exists in assembly list. Proceed with deleting assembly..."
-			delete_assembly_response = send_request('/rest/assembly/delete', {:assembly_id=>assembly_name, :subtype=>:template})
+			delete_assembly_response = send_request('/rest/service_module/delete_assembly_template', {:service_module_id => id, :assembly_id=>assembly_name, :subtype=>:template})
 
 			if (delete_assembly_response['status'] == "ok")
 				puts "Assembly #{assembly_name} deleted successfully!"

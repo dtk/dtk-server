@@ -89,7 +89,7 @@ module DTK
       impl_obj.modify_file_assets(diffs_summary)
       if diffs_summary.meta_file_changed?()
         if e = ErrorUsage::Parsing.trap{component_module.parse_dsl_and_update_model(impl_obj,id_handle())}
-          ret.merge!(:dsl_parsing_errors => e) 
+          ret.merge!(:dsl_parsing_errors => e)
         end
       end
       ret
@@ -131,7 +131,7 @@ module DTK
     def version_print_form(opts=Opts.new)
       default_version_string = opts[:default_version_string] # can be null
       update_object!(:version)
-      has_default_version?() ? default_version_string : self[:version] 
+      has_default_version?() ? default_version_string : self[:version]
     end
 
     def matches_version?(version=nil)
@@ -145,9 +145,9 @@ module DTK
       fragment_hash
     end
 
-    # args could be either file_path,hash_content,file_format(optional) or single element which is an array having elements with keys :path, :hash_content, :format 
+    # args could be either file_path,hash_content,file_format(optional) or single element which is an array having elements with keys :path, :hash_content, :format
     def serialize_and_save_to_repo(*args)
-      files = 
+      files =
       if args.size == 1
         args[0]
       else
@@ -159,7 +159,7 @@ module DTK
         files.each do |file_info|
           content = Aux.serialize(file_info[:hash_content],file_info[:format_type])
           any_change = RepoManager.add_file({:path => file_info[:path]},content,self)
-          any_changes = true if any_change 
+          any_changes = true if any_change
         end
         push_changes_to_repo() if any_changes
       end
@@ -201,7 +201,7 @@ module DTK
       base_repo #bakes in that different versions share same git repo
     end
 
-    # MOD_RESTRUCT: TODO: deprecate 
+    # MOD_RESTRUCT: TODO: deprecate
     def self.update_library_from_workspace?(ws_branches,opts={})
       ws_branches = [ws_branches] unless ws_branches.kind_of?(Array)
       ret = Array.new
@@ -340,13 +340,13 @@ module DTK
           component_dsl = ModuleDSL.create_dsl_object_from_impl(target_impl)
           component_dsl.update_model()
         end
-      
+
         # update the repo
         RepoManager.merge_from_branch(source_branch_name,target_branch_obj)
         RepoManager.push_implementation(target_branch_obj)
       end
     end
-  
+
     def self.get_component_workspace_branches(node_idhs)
       sp_hash = {
     # MOD_RESTRUCT: after get rid of lib branches might use below
@@ -356,7 +356,7 @@ module DTK
       }
       sample_node_idh = node_idhs.first()
       node_rows = get_objs(sample_node_idh.createMH(),sp_hash)
-      # get rid of dups 
+      # get rid of dups
       node_rows.inject(Hash.new) do |h,r|
         module_branch = r[:module_branch]
         h[module_branch[:id]] ||= module_branch
@@ -416,7 +416,7 @@ module DTK
       update_object!(*cols)
       unless repo
         sp_hash = {
-          :cols => [:id,:display_name],
+          :cols => [:id,:display_name, :repo_name],
           :filter => [:eq,:id,self[:repo_id]]
         }
         repo = Model.get_obj(model_handle(:repo),sp_hash)

@@ -112,7 +112,7 @@ module DTK; class Assembly
     end
 
     def self.list(assembly_mh,opts={})
-      opts = opts.merge(:cols => [:id, :group_id,:display_name,:component_type,:module_branch_id,:module_branch,list_virtual_column?(opts[:detail_level])].compact)
+      opts = opts.merge(:cols => [:id, :group_id,:display_name,:component_type,:module_branch_id,:service_module,list_virtual_column?(opts[:detail_level])].compact)
       assembly_rows = get(assembly_mh,opts)
       if opts[:detail_level] == "attributes"
         attr_rows = get_component_attributes(assembly_mh,assembly_rows)
@@ -124,13 +124,14 @@ module DTK; class Assembly
 
     def self.get(mh,opts={})
       sp_hash = {
-        :cols => opts[:cols] || [:id, :group_id,:display_name,:component_type,:module_branch_id,:module_branch],
+        :cols => opts[:cols] || [:id, :group_id,:display_name,:component_type,:module_branch_id,:service_module],
         :filter => [:and, [:eq, :type, "composite"], 
                     opts[:project_idh] ? [:eq,:project_project_id,opts[:project_idh].get_id()] : [:neq, :project_project_id,nil],
                     opts[:filter]
                    ].compact
       }
-      ret = get_these_objs(mh,sp_hash)
+      ret = get_these_objs(mh,sp_hash,:keep_ref_cols => true)
+
       # TODO: may instead make sure that version in assembly is set
       ret.each{|r|r[:version] ||= (r[:module_branch]||{})[:version]}
       ret
@@ -158,6 +159,8 @@ module DTK; class Assembly
         # get_objs do this (using possibly option flag for subtype processing)
         pntr = ndx_ret[r[:id]] ||= r.id_handle.create_object().merge(:display_name => pretty_print_name(r,pp_opts),:ndx_nodes => Hash.new)
         pntr.merge!(:module_branch_id => r[:module_branch_id]) if r[:module_branch_id]
+        pntr.merge!(:namespace => r[:service_module][:ref].split("::").first) if r[:service_module][:ref].include? "::"
+
         if version = pretty_print_version(r)
           pntr.merge!(:version => version)
         end
@@ -172,8 +175,9 @@ module DTK; class Assembly
           node[:os_type] = r[:node][:os_type] if r[:node][:os_type]
         end
       end
+
       unsorted = ndx_ret.values.map do |r|
-        el = r.slice(:id,:display_name,:module_branch_id,:version)
+        el = r.slice(:id,:display_name,:module_branch_id,:version,:namespace)
         include_nodes ? el.merge(:nodes => r[:ndx_nodes].values) : el
       end
       opts[:no_sorting] ? unsorted : unsorted.sort{|a,b|a[:display_name] <=> b[:display_name]}

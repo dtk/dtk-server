@@ -9,39 +9,34 @@ module DTK; class ModuleBranch
           ret_branch_name(project,version)
         end
 
+        def self.private_user_repo_name(username, module_type, module_name, module_namespace)
+          repo_name = "#{username}-#{module_namespace}-#{module_name}"
+
+          case module_type
+            when :service_module
+              return "sm-#{repo_name}"
+            when :test
+              return "tm-#{repo_name}"
+            else
+              repo_name
+            end
+        end
+
        private
+
         def ret_branch_name()
           self.class.ret_branch_name(@project,version())
         end
 
         def ret_private_user_repo_name()
-          # DEBUG SNIPPET >>> REMOVE <<<
-          require 'ap'
-          ap "Private user repo name called!!!"
-          ap caller[-1..1]
           username = CurrentSession.new.get_username()
-          repo_name = "#{username}-local-#{module_name()}"
-          # component_type can be :service_module, :puppet or :chef
-          # @component_type == :service_module ? "sm-#{repo_name}" : repo_name
-          case @component_type
-            when :service_module
-              return "sm-#{repo_name}"
-            when :test
-              return "tm-#{repo_name}"
-            when :node_module
-              return "nm-#{repo_name}"
-            else
-             repo_name
-           end
+          namespace_name = module_namespace_name() || Namespace.default_namespace_name
+          Local.private_user_repo_name(username, @component_type, module_name(), namespace_name)
         end
 
         #===== helper methods
 
         def self.ret_branch_name(project,version)
-           # DEBUG SNIPPET >>> REMOVE <<<
-          require 'ap'
-          ap "Private ret branch name called!!!"
-          ap caller[-1..1]
           user_prefix = "workspace-#{project.get_field?(:ref)}"
           if version.kind_of?(ModuleVersion::AssemblyModule)
             assembly_suffix = "--assembly-#{version.assembly_name}"

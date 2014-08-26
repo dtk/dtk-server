@@ -14,21 +14,24 @@ require './lib/component_modules_spec'
 
 namespace = "dtk17"
 existing_service_module_name = "test_service"
+imported_service_module_name = "dtk17::test_service"
 service_module_name = "bakir_test1"
+local_service_module_name = "local::bakir_test1"
 component_module_filesystem_location = '~/dtk/component_modules'
 service_filesystem_location = '~/dtk/service_modules'
 component_module_namespace = "dtk17"
 component_module_name = "test_module"
+<<<<<<< HEAD
+=======
+local_component_module_name = "dtk17::test_module"
+>>>>>>> namespace_support_merged
 
 dtk_common = DtkCommon.new('', '')
 
 describe "(Modules, Services and Versioning) Test Case 12: Export service module using full name #{service_module_name} to users default namespace and then delete it" do
 
   before(:all) do
-    puts "***********************************************************************************************************************************************************"
-    puts "(Modules, Services and Versioning) Test Case 12: Export service module using full name #{service_module_name} to users default namespace and then delete it"
-    puts "***********************************************************************************************************************************************************"
-    puts ""
+    puts "***********************************************************************************************************************************************************",""
   end
 
   context "Import component module function" do
@@ -36,11 +39,11 @@ describe "(Modules, Services and Versioning) Test Case 12: Export service module
   end
 
   context "Import service module function" do
-    include_context "Import remote service module", dtk_common, namespace + "/" + existing_service_module_name
+    include_context "Import remote service module", namespace + "/" + existing_service_module_name
   end
 
   context "List all service modules" do
-    include_context "List all service modules", dtk_common, existing_service_module_name
+    include_context "List all service modules", dtk_common, imported_service_module_name
   end
 
   context "Create new #{service_module_name} directory" do
@@ -56,15 +59,15 @@ describe "(Modules, Services and Versioning) Test Case 12: Export service module
     end
   end
 
-  context "Copy content of #{existing_service_module_name} to new #{service_module_name} service module" do
-    it "copies content of #{existing_service_module_name} to new #{service_module_name} service module" do
-      puts "Copy content of #{existing_service_module_name} to new #{service_module_name} service module:", "-------------------------------------------------------------------------------"
+  context "Copy content of #{imported_service_module_name} to new #{service_module_name} service module" do
+    it "copies content of #{imported_service_module_name} to new #{service_module_name} service module" do
+      puts "Copy content of #{imported_service_module_name} to new #{service_module_name} service module:", "-------------------------------------------------------------------------------"
       pass = false
-      value = `cp -r #{service_filesystem_location}/#{existing_service_module_name}/* #{service_filesystem_location}/#{service_module_name}/`
+      value = `cp -r #{service_filesystem_location}/#{imported_service_module_name}/* #{service_filesystem_location}/#{service_module_name}/`
       # not good validation, improve it...
       pass = !value.include?("some error")
-      puts "Content of #{existing_service_module_name} copied to #{service_module_name} service successfully!" if pass == true
-      puts "Content of #{existing_service_module_name} was not copied to #{service_module_name} service successfully!" if pass == false
+      puts "Content of #{imported_service_module_name} copied to #{service_module_name} service successfully!" if pass == true
+      puts "Content of #{imported_service_module_name} was not copied to #{service_module_name} service successfully!" if pass == false
       puts ""
       pass.should eq(true)
     end
@@ -75,39 +78,39 @@ describe "(Modules, Services and Versioning) Test Case 12: Export service module
   end
 
   context "Export service module to default namespace" do
-    include_context "Export service module", dtk_common, service_module_name, namespace
+    include_context "Export service module", dtk_common, local_service_module_name, namespace
   end
 
   context "List all service modules on remote" do
     include_context "List all service modules on remote", dtk_common, service_module_name, namespace
   end
 
-  context "Delete #{service_module_name} service module" do
-    include_context "Delete service module", dtk_common, service_module_name
+  context "Delete #{local_service_module_name} service module" do
+    include_context "Delete service module", dtk_common, local_service_module_name
   end
 
   context "Delete #{service_module_name} service module from remote" do
     include_context "Delete service module from remote repo", dtk_common, service_module_name, namespace
   end
 
-  context "Delete #{service_module_name} service module from local filesystem" do
-    include_context "Delete service module from local filesystem", service_filesystem_location, service_module_name
+  context "Delete #{local_service_module_name} service module from local filesystem" do
+    include_context "Delete service module from local filesystem", service_filesystem_location, local_service_module_name
   end
 
-  context "Delete #{existing_service_module_name} service module" do
-    include_context "Delete service module", dtk_common, existing_service_module_name
+  context "Delete #{imported_service_module_name} service module" do
+    include_context "Delete service module", dtk_common, imported_service_module_name
   end
 
-  context "Delete #{existing_service_module_name} service module from local filesystem" do
-    include_context "Delete service module from local filesystem", service_filesystem_location, existing_service_module_name
+  context "Delete #{imported_service_module_name} service module from local filesystem" do
+    include_context "Delete service module from local filesystem", service_filesystem_location, imported_service_module_name
   end
 
   context "Delete component module" do
-    include_context "Delete component module", dtk_common, component_module_name
+    include_context "Delete component module", dtk_common, local_component_module_name
   end
 
   context "Delete component module from local filesystem" do
-    include_context "Delete component module from local filesystem", component_module_filesystem_location, component_module_name
+    include_context "Delete component module from local filesystem", component_module_filesystem_location, local_component_module_name
   end
 
   after(:all) do

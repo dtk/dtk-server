@@ -55,6 +55,7 @@ module DTK
           end
         end
       end
+
       ret
     end
 
@@ -276,6 +277,7 @@ module DTK
 
    private
     def create_new_version__type_specific(repo_for_new_branch,new_version,opts={})
+      raise "Contact Haris if this is called, namespace needed!"
       project = get_project()
       repo_idh = repo_for_new_branch.id_handle()
       module_and_branch_info = self.class.create_ws_module_and_branch_obj?(project,repo_idh,module_name(),new_version)

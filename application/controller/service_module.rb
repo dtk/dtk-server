@@ -41,6 +41,8 @@ module DTK
 
     # TODO: rename; this is just called by install; import ops call create route
     def rest__import()
+
+
       rest_ok_response install_from_dtkn_helper(:service_module)
     end
 
@@ -105,7 +107,8 @@ module DTK
       opts.merge!(:remote_repo_base => remote_repo_base, :diff => diff)
       datatype = :module_diff if diff
 
-      rest_ok_response ServiceModule.list(opts), :datatype => datatype
+      full_list = ServiceModule.list(opts)
+      rest_ok_response full_list, :datatype => datatype
     end
 
     def rest__versions()

@@ -6,8 +6,8 @@ module DTK
     end
     def modify_uri_with_user_name(uri,username)
       return uri unless username
-      if uri =~ Regexp.new("^(/[^/]+/[^/]+)(/.+$)") 
-        "#{$1}-#{username}#{$2}" 
+      if uri =~ Regexp.new("^(/[^/]+/[^/]+)(/.+$)")
+        "#{$1}-#{username}#{$2}"
       elsif uri =~ Regexp.new("^/[^/]+/[^/]+$")
         "#{uri}-#{username}"
       else
@@ -31,7 +31,7 @@ module DTK
             "display_name" => users_private_lib_name,
             "implementation" => library_impl_hash
           }
-        } 
+        }
       }
       input_hash_content_into_model(top_container_idh,hash_content)
       library_ref = users_private_lib_name
@@ -52,7 +52,7 @@ module DTK
     # assumption is that container_id_handle is in uri form
     def import_objects_from_file(container_id_handle,json_file,opts={})
       raise Error.new("file given #{json_file} does not exist") unless File.exists?(json_file)
-      hash_content = Aux::hash_from_file_with_json(json_file) 
+      hash_content = Aux::hash_from_file_with_json(json_file)
       import_objects_from_hash(container_id_handle,hash_content,opts)
     end
 
@@ -79,9 +79,9 @@ module DTK
       unless container_id_handle.is_top?
         # TODO: do we need to factor in opts[:username] here?
         if opts[:return_info]
-          global_fks, return_info = input_into_model(container_id_handle,hash_content,opts) 
+          global_fks, return_info = input_into_model(container_id_handle,hash_content,opts)
         else
-          global_fks = input_into_model(container_id_handle,hash_content,opts) 
+          global_fks = input_into_model(container_id_handle,hash_content,opts)
         end
       else
         hash_content.each do |relation_type,info|
@@ -99,13 +99,13 @@ module DTK
           end
         end
       end
-      
+
       return return_info if return_info
       process_global_keys(global_fks,container_id_handle[:c]) unless global_fks.nil? or global_fks.empty?
     end
 
     def create_prefix_object_if_needed(container_id_handle,opts={})
-      return nil if exists? container_id_handle 
+      return nil if exists? container_id_handle
       if opts[:delete]
         Log.info("deleting #{container_id_handle}")
         delete_instance(container_id_handle)
@@ -155,7 +155,7 @@ module DTK
           else
             Log.error("link def references a remote component (#{remote_cmp_ref}) that does not exist")
           end
-        end 
+        end
       else
         raise Error.new("Format type #{format_type} not supported")
       end
@@ -187,8 +187,8 @@ module DTK
         implementation_hash = hash["library"][library_ref]["implementation"] ||= Hash.new
         impl_repos.each do |repo|
           next unless file_paths = indexed_file_paths[repo]
-          
-          type = 
+
+          type =
             case file_paths.find{|fn|fn =~ Regexp.new("r8meta\.[^/]+$")}
             when /r8meta.chef/ then ImportChefType.new()
             when /r8meta.puppet/ then ImportPuppetType.new()

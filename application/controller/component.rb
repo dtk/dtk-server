@@ -1,7 +1,7 @@
 module XYZ
   class ComponentController < AuthController
     helper :filter_context_helper
-    helper :i18n_string_mapping 
+    helper :i18n_string_mapping
 
     def delete()
       id = ret_non_null_request_params(:id)
@@ -117,11 +117,11 @@ pp poss_remote_cmps
         # TDOO: temporary to distingusih between chef and puppet components
         if model_name == :component
           if config_agent_type = component_list[index][:config_agent_type]
-            title += " (#{config_agent_type[0].chr})" 
+            title += " (#{config_agent_type[0].chr})"
           end
         end
 =end
-        
+
 # TODO: change after implementing all the new types and making generic icons for them
         model_type = 'service'
         model_sub_type = 'db'
@@ -133,11 +133,11 @@ pp poss_remote_cmps
         component_list[index][:i18n] = title
 
 =begin
-        img_value = model_list[index][:ui][:images][:tnail] ? 
-        '<div class="img_wrapper"><img title="'+title+'"src="'+R8::Config[:base_images_uri]+'/'+model_name+'Icons/'+model_list[index][:ui][:images][:tnail]+'"/></div>' : 
+        img_value = model_list[index][:ui][:images][:tnail] ?
+        '<div class="img_wrapper"><img title="'+title+'"src="'+R8::Config[:base_images_uri]+'/'+model_name+'Icons/'+model_list[index][:ui][:images][:tnail]+'"/></div>' :
           ''
         body_value = img_value
-          
+
         body_value == '' ? body_value = model_list[index][:display_name] : nil
         model_list[index][:body_value] = body_value
 =end
@@ -169,7 +169,7 @@ pp poss_remote_cmps
         }
         component_obj = target_object.clone_into(id_handle.create_object(),override_attrs,clone_opts)
         component_obj.materialize!(Component.common_columns())
-        
+
         # TODO: ganglia hack: remove after putting this info in teh r8 meta files
         if component_obj[:display_name] == "ganglia__server"
           (clone_opts[:outermost_ports]||[]).each{|x|x[:location] = "east"}
@@ -188,8 +188,8 @@ pp poss_remote_cmps
     def ret_project_component_template(cmp_type,version)
       sp_hash = {
         :cols => [:id],
-        :filter => [:and, 
-                    [:eq,:version, version], 
+        :filter => [:and,
+                    [:eq,:version, version],
                     [:eq, :component_type, cmp_type],
                     [:neq, :project_project_id, nil]]
         }
@@ -204,7 +204,7 @@ pp poss_remote_cmps
       Component.create_user_library_template(model_handle,params)
       return {:content => {}}
     end
-    
+
     def details(id)
       component = get_object_by_id(id)
 
@@ -306,7 +306,7 @@ pp [:field_defs,field_defs]
       field_def_update["required"] = [true,"true"].include?(field_def_update["required"])
       component = create_object_from_id(field_def_update["field_def"]["component_id"])
       new_field_def = component.update_field_def(field_def_update)
-      
+
       run_javascript("R8.Fields.handleSavedField(#{JSON.generate(new_field_def)});")
       return {}
     end
@@ -369,12 +369,12 @@ pp [:field_defs,field_defs]
     def add_cfg_file_from_upload(id)
        component = get_object_by_id(id)
 #      redirect_route = request.params["redirect"]
-#      component_id = request.params["component_id"].to_i 
+#      component_id = request.params["component_id"].to_i
 
       upload_param = request.params["config_file"]
       cfg_filename = upload_param[:filename]
       tmp_file_handle = upload_param[:tempfile]
-      file_content = tmp_file_handle.read 
+      file_content = tmp_file_handle.read
       tmp_file_handle.close
 # TODO: need to clean up ways to get at and work with objects
 # create_object_from_id,get_object_by_id,id_handle(id).create_object(), etc
@@ -382,14 +382,14 @@ pp [:field_defs,field_defs]
       component.add_config_file(cfg_filename,file_content)
       # TODO: delete /tmp file File.unlink(tmp_file_path)
 
-#     pp [:test,id_handle(component_id).create_object().get_config_file(cfg_filename)] 
+#     pp [:test,id_handle(component_id).create_object().get_config_file(cfg_filename)]
 
 =begin
 pp tmp_file.path
       new_path = R8::Config[:config_file_path]+'/'+cfg_filename
       file_contents=IO.read(tmp_file.path)
 
-      File.open(new_path, 'w') do |f|  
+      File.open(new_path, 'w') do |f|
         f.puts file_contents
       end
 =end
@@ -404,24 +404,24 @@ pp tmp_file.path
 
     def upload_config()
       redirect_route = request.params["redirect"]
-      component_id = request.params["component_id"].to_i 
+      component_id = request.params["component_id"].to_i
 
       upload_param = request.params["config_file"]
       cfg_filename = upload_param[:filename]
       tmp_file_handle = upload_param[:tempfile]
-      file_content = tmp_file_handle.read 
+      file_content = tmp_file_handle.read
       tmp_file_handle.close
       id_handle(component_id).create_object().add_config_file(cfg_filename,file_content)
       # TODO: delete /tmp file File.unlink(tmp_file_path)
 
-#     pp [:test,id_handle(component_id).create_object().get_config_file(cfg_filename)] 
+#     pp [:test,id_handle(component_id).create_object().get_config_file(cfg_filename)]
 
 =begin
 pp tmp_file.path
       new_path = R8::Config[:config_file_path]+'/'+cfg_filename
       file_contents=IO.read(tmp_file.path)
 
-      File.open(new_path, 'w') do |f|  
+      File.open(new_path, 'w') do |f|
         f.puts file_contents
       end
 =end
@@ -510,7 +510,7 @@ pp tmp_file.path
 
     def save_layout(id)
       hash = request.params
-      
+
       layout_info = {
         :type => hash["type"]||"wspace-edit", #TODO: remove ||"wspace-edit" when value explicitly passed
         :description => hash["description"]||"sample description", #TODO: remove ||"sample description"
@@ -632,7 +632,7 @@ pp request.params
       redirect "/xyz/component/instance_edit_test/#{component_id.to_s}"
     end
 
-   ####### end TODO for testing 
+   ####### end TODO for testing
 
     def dock_edit(component_id)
       component = create_object_from_id(component_id)
@@ -742,7 +742,7 @@ pp request.params
 
       # compute uui positions
       assembly_left_pos = request.params["assembly_left_pos"]
-    
+
       node_list = get_objects(:node,{:assembly_id=>id})
 
       dc_hash = get_object_by_id(parent_id,:datacenter)
@@ -750,7 +750,7 @@ pp request.params
       # get the top most item in the list to set new positions
       top_node = {}
       top_most = 2000
-    
+
       node_list.each do |node|
         ui = node.get_ui_info(dc_hash)
         if ui and (ui[:top].to_i < top_most.to_i)
@@ -807,7 +807,7 @@ pp request.params
 
       # compute uui positions
       assembly_left_pos = request.params["assembly_left_pos"]
-    
+
       node_list = get_objects(:node,{:assembly_id=>id})
 
       dc_hash = get_object_by_id(parent_id,:datacenter)
@@ -815,7 +815,7 @@ pp request.params
       # get the top most item in the list to set new positions
       top_node = {}
       top_most = 2000
-    
+
       node_list.each do |node|
         ui = node.get_ui_info(dc_hash)
         if ui and (ui[:top].to_i < top_most.to_i)

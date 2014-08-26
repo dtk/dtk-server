@@ -16,7 +16,7 @@ lambda__segment_namespace =
     :model_name=>:namespace,
     :convert => true,
     :join_type=>:inner,
-    :join_cond=>{:id =>:namespace__id},
+    :join_cond=>{:id =>:component_module__namespace_id},
     :cols=>args[:cols]
   }
   ret

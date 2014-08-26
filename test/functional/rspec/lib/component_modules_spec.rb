@@ -50,6 +50,7 @@ shared_context "NEG - Import component module with dependency from provided git 
   it "imports #{component_module_name} component module from #{git_ssh_repo_url} repo but with dependency warning on #{dependency_component_module}" do
     puts "NEG - Import component module with dependency from git repo:", "------------------------------------------------------------"
     pass = false
+    puts "dtk component-module import-git #{git_ssh_repo_url} #{component_module_name}"
     value = `dtk component-module import-git #{git_ssh_repo_url} #{component_module_name}`
     puts value
     if (value.include? "There are some missing dependencies: [\"#{dependency_component_module}\"]")
@@ -96,11 +97,12 @@ shared_context "Export component module" do |dtk_common, component_module_name, 
   it "exports #{component_module_name} component module to #{namespace} namespace on remote repo" do
     puts "Export component module:", "------------------------"
     pass = false
-    value = `dtk component-module #{component_module_name} publish #{namespace}/#{component_module_name}`
+    cmp_module = component_module_name.split("::").last
+    value = `dtk component-module #{component_module_name} publish #{namespace}/#{cmp_module}`
     puts value
     pass = true unless value.include? "ERROR"
-    puts "Component module #{component_module_name} exported successfully!" if pass == true
-    puts "Component module #{component_module_name} was not exported successfully!" if pass == false
+    puts "Component module #{cmp_module} exported successfully!" if pass == true
+    puts "Component module #{cmp_module} was not exported successfully!" if pass == false
     puts ""
     pass.should eq(true)
   end

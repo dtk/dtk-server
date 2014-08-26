@@ -2,9 +2,9 @@ module DTK
   class Model
     module NameAndIdClassMixin
       def name_to_id(model_handle,name)
-        return 
+        return
         if name.match(/^[0-9]+$/)
-          name.to_i 
+          name.to_i
         else
           name_to_id_default(model_handle,name)
         end
@@ -47,7 +47,7 @@ module DTK
           unless opts[:no_error_if_no_match]
             raise ErrorNameDoesNotExist.new(name,pp_object_type())
           end
-        elsif rows.size > 1
+        elsif rows.size > 2
           raise ErrorNameAmbiguous.new(name,rows.map{|r|r[:id]},pp_object_type())
         else
           rows.first[:id]

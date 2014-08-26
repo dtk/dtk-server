@@ -17,6 +17,7 @@ module DTK; class  Assembly
     def get_objs(sp_hash,opts={})
       super(sp_hash,opts.merge(:model_handle => model_handle().createMH(:assembly_instance)))
     end
+
     def self.get_objs(mh,sp_hash,opts={})
       if mh[:model_name] == :assembly_instance
         get_these_objs(mh,sp_hash,opts)
@@ -139,7 +140,7 @@ module DTK; class  Assembly
       unless opts[:ret_subclasses]
         ret
       else
-        ret.map do |r| 
+        ret.map do |r|
           r.is_node_group? ? r.id_handle().create_object(:model_name => :service_node_group).merge(r) : r
         end
       end
@@ -170,7 +171,7 @@ module DTK; class  Assembly
         :filter => [:oneof, :assembly_id, assembly_idhs.map{|idh|idh.get_id()}]
       }
       ndx_nodes = Hash.new
-      component_mh = assembly_idhs.first.createMH(:component) 
+      component_mh = assembly_idhs.first.createMH(:component)
       get_objs(component_mh,sp_hash).each do |cmp|
         ndx_nodes[cmp[:node_node_id]] ||= true
       end
@@ -242,7 +243,7 @@ module DTK; class  Assembly
     def get_target()
       get_obj_helper(:target,:target)
     end
-    
+
     def get_target_idh()
       id_handle().get_parent_id_handle_with_auth_info()
     end
@@ -422,7 +423,7 @@ module DTK; class  Assembly
     #[col,empty_assem_nodes]
     def self.list_virtual_column?(detail_level=nil)
       empty_assem_nodes = false
-      col = 
+      col =
         if detail_level.nil?
           nil
         elsif detail_level == "nodes"
@@ -453,7 +454,7 @@ module DTK; class  Assembly
       target = get_target()
 
       node_template = Node::Template.find_matching_node_template(target,:node_binding_ruleset => node_binding_rs)
-      
+
       override_attrs = {
         :display_name => node_name,
         :assembly_id => id(),
@@ -518,7 +519,7 @@ module DTK; class  Assembly
       end
       sub_assembly_template = aug_service_add_on[:sub_assembly_template].copy_as_assembly_template()
 
-      override_attrs = { 
+      override_attrs = {
         :display_name => assembly_name||aug_service_add_on.new_sub_assembly_name(self,sub_assembly_template),
         :assembly_id => id()
       }
@@ -567,14 +568,14 @@ module DTK; class  Assembly
         case filter
           when :required_unset_attributes
             opts.merge!(:filter_proc => FilterProc)
-          else 
+          else
             raise Error.new("not treating filter (#{filter}) in Assembly::Instance#get_attributes_print_form")
-        end  
+        end
       end
       get_attributes_print_form_aux(opts)
     end
     FilterProc = lambda do |r|
-      attr = 
+      attr =
         if r.kind_of?(Attribute) then r
         elsif r[:attribute] then r[:attribute]
         else raise Error.new("Unexpected form for filtered element (#{r.inspect})")
@@ -610,7 +611,7 @@ module DTK; class  Assembly
     private :get_attributes_print_form_aux
 
     def self.check_valid_id(model_handle,id)
-      filter = 
+      filter =
         [:and,
          [:eq, :id, id],
          [:eq, :type, "composite"],
@@ -620,7 +621,7 @@ module DTK; class  Assembly
 
     def self.name_to_id(model_handle,name)
       parts = name.split("/")
-      augmented_sp_hash = 
+      augmented_sp_hash =
         if parts.size == 1
           {:cols => [:id],
            :filter => [:and,
@@ -645,7 +646,7 @@ module DTK; class  Assembly
     def model_handle(mn=nil)
       super(mn||:component)
     end
-    
+
    private
     def get_associated_template?(library_idh=nil)
       update_object!(:ancestor_id,:component_type,:version,:ui)
@@ -667,7 +668,7 @@ module DTK; class  Assembly
     end
 
   end
-end 
+end
 # TODO: hack to get around error in lib/model.rb:31:in `const_get
 AssemblyInstance = Assembly::Instance
 end

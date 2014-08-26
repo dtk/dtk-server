@@ -116,7 +116,11 @@ module DTK
         node_mh = target.model_handle(:node)
         node_info.map do |node|
           nb_ruleset = node[:node_binding_ruleset]
+<<<<<<< HEAD
           node_target = node_bindings && node_bindings.has_node_target?(node.get_field?(:display_name))
+=======
+          node_target = node_bindings && node_bindings.has_node_target?(node)
+>>>>>>> namespace_support_merged
           case match_or_create_node?(target,node,node_target,nb_ruleset)
             when :create 
               opts_fm = {:node_binding_ruleset => nb_ruleset, :node_target => node_target}

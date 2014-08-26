@@ -13,6 +13,7 @@ module DTK
     def rest__create()
       # setup needed data
       module_name = ret_non_null_request_params(:module_name)
+
       config_agent_type =  ret_config_agent_type()
       project = get_default_project()
       version = nil #TODO: stub
@@ -46,6 +47,7 @@ module DTK
       if ret_request_param_boolean(:force_parse)
         opts.merge!(:force_parse=> true)
       end
+
       dsl_created_info = component_module.update_model_from_clone_changes?(commit_sha,diffs_summary,version,opts)
       rest_ok_response dsl_created_info
     end
@@ -79,7 +81,6 @@ module DTK
 
       opts.merge!(:remote_repo_base => remote_repo_base, :diff => diff)
       datatype = :module_diff if diff
-
       rest_ok_response ComponentModule.list(opts), :datatype => datatype
     end
 
@@ -146,6 +147,8 @@ module DTK
     #### actions to interact with remote repos ###
     # TODO: rename; this is just called by install; import ops call create route
     def rest__import()
+
+
       rest_ok_response install_from_dtkn_helper(:component_module)
     end
 

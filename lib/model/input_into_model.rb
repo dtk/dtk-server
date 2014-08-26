@@ -38,14 +38,14 @@ module XYZ
     def foreign_key_attr_form(attr)
       return attr if attr.kind_of?(ForeignKeyAttr)
       ForeignKeyAttr.new(attr[0,1] == "*" ? attr[1,attr.size-1] : attr)
-    end 
+    end
 
-    class ForeignKeyAttr 
+    class ForeignKeyAttr
       attr_reader :create_ref_object, :attribute
       def initialize(attribute,opts={})
         @attribute=attribute
         @create_ref_object=opts[:create_ref_object]
-      end      
+      end
       def to_s()
         @attribute
       end
@@ -56,18 +56,18 @@ module XYZ
 
     def remove_fks_and_return_fks!(obj,fks,opts={},path="")
       obj.each_pair do |k,v|
-        if v.kind_of?(Hash) 
-	  remove_fks_and_return_fks!(v,fks,opts,path + "/" + k.to_s)	    
+        if v.kind_of?(Hash)
+	  remove_fks_and_return_fks!(v,fks,opts,path + "/" + k.to_s)
         elsif v.kind_of?(Array)
 	  next
         elsif is_foreign_key_attr?(k)
 	  fks[path] ||= Hash.new
-	  fks[path][foreign_key_attr_form(k)] = modify_uri_with_user_name(v,opts[:username]) 
+	  fks[path][foreign_key_attr_form(k)] = modify_uri_with_user_name(v,opts[:username])
 	  obj.delete(k)
-        end 
+        end
       end
       obj
-    end  
+    end
 
     def insert_fks_back_in_hash!(hash,fks)
       fks.each do |string_path,fk_info|
@@ -116,7 +116,7 @@ module XYZ
 	      ref_id_info = get_row_from_id_handle(idh)
             else
               unless opts[:ret_global_fks]
-                Log.error("In import_into_model cannot find object with uri #{ref_uri}") 
+                Log.error("In import_into_model cannot find object with uri #{ref_uri}")
               else
                 ret_global_fks ||= Hash.new
                 # purposely using fk_rel_uri (rebaselined) but ref_uri_x (raw)
@@ -126,37 +126,37 @@ module XYZ
               next
             end
           end
-	  update_instance(fk_rel_id_handle,{col.to_sym =>  ref_id_info[:id]})	  
+	  update_instance(fk_rel_id_handle,{col.to_sym =>  ref_id_info[:id]})
         end
       end
       ret_global_fks
     end
-   
+
     def process_global_keys(global_fks,c)
       global_fks.each_pair do |fk_rel_uri,info|
-	fk_rel_id_handle = IDHandle[:c => c, :uri => fk_rel_uri]
-	info.each_pair do |col,ref_uri|
-	  ref_id_info = get_row_from_id_handle(IDHandle[:c => c, :uri => ref_uri])
+	    fk_rel_id_handle = IDHandle[:c => c, :uri => fk_rel_uri]
+	    info.each_pair do |col,ref_uri|
+	      ref_id_info = get_row_from_id_handle(IDHandle[:c => c, :uri => ref_uri])
           unless ref_id_info and ref_id_info[:id]
             if col.create_ref_object
               # TODO: check whether should also populate ds_key; may not be needed because
               # of relation between ds_key and relative distinguished name
               idh = IDHandle[:c => c, :uri => ref_uri]
               create_simple_instance?(idh,:set_display_name => true)
-	      ref_id_info = get_row_from_id_handle(idh)
+	            ref_id_info = get_row_from_id_handle(idh)
             else
-              Log.error("In process_global_keys cannot find object with uri #{ref_uri}") 
+              Log.error("In process_global_keys cannot find object with uri #{ref_uri}")
               next
             end
           end
-	  update_instance(fk_rel_id_handle,{col.to_sym =>  ref_id_info[:id]})	  
+	        update_instance(fk_rel_id_handle,{col.to_sym =>  ref_id_info[:id]})
         end
       end
     end
 
     def ret_rebased_uri(uri_x,prefixes,container_uri=nil)
       relation_type_string = stripped_uri = ref = nil
-      if uri_x =~ %r{^/(.+?)/(.+?)(/.+$)} 
+      if uri_x =~ %r{^/(.+?)/(.+?)(/.+$)}
          relation_type_string = $1
          ref = $2
          stripped_uri = $3
@@ -166,7 +166,7 @@ module XYZ
          stripped_uri = ""
       else
         # TODO: double check that everything that works heer is fine;being no op seems to work fine when uri_x is "" because it is referencing top level object like aproject
-# TODO        raise Error 
+# TODO        raise Error
       end
       # find prefix that matches and rebase
       # TODO: don't think this is exactly right
@@ -175,10 +175,10 @@ module XYZ
 	prefix =~ %r{^.+/(.+?)/(.+?$)}
 	raise Error unless prefix_ref = $2
         prefix_rt = $1
-	if relation_type_string == prefix_rt 
+	if relation_type_string == prefix_rt
 	  if ref == prefix_ref
-	    return prefix + stripped_uri 
-          elsif fks_have_common_base(ref,prefix_ref) 
+	    return prefix + stripped_uri
+          elsif fks_have_common_base(ref,prefix_ref)
            prefix_matches << prefix
           end
         end
@@ -187,7 +187,7 @@ module XYZ
       raise Error.new("not handling case where not exact, but or more prfix matches") if prefix_matches.size  > 1
       # if container_uri is non null then uri_x can be wrt container_uri and this is assumed to be the case if reach here
       return container_uri + uri_x if container_uri
-      raise Error 
+      raise Error
     end
 
     def fks_have_common_base(x,y)

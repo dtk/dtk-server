@@ -38,18 +38,12 @@ module DTK
     end
 
     def get_node_members()
-<<<<<<< HEAD
       self.class.get_node_members(id_handle())
     end
     def self.get_node_members(node_group_idh) 
       get_ndx_node_members([node_group_idh]).values.first||[]
     end
-=======
-      #if ndx_node_members is not empty then {id_handle-> [ng_el1,ng_el2,..]} will be returned
-      self.class.get_ndx_node_members([id_handle()]).values.first||[]
-    end
 
->>>>>>> namespace_support_merged
     def self.get_ndx_node_members(node_group_idhs)
       ret = Hash.new
       return ret if node_group_idhs.empty?
@@ -67,7 +61,6 @@ module DTK
         (ret[ndx] ||= Array.new) << node_member
       end
       ret
-<<<<<<< HEAD
     end
 
     def self.expand_with_node_group_members?(node_or_ngs,opts={})
@@ -95,35 +88,6 @@ module DTK
       ret
     end
 
-=======
-    end
-
-    def self.expand_with_node_group_members?(node_or_ngs,opts={})
-      ret = node_or_ngs
-      ng_idhs = node_or_ngs.select{|n|n.is_node_group?}.map{|n|n.id_handle()}
-      if ng_idhs.empty?
-        return ret
-      end
-      ndx_node_members = get_ndx_node_members(ng_idhs)
-      ret = Array.new
-      if opts[:remove_node_groups]
-        node_or_ngs.each do |n|
-          if n.is_node_group?
-            ret += ndx_node_members[n[:id]]
-          else
-            ret << n
-          end
-        end
-      else
-        node_or_ngs.each do |n|
-          ret << n
-          ret += ndx_node_members[n[:id]] if n.is_node_group?
-        end
-      end
-      ret
-    end
-
->>>>>>> namespace_support_merged
     def self.get_attributes_to_copy_to_target_refs(node_group_idhs)
       Node.get_target_ref_attributes(node_group_idhs,:cols=>CopyToTargetRefAttrs)
     end
@@ -141,7 +105,6 @@ module DTK
 
     def destroy_and_delete(opts={})
       get_node_members().map{|node|node.destroy_and_delete(opts)}
-<<<<<<< HEAD
       delete_object(:members_are_deleted=>true)
     end
     def delete_object(opts={})
@@ -149,11 +112,6 @@ module DTK
         get_node_members().map{|node|node.delete_object(opts)}
       end
       super(opts)
-=======
-    end
-    def delete_object(opts={})
-      get_node_members().map{|node|node.delete_object(opts)}
->>>>>>> namespace_support_merged
     end
 
 

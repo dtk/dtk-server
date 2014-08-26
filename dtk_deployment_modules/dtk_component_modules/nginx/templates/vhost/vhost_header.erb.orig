@@ -14,12 +14,10 @@ server {
 <% @proxy_set_header.each do |header| -%>
   proxy_set_header        <%= header %>;
 <% end -%>
-<<<<<<< HEAD
-=======
-<% if @add_header -%><% @add_header.each do |header| -%>
-  add_header        <%= header %>;
-<% end -%><% end -%>
->>>>>>> local_remote/v0.0.5-branch
+##MERGE-BAKIR
+##<% if @add_header -%><% @add_header.each do |header| -%>
+## add_header        <%= header %>;
+##<% end -%><% end -%>
 <% if @rewrite_to_https -%>
   if ($ssl_protocol = "") {
        return 301 https://$host$request_uri;

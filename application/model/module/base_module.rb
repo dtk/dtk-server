@@ -89,28 +89,6 @@ module DTK
       end
     end
 
-<<<<<<< HEAD
-    # def self.model_type()
-    #   :component_module
-    # end
-    # def self.component_type()
-    #   :puppet #hardwired
-    # end
-    # def component_type()
-    #   :puppet #hardwired
-    # end
-=======
-    def self.model_type()
-      :component_module
-    end
-    def self.component_type()
-      :puppet #hardwired
-    end
-    def component_type()
-      :puppet #hardwired
-    end
->>>>>>> namespace_support_merged
-
     def self.module_specific_type(config_agent_type)
       config_agent_type
     end

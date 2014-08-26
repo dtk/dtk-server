@@ -79,9 +79,11 @@ module DTK; class Component
       versions = type_version_field_list.map{|r|r[:version_field]}
       sp_hash = {
         :cols => [:id,:group_id,:component_type,:version,:implementation_id],
-        :filter => [:and, [:eq, :project_project_id, project_idh.get_id()],
+        :filter => [:and, 
+                    [:eq, :project_project_id, project_idh.get_id()],
                     [:oneof, :version, versions],
-                    [:eq, :assembly_id, nil], #so get component templates, not components on assembly instances
+                    [:eq, :assembly_id, nil], #so get component templates, not components on assembly instances   
+                    [:eq, :node_node_id, nil],
                     [:oneof, :component_type, cmp_types]]
       }
       component_rows = get_objs(project_idh.createMH(:component),sp_hash)

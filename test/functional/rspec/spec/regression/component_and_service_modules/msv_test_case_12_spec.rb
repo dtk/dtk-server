@@ -21,10 +21,7 @@ component_module_filesystem_location = '~/dtk/component_modules'
 service_filesystem_location = '~/dtk/service_modules'
 component_module_namespace = "dtk17"
 component_module_name = "test_module"
-<<<<<<< HEAD
-=======
 local_component_module_name = "dtk17::test_module"
->>>>>>> namespace_support_merged
 
 dtk_common = DtkCommon.new('', '')
 

@@ -18,10 +18,7 @@ local_service_module_name = 'r8::bakir_test_apache'
 service_module_filesystem_location = '~/dtk/service_modules'
 component_module_filesystem_location = '~/dtk/component_modules'
 component_module_name = 'apache'
-<<<<<<< HEAD
-=======
 local_component_module_name = 'r8::apache'
->>>>>>> namespace_support_merged
 
 dtk_common = DtkCommon.new('', '')
 

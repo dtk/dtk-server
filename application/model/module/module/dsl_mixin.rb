@@ -84,6 +84,7 @@ module DTK; class BaseModule
       local_params = ModuleBranch::Location::LocalParams::Server.new(
         :module_type => module_type(),
         :module_name => module_name(),
+        :namespace   => module_namespace(),
         :version => version
       )
       local_params.create_local(get_project())
@@ -92,10 +93,11 @@ module DTK; class BaseModule
       ret = Hash.new
       module_name = local.module_name
       branch_name = local.branch_name
+      module_namespace = local.module_namespace_name
       version = local.version
       project = local.project
       config_agent_type = config_agent_type_default()
-      impl_obj = Implementation.create_workspace_impl?(project.id_handle(),repo,module_name,config_agent_type,branch_name,version)
+      impl_obj = Implementation.create_workspace_impl?(project.id_handle(),repo,module_name,config_agent_type,branch_name,version,module_namespace)
       impl_obj.create_file_assets_from_dir_els()
 
       module_and_branch_info = self.class.create_module_and_branch_obj?(project,repo.id_handle(),local,opts[:ancestor_branch_idh])

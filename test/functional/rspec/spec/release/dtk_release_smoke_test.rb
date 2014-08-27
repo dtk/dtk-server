@@ -20,7 +20,9 @@ memory_size = 't1.micro'
 memory_size_attribute = 'memory_size'
 node_name = 'node1'
 component_module_name = "test_module"
+local_component_module_name = 'local::test_module'
 service_module_name = "bootstrap"
+local_service_module_name = 'local::bootstrap'
 namespace = 'demo'
 component_module_filesystem_location = "~/dtk/component_modules"
 
@@ -44,15 +46,15 @@ describe "DTK Server smoke test release" do
   end
 
   context "Export component module to #{namespace} namespace" do
-    include_context "Export component module", dtk_common, component_module_name, namespace
+    include_context "Export component module", dtk_common, local_component_module_name, namespace
   end
 
   context "Export service module to #{namespace} namespace" do
-    include_context "Export service module", dtk_common, service_module_name, namespace
+    include_context "Export service module", dtk_common, local_service_module_name, namespace
   end
 
   context "Get component module components list" do
-    include_context "Get component module components list", dtk_common, component_module_name
+    include_context "Get component module components list", dtk_common, local_component_module_name
   end
 
   os_templates.each do |os|
@@ -82,19 +84,19 @@ describe "DTK Server smoke test release" do
   end
 
   context "Delete service module function" do
-    include_context "Delete service module", dtk_common, service_module_name
+    include_context "Delete service module", dtk_common, local_service_module_name
   end
 
   context "Delete component module function" do
-    include_context "Delete component module", dtk_common, component_module_name
+    include_context "Delete component module", dtk_common, local_component_module_name
   end
 
-  context "Delete #{component_module_name} component module from remote" do
-    include_context "Delete component module from remote repo", dtk_common, component_module_name, namespace
+  context "Delete #{local_component_module_name} component module from remote" do
+    include_context "Delete component module from remote repo", dtk_common, local_component_module_name, namespace
   end
 
-  context "Delete #{service_module_name} service module from remote" do
-    include_context "Delete service module from remote repo", dtk_common, service_module_name, namespace
+  context "Delete #{local_service_module_name} service module from remote" do
+    include_context "Delete service module from remote repo", dtk_common, local_service_module_name, namespace
   end
 
   after(:all) do

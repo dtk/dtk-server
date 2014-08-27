@@ -21,6 +21,7 @@ memory_size_attribute = 'memory_size'
 node_name = 'node1'
 component_module_name = "test_module"
 component_module_namespace = "dtk17"
+local_component_module_name = 'dtk17::test_module'
 component_module_filesystem_location = "~/dtk/component_modules"
 
 dtk_common = DtkCommon.new(service_name, assembly_name)
@@ -39,11 +40,11 @@ describe "DTK Server smoke test" do
   end
 
   context "Get component module components list" do
-    include_context "Get component module components list", dtk_common, component_module_name
+    include_context "Get component module components list", dtk_common, local_component_module_name
   end
 
   context "Check if component module imported on local filesystem" do
-    include_context "Check component module imported on local filesystem", component_module_filesystem_location, component_module_name
+    include_context "Check component module imported on local filesystem", component_module_filesystem_location, local_component_module_name
   end
 
   os_templates.each do |os|
@@ -77,11 +78,11 @@ describe "DTK Server smoke test" do
   end
 
   context "Delete component module function" do
-    include_context "Delete component module", dtk_common, component_module_name
+    include_context "Delete component module", dtk_common, local_component_module_name
   end
 
   context "Delete component module from local filesystem" do
-    include_context "Delete component module from local filesystem", component_module_filesystem_location, component_module_name
+    include_context "Delete component module from local filesystem", component_module_filesystem_location, local_component_module_name
   end
 
   after(:all) do

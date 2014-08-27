@@ -16,6 +16,7 @@ node_name = 'test1'
 component_name = 'temp::source'
 component_module_name = 'temp'
 component_module_namespace = 'dtk17'
+local_component_module_name = 'dtk17::temp'
 component_module_filesystem_location = "~/dtk/component_modules"
 file_for_change_location = "./spec/regression/dslv3_component_modules/resources/cmd_test_case_5_dtk.model.yaml"
 file_for_change = "dtk.model.yaml"
@@ -25,10 +26,7 @@ dtk_common = DtkCommon.new(service_name, assembly_name)
 describe "(Component Module DSL) Test Case 5: Rename existing component attribute in dtk.model.yaml file, push-clone-changes to server and check if component attribute present" do
 
   before(:all) do
-    puts "*********************************************************************************************************************************************************************"
-    puts "(Component Module DSL) Test Case 5: Rename existing component attribute in dtk.model.yaml file, push-clone-changes to server and check if component attribute present"
-    puts "*********************************************************************************************************************************************************************"
-    puts ""
+    puts "*********************************************************************************************************************************************************************",""
   end
 
   context "Import component module function" do
@@ -36,19 +34,19 @@ describe "(Component Module DSL) Test Case 5: Rename existing component attribut
   end
 
   context "Get component module components list" do
-    include_context "Get component module components list", dtk_common, component_module_name
+    include_context "Get component module components list", dtk_common, local_component_module_name
   end
 
   context "Check if component module imported on local filesystem" do
-    include_context "Check component module imported on local filesystem", component_module_filesystem_location, component_module_name
+    include_context "Check component module imported on local filesystem", component_module_filesystem_location, local_component_module_name
   end
 
   context "Rename existing component attribute in dtk.model.yaml file" do
-    include_context "Replace dtk.model.yaml file with new one", component_module_name, file_for_change_location, file_for_change, component_module_filesystem_location, "renames param2 attribute from source component to test_attribute in dtk.model.yaml"
+    include_context "Replace dtk.model.yaml file with new one", local_component_module_name, file_for_change_location, file_for_change, component_module_filesystem_location, "renames param2 attribute from source component to test_attribute in dtk.model.yaml"
   end
 
   context "Push clone changes of component module from local copy to server" do
-    include_context "Push clone changes to server", component_module_name, file_for_change
+    include_context "Push clone changes to server", local_component_module_name, file_for_change
   end
 
   context "Stage service function on #{assembly_name} assembly" do
@@ -76,11 +74,11 @@ describe "(Component Module DSL) Test Case 5: Rename existing component attribut
   end
 
   context "Delete component module" do
-    include_context "Delete component module", dtk_common, component_module_name
+    include_context "Delete component module", dtk_common, local_component_module_name
   end
 
   context "Delete component module from local filesystem" do
-    include_context "Delete component module from local filesystem", component_module_filesystem_location, component_module_name
+    include_context "Delete component module from local filesystem", component_module_filesystem_location, local_component_module_name
   end
 
   after(:all) do

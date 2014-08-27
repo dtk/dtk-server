@@ -1095,7 +1095,7 @@ class DtkCommon
 			component_module_id = component_modules_list['data'].select { |x| x['display_name'] == component_module_name}.first['id']
 			component_module_attribute_list = send_request('/rest/component_module/info_about', {:about=>"attributes", :component_module_id=>component_module_id})
 			pretty_print_JSON(component_module_attribute_list)
-			attribute_value = component_module_attribute_list['data'].select { |x| x['display_name'] == "cmp[#{component_module_name}::#{component_name}]/#{attribute_name}" }.first['value']
+			attribute_value = component_module_attribute_list['data'].select { |x| x['display_name'] == "cmp[#{component_module_name.split("::").last}::#{component_name}]/#{attribute_name}" }.first['value']
 			puts attribute_value
 		end
 		

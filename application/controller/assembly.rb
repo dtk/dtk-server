@@ -179,8 +179,7 @@ module DTK
       response = 
         case module_type.to_sym
           when :component_module
-            Log.error("TODO: write special function to create object that finds it from Assembly::Instance.get_component_modules")
-            component_module = create_obj(:module_name,ComponentModule)
+            component_module = create_obj(:module_name,ComponentModule,:assembly => assembly)
             AssemblyModule::Component.prepare_for_edit(assembly,component_module)
           when :service_module
           modification_type = ret_non_null_request_params(:modification_type).to_sym
@@ -198,8 +197,7 @@ module DTK
         raise Error.new("promote_module_changes only treats component_module type") 
       end
       module_name = ret_non_null_request_params(:module_name)
-      Log.error("TODO: write special function to create object that finds it from Assembly::Instance.get_component_modules")
-      component_module = create_obj(:module_name,ComponentModule)
+      component_module = create_obj(:module_name,ComponentModule,:assembly => assembly)
       opts = ret_boolean_params_hash(:force)
       rest_ok_response AssemblyModule::Component.promote_module_updates(assembly,component_module,opts)
     end

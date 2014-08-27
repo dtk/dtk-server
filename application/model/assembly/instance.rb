@@ -464,7 +464,7 @@ module DTK; class  Assembly
       new_obj && new_obj.id_handle()
     end
 
-    def add_component(node_idh,component_template,component_title)
+    def add_component(node_idh,component_template,component_title,namespace=nil)
       # first check that node_idh is directly attached to the assembly instance
       # one reason it may not be is if its a node group member
       sp_hash = {
@@ -483,7 +483,7 @@ module DTK; class  Assembly
       cmp_instance_idh = nil
 
       Transaction do
-        cmp_instance_idh = node.add_component(component_template,component_title)
+        cmp_instance_idh = node.add_component(component_template,component_title,namespace)
         Task::Template::ConfigComponents.update_when_added_component?(self,node,cmp_instance_idh.create_object(),component_title,opts)
       end
       cmp_instance_idh

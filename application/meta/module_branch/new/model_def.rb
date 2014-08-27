@@ -154,6 +154,25 @@ lambda__matching_library_branches =
          :cols => [:id,:display_name]
        }]
     },
+    :component_module_namespace_info =>{
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>
+      [{
+         :model_name => :component_module,
+         :convert => true,
+         :join_type => :inner,
+         :join_cond=>{:id => q(:module_branch,:component_id)},
+         :cols => [:id,:display_name,:namespace_id]
+       },
+       {
+         :model_name => :namespace,
+         :convert => true,
+         :join_type => :inner,
+         :join_cond=>{:id => q(:component_module,:namespace_id)},
+         :cols => [:id,:display_name]
+       }]
+    },
     # TODO: now that assembly_id is added, can we remove this?
     :assemblies=>{
       :type=>:json,

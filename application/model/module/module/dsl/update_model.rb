@@ -10,7 +10,7 @@ module DTK; class ModuleDSL
           add_component_override_attrs(@input_hash,opts[:override_attrs])
         end
       
-      self.class.add_components_from_dsl(@container_idh,@config_agent_type,@impl_idh,input_hash)
+      self.class.add_components_from_dsl(@container_idh,@config_agent_type,@impl_idh,input_hash,nil,opts)
     end
 
     class Parser
@@ -24,12 +24,12 @@ module DTK; class ModuleDSL
       end
       attr_reader :components_hash,:stored_components_hash
 
-      def parse_components!(config_agent_type,dsl_hash)
+      def parse_components!(config_agent_type,dsl_hash,namespace=nil)
         impl_id = impl_idh.get_id()
         module_branch_id = module_branch_idh.get_id()
         
         @components_hash = dsl_hash.inject({}) do |h, (r8_hash_cmp_ref,cmp_info)|
-          cmp_ref = component_ref(config_agent_type,r8_hash_cmp_ref)
+          cmp_ref = component_ref(config_agent_type,r8_hash_cmp_ref,namespace)
           info = Hash.new
           cmp_info.each do |k,v|
             case k
@@ -59,9 +59,13 @@ module DTK; class ModuleDSL
       def component_ref_from_cmp_type(config_agent_type,component_type)
         "#{config_agent_type}-#{component_type}"
       end
-      def component_ref(config_agent_type,r8_hash_cmp_ref)
+      def component_ref(config_agent_type,r8_hash_cmp_ref,namespace=nil)
         # TODO: may be better to have these prefixes already in r8 dsl file
-        "#{config_agent_type}-#{r8_hash_cmp_ref}"
+        # "#{config_agent_type}-#{r8_hash_cmp_ref}"
+        ret = "#{config_agent_type}-#{r8_hash_cmp_ref}"
+        ret = Namespace.join_namespace(namespace, ret) if namespace
+
+        ret
       end
 
     end
@@ -89,11 +93,11 @@ module DTK; class ModuleDSL
   end
 
   module UpdateModelClassMixin
-    def add_components_from_dsl(container_idh,config_agent_type,impl_idh,dsl_hash,dsl_integer_version=nil)
+    def add_components_from_dsl(container_idh,config_agent_type,impl_idh,dsl_hash,dsl_integer_version=nil,opts={})
       dsl_integer_version ||= integer_version(dsl_integer_version)
       module_branch_idh = impl_idh.create_object().get_module_branch().id_handle()
       parser_proc = create_parser_processor(dsl_integer_version,impl_idh,module_branch_idh,container_idh)
-      parser_proc.parse_components!(config_agent_type,dsl_hash)
+      parser_proc.parse_components!(config_agent_type,dsl_hash,opts[:namespace])
       cmps_hash = parser_proc.components_hash()
       stored_cmps_hash = parser_proc.stored_components_hash()
 
@@ -102,7 +106,7 @@ module DTK; class ModuleDSL
       Model.input_hash_content_into_model(container_idh,db_update_hash)
       sp_hash =  {
         :cols => [:id,:display_name], 
-        :filter => [:and,[:oneof,:ref,cmps_hash.keys],[:eq,:library_library_id,container_idh.get_id()]]
+        :filter => [:and,[:oneof,:ref,cmps_hash.keys],[:eq,:project_project_id,container_idh.get_id()]]
       }
       Model.get_objs(container_idh.create_childMH(:component),sp_hash).map{|r|r.id_handle()}
     end

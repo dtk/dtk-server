@@ -312,7 +312,7 @@ module DTK
       ret
     end
 
-    def add_component(component_template,component_title=nil)
+    def add_component(component_template,component_title=nil,namespace=nil)
       component_template.update_with_clone_info!()
 
       if module_branch = component_template[:module_branch]
@@ -327,7 +327,7 @@ module DTK
           :display_name => SQL::ColRef.cast(ComponentTitle.display_name_with_title(component_type,component_title),:text)
         }
       end
-      clone_opts = {:no_post_copy_hook => true,:ret_new_obj_with_cols => [:id,:display_name]}
+      clone_opts = {:no_post_copy_hook => true,:ret_new_obj_with_cols => [:id,:display_name],:namespace => namespace}
       new_cmp = clone_into(component_template,override_attrs,clone_opts)
       new_cmp_idh = new_cmp.id_handle()
       if title_attr_name

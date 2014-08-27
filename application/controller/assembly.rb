@@ -123,6 +123,11 @@ module DTK
           opts.merge!(:truncate_attribute_values => true,:mark_unset_required => true)
         end
       end
+
+      if about == :modules
+        opts.merge!(:with_namespace => true)
+      end
+
       if node_id
         opts.merge!(:node_cmp_name => true)  unless node_id.empty?
       end
@@ -179,7 +184,7 @@ module DTK
       response = 
         case module_type.to_sym
           when :component_module
-            component_module = create_obj(:module_name,ComponentModule,:assembly => assembly)
+            component_module = create_obj(:module_name,ComponentModule)
             AssemblyModule::Component.prepare_for_edit(assembly,component_module)
           when :service_module
           modification_type = ret_non_null_request_params(:modification_type).to_sym
@@ -197,7 +202,7 @@ module DTK
         raise Error.new("promote_module_changes only treats component_module type") 
       end
       module_name = ret_non_null_request_params(:module_name)
-      component_module = create_obj(:module_name,ComponentModule,:assembly => assembly)
+      component_module = create_obj(:module_name,ComponentModule)
       opts = ret_boolean_params_hash(:force)
       rest_ok_response AssemblyModule::Component.promote_module_updates(assembly,component_module,opts)
     end

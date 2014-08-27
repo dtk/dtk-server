@@ -45,11 +45,8 @@ module DTK
     #
     # Get full module name
     #
-    def full_module_name
-      namespace   = get_field?(:namespace)
-      module_name = get_field?(:display_name)
-
-      namespace ? Namespace.join_namespace(namespace[:display_name], module_name) : module_name
+    def full_module_name()
+      self.class.ndx_full_module_names([id_handle]).values.first
     end
 
     #
@@ -368,13 +365,34 @@ module DTK
       check_valid_id_default(model_handle,id)
     end
 
-    def name_to_id(model_handle,name,namespace)
+    def name_to_id(model_handle,name_or_full_module_name,namespace=nil)
+      namespace_x, name = Namespace.full_module_name_parts?(name_or_full_module_name)
+      unless namespace ||= namespace_x
+        raise Error.new("Cannot find namespace")
+      end
       namespace_obj = Namespace.find_by_name(model_handle.createMH(:namespace), namespace)
       sp_hash = {
        :cols => [:id],
         :filter => [:and,[:eq, :namespace_id, namespace_obj.id],[:eq, :display_name, name]]
       }
       name_to_id_helper(model_handle,name,sp_hash)
+    end
+
+    # arguments are module idhs
+    def ndx_full_module_names(idhs)
+      ret = Hash.new
+      return ret if idhs.empty?
+      sp_hash =  {
+        :cols => [:id,:group_id,:display_name,:namespace],
+        :filter => [:oneof, :id,idhs.map{|idh|idh.get_id()}]
+      }
+      mh = idhs.first.createMH()
+      get_objs(mh,sp_hash).inject(Hash.new) do |h,row|
+        namespace   = row[:namespace]
+        module_name = row[:display_name]
+        full_module_name = (namespace ? Namespace.join_namespace(namespace[:display_name], module_name) : module_name)
+        h.merge(row[:id] => full_module_name)
+      end
     end
 
     def info(target_mh, id, opts={})

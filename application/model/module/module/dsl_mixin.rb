@@ -64,6 +64,7 @@ module DTK; class BaseModule
       local_params = ModuleBranch::Location::LocalParams::Server.new(
         :module_type => module_type(),
         :module_name => module_name(),
+        :namespace   => module_namespace(),
         :version => new_version
       )
       local = local_params.create_local(get_project())

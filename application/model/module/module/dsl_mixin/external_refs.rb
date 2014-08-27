@@ -83,7 +83,7 @@ module DTK; class BaseModule
          rescue Exception => e
           Log.error_pp([e,e.backtrace[0..20]])
         end
-        all_modules = BaseModule.get_all(project.id_handle())
+        all_modules = self.class.get_all(project.id_handle())
         parsed_dependencies.each do |parsed_dependency|
           dep_name = parsed_dependency[:name].strip()
           version_constraints = parsed_dependency[:version_constraints]

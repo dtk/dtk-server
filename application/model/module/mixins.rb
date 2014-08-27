@@ -368,23 +368,13 @@ module DTK
       check_valid_id_default(model_handle,id)
     end
 
-    def name_to_id(model_handle,name,opts={})
-      if namespace = opts[:namespace]
-        namespace_obj = Namespace.find_by_name(model_handle.createMH(:namespace), namespace)
-        sp_hash =  {
-          :cols => [:id],
-          :filter => [:and,[:eq, :namespace_id, namespace_obj.id],[:eq, :display_name, name]]
-        }
-        name_to_id_helper(model_handle,name,sp_hash)
-      else
-        unless assembly = opts[:assembly]
-          raise Error.new("If no namespace is given an assembly instance must be given")
-        end
-        unless match = assembly.get_component_modules().find{|r|r[:display_name] == name}
-          raise ErrorNameDoesNotExist.new(name,pp_object_type())
-        end
-        match[:id]
-      end
+    def name_to_id(model_handle,name,namespace)
+      namespace_obj = Namespace.find_by_name(model_handle.createMH(:namespace), namespace)
+      sp_hash = {
+       :cols => [:id],
+        :filter => [:and,[:eq, :namespace_id, namespace_obj.id],[:eq, :display_name, name]]
+      }
+      name_to_id_helper(model_handle,name,sp_hash)
     end
 
     def info(target_mh, id, opts={})

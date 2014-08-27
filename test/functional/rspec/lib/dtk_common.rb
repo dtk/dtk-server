@@ -12,7 +12,7 @@ class DtkCommon
 
 	attr_accessor :SERVER, :PORT, :ENDPOINT, :USERNAME, :PASSWORD
 	attr_accessor :service_name, :service_id, :assembly, :node_id, :success, :error_message, :server_log, :ssh_key
-	attr_accessor :component_module_id_list
+	attr_accessor :component_module_id_list, :component_module_name_list
 
 	$opts = {
 		:timeout => 100,
@@ -34,8 +34,9 @@ class DtkCommon
 	  @server_log = config_yml['r8server']['log']
 	  @ssh_key = config_yml['r8server']['ssh_key']
 
-		#used as placeholder for component ids for specific module that are accumulated
+		#used as placeholders for component ids/names for specific module that are accumulated
 		@component_module_id_list = Array.new()
+		@component_module_name_list = Array.new()
 
 		#Login to dtk application
 		response_login = RestClient.post(@ENDPOINT + '/rest/user/process_login', 'username' => @USERNAME, 'password' => @PASSWORD, 'server_host' => @SERVER, 'server_port' => @PORT)
@@ -1019,9 +1020,11 @@ class DtkCommon
 			module_components_list['data'].each do |x|
 				if (filter_version != "")
 					@component_module_id_list << x['id'] if x['version'] == filter_version
+					@component_module_name_list << x['display_name'] if x['version'] == filter_version
 					puts "Component module component: #{x['display_name']}"
 				else
 					@component_module_id_list << x['id'] if x['version'] == nil
+					@component_module_name_list << x['display_name'] if x['version'] == nil
 					puts "Component module component: #{x['display_name']}"
 				end
 			end
@@ -1877,7 +1880,7 @@ class DtkCommon
 		return node_exists
 	end
 
-	def add_component_to_service_node(service_id, node_name, component_id)
+	def add_component_to_service_node(service_id, node_name, component_id, namespace)
 		puts "Add component to node:", "----------------------"
 		component_added = false
 
@@ -1885,8 +1888,7 @@ class DtkCommon
 		puts "Node list:"
 		pretty_print_JSON(node_list)
 		node_id = node_list['data'].select { |x| x['display_name'] == node_name }.first['id']
-
-		component_add_response = send_request('/rest/assembly/add_component', {:assembly_id=>service_id, :node_id=>node_id, :component_template_id=>component_id})
+		component_add_response = send_request('/rest/assembly/add_component', {:assembly_id=>service_id, :node_id=>node_id, :component_template_id=>component_id, :namespace=>namespace})
 
 		if (component_add_response['status'] == 'ok')
 			component_list_response = send_request('/rest/assembly/info_about', {:assembly_id=>service_id, :about=>'components', :subtype=>'instance'})

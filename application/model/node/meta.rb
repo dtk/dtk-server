@@ -454,6 +454,37 @@ module DTK
            :cols => [:id,:display_name,:group_id,:description,:component_type,:version,:ref_num, :module_branch_id]
          }]
 
+      virtual_column :components_with_namespace, :type => :json, :hidden => true,
+      :remote_dependencies =>
+        [
+         {
+           :model_name => :component,
+           :convert => true,
+           :join_type => :inner,
+           :join_cond=>{:node_node_id =>:node__id},
+           :cols => [:id,:display_name,:group_id,:description,:component_type,:version,:ref_num, :module_branch_id]
+         },
+         {
+           :model_name => :module_branch,
+           :convert => true,
+           :join_type => :inner,
+           :join_cond=>{:id =>:component__module_branch_id},
+           :cols => [:id,:display_name,:component_id]
+         },
+         {
+           :model_name => :component_module,
+           :convert => true,
+           :join_type => :inner,
+           :join_cond=>{:id =>:module_branch__component_id},
+           :cols => [:id,:display_name,:namespace_id]
+         },
+         {
+           :model_name => :namespace,
+           :convert => true,
+           :join_type => :inner,
+           :join_cond=>{:id =>:component_module__namespace_id},
+           :cols => [:id,:display_name]
+         }]
 
       virtual_column :component_list, :type => :json, :hidden => true,
       :remote_dependencies =>

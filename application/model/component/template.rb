@@ -193,9 +193,15 @@ module DTK; class Component
                     [:eq, :node_node_id, nil]]
       }
       cmps = Model.get_objs(cmp_mh,sp_hash,:keep_ref_cols=>true)
+
       # remove components that does not match by namespace
-      cmps.reject!{|c| !c[:ref].split('::').include?(namespace)}
-      cmps.first
+      ret_cmp = nil
+      cmps.each do |cmp|
+        n_spc, name = cmp[:ref].split('::')
+        ret_cmp = cmp if(n_spc.to_s.eql?(namespace) || name.nil?)
+      end
+
+      ret_cmp
     end
 
    private 

@@ -399,10 +399,19 @@ module DTK
 
     def rest__add_component()
       assembly = ret_assembly_instance_object()
-      component_template, component_title = ret_component_template_and_title_for_assembly(:component_template_id,assembly)
+      # component_template, component_title = ret_component_template_and_title_for_assembly(:component_template_id,assembly)
+
+      cmp_name, namespace = ret_non_null_request_params(:component_template_id, :namespace)
+      assembly_idh = assembly.id_handle()
+
+      cmp_mh = assembly_idh.createMH(:component)
+      component = Component::Template.get_cmp_template_from_name_with_namespace(cmp_mh, cmp_name, namespace)
+
+      component_template, component_title = ret_component_template_and_title_with_namespace(component,assembly)
+
       # not checking here if node_id points to valid object; check is in add_component
       node_idh = ret_request_param_id_handle(:node_id,Node)
-      new_component_idh = assembly.add_component(node_idh,component_template,component_title)
+      new_component_idh = assembly.add_component(node_idh,component_template,component_title,namespace)
       rest_ok_response(:component_id => new_component_idh.get_id())
     end
 

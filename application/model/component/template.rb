@@ -123,11 +123,16 @@ module DTK; class Component
       ret = []
       cmps.each do |r|
         sp_h = {
-          :cols => [:id, :type, :display_name],
+          :cols => [:id, :type, :display_name, :component_module_namespace_info],
           :filter => [:eq, :id, r[:module_branch_id]]
         }
         m_branch = Model.get_obj(project_idh.createMH(:module_branch),sp_h)
-        ret << r unless m_branch[:type].eql?(ingore_type)
+        # ret << r unless m_branch[:type].eql?(ingore_type)
+        if(m_branch && !m_branch[:type].eql?(ingore_type))
+          branch_namespace = m_branch[:namespace]
+          r['namespace'] = branch_namespace[:display_name]
+          ret << r
+        end
       end
 
       if constraint = opts[:component_version_constraints]
@@ -173,6 +178,24 @@ module DTK; class Component
       else
         name_to_id_aux(model_handle,name,version_or_versions)
       end
+    end
+
+    def self.get_cmp_template_from_name_with_namespace(cmp_mh, cmp_name, namespace)
+      display_name = display_name_from_user_friendly_name(cmp_name)
+      component_type,title =  ComponentTitle.parse_component_display_name(display_name)
+      sp_hash = {
+        :cols => [:id, :display_name, :module_branch_id, :type, :ref],
+        :filter => [:and,
+                    [:eq, :display_name, display_name],
+                    [:eq, :type, 'template'],
+                    [:eq, :component_type, component_type],
+                    [:neq, :project_project_id, nil],
+                    [:eq, :node_node_id, nil]]
+      }
+      cmps = Model.get_objs(cmp_mh,sp_hash,:keep_ref_cols=>true)
+      # remove components that does not match by namespace
+      cmps.reject!{|c| !c[:ref].split('::').include?(namespace)}
+      cmps.first
     end
 
    private 

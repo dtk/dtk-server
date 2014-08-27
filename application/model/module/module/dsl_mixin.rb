@@ -43,9 +43,9 @@ module DTK; class BaseModule
       deprecate_create_needed_objects_and_dsl?(repo,version)
     end
 
-    def parse_dsl_and_update_model(impl_obj,module_branch_idh,version=nil,opts={})
+    def parse_dsl_and_update_model(impl_obj,module_branch_idh,version=nil,namespace=nil,opts={})
       set_dsl_parsed!(false)
-      klass(self).parse_and_update_model(self,impl_obj,module_branch_idh,version,opts)
+      klass(self).parse_and_update_model(self,impl_obj,module_branch_idh,version,namespace,opts)
       set_dsl_parsed!(true)
     end
 
@@ -116,7 +116,7 @@ module DTK; class BaseModule
       dsl_created_info = Hash.new()
       klass = klass(self)
       if klass.contains_dsl_file?(impl_obj)
-        if e = klass::ParsingError.trap{parse_dsl_and_update_model(impl_obj,module_branch_idh,version,opts)}
+        if e = klass::ParsingError.trap{parse_dsl_and_update_model(impl_obj,module_branch_idh,version,module_namespace,opts)}
           ret.merge!(:dsl_parsed_info => e)
         end
       elsif opts[:scaffold_if_no_dsl] 
@@ -147,7 +147,7 @@ module DTK; class BaseModule
         AssemblyModule::Component.finalize_edit(assembly,self,module_branch)
       elsif ModuleDSL.contains_dsl_file?(impl_obj)
         if opts[:force_parse] or diffs_summary.meta_file_changed?() or (get_field?(:dsl_parsed) == false)
-          if e = ModuleDSL::ParsingError.trap{parse_dsl_and_update_model(impl_obj,module_branch.id_handle(),version,opts)}
+          if e = ModuleDSL::ParsingError.trap{parse_dsl_and_update_model(impl_obj,module_branch.id_handle(),version,nil,opts)}
             ret.merge!(:dsl_parsed_info => e)
           end
         end

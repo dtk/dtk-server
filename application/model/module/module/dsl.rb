@@ -10,7 +10,7 @@ module DTK
     extend UpdateModelClassMixin
     include UpdateModelMixin
 
-    def self.parse_and_update_model(component_module,impl_obj,module_branch_idh,version=nil,opts={})
+    def self.parse_and_update_model(component_module,impl_obj,module_branch_idh,version=nil,namespace=nil,opts={})
       # get associated assembly templates before do any updates and use this to see if any referential integrity
       # problems within transaction after do update; transaction is aborted if any errors found
       ref_integrity_snapshot = RefIntegrity.snapshot_associated_assembly_templates(component_module)
@@ -21,6 +21,7 @@ module DTK
 
         update_opts = {:override_attrs => {"module_branch_id" => module_branch_idh.get_id()}}
         update_opts.merge!(:version => version) if version
+        update_opts.merge!(:namespace => namespace) if namespace
         component_dsl_obj.update_model(update_opts)
 
         ref_integrity_snapshot.raise_error_if_any_violations(opts)

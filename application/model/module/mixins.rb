@@ -640,7 +640,7 @@ module DTK
         :branch_head_sha => RepoManager.branch_head_sha(branch_obj)
       }
       if version
-        hash.merge!(:version => version, :full_module_name => version.module_name(:with_namespace))
+        hash.merge!(:version => version)
         if assembly_name = version.respond_to?(:assembly_name) && version.assembly_name()
           hash.merge!(:assembly_name => assembly_name)
         end

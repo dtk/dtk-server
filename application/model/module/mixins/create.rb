@@ -55,21 +55,19 @@ module DTK; module ModuleMixins
       mb_create_hash = ModuleBranch.ret_create_hash(repo_idh,local,opts)
       version_field = mb_create_hash.values.first[:version]
 
-      unless is_there_module?(project, module_name, namespace.id)
-        fields = {
-          :display_name => module_name,
-          :module_branch => mb_create_hash,
-          :namespace_id => namespace.id()
-        }
+      # create module and branch (if needed)
+      fields = {
+        :display_name => module_name,
+        :module_branch => mb_create_hash,
+        :namespace_id => namespace.id()
+      }
 
-        create_hash = {
-          model_name.to_s() => {
-            ref => fields
-          }
+      create_hash = {
+        model_name.to_s() => {
+          ref => fields
         }
-        input_hash_content_into_model(project_idh,create_hash)
-      end
-
+        }
+      input_hash_content_into_model(project_idh,create_hash)
 
       module_branch = get_module_branch_from_local(local,:with_namespace=>true)
       module_idh =  project_idh.createIDH(:model_name => model_name(),:id => module_branch[:module_id])

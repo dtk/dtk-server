@@ -1,3 +1,4 @@
+# TODO: this version is deprecated 
 module DTK; class ServiceModule
   class AssemblyImport
     class V1 < self
@@ -46,6 +47,7 @@ module DTK; class ServiceModule
       
       def self.internal_assembly_ref__without_version(serialized_assembly_ref)
         module_name,assembly_name = parse_serialized_assembly_ref(serialized_assembly_ref)
+        Log.error("since this dsl version is depcated, was no problem removing  Assembly.internal_assembly_ref")
         Assembly.internal_assembly_ref(module_name,assembly_name)
       end
 

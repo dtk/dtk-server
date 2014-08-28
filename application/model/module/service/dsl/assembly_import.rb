@@ -157,11 +157,6 @@ module DTK; class ServiceModule
       end
     end
 
-    # TODO: deprecate or move to within ServiceModule.assembly_ref
-    def self.internal_assembly_ref__add_version(assembly_ref,version_field)
-      Assembly.internal_assembly_ref__add_version(assembly_ref,version_field)
-    end
-
    private
     def determine_integer_version(hash_content,opts={})
       if version = hash_content["dsl_version"]
@@ -193,24 +188,6 @@ module DTK; class ServiceModule
     def self.parse_node_bindings_hash!(node_bindings_hash,opts={})      
       nil
     end
-
-    # TODO: deprecate or move to within ServiceModule.assembly_ref
-    def self.internal_assembly_ref__with_version(serialized_assembly_ref,version_field)
-      module_name,assembly_name = parse_serialized_assembly_ref(serialized_assembly_ref)
-      Assembly.internal_assembly_ref(module_name,assembly_name,version_field)
-    end
-
-    # return [module_name,assembly_name]
-    def self.parse_serialized_assembly_ref(ref)
-      if ref =~ /(^.+)::(.+$)/
-        [$1,$2]
-      elsif ref =~ /(^[^-]+)-(.+$)/ #TODO: this can be eventually deprecated
-        [$1,$2]
-      else
-        raise Error.new("Unexpected form for serialized assembly ref (#{ref})")
-      end
-    end
-    ### end: TODO: deprecate or move to within ServiceModule.assembly_ref
 
     def self.import_component_refs(container_idh,assembly_name,components_hash,component_module_refs,opts={})
       cmps_with_titles = Array.new

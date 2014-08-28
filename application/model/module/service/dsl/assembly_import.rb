@@ -22,10 +22,9 @@ module DTK; class ServiceModule
     def process(module_name,hash_content,opts={})
       integer_version = determine_integer_version(hash_content,opts)
       version_proc_class = load_and_return_version_adapter_class(integer_version)
-      version_proc_class.assembly_iterate(module_name,hash_content) do |assemblies_hash,node_bindings_hash|
+      version_proc_class.assembly_iterate(@service_module,hash_content) do |assemblies_hash,node_bindings_hash|
         dangling_errors = ParsingError::DanglingComponentRefs::Aggregate.new()
-        assemblies_hash.each do |ref_without_ns,assem|
-          ref = Namespace.join_namespace(@module_namespace,ref_without_ns)
+        assemblies_hash.each do |ref,assem|
           if file_path = opts[:file_path]
             @ndx_assembly_file_paths[ref] = file_path
           end
@@ -75,15 +74,21 @@ module DTK; class ServiceModule
       @db_updates_assemblies["component"]
     end
 
-    def self.import_assembly_top(serialized_assembly_ref,assembly_hash,module_branch,module_name,opts={})
+    def self.import_assembly_top(assembly_ref,assembly_hash,module_branch,module_name,opts={})
       if assembly_hash.empty?
         raise ParsingError.new("Empty assembly dsl file",opts_file_path(opts))
       end
       unless assembly_name = assembly_hash["name"]||opts[:default_assembly_name]
         raise ParsingError.new("No name associated with assembly dsl file",opts_file_path(opts))
       end
-      version_field = module_branch.get_field?(:version)
-      assembly_ref = internal_assembly_ref__with_version(serialized_assembly_ref,version_field)
+
+      if version_field = module_branch.get_field?(:version)
+        unless version_field == 'master'
+          Log.error("this probably should be done same time module name and module namesapce put in to form ref, i.e., in ServiceModule#assembly_ref")
+          raise Error.new("Treatment of versions in import is not yet implemented")
+          # assembly_ref = internal_assembly_ref__with_version(assembly_ref,version_field)
+        end
+      end
       {
         assembly_ref => {
           "display_name" => assembly_name,
@@ -162,6 +167,7 @@ module DTK; class ServiceModule
       end
     end
 
+    # TODO: deprecate or move to within ServiceModule.assembly_ref
     def self.internal_assembly_ref__add_version(assembly_ref,version_field)
       Assembly.internal_assembly_ref__add_version(assembly_ref,version_field)
     end
@@ -198,6 +204,7 @@ module DTK; class ServiceModule
       nil
     end
 
+    # TODO: deprecate or move to within ServiceModule.assembly_ref
     def self.internal_assembly_ref__with_version(serialized_assembly_ref,version_field)
       module_name,assembly_name = parse_serialized_assembly_ref(serialized_assembly_ref)
       Assembly.internal_assembly_ref(module_name,assembly_name,version_field)
@@ -213,6 +220,7 @@ module DTK; class ServiceModule
         raise Error.new("Unexpected form for serialized assembly ref (#{ref})")
       end
     end
+    ### end: TODO: deprecate or move to within ServiceModule.assembly_ref
 
     def self.import_component_refs(container_idh,assembly_name,components_hash,component_module_refs,opts={})
       cmps_with_titles = Array.new

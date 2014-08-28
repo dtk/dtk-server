@@ -101,7 +101,8 @@ module DTK
         unless assembly = @assemblies.find{|a|a[:display_name] == name}
           Log.error("Field (#{field}) has value (#{name}) which is not a valid assembly reference")
         end
-        [assembly,ServiceModule.assembly_ref(module_name,name)]
+        raise Error.new("if use need to pass in service_module and call service_module.assembly_ref(name)")
+#        [assembly,ServiceModule.assembly_ref(module_name,name)]
       end
     end
   end

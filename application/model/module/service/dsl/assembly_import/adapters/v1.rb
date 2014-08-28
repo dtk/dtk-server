@@ -1,9 +1,9 @@
 module DTK; class ServiceModule
   class AssemblyImport
     class V1 < self
-      def self.assembly_iterate(module_name,hash_content,&block)
+      def self.assembly_iterate(service_module,hash_content,&block)
         assemblies_hash = hash_content["assemblies"].values.inject(Hash.new) do |h,assembly_info|
-          h.merge(ServiceModule.assembly_ref(module_name,assembly_info["name"]) => assembly_info)
+          h.merge(service_module.assembly_ref(assembly_info["name"]) => assembly_info)
         end
         node_bindings_hash = hash_content["node_bindings"]
         block.call(assemblies_hash,node_bindings_hash)

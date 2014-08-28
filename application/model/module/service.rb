@@ -29,6 +29,10 @@ module DTK
       ndx_ret.values
     end
 
+    def assembly_ref(assembly_name)
+      Namespace.join_namespace(module_namespace(),"#{module_name()}-#{assembly_name}")
+    end
+
     def self.get_required_and_missing_modules(project, remote_params, client_rsa_pub_key=nil)
       remote = remote_params.create_remote(project)
       response = Repo::Remote.new(remote).get_remote_module_components(client_rsa_pub_key)
@@ -330,12 +334,6 @@ pp [:debug_publish_preprocess_raise_error,:module_info,module_info]
       mb_mh = model_handle(:module_branch)
       cmp_module_branch_idhs = component_templates.map{|r|r[:module_branch_id]}.uniq.map{|id|mb_mh.createIDH(:id => id)}
       ModuleBranch.get_component_modules_info(cmp_module_branch_idhs)
-    end
-
-    def self.assembly_ref(module_name,assembly_name)
-      # TODO: right now cannot change because node bdings in assembly.json hard coded to this. Need to check if any ambiguity
-      # if have module name with hyphen
-      "#{module_name}-#{assembly_name}"
     end
   end
 end

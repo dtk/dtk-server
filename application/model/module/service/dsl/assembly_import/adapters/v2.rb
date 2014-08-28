@@ -1,16 +1,16 @@
 module DTK; class ServiceModule
   class AssemblyImport
     class V2 < self
-      def self.assembly_iterate(module_name,hash_content,&block)
+      def self.assembly_iterate(service_module,hash_content,&block)
         assembly_hash = (hash_content["assembly"]||{}).merge(Aux::hash_subset(hash_content,["name","workflow"]))
-        assembly_ref = ServiceModule.assembly_ref(module_name,hash_content["name"])
+        assembly_ref = service_module.assembly_ref(hash_content["name"])
         assemblies_hash = {assembly_ref => assembly_hash}
         node_bindings_hash = hash_content["node_bindings"]
         block.call(assemblies_hash,node_bindings_hash)
       end
 
-      def self.import_assembly_top(serialized_assembly_ref,assembly_hash,module_branch,module_name,opts={})
-        ret = super(serialized_assembly_ref,assembly_hash,module_branch,module_name,opts)
+      def self.import_assembly_top(assembly_ref,assembly_hash,module_branch,module_name,opts={})
+        ret = super(assembly_ref,assembly_hash,module_branch,module_name,opts)
         ret_assembly_hash = ret.values.first
         ret_assembly_hash.merge!("task_template" => import_task_templates(assembly_hash))
         ret

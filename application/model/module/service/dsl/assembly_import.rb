@@ -12,6 +12,7 @@ module DTK; class ServiceModule
       @ndx_assembly_hashes = Hash.new #indexed by ref
       @module_branch = module_branch
       @module_name = service_module.module_name()
+      @module_namespace = service_module.module_namespace()
       @service_module = service_module
       @component_module_refs = component_module_refs
       @ndx_version_proc_classes = Hash.new
@@ -23,7 +24,8 @@ module DTK; class ServiceModule
       version_proc_class = load_and_return_version_adapter_class(integer_version)
       version_proc_class.assembly_iterate(module_name,hash_content) do |assemblies_hash,node_bindings_hash|
         dangling_errors = ParsingError::DanglingComponentRefs::Aggregate.new()
-        assemblies_hash.each do |ref,assem|
+        assemblies_hash.each do |ref_without_ns,assem|
+          ref = "#{@module_namespace}--#{ref_without_ns}"
           if file_path = opts[:file_path]
             @ndx_assembly_file_paths[ref] = file_path
           end

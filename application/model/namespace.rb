@@ -84,11 +84,9 @@ module DTK
       "#{self.display_name()}#{NAMESPACE_DELIMITER}#{module_name}"
     end
 
+    # TODO: would need to enhance if get a legitimate key, but it has nil or false value
     def method_missing(m, *args, &block)
-      if self.keys.include?(m)
-        return self[m]
-      end
-      super(m, *args, &block)
+      get_field?(m) || super(m, *args, &block)
     end
 
   end

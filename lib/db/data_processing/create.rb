@@ -24,14 +24,14 @@ module XYZ
         end
       end
 
-      # TODO: this can be optimzed and simplified
+      # TODO: this can be optimized and simplified
       def create_from_select(model_handle,field_set,select_ds,override_attrs={},opts={})
 
         # TODO: temp for debugging; there are top level objects that can mistakenly trigger this
         unless model_handle[:parent_model_name]
           unless  (not Model.has_group_id_col?(model_handle)) or
-              [:repo,:datacenter,:library,:task,:repo_user,:repo_user_acl,:repo_remote].include?(model_handle[:model_name])
-            Log.error_pp(["missing :parent_model_name in create_from_select", model_handle,caller[0..10]])
+              [:repo,:datacenter,:library,:task,:repo_user,:repo_user_acl,:repo_remote,:namespace].include?(model_handle[:model_name])
+            Log.info_pp(["missing :parent_model_name in create_from_select", model_handle,caller[0..10]])
           end
         end
 

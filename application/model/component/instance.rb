@@ -116,8 +116,11 @@ module DTK; class Component
       self.class.print_form(self)
     end
 
-    def self.print_form(component)
-      component.get_field?(:display_name).gsub(/__/,"::")
+    def self.print_form(component, namespace=nil)
+      ret = component.get_field?(:display_name).gsub(/__/,"::")
+      ret = "#{namespace[:display_name]}/#{ret}" if namespace
+
+      ret
     end
 
     def self.legal_display_name?(display_name)

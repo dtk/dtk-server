@@ -404,6 +404,27 @@ module DTK
         get_virtual_attributes_aux_base(attribute_names,cols,field_to_match,multiple_instance_clause)
     end
 
+    def self.ret_component_with_namespace_for_node(cmp_mh, cmp_name, node_id, namespace)
+      display_name = cmp_name.gsub(/::/,"__")
+      sp_hash = {
+        :cols => [:id, :display_name, :module_branch_id, :type, :ref],
+        :filter => [:and,
+                    [:eq, :display_name, display_name],
+                    [:eq, :type, 'instance'],
+                    [:eq, :project_project_id, nil],
+                    [:eq, :node_node_id, node_id]]
+      }
+      cmps = Model.get_objs(cmp_mh,sp_hash,:keep_ref_cols=>true)
+
+      ret_cmp = nil
+      cmps.each do |cmp|
+        n_spc, name = cmp[:ref].split('::')
+        ret_cmp = cmp if(n_spc.to_s.eql?(namespace) || name.nil?)
+      end
+
+      ret_cmp
+    end
+
     def self.get_component_instances_related_by_mixins(components,cols)
       return Array.new if components.empty?
       sample_cmp = components.first

@@ -136,8 +136,9 @@ module DTK; class  Assembly
         aug_cmps = get_augmented_components(opts)
         node_cmp_name = opts[:node_cmp_name]
         cmps_print_form = aug_cmps.map do |r|
+          namespace = r[:namespace]
           node_name = "#{r[:node][:display_name]}/"
-          display_name = "#{node_cmp_name.nil? ? node_name : ''}#{Component::Instance.print_form(r)}"
+          display_name = "#{node_cmp_name.nil? ? node_name : ''}#{Component::Instance.print_form(r, namespace)}"
           r.hash_subset(:id).merge({:display_name => display_name})
         end
       

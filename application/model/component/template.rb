@@ -195,6 +195,7 @@ module DTK; class Component
       cmps = Model.get_objs(cmp_mh,sp_hash,:keep_ref_cols=>true)
 
       # remove components that does not match by namespace
+      # for now if no namespace in component name will not throw error
       ret_cmp = nil
       cmps.each do |cmp|
         n_spc, name = cmp[:ref].split('::')

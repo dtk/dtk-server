@@ -57,9 +57,17 @@ module DTK
       assembly = ret_assembly_instance_object()
       assembly_id = assembly.id()
       cmp_full_name = ret_request_params(:cmp_full_name)
+
+      cmp_name, namespace = ret_non_null_request_params(:component_id, :namespace)
+      assembly_idh = assembly.id_handle()
+      cmp_mh = assembly_idh.createMH(:component)
       
       if cmp_full_name
-        cmp_idh = ret_component_id_handle(:cmp_full_name,:assembly_id => assembly_id)
+        # cmp_idh = ret_component_id_handle(:cmp_full_name,:assembly_id => assembly_id)
+        component = Component.ret_component_with_namespace_for_node(cmp_mh, cmp_name, node_id, namespace)
+        raise ErrorUsage.new("Component with identifier '#{namespace}/#{cmp_name}' does not exist!") unless component
+
+        cmp_idh = component.id_handle()
       else
         cmp_idh = id_handle(component_id,:component)
       end
@@ -405,11 +413,13 @@ module DTK
       cmp_mh = assembly_idh.createMH(:component)
       component = Component::Template.get_cmp_template_from_name_with_namespace(cmp_mh, cmp_name, namespace)
 
-      component_template, component_title = ret_component_template_and_title_with_namespace(component,assembly)
+      raise ErrorUsage.new("Component with identifier '#{namespace}/#{cmp_name}' does not exist!") unless component
 
+      component_template, component_title = ret_component_template_and_title_with_namespace(component,assembly)
       # not checking here if node_id points to valid object; check is in add_component
       node_idh = ret_request_param_id_handle(:node_id,Node)
       new_component_idh = assembly.add_component(node_idh,component_template,component_title,namespace)
+
       rest_ok_response(:component_id => new_component_idh.get_id())
     end
 

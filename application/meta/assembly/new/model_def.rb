@@ -241,6 +241,27 @@ lambda__instance_nodes_components_assembly_template =
          :join_type=>:left_outer,
          :join_cond=>{:id=>:component__datacenter_datacenter_id},
          :cols => [:id,:group_id,:display_name]
+       }] +
+       [{
+         :model_name=>:module_branch,
+         :convert => true,
+         :join_type=>:inner,
+         :join_cond=>{:id=>:nested_component__module_branch_id},
+         :cols => [:id,:display_name,:group_id,:version,:current_sha,:component_id]
+       },
+       {
+         :model_name=>:component_module,
+         :convert => true,
+         :join_type=>:inner,
+         :join_cond=>{:id=>:module_branch__component_id},
+         :cols => [:id,:display_name,:group_id,:namespace_id]
+       },
+       {
+         :model_name=>:namespace,
+         :convert => true,
+         :join_type=>:inner,
+         :join_cond=>{:id=>:component_module__namespace_id},
+         :cols => [:id,:display_name]
        }]
     },
     :instance_component_list=> lambda__instance_nodes_and_components.call(Node::Instance.component_list_fields(),Component::Instance.component_list_fields()),

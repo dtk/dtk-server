@@ -218,8 +218,6 @@ module DTK; class ServiceModule
         h.merge(parse[:ref] => cmp_ref)
       end
 
-      # find and insert component template ids in first component_refs and then for the attribute_overrides
-      # just set component_template_id
       # TODO: set_matching_component_template_info does not use option: :donot_set_component_templates
       component_module_refs.set_matching_component_template_info!(ret.values, :donot_set_component_templates=>true)
       set_attribute_template_ids!(ret,container_idh)

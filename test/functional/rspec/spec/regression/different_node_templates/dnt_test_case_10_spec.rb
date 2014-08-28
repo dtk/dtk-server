@@ -80,11 +80,8 @@ end
 describe "(Different Node Templates) Test Case 10: Elasticsearch - Simple scenario" do
 
 	before(:all) do
-		puts "************************************************************************"
-		puts "(Different Node Templates) Test Case 10: Elasticsearch - Simple scenario"
-		puts "************************************************************************"
-		puts ""
-  	end
+		puts "************************************************************************",""
+  end
 
 	context "Stage service function on #{assembly_name} assembly" do
 		include_context "Stage", dtk_common

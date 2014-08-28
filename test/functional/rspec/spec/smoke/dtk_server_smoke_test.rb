@@ -29,10 +29,7 @@ dtk_common = DtkCommon.new(service_name, assembly_name)
 describe "DTK Server smoke test" do
 
   before(:all) do
-    puts "*********************"
-    puts "DTK Server smoke test"
-    puts "*********************"
-    puts ""
+    puts "*********************",""
   end
 
   context "Import component module function" do
@@ -65,7 +62,7 @@ describe "DTK Server smoke test" do
     end
 
     context "Add components from test module to service node" do
-      include_context "Add component to service node", dtk_common, node_name
+      include_context "Add component to service node", dtk_common, node_name, component_module_name, component_module_namespace
     end
 
     context "Converge function" do

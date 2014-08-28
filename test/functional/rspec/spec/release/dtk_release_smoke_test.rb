@@ -31,10 +31,7 @@ dtk_common = DtkCommon.new(service_name, assembly_name)
 describe "DTK Server smoke test release" do
 
   before(:all) do
-    puts "*****************************"
-    puts "DTK Server smoke test release"
-    puts "*****************************"
-    puts ""
+    puts "*****************************",""
   end
 
   context "Import new component module function" do

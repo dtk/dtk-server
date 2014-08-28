@@ -27,10 +27,7 @@ dtk_common = DtkCommon.new(service_name, assembly_name)
 describe "(Component link relations) Test Case 2: Fan-out scenario - $node.host_address from sink components on different nodes (sink1, sink2) are linked to upstream attribute of source component" do
 
   before(:all) do
-    puts "*****************************************************************************************************************************************************************************************"
-    puts "(Component link relations) Test Case 2: Fan-out scenario - $node.host_address from sink components on different nodes (sink1, sink2) are linked to upstream attribute of source component"
-    puts "*****************************************************************************************************************************************************************************************"
-    puts ""
+    puts "*****************************************************************************************************************************************************************************************",""
   end
 
   context "Stage service function on #{assembly_name} assembly" do

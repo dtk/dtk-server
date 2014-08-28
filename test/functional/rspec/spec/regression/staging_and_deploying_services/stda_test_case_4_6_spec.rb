@@ -20,10 +20,7 @@ dtk_common = DtkCommon.new(service_name_1, assembly_name)
 describe "(Staging And Deploying Assemblies) Test Case 4 6: Renaming service and renaming it to workspace" do
 
 	before(:all) do
-		puts "***********************************************************************************************"
-		puts "(Staging And Deploying Assemblies) Test Case 4 6: Renaming service and renaming it to workspace"
-		puts "***********************************************************************************************"
-		puts ""
+		puts "***********************************************************************************************",""
 	end
 
 	context "Stage service function on #{assembly_name} assembly" do

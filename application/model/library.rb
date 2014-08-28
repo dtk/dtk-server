@@ -1,15 +1,6 @@
 module XYZ
   class Library < Model
     ### get methods
-    # MOD_RESTRUCT: deprecate
-    def get_service_module(module_name)
-      sp_hash = {
-        :cols => [:id,:group_id,:display_name],
-        :filter => [:and,[:eq,:library_library_id,id()],[:eq,:display_name,module_name]]
-      }
-      Model.get_obj(model_handle(:service_module),sp_hash)
-    end
-
 
     def get_node_binding_rulesets(filter=nil)
       full_filter = [:eq,:library_library_id,id()]

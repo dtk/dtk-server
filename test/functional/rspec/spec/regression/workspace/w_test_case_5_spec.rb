@@ -20,11 +20,8 @@ dtk_common = DtkCommon.new('', '')
 describe "(Workspace) Test Case 5: Create two nodes (list nodes), delete one node (list nodes again) and purge workspace content" do
 
 	before(:all) do
-		puts "**********************************************************************************************************************"
-		puts "(Workspace) Test Case 5: Create two nodes (list nodes), delete one node (list nodes again) and purge workspace content"
-		puts "**********************************************************************************************************************"
-		puts ""
-  	end
+		puts "**********************************************************************************************************************",""
+  end
 
 	context "Create node in workspace" do
 		include_context "Create node in workspace", dtk_common, node_name_1, node_template

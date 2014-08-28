@@ -15,6 +15,7 @@ assembly_name = 'bootstrap::node_with_params'
 new_service_name = 'uop_test_case_1_instance2'
 new_assembly = 'uop_test_case_1_temp'
 service_module_name = 'bootstrap'
+local_namespace = "r8"
 
 os_attribute = 'os_identifier'
 memory_size_attribute = 'memory_size'
@@ -27,10 +28,7 @@ dtk_common2 = DtkCommon.new(new_service_name, "#{service_module_name}::#{new_ass
 describe "(Use Of Parameters) Test Case 1: Check possibility to create assembly from existing service and then to converge new assembly" do
 
   before(:all) do
-    puts "*****************************************************************************************************************************"
-    puts "(Use Of Parameters) Test Case 1: Check possibility to create assembly from existing service and then to converge new assembly"
-    puts "*****************************************************************************************************************************"
-    puts ""
+    puts "*****************************************************************************************************************************",""
   end
 
   context "Stage service function on #{assembly_name} assembly" do
@@ -74,7 +72,7 @@ describe "(Use Of Parameters) Test Case 1: Check possibility to create assembly 
   end
 
   context "Delete assembly function" do
-    include_context "Delete assembly", dtk_common2, "#{service_module_name}::#{new_assembly}"
+    include_context "Delete assembly", dtk_common2, "#{service_module_name}::#{new_assembly}", local_namespace
   end
 
   after(:all) do

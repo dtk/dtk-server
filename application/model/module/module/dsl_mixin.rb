@@ -135,6 +135,7 @@ module DTK; class BaseModule
     def update_model_objs_or_create_dsl?(diffs_summary,module_branch,version,opts={})
       ret = Hash.new
       dsl_created_info = Hash.new
+      module_namespace = module_namespace()
       impl_obj = module_branch.get_implementation()
       # TODO: make more robust to handle situation where diffs dont cover all changes; think can detect by looking at shas
       impl_obj.modify_file_assets(diffs_summary)
@@ -148,7 +149,7 @@ module DTK; class BaseModule
         AssemblyModule::Component.finalize_edit(assembly,self,module_branch)
       elsif ModuleDSL.contains_dsl_file?(impl_obj)
         if opts[:force_parse] or diffs_summary.meta_file_changed?() or (get_field?(:dsl_parsed) == false)
-          if e = ModuleDSL::ParsingError.trap{parse_dsl_and_update_model(impl_obj,module_branch.id_handle(),version,nil,opts)}
+          if e = ModuleDSL::ParsingError.trap{parse_dsl_and_update_model(impl_obj,module_branch.id_handle(),version,module_namespace,opts)}
             ret.merge!(:dsl_parsed_info => e)
           end
         end

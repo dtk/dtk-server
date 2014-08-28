@@ -25,11 +25,8 @@ dtk_common = DtkCommon.new(service_name, assembly_name)
 describe "(Different Node Templates) Test Case 1: Stage existing assembly with OS and MEMORY_SIZE combination and then converge it" do
 
 	before(:all) do
-		puts "************************************************************************************************************************"
-		puts "(Different Node Templates) Test Case 1: Stage existing assembly with OS and MEMORY_SIZE combination and then converge it"
-		puts "************************************************************************************************************************"
-		puts ""
-  	end
+		puts "************************************************************************************************************************",""
+  end
 
 	os_memory_array.each do |x|
 		os = x[:os]

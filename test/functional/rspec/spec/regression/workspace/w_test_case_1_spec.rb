@@ -14,6 +14,7 @@ STDOUT.sync = true
 node_name = 'test'
 node_template = 'precise-micro'
 component_name = 'stdlib'
+component_module_namespace = 'r8'
 info_to_check_1 = 'ec2_public_address'
 info_to_check_2 = 'node_name: test'
 info_to_check_3 = 'stdlib'
@@ -23,18 +24,15 @@ dtk_common = DtkCommon.new('', '')
 describe "(Workspace) Test Case 1: Create one node, add component in it, converge workspace, inspect info output and task output and purge workspace content" do
 
 	before(:all) do
-		puts "**************************************************************************************************************************************************"
-		puts "(Workspace) Test Case 1: Create one node, add component in it, converge workspace, inspect info output and task output and purge workspace content"
-		puts "**************************************************************************************************************************************************"
-		puts ""
-  	end
+		puts "**************************************************************************************************************************************************",""
+  end
 
 	context "Create node in workspace" do
 		include_context "Create node in workspace", dtk_common, node_name, node_template
 	end
 
 	context "Add component to the node in workspace" do
-		include_context "Add component to the node in workspace", dtk_common, node_name, component_name
+		include_context "Add component to the node in workspace", dtk_common, node_name, component_name, component_module_namespace
 	end		
 
 	context "Converge workspace" do

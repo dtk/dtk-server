@@ -127,7 +127,7 @@ module DTK
         setting_files = check_if_settings_exist(module_branch)
         new_structure = setting_files.empty? ? false : true
 
-        assembly_import_helper = AssemblyImport.new(project_idh,module_branch,module_name,component_module_refs)
+        assembly_import_helper = AssemblyImport.new(project_idh,module_branch,self,component_module_refs)
         #TODO: make more general than just aggregating DanglingComponentRefs
         dangling_errors = ParsingError::DanglingComponentRefs::Aggregate.new(:error_cleanup => proc{error_cleanup()})
         assembly_meta_file_paths(module_branch, new_structure) do |meta_file,default_assembly_name|

@@ -46,12 +46,12 @@ shared_context "Check component" do |dtk_common, node_name, name|
   end
 end
 
-shared_context "Add component to service node" do |dtk_common, node_name|
+shared_context "Add component to service node" do |dtk_common, node_name, component_module, namespace|
   it "adds a component/s to #{node_name} node" do
     component_added_array = Array.new()
     pass = false
-    dtk_common.component_module_id_list.each do |component_id|
-      component_added_array << dtk_common.add_component_to_service_node(dtk_common.service_id, node_name, component_id)
+    dtk_common.component_module_name_list.each do |component_name|
+      component_added_array << dtk_common.add_component_to_service_node(dtk_common.service_id, node_name, component_module + "::" +component_name, namespace)
     end
     # Check if component_added_array contains any element with false value. 
     # That would indicate that particular component was not added successfully to the service node.

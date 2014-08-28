@@ -50,11 +50,8 @@ end
 describe "(Different Node Templates) Test Case 8: Wordpress - Single node scenario" do
 
 	before(:all) do
-		puts "************************************************************************"
-		puts "(Different Node Templates) Test Case 8: Wordpress - Single node scenario"
-		puts "************************************************************************"
-		puts ""
-  	end
+		puts "************************************************************************",""
+  end
 
 	context "Stage service function on #{assembly_name} assembly" do
 		include_context "Stage", dtk_common

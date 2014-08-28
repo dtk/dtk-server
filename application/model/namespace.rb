@@ -32,6 +32,16 @@ module DTK
       "#{namespace}#{NAMESPACE_DELIMITER}#{name}"
     end
 
+    # returns [namespace,name]; namespace can be null if cant determine it
+    def self.full_module_name_parts?(name_or_full_module_name)
+      if name_or_full_module_name =~ Regexp.new("(^.+)#{NAMESPACE_DELIMITER}(.+$)")
+        namespace,name = [$1,$2]
+      else
+        namespace,name = [nil,name_or_full_module_name]
+      end
+      [namespace,name]
+    end
+
     def self.find_by_name(namespace_mh, namespace_name)
       sp_hash = {
         :cols => common_columns(),
@@ -74,11 +84,9 @@ module DTK
       "#{self.display_name()}#{NAMESPACE_DELIMITER}#{module_name}"
     end
 
+    # TODO: would need to enhance if get a legitimate key, but it has nil or false value
     def method_missing(m, *args, &block)
-      if self.keys.include?(m)
-        return self[m]
-      end
-      super(m, *args, &block)
+      get_field?(m) || super(m, *args, &block)
     end
 
   end

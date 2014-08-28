@@ -111,11 +111,11 @@ describe "(Repoman client integration) Test Case 17: NEG - delete-from-catalog n
   end
 
   context "Delete component module" do
-		include_context "Delete component module", dtk_common, user_data[:component_module]
+		include_context "Delete component module", dtk_common, user_data[:namespace] + "::" + user_data[:component_module]
 	end
 
 	context "Delete component module from local filesystem" do
-		include_context "Delete component module from local filesystem", user_data[:component_module_filesystem_location], user_data[:component_module]
+		include_context "Delete component module from local filesystem", user_data[:component_module_filesystem_location], user_data[:namespace] + "::" + user_data[:component_module]
 	end
 
 	context "Usergroup #{user_data[:usergroup]}, user #{user_data[:user]} and RWDP/RWDP/RWDP permissions" do

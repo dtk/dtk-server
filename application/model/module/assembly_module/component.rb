@@ -80,11 +80,22 @@ module DTK; class AssemblyModule
       
       # remove branches; they are no longer needed
       ret.each{|r|r.delete(:module_branch)}
-    
+
+      if opts[:with_namespace]
+        get_for_assembly__augment_name_with_namespace!(ret)
+      end
       ret
     end
 
    private
+    def get_for_assembly__augment_name_with_namespace!(cmp_modules)
+      return if cmp_modules.empty?
+      ndx_cmp_modules = cmp_modules.inject(Hash.new){|h,m|h.merge(m[:id] => m)}
+      ComponentModule.ndx_full_module_names(cmp_modules.map{|m|m.id_handle()}).each_pair do |ndx,full_module_name|
+        ndx_cmp_modules[ndx][:display_name] = full_module_name
+      end
+    end
+
     def create_assembly_branch?(component_module,opts={})
       am_version = assembly_module_version()
       unless component_module.get_workspace_module_branch(am_version)

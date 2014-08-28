@@ -2,7 +2,6 @@ r8_require('base_module')
 
 module DTK
   class ComponentModule < BaseModule
-
     def self.model_type()
       :component_module
     end

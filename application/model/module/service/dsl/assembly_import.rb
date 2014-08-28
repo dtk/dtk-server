@@ -25,7 +25,7 @@ module DTK; class ServiceModule
       version_proc_class.assembly_iterate(module_name,hash_content) do |assemblies_hash,node_bindings_hash|
         dangling_errors = ParsingError::DanglingComponentRefs::Aggregate.new()
         assemblies_hash.each do |ref_without_ns,assem|
-          ref = "#{@module_namespace}--#{ref_without_ns}"
+          ref = Namespace.join_namespace(@module_namespace,ref_without_ns)
           if file_path = opts[:file_path]
             @ndx_assembly_file_paths[ref] = file_path
           end

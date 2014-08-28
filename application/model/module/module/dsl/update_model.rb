@@ -24,7 +24,7 @@ module DTK; class ModuleDSL
       end
       attr_reader :components_hash,:stored_components_hash
 
-      def parse_components!(config_agent_type,dsl_hash,namespace=nil)
+      def parse_components!(config_agent_type,dsl_hash,namespace)
         impl_id = impl_idh.get_id()
         module_branch_id = module_branch_idh.get_id()
         
@@ -48,9 +48,6 @@ module DTK; class ModuleDSL
           info.merge!("implementation_id" => impl_id, "module_branch_id" => module_branch_id)
           h.merge(cmp_ref => info)
         end
-        # TODO: think this is no longer needed
-        # process the link defs for remote components
-        # process_remote_link_defs!(container_idh)
       end
 
      private
@@ -59,13 +56,9 @@ module DTK; class ModuleDSL
       def component_ref_from_cmp_type(config_agent_type,component_type)
         "#{config_agent_type}-#{component_type}"
       end
-      def component_ref(config_agent_type,r8_hash_cmp_ref,namespace=nil)
-        # TODO: may be better to have these prefixes already in r8 dsl file
-        # "#{config_agent_type}-#{r8_hash_cmp_ref}"
-        ret = "#{config_agent_type}-#{r8_hash_cmp_ref}"
-        ret = Namespace.join_namespace(namespace, ret) if namespace
-
-        ret
+      def component_ref(config_agent_type,hash_cmp_ref,namespace)
+        ref_wo_ns = "#{config_agent_type}-#{hash_cmp_ref}"
+        Namespace.join_namespace(namespace, ref_wo_ns)
       end
 
     end

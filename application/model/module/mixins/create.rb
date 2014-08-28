@@ -76,11 +76,11 @@ module DTK; module ModuleMixins
       {:version => version_field, :module_name => module_name, :module_idh => module_idh,:module_branch_idh => module_branch.id_handle()}
     end
 
-    # TODO: ModuleBranch::Location: deprecate below for aboce
+    # TODO: ModuleBranch::Location: deprecate below for above
     def create_ws_module_and_branch_obj?(project, repo_idh, module_name, input_version, namespace, ancestor_branch_idh=nil)
       project_idh = project.id_handle()
 
-      ref = module_name
+      ref = namespace.enrich_module_name(module_name)
       module_type = model_name.to_s
       opts = {:version => input_version}
       opts.merge!(:ancestor_branch_idh => ancestor_branch_idh) if ancestor_branch_idh
@@ -103,15 +103,7 @@ module DTK; module ModuleMixins
 
       module_branch = get_workspace_module_branch(project,module_name,version,namespace)
       module_idh =  project_idh.createIDH(:model_name => model_name(),:id => module_branch[:module_id])
-      module_idh.create_object().update(:ref => namespace.enrich_module_name(module_name))
       {:version => version, :module_name => module_name, :module_idh => module_idh,:module_branch_idh => module_branch.id_handle()}
-    end
-
-    def is_there_module?(project, module_name, namespace_id)
-      !Model.get_obj(project.model_handle(module_type), {
-        :cols => [:id],
-        :filter => [:and, [:eq, :display_name, module_name], [:eq, :namespace_id, namespace_id]]
-      }).nil?
     end
   end
 

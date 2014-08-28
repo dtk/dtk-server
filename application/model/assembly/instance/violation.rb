@@ -180,7 +180,7 @@ module DTK
           :missing_included_module
         end
         def description()
-          "Module '#{@included_module}#{@version.nil? ? '' : '-'+@version}' is included in dsl, but not imported."
+          "Module '#{@included_module}#{@version.nil? ? '' : '-'+@version}' is included in dsl, but not installed."
         end
       end
     end

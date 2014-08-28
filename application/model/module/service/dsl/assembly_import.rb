@@ -82,19 +82,12 @@ module DTK; class ServiceModule
         raise ParsingError.new("No name associated with assembly dsl file",opts_file_path(opts))
       end
 
-      if version_field = module_branch.get_field?(:version)
-        unless version_field == 'master'
-          Log.error("this probably should be done same time module name and module namesapce put in to form ref, i.e., in ServiceModule#assembly_ref")
-          raise Error.new("Treatment of versions in import is not yet implemented")
-          # assembly_ref = internal_assembly_ref__with_version(assembly_ref,version_field)
-        end
-      end
       {
         assembly_ref => {
           "display_name" => assembly_name,
           "type" => "composite",
           "module_branch_id" => module_branch[:id],
-          "version" => version_field,
+          "version" => module_branch.get_field?(:version),
           "component_type" => Assembly.ret_component_type(module_name,assembly_name),
           "attribute" => import_assembly_attributes(assembly_hash["attributes"],opts)
         }
@@ -114,21 +107,18 @@ module DTK; class ServiceModule
       end
 
       dangling_errors = ParsingError::DanglingComponentRefs::Aggregate.new()
-      version_field = module_branch.get_field?(:version)
-      assembly_ref_with_version = internal_assembly_ref__add_version(assembly_ref,version_field)
-
       unless assembly_hash["nodes"]
         return Hash.new
       end
       ret = assembly_hash["nodes"].inject(Hash.new) do |h,(node_hash_ref,node_hash)|
         dangling_errors.aggregate_errors!(h) do
-          node_ref = assembly_template_node_ref(assembly_ref_with_version,node_hash_ref)
+          node_ref = assembly_template_node_ref(assembly_ref,node_hash_ref)
           type,attributes = import_type_and_node_attributes(node_hash,opts)
           node_output = {
             "display_name" => node_hash_ref, 
             "type" => type,
             "attribute" => attributes,
-            "*assembly_id" => "/component/#{assembly_ref_with_version}" 
+            "*assembly_id" => "/component/#{assembly_ref}"
           }
           if nb_rs = node_to_nb_rs[node_hash_ref]
             if nb_rs_id = nb_rs_to_id[nb_rs]

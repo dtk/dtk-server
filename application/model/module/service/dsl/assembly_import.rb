@@ -5,14 +5,14 @@ module DTK; class ServiceModule
     r8_nested_require('assembly_import','port_mixin')
     include PortMixin
     extend FactoryObjectClassMixin
-    def initialize(container_idh,module_branch,module_name,component_module_refs)
+    def initialize(container_idh,module_branch,service_module,component_module_refs)
       @container_idh = container_idh
       @db_updates_assemblies = DBUpdateHash.new("component" => DBUpdateHash.new,"node" => DBUpdateHash.new)
       @ndx_ports = Hash.new
       @ndx_assembly_hashes = Hash.new #indexed by ref
       @module_branch = module_branch
-      @module_name = module_name
-      @service_module = get_service_module(container_idh,module_name)
+      @module_name = service_module.module_name()
+      @service_module = service_module
       @component_module_refs = component_module_refs
       @ndx_version_proc_classes = Hash.new
       @ndx_assembly_file_paths = Hash.new
@@ -192,11 +192,6 @@ module DTK; class ServiceModule
     end
     CachedAdapterClasses = Hash.new
 
-    def get_service_module(container_idh,module_name)
-      container_idh.create_object().get_service_module(module_name)
-    end
-
-    
     def self.parse_node_bindings_hash!(node_bindings_hash,opts={})      
       nil
     end

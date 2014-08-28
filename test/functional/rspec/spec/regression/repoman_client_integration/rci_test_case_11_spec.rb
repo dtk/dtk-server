@@ -4,7 +4,7 @@ require './spec/setup_browser'
 require './lib/component_modules_spec'
 require './lib/dtk_common'
 
-component_module = "java"
+component_module = "r8::java"
 permission_set_1 = "ugo+rwd"
 permission_set_2 = "ugo-wd"
 user_data = {

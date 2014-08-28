@@ -44,10 +44,10 @@ shared_context "Purge workspace content" do |dtk_common|
   end
 end
 
-shared_context "Add component to the node in workspace" do |dtk_common, node_name, component_name|
+shared_context "Add component to the node in workspace" do |dtk_common, node_name, component_name, namespace|
   it "adds #{component_name} component to #{node_name} node in workspace context" do
     workspace_id = dtk_common.get_workspace_id
-    component_added = dtk_common.add_component_to_service_node(workspace_id, node_name, component_name)
+    component_added = dtk_common.add_component_to_service_node(workspace_id, node_name, component_name, namespace)
     component_added.should eq(true)
   end
 end

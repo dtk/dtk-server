@@ -70,7 +70,7 @@ def add_document_to_collection(mongodb_host, mongodb_port, database_name, collec
 	collection = db.collection(collection_name)
 	id = collection.insert(document)
 	puts "Document id: #{id}"
-    puts "Collection added: #{collection.find.to_a}"
+  puts "Collection added: #{collection.find.to_a}"
 	document_added = true if !collection.find({"_id" => id}).to_a.empty?
 	puts ""
 	return document_added
@@ -81,11 +81,11 @@ def get_collection(mongodb_host, mongodb_port, database_name, collection_name)
 	collection_exists = false
 
 	puts "MongoDB host: #{mongodb_host}"
-    puts "MongoDB port: #{mongodb_port}"
-    puts "Database name: #{database_name}"
-    puts "Collection name: #{collection_name}"
+  puts "MongoDB port: #{mongodb_port}"
+  puts "Database name: #{database_name}"
+  puts "Collection name: #{collection_name}"
 
-    client = Mongo::MongoClient.new(mongodb_host, mongodb_port)
+  client = Mongo::MongoClient.new(mongodb_host, mongodb_port)
 	db = client.db(database_name)
 	collection = db.collection(collection_name)
 
@@ -100,11 +100,8 @@ end
 describe "(Different Node Templates) Test Case 7: MongoDB - Master/Slave scenario" do
 
 	before(:all) do
-		puts "***********************************************************************"
-		puts "(Different Node Templates) Test Case 7: MongoDB - Master/Slave scenario"
-		puts "***********************************************************************"
-		puts ""
-  	end
+		puts "***********************************************************************",""
+ 	end
 
 	context "Stage service function on #{assembly_name} assembly" do
 		include_context "Stage", dtk_common

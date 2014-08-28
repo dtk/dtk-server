@@ -92,7 +92,7 @@ describe "(Repoman client integration) Test Case 16: delete-from-catalog positiv
   end
 
   context "Publish component module" do
-    include_context "Export component module", dtk_common, user_data[:component_module], user_data[:namespace]
+    include_context "Export component module", dtk_common, user_data[:namespace] + "::" + user_data[:component_module], user_data[:namespace]
   end
 
   #User A is not owner of module A but belongs to user group A which is set as user group on module (permissions: None/D/None)
@@ -116,15 +116,15 @@ describe "(Repoman client integration) Test Case 16: delete-from-catalog positiv
   end
 
   context "Publish component module" do
-    include_context "Export component module", dtk_common, user_data[:component_module], user_data[:namespace]
+    include_context "Export component module", dtk_common, user_data[:namespace] + "::" + user_data[:component_module], user_data[:namespace]
   end
 
   context "Delete component module" do
-		include_context "Delete component module", dtk_common, user_data[:component_module]
+		include_context "Delete component module", dtk_common, user_data[:namespace] + "::" + user_data[:component_module]
 	end
 
 	context "Delete component module from local filesystem" do
-		include_context "Delete component module from local filesystem", user_data[:component_module_filesystem_location], user_data[:component_module]
+		include_context "Delete component module from local filesystem", user_data[:component_module_filesystem_location], user_data[:namespace] + "::" + user_data[:component_module]
 	end
 
 	context "Usergroup #{user_data[:usergroup]}, user #{user_data[:user]} and RWDP/RWDP/RWDP permissions" do

@@ -15,28 +15,26 @@ node_name = 'test'
 node_template = 'precise-micro'
 component_name_1 = 'bootstrap::sink'
 component_name_2 = 'bootstrap::source'
+component_module_namespace = 'r8'
 
 dtk_common = DtkCommon.new('', '')
 
 describe "(Workspace) Test Case 6: Create one node, add two components in it (list components), delete one component (list components again) and purge workspace content" do
 
 	before(:all) do
-		puts "**************************************************************************************************************************************************************"
-		puts "(Workspace) Test Case 6: Create one node, add two components in it (list components), delete one component (list components again) and purge workspace content"
-		puts "**************************************************************************************************************************************************************"
-		puts ""
-  	end
+		puts "**************************************************************************************************************************************************************",""
+  end
 
 	context "Create node in workspace" do
 		include_context "Create node in workspace", dtk_common, node_name, node_template
 	end
 
 	context "Add component to the node in workspace" do
-		include_context "Add component to the node in workspace", dtk_common, node_name, component_name_1
+		include_context "Add component to the node in workspace", dtk_common, node_name, component_name_1, component_module_namespace
 	end	
 
 	context "Add component to the node in workspace" do
-		include_context "Add component to the node in workspace", dtk_common, node_name, component_name_2
+		include_context "Add component to the node in workspace", dtk_common, node_name, component_name_2, component_module_namespace
 	end	
 
 	context "List components in workspace node" do

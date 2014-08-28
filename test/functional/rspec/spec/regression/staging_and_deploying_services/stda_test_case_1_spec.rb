@@ -18,11 +18,8 @@ dtk_common = DtkCommon.new(service_name, assembly_name)
 describe "(Staging And Deploying Assemblies) Test Case 1: Stage existing assembly and then delete service" do
 
 	before(:all) do
-		puts "************************************************************************************************"
-		puts "(Staging And Deploying Assemblies) Test Case 1: Stage existing assembly and then delete service"
-		puts "************************************************************************************************"
-		puts ""
-  	end
+		puts "************************************************************************************************",""
+  end
 
 	context "Stage service function on #{assembly_name} assembly" do
 		include_context "Stage", dtk_common

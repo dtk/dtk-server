@@ -4,7 +4,7 @@ require './spec/setup_browser'
 require './lib/component_modules_spec'
 require './lib/dtk_common'
 
-component_module = "java"
+component_module = "r8::java"
 user_data = {
 	:usergroup => "bakir_test_group",
 	:user => "dtk17-client",

@@ -17,6 +17,7 @@ node_name_1 = 'test1'
 node_name_2 = 'test2'
 node_template = 'precise-micro'
 component_name = 'stdlib'
+component_module_namespace = 'r8'
 service_module_name = 'new_bootstrap'
 service_module_filesystem_location = '~/dtk/service_modules'
 assembly_name = 'workspace_assembly'
@@ -26,11 +27,8 @@ dtk_common = DtkCommon.new('', '')
 describe "(Workspace) Test Case 9: Create two nodes, add components in both of them, and create assembly from the workspace content in new service module" do
 
 	before(:all) do
-		puts "***********************************************************************************************************************************************"
-		puts "(Workspace) Test Case 9: Create two nodes, add components in both of them, and create assembly from the workspace content in new service module"
-		puts "***********************************************************************************************************************************************"
-		puts ""
-  	end
+		puts "***********************************************************************************************************************************************",""
+  end
 
 	context "Create node in workspace" do
 		include_context "Create node in workspace", dtk_common, node_name_1, node_template
@@ -41,11 +39,11 @@ describe "(Workspace) Test Case 9: Create two nodes, add components in both of t
 	end
 
 	context "Add component to the node in workspace" do
-		include_context "Add component to the node in workspace", dtk_common, node_name_1, component_name
+		include_context "Add component to the node in workspace", dtk_common, node_name_1, component_name, component_module_namespace
 	end	
 
 	context "Add component to the node in workspace" do
-		include_context "Add component to the node in workspace", dtk_common, node_name_2, component_name
+		include_context "Add component to the node in workspace", dtk_common, node_name_2, component_name, component_module_namespace
 	end	
 
 	context "NEG - List all service modules" do

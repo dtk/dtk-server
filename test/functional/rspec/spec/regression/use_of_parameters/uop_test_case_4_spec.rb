@@ -21,10 +21,7 @@ dtk_common = DtkCommon.new(service_name, assembly_name)
 describe "(Use Of Parameters) Test Case 4: Add optional params on existing attributes in service nodes (values were not defined)" do
 
 	before(:all) do
-		puts "**********************************************************************************************************************"
-		puts "(Use Of Parameters) Test Case 4: Add optional params on existing attributes in service nodes (values were not defined)"
-		puts "**********************************************************************************************************************"
-    puts ""
+		puts "**********************************************************************************************************************",""
 	end
 
 	context "Stage service function on #{assembly_name} assembly" do

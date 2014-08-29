@@ -7,16 +7,6 @@ module DTK
         :path_depth => 4
       }
 
-      def check_if_settings_exist(module_branch)
-        ret = {}
-        setting_dsl_path_info = SettingFilenamePathInfo
-        depth = setting_dsl_path_info[:path_depth]
-        ret = RepoManager.ls_r(depth,{:file_only => true},module_branch)
-        regexp = setting_dsl_path_info[:regexp]
-        ret.reject!{|f|not (f =~ regexp)}
-        ret
-      end
-
       def create_setting_objects_from_dsl(project_idh,module_branch)
         ret = nil
         settings_to_add = Hash.new

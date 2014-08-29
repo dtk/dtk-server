@@ -476,6 +476,32 @@ lambda__instance_nodes_components_assembly_template =
          :join_cond=>{:id=>:service_add_on__sub_assembly_id},
          :cols=>[:id,:group_id,:display_name]
        }]
+    },
+    :namespace_info_for_cmp_templates=> {
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>
+      [{
+         :model_name=>:module_branch,
+         :convert => true,
+         :join_type=>:inner,
+         :join_cond=>{:id=>:component__module_branch_id},
+         :cols=>[:id,:group_id,:display_name,:component_id]
+       },
+       {
+         :model_name=>:component_module,
+         :convert => true,
+         :join_type=>:inner,
+         :join_cond=>{:id=>:module_branch__component_id},
+         :cols=>[:id,:group_id,:display_name,:namespace_id]
+       },
+       {
+         :model_name=>:namespace,
+         :convert => true,
+         :join_type=>:inner,
+         :join_cond=>{:id=>:component_module__namespace_id},
+         :cols=>[:id,:group_id,:display_name]
+       }]
     }
   }
 }

@@ -412,13 +412,14 @@ module DTK
       assembly = ret_assembly_instance_object()
       # component_template, component_title = ret_component_template_and_title_for_assembly(:component_template_id,assembly)
 
-      cmp_name, namespace = ret_non_null_request_params(:component_template_id, :namespace)
+      # cmp_name, namespace = ret_non_null_request_params(:component_template_id, :namespace)
+      cmp_name, namespace = ret_request_params(:component_template_id, :namespace)
       assembly_idh = assembly.id_handle()
 
       cmp_mh = assembly_idh.createMH(:component)
-      component = Component::Template.get_cmp_template_from_name_with_namespace(cmp_mh, cmp_name, namespace)
+      component = Component::Template.get_cmp_template_from_name_with_namespace(cmp_mh, cmp_name, namespace, assembly)
 
-      raise ErrorUsage.new("Component with identifier '#{namespace}/#{cmp_name}' does not exist!") unless component
+      raise ErrorUsage.new("Component with identifier #{namespace.nil? ? '\'' : ('\'' + namespace + '/')}#{cmp_name}' does not exist!") unless component
 
       component_template, component_title = ret_component_template_and_title_with_namespace(component,assembly)
       # not checking here if node_id points to valid object; check is in add_component

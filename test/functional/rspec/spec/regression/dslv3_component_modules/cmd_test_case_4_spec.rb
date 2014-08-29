@@ -58,7 +58,7 @@ describe "(Component Module DSL) Test Case 4: Remove existing component attribut
   end
 
   context "Add components to service node" do
-    include_context "Add component to service node", dtk_common, node_name
+    include_context "Add component to service node", dtk_common, node_name, component_module_name, component_module_namespace
   end
 
   context "Check param2 attribute does not exist on source component" do

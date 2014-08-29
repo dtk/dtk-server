@@ -76,10 +76,10 @@ shared_context "NEG - List components in workspace node" do |dtk_common, node_na
   end
 end
 
-shared_context "Delete component from workspace node" do |dtk_common, node_name, component_name|
+shared_context "Delete component from workspace node" do |dtk_common, node_name, component_name, namespace|
   it "deletes #{component_name} component in #{node_name} node in workspace context" do
     workspace_id = dtk_common.get_workspace_id
-    component_deleted = dtk_common.delete_component_from_service_node(workspace_id, node_name, component_name)
+    component_deleted = dtk_common.delete_component_from_service_node(workspace_id, node_name, component_name, namespace)
     component_deleted.should eq(true)
   end
 end

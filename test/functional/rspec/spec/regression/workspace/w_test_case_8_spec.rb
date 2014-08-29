@@ -19,6 +19,8 @@ node_template = 'precise-micro'
 component_name = 'stdlib'
 component_module_namespace = 'r8'
 service_module_name = 'bootstrap'
+local_service_module_name = 'r8::bootstrap'
+namespace = 'r8'
 assembly_name = 'workspace_assembly'
 
 dtk_common = DtkCommon.new('', '')
@@ -50,11 +52,11 @@ describe "(Workspace) Test Case 8: Create two nodes, add components in both of t
 	end
 
 	context "Check if assembly belongs to the service module" do
-		include_context "Check if assembly belongs to the service module", dtk_common, service_module_name, assembly_name
+		include_context "Check if assembly belongs to the service module", dtk_common, local_service_module_name, assembly_name
 	end
 
 	context "Delete assembly" do
-		include_context "Delete assembly", dtk_common, "#{service_module_name}::#{assembly_name}"
+		include_context "Delete assembly", dtk_common, "#{service_module_name}::#{assembly_name}", namespace
 	end
 
 	context "Purge workspace content" do

@@ -1406,6 +1406,7 @@ class DtkCommon
 		if (service_module_list['data'].select { |x| x['display_name'] == service_module_name }.first)
 			puts "Service module exists in service module list. Try to find if #{assembly_name} assembly belongs to #{service_module_name} service module..."
 			service_module_id = service_module_list['data'].select { |x| x['display_name'] == service_module_name }.first['id']
+
 			service_module_assembly_list = send_request('/rest/service_module/list_assemblies', {:service_module_id=>service_module_id})
 			puts "List of assemblies that belong to service #{service_module_name}:"
 			pretty_print_JSON(service_module_assembly_list)
@@ -1938,7 +1939,7 @@ class DtkCommon
 		return component_check
 	end
 
-	def delete_component_from_service_node(service_id, node_name, component_to_delete)
+	def delete_component_from_service_node(service_id, node_name, component_to_delete, namespace)
 		puts "Delete component from service node:", "-----------------------------------"
 		component_deleted = false
 		puts "List of service components:"
@@ -1952,7 +1953,7 @@ class DtkCommon
 			node_id = node_list['data'].select { |x| x['display_name'] == node_name }.first['id']
 
 			puts "Deleting component #{component_to_delete} from node #{node_name}..."
-			component_delete_response = send_request('/rest/assembly/delete_component', {:assembly_id=>service_id, :node_id=>node_id, :component_id=>component['id']})
+			component_delete_response = send_request('/rest/assembly/delete_component', {:assembly_id=>service_id, :node_id=>node_id, :component_id=>component['id'], :namespace=>namespace})
 			pretty_print_JSON(component_delete_response)
 			if component_delete_response['status'].include? 'ok'
 				puts "Component #{component_to_delete} has been deleted successfully!"

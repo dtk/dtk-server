@@ -59,7 +59,7 @@ describe "(Component Module DSL) Test Case 6: Add new component attribute in dtk
   end
 
   context "Add components to service node" do
-    include_context "Add component to service node", dtk_common, node_name
+    include_context "Add component to service node", dtk_common, node_name, component_module_name, component_module_namespace
   end
 
   context "Check param1 attribute exist on source component" do

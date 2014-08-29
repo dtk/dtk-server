@@ -149,7 +149,6 @@ shared_context "Delete service module" do |dtk_common, service_module_name|
   end
 end
 
-
 shared_context "Delete service module from local filesystem" do |service_module_filesystem_location, service_module_name|
   it "deletes #{service_module_name} service module from local filesystem" do
     puts "Delete service module from local filesystem:", "--------------------------------------------"

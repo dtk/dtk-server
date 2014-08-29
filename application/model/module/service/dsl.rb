@@ -126,13 +126,10 @@ module DTK
         module_name = module_name()
         module_branch_idh = module_branch.id_handle()
 
-        setting_files = check_if_settings_exist(module_branch)
-        new_structure = setting_files.empty? ? false : true
-
         assembly_import_helper = AssemblyImport.new(project_idh,module_branch,self,component_module_refs)
         #TODO: make more general than just aggregating DanglingComponentRefs
         dangling_errors = ParsingError::DanglingComponentRefs::Aggregate.new(:error_cleanup => proc{error_cleanup()})
-        assembly_meta_file_paths(module_branch, new_structure) do |meta_file,default_assembly_name|
+        assembly_meta_file_paths(module_branch) do |meta_file,default_assembly_name|
           dangling_errors.aggregate_errors!()  do
             file_content = RepoManager.get_file_content(meta_file,module_branch)
             format_type = meta_file_format_type(meta_file)
@@ -157,18 +154,6 @@ module DTK
         imported
       end
 
-      # signature is  assembly_meta_file_paths(module_branch) do |meta_file,default_assembly_name|
-      def assembly_meta_file_paths(module_branch, new_structure, &block)
-        assembly_dsl_path_info = new_structure ? AssemblyFilenamePathInfoNew : AssemblyFilenamePathInfo
-        depth = assembly_dsl_path_info[:path_depth]
-        ret = RepoManager.ls_r(depth,{:file_only => true},module_branch)
-        regexp = assembly_dsl_path_info[:regexp]
-        ret.reject!{|f|not (f =~ regexp)}
-        ret_with_removed_variants(ret).each do |meta_file|
-          default_assembly_name = (if meta_file =~ regexp then $1; end) 
-          block.call(meta_file,default_assembly_name)
-        end
-      end
       AssemblyFilenamePathInfo = {
         :regexp => Regexp.new("^assemblies/([^/]+)/assembly\.(json|yaml)$"),
         :path_depth => 3
@@ -177,6 +162,26 @@ module DTK
         :regexp => Regexp.new("^assemblies/(.*)\.dtk\.assembly\.(json|yaml)$"),
         :path_depth => 3
       }
+
+      # signature is  assembly_meta_file_paths(module_branch) do |meta_file,default_assembly_name|
+      def assembly_meta_file_paths(module_branch, &block)
+        # determine if new structure or not
+        meta_files,regexp = meta_files_and_regexp?(AssemblyFilenamePathInfoNew,module_branch)
+        if meta_files.empty?
+          meta_files,regexp = meta_files_and_regexp?(AssemblyFilenamePathInfo,module_branch)
+        end
+        ret_with_removed_variants(meta_files).each do |meta_file|
+          default_assembly_name = (if meta_file =~ regexp then $1; end) 
+          block.call(meta_file,default_assembly_name)
+        end
+      end
+      # returns [meta_files, regexp]
+      def meta_files_and_regexp?(assembly_dsl_path_info,module_branch)
+        depth = assembly_dsl_path_info[:path_depth]
+        meta_files = RepoManager.ls_r(depth,{:file_only => true},module_branch)
+        regexp = assembly_dsl_path_info[:regexp]
+        [meta_files.select{|f|f =~ regexp},regexp]
+      end
 
       def ret_with_removed_variants(paths)
         # if multiple files that match where one is json and one yaml, favor the default one

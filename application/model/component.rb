@@ -410,8 +410,8 @@ module DTK
         :cols => [:id, :display_name, :module_branch_id, :type, :ref],
         :filter => [:and,
                     [:eq, :display_name, display_name],
-                    [:eq, :type, 'instance'],
-                    [:eq, :project_project_id, nil],
+                    # [:eq, :type, 'instance'],
+                    # [:eq, :project_project_id, nil],
                     [:eq, :node_node_id, node_id]]
       }
       cmps = Model.get_objs(cmp_mh,sp_hash,:keep_ref_cols=>true)

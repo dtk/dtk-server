@@ -9,18 +9,17 @@ module DTK; class ServiceModule
         # port links can only be imported in after ports created
         # add ports to assembly nodes
         db_updates_port_links = Hash.new
-        version_field = @module_branch.get_field?(:version)
-        @ndx_assembly_hashes.each do |ref,assembly|
-          qualified_ref = self.class.internal_assembly_ref__add_version(ref,version_field)
-          assembly_idh = @container_idh.get_child_id_handle(:component,qualified_ref)
+        @ndx_assembly_hashes.each do |assembly_ref,assembly|
+          assembly_idh = @container_idh.get_child_id_handle(:component,assembly_ref)
           ports = add_needed_ports(assembly_idh)
-          version_proc_class = @ndx_version_proc_classes[ref]
-          # db_updates_port_links.merge!(version_proc_class.import_port_links(assembly_idh,qualified_ref,assembly,ports))
+          version_proc_class = @ndx_version_proc_classes[assembly_ref]
+          # TODO: is this needed
+          # db_updates_port_links.merge!(version_proc_class.import_port_links(assembly_idh,assembly_ref,assembly,ports))
           opts = Hash.new
-          if file_path = @ndx_assembly_file_paths[ref]
+          if file_path = @ndx_assembly_file_paths[assembly_ref]
             opts[:file_path] = file_path
           end
-          port_links = version_proc_class.import_port_links(assembly_idh,qualified_ref,assembly,ports,opts)
+          port_links = version_proc_class.import_port_links(assembly_idh,assembly_ref,assembly,ports,opts)
           return port_links if ParsingError.is_error?(port_links)
 
           db_updates_port_links.merge!(port_links)

@@ -65,7 +65,7 @@ module DTK
           assembly_mh = project_idh.create_childMH(:component)
           hash_values = {
             :project_project_id => project_idh.get_id(),
-            :ref => Assembly.internal_assembly_ref(service_module_name,assembly_name),
+            :ref => service_module.assembly_ref(assembly_name),
             :display_name => assembly_name,
             :type => "composite",
             :module_branch_id => service_module_branch[:id],

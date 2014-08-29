@@ -60,6 +60,20 @@ module DTK; class Assembly
       get_objs(node_mh,sp_hash)
     end
 
+    def self.get_ndx_assembly_names_to_ids(project_idh,service_module,assembly_names)
+      ndx_assembly_refs = assembly_names.inject(Hash.new){|h,n|h.merge(n => service_module.assembly_ref(n))}
+      sp_hash = {
+        :cols => [:id,:group_id,:display_name,:ref],
+        :filter => [:and,[:eq,:project_project_id,project_idh.get_id],[:oneof,:ref,ndx_assembly_refs.values]]
+      }
+      assembly_templates = get_objs(project_idh.createMH(:component),sp_hash,:keep_ref_cols => true)
+      ndx_ref_ids = assembly_templates.inject(Hash.new){|h,r|h.merge(r[:ref] => r[:id])}
+      ndx_assembly_refs.inject(Hash.new) do |h,(name,ref)|
+        id = ndx_ref_ids[ref]
+        id ? h.merge(name => id) : h
+      end
+    end
+
     def get_settings(opts={})
       sp_hash = {
         :cols => opts[:cols]||ServiceSetting.common_columns(),

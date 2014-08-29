@@ -22,10 +22,9 @@ module DTK; class ServiceModule
     def process(module_name,hash_content,opts={})
       integer_version = determine_integer_version(hash_content,opts)
       version_proc_class = load_and_return_version_adapter_class(integer_version)
-      version_proc_class.assembly_iterate(module_name,hash_content) do |assemblies_hash,node_bindings_hash|
+      version_proc_class.assembly_iterate(@service_module,hash_content) do |assemblies_hash,node_bindings_hash|
         dangling_errors = ParsingError::DanglingComponentRefs::Aggregate.new()
-        assemblies_hash.each do |ref_without_ns,assem|
-          ref = Namespace.join_namespace(@module_namespace,ref_without_ns)
+        assemblies_hash.each do |ref,assem|
           if file_path = opts[:file_path]
             @ndx_assembly_file_paths[ref] = file_path
           end
@@ -75,21 +74,20 @@ module DTK; class ServiceModule
       @db_updates_assemblies["component"]
     end
 
-    def self.import_assembly_top(serialized_assembly_ref,assembly_hash,module_branch,module_name,opts={})
+    def self.import_assembly_top(assembly_ref,assembly_hash,module_branch,module_name,opts={})
       if assembly_hash.empty?
         raise ParsingError.new("Empty assembly dsl file",opts_file_path(opts))
       end
       unless assembly_name = assembly_hash["name"]||opts[:default_assembly_name]
         raise ParsingError.new("No name associated with assembly dsl file",opts_file_path(opts))
       end
-      version_field = module_branch.get_field?(:version)
-      assembly_ref = internal_assembly_ref__with_version(serialized_assembly_ref,version_field)
+
       {
         assembly_ref => {
           "display_name" => assembly_name,
           "type" => "composite",
           "module_branch_id" => module_branch[:id],
-          "version" => version_field,
+          "version" => module_branch.get_field?(:version),
           "component_type" => Assembly.ret_component_type(module_name,assembly_name),
           "attribute" => import_assembly_attributes(assembly_hash["attributes"],opts)
         }
@@ -109,21 +107,18 @@ module DTK; class ServiceModule
       end
 
       dangling_errors = ParsingError::DanglingComponentRefs::Aggregate.new()
-      version_field = module_branch.get_field?(:version)
-      assembly_ref_with_version = internal_assembly_ref__add_version(assembly_ref,version_field)
-
       unless assembly_hash["nodes"]
         return Hash.new
       end
       ret = assembly_hash["nodes"].inject(Hash.new) do |h,(node_hash_ref,node_hash)|
         dangling_errors.aggregate_errors!(h) do
-          node_ref = assembly_template_node_ref(assembly_ref_with_version,node_hash_ref)
+          node_ref = assembly_template_node_ref(assembly_ref,node_hash_ref)
           type,attributes = import_type_and_node_attributes(node_hash,opts)
           node_output = {
             "display_name" => node_hash_ref, 
             "type" => type,
             "attribute" => attributes,
-            "*assembly_id" => "/component/#{assembly_ref_with_version}" 
+            "*assembly_id" => "/component/#{assembly_ref}"
           }
           if nb_rs = node_to_nb_rs[node_hash_ref]
             if nb_rs_id = nb_rs_to_id[nb_rs]
@@ -162,10 +157,6 @@ module DTK; class ServiceModule
       end
     end
 
-    def self.internal_assembly_ref__add_version(assembly_ref,version_field)
-      Assembly.internal_assembly_ref__add_version(assembly_ref,version_field)
-    end
-
    private
     def determine_integer_version(hash_content,opts={})
       if version = hash_content["dsl_version"]
@@ -198,22 +189,6 @@ module DTK; class ServiceModule
       nil
     end
 
-    def self.internal_assembly_ref__with_version(serialized_assembly_ref,version_field)
-      module_name,assembly_name = parse_serialized_assembly_ref(serialized_assembly_ref)
-      Assembly.internal_assembly_ref(module_name,assembly_name,version_field)
-    end
-
-    # return [module_name,assembly_name]
-    def self.parse_serialized_assembly_ref(ref)
-      if ref =~ /(^.+)::(.+$)/
-        [$1,$2]
-      elsif ref =~ /(^[^-]+)-(.+$)/ #TODO: this can be eventually deprecated
-        [$1,$2]
-      else
-        raise Error.new("Unexpected form for serialized assembly ref (#{ref})")
-      end
-    end
-
     def self.import_component_refs(container_idh,assembly_name,components_hash,component_module_refs,opts={})
       cmps_with_titles = Array.new
 
@@ -243,8 +218,6 @@ module DTK; class ServiceModule
         h.merge(parse[:ref] => cmp_ref)
       end
 
-      # find and insert component template ids in first component_refs and then for the attribute_overrides
-      # just set component_template_id
       # TODO: set_matching_component_template_info does not use option: :donot_set_component_templates
       component_module_refs.set_matching_component_template_info!(ret.values, :donot_set_component_templates=>true)
       set_attribute_template_ids!(ret,container_idh)

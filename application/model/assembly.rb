@@ -172,17 +172,6 @@ module DTK
       !interrsecting_nodes.empty?
     end
 
-    def self.internal_assembly_ref(service_module_name,assembly_name,version_field=nil)
-      simple_assembly_ref = "#{service_module_name}-#{assembly_name}"
-      internal_assembly_ref__add_version(simple_assembly_ref,version_field)
-    end
-
-    def self.internal_assembly_ref__add_version(assembly_ref,version_field=nil)
-      version = (version_field && ModuleBranch.version_from_version_field(version_field))
-      version_suffix = (version ? "--#{version}" : "")
-      "#{assembly_ref}#{version_suffix}"
-    end
-    
     def self.is_template?(assembly_idh)
       assembly_idh.create_object().is_template?()
     end

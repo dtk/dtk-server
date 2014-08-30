@@ -14,10 +14,10 @@ module DTK
       # TODO: here or earlier check that bindings in this mention only logical nodes in the assembly
       content().find_target_specific_info(target).each_pair do |node,target_specific_info|
         if image_val = target_specific_info.node_target_image?()
-          assembly.set_attribute(assembly_node_attribute(:image,node),image_val)
+          assembly.set_attribute(assembly_node_attribute(:image,node),image_val, :create=>true)
         end
         if size_val = target_specific_info.size()
-          assembly.set_attribute(assembly_node_attribute(:size,node),size_val)
+          assembly.set_attribute(assembly_node_attribute(:size,node),size_val, :create=>true)
         end
       end
     end

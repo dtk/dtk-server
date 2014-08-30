@@ -69,8 +69,8 @@ module DTK; module ModuleMixins
         parsed = module_obj.install__process_dsl(repo_with_branch,module_branch,local,:do_not_raise => true)
         module_branch.set_sha(commit_sha)
       end
-
-      response = module_repo_info(repo_with_branch,module_and_branch_info,version,local_namespace)
+      opts_info = {:version=>version, :module_namespace=>local_namespace}
+      response = module_repo_info(repo_with_branch,module_and_branch_info,opts_info)
 
       if ErrorUsage::Parsing.is_error?(parsed)
         response[:dsl_parsed_info] = parsed

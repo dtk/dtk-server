@@ -212,7 +212,10 @@ module DTK
       module_name = ret_non_null_request_params(:module_name)
       component_module = create_obj(:module_name,ComponentModule)
       opts = ret_boolean_params_hash(:force)
-      rest_ok_response AssemblyModule::Component.promote_module_updates(assembly,component_module,opts)
+#      rest_ok_response AssemblyModule::Component.promote_module_updates(assembly,component_module,opts)
+ret= AssemblyModule::Component.promote_module_updates(assembly,component_module,opts)
+pp ret
+rest_ok_response ret
     end
 
     def rest__create_component_dependency()

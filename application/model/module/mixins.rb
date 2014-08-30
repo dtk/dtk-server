@@ -34,7 +34,8 @@ module DTK
       if aug_branch = get_augmented_workspace_branch({:filter => {:version => version}}.merge(opts))
         module_name = aug_branch[:module_name]
         module_namespace = aug_branch[:module_namespace]
-        ModuleRepoInfo.new(aug_branch[:repo],module_name,id_handle(),aug_branch,version, module_namespace)
+        opts_info = {:version=>version, :module_namespace=>module_namespace}
+        ModuleRepoInfo.new(aug_branch[:repo],module_name,id_handle(),aug_branch,opts_info)
       end
     end
 
@@ -523,10 +524,10 @@ module DTK
       end
     end
 
-    def module_repo_info(repo,module_and_branch_info,version,module_namespace=nil)
+    def module_repo_info(repo,module_and_branch_info,opts={})
       info = module_and_branch_info #for succinctness
       branch_obj = info[:module_branch_idh].create_object()
-      ModuleRepoInfo.new(repo,info[:module_name],info[:module_idh],branch_obj,version,module_namespace)
+      ModuleRepoInfo.new(repo,info[:module_name],info[:module_idh],branch_obj,opts)
     end
 
     # can be overwritten
@@ -632,9 +633,10 @@ module DTK
   end
 
   class ModuleRepoInfo < Hash
-    def initialize(repo,module_name,module_idh,branch_obj,version=nil,module_namespace=nil)
+    def initialize(repo,module_name,module_idh,branch_obj,opts={})
       super()
       repo_name = repo.get_field?(:repo_name)
+      module_namespace =  opts[:module_namespace]
       full_module_name = module_namespace ? Namespace.join_namespace(module_namespace, module_name) : nil
       hash = {
         :repo_id => repo[:id],
@@ -648,7 +650,7 @@ module DTK
         :workspace_branch => branch_obj.get_field?(:branch),
         :branch_head_sha => RepoManager.branch_head_sha(branch_obj)
       }
-      if version
+      if version = opts[:version]
         hash.merge!(:version => version)
         if assembly_name = version.respond_to?(:assembly_name) && version.assembly_name()
           hash.merge!(:assembly_name => assembly_name)
@@ -661,7 +663,9 @@ module DTK
   class CloneUpdateInfo < ModuleRepoInfo
     def initialize(module_obj,version=nil)
       aug_branch = module_obj.get_augmented_workspace_branch(:filter => {:version => version})
-      super(aug_branch[:repo],aug_branch[:module_name],module_obj.id_handle(),aug_branch,version)
+      opts = {:version => version, :module_namespace => module_obj.module_namespace()}
+      super(aug_branch[:repo],aug_branch[:module_name],module_obj.id_handle(),opts)
+      # TODO: is 'replace' necessary?; if so should also add other fields like module_namespace, ..
       replace(Aux.hash_subset(self,[:repo_name,:repo_url,:module_name,:workspace_branch]))
       self[:commit_sha] = aug_branch[:current_sha]
     end

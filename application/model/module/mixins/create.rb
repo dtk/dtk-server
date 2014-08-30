@@ -40,9 +40,8 @@ module DTK; module ModuleMixins
 
       module_and_branch_info = create_ws_module_and_branch_obj?(project, local_repo_obj.id_handle(), local.module_name, local.version, default_namespace)
 
-      module_and_branch_info.merge(
-        :module_repo_info => module_repo_info(local_repo_obj,module_and_branch_info,local.version,local.namespace)
-      )
+      opts_info = {:version=>local.version, :module_namespace=>local.namespace}
+      module_and_branch_info.merge(:module_repo_info => module_repo_info(local_repo_obj,module_and_branch_info,opts_info))
     end
 
     def create_module_and_branch_obj?(project,repo_idh,local,ancestor_branch_idh=nil)

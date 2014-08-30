@@ -14,6 +14,7 @@ module DTK; class  Assembly
       end
 
       def list(assembly_mh,opts={})
+        assembly_mh = assembly_mh.createMH(:assembly_instance) # to insure right mh type
         assembly_rows = get_info__flat_list(assembly_mh,opts)
         assembly_rows.reject!{|r|Workspace.is_workspace?(r)} unless opts[:include_workspace]
 

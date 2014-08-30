@@ -126,6 +126,7 @@ module DTK; class Assembly
     end
 
     def self.list(assembly_mh,opts={})
+      assembly_mh = assembly_mh.createMH(:assembly_template) # to insure right mh type
       opts = opts.merge(:cols => [:id, :group_id,:display_name,:component_type,:module_branch_id,:service_module,list_virtual_column?(opts[:detail_level])].compact)
       assembly_rows = get(assembly_mh,opts)
       if opts[:detail_level] == "attributes"

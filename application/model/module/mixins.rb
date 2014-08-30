@@ -664,9 +664,7 @@ module DTK
     def initialize(module_obj,version=nil)
       aug_branch = module_obj.get_augmented_workspace_branch(:filter => {:version => version})
       opts = {:version => version, :module_namespace => module_obj.module_namespace()}
-      super(aug_branch[:repo],aug_branch[:module_name],module_obj.id_handle(),opts)
-      # TODO: is 'replace' necessary?; if so should also add other fields like module_namespace, ..
-      replace(Aux.hash_subset(self,[:repo_name,:repo_url,:module_name,:workspace_branch]))
+      super(aug_branch[:repo],aug_branch[:module_name],module_obj.id_handle(),aug_branch,opts)
       self[:commit_sha] = aug_branch[:current_sha]
     end
   end

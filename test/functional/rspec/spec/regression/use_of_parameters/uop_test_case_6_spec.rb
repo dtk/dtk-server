@@ -123,7 +123,7 @@ describe "(Use Of Parameters) Test Case 6: Check possibility to query list of no
 	end
 
 	context "Check component on node" do
-		include_context "Check component", dtk_common, node_name, 'stdlib'
+		include_context "Check component", dtk_common, node_name, 'r8/stdlib'
 	end
 
 	context "Attribute params check function" do

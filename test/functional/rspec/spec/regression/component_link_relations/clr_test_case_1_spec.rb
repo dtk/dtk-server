@@ -16,8 +16,9 @@ service_name = 'clr_test_case_1_instance'
 assembly_name = 'unit_test::simple_link'
 node_name = "source"
 component_name = "unit_test::source"
+namespace = "dtk18"
 dependency_component = 'unit_test::sink'
-dependency_satisfied_by = ['sink/unit_test::sink']
+dependency_satisfied_by = ['sink/dtk18/unit_test::sink']
 value_to_match_1 = 'nil'
 value_to_match_2 = 'ec2'
 attribute_name = 'upstream'
@@ -39,7 +40,7 @@ describe "(Component link relations) Test Case 1: Simple link scenario - $node.h
   end
 
   context "List component dependencies" do
-    include_context "List component dependencies", dtk_common, "#{node_name}/#{component_name}", dependency_component, dependency_satisfied_by
+    include_context "List component dependencies", dtk_common, "#{node_name}/#{namespace}/#{component_name}", dependency_component, dependency_satisfied_by
   end
 
   context "Get attribute value from component" do

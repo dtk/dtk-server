@@ -56,14 +56,6 @@ describe "(Modules, Services and Versioning) Test Case 20: Import service module
     include_context "Delete component module from local filesystem", component_module_filesystem_location, local_component_module_name
   end
 
-  context "Delete component module" do
-    include_context "Delete component module", dtk_common, component_module_name
-  end
-
-  context "Delete component module from local filesystem" do
-    include_context "Delete component module from local filesystem", component_module_filesystem_location, component_module_name
-  end
-
   after(:all) do
     puts "", ""
   end

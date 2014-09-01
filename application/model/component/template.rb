@@ -72,26 +72,37 @@ module DTK; class Component
       ret
     end
 
-    # type_version_list is an array with each element having keys :component_type, :version_field
-    def self.get_matching_type_and_version(project_idh,type_version_field_list,opts={})
+    class MatchElement < Hash
+      def initialize(hash)
+        super()
+        replace(hash)
+      end
+      def component_type()
+        self[:component_type]
+      end
+      def version_field()
+        self[:version_field]
+      end
+    end
+    def self.get_matching_elements(project_idh,match_element_array,opts={})
       ret = Array.new
-      cmp_types = type_version_field_list.map{|r|r[:component_type]}.uniq
-      versions = type_version_field_list.map{|r|r[:version_field]}
+      cmp_types = match_element_array.map{|el|el.component_type}.uniq
+      versions = match_element_array.map{|el|el.version_field}
       sp_hash = {
         :cols => [:id,:group_id,:component_type,:version,:implementation_id],
         :filter => [:and, 
                     [:eq, :project_project_id, project_idh.get_id()],
                     [:oneof, :version, versions],
-                    [:eq, :assembly_id, nil], #so get component templates, not components on assembly instances   
-                    [:eq, :node_node_id, nil],
+#                    [:eq, :assembly_id, nil], #so get component templates, not components on assembly instances   
+                    [:eq, :node_node_id, nil],#so get component templates, not components on assembly instances
                     [:oneof, :component_type, cmp_types]]
       }
       component_rows = get_objs(project_idh.createMH(:component),sp_hash)
 
       ret = Array.new
       unmatched = Array.new
-      type_version_field_list.each do |tv|
-        if match = component_rows.find{|r|tv[:version_field] == r[:version] and tv[:component_type] == r[:component_type]}
+      match_element_array.each do |el|
+        if match = component_rows.find{|r|el.version_field == r[:version] and el.component_type == r[:component_type]}
           ret << match
         else
           unmatched << tv

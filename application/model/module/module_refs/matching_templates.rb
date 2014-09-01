@@ -1,8 +1,11 @@
 module DTK
   class ModuleRefs
     module MatchingTemplatesMixin
-      # augmented with :component_template key which points to associated component template or nil 
-      def set_matching_component_template_info!(aug_cmp_refs,opts={})
+      # component refs are augmented with :component_template key which points to 
+      # associated component template or nil 
+      # This method can be called when assembly is imported or staged
+      # TODO: any other time this can be called
+      def set_matching_component_template_info?(aug_cmp_refs,opts={})
         ret = aug_cmp_refs
         if aug_cmp_refs.empty?
           return ret 
@@ -12,7 +15,7 @@ module DTK
         if cmp_types_to_check.empty?
           return ret 
         end
-        update_component_template_info!(aug_cmp_refs,cmp_types_to_check,opts)
+        set_matching_component_template_info!(aug_cmp_refs,cmp_types_to_check,opts)
         ret
       end
 
@@ -57,13 +60,13 @@ module DTK
 
         # shortcut if no locked versions and no required elements
         if component_modules().empty? and not cmp_types_to_check.values.find{|r|r.mapping_required?()}
-          # TODO: shoudl we instead prune out all thoese that dont have mapping required
+          # TODO: should we instead prune out all those that dont have mapping required
           return Hash.new
         end
         cmp_types_to_check
       end
 
-      def update_component_template_info!(aug_cmp_refs,cmp_types_to_check,opts={})
+      def set_matching_component_template_info!(aug_cmp_refs,cmp_types_to_check,opts={})
         ret = aug_cmp_refs
         # Lookup up modules mapping
         # mappings will have key for each component type referenced and for each key will return hash with keys :component_template and :version;
@@ -77,7 +80,7 @@ module DTK
             cmp_type_version_info = mappings[cmp_type]
             if cmp_template = cmp_type_version_info[:component_template]
               el[:pntr][:component_template_id] = cmp_template[:id] 
-              unless opts[:donot_set_component_template]
+              unless opts[:donot_set_component_templates]
                 el[:pntr][:component_template] = cmp_template
               end
             elsif el[:required]
@@ -103,11 +106,16 @@ module DTK
         # first put in ret info about component type and version
         ret = cmp_types.inject(Hash.new) do |h,cmp_type|
           version = ret_selected_version_string(cmp_type)
-          h.merge(cmp_type => {:component_type => cmp_type, :version => version, :version_field => ModuleBranch.version_field(version)})
+          el = Component::Template::MatchElement.new(
+            :component_type => cmp_type, 
+            :version => version, 
+            :version_field => ModuleBranch.version_field(version)
+          )
+          h.merge(cmp_type => el)
         end
 
         # get matching component template info and insert matches into ret
-        Component::Template.get_matching_type_and_version(project_idh(),ret.values,opts).each do |cmp_template|
+        Component::Template.get_matching_elements(project_idh(),ret.values,opts).each do |cmp_template|
           ret[cmp_template[:component_type]].merge!(:component_template => cmp_template) 
         end
         ret

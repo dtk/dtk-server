@@ -1,4 +1,4 @@
-module DTK; class ComponentModuleRef
+module DTK; class ModuleRef
   class VersionInfo
 
     DEFAULT_VERSION = nil
@@ -14,7 +14,7 @@ module DTK; class ComponentModuleRef
         version_string = 
           if object.kind_of?(String) 
             ModuleVersion.string_master_or_empty?(object) ? DEFAULT_VERSION : object
-          elsif object.kind_of?(ComponentModuleRef) 
+          elsif object.kind_of?(ModuleRef) 
             object[:version_info]
           end
         if version_string 

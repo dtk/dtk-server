@@ -1,3 +1,4 @@
+#TODO: this wil be deprecated for module_ref
 {
   :schema=>:module,
   :table=>:component_module_ref,

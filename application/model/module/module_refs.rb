@@ -1,53 +1,13 @@
 module DTK
-  class ServiceModule
-    module ComponentModuleRefsMixin
-      def set_component_module_version(component_module,component_version,service_version=nil)
-        cmp_module_name = component_module.module_name()
-        # make sure that component_module has version defined
-        unless component_mb = component_module.get_module_branch_matching_version(component_version)
-          defined_versions = component_module.get_module_branches().map{|r|r.version_print_form()}.compact
-          version_info = 
-            if defined_versions.empty?
-              "there are no versions loaded"
-            else
-              "available versions: #{defined_versions.join(', ')}"
-            end
-          raise ErrorUsage.new("Component module (#{cmp_module_name}) does not have version (#{component_version}) defined; #{version_info}")
-        end
-        
-        cmp_module_refs = get_component_module_refs(service_version)
-        
-        # check if set to this version already; if so no-op
-        if cmp_module_refs.has_module_version?(cmp_module_name,component_version)
-          return ret_clone_update_info(service_version)
-        end
-
-        # set in cmp_module_refs the module have specfied value and update both model and service's global refs
-        cmp_module_refs.set_module_version(cmp_module_name,component_version)
-        
-        # update the component refs with the new component_template_ids
-        cmp_module_refs.update_component_template_ids(component_module)
-        
-        ret_clone_update_info(service_version)
-      end
-
-     private
-      def get_component_module_refs(service_version=nil)
-        branch = get_module_branch_matching_version(service_version)
-        ComponentModuleRefs.get_component_module_refs(branch)
-      end
-
-    end
-  end
-
-  class ComponentModuleRefs 
+  class ModuleRefs 
+    r8_nested_require('module_refs','mixin')
     def self.get_component_module_refs(branch)
-      content_hash_content = ComponentModuleRef.get_component_module_refs(branch).inject(Hash.new) do |h,r|
+      content_hash_content = ModuleRef.get_component_module_refs(branch).inject(Hash.new) do |h,r|
         h.merge(key(r[:component_module]) => r)
       end
       new(branch,content_hash_content)
     end
-
+    
     def self.update_from_dsl_parsed_info(branch,parsed_info,opts={})
       content_hash_content = reify_content(branch.model_handle(:component_model_ref),parsed_info)
       update(branch,content_hash_content,opts)
@@ -63,9 +23,10 @@ module DTK
       end
       ret
     end
-
+    
+    MetaFilenamePath = 'global_module_refs.json'
     def self.meta_filename_path()
-      "global_module_refs.json"
+      MetaFilenamePath
     end
 
     def update_component_template_ids(component_module)
@@ -85,7 +46,6 @@ module DTK
       Model.update_from_rows(component_module.model_handle(:component_ref),cmp_ref_update_rows)
     end
 
-    # TODO: we may simplify relationship of component ref to compoennt template to simplify and make more efficient below
     # augmented with :component_template key which points to associated component template or nil 
     def set_matching_component_template_info!(aug_cmp_refs,opts={})
       ret = aug_cmp_refs
@@ -190,7 +150,7 @@ module DTK
           :component_module => cmp_module_name,
           :version_info => version
         }
-        @component_modules[key] = ComponentModuleRef.reify(@parent.model_handle,hash_content)
+        @component_modules[key] = ModuleRef.reify(@parent.model_handle,hash_content)
       end
       self.class.update(@parent,@component_modules)
     end
@@ -210,18 +170,18 @@ module DTK
     def self.reify_content(mh,object)
       if object.kind_of?(Hash)
         object.inject(Hash.new) do |h,(k,v)|
-          if v.kind_of?(ComponentModuleRef)
-            h.merge(k.to_sym => ComponentModuleRef.reify(mh,v))
+          if v.kind_of?(ModuleRef)
+            h.merge(k.to_sym => ModuleRef.reify(mh,v))
           elsif v.kind_of?(String)
             # TODO: this clause will be deprecated
-            h.merge(k.to_sym => ComponentModuleRef.reify(mh,:component_module => k,:version_info => v))
+            h.merge(k.to_sym => ModuleRef.reify(mh,:component_module => k,:version_info => v))
           else
             raise Error.new("Unexpected value associated with component module ref: #{v.class}")
           end
         end
       elsif object.kind_of?(ServiceModule::DSLParser::Output)
         object.inject(Hash.new) do |h,r|
-          h.merge(r[:component_module].to_sym => ComponentModuleRef.reify(mh,Aux.hash_subset(r,ReifyParsingColMapping)))
+          h.merge(r[:component_module].to_sym => ModuleRef.reify(mh,Aux.hash_subset(r,ReifyParsingColMapping)))
         end
       else
         raise Error.new("Unexpected input (#{object.class})")
@@ -237,7 +197,7 @@ module DTK
     end
 
     def self.update(parent,cmp_modules,opts={})
-      ComponentModuleRef.create_or_update(parent,cmp_modules)
+      ModuleRef.create_or_update(parent,cmp_modules)
 
       unless opts[:donot_make_repo_changes]
         meta_filename_path = meta_filename_path()
@@ -311,6 +271,5 @@ module DTK
       end
       @parent.model_handle(:project).createIDH(:id => project_id)
     end
-    
   end
 end

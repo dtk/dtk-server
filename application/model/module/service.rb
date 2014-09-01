@@ -1,7 +1,5 @@
 module DTK
   class ServiceModule < Model
-    r8_nested_require('service','component_module_ref')
-    r8_nested_require('service','component_module_refs')
     r8_nested_require('service','dsl')
     r8_nested_require('service','service_add_on')
 
@@ -9,7 +7,7 @@ module DTK
     include ModuleMixin
     extend DSLClassMixin
     include DSLMixin
-    include ComponentModuleRefsMixin
+    include ModuleRefs::Mixin
 
     ### standard get methods
     def get_assemblies()

@@ -1,15 +1,19 @@
 module DTK
-  class ComponentModuleRef < Model
-    r8_nested_require('component_module_ref','version_info')
+  class ModuleRef < Model
+    r8_nested_require('module_ref','version_info')
+
+    def self.common_columns()
+      [:id,:display_name,:group_id,:module_name,:version_info,:namespace_info]
+    end
 
     def self.reify(mh,object)
       cmr_mh = mh.createMH(:component_model_ref)
       ret = version_info = nil
-      if object.kind_of?(ComponentModuleRef)
+      if object.kind_of?(ModuleRef)
         ret = object
         version_info = VersionInfo::Assignment.reify?(object)
       else #object.kind_of?(Hash)  
-        ret = ComponentModuleRef.create_stub(cmr_mh,object)
+        ret = ModuleRef.create_stub(cmr_mh,object)
         if v = object[:version_info]
           version_info = VersionInfo::Assignment.reify?(v)
         end
@@ -24,17 +28,17 @@ module DTK
 
     def self.get_component_module_refs(branch)
       sp_hash = {
-        :cols => [:id,:display_name,:group_id,:component_module,:version_info,:remote_info],
+        :cols => common_columns(),
         :filter => [:eq,:branch_id,branch.id()]
       }
-      mh = branch.model_handle(:component_module_ref)
+      mh = branch.model_handle(:module_ref)
       get_objs(mh,sp_hash)
     end
 
     def self.create_or_update(parent,component_module_refs)
       return if component_module_refs.empty?
       parent_id_assigns = {
-        parent.parent_id_field_name(:component_module_ref) => parent.id()
+        parent.parent_id_field_name(:module_ref) => parent.id()
       }
       rows = component_module_refs.values.map do |cmr_hash|
         assigns = 
@@ -43,10 +47,10 @@ module DTK
           else
             assigns = parent_id_assigns
           end
-        Aux.hash_subset(cmr_hash,[:component_module,:remote_info]).merge(assigns)
+        Aux.hash_subset(cmr_hash,[:module_name,:namespace_info]).merge(assigns)
       end
-      model_handle = parent.model_handle(:component_module_ref)
-      matching_cols = [:component_module]
+      model_handle = parent.model_handle(:module_ref)
+      matching_cols = [:module_name]
       modify_children_from_rows(model_handle,parent.id_handle(),rows,matching_cols,:update_matching => true)
     end
 
@@ -59,11 +63,11 @@ module DTK
       if version_string = version_string()
         ret.merge!(:version_info => version_string)
       end
-      if ret[:version_info] and ret[:remote_info].nil?
+      if ret[:version_info] and ret[:namespace_info].nil?
         return ret[:version_info] # simple form
       end
       ret
     end
-    DSLHashCols = [:version_info,{:remote_info => :remote_namespace}]
+    DSLHashCols = [:version_info,{:namespace_info => :namespace}]
   end
 end

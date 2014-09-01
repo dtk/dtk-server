@@ -31,7 +31,7 @@ module DTK
         :filter => filter,
         :component_module_refs => self,
         :force_compute_template_id => true,
-        :raise_errors_if_unmatched => true
+        :raise_errors => true
       }
       aug_cmp_refs = Assembly::Template.get_augmented_component_refs(component_module.model_handle(:component),opts)
       return if aug_cmp_refs.empty?

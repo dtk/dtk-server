@@ -83,6 +83,19 @@ module DTK; class Component
       def version_field()
         self[:version_field]
       end
+      def version()
+        self[:version]
+      end
+      def namespace()
+        self[:namespace]
+      end
+      def print_form()
+        ret = namespace ? "#{namespace}:#{component_type}" :  component_type
+        if version
+          ret << "(#{version})"
+        end
+        ret
+      end
     end
     def self.get_matching_elements(project_idh,match_element_array,opts={})
       ret = Array.new
@@ -93,26 +106,42 @@ module DTK; class Component
         :filter => [:and, 
                     [:eq, :project_project_id, project_idh.get_id()],
                     [:oneof, :version, versions],
-#                    [:eq, :assembly_id, nil], #so get component templates, not components on assembly instances   
-                    [:eq, :node_node_id, nil],#so get component templates, not components on assembly instances
+                    [:eq, :assembly_id, nil], 
+                    [:eq, :node_node_id, nil],
                     [:oneof, :component_type, cmp_types]]
       }
       component_rows = get_objs(project_idh.createMH(:component),sp_hash)
-
+      augment_with_namespace!(component_rows)
       ret = Array.new
       unmatched = Array.new
       match_element_array.each do |el|
-        if match = component_rows.find{|r|el.version_field == r[:version] and el.component_type == r[:component_type]}
-          ret << match
+        matches = component_rows.select do |r|
+          el.version_field == r[:version] and 
+            el.component_type == r[:component_type] and
+            (el.namespace.nil? or el.namespace == r[:namespace])
+        end
+        if matches.empty?
+          unmatched << el
+        elsif matches.size == 1
+          ret << matches.first
         else
-          unmatched << tv
+          # TODO: may put in logic that sees if one is service modules ns and uses that one when multiple matches
+          error_msg = "Unexpected multiple matches: #{matches.inspect}"
+          if opts[:raise_errors]
+            raise ErrorUsage.new(error_msg)
+          else
+            Log.error(error_msg)
+          end
         end
       end
-      if opts[:raise_errors_if_unmatched] and not unmatched.empty?()
-        ct_print_form = unmatched.map do |r|
-          r[:version] ? "#{r[:component_type]}:#{r[:version]}" : r[:component_type]
-        end.join(',')
-        raise Error.new("No match for component templates (#{ct_print_form})")
+      unless unmatched.empty?()
+        ct_print_form = unmatched.map{|r|r.print_form()}.join(',')
+        error_msg = "No match for component templates (#{ct_print_form})"
+        if opts[:raise_errors] 
+          raise ErrorUsage.new(error_msg)
+        else
+          Log.error(error_msg)
+        end
       end
       ret
     end
@@ -245,6 +274,25 @@ module DTK; class Component
                     [:eq, :version, version_field(version)]]
       }
       name_to_id_helper(model_handle,Component.name_with_version(name,version),sp_hash,opts)
+    end
+
+    def self.augment_with_namespace!(component_templates)
+      ret = Array.new
+      return ret if component_templates.empty?
+      sp_hash = {
+        :cols => [:id,:namespace_info],
+        :filter => [:oneof, :id, component_templates.map{|r|r.id()}]
+      }
+      mh = component_templates.first.model_handle()
+      ndx_namespace_info = get_objs(mh,sp_hash).inject(Hash.new) do |h,r|
+        h.merge(r[:id] => (r[:namespace]||{})[:display_name])
+      end
+      component_templates.each do |r|
+        if namespace = ndx_namespace_info[r[:id]]
+          r.merge!(:namespace => namespace)
+        end
+      end
+      component_templates
     end
   end
 

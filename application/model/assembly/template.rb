@@ -110,7 +110,7 @@ module DTK; class Assembly
           (pntr[:aug_cmp_refs] ||= Array.new) << aug_cmp_ref
         end
       end
-      set_matching_opts = Aux.hash_subset(opts,[:force_compute_template_id,:raise_errors_if_unmatched])
+      set_matching_opts = Aux.hash_subset(opts,[:force_compute_template_id,:raise_errors])
       aug_cmp_refs_ndx_by_vc.each_value do |r|
         r[:component_module_refs].set_matching_component_template_info?(r[:aug_cmp_refs],set_matching_opts)
       end

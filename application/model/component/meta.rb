@@ -72,6 +72,26 @@ module XYZ
 
       virtual_column :view_def_key, :type => :varchar, :hidden => true, :local_dependencies => [:id,:view_def_ref,:component_type] 
 
+    virtual_column :namespace_info, :type => :json, :hidden => true,
+        :remote_dependencies =>
+        [
+         { :model_name => :module_branch,
+           :join_type => :inner,
+           :join_cond=>{:id => q(:component,:module_branch_id)},
+           :cols => [:id,:group_id,:component_id]
+         },
+         { :model_name => :component_module,
+           :join_type => :inner,
+           :join_cond=>{:id => q(:module_branch,:component_id)},
+           :cols => [:id,:group_id,:display_name,:namespace_id]
+         },
+         { :model_name => :namespace,
+           :convert => true,
+           :join_type => :inner,
+           :join_cond=>{:id => q(:component_module,:namespace_id)},
+           :cols => [:id,:group_id,:display_name]
+         }]
+
       ###### virtual columns related to attributes
         attributes_def =  {
           :model_name => :attribute,

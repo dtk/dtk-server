@@ -105,12 +105,17 @@ module DTK
         return ret if cmp_types.empty?
         # first put in ret info about component type and version
         ret = cmp_types.inject(Hash.new) do |h,cmp_type|
-          version = ret_selected_version_string(cmp_type)
+          version = version_string?(cmp_type)
           el = Component::Template::MatchElement.new(
             :component_type => cmp_type, 
-            :version => version, 
             :version_field => ModuleBranch.version_field(version)
           )
+          if version
+            el[:version] = version
+          end
+          if namespace = namespace?(cmp_type)
+            el[:namespace] = namespace
+          end
           h.merge(cmp_type => el)
         end
 
@@ -121,10 +126,20 @@ module DTK
         ret
       end
 
-      def ret_selected_version_string(component_type)
-        if cmp_module_ref = component_modules[key(Component.module_name(component_type))]
+      def version_string?(component_type)
+        if cmp_module_ref = component_module_ref?(component_type)
           cmp_module_ref.version_string()
         end
+      end
+
+      def namespace?(component_type)
+        if cmp_module_ref = component_module_ref?(component_type)
+          cmp_module_ref.namespace()
+        end
+      end
+
+      def component_module_ref?(component_type)
+        component_modules[key(Component.module_name(component_type))]
       end
     end
   end

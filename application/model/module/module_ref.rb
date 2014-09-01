@@ -58,6 +58,16 @@ module DTK
       self[:version_info] && self[:version_info].version_string()
     end
 
+    def namespace()
+      unless self[:namespace_info].nil?
+        if self[:namespace_info].kind_of?(String)
+          self[:namespace_info]
+        else
+          raise Error.new("Unexpected type in namespace_info: #{self[:namespace_info].class}")
+        end
+      end
+    end
+
     def dsl_hash_form()
       ret = Aux.hash_subset(self,DSLHashCols,:only_non_nil=>true) 
       if version_string = version_string()

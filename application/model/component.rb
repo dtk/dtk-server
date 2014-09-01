@@ -185,6 +185,7 @@ module DTK
       component_type.gsub(/__.+$/,'')
     end
 
+    NamespaceDelim = ':'
     def self.display_name_print_form(display_name,opts=Opts.new)
       ret =
         if opts[:no_module_name]
@@ -194,7 +195,7 @@ module DTK
         end
 
       if namespace = opts[:namespace]
-        ret = "#{namespace}:#{ret}"
+        ret = "#{namespace}#{NamespaceDelim}#{ret}"
       end
 
       ret

@@ -1,19 +1,14 @@
 module DTK
   class ModuleRefs 
     r8_nested_require('module_refs','mixin')
+    r8_nested_require('module_refs','parse')
     def self.get_component_module_refs(branch)
       content_hash_content = ModuleRef.get_component_module_refs(branch).inject(Hash.new) do |h,r|
-        h.merge(key(r[:component_module]) => r)
+        h.merge(key(r[:module_name]) => r)
       end
       new(branch,content_hash_content)
     end
     
-    def self.update_from_dsl_parsed_info(branch,parsed_info,opts={})
-      content_hash_content = reify_content(branch.model_handle(:component_model_ref),parsed_info)
-      update(branch,content_hash_content,opts)
-      new(branch,content_hash_content,:content_hash_form_is_reified => true)
-    end
-
     def version_objs_indexed_by_modules()
       ret = Hash.new
       component_modules.each_pair do |mod,cmr|
@@ -24,11 +19,6 @@ module DTK
       ret
     end
     
-    MetaFilenamePath = 'global_module_refs.json'
-    def self.meta_filename_path()
-      MetaFilenamePath
-    end
-
     def update_component_template_ids(component_module)
       # first get filter so can call get_augmented_component_refs
       assembly_templates = component_module.get_associated_assembly_templates()
@@ -164,36 +154,19 @@ module DTK
       @parent = parent
       @component_modules = opts[:content_hash_form_is_reified] ?
         content_hash_form :
-        self.class.reify_content(parent.model_handle(:component_model_ref),content_hash_form)
+        Parse.reify_content(parent.model_handle(:model_ref),content_hash_form)
     end
-
-    def self.reify_content(mh,object)
-      if object.kind_of?(Hash)
-        object.inject(Hash.new) do |h,(k,v)|
-          if v.kind_of?(ModuleRef)
-            h.merge(k.to_sym => ModuleRef.reify(mh,v))
-          elsif v.kind_of?(String)
-            # TODO: this clause will be deprecated
-            h.merge(k.to_sym => ModuleRef.reify(mh,:component_module => k,:version_info => v))
-          else
-            raise Error.new("Unexpected value associated with component module ref: #{v.class}")
-          end
-        end
-      elsif object.kind_of?(ServiceModule::DSLParser::Output)
-        object.inject(Hash.new) do |h,r|
-          h.merge(r[:component_module].to_sym => ModuleRef.reify(mh,Aux.hash_subset(r,ReifyParsingColMapping)))
-        end
-      else
-        raise Error.new("Unexpected input (#{object.class})")
-      end
-    end
-    ReifyParsingColMapping = [:component_module,:version_info,{:remote_namespace => :remote_info}]
 
     def self.key(el)
       el.to_sym
     end
     def key(el)
       self.class.key(el)
+    end
+
+    MetaFilenamePath = 'global_module_refs.json'
+    def self.meta_filename_path()
+      MetaFilenamePath
     end
 
     def self.update(parent,cmp_modules,opts={})

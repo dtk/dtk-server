@@ -3,17 +3,17 @@ module DTK
     r8_nested_require('module_ref','version_info')
 
     def self.common_columns()
-      [:id,:display_name,:group_id,:module_name,:version_info,:namespace_info]
+      [:id,:display_name,:group_id,:module_name,:module_type,:version_info,:namespace_info]
     end
 
     def self.reify(mh,object)
-      cmr_mh = mh.createMH(:component_model_ref)
+      mr_mh = mh.createMH(:model_ref)
       ret = version_info = nil
       if object.kind_of?(ModuleRef)
         ret = object
         version_info = VersionInfo::Assignment.reify?(object)
       else #object.kind_of?(Hash)  
-        ret = ModuleRef.create_stub(cmr_mh,object)
+        ret = ModuleRef.create_stub(mr_mh,object)
         if v = object[:version_info]
           version_info = VersionInfo::Assignment.reify?(v)
         end

@@ -108,7 +108,7 @@ module DTK
             DSLParser::Output.new(:component_module_refs,legacy_component_module_refs_parsed_info(module_branch,opts))
           end
         return parsed_info if ParsingError.is_error?(parsed_info)
-        ModuleRefs.update_from_dsl_parsed_info(module_branch,parsed_info,opts)
+        ModuleRefs::Parse.update_from_dsl_parsed_info(module_branch,parsed_info,opts)
       end
 
       # TODO: deprecate when DSLParser methods stable

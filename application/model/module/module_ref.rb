@@ -47,7 +47,7 @@ module DTK
           else
             assigns = parent_id_assigns
           end
-        Aux.hash_subset(cmr_hash,[:module_name,:namespace_info]).merge(assigns)
+        Aux.hash_subset(cmr_hash,[:module_name,:module_type,:namespace_info]).merge(assigns)
       end
       model_handle = parent.model_handle(:module_ref)
       matching_cols = [:module_name]

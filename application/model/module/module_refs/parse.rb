@@ -18,7 +18,7 @@ module DTK
               raise Error.new("Unexpected value associated with component module ref: #{v.inspect}")
             end
           end
-          #This comes from parsing teh dsl file
+          #This comes from parsing the dsl file
         elsif object.kind_of?(ServiceModule::DSLParser::Output)
           object.inject(Hash.new) do |h,r|
             internal_form = convert_parse_to_internal_form(r)

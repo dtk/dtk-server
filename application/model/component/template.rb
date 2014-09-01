@@ -130,7 +130,7 @@ module DTK; class Component
         # ret << r unless m_branch[:type].eql?(ingore_type)
         if(m_branch && !m_branch[:type].eql?(ingore_type))
           branch_namespace = m_branch[:namespace]
-          r['namespace'] = branch_namespace[:display_name]
+          r[:namespace] = branch_namespace[:display_name]
           ret << r
         end
       end

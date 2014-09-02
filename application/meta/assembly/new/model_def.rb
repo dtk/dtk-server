@@ -296,7 +296,14 @@ lambda__instance_nodes_components_assembly_template =
          :convert => true,
          :join_type=>:inner,
          :join_cond=>{:id=>:module_branch__component_id},
-         :cols => [:id,:display_name,:group_id]
+         :cols => [:id,:display_name,:group_id,:namespace_id]
+       },
+       {
+         :model_name=>:namespace,
+         :convert => true,
+         :join_type=>:inner,
+         :join_cond=>{:id=>:component_module__namespace_id},
+         :cols => [:id,:display_name]
        }
       ]
     },
@@ -477,7 +484,7 @@ lambda__instance_nodes_components_assembly_template =
          :cols=>[:id,:group_id,:display_name]
        }]
     },
-    :namespace_info_for_cmp_templates=> {
+    :namespace_info_for_cmps=> {
       :type=>:json,
       :hidden=>true,
       :remote_dependencies=>

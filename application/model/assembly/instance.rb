@@ -211,7 +211,7 @@ module DTK; class  Assembly
       rows.each do |r|
         if cmp = r[:nested_component]
           # add node and namespace hash information to component hash
-          components << cmp.merge(r.hash_subset(:node).merge!(r.hash_subset(:namespace)))
+          components << cmp.merge(r.hash_subset(:node))#.merge!(r.hash_subset(:namespace)))
         end
       end
 

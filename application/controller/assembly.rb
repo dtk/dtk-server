@@ -58,14 +58,16 @@ module DTK
       assembly_id = assembly.id()
       cmp_full_name = ret_request_params(:cmp_full_name)
 
-      cmp_name, namespace = ret_non_null_request_params(:component_id, :namespace)
+      # cmp_name, namespace = ret_non_null_request_params(:component_id, :namespace)
+      cmp_name, namespace = ret_request_params(:component_id, :namespace)
+
       assembly_idh = assembly.id_handle()
       cmp_mh = assembly_idh.createMH(:component)
-      
+
       if cmp_full_name
         # cmp_idh = ret_component_id_handle(:cmp_full_name,:assembly_id => assembly_id)
-        component = Component.ret_component_with_namespace_for_node(cmp_mh, cmp_name, node_id, namespace)
-        raise ErrorUsage.new("Component with identifier '#{namespace}/#{cmp_name}' does not exist!") unless component
+        component = Component.ret_component_with_namespace_for_node(cmp_mh, cmp_name, node_id, namespace, assembly)
+        raise ErrorUsage.new("Component with identifier (#{namespace.nil? ? '' : namespace + ':'}#{cmp_name}) does not exist!") unless component
 
         cmp_idh = component.id_handle()
       else
@@ -132,9 +134,9 @@ module DTK
         end
       end
 
-      if about == :modules
-        opts.merge!(:with_namespace => true)
-      end
+      # if about == :modules
+      #   opts.merge!(:with_namespace => true)
+      # end
 
       if node_id
         opts.merge!(:node_cmp_name => true)  unless node_id.empty?
@@ -188,11 +190,13 @@ module DTK
 
     def rest__prepare_for_edit_module()
       assembly = ret_assembly_instance_object()
-      module_type = ret_non_null_request_params(:module_type)
+      module_type, module_name = ret_non_null_request_params(:module_type,:module_name)
+
       response = 
         case module_type.to_sym
           when :component_module
-            component_module = create_obj(:module_name,ComponentModule)
+            namespace = AssemblyModule::Component.validate_component_module_ret_namespace(assembly,module_name)
+            component_module = create_obj(:module_name,ComponentModule,namespace)
             AssemblyModule::Component.prepare_for_edit(assembly,component_module)
           when :service_module
           modification_type = ret_non_null_request_params(:modification_type).to_sym
@@ -200,17 +204,20 @@ module DTK
           else
             raise ErrorUsage.new("Illegal module_type #{module_type}")
         end
+
       rest_ok_response response
     end
 
     def rest__promote_module_updates()
       assembly = ret_assembly_instance_object()
-      module_type = ret_non_null_request_params(:module_type)
+      module_type, module_name = ret_non_null_request_params(:module_type,:module_name)
+
       unless module_type.to_sym == :component_module
         raise Error.new("promote_module_changes only treats component_module type") 
       end
-      module_name = ret_non_null_request_params(:module_name)
-      component_module = create_obj(:module_name,ComponentModule)
+
+      namespace = AssemblyModule::Component.validate_component_module_ret_namespace(assembly,module_name)
+      component_module = create_obj(:module_name,ComponentModule,namespace)
       opts = ret_boolean_params_hash(:force)
       rest_ok_response AssemblyModule::Component.promote_module_updates(assembly,component_module,opts)
     end

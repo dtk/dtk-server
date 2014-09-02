@@ -369,9 +369,12 @@ module DTK
     def name_to_id(model_handle,name_or_full_module_name,namespace=nil)
       namespace_x, name = Namespace.full_module_name_parts?(name_or_full_module_name)
       unless namespace ||= namespace_x
-        raise Error.new("Cannot find namespace")
+        raise ErrorUsage.new("Cannot find namespace!")
       end
+
       namespace_obj = Namespace.find_by_name(model_handle.createMH(:namespace), namespace)
+      raise ErrorUsage.new("Namespace (#{namespace_x}) does not exist!") unless namespace_obj
+
       sp_hash = {
        :cols => [:id],
         :filter => [:and,[:eq, :namespace_id, namespace_obj.id],[:eq, :display_name, name]]

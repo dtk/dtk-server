@@ -407,10 +407,11 @@ module DTK
         get_virtual_attributes_aux_base(attribute_names,cols,field_to_match,multiple_instance_clause)
     end
 
-    def self.ret_component_with_namespace_for_node(cmp_mh, cmp_name, node_id, namespace)
+    def self.ret_component_with_namespace_for_node(cmp_mh, cmp_name, node_id, namespace, assembly)
+      ret_cmp, match_cmps = nil, []
       display_name = cmp_name.gsub(/::/,"__")
       sp_hash = {
-        :cols => [:id, :display_name, :module_branch_id, :type, :ref],
+        :cols => [:id, :display_name, :module_branch_id, :type, :ref, :namespace_info_for_cmps],
         :filter => [:and,
                     [:eq, :display_name, display_name],
                     # [:eq, :type, 'instance'],
@@ -419,10 +420,25 @@ module DTK
       }
       cmps = Model.get_objs(cmp_mh,sp_hash,:keep_ref_cols=>true)
 
-      ret_cmp = nil
-      cmps.each do |cmp|
-        n_spc, name = cmp[:ref].split('::')
-        ret_cmp = cmp if(n_spc.to_s.eql?(namespace) || name.nil?)
+      if namespace
+        cmps.select!{|c| (c[:namespace] && c[:namespace][:display_name] == namespace)}
+        ret_cmp = cmps.first
+      else
+        return cmps.first if cmps.size == 1
+
+        opts = Opts.new(:with_namespace => true)
+        cmp_modules_for_assembly = assembly.list_component_modules(opts)
+
+        cmp_modules_for_assembly.each do |cmp_mod|
+          cmps.each do |cmp|
+            if cmp_module = cmp[:component_module]
+              match_cmps << cmp if cmp_module[:id] == cmp_mod[:id]
+            end
+          end
+
+          raise ErrorUsage.new("Multiple components matching component name you provided. Please use namespace:component format to delete component!") if match_cmps.size > 1
+          ret_cmp = match_cmps.first
+        end
       end
 
       ret_cmp

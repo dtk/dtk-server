@@ -91,9 +91,11 @@ module DTK
       self.class.key(el)
     end
 
-    MetaFilenamePath = 'global_module_refs.json'
     def self.meta_filename_path()
-      MetaFilenamePath
+      unless @meta_filename_path ||= ServiceModule::DSLParser.default_rel_path?(:component_module_refs)
+        raise Error.new("Unexpected that cannot compute a meta_filename_path for component_module_refs")
+      end
+      @meta_filename_path
     end
 
     def self.update(parent,cmp_modules,opts={})

@@ -24,6 +24,10 @@ module DTK
           parsed_info.inject(Hash.new){|h,(file_type,v)|h.merge(file_type => Output.new(file_type,v))} 
       end
 
+      def self.default_rel_path?(file_type)
+        ExtMod::DirectoryParser::Git.default_rel_path?(:service_module,file_type)
+      end
+
       def self.generate_hash(file_type,output_array)
         ExtMod::FileParser.generate_hash(file_type,output_array)
       end

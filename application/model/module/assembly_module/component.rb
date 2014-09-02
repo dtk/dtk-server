@@ -81,9 +81,6 @@ module DTK; class AssemblyModule
       # remove branches; they are no longer needed
       ret.each{|r|r.delete(:module_branch)}
 
-      if opts[:with_namespace]
-        get_for_assembly__augment_name_with_namespace!(ret)
-      end
       ret
     end
 

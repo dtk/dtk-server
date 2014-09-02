@@ -134,10 +134,6 @@ module DTK
         end
       end
 
-      # if about == :modules
-      #   opts.merge!(:with_namespace => true)
-      # end
-
       if node_id
         opts.merge!(:node_cmp_name => true)  unless node_id.empty?
       end

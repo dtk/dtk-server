@@ -15,7 +15,7 @@ module DTK
       def self.parse_directory(module_branch,file_type,opts={})
         repo_full_path,branch = RepoManager.repo_full_path_and_branch(module_branch)
         dir_parser = ExtMod::DirectoryParser::Git.new(:service_module,repo_full_path,branch)
-        parsed_info = dir_parser.parse_directory(file_type,opts)
+        parsed_info = dir_parser.parse_directory(file_type,opts)||{}
 
         return parsed_info if ParsingError.is_error?(parsed_info)
 

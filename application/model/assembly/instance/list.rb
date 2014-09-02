@@ -103,9 +103,6 @@ module DTK; class  Assembly
           opts.set_datatype!(:assembly_component_module)
           component_modules_opts.merge!(:get_version_info=>true)
         end
-        if opts[:with_namespace]
-          component_modules_opts.merge!(:with_namespace => true)
-        end
         unsorted_ret = get_component_modules(component_modules_opts)
           if get_version_info
             unsorted_ret.each do |r|
@@ -113,7 +110,7 @@ module DTK; class  Assembly
               r[:update_saved] = !r[:local_copy_diff]
             end
           end
-          end
+        end
         unsorted_ret.sort{|a,b| a[:display_name] <=> b[:display_name] }
       end
 

@@ -5,26 +5,32 @@ module DTK; module ModuleMixins
     # TODO: ModuleBranch::Location: refactor like ModuleMixins::Remote::Class install
     # returns hash with keys :module_idh :module_branch_idh
     def create_module(project,module_name,opts={})
-      default_namespace = Namespace.default_namespace(project.model_handle(:namespace))
-      # TODO: pass local_params in
+      # check if passed, if not use default namespace
+      if (opts[:module_namespace] && !opts[:module_namespace].empty?)
+        module_namespace = Namespace.find_or_create(project.model_handle(:namespace), opts[:module_namespace])
+      else
+        module_namespace = Namespace.default_namespace(project.model_handle(:namespace))
+      end
+
+      # we encapsulate
       local_params = ModuleBranch::Location::LocalParams::Server.new(
         :module_type => module_type(),
         :module_name => module_name,
-        :namespace   => default_namespace[:display_name],
+        :namespace   => module_namespace.name,
         :version => opts[:version]
       )
 
       local = local_params.create_local(project)
-
       project_idh = project.id_handle()
 
       is_parsed   = false
-      if module_exists = module_exists?(project_idh,module_name,Namespace.default_namespace_name)
+      if module_exists = module_exists?(project_idh, module_name, module_namespace.name)
         is_parsed = module_exists[:dsl_parsed]
       end
 
       if is_parsed and not opts[:no_error_if_exists]
-        raise ErrorUsage.new("Module (#{module_name}) cannot be created since it exists already")
+        full_module_name = module_namespace.enrich_module_name(module_name)
+        raise ErrorUsage.new("Module (#{full_module_name}) cannot be created since it exists already")
       end
 
       create_opts = {
@@ -32,15 +38,15 @@ module DTK; module ModuleMixins
         :push_created_branch => true,
         :donot_create_master_branch => true,
         :delete_if_exists => true,
-        :namespace_name => default_namespace.name
+        :namespace_name => module_namespace.name
       }
 
       repo_user_acls = RepoUser.authorized_users_acls(project_idh)
       local_repo_obj = Repo::WithBranch.create_empty_workspace_repo(project_idh,local,repo_user_acls,create_opts)
 
-      module_and_branch_info = create_ws_module_and_branch_obj?(project, local_repo_obj.id_handle(), local.module_name, local.version, default_namespace)
+      module_and_branch_info = create_ws_module_and_branch_obj?(project, local_repo_obj.id_handle(), local.module_name, local.version, module_namespace)
 
-      opts_info = {:version=>local.version, :module_namespace=>local.namespace}
+      opts_info = { :version=>local.version, :module_namespace => local.namespace }
       module_and_branch_info.merge(:module_repo_info => module_repo_info(local_repo_obj,module_and_branch_info,opts_info))
     end
 

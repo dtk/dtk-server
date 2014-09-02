@@ -1,5 +1,6 @@
 module DTK; class ServiceModule
   class ParsingError
+    # TODO: Think below can just be DanglingComponentRefs < self
     class ParsingError::DanglingComponentRefs < self
       def initialize(cmp_ref_info_list,opts={})
         super(err_msg(cmp_ref_info_list),opts)

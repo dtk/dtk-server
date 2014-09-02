@@ -3,7 +3,7 @@
   :table=>:implementation,
   :columns=>{
     :type => {:type=>:varchar, :size => 25},
-    :repo => {:type=>:varchar, :size => 50}, #not normalized TODO: creating problems because it has same name as model :repo
+    :repo => {:type=>:varchar, :size => 100}, #not normalized TODO: creating problems because it has same name as model :repo
     :module_name => {:type=>:varchar, :size => 50},
     :module_namespace => {:type=>:varchar, :size => 50},
     :parse_state => {:type=>:varchar, :size => 25},

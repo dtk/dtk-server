@@ -36,7 +36,7 @@ module DTK
             :filter => [:eq,:id,source_obj.get_field?(:module_branch_id)]
           }
           branch = Model.get_obj(source_obj.model_handle(:module_branch),sp_hash)
-          ComponentModuleRefs.get_component_module_refs(branch)
+          ModuleRefs.get_component_module_refs(branch)
         end
         def get_nested_objects_top_level(model_handle,target_parent_mh,assembly_objs_info,recursive_override_attrs,opts={},&block)
           raise Error.new("Not treating assembly_objs_info with more than 1 element") unless assembly_objs_info.size == 1

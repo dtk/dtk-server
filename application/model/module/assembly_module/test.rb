@@ -190,8 +190,13 @@ need to do a refresh on workspace branch sha in case this was updated in another
       return if cmp_instances_needing_update.empty?
       component_types = cmp_instances_needing_update.map{|cmp|cmp.get_field?(:component_type)}.uniq
       version_field = module_branch.get_field?(:version)
-      type_version_field_list = component_types.map{|ct|{:component_type => ct, :version_field => version_field}}
-      ndx_cmp_templates = DTK::Component::Template.get_matching_type_and_version(project_idh,type_version_field_list).inject(Hash.new) do |h,r|
+      match_el_array = component_types.map do |ct|
+        Component::Template::MatchElement.new(
+          :component_type => ct, 
+          :version_field => version_field
+        )
+      end
+      ndx_cmp_templates = Component::Template.get_matching_elements(project_idh,match_el_array).inject(Hash.new) do |h,r|
         h.merge(r[:component_type] => r)
       end
       rows_to_update = cmp_instances_needing_update.map do |cmp|

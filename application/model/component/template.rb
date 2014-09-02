@@ -89,13 +89,6 @@ module DTK; class Component
       def namespace()
         self[:namespace]
       end
-      def print_form()
-        ret = namespace ? "#{namespace}:#{component_type}" :  component_type
-        if version
-          ret << "(#{version})"
-        end
-        ret
-      end
     end
     def self.get_matching_elements(project_idh,match_element_array,opts={})
       ret = Array.new
@@ -126,22 +119,24 @@ module DTK; class Component
           ret << matches.first
         else
           # TODO: may put in logic that sees if one is service modules ns and uses that one when multiple matches
-          error_msg = "Unexpected multiple matches: #{matches.inspect}"
-          if opts[:raise_errors]
-            raise ErrorUsage.new(error_msg)
-          else
-            Log.error(error_msg)
-          end
+          module_name = Component.module_name(el.component_type)
+          error_params = {
+            :module_type => 'component',
+            :module_name => Component.module_name(el.component_type),
+            :namespaces => matches.map{|m|m[:namespace]}.compact # compact just to be safe
+          }
+          raise ServiceModule::ParsingError::AmbiguousModuleRef.new(error_params)
         end
       end
       unless unmatched.empty?()
-        ct_print_form = unmatched.map{|r|r.print_form()}.join(',')
-        error_msg = "No match for component templates (#{ct_print_form})"
-        if opts[:raise_errors] 
-          raise ErrorUsage.new(error_msg)
-        else
-          Log.error(error_msg)
+        # TODO: indicate whether there is a nailed namespace that does not exist or no matches at all
+        cmp_refs = unmatched.map do |match_el|
+          {
+            :component_type => match_el.component_type,
+            :version => match_el.version
+          }
         end
+        raise ServiceModule::ParsingError::DanglingComponentRefs.new(cmp_refs)
       end
       ret
     end

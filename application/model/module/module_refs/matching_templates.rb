@@ -71,26 +71,26 @@ module DTK
         # Lookup up modules mapping
         # mappings will have key for each component type referenced and for each key will return hash with keys :component_template and :version;
         # component_template will be null if no match is found
-        mappings = get_component_type_to_template_mappings?(cmp_types_to_check.keys,opts)
+        mappings = get_component_type_to_template_mappings?(cmp_types_to_check.keys)
         
         # set the component template ids; raise error if there is a required element that does not have a matching component template
         reference_errors = Array.new
         cmp_types_to_check.each do |cmp_type,els|
           els.each do |el|
-            cmp_type_version_info = mappings[cmp_type]
-            if cmp_template = cmp_type_version_info[:component_template]
+            cmp_type_info = mappings[cmp_type]
+            if cmp_template = cmp_type_info[:component_template]
               el[:pntr][:component_template_id] = cmp_template[:id] 
               unless opts[:donot_set_component_templates]
                 el[:pntr][:component_template] = cmp_template
               end
             elsif el[:required]
-              cmp_ref = {
-                :component_type => cmp_type, 
-                :version => cmp_type_version_info[:version]
-              }
-              remote_namespace = nil #TODO: stub to find remote namespace associated with module
-              cmp_ref.merge!(:remote_namespace => remote_namespace) if remote_namespace
-              reference_errors << cmp_ref
+              # This will not be raeched because if error then an error wil be raised by get_component_type_to_template_mappings? call
+             Log.error("TODO: may put back in logic to accruse errors; until then this should not be reached")
+#              cmp_ref = {
+#                :component_type => cmp_type, 
+#                :version => cmp_type_info[:version]
+#              }
+#              reference_errors << cmp_ref
             end
           end
         end

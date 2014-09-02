@@ -190,11 +190,12 @@ module DTK
 
     def rest__prepare_for_edit_module()
       assembly = ret_assembly_instance_object()
-      module_type, module_name = ret_non_null_request_params(:module_type,:module_name)
+      module_type = ret_non_null_request_params(:module_type)
 
       response = 
         case module_type.to_sym
           when :component_module
+            module_name = ret_non_null_request_params(:module_name)
             namespace = AssemblyModule::Component.validate_component_module_ret_namespace(assembly,module_name)
             component_module = create_obj(:module_name,ComponentModule,namespace)
             AssemblyModule::Component.prepare_for_edit(assembly,component_module)

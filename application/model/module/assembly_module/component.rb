@@ -37,7 +37,6 @@ module DTK; class AssemblyModule
       end
     end
 
-
     def self.create_component_dependency?(type,assembly,cmp_template,antecedent_cmp_template,opts={})
       AdHocLink.new(assembly).create_dependency?(type,cmp_template,antecedent_cmp_template,opts)
     end
@@ -71,6 +70,7 @@ module DTK; class AssemblyModule
       # there is a row for each component; assumption is that all rows belonging to same component with have same branch
       @assembly.get_objs(:cols=> [:instance_component_module_branches]).each do |r|
         component_module = r[:component_module]
+        component_module.merge!({:namespace_name => r[:namespace][:display_name]}) if r[:namespace]
         ndx_ret[component_module[:id]] ||= component_module.merge(add_module_branches ? r.hash_subset(:module_branch) : {})
       end
       ret = ndx_ret.values
@@ -85,6 +85,23 @@ module DTK; class AssemblyModule
         get_for_assembly__augment_name_with_namespace!(ret)
       end
       ret
+    end
+
+    def self.validate_component_module_ret_namespace(assembly,module_name)
+      new(assembly).validate_component_module_ret_namespace(module_name)
+    end
+    def validate_component_module_ret_namespace(module_name)
+      namespace, name = Namespace.full_module_name_parts?(module_name)
+      return namespace if namespace
+
+      component_modules = get_for_assembly()
+      matching_by_name = component_modules.select{|cm| cm[:display_name].eql?(module_name)}
+
+      raise ErrorUsage.new("No object of type component module with name (#{module_name}) exists") if matching_by_name.empty?
+      raise ErrorUsage.new("Multiple components modules matching name you provided. Please use namespace::component_module format!") if matching_by_name.size > 1
+
+      namespace = matching_by_name.first[:namespace_name] if matching_by_name.size == 1
+      namespace
     end
 
    private

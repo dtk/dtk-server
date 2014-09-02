@@ -123,7 +123,7 @@ module DTK
         end
         data = { :name => name, :version => version, :namespace => namespace||service_namespace}
         if is_found
-        found_modules << data 
+          found_modules << data 
         else
           missing_modules << data
         end

@@ -171,12 +171,14 @@
   "assembly_component_module": {
     "order": [
       "id",
+      "namespace",
       "name",
       "updated",
       "update saved"
     ],
     "mapping": {
       "id": "dtk_id",
+      "namespace": "namespace_name",
       "name": "display_name",
       "updated": "local_copy",
       "update saved": "update_saved"

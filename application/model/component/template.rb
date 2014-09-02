@@ -220,7 +220,7 @@ module DTK; class Component
       display_name = display_name_from_user_friendly_name(cmp_name)
       component_type,title =  ComponentTitle.parse_component_display_name(display_name)
       sp_hash = {
-        :cols => [:id, :display_name, :module_branch_id, :type, :ref, :namespace_info_for_cmp_templates],
+        :cols => [:id, :display_name, :module_branch_id, :type, :ref, :namespace_info_for_cmps],
         :filter => [:and,
                     [:eq, :display_name, display_name],
                     [:eq, :type, 'template'],
@@ -246,7 +246,7 @@ module DTK; class Component
             end
           end
 
-          raise ErrorUsage.new("Multiple components matching component name you provided. Please use namespace/component format to add new component!") if match_cmps.size > 1
+          raise ErrorUsage.new("Multiple components matching component name you provided. Please use namespace:component format to add new component!") if match_cmps.size > 1
           ret_cmp = match_cmps.first
         end
       end

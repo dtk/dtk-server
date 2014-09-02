@@ -288,10 +288,9 @@ module DTK
 
    private
     def create_new_version__type_specific(repo_for_new_branch,new_version,opts={})
-      raise "Contact Haris if this is called, namespace needed!"
       project = get_project()
       repo_idh = repo_for_new_branch.id_handle()
-      module_and_branch_info = self.class.create_ws_module_and_branch_obj?(project,repo_idh,module_name(),new_version)
+      module_and_branch_info = self.class.create_ws_module_and_branch_obj?(project,repo_idh,module_name(),new_version,module_namespace_obj())
       module_branch_idh = module_and_branch_info[:module_branch_idh]
       module_branch = module_branch_idh.create_object().merge(:repo => repo_for_new_branch) #repo added to avoid lookup in update_model_from_dsl
       if opts[:ret_module_branch]

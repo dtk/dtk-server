@@ -286,6 +286,10 @@ module DTK
       get_field?(:namespace)[:display_name]
     end
 
+    def module_namespace_obj()
+      get_field?(:namespace)
+    end
+
     def pp_module_name(version=nil)
       self.class.pp_module_name(module_name(),version)
     end

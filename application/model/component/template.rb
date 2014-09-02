@@ -72,36 +72,71 @@ module DTK; class Component
       ret
     end
 
-    # type_version_list is an array with each element having keys :component_type, :version_field
-    def self.get_matching_type_and_version(project_idh,type_version_field_list,opts={})
+    class MatchElement < Hash
+      def initialize(hash)
+        super()
+        replace(hash)
+      end
+      def component_type()
+        self[:component_type]
+      end
+      def version_field()
+        self[:version_field]
+      end
+      def version()
+        self[:version]
+      end
+      def namespace()
+        self[:namespace]
+      end
+    end
+    def self.get_matching_elements(project_idh,match_element_array,opts={})
       ret = Array.new
-      cmp_types = type_version_field_list.map{|r|r[:component_type]}.uniq
-      versions = type_version_field_list.map{|r|r[:version_field]}
+      cmp_types = match_element_array.map{|el|el.component_type}.uniq
+      versions = match_element_array.map{|el|el.version_field}
       sp_hash = {
         :cols => [:id,:group_id,:component_type,:version,:implementation_id],
         :filter => [:and, 
                     [:eq, :project_project_id, project_idh.get_id()],
                     [:oneof, :version, versions],
-                    [:eq, :assembly_id, nil], #so get component templates, not components on assembly instances   
+                    [:eq, :assembly_id, nil], 
                     [:eq, :node_node_id, nil],
                     [:oneof, :component_type, cmp_types]]
       }
       component_rows = get_objs(project_idh.createMH(:component),sp_hash)
-
+      augment_with_namespace!(component_rows)
       ret = Array.new
       unmatched = Array.new
-      type_version_field_list.each do |tv|
-        if match = component_rows.find{|r|tv[:version_field] == r[:version] and tv[:component_type] == r[:component_type]}
-          ret << match
+      match_element_array.each do |el|
+        matches = component_rows.select do |r|
+          el.version_field == r[:version] and 
+            el.component_type == r[:component_type] and
+            (el.namespace.nil? or el.namespace == r[:namespace])
+        end
+        if matches.empty?
+          unmatched << el
+        elsif matches.size == 1
+          ret << matches.first
         else
-          unmatched << tv
+          # TODO: may put in logic that sees if one is service modules ns and uses that one when multiple matches
+          module_name = Component.module_name(el.component_type)
+          error_params = {
+            :module_type => 'component',
+            :module_name => Component.module_name(el.component_type),
+            :namespaces => matches.map{|m|m[:namespace]}.compact # compact just to be safe
+          }
+          raise ServiceModule::ParsingError::AmbiguousModuleRef.new(error_params)
         end
       end
-      if opts[:raise_errors_if_unmatched] and not unmatched.empty?()
-        ct_print_form = unmatched.map do |r|
-          r[:version] ? "#{r[:component_type]}:#{r[:version]}" : r[:component_type]
-        end.join(',')
-        raise Error.new("No match for component templates (#{ct_print_form})")
+      unless unmatched.empty?()
+        # TODO: indicate whether there is a nailed namespace that does not exist or no matches at all
+        cmp_refs = unmatched.map do |match_el|
+          {
+            :component_type => match_el.component_type,
+            :version => match_el.version
+          }
+        end
+        raise ServiceModule::ParsingError::DanglingComponentRefs.new(cmp_refs)
       end
       ret
     end
@@ -130,7 +165,7 @@ module DTK; class Component
         # ret << r unless m_branch[:type].eql?(ingore_type)
         if(m_branch && !m_branch[:type].eql?(ingore_type))
           branch_namespace = m_branch[:namespace]
-          r['namespace'] = branch_namespace[:display_name]
+          r[:namespace] = branch_namespace[:display_name]
           ret << r
         end
       end
@@ -234,6 +269,25 @@ module DTK; class Component
                     [:eq, :version, version_field(version)]]
       }
       name_to_id_helper(model_handle,Component.name_with_version(name,version),sp_hash,opts)
+    end
+
+    def self.augment_with_namespace!(component_templates)
+      ret = Array.new
+      return ret if component_templates.empty?
+      sp_hash = {
+        :cols => [:id,:namespace_info],
+        :filter => [:oneof, :id, component_templates.map{|r|r.id()}]
+      }
+      mh = component_templates.first.model_handle()
+      ndx_namespace_info = get_objs(mh,sp_hash).inject(Hash.new) do |h,r|
+        h.merge(r[:id] => (r[:namespace]||{})[:display_name])
+      end
+      component_templates.each do |r|
+        if namespace = ndx_namespace_info[r[:id]]
+          r.merge!(:namespace => namespace)
+        end
+      end
+      component_templates
     end
   end
 

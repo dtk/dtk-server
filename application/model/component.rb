@@ -185,7 +185,8 @@ module DTK
       component_type.gsub(/__.+$/,'')
     end
 
-    def self.display_name_print_form(display_name,namespace=nil,opts=Opts.new)
+    NamespaceDelim = ':'
+    def self.display_name_print_form(display_name,opts=Opts.new)
       ret =
         if opts[:no_module_name]
           display_name.gsub(/^.+__/,"")
@@ -193,7 +194,10 @@ module DTK
           display_name.gsub(/__/,"::")
         end
 
-      ret = "#{namespace}/#{ret}" if namespace
+      if namespace = opts[:namespace]
+        ret = "#{namespace}#{NamespaceDelim}#{ret}"
+      end
+
       ret
     end
 
@@ -211,7 +215,7 @@ module DTK
     def convert_to_print_form!()
       update_object!(:display_name,:version)
       component_type = component_type_print_form()
-      self[:display_name] = self.class.display_name_print_form(self[:display_name],self['namespace'])
+      self[:display_name] = self.class.display_name_print_form(self[:display_name],{:namespace => self[:namespace]})
       if has_default_version?()
         self[:version] = nil
       end 

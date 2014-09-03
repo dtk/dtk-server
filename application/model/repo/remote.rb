@@ -16,9 +16,8 @@ module DTK
           @remote_repo_base = arg.to_sym
         end
 
-        repo_url = rest_base_url(@remote_repo_base)
-        @client = RepoManagerClient.new(repo_url)
-        Log.debug "Using repo manager: '#{repo_url}'"
+        @client = RepoManagerClient.new()
+        Log.debug "Using repo manager: '#{@client.rest_base_url}'"
       end
 
       def repoman_client
@@ -221,18 +220,6 @@ module DTK
           qualified_name = "NOT PROVIDED" if qualified_name.nil? || qualified_name.empty?
           raise ErrorUsage.new("Module remote name (#{qualified_name}) ill-formed. Must be of form 'name', 'namespace/name' or 'name/namespace/version'")
         end
-      end
-
-      def rest_base_url(remote_repo=nil)
-        unless remote_repo.nil? or remote_repo == default_remote_repo()
-          raise Error.new("MOD_RESTRUCT:  need to put in logic to treat non default repo_name")
-        end
-        # TODO: change config so that it has ability to have multiple repos and use form like
-        # remote = ::R8::Config[:repo][:remote][remote_repo]
-        remote = ::R8::Config[:repo][:remote]
-        is_ssl = R8::Config[:repo][:remote][:secure_connection]
-
-        "http#{is_ssl ? 's' : ''}://#{remote[:host]}:#{remote[:rest_port].to_s}"
       end
 
      private

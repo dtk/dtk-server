@@ -1,38 +1,16 @@
 require 'sshkey'
 
 module DTK
-  # TODO: RepoType should be in common
-  class RepoType < String
-    def is_component_module?()
-      self =~ /^component_module/
-    end
-    def is_service_module?()
-      self =~ /^service_module/
-    end
-    def is_test_module?()
-      self =~ /^test_module/
-    end
-    def is_node_module?()
-      self =~ /^node_module/
-    end
-  end
   class RepoManagerClient
-    def initialize(rest_base_url_or_host=nil)
-      rest_base_url_or_host ||= R8::Config[:repo][:remote][:host]
-      if rest_base_url_or_host =~ /^https?:/
-        # input is rest_base_url
-        @rest_base_url = rest_base_url_or_host
-        if @rest_base_url =~ Regexp.new("^https?://(.+):[0-9]+$")
-          @host = $1
-        elsif @rest_base_url =~ Regexp.new("^https?://(.+)$")
-          @host = $1
-        end
-      else
-        # input is host
-        @host = rest_base_url_or_host
-        port = DefaultRestServicePort #TODO: may put in provision that this can be omitted or explicitly passed
-        @rest_base_url = "http://#{@host}#{port && ":#{port.to_s}"}"
-      end
+
+    attr_reader :rest_base_url
+
+    def initialize()
+      remote = ::R8::Config[:repo][:remote]
+      is_ssl = remote[:secure_connection]
+      @host  = remote[:host]
+
+      @rest_base_url = "http#{is_ssl ? 's' : ''}://#{@host}:#{remote[:rest_port].to_s}"
     end
 
     def self.repo_url_ssh_access(remote_repo_name,git_user=nil)
@@ -43,8 +21,6 @@ module DTK
       git_user ||= R8::Config[:repo][:remote][:git_user]
       "#{git_user}@#{@host}:#{remote_repo_name}"
     end
-
-    DefaultRestServicePort = 7000
 
     def create_branch_instance(repo,branch,opts={})
       BranchInstance.new(@rest_base_url,repo,branch,opts)
@@ -197,7 +173,6 @@ module DTK
 
       post_rest_request_data(route,body,:raise_error => true)
     end
-
 
     def get_module_info(params_hash)
       route = collection_route_from_type(params_hash) + '/module_info'

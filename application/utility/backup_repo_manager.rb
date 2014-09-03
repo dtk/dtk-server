@@ -30,7 +30,7 @@ pp [:remote_modules,remote_modules]
 
 remote_modules.each do |repo_name|
   # TODO: below is no-op if repo exsits; so if different user the specfied users rights not included; so have explicit set users rights
-  mirror_client.create_repo(username,repo_name,"RW+") 
+  mirror_client.create_repo(username,repo_name,"RW+")
   mirror_client.set_user_rights_in_repo(username,repo_name,"RW+")
 
   pp "created or found mirror_repo  #{repo_name}"

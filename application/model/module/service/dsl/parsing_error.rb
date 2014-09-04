@@ -1,6 +1,7 @@
 module DTK
   class ServiceModule 
     class ParsingError < ErrorUsage::Parsing
+      r8_nested_require('parsing_error','aggregate')
       r8_nested_require('parsing_error','dangling_component_refs')
       r8_nested_require('parsing_error','bad_component_link')
 

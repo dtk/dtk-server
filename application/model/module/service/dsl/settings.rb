@@ -10,9 +10,9 @@ module DTK
       def create_setting_objects_from_dsl(project_idh,module_branch)
         ret = nil
         settings_to_add = Hash.new
-        dangling_errors = ParsingError::DanglingComponentRefs::Aggregate.new(:error_cleanup => proc{error_cleanup()})
+        aggregate_errors = ParsingError::Aggregate.new(:error_cleanup => proc{error_cleanup()})
         setting_meta_file_paths(module_branch) do |meta_file,assembly_name|
-          dangling_errors.aggregate_errors!()  do
+          aggregate_errors.aggregate_errors!()  do
             file_content = RepoManager.get_file_content(meta_file,module_branch)
             format_type = meta_file_format_type(meta_file)
             hash_content = Aux.convert_to_hash(file_content,format_type,:file_path => meta_file)||{}
@@ -20,7 +20,7 @@ module DTK
             (settings_to_add[assembly_name] ||= Array.new) << hash_content
           end
         end
-        if errors = dangling_errors.raise_error?(:do_not_raise => true)
+        if errors = aggregate_errors.raise_error?(:do_not_raise => true)
           return errors
         end
         return ret if settings_to_add.empty?

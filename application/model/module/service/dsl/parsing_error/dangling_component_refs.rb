@@ -1,11 +1,15 @@
 module DTK; class ServiceModule
   class ParsingError
-    # TODO: Think below can just be DanglingComponentRefs < self
-    class ParsingError::DanglingComponentRefs < self
+    class DanglingComponentRefs < self
+      attr_reader :cmp_ref_info_list
       def initialize(cmp_ref_info_list,opts={})
         super(err_msg(cmp_ref_info_list),opts)
         # each element can be a component ref object or a hash
         @cmp_ref_info_list = cmp_ref_info_list 
+      end
+
+      def add_error_opts(error_opts={})
+        error_opts.empty? ? self : self.class.new(@cmp_ref_info_list,error_opts)
       end
 
       #
@@ -28,52 +32,31 @@ module DTK; class ServiceModule
         module_hash.values
       end
       
-      attr_reader :cmp_ref_info_list
-      
-      class Aggregate 
-        def initialize(opts={})
-          @cmp_ref_info_list = Array.new
-          @error_cleanup = opts[:error_cleanup]
+      # aggregate_error can be nil, a anglingComponentRefs error or other error
+      def add_with(aggregate_error=nil)
+        if aggregate_error.nil?
+          self
+        elsif aggregate_error.kind_of?(DanglingComponentRefs)
+          self.class.new(ret_unique_union(@cmp_ref_info_list,aggregate_error.cmp_ref_info_list))
+        else
+          super
         end
-        
-        def aggregate_errors!(ret_when_err=nil,&block)
-          begin
-            yield
-          rescue ParsingError::DanglingComponentRefs => e
-            @cmp_ref_info_list = ret_unique_union(@cmp_ref_info_list,e.cmp_ref_info_list)
-            ret_when_err
-          rescue Exception => e
-            @error_cleanup.call() if @error_cleanup
-            raise e
-          end
-        end
-        
-        def raise_error?(opts={})
-          unless @cmp_ref_info_list.empty?()
-            @error_cleanup.call() if @error_cleanup
-            opts_err = Opts.new(:log_error => false)
-            return ParsingError::DanglingComponentRefs.new(@cmp_ref_info_list,opts_err) if opts[:do_not_raise]
-            raise ParsingError::DanglingComponentRefs.new(@cmp_ref_info_list,opts_err)
-          end
-        end
-        
-        private
-        def ret_unique_union(cmp_refs1,cmp_refs2)
-          ndx_ret = cmp_refs1.inject(Hash.new){|h,r|h.merge(ret_unique_union__ndx(r) => r)}
-          cmp_refs2.inject(ndx_ret){|h,r|h.merge(ret_unique_union__ndx(r) => r)}.values
-        end
-        
-        def ret_unique_union__ndx(cmp_ref_info)
-          ret = cmp_ref_info[:component_type]
-          if version = cmp_ref_info[:version]
-            ret = "#{ret}(#{version})"
-          end
-          ret
-        end
-        
       end
 
      private
+      def ret_unique_union(cmp_refs1,cmp_refs2)
+        ndx_ret = cmp_refs1.inject(Hash.new){|h,r|h.merge(ret_unique_union__ndx(r) => r)}
+        cmp_refs2.inject(ndx_ret){|h,r|h.merge(ret_unique_union__ndx(r) => r)}.values
+      end
+      
+      def ret_unique_union__ndx(cmp_ref_info)
+        ret = cmp_ref_info[:component_type]
+        if version = cmp_ref_info[:version]
+          ret = "#{ret}(#{version})"
+        end
+        ret
+      end
+
       def err_msg(cmp_ref_info_list)
         what = (cmp_ref_info_list.size==1 ? "component template" : "component templates")
         refs = cmp_ref_info_list.map{|cmp_ref_info|print_form(cmp_ref_info)}.compact.join(",")

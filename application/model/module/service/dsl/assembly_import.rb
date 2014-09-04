@@ -23,12 +23,12 @@ module DTK; class ServiceModule
       integer_version = determine_integer_version(hash_content,opts)
       version_proc_class = load_and_return_version_adapter_class(integer_version)
       version_proc_class.assembly_iterate(@service_module,hash_content) do |assemblies_hash,node_bindings_hash|
-        dangling_errors = ParsingError::DanglingComponentRefs::Aggregate.new()
+        aggregate_errors = ParsingError::Aggregate.new()
         assemblies_hash.each do |ref,assem|
           if file_path = opts[:file_path]
             @ndx_assembly_file_paths[ref] = file_path
           end
-          dangling_errors.aggregate_errors! do
+          aggregate_errors.aggregate_errors! do
             db_updates_cmp = version_proc_class.import_assembly_top(ref,assem,@module_branch,@module_name,opts)
             @db_updates_assemblies["component"].merge!(db_updates_cmp)
 
@@ -52,7 +52,7 @@ module DTK; class ServiceModule
             @ndx_version_proc_classes[ref] ||= version_proc_class
           end
         end
-        dangling_errors.raise_error?()
+        aggregate_errors.raise_error?()
       end
     end
 
@@ -106,12 +106,12 @@ module DTK; class ServiceModule
         end
       end
 
-      dangling_errors = ParsingError::DanglingComponentRefs::Aggregate.new()
+      aggregate_errors = ParsingError::Aggregate.new()
       unless assembly_hash["nodes"]
         return Hash.new
       end
       ret = assembly_hash["nodes"].inject(Hash.new) do |h,(node_hash_ref,node_hash)|
-        dangling_errors.aggregate_errors!(h) do
+        aggregate_errors.aggregate_errors!(h) do
           node_ref = assembly_template_node_ref(assembly_ref,node_hash_ref)
           type,attributes = import_type_and_node_attributes(node_hash,opts)
           node_output = {
@@ -124,7 +124,7 @@ module DTK; class ServiceModule
             if nb_rs_id = nb_rs_to_id[nb_rs]
               node_output["node_binding_rs_id"] = nb_rs_id
             else
-              # TODO: extend dangling_errors.aggregate_errors to handle this
+              # TODO: extend aggregate_errors.aggregate_errors to handle this
               # We want to import module still even if there are bad node references
               # we stop importing nodes when run into bad node reference but still continue with module import
               return ParsingError::BadNodeReference.new(:node_template => nb_rs,:assembly => assembly_hash["name"])
@@ -143,7 +143,7 @@ module DTK; class ServiceModule
         end
       end
 
-      dangling_errors.raise_error?()
+      aggregate_errors.raise_error?()
       ret
     end
 
@@ -327,7 +327,7 @@ module DTK; class ServiceModule
         end
       end
       unless bad_attrs.empty?
-        # TODO: extend dangling_errors.aggregate_errors to handle this
+        # TODO: extend aggregate_errors.aggregate_errors to handle this
         bad_attrs_list = bad_attrs.map do |attr_info|
           cmp_name = Component.display_name_print_form(attr_info[:component_display_name])          
           "#{cmp_name}/#{attr_info[:display_name]}"

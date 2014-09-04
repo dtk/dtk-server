@@ -141,7 +141,7 @@ module DTK
           end
         end
         errors = aggregate_errors.raise_error?(:do_not_raise => true)
-        return errors if errors.is_a?(ParsingError::DanglingComponentRefs)
+        return errors if errors.is_a?(ParsingError)
 
         imported = assembly_import_helper.import()
 

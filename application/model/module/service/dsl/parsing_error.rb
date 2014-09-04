@@ -5,6 +5,14 @@ module DTK
       r8_nested_require('parsing_error','dangling_component_refs')
       r8_nested_require('parsing_error','bad_component_link')
 
+      # These can be ovewritten; default is simple behavior that ignores new errors (reports first one)
+      def add_with(aggregate_error=nil)
+        aggregate_error || self
+      end
+      def add_error_opts(error_opts=Opts.new)
+        self
+      end
+
       class BadNodeReference < self
         def initialize(params={})
           err_msg = "Bad node template (?node_template) in assembly '?assembly'"

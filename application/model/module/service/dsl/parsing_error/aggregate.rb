@@ -10,7 +10,10 @@ module DTK; class ServiceModule
         begin
           yield
          rescue DanglingComponentRefs => e
-          @aggregate_error = e.union_in(@aggregate_error)
+          @aggregate_error = e.add_with(@aggregate_error)
+          ret_when_err
+         rescue AmbiguousModuleRef => e
+          @aggregate_error = e.add_with(@aggregate_error)
           ret_when_err
          rescue Exception => e
           @error_cleanup.call() if @error_cleanup

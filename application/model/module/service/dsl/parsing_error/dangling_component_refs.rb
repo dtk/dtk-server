@@ -32,15 +32,14 @@ module DTK; class ServiceModule
         module_hash.values
       end
       
-      # error can be nil, a anglingComponentRefs error or other error
-      # TODO: not best solution but simplest if have another error we will just ignore it
-      def union_in(error=nil)
-        if error.nil?
+      # aggregate_error can be nil, a anglingComponentRefs error or other error
+      def add_with(aggregate_error=nil)
+        if aggregate_error.nil?
           self
-        elsif error.kind_of?(DanglingComponentRefs)
-          self.class.new(ret_unique_union(@cmp_ref_info_list,e.cmp_ref_info_list))
+        elsif aggregate_error.kind_of?(DanglingComponentRefs)
+          self.class.new(ret_unique_union(@cmp_ref_info_list,aggregate_error.cmp_ref_info_list))
         else
-          self
+          super
         end
       end
 

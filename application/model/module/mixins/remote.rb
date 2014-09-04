@@ -87,12 +87,8 @@ module DTK; module ModuleMixins
 
       # unlink any local repos that were linked to this remote module
       local_module_name = remote.module_name
-      sp_hash = {
-        :cols => [:id,:display_name],
-        :filter => [:and, [:eq, :display_name, local_module_name], [:eq, :project_project_id,project[:id]]]
-      }
-
-      if module_obj = get_obj(project.model_handle(model_type),sp_hash)
+      local_namespace = remote.namespace # TODO: is this right?
+      if module_obj = module_exists?(project.id_handle(),local_module_name, local_namespace)
         repos = module_obj.get_repos().uniq()
         # TODO: ModuleBranch::Location: below looks broken
         # module_obj.get_repos().each do |repo|
@@ -104,7 +100,7 @@ module DTK; module ModuleMixins
 
           repo.unlink_remote(remote)
 
-          ::DTK::RepoRemote.delete_repos([repo_remote_db.id_handle()])
+          RepoRemote.delete_repos([repo_remote_db.id_handle()])
         end
       end
       nil

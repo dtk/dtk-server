@@ -74,7 +74,7 @@ module DTK; module ModuleMixins
         }
       input_hash_content_into_model(project_idh,create_hash)
 
-      module_branch = get_module_branch_from_local(local,:with_namespace=>true)
+      module_branch = get_module_branch_from_local(local)
       module_idh =  project_idh.createIDH(:model_name => model_name(),:id => module_branch[:module_id])
       # TODO: ModuleBranch::Location: see if after refactor version field needed
       # TODO: ModuleBranch::Location: ones that come from local can be omitted

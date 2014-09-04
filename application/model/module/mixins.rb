@@ -18,8 +18,8 @@ module DTK
     include ModuleMixins::Create::Instance
     include ModuleMixins::Gitolite
 
-    def get_module_branch_from_local_params(local_params,opts={})
-      self.class.get_module_branch_from_local(local_params.create_local(get_project()),opts)
+    def get_module_branch_from_local_params(local_params)
+      self.class.get_module_branch_from_local(local_params.create_local(get_project()))
     end
 
     def get_module_branches()
@@ -158,7 +158,7 @@ module DTK
 
       # aggregate by remote_namespace, filtering by remote_namespace if remote_namespace is given
       unless module_obj = aggregate_by_remote_namespace(module_rows,opts)
-        raise ErrorUsage.new("There is no module (#{pp_module_name(version)}) with namespace '#{opts[:filter][:remote_namespace]}' registered on server")
+        raise ErrorUsage.new("The module (#{pp_module_name(version)}) is not tied to namespace '#{opts[:filter][:remote_namespace]}' on the repo manager")
       end
 
       ret = module_obj[:module_branch].merge(:repo => module_obj[:repo],:module_name => module_obj[:display_name], :module_namespace => module_obj[:namespace][:display_name])
@@ -318,12 +318,14 @@ module DTK
       namespace = (opts[:filter]||{})[:remote_namespace]
 
       repo_remotes = raw_module_rows.map do |e|
-        repo_remote = e.delete(:repo_remote)
-        if namespace.nil? or namespace == repo_remote[:repo_namespace]
-          repo_remote
+        if repo_remote = e.delete(:repo_remote)
+          if namespace.nil? or namespace == repo_remote[:repo_namespace]
+            repo_remote
+          end
         end
       end.compact
       # if filtering by namespace (tested by namespace is non-null) and nothing matched then return ret (which is nil)
+      # TODO: should we return nil when just repo_remotes.empty?
       if namespace and repo_remotes.empty?
         return ret
       end
@@ -544,17 +546,17 @@ module DTK
     end
     private :module_specific_type
 
-    def get_module_branch_from_local(local,opts={})
+    def get_module_branch_from_local(local)
       project = local.project()
       project_idh = project.id_handle()
       module_match_filter =
-        (opts[:with_namespace] ?
+        (local.module_namespace_name() ?
          [:eq, :ref, local.module_name(:with_namespace=>true)] :
          [:eq, :display_name, local.module_name])
       filter = [:and, module_match_filter, [:eq, :project_project_id, project_idh.get_id()]]
       branch = local.branch_name()
       post_filter = proc{|mb|mb[:branch] == branch}
-      matches = get_matching_module_branches(project_idh,filter,post_filter,opts)
+      matches = get_matching_module_branches(project_idh,filter,post_filter)
       if matches.size == 0
         nil
       elsif matches.size == 1

@@ -23,6 +23,7 @@ module DTK
         :version? => version,
         :module_namespace => module_namespace
       )
+
       module_repo_info = ComponentModule.create_module(project,module_name,opts)[:module_repo_info]
       rest_ok_response module_repo_info
     end

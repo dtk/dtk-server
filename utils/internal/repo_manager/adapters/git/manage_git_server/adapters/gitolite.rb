@@ -1,9 +1,14 @@
 require 'erubis'
 module DTK
   class ManageGitServerGitolite < ManageGitServer
+
+    ALLOWED_CHARACTERS = /[a-zA-Z0-9\-]*/
+
     class << self
       def create_server_repo(repo_obj,repo_user_acls,opts={})
         ret = repo_name = repo_obj[:repo_name]
+
+        validate_repo_module_name!(repo_name)
         if repos_having_config_files().include?(repo_name)
           if opts[:delete_if_exists]
             delete_server_repo(repo_name)
@@ -160,16 +165,20 @@ module DTK
       def repo_config_relative_path()
         "conf/repo-configs"
       end
+
       def repo_config_directory()
         "#{admin_directory}/#{repo_config_relative_path}"
       end
+
       def repo_config_files()
         return Array.new unless File.directory?(repo_config_directory)
         Dir.chdir(repo_config_directory){Dir["*.conf"]}
       end
+
       def repos_having_config_files()
         repo_config_files().map{|fn|fn.gsub(/\.conf/,"")}
       end
+
       def repo_config_file_relative_path(repo_name)
         "#{repo_config_relative_path}/#{repo_name}.conf"
       end
@@ -203,6 +212,12 @@ module DTK
           end
         end
         ret
+      end
+
+      def validate_repo_module_name!(repo_name)
+        unless repo_name.eql? repo_name.match(ALLOWED_CHARACTERS)[0]
+          raise Error.new("Illegal characters used in gitolite repo name (#{repo_name}). Letters, numbers and dashes only allowed.")
+        end
       end
 
       def generate_config_file_content(repo_name,repo_user_acls)

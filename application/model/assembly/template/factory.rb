@@ -47,7 +47,11 @@ module DTK
         local_params = ModuleBranch::Location::LocalParams::Server.new(
           :module_type => :service_module,
           :module_name => service_module_name,
-          :module_namespace => service_module.module_namespace(),
+          # :module_namespace => service_module.module_namespace(),
+          # changed module_namespace to namespace because getting error message error: [#<XYZ::Error: Illegal key(s): module_namespace>
+          # when do service/service_name> create-assembly
+          # revert if breaks anything
+          :namespace => service_module.module_namespace(),
           :version => opts[:version]
         )
         service_module_branch = service_module.get_module_branch_from_local_params(local_params)

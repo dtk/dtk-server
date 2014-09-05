@@ -1,24 +1,27 @@
 module DTK; class ModuleRef
   class VersionInfo
 
-    DEFAULT_VERSION = nil
+    DEFAULT_VERSION = "master"
 
     class Assignment < self
       def initialize(version_string)
         @version_string = version_string
       end
 
-      attr_reader :version_string      
+      attr_reader :version_string
 
       def self.reify?(object)
-        version_string = 
-          if object.kind_of?(String) 
-            ModuleVersion.string_master_or_empty?(object) ? DEFAULT_VERSION : object
-          elsif object.kind_of?(ModuleRef) 
+        version_string =
+          if object.kind_of?(String)
+            object
+          elsif object.kind_of?(ModuleRef)
             object[:version_info]
           end
-        if version_string 
-          if ModuleVersion::Semantic.legal_format?(version_string)
+
+        version_string = ModuleVersion.string_master_or_empty?(version_string) ? DEFAULT_VERSION : version_string
+
+        if version_string
+          if ModuleVersion::Semantic.legal_format?(version_string) || version_string.eql?(DEFAULT_VERSION)
             new(version_string)
           else
             raise Error.new("Unexpected form of version string (#{version_string})")
@@ -52,7 +55,7 @@ module DTK; class ModuleRef
           raise Error.new("Constraint of form (#{constraint.inspect}) not treated")
         end
       end
-      
+
       def include?(version)
         case @type
         when :empty
@@ -69,20 +72,20 @@ module DTK; class ModuleRef
       def empty?()
         @type == :empty
       end
-      
+
       def to_s()
         case @type
         when :scalar
           @value.to_s
         end
       end
-      
+
      private
       def initialize(scalar=nil)
         @type = (scalar ? :scalar : :empty)
         @value = scalar
       end
-      
+
     end
   end
 end; end

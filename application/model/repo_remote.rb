@@ -49,10 +49,10 @@ module DTK
     def self.get_remote_repo(repo_remote_mh,repo_id, module_name, repo_namespace)
       matches = get_matching_remote_repos(repo_remote_mh,repo_id, module_name, repo_namespace)
       if matches.size > 1
-        raise Error.new("Unexpected to have multiple matches in get_remote_repo (#{matches.map{|r|r[:display_name]}.join(',')})")
-      else
-        matches.first
+        Log.error("Unexpected to have multiple matches in get_remote_repo (#{matches.inspect})")
+        # will pick first one
       end
+      matches.first
     end
     def self.get_matching_remote_repos(repo_remote_mh,repo_id, module_name, repo_namespace=nil)
       sp_hash = {
@@ -72,13 +72,9 @@ module DTK
     end
 
     def self.create_repo_remote?(repo_remote_mh, module_name, repo_name, repo_namespace, repo_id)
-      repo_remote = get_remote_repo(repo_remote_mh, repo_id, module_name, repo_namespace)
-      unless repo_remote
-        repo_remote = create_repo_remote(repo_remote_mh, module_name, repo_name, repo_namespace, repo_id)
-      end
-      repo_remote
+      get_remote_repo(repo_remote_mh, repo_id, module_name, repo_namespace) ||
+      create_repo_remote(repo_remote_mh, module_name, repo_name, repo_namespace, repo_id)
     end
-
 
     def remote_dtkn_location(project,module_type,module_name)
       remote_params = ModuleBranch::Location::RemoteParams::DTKNCatalog.new(

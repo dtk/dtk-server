@@ -226,7 +226,7 @@ lambda__instance_nodes_components_assembly_template =
       ]
     },
     :instance_nodes_and_cmps=> lambda__instance_nodes_components_assembly_template.call(Node.common_columns,Component.common_columns),
-    :instance_nodes_and_cmps_summary=> {
+    :instance_nodes_and_cmps_summary_with_namespace=> {
       :type=>:json,
       :hidden=>true,
       :remote_dependencies=>
@@ -262,6 +262,23 @@ lambda__instance_nodes_components_assembly_template =
          :join_type=>:inner,
          :join_cond=>{:id=>:component_module__namespace_id},
          :cols => [:id,:display_name]
+       }]
+    },
+    :instance_nodes_and_cmps_summary=> {
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>
+        lambda__segments_nodes_components_assembly_template.call(
+          [:id,:display_name,:os_type,:admin_op_status,:external_ref],
+          [:id,:display_name,:component_type,:basic_type,:extended_base,:description,:version,:module_branch_id]
+        ) +
+      [{
+         :model_name=>:datacenter,
+         :alias => :target,
+         :convert => true,
+         :join_type=>:left_outer,
+         :join_cond=>{:id=>:component__datacenter_datacenter_id},
+         :cols => [:id,:group_id,:display_name]
        }]
     },
     :instance_component_list=> lambda__instance_nodes_and_components.call(Node::Instance.component_list_fields(),Component::Instance.component_list_fields()),

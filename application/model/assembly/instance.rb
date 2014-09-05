@@ -197,7 +197,7 @@ module DTK; class  Assembly
 
     def get_augmented_components(opts=Opts.new)
       ret = Array.new
-      rows = get_objs(:cols => [:instance_nodes_and_cmps_summary])
+      rows = get_objs(:cols => [:instance_nodes_and_cmps_summary_with_namespace])
       if opts[:filter_proc]
         rows.reject!{|r|!opts[:filter_proc].call(r)}
       elsif opts[:filter_component] != ""

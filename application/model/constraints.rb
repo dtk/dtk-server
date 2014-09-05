@@ -121,8 +121,9 @@ module XYZ
 
     module Macro
       def self.only_one_per_node(component_type)
+        user_friendly_type = Component.display_name_print_form(component_type)
         dep = {
-          :description => "Only one component of type #{component_type} can be on a node",
+          :description => "Only one component of type #{user_friendly_type} can be on a node",
           :severity => "error",
           :negate => true,
           :search_pattern => {

@@ -1,7 +1,7 @@
 module DTK; class ModuleRef
   class VersionInfo
 
-    DEFAULT_VERSION = "master"
+    DEFAULT_VERSION = nil
 
     class Assignment < self
       def initialize(version_string)
@@ -13,16 +13,14 @@ module DTK; class ModuleRef
       def self.reify?(object)
         version_string =
           if object.kind_of?(String)
-            object
+            ModuleVersion.string_master_or_empty?(object) ? DEFAULT_VERSION : object
           elsif object.kind_of?(ModuleRef)
             object[:version_info]
           end
 
-        version_string = ModuleVersion.string_master_or_empty?(version_string) ? DEFAULT_VERSION : version_string
-
-        if version_string
-          if ModuleVersion::Semantic.legal_format?(version_string) || version_string.eql?(DEFAULT_VERSION)
-            new(version_string)
+         if version_string 
+           if ModuleVersion::Semantic.legal_format?(version_string)  
+             new(version_string)
           else
             raise Error.new("Unexpected form of version string (#{version_string})")
           end

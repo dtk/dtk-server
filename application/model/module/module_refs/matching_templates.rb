@@ -84,8 +84,8 @@ module DTK
                 el[:pntr][:component_template] = cmp_template
               end
             elsif el[:required]
-              # This will not be raeched because if error then an error wil be raised by get_component_type_to_template_mappings? call
-             Log.error("TODO: may put back in logic to accruse errors; until then this should not be reached")
+              # TODO: This should not be reached because if error then an error wil be raised by get_component_type_to_template_mappings? call
+             Log.error("TODO: may put back in logic to accrue errors; until then this should not be reached")
 #              cmp_ref = {
 #                :component_type => cmp_type, 
 #                :version => cmp_type_info[:version]
@@ -97,6 +97,7 @@ module DTK
         unless reference_errors.empty?
           raise ServiceModule::ParsingError::DanglingComponentRefs.new(reference_errors) 
         end
+        update_module_refs_dsl?(mappings)
         ret
       end
 
@@ -126,21 +127,106 @@ module DTK
         ret
       end
 
+      def update_module_refs_dsl?(cmp_type_to_template_mappings)
+        module_name_to_ns = Hash.new
+        cmp_type_to_template_mappings.each do |cmp_type,cmp_info|
+          module_name = module_name(cmp_type)
+          unless module_name_to_ns[module_name] 
+            if namespace = (cmp_info[:component_template]||{})[:namespace]
+              module_name_to_ns[module_name] = namespace
+            end
+          end
+        end
+        module_name_to_ns.each do |cmp_module_name,namespace|
+          if component_module_ref = component_module_ref?(cmp_module_name)
+            unless component_module_ref.namespace() == namespace
+              raise Error.new("Unexpected that at this point component_module_ref.namespace() (#{component_module_ref.namespace()}) unequal to namespace (#{namespace})")
+            end
+          else
+            Log.info("TODO: write code to update dsl file with: #{cmp_module_name} -> #{namespace}")
+          end
+        end
+      end
+
       def version_string?(component_type)
-        if cmp_module_ref = component_module_ref?(component_type)
+        if cmp_module_ref = component_types_module_ref?(component_type)
           cmp_module_ref.version_string()
         end
       end
 
       def namespace?(component_type)
-        if cmp_module_ref = component_module_ref?(component_type)
+        if cmp_module_ref = component_types_module_ref?(component_type)
           cmp_module_ref.namespace()
         end
       end
+      
+      def module_name(component_type)
+        Component.module_name(component_type)
+      end
 
-      def component_module_ref?(component_type)
-        component_modules[key(Component.module_name(component_type))]
+      def component_types_module_ref?(component_type)
+        component_module_ref?(module_name(component_type))
       end
     end
   end
 end
+
+=begin
+{"bigtop_base"=>
+  {:component_type=>"bigtop_base",
+   :version_field=>"master",
+   :namespace=>"bigtop",
+   :component_template=>
+    {:id=>2147627627,
+     :group_id=>2147621535,
+     :component_type=>"bigtop_base",
+     :version=>"master",
+     :implementation_id=>2147627620,
+     :namespace=>"bigtop"}},
+ "hadoop_zookeeper__server_single_node"=>
+  {:component_type=>"hadoop_zookeeper__server_single_node",
+   :version_field=>"master",
+   :namespace=>"rich",
+   :component_template=>
+    {:id=>2147636032,
+     :group_id=>2147621535,
+     :component_type=>"hadoop_zookeeper__server_single_node",
+     :version=>"master",
+     :implementation_id=>2147636022,
+     :namespace=>"rich"}},
+ "fluentd"=>
+  {:component_type=>"fluentd",
+   :version_field=>"master",
+   :component_template=>
+    {:id=>2147635677,
+     :group_id=>2147621535,
+     :component_type=>"fluentd",
+     :version=>"master",
+     :implementation_id=>2147635607,
+     :namespace=>"rich"}},
+ "kafka__broker"=>
+  {:component_type=>"kafka__broker",
+   :version_field=>"master",
+   :namespace=>"rich",
+   :component_template=>
+    {:id=>2147634752,
+     :group_id=>2147621535,
+     :component_type=>"kafka__broker",
+     :version=>"master",
+     :implementation_id=>2147634703,
+     :namespace=>"rich"}}}
+#<XYZ::ModuleRefs:0x00000004e98028
+ @component_modules=
+  {:bigtop_base=>
+    {:module_name=>"bigtop_base",
+     :module_type=>"component",
+     :namespace_info=>"bigtop"},
+   :hadoop_zookeeper=>
+    {:module_name=>"hadoop_zookeeper",
+     :module_type=>"component",
+     :namespace_info=>"rich"},
+   :kafka=>
+    {:module_name=>"kafka",
+     :module_type=>"component",
+     :namespace_info=>"rich"}},
+=end

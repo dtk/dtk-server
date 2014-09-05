@@ -11,7 +11,7 @@ module DTK
       end
       new(branch,content_hash_content)
     end
-    
+
     def version_objs_indexed_by_modules()
       ret = Hash.new
       component_modules.each_pair do |mod,cmr|
@@ -42,7 +42,7 @@ module DTK
     attr_reader :component_modules
                                                                           
     def has_module_version?(cmp_module_name,version_string)
-      if cmp_module_ref = ret_component_module_ref(cmp_module_name)
+      if cmp_module_ref = component_module_ref?(cmp_module_name)
         cmp_module_ref.version_string() == version_string
       end
     end
@@ -73,7 +73,7 @@ module DTK
     end
 
    private
-    def ret_component_module_ref(cmp_module_name)
+    def component_module_ref?(cmp_module_name)
       @component_modules[key(cmp_module_name)]
     end
 

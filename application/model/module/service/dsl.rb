@@ -95,7 +95,11 @@ module DTK
         return component_module_refs if ParsingError.is_error?(component_module_refs)
 
         parsed = update_assemblies_from_dsl(module_branch,component_module_refs,opts)
-        set_dsl_parsed!(true) unless ParsingError.is_error?(parsed)
+        return parsed if ParsingError.is_error?(parsed)
+        unless opts[:donot_make_repo_changes]
+          ModuleRefs.serialize_and_save_to_repo(module_branch)
+        end
+        set_dsl_parsed!(true)
         parsed
       end
 
@@ -108,7 +112,7 @@ module DTK
             DSLParser::Output.new(:component_module_refs,legacy_component_module_refs_parsed_info(module_branch,opts))
           end
         return parsed_info if ParsingError.is_error?(parsed_info)
-        ModuleRefs::Parse.update_from_dsl_parsed_info(module_branch,parsed_info,opts)
+        ModuleRefs::Parse.update_from_dsl_parsed_info(module_branch,parsed_info)
       end
 
       # TODO: deprecate when DSLParser methods stable

@@ -1,9 +1,9 @@
 module DTK
   class ModuleRefs
     class Parse < self
-      def self.update_from_dsl_parsed_info(branch,parsed_info,opts={})
+      def self.update_from_dsl_parsed_info(branch,parsed_info)
         content_hash_content = reify_content(branch.model_handle(:model_ref),parsed_info)
-        update(branch,content_hash_content,opts)
+        update(branch,content_hash_content)
         ModuleRefs.new(branch,content_hash_content,:content_hash_form_is_reified => true)
       end
 

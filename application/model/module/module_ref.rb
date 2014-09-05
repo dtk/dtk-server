@@ -35,24 +35,40 @@ module DTK
       get_objs(mh,sp_hash)
     end
 
-    def self.create_or_update(parent,component_module_refs)
-      return if component_module_refs.empty?
+    def self.update(operation,parent,module_ref_hash_array)
+      return if module_ref_hash_array.empty?
+      rows = ret_create_rows(parent,module_ref_hash_array)
+      model_handle = parent.model_handle.create_childMH(:module_ref)
+      case operation
+       when :create_or_update
+        matching_cols = [:module_name]
+        modify_children_from_rows(model_handle,parent.id_handle(),rows,matching_cols,:update_matching => true)
+       when :add
+        create_from_rows(model_handle,rows)
+       else
+        raise Error.new("Unexpected operation (#{operation})")
+      end
+    end
+
+    def self.ret_create_rows(parent,module_ref_hash_array)
+      return if module_ref_hash_array.empty?
       parent_id_assigns = {
         parent.parent_id_field_name(:module_ref) => parent.id()
       }
-      rows = component_module_refs.values.map do |cmr_hash|
+      module_ref_hash_array.map do |module_ref_hash|
         assigns = 
-          if version_info = cmr_hash[:version_info]
+          if version_info = module_ref_hash[:version_info]
             parent_id_assigns.merge(:version_info => version_info.to_s)
           else
             assigns = parent_id_assigns
           end
-        Aux.hash_subset(cmr_hash,[:module_name,:module_type,:namespace_info]).merge(assigns)
+        el = Aux.hash_subset(module_ref_hash,[:ref,:display_name,:module_name,:module_type,:namespace_info]).merge(assigns)
+        el[:display_name] ||= display_name(el)
+        el[:ref] ||= ref(el)
+        el
       end
-      model_handle = parent.model_handle(:module_ref)
-      matching_cols = [:module_name]
-      modify_children_from_rows(model_handle,parent.id_handle(),rows,matching_cols,:update_matching => true)
     end
+    private_class_method :ret_create_rows
 
     def version_string()
       self[:version_info] && self[:version_info].version_string()
@@ -79,5 +95,24 @@ module DTK
       ret
     end
     DSLHashCols = [:version_info,{:namespace_info => :namespace}]
+
+   private
+    def self.display_name(module_ref_hash)
+      [:module_name].each do |key|
+        if module_ref_hash[key].nil?
+          raise Error.new("Unexpected that module_ref_hash[#{key}] is nil")
+        end
+      end
+      module_ref_hash[:module_name]
+    end
+    
+    def self.ref(module_ref_hash)
+      [:module_type,:module_name].each do |key|
+        if module_ref_hash[key].nil?
+          raise Error.new("Unexpected that module_ref_hash[#{key}] is nil")
+        end
+      end
+      "#{module_ref_hash[:module_type]}--#{module_ref_hash[:module_name]}"
+    end
   end
 end

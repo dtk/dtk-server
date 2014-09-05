@@ -98,12 +98,13 @@ module DTK
       @meta_filename_path
     end
 
-    def self.update(parent,cmp_modules,opts={})
-      ModuleRef.create_or_update(parent,cmp_modules)
-      unless opts[:donot_make_repo_changes]
-        meta_filename_path = meta_filename_path()
-        parent.serialize_and_save_to_repo(meta_filename_path,dsl_hash_form(parent))
-      end
+    def self.update(parent,cmp_modules)
+      ModuleRef.update(:create_or_update,parent,cmp_modules.values)
+    end
+
+    def self.serialize_and_save_to_repo(parent)
+      meta_filename_path = meta_filename_path()
+      parent.serialize_and_save_to_repo(meta_filename_path,dsl_hash_form(parent))
     end
 
     def self.dsl_hash_form(service_module_branch)

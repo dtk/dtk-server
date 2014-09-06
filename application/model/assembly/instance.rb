@@ -586,30 +586,38 @@ module DTK; class  Assembly
 
     def get_attributes_all_levels()
       assembly_attrs = get_assembly_level_attributes()
-      # TODO: more efficient is they do not need to be augmenetd
       component_attrs = get_augmented_nested_component_attributes()
       node_attrs = get_augmented_node_attributes()
       assembly_attrs + component_attrs + node_attrs
     end
 
-    def get_attributes_print_form_aux(opts={})
+    def get_attributes_print_form_aux(opts=Opts.new)
+      raw_attrs = get_attributes_raw_print_form(opts)
       filter_proc = opts[:filter_proc]
-      assembly_attrs = get_assembly_level_attributes(filter_proc).map do |attr|
+      assembly_attrs = raw_attrs.assembly_attrs.map do |attr|
         attr.print_form(opts.merge(:level => :assembly))
       end
 
-      raw_cmp_attrs = get_augmented_nested_component_attributes(filter_proc).reject do |attr|
-        (not attr[:nested_component].get_field?(:only_one_per_node)) and attr.is_title_attribute?()
-      end
-      component_attrs = Attribute.print_form(raw_cmp_attrs,opts.merge(:level => :component,:assembly => self))
+      opts_attr = opts.merge(:level => :component,:assembly => self)
+      component_attrs = Attribute.print_form(raw_attrs.component_attrs,opts_attr)
 
-      node_attrs = get_augmented_node_attributes(filter_proc).map do |aug_attr|
+      node_attrs = raw_attrs.node_attrs.map do |aug_attr|
         aug_attr.print_form(opts.merge(:level => :node))
       end
-
       (assembly_attrs + node_attrs + component_attrs).sort{|a,b|a[:display_name] <=> b[:display_name]}
     end
     private :get_attributes_print_form_aux
+
+    AttributesRawPrintForm = Struct.new(:assembly_attrs,:component_attrs,:node_attrs)
+    def get_attributes_raw_print_form(opts=Opts.new)
+      filter_proc = opts[:filter_proc]
+      assembly_attrs = get_assembly_level_attributes(filter_proc)
+      component_atttrs = get_augmented_nested_component_attributes(filter_proc).reject do |attr|
+        (not attr[:nested_component].get_field?(:only_one_per_node)) and attr.is_title_attribute?()
+      end
+      node_attrs = get_augmented_node_attributes(filter_proc)
+      AttributesRawPrintForm.new(assembly_attrs,component_atttrs,node_attrs)
+    end
 
     def self.check_valid_id(model_handle,id)
       filter =

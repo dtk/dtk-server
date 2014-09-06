@@ -1,6 +1,11 @@
 module DTK
   class ServiceSetting
     class AttributeSettings < Array
+      def self.get_and_render_in_hash_form(assembly,opts={})
+        attrs = assembly.get_attributes_raw_print_form(opts)
+        render_in_hash_form(attrs)
+      end
+
       def apply_settings(assembly)
         av_pairs = map{|el|el.av_pair_form()}
         assembly.set_attributes(av_pairs)
@@ -20,6 +25,11 @@ module DTK
       end
       ContextDelim = '/'
      private
+
+      def self.render_in_hash_form(attrs_raw_print_form)
+        pp attrs_raw_print_form
+        raise Error.new('got here')
+      end
       def self.compose_attr(attr_prefix,attr_part)
         attr_prefix ? "#{attr_prefix}#{AttrPartDelim}#{attr_part}" : attr_part.to_s
       end

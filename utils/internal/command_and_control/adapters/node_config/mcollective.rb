@@ -138,7 +138,7 @@ module DTK
         async_agent_call("git_access","add_rsa_info",params,filter,callbacks,context)
       end
 
-      DefaultTimeoutAuthNode = 5
+      DefaultTimeoutAuthNode = 60
 
       # TODO: change signature to poll_to_detect_node_ready(node,callbacks,context)
       def self.poll_to_detect_node_ready(node,opts)

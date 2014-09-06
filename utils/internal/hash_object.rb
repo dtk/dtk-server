@@ -63,14 +63,14 @@ module DTK
     end
   end
 
-  simple_orederd_hash_parent =
+  simple_ordered_hash_parent =
     if RUBY_VERSION =~ /^1\.9/ then ::Hash
     else
       require 'active_support/ordered_hash'
       ::ActiveSupport::OrderedHash
     end
 
-  class SimpleOrderedHash < simple_orederd_hash_parent
+  class SimpleOrderedHash < simple_ordered_hash_parent
     def initialize(elements=[])
       super()
       elements = [elements] unless elements.kind_of?(Array)

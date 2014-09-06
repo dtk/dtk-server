@@ -98,9 +98,8 @@ module DTK; class Task; class Template
           elsif lvs.add_and_match?(serialized_item){HashWithSingleKey(Constant::ComponentGroup)}
             component_group = serialized_item.values.first
             ParsingError.raise_error_unless(component_group,[String,Array])
-            opts.merge!(:component_group_num => component_group_num)
             Array(component_group).each do |serialized_action|
-              find_and_add_action!(ret,serialized_action,node_name,action_list,opts)
+              find_and_add_action!(ret,serialized_action,node_name,action_list,opts.merge(:component_group_num => component_group_num))
             end
             component_group_num += 1
           else

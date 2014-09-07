@@ -57,7 +57,7 @@ module DTK
           ret
         else
           opts_create = {:convert => true}.merge(Aux.hash_subset(opts,:returning_sql_cols))
-          Model.create_from_rows(model_handle,create_rows,opts_create)
+          Model.create_from_row(model_handle,create_row,opts_create).create_object()
         end
       end
 

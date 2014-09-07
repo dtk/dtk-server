@@ -103,8 +103,11 @@ module DTK
     end
 
     def self.serialize_and_save_to_repo(parent)
-      meta_filename_path = meta_filename_path()
-      parent.serialize_and_save_to_repo(meta_filename_path,dsl_hash_form(parent))
+      dsl_hash_form = dsl_hash_form(parent)
+      unless dsl_hash_form.empty?
+        meta_filename_path = meta_filename_path()
+        parent.serialize_and_save_to_repo(meta_filename_path,dsl_hash_form)
+      end
     end
 
     def self.dsl_hash_form(service_module_branch)

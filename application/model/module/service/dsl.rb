@@ -91,14 +91,14 @@ module DTK
     module DSLMixin
       def update_model_from_dsl(module_branch,opts={})
         set_dsl_parsed!(false)
+
         component_module_refs = update_component_module_refs(module_branch,opts)
         return component_module_refs if ParsingError.is_error?(component_module_refs)
 
         parsed = update_assemblies_from_dsl(module_branch,component_module_refs,opts)
+        ModuleRefs.serialize_and_save_to_repo(module_branch)
         return parsed if ParsingError.is_error?(parsed)
-        unless opts[:donot_make_repo_changes]
-          ModuleRefs.serialize_and_save_to_repo(module_branch)
-        end
+
         set_dsl_parsed!(true)
         parsed
       end

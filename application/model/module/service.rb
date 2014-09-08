@@ -317,7 +317,7 @@ module DTK
         if ErrorUsage::Parsing.is_error?(response)
           ret.dsl_parsed_info = response
         else
-          ret.merg!(response)
+          ret.merge!(response)
         end
         dsl_created_info = opts[:ret_create_dsl_info]
         unless dsl_created_info.empty?

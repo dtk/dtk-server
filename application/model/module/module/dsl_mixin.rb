@@ -10,9 +10,9 @@ module DTK
       merge!(:dsl_parsed_info => dsl_parsed_info)
       dsl_parsed_info
     end
-    def dsl_create_info=(dsl_create_info)
-      merge!(:dsl_create_info => dsl_create_info)
-      dsl_create_info
+    def dsl_created_info=(dsl_created_info)
+      merge!(:dsl_created_info => dsl_created_info)
+      dsl_created_info
     end
   end              
   # has info if DSL file is updated or created              

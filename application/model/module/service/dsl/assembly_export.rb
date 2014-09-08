@@ -11,10 +11,10 @@ module DTK
         Model.input_hash_content_into_model(@container_idh,self,:preserve_input_hash=>true)
       end
 
-      def serialize_and_save_to_repo()
+      def serialize_and_save_to_repo?()
         path = assembly_meta_filename_path()
         ordered_hash_serialized_content = serialize()
-        @service_module_branch.serialize_and_save_to_repo(path,ordered_hash_serialized_content)
+        @service_module_branch.serialize_and_save_to_repo?(path,ordered_hash_serialized_content)
         path
       end
 

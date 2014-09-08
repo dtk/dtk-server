@@ -303,15 +303,30 @@ module DTK
       is_parsed
     end
 
+    # returns dsl_info
     def update_model_from_clone__type_specific?(commit_sha,diffs_summary,module_branch,version,opts={})
       if version.kind_of?(ModuleVersion::AssemblyModule)
+        Log.error("TODO: dont think this reached now or woudl get error because  AssemblyModule::Service.finalize_edit callss non existing fn")
         assembly = version.get_assembly(model_handle(:component))
         AssemblyModule::Service.finalize_edit(assembly,opts[:modification_type],self,module_branch,diffs_summary)
       else
-        update_model_from_dsl(module_branch,opts)
+        opts.merge!(:ret_create_dsl_info => Hash.new)
+        response = update_model_from_dsl(module_branch,opts)
+        # TODO: move this into update_model_from_dsl when see all calling fns
+        ret = DSLInfo.new()
+        if ErrorUsage::Parsing.is_error?(response)
+          ret.dsl_parsed_info = response
+        else
+          ret.merg!(response)
+        end
+        dsl_created_info = opts[:ret_create_dsl_info]
+        unless dsl_created_info.empty?
+          ret.dsl_created_info = dsl_created_info
+        end
+        ret
       end
     end
-
+      
     def publish_preprocess_raise_error?(module_branch_obj)
       unless get_field?(:dsl_parsed)
         raise ErrorUsage.new("Unable to publish module that has parsing errors. Please fix errors and try to publish again.")

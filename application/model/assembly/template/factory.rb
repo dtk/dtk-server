@@ -6,17 +6,16 @@ module DTK
       include FactoryObjectMixin
 
       def self.get_or_create_service_module(project,service_module_name,opts={})
-        sp_hash = {
-          :cols => [:id,:group_id,:display_name],
-          :filter => [:eq,:display_name,service_module_name]
-        }
-        if service_module = get_obj(project.model_handle(:service_module),sp_hash)
+        unless namespace = opts[:namespace]
+          raise Error.new("Need to update code so that namespace passed in")
+        end
+        if service_module = get_service_module?(project,service_module_name,namespace)
           service_module
         else
           if opts[:mode] == :update
             raise ErrorUsage.new("Service module (#{service_module_name}) does not exist")
           end
-          opts_create = {:config_agent_type => ConfigAgentType}
+          opts_create = {:config_agent_type => ConfigAgentType,:module_namespace => namespace}
           module_and_branch_info = ServiceModule.create_module(project,service_module_name,opts_create)
           module_and_branch_info[:module_idh].create_object()
         end
@@ -54,7 +53,7 @@ module DTK
         project_idh = service_module.get_project().id_handle()
 
         assembly_mh = project_idh.create_childMH(:component)
-        if ret = exists?(assembly_mh,project_idh,service_module_name,assembly_name)
+        if ret = exists?(assembly_mh,service_module,assembly_name)
           if opts[:mode] == :create
             raise ErrorUsage.new("Assembly (#{assembly_name}) already exists in service module (#{service_module_name})")
           end
@@ -196,17 +195,30 @@ module DTK
         end
       end
 
-      def self.exists?(assembly_mh,project_idh,service_module_name,template_name)
-        props = {
-          :service_module_name => service_module_name,
-          :template_name => template_name,
-          :project_idh => project_idh
+      def self.exists?(assembly_mh,service_module,template_name)
+        Log.info("TODO: Rich wil fix this up; not catching case when exists?")
+        ret = nil
+        sp_hash = {
+          :cols => [:id,:group_id,:display_name],
+          :filter => [:and,[:eq,:service_id,service_module.id()]]
         }
-        if assembly_template = Template.get_from(assembly_mh,props,:cols => ExistsTemplateCols)
-          subclass_model(assembly_template) #so that what is returned is object of type Assembly::Template::Factory
+        module_branches = get_objs(service_module.model_handle(:module_branch),sp_hash)
+        return ret if module_branches.empty?
+
+        service_module_name = service_module.get_field?(:display_name),
+        component_type = component_type(service_module_name,template_name)
+        sp_hash = {
+          :cols => [:id,:display_name,:group_id,:component_type,:project_project_id,:ref,:ui,:type,:module_branch_id],
+          :filter =>  
+          [:and,
+           [:eq, :type, "composite"],
+           [:eq, :component_type, component_type],
+           [:oneof, :module_branch_id, module_branches.map{|r|r.id()}]]
+        }
+        if row = get_obj(assembly_mh,sp_hash,:keep_ref_cols => true)
+          subclass_model(row) # so that what is returned is object of type Assembly::Template::Factory
         end
       end
-      ExistsTemplateCols = [:id,:display_name,:group_id,:component_type,:project_project_id,:ref,:ui,:type,:module_branch_id]
 
       def create_port_link_content(port_link)
         in_port = @ndx_ports[port_link[:input_id]]

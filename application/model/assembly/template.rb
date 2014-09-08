@@ -307,23 +307,13 @@ module DTK; class Assembly
       name_to_id_helper(model_handle,name,augmented_sp_hash)
     end
 
-    def self.get_from(assembly_mh,prop_hash,opts={})
-      filter = 
-        if Aux.has_just_these_keys?(prop_hash,[:service_module_name,:template_name,:project_idh])
-          component_type = component_type(prop_hash[:service_module_name],prop_hash[:template_name])
-          [:and,
-           [:eq, :type, "composite"],
-           [:eq, :component_type, component_type],
-           [:eq, :project_project_id, prop_hash[:project_idh].get_id()]]
-        else
-          raise Error.new("Not supported with keys (#{attr_hash.keys}.join(',')})")
-        end
-
+    def self.get_service_module?(project,service_module_name,namespace)
+      ret = nil
       sp_hash = {
-        :cols => opts[:cols]||[:id,:display_name,:group_id],
-        :filter => filter
+        :cols => [:id,:group_id,:display_name,:namespace],
+        :filter => [:eq,:display_name,service_module_name]
       }
-      get_obj(assembly_mh,sp_hash,:keep_ref_cols => true)
+      get_objs(project.model_handle(:service_module),sp_hash).find{|r|r[:namespace][:display_name] == namespace}
     end
 
      # returns [service_module_name,assembly_name]

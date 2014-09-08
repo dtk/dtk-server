@@ -98,10 +98,9 @@ module DTK
 
         parsed = update_assemblies_from_dsl(module_branch,component_module_refs,opts)
         if new_commit_sha = ModuleRefs.serialize_and_save_to_repo?(module_branch)
-          if opts[:ret_create_dsl_info]
-            # TODO: shoudl put in and use the new_commit_sha
-            msg = "The module refs fill was updated"
-            opts[:ret_create_dsl_info] = DSLCreatedInfo.create_with_msg(msg)
+          if opts[:ret_dsl_updated_info]
+            msg = "The module refs file was updated by the server"
+            opts[:ret_dsl_updated_info] = DSLUpdatedInfo.new(msg,new_commit_sha)
           end
         end
         return parsed if ParsingError.is_error?(parsed)

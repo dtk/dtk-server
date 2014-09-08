@@ -310,7 +310,7 @@ module DTK
         assembly = version.get_assembly(model_handle(:component))
         AssemblyModule::Service.finalize_edit(assembly,opts[:modification_type],self,module_branch,diffs_summary)
       else
-        opts.merge!(:ret_create_dsl_info => Hash.new)
+        opts.merge!(:ret_dsl_updated_info => Hash.new)
         response = update_model_from_dsl(module_branch,opts)
         # TODO: move this into update_model_from_dsl when see all calling fns
         ret = DSLInfo.new()
@@ -319,9 +319,9 @@ module DTK
         else
           ret.merge!(response)
         end
-        dsl_created_info = opts[:ret_create_dsl_info]
-        unless dsl_created_info.empty?
-          ret.dsl_created_info = dsl_created_info
+        dsl_updated_info = opts[:ret_dsl_updated_info]
+        unless dsl_updated_info.empty?
+          ret.dsl_updated_info = dsl_updated_info
         end
         ret
       end

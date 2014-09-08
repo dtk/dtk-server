@@ -17,52 +17,18 @@ module DTK
       ret
     end
 
+
     def self.get_referenced_component_modules(project,component_refs)
-      template_ids_to_get = Array.new
-      component_types = Hash.new
-      component_versions = Hash.new
-
-      component_refs.each do |r|
-        unless r[:component_type] or r[:component_template_id]
-          update_object(:component_type,:component_template_id)
-        end
-        if r[:component_type]
-          component_types.store(r[:component_type], r[:version])
-        else
-          template_ids_to_get << r[:component_template_id]
-        end
-      end
-
-      unless template_ids_to_get.empty?
-        sp_hash = {
-          :cols => [:component_type],
-          :filter => [:oneof, :id, template_ids_to_get]
-        }
-        get_objs(project.model_handle(:component),sp_hash).each do |r|
-          component_types.store(r[:component_type], r[:version])
-        end
-      end
-
-      return ret if component_types.empty?
-      module_names = component_types.keys.uniq.map do |r|
-        module_name = Component.module_name(r)
-        component_versions[module_name] = component_types[r]
-        module_name
-      end
-
+      ret = Array.new
+      return ret if component_refs.empty?
       sp_hash = {
-        :cols => [:id,:group_id,:display_name, :namespace],
-        :filter => [:and,[:eq,:project_project_id,project[:id]],[:oneof,:display_name,module_names]]
+        :cols => [:id,:display_name,:group_id,:namespace_info],
+        :filter => [:oneof, :id, component_refs.map{|r|r[:component_template_id]}.uniq]
       }
-
-      response = get_objs(project.model_handle(:component_module),sp_hash)
-      response.each do |element|
-        # we take previusly saved version and return it to the map
-        element.merge!( :version => component_versions[element[:display_name]])
-        element.merge!( :full_module_name => element[:namespace] ? "#{element[:namespace][:display_name]}::#{element[:display_name]}" : nil)
+      aug_cmp_templates = get_objs(project.model_handle(:component),sp_hash)
+      aug_cmp_templates.map do |r|
+        r[:component_module].merge(:namespace_name => r[:namespace][:display_name])
       end
-
-      response
     end
 
     def self.print_form(cmp_ref__obj_or_hash)

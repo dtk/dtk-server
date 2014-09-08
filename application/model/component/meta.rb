@@ -81,6 +81,7 @@ module XYZ
            :cols => [:id,:group_id,:component_id]
          },
          { :model_name => :component_module,
+           :convert => true,
            :join_type => :inner,
            :join_cond=>{:id => q(:module_branch,:component_id)},
            :cols => [:id,:group_id,:display_name,:namespace_id]

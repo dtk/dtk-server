@@ -2,6 +2,12 @@ module DTK
   class Namespace < Model
 
     NAMESPACE_DELIMITER = '::'
+    # TODO: should replace with something more robust to find namespace
+    def self.deprecate__namespace_from_ref?(service_module_ref)
+      if service_module_ref.include? '::'
+        service_module_ref.split("::").first
+      end
+    end
 
     def self.common_columns()
       [
@@ -28,6 +34,10 @@ module DTK
       R8::Config[:repo][:local][:default_namespace]
     end
 
+    # TODO: when make global change to NAMESPACE_DELIMITER deprecate
+    def self.join_namespace2(namespace, name)
+      "#{namespace}:#{name}"
+    end
     def self.join_namespace(namespace, name)
       "#{namespace}#{NAMESPACE_DELIMITER}#{name}"
     end

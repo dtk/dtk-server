@@ -332,7 +332,7 @@ module DTK
       subtype = ret_assembly_subtype()
       result = 
         if subtype == :instance 
-          opts = ret_params_hash(:filter,:detail_level)
+          opts = ret_params_hash(:filter,:detail_level,:include_namespaces)
           Assembly::Instance.list(model_handle(),opts)
         else 
           project = get_default_project()

@@ -67,6 +67,10 @@ module DTK
         
         ndx_ret = Hash.new
         pp_opts = Aux.hash_subset(opts,[:no_module_prefix])
+        assembly_template_opts = {:version_suffix => true}
+        if opts[:include_namespaces]
+          assembly_template_opts.merge!(:include_namespace => true)
+        end
         assembly_rows.each do |r|
           last_task_run_status = r[:last_task_run_status]
           pntr = ndx_ret[r[:id]] ||= r.prune_with_values(
@@ -89,7 +93,7 @@ module DTK
           end
           if template = r[:assembly_template]
             # just triggers for assembly instances; indicates the assembly templaet that spawned it
-            pntr.merge!(:assembly_template => Template.pretty_print_name(template,:version_suffix => true))
+            pntr.merge!(:assembly_template => Template.pretty_print_name(template,assembly_template_opts))
           end
           if created_at = r[:created_at]
             pntr.merge!(:created_at => created_at) 

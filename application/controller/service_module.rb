@@ -36,13 +36,11 @@ module DTK
     def rest__list_component_modules()
       service_module_id = ret_request_param_id(:service_module_id)
       service_module = create_obj(:service_module_id)
-      rest_ok_response service_module.get_referenced_component_modules(Opts.new(:detail_to_include=>[:versions]))
+      rest_ok_response service_module.list_component_modules(Opts.new(:detail_to_include=>[:versions]))
     end
 
     # TODO: rename; this is just called by install; import ops call create route
     def rest__import()
-
-
       rest_ok_response install_from_dtkn_helper(:service_module)
     end
 

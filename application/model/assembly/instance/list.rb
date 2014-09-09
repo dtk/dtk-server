@@ -24,7 +24,11 @@ module DTK; class  Assembly
           get_attrs = [opts[:detail_level]].flatten.include?("attributes")
           attr_rows = get_attrs ? get_default_component_attributes(assembly_mh,assembly_rows) : []
           add_last_task_run_status!(assembly_rows,assembly_mh)
-        
+
+          if [opts[:detail_level]].flatten.include?("assembly_template_namespaces")
+            assembly_templates = assembly_rows.map{|a|a[:assembly_template]}
+            Template.augment_with_namespaces!(assembly_templates)
+          end
           list_aux(assembly_rows,attr_rows,opts)
         end
       end

@@ -50,7 +50,11 @@ module DTK
       module_info_array.push(response['dependency_warnings'])
     end
 
+    def list_component_modules(opts=Opts.new)
+      get_referenced_component_modules(opts).sort{|a,b|a[:display_name] <=> b[:display_name]}
+    end
     def get_referenced_component_modules(opts=Opts.new)
+      # TODO: alternative is to get this by getting the module_refs
       ret = Array.new
       cmp_refs = get_referenced_component_refs()
       return ret if cmp_refs.empty?

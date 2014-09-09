@@ -101,7 +101,7 @@ module DTK; class AssemblyModule
 
       def splice_in_workflow(module_branch,template_content,task_action=nil)
         hash_content = template_content.serialization_form()
-        module_branch.serialize_and_save_to_repo(meta_file_path(task_action),hash_content)
+        module_branch.serialize_and_save_to_repo?(meta_file_path(task_action),hash_content)
       end
       def meta_file_path(task_action=nil)
         task_action ||= DefaultTaskAction

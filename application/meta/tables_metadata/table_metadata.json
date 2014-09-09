@@ -184,6 +184,18 @@
       "update saved": "update_saved"
     }
   },
+  "component_module": {
+    "order": [
+      "id",
+      "namespace",
+      "name"
+    ],
+    "mapping": {
+      "id": "dtk_id",
+      "namespace": "namespace_name",
+      "name": "display_name"
+    }
+  },
   "module_diff": {
     "order": [
       "id",

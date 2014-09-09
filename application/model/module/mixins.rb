@@ -189,12 +189,8 @@ module DTK
       return unless pull_was_needed or parse_needed
 
       opts_update = Aux.hash_subset(opts,[:do_not_raise,:modification_type,:force_parse])
-      response = update_model_from_clone__type_specific?(commit_sha,diffs_summary,module_branch,version,opts_update)
-      if ErrorUsage::Parsing.is_error?(response)
-        {:dsl_parsed_info => response}
-      else
-        response
-      end
+      dsl_info = update_model_from_clone__type_specific?(commit_sha,diffs_summary,module_branch,version,opts_update)
+      dsl_info
     end
 
     def get_project()

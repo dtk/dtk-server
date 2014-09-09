@@ -37,6 +37,7 @@ R8::ReactorRoute.draw do
   post  'assembly/purge' => 'assembly#purge' #workspace command
   post  'assembly/set_target' => 'assembly#set_target' #workspace command
   post  'assembly/set_attributes' => 'assembly#set_attributes'
+  post  'assembly/apply_attribute_settings' => 'assembly#apply_attribute_settings'
   post  'assembly/get_attributes' => 'assembly#get_attributes'
   post  'assembly/add_assembly_template' => 'assembly#add_assembly_template'
   post  'assembly/add_node' => 'assembly#add_node'

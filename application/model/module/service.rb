@@ -50,7 +50,11 @@ module DTK
       module_info_array.push(response['dependency_warnings'])
     end
 
+    def list_component_modules(opts=Opts.new)
+      get_referenced_component_modules(opts).sort{|a,b|a[:display_name] <=> b[:display_name]}
+    end
     def get_referenced_component_modules(opts=Opts.new)
+      # TODO: alternative is to get this by getting the module_refs
       ret = Array.new
       cmp_refs = get_referenced_component_refs()
       return ret if cmp_refs.empty?
@@ -303,15 +307,30 @@ module DTK
       is_parsed
     end
 
+    # returns dsl_info
     def update_model_from_clone__type_specific?(commit_sha,diffs_summary,module_branch,version,opts={})
       if version.kind_of?(ModuleVersion::AssemblyModule)
+        Log.error("TODO: dont think this reached now or woudl get error because  AssemblyModule::Service.finalize_edit callss non existing fn")
         assembly = version.get_assembly(model_handle(:component))
         AssemblyModule::Service.finalize_edit(assembly,opts[:modification_type],self,module_branch,diffs_summary)
       else
-        update_model_from_dsl(module_branch,opts)
+        opts.merge!(:ret_dsl_updated_info => Hash.new)
+        response = update_model_from_dsl(module_branch,opts)
+        # TODO: move this into update_model_from_dsl when see all calling fns
+        ret = DSLInfo.new()
+        if ErrorUsage::Parsing.is_error?(response)
+          ret.dsl_parsed_info = response
+        else
+          ret.merge!(response)
+        end
+        dsl_updated_info = opts[:ret_dsl_updated_info]
+        unless dsl_updated_info.empty?
+          ret.dsl_updated_info = dsl_updated_info
+        end
+        ret
       end
     end
-
+      
     def publish_preprocess_raise_error?(module_branch_obj)
       unless get_field?(:dsl_parsed)
         raise ErrorUsage.new("Unable to publish module that has parsing errors. Please fix errors and try to publish again.")

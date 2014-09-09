@@ -74,6 +74,31 @@ module DTK; class Assembly
       end
     end
 
+    def self.augment_with_namespaces!(assembly_templates)
+      ndx_namespaces = get_ndx_namespaces(assembly_templates)
+      assembly_templates.each do |a|
+        if namespace = ndx_namespaces[a[:id]]
+          a[:namespace] ||= namespace
+        end
+      end
+      assembly_templates
+    end
+
+    # indexed by assembly_template id
+    def self.get_ndx_namespaces(assembly_templates)
+      ret = Hash.new
+      return ret if assembly_templates.empty?
+      sp_hash = {
+        :cols =>  [:id,:group_id,:display_name,:module_branch_id,:assembly_template_namespace_info],
+        :filter => [:oneof,:id,assembly_templates.map{|a|a.id()}]
+      }
+      mh = assembly_templates.first.model_handle()
+      get_objs(mh,sp_hash).inject(Hash.new) do |h,r|
+        h.merge(r[:id] => r[:namespace])
+      end
+    end
+    private_class_method :get_ndx_namespaces
+
     def get_settings(opts={})
       sp_hash = {
         :cols => opts[:cols]||ServiceSetting.common_columns(),
@@ -146,8 +171,6 @@ module DTK; class Assembly
                    ].compact
       }
       ret = get_these_objs(mh,sp_hash,:keep_ref_cols => true)
-
-      # TODO: may instead make sure that version in assembly is set
       ret.each{|r|r[:version] ||= (r[:module_branch]||{})[:version]}
       ret
     end
@@ -174,7 +197,10 @@ module DTK; class Assembly
         # get_objs do this (using possibly option flag for subtype processing)
         pntr = ndx_ret[r[:id]] ||= r.id_handle.create_object().merge(:display_name => pretty_print_name(r,pp_opts),:ndx_nodes => Hash.new)
         pntr.merge!(:module_branch_id => r[:module_branch_id]) if r[:module_branch_id]
-        pntr.merge!(:namespace => r[:service_module][:ref].split("::").first) if r[:service_module][:ref].include? "::"
+        # TODO: should replace with something more robust to find namespace
+        if namespace = Namespace.deprecate__namespace_from_ref?(r[:service_module][:ref])
+          pntr.merge!(:namespace => namespace)
+        end
 
         if version = pretty_print_version(r)
           pntr.merge!(:version => version)
@@ -211,11 +237,18 @@ module DTK; class Assembly
         end
       
       if opts[:version_suffix] 
-        version = pretty_print_version(assembly)
-        version ? "#{ret}-v#{version}" : ret
-      else
-        ret
+        if version = pretty_print_version(assembly)
+          ret << "-v#{version}"
+        end
       end
+      if opts[:include_namespace] 
+        unless namespace_name = (assembly[:namespace]||{})[:display_name]
+          Log.error("Unexpected that opts[:include_namespace] is truue and no namespace object in assembly")
+          return ret
+        end
+        ret = Namespace.join_namespace2(namespace_name, ret)
+      end
+      ret
     end
 
     def self.delete_and_ret_module_repo_info(assembly_idh)

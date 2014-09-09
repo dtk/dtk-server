@@ -142,12 +142,14 @@ module DTK
 
     def incrementally_update_component_dsl(augmented_objects,context={})
       dsl_path,hash_content,fragment_hash = ModuleDSL.incremental_generate(self,augmented_objects,context)
-      serialize_and_save_to_repo(dsl_path,hash_content)
+      serialize_and_save_to_repo?(dsl_path,hash_content)
       fragment_hash
     end
 
-    # args could be either file_path,hash_content,file_format(optional) or single element which is an array having elements with keys :path, :hash_content, :format
-    def serialize_and_save_to_repo(*args)
+    # updates repo if any changes and if so returns new commit_sha
+    # args could be either file_path,hash_content,file_format(optional) or single element which is an array 
+    # having elements with keys :path, :hash_content, :format
+    def serialize_and_save_to_repo?(*args)
       files =
       if args.size == 1
         args[0]
@@ -155,6 +157,7 @@ module DTK
         path,hash_content,format_type = args
         [{:path => path,:hash_content => hash_content,:format_type => format_type||dsl_format_type_form_path(path)}]
       end
+
       unless files.empty?
         any_changes = false
         files.each do |file_info|
@@ -162,10 +165,13 @@ module DTK
           any_change = RepoManager.add_file({:path => file_info[:path]},content,self)
           any_changes = true if any_change
         end
-        push_changes_to_repo() if any_changes
+        if any_changes
+          new_commit_sha = push_changes_to_repo() 
+          new_commit_sha
+        end
       end
     end
-
+      
     def dsl_format_type_form_path(path)
       extension = (path =~ /\.([^\.]+$)/; $1)
       unless ret = FormatTypeFromExtension[extension]
@@ -181,7 +187,7 @@ module DTK
 
     def push_changes_to_repo()
       commit_sha = RepoManager.push_changes(self)
-      set_sha(commit_sha)
+      set_sha(commit_sha) # returns commit_sha to calling fn
     end
     private :push_changes_to_repo
 

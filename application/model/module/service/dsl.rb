@@ -90,7 +90,7 @@ module DTK
         case format_type_default
         when "json" then "json"
         when "yaml" then "yaml"
-          else raise Error.new("Unexepcted value for dsl.service.format_type.default: #{format_type_default}")
+          else raise Error.new("Unexpected value for dsl.service.format_type.default: #{format_type_default}")
         end
       end
 
@@ -113,6 +113,7 @@ module DTK
     end
 
     module DSLMixin
+      # returns dsl_info
       def update_model_from_dsl(module_branch,opts={})
         set_dsl_parsed!(false)
 
@@ -120,7 +121,12 @@ module DTK
         return component_module_refs if ParsingError.is_error?(component_module_refs)
 
         parsed = update_assemblies_from_dsl(module_branch,component_module_refs,opts)
-        ModuleRefs.serialize_and_save_to_repo(module_branch)
+        if new_commit_sha = ModuleRefs.serialize_and_save_to_repo?(module_branch)
+          if opts[:ret_dsl_updated_info]
+            msg = "The module refs file was updated by the server"
+            opts[:ret_dsl_updated_info] = DSLUpdatedInfo.new(msg,new_commit_sha)
+          end
+        end
         return parsed if ParsingError.is_error?(parsed)
 
         set_dsl_parsed!(true)

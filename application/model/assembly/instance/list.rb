@@ -19,12 +19,19 @@ module DTK; class  Assembly
         assembly_rows.reject!{|r|Workspace.is_workspace?(r)} unless opts[:include_workspace]
 
         if opts[:detail_level].nil?
+          if opts[:include_namespaces]
+            Log.error("Unexpcetd that opts[:include_namespaces] is true")
+          end
           list_aux__no_details(assembly_rows)
         else
           get_attrs = [opts[:detail_level]].flatten.include?("attributes")
           attr_rows = get_attrs ? get_default_component_attributes(assembly_mh,assembly_rows) : []
           add_last_task_run_status!(assembly_rows,assembly_mh)
-        
+
+          if opts[:include_namespaces]
+            assembly_templates = assembly_rows.map{|a|a[:assembly_template]}
+            Template.augment_with_namespaces!(assembly_templates)
+          end
           list_aux(assembly_rows,attr_rows,opts)
         end
       end

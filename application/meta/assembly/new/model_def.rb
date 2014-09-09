@@ -225,6 +225,32 @@ lambda__instance_nodes_components_assembly_template =
        segment_assembly_template
       ]
     },
+    :assembly_template_namespace_info=> {
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>
+       [{
+         :model_name=>:module_branch,
+         :convert => true,
+         :join_type=>:inner,
+         :join_cond=>{:id=>:component__module_branch_id},
+          :cols => [:id,:display_name,:group_id,:version,:current_sha,:service_id]
+       },
+       {
+         :model_name=>:service_module,
+         :convert => true,
+         :join_type=>:inner,
+         :join_cond=>{:id=>:module_branch__service_id},
+         :cols => [:id,:display_name,:group_id,:namespace_id]
+       },
+       {
+         :model_name=>:namespace,
+         :convert => true,
+         :join_type=>:inner,
+         :join_cond=>{:id=>:service_module__namespace_id},
+         :cols => [:id,:display_name]
+       }]
+    },
     :instance_nodes_and_cmps=> lambda__instance_nodes_components_assembly_template.call(Node.common_columns,Component.common_columns),
     :instance_nodes_and_cmps_summary_with_namespace=> {
       :type=>:json,

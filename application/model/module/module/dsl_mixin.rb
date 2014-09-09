@@ -1,5 +1,46 @@
 #TODO: Aldin: think you want to replace cases where there is an instance function that uses ModuleDSL
 #with klass(self)
+module DTK
+  class DSLInfo < Hash
+    def initialize(hash={})
+      super()
+      replace(hash)
+    end
+    def dsl_parsed_info=(dsl_parsed_info)
+      merge!(:dsl_parsed_info => dsl_parsed_info)
+      dsl_parsed_info
+    end
+    def dsl_created_info=(dsl_created_info)
+      merge!(:dsl_created_info => dsl_created_info)
+      dsl_created_info
+    end
+    def dsl_updated_info=(dsl_updated_info)
+      merge!(:dsl_updated_info => dsl_updated_info)
+      dsl_updated_info
+    end
+  end              
+  # has info if DSL file is created and being passed to 
+  class DSLCreatedInfo < Hash
+    def self.create_empty()
+      new()
+    end
+    def self.create_with_path_and_content(path,content)
+      new(:path => path, :content => content)
+    end
+   private
+    def initialize(hash={})
+      super()
+      replace(hash)
+    end
+  end
+  class DSLUpdatedInfo < Hash
+    def initialize(msg,commit_sha)
+      super()
+      replace(:msg => msg, :commit_sha => commit_sha)
+    end
+  end
+end
+
 module DTK; class BaseModule
   module DSLMixin
     r8_nested_require('dsl_mixin','external_refs')
@@ -11,7 +52,7 @@ module DTK; class BaseModule
     end
 
     def update_from_initial_create(commit_sha,repo_idh,version,opts={})
-      ret = {:dsl_created_info => Hash.new}
+      ret = DSLInfo.new()
       module_branch = get_workspace_module_branch(version)
       pull_was_needed = module_branch.pull_repo_changes?(commit_sha)
 
@@ -32,7 +73,7 @@ module DTK; class BaseModule
       component_dsl = ModuleDSL.create_dsl_object(module_branch,previous_dsl_version)
       # create from component_dsl the new version dsl
       dsl_paths_and_content = component_dsl.migrate(module_name(),new_dsl_integer_version,format_type)
-      module_branch.serialize_and_save_to_repo(dsl_paths_and_content)
+      module_branch.serialize_and_save_to_repo?(dsl_paths_and_content)
     end
 
     def pull_from_remote__update_from_dsl(repo, module_and_branch_info,version=nil)
@@ -91,7 +132,7 @@ module DTK; class BaseModule
       local_params.create_local(get_project())
     end
     def create_needed_objects_and_dsl?(repo,local,opts={})
-      ret = Hash.new
+      ret = DSLInfo.new()
       module_name = local.module_name
       branch_name = local.branch_name
       module_namespace = local.module_namespace_name
@@ -114,11 +155,11 @@ module DTK; class BaseModule
         end
       end
 
-      dsl_created_info = Hash.new()
+      dsl_created_info = DSLCreatedInfo.create_empty()
       klass = klass(self)
       if klass.contains_dsl_file?(impl_obj)
         if e = klass::ParsingError.trap{parse_dsl_and_update_model(impl_obj,module_branch_idh,version,module_namespace,opts)}
-          ret.merge!(:dsl_parsed_info => e)
+          ret.dsl_parsed_info = e
         end
       elsif opts[:scaffold_if_no_dsl] 
         opts = Hash.new
@@ -130,16 +171,13 @@ module DTK; class BaseModule
       ret.merge!(:module_branch_idh => module_branch_idh, :dsl_created_info => dsl_created_info)
       ret
     end
-
-    # returns dsl info
     def update_model_objs_or_create_dsl?(diffs_summary,module_branch,version,opts={})
-      ret = Hash.new
-      dsl_created_info = Hash.new
+      ret = DSLInfo.new()
+      dsl_created_info = DSLCreatedInfo.create_empty()
       module_namespace = module_namespace()
       impl_obj = module_branch.get_implementation()
       # TODO: make more robust to handle situation where diffs dont cover all changes; think can detect by looking at shas
       impl_obj.modify_file_assets(diffs_summary)
-      dsl_created_info = Hash.new
 
       if version.kind_of?(ModuleVersion::AssemblyModule)
         if diffs_summary.meta_file_changed?()
@@ -150,14 +188,14 @@ module DTK; class BaseModule
       elsif ModuleDSL.contains_dsl_file?(impl_obj)
         if opts[:force_parse] or diffs_summary.meta_file_changed?() or (get_field?(:dsl_parsed) == false)
           if e = ModuleDSL::ParsingError.trap{parse_dsl_and_update_model(impl_obj,module_branch.id_handle(),version,module_namespace,opts)}
-            ret.merge!(:dsl_parsed_info => e)
+            ret.dsl_parsed_info = e
           end
         end
       else
         config_agent_type = config_agent_type_default()
         dsl_created_info = parse_impl_to_create_dsl(config_agent_type,impl_obj)
       end
-      ret.merge!(:dsl_created_info => dsl_created_info)
+      ret.dsl_created_info = dsl_created_info
       ret
     end
 
@@ -181,7 +219,7 @@ module DTK; class BaseModule
         format_type = ModuleDSL.default_format_type()
         content = render_hash.serialize(format_type)
         dsl_filename = ModuleDSL.dsl_filename(config_agent_type,format_type)
-        ret = {:path => dsl_filename, :content => content}
+        ret = DSLCreatedInfo.create_with_path_and_content(dsl_filename, content)
       end
       raise parsing_error if parsing_error
       ret

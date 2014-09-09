@@ -191,7 +191,8 @@ module DTK
         @template_output.merge!(:node => nodes,:port_link => port_links,:component => {assembly_ref => assembly_hash})
         Transaction do 
           @template_output.save_to_model()
-          @template_output.serialize_and_save_to_repo()
+          new_commit_sha = @template_output.serialize_and_save_to_repo?()
+          new_commit_sha
         end
       end
 

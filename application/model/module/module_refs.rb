@@ -102,11 +102,12 @@ module DTK
       ModuleRef.update(:create_or_update,parent,cmp_modules.values)
     end
 
-    def self.serialize_and_save_to_repo(parent)
+    # updates repo if any changes and if so returns new commit_sha
+    def self.serialize_and_save_to_repo?(parent)
       dsl_hash_form = dsl_hash_form(parent)
       unless dsl_hash_form.empty?
         meta_filename_path = meta_filename_path()
-        parent.serialize_and_save_to_repo(meta_filename_path,dsl_hash_form)
+        parent.serialize_and_save_to_repo?(meta_filename_path,dsl_hash_form)
       end
     end
 

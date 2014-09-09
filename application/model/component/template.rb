@@ -220,19 +220,18 @@ module DTK; class Component
       display_name = display_name_from_user_friendly_name(cmp_name)
       component_type,title =  ComponentTitle.parse_component_display_name(display_name)
       sp_hash = {
-        :cols => [:id, :display_name, :module_branch_id, :type, :ref, :namespace_info_for_cmps],
+        :cols => [:id, :group_id, :display_name, :module_branch_id, :type, :ref, :namespace_info_for_cmps],
         :filter => [:and,
-                    [:eq, :display_name, display_name],
                     [:eq, :type, 'template'],
                     [:eq, :component_type, component_type],
                     [:neq, :project_project_id, nil],
-                    # not sure if need this version field,
+                    # TODO: not sure if need this version field,
                     # added because we can have the same component template just with different vesion
                     # e.g. one has version = 'master' and other one version = "assembly--test"
                     [:eq, :version, 'master'],
                     [:eq, :node_node_id, nil]]
       }
-      cmp_templates = Model.get_objs(cmp_mh,sp_hash,:keep_ref_cols=>true)
+      cmp_templates = get_objs(cmp_mh.createMH(:component_template),sp_hash,:keep_ref_cols=>true)
       return ret_cmp if cmp_templates.empty?
 
       # get component_modules already associated with service instance

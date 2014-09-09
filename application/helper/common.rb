@@ -398,22 +398,13 @@ module Ramaze::Helper
       [component_template,component_title]
     end
 
-    def cmp_template_and_title_with_namespace(component,opts={})
-      version = opts[:versions]||opts[:version]
-      component_template_idh = id_handle(component[:id],ret_module_name_from_class(::DTK::Component::Template))
-      component_template = component_template_idh.create_object(:model_name => :component_template)
-      component_title = ::DTK::ComponentTitle.parse_title?(component[:display_name])
-      [component_template,component_title]
-    end
-
     def ret_component_template_and_title_for_assembly(param,assembly)
       opts = {:versions => [::DTK::ModuleVersion.ret(assembly),nil]} #so first tries the assembly module context and then the component module context
       ret_component_template_and_title(param,opts)
     end
 
-    def ret_component_template_and_title_with_namespace(component,assembly)
-      opts = {:versions => [::DTK::ModuleVersion.ret(assembly),nil]}
-      cmp_template_and_title_with_namespace(component,opts)
+    def ret_component_title?(component_name)
+      ::DTK::ComponentTitle.parse_title?(component_name)
     end
 
     def raise_error_null_params?(*null_params)

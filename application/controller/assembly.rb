@@ -424,18 +424,14 @@ module DTK
 
     def rest__add_component()
       assembly = ret_assembly_instance_object()
-      # component_template, component_title = ret_component_template_and_title_for_assembly(:component_template_id,assembly)
-
-      # cmp_name, namespace = ret_non_null_request_params(:component_template_id, :namespace)
       cmp_name, namespace = ret_request_params(:component_template_id, :namespace)
       assembly_idh = assembly.id_handle()
 
       cmp_mh = assembly_idh.createMH(:component)
-      component = Component::Template.get_cmp_template_with_namespace(cmp_mh, cmp_name, namespace, assembly)
-
-      raise ErrorUsage.new("Component with identifier #{namespace.nil? ? '\'' : ('\'' + namespace + ':')}#{cmp_name}' does not exist!") unless component
-
-      component_template, component_title = ret_component_template_and_title_with_namespace(component,assembly)
+      unless component_template = Component::Template.get_cmp_template_with_namespace(cmp_mh, cmp_name, namespace, assembly)
+        raise ErrorUsage.new("Component with identifier #{namespace.nil? ? '\'' : ('\'' + namespace + ':')}#{cmp_name}' does not exist!")
+      end
+      component_title = ret_component_title?(cmp_name)
       # not checking here if node_id points to valid object; check is in add_component
       node_idh = ret_request_param_id_handle(:node_id,Node)
       new_component_idh = assembly.add_component(node_idh,component_template,component_title,namespace)

@@ -96,7 +96,7 @@ module DTK; class  Assembly
 
       def list_attributes(opts)
         if opts[:settings_form]
-          ServiceSetting::AttributeSettings.get_and_render_in_hash_form(self)
+          ServiceSetting::AttributeSettings::HashForm.get_and_render_in_hash_form(self)
         else
           cols_to_get = (opts[:raw_attribute_value] ? [:display_name,:value] : [:id,:display_name,:value,:linked_to_display_form,:datatype,:name])
           ret = get_attributes_print_form_aux(opts).map do |a|

@@ -150,11 +150,11 @@ module Ramaze::Helper
     end
   end
 
-  def ret_yaml_settings_hash()
+  def ret_attribute_settings_hash()
     yaml_content = ret_non_null_request_params(:settings_yaml_content)
-    hash_or_error = ::DTK::Aux.convert_to_hash( yaml_content ,:yaml)
-    raise hash_or_error if hash_or_error.kind_of?(::DTK::Error)
-    hash_or_error
+    response = ::DTK::Aux.convert_to_hash( yaml_content ,:yaml)
+    raise response if response.kind_of?(::DTK::Error)
+    response
   end
 end
 

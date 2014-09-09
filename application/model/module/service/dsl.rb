@@ -67,8 +67,16 @@ module DTK
       def assembly_meta_directory_path(assembly_name)
         "assemblies/#{assembly_name}"
       end
-      def assembly_meta_filename_path(assembly_name)
+
+      def new_assembly_file_path(assembly_name, file_type)
+        "assemblies/#{assembly_name}.dtk.assembly.#{file_type}"
+      end
+
+      def assembly_meta_filename_path(assembly_name, opts={})
+        is_new_structure = is_new_service_structure?(opts[:module_branch])
         file_type = dsl_files_format_type()
+
+        return new_assembly_file_path(assembly_name, file_type) if is_new_structure
         "#{assembly_meta_directory_path(assembly_name)}/assembly.#{file_type}"
       end
 
@@ -85,6 +93,22 @@ module DTK
           else raise Error.new("Unexepcted value for dsl.service.format_type.default: #{format_type_default}")
         end
       end
+
+      def is_new_service_structure?(module_branch)
+        assembly_dsl_path_info = NewStructureFilepaths
+        regex = assembly_dsl_path_info[:regexp]
+        depth = assembly_dsl_path_info[:path_depth]
+
+        meta_files = RepoManager.ls_r(depth, {:file_only => true}, module_branch)
+        meta_files.select!{|f|f =~ regex}
+
+        !meta_files.empty?
+      end
+      NewStructureFilepaths = {
+        :regexp => Regexp.new("^assemblies/(.*)\.dtk\.assembly\.(json|yaml)$"),
+        :path_depth => 2
+      }
+
       private :dsl_files_format_type
     end
 

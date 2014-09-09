@@ -351,8 +351,8 @@ module DTK
 
     def rest__apply_attribute_settings()
       assembly = ret_assembly_instance_object()
-      settings_hash = ret_non_null_request_params(:settings_hash)
-      pp [:settings_hash,settings_hash]
+      yaml_settings_hash = ret_yaml_settings_hash()
+      pp yaml_settings_hash
       raise Error.new("need to write apply_attribute_settings")
     end
 

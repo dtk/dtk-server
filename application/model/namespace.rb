@@ -1,7 +1,24 @@
 module DTK
   class Namespace < Model
+    # TODO: get rid of this class and fold into paraent after finish conversion
+    class New < self
+      NEW_NAMESPACE_DELIMITER = ':'
+     private 
+      def self.namespace_delimiter()
+        NEW_NAMESPACE_DELIMITER
+      end
+    end
 
     NAMESPACE_DELIMITER = '::'
+    def self.namespace_delimiter()
+      NAMESPACE_DELIMITER
+    end
+    def namespace_delimiter()
+      self.class.namespace_delimiter()
+    end
+    private :namespace_delimiter
+    private_class_method :namespace_delimiter
+
     # TODO: should replace with something more robust to find namespace
     def self.deprecate__namespace_from_ref?(service_module_ref)
       if service_module_ref.include? '::'
@@ -27,24 +44,20 @@ module DTK
     end
 
     def self.enrich_with_default_namespace(module_name)
-      module_name.include?(NAMESPACE_DELIMITER) ? module_name : "#{default_namespace_name}#{NAMESPACE_DELIMITER}#{module_name}"
+      module_name.include?(namespace_delimiter()) ? module_name : "#{default_namespace_name}#{namespace_delimiter()}#{module_name}"
     end
 
     def self.default_namespace_name
       R8::Config[:repo][:local][:default_namespace]
     end
 
-    # TODO: when make global change to NAMESPACE_DELIMITER deprecate
-    def self.join_namespace2(namespace, name)
-      "#{namespace}:#{name}"
-    end
     def self.join_namespace(namespace, name)
-      "#{namespace}#{NAMESPACE_DELIMITER}#{name}"
+      "#{namespace}#{namespace_delimiter()}#{name}"
     end
 
     # returns [namespace,name]; namespace can be null if cant determine it
     def self.full_module_name_parts?(name_or_full_module_name)
-      if name_or_full_module_name =~ Regexp.new("(^.+)#{NAMESPACE_DELIMITER}(.+$)")
+      if name_or_full_module_name =~ Regexp.new("(^.+)#{namespace_delimiter()}(.+$)")
         namespace,name = [$1,$2]
       else
         namespace,name = [nil,name_or_full_module_name]
@@ -91,7 +104,7 @@ module DTK
     end
 
     def enrich_module_name(module_name)
-      "#{self.display_name()}#{NAMESPACE_DELIMITER}#{module_name}"
+      "#{self.display_name()}#{namespace_delimiter()}#{module_name}"
     end
 
     # TODO: would need to enhance if get a legitimate key, but it has nil or false value

@@ -105,8 +105,7 @@ module DTK
       opts.merge!(:remote_repo_base => remote_repo_base, :diff => diff)
       datatype = :module_diff if diff
 
-      full_list = ServiceModule.list(opts)
-      rest_ok_response full_list, :datatype => datatype
+      rest_ok_response ServiceModule.list(opts), :datatype => datatype
     end
 
     def rest__versions()

@@ -255,7 +255,7 @@ module DTK; class Assembly
           Log.error("Unexpected that opts[:include_namespace] is truue and no namespace object in assembly")
           return ret
         end
-        ret = Namespace.join_namespace2(namespace_name, ret)
+        ret = Namespace::New.join_namespace(namespace_name, ret)
       end
       ret
     end

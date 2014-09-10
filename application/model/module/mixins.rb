@@ -462,7 +462,7 @@ module DTK
         r.merge!(:type => r.component_type()) if r.respond_to?(:component_type)
 
         if r[:namespace]
-          r[:display_name] = Namespace.join_namespace(r[:namespace][:display_name], r[:display_name])
+          r[:display_name] = Namespace::New.join_namespace(r[:namespace][:display_name], r[:display_name])
         end
       end
       if include_any_detail

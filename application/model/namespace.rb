@@ -1,6 +1,10 @@
 module DTK
   class Namespace < Model
     # TODO: get rid of this class and fold into paraent after finish conversion
+    # Methods that use this constant are:
+    # - join_namespace
+    # - full_module_name_parts?
+    # - deprecate__namespace_from_ref?
     class New < self
       NEW_NAMESPACE_DELIMITER = ':'
      private 
@@ -13,16 +17,12 @@ module DTK
     def self.namespace_delimiter()
       NAMESPACE_DELIMITER
     end
-    def namespace_delimiter()
-      self.class.namespace_delimiter()
-    end
-    private :namespace_delimiter
     private_class_method :namespace_delimiter
 
     # TODO: should replace with something more robust to find namespace
     def self.deprecate__namespace_from_ref?(service_module_ref)
-      if service_module_ref.include? '::'
-        service_module_ref.split("::").first
+      if service_module_ref.include? namespace_delimiter()
+        service_module_ref.split(namespace_delimiter()).first
       end
     end
 
@@ -41,10 +41,6 @@ module DTK
     #
     def self.default_namespace(namespace_mh)
       find_or_create(namespace_mh, R8::Config[:repo][:local][:default_namespace])
-    end
-
-    def self.enrich_with_default_namespace(module_name)
-      module_name.include?(namespace_delimiter()) ? module_name : "#{default_namespace_name}#{namespace_delimiter()}#{module_name}"
     end
 
     def self.default_namespace_name
@@ -101,10 +97,6 @@ module DTK
         ).first
 
       idh.create_object()
-    end
-
-    def enrich_module_name(module_name)
-      "#{self.display_name()}#{namespace_delimiter()}#{module_name}"
     end
 
     # TODO: would need to enhance if get a legitimate key, but it has nil or false value

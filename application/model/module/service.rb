@@ -28,7 +28,7 @@ module DTK
     end
 
     def assembly_ref(assembly_name,version_field=nil)
-      assembly_ref = Namespace.join_namespace(module_namespace(),"#{module_name()}-#{assembly_name}")
+      assembly_ref = Namespace::New.join_namespace(module_namespace(),"#{module_name()}-#{assembly_name}")
       if version_field
         assembly_ref = assembly_ref__add_version(assembly_ref,version_field)
       end

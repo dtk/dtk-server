@@ -58,7 +58,7 @@ module DTK; class ModuleDSL
       end
       def component_ref(config_agent_type,hash_cmp_ref,namespace)
         ref_wo_ns = "#{config_agent_type}-#{hash_cmp_ref}"
-        Namespace.join_namespace(namespace, ref_wo_ns)
+        Namespace::New.join_namespace(namespace, ref_wo_ns)
       end
 
     end

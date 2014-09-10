@@ -369,7 +369,7 @@ module DTK
     end
 
     def name_to_id(model_handle,name_or_full_module_name,namespace=nil)
-      namespace_x, name = Namespace.full_module_name_parts?(name_or_full_module_name)
+      namespace_x, name = Namespace::New.full_module_name_parts?(name_or_full_module_name)
       unless namespace ||= namespace_x
         raise ErrorUsage.new("Cannot find namespace!")
       end
@@ -396,7 +396,7 @@ module DTK
       get_objs(mh,sp_hash).inject(Hash.new) do |h,row|
         namespace   = row[:namespace]
         module_name = row[:display_name]
-        full_module_name = (namespace ? Namespace.join_namespace(namespace[:display_name], module_name) : module_name)
+        full_module_name = (namespace ? Namespace::New.join_namespace(namespace[:display_name], module_name) : module_name)
         h.merge(row[:id] => full_module_name)
       end
     end
@@ -642,7 +642,7 @@ module DTK
       super()
       repo_name = repo.get_field?(:repo_name)
       module_namespace =  opts[:module_namespace]
-      full_module_name = module_namespace ? Namespace.join_namespace(module_namespace, module_name) : nil
+      full_module_name = module_namespace ? Namespace::New.join_namespace(module_namespace, module_name) : nil
       hash = {
         :repo_id => repo[:id],
         :repo_name => repo_name,

@@ -18,25 +18,25 @@ module DTK
 
     #### actions to interact with remote repos ###
     def rest__list_remote()
-      rest_ok_response ServiceModule.list_remotes(model_handle, ret_request_params(:rsa_pub_key)), :datatype => :module_remote
+      rsa_pub_key = ret_request_params(:rsa_pub_key)
+      datatype_opts = {:datatype => :module_remote}
+      rest_ok_response ServiceModule.list_remotes(model_handle,rsa_pub_key),datatype_opts
     end
 
     def rest__list_assemblies()
-      service_module_id = ret_request_param_id(:service_module_id)
       service_module = create_obj(:service_module_id)
       rest_ok_response service_module.get_assembly_templates()
     end
 
     def rest__list_instances()
-      service_module_id = ret_request_param_id(:service_module_id)
       service_module = create_obj(:service_module_id)
       rest_ok_response service_module.get_assembly_instances()
     end
 
     def rest__list_component_modules()
-      service_module_id = ret_request_param_id(:service_module_id)
       service_module = create_obj(:service_module_id)
-      rest_ok_response service_module.list_component_modules(Opts.new(:detail_to_include=>[:versions]))
+      opts = Opts.new(:detail_to_include=>[:versions])
+      rest_ok_response service_module.list_component_modules(opts)
     end
 
     # TODO: rename; this is just called by install; import ops call create route

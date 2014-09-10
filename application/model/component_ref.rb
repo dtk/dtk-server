@@ -26,9 +26,13 @@ module DTK
         :filter => [:oneof, :id, component_refs.map{|r|r[:component_template_id]}.uniq]
       }
       aug_cmp_templates = get_objs(project.model_handle(:component),sp_hash)
-      aug_cmp_templates.map do |r|
-        r[:component_module].merge(:namespace_name => r[:namespace][:display_name])
+      ndx_ret = Hash.new
+      aug_cmp_templates.each do |r|
+        component_module = r[:component_module]
+        ndx = component_module[:id]
+        ndx_ret[ndx] ||= component_module.merge(:namespace_name => r[:namespace][:display_name])
       end
+      ndx_ret.values
     end
 
     def self.print_form(cmp_ref__obj_or_hash)

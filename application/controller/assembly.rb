@@ -402,12 +402,17 @@ module DTK
         raise ErrorUsage.new("SERVICE-NAME/ASSEMBLY-NAME cannot be determined and must be explicitly given")
       end
       project = get_default_project()
+      default_namespace = default_namespace()
+
       opts = ret_symbol_params_hash(:mode)
       if namespace = ret_request_params(:namespace)
         opts.merge!(:namespace => namespace)
       end
+
+      opts.merge!(:default_namespace => default_namespace) if default_namespace
       service_module = Assembly::Template.create_or_update_from_instance(project,assembly,service_module_name,assembly_template_name,opts)
       clone_update_info = service_module.ret_clone_update_info()
+
       rest_ok_response clone_update_info
     end
     #### end: actions to update and create assembly templates

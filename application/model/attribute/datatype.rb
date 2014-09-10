@@ -1,7 +1,44 @@
-# TODO: initially scaffolds SemanticType then will remove semantic type
-# TODO: initially form sap from sap config then move to model where datatype has dynamic attribute that gets filled in
-module DTK
-  module AttributeDatatype
+module DTK; class Attribute
+  module DatatypeMixin
+    def ret_datatype()
+      unless st_summary = self[:semantic_type_summary]
+        self[:data_type]
+      else
+        is_array?() ? "array(#{st_summary})" : st_summary
+      end
+    end  
+
+    def ret_default_info()
+      default = self[:value_asserted]
+      return nil unless default
+      if is_array?()
+        ret = Hash.new
+        hash_semantic_type = semantic_type[:array]
+        default.each_with_index do |d,i|
+          el = ret_default_info__hash(hash_semantic_type,d)
+          el.each{|k,v|ret.merge!("#{k}[#{i.to_s}]" => v)}
+        end
+        ret
+      else
+        Datatype.ret_default_info__hash(semantic_type,default)
+      end
+    end
+
+    def convert_value_to_ruby_object()
+      update_object!(:data_type,:attribute_value)
+      Datatype.convert_value_to_ruby_object(self)
+    end
+
+   private
+    def semantic_type()
+      @semantic_type ||= SemanticTypeSchema.create_from_attribute(self)
+    end
+    def is_array?()
+      semantic_type().is_array?()
+    end
+  end
+
+  module Datatype
     def self.ret_datatypes()
       scalar_types = SemanticTypeSchema.ret_scalar_defined_datatypes()
       scalar_types += ret_builtin_scalar_types()
@@ -13,47 +50,28 @@ module DTK
       ret
     end
 
-    def ret_datatype()
-      st_summary = self[:semantic_type_summary]
-      return self[:data_type] unless st_summary
-      is_array? ? "array(#{st_summary})" : st_summary
-    end
-
-    def ret_default_info()
-      default = self[:value_asserted]
-      return nil unless default
-      # TODO: temparily unraveling arrays
-      if is_array?()
-        ret = Hash.new
-        hash_semantic_type = semantic_type[:array]
-        default.each_with_index do |d,i|
-          el = ret_default_info__hash(hash_semantic_type,d)
-          el.each{|k,v|ret.merge!("#{k}[#{i.to_s}]" => v)}
-        end
-        ret
-      else
-        ret_default_info__hash(semantic_type,default)
-      end
-    end
-
-    def self.convert_value_to_ruby_object(attr)
-      string_val = attr[:value_asserted]
-      return nil if string_val.nil?
+    def self.convert_value_to_ruby_object(attr,opts={})
+      attr_val_field = opts[:value_field]||:attribute_value
+      raw_val = attr[attr_val_field]
+      return nil if raw_val.nil?
       case (attr[:data_type]||"string")
         when "string" 
-          string_val
+          raw_val
         when "boolean"
-          case string_val
+          case raw_val.to_s
             when "true" then true
             when "false" then false
-            else raise Error.new("Unexpected Boolean value (#{string_val})")
+            else raise Error.new("Unexpected Boolean value (#{raw_val})")
           end
         when "integer"
-          if string_val =~ /^[0-9]+$/
-            string_val.to_i
+          if raw_val =~ /^[0-9]+$/
+            raw_val.to_i
           else 
-            raise Error.new("Unexpected Integer value (#{string_val})")
+            raise Error.new("Unexpected Integer value (#{raw_val})")
           end
+        when "json"
+          # will be converted already
+          raw_val
         else 
           raise Error.new("Unexpected Datatype (#{attr[:data_type]})")
       end
@@ -80,20 +98,7 @@ module DTK
       ret
     end
 
-    def self.default()
-      "string"
-    end
-
-   private
-    def self.ret_builtin_scalar_types()
-      [
-       "string",
-       "integer",
-       "boolean"
-      ]
-    end
-
-    def ret_default_info__hash(hash_semantic_type,default)
+    def self.ret_default_info__hash(hash_semantic_type,default)
       hash_semantic_type.inject({}) do |h,(k,v)|
         if v[:dynamic]
           h
@@ -107,11 +112,17 @@ module DTK
       end
     end
 
-    def semantic_type()
-      @semantic_type ||= SemanticTypeSchema.create_from_attribute(self)
+    def self.default()
+      "string"
     end
-    def is_array?()
-      semantic_type().is_array?
+
+   private
+    def self.ret_builtin_scalar_types()
+      [
+       "string",
+       "integer",
+       "boolean"
+      ]
     end
   end
-end
+end; end

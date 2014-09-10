@@ -64,8 +64,9 @@ module DTK
 
       def assembly_level_attributes_hash()
         if attrs = assembly_hash()[:attribute]
+          convert_opts = {:value_field => :value_asserted}
           ret = attrs.values.inject(SimpleOrderedHash.new()) do |h,a|
-            h.merge(a[:display_name] => AttributeDatatype.convert_value_to_ruby_object(a))
+            h.merge(a[:display_name] => Attribute::Datatype.convert_value_to_ruby_object(a,convert_opts))
           end
           ret unless ret.empty?
         end

@@ -3,13 +3,13 @@ files =
    'dependency_analysis',
    'group',
    'complex_type',
-   'datatype',
    'update_derived_values',
    'meta'
   ]
 r8_nested_require('attribute',files)
 module DTK
   class Attribute < Model
+    r8_nested_require('attribute','datatype')
     r8_nested_require('attribute','propagate_changes')
     r8_nested_require('attribute','pattern')
     r8_nested_require('attribute','legal_value')
@@ -18,7 +18,7 @@ module DTK
     r8_nested_require('attribute','print_form')
     r8_nested_require('attribute','semantic_datatype')
     include AttributeGroupInstanceMixin
-    include AttributeDatatype
+    include DatatypeMixin
     extend AttrDepAnalaysisClassMixin
     extend AttributeGroupClassMixin
     include ConstantMixin
@@ -332,8 +332,9 @@ module DTK
       end
       ret[:datatype] = ret_datatype()
 
-      default_info = ret_default_info()
-      ret[:default_info] = default_info if default_info
+      if default_info = ret_default_info()
+        ret[:default_info] = default_info
+      end
       
       ret
     end
@@ -388,7 +389,7 @@ module DTK
       ret = Hash.new
       [:required,:id].each{ |k| ret[k] = hash[k] if hash.has_key?(k) }
       ret[:display_name] = hash[:field_name] if hash.has_key?(:field_name)
-      type_info = AttributeDatatype.attr_def_to_internal_form(hash)
+      type_info = Datatype.attr_def_to_internal_form(hash)
       type_info.each{ |k,v| ret[k] = v }
       ret[:external_ref] = attr_def_to_internal_form__external_ref(hash)
       ret[:value_asserted] = hash[:default_info] if hash.has_key?(:default_info)

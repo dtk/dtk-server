@@ -127,7 +127,7 @@ lambda__instance_nodes_components_assembly_template =
          :convert => true,
          :join_type=>:inner,
          :join_cond=>{:id=> q(:module_branch, :service_id)},
-         :cols=>[:id,:group_id,:display_name,:ref]
+         :cols=>[:id,:group_id,:display_name,:ref,:namespace_id]
        }]
     },
     :augmented_ports=> {

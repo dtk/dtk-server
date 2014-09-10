@@ -32,6 +32,17 @@ module DTK
       get_obj_helper(:service_module)
     end
 
+    def get_namespace()
+      service_module = get_service_module()
+
+      sp_hash = {
+        :cols => [:id, :display_name],
+        :filter => [:eq, :id, service_module[:namespace_id]]
+      }
+
+      namespace = Model.get_obj(model_handle(:namespace),sp_hash)
+    end
+
     def get_port_links(opts={})
       filter = [:eq,:assembly_id,id()]
       if opts[:filter]

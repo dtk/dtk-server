@@ -39,7 +39,7 @@ module DTK; class Assembly
     end
 
     def self.create_or_update_from_instance(project,assembly_instance,service_module_name,assembly_template_name,opts={})
-      default_namespace = Namespace.default_namespace_name||opts[:default_namespace_for_user]||''
+      default_namespace = Namespace.default_namespace_name
       is_workspace = Workspace.is_workspace?(assembly_instance)
       # if namespace is not provided by user there are two options
       # 1. if this method is called from workspace then use default namespace

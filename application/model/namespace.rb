@@ -23,15 +23,16 @@ module DTK
     # Get/Create default namespace
     #
     def self.default_namespace(namespace_mh)
-      find_or_create(namespace_mh, R8::Config[:repo][:local][:default_namespace])
+      find_or_create(namespace_mh, default_namespace_name)
     end
 
     def self.enrich_with_default_namespace(module_name)
       module_name.include?(NAMESPACE_DELIMITER) ? module_name : "#{default_namespace_name}#{NAMESPACE_DELIMITER}#{module_name}"
     end
 
+    # if user for some reason set R8::Config[:repo][:local][:default_namespace] to '' we will use running_process_user() as namespace
     def self.default_namespace_name
-      R8::Config[:repo][:local][:default_namespace]
+      R8::Config[:repo][:local][:default_namespace]||::DTK::Common::Aux.running_process_user()
     end
 
     # TODO: when make global change to NAMESPACE_DELIMITER deprecate

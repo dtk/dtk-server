@@ -64,9 +64,8 @@ module DTK
 
       def assembly_level_attributes_hash()
         if attrs = assembly_hash()[:attribute]
-          convert_opts = {:value_field => :value_asserted}
           ret = attrs.values.inject(SimpleOrderedHash.new()) do |h,a|
-            h.merge(a[:display_name] => Attribute::Datatype.convert_value_to_ruby_object(a,convert_opts))
+            h.merge(a[:display_name] => attr_value_output_form(a,:value_asserted))
           end
           ret unless ret.empty?
         end
@@ -74,7 +73,7 @@ module DTK
 
       def node_attributes_output_form?(attrs)
         ret = (attrs||Hash.new).values.inject(Hash.new) do |h,attr|
-          val = attr[:value_asserted]
+          val = attr_value_output_form(attr,:value_asserted)
           val.nil? ? h : h.merge(attr[:display_name] => val)
         end
         ret unless ret.empty?
@@ -164,29 +163,15 @@ module DTK
         return ret unless attr_overrides
         av_list = attr_overrides.values.map do |attr|
           unless attr.is_title_attribute()
-            {attr[:display_name] => attr_override_value_output_form(attr)}
+            {attr[:display_name] => attr_value_output_form(attr,:attribute_value)}
           end
         end.compact.sort{|a,b|a.keys.first <=> b.keys.first}
         (!av_list.empty?)  && SimpleOrderedHash.new(:attributes => SimpleOrderedHash.new(av_list))
       end
 
-      def attr_override_value_output_form(attr)
-        if raw_val = attr[:attribute_value]
-          converted_val = 
-            case attr[:data_type]
-              when 'boolean'
-                if raw_val == 'true'
-                  true
-                elsif raw_val == 'false'
-                  false
-                end
-              when 'integer'
-                raw_val.to_i
-            end
-          converted_val || raw_val
-        end
+      def attr_value_output_form(attr,value_field)
+        Attribute::Datatype.convert_value_to_ruby_object(attr,:value_field => value_field)
       end
-
     end
   end; end
 end

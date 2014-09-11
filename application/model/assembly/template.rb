@@ -207,7 +207,7 @@ module DTK; class Assembly
         pntr = ndx_ret[r[:id]] ||= r.id_handle.create_object().merge(:display_name => pretty_print_name(r,pp_opts),:ndx_nodes => Hash.new)
         pntr.merge!(:module_branch_id => r[:module_branch_id]) if r[:module_branch_id]
         # TODO: should replace with something more robust to find namespace
-        if namespace = Namespace.deprecate__namespace_from_ref?(r[:service_module][:ref])
+        if namespace = Namespace::New.deprecate__namespace_from_ref?(r[:service_module][:ref])
           pntr.merge!(:namespace => namespace)
         end
 
@@ -255,7 +255,7 @@ module DTK; class Assembly
           Log.error("Unexpected that opts[:include_namespace] is truue and no namespace object in assembly")
           return ret
         end
-        ret = Namespace.join_namespace2(namespace_name, ret)
+        ret = Namespace::New.join_namespace(namespace_name, ret)
       end
       ret
     end

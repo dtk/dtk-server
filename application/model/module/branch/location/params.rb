@@ -8,7 +8,7 @@ module DTK; class ModuleBranch
           unless ns = module_namespace_name()
             raise Error.new("Unexpected that self does not have namespace set")
           end
-          ret = Namespace.join_namespace(ns, ret)
+          ret = Namespace::New.join_namespace(ns, ret)
         end
         ret
       end

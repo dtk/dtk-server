@@ -29,7 +29,7 @@ module DTK; module ModuleMixins
       end
 
       if is_parsed and not opts[:no_error_if_exists]
-        full_module_name = module_namespace.enrich_module_name(module_name)
+        full_module_name = Namespace(module_namespace.display_name(),module_name)
         raise ErrorUsage.new("Module (#{full_module_name}) cannot be created since it exists already")
       end
 
@@ -85,7 +85,7 @@ module DTK; module ModuleMixins
     def create_ws_module_and_branch_obj?(project, repo_idh, module_name, input_version, namespace, ancestor_branch_idh=nil)
       project_idh = project.id_handle()
 
-      ref = namespace.enrich_module_name(module_name)
+      ref = Namespace::New.join_namespace(namespace.display_name(),module_name)
       module_type = model_name.to_s
       opts = {:version => input_version}
       opts.merge!(:ancestor_branch_idh => ancestor_branch_idh) if ancestor_branch_idh

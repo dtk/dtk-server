@@ -1,11 +1,28 @@
 module DTK
   class Namespace < Model
+    # TODO: get rid of this class and fold into paraent after finish conversion
+    # Methods that use this constant are:
+    # - namespace_delimiter
+    # - join_namespace
+    # - full_module_name_parts?
+    # - deprecate__namespace_from_ref?
+    class New < self
+      NEW_NAMESPACE_DELIMITER = ':'
+      def self.namespace_delimiter()
+        NEW_NAMESPACE_DELIMITER
+      end
+    end
 
     NAMESPACE_DELIMITER = '::'
+    def self.namespace_delimiter()
+      NAMESPACE_DELIMITER
+    end
+    private_class_method :namespace_delimiter
+
     # TODO: should replace with something more robust to find namespace
     def self.deprecate__namespace_from_ref?(service_module_ref)
-      if service_module_ref.include? '::'
-        service_module_ref.split("::").first
+      if service_module_ref.include? namespace_delimiter()
+        service_module_ref.split(namespace_delimiter()).first
       end
     end
 
@@ -35,17 +52,13 @@ module DTK
       R8::Config[:repo][:local][:default_namespace]||::DTK::Common::Aux.running_process_user()
     end
 
-    # TODO: when make global change to NAMESPACE_DELIMITER deprecate
-    def self.join_namespace2(namespace, name)
-      "#{namespace}:#{name}"
-    end
     def self.join_namespace(namespace, name)
-      "#{namespace}#{NAMESPACE_DELIMITER}#{name}"
+      "#{namespace}#{namespace_delimiter()}#{name}"
     end
 
     # returns [namespace,name]; namespace can be null if cant determine it
     def self.full_module_name_parts?(name_or_full_module_name)
-      if name_or_full_module_name =~ Regexp.new("(^.+)#{NAMESPACE_DELIMITER}(.+$)")
+      if name_or_full_module_name =~ Regexp.new("(^.+)#{namespace_delimiter()}(.+$)")
         namespace,name = [$1,$2]
       else
         namespace,name = [nil,name_or_full_module_name]
@@ -89,10 +102,6 @@ module DTK
         ).first
 
       idh.create_object()
-    end
-
-    def enrich_module_name(module_name)
-      "#{self.display_name()}#{NAMESPACE_DELIMITER}#{module_name}"
     end
 
     # TODO: would need to enhance if get a legitimate key, but it has nil or false value

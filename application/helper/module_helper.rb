@@ -165,6 +165,14 @@ module Ramaze::Helper
       end
     end
 
+    def ret_assembly_template_idh()
+      assembly_template_id, subtype = ret_assembly_params_id_and_subtype()
+      unless subtype == :template
+        raise ::DTK::Error.new("Unexpected that subtype has value (#{subtype})")
+      end
+      id_handle(assembly_template_id,:assembly_template)
+    end
+
     def ret_config_agent_type()
       ret_request_params(:config_agent_type)|| :puppet #TODO: puppet hardwired
     end
@@ -199,7 +207,6 @@ module Ramaze::Helper
     end
 
     private
-
     def module_class(module_type)
       case module_type.to_sym
         when :component_module then ComponentModule
@@ -235,14 +242,12 @@ module Ramaze::Helper
       remote_namespace
     end
 
-    NAMESPACE_NAME_SPLITER = "::"
-
     # override to include namespace in given calculations
     def create_obj(param, model_class=nil,extra_context=nil)
       id_or_name = ret_non_null_request_params(param)
-
-      if id_or_name.include?(NAMESPACE_NAME_SPLITER)
-        namespace, id_or_name = id_or_name.split(NAMESPACE_NAME_SPLITER)
+      namespace_delimiter = ::DTK::Namespace::New.namespace_delimiter()
+      if id_or_name.include?(namespace_delimiter)
+        namespace, id_or_name = id_or_name.split(namespace_delimiter)
       end
 
       id_resolved = resolve_id_from_name_or_id(id_or_name, model_class, extra_context || namespace)

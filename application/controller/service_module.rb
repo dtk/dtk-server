@@ -18,25 +18,25 @@ module DTK
 
     #### actions to interact with remote repos ###
     def rest__list_remote()
-      rest_ok_response ServiceModule.list_remotes(model_handle, ret_request_params(:rsa_pub_key)), :datatype => :module_remote
+      rsa_pub_key = ret_request_params(:rsa_pub_key)
+      datatype_opts = {:datatype => :module_remote}
+      rest_ok_response ServiceModule.list_remotes(model_handle,rsa_pub_key),datatype_opts
     end
 
     def rest__list_assemblies()
-      service_module_id = ret_request_param_id(:service_module_id)
       service_module = create_obj(:service_module_id)
       rest_ok_response service_module.get_assembly_templates()
     end
 
     def rest__list_instances()
-      service_module_id = ret_request_param_id(:service_module_id)
       service_module = create_obj(:service_module_id)
       rest_ok_response service_module.get_assembly_instances()
     end
 
     def rest__list_component_modules()
-      service_module_id = ret_request_param_id(:service_module_id)
       service_module = create_obj(:service_module_id)
-      rest_ok_response service_module.list_component_modules(Opts.new(:detail_to_include=>[:versions]))
+      opts = Opts.new(:detail_to_include=>[:versions])
+      rest_ok_response service_module.list_component_modules(opts)
     end
 
     # TODO: rename; this is just called by install; import ops call create route
@@ -105,8 +105,7 @@ module DTK
       opts.merge!(:remote_repo_base => remote_repo_base, :diff => diff)
       datatype = :module_diff if diff
 
-      full_list = ServiceModule.list(opts)
-      rest_ok_response full_list, :datatype => datatype
+      rest_ok_response ServiceModule.list(opts), :datatype => datatype
     end
 
     def rest__versions()
@@ -203,9 +202,8 @@ module DTK
     end
 
     def rest__delete_assembly_template()
-      # using ret_assembly_params_id_and_subtype to get asembly_template_id
-      assembly_id, subtype = ret_assembly_params_id_and_subtype()
-      rest_ok_response Assembly::Template.delete_and_ret_module_repo_info(id_handle(assembly_id))
+      assembly_template_idh = ret_assembly_template_idh()
+      rest_ok_response Assembly::Template.delete_and_ret_module_repo_info(assembly_template_idh)
     end
 
     def rest__update_model_from_clone()

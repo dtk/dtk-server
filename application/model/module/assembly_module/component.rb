@@ -88,7 +88,7 @@ module DTK; class AssemblyModule
       new(assembly).validate_component_module_ret_namespace(module_name)
     end
     def validate_component_module_ret_namespace(module_name)
-      namespace, name = Namespace.full_module_name_parts?(module_name)
+      namespace, name = Namespace::New.full_module_name_parts?(module_name)
       return namespace if namespace
 
       component_modules = get_for_assembly()

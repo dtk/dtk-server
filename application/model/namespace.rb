@@ -2,12 +2,12 @@ module DTK
   class Namespace < Model
     # TODO: get rid of this class and fold into paraent after finish conversion
     # Methods that use this constant are:
+    # - namespace_delimiter
     # - join_namespace
     # - full_module_name_parts?
     # - deprecate__namespace_from_ref?
     class New < self
       NEW_NAMESPACE_DELIMITER = ':'
-     private 
       def self.namespace_delimiter()
         NEW_NAMESPACE_DELIMITER
       end

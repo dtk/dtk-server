@@ -40,18 +40,24 @@ module DTK
     end
 
     module DSLClassMixin
-      def delete_assembly_dsl?(assembly_idh)
+      def delete_assembly_dsl?(assembly_template_idh)
         sp_hash = {
           :cols => [:display_name, :module_branch],
-          :filter => [:eq,:id,assembly_idh.get_id()]
+          :filter => [:eq,:id,assembly_template_idh.get_id()]
         }
-        assembly_mh = assembly_idh.createMH()
+        assembly_template_mh = assembly_template_idh.createMH()
         ndx_module_branches = Hash.new
-        get_objs(assembly_mh,sp_hash).each do |r|
+        Assembly::Template.get_objs(assembly_template_mh,sp_hash).each do |r|
           module_branch = r[:module_branch]
           assembly_name = r[:display_name]
+
+          assembly_path = assembly_meta_filename_path(assembly_name,module_branch)
+          raise Error.new("need to modify to componsate for fact that what is now needs to be deleted is files and possibly dir; these are assembly file (#{assembly_path}), plus possibly settings files")
+          ## OLD code
           assembly_dir = assembly_meta_directory_path(assembly_name)
           RepoManager.delete_directory?(assembly_dir,module_branch)
+          ## END OF code that must be modified
+
           ndx_module_branches[module_branch[:id]] ||= module_branch
         end
         ret = nil
@@ -64,25 +70,59 @@ module DTK
         ret
       end
 
-      def assembly_meta_directory_path(assembly_name)
-        "assemblies/#{assembly_name}"
-      end
-
-      def new_assembly_file_path(assembly_name, file_type)
-        "assemblies/#{assembly_name}.dtk.assembly.#{file_type}"
-      end
-
-      def assembly_meta_filename_path(assembly_name, opts={})
-        is_new_structure = is_new_service_structure?(opts[:module_branch])
+      def assembly_meta_filename_path(assembly_name,module_branch)
         file_type = dsl_files_format_type()
-
-        return new_assembly_file_path(assembly_name, file_type) if is_new_structure
-        "#{assembly_meta_directory_path(assembly_name)}/assembly.#{file_type}"
+        if is_legacy_service_module_structure?(module_branch)
+          "assemblies/#{assembly_name}/assembly.#{file_type}"
+        else
+          "assemblies/#{assembly_name}.dtk.assembly.#{file_type}"
+        end
       end
 
       def assembly_workflow_meta_filename_path(assembly_name,task_action)
         file_type = dsl_files_format_type()
-        "#{assembly_meta_directory_path(assembly_name)}/workflows/#{task_action}.#{file_type}"
+        "assemblies/#{assembly_name}/workflows/#{task_action}.#{file_type}"
+      end
+
+      # returns [meta_files,regexp]
+      def meta_files_and_regexp?(module_branch)
+        meta_files,regexp,is_legacy_structure = meta_files_regexp_and_is_legacy?(module_branch)
+        [meta_files,regexp]
+      end
+
+     private
+
+      # returns [meta_files,regexp,is_legacy_structure]
+      def meta_files_regexp_and_is_legacy?(module_branch)
+        # determine if new structure or not
+        is_legacy_structure = false 
+        meta_files,regexp = meta_files_and_regexp_aux?(AssemblyFilenamePathInfo,module_branch)
+        if meta_files.empty?
+          meta_files,regexp = meta_files_and_regexp_aux?(AssemblyFilenamePathInfoLegacy,module_branch)
+          is_legacy_structure = !meta_files.empty?
+        end
+        [meta_files,regexp,is_legacy_structure]
+      end
+      AssemblyFilenamePathInfoLegacy = {
+        :regexp => Regexp.new("^assemblies/([^/]+)/assembly\.(json|yaml)$"),
+        :path_depth => 3
+      }
+      AssemblyFilenamePathInfo = {
+        :regexp => Regexp.new("^assemblies/(.*)\.dtk\.assembly\.(json|yaml)$"),
+        :path_depth => 3
+      }
+
+      def is_legacy_service_module_structure?(module_branch)
+        meta_files,regexp,is_legacy_structure = meta_files_regexp_and_is_legacy?(module_branch)
+        is_legacy_structure
+      end
+
+      # returns [meta_files, regexp]
+      def meta_files_and_regexp_aux?(assembly_dsl_path_info,module_branch)
+        depth = assembly_dsl_path_info[:path_depth]
+        meta_files = RepoManager.ls_r(depth,{:file_only => true},module_branch)
+        regexp = assembly_dsl_path_info[:regexp]
+        [meta_files.select{|f|f =~ regexp},regexp]
       end
 
       def dsl_files_format_type()
@@ -93,23 +133,6 @@ module DTK
           else raise Error.new("Unexpected value for dsl.service.format_type.default: #{format_type_default}")
         end
       end
-
-      def is_new_service_structure?(module_branch)
-        assembly_dsl_path_info = NewStructureFilepaths
-        regex = assembly_dsl_path_info[:regexp]
-        depth = assembly_dsl_path_info[:path_depth]
-
-        meta_files = RepoManager.ls_r(depth, {:file_only => true}, module_branch)
-        meta_files.select!{|f|f =~ regex}
-
-        !meta_files.empty?
-      end
-      NewStructureFilepaths = {
-        :regexp => Regexp.new("^assemblies/(.*)\.dtk\.assembly\.(json|yaml)$"),
-        :path_depth => 2
-      }
-
-      private :dsl_files_format_type
     end
 
     module DSLMixin
@@ -187,33 +210,13 @@ module DTK
         imported
       end
 
-      AssemblyFilenamePathInfo = {
-        :regexp => Regexp.new("^assemblies/([^/]+)/assembly\.(json|yaml)$"),
-        :path_depth => 3
-      }
-      AssemblyFilenamePathInfoNew = {
-        :regexp => Regexp.new("^assemblies/(.*)\.dtk\.assembly\.(json|yaml)$"),
-        :path_depth => 3
-      }
-
-      # signature is  assembly_meta_file_paths(module_branch) do |meta_file,default_assembly_name|
+      # signature is assembly_meta_file_paths(module_branch) do |meta_file,default_assembly_name|
       def assembly_meta_file_paths(module_branch, &block)
-        # determine if new structure or not
-        meta_files,regexp = meta_files_and_regexp?(AssemblyFilenamePathInfoNew,module_branch)
-        if meta_files.empty?
-          meta_files,regexp = meta_files_and_regexp?(AssemblyFilenamePathInfo,module_branch)
-        end
+        meta_files,regexp = ServiceModule.meta_files_and_regexp?(module_branch)
         ret_with_removed_variants(meta_files).each do |meta_file|
           default_assembly_name = (if meta_file =~ regexp then $1; end) 
           block.call(meta_file,default_assembly_name)
         end
-      end
-      # returns [meta_files, regexp]
-      def meta_files_and_regexp?(assembly_dsl_path_info,module_branch)
-        depth = assembly_dsl_path_info[:path_depth]
-        meta_files = RepoManager.ls_r(depth,{:file_only => true},module_branch)
-        regexp = assembly_dsl_path_info[:regexp]
-        [meta_files.select{|f|f =~ regexp},regexp]
       end
 
       def ret_with_removed_variants(paths)

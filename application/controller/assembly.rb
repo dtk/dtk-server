@@ -411,9 +411,7 @@ module DTK
 
       opts.merge!(:default_namespace_for_user => default_namespace_for_user) if default_namespace_for_user
       service_module = Assembly::Template.create_or_update_from_instance(project,assembly,service_module_name,assembly_template_name,opts)
-      clone_update_info = service_module.ret_clone_update_info()
-
-      rest_ok_response clone_update_info
+      rest_ok_response service_module.ret_clone_update_info()
     end
     #### end: actions to update and create assembly templates
 

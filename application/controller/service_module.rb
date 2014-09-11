@@ -202,9 +202,8 @@ module DTK
     end
 
     def rest__delete_assembly_template()
-      # using ret_assembly_params_id_and_subtype to get asembly_template_id
-      assembly_id, subtype = ret_assembly_params_id_and_subtype()
-      rest_ok_response Assembly::Template.delete_and_ret_module_repo_info(id_handle(assembly_id))
+      assembly_template_idh = ret_assembly_template_idh()
+      rest_ok_response Assembly::Template.delete_and_ret_module_repo_info(assembly_template_idh)
     end
 
     def rest__update_model_from_clone()

@@ -20,7 +20,7 @@ module DTK; class  Assembly
 
         if opts[:detail_level].nil?
           if opts[:include_namespaces]
-            Log.error("Unexpcetd that opts[:include_namespaces] is true")
+            Log.error("Unexpectd that opts[:include_namespaces] is true")
           end
           list_aux__no_details(assembly_rows)
         else

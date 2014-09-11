@@ -332,7 +332,7 @@ module DTK
       :remote_dependencies =>
         lambda__components_and_non_default_attrs.call(
           :cmp_cols=>FactoryObject::CommonCols+[:ancestor_id,:component_type,:only_one_per_node],
-          :attr_cols=>FactoryObject::CommonCols+[:attribute_value,:external_ref])
+          :attr_cols=>FactoryObject::CommonCols+[:attribute_value,:external_ref,:data_type])
         
       virtual_column :input_attribute_links_cmp, :type => :json, :hidden => true, 
       :remote_dependencies => 

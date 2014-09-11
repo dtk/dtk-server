@@ -162,14 +162,14 @@ module DTK
 
       # target_ref_attributes are ones used on target refs and can also be on instances
       def get_target_ref_attributes(node_idhs,opts={})
-        cols = opts[:cols] || [:id,:display_name,:node_node_id,:attribute_value]
+        cols = opts[:cols] || [:id,:display_name,:node_node_id,:attribute_value,:data_type]
         add_filter = NodeAttribute.target_ref_attributes_filter()
         get_node_level_attributes(node_idhs,:cols=>cols,:add_filter=>add_filter)
       end
 
       # node_level_assembly_template_attributes are ones that are persisted in service modules
       def get_node_level_assembly_template_attributes(node_idhs,opts={})
-        cols = opts[:cols] || [:id,:display_name,:node_node_id,:attribute_value]
+        cols = opts[:cols] || [:id,:display_name,:node_node_id,:attribute_value,:data_type]
         add_filter = NodeAttribute.assembly_template_attribute_filter()
         get_node_level_attributes(node_idhs,:cols=>cols,:add_filter=>add_filter)
       end

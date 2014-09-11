@@ -263,22 +263,14 @@ module DTK; class ServiceModule
       ret = DBUpdateHash.new()
       attr_val_hash.each_pair do |attr_name,attr_val|
         ref = dispaly_name = attr_name
-        data_type =
-          if attr_val.kind_of?(TrueClass) or attr_val.kind_of?(FalseClass)
-            "boolean"
-          else
-            "string"
-          end
-            
         ret[ref] = {
           "display_name" => attr_name,
           "value_asserted" => attr_val,
-          "data_type" => data_type
+          "data_type" => Attribute::Datatype.datatype_from_ruby_object(attr_val)
         }
       end
       ret.mark_as_complete()
     end
-
 
     def self.import_attribute_overrides(attr_name,attr_val,opts={})
       attr_info = {:display_name => attr_name, :attribute_value => attr_val}

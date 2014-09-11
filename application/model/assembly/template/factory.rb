@@ -197,7 +197,6 @@ module DTK
       end
 
       def self.exists?(assembly_mh,service_module,template_name)
-        Log.info("TODO: Rich wil fix this up; not catching case when exists?")
         ret = nil
         sp_hash = {
           :cols => [:id,:group_id,:display_name],
@@ -206,7 +205,7 @@ module DTK
         module_branches = get_objs(service_module.model_handle(:module_branch),sp_hash)
         return ret if module_branches.empty?
 
-        service_module_name = service_module.get_field?(:display_name),
+        service_module_name = service_module.get_field?(:display_name)
         component_type = component_type(service_module_name,template_name)
         sp_hash = {
           :cols => [:id,:display_name,:group_id,:component_type,:project_project_id,:ref,:ui,:type,:module_branch_id],

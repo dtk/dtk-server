@@ -278,7 +278,10 @@ module DTK; class Component
             end
           end
 
-          raise ErrorUsage.new("Multiple components matching component name you provided. Please use namespace:component format to add new component!") if match_cmps.size > 1
+          # if match multiple cmp templates but no matching component modules, or multiple matching component modules raise error
+          non_matching = ((cmp_templates.size > 1) && match_cmps.empty?)
+          raise ErrorUsage.new("Multiple components matching name you provided. Please use namespace:component format to add new component!") if (match_cmps.size > 1 || non_matching)
+
           ret_cmp = match_cmps.first
         end
       end

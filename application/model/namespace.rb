@@ -13,7 +13,7 @@ module DTK
       end
     end
 
-    NAMESPACE_DELIMITER = '::'
+    NAMESPACE_DELIMITER = ':'
     def self.namespace_delimiter()
       NAMESPACE_DELIMITER
     end

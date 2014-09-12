@@ -20,8 +20,10 @@ module DTK
         def msgs_per_cmp_template(ref_cmp_templates)
           ref_cmp_templates.map do |ref_cmp_template|
             cmp_tmpl_name = ref_cmp_template[:component_template].display_name_print_form
-            ref_cmp_template[:assembly_templates].map do |assembly_template|
-              assembly_template_name = Assembly::Template.pretty_print_name(assembly_template)
+            assembly_templates = ref_cmp_template[:assembly_templates]
+            Assembly::Template.augment_with_namespaces!(assembly_templates)
+            assembly_templates.map do |assembly_template|
+              assembly_template_name = Assembly::Template.pretty_print_name(assembly_template,:include_namespace=>true)
               "Component Template (#{cmp_tmpl_name}) is referenced by assembly template (#{assembly_template_name})"
             end
           end.flatten(1)

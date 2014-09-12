@@ -1,30 +1,24 @@
 module DTK; class ModuleDSL
   class RefIntegrity
     class Snapshot
-# TODO: for testing
-attr_reader :ndx_cmp_refs,:ports,:port_links
       attr_reader :link_defs
       def initialize(cmp_module)
         @cmp_module = cmp_module
-        # ndx_cmp_refs is component refs indexed by component template; plus augmented info for cmp refs; it has form
-        # Component::Template:
-        #   component_refs:
-        #   - ComponentRef:
-        #      node: Node
-        #      assembly_template: Assembly::Template
-        @ndx_cmp_refs = get_ndx_cmp_refs(cmp_module)
-        @ports = get_ports(@ndx_cmp_refs)
+        # aug_cmp_templates is array with component ref info augmented to it
+        @aug_cmp_templates = get_aug_cmp_templates(cmp_module)
+        @ports = get_ports(@aug_cmp_templates)
         @port_links = get_port_links(@ports)
-        @link_defs = get_link_defs(@ndx_cmp_refs)
+        @link_defs = get_link_defs(@aug_cmp_templates)
       end
 
-      def cmp_ref_ids()
-        @ndx_cmp_refs.map{|r|r[:id]}
+      def component_template_ids(aug_cmp_templates=nil)
+        aug_cmp_templates ||= @aug_cmp_templates
+        aug_cmp_templates.map{|cmp_template|cmp_template.id()}
       end
 
       def referenced_cmp_templates(exclude_cmp_template_ids)
-        pruned_ndx_cmp_refs = @ndx_cmp_refs.reject{|ct|exclude_cmp_template_ids.include?(ct[:id])}
-        ReferencedComponentTemplates.new(pruned_ndx_cmp_refs)
+        pruned_aug_cmp_templates = @aug_cmp_templates.reject{|ct|exclude_cmp_template_ids.include?(ct[:id])}
+        ReferencedComponentTemplates.new(pruned_aug_cmp_templates)
       end
 
       def create_link_def_info(new_links_defs)
@@ -35,7 +29,7 @@ attr_reader :ndx_cmp_refs,:ports,:port_links
           h.merge(ld[:component_component_id] => ld)
         end
         
-        @ndx_cmp_refs.each do |cmp_template|
+        @aug_cmp_templates.each do |cmp_template|
           if link_def = ndx_link_defs[cmp_template[:id]]
             cmp_template[:component_refs].each do |cmp_ref|
               node = cmp_ref[:node]
@@ -55,14 +49,14 @@ attr_reader :ndx_cmp_refs,:ports,:port_links
 
      private
       # writing the get function sso can be passed explicitly refernce object or can use the internal @ vars
-      def get_ndx_cmp_refs(cmp_module=nil)
+      def get_aug_cmp_templates(cmp_module=nil)
         cmp_module ||= @cmp_module
         cmp_module.get_associated_assembly_cmp_refs()
       end
-      def get_link_defs(ndx_cmp_refs=nil)
-        ndx_cmp_refs ||= @ndx_cmp_refs
+      def get_link_defs(aug_cmp_templates=nil)
+        aug_cmp_templates ||= @aug_cmp_templates
         ret = Array.new
-        cmp_template_ids = cmp_template_ids(ndx_cmp_refs)
+        cmp_template_ids = component_template_ids(aug_cmp_templates)
         if cmp_template_ids.empty?
           return ret
         end
@@ -72,10 +66,10 @@ attr_reader :ndx_cmp_refs,:ports,:port_links
         }
         Model.get_objs(model_handle(:link_def),sp_hash,:keep_ref_cols => true)
       end
-      def get_ports(ndx_cmp_refs=nil)
-        ndx_cmp_refs ||= @ndx_cmp_refs
+      def get_ports(aug_cmp_templates=nil)
+        aug_cmp_templates ||= @aug_cmp_templates
         ret = Array.new
-        cmp_template_ids = cmp_template_ids(ndx_cmp_refs)
+        cmp_template_ids = component_template_ids(aug_cmp_templates)
         if cmp_template_ids.empty?
           return ret
         end
@@ -99,27 +93,22 @@ attr_reader :ndx_cmp_refs,:ports,:port_links
         Model.get_objs(model_handle(:port_link),sp_hash)
       end
 
-      def cmp_template_ids(ndx_cmp_refs=nil)
-        ndx_cmp_refs ||= @ndx_cmp_refs
-        ndx_cmp_refs.map{|ct|ct[:component_refs].map{|cr|cr[:component_template_id]}}.flatten.uniq
-      end
-
       def model_handle(model_name)
         @cmp_module.model_handle(model_name)
       end
 
       class ReferencedComponentTemplates < Array
-        def initialize(ndx_cmp_refs)
-          super(ref_cmp_templates(ndx_cmp_refs))
+        def initialize(aug_cmp_templates)
+          super(ref_cmp_templates(aug_cmp_templates))
         end
        private
-        def ref_cmp_templates(ndx_cmp_refs)
+        def ref_cmp_templates(aug_cmp_templates)
           ret = Array.new
-          if ndx_cmp_refs.empty?
+          if aug_cmp_templates.empty?
             return ret
           end
           ndx_ret = Hash.new
-          ndx_cmp_refs.each do |cmp_tmpl|
+          aug_cmp_templates.each do |cmp_tmpl|
             ndx = cmp_tmpl[:id]
             cmp_tmpl[:component_refs].map do |aug_cmp_ref|
               pntr = ndx_ret[ndx] ||= {:component_template => aug_cmp_ref.hash_subset(*CmpTemplateCols), :assembly_templates => Array.new}

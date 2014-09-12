@@ -23,8 +23,8 @@ module DTK
       end
 
       def raise_error_if_dangling_cmp_ref(opts={})
-        cmp_ref_ids = @snapshot.cmp_ref_ids()
-        return if cmp_ref_ids.empty?
+        referenced_cmp_template_ids = @snapshot.component_template_ids()
+        return if referenced_cmp_template_ids.empty?
         # this is called within transaction after any deletes are performed (if any)
         # TODO: have ModuleDSL.parse_and_update_model return if any deletes
         # below is the conservative thing to do if dont know if any deletes
@@ -34,7 +34,7 @@ module DTK
         
         sp_hash = {
           :cols => [:id,:display_name,:group_id],
-          :filter => [:oneof, :id, cmp_ref_ids]
+          :filter => [:oneof, :id, referenced_cmp_template_ids]
         }
         cmp_template_ids_still_present = Model.get_objs(model_handle(:component),sp_hash).map{|r|r[:id]}
         referenced_cmp_templates = @snapshot.referenced_cmp_templates(cmp_template_ids_still_present)

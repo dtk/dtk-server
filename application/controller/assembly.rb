@@ -116,31 +116,41 @@ module DTK
         raise ErrorUsage::BadParamValue.new(:about,AboutEnum[subtype])
       end
 
+      opts = Opts.new(:detail_level => detail_level)
       additional_filter_proc = nil
-      if about == :attributes and 'editable' == ret_request_params(:attribute_type)
-        Log.error("TODO: set additional_filter_proc as {|e|e[:attribute].editable?")
-      end
-      filter_proc = Proc.new do |e|
-        ret_val = check_element(e,[:node,:id],node_id) && check_element(e,[:attribute,:component_component_id],component_id) && e
-        ret_val = nil if (e[:attribute] and e[:attribute][:hidden])
-        ret_val
-      end 
-      opts = Opts.new(:filter_proc => filter_proc, :detail_level => detail_level)
-      opts.add_return_datatype!()
-      if detail_to_include
-        opts.merge!(:detail_to_include => detail_to_include.map{|r|r.to_sym})
-        opts.add_value_to_return!(:datatype)
-      end
       if about == :attributes
         if format == :yaml
           opts.merge!(:settings_form => true,:mark_unset_required => true)
         else
           opts.merge!(:truncate_attribute_values => true,:mark_unset_required => true)
         end
+
+        additional_filter_proc = 
+          if 'editable' == ret_request_params(:attribute_type)
+            Proc.new{|e|(!e[:attribute].kind_of?(Attribute)) or (!e[:attribute][:hidden] and e[:attribute].editable?)}
+          else
+            Proc.new do |e|
+            (!e[:attribute].kind_of?(Attribute)) or !e[:attribute][:hidden]
+          end
+          end
       end
 
-      if node_id
-        opts.merge!(:node_cmp_name => true)  unless node_id.empty?
+      opts[:filter_proc] = Proc.new do |e|
+        if element_matches?(e,[:node,:id],node_id) and
+            element_matches?(e,[:attribute,:component_component_id],component_id)
+          if additional_filter_proc.nil? or additional_filter_proc.call(e)
+            e
+          end
+        end
+      end
+      opts.add_return_datatype!()
+      if detail_to_include
+        opts.merge!(:detail_to_include => detail_to_include.map{|r|r.to_sym})
+        opts.add_value_to_return!(:datatype)
+      end
+
+      if node_id and !node_id.empty?
+        opts.merge!(:node_cmp_name => true)
       end
       
       data = assembly.info_about(about, opts)
@@ -231,18 +241,6 @@ module DTK
       type = :simple 
       AssemblyModule::Component.create_component_dependency?(type,assembly,cmp_template,antecedent_cmp_template)
       rest_ok_response
-    end
-
-    # checks element through set of fields
-    def check_element(element, fields, element_id_val)
-      return true if (element_id_val.nil? || element_id_val.empty?)
-      return false if element.nil?
-      temp_element = element.dup
-      fields.each do |field|
-        temp_element = temp_element[field]
-        return false if temp_element.nil?
-      end
-      return (temp_element == element_id_val.to_i)
     end
 
     AboutEnum = {

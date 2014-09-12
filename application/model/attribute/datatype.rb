@@ -25,7 +25,7 @@ module DTK; class Attribute
     end
 
     def convert_value_to_ruby_object()
-      update_object!(:data_type,:attribute_value)
+      update_object!(:data_type,:value_asserted,:value_derived)
       Datatype.convert_value_to_ruby_object(self)
     end
 

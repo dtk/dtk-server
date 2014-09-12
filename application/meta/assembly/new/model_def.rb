@@ -209,7 +209,7 @@ lambda__instance_nodes_components_assembly_template =
          :convert => true,
          :join_type=>:inner,
          :join_cond=>{:node_node_id=>:node__id},
-         :cols => [:id,:display_name,:group_id,:hidden,:description,:component_component_id,:attribute_value,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change]
+         :cols => Attribute.common_columns()
        }]
     },
     :instance_parent=> {

@@ -1,6 +1,13 @@
 # TODO: temp until move into meta directory
-module XYZ
-  module AttributeMetaClassMixin
+module XYZ; class Attribute
+ # TOOD: hack taht can be removed when update_object allows virtual types
+  module VirtulaDependency              
+    def self.port_type()
+      [:dynamic,:is_port,:port_type_asserted,:semantic_type_summary]
+    end
+  end
+
+  module MetaClassMixin
     def up()
       external_ref_column_defs()
       virtual_column :config_agent_type, :type => :string, :local_dependencies => [:external_ref]
@@ -39,7 +46,9 @@ module XYZ
       column :is_port, :boolean, :default => false
       column :port_type_asserted, :varchar, :size => 10
       column :is_external, :boolean
-      virtual_column :port_type, :type => :varchar, :hidden => true, :local_dependencies => [:dynamic,:is_port,:port_type_asserted,:semantic_type_summary]
+      
+      virtual_column :port_type, :type => :varchar, :hidden => true, :local_dependencies => VirtulaDependency.port_type()
+      
       virtual_column :port_is_external, :type => :boolean, :hidden => true, :local_dependencies => [:is_port,:is_external,:semantic_type_summary]
 
       virtual_column :is_unset, :type => :boolean, :hidden => true, :local_dependencies => [:value_asserted,:value_derived,:data_type,:semantic_type]
@@ -175,4 +184,4 @@ module XYZ
 
     end
   end
-end
+end; end

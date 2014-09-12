@@ -127,7 +127,7 @@ module DTK
 
         additional_filter_proc = 
           if 'editable' == ret_request_params(:attribute_type)
-            Proc.new{|e|(!e[:attribute].kind_of?(Attribute)) or (!e[:attribute][:hidden] and e[:attribute].editable?)}
+            Proc.new{|e|(!e[:attribute].kind_of?(Attribute)) or (!e[:attribute][:hidden] and !e[:attribute].is_readonly?)}
           else
             Proc.new do |e|
             (!e[:attribute].kind_of?(Attribute)) or !e[:attribute][:hidden]

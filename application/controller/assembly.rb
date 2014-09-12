@@ -115,6 +115,11 @@ module DTK
       unless AboutEnum[subtype].include?(about)
         raise ErrorUsage::BadParamValue.new(:about,AboutEnum[subtype])
       end
+
+      additional_filter_proc = nil
+      if about == :attributes and 'editable' == ret_request_params(:attribute_type)
+        Log.error("TODO: set additional_filter_proc as {|e|e[:attribute].editable?")
+      end
       filter_proc = Proc.new do |e|
         ret_val = check_element(e,[:node,:id],node_id) && check_element(e,[:attribute,:component_component_id],component_id) && e
         ret_val = nil if (e[:attribute] and e[:attribute][:hidden])

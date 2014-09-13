@@ -592,7 +592,7 @@ module DTK; class  Assembly
     end
 
     AttributesAllLevels = Struct.new(:assembly_attrs,:component_attrs,:node_attrs)
-    def get_attributes_all_levels_struct(filter_proc)
+    def get_attributes_all_levels_struct(filter_proc=nil)
       assembly_attrs = get_assembly_level_attributes(filter_proc)
       component_atttrs = get_augmented_nested_component_attributes(filter_proc).reject do |attr|
         (not attr[:nested_component].get_field?(:only_one_per_node)) and attr.is_title_attribute?()

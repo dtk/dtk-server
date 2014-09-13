@@ -546,9 +546,11 @@ module DTK
       project = local.project()
       project_idh = project.id_handle()
       module_match_filter =
-        (local.module_namespace_name() ?
-         [:eq, :ref, local.module_name(:with_namespace=>true)] :
-         [:eq, :display_name, local.module_name])
+        if local_namespace = local.module_namespace_name()
+         [:eq, :ref, Namespace::New.module_ref_field(local.module_name(),local_namespace)]
+        else
+          [:eq, :display_name, local.module_name]
+        end
       filter = [:and, module_match_filter, [:eq, :project_project_id, project_idh.get_id()]]
       branch = local.branch_name()
       post_filter = proc{|mb|mb[:branch] == branch}

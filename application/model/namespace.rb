@@ -5,7 +5,8 @@ module DTK
     # - namespace_delimiter
     # - join_namespace
     # - full_module_name_parts?
-    # - deprecate__namespace_from_ref?
+    # - namespace_from_ref?
+    # - module_ref_field
     class New < self
       NEW_NAMESPACE_DELIMITER = ':'
       def self.namespace_delimiter()
@@ -19,13 +20,6 @@ module DTK
     end
     private_class_method :namespace_delimiter
 
-    # TODO: should replace with something more robust to find namespace
-    def self.deprecate__namespace_from_ref?(service_module_ref)
-      if service_module_ref.include? namespace_delimiter()
-        service_module_ref.split(namespace_delimiter()).first
-      end
-    end
-
     def self.common_columns()
       [
         :id,
@@ -34,6 +28,17 @@ module DTK
         :name,
         :remote
       ]
+    end
+
+    # TODO: should these both be replaced by something that doed not rely on format of ref
+    def self.namespace_from_ref?(service_module_ref)
+      if service_module_ref.include? namespace_delimiter()
+        service_module_ref.split(namespace_delimiter()).first
+      end
+    end
+    
+    def self.module_ref_field(module_name,namespace)
+      "#{namespace}#{namespace_delimiter()}#{module_name}"
     end
 
     #

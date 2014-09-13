@@ -131,7 +131,7 @@ module Ramaze::Helper
       end
       module_type = module_obj.module_type
       remote_params = remote_params_dtkn(module_type,namespace,remote_module_name,version)
-      local_params = local_params_dtkn(module_type,namespace,local_module_name,version)
+      local_params = local_params_dtkn(module_type,module_obj.module_namespace(),local_module_name,version)
       module_obj.publish(local_params,remote_params,client_rsa_pub_key)
     end
 

@@ -1,9 +1,8 @@
 module DTK; class ServiceSetting
   class AttributeSettings
     class HashForm < self
-      def self.get_and_render_in_hash_form(assembly,opts={})
-        attrs = assembly.get_attributes_raw_print_form(opts)
-        render_in_hash_form(attrs)
+      def self.render(all_attrs_struct)
+        render_in_hash_form(all_attrs_struct)
       end
 
      private
@@ -27,21 +26,21 @@ module DTK; class ServiceSetting
         attr_prefix ? "#{attr_prefix}#{AttrPartDelim}#{attr_part}" : attr_part.to_s
       end
 
-      def self.render_in_hash_form(raw_attrs)
+      def self.render_in_hash_form(all_attrs_struct)
         # merge the node and component attributes in a nested structure
         ndx_attrs = Hash.new
-        raw_attrs.node_attrs.each do |node_attr|
+        all_attrs_struct.node_attrs.each do |node_attr|
           node_info = ndx_attrs[node_attr[:node][:display_name]]||= {:attrs => Hash.new,:cmps => Hash.new}
           node_info[:attrs].merge!(node_attr[:display_name] => attribute_value(node_attr))
         end
-        raw_attrs.component_attrs.each do |cmp_attr|
+        all_attrs_struct.component_attrs.each do |cmp_attr|
           node_info = ndx_attrs[cmp_attr[:node][:display_name]]||= {:attrs => Hash.new,:cmps => Hash.new}
           cmp_info = node_info[:cmps][cmp_attr[:nested_component][:display_name]]||= Hash.new
           cmp_info.merge!(cmp_attr[:display_name] => attribute_value(cmp_attr))
         end
         
         # put assembly attributes in ret
-        ret = raw_attrs.assembly_attrs.sort{|a,b|a[:display_name] <=> b[:display_name]}.inject(SimpleOrderedHash.new) do |h,attr|
+        ret = all_attrs_struct.assembly_attrs.sort{|a,b|a[:display_name] <=> b[:display_name]}.inject(SimpleOrderedHash.new) do |h,attr|
           h.merge(attr[:display_name] => attribute_value(attr))
         end
 

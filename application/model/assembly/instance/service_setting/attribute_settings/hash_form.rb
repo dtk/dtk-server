@@ -1,18 +1,32 @@
 module DTK; class ServiceSetting
   class AttributeSettings
     class HashForm < self
-      def self.apply_from_hash_content(assembly,hash_content)
-        pp hash_content
-        raise Error.new("Got here")
-        new(hash_content).apply_settings(assembly)
-      end
-
       def self.get_and_render_in_hash_form(assembly,opts={})
         attrs = assembly.get_attributes_raw_print_form(opts)
         render_in_hash_form(attrs)
       end
 
      private
+      ContextDelim = '/'
+      def self.each_element(settings_hash,attr_prefix=nil,&block)
+        settings_hash.each_pair do |key,body|
+          if key =~ Regexp.new("(^.+)#{ContextDelim}$")
+            attr_part = $1
+            nested_attr_prefix = compose_attr(attr_prefix,attr_part)
+            each_element(body,nested_attr_prefix,&block)
+          else
+            attr = compose_attr(attr_prefix,key)
+            value = body
+            block.call(Element.new(attr,value))
+          end
+        end
+      end
+
+      AttrPartDelim = '/'
+      def self.compose_attr(attr_prefix,attr_part)
+        attr_prefix ? "#{attr_prefix}#{AttrPartDelim}#{attr_part}" : attr_part.to_s
+      end
+
       def self.render_in_hash_form(raw_attrs)
         # merge the node and component attributes in a nested structure
         ndx_attrs = Hash.new

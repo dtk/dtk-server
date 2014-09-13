@@ -355,7 +355,7 @@ module DTK
     def rest__apply_attribute_settings()
       assembly = ret_assembly_instance_object()
       settings_hash = ret_attribute_settings_hash()
-      ServiceSetting::AttributeSettings::HashForm.apply_from_hash_content(assembly,settings_hash)
+      ServiceSetting::AttributeSettings.apply_using_settings_hash(assembly,settings_hash)
       rest_ok_response
     end
 

@@ -11,11 +11,11 @@ require './lib/assembly_and_service_operations_spec'
 require './lib/service_modules_spec'
 
 service_name = 'msv_test_case_4_instance'
-assembly_name = 'bootstrap::test1'
+assembly_name = 'bootstrap:test1'
 new_assembly_name = 'msv_test_case_4_temp'
 service_module_filesystem_location = '~/dtk/service_modules'
 service_module_name = 'new_service'
-local_service_module_name = 'local::new_service'
+local_service_module_name = 'local:new_service'
 local_namespace = "local"
 
 dtk_common = DtkCommon.new(service_name, assembly_name)

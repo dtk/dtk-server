@@ -14,7 +14,7 @@ require './lib/component_modules_spec'
 namespace = "dtk17"
 component_module_name = "apache"
 component_module_namespace = "r8"
-imported_component_module_name = "r8::apache"
+imported_component_module_name = "r8:apache"
 component_module_filesystem_location = "~/dtk/component_modules"
 
 dtk_common = DtkCommon.new('', '')

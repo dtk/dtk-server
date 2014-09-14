@@ -13,7 +13,7 @@ require './lib/component_modules_spec'
 
 dependency_module = "maestrodev/wget"
 component_module_name = "maven"
-local_component_module_name = "local::maven"
+local_component_module_name = "local:maven"
 git_ssh_repo_url = "git@github.com:maestrodev/puppet-maven.git"
 component_module_filesystem_location = "~/dtk/component_modules"
 

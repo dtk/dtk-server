@@ -13,10 +13,10 @@ require './lib/component_modules_spec'
 
 component_module_name_1 = "wget"
 git_ssh_repo_url_1 = "git@github.com:maestrodev/puppet-wget.git"
-local_component_module_name_1 = "local::wget"
+local_component_module_name_1 = "local:wget"
 component_module_name_2 = "maven"
 git_ssh_repo_url_2 = "git@github.com:maestrodev/puppet-maven.git"
-local_component_module_name_2 = "local::maven"
+local_component_module_name_2 = "local:maven"
 component_module_filesystem_location = "~/dtk/component_modules"
 
 dtk_common = DtkCommon.new('', '')

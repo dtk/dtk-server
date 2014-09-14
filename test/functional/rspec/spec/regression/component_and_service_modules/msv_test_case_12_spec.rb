@@ -14,14 +14,14 @@ require './lib/component_modules_spec'
 
 namespace = "dtk17"
 existing_service_module_name = "test_service"
-imported_service_module_name = "dtk17::test_service"
+imported_service_module_name = "dtk17:test_service"
 service_module_name = "bakir_test1"
-local_service_module_name = "local::bakir_test1"
+local_service_module_name = "local:bakir_test1"
 component_module_filesystem_location = '~/dtk/component_modules'
 service_filesystem_location = '~/dtk/service_modules'
 component_module_namespace = "dtk17"
 component_module_name = "test_module"
-local_component_module_name = "dtk17::test_module"
+local_component_module_name = "dtk17:test_module"
 
 dtk_common = DtkCommon.new('', '')
 

@@ -10,7 +10,7 @@ require './lib/component_modules_spec'
 
 component_module_name = 'temp'
 component_module_namespace = 'dtk17'
-local_component_module_name = 'dtk17::temp'
+local_component_module_name = 'dtk17:temp'
 component_module_filesystem_location = "~/dtk/component_modules"
 file_for_change_location = "./spec/regression/dslv3_component_modules/resources/cmd_test_case_18_dtk.model.yaml"
 file_for_change = "dtk.model.yaml"

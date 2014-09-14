@@ -18,7 +18,7 @@ os_attribute = 'os_identifier'
 node_name = 'node1'
 component_module_name = "test_module"
 component_module_namespace = "dtk17"
-local_component_module_name = "dtk17::test_module"
+local_component_module_name = "dtk17:test_module"
 component_module_filesystem_location = "~/dtk/component_modules"
 
 dtk_common = DtkCommon.new(service_name, assembly_name)

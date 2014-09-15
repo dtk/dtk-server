@@ -317,11 +317,7 @@ module DTK
 
       def create_node_attribute_content(attr)
         attr_ref = attr[:display_name]
-        attr_hash = Aux::hash_subset(attr,[:display_name,:value_asserted,:value_derived,:datatype])
-Log.info("TODO: temp; Rich will take out")
-if attr_hash[:display_name] == "cardinality"
-  attr_hash[:data_type] = "integer"
-end
+        attr_hash = Aux::hash_subset(attr,[:display_name,:value_asserted,:value_derived,:data_type])
         {attr_ref => attr_hash}
       end
 

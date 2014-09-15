@@ -14,11 +14,11 @@ require './lib/component_modules_spec'
 assembly_name = 'test_apache'
 service_module_name = 'bakir_test_apache'
 service_module_namespace = 'r8'
-local_service_module_name = 'r8::bakir_test_apache'
+local_service_module_name = 'r8:bakir_test_apache'
 service_module_filesystem_location = '~/dtk/service_modules'
 component_module_filesystem_location = '~/dtk/component_modules'
 component_module_name = 'apache'
-local_component_module_name = 'r8::apache'
+local_component_module_name = 'r8:apache'
 
 dtk_common = DtkCommon.new('', '')
 

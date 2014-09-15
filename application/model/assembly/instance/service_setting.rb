@@ -34,9 +34,7 @@ module DTK
     def reify_field!(field,klass)
       if content = self[field]
         unless content.kind_of?(klass)
-          reified = klass.new()
-          klass.each_element(content){|el|reified << el}
-          self[field] = reified
+          self[field] = klass.new(content)
         end
       end
     end

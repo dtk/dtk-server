@@ -25,7 +25,7 @@ module DTK; class Attribute
     end
 
     def convert_value_to_ruby_object()
-      update_object!(:data_type,:attribute_value)
+      update_object!(:data_type,:value_asserted,:value_derived)
       Datatype.convert_value_to_ruby_object(self)
     end
 
@@ -48,6 +48,18 @@ module DTK; class Attribute
         ret << "array(#{t})"
       end
       ret
+    end
+
+    def self.datatype_from_ruby_object(obj)
+      if obj.kind_of?(TrueClass) or obj.kind_of?(FalseClass)
+        "boolean"
+      elsif obj.kind_of?(Fixnum)
+        "integer"
+        elsif obj.kind_of?(Hash) or obj.kind_of?(Array)
+        "json"
+      else
+        "string"
+      end
     end
 
     def self.convert_value_to_ruby_object(attr,opts={})

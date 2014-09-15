@@ -10,7 +10,7 @@ require './lib/component_modules_spec'
 
 component_module_name = 'temp'
 component_module_namespace = 'dtk17'
-local_component_module_name = 'dtk17::temp'
+local_component_module_name = 'dtk17:temp'
 component_module_filesystem_location = "~/dtk/component_modules"
 component_name = 'source'
 attribute_name = 'hash_attr'

@@ -13,7 +13,7 @@ require './lib/component_modules_spec'
 
 component_module_name = "tftp"
 git_ssh_repo_url = "git@github.com:puppetlabs/puppetlabs-tftp.git"
-imported_component_module_name = "local::tftp"
+imported_component_module_name = "local:tftp"
 component_module_filesystem_location = "~/dtk/component_modules"
 
 dtk_common = DtkCommon.new('', '')

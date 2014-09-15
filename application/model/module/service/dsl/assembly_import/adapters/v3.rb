@@ -6,7 +6,7 @@ module DTK; class ServiceModule
       def self.parse_component_links(assembly_hash,opts={})
         ret = Array.new
         (assembly_hash["nodes"]||{}).each_pair do |input_node_name,node_hash|
-          components = node_hash["components"]||[]
+          components = (node_hash||{})["components"]||[]
           components = [components] unless components.kind_of?(Array)
           components.each do |base_cmp|
             if base_cmp.kind_of?(Hash) 

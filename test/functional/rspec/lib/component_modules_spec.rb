@@ -97,7 +97,7 @@ shared_context "Export component module" do |dtk_common, component_module_name, 
   it "exports #{component_module_name} component module to #{namespace} namespace on remote repo" do
     puts "Export component module:", "------------------------"
     pass = false
-    cmp_module = component_module_name.split("::").last
+    cmp_module = component_module_name.split(":").last
     value = `dtk component-module #{component_module_name} publish #{namespace}/#{cmp_module}`
     puts value
     pass = true unless value.include? "ERROR"

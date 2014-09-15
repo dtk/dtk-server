@@ -19,7 +19,7 @@ node_template = 'precise-micro'
 component_name = 'stdlib'
 component_module_namespace = 'r8'
 service_module_name = 'bootstrap'
-local_service_module_name = 'r8::bootstrap'
+local_service_module_name = 'r8:bootstrap'
 namespace = 'r8'
 assembly_name = 'workspace_assembly'
 

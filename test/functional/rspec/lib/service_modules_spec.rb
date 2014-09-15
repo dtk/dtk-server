@@ -124,7 +124,7 @@ shared_context "Export service module" do |dtk_common, service_module_name, name
   it "exports #{service_module_name} service module to #{namespace} namespace on remote repo" do
     puts "Export service module to remote:", "--------------------------------"
     pass = false
-    service_module = service_module_name.split("::").last
+    service_module = service_module_name.split(":").last
     value = `dtk service-module #{service_module_name} publish #{namespace}/#{service_module}`
     puts value
     pass = true if (!value.include? "error")

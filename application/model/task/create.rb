@@ -35,6 +35,9 @@ module DTK; class Task
       task_template_content = Template::ConfigComponents.get_or_generate_template_content([:assembly,:node_centric],assembly,opts_tt)
       stages_config_nodes_task = task_template_content.create_subtask_instances(task_mh,assembly.id_handle())
 
+      if create_or_start_nodes_task.nil? and stages_config_nodes_task.empty?
+        raise ErrorUsage.new("There are no actions in the service instance")
+      end
       ret.add_subtask(create_or_start_nodes_task) if create_or_start_nodes_task
       ret.add_subtasks(stages_config_nodes_task) unless stages_config_nodes_task.empty?
       ret

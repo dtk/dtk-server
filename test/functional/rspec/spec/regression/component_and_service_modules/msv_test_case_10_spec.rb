@@ -13,11 +13,11 @@ require './lib/component_modules_spec'
 
 existing_component_module_name = "jmeter"
 component_module_namespace = "r8"
-existing_component_module = "r8::jmeter"
+existing_component_module = "r8:jmeter"
 namespace = "dtk17"
 component_module_name = "bakir_test1"
-local_component_module = "local::bakir_test1"
-new_local_component_module = "dtk17::bakir_test1"
+local_component_module = "local:bakir_test1"
+new_local_component_module = "dtk17:bakir_test1"
 component_module_filesystem_location = "~/dtk/component_modules"
 
 dtk_common = DtkCommon.new('', '')

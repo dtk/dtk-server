@@ -107,10 +107,18 @@ module DTK; class ServiceModule
       end
 
       aggregate_errors = ParsingError::Aggregate.new()
-      unless assembly_hash["nodes"]
+      unless nodes = assembly_hash["nodes"]
         return Hash.new
       end
-      ret = assembly_hash["nodes"].inject(Hash.new) do |h,(node_hash_ref,node_hash)|
+      if nodes.kind_of?(Hash)
+        # no op
+      elsif nodes.kind_of?(String) # corner case: single node with no attributes
+        nodes = {nodes => {}}
+      else
+        raise ParsingError.new("Nodes section is ill-formed",opts_file_path(opts))
+      end
+      ret = nodes.inject(Hash.new) do |h,(node_hash_ref,node_hash)|
+        node_hash ||= Hash.new
         aggregate_errors.aggregate_errors!(h) do
           node_ref = assembly_template_node_ref(assembly_ref,node_hash_ref)
           type,attributes = import_type_and_node_attributes(node_hash,opts)
@@ -190,11 +198,11 @@ module DTK; class ServiceModule
     end
 
     def self.import_component_refs(container_idh,assembly_name,components_hash,component_module_refs,opts={})
-      cmps_with_titles = Array.new
-
+      ret = Hash.new
       unless components_hash
-        return ParsingError::BadComponentReference.new("Missing components section",opts_file_path(opts))
+        return ret
       end
+      cmps_with_titles = Array.new
       components_hash = [components_hash] unless components_hash.kind_of?(Array)
       ret = components_hash.inject(Hash.new) do |h,cmp_input|
         parse = cmp_ref = nil
@@ -263,22 +271,14 @@ module DTK; class ServiceModule
       ret = DBUpdateHash.new()
       attr_val_hash.each_pair do |attr_name,attr_val|
         ref = dispaly_name = attr_name
-        data_type =
-          if attr_val.kind_of?(TrueClass) or attr_val.kind_of?(FalseClass)
-            "boolean"
-          else
-            "string"
-          end
-            
         ret[ref] = {
           "display_name" => attr_name,
           "value_asserted" => attr_val,
-          "data_type" => data_type
+          "data_type" => Attribute::Datatype.datatype_from_ruby_object(attr_val)
         }
       end
       ret.mark_as_complete()
     end
-
 
     def self.import_attribute_overrides(attr_name,attr_val,opts={})
       attr_info = {:display_name => attr_name, :attribute_value => attr_val}

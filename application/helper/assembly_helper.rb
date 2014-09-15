@@ -156,5 +156,22 @@ module Ramaze::Helper
     raise response if response.kind_of?(::DTK::Error)
     response
   end
+
+      def info_about_filter()
+      end
+
+    # checks element through set of fields
+    def element_matches?(element,path_array, element_id_val)
+      return true if (element_id_val.nil? || element_id_val.empty?)
+      return false if element.nil?
+      temp_element = element
+        path_array.each do |field|
+        temp_element = temp_element[field]
+        return false if temp_element.nil?
+      end
+      temp_element == element_id_val.to_i
+    end
+
+
 end
 

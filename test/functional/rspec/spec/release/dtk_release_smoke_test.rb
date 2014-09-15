@@ -20,9 +20,9 @@ memory_size = 't1.micro'
 memory_size_attribute = 'memory_size'
 node_name = 'node1'
 component_module_name = "test_module"
-local_component_module_name = 'local::test_module'
+local_component_module_name = 'local:test_module'
 service_module_name = "bootstrap"
-local_service_module_name = 'local::bootstrap'
+local_service_module_name = 'local:bootstrap'
 namespace = 'demo'
 component_module_filesystem_location = "~/dtk/component_modules"
 

@@ -10,7 +10,7 @@ user_data = {
 	:module_name => "r8/java",
 }
 
-component_module = "r8::java"
+component_module = "r8:java"
 user_names = "bakir_test,bakir_test2"
 user_emails = "bakir@atlantbh.com,bakir2@atlantbh.com"
 collaborator_type = "users"

@@ -20,7 +20,7 @@ module DTK; class  Assembly
 
         if opts[:detail_level].nil?
           if opts[:include_namespaces]
-            Log.error("Unexpcetd that opts[:include_namespaces] is true")
+            Log.error("Unexpectd that opts[:include_namespaces] is true")
           end
           list_aux__no_details(assembly_rows)
         else
@@ -96,7 +96,9 @@ module DTK; class  Assembly
 
       def list_attributes(opts)
         if opts[:settings_form]
-          ServiceSetting::AttributeSettings::HashForm.get_and_render_in_hash_form(self)
+          filter_proc = opts[:filter_proc]
+          attrs_all_levels_struct = get_attributes_all_levels_struct(filter_proc)
+          ServiceSetting::AttributeSettings::HashForm.render(attrs_all_levels_struct)
         else
           cols_to_get = (opts[:raw_attribute_value] ? [:display_name,:value] : [:id,:display_name,:value,:linked_to_display_form,:datatype,:name])
           ret = get_attributes_print_form_aux(opts).map do |a|

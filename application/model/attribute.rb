@@ -3,12 +3,12 @@ files =
    'dependency_analysis',
    'group',
    'complex_type',
-   'update_derived_values',
-   'meta'
+   'update_derived_values'
   ]
 r8_nested_require('attribute',files)
 module DTK
   class Attribute < Model
+    r8_nested_require('attribute','meta')
     r8_nested_require('attribute','datatype')
     r8_nested_require('attribute','propagate_changes')
     r8_nested_require('attribute','pattern')
@@ -26,10 +26,10 @@ module DTK
     extend PrintFormClassMixin
     extend PropagateChangesClassMixin
     set_relation_name(:attribute,:attribute)
-    extend AttributeMetaClassMixin
+    extend MetaClassMixin
 
     def self.common_columns()
-      [:id,:display_name,:group_id,:hidden,:description,:component_component_id,:value_derived,:value_asserted,:semantic_data_type,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change,:port_type_asserted,:is_port,:external_ref]
+      [:id,:display_name,:group_id,:hidden,:description,:component_component_id,:value_derived,:value_asserted,:semantic_data_type,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change,:port_type_asserted,:is_port,:external_ref,:read_only]
     end
 
     def self.legal_display_name?(display_name)
@@ -165,6 +165,7 @@ module DTK
 
     # TODO: collapse this and 4 fields used here
     def is_readonly?()
+      update_object!(*(VirtulaDependency.port_type()+[:read_only,:dynamic,:cannot_change]))
       (self[:port_type] == "input") or self[:read_only] or self[:dynamic] or self[:cannot_change] 
     end
 

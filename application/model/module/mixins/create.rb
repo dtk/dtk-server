@@ -29,7 +29,7 @@ module DTK; module ModuleMixins
       end
 
       if is_parsed and not opts[:no_error_if_exists]
-        full_module_name = Namespace(module_namespace.display_name(),module_name)
+        full_module_name = Namespace::New.join_namespace(module_namespace.display_name(),module_name)
         raise ErrorUsage.new("Module (#{full_module_name}) cannot be created since it exists already")
       end
 

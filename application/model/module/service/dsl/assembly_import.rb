@@ -107,10 +107,18 @@ module DTK; class ServiceModule
       end
 
       aggregate_errors = ParsingError::Aggregate.new()
-      unless assembly_hash["nodes"]
+      unless nodes = assembly_hash["nodes"]
         return Hash.new
       end
-      ret = assembly_hash["nodes"].inject(Hash.new) do |h,(node_hash_ref,node_hash)|
+      if nodes.kind_of?(Hash)
+        # no op
+      elsif nodes.kind_of?(String) # corner case: single node with no attributes
+        nodes = {nodes => {}}
+      else
+        raise ParsingError.new("Nodes section is ill-formed",opts_file_path(opts))
+      end
+      ret = nodes.inject(Hash.new) do |h,(node_hash_ref,node_hash)|
+        node_hash ||= Hash.new
         aggregate_errors.aggregate_errors!(h) do
           node_ref = assembly_template_node_ref(assembly_ref,node_hash_ref)
           type,attributes = import_type_and_node_attributes(node_hash,opts)

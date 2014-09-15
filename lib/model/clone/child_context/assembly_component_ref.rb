@@ -35,6 +35,7 @@ module DTK
 
       # for processing component refs in an assembly
       def ret_new_objs_info(field_set_to_copy,create_override_attrs)
+        ret = Array.new
         # mapping from component ref to component template 
         component_mh = model_handle.createMH(:component)
         ndx_node_stub_to_instance = parent_rels.inject(Hash.new){|h,r|h.merge(r[:old_par_id] => r[:node_node_id])}
@@ -71,7 +72,8 @@ module DTK
             :ref => m[:ref]
           }
         end
-
+        return ret if mapping_rows.empty?
+ 
         mapping_ds = SQL::ArrayDataset.create(db(),mapping_rows,model_handle.createMH(:mapping))
       
         # all parent_rels will have same cols so taking a sample

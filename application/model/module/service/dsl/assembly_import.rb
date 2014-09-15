@@ -198,11 +198,11 @@ module DTK; class ServiceModule
     end
 
     def self.import_component_refs(container_idh,assembly_name,components_hash,component_module_refs,opts={})
-      cmps_with_titles = Array.new
-
+      ret = Hash.new
       unless components_hash
-        return ParsingError::BadComponentReference.new("Missing components section",opts_file_path(opts))
+        return ret
       end
+      cmps_with_titles = Array.new
       components_hash = [components_hash] unless components_hash.kind_of?(Array)
       ret = components_hash.inject(Hash.new) do |h,cmp_input|
         parse = cmp_ref = nil

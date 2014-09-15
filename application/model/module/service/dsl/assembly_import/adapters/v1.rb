@@ -30,7 +30,7 @@ module DTK; class ServiceModule
      private
       include ServiceDSLCommonMixin
 
-      def self.ret_node_to_node_binding_rs(assembly_ref,node_bindings_hash)
+      def self.node_to_node_binding_rs(assembly_ref,node_bindings_hash,opts={})
         an_sep = Seperators[:assembly_node]
         (node_bindings_hash||{}).inject(Hash.new) do |h,(ser_assem_node,v)|
           merge_hash = Hash.new

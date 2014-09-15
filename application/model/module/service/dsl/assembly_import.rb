@@ -96,7 +96,7 @@ module DTK; class ServiceModule
 
     def self.import_nodes(container_idh,module_branch,assembly_ref,assembly_hash,node_bindings_hash,component_module_refs,opts={})
       # compute node_to_nb_rs and nb_rs_to_id
-      node_to_nb_rs = ret_node_to_node_binding_rs(assembly_ref,node_bindings_hash)
+      node_to_nb_rs = node_to_node_binding_rs(assembly_ref,node_bindings_hash,opts)
       nb_rs_to_id = Hash.new
       unless node_to_nb_rs.empty?
         filter = [:oneof, :ref, node_to_nb_rs.values]

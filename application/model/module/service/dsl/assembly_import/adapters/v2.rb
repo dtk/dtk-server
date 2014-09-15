@@ -119,7 +119,7 @@ module DTK; class ServiceModule
         ret
       end
 
-      def self.ret_node_to_node_binding_rs(assembly_ref,node_bindings_hash)
+      def self.node_to_node_binding_rs(assembly_ref,node_bindings_hash,opts={})
         (node_bindings_hash||{}).inject(Hash.new) do |h,(node,v)|
           merge_hash = 
             if v.kind_of?(String) then {node => v}
@@ -127,7 +127,7 @@ module DTK; class ServiceModule
               Log.error("Not implemented yet have node bindings with explicit properties")
               Hash.new
             else
-              raise Error.new("Unexpected form of node binding")
+              raise ParsingError.new("Unexpected form of node binding",opts_file_path(opts))
             end
           h.merge(merge_hash)
         end

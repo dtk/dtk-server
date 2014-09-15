@@ -9,10 +9,10 @@ module DTK
     # - module_ref_field
 
     NAMESPACE_DELIMITER = ':'
+
     def self.namespace_delimiter()
       NAMESPACE_DELIMITER
     end
-    private_class_method :namespace_delimiter
 
     def self.common_columns()
       [

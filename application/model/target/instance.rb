@@ -8,16 +8,30 @@ module DTK
       end
 
       def self.create_target(project_idh,provider,region,opts={})
-        properties = provider.get_field?(:iaas_properties).merge(:region => region)
-        provider_type = provider.get_field?(:iaas_type)
+        properties      = provider.get_field?(:iaas_properties).merge(:region => region)
+        provider_type   = provider.get_field?(:iaas_type)
+        iaas_properties = []
 
         unless region
           raise ErrorUsage.new("Region is required for target created in '#{provider_type}' provider type!") unless provider_type.eql?('physical')
         end
 
         target_name = opts[:target_name]|| provider.default_target_name(:region => region)
-        iaas_properties = IAASProperties.new(:name => target_name, :iaas_properties => properties)
-        create_targets?(project_idh,provider,[iaas_properties],:raise_error_if_exists=>true).first
+        availability_zones = CommandAndControl.get_and_process_availability_zones(provider_type, properties)
+
+        # add iaas_properties for target without availability zone
+        iaas_properties << IAASProperties.new(:name => target_name, :iaas_properties => properties)
+
+        # add iass_properties for targets created separately for every availability zone
+        availability_zones.each do |az|
+          custom_properties = properties.clone
+          custom_properties[:availability_zone] = az
+          iaas_properties << IAASProperties.new(:name => "#{target_name}-#{az}", :iaas_properties => custom_properties)
+        end
+
+        # iaas_properties = IAASProperties.new(:name => target_name, :iaas_properties => properties)
+        # create_targets?(project_idh,provider,[iaas_properties],:raise_error_if_exists=>true).first
+        create_targets?(project_idh,provider,iaas_properties,:raise_error_if_exists=>true).first
       end
 
       def self.create_targets?(project_idh,provider,iaas_properties_list,opts={})

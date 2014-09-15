@@ -91,6 +91,11 @@ module DTK
       klass.check_iaas_properties(iaas_properties)
     end
 
+    def self.get_and_process_availability_zones(iaas_type, iaas_properties)
+      klass = load_for_aux(:iaas, iaas_type.to_s)
+      klass.get_availability_zones(iaas_properties)
+    end
+
     def self.find_matching_node_binding_rule(node_binding_rules,target)
       target.update_object!(:iaas_type,:iaas_properties)
       klass = load_iaas_for(:target => target)

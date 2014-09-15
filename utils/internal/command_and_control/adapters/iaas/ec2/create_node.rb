@@ -90,7 +90,7 @@ module DTK; module CommandAndControlAdapter
         end
        private
         def create_ec2_instance()
-          response = nil
+          response, target_availability_zone = nil, nil
           unless ami = external_ref[:image_id]
             raise ErrorUsage.new("Cannot find ami for node (#{node[:display_name]})")
           end
@@ -109,8 +109,11 @@ module DTK; module CommandAndControlAdapter
           # check priority of keypair
           keypair = target.get_keypair_name() || R8::Config[:ec2][:keypair]
 
+          target_ias_props = target[:iaas_properties]
+          target_availability_zone = target_ias_props[:availability_zone] if target_ias_props
+
           create_options.merge!(:key_name => keypair)
-          avail_zone = R8::Config[:ec2][:availability_zone] || external_ref[:availability_zone]
+          avail_zone = R8::Config[:ec2][:availability_zone] || external_ref[:availability_zone] || target_availability_zone
           
           unless avail_zone.nil? or avail_zone == "automatic"
             create_options.merge!(:availability_zone => avail_zone)

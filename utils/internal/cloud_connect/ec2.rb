@@ -23,6 +23,10 @@ module DTK
         @conn.security_groups.all.map{|x|hash_form(x)}
       end
 
+      def describe_availability_zones()
+        @conn.describe_availability_zones()
+      end
+
       def get_instance_status(id)
         Log.info "Checking instance with ID: '#{id}'"
         response = @conn.describe_instances('instance-id' => id)

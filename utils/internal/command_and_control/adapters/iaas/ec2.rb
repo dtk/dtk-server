@@ -57,6 +57,16 @@ module DTK
         end
       end
 
+      def self.get_availability_zones(iaas_properties)
+        ec2_creds = get_ec2_credentials(iaas_properties)
+        connection = conn(ec2_creds)
+
+        response = connection.describe_availability_zones
+        raise ErrorUsage.new("Unable to retreive availability zones!") unless response.status == 200
+
+        a_zones = response.body["availabilityZoneInfo"].map{|z| z['zoneName']}||[]
+      end
+
       def self.check_iaas_properties(iaas_properties)
         begin
           ec2_creds = get_ec2_credentials(iaas_properties)
@@ -98,7 +108,7 @@ module DTK
       end
 
       def self.get_ec2_credentials(iaas_credentials)
-        if iaas_credentials && (aws_key = iaas_credentials['key']) && (aws_secret = iaas_credentials['secret'])
+        if iaas_credentials && (aws_key = iaas_credentials['key'] || aws_key = iaas_credentials[:key]) && (aws_secret = iaas_credentials['secret'] || aws_secret = iaas_credentials[:secret])
           { :aws_access_key_id => aws_key, :aws_secret_access_key => aws_secret }
         end
       end

@@ -84,7 +84,7 @@ module DTK
 
       opts.merge!(:remote_repo_base => remote_repo_base, :diff => diff)
       datatype = :module_diff if diff
-      rest_ok_response ComponentModule.list(opts), :datatype => datatype
+      rest_ok_response filter_by_namespace(ComponentModule.list(opts)), :datatype => datatype
     end
 
     def rest__get_workspace_branch_info()
@@ -182,7 +182,8 @@ module DTK
     end
 
     def rest__list_remote()
-      rest_ok_response ComponentModule.list_remotes(model_handle, ret_request_params(:rsa_pub_key)), :datatype => :module_remote
+      module_list = ComponentModule.list_remotes(model_handle, ret_request_params(:rsa_pub_key))
+      rest_ok_response filter_by_namespace(module_list), :datatype => :module_remote
     end
 
     # get remote_module_info; throws an access rights usage error if user does not have access

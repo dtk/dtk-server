@@ -165,6 +165,20 @@ module Ramaze::Helper
       end
     end
 
+    def filter_by_namespace(object_list)
+      module_namespace = ret_request_params(:module_namespace)
+      return object_list if module_namespace.nil? || module_namespace.strip.empty?
+
+      object_list.select do |el|
+        if el[:namespace]
+          # these are local modules and have namespace object
+          module_namespace.eql?(el[:namespace][:display_name])
+        else
+          el[:display_name].match(/#{module_namespace}\//)
+        end
+      end
+    end
+
     def ret_assembly_template_idh()
       assembly_template_id, subtype = ret_assembly_params_id_and_subtype()
       unless subtype == :template

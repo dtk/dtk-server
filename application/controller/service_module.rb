@@ -20,7 +20,8 @@ module DTK
     def rest__list_remote()
       rsa_pub_key = ret_request_params(:rsa_pub_key)
       datatype_opts = {:datatype => :module_remote}
-      rest_ok_response ServiceModule.list_remotes(model_handle,rsa_pub_key),datatype_opts
+      module_list = ServiceModule.list_remotes(model_handle,rsa_pub_key)
+      rest_ok_response filter_by_namespace(module_list), datatype_opts
     end
 
     def rest__list_assemblies()
@@ -105,7 +106,7 @@ module DTK
       opts.merge!(:remote_repo_base => remote_repo_base, :diff => diff)
       datatype = :module_diff if diff
 
-      rest_ok_response ServiceModule.list(opts), :datatype => datatype
+      rest_ok_response filter_by_namespace(ServiceModule.list(opts)), :datatype => datatype
     end
 
     def rest__versions()

@@ -25,7 +25,7 @@ module DTK; class Assembly
 
       override_attrs = Hash.new
       if assembly_name
-        override_attrs[:display_name] = assembly_name 
+        override_attrs[:display_name] = assembly_name
       end
       clone_opts = {:ret_new_obj_with_cols => [:id,:type]}
       if settings = opts[:service_settings]
@@ -133,9 +133,9 @@ module DTK; class Assembly
         else
           service_module_name = service_module_name(r[:component_type])
           pntr = aug_cmp_refs_ndx_by_vc[service_module_name]
-          unless pntr 
+          unless pntr
             component_module_refs = opts[:component_module_refs] || ModuleRefs.get_component_module_refs(mh.createIDH(:model_name => :module_branch, :id => r[:module_branch_id]).create_object())
-            
+
             pntr = aug_cmp_refs_ndx_by_vc[service_module_name] = {
               :component_module_refs => component_module_refs
             }
@@ -174,7 +174,7 @@ module DTK; class Assembly
     def self.get(mh,opts={})
       sp_hash = {
         :cols => opts[:cols] || [:id, :group_id,:display_name,:component_type,:module_branch_id,:service_module],
-        :filter => [:and, [:eq, :type, "composite"], 
+        :filter => [:and, [:eq, :type, "composite"],
                     opts[:project_idh] ? [:eq,:project_project_id,opts[:project_idh].get_id()] : [:neq, :project_project_id,nil],
                     opts[:filter]
                    ].compact
@@ -202,12 +202,12 @@ module DTK; class Assembly
       include_nodes = ["nodes"].include?(opts[:detail_level])
       pp_opts = Aux.hash_subset(opts,[:no_module_prefix,:version_suffix])
       assembly_rows.each do |r|
-        # TODO: hack to create a Assembly object (as opposed to row which is component); should be replaced by having 
+        # TODO: hack to create a Assembly object (as opposed to row which is component); should be replaced by having
         # get_objs do this (using possibly option flag for subtype processing)
         pntr = ndx_ret[r[:id]] ||= r.id_handle.create_object().merge(:display_name => pretty_print_name(r,pp_opts),:ndx_nodes => Hash.new)
         pntr.merge!(:module_branch_id => r[:module_branch_id]) if r[:module_branch_id]
         # TODO: should replace with something more robust to find namespace
-        if namespace = Namespace::New.namespace_from_ref?(r[:service_module][:ref])
+        if namespace = Namespace.namespace_from_ref?(r[:service_module][:ref])
           pntr.merge!(:namespace => namespace)
         end
 
@@ -216,10 +216,10 @@ module DTK; class Assembly
         end
         next unless include_nodes
         node_id = r[:node][:id]
-        unless node = pntr[:ndx_nodes][node_id] 
+        unless node = pntr[:ndx_nodes][node_id]
           node = pntr[:ndx_nodes][node_id] = {
-            :node_name => r[:node][:display_name], 
-            :node_id => node_id 
+            :node_name => r[:node][:display_name],
+            :node_id => node_id
           }
           node[:external_ref] = r[:node][:external_ref] if r[:node][:external_ref]
           node[:os_type] = r[:node][:os_type] if r[:node][:os_type]
@@ -234,28 +234,28 @@ module DTK; class Assembly
     end
 
     def self.pretty_print_name(assembly,opts={})
-      ret = 
-        if cmp_type = assembly.get_field?(:component_type) 
+      ret =
+        if cmp_type = assembly.get_field?(:component_type)
           if opts[:no_module_prefix]
             cmp_type.gsub(/^.+__/,"")
           else
             cmp_type.gsub(/__/,"::")
           end
-        else 
+        else
           assembly.get_field?(:display_name)
         end
-      
-      if opts[:version_suffix] 
+
+      if opts[:version_suffix]
         if version = pretty_print_version(assembly)
           ret << "-v#{version}"
         end
       end
-      if opts[:include_namespace] 
+      if opts[:include_namespace]
         unless namespace_name = (assembly[:namespace]||{})[:display_name]
           Log.error("Unexpected that opts[:include_namespace] is truue and no namespace object in assembly")
           return ret
         end
-        ret = Namespace::New.join_namespace(namespace_name, ret)
+        ret = Namespace.join_namespace(namespace_name, ret)
       end
       ret
     end
@@ -278,14 +278,14 @@ module DTK; class Assembly
       ret = Array.new
       return ret if assembly_idhs.empty?
       node_idhs = get_nodes(assembly_idhs).map{|n|n.id_handle()}
-      Model.delete_instances(node_idhs)    
+      Model.delete_instances(node_idhs)
     end
 
     def info_about(about, opts=Opts.new)
       cols = post_process = nil
       order = proc{|a,b|a[:display_name] <=> b[:display_name]}
       ret = nil
-      case about 
+      case about
        when :components
         aug_component_refs = self.class.get_augmented_component_refs(model_handle,:filter => [:eq,:id,id()])
         ret = aug_component_refs.map do |r|
@@ -335,7 +335,7 @@ module DTK; class Assembly
     end
     def self.name_to_id(model_handle,name)
       parts = name.split("/")
-      augmented_sp_hash = 
+      augmented_sp_hash =
         if parts.size == 1
           {:cols => [:id,:component_type],
            :filter => [:and,

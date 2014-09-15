@@ -165,6 +165,20 @@ module Ramaze::Helper
       end
     end
 
+    def filter_by_namespace(object_list)
+      module_namespace = ret_request_params(:module_namespace)
+      return object_list if module_namespace.nil? || module_namespace.strip.empty?
+
+      object_list.select do |el|
+        if el[:namespace]
+          # these are local modules and have namespace object
+          module_namespace.eql?(el[:namespace][:display_name])
+        else
+          el[:display_name].match(/#{module_namespace}\//)
+        end
+      end
+    end
+
     def ret_assembly_template_idh()
       assembly_template_id, subtype = ret_assembly_params_id_and_subtype()
       unless subtype == :template
@@ -245,7 +259,7 @@ module Ramaze::Helper
     # override to include namespace in given calculations
     def create_obj(param, model_class=nil,extra_context=nil)
       id_or_name = ret_non_null_request_params(param)
-      namespace_delimiter = ::DTK::Namespace::New.namespace_delimiter()
+      namespace_delimiter = ::DTK::Namespace.namespace_delimiter()
       if id_or_name.include?(namespace_delimiter)
         namespace, id_or_name = id_or_name.split(namespace_delimiter)
       end

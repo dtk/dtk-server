@@ -77,7 +77,7 @@ module DTK; class AssemblyModule
       if add_module_branches
         add_version_info!(ret)
       end
-      
+
       # remove branches; they are no longer needed
       ret.each{|r|r.delete(:module_branch)}
 
@@ -88,7 +88,7 @@ module DTK; class AssemblyModule
       new(assembly).validate_component_module_ret_namespace(module_name)
     end
     def validate_component_module_ret_namespace(module_name)
-      namespace, name = Namespace::New.full_module_name_parts?(module_name)
+      namespace, name = Namespace.full_module_name_parts?(module_name)
       return namespace if namespace
 
       component_modules = get_for_assembly()
@@ -161,7 +161,7 @@ module DTK; class AssemblyModule
       mod_idhs = local_copy_els.map{|r|r.id_handle()}
       ndx_workspace_branches = ComponentModule.get_workspace_module_branches(mod_idhs).inject(Hash.new) do |h,r|
         h.merge(r[:module_id] => r)
-      end 
+      end
 
       local_copy_els.each do |r|
         unless workspace_branch = ndx_workspace_branches[r[:id]]
@@ -178,10 +178,10 @@ module DTK; class AssemblyModule
         end
         r[:local_copy_diff]  = (assembly_mod_sha != workspace_mod_sha)
 =begin
-TODO: code to put in when 
+TODO: code to put in when
 want to check case when :local_behind and :branchpoint
 In order to do this must ireate all branches, not just changed ones and
-need to do a refresh on workspace branch sha in case this was updated in another branch 
+need to do a refresh on workspace branch sha in case this was updated in another branch
         if r[:local_copy_diff]
           sha_relationship = RepoManager.ret_sha_relationship(assembly_mod_sha,workspace_mod_sha,assembly_mod_branch)
           case sha_relationship
@@ -217,7 +217,7 @@ need to do a refresh on workspace branch sha in case this was updated in another
       version_field = module_branch.get_field?(:version)
       match_el_array = component_types.map do |ct|
         DTK::Component::Template::MatchElement.new(
-          :component_type => ct, 
+          :component_type => ct,
           :version_field => version_field
         )
       end
@@ -267,7 +267,7 @@ need to do a refresh on workspace branch sha in case this was updated in another
       def error_msg()
         "Changes to component module (#{@module_name}) have not been made in assembly (#{@assembly_name})"
       end
-    end 
+    end
     class ErrorNoComponentsInModule < ErrorComponentModule
       private
       def error_msg()

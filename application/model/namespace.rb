@@ -7,18 +7,12 @@ module DTK
     # - full_module_name_parts?
     # - namespace_from_ref?
     # - module_ref_field
-    class New < self
-      NEW_NAMESPACE_DELIMITER = ':'
-      def self.namespace_delimiter()
-        NEW_NAMESPACE_DELIMITER
-      end
-    end
 
-    NAMESPACE_DELIMITER = '::'
+    NAMESPACE_DELIMITER = ':'
+
     def self.namespace_delimiter()
       NAMESPACE_DELIMITER
     end
-    private_class_method :namespace_delimiter
 
     def self.common_columns()
       [
@@ -36,7 +30,7 @@ module DTK
         service_module_ref.split(namespace_delimiter()).first
       end
     end
-    
+
     def self.module_ref_field(module_name,namespace)
       "#{namespace}#{namespace_delimiter()}#{module_name}"
     end
@@ -54,7 +48,7 @@ module DTK
 
     # if user for some reason set R8::Config[:repo][:local][:default_namespace] to '' we will use running_process_user() as namespace
     def self.default_namespace_name
-      R8::Config[:repo][:local][:default_namespace]||::DTK::Common::Aux.running_process_user()
+      CurrentSession.get_default_namespace()||R8::Config[:repo][:local][:default_namespace]||::DTK::Common::Aux.running_process_user()
     end
 
     def self.join_namespace(namespace, name)

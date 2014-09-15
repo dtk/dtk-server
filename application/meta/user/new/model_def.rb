@@ -10,7 +10,8 @@
     :email_addresses_primary => {:type=>:varchar, :size => 50},
     :settings => {:type=>:json},
     :status => {:type=>:varchar, :size => 50},
-    :ssh_rsa_pub_keys => {:type=>:json}
+    :ssh_rsa_pub_keys => {:type=>:json},
+    :default_namespace => {:type=>:varchar, :size => 50}
   },
   :virtual_columns=>{
     :user_groups=>{

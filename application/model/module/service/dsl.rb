@@ -52,11 +52,15 @@ module DTK
           assembly_name = r[:display_name]
 
           assembly_path = assembly_meta_filename_path(assembly_name,module_branch)
-          raise Error.new("need to modify to componsate for fact that what is now needs to be deleted is files and possibly dir; these are assembly file (#{assembly_path}), plus possibly settings files")
-          ## OLD code
-          assembly_dir = assembly_meta_directory_path(assembly_name)
+          is_legacy  = is_legacy_service_module_structure?(module_branch)
+
+          # if not legacy structure, delete assembly_name.dtk.assembly.yaml file
+          RepoManager.delete_file?(assembly_path,module_branch) unless is_legacy
+
+          # raise Error.new("need to modify to componsate for fact that what is now needs to be deleted is files and possibly dir; these are assembly file (#{assembly_path}), plus possibly settings files")
+
+          assembly_dir = assembly_meta_directory_path(assembly_name,module_branch)
           RepoManager.delete_directory?(assembly_dir,module_branch)
-          ## END OF code that must be modified
 
           ndx_module_branches[module_branch[:id]] ||= module_branch
         end
@@ -77,6 +81,10 @@ module DTK
         else
           "assemblies/#{assembly_name}.dtk.assembly.#{file_type}"
         end
+      end
+
+      def assembly_meta_directory_path(assembly_name,module_branch)
+        "assemblies/#{assembly_name}"
       end
 
       def assembly_workflow_meta_filename_path(assembly_name,task_action)

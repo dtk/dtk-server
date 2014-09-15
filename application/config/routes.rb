@@ -13,6 +13,7 @@ R8::ReactorRoute.draw do
   post  'account/list_ssh_keys' => 'account#list_ssh_keys'
   post  'account/add_user_direct_access' => 'account#add_user_direct_access'
   post  'account/remove_user_direct_access' => 'account#remove_user_direct_access'
+  post  'account/set_default_namespace' => 'account#set_default_namespace'
 
    # ASSEMBLY
   post  'assembly/promote_to_template' => 'assembly#promote_to_template'
@@ -46,7 +47,7 @@ R8::ReactorRoute.draw do
   post  'assembly/initiate_grep' => 'assembly#initiate_grep'
   post  'assembly/initiate_get_ps' => 'assembly#initiate_get_ps'
   post  'assembly/initiate_execute_tests' => 'assembly#initiate_execute_tests'
- 
+
   post  'assembly/start' => 'assembly#start'
   post  'assembly/stop' => 'assembly#stop'
   post  'assembly/list' => 'assembly#list'
@@ -281,7 +282,7 @@ R8::ReactorRoute.draw do
   post  'target/install_agents' => 'target#install_agents'
   post  'target/create_install_agents_task' => 'target#create_install_agents_task'
   post  'target/task_status' => 'target#task_status'
-  
+
    # TASK
   post  'task/cancel_task' => 'task#cancel_task'
   post  'task/execute' => 'task#execute'
@@ -302,7 +303,7 @@ R8::Routes["component/display"] = {
   :layout => 'default',
   :alias => '',
   :params => [:id],
-  :action_set => 
+  :action_set =>
   [
    {
      :route => "component/display",
@@ -314,13 +315,13 @@ R8::Routes["component/display"] = {
      :action_params => [{:parent_id => "$id$"}],
      :panel => "main_body",
 #      :assign_type => 'append | prepend | replace'
-     :assign_type => :append 
+     :assign_type => :append
    },
    {
      :route => "monitoring_item/list_for_component_display",
      :action_params => [{:parent_id => "$id$"}],
      :panel => "main_body",
-     :assign_type => :append 
+     :assign_type => :append
    }
   ]
 }
@@ -329,7 +330,7 @@ R8::Routes["node/display"] = {
   :layout => 'default',
   :alias => '',
   :params => [:id],
-  :action_set => 
+  :action_set =>
   [
    {
      :route => "node/display",
@@ -340,13 +341,13 @@ R8::Routes["node/display"] = {
      :route => "node_interface/list",
      :action_params => [{:parent_id => "$id$"}],
      :panel => "main_body",
-     :assign_type => :append 
+     :assign_type => :append
    },
    {
      :route => "monitoring_item/node_display",
      :action_params => [{:parent_id => "$id$"}],
      :panel => "main_body",
-     :assign_type => :append 
+     :assign_type => :append
    }
   ]
 }
@@ -355,7 +356,7 @@ R8::Routes["state_change/list_pending"] = {
   :layout => 'default',
   :alias => '',
   :params => [],
-  :action_set => 
+  :action_set =>
   [
    {
      :route => "state_change/list",
@@ -370,7 +371,7 @@ R8::Routes["state_change/display"] = {
   :layout => 'default',
   :alias => '',
   :params => [:id],
-  :action_set => 
+  :action_set =>
   [
    {
      :route => "state_change/display",
@@ -381,7 +382,7 @@ R8::Routes["state_change/display"] = {
      :route => "state_change/list",
      :action_params => [{:parent_id => "$id$"}],
      :panel => "main_body",
-     :assign_type => :append 
+     :assign_type => :append
    }
   ]
 }
@@ -390,7 +391,7 @@ R8::Routes["task/list"] = {
   :layout => 'default',
   :alias => '',
   :params => [],
-  :action_set => 
+  :action_set =>
   [
    {
      :route => "task/list",
@@ -405,7 +406,7 @@ R8::Routes["task/display"] = {
   :layout => 'default',
   :alias => '',
   :params => [:id],
-  :action_set => 
+  :action_set =>
   [
    {
      :route => "task/display",
@@ -416,7 +417,7 @@ R8::Routes["task/display"] = {
      :route => "task/list",
      :action_params => [{:parent_id => "$id$"}],
      :panel => "main_body",
-     :assign_type => :append 
+     :assign_type => :append
    }
   ]
 }

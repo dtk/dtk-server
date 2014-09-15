@@ -48,7 +48,7 @@ module DTK
 
     # if user for some reason set R8::Config[:repo][:local][:default_namespace] to '' we will use running_process_user() as namespace
     def self.default_namespace_name
-      R8::Config[:repo][:local][:default_namespace]||::DTK::Common::Aux.running_process_user()
+      CurrentSession.get_default_namespace()||R8::Config[:repo][:local][:default_namespace]||::DTK::Common::Aux.running_process_user()
     end
 
     def self.join_namespace(namespace, name)

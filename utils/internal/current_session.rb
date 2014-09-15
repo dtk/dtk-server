@@ -23,6 +23,14 @@ module XYZ
       get_user_object()[:username]
     end
 
+    def get_default_namespace()
+      get_user_object()[:default_namespace]
+    end
+
+    def self.get_default_namespace()
+      CurrentSession.new.get_default_namespace()
+    end
+
     def self.get_username()
        CurrentSession.new.get_username()
     end

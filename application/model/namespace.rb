@@ -7,14 +7,8 @@ module DTK
     # - full_module_name_parts?
     # - namespace_from_ref?
     # - module_ref_field
-    class New < self
-      NEW_NAMESPACE_DELIMITER = ':'
-      def self.namespace_delimiter()
-        NEW_NAMESPACE_DELIMITER
-      end
-    end
 
-    NAMESPACE_DELIMITER = '::'
+    NAMESPACE_DELIMITER = ':'
     def self.namespace_delimiter()
       NAMESPACE_DELIMITER
     end
@@ -36,7 +30,7 @@ module DTK
         service_module_ref.split(namespace_delimiter()).first
       end
     end
-    
+
     def self.module_ref_field(module_name,namespace)
       "#{namespace}#{namespace_delimiter()}#{module_name}"
     end

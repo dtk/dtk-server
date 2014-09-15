@@ -9,7 +9,7 @@ module DTK; class ModuleDSL
         else
           add_component_override_attrs(@input_hash,opts[:override_attrs])
         end
-      
+
       self.class.add_components_from_dsl(@container_idh,@config_agent_type,@impl_idh,input_hash,nil,opts)
     end
 
@@ -27,18 +27,18 @@ module DTK; class ModuleDSL
       def parse_components!(config_agent_type,dsl_hash,namespace)
         impl_id = impl_idh.get_id()
         module_branch_id = module_branch_idh.get_id()
-        
+
         @components_hash = dsl_hash.inject({}) do |h, (r8_hash_cmp_ref,cmp_info)|
           cmp_ref = component_ref(config_agent_type,r8_hash_cmp_ref,namespace)
           info = Hash.new
           cmp_info.each do |k,v|
             case k
-            # TODO: deprecate this case when remove v1  
+            # TODO: deprecate this case when remove v1
             when "external_link_defs"
               v.each{|ld|(ld["possible_links"]||[]).each{|pl|pl.values.first["type"] = "external"}} #TODO: temp hack to put in type = "external"
               parsed_link_def = LinkDef.parse_serialized_form_local(v,config_agent_type,@remote_link_defs,cmp_ref)
               (info["link_def"] ||= Hash.new).merge!(parsed_link_def)
-            when "link_defs" 
+            when "link_defs"
               parsed_link_def = LinkDef.parse_serialized_form_local(v,config_agent_type,@remote_link_defs,cmp_ref)
               (info["link_def"] ||= Hash.new).merge!(parsed_link_def)
             else
@@ -58,7 +58,7 @@ module DTK; class ModuleDSL
       end
       def component_ref(config_agent_type,hash_cmp_ref,namespace)
         ref_wo_ns = "#{config_agent_type}-#{hash_cmp_ref}"
-        Namespace::New.join_namespace(namespace, ref_wo_ns)
+        Namespace.join_namespace(namespace, ref_wo_ns)
       end
 
     end
@@ -98,7 +98,7 @@ module DTK; class ModuleDSL
       db_update_hash = db_update_form(cmps_hash,stored_cmps_hash,module_branch_idh)
       Model.input_hash_content_into_model(container_idh,db_update_hash)
       sp_hash =  {
-        :cols => [:id,:display_name], 
+        :cols => [:id,:display_name],
         :filter => [:and,[:oneof,:ref,cmps_hash.keys],[:eq,:project_project_id,container_idh.get_id()]]
       }
       Model.get_objs(container_idh.create_childMH(:component),sp_hash).map{|r|r.id_handle()}

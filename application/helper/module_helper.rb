@@ -259,7 +259,7 @@ module Ramaze::Helper
     # override to include namespace in given calculations
     def create_obj(param, model_class=nil,extra_context=nil)
       id_or_name = ret_non_null_request_params(param)
-      namespace_delimiter = ::DTK::Namespace::New.namespace_delimiter()
+      namespace_delimiter = ::DTK::Namespace.namespace_delimiter()
       if id_or_name.include?(namespace_delimiter)
         namespace, id_or_name = id_or_name.split(namespace_delimiter)
       end

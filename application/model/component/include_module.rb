@@ -48,6 +48,7 @@ module DTK; class Component
       end
 
       unless impls_to_set_on_incl_mods.empty? 
+        # if ret is not empty then it will be indicating that there is an error
         # not doing updates if any errors
         if ret.empty?
           incl_mod_mh = component_idhs.first.createMH(:component_include_module)

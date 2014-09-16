@@ -29,7 +29,7 @@ module DTK; class  Assembly
           add_last_task_run_status!(assembly_rows,assembly_mh)
 
           if opts[:include_namespaces]
-            assembly_templates = assembly_rows.map{|a|a[:assembly_template]}
+            assembly_templates = assembly_rows.map{|a|a[:assembly_template]}.compact
             Template.augment_with_namespaces!(assembly_templates)
           end
           list_aux(assembly_rows,attr_rows,opts)

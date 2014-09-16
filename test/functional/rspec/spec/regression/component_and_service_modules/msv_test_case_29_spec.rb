@@ -17,7 +17,7 @@ local_component_module_name_1 = "local:wget"
 component_module_name_2 = "maven"
 git_ssh_repo_url_2 = "git@github.com:maestrodev/puppet-maven.git"
 local_component_module_name_2 = "local:maven"
-component_module_filesystem_location = "~/dtk/component_modules"
+component_module_filesystem_location = "~/dtk/component_modules/r8"
 
 dtk_common = DtkCommon.new('', '')
 
@@ -32,7 +32,7 @@ describe "(Modules, Services and Versioning) Test Case 29: Import component modu
   end
 
   context "Check if component module imported on local filesystem" do
-    include_context "Check component module imported on local filesystem", component_module_filesystem_location, local_component_module_name_1
+    include_context "Check component module imported on local filesystem", component_module_filesystem_location, component_module_name_1
   end
 
   context "Import component module from git repo" do
@@ -40,7 +40,7 @@ describe "(Modules, Services and Versioning) Test Case 29: Import component modu
   end
 
   context "Check if component module imported on local filesystem" do
-    include_context "Check component module imported on local filesystem", component_module_filesystem_location, local_component_module_name_2
+    include_context "Check component module imported on local filesystem", component_module_filesystem_location, component_module_name_2
   end
 
   context "Delete component module" do
@@ -48,7 +48,7 @@ describe "(Modules, Services and Versioning) Test Case 29: Import component modu
   end
 
   context "Delete component module from local filesystem" do
-    include_context "Delete component module from local filesystem", component_module_filesystem_location, local_component_module_name_1
+    include_context "Delete component module from local filesystem", component_module_filesystem_location, component_module_name_1
   end
 
   context "Delete component module" do
@@ -56,7 +56,7 @@ describe "(Modules, Services and Versioning) Test Case 29: Import component modu
   end
 
   context "Delete component module from local filesystem" do
-    include_context "Delete component module from local filesystem", component_module_filesystem_location, local_component_module_name_2
+    include_context "Delete component module from local filesystem", component_module_filesystem_location, component_module_name_2
   end
 
   after(:all) do

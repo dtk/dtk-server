@@ -20,7 +20,7 @@ node_name_2 = "source2"
 component_name_2 = "unit_test::source"
 namespace = "dtk18"
 dependency_component = 'unit_test::sink'
-dependency_satisfied_by = ['sink/dtk18/unit_test::sink']
+dependency_satisfied_by = ['sink/unit_test::sink']
 value_to_match_1_1 = 'nil'
 value_to_match_1_2 = 'nil'
 value_to_match_2_1 = 'ec2'
@@ -44,11 +44,11 @@ describe "(Component link relations) Test Case 3: Fan-in scenario - $node.host_a
   end
 
   context "List component dependencies" do
-    include_context "List component dependencies", dtk_common, "#{node_name_1}/#{namespace}/#{component_name_1}", dependency_component, dependency_satisfied_by
+    include_context "List component dependencies", dtk_common, "#{node_name_1}/#{component_name_1}", dependency_component, dependency_satisfied_by
   end
 
   context "List component dependencies" do
-    include_context "List component dependencies", dtk_common, "#{node_name_2}/#{namespace}/#{component_name_2}", dependency_component, dependency_satisfied_by
+    include_context "List component dependencies", dtk_common, "#{node_name_2}/#{component_name_2}", dependency_component, dependency_satisfied_by
   end
 
   context "Get attribute value from component" do

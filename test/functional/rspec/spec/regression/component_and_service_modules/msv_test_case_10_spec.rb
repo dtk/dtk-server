@@ -18,7 +18,9 @@ namespace = "dtk17"
 component_module_name = "bakir_test1"
 local_component_module = "local:bakir_test1"
 new_local_component_module = "dtk17:bakir_test1"
-component_module_filesystem_location = "~/dtk/component_modules"
+default_filesystem_location = "~/dtk/component_modules"
+r8_component_module_filesystem_location = "~/dtk/component_modules/r8"
+dtk17_component_module_filesystem_location = "~/dtk/component_modules/dtk17"
 
 dtk_common = DtkCommon.new('', '')
 
@@ -37,16 +39,16 @@ describe "(Modules, Services and Versioning) Test Case 10: Export component modu
   end
 
   context "Check if component module imported on local filesystem" do
-    include_context "Check component module imported on local filesystem", component_module_filesystem_location, existing_component_module
+    include_context "Check component module imported on local filesystem", r8_component_module_filesystem_location, existing_component_module_name
   end
 
   context "Create new directory called #{component_module_name} and copy the content of #{existing_component_module} in it" do
     it "creates new directory with existing component module content in it" do
       puts "Create new directory and copy the content of existing component module", "----------------------------------------------------------------------"
       pass = false
-      `mkdir #{component_module_filesystem_location}/#{component_module_name}`
-      `cp -r #{component_module_filesystem_location}/#{existing_component_module}/* #{component_module_filesystem_location}/#{component_module_name}/`
-      value = `ls #{component_module_filesystem_location}/#{component_module_name}/manifests`
+      `mkdir #{default_filesystem_location}/#{component_module_name}`
+      `cp -r #{r8_component_module_filesystem_location}/#{existing_component_module_name}/* #{default_filesystem_location}/#{component_module_name}/`
+      value = `ls #{default_filesystem_location}/#{component_module_name}/manifests`
       pass = !value.include?("No such file or directory")
       puts ""
       pass.should eq(true)
@@ -66,7 +68,7 @@ describe "(Modules, Services and Versioning) Test Case 10: Export component modu
   end
 
   context "Delete component module from local filesystem" do
-    include_context "Delete component module from local filesystem", component_module_filesystem_location, local_component_module
+    include_context "Delete component module from local filesystem", r8_component_module_filesystem_location, local_component_module
   end
 
   context "Delete old component module" do
@@ -74,7 +76,7 @@ describe "(Modules, Services and Versioning) Test Case 10: Export component modu
   end
 
   context "Delete old component module from local filesystem" do
-    include_context "Delete component module from local filesystem", component_module_filesystem_location, existing_component_module
+    include_context "Delete component module from local filesystem", r8_component_module_filesystem_location, existing_component_module_name
   end
 
   context "Import component module function" do
@@ -82,7 +84,7 @@ describe "(Modules, Services and Versioning) Test Case 10: Export component modu
   end
 
   context "Check if component module imported on local filesystem" do
-    include_context "Check component module imported on local filesystem", component_module_filesystem_location, new_local_component_module
+    include_context "Check component module imported on local filesystem", dtk17_component_module_filesystem_location, component_module_name
   end
 
   context "Delete component module" do
@@ -90,7 +92,7 @@ describe "(Modules, Services and Versioning) Test Case 10: Export component modu
   end
 
   context "Delete component module from local filesystem" do
-    include_context "Delete component module from local filesystem", component_module_filesystem_location, new_local_component_module
+    include_context "Delete component module from local filesystem", dtk17_component_module_filesystem_location, component_module_name
   end
 
   context "Delete component module from remote" do

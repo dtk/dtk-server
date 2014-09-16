@@ -21,7 +21,6 @@ component_module_namespace = 'r8'
 service_module_name = 'bootstrap'
 local_service_module_name = 'r8:bootstrap'
 namespace = 'r8'
-service_module_filesystem_location = '~/dtk/service_modules'
 assembly = 'workspace_assembly'
 assembly_name = 'bootstrap::workspace_assembly'
 service_name = 'w_test_case_10_instance'
@@ -51,7 +50,7 @@ describe "(Workspace) Test Case 10: Create two nodes, add components in both of 
 	end	
 
 	context "Create assembly from workspace content" do
-		include_context "Create assembly from workspace content", dtk_common, service_module_name, assembly
+		include_context "Create assembly from workspace content", dtk_common, service_module_name, assembly, namespace
 	end
 
 	context "Check if assembly belongs to the service module" do

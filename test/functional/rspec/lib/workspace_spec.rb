@@ -188,10 +188,10 @@ shared_context "Check if port avaliable on specific node" do |dtk_common, node_n
   end
 end
 
-shared_context "Create assembly from workspace content" do |dtk_common, service_module_name, assembly_name|
+shared_context "Create assembly from workspace content" do |dtk_common, service_module_name, assembly_name, namespace|
   it "creates assembly #{assembly_name} in #{service_module_name} service module" do
   	workspace_id = dtk_common.get_workspace_id
-    assembly_created = dtk_common.create_assembly_from_service(workspace_id, service_module_name, assembly_name)
+    assembly_created = dtk_common.create_assembly_from_service(workspace_id, service_module_name, assembly_name, namespace)
     assembly_created.should eq(true)
   end
 end

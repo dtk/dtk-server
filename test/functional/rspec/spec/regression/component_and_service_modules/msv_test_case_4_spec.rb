@@ -11,12 +11,12 @@ require './lib/assembly_and_service_operations_spec'
 require './lib/service_modules_spec'
 
 service_name = 'msv_test_case_4_instance'
-assembly_name = 'bootstrap:test1'
+assembly_name = 'bootstrap::test1'
 new_assembly_name = 'msv_test_case_4_temp'
-service_module_filesystem_location = '~/dtk/service_modules'
+service_module_filesystem_location = '~/dtk/service_modules/r8'
 service_module_name = 'new_service'
-local_service_module_name = 'local:new_service'
-local_namespace = "local"
+local_service_module_name = 'r8:new_service'
+local_namespace = "r8"
 
 dtk_common = DtkCommon.new(service_name, assembly_name)
 
@@ -59,7 +59,7 @@ describe "(Modules, Services and Versioning) Test Case 4: Get list of all assemb
 	end
 
 	context "Delete service module from local filesystem" do
-    	include_context "Delete service module from local filesystem", service_module_filesystem_location, local_service_module_name
+    	include_context "Delete service module from local filesystem", service_module_filesystem_location, service_module_name
   	end
 
 	after(:all) do

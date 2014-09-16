@@ -14,7 +14,7 @@ require './lib/component_modules_spec'
 component_module_name = "tftp"
 git_ssh_repo_url = "git@github.com:puppetlabs/puppetlabs-tftp.git"
 imported_component_module_name = "local:tftp"
-component_module_filesystem_location = "~/dtk/component_modules"
+component_module_filesystem_location = "~/dtk/component_modules/local"
 
 dtk_common = DtkCommon.new('', '')
 
@@ -29,7 +29,7 @@ describe "(Modules, Services and Versioning) Test Case 15: Import component modu
   end
 
   context "Check if component module imported on local filesystem" do
-    include_context "Check component module imported on local filesystem", component_module_filesystem_location, imported_component_module_name
+    include_context "Check component module imported on local filesystem", component_module_filesystem_location, component_module_name
   end
 
   context "Delete component module" do
@@ -37,7 +37,7 @@ describe "(Modules, Services and Versioning) Test Case 15: Import component modu
   end
 
   context "Delete component module from local filesystem" do
-    include_context "Delete component module from local filesystem", component_module_filesystem_location, imported_component_module_name
+    include_context "Delete component module from local filesystem", component_module_filesystem_location, component_module_name
   end
 
   after(:all) do

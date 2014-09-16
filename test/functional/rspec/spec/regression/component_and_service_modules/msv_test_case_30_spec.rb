@@ -15,7 +15,7 @@ dependency_module = "maestrodev/wget"
 component_module_name = "maven"
 local_component_module_name = "local:maven"
 git_ssh_repo_url = "git@github.com:maestrodev/puppet-maven.git"
-component_module_filesystem_location = "~/dtk/component_modules"
+component_module_filesystem_location = "~/dtk/component_modules/r8"
 
 dtk_common = DtkCommon.new('', '')
 
@@ -30,7 +30,7 @@ describe "(Modules, Services and Versioning) Test Case 30: NEG - Import componen
   end
 
   context "Check if component module imported on local filesystem" do
-    include_context "Check component module imported on local filesystem", component_module_filesystem_location, local_component_module_name
+    include_context "Check component module imported on local filesystem", component_module_filesystem_location, component_module_name
   end
 
   context "Delete component module" do
@@ -38,7 +38,7 @@ describe "(Modules, Services and Versioning) Test Case 30: NEG - Import componen
   end
 
   context "Delete component module from local filesystem" do
-    include_context "Delete component module from local filesystem", component_module_filesystem_location, local_component_module_name
+    include_context "Delete component module from local filesystem", component_module_filesystem_location, component_module_name
   end
 
   after(:all) do

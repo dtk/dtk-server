@@ -14,8 +14,9 @@ service_module_name = 'bakir_test_apache'
 service_module_namespace = 'r8'
 local_service_module_name = "r8:bakir_test_apache"
 component_module_name = 'r8:apache'
-service_module_filesystem_location = '~/dtk/service_modules'
-component_module_filesystem_location = '~/dtk/component_modules'
+component_module = 'apache'
+service_module_filesystem_location = '~/dtk/service_modules/r8'
+component_module_filesystem_location = '~/dtk/component_modules/r8'
 components_list_to_check = ['apache']
 
 dtk_common = DtkCommon.new('', '')
@@ -39,7 +40,7 @@ describe "(Modules, Services and Versioning) Test Case 23: Import new service mo
   end
 
   context "Check if service module imported on local filesystem" do
-    include_context "Check service module imported on local filesystem", service_module_filesystem_location, local_service_module_name
+    include_context "Check service module imported on local filesystem", service_module_filesystem_location, service_module_name
   end
 
   context "Check component modules exist in service module" do
@@ -55,7 +56,7 @@ describe "(Modules, Services and Versioning) Test Case 23: Import new service mo
   end
 
   context "Delete service module from local filesystem" do
-    include_context "Delete service module from local filesystem", service_module_filesystem_location, local_service_module_name
+    include_context "Delete service module from local filesystem", service_module_filesystem_location, service_module_name
   end
 
   context "Delete component module" do
@@ -63,7 +64,7 @@ describe "(Modules, Services and Versioning) Test Case 23: Import new service mo
   end
 
   context "Delete component module from local filesystem" do
-    include_context "Delete component module from local filesystem", component_module_filesystem_location, component_module_name
+    include_context "Delete component module from local filesystem", component_module_filesystem_location, component_module
   end
 
   after(:all) do

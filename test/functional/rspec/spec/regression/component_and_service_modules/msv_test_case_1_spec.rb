@@ -19,7 +19,7 @@ node_name = 'node1'
 component_module_name = "test_module"
 component_module_namespace = "dtk17"
 local_component_module_name = "dtk17:test_module"
-component_module_filesystem_location = "~/dtk/component_modules"
+component_module_filesystem_location = "~/dtk/component_modules/dtk17"
 
 dtk_common = DtkCommon.new(service_name, assembly_name)
 
@@ -38,7 +38,7 @@ describe "(Modules, Services and Versioning) Test Case 1: Import component modul
 	end
 
 	context "Check if component module imported on local filesystem" do
-		include_context "Check component module imported on local filesystem", component_module_filesystem_location, local_component_module_name
+		include_context "Check component module imported on local filesystem", component_module_filesystem_location, component_module_name
 	end
 
 	context "Stage service on #{assembly_name} assembly" do
@@ -70,7 +70,7 @@ describe "(Modules, Services and Versioning) Test Case 1: Import component modul
 	end
 
 	context "Delete component module from local filesystem" do
-		include_context "Delete component module from local filesystem", component_module_filesystem_location, local_component_module_name
+		include_context "Delete component module from local filesystem", component_module_filesystem_location, component_module_name
 	end
 
 	after(:all) do

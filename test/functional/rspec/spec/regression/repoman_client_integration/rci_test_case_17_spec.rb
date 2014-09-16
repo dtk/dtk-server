@@ -9,7 +9,7 @@ user_data = {
 	:module_name => "dtk17/bakir_test_module",
 	:component_module => "bakir_test_module",
 	:namespace => "dtk17",
-	:component_module_filesystem_location => "~/dtk/component_modules",
+	:component_module_filesystem_location => "~/dtk/component_modules/dtk17",
 	:another_usergroup => "bakir_test",
 	:another_user => "(None) - bakir_test"
 }
@@ -111,11 +111,11 @@ describe "(Repoman client integration) Test Case 17: NEG - delete-from-catalog n
   end
 
   context "Delete component module" do
-		include_context "Delete component module", dtk_common, user_data[:namespace] + "::" + user_data[:component_module]
+		include_context "Delete component module", dtk_common, user_data[:namespace] + ":" + user_data[:component_module]
 	end
 
 	context "Delete component module from local filesystem" do
-		include_context "Delete component module from local filesystem", user_data[:component_module_filesystem_location], user_data[:namespace] + "::" + user_data[:component_module]
+		include_context "Delete component module from local filesystem", user_data[:component_module_filesystem_location], user_data[:component_module]
 	end
 
 	context "Usergroup #{user_data[:usergroup]}, user #{user_data[:user]} and RWDP/RWDP/RWDP permissions" do

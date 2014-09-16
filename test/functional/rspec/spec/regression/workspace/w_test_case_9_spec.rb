@@ -21,7 +21,7 @@ component_module_namespace = 'r8'
 service_module_name = 'new_bootstrap'
 local_service_module_name = 'local:new_bootstrap'
 namespace = 'local'
-service_module_filesystem_location = '~/dtk/service_modules'
+service_module_filesystem_location = '~/dtk/service_modules/local'
 assembly_name = 'workspace_assembly'
 
 dtk_common = DtkCommon.new('', '')
@@ -53,7 +53,7 @@ describe "(Workspace) Test Case 9: Create two nodes, add components in both of t
 	end
 
 	context "Create assembly from workspace content" do
-		include_context "Create assembly from workspace content", dtk_common, service_module_name, assembly_name
+		include_context "Create assembly from workspace content", dtk_common, service_module_name, assembly_name, namespace
 	end
 
 	context "Check if assembly belongs to the service module" do
@@ -69,7 +69,7 @@ describe "(Workspace) Test Case 9: Create two nodes, add components in both of t
 	end
 
 	context "Delete service module from local filesystem" do
-    	include_context "Delete service module from local filesystem", service_module_filesystem_location, local_service_module_name
+    	include_context "Delete service module from local filesystem", service_module_filesystem_location, service_module_name
   	end
 
 	context "Purge workspace content" do

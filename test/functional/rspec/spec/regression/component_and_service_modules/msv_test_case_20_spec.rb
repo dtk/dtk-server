@@ -15,8 +15,8 @@ assembly_name = 'test_apache'
 service_module_name = 'bakir_test_apache'
 service_module_namespace = 'r8'
 local_service_module_name = 'r8:bakir_test_apache'
-service_module_filesystem_location = '~/dtk/service_modules'
-component_module_filesystem_location = '~/dtk/component_modules'
+service_module_filesystem_location = '~/dtk/service_modules/r8'
+component_module_filesystem_location = '~/dtk/component_modules/r8'
 component_module_name = 'apache'
 local_component_module_name = 'r8:apache'
 
@@ -45,7 +45,7 @@ describe "(Modules, Services and Versioning) Test Case 20: Import service module
   end
 
   context "Delete service module from local filesystem" do
-    include_context "Delete service module from local filesystem", service_module_filesystem_location, local_service_module_name
+    include_context "Delete service module from local filesystem", service_module_filesystem_location, service_module_name
   end
 
   context "Delete component module" do
@@ -53,7 +53,7 @@ describe "(Modules, Services and Versioning) Test Case 20: Import service module
   end
 
   context "Delete component module from local filesystem" do
-    include_context "Delete component module from local filesystem", component_module_filesystem_location, local_component_module_name
+    include_context "Delete component module from local filesystem", component_module_filesystem_location, component_module_name
   end
 
   after(:all) do

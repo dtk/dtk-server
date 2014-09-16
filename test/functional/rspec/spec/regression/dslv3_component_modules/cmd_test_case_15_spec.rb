@@ -11,7 +11,7 @@ require './lib/component_modules_spec'
 component_module_name = 'temp'
 component_module_namespace = 'dtk17'
 local_component_module_name = 'dtk17:temp'
-component_module_filesystem_location = "~/dtk/component_modules"
+component_module_filesystem_location = "~/dtk/component_modules/dtk17"
 component_name = 'source'
 attribute_name = 'hash_attr'
 file_for_change_location = "./spec/regression/dslv3_component_modules/resources/cmd_test_case_15_dtk.model.yaml"
@@ -35,11 +35,11 @@ describe "(Component Module DSL) Test Case 15: dtk.model.yaml with hash type att
   end
 
   context "Check if component module imported on local filesystem" do
-    include_context "Check component module imported on local filesystem", component_module_filesystem_location, local_component_module_name
+    include_context "Check component module imported on local filesystem", component_module_filesystem_location, component_module_name
   end
 
   context "Remove existing component in dtk.model.yaml file" do
-    include_context "Replace dtk.model.yaml file with new one", local_component_module_name, file_for_change_location, file_for_change, component_module_filesystem_location, "adds hash type attribute that contains key without value to dtk.model.yaml"
+    include_context "Replace dtk.model.yaml file with new one", component_module_name, file_for_change_location, file_for_change, component_module_filesystem_location, "adds hash type attribute that contains key without value to dtk.model.yaml"
   end
 
   context "Push clone changes of component module from local copy to server" do
@@ -55,7 +55,7 @@ describe "(Component Module DSL) Test Case 15: dtk.model.yaml with hash type att
   end
 
   context "Delete component module from local filesystem" do
-    include_context "Delete component module from local filesystem", component_module_filesystem_location, local_component_module_name
+    include_context "Delete component module from local filesystem", component_module_filesystem_location, component_module_name
   end
 
   after(:all) do

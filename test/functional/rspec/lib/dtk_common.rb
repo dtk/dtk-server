@@ -625,6 +625,7 @@ class DtkCommon
 		puts "Delete assembly:", "----------------"
 		assembly_deleted = false
 		assembly_list = send_request('/rest/assembly/list', {:subtype=>"template"})
+		
 		if (id = assembly_list['data'].select { |x| x['display_name'] == assembly_name && x['namespace'] == namespace }.first)
 			puts "Assembly exists in assembly list. Proceed with deleting assembly..."
 			delete_assembly_response = send_request('/rest/service_module/delete_assembly_template', {:service_module_id => id, :assembly_id=>assembly_name, :subtype=>:template})
@@ -642,10 +643,10 @@ class DtkCommon
 		return assembly_deleted
 	end
 
-	def create_assembly_from_service(service_id, service_module_name, assembly_name)
+	def create_assembly_from_service(service_id, service_module_name, assembly_name, namespace=nil)
 		puts "Create assembly from service:", "-----------------------------"
-		assembly_created = false	
-		create_assembly_response = send_request('/rest/assembly/promote_to_template', {:service_module_name=>service_module_name, :assembly_id=>service_id, :assembly_template_name=>assembly_name})
+		assembly_created = false
+		create_assembly_response = send_request('/rest/assembly/promote_to_template', {:service_module_name=>service_module_name, :assembly_id=>service_id, :assembly_template_name=>assembly_name, :namespace=>namespace})
 		if (create_assembly_response['status'] == 'ok')
 			puts "Assembly #{assembly_name} created in service module #{service_module_name}"
 			assembly_created = true
@@ -1098,7 +1099,7 @@ class DtkCommon
 			component_module_id = component_modules_list['data'].select { |x| x['display_name'] == component_module_name}.first['id']
 			component_module_attribute_list = send_request('/rest/component_module/info_about', {:about=>"attributes", :component_module_id=>component_module_id})
 			pretty_print_JSON(component_module_attribute_list)
-			attribute_value = component_module_attribute_list['data'].select { |x| x['display_name'] == "cmp[#{component_module_name.split("::").last}::#{component_name}]/#{attribute_name}" }.first['value']
+			attribute_value = component_module_attribute_list['data'].select { |x| x['display_name'] == "cmp[#{component_module_name.split(":").last}::#{component_name}]/#{attribute_name}" }.first['value']
 			puts attribute_value
 		end
 		

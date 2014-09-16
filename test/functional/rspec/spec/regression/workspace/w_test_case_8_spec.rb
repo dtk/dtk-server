@@ -48,7 +48,7 @@ describe "(Workspace) Test Case 8: Create two nodes, add components in both of t
 	end	
 
 	context "Create assembly from workspace content" do
-		include_context "Create assembly from workspace content", dtk_common, service_module_name, assembly_name
+		include_context "Create assembly from workspace content", dtk_common, service_module_name, assembly_name, namespace
 	end
 
 	context "Check if assembly belongs to the service module" do

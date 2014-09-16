@@ -16,8 +16,8 @@ local_service_module_name = 'r8:bakir_test_apache'
 component_module_namespace = 'r8'
 component_module_name = 'apache'
 local_component_module_name = 'r8:apache'
-service_module_filesystem_location = '~/dtk/service_modules'
-component_module_filesystem_location = '~/dtk/component_modules'
+service_module_filesystem_location = '~/dtk/service_modules/r8'
+component_module_filesystem_location = '~/dtk/component_modules/r8'
 
 dtk_common = DtkCommon.new('', '')
 
@@ -32,7 +32,7 @@ describe "(Modules, Services and Versioning) Test Case 26: NEG - Import new serv
   end
 
   context "Check if component module imported on local filesystem" do
-    include_context "Check component module imported on local filesystem", component_module_filesystem_location, local_component_module_name
+    include_context "Check component module imported on local filesystem", component_module_filesystem_location, component_module_name
   end
 
   context "Delete component module" do
@@ -44,7 +44,7 @@ describe "(Modules, Services and Versioning) Test Case 26: NEG - Import new serv
   end
 
   context "Delete component module from local filesystem" do
-    include_context "Delete component module from local filesystem", component_module_filesystem_location, local_component_module_name
+    include_context "Delete component module from local filesystem", component_module_filesystem_location, component_module_name
   end
 
   after(:all) do

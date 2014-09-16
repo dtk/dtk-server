@@ -17,8 +17,10 @@ existing_service_module_name = "test_service"
 imported_service_module_name = "dtk17:test_service"
 service_module_name = "bakir_test1"
 local_service_module_name = "local:bakir_test1"
-component_module_filesystem_location = '~/dtk/component_modules'
-service_filesystem_location = '~/dtk/service_modules'
+component_module_filesystem_location = '~/dtk/component_modules/dtk17'
+service_filesystem_location = '~/dtk/service_modules/dtk17'
+default_service_filesystem_location = '~/dtk/service_modules'
+local_service_filesystem_location = '~/dtk/service_modules/local'
 component_module_namespace = "dtk17"
 component_module_name = "test_module"
 local_component_module_name = "dtk17:test_module"
@@ -47,7 +49,7 @@ describe "(Modules, Services and Versioning) Test Case 12: Export service module
     it "creates directory #{service_module_name} on local filesystem" do
       puts "Create new #{service_module_name} directory:", "-------------------------------------"
       pass = false
-      value = `mkdir #{service_filesystem_location}/#{service_module_name}`
+      value = `mkdir #{default_service_filesystem_location}/#{service_module_name}`
       pass = !value.include?("cannot create directory")
       puts "#{service_module_name} directory was created on local filesystem successfully!" if pass == true
       puts "#{service_module_name} directory was not created on local filesystem successfully!" if pass == false
@@ -56,15 +58,14 @@ describe "(Modules, Services and Versioning) Test Case 12: Export service module
     end
   end
 
-  context "Copy content of #{imported_service_module_name} to new #{service_module_name} service module" do
-    it "copies content of #{imported_service_module_name} to new #{service_module_name} service module" do
-      puts "Copy content of #{imported_service_module_name} to new #{service_module_name} service module:", "-------------------------------------------------------------------------------"
+  context "Copy content of #{existing_service_module_name} to new #{service_module_name} service module" do
+    it "copies content of #{existing_service_module_name} to new #{service_module_name} service module" do
+      puts "Copy content of #{existing_service_module_name} to new #{service_module_name} service module:", "-------------------------------------------------------------------------------"
       pass = false
-      value = `cp -r #{service_filesystem_location}/#{imported_service_module_name}/* #{service_filesystem_location}/#{service_module_name}/`
-      # not good validation, improve it...
-      pass = !value.include?("some error")
-      puts "Content of #{imported_service_module_name} copied to #{service_module_name} service successfully!" if pass == true
-      puts "Content of #{imported_service_module_name} was not copied to #{service_module_name} service successfully!" if pass == false
+      value = `cp -r #{service_filesystem_location}/#{existing_service_module_name}/* #{default_service_filesystem_location}/#{service_module_name}/`
+      pass = !value.include?("No such file or directory")
+      puts "Content of #{existing_service_module_name} copied to #{service_module_name} service successfully!" if pass == true
+      puts "Content of #{existing_service_module_name} was not copied to #{service_module_name} service successfully!" if pass == false
       puts ""
       pass.should eq(true)
     end
@@ -90,16 +91,16 @@ describe "(Modules, Services and Versioning) Test Case 12: Export service module
     include_context "Delete service module from remote repo", dtk_common, service_module_name, namespace
   end
 
-  context "Delete #{local_service_module_name} service module from local filesystem" do
-    include_context "Delete service module from local filesystem", service_filesystem_location, local_service_module_name
-  end
-
   context "Delete #{imported_service_module_name} service module" do
     include_context "Delete service module", dtk_common, imported_service_module_name
   end
 
-  context "Delete #{imported_service_module_name} service module from local filesystem" do
-    include_context "Delete service module from local filesystem", service_filesystem_location, imported_service_module_name
+  context "Delete #{service_module_name} service module from local filesystem" do
+    include_context "Delete service module from local filesystem", local_service_filesystem_location, service_module_name
+  end
+
+  context "Delete #{existing_service_module_name} service module from local filesystem" do
+    include_context "Delete service module from local filesystem", service_filesystem_location, existing_service_module_name
   end
 
   context "Delete component module" do
@@ -107,7 +108,7 @@ describe "(Modules, Services and Versioning) Test Case 12: Export service module
   end
 
   context "Delete component module from local filesystem" do
-    include_context "Delete component module from local filesystem", component_module_filesystem_location, local_component_module_name
+    include_context "Delete component module from local filesystem", component_module_filesystem_location, component_module_name
   end
 
   after(:all) do

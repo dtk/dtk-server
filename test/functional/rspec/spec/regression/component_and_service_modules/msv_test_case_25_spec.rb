@@ -17,8 +17,8 @@ component_module_name2 = 'stdlib'
 component_module_name3 = 'apache'
 local_component_module_name2 = 'r8:stdlib'
 local_component_module_name3 = 'r8:apache'
-service_module_filesystem_location = '~/dtk/service_modules'
-component_module_filesystem_location = '~/dtk/component_modules'
+service_module_filesystem_location = '~/dtk/service_modules/r8'
+component_module_filesystem_location = '~/dtk/component_modules/r8'
 components_list_to_check = ['apache','stdlib']
 
 dtk_common = DtkCommon.new('', '')
@@ -34,7 +34,7 @@ describe "(Modules, Services and Versioning) Test Case 25: Import new service mo
   end
 
   context "Check if component module #{local_component_module_name2} imported on local filesystem" do
-    include_context "Check component module imported on local filesystem", component_module_filesystem_location, local_component_module_name2
+    include_context "Check component module imported on local filesystem", component_module_filesystem_location, component_module_name2
   end
 
   context "Import service module function" do
@@ -46,7 +46,7 @@ describe "(Modules, Services and Versioning) Test Case 25: Import new service mo
   end
 
   context "Check if service module imported on local filesystem" do
-    include_context "Check service module imported on local filesystem", service_module_filesystem_location, local_service_module_name
+    include_context "Check service module imported on local filesystem", service_module_filesystem_location, service_module_name
   end
 
   context "Check component modules exist in service module" do
@@ -58,7 +58,7 @@ describe "(Modules, Services and Versioning) Test Case 25: Import new service mo
   end
 
   context "Check if component module #{local_component_module_name3} imported on local filesystem" do
-    include_context "Check component module imported on local filesystem", component_module_filesystem_location, local_component_module_name3
+    include_context "Check component module imported on local filesystem", component_module_filesystem_location, component_module_name3
   end
 
   context "Delete service module function" do
@@ -66,7 +66,7 @@ describe "(Modules, Services and Versioning) Test Case 25: Import new service mo
   end
 
   context "Delete service module from local filesystem" do
-    include_context "Delete service module from local filesystem", service_module_filesystem_location, local_service_module_name
+    include_context "Delete service module from local filesystem", service_module_filesystem_location, service_module_name
   end
 
   context "Delete component module" do
@@ -74,7 +74,7 @@ describe "(Modules, Services and Versioning) Test Case 25: Import new service mo
   end
 
   context "Delete component module from local filesystem" do
-    include_context "Delete component module from local filesystem", component_module_filesystem_location, local_component_module_name3
+    include_context "Delete component module from local filesystem", component_module_filesystem_location, component_module_name3
   end
 
   after(:all) do

@@ -17,7 +17,7 @@ local_component_module_name_1 = "local:wget"
 component_module_name_2 = "maven"
 git_ssh_repo_url_2 = "git@github.com:maestrodev/puppet-maven.git"
 local_component_module_name_2 = "local:maven"
-component_module_filesystem_location = "~/dtk/component_modules/r8"
+component_module_filesystem_location = "~/dtk/component_modules/local"
 
 dtk_common = DtkCommon.new('', '')
 

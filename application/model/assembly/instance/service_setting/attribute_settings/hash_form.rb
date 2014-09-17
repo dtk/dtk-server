@@ -39,7 +39,8 @@ module DTK; class ServiceSetting
         end
         all_attrs_struct.component_attrs.each do |cmp_attr|
           node_info = ndx_attrs[cmp_attr[:node][:display_name]]||= {:attrs => Hash.new,:cmps => Hash.new}
-          cmp_info = node_info[:cmps][cmp_attr[:nested_component][:display_name]]||= Hash.new
+          cmp_print_name = cmp_attr[:nested_component].display_name_print_form()
+          cmp_info = node_info[:cmps][cmp_print_name] ||= Hash.new
           cmp_info.merge!(cmp_attr[:display_name] => attribute_value(cmp_attr))
         end
         

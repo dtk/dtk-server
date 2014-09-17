@@ -17,6 +17,9 @@ module DTK
             format_type = meta_file_format_type(meta_file)
             hash_content = Aux.convert_to_hash(file_content,format_type,:file_path => meta_file)||{}
             return hash_content if ParsingError.is_error?(hash_content)
+            if parsing_error = check_for_parsing_errors(hash_content,:file_path => meta_file)
+              return parsing_error
+            end
             (settings_to_add[assembly_name] ||= Array.new) << hash_content
           end
         end
@@ -45,8 +48,24 @@ module DTK
         Model.input_hash_content_into_model(assembly_idh,:service_setting => db_update_hash)
       end
 
+      def check_for_parsing_errors(hash_content,opts)
+        ret = nil
+        unless hash_content['name']
+          return ParsingError.new("Missing 'name' field",AssemblyImport.opts_file_path(opts))
+        end
+        illegal_keys = hash_content.keys - (['name'] + LegalTopSettingKeys)
+        unless illegal_keys.empty?
+          key_or_keys = (illegal_keys.size == 1 ? 'key' : 'keys')
+          legal_keys = "legal keys are: (#{LegalTopSettingKeys.join(',')})"
+          return ParsingError.new("Illegal top level #{key_or_keys} (#{illegal_keys.join(',')}); #{legal_keys}",AssemblyImport.opts_file_path(opts))
+        end
+        ret
+      end
+      LegalTopSettingKeys = ['node_bindings','attribute_settings']
+
       def ret_settings_hash(assembly_idh,hash_content)
-        ref = hash_content['name']
+        unless ref = hash_content['name']
+        end
         {
           ref => {
             :display_name => hash_content['name'],

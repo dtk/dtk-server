@@ -110,7 +110,7 @@ module Ramaze::Helper
       if module_type == :service_module and !do_not_raise
         missing_modules, required_modules, dependency_warnings = ServiceModule.get_required_and_missing_modules(project, remote_params, dtk_client_pub_key)
         # return missing modules if any
-        return { :missing_module_components => missing_modules, :dependency_warnings => dependency_warnings } unless missing_modules.empty?
+        return { :missing_module_components => missing_modules, :dependency_warnings => dependency_warnings, :required_modules => required_modules } unless (missing_modules.empty? && required_modules.empty?)
       end
 
       opts = {:do_not_raise=>do_not_raise, :additional_message=>additional_message, :ignore_component_error=>ignore_component_error}

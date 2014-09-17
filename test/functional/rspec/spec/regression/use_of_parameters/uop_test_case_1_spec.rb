@@ -40,7 +40,7 @@ describe "(Use Of Parameters) Test Case 1: Check possibility to create assembly 
   end
 
   context "Create new assembly from existing service" do
-    include_context "Create assembly from service", dtk_common, service_module_name, new_assembly
+    include_context "Create assembly from service", dtk_common, service_module_name, new_assembly, local_namespace
   end
 
   context "Delete and destroy service function" do

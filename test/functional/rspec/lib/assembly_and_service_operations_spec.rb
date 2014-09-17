@@ -117,9 +117,9 @@ shared_context "Delete assembly" do |dtk_common, assembly_name, namespace|
   end
 end
 
-shared_context "Create assembly from service" do |dtk_common, service_name, assembly_name|
+shared_context "Create assembly from service" do |dtk_common, service_name, assembly_name, namespace|
   it "creates #{assembly_name} assembly in #{service_name} service module from existing service" do
-    assembly_created = dtk_common.create_assembly_from_service(dtk_common.service_id, service_name, assembly_name)
+    assembly_created = dtk_common.create_assembly_from_service(dtk_common.service_id, service_name, assembly_name, namespace)
     assembly_created.should eq(true)
   end
 end

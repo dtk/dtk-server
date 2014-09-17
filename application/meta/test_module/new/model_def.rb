@@ -250,6 +250,7 @@ lambda__segment_impls =
         :cols => [:id,:display_name,:group_id,:component_type,:version],
         :alias=>:component_template,
         :filter=>[:eq,:node_node_id,nil]),
+       lambda__segment_namespace.call(:cols => [:id,:display_name]),
        {
          :model_name=>:component_ref,
          :convert => true,
@@ -280,7 +281,8 @@ lambda__segment_impls =
       [lambda__segment_module_branches.call(:cols => [:id]),
        lambda__segment_components.call(
         :cols => [:id,:group_id,:display_name,:component_type,:version,:assembly_id,:project_project_id,:component_template_id,:locked_sha],
-        :filter=>[:neq,:node_node_id,nil])
+        :filter=>[:neq,:node_node_id,nil]),
+       lambda__segment_namespace.call(:cols => [:id,:display_name])
       ]
     },
     :component_module_instances_node=>{

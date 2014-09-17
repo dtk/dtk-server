@@ -18,6 +18,7 @@ module DTK
       ndx_ret = Hash.new
       get_objs(:cols => [:assembly_templates]).each do |r|
         assembly_template = r[:assembly_template]
+        assembly_template[:namespace] = r[:namespace][:display_name] if r[:namespace]
         ndx_ret[assembly_template[:id]] ||= Assembly::Template.create_as(assembly_template)
       end
       ndx_ret.values
@@ -44,6 +45,7 @@ module DTK
       ndx_ret = Hash.new
       get_objs(:cols => [:component_instances]).each do |r|
         cmp = r[:component]
+        cmp[:namespace] = r[:namespace][:display_name] if r[:namespace]
         ndx_ret[cmp[:id]] ||= Component::Instance.create_subclass_object(cmp)
       end
      ndx_ret.values

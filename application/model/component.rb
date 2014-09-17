@@ -161,6 +161,12 @@ module DTK
         ret = ComponentTitle.print_form_with_title(ret,title)
       end
 
+      if opts[:namespace_prefix]
+        if cmp_namespace = self[:namespace]
+          ret = "#{cmp_namespace}:#{ret}"
+        end
+      end
+
       if opts[:node_prefix]
         if node = get_node()
           ret = "#{node[:display_name]}/#{ret}"

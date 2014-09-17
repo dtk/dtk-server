@@ -19,7 +19,7 @@ module DTK; class BaseModule
           ndx_assemblies = Assembly::Instance.get_objs(model_handle(:assembly_instance),sp_hash).inject(Hash.new){|h,r|h.merge(r[:id] => r)}
         end
         component_names = components.map do |r|
-          cmp_name = r.display_name_print_form(:node_prefix=>true)
+          cmp_name = r.display_name_print_form(:node_prefix=>true,:namespace_prefix=>true)
           if assembly = ndx_assemblies[r[:assembly_id]]
             cmp_name = "#{assembly.display_name_print_form()}/#{cmp_name}"
           end

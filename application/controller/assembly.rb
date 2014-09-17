@@ -502,7 +502,11 @@ module DTK
         violation_table = violation_objects.map do |v|
           {:type => v.type(),:description => v.description()}
         end
-#        return rest_notok_response(:code => :assembly_violations, :violations => violation_table.uniq)
+        error_data = {
+          :violations => violation_table.uniq
+        }
+        error_msg = "Assembly cannot be executed because of violations"
+#        return rest_notok_response(:code => :assembly_violations, :message => error_msg, :data => error_data)
       end
 
       # create task
@@ -510,17 +514,13 @@ module DTK
       task.save!()
 
       # execute task
-      task_id =  task.id()
-      # TODO: rereading task probably not needed; but initially to do it has was done
-      task = Task.get_hierarchical_structure(id_handle(task_id))
-
       workflow = Workflow.create(task)
       workflow.defer_execution()
 
       response = {
         :assembly_instance_id => assembly_instance.id(),
         :assembly_instance_name => assembly_instance.display_name_print_form,
-        :task_id => task_id
+        :task_id => task_id =  task.id()
       }
       rest_ok_response response
     end

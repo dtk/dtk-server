@@ -58,7 +58,7 @@ module DTK; class Task
         :temporal_order => "sequential",
       }
       if commit_msg = opts[:commit_msg]
-        task_info_hash.mereg!(:commit_message => commit_msg)
+        task_info_hash.merge!(:commit_message => commit_msg)
       end
 
       create_new_task(task_mh,task_info_hash)

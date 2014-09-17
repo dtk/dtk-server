@@ -21,6 +21,7 @@ new_local_component_module = "dtk17:bakir_test1"
 default_filesystem_location = "~/dtk/component_modules"
 r8_component_module_filesystem_location = "~/dtk/component_modules/r8"
 dtk17_component_module_filesystem_location = "~/dtk/component_modules/dtk17"
+local_component_module_filesystem_location = "~/dtk/component_modules/local"
 
 dtk_common = DtkCommon.new('', '')
 
@@ -68,7 +69,7 @@ describe "(Modules, Services and Versioning) Test Case 10: Export component modu
   end
 
   context "Delete component module from local filesystem" do
-    include_context "Delete component module from local filesystem", r8_component_module_filesystem_location, local_component_module
+    include_context "Delete component module from local filesystem", local_component_module_filesystem_location, component_module_name
   end
 
   context "Delete old component module" do

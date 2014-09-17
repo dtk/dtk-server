@@ -483,7 +483,6 @@ module DTK
     end
 
     def rest__deploy()
-
       # stage assembly template
       target_id = ret_request_param_id_optional(:target_id, Target::Instance)
       target = target_idh_with_default(target_id).create_object(:model_name => :target_instance)
@@ -496,6 +495,15 @@ module DTK
  #       opts[:service_settings] = service_settings
  #     end
       assembly_instance = assembly_template.stage(target, opts)
+
+      # see if any violations
+      violation_objects = assembly_instance.find_violations()
+      unless violation_objects.empty?
+        violation_table = violation_objects.map do |v|
+          {:type => v.type(),:description => v.description()}
+        end
+#        return rest_notok_response(:code => :assembly_violations, :violations => violation_table.uniq)
+      end
 
       # create task
       task = Task.create_from_assembly_instance(assembly_instance,ret_params_hash(:commit_msg))

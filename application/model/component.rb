@@ -136,7 +136,10 @@ module DTK
 
     ### display name functions    
     def self.display_name_from_user_friendly_name(user_friendly_name)
-      user_friendly_name.gsub(/::/,"__")
+      # user_friendly_name.gsub(/::/,"__")
+      # using sub instead of gsub because we need only first :: to change to __
+      # e.g. we have cmp "mysql::bindings::java" we want "mysql__bindings::java"
+      user_friendly_name.sub(/::/,"__")
     end
 
     # TODO: these methods in this section need to be cleaned up and also possibly partitioned into Component::Instance and Component::Template

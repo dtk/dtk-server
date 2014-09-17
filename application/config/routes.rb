@@ -55,6 +55,7 @@ R8::ReactorRoute.draw do
   post  'assembly/info_about' => 'assembly#info_about'
   post  'assembly/info_about_task' => 'assembly#info_about_task'
   post  'assembly/stage' => 'assembly#stage'
+  post  'assembly/deploy' => 'assembly#deploy'
   post  'assembly/task_status' => 'assembly#task_status'
   post  'assembly/remove_from_system' => 'assembly#remove_from_system'
   post  'assembly/initiate_get_netstats' => 'assembly#initiate_get_netstats'

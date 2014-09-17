@@ -482,6 +482,41 @@ module DTK
       rest_ok_response(response,:encode_into => :yaml)
     end
 
+    def rest__deploy()
+
+      # stage assembly template
+      target_id = ret_request_param_id_optional(:target_id, Target::Instance)
+      target = target_idh_with_default(target_id).create_object(:model_name => :target_instance)
+      assembly_template = ret_assembly_template_object()
+      opts = Hash.new
+      if assembly_name = ret_request_params(:name)
+        opts[:assembly_name] = assembly_name
+      end
+ #     if service_settings = ret_settings(assembly_template,:settings)
+ #       opts[:service_settings] = service_settings
+ #     end
+      assembly_instance = assembly_template.stage(target, opts)
+
+      # create task
+      task = Task.create_from_assembly_instance(assembly_instance,ret_params_hash(:commit_msg))
+      task.save!()
+
+      # execute task
+      task_id =  task.id()
+      # TODO: rereading task probably not needed; but initially to do it has was done
+      task = Task.get_hierarchical_structure(id_handle(task_id))
+
+      workflow = Workflow.create(task)
+      workflow.defer_execution()
+
+      response = {
+        :assembly_instance_id => assembly_instance.id(),
+        :assembly_instance_name => assembly_instance.display_name_print_form,
+        :task_id => task_id
+      }
+      rest_ok_response response
+    end
+
     def rest__list_settings()
       assembly_template = ret_assembly_template_object()
       rest_ok_response assembly_template.get_settings()

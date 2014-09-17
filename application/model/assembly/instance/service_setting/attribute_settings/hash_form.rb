@@ -12,7 +12,11 @@ module DTK; class ServiceSetting
           if key =~ Regexp.new("(^.+)#{ContextDelim}$")
             attr_part = $1
             nested_attr_prefix = compose_attr(attr_prefix,attr_part)
-            each_element(body,nested_attr_prefix,&block)
+            if body.kind_of?(Hash)
+              each_element(body,nested_attr_prefix,&block)
+            else
+              Log.error_pp(["Unexpected form in AttributeSettings::HashForm.each_element:",key,body, "ignoring; should be caught in better parsing of settings"])
+            end
           else
             attr = compose_attr(attr_prefix,key)
             value = body

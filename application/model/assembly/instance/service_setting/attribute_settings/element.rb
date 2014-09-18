@@ -18,8 +18,12 @@ module DTK; class ServiceSetting
         begin
           @raw_value = eruby.result(hash_params)
          rescue Exception => e
-          Log.error("The following erubis error resulted from service setting bindings: #{e.insepct}")
-          raise ErrorUsage.new("Error in applying service setting parameters to attribute (#{@attribute_path}) with value (#{@raw_value}")
+          Log.error("The following erubis error resulted from service setting bindings: #{e.inspect}")
+          params_print = hash_params.inject(String.new) do |s,(k,v)|
+            av = "#{k}=>#{v}"
+            s.empty? ? av : "#{s},#{av}"
+          end
+          raise ErrorUsage.new("Error in applying setting parameters (#{params_print}) to attribute (#{@attribute_path}) with value (#{@raw_value}")
         end
         ret
       end

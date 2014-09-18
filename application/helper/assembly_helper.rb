@@ -114,15 +114,24 @@ module Ramaze::Helper
     # order determines order it is applied
     def ret_settings(assembly_template, settings_param_name)
       ret = ::DTK::ServiceSetting::Array.new()
-      param_settings = ret_request_params(settings_param_name)
-      return ret unless param_settings
+      unless param_settings_string = ret_request_params(settings_param_name)
+        return ret
+      end
+      param_settings = ParseSettings.parse(param_settings_string)
+
       # indexed by display_name
       ndx_existing_settings = assembly_template.get_settings().inject(Hash.new) do |h,s|
         h.merge(s[:display_name] => s)
       end
       bad_settings = Array.new
-      param_settings.split(',').each do |setting_name|
+      param_settings.each do |param_setting|
+        unless setting_name = param_setting[:name]
+          raise ::DTK::ErrorUsage.new("Ill-formed service settings string")
+        end
         if setting = ndx_existing_settings[setting_name]
+          if param_setting[:parameters]
+            raise ::DTK::Error.new("Write code to handle param settings")
+          end
           ret << setting
         else
           bad_settings << setting_name
@@ -132,6 +141,35 @@ module Ramaze::Helper
         raise ::DTK::ErrorUsage.new("Provided service settings (#{bad_settings.join(',')}) are not defined; legal settings are: #{ndx_existing_settings.keys.join(',')}")
       end
       ret
+    end
+    module ParseSettings
+      # the form of settings_string should be
+      # SETTINGS := SETTING[;...SETTING]
+      # SETTING := ATOM || ATOM(ATTR=VAL,...)
+      def self.parse(settings_string)
+        settings_string && settings_string.split(';').map{|setting|parse_setting(setting)}
+      end
+     private
+      def self.parse_setting(setting)
+        if setting =~ /(^[^\(]+)\((.+)\)$/
+          name = $1
+          param_string = $2
+          {:name => name, :parameters => parse_params(param_string)}
+        else
+          {:name => setting}
+        end
+      end
+      def self.parse_params(param_string)
+        param_string.split(',').inject(Hash.new) do |h,av_pair|
+          if av_pair =~ /(^[^=]+)=(.+$)/
+            attr = $1
+            val = $2
+            h.merge(attr => val)
+          else
+            raise ::DTK::ErrorUsage.new("Settings param string is ill-formed")
+          end
+        end
+      end
     end
 
     # returns [assembly_template_name,service_module_name]; if cannot find one or both or these nil is returned in the associated element

@@ -117,7 +117,6 @@ module DTK
 
     # returns parsing_error if parsing error
 
-
     # TODO: this might move to a more common area
     def self.convert_attribute_mapping(input_am,base_cmp,dep_cmp,opts={})
       integer_version = 2 #TODO: fix this being hard coded
@@ -204,7 +203,7 @@ module DTK
         case integer_version(dsl_integer_version)
          when 1
           "r8meta.#{config_agent_type}"
-         when 2,3
+         when 2,3,4
           "dtk.model"
         else
           raise Error.new("DSL type not treated")
@@ -221,8 +220,9 @@ module DTK
     end
     VersionIntegerWhenVersionMissing = 1
     VersionToVersionInteger = {
-      "0.9" => 2,
-      "0.9.1" => 3
+      "0.9"   => 2,
+      "0.9.1" => 3,
+      "1.0.0" => 4
     }
     VersionIntegerToVersion = VersionToVersionInteger.inject(Hash.new) do |h,(v,vi)|
       h.merge(vi=>v)
@@ -231,7 +231,8 @@ module DTK
     DSLFilenameRegexp = {
       1 => /^r8meta\.[a-z]+\.([a-z]+$)/,
       2 => /^dtk\.model\.([a-z]+$)/,
-      3 => /^dtk\.model\.([a-z]+$)/
+      3 => /^dtk\.model\.([a-z]+$)/,
+      4 => /^dtk\.model\.([a-z]+$)/,
     }
 
     VersionsTreated = DSLFilenameRegexp.keys

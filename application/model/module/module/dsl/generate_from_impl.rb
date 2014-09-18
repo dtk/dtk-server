@@ -8,7 +8,7 @@ module DTK; class ModuleDSL
       end
       new(integer_version)
     end
-    SupportedIntegerVersions = [1,2,3]
+    SupportedIntegerVersions = [1,2,3,4]
    
     def initialize(integer_version)
       @integer_version = integer_version

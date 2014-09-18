@@ -2,7 +2,7 @@ module DTK
   class ServiceModule
     class AssemblyExport < Hash
       def self.create(container_idh,service_module_branch,integer_version=nil)
-        integer_version ||= ServiceModule::DSLVersionInfo.default_integer_version()
+        integer_version ||= DSLVersionInfo.default_integer_version()
         klass = load_and_return_version_adapter_class(integer_version)
         klass.new(container_idh,service_module_branch,integer_version)
       end

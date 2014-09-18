@@ -11,7 +11,7 @@ module DTK
          [
           {:name => assembly_hash()[:display_name]},
           dsl_version && {:dsl_version => dsl_version},
-          {:node_bindings => node_bindings_hash}, 
+          node_bindings_hash.empty? ? nil : {:node_bindings => node_bindings_hash},
           {:assembly => assembly_hash},
           temporal_ordering && {:workflow => temporal_ordering}
          ].compact)
@@ -145,7 +145,8 @@ module DTK
         node_binding_rows = Model.get_objs(@container_idh.createMH(:node_binding_ruleset),sp_hash,:keep_ref_cols => true)
         node_binding_id_to_ref = node_binding_rows.inject(Hash.new){|h,r|h.merge(r[:id] => r[:ref])}
         self[:node].inject(Hash.new) do |h,(node_ref,node_hash)|
-          h.merge("#{node_hash[:display_name]}" => node_binding_id_to_ref[node_hash[:node_binding_rs_id]])
+          nb =  node_binding_id_to_ref[node_hash[:node_binding_rs_id]]
+          nb ? h.merge(node_hash[:display_name] => nb) : h
         end
       end
 

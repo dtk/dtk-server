@@ -1,3 +1,4 @@
+require 'erubis'
 module DTK; class ServiceSetting
   class AttributeSettings
     class Element
@@ -5,6 +6,22 @@ module DTK; class ServiceSetting
       def initialize(attribute_path,raw_value)
         @attribute_path = attribute_path
         @raw_value = raw_value
+      end
+
+      def bind_parameters!(hash_params)
+        # TODO: need alot more checking also making sure no unbound attribute
+        ret = self
+        unless @raw_value.kind_of?(String)
+          return ret
+        end
+        eruby =  ::Erubis::Eruby.new(@raw_value)
+        begin
+          @raw_value = eruby.result(hash_params)
+         rescue Exception => e
+          Log.error("The following erubis error resulted from service setting bindings: #{e.insepct}")
+          raise ErrorUsage.new("Error in applying service setting parameters to attribute (#{@attribute_path}) with value (#{@raw_value}")
+        end
+        ret
       end
 
       def av_pair_form()

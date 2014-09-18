@@ -13,24 +13,29 @@ module DTK
        :attribute_settings
       ]
     end
+
+    def bind_parameters!(hash_params)
+      reify!()
+      apply_to_field?(:attribute_settings){|settings|settings.bind_parameters!(hash_params)}
+    end
     
     def apply_setting(target,assembly)
       reify!()
-      if settings = self[AttributeSettingsField]
-        settings.apply_settings(assembly)
-      end
-      if node_bindings = self[NodeBindingsField]
-        node_bindings.set_node_bindings(target,assembly)
-      end
+      apply_to_field?(:attribute_settings){|settings|settings.apply_settings(assembly)}
+      apply_to_field?(:node_bindings){|node_bindings|node_bindings.set_node_bindings(target,assembly)}
     end
 
     def reify!()
-      reify_field!(AttributeSettingsField,AttributeSettings)
-      reify_field!(NodeBindingsField,NodeBindings)      
+      reify_field!(:attribute_settings,AttributeSettings)
+      reify_field!(:node_bindings,NodeBindings)      
     end
-    AttributeSettingsField = :attribute_settings
-    NodeBindingsField = :node_bindings
    private
+    def apply_to_field?(field,&block)
+      if content = self[field]
+        block.call(content)
+      end
+    end
+
     def reify_field!(field,klass)
       if content = self[field]
         unless content.kind_of?(klass)

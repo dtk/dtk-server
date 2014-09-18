@@ -11,6 +11,11 @@ module DTK
         end
       end
 
+      def bind_parameters!(hash_params)
+        # TODO: would be more efficient probably to apply these all at once raher than per element
+        each{|el|el.bind_parameters!(hash_params)}
+      end
+
       def self.apply_using_settings_hash(assembly,settings_hash)
         attr_settings = new(settings_hash)
         # get all existing attributes to find just the diffs

@@ -129,8 +129,8 @@ module Ramaze::Helper
           raise ::DTK::ErrorUsage.new("Ill-formed service settings string")
         end
         if setting = ndx_existing_settings[setting_name]
-          if param_setting['parameters']
-            raise ::DTK::Error.new("Write code to handle param settings")
+          if parameters = param_setting['parameters']
+            setting.bind_parameters!(parameters)
           end
           ret << setting
         else

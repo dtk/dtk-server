@@ -18,13 +18,13 @@ module DTK; class Assembly
     end
 
     def stage(target,opts={})
-      assembly_name = opts[:assembly_name]
       service_module = get_service_module()
-      is_dsl_parsed = service_module.dsl_parsed?()
-      raise ErrorUsage.new("You are not allowed to stage service from service-module ('#{service_module}') that has dsl parsing errors") unless is_dsl_parsed
+      unless is_dsl_parsed = service_module.dsl_parsed?()
+        raise ErrorUsage.new("An assembly template from an unparsed service-module ('#{service_module}') cannot be staged")
+      end
 
       override_attrs = Hash.new
-      if assembly_name
+      if assembly_name = opts[:assembly_name]
         override_attrs[:display_name] = assembly_name
       end
       clone_opts = {:ret_new_obj_with_cols => [:id,:type]}

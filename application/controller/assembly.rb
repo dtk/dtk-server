@@ -491,9 +491,9 @@ module DTK
       if assembly_name = ret_request_params(:name)
         opts[:assembly_name] = assembly_name
       end
- #     if service_settings = ret_settings(assembly_template,:settings)
- #       opts[:service_settings] = service_settings
- #     end
+      if service_settings = ret_settings(assembly_template,:settings)
+        opts[:service_settings] = service_settings
+      end
       assembly_instance = assembly_template.stage(target, opts)
 
       # see if any violations

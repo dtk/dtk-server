@@ -459,3 +459,10 @@ shared_context "Check module permissions" do |dtk_common, component_module_name,
     permission_set_correctly.should eq(true)
   end
 end
+
+shared_context "Set default namespace" do |dtk_common, namespace|
+  it "sets namespace #{namespace} as default one tenant for particular user" do
+    default_namespace_set = dtk_common.set_default_namespace(namespace)
+    default_namespace_set.should eq(true)
+  end
+end

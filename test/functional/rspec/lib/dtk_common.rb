@@ -123,11 +123,44 @@ class DtkCommon
  
 		puts "List of avaliable assemblies: "
 		pretty_print_JSON(assembly_list)
-
 		test_template = assembly_list['data'].select { |x| x['display_name'] == @assembly }.first
 
 		if (!test_template.nil?)
 			puts "Assembly #{@assembly} found!"
+			assembly_id = test_template['id']
+			puts "Assembly id: #{assembly_id}"
+
+			stage_service_response = send_request('/rest/assembly/stage', {:assembly_id=>assembly_id, :name=>@service_name})	
+
+			pretty_print_JSON(stage_service_response)
+
+			if (stage_service_response['data'].include? "name: #{@service_name}")
+				puts "Stage of #{@service_name} assembly completed successfully!"
+				service_id_match = stage_service_response['data'].match(extract_id_regex)
+				self.service_id = service_id_match[1].to_i
+				puts "Service id for a staged service: #{self.service_id}"
+			else
+				puts "Stage service didnt pass!"
+			end
+		else
+			puts "Assembly #{@service_name} not found!"
+		end
+		puts ""
+	end
+
+	def stage_service_with_namespace(namespace)
+		#Get list of assemblies, extract selected assembly, stage service and return its id
+		puts "Stage service:", "--------------"
+		service_id = nil
+		extract_id_regex = /id: (\d+)/
+		assembly_list = send_request('/rest/assembly/list', {:subtype=>'template'})
+ 
+		puts "List of avaliable assemblies: "
+		pretty_print_JSON(assembly_list)
+		test_template = assembly_list['data'].select { |x| x['display_name'] == @assembly && x['namespace'] == namespace }.first
+
+		if (!test_template.nil?)
+			puts "Assembly #{@assembly} from namespace #{namespace} found!"
 			assembly_id = test_template['id']
 			puts "Assembly id: #{assembly_id}"
 
@@ -1808,6 +1841,19 @@ class DtkCommon
 			puts "Assembly #{@assembly} not found!"
 		end
 		puts ""
+	end
+
+	def set_default_namespace(namespace)
+		puts "Set default namespace:", "---------------------"
+		default_namespace_set = false
+		response = send_request('/rest/account/set_default_namespace', {:namespace=>namespace})
+	  if response['status'] == 'ok'
+	  	puts "Default namespace is set to #{namespace}"
+	  	default_namespace_set = true
+	  else
+	  	puts "Default namespace has not been set correctly!"
+	  end
+	  return default_namespace_set
 	end
 
 # Following list of methods is used for interaction with workspace context

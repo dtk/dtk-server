@@ -24,6 +24,7 @@ local_component_module_name = 'local:test_module'
 service_module_name = "bootstrap"
 local_service_module_name = 'local:bootstrap'
 namespace = 'demo'
+local_default_namespace = 'local'
 component_module_filesystem_location = "~/dtk/component_modules"
 
 dtk_common = DtkCommon.new(service_name, assembly_name)
@@ -32,6 +33,10 @@ describe "DTK Server smoke test release" do
 
   before(:all) do
     puts "*****************************",""
+  end
+
+  context "Set default namespace" do
+    include_context "Set default namespace", dtk_common, local_default_namespace
   end
 
   context "Import new component module function" do

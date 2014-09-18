@@ -11,12 +11,13 @@ require './lib/dtk_common'
 
 service_name = 'dtk_release_deployment'
 assembly_name = 'dtk::release'
+namespace = 'internal'
 
 dtk_common = DtkCommon.new(service_name, assembly_name)
 config = YAML::load(File.open("./config/release.yml"))
 
 # Stage service
-dtk_common.stage_service
+dtk_common.stage_service_with_namespace(namespace)
 
 begin
 	if dtk_common.check_if_service_exists(dtk_common.service_id)

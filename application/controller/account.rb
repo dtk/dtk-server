@@ -56,10 +56,17 @@ module DTK
     def rest__remove_user_direct_access()
       username = ret_non_null_request_params(:username)
 
+      # if id instead of username
+      if username.to_s =~ /^[0-9]+$/
+        model_handle = model_handle_with_private_group()
+        user_mh = model_handle.createMH(:repo_user)
+        user = User.get_user_by_id( user_mh, username)
+        username = user[:username] if user
+      end
+
       response = Repo::Remote.new.remove_client_user(username)
 
       ServiceModule.remove_user_direct_access(model_handle_with_private_group(:service_module),username)
-
       ComponentModule.remove_user_direct_access(model_handle_with_private_group(:component_module),username)
 
       rest_ok_response

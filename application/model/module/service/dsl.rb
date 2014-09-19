@@ -202,8 +202,9 @@ module DTK
             hash_content = Aux.convert_to_hash(file_content,format_type,opts)||{}
             return hash_content if ParsingError.is_error?(hash_content)
 
-            assembly_name = validate_name_for_assembly(meta_file,hash_content['name'])
-            return assembly_name if ParsingError.is_error?(assembly_name)
+            # commented out because not tested yet
+            # assembly_name = validate_name_for_assembly(meta_file,hash_content['name'])
+            # return assembly_name if ParsingError.is_error?(assembly_name)
 
             imported = assembly_import_helper.process(module_name,hash_content,opts)
             return imported if ParsingError.is_error?(imported)
@@ -267,12 +268,13 @@ module DTK
         ret
       end
 
-      def validate_name_for_assembly(file_path,name)
-        return unless (name || file_path)
-        file_name = file_path.split('/').last
-        assembly_name = file_name.split('.').first
-        return ParsingError::BadAssemblyReference.new(:file_path => file_path, :name => name) unless assembly_name.eql?(name)
-      end
+      # commented out because not tested yet
+      # def validate_name_for_assembly(file_path,name)
+      #   return unless (name || file_path)
+      #   file_name = file_path.split('/').last
+      #   assembly_name = file_name.split('.').first
+      #   return ParsingError::BadAssemblyReference.new(:file_path => file_path, :name => name) unless assembly_name.eql?(name)
+      # end
 
       def meta_file_format_type(path)
         Aux.format_type(path)

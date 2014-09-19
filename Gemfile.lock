@@ -56,7 +56,7 @@ GEM
       eventmachine
       net-ssh
     erubis (2.7.0)
-    eventmachine (1.0.0)
+    eventmachine (1.0.3)
     excon (0.16.10)
     facter (1.7.5)
     file-tail (1.0.12)
@@ -207,7 +207,7 @@ DEPENDENCIES
   dtk-common!
   dtk-common-core!
   em-ssh (= 0.6.5)
-  eventmachine (= 1.0.0)
+  eventmachine (= 1.0.3)
   excon (= 0.16.10)
   fog (= 1.8.0)
   grit (= 2.5.0)

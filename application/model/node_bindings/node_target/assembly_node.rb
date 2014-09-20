@@ -61,7 +61,9 @@ module DTK; class NodeBindings
           :filter => [:eq,:datacenter_datacenter_id,target.id()]
         }   
         Assembly::Instance.get_objs(target.model_handle(:assembly_instance),sp_hash).select do |r|
-          @assembly_name == Assembly::Template.pretty_print_name(r[:assembly_template])
+          if assembly_template = r[:assembly_template]
+            @assembly_name == Assembly::Template.pretty_print_name(assembly_template)
+          end
         end
       end
 

@@ -513,6 +513,9 @@ module DTK
       task = Task.create_from_assembly_instance(assembly_instance,ret_params_hash(:commit_msg))
       task.save!()
 
+      # TODO: this is simple but expensive way to get all teh embedded task ids filled out
+      # can replace with targeted method that does just this
+      task = Task.get_hierarchical_structure(task.id_handle())
       # execute task
       workflow = Workflow.create(task)
       workflow.defer_execution()
@@ -520,7 +523,7 @@ module DTK
       response = {
         :assembly_instance_id => assembly_instance.id(),
         :assembly_instance_name => assembly_instance.display_name_print_form,
-        :task_id => task_id =  task.id()
+        :task_id => task.id()
       }
       rest_ok_response response
     end

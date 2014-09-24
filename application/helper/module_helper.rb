@@ -123,6 +123,10 @@ module Ramaze::Helper
     def publish_to_dtkn_helper(module_obj)
       client_rsa_pub_key = ret_non_null_request_params(:rsa_pub_key)
       qualified_remote_name = ret_request_params(:remote_component_name)
+
+      module_obj.update_object!(:display_name)
+      qualified_remote_name = module_obj[:display_name] if qualified_remote_name.to_s.empty?
+
       namespace, remote_module_name,version = Repo::Remote.split_qualified_name(qualified_remote_name)
       local_module_name = module_obj.module_name()
       # [Amar & Haris] this is temp restriction until rest of logic is properly fixed

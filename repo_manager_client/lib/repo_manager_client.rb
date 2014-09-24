@@ -356,8 +356,11 @@ module DTK
     def error_msg(response)
       errors = response["errors"]
       if response.kind_of?(Common::Response::Error) and errors
-        # if include_error_code?(errors,"connection_refused")
-        "Repo Manager refused the connection; it may be down"
+        if errors.first && errors.first['code'].eql?('unavailable')
+          'The DTK Repo service is currently down for maintenance'
+        else
+          'The DTK Repo service is unavailable'
+        end
       else
         error_detail = nil
         if errors.kind_of?(Array) and errors.size > 0

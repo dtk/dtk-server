@@ -21,14 +21,13 @@ module DTK
         end
       end
 
-      # commented out because not tested yet
-      # class BadAssemblyReference < self
-      #   def initialize(params={})
-      #     err_msg = "Assembly name (?name) does not match assembly name in file path '?file_path'"
-      #     err_params = Params.new(:file_path => params[:file_path],:name => params[:name])
-      #     super(err_msg,err_params)
-      #   end
-      # end
+      class BadAssemblyReference < self
+        def initialize(params={})
+          err_msg = "Assembly name (?name) does not match assembly name in file path '?file_path'"
+          err_params = Params.new(:file_path => params[:file_path],:name => params[:name])
+          super(err_msg,err_params)
+        end
+      end
 
       class BadComponentReference < self
       end

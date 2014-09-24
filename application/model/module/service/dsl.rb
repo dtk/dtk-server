@@ -98,6 +98,11 @@ module DTK
         [meta_files,regexp]
       end
 
+      def is_legacy_service_module_structure?(module_branch)
+        meta_files,regexp,is_legacy_structure = meta_files_regexp_and_is_legacy?(module_branch)
+        is_legacy_structure
+      end
+
      private
 
       # returns [meta_files,regexp,is_legacy_structure]
@@ -119,11 +124,6 @@ module DTK
         :regexp => Regexp.new("^assemblies/(.*)\.dtk\.assembly\.(json|yaml)$"),
         :path_depth => 3
       }
-
-      def is_legacy_service_module_structure?(module_branch)
-        meta_files,regexp,is_legacy_structure = meta_files_regexp_and_is_legacy?(module_branch)
-        is_legacy_structure
-      end
 
       # returns [meta_files, regexp]
       def meta_files_and_regexp_aux?(assembly_dsl_path_info,module_branch)
@@ -202,8 +202,12 @@ module DTK
             hash_content = Aux.convert_to_hash(file_content,format_type,opts)||{}
             return hash_content if ParsingError.is_error?(hash_content)
 
-            assembly_name = validate_name_for_assembly(meta_file,hash_content['name'])
-            return assembly_name if ParsingError.is_error?(assembly_name)
+            # check if comp_name.dtk.assembly.yaml matches name in that file
+            # only perform check for new service module structure
+            unless self.class.is_legacy_service_module_structure?(module_branch)
+              assembly_name = validate_name_for_assembly(meta_file,hash_content['name'])
+              return assembly_name if ParsingError.is_error?(assembly_name)
+            end
 
             imported = assembly_import_helper.process(module_name,hash_content,opts)
             return imported if ParsingError.is_error?(imported)

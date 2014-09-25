@@ -29,6 +29,14 @@ module DTK
         end
       end
 
+      class BadNamespaceReference < self
+        def initialize(params={})
+          err_msg = "Namespace (?name) rerenced in module_refs file does not exist"
+          err_params = Params.new(:name => params[:name])
+          super(err_msg,err_params)
+        end
+      end
+
       class BadComponentReference < self
       end
 

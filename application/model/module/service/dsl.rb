@@ -151,6 +151,9 @@ module DTK
         component_module_refs = update_component_module_refs(module_branch,opts)
         return component_module_refs if ParsingError.is_error?(component_module_refs)
 
+        v_namespaces = validate_module_ref_namespaces(module_branch,component_module_refs)
+        return v_namespaces if ParsingError.is_error?(v_namespaces)
+
         parsed = update_assemblies_from_dsl(module_branch,component_module_refs,opts)
         if new_commit_sha = ModuleRefs.serialize_and_save_to_repo?(module_branch)
           if opts[:ret_dsl_updated_info]
@@ -276,6 +279,21 @@ module DTK
         file_name = file_path.split('/').last
         assembly_name = file_name.split('.').first
         return ParsingError::BadAssemblyReference.new(:file_path => file_path, :name => name) unless assembly_name.eql?(name)
+      end
+
+      def validate_module_ref_namespaces(module_branch,component_module_refs)
+        cmp_modules = component_module_refs.component_modules
+        namespace_mh = module_branch.id_handle().createMH(:namespace)
+
+        sp_hash = {
+          :cols => [:id, :display_name]
+        }
+        namespaces = Model.get_objs(namespace_mh,sp_hash).map{|ns| ns[:display_name]}
+
+        cmp_modules.each do |k,v|
+          v_namespace = v[:namespace_info]
+          return ParsingError::BadNamespaceReference.new(:name => v_namespace) unless namespaces.include?(v_namespace)
+        end
       end
 
       def meta_file_format_type(path)

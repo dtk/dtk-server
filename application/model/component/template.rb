@@ -132,7 +132,7 @@ module DTK; class Component
         # TODO: indicate whether there is a nailed namespace that does not exist or no matches at all
         cmp_refs = unmatched.map do |match_el|
           {
-            :component_type => match_el.component_type,
+            :component_type => "#{match_el.namespace}:#{match_el.component_type}",
             :version => match_el.version
           }
         end

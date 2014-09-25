@@ -18,6 +18,20 @@ shared_context "Import remote component module" do |component_module_name|
   end
 end
 
+shared_context "NEG - Import remote component module" do |component_module_name|
+  it "does not import #{component_module_name} component module from remote repo since it already exists" do
+    puts "NEG - Import remote component module:", "-----------------------------------"
+    pass = false
+    value = `dtk component-module install #{component_module_name}`
+    puts value
+    pass = true if ((value.include? "ERROR") || (value.include? "exists on client") || (value.include? "denied") || (value.include? "Conflicts with existing server local module")) 
+    puts "Import of remote component module #{component_module_name} did not complete successfully since component module from same namespace already exists!" if pass == true
+    puts "Import of remote component module #{component_module_name} completed successfully even though it should not!" if pass == false
+    puts ""
+    pass.should eq(true)
+  end
+end
+
 shared_context "Import component module from provided git repo" do |component_module_name, git_ssh_repo_url|
   it "imports #{component_module_name} component module from #{git_ssh_repo_url} repo" do
     puts "Import component module from git repo:", "--------------------------------------"
@@ -37,6 +51,34 @@ shared_context "NEG - Import component module from provided git repo" do |compon
     puts "NEG - Import component module from git repo:", "--------------------------------------------"
     pass = false
     value = `dtk component-module import-git #{git_ssh_repo_url} #{component_module_name}`
+    puts value
+    pass = true if ((value.include? "ERROR") || (value.include? "Repository not found") || (value.include? "denied"))
+    puts "Component module #{component_module_name} was not created successfully from provided incorrect git repo!" if pass == true
+    puts "Component module #{component_module_name} was created successfully from provided incorrect git repo!" if pass == false
+    puts ""
+    pass.should eq(true)
+  end
+end
+
+shared_context "Import component module from provided git repo to specific namespace" do |component_module_name, git_ssh_repo_url, namespace|
+  it "imports #{component_module_name} component module from #{git_ssh_repo_url} repo to namespace #{namespace}" do
+    puts "Import component module from git repo:", "--------------------------------------"
+    pass = true
+    value = `dtk component-module import-git #{git_ssh_repo_url} #{namespace}:#{component_module_name}`
+    puts value
+    pass = false if ((value.include? "ERROR") || (value.include? "Repository not found") || (value.include? "denied"))
+    puts "Component module #{component_module_name} created successfully from provided git repo!" if pass == true
+    puts "Component module #{component_module_name} was not created successfully from provided git repo!" if pass == false
+    puts ""
+    pass.should eq(true)
+  end
+end
+
+shared_context "NEG - Import component module from provided git repo to specific namespace" do |component_module_name, git_ssh_repo_url, namespace|
+  it "does not import #{component_module_name} component module from #{git_ssh_repo_url} repo to namespace #{namespace}" do
+    puts "NEG - Import component module from git repo:", "--------------------------------------------"
+    pass = false
+    value = `dtk component-module import-git #{git_ssh_repo_url} #{namespace}:#{component_module_name}`
     puts value
     pass = true if ((value.include? "ERROR") || (value.include? "Repository not found") || (value.include? "denied"))
     puts "Component module #{component_module_name} was not created successfully from provided incorrect git repo!" if pass == true

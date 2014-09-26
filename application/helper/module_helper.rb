@@ -128,7 +128,7 @@ module Ramaze::Helper
       opts = {:namespace => module_obj[:namespace][:display_name]}
       qualified_remote_name = module_obj[:display_name] if qualified_remote_name.to_s.empty?
 
-      namespace, remote_module_name,version = Repo::Remote.split_qualified_name(qualified_remote_name)#,opts)
+      namespace, remote_module_name,version = Repo::Remote.split_qualified_name(qualified_remote_name,opts)
       local_module_name = module_obj.module_name()
       # [Amar & Haris] this is temp restriction until rest of logic is properly fixed
       if local_module_name != remote_module_name

@@ -25,6 +25,7 @@ module DTK
       # creates a new assembly template if it does not exist
       def self.create_or_update_from_instance(assembly_instance,service_module,assembly_name,opts={})
         assembly_factory = create_assembly_factory(assembly_instance,service_module,assembly_name,opts)
+        assembly_factory.raise_error_if_integrity_error()
         assembly_factory.create_assembly_template()
       end
 
@@ -33,14 +34,46 @@ module DTK
         create_assembly_template_aux()
       end
 
-      def set_attrs!(project_idh,assembly_instance,service_module_branch)
+      def set_object_attributes!(project_idh,assembly_instance,service_module,service_module_branch)
         @project_idh = project_idh
         @assembly_instance = assembly_instance 
+        @service_module = service_module
         @service_module_branch = service_module_branch
+        @assembly_component_modules = assembly_instance.get_component_modules(:get_version_info=>true)
+        @service_module_refs = service_module.get_component_module_refs()
         self
       end
 
+      def raise_error_if_integrity_error()
+        raise_error_if_inconsistent_mod_refs()
+      end
+
      private
+      def raise_error_if_inconsistent_mod_refs()
+        mismatched_cmp_mods = Array.new
+        @assembly_component_modules.each do |cmp_mod|
+          cmp_mod_name = cmp_mod[:display_name]
+          if namespace = @service_module_refs.matching_component_module_namespace?(cmp_mod_name)
+            if namespace != cmp_mod[:namespace_name]
+              mismatch = {
+                :module_name => cmp_mod_name,
+                :template_ns => namespace,
+                :instance_ns => cmp_mod[:namespace_name]
+              }
+              mismatched_cmp_mods << mismatch
+            end
+          end
+        end
+        unless mismatched_cmp_mods.empty?
+          err_msg = "Cannot push to service module (#{@service_module.get_field?(:display_name)}) because the following mismatches in namespaces:\n"
+          mismatched_cmp_mods.each do |el|
+            err_msg << " Component module (#{el[:module_name]}) in instance has namespace (#{el[:instance_ns]}), but namespace (#{el[:template_ns]}) in service module\n"
+          end
+          err_msg << "Alternatives are to push to another service module or change the service module's module_refs.yaml file"
+          raise ErrorUsage.new(err_msg)
+        end
+      end
+
       def self.create_assembly_factory(assembly_instance,service_module,assembly_name,opts={})
         service_module_name = service_module.get_field?(:display_name)
         local_params = ModuleBranch::Location::LocalParams::Server.new(
@@ -57,7 +90,7 @@ module DTK
           if opts[:mode] == :create
             raise ErrorUsage.new("Assembly (#{assembly_name}) already exists in service module (#{service_module_name})")
           end
-          ret.set_attrs!(project_idh,assembly_instance,service_module_branch)
+          ret.set_object_attributes!(project_idh,assembly_instance,service_module,service_module_branch)
         else
           if opts[:mode] == :update
             raise ErrorUsage.new("Assembly (#{assembly_name}) does not exist in service module (#{service_module_name})")
@@ -72,7 +105,7 @@ module DTK
             :component_type => Assembly.ret_component_type(service_module_name,assembly_name)
           }
           ret = create(assembly_mh,hash_values)
-          ret.set_attrs!(project_idh,assembly_instance,service_module_branch)
+          ret.set_object_attributes!(project_idh,assembly_instance,service_module,service_module_branch)
         end
       end
 

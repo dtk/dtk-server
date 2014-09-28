@@ -12,6 +12,12 @@ module DTK
       new(branch,content_hash_content)
     end
 
+    def matching_component_module_namespace?(cmp_module_name)
+      if module_ref = component_module_ref?(cmp_module_name)
+        module_ref.namespace()
+      end
+    end
+
     def version_objs_indexed_by_modules()
       ret = Hash.new
       component_modules.each_pair do |mod,cmr|

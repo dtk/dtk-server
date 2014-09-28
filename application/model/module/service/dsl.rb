@@ -155,7 +155,7 @@ module DTK
         return v_namespaces if ParsingError.is_error?(v_namespaces)
 
         parsed = update_assemblies_from_dsl(module_branch,component_module_refs,opts)
-        if new_commit_sha = ModuleRefs.serialize_and_save_to_repo?(module_branch)
+        if new_commit_sha = component_module_refs.serialize_and_save_to_repo?()
           if opts[:ret_dsl_updated_info]
             msg = "The module refs file was updated by the server"
             opts[:ret_dsl_updated_info] = DSLUpdatedInfo.new(msg,new_commit_sha)

@@ -4,6 +4,19 @@ module DTK
       [:id,:group_id,:display_name,:component_template_id,:has_override_version,:version,:component_type,:template_id_synched]
     end
 
+    def self.ref(component_type,title = nil)
+      title ? ComponentTitle.ref_with_title(component_type,title) ? component_type
+    end
+    def self.display_name(cmp_type_ext_form,title = nil)
+      title ? ComponentTitle.display_name_with_title(cmp_type_ext_form,title) : cmp_type_ext_form
+    end
+
+    def self.qualified_ref(obj_hash)
+     ref = "#{obj_hash[:ref]}#{obj_hash[:ref_num] ? "-#{obj_hash[:ref_num].to_s}" : ""}"
+        pp [:push_assembly,{:input => obj_hash,:ref => ref}]
+      ref 
+    end
+
     def display_name_print_form(opts={})
       cols_to_get = [:component_type,:display_name,:ref_name]
       update_object!(*cols_to_get)

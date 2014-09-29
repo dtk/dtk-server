@@ -70,6 +70,7 @@ R8::ReactorRoute.draw do
   post  'assembly/initiate_ssh_pub_access' => 'assembly#initiate_ssh_pub_access'
   post  'assembly/list_ssh_access' => 'assembly#list_ssh_access'
   post  'assembly/list_settings' => 'assembly#list_settings'
+  post  'assembly/get_component_modules' => 'assembly#get_component_modules'
 
    # ATTRIBUTE
   post  'attribute/set' => 'attribute#set'

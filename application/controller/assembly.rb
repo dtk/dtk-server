@@ -91,6 +91,11 @@ module DTK
       end
     end
 
+    def rest__get_component_modules()
+      assembly = ret_assembly_object()
+      rest_ok_response assembly.get_component_modules({:get_version_info=>true})
+    end
+
     def rest__rename()
       assembly = ret_assembly_object()
       assembly_name = ret_non_null_request_params(:assembly_name)

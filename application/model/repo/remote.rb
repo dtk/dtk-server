@@ -24,20 +24,27 @@ module DTK
         return client
       end
 
-      def create_client_user(client_rsa_pub_key)
-        client.create_client_user(client_rsa_pub_key)
+      def add_client_access(client_rsa_pub_key)
+        response = client.add_client_access(client_rsa_pub_key)
+        # we also make sure that tenant user is created
+        create_tenant_user()
+        response
       end
 
-      def remove_client_user(username)
-        client.remove_client_user(username)
+      def remove_client_access(username)
+        client.remove_client_access(username)
       end
 
-      def publish_to_remote(client_rsa_pub_key, module_refs_content = nil)
+      def create_tenant_user()
         username        = dtk_instance_remote_repo_username()
         rsa_pub_key     = dtk_instance_rsa_pub_key()
         rsa_key_name    = dtk_instance_remote_repo_key_name()
 
-        client.create_user(username, rsa_pub_key, rsa_key_name, client_rsa_pub_key)
+        client.create_tenant_user(username, rsa_pub_key, rsa_key_name)
+      end
+
+      def publish_to_remote(client_rsa_pub_key, module_refs_content = nil)
+        username        = dtk_instance_remote_repo_username()
 
         unless namespace = remote.namespace
           namespace = CurrentSession.new.get_user_object().get_namespace()

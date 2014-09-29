@@ -187,7 +187,7 @@ module DTK
       get_rest_request_data(route, user_params_delegated_client(client_rsa_pub_key, params_hash),:raise_error => true)
     end
 
-    def remove_client_user(username)
+    def remove_client_access(username)
       client_repo_user = get_repo_user_by_username(username)
 
       if client_repo_user && client_repo_user.has_repoman_direct_access?
@@ -198,19 +198,34 @@ module DTK
       nil
     end
 
+    def add_client_access(client_rsa_pub_key)
+      client_repo_user = get_repo_user(client_rsa_pub_key)
+
+      unless client_repo_user.has_repoman_direct_access?
+        response = post_rest_request_data(
+          '/v1/users/add_access',
+           user_params(client_repo_user.owner_username, client_rsa_pub_key, client_repo_user.rsa_key_name),
+          :raise_error => true
+        )
+
+        client_repo_user.update(:repo_manager_direct_access => true) if response
+      end
+    end
+
+    def create_tenant_user(username, rsa_pub_key, rsa_key_name)
+      # Create Tenant
+      route = "/v1/users/tenant"
+      body = user_params(username, rsa_pub_key, rsa_key_name)
+
+      tenant_response = post_rest_request_data(route,body,:raise_error => true)
+
+      return tenant_response
+    end
+
     ###
     ##  Legacy methods
     #
 
-    def create_client_user(client_rsa_pub_key)
-      client_repo_user = get_repo_user(client_rsa_pub_key)
-
-      unless client_repo_user.has_repoman_direct_access?
-        # we are using real user name not repo user
-        response = create_user(client_repo_user.owner_username, client_rsa_pub_key, client_repo_user.rsa_key_name)
-        client_repo_user.update(:repo_manager_direct_access => true) if response
-      end
-    end
 
     # This is more revokew access
     def delete_user(username, rsa_pub_key)
@@ -219,23 +234,7 @@ module DTK
       delete_rest_request_data(route,body,:raise_error => true)
     end
 
-    def create_user(username, rsa_pub_key, rsa_key_name, client_rsa_pub_key = nil)
-      # Create Tenant
-      route = "/v1/users"
-      body = user_params(username, rsa_pub_key, rsa_key_name)
 
-      #TODO: temp hack if missing email
-      unless body[:email]
-        body[:email] = "#{body[:username]}.#{body[:dtk_instance_name]}@reactor8.com"
-      end
-
-      tenant_response = post_rest_request_data(route,body,:raise_error => true)
-
-      # Create Client
-      create_client_user(client_rsa_pub_key) if client_rsa_pub_key
-
-      return tenant_response
-    end
 
     ###
     ##  Legacy methods (Admin)
@@ -328,7 +327,7 @@ module DTK
         if is_internal_error?(response)
           raise Error.new(msg)
         else
-          raise ErrorUsage.new(msg)
+          raise ErrorUsage.new("Repo Manager error, #{msg}")
         end
       else
         return response.data
@@ -463,8 +462,7 @@ module DTK
     def update_user_params(params_hash)
       if params_hash[:username]
         {
-          :dtk_instance_name => dtk_instance_repo_username(),
-          :default_namespace => ::DTK::Common::Aux.running_process_user()
+          :default_namespace => Namespace.default_namespace_name
         }.merge(params_hash)
       else
         params_hash
@@ -477,7 +475,6 @@ module DTK
       repo_user = get_repo_user(client_rsa_pub_key)
 
       params_hash[:username] = repo_user.owner_username
-      params_hash[:dtk_instance_name] = dtk_instance_repo_username()
       params_hash[:user_fingerprint] = SSHKey.fingerprint(client_rsa_pub_key)
 
       params_hash

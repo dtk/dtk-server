@@ -91,6 +91,29 @@ module DTK; class ServiceModule
         ret
       end
 
+      # TODO: temporary that have this overwrite of component_ref_parse; relates to DTK-1663
+      DSLComponentTitleRegex = /(^.+)\[(.+)\]/
+      
+      def self.component_ref_parse(cmp)
+        ref,type,version = InternalForm.component_ref_type_and_version(cmp.kind_of?(Hash) ?  cmp.keys.first : cmp)
+        display_name = ref
+
+        # TODO: move this also to dsl/common
+        component_title = nil
+        if type =~ DSLComponentTitleRegex
+          type = $1
+          component_title = $2
+          ref = ComponentTitle.ref_with_title(type,component_title)
+          display_name = ComponentTitle.display_name_with_title(type,component_title)
+        end
+
+        ret = {:component_type => type, :ref => ref, :display_name => display_name}
+        ret.merge!(:version => version) if version
+        ret.merge!(:component_title => component_title) if component_title
+        ret
+      end
+
+
       # returns Array with each element being Hash with keys :parsed_component_link, :base_cmp_name
       def self.parse_component_links(assembly_hash,opts={})
         ret = Array.new

@@ -82,7 +82,7 @@ module DTK; class ServiceModule
         type = component_ref_info[:component_type]
         title = component_ref_info[:title]
         version = component_ref_info[:version]
-        ref = ComponentRef.ref(component_type,title)
+        ref = ComponentRef.ref(type,title)
         display_name = ComponentRef.display_name(cmp_type_ext_form,title)
 
         ret = {:component_type => type, :ref => ref, :display_name => display_name}

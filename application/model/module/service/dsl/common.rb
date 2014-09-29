@@ -26,7 +26,7 @@ module DTK
       # returns hash with keys
       # component_type,
       # version (optional)
-      # component_title (optional)
+      # title (optional)
       def self.component_ref_info(cmp_type_ext_form)
         ref = component_ref(cmp_type_ext_form)
         if ref =~ CmpVersionRegexp
@@ -36,13 +36,13 @@ module DTK
         end
         if type =~ DSLComponentTitleRegex
           type = $1
-          component_title = $2
-          ref = ComponentTitle.ref_with_title(type,component_title)
-          display_name = ComponentTitle.display_name_with_title(type,component_title)
+          title = $2
+          ref = ComponentTitle.ref_with_title(type,title)
+          display_name = ComponentTitle.display_name_with_title(type,title)
         end
         ret = {:component_type => type}
         ret.merge!(:version => version) if version
-        ret.merge!(:component_title => title) if title
+        ret.merge!(:title => title) if title
         ret
       end
     end

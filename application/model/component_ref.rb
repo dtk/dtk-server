@@ -5,16 +5,15 @@ module DTK
     end
 
     def self.ref(component_type,title = nil)
-      title ? ComponentTitle.ref_with_title(component_type,title) ? component_type
+      title ? ComponentTitle.ref_with_title(component_type,title) : component_type
     end
-    def self.display_name(cmp_type_ext_form,title = nil)
-      title ? ComponentTitle.display_name_with_title(cmp_type_ext_form,title) : cmp_type_ext_form
+    def self.ref_from_component_hash(cmp_hash)
+      title = ComponentTitle.title?(cmp_hash)
+      ref(cmp_hash[:component_type],title)
     end
 
-    def self.qualified_ref(obj_hash)
-     ref = "#{obj_hash[:ref]}#{obj_hash[:ref_num] ? "-#{obj_hash[:ref_num].to_s}" : ""}"
-        pp [:push_assembly,{:input => obj_hash,:ref => ref}]
-      ref 
+    def self.display_name(cmp_type_ext_form,title = nil)
+      title ? ComponentTitle.display_name_with_title(cmp_type_ext_form,title) : cmp_type_ext_form
     end
 
     def display_name_print_form(opts={})
@@ -23,8 +22,7 @@ module DTK
       component_type = self[:component_type] && self[:component_type].gsub(/__/,"::")
       ret = component_type
       # handle component title
-      # NOTE: ref_num is for dsl versions before v2
-      if title = ComponentTitle.title?(self)||self[:ref_num]
+      if title = ComponentTitle.title?(self)
         ret = ComponentTitle.print_form_with_title(ret,title)
       end
       ret

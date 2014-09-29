@@ -355,7 +355,7 @@ module DTK
       end
 
       def create_component_ref_content(cmp)
-        cmp_ref_ref = ComponentRef.qualified_ref(cmp)
+        cmp_ref_ref = ComponentRef.ref_from_component_hash(cmp)
         cmp_ref_hash = Aux::hash_subset(cmp,[:display_name,:description,:component_type])
         cmp_template_id = cmp[:ancestor_id]
         cmp_ref_hash.merge!(:component_template_id => cmp_template_id)

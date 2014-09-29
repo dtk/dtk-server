@@ -201,7 +201,8 @@ module DTK
       def self.default_user_namespace()
         # CurrentSession.new.get_user_object().get_namespace()
         # we don't want username as default namespace, we will use tenant unique name instead
-        ::DTK::Common::Aux.running_process_user()
+        # ::DTK::Common::Aux.running_process_user()
+        Namespace.default_namespace_name
       end
 
       # TODO: this needs to be cleaned up
@@ -216,12 +217,13 @@ module DTK
 
       # example:
       # returns namespace, name, version (optional)
-      def self.split_qualified_name(qualified_name)
+      def self.split_qualified_name(qualified_name,opts={})
         raise ErrorUsage.new("Please provide module name to publish") if qualified_name.nil? || qualified_name.empty?
+        namespace = opts[:namespace]||default_namespace()
 
         split = qualified_name.split("/")
         case split.size
-         when 1 then [default_namespace(),qualified_name]
+         when 1 then [namespace,qualified_name]
          when 2,3 then split
         else
           qualified_name = "NOT PROVIDED" if qualified_name.nil? || qualified_name.empty?

@@ -31,7 +31,6 @@ module DTK
         ret_clone_update_info(service_version)
       end
       
-      private
       def get_component_module_refs(service_version=nil)
         branch = get_module_branch_matching_version(service_version)
         ModuleRefs.get_component_module_refs(branch)

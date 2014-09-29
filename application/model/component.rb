@@ -73,7 +73,7 @@ module DTK
         display_name = Component.display_name_from_user_friendly_name(name)
         node_name,cmp_type,cmp_title = ComponentTitle.parse_component_display_name(display_name,:node_prefix => true)
         unless node_name
-          raise ErrorUsage.new("Ill-formed name for component (#{name})")
+          raise ErrorUsage.new("Ill-formed name for component (#{name}); it should have form NODE/CMP or NODE/MOD::CMP")
         end
         sp_hash = {
           :cols => [:id,:node],

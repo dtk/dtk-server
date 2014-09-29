@@ -75,7 +75,23 @@ module DTK; class ServiceModule
         ret
       end
 
-      # pattern that appears in dsl that designates a component title
+      
+      def self.component_ref_parse(cmp)
+        cmp_type_ext_form = (cmp.kind_of?(Hash) ?  cmp.keys.first : cmp)
+        component_ref_info = InternalForm.component_ref_info(cmp_type_ext_form)
+        type = component_ref_info[:component_type]
+        title = component_ref_info[:title]
+        version = component_ref_info[:version]
+        ref = ComponentRef.ref(type,title)
+        display_name = ComponentRef.display_name(cmp_type_ext_form,title)
+
+        ret = {:component_type => type, :ref => ref, :display_name => display_name}
+        ret.merge!(:version => version) if version
+        ret.merge!(:component_title => title) if title
+        ret
+      end
+
+      # TODO: temporary that have this overwrite of component_ref_parse; relates to DTK-1663
       DSLComponentTitleRegex = /(^.+)\[(.+)\]/
       
       def self.component_ref_parse(cmp)

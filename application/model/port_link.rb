@@ -137,10 +137,12 @@ module DTK
       }
       cmp_mh = local_port_cmp_info[:component].model_handle()
       rows = Model.get_objs(cmp_mh,sp_hash)
-      unless rows.size == 1
-        raise Error.new("Unexpected that getting remote port link component does not return unique element")
-      else
+      if rows.size == 1
         remote_cmp = rows.first
+      elsif rows.empty?
+        raise Error.new("Unexpected that no remote component found")
+      else
+        raise Error.new("Unexpected that getting remote port link component does not return unique element")
       end
       link_def_link = match[:link_def_link].merge!(:local_component_type => local_port_cmp_info[:component][:component_type])
       relevant_components = [local_port_cmp_info[:component], remote_cmp]

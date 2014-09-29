@@ -213,6 +213,8 @@ module DTK
       version = ret_version()
       diffs_summary = ret_diffs_summary()
       opts = Hash.new
+      # TODO: might make this contingent
+      opts.merge!(:auto_update_module_refs => true)
       if ret_request_param_boolean(:internal_trigger)
         opts.merge!(:do_not_raise => true )
       end

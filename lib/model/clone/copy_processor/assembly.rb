@@ -32,7 +32,7 @@ module DTK
 
         def get_component_module_refs(source_obj)
           sp_hash = {
-            :cols => [:id],
+            :cols => [:id,:group_id,:display_name],
             :filter => [:eq,:id,source_obj.get_field?(:module_branch_id)]
           }
           branch = Model.get_obj(source_obj.model_handle(:module_branch),sp_hash)

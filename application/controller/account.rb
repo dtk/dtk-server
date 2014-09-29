@@ -31,7 +31,7 @@ module DTK
       if matched_repo_user && !matched_repo_user.has_repoman_direct_access?
         begin
           # Add Repo Manager user
-          response = Repo::Remote.new.create_client_user(rsa_pub_key)
+          response = Repo::Remote.new.add_client_access(rsa_pub_key)
 
           # update user so we know that rsa pub key was added
           matched_repo_user.update(:repo_manager_direct_access => true)
@@ -64,7 +64,7 @@ module DTK
         username = user[:username] if user
       end
 
-      response = Repo::Remote.new.remove_client_user(username)
+      response = Repo::Remote.new.remove_client_access(username)
 
       ServiceModule.remove_user_direct_access(model_handle_with_private_group(:service_module),username)
       ComponentModule.remove_user_direct_access(model_handle_with_private_group(:component_module),username)

@@ -12,6 +12,37 @@ module DTK
       new(branch,content_hash_content)
     end
 
+    # returns true if an update made; this updates the ruby object
+    def update_if_needed(cmp_modules_with_namespaces)
+      ret = false
+      cmp_modules_with_namespaces.each do |cmp_mod|
+        [:display_name,:namespace_name].each do |key|
+          raise Error.new("Unexpected that cmp_modules_with_namespaces element does not have key: #{key}") unless cmp_mod[key]
+        end
+        cmp_mod_name = cmp_mod[:display_name]
+        unless component_module_ref?(cmp_mod_name)
+          add_or_set_component_module_ref(cmp_mod_name,:namespace_info => cmp_mod[:namespace_name])
+          ret = true
+        end
+      end
+      ret
+    end
+
+    # serializes and saves object to repo
+    def serialize_and_save_to_repo?()
+      dsl_hash_form = dsl_hash_form()
+      unless dsl_hash_form.empty?
+        meta_filename_path = meta_filename_path()
+        @parent.serialize_and_save_to_repo?(meta_filename_path,dsl_hash_form)
+      end
+    end
+
+    def matching_component_module_namespace?(cmp_module_name)
+      if module_ref = component_module_ref?(cmp_module_name)
+        module_ref.namespace()
+      end
+    end
+
     def version_objs_indexed_by_modules()
       ret = Hash.new
       component_modules.each_pair do |mod,cmr|
@@ -77,6 +108,10 @@ module DTK
       @component_modules[key(cmp_module_name)]
     end
 
+    def add_or_set_component_module_ref(cmp_module_name,mod_ref_hash)
+      @component_modules[key(cmp_module_name)] = ModuleRef.reify(@parent.model_handle(),mod_ref_hash)
+    end
+
     def initialize(parent,content_hash_form,opts={})
       @parent = parent
       @component_modules = opts[:content_hash_form_is_reified] ?
@@ -91,30 +126,17 @@ module DTK
       self.class.key(el)
     end
 
-    def self.meta_filename_path()
-      unless @meta_filename_path ||= ServiceModule::DSLParser.default_rel_path?(:component_module_refs)
-        raise Error.new("Unexpected that cannot compute a meta_filename_path for component_module_refs")
-      end
-      @meta_filename_path
+    def meta_filename_path()
+      ServiceModule::DSLParser.default_rel_path?(:component_module_refs) ||
+        raise(Error.new("Unexpected that cannot compute a meta_filename_path for component_module_refs"))
     end
 
     def self.update(parent,cmp_modules)
       ModuleRef.update(:create_or_update,parent,cmp_modules.values)
     end
 
-    # updates repo if any changes and if so returns new commit_sha
-    def self.serialize_and_save_to_repo?(parent)
-      dsl_hash_form = dsl_hash_form(parent)
-      unless dsl_hash_form.empty?
-        meta_filename_path = meta_filename_path()
-        parent.serialize_and_save_to_repo?(meta_filename_path,dsl_hash_form)
-      end
-    end
-
-    def self.dsl_hash_form(service_module_branch)
+    def dsl_hash_form()
       ret = SimpleOrderedHash.new()
-      component_modules = get_component_module_refs(service_module_branch).component_modules
-
       dsl_hash_form = Hash.new
       component_modules.each_pair do |cmp_module_name,cmr|
         hf = cmr.dsl_hash_form()

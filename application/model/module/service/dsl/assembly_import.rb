@@ -232,13 +232,6 @@ module DTK; class ServiceModule
       ret
     end
 
-    def self.component_ref_parse(cmp)
-      ref,type,version = InternalForm.component_ref_type_and_version(cmp.kind_of?(Hash) ?  cmp.keys.first : cmp)
-      ret = {:component_type => type, :ref => ref, :display_name => ref}
-      ret.merge!(:version => version) if version
-      ret
-    end
-
     # These are attributes at the assembly level, as opposed to being at the component or node level
     def self.import_assembly_attributes(assembly_attrs_hash,opts={})
       assembly_attrs_hash ||= Hash.new

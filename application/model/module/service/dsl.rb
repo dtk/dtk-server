@@ -154,8 +154,8 @@ module DTK
         v_namespaces = validate_module_ref_namespaces(module_branch,component_module_refs)
         return v_namespaces if ParsingError.is_error?(v_namespaces)
 
-        parsed = update_assemblies_from_dsl(module_branch,component_module_refs,opts)
-        if new_commit_sha = ModuleRefs.serialize_and_save_to_repo?(module_branch)
+        parsed, component_module_refs = update_assemblies_from_dsl(module_branch,component_module_refs,opts)
+        if new_commit_sha = component_module_refs.serialize_and_save_to_repo?()
           if opts[:ret_dsl_updated_info]
             msg = "The module refs file was updated by the server"
             opts[:ret_dsl_updated_info] = DSLUpdatedInfo.new(msg,new_commit_sha)
@@ -189,7 +189,9 @@ module DTK
         ret
       end
 
+      # returns[ parsed,new_component_module_refs]
       def update_assemblies_from_dsl(module_branch,component_module_refs,opts={})
+        ret_cmr = component_module_refs
         project_idh = get_project.id_handle()
         module_name = module_name()
         module_branch_idh = module_branch.id_handle()
@@ -203,30 +205,36 @@ module DTK
             opts.merge!(:file_path => meta_file,:default_assembly_name => default_assembly_name)
             
             hash_content = Aux.convert_to_hash(file_content,format_type,opts)||{}
-            return hash_content if ParsingError.is_error?(hash_content)
+            return [hash_content,ret_cmr] if ParsingError.is_error?(hash_content)
 
             # check if comp_name.dtk.assembly.yaml matches name in that file
             # only perform check for new service module structure
             unless self.class.is_legacy_service_module_structure?(module_branch)
-              assembly_name = validate_name_for_assembly(meta_file,hash_content['name'])
-              return assembly_name if ParsingError.is_error?(assembly_name)
+              response = validate_name_for_assembly(meta_file,hash_content['name'])
+              return [response,ret_cmr] if ParsingError.is_error?(response)
             end
 
-            imported = assembly_import_helper.process(module_name,hash_content,opts)
-            return imported if ParsingError.is_error?(imported)
+            parsed = assembly_import_helper.process(module_name,hash_content,opts)
+            return [parsed,ret_cmr] if ParsingError.is_error?(parsed)
           end
         end
         errors = aggregate_errors.raise_error?(:do_not_raise => true)
-        return errors if errors.is_a?(ParsingError)
+        return [errors,ret_cmr] if errors.is_a?(ParsingError)
 
-        imported = assembly_import_helper.import()
+        parsed = assembly_import_helper.import()
 
         if response = create_setting_objects_from_dsl(project_idh,module_branch)
           if ParsingError.is_error?(response)
-            return response
+            return [response,ret_cmr]
           end
         end
-        imported
+        
+        if opts[:auto_update_module_refs]
+          # TODO: should also update teh contents of component module refs
+          ret_cmr = ModuleRefs.get_component_module_refs(module_branch)
+        end
+
+        [parsed,ret_cmr]
       end
 
       # signature is assembly_meta_file_paths(module_branch) do |meta_file,default_assembly_name|

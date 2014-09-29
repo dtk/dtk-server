@@ -15,11 +15,38 @@ module DTK
     }
     CmpVersionRegexp = Regexp.new("(^.+)#{Seperators[:component_version]}([0-9]+.+$)")
 
+    # pattern that appears in dsl that designates a component title
+    DSLComponentTitleRegex = /(^.+)\[(.+)\]/
+
     module InternalForm
       def self.component_ref(cmp_type_ext_form)
         cmp_type_ext_form.gsub(ModCompGsub[:pattern],ModCompGsub[:sub])
       end
 
+      # returns hash with keys
+      # component_type,
+      # version (optional)
+      # title (optional)
+      def self.component_ref_info(cmp_type_ext_form)
+        ref = component_ref(cmp_type_ext_form)
+        if ref =~ CmpVersionRegexp
+          type = $1; version = $2
+        else
+          type = ref; version = nil
+        end
+        if type =~ DSLComponentTitleRegex
+          type = $1
+          title = $2
+          ref = ComponentTitle.ref_with_title(type,title)
+          display_name = ComponentTitle.display_name_with_title(type,title)
+        end
+        ret = {:component_type => type}
+        ret.merge!(:version => version) if version
+        ret.merge!(:title => title) if title
+        ret
+      end
+
+      # TODO: temporary relates to DTK-1663
       # returns [ref,component_type,version] where version can be nil
       def self.component_ref_type_and_version(cmp_type_ext_form)
         ref = component_ref(cmp_type_ext_form)
@@ -30,6 +57,8 @@ module DTK
         end
         [ref,type,version]
       end
+
+
     end
   end
 end

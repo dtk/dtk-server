@@ -16,7 +16,6 @@ client = RepoManagerClient.new(repo_base_url)
 username='test_user'
 mod_name='test_repo2'
 rsa_pub_key = Common::Aux.get_ssh_rsa_pub_key()
-pp client.create_user(username,rsa_pub_key)
 module_name_params = {
   :name => mod_name,
   :namespace => "r8",
@@ -24,9 +23,9 @@ module_name_params = {
 }
 create_module_params = {
   :username => username,
-  :access_rights => "RW+", 
+  :access_rights => "RW+",
   :tags => {:internal_id => 1},
-  :noop_if_exists => true, 
+  :noop_if_exists => true,
 #  :enable_all_users => true
 }.merge(module_name_params)
 

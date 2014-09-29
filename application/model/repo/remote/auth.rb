@@ -1,4 +1,4 @@
-module DTK; class Repo 
+module DTK; class Repo
   class Remote
     module AuthMixin
 
@@ -20,9 +20,8 @@ module DTK; class Repo
         authorize_user(username,rsa_pub_key,access_rights.remote_repo_form(),module_name,module_namespace,type)
       end
 
-     private 
+     private
       def authorize_user(username, rsa_pub_key, rsa_key_name, access_rights, module_name, module_namespace, type, client_rsa_pub_key = nil)
-        client.create_user(username, rsa_pub_key, rsa_key_name, client_rsa_pub_key)
         grant_user_rights_params = {
           :name => module_name,
           :namespace => module_namespace || DefaultsNamespace,
@@ -78,7 +77,7 @@ module DTK; class Repo
           when "r" then R
           when "rw" then RW
           else raise ErrorUsage("Illegal access rights string '#{rights}'")
-        end  
+        end
       end
     end
   end

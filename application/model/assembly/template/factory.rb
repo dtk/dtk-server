@@ -222,8 +222,16 @@ module DTK
         assembly_hash.merge!(:task_template => task_templates) unless task_templates.empty?
         assembly_hash.merge!(:attribute => assembly_level_attributes) unless assembly_level_attributes.empty?
         @template_output.merge!(:node => nodes,:port_link => port_links,:component => {assembly_ref => assembly_hash})
+
+        module_refs_updated = @service_module_refs.update_if_needed(@assembly_component_modules)
+        
         Transaction do 
           @template_output.save_to_model()
+          if module_refs_updated
+            # TODO: see if need a @service_module_refs.save_to_model() method; may not be needed since 
+            # the way that querying service module to get component module refs is through the component_modules
+            @service_module_refs.serialize_and_save_to_repo?()
+          end
           new_commit_sha = @template_output.serialize_and_save_to_repo?()
           new_commit_sha
         end

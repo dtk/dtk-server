@@ -12,6 +12,22 @@ module DTK
       new(branch,content_hash_content)
     end
 
+    # returns true if an update made; this updates the ruby object
+    def update_if_needed(cmp_modules_with_namespaces)
+      ret = false
+      cmp_modules_with_namespaces.each do |cmp_mod|
+        [:display_name,:namespace_name].each do |key|
+          raise Error.new("Unexpected that cmp_modules_with_namespaces element does not have key: #{key}") unless cmp_mod[key]
+        end
+        cmp_mod_name = cmp_mod[:display_name]
+        unless component_module_ref?(cmp_mod_name)
+          add_or_set_component_module_ref(cmp_mod_name,:namespace_info => cmp_mod[:namespace_name])
+          ret = true
+        end
+      end
+      ret
+    end
+
     # serializes and saves object to repo
     def serialize_and_save_to_repo?()
       dsl_hash_form = dsl_hash_form()
@@ -20,8 +36,6 @@ module DTK
         @parent.serialize_and_save_to_repo?(meta_filename_path,dsl_hash_form)
       end
     end
-
-
 
     def matching_component_module_namespace?(cmp_module_name)
       if module_ref = component_module_ref?(cmp_module_name)
@@ -92,6 +106,10 @@ module DTK
    private
     def component_module_ref?(cmp_module_name)
       @component_modules[key(cmp_module_name)]
+    end
+
+    def add_or_set_component_module_ref(cmp_module_name,mod_ref_hash)
+      @component_modules[key(cmp_module_name)] = ModuleRef.reify(@parent.model_handle(),mod_ref_hash)
     end
 
     def initialize(parent,content_hash_form,opts={})

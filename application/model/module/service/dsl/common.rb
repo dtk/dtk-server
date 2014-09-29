@@ -45,6 +45,20 @@ module DTK
         ret.merge!(:title => title) if title
         ret
       end
+
+      # TODO: temporary relates to DTK-1663
+      # returns [ref,component_type,version] where version can be nil
+      def self.component_ref_type_and_version(cmp_type_ext_form)
+        ref = component_ref(cmp_type_ext_form)
+        if ref =~ CmpVersionRegexp
+          type = $1; version = $2
+        else
+          type = ref; version = nil
+        end
+        [ref,type,version]
+      end
+
+
     end
   end
 end

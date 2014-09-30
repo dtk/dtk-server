@@ -12,6 +12,8 @@ module DTK
         if service_module = get_service_module?(project,service_module_name,namespace)
           service_module
         else
+          raise ErrorUsage.new("Unable to create assembly because service module (#{namespace}:#{service_module_name}) clone exists on local machine but missing from server. You should import service module or delete local clone and try again.") if opts[:local_clone_dir_exists]
+
           if opts[:mode] == :update
             raise ErrorUsage.new("Service module (#{service_module_name}) does not exist")
           end

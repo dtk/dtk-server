@@ -327,7 +327,7 @@ module DTK
         if is_internal_error?(response)
           raise Error.new(msg)
         else
-          raise ErrorUsage.new("Repo Manager error, #{msg}")
+          raise ErrorUsage.new("Repo Manager error: #{msg}")
         end
       else
         return response.data

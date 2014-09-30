@@ -440,12 +440,12 @@ lambda__instance_nodes_components_assembly_template =
       :type=>:json,
       :hidden=>true,
       :remote_dependencies=>
-      [lambda__segment_node.call([:id,:display_name,:os_type,:node_binding_rs_id]),
+      [lambda__segment_node.call([:id,:display_name,:type,:os_type,:node_binding_rs_id]),
        {
          :model_name => :node_binding_ruleset,
          :convert => true,
          :alias => :node_binding,
-         :join_type => :inner,
+         :join_type => :left_outer,
          :join_cond=>{:id => q(:node,:node_binding_rs_id)},
          :cols => [:id,:display_name,:os_type,:rules]
        }]

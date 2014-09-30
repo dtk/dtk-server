@@ -75,7 +75,6 @@ module DTK; class ServiceModule
         ret
       end
 
-      
       def self.component_ref_parse(cmp)
         cmp_type_ext_form = (cmp.kind_of?(Hash) ?  cmp.keys.first : cmp)
         component_ref_info = InternalForm.component_ref_info(cmp_type_ext_form)
@@ -83,33 +82,10 @@ module DTK; class ServiceModule
         title = component_ref_info[:title]
         version = component_ref_info[:version]
         ref = ComponentRef.ref(type,title)
-        display_name = ComponentRef.display_name(cmp_type_ext_form,title)
-
+        display_name = ComponentRef.display_name(type,title)
         ret = {:component_type => type, :ref => ref, :display_name => display_name}
         ret.merge!(:version => version) if version
         ret.merge!(:component_title => title) if title
-        ret
-      end
-
-      # TODO: temporary that have this overwrite of component_ref_parse; relates to DTK-1663
-      DSLComponentTitleRegex = /(^.+)\[(.+)\]/
-      
-      def self.component_ref_parse(cmp)
-        ref,type,version = InternalForm.component_ref_type_and_version(cmp.kind_of?(Hash) ?  cmp.keys.first : cmp)
-        display_name = ref
-
-        # TODO: move this also to dsl/common
-        component_title = nil
-        if type =~ DSLComponentTitleRegex
-          type = $1
-          component_title = $2
-          ref = ComponentTitle.ref_with_title(type,component_title)
-          display_name = ComponentTitle.display_name_with_title(type,component_title)
-        end
-
-        ret = {:component_type => type, :ref => ref, :display_name => display_name}
-        ret.merge!(:version => version) if version
-        ret.merge!(:component_title => component_title) if component_title
         ret
       end
 

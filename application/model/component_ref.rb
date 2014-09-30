@@ -12,8 +12,10 @@ module DTK
       ref(cmp_hash[:component_type],title)
     end
 
-    def self.display_name(cmp_type_ext_form,title = nil)
-      title ? ComponentTitle.display_name_with_title(cmp_type_ext_form,title) : cmp_type_ext_form
+    # TODO: changed this to use '::' form but that broke the port links; determine how display name is used
+    # before making any changes; this relates to DTK-1663
+    def self.display_name(cmp_type,title = nil)
+      title ? ComponentTitle.display_name_with_title(cmp_type,title) : cmp_type
     end
 
     def display_name_print_form(opts={})

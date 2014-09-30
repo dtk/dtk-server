@@ -173,10 +173,6 @@ module DTK; class Node; class TargetRef
             raise Error.new("Unexpected that that node has no name field")
           end
           external_ref = @node.external_ref
-          unless external_ref.references_image?(target)
-#            raise ErrorUsage.new("Node (#{display_name}) is not in target that supports node creation or does not have needed info")
-            Log.error("Think this needs to be further contrsinaed: Node (#{display_name}) is not in target that supports node creation or does not have needed info")
-          end
           (@offset...(@offset+@num_needed)).inject(Hash.new) do |h,index|
             hash = {
               :display_name => ret_display_name(display_name,:index => index,:assembly => assembly),

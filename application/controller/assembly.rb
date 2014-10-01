@@ -405,7 +405,7 @@ module DTK
     #### actions to update and create assembly templates
     def rest__promote_to_template()
       assembly = ret_assembly_instance_object()
-      assembly_template_name,service_module_name = get_template_and_service_names_params(assembly)
+      assembly_template_name,service_module_name,module_namespace = get_template_and_service_names_params(assembly)
 
       if assembly_template_name.nil? or service_module_name.nil?
         raise ErrorUsage.new("SERVICE-NAME/ASSEMBLY-NAME cannot be determined and must be explicitly given")
@@ -415,6 +415,8 @@ module DTK
 
       if namespace = ret_request_params(:namespace)
         opts.merge!(:namespace => namespace)
+      elsif ret_request_params(:use_module_namespace)
+        opts.merge!(:namespace => module_namespace)
       end
 
       if local_clone_dir_exists = ret_request_params(:local_clone_dir_exists)

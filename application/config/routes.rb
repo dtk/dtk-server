@@ -294,6 +294,9 @@ R8::ReactorRoute.draw do
 
   # DEVELOPER
   post  'developer/inject_agent' => 'developer#inject_agent'
+
+  # NAMESPACE
+  post  'namespace/default_namespace_name' => 'namespace#default_namespace_name'
 end
 
 R8::Routes[:login] = {

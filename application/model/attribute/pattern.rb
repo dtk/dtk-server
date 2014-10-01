@@ -76,13 +76,15 @@ module DTK; class Attribute
         end
       end
 
-      if attribute_rows.empty?
-        if opts[:create]
-          raise ErrorUsage.new("Unable to create a new attribute")
-        else
-          raise ErrorUsage.new("The attribute specified does not match an existing attribute in the assembly")
-        end
-      end
+      # TODO: may completely remove; this is wrong criteria since it raises error if all attributes have problems
+      # but not if teher are errors, but at least one good
+      #if attribute_rows.empty?
+      #  if opts[:create]
+      #    raise ErrorUsage.new("Unable to create a new attribute")
+      #  else
+      #    raise ErrorUsage.new("The attribute specified does not match an existing attribute in the assembly")
+      #  end
+      #end
 
       attr_ids = attribute_rows.map{|r|r[:id]}
       attr_mh = base_object.model_handle(:attribute)

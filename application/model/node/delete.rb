@@ -8,9 +8,10 @@ module DTK
           return suceeeded
         end
 
-        if is_target_ref?()
-          Log.error("need update logic for target ref; unnecssary to do TargetRef.get_linked_target_ref_info_single_node")
-        end
+        # TODO: handle described issue
+        # if is_target_ref?()
+        #  Log.error("need update logic for target ref; unnecssary to do TargetRef.get_linked_target_ref_info_single_node")
+        # end
 
         target_ref_info = TargetRef.get_linked_target_ref_info_single_node(self)
         if target_ref_info.ref_count < 2

@@ -313,7 +313,8 @@ module DTK
         nodes.each do |n_name,n_value|
           cmps = n_value['components']
           cmps.each do |c|
-            return ParsingError::BadComponentReference.new(:component_name => c, :node_name => n_name) unless module_refs_cmps.include?(c)
+            c_name = c.split('::').first
+            return ParsingError::BadComponentReference.new(:component_name => c, :node_name => n_name) unless module_refs_cmps.include?(c_name)
           end
         end
 

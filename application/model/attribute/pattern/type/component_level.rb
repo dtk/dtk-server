@@ -33,7 +33,7 @@ module DTK; class Attribute
         @attribute_stacks = Array.new
         ndx_nodes  = ret_matching_nodes(parent_idh).inject(Hash.new){|h,r|h.merge(r[:id] => r)}
         if ndx_nodes.empty?
-          if opts[:create]
+          if create_this_type?(opts)
             raise ErrorUsage.new("Node name (#{pattern_node_name()}) in attribute does not match an existing node")
           end
           return ret 
@@ -42,7 +42,7 @@ module DTK; class Attribute
         cmp_fragment = pattern_component_fragment()
         ndx_cmps = ret_matching_components(ndx_nodes.values,cmp_fragment).inject(Hash.new){|h,r|h.merge(r[:id] => r)}
         if ndx_cmps.empty?
-          if opts[:create]
+          if create_this_type?(opts)
             raise ErrorUsage.new("Component name (#{pattern_component_name()}) in attribute does not match an existing component in node (#{pattern_node_name()})")
           end
           return ret 
@@ -50,7 +50,7 @@ module DTK; class Attribute
         
         attr_fragment = pattern_attribute_fragment()
         attrs = ret_matching_attributes(:component,ndx_cmps.values.map{|r|r.id_handle()},attr_fragment)
-        if attrs.empty? and opts[:create]
+        if attrs.empty? and create_this_type?(opts)
           @created = true
           set_attribute_properties!(opts[:attribute_properties]||{})
           attrs = create_attributes(ndx_cmps.values)

@@ -37,6 +37,12 @@ module DTK; class Attribute
      private
       attr_reader :pattern, :id
 
+      def create_this_type?(opts)
+        if create = opts[:create]
+          create.kind_of?(TrueClass) or (create.kind_of?(Array) and create.include?(type()))
+        end
+      end
+
       module CommonNodeComponentLevel
         def attribute_idhs()
           @attribute_stacks.map{|r|r[:attribute].id_handle()}

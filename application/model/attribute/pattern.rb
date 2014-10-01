@@ -45,6 +45,7 @@ module DTK; class Attribute
       create(attr_term,base_object,opts).set_parent_and_attributes!(base_object.id_handle(),opts)
     end
 
+    # set_attributes can create or set attributes depending on options in opts
     # returns attribute patterns
     def self.set_attributes(base_object,av_pairs,opts={})
       ret = Array.new
@@ -59,10 +60,11 @@ module DTK; class Attribute
             end
           end
         end
+        # if needed as indicated by opts, create_attr_pattern also creates attribute
         pattern = create_attr_pattern(base_object,av_pair[:pattern],opts)
         ret << pattern
         attr_idhs = pattern.attribute_idhs
-        # TODO: modify; rather than checking checking datatype; convert attribute value, which might be in string form to right ruby data type
+        # TODO: modify; rather than checking datatype; convert attribute value, which might be in string form to right ruby data type
         # do not need to check value validity if opts[:create] (since checked already)
         unless opts[:create]
           attr_idhs.each do |attr_idh|
@@ -76,15 +78,15 @@ module DTK; class Attribute
         end
       end
 
-      # TODO: may completely remove; this is wrong criteria since it raises error if all attributes have problems
-      # but not if teher are errors, but at least one good
-      #if attribute_rows.empty?
-      #  if opts[:create]
-      #    raise ErrorUsage.new("Unable to create a new attribute")
-      #  else
-      #    raise ErrorUsage.new("The attribute specified does not match an existing attribute in the assembly")
-      #  end
-      #end
+      # attribute_rows can have multiple rows if pattern decomposes into multiple attributes
+      # it should have at least one row or there is an error
+      if attribute_rows.empty?
+        if opts[:create]
+          raise ErrorUsage.new("Unable to create a new attribute")
+        else
+          raise ErrorUsage.new("The attribute specified does not match an existing attribute in the assembly")
+        end
+      end
 
       attr_ids = attribute_rows.map{|r|r[:id]}
       attr_mh = base_object.model_handle(:attribute)

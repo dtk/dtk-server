@@ -25,7 +25,7 @@ module DTK; class Attribute
         pattern =~ /^node[^\/]*\/(attribute.+$)/  
         attr_fragment = attr_name_special_processing($1)
         attrs = ret_matching_attributes(:node,ndx_nodes.values.map{|r|r.id_handle()},attr_fragment)
-        if attrs.empty? and opts[:create]
+        if attrs.empty? and create_this_type?(opts)
           @created = true
           set_attribute_properties!(opts[:attribute_properties]||{})
           attrs = create_attributes(ndx_nodes.values)

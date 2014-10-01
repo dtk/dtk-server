@@ -32,7 +32,7 @@ module DTK
 
       def apply_settings(assembly)
         av_pairs = map{|el|el.av_pair_form()}
-        assembly.set_attributes(av_pairs)
+        assembly.set_attributes(av_pairs,:create=>[:node_level,:assembly_level])
       end
 
       def ret_just_diffs(existing_attr_settings)

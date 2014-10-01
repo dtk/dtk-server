@@ -213,9 +213,9 @@ module DTK
               response = validate_name_for_assembly(meta_file,hash_content['name'])
               return [response,ret_cmr] if ParsingError.is_error?(response)
             end
-
-            cmp_names = validate_component_names(hash_content,component_module_refs)
-            return [cmp_names,ret_cmr] if ParsingError.is_error?(cmp_names)
+            # TODO: ref DTK-1619: taking out for now
+            # cmp_names = validate_component_names(hash_content,component_module_refs)
+            # return [cmp_names,ret_cmr] if ParsingError.is_error?(cmp_names)
 
             parsed = assembly_import_helper.process(module_name,hash_content,opts)
             return [parsed,ret_cmr] if ParsingError.is_error?(parsed)
@@ -307,19 +307,22 @@ module DTK
         end
       end
 
-      def validate_component_names(hash_content,component_module_refs)
-        module_refs_cmps = component_module_refs.component_modules.map{|k,v| k.to_s}
-        nodes = hash_content['assembly']['nodes']||{}
-        nodes.each do |n_name,n_value|
-          cmps = n_value['components']
-          cmps.each do |c|
-            c_name = c.split('::').first
-            return ParsingError::BadComponentReference.new(:component_name => c, :node_name => n_name) unless module_refs_cmps.include?(c_name)
-          end
-        end
+      # TODO: ref DTK-1619: if we put this back in we need to handle case where cmps has an element with a title like
+      # cmp[title] or mod::cmp[title]; also would want to write or use a method in service/common that does not
+      # hard code '::' put instead takes a component ref and returns a module name
+#      def validate_component_names(hash_content,component_module_refs)
+#        module_refs_cmps = component_module_refs.component_modules.map{|k,v| k.to_s}
+#        nodes = hash_content['assembly']['nodes']||{}
+#        nodes.each do |n_name,n_value|
+#          cmps = n_value['components']
+#          cmps.each do |c|
+#            c_name = c.split('::').first
+#            return ParsingError::BadComponentReference.new(:component_name => c, :node_name => n_name) unless module_refs_cmps.include?(c_name)
+#          end
+#        end
 
-        module_refs_cmps
-      end
+#        module_refs_cmps
+#      end
 
       def meta_file_format_type(path)
         Aux.format_type(path)

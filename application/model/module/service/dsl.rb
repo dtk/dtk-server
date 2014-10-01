@@ -214,6 +214,9 @@ module DTK
               return [response,ret_cmr] if ParsingError.is_error?(response)
             end
 
+            cmp_names = validate_component_names(hash_content,component_module_refs)
+            return [cmp_names,ret_cmr] if ParsingError.is_error?(cmp_names)
+
             parsed = assembly_import_helper.process(module_name,hash_content,opts)
             return [parsed,ret_cmr] if ParsingError.is_error?(parsed)
           end
@@ -302,6 +305,19 @@ module DTK
           v_namespace = v[:namespace_info]
           return ParsingError::BadNamespaceReference.new(:name => v_namespace) unless namespaces.include?(v_namespace)
         end
+      end
+
+      def validate_component_names(hash_content,component_module_refs)
+        module_refs_cmps = component_module_refs.component_modules.map{|k,v| k.to_s}
+        nodes = hash_content['assembly']['nodes']||{}
+        nodes.each do |n_name,n_value|
+          cmps = n_value['components']
+          cmps.each do |c|
+            return ParsingError::BadComponentReference.new(:component_name => c, :node_name => n_name) unless module_refs_cmps.include?(c)
+          end
+        end
+
+        module_refs_cmps
       end
 
       def meta_file_format_type(path)

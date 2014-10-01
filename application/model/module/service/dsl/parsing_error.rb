@@ -38,6 +38,11 @@ module DTK
       end
 
       class BadComponentReference < self
+        def initialize(params={})
+          err_msg = "The following component template (?component_name) required by node (?node_name) is not referenced in module_refs.yaml with its component module and namespace which it belongs to"
+          err_params = Params.new(:component_name => params[:component_name], :node_name => params[:node_name])
+          super(err_msg,err_params)
+        end
       end
 
       class AmbiguousModuleRef < self

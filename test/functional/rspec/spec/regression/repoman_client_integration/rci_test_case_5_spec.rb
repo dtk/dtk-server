@@ -9,7 +9,7 @@ user_data = {
 	:usergroup => "bakir_test_group",
 	:user => "dtk17-client",
 	:module_name => "r8/java",
-	:another_user => "(None) - bakir_test",
+	:another_user => "bakir_test",
 	:another_usergroup => "bakir_test"
 }
 

@@ -11,7 +11,7 @@ user_data = {
 	:namespace => "dtk17",
 	:component_module_filesystem_location => "~/dtk/component_modules/dtk17",
 	:another_usergroup => "bakir_test",
-	:another_user => "(None) - bakir_test"
+	:another_user => "bakir_test"
 }
 
 permissions = {

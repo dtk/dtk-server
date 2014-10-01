@@ -9,7 +9,7 @@ user_data = {
 	:user => "dtk17-client",
 	:module_name => "r8/java",
 	:another_usergroup => "bakir_test",
-	:another_user => "(None) - bakir_test"
+	:another_user => "bakir_test"
 }
 
 permissions = {

@@ -8,7 +8,7 @@ component_module = "r8:java"
 user_data = {
 	:usergroup => "bakir_test_group",
 	:user => "dtk17-client",
-	:another_user => "(None) - bakir_test",
+	:another_user => "bakir_test",
 	:module_name => "r8/java"
 }
 

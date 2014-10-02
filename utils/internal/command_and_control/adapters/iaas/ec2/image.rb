@@ -1,15 +1,18 @@
 module DTK; module CommandAndControlAdapter
   class Ec2
     module ImageClassMixin
-      def image(image_id)
-        Image.new(image_id)
+      def image(image_id,opts={})
+        Image.new(image_id,opts)
       end
     end
 
     class Image
-
-      def initialize(image_id)
-        @ami = Ec2.conn().image_get(image_id)
+      def initialize(image_id,opts={})
+        aws_creds = nil
+        if target = opts[:target]
+          aws_creds = Ec2.target_non_default_aws_creds?(target)
+        end
+        @ami = Ec2.conn(aws_creds).image_get(image_id)
       end
 
       def exists?()

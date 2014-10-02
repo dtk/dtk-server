@@ -66,9 +66,13 @@ module DTK
       klass.pbuilderid(node)
     end
 
-    def self.existing_image?(image_id,image_type)
-      klass = load_iaas_for(:image_type => image_type)
-      klass.existing_image?(image_id)
+    def self.raise_error_if_invalid_image?(image_id,target)
+      klass = load_iaas_for(:target => target)
+      klass.raise_error_if_invalid_image?(image_id,target)
+    end
+    def self.existing_image?(image_id,target)
+      klass = load_iaas_for(:target => target)
+      klass.existing_image?(image_id,target)
     end
 
     def self.references_image?(target,node_external_ref)

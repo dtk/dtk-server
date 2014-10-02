@@ -28,9 +28,18 @@ module DTK
         node_external_ref[:type] == "ec2_image" and node_external_ref[:image_id]
       end
 
-      def self.existing_image?(image_id)
-        raise Error.new("existing_image does not take target region as param")
-        image(image_id).exists?()
+      def self.existing_image?(image_id,target)
+        image(image_id,:target => target).exists?()
+      end
+
+      def self.raise_error_if_invalid_image?(image_id,target)
+        unless existing_image?(image_id,target)
+          err_msg = "Image (#{image_id}) is not accessible from target (#{target.get_field?(:display_name)})"
+          if region = target.iaas_properties.hash()[:region]
+            err_msg << ", which is in EC2 region (#{region})"
+          end
+          raise ErrorUsage.new(err_msg)
+        end
       end
 
       def self.pbuilderid(node)
@@ -146,8 +155,28 @@ module DTK
       private_class_method :reset_node
       ExternalRefPendingCols = [:image_id,:type,:size,:region]
 
+      def self.target_non_default_aws_creds?(target)
+        iaas_prop_hash = target.iaas_properties.hash()
+        region = iaas_prop_hash[:region]
+        if target.is_builtin_target?()
+          if region
+            CloudConnect::EC2.new.get_compute_params().merge(:region => region)
+          else
+            unless iaas_prop_hash[:key] and iaas_prop_hash[:secret]
+              raise Error.new("Unexpected that no builtin target does not have needed fields")
+              ret = {
+                :aws_access_key_id => iaas_prop_hash[:key],
+                :aws_secret_access_key => iaas_prop_hash[:secret]
+              }
+              ret.merge!(:region => region) if region
+              ret
+            end
+          end
+        end
+      end
+
       # we can provide this methods set of aws_creds that will be used. We will not use this
-      # EC2 client as member, since this is only for this specific deployment
+      # EC2 client as member, since this is only for this specific call
       def self.conn(target_aws_creds=nil)
         if target_aws_creds
           return CloudConnect::EC2.new(target_aws_creds)

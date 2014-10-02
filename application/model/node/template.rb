@@ -24,7 +24,7 @@ module DTK
         end
 
         node_bindings.each do |nb|
-          # TODO: fix so taht have a unique id for each
+          # TODO: fix so that have a unique id for each
           unique_id = ((nb[:rules].size == 1) && nb[:id])
           nb[:rules].each do |r|
             # Amar & Haris: Skipping node template in case when target name filter is sent in method request from CLI
@@ -40,8 +40,9 @@ module DTK
         ret.sort{|a,b|a[:display_name] <=> b[:display_name]}
       end
 
-
       def self.add(target,node_template_name,image_id,opts={})
+        CommandAndControl.raise_error_if_invalid_image?(image_id,target)
+        nil
       end
 
       def self.legal_os_identifiers(model_handle)
@@ -147,7 +148,8 @@ module DTK
 
         image_type = matching_node_bindings.first[:rules].first[:node_template][:type].to_sym
 
-        # TODO: commented out below until fix DTK-434
+        # TODO: commented out below until can use new signature where pass in target to
+        # get context, which includes image_type and if ec2 region
         # unless CommandAndControl.existing_image?(new_image_id,image_type)
         #  raise ErrorUsage.new("Image id (#{new_image_id}) does not exist")
         # end

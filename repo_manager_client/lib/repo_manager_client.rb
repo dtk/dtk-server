@@ -355,7 +355,7 @@ module DTK
     def error_msg(response)
       errors = response["errors"]
       if response.kind_of?(Common::Response::Error) and errors
-        if errors.first && errors.first['code'].eql?('unavailable')
+        if errors.first && (errors.first['code'].eql?('unavailable') || errors.first['code'].eql?('RestClient::ServiceUnavailable'))
           'The DTK Repo service is currently down for maintenance'
         else
           'The DTK Repo service is unavailable'

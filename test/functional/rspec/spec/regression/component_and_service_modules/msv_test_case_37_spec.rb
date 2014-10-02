@@ -53,6 +53,10 @@ describe "(Modules, Services and Versioning) Test Case 37: NEG - Install compone
     include_context "Delete component module from local filesystem", r8_component_module_filesystem_location, component_module_name
   end
 
+  context "Revert old default namespace" do
+    include_context "Set default namespace", dtk_common, default_namespace
+  end
+
   after(:all) do
     puts "", ""
   end

@@ -2,11 +2,12 @@ module DTK; class Node
   class Template
     class Add < self
       def add()
+        pp ret_node_templates_create_hash()
         nil
       end
       def initialize(target,node_template_name,image_id,opts={})
         @target = target
-        @image_id = CommandAndControl.raise_error_if_invalid_image?(image_id,target)
+        @image_id = raise_error_if_invalid_image?(image_id,target)
         @node_template_name = node_template_name
         @os = raise_error_if_invalid_os(opts[:operating_system])
         @size_array = raise_error_if_invalid_size_array(opts[:size_array])
@@ -31,6 +32,27 @@ module DTK; class Node
         # size_array.each{|image_size|CommandAndControl.raise_error_if_invalid_image_size(image_size,target)}
         size_array
       end
+
+      def ret_node_templates_create_hash()
+        @size_array.inject(Hash.new) do |h,size|
+          ref = node_template_ref(size)
+          body = {
+            :os_identifier => @node_template_name,
+            :ami => @image_id,
+            :display_name => node_template_display_name(size),
+            :os_type => @os,
+            :size => size
+          }
+          h.merge(ref => body)
+        end
+      end
+      def node_template_ref(size)
+        "#{@image_id}-#{size}"
+      end
+      def node_template_display_name(size)
+        "#{@node_template_name} #{size}"
+      end
+
     end
   end
 end; end

@@ -183,6 +183,7 @@ R8::ReactorRoute.draw do
   # NODE TEMPLATE
   post  'node/list' => 'node#list'
   post  'node/image_upgrade' => 'node#image_upgrade'
+  post  'node/add_node_template' => 'node#add_node_template'
 
   # NODE INSTANCE
   post  'node/start' => 'node#start'

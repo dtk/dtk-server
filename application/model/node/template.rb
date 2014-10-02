@@ -40,6 +40,10 @@ module DTK
         ret.sort{|a,b|a[:display_name] <=> b[:display_name]}
       end
 
+
+      def self.add(target,node_template_name,image_id,opts={})
+      end
+
       def self.legal_os_identifiers(model_handle)
         public_library = Library.get_public_library(model_handle.createMH(:library))
         sp_hash = {

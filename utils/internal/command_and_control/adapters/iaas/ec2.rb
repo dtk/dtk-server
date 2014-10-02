@@ -34,9 +34,9 @@ module DTK
 
       def self.raise_error_if_invalid_image?(image_id,target)
         unless existing_image?(image_id,target)
-          err_msg = "Image (#{image_id}) is not accessible from target (#{target.get_field?(:display_name)})"
+          err_msg = "Image (#{image_id}) is not accessible from target #{target.get_field?(:display_name)}"
           if region = target.iaas_properties.hash()[:region]
-            err_msg << ", which is in EC2 region (#{region})"
+            err_msg << " (ec2: #{region})"
           end
           raise ErrorUsage.new(err_msg)
         end

@@ -29,7 +29,7 @@ module DTK
         config_agent = ConfigAgent.load(config_node[:config_agent_type])
 
         opts_ret_msg = Hash.new
-        if assembly_id = config_node[:assembly_idh][:guid]
+        if assembly_id = (config_node[:assembly_idh]||{})[:guid]
           assembly = assembly_id && task_idh.createIDH(:model_name => :assembly_instance,:id => assembly_id).create_object()
           opts_ret_msg.merge!(:assembly => assembly)
         end

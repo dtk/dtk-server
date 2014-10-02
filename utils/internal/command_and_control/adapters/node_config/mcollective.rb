@@ -27,7 +27,14 @@ module DTK
       def self.initiate_execution(task_idh,top_task_idh,config_node,opts)
         version_context = get_version_context(config_node)
         config_agent = ConfigAgent.load(config_node[:config_agent_type])
-        msg_content =  config_agent.ret_msg_content(config_node)
+
+        opts_ret_msg = Hash.new
+        if assembly_id = config_node[:assembly_idh][:guid]
+          assembly = assembly_id && task_idh.createIDH(:model_name => :assembly_instance,:id => assembly_id).create_object()
+          opts_ret_msg.merge!(:assembly => assembly)
+        end
+        msg_content = config_agent.ret_msg_content(config_node,opts_ret_msg)
+
         agent_git_details = { :repo => "dtk-node-agent", :branch => "" }
         msg_content.merge!( :task_id => task_idh.get_id(),
                             :top_task_id => top_task_idh.get_id(), 

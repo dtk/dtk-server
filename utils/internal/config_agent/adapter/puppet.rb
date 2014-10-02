@@ -28,15 +28,19 @@ module DTK
         '3.4' => (0..3).map{|x|x.to_s},
       }
 
-      def ret_msg_content(config_node)
+      def ret_msg_content(config_node,opts={})
         cmps_with_attrs = components_with_attributes(config_node)
         assembly_attrs = assembly_attributes(config_node)
         puppet_manifests = NodeManifest.new.generate(cmps_with_attrs,assembly_attrs,config_node.intra_node_stages())
-        {
+        ret = {
           :components_with_attributes => cmps_with_attrs, 
           :node_manifest => puppet_manifests, 
           :inter_node_stage => config_node.inter_node_stage()
         }
+        if assembly = opts[:assembly]
+          ret.merge!(:service_id => assembly.id(), :service_name => assembly.get_field?(:display_name))
+        end
+        ret
       end
 
       def type()

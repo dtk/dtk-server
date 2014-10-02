@@ -47,7 +47,7 @@ describe "(Modules, Services and Versioning) Test Case 10: Export component modu
     it "creates new directory with existing component module content in it" do
       puts "Create new directory and copy the content of existing component module", "----------------------------------------------------------------------"
       pass = false
-      `mkdir #{default_filesystem_location}/#{component_module_name}`
+      `mkdir -p #{default_filesystem_location}/#{component_module_name}`
       `cp -r #{r8_component_module_filesystem_location}/#{existing_component_module_name}/* #{default_filesystem_location}/#{component_module_name}/`
       value = `ls #{default_filesystem_location}/#{component_module_name}/manifests`
       pass = !value.include?("No such file or directory")

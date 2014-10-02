@@ -43,9 +43,9 @@ describe "(Modules, Services and Versioning) Test Case 38: Import to two differe
     it "creates new directory with existing component module content in it" do
       puts "Create new directory and copy the content of existing component module", "----------------------------------------------------------------------"
       pass = false
-      `mkdir #{default_filesystem_location}/#{component_module_name}`
-      `cp -r #{r8_component_module_filesystem_location}/#{component_module_name}/* #{default_filesystem_location}/#{component_module_name}/`
-      value = `ls #{default_filesystem_location}/#{component_module_name}/manifests`
+      `mkdir -p #{test_component_module_filesystem_location}/#{component_module_name}`
+      `cp -r #{r8_component_module_filesystem_location}/#{component_module_name}/* #{test_component_module_filesystem_location}/#{component_module_name}/`
+      value = `ls #{test_component_module_filesystem_location}/#{component_module_name}/manifests`
       pass = !value.include?("No such file or directory")
       puts ""
       pass.should eq(true)
@@ -68,9 +68,9 @@ describe "(Modules, Services and Versioning) Test Case 38: Import to two differe
     it "creates new directory with existing component module content in it" do
       puts "Create new directory and copy the content of existing component module", "----------------------------------------------------------------------"
       pass = false
-      `mkdir #{default_filesystem_location}/#{component_module_name}`
-      `cp -r #{r8_component_module_filesystem_location}/#{component_module_name}/* #{default_filesystem_location}/#{component_module_name}/`
-      value = `ls #{default_filesystem_location}/#{component_module_name}/manifests`
+      `mkdir -p #{test2_component_module_filesystem_location}/#{component_module_name}`
+      `cp -r #{r8_component_module_filesystem_location}/#{component_module_name}/* #{test2_component_module_filesystem_location}/#{component_module_name}/`
+      value = `ls #{test2_component_module_filesystem_location}/#{component_module_name}/manifests`
       pass = !value.include?("No such file or directory")
       puts ""
       pass.should eq(true)

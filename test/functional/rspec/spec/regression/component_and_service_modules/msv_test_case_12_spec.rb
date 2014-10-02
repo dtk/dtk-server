@@ -49,7 +49,7 @@ describe "(Modules, Services and Versioning) Test Case 12: Export service module
     it "creates directory #{service_module_name} on local filesystem" do
       puts "Create new #{service_module_name} directory:", "-------------------------------------"
       pass = false
-      value = `mkdir #{default_service_filesystem_location}/#{service_module_name}`
+      value = `mkdir -p #{default_service_filesystem_location}/#{service_module_name}`
       pass = !value.include?("cannot create directory")
       puts "#{service_module_name} directory was created on local filesystem successfully!" if pass == true
       puts "#{service_module_name} directory was not created on local filesystem successfully!" if pass == false

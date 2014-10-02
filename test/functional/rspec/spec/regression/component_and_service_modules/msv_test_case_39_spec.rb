@@ -21,10 +21,10 @@ test2_service_module_filesystem_location = '~/dtk/service_modules/test2'
 
 dtk_common = DtkCommon.new('', '')
 
-describe "(Modules, Services and Versioning) Test Case 39: Import to two differenet namespaces (service module)" do
+describe "(Modules, Services and Versioning) Test Case 39: Import to two different namespaces (service module)" do
 
   before(:all) do
-    puts "*****************************************************************************************************",""
+    puts "****************************************************************************************************",""
   end
 
   context "Import service module function" do
@@ -43,9 +43,9 @@ describe "(Modules, Services and Versioning) Test Case 39: Import to two differe
     it "creates new directory with existing component module content in it" do
       puts "Create new directory and copy the content of existing component module", "----------------------------------------------------------------------"
       pass = false
-      `mkdir #{default_filesystem_location}/#{service_module_name}`
-      `cp -r #{r8_service_module_filesystem_location}/#{service_module_name}/* #{default_filesystem_location}/#{service_module_name}/`
-      value = `ls #{default_filesystem_location}/#{service_module_name}/manifests`
+      `mkdir -p #{test_service_module_filesystem_location}/#{service_module_name}`
+      `cp -r #{r8_service_module_filesystem_location}/#{service_module_name}/* #{test_service_module_filesystem_location}/#{service_module_name}/`
+      value = `ls #{test_service_module_filesystem_location}/#{service_module_name}/manifests`
       pass = !value.include?("No such file or directory")
       puts ""
       pass.should eq(true)
@@ -68,9 +68,9 @@ describe "(Modules, Services and Versioning) Test Case 39: Import to two differe
     it "creates new directory with existing component module content in it" do
       puts "Create new directory and copy the content of existing component module", "----------------------------------------------------------------------"
       pass = false
-      `mkdir #{default_filesystem_location}/#{service_module_name}`
-      `cp -r #{r8_service_module_filesystem_location}/#{service_module_name}/* #{default_filesystem_location}/#{service_module_name}/`
-      value = `ls #{default_filesystem_location}/#{service_module_name}/manifests`
+      `mkdir -p #{test2_service_module_filesystem_location}/#{service_module_name}`
+      `cp -r #{r8_service_module_filesystem_location}/#{service_module_name}/* #{test2_service_module_filesystem_location}/#{service_module_name}/`
+      value = `ls #{test2_service_module_filesystem_location}/#{service_module_name}/manifests`
       pass = !value.include?("No such file or directory")
       puts ""
       pass.should eq(true)

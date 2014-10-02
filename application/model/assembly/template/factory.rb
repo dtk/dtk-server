@@ -255,6 +255,9 @@ module DTK
           :filter =>  
           [:and,
            [:eq, :type, "composite"],
+           # Aldin: added ancestor_id==nil check to distinct between service instance (has ancestor_id) and assembly-template
+           # with same name (does not have ancestor_id)
+           [:eq, :ancestor_id, nil],
            [:eq, :component_type, component_type],
            [:oneof, :module_branch_id, module_branches.map{|r|r.id()}]]
         }

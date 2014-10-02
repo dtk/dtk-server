@@ -1,6 +1,12 @@
 module DTK
   class Node
     class Template < self
+      r8_nested_require('template','add')
+
+      def self.add(target,node_template_name,image_id,opts={})
+        Add.new(target,node_template_name,image_id,opts).add()
+      end
+
       def self.list(model_handle,opts={})
         ret = Array.new
         node_bindings = nil
@@ -38,34 +44,6 @@ module DTK
           end
         end
         ret.sort{|a,b|a[:display_name] <=> b[:display_name]}
-      end
-
-      def self.add(target,node_template_name,image_id,opts={})
-        Add.add(target,node_template_name,image_id,opts)
-      end
-      module Add
-        def self.add(target,node_template_name,image_id,opts={})
-          CommandAndControl.raise_error_if_invalid_image?(image_id,target)
-          os = raise_error_if_invalid_os(opts[:operating_system])
-          size_array = raise_error_if_invalid_size_array(opts[:size_array])
-          nil
-        end
-
-       private
-        def self.raise_error_if_invalid_os(os)
-          if os.nil?
-            raise ErrorUsage.new("Operating system must be given")
-          end
-          os #TODO: stub
-        end
-        def self.raise_error_if_invalid_size_array(size_array)
-        size_array ||= ['t1.micro'] #TODO: stub
-          if size_array.nil?
-            raise ErrorUsage.new("One or more image sizes must be given")
-          end
-          # size_array.each{|image_size|CommandAndControl.raise_error_if_invalid_image_size(image_size,target)}
-          size_array
-        end
       end
 
       def self.legal_os_identifiers(model_handle)

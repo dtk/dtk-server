@@ -62,7 +62,7 @@ class R8Server
     end
   end
 
-  def create_public_library_nodes?()
+ def create_public_library_nodes?()
     container_idh = pre_execute(:top)
     hash_content = LibraryNodes.get_hash(:in_library => "public")
     hash_content["library"]["public"]["display_name"] ||= "public"

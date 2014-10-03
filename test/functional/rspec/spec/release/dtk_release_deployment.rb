@@ -39,8 +39,6 @@ begin
 		set_attributes_array << dtk_common.set_attribute(dtk_common.service_id, 'repo_manager/dtk_repo_manager/dtk_common_tag', config['properties']['common_release'])
 		set_attributes_array << dtk_common.set_attribute(dtk_common.service_id, 'repo_manager/dtk_repo_manager/dtk_common_core_tag', config['properties']['common_core_release'])
 		set_attributes_array << dtk_common.set_attribute(dtk_common.service_id, 'tenant/dtk_server::tenant/server_branch', config['properties']['server_release'])
-		set_attributes_array << dtk_common.set_attribute(dtk_common.service_id, 'tenant/dtk_server::tenant/common_branch', config['properties']['common_release'])
-		set_attributes_array << dtk_common.set_attribute(dtk_common.service_id, 'tenant/dtk_server::tenant/common_core_branch', config['properties']['common_core_release'])
 		
 		#If all attribures have been set, proceed with dtk::release converge
 		if !set_attributes_array.include? false

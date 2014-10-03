@@ -86,9 +86,8 @@ pp node_binding_rulesets
         "#{@os_identifier} #{@size}"
       end
       def node_template_type()
-        "#{@target.iaas_properties.type()}_image"
+        Template.image_type(@target)
       end
-
     end
   end
 end; end

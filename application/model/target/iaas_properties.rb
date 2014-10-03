@@ -29,9 +29,22 @@ module DTK
       def supports_create_image?()
         [:ec2].include?(type())
       end
-     private
+
       def iaas_properties()
         @iaas_properties ||= @target_instance.get_field?(:iaas_properties)||{}
+      end
+
+      def self.equal?(i2)
+        case type()
+          when :ec2 then Ec2.equal?(i2)
+          else raise Error.new("Unexpected iaas_properties type (#{type})")
+        end
+      end
+      module Ec2
+        def self.equal?(i2)
+          i2.type == :ec2 and
+            iaas_properties[:region] == i2.iaas_properties[:region]
+          end
       end
     end
   end

@@ -1,61 +1,53 @@
 module DTK; class NodeBindingRuleset
   class Factory
-    def initialize(parent)
-      @os_type = parent.os_type
-      @os_identifier = parent.os_identifier
-      @size = parent.size
+    def initialize(top_factory)
+      @top_factory = top_factory
+      @os_type = top_factory.os_type
+      @os_identifier = top_factory.os_identifier
+      @size = top_factory.size
     end
-    
+
     def create_hash()
       hash_body = {
         :type => 'clone',
         :os_type => @os_type,
-        :os_identifier=> @os_identifier
+        :os_identifier=> @os_identifier,
+        :rules => Rules.create(@top_factory)
       }
       #        pntr[:rules] = Rules.add(pntr[:rules],info,ami,ec2_size)
       {ref() => hash_body}
     end
-    private
+
+   private
     def ref()
-      #TODO: stub; want normaized form so cross service providers
+      #TODO: stub; may want normaized of size form so abstracted from iaas
       "#{@os_identifier}-#{@size}"
+    end
+
+    class Rules
+      def self.create(top_factory)
+        el = {
+          :conditions=>Conditions.new(top_factory), 
+#          :node_template=>NodeTemplate.new(top_factory)
+        }
+        [el]
+      end
+
+      class Conditions < Hash
+        attr_reader :iaas_properties
+        def initialize(top_factory)
+          target = top_factory.target
+          iaas_properties = target.iaas_properties
+          hash = {
+            :type => Node::Template.image_type(target),
+            :region => iaas_properties.hash[:region]
+          }
+          replace(hash)
+        end
+
+      end
     end
   end
 end; end
-=begin
-
-      class Rules
-        def self.add(rules,info,ami,ec2_size)
-          new_el = {:conditions=>Conditions.new(info), :node_template=>NodeTemplate.new(info,ami,ec2_size)}
-          if rules
-            add_element?(rules,new_el)
-          else
-            [new_el]
-          end
-        end
-
-      private
-       def self.add_element?(rules,new_el)
-         rules.each do |rule|
-           if rule[:conditions].equal?(new_el[:conditions])
-             Log.error("Unexpected that have matching conditions; skipping")
-             return rules
-           end
-         end
-         rules + [new_el]
-       end
-
-       class Conditions < Hash
-         def initialize(info)
-           replace(:type=>"ec2_image", :region=>info["region"])
-         end
-         def equal?(rc)
-           self[:type] == rc[:type] and self[:region] == rc[:region]
-         end
-       end
-
-    end
-  end
-end
     
-=end
+

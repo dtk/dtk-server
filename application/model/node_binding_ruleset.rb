@@ -1,5 +1,7 @@
 module DTK
   class NodeBindingRuleset < Model
+    r8_nested_require('node_binding_ruleset','factory')
+
     def self.common_columns()
       [:id,:display_name,:type,:os_type,:rules, :ref]
     end

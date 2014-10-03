@@ -7,10 +7,11 @@ module DTK; class Node
         size_array = raise_error_if_invalid_size_array(opts[:size_array])
         factory_array = size_array.map{|size|new(target,node_template_name,image_id,size,opts)}
         node_templates = factory_array.inject(Hash.new){|h,r|h.merge(r.node_template())}
-pp node_templates
-=begin
+
         node_binding_rulesets = factory_array.inject(Hash.new){|h,r|h.merge(r.node_binding_ruleset())}
 
+pp node_binding_rulesets
+=begin
         hash_content = {
           :node=> node_templates, 
           :node_binding_ruleset => node_binding_rulesets
@@ -20,18 +21,24 @@ pp node_templates
         nil
       end
 
-      def initialize(target,node_template_name,image_id,size,opts={})
+      attr_reader :target,:image_id,:os_identifier,:os_type,:size
+
+      def initialize(target,os_identifier,image_id,size,opts={})
         @target = target
         @image_id = image_id
-        @node_template_name = node_template_name
-        @os = opts[:operating_system]
+        @os_identifier = os_identifier
+        @os_type = opts[:operating_system]
         @size = size
+      end
+
+      def node_binding_ruleset()
+        NodeBindingRuleset::Factory.new(self).create_hash()
       end
 
       def node_template()
         hash_body = {
-          :os_type => @os,
-          :os_identifier => @node_template_name, 
+          :os_type => @os_type,
+          :os_identifier => @os_identifier, 
           :type => 'image',
           :display_name => node_template_display_name(),
           :external_ref =>{
@@ -76,7 +83,7 @@ pp node_templates
         "#{@image_id}-#{@size}"
       end
       def node_template_display_name()
-        "#{@node_template_name} #{@size}"
+        "#{@os_identifier} #{@size}"
       end
       def node_template_type()
         "#{@target.iaas_properties.type()}_image"

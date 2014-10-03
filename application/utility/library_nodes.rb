@@ -1,3 +1,4 @@
+#TODO: plug in new method in Node::Template 
 module XYZ
   class LibraryNodes
     def self.get_hash(opts={})

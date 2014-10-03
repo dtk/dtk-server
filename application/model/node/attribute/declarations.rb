@@ -8,8 +8,5 @@ module DTK; class Node
       types lambda{|v|ConfigAgent.treated_version?(:puppet,v)}
       # TODO: put in meta attribute cannot_change_after_converge
     end
-    Attribute 'foo' do
-      data_type :string
-    end
   end
 end; end

@@ -1,10 +1,10 @@
 module DTK
   class Node
     class Template < self
-      r8_nested_require('template','add')
+      r8_nested_require('template','factory')
 
-      def self.add(target,node_template_name,image_id,opts={})
-        Add.new(target,node_template_name,image_id,opts).add()
+      def self.create(target,node_template_name,image_id,opts={})
+        Factory.create(target,node_template_name,image_id,opts)
       end
 
       def self.list(model_handle,opts={})

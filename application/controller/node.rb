@@ -224,9 +224,10 @@ module XYZ
 
     def rest__add_node_template()
       node_template_name,target_id,image_id = ret_non_null_request_params(:node_template_name,:target_id,:image_id)
+      
       target = create_obj(:target_id, Target::Instance)
       opts = ret_params_hash(:operating_system,:size_array)
-      Node::Template.add(target,node_template_name,image_id,opts)
+      Node::Template.create(target,node_template_name,image_id,opts)
       rest_ok_response 
     end
 

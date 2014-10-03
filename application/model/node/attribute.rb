@@ -28,8 +28,53 @@ module DTK
       end
       TargetRefAttributes = ['host_addresses_ipv4','fqdn','node_components','puppet_version','root_device_size']
       TargetRefAttributeFilter = [:oneof,:display_name,TargetRefAttributes]
-      NonTemplateAttributes = ['host_addresses_ipv4','node_components','fqdn']
-      AssemblyTemplateAttributeFilter = [:and] + NonTemplateAttributes.map{|a|[:neq,:display_name,a]}
+      NodeTemplateAttributes = ['host_addresses_ipv4','node_components','fqdn']
+      AssemblyTemplateAttributeFilter = [:and] + NodeTemplateAttributes.map{|a|[:neq,:display_name,a]}
+
+      module DefaultValue
+        def self.host_addresses_ipv4()
+          {
+            :required => false,
+            :read_only => true,
+            :is_port => true,
+            :cannot_change => false,
+            :data_type => 'json',
+            :value_derived => [nil],
+            :semantic_type_summary => 'host_address_ipv4',
+            :display_name =>"host_addresses_ipv4",
+            :dynamic =>true,
+            :hidden =>true,
+            :semantic_type =>{':array'=>'host_address_ipv4'}
+          }
+        end
+
+        def self.fqdn()
+          {
+            :required => false,
+            :read_only => true,
+            :is_port => true,
+            :cannot_change => false,
+            :data_type => 'string',
+            :display_name => 'fqdn',
+            :dynamic => true,
+            :hidden => true,
+          }
+        end
+
+        def self.node_components()
+          {
+            :required => false,
+            :read_only => true,
+            :is_port => true,
+            :cannot_change => false,
+            :data_type => 'json',
+            :display_name => 'node_components',
+            :dynamic => true,
+            :hidden => true,
+          }
+        end
+      end
+
 
       # for each node, one of following actions is taken
       # - if attribute does not exist, it is created with the given value

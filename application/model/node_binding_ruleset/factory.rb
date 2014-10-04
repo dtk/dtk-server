@@ -14,11 +14,9 @@ module DTK; class NodeBindingRuleset
         :os_identifier=> @os_identifier,
         :rules => Rules.create(@top_factory)
       }
-      #        pntr[:rules] = Rules.add(pntr[:rules],info,ami,ec2_size)
       {ref() => hash_body}
     end
 
-   private
     def ref()
       #TODO: stub; may want normaized of size form so abstracted from iaas
       "#{@os_identifier}-#{@size}"
@@ -26,25 +24,30 @@ module DTK; class NodeBindingRuleset
 
     class Rules
       def self.create(top_factory)
+        target = top_factory.target
+        type = Node::Template.image_type(target)
+        region = target.iaas_properties.hash[:region]
         el = {
-          :conditions=>Conditions.new(top_factory), 
-#          :node_template=>NodeTemplate.new(top_factory)
+          :conditions => conditions(type,region),
+          :node_template => node_template(top_factory,type,region)
         }
         [el]
       end
 
-      class Conditions < Hash
-        attr_reader :iaas_properties
-        def initialize(top_factory)
-          target = top_factory.target
-          iaas_properties = target.iaas_properties
-          hash = {
-            :type => Node::Template.image_type(target),
-            :region => iaas_properties.hash[:region]
-          }
-          replace(hash)
-        end
+      def self.conditions(type,region)
+        {
+          :type => type,
+          :region => region
+        }
+      end
 
+      def self.node_template(top_factory,type,region)
+        {
+          :type => type,
+          :region=> region,
+          :image_id => top_factory.image_id,
+          :size => top_factory.size
+        }
       end
     end
   end

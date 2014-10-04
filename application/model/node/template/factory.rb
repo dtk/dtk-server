@@ -5,20 +5,20 @@ module DTK; class Node
         raise_error_if_invalid_image(image_id,target)
         raise_error_if_invalid_os(opts[:operating_system])
         size_array = raise_error_if_invalid_size_array(opts[:size_array])
-        factory_array = size_array.map{|size|new(target,node_template_name,image_id,size,opts)}
-        node_templates = factory_array.inject(Hash.new){|h,r|h.merge(r.node_template())}
 
-        node_binding_rulesets = factory_array.inject(Hash.new){|h,r|h.merge(r.node_binding_ruleset())}
-
-pp node_binding_rulesets
-=begin
         hash_content = {
-          :node=> node_templates, 
-          :node_binding_ruleset => node_binding_rulesets
+          :node => Hash.new,
+          :node_binding_ruleset => Hash.new
         }
+        size_array.each do |size|
+          factory = new(target,node_template_name,image_id,size,opts)
+          nbrs_factory = NodeBindingRuleset::Factory.new(factory)
+          hash_content[:node].merge!(factory.node_template(nbrs_factory))
+          hash_content[:node_binding_ruleset].merge!(nbrs_factory.create_hash())
+        end
+
+        public_library_idh = get_public_library(target.model_handle()).id_handle()
         Model.import_objects_from_hash(public_library_idh,hash_content)
-=end
-        nil
       end
 
       attr_reader :target,:image_id,:os_identifier,:os_type,:size
@@ -31,11 +31,7 @@ pp node_binding_rulesets
         @size = size
       end
 
-      def node_binding_ruleset()
-        NodeBindingRuleset::Factory.new(self).create_hash()
-      end
-
-      def node_template()
+      def node_template(nbrs_factory)
         hash_body = {
           :os_type => @os_type,
           :os_identifier => @os_identifier, 
@@ -51,11 +47,9 @@ pp node_binding_rulesets
             'fqdn' => NodeAttribute::DefaultValue.fqdn(),
             'node_components' => NodeAttribute::DefaultValue.node_components()
           },
-          :node_interface => {'eth0' => {:type => 'ethernet', :display_name => 'eth0'}}
+          :node_interface => {'eth0' => {:type => 'ethernet', :display_name => 'eth0'}},
+          "*node_binding_rs_id" => "/node_binding_ruleset/#{nbrs_factory.ref()}"
         }
-        #if node_binding_rs_id = node_info_binding_ruleset_id(info,opts)
-       # ret["*node_binding_rs_id"] =  node_binding_rs_id
-        # end
         {node_template_ref() => hash_body}
       end
 

@@ -50,8 +50,13 @@ module DTK
         "#{target.iaas_properties.type()}_image"
       end
 
+      def self.get_public_library(model_handle)
+        Library.get_public_library(model_handle.createMH(:library))
+      end
+      private_class_method :get_public_library
+
       def self.legal_os_identifiers(model_handle)
-        public_library = Library.get_public_library(model_handle.createMH(:library))
+        public_library = get_public_library(model_handle)
         sp_hash = {
           :cols => [:id,:os_identifier],
           :filter => [:and,[:eq,:type,"image"],[:eq,:library_library_id,public_library[:id]]]

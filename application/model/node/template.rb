@@ -3,7 +3,7 @@ module DTK
     class Template < self
       r8_nested_require('template','factory')
 
-      def self.create(target,node_template_name,image_id,opts={})
+      def self.create_node_template(target,node_template_name,image_id,opts={})
         Factory.create(target,node_template_name,image_id,opts)
       end
 

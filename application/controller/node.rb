@@ -178,7 +178,7 @@ module XYZ
 
     #### creates tasks to execute/converge assemblies and monitor status
     def rest__stage()
-      target = create_target_obj_with_default(:target_id)
+      target = create_target_instance_with_default(:target_id)
       unless node_binding_rs = node_binding_ruleset?(:node_template_identifier)
         raise ErrorUsage.new("Missing node template identifier")
       end
@@ -223,12 +223,16 @@ module XYZ
     end
 
     def rest__add_node_template()
-      node_template_name,target_id,image_id = ret_non_null_request_params(:node_template_name,:target_id,:image_id)
-      
-      target = create_obj(:target_id, Target::Instance)
+      target = create_target_instance_with_default(:target_id)
+      node_template_name,image_id = ret_non_null_request_params(:node_template_name,:image_id)
       opts = ret_params_hash(:operating_system,:size_array)
-      Node::Template.create(target,node_template_name,image_id,opts)
+      Node::Template.create_node_template(target,node_template_name,image_id,opts)
       rest_ok_response 
+    end
+
+    def rest__delete_node_template()
+      project = get_default_project()
+      Node::Template.delete_node_template(project,node_template_name)
     end
 
     def rest__get_op_status()

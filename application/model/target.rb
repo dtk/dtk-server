@@ -60,7 +60,7 @@ module DTK
         raise Error.new("TODO: not implemented yet: processing of info_about(#{about})")
       end
     end
-
+2
     def self.info(target_mh, id)
       target_info = Target.get(target_mh, id)
       target_info[:provider_name] = target_info[:provider][:display_name] if target_info[:provider]
@@ -85,7 +85,8 @@ module DTK
         :cols => cols,
         :filter => [:eq,:is_default_target,true]
       }
-      Model.get_obj(target_mh,sp_hash)
+      ret = Target::Instance.get_obj(target_mh,sp_hash)
+      ret && ret.create_subclass_obj(:target_instance)
     end
       
     def self.set_default_target(target)

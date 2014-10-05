@@ -184,6 +184,7 @@ R8::ReactorRoute.draw do
   post  'node/list' => 'node#list'
   post  'node/image_upgrade' => 'node#image_upgrade'
   post  'node/add_node_template' => 'node#add_node_template'
+  post  'node/delete_node_template' => 'node#delete_node_template'
 
   # NODE INSTANCE
   post  'node/start' => 'node#start'

@@ -39,7 +39,9 @@ module DTK; class Attribute
 
       def create_this_type?(opts)
         if create = opts[:create]
-          create.kind_of?(TrueClass) or (create.kind_of?(Array) and create.include?(type()))
+          create.kind_of?(TrueClass) or 
+            (create.kind_of?(String) and create == 'true') or
+            (create.kind_of?(Array) and create.include?(type()))
         end
       end
 

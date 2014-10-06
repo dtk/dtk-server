@@ -197,9 +197,8 @@ EOF
 <% unless puppet_version.empty? %>
 /opt/puppet-omnibus/embedded/bin/gem uninstall -aIx puppet
 /opt/puppet-omnibus/embedded/bin/gem install puppet -v <%= puppet_version %> --no-rdoc --no-ri
-<% end %>
-
 /etc/init.d/mcollective* restart
+<% end %>
 
 eos
 

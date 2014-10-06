@@ -285,22 +285,20 @@
     "order": [
       "id",
       "assembly_name",
-      "node_status",
+      "status",
       "last_run",
       "assembly_template",
       "target",
       "# nodes",
-      "# cmps",
       "created_at"
     ],
     "mapping": {
-      "# cmps": "nodes.map{|r|r['components']||[]}.flatten.size",
       "# nodes": "nodes.size",
       "assembly_name": "display_name",
       "created_at": "created_at.get_date",
       "id": "dtk_id",
       "assembly_template": "assembly_template",
-      "node_status": "op_status",
+      "status": "op_status",
       "last_run": "last_task_run_status",
       "target": "target"
     }

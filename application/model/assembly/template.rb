@@ -197,32 +197,42 @@ module DTK; class Assembly
       end
     end
 
-    def self.pretty_print_name(assembly,opts={})
-      ret =
-        if cmp_type = assembly.get_field?(:component_type)
-          if opts[:no_module_prefix]
-            cmp_type.gsub(/^.+__/,"")
-          else
-            cmp_type.gsub(/__/,"::")
-          end
-        else
-          assembly.get_field?(:display_name)
+    #returns [assembly_template_name,module_name] in pretty print form
+    def self.pretty_print_module_and_assembly(assembly_template,opts={})
+      assembly_name = module_name = nil
+      if cmp_type = assembly_template.get_field?(:component_type)
+        split = cmp_type.split('__')
+        if split.size == 2
+          module_name, assembly_name = split
         end
+      end
+      assembly_name ||= assembly_template.get_field?(:display_name) # heurstic
 
       if opts[:version_suffix]
-        if version = pretty_print_version(assembly)
-          ret << "-v#{version}"
+        if version = pretty_print_version(assembly_template)
+          assembly_name << "-v#{version}"
         end
       end
       if opts[:include_namespace]
-        unless namespace_name = (assembly[:namespace]||{})[:display_name]
-          Log.error("Unexpected that opts[:include_namespace] is truue and no namespace object in assembly")
-          return ret
+        unless namespace_name = (assembly_template[:namespace]||{})[:display_name]
+          Log.error("Unexpected that opts[:include_namespace] is truu and no namespace object in assembly")
+        else
+          module_name = module_name && Namespace.join_namespace(namespace_name, module_name)
         end
-        ret = Namespace.join_namespace(namespace_name, ret)
       end
-      ret
+      [assembly_name,module_name]
     end
+
+
+    def self.pretty_print_name(assembly_template,opts={})
+      assembly_name,module_name = pretty_print_module_and_assembly(assembly_template,opts)
+      if opts[:no_module_prefix] or module_name.nil?
+        assembly_name
+      else
+        "#{module_name}#{ServiceModuleAssemblyDelim}#{assembly_name}"
+      end
+    end
+    ServiceModuleAssemblyDelim = '/'
 
     def self.delete_and_ret_module_repo_info(assembly_idh)
       # first delete the dsl files

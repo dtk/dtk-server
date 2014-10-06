@@ -92,7 +92,7 @@ module DTK
             pntr.merge!(:version => version)
           end
           if template = r[:assembly_template]
-            # just triggers for assembly instances; indicates the assembly templaet that spawned it
+            # just triggers for assembly instances; indicates the assembly template that spawned it
             pntr.merge!(:assembly_template => Template.pretty_print_name(template,assembly_template_opts))
           end
           if created_at = r[:created_at]

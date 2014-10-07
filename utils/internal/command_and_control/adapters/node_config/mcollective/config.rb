@@ -137,10 +137,27 @@ eos
               :mcollective_username => R8::Config[:mcollective][:username],
               :mcollective_password => R8::Config[:mcollective][:password],
               :mcollective_collective => R8::Config[:mcollective][:collective],
+              :mcollective_restart => mcollective_restart(node),
               # TODO: will generalize so not just puppet                           
-              :puppet_version => get_puppet_version(node),
+              :puppet_version => puppet_version(node),
               :pbuilderid => pbuilderid
             )
+          end
+
+          def mcollective_restart(node)
+            if OSNeedsRestart.include?(node[:os_type])
+              true
+            else
+              if puppet_version = puppet_version(node)
+                !puppet_version.empty?
+              end
+            end
+          end
+          OSNeedsRestart =  ['ubuntu']
+
+          def puppet_version(node)
+            @puppet_version ||= Hash.new
+            @puppet_version[node.id] ||= get_puppet_version(node)
           end
 
           def get_puppet_version(node)
@@ -197,9 +214,11 @@ EOF
 <% unless puppet_version.empty? %>
 /opt/puppet-omnibus/embedded/bin/gem uninstall -aIx puppet
 /opt/puppet-omnibus/embedded/bin/gem install puppet -v <%= puppet_version %> --no-rdoc --no-ri
-/etc/init.d/mcollective* restart
 <% end %>
 
+<% if mcollective_restart %>
+/etc/init.d/mcollective* restart
+<% end %>
 eos
 
         end

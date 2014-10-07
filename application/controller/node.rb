@@ -231,8 +231,9 @@ module XYZ
     end
 
     def rest__delete_node_template()
-      project = get_default_project()
-      Node::Template.delete_node_template(project,node_template_name)
+      node_binding_ruleset = create_obj(:node_template_name, NodeBindingRuleset)
+      Node::Template.delete_node_template(node_binding_ruleset)
+      rest_ok_response
     end
 
     def rest__get_op_status()

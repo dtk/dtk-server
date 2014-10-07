@@ -58,12 +58,20 @@ module DTK; class Node
         CommandAndControl.raise_error_if_invalid_image?(image_id,target)
         image_id
       end
+
       def self.raise_error_if_invalid_os(os)
-          if os.nil?
-            raise ErrorUsage.new("Operating system must be given")
-          end
-        os #TODO: stub
+        if os.nil?
+          raise ErrorUsage.new("Operating system must be given")
+        end
+        os = os.to_sym 
+        unless LegalOSs.include?(os)
+          raise ErrorUsage.new("OS parameter (#{os}) is invalid; legal values are: #{LegalOSs.join(',')}")
+        end
+        os
       end
+      # TODO: sync with ../utils/internal/command_and_control/install_script.rb OSTemplates keys
+      LegalOSs = [:ubuntu,:redhat,:centos,:debian]
+
       def self.raise_error_if_invalid_size_array(size_array)
         size_array ||= ['t1.micro'] #TODO: stub
         if size_array.nil?

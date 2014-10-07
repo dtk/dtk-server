@@ -1,7 +1,7 @@
 module DTK
   class Target
     class IAASProperties
-      attr_reader :name,:properties
+      attr_reader :name
       # IAASProperties.new will be called with 
       #  :name and :iaas_properties, or with
       # :target_instance
@@ -9,6 +9,10 @@ module DTK
         @name = hash_args[:name]
         @iaas_properties = hash_args[:iaas_properties]
         @target_instance = hash_args[:target_instance]
+      end
+
+      def properties()
+        iaas_properties()        
       end
 
       def self.check_and_process(iaas_type,iaas_properties)
@@ -31,7 +35,7 @@ module DTK
       end
 
       def iaas_properties()
-        @iaas_properties ||= @target_instance.get_field?(:iaas_properties)||{}
+        @iaas_properties ||= (@target_instance && @target_instance.get_field?(:iaas_properties))||{}
       end
 
       def self.equal?(i2)

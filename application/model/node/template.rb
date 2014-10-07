@@ -6,6 +6,9 @@ module DTK
       def self.create_node_template(target,node_template_name,image_id,opts={})
         Factory.create(target,node_template_name,image_id,opts)
       end
+      def self.delete_node_template(node_binding_ruleset)
+        pp node_binding_ruleset
+      end
 
       def self.list(model_handle,opts={})
         ret = Array.new
@@ -16,7 +19,7 @@ module DTK
           node_bindings = get_objs(model_handle.createMH(:node), sp_hash)
           unq_bindings = node_bindings.inject({}) { |tmp,nb| tmp.merge(nb[:node_binding_rs_id] => nb[:node_binding_ruleset])}
           node_bindings = unq_bindings.values
-        elsif opts[:is_list_all] == "true"
+        elsif opts[:is_list_all] and opts[:is_list_all].to_s == "true"
           sp_hash = { :cols => [:node_bindings], :filter => [:neq, :datacenter_datacenter_id, nil]}
           node_bindings = get_objs(model_handle.createMH(:node), sp_hash)
           unq_bindings = node_bindings.inject({}) { |tmp,nb| tmp.merge(nb[:node_binding_rs_id] => nb[:node_binding_ruleset])}

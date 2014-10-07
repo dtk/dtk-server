@@ -161,12 +161,7 @@ eos
           end
 
           def get_puppet_version(node)
-            puppet_version = node.attribute().puppet_version()
-            if puppet_version != '' && RubyGemsChecker.gem_exists?('puppet', puppet_version)
-               puppet_version
-            else
-               ''
-            end
+            node.attribute().puppet_version(:raise_error_if_invalid => true)||''
           end
 
           def install_script_erb()

@@ -16,8 +16,20 @@ module DTK
       end
       CardinalityDefault = 1
 
-      def puppet_version()
-        ret_value?(:puppet_version)||R8::Config[:puppet][:version]
+      def puppet_version(opts={})
+        puppet_version = ret_value?(:puppet_version)
+        if opts[:raise_error_if_invalid]
+          raise_error_if_invalid_puppet_version(puppet_version)
+        end
+        puppet_version||R8::Config[:puppet][:version]
+      end
+
+      def raise_error_if_invalid_puppet_version(puppet_version)
+        unless puppet_version.nil? or puppet_version.empty?
+          unless RubyGemsChecker.gem_exists?('puppet', puppet_version)
+            raise ErrorUsage.new("Invalid Puppet version (#{puppet_version})")
+          end
+        end
       end
 
       def self.target_ref_attributes_filter()

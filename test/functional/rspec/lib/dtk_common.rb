@@ -24,8 +24,9 @@ class DtkCommon
 		config_yml = YAML::load(File.open("./config/config.yml"))		
 
 		@service_name = service_name
+		#Fixed current format of assembly name
+		@assembly = assembly_name.gsub!("::","/")
 
-		@assembly = assembly_name
 		@SERVER = config_yml['r8server']['server']
 		@PORT = config_yml['r8server']['port']
 		@ENDPOINT = "#{@SERVER}:#{@PORT}"

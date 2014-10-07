@@ -226,7 +226,7 @@ module XYZ
       target = create_target_instance_with_default(:target_id)
       node_template_name,image_id = ret_non_null_request_params(:node_template_name,:image_id)
       opts = ret_params_hash(:operating_system,:size_array)
-      Node::Template.create_node_template(target,node_template_name,image_id,opts)
+      Node::Template.create_or_update_node_template(target,node_template_name,image_id,opts)
       rest_ok_response 
     end
 

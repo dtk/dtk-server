@@ -1,7 +1,7 @@
 module DTK; class Node
   class Template
     class Factory < self
-      def self.create(target,node_template_name,image_id,opts={})
+      def self.create_or_update(target,node_template_name,image_id,opts={})
         raise_error_if_invalid_image(image_id,target)
         raise_error_if_invalid_os(opts[:operating_system])
         size_array = raise_error_if_invalid_size_array(opts[:size_array])

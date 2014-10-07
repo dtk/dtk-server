@@ -158,7 +158,7 @@ module DTK
       def self.target_non_default_aws_creds?(target)
         iaas_prop_hash = target.iaas_properties.hash()
         region = iaas_prop_hash[:region]
-        if target.is_builtin_target?()
+        unless target.is_builtin_target?()
           if region
             CloudConnect::EC2.new.get_compute_params().merge(:region => region)
           else

@@ -19,16 +19,6 @@ module DTK
       name_to_id_helper(model_handle,name,sp_hash)
     end
 
-    def self.get(model_handle,opts={})
-      sp_hash = {
-        :cols => opts[:cols]||common_columns()
-      }
-      if filter = opts[:filter]
-        sp_hash.merge!(:filter => filter)
-      end
-      get_objs(model_handle.createMH(:node_binding_ruleset),sp_hash)
-    end
-
     def find_matching_node_template(target)
       match = CommandAndControl.find_matching_node_binding_rule(get_field?(:rules),target)
       match && get_node_template(match[:node_template])

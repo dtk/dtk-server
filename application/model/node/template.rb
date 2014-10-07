@@ -3,11 +3,12 @@ module DTK
     class Template < self
       r8_nested_require('template','factory')
 
-      def self.create_node_template(target,node_template_name,image_id,opts={})
-        Factory.create(target,node_template_name,image_id,opts)
+      def self.create_or_update_node_template(target,node_template_name,image_id,opts={})
+        Factory.create_or_update(target,node_template_name,image_id,opts)
       end
+
       def self.delete_node_template(node_binding_ruleset)
-        pp node_binding_ruleset
+        pp node_binding_ruleset.update_object!(*NodeBindingRuleset.common_columns())
       end
 
       def self.list(model_handle,opts={})

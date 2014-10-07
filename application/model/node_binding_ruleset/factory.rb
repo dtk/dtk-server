@@ -5,6 +5,14 @@ module DTK; class NodeBindingRuleset
       @os_type = top_factory.os_type
       @os_identifier = top_factory.os_identifier
       @size = top_factory.size
+
+pp matching_node_binding_ruleset()
+    end
+
+    def matches_existing_item?()
+      if matching_nbrs = matching_nbrs_object?()
+        matching_nbrs.has_size(@size)
+      end
     end
 
     def create_hash()
@@ -20,6 +28,24 @@ module DTK; class NodeBindingRuleset
     def ref()
       #TODO: stub; may want normaized of size form so abstracted from iaas
       "#{@os_identifier}-#{@size}"
+    end
+
+   private
+    def matching_node_binding_ruleset()
+      if @nbrs_calculated
+        @matching_node_binding_ruleset 
+      else
+        @nbrs_calculated = true
+        sp_hash = {
+          :cols => NodeBindingRuleset.common_columns(),
+          :filter => [:eq,:ref,ref()]
+        }
+        @matching_node_binding_ruleset = Model.get_obj(model_handle(),sp_hash)
+      end
+    end
+
+    def model_handle()
+      @model_handle ||= @top_factory.target.model_handle(:node_binding_ruleset)
     end
 
     class Rules

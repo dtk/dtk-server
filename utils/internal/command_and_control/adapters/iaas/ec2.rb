@@ -66,8 +66,9 @@ module DTK
         end
       end
 
-      def self.get_availability_zones(iaas_properties)
+      def self.get_availability_zones(iaas_properties, region)
         ec2_creds = get_ec2_credentials(iaas_properties)
+        ec2_creds.merge!(:region => region)
         connection = conn(ec2_creds)
 
         response = connection.describe_availability_zones

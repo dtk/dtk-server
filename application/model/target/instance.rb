@@ -17,7 +17,7 @@ module DTK
         end
 
         target_name = opts[:target_name]|| provider.default_target_name(:region => region)
-        availability_zones = CommandAndControl.get_and_process_availability_zones(provider_type, properties)
+        availability_zones = CommandAndControl.get_and_process_availability_zones(provider_type, properties, region)
 
         # add iaas_properties for target without availability zone
         iaas_properties << IAASProperties.new(:name => target_name, :iaas_properties => properties)
@@ -26,7 +26,8 @@ module DTK
         availability_zones.each do |az|
           custom_properties = properties.clone
           custom_properties[:availability_zone] = az
-          iaas_properties << IAASProperties.new(:name => "#{target_name}-#{az}", :iaas_properties => custom_properties)
+          zone_simple_name = az.split('-').last
+          iaas_properties << IAASProperties.new(:name => "#{target_name}-#{zone_simple_name}", :iaas_properties => custom_properties)
         end
 
         # iaas_properties = IAASProperties.new(:name => target_name, :iaas_properties => properties)

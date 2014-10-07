@@ -26,8 +26,7 @@ module DTK
         availability_zones.each do |az|
           custom_properties = properties.clone
           custom_properties[:availability_zone] = az
-          zone_simple_name = az.split('-').last
-          iaas_properties << IAASProperties.new(:name => "#{target_name}-#{zone_simple_name}", :iaas_properties => custom_properties)
+          iaas_properties << IAASProperties.new(:name => "#{target_name}-#{az}", :iaas_properties => custom_properties)
         end
 
         # iaas_properties = IAASProperties.new(:name => target_name, :iaas_properties => properties)

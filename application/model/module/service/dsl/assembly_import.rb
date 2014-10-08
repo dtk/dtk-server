@@ -121,6 +121,9 @@ module DTK; class ServiceModule
         node_hash ||= Hash.new
         aggregate_errors.aggregate_errors!(h) do
           node_ref = assembly_template_node_ref(assembly_ref,node_hash_ref)
+          unless (node_hash||{}).kind_of?(Hash)
+            raise ParsingError.new("The content associated with key (#{node_hash_ref}) should be a hash representing assembly node info",opts_file_path(opts))
+          end
           type,attributes = import_type_and_node_attributes(node_hash,opts)
           node_output = {
             "display_name" => node_hash_ref, 

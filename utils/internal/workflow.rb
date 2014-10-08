@@ -92,11 +92,17 @@ module DTK
       end
     end
 
+    def self.task_is_active?(task_id)
+      !!@@active_workflows[task_id]
+    end
     def self.kill(task_id)
       @@Lock.synchronize do 
-        raise Error.new("There are no tasks running with TASK_ID: #{task_id}") unless @@active_workflows[task_id]
-        @@active_workflows[task_id].kill()
-        @@active_workflows.delete(task_id)
+        if task_is_active?(task_id)
+          @@active_workflows[task_id].kill()
+          @@active_workflows.delete(task_id)
+        else
+          Log.info("There are no tasks running with TASK_ID: #{task_id}")
+        end
       end
     end
 

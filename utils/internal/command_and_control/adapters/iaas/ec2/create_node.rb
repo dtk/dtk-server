@@ -60,6 +60,10 @@ module DTK; module CommandAndControlAdapter
             Log.info("node already created with instance id #{instance_id}; waiting for it to be available")
           else
             response = create_ec2_instance()
+            if response[:status] == "failed"
+              return response
+            end
+
             instance_id = response[:id]
             state = response[:state]
             updated_external_ref = external_ref.merge({
@@ -141,6 +145,7 @@ module DTK; module CommandAndControlAdapter
             
           begin
             response = Ec2.conn(target_aws_creds).server_create(create_options)
+            response[:status] ||= "succeeded"
            rescue => e
             # append region to error message
             region = target.get_region() if target

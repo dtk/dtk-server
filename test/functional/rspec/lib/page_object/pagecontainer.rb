@@ -11,6 +11,6 @@ class PageContainer
   end
 
   def close
-    @session.close 
+    @session.driver.browser.close 
   end
 end

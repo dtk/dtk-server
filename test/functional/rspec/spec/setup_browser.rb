@@ -15,15 +15,26 @@ RSpec.configure do |config|
   config.filter_run :focus
 
   config.before(:all) do
-    conf = load_configs
-    if conf.headless
-      load_headless(conf.host)
+    @conf = load_configs
+    if @conf.headless
+      @homepage = load_headless(@conf.host)
     else
-      puts "Host: #{conf.host}"
-      puts "Browser: #{conf.browser}"
-      load_browser(conf.host,conf.browser)
+      puts "Host: #{@conf.host}"
+      puts "Browser: #{@conf.browser}"
+      @homepage = load_browser(@conf.host,@conf.browser)
     end
   end
+
+  #close browser after each test
+  config.after(:all) do 
+    if @conf.headless
+      puts "Destroying Headless"
+      @headless.destroy
+    else
+      puts "Closing browser"
+      @homepage.close 
+    end
+  end 
 end
 
 def load_configs
@@ -52,8 +63,8 @@ def load_headless(full_host)
   require 'headless'
   puts "Initializing browser, HEADLESS mode"
   Capybara.default_driver = :webkit
-  headless = Headless.new
-  headless.start
+  @headless = Headless.new
+  @headless.start
   session = Capybara::Session.new :webkit
   @homepage = HomePage.new(session)
   @homepage.goto_homepage(full_host)

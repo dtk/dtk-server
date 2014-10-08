@@ -43,7 +43,7 @@ describe "(Modules, Services and Versioning) Test Case 4: Get list of all assemb
 	end
 
 	context "Delete assembly" do
-		include_context "Delete assembly", dtk_common, service_module_name + "::" + new_assembly_name, local_namespace
+		include_context "Delete assembly", dtk_common, service_module_name + "/" + new_assembly_name, local_namespace
 	end
 
 	context "Delete and destroy service function" do

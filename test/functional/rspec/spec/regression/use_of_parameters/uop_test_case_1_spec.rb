@@ -72,7 +72,7 @@ describe "(Use Of Parameters) Test Case 1: Check possibility to create assembly 
   end
 
   context "Delete assembly function" do
-    include_context "Delete assembly", dtk_common2, "#{service_module_name}::#{new_assembly}", local_namespace
+    include_context "Delete assembly", dtk_common2, "#{service_module_name}/#{new_assembly}", local_namespace
   end
 
   after(:all) do

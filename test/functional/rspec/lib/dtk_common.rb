@@ -607,9 +607,9 @@ class DtkCommon
 
 		while (end_loop == false)
 			sleep 10
-		    count += 1
+		  count += 1
 
-		    response = send_request('/rest/assembly/initiate_grep', {:assembly_id => service_id, :subtype=>'instance', :log_path=>log_location, :node_pattern=>node_name, :grep_pattern=>grep_pattern, :stop_on_first_match =>false})
+		  response = send_request('/rest/assembly/initiate_grep', {:assembly_id => service_id, :subtype=>'instance', :log_path=>log_location, :node_pattern=>node_name, :grep_pattern=>grep_pattern, :stop_on_first_match =>false})
 			action_results_id = response['data']['action_results_id']
 
 			if (count > max_num_of_retries)
@@ -659,10 +659,11 @@ class DtkCommon
 		puts "Delete assembly:", "----------------"
 		assembly_deleted = false
 		assembly_list = send_request('/rest/assembly/list', {:subtype=>"template"})
+		assembly = assembly_list['data'].select { |x| x['display_name'] == assembly_name && x['namespace'] == namespace }
 		
-		if (id = assembly_list['data'].select { |x| x['display_name'] == assembly_name && x['namespace'] == namespace }.first)
+		if !assembly.nil?
 			puts "Assembly exists in assembly list. Proceed with deleting assembly..."
-			delete_assembly_response = send_request('/rest/service_module/delete_assembly_template', {:service_module_id => id, :assembly_id=>assembly_name, :subtype=>:template})
+			delete_assembly_response = send_request('/rest/service_module/delete_assembly_template', {:service_module_id => namespace + ":" + assembly_name.split("/").first, :assembly_id=>assembly.first['id'], :subtype=>:template})
 
 			if (delete_assembly_response['status'] == "ok")
 				puts "Assembly #{assembly_name} deleted successfully!"

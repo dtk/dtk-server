@@ -112,7 +112,7 @@ describe "(Different Node Templates) Test Case 7: MongoDB - Master/Slave scenari
 	end
 
 	context "Converge function" do
-		include_context "Converge service", dtk_common, 35
+		include_context "Converge service", dtk_common, 25
 	end
 
 	context "Grep command on puppet log on master instance" do

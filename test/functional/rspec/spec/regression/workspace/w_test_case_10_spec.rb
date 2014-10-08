@@ -74,7 +74,7 @@ describe "(Workspace) Test Case 10: Create two nodes, add components in both of 
 	end
 
 	context "Delete assembly" do
-		include_context "Delete assembly", dtk_common, assembly_name, namespace
+		include_context "Delete assembly", dtk_common, service_module_name + "/" + assembly, namespace
 	end
 
 	context "Purge workspace content" do

@@ -31,7 +31,7 @@ describe "(Repoman Drupal API) Test Case 2: Create user with only required param
 			if response['status'] == 'ok'
 				username = response['data']['username']
 				email = response['data']['email']
-				user_group = response['data']['user_group_names']
+				user_group = response['data']['user_groups'].first['name']
 				namespace = response['data']['namespaces'].first['name']
 				user_created = true if (username == user_info[:username] && email == user_info[:email] &&
 					user_group == user_info[:user_group] && namespace == user_info[:namespace])

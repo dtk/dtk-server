@@ -35,7 +35,7 @@ describe "(Repoman Drupal API) Test Case 1: Create user with all correct params 
 				email = response['data']['email']
 				first_name = response['data']['first_name']
 				last_name = response['data']['last_name']
-				user_group = response['data']['user_group_names']
+				user_group = response['data']['user_groups'].first['name']
 				namespace = response['data']['namespaces'].first['name']
 				user_created = true if (username == user_info[:username] && email == user_info[:email] && first_name == user_info[:first_name] && last_name == user_info[:last_name] &&
 				user_group == user_info[:user_group] && namespace == user_info[:namespace])

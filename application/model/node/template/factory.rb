@@ -13,8 +13,9 @@ module DTK; class Node
         size_array.each do |size|
           factory = new(target,node_template_name,image_id,size,opts)
           nbrs_factory = NodeBindingRuleset::Factory.new(factory)
+
+          hash_content[:node_binding_ruleset].merge!(nbrs_factory.create_or_update_hash())
           hash_content[:node].merge!(factory.node_template(nbrs_factory))
-          hash_content[:node_binding_ruleset].merge!(nbrs_factory.create_hash())
         end
 
         public_library_idh = get_public_library(target.model_handle()).id_handle()

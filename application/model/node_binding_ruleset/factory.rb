@@ -5,22 +5,30 @@ module DTK; class NodeBindingRuleset
       @os_type = top_factory.os_type
       @os_identifier = top_factory.os_identifier
       @size = top_factory.size
-
-pp matching_node_binding_ruleset()
     end
 
-    def matches_existing_item?()
-      if matching_nbrs = matching_nbrs_object?()
-        matching_nbrs.has_size(@size)
+    def create_or_update_hash()
+      unless matching_nbrs = matching_node_binding_ruleset?()
+        return create_hash()
       end
-    end
 
-    def create_hash()
+      unless @os_type == matching_nbrs[:os_type]
+        node_template_name = @top_factory.os_identifier
+        raise ErrorUsage.new("Node template (#{node_template_name}) exists already and must have os type: #{matching_nbrs[:os_type]}")
+      end
+      if matching_nbrs.find_matching_node_template(@top_factory.target)
+        node_template_name = @top_factory.os_identifier
+        raise ErrorUsage.new("Node template (#{node_template_name}) with size #{@size} exists already")
+      end
+      create_hash(:existing_rules => matching_nbrs[:rules])
+    end
+    
+    def create_hash(opts={})
       hash_body = {
         :type => 'clone',
         :os_type => @os_type,
         :os_identifier=> @os_identifier,
-        :rules => Rules.create(@top_factory)
+        :rules => (opts[:existing_rules]||[]) + Rules.create(@top_factory)
       }
       {ref() => hash_body}
     end
@@ -31,7 +39,7 @@ pp matching_node_binding_ruleset()
     end
 
    private
-    def matching_node_binding_ruleset()
+    def matching_node_binding_ruleset?()
       if @nbrs_calculated
         @matching_node_binding_ruleset 
       else

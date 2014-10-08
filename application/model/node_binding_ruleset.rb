@@ -19,6 +19,10 @@ module DTK
       name_to_id_helper(model_handle,name,sp_hash)
     end
 
+    def self.object_type_string()
+      "node template"
+    end
+
     def find_matching_node_template(target)
       match = CommandAndControl.find_matching_node_binding_rule(get_field?(:rules),target)
       match && get_node_template(match[:node_template])

@@ -1,23 +1,26 @@
 module DTK
   class Model
-    # format below can be
-    # :s - singular (default)
-    # :p - plural
-    # :pos - plural or singular    
-    module PPObjectTypeMixin
-      def pp_object_type(format=nil)
-        self.class.pp_object_type(format)
-      end
-    end
-    module PPObjectTypeClassMixin
-      def pp_object_type(format=nil)
-        PPObjectType.render(self,format)
-      end
-    end
-
     class PPObjectType < String
+      # format below can be
+      # :s - singular (default)
+      # :p - plural
+      # :pos - plural or singular    
+      module Mixin
+        def pp_object_type(format=nil)
+          self.class.pp_object_type(format)
+        end
+      end
+      module ClassMixin
+        def pp_object_type(format=nil)
+          PPObjectType.render(self,format)
+        end
+        def object_type_string()
+          to_s.split("::").last.gsub(/([a-z])([A-Z])/,'\1 \2').downcase
+        end
+      end
+
       def self.render(model_class,format_or_cardinality=nil)
-        print_form = SubclassProcessing.print_form(model_class) || model_class.to_s.split("::").last.gsub(/([a-z])([A-Z])/,'\1 \2').downcase
+        print_form = SubclassProcessing.print_form(model_class) || model_class.object_type_string()
         string = 
           if format_or_cardinality.kind_of?(Fixnum)
             cardinality = format_or_cardinality

@@ -20,8 +20,8 @@ module DTK
     extend NameAndIdClassMixin
 
     r8_nested_require('model','pp_object_type')
-    extend PPObjectTypeClassMixin
-    include PPObjectTypeMixin
+    extend PPObjectType::ClassMixin
+    include PPObjectType::Mixin
 
     extend ImportObject
     extend ExportObject

@@ -153,7 +153,7 @@ eos
               end
             end
           end
-          OSNeedsRestart =  ['ubuntu']
+          OSNeedsRestart =  ['ubuntu', 'debian']
 
           def puppet_version(node)
             @puppet_version ||= Hash.new

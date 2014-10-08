@@ -41,7 +41,11 @@ module DTK; class Attribute
           image_id, os_type = Node::Template.find_image_id_and_os_type(os_identifier,target)
           unless image_id
             target.update_object!(:display_name,:iaas_type,:iaas_properties)
-            raise ErrorUsage.new("Cannot find image_id from os identifier (#{os_identifier}) in target (#{target[:display_name]})")
+            err_msg = "No image_id defined for os identifier (#{os_identifier}) in target #{target[:display_name]}"
+            if region = target.iaas_properties.hash[:region]
+              err_msg << " (region: #{region})"
+            end
+            raise ErrorUsage.new(err_msg)
           end
           update_node!(node,image_id,os_type)
           if node.is_node_group?()

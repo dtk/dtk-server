@@ -215,7 +215,7 @@ module DTK; class Assembly
       end
       if opts[:include_namespace]
         unless namespace_name = (assembly_template[:namespace]||{})[:display_name]
-          Log.error("Unexpected that opts[:include_namespace] is truu and no namespace object in assembly")
+          Log.error("Unexpected that opts[:include_namespace] is true and no namespace object in assembly")
         else
           module_name = module_name && Namespace.join_namespace(namespace_name, module_name)
         end

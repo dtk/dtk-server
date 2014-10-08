@@ -44,7 +44,24 @@ module DTK
         end
 
         # reconfigure response fields that will be returned to the client
-        self.class.list_aux(assembly_rows,attr_rows, {:print_form=>true,:sanitize=>true}.merge(opts)).first      
+        opts_list = {:print_form=>true,:sanitize=>true}.merge(opts)
+
+        if kind_of?(Instance)
+          assembly_templates = assembly_rows.map{|a|a[:assembly_template] unless Workspace.is_workspace?(a)}.compact
+          unless assembly_templates.empty?
+            Template.augment_with_namespaces!(assembly_templates)
+            opts_list[:include_namespaces] ||= true
+          end
+        end
+
+        ret = self.class.list_aux(assembly_rows,attr_rows, opts_list).first      
+        if kind_of?(Template)
+          [:op_status,:last_task_run_status].each{|k|ret.delete(k)}
+        end
+
+        # TODO: temp until get removes this attribute
+        ret.delete(:execution_status)
+        ret
       end
 
       def pretty_print_name(opts={})

@@ -8,7 +8,16 @@ module DTK
       end
 
       def self.delete_node_template(node_binding_ruleset)
-        pp node_binding_ruleset.update_object!(*NodeBindingRuleset.common_columns())
+        sp_hash = {
+          :cols => [:id,:group_id,:display_name],
+          :filter => [:eq,:node_binding_rs_id,node_binding_ruleset.id]
+        }
+        node_images = get_objs(node_binding_ruleset.model_handle(:node),sp_hash)
+        unless node_images.size == 1
+          Log.error("Unexpected that there are (#{node_images.size}) node images that match #{node_binding_ruleset.get_field?(:ref)}")
+        end
+        node_images.map{|n|delete_instance(n.id_handle())}
+        delete_instance(node_binding_ruleset.id_handle())
       end
 
       def self.list(model_handle,opts={})

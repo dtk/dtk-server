@@ -4,6 +4,8 @@ module DTK; class NodeBindings
       def initialize(hash)
         super(Type)
         @assembly_name = hash[:assembly_name]
+        @assembly_name_internal_form = @assembly_name.gsub(/::/,'/')
+        # TODO: encapsulate sepeartor between service mod and assembly in Assembly::Template
         @node_name = hash[:node_name]
       end
       Type = :assembly_node
@@ -22,7 +24,6 @@ module DTK; class NodeBindings
           input = parse_input.input
           if input.split('/').size == 3 and input =~ /^assembly\//
             split = input.split('/')
-            # TODO: encapsulate sepeartor between service mod and assembly in Assembly::Template
             assembly_name = split[1].gsub(/::/,'/')
             node_name = split[2]
             ret = new(:assembly_name => assembly_name,:node_name => node_name)
@@ -63,7 +64,7 @@ module DTK; class NodeBindings
         }   
         Assembly::Instance.get_objs(target.model_handle(:assembly_instance),sp_hash).select do |r|
           if assembly_template = r[:assembly_template]
-            @assembly_name == Assembly::Template.pretty_print_name(assembly_template)
+            @assembly_name_internal_form == Assembly::Template.pretty_print_name(assembly_template)
           end
         end
       end

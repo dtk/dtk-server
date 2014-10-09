@@ -22,7 +22,8 @@ module DTK; class NodeBindings
           input = parse_input.input
           if input.split('/').size == 3 and input =~ /^assembly\//
             split = input.split('/')
-            assembly_name = split[1]
+            # TODO: encapsulate sepeartor between service mod and assembly in Assembly::Template
+            assembly_name = split[1].gsub(/::/,'/')
             node_name = split[2]
             ret = new(:assembly_name => assembly_name,:node_name => node_name)
           end

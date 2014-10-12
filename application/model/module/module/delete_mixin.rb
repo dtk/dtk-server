@@ -3,7 +3,7 @@ module DTK; class BaseModule
     def delete_object()
       assembly_templates = get_associated_assembly_templates()
       unless assembly_templates.empty?
-        assembly_names = assembly_templates.map{|a|a.display_name_print_form()}
+        assembly_names = assembly_templates.map{|a|a.display_name_print_form(:include_namespace=>true)}
         raise ErrorUsage.new("Cannot delete the component module because the assembly template(s) (#{assembly_names.join(',')}) reference it")
       end
 

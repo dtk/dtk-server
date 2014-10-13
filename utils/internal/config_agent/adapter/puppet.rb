@@ -26,12 +26,15 @@ module DTK
         '3.2' => (0..4).map{|x|x.to_s},
         '3.3' => (0..2).map{|x|x.to_s},
         '3.4' => (0..3).map{|x|x.to_s},
+        '3.5' => (0..1).map{|x|x.to_s},
+        '3.6' => (0..2).map{|x|x.to_s},
+        '3.7' => (0..1).map{|x|x.to_s},
       }
 
       def ret_msg_content(config_node,opts={})
         cmps_with_attrs = components_with_attributes(config_node)
         assembly_attrs = assembly_attributes(config_node)
-        puppet_manifests = NodeManifest.new.generate(cmps_with_attrs,assembly_attrs,config_node.intra_node_stages())
+        puppet_manifests = NodeManifest.new(config_node).generate(cmps_with_attrs,assembly_attrs)
         ret = {
           :components_with_attributes => cmps_with_attrs, 
           :node_manifest => puppet_manifests, 

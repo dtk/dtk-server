@@ -20,10 +20,9 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
           next unless match = el.match(/(\S+)\s(.+)/)
           key, value = match[1], match[2]
           if key.to_s.eql?('dependency')
-              dependencies << value
-          else
-            content_hash.merge!(key.to_sym=>value.to_s)
+            dependencies << ExternalDependency.new(value)
           end
+          content_hash.merge!(key.to_sym=>value.to_s)
         end
         
         content_hash.merge!(:type => type) if type
@@ -37,6 +36,15 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
           f.eql?("Modulefile")
         end
       end
+
+      class ExternalDependency < Puppet::ExternalDependency
+        def initialize(string_info)
+          name, version = string_info.split(',')
+          version.strip! if version
+          super(name, version)
+        end
+      end
+
     end
   end
 end; end; end; end

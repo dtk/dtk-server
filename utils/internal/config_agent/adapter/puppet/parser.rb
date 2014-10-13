@@ -5,11 +5,21 @@ require 'puppet/type'
 require 'puppet/parser'
 
 module DTK; class ConfigAgent; module Adapter; class Puppet
+  class ExternalDependency
+    attr_reader :name,:version_constraints_string
+    def initialize(name,version_constraints_string)
+      @name = name
+      @version_constraints_string = version_constraints_string
+    end
+  end
+
   module ParserMixin
     r8_nested_require('parser','modulefile')
+    r8_nested_require('parser','metadata_file')
 
     def parse_external_ref?(impl_obj)
-      Modulefile.parse?(impl_obj)
+      # use metadata file source over modulefile
+      MetadataFile.parse?(impl_obj) ||  Modulefile.parse?(impl_obj)
     end
 
     def parse_given_module_directory(impl_obj)

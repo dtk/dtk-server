@@ -1,0 +1,8 @@
+--- 
+  nginx__include: 
+    display_name: nginx__include
+    external_ref: 
+      class_name: nginx::include
+      type: puppet_class
+    basic_type: service
+    component_type: nginx__include

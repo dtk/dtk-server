@@ -1,0 +1,277 @@
+--- 
+  logrotate__base: 
+    display_name: logrotate__base
+    external_ref: 
+      class_name: logrotate::base
+      type: puppet_class
+    basic_type: service
+    component_type: logrotate__base
+  logrotate__rule: 
+    display_name: logrotate__rule
+    external_ref: 
+      definition_name: logrotate::rule
+      type: puppet_definition
+    basic_type: service
+aaa
+    component_type: logrotate__rule
+    only_one_per_node: false
+    attribute: 
+      name: 
+        display_name: name
+        data_type: string
+        required: true
+        external_ref: 
+          type: puppet_attribute
+          path: "node[logrotate][name]"
+      path: 
+        display_name: path
+        data_type: string
+        value_asserted: undef
+        external_ref: 
+          type: puppet_attribute
+          path: "node[logrotate][path]"
+      ensure: 
+        display_name: ensure
+        data_type: string
+        value_asserted: present
+        external_ref: 
+          type: puppet_attribute
+          path: "node[logrotate][ensure]"
+      compress: 
+        display_name: compress
+        data_type: string
+        value_asserted: undef
+        external_ref: 
+          type: puppet_attribute
+          path: "node[logrotate][compress]"
+      compresscmd: 
+        display_name: compresscmd
+        data_type: string
+        value_asserted: undef
+        external_ref: 
+          type: puppet_attribute
+          path: "node[logrotate][compresscmd]"
+      compressext: 
+        display_name: compressext
+        data_type: string
+        value_asserted: undef
+        external_ref: 
+          type: puppet_attribute
+          path: "node[logrotate][compressext]"
+      compressoptions: 
+        display_name: compressoptions
+        data_type: string
+        value_asserted: undef
+        external_ref: 
+          type: puppet_attribute
+          path: "node[logrotate][compressoptions]"
+      copy: 
+        display_name: copy
+        data_type: string
+        value_asserted: undef
+        external_ref: 
+          type: puppet_attribute
+          path: "node[logrotate][copy]"
+      copytruncate: 
+        display_name: copytruncate
+        data_type: string
+        value_asserted: undef
+        external_ref: 
+          type: puppet_attribute
+          path: "node[logrotate][copytruncate]"
+      create: 
+        display_name: create
+        data_type: string
+        value_asserted: undef
+        external_ref: 
+          type: puppet_attribute
+          path: "node[logrotate][create]"
+      create_mode: 
+        display_name: create_mode
+        data_type: string
+        value_asserted: undef
+        external_ref: 
+          type: puppet_attribute
+          path: "node[logrotate][create_mode]"
+      create_owner: 
+        display_name: create_owner
+        data_type: string
+        value_asserted: undef
+        external_ref: 
+          type: puppet_attribute
+          path: "node[logrotate][create_owner]"
+      create_group: 
+        display_name: create_group
+        data_type: string
+        value_asserted: undef
+        external_ref: 
+          type: puppet_attribute
+          path: "node[logrotate][create_group]"
+      dateext: 
+        display_name: dateext
+        data_type: string
+        value_asserted: undef
+        external_ref: 
+          type: puppet_attribute
+          path: "node[logrotate][dateext]"
+      dateformat: 
+        display_name: dateformat
+        data_type: string
+        value_asserted: undef
+        external_ref: 
+          type: puppet_attribute
+          path: "node[logrotate][dateformat]"
+      delaycompress: 
+        display_name: delaycompress
+        data_type: string
+        value_asserted: undef
+        external_ref: 
+          type: puppet_attribute
+          path: "node[logrotate][delaycompress]"
+      extension: 
+        display_name: extension
+        data_type: string
+        value_asserted: undef
+        external_ref: 
+          type: puppet_attribute
+          path: "node[logrotate][extension]"
+      ifempty: 
+        display_name: ifempty
+        data_type: string
+        value_asserted: undef
+        external_ref: 
+          type: puppet_attribute
+          path: "node[logrotate][ifempty]"
+      mail: 
+        display_name: mail
+        data_type: string
+        value_asserted: undef
+        external_ref: 
+          type: puppet_attribute
+          path: "node[logrotate][mail]"
+      mailfirst: 
+        display_name: mailfirst
+        data_type: string
+        value_asserted: undef
+        external_ref: 
+          type: puppet_attribute
+          path: "node[logrotate][mailfirst]"
+      maillast: 
+        display_name: maillast
+        data_type: string
+        value_asserted: undef
+        external_ref: 
+          type: puppet_attribute
+          path: "node[logrotate][maillast]"
+      maxage: 
+        display_name: maxage
+        data_type: string
+        value_asserted: undef
+        external_ref: 
+          type: puppet_attribute
+          path: "node[logrotate][maxage]"
+      minsize: 
+        display_name: minsize
+        data_type: string
+        value_asserted: undef
+        external_ref: 
+          type: puppet_attribute
+          path: "node[logrotate][minsize]"
+      missingok: 
+        display_name: missingok
+        data_type: string
+        value_asserted: undef
+        external_ref: 
+          type: puppet_attribute
+          path: "node[logrotate][missingok]"
+      olddir: 
+        display_name: olddir
+        data_type: string
+        value_asserted: undef
+        external_ref: 
+          type: puppet_attribute
+          path: "node[logrotate][olddir]"
+      postrotate: 
+        display_name: postrotate
+        data_type: string
+        value_asserted: undef
+        external_ref: 
+          type: puppet_attribute
+          path: "node[logrotate][postrotate]"
+      prerotate: 
+        display_name: prerotate
+        data_type: string
+        value_asserted: undef
+        external_ref: 
+          type: puppet_attribute
+          path: "node[logrotate][prerotate]"
+      firstaction: 
+        display_name: firstaction
+        data_type: string
+        value_asserted: undef
+        external_ref: 
+          type: puppet_attribute
+          path: "node[logrotate][firstaction]"
+      lastaction: 
+        display_name: lastaction
+        data_type: string
+        value_asserted: undef
+        external_ref: 
+          type: puppet_attribute
+          path: "node[logrotate][lastaction]"
+      rotate: 
+        display_name: rotate
+        data_type: string
+        value_asserted: undef
+        external_ref: 
+          type: puppet_attribute
+          path: "node[logrotate][rotate]"
+      rotate_every: 
+        display_name: rotate_every
+        data_type: string
+        value_asserted: undef
+        external_ref: 
+          type: puppet_attribute
+          path: "node[logrotate][rotate_every]"
+      size: 
+        display_name: size
+        data_type: string
+        value_asserted: undef
+        external_ref: 
+          type: puppet_attribute
+          path: "node[logrotate][size]"
+      sharedscripts: 
+        display_name: sharedscripts
+        data_type: string
+        value_asserted: undef
+        external_ref: 
+          type: puppet_attribute
+          path: "node[logrotate][sharedscripts]"
+      shred: 
+        display_name: shred
+        data_type: string
+        value_asserted: undef
+        external_ref: 
+          type: puppet_attribute
+          path: "node[logrotate][shred]"
+      shredcycles: 
+        display_name: shredcycles
+        data_type: string
+        value_asserted: undef
+        external_ref: 
+          type: puppet_attribute
+          path: "node[logrotate][shredcycles]"
+      start: 
+        display_name: start
+        data_type: string
+        value_asserted: undef
+        external_ref: 
+          type: puppet_attribute
+          path: "node[logrotate][start]"
+      uncompresscmd: 
+        display_name: uncompresscmd
+        data_type: string
+        value_asserted: undef
+        external_ref: 
+          type: puppet_attribute
+          path: "node[logrotate][uncompresscmd]"

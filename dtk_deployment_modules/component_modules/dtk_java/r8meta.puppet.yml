@@ -1,0 +1,45 @@
+--- !omap 
+- dtk_java: !omap 
+    - display_name: dtk_java
+    - description: Installs java
+    - external_ref: 
+        class_name: dtk_java
+        type: puppet_class
+    - basic_type: service
+    - component_type: dtk_java
+    - ui: 
+        images: 
+          tiny: ""
+          tnail: java-01.png
+          display: java-01.png
+    - dependency: 
+        stdlib: 
+          type: component
+          search_pattern: 
+            ":filter": 
+            - ":eq"
+            - ":component_type"
+            - stdlib
+          display_name: stdlib
+          description: stdlib is required for java
+          severity: warning
+        dtk: 
+          type: component
+          search_pattern: 
+            ":filter": 
+            - ":eq"
+            - ":component_type"
+            - dtk
+          display_name: dtk
+          description: dtk is required for java
+          severity: warning
+    - attribute: !omap 
+        - java_home: !omap 
+            - display_name: java_home
+            - description: java home directory
+            - data_type: string
+            - is_port: true
+            - dynamic: true
+            - external_ref: 
+                type: puppet_attribute
+                path: node[dtk_java][java_home]

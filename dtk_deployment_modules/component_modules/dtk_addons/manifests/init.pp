@@ -1,0 +1,4 @@
+class dtk_addons()
+{
+}
+

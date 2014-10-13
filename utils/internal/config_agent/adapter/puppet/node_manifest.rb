@@ -246,7 +246,15 @@ module DTK; class ConfigAgent; module Adapter
       end
 
       
-      def process_val(val)
+      def process_val(val_x)
+        # TODO: see why non scalar vals are string form
+        val = val_x
+        if val_x =~ /^\[/ or val_x =~ /^\{/ 
+          # string array or hash
+          begin
+            val = eval(val_x) rescue nil
+          end
+        end
         # a guarded val
         if val.kind_of?(Hash) and val.size == 1 and val.keys.first == "__ref"
           "$#{val.values.join("::")}"

@@ -249,7 +249,7 @@ module DTK; class ConfigAgent; module Adapter
       def process_val(val_x)
         # TODO: see why non scalar vals are string form
         val = val_x
-        if val_x =~ /^\[/ or val_x =~ /^\{/ 
+        if val_x.kind_of?(String) and (val_x =~ /^\[/ or val_x =~ /^\{/ )
           # string array or hash
           begin
             val = eval(val_x) rescue nil

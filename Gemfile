@@ -53,7 +53,7 @@ end
 gem 'chef','10.16.2'
 gem 'mcollective-client','2.2.3'
 #gem 'puppet','2.7.6'
-gem 'puppet','3.1.0'
+gem 'puppet','3.4.0'
 gem 'stomp','1.1.9'
 gem 'grit','2.5.0'
 gem 'innate','2012.03' #version compatible with ramaze','2012.04.14

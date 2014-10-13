@@ -10,6 +10,7 @@ module DTK
           :cols => [:id, :display_name,:component_type,nested_virtual_attr]
         }
         assembly_rows = get_objs(sp_hash)
+        Instance.get_last_task_run_status(assembly_rows,model_handle())
 
         if(node_id.to_s.empty? && component_id.to_s.empty? && attribute_id.to_s.empty?)
           nodes_info = (is_template ? get_nodes() : get_nodes(:id,:display_name,:admin_op_status,:os_type,:external_ref,:type))          

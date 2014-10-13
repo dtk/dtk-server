@@ -1,15 +1,17 @@
 module DTK; class ConfigAgent; module Adapter
   class Puppet
     class NodeManifest
-      def initialize(import_statement_modules=nil)
-        @import_statement_modules = import_statement_modules||Array.new
+      def initialize(config_node,opts={})
+        @import_statement_modules = opts[:import_statement_modules]||Array.new
+        @config_node = config_node
       end
 
-      def generate(cmps_with_attrs,assembly_attrs=nil,stages_ids=nil)
-        # Amar:
+      # TODO: cleaner to make cmps_with_attrs,assembly_attrs class attributes, but to do so would maen need to also
+      # modify PuppetStage
+      def generate(cmps_with_attrs,assembly_attrs)
         # if intra node stages configured 'stages_ids' will not be nil, 
         # if stages_ids is nil use generation with total ordering (old implementation)
-        if stages_ids
+        if stages_ids = @config_node.intra_node_stages()
           generate_with_stages(cmps_with_attrs,assembly_attrs,stages_ids)
         else
           generate_with_total_ordering(cmps_with_attrs,assembly_attrs)
@@ -35,13 +37,13 @@ module DTK; class ConfigAgent; module Adapter
       def generate_with_stages(cmps_with_attrs,assembly_attrs,stages_ids)
         stages_ids.map do |stage_ids_exec_block|
           exec_block = Array.new
-          add_default_extlookup_config!(exec_block)
+          add_global_defaults!(exec_block)
           add_assembly_attributes!(exec_block,assembly_attrs||[])
           exec_block << generate_stage_statements(stage_ids_exec_block.size)
           stage_ids_exec_block.each_with_index do |stage_ids, i|
             stage = i+1
             exec_block << " " #space between stages
-            puppet_stage = PuppetStage.new(stage,@import_statement_modules)
+            puppet_stage = PuppetStage.new(stage,@config_node,@import_statement_modules)
             Array(stage_ids).each do |cmp_id| 
               cmp_with_attrs = cmps_with_attrs.find { |cmp| cmp["id"] == cmp_id }       
               puppet_stage.generate_manifest!(cmp_with_attrs)
@@ -58,13 +60,13 @@ module DTK; class ConfigAgent; module Adapter
 
       def generate_with_total_ordering(cmps_with_attrs,assembly_attrs=nil)
         lines = Array.new
-        add_default_extlookup_config!(lines)
+        add_global_defaults!(lines)
         add_assembly_attributes!(lines,assembly_attrs||[])
         lines << generate_stage_statements(cmps_with_attrs.size)
         cmps_with_attrs.each_with_index do |cmp_with_attrs,i|
           stage = i+1
           lines << " " #space between stages
-          PuppetStage.new(stage,@import_statement_modules).generate_manifest!(cmp_with_attrs).add_lines_for_stage!(lines)
+          PuppetStage.new(stage,@config_node,@import_statement_modules).generate_manifest!(cmp_with_attrs).add_lines_for_stage!(lines)
         end
 
         if attr_val_stmts = get_attr_val_statements(cmps_with_attrs)
@@ -78,8 +80,8 @@ module DTK; class ConfigAgent; module Adapter
       end
 
       class PuppetStage < self
-        def initialize(stage,import_statement_modules)
-          super(import_statement_modules)
+        def initialize(stage,config_node,import_statement_modules)
+          super(config_node,:import_statement_modules => import_statement_modules)
           @stage = stage
           @class_lines = Array.new
           @def_lines = Array.new
@@ -197,18 +199,32 @@ module DTK; class ConfigAgent; module Adapter
         end
 
       end
+      def add_global_defaults!(lines)
+        add_default_extlookup_config!(lines)
+        add_dtk_globals!(lines)
+      end
 
-      def add_default_extlookup_config!(ret)
-        ret << "$extlookup_datadir = #{DefaultExtlookupDatadir}"
-        ret << "$extlookup_precedence = #{DefaultExtlookupPrecedence}"
+      def add_default_extlookup_config!(lines)
+        lines << "$extlookup_datadir = #{DefaultExtlookupDatadir}"
+        lines << "$extlookup_precedence = #{DefaultExtlookupPrecedence}"
       end
       DefaultExtlookupDatadir = "'/etc/puppet/manifests/extdata'"
       DefaultExtlookupPrecedence = "['common']"
 
-      def add_assembly_attributes!(ret,assembly_attrs)
+      def add_assembly_attributes!(lines,assembly_attrs)
         assembly_attrs.each do |attr|
-          ret << "$#{attr['name']} = #{process_val(attr['value'])}"
+          add_top_level_assignment!(lines,attr['name'],attr['value'])
         end
+      end
+
+      def add_dtk_globals!(lines)
+        if node = @config_node[:node]
+          add_top_level_assignment!(lines,'dtk_assembly_node',node.get_field?(:display_name))
+        end
+      end
+
+      def add_top_level_assignment!(lines,name,value)
+        lines << "$#{name} = #{process_val(value)}"
       end
 
       def get_attr_val_statements(cmps_with_attrs)
@@ -230,7 +246,15 @@ module DTK; class ConfigAgent; module Adapter
       end
 
       
-      def process_val(val)
+      def process_val(val_x)
+        # TODO: see why non scalar vals are string form
+        val = val_x
+        if val_x.kind_of?(String) and (val_x =~ /^\[/ or val_x =~ /^\{/ )
+          # string array or hash
+          begin
+            val = eval(val_x) rescue nil
+          end
+        end
         # a guarded val
         if val.kind_of?(Hash) and val.size == 1 and val.keys.first == "__ref"
           "$#{val.values.join("::")}"

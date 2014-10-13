@@ -40,19 +40,20 @@ module DTK; class BaseModule
         end
       end
 
-      # TODO: move this to under config_agent/puppet
-      def parse_dependencies(dependencies)
-        dependencies.map do |dep|
-          name, version = dep.split(',')
+      # TODO: move this to under config_agent/puppet/parser
+      def parse_dependencies(ext_dependencies)
+        ext_dependencies.map do |ext_dep|
+          name = ext_dep.name
+          version_string = ext_dep.version_constraints_string 
           parsed_dep = {:name=>name}
-          if version_constraints = (version && get_dependency_condition(version.strip!()))
+          if version_constraints = (version_string && get_dependency_condition(version_string))
             parsed_dep.merge!(:version_constraints=>version_constraints)
           end
           parsed_dep
         end
       end
       
-      # TODO: move this to under config_agent/puppet
+      # TODO: move this to under config_agent/puppet/parser
       def get_dependency_condition(versions)
         conds, multiple_versions = [], []
         # multiple_versions = versions.split(' ')

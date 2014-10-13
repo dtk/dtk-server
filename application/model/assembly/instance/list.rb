@@ -40,6 +40,10 @@ module DTK; class  Assembly
         assembly.get_field?(:display_name)
       end
 
+      def get_last_task_run_status(assembly_rows,assembly_mh)
+        add_last_task_run_status!(assembly_rows,assembly_mh)
+      end
+
      private
       def list_aux__no_details(assembly_rows)
         assembly_rows.map do |r|

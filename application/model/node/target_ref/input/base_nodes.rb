@@ -78,6 +78,40 @@ module DTK; class Node; class TargetRef
         Log.error("need to also update top.id_info since parent field is being updated")
         Model.update_from_rows(attr_mh,rows_to_update)
       end
+      # TODO: Step in fixing DTK-1739 is putting in this copy to possible replace above Not switching over yet
+      # in create_linked_target_ref? in master branch until make sure that this does not impact node groups
+      # to_link_array is of form [{:node_instance => node,:target_ref => target_ref},..]
+      def self.copy_node_attributes_to_target_refs(target,to_link_array)
+        return if to_link_array.empty?
+        cols = Model::FieldSet.all_real(:attribute).with_removed_cols(:id,:local_id).cols
+        sp_hash = {
+          :cols => cols,
+          :filter => [:oneof,:node_node_id,to_link_array.map{|n|n[:node_instance].id()}]
+        }
+        attr_mh = target.model_handle(:node).create_childMH(:attribute)
+        attrs = Model.get_objs(attr_mh,sp_hash,:keep_ref_cols => true)
+        return if attrs.empty?
+        to_link_hash = to_link_array.inject(Hash.new){|h,r|h.merge(r[:node_instance].id => r[:target_ref].id)}
+
+        create_rows = attrs.map do |a|
+          target_ref_id = to_link_hash[a[:node_node_id]]
+          el = Hash.new
+          # copy with some special processing
+          a.each do |k,v|
+            if k == :id
+              #dont copy
+            elsif k == :node_node_id
+              el.merge!(k => target_ref_id)
+            elsif v.nil?
+              #dont copy
+            else
+              el.merge!(k => v)
+            end
+          end
+          el
+        end
+        Model.create_from_rows(attr_mh,create_rows,:convert => true)
+      end
 
       def self.copy_node_group_attrs_to_target_refs?(target,nodes,ngr_idhs)
         node_groups = nodes.select{|n|n.is_node_group?()}

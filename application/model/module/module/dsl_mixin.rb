@@ -18,8 +18,8 @@ module DTK
       merge!(:dsl_updated_info => dsl_updated_info)
       dsl_updated_info
     end
-  end              
-  # has info if DSL file is created and being passed to 
+  end
+  # has info if DSL file is created and being passed to
   class DSLCreatedInfo < Hash
     def self.create_empty()
       new()
@@ -66,7 +66,7 @@ module DTK; class BaseModule
       unless new_dsl_integer_version == 2
         raise Error.new("component_module.create_new_dsl_version only implemented when target version is 2")
       end
-      previous_dsl_version = new_dsl_integer_version-1 
+      previous_dsl_version = new_dsl_integer_version-1
       module_branch = get_module_branch_matching_version(module_version)
 
       # create in-memory dsl object using old version
@@ -161,7 +161,7 @@ module DTK; class BaseModule
         if e = klass::ParsingError.trap{parse_dsl_and_update_model(impl_obj,module_branch_idh,version,module_namespace,opts)}
           ret.dsl_parsed_info = e
         end
-      elsif opts[:scaffold_if_no_dsl] 
+      elsif opts[:scaffold_if_no_dsl]
         opts = Hash.new
         if matching_branches
           opts.merge!(:include_module_branches => matching_branches)
@@ -215,7 +215,7 @@ module DTK; class BaseModule
         Log.error_pp([:parsing_error,e,e.backtrace[0..10]])
         raise e
       end
-      if render_hash 
+      if render_hash
         format_type = ModuleDSL.default_format_type()
         content = render_hash.serialize(format_type)
         dsl_filename = ModuleDSL.dsl_filename(config_agent_type,format_type)

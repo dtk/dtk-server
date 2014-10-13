@@ -267,6 +267,10 @@ module DTK; class Assembly
     def self.parse_component_type(component_type)
       component_type.split(ModuleTemplateSep)
     end
+
+    def self.component_type(service_module_name,template_name)
+      "#{service_module_name}#{ModuleTemplateSep}#{template_name}"
+    end
   end
 end
 # TODO: hack to get around error in /home/dtk/server/system/model.rb:31:in `const_get

@@ -6,7 +6,7 @@ module DTK; class ModuleDSL; class V2
       new.convert(input_hash)
     end
     def convert(input_hash)
-      component().new(input_hash.req(:module)).convert(input_hash.req(:components),context(input_hash))
+      component().new(input_hash.req(:module)).convert(input_hash[:components],context(input_hash))
     end
 
     def self.convert_attribute_mapping(input_am,base_cmp,dep_cmp,opts={})
@@ -73,7 +73,7 @@ module DTK; class ModuleDSL; class V2
         @module_name = module_name
       end
       def convert(input_hash,context={})
-        input_hash.inject(OutputHash.new){|h,(k,v)|h.merge(key(k) => body(v,k,context))}
+        (input_hash||{}).inject(OutputHash.new){|h,(k,v)|h.merge(key(k) => body(v,k,context))}
       end
      private
       def key(input_key)

@@ -81,5 +81,18 @@ module DTK
 
       rest_ok_response
     end
+
+    def rest__set_catalog_credentials()
+      username, password = ret_non_null_request_params(:username, :password)
+
+      user_object = CurrentSession.new.get_user_object()
+      user_object.update(:catalog_username => username, :catalog_password => password)
+      session_obj = CurrentSession.new
+      session_obj.set_user_object(user_object)
+      # we invalidate the session for repoman
+      session_obj.set_repoman_session_id(nil)
+
+      rest_ok_response
+    end
   end
 end

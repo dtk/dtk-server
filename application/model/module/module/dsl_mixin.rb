@@ -18,8 +18,8 @@ module DTK
       merge!(:dsl_updated_info => dsl_updated_info)
       dsl_updated_info
     end
-  end              
-  # has info if DSL file is created and being passed to 
+  end
+  # has info if DSL file is created and being passed to
   class DSLCreatedInfo < Hash
     def self.create_empty()
       new()
@@ -66,7 +66,7 @@ module DTK; class BaseModule
       unless new_dsl_integer_version == 2
         raise Error.new("component_module.create_new_dsl_version only implemented when target version is 2")
       end
-      previous_dsl_version = new_dsl_integer_version-1 
+      previous_dsl_version = new_dsl_integer_version-1
       module_branch = get_module_branch_matching_version(module_version)
 
       # create in-memory dsl object using old version
@@ -145,6 +145,7 @@ module DTK; class BaseModule
       module_and_branch_info = self.class.create_module_and_branch_obj?(project,repo.id_handle(),local,opts[:ancestor_branch_idh])
       module_branch_idh = module_and_branch_info[:module_branch_idh]
       external_dependencies = matching_branches = nil
+      # opts[:process_external_refs] means to see if external refs and then check againts existing loaded components
       if opts[:process_external_refs]
         module_branch = module_branch_idh.create_object()
         if external_deps = process_external_refs(module_branch,config_agent_type,project,impl_obj)
@@ -153,6 +154,10 @@ module DTK; class BaseModule
           end
           matching_branches = external_deps.matching_module_branches?()
         end
+      # opts[:set_external_refs] means to set external refs if they exist from parsing module files   
+      elsif opts[:set_external_refs]
+        module_branch = module_branch_idh.create_object()
+        set_external_ref?(module_branch,config_agent_type,impl_obj)
       end
 
       dsl_created_info = DSLCreatedInfo.create_empty()
@@ -161,7 +166,7 @@ module DTK; class BaseModule
         if e = klass::ParsingError.trap{parse_dsl_and_update_model(impl_obj,module_branch_idh,version,module_namespace,opts)}
           ret.dsl_parsed_info = e
         end
-      elsif opts[:scaffold_if_no_dsl] 
+      elsif opts[:scaffold_if_no_dsl]
         opts = Hash.new
         if matching_branches
           opts.merge!(:include_module_branches => matching_branches)
@@ -215,7 +220,7 @@ module DTK; class BaseModule
         Log.error_pp([:parsing_error,e,e.backtrace[0..10]])
         raise e
       end
-      if render_hash 
+      if render_hash
         format_type = ModuleDSL.default_format_type()
         content = render_hash.serialize(format_type)
         dsl_filename = ModuleDSL.dsl_filename(config_agent_type,format_type)

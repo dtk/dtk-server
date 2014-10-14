@@ -268,6 +268,7 @@ module XYZ
         ret = rows
         # need to get values if there are any json columns being updated and update value is array or hash
         db_rel = DB_REL_DEF[model_handle[:model_name]]
+        # Assumes that all rows have exact same keys
         cols_to_get = rows.first.reject{|k,v|not ((v.kind_of?(Hash) or v.kind_of?(Array)) and db.json_table_column?(k,db_rel))}.keys
         return ret if cols_to_get.empty?
         unless rows.first.has_key?(:id)
@@ -280,12 +281,12 @@ module XYZ
         
         rows.map do |row|
           id = row[:id]
-          obj = indexed_objs[id]
-          unless obj
+          unless to_merge = indexed_objs[id]
             row
           else
-            (obj.keys-[:id]).each{|k|Aux.merge_into_json_col!(obj,k,row[k])}
-            obj
+            # do merge updating to_merge
+            (to_merge.keys-[:id]).each{|k|Aux.merge_into_json_col!(to_merge,k,row[k])}
+            row.merge(to_merge) # so get unchanged plus changed rows
           end
         end
       end

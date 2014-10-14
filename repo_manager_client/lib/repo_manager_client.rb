@@ -404,8 +404,12 @@ module DTK
     end
 
     def login_to_repoman()
+      unless CurrentSession.are_catalog_credentilas_set?
+        raise ErrorUsage, "Catalog credentials are not set, you can set them via account context"
+      end
+
       response = handle_error(:raise_error => true) do
-        RestClientWrapper.post("#{@rest_base_url}/v1/auth/login", :username => R8::Config[:remote_repo][:username], :password => R8::Config[:remote_repo][:password])
+        RestClientWrapper.post("#{@rest_base_url}/v1/auth/login", CurrentSession.catalog_credentials )
       end
       response['token']
     end

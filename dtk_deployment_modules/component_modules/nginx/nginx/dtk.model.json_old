@@ -1,0 +1,12 @@
+{
+  "module": "nginx",
+  "dsl_version": "0.9",
+  "module_type": "puppet_module",
+  "components": {
+    "include": {
+      "external_ref": {
+        "puppet_class": "nginx::include"
+      }
+    }
+  }
+}

@@ -27,12 +27,25 @@ module XYZ
       get_user_object()[:default_namespace]
     end
 
+    def are_catalog_credentilas_set?()
+      get_user_object().catalog_username && get_user_object().catalog_password
+    end
+
     def self.get_default_namespace()
       CurrentSession.new.get_default_namespace()
     end
 
     def self.get_username()
        CurrentSession.new.get_username()
+    end
+
+    def self.are_catalog_credentilas_set?()
+      CurrentSession.new.are_catalog_credentilas_set?()
+    end
+
+    def self.catalog_credentials
+      usr_obj = CurrentSession.new.get_user_object()
+      { :username => usr_obj.catalog_username, :password => usr_obj.catalog_password }
     end
 
     def set_user_object(user_object)

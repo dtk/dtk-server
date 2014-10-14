@@ -74,18 +74,25 @@ module DTK
         # another query to get component instances that do not have assembly
         results += get_objs(:cols => [:component_module_instances_node])
 
-        ret = []
-        results.each do |el|
-          title_elements = [el[:node][:display_name],el[:component_instance][:display_name]]
-          title_elements.unshift(el[:assembly][:display_name]) if el[:assembly]
-          ret << { 
-            :id => el[:component_instance][:id], 
-            :display_name => title_elements.join('/'), 
-            :version => ModuleBranch.version_from_version_field(el[:component_instance][:version])
+        results.map do |el|
+          component_instance = el[:component_instance]
+          display_name_parts = {
+            :node => el[:node][:display_name],
+            :component => Component::Instance.print_form(component_instance),
+          }
+          display_name = "#{display_name_parts[:node]}/#{display_name_parts[:component]}"
+          if assembly = el[:assembly]
+            assembly_name = assembly[:display_name]
+            display_name_parts.merge!(:assembly => assembly_name)
+            display_name = "#{assembly_name}/#{display_name}"
+          end
+          { 
+            :id => component_instance[:id], 
+            :display_name => display_name,
+            :display_name_parts => display_name_parts,
+            :version => ModuleBranch.version_from_version_field(component_instance[:version])
           }
         end
-
-        return ret
       else
         raise Error.new("TODO: not implemented yet: processing of info_about(#{about})")        
       end

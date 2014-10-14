@@ -1,5 +1,5 @@
-module DTK; class ConfigAgent; module Adapter; class Puppet
-  module ParserMixin
+module DTK; class ConfigAgent
+  module Adapter; class Puppet
     module Modulefile
       # used for parsing Modulefile when importing module from git (import-git)
       def self.parse?(impl_obj)
@@ -46,7 +46,8 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
       end
 
     end
-  end
-end; end; end; end
+  end; end
+end; end
+
 
 

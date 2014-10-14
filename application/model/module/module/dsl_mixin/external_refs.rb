@@ -1,9 +1,9 @@
 module DTK; class BaseModule
               
   class ExternalDependencies < Hash
-    def initialize(match_hashes,inconsistent,possibly_missing)
+    def initialize(hash={})
       super()
-      replace(:match_hashes => match_hashes, :inconsistent => inconsistent, :possibly_missing => possibly_missing)
+      replace(hash)
     end
 
     def possible_problems?()
@@ -40,50 +40,16 @@ module DTK; class BaseModule
       end
 
      private
-      # TODO: move this to under config_agent/puppet/parser
-      def parse_dependencies(ext_dependencies)
-        ext_dependencies.map do |ext_dep|
-          name = ext_dep.name
-          version_string = ext_dep.version_constraints_string 
-          parsed_dep = {:name=>name}
-          if version_constraints = (version_string && get_dependency_condition(version_string))
-            parsed_dep.merge!(:version_constraints=>version_constraints)
-          end
-          parsed_dep
-        end
-      end
-      
-      # TODO: move this to under config_agent/puppet/parser
-      def get_dependency_condition(versions)
-        conds, multiple_versions = [], []
-        # multiple_versions = versions.split(' ')
-        
-        matched_versions = versions.match(/(^[>=<]+\s*\d\.\d\.\d)\s*([>=<]+\s*\d\.\d\.\d)*/)
-        multiple_versions << matched_versions[1] if matched_versions[1]
-        multiple_versions << matched_versions[2] if matched_versions[2]
-        
-        multiple_versions.each do |version|
-          match = version.to_s.match(/(^>*=*<*)(.+)/)
-        conds << {:version=>match[2], :constraint=>match[1]}
-        end
-
-        conds
-      end
- 
-      # TODO: factor to seperate into puppet specfic parts and general parts
+      # TODO: move matching logic under DTK::ConfigAgent::Adapter::Puppet::ExternalDependency::ParsedForm
       # move puppet specific to under config_agent/puppet
       def check_and_ret_external_ref_dependencies?(external_ref,project)
-        ret = Hash.new
-        unless dependencies = external_ref[:dependencies]
-          return ret
-        end
-        parsed_dependencies, all_match_hashes, all_inconsistent, all_possibly_missing = [], {}, [], []
-        # using begin rescue statement to avoid import failure if parsing errors or if using old Modulefile format
-        begin
-          parsed_dependencies = parse_dependencies(dependencies)
-         rescue Exception => e
-          Log.error_pp([e,e.backtrace[0..20]])
-        end
+        ret = ExternalDependencies.new()
+        return ret unless dependencies = external_ref[:dependencies]
+
+        parsed_dependencies = dependencies.map{|dep|dep.parsed_form?()}.compact
+        return ret if parsed_dependencies.empty?
+
+        all_match_hashes, all_inconsistent, all_possibly_missing = {}, [], []
         all_modules = self.class.get_all(project.id_handle()).map{|cmp_mod|ComponentModuleWrapper.new(cmp_mod)}
         parsed_dependencies.each do |parsed_dependency|
           dep_name = parsed_dependency[:name].strip()
@@ -140,7 +106,12 @@ module DTK; class BaseModule
         end
         all_inconsistent = (all_inconsistent - all_match_hashes.keys)
         all_possibly_missing = (all_possibly_missing - all_inconsistent - all_match_hashes.keys)
-        ExternalDependencies.new(all_match_hashes,all_inconsistent.uniq,all_possibly_missing.uniq)
+        ext_deps_hash = {
+          :match_hashes => all_match_hashes,
+          :inconsistent => all_inconsistent.uniq,
+          :possibly_missing => all_possibly_missing.uniq
+        }
+        ExternalDependencies.new(ext_deps_hash)
       end
       # for caching info
       class ComponentModuleWrapper

@@ -12,6 +12,14 @@ module DTK
         provider_type   = provider.get_field?(:iaas_type)
         iaas_properties = []
 
+        if iaas_props = opts[:iaas_properties]
+          # remove security_groups from provider and use params provided with create-target
+          properties.delete_if{|k,v| [:security_group, :security_group_set].include?(k)}
+
+          # convert params "keypair" to :keypair and "security_group" to :security_group and merge to properties
+          properties.merge!(iaas_props.inject({}){|prop,(k,v)| prop[k.to_sym] = v; prop})
+        end
+
         unless region
           raise ErrorUsage.new("Region is required for target created in '#{provider_type}' provider type!") unless provider_type.eql?('physical')
         end
@@ -49,6 +57,13 @@ module DTK
             :type => 'instance'
           }
           el = provider.hash_subset(*InheritedProperties).merge(specific_params)
+
+          # remove security_groups and keypair from provider and use params sent by user with create-target
+          if iaas_props = iaas_properties.properties
+            el[:iaas_properties].delete_if{|k,v| [:security_group, :security_group_set].include?(k)} if [:security_group, :security_group_set].any? {|s| iaas_props.key? s}
+            el[:iaas_properties].delete(:keypair) if iaas_props[:keypair]
+          end
+
           # need deep merge for iaas_properties
           el.merge(:iaas_properties => (el[:iaas_properties]||Hash.new).merge(iaas_properties.properties))
         end

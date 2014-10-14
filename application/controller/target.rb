@@ -74,7 +74,7 @@ module DTK
     def rest__create()
       provider     = create_obj(:provider_id, ::DTK::Target::Template)
       region       = ret_request_params(:region)
-      opts         = ret_params_hash(:target_name)
+      opts         = ret_params_hash(:target_name, :iaas_properties)
       project_idh  = get_default_project().id_handle()
 
       Target::Instance.create_target(project_idh, provider, region, opts)

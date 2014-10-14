@@ -65,6 +65,9 @@ module DTK
           end
         
         common_iaas_properties = get_field?(:iaas_properties)
+        # DTK-1735 DO NOT copy aws key and secret from provider to target
+        common_iaas_properties.delete_if{|k,v| [:key, :secret].include?(k)}
+
         iaas_properties_list = regions.map do |region|
           name = default_target_name(:region => region)
           properties = common_iaas_properties.merge(:region => region)

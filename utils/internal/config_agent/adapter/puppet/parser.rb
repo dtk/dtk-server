@@ -1,8 +1,6 @@
 module Puppet
 end
-require 'puppet/resource'
-require 'puppet/type'
-require 'puppet/parser'
+require 'puppet'
 
 module DTK; class ConfigAgent; class Adapter::Puppet
   r8_nested_require('parser','external_dependency')

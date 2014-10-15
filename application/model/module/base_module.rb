@@ -57,9 +57,11 @@ module DTK
         get_objs(:cols => [:components]).map do |r|
           cmp = r[:component]
           branch = r[:module_branch]
-          display_name = Component::Template.component_type_print_form(cmp[:component_type],Opts.new(:no_module_name => true))
-          {:id => cmp[:id], :display_name => display_name,:version => branch.version_print_form() }
-        end.sort{|a,b|"#{a[:version]}-#{a[:display_name]}" <=>"#{b[:version]}-#{b[:display_name]}"}
+          unless branch.assembly_module_version?()
+            display_name = Component::Template.component_type_print_form(cmp[:component_type],Opts.new(:no_module_name => true))
+            {:id => cmp[:id], :display_name => display_name,:version => branch.version_print_form() }
+          end
+        end.compact.sort{|a,b|"#{a[:version]}-#{a[:display_name]}" <=>"#{b[:version]}-#{b[:display_name]}"}
       when :attributes
         results = get_objs(:cols => [:attributes])
         results.delete_if { |e| !(e[:component][:id] == cmp_id.to_i) } if cmp_id && !cmp_id.empty?

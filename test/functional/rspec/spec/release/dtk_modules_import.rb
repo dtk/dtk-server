@@ -14,7 +14,10 @@ STDOUT.sync = true
 
 service_module = "internal:dtk"
 service_module_remote = "internal/dtk"
-component_modules = ['internal:apt', 'internal:common_user', 'internal:dtk', 'internal:dtk_activemq', 'internal:dtk_addons', 'internal:dtk_client', 'internal:dtk_java', 'internal:dtk_nginx', 'internal:dtk_postgresql', 'internal:dtk_repo_manager', 'internal:dtk_server', 'internal:dtk_thin', 'internal:dtk_user', 'internal:gitolite', 'internal:logrotate', 'internal:nginx', 'internal:rvm', 'internal:sysctl', 'internal:thin', 'internal:vcsrepo']
+component_module_1 = "internal/apt"
+component_module_2 = "internal/dtk_user"
+component_module_3 = "internal/rvm"
+component_modules = ['internal:apt', 'internal:common_user', 'internal:dtk', 'internal:dtk_activemq', 'internal:dtk_addons', 'internal:dtk_client', 'internal:dtk_java', 'internal:dtk_nginx', 'internal:dtk_postgresql', 'internal:dtk_repo_manager', 'internal:dtk_server', 'internal:dtk_thin', 'internal:dtk_user', 'internal:gitolite', 'internal:logrotate', 'internal:nginx', 'internal:rvm', 'internal:stdlib', 'internal:sysctl', 'internal:thin', 'internal:vcsrepo']
 
 service_module_filesystem_location = '~/dtk/service_modules/internal'
 component_module_filesystem_location = '~/dtk/component_modules/internal'
@@ -57,6 +60,16 @@ def install_service_module(service_module_remote)
   return pass
 end
 
+def install_component_module(component_module_remote)
+	pass = false
+	value = `dtk component-module install #{component_module_remote}`
+  puts value
+  pass = false if ((value.include? "ERROR") || (value.include? "exists on client"))
+  puts "Import of remote component module #{component_module_remote} completed successfully!" if pass == true
+  puts "Import of remote component module #{component_module_remote} did not complete successfully!" if pass == false
+  return pass
+end
+
 dtk_common = DtkCommon.new('', '')
 
 service_module_deleted = dtk_common.delete_service_module(service_module)
@@ -69,6 +82,7 @@ if service_module_deleted && service_module_deleted_local
 end
 
 install_service_module(service_module_remote)
-
-
+install_component_module(component_module_1)
+install_component_module(component_module_2)
+install_component_module(component_module_3)
 

@@ -48,6 +48,7 @@ module DTK
         :repo_manager_fingerprint => RepoManager.repo_server_ssh_rsa_fingerprint(),
         :repo_manager_dns => RepoManager.repo_server_dns(),
         :match => match,
+        :catalog_credentials_set => CurrentSession.are_catalog_credentilas_set?,
         :new_username => matched_repo_user ? matched_repo_user[:username] : nil,
         :matched_username => match && matched_repo_user ? matched_repo_user[:username] : nil
       )

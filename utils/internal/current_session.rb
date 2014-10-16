@@ -28,7 +28,7 @@ module XYZ
     end
 
     def are_catalog_credentilas_set?()
-      get_user_object().catalog_username && get_user_object().catalog_password
+      !(get_user_object().catalog_username.nil? || get_user_object().catalog_password.nil?)
     end
 
     def self.get_default_namespace()

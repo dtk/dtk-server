@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 # adds user, his or her private 
 require File.expand_path('common', File.dirname(__FILE__))
-
 username = ARGV[0]
 ec2_region = ARGV[1]
 options = Hash.new

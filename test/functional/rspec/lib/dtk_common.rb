@@ -1884,6 +1884,19 @@ class DtkCommon
 	  return default_namespace_set
 	end
 
+	def set_catalog_credentials(catalog_username, catalog_password)
+		puts "Set catalog credentials:", "------------------------"
+		catalog_credentials_set = false
+		response = send_request('/rest/account/set_catalog_credentials', {:username=>catalog_username, :password=>catalog_password})
+	  if response['status'] == 'ok'
+	  	puts "Catalog credentials have been set"
+	  	catalog_credentials_set = true
+	  else
+	  	puts "Catalog credentials has not been set correctly!"
+	  end
+	  return catalog_credentials_set
+	end
+
 # Following list of methods is used for interaction with workspace context
 
 	#Method to get workspace id for further interaction with workspace

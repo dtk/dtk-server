@@ -8,7 +8,7 @@ login = {
 user_info = { 
 	:username=>'test', 
 	:email=>'test@r8network.com', 
-	:user_group=>'private_test', 
+	:user_group=>'test', 
 	:namespace=>'test' 
 }
 

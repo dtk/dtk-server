@@ -8,16 +8,26 @@ module DTK
       end
 
       def self.create_target(project_idh,provider,region,opts={})
-        properties      = provider.get_field?(:iaas_properties).merge(:region => region)
+        provider_properties = provider.get_field?(:iaas_properties).merge(:region => region)
+        # # DTK-1735 DO NOT copy aws key and secret from provider to target
+        properties      = {:region => region}
         provider_type   = provider.get_field?(:iaas_type)
         iaas_properties = []
+
+        if iaas_props = opts[:iaas_properties]
+          # remove security_groups from provider and use params provided with create-target
+          properties.delete_if{|k,v| [:security_group, :security_group_set].include?(k)}
+
+          # convert params "keypair" to :keypair and "security_group" to :security_group and merge to properties
+          properties.merge!(iaas_props.inject({}){|prop,(k,v)| prop[k.to_sym] = v; prop})
+        end
 
         unless region
           raise ErrorUsage.new("Region is required for target created in '#{provider_type}' provider type!") unless provider_type.eql?('physical')
         end
 
         target_name = opts[:target_name]|| provider.default_target_name(:region => region)
-        availability_zones = CommandAndControl.get_and_process_availability_zones(provider_type, properties, region)
+        availability_zones = CommandAndControl.get_and_process_availability_zones(provider_type, provider_properties, region)
 
         # add iaas_properties for target without availability zone
         iaas_properties << IAASProperties.new(:name => target_name, :iaas_properties => properties)
@@ -48,9 +58,14 @@ module DTK
             :display_name => display_name,
             :type => 'instance'
           }
-          el = provider.hash_subset(*InheritedProperties).merge(specific_params)
+
+          # DTK-1735 and DTK-1711 DO NOT use iaas_properties from provider
+          # user region, keypair and security_groups provided by user
+          # el = provider.hash_subset(*InheritedProperties).merge(specific_params)
+          el = provider.hash_subset(:iaas_type,:type,:description).merge(specific_params)
+
           # need deep merge for iaas_properties
-          el.merge(:iaas_properties => (el[:iaas_properties]||Hash.new).merge(iaas_properties.properties))
+          el.merge(:iaas_properties => iaas_properties.properties)
         end
 
         # check if there are any matching target instances that are created already

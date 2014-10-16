@@ -1,6 +1,6 @@
 module DTK; class Attribute
   module PropagateChangesClassMixin
-    # assume attribute_rows  all have :value_asserted or all have :value_derived
+    # assume attribute_rows all have :value_asserted or all have :value_derived
     def update_and_propagate_attributes(attr_mh,attribute_rows,opts={})
       ret = Array.new
       return ret if attribute_rows.empty?
@@ -40,14 +40,13 @@ module DTK; class Attribute
 
       update_rows = changed_attrs_info.map do |r|
         row = Aux::hash_subset(r,[:id,val_field])
-        # TODO: this line is commented out because it caused failure of set complex attributes 
-        # need to check with Rich why this is happening
-        row.merge!(:is_instance_value => true) if (val_field == :value_asserted)
+        row.merge!(:is_instance_value => (val_field == :value_asserted))
         row
       end
 
       # make actual changes in database
-      update_from_rows(attr_mh,update_rows,:partial_value => true)
+      opts_update = {:partial_value => true}.merge(Aux.hash_subset(opts,:partial_value))
+      update_from_rows(attr_mh,update_rows,opts_update)
 
       propagate_and_optionally_add_state_changes(attr_mh,changed_attrs_info,opts)
     end

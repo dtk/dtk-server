@@ -95,12 +95,12 @@ module DTK; class Attribute
         :cols => [:id,:group_id,:display_name,:node_node_id,:component_component_id],
         :filter => [:oneof,:id,attribute_rows.map{|a|a[:id]}]
       }
-      existing_attrs = Model.get_objs(attr_mh,sp_hash)
+      existing_attrs = Model.get_objs(attr_mh,sp_hash,opts)
       ndx_new_vals = attribute_rows.inject(Hash.new){|h,r|h.merge(r[:id] => r[:value_asserted])}
       LegalValue.raise_usage_errors?(existing_attrs,ndx_new_vals)
 
       SpecialProcessing::Update.handle_special_processing_attributes(existing_attrs,ndx_new_vals)
-      Attribute.update_and_propagate_attributes(attr_mh,attribute_rows)
+      Attribute.update_and_propagate_attributes(attr_mh,attribute_rows,opts)
       ret
     end
 

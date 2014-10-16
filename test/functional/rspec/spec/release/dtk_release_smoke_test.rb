@@ -12,6 +12,8 @@ require './lib/parameters_setting_spec'
 require './lib/component_modules_spec'
 require './lib/service_modules_spec'
 
+catalog_username = "dtk16"
+catalog_password = "password"
 service_name = 'dtk_release_smoke_test'
 assembly_name = 'bootstrap::node_with_params'
 os_templates = ['precise','centos6']
@@ -33,6 +35,10 @@ describe "DTK Server smoke test release" do
 
   before(:all) do
     puts "*****************************",""
+  end
+
+  context "Set catalog credentials" do
+    include_context "Set catalog credentials", catalog_username, catalog_password
   end
 
   context "Set default namespace" do

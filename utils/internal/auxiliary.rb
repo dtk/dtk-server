@@ -48,6 +48,40 @@ module DTK
         # TODO: change to use app server clock
       end
 
+      # default is to remove nils
+      # TODO: put so may have other things otehr than removing nils too
+      def HashHelper(hash,opts={})
+        remove_nils = opts[:remove_nils]||true
+        if remove_nils
+          hash.inject(hash.class.new()){|h,(k,v)|v.nil? ? h : h.merge(k => v)}
+        else
+          hash
+        end
+      end  
+
+      def random_generate(opts={})
+        length = opts[:length] || RandomGenerate::DefaultLength
+        types = opts[:types] || (opts[:type] && [opts[:type]]) || [RandomGenerate::DefaultType]
+        charset = types.inject(String.new) do |str,type|
+          unless cs = RandomGenerate::CharSet[type]
+            raise Error.new("Type (#{type.inspect}) not treated")
+          end
+          str + cs
+        end
+        num_chars_minus_1 = charset.size-1
+        length.times.map{charset[Random.rand(num_chars_minus_1)]}.join('')
+      end
+
+      module RandomGenerate
+        DefaultLength = 8
+        DefaultType = /[a-z]/
+        CharSet = {
+          /[a-z]/ => (97..97+25).map{|n|n.chr}.join(''),
+          /[A-Z]/ => (65..65+25).map{|n|n.chr}.join(''),
+          /[0-9]/ => '01234567989'
+        }
+      end
+
       def convert_keys_to_symbols(hash)
         hash.keys.inject(Hash.new){|h,k|h.merge(k.to_sym => hash[k])}
       end

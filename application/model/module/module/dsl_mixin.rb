@@ -145,6 +145,7 @@ module DTK; class BaseModule
       module_and_branch_info = self.class.create_module_and_branch_obj?(project,repo.id_handle(),local,opts[:ancestor_branch_idh])
       module_branch_idh = module_and_branch_info[:module_branch_idh]
       external_dependencies = matching_branches = nil
+      # opts[:process_external_refs] means to see if external refs and then check againts existing loaded components
       if opts[:process_external_refs]
         module_branch = module_branch_idh.create_object()
         if external_deps = process_external_refs(module_branch,config_agent_type,project,impl_obj)
@@ -153,6 +154,10 @@ module DTK; class BaseModule
           end
           matching_branches = external_deps.matching_module_branches?()
         end
+      # opts[:set_external_refs] means to set external refs if they exist from parsing module files   
+      elsif opts[:set_external_refs]
+        module_branch = module_branch_idh.create_object()
+        set_external_ref?(module_branch,config_agent_type,impl_obj)
       end
 
       dsl_created_info = DSLCreatedInfo.create_empty()

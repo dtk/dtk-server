@@ -66,7 +66,11 @@ module DTK; module ModuleMixins
         module_obj ||= module_and_branch_info[:module_idh].create_object()
         module_branch = module_and_branch_info[:module_branch_idh].create_object()
 
-        parsed = module_obj.install__process_dsl(repo_with_branch,module_branch,local,:do_not_raise => true)
+        opts_process_dsl = {:do_not_raise => true}
+        if module_type == :component_module
+          opts_process_dsl.merge!(:set_external_refs => true)
+        end
+        parsed = module_obj.install__process_dsl(repo_with_branch,module_branch,local,opts_process_dsl)
         module_branch.set_sha(commit_sha)
       end
       opts_info = {:version=>version, :module_namespace=>local_namespace}
@@ -195,7 +199,7 @@ module DTK; module ModuleMixins
       repo.push_to_remote(local,remote)
 
       self.class.create_repo_remote_object(repo,remote,remote_repo_name)
-      repoman_response
+      repoman_response.merge(:remote_repo_name => remote[:module_name])
     end
 
    private

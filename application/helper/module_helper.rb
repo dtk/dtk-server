@@ -23,7 +23,7 @@ module Ramaze::Helper
       namespace = module_obj.get_field?(:namespace)
 
       version = ret_version()
-      remote_namespace = ret_request_params(:remote_namespace)||get_existing_default_namespace?(module_obj,version)
+      remote_namespace = ret_request_params(:remote_namespace)||get_existing_default_namespace?(module_obj,version)||ret_request_params(:local_namespace)
       remote_params = remote_params_dtkn(module_obj.module_type(),remote_namespace,remote_module_name,version)
 
       access_rights = ret_access_rights()

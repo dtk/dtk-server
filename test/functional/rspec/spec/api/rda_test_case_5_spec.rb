@@ -10,7 +10,7 @@ user_info = {
 	:email=>'test@r8network.com', 
 	:first_name=>'test_name', 
 	:last_name=>'test_last_name', 
-	:user_group=>'private_test', 
+	:user_group=>'test', 
 	:namespace=>'test' 
 }
 

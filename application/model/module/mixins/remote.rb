@@ -199,7 +199,7 @@ module DTK; module ModuleMixins
       repo.push_to_remote(local,remote)
 
       self.class.create_repo_remote_object(repo,remote,remote_repo_name)
-      repoman_response
+      repoman_response.merge(:remote_repo_name => remote[:module_name])
     end
 
    private

@@ -508,3 +508,10 @@ shared_context "Set default namespace" do |dtk_common, namespace|
     default_namespace_set.should eq(true)
   end
 end
+
+shared_context "Set catalog credentials" do |dtk_common, catalog_username, catalog_password|
+  it "sets catalog credentials for user #{catalog_username}" do
+    catalog_credentials_set = dtk_common.set_catalog_credentials(catalog_username, catalog_password)
+    catalog_credentials_set.should eq(true)
+  end
+end

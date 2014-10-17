@@ -448,6 +448,7 @@ module DTK
 
     def list(opts=opts.new)
       diff               = opts[:diff]
+      namespace          = opts[:namespace]
       project_idh        = opts.required(:project_idh)
       remote_repo_base   = opts[:remote_repo_base]
       include_remotes    = opts.array(:detail_to_include).include?(:remotes)
@@ -456,6 +457,9 @@ module DTK
 
       cols = [:id, :display_name, :namespace_id, :dsl_parsed, :namespace, include_any_detail && :module_branches_with_repos].compact
       unsorted_ret = get_all(project_idh,cols)
+
+      # if namespace provided with list command filter before aggregating details
+      unsorted_ret = filter_by_namespace(unsorted_ret,namespace) if namespace
 
       filter_list!(unsorted_ret) if respond_to?(:filter_list!)
       unsorted_ret.each do |r|
@@ -485,6 +489,19 @@ module DTK
       }
       mh = project_idh.createMH(model_type())
       get_objs(mh,sp_hash)
+    end
+
+    def filter_by_namespace(object_list,namespace)
+      return object_list if namespace.nil? || namespace.strip.empty?
+
+      object_list.select do |el|
+        if el[:namespace]
+          # these are local modules and have namespace object
+          namespace.eql?(el[:namespace][:display_name])
+        else
+          el[:display_name].match(/#{namespace}\//)
+        end
+      end
     end
 
     def add_user_direct_access(model_handle,rsa_pub_key,username=nil)

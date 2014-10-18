@@ -7,7 +7,9 @@ class Users < Main
   end
 
   def assign_user_group_for_user(usergroup)
-    @session.select(usergroup, :from => "repo_client_dtk_open_struct_user_group_ids")
+    @session.find("//div/button[@class = \"multiselect dropdown-toggle btn btn-default\"]").click
+    @session.check(usergroup)
+    @session.find("//div/button[@class = \"multiselect dropdown-toggle btn btn-default\"]").click
   end
 
   def save_edit_changes

@@ -17,11 +17,17 @@ class Modules < Main
   end
 
   def set_module_owner_group(usergroup)
-    @session.select(usergroup, :from => "repo_client_dtk_open_struct_user_group_ids")
+    @session.find("//div/button[@class = \"multiselect dropdown-toggle btn btn-default\"]").click
+    @session.check(usergroup)
+    @session.find("//div/button[@class = \"multiselect dropdown-toggle btn btn-default\"]").click
+    #@session.select(usergroup, :from => "repo_client_dtk_open_struct_user_group_ids")
   end
 
   def unset_module_owner_group(usergroup)
-    @session.unselect(usergroup, from: "repo_client_dtk_open_struct_user_group_ids")
+    @session.find("//div/button[@class = \"multiselect dropdown-toggle btn btn-default\"]").click
+    @session.check(usergroup)
+    @session.find("//div/button[@class = \"multiselect dropdown-toggle btn btn-default\"]").click
+    #@session.unselect(usergroup, from: "repo_client_dtk_open_struct_user_group_ids")
   end
 
   def set_module_permissions(permissions={})

@@ -29,7 +29,7 @@ class Modules < Main
 
   def unset_module_owner_group(usergroup)
     @session.find("//div/button[@class = \"multiselect dropdown-toggle btn btn-default\"]").click
-    @session.check(usergroup)
+    @session.uncheck(usergroup)
     #overlapping elements issue in headless mode
     if Capybara.default_driver == :webkit
       @session.find("//div/button[@class = \"multiselect dropdown-toggle btn btn-default\"]").trigger("click")

@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-# Test Case 11: NEG - Ill-formed yaml content (component instead of components) in dtk.model.yaml file and push-clone-changes to server
+# Test Case 11: Ill-formed yaml content (component instead of components) in dtk.model.yaml file and push-clone-changes to server
 
 require 'rubygems'
 require 'rest_client'
@@ -18,10 +18,10 @@ fail_message = "missing components section"
 expected_error_message = "error"
 dtk_common = DtkCommon.new('', '')
 
-describe "(Component Module DSL) Test Case 11: NEG - Ill-formed yaml content (component instead of components) in dtk.model.yaml file and push-clone-changes to server" do
+describe "(Component Module DSL) Test Case 11: Ill-formed yaml content (component instead of components) in dtk.model.yaml file and push-clone-changes to server" do
 
   before(:all) do
-    puts "************************************************************************************************************************************************************",""
+    puts "******************************************************************************************************************************************************",""
   end
 
   context "Import component module function" do

@@ -40,8 +40,13 @@ describe "(Component Module DSL) Test Case 11: NEG - Ill-formed yaml content (co
     include_context "Replace dtk.model.yaml file with new one", component_module_name, file_for_change_location, file_for_change, component_module_filesystem_location, "sets incorrect value - component instead of components in dtk.model.yaml"
   end
 
+  #Removing this part because currently it is possible to push changes for module that does not have components section
+  #context "Push clone changes of component module from local copy to server" do
+  #  include_context "NEG - Push clone changes to server", local_component_module_name, fail_message, expected_error_message
+  #end
+
   context "Push clone changes of component module from local copy to server" do
-    include_context "NEG - Push clone changes to server", local_component_module_name, fail_message, expected_error_message
+    include_context "Push clone changes to server", local_component_module_name, file_for_change
   end
 
   context "Delete component module" do

@@ -37,9 +37,8 @@ components:
       - gitolite
       - dtk
       - common_user
-      includes: 
+      includes:
       - vcsrepo
       - rvm
       - apt
       - nginx
-

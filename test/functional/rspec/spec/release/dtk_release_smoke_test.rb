@@ -38,7 +38,7 @@ describe "DTK Server smoke test release" do
   end
 
   context "Set catalog credentials" do
-    include_context "Set catalog credentials", catalog_username, catalog_password
+    include_context "Set catalog credentials", dtk_common, catalog_username, catalog_password
   end
 
   context "Set default namespace" do

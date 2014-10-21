@@ -1,0 +1,16 @@
+meta_table_ttl=7200000            # time to live (ms)
+meta_constants_ttl=7200000        # time to live (ms)
+meta_pretty_print_ttl=7200000     # time to live (ms)
+task_check_frequency=60           # check frequency for task status threads (seconds)
+tail_log_frequency=2              # assembly - frequency between requests (seconds)
+debug_task_frequency=5            # assembly - frequency between requests (seconds)
+auto_commit_changes=false         # autocommit for modules
+# if relative path is used we will use HOME + relative path, apsoluth path will override this
+module_location=component_modules
+service_location=service_modules
+# server connection details
+server_port=<%= @server_port %>
+secure_connection_server_port=<%= @secure_connection_server_port %>
+secure_connection=<%= @secure_connection %>
+server_host=<%= @server_host %>
+

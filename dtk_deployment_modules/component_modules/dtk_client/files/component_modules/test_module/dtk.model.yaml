@@ -1,0 +1,8 @@
+---
+  module: test_module
+  dsl_version: 0.9.1
+  module_type: puppet_module
+  components: 
+    test: 
+      external_ref: 
+        puppet_class: test_module

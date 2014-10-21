@@ -1,0 +1,36 @@
+---
+  name: dtk-server-nginx
+  node_bindings: 
+    tenant: precise-small
+  assembly: 
+    nodes: 
+      tenant: 
+        components: 
+          - dtk_postgresql::server
+          - dtk
+          - dtk_thin::instance: 
+              name: dtk
+              app_dir: /home/dtk/server/application
+          - dtk_server::tenant: 
+              gitolite_user: git2
+              name: dtk
+              server_public_dns: foo1.r8network.com
+          - dtk_nginx::base
+          - dtk_nginx::service
+          - dtk_java
+          - dtk_postgresql::db: 
+              name: dtk
+          - gitolite: 
+              name: git2
+          - dtk_nginx::vhost_for_tenant: 
+              name: dtk
+              tenant_dns_address: foo1.r8network.com
+          - dtk_thin::base
+          - gitolite::admin_client: 
+              gitolite_user: git2
+              name: dtk
+          - dtk_activemq
+          - stdlib
+          - nginx::include
+          - dtk_server::base
+

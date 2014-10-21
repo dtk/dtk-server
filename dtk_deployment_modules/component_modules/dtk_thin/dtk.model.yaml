@@ -1,0 +1,23 @@
+---
+  module: dtk_thin
+  dsl_version: 0.9.1
+  module_type: puppet_module
+  components: 
+    base: 
+      external_ref: 
+        puppet_class: dtk_thin::base
+    instance: 
+      external_ref: 
+        puppet_class: dtk_thin::instance
+      attributes: 
+        daemon_user: 
+          description: "Daemon User"
+          type: string
+          required: true
+        app_dir: 
+          type: string
+          required: true
+      dependencies: 
+        - dtk_thin::base
+        - dtk_server::tenant
+

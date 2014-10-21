@@ -1,0 +1,3 @@
+class vcsrepo::include {
+	
+}

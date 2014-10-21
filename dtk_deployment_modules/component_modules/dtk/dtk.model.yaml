@@ -1,0 +1,9 @@
+---
+module: dtk
+dsl_version: 0.9.1
+module_type: puppet_module
+components: 
+    dtk: 
+      description: "Core utilities for dtk"
+      external_ref: 
+        puppet_class: dtk

@@ -1,8 +1,0 @@
----
-module: vcsrepo
-dsl_version: 0.9.1
-module_type: puppet_module
-components:
-  include:
-    external_ref:
-      puppet_class: vcsrepo::include

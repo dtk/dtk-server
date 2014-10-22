@@ -40,7 +40,8 @@ module DTK; class Attribute::Pattern
           raise DSLNotSupported::LinkBetweenSameComponentTypes.new(source_component_instance)
         end
         if source_component_instance.has_title?()
-          raise DSLNotSupported::LinkFromComponentWithTitle.create_from_component(source_component_instance)
+          Log.error("Took out DSLNotSupported::LinkFromComponentWithTitle")
+#          raise DSLNotSupported::LinkFromComponentWithTitle.create_from_component(source_component_instance)
         end
 
         # TODO: need to do more checking and processing to include:

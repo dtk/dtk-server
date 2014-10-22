@@ -74,6 +74,7 @@ module DTK
     def rest__list()
       diff             = ret_request_params(:diff)
       project          = get_default_project()
+      namespace        = ret_request_params(:module_namespace)
       datatype         = :module
       remote_repo_base = ret_remote_repo_base()
 
@@ -82,9 +83,11 @@ module DTK
         opts.merge!(:detail_to_include => detail.map{|r|r.to_sym})
       end
 
-      opts.merge!(:remote_repo_base => remote_repo_base, :diff => diff)
+      opts.merge!(:remote_repo_base => remote_repo_base, :diff => diff, :namespace => namespace)
       datatype = :module_diff if diff
-      rest_ok_response filter_by_namespace(ComponentModule.list(opts)), :datatype => datatype
+
+      # rest_ok_response filter_by_namespace(ComponentModule.list(opts)), :datatype => datatype
+      rest_ok_response ComponentModule.list(opts), :datatype => datatype
     end
 
     def rest__get_workspace_branch_info()

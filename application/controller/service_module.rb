@@ -96,6 +96,7 @@ module DTK
       diff             = ret_request_params(:diff)
       project          = get_default_project()
       datatype         = :module
+      namespace        = ret_request_params(:module_namespace)
       remote_repo_base = ret_remote_repo_base()
 
       opts = Opts.new(:project_idh => project.id_handle())
@@ -103,10 +104,11 @@ module DTK
         opts.merge!(:detail_to_include => detail.map{|r|r.to_sym})
       end
 
-      opts.merge!(:remote_repo_base => remote_repo_base, :diff => diff)
+      opts.merge!(:remote_repo_base => remote_repo_base, :diff => diff, :namespace => namespace)
       datatype = :module_diff if diff
 
-      rest_ok_response filter_by_namespace(ServiceModule.list(opts)), :datatype => datatype
+      # rest_ok_response filter_by_namespace(ServiceModule.list(opts)), :datatype => datatype
+      rest_ok_response ServiceModule.list(opts), :datatype => datatype
     end
 
     def rest__versions()

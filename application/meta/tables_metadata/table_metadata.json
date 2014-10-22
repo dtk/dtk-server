@@ -64,6 +64,18 @@
       "description": "description"
     }
   },
+  "assembly_node_template": {
+    "order": [
+      "name",
+      "os",
+      "type"
+    ],
+    "mapping": {
+      "name": "display_name",
+      "os": "os_type",
+      "type": "dtk_type"
+    }
+  },
   "component": {
     "order": [
       "id",

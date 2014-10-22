@@ -7,7 +7,14 @@ class Users < Main
   end
 
   def assign_user_group_for_user(usergroup)
-    @session.select(usergroup, :from => "repo_client_dtk_open_struct_user_group_ids")
+    @session.find("//div/button[@class = \"multiselect dropdown-toggle btn btn-default\"]").click
+    @session.check(usergroup)
+    #overlapping elements issue in headless mode
+    if Capybara.default_driver == :webkit
+      @session.find("//div/button[@class = \"multiselect dropdown-toggle btn btn-default\"]").trigger("click")
+    else
+      @session.find("//div/button[@class = \"multiselect dropdown-toggle btn btn-default\"]").click
+    end
   end
 
   def save_edit_changes

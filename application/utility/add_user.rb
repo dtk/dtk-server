@@ -1,8 +1,6 @@
 #!/usr/bin/env ruby
 # adds user, his or her private 
 require File.expand_path('common', File.dirname(__FILE__))
-username = ARGV[0]
-ec2_region = ARGV[1]
 options = Hash.new
 OptionParser.new do|opts|
 #   opts.banner = "Usage: add_user.rb USERNAME [EC2-REGION] [--create-private [MODULE_SEED_LIST]]"
@@ -27,6 +25,9 @@ OptionParser.new do|opts|
     end
   end
 end.parse!
+username = ARGV[0]
+ec2_region = ARGV[1]
+
 # default is that catalog_username is set to username
 options[:catalog_username] ||= username
 

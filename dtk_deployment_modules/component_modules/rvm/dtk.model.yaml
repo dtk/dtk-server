@@ -1,0 +1,154 @@
+---
+module: rvm
+dsl_version: 0.9.1
+module_type: puppet_module
+components:
+  include:
+    external_ref:
+      puppet_class: rvm::include
+  system_user:
+    external_ref:
+      puppet_definition: rvm::system_user
+    attributes:
+      name:
+        type: string
+        required: true
+  dependencies:
+    external_ref:
+      puppet_class: rvm::dependencies
+  system:
+    external_ref:
+      puppet_class: rvm::system
+    attributes:
+      version:
+        type: string
+  passenger::apache::ubuntu::post:
+    external_ref:
+      puppet_class: rvm::passenger::apache::ubuntu::post
+    attributes:
+      ruby_version:
+        type: string
+        required: true
+      version:
+        type: string
+        required: true
+      rvm_prefix:
+        type: string
+        default: /usr/local/
+      mininstances:
+        type: string
+        default: '1'
+      maxpoolsize:
+        type: string
+        default: '6'
+      poolidletime:
+        type: string
+        default: '300'
+      maxinstancesperapp:
+        type: string
+        default: '0'
+      spawnmethod:
+        type: string
+        default: smart-lv2
+      gempath:
+        type: string
+        required: true
+      binpath:
+        type: string
+        required: true
+  passenger::apache::ubuntu::pre:
+    external_ref:
+      puppet_class: rvm::passenger::apache::ubuntu::pre
+  passenger::apache::centos::post:
+    external_ref:
+      puppet_class: rvm::passenger::apache::centos::post
+    attributes:
+      ruby_version:
+        type: string
+        required: true
+      version:
+        type: string
+        required: true
+      rvm_prefix:
+        type: string
+        default: /usr/local/
+      mininstances:
+        type: string
+        default: '1'
+      maxpoolsize:
+        type: string
+        default: '6'
+      poolidletime:
+        type: string
+        default: '300'
+      maxinstancesperapp:
+        type: string
+        default: '0'
+      spawnmethod:
+        type: string
+        default: smart-lv2
+      gempath:
+        type: string
+        required: true
+      binpath:
+        type: string
+        required: true
+  passenger::apache::centos::pre:
+    external_ref:
+      puppet_class: rvm::passenger::apache::centos::pre
+  passenger::apache:
+    external_ref:
+      puppet_class: rvm::passenger::apache
+    attributes:
+      ruby_version:
+        type: string
+        required: true
+      version:
+        type: string
+        required: true
+      rvm_prefix:
+        type: string
+        default: /usr/local/
+      mininstances:
+        type: string
+        default: '1'
+      maxpoolsize:
+        type: string
+        default: '6'
+      poolidletime:
+        type: string
+        default: '300'
+      maxinstancesperapp:
+        type: string
+        default: '0'
+      spawnmethod:
+        type: string
+        default: smart-lv2
+  passenger::gem:
+    external_ref:
+      puppet_class: rvm::passenger::gem
+    attributes:
+      ruby_version:
+        type: string
+        required: true
+      version:
+        type: string
+        required: true
+  rvm:
+    external_ref:
+      puppet_class: rvm
+    attributes:
+      version:
+        type: string
+      install_rvm:
+        type: boolean
+        default: true
+  dependencies::oraclelinux:
+    external_ref:
+      puppet_class: rvm::dependencies::oraclelinux
+  dependencies::ubuntu:
+    external_ref:
+      puppet_class: rvm::dependencies::ubuntu
+  dependencies::centos:
+    external_ref:
+      puppet_class: rvm::dependencies::centos

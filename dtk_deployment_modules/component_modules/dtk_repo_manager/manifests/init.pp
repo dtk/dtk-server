@@ -138,16 +138,23 @@ class dtk_repo_manager(
   }
 
   exec { "rake_db_seed":
-    command => "/usr/local/rvm/wrappers/default/rake db:seed ci:seed",
+    command => "/usr/local/rvm/wrappers/default/rake db:seed",
     user    => $gitolite_user,
     cwd     => $repo_target_dir,
     require => Exec["rake_db_migrate"],
   }
 
+  exec { "rake_ci_create_user":
+    command => "/usr/local/rvm/wrappers/default/rake ci:create_user['dtk16','fakedtk@dtk.io','password','test','test']",
+    user    => $gitolite_user,
+    cwd     => $repo_target_dir,
+    require => Exec["rake_db_seed"],
+  }
+
   file { "/etc/init.d/sidekiq":
     content => template("dtk_repo_manager/sidekiq.init.erb"),
     mode    => "o+x",
-    require => Exec["rake_db_seed"],
+    require => Exec["rake_ci_create_user"],
   }
 
   service { "sidekiq":

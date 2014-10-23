@@ -8,25 +8,7 @@ module DTK; class BaseModule
       end
 
       components = get_associated_component_instances()
-      unless components.empty?
-        ndx_assemblies = Hash.new
-        asssembly_ids =  components.map{|r|r[:assembly_id]}.compact
-        unless asssembly_ids.empty?
-          sp_hash = {
-            :cols => [:id,:group_id,:display_name],
-            :filter => [:oneof,:id,asssembly_ids]
-          }
-          ndx_assemblies = Assembly::Instance.get_objs(model_handle(:assembly_instance),sp_hash).inject(Hash.new){|h,r|h.merge(r[:id] => r)}
-        end
-        component_names = components.map do |r|
-          cmp_name = r.display_name_print_form(:node_prefix=>true,:namespace_prefix=>true)
-          if assembly = ndx_assemblies[r[:assembly_id]]
-            cmp_name = "#{assembly.display_name_print_form()}/#{cmp_name}"
-          end
-          cmp_name
-        end
-        raise ErrorUsage.new("Cannot delete the component module because the component instance(s) (#{component_names.join(',')}) reference it")
-      end
+      raise_error_component_refs(components) unless components.empty?
 
       impls = get_implementations()
       delete_instances(impls.map{|impl|impl.id_handle()})
@@ -36,7 +18,7 @@ module DTK; class BaseModule
       delete_instance(id_handle())
       {:module_name => module_name()}
     end
-
+    
     def delete_version?(version)
       delete_version(version,:no_error_if_does_not_exist=>true)
     end
@@ -59,6 +41,29 @@ module DTK; class BaseModule
 
 
    private
-
+    def raise_error_component_refs(components)
+      ndx_assemblies = Hash.new
+      asssembly_ids =  components.map{|r|r[:assembly_id]}.compact
+      unless asssembly_ids.empty?
+        sp_hash = {
+          :cols => [:id,:group_id,:display_name],
+          :filter => [:oneof,:id,asssembly_ids]
+        }
+        ndx_assemblies = Assembly::Instance.get_objs(model_handle(:assembly_instance),sp_hash).inject(Hash.new){|h,r|h.merge(r[:id] => r)}
+      end
+      refs = components.map do |r|
+        cmp_ref = r.display_name_print_form(:node_prefix=>true,:namespace_prefix=>true)
+        ref = 
+          if cmp_ref =~ /(^[^\/]+)\/([^\/]+$)/
+            "Reference to '#{$2}' on node '#{$1}'"
+          else
+            "Reference to '#{cmp_ref}'"
+          end
+        if assembly = ndx_assemblies[r[:assembly_id]]
+          ref << " in service instance '#{assembly.display_name_print_form()}'"
+        end
+        ref
+      end
+      raise ErrorUsage.new("Cannot delete the component module because the following:\n  #{refs.join("\n  ")}")    end
   end              
 end; end

@@ -18,7 +18,7 @@ assembly_name = 'bootstrap::node_with_params'
 os_attribute = 'os_identifier'
 memory_size_attribute = 'memory_size'
 OS_Memory = Struct.new(:os, :memory)
-os_memory_array = [OS_Memory.new("precise","t1.micro"),OS_Memory.new("centos6.4","t1.micro")]
+os_memory_array = [OS_Memory.new("precise","t1.micro"),OS_Memory.new("rhel6","t1.micro")]
 
 dtk_common = DtkCommon.new(service_name, assembly_name)
 

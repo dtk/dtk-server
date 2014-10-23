@@ -14,7 +14,7 @@ require './lib/component_modules_spec'
 
 service_name = 'smoke_test_instance'
 assembly_name = 'bootstrap::node_with_params'
-os_templates = ['precise','centos6']
+os_templates = ['precise','rhel6']
 os_attribute = 'os_identifier'
 memory_size = 't1.micro'
 memory_size_attribute = 'memory_size'

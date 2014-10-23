@@ -183,7 +183,7 @@ module DTK
     end
 
     def get_components_info(params_hash, client_rsa_pub_key = nil)
-      route = collection_route_from_type({:type => 'service'}) + '/component_info'
+      route = collection_route_from_type({:type => params_hash[:type]}) + '/component_info'
       get_rest_request_data(route, user_params_delegated_client(client_rsa_pub_key, params_hash),:raise_error => true)
     end
 

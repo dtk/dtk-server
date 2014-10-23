@@ -107,8 +107,8 @@ module Ramaze::Helper
       dependency_warnings = []
 
       # check for missing module dependencies
-      if module_type == :service_module and !do_not_raise
-        missing_modules, required_modules, dependency_warnings = ServiceModule.get_required_and_missing_modules(project, remote_params, dtk_client_pub_key)
+      if !do_not_raise
+        missing_modules, required_modules, dependency_warnings = module_class(module_type).get_required_and_missing_modules(project, remote_params, dtk_client_pub_key)
         # return missing modules if any
         return { :missing_module_components => missing_modules, :dependency_warnings => dependency_warnings, :required_modules => required_modules } unless (missing_modules.empty? && required_modules.empty?)
       end

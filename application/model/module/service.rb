@@ -2,8 +2,10 @@ module DTK
   class ServiceModule < Model
     r8_nested_require('service','dsl')
     r8_nested_require('service','service_add_on')
+    r8_nested_require('module','auto_import')
 
     extend ModuleClassMixin
+    extend AutoImport
     include ModuleMixin
     extend DSLClassMixin
     include DSLMixin
@@ -38,17 +40,8 @@ module DTK
       version = ModuleBranch.version_from_version_field(version_field)
       "#{assembly_ref}--#{version}"
     end
+
     private :assembly_ref__add_version
-
-    def self.get_required_and_missing_modules(project, remote_params, client_rsa_pub_key=nil)
-      remote = remote_params.create_remote(project)
-      response = Repo::Remote.new(remote).get_remote_module_components(client_rsa_pub_key)
-      opts = Opts.new(:project_idh => project.id_handle())
-
-      # this method will return array with missing and required modules
-      module_info_array = ComponentModule.cross_reference_modules(opts, response['component_info'], remote.namespace)
-      module_info_array.push(response['dependency_warnings'])
-    end
 
     def list_component_modules(opts=Opts.new)
       get_referenced_component_modules(opts).sort{|a,b|a[:display_name] <=> b[:display_name]}

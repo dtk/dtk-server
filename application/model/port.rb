@@ -274,7 +274,14 @@ module DTK
       # TODO: clean up direction to make it cleaner how you set it
       dir = opts[:direction]||direction_from_local_remote(link_def[:local_or_remote],opts)
       cmp_ref = opts[:component_ref]
-      title = cmp_ref && ComponentTitle.title?(cmp_ref)
+      # TODO: cleanup logic aroudn when cmp_ref is passed vs when it is not
+      title = 
+        if cmp_ref
+          ComponentTitle.title?(cmp_ref)
+        elsif component
+          ComponentTitle.title?(component)
+        end
+
       display_name = ref = ret_encoded_port_name(type,component_type,link_def,dir,title)
       location_asserted = ret_location_asserted(component_type,link_def[:link_type])
       row = {

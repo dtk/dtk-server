@@ -111,6 +111,13 @@ module DTK
       rest_ok_response
     end
 
+    def rest__edit_target()
+      target_instance = create_obj(:target_id, ::DTK::Target::Instance)
+      iaas_properties = ret_request_params(:iaas_properties)
+      Target::Instance.edit_target(target_instance, iaas_properties)
+      rest_ok_response
+    end
+
     def rest__delete()
       target_instance = create_obj(:target_id, ::DTK::Target::Instance) 
       Target::Instance.delete(target_instance)

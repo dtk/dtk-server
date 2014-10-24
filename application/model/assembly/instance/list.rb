@@ -88,6 +88,7 @@ module DTK; class  Assembly
         when :components
           list_components(opts)
         when :nodes
+          opts.merge!(:cols => Node.common_columns()+[:target])
           list_nodes(opts)
         when :modules
           list_component_modules(opts)
@@ -130,12 +131,16 @@ module DTK; class  Assembly
       end
 
       def list_nodes(opts=Opts.new)
-        nodes = get_nodes__expand_node_groups()
+        nodes = get_nodes__expand_node_groups(opts)
         nodes.each do |node|
           set_node_display_name!(node)
           set_node_admin_op_status!(node)
           if external_ref = node[:external_ref]
             external_ref[:dns_name] ||= external_ref[:routable_host_address] #TODO: should be cleaner place to put this
+          end
+          if target = node[:target]
+            target[:iaas_properties][:security_group] ||=
+              target[:iaas_properties][:security_group_set].join(',') if target[:iaas_properties][:security_group_set]
           end
           node.sanitize!()
         end

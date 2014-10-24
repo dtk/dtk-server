@@ -594,6 +594,14 @@ module DTK
          }
         ]
 
+      virtual_column :target, :type => :json, :hidden => true,
+      :remote_dependencies =>
+        [{
+          :model_name => :target,
+          :join_type => :inner,
+          :join_cond=>{:id => q(:node,:datacenter_datacenter_id)},
+          :cols=>[:id,:display_name,:iaas_properties]
+        }]
 
       monitoring_items_cols_def = [:id,:display_name,:service_name,:condition_name,:condition_description,:enabled,:params,:attributes_to_monitor]
       virtual_column :monitoring_items__node, :type => :json, :hidden => true,

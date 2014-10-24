@@ -105,6 +105,22 @@ module DTK
         end
         delete_instance(target.id_handle())
       end
+
+      def self.edit_target(target,iaas_properties)
+        target.update_obj!(:iaas_properties)
+        current_properties = target[:iaas_properties]
+
+        # convert string keys to symbols ({'keypair' => 'default'} to {:keypair => 'default'})
+        iaas_properties = iaas_properties.inject({}){|memo,(k,v)| memo[k.to_sym] = v; memo}
+
+        # avoid having security_group and security_group_set in one iaas_properties
+        if iaas_properties[:security_group_set] || iaas_properties[:security_group]
+          current_properties.delete(iaas_properties[:security_group] ? :security_group_set : :security_group)
+        end
+
+        hash_assignments = {:iaas_properties => current_properties.merge(iaas_properties)}
+        Model.update_from_hash_assignments(target.id_handle(),hash_assignments)
+      end
    
       def self.list(target_mh,opts={})
         filter = [:neq,:type,'template']
@@ -112,13 +128,17 @@ module DTK
           filter = [:and,filter,opts[:filter]]
         end
         sp_hash = {
-          :cols => [:id, :display_name, :iaas_type, :type, :parent_id, :provider, :is_default_target],
+          :cols => [:id, :display_name, :iaas_type, :type, :parent_id, :iaas_properties, :provider, :is_default_target],
           :filter => filter
         }
         unsorted_rows = get_these_objs(target_mh, sp_hash)
         unsorted_rows.each do |t|
           if t.is_builtin_target?()
             set_builtin_provider_display_fields!(t)
+          end
+          if t[:iaas_properties]
+            t[:iaas_properties][:security_group] ||=
+              t[:iaas_properties][:security_group_set].join(',') if t[:iaas_properties][:security_group_set]
           end
           # if t.is_default?()
           #   t[:display_name] << DefaultTargetMark

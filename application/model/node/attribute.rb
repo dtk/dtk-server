@@ -32,6 +32,18 @@ module DTK
         end
       end
 
+     def clear_host_addresses()
+       if attr = @node.get_node_attribute?('host_addresses_ipv4',:cols=>[:id,:group_id,:value_derived])
+         if host_addresses = attr[:value_derived]
+           if host_addresses.find{|a|!a.nil?}
+             cleared_vals = host_addresses.map{|a|nil}
+             attr.merge!(:value_derived => cleared_vals)
+             Attribute.update_and_propagate_attributes(attr.model_handle(),[attr])
+           end
+         end
+       end
+     end
+
       def self.target_ref_attributes_filter()
         TargetRefAttributeFilter
       end

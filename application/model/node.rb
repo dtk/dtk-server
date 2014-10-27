@@ -114,6 +114,12 @@ module DTK
       "#{first_word} (#{name()}) with id (#{id.to_s})"
     end
 
+    ########
+    def self.stop_instances(nodes)
+      CommandAndControl.stop_instances(nodes)
+      nodes.each{|node|node.attribute.clear_host_addresses()}
+    end
+
     #######################
     # standard get methods
     def get_target(additional_columns = [])
@@ -609,13 +615,13 @@ module DTK
     end
 
     def associate_persistent_dns?()
-        CommandAndControl.associate_persistent_dns?(self)
+      CommandAndControl.associate_persistent_dns?(self)
     end
 
     # Method will remove DNS information for node, this happens when we do not persistent
     # DNS and by stopping node we do not need to keep DNS information
     def strip_dns_info!()
-      self.update(:external_ref => self[:external_ref].merge(:dns_name => nil, :ec2_public_address => nil, :private_dns_name => nil ))
+      update(:external_ref => self[:external_ref].merge(:dns_name => nil, :ec2_public_address => nil, :private_dns_name => nil ))
     end
 
     def get_node_service_checks()

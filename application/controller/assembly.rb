@@ -643,7 +643,7 @@ module DTK
         return rest_ok_response(:errors => [error_msg])
       end
       
-      CommandAndControl.stop_instances(nodes)
+      Node.stop_instances(nodes)
 
       rest_ok_response :status => :ok
     end

@@ -144,7 +144,12 @@ module DTK
             if opts[:nested]
               PrintValueNil
             else
-              ((@mark_unset_required and @aug_attr[:required]) ? PrintValueUnsetRequired : nil)
+              if @mark_unset_required and @aug_attr[:required]
+                # dont mark as required input ports since they wil be propagated
+                unless @aug_attr[:is_port] and @aug_attr[:port_type_asserted] == 'input'
+                  PrintValueUnsetRequired
+                end
+              end
             end
           return ret
         end

@@ -31,7 +31,7 @@ module DTK
 
       class BadNamespaceReference < self
         def initialize(params={})
-          err_msg = "Namespace (?name) rerenced in module_refs file does not exist"
+          err_msg = "Namespace (?name) referenced in module_refs file does not exist in local environment"
           err_params = Params.new(:name => params[:name])
           super(err_msg,err_params)
         end

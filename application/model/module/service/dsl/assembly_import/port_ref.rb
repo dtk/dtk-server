@@ -59,13 +59,20 @@ module DTK; class ServiceModule
 
       # ports are augmented with field :parsed_port_name
       def matching_id(aug_ports,opts={})
+        if port_or_error = matching_port(aug_ports,opts)
+          port_or_error.kind_of?(ParsingError) ? port_or_error : port_or_error[:id]
+        end
+      end
+
+      # ports are augmented with field :parsed_port_name
+      def matching_port(aug_ports,opts={})
         if opts[:is_output]
           if self[:title]
             err_class = DSLNotSupported::LinkFromComponentWithTitle
             return raise_or_ret_error(err_class,[self[:node],self[:component_type],self[:title]],opts)
           end
         end
-        match = aug_ports.find do |port|
+        ret = aug_ports.find do |port|
           p = port[:parsed_port_name]
           node = port[:node][:display_name]
           if self[:component_type] == p[:component_type] and self[:link_def_ref] == p[:link_def_ref] and node == self[:node] 
@@ -80,8 +87,8 @@ module DTK; class ServiceModule
             end
           end
         end
-        if match
-          match[:id]
+        if ret
+          ret
         elsif opts[:do_not_throw_error]
           opts_err = Opts.new(opts).slice(:file_path)
           return ParsingError::BadComponentLink.new(self[:link_def_ref],opts[:base_cmp_name],opts_err)

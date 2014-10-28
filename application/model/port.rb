@@ -79,7 +79,11 @@ module DTK
       ret
     end
 
-    # TODO: assumption that ref and display_name are the same
+    def self.ref_from_display_name(display_name)
+      display_name
+    end
+
+    # TODO: assumption that ref and display_name are the same; start to use ref_from_display_name
     def component_name()
       parse_port_display_name()[:component_type]
     end

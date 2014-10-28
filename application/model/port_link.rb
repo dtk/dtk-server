@@ -57,9 +57,15 @@ module DTK
       link_def_link.process(parent_idh,components,:port_link_idh => id_handle())
       self
     end
+    def self.port_link_ref(port_link_ref_info)
+      p = port_link_ref_info # for succinctness
+      "#{p[:assembly_template_ref]}--#{p[:in_node_ref]}-#{p[:in_port_ref]}--#{p[:out_node_ref]}-#{p[:out_port_ref]}"
+    end
 
     # TODO: possibly change to using refs w/o ids to make increemntal updates easier
     def self.ref_from_ids(input_id,output_id)
+
+pp ['***********************',caller[0..5],input_id,output_id]
       "port_link:#{input_id}-#{output_id}"
     end
     def self.matches_ref_id_form(mh,input_output_rows)

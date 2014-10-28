@@ -204,8 +204,6 @@ module DTK
       def create_assembly_template_aux()
         nodes = self[:nodes].inject(DBUpdateHash.new){|h,node|h.merge(create_node_content(node))}
         port_links = self[:port_links].inject(DBUpdateHash.new){|h,pl|h.merge(create_port_link_content(pl))}
-        # Need to explicitly prune because the port link refs used when creating from import uses ids
-        prune_duplicate_port_links!(port_links) 
         task_templates = self[:task_templates].inject(DBUpdateHash.new){|h,tt|h.merge(create_task_template_content(tt))}
         assembly_level_attributes = self[:assembly_level_attributes].inject(DBUpdateHash.new){|h,a|h.merge(create_assembly_level_attributes(a))}
 
@@ -223,8 +221,11 @@ module DTK
         assembly_hash = hash_subset(:display_name,:type,:ui,:module_branch_id,:component_type)
         assembly_hash.merge!(:task_template => task_templates) unless task_templates.empty?
         assembly_hash.merge!(:attribute => assembly_level_attributes) unless assembly_level_attributes.empty?
-        @template_output.merge!(:node => nodes,:port_link => port_links,:component => {assembly_ref => assembly_hash})
 
+
+#        @template_output.merge!(:node => nodes,:port_link => port_links,:component => {assembly_ref => assembly_hash})
+        assembly_hash.merge!(:port_link => port_links) unless port_links.empty?
+        @template_output.merge!(:node => nodes,:component => {assembly_ref => assembly_hash})
         module_refs_updated = @service_module_refs.update_if_needed(@assembly_component_modules)
         
         Transaction do 
@@ -275,45 +276,20 @@ module DTK
         out_port_ref = qualified_ref(out_port)
 
         assembly_ref = self[:ref]
-        port_link_ref = "#{assembly_ref}--#{in_node_ref}-#{in_port_ref}--#{out_node_ref}-#{out_port_ref}"
+        port_link_ref_info =  {
+          :assembly_template_ref => assembly_ref,
+          :in_node_ref => in_node_ref,
+          :in_port_ref => in_port_ref,
+          :out_node_ref => out_node_ref,
+          :out_port_ref => out_port_ref
+        }
+        port_link_ref = PortLink.port_link_ref(port_link_ref_info)
         port_link_hash = {
           "*input_id" => "/node/#{in_node_ref}/port/#{in_port_ref}",
           "*output_id" => "/node/#{out_node_ref}/port/#{out_port_ref}",
           "*assembly_id" => "/component/#{assembly_ref}"
         }
         {port_link_ref => port_link_hash}
-      end
-
-      def prune_duplicate_port_links!(port_links)
-        return port_links if port_links.empty?()
-        relative_port_refs = port_links.values.map{|pl|[pl["*input_id"],pl["*output_id"]]}.flatten(1)
-        port_matches = get_ndx_target_port_refs(relative_port_refs)
-        return port_links if port_matches.empty?
-
-        pl_to_match = Array.new
-        prune_duplicate_port_links_iter(port_matches,port_links) do |ref,input_match_id,output_match_id|
-          pl_to_match << {:input_id => input_match_id, :output_id => output_match_id}
-        end
-
-        pl_matches = PortLink.matches_ref_id_form(model_handle(:port_link),pl_to_match)
-        return port_links if pl_matches.empty?
-
-        prune_duplicate_port_links_iter(port_matches,port_links) do |ref,input_match_id,output_match_id|
-          if pl_matches.find{|pl_match| input_match_id == pl_match[:input_id] and output_match_id == pl_match[:output_id]}
-            port_links.delete(ref)
-          end
-        end
-        port_links
-      end
-
-      def prune_duplicate_port_links_iter(port_matches,port_links,&block)
-        port_links.each_pair do |ref,pl_info|
-          if input_match_id = port_matches[pl_info["*input_id"]]
-            if output_match_id = port_matches[pl_info["*output_id"]]
-              block.call(ref,input_match_id,output_match_id)
-            end
-          end
-        end
       end
 
       def get_ndx_target_port_refs(relative_port_refs_x)

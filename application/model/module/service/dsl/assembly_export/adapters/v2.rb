@@ -39,9 +39,7 @@ module DTK
         end
 
         # add in port links
-        self[:port_link].values.each do |pl|
-          in_parsed_port = parse_port_ref(pl["*input_id"],node_ref_to_name)
-          out_parsed_port  = parse_port_ref(pl["*output_id"],node_ref_to_name)
+        port_links(node_ref_to_name) do |in_parsed_port,out_parsed_port|
           unless matching_node = ret[:nodes][in_parsed_port[:node_name]]
             raise Error.new("Cannot find matching node for input port")
           end
@@ -60,6 +58,16 @@ module DTK
           end
         end
         ret
+      end
+
+      def port_links(node_ref_to_name,&block)
+        (self[:component]||{}).each_value do |cmp|
+          (cmp[:port_link]||{}).each_value do |pl|
+            in_parsed_port = parse_port_ref(pl["*input_id"],node_ref_to_name)
+            out_parsed_port  = parse_port_ref(pl["*output_id"],node_ref_to_name)
+            block.call(in_parsed_port,out_parsed_port)
+          end
+        end
       end
 
       def assembly_level_attributes_hash()

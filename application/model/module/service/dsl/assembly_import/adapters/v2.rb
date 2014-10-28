@@ -33,7 +33,7 @@ module DTK; class ServiceModule
           return output_port_hash if ParsingError.is_error?(output_port_hash)
 
           port_link_ref_info =  {
-            :assembly_ref => assembly_idh.create_object().get_field?(:ref),
+            :assembly_template_ref => assembly_idh.create_object().get_field?(:ref),
             :in_node_ref => input_port_hash[:node].get_field?(:ref),
             :in_port_ref => Port.ref_from_display_name(input_port_hash[:display_name]),
             :out_node_ref => output_port_hash[:node].get_field?(:ref),

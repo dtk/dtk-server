@@ -59,7 +59,7 @@ module DTK
     end
     def self.port_link_ref(port_link_ref_info)
       p = port_link_ref_info # for succinctness
-      "#{p[:assembly_ref]}--#{p[:in_node_ref]}-#{p[:in_port_ref]}--#{p[:out_node_ref]}-#{p[:out_port_ref]}"
+      "#{p[:assembly_template_ref]}--#{p[:in_node_ref]}-#{p[:in_port_ref]}--#{p[:out_node_ref]}-#{p[:out_port_ref]}"
     end
 
     # TODO: possibly change to using refs w/o ids to make increemntal updates easier

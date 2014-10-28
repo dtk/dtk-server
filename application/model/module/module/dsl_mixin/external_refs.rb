@@ -49,7 +49,7 @@ module DTK; class BaseModule
         parsed_dependencies = dependencies.map{|dep|dep.parsed_form?()}.compact
         return ret if parsed_dependencies.empty?
 
-        all_match_hashes, all_inconsistent, all_possibly_missing = {}, [], []
+        all_match_hashes, all_inconsistent, all_possibly_missing, all_inconsistent_names = {}, [], [], []
         all_modules = self.class.get_all(project.id_handle()).map{|cmp_mod|ComponentModuleWrapper.new(cmp_mod)}
         parsed_dependencies.each do |parsed_dependency|
           dep_name = parsed_dependency[:name].strip()
@@ -83,15 +83,22 @@ module DTK; class BaseModule
                         constraint_op    = vconst[:constraint]
                         req_version      = required_version.gsub('.','')
                         
-                        evaluated = eval("#{br_version}#{constraint_op}#{req_version}")
+                        # if version contraints in form of 4.x
+                        if req_version.to_s.include?('x')
+                          req_version.gsub!(/x/,'')
+                          evaluated = br_version.to_s.start_with?(req_version.to_s)
+                        else
+                          evaluated = eval("#{br_version}#{constraint_op}#{req_version}")
+                        end
                         break if evaluated == false
                       end
                     end
-                    
+
                     if evaluated
                       all_match_hashes.merge!(dep_name  => branch)
                     else
                       all_inconsistent << "#{dep_name} (current:#{branch_version}, required:#{constraint_op}#{required_version})"
+                      all_inconsistent_names << dep_name
                     end
                   else
                     all_possibly_missing << dep_name
@@ -105,7 +112,7 @@ module DTK; class BaseModule
           end
         end
         all_inconsistent = (all_inconsistent - all_match_hashes.keys)
-        all_possibly_missing = (all_possibly_missing - all_inconsistent - all_match_hashes.keys)
+        all_possibly_missing = (all_possibly_missing.uniq - all_inconsistent_names - all_match_hashes.keys)
         ext_deps_hash = {
           :match_hashes => all_match_hashes,
           :inconsistent => all_inconsistent.uniq,

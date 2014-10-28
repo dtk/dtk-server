@@ -204,8 +204,6 @@ module DTK
       def create_assembly_template_aux()
         nodes = self[:nodes].inject(DBUpdateHash.new){|h,node|h.merge(create_node_content(node))}
         port_links = self[:port_links].inject(DBUpdateHash.new){|h,pl|h.merge(create_port_link_content(pl))}
-        # Need to explicitly prune because the port link refs used when creating from import uses ids
-        prune_duplicate_port_links!(port_links) 
         task_templates = self[:task_templates].inject(DBUpdateHash.new){|h,tt|h.merge(create_task_template_content(tt))}
         assembly_level_attributes = self[:assembly_level_attributes].inject(DBUpdateHash.new){|h,a|h.merge(create_assembly_level_attributes(a))}
 
@@ -275,7 +273,14 @@ module DTK
         out_port_ref = qualified_ref(out_port)
 
         assembly_ref = self[:ref]
-        port_link_ref = "#{assembly_ref}--#{in_node_ref}-#{in_port_ref}--#{out_node_ref}-#{out_port_ref}"
+        port_link_ref_info =  {
+          :assembly_ref => assembly_ref,
+          :in_node_ref => in_node_ref,
+          :in_port_ref => in_port_ref,
+          :out_node_ref => out_node_ref,
+          :out_port_ref => out_port_ref
+        }
+        port_link_ref = PortLink.port_link_ref(port_link_ref_info)
         port_link_hash = {
           "*input_id" => "/node/#{in_node_ref}/port/#{in_port_ref}",
           "*output_id" => "/node/#{out_node_ref}/port/#{out_port_ref}",
@@ -284,6 +289,7 @@ module DTK
         {port_link_ref => port_link_hash}
       end
 
+      # TODO: remove below and change import so that uses same refs
       def prune_duplicate_port_links!(port_links)
         return port_links if port_links.empty?()
         relative_port_refs = port_links.values.map{|pl|[pl["*input_id"],pl["*output_id"]]}.flatten(1)

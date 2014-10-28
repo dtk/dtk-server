@@ -13,8 +13,6 @@ module DTK; class ServiceModule
           assembly_idh = @container_idh.get_child_id_handle(:component,assembly_ref)
           ports = add_needed_ports(assembly_idh)
           version_proc_class = @ndx_version_proc_classes[assembly_ref]
-          # TODO: is this needed
-          # db_updates_port_links.merge!(version_proc_class.import_port_links(assembly_idh,assembly_ref,assembly,ports))
           opts = Hash.new
           if file_path = @ndx_assembly_file_paths[assembly_ref]
             opts[:file_path] = file_path

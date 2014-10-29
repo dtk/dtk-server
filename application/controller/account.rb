@@ -17,6 +17,7 @@ module DTK
     def rest__add_user_direct_access
       rsa_pub_key = ret_non_null_request_params(:rsa_pub_key)
       username = ret_request_params(:username)
+      registered_with_repoman = true
 
       # Service call
       match_service, repo_user_service = ServiceModule.add_user_direct_access(model_handle_with_private_group(:service_module), rsa_pub_key, username)
@@ -37,7 +38,8 @@ module DTK
           matched_repo_user.update(:repo_manager_direct_access => true)
         rescue DTK::Error => e
           # we ignore it and we fix it later when calling repomanager
-          Log.info("We were not able to add user to Repo Manager, reason: #{e.message}")
+          Log.warn("We were not able to add user to Repo Manager, reason: #{e.message}")
+          registered_with_repoman = false
         end
       end
 
@@ -49,7 +51,8 @@ module DTK
         :repo_manager_dns => RepoManager.repo_server_dns(),
         :match => match,
         :new_username => matched_repo_user ? matched_repo_user[:username] : nil,
-        :matched_username => match && matched_repo_user ? matched_repo_user[:username] : nil
+        :matched_username => match && matched_repo_user ? matched_repo_user[:username] : nil,
+        :registered_with_repoman => registered_with_repoman
       )
     end
 

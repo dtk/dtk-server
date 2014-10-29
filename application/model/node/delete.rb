@@ -42,6 +42,7 @@ module DTK
         else
           raise ErrorUsage.new("Cannot destroy_and_reset node (#{get_field?(:display_name)}), which has other assemblies pointing to it")
         end
+        attribute.clear_host_addresses()
       end
       
       def delete_object(opts={})

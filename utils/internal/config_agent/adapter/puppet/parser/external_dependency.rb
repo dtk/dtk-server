@@ -35,12 +35,15 @@ module DTK; class ConfigAgent
         if matched_versions = versions_string.match(/(^[>=<]+\s*\d\.\d\.\d)\s*([>=<]+\s*\d\.\d\.\d)*/)
           multiple_versions << matched_versions[1] if matched_versions[1]
           multiple_versions << matched_versions[2] if matched_versions[2]
+        # if version_constraint: 4.x
+        elsif matched_version = versions_string.match(/^(\d\.x)/)
+          ret << {:version=>matched_version[1], :constraint=>'='}
         else
           raise Error.new("error parsing version constraints string: #{versions_string})")
         end
         multiple_versions.each do |version|
           match = version.to_s.match(/(^>*=*<*)(.+)/)
-        ret << {:version=>match[2], :constraint=>match[1]}
+          ret << {:version=>match[2], :constraint=>match[1]}
         end
         ret
       end

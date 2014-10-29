@@ -35,13 +35,13 @@ module DTK
       end
     end
 
-    def self.create_port_and_attr_links(parent_idh,port_link_hash,opts={})
+    def self.create_port_and_attr_links(target_idh,port_link_hash,opts={})
       # get the associated link_def_link TODO: if it does not exist means constraint violation
-      link_def_link, components = get_link_def_and_components(parent_idh,port_link_hash)
+      link_def_link, components = get_link_def_and_components(target_idh,port_link_hash)
       raise PortLinkError.new("Illegal link") unless link_def_link
       link_to_create = port_link_hash.merge(:temporal_order => link_def_link[:temporal_order])
-      port_link = create_from_links_hash(parent_idh,[link_to_create],opts).first
-      link_def_link.process(parent_idh,components,opts.merge(:port_link_idh => port_link.id_handle))
+      port_link = create_from_links_hash(target_idh,[link_to_create],opts).first
+      link_def_link.process(target_idh,components,opts.merge(:port_link_idh => port_link.id_handle))
       port_link
     end
 
@@ -57,37 +57,35 @@ module DTK
       link_def_link.process(parent_idh,components,:port_link_idh => id_handle())
       self
     end
+    def self.port_link_ref(port_link_ref_info)
+      p = port_link_ref_info # for succinctness
+      "#{p[:assembly_template_ref]}--#{p[:in_node_ref]}-#{p[:in_port_ref]}--#{p[:out_node_ref]}-#{p[:out_port_ref]}"
+    end
 
-    # TODO: possibly change to using refs w/o ids to make increemntal updates easier
+    # TODO: deprecate after removing v1 assembly export adaptor
     def self.ref_from_ids(input_id,output_id)
-      "port_link:#{input_id}-#{output_id}"
+      ref_from_ids_for_service_instances(input_id,output_id)
     end
-    def self.matches_ref_id_form(mh,input_output_rows)
-      ret = Array.new
-      return ret if input_output_rows.empty?
-      sp_hash =  {
-        :cols => [:id,:group_id,:input_id,:output_id],
-        :filter => [:oneof,:ref,input_output_rows.map{|r|ref_from_ids(r[:input_id],r[:output_id])}]
-      }
-      get_objs(mh,sp_hash)
-    end
-
 
    private
-    def self.create_from_links_hash(parent_idh,links_to_create,opts={})
-      parent_mn = parent_idh[:model_name]
-      parent_id = parent_idh.get_id()
-      port_link_mh = parent_idh.createMH(:model_name => :port_link,:parent_model_name => parent_mn)
-      parent_col = DB.parent_field(parent_mn,:port_link)
+    # TODO: possibly change to using refs for service_instances like do for assembly templates
+    def self.ref_from_ids_for_service_instances(input_id,output_id)
+      "port_link:#{input_id}-#{output_id}"
+    end
+
+    def self.create_from_links_hash(target_idh,links_to_create,opts={})
       override_attrs = opts[:override_attrs]||{}
       rows = links_to_create.map do |link|
-        {:input_id => link[:input_id],
-         :output_id => link[:output_id],
-          parent_col => parent_id,
-          :ref => ref_from_ids(link[:input_id],link[:output_id])
+        ref = ref_from_ids_for_service_instances(link[:input_id],link[:output_id])
+        {
+          :input_id => link[:input_id],
+          :output_id => link[:output_id],
+          :datacenter_datacenter_id => target_idh.get_id(),
+          :ref => ref
         }.merge(override_attrs)
       end
       create_opts = {:returning_sql_cols => [:id,:input_id,:output_id]}
+      port_link_mh = target_idh.create_childMH(:port_link)
       # TODO: push in use of :c into create_from_rows
       create_from_rows(port_link_mh,rows,create_opts).map{|hash|new(hash,port_link_mh[:c])}
     end

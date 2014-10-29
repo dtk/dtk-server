@@ -303,7 +303,6 @@ module DTK
     # returns dsl_info
     def update_model_from_clone__type_specific?(commit_sha,diffs_summary,module_branch,version,opts={})
       if version.kind_of?(ModuleVersion::AssemblyModule)
-        Log.error("TODO: dont think this reached now or woudl get error because  AssemblyModule::Service.finalize_edit callss non existing fn")
         assembly = version.get_assembly(model_handle(:component))
         AssemblyModule::Service.finalize_edit(assembly,opts[:modification_type],self,module_branch,diffs_summary)
       else

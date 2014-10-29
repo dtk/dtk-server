@@ -24,16 +24,27 @@ module DTK; class ServiceModule
           base_cmp_name = component_link_info[:base_cmp_name]
           input = parsed_component_link[:input]
           output = parsed_component_link[:output]
-          opts_matching_id = opts.merge(:do_not_throw_error => true,:base_cmp_name => base_cmp_name)
+          opts_matching_port = opts.merge(:do_not_throw_error => true,:base_cmp_name => base_cmp_name)
 
-          input_id = input.matching_id(ports,opts_matching_id)
-          return input_id if ParsingError.is_error?(input_id)
+          input_port_hash = input.matching_port(ports,opts_matching_port)
+          return input_port_hash if ParsingError.is_error?(input_port_hash)
           
-          output_id = output.matching_id(ports,opts_matching_id.merge(:is_output => true))
-          return output_id if ParsingError.is_error?(output_id)
+          output_port_hash = output.matching_port(ports,opts_matching_port.merge(:is_output => true))
+          return output_port_hash if ParsingError.is_error?(output_port_hash)
 
-          pl_ref = PortLink.ref_from_ids(input_id,output_id)
-          pl_hash = {"input_id" => input_id,"output_id" => output_id, "assembly_id" => assembly_idh.get_id()}
+          port_link_ref_info =  {
+            :assembly_template_ref => assembly_idh.create_object().get_field?(:ref),
+            :in_node_ref => input_port_hash[:node].get_field?(:ref),
+            :in_port_ref => Port.ref_from_display_name(input_port_hash[:display_name]),
+            :out_node_ref => output_port_hash[:node].get_field?(:ref),
+            :out_port_ref => Port.ref_from_display_name(output_port_hash[:display_name])
+          }
+          pl_ref = PortLink.port_link_ref(port_link_ref_info)
+          pl_hash = {
+            "input_id" => input_port_hash[:id],
+            "output_id" => output_port_hash[:id],
+            "assembly_id" => assembly_idh.get_id()
+          }
           h.merge(pl_ref => pl_hash)
         end
         port_links.mark_as_complete(:assembly_id=>@existing_assembly_ids)

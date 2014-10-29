@@ -62,18 +62,25 @@ module DTK; class ErrorUsage
       obj.is_a?(ErrorUsage::Parsing)
     end
 
-    def self.raise_error_if_value_nil(k,v)
+    def self.raise_error_if_value_nil(v,opts={})
       if v.nil?
-        raise new("Value of (?1) should not be nil",k)
+        if err_params = opts[:err_params] 
+          err_msg = opts[:err_msg] || "Value of (?1) should not be nil"
+          raise new(err_msg,err_params)
+        else
+          err_msg = opts[:err_msg] || "Value should not be nil"
+          raise new(err_msg)
+        end
       end
     end
 
     def self.raise_error_if_not(obj,klass,opts={})
+      # TODO: put in pretty print of "#{klass}
       unless obj.kind_of?(klass)
         fragment_type = opts[:type]||'fragment'
         for_text = (opts[:for] ? " for #{opts[:for]}" : nil)
-        err_msg = "Ill-formed #{fragment_type} (?obj)#{for_text}; it should be a #{klass}"
-        err_params = Params.new(:obj => obj)
+        err_msg = opts[:err_msg] || "Ill-formed #{fragment_type} (?obj)#{for_text}; it should be a #{klass}"
+        err_params = opts[:err_params] || Params.new(:obj => obj)
         if context = opts[:context]
           err_msg << "; it appears in ?context"
           err_params.merge!(:context => context)

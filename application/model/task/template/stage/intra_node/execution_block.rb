@@ -99,6 +99,7 @@ module DTK; class Task; class Template
             component_group = serialized_item.values.first
             ParsingError.raise_error_unless(component_group,[String,Array])
             Array(component_group).each do |serialized_action|
+              ParsingError.raise_error_unless(serialized_action,String)
               find_and_add_action!(ret,serialized_action,node_name,action_list,opts.merge(:component_group_num => component_group_num))
             end
             component_group_num += 1

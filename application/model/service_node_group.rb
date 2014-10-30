@@ -54,6 +54,8 @@ module DTK
       mh = node_group_idhs.first.createMH()
       get_objs(mh,sp_hash).each do |ng|
         node_member = ng[:node_member]
+        target = ng[:target]
+        node_member.merge!(:target => target) if target
         if index = TargetRef.node_member_index(node_member)
           node_member.merge!(:index => index)
         end

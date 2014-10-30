@@ -43,8 +43,12 @@ module DTK
       end
 
       def self.parse_form_module_name(parse_form_hash)
-        parse_form_hash[:component_module]
+        ret = parse_form_hash[:component_module]
+        ErrorUsage::Parsing.raise_error_if_not(ret,String,
+         :type => 'module name',:for => 'component module ref')
+        ret
       end
+
       def self.convert_parse_to_internal_form(parse_form_hash)
         ret = {
           :module_name => parse_form_hash[:component_module],

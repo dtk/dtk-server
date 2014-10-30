@@ -72,14 +72,15 @@ module DTK; class ErrorUsage
           raise new(err_msg)
         end
       end
+      v
     end
 
     def self.raise_error_if_not(obj,klass,opts={})
       # TODO: put in pretty print of "#{klass}
       unless obj.kind_of?(klass)
         fragment_type = opts[:type]||'fragment'
-        for_text = (opts[:for] ? " for #{opts[:for]}" : nil)
-        err_msg = opts[:err_msg] || "Ill-formed #{fragment_type} (?obj)#{for_text}; it should be a #{klass}"
+        for_text = (opts[:for] ? "for #{opts[:for]}; " : nil)
+        err_msg = opts[:err_msg] || "Ill-formed #{fragment_type} #{error_obj_ref(obj)}#{for_text}it should be a #{klass}"
         err_params = opts[:err_params] || Params.new(:obj => obj)
         if context = opts[:context]
           err_msg << "; it appears in ?context"
@@ -87,6 +88,7 @@ module DTK; class ErrorUsage
         end
         raise new(err_msg,err_params)
       end
+      obj
     end
     # TODO: combine these two
     def self.raise_error_unless(object,legal_values_input_form=[],&legal_values_block)
@@ -94,9 +96,18 @@ module DTK; class ErrorUsage
       unless legal_values.match?(object)
         raise WrongType.new(object,legal_values,&legal_values_block)
       end
+      object
     end
 
    private
+    def self.error_obj_ref(obj)
+      if obj.kind_of?(Hash) or obj.kind_of?(Array)
+        "?obj\n"
+      else
+        "(?obj) "
+      end
+    end
+
     def self.create_with_hash_params(msg,hash_params,*args)
       new(msg,*Params.add_to_array(args,hash_params))
     end

@@ -1,0 +1,4 @@
+---
+component_modules:
+  tomcat:
+    namespace: r8

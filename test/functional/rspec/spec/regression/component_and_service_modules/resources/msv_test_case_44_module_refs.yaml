@@ -1,0 +1,6 @@
+---
+component_modules:
+  concat:
+    namespace: r8
+  python:
+    namespace: r8

@@ -381,6 +381,20 @@ shared_context "NEG - Push clone changes to server" do |component_module_name, f
     end
 end
 
+shared_context "Push to remote changes for component module" do |dtk_common, component_module_name|
+  it "pushes #{component_module_name} component module changes from server to repoman" do
+    puts "Push to remote component module changes:", "-----------------------------------"
+    pass = false
+    value = `dtk component-module #{component_module_name} push-dtkn`
+    puts value
+    pass = value.include?("Status: OK")
+    puts "Push to remote passed successfully!" if pass == true
+    puts "Push to remote didnt pass successfully!" if pass == false
+    puts ""
+    pass.should eq(true)
+  end
+end
+
 shared_context "Replace dtk.model.yaml file with new one" do |component_module_name, file_for_change_location, file_for_change, component_module_filesystem_location, it_message|
   it "#{it_message}" do
     puts "Replace dtk.model.yaml file with new one", "----------------------------------------"
@@ -392,6 +406,37 @@ shared_context "Replace dtk.model.yaml file with new one" do |component_module_n
     pass = !value.include?("No such file or directory")
     puts "Old dtk.model.yaml replaced with new one!" if pass == true
     puts "Old dtk.model.yaml was not replaced with new one!" if pass == false
+    puts ""
+    pass.should eq(true)
+  end
+end
+
+shared_context "Add module_refs.yaml file" do |component_module_name, file_for_change_location, file_for_add, component_module_filesystem_location|
+  it "adds module_refs.yaml file" do
+    puts "Add module_refs.yaml file", "---------------------------"
+    pass = false
+    current_path = `pwd`
+      `cd #{component_module_filesystem_location}/#{component_module_name};git pull;cd #{current_path}`
+      `cp #{file_for_change_location} #{component_module_filesystem_location}/#{component_module_name}/`
+      `cd #{component_module_filesystem_location}/#{component_module_name};mv *_module_refs.yaml #{file_for_add}`
+    value = `ls #{component_module_filesystem_location}/#{component_module_name}/#{file_for_add}`
+    pass = !value.include?("No such file or directory")
+    puts "module_refs.yaml has been added!" if pass == true
+    puts "module_refs.yaml has not been added!" if pass == false
+    puts ""
+    pass.should eq(true)
+  end
+end
+
+shared_context "Remove module_refs.yaml file" do |component_module_name, file_for_remove, component_module_filesystem_location|
+  it "removes module_refs.yaml file" do
+    puts "Remove module_refs.yaml file", "-----------------------------"
+    pass = false
+      `rm #{component_module_filesystem_location}/#{component_module_name}/#{file_for_remove}`
+    value = `ls #{component_module_filesystem_location}/#{component_module_name}/#{file_for_remove}`
+    pass = !value.include?("No such file or directory")
+    puts "module_refs.yaml has been removed!" if pass == true
+    puts "module_refs.yaml has not been removed!" if pass == false
     puts ""
     pass.should eq(true)
   end

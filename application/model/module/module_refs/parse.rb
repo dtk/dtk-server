@@ -1,8 +1,21 @@
 module DTK
   class ModuleRefs
     class Parse < self
-      def self.update_from_dsl_parsed_info(branch,parsed_info)
-        content_hash_content = reify_content(branch.model_handle(:model_ref),parsed_info)
+      def self.semantic_parse(branch,syntactic_parse_info)
+        ret = nil
+        begin
+          ret = reify_content(branch.model_handle(:model_ref),syntactic_parse_info)
+         rescue ErrorUsage::Parsing => e
+          return e
+         rescue => e
+          #TODO: Logging to make sure that it is parse error and not code error
+          Log.info_pp([e,e.backtrace[0..5]])
+          return ErrorUsage::Parsing.new('Module refs parsing error')
+        end 
+        ret
+      end
+
+      def self.update_from_dsl_parsed_info(branch,content_hash_content)
         update(branch,content_hash_content)
         ModuleRefs.new(branch,content_hash_content,:content_hash_form_is_reified => true)
       end

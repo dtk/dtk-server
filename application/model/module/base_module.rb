@@ -20,10 +20,9 @@ module DTK
       ndx_ret = Hash.new
       get_objs(:cols => [:assembly_templates]).each do |r|
         assembly_template = r[:assembly_template]
-        assembly_template[:namespace] = r[:namespace][:display_name] if r[:namespace]
         ndx_ret[assembly_template[:id]] ||= Assembly::Template.create_as(assembly_template)
       end
-      ndx_ret.values
+      Assembly::Template.augment_with_namespaces!(ndx_ret.values)
     end
 
     # each of the module's component_templates associated with zero or more assembly template component references

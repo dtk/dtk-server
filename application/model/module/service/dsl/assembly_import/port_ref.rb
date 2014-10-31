@@ -68,8 +68,9 @@ module DTK; class ServiceModule
       def matching_port(aug_ports,opts={})
         if opts[:is_output]
           if self[:title]
-            err_class = DSLNotSupported::LinkFromComponentWithTitle
-            return raise_or_ret_error(err_class,[self[:node],self[:component_type],self[:title]],opts)
+            # TODO: DTK-1772; removing restrictions:
+            # err_class = DSLNotSupported::LinkFromComponentWithTitle
+            # return raise_or_ret_error(err_class,[self[:node],self[:component_type],self[:title]],opts)
           end
         end
         ret = aug_ports.find do |port|
@@ -80,9 +81,11 @@ module DTK; class ServiceModule
               if self[:title] == p[:title] #they both can be nil -> want a match
                 true
               elsif opts[:is_output] and p[:title] and self[:title].nil?
+                # TODO: DTK-1772; removing restrictions:
                 # TODO: once add support for LinkFromComponentWithTitle put in error that indicates missing title in component link
-                err_class = DSLNotSupported::LinkFromComponentWithTitle
-                return raise_or_ret_error(err_class,[self[:node],self[:component_type],nil],opts)
+                # err_class = DSLNotSupported::LinkFromComponentWithTitle
+                # return raise_or_ret_error(err_class,[self[:node],self[:component_type],nil],opts)
+                true
               end
             end
           end

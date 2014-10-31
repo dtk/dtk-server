@@ -2,7 +2,7 @@ module DTK
   class Assembly::Instance
     module ServiceLinkMixin
       def add_service_link?(input_cmp_idh,output_cmp_idh,opts={})
-        raise_error_if_link_from_component_title(output_cmp_idh.create_object())
+#TODO: DTK-1772        raise_error_if_link_from_component_title(output_cmp_idh.create_object())
         dependency_name = find_dep_name_raise_error_if_ambiguous(input_cmp_idh,output_cmp_idh,opts)
         ServiceLink::Factory.new(self,input_cmp_idh,output_cmp_idh,dependency_name).add?()
       end

@@ -7,7 +7,7 @@ gem 'dtk-common', :github => 'rich-reactor8/dtk-common' #, :tag => '>= 0.5.15'
 gem 'dtk-common-core', :github => 'rich-reactor8/dtk-common-repo'
 
 # required to start a server
-gem 'bundler','~> 1.7.4'
+gem 'bundler','>= 1.1.5'
 gem 'fog','1.8.0'
 gem 'ramaze','2012.04.14'
 gem 'sequel','3.25.0'

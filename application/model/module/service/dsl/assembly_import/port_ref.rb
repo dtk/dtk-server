@@ -44,19 +44,6 @@ module DTK; class ServiceModule
       ServiceLinkTarget = Regexp.new("(^.+)#{Seperators[:node_component]}(.+$)")
       ServiceLinkLegalForm = "LinkType: Node/Component"
 
-      def self.parsed_endpoint(node,cmp_name,link_def_ref)
-        component_type,title = ComponentTitle.parse_component_display_name(cmp_name)
-        ret_hash = {:node => node,:component_type => component_type_internal_form(component_type), :link_def_ref => link_def_ref}
-        ret_hash.merge!(:title => title) if title
-        new(ret_hash)
-      end
-      private_class_method :parsed_endpoint
-      def self.component_type_internal_form(cmp_type_ext_form)
-        # TODO: this does not take into account that there could be a version on cmp_type_ext_form
-        InternalForm.component_ref(cmp_type_ext_form)
-      end
-      private_class_method :component_type_internal_form
-
       # ports are augmented with field :parsed_port_name
       def matching_id(aug_ports,opts={})
         if port_or_error = matching_port(aug_ports,opts)
@@ -66,38 +53,43 @@ module DTK; class ServiceModule
 
       # ports are augmented with field :parsed_port_name
       def matching_port(aug_ports,opts={})
-        if opts[:is_output]
-          if self[:title]
-            # TODO: DTK-1772; removing restrictions:
-            # err_class = DSLNotSupported::LinkFromComponentWithTitle
-            # return raise_or_ret_error(err_class,[self[:node],self[:component_type],self[:title]],opts)
-          end
-        end
-        ret = aug_ports.find do |port|
-          p = port[:parsed_port_name]
-          node = port[:node][:display_name]
-          if self[:component_type] == p[:component_type] and self[:link_def_ref] == p[:link_def_ref] and node == self[:node] 
-            if self[:assembly_id].nil? or (self[:assembly_id] == port[:assembly_id])
-              if self[:title] == p[:title] #they both can be nil -> want a match
-                true
-              elsif opts[:is_output] and p[:title] and self[:title].nil?
-                # TODO: DTK-1772; removing restrictions:
-                # TODO: once add support for LinkFromComponentWithTitle put in error that indicates missing title in component link
-                # err_class = DSLNotSupported::LinkFromComponentWithTitle
-                # return raise_or_ret_error(err_class,[self[:node],self[:component_type],nil],opts)
-                true
-              end
-            end
-          end
-        end
-        if ret
-          ret
-        elsif opts[:do_not_throw_error]
+        aug_ports.find{|port|matching_port__match?(port)} || matching_port__error(opts)
+      end
+
+     private
+      def self.parsed_endpoint(node,cmp_name,link_def_ref)
+        component_type,title = ComponentTitle.parse_component_display_name(cmp_name)
+        ret_hash = {:node => node,:component_type => component_type_internal_form(component_type), :link_def_ref => link_def_ref}
+        ret_hash.merge!(:title => title) if title
+        new(ret_hash)
+      end
+      def self.component_type_internal_form(cmp_type_ext_form)
+        # TODO: this does not take into account that there could be a version on cmp_type_ext_form
+        InternalForm.component_ref(cmp_type_ext_form)
+      end
+
+      def matching_port__error(opts={})
+        if opts[:do_not_throw_error]
           opts_err = Opts.new(opts).slice(:file_path)
-          return ParsingError::BadComponentLink.new(self[:link_def_ref],opts[:base_cmp_name],opts_err)
+          ParsingError::BadComponentLink.new(self[:link_def_ref],opts[:base_cmp_name],opts_err)
         else
-          raise Error.new("Cannot find match to (#{self.inspect})")
+          Error.new("Cannot find match to (#{self.inspect})")
         end
+      end
+
+      def matching_port__match?(aug_port)
+        p = aug_port[:parsed_port_name]
+        node = aug_port[:node][:display_name]
+
+        matching_port__match_on_assembly_id?(aug_port) and
+          self[:node] == node and
+          self[:component_type] == p[:component_type] and 
+          self[:link_def_ref] == p[:link_def_ref] and 
+          self[:title] == p[:title]
+      end
+
+      def matching_port__match_on_assembly_id?(aug_port)
+        self[:assembly_id].nil? or (self[:assembly_id] == aug_port[:assembly_id])
       end
 
       def raise_or_ret_error(err_class,args,opts={})
@@ -105,7 +97,6 @@ module DTK; class ServiceModule
         err = err_class.new(*args,opts_file_path)
         opts[:do_not_throw_error] ? err : raise(err)
       end
-      private :raise_or_ret_error
 
       class AddOn < self
         # returns assembly ref, port_ref

@@ -2,8 +2,6 @@ module DTK
   class Assembly::Instance
     module ServiceLinkMixin
       def add_service_link?(input_cmp_idh,output_cmp_idh,opts={})
-        # TODO: DTK-1772; removing restrictions:
-        # raise_error_if_link_from_component_title(output_cmp_idh.create_object())
         dependency_name = find_dep_name_raise_error_if_ambiguous(input_cmp_idh,output_cmp_idh,opts)
         ServiceLink::Factory.new(self,input_cmp_idh,output_cmp_idh,dependency_name).add?()
       end
@@ -35,13 +33,6 @@ module DTK
       end
 
      private
-      def raise_error_if_link_from_component_title(cmp)
-        only_one_per_node = cmp.get_field?(:only_one_per_node)
-        if (!only_one_per_node.nil?) and not only_one_per_node
-          raise DSLNotSupported::LinkFromComponentWithTitle.create_from_component(cmp)
-        end
-      end
-
       def find_dep_name_raise_error_if_ambiguous(input_cmp_idh,output_cmp_idh,opts={})
         input_cmp = input_cmp_idh.create_object()
         output_cmp = output_cmp_idh.create_object()

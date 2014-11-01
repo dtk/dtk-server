@@ -221,9 +221,6 @@ module DTK
         assembly_hash = hash_subset(:display_name,:type,:ui,:module_branch_id,:component_type)
         assembly_hash.merge!(:task_template => task_templates) unless task_templates.empty?
         assembly_hash.merge!(:attribute => assembly_level_attributes) unless assembly_level_attributes.empty?
-
-
-#        @template_output.merge!(:node => nodes,:port_link => port_links,:component => {assembly_ref => assembly_hash})
         assembly_hash.merge!(:port_link => port_links) unless port_links.empty?
         @template_output.merge!(:node => nodes,:component => {assembly_ref => assembly_hash})
         module_refs_updated = @service_module_refs.update_if_needed(@assembly_component_modules)
@@ -235,8 +232,8 @@ module DTK
             # the way that querying service module to get component module refs is through the component_modules
             @service_module_refs.serialize_and_save_to_repo?()
           end
-          new_commit_sha = @template_output.serialize_and_save_to_repo?()
-          new_commit_sha
+          # serialize_and_save_to_repo? returns new_commit_sha
+          @template_output.serialize_and_save_to_repo?()
         end
       end
 

@@ -1,5 +1,8 @@
 module DTK
   class AccountController < AuthController
+
+    PUB_KEY_NAME_REGEX = /[a-zA-Z0-9_\-]*/
+
   	def rest__set_password()
       password = ret_non_null_request_params(:new_password)
       user = CurrentSession.new.get_user_object()
@@ -16,8 +19,13 @@ module DTK
     # we use this method to add user access to modules / servier / repo manager
     def rest__add_user_direct_access
       rsa_pub_key = ret_non_null_request_params(:rsa_pub_key)
+      # username in this context is rsa pub key name
       username = ret_request_params(:username)
       registered_with_repoman = true
+
+      unless username.eql?(username.match(PUB_KEY_NAME_REGEX)[0])
+        raise DTK::Error, "Invalid format of pub key name, characters allower are: '#{PUB_KEY_NAME_REGEX.source.gsub('\\','')}'"
+      end
 
       # Service call
       match_service, repo_user_service = ServiceModule.add_user_direct_access(model_handle_with_private_group(:service_module), rsa_pub_key, username)

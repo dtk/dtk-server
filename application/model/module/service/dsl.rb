@@ -169,24 +169,11 @@ module DTK
 
      private
       def update_component_module_refs(module_branch,opts={})
-        parsed_info = 
-          if DSLParser.implements_method?(:parse_directory)
-            DSLParser.parse_directory(module_branch,:component_module_refs,opts)
-          else
-            DSLParser::Output.new(:component_module_refs,legacy_component_module_refs_parsed_info(module_branch,opts))
-          end
+        syntatic_parsed_info = DSLParser.parse_directory(module_branch,:component_module_refs,opts) 
+        return syntatic_parsed_info if ParsingError.is_error?(syntatic_parsed_info)
+        parsed_info = ModuleRefs::Parse.semantic_parse(module_branch,syntatic_parsed_info)
         return parsed_info if ParsingError.is_error?(parsed_info)
         ModuleRefs::Parse.update_from_dsl_parsed_info(module_branch,parsed_info)
-      end
-
-      # TODO: deprecate when DSLParser methods stable
-      def legacy_component_module_refs_parsed_info(module_branch,opts={})
-        ret = Hash.new
-        meta_filename_path = ModuleRefs.meta_filename_path()
-        if json_content = RepoManager.get_file_content(meta_filename_path,module_branch,:no_error_if_not_found=>true)
-          ret = Aux.json_parse(json_content,meta_filename_path)
-        end
-        ret
       end
 
       # returns[ parsed,new_component_module_refs]

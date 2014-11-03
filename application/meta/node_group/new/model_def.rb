@@ -18,7 +18,7 @@
          :join_type=>:inner,
          :convert => true,
          :join_cond=>{:node_group_id=>:node__id},
-         :cols=>[:id,:group_id,:display_name,:node_id]
+         :cols=>[:id,:group_id,:display_name,:node_id,:datacenter_datacenter_id]
        },
        {
          :model_name=>:node,
@@ -27,6 +27,14 @@
          :join_type => :left_outer,
          :join_cond=>{:id=>:node_group_relation__node_id},
          :cols=>Node.common_columns()
+       },
+       {
+         :model_name=>:datacenter,
+         :alias=>:target,
+         :convert=>true,
+         :join_type=>:inner,
+         :join_cond=>{:id=>:node_group_relation__datacenter_datacenter_id},
+         :cols=>[:id,:group_id,:display_name,:iaas_properties]
        }]
     },
   }

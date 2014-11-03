@@ -27,7 +27,8 @@ module DTK; module WorkflowAdapter
       
       def self.clean(top_task_id)
         Lock.synchronize{ Store.delete_if { |key, value| key.match(Regexp.new("^#{top_task_id.to_s}#{TopTaskDelim}")) }}
-        pp [:write_cleanup,Store.keys]
+        #TODO: this is not write in taht this can have values if concurrent service
+        # instances running pp [:write_cleanup,Store.keys]
         # TODO: this needs to clean all keys associated with the task; some handle must be passed in
         # TODO: if run through all the tasks this does not need to be called; so call to cleanup aborted tasks
       end

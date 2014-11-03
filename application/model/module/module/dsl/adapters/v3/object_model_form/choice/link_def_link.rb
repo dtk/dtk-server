@@ -14,9 +14,12 @@ module DTK; class ModuleDSL; class V3
 
       def convert(link_def_link,opts={})
         in_attr_mappings = link_def_link["attribute_mappings"]
-        if (in_attr_mappings||[]).empty?
-          err_msg = "The following link defs section on component '?1' is missing the attribute mappings section: ?2"
-          raise ParsingError.new(err_msg,base_cmp_print_form(),{dep_cmp_print_form() => link_def_link})
+        if in_attr_mappings.nil?
+          err_msg_fragment = "is missing the attribute mappings section"
+          raise_error(link_def_link,err_msg_fragment)
+        elsif !in_attr_mappings.kind_of?(Array)
+          err_msg_fragment = "is ill-formed"
+          raise_error(link_def_link,err_msg_fragment)
         end
 
         unless type = opts[:link_type] || link_def_link_type(link_def_link)
@@ -43,6 +46,12 @@ module DTK; class ModuleDSL; class V3
       end
 
     private
+
+      def raise_error(link_def_link,err_msg_fragment)
+        err_msg = "The following link defs section on component '?1' #{err_msg_fragment}: ?2"
+        raise ParsingError.new(err_msg,base_cmp_print_form(),{dep_cmp_print_form() => link_def_link})
+      end
+
       def link_def_link_type(link_info)
         if loc = link_info["location"]
           case loc

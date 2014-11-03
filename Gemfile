@@ -1,5 +1,5 @@
 source 'http://rubygems.org'
-source 'http://dtkuser:g3msdtk@gems.r8network.com/'
+source 'http://gems.github.com'
 
 # dtk gems
 #TODO commented until we solve issue with nee to get latest versions from our geminabox not rubygems

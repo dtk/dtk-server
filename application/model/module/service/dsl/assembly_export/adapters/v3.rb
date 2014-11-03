@@ -12,7 +12,7 @@ module DTK
           component_links = Hash.new  
           ret = {component_in_ret => {:component_links => component_links}}
         end
-        output_target = "#{out_parsed_port[:node_name]}#{Seperators[:node_component]}#{out_parsed_port[:component_name]}"
+        output_target = component_link_output_target(out_parsed_port)
         link_def_ref = out_parsed_port[:link_def_ref]
         if existing_links = component_links[link_def_ref]
           if existing_links.kind_of?(Array)
@@ -26,6 +26,15 @@ module DTK
         end
         ret 
       end
+
+      def component_link_output_target(parsed_port)
+        ret = "#{parsed_port[:node_name]}#{Seperators[:node_component]}#{parsed_port[:component_name]}"
+        if title = parsed_port[:title]
+          ret << "#{Seperators[:title_before]}#{title}#{Seperators[:title_after]}"
+        end
+        ret
+      end
+      
     end
   end; end
 end

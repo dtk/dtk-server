@@ -131,6 +131,7 @@ module DTK; class  Assembly
       end
 
       def list_nodes(opts=Opts.new)
+        opts.merge!(:remove_node_groups=>true)
         nodes = get_nodes__expand_node_groups(opts)
         nodes.each do |node|
           set_node_display_name!(node)

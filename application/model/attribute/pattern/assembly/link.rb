@@ -39,10 +39,6 @@ module DTK; class Attribute::Pattern
         if source_component_instance[:component_type] == target_attr_pattern.component_instance[:component_type]
           raise DSLNotSupported::LinkBetweenSameComponentTypes.new(source_component_instance)
         end
-        if source_component_instance.has_title?()
-          Log.error("Took out DSLNotSupported::LinkFromComponentWithTitle")
-#          raise DSLNotSupported::LinkFromComponentWithTitle.create_from_component(source_component_instance)
-        end
 
         # TODO: need to do more checking and processing to include:
         #  if has a relation set already and scalar conditionally reject or replace

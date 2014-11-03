@@ -131,8 +131,12 @@ module DTK; class Component
       unless unmatched.empty?()
         # TODO: indicate whether there is a nailed namespace that does not exist or no matches at all
         cmp_refs = unmatched.map do |match_el|
+          cmp_type = match_el.component_type
+          if ns = match_el.namespace
+            cmp_type = "#{ns}:#{cmp_type}"
+          end
           {
-            :component_type => "#{match_el.namespace}:#{match_el.component_type}",
+            :component_type => cmp_type,
             :version => match_el.version
           }
         end

@@ -1,0 +1,4 @@
+---
+test_modules:
+  mytest:
+    namespace: r8

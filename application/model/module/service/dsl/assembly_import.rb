@@ -229,7 +229,8 @@ module DTK; class ServiceModule
         h.merge(parse[:ref] => cmp_ref)
       end
 
-      component_module_refs.set_matching_component_template_info?(ret.values, :donot_set_component_templates=>true)
+      opts_set_matching = {:donot_set_component_templates=>true,:set_namespace=>true}
+      component_module_refs.set_matching_component_template_info?(ret.values,opts_set_matching)
       set_attribute_template_ids!(ret,container_idh)
       add_title_attribute_overrides!(cmps_with_titles,container_idh)
       ret
@@ -323,13 +324,13 @@ module DTK; class ServiceModule
         end
       end
       unless bad_attrs.empty?
-        # TODO: extend aggregate_errors.aggregate_errors to handle this
+        # TODO: include namespace info
         bad_attrs_list = bad_attrs.map do |attr_info|
           cmp_name = Component.display_name_print_form(attr_info[:component_display_name])          
           "#{cmp_name}/#{attr_info[:display_name]}"
         end
         attribute = (bad_attrs.size == 1 ? "attribute" : "attributes")
-        raise ErrorUsage.new("Bad #{attribute} (#{bad_attrs_list.join(', ')})")
+        raise ParsingError.new("Bad #{attribute} (#{bad_attrs_list.join(', ')}) in assembly template")
       end
       ret
     end
@@ -350,9 +351,12 @@ module DTK; class ServiceModule
           pntr.merge!(import_attribute_overrides(title_attribute[:display_name],r[:cmp_title],:cannot_change => true))
         else
           cmp_name = Component.display_name_print_form(cmp_ref[:display_name])
-          # This should be caught when importing component module and is a component module, 
-          # not a service module problem; so just logging as error here
-          Log.error("Component module for #{cmp_name} missing the title field")
+          err_msg = "Component referenced by #{cmp_name}"
+          if ns = cmp_ref[:namespace]
+            err_msg << "(namespace: #{ns})"
+          end
+          err_msg << " is missing the title field attribute (usally 'name') or is configured to be a singleton; correct by editing this component module or removing title reference in assembly template)"
+          raise ParsingError.new(err_msg)
         end
       end
     end

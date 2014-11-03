@@ -72,8 +72,21 @@ module DTK
         # mappings will have key for each component type referenced and for each key will return hash with keys :component_template and :version;
         # component_template will be null if no match is found
         mappings = get_component_type_to_template_mappings?(cmp_types_to_check.keys)
-        
+
         # set the component template ids; raise error if there is a required element that does not have a matching component template
+
+        if opts[:set_namespace]
+          ret.each do |cmp_ref|
+            cmp_type = cmp_ref[:component_type]
+            next unless cmp_types_to_check[cmp_type]
+            if cmp_type_info = mappings[cmp_type]
+              if namespace = cmp_type_info[:namespace]
+                cmp_ref[:namespace] = namespace
+              end
+            end
+          end
+        end
+
         reference_errors = Array.new
         cmp_types_to_check.each do |cmp_type,els|
           els.each do |el|

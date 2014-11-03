@@ -98,6 +98,15 @@ module DTK
       rest_ok_response TestModule.info(model_handle(), module_id, opts)
     end
 
+    #
+    # Method will check new dependencies on repo manager and report missing dependencies.
+    # Response will return list of modules for given component.
+    #
+    def rest__resolve_pull_from_remote()
+      rest_ok_response resolve_pull_from_remote(:test_module)
+    end
+
+
     def rest__pull_from_remote()
       rest_ok_response pull_from_remote_helper(TestModule)
     end

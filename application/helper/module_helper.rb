@@ -34,9 +34,9 @@ module Ramaze::Helper
       module_obj.get_linked_remote_module_info(project,action,remote_params,rsa_pub_key,access_rights,module_ref_content)
     end
 
-    def get_service_dependencies(remote_params, client_rsa_pub_key=nil)
+    def get_service_dependencies(module_type, remote_params, client_rsa_pub_key=nil)
       project = get_default_project()
-      missing_modules, required_modules, dependency_warnings = ServiceModule.get_required_and_missing_modules(project, remote_params, client_rsa_pub_key)
+      missing_modules, required_modules, dependency_warnings = module_class(module_type).get_required_and_missing_modules(project, remote_params, client_rsa_pub_key)
       { :missing_modules => missing_modules, :required_modules => required_modules, :dependency_warnings => dependency_warnings }
     end
 
@@ -225,7 +225,20 @@ module Ramaze::Helper
       end
     end
 
-    private
+  protected
+
+    def resolve_pull_from_remote(module_type)
+      repo_module = create_obj(:module_id)
+      opts = Opts.create?(:remote_namespace? => ret_request_params(:remote_namespace))
+      module_name, namespace, version = repo_module.get_basic_info(opts)
+      remote_params = remote_params_dtkn(module_type,namespace,module_name,version)
+      client_rsa_pub_key   = ret_request_params(:rsa_pub_key)
+
+      get_service_dependencies(module_type, remote_params, client_rsa_pub_key)
+    end
+
+  private
+
     def module_class(module_type)
       case module_type.to_sym
         when :component_module then ComponentModule

@@ -196,12 +196,7 @@ module DTK
     # Response will return list of modules for given component.
     #
     def rest__resolve_pull_from_remote()
-      service_module = create_obj(:service_module_id)
-      opts = Opts.create?(:remote_namespace? => ret_request_params(:remote_namespace))
-      module_name, namespace, version = service_module.get_basic_info(opts)
-      remote_params = remote_params_dtkn(:service_module,namespace,module_name,version)
-      client_rsa_pub_key   = ret_request_params(:rsa_pub_key)
-      rest_ok_response get_service_dependencies(remote_params, client_rsa_pub_key)
+      rest_ok_response resolve_pull_from_remote(:service_module)
     end
 
     def rest__delete_assembly_template()

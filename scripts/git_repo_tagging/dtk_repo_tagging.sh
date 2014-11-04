@@ -55,14 +55,14 @@ function tag_code() {
 
 		if [[ $repo_name == "dtk-client" || $repo_name == "dtk-common" || $repo_name == "dtk-node-agent" ]]; then
 			cd lib/$repo_name
-			sed -i '' 's/VERSION=".*"/VERSION="'${tag}'"/' version.rb
+			sed -i -e 's/VERSION=".*"/VERSION="'${tag}'"/' version.rb
 			# Add git add .; git commit -m "bump version"; git push origin master
 			cd -
 			git tag $next_tag
 			# git push --tags
 		elif [[ $repo_name == "dtk-common-repo" ]]; then
 			cd lib/dtk-common-core
-			sed -i '' 's/VERSION=".*"/VERSION="'${tag}'"/' version.rb
+			sed -i -e 's/VERSION=".*"/VERSION="'${tag}'"/' version.rb
 			# Add git add .; git commit -m "bump version"; git push origin master
 			cd -
 			git tag $next_tag
@@ -77,14 +77,14 @@ function tag_code() {
 
 		if [[ $repo_name == "dtk-client" || $repo_name == "dtk-common" || $repo_name == "dtk-node-agent" ]]; then
 			cd lib/$repo_name
-			sed -i '' 's/VERSION=".*"/VERSION="'$tag'"/' version.rb
+			sed -i -e 's/VERSION=".*"/VERSION="'$tag'"/' version.rb
 			# Add git add .; git commit -m "bump version"; git push origin master
 			cd -
 			git tag $dtk_major_tag
 			# git push --tags
 		elif [[ $repo_name == "dtk-common-repo" ]]; then
 			cd lib/dtk-common-core
-			sed -i '' 's/VERSION=".*"/VERSION="'${tag}'"/' version.rb
+			sed -i -e 's/VERSION=".*"/VERSION="'${tag}'"/' version.rb
 			# Add git add .; git commit -m "bump version"; git push origin master
 			cd -
 			git tag $dtk_major_tag

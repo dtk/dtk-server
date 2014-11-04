@@ -57,7 +57,6 @@ module DTK; module CommandAndControlAdapter
           create_node = true
           if instance_id = external_ref[:instance_id]
             # handle case where node is terminated and need to recreate
-            pp get_node_status(instance_id)
             if get_node_status(instance_id) == :terminated
               Log.info("node instance id #{instance_id} has been terminated; creating new node")
             else

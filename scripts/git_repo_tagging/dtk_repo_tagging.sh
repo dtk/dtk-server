@@ -30,9 +30,12 @@ function increase_version_number() {
 	# get last number in tag and increment it
 	subtag=`echo $current_tag | cut -d. -f3`
 	increment_subtag=$((subtag + 1))
-	first_tag_part=`echo "$current_tag" | grep -o "v\d.\d."`
+
+	a=`echo $current_tag | cut -d. -f1`
+	b=`echo $current_tag | cut -d. -f2`
+
 	# concatenate first tag part with incremented tag number
-	echo "$first_tag_part$increment_subtag"
+	echo "$a.$b.$increment_subtag"
 }
 
 function tag_code() {

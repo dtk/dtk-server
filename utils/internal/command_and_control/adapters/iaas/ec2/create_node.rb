@@ -54,11 +54,18 @@ module DTK; module CommandAndControlAdapter
         end
 
         def run()
-          instance_id = external_ref[:instance_id]
-          
-          if instance_id
-            Log.info("node already created with instance id #{instance_id}; waiting for it to be available")
-          else
+          create_node = true
+          if instance_id = external_ref[:instance_id]
+            # handle case where node is terminated and need to recreate
+            pp get_node_status(instance_id)
+            if get_node_status(instance_id) == :terminated
+              Log.info("node instance id #{instance_id} has been terminated; creating new node")
+            else
+              create_node = false
+              Log.info("node already created with instance id #{instance_id}; waiting for it to be available")
+            end
+          end
+          if create_node
             response = create_ec2_instance()
             if response[:status] == "failed"
               return response
@@ -155,6 +162,18 @@ module DTK; module CommandAndControlAdapter
             return {:status => "failed", :error_object => e}
           end
           response
+        end
+
+        def get_node_status(instance_id)
+          ret = nil
+          begin 
+            target_aws_creds = node.get_target_iaas_credentials()
+            response = Ec2.conn(target_aws_creds).get_instance_status(instance_id)
+            ret = response[:status] && response[:status].to_sym
+           rescue => e
+             Log.error_pp([e,e.backtrace[0..10]])
+          end
+          ret
         end
 
         def ec2_name_tag()

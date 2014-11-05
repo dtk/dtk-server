@@ -78,16 +78,16 @@ function tag_code() {
 			cd lib/$repo_name
 			sed -i -e 's/VERSION=".*"/VERSION="'${tag}'"/' version.rb
 			cd ../..
-			#git add .; git commit -m "bump version"; git push origin master
+			git add .; git commit -m "bump version"; git push origin master
 			git tag $next_tag
-			#git push --tags
+			git push --tags
 		elif [[ $repo_name == "dtk-common-repo" ]]; then
 			cd lib/dtk-common-core
 			sed -i -e 's/VERSION=".*"/VERSION="'${tag}'"/' version.rb
 			cd ../..
-			#git add .; git commit -m "bump version"; git push origin master
+			git add .; git commit -m "bump version"; git push origin master
 			git tag $next_tag
-		  #git push --tags
+		  git push --tags
 		elif [[ $repo_name == "server" ]]; then
 			set_release_yaml_file "not_set"
 			cd $repo_name
@@ -107,16 +107,16 @@ function tag_code() {
 			cd lib/$repo_name
 			sed -i -e 's/VERSION=".*"/VERSION="'${tag}'"/' version.rb
 			cd ../..
-			#git add .; git commit -m "bump version"; git push origin master
+			git add .; git commit -m "bump version"; git push origin master
 			git tag $dtk_major_tag
-			#git push --tags
+			git push --tags
 		elif [[ $repo_name == "dtk-common-repo" ]]; then
 			cd lib/dtk-common-core
 			sed -i -e 's/VERSION=".*"/VERSION="'${tag}'"/' version.rb
 			cd ../..
-			#git add .; git commit -m "bump version"; git push origin master
+			git add .; git commit -m "bump version"; git push origin master
 			git tag $dtk_major_tag
-			#git push --tags
+			git push --tags
 		elif [[ $repo_name == "server" ]]; then
 			set_release_yaml_file $dtk_major_tag
 			cd $repo_name

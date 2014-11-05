@@ -127,7 +127,7 @@ shared_context "Export service module" do |dtk_common, service_module_name, name
     service_module = service_module_name.split(":").last
     value = `dtk service-module #{service_module_name} publish #{namespace}/#{service_module}`
     puts value
-    pass = true if (!value.include? "error")
+    pass = true if (value.include? "Module has been successfully published")
     puts "Publish of #{service_module} service module to #{namespace} namespace has been completed successfully!" if pass == true
     puts "Publish of #{service_module} service module to #{namespace} namespace did not complete successfully!" if pass == false
     puts ""

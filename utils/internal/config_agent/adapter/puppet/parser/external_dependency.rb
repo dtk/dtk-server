@@ -26,26 +26,49 @@ module DTK; class ConfigAgent
         end
       end
      private
+      # TODO: too many restrictions; such as that version nums can only be single digit
       def parse_constraints_string(versions_string)
-        ret = []
+        ret = Array.new
         return ret if versions_string.nil?
+        rest_string = parse_one_constraint!(ret,versions_string)
+        if rest_string
+          parse_one_constraint!(ret,rest_string)
+        end
+        ret
+      end
 
-        multiple_versions = []
-        # multiple_versions = versions.split(' ')
-        if matched_versions = versions_string.match(/(^[>=<]+\s*\d\.\d\.\d)\s*([>=<]+\s*\d\.\d\.\d)*/)
-          multiple_versions << matched_versions[1] if matched_versions[1]
-          multiple_versions << matched_versions[2] if matched_versions[2]
-        # if version_constraint: 4.x
-        elsif matched_version = versions_string.match(/^(\d\.x)/)
-          ret << {:version=>matched_version[1], :constraint=>'='}
+      ConstraintRegex1 = /^\s*([>=<]+)\s*(\d\.*\d*\.*\d*)\s*(.*$)/
+      ConstraintRegex2 = /^\s*(\d)\.x\s*$/
+      # returns rest of string after parsing
+      # :rest, :match, which has keys :version, :constraint
+      def parse_one_constraint!(ret,versions_string)
+        rest_string = nil
+        if match = versions_string.match(ConstraintRegex1)
+          ret << {:version=>normalize_to_three_parts(match[2]), :constraint=>match[1]}
+          rest_string =  match[3] unless match[3].empty?
+        elsif match = versions_string.match(ConstraintRegex2)
+          ret << {:version=>normalize_to_three_parts(match[1]), :constraint=>'>='}
+          ret << {:version=>normalize_to_three_parts(match[1].to_i+1), :constraint=>'<'}
         else
           raise Error.new("error parsing version constraints string: #{versions_string})")
         end
-        multiple_versions.each do |version|
-          match = version.to_s.match(/(^>*=*<*)(.+)/)
-          ret << {:version=>match[2], :constraint=>match[1]}
+        rest_string
+      end
+
+      # TODO: assumption that version has form
+      # x.y.z, x.y, or x
+      ThreeParts = /\d\.\d\.\d/
+      TwoParts = /\d\.\d/
+      def normalize_to_three_parts(version)
+        if version.kind_of?(Fixnum)
+          "#{version.to_s}.0.0"
+        elsif version =~ ThreeParts
+          version
+        elsif version =~ TwoParts
+          "#{version}.0"
+        else
+          "#{version}.0.0"
         end
-        ret
       end
     end
   end

@@ -73,19 +73,19 @@ module DTK; class Attribute
           case raw_val.to_s
             when "true" then true
             when "false" then false
-            else raise Error.new("Unexpected Boolean value (#{raw_val})")
+            else raise_error_msg("boolean",raw_val,attr)
           end
         when "integer"
           if raw_val =~ /^[0-9]+$/
             raw_val.to_i
           else 
-            raise Error.new("Unexpected Integer value (#{raw_val})")
+            raise_error_msg("integer",raw_val,attr)
           end
         when "json"
           # will be converted already
           raw_val
         else 
-          raise Error.new("Unexpected Datatype (#{attr[:data_type]})")
+        raise Error.new("Unexpected Datatype (#{attr[:data_type]}) for attribute (#{attr.print_form()})")
       end
     end 
 
@@ -129,6 +129,12 @@ module DTK; class Attribute
     end
 
    private
+    def self.raise_error_msg(type,val,attr)
+      val_print_form = (val.respond_to?(:to_s) ? val.to_s : val.inspect)
+      raise ErrorUsage.new("Unexpected #{type.to_s.capitalize} Value (#{val_print_form}) for attribute (#{attr.print_form}); use set-attribute to change its value")
+    end
+
+
     def self.ret_builtin_scalar_types()
       [
        "string",

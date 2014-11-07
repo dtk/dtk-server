@@ -1,0 +1,105 @@
+---
+module: dtk_client
+dsl_version: 0.9.1
+module_type: puppet_module
+components:
+    resources:
+      description: "DTK Client resources (modules and services)"
+      external_ref:
+        puppet_class: dtk_client::resources
+      attributes:
+        user:
+          description: "Unix user on which DTK Client resources will be copied"
+          type: string
+          required: true
+    dtk_client:
+      description: "DTK Client init"
+      external_ref:
+        puppet_class: dtk_client
+      attributes:
+        dtk_client_unix_user:
+          description: "Unix user on which DTK Client will be installed"
+          type: string
+          required: true
+        gem_source_location:
+          description: "DTK Client gem source"
+          type: string
+          required: true
+        dtk_client_username:
+          description: "Username for DTK Client connection to DTK Server"
+          type: string
+          required: true
+        dtk_client_password:
+          description: "Password for DTK Client connection to DTK Server"
+          type: string
+          required: true
+        dtk_server_host:
+          description: "DTK Server host address"
+          type: string
+          default: "dtk16.dtk.io"
+        dtk_server_port:
+          description: "DTK Server port"
+          type: string
+          default: 7000
+        dtk_server_secure_connection_port:
+          description: "DTK Server secure https port"
+          type: string
+          default: 443
+        dtk_server_secure_connection:
+          description: "Enable https connection to DTK Server"
+          type: string
+          default: true
+        git_config_user_name:
+          description: "Git config global username"
+          type: string
+          default: "test"
+        git_config_user_email:
+          description: "Git config global user email"
+          type: string
+          default: "test@reactor8.com"
+    install:
+      description: "DTK Client setup and installation"
+      external_ref:
+        puppet_definition: dtk_client::install
+      attributes:
+        name:
+          description: "Unix user on which DTK Client will be installed"
+          type: string
+        gem_source:
+          description: "DTK Client gem source"
+          type: string
+          required: true
+        git_config_user_name:
+          description: "Git config global username"
+          type: string
+          default: "test"
+        git_config_user_email:
+          description: "Git config global user email"
+          type: string
+          default: "test@reactor8.com"
+        username:
+          description: "Username for DTK Client connection to DTK Server"
+          type: string
+          required: true
+        password:
+          description: "Password for DTK Client connection to DTK Server"
+          type: string
+          required: true
+        server_host:
+          description: "DTK Server host address"
+          type: string
+          default: "dtk16.dtk.io"
+        server_port:
+          description: "DTK Server port"
+          type: string
+          default: 7000
+        secure_connection_server_port:
+          description: "DTK Server secure https port"
+          type: string
+          default: 443
+        secure_connection:
+          description: "Enable https connection to DTK Server"
+          type: string
+          default: false
+       
+

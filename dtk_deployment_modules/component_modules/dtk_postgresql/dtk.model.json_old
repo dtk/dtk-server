@@ -1,0 +1,76 @@
+{
+  "module": "dtk_postgresql",
+  "dsl_version": "0.9",
+  "module_type": "puppet_module",
+  "components": {
+    "server": {
+      "description": "Postgres server",
+      "external_ref": {
+        "puppet_class": "dtk_postgresql::server"
+      },
+      "depends_on": [
+        "dtk"
+      ],
+      "include_modules": ["sysctl"]
+    },
+    "client": {
+      "description": "Postgres client",
+      "external_ref": {
+        "puppet_class": "dtk_postgresql::client"
+      },
+      "attributes": {
+        "server_hostname": {
+          "description": "Postgres server host address",
+          "type": "string",
+          "required": true
+        }
+      },
+      "depends_on": [
+        {
+          "postgresql_server": {
+            "component": "postgresql::server",
+            "location": "remote",
+            "attribute_mappings": [
+              "$node.host_address -> server_hostname" 
+            ]
+          }
+        }
+      ]
+    },
+    "db": {
+      "description": "Postgres DB",
+      "external_ref": {
+        "puppet_definition": "dtk_postgresql::db"
+      },
+      "attributes": {
+        "name": {
+          "description": "DB name",
+          "type": "string"
+        },
+        "db_name": {
+          "description": "DB name",
+          "type": "string",
+          "required": true
+        }
+      },
+      "depends_on": [
+        "dtk"
+      ],
+      "after": [
+        "dtk_postgresql::server"
+      ]
+    }
+  }
+} 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 

@@ -1,0 +1,10 @@
+.idea
+.rvmrc
+.ruby-version
+.project
+.librarian/
+.tmp/
+doc/
+spec/fixtures/
+pkg/
+.vagrant/

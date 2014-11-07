@@ -1,0 +1,22 @@
+---
+module: dtk_user
+dsl_version: 0.9.1
+module_type: puppet_module
+components:
+  simple_ssh_key:
+    external_ref:
+      puppet_definition: dtk_user::simple_ssh_key
+    attributes:
+      sudo_access:
+        description: "Whether passwordless sudo access for user [true/false]"
+        type: string
+        required: true
+      rsa_pub_key:
+        description: RSA public key
+        type: string
+        required: true
+    dependencies:
+    - dtk_user::base
+  base:
+    external_ref:
+      puppet_class: dtk_user::base

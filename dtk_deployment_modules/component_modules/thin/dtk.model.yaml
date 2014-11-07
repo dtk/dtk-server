@@ -1,0 +1,27 @@
+---
+module: thin
+dsl_version: 0.9.1
+module_type: puppet_module
+components:
+  thin:
+    description: "Thin server"
+    external_ref:
+      puppet_definition: thin
+    attributes:
+      app_dir:
+        description: "Application directory"
+        type: string
+        required: true
+      daemon_user:
+        description: "Daemon User"
+        type: string
+        required: true
+      name:
+        type: string
+    dependencies:
+    - stdlib
+    - logrotate::base
+    after:
+    - dtk_postgresql::server
+    - dtk_server::tenant
+

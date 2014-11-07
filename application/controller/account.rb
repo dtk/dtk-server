@@ -23,7 +23,7 @@ module DTK
       username = ret_request_params(:username)
       registered_with_repoman = true
 
-      unless username.eql?(username.match(PUB_KEY_NAME_REGEX)[0])
+      if username && !username.eql?(username.match(PUB_KEY_NAME_REGEX)[0])
         raise DTK::Error, "Invalid format of pub key name, characters allower are: '#{PUB_KEY_NAME_REGEX.source.gsub('\\','')}'"
       end
 

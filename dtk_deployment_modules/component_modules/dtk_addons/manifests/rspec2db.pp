@@ -6,20 +6,6 @@ class dtk_addons::rspec2db(
   
   $repo_target_dir = "/home/${user}/rspec"
 
-  package { 'rspec':
-    ensure   => 'installed',
-    provider => 'gem',
-  }
-
-  /*
-  exec { 'git_clone_rspec2db_repo':
-    command => "git clone ${rspec2db_repo}",
-    user    => $user,
-    cwd     => "/home/${user}",
-    path    => ['/usr/bin'],
-  }
-  */
-
   vcsrepo { $repo_target_dir: 
     ensure   => 'present',
     owner    => $user, 
@@ -58,5 +44,5 @@ class dtk_addons::rspec2db(
     path    => ['/usr/bin','/usr/local/bin'],
   }
 
-  Package['rspec'] ->  Vcsrepo[$repo_target_dir] -> Exec['rspec2db_build'] -> Exec['rspec2db_gem_install'] -> Exec['install_libpg-dev'] -> Exec['rspec2db_bundle_install']
+  Vcsrepo[$repo_target_dir] -> Exec['rspec2db_build'] -> Exec['install_libpg-dev'] -> Exec['rspec2db_bundle_install'] -> Exec['rspec2db_gem_install']
 }

@@ -11,6 +11,7 @@ class dtk_repo_manager(
 {
   include dtk_repo_manager::params
   include rvm
+
   $gitolite_user = $dtk_repo_manager::params::gitolite_user
   $admin_user = $dtk_repo_manager::params::admin_user
   #$app_repos = $dtk_repo_manager::params::app_repos
@@ -43,7 +44,16 @@ class dtk_repo_manager(
     require => Package['redis-server'],
   }
 
-  dtk_repo_manager::rvm { $rvm_ruby_version: }
+  # Temporary fix (GPG signature verification failed) for rvm initial installation
+  exec { 'gpg_signature_key':
+    path    => "/usr/local/bin/:/bin/:/usr/bin/",
+    command => "gpg --keyserver hkp://keys.gnupg.net --recv-keys D39DC0E3",
+    creates => "/root/.gnupg/trustdb.gpg"
+  }
+
+  dtk_repo_manager::rvm { $rvm_ruby_version:
+    require => Exec["gpg_signature_key"],
+  }
 
   class { 'nginx::config':}
 
@@ -130,11 +140,24 @@ class dtk_repo_manager(
     require => [Exec["bundle_install"], Package["nodejs"]],
   }
 
+  # Needed package for fuzzy search on repoman admin
+  package { "postgresql-contrib-8.4":
+    ensure  => "installed",
+    require => Exec["rake_db_create"]
+  }
+
+  exec { "run_postgresql_contrib_script":
+    command => "psql -U postgres -d repoman -f /usr/share/postgresql/8.4/contrib/pg_trgm.sql",
+    path    => "/usr/bin/",
+    user    => postgres,
+    require => Package["postgresql-contrib-8.4"]
+  }
+
   exec { "rake_db_migrate":
     command => "/usr/local/rvm/wrappers/default/rake db:migrate",
     user    => $gitolite_user,
     cwd     => $repo_target_dir,
-    require => Exec["rake_db_create"],
+    require => Exec["run_postgresql_contrib_script"],
   }
 
   exec { "rake_db_seed":

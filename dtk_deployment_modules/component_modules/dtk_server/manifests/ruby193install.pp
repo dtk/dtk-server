@@ -4,7 +4,6 @@ include dtk_server::params
 define dtk_server::ruby193install($install)
 {
   include rvm
-
   $ruby_version = $dtk_server::params::ruby_version
 
   if $::osfamily == 'Debian' {
@@ -15,13 +14,21 @@ define dtk_server::ruby193install($install)
     }
   }
 
+  # Temporary fix (GPG signature verification failed) for rvm initial installation
+  exec { 'gpg_signature_key':
+    path    => "/usr/local/bin/:/bin/:/usr/bin/",
+    command => "gpg --keyserver hkp://keys.gnupg.net --recv-keys D39DC0E3",
+    creates => "/root/.gnupg/trustdb.gpg"
+  }
+
   rvm_system_ruby {
     $ruby_version:
     ensure      => 'present',
     default_use => true,
     # looks like 1.9.3 binaries are no longer available
     # or mybe not
-    build_opts  => ['--binary'];
+    build_opts  => ['--binary'],
+    require     => Exec['gpg_signature_key']
   }
 
   rvm_gem {

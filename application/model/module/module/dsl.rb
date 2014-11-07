@@ -14,6 +14,7 @@ module DTK
       # get associated assembly templates before do any updates and use this to see if any referential integrity
       # problems within transaction after do update; transaction is aborted if any errors found
       ref_integrity_snapshot = RefIntegrity.snapshot_associated_assembly_templates(component_module)
+      opts.merge!(:ref_integrity_snapshot => ref_integrity_snapshot)
       model_parsed = nil
       Transaction do
         component_dsl_obj = create_dsl_object_from_impl(impl_obj, opts)
@@ -52,6 +53,9 @@ module DTK
 
       config_agent_type = ret_config_agent_type(input_hash)
       return config_agent_type if ParsingError.is_error?(config_agent_type)
+
+      ref_integrity_snapshot = opts[:ref_integrity_snapshot]
+      integrity_check = ref_integrity_snapshot.raise_error_if_missing_from_module_refs(input_hash,opts[:component_module_refs])
 
       ParsingError.trap do
         new(config_agent_type,target_impl.id_handle(),module_branch_idh,input_hash,container_idh)
@@ -114,6 +118,28 @@ module DTK
       VersionIntegerToVersion[integer_version]
     end
 
+    def self.update_component_module_refs(module_class,module_branch,opts={})
+      syntatic_parsed_info = module_class::DSLParser.parse_directory(module_branch,:component_module_refs,opts)
+      return syntatic_parsed_info if ParsingError.is_error?(syntatic_parsed_info)
+      parsed_info = ModuleRefs::Parse.semantic_parse(module_branch,syntatic_parsed_info)
+      return parsed_info if ParsingError.is_error?(parsed_info)
+      ModuleRefs::Parse.update_from_dsl_parsed_info(module_branch,parsed_info)
+    end
+
+    def self.validate_module_ref_namespaces(module_branch,component_module_refs)
+      cmp_modules = component_module_refs.component_modules
+      namespace_mh = module_branch.id_handle().createMH(:namespace)
+
+      sp_hash = {
+        :cols => [:id, :display_name]
+      }
+      namespaces = Model.get_objs(namespace_mh,sp_hash).map{|ns| ns[:display_name]}
+
+      cmp_modules.each do |k,v|
+        v_namespace = v[:namespace_info]
+        return ParsingError::BadNamespaceReference.new(:name => v_namespace) unless namespaces.include?(v_namespace)
+      end
+    end
 
     # returns parsing_error if parsing error
 

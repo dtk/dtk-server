@@ -86,6 +86,15 @@ module DTK; class BaseModule
 
     def parse_dsl_and_update_model(impl_obj,module_branch_idh,version=nil,namespace=nil,opts={})
       set_dsl_parsed!(false)
+
+      module_branch = module_branch_idh.create_object()
+      component_module_refs = klass(self).update_component_module_refs(self.class,module_branch,opts)
+      return component_module_refs if ModuleDSL::ParsingError.is_error?(component_module_refs)
+
+      v_namespaces = klass(self).validate_module_ref_namespaces(module_branch,component_module_refs)
+      return v_namespaces if ModuleDSL::ParsingError.is_error?(v_namespaces)
+
+      opts.merge!(:component_module_refs => component_module_refs)
       klass(self).parse_and_update_model(self,impl_obj,module_branch_idh,version,namespace,opts)
       set_dsl_parsed!(true)
     end

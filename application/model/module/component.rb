@@ -16,6 +16,15 @@ module DTK
       config_agent_type
     end
 
+    class DSLParser < DTK::ModuleDSLParser
+      def self.module_type()
+        :component_module
+      end
+      def self.module_class
+        ModuleDSL
+      end
+    end
+
    private
     def config_agent_type_default()
       :puppet

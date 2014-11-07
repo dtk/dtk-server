@@ -16,6 +16,18 @@ module DTK
         add_new_ports_on_component_templates()
       end
 
+      def raise_error_if_missing_from_module_refs(include_modules,module_refs_modules={})
+        if inc_modules = include_modules['includes']
+          missing = []
+          ref_cmp_modules = module_refs_modules.component_modules.keys
+          inc_modules.each do |im|
+            missing << im unless ref_cmp_modules.include?(im.to_sym)
+          end
+
+          raise ParsingError::MissingFromModuleRefs.new(:modules => missing) unless missing.empty?
+        end
+      end
+
      private
       def initialize(cmp_module)
         @cmp_module = cmp_module

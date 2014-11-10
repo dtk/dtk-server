@@ -323,6 +323,7 @@ module DTK
           {}
         end
       elsif opts[:raise_error] and not response.ok?
+        Log.error_pp(response)
         msg = error_msg(response)
         if is_internal_error?(response)
           raise Error.new(msg)

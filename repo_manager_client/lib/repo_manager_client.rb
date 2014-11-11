@@ -53,22 +53,15 @@ module DTK
     def list_modules(filter=nil, client_rsa_pub_key = nil)
       repo_user = get_approved_repouser(client_rsa_pub_key)
 
-      # added 'test' to list component_modules until we implement test_modules on repo_manager
-      # if filter[:type].eql?('component') || filter[:type].eql?('test')
-      #   response = list_component_modules(repo_user.owner_username, client_rsa_pub_key)
-      # else
-      #   response = list_service_modules(repo_user.owner_username, client_rsa_pub_key)
-      # end
-
       case filter[:type]
         when 'component'
-          response = list_component_modules(repo_user.owner_username, client_rsa_pub_key)
+          response = list_component_modules(CurrentSession.catalog_username, client_rsa_pub_key)
         when 'service'
-          response = list_service_modules(repo_user.owner_username, client_rsa_pub_key)
+          response = list_service_modules(CurrentSession.catalog_username, client_rsa_pub_key)
         when 'test'
-          response = list_test_modules(repo_user.owner_username, client_rsa_pub_key)
+          response = list_test_modules(CurrentSession.catalog_username, client_rsa_pub_key)
         when 'node'
-          response = list_node_modules(repo_user.owner_username, client_rsa_pub_key)
+          response = list_node_modules(CurrentSession.catalog_username, client_rsa_pub_key)
         else
           raise ErrorUsage.new("Provided module type '#{filter[:type]}' is not valid")
         end
@@ -89,7 +82,7 @@ module DTK
 
       post_rest_request_data(
         url,
-        request_params.merge(user_params_with_fingerprint(repo_user.owner_username, client_rsa_pub_key)),
+        request_params.merge(user_params_with_fingerprint(CurrentSession.catalog_username, client_rsa_pub_key)),
         :raise_error => true
         )
     end
@@ -107,7 +100,7 @@ module DTK
 
       post_rest_request_data(
         url,
-        request_params.merge(user_params_with_fingerprint(repo_user.owner_username, client_rsa_pub_key)),
+        request_params.merge(user_params_with_fingerprint(CurrentSession.catalog_username, client_rsa_pub_key)),
         :raise_error => true
         )
     end
@@ -127,7 +120,7 @@ module DTK
 
       post_rest_request_data(
         url,
-        request_params.merge(user_params_with_fingerprint(repo_user.owner_username, client_rsa_pub_key)),
+        request_params.merge(user_params_with_fingerprint(CurrentSession.catalog_username, client_rsa_pub_key)),
         :raise_error => true
         )
     end
@@ -144,7 +137,7 @@ module DTK
 
       response = post_rest_request_data(
         url,
-        request_params.merge(user_params_with_fingerprint(repo_user.owner_username, client_rsa_pub_key)),
+        request_params.merge(user_params_with_fingerprint(CurrentSession.catalog_username, client_rsa_pub_key)),
         :raise_error => true
         )
       response['collaborators']
@@ -191,7 +184,7 @@ module DTK
       client_repo_user = get_repo_user_by_username(username)
 
       if client_repo_user && client_repo_user.has_repoman_direct_access?
-        response = delete_user(client_repo_user.owner_username, client_repo_user.rsa_pub_key)
+        response = delete_user(CurrentSession.catalog_username, client_repo_user.rsa_pub_key)
         client_repo_user.update(:repo_manager_direct_access => false) if response
       end
 
@@ -204,7 +197,7 @@ module DTK
       unless client_repo_user.has_repoman_direct_access?
         response = post_rest_request_data(
           '/v1/users/add_access',
-           user_params(client_repo_user.owner_username, client_rsa_pub_key, client_repo_user.rsa_key_name),
+           user_params(CurrentSession.catalog_username, client_rsa_pub_key, client_repo_user.rsa_key_name),
           :raise_error => true
         )
 
@@ -478,7 +471,7 @@ module DTK
 
       repo_user = get_repo_user(client_rsa_pub_key)
 
-      params_hash[:username] = repo_user.owner_username
+      params_hash[:username] = CurrentSession.catalog_username
       params_hash[:user_fingerprint] = SSHKey.fingerprint(client_rsa_pub_key)
 
       params_hash

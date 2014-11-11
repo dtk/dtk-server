@@ -48,6 +48,10 @@ module XYZ
       { :username => usr_obj.catalog_username, :password => usr_obj.catalog_password }
     end
 
+    def self.catalog_username
+      catalog_credentials()[:username]
+    end
+
     def set_user_object(user_object)
       self.access_time = Time.now
       self.user_object = user_object

@@ -87,6 +87,17 @@ module DTK
       namespace
     end
 
+    def self.find_or_create_or_default(namespace_mh, namespace_name)
+      namespace_obj = nil
+      if (namespace_name && !namespace_name.empty?)
+        namespace_obj = self.find_or_create(namespace_mh, namespace_name)
+      else
+        namespace_obj = self.default_namespace(namespace_mh)
+      end
+
+      namespace_obj
+    end
+
     #
     # Create namespace object
     #

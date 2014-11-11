@@ -1,3 +1,5 @@
+r8_require('../../utils/internal/puppet_forge/client')
+
 module DTK
   class Component_moduleController < AuthController
     helper :module_helper
@@ -161,8 +163,6 @@ module DTK
     #### actions to interact with remote repos ###
     # TODO: rename; this is just called by install; import ops call create route
     def rest__import()
-
-
       rest_ok_response install_from_dtkn_helper(:component_module)
     end
 
@@ -172,6 +172,15 @@ module DTK
       rest_ok_response publish_to_dtkn_helper(component_module)
     end
 
+    def rest__install_puppet_module()
+      puppet_module_name = ret_non_null_request_params(:puppetf_module_name)
+      module_name = ret_non_null_request_params(:module_name)
+      namespace = ret_request_params(:module_namespace)
+
+      response = PuppetForge::Client.install(puppet_module_name, nil, true)
+
+      rest_ok_response :ok
+    end
 
     # this should be called when the module is linked, but the specfic version is not
     def rest__import_version()

@@ -6,11 +6,7 @@ module DTK; module ModuleMixins
     # returns hash with keys :module_idh :module_branch_idh
     def create_module(project,module_name,opts={})
       # check if passed, if not use default namespace
-      if (opts[:module_namespace] && !opts[:module_namespace].empty?)
-        module_namespace = Namespace.find_or_create(project.model_handle(:namespace), opts[:module_namespace])
-      else
-        module_namespace = Namespace.default_namespace(project.model_handle(:namespace))
-      end
+      module_namespace = Namespace.find_or_create_or_default(project.model_handle(:namespace), opts[:module_namespace])
 
       # we encapsulate
       local_params = ModuleBranch::Location::LocalParams::Server.new(

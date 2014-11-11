@@ -111,6 +111,7 @@ R8::ReactorRoute.draw do
   post  'component_module/get_workspace_branch_info' => 'component_module#get_workspace_branch_info'
   post  'component_module/update_from_initial_create' => 'component_module#update_from_initial_create'
   post  'component_module/list' => 'component_module#list'
+  post  'component_module/install_puppet_module' => 'component_module#install_puppet_module'
 
    # TEST_MODULE
   post  'test_module/add_user_direct_access' => 'account#add_user_direct_access'

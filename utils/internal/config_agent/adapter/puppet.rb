@@ -28,7 +28,7 @@ module DTK
         '3.4' => (0..3).map{|x|x.to_s},
         '3.5' => (0..1).map{|x|x.to_s},
         '3.6' => (0..2).map{|x|x.to_s},
-        '3.7' => (0..1).map{|x|x.to_s},
+        '3.7' => (0..3).map{|x|x.to_s},
       }
 
       def ret_msg_content(config_node,opts={})

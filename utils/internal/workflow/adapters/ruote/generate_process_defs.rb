@@ -43,8 +43,7 @@ module DTK
               participant_executable_action(:sync_agent_code,task,context,:task_type => "sync_agent_code")
             end
               main = participant_executable_action(:execute_on_node,task,context,:task_type => "config_node",:task_end => true)
-#          sequence_tasks = [guards,sync_agent_code,authorize_action,main].compact
-          sequence_tasks = [guards,authorize_action,sync_agent_code,main].compact
+          sequence_tasks = [guards,sync_agent_code,authorize_action,main].compact
           sequence(*sequence_tasks)
         end
       end

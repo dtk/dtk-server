@@ -8,12 +8,11 @@ module DTK
           task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
           PerformanceService.start(name(),object_id)          
 
-          head_git_commit_id = nil
           execution_context(task,workitem,task_start) do
             node = task[:executable_action][:node]
-
-            skip_sync, head_git_commit_id = skip_sync?(node)
-            if skip_sync
+            node.refresh_external_ref!()
+            agent_commit_id_helper = AgentComitIdHelper.new(node)
+            if skip_sync = agent_commit_id_helper.skip_sync?()
               set_result_succeeded(workitem,nil,task,action) if task_end
               skip_reason = (skip_sync[:error] ? :skipped_because_of_error : :skipped_because_already_synced)
               log_participant.end(skip_reason,:task_id=>task_id)
@@ -42,7 +41,7 @@ module DTK
                     # cancel_upstream_subtasks(workitem)
                     set_result_failed(workitem,result,task)
                   else
-                    node.update_agent_git_commit_id(head_git_commit_id)
+                    agent_commit_id_helper.update_node()
                     task.add_event(:complete_succeeded,result)
                     log_participant.end(:complete_succeeded,:task_id=>task_id)
                     set_result_succeeded(workitem,result,task,action) if task_end 
@@ -81,7 +80,11 @@ module DTK
                 end
               end
             }
-            receiver_context = {:callbacks => callbacks, :head_git_commit_id => head_git_commit_id, :expected_count => 1}
+            receiver_context = {
+              :callbacks => callbacks, 
+              :head_git_commit_id => agent_commit_id_helper.head_git_commit_id, 
+              :expected_count => 1
+            }
             begin
               workflow.initiate_sync_agent_action(task,receiver_context)
              rescue Exception => e
@@ -106,23 +109,32 @@ module DTK
           reply_to_engine(wi)
         end
 
-        # [returns skip_sync, head_git_commit_id]
-        # where skip_synch if non null has Boolean key :error
-        def skip_sync?(node)
-          skip_sync = nil
-          head_git_commit_id = nil #nil means dont skip
-          installed_agent_git_commit_id = node.get_field?(:agent_git_commit_id)
-          begin
-            head_git_commit_id = AgentGritAdapter.get_head_git_commit_id()
-            if R8::Config[:node_agent_git_clone][:mode] == 'debug'
-              installed_agent_git_commit_id=node[:agent_git_commit_id]=nil
-            end
-           rescue => e
-            Log.error("Error trying to get most recent sync agent code (#{e.to_s}); skipping the sync")
-            skip_sync = {:error => true}
+        class AgentComitIdHelper
+          attr_reader :head_git_commit_id
+          def initialize(node)
+            @node = node
+            @head_git_commit_id = nil
           end
-          skip_sync ||= (head_git_commit_id == installed_agent_git_commit_id) && {:error => false}
-          [skip_sync, head_git_commit_id]
+          # returns nil of hash with Boolean key :error
+          def skip_sync?()
+            skip_sync = nil
+            @head_git_commit_id = nil #nil means dont skip
+            installed_agent_git_commit_id = @node.get_field?(:agent_git_commit_id)
+            begin
+              @head_git_commit_id = AgentGritAdapter.get_head_git_commit_id()
+              if R8::Config[:node_agent_git_clone][:mode] == 'debug'
+                installed_agent_git_commit_id = @node[:agent_git_commit_id] = nil
+              end
+             rescue => e
+              Log.error("Error trying to get most recent sync agent code (#{e.to_s}); skipping the sync")
+              skip_sync = {:error => true}
+            end
+            skip_sync || ((@head_git_commit_id == installed_agent_git_commit_id) && {:error => false})
+          end
+
+          def update_node()
+            @node.update_agent_git_commit_id(@head_git_commit_id)
+          end
         end
 
       end

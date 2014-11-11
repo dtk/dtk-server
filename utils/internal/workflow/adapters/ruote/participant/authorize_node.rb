@@ -3,7 +3,6 @@ module DTK
     module RuoteParticipant
       class AuthorizeNode < NodeParticipants
         def consume(workitem)
-          # TODO succeed without sending node request if authorized already
           params = get_params(workitem) 
           PerformanceService.start(name(),object_id)
           task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
@@ -12,6 +11,15 @@ module DTK
           user_object  = CurrentSession.new.user_object()
 
           execution_context(task,workitem,task_start) do
+            node = task[:executable_action][:node]
+            if authorized_already?(node)
+              set_result_succeeded(workitem,nil,task,action) if task_end
+              log_participant.end(:skipped_because_already_authorized,:task_id=>task_id)
+              delete_task_info(workitem)
+              PerformanceService.end_measurement(name(),object_id)
+              return reply_to_engine(workitem)
+            end
+
             callbacks = {
               :on_msg_received => proc do |msg|
                 inspect_agent_response(msg)
@@ -70,6 +78,12 @@ module DTK
           delete_task_info(wi)
           reply_to_engine(wi)
         end
+
+        def authorized_already?(node)
+          node
+          false
+        end
+
       end
     end
   end

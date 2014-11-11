@@ -9,29 +9,14 @@ module DTK
           PerformanceService.start(name(),object_id)          
 
           head_git_commit_id = nil
-          # TODO Amar: test to remove dyn attrs and errors_in_result part
           execution_context(task,workitem,task_start) do
-
             node = task[:executable_action][:node]
-            installed_agent_git_commit_id = node.get_field?(:agent_git_commit_id)
-            head_git_commit_id = nil
-            begin
-              head_git_commit_id = AgentGritAdapter.get_head_git_commit_id()
-              if R8::Config[:node_agent_git_clone][:mode] == 'debug'
-                installed_agent_git_commit_id=node[:agent_git_commit_id]=nil
-              end
-             rescue => e
-              Log.error("Error trying to get most recent sync agent code (#{e.to_s}); skipping the sync")
-              head_git_commit_id = -1
-            end
-            if (head_git_commit_id == installed_agent_git_commit_id) or head_git_commit_id == -1
-              set_result_succeeded(workitem,nil,task,action) if task_end
-              if head_git_commit_id == -1
-                log_participant.end(:skipped_because_of_error,:task_id=>task_id)
-              else
-                log_participant.end(:skipped_because_already_synced,:task_id=>task_id)
-              end
 
+            skip_sync, head_git_commit_id = skip_sync?(node)
+            if skip_sync
+              set_result_succeeded(workitem,nil,task,action) if task_end
+              skip_reason = (skip_sync[:error] ? :skipped_because_of_error : :skipped_because_already_synced)
+              log_participant.end(skip_reason,:task_id=>task_id)
               delete_task_info(workitem)
               PerformanceService.end_measurement(name(),object_id)
               return reply_to_engine(workitem)
@@ -120,6 +105,26 @@ module DTK
           delete_task_info(wi)
           reply_to_engine(wi)
         end
+
+        # [returns skip_sync, head_git_commit_id]
+        # where skip_synch if non null has Boolean key :error
+        def skip_sync?(node)
+          skip_sync = nil
+          head_git_commit_id = nil #nil means dont skip
+          installed_agent_git_commit_id = node.get_field?(:agent_git_commit_id)
+          begin
+            head_git_commit_id = AgentGritAdapter.get_head_git_commit_id()
+            if R8::Config[:node_agent_git_clone][:mode] == 'debug'
+              installed_agent_git_commit_id=node[:agent_git_commit_id]=nil
+            end
+           rescue => e
+            Log.error("Error trying to get most recent sync agent code (#{e.to_s}); skipping the sync")
+            skip_sync = {:error => true}
+          end
+          skip_sync ||= (head_git_commit_id == installed_agent_git_commit_id) && {:error => false}
+          [skip_sync, head_git_commit_id]
+        end
+
       end
     end
   end

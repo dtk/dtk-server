@@ -361,6 +361,14 @@ module DTK
       update_from_select(model_handle,field_set,array_ds)
     end
 
+    def update_hash_key(field,hash_key,hash_key_val)
+      self[field] ||= Hash.new
+      self[field].merge!(hash_key => hash_key_val)
+      raise Error.new("Cannot execute update without the object having an id") unless id()
+      self.class.update_from_rows(model_handle,[{:id => id(),field => {hash_key => hash_key_val}}],:partial_value=>true)
+    end
+    # TODO: check calss to update with opts having :partial_value=>true to see whether shoudl use variant of update_hash_key instead
+    # where there is a deep merge on the field's value
     def update(scalar_assignments,opts={})
       scalar_assignments.each{|k,v| self[k] = v}
       raise Error.new("Cannot execute update without the object having an id") unless id()

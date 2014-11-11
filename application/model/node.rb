@@ -391,8 +391,15 @@ module DTK
       name_to_id_helper(model_handle,name,sp_hash)
     end
 
+    def git_authorized?()
+      (get_field?(:external_ref)||{})[:git_authorized]
+    end
+    def set_git_authorized(bool_val)
+      update_external_ref_field(:git_authorized,bool_val)
+    end
+
     def update_external_ref_field(ext_ref_field,val)
-      update({:external_ref => {ext_ref_field => val}},{:partial_value=>true})
+      update_hash_key(:external_ref,ext_ref_field,val)
     end
 
     def get_and_update_status!()

@@ -12,7 +12,7 @@ module DTK
 
           execution_context(task,workitem,task_start) do
             node = task[:executable_action][:node]
-            if authorized_already?(node)
+            if node.git_authorized?()
               set_result_succeeded(workitem,nil,task,action) if task_end
               log_participant.end(:skipped_because_already_authorized,:task_id=>task_id)
               delete_task_info(workitem)
@@ -35,7 +35,7 @@ module DTK
                     set_result_failed(workitem,result,task)
                   else
                     log_participant.end(:complete_succeeded,:task_id=>task_id)
-                    # task[:executable_action][:node].set_authorized()
+                    node.set_git_authorized(true)
                     set_result_succeeded(workitem,result,task,action) if task_end 
                   end
                   delete_task_info(workitem)
@@ -57,6 +57,7 @@ module DTK
                   cancel_upstream_subtasks(workitem)
                   delete_task_info(workitem)
                   log_participant.end(:error,:error_obj=>error_obj,:backtrace=>error_obj.backtrace[0..7],:task_id=>task[:id])
+                  reply_to_engine(workitem)
                 end
               end 
             }
@@ -78,12 +79,6 @@ module DTK
           delete_task_info(wi)
           reply_to_engine(wi)
         end
-
-        def authorized_already?(node)
-          node
-          false
-        end
-
       end
     end
   end

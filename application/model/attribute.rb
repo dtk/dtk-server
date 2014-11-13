@@ -29,7 +29,7 @@ module DTK
     extend MetaClassMixin
 
     def self.common_columns()
-      [:id,:display_name,:group_id,:hidden,:description,:component_component_id,:value_derived,:value_asserted,:semantic_data_type,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change,:port_type_asserted,:is_port,:external_ref,:read_only]
+      [:id,:display_name,:group_id,:hidden,:description,:component_component_id,:value_derived,:value_asserted,:semantic_data_type,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change,:port_type_asserted,:is_port,:external_ref,:read_only,:tags]
     end
 
     def self.legal_display_name?(display_name)
@@ -147,6 +147,23 @@ module DTK
       end
     end
 
+    def filter_when_listing?(opts={})
+      if self[:hidden]
+        return true
+      end
+      if opts[:editable] and is_readonly?
+        return true
+      end
+      if tags = opts[:tags]
+        return true unless tags.find{|tag|match_tag?(tag)}
+      end
+      false
+    end
+
+    # assume this is called when :tags filed has been pulled from db
+    def match_tag?(tag)
+      self[:tags] and self[:tags].include?(tag)
+    end
 
     def self.create_or_modify_field_def(parent,field_def)
       attr_mh = parent.model_handle.create_childMH(:attribute)

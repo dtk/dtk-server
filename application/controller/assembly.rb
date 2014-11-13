@@ -130,14 +130,14 @@ module DTK
           opts.merge!(:truncate_attribute_values => true,:mark_unset_required => true)
         end
 
-        additional_filter_proc = 
-          if 'editable' == ret_request_params(:attribute_type)
-            Proc.new{|e|(!e[:attribute].kind_of?(Attribute)) or (!e[:attribute][:hidden] and !e[:attribute].is_readonly?)}
-          else
-            Proc.new do |e|
-            (!e[:attribute].kind_of?(Attribute)) or !e[:attribute][:hidden]
-          end
-          end
+        additional_filter_opts = {
+          :tags => ret_request_params(:tags),
+          :editable => 'editable' == ret_request_params(:attribute_type)
+        }
+        additional_filter_proc = Proc.new do |e|
+          attr = e[:attribute]
+          (!attr.kind_of?(Attribute)) or !attr.filter_when_listing?(additional_filter_opts)
+        end
       end
 
       opts[:filter_proc] = Proc.new do |e|

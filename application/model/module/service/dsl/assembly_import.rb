@@ -219,10 +219,8 @@ module DTK; class ServiceModule
             cmps_with_titles << {:cmp_ref => cmp_ref, :cmp_title => cmp_title}
           end
           
-          ret_attribute_overrides(cmp_input).each_pair do |attr_name,attr_val|
-            pntr = cmp_ref[:attribute_override] ||= Hash.new
-            pntr.merge!(import_attribute_overrides(attr_name,attr_val))
-          end
+          import_component_attribute_info(cmp_ref,cmp_input)
+
          rescue ParsingError => e
           return ParsingError.new(e.to_s,opts_file_path(opts))
         end
@@ -234,6 +232,19 @@ module DTK; class ServiceModule
       set_attribute_template_ids!(ret,container_idh)
       add_title_attribute_overrides!(cmps_with_titles,container_idh)
       ret
+    end
+
+    def self.import_component_attribute_info(cmp_ref,cmp_input)
+      ret_attribute_overrides(cmp_input).each_pair do |attr_name,attr_val|
+        attr_overrides = import_attribute_overrides(attr_name,attr_val)
+        update_component_attribute_info(cmp_ref,attr_overrides)
+      end
+    end
+    def self.output_component_attribute_info(cmp_ref)
+      cmp_ref[:attribute_override] ||= Hash.new
+    end
+    def self.update_component_attribute_info(cmp_ref,hash)
+      output_component_attribute_info(cmp_ref).merge!(hash)
     end
 
     # These are attributes at the assembly level, as opposed to being at the component or node level

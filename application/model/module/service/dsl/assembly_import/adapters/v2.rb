@@ -136,22 +136,24 @@ module DTK; class ServiceModule
         end
       end
 
-      def self.ret_attribute_overrides(cmp_input)
-        ret =
-          if cmp_input.kind_of?(Hash) 
-            info = cmp_input.values.first
-            unless info.kind_of?(Hash)
-              err_msg = "Parsing error after component term (#{cmp_input.keys.first}) in: ?1"
-              if info.nil?
-                err_msg << "\nThere is a nil value after this term"
-              end
-              raise ParsingError.new(err_msg,cmp_input)
+      def self.ret_component_hash(cmp_input)
+        ret = Hash.new
+        if cmp_input.kind_of?(Hash) 
+          ret = cmp_input.values.first
+          unless ret.kind_of?(Hash)
+            err_msg = "Parsing error after component term (#{cmp_input.keys.first}) in: ?1"
+            if ret.nil?
+              err_msg << "\nThere is a nil value after this term"
             end
-            info["attributes"]||{}
+            raise ParsingError.new(err_msg,cmp_input)
           end
-        ret||{}
+        end
+        ret
       end
-      
+
+      def self.ret_attribute_overrides(cmp_input)
+        ret_component_hash(cmp_input)["attributes"]||{}
+      end
     end
   end
 end; end

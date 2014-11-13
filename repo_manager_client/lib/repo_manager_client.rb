@@ -224,7 +224,7 @@ module DTK
     def delete_user(username, rsa_pub_key)
       route = "/v1/users/remove_access"
       body = user_params(username, rsa_pub_key)
-      delete_rest_request_data(route,body,:raise_error => true)
+      delete_rest_request_data(route,body, :raise_error => true)
     end
 
 

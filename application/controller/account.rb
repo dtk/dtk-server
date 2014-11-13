@@ -66,6 +66,7 @@ module DTK
 
     def rest__remove_user_direct_access()
       username = ret_non_null_request_params(:username)
+      unregistered_with_repoman = true
 
       # if id instead of username
       if username.to_s =~ /^[0-9]+$/
@@ -75,12 +76,20 @@ module DTK
         username = user[:username] if user
       end
 
-      response = Repo::Remote.new.remove_client_access(username)
+      begin
+        response = Repo::Remote.new.remove_client_access(username)
+      rescue DTK::Error => e
+        # we ignore it and we fix it later when calling repomanager
+        Log.warn("We were not able to remove user from Repo Manager, reason: #{e.message}")
+        unregistered_with_repoman = false
+      end
 
       ServiceModule.remove_user_direct_access(model_handle_with_private_group(:service_module),username)
       ComponentModule.remove_user_direct_access(model_handle_with_private_group(:component_module),username)
 
-      rest_ok_response
+      rest_ok_response(
+          :unregistered_with_repoman => unregistered_with_repoman
+        )
     end
 
     def rest__set_default_namespace()

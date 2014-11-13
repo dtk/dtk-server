@@ -1,8 +1,8 @@
 module Puppet
 end
-require 'puppet'
-#require 'puppet/type'
-#require 'puppet/parser'
+require 'puppet/resource'
+require 'puppet/type'
+require 'puppet/parser'
 
 module DTK; class ConfigAgent; class Adapter::Puppet
   r8_nested_require('parser','external_dependency')
@@ -58,9 +58,7 @@ module DTK; class ConfigAgent; class Adapter::Puppet
     def parse_given_file_content__manifest(file_content,opts={})
       synchronize_and_handle_puppet_globals({:code => file_content, :ignoreimport => false},opts) do
         environment = "production"
-        # puppet versions 3.5 and up dont allow creating a new environment like below
-        #node_env = ::Puppet::Node::Environment.new(environment)
-        node_env = ::Puppet::Node::Environment.current.clone
+        node_env = ::Puppet::Node::Environment.new(environment)
         known_resource_types = ::Puppet::Resource::TypeCollection.new(node_env)
         # needed to make more complicared because cannot call krt = ::Puppet::Node::Environment.new(environment).known_resource_types because perform_initial_import needs import set to false, but rest needs it set to true
         # fragment from perform_initial_import call with ::Puppet[:ignoreimport] = true set in middle

@@ -30,6 +30,10 @@ module XYZ; class Attribute
       column :semantic_type_summary, :varchar, :size => 25 #for efficiency optional token that summarizes info from semantic_type
       virtual_column :semantic_type_object, :type => :object, :hidden => true, :local_dependencies => [:semantic_type]
 
+
+      # TODO: may be able to remove some feilds and use tags to store them
+      column :tags, :json
+
       ###cols that relate to who or what can or does change the attribute
       # TODO: need to clearly relate these four; may get rid of read_only
       column :read_only, :boolean, :default => false 

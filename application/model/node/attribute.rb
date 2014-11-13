@@ -27,7 +27,9 @@ module DTK
       def raise_error_if_invalid_puppet_version(puppet_version)
         unless puppet_version.nil? or puppet_version.empty?
           unless RubyGemsChecker.gem_exists?('puppet', puppet_version)
-            raise ErrorUsage.new("Invalid Puppet version (#{puppet_version})")
+           # TODO: took out because this is giving false posatives 
+           # raise ErrorUsage.new("Invalid Puppet version (#{puppet_version})")
+            Log.error("RubyGemsChecker.gem_exists? test fails with Puppet version (#{puppet_version})")
           end
         end
       end

@@ -1,2 +1,0 @@
-class apt::include() {
-}

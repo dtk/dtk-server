@@ -1,0 +1,9 @@
+[submodule "temp_modules/internal--cm--dtk_server"]
+	path = temp_modules/internal--cm--dtk_server
+	url = git@dtknet.servicecatalog.it:internal--cm--dtk_server
+[submodule "temp_modules/internal--cm--dtk_repo_manager"]
+	path = temp_modules/internal--cm--dtk_repo_manager
+	url = git@dtknet.servicecatalog.it:internal--cm--dtk_repo_manager
+[submodule "dtk_modules/internal--cm--dtk_server"]
+	path = dtk_modules/internal--cm--dtk_server
+	url = git@dtknet.servicecatalog.it:internal--cm--dtk_server

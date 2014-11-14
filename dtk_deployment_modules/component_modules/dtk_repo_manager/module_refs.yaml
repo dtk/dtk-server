@@ -1,6 +1,0 @@
----
-component_modules:
-  apt:
-    namespace: internal
-  rvm:
-    namespace: internal

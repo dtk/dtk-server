@@ -158,9 +158,9 @@ module DTK
           @ndx_ports[port[:id]] = port
         end
 
-        # get contained components-non-default attributes
+        # get contained components-non-default attribute candidates
         sp_hash = {
-          :cols => node_scalar_cols + [:cmps_and_non_default_attrs],
+          :cols => node_scalar_cols + [:cmps_and_non_default_attr_candidates],
           :filter => [:oneof,:id,node_ids]
         }
 
@@ -168,7 +168,7 @@ module DTK
         if node_cmp_attr_rows.empty?
           raise ErrorUsage.new("No components in the nodes being grouped to be an assembly template")
         end
-        cmp_scalar_cols = node_cmp_attr_rows.first[:component].keys - [:non_default_attribute]
+        cmp_scalar_cols = node_cmp_attr_rows.first[:component].keys - [:non_default_attr_candidate]
         @ndx_nodes = Hash.new
         node_cmp_attr_rows.each do |r|
           node_id = r[:id]
@@ -184,9 +184,9 @@ module DTK
             matching_cmp = r[:component].hash_subset(*cmp_scalar_cols).merge(:non_default_attributes => Array.new)
             cmps << matching_cmp
           end
-          if attr = r[:non_default_attribute]
-            unless attr[:attribute_value].nil?
-              matching_cmp[:non_default_attributes] << attr
+          if attr_cand = r[:non_default_attr_candidate] 
+            if non_default_attr = NonDefaultAttribute.isa?(attr_cand,matching_cmp)
+              matching_cmp[:non_default_attributes] << non_default_attr
             end
           end
         end
@@ -345,7 +345,10 @@ module DTK
         cmp_ref_hash = Aux::hash_subset(cmp,[:display_name,:description,:component_type])
         cmp_template_id = cmp[:ancestor_id]
         cmp_ref_hash.merge!(:component_template_id => cmp_template_id)
-        add_attribute_overrides!(cmp_ref_hash,cmp,cmp_template_id)
+        attrs = cmp[:non_default_attributes]
+        unless attrs.nil? or attrs.empty?
+          NonDefaultAttribute.add_to_cmp_ref_hash!(cmp_ref_hash,self,attrs,cmp_template_id)
+        end
         {cmp_ref_ref => cmp_ref_hash}
       end
 
@@ -353,38 +356,41 @@ module DTK
         assembly_template_node_ref(self[:ref],node[:display_name])
       end
 
-      def add_attribute_overrides!(cmp_ref_hash,cmp,cmp_template_id)
-        attrs = cmp[:non_default_attributes]
-        return if attrs.nil? or attrs.empty?
-        sp_hash = {
-          :cols => [:id,:display_name,:data_type,:semantic_data_type],
-          :filter => [:and,[:eq,:component_component_id,cmp_template_id],[:oneof,:display_name,attrs.map{|a|a[:display_name]}]]
-        }
-        ndx_attrs = Model.get_objs(model_handle(:attribute),sp_hash).inject(Hash.new) do |h,r|
-          h.merge(r[:display_name] => r)
-        end
-        attr_override = cmp_ref_hash[:attribute_override] = Hash.new
-        attrs.each do |attr|
-          attr_ref =  attr[:ref]
-          attr_hash =  AttrHash.new(attr,cmp)
-          if attribute_template = ndx_attrs[attr[:display_name]] 
-            attr_hash[:attribute_template_id] = attribute_template[:id]
-            attr_hash.merge!(Aux::hash_subset(attribute_template,[:data_type,:semantic_data_type]))
-          else
-            component_type = Component.display_name_print_form(cmp_ref_hash[:component_type])
-            module_name = Component.module_name(cmp_ref_hash[:component_type])
-            raise ErrorUsage.new("Attribute (#{attr[:display_name]}) does not exist in base component (#{component_type}); you may need to invoke push-module-updates #{module_name}")
-          end
-          attr_override[attr_ref] = attr_hash
-        end
-      end
-      class AttrHash < ::Hash
+      class NonDefaultAttribute < ::Hash
         attr_reader :is_title_attribute
         def initialize(attr,cmp)
           super()
-          replace(Aux::hash_subset(attr,[:display_name,:description]))
+          replace(Aux::hash_subset(attr,[:display_name,:description,:ref]))
           self[:attribute_value] = attr[:attribute_value] # virtual attributes do not work in Aux::hash_subset
           @is_title_attribute = ((not cmp[:only_one_per_node]) and attr.is_title_attribute?())
+        end
+        def self.isa?(attr,cmp)
+          if (attr[:is_instance_value] and !attr[:attribute_value].nil?) or attr[:tags]
+            new(attr,cmp)
+          end
+        end
+
+        def self.add_to_cmp_ref_hash!(cmp_ref_hash,factory,non_def_attrs,cmp_template_id)
+          attr_names = non_def_attrs.map{|a|a[:display_name]}
+          sp_hash = {
+            :cols => [:id,:display_name,:data_type,:semantic_data_type],
+            :filter => [:and,[:eq,:component_component_id,cmp_template_id],[:oneof,:display_name,attr_names]]
+          }
+          ndx_attrs = Model.get_objs(factory.model_handle(:attribute),sp_hash).inject(Hash.new) do |h,r|
+            h.merge(r[:display_name] => r)
+          end
+          attr_override = cmp_ref_hash[:attribute_override] = Hash.new
+          non_def_attrs.each do |non_def_attr|
+            if attribute_template = ndx_attrs[non_def_attr[:display_name]] 
+              non_def_attr[:attribute_template_id] = attribute_template[:id]
+              non_def_attr.merge!(Aux::hash_subset(attribute_template,[:data_type,:semantic_data_type]))
+            else
+              component_type = Component.display_name_print_form(cmp_ref_hash[:component_type])
+              module_name = Component.module_name(cmp_ref_hash[:component_type])
+              raise ErrorUsage.new("Attribute (#{non_def_attr[:display_name]}) does not exist in base component (#{component_type}); you may need to invoke push-module-updates #{module_name}")
+            end
+            attr_override[non_def_attr[:ref]] = non_def_attr
+          end
         end
       end
     end

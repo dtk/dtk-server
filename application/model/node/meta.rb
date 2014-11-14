@@ -287,7 +287,7 @@ module DTK
            :cols => attr_cols
          }]
       }
-      lambda__components_and_non_default_attrs =
+      lambda__cmps_and_non_default_attr_candidates =
         lambda{|args|
         cmp_cols = args[:cmp_cols]
         attr_cols = args[:attr_cols]
@@ -295,11 +295,10 @@ module DTK
          {
            :model_name => :attribute,
            :convert => true,
-           :alias => :non_default_attribute,
+           :alias => :non_default_attr_candidate,
            :join_type => :left_outer,
            :join_cond=>{:component_component_id => q(:component,:id)},
-           :filter => [:eq,:is_instance_value,true],
-           :cols => attr_cols
+                 :cols => attr_cols
          }]
       }
       virtual_column :component_ws_module_branches, :type => :json, :hidden => true, 
@@ -328,11 +327,12 @@ module DTK
         lambda__components_and_attrs.call(
           :cmp_cols=>FactoryObject::CommonCols+[:component_type],
           :attr_cols=>FactoryObject::CommonCols+[:attribute_value,:required])
-      virtual_column :cmps_and_non_default_attrs, :type => :json, :hidden => true, 
+
+      virtual_column :cmps_and_non_default_attr_candidates, :type => :json, :hidden => true, 
       :remote_dependencies =>
-        lambda__components_and_non_default_attrs.call(
+        lambda__cmps_and_non_default_attr_candidates.call(
           :cmp_cols=>FactoryObject::CommonCols+[:ancestor_id,:component_type,:only_one_per_node],
-          :attr_cols=>FactoryObject::CommonCols+[:attribute_value,:external_ref,:data_type,:tags])
+          :attr_cols=>FactoryObject::CommonCols+[:is_instance_value,:attribute_value,:external_ref,:data_type,:tags])
         
       virtual_column :input_attribute_links_cmp, :type => :json, :hidden => true, 
       :remote_dependencies => 

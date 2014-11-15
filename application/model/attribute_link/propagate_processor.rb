@@ -1,45 +1,8 @@
-# TODO: this needs a lot of cleanup
+# TODO: deprecated most of this and moving to DTK::AttributeLink::Function
 module DTK; class AttributeLink
   class PropagateProcessor
-    class Output < HashObject
-    end
-    class OutputArrayAppend < Output
-    end
-    class OutputPartial < Output
-    end
-
-    # propagate from output var to input var
-    def propagate()
-      # function 'eq' short circuited
-      return {:value_derived => output_value_aux()} if function == "eq"
-      hash_ret = 
-        if function.kind_of?(String)
-          case function
-            when "eq_indexed"
-             propagate_when_eq_indexed()
-            when "array_append"
-              propagate_when_array_append()
-            # TODO: may deprecate rest
-             when "select_one"
-              propagate_when_select_one()
-            when "sap_config__l4" 
-              propagate_when_sap_config__l4()
-            when "host_address_ipv4"
-              propagate_when_host_address_ipv4()
-            when "sap_conn__l4__db" 
-              propagate_when_sap_conn__l4__db()
-            when "sap_config_conn__db"
-              propagate_when_sap_config_conn__db()
-          end
-        elsif function.kind_of?(Hash) and function.has_key?(:function)
-          propagate_when_function_specified(function[:function])
-        end
-      unless hash_ret
-        raise Error::NotImplemented.new("propagate value not implemented yet for fn #{function}")
-      end
-      hash_ret.kind_of?(Output) ? hash_ret : Output.new(hash_ret)
-    end
-
+    include Propagate::Mixin
+    attr_reader :index_map,:attr_link_id,:input_attr,:output_attr,:input_path,:output_path
     def initialize(attr_link,input_attr,output_attr)
       @function = attr_link[:function]
       @index_map = AttributeLink::IndexMap.convert_if_needed(attr_link[:index_map])
@@ -49,57 +12,40 @@ module DTK; class AttributeLink
       @input_path = attr_link[:input_path]
       @output_path = attr_link[:output_path]
     end
+
+    # propagate from output var to input var
+    def propagate()
+      # function 'eq' short circuited
+      if Function::Eq.isa?(function)
+       {:value_derived => output_value_aux()} 
+      else
+        # TODO: this returns nil if it is not (yet) processed by Function meaning its legacy or illegal
+        unless hash_ret = Function.internal_hash_form?(function,self) || legacy_internal_hash_form?()
+          raise Error::NotImplemented.new("propagate value not implemented yet for fn #{function}")
+        end
+      end
+      hash_ret.kind_of?(Output) ? hash_ret : Output.new(hash_ret)
+    end
+
    private
-    def propagate_when_function_specified(function_def)
-      if output_semantic_type().is_array? 
-        raise Error::NotImplemented.new("specified functions not implemented when output is an array")
-      end
-      if input_semantic_type().is_array? 
-        raise Error::NotImplemented.new("specified functions not implemented when input is an array")
-      end
-
-      computed_value = SpecifiedFunction.ret_computed_value(function_def,output_value)
-      {:value_derived => computed_value}
-    end
-    
-    class SpecifiedFunction
-      def self.ret_computed_value(function_def,output_value)
-        function_class(function_def).compute_value(function_def,output_value)
-      end
-     private
-      def self.function_class(function_def)
-        function_name = function_def[:name].to_sym
-        FunctionClasses.find{|klass|function_name == klass.name} ||
-          raise(Error.new("propagate value not implemented yet for #{function_name})"))
-      end
-
-      class VarEmbeddedInText < self
-      end
-      FunctionClasses = [VarEmbeddedInText]
-      class VarEmbeddedInText
-        def self.name()
-          :var_embedded_in_text
-        end
-        def self.function_def(text_parts)
-         {
-            :name => name(),
-            :constants => {:text_parts => text_parts}
-          }
-        end
-        def self.compute_value(function_def,param)
-          ret = nil
-          return ret if param.nil?
-
-          text_parts = function_def[:constants][:text_parts].dup
-          ret = text_parts.shift
-          text_parts.each do |text_part|
-            ret << param
-            ret << text_part
-          end
-          ret
-        end
+    def legacy_internal_hash_form?()
+      if function.kind_of?(String)
+        case function
+         when "select_one"
+          propagate_when_select_one()
+         when "sap_config__l4" 
+          propagate_when_sap_config__l4()
+         when "host_address_ipv4"
+          propagate_when_host_address_ipv4()
+         when "sap_conn__l4__db" 
+          propagate_when_sap_conn__l4__db()
+         when "sap_config_conn__db"
+          propagate_when_sap_config_conn__db()
+         end
       end
     end
+
+
 
     # TODO: need to simplify so we dont need all these one ofs
     #######function-specfic propagation
@@ -163,34 +109,6 @@ module DTK; class AttributeLink
       {:value_derived => output_value ? output_value().first : nil}
     end
 
-    # called when it is an equlaity setting between indexed values on input and output side. Can be the null index on one of the sides meaning to take whole value
-    # TODO: can simplify because only will be called when input is not an array
-    def propagate_when_eq_indexed()
-      # TODO: may flag more explicitly if from create or propagate vars
-      if @index_map.nil? and (@input_path.nil? or @input_path.empty?) and (@output_path.nil? or @output_path.empty?)
-        new_rows = output_value().nil? ? [nil] : (output_semantic_type().is_array? ?  output_value() : [output_value()])
-        OutputArrayAppend.new(:array_slice => new_rows, :attr_link_id => @attr_link_id)
-      else
-        index_map_persisted = @index_map ? true : false
-        index_map = @index_map || AttributeLink::IndexMap.generate_from_paths(@input_path,@output_path)
-        OutputPartial.new(:attr_link_id => @attr_link_id, :output_value => output_value, :index_map => index_map, :index_map_persisted => index_map_persisted)
-      end
-    end
-
-    # called when input is an array and each link into it appends teh value in
-    def propagate_when_array_append()
-      # TODO: may flag more explicitly if from create or propagate vars
-      if @index_map.nil? and (@input_path.nil? or @input_path.empty?)
-        new_rows = output_value().nil? ? [nil] : (output_semantic_type().is_array? ?  output_value() : [output_value()])
-        output_is_array = @output_attr[:semantic_type_object].is_array?()
-        OutputArrayAppend.new(:array_slice => new_rows, :attr_link_id => @attr_link_id, :output_is_array => output_is_array)
-      else
-        index_map_persisted = @index_map ? true : false
-        index_map = @index_map || AttributeLink::IndexMap.generate_from_paths(@input_path,nil)
-        OutputPartial.new(:attr_link_id => @attr_link_id, :output_value => output_value, :index_map => index_map, :index_map_persisted => index_map_persisted)
-      end
-    end
-
     def ret_cartesian_product()
       output_v = 
         if output_semantic_type().is_array? 
@@ -215,21 +133,6 @@ module DTK; class AttributeLink
 
     #########instance var access fns
     attr_reader :function
-    def input_value()
-      @input_value ||= @input_attr[:value_derived]
-    end
-    def input_semantic_type()
-      @input_semantic_type ||= SemanticType.create_from_attribute(@input_attr)
-    end
-
-    def output_value()
-      @output_value ||= output_value_aux()
-    end
-    def output_value_aux()
-      @output_attr[:value_asserted]||@output_attr[:value_derived]
-    end
-    def output_semantic_type()
-      @output_semantic_type ||= SemanticType.create_from_attribute(@output_attr)
-    end
   end
 end; end
+

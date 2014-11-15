@@ -77,7 +77,7 @@ module DTK
           def self.link_function?(output_var)
             if output_var =~ /(^[^\$]*)\$\{[^\}]+\}(.*$)/
               text_parts = [$1,$2]
-              AttributeLink::PropagateProcessor::SpecifiedFunction::VarEmbeddedInText.function_def(text_parts)
+              AttributeLink::Function::VarEmbeddedInText.function_def(text_parts)
             end
           end
         end

@@ -1,10 +1,20 @@
 module DTK
   class AttributeLink < Model
+    r8_nested_require('attribute_link','propagate_mixins')
     r8_nested_require('attribute_link','propagate_changes')
+    r8_nested_require('attribute_link','function')
     r8_nested_require('attribute_link','propagate_processor')
     r8_nested_require('attribute_link','ad_hoc')
 
     extend PropagateChangesClassMixin
+
+    class Output < HashObject
+    end
+    class OutputArrayAppend < Output
+    end
+    class OutputPartial < Output
+    end
+
     
     # virtual attribute defs    
     def output_index_map()

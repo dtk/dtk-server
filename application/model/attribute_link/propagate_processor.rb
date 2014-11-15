@@ -15,15 +15,13 @@ module DTK; class AttributeLink
 
     # propagate from output var to input var
     def propagate()
-      # function 'eq' short circuited
-      if Function::Eq.isa?(function)
-       {:value_derived => output_value_aux()} 
-      else
-        # TODO: this returns nil if it is not (yet) processed by Function meaning its legacy or illegal
-        unless hash_ret = Function.internal_hash_form?(function,self) || legacy_internal_hash_form?()
-          raise Error::NotImplemented.new("propagate value not implemented yet for fn #{function}")
-        end
+      hash_ret = Function.internal_hash_form?(function,self) 
+
+      # TODO: this returns nil if it is not (yet) processed by Function meaning its legacy or illegal
+      unless hash_ret ||= legacy_internal_hash_form?()
+        raise Error::NotImplemented.new("propagate value not implemented yet for fn #{function}")
       end
+
       hash_ret.kind_of?(Output) ? hash_ret : Output.new(hash_ret)
     end
 

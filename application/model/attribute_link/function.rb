@@ -44,8 +44,8 @@ module DTK; class AttributeLink
     end
 
     class Eq < self
-      def self.isa?(function)
-        scalar_function?(function,:eq)
+      def internal_hash_form()
+        Output.new(:value_derived => output_value_aux())
       end
     end
 

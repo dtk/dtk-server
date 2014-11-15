@@ -170,6 +170,9 @@ module DTK; class LinkDef
       end
       if split[1] =~ AttributeTermRE
         ret[:attribute_name] = $1
+# ABC
+      elsif split[1] =~ /\$\{(.+)\}/
+        ret[:attribute_name] = $1
       else
         raise Error.new("unexpected form (#{term_x.inspect})")
       end

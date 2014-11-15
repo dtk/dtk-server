@@ -5,7 +5,7 @@ module DTK
     r8_nested_require('attribute_link','ad_hoc')
 
     extend PropagateChangesClassMixin
-
+    
     # virtual attribute defs    
     def output_index_map()
       index_map_aux(:output)
@@ -44,6 +44,13 @@ module DTK
     ########################## end: get links ##################
 
     ##########################  add new links ##################
+    class AugmentedRowToCreate < Hash
+      def initialize(row,attribute_mapping_def)
+        super()
+        replace(row)
+        @attribute_mapping_def = attribute_mapping_def  
+      end
+    end
     def self.create_attribute_links(parent_idh,rows_to_create,opts={})
       return Array.new if rows_to_create.empty?
       attr_mh = parent_idh.create_childMH(:attribute)

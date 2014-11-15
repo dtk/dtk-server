@@ -62,8 +62,6 @@ module DTK
 
       on_create_events.each{|ev|ev.process!(context)} 
 
-      # TODO: not bulking up procssing multiple node group members because dont yet handle case when
-      # theer are multiple members taht are output that feed into a node attribute
       links_array = AttributeMapping.ret_links_array(attribute_mappings,context,:raise_error => opts[:raise_error])
       links_array.each do |links|
         # ret_links returns nil only if error such as not being able to find input_id or output_id
@@ -72,6 +70,7 @@ module DTK
           port_link_id = port_link_idh.get_id()
           links.each{|link|link[:port_link_id] = port_link_id}
         end
+
         AttributeLink.create_attribute_links(parent_idh,links)
       end
     end

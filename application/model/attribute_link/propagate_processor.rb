@@ -68,14 +68,28 @@ module DTK; class AttributeLink
       end
      private
       def self.function_class(function_def)
-        case function_def[:name].to_sym
-          when :var_embedded_in_text then VarEmbeddedInText
-          else raise Error.new("propagate value not implemented yet for #{function_def[:name]})")
-        end
+        function_name = function_def[:name].to_sym
+        FunctionClasses.find{|klass|function_name == klass.name} ||
+          raise(Error.new("propagate value not implemented yet for #{function_name})"))
       end
-                              
+
       class VarEmbeddedInText < self
+      end
+      FunctionClasses = [VarEmbeddedInText]
+      class VarEmbeddedInText
+        def self.name()
+          :var_embedded_in_text
+        end
+        def self.function_def(text_parts)
+         {
+            :name => name(),
+            :constants => {:text_parts => text_parts}
+          }
+        end
         def self.compute_value(function_def,param)
+          ret = nil
+          return ret if param.nil?
+
           text_parts = function_def[:constants][:text_parts].dup
           ret = text_parts.shift
           text_parts.each do |text_part|

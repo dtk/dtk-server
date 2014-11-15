@@ -44,13 +44,6 @@ module DTK
     ########################## end: get links ##################
 
     ##########################  add new links ##################
-    class AugmentedRowToCreate < Hash
-      def initialize(row,attribute_mapping_def)
-        super()
-        replace(row)
-        @attribute_mapping_def = attribute_mapping_def  
-      end
-    end
     def self.create_attribute_links(parent_idh,rows_to_create,opts={})
       return Array.new if rows_to_create.empty?
       attr_mh = parent_idh.create_childMH(:attribute)
@@ -144,14 +137,24 @@ module DTK
     end
 
     def self.add_link_fns!(rows_to_create,attr_info)
-      rows_to_create.select{|r|r[:function].nil?}.each do |r|
-        input_attr = attr_info[r[:input_id]].merge(r[:input_path] ? {:input_path => r[:input_path]} : {})
-        output_attr = attr_info[r[:output_id]].merge(r[:output_path] ? {:output_path => r[:output_path]} : {})
-        r[:function] = SemanticType.find_link_function(input_attr,output_attr)
-      end
+      rows_to_create.each{|r|r[:function] ||= link_function(r,attr_info)}
     end
-    add_to_remove_keys :input_path,:output_path
 
+    def self.link_function(link_info,attr_info)
+      r = link_info # for succinctness
+      input_attr = attr_info[r[:input_id]].merge(r[:input_path] ? {:input_path => r[:input_path]} : {})
+      output_attr = attr_info[r[:output_id]].merge(r[:output_path] ? {:output_path => r[:output_path]} : {})
+
+      function = SemanticType.find_link_function_based_on_type(input_attr,output_attr)
+      if r.kind_of?(LinkDefLink::AttributeMapping::AugmentedLink)
+        if fn_based_on_mapping = r.link_function?(function)
+          function = fn_based_on_mapping
+        end
+      end
+      function
+    end
+
+    add_to_remove_keys :input_path,:output_path
 
 ####################
    public

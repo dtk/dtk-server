@@ -23,6 +23,18 @@ module DTK
         contexts.map{|context|attribute_mappings.map{|am|am.ret_link(context,opts)}.compact}
       end
 
+      class AugmentedLink < Hash
+        def initialize(attribute_mapping)
+          super()
+          @attribute_mapping = attribute_mapping
+        end
+        def link_function?(fn_based_on_type)
+          if fn = @attribute_mapping.link_function?(fn_based_on_type)
+            {:function => fn}
+          end
+        end
+      end
+      # returns AugmentedLink
       def ret_link(context,opts={})
         input_attr,input_path = get_attribute_with_unravel_path(:input,context)
         output_attr,output_path = get_attribute_with_unravel_path(:output,context)
@@ -44,10 +56,31 @@ module DTK
           end
         end
 
-        ret = {:input_id => input_attr[:id],:output_id => output_attr[:id]}
+        ret = AugmentedLink.new(self).merge(:input_id => input_attr[:id],:output_id => output_attr[:id])
         ret.merge!(:input_path => input_path) if input_path
         ret.merge!(:output_path => output_path) if output_path
         ret
+      end
+
+      def link_function?(fn_based_on_type)
+        if fn_based_on_type.to_sym == :eq
+          if output_term_index = (self[:output]||{})[:term_index] 
+            if output_var = output_term_index.split('.').last
+              LinkFunction::Eq.link_function?(output_var)
+            end
+          end
+        end
+      end
+      module LinkFunction
+        module Eq
+          # example abc${output_var}def",
+          def self.link_function?(output_var)
+            if output_var =~ /(^[^\$]*)\$\{[^\}]+\}(.*$)/
+              text_parts = [$1,$2]
+              AttributeLink::PropagateProcessor::SpecifiedFunction::VarEmbeddedInText.function_def(text_parts)
+            end
+          end
+        end
       end
 
       def pp_form(direction)

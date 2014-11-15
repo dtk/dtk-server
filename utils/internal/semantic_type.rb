@@ -19,7 +19,7 @@ module DTK
     end
 
     # TODO: this needs to be fixed; this includes fixing up to handle inputs that are arrays of hashes
-    def self.find_link_function(input_attr,output_attr)
+    def self.find_link_function_based_on_type(input_attr,output_attr)
       input_type = attribute_index_type__input(input_attr)
       output_type = attribute_index_type__output(output_attr)
       LinkFunctionMatrix[output_type][input_type]

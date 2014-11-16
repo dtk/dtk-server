@@ -28,10 +28,8 @@ module DTK
           super()
           @attribute_mapping = attribute_mapping
         end
-        def link_function?(fn_based_on_type)
-          if fn = @attribute_mapping.link_function?(fn_based_on_type)
-            {:function => fn}
-          end
+        def parse_function_with_args?()
+          @attribute_mapping.parse_function_with_args?()
         end
       end
       # returns AugmentedLink
@@ -62,28 +60,31 @@ module DTK
         ret
       end
 
-      def link_function?(fn_based_on_type)
-        if fn_based_on_type.to_sym == :eq
-          if output_term_index = (self[:output]||{})[:term_index] 
-            if output_var = output_term_index.split('.').last
-              LinkFunction::Eq.link_function?(output_var)
+      # returns a hash with args if this is a function that takes args
+      #
+      # 
+      def parse_function_with_args?()
+        ParseHelper::VarEmbeddedInText.isa?(self) # || other ones we add
+      end
+      module ParseHelper
+        module VarEmbeddedInText
+          def self.isa?(am)
+            if output_term_index = (am[:output]||{})[:term_index] 
+              if output_var = output_term_index.split('.').last
+                # example abc${output_var}def",
+                if output_var =~ /(^[^\$]*)\$\{[^\}]+\}(.*$)/
+                  text_parts = [$1,$2]
+                  {
+                    :name => :var_embedded_in_text,
+                    :constants  =>  {:text_parts => text_parts}
+                  }
+                end
+              end
             end
           end
         end
       end
-      module LinkFunction
-        Log.error("rather than just casing for eq, while create a composite function")
-        module Eq
-          # example abc${output_var}def",
-          def self.link_function?(output_var)
-            if output_var =~ /(^[^\$]*)\$\{[^\}]+\}(.*$)/
-              text_parts = [$1,$2]
-              AttributeLink::Function::VarEmbeddedInText.function_def(text_parts)
-            end
-          end
-        end
-      end
-
+          
       def pp_form(direction)
         ret = 
           if attr = self[direction]

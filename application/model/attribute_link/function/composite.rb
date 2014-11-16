@@ -1,6 +1,6 @@
 module DTK; class AttributeLink
   class Function
-    class Composite  < HashFunction 
+    class Composite  < WithArgs
       def internal_hash_form(opts={})
         unless opts.empty?
           raise Error.new("Opts should be empty")

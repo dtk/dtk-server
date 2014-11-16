@@ -1,22 +1,11 @@
 module DTK; class AttributeLink
   class Function
-    #TODO: update so deals with different forms other than :eq
-    class VarEmbeddedInText < HashFunction
+    class VarEmbeddedInText < WithArgs
       def initialize(function_def,propagate_proc)
         super
-        @text_parts = (function_hash[:constants]||{})[:text_parts]
-        unless @text_parts
-          raise Error.new("function_def[:constants][:text_parts] is missing")
-        end
+        @text_parts = function_hash[:constants][:text_parts]
       end
     
-      def self.function_def(text_parts)
-        {
-          :name => name(),
-          :constants => {:text_parts => text_parts}
-        }
-      end
-
       # TODO: remove
       def internal_hash_form(opts={})
         {:value_derived => value()}

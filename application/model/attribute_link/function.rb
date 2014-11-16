@@ -1,13 +1,13 @@
 module DTK; class AttributeLink
   class Function 
-    # base must go before base functions
+    # base must go before its children
     r8_nested_require('function','base')
     r8_nested_require('function','eq')
     r8_nested_require('function','eq_indexed')
     r8_nested_require('function','array_append')
 
-    # hash_function must go before hash_function functions
-    r8_nested_require('function','hash_function')
+    # with_args must go before its children
+    r8_nested_require('function','with_args')
     r8_nested_require('function','composite')
     r8_nested_require('function','var_embedded_in_text')
 
@@ -25,9 +25,9 @@ module DTK; class AttributeLink
 
     def self.link_function(link_info,input_attr,output_attr)
       ret = outer_fn = Base.base_link_function(input_attr,output_attr)
-      if link_info.kind_of?(LinkDefLink::AttributeMapping::AugmentedLink)
-        if fn_based_on_mapping = link_info.link_function?(outer_fn)
-          ret = fn_based_on_mapping
+      if link_info.respond_to?(:parse_function_with_args?)
+        if parse_info = link_info.parse_function_with_args?()
+          ret = WithArgs.with_args_link_function(parse_info)
         end
       end
       ret
@@ -56,6 +56,15 @@ module DTK; class AttributeLink
     def self.function_class_names()
       @function_class_names = [Eq,EqIndexed,ArrayAppend,VarEmbeddedInText]
     end
+    
+    def self.klass(name)
+      begin
+        const_get(Aux.camelize(name))
+       rescue
+        raise Error.new("Illegal function name (#{name}")
+      end
+    end
+
     def self.name()
       Aux.underscore(self.to_s).split('/').last.to_sym
     end
@@ -64,10 +73,9 @@ module DTK; class AttributeLink
     end
     
     def self.function_name(function_def)
-      scalar_function_name?(function_def) || HashFunction.hash_function_name?(function_def) ||
+      scalar_function_name?(function_def) || WithArgs.hash_function_name?(function_def) ||
         raise(Error.new("Function def has illegal form: #{function_def.inspect}"))
     end
-
 
   end
 end; end

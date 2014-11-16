@@ -1,5 +1,9 @@
 module DTK; class AttributeLink
   class Function 
+    # hash_function must go first
+    r8_nested_require('function','hash_function')
+    r8_nested_require('function','var_embedded_in_text')
+
     include Propagate::Mixin 
     def initialize(function_def,propagate_proc)
       
@@ -12,7 +16,7 @@ module DTK; class AttributeLink
       @input_path   = propagate_proc.input_path
       @output_path  = propagate_proc.output_path
     end
-
+    
     def self.scalar_function?(function_def,function_name=nil)
       scalar_function_name?(function_def) and 
         (function_name.nil? or function_name(function_def) == function_name)
@@ -33,22 +37,19 @@ module DTK; class AttributeLink
     def self.scalar_function_name?(function_def)
       function_def.kind_of?(String) && function_def.to_sym
     end
-    def self.hash_function_name?(function_def)
-      if function_def.kind_of?(Hash) and function.has_key?(:function)
-        (function[:function]||{})[:name]
-      end
-    end
+    
     def self.function_name(function_def)
-      scalar_function_name?(function_def) || hash_function_name?(function_def) ||
+      scalar_function_name?(function_def) || HashFunction.hash_function_name?(function_def) ||
         raise(Error.new("Function def has illegal form: #{function_def.inspect}"))
     end
+
 
     class Eq < self
       def internal_hash_form()
         Output.new(:value_derived => output_value_aux())
       end
     end
-
+    
     class EqIndexed < self
       # called when it is an equlaity setting between indexed values on input and output side. Can be the null index on one of the sides meaning to take whole value
       # TODO: can simplify because only will be called when input is not an array
@@ -77,36 +78,8 @@ module DTK; class AttributeLink
           OutputPartial.new(:attr_link_id => @attr_link_id, :output_value => output_value, :index_map => index_map, :index_map_persisted => index_map_persisted)
         end
       end
+      
     end
-
-    #TODO: update so deals with different forms other than :eq
-    class VarEmbeddedInText < self
-      def initialize(function_def,propagate_proc)
-        super
-        unless @text_parts = (@function_def[:constants]||{})[:text_parts]
-          raise Error.new("function_def[:constants]:text_parts] is missing")
-        end
-      end
-
-      def self.function_def(text_parts)
-        {
-          :name => name(),
-          :constants => {:text_parts => text_parts}
-        }
-      end
-      def self.internal_hash_form()
-        val = nil
-        valurn val if param.nil?
-        
-        text_parts = @function_def.dup
-        val = text_parts.shift
-        text_parts.each do |text_part|
-          val << param
-          val << text_part
-        end
-        val && {:value_derived => val} 
-      end
-    end
-
   end
 end; end
+

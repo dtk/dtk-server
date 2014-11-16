@@ -147,21 +147,11 @@ module DTK
     end
 
     def self.add_link_fns!(rows_to_create,attr_info)
-      rows_to_create.each{|r|r[:function] ||= link_function(r,attr_info)}
-    end
-
-    def self.link_function(link_info,attr_info)
-      r = link_info # for succinctness
-      input_attr = attr_info[r[:input_id]].merge(r[:input_path] ? {:input_path => r[:input_path]} : {})
-      output_attr = attr_info[r[:output_id]].merge(r[:output_path] ? {:output_path => r[:output_path]} : {})
-
-      function = SemanticType.find_link_function_based_on_type(input_attr,output_attr)
-      if r.kind_of?(LinkDefLink::AttributeMapping::AugmentedLink)
-        if fn_based_on_mapping = r.link_function?(function)
-          function = fn_based_on_mapping
-        end
+      rows_to_create.each do |r|
+        input_attr = attr_info[r[:input_id]].merge(r[:input_path] ? {:input_path => r[:input_path]} : {})
+        output_attr = attr_info[r[:output_id]].merge(r[:output_path] ? {:output_path => r[:output_path]} : {})
+        r[:function] ||= Function.link_function(r,input_attr,output_attr)
       end
-      function
     end
 
     add_to_remove_keys :input_path,:output_path

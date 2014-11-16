@@ -72,6 +72,7 @@ module DTK
         end
       end
       module LinkFunction
+        Log.error("rather than just casing for eq, while create a composite function")
         module Eq
           # example abc${output_var}def",
           def self.link_function?(output_var)

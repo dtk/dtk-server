@@ -17,14 +17,14 @@ module DTK; class AttributeLink
         }
       end
 
-      def internal_hash_form()
+      # TODO: remove
+      def internal_hash_form(opts={})
         {:value_derived => value()}
       end
 
-     private      
-      def value()
+      def value(opts={})
         val = nil
-        var = output_value_aux()
+        var = output_value(opts)
         # alternative sematics is to treat nil like var with empty string
         return val if var.nil?
         

@@ -11,9 +11,8 @@ module DTK; class ServiceModule
       def self.import_component_attribute_info(cmp_ref,cmp_input)
         super
         ret_input_attribute_info(cmp_input).each_pair do |attr_name,attr_info|
-          tags = attr_info["tags"] || ([attr_info["tag"]] if attr_info["tag"])
-          if tags
-            add_attribute_tags(cmp_ref,attr_name,tags)
+          if base_tags = attr_info["tags"] || ([attr_info["tag"]] if attr_info["tag"])
+            add_attribute_tags(cmp_ref,attr_name,base_tags)
           end
         end
       end
@@ -23,7 +22,7 @@ module DTK; class ServiceModule
       end
       def self.add_attribute_tags(cmp_ref,attr_name,tags)
         attr_info = output_component_attribute_info(cmp_ref)
-        (attr_info[attr_name] ||= {:display_name => attr_name}).merge!(:tags => tags)
+        (attr_info[attr_name] ||= {:display_name => attr_name}).merge!(:tags => HierarchicalTags.new(tags))
       end
 
     end

@@ -27,7 +27,8 @@ files =
    'simple_action_queue',
    'async_response',
    'output_table',
-   'rubygems_checker'
+   'rubygems_checker',
+   'hierarchical_tags'
   ]
 r8_nested_require('internal',files)
 

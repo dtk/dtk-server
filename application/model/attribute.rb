@@ -154,15 +154,18 @@ module DTK
       if opts[:editable] and is_readonly?
         return true
       end
-      if tags = opts[:tags]
-        return true unless tags.find{|tag|match_tag?(tag)}
+      if filter_base_tags = opts[:tags]
+        common_tags = (base_tags?()||[]) & filter_base_tags.map{|x|x.to_sym}
+        return common_tags.empty?
       end
       false
     end
 
-    # assume this is called when :tags filed has been pulled from db
-    def match_tag?(tag)
-      self[:tags] and self[:tags].include?(tag)
+    # assume this is called when :tags is pull from db
+    def base_tags?()
+      if self[:tags] = HierarchicalTags.reify(self[:tags])
+        self[:tags].base_tags?()
+      end
     end
 
     def self.create_or_modify_field_def(parent,field_def)

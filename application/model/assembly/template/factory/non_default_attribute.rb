@@ -10,7 +10,7 @@ module DTK; class Assembly; class Template
       end
 
       def self.isa?(attr,cmp)
-        if isa_value_override?(attr) or !!tags?(attr)
+        if isa_value_override?(attr) or !!base_tags?(attr)
           new(attr,cmp)
         end
       end
@@ -22,11 +22,13 @@ module DTK; class Assembly; class Template
         attr[:is_instance_value] and !attr[:attribute_value].nil?
       end
 
-      def tags?()
-        self.class.tags?(self)
+      def base_tags?()
+        self.class.base_tags?(self)
       end
-      def self.tags?(attr)
-        attr[:tags]
+      def self.base_tags?(attr)
+        if attr[:tags] = HierarchicalTags.reify(attr[:tags])
+          attr[:tags].base_tags?()
+        end
       end
 
       def self.add_to_cmp_ref_hash!(cmp_ref_hash,factory,non_def_attrs,cmp_template_id)

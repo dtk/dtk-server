@@ -13,8 +13,8 @@ module DTK
               value_overrides << {attr[:display_name] => attr_value_output_form(attr,:attribute_value)}
             end
           end
-          if tags = attr.tags?()
-            attribute_info << {attr[:display_name] => attr_tags_setting(tags)}
+          if base_tags = attr.base_tags?()
+            attribute_info << {attr[:display_name] => attr_tags_setting(base_tags)}
           end
         end
 

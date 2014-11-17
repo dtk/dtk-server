@@ -448,12 +448,13 @@ module DTK; class ModuleDSL; class V2
           else raise ParsingError.new("Attribute reference (?1) is ill-formed",attr_ref)  
           end + ".#{attr.gsub(/host_address$/,"host_addresses_ipv4.0")}"
         else
-          dollar_sign,var_name = (attr_ref =~ /(^\$*)(.+$)/; [$1,$2])
-          has_dollar_sign = !dollar_sign.empty?
+          has_dollar_sign = (attr_ref =~ /\$/)
           if (input_or_output == :input and has_dollar_sign) or
               (input_or_output == :output and !has_dollar_sign)
             raise ParsingError.new("Attribute reference (?1) is ill-formed",attr_ref)
           end
+          # if dollar sign is first character strip it off; otherwise if teher is an embedded dollar sign keep it in var_name
+          var_name = attr_ref.gsub(/^\$/,'')
           "#{convert_to_internal_cmp_form(cmp)}.#{var_name}"
         end
       end

@@ -53,11 +53,10 @@ dtk_modules+=($sysctl_url)
 dtk_modules+=($thin_url)
 dtk_modules+=($vcsrepo_url)
 
-cd $output_dir && git clone $dtk_server && cd server/dtk_modules
+cd $output_dir && git clone $dtk_server && cd server && git submodule init && git submodule update
 for module in ${dtk_modules[@]}; do
-	cd $module
-	git submodule init && git submodule update && git fetch && git merge origin/master 
-	cd ..
+	cd dtk_modules/$module
+	git fetch && git merge origin/master 
+	cd ../..
 done
-cd ..
 git add .; git commit -m "Adding latest updates for dtk modules"; git push origin master

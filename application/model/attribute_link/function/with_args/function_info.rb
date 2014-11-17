@@ -3,7 +3,7 @@ module DTK; class AttributeLink
     class FunctionInfo
       attr_reader :name,:constants
       def initialize(name,constants_hash)
-        @name = name
+        @name = name.to_sym
         @constants = Constants.new(constants_hash)
       end
       

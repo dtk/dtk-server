@@ -448,13 +448,16 @@ module DTK; class ModuleDSL; class V2
           else raise ParsingError.new("Attribute reference (?1) is ill-formed",attr_ref)  
           end + ".#{attr.gsub(/host_address$/,"host_addresses_ipv4.0")}"
         else
-          has_dollar_sign = (attr_ref =~ /\$/)
+          has_dollar_sign = has_variable?(attr_ref)
           if (input_or_output == :input and has_dollar_sign) or
               (input_or_output == :output and !has_dollar_sign)
             raise ParsingError.new("Attribute reference (?1) is ill-formed",attr_ref)
           end
-          # if dollar sign is first character strip it off; otherwise if teher is an embedded dollar sign keep it in var_name
-          var_name = attr_ref.gsub(/^\$/,'')
+          var_name = attr_ref
+          # if dollar sign is first character and not embedded string than strip of dollar sign
+          if var_name =~ /^\$[^\{]/
+            var_name = var_name.gsub(/^\$/,'')
+          end
           "#{convert_to_internal_cmp_form(cmp)}.#{var_name}"
         end
       end
@@ -463,8 +466,12 @@ module DTK; class ModuleDSL; class V2
         is_constant?(attr_ref,base_cmp,dep_attr_ref,dep_cmp,opts) || convert_attr_ref_simple(attr_ref,:base,base_cmp,input_or_output)
       end
 
+      def has_variable?(attr_ref)
+        attr_ref =~ /\$/
+      end
+
       def is_constant?(attr_ref,base_cmp,dep_attr_ref,dep_cmp,opts={})
-        return nil if attr_ref =~ /^\$/
+        return nil if has_variable?(attr_ref)
           
         datatype = :string
         const = nil

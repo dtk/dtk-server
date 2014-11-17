@@ -13,7 +13,6 @@ module DTK; class AttributeLink
 
     include Propagate::Mixin 
     def initialize(function_def,propagate_proc)
-      @function_def = function_def
       # TODO: temp until we get rid of propagate_proc
       @index_map    = propagate_proc.index_map
       @attr_link_id = propagate_proc.attr_link_id
@@ -24,10 +23,10 @@ module DTK; class AttributeLink
     end
 
     def self.link_function(link_info,input_attr,output_attr)
-      ret = outer_fn = Base.base_link_function(input_attr,output_attr)
+      ret = base_fn = Base.base_link_function(input_attr,output_attr)
       if link_info.respond_to?(:parse_function_with_args?)
         if parse_info = link_info.parse_function_with_args?()
-          ret = WithArgs.with_args_link_function(parse_info)
+          ret = WithArgs.with_args_link_function(base_fn,parse_info)
         end
       end
       ret
@@ -54,7 +53,7 @@ module DTK; class AttributeLink
     end
 
     def self.function_class_names()
-      @function_class_names = [Eq,EqIndexed,ArrayAppend,VarEmbeddedInText]
+      @function_class_names = [Eq,EqIndexed,ArrayAppend,Composite,VarEmbeddedInText]
     end
     
     def self.klass(name)
@@ -68,12 +67,9 @@ module DTK; class AttributeLink
     def self.name()
       Aux.underscore(self.to_s).split('/').last.to_sym
     end
-    def self.scalar_function_name?(function_def)
-      function_def.kind_of?(String) && function_def.to_sym
-    end
     
     def self.function_name(function_def)
-      scalar_function_name?(function_def) || WithArgs.hash_function_name?(function_def) ||
+     Base.function_name?(function_def) || WithArgs.function_name?(function_def) ||
         raise(Error.new("Function def has illegal form: #{function_def.inspect}"))
     end
 

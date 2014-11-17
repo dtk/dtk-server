@@ -1,6 +1,10 @@
 module DTK; class AttributeLink
   class Function
     class Base < self
+      def self.function_name?(function_def)
+        function_def.kind_of?(String) && function_def.to_sym
+      end
+
       def self.base_link_function(input_attr,output_attr)
         input_type = attribute_index_type__input(input_attr)
         output_type = attribute_index_type__output(output_attr)

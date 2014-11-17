@@ -13,7 +13,9 @@ module DTK; class AttributeLink
 
     include Propagate::Mixin 
     def initialize(function_def,propagate_proc)
-      # TODO: temp until we get rid of propagate_proc
+      # TODO: when get rid of lgacy fn processing can get rid of needing to copy all these vars
+      @propagate_proc = propagate_proc
+      @output_attr = propagate_proc.output_attr
       @index_map    = propagate_proc.index_map
       @attr_link_id = propagate_proc.attr_link_id
       @input_attr   = propagate_proc.input_attr
@@ -41,11 +43,6 @@ module DTK; class AttributeLink
     end
     
    private
-    def self.scalar_function?(function_def,function_name=nil)
-      scalar_function_name?(function_def) and 
-        (function_name.nil? or function_name(function_def) == function_name)
-    end
-
     def self.internal_hash_form?(function_def,propagate_proc)
       fn_name = function_name(function_def)
       fn_klass = function_class_names().find{|k|k.name() == fn_name}

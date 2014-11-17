@@ -4,8 +4,10 @@ module DTK; class AttributeLink
       def initialize(function_def,propagate_proc)
         super
         # need to reify constants
-        constants[:outer_function]
+        reify_constant!(:outer_function,propagate_proc)
+        reify_constant!(:inner_expression,propagate_proc)
       end
+
       def self.composite_link_function(outer_function,inner_expression)
         {
           :function => {
@@ -31,6 +33,13 @@ module DTK; class AttributeLink
         outer_function.value(:inner_value => inner_value) 
       end
      private
+      def reify_constant!(constant_name,propagate_proc)
+        nested_function_def = constants[constant_name]
+        nested_fn_name = self.class.function_name(nested_function_def)
+        nested_klass = self.class.klass(nested_fn_name)
+        constants[constant_name] = nested_klass.new(nested_function_def,propagate_proc)
+      end
+
       def inner_expression()
         constants[:inner_expression]
       end

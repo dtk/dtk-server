@@ -335,6 +335,20 @@
       "id": "dtk_id"
     }
   },
+  "assembly_template_description": {
+    "order": [
+      "id",
+      "assembly_name",
+      "nodes",
+      "description"
+    ],
+    "mapping": {
+      "nodes": "nodes.size",
+      "assembly_name": "display_name",
+      "id": "dtk_id",
+      "description": "description"
+    }
+  },
   "service_link": {
     "order": [
       "id",

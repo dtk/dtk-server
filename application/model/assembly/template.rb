@@ -179,7 +179,7 @@ module DTK; class Assembly
 
     def self.get(mh,opts={})
       sp_hash = {
-        :cols => opts[:cols] || [:id, :group_id,:display_name,:component_type,:module_branch_id,:service_module],
+        :cols => opts[:cols] || [:id, :group_id,:display_name,:component_type,:module_branch_id, :description, :service_module],
         :filter => [:and, [:eq, :type, "composite"],
                     opts[:project_idh] ? [:eq,:project_project_id,opts[:project_idh].get_id()] : [:neq, :project_project_id,nil],
                     opts[:filter]

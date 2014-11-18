@@ -59,7 +59,13 @@ module DTK; class BaseModule
       parse_needed = !dsl_parsed?()
       return ret unless pull_was_needed or parse_needed
       repo = repo_idh.create_object()
-      deprecate_create_needed_objects_and_dsl?(repo,version,opts)
+      ret = deprecate_create_needed_objects_and_dsl?(repo,version,opts)
+
+      opts.merge!(:match_hashes => ret[:match_hashes]) if ret[:match_hashes]
+      component_module_refs = klass(self).update_component_module_refs(self.class,module_branch,opts)
+      return component_module_refs if ModuleDSL::ParsingError.is_error?(component_module_refs)
+
+      ret
     end
 
     def create_new_dsl_version(new_dsl_integer_version,format_type,module_version)
@@ -87,15 +93,22 @@ module DTK; class BaseModule
     def parse_dsl_and_update_model(impl_obj,module_branch_idh,version=nil,namespace=nil,opts={})
       set_dsl_parsed!(false)
 
-      module_branch = module_branch_idh.create_object()
-      component_module_refs = klass(self).update_component_module_refs(self.class,module_branch,opts)
-      return component_module_refs if ModuleDSL::ParsingError.is_error?(component_module_refs)
+      includes = klass(self).validate_includes_and_update_module_refs(impl_obj, self, opts)
+      return includes if ModuleDSL::ParsingError.is_error?(includes)
 
-      v_namespaces = klass(self).validate_module_ref_namespaces(module_branch,component_module_refs)
-      return v_namespaces if ModuleDSL::ParsingError.is_error?(v_namespaces)
-
-      opts.merge!(:component_module_refs => component_module_refs)
       klass(self).parse_and_update_model(self,impl_obj,module_branch_idh,version,namespace,opts)
+      # module_branch = module_branch_idh.create_object()
+      # component_module_refs = klass(self).update_component_module_refs(self.class,module_branch,opts)
+      # return component_module_refs if ModuleDSL::ParsingError.is_error?(component_module_refs)
+      module_branch = module_branch_idh.create_object()
+      ret_cmr = ModuleRefs.get_component_module_refs(module_branch)
+      if new_commit_sha = ret_cmr.serialize_and_save_to_repo?()
+        if opts[:ret_dsl_updated_info]
+          msg = "The module refs file was updated by the server"
+          opts[:ret_dsl_updated_info] = DSLUpdatedInfo.new(msg,new_commit_sha)
+        end
+      end
+
       set_dsl_parsed!(true)
     end
 
@@ -122,6 +135,7 @@ module DTK; class BaseModule
     end
 
     def update_model_from_clone__type_specific?(commit_sha,diffs_summary,module_branch,version,opts={})
+      opts.merge!(:ret_dsl_updated_info => Hash.new)
       update_model_objs_or_create_dsl?(diffs_summary,module_branch,version,opts)
     end
 
@@ -145,6 +159,7 @@ module DTK; class BaseModule
       module_name = local.module_name
       branch_name = local.branch_name
       module_namespace = local.module_namespace_name
+      opts.merge!(:ret_dsl_updated_info => Hash.new)
       version = local.version
       project = local.project
       config_agent_type = config_agent_type_default()
@@ -182,7 +197,18 @@ module DTK; class BaseModule
         end
         dsl_created_info = parse_impl_to_create_dsl(config_agent_type,impl_obj,opts)
       end
-      ret.merge!(:module_branch_idh => module_branch_idh, :dsl_created_info => dsl_created_info)
+
+      if ext_deps = opts[:external_dependencies]
+        ret.merge!(:external_dependencies => ext_deps) unless ret[:external_dependencies]
+      end
+
+      dsl_updated_info = opts[:ret_dsl_updated_info]
+      if dsl_updated_info && !dsl_updated_info.empty?
+        ret.dsl_updated_info = dsl_updated_info
+      end
+
+      matchig_for_module_refs = prepare_for_module_refs(matching_branches)
+      ret.merge!(:module_branch_idh => module_branch_idh, :dsl_created_info => dsl_created_info, :match_hashes => matchig_for_module_refs)
       ret
     end
     def update_model_objs_or_create_dsl?(diffs_summary,module_branch,version,opts={})
@@ -209,6 +235,12 @@ module DTK; class BaseModule
         config_agent_type = config_agent_type_default()
         dsl_created_info = parse_impl_to_create_dsl(config_agent_type,impl_obj)
       end
+
+      dsl_updated_info = opts[:ret_dsl_updated_info]
+      unless dsl_updated_info.empty?
+        ret.dsl_updated_info = dsl_updated_info
+      end
+
       ret.dsl_created_info = dsl_created_info
       ret
     end
@@ -237,6 +269,18 @@ module DTK; class BaseModule
       end
       raise parsing_error if parsing_error
       ret
+    end
+
+    def prepare_for_module_refs(matching_branches)
+      matching = []
+      return matching unless matching_branches
+
+      matching_branches.each do |mb|
+        m_module = mb.get_module()
+        m_namespace = m_module.module_namespace()
+        matching << {:component_module => m_module[:display_name].to_s, :remote_namespace => m_namespace.to_s}
+      end
+      matching
     end
 
     def klass(klass)

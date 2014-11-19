@@ -1101,7 +1101,8 @@ POSSIBLE CHANGES TO HASH
       id_handles = node_idhs + link_idhs
       library_object = library_idh.create_object()
       # TODO: encapsulate some of above so ca just call library_object.clone_into(...
-      library_object.clone_into_library_assembly(assembly_idh,id_handles)
+      raise Error.new("library_object.clone_into_library_assembly is removed")
+      #library_object.clone_into_library_assembly(assembly_idh,id_handles)
       return {:content => nil}
     end
 

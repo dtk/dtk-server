@@ -223,13 +223,14 @@ module DTK; class Component
       ret_cmp, match_cmps, cmp_module_ids = nil, [], []
       display_name = display_name_from_user_friendly_name(cmp_name)
       component_type,title =  ComponentTitle.parse_component_display_name(display_name)
+      version = ModuleVersion.ret(assembly)
       sp_hash = {
         :cols => [:id, :group_id, :display_name, :module_branch_id, :type, :ref, :namespace_info_for_cmps],
         :filter => [:and,
                     [:eq, :type, 'template'],
                     [:eq, :component_type, component_type],
                     [:neq, :project_project_id, nil],
-# DTK-1730 TODO: change so that this is version of assembly                    [:eq, :version, 'master'],
+                    [:eq, :version, version],
                     [:eq, :node_node_id, nil]]
       }
       cmp_templates = get_objs(cmp_mh.createMH(:component_template),sp_hash,:keep_ref_cols=>true)

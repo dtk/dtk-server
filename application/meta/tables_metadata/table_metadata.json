@@ -104,6 +104,20 @@
       "satisfied_by": "satisfied_by"  
     }
   },
+  "component_instances": {
+    "order": [
+      "id",
+      "service_instance",
+      "node",
+      "component_instance"
+    ],
+    "mapping": {
+      "id": "dtk_id",
+      "service_instance": "service_instance",
+      "node": "node",
+      "component_instance": "component_instance"
+    }
+  },
   "attribute": {
     "order": [
       "id",

@@ -93,6 +93,9 @@ module DTK
             :id => component_instance[:id],
             :display_name => display_name,
             :display_name_parts => display_name_parts,
+            :service_instance => display_name_parts[:assembly],
+            :node => display_name_parts[:node],
+            :component_instance => display_name_parts[:component],
             :version => ModuleBranch.version_from_version_field(component_instance[:version])
           }
         end

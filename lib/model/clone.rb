@@ -6,7 +6,7 @@ module DTK
     r8_nested_require('clone','copy_processor') #TODO: better to not need copy_processor and just make part of this class
     r8_nested_require('clone','global')
   end
-  module CloneClassMixins
+  module ClassMixins
     # TODO: may just be temporary; this function takes into account that front end may not send teh actual target handle for componenst who parents
     # are on components not nodes
     def find_real_target_id_handle(id_handle,specified_target_idh)
@@ -15,7 +15,7 @@ module DTK
     end
   end
 
-  module CloneInstanceMixins
+  module Mixins
     def clone_into(clone_source_object,override_attrs={},opts={})
       unless opts[:ret_new_obj_with_cols]
         Log.error("TODO: may be error when :ret_new_obj_with_cols omitted in Model#clone_into")

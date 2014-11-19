@@ -193,10 +193,10 @@ module DTK; class BaseModule
       # TODO: make more robust to handle situation where diffs dont cover all changes; think can detect by looking at shas
       impl_obj.modify_file_assets(diffs_summary)
 
-#ABC      if version.kind_of?(ModuleVersion::AssemblyModule)
-      if false
+      if version.kind_of?(ModuleVersion::AssemblyModule)
         if diffs_summary.meta_file_changed?()
-          raise ErrorUsage.new("Modifying dtk meta information in assembly instance is not supported; changes to dtk meta file will not take effect in instance")
+          # DTK-1730
+          parse_dsl_and_update_model(impl_obj,module_branch.id_handle(),version,module_namespace,opts)
         end
         assembly = version.get_assembly(model_handle(:component))
         AssemblyModule::Component.finalize_edit(assembly,self,module_branch)

@@ -229,10 +229,7 @@ module DTK; class Component
                     [:eq, :type, 'template'],
                     [:eq, :component_type, component_type],
                     [:neq, :project_project_id, nil],
-                    # TODO: not sure if need this version field,
-                    # added because we can have the same component template just with different vesion
-                    # e.g. one has version = 'master' and other one version = "assembly--test"
-                    [:eq, :version, 'master'],
+# DTK-1730 TODO: change so that this is version of assembly                    [:eq, :version, 'master'],
                     [:eq, :node_node_id, nil]]
       }
       cmp_templates = get_objs(cmp_mh.createMH(:component_template),sp_hash,:keep_ref_cols=>true)

@@ -211,8 +211,8 @@ module DTK
     end
 
     include FieldSetInstanceMixin
-    extend CloneClassMixins
-    include CloneInstanceMixins
+    extend Clone::ClassMixins
+    include Clone::Mixins
     extend InputIntoModelClassMixins
     include GetItemsInstanceMixins
 

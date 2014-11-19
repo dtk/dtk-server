@@ -86,6 +86,7 @@ module DTK; class ServiceModule
         assembly_ref => {
           "display_name" => assembly_name,
           "type" => "composite",
+          "description" => assembly_hash['description'],
           "module_branch_id" => module_branch[:id],
           "version" => module_branch.get_field?(:version),
           "component_type" => Assembly.ret_component_type(module_name,assembly_name),

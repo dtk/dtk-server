@@ -259,7 +259,7 @@ module DTK; class Component
         ret_cmp_ns = ret_cmp[:namespace][:display_name]
         cmp_mod_ns = cmp_mod[:namespace_name]
         if ret_cmp_ns != cmp_mod_ns
-          raise ErrorUsage.new("Unable to add component from (#{ret_cmp_ns}:#{ret_cmp_mod}) because you are already using components from following component modules: #{cmp_mod_ns}:#{cmp_mod[:display_name]}!")
+          raise ErrorUsage.new("Unable to add component from (#{ret_cmp_ns}:#{ret_cmp_mod}) because you are already using components from following component modules: #{cmp_mod_ns}:#{cmp_mod[:display_name]}")
         end
       end
       ret_cmp

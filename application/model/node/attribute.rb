@@ -106,26 +106,30 @@ module DTK
       # - if attribute does not exist, it is created with the given value
       # - if attribute exists but has vlaue differing from 'value' then it is updated
       # - otherwise no-op
-      def self.create_or_set_attributes?(nodes,name,value)
+      def self.create_or_set_attributes?(nodes,name,value,extra_fields={})
+
         node_idhs = nodes.map{|n|n.id_handle()}
         ndx_attrs = get_ndx_attributes(node_idhs,name)
+        
         to_create_on_node = Array.new
         to_change_attrs = Array.new
+        
         nodes.each do |node|
           if attr = ndx_attrs[node[:id]]
-            if existing_val = attr[:attribute_value]
-              unless existing_val == value
-                to_change_attrs << node
-              end
+            existing_val = attr[:attribute_value]
+            # just for simplicity no checking whether extra_fields match in 
+            # test of update needed
+            unless extra_fields.empty? and existing_val == value
+              to_change_attrs << node
             end
           else
             to_create_on_node << node
           end
         end
-        to_change_attrs.each{|attr|attr.update(:value_asserted => val)}
+        to_change_attrs.each{|attr|attr.update(extra_fields.merge(:value_asserted => val))}
         
         unless to_create_on_node.empty?
-          create_rows = to_create_on_node.map{|n|attribute_create_hash(n.id,name,value)}
+          create_rows = to_create_on_node.map{|n|attribute_create_hash(n.id,name,value,extra_fields)}
           attr_mh = to_create_on_node.first.model_handle().create_childMH(:attribute)
           Model.create_from_rows(attr_mh,create_rows,:convert => true)
         end
@@ -158,24 +162,22 @@ module DTK
         end
       end
 
-      # TODO: need to btter coordinate with code in model/attribute special processing and also the
+      # TODO: need to better coordinate with code in model/attribute special processing and also the
       # constants in FieldInfo
       def self.attribute_create_hash(node_id,name,value,extra_fields={})
-        unless extra_fields.empty?
-          raise Error.new("extra_fields with args not treated yet")
-        end
         name = name.to_s
         {:ref => name,
           :display_name => name,
           :value_asserted => value,
           :node_node_id => node_id
-        }
+        }.merge(extra_fields)
       end
 
       FieldInfo = {
-        :cardinality => {:name => :cardinality, :semantic_type => :integer},
+        :name             => {:name => :name},
+        :cardinality      => {:name => :cardinality, :semantic_type => :integer},
         :root_device_size => {:name => :root_device_size, :semantic_type => :integer},
-        :puppet_version => {:name => :puppet_version}
+        :puppet_version   => {:name => :puppet_version}
       }
 
       def self.field_info(name)

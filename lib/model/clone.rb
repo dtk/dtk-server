@@ -8,11 +8,8 @@ module DTK
 
     module Mixins
       def clone_into(clone_source_object,override_attrs={},opts={})
-        unless opts[:ret_new_obj_with_cols]
-          Log.error("TODO: may be error when :ret_new_obj_with_cols omitted in Model#clone_into")
-        end
         target_id_handle = id_handle_with_auth_info()
-      clone_source_object = clone_pre_copy_hook(clone_source_object,opts)
+        clone_source_object = clone_pre_copy_hook(clone_source_object,opts)
         clone_source_object.add_model_specific_override_attrs!(override_attrs,self)
         proc = Clone::CopyProcessor.create(self,clone_source_object,opts.merge(:include_children => true))
         clone_copy_output = proc.clone_copy_top_level(clone_source_object.id_handle,[target_id_handle],override_attrs)

@@ -663,6 +663,16 @@ module DTK
       assembly = ret_assembly_instance_object()
       params = ret_params_hash(:log_path, :start_line)
       node_pattern = ret_params_hash(:node_identifier)
+
+      nodes = ret_matching_nodes(assembly, node_pattern)
+      assembly_name = Assembly::Instance.pretty_print_name(assembly)
+      nodes, is_valid, error_msg = nodes_are_up?(assembly_name, nodes, :running, {:what => "Tail"})
+
+      unless is_valid
+        Log.info(error_msg)
+        return rest_ok_response(:errors => error_msg)
+      end
+
       queue = initiate_action(GetLog, assembly, params, node_pattern)
       rest_ok_response :action_results_id => queue.id
     end
@@ -673,6 +683,16 @@ module DTK
       #TODO: should use in rest call :node_identifier
       np = ret_request_params(:node_pattern)
       node_pattern = (np ? {:node_identifier => np} : {})
+
+      nodes = ret_matching_nodes(assembly, node_pattern)
+      assembly_name = Assembly::Instance.pretty_print_name(assembly)
+      nodes, is_valid, error_msg = nodes_are_up?(assembly_name, nodes, :running, {:what => "Grep"})
+
+      unless is_valid
+        Log.info(error_msg)
+        return rest_ok_response(:errors => error_msg)
+      end
+
       queue = initiate_action(Grep, assembly, params, node_pattern)
       rest_ok_response :action_results_id => queue.id
     end
@@ -681,6 +701,16 @@ module DTK
       assembly = ret_assembly_instance_object()
       params = Hash.new
       node_pattern = ret_params_hash(:node_id)
+
+      nodes = ret_matching_nodes(assembly, node_pattern)
+      assembly_name = Assembly::Instance.pretty_print_name(assembly)
+      nodes, is_valid, error_msg = nodes_are_up?(assembly_name, nodes, :running, {:what => "Get netstats"})
+
+      unless is_valid
+        Log.info(error_msg)
+        return rest_ok_response(:errors => error_msg)
+      end
+
       queue = initiate_action(GetNetstats, assembly, params, node_pattern)
       rest_ok_response :action_results_id => queue.id
     end
@@ -689,6 +719,16 @@ module DTK
       assembly = ret_assembly_instance_object()
       params = Hash.new
       node_pattern = ret_params_hash(:node_id)
+
+      nodes = ret_matching_nodes(assembly, node_pattern)
+      assembly_name = Assembly::Instance.pretty_print_name(assembly)
+      nodes, is_valid, error_msg = nodes_are_up?(assembly_name, nodes, :running, {:what => "Get ps"})
+
+      unless is_valid
+        Log.info(error_msg)
+        return rest_ok_response(:errors => error_msg)
+      end
+
       queue = initiate_action(GetPs, assembly, params, node_pattern)
       rest_ok_response :action_results_id => queue.id
     end
@@ -735,7 +775,7 @@ module DTK
       # Filter only running nodes for this assembly
       nodes = assembly.get_leaf_nodes(:cols => [:id,:display_name,:type,:external_ref,:hostname_external_ref, :admin_op_status])
       assembly_name = Assembly::Instance.pretty_print_name(assembly)
-      nodes, is_valid, error_msg = nodes_are_up?(assembly_name, nodes, :running)
+      nodes, is_valid, error_msg = nodes_are_up?(assembly_name, nodes, :running, {:what => "Serverspec tests"})
 
       unless is_valid
         Log.info(error_msg)

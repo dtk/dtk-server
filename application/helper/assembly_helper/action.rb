@@ -138,11 +138,12 @@ module Ramaze::Helper
         return filtered_nodes, true, nil      
       end
       #TODO: collapse above and below
-      def nodes_are_up?(assembly_name, nodes, status_pattern)
+      def nodes_are_up?(assembly_name, nodes, status_pattern, opts={})
+        what = opts[:what]||"Command"
         # check if staged
         nodes.each do |node|
           if node.get_field?(:type) == ::DTK::Node::Type::Node.staged
-            return nodes, false, "Serverspec tests cannot be executed on nodes that are 'staged'."
+            return nodes, false, "#{what} cannot be executed on nodes that are 'staged'."
           end
         end
         

@@ -24,7 +24,7 @@ module DTK; class AssemblyModule
         }
         result = create_dependency?(:link,dep_cmp_template,antec_cmp_template,module_branch,opts_create_dep)
         if result[:component_module_updated]
-          modify_cmp_instances_with_new_parents(component_module,module_branch)
+          update_cmp_instances_with_modified_template(component_module,module_branch)
         end
         result
       end

@@ -194,12 +194,13 @@ module DTK; class BaseModule
       impl_obj.modify_file_assets(diffs_summary)
 
       if version.kind_of?(ModuleVersion::AssemblyModule)
-        if diffs_summary.meta_file_changed?()
-          # DTK-1730
+
+        if meta_file_changed = diffs_summary.meta_file_changed?()
           parse_dsl_and_update_model(impl_obj,module_branch.id_handle(),version,module_namespace,opts)
         end
         assembly = version.get_assembly(model_handle(:component))
-        AssemblyModule::Component.finalize_edit(assembly,self,module_branch)
+        opts_finalize = (meta_file_changed ? {:meta_file_changed => true} : {})
+        AssemblyModule::Component.finalize_edit(assembly,self,module_branch,opts_finalize)
       elsif ModuleDSL.contains_dsl_file?(impl_obj)
         if opts[:force_parse] or diffs_summary.meta_file_changed?() or (get_field?(:dsl_parsed) == false)
           if e = ModuleDSL::ParsingError.trap{parse_dsl_and_update_model(impl_obj,module_branch.id_handle(),version,module_namespace,opts)}

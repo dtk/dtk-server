@@ -11,11 +11,13 @@ module DTK; class AssemblyModule
       create_assembly_branch?(component_module)
     end
 
-    def self.finalize_edit(assembly,component_module,module_branch)
-      new(assembly).finalize_edit(component_module,module_branch)
+    def self.finalize_edit(assembly,component_module,module_branch,opts={})
+      new(assembly).finalize_edit(component_module,module_branch,opts)
     end
-    def finalize_edit(component_module,module_branch)
-      modify_cmp_instances_with_new_parents(component_module,module_branch)
+    def finalize_edit(component_module,module_branch,opts={})
+      cmp_instances = get_applicable_component_instances(component_module)
+      project_idh = component_module.get_project().id_handle()
+      Clone::IncrementalUpdate::Component.update(project_idh,cmp_instances,module_branch,opts)
     end
 
     def delete_modules?()
@@ -28,7 +30,7 @@ module DTK; class AssemblyModule
       component_module_mh = @assembly.model_handle(:component_module)
       Model.get_objs(@assembly.model_handle(:module_branch),sp_hash).each do |r|
         unless r[:component_id]
-          Log.error("Unexpected that #{r.inspect} has :component_id nil; workaround is to delete this module branch")
+#          Log.error("Unexpected that #{r.inspect} has :component_id nil; workaround is to delete this module branch")
           Model.delete_instance(r.id_handle())
           next
         end
@@ -196,52 +198,6 @@ need to do a refresh on workspace branch sha in case this was updated in another
 =end
       end
       modules_with_branches
-    end
-
-    def modify_cmp_instances_with_new_parents(component_module,module_branch)
-      cmp_instances = get_applicable_component_instances(component_module)
-      update_impacted_component_instances(cmp_instances,module_branch,component_module.get_project().id_handle())
-    end
-
-    def update_impacted_component_instances(cmp_instances,module_branch,project_idh)
-      module_branch_id = module_branch[:id]
-
-      # shortcut; do not need to update components that are set already to this module id; and for added protection making
-      # sure that these it does not have :locked_sha set
-      cmp_instances_needing_update = cmp_instances.reject do |cmp|
-        (cmp.get_field?(:module_branch_id) == module_branch_id) and
-          ((cmp.has_key?(:locked_sha) and cmp[:locked_sha].nil?) or cmp.get_field?(:locked_sha).nil?)
-      end
-      return if cmp_instances_needing_update.empty?
-      component_types = cmp_instances_needing_update.map{|cmp|cmp.get_field?(:component_type)}.uniq
-      version_field = module_branch.get_field?(:version)
-      match_el_array = component_types.map do |ct|
-        DTK::Component::Template::MatchElement.new(
-          :component_type => ct,
-          :version_field => version_field
-        )
-      end
-      ndx_cmp_templates = DTK::Component::Template.get_matching_elements(project_idh,match_el_array).inject(Hash.new) do |h,r|
-        h.merge(r[:component_type] => r)
-      end
-      rows_to_update = cmp_instances_needing_update.map do |cmp|
-        if cmp_template = ndx_cmp_templates[cmp[:component_type]]
-          {
-            :id => cmp[:id],
-            :module_branch_id => module_branch_id,
-            :version => cmp_template[:version],
-            :locked_sha => nil, #this serves to let component instance get updated as this branch is updated
-            :implementation_id => cmp_template[:implementation_id],
-            :ancestor_id => cmp_template[:id]
-          }
-        else
-          Log.error("Cannot find matching component template for component instance (#{cmp.inspect}) for version (#{version_field})")
-          nil
-        end
-      end.compact
-      unless rows_to_update.empty?
-        Model.update_from_rows(project_idh.createMH(:component),rows_to_update)
-      end
     end
 
     def get_applicable_component_instances(component_module,opts={})

@@ -31,6 +31,7 @@ module DTK
        :group_id,
        :display_name,
        :name,
+       :external_ref,
        :basic_type,
        :type, 
        :component_type,

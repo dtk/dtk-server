@@ -146,14 +146,12 @@ module DTK; class Component
     end
       
     def self.list(mh,opts=Opts.new)
-      unless project_idh = opts[:project_idh]
-        raise Error.new("Requires opts[:project_idh]")
-      end
-
+      project_idh = opts[:project_idh]
+      assembly = opts[:assembly_instance]
       sp_hash = {
         :cols => [:id, :type, :display_name, :description, :component_type, :version, :refnum, :module_branch_id],
         :filter => [:and, [:eq, :type, "template"], 
-                    [:eq, :assembly_id, nil], #so get component templates, not components on assembly instances
+                    [:oneof, :version, filter_on_versions(:assembly => assembly)],
                     [:eq, :project_project_id, project_idh.get_id()]]
       }
       cmps = get_objs(project_idh.createMH(:component),sp_hash,:keep_ref_cols => true)
@@ -223,14 +221,13 @@ module DTK; class Component
       ret_cmp, match_cmps, cmp_module_ids = nil, [], []
       display_name = display_name_from_user_friendly_name(cmp_name)
       component_type,title =  ComponentTitle.parse_component_display_name(display_name)
-      assembly_version = ModuleVersion.ret(assembly)
       sp_hash = {
         :cols => [:id, :group_id, :display_name, :module_branch_id, :type, :ref, :namespace_info_for_cmps,:version],
         :filter => [:and,
                     [:eq, :type, 'template'],
                     [:eq, :component_type, component_type],
                     [:neq, :project_project_id, nil],
-                    [:oneof, :version, [assembly_version,'master']],
+                    [:oneof, :version, filter_on_versions(:assembly => assembly)],
                     [:eq, :node_node_id, nil]]
       }
       cmp_templates = get_objs(cmp_mh.createMH(:component_template),sp_hash,:keep_ref_cols=>true)
@@ -242,6 +239,7 @@ module DTK; class Component
 
       # there could be two matches one from base template and one from service insatnce specific template; in
       # this case use service specfic one
+      assembly_version = assembly_version(assembly)
       if cmp_templates.find{|cmp| cmp[:version] == assembly_version}
         cmp_templates.select!{|cmp|cmp[:version] == assembly_version}
       end
@@ -266,6 +264,14 @@ module DTK; class Component
     end
 
    private 
+    def self.assembly_version(assembly)
+      ModuleVersion.ret(assembly)
+    end
+    def self.filter_on_versions(opts)
+      assembly = opts[:assembly]
+      ['master', assembly && assembly_version(assembly)].compact
+    end
+
     # if title is in the name, this strips it off
     def self.name_to_id_aux(model_handle,name,version,opts={})
       display_name = display_name_from_user_friendly_name(name)

@@ -266,6 +266,11 @@ module Ramaze::Helper
     # which avoids needing to call create_object_from_id in create_obj
 
     # param refers to key that can have id or name value
+    def ret_request_param_id?(param, model_class=nil, extra_context=nil)
+      if id_or_name = ret_request_params(param)
+        resolve_id_from_name_or_id(id_or_name, model_class, extra_context)
+      end
+    end
     def ret_request_param_id(param, model_class=nil, extra_context=nil)
       id_or_name = ret_non_null_request_params(param)
       resolve_id_from_name_or_id(id_or_name, model_class, extra_context)

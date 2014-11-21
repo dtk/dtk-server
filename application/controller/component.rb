@@ -1,29 +1,31 @@
-module XYZ
+module DTK
   class ComponentController < AuthController
-    helper :filter_context_helper
-    helper :i18n_string_mapping
-
-    def delete()
-      id = ret_non_null_request_params(:id)
-      Model.delete_instance(id_handle(id))
-
-      return {:data => {:id=>id,:result=>true}}
-    end
+    helper :assembly_helper
 
     def rest__delete()
-      delete()
+      id = ret_non_null_request_params(:id)
+      Model.delete_instance(id_handle(id))
       rest_ok_response
     end
 
     def rest__list()
       project = get_default_project()
       ignore = ret_request_params(:ignore)
-      cmp_version_constraints = get_component_filter_constraints?()
+      assembly_instance = ret_assembly_instance_object?()
       opts = Opts.new(:project_idh => project.id_handle())
-      opts.merge!(:component_version_constraints => cmp_version_constraints) if cmp_version_constraints
-      opts.merge!(:ignore => ignore) if ignore
+      opts.merge?(:assembly_instance => assembly_instance)
+      opts.merge?(:ignore => ignore)
       rest_ok_response Component::Template.list(model_handle(),opts)
     end
+
+    # TODO: non rest routes; cleanup or remove
+    def delete()
+      id = ret_non_null_request_params(:id)
+      Model.delete_instance(id_handle(id))
+      {:data => {:id=>id,:result=>true}}
+    end
+
+
 
     def get_attributes_for_attr_mappings(component_id)
       component = create_object_from_id(component_id)

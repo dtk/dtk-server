@@ -14,6 +14,9 @@ module DTK
         end
       end
     end
+    def merge?(hash)
+      hash.each_pair{|k,v|merge!(k=>v) unless v.nil?}
+    end
 
     def slice(*keys)
       keys.inject(self.class.new) do |h,k|

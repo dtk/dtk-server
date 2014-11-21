@@ -1,8 +1,9 @@
 module DTK; class Clone
   module IncrementalUpdate
-    # This module is responsible for incremntal clone (incremental update) when component module 
-    # in a service instance are updated the compoennt isnatnce needs to be updated
+    # This module is responsible for incremental clone (incremental update) when component module 
+    # in a service instance are updated the compoennt instance needs to be updated
     module Component
+      r8_nested_require('component','dependency')
       def self.update(project_idh,components,module_branch,opts={})
         module_branch_id = module_branch[:id]
         cmps_needing_update = components.select{|cmp|component_needs_update?(cmp,module_branch_id,opts)}
@@ -33,6 +34,7 @@ module DTK; class Clone
         unless rows_to_update.empty?
           Model.update_from_rows(project_idh.createMH(:component),rows_to_update)
         end
+#        Dependency.update?()
       end
 
      private

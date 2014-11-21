@@ -11,30 +11,22 @@ module DTK; class Clone
 
         # get mapping between component instances and their templates
         # component templates indexed by component type
-        ndx_cmp_templates = get_ndx_component_templates(project_idh,cmps_needing_update,module_branch)
-
+        instance_template_links = get_instance_template_links(project_idh,cmps_needing_update,module_branch)
         rows_to_update = cmps_needing_update.map do |cmp|
-          if cmp_template = ndx_cmp_templates[cmp[:component_type]]
-            {
-              :id => cmp[:id],
-              :module_branch_id => module_branch_id,
-              :version => cmp_template[:version],
-              :locked_sha => nil, #this serves to let component instance get updated as this branch is updated
-              :implementation_id => cmp_template[:implementation_id],
-              :ancestor_id => cmp_template[:id],
-              :external_ref => cmp_template[:external_ref]
-
-            }
-          else
-            Log.error("Cannot find matching component template for component instance (#{cmp.inspect}) for version (#{version_field})")
-            nil
-          end
-        end.compact
-
-        unless rows_to_update.empty?
-          Model.update_from_rows(project_idh.createMH(:component),rows_to_update)
+          cmp_template = instance_template_links.template(cmp)
+          {
+            :id => cmp[:id],
+            :module_branch_id => module_branch_id,
+            :version => cmp_template[:version],
+            :locked_sha => nil, #this serves to let component instance get updated as this branch is updated
+            :implementation_id => cmp_template[:implementation_id],
+            :ancestor_id => cmp_template[:id],
+            :external_ref => cmp_template[:external_ref]
+            
+          }
         end
-#        Dependency.update?()
+        Model.update_from_rows(project_idh.createMH(:component),rows_to_update)
+#        Dependency.update?(instance_template_links)
       end
 
      private
@@ -51,7 +43,8 @@ module DTK; class Clone
          !cmp.get_field?(:locked_sha).nil?
       end
 
-      def self.get_ndx_component_templates(project_idh,cmps,module_branch)
+      def self.get_instance_template_links(project_idh,cmps,module_branch)
+        ret = InstanceTemplateLinks.new()
         component_types = cmps.map{|cmp|cmp.get_field?(:component_type)}.uniq
         version_field = module_branch.get_field?(:version)
         match_el_array = component_types.map do |ct|
@@ -60,9 +53,15 @@ module DTK; class Clone
             :version_field => version_field
           )
         end
-        DTK::Component::Template.get_matching_elements(project_idh,match_el_array).inject(Hash.new) do |h,r|
+        ndx_cmp_type_template = DTK::Component::Template.get_matching_elements(project_idh,match_el_array).inject(Hash.new) do |h,r|
           h.merge(r[:component_type] => r)
         end
+        cmps.each do |cmp|
+          if template = ndx_cmp_type_template[cmp[:component_type]] # this should be non null; "if" just for protection
+            ret.add(cmp,template)
+          end
+        end
+        ret
       end
 
     end

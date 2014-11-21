@@ -3,14 +3,17 @@ module DTK; class Clone
   # initial clone, which does not              
   module IncrementalUpdate
     r8_nested_require('incremental_update','component')
-    class InstanceTemplateLinks < Array
-      def initialize()
-        super()
-      end
+    class InstanceTemplateLinks < Hash
       def add(instance,template)
-        self << {:instance => instance, :template => template}
+        self[key(instance)] = {:instance => instance, :template => template}
       end
-      def find_template(instance)
+      def template(instance)
+        (self[key(instance)]||{})[:template] || 
+          raise(Error.new("Cannot find matching template for instance (#{instance.inspect})"))
+      end
+      private
+      def key(instance)
+        instance.id()
       end
     end
   end

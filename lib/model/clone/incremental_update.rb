@@ -47,9 +47,9 @@ module DTK; class Clone
         self << {:instances => instances, :templates => templates,:instance_parent => instance_parent}
       end
       def update_model()
-        delete_instances = Array.new
+        delete_instances = Array.new 
+        templates_to_clone = Array.new
         modify_instances = InstanceTemplateLink.new
-        add_template = Hash.new
         each do |link|
           ndx_templates = link[:templates].inject(Hash.new) do |h,t|
             h.merge(t[:id] => {:template => t,:matched => false})
@@ -63,15 +63,15 @@ module DTK; class Clone
             end
           end
           ndx_templates.values.each do |r|
-            if r[:matched]
-              add_template << {:template => r[:template], :instance_parent => link[:instance_parent]}
+            unless r[:matched]
+              templates_to_clone << {:template => r[:template], :instance_parent => link[:instance_parent]}
             end
           end
         end
         pp(
            :delete_instances => delete_instances,
            :modify_instances =>  modify_instances,
-           :add_template => add_template
+           :templates_to_clone => templates_to_clone
            )
       end
     end

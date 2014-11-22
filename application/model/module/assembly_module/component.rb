@@ -17,7 +17,7 @@ module DTK; class AssemblyModule
     def finalize_edit(component_module,module_branch,opts={})
       cmp_instances = get_applicable_component_instances(component_module)
       project_idh = component_module.get_project().id_handle()
-      Clone::IncrementalUpdate::Component.update(project_idh,cmp_instances,module_branch,opts)
+      Clone::IncrementalUpdate::Component.new(project_idh,module_branch).update?(cmp_instances,opts)
     end
 
     def delete_modules?()

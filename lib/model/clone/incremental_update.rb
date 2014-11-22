@@ -6,10 +6,8 @@ module DTK; class Clone
     r8_nested_require('incremental_update','dependency')
 
     class InstanceTemplateLink < Array
-      def add(instance,template,instance_parent=nil)
-        el = {:instance => instance, :template => template}
-        el.merge!(:instance_parent => instance_parent) if instance_parent
-        self << el
+      def add(instance,template)
+        self << {:instance => instance, :template => template}
       end
 
       def template(instance)
@@ -41,6 +39,40 @@ module DTK; class Clone
       def instances()
         #no dups
         map{|el|el[:instance]}.compact
+      end
+    end
+
+    class InstancesTemplatesLink < Array
+      def add(instances,templates,instance_parent)
+        self << {:instances => instances, :templates => templates,:instance_parent => instance_parent}
+      end
+      def update_model()
+        delete_instances = Array.new
+        modify_instances = InstanceTemplateLink.new
+        add_template = Hash.new
+        each do |link|
+          ndx_templates = link[:templates].inject(Hash.new) do |h,t|
+            h.merge(t[:id] => {:template => t,:matched => false})
+          end
+          link[:instances].each do |instance|
+            if template_match = ndx_templates[instance[:ancestor_id]]
+              modify_instances.add(instance,template_match[:template])
+              template_match[:matched] = true
+            else
+              delete_instances << instance
+            end
+          end
+          ndx_templates.values.each do |r|
+            if r[:matched]
+              add_template << {:template => r[:template], :instance_parent => link[:instance_parent]}
+            end
+          end
+        end
+        pp(
+           :delete_instances => delete_instances,
+           :modify_instances =>  modify_instances,
+           :add_template => add_template
+           )
       end
     end
   end

@@ -10,7 +10,16 @@ module DTK; class Component
           :filter => [:oneof,:id,component_idhs.map{|idh|idh.get_id()}]
         }
         cmp_mh = component_idhs.first.createMH()
-        Component.get_objs(cmp_mh,sp_hash)
+        # if agree on component id thean all attributes same execpet for dependencies
+        ndx_ret = Hash.new
+        # aggregate dependencies under the component it is nested on
+        Component.get_objs(cmp_mh,sp_hash).each do |aug_cmp|
+          # confugsing that from Component.get_objs :dependencies will be hash and we are using same field as an array
+          dep = aug_cmp[:dependencies]
+          pntr = ndx_ret[aug_cmp[:id]] ||= aug_cmp.merge(:dependencies => Array.new)
+          pntr[:dependencies] << dep if dep
+        end
+        ndx_ret.values
       end
       
       # returns hash with ndx component_id and keys :constraints, :component
@@ -18,9 +27,10 @@ module DTK; class Component
       def get_ndx_constraints(component_idhs,opts={})
         ret = Hash.new
         return ret if component_idhs.empty?
-        get_nested_dependencies(component_idhs).each do |r|
-          pntr = ret[r[:id]] ||= {:constraints => Array.new, :component => r.slice(*cmp_cols)}
-          pntr[:constraints] << Constraint.create(r[:dependencies]) if r[:dependencies]
+        cmp_cols = [:id,:group_id,:only_one_per_node,:component_type,:extended_base,:implementation_id]
+        ret = get_nested_dependencies(component_idhs).inject(Hash.new) do |h,r|
+          constraints = r[:dependencies].map{|dep|Constraint.create(dep)}
+          h.merge(r[:id] => {:constraints => constraints, :component => r.slice(*cmp_cols)})
         end
         ret.each_value do |r|
           cmp = r[:component]

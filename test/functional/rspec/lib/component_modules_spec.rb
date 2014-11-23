@@ -150,13 +150,6 @@ shared_context "Export component module" do |dtk_common, component_module_name, 
   end
 end
 
-# shared_context "OLD - Export module" do |dtk_common, component_module_name, namespace|
-#  it "exports #{component_module_name} module to #{namespace} namespace on remote repo" do
-#    module_exported = dtk_common.export_module_to_remote(component_module_name, namespace)
-#    module_exported.should eq(true)
-#  end
-# end
-
 shared_context "Import versioned component module from remote" do |dtk_common, component_module_name, version|
   it "checks existance of #{component_module_name} component module and imports component module with version #{version} from remote repo" do
     component_module_imported = dtk_common.import_versioned_component_module_from_remote(component_module_name, version)

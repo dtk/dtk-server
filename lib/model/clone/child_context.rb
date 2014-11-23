@@ -1,4 +1,4 @@
-module DTK
+module DTK; class Clone
   class ChildContext < SimpleHashObject
     r8_nested_require('child_context','assembly_node')
     r8_nested_require('child_context','assembly_node_attribute')
@@ -205,4 +205,5 @@ module DTK
       self[:parent_objs_info]
     end
   end
-end
+end; end
+

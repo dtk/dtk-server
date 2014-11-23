@@ -1,4 +1,4 @@
-module XYZ
+module DTK; class Clone
   class ChildContext 
     class PortLink < self
      private
@@ -8,5 +8,5 @@ module XYZ
       end
     end
   end
-end
+end; end
 

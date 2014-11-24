@@ -128,7 +128,7 @@ module DTK; class BaseModule
     def deprecate_create_needed_objects_and_dsl?(repo,version,opts={})
       # TODO: used temporarily until get all callers to use local object
       local = deprecate_ret_local(version)
-      Log.info_pp(["Using deprecate_create_needed_objects_and_dsl?; local =",local,caller[0..4]])
+#      Log.info_pp(["TODO: Using deprecate_create_needed_objects_and_dsl?; local =",local,caller[0..4]])
       create_needed_objects_and_dsl?(repo,local,opts)
     end
     def deprecate_ret_local(version)
@@ -194,11 +194,13 @@ module DTK; class BaseModule
       impl_obj.modify_file_assets(diffs_summary)
 
       if version.kind_of?(ModuleVersion::AssemblyModule)
-        if diffs_summary.meta_file_changed?()
-          raise ErrorUsage.new("Modifying dtk meta information in assembly instance is not supported; changes to dtk meta file will not take effect in instance")
+
+        if meta_file_changed = diffs_summary.meta_file_changed?()
+          parse_dsl_and_update_model(impl_obj,module_branch.id_handle(),version,module_namespace,opts)
         end
         assembly = version.get_assembly(model_handle(:component))
-        AssemblyModule::Component.finalize_edit(assembly,self,module_branch)
+        opts_finalize = (meta_file_changed ? {:meta_file_changed => true} : {})
+        AssemblyModule::Component.finalize_edit(assembly,self,module_branch,opts_finalize)
       elsif ModuleDSL.contains_dsl_file?(impl_obj)
         if opts[:force_parse] or diffs_summary.meta_file_changed?() or (get_field?(:dsl_parsed) == false)
           if e = ModuleDSL::ParsingError.trap{parse_dsl_and_update_model(impl_obj,module_branch.id_handle(),version,module_namespace,opts)}

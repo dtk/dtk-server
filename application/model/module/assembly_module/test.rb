@@ -15,7 +15,7 @@ module DTK; class AssemblyModule
       new(assembly).finalize_edit(component_module,module_branch)
     end
     def finalize_edit(component_module,module_branch)
-      modify_cmp_instances_with_new_parents(component_module,module_branch)
+      update_cmp_instances_with_modified_template(component_module,module_branch)
     end
 
     def delete_modules?()
@@ -28,7 +28,7 @@ module DTK; class AssemblyModule
       component_module_mh = @assembly.model_handle(:test_module)
       Model.get_objs(@assembly.model_handle(:module_branch),sp_hash).each do |r|
         unless r[:test_id]
-          Log.error("Unexpected that #{r.inspect} has :component_id nil; workaround is to delete this module branch")
+#          Log.error("Unexpected that #{r.inspect} has :component_id nil; workaround is to delete this module branch")
           Model.delete_instance(r.id_handle())
           next
         end
@@ -173,7 +173,7 @@ need to do a refresh on workspace branch sha in case this was updated in another
       modules_with_branches
     end
 
-    def modify_cmp_instances_with_new_parents(component_module,module_branch)
+    def update_cmp_instances_with_modified_template(component_module,module_branch)
       cmp_instances = get_applicable_component_instances(component_module)
       update_impacted_component_instances(cmp_instances,module_branch,component_module.get_project().id_handle())
     end

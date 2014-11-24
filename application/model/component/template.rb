@@ -95,7 +95,7 @@ module DTK; class Component
       cmp_types = match_element_array.map{|el|el.component_type}.uniq
       versions = match_element_array.map{|el|el.version_field}
       sp_hash = {
-        :cols => [:id,:group_id,:component_type,:version,:implementation_id],
+        :cols => [:id,:group_id,:component_type,:version,:implementation_id,:external_ref],
         :filter => [:and, 
                     [:eq, :project_project_id, project_idh.get_id()],
                     [:oneof, :version, versions],
@@ -146,14 +146,12 @@ module DTK; class Component
     end
       
     def self.list(mh,opts=Opts.new)
-      unless project_idh = opts[:project_idh]
-        raise Error.new("Requires opts[:project_idh]")
-      end
-
+      project_idh = opts[:project_idh]
+      assembly = opts[:assembly_instance]
       sp_hash = {
         :cols => [:id, :type, :display_name, :description, :component_type, :version, :refnum, :module_branch_id],
         :filter => [:and, [:eq, :type, "template"], 
-                    [:eq, :assembly_id, nil], #so get component templates, not components on assembly instances
+                    [:oneof, :version, filter_on_versions(:assembly => assembly)],
                     [:eq, :project_project_id, project_idh.get_id()]]
       }
       cmps = get_objs(project_idh.createMH(:component),sp_hash,:keep_ref_cols => true)
@@ -224,76 +222,56 @@ module DTK; class Component
       display_name = display_name_from_user_friendly_name(cmp_name)
       component_type,title =  ComponentTitle.parse_component_display_name(display_name)
       sp_hash = {
-        :cols => [:id, :group_id, :display_name, :module_branch_id, :type, :ref, :namespace_info_for_cmps],
+        :cols => [:id, :group_id, :display_name, :module_branch_id, :type, :ref, :namespace_info_for_cmps,:version],
         :filter => [:and,
                     [:eq, :type, 'template'],
                     [:eq, :component_type, component_type],
                     [:neq, :project_project_id, nil],
-                    # TODO: not sure if need this version field,
-                    # added because we can have the same component template just with different vesion
-                    # e.g. one has version = 'master' and other one version = "assembly--test"
-                    [:eq, :version, 'master'],
+                    [:oneof, :version, filter_on_versions(:assembly => assembly)],
                     [:eq, :node_node_id, nil]]
       }
       cmp_templates = get_objs(cmp_mh.createMH(:component_template),sp_hash,:keep_ref_cols=>true)
-      return ret_cmp if cmp_templates.empty?
-
-      # get component_modules already associated with service instance
-      opts = Opts.new(:with_namespace => true)
-      cmp_modules_for_assembly = assembly.list_component_modules(opts)
-
       if namespace
         # filter component templates by namsepace
-        cmp_templates.select!{|c| (c[:namespace] && c[:namespace][:display_name] == namespace)}
-        cmp_module_ids = cmp_modules_for_assembly.map{|i| i.id}
+        cmp_templates.select!{|cmp| cmp[:namespace][:display_name] == namespace}
+      end
+      return ret_cmp if cmp_templates.empty?
 
-        # filter component_templates to check if component_module this component_template belongs to
-        # already exist in current service instance; if true then return component_template as match
-        selected_cmp_temps = []
-        cmp_templates.each do |cmp_t|
-          selected_cmp_temps << cmp_t if (cmp_t[:component_module] && cmp_module_ids.include?(cmp_t[:component_module][:id]))
-        end
-        return selected_cmp_temps.first if selected_cmp_temps.size == 1
+      # there could be two matches one from base template and one from service insatnce specific template; in
+      # this case use service specfic one
+      assembly_version = assembly_version(assembly)
+      if cmp_templates.find{|cmp| cmp[:version] == assembly_version}
+        cmp_templates.select!{|cmp|cmp[:version] == assembly_version}
+      end
+      unless cmp_templates.size == 1
+        raise Error.new("Unexpected that more than one component template matches")
+      end
+      ret_cmp = cmp_templates.first
 
-        # if component_template with same name exist but have different namespace, return error message that user should
-        # use component_template from module that already exist in service instance
-        matching_cmp_modules = []
-        cmp_modules_for_assembly.each do |cmp_mod|
-          cmp_templates.each do |cmp_temp|
-            if (cmp_temp[:component_module] && (cmp_mod[:display_name]).eql?(cmp_temp[:component_module][:display_name]))
-              matching_cmp_modules << "#{cmp_mod[:namespace_name]}:#{cmp_mod[:display_name]}"
-            end
-          end
-        end
-
-        unless matching_cmp_modules.empty?
-          component_name = cmp_name.split('::').first
-          raise ErrorUsage.new("Unable to add component from (#{namespace}:#{component_name}) because you are already using components from following component modules: #{matching_cmp_modules}!")
-        end
-
-        ret_cmp = cmp_templates.first
-      else
-        return cmp_templates.first if cmp_templates.size == 1
-
-        cmp_modules_for_assembly.each do |cmp_mod|
-          cmp_templates.each do |cmp|
-            if cmp_module = cmp[:component_module]
-              match_cmps << cmp if cmp_module[:id] == cmp_mod[:id]
-            end
-          end
-
-          # if match multiple cmp templates but no matching component modules, or multiple matching component modules raise error
-          non_matching = ((cmp_templates.size > 1) && match_cmps.empty?)
-          raise ErrorUsage.new("Multiple components matching name you provided. Please use namespace:component format to add new component!") if (match_cmps.size > 1 || non_matching)
-
-          ret_cmp = match_cmps.first
+      # if component_template with same name exist but have different namespace, return error message that user should
+      # use component_template from module that already exist in service instance
+      opts = Opts.new(:with_namespace => true)
+      assembly_cmp_mods = assembly.list_component_modules(opts) # component_modules already associated with service instance
+      ret_cmp_mod = ret_cmp[:component_module][:display_name]
+      if cmp_mod = assembly_cmp_mods.find{|cmp_mod|cmp_mod[:display_name] == ret_cmp_mod}
+        ret_cmp_ns = ret_cmp[:namespace][:display_name]
+        cmp_mod_ns = cmp_mod[:namespace_name]
+        if ret_cmp_ns != cmp_mod_ns
+          raise ErrorUsage.new("Unable to add component from (#{ret_cmp_ns}:#{ret_cmp_mod}) because you are already using components from following component modules: #{cmp_mod_ns}:#{cmp_mod[:display_name]}")
         end
       end
-
       ret_cmp
     end
 
    private 
+    def self.assembly_version(assembly)
+      ModuleVersion.ret(assembly)
+    end
+    def self.filter_on_versions(opts)
+      assembly = opts[:assembly]
+      ['master', assembly && assembly_version(assembly)].compact
+    end
+
     # if title is in the name, this strips it off
     def self.name_to_id_aux(model_handle,name,version,opts={})
       display_name = display_name_from_user_friendly_name(name)

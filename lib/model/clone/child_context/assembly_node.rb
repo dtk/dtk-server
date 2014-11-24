@@ -1,4 +1,4 @@
-module DTK
+module DTK; class Clone
   class ChildContext
     class AssemblyNode < self
       r8_nested_require('assembly_node','match_target_refs')
@@ -183,4 +183,4 @@ module DTK
 
     end
   end
-end
+end; end

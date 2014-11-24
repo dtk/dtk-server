@@ -1,4 +1,4 @@
-module DTK
+module DTK; class Clone
   class ChildContext
     class AssemblyComponentRef < self
       r8_nested_require('assembly_component_ref','add_on')
@@ -104,5 +104,5 @@ module DTK
  
    end
   end
-end
+end; end
 

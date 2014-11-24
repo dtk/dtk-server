@@ -277,7 +277,7 @@ module XYZ
            :convert => true,
            :join_type => :left_outer,
            :join_cond=>{:component_component_id => q(:component,:id)}, 
-           :cols => [:id,:search_pattern,:type,:description,:severity]
+           :cols => [:id,:search_pattern,:type,:description,:severity,:ancestor_id]
          }
         ]
         # above is direct dependencies; below is inherited ones

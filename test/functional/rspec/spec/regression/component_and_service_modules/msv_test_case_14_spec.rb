@@ -38,7 +38,7 @@ describe "(Modules, Services and Versioning) Test Case 14: Import component modu
   end
 
   context "Export component module to default namespace" do
-    include_context "Export component module", dtk_common, component_module_name, namespace
+    include_context "Export component module", dtk_common, imported_component_module_name, namespace
   end
 
   context "Delete component module" do

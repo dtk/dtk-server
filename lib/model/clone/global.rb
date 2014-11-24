@@ -1,4 +1,4 @@
-module XYZ
+module DTK
   class Clone
     module Global
       AssemblyChildren = [:node,:attribute_link,:port_link]

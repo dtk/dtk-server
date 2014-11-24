@@ -6,13 +6,6 @@ require 'awesome_print'
 
 STDOUT.sync = true
 
-# shared_context "Import service module" do |dtk_common, service_module_name|
-#  it "imports new service module #{service_module_name}" do
-#    service_module_created = dtk_common.import_new_service_module(service_module_name)
-#    service_module_created.should eq(true)
-#  end
-# end
-
 shared_context "Import service module" do |service_module_name|
   it "imports #{service_module_name} service module from local filesystem to server" do
     puts "Import service module:", "----------------------"

@@ -1,4 +1,4 @@
-module DTK; class ChildContext
+module DTK; class Clone; class ChildContext
   class AssemblyNode
     class MatchTargetRefs
       def initialize(parent)
@@ -92,4 +92,4 @@ module DTK; class ChildContext
       end
     end
   end
-end; end
+end; end; end

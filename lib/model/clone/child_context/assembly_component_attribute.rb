@@ -1,4 +1,4 @@
-module DTK
+module DTK; class Clone
   class ChildContext 
     class AssemblyComponentAttribute < self
      private
@@ -38,5 +38,6 @@ module DTK
       end
     end
   end
-end
+end; end
+
 

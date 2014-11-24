@@ -3,8 +3,10 @@
 module DTK
   class Clone
     r8_nested_require('clone','child_context') 
-    r8_nested_require('clone','copy_processor') #TODO: better to not need copy_processor and just make part of this class
+    #TODO: better to not need copy_processor and just make part of this class
+    r8_nested_require('clone','copy_processor') 
     r8_nested_require('clone','global')
+    r8_nested_require('clone','incremental_update')
 
     module Mixins
       def clone_into(clone_source_object,override_attrs={},opts={})

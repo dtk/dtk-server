@@ -12,9 +12,12 @@ module DTK
   class Component < Model
     r8_nested_require('component','template')
     r8_nested_require('component','instance')
+    r8_nested_require('component','dependency')
     r8_nested_require('component','test')
     r8_nested_require('component','resource_matching')
     r8_nested_require('component','include_module')
+    include Dependency::Mixin
+    extend Dependency::ClassMixin
     include TemplateMixin
     include ComponentModelDefProcessor
     include ComponentViewMetaProcessor
@@ -23,7 +26,7 @@ module DTK
     extend ComponentMetaClassMixin 
     extend BranchNamesClassMixin
     include BranchNamesMixin
-
+    
     set_relation_name(:component,:component)
     def self.common_columns()
       [
@@ -31,6 +34,7 @@ module DTK
        :group_id,
        :display_name,
        :name,
+       :external_ref,
        :basic_type,
        :type, 
        :component_type,
@@ -511,6 +515,92 @@ module DTK
       end
     end
 
+    def get_attributes_ports()
+      opts = {:keep_ref_cols => true}
+      rows = get_objects_from_sp_hash({:columns => [:ref,:ref_num,:attributes_ports]},opts)
+      return Array.new if rows.empty?
+      component_ref = rows.first[:ref]
+      component_ref_num = rows.first[:ref_num]
+      rows.map do |r|
+        r[:attribute].merge(:component_ref => component_ref,:component_ref_num => component_ref_num) if r[:attribute]
+      end.compact
+    end
+
+    def get_component_i18n_label()
+      ret = get_stored_component_i18n_label?()
+      return ret if ret
+      i18n = get_i18n_mappings_for_models(:component)      
+      i18n_string(i18n,:component,self[:display_name])
+    end
+
+    def get_attribute_i18n_label(attribute)
+      ret = get_stored_attribute_i18n_label?(attribute)
+      return ret if ret
+      i18n = get_i18n_mappings_for_models(:attribute,:component)      
+      i18n_string(i18n,:attribute,attribute[:display_name],self[:component_type])
+    end
+
+    def update_component_i18n_label(label)
+      update_hash = {:id => self[:id], :i18n_labels => {i18n_language() => {"component" => label}}}
+      Model.update_from_rows(model_handle,[update_hash],:partial_value=>true)
+    end
+    def update_attribute_i18n_label(attribute_name,label)
+      update_hash = {:id => self[:id], :i18n_labels => {i18n_language() => {"attributes" => {attribute_name => label}}}}
+      Model.update_from_rows(model_handle,[update_hash],:partial_value=>true)
+    end
+
+    # self is an instance and it finds a library component
+    # multiple_instance_clause is used in case multiple extensions of same type and need to select particular one
+    # TODO: extend with logic for multiple_instance_clause
+    def get_extension_in_library(extension_type,cols=[:id,:display_name],multiple_instance_clause=nil)
+      base_sp_hash = {
+        :model_name => :implementation,
+        :filter => [:eq, :id, self[:implementation_id]],
+        :cols => [:id,:ancestor_id]
+      }
+      join_array = 
+        [
+         {          
+           :model_name => :component,
+           :alias => :library_template,
+           :join_type => :inner,
+           :filter => [:eq, :extension_type, extension_type.to_s],
+           :convert => true,
+           :join_cond => {:implementation_id => :implementation__ancestor_id},
+           :cols => Aux.array_add?(cols,:implementation_id)
+         }
+        ]
+      rows = Model.get_objects_from_join_array(model_handle(:implementation),base_sp_hash,join_array)
+      Log.error("get extension library shoudl only match one component") if rows.size > 1
+      rows.first && rows.first[:library_template]
+    end
+
+    def get_containing_node_id()
+      return self[:node_node_id] if self[:node_node_id]
+      row = get_objects_from_sp_hash(:columns => [:node_node_id,:containing_node_id_info]).first
+      row[:node_node_id]||(row[:parent_component]||{})[:node_node_id]
+    end
+
+    ####################
+    def save_view_in_cache?(type,user_context)
+      ViewDefProcessor.save_view_in_cache?(type,id_handle(),user_context)
+    end
+
+    ### object processing and access functions
+    def get_component_with_attributes_unraveled(attr_filters={:hidden => true})
+      sp_hash = {:columns => [:id,:display_name,:component_type,:basic_type,:attributes,:i18n_labels]}
+      component_and_attrs = get_objects_from_sp_hash(sp_hash)
+      return nil if component_and_attrs.empty?
+      component = component_and_attrs.first.subset(:id,:display_name,:component_type,:basic_type,:i18n_labels)
+      component_attrs = {:component_type => component[:component_type],:component_name => component[:display_name]}
+      filtered_attrs = component_and_attrs.map do |r|
+        attr = r[:attribute]
+        attr.merge(component_attrs) if attr and not attribute_is_filtered?(attr,attr_filters)
+      end.compact
+      attributes = AttributeComplexType.flatten_attribute_list(filtered_attrs)
+      component.merge(:attributes => attributes)
+    end
+
   private
     def sub_item_model_names()
       [:node,:component]
@@ -590,147 +680,6 @@ module DTK
       Model.get_objects_from_join_array(model_handle,base_sp_hash,join_array).map{|r|r[:attribute]}
     end
 
-   public
-
-    def get_attributes_ports()
-      opts = {:keep_ref_cols => true}
-      rows = get_objects_from_sp_hash({:columns => [:ref,:ref_num,:attributes_ports]},opts)
-      return Array.new if rows.empty?
-      component_ref = rows.first[:ref]
-      component_ref_num = rows.first[:ref_num]
-      rows.map do |r|
-        r[:attribute].merge(:component_ref => component_ref,:component_ref_num => component_ref_num) if r[:attribute]
-      end.compact
-    end
-
-    def get_component_i18n_label()
-      ret = get_stored_component_i18n_label?()
-      return ret if ret
-      i18n = get_i18n_mappings_for_models(:component)      
-      i18n_string(i18n,:component,self[:display_name])
-    end
-
-    def get_attribute_i18n_label(attribute)
-      ret = get_stored_attribute_i18n_label?(attribute)
-      return ret if ret
-      i18n = get_i18n_mappings_for_models(:attribute,:component)      
-      i18n_string(i18n,:attribute,attribute[:display_name],self[:component_type])
-    end
-
-    def update_component_i18n_label(label)
-      update_hash = {:id => self[:id], :i18n_labels => {i18n_language() => {"component" => label}}}
-      Model.update_from_rows(model_handle,[update_hash],:partial_value=>true)
-    end
-    def update_attribute_i18n_label(attribute_name,label)
-      update_hash = {:id => self[:id], :i18n_labels => {i18n_language() => {"attributes" => {attribute_name => label}}}}
-      Model.update_from_rows(model_handle,[update_hash],:partial_value=>true)
-    end
-
-    # self is an instance and it finds a library component
-    # multiple_instance_clause is used in case multiple extensions of same type and need to select particular one
-    # TODO: extend with logic for multiple_instance_clause
-    def get_extension_in_library(extension_type,cols=[:id,:display_name],multiple_instance_clause=nil)
-      base_sp_hash = {
-        :model_name => :implementation,
-        :filter => [:eq, :id, self[:implementation_id]],
-        :cols => [:id,:ancestor_id]
-      }
-      join_array = 
-        [
-         {          
-           :model_name => :component,
-           :alias => :library_template,
-           :join_type => :inner,
-           :filter => [:eq, :extension_type, extension_type.to_s],
-           :convert => true,
-           :join_cond => {:implementation_id => :implementation__ancestor_id},
-           :cols => Aux.array_add?(cols,:implementation_id)
-         }
-        ]
-      rows = Model.get_objects_from_join_array(model_handle(:implementation),base_sp_hash,join_array)
-      Log.error("get extension library shoudl only match one component") if rows.size > 1
-      rows.first && rows.first[:library_template]
-    end
-
-   private
-    def get_stored_attribute_i18n_label?(attribute)
-      return nil unless self[:i18n_labels]
-      ((self[:i18n_labels][i18n_language()]||{})["attributes"]||{})[attribute[:display_name]]
-    end
-    def get_stored_component_i18n_label?()
-      return nil unless self[:i18n_labels]
-      ((self[:i18n_labels][i18n_language()]||{})["component"]||{})[self[:display_name]]
-    end
-   public
-
-    # returns hash with ndx component_id and keys :constraints, :component
-    # opts can have key :when_evaluated
-    def self.get_ndx_constraints(component_idhs,opts={})
-      ret = Hash.new
-      return ret if component_idhs.empty?
-      cmp_cols = [:id,:group_id,:only_one_per_node,:component_type,:extended_base,:implementation_id]
-      sp_hash = {
-        :cols => [:dependencies] + cmp_cols,
-        :filter => [:oneof,:id,component_idhs.map{|idh|idh.get_id()}]
-      }
-      cmp_mh = component_idhs.first.createMH()
-      get_objs(cmp_mh,sp_hash).each do |r|
-        pntr = ret[r[:id]] ||= {:constraints => Array.new, :component => r.slice(*cmp_cols)}
-        pntr[:constraints] << Constraint.create(r[:dependencies]) if r[:dependencies]
-      end
-      ret.each_value do |r|
-        cmp = r[:component]
-        unless opts[:when_evaluated] == :after_cmp_added
-          # these shoudl only be evaluated before component is evaluated
-          r[:constraints] << Constraint::Macro.only_one_per_node(cmp[:component_type]) if cmp[:only_one_per_node]
-          r[:constraints] << Constraint::Macro.base_for_extension(cmp) if cmp[:extended_base]
-        end
-      end
-      ret
-    end
-
-    # TODO: may deprecate below or write in terms of above
-    def get_constraints!(opts={})
-      # TODO: may see if precalculating more is more efficient
-      cmp_cols = [:only_one_per_node,:component_type,:extended_base,:implementation_id]
-      rows = get_objs(:cols => [:dependencies] + cmp_cols)
-      cmp_info = rows.first #just picking first since component info same for all rows
-      cmp_cols.each{|col|self[col] = cmp_info[col]} if opts[:update_object]
-
-      constraints = rows.map{|r|Constraint.create(r[:dependencies]) if r[:dependencies]}.compact
-      constraints << Constraint::Macro.only_one_per_node(cmp_info[:component_type]) if cmp_info[:only_one_per_node]
-      constraints << Constraint::Macro.base_for_extension(cmp_info) if cmp_info[:extended_base]
-
-      return Constraints.new() if constraints.empty?
-      Constraints.new(:and,constraints)
-    end
-
-    def get_containing_node_id()
-      return self[:node_node_id] if self[:node_node_id]
-      row = get_objects_from_sp_hash(:columns => [:node_node_id,:containing_node_id_info]).first
-      row[:node_node_id]||(row[:parent_component]||{})[:node_node_id]
-    end
-
-    ####################
-    def save_view_in_cache?(type,user_context)
-      ViewDefProcessor.save_view_in_cache?(type,id_handle(),user_context)
-    end
-
-    ### object processing and access functions
-    def get_component_with_attributes_unraveled(attr_filters={:hidden => true})
-      sp_hash = {:columns => [:id,:display_name,:component_type,:basic_type,:attributes,:i18n_labels]}
-      component_and_attrs = get_objects_from_sp_hash(sp_hash)
-      return nil if component_and_attrs.empty?
-      component = component_and_attrs.first.subset(:id,:display_name,:component_type,:basic_type,:i18n_labels)
-      component_attrs = {:component_type => component[:component_type],:component_name => component[:display_name]}
-      filtered_attrs = component_and_attrs.map do |r|
-        attr = r[:attribute]
-        attr.merge(component_attrs) if attr and not attribute_is_filtered?(attr,attr_filters)
-      end.compact
-      attributes = AttributeComplexType.flatten_attribute_list(filtered_attrs)
-      component.merge(:attributes => attributes)
-    end
-   private
     # only filters if value is known
     def attribute_is_filtered?(attribute,attr_filters)
       return false if attr_filters.empty?
@@ -897,6 +846,15 @@ module DTK
       common_cols =  self.class.common_columns()
       ret = get_objs(:cols => common_cols).first
       ret.materialize!(common_cols)
+    end
+
+    def get_stored_attribute_i18n_label?(attribute)
+      return nil unless self[:i18n_labels]
+      ((self[:i18n_labels][i18n_language()]||{})["attributes"]||{})[attribute[:display_name]]
+    end
+    def get_stored_component_i18n_label?()
+      return nil unless self[:i18n_labels]
+      ((self[:i18n_labels][i18n_language()]||{})["component"]||{})[self[:display_name]]
     end
 
   end

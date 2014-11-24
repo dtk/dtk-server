@@ -1,5 +1,5 @@
 # for processing AssemblyComponentRefs when assembly being added is an add-on
-module DTK;class ChildContext
+module DTK; class Clone; class ChildContext
   class AssemblyComponentRef
     class AddOn < self
       def find_component_templates_in_assembly!()
@@ -34,4 +34,4 @@ module DTK;class ChildContext
 
     end
   end
-end; end
+end; end; end

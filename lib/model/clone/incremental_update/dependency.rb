@@ -12,7 +12,7 @@ module DTK; class Clone;
       def get_instance_template_links()
         ret = InstancesTemplatesLinks.new()
         component_idhs = @cmp_template_links.all_id_handles()
-        ndx_dependencies = ::DTK::Component.get_nested_dependencies(component_idhs).inject(Hash.new) do |h,r|
+        ndx_dependencies = ::DTK::Component::Dependency.get_nested_dependencies(component_idhs).inject(Hash.new) do |h,r|
           h.merge(r[:id] => r[:dependencies])
         end
         @cmp_template_links.each do |cmp_link|

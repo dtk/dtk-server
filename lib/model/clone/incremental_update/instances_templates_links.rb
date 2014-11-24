@@ -7,16 +7,17 @@ module DTK; class Clone
           self << Link.new(instances,templates,instance_parent)
         end
       end
-      def update_model()
+      def update_model(opts={})
         delete_instances = Array.new 
-        templates_to_clone = Array.new
+        add_templates = Array.new
         modify_instances = InstanceTemplateLinks.new
         each do |link|
+          # ndexd by ref
           ndx_templates = link.templates.inject(Hash.new) do |h,t|
-            h.merge(t[:id] => {:template => t,:matched => false})
+            h.merge(t[:ref] => {:template => t,:matched => false})
           end
           link.instances.each do |instance|
-            if template_match = ndx_templates[instance[:ancestor_id]]
+            if template_match = ndx_templates[instance[:ref]]
               modify_instances.add(instance,template_match[:template])
               template_match[:matched] = true
             else
@@ -25,24 +26,38 @@ module DTK; class Clone
           end
           ndx_templates.values.each do |r|
             unless r[:matched]
-              templates_to_clone << {:template => r[:template], :instance_parent => link.instance_parent}
+              add_templates << {:template => r[:template], :instance_parent => link.instance_parent}
             end
           end
         end
         pp(
            :delete_instances => delete_instances,
            :modify_instances =>  modify_instances,
-           :templates_to_clone => templates_to_clone
+           :add_templates => add_templates
            )
-        pp [:field_set_to_copy,field_set_to_copy()]
+        delete_instances(delete_instances,opts) unless delete_instances.empty? 
+        modify_instances(modify_instances) unless modify_instances.empty?
+        add_templates(add_templates) unless add_templates.empty?
       end
+
      private
+      def delete_instances(instances,opts={})
+        if opts[:donot_allow_deletes]
+          mn = delete_instances.first.model_name
+          instance_names = delete_instances.map{|r|r[:display_name]}.join(',')
+          raise ErrorUsage.new("The change to the dtk.model.yaml for would case the #{mn} objects (#{instance_names}) to be deleted")
+        else
+          Model.delete_instances(instances.map{|r|r.id_handle})
+        end
+      end
+
       def field_set_to_copy()
+        return @field_set_to_copy if @field_set_to_copy
         instance_mh = instance_mh()
         parent_id_col = instance_mh.parent_id_field_name()
         remove_cols = [:id,:local_id,parent_id_col]
         concrete_model_name = Model.concrete_model_name(instance_mh[:model_name])
-        Model::FieldSet.all_real(concrete_model_name).with_removed_cols(*remove_cols)
+        @field_set_to_copy = Model::FieldSet.all_real(concrete_model_name).with_removed_cols(*remove_cols)
       end
 
       def instance_mh()

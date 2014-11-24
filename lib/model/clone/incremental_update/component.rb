@@ -11,11 +11,18 @@ module DTK; class Clone
       def update?(components,opts={})
         cmps_needing_update = components.select{|cmp|component_needs_update?(cmp,opts)}
         return if cmps_needing_update.empty?
+        # putting this here but not in other update functions in IncrementalUpdate because this is top level entry point
+        Model.Transaction do 
+          update(cmps_needing_update,opts)
+        end
+      end
 
+     private
+      def update(components,opts={})
         # get mapping between component instances and their templates
         # component templates indexed by component type
-        links = get_instance_template_links(cmps_needing_update)
-        rows_to_update = cmps_needing_update.map do |cmp|
+        links = get_instance_template_links(components)
+        rows_to_update = components.map do |cmp|
           cmp_template = links.template(cmp)
           {
             :id => cmp[:id],
@@ -31,7 +38,6 @@ module DTK; class Clone
         Dependency.new(links).update?()
       end
 
-     private
       def component_needs_update?(cmp,opts={})
         opts[:meta_file_changed] or
         (cmp.get_field?(:module_branch_id) != @module_branch_id) or #TODO: check how this can happen

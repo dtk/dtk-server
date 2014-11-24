@@ -51,6 +51,12 @@ module DTK; class Clone
         end
       end
 
+      def modify_instances(instance_template_links)
+      end
+
+      def add_templates(template_parent_instance_pairs)
+      end
+
       def field_set_to_copy()
         return @field_set_to_copy if @field_set_to_copy
         instance_mh = instance_mh()

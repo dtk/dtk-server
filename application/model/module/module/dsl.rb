@@ -146,35 +146,36 @@ module DTK
 
     def self.name_attribute_integrity_check(components)
       return unless components
-      names, missing_req_or_def = [], []
+      names = []
 
       components.each do |name,value|
         # if component is 'puppet definition'
         if (value['external_ref']||{}).has_key?('puppet_definition')
           attributes = value['attributes']
-          names, missing_req_or_def = get_name_attributes(attributes)
-          if names.size == 1
-            return ParsingError::BadPuppetDefinition.new(:component => name, :missing_req_or_def => missing_req_or_def) unless missing_req_or_def.empty?
-          else
-            return ParsingError::BadPuppetDefinition.new(:component => name, :invalid_names => names)
-          end
+          names = get_name_attributes(attributes)
+          return ParsingError::BadPuppetDefinition.new(:component => name, :invalid_names => names) unless names.size == 1
+          # if names.size == 1
+            # return ParsingError::BadPuppetDefinition.new(:component => name, :missing_req_or_def => missing_req_or_def) unless missing_req_or_def.empty?
+          # else
+            # return ParsingError::BadPuppetDefinition.new(:component => name, :invalid_names => names)
+          # end
         end
       end
     end
 
     def self.get_name_attributes(attributes)
-      names, missing_req_or_def = [], []
-      return names,missing_req_or_def unless attributes
+      names = []
+      return names unless attributes
 
       attributes.each do |n_name, n_attr|
         if n_name.eql?('name')
           names << n_name
-          missing_req_or_def << n_name unless (n_attr.has_key?('required') || n_attr.has_key?('default'))
+          # missing_req_or_def << n_name unless (n_attr.has_key?('required') || n_attr.has_key?('default'))
         elsif ext_ref = n_attr['external_ref']
           names << n_name if (ext_ref.has_key?('puppet_attribute') && ext_ref['puppet_attribute'].eql?('name'))
         end
       end
-      return names, missing_req_or_def
+      return names
     end
     # returns parsing_error if parsing error
 

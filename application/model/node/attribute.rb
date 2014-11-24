@@ -126,7 +126,7 @@ module DTK
             to_create_on_node << node
           end
         end
-        to_change_attrs.each{|attr|attr.update(extra_fields.merge(:value_asserted => val))}
+        to_change_attrs.each{|attr|attr.update(extra_fields.merge(:value_asserted => value))}
         
         unless to_create_on_node.empty?
           create_rows = to_create_on_node.map{|n|attribute_create_hash(n.id,name,value,extra_fields)}

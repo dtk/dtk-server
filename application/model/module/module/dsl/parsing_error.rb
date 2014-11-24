@@ -36,6 +36,25 @@ module DTK
         end
       end
 
+      class BadPuppetDefinition < self
+        def initialize(params={})
+          component = params[:component]
+          invalid_names = params[:invalid_names]
+          missing_req_or_def = params[:missing_req_or_def]
+
+          if invalid_names
+            err_msg =
+              (invalid_names.size == 0) ? "The following component (?name) that is mapped to puppet definition does not have designated name attribute"
+                : "The following component (?name) that is mapped to puppet definition has multiple attributes designated as being the puppet definition name"
+          elsif missing_req_or_def
+            err_msg = "The following component (?name) that is mapped to puppet definition has name attribute that is not marked as required or does not have default value"
+          end
+
+          err_params = Params.new(:name => params[:component])
+          super(err_msg,err_params)
+        end
+      end
+
     end
   end
 end

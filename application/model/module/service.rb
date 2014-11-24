@@ -330,7 +330,7 @@ module DTK
 
       # get module info for every component in an assembly in the service module
       module_info = get_component_modules_info(module_branch_obj)
-pp [:debug_publish_preprocess_raise_error,:module_info,module_info]
+      pp [:debug_publish_preprocess_raise_error,:module_info,module_info]
       # check that all component modules are linked to a remote component module
 =begin
       # TODO: ModuleBranch::Location: removed linked_remote; taking out this check until have replacement

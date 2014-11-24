@@ -163,7 +163,7 @@ module DTK; class BaseModule
           end
           matching_branches = external_deps.matching_module_branches?()
         end
-      # opts[:set_external_refs] means to set external refs if they exist from parsing module files   
+      # opts[:set_external_refs] means to set external refs if they exist from parsing module files
       elsif opts[:set_external_refs]
         module_branch = module_branch_idh.create_object()
         set_external_ref?(module_branch,config_agent_type,impl_obj)

@@ -287,6 +287,10 @@ module Ramaze::Helper
       create_object_from_id(id_resolved, model_class)
     end
 
+    def get_obj(id, model_class=nil)
+      create_object_from_id(id, model_class)
+    end
+
   end
 end
 

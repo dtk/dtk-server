@@ -19,7 +19,7 @@ module DTK
 
       config_agent_type =  ret_config_agent_type()
       project = get_default_project()
-      version = nil #TODO: stub
+      version = nil # TODO: stub
       opts = Opts.create?(
         :config_agent_type => config_agent_type,
         :version? => version,
@@ -176,10 +176,29 @@ module DTK
       puppet_module_name = ret_non_null_request_params(:puppetf_module_name)
       module_name = ret_non_null_request_params(:module_name)
       namespace = ret_request_params(:module_namespace)
+      version   = nil
 
       response = PuppetForge::Client.install(puppet_module_name, nil, true)
 
-      rest_ok_response :ok
+      opts = Opts.create?(
+        :config_agent_type => ret_config_agent_type(),
+        :version? => version,
+        :module_namespace => namespace
+      )
+
+      module_info = ComponentModule.create_module(get_default_project(),module_name,opts)[:module_repo_info]
+      commit_sha  = PuppetForge::Client.push_to_server(response['install_dir'], module_info[:repo_url])
+      module_id   = module_info[:module_id]
+      component_module = get_obj(module_id)
+
+      dsl_info_response = component_module.update_from_initial_create(
+          commit_sha,
+          id_handle(module_info[:repo_id], :repo),
+          version,
+          { :scaffold_if_no_dsl => true, :do_not_raise => true, :process_external_refs => true }
+        )
+
+      rest_ok_response dsl_info_response.merge(:module_id => module_id, :version => version)
     end
 
     # this should be called when the module is linked, but the specfic version is not

@@ -54,8 +54,11 @@ module DTK
       config_agent_type = ret_config_agent_type(input_hash)
       return config_agent_type if ParsingError.is_error?(config_agent_type)
 
-      ref_integrity_snapshot = opts[:ref_integrity_snapshot]
-      integrity_check = ref_integrity_snapshot.raise_error_if_missing_from_module_refs(input_hash,opts[:component_module_refs])
+      name_attribute_check = name_attribute_integrity_check(input_hash['components'])
+      return name_attribute_check if ParsingError.is_error?(name_attribute_check)
+
+      # ref_integrity_snapshot = opts[:ref_integrity_snapshot]
+      # integrity_check = ref_integrity_snapshot.raise_error_if_missing_from_module_refs(input_hash,opts[:component_module_refs])
 
       ParsingError.trap do
         new(config_agent_type,target_impl.id_handle(),module_branch_idh,input_hash,container_idh)
@@ -141,6 +144,38 @@ module DTK
       end
     end
 
+    def self.name_attribute_integrity_check(components)
+      return unless components
+      names, missing_req_or_def = [], []
+
+      components.each do |name,value|
+        # if component is 'puppet definition'
+        if (value['external_ref']||{}).has_key?('puppet_definition')
+          attributes = value['attributes']
+          names, missing_req_or_def = get_name_attributes(attributes)
+          if names.size == 1
+            return ParsingError::BadPuppetDefinition.new(:component => name, :missing_req_or_def => missing_req_or_def) unless missing_req_or_def.empty?
+          else
+            return ParsingError::BadPuppetDefinition.new(:component => name, :invalid_names => names)
+          end
+        end
+      end
+    end
+
+    def self.get_name_attributes(attributes)
+      names, missing_req_or_def = [], []
+      return names,missing_req_or_def unless attributes
+
+      attributes.each do |n_name, n_attr|
+        if n_name.eql?('name')
+          names << n_name
+          missing_req_or_def << n_name unless (n_attr.has_key?('required') || n_attr.has_key?('default'))
+        elsif ext_ref = n_attr['external_ref']
+          names << n_name if (ext_ref.has_key?('puppet_attribute') && ext_ref['puppet_attribute'].eql?('name'))
+        end
+      end
+      return names, missing_req_or_def
+    end
     # returns parsing_error if parsing error
 
     # TODO: this might move to a more common area

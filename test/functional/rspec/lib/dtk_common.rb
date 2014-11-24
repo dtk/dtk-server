@@ -21,6 +21,7 @@ class DtkCommon
 	include TargetMixin
 	include ComponentModulesMixin
 	include ServiceModulesMixin
+	include TestModulesMixin
 
 	attr_accessor :server, :port, :endpoint, :username, :password
 	attr_accessor :service_name, :service_id, :assembly, :node_id, :success, :error_message, :server_log, :ssh_key

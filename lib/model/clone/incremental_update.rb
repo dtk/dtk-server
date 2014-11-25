@@ -1,10 +1,12 @@
 module DTK; class Clone
-  # These mdouels explicitly have class to the sub object type in contrast to 
-  # initial clone, which does not              
+  # The incremental update code explicitly has classes per sub object type in contrast to 
+  # initial clone, which aside from spacial processing has generic mecahnism for parent child processing
   module IncrementalUpdate
-    # Helper classes
-    r8_nested_require('incremental_update','instance_template_links')
-    r8_nested_require('incremental_update','instances_templates_links')
+    # helper fns
+    module InstancesTemplates
+      r8_nested_require('incremental_update','instances_templates/link')
+      r8_nested_require('incremental_update','instances_templates/links')
+    end
     # classes for processing specific object model types
     r8_nested_require('incremental_update','component')
     r8_nested_require('incremental_update','dependency')

@@ -68,14 +68,10 @@ module DTK; class Clone
       ret unless block
     end
 
-    def self.returning_sql_cols(parent_id_col)
-      [:ancestor_id,parent_id_col]
-    end
-
-    def self.create_from_parent_rels(instance_mh,parent_rels)
-      parent_id_col = instance_mh.parent_id_field_name()
+    def self.create_from_parent_links(child_mh,parent_links)
+      parent_id_col = child_mh.parent_id_field_name()
       hash = {
-        :model_handle => instance_mh,
+        :model_handle => child_mh,
         :clone_par_col => parent_id_col,
         :parent_rels => parent_rels, 
         :create_opts => {
@@ -86,6 +82,11 @@ module DTK; class Clone
       clone_proc = nil
       new(clone_proc,hash)
     end
+
+    def self.returning_sql_cols(parent_id_col)
+      [:ancestor_id,parent_id_col]
+    end
+
 
     def create_new_objects()
       ret_new_objs_info(field_set_to_copy())

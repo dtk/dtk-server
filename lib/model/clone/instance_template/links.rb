@@ -1,7 +1,6 @@
 module DTK; class Clone
-  module IncrementalUpdate
-    class InstanceTemplateLinks < Array
-      Link = Struct.new(:instance,:template)
+  module InstanceTemplate
+    class Links < Array
       def add(instance,template)
         self << Link.new(instance,template)
       end

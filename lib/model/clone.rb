@@ -2,14 +2,19 @@
 # TODO: try to move more to chidl context geenraizing to be object context and possibly using it to subsume cloneprocesseor
 module DTK
   class Clone
+    module InstanceTemplate
+      r8_nested_require('clone','instance_template/link')
+      r8_nested_require('clone','instance_template/links')
+    end
+
     r8_nested_require('clone','child_context') 
     #TODO: better to not need copy_processor and just make part of this class
     r8_nested_require('clone','copy_processor') 
     r8_nested_require('clone','global')
     r8_nested_require('clone','incremental_update')
 
-    def self.create_new_objects(instance_mh,parent_rels)
-      child_context = ChildContext.create_from_parent_rels(instance_mh,parent_rels)
+    def self.create_child_objects(child_mh,parent_rels)
+      child_context = ChildContext.create_from_parent_rels(child_mh,parent_rels)
       child_context.create_new_objects()
     end
 

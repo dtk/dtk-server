@@ -1,4 +1,4 @@
-module DTK; class Clone; 
+module DTK; class Clone;
   module IncrementalUpdate
     class Dependency 
       def initialize(cmp_template_links)
@@ -10,7 +10,7 @@ module DTK; class Clone;
       end
      private
       def get_instance_template_links()
-        ret = InstancesTemplatesLinks.new()
+        ret = InstancesTemplates::Links.new()
         component_idhs = @cmp_template_links.all_id_handles()
         ndx_dependencies = ::DTK::Component::Dependency.get_nested_dependencies(component_idhs).inject(Hash.new) do |h,r|
           h.merge(r[:id] => r[:dependencies])

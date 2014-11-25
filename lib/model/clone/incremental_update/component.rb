@@ -51,7 +51,7 @@ module DTK; class Clone
       end
 
       def get_instance_template_links(cmps)
-        ret = InstanceTemplateLinks.new()
+        ret = InstanceTemplate::Links.new()
         component_types = cmps.map{|cmp|cmp.get_field?(:component_type)}.uniq
         version_field = @module_branch.get_field?(:version)
         match_el_array = component_types.map do |ct|

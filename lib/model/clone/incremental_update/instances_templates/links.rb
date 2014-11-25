@@ -1,17 +1,17 @@
-module DTK; class Clone
-  module IncrementalUpdate
-    class InstancesTemplatesLinks < Array
-      r8_nested_require('instances_templates_links','link')
+module DTK; class Clone; module IncrementalUpdate
+  module InstancesTemplates
+    class Links < Array
       def add?(instances,templates,parent_link)
         # do not add if both instances and templates are empty?
         unless instances.empty? and templates.empty?
           self << Link.new(instances,templates,parent_link)
         end
       end
+
       def update_model(opts={})
         delete_instances = Array.new 
         create_from_templates = Array.new
-        modify_instances = InstanceTemplateLinks.new
+        modify_instances = Clone::InstanceTemplate::Links.new
         each do |link|
           # indexd by ref
           ndx_templates = link.templates.inject(Hash.new) do |h,t|
@@ -51,11 +51,17 @@ module DTK; class Clone
           Model.delete_instances(instances.map{|r|r.id_handle})
         end
       end
-
+      
       def modify_instances(instance_template_links)
       end
-
-      def create_from_templates(create_info)
+      
+      def create_from_templates(template_parent_link_pairs)
+=begin
+        template_parent_link_pairs.each do |r|
+          template = r[:template]
+          parent_link = r[:parentt_link]
+          create_new_objects(instance_mh,parent_rels)
+=end
       end
 
       def field_set_to_copy()
@@ -70,11 +76,11 @@ module DTK; class Clone
       def instance_mh()
         return @instance_mh if @instance_mh 
         unless link = first 
-          raise Error.new("This methdo should not be called when no links")
+          raise Error.new("This method should not be called when no links")
         end
         @instance_mh = link.instance_model_handle()
       end
 
     end
   end
-end; end
+end; end; end

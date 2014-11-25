@@ -5,6 +5,10 @@ module DTK; class Clone
         self << Link.new(instance,template)
       end
 
+      def parent_rels()
+        map{|link|{:ancestor_id => link.instance.id, :old_par_id => link.template.id}}
+      end
+
       def template(instance)
         match = match_instance(instance)
         match[:template] || raise(Error.new("Cannot find matching template for instance (#{instance.inspect})"))

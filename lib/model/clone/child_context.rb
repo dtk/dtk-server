@@ -74,7 +74,7 @@ module DTK; class Clone
       end
       child_mh = template_child_idhs.first.createMH()
       parent_id_col = child_mh.parent_id_field_name()
-      parent_rels = parent_links.parent_rels()
+      parent_rels = parent_links.parent_rels(child_mh)
 
       hash = {
         :model_handle => child_mh,

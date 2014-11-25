@@ -5,8 +5,9 @@ module DTK; class Clone
         self << Link.new(instance,template)
       end
 
-      def parent_rels()
-        map{|link|{:ancestor_id => link.instance.id, :old_par_id => link.template.id}}
+      def parent_rels(child_mh)
+        parent_id_col = child_mh.parent_id_field_name()
+        map{|link|{parent_id_col => link.instance.id, :old_par_id => link.template.id}}
       end
 
       def template(instance)

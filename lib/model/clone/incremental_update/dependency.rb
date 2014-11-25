@@ -16,10 +16,11 @@ module DTK; class Clone;
           h.merge(r[:id] => r[:dependencies])
         end
         @cmp_template_links.each do |cmp_link|
-          cmp_instance = cmp_link[:instance]
+          cmp_instance = cmp_link.instance
           dep_instances = cmp_instance && ndx_dependencies[cmp_instance.id]
-          dep_templates = cmp_link[:template] && ndx_dependencies[cmp_link[:template].id]
-          ret.add?(dep_instances,dep_templates,cmp_instance)
+          cmp_template = cmp_link.template
+          dep_templates = cmp_template && ndx_dependencies[cmp_template.id]
+          ret.add?(dep_instances,dep_templates,cmp_link)
         end
         ret
       end

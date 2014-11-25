@@ -72,6 +72,25 @@ module DTK; class Clone
       [:ancestor_id,parent_id_col]
     end
 
+    def self.create_from_parent_rels(instance_mh,parent_rels)
+      parent_id_col = instance_mh.parent_id_field_name()
+      hash = {
+        :model_handle => instance_mh,
+        :clone_par_col => parent_id_col,
+        :parent_rels => parent_rels, 
+        :create_opts => {
+          :duplicate_refs => :no_check, 
+#          :returning_sql_cols => returning_sql_cols(parent_id_col)
+        }
+      }
+      clone_proc = nil
+      new(clone_proc,hash)
+    end
+
+    def create_new_objects()
+      ret_new_objs_info(field_set_to_copy())
+    end
+
     def self.create_from_hash(clone_proc,hash,opts={})
       if opts[:standard_child_context]
         return new(clone_proc,hash)
@@ -87,6 +106,7 @@ module DTK; class Clone
     end
 
    private
+
     #this can be over-written
     def include_list()
       nil
@@ -125,13 +145,15 @@ module DTK; class Clone
       }
     }
 
+    
     def initialize(clone_proc,hash)
       super(hash)
       @clone_proc = clone_proc
     end
 
     def db()
-      @clone_proc.db()
+      # TODO: could probably simplify this to model_handle.db() 
+      (@clone_proc && @clone_proc.db()) || model_handle.db()
     end
 
     def self.get_children_model_handles(model_handle,opts={},&block)

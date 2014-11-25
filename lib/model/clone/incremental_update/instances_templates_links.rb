@@ -1,10 +1,11 @@
 module DTK; class Clone
   module IncrementalUpdate
     class InstancesTemplatesLinks < Array
-      def add?(instances,templates,instance_parent)
+      r8_nested_require('instances_templates_links','link')
+      def add?(instances,templates,parent_link)
         # do not add if both instances and templates are empty?
         unless instances.empty? and templates.empty?
-          self << Link.new(instances,templates,instance_parent)
+          self << Link.new(instances,templates,parent_link)
         end
       end
       def update_model(opts={})
@@ -12,7 +13,7 @@ module DTK; class Clone
         create_from_templates = Array.new
         modify_instances = InstanceTemplateLinks.new
         each do |link|
-          # ndexd by ref
+          # indexd by ref
           ndx_templates = link.templates.inject(Hash.new) do |h,t|
             h.merge(t[:ref] => {:template => t,:matched => false})
           end
@@ -26,7 +27,7 @@ module DTK; class Clone
           end
           ndx_templates.values.each do |r|
             unless r[:matched]
-              create_from_templates << {:template => r[:template], :instance_parent => link.instance_parent}
+              create_from_templates << {:template => r[:template], :parent_link => link.parent_link}
             end
           end
         end
@@ -54,7 +55,7 @@ module DTK; class Clone
       def modify_instances(instance_template_links)
       end
 
-      def create_from_templates(template_parent_instance_pairs)
+      def create_from_templates(create_info)
       end
 
       def field_set_to_copy()
@@ -74,25 +75,6 @@ module DTK; class Clone
         @instance_mh = link.instance_model_handle()
       end
 
-      class Link
-        attr_reader :instances,:templates,:instance_parent
-        def initialize(instances,templates,instance_parent)
-          @instances = instances
-          @templates = templates
-          @instance_parent = instance_parent
-        end
-
-        def instance_model_handle()
-          #want parent information
-          @instance_parent.child_model_handle(instance_model_name())
-        end
-        private
-        def instance_model_name()
-          #all templates and instances should have same model name so just need to find one
-          #one of these wil be non null
-        (@instances.first || @templates.first).model_name
-        end
-      end
     end
   end
 end; end

@@ -8,6 +8,11 @@ module DTK
     r8_nested_require('clone','global')
     r8_nested_require('clone','incremental_update')
 
+    def self.create_new_objects(instance_mh,parent_rels)
+      child_context = ChildContext.create_from_parent_rels(instance_mh,parent_rels)
+      child_context.create_new_objects()
+    end
+
     module Mixins
       def clone_into(clone_source_object,override_attrs={},opts={})
         target_id_handle = id_handle_with_auth_info()

@@ -1,8 +1,6 @@
 # TODO: unify relation_type and model_name
-module XYZ
-
-  # TODO: should this class  be in this file or instead somewhere else
-  module CommonMixin
+module DTK
+  module IdInfoTable; module Mixin
     def [](x)
       super(x.to_sym)
     end
@@ -86,10 +84,10 @@ module XYZ
     def raise_has_illegal_form(x)
       raise Error.new("#{x.inspect} has incorrect form to be an id handle")
     end
-  end
+  end; end
 
   class IDHandle < Hash
-    include CommonMixin
+    include IdInfoTable::Mixin
 
     def create_object(opts={})
       model_name =
@@ -256,7 +254,7 @@ module XYZ
   end
 
   class ModelHandle < Hash
-    include CommonMixin
+    include IdInfoTable::Mixin
     def initialize(c,model_name,parent_model_name=nil,user=nil)
       super()
       self[:c] = c

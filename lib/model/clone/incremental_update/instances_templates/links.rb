@@ -55,13 +55,11 @@ module DTK; class Clone; module IncrementalUpdate
       def modify_instances(instance_template_links)
       end
       
-      def create_from_templates(template_parent_link_pairs)
-=begin
-        template_parent_link_pairs.each do |r|
-          template = r[:template]
-          parent_link = r[:parentt_link]
-          create_new_objects(instance_mh,parent_rels)
-=end
+      def create_from_templates(template__parent_links)
+        # TODO: more efficient is group by common parent_links and pass all templates that are relevant at one time
+        template__parent_links.each do |r|
+          Clone.create_child_object([r[:template].id_handle],r[:parent_link])
+        end
       end
 
       def field_set_to_copy()

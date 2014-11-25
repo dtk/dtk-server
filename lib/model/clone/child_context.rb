@@ -68,8 +68,14 @@ module DTK; class Clone
       ret unless block
     end
 
-    def self.create_from_parent_links(child_mh,parent_links)
+    def self.create_from_parent_links(template_child_idhs,parent_links)
+      if template_child_idhs.empty? or parent_links.empty?
+        raise Error.new("Should not be called with template_child_idhs.empty? or parent_links.empty?")
+      end
+      child_mh = template_child_idhs.first.model_handle
       parent_id_col = child_mh.parent_id_field_name()
+      parent_rels = parent_links.parent_rels()
+
       hash = {
         :model_handle => child_mh,
         :clone_par_col => parent_id_col,

@@ -9,7 +9,7 @@ module DTK; class Clone
       end
       def update_model(opts={})
         delete_instances = Array.new 
-        add_templates = Array.new
+        create_from_templates = Array.new
         modify_instances = InstanceTemplateLinks.new
         each do |link|
           # ndexd by ref
@@ -26,18 +26,18 @@ module DTK; class Clone
           end
           ndx_templates.values.each do |r|
             unless r[:matched]
-              add_templates << {:template => r[:template], :instance_parent => link.instance_parent}
+              create_from_templates << {:template => r[:template], :instance_parent => link.instance_parent}
             end
           end
         end
         pp(
            :delete_instances => delete_instances,
            :modify_instances =>  modify_instances,
-           :add_templates => add_templates
+           :create_from_templates => create_from_templates
            )
         delete_instances(delete_instances,opts) unless delete_instances.empty? 
         modify_instances(modify_instances) unless modify_instances.empty?
-        add_templates(add_templates) unless add_templates.empty?
+        create_from_templates(create_from_templates) unless create_from_templates.empty?
       end
 
      private
@@ -54,7 +54,7 @@ module DTK; class Clone
       def modify_instances(instance_template_links)
       end
 
-      def add_templates(template_parent_instance_pairs)
+      def create_from_templates(template_parent_instance_pairs)
       end
 
       def field_set_to_copy()

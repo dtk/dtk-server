@@ -72,7 +72,7 @@ module DTK; class Clone
       if template_child_idhs.empty? or parent_links.empty?
         raise Error.new("Should not be called with template_child_idhs.empty? or parent_links.empty?")
       end
-      child_mh = template_child_idhs.first.model_handle
+      child_mh = template_child_idhs.first.createMH()
       parent_id_col = child_mh.parent_id_field_name()
       parent_rels = parent_links.parent_rels()
 
@@ -80,9 +80,10 @@ module DTK; class Clone
         :model_handle => child_mh,
         :clone_par_col => parent_id_col,
         :parent_rels => parent_rels, 
+        :where_clause => {:id => template_child_idhs.map{|idh|idh.get_id()}},
         :create_opts => {
           :duplicate_refs => :no_check, 
-#          :returning_sql_cols => returning_sql_cols(parent_id_col)
+          :returning_sql_cols => returning_sql_cols(parent_id_col)
         }
       }
       clone_proc = nil
@@ -95,7 +96,8 @@ module DTK; class Clone
 
 
     def create_new_objects()
-      ret_new_objs_info(field_set_to_copy())
+      create_override_attrs = {}
+      ret_new_objs_info(ret_field_set_to_copy(),create_override_attrs)
     end
 
     def self.create_from_hash(clone_proc,hash,opts={})
@@ -184,7 +186,7 @@ module DTK; class Clone
       remove_cols = [:ancestor_id] + parent_rels.first.keys.reject{|col|col == :old_par_id}
       field_set_from_ancestor = field_set_to_copy.with_removed_cols(*remove_cols).with_added_cols({:id => :ancestor_id},{clone_par_col => :old_par_id})
 
-      wc = nil
+      wc = self[:where_clause]
       ds = Model.get_objects_just_dataset(model_handle,wc,Model::FieldSet.opt(field_set_from_ancestor))
         
       select_ds = ancestor_rel_ds.join_table(:inner,ds,[:old_par_id])

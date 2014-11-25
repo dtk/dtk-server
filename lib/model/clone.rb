@@ -23,7 +23,7 @@ module DTK
     def self.create_child_objects(template_child_idhs,parent_links)
       ret = Array.new
       return ret if template_child_idhs.empty? or parent_links.empty?
-      child_context = ChildContext.create_from_parent_rels(template_child_idhs,parent_links)
+      child_context = ChildContext.create_from_parent_links(template_child_idhs,parent_links)
       child_context.create_new_objects()
     end
 

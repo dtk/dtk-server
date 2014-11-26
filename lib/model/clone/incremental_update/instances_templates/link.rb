@@ -1,4 +1,4 @@
-module DTK; class Clone; module IncrementalUpdate
+module DTK; class Clone; class IncrementalUpdate
   module InstancesTemplates
     class Link
       attr_reader :instances,:templates,:parent_link

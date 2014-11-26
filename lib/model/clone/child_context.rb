@@ -68,6 +68,7 @@ module DTK; class Clone
       ret unless block
     end
 
+    # parent_links has type InstanceTemplate::Links
     def self.create_from_parent_links(template_child_idhs,parent_links)
       if template_child_idhs.empty? or parent_links.empty?
         raise Error.new("Should not be called with template_child_idhs.empty? or parent_links.empty?")
@@ -88,6 +89,25 @@ module DTK; class Clone
       }
       clone_proc = nil
       new(clone_proc,hash)
+    end
+
+    #instance_template_links has type InstanceTemplate::Links
+    def self.modify_instances(instance_template_links)
+      model_handle = instance_template_links.model_handle()
+      field_set = instance_template_links.field_set()
+
+      base_fs = Model::FieldSet.opt(field_set.cols + [{:id => :template_id}],model_handle[:model_name])
+      base_wc = SQL.in(:id,instance_template_links.templates.map{|r|r.id})
+      base_ds = Model.get_objects_just_dataset(model_handle,base_wc,base_fs)
+
+      mappping_rows = instance_template_links.map do |l|
+        {:id => l.instance.id, :template_id => l.template.id}
+      end
+      mapping_mh = model_handle.createMH(:mappings) 
+      mapping_ds = array_dataset(model_handle.db(),mappping_rows,mapping_mh)
+
+      select_ds = base_ds.join_table(:inner,mapping_ds,[:template_id])
+      Model.update_from_select(model_handle,field_set,select_ds)
     end
 
     def create_new_objects()
@@ -180,8 +200,7 @@ module DTK; class Clone
     end
 
     def ret_new_objs_info(field_set_to_copy,create_override_attrs)
-      ancestor_rel_ds = SQL::ArrayDataset.create(db(),parent_rels,model_handle.createMH(:target))
-
+      ancestor_rel_ds = array_dataset(parent_rels,:target)
       # all parent_rels will have same cols so taking a sample
       remove_cols = [:ancestor_id] + parent_rels.first.keys.reject{|col|col == :old_par_id}
       field_set_from_ancestor = field_set_to_copy.with_removed_cols(*remove_cols).with_added_cols({:id => :ancestor_id},{clone_par_col => :old_par_id})
@@ -191,6 +210,13 @@ module DTK; class Clone
         
       select_ds = ancestor_rel_ds.join_table(:inner,ds,[:old_par_id])
       Model.create_from_select(model_handle,field_set_to_copy,select_ds,create_override_attrs,create_opts)
+    end
+
+    def array_dataset(rows,model_name)
+      self.class.array_dataset(db(),rows,model_handle.createMH(model_name))
+    end
+    def self.array_dataset(db,rows,model_handle)
+      SQL::ArrayDataset.create(db,rows,model_handle)
     end
 
     def self.ret_old_parent_rel_col(clone_proc,model_handle)

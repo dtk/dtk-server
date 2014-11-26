@@ -27,10 +27,10 @@ module DTK; class Clone
         attr_override_ds = Model.get_objects_just_dataset(model_handle.createMH(:attribute_override),attr_override_wc,Model::FieldSet.opt(attr_override_fs))
 
         cmp_mapping_rows = parent_objs_info.map{|r|Aux::hash_subset(r,[:component_ref_id,{:id => :component_component_id}])}
-        cmp_mapping_ds = SQL::ArrayDataset.create(db,cmp_mapping_rows,model_handle.createMH(:cmp_mapping))
+        cmp_mapping_ds = array_dataset(cmp_mapping_rows,:cmp_mapping)
 
         attr_mapping_rows = new_objs_info.map{|r|Aux::hash_subset(r,[:component_component_id,:display_name,:id])}
-        attr_mapping_ds = SQL::ArrayDataset.create(db,attr_mapping_rows,model_handle.createMH(:attr_mapping))
+        attr_mapping_ds = array_dataset(attr_mapping_rows,:attr_mapping)
 
         select_ds = attr_override_ds.join_table(:inner,cmp_mapping_ds,[:component_ref_id]).join_table(:inner,attr_mapping_ds,[:component_component_id,:display_name])
         update_set_fs = Model::FieldSet.new(:attribute,[:value_asserted,:tags,:is_instance_value])

@@ -13,6 +13,11 @@ module DTK
     r8_nested_require('clone','global')
     r8_nested_require('clone','incremental_update')
 
+    #instance_template_links has type InstanceTemplate::Links
+    def self.modify_instances(instance_template_links)
+      ChildContext.modify_instances(instance_template_links)
+    end
+
     # parent_links of type InstanceTemplate::Links
     def self.create_child_objects(template_child_idhs,parent_links)
       ret = Array.new

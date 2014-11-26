@@ -10,6 +10,24 @@ module DTK; class Clone
         map{|link|{parent_id_col => link.instance.id, :old_par_id => link.template.id}}
       end
 
+      def field_set()
+        return @field_set if @field_set
+        model_handle = model_handle()
+        parent_id_col = model_handle.parent_id_field_name()
+        remove_cols = [:id,:local_id,parent_id_col]
+        concrete_model_name = Model.concrete_model_name(model_handle[:model_name])
+        @field_set = Model::FieldSet.all_real(concrete_model_name).with_removed_cols(*remove_cols)
+      end
+
+      def model_handle()
+        return @model_handle if @model_handle 
+        unless link = first 
+          raise Error.new("This method should not be called when no links")
+        end
+        # isnatnce and template have same model handle
+        @model_handle = link.instance.model_handle()
+      end
+
       def get_templates_with_cols(cols)
         templates = templates()
         return templates if templates.empty?()
@@ -46,7 +64,6 @@ module DTK; class Clone
         templates().map{|r|r.id_handle()} + instances().map{|r|r.id_handle()}
       end
       
-     private
       def templates()
         #removes dups
         inject(Hash.new) do |h,l|

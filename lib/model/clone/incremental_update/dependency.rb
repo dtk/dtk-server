@@ -8,6 +8,7 @@ module DTK; class Clone;
         links = get_instance_template_links()
         links.update_model(self.class) unless links.empty?
       end
+      # TODO: put in equality test so that does not need to do the modify of equal objects
       def self.equal?(instance,template)
         false
       end

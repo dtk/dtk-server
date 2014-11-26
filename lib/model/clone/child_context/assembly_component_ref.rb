@@ -74,8 +74,7 @@ module DTK; class Clone
         end
         return ret if mapping_rows.empty?
  
-        mapping_ds = SQL::ArrayDataset.create(db(),mapping_rows,model_handle.createMH(:mapping))
-      
+        mapping_ds = array_dataset(mapping_rows,:mapping)
         # all parent_rels will have same cols so taking a sample
         remove_cols = [:ancestor_id,:assembly_id,:display_name,:ref,:locked_sha] + parent_rels.first.keys
         cmp_template_fs = field_set_to_copy.with_removed_cols(*remove_cols).with_added_cols({:id => :component_template_id})

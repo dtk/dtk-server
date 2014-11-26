@@ -1,12 +1,15 @@
 module DTK; class Clone;
-  module IncrementalUpdate
-    class Dependency 
+  class IncrementalUpdate
+    class Dependency < self
       def initialize(cmp_template_links)
         @cmp_template_links = cmp_template_links
       end
       def update?()
         links = get_instance_template_links()
-        links.update_model() unless links.empty?
+        links.update_model(self.class) unless links.empty?
+      end
+      def self.equal?(instance,template)
+        false
       end
      private
       def get_instance_template_links()

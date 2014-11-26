@@ -1,4 +1,4 @@
-module DTK; class Clone; module IncrementalUpdate
+module DTK; class Clone; class IncrementalUpdate
   module InstancesTemplates
     class Links < Array
       def add?(instances,templates,parent_link)
@@ -8,7 +8,7 @@ module DTK; class Clone; module IncrementalUpdate
         end
       end
 
-      def update_model(opts={})
+      def update_model(object_klass,opts={})
         delete_instances = Array.new 
         create_from_templates = Array.new
         modify_instances = Clone::InstanceTemplate::Links.new
@@ -19,8 +19,11 @@ module DTK; class Clone; module IncrementalUpdate
           end
           link.instances.each do |instance|
             if template_match = ndx_templates[instance[:ref]]
-              modify_instances.add(instance,template_match[:template])
-              template_match[:matched] = true
+              template = template_match[:template]
+              unless object_klass.equal?(instance,template)
+                modify_instances.add(instance,template_match[:template])
+                template_match[:matched] = true
+              end
             else
               delete_instances << instance
             end
@@ -31,11 +34,6 @@ module DTK; class Clone; module IncrementalUpdate
             end
           end
         end
-        pp(
-           :delete_instances => delete_instances,
-           :modify_instances =>  modify_instances,
-           :create_from_templates => create_from_templates
-           )
         delete_instances(delete_instances,opts) unless delete_instances.empty? 
         modify_instances(modify_instances) unless modify_instances.empty?
         create_from_templates(create_from_templates) unless create_from_templates.empty?
@@ -53,8 +51,19 @@ module DTK; class Clone; module IncrementalUpdate
       end
       
       def modify_instances(instance_template_links)
+        cols_to_copy = field_set_to_copy().cols 
+        templates_to_copy = instance_template_links.get_templates_with_cols(cols_to_copy + [:id])
+        ndx_templates_to_copy = templates_to_copy.inject(Hash.new){|h,r|h.merge(r.id => r)}
+        instances_to_update = instance_template_links.map do |l|
+          template_id = l.template.id
+          instance_id = l.instance.id
+          ndx_templates_to_copy[template_id].merge(:id => instance_id)
+        end
+        pp [:instances_to_update,instances_to_update]
+        Model.update_from_rows(instance_mh(),cols_to_copy,:convert => true)
       end
-      
+      # TODO: might unify how update and create are done; modify_instances bring all rows into memory and is
+      # is simpler to understand while create_from_templates uses Clone metheds that use create from select
       def create_from_templates(template__parent_links)
         # TODO: more efficient is group by common parent_links and pass all templates that are relevant at one time
         template__parent_links.each do |r|

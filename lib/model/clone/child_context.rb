@@ -90,15 +90,15 @@ module DTK; class Clone
       new(clone_proc,hash)
     end
 
-    def self.returning_sql_cols(parent_id_col)
-      [:ancestor_id,parent_id_col]
-    end
-
-
     def create_new_objects()
       create_override_attrs = {}
       ret_new_objs_info(ret_field_set_to_copy(),create_override_attrs)
     end
+
+    def self.returning_sql_cols(parent_id_col)
+      [:ancestor_id,parent_id_col]
+    end
+
 
     def self.create_from_hash(clone_proc,hash,opts={})
       if opts[:standard_child_context]

@@ -13,18 +13,18 @@ module DTK
     r8_nested_require('clone','global')
     r8_nested_require('clone','incremental_update')
 
-    # parent link of type InstanceTemplate::Link
-    def self.create_child_object(template_child_idhs,parent_link)
-      parent_links = InstanceTemplate::Links.new
-      parent_links.add(parent_link.instance,parent_link.template)
-      create_child_objects(template_child_idhs,parent_links).first
-    end
-    # parent links of type InstanceTemplate::Links
+    # parent_links of type InstanceTemplate::Links
     def self.create_child_objects(template_child_idhs,parent_links)
       ret = Array.new
       return ret if template_child_idhs.empty? or parent_links.empty?
       child_context = ChildContext.create_from_parent_links(template_child_idhs,parent_links)
       child_context.create_new_objects()
+    end
+    # parent_link of type InstanceTemplate::Link
+    def self.create_child_object(template_child_idhs,parent_link)
+      parent_links = InstanceTemplate::Links.new
+      parent_links.add(parent_link.instance,parent_link.template)
+      create_child_objects(template_child_idhs,parent_links).first
     end
 
     module Mixins

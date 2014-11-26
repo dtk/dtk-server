@@ -1,8 +1,8 @@
 module DTK; class Clone
-  module IncrementalUpdate
+  class IncrementalUpdate
     # This module is responsible for incremental clone (incremental update) when component module 
     # in a service instance are updated the compoennt instance needs to be updated
-    class Component
+    class Component < self
       def initialize(project_idh,module_branch)
         @project_idh = project_idh
         @module_branch = module_branch

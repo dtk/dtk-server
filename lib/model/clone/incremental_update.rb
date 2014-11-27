@@ -10,10 +10,40 @@ module DTK; class Clone
     # classes for processing specific object model types
     r8_nested_require('incremental_update','component')
     r8_nested_require('incremental_update','dependency')
+    r8_nested_require('incremental_update','component_include_module')
 
+    # parent_links is of type Clone::InstanceTemplate::Links
+    def initialize(parent_links=nil)
+      @parent_links = parent_links
+    end
+    def update?()
+      links = get_instances_templates_links()
+      links.update_model(self.class) unless links.empty?
+    end
     # can be overwritten; used for detecting with an isnatnce and template are euqal and thus modification not needed
     def self.equal?(instance,template)
       false
+    end
+    
+    private
+    # must be overwritten; this method returns a hash where key is parent id and value is array of objects under this
+    # parent; the objects are both instances and templates
+    def get_ndx_objects(parent_idhs)
+      raise Error.new("Abstract method that should be overwritten")
+    end
+
+    def get_instances_templates_links()
+      ret = InstancesTemplates::Links.new()
+      parent_idhs = @parent_links.all_id_handles()
+      ndx_objects = get_ndx_objects(parent_idhs)
+      @parent_links.each do |parent_link|
+        parent_instance = parent_link.instance
+        instances = parent_instance && ndx_objects[parent_instance.id]
+        parent_template = parent_link.template
+        templates = parent_template && ndx_objects[parent_template.id]
+        ret.add?(instances,templates,parent_link)
+      end
+      ret
     end
   end
 end; end

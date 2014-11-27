@@ -1,6 +1,6 @@
 module DTK; class Clone
   class IncrementalUpdate
-    class Dependency < self
+    class ComputeIncludeModule < self
       def initialize(cmp_template_links)
         super(cmp_template_links)
       end
@@ -10,9 +10,8 @@ module DTK; class Clone
       end
      private
       def get_ndx_objects(component_idhs)
-        ::DTK::Component::Dependency.get_nested_dependencies(component_idhs).inject(Hash.new) do |h,r|
-          h.merge(r[:id] => r[:dependencies])
-        end
+         # TODO: need to write; stub
+        component_idhs.inject(Hash.new){|h,idh|h.merge(idh.get_id() => Array.new)}
       end
     end
   end

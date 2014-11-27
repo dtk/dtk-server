@@ -176,9 +176,9 @@ module DTK
       puppet_module_name = ret_non_null_request_params(:puppetf_module_name)
       module_name = ret_non_null_request_params(:module_name)
       namespace = ret_request_params(:module_namespace)
-      version   = nil
+      version   = ret_request_params_force_nil(:module_version)
 
-      response = PuppetForge::Client.install(puppet_module_name, nil, true)
+      response = PuppetForge::Client.install(puppet_module_name, version)
 
       opts = Opts.create?(
         :config_agent_type => ret_config_agent_type(),
@@ -187,9 +187,17 @@ module DTK
       )
 
       module_info = ComponentModule.create_module(get_default_project(),module_name,opts)[:module_repo_info]
-      commit_sha  = PuppetForge::Client.push_to_server(response['install_dir'], module_info[:repo_url])
+      commit_sha  = PuppetForge::Client.push_to_server(response['install_dir'], module_info[:repo_url], response['parent_install_dir'])
       module_id   = module_info[:module_id]
+      full_module_name   = module_info[:full_module_name]
+
       component_module = get_obj(module_id)
+
+      # Calculate dependencies
+      missing, found, dw = ComponentModule.cross_reference_modules(
+            Opts.new(:project_idh => get_default_project().id_handle()),
+            response['module_dependencies'][:dependencies]
+            )
 
       dsl_info_response = component_module.update_from_initial_create(
           commit_sha,
@@ -198,7 +206,7 @@ module DTK
           { :scaffold_if_no_dsl => true, :do_not_raise => true, :process_external_refs => true }
         )
 
-      rest_ok_response dsl_info_response.merge(:module_id => module_id, :version => version)
+      rest_ok_response dsl_info_response.merge(:module_id => module_id, :version => version, :full_module_name => full_module_name, :missing_modules => missing)
     end
 
     # this should be called when the module is linked, but the specfic version is not

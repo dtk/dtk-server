@@ -148,7 +148,7 @@ module DTK
     end
 
     # updates repo if any changes and if so returns new commit_sha
-    # args could be either file_path,hash_content,file_format(optional) or single element which is an array 
+    # args could be either file_path,hash_content,file_format(optional) or single element which is an array
     # having elements with keys :path, :hash_content, :format
     def serialize_and_save_to_repo?(*args)
       files =
@@ -167,12 +167,12 @@ module DTK
           any_changes = true if any_change
         end
         if any_changes
-          new_commit_sha = push_changes_to_repo() 
+          new_commit_sha = push_changes_to_repo()
           new_commit_sha
         end
       end
     end
-      
+
     def dsl_format_type_form_path(path)
       extension = (path =~ /\.([^\.]+$)/; $1)
       unless ret = FormatTypeFromExtension[extension]
@@ -243,10 +243,10 @@ module DTK
 
     def self.cols_for_matching_library_branches(type)
       # matching_lib_branches_col = (type.to_s == "component_module" ? :matching_component_library_branches : :matching_service_library_branches)
-      matching_lib_branches_col = 
-        case type.to_s 
+      matching_lib_branches_col =
+        case type.to_s
           when 'component_module'
-            return :matching_component_library_branches 
+            return :matching_component_library_branches
           when 'service_module'
             reuturn :matching_service_library_branches
           when 'test_module'

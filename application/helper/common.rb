@@ -11,7 +11,7 @@ module Ramaze::Helper
           ret_module_name_from_class(model_name_or_class)
         end
       id_handle(id,model_name).create_object(opts.merge(:controller_class => self.class))
-    end      
+    end
 
     def user_object()
       ret = user
@@ -163,7 +163,7 @@ module Ramaze::Helper
       start = (saved_search["start"]||0).to_i
       limit = (saved_search["limit"] || R8::Config[:page_limit] || LimitDefault).to_i
       # TODO: just for testing
-      limit = TestOveride if TestOveride 
+      limit = TestOveride if TestOveride
       num_model_items = (saved_search["num_model_items"] || NumModelItemsDefault)
       {:start => start, :limit => limit, :num_model_items => num_model_items}
     end
@@ -212,7 +212,7 @@ module Ramaze::Helper
       explicit_qs = ret_parsed_query_string_from_uri()
       return @parsed_query_string if explicit_qs.nil? or explicit_qs.empty?
       return explicit_qs if @parsed_query_string.nil? or @parsed_query_string.empty?
-      @parsed_query_string 
+      @parsed_query_string
     end
 
 
@@ -225,7 +225,7 @@ module Ramaze::Helper
       query_string.scan(%r{([/A-Za-z0-9_]+)=([/A-Za-z0-9_]+)}) do
         key = $1.to_sym
         value = $2
-        if value == "true" 
+        if value == "true"
           ret[key] = true
         elsif value == "false"
           ret[key] = false
@@ -309,11 +309,18 @@ module Ramaze::Helper
     end
     private :ret_module_name_from_class
 
+
     def ret_request_params(*params)
       return nil unless request_method_is_post?()
       return request.params if params.size == 0
-      ret = params.map{|p|request.params[p.to_s]}
+      ret = params.map { |p| request.params[p.to_s] }
       ret.size == 1 ? ret.first : ret
+    end
+
+    def ret_request_params_force_nil(*params)
+      ret = ret_request_params(params)
+      ret = [*ret].collect { |v| v.empty? ? nil : v }
+      ret.size <= 1 ? ret.first : ret
     end
 
     def ret_request_param_boolean(param)
@@ -442,7 +449,7 @@ module Ramaze::Helper
         tpl.assign(:list_start_next, 0)
         return nil
       end
-      start = paging_info[:start]; limit = paging_info[:limit]; num_model_items = paging_info[:num_model_items] 
+      start = paging_info[:start]; limit = paging_info[:limit]; num_model_items = paging_info[:num_model_items]
       start_prev = ((start - limit) < 0) ? 0 : (start-limit)
       tpl.assign(:list_start_prev, start_prev)
       start_next = ((start + limit) > num_model_items) ? nil : (start+limit)
@@ -456,7 +463,7 @@ module Ramaze::Helper
         sort_order = 'ASC'
         ort_class = ''
         if order_by_hash[field]
-          sort_order = 'DESC' if order_by_hash[field]== 'ASC'  
+          sort_order = 'DESC' if order_by_hash[field]== 'ASC'
           sort_class = (order_by_hash[field]== 'ASC') ? 'asc' : 'desc'
         end
 
@@ -476,7 +483,7 @@ module Ramaze::Helper
       }
     end
 
-    # aux fns 
+    # aux fns
     def model_class(model_name_x=model_name())
       Model.model_class(model_name_x)
     end

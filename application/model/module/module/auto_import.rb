@@ -11,7 +11,7 @@ module DTK
 
     # Method will check if given component modules are present on the system
     # returns [missing_modules, found_modules]
-    def cross_reference_modules(opts, required_modules, service_namespace, dependency_warnings)
+    def cross_reference_modules(opts, required_modules, service_namespace=nil, dependency_warnings=nil)
       project_idh = opts.required(:project_idh)
 
       required_modules ||= []
@@ -23,7 +23,8 @@ module DTK
         name      = r_module["module_name"]
         type      = r_module["module_type"]
         version   = r_module["version_info"]
-        namespace = r_module["remote_namespace"]
+        # we support both fields for namespace
+        namespace = r_module["remote_namespace"]||r_module["module_namespace"]
 
         i_modules = installed_modules(type.to_sym, project_idh)
 
@@ -43,24 +44,26 @@ module DTK
       end
 
       # delete modules that are alreafy installed
-      dependency_warnings.reject! do |el|
-        reject_it = false
-        if el['error_type'].eql?('not_found')
-          installed = installed_modules(el['module_type'], project_idh)
-          installed.each do |i_module|
-            # does it match name and namespace
-            installed_name = i_module.display_name
-            installed_ns   = i_module.module_namespace
+      if dependency_warnings
+        dependency_warnings.reject! do |el|
+          reject_it = false
+          if el['error_type'].eql?('not_found')
+            installed = installed_modules(el['module_type'], project_idh)
+            installed.each do |i_module|
+              # does it match name and namespace
+              installed_name = i_module.display_name
+              installed_ns   = i_module.module_namespace
 
-            if (el['module_name'].eql?(installed_name) and el['module_namespace'].eql?(installed_ns))
-              found_modules << data_element(installed_name, installed_ns, el['module_type'], nil)
-              reject_it = true
-              break
+              if (el['module_name'].eql?(installed_name) and el['module_namespace'].eql?(installed_ns))
+                found_modules << data_element(installed_name, installed_ns, el['module_type'], nil)
+                reject_it = true
+                break
+              end
             end
           end
-        end
 
-        reject_it
+          reject_it
+        end
       end
 
       # important

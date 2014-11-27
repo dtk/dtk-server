@@ -21,7 +21,7 @@ module DTK; class Clone; class IncrementalUpdate
           link.instances.each do |instance|
             if template_match = ndx_templates[instance[:ref]]
               template = template_match[:template]
-              unless object_klass.equal?(instance,template)
+              unless object_klass.equal_so_no_modify?(instance,template)
                 modify_instances.add(instance,template_match[:template])
                 template_match[:matched] = true
               end

@@ -107,7 +107,8 @@ module DTK; class Clone
       mapping_ds = array_dataset(model_handle.db(),mappping_rows,mapping_mh)
 
       select_ds = base_ds.join_table(:inner,mapping_ds,[:template_id])
-      Model.update_from_select(model_handle,field_set,select_ds)
+      field_set_to_update = field_set.with_removed_cols(:ancestor_id,model_handle.parent_id_field_name())
+      Model.update_from_select(model_handle,field_set_to_update,select_ds)
     end
 
     def create_new_objects()

@@ -22,11 +22,11 @@ module DTK; class Clone
       links.update_model(self.class) unless links.empty?
     end
     # can be overwritten; used for detecting with an isnatnce and template are euqal and thus modification not needed
-    def self.equal?(instance,template)
+    def self.equal_so_no_modify?(instance,template)
       false
     end
-    # can be overwritten; this i soptions when updating (i.e., delete, modify, create) objects
 
+    # can be overwritten; this is options when updating (i.e., delete, modify, create) objects
     def self.update_opts()
       Hash.new
     end

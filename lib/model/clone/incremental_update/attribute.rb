@@ -5,7 +5,7 @@ module DTK; class Clone
         super(cmp_template_links)
       end
       # TODO: put in equality test so that does not need to do the modify equal objects
-      def self.equal?(instance,template)
+      def self.equal_so_no_modify?(instance,template)
         false
       end
 

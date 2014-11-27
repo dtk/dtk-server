@@ -10,12 +10,15 @@ r8_nested_require('component',files)
 r8_require('branch_names')
 module DTK
   class Component < Model
+    r8_nested_require('component','get_method')
     r8_nested_require('component','template')
     r8_nested_require('component','instance')
     r8_nested_require('component','dependency')
     r8_nested_require('component','test')
     r8_nested_require('component','resource_matching')
     r8_nested_require('component','include_module')
+    include GetMethod::Mixin
+    extend GetMethod::ClassMixin
     include Dependency::Mixin
     extend Dependency::ClassMixin
     include TemplateMixin

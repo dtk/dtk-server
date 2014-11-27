@@ -38,9 +38,9 @@ module DTK; class Clone
       ndx_objects = get_ndx_objects(parent_idhs)
       @parent_links.each do |parent_link|
         parent_instance = parent_link.instance
-        instances = parent_instance && ndx_objects[parent_instance.id]
+        instances = (parent_instance && ndx_objects[parent_instance.id])||[]
         parent_template = parent_link.template
-        templates = parent_template && ndx_objects[parent_template.id]
+        templates = (parent_template && ndx_objects[parent_template.id])||[]
         ret.add?(instances,templates,parent_link)
       end
       ret

@@ -10,8 +10,11 @@ module DTK; class Clone
       end
      private
       def get_ndx_objects(component_idhs)
-         # TODO: need to write; stub
-        component_idhs.inject(Hash.new){|h,idh|h.merge(idh.get_id() => Array.new)}
+        ret = Hash.new
+        ::DTK::Component.get_include_modules(component_idhs,:cols_plus => [:component_id,:ref]).each do |r|
+          (ret[r[:component_id]] ||= Array.new) << r
+        end
+        ret
       end
     end
   end

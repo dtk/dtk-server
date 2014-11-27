@@ -178,11 +178,8 @@ module DTK
       namespace = ret_request_params(:module_namespace)
       version   = ret_request_params_force_nil(:module_version)
 
-      begin
-        response = PuppetForge::Client.install(puppet_module_name, version)
-      catch PuppetForge::Error => e
-        return rest_notok_response e.message
-      end
+      # will raise an exception in case of error
+      response = PuppetForge::Client.install(puppet_module_name, version)
 
       opts = Opts.create?(
         :config_agent_type => ret_config_agent_type(),

@@ -10,7 +10,7 @@ module DTK; class Clone
       end
 
     def self.update_opts()
-      # TODO: can refine to allow deletes if instance has nil value
+      # TODO: can refine to allow deletes if instance has nil value and not in any attribute link
       # can do this by passing in a charachterstic fn
       {:donot_allow_deletes => true}
     end

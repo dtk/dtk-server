@@ -25,14 +25,14 @@ module DTK
           dir_name         = module_name.split(MODULE_NAME_SEPARATOR, 2).last
           rand_install_dir = random_install_dir()
 
-          command  = "puppet module install #{module_name} --render-as json --target-dir #{rand_install_dir} --modulepath #{rand_install_dir}"
+          command  = "puppet _3.4.0_ module install #{module_name} --render-as json --target-dir #{rand_install_dir} --modulepath #{rand_install_dir}"
           command += " --version #{version}" if version && !version.empty?
           command += " --force"              if force
 
           output_s = `#{command}`
 
           # we remove invalid characters to get to JSON response
-          output_s = output_s.split("\e[0m\n").last
+          output_s = normalize_output(output_s)
           output   = JSON.parse(output_s)
 
           # augment data with install_dir info
@@ -47,10 +47,8 @@ module DTK
         # We use installed puppet forge gem and initialize git repo in it, after which we push it to gitolite.
         #
 
-        def push_to_server(pf_module_location, gitolite_remote_url, pf_parent_location)
+        def push_to_server(pf_module_location, gitolite_remote_url, pf_parent_location, branch_name)
           repo = Grit::Repo.init(pf_module_location)
-
-          branch_name = 'workspace-private-dtk16'
 
           # after init we add all and push to our tenant
           repo.remote_add('tenant_upstream', gitolite_remote_url)
@@ -98,6 +96,11 @@ module DTK
 
         def extrace_namespace_and_name(pf_module_name)
           pf_module_name.split(MODULE_NAME_SEPARATOR, 2)
+        end
+
+        def normalize_output(output_s)
+          output_s = output_s.split("\e[0m\n").last
+          output_s
         end
 
       end

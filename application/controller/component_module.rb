@@ -187,7 +187,8 @@ module DTK
       )
 
       module_info = ComponentModule.create_module(get_default_project(),module_name,opts)[:module_repo_info]
-      commit_sha  = PuppetForge::Client.push_to_server(response['install_dir'], module_info[:repo_url], response['parent_install_dir'])
+      branch_name = ModuleBranch::Location::Server::Local.ret_branch_name(get_default_project(), version)
+      commit_sha  = PuppetForge::Client.push_to_server(response['install_dir'], module_info[:repo_url], response['parent_install_dir'], branch_name)
       module_id   = module_info[:module_id]
       full_module_name   = module_info[:full_module_name]
 

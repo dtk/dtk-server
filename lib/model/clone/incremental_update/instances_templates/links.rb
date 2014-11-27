@@ -14,7 +14,7 @@ module DTK; class Clone; class IncrementalUpdate
         create_from_templates = Array.new
         modify_instances = Clone::InstanceTemplate::Links.new
         each do |link|
-          # indexd by ref
+          # indexed by ref
           ndx_templates = link.templates.inject(Hash.new) do |h,t|
             h.merge(t[:ref] => {:template => t,:matched => false})
           end
@@ -43,8 +43,8 @@ module DTK; class Clone; class IncrementalUpdate
      private
       def delete_instances(instances,opts={})
         if opts[:donot_allow_deletes]
-          mn = delete_instances.first.model_name
-          instance_names = delete_instances.map{|r|r[:display_name]}.join(',')
+          mn = instances.first.model_name
+          instance_names = instances.map{|r|r[:display_name]}.join(',')
           raise ErrorUsage.new("The change to the dtk.model.yaml for would case the #{mn} objects (#{instance_names}) to be deleted")
         else
           Model.delete_instances(instances.map{|r|r.id_handle})

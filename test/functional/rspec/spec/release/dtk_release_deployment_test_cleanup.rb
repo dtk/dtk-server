@@ -3,6 +3,8 @@
 
 require './lib/dtk_common'
 
-service_id = ARGV[0]
 dtk_common = DtkCommon.new('', '')
-dtk_common.delete_and_destroy_service(service_id)
+services = dtk_common.list_specific_failed_service("dtk_release_deployment_test")
+services.each do |s|
+	dtk_common.delete_and_destroy_service(s['id'])
+end

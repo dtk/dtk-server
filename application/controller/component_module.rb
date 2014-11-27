@@ -207,7 +207,7 @@ module DTK
           { :scaffold_if_no_dsl => true, :do_not_raise => true, :process_external_refs => true }
         )
 
-      rest_ok_response dsl_info_response.merge(:module_id => module_id, :version => version, :full_module_name => full_module_name, :missing_modules => missing)
+      rest_ok_response dsl_info_response.merge(:module_id => module_id, :version => version, :full_module_name => full_module_name, :missing_modules => missing, :found_modules => found)
     end
 
     # this should be called when the module is linked, but the specfic version is not

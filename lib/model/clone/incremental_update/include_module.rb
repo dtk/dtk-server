@@ -1,10 +1,10 @@
 module DTK; class Clone
   class IncrementalUpdate
-    class ComputeIncludeModule < self
+    class IncludeModule < self
       def initialize(cmp_template_links)
         super(cmp_template_links)
       end
-      # TODO: put in equality test so that does not need to do the modify of equal objects
+      # TODO: put in equality test so that does not need to do the modify equal objects
       def self.equal?(instance,template)
         false
       end

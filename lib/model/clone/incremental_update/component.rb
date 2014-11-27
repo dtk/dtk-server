@@ -35,8 +35,13 @@ module DTK; class Clone
           }
         end
         Model.update_from_rows(@project_idh.createMH(:component),rows_to_update)
+        update_children(links)
+      end
+
+      def update_children(links)
         Dependency.new(links).update?()
-        ComputeIncludeModule.new(links).update?()
+        IncludeModule.new(links).update?()
+        Attribute.new(links).update?()
       end
 
       def component_needs_update?(cmp,opts={})

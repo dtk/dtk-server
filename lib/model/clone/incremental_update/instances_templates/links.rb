@@ -8,7 +8,8 @@ module DTK; class Clone; class IncrementalUpdate
         end
       end
 
-      def update_model(object_klass,opts={})
+      def update_model(object_klass)
+        opts = object_klass.update_opts()
         delete_instances = Array.new 
         create_from_templates = Array.new
         modify_instances = Clone::InstanceTemplate::Links.new

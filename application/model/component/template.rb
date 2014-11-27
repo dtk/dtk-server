@@ -67,7 +67,11 @@ module DTK; class Component
       need_title_attrs_cmp_idhs = rows.select{|r|r[:attribute].nil?}.map{|r|r.id_handle()}
       ret = rows.map{|r|r[:attribute]}.compact
       unless need_title_attrs_cmp_idhs.empty?
-        ret += Attribute.get_title_attributes(need_title_attrs_cmp_idhs)
+        attr_cols = [:id,:group_id,:display_name,:external_ref,:component_component_id]
+        title_attrs = get_attributes(need_title_attrs_cmp_idhs,:cols => attr_cols).select{|a|a.is_title_attribute?()}
+        unless title_attrs.empty?
+          ret += title_attrs
+        end
       end
       ret
     end

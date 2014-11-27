@@ -1,4 +1,4 @@
-# TOIDO: wil move get methods taht wil not be deprecating to here or some file underneath a file directory
+# TODO: will move get methods that will not be deprecating to here or some file underneath a file directory
 module DTK; class Component
   module GetMethod
     module Mixin
@@ -21,12 +21,23 @@ module DTK; class Component
     
     module ClassMixin
       def get_include_modules(component_idhs,opts={})
+        get_component_children(component_idhs,IncludeModule,:component_include_module,opts)
+      end
+
+      def get_attributes(component_idhs,opts={})
+        get_component_children(component_idhs,::DTK::Attribute,:attribute,opts)
+      end
+
+     private
+      def get_component_children(component_idhs,child_class,child_model_name,opts={})
+        ret = Array.new
+        return ret if component_idhs.empty?
+        mh = component_idhs.first.create_childMH(child_model_name)
         sp_hash = {
-          :cols => opts[:cols] || IncludeModule.common_columns()+(opts[:cols_plus]||[]),
-          :filter => [:oneof,:component_id,component_idhs.map{|idh|idh.get_id()}]
+          :cols => opts[:cols] || child_class.common_columns()+(opts[:cols_plus]||[]),
+          :filter => [:oneof,mh.parent_id_field_name,component_idhs.map{|idh|idh.get_id()}]
         }
-        incl_mod_mh = component_idhs.first.createMH(:component_include_module)
-        get_objs(incl_mod_mh,sp_hash)
+        get_objs(mh,sp_hash)
       end
     end
   end

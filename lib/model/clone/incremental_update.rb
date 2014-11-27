@@ -10,7 +10,8 @@ module DTK; class Clone
     # classes for processing specific object model types
     r8_nested_require('incremental_update','component')
     r8_nested_require('incremental_update','dependency')
-    r8_nested_require('incremental_update','component_include_module')
+    r8_nested_require('incremental_update','include_module')
+    r8_nested_require('incremental_update','attribute')
 
     # parent_links is of type Clone::InstanceTemplate::Links
     def initialize(parent_links=nil)
@@ -24,8 +25,13 @@ module DTK; class Clone
     def self.equal?(instance,template)
       false
     end
-    
-    private
+    # can be overwritten; this i soptions when updating (i.e., delete, modify, create) objects
+
+    def self.update_opts()
+      Hash.new
+    end
+
+   private
     # must be overwritten; this method returns a hash where key is parent id and value is array of objects under this
     # parent; the objects are both instances and templates
     def get_ndx_objects(parent_idhs)

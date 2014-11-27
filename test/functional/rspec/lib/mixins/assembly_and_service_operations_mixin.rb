@@ -189,6 +189,13 @@ module AssemblyAndServiceOperationsMixin
 		return service_exists
 	end
 
+	def list_specific_failed_service(service_name)
+		puts "List all services:", "--------------------"
+		service_list = send_request('/rest/assembly/list', {:subtype=>'instance', :detail_level => 'nodes'})
+		pretty_print_JSON(service_list)
+		return service_list['data'].select { |x| x['display_name'] == service_name && x['execution_status'] == 'succeeded' }
+	end
+
 	def check_service_status(service_id, status_to_check)
 		#Get list of services and check if service exists and its status
 		puts "Check service status:", "---------------------"

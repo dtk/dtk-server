@@ -10,6 +10,8 @@ module DTK
     #
     # Wrapper around puppet CLI (distributed via puppet gem)
     #
+    class Error < Exception
+    end
 
     class Client
       class << self
@@ -39,6 +41,10 @@ module DTK
           output['install_dir'] += "/#{dir_name}"
           output['parent_install_dir']  = rand_install_dir
           output['module_dependencies'] = check_for_dependencies(module_name, output)
+
+          unless 'success'.eql?(output['result'])
+            raise PuppetForge::Error, "Puppet Forge Error: #{output['error']['oneline']}"
+          end
 
           output
         end

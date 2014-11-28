@@ -17,5 +17,6 @@
 
 require ::File.expand_path('../app', __FILE__)
 
+Ramaze.options.mode = :live
 Ramaze.start(:root => __DIR__, :started => true)
 run Ramaze

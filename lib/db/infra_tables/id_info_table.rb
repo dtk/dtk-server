@@ -299,7 +299,10 @@ module DTK
     def parent_id_field_name(parent_model_name_or_idh=nil)
       arg = parent_model_name_or_idh #shorthand
       parent_model_name ||= self[:parent_model_name]||(arg && (arg.kind_of?(Symbol) ? arg : arg[:model_name]))
-      return nil unless parent_model_name
+      unless parent_model_name
+        Log.error("Unexpected that parent_model_name is nil")
+        return nil 
+      end
       DB.parent_field(parent_model_name,self[:model_name])
     end
    private

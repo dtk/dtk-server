@@ -1,6 +1,14 @@
 module DTK; class Clone
   module InstanceTemplate
     class Links < Array
+#TODO:       def initialize(opts={})
+      def initialize(opts)
+        super()
+        if opts[:parent_model_name]
+          @parent_model_name = opts[:parent_model_name]
+        end
+      end
+
       def add(instance,template)
         self << Link.new(instance,template)
       end
@@ -24,8 +32,13 @@ module DTK; class Clone
         unless link = first 
           raise Error.new("This method should not be called when no links")
         end
-        # isnatnce and template have same model handle
+
+        # isntance and template have same model handle
         @model_handle = link.instance.model_handle()
+        if @parent_model_name
+         @model_handle[:parent_model_name] ||= @parent_model_name 
+        end
+        @model_handle
       end
 
       def get_templates_with_cols(cols)

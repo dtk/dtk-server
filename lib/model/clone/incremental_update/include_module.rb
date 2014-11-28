@@ -11,7 +11,7 @@ module DTK; class Clone
      private
       def get_ndx_objects(component_idhs)
         ret = Hash.new
-        ::DTK::Component.get_include_modules(component_idhs,:cols_plus => [:component_id,:ref]).each do |r|
+        ::DTK::Component.get_include_modules(component_idhs,:cols_plus => [:component_id,:ancestor_id]).each do |r|
           (ret[r[:component_id]] ||= Array.new) << r
         end
         ret

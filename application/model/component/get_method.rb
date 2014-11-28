@@ -33,9 +33,13 @@ module DTK; class Component
         ret = Array.new
         return ret if component_idhs.empty?
         mh = component_idhs.first.create_childMH(child_model_name)
+        cols = opts[:cols] || child_class.common_columns()
+        if cols_plus = opts[:cols_plus]
+          cols = (cols + opts[:cols_plus]).uniq
+        end
         sp_hash = {
-          :cols => opts[:cols] || child_class.common_columns()+(opts[:cols_plus]||[]),
-          :filter => [:oneof,mh.parent_id_field_name,component_idhs.map{|idh|idh.get_id()}]
+          :cols => cols,
+          :filter => [:oneof, mh.parent_id_field_name, component_idhs.map{|idh|idh.get_id()}]
         }
         get_objs(mh,sp_hash)
       end

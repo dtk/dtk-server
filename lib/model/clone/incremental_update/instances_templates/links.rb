@@ -14,12 +14,16 @@ module DTK; class Clone; class IncrementalUpdate
         create_from_templates = Array.new
         modify_instances = Clone::InstanceTemplate::Links.new
         each do |link|
-          # indexed by ref
+          # indexed by id
           ndx_templates = link.templates.inject(Hash.new) do |h,t|
-            h.merge(t[:ref] => {:template => t,:matched => false})
+            h.merge(t[:id] => {:template => t,:matched => false})
           end
           link.instances.each do |instance|
-            if template_match = ndx_templates[instance[:ref]]
+            unless template_id = instance[:ancestor_id]
+              Log.error("Unexpected that (#{instance.inspect}) does not have ancestor_id; skipping")
+              next
+            end
+            if template_match = ndx_templates[template_id]
               template = template_match[:template]
               unless object_klass.equal_so_no_modify?(instance,template)
                 modify_instances.add(instance,template_match[:template])

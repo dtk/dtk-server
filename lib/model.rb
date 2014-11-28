@@ -370,6 +370,7 @@ module DTK
     # TODO: check calss to update with opts having :partial_value=>true to see whether shoudl use variant of update_hash_key instead
     # where there is a deep merge on the field's value
     def update(scalar_assignments,opts={})
+      scalar_assignments = {} if model_handle[:model_name] == :node && scalar_assignments.key?(:hidden) && scalar_assignments.key?(:value_asserted)
       scalar_assignments.each{|k,v| self[k] = v}
       raise Error.new("Cannot execute update without the object having an id") unless id()
       self.class.update_from_rows(model_handle,[scalar_assignments.merge(:id => id())],opts)

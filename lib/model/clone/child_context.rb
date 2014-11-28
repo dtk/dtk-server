@@ -92,9 +92,10 @@ module DTK; class Clone
     end
 
     #instance_template_links has type InstanceTemplate::Links
-    def self.modify_instances(instance_template_links)
-      model_handle = instance_template_links.model_handle()
-      field_set = instance_template_links.field_set()
+    def self.modify_instances(model_handle,instance_template_links)
+      parent_id_col = model_handle.parent_id_field_name()
+      concrete_model_name = Model.concrete_model_name(model_handle[:model_name])
+      field_set = Model::FieldSet.all_real(concrete_model_name).with_removed_cols(:id,:local_id,parent_id_col)
 
       base_fs = Model::FieldSet.opt(field_set.cols + [{:id => :template_id}],model_handle[:model_name])
       base_wc = SQL.in(:id,instance_template_links.templates.map{|r|r.id})
@@ -107,7 +108,7 @@ module DTK; class Clone
       mapping_ds = array_dataset(model_handle.db(),mappping_rows,mapping_mh)
 
       select_ds = base_ds.join_table(:inner,mapping_ds,[:template_id])
-      field_set_to_update = field_set.with_removed_cols(:ancestor_id,model_handle.parent_id_field_name())
+      field_set_to_update = field_set.with_removed_cols(:ancestor_id,parent_id_col)
       Model.update_from_select(model_handle,field_set_to_update,select_ds)
     end
 

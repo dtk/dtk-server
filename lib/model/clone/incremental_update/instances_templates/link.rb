@@ -9,7 +9,7 @@ module DTK; class Clone; class IncrementalUpdate
       end
       
       def instance_model_handle()
-        #want parent information
+        # want parent information
         @parent_link.instance.child_model_handle(instance_model_name())
       end
 

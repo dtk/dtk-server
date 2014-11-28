@@ -1,21 +1,18 @@
 module DTK; class Clone
   class IncrementalUpdate
     class Attribute < self
-      def initialize(cmp_template_links)
-        super(cmp_template_links)
-      end
+     private
       # TODO: put in equality test so that does not need to do the modify equal objects
-      def self.equal_so_no_modify?(instance,template)
+      def equal_so_dont_modify?(instance,template)
         false
       end
-
-    def self.update_opts()
-      # TODO: can refine to allow deletes if instance has nil value and not in any attribute link
-      # can do this by passing in a charachterstic fn
-      {:donot_allow_deletes => true}
-    end
-
-     private
+      
+      def update_opts()
+        # TODO: can refine to allow deletes if instance has nil value and not in any attribute link
+        # can do this by passing in a charachterstic fn
+        {:donot_allow_deletes => true}
+      end
+      
       def get_ndx_objects(component_idhs)
         ret = Hash.new
         ::DTK::Component.get_attributes(component_idhs,:cols_plus => [:component_component_id,:ancestor_id]).each do |r|
@@ -23,6 +20,7 @@ module DTK; class Clone
         end
         ret
       end
+
     end
   end
 end; end

@@ -19,16 +19,7 @@ module DTK; class Clone
     end
     def update?()
       links = get_instances_templates_links()
-      links.update_model(self.class) unless links.empty?
-    end
-    # can be overwritten; used for detecting with an isnatnce and template are euqal and thus modification not needed
-    def self.equal_so_no_modify?(instance,template)
-      false
-    end
-
-    # can be overwritten; this is options when updating (i.e., delete, modify, create) objects
-    def self.update_opts()
-      Hash.new
+      update_model?(links)
     end
 
    private
@@ -36,6 +27,16 @@ module DTK; class Clone
     # parent; the objects are both instances and templates
     def get_ndx_objects(parent_idhs)
       raise Error.new("Abstract method that should be overwritten")
+    end
+
+    # can be overwritten; used for detecting with an isnatnce and template are euqal and thus modification not needed
+    def equal_so_dont_modify?(instance,template)
+      false
+    end
+
+    # can be overwritten; this is options when updating (i.e., delete, modify, create) objects
+    def update_opts()
+      Hash.new
     end
 
     def get_instances_templates_links()
@@ -50,6 +51,64 @@ module DTK; class Clone
         ret.add?(instances,templates,parent_link)
       end
       ret
+    end
+
+    def update_model?(links)
+      return if links.empty?
+      opts = update_opts()
+      delete_instances = Array.new 
+      create_from_templates = Array.new
+      modify_instances = Clone::InstanceTemplate::Links.new()
+      links.each do |link|
+        # indexed by id
+        ndx_templates = link.templates.inject(Hash.new) do |h,t|
+          h.merge(t[:id] => {:template => t,:matched => false})
+        end
+        link.instances.each do |instance|
+          unless template_id = instance[:ancestor_id]
+            Log.error("Unexpected that (#{instance.inspect}) does not have ancestor_id; skipping")
+            next
+          end
+          if template_match = ndx_templates[template_id]
+            template = template_match[:template]
+            unless equal_so_dont_modify?(instance,template)
+              modify_instances.add(instance,template_match[:template])
+              template_match[:matched] = true
+            end
+          else
+            delete_instances << instance
+          end
+        end
+        ndx_templates.values.each do |r|
+          unless r[:matched]
+            create_from_templates << {:template => r[:template], :parent_link => link.parent_link}
+          end
+        end
+      end
+      delete_instances(delete_instances,opts) unless delete_instances.empty? 
+      modify_instances(links.instance_model_handle(),modify_instances) unless modify_instances.empty?
+      create_from_templates(create_from_templates) unless create_from_templates.empty?
+    end
+
+    def delete_instances(instances,opts={})
+      if opts[:donot_allow_deletes]
+        mn = instances.first.model_name
+        instance_names = instances.map{|r|r[:display_name]}.join(',')
+        raise ErrorUsage.new("The change to the dtk.model.yaml for would case the #{mn} objects (#{instance_names}) to be deleted")
+      else
+        Model.delete_instances(instances.map{|r|r.id_handle})
+      end
+    end
+      
+    def modify_instances(instance_model_handle,instance_template_links)
+      Clone.modify_instances(instance_model_handle,instance_template_links)
+    end
+
+    def create_from_templates(template__parent_links)
+      # TODO: more efficient is group by common parent_links and pass all templates that are relevant at one time
+      template__parent_links.each do |r|
+        Clone.create_child_object([r[:template].id_handle],r[:parent_link])
+      end
     end
   end
 end; end

@@ -15,6 +15,9 @@
 # You can choose the adapter like `ramaze start -s mongrel` or set it in the
 # 'start.rb' and use `ruby start.rb` instead.
 
+require 'eventmachine'
+Thread.new { EventMachine.run }
+
 require ::File.expand_path('../app', __FILE__)
 
 Ramaze.options.mode = :live

@@ -111,6 +111,9 @@ module DTK; class Task; class Template
         normalized_content = serialized_content[Field::Subtasks]||[serialized_content]
         normalized_content.inject(new(serialized_content[:name])) do |h,serialized_node_actions|
           unless node_name = serialized_node_actions[:node]
+            if serialized_node_actions[:nodes]
+              raise ParsingError.new("Within nested subtask only 'node' and not 'nodes' keyword can be used")
+            end
             raise ParsingError.new("Missing node reference in: ?1",serialized_node_actions)
           end
           node_id = 0 #dummy value when just used for parsing

@@ -10,12 +10,13 @@ module DTK; class Clone
       def update_opts()
         # TODO: can refine to allow deletes if instance has nil value and not in any attribute link
         # can do this by passing in a charachterstic fn
-        {:donot_allow_deletes => true}
+        #{:donot_allow_deletes => true}
+        super
       end
       
       def get_ndx_objects(component_idhs)
         ret = Hash.new
-        ::DTK::Component.get_attributes(component_idhs,:cols_plus => [:component_component_id,:ancestor_id]).each do |r|
+        ::DTK::Component.get_attributes(component_idhs,:cols_plus => [:component_component_id,:ref]).each do |r|
           (ret[r[:component_component_id]] ||= Array.new) << r
         end
         ret

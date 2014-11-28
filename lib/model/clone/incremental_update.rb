@@ -60,16 +60,21 @@ module DTK; class Clone
       create_from_templates = Array.new
       modify_instances = Clone::InstanceTemplate::Links.new()
       links.each do |link|
-        # indexed by id
+        # TODO: make sure all objects can use ref as key; if not make this a function of the class
+        # indexed by ref
         ndx_templates = link.templates.inject(Hash.new) do |h,t|
-          h.merge(t[:id] => {:template => t,:matched => false})
-        end
-        link.instances.each do |instance|
-          unless template_id = instance[:ancestor_id]
-            Log.error("Unexpected that (#{instance.inspect}) does not have ancestor_id; skipping")
+          unless key = t[:ref]
+            Log.error("Unexpected that object (#{t.inspect}) does not have field :ref")
             next
           end
-          if template_match = ndx_templates[template_id]
+          h.merge(key => {:template => t,:matched => false})
+        end
+        link.instances.each do |instance|
+          unless key = instance[:ref]
+            Log.error("Unexpected that object (#{instance.inspect}) does not have field :ref")
+            next
+          end
+            if template_match = ndx_templates[key]
             template = template_match[:template]
             unless equal_so_dont_modify?(instance,template)
               modify_instances.add(instance,template_match[:template])

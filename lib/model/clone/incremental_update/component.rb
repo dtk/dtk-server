@@ -12,9 +12,9 @@ module DTK; class Clone
         cmps_needing_update = components.select{|cmp|component_needs_update?(cmp,opts)}
         return if cmps_needing_update.empty?
         # putting this here but not in other update functions in IncrementalUpdate because this is top level entry point
-#        Model.Transaction do 
+        Model.Transaction do 
           update(cmps_needing_update,opts)
- #       end
+        end
       end
 
      private

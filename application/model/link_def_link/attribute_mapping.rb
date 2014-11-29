@@ -18,10 +18,10 @@ module DTK
         end
       end
 
-      def self.ret_links_array(attribute_mappings,context,opts={})
-        #contexts = (context.has_node_group_form?() ? context.node_group_contexts_array() : [context])
-        contexts =  [context]
-        contexts.map{|context|attribute_mappings.map{|am|am.ret_link(context,opts)}.compact}
+      def self.ret_links(attribute_mappings,context,opts={})
+        attribute_mappings.inject(Array.new) do |ret,am|
+          ret + am.ret_links(context,opts)
+        end
       end
 
       class AugmentedLink < Hash
@@ -33,32 +33,24 @@ module DTK
           @attribute_mapping.parse_function_with_args?()
         end
       end
-      # returns AugmentedLink
-      def ret_link(context,opts={})
-        input_attr,input_path = get_attribute_with_unravel_path(:input,context)
-        output_attr,output_path = get_attribute_with_unravel_path(:output,context)
-        
+
+      # returns array of AugmentedLink elements
+      def ret_links(context,opts={})
+        ret = Array.new
         err_msgs = Array.new
-        unless input_attr
-          err_msgs << "attribute (#{pp_form(:input)}) does not exist"
-        end
-        unless output_attr
-          err_msgs << "attribute (#{pp_form(:output)}) does not exist"
-        end
+        input_attr,input_path = get_attribute_with_unravel_path(err_msgs,:input,context)
+        output_attr,output_path = get_attribute_with_unravel_path(err_msgs,:output,context)
+
         unless err_msgs.empty?
-          err_msg = err_msgs.join(" and ").capitalize
-          if opts[:raise_error]
-            raise ErrorUsage.new(err_msg)
-          else
-            Log.error(err_msg)
-            return nil
-          end
+          process_ret_links_error(err_msgs,opts)
+          # above might raise an exception in which case below is never reached
+          return ret
         end
 
-        ret = AugmentedLink.new(self).merge(:input_id => input_attr[:id],:output_id => output_attr[:id])
-        ret.merge!(:input_path => input_path) if input_path
-        ret.merge!(:output_path => output_path) if output_path
-        ret
+        am_link = AugmentedLink.new(self).merge(:input_id => input_attr[:id],:output_id => output_attr[:id])
+        am_link.merge!(:input_path => input_path) if input_path
+        am_link.merge!(:output_path => output_path) if output_path
+        [am_link]
       end
 
       # returns a hash with args if this is a function that takes args
@@ -99,16 +91,25 @@ module DTK
       end
 
      private
-      # returns [attribute,unravel_path]
-      def get_attribute_with_unravel_path(dir,context)
-        index_map_path = nil
-        attr = nil
-        ret = [attr,index_map_path]
-        attr = context.find_attribute(self[dir][:term_index])
+      # returns [attribute,unravel_path] and updates error if any error
+      def get_attribute_with_unravel_path(err_msgs,dir,context)
+        unless attr = context.find_attribute(self[dir][:term_index])
+          err_msgs << "attribute (#{pp_form(:dir)}) does not exist"
+        end
         index_map_path = self[dir][:path]
         # TODO: if treat :create_component_index need to put in here process_unravel_path and process_create_component_index (from link_defs.rb)
         [attr,index_map_path && AttributeLink::IndexMapPath.create_from_array(index_map_path)]
       end
+
+      def process_ret_links_error(err_msgs,opts={})
+        err_msg = err_msgs.join(" and ").capitalize
+        if opts[:raise_error]
+          raise ErrorUsage.new(err_msg)
+        else
+          Log.error(err_msg)
+        end
+      end
+
     end
   end
 end

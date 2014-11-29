@@ -62,17 +62,13 @@ module DTK
 
       on_create_events.each{|ev|ev.process!(context)} 
 
-      links_array = AttributeMapping.ret_links_array(attribute_mappings,context,:raise_error => opts[:raise_error])
-      links_array.each do |links|
-        # ret_links returns nil only if error such as not being able to find input_id or output_id
-        next if links.empty?
-        if port_link_idh = opts[:port_link_idh]
-          port_link_id = port_link_idh.get_id()
-          links.each{|link|link[:port_link_id] = port_link_id}
-        end
-
-        AttributeLink.create_attribute_links(parent_idh,links)
+      am_links = AttributeMapping.ret_links(attribute_mappings,context,:raise_error => opts[:raise_error])
+      if port_link_idh = opts[:port_link_idh]
+        port_link_id = port_link_idh.get_id()
+        am_links.each{|link|link[:port_link_id] = port_link_id}
       end
+
+      AttributeLink.create_attribute_links(parent_idh,am_links)
     end
 
     def update_attribute_mappings!(new_attribute_mappings)

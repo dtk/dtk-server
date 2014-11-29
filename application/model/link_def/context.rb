@@ -1,5 +1,6 @@
 module DTK
   class LinkDefContext
+    r8_nested_require('context','term_mappings')
     r8_nested_require('context','node_mappings')
     r8_nested_require('context','node_group_member')
     r8_nested_require('context','value')
@@ -9,57 +10,42 @@ module DTK
     end
 
     def initialize(link,link_defs_info)
-      @type = nil # can by :internal | :node_to_node | :node_to_node_group
+      @type = nil # can by :internal | :between_nodes | :contains_nodegroup
       @node_member_contexts = Hash.new
-      @term_mappings = Hash.new
+      @term_mappings = TermMappings.new
       @node_mappings = Hash.new
       @component_attr_index = Hash.new
       # TODO: add back in commented out parts
       # constraints.each{|cnstr|cnstr.get_context_refs!(ret)}
-      link.attribute_mappings.each do |am|
-        add_ref!(am[:input])
-        add_ref!(am[:output])
-      end
+
+      @term_mappings.add_attribute_refs!(@component_attr_index,link.attribute_mappings)
 
       set_values!(link,link_defs_info)
     end
     private :initialize
 
+    def find_attribute(term_index)
+      @term_mappings.find_attribute(term_index)
+    end
+
+    def find_component(term_index)
+      @term_mappings.find_component(term_index)
+    end
+
     def has_node_group_form?()
-      @type == :node_to_node_group
+      @type == :contains_nodegroup
     end
 
     def node_group_contexts_array()
       @node_member_contexts.values
     end
 
-    def find_attribute(term_index)
-      match = @term_mappings[term_index]
-      match && match.value
-    end
-    def find_component(term_index)
-      match = @term_mappings[term_index]
-      match && match.value
-    end
     def remote_node()
       @node_mappings.remote
     end
     def local_node()
       @node_mappings.local
     end
-
-    def add_ref!(term)
-      # TODO: see if there can be name conflicts between different types in which nmay want to prefix with type (type's initials, like CA for componanet attribute)
-      term_index = term[:term_index]
-      value = @term_mappings[term_index] ||= Value.create(term)
-      value.update_component_attr_index!(self)
-    end
-    def add_ref_component!(component_type)
-      term_index = component_type
-      @term_mappings[term_index] ||= Value::Component.new(:component_type => component_type)
-    end
-
-    attr_reader :component_attr_index
 
     def add_component_ref_and_value!(component_type,component)
       if has_node_group_form?()
@@ -71,7 +57,7 @@ module DTK
 
    protected
     def add_component_ref_and_value__node!(component_type,component)
-      add_ref_component!(component_type).set_component_value!(component)
+      @term_mappings.add_ref_component!(component_type).set_component_value!(component)
       # update all attributes that ref this component
       cmp_id = component[:id]
       attrs_to_get = {cmp_id => {:component => component, :attribute_info => @component_attr_index[component_type]}}
@@ -81,7 +67,7 @@ module DTK
    private
     #TODO: WasForInventoryNodeGroup; may deprecate
     def add_component_ref_and_value__node_group!(component_type,ng_component)
-      # TODO: dont think needed add_ref_component!(component_type).set_component_value!(component) 
+      # TODO: dont think needed @term_mappings.add_ref_component!(component_type).set_component_value!(component) 
       # TODO: may be more efficient to do this in bulk
       # get corresponding components on node group members
       node_ids = @node_member_contexts.keys
@@ -100,7 +86,7 @@ module DTK
       remote_cmp_type = link[:remote_component_type]
       remote_cmp = get_component(remote_cmp_type,link_defs_info)
 
-      [local_cmp_type,remote_cmp_type].each{|t|add_ref_component!(t)}
+      [local_cmp_type,remote_cmp_type].each{|t|@term_mappings.add_ref_component!(t)}
 
       cmp_mappings = {:local => local_cmp, :remote => remote_cmp}
       @node_mappings = NodeMappings.create_from_cmp_mappings(cmp_mappings)
@@ -126,7 +112,7 @@ module DTK
 
     # TODO: WasForInventoryNodeGroup; may deprecate
     # def set_values__node_to_node_group!(link,cmp_mappings)
-    #  @type =  :node_to_node_group
+    #  @type =  :contains_nodegroup
     #  # creates a link def context for each node to node member pair
     #  @node_member_contexts = NodeGroupMember.create_node_member_contexts(link,@node_mappings,cmp_mappings)
 
@@ -136,41 +122,19 @@ module DTK
     #  end
     # end
 
+    # this updates term mappings
     def set_values__node_to_node!(link,cmp_mappings)
-      @type ||= :node_to_node
-      @term_mappings.values.each do |v| 
-        v.set_component_remote_and_local_value!(link,cmp_mappings)
-      end
+      @type ||= :between_nodes
+      # set components
+      @term_mappings.set_components!(link,cmp_mappings)
+
       # set component attributes
-      attrs_to_get = Hash.new
-      @term_mappings.each_value do |v|
-        if v.kind_of?(Value::ComponentAttribute)
-          # v.component can be null if refers to component created by an event
-          next unless cmp = v.component
-          a = (attrs_to_get[cmp[:id]] ||= {:component => cmp, :attribute_info => Array.new})[:attribute_info]
-          a << {:attribute_name => v.attribute_ref.to_s, :value_object => v}
-        end
-      end
-      get_and_update_component_virtual_attributes!(attrs_to_get)
+      attrs_to_set = @term_mappings.component_attributes_to_set()
+      get_and_update_component_virtual_attributes!(attrs_to_set)
 
       # set node attributes
-      attrs_to_get = Hash.new
-      @term_mappings.each_value do |v|
-        if v.kind_of?(Value::NodeAttribute)
-          unless node = @node_mappings[v.node_ref.to_sym]
-            Log.error("cannot find node associated with node ref")
-            next
-          end
-          if node.is_node_group?()
-            # TODO: put in logic to treat this case by getting attributes on node members and doing fan in mapping
-            # to input (which wil be restricted to by a non node group)
-            raise ErrorUsage.new("Not treating link from a node attribute (#{v.attribute_ref}) on a node group (#{node[:display_name]})")
-          end
-          a = (attrs_to_get[node[:id]] ||= {:node => node, :attribute_info => Array.new})[:attribute_info]
-          a << {:attribute_name => v.attribute_ref.to_s, :value_object => v}
-        end
-      end
-      get_and_update_node_virtual_attributes!(attrs_to_get)
+      attrs_to_set = @term_mappings.node_attributes_to_set(@node_mappings)
+      get_and_update_node_virtual_attributes!(attrs_to_set)
       self
     end
 
@@ -182,11 +146,12 @@ module DTK
       ret
     end
 
-    def get_and_update_component_virtual_attributes!(attrs_to_get)
-      return if attrs_to_get.empty?
-      cols = [:id,:value_derived,:value_asserted]
-      from_db = Component.get_virtual_attributes__include_mixins(attrs_to_get,cols)
-      attrs_to_get.each do |component_id,hash_val|
+    def get_and_update_component_virtual_attributes!(attrs_to_set)
+      return if attrs_to_set.empty?
+      # TODO: prune which of these data type attributes needed; longer term is to clean them up to be normalized
+      cols = [:id,:value_derived,:value_asserted,:data_type,:semantic_data_type,:semantic_type,:semantic_type_summary]
+      from_db = Component.get_virtual_attributes__include_mixins(attrs_to_set,cols)
+      attrs_to_set.each do |component_id,hash_val|
         next unless cmp_info = from_db[component_id]
         hash_val[:attribute_info].each do |a|
           attr_name = a[:attribute_name]
@@ -195,11 +160,11 @@ module DTK
       end
     end
 
-    def get_and_update_node_virtual_attributes!(attrs_to_get)
-      return if attrs_to_get.empty?
+    def get_and_update_node_virtual_attributes!(attrs_to_set)
+      return if attrs_to_set.empty?
       cols = [:id,:value_derived,:value_asserted]
-      from_db = Node.get_virtual_attributes(attrs_to_get,cols)
-      attrs_to_get.each do |node_id,hash_val|
+      from_db = Node.get_virtual_attributes(attrs_to_set,cols)
+      attrs_to_set.each do |node_id,hash_val|
         next unless node_info = from_db[node_id]
         hash_val[:attribute_info].each do |a|
           attr_name = a[:attribute_name]

@@ -15,11 +15,8 @@ module DTK
       @term_mappings = TermMappings.new
       @node_mappings = Hash.new
       @component_attr_index = Hash.new
-      # TODO: add back in commented out parts
-      # constraints.each{|cnstr|cnstr.get_context_refs!(ret)}
 
       @term_mappings.add_attribute_refs!(@component_attr_index,link.attribute_mappings)
-
       set_values!(link,link_defs_info)
     end
     private :initialize

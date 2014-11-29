@@ -44,6 +44,7 @@ module DTK
       Transaction do 
         port_link = create_from_links_hash(target_idh,[link_to_create],opts).first
         link_def_link.process(target_idh,components,opts.merge(:port_link_idh => port_link.id_handle))
+       # raise ErrorUsage.new("for testing")
       end
       port_link
     end

@@ -29,11 +29,52 @@ module DTK
         end
       end
 
+      def set_component_attributes!()
+        attrs_to_set = component_attributes_to_set()
+        get_and_update_component_attributes!(attrs_to_set)
+      end
+      def set_node_attributes!(node_mappings)
+        attrs_to_set = node_attributes_to_set(node_mappings)
+        get_and_update_node_attributes!(attrs_to_set)
+      end
+
+      def get_and_update_component_attributes!(attrs_to_set)
+        return if attrs_to_set.empty?
+        from_db = Component.get_virtual_attributes__include_mixins(attrs_to_set,attribute_fields_to_get())
+        attrs_to_set.each do |component_id,hash_val|
+          next unless cmp_info = from_db[component_id]
+          hash_val[:attribute_info].each do |a|
+            attr_name = a[:attribute_name]
+            a[:value_object].set_attribute_value!(cmp_info[attr_name]) if cmp_info.has_key?(attr_name)
+          end
+        end
+      end
+
+      def get_and_update_node_attributes!(attrs_to_set)
+        return if attrs_to_set.empty?
+        from_db = Node.get_virtual_attributes(attrs_to_set,attribute_fields_to_get())
+        attrs_to_set.each do |node_id,hash_val|
+          next unless node_info = from_db[node_id]
+          hash_val[:attribute_info].each do |a|
+            attr_name = a[:attribute_name]
+            a[:value_object].set_attribute_value!(node_info[attr_name]) if node_info.has_key?(attr_name)
+          end
+        end
+      end
+    
+
+
+     private
+      def attribute_fields_to_get()
+        # TODO: prune which of these data type attributes needed; longer term is to clean them up to be normalized
+        [:id,:value_derived,:value_asserted,:data_type,:semantic_data_type,:semantic_type,:semantic_type_summary]
+      end
+
       def component_attributes_to_set()
         ret = Hash.new
         each_value do |v|
           if v.kind_of?(Value::ComponentAttribute)
-          # v.component can be null if refers to component created by an event
+            # v.component can be null if refers to component created by an event
             next unless cmp = v.component
             a = (ret[cmp[:id]] ||= {:component => cmp, :attribute_info => Array.new})[:attribute_info]
             a << {:attribute_name => v.attribute_ref.to_s, :value_object => v}
@@ -41,19 +82,13 @@ module DTK
         end
         ret
       end
-
       def node_attributes_to_set(node_mappings)
-        ret = Hash.new
+      ret = Hash.new
         each_value do |v|
           if v.kind_of?(Value::NodeAttribute)
             unless node = node_mappings[v.node_ref.to_sym]
               Log.error("cannot find node associated with node ref")
               next
-            end
-            if node.is_node_group?()
-              # TODO: put in logic to treat this case by getting attributes on node members and doing fan in mapping
-              # to input (which wil be restricted to by a non node group)
-           #   raise ErrorUsage.new("Not treating link from a node attribute (#{v.attribute_ref}) on a node group (#{node[:display_name]})")
             end
             a = (ret[node[:id]] ||= {:node => node, :attribute_info => Array.new})[:attribute_info]
             a << {:attribute_name => v.attribute_ref.to_s, :value_object => v}
@@ -62,7 +97,6 @@ module DTK
         ret
       end
 
-     private
       def add_ref!(component_attr_index,term)
         # TODO: see if there can be name conflicts between different types in which nmay want to prefix with 
         # type (type's initials, like CA for componanet attribute)

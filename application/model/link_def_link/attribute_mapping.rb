@@ -19,7 +19,8 @@ module DTK
       end
 
       def self.ret_links_array(attribute_mappings,context,opts={})
-        contexts = (context.has_node_group_form?() ? context.node_group_contexts_array() : [context])
+        #contexts = (context.has_node_group_form?() ? context.node_group_contexts_array() : [context])
+        contexts =  [context]
         contexts.map{|context|attribute_mappings.map{|am|am.ret_link(context,opts)}.compact}
       end
 

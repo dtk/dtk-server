@@ -53,7 +53,7 @@ module DTK
             if node.is_node_group?()
               # TODO: put in logic to treat this case by getting attributes on node members and doing fan in mapping
               # to input (which wil be restricted to by a non node group)
-              raise ErrorUsage.new("Not treating link from a node attribute (#{v.attribute_ref}) on a node group (#{node[:display_name]})")
+           #   raise ErrorUsage.new("Not treating link from a node attribute (#{v.attribute_ref}) on a node group (#{node[:display_name]})")
             end
             a = (ret[node[:id]] ||= {:node => node, :attribute_info => Array.new})[:attribute_info]
             a << {:attribute_name => v.attribute_ref.to_s, :value_object => v}

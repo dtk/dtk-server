@@ -46,6 +46,12 @@ module DTK
           # above might raise an exception in which case below is never reached
           return ret
         end
+# TODO: case to see if need to break into multiple links
+input_attr_node = input_attr[:node]
+output_attr_node = output_attr[:node]
+input_node_group = input_attr_node.is_node_group?()
+output_node_group = output_attr_node.is_node_group?()
+pp [input_attr_node,output_attr_node,input_node_group,output_node_group]
 
         am_link = AugmentedLink.new(self).merge(:input_id => input_attr[:id],:output_id => output_attr[:id])
         am_link.merge!(:input_path => input_path) if input_path

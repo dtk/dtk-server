@@ -25,7 +25,8 @@ module DTK
 
     # augmented with node and component
     def find_augmented_attribute(term_index)
-      @term_mappings.find_augmented_attribute(term_index,@node_mappings)
+      ret = @term_mappings.find_augmented_attribute(term_index,@node_mappings)
+      ret
     end
     
     #def node_group_contexts_array()

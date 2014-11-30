@@ -1,26 +1,14 @@
 module DTK
   class LinkDefContext
     class TermMappings < Hash
-      def find_attribute(term_index)
-        match = self[term_index]
-        match && match.value
+      def self.create_and_update_cmp_attr_index(component_attr_index,attribute_mappings,cmp_mappings)
+        ret = TermMappings.new()
+        ret.update_this_and_cmp_attr_index(component_attr_index,attribute_mappings,cmp_mappings)
       end
-
-      def find_component(term_index)
-        match = self[term_index]
-        match && match.value
-      end
-
-      def add_attribute_refs!(component_attr_index,attribute_mappings)
-        attribute_mappings.each do |am|
-          add_ref!(component_attr_index,am[:input])
-          add_ref!(component_attr_index,am[:output])
-        end
-      end
-
-      def add_ref_component!(component_type)
-        term_index = component_type
-        self[term_index] ||= Value::Component.new(:component_type => component_type)
+      def update_this_and_cmp_attr_index(component_attr_index,attribute_mappings,cmp_mappings)
+        add_component_refs!(cmp_mappings)
+        add_attribute_refs!(component_attr_index,attribute_mappings)
+        self
       end
 
       def set_components!(link,cmp_mappings)
@@ -28,14 +16,19 @@ module DTK
           v.set_component_remote_and_local_value!(link,cmp_mappings)
         end
       end
-
-      def set_component_attributes!()
+      
+      def set_attribute_values!(link,link_defs_info,node_mappings)
         attrs_to_set = component_attributes_to_set()
         get_and_update_component_attributes!(attrs_to_set)
-      end
-      def set_node_attributes!(node_mappings)
+
         attrs_to_set = node_attributes_to_set(node_mappings)
         get_and_update_node_attributes!(attrs_to_set)
+      end
+
+      def find_augmented_attribute(term_index)
+        Log.error("add component and node info")
+        match = self[term_index]
+        match && match.value
       end
 
       def get_and_update_component_attributes!(attrs_to_set)
@@ -61,10 +54,25 @@ module DTK
           end
         end
       end
-    
-
 
      private
+      def add_component_refs!(cmp_mappings)
+        cmp_mappings.each_value{|cmp|add_component_ref!(cmp)}
+      end
+
+      def add_attribute_refs!(component_attr_index,attribute_mappings)
+        attribute_mappings.each do |am|
+          add_ref!(component_attr_index,am[:input])
+          add_ref!(component_attr_index,am[:output])
+        end
+      end
+
+      def add_component_ref!(component)
+        component_type = component[:component_type] 
+        term_index = component_type
+        self[term_index] ||= Value::Component.new(:component_type => component_type)
+      end
+
       def attribute_fields_to_get()
         # TODO: prune which of these data type attributes needed; longer term is to clean them up to be normalized
         [:id,:value_derived,:value_asserted,:data_type,:semantic_data_type,:semantic_type,:semantic_type_summary]

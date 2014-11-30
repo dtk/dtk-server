@@ -25,10 +25,9 @@ module DTK
         get_and_update_node_attributes!(attrs_to_set)
       end
 
-      def find_augmented_attribute(term_index)
-        Log.error("add component and node info")
+      def find_augmented_attribute(term_index,node_mappings)
         match = self[term_index]
-        match && match.value
+        match && match.augmented_attribute(node_mappings)
       end
 
       def get_and_update_component_attributes!(attrs_to_set)

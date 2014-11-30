@@ -43,7 +43,7 @@ module DTK
           output['module_dependencies'] = check_for_dependencies(module_name, output)
 
           unless 'success'.eql?(output['result'])
-            raise PuppetForge::Error, "Puppet Forge Error: #{output['error']['oneline']}"
+            raise ErrorUsage, "Puppet Forge Error: #{output['error']['oneline']}"
           end
 
           output

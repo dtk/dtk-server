@@ -64,6 +64,19 @@ module DTK
         def value()
           @attribute
         end
+        def augmented_attribute(node_mappings)
+          ret = @attribute
+          if @component
+            ret = ret.merge(:component => @component)
+            if node_id = @component[:node_node_id]
+              if node = node_mappings.values.find{|n|n[:id] == node_id}
+                ret = ret.merge(:node => node)
+              end
+            end
+          end
+          ret
+        end
+
         def update_component_attr_index!(component_attr_index)
           p = component_attr_index[@component_ref] ||= Array.new
           p << {:attribute_name => @attribute_ref, :value_object => self}
@@ -82,6 +95,15 @@ module DTK
         end
         def value()
           @attribute
+        end
+        def augmented_attribute(node_mappings)
+          ret = @attribute
+          if @node_ref
+            if node = node_mappings[@node_ref.to_sym]
+              ret = ret.merge(:node => node)
+            end
+          end
+          ret
         end
       end
 

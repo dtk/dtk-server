@@ -10,21 +10,22 @@ module DTK
     end
 
     def initialize(link,link_defs_info)
-      @node_member_contexts = Hash.new
-      @term_mappings = TermMappings.new
-      @node_mappings = Hash.new
+      cmp_mappings = component_mappings(link,link_defs_info)
+      @node_mappings = NodeMappings.create_from_cmp_mappings(cmp_mappings)
+      # @node_member_contexts = Hash.new
       @component_attr_index = Hash.new
-      @term_mappings.add_attribute_refs!(@component_attr_index,link.attribute_mappings)
-      set_values!(link,link_defs_info)
+      attribute_mappings = link.attribute_mappings
+      # @term_mappings has element for each component, component attribute and node attribute
+      @term_mappings = TermMappings.create_and_update_cmp_attr_index(@component_attr_index,attribute_mappings,cmp_mappings)
+      # these two function set all the component and attribute refs populated above
+      @term_mappings.set_components!(link,cmp_mappings)
+      @term_mappings.set_attribute_values!(link,link_defs_info,@node_mappings)
     end
     private :initialize
 
-    def find_attribute(term_index)
-      @term_mappings.find_attribute(term_index)
-    end
-    
-    def find_component(term_index)
-      @term_mappings.find_component(term_index)
+    # augmented with node and component
+    def find_augmented_attribute(term_index)
+      @term_mappings.find_augmented_attribute(term_index)
     end
     
     #def node_group_contexts_array()
@@ -56,27 +57,12 @@ module DTK
     end
     
    private
-    def set_values!(link,link_defs_info)
+    def component_mappings(link,link_defs_info)
       local_cmp_type = link[:local_component_type]
       local_cmp = get_component(local_cmp_type,link_defs_info)
       remote_cmp_type = link[:remote_component_type]
       remote_cmp = get_component(remote_cmp_type,link_defs_info)
-      
-      [local_cmp_type,remote_cmp_type].each{|t|@term_mappings.add_ref_component!(t)}
-      
-      cmp_mappings = {:local => local_cmp, :remote => remote_cmp}
-      @node_mappings = NodeMappings.create_from_cmp_mappings(cmp_mappings)
-      
-      # this updates term mappings
-
-      # set components
-      @term_mappings.set_components!(link,cmp_mappings)
-
-      # set component attributes
-      @term_mappings.set_component_attributes!()
-
-      # set node attributes
-      @term_mappings.set_node_attributes!(@node_mappings)
+      {:local => local_cmp, :remote => remote_cmp}
     end
 
     def get_component(component_type,link_defs_info)

@@ -22,7 +22,7 @@ module DTK
       self
     end
 
-    # TODO: when add cardinality contrsaints on links, would check it here
+    # TODO: when add cardinality constraints on links, would check it here
     # assuming that augmented ports have :port_info
     def ret_matches(in_aug_port,out_aug_ports)
       ret = Array.new
@@ -60,8 +60,7 @@ module DTK
       link_defs_info = components.map{|cmp| {:component => cmp}}
       context = LinkDefContext.create(self,link_defs_info)
 
-      on_create_events.each{|ev|ev.process!(context)} 
-
+      #TODO: might put back in on_create_events.each{|ev|ev.process!(context)} 
       am_links = AttributeMapping.ret_links(attribute_mappings,context,:raise_error => opts[:raise_error])
       if port_link_idh = opts[:port_link_idh]
         port_link_id = port_link_idh.get_id()
@@ -108,7 +107,8 @@ module DTK
       end
 
       def process!(context)
-        base_component = context.find_component(self[:base_component])
+        raise Error.new("deprecated context.find_component")
+        # base_component = context.find_component(self[:base_component])
         raise Error.new("cannot find component with ref #{self[:base_component]} in context") unless base_component
         component_extension = base_component.get_extension_in_library(self[:extension_type])
         raise Error.new("cannot find library extension of type #{self[:extension_type]} to #{self[:base_component]} in library") unless component_extension

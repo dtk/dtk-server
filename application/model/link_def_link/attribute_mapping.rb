@@ -38,8 +38,8 @@ module DTK
       def ret_links(context,opts={})
         ret = Array.new
         err_msgs = Array.new
-        input_attr,input_path = get_attribute_with_unravel_path(err_msgs,:input,context)
-        output_attr,output_path = get_attribute_with_unravel_path(err_msgs,:output,context)
+        input_attr,input_path = get_aug_attr_with_unravel_path(err_msgs,:input,context)
+        output_attr,output_path = get_aug_attr_with_unravel_path(err_msgs,:output,context)
 
         unless err_msgs.empty?
           process_ret_links_error(err_msgs,opts)
@@ -92,8 +92,8 @@ module DTK
 
      private
       # returns [attribute,unravel_path] and updates error if any error
-      def get_attribute_with_unravel_path(err_msgs,dir,context)
-        unless attr = context.find_attribute(self[dir][:term_index])
+      def get_aug_attr_with_unravel_path(err_msgs,dir,context)
+        unless attr = context.find_augmented_attribute(self[dir][:term_index])
           err_msgs << "attribute (#{pp_form(:dir)}) does not exist"
         end
         index_map_path = self[dir][:path]

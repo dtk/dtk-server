@@ -16,17 +16,15 @@ module DTK
       @component_attr_index = Hash.new
       attribute_mappings = link.attribute_mappings
       # @term_mappings has element for each component, component attribute and node attribute
-      @term_mappings = TermMappings.create_and_update_cmp_attr_index(@component_attr_index,attribute_mappings,cmp_mappings)
+      @term_mappings = TermMappings.create_and_update_cmp_attr_index(@node_mappings,@component_attr_index,attribute_mappings,cmp_mappings)
       # these two function set all the component and attribute refs populated above
       @term_mappings.set_components!(link,cmp_mappings)
       @term_mappings.set_attribute_values!(link,link_defs_info,@node_mappings)
     end
     private :initialize
 
-    # augmented with node and component
-    def find_augmented_attribute(term_index)
-      ret = @term_mappings.find_augmented_attribute(term_index,@node_mappings)
-      ret
+    def find_attribute_object?(term_index)
+      @term_mappings.find_attribute_object?(term_index)
     end
     
     #def node_group_contexts_array()

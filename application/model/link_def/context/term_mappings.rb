@@ -1,13 +1,13 @@
 module DTK
   class LinkDefContext
     class TermMappings < Hash
-      def self.create_and_update_cmp_attr_index(component_attr_index,attribute_mappings,cmp_mappings)
+      def self.create_and_update_cmp_attr_index(node_mappings,component_attr_index,attribute_mappings,cmp_mappings)
         ret = TermMappings.new()
-        ret.update_this_and_cmp_attr_index(component_attr_index,attribute_mappings,cmp_mappings)
+        ret.update_this_and_cmp_attr_index(node_mappings,component_attr_index,attribute_mappings,cmp_mappings)
       end
-      def update_this_and_cmp_attr_index(component_attr_index,attribute_mappings,cmp_mappings)
+      def update_this_and_cmp_attr_index(node_mappings,component_attr_index,attribute_mappings,cmp_mappings)
         add_component_refs!(cmp_mappings)
-        add_attribute_refs!(component_attr_index,attribute_mappings)
+        add_attribute_refs!(node_mappings,component_attr_index,attribute_mappings)
         self
       end
 
@@ -25,9 +25,8 @@ module DTK
         get_and_update_node_attributes!(attrs_to_set)
       end
 
-      def find_augmented_attribute(term_index,node_mappings)
-        match = self[term_index]
-        match && match.augmented_attribute(node_mappings)
+      def find_attribute_object?(term_index)
+        self[term_index]
       end
 
       def get_and_update_component_attributes!(attrs_to_set)
@@ -59,10 +58,10 @@ module DTK
         cmp_mappings.each_value{|cmp|add_component_ref!(cmp)}
       end
 
-      def add_attribute_refs!(component_attr_index,attribute_mappings)
+      def add_attribute_refs!(node_mappings,component_attr_index,attribute_mappings)
         attribute_mappings.each do |am|
-          add_ref!(component_attr_index,am[:input])
-          add_ref!(component_attr_index,am[:output])
+          add_ref!(node_mappings,component_attr_index,am[:input])
+          add_ref!(node_mappings,component_attr_index,am[:output])
         end
       end
 
@@ -104,11 +103,11 @@ module DTK
         ret
       end
 
-      def add_ref!(component_attr_index,term)
+      def add_ref!(node_mappings,component_attr_index,term)
         # TODO: see if there can be name conflicts between different types in which nmay want to prefix with 
         # type (type's initials, like CA for componanet attribute)
         term_index = term[:term_index]
-        value = self[term_index] ||= Value.create(term)
+        value = self[term_index] ||= Value.create(term,:node_mappings => node_mappings)
         value.update_component_attr_index!(component_attr_index)
       end
 

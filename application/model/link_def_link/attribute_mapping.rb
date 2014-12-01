@@ -24,14 +24,14 @@ module DTK
       def ret_links(context,opts={})
         ret = Array.new
         err_msgs = Array.new
-        input_attr,input_path = get_aug_attr_with_unravel_path(err_msgs,:input,context)
-        output_attr,output_path = get_aug_attr_with_unravel_path(err_msgs,:output,context)
+        input_attr_obj,input_path = get_context_attr_obj_with_path(err_msgs,:input,context)
+        output_attr_obj,output_path = get_context_attr_obj_with_path(err_msgs,:output,context)
         unless err_msgs.empty?
           process_ret_links_error(err_msgs,opts)
           # above might raise an exception in which case below is never reached
           return ret
         end
-        AugmentedLinkContext.new(self,input_attr,input_path,output_attr,output_path).ret_links()
+        AugmentedLinkContext.new(self,input_attr_obj,input_path,output_attr_obj,output_path).ret_links()
       end
 
       # returns a hash with args if this is a function that takes args
@@ -49,14 +49,14 @@ module DTK
       end
           
      private
-      # returns [attribute,unravel_path] and updates error if any error
-      def get_aug_attr_with_unravel_path(err_msgs,dir,context)
-        unless attr = context.find_augmented_attribute(self[dir][:term_index])
+      # returns [attribute_object,unravel_path] and updates error if any error
+      def get_context_attr_obj_with_path(err_msgs,dir,context)
+        unless attr_object = context.find_attribute_object?(self[dir][:term_index])
           err_msgs << "attribute (#{pp_form(:dir)}) does not exist"
         end
         index_map_path = self[dir][:path]
         # TODO: if treat :create_component_index need to put in here process_unravel_path and process_create_component_index (from link_defs.rb)
-        [attr,index_map_path && AttributeLink::IndexMapPath.create_from_array(index_map_path)]
+        [attr_object,index_map_path && AttributeLink::IndexMapPath.create_from_array(index_map_path)]
       end
 
       def process_ret_links_error(err_msgs,opts={})

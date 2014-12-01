@@ -2,13 +2,14 @@ module DTK; class LinkDefLink
   class AttributeMapping
     class AugmentedLinkContext
       attr_reader :attribute_mapping,:input_path,:output_path
-      def initialize(am,input_attr_obj,input_path,output_attr_obj,output_path)
-        super()
-        @attribute_mapping = am
-        @input_attr_obj = input_attr_obj
-        @input_path = input_path
-        @output_attr_obj = output_attr_obj
-        @output_path = output_path
+      def initialize(attribute_mapping,link_def_context,attr_and_path_info)
+        @attribute_mapping = attribute_mapping
+        @link_def_context = link_def_context
+        info = attr_and_path_info # for succinctness
+        @input_attr_obj = info[:input_attr_obj]
+        @input_path = info[:input_path]
+        @output_attr_obj = info[:output_attr_obj]
+        @output_path = info[:output_path]
       end
       def input_attr()
         @input_attr_obj.value()
@@ -41,12 +42,13 @@ module DTK; class LinkDefLink
           # raise error if array on node group
           #TODO: wrong check; see if there is apath and if so then see .. 
           if @output_attr_obj.is_array?()
-            raise ErrorUsage.new("Not treating attribute mappings from an array attribute on a node group (#{@output_attr_obj.pp_form()})")
+#            raise ErrorUsage.new("Not treating attribute mappings from an array attribute on a node group (#{@output_attr_obj.pp_form()})")
           end
-          if @output_attr_obj.kind_of?(LinkDefContext::Value::NodeAttribute) and !input_attr_obj.is_array?()
-            raise ErrorUsage.new("Node attributes on node groups (#{@output_attr_obj.pp_form()}) must connect to an array attribute, not '#{@inpput_attr_obj.pp_form()}'")
+          if @output_attr_obj.kind_of?(LinkDefContext::Value::NodeAttribute) and !@input_attr_obj.is_array?()
+            raise ErrorUsage.new("Node attributes on node groups (#{@output_attr_obj.pp_form()}) must connect to an array attribute, not '#{@input_attr_obj.pp_form()}'")
           end          
           #TODO: stub
+          @link_def_context.node_member_contexts()
           nil
         end
       end

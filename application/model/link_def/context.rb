@@ -10,16 +10,20 @@ module DTK
     end
 
     def initialize(link,link_defs_info)
-      cmp_mappings = component_mappings(link,link_defs_info)
-      @node_mappings = NodeMappings.create_from_cmp_mappings(cmp_mappings)
-      # @node_member_contexts = Hash.new
+      @link = link
+      @component_mappings = component_mappings(link_defs_info)
+      @node_mappings = NodeMappings.create_from_cmp_mappings(@component_mappings)
+
       @component_attr_index = Hash.new
-      attribute_mappings = link.attribute_mappings
       # @term_mappings has element for each component, component attribute and node attribute
-      @term_mappings = TermMappings.create_and_update_cmp_attr_index(@node_mappings,@component_attr_index,attribute_mappings,cmp_mappings)
+      @term_mappings = TermMappings.create_and_update_cmp_attr_index(
+                          @node_mappings,
+                          @component_attr_index,
+                          @link.attribute_mappings,
+                          @component_mappings)
       # these two function set all the component and attribute refs populated above
-      @term_mappings.set_components!(link,cmp_mappings)
-      @term_mappings.set_attribute_values!(link,link_defs_info,@node_mappings)
+      @term_mappings.set_components!(@link,@component_mappings)
+      @term_mappings.set_attribute_values!(@link,link_defs_info,@node_mappings)
     end
     private :initialize
 
@@ -27,17 +31,17 @@ module DTK
       @term_mappings.find_attribute_object?(term_index)
     end
     
-    #def node_group_contexts_array()
-    #  @node_member_contexts.values
-    #end
-    
     def remote_node()
       @node_mappings.remote
     end
     def local_node()
       @node_mappings.local
     end
-    
+
+    def node_member_contexts()
+      @node_member_contexts ||= NodeGroupMember.create_node_member_contexts(@link,@node_mappings,@component_mappings)
+    end
+
     def add_component_ref_and_value!(component_type,component)
     #  if has_node_group_form?()
     #    add_component_ref_and_value__node_group!(component_type,component)
@@ -56,10 +60,10 @@ module DTK
     end
     
    private
-    def component_mappings(link,link_defs_info)
-      local_cmp_type = link[:local_component_type]
+    def component_mappings(link_defs_info)
+      local_cmp_type = @link[:local_component_type]
       local_cmp = get_component(local_cmp_type,link_defs_info)
-      remote_cmp_type = link[:remote_component_type]
+      remote_cmp_type = @link[:remote_component_type]
       remote_cmp = get_component(remote_cmp_type,link_defs_info)
       {:local => local_cmp, :remote => remote_cmp}
     end

@@ -27,11 +27,21 @@ module DTK
         input_attr_obj,input_path = get_context_attr_obj_with_path(err_msgs,:input,context)
         output_attr_obj,output_path = get_context_attr_obj_with_path(err_msgs,:output,context)
         unless err_msgs.empty?
-          process_ret_links_error(err_msgs,opts)
-          # above might raise an exception in which case below is never reached
-          return ret
+          err_msg = err_msgs.join(" and ").capitalize
+          if opts[:raise_error]
+            raise ErrorUsage.new(err_msg)
+          else
+            return ret
+          end
         end
-        AugmentedLinkContext.new(self,input_attr_obj,input_path,output_attr_obj,output_path).ret_links()
+
+        attr_and_path_info = {
+          :input_attr_obj  => input_attr_obj,
+          :input_path      => input_path,
+          :output_attr_obj => output_attr_obj,
+          :output_path     => output_path
+        }
+        AugmentedLinkContext.new(self,context,attr_and_path_info).ret_links()
       end
 
       # returns a hash with args if this is a function that takes args
@@ -57,15 +67,6 @@ module DTK
         index_map_path = self[dir][:path]
         # TODO: if treat :create_component_index need to put in here process_unravel_path and process_create_component_index (from link_defs.rb)
         [attr_object,index_map_path && AttributeLink::IndexMapPath.create_from_array(index_map_path)]
-      end
-
-      def process_ret_links_error(err_msgs,opts={})
-        err_msg = err_msgs.join(" and ").capitalize
-        if opts[:raise_error]
-          raise ErrorUsage.new(err_msg)
-        else
-          Log.error(err_msg)
-        end
       end
 
       def pp_form(direction)

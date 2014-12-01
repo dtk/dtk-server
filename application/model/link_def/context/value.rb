@@ -111,7 +111,7 @@ module DTK
 
         def pp_form()
           attr =  @attribute.get_field?(:display_name)
-          node = node.get_field?(:node)
+          node = node().get_field?(:display_name)
           "#{node}/#{attr}"
         end
 

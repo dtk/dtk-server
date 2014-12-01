@@ -1,13 +1,12 @@
 module DTK; class LinkDefLink
   class AttributeMapping
     class AugmentedLink < Hash
-      def initialize(aug_link_context)
-        cntx = aug_link_context # for succinctness
+      def initialize(attribute_mapping,input_attr,input_path,output_attr,output_path)
         super()
-        @attribute_mapping = cntx.attribute_mapping
-        merge!(:input_id => cntx.input_attr[:id],:output_id => cntx.output_attr[:id])
-        merge!(:input_path => cntx.input_path) if cntx.input_path
-        merge!(:output_path => cntx.output_path) if cntx.output_path
+        @attribute_mapping = attribute_mapping,
+        merge!(:input_id => input_attr.id,:output_id => output_attr.id)
+        merge!(:input_path => input_path) if input_path
+        merge!(:output_path => output_path) if output_path
       end
       private :initialize
 

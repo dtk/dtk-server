@@ -20,10 +20,14 @@ module DTK; class LinkDefLink
 
       # returns Array of AugmentedLink objects 
       def ret_links()
-        ret_links_multiple_links_needed?() || [AugmentedLink.ret_link(self)]
+        ret_links_multiple_links_needed?() || [ret_single_link(input_attr(),output_attr())]
       end
 
      private
+      def ret_single_link(input_attr,output_attr)
+        AugmentedLink.ret_link(@attribute_mapping,input_attr,@input_path,output_attr,@output_path)
+      end
+
       def ret_links_multiple_links_needed?()
         num_ngs = [@input_attr_obj.node,@output_attr_obj.node].inject(0){|r,n|r +(n.is_node_group? ? 1 : 0)}
         case num_ngs
@@ -39,16 +43,26 @@ module DTK; class LinkDefLink
         if @input_attr_obj.on_node_group?()
           nil # to fallback to single link treatment
         else # @output_attr_obj.ON_node_group?
-          # raise error if array on node group
-          #TODO: wrong check; see if there is apath and if so then see .. 
-          if @output_attr_obj.is_array?()
-#            raise ErrorUsage.new("Not treating attribute mappings from an array attribute on a node group (#{@output_attr_obj.pp_form()})")
+          # raise error if array on node group and not being indexed
+          if @output_attr_obj.is_array?() and @output_path.nil?
+            raise ErrorUsage.new("Not treating attribute mappings from an array attribute on a node group (#{@output_attr_obj.pp_form()})")
           end
-          if @output_attr_obj.kind_of?(LinkDefContext::Value::NodeAttribute) and !@input_attr_obj.is_array?()
+          if @output_attr_obj.is_node_attribute?() and !@input_attr_obj.is_array?()
             raise ErrorUsage.new("Node attributes on node groups (#{@output_attr_obj.pp_form()}) must connect to an array attribute, not '#{@input_attr_obj.pp_form()}'")
           end          
+          ret_links_with_output_node_group()
+        end
+      end
+
+      def ret_links_with_output_node_group()
+        #TODO mapcar over node member attributes and call ret_single_link(input_attr(),ng_member_output_attr)
           #TODO: stub
-          @link_def_context.node_member_contexts()
+          #TODO: handle first case where @output_attr_obj.kind_of?(LinkDefContext::Value::NodeAttribute)
+          if @output_attr_obj.is_node_attribute?()
+            #TODO: see what this does for testing
+            @link_def_context.node_member_contexts()
+            # get all the attributes
+          end
           nil
         end
       end

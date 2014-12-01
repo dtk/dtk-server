@@ -42,9 +42,9 @@ module DTK; class LinkDefLink
       def ret_links_with_node_group?()
         if @input_attr_obj.on_node_group?()
           nil # to fallback to single link treatment
-        else # @output_attr_obj.ON_node_group?
-          # raise error if array on node group and not being indexed
+        else # @output_attr_obj.On_node_group?
           if @output_attr_obj.is_array?() and @output_path.nil?
+          # raise error if array (not being indexed to be a scalar) on node group 
             raise ErrorUsage.new("Not treating attribute mappings from an array attribute on a node group (#{@output_attr_obj.pp_form()})")
           end
           if @output_attr_obj.is_node_attribute?() and !@input_attr_obj.is_array?()
@@ -56,15 +56,14 @@ module DTK; class LinkDefLink
 
       def ret_links_with_output_node_group()
         #TODO mapcar over node member attributes and call ret_single_link(input_attr(),ng_member_output_attr)
-          #TODO: stub
-          #TODO: handle first case where @output_attr_obj.kind_of?(LinkDefContext::Value::NodeAttribute)
-          if @output_attr_obj.is_node_attribute?()
-            #TODO: see what this does for testing
-            @link_def_context.node_member_contexts()
-            # get all the attributes
-          end
-          nil
+        #TODO: stub
+        #TODO: handle first case where @output_attr_obj.kind_of?(LinkDefContext::Value::NodeAttribute)
+        if @output_attr_obj.is_node_attribute?()
+          #TODO: see what this does for testing
+          @link_def_context.node_member_contexts()
+          # get all the attributes
         end
+        nil
       end
     end
   end

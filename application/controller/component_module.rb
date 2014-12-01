@@ -204,7 +204,10 @@ module DTK
 
     def rest__list_remote()
       module_list = ComponentModule.list_remotes(model_handle, ret_request_params(:rsa_pub_key))
-      rest_ok_response filter_by_namespace(module_list), :datatype => :module_remote
+      rest_ok_response filter_by_namespace(module_list), :datatype => :module_remote,
+      :info => "This works very well",
+      :warn => "This is example of warnign msg",
+      :error => "This is error message"
     end
 
     # get remote_module_info; throws an access rights usage error if user does not have access

@@ -23,6 +23,11 @@ module DTK
         end
       end
 
+      # can be overwritten
+      def is_node_attribute?()
+        false
+      end
+
       def set_component_remote_and_local_value!(link,cmp_mappings)
         return if @component_ref.nil? #would fire if this is a NodeAttribute
         if @component_ref == link[:local_component_type]
@@ -107,6 +112,10 @@ module DTK
           @node_ref = term[:node_name]
           @attribute_ref = term[:attribute_name]
           @node_mappings =  opts[:node_mappings]
+        end
+
+        def is_node_attribute?()
+          true
         end
 
         def pp_form()

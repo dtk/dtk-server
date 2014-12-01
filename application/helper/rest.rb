@@ -4,7 +4,7 @@ module Ramaze::Helper
       unless @ctrl_results.kind_of?(BundleAndReturnHelper::ControllerResultsRest)
         raise Error.new("controller results are in wrong form; it should have 'rest' form")
       end
-      
+
       JSON.generate(@ctrl_results)
     end
 
@@ -13,19 +13,25 @@ module Ramaze::Helper
       if encode_format = opts[:encode_into]
         # This might be a misnomer in taht payload is still a hash which then in RestResponse.new becomes json
         # for case of yaml, the data wil be a string formed by yaml encoding
-        data = 
+        data =
           case encode_format
             when :yaml then encode_into_yaml(data)
             else raise Error.new("Unexpected encode format (#{encode_format})")
           end
       end
 
-      payload = {:status => :ok,:data => data}
+      payload = { :status => :ok, :data => data}
       payload.merge!(:datatype => opts[:datatype]) if opts[:datatype]
+
+      # set custom messages in response
+      [:info, :warn, :error].each do |msg_type|
+        payload.merge!(msg_type => opts[msg_type]) if opts[msg_type]
+      end
+
       RestResponse.new(payload)
     end
 
-    # 
+    #
     # Actions needed is Array of Hashes with following attributes:
     #
     # :action => Name of action to be executed
@@ -34,17 +40,17 @@ module Ramaze::Helper
     #                       It will call task_status for given entity.
     # Example:
     #[
-    #  :action => :start, 
-    #  :params => {:assembly_id => assembly[:id]}, 
+    #  :action => :start,
+    #  :params => {:assembly_id => assembly[:id]},
     #  :wait_for_complete => {:type => :assembly, :id => assembly[:id]}
     #]
 
     def rest_validate_response(message, actions_needed)
       RestResponse.new({
-        :status => :notok, 
-        :validation => 
-          { 
-            :message => message, 
+        :status => :notok,
+        :validation =>
+          {
+            :message => message,
             :actions_needed => actions_needed
           }
         })

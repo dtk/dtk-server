@@ -37,19 +37,17 @@ module DTK; class LinkDefLink
       def ret_links_with_node_group?()
         if @input_attr_obj.on_node_group?()
           nil # to fallback to single link treatment
-        else # @output_attr_obj[:node].is_node_group?
-          raise_error_if_array_on_node_group(@output_attr_obj)
-          # raise error if output_attr_obj is node attributes and input is not an array
-          
-#          raise Error.new("got here")
+        else # @output_attr_obj.ON_node_group?
+          # raise error if array on node group
+          #TODO: wrong check; see if there is apath and if so then see .. 
+          if @output_attr_obj.is_array?()
+            raise ErrorUsage.new("Not treating attribute mappings from an array attribute on a node group (#{@output_attr_obj.pp_form()})")
+          end
+          if @output_attr_obj.kind_of?(LinkDefContext::Value::NodeAttribute) and !input_attr_obj.is_array?()
+            raise ErrorUsage.new("Node attributes on node groups (#{@output_attr_obj.pp_form()}) must connect to an array attribute, not '#{@inpput_attr_obj.pp_form()}'")
+          end          
           #TODO: stub
           nil
-        end
-      end
-
-      def raise_error_if_array_on_node_group(attr_obj)
-        if attr_obj.is_array?() and attr_obj.on_node_group?()
-          raise ErrorUsage.new("Not treating attribute mapping with an array attribute (#{attr_obj.pp_form()}) on a node group")
         end
       end
     end

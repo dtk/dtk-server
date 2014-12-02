@@ -1,7 +1,7 @@
 module DTK
   class Node < Model
     r8_nested_require('node','meta')
-
+    extend NodeMetaClassMixin
     set_relation_name(:node,:node)
 
     r8_nested_require('node','type')
@@ -10,17 +10,16 @@ module DTK
     r8_nested_require('node','target_ref')
     r8_nested_require('node','filter')
     r8_nested_require('node','clone')
-    r8_nested_require('node','attribute')
+    r8_nested_require('node','node_attribute')
     r8_nested_require('node','external_ref')
     r8_nested_require('node','delete')
 
-    include TypeMixin
-    include CloneMixin
-    extend NodeMetaClassMixin
-    extend AttributeClassMixin
-    include AttributeMixin
+    include Type::Mixin
+    include Clone::Mixin
+    extend NodeAttribute::ClassMixin
+    include NodeAttribute::Mixin
     include ExternalRef::Mixin
-    include DeleteMixin
+    include Delete::Mixin
 
     def self.common_columns()
       [

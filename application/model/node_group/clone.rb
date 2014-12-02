@@ -1,5 +1,5 @@
 module DTK; class NodeGroup
-  module CloneMixin
+  module Clone; module Mixin
     def clone_post_copy_hook(clone_copy_output,opts={})
       return if opts[:no_post_copy_hook]
       super_opts = opts.merge(:donot_create_pending_changes => true, :donot_create_internal_links => true)
@@ -90,7 +90,7 @@ module DTK; class NodeGroup
         {:node_group_port_link => ng_pl, :node_port_link_hash => {index => node_port_id, other_index => ng_pl[other_index]}}
       end
     end
-  end
+  end; end
 end; end
 
 =begin

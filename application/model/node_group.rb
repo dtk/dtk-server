@@ -1,7 +1,7 @@
 module DTK
   class NodeGroup < Node
     r8_nested_require('node_group','clone')
-    include CloneMixin
+    include Clone::Mixin
 
     def self.get_component_list(nodes,opts={})
       ret = opts[:add_on_to]||opts[:seed]||Array.new

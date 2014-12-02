@@ -1,5 +1,5 @@
 module DTK; class Node
-  module CloneMixin
+  module Clone; module Mixin
     def add_model_specific_override_attrs!(override_attrs,target_obj)
       override_attrs[:type] ||= Type::Node.staged
       override_attrs[:ref] ||= SQL::ColRef.concat("s-",:ref)
@@ -218,5 +218,5 @@ module DTK; class Node
         end
       end
     end
-  end
+  end; end
 end; end

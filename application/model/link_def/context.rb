@@ -12,7 +12,7 @@ module DTK
     def initialize(link,link_defs_info)
       @link = link
       @component_mappings = component_mappings(link_defs_info)
-      @node_mappings = NodeMappings.create_from_cmp_mappings(@component_mappings)
+      @node_mappings = NodeMappings.create_from_component_mappings(@component_mappings)
 
       @component_attr_index = Hash.new
       # @term_mappings has element for each component, component attribute and node attribute

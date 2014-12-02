@@ -1,6 +1,6 @@
-module DTK
-  class Node
-    module DeleteMixin
+module DTK; class Node
+  module Delete
+    module Mixin
       def destroy_and_delete(opts={})
         suceeeded = true
         if is_target_ref?(:not_deletable=>true)
@@ -74,4 +74,4 @@ module DTK
       end
     end
   end
-end
+end; end

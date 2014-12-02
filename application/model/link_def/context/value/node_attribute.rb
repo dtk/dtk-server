@@ -20,8 +20,10 @@ module DTK; class LinkDefContext
         "#{node}/#{attr}"
       end
       
-      def get_node_group_attributes()
-        node_group_attrs = @node_mappings.get_node_group_attributes!(node())
+      # this should only be called on anode group; it returns the assocaited attributes
+      # on the nod egoup members
+      def get_node_group_member_attributes()
+        node_group_attrs = node_group().get_node_attributes()
         attr_name = @attribute.get_field?(:display_name)
         node_group_attrs.select{|a|a[:display_name] == attr_name}
       end

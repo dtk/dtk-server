@@ -56,9 +56,8 @@ module DTK; class LinkDefLink
 
       def ret_links_with_output_node_group()
         if @output_attr_obj.is_node_attribute?()
-          node_group = @output_attr_obj.node_group()
-          node_group_attrs = node_group.get_node_attributes()
-          pp [:node_group_attrs,node_group_attrs]
+          node_group_attrs = @output_attr_obj.get_node_group_member_attributes()
+          pp(:attr => @output_attr_obj.value, :node_group_attrs => node_group_attrs)
         end
         nil
       end

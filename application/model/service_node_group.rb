@@ -1,3 +1,4 @@
+# TODO: need to reconcile or have better names on this versus NodeGroup
 module DTK
   class ServiceNodeGroup < Node
     def add_group_members(new_cardinality)

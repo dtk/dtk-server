@@ -1,3 +1,4 @@
+# TODO: need to reconcile or haev better names on this versus ServiceNodeGroup
 module DTK
   class NodeGroup < Node
     r8_nested_require('node_group','clone')

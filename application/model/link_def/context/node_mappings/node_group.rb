@@ -1,6 +1,6 @@
 module DTK; class LinkDefContext
   class NodeMappings
-    class NodeGroup < ::DTK::NodeGroup
+    class NodeGroup < ::DTK::ServiceNodeGroup
       def self.model_name()
         :node
       end
@@ -20,6 +20,7 @@ module DTK; class LinkDefContext
 
      private
       def get_node_attributes_aux()
+        x = self.class.get_attributes_to_copy_to_target_refs([id_handle()])
         target_ref_ids = @target_refs.map{|n|n.id} 
         sp_hash = {
           :cols => [:id,:group,:display_name,:node_node_id],

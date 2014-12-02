@@ -1,16 +1,25 @@
 module DTK; class LinkDefContext
   class NodeMappings
     class NodeGroup < ::DTK::NodeGroup
+      def self.model_name()
+        :node
+      end
+
       def self.create_as(node,target_refs)
+        super(node).set_target_refs!(target_refs)
+      end
+
+      def set_target_refs!(target_refs)
         @target_refs = target_refs
-        super(node)
+        self
       end
-      def get_node_attributes!()
-        @node_attributes ||= get_node_group_attributes()
+
+      def get_node_attributes()
+        @node_attributes ||= get_node_attributes_aux()
       end
-      
+
      private
-      def get_node_attributes(node_mapping_nodegroup)
+      def get_node_attributes_aux()
         target_ref_ids = @target_refs.map{|n|n.id} 
         sp_hash = {
           :cols => [:id,:group,:display_name,:node_node_id],

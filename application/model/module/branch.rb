@@ -151,12 +151,15 @@ module DTK
     # args could be either file_path,hash_content,file_format(optional) or single element which is an array 
     # having elements with keys :path, :hash_content, :format
     def serialize_and_save_to_repo?(*args)
+      opts = Hash.new
       files =
       if args.size == 1
         args[0]
       else
         path,hash_content,format_type,opts = args
-        [{:path => path,:hash_content => hash_content,:format_type => format_type||dsl_format_type_form_path(path)}]
+        format_type ||= dsl_format_type_form_path(path)
+        opts ||= Hash.new
+        [{:path => path,:hash_content => hash_content,:format_type => format_type}]
       end
 
       unless files.empty?

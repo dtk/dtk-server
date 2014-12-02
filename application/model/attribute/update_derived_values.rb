@@ -1,4 +1,4 @@
-module XYZ
+module DTK
   class AttributeUpdateDerivedValues
     def self.update(attr_mh,update_deltas,opts={})
       ret = Array.new
@@ -49,7 +49,6 @@ module XYZ
       end
     end
 
-
     def self.update_attribute_values_simple(attr_mh,update_hashes,opts={})
       ret = Array.new
       id_list = update_hashes.map{|r|r[:id]}
@@ -68,12 +67,12 @@ module XYZ
 
     # appends value to any array type; if the array does not exist already it creates it from fresh
     def self.update_attribute_values_array_append(attr_mh,array_slice_rows,opts={})
-      ret = Array.new
+      ndx_ret = Hash.new
       attr_link_updates = Array.new
       id_list = array_slice_rows.map{|r|r[:id]}
       Model.select_process_and_update(attr_mh,[:id,:value_derived],id_list) do |existing_vals|
-        ndx_existing_vals = existing_vals.inject({}){|h,r|h.merge(r[:id] => r[:value_derived])}
-        attr_updates = array_slice_rows.map do |r|
+        ndx_existing_vals = existing_vals.inject(Hash.new){|h,r|h.merge(r[:id] => r[:value_derived])}
+        ndx_attr_updates = array_slice_rows.inject(Hash.new) do |h,r|
           attr_id = r[:id]
           existing_val = ndx_existing_vals[attr_id]||[]
           offset = existing_val.size
@@ -86,17 +85,25 @@ module XYZ
             :index_map => index_map
           }
           attr_link_updates << attr_link_update
-          
-          replacement_row = {:id => attr_id, :value_derived => existing_val + r[:array_slice]}
-          ret << replacement_row.merge(:source_output_id => r[:source_output_id], :old_value_derived => existing_val)
-          replacement_row
+
+          # update ndx_existing_vals to handle case where  multiple entries pointing to same element
+          ndx_existing_vals[attr_id] = new_val = existing_val + r[:array_slice]
+          replacement_row = {:id => attr_id, :value_derived => new_val}
+
+          # if multiple entries pointing to same element then last one taken since it incorporates all of them  
+
+          # TODO: if multiple entries pointing to same element source_output_id will be the last one; 
+          # this may be be problematic because source_output_id may be used just for parent to use for change
+          # objects; double check this
+          ndx_ret.merge!(attr_id => replacement_row.merge(:source_output_id => r[:source_output_id], :old_value_derived => existing_val))
+          h.merge(attr_id => replacement_row)
         end
-        attr_updates
+        ndx_attr_updates.values
       end
 
       # update the index_maps on the links
       Model.update_from_rows(attr_mh.createMH(:attribute_link),attr_link_updates)
-      ret
+      ndx_ret.values
     end
 
     def self.update_attribute_values_partial(attr_mh,partial_update_rows,opts={})

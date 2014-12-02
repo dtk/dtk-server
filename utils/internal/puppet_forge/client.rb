@@ -73,6 +73,22 @@ module DTK
           head_commit_sha
         end
 
+        #
+        # Verify if puppet forge module name is supported, to new name
+        #
+
+        def is_module_name_valid?(puppet_forge_name, module_name)
+          pf_module_name = puppet_forge_name.split(MODULE_NAME_SEPARATOR, 2).last
+
+          unless module_name
+            raise ErrorUsage.new("Please provide module name")
+          end
+
+          unless module_name.eql?(pf_module_name)
+            raise ErrorUsage.new("Install with module name (#{module_name}) unequal to puppet forge module name (#{pf_module_name}) is currently not supported.")
+          end
+        end
+
       private
 
         def random_install_dir

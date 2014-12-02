@@ -178,6 +178,9 @@ module DTK
       namespace = ret_request_params(:module_namespace)
       version   = ret_request_params_force_nil(:module_version)
 
+      # will raise exception if not valid
+      PuppetForge::Client.is_module_name_valid?(puppet_module_name, module_name)
+
       # will raise an exception in case of error
       response = PuppetForge::Client.install(puppet_module_name, version)
 

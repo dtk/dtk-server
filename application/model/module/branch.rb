@@ -155,7 +155,7 @@ module DTK
       if args.size == 1
         args[0]
       else
-        path,hash_content,format_type = args
+        path,hash_content,format_type,opts = args
         [{:path => path,:hash_content => hash_content,:format_type => format_type||dsl_format_type_form_path(path)}]
       end
 
@@ -169,7 +169,7 @@ module DTK
           file_path = file_info[:path]
 
           # if module_refs.yaml and content already exist then append new module_refs to existing
-          if existing_content && file_path.eql?("module_refs.#{file_info[:format_type].to_s}")
+          if existing_content && opts[:update_module_refs] && file_path.eql?("module_refs.#{file_info[:format_type].to_s}")
             existing_c_hash = Aux.convert_to_hash(existing_content,file_info[:format_type])
             new_cmp_refs = file_info[:hash_content].clone
 

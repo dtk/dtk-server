@@ -29,11 +29,11 @@ module DTK
     end
 
     # serializes and saves object to repo
-    def serialize_and_save_to_repo?()
+    def serialize_and_save_to_repo?(opts={})
       dsl_hash_form = dsl_hash_form()
       unless dsl_hash_form.empty?
         meta_filename_path = meta_filename_path()
-        @parent.serialize_and_save_to_repo?(meta_filename_path,dsl_hash_form)
+        @parent.serialize_and_save_to_repo?(meta_filename_path,dsl_hash_form,nil,opts)
       end
     end
 

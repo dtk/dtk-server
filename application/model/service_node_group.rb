@@ -1,5 +1,8 @@
 # TODO: need to reconcile or have better names on this versus NodeGroup
 module DTK
+  # This class represents objects that are specfied by node groups in assembly templates and service insatnces
+  # TODO: double check this is accurate description; they capture what Input::BaseNodes is, 
+  # but maybe not inventory data subclass
   class ServiceNodeGroup < Node
     def add_group_members(new_cardinality)
       target = get_target()
@@ -91,10 +94,10 @@ module DTK
       ret
     end
 
-    def self.get_attributes_to_copy_to_target_refs(node_group_idhs)
-      Node.get_target_ref_attributes(node_group_idhs,:cols=>CopyToTargetRefAttrs)
+    def self.get_node_attributes_to_copy(node_group_idhs)
+      Node.get_target_ref_attributes(node_group_idhs,:cols=>NodeAttributesToCopy)
     end
-    CopyToTargetRefAttrs = (Attribute.common_columns + [:ref,:node_node_id]).uniq - [:id]
+    NodeAttributesToCopy = (Attribute.common_columns + [:ref,:node_node_id]).uniq - [:id]
 
     def self.check_valid_id(model_handle,id)
       IdNameHelper.check_valid_id(model_handle,id)

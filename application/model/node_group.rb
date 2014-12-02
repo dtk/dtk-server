@@ -1,5 +1,7 @@
-# TODO: need to reconcile or haev better names on this versus ServiceNodeGroup
+# TODO: need to reconcile or have better names on this versus ServiceNodeGroup
 module DTK
+  # This class represents objects that are group of nodes in a target that are grouped together
+  # they leave seperately from assemblies
   class NodeGroup < Node
     r8_nested_require('node_group','clone')
     include Clone::Mixin

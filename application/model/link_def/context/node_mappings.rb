@@ -1,8 +1,6 @@
 module DTK
   class LinkDefContext
     class NodeMappings < Hash
-      r8_nested_require('node_mappings','node_group')
-
       def initialize(local,remote=nil)
         super()
         replace(:local => local, :remote => remote||local)
@@ -17,7 +15,7 @@ module DTK
           node = tr_info.node
           ndx = node.id
           if node.is_node_group?
-            node = NodeGroup.create_as(node,tr_info.target_refs) 
+            node = ServiceNodeGroupWrapper.create_as(node,tr_info.target_refs) 
           else
             #switch to pointing to target ref if it exists
             unless tr_info.target_refs.empty?

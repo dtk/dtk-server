@@ -1,9 +1,11 @@
 module DTK
   class LinkDefContext
     r8_nested_require('context','term_mappings')
+    r8_nested_require('context','service_node_group_wrapper')
     r8_nested_require('context','node_mappings')
-    r8_nested_require('context','node_group_member')
     r8_nested_require('context','value')
+    # TODO: may deprecate 
+    #r8_nested_require('context','node_group_member')
 
     def self.create(link,link_defs_info)
       new(link,link_defs_info)

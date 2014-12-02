@@ -38,13 +38,12 @@ module DTK; class LinkDefLink
       end
 
       # determine if this manifests as single of multiple links; if single link just pass nil
-      # when this is called theer is one node group and one node
+      # when this is called there is one node group and one node
       def ret_links_with_node_group?()
         if @input_attr_obj.on_node_group?()
           nil # to fallback to single link treatment
         else # @output_attr_obj.On_node_group?
           if @output_attr_obj.is_array?() and @output_path.nil?
-          # raise error if array (not being indexed to be a scalar) on node group 
             raise ErrorUsage.new("Not treating attribute mappings from an array attribute on a node group (#{@output_attr_obj.pp_form()})")
           end
           if @output_attr_obj.is_node_attribute?() and !@input_attr_obj.is_array?()

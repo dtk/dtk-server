@@ -55,13 +55,10 @@ module DTK; class LinkDefLink
       end
 
       def ret_links_with_output_node_group()
-        #TODO mapcar over node member attributes and call ret_single_link(input_attr(),ng_member_output_attr)
-        #TODO: stub
-        #TODO: handle first case where @output_attr_obj.kind_of?(LinkDefContext::Value::NodeAttribute)
         if @output_attr_obj.is_node_attribute?()
-          #TODO: see what this does for testing
-          @link_def_context.node_member_contexts()
-          # get all the attributes
+          node_group = @output_attr_obj.node_group()
+          node_group_attrs = node_group.get_node_attributes()
+          pp [:node_group_attrs,node_group_attrs]
         end
         nil
       end

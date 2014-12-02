@@ -1,0 +1,31 @@
+module DTK; class LinkDefContext
+  class Value 
+    class ComponentAttribute < self
+      include AttributeMixin
+      attr_reader :attribute_ref
+      def initialize(term,opts={})
+        super(term[:component_type])
+        @attribute_ref = term[:attribute_name]
+        @node_mappings =  opts[:node_mappings]
+      end
+      
+      def pp_form()
+        attr =  @attribute.get_field?(:display_name)
+        cmp = @component.get_field?(:display_name)
+        node = node().get_field?(:node)
+        "#{node}/#{cmp}/#{attr}"
+      end
+        
+      def update_component_attr_index!(component_attr_index)
+        p = component_attr_index[@component_ref] ||= Array.new
+        p << {:attribute_name => @attribute_ref, :value_object => self}
+      end
+      
+     private
+      def ret_node()
+        node_id = @component[:node_node_id]
+          @node_mappings.values.find{|n|n[:id] == node_id}
+      end
+    end
+  end
+end; end

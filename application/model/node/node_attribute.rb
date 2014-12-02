@@ -6,6 +6,7 @@ module DTK
       r8_nested_require('node_attribute','class_mixin')
       r8_nested_require('node_attribute','cache')
       r8_nested_require('node_attribute','default_value')
+
       def initialize(node)
         @node = node
       end
@@ -50,16 +51,36 @@ module DTK
         end
       end
       
+      TargetRefAttributes = ['host_addresses_ipv4','name','fqdn','node_components','puppet_version','root_device_size']
+      TargetRefAttributeFilter = [:oneof,:display_name,TargetRefAttributes]
+      NodeTemplateAttributes = ['host_addresses_ipv4','node_components','fqdn']
+      AssemblyTemplateAttributeFilter = [:and] + NodeTemplateAttributes.map{|a|[:neq,:display_name,a]}
+      # TODO: FieldInfo and above should be normalized
+      # TODO: need to better coordinate with code in model/attribute special processing and also the
+      # constants in FieldInfo
+      FieldInfo = {
+        :name             => {:name => :name},
+        :cardinality      => {:name => :cardinality, :semantic_type => :integer},
+        :root_device_size => {:name => :root_device_size, :semantic_type => :integer},
+        :puppet_version   => {:name => :puppet_version}
+      }
+
+      def self.field_info(name)
+        unless ret = FieldInfo[name.to_sym]
+          raise Error.new("No node attribute with name (#{name})")
+        end
+        ret
+      end
+      def field_info(name)
+        self.class.field_info(name)
+      end
+
       def self.target_ref_attributes_filter()
         TargetRefAttributeFilter
       end
       def self.assembly_template_attribute_filter()
         AssemblyTemplateAttributeFilter
       end
-      TargetRefAttributes = ['host_addresses_ipv4','fqdn','node_components','puppet_version','root_device_size']
-      TargetRefAttributeFilter = [:oneof,:display_name,TargetRefAttributes]
-      NodeTemplateAttributes = ['host_addresses_ipv4','node_components','fqdn']
-      AssemblyTemplateAttributeFilter = [:and] + NodeTemplateAttributes.map{|a|[:neq,:display_name,a]}
 
 
       # for each node, one of following actions is taken
@@ -122,8 +143,6 @@ module DTK
         end
       end
 
-      # TODO: need to better coordinate with code in model/attribute special processing and also the
-      # constants in FieldInfo
       def self.attribute_create_hash(node_id,name,value,extra_fields={})
         name = name.to_s
         {:ref => name,
@@ -131,23 +150,6 @@ module DTK
           :value_asserted => value,
           :node_node_id => node_id
         }.merge(extra_fields)
-      end
-
-      FieldInfo = {
-        :name             => {:name => :name},
-        :cardinality      => {:name => :cardinality, :semantic_type => :integer},
-        :root_device_size => {:name => :root_device_size, :semantic_type => :integer},
-        :puppet_version   => {:name => :puppet_version}
-      }
-
-      def self.field_info(name)
-        unless ret = FieldInfo[name.to_sym]
-          raise Error.new("No node attribute with name (#{name})")
-        end
-        ret
-      end
-      def field_info(name)
-        self.class.field_info(name)
       end
 
       def ret_value?(name)

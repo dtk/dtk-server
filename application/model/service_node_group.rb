@@ -18,6 +18,14 @@ module DTK
       IdNameHelper.id_to_name(model_handle, id)
     end
 
+    # clone_components_to_members returns array with each element being a cloned component
+    # on node_members with their attributes; it clones if necssary
+    # if opts[:node_group_components] then filter to only include components corresponding 
+    # to these node_group_components
+    def clone_and_get_components_with_attrs(node_members,opts={})
+      Clone.clone_and_get_components_with_attrs(self,node_members,opts)
+    end
+
     def add_group_members(new_cardinality)
       target = get_target()
       assembly = get_assembly?() 
@@ -53,14 +61,6 @@ module DTK
       end
       to_delete = (0...num_to_delete).map{|i|sorted[i]}
       to_delete.each{|node_group_member|node_group_member.destroy_and_delete()}
-    end
-
-    # clone_components_to_members returns array with each element being a cloned component
-    # and within that element an attributes filed that has all clone attributes
-    # if opts[:node_group_components] then filter to only include components corresponding 
-    # to these node_group_components
-    def clone_components_to_members(node_members,opts={})
-      Clone.clone_components_to_members(self,node_members,opts)
     end
 
     def get_node_members()

@@ -18,11 +18,11 @@ module DTK; class LinkDefContext
     end
 
     # gets component attributes on node members, first cloning components from node group if needed 
-    def get_and_clone_component_attributes?(node_group_component)
+    def get_component_attributes(node_group_component)
       # indexed by node_group_component_id
       @ndx_component_attributes ||= Hash.new
       ndx = node_group_component.id()
-      cmps_with_attrs = @ndx_component_attributes[ndx] ||= clone_component_attributes(node_group_component)
+      cmps_with_attrs = @ndx_component_attributes[ndx] ||= clone_and_get_components_with_attrs(node_group_component)
       cmps_with_attrs.inject(Array.new){|a,cmp|a + cmp[:attributes]}
     end
     
@@ -37,10 +37,10 @@ module DTK; class LinkDefContext
       Model.get_objs(attr_mh,sp_hash)
     end
     
-    def clone_component_attributes(node_group_component)
+    def clone_and_get_components_with_attrs(node_group_component)
       # clone_components_to_members returns array with each element being a cloned component
       # and within that element an :attributes field that has all clone attributes
-      clone_components_to_members(@target_refs,:node_group_components => [node_group_component])
+      super(@target_refs,:node_group_components => [node_group_component])
     end
     
   end

@@ -1,14 +1,18 @@
 module DTK; class ServiceNodeGroup
   module Clone
     # clone_components_to_members returns array with each element being a cloned component
-    # and within that element an attributes filed that has all clone attributes
+    # on node_members with their attributes; it clones if necssary
     # if opts[:node_group_components] then filter to only include components corresponding 
     # to these node_group_components
-    def self.clone_components_to_members(node_group,node_members,opts={})
-      # TODO: this only returns newly cloned; instead should eb idempotent and return cloned and found 
-      get_components_not_cloned(node_group,node_members,opts).map do |pair|
+    def self.clone_and_get_components_with_attrs(node_group,node_members,opts={})
+      needs_cloning, cloned_components = determine_cloned_components(node_group,node_members,opts)
+      ret = needs_cloning.map do |pair|
         clone_component(pair.node_group_component,pair.node_group_member)
       end
+      unless cloned_components.empty?
+        ret += get_components_with_attributes(cloned_components)
+      end
+      ret
     end
 
    private
@@ -29,11 +33,15 @@ module DTK; class ServiceNodeGroup
     end
 
     ComponentNodePair = Struct.new(:node_group_component,:node_group_member)
-    # returns array of ComponentNodePairs where component is node group component and node is node member
+    # returns two arrays [needs_cloning, cloned_components]
+    # needs_cloning has elements of type ComponentNodePairs 
+    #   where component is node group component and node is node member
+    # cloned_components is array with cloned components 
     # if opts[:node_group_components] then filter to only include components corresponding 
     # to these node_group_components
-    def self.get_components_not_cloned(node_group,node_members,opts={})
-      ret = Array.new
+    def self.determine_cloned_components(node_group,node_members,opts)
+      needs_cloning, cloned_components = [], []
+      ret = [needs_cloning, cloned_components]
       return ret if node_members.empty?()
       node_group_id = node_group.id()
       sp_hash = {
@@ -56,16 +64,39 @@ module DTK; class ServiceNodeGroup
       end
 
       return ret if ng_cmp_ids.empty?
-      node_members.each do |node_member|
-        needed_cmp_ids = ng_cmp_ids - (ndx_cmps[node_member.id]||{}).keys
-        needed_cmp_ids.each do |cmp_id|
-          ng_cmp = ndx_ng_cmps[cmp_id]
-          # node_member is of type Node and we want to use type NodeGroupMember
-          node_group_member = NodeGroupMember.create_as(node_member)
-          ret << ComponentNodePair.new(ng_cmp,node_group_member)
+
+      node_members.each do |node|
+        ndx_cmps_on_node = ndx_cmps[node.id]||{}
+        ng_cmp_ids.each do |cmp_id|
+          if cloned_cmp = ndx_cmps_on_node[cmp_id]
+            cloned_components << cloned_cmp
+          else
+            ng_cmp = ndx_ng_cmps[cmp_id]
+            # node is of type Node and we want to use type NodeGroupMember
+            node_group_member = NodeGroupMember.create_as(node)
+            needs_cloning << ComponentNodePair.new(ng_cmp,node_group_member)
+          end
         end
       end
       ret
+    end
+
+    def self.get_components_with_attributes(components)
+      ret = Array.new
+      return ret if components.empty?
+      ndx_cmps = components.inject(Hash.new) do |h,cmp|
+        h.merge(cmp[:id] => cmp.merge(:attributes => Array.new))
+      end
+      sp_hash = {
+        :cols => [:id,:group_id,:display_name,:component_component_id],
+        :filter => [:oneof,:component_component_id,ndx_cmps.keys]
+      }
+      attr_mh = components.first.model_handle(:attribute)
+      Model.get_objs(attr_mh,sp_hash).each do |attr|
+        ndx = attr[:component_component_id]
+        ndx_cmps[ndx][:attributes] << attr
+      end
+      ndx_cmps.values
     end
 
   end

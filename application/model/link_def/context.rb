@@ -4,8 +4,6 @@ module DTK
     r8_nested_require('context','service_node_group_wrapper')
     r8_nested_require('context','node_mappings')
     r8_nested_require('context','value')
-    # TODO: may deprecate 
-    #r8_nested_require('context','node_group_member')
 
     def self.create(link,link_defs_info)
       new(link,link_defs_info)
@@ -40,20 +38,7 @@ module DTK
       @node_mappings.local
     end
 
-    def node_member_contexts()
-      @node_member_contexts ||= NodeGroupMember.create_node_member_contexts(@link,@node_mappings,@component_mappings)
-    end
-
     def add_component_ref_and_value!(component_type,component)
-    #  if has_node_group_form?()
-    #    add_component_ref_and_value__node_group!(component_type,component)
-    #  else
-        add_component_ref_and_value__node!(component_type,component)
-    #  end
-    end
-    
-   protected
-    def add_component_ref_and_value__node!(component_type,component)
       @term_mappings.add_ref_component!(component_type).set_component_value!(component)
       # update all attributes that ref this component
       cmp_id = component[:id]
@@ -79,49 +64,3 @@ module DTK
     end
   end
 end    
-    #TODO: WasForInventoryNodeGroup; may deprecate
-#    def add_component_ref_and_value__node_group!(component_type,ng_component)
-      # TODO: dont think needed @term_mappings.add_ref_component!(component_type).set_component_value!(component) 
-      # TODO: may be more efficient to do this in bulk
-      # get corresponding components on node group members
-#      node_ids = @node_member_contexts.keys
-#      ndx_node_cmps = NodeGroupMember.get_node_member_components(node_ids,ng_component).inject({}) do |h,r|
-#        h.merge(r[:node_node_id] => r)
-#      end
-#      @node_member_contexts.each do |node_id,member_context|
-#        node_cmp = ndx_node_cmps[node_id]
-#        member_context.add_component_ref_and_value__node!(component_type,node_cmp)
-#      end
-#    end
-    
-
-      # TODO: WasForInventoryNodeGroup; may deprecate
-      # case @node_mappings.num_node_groups()
-      #   when 0 then set_values__node_to_node!(link,cmp_mappings)
-      #   when 1 then set_values__node_to_node_group!(link,cmp_mappings)
-      #   when 2 
-      #  if @node_mappings.is_internal?
-      #    set_values__internal!(link,cmp_mappings) 
-      #  else 
-      #    raise Error.new("Not treating port link between two node groups")
-      #  end
-      # end
-      # substituted below for above
-    #  set_values__node_to_node!(link,cmp_mappings)
-    #end
-
-    #def set_values__internal!(link,cmp_mappings)
-    #  set_values!(link,cmp_mappings)
-    #end
-
-    # TODO: WasForInventoryNodeGroup; may deprecate
-    # def set_values__node_to_node_group!(link,cmp_mappings)
-    #  @type =  :contains_nodegroup
-    #  # creates a link def context for each node to node member pair
-    #  @node_member_contexts = NodeGroupMember.create_node_member_contexts(link,@node_mappings,cmp_mappings)
-
-    #  # below is needed so that create can have ref to component
-    #  @term_mappings.values.each do |v| 
-    #    v.set_component_remote_and_local_value!(link,cmp_mappings)
-    #  end
-    # end

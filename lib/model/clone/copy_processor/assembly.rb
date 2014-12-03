@@ -38,16 +38,16 @@ module DTK
           branch = Model.get_obj(source_obj.model_handle(:module_branch),sp_hash)
           ModuleRefs.get_component_module_refs(branch)
         end
-        def get_nested_objects_top_level(model_handle,target_parent_mh,assembly_objs_info,recursive_override_attrs,opts={},&block)
+        def get_nested_objects_top_level(model_handle,target_parent_mh,assembly_objs_info,recursive_override_attrs,&block)
           raise Error.new("Not treating assembly_objs_info with more than 1 element") unless assembly_objs_info.size == 1
           assembly_obj_info = assembly_objs_info.first
-          get_nested_objects_top_level_aux(model_handle,target_parent_mh,assembly_obj_info,recursive_override_attrs,opts,&block)
+          get_nested_objects_top_level_aux(model_handle,target_parent_mh,assembly_obj_info,recursive_override_attrs,&block)
           override_attrs = {}
           opts_generate = {:include_list => [:attribute,:task_template],:standard_child_context => true}
           ChildContext.generate(self,model_handle,[assembly_obj_info],override_attrs,opts_generate,&block)
         end          
 
-        def get_nested_objects_top_level_aux(model_handle,target_parent_mh,assembly_obj_info,recursive_override_attrs,opts={},&block)
+        def get_nested_objects_top_level_aux(model_handle,target_parent_mh,assembly_obj_info,recursive_override_attrs,&block)
           ancestor_id = assembly_obj_info[:ancestor_id]
           target_parent_mn = target_parent_mh[:model_name]
           model_name = model_handle[:model_name]

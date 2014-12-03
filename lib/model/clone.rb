@@ -51,11 +51,16 @@ module DTK
 # TODO: for debugging
 stop = R8::Config[:stop_for_testing]
 if stop then raise ErrorUsage.new('stop for testing'); end
-        
-        if clone_source_object.class == Component and target_id_handle[:model_name] == :node
-          Violation.update_violations([target_id_handle])
-        end
-        if opts[:ret_new_obj_with_cols]
+
+         unless opts[:no_violation_checking]
+           if clone_source_object.class == Component and target_id_handle[:model_name] == :node
+             Violation.update_violations([target_id_handle])
+           end
+         end
+
+        if opts[:ret_clone_copy_output]
+          clone_copy_output
+        elsif opts[:ret_new_obj_with_cols]
           clone_copy_output.objects.first
         else
           new_id_handle.get_id()

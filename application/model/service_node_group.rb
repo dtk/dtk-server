@@ -6,6 +6,7 @@ module DTK
   class ServiceNodeGroup < Node
     r8_nested_require('service_node_group','id_name_helper')
     r8_nested_require('service_node_group','clone')
+    r8_nested_require('service_node_group','node_group_member')
 
     def self.check_valid_id(model_handle,id)
       IdNameHelper.check_valid_id(model_handle,id)

@@ -14,7 +14,6 @@ module DTK; class LinkDefContext
     end
     
     def get_node_attributes()
-      ndx_cmps_to_clone = get_ndx_components_not_cloned(@target_refs)
       @node_attributes ||= get_node_attributes_aux()
     end
 

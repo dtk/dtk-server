@@ -30,6 +30,11 @@ module DTK
         false
       end
 
+      # can be overwritten
+      def get_node_group_member_attributes()
+        Array.new
+      end
+
       def set_component_remote_and_local_value!(link,cmp_mappings)
         return if @component_ref.nil? #would fire if this is a NodeAttribute
         if @component_ref == link[:local_component_type]

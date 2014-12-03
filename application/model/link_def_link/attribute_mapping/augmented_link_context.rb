@@ -54,8 +54,8 @@ module DTK; class LinkDefLink
       end
 
       def ret_links_with_output_node_group()
-        if @output_attr_obj.is_node_attribute?()
-          node_group_attrs = @output_attr_obj.get_node_group_member_attributes()
+        node_group_attrs = @output_attr_obj.get_node_group_member_attributes()
+        unless node_group_attrs.empty?
           pp(:attr => @output_attr_obj.value, :node_group_attrs => node_group_attrs)
           input_attr = input_attr()
           node_group_attrs.map do |output_attr|
@@ -63,7 +63,6 @@ module DTK; class LinkDefLink
           end
         end
       end
-
     end
   end
 end; end

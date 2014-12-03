@@ -1,5 +1,5 @@
 module DTK; class LinkDefContext
-  class ServiceNodeGroupWrapper < ::DTK::ServiceNodeGroup
+  class ServiceNodeGroupCache < ::DTK::ServiceNodeGroup
     def self.model_name()
       :node
     end
@@ -14,10 +14,13 @@ module DTK; class LinkDefContext
     end
     
     def get_node_attributes()
+      ndx_cmps_to_clone = get_ndx_components_not_cloned(@target_refs)
       @node_attributes ||= get_node_attributes_aux()
     end
-    def get_and_create_component_attributes?()
-      @component_attributes ||= create_component_attributes()
+
+    # gets component attributes on node members, first cloning components from node group if needed 
+    def get_and_clone_component_attributes?()
+      @component_attributes ||= clone_component_attributes()
     end
     
    private
@@ -31,7 +34,11 @@ module DTK; class LinkDefContext
       Model.get_objs(attr_mh,sp_hash)
     end
     
-    def create_component_attributes()
+    def clone_component_attributes()
+      ndx_cmps_to_clone = get_ndx_components_not_cloned(@target_refs)
+      pp [:ndx_cmps_to_clone,ndx_cmps_to_clone]
+      #TODO: stub
+      Array.new
     end
     
   end

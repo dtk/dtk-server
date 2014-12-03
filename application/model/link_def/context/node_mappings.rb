@@ -15,7 +15,7 @@ module DTK
           node = tr_info.node
           ndx = node.id
           if node.is_node_group?
-            node = ServiceNodeGroupWrapper.create_as(node,tr_info.target_refs) 
+            node = ServiceNodeGroupCache.create_as(node,tr_info.target_refs) 
           else
             #switch to pointing to target ref if it exists
             unless tr_info.target_refs.empty?

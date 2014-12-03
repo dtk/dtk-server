@@ -5,6 +5,10 @@ module DTK
   # but maybe not inventory data subclass
   class ServiceNodeGroup < Node
     r8_nested_require('service_node_group','id_name_helper')
+    r8_nested_require('service_node_group','clone_to_node_members')
+   
+    include CloneToNodeMembers::Mixin 
+    extend CloneToNodeMembers::ClassMixin 
 
     def self.check_valid_id(model_handle,id)
       IdNameHelper.check_valid_id(model_handle,id)

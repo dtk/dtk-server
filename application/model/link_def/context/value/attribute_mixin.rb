@@ -16,7 +16,7 @@ module DTK; class LinkDefContext
       def on_node_group?
         node().is_node_group?()
       end
-      def node_group()
+      def service_node_group_cache()
         ret = node()
         unless ret.is_node_group?()
           raise Error.new("Shoud not be called if not node group")

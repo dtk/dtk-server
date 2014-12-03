@@ -405,33 +405,6 @@ module XYZ
             }
          ]
 
-      # TODO: needs to be refined since now no node_group_id
-        virtual_column :containing_datacenter, :type => :varchar, :hidden => true,
-          :remote_dependencies =>
-         [
-          {
-            :model_name => :datacenter,
-            :alias => :datacenter_node,
-            :sequel_def => lambda{|ds|ds.join_table(:right_outer,:node__node,{:datacenter_datacenter_id => :datacenter__id}).select({:node__id => :node_id},:datacenter__display_name)},
-            :join_type => :left_outer,
-            :join_cond=>{:node_id => p(:component,:node)}
-          },
-          {
-            :model_name => :datacenter,
-            :alias => :datacenter_node_group,
-            :sequel_def => lambda{|ds|ds.join_table(:right_outer,:node__node_group,{:datacenter_datacenter_id => :datacenter__id}).select({:node_group__id => :node_group_id},:datacenter__display_name)},
-            :join_type => :left_outer,
-            :join_cond=>{:node_group_id => p(:component,:node_group)}
-          },
-          {
-            :model_name => :datacenter,
-            :alias => :datacenter_direct,
-            :join_type => :left_outer,
-            :join_cond=>{:id => p(:component,:datacenter)}
-          }
-         ]
-
-
         virtual_column :sap_dependency_database, :type => :json, :hidden => true,
         :remote_dependencies =>
           [{

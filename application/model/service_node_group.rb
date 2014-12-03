@@ -5,10 +5,7 @@ module DTK
   # but maybe not inventory data subclass
   class ServiceNodeGroup < Node
     r8_nested_require('service_node_group','id_name_helper')
-    r8_nested_require('service_node_group','clone_to_node_members')
-   
-    include CloneToNodeMembers::Mixin 
-    extend CloneToNodeMembers::ClassMixin 
+    r8_nested_require('service_node_group','clone')
 
     def self.check_valid_id(model_handle,id)
       IdNameHelper.check_valid_id(model_handle,id)
@@ -55,6 +52,10 @@ module DTK
       end
       to_delete = (0...num_to_delete).map{|i|sorted[i]}
       to_delete.each{|node_group_member|node_group_member.destroy_and_delete()}
+    end
+
+    def clone_components_to_members(node_members,opts={})
+      Clone.clone_components_to_members(self,node_members,opts)
     end
 
     def get_node_members()

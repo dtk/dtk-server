@@ -35,8 +35,7 @@ module DTK; class LinkDefContext
     end
     
     def clone_component_attributes()
-      ndx_cmps_to_clone = get_ndx_components_not_cloned(@target_refs)
-      pp [:ndx_cmps_to_clone,ndx_cmps_to_clone]
+      clone_components_to_members(@target_refs)
       #TODO: stub
       Array.new
     end

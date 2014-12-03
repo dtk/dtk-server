@@ -1,13 +1,18 @@
 module DTK; class ServiceNodeGroup
   module Clone
+    # clone_components_to_members returns array with each element being a cloned component
+    # and within that element an attributes filed that has all clone attributes
+    # if opts[:node_group_components] then filter to only include components corresponding 
+    # to these node_group_components
     def self.clone_components_to_members(node_group,node_members,opts={})
-      get_components_not_cloned(node_group,node_members,opts).each do |pair|
-        pp [:component_node_pair_to_clone,pair]
+      # TODO: this only returns newly cloned; instead should eb idempotent and return cloned and found 
+      get_components_not_cloned(node_group,node_members,opts).map do |pair|
         clone_component(pair.node_group_component,pair.node_group_member)
       end
     end
 
    private
+    # returns a cloned component with a field :attributes, which has all the components attributes
     def self.clone_component(node_group_cmp,node_group_member)
       clone_opts = {
         :include_list => [:attribute],
@@ -16,12 +21,15 @@ module DTK; class ServiceNodeGroup
         :no_violation_checking => true
       }
       override_attrs = Hash.new
-      ret = node_group_member.clone_into(node_group_cmp,override_attrs,clone_opts)
-      pp [:clone_component,ret]
+      clone_copy_output = node_group_member.clone_into(node_group_cmp,override_attrs,clone_opts)
+      node_member_cmp = clone_copy_output.objects.first
+      level = 1
+      attributes = clone_copy_output.children_objects(level,:attribute)
+      node_member_cmp.merge(:attributes => attributes)
     end
 
     ComponentNodePair = Struct.new(:node_group_component,:node_group_member)
-    # returns array of ComponentNodePairs wheer component is node group component and node is node member
+    # returns array of ComponentNodePairs where component is node group component and node is node member
     # if opts[:node_group_components] then filter to only include components corresponding 
     # to these node_group_components
     def self.get_components_not_cloned(node_group,node_members,opts={})

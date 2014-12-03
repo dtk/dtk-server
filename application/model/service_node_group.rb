@@ -55,6 +55,10 @@ module DTK
       to_delete.each{|node_group_member|node_group_member.destroy_and_delete()}
     end
 
+    # clone_components_to_members returns array with each element being a cloned component
+    # and within that element an attributes filed that has all clone attributes
+    # if opts[:node_group_components] then filter to only include components corresponding 
+    # to these node_group_components
     def clone_components_to_members(node_members,opts={})
       Clone.clone_components_to_members(self,node_members,opts)
     end

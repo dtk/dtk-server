@@ -17,6 +17,7 @@ module DTK
         @fk_info = ForeignKeyInfo.new(@db)
         @model_name = source_obj.model_name()
         @ret = Output.new(source_obj,opts)
+        @include_list = opts[:include_list]
       end
       private :initialize
 
@@ -68,8 +69,13 @@ module DTK
         fk_info.shift_foregn_keys()
         @ret
       end
-      def get_nested_objects_top_level(model_handle,target_parent_mh,objs_info,recursive_override_attrs,opts={},&block)
-        ChildContext.generate(self,model_handle,objs_info,recursive_override_attrs,&block)
+      def get_nested_objects_top_level(model_handle,target_parent_mh,objs_info,recursive_override_attrs,&block)
+        opts_generate = Hash.new
+        if @include_list
+          opts_generate.merge!(:include_list => @include_list)
+        end
+
+        ChildContext.generate(self,model_handle,objs_info,recursive_override_attrs,opts_generate,&block)
       end
 
       def output()

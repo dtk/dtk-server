@@ -9,7 +9,7 @@ module DTK; class ServiceNodeGroup
 
    private
     def self.clone_component(node_group_cmp,node_group_member)
-      clone_opts = Hash.new
+      clone_opts = {:include_list => [:attribute]}
       override_attrs = Hash.new
       ret = node_group_member.clone_into(node_group_cmp,override_attrs,clone_opts)
       pp [:clone_component,ret]

@@ -9,7 +9,12 @@ module DTK; class ServiceNodeGroup
 
    private
     def self.clone_component(node_group_cmp,node_group_member)
-      clone_opts = {:include_list => [:attribute]}
+      clone_opts = {
+        :include_list => [:attribute],
+        :ret_new_obj_with_cols => [:id,:group_id,:display_name],
+        :ret_clone_copy_output => true,
+        :no_violation_checking => true
+      }
       override_attrs = Hash.new
       ret = node_group_member.clone_into(node_group_cmp,override_attrs,clone_opts)
       pp [:clone_component,ret]
@@ -47,7 +52,9 @@ module DTK; class ServiceNodeGroup
         needed_cmp_ids = ng_cmp_ids - (ndx_cmps[node_member.id]||{}).keys
         needed_cmp_ids.each do |cmp_id|
           ng_cmp = ndx_ng_cmps[cmp_id]
-          ret << ComponentNodePair.new(ng_cmp,node_member)
+          # node_member is of type Node and we want to use type NodeGroupMember
+          node_group_member = NodeGroupMember.create_as(node_member)
+          ret << ComponentNodePair.new(ng_cmp,node_group_member)
         end
       end
       ret

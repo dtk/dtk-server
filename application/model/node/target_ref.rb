@@ -28,12 +28,7 @@ module DTK
         if name =~ Regexp.new("^#{physical_node_prefix()}(.+$)")
           $1
         else
-          split = name.split(AssemblyDelim)
-          unless split.size == 2
-            Log.error("Display Name has unexpected form (#{name})")
-            return name
-          end
-          split[1]
+          name
         end
       end
 
@@ -42,9 +37,12 @@ module DTK
           when :physical
             "#{physical_node_prefix()}#{name}"
           when :base_node_link
-            ret = "#{opts[:assembly_name]}#{AssemblyDelim}#{target_ref_name}"
+            ret = target_ref_name
             if index = opts[:index]
-              ret << "#{IndexDelim}#{index.to_s}"
+              ret = "#{ret}#{IndexDelim}#{index.to_s}"
+            end
+            if assembly_name = opts[:assembly_name]
+              ret = "#{assembly_name}#{AssemblyDelim}#{ret}"
             end
             ret
           else

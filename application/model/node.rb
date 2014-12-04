@@ -230,7 +230,7 @@ module DTK
     def self.legal_display_name?(display_name)
       display_name =~ LegalDisplayName
     end
-    LegalDisplayName = /^[a-zA-Z0-9_\[\]\.-]+$/
+    LegalDisplayName = /^[a-zA-Z0-9_:\[\]\.-]+$/
 
     def self.user_friendly_name(node_name,assembly_name=nil)
       assembly_name ? "#{assembly_name}::#{node_name}" : node_name

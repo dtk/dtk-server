@@ -1,7 +1,7 @@
+# For populating target refs from different input sources
 module DTK; class Node
   class TargetRef
     class Input < Array
-      r8_nested_require('input','element_mixin')
       r8_nested_require('input','inventory_data')
       r8_nested_require('input','base_nodes')
 

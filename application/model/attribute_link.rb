@@ -109,7 +109,7 @@ module DTK
       propagate(attr_mh,attrs_links_to_update)
     end
 
-    # mechanism to compensate for fact that cols arer being added by processing fns to rows_to_create that
+    # mechanism to compensate for fact that cols are being added by processing fns to rows_to_create that
     # must be removed before they are saved
     RemoveKeys = Array.new
     def self.remove_keys()

@@ -159,8 +159,7 @@ module DTK; class  Assembly
       rows.first
     end
 
-    # TODO: when components on node group memebrs getting those, but of not, not getting these
-    # need to make more consisetnt
+    # TODO: rename to reflect that not including node group members, just node groups themselves and top level nodes
     def get_nodes(*alt_cols)
       self.class.get_nodes([id_handle],*alt_cols)
     end
@@ -180,8 +179,11 @@ module DTK; class  Assembly
       cols = ([:id,:display_name,:group_id] + alt_cols).uniq
       sp_hash = {
         :cols => cols,
-        :filter => [:or,[:oneof, :id, ndx_nodes.keys],
-                    [:oneof,:assembly_id,assembly_idhs.map{|idh|idh.get_id()}]] #to catch nodes without any components
+        :filter => [:and, [:neq, :type, 'target_ref'], 
+                          [:or,[:oneof, :id, ndx_nodes.keys],
+                               #to catch nodes without any components
+                               [:oneof,:assembly_id,assembly_idhs.map{|idh|idh.get_id()}]]
+                   ]
       }
       node_mh = assembly_idhs.first.createMH(:node)
       get_objs(node_mh,sp_hash)

@@ -1,7 +1,6 @@
 module DTK; class Node; class TargetRef
   class Input; class BaseNodes
     class Element 
-      include ElementMixin
       attr_reader :node,:num_needed
       def initialize(node_info)
         @node = node_info[:node]
@@ -30,7 +29,7 @@ module DTK; class Node; class TargetRef
         external_ref = @node.external_ref
           (@offset...(@offset+@num_needed)).inject(Hash.new) do |h,index|
           hash = {
-            :display_name => ret_display_name(display_name,:index => index,:assembly => assembly),
+            :display_name => ret_display_name(display_name,:index => index),
             :os_type => @node.get_field?(:os_type),
             :type => Type::Node.target_ref_staged,
             :external_ref => external_ref.hash() 
@@ -40,6 +39,13 @@ module DTK; class Node; class TargetRef
         end
       end
 
+     private
+      def ret_display_name(name,opts={})
+        TargetRef.ret_display_name(@type,name,opts)
+      end
+      def ret_ref(name,opts={})
+        "#{@type}--#{ret_display_name(name,opts)}"
+      end
     end
   end; end
 end; end; end

@@ -24,7 +24,8 @@ module DTK; class ServiceNodeGroup
         :ret_clone_copy_output => true,
         :no_violation_checking => true
       }
-      override_attrs = {:attribute => {:hidden => true}}
+#      override_attrs = {:attribute => {:hidden => true}}
+      override_attrs = Hash.new
       clone_copy_output = node_group_member.clone_into(node_group_cmp,override_attrs,clone_opts)
       node_member_cmp = clone_copy_output.objects.first
       level = 1

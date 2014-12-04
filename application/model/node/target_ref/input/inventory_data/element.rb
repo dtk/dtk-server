@@ -7,7 +7,6 @@ module DTK; class Node; class TargetRef
     # "managed"=>"false",
     # "external_ref"=>
     class Element < Hash
-      include ElementMixin
       def initialize(ref,hash)
         super()
         if ref =~ Regexp.new("^#{TargetRef.physical_node_prefix()}")
@@ -38,6 +37,13 @@ module DTK; class Node; class TargetRef
         {ret_ref(name) => ret_hash}
       end
 
+     private
+      def ret_display_name(name)
+        TargetRef.ret_display_name(@type,name)
+      end
+      def ret_ref(name)
+        "#{@type}--#{name}"
+      end
     end
   end; end
 end; end; end

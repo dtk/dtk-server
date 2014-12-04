@@ -159,10 +159,11 @@ module DTK; class  Assembly
       rows.first
     end
 
+    # TODO: when components on node group memebrs getting those, but of not, not getting these
+    # need to make more consisetnt
     def get_nodes(*alt_cols)
       self.class.get_nodes([id_handle],*alt_cols)
     end
-
     def self.get_nodes(assembly_idhs,*alt_cols)
       ret = Array.new
       return ret if assembly_idhs.empty?

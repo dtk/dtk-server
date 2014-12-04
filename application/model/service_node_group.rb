@@ -91,6 +91,7 @@ module DTK
       ret
     end
 
+    # making robust so checks if node_or_ngs has node groups already
     def self.expand_with_node_group_members?(node_or_ngs,opts={})
       ret = node_or_ngs
       ng_idhs = node_or_ngs.select{|n|n.is_node_group?}.map{|n|n.id_handle()}
@@ -98,22 +99,16 @@ module DTK
         return ret
       end
       ndx_node_members = get_ndx_node_members(ng_idhs)
-      ret = Array.new
-      if opts[:remove_node_groups]
-        node_or_ngs.each do |n|
-          if n.is_node_group?
-            ret += ndx_node_members[n[:id]] unless ndx_node_members.empty?
-          else
-            ret << n
-          end
-        end
-      else
-        node_or_ngs.each do |n|
-          ret << n
-          ret += ndx_node_members[n[:id]] if n.is_node_group?
+      ndx_ret = Hash.new
+      node_or_ngs.each do |n|
+        if n.is_node_group?
+          ndx_ret.merge!(n.id => n) unless opts[:remove_node_groups]
+          ndx_node_members[n[:id]].each{|n|ndx_ret.merge!(n.id => n)}
+        else
+          ndx_ret.merge!(n.id => n)
         end
       end
-      ret
+      ndx_ret.values
     end
 
     def self.get_node_attributes_to_copy(node_group_idhs)

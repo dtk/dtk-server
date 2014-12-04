@@ -24,7 +24,7 @@ module DTK; class ServiceNodeGroup
         :ret_clone_copy_output => true,
         :no_violation_checking => true
       }
-      override_attrs = Hash.new
+      override_attrs = {:attribute => {:hidden => true}}
       clone_copy_output = node_group_member.clone_into(node_group_cmp,override_attrs,clone_opts)
       node_member_cmp = clone_copy_output.objects.first
       level = 1
@@ -45,7 +45,7 @@ module DTK; class ServiceNodeGroup
       return ret if node_members.empty?()
       node_group_id = node_group.id()
       sp_hash = {
-        :cols => [:id,:group_id,:display_name,:node_node_id],
+        :cols => [:id,:group_id,:display_name,:node_node_id,:ancestor_id],
         :filter => [:oneof, :node_node_id, node_members.map{|n|n.id}+[node_group_id]]
       }
       # ndx_cmps is double indexed by [node_id][cmp_id]
@@ -66,12 +66,19 @@ module DTK; class ServiceNodeGroup
       return ret if ng_cmp_ids.empty?
 
       node_members.each do |node|
-        ndx_cmps_on_node = ndx_cmps[node.id]||{}
-        ng_cmp_ids.each do |cmp_id|
-          if cloned_cmp = ndx_cmps_on_node[cmp_id]
+        # for each node group component id see if there is a corresponding component on
+        # the node (member) by looking at if there is cloned component that has
+        # ancestor_id as as matching ng_cmp_id
+        #
+        # To enable this compute an ndx that takes ancestor_id to cmp_id;
+        # this is possible because cmps_on_node has unique ancestor_ids
+        cmps_on_node = (ndx_cmps[node.id]||{}).values
+        ndx_ancestor_id_to_cmp = cmps_on_node.inject(Hash.new){|h,r|h.merge(r[:ancestor_id] => r)}
+        ng_cmp_ids.each do |ng_cmp_id|
+          if cloned_cmp = ndx_ancestor_id_to_cmp[ng_cmp_id]
             cloned_components << cloned_cmp
           else
-            ng_cmp = ndx_ng_cmps[cmp_id]
+            ng_cmp = ndx_ng_cmps[ng_cmp_id]
             # node is of type Node and we want to use type NodeGroupMember
             node_group_member = NodeGroupMember.create_as(node)
             needs_cloning << ComponentNodePair.new(ng_cmp,node_group_member)

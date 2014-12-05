@@ -76,7 +76,7 @@ module DTK
       if opts[:remove_node_groups]
         node_or_ngs.each do |n|
           if n.is_node_group?
-            ret += ndx_node_members[n[:id]]
+            ret += ndx_node_members[n[:id]] unless ndx_node_members.empty?
           else
             ret << n
           end

@@ -131,7 +131,7 @@ module DTK
 
         task_templates = Task::Template::ConfigComponents.get_existing_or_stub_templates(:assembly,assembly_instance)
 
-        node_scalar_cols = FactoryObject::CommonCols + [:node_binding_rs_id]
+        node_scalar_cols = FactoryObject::CommonCols + [:type,:node_binding_rs_id]
         node_mh = node_idhs.first.createMH()
         node_ids = node_idhs.map{|idh|idh.get_id()}
 
@@ -218,6 +218,7 @@ module DTK
         end
 
         @template_output = ServiceModule::AssemblyExport.create(project_idh,service_module_branch)
+        @template_output.factory = self
         assembly_ref = self[:ref]
         assembly_hash = hash_subset(:display_name,:type,:ui,:module_branch_id,:component_type)
         assembly_hash.merge!(:task_template => task_templates) unless task_templates.empty?

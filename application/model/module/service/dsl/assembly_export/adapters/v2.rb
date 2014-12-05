@@ -31,7 +31,8 @@ module DTK
           node_ref_to_name[node_ref] = node_name
           cmp_info = node_hash[:component_ref].values.map{|cmp|component_output_form(cmp)}
           node_hash_output = SimpleOrderedHash.new()
-          if node_attrs_output = node_attributes_output_form?(node_hash[:attribute])
+          node = factory[:nodes].find{|n|n[:display_name] == node_name}
+          if node_attrs_output = node_attributes_output_form?(node_hash[:attribute],node)
             node_hash_output.merge!(:attributes => node_attrs_output)
           end
           node_hash_output.merge!(:components => cmp_info)
@@ -79,13 +80,18 @@ module DTK
         end
       end
 
-      def node_attributes_output_form?(attrs)
+      def node_attributes_output_form?(attrs,node)
         ret = (attrs||Hash.new).values.inject(Hash.new) do |h,attr|
           val = attr_value_output_form(attr,:value_asserted)
-          val.nil? ? h : h.merge(attr[:display_name] => val)
+          name = attr[:display_name]
+          (!val.nil? and NodeAttributesInDSL.include?(name)) ? h.merge(name => val) : h
+        end
+        if node and node.is_node_group?()
+          ret.merge!(:type => 'group')
         end
         ret unless ret.empty?
       end
+      NodeAttributesInDSL = ['cardinality','root_device_size','puppet_version']
 
       def temporal_ordering_hash()
         if default_action_task_template = (assembly_hash()[:task_template]||{})[Task::Template.default_task_action()]

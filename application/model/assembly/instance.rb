@@ -128,6 +128,21 @@ module DTK; class  Assembly
       get_obj_helper(:aug_service_add_ons_from_instance,:service_add_on,:filter_proc => filter_proc, :augmented => true)
     end
 
+    def get_node?(filter)
+      sp_hash = {
+        :cols => [:id,:display_name],
+        :filter => [:and,[:eq, :assembly_id, id()],filter]
+      }
+      rows = Model.get_objs(model_handle(:node),sp_hash)
+      if rows.size > 1
+        Log.error("Unexpected that more than one row returned for filter (#{filter.inspect})")
+        return nil
+      end
+      rows.first
+    end
+
+    # TODO: rename to reflect that not including node group members, just node groups themselves and top level nodes
+    # This is equivalent to saying that this does not return target_refs
     def self.get_nodes_simple(assembly_idhs,opts={})
       ret = Array.new
       return ret if assembly_idhs.empty?()
@@ -146,20 +161,8 @@ module DTK; class  Assembly
       end
     end
 
-    def get_node?(filter)
-      sp_hash = {
-        :cols => [:id,:display_name],
-        :filter => [:and,[:eq, :assembly_id, id()],filter]
-      }
-      rows = Model.get_objs(model_handle(:node),sp_hash)
-      if rows.size > 1
-        Log.error("Unexpected that more than one row returned for filter (#{filter.inspect})")
-        return nil
-      end
-      rows.first
-    end
-
     # TODO: rename to reflect that not including node group members, just node groups themselves and top level nodes
+    # This is equivalent to saying that this does not return target_refs
     def get_nodes(*alt_cols)
       self.class.get_nodes([id_handle],*alt_cols)
     end
@@ -179,15 +182,19 @@ module DTK; class  Assembly
       cols = ([:id,:display_name,:group_id] + alt_cols).uniq
       sp_hash = {
         :cols => cols,
-        :filter => [:and, [:neq, :type, 'target_ref'], 
+        :filter => [:and, filter_out_target_refs(),
                           [:or,[:oneof, :id, ndx_nodes.keys],
                                #to catch nodes without any components
-                               [:oneof,:assembly_id,assembly_idhs.map{|idh|idh.get_id()}]]
+                               [:oneof, :assembly_id,assembly_idhs.map{|idh|idh.get_id()}]]
                    ]
       }
       node_mh = assembly_idhs.first.createMH(:node)
       get_objs(node_mh,sp_hash)
     end
+    def self.filter_out_target_refs()
+      @filter_out_target_ref ||= [:and] + Node::TargetRef.types.map{|t|[:neq, :type, t]}
+    end
+    private_class_method :filter_out_target_refs
 
     def get_leaf_nodes(opts={})
       get_nodes__expand_node_groups(opts.merge(:remove_node_groups=>true))

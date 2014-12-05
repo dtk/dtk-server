@@ -111,6 +111,8 @@ module DTK
     # TODO: may be cleaner if we break into list_nodes, list_components with some shared helper functions
     def rest__info_about()
       node_id, component_id, detail_level, detail_to_include = ret_request_params(:node_id, :component_id, :detail_level, :detail_to_include)
+      node_id = nil if node_id.kind_of?(String) and node_id.empty?
+      component_id = nil if component_id.kind_of?(String) and component_id.empty?
       assembly,subtype = ret_assembly_params_object_and_subtype()
       response_opts = Hash.new
       if format = ret_request_params(:format)
@@ -142,10 +144,13 @@ module DTK
           attr = e[:attribute]
           (!attr.kind_of?(Attribute)) or !attr.filter_when_listing?(additional_filter_opts)
         end
-      elsif about == :component
-        additional_filter_proc = Proc.new do |e|
-          node = e[:node]
-          (!node.kind_of?(Node)) or !Node::TargetRef.is_target_ref?(node)
+      elsif about == :components
+        # if not at node level filter out components on node group members (target_refs)
+        unless node_id
+          additional_filter_proc = Proc.new do |e|
+            node = e[:node]
+            (!node.kind_of?(Node)) or !Node::TargetRef.is_target_ref?(node)
+          end
         end
       end
 
@@ -163,7 +168,7 @@ module DTK
         opts.add_value_to_return!(:datatype)
       end
 
-      if node_id and !node_id.empty?
+      if node_id
         opts.merge!(:node_cmp_name => true)
       end
 

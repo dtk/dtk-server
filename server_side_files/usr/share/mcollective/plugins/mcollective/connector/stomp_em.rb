@@ -133,8 +133,7 @@ module MCollective
       # Subscribe to a topic or queue
       def subscribe(source)
         unless @subscriptions.include?(source)
-          user_object  = CurrentSession.new.user_object()
-          CreateThread.defer_with_session(user_object) do
+          EM::defer do
             Log.debug("Subscribing to #{source}")
             wait_until_connected?
             @connection.subscribe(source)
@@ -143,8 +142,7 @@ module MCollective
         end
       end
       def subscribe_and_send(source,destination,body,params={})
-        user_object  = CurrentSession.new.user_object()
-        CreateThread.defer_with_session(user_object) do
+        EM::defer do
           wait_until_connected?
           unless @subscriptions.include?(source)
             Log.debug("Subscribing to #{source}")

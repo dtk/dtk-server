@@ -23,7 +23,10 @@ module XYZ
           if user_object
             require 'pp'
             pp Thread.current
+            pp Thread.current.keys
             pp '..............................................................'
+            pp Thread.current[:session]
+            pp '...................... ENDINGGGGG ................................'
             Thread.current[:user_object]    = user_object
             # Thread.current[:session][:USER] = ::DTK::User::create_user_session_hash(user_object) unless Thread.current[:session]
           end

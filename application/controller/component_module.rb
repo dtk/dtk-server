@@ -81,13 +81,6 @@ module DTK
       datatype         = :module
       remote_repo_base = ret_remote_repo_base()
 
-      unless EventMachine.reactor_running?
-        # DEBUG SNIPPET >>> REMOVE <<<
-        require 'ap'
-        ap "STARTED EM!!!!"
-        Thread.new { EventMachine.run }
-      end
-
       opts = Opts.new(:project_idh => project.id_handle())
       if detail = ret_request_params(:detail_to_include)
         opts.merge!(:detail_to_include => detail.map{|r|r.to_sym})

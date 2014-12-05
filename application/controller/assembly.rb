@@ -45,7 +45,11 @@ module DTK
 
     def rest__delete_node()
       assembly = ret_assembly_instance_object()
-      node_idh = ret_node_id_handle(:node_id,assembly)
+      # node_idh = ret_node_id_handle(:node_id,assembly)
+
+      node_id = ret_non_null_request_params(:node_id)
+      node_idh = ret_node_or_group_member_id_handle(node_id,assembly)
+
       assembly.delete_node(node_idh,:destroy_nodes => true)
       rest_ok_response
     end

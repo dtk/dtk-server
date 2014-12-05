@@ -77,6 +77,25 @@ module Ramaze::Helper
       ret_request_param_id_handle(node_name_param,::DTK::Node,assembly.id())
     end
 
+    def ret_node_or_group_member_id_handle(node_name_param,assembly)
+      if node_name_param =~ /^[0-9]+$/
+        ret_request_param_id_handle(:node_id,::DTK::Node,assembly.id())
+      else
+        nodes = assembly.info_about(:nodes)
+        matching_nodes = nodes.select{|node| node[:display_name].eql?(node_name_param)}
+
+        if matching_nodes.size == 0
+          raise ::DTK::ErrorNameDoesNotExist.new(node_name_param,:node)
+        elsif matching_nodes.size > 2
+          raise ::DTK::ErrorNameAmbiguous.new(node_name_param,matching_nodes.map{|r|r[:id]},:node)
+        else
+          matching_id = matching_nodes.first[:id]
+        end
+
+        id_handle(matching_id,:node)
+      end
+    end
+
     ##
     # Pass param name containing with comma seperated names or ids. Param name should
     # resolve to command seperated node id/names (String)

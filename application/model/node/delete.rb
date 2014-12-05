@@ -1,39 +1,27 @@
 module DTK; class Node
   module Delete
     module Mixin
+      # This wil be called only when self is non node group (i.e., top level node or target ref)
       def destroy_and_delete(opts={})
-        suceeeded = true
-        if is_target_ref?(:not_deletable=>true)
-          # no op
-          return suceeeded
+        if is_node_group?()
+          raise Error.new("Unexpected this is node group")
         end
-
-        TargetRef.get_linked_target_refs_info(self).each do |target_ref_info|
-          if target_ref_info.ref_count < 2
-            suceeeded = CommandAndControl.destroy_node?(self)
-          end
-          return false unless suceeeded
-          opts_delete = opts
-          target_ref = target_ref_info.target_ref
-          if target_ref and target_ref_info.ref_count == 1
-            opts_delete.merge(:delete_target_ref => target_ref.id_handle())
-          end
-          delete_object(opts_delete)
+        if is_target_ref?
+          destroy_and_delete__target_ref(opts)
+        else
+          destroy_and_delete__top_level_node(opts)
         end
-        suceeeded
       end
-      
+
       def destroy_and_reset(target_idh)
-        TargetRef.get_linked_target_refs_info(self).each do |target_ref_info|
-          target_ref = target_ref_info.target_ref
-          if target_ref.nil? or target_ref_info.ref_count < 2
-            if CommandAndControl.destroy_node?(self,:reset => true)
-              Model.delete_instance(target_ref.id_handle) if target_ref
-              StateChange.create_pending_change_item(:new_item => id_handle(), :parent => target_idh)
-            end
-          else
-            raise ErrorUsage.new("Cannot destroy_and_reset node (#{get_field?(:display_name)}), which has other assemblies pointing to it")
-          end
+# TODO: DTK-1857
+if is_node_group?() or is_target_ref?()
+  raise ErrorUsage.new("destroy_and_reset_nodes not supported for service instances with node groups")
+end
+        
+        if CommandAndControl.destroy_node?(self,:reset => true)
+          Model.delete_instance(target_ref.id_handle) if target_ref
+          StateChange.create_pending_change_item(:new_item => id_handle(), :parent => target_idh)
         end
         update_agent_git_commit_id(nil)
         attribute.clear_host_addresses()
@@ -43,10 +31,13 @@ module DTK; class Node
         if target_ref_idh = opts[:delete_target_ref]
           Model.delete_instance(target_ref_idh)
         end
-        update_dangling_links()
+        # unless :update_dangling_links explicily set to false
+        unless !opts[:update_dangling_links].nil? and !opts[:update_dangling_links]
+          update_dangling_links() 
+        end
         if opts[:update_task_template]
           unless assembly = opts[:assembly]
-            raise Error.new("If update_task_template is assembled :assembly must be given as an option")
+            raise Error.new("If update_task_template is set, :assembly must be given as an option")
           end
           update_task_templates_when_deleted_node?(assembly)
         end
@@ -55,6 +46,52 @@ module DTK; class Node
       end
 
      private
+      def destroy_and_delete__target_ref(opts={})
+        suceeeded = true
+        if is_target_ref?(:not_deletable=>true)
+          # no op
+          return suceeeded
+        end
+        # check the reference count on the target ref; if one (or less can delet) since this
+        # is being initiated by a node group or top level node pointing to it
+        # if more than 1 reference count than succeed with no op
+        ref_count = TargetRef.get_reference_count(self)
+        if ref_count < 2
+          execute_destroy_and_delete({:update_dangling_links => false}.merge(opts))
+        else
+          # no op
+          true
+        end
+      end
+        
+      def destroy_and_delete__top_level_node(opts)
+        # see if there are any target refs this points to this
+        # if none then destroy and delete
+        # if 1 then check reference count
+        # since this is not anode group target_refs_info should not have size greater than 1
+        target_refs_info = TargetRef.get_linked_target_refs_info(self)
+        if target_refs_info.empty?
+          execute_destroy_and_delete(opts)
+        elsif target_refs_info.size == 1
+          target_ref_info = target_refs_info.first
+          opts_delete = opts
+          target_ref = target_ref_info.target_ref
+          if target_ref and target_ref_info.ref_count == 1
+            # this means to delete target ref also
+            opts_delete.merge(:delete_target_ref => target_ref.id_handle())
+          end
+          execute_destroy_and_delete(opts)
+        else
+          raise Error.new("Unexpected that self is linked to more than 1 target refs")
+        end
+      end
+
+      def execute_destroy_and_delete(opts={})
+        suceeeded = CommandAndControl.destroy_node?(self)
+        return false unless suceeeded
+        delete_object(opts)
+      end
+
       def update_task_templates_when_deleted_node?(assembly)
         # TODO: can be more efficient if have Task::Template method that takes node and deletes all teh nodes component in bulk
         sp_hash = {

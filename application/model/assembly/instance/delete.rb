@@ -23,6 +23,10 @@ module DTK; class  Assembly
     module DeleteMixin
       def destroy_and_reset_nodes()
         nodes = Delete.get_nodes_simple(model_handle(:node),[id()])
+# TODO: DTK-1857
+if nodes.find{|n|n.is_node_group?()}
+  raise ErrorUsage.new("destroy_and_reset_nodes not supported for service instances with node groups")
+end
         target_idh = get_target.id_handle()
         nodes.map{|node|node.destroy_and_reset(target_idh)}
       end

@@ -179,6 +179,15 @@ module DTK
         ret
       end
 
+      def self.get_reference_count(target_ref)
+        sp_hash = {
+          :cols => [:id,:group_id],
+          :filter => [:eq, :node_id, target_ref.id]
+        }
+        ngr_mh = target_ref.model_handle(:node_group_relation)
+        Model.get_objs(ngr_mh,sp_hash).size
+      end
+
       class Info
         attr_reader :target_ref,:ref_count
         def initialize(target_ref)
@@ -189,9 +198,8 @@ module DTK
           @ref_count +=1 
         end
       end
-      # returns array of Info elements
+      # returns array of Info elements; should only be called on non target ref
       def self.get_linked_target_refs_info(node_instance)
-        # Todo: can put in shortcut that returns [] if node_instance is a target ref itself
         get_ndx_linked_target_refs_info([node_instance]).values.first||[]
       end
 

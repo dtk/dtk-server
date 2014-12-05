@@ -12,7 +12,7 @@ module XYZ
     end
 
     # wrap() - Added this part of code so if thread fails we will know imedietly. Helps with development,
-    # in case there is some internal logic that expects some thread to fail error messages can be 
+    # in case there is some internal logic that expects some thread to fail error messages can be
     # ignored or this call
 
     def self.wrap(user_object=nil, &block)
@@ -21,8 +21,11 @@ module XYZ
           # this part of code sets session information to make sure that newly created thread keeps its session
           # this was necessery due to concurency issues
           if user_object
+            require 'pp'
+            pp Thread.current
+            pp '..............................................................'
             Thread.current[:user_object]    = user_object
-            Thread.current[:session][:USER] = ::DTK::User::create_user_session_hash(user_object)
+            Thread.current[:session][:USER] = ::DTK::User::create_user_session_hash(user_object) unless Thread.current[:session]
           end
 
           # yield original block

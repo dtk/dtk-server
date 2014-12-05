@@ -28,7 +28,7 @@ module DTK; class Task; class Template; class Stage
      private
       def self.klass(multi_node_type)
         case multi_node_type
-          when "All_applicable" then Applicable
+          when 'All_applicable' then Applicable
           else raise ParsingError.new("Illegal multi node type (#{multi_node_type})")
         end
       end
@@ -41,9 +41,11 @@ module DTK; class Task; class Template; class Stage
           return ret unless action_list
           info_per_node = Hash.new #indexed by node_id
           @ordered_components.each do |cmp_ref|
-            # TODO: if there is a title then we need to match on title
-            cmp_type = cmp_ref
-            matching_actions = action_list.select{|a|a.match_component_type?(cmp_type)}
+            cmp_type,cmp_title = [cmp_ref,nil]
+            if cmp_ref =~ CmpRefWithTitleRegexp
+              cmp_type,cmp_title = [$1,$2]
+            end
+            matching_actions = action_list.select{|a|a.match_component_ref?(cmp_type,cmp_title)}
             matching_actions.each do |a|
               node_id = a.node_id
               pntr = info_per_node[node_id] ||= {:actions => Array.new, :name => a.node_name, :id => node_id}
@@ -55,6 +57,7 @@ module DTK; class Task; class Template; class Stage
           end
           ret
         end
+        CmpRefWithTitleRegexp = /(^[^\[]+)\[([^\]]+)\]$/
 
         def serialized_multi_node_type()
           "All_applicable"

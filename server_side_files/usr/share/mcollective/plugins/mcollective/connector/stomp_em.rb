@@ -40,7 +40,7 @@ module MCollective
           if msg.command == "CONNECTED"
             @connected = true
           else
-            Stomp_em.process(msg) 
+            Stomp_em.process(msg)
           end
         end
 
@@ -98,26 +98,26 @@ module MCollective
 
       def wait_until_connected?
         return if @connected
-        loop do 
+        loop do
           return if @connected = @connection.is_connected?
           sleep 1
         end
       end
-    
-    
+
+
       def self.process(msg)
         # STOMP puts the payload in the body variable, pass that
         # into the payload of MCollective::Request and discard all the
         # other headers etc that stomp provides
 =begin
-        raw_msg = 
+        raw_msg =
 
   # 1.3.2 CHANGE
           if @@base64
             Request.new(SSL.base64_decode(msg.body))
           else
             Request.new(msg.body)
-          end     
+          end
 =end
         raw_msg = Message.new(msg.body, msg, :base64 => @base64, :headers => msg.headers)
         msg = @@decode_context.r8_decode_receive(raw_msg)
@@ -133,7 +133,8 @@ module MCollective
       # Subscribe to a topic or queue
       def subscribe(source)
         unless @subscriptions.include?(source)
-          EM::defer do 
+          user_object  = CurrentSession.new.user_object()
+          CreateThread.defer_with_session(user_object) do
             Log.debug("Subscribing to #{source}")
             wait_until_connected?
             @connection.subscribe(source)
@@ -142,7 +143,8 @@ module MCollective
         end
       end
       def subscribe_and_send(source,destination,body,params={})
-        EM::defer do 
+        user_object  = CurrentSession.new.user_object()
+        CreateThread.defer_with_session(user_object) do
           wait_until_connected?
           unless @subscriptions.include?(source)
             Log.debug("Subscribing to #{source}")

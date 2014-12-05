@@ -8,17 +8,11 @@ module DTK; class Node
           return suceeeded
         end
 
-        # TODO: handle described issue
-        # if is_target_ref?()
-        #  Log.error("need update logic for target ref; unnecssary to do TargetRef.get_linked_target_ref_info_single_node")
-        # end
-
-        target_ref_info = TargetRef.get_linked_target_ref_info_single_node(self)
-        if target_ref_info.ref_count < 2
-          suceeeded = CommandAndControl.destroy_node?(self)
-        end
-
-        if suceeeded
+        TargetRef.get_linked_target_refs_info(self).each do |target_ref_info|
+          if target_ref_info.ref_count < 2
+            suceeeded = CommandAndControl.destroy_node?(self)
+          end
+          return false unless suceeeded
           opts_delete = opts
           target_ref = target_ref_info.target_ref
           if target_ref and target_ref_info.ref_count == 1
@@ -30,17 +24,16 @@ module DTK; class Node
       end
       
       def destroy_and_reset(target_idh)
-        target_ref_info = TargetRef.get_linked_target_ref_info_single_node(self)
-        target_ref = target_ref_info.target_ref
-        if target_ref.nil? or target_ref_info.ref_count < 2
-          if CommandAndControl.destroy_node?(self,:reset => true)
-            if target_ref
-              Model.delete_instance(target_ref.id_handle)
+        TargetRef.get_linked_target_refs_info(self).each do |target_ref_info|
+          target_ref = target_ref_info.target_ref
+          if target_ref.nil? or target_ref_info.ref_count < 2
+            if CommandAndControl.destroy_node?(self,:reset => true)
+              Model.delete_instance(target_ref.id_handle) if target_ref
+              StateChange.create_pending_change_item(:new_item => id_handle(), :parent => target_idh)
             end
-            StateChange.create_pending_change_item(:new_item => id_handle(), :parent => target_idh)
+          else
+            raise ErrorUsage.new("Cannot destroy_and_reset node (#{get_field?(:display_name)}), which has other assemblies pointing to it")
           end
-        else
-          raise ErrorUsage.new("Cannot destroy_and_reset node (#{get_field?(:display_name)}), which has other assemblies pointing to it")
         end
         update_agent_git_commit_id(nil)
         attribute.clear_host_addresses()

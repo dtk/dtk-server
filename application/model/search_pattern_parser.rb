@@ -231,7 +231,7 @@ module XYZ
       end
       ret
     end
-    FilterOperationsParsed = [:eq, :neq, :lt, :lte, :gt, :gte, "match-prefix".to_sym, :regex, :oneof] #TODO: just partial list
+    FilterOperationsParsed = [:eq, :neq, :lt, :lte, :gt, :gte, "match-prefix".to_sym, :regex, :oneof]
 
     def ret_order_by(hash_input)
       order_by = find_key_from_input(:order_by,hash_input)

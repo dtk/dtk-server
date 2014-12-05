@@ -142,6 +142,11 @@ module DTK
           attr = e[:attribute]
           (!attr.kind_of?(Attribute)) or !attr.filter_when_listing?(additional_filter_opts)
         end
+      elsif about == :component
+        additional_filter_proc = Proc.new do |e|
+          node = e[:node]
+          (!node.kind_of?(Node)) or !Node::TargetRef.is_target_ref?(node)
+        end
       end
 
       opts[:filter_proc] = Proc.new do |e|

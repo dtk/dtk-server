@@ -82,7 +82,8 @@ end
           end
           execute_destroy_and_delete(opts)
         else
-          raise Error.new("Unexpected that self is linked to more than 1 target refs")
+          Log.error("Unexpected that (#{inspect}) is linked to more than 1 target refs")
+          delete_object(opts)
         end
       end
 

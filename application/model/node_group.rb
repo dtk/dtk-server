@@ -199,7 +199,7 @@ module DTK
     def delete()
       Model.delete_instance(id_handle())
     end
-    def destroy_and_delete
+    def destroy_and_delete(opts={})
       delete()
     end
   end

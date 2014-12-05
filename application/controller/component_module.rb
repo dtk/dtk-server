@@ -1,4 +1,5 @@
 r8_require('../../utils/internal/puppet_forge/client')
+require 'eventmachine'
 
 module DTK
   class Component_moduleController < AuthController
@@ -79,6 +80,13 @@ module DTK
       namespace        = ret_request_params(:module_namespace)
       datatype         = :module
       remote_repo_base = ret_remote_repo_base()
+
+      unless EventMachine.reactor_running?
+        # DEBUG SNIPPET >>> REMOVE <<<
+        require 'ap'
+        ap "STARTED EM!!!!"
+        Thread.new { EventMachine.run }
+      end
 
       opts = Opts.new(:project_idh => project.id_handle())
       if detail = ret_request_params(:detail_to_include)

@@ -46,7 +46,8 @@ module DTK
             if index = opts[:index]
               ret = "#{ret}#{IndexDelim}#{index.to_s}"
             end
-            if assembly_name = opts[:assembly_name]
+            if assembly = opts[:assembly]
+              assembly_name = assembly.get_field?(:display_name)
               ret = "#{assembly_name}#{AssemblyDelim}#{ret}"
             end
             ret

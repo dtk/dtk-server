@@ -170,7 +170,7 @@ module DTK; class  Assembly
       ret = Array.new
       return ret if assembly_idhs.empty?
       sp_hash = {
-        :cols => [:id,:group_id,:node_node_id,:type],
+        :cols => [:id,:group_id,:node_node_id],
         :filter => [:oneof, :assembly_id, assembly_idhs.map{|idh|idh.get_id()}]
       }
       ndx_nodes = Hash.new
@@ -179,7 +179,7 @@ module DTK; class  Assembly
         ndx_nodes[cmp[:node_node_id]] ||= true
       end
 
-      cols = ([:id,:display_name,:group_id] + alt_cols).uniq
+      cols = ([:id,:display_name,:group_id,:type] + alt_cols).uniq
       sp_hash = {
         :cols => cols,
         :filter => [:and, filter_out_target_refs(),

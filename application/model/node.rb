@@ -489,30 +489,35 @@ module DTK
 # end of these may be depracted
 
     def update_dangling_links()
-      dangling_links_info_cmps = get_objs(:cols => [:dangling_input_links_from_components])
-      dangling_links_info_nodes = get_objs(:cols => [:dangling_input_links_from_nodes])
+      ret = Array.new
+      dangling_links = 
+        get_objs(:cols => [:dangling_input_links_from_components]) +
+        get_objs(:cols => [:dangling_input_links_from_nodes])
+      return ret if dangling_links.empty?
 
-      # TODO: if only processing external links, more efficeint to filter in sql query
+      # ndx_links_delete_info is indexed hash with each value being type
+      # Attribute::LinkDeleteInfo
       ndx_dangling_links_info = Hash.new
-      (dangling_links_info_cmps + dangling_links_info_nodes).each do |r|
+      dangling_links.each do |r|
         link = r[:all_input_links]
         if link[:type] == "external"
           attr_id = link[:input_id]
-          p = ndx_dangling_links_info[attr_id] ||= {:input_attribute => r[:input_attribute], :other_links => Array.new}
+          l = ndx_dangling_links_info[attr_id] ||= Attribute::LinkDeleteInfo.new(r[:input_attribute])
           new_el = {
             :attribute_link_id => link[:id],
             :index_map => link[:index_map],
           }
           if link[:id] == r[:attribute_link][:id]
-            p[:deleted_link] = new_el
+            l.deleted_link = new_el
           else
-            p[:other_links] << new_el
+            l.add_other_link!(new_el)
           end
         end
       end
       attr_mh = model_handle_with_auth_info(:attribute)
       # update attributes connected to dangling links on input side
-      updated_attrs = AttributeUpdateDerivedValues.update_for_delete_links(attr_mh,ndx_dangling_links_info.values)
+      dangling_links_info = ndx_dangling_links_info.values
+      updated_attrs = Attribute.update_attributes_for_delete_links(attr_mh,dangling_links_info)
       # add state changes for updated attributes and see if any connected attributes
       Attribute.propagate_and_optionally_add_state_changes(attr_mh,updated_attrs,:add_state_changes => true)
     end

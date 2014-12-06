@@ -11,7 +11,7 @@ module DTK; class AttributeLink
       # make actual changes
       opts = {:update_only_if_change => [:value_derived],:returning_cols => [:id]}
       
-      changed_input_attrs = AttributeUpdateDerivedValues.update(attr_mh,update_deltas,opts)
+      changed_input_attrs = Attribute::UpdateDerivedValues.update(attr_mh,update_deltas,opts)
 
       # if no changes exit, otherwise recursively call propagate
       return ret if changed_input_attrs.empty?

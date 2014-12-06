@@ -112,7 +112,10 @@ module DTK
         end
       end
 
-      attr_reader :assembly_instance,:project_idh,:service_module_branch
+      public
+      attr_reader :assembly_instance
+      private
+      attr_reader :project_idh,:service_module_branch
 
       def project_uri()
         @project_uri ||= @project_idh.get_uri()
@@ -217,10 +220,12 @@ module DTK
           assembly_level_attributes.mark_as_complete(:component_component_id=>assembly_template_id)
         end
 
-        @template_output = ServiceModule::AssemblyExport.create(project_idh,service_module_branch)
-        @template_output.factory = self
+        @template_output = ServiceModule::AssemblyExport.create(self,project_idh,service_module_branch)
         assembly_ref = self[:ref]
         assembly_hash = hash_subset(:display_name,:type,:ui,:module_branch_id,:component_type)
+        if description = @assembly_instance.get_field?(:description)
+          assembly_hash.merge!(:description => description)
+        end
         assembly_hash.merge!(:task_template => task_templates) unless task_templates.empty?
         assembly_hash.merge!(:attribute => assembly_level_attributes) unless assembly_level_attributes.empty?
         assembly_hash.merge!(:port_link => port_links) unless port_links.empty?

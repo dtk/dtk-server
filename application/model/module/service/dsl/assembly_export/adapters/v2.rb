@@ -7,9 +7,11 @@ module DTK
         node_bindings_hash = node_bindings_output_hash()
         temporal_ordering = temporal_ordering_hash()
         dsl_version = dsl_version?()
+        description = assembly_description?()
         SimpleOrderedHash.new(
          [
           {:name => assembly_hash()[:display_name]},
+          description && {:description => description},
           dsl_version && {:dsl_version => dsl_version},
           node_bindings_hash.empty? ? nil : {:node_bindings => node_bindings_hash},
           {:assembly => assembly_hash},

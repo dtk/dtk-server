@@ -1,7 +1,7 @@
-# TODO: think want to replace some of the DTK::CreateThread.defer_with_session(user_object) do
-# with  create_thread_in_callback_context(task,workitem) 
+# TODO: think want to replace some of the DTK::CreateThread.defer_with_session(user_object, Ramaze::Current.session) do
+# with  create_thread_in_callback_context(task,workitem)
 # and also do teh same for non threaded callbacks to make sure that have proper bahvior if fail in callback (i.e., canceling task)
-module DTK 
+module DTK
   module WorkflowAdapter
     module RuoteParticipant
       class Top
@@ -96,7 +96,7 @@ module DTK
           # Flag that will be checked inside mcollective.poll_to_detect_node_ready and will indicate detection to stop
           # Due to asyc calls, it was the only way I could figure out how to stop node detection task
           task[:executable_action][:node][:is_task_failed] = true
-          error = 
+          error =
             if not new_result[:statuscode] == 0
               CommandAndControl::Error::Communication.new
             else
@@ -104,7 +104,7 @@ module DTK
               if data and data[:status] == :failed and (data[:error]||{})[:formatted_exception]
                 CommandAndControl::Error::FailedResponse.new(data[:error][:formatted_exception])
               else
-                CommandAndControl::Error.new 
+                CommandAndControl::Error.new
               end
             end
           task.update_at_task_completion("failed",Task::Action::Result::Failed.new(error))
@@ -161,7 +161,7 @@ module DTK
         end
 
         def create_thread_in_callback_context(task,workitem,user_object,&body)
-          CreateThread.defer_with_session(user_object) do
+          CreateThread.defer_with_session(user_object, Ramaze::Current.session) do
             execution_context_block(task,workitem,&body)
           end
         end
@@ -187,8 +187,8 @@ module DTK
           # begin-rescue block is required, as multiple concurrent subtasks can initiate this method and only first will do the canceling
           begin
             # Killing task to prevent upstream subtasks' execution
-            Workflow.kill(get_top_task_id(workitem))            
-           rescue Exception => e   
+            Workflow.kill(get_top_task_id(workitem))
+           rescue Exception => e
             Log.error_pp(["exception when cancel_upstream_subtasks",e,e.backtrace[0..5]])
           end
         end
@@ -217,7 +217,7 @@ module DTK
       class DebugTask < Top
         def consume(workitem)
           count = 15
-          pp "debug task sleep for #{s.to_s} seconds" 
+          pp "debug task sleep for #{s.to_s} seconds"
           @is_on = true
           while @is_on and count > 0
             sleep 1

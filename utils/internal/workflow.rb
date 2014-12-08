@@ -43,19 +43,19 @@ module DTK
       end
     end
 
-    # Variables to enable cancelation of tasks. 
+    # Variables to enable cancelation of tasks.
     # 'active_workflows' holds current active tasks executing on Ruote engine
     # Lock is needed in case of concurrent execution
     @@active_workflows = ActiveWorkflow.new
     @@Lock = Mutex.new
- 
+
     def defer_execution()
       user_object  = CurrentSession.new.user_object()
-      CreateThread.defer_with_session(user_object) do
+      CreateThread.defer_with_session(user_object, Ramaze::Current::session) do
       #  pp [:new_thread_from_defer, Thread.current, Thread.list]
         raise Error.new("not implemented: putting block in reactor loop when not using eventmachine web server") unless R8EM.reactor_running?
         begin
-          pp "starting top_task_id = #{@top_task.id.to_s}"          
+          pp "starting top_task_id = #{@top_task.id.to_s}"
           # RICH-WF: for both Ruote and Simple think we dont need to pass in @top_task.id.to_s
           execute(@top_task.id.to_s)
          rescue Exception => e
@@ -75,10 +75,10 @@ module DTK
 
     def self.cancel(task_id, task)
       @@Lock.synchronize do
-        # Amar: If task is present in '@@active_workflows' ruote process will be cancelled, 
+        # Amar: If task is present in '@@active_workflows' ruote process will be cancelled,
         #       task status updated and resources cleaned up
         #       If task loaded from DB has status executing, but not present in '@@active_workflows'
-        #       it means, unexpected server behavior (i.e. server restarted during converge), 
+        #       it means, unexpected server behavior (i.e. server restarted during converge),
         #       and only task status will get updated.
         #       Otherwise, raise error task not running.
         if @@active_workflows[task_id]
@@ -96,7 +96,7 @@ module DTK
       !!@@active_workflows[task_id]
     end
     def self.kill(task_id)
-      @@Lock.synchronize do 
+      @@Lock.synchronize do
         if task_is_active?(task_id)
           @@active_workflows[task_id].kill()
           @@active_workflows.delete(task_id)

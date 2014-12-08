@@ -8,10 +8,10 @@ module DTK
       end
 
       user_object  = ::DTK::CurrentSession.new.user_object()
-      CreateThread.defer_with_session(user_object) do
+      CreateThread.defer_with_session(user_object, Ramaze::Current::session) do
         begin
           # TODO: to allow simpler form where blk does not have a handle parameter
-          # can case on whether this is the case and if not call 
+          # can case on whether this is the case and if not call
           # data = blk.call()
           # deferred_body.rest_ok_response(data)
           blk.call(deferred_body)
@@ -28,7 +28,7 @@ module DTK
     end
     def rest_notok_response(data)
       push_data(@response_procs[:notok].call(data))
-      signal_eos() 
+      signal_eos()
     end
 
     # needed by rack/thin
@@ -43,7 +43,7 @@ module DTK
     end
 
     def push_data(data)
-      ::EventMachine::next_tick do 
+      ::EventMachine::next_tick do
         @body_callback.call data
       end
     end

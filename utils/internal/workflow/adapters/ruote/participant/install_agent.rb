@@ -17,11 +17,11 @@ module DTK
             callbacks = {
               :on_msg_received => proc do |msg|
                 inspect_agent_response(msg)
-                # CreateThread.defer_with_session(user_object) do
+                # CreateThread.defer_with_session(user_object, Ramaze::Current.session) do
                 PerformanceService.end_measurement("#{self.class.to_s.split("::").last}", self.object_id)
                 task.add_event(:complete_succeeded,msg)
                 log_participant.end(:complete_succeeded,:task_id=>task_id)
-                set_result_succeeded(workitem,msg,task,action) if task_end 
+                set_result_succeeded(workitem,msg,task,action) if task_end
                 delete_task_info(workitem)
                 reply_to_engine(workitem)
                 # end
@@ -64,7 +64,7 @@ module DTK
           # flavour will have 'kill' value if kill_process is invoked instead of cancel_process
           return if flavour
           wi = workitem
-          params = get_params(wi) 
+          params = get_params(wi)
           task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
           log_participant.canceling(task_id)
 

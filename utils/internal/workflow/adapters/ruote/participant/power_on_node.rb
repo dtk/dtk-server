@@ -4,7 +4,7 @@ module DTK
       class PowerOnNode < Top
 
         def consume(workitem)
-          params = get_params(workitem) 
+          params = get_params(workitem)
           PerformanceService.start("#{self.class.to_s.split("::").last}", self.object_id)
           # task_id,action,workflow,task = %w{task_id action workflow task}.map{|k|params[k]}
           task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
@@ -37,8 +37,8 @@ module DTK
                   reply_to_engine(workitem)
                 end
               end,
-              :on_timeout => proc do 
-                DTK::CreateThread.defer_with_session(user_object) do
+              :on_timeout => proc do
+                DTK::CreateThread.defer_with_session(user_object, Ramaze::Current.session) do
                   Log.error("Timeout detecting node is ready to be powered on!")
                   result = {:type => :timeout_create_node, :task_id => task_id}
                   set_result_failed(workitem,result,task)
@@ -53,12 +53,12 @@ module DTK
         end
 
         def cancel(fei, flavour)
-          
+
           # flavour will have 'kill' value if kill_process is invoked instead of cancel_process
           return if flavour
 
           wi = workitem
-          params = get_params(wi) 
+          params = get_params(wi)
           task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
           task.add_internal_guards!(workflow.guards[:internal])
           pp ["Canceling task #{action.class.to_s}: #{task_id}"]

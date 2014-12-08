@@ -1,8 +1,8 @@
 module XYZ
   module CreateThread
 
-    def self.defer_with_session(user_object, &block)
-      Ramaze::defer(&wrap(user_object, &block))
+    def self.defer_with_session(user_object, current_session, &block)
+      Ramaze::defer(&wrap(user_object, current_session, &block))
     end
 
     private
@@ -15,7 +15,7 @@ module XYZ
     # in case there is some internal logic that expects some thread to fail error messages can be
     # ignored or this call
 
-    def self.wrap(user_object=nil, &block)
+    def self.wrap(user_object=nil, current_session, &block)
       return lambda do
         begin
           # this part of code sets session information to make sure that newly created thread keeps its session
@@ -26,10 +26,10 @@ module XYZ
             require 'ap'
             ap ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
             ap ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
-            ap "Session is #{Ramaze::Current.session}!!!"
+            ap "Session is #{current_session}!!!"
 
-            if Ramaze::Current.session
-              Ramaze::Current.session[:USER]  = ::DTK::User::create_user_session_hash(user_object)
+            if current_session
+              current_session[:USER]  = ::DTK::User::create_user_session_hash(user_object)
             end
           end
 

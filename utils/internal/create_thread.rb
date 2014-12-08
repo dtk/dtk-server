@@ -22,8 +22,15 @@ module XYZ
           # this was necessery due to concurency issues
           if user_object
             Thread.current[:user_object]    = user_object
-            # Thread.current[:session][:USER] = ::DTK::User::create_user_session_hash(user_object) unless Thread.current[:session]
-            Ramaze::Current.session[:USER]  = ::DTK::User::create_user_session_hash(user_object)
+
+            require 'ap'
+            ap ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+            ap ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+            ap "Session is #{Ramaze::Current.session}!!!"
+
+            if Ramaze::Current.session
+              Ramaze::Current.session[:USER]  = ::DTK::User::create_user_session_hash(user_object)
+            end
           end
 
           # yield original block

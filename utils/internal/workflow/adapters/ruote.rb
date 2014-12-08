@@ -109,7 +109,7 @@ module Ruote
       # would be OK.
       # Or maybe it's the job of an extension / subclass
 
-      DTK::CreateThread.defer_with_session(retrive_user_info(msg)) do
+      DTK::CreateThread.defer_with_session(retrive_user_info(msg), Ramaze::Current.session) do
         begin
           do_dispatch(participant, msg)
         rescue => exception

@@ -81,12 +81,6 @@ module DTK
       datatype         = :module
       remote_repo_base = ret_remote_repo_base()
 
-      # START RAMAZE IF NOT STARTED
-      unless EventMachine.reactor_running?
-        Thread.new { EventMachine.run }
-        puts "EventMachine has been started!"
-      end
-
       opts = Opts.new(:project_idh => project.id_handle())
       if detail = ret_request_params(:detail_to_include)
         opts.merge!(:detail_to_include => detail.map{|r|r.to_sym})

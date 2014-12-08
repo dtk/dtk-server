@@ -81,3 +81,9 @@ Ramaze.options.roots = [__DIR__]
 r8_require('model/init')
 r8_require('controller/init')
 
+# Start Event Machine if not started (this is mainly passenger fix)
+unless EventMachine.reactor_running?
+  Thread.new { EventMachine.run }
+  puts "EventMachine has been started!"
+end
+

@@ -98,8 +98,9 @@ module DTK
       end
     end
     
-    def self.parent_field(parent_model_name,model_name)
-      unless ret = ret_parent_id_field_name(DB_REL_DEF[parent_model_name],DB_REL_DEF[model_name])
+    def self.parent_field(parent_model_name,model_name,opts={})
+      ret = ret_parent_id_field_name(DB_REL_DEF[parent_model_name],DB_REL_DEF[model_name])
+      if ret.nil? and !opts[:can_be_nil]
         Log.error("Unexpectd that there is call to parent_field(#{parent_model_name},#{model_name}) which yields nil")
       end
       ret

@@ -21,15 +21,16 @@ module XYZ
           # this part of code sets session information to make sure that newly created thread keeps its session
           # this was necessery due to concurency issues
           if user_object
-            Thread.current[:user_object]    = user_object
+            Thread.current[:user_object] = user_object
 
-            require 'ap'
-            ap ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
-            ap ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
-            ap "Session is #{current_session}!!!"
+            #
+            # There is passenger issue that forced our hand to send current_session from main thread.
+            #
+            # This has been tested with concurrent user converging assemblies at the same time and it is working.
+            #
 
             if current_session
-              current_session[:USER]  = ::DTK::User::create_user_session_hash(user_object)
+              current_session[:USER] = ::DTK::User::create_user_session_hash(user_object)
             end
           end
 
@@ -38,7 +39,7 @@ module XYZ
 
           # end
         rescue Exception => e
-          Log.error_pp(["ERROR IN THREAD",e.message,e.backtrace])
+          Log.error_pp(["ERROR IN THREAD", e.message,e.backtrace])
         end
       end
     end

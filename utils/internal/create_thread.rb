@@ -21,11 +21,9 @@ module XYZ
           # this part of code sets session information to make sure that newly created thread keeps its session
           # this was necessery due to concurency issues
           if user_object
-            require 'pp'
-            pp Thread.current.keys
-            pp '...................... ENDINGGGGG ................................'
             Thread.current[:user_object]    = user_object
             # Thread.current[:session][:USER] = ::DTK::User::create_user_session_hash(user_object) unless Thread.current[:session]
+            Ramaze::Current.session[:USER]  = ::DTK::User::create_user_session_hash(user_object)
           end
 
           # yield original block

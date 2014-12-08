@@ -301,7 +301,7 @@ module DTK
     def parent_id_field_name(parent_model_name_or_idh=nil,opts={})
       arg = parent_model_name_or_idh #shorthand
       parent_model_name ||= self[:parent_model_name]||(arg && (arg.kind_of?(Symbol) ? arg : arg[:model_name]))
-      unless parent_model_name and !opts[:can_be_nil]
+      if parent_model_name.nil? and !opts[:can_be_nil]
         Log.error("Unexpected that object's (#{inspect}) parent_model_name is nil")
         return nil 
       end

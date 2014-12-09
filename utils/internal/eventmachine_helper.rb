@@ -16,10 +16,6 @@ module XYZ
       end
     end
 
-end
-
-    end
-
     def self.reactor_running?()
       ::EM.reactor_running?()
     end

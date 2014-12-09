@@ -2,30 +2,24 @@ module DTK; module ModuleMixins
   module Create
   end
   module Create::Class
-    # TODO: ModuleBranch::Location: refactor like ModuleMixins::Remote::Class install
-    # returns hash with keys :module_idh :module_branch_idh
+    # TODO: want to change to signature:
+    # create_module(project,local_params,opts={})
+    # where opts has key :config_agent_typ
+    # after converting all places that call this over to new signature can remove 
+    # deprecate_ret_local_params
     def create_module(project,module_name,opts={})
-      # check if passed, if not use default namespace
-      module_namespace = Namespace.find_or_create_or_default(project.model_handle(:namespace), opts[:module_namespace])
-
-      # we encapsulate
-      local_params = ModuleBranch::Location::LocalParams::Server.new(
-        :module_type => module_type(),
-        :module_name => module_name,
-        :namespace   => module_namespace.name,
-        :version => opts[:version]
-      )
-
+      local_params = opts[:local_params] || deprecate_ret_local_params(project,module_name)
       local = local_params.create_local(project)
+      namespace = local_params.namespace
       project_idh = project.id_handle()
 
       is_parsed   = false
-      if module_exists = module_exists?(project_idh, module_name, module_namespace.name)
+      if module_exists = module_exists?(project_idh, module_name, namespace)
         is_parsed = module_exists[:dsl_parsed]
       end
 
       if is_parsed and not opts[:no_error_if_exists]
-        full_module_name = Namespace.join_namespace(module_namespace.display_name(),module_name)
+        full_module_name = Namespace.join_namespace(namespace,module_name)
         raise ErrorUsage.new("Module (#{full_module_name}) cannot be created since it exists already")
       end
 
@@ -34,16 +28,27 @@ module DTK; module ModuleMixins
         :push_created_branch => true,
         :donot_create_master_branch => true,
         :delete_if_exists => true,
-        :namespace_name => module_namespace.name
+        :namespace_name => namespace
       }
 
       repo_user_acls = RepoUser.authorized_users_acls(project_idh)
       local_repo_obj = Repo::WithBranch.create_empty_workspace_repo(project_idh,local,repo_user_acls,create_opts)
-
-      module_and_branch_info = create_ws_module_and_branch_obj?(project, local_repo_obj.id_handle(), local.module_name, local.version, module_namespace)
+      repo_idh = local_repo_obj.id_handle()
+      module_and_branch_info = create_module_and_branch_obj?(project,repo_idh,local)
 
       opts_info = { :version=>local.version, :module_namespace => local.namespace }
       module_and_branch_info.merge(:module_repo_info => module_repo_info(local_repo_obj,module_and_branch_info,opts_info))
+    end
+
+    def deprecate_ret_local_params(project,module_name,opts={})
+      # check if passed, if not use default namespace
+      module_namespace = Namespace.find_or_create_or_default(project.model_handle(:namespace), opts[:module_namespace])
+      ModuleBranch::Location::LocalParams::Server.new(
+        :module_type => module_type(),
+        :module_name => module_name,
+        :namespace   => module_namespace.name,
+        :version => opts[:version]
+      )
     end
 
     def create_module_and_branch_obj?(project,repo_idh,local,ancestor_branch_idh=nil)

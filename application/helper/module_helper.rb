@@ -102,7 +102,7 @@ module Ramaze::Helper
       do_not_raise = (ret_request_params(:do_not_raise) ? ret_request_params(:do_not_raise) : false)
       ignore_component_error = (ret_request_params(:ignore_component_error) ? ret_request_params(:ignore_component_error) : false)
       additional_message = (ret_request_params(:additional_message) ? ret_request_params(:additional_message) : false)
-      local_params = local_params_dtkn(module_type,local_namespace,local_module_name,version)
+      local_params = local_params(module_type,local_module_name,:namespace => local_namespace,:version => version)
 
       dependency_warnings = []
 
@@ -138,11 +138,15 @@ module Ramaze::Helper
 
       module_type = module_obj.module_type
       remote_params = remote_params_dtkn(module_type,namespace,remote_module_name,version)
-      local_params = local_params_dtkn(module_type,module_obj.module_namespace(),local_module_name,version)
+      namespace = module_obj.module_namespace()
+      local_params = local_params(module_type,local_module_name,:namespace => namespace,:version => version)
       module_obj.publish(local_params,remote_params,client_rsa_pub_key)
     end
 
-    def local_params_dtkn(module_type,namespace,module_name,version=nil)
+    # opts can have :version and :namespace
+    def local_params(module_type,module_name,opts={})
+      version = opts[:version]
+      namespace = opts[:namespace] || default_local_namespace_name() 
       ModuleBranch::Location::LocalParams::Server.new(
         :module_type => module_type,
         :module_name => module_name,
@@ -156,9 +160,15 @@ module Ramaze::Helper
         :module_type => module_type,
         :module_name => module_name,
         :version => version,
-        :namespace => namespace||default_namespace(),
+        :namespace => namespace||default_namespace_name(),
         :remote_repo_base => ret_remote_repo_base()
       )
+    end
+
+    def default_local_namespace_name() 
+      namespace_mh =  get_default_project().model_handle(:namespace)
+      namespace_obj = ::DTK::Namespace::default_namespace(namespace_mh)
+      namespace_obj.get_field?(:display_name)
     end
 
     # this looks at connected remote repos to make an assessment; default_namespace() above is static
@@ -192,6 +202,12 @@ module Ramaze::Helper
         raise ::DTK::Error.new("Unexpected that subtype has value (#{subtype})")
       end
       id_handle(assembly_template_id,:assembly_template)
+    end
+
+    def ret_request_param_module_namespace?(param=:module_namespace)
+      ret = ret_request_params(param)
+      # TODO: remove need for this by on client side not passing empty strings when no namespace
+      (ret.kind_of?(String) and ret.empty?) ? nil : ret
     end
 
     def ret_config_agent_type()

@@ -15,18 +15,19 @@ module DTK
     def rest__create()
       # setup needed data
       module_name = ret_non_null_request_params(:module_name)
-      module_namespace = ret_request_params(:module_namespace)
-
+      namespace = ret_request_param_module_namespace?()
       config_agent_type =  ret_config_agent_type()
       project = get_default_project()
-      version = nil # TODO: stub
-      opts = Opts.create?(
-        :config_agent_type => config_agent_type,
-        :version? => version,
-        :module_namespace => module_namespace
-      )
 
-      module_repo_info = ComponentModule.create_module(project,module_name,opts)[:module_repo_info]
+      # local_params encapsulates local module branch params                           
+      opts_local_params = (namespace ? {:namespace=>namespace} : {})
+      local_params = local_params(:component,module_name,opts_local_params)
+
+      opts_create_mod = Opts.new(
+        :local_params => local_params,                                 
+        :config_agent_type => ret_config_agent_type()
+      )
+      module_repo_info = ComponentModule.create_module(project,module_name,opts_create_mod)[:module_repo_info]
       rest_ok_response module_repo_info
     end
 
@@ -175,25 +176,29 @@ module DTK
     def rest__install_puppet_module()
       puppet_module_name = ret_non_null_request_params(:puppetf_module_name)
       module_name = ret_non_null_request_params(:module_name)
-      namespace = ret_request_params(:module_namespace)
-      version   = ret_request_params_force_nil(:module_version)
+      namespace = ret_request_param_module_namespace?()
+      # DTK-1754: Haris: assuming :module_version is puppet, not dtk, version 
+      # so renamed it here; we migt rename also in rest payload
+      puppet_version  = ret_request_params_force_nil(:module_version)
+      project = get_default_project()
 
       # will raise exception if not valid
       PuppetForge::Client.is_module_name_valid?(puppet_module_name, module_name)
 
       # will raise an exception in case of error
-      response = PuppetForge::Client.install(puppet_module_name, version)
+      response = PuppetForge::Client.install(puppet_module_name, puppet_version)
 
-      opts = Opts.create?(
-        :config_agent_type => ret_config_agent_type(),
-        :version? => version,
-        :module_namespace => namespace
+      # local params encapsulates local module branch params                           
+      opts_local_params =  namespace ? {:namespace=>namespace} : {}
+      local_params = local_params(:component,module_name,opts_local_params)
+
+      opts_create_mod = Opts.new(
+        :local_params => local_params,                                 
+        :config_agent_type => ret_config_agent_type()
       )
+      module_info = ComponentModule.create_module(project,module_name,opts_create_mod)[:module_repo_info]
 
-      module_info = ComponentModule.create_module(get_default_project(),module_name,opts)[:module_repo_info]
-      branch_name = ModuleBranch::Location::Server::Local.ret_branch_name(get_default_project(), version)
-
-      commit_sha  = PuppetForge::Client.push_to_server(response['install_dir'], module_info[:repo_url], response['parent_install_dir'], branch_name)
+      commit_sha  = PuppetForge::Client.push_to_server(project,local_params,response['install_dir'], module_info[:repo_url], response['parent_install_dir'])
 
       module_id   = module_info[:module_id]
       full_module_name   = module_info[:full_module_name]
@@ -205,6 +210,8 @@ module DTK
             Opts.new(:project_idh => get_default_project().id_handle()),
             response['module_dependencies'][:dependencies]
             )
+
+      version = local_params.version
 
       dsl_info_response = component_module.update_from_initial_create(
           commit_sha,

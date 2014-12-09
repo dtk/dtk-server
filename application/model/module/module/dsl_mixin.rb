@@ -215,6 +215,14 @@ module DTK; class BaseModule
       ret
     end
 
+    # Rich: DTK-1754 pass in an (optional) option that indicates scaffolding strategy
+    # will build in flexibility to support a number of varaints in how Puppet as an example
+    # gets mapped to a starting point dtk.model.yaml file
+    # Initially we wil hace existing stargey for the top level and
+    # completely commented out for the component module dependencies
+    # As we progress we can identiy two pieces of info
+    # 1) what signatures get parsed (e.g., only top level puppet ones) and put in dtk
+    # 2) what signatures get parsed and put in commented out
     def parse_impl_to_create_dsl(config_agent_type,impl_obj,opts={})
       parsing_error = nil
       render_hash = nil

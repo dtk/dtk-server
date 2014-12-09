@@ -20,7 +20,7 @@ module DTK
         MODULE_NAME_SEPARATOR = '-'
 
 
-        def install(module_name, version=nil, force=false)
+        def install(module_name, puppet_version=nil, force=false)
           raise DTK::Puppet::ModuleNameMissing, "Puppet forge module name not provided" if module_name.nil? || module_name.empty?
 
           # dir name
@@ -28,7 +28,7 @@ module DTK
           rand_install_dir = random_install_dir()
 
           command  = "puppet _3.4.0_ module install #{module_name} --render-as json --target-dir #{rand_install_dir} --modulepath #{rand_install_dir}"
-          command += " --version #{version}" if version && !version.empty?
+          command += " --version #{puppet_version}" if puppet_version && !puppet_version.empty?
           command += " --force"              if force
 
           output_s = `#{command}`
@@ -53,7 +53,9 @@ module DTK
         # We use installed puppet forge gem and initialize git repo in it, after which we push it to gitolite.
         #
 
-        def push_to_server(pf_module_location, gitolite_remote_url, pf_parent_location, branch_name)
+        def push_to_server(project, local_params, pf_module_location, gitolite_remote_url, pf_parent_location)
+          local = local_params.create_local(project) 
+          branch_name = local.branch_name 
           repo = Grit::Repo.init(pf_module_location)
 
           # after init we add all and push to our tenant

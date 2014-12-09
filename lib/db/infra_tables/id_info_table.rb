@@ -98,7 +98,9 @@ module DTK
         else
           self[:model_name]
         end
-      Model.model_class(model_name).new({:id => get_id()},self[:c],nil,self)
+      ret = Model.model_class(model_name).new({:id => get_id()},self[:c],nil,self)
+      ret.update_object!(*opts[:cols]) if opts[:cols] 
+      ret
     end
 
     def get_field?(field)

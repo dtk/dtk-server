@@ -196,6 +196,7 @@ module DTK
         :local_params => local_params,                                 
         :config_agent_type => ret_config_agent_type()
       )
+      # module_info has has info about the specfic applicable branch
       module_info = ComponentModule.create_module(project,module_name,opts_create_mod)[:module_repo_info]
 
       commit_sha  = PuppetForge::Client.push_to_server(project,local_params,response['install_dir'], module_info[:repo_url], response['parent_install_dir'])
@@ -213,13 +214,23 @@ module DTK
 
       version = local_params.version
 
-      dsl_info_response = component_module.update_from_initial_create(
-          commit_sha,
-          id_handle(module_info[:repo_id], :repo),
-          version,
-          { :scaffold_if_no_dsl => true, :do_not_raise => true, :process_external_refs => true }
-        )
-
+      # DTK-1754: Rich: put in different call (update_from_initial_create_and_commit_dsl) 
+      # than update_from_initial_create which is combination of update_from_initial_create
+      # and update_model_from_clone_changes?
+#      dsl_info_response = component_module.update_from_initial_create(
+#          commit_sha,
+#          id_handle(module_info[:repo_id], :repo),
+#          version,
+#          { :scaffold_if_no_dsl => true, :do_not_raise => true, :process_external_refs => true }
+#        )
+      response = component_module.update_from_initial_create_and_commit_dsl(
+        commit_sha,
+        id_handle(module_info[:repo_id], :repo),                                                                         
+        module_info[:module_branch_idh],
+        local_params,
+        { :scaffold_if_no_dsl => true, :do_not_raise => true, :process_external_refs => true }
+      )
+raise ErrorUsage.new("got here")
       rest_ok_response dsl_info_response.merge(:module_id => module_id, :version => version, :full_module_name => full_module_name, :missing_modules => missing, :found_modules => found)
     end
 

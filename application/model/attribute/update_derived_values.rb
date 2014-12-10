@@ -4,8 +4,11 @@ module DTK; class Attribute
     module ClassMixin
       ::DTK::Attribute::LinkDeleteInfo = UpdateDerivedValues::Delete::LinkInfo
       # links_delete_info has type array of Delete::LinkInfo
-      def update_attributes_for_delete_links(attr_mh,links_delete_info)
-        UpdateDerivedValues.update_for_delete_links(attr_mh,links_delete_info)
+      def update_and_propagate_attributes_for_delete_links(attr_mh,links_delete_info,propagate_opts={})
+        # find updated attributes
+        updated_attrs = UpdateDerivedValues.update_for_delete_links(attr_mh,links_delete_info)
+        # propagate these changes; if opts[::add_state_changes] then produce state changes
+        propagate_and_optionally_add_state_changes(attr_mh,updated_attrs,propagate_opts)
       end
     end
 

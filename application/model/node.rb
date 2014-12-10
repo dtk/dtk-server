@@ -516,10 +516,8 @@ module DTK
       end
       attr_mh = model_handle_with_auth_info(:attribute)
       # update attributes connected to dangling links on input side
-      dangling_links_info = ndx_dangling_links_info.values
-      updated_attrs = Attribute.update_attributes_for_delete_links(attr_mh,dangling_links_info)
-      # add state changes for updated attributes and see if any connected attributes
-      Attribute.propagate_and_optionally_add_state_changes(attr_mh,updated_attrs,:add_state_changes => true)
+      links_delete_info = ndx_dangling_links_info.values
+      Attribute.update_and_propagate_attributes_for_delete_links(attr_mh,links_delete_info,:add_state_changes => true)
     end
     private :update_dangling_links
 

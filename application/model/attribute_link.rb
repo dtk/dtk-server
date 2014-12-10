@@ -15,7 +15,10 @@ module DTK
     class OutputPartial < Output
     end
 
-    
+    def self.common_columns()
+      [:id,:group_id,:display_name,:input_id,:output_id,:type,:hidden,:function,:index_map,:assembly_id,:port_link_id]
+    end
+
     # virtual attribute defs    
     def output_index_map()
       index_map_aux(:output)

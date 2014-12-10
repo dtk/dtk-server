@@ -285,7 +285,7 @@ module DTK
 
     def rest__delete_service_link()
       port_link = ret_port_link()
-      Model.delete_instance(port_link.id_handle())
+      Assembly::Instance::ServiceLink.delete(port_link.id_handle())
       rest_ok_response
     end
 

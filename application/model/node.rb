@@ -494,33 +494,13 @@ module DTK
         get_objs(:cols => [:dangling_input_links_from_components]) +
         get_objs(:cols => [:dangling_input_links_from_nodes])
       return ret if dangling_links.empty?
-
-      # ndx_links_delete_info is indexed hash with each value being type
-      # Attribute::LinkDeleteInfo
-      ndx_dangling_links_info = Hash.new
-      dangling_links.each do |r|
-        link = r[:all_input_links]
-        if link[:type] == "external"
-          attr_id = link[:input_id]
-          l = ndx_dangling_links_info[attr_id] ||= Attribute::LinkDeleteInfo.new(r[:input_attribute])
-          new_el = {
-            :attribute_link_id => link[:id],
-            :index_map => link[:index_map],
-          }
-          if link[:id] == r[:attribute_link][:id]
-            l.deleted_link = new_el
-          else
-            l.add_other_link!(new_el)
-          end
-        end
+      aug_dangling_links = dangling_links.map do |r|
+        r[:attribute_link].merge(r.hash_subset(:input_attribute,:all_input_links))
       end
       attr_mh = model_handle_with_auth_info(:attribute)
-      # update attributes connected to dangling links on input side
-      links_delete_info = ndx_dangling_links_info.values
-      Attribute.update_and_propagate_attributes_for_delete_links(attr_mh,links_delete_info,:add_state_changes => true)
+      Attribute.update_and_propagate_attributes_for_delete_links(attr_mh,aug_dangling_links,:add_state_changes => true)
     end
     private :update_dangling_links
-
 
     def self.get_port_links(id_handles,*port_types)
       input_port_rows =  get_objs_in_set(id_handles,:columns => [:id, :display_name, :input_port_link_info]).select do |r|

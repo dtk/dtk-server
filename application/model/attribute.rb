@@ -20,6 +20,7 @@ module DTK
     r8_nested_require('attribute','constant')
     r8_nested_require('attribute','print_form')
     r8_nested_require('attribute','semantic_datatype')
+    r8_nested_require('attribute','dangling_links_class_mixin')
     r8_nested_require('attribute','update_derived_values')
 
     include GetMethod::Mixin
@@ -33,7 +34,7 @@ module DTK
     extend PrintFormClassMixin
     extend PropagateChangesClassMixin
     extend MetaClassMixin
-    extend UpdateDerivedValues::ClassMixin
+    extend DanglingLinksClassMixin
 
     def self.common_columns()
       [:id,:display_name,:group_id,:hidden,:description,:component_component_id,:value_derived,:value_asserted,:semantic_data_type,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change,:port_type_asserted,:is_port,:external_ref,:read_only,:tags]

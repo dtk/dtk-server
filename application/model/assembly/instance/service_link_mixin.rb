@@ -3,7 +3,7 @@ module DTK
     module ServiceLinkMixin
       def add_service_link?(input_cmp_idh,output_cmp_idh,opts={})
         dependency_name = find_dep_name_raise_error_if_ambiguous(input_cmp_idh,output_cmp_idh,opts)
-        Factory.new(self,input_cmp_idh,output_cmp_idh,dependency_name).add?()
+        ServiceLink::Factory.new(self,input_cmp_idh,output_cmp_idh,dependency_name).add?()
       end
       
       def list_service_links(opts={})

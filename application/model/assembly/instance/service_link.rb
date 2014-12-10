@@ -8,12 +8,18 @@ module DTK
       end
 
       def self.delete(port_link_idhs)
-        port_link_idhs = [port_link_idhs] unless port_link_idhs.kind_of?(Array)
+        if port_link_idhs.kind_of?(Array)
+          return if port_link_idhs.empty?
+        else
+          port_link_idhs = [port_link_idhs]
+        end
+        
+        aug_attr_links = get_augmented_attribute_links(port_link_idhs)
+        attr_mh = port_link_idhs.first.createMH(:attribute)
         Model.Transaction do
-          aug_attr_links = get_augmented_attribute_links(port_link_idhs)
-          pp [:aug_attr_links,aug_attr_links]
+          Attribute.update_and_propagate_attributes_for_delete_links(attr_mh,aug_attr_links)
           port_link_idhs.map{|port_link_idh|Model.delete_instance(port_link_idh)}
-          raise ErrorUsage.new('got here')
+          raise ErrorUsage.new()
         end
       end
 

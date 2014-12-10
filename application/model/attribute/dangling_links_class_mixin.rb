@@ -5,7 +5,8 @@ module DTK
       # aug_attr_links has the dangling link info
       # it is augmented with 
       # :input_attribute - attribute that is on input side of attribute link
-      # :all_input_links - all atribute links that connect to this input link
+      # :other_input_link - an atribute link that connects to :input_attribute attribute; can refer to same
+      # link as self does
       # 
       def update_and_propagate_attributes_for_delete_links(attr_mh,aug_attr_links,propagate_opts={}) 
         ret = Array.new
@@ -21,7 +22,7 @@ module DTK
       def links_delete_info(aug_attr_links)
         ndx_ret = Hash.new
         aug_attr_links.each do |link|
-          a_link = link[:all_input_links]
+          a_link = link[:other_input_link]
           if a_link[:type] == "external"
             input_attribute = link[:input_attribute]
             attr_id = input_attribute[:id]

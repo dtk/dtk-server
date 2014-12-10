@@ -397,7 +397,7 @@ module DTK
          },
          {
            :model_name => :attribute_link,
-           :alias => :all_input_links,
+           :alias => :other_input_link,
            :convert => true,
            :join_type => :inner,
            :join_cond=>{:input_id => q(:attribute_link,:input_id)},

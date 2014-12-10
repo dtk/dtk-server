@@ -495,7 +495,7 @@ module DTK
         get_objs(:cols => [:dangling_input_links_from_nodes])
       return ret if dangling_links.empty?
       aug_dangling_links = dangling_links.map do |r|
-        r[:attribute_link].merge(r.hash_subset(:input_attribute,:all_input_links))
+        r[:attribute_link].merge(r.hash_subset(:input_attribute,:other_input_link))
       end
       attr_mh = model_handle_with_auth_info(:attribute)
       Attribute.update_and_propagate_attributes_for_delete_links(attr_mh,aug_dangling_links,:add_state_changes => true)

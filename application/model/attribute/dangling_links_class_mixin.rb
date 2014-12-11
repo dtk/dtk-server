@@ -32,7 +32,7 @@ module DTK
               :index_map => a_link[:index_map],
             }
             if a_link[:id] == link[:id]
-              l.deleted_link = new_el
+              l.add_deleted_link!(new_el)
             else
               l.add_other_link!(new_el)
             end

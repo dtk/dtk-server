@@ -2,73 +2,124 @@ module DTK; class Attribute; class UpdateDerivedValues
   # for processing deleting of links
   class Delete < self
     class LinkInfo
-      attr_reader :input_attribute,:other_links
-      attr_accessor :deleted_link
+      attr_reader :input_attribute,:deleted_links,:other_links
       def initialize(input_attribute)
         @input_attribute = input_attribute
+        @deleted_links = Array.new
         @other_links = Array.new
       end
       def add_other_link!(link)
-        @other_links << link
+        @other_links << link unless match?(@other_links,link)
+      end
+      def add_deleted_link!(link)
+        @deleted_links << link unless match?(@deleted_links,link)
+      end
+     private
+      def match?(links,link)
+        attribute_link_id = link[:attribute_link_id]
+        links.find{|l|l[:attribute_link_id] == attribute_link_id}
       end
     end
 
     def self.update_attribute(attr_mh,link_info)
-      # if (input) attribute is array then need to splice out; otherwise just need to set to null
-      input_index = input_index(link_info.deleted_link)
-      if input_index.nil? or input_index.empty?
-        set_to_null(attr_mh,link_info)
+      # determine if should null out input attribute or instead to splice out indexes from array
+      indexes_to_delete = Array.new
+      # test link_info.other_links.empty? is a simple way to test whether what is in deleted_links is all
+      # the entries in the input attribute
+      unless link_info.other_links.empty?
+        indexes_to_delete = link_info.deleted_links.map{|link|input_index(link)}.select do |input_index|
+          input_index and array_integer?(input_index)
+        end
+      end
+
+      if indexes_to_delete.empty?
+        set_to_null(attr_mh,link_info.input_attribute)
       else
-        splice_out(attr_mh,link_info,input_index)
+        splice_out(attr_mh,indexes_to_delete,link_info)
       end
     end
    private
-    def self.set_to_null(attr_mh,link_info)
+    def self.set_to_null(attr_mh,input_attribute)
       row_to_update = {
-        :id =>link_info.input_attribute[:id],
+        :id =>input_attribute[:id],
         :value_derived => nil
       }
       Model.update_from_rows(attr_mh,[row_to_update])
-      old_value_derived = link_info.input_attribute[:value_derived]
+      old_value_derived = input_attribute[:value_derived]
       row_to_update.merge(:old_value_derived => old_value_derived)
     end
 
-    def self.splice_out(attr_mh,link_info,input_index)
-      pos_to_delete = input_index.first 
+    IndexPositionInfo = Struct.new(:current_pos,:new_pos,:link)
 
-      # if this is not an array or last link in output then null
-      if pos_to_delete.kind_of?(String) or link_info.other_links.empty?
-        return set_to_null(attr_mh,link_info)
+    # splice out the values in input array from the deleted links and renumber on the other links
+    def self.splice_out(attr_mh,indexes_to_delete,link_info)
+      ret = nil
+      input_attribute = link_info.input_attribute
+
+      # for other links to facilitate renumbering maintain a renumbering_mapping
+      index_pos_info_array = link_info.other_links.map do |link|
+        current_pos = array_integer(input_index(link))
+        IndexPositionInfo.new(current_pos,current_pos,link)
       end
 
-      # splice out the value from the deleted link
-      ret = nil
-      Model.select_process_and_update(attr_mh,[:id,:value_derived],[link_info.input_attribute[:id]]) do |rows|
+      # will be interating over delete_positions; reversing order so dont have to renumber this
+      delete_positions = link_info.deleted_links.map do |link|
+        array_integer(input_index(link))
+      end.sort{|a,b|b <=> a}
+      Model.select_process_and_update(attr_mh,[:id,:value_derived],[input_attribute[:id]]) do |rows|
         # will only be one row; 
         row = rows.first
         val = row[:value_derived]
         ret = {:id => row[:id], :old_value_derived => val.dup?}
-        val.delete_at(pos_to_delete)
+        delete_positions.each do |pos_to_delete|
+          val.delete_at(pos_to_delete)
+          index_pos_info_array.each do |other_link_info|
+            if other_link_info.new_pos > pos_to_delete
+              other_link_info.new_pos -= 1
+            end
+          end
+        end
         ret.merge!(:value_derived => val)
         [row] #row with changed :value_derived
       end
-      # renumber other links (ones not deleted) if necessary
-      links_to_renumber = link_info.other_links.select do |other_link| 
-        input_index(other_link).first > pos_to_delete
-      end
 
-      renumber_links(attr_mh,links_to_renumber) unless links_to_renumber.empty?
+      renumber_links?(attr_mh,index_pos_info_array)
+
       ret
     end
 
-    def self.renumber_links(attr_mh,links_to_renumber)
-      rows_to_update = links_to_renumber.map do |l|
-        new_input_index = input_index(l).dup
-        new_input_index[0] -= 1
-        new_index_map = [{:output => output_index(l), :input => new_input_index}]
-        {:id => l[:attribute_link_id], :index_map => new_index_map}
+    def self.renumber_links?(attr_mh,index_pos_info_array)
+      rows_to_update = Array.new
+      index_pos_info_array.map do |index_pos_info|
+        if index_pos_info.current_pos != index_pos_info.new_pos
+          link = index_pos_info.link
+          new_index_map = [{:output => output_index(link), :input => [index_pos_info.new_pos]}]
+          rows_to_update << {:id => link[:attribute_link_id], :index_map => new_index_map}
+        end
       end
-      Model.update_from_rows(attr_mh.createMH(:attribute_link),rows_to_update)
+      unless rows_to_update.empty?
+        Model.update_from_rows(attr_mh.createMH(:attribute_link),rows_to_update)
+      end
+    end
+
+    def self.array_integer(input_index)
+      array_integer?(input_index,:no_error_msg => true) ||
+        raise(Error.new(error_msg_link_def_index(input_index)))
+    end
+
+    def self.array_integer?(input_index,opts={})
+      ret = nil
+      if input_index.kind_of?(Array) and input_index.size == 1 and input_index.first.kind_of?(Fixnum)
+        ret = input_index.first
+      end
+      if ret.nil? and !opts[:no_error_msg]
+        Log.error(error_msg_link_def_index(input_index))
+      end
+      ret
+    end
+
+    def self.error_msg_link_def_index(input_index)
+      "Unexpected that link def index (#{input_index.inspect}) does not have form: [n]"
     end
   end
 end; end; end

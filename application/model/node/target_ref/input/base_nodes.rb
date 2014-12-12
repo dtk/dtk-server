@@ -20,7 +20,7 @@ module DTK; class Node; class TargetRef
       end
 
       # TODO: need better name for create_linked_target_ref? vs create_linked_target_refs?
-      # since diffeernt in what they do with node attributes
+      # since different in what they do with node attributes
 
       # This creates if needed target refs and links nodes to them
       # returns new idhs indexed by node (id) they linked to

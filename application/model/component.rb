@@ -518,17 +518,6 @@ module DTK
       end
     end
 
-    def get_attributes_ports()
-      opts = {:keep_ref_cols => true}
-      rows = get_objects_from_sp_hash({:columns => [:ref,:ref_num,:attributes_ports]},opts)
-      return Array.new if rows.empty?
-      component_ref = rows.first[:ref]
-      component_ref_num = rows.first[:ref_num]
-      rows.map do |r|
-        r[:attribute].merge(:component_ref => component_ref,:component_ref_num => component_ref_num) if r[:attribute]
-      end.compact
-    end
-
     def get_component_i18n_label()
       ret = get_stored_component_i18n_label?()
       return ret if ret

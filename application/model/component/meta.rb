@@ -119,13 +119,6 @@ module XYZ
            :cols => [:id,:display_name,:view_def_key,id(:component),:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change]
          )]
 
-        virtual_column :attributes_ports, :type => :json, :hidden => true, 
-        :remote_dependencies => 
-        [attributes_def.merge(
-           :filter => [:eq, :is_port, true],
-           :cols => [:id,:display_name,id(:component),:port_is_external,:port_type,:port_location]
-         )]
-
 
       virtual_column :dynamic_attributes, :type => :json, :hidden => true,
         :remote_dependencies =>
@@ -167,6 +160,7 @@ module XYZ
          }]
 
       ###### end of virtual columns related to attributes, ports, and link_defs
+
 
     virtual_column :library, :type => :json, :hidden => true,
       :remote_dependencies =>

@@ -88,6 +88,26 @@ module DTK; class Component
       ret
     end
 
+    # these are port links that are connected on either end to the components in component_idhs
+    def self.get_port_links(component_idhs)
+      ret = Array.new
+      return ret if component_idhs.empty?
+      sp_hash = {
+        :cols => [:id],
+        :filter => [:oneof, :component_id, component_idhs.map{|idh|idh.get_id()}]
+      }
+      port_mh = component_idhs.first.createMH(:port)
+      port_ids = Model.get_objs(port_mh,sp_hash).map{|r|r[:id]}
+      return ret if port_ids.empty?
+
+      sp_hash = {
+        :cols => PortLink.common_columns(),
+        :filter => [:or, [:oneof, :input_id, port_ids], [:oneof, :output_id, port_ids]]
+      }
+      port_link_mh = component_idhs.first.createMH(:port_link)
+      Model.get_objs(port_link_mh,sp_hash)
+    end
+
     def get_component_template_parent()
       unless row = get_obj(:cols => [:instance_component_template_parent])
         raise Error.new("Unexpected that get_component_template_parent() called and nil result")

@@ -13,6 +13,7 @@ module DTK
     r8_nested_require('node','node_attribute')
     r8_nested_require('node','external_ref')
     r8_nested_require('node','delete')
+    r8_nested_require('node','dangling_link_mixin')
 
     include Type::Mixin
     include Clone::Mixin
@@ -20,6 +21,7 @@ module DTK
     include NodeAttribute::Mixin
     include ExternalRef::Mixin
     include Delete::Mixin
+    include DanglingLink::Mixin
 
     def self.common_columns()
       [
@@ -488,19 +490,6 @@ module DTK
     end
 # end of these may be depracted
 
-    def update_dangling_links()
-      ret = Array.new
-      dangling_links = 
-        get_objs(:cols => [:dangling_input_links_from_components]) +
-        get_objs(:cols => [:dangling_input_links_from_nodes])
-      return ret if dangling_links.empty?
-      aug_dangling_links = dangling_links.map do |r|
-        r[:attribute_link].merge(r.hash_subset(:input_attribute,:other_input_link))
-      end
-      attr_mh = model_handle_with_auth_info(:attribute)
-      Attribute.update_and_propagate_attributes_for_delete_links(attr_mh,aug_dangling_links,:add_state_changes => true)
-    end
-    private :update_dangling_links
 
     def self.get_port_links(id_handles,*port_types)
       input_port_rows =  get_objs_in_set(id_handles,:columns => [:id, :display_name, :input_port_link_info]).select do |r|

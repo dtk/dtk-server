@@ -61,7 +61,7 @@ module DTK; class ModuleDSL; class V3
       end
 
       def self.convert_link_def_link(link_def_link,dep_cmp_name,base_cmp,opts={})
-        Choice::LinkDefLink.new(link_def_link,dep_cmp_name,base_cmp).convert(link_def_link,opts)
+        Choice::LinkDef::Link.new(link_def_link,dep_cmp_name,base_cmp).convert(link_def_link,opts)
       end
 
     end

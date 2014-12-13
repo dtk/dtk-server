@@ -60,7 +60,7 @@ module DTK
     def self.create_from_link_defs__clone_if_needed(parent_idh,link_def_context,opts={})
 
       #TODO: might put back in on_create_events.each{|ev|ev.process!(context)} 
-      # ret_links__clone_if_needed returns array of type LinkDefLink::AttributeMapping::AugmentedLinkContext
+      # ret_links__clone_if_needed returns array of type LinkDef::Link::AttributeMapping::AugmentedLinkContext
       # which has attribute_mapping plus needed context
       am_links = link_def_context.augmented_attribute_mappings__clone_if_needed(:raise_error => opts[:raise_error])
       if port_link_idh = opts[:port_link_idh]

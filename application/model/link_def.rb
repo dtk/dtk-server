@@ -1,5 +1,7 @@
 module DTK
   class LinkDef < Model
+    r8_nested_require('link_def','link')
+    r8_nested_require('link_def','context')
     r8_nested_require('link_def','auto_complete')
     r8_nested_require('link_def','parse_serialized_form')
     r8_nested_require('link_def','info')
@@ -39,7 +41,7 @@ module DTK
         filter = [:and,filter,opts[:filter]]
       end
       sp_hash = {
-        :cols => opts[:cols]||LinkDefLink.common_columns(),
+        :cols => opts[:cols]||Link.common_columns(),
         :filter => filter
       }
       ld_link_mh = link_def_idhs.first.create_childMH(:link_def_link)

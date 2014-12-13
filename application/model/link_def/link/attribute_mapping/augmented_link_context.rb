@@ -1,4 +1,4 @@
-module DTK; class LinkDefLink
+module DTK; class LinkDef::Link
   class AttributeMapping
     class AugmentedLinkContext
       attr_reader :attribute_mapping,:input_path,:output_path

@@ -1,5 +1,5 @@
 module DTK
-  class LinkDefLink
+  class LinkDef::Link
     class AttributeMapping < HashObject
       r8_nested_require('attribute_mapping','augmented_link_context')
       r8_nested_require('attribute_mapping','augmented_link')

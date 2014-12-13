@@ -1,4 +1,4 @@
-module DTK; class LinkDefLink; class AttributeMapping
+module DTK; class LinkDef::Link; class AttributeMapping
   module ParseHelper
     module VarEmbeddedInText
       def self.isa?(am)

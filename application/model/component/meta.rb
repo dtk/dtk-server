@@ -156,7 +156,7 @@ module XYZ
            :convert => true,
            :join_type => :inner,
            :join_cond=>{:link_def_id => q(:link_def,:id)},
-           :cols => LinkDefLink.common_columns()
+           :cols => LinkDef::Link.common_columns()
          }]
 
       ###### end of virtual columns related to attributes, ports, and link_defs

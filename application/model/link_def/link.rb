@@ -1,7 +1,6 @@
-require  File.expand_path('link_def/context', File.dirname(__FILE__))
-module DTK
-  class LinkDefLink < Model
-    r8_nested_require('link_def_link','attribute_mapping')
+module DTK; class LinkDef
+  class Link < Model
+    r8_nested_require('link','attribute_mapping')
 
     def self.common_columns()
       [:id,:group_id,:display_name,:remote_component_type,:position,:content,:type,:temporal_order]
@@ -36,7 +35,7 @@ module DTK
              when "internal"
               in_aug_port[:node_node_id] == out_port[:node_node_id]
              else
-              raise Error.new("unexpected type for LinkDefLink object")
+              raise Error.new("unexpected type for LinkDef::Link object")
             end
           if match
             ret << {:input_port => in_aug_port,:output_port => out_port}
@@ -124,4 +123,4 @@ module DTK
       end
     end
   end
-end
+end; end

@@ -19,13 +19,13 @@ module DTK; class LinkDefLink
       end
 
       # returns Array of AugmentedLink objects 
-      def ret_links()
+      def ret_links__clone_if_needed()
         ret_links_multiple_links_needed?() || [ret_single_link(input_attr(),output_attr())]
       end
 
      private
       def ret_single_link(input_attr,output_attr)
-        AugmentedLink.ret_link(@attribute_mapping,input_attr,@input_path,output_attr,@output_path)
+        AugmentedLink.new(@attribute_mapping,input_attr,@input_path,output_attr,@output_path)
       end
 
       def ret_links_multiple_links_needed?()
@@ -49,19 +49,17 @@ module DTK; class LinkDefLink
           if @output_attr_obj.is_node_attribute?() and !@input_attr_obj.is_array?()
             raise ErrorUsage.new("Node attributes on node groups (#{@output_attr_obj.pp_form()}) must connect to an array attribute, not '#{@input_attr_obj.pp_form()}'")
           end          
-          ret_links_with_output_node_group()
-        end
-      end
 
-      def ret_links_with_output_node_group()
-        node_group_attrs = @output_attr_obj.get_node_group_member_attributes()
-        unless node_group_attrs.empty?
-          input_attr = input_attr()
-          node_group_attrs.map do |output_attr|
-            ret_single_link(input_attr(),output_attr)
+          node_group_attrs = @output_attr_obj.get_or_create_node_group_member_attributes()
+          unless node_group_attrs.empty?
+            input_attr = input_attr()
+            node_group_attrs.map do |output_attr|
+              ret_single_link(input_attr(),output_attr)
+            end
           end
         end
       end
+      
     end
   end
 end; end

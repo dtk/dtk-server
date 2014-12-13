@@ -8,11 +8,6 @@ module DTK; class LinkDefLink
         merge!(:input_path => input_path) if input_path
         merge!(:output_path => output_path) if output_path
       end
-      private :initialize
-
-      def self.ret_link(attribute_mapping,input_attr,input_path,output_attr,output_path)
-        new(attribute_mapping,input_attr,input_path,output_attr,output_path)
-      end
 
       def parse_function_with_args?()
         @attribute_mapping.parse_function_with_args?()

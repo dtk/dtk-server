@@ -1,11 +1,11 @@
 module DTK
   class Target < Model
-    r8_nested_require('target','clone_post_copy_hook')
+    r8_nested_require('target','clone')
     r8_nested_require('target','install_agents_helper')
     r8_nested_require('target','iaas_properties')
     r8_nested_require('target','instance')
     r8_nested_require('target','template')
-    include ClonePostCopyHook::Mixin
+    include Clone::Mixin
 
     def model_name() #TODO: remove temp datacenter->target
       :datacenter

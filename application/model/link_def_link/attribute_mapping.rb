@@ -15,17 +15,11 @@ module DTK
         end
       end
 
-      # returns array of AugmentedLink elements
-      def self.ret_links(attribute_mappings,context,opts={})
-        attribute_mappings.inject(Array.new) do |ret,am|
-          ret + am.ret_links(context,opts)
-        end
-      end
-      def ret_links(context,opts={})
+      def ret_links__clone_if_needed(link_def_context,opts={})
         ret = Array.new
         err_msgs = Array.new
-        input_attr_obj,input_path = get_context_attr_obj_with_path(err_msgs,:input,context)
-        output_attr_obj,output_path = get_context_attr_obj_with_path(err_msgs,:output,context)
+        input_attr_obj,input_path = get_context_attr_obj_with_path(err_msgs,:input,link_def_context)
+        output_attr_obj,output_path = get_context_attr_obj_with_path(err_msgs,:output,link_def_context)
         unless err_msgs.empty?
           err_msg = err_msgs.join(" and ").capitalize
           if opts[:raise_error]
@@ -42,7 +36,7 @@ module DTK
           :output_attr_obj => output_attr_obj,
           :output_path     => output_path
         }
-        AugmentedLinkContext.new(self,context,attr_and_path_info).ret_links()
+        AugmentedLinkContext.new(self,link_def_context,attr_and_path_info).ret_links__clone_if_needed()
       end
 
       # returns a hash with args if this is a function that takes args

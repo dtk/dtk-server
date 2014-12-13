@@ -1,4 +1,4 @@
-module DTK; class LinkDefContext
+module DTK; class LinkDef::Context
   class ServiceNodeGroupCache < ::DTK::ServiceNodeGroup
     def self.model_name()
       :node

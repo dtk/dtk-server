@@ -1,5 +1,5 @@
 module DTK
-  class LinkDefContext
+  class LinkDef::Context
     class NodeMappings < Hash
       def initialize(local,remote=nil)
         super()

@@ -57,6 +57,20 @@ module DTK
     ########################## end: get links ##################
 
     ##########################  add new links ##################
+    def self.create_from_link_defs__clone_if_needed(parent_idh,link_def_context,opts={})
+
+      #TODO: might put back in on_create_events.each{|ev|ev.process!(context)} 
+      # ret_links__clone_if_needed returns array of type LinkDefLink::AttributeMapping::AugmentedLinkContext
+      # which has attribute_mapping plus needed context
+      am_links = link_def_context.augmented_attribute_mappings__clone_if_needed(:raise_error => opts[:raise_error])
+      if port_link_idh = opts[:port_link_idh]
+        port_link_id = port_link_idh.get_id()
+        am_links.each{|link|link[:port_link_id] = port_link_id}
+      end
+
+      create_attribute_links(parent_idh,am_links)
+    end
+
     def self.create_attribute_links(parent_idh,rows_to_create,opts={})
       return Array.new if rows_to_create.empty?
       attr_mh = parent_idh.create_childMH(:attribute)

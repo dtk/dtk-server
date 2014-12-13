@@ -1,4 +1,4 @@
-module DTK; class LinkDefContext
+module DTK; class LinkDef::Context
   class Value 
     class ComponentAttribute < self
       include AttributeMixin
@@ -23,7 +23,7 @@ module DTK; class LinkDefContext
 
       # this should only be called on a node group
       # it returns the associated attributes on the node goup members
-      def get_node_group_member_attributes()
+      def get_or_create_node_group_member_attributes()
         node_group_attrs = service_node_group_cache().get_component_attributes(@component)
         attr_name = @attribute.get_field?(:display_name)
         node_group_attrs.select{|a|a[:display_name] == attr_name}

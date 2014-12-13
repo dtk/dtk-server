@@ -1,15 +1,15 @@
 module DTK
   class Target
-    module ClonePostCopyHook
-      r8_nested_require('clone_post_copy_hook','special_node_attributes')
+    module Clone
+      r8_nested_require('clone','special_node_attributes')
 
       module Mixin
         def clone_post_copy_hook(clone_copy_output,opts={})
           case clone_copy_output.model_name()
           when :component
-            ClonePostCopyHook.component(self,clone_copy_output,opts)
+            Clone.component(self,clone_copy_output,opts)
           when :node
-            ClonePostCopyHook.node(self,clone_copy_output,opts)
+            Clone.node(self,clone_copy_output,opts)
           else #TODO: catchall that will be expanded
             new_id_handle = clone_copy_output.id_handles.first
             StateChange.create_pending_change_item(:new_item => new_id_handle, :parent => id_handle())
@@ -68,7 +68,7 @@ module DTK
         # Computing port_links (and also attribute links after create_target_refs_and_links
         # because relying on the node attributes to be shifted to target refs if connected to target refs
         port_link_idhs = clone_copy_output.children_id_handles(level,:port_link)
-        assembly__port_links(target,clone_copy_output,port_link_idhs,opts)
+        create_target_ref_links_and_components(target,clone_copy_output,port_link_idhs,opts)
 
         level = 2
         component_child_hashes = clone_copy_output.children_hash_form(level,:component)
@@ -145,8 +145,7 @@ module DTK
         Port.set_ports_link_def_and_cmp_ids(port_mh,ports,cmps,link_defs)
       end
 
-      # TODO: change name to reflecxt taht this can copy components onto target refs
-      def self.assembly__port_links(target,clone_copy_output,port_link_idhs,opts)
+      def self.create_target_ref_links_and_components(target,clone_copy_output,port_link_idhs,opts)
         #find the port_links under the assembly and then add attribute_links associated with it
         #  TODO: this may be considered bug; but at this point assembly_id on port_links point to assembly library instance
         return if port_link_idhs.empty?
@@ -157,7 +156,7 @@ module DTK
           :filter => [:oneof,:id, port_link_idhs.map{|pl_idh|pl_idh.get_id()}]
         }
         Model.get_objs(port_link_mh,sp_hash).each do |port_link|
-          port_link.create_attr_links!(target.id_handle,:set_port_link_temporal_order=>true)
+          port_link.create_attribute_links!(target.id_handle,:set_port_link_temporal_order=>true)
         end
       end
     end

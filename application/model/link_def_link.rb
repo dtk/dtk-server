@@ -56,19 +56,7 @@ module DTK
       create_from_rows(model_handle,rows)
     end
 
-    def process(parent_idh,components,opts={})
-      link_defs_info = components.map{|cmp| {:component => cmp}}
-      context = LinkDefContext.create(self,link_defs_info)
-
-      #TODO: might put back in on_create_events.each{|ev|ev.process!(context)} 
-      am_links = AttributeMapping.ret_links(attribute_mappings,context,:raise_error => opts[:raise_error])
-      if port_link_idh = opts[:port_link_idh]
-        port_link_id = port_link_idh.get_id()
-        am_links.each{|link|link[:port_link_id] = port_link_id}
-      end
-
-      AttributeLink.create_attribute_links(parent_idh,am_links)
-    end
+    # craetes attribute links and can clone if needed attributes on a service node group to its members 
 
     def update_attribute_mappings!(new_attribute_mappings)
       ret = self[:attribute_mappings] = new_attribute_mappings

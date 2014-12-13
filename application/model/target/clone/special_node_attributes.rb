@@ -1,6 +1,6 @@
 module DTK
   class Target
-    module ClonePostCopyHook
+    module Clone
       module SpecialNodeAttributes
         def self.process!(nodes)
           process_name_attribute!(nodes)

@@ -31,7 +31,7 @@ module DTK
       end
 
       # can be overwritten
-      def get_or_create_node_group_member_attributes()
+      def get_ng_member_attributes__clone_if_needed()
         Array.new
       end
 

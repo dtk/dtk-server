@@ -1,6 +1,6 @@
 module DTK; class ModuleDSL; class V3
   class ObjectModelForm; class Choice
-    class LinkDef::Link < self
+    class LinkDefLink < self
       attr_reader :dependency_name
       attr_accessor :required
       def dep_cmp_ndx()

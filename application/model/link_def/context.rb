@@ -1,7 +1,6 @@
 module DTK
   class LinkDef::Context
     r8_nested_require('context','term_mappings')
-    r8_nested_require('context','service_node_group_cache')
     r8_nested_require('context','node_mappings')
     r8_nested_require('context','value')
 

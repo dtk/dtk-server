@@ -22,8 +22,8 @@ module DTK; class LinkDef::Context
 
       # this should only be called on a node group
       # it returns the associated attributes on the node goup members
-      def get_ng_member_attributes__clone_if_needed()
-        node_group_attrs = service_node_group_cache().get_node_attributes()
+      def get_ng_member_attributes__clone_if_needed(opts={})
+        node_group_attrs = service_node_group_cache().get_node_attributes(opts)
         attr_name = @attribute.get_field?(:display_name)
         node_group_attrs.select{|a|a[:display_name] == attr_name}
       end

@@ -11,7 +11,6 @@ module DTK; class LinkDef::Link
         @input_path = info[:input_path]
         @output_attr_obj = info[:output_attr_obj]
         @output_path = info[:output_path]
-        @port_link_id = opts[:port_link_idh] && opts[:port_link_idh].get_id()
       end
       private :initialize
       def input_attr()
@@ -24,28 +23,29 @@ module DTK; class LinkDef::Link
       # returns Array of Augmented (AttributeMapping) objects 
       # clones component and their attributes from a node group if needed
       def self.aug_attr_mappings__clone_if_needed(attribute_mapping,link_def_context,attr_and_path_info,opts={})
-        new(attribute_mapping,link_def_context,attr_and_path_info,opts).aug_attr_mappings__clone_if_needed()
+        new(attribute_mapping,link_def_context,attr_and_path_info,opts).aug_attr_mappings__clone_if_needed(opts)
       end
 
-      def aug_attr_mappings__clone_if_needed()
+      def aug_attr_mappings__clone_if_needed(opts={})
         ret = Array.new
         input_attr = input_attr()
+        port_link_id = opts[:port_link_idh] && opts[:port_link_idh].get_id()
         if cloning_node_group_members_needed?() 
-          node_group_attrs = @output_attr_obj.get_ng_member_attributes__clone_if_needed()
+          node_group_attrs = @output_attr_obj.get_ng_member_attributes__clone_if_needed(opts)
           node_group_attrs.each do |output_attr|
-            ret << ret_single_link(input_attr,output_attr)
+            ret << ret_single_link(input_attr,output_attr,port_link_id)
           end
         else
-          ret << ret_single_link(input_attr,output_attr())
+          ret << ret_single_link(input_attr,output_attr(),port_link_id)
         end
         ret
       end
 
      private
-      def ret_single_link(input_attr,output_attr)
+      def ret_single_link(input_attr,output_attr,port_link_id=nil)
         ret = Augmented.new(@attribute_mapping,input_attr,@input_path,output_attr,@output_path)
-        if @port_link_id
-          ret.merge!(:port_link_id => @port_link_id)
+        if port_link_id
+          ret.merge!(:port_link_id => port_link_id)
         end
         ret        
       end

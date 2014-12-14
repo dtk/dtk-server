@@ -31,7 +31,7 @@ module DTK
       end
 
       # can be overwritten
-      def get_ng_member_attributes__clone_if_needed()
+      def get_ng_member_attributes__clone_if_needed(opts={})
         Array.new
       end
 

@@ -67,7 +67,8 @@ module DTK
           update(:temporal_order => temporal_order)
         end
       end
-      AttributeLink.create_from_link_defs__clone_if_needed(parent_idh,link_def_context,:port_link_idh => id_handle())
+      opts_create = Aux.hash_subset(opts,[:filter]).merge(:port_link_idh => id_handle())
+      AttributeLink.create_from_link_defs__clone_if_needed(parent_idh,link_def_context,opts_create)
       self
     end
 

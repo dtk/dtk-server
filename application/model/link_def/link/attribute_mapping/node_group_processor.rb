@@ -1,8 +1,9 @@
 module DTK; class LinkDef::Link
   class AttributeMapping
-    class AugmentedLinkContext
+    # processes service node groups when needed
+    class NodeGroupProcessor
       attr_reader :attribute_mapping,:input_path,:output_path
-      def initialize(attribute_mapping,link_def_context,attr_and_path_info)
+      def initialize(attribute_mapping,link_def_context,attr_and_path_info,opts={})
         @attribute_mapping = attribute_mapping
         @link_def_context = link_def_context
         info = attr_and_path_info # for succinctness
@@ -10,7 +11,9 @@ module DTK; class LinkDef::Link
         @input_path = info[:input_path]
         @output_attr_obj = info[:output_attr_obj]
         @output_path = info[:output_path]
+        @port_link_id = opts[:port_link_idh] && opts[:port_link_idh].get_id()
       end
+      private :initialize
       def input_attr()
         @input_attr_obj.value()
       end
@@ -18,8 +21,13 @@ module DTK; class LinkDef::Link
         @output_attr_obj.value()
       end
 
-      # returns Array of AugmentedLink objects 
-      def ret_links__clone_if_needed()
+      # returns Array of Augmented (AttributeMapping) objects 
+      # clones component and their attributes from a node group if needed
+      def self.aug_attr_mappings__clone_if_needed(attribute_mapping,link_def_context,attr_and_path_info,opts={})
+        new(attribute_mapping,link_def_context,attr_and_path_info,opts).aug_attr_mappings__clone_if_needed()
+      end
+
+      def aug_attr_mappings__clone_if_needed()
         ret = Array.new
         input_attr = input_attr()
         if cloning_node_group_members_needed?() 
@@ -35,7 +43,11 @@ module DTK; class LinkDef::Link
 
      private
       def ret_single_link(input_attr,output_attr)
-        AugmentedLink.new(@attribute_mapping,input_attr,@input_path,output_attr,@output_path)
+        ret = Augmented.new(@attribute_mapping,input_attr,@input_path,output_attr,@output_path)
+        if @port_link_id
+          ret.merge!(:port_link_id => @port_link_id)
+        end
+        ret        
       end
 
       def cloning_node_group_members_needed?() 

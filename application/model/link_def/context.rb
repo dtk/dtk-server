@@ -27,10 +27,10 @@ module DTK
     end
     private :initialize
 
-    # returns array of LinkDef::Link::AttributeMapping::AugmentedLinkContext
-    def augmented_attribute_mappings__clone_if_needed(opts={})
+    # returns array of LinkDef::Link::AttributeMapping::Augmented
+    def aug_attr_mappings__clone_if_needed(opts={})
       @link.attribute_mappings().inject(Array.new) do |ret,am|
-        ret + am.ret_links__clone_if_needed(self,opts)
+        ret + am.aug_attr_mappings__clone_if_needed(self,opts)
       end
     end
 

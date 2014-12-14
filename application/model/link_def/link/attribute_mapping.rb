@@ -1,8 +1,8 @@
 module DTK
   class LinkDef::Link
     class AttributeMapping < HashObject
-      r8_nested_require('attribute_mapping','augmented_link_context')
-      r8_nested_require('attribute_mapping','augmented_link')
+      r8_nested_require('attribute_mapping','node_group_processor')
+      r8_nested_require('attribute_mapping','augmented')
       r8_nested_require('attribute_mapping','parse_helper')
                         
       def self.reify(object)
@@ -15,7 +15,7 @@ module DTK
         end
       end
 
-      def ret_links__clone_if_needed(link_def_context,opts={})
+      def aug_attr_mappings__clone_if_needed(link_def_context,opts={})
         ret = Array.new
         err_msgs = Array.new
         input_attr_obj,input_path = get_context_attr_obj_with_path(err_msgs,:input,link_def_context)
@@ -36,7 +36,7 @@ module DTK
           :output_attr_obj => output_attr_obj,
           :output_path     => output_path
         }
-        AugmentedLinkContext.new(self,link_def_context,attr_and_path_info).ret_links__clone_if_needed()
+        NodeGroupProcessor.aug_attr_mappings__clone_if_needed(self,link_def_context,attr_and_path_info,opts)
       end
 
       # returns a hash with args if this is a function that takes args

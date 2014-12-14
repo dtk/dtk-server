@@ -60,25 +60,19 @@ module DTK
     def self.create_from_link_defs__clone_if_needed(parent_idh,link_def_context,opts={})
 
       #TODO: might put back in on_create_events.each{|ev|ev.process!(context)} 
+
       # ret_links__clone_if_needed returns array of type LinkDef::Link::AttributeMapping::AugmentedLinkContext
       # which has attribute_mapping plus needed context
-      am_links = link_def_context.augmented_attribute_mappings__clone_if_needed(:raise_error => opts[:raise_error])
-      if port_link_idh = opts[:port_link_idh]
-        port_link_id = port_link_idh.get_id()
-        am_links.each{|link|link[:port_link_id] = port_link_id}
-      end
-
-      create_attribute_links(parent_idh,am_links)
-    end
+      aug_am_links = link_def_context.aug_attr_mappings__clone_if_needed(opts)
+      create_attribute_links(parent_idh,aug_am_links)
+   end
 
     def self.create_attribute_links(parent_idh,rows_to_create,opts={})
       return Array.new if rows_to_create.empty?
       attr_mh = parent_idh.create_childMH(:attribute)
       attr_link_mh = parent_idh.create_childMH(:attribute_link)
 
-      attr_rows = opts[:attr_rows]||get_attribute_info(attr_mh,rows_to_create)
-      attr_info = attr_rows.inject({}){|h,attr|h.merge(attr[:id] => attr)}
-      
+      attr_info = create_attribute_links__attr_info(attr_mh,rows_to_create,opts)
       add_link_fns!(rows_to_create,attr_info)
 
       # add parent_col and ref
@@ -89,19 +83,21 @@ module DTK
         row[:ref] ||= "attribute_link:#{row[:input_id]}-#{row[:output_id]}"
       end
 
+      # actual create of new attribute_links
       rows_for_array_ds = rows_to_create.map{|row|Aux::hash_subset(row,row.keys - remove_keys)}
       select_ds = SQL::ArrayDataset.create(db,rows_for_array_ds,attr_link_mh,:convert_for_create => true)
       override_attrs = {}
       field_set = FieldSet.new(model_name,rows_for_array_ds.first.keys)
       returning_ids = create_from_select(attr_link_mh,field_set,select_ds,override_attrs,:returning_sql_cols=> [:id])
+
       # insert the new ids into rows_to_create
       returning_ids.each_with_index{|id_info,i|rows_to_create[i][:id] = id_info[:id]}
 
       # augment attributes with port info; this is needed only if port is external
       Attribute.update_port_info(attr_mh,rows_to_create) unless opts[:donot_update_port_info]
 
-      # want to use auth_info from parent_idh in case more specific than datacenter
-      change_parent_idh = parent_idh.get_top_container_id_handle(:datacenter,:auth_info_from_self => true)
+      # want to use auth_info from parent_idh in case more specific than target 
+      change_parent_idh = parent_idh.get_top_container_id_handle(:target,:auth_info_from_self => true)
       # propagate attribute values
       ndx_nested_change_hashes = propagate_from_create(attr_mh,attr_info,rows_to_create,change_parent_idh)
       StateChange.create_pending_change_items(ndx_nested_change_hashes.values) unless opts[:donot_create_pending_changes]
@@ -161,6 +157,11 @@ module DTK
         # TODO: may treat differently if rows_to_create has multiple rows
         constraints.evaluate_given_target(target, :raise_error_when_error_violation => true)
       end
+    end
+
+    def self.create_attribute_links__attr_info(attr_mh,rows_to_create,opts={})
+      attr_rows = opts[:attr_rows]||get_attribute_info(attr_mh,rows_to_create)
+      attr_rows.inject({}){|h,attr|h.merge(attr[:id] => attr)}
     end
 
     def self.add_link_fns!(rows_to_create,attr_info)

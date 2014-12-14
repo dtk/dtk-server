@@ -68,7 +68,7 @@ module DTK
         # Computing port_links (and also attribute links after create_target_refs_and_links
         # because relying on the node attributes to be shifted to target refs if connected to target refs
         port_link_idhs = clone_copy_output.children_id_handles(level,:port_link)
-        create_target_ref_links_and_components(target,clone_copy_output,port_link_idhs,opts)
+        create_attribute_links__clone_if_needed(target,port_link_idhs)
 
         level = 2
         component_child_hashes = clone_copy_output.children_hash_form(level,:component)
@@ -131,7 +131,7 @@ module DTK
           # TODO: more efficient if had bulk create; also may consider better intergrating with creation of the assembly proper's port links
           target_idh = target.id_handle()
           pl_hashes.each do |port_link_hash|
-            PortLink.create_port_and_attr_links(target_idh,port_link_hash,opts)
+            PortLink.create_port_and_attr_links__clone_if_needed(target_idh,port_link_hash,opts)
           end
         end
       end
@@ -145,8 +145,8 @@ module DTK
         Port.set_ports_link_def_and_cmp_ids(port_mh,ports,cmps,link_defs)
       end
 
-      def self.create_target_ref_links_and_components(target,clone_copy_output,port_link_idhs,opts)
-        #find the port_links under the assembly and then add attribute_links associated with it
+      # find the port_links under the assembly and then add attribute_links associated with it
+      def self.create_attribute_links__clone_if_needed(target,port_link_idhs)
         #  TODO: this may be considered bug; but at this point assembly_id on port_links point to assembly library instance
         return if port_link_idhs.empty?
         sample_pl_idh = port_link_idhs.first
@@ -156,7 +156,7 @@ module DTK
           :filter => [:oneof,:id, port_link_idhs.map{|pl_idh|pl_idh.get_id()}]
         }
         Model.get_objs(port_link_mh,sp_hash).each do |port_link|
-          port_link.create_attribute_links!(target.id_handle,:set_port_link_temporal_order=>true)
+          port_link.create_attribute_links__clone_if_needed(target.id_handle,:set_port_link_temporal_order=>true)
         end
       end
     end

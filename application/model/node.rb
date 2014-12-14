@@ -182,6 +182,24 @@ module DTK
       get_objs_in_set(id_handles,{:cols => [:ports]},{:keep_ref_cols => true}).map{|r|r[:port]}
     end
 
+    def get_port_links()
+      self.class.get_port_links([id_handle()])
+    end
+
+    def self.get_port_links(id_handles)
+      ret = Array.new
+      ports = get_ports(id_handles)
+      return ret if ports.empty?()
+      port_ids = ports.map{|p|p[:id]}
+      sp_hash = {
+        :cols => PortLink.common_columns(),
+        :filter => [:or, [:oneof, :input_id, port_ids], [:oneof, :output_id, port_ids]] 
+      }
+      port_link_mh = ports.first.model_handle(:port_link)
+      Model.get_objs(port_link_mh,sp_hash)
+    end
+
+    # TODO: gui based may remove
     def get_ports(*types)
       port_list = self.class.get_ports([id_handle])
       i18n = get_i18n_mappings_for_models(:component,:attribute)
@@ -489,46 +507,6 @@ module DTK
       eval(ordered_component_ids)[:order]
     end
 # end of these may be depracted
-
-
-    def self.get_port_links(id_handles,*port_types)
-      input_port_rows =  get_objs_in_set(id_handles,:columns => [:id, :display_name, :input_port_link_info]).select do |r|
-        port_types.include?((r[:port]||{})[:type])
-      end
-      # TODO: implement using PortLink.common_columns and materialize
-      input_port_rows.each do |r|
-        r[:port_link][:ui] ||= {
-          :type => R8::Config[:links][:default_type],
-          :style => R8::Config[:links][:default_style]
-        }
-      end
-
-      output_port_rows =  get_objs_in_set(id_handles,:columns => [:id, :display_name, :output_port_link_info]).select do |r|
-        port_types.include?((r[:port]||{})[:type])
-      end
-      # TODO: implement using PortLink.common_columns and materialize
-      output_port_rows.each do |r|
-        r[:port_link][:ui] ||= {
-          :type => R8::Config[:links][:default_type],
-          :style => R8::Config[:links][:default_style]
-        }
-      end
-
-      return Array.new if input_port_rows.empty? and output_port_rows.empty?
-
-      indexed_ret = Hash.new
-      input_port_rows.each do |r|
-        id = r[:id]
-        indexed_ret[id] ||= r.subset(:id, :display_name).merge(:input_port_links => Array.new, :output_port_links => Array.new)
-        indexed_ret[id][:input_port_links] << r[:port_link]
-      end
-      output_port_rows.each do |r|
-        id = r[:id]
-        indexed_ret[id] ||= r.subset(:id, :display_name).merge(:output_port_links => Array.new, :output_port_links => Array.new)
-        indexed_ret[id][:output_port_links] << r[:port_link]
-      end
-      indexed_ret.values
-    end
 
     def self.get_output_attrs_to_l4_input_ports(id_handles)
       rows = get_objs_in_set(id_handles,{:cols => [:output_attrs_to_l4_input_ports]},{:keep_ref_cols => true})

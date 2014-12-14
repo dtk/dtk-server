@@ -97,7 +97,7 @@ module DTK
             :assembly_id => @assembly_instance.id()
           }
           target = @assembly_instance.get_target()
-          PortLink.create_port_and_attr_links(target.id_handle(),port_link_hash,:override_attrs => override_attrs)
+          PortLink.create_port_and_attr_links__clone_if_needed(target.id_handle(),port_link_hash,:override_attrs => override_attrs)
         end
 
       end

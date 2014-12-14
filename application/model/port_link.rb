@@ -37,7 +37,7 @@ module DTK
 
     # create port link adn associated attribute links
     # can clone if needed attributes on a service node group to its members 
-    def self.create_port_and_attr_links(target_idh,port_link_hash,opts={})
+    def self.create_port_and_attr_links__clone_if_needed(target_idh,port_link_hash,opts={})
       unless link_def_context = get_link_def_context?(target_idh,port_link_hash)
         raise PortLinkError.new("Illegal link")
       end
@@ -51,9 +51,13 @@ module DTK
     end
 
     # create attribute links from this port link
+    def create_attribute_links(parent_idh,opts={})
+      # The reason to have create_attribute_links is to document callers from which we know no cloning will be needed
+      create_attribute_links__clone_if_needed(parent_idh,opts)
+    end
     # can clone if needed attributes on a service node group to its members 
     # this sets temporal order if have option :set_port_link_temporal_order
-    def create_attribute_links!(parent_idh,opts={})
+    def create_attribute_links__clone_if_needed(parent_idh,opts={})
       update_obj!(:input_id,:output_id)
       unless link_def_context = get_link_def_context?(parent_idh)
         raise PortLinkError.new("Illegal link")

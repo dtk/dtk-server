@@ -359,6 +359,7 @@ module DTK
 # TODO: move this call into underlying get_links call,
       item_list = item_list.map{|x|id_handle(x["id"].to_i,x["model"].to_sym)}
 # TODO: make get_links an instance method, should pull all links from children if item_list is []/nil
+      raise Error.new("Target::get_ports_links is deprecated")
       link_list = target.class.get_port_links(item_list,"component_external")
       return {'data'=>link_list}
     end

@@ -26,6 +26,7 @@ module DTK
       Clone.clone_and_get_components_with_attrs(self,node_members,opts)
     end
 
+    # called when bumping up cardinaility in a service instance
     def add_group_members(new_cardinality)
       target = get_target()
       assembly = get_assembly?() 
@@ -40,6 +41,10 @@ module DTK
       node_group_sc_idh = node_group_sc.id_handle()
       new_items_hash = new_tr_idhs.map{|idh|{:new_item => idh, :parent => node_group_sc_idh}}
       StateChange.create_pending_change_items(new_items_hash)
+
+      # add attribute mappsings, cloning if needed
+      create_attribute_links__clone_if_needed(target)      
+
       new_tr_idhs
     end
 
@@ -127,6 +132,14 @@ module DTK
       super(opts)
     end
 
+   private
+    def create_attribute_links__clone_if_needed(target)
+      port_links = get_port_links()
+      return if port_links.empty?
+      port_links.each do |port_link|
+        port_link.create_attribute_links__clone_if_needed(target.id_handle,:set_port_link_temporal_order=>true)
+      end
+    end
   end
 end
 

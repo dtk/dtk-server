@@ -1,6 +1,7 @@
 .tmp*
 cache/
 application/r8server.log*
+application/tmp/
 application/config/config.rb
 application/config/environment_config.rb
 application/public/js/cache/*.js
@@ -11,3 +12,4 @@ application/config/newrelic.yml
 application/log/
 .gitattributes
 *.DS_Store
+

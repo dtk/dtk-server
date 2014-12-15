@@ -47,7 +47,7 @@ module DTK; class NodeGroup
       # TODO: can also look at approach were if one node member exists already can do simpler copy
       port_link_info.each do |pl|
         port_link = pl[:node_group_port_link]
-        port_link.create_attr_links!(node.id_handle)
+        port_link.create_attribute_links(node.id_handle)
       end
     end
 

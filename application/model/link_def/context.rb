@@ -1,7 +1,6 @@
 module DTK
-  class LinkDefContext
+  class LinkDef::Context
     r8_nested_require('context','term_mappings')
-    r8_nested_require('context','service_node_group_cache')
     r8_nested_require('context','node_mappings')
     r8_nested_require('context','value')
 
@@ -27,15 +26,26 @@ module DTK
     end
     private :initialize
 
+    # returns array of LinkDef::Link::AttributeMapping::Augmented
+    def aug_attr_mappings__clone_if_needed(opts={})
+      @link.attribute_mappings().inject(Array.new) do |ret,am|
+        ret + am.aug_attr_mappings__clone_if_needed(self,opts)
+      end
+    end
+
     def find_attribute_object?(term_index)
       @term_mappings.find_attribute_object?(term_index)
     end
-    
+
     def remote_node()
       @node_mappings.remote
     end
     def local_node()
       @node_mappings.local
+    end
+
+    def temporal_order()
+      @link[:temporal_order]
     end
 
     def add_component_ref_and_value!(component_type,component)

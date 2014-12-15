@@ -3,7 +3,7 @@ module XYZ
 
     # deprecate for Port_linkController#save
     def save(explicit_hash=nil,opts={})
-      raise Error.new("TODO: this is now deprecated: PortLink.create_port_and_attr_links has changed")
+      raise Error.new("TODO: this is now deprecated: PortLink.create_port_and_attr_links__clone_if_needed has changed")
       hash = explicit_hash || request.params
       return Error.new("not implemented update of port link") if hash["id"]
 
@@ -17,7 +17,7 @@ module XYZ
       handle_errors do
         parent_id_handle = id_handle(hash["parent_id"],hash["parent_model_name"])
         # TODO: many hacks to return new interface to front end
-        link = PortLink.create_port_and_attr_links(parent_id_handle,port_link_hash)
+        link = PortLink.create_port_and_attr_links__clone_if_needed(parent_id_handle,port_link_hash)
         new_id = link.id
 
         link.update_object!(:input_id,:output_id)

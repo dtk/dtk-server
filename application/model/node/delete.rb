@@ -31,10 +31,15 @@ end
         if target_ref_idh = opts[:delete_target_ref]
           Model.delete_instance(target_ref_idh)
         end
-        # unless :update_dangling_links explicily set to false
-        unless !opts[:update_dangling_links].nil? and !opts[:update_dangling_links]
-          update_dangling_links() 
+
+        update_dangling_links() 
+
+        if is_target_ref?()
+          # This wil be a node group member; need to bump down is assocaited node groups cardinality
+          node_group_member = ServiceNodeGroup::NodeGroupMember.create_as(self)
+          node_group_member.bump_down_associated_node_group_cardinality()
         end
+
         if opts[:update_task_template]
           unless assembly = opts[:assembly]
             raise Error.new("If update_task_template is set, :assembly must be given as an option")
@@ -57,7 +62,7 @@ end
         # if more than 1 reference count than succeed with no op
         ref_count = TargetRef.get_reference_count(self)
         if ref_count < 2
-          execute_destroy_and_delete({:update_dangling_links => false}.merge(opts))
+          execute_destroy_and_delete(opts)
         else
           # no op
           true

@@ -1,5 +1,5 @@
 module DTK
-  class LinkDefContext
+  class LinkDef::Context
     class TermMappings < Hash
       def self.create_and_update_cmp_attr_index(node_mappings,component_attr_index,attribute_mappings,cmp_mappings)
         ret = TermMappings.new()

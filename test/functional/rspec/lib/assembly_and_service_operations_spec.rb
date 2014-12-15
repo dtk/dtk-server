@@ -137,3 +137,117 @@ shared_context "List component dependencies" do |dtk_common, source_component, d
     dependency_found.should eq(true)
   end
 end
+
+shared_context "Push assembly updates" do |dtk_common, service_module|
+  it "pushes changes from service back to origin service" do
+    assembly_updated = dtk_common.push_assembly_updates(dtk_common.service_id, service_module)
+    assembly_updated.should eq(true)
+  end
+end
+
+shared_context "Push component module updates without changes" do |dtk_common, component_module, assembly_name|
+  it "retrieves message that no changes have been made" do
+    response = dtk_common.push_component_module_updates(dtk_common.service_id, component_module)
+    response['errors'].first['message'].should eq("Changes to component module (#{component_module.split(":").last}) have not been made in assembly (#{assembly_name})")
+  end
+end
+
+shared_context "List nodes" do |dtk_common, nodes_list|
+  it "gives list of all nodes on the service and matches them with given #{nodes_list} input" do
+    nodes_exist = true
+    nodes_retrieved = dtk_common.get_nodes(dtk_common.service_id)
+    nodes_list.each do |n|
+      unless nodes_retrieved.include? n
+        nodes_exist = false
+        break
+      end
+    end
+    nodes_exist.should eq(true)
+  end
+end
+
+shared_context "List components" do |dtk_common, components_list|
+  it "gives list of all components on the service and matches them with given #{components_list} input" do
+    components_exist = true
+    components_retrieved = dtk_common.get_components(dtk_common.service_id)
+    components_list.each do |c|
+      unless components_retrieved.include? c
+        components_exist = false
+        break
+      end
+    end
+    components_exist.should eq(true)
+  end
+end
+
+shared_context "Delete node" do |dtk_common, node_name|
+  it "deletes #{node_name} node" do
+    node_deleted = dtk_common.delete_node(dtk_common.service_id, node_name)
+    node_deleted.should eq(true)
+  end
+end
+
+shared_context "Get cardinality" do |dtk_common, node_name, cardinality_expected|
+  it "gets cardinality and verifies it is equal to provided cardinality: #{cardinality_expected}" do
+    cardinality = dtk_common.get_cardinality(dtk_common.service_id, node_name)
+    cardinality.should eq(cardinality_expected)
+  end
+end
+
+shared_context "Grant access after converge" do |dtk_common, system_user, rsa_pub_name|
+  it "grants access to nodes" do
+    access_granted = false
+    response = dtk_common.grant_access(dtk_common.service_id, system_user, rsa_pub_name, dtk_common.ssh_key)
+    if response['status'] == 'ok'
+      access_granted = true
+    end
+    access_granted.should eq(true)
+  end
+end
+
+shared_context "NEG - Grant access before converge" do |dtk_common, system_user, rsa_pub_name|
+  it "does not grant access because nodes are staged" do
+    access_granted = true
+    response = dtk_common.grant_access(dtk_common.service_id, system_user, rsa_pub_name, dtk_common.ssh_key)
+    if response['status'] == 'notok'
+      access_granted = false
+    end
+    access_granted.should eq(false)
+  end
+end
+
+shared_context "Revoke access after converge" do |dtk_common, system_user, rsa_pub_name|
+  it "revokes access to nodes" do
+    access_revoked = false
+    response = dtk_common.revoke_access(dtk_common.service_id, system_user, rsa_pub_name, dtk_common.ssh_key)
+    if response['status'] == 'ok'
+      access_revoked = true
+    end
+    access_revoked.should eq(true)
+  end
+end
+
+shared_context "NEG - Revoke access before converge" do |dtk_common, system_user, rsa_pub_name|
+  it "does not revoke access because nodes are staged" do
+    access_revoked = true
+    response = dtk_common.revoke_access(dtk_common.service_id, system_user, rsa_pub_name, dtk_common.ssh_key)
+    unless response['data']['results']['error'].nil?
+      access_revoked = false
+    end
+    access_revoked.should eq(false)
+  end
+end
+
+shared_context "List ssh access and confirm is empty" do |dtk_common, system_user, rsa_pub_name, nodes|
+  it "returns empty list for ssh access" do
+    ssh_list = dtk_common.list_ssh_access(dtk_common.service_id, system_user, rsa_pub_name, nodes)
+    expect(ssh_list).to be_empty
+  end
+end
+
+shared_context "List ssh access" do |dtk_common, system_user, rsa_pub_name, nodes|
+  it "returns list for ssh access" do
+    ssh_list = dtk_common.list_ssh_access(dtk_common.service_id, system_user, rsa_pub_name, nodes)
+    expect(ssh_list).to include(rsa_pub_name)
+  end
+end

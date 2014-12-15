@@ -1,9 +1,12 @@
 module DTK; class Attribute
   class Pattern 
     class Type
-
       r8_nested_require('type','explicit_id')      
       r8_nested_require('type','assembly_level')      
+      # common_node_component_level must be before node_level and component_level
+      r8_nested_require('type','common_node_component_level')      
+      r8_nested_require('type','node_level')
+      r8_nested_require('type','component_level')
 
       def initialize(pattern)
         @pattern = pattern
@@ -34,6 +37,11 @@ module DTK; class Attribute
         attribute_stack(attribute_idh)[:attribute][:semantic_data_type]
       end
 
+      # can be overwritten
+      def node_group_member_attribute_idhs()
+        Array.new 
+      end
+
      private
       attr_reader :pattern, :id
 
@@ -45,58 +53,7 @@ module DTK; class Attribute
         end
       end
 
-      module CommonNodeComponentLevel
-        def attribute_idhs()
-          @attribute_stacks.map{|r|r[:attribute].id_handle()}
-        end
-        def attribute_name()
-          attribute_stack()[:attribute][:display_name]
-        end
-        def attribute_id()
-          attribute_stack()[:attribute].id()
-        end
-        def component_instance()
-          attribute_stack()[:component]
-        end
-        def component_instances()
-          @attribute_stacks.map{|as|as[:component]}.compact
-        end
-        def node()
-          attribute_stack()[:node]
-        end
-       private
-        def create_attributes(attr_parents)
-          attribute_idhs = Array.new
-          attr_properties = attribute_properties().inject(Hash.new){|h,(k,v)|h.merge(k.to_s => v)}
-          field_def = 
-            {'display_name' => pattern_attribute_name()}.merge(attr_properties)
-          attr_parents.each do |attr_parent|
-            attribute_idhs += Attribute.create_or_modify_field_def(attr_parent,field_def)
-          end
-          
-          return attribute_idhs if attribute_idhs.empty?
-          
-          # TODO: can make more efficient by having create_or_modify_field_def return object with cols, rather than id_handles
-          sp_hash = {
-            :cols => [:id,:group_id,:display_name,:description,:component_component_id,:data_type,:semantic_type,:required,:dynamic,:external_ref,:semantic_data_type],
-            :filter => [:oneof,:id,attribute_idhs.map{|idh|idh.get_id()}]
-          }
-          attr_mh = attribute_idhs.first.createMH()
-          Model.get_objs(attr_mh,sp_hash)
-        end
 
-        def pattern_attribute_name()
-          first_name_in_fragment(pattern_attribute_fragment())
-        end
-        
-        def first_name_in_fragment(fragment)
-          fragment =~ NameInFragmentRegexp
-          $1
-        end
-        NameInFragmentRegexp = /[^<]*<([^>]*)>/
-      end
-      r8_nested_require('type','node_level')
-      r8_nested_require('type','component_level')
 
       def attribute_stack(attribute_idh=nil)
         if attribute_idh

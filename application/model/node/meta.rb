@@ -386,7 +386,7 @@ module DTK
            :convert => true,
            :join_type => :inner,
            :join_cond=>{:output_id => q(:output_attribute,:id)},
-           :cols => [:id, :type, :input_id,:index_map]
+           :cols => [:id,:type,:input_id,:index_map,:port_link_id]
          },
          {
            :model_name => :attribute,
@@ -397,11 +397,11 @@ module DTK
          },
          {
            :model_name => :attribute_link,
-           :alias => :all_input_links,
+           :alias => :other_input_link,
            :convert => true,
            :join_type => :inner,
            :join_cond=>{:input_id => q(:attribute_link,:input_id)},
-           :cols => [:id,:type, :input_id,:index_map]
+           :cols => [:id,:type,:input_id,:index_map,:port_link_id]
          }]
       virtual_column :dangling_input_links_from_components, :type => :json, :hidden => true, 
       :remote_dependencies => 

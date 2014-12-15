@@ -35,32 +35,43 @@ module DTK
       end
     end
 
-    def self.create_port_and_attr_links(target_idh,port_link_hash,opts={})
-      # get the associated link_def_link TODO: if it does not exist means constraint violation
-      link_def_link, components = get_link_def_and_components(target_idh,port_link_hash)
-      raise PortLinkError.new("Illegal link") unless link_def_link
-      link_to_create = port_link_hash.merge(:temporal_order => link_def_link[:temporal_order])
+    # create port link adn associated attribute links
+    # can clone if needed attributes on a service node group to its members 
+    def self.create_port_and_attr_links__clone_if_needed(target_idh,port_link_hash,opts={})
+      unless link_def_context = get_link_def_context?(target_idh,port_link_hash)
+        raise PortLinkError.new("Illegal link")
+      end
+      port_link_to_create = port_link_hash.merge(:temporal_order => link_def_context.temporal_order)
       port_link = nil
       Transaction do 
-        port_link = create_from_links_hash(target_idh,[link_to_create],opts).first
-        link_def_link.process(target_idh,components,opts.merge(:port_link_idh => port_link.id_handle))
-#        raise ErrorUsage.new("for testing")
+        port_link = create_from_links_hash(target_idh,[port_link_to_create],opts).first
+        AttributeLink.create_from_link_defs__clone_if_needed(target_idh,link_def_context,opts.merge(:port_link_idh => port_link.id_handle))
       end
       port_link
     end
 
+    # create attribute links from this port link
+    def create_attribute_links(parent_idh,opts={})
+      # The reason to have create_attribute_links is to document callers from which we know no cloning will be needed
+      create_attribute_links__clone_if_needed(parent_idh,opts)
+    end
+    # can clone if needed attributes on a service node group to its members 
     # this sets temporal order if have option :set_port_link_temporal_order
-    def create_attr_links!(parent_idh,opts={})
+    def create_attribute_links__clone_if_needed(parent_idh,opts={})
       update_obj!(:input_id,:output_id)
-      # get the associated link_def_link TODO: if it does not exist means constraint violation
-      link_def_link, components = self.class.get_link_def_and_components(parent_idh,self)
-      raise PortLinkError.new("Illegal link") unless link_def_link
-      if opts[:set_port_link_temporal_order] and link_def_link[:temporal_order]
-        update(:temporal_order => link_def_link[:temporal_order])
+      unless link_def_context = get_link_def_context?(parent_idh)
+        raise PortLinkError.new("Illegal link")
       end
-      link_def_link.process(parent_idh,components,:port_link_idh => id_handle())
+      if opts[:set_port_link_temporal_order] 
+        if temporal_order = link_def_context.temporal_order
+          update(:temporal_order => temporal_order)
+        end
+      end
+      opts_create = Aux.hash_subset(opts,[:filter]).merge(:port_link_idh => id_handle())
+      AttributeLink.create_from_link_defs__clone_if_needed(parent_idh,link_def_context,opts_create)
       self
     end
+
     def self.port_link_ref(port_link_ref_info)
       p = port_link_ref_info # for succinctness
       "#{p[:assembly_template_ref]}--#{p[:in_node_ref]}-#{p[:in_port_ref]}--#{p[:out_node_ref]}-#{p[:out_port_ref]}"
@@ -94,9 +105,11 @@ module DTK
       create_from_rows(port_link_mh,rows,create_opts).map{|hash|new(hash,port_link_mh[:c])}
     end
 
-    def self.get_link_def_and_components(parent_idh,port_link_hash)
-      # returns [link_def_link,relevant_components]
-      ret = [nil,nil]
+    def get_link_def_context?(parent_idh)
+      self.class.get_link_def_context?(parent_idh,self)
+    end
+    def self.get_link_def_context?(parent_idh,port_link_hash)
+      ret = nil
       sp_hash = {
         :cols => [:id,:group_id,:display_name,:component_type,:direction,:link_type,:link_def_info,:node_node_id],
         :filter => [:oneof, :id, [port_link_hash[:input_id],port_link_hash[:output_id]]]
@@ -137,8 +150,8 @@ module DTK
                         [:eq,:node_node_id,remote_port_cmp_info[:node_node_id]]
                    ]
       }
-      cmp_mh = local_port_cmp_info[:component].model_handle()
-      rows = Model.get_objs(cmp_mh,sp_hash)
+      local_cmp = local_port_cmp_info[:component]
+      rows = Model.get_objs(local_cmp.model_handle(),sp_hash)
       if rows.size == 1
         remote_cmp = rows.first
       elsif rows.empty?
@@ -146,9 +159,9 @@ module DTK
       else
         raise Error.new("Unexpected that getting remote port link component does not return unique element")
       end
-      link_def_link = match[:link_def_link].merge!(:local_component_type => local_port_cmp_info[:component][:component_type])
-      relevant_components = [local_port_cmp_info[:component], remote_cmp]
-      [link_def_link,relevant_components]
+      link_def_link = match[:link_def_link].merge!(:local_component_type => local_cmp[:component_type])
+
+      LinkDef::Context.create(link_def_link,[{:component => local_cmp},{:component => remote_cmp}])
     end
   end
 

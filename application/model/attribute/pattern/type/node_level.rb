@@ -82,6 +82,7 @@ module DTK; class Attribute
           attr_fragment
         end
       end
+
     end
   end; end
 end; end

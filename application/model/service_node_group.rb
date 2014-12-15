@@ -51,7 +51,7 @@ module DTK
     end
 
     def delete_group_members(new_cardinality)
-      node_members = get_node_members()
+      node_members = get_node_group_members()
       num_to_delete = node_members.size - new_cardinality
       # to find ones to delete; 
       # first look for  :admin_op_status == pending"
@@ -80,14 +80,14 @@ module DTK
       new_card
     end
 
-    def get_node_members()
-      self.class.get_node_members(id_handle())
+    def get_node_group_members()
+      self.class.get_node_group_members(id_handle())
     end
-    def self.get_node_members(node_group_idh) 
-      get_ndx_node_members([node_group_idh]).values.first||[]
+    def self.get_node_group_members(node_group_idh) 
+      get_ndx_node_group_members([node_group_idh]).values.first||[]
     end
 
-    def self.get_ndx_node_members(node_group_idhs)
+    def self.get_ndx_node_group_members(node_group_idhs)
       ret = Hash.new
       return ret if node_group_idhs.empty?
       sp_hash = {
@@ -115,7 +115,7 @@ module DTK
       if ng_idhs.empty?
         return ret
       end
-      ndx_node_members = get_ndx_node_members(ng_idhs)
+      ndx_node_members = get_ndx_node_group_members(ng_idhs)
       ndx_ret = Hash.new
       node_or_ngs.each do |n|
         if n.is_node_group?
@@ -134,12 +134,12 @@ module DTK
     NodeAttributesToCopy = (Attribute.common_columns + [:ref,:node_node_id]).uniq - [:id]
 
     def destroy_and_delete(opts={})
-      get_node_members().map{|node|node.destroy_and_delete(opts)}
+      get_node_group_members().map{|node|node.destroy_and_delete(opts)}
       delete_object(:members_are_deleted=>true)
     end
     def delete_object(opts={})
       unless opts[:members_are_deleted]
-        get_node_members().map{|node|node.delete_object(opts)}
+        get_node_group_members().map{|node|node.delete_object(opts)}
       end
       super(opts)
     end

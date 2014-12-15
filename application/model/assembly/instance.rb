@@ -564,6 +564,8 @@ module DTK; class  Assembly
     def set_attributes(av_pairs,opts={})
       attr_patterns = nil
       Transaction do
+        # super does the processing that sets the actual attributes then if opts[:update_meta] set
+        # then if opts[:update_meta] set meta info can be changed on the assembly module
         attr_patterns = super
         if opts[:update_meta]
           created_cmp_level_attrs = attr_patterns.select{|r|r.type == :component_level and r.created?()}

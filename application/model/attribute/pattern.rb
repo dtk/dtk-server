@@ -4,22 +4,7 @@ module DTK; class Attribute
     r8_nested_require('pattern','type')
     r8_nested_require('pattern','assembly')
     r8_nested_require('pattern','node')
-
-    module Term
-      def self.canonical_form(type,term)
-        "#{type}#{LDelim}#{term}#{RDelim}"
-      end
-      def self.extract_term?(canonical_form)
-        if canonical_form =~ FilterFragmentRegexp
-          $1 
-        end
-      end
-      LDelim = '<'
-      RDelim = '>'
-      EscpLDelim = "\\#{LDelim}"
-      EscpRDelim = "\\#{RDelim}"
-      FilterFragmentRegexp = Regexp.new("[a-z]#{EscpLDelim}([^#{EscpRDelim}]+)#{EscpRDelim}")
-    end
+    r8_nested_require('pattern','term')
 
     def self.node_name()
       (pattern =~ NodeComponentRegexp ? $1 : raise_unexpected_pattern(pattern))
@@ -63,7 +48,13 @@ module DTK; class Attribute
         # if needed as indicated by opts, create_attr_pattern also creates attribute
         pattern = create_attr_pattern(base_object,av_pair[:pattern],opts)
         ret << pattern
+        # attribute_idhs are base level attribute id_handles; in contrast to
+        # node_group_member_attribute_idhs, which gives non null set if attribute is on a node and node is a service_node_group
+        # purpose of finding node_group_member_attribute_idhs is when explicitly setting node group attribute want to set
+        # all its members to same value; only checking for component level and not node level because 
+        # node level attributes different for each node member
         attr_idhs = pattern.attribute_idhs
+        ngm_attr_idhs = pattern.kind_of?(Type::ComponentLevel) ? pattern.node_group_member_attribute_idhs : []
         # TODO: modify; rather than checking datatype; convert attribute value, which might be in string form to right ruby data type
         # do not need to check value validity if opts[:create] (since checked already)
         unless opts[:create]
@@ -73,8 +64,16 @@ module DTK; class Attribute
             end
           end
         end
-        unless attr_idhs.empty?
-          attribute_rows += attr_idhs.map{|idh|{:id => idh.get_id(),:value_asserted => value}.merge(attr_properties)}
+
+        all_attr_idhs = attr_idhs
+        unless ngm_attr_idhs.empty?
+          if opts[:create]
+            raise ErrorUsage.new("Not supported creating attributes on a node group")
+          end
+          all_attr_idhs += ngm_attr_idhs
+        end
+        all_attr_idhs.each do |idh|
+          attribute_rows << {:id => idh.get_id(),:value_asserted => value}.merge(attr_properties)
         end
       end
 

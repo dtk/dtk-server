@@ -34,6 +34,12 @@ end
 
         update_dangling_links() 
 
+        if is_target_ref?()
+          # This wil be a node group member; need to bump down is assocaited node groups cardinality
+          node_group_member = ServiceNodeGroup::NodeGroupMember.create_as(self)
+          node_group_member.bump_down_associated_node_group_cardinality()
+        end
+
         if opts[:update_task_template]
           unless assembly = opts[:assembly]
             raise Error.new("If update_task_template is set, :assembly must be given as an option")

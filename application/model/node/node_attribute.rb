@@ -101,7 +101,7 @@ module DTK
             # just for simplicity no checking whether extra_fields match in 
             # test of update needed
             unless extra_fields.empty? and existing_val == value
-              to_change_attrs << node
+              to_change_attrs << attr
             end
           else
             to_create_on_node << node

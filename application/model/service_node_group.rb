@@ -70,6 +70,16 @@ module DTK
       to_delete.each{|node_group_member|node_group_member.destroy_and_delete()}
     end
 
+    def bump_down_cardinality(amount=1)
+      card = attribute.cardinality
+      new_card = card - amount
+      if new_card < 0
+        raise ErrorUsage.new("Existing cardinality (#{card.to_s}) is less than amount to decrease it by (#{amount.to_s})")
+      end
+      Node::NodeAttribute.create_or_set_attributes?([self],:cardinality,new_card)
+      new_card
+    end
+
     def get_node_members()
       self.class.get_node_members(id_handle())
     end

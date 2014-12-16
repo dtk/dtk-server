@@ -71,10 +71,10 @@ module DTK
     end
 
     #This is overwritten by node group subclasses
-    def get_node_members()
+    def get_node_group_members()
       #in case this called on superclass that is actually a node group
       if is_node_group?()
-        create_obj_subclass().get_node_members()
+        create_obj_subclass().get_node_group_members()
       else
         [self]
       end

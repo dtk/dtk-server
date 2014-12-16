@@ -112,7 +112,7 @@ module DTK; class StateChange
         unless node_group = opts[:node_group]
           raise Error.new("Expecting opts[:node_group]")
         end
-        nodes = node_group.get_node_members()
+        nodes = node_group.get_node_group_members()
         (!nodes.empty?) && [:oneof, :node_id, nodes.map{|r|r[:id]}]
       end
 
@@ -122,7 +122,7 @@ module DTK; class StateChange
         unless node_group = opts[:node_group]
           raise Error.new("Expecting opts[:node_group]")
         end
-        nodes = node_group.get_node_members()
+        nodes = node_group.get_node_group_members()
         ng_id = node_group[:id]
         node_to_ng = nodes.inject(Hash.new) do |h,n|
           h.merge(n[:id] => {ng_id => true})

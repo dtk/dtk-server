@@ -12,7 +12,7 @@ module DTK; class NodeGroup
       node_clone_opts = [:ret_new_obj_with_cols].inject({}) do |h,k|
         opts.has_key?(k) ? h.merge(k => opts[k]) : h
       end
-      get_node_members().each{|node|node.clone_into(clone_source_obj,override_attrs,node_clone_opts)}
+      get_node_group_members().each{|node|node.clone_into(clone_source_obj,override_attrs,node_clone_opts)}
     end
 
     # clone components and links on this node group to node
@@ -98,7 +98,7 @@ TODO: ***; may want to put in version of this for varaibles taht are not input p
 
 TODO: currently not used because instead treating node group more like proxy for node members; keeping in 
 for now in case turns out taking this approach will be more efficient 
-      node_components = get_node_members().map{|node|node.clone_into(clone_source_obj,override_attrs,node_clone_opts)}
+      node_components = get_node_group_members().map{|node|node.clone_into(clone_source_obj,override_attrs,node_clone_opts)}
 
       unless node_components.empty?
         ng_component = clone_copy_output.objects.first

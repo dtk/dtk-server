@@ -82,13 +82,13 @@ module DTK
     end
 
     # TODO: change to having node group having explicit links or using a saved search
-    def get_node_members()
+    def get_node_group_members()
       sp_hash = {
         :cols => [:node_members]
       }
       rows = get_objs(sp_hash)
       if target_idh = NodeGroupRelation.spans_target?(rows.map{|r|r[:node_group_relation]})
-        target_idh.create_object().get_node_members()
+        target_idh.create_object().get_node_group_members()
       else
         rows.map{|r|r[:node_member]}
       end
@@ -110,7 +110,7 @@ module DTK
         node_group = r.hash_subset(:id,:group_id,:display_name)
         if target_idh = r[:node_group_relation].spans_target?
           target_id = target_idh.get_id()
-          target_nodes[target_id] ||= node_filter.filter(target_idh.create_object().get_node_members()).map{|n|n[:id]} 
+          target_nodes[target_id] ||= node_filter.filter(target_idh.create_object().get_node_group_members()).map{|n|n[:id]} 
           target_nodes[target_id].each do |n_id|
             (node_to_ng[n_id] ||= Hash.new)[node_group[:id]] ||= node_group
           end

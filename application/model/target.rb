@@ -120,7 +120,7 @@ module DTK
       port_list.map{|port|port.filter_and_process!(i18n,*types)}.compact
     end
 
-    def get_node_members()
+    def get_node_group_members()
       get_objs(:cols => [:node_members]).map{|r|r[:node_member]}
     end
 

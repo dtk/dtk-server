@@ -55,7 +55,7 @@ module DTK; class Task
       def nodes()
         node_or_ng = self[:node]
         if node_or_ng.is_node_group?()
-          node_or_ng.get_node_members()
+          node_or_ng.get_node_group_members()
         else
           [node_or_ng]
         end

@@ -103,6 +103,32 @@ module DTK; class AssemblyModule
       namespace
     end
 
+    def self.list_remote_diffs(model_handle, module_id, repo, module_branch, opts)
+      diffs, diff = [], nil
+      # module_branch = id_handle(module_branch_idh['guid'],:module_branch).create_object()
+      remote_repo_cols = [:id, :display_name, :version, :remote_repos, :dsl_parsed]
+      project_idh      = opts[:project_idh]
+
+      sp_hash = {
+        :cols => [:id,:group_id,:display_name,:component_type],
+        :filter => [:and,
+                    [:eq,:type,'component_module'],
+                    [:eq,:display_name,'workspace-private-abh'],
+                    [:eq,:repo_id,repo.id()],
+                    [:eq,:component_id,module_id]
+                   ]
+      }
+      base_branch = Model.get_obj(module_branch.model_handle(), sp_hash)
+      diff = repo.get_local_branches_diffs(module_branch,base_branch)
+
+      diff.each do |diff_obj|
+        path = "diff --git a/#{diff_obj.a_path} b/#{diff_obj.b_path}\n"
+        diffs << (path + "#{diff_obj.diff}\n")
+      end
+
+      diffs
+    end
+
    private
     def get_for_assembly__augment_name_with_namespace!(cmp_modules)
       return if cmp_modules.empty?

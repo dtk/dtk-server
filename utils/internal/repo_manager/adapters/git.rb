@@ -431,6 +431,19 @@ module DTK
       get_diffs(remote_sha, local_sha)
     end
 
+    def get_local_branches_diffs(repo_name, module_branch, base_branch_name)
+      # base = @grit_repo.heads.find{|r|r.name.eql?(base_branch_name.to_s)}
+      base  = @grit_repo.remotes.find{|r|r.name.eql?("origin/#{base_branch_name.to_s}")}
+      local = @grit_repo.heads.first
+
+      raise Error.new("Cannot find base branch (#{base})") unless base
+
+      base_sha  = base.commit.id
+      local_sha = local.commit.id
+
+      get_diffs(local_sha, base_sha)
+    end
+
     def push_changes(opts={})
       git_command__push(@branch,opts[:remote_name],opts[:remote_branch],opts)
     end

@@ -512,7 +512,6 @@ module DTK
 
         if default_remote_repo = RepoRemote.ret_default_remote_repo((ndx_repo_remotes||{}).values)
           remote = default_remote_repo.remote_dtkn_location(project,model_type(),module_name)
-          # is_equal = r[:repo].ret_local_remote_diff(module_branch,remote)
           diff = r[:repo].get_remote_diffs(module_branch,remote)
         end
       end

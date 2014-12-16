@@ -72,11 +72,14 @@ module DTK
 
       def self.augment_with_remotes_info!(branch_module_rows,module_mh)
         # index by repo_id
-        ndx_branch_module_rows = branch_module_rows.inject(Hash.new){|h,r|h.merge(r[:repo][:id] => r)}
+        ndx_branch_module_rows = branch_module_rows.inject(Hash.new){|h,r|h.merge(r[:repo][:id] => r) if r[:repo]}
+        return unless ndx_branch_module_rows
+
         sp_hash = {
           :cols => [:id,:group_id,:display_name,:repo_id,:repo_name,:repo_namespace,:created_at,:is_default],
           :filter => [:oneof, :repo_id, ndx_branch_module_rows.keys]
         }
+
         Model.get_objs(module_mh.createMH(:repo_remote),sp_hash).each do |r|
           ndx = r[:repo_id]
           (ndx_branch_module_rows[ndx][:ndx_repo_remotes] ||= Hash.new).merge!(r[:id] => r)

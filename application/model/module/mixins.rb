@@ -502,7 +502,7 @@ module DTK
       project = project_idh.create_object()
       module_mh = project_idh.createMH(model_type())
       ModuleUtils::ListMethod.augment_with_remotes_info!(response,module_mh)
-      diffs, diff = [], nil
+      diffs, diff, module_name = [], nil, ''
 
       response.each do |r|
         module_branch = r[:module_branch]
@@ -516,6 +516,7 @@ module DTK
         end
       end
 
+      raise ErrorUsage.new("Module '#{module_name}' is not linked to remote repo!") if diff.nil?
       diff.each do |diff_obj|
         path = "diff --git a/#{diff_obj.a_path} b/#{diff_obj.b_path}\n"
         diffs << (path + "#{diff_obj.diff}\n")

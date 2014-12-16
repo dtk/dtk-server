@@ -120,6 +120,13 @@ module DTK
       rest_ok_response service_module.local_and_remote_versions(client_rsa_pub_key, opts)
     end
 
+    def rest__list_remote_diffs()
+      module_id = ret_request_param_id_optional(:service_module_id, ::DTK::ServiceModule)
+      project   = get_default_project()
+      opts      = Opts.new(:project_idh => project.id_handle())
+      rest_ok_response ServiceModule.list_remote_diffs(model_handle(), module_id, opts)
+    end
+
     def rest__info()
       module_id = ret_request_param_id_optional(:service_module_id, ::DTK::ServiceModule)
       project   = get_default_project()

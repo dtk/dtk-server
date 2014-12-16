@@ -105,6 +105,13 @@ module DTK
       rest_ok_response ComponentModule.info(model_handle(), module_id, opts)
     end
 
+    def rest__list_remote_diffs()
+      module_id = ret_request_param_id_optional(:component_module_id, ::DTK::ComponentModule)
+      project   = get_default_project()
+      opts      = Opts.new(:project_idh => project.id_handle())
+      rest_ok_response ComponentModule.list_remote_diffs(model_handle(), module_id, opts)
+    end
+
     #
     # Method will check new dependencies on repo manager and report missing dependencies.
     # Response will return list of modules for given component.

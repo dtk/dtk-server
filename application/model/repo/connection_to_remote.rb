@@ -26,6 +26,13 @@ module DTK
         remote_branch = remote.branch_name()
         RepoManager.get_loaded_and_remote_diffs(remote_ref, get_field?(:repo_name), module_branch, remote_url, remote_branch)
       end
+
+      def get_remote_diffs(module_branch,remote)
+        remote_url = remote.repo_url()
+        remote_ref = remote.remote_ref()
+        remote_branch = remote.branch_name()
+        RepoManager.get_remote_diffs(remote_ref, get_field?(:repo_name), module_branch, remote_url, remote_branch)
+      end
     end
   end
 end

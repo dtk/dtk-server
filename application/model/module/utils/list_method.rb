@@ -70,8 +70,6 @@ module DTK
         ndx_ret.values
       end
 
-     private
-
       def self.augment_with_remotes_info!(branch_module_rows,module_mh)
         # index by repo_id
         ndx_branch_module_rows = branch_module_rows.inject(Hash.new){|h,r|h.merge(r[:repo][:id] => r)}
@@ -85,6 +83,8 @@ module DTK
         end
         branch_module_rows
       end
+
+      private
 
       def self.linked_remotes_print_form(repo_remotes,external_ref_source,opts={})
         opts_pp = Opts.new(:dtkn_prefix => true)

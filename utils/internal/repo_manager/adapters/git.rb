@@ -238,6 +238,10 @@ module DTK
       not @grit_repo.diff(ref1,ref2).empty?
     end
 
+    def get_diffs(ref1,ref2)
+      @grit_repo.diff(ref1,ref2)
+    end
+
     # returns :no_change, :changed, :merge_needed
     def fast_foward_pull(remote_branch,remote_name=nil)
       remote_name ||= default_remote_name()
@@ -403,6 +407,28 @@ module DTK
       else
         !any_diffs?(local_sha,remote_sha)
       end
+    end
+
+    def get_remote_diffs(remote_name, remote_url, remote_branch)
+      add_remote?(remote_name,remote_url)
+      # TODO: dont think this is rescue needed any more because of the c
+      # If fails to fetch remote, do initial sync to load remote repo name and try to fetch remote again
+      begin
+        git_command__fetch(remote_name)
+      rescue Exception => e
+        initial_sync_with_remote_repo(remote_name,remote_url,remote_branch)
+        git_command__fetch(remote_name)
+      end
+
+      remote = @grit_repo.remotes.find{|r|r.name.include?(remote_name.to_s)}
+      local  = @grit_repo.heads.first
+
+      raise Error.new("Cannot find remote repo (#{remote_name})") unless remote
+
+      remote_sha = remote.commit.id
+      local_sha = local.commit.id
+
+      get_diffs(remote_sha, local_sha)
     end
 
     def push_changes(opts={})

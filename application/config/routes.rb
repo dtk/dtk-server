@@ -112,6 +112,7 @@ R8::ReactorRoute.draw do
   post  'component_module/update_from_initial_create' => 'component_module#update_from_initial_create'
   post  'component_module/list' => 'component_module#list'
   post  'component_module/install_puppet_module' => 'component_module#install_puppet_module'
+  post  'component_module/list_remote_diffs' => 'component_module#list_remote_diffs'
 
    # TEST_MODULE
   post  'test_module/add_user_direct_access' => 'account#add_user_direct_access'
@@ -142,6 +143,7 @@ R8::ReactorRoute.draw do
   post  'test_module/get_workspace_branch_info' => 'test_module#get_workspace_branch_info'
   post  'test_module/update_from_initial_create' => 'test_module#update_from_initial_create'
   post  'test_module/list' => 'test_module#list'
+  post  'test_module/list_remote_diffs' => 'test_module#list_remote_diffs'
 
    # NODE_MODULE
   post  'node_module/add_user_direct_access' => 'account#add_user_direct_access'
@@ -272,6 +274,7 @@ R8::ReactorRoute.draw do
   post  'service_module/get_workspace_branch_info' => 'service_module#get_workspace_branch_info'
   post  'service_module/info' => 'service_module#info'
   post  'service_module/pull_from_remote' => 'service_module#pull_from_remote'
+  post  'service_module/list_remote_diffs' => 'service_module#list_remote_diffs'
 
   # get   'service_module/workspace_branch_info/#{service_module_id.to_s}' => 'service_module#workspace_branch_info/#{service_module_id.to_s}'
 

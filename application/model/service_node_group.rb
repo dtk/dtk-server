@@ -7,6 +7,7 @@ module DTK
     r8_nested_require('service_node_group','id_name_helper')
     r8_nested_require('service_node_group','clone')
     r8_nested_require('service_node_group','node_group_member')
+    r8_nested_require('service_node_group','cache')
 
     def self.check_valid_id(model_handle,id)
       IdNameHelper.check_valid_id(model_handle,id)
@@ -26,25 +27,31 @@ module DTK
       Clone.clone_and_get_components_with_attrs(self,node_members,opts)
     end
 
+    # called when bumping up cardinaility in a service instance
     def add_group_members(new_cardinality)
       target = get_target()
       assembly = get_assembly?() 
+      new_tr_idhs = nil
+      Transaction do
+        ndx_new_tr_idhs = TargetRef::Input::BaseNodes.create_linked_target_refs?(target,assembly,[self],:new_cardinality => new_cardinality)
+        unless new_tr_idhs = ndx_new_tr_idhs && ndx_new_tr_idhs[id()]
+          raise Error.new("Unexpected that new_tr_idhs is empty")
+        end
 
-      ndx_new_tr_idhs = TargetRef::Input::BaseNodes.create_linked_target_refs?(target,assembly,[self],:new_cardinality => new_cardinality)
-      unless new_tr_idhs = ndx_new_tr_idhs && ndx_new_tr_idhs[id()]
-        raise Error.new("Unexpected that new_tr_idhs is empty")
+        # add attribute mappings, cloning if needed
+        create_attribute_links__clone_if_needed(target,new_tr_idhs)      
+        
+        # find or add state change for node group and then add state change objects for new node members
+        node_group_sc = StateChange.create_pending_change_item?(:new_item => id_handle(), :parent => target.id_handle())
+        node_group_sc_idh = node_group_sc.id_handle()
+        new_items_hash = new_tr_idhs.map{|idh|{:new_item => idh, :parent => node_group_sc_idh}}
+        StateChange.create_pending_change_items(new_items_hash)
       end
-
-      # find or add state change for node group and then add state change objects for new node members
-      node_group_sc = StateChange.create_pending_change_item?(:new_item => id_handle(), :parent => target.id_handle())
-      node_group_sc_idh = node_group_sc.id_handle()
-      new_items_hash = new_tr_idhs.map{|idh|{:new_item => idh, :parent => node_group_sc_idh}}
-      StateChange.create_pending_change_items(new_items_hash)
       new_tr_idhs
     end
 
     def delete_group_members(new_cardinality)
-      node_members = get_node_members()
+      node_members = get_node_group_members()
       num_to_delete = node_members.size - new_cardinality
       # to find ones to delete; 
       # first look for  :admin_op_status == pending"
@@ -63,14 +70,24 @@ module DTK
       to_delete.each{|node_group_member|node_group_member.destroy_and_delete()}
     end
 
-    def get_node_members()
-      self.class.get_node_members(id_handle())
-    end
-    def self.get_node_members(node_group_idh) 
-      get_ndx_node_members([node_group_idh]).values.first||[]
+    def bump_down_cardinality(amount=1)
+      card = attribute.cardinality
+      new_card = card - amount
+      if new_card < 0
+        raise ErrorUsage.new("Existing cardinality (#{card.to_s}) is less than amount to decrease it by (#{amount.to_s})")
+      end
+      Node::NodeAttribute.create_or_set_attributes?([self],:cardinality,new_card)
+      new_card
     end
 
-    def self.get_ndx_node_members(node_group_idhs)
+    def get_node_group_members()
+      self.class.get_node_group_members(id_handle())
+    end
+    def self.get_node_group_members(node_group_idh) 
+      get_ndx_node_group_members([node_group_idh]).values.first||[]
+    end
+
+    def self.get_ndx_node_group_members(node_group_idhs)
       ret = Hash.new
       return ret if node_group_idhs.empty?
       sp_hash = {
@@ -98,7 +115,7 @@ module DTK
       if ng_idhs.empty?
         return ret
       end
-      ndx_node_members = get_ndx_node_members(ng_idhs)
+      ndx_node_members = get_ndx_node_group_members(ng_idhs)
       ndx_ret = Hash.new
       node_or_ngs.each do |n|
         if n.is_node_group?
@@ -117,16 +134,25 @@ module DTK
     NodeAttributesToCopy = (Attribute.common_columns + [:ref,:node_node_id]).uniq - [:id]
 
     def destroy_and_delete(opts={})
-      get_node_members().map{|node|node.destroy_and_delete(opts)}
+      get_node_group_members().map{|node|node.destroy_and_delete(opts)}
       delete_object(:members_are_deleted=>true)
     end
     def delete_object(opts={})
       unless opts[:members_are_deleted]
-        get_node_members().map{|node|node.delete_object(opts)}
+        get_node_group_members().map{|node|node.delete_object(opts)}
       end
       super(opts)
     end
 
+   private
+    def create_attribute_links__clone_if_needed(target,target_ref_idhs)
+      port_links = get_port_links()
+      return if port_links.empty?
+      opts_create_links = {:set_port_link_temporal_order=>true, :filter => {:target_ref_idhs => target_ref_idhs}}
+      port_links.each do |port_link|
+        port_link.create_attribute_links__clone_if_needed(target.id_handle,opts_create_links)
+      end
+    end
   end
 end
 

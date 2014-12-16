@@ -1,4 +1,5 @@
 r8_require('../../utils/internal/puppet_forge/client')
+require 'eventmachine'
 
 module DTK
   class Component_moduleController < AuthController

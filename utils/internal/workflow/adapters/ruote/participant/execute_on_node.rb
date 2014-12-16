@@ -5,10 +5,10 @@ module DTK
         # LockforDebug = Mutex.new
         def consume(workitem)
           # LockforDebug.synchronize{pp [:in_consume, Thread.current, Thread.list];STDOUT.flush}
-          params = get_params(workitem) 
+          params = get_params(workitem)
           PerformanceService.start("#{self.class.to_s.split("::").last}", self.object_id)
           task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
-          
+
           task.update_input_attributes!() if task_start
           workitem.fields["guard_id"] = task_id # ${guard_id} is referenced if guard for execution of this
 
@@ -29,10 +29,10 @@ module DTK
               callbacks = {
                 :on_msg_received => proc do |msg|
                   inspect_agent_response(msg)
-                  CreateThread.defer_with_session(user_object) do
+                  CreateThread.defer_with_session(user_object, Ramaze::Current.session) do
                     # Amar: PERFORMANCE
                     PerformanceService.end_measurement("#{self.class.to_s.split("::").last}", self.object_id)
-                    
+
                     result = msg[:body].merge("task_id" => task_id)
                     if errors_in_result = errors_in_result?(result)
                       event,errors = task.add_event_and_errors(:complete_failed,:config_agent,errors_in_result)
@@ -44,7 +44,7 @@ module DTK
                     else
                       event = task.add_event(:complete_succeeded,result)
                       log_participant.end(:complete_succeeded,:task_id=>task_id)
-                      set_result_succeeded(workitem,result,task,action) if task_end 
+                      set_result_succeeded(workitem,result,task,action) if task_end
                       action.get_and_propagate_dynamic_attributes(result)
                     end
                     delete_task_info(workitem)
@@ -52,7 +52,7 @@ module DTK
                   end
                 end,
                 :on_timeout => proc do
-                  CreateThread.defer_with_session(user_object) do
+                  CreateThread.defer_with_session(user_object, Ramaze::Current.session) do
                     result = {
                       :status => "timeout"
                     }
@@ -66,8 +66,8 @@ module DTK
                     reply_to_engine(workitem)
                   end
                 end,
-                :on_cancel => proc do 
-                  CreateThread.defer_with_session(user_object) do
+                :on_cancel => proc do
+                  CreateThread.defer_with_session(user_object, Ramaze::Current.session) do
                     log_participant.canceled(task_id)
                     set_result_canceled(workitem, task)
                     delete_task_info(workitem)
@@ -91,7 +91,7 @@ module DTK
 
           begin
             wi = workitem
-            params = get_params(wi) 
+            params = get_params(wi)
             task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
             task.add_internal_guards!(workflow.guards[:internal])
             pp ["Canceling task #{action.class.to_s}: #{task_id}"]
@@ -126,7 +126,7 @@ module DTK
           Model.get_objs(task.model_handle,sp_hash)
         end
 
-        # TODO: need to turn threading off for now because if dont can have two threads 
+        # TODO: need to turn threading off for now because if dont can have two threads
         # eat ech others messages; may solve with existing mechism or go straight to
         # using stomp event machine
         # may even not be necessary to thread the consume since very fast

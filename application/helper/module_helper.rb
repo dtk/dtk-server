@@ -10,7 +10,7 @@ module Ramaze::Helper
       end
 
       user_object  = CurrentSession.new.user_object()
-      CreateThread.defer_with_session(user_object) do
+      CreateThread.defer_with_session(user_object, Ramaze::Current::session) do
         yield(body)
         body.succeed
       end

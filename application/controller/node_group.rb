@@ -67,7 +67,7 @@ module DTK
 
     def rest__get_members()
       node_group = create_obj(:node_group_id)
-      rest_ok_response node_group.get_node_members()
+      rest_ok_response node_group.get_node_group_members()
     end
 
     def rest__create_task()

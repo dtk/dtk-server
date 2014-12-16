@@ -1,11 +1,11 @@
 module DTK
   class Target < Model
     r8_nested_require('target','clone')
-    include TargetCloneMixin
     r8_nested_require('target','install_agents_helper')
     r8_nested_require('target','iaas_properties')
     r8_nested_require('target','instance')
     r8_nested_require('target','template')
+    include Clone::Mixin
 
     def model_name() #TODO: remove temp datacenter->target
       :datacenter
@@ -120,7 +120,7 @@ module DTK
       port_list.map{|port|port.filter_and_process!(i18n,*types)}.compact
     end
 
-    def get_node_members()
+    def get_node_group_members()
       get_objs(:cols => [:node_members]).map{|r|r[:node_member]}
     end
 
@@ -213,25 +213,6 @@ module DTK
       clone_opts = source_obj.source_clone_info_opts()
       new_obj = clone_into(source_obj,override_attrs,clone_opts)
       new_obj && new_obj.id()
-    end
-
-    def self.get_port_links(id_handles,*port_types)
-      return Array.new if id_handles.empty?
-
-      node_id_handles = id_handles.select{|idh|idh[:model_name] == :node}
-      if node_id_handles.size < id_handles.size
-        models_not_treated = id_handles.reject{|idh|idh[:model_name] == :node}.map{idh|idh[:model_name]}.unique
-        Log.error("Item list for Target.get_port_links has models not treated (#{models_not_treated.join(",")}; they will be ignored")
-      end
-
-      raw_link_list = Node.get_port_links(node_id_handles,*port_types)
-      ndx_ret = Hash.new
-      raw_link_list.each do |el|
-        [:input_port_links,:output_port_links].each do |dir|
-          (el[dir]||[]).each{|port_link|ndx_ret[port_link[:id]] ||= port_link}
-        end
-      end
-      ndx_ret.values
     end
 
    private

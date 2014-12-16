@@ -1,7 +1,6 @@
-require  File.expand_path('link_def/context', File.dirname(__FILE__))
-module DTK
-  class LinkDefLink < Model
-    r8_nested_require('link_def_link','attribute_mapping')
+module DTK; class LinkDef
+  class Link < Model
+    r8_nested_require('link','attribute_mapping')
 
     def self.common_columns()
       [:id,:group_id,:display_name,:remote_component_type,:position,:content,:type,:temporal_order]
@@ -36,7 +35,7 @@ module DTK
              when "internal"
               in_aug_port[:node_node_id] == out_port[:node_node_id]
              else
-              raise Error.new("unexpected type for LinkDefLink object")
+              raise Error.new("unexpected type for LinkDef::Link object")
             end
           if match
             ret << {:input_port => in_aug_port,:output_port => out_port}
@@ -56,19 +55,7 @@ module DTK
       create_from_rows(model_handle,rows)
     end
 
-    def process(parent_idh,components,opts={})
-      link_defs_info = components.map{|cmp| {:component => cmp}}
-      context = LinkDefContext.create(self,link_defs_info)
-
-      #TODO: might put back in on_create_events.each{|ev|ev.process!(context)} 
-      am_links = AttributeMapping.ret_links(attribute_mappings,context,:raise_error => opts[:raise_error])
-      if port_link_idh = opts[:port_link_idh]
-        port_link_id = port_link_idh.get_id()
-        am_links.each{|link|link[:port_link_id] = port_link_id}
-      end
-
-      AttributeLink.create_attribute_links(parent_idh,am_links)
-    end
+    # craetes attribute links and can clone if needed attributes on a service node group to its members 
 
     def update_attribute_mappings!(new_attribute_mappings)
       ret = self[:attribute_mappings] = new_attribute_mappings
@@ -136,4 +123,4 @@ module DTK
       end
     end
   end
-end
+end; end

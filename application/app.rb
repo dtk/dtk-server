@@ -80,4 +80,3 @@ Ramaze.options.roots = [__DIR__]
 
 r8_require('model/init')
 r8_require('controller/init')
-

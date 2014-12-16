@@ -1,5 +1,5 @@
 module DTK
-  class LinkDefContext
+  class LinkDef::Context
     class Value 
       r8_nested_require('value','component')
       r8_nested_require('value','attribute_mixin') # must be before component_attribute and node_attribute
@@ -31,7 +31,7 @@ module DTK
       end
 
       # can be overwritten
-      def get_node_group_member_attributes()
+      def get_ng_member_attributes__clone_if_needed(opts={})
         Array.new
       end
 

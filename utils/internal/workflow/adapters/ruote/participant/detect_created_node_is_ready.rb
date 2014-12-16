@@ -34,7 +34,7 @@ module DTK
                 end
               end,
               :on_timeout => proc do
-                CreateThread.defer_with_session(user_object) do
+                CreateThread.defer_with_session(user_object, Ramaze::Current.session) do
                   result = {:type => :timeout_create_node, :task_id => task_id}
                   set_result_failed(workitem,result,task)
                   cancel_upstream_subtasks(workitem)

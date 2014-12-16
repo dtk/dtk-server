@@ -1,5 +1,5 @@
 module DTK
-  class LinkDefContext
+  class LinkDef::Context
     class NodeMappings < Hash
       def initialize(local,remote=nil)
         super()
@@ -15,7 +15,7 @@ module DTK
           node = tr_info.node
           ndx = node.id
           if node.is_node_group?
-            node = ServiceNodeGroupCache.create_as(node,tr_info.target_refs) 
+            node = ServiceNodeGroup::Cache.create_as(node,tr_info.target_refs) 
           else
             #switch to pointing to target ref if it exists
             unless tr_info.target_refs.empty?

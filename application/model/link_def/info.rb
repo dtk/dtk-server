@@ -9,7 +9,7 @@ module DTK
     #   link_def: 
     #     <LinkDef> 
     #     link_def_links:
-    #     - LinkDefLink 
+    #     - LinkDef::Link 
     class Info < Array
       def self.component_ref_cols()
         ComponentRef.common_cols()        

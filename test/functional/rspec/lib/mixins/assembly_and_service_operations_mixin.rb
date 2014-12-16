@@ -593,7 +593,6 @@ module AssemblyAndServiceOperationsMixin
 	end
 
 	def delete_and_destroy_service(service_id)
-		#Cleanup step - Delete and destroy service
 		puts "Delete and destroy service:", "---------------------------"
 		service_deleted = false
 		delete_service_response = send_request('/rest/assembly/delete', {:assembly_id=>service_id})
@@ -606,5 +605,85 @@ module AssemblyAndServiceOperationsMixin
 		end
 		puts ""
 		return service_deleted
+	end
+
+	def push_assembly_updates(service_id, service_module)
+		puts "Push assembly updates:", "---------------------"
+		assembly_updated = false
+		response = send_request('/rest/assembly/promote_to_template', {:assembly_id=>service_id, :mode => 'update', :use_module_namespace => true })
+		pretty_print_JSON(response)
+		if response['status'] == 'ok' && response['data']['full_module_name'] == service_module
+			assembly_updated = true
+		end
+		puts ""
+		return assembly_updated
+	end
+
+	def push_component_module_updates(service_id, component_module)
+		puts "Push component module updates:", "-------------------------------"
+		response = send_request('/rest/assembly/promote_module_updates', {:assembly_id=>service_id, :module_name => component_module, :module_type => "component_module" })
+		return response
+	end
+
+	def get_nodes(service_id)
+		puts "Get all nodes from service:", "-----------------------------"
+		nodes_list = send_request('/rest/assembly/info_about', {:assembly_id=>service_id, :node_id => nil, :component_id => nil, :subtype=>'instance', :about=>'nodes'})
+		nodes_list = nodes_list['data'].map! { |c| c['display_name'] }
+		pretty_print_JSON(nodes_list)
+		puts ""
+		return nodes_list
+	end
+
+	def get_components(service_id)
+		puts "Get all components from service:", "-----------------------------"
+		components_list = send_request('/rest/assembly/info_about', {:assembly_id=>service_id, :node_id => nil, :component_id => nil, :subtype=>'instance', :about=>'components'})
+		components_list = components_list['data'].map! { |c| c['display_name'] }
+		puts ""
+		return components_list
+	end
+
+	def get_cardinality(service_id, node_name)
+		puts "Get cardinality from service:", "-----------------------------"
+		cardinality = send_request('/rest/assembly/info_about', {:assembly_id=>service_id, :node_id => nil, :component_id => nil, :subtype=>'instance', :about=>'attributes', :format=>'yaml'})
+		content = YAML.load(cardinality['data'])
+		puts content
+		puts ""
+		return content["#{node_name}/"]['cardinality'].to_i
+	end
+
+	def get_workflow_info(service_id)
+		puts "Get workflow info:", "----------------------"
+		workflow_info = send_request('/rest/assembly/info_about_task', {:assembly_id=>service_id, :subtype => 'instance'})
+		content = YAML.load(workflow_info['data'])
+		puts content
+		puts ""
+		return content
+	end
+
+	def grant_access(service_id, system_user, rsa_pub_name, ssh_key)
+		puts "Grant access:", "-----------------"
+		response = send_request('/rest/assembly/initiate_ssh_pub_access', {:agent_action => :grant_access, :assembly_id=>service_id, :system_user => system_user, :rsa_pub_name => rsa_pub_name, :rsa_pub_key => ssh_key})
+		pretty_print_JSON(response)
+		puts ""
+		return response
+	end
+
+	def revoke_access(service_id, system_user, rsa_pub_name, ssh_key)
+		puts "Revoke access:", "-----------------"
+		resp = send_request('/rest/assembly/initiate_ssh_pub_access', {:agent_action => :revoke_access, :assembly_id=>service_id, :system_user => system_user, :rsa_pub_name => rsa_pub_name, :rsa_pub_key => ssh_key})
+		pretty_print_JSON(resp)
+		response = send_request('/rest/assembly/get_action_results', {:action_results_id => resp['data']['action_results_id'], :return_only_if_complete => true, :disable_post_processing => true})
+		puts response
+		puts ""
+		return response
+	end
+
+	def list_ssh_access(service_id, system_user, rsa_pub_name, nodes)
+		puts "List ssh access:", "---------------------"
+		response = send_request('/rest/assembly/list_ssh_access', {:assembly_id=>service_id})
+		pretty_print_JSON(response)
+		list = response['data'].select { |x| x['attributes']['linux_user'] == system_user && x['attributes']['key_name'] == rsa_pub_name && (nodes.include? x['node_name']) }
+		puts ""
+		return list.map! { |x| x['attributes']['key_name']}
 	end
 end

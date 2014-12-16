@@ -13,6 +13,7 @@ module DTK
     r8_nested_require('node','node_attribute')
     r8_nested_require('node','external_ref')
     r8_nested_require('node','delete')
+    r8_nested_require('node','dangling_link_mixin')
 
     include Type::Mixin
     include Clone::Mixin
@@ -20,6 +21,7 @@ module DTK
     include NodeAttribute::Mixin
     include ExternalRef::Mixin
     include Delete::Mixin
+    include DanglingLink::Mixin
 
     def self.common_columns()
       [
@@ -69,10 +71,10 @@ module DTK
     end
 
     #This is overwritten by node group subclasses
-    def get_node_members()
+    def get_node_group_members()
       #in case this called on superclass that is actually a node group
       if is_node_group?()
-        create_obj_subclass().get_node_members()
+        create_obj_subclass().get_node_group_members()
       else
         [self]
       end
@@ -180,6 +182,24 @@ module DTK
       get_objs_in_set(id_handles,{:cols => [:ports]},{:keep_ref_cols => true}).map{|r|r[:port]}
     end
 
+    def get_port_links()
+      self.class.get_port_links([id_handle()])
+    end
+
+    def self.get_port_links(id_handles)
+      ret = Array.new
+      ports = get_ports(id_handles)
+      return ret if ports.empty?()
+      port_ids = ports.map{|p|p[:id]}
+      sp_hash = {
+        :cols => PortLink.common_columns(),
+        :filter => [:or, [:oneof, :input_id, port_ids], [:oneof, :output_id, port_ids]] 
+      }
+      port_link_mh = ports.first.model_handle(:port_link)
+      Model.get_objs(port_link_mh,sp_hash)
+    end
+
+    # TODO: gui based may remove
     def get_ports(*types)
       port_list = self.class.get_ports([id_handle])
       i18n = get_i18n_mappings_for_models(:component,:attribute)
@@ -487,76 +507,6 @@ module DTK
       eval(ordered_component_ids)[:order]
     end
 # end of these may be depracted
-
-    def update_dangling_links()
-      dangling_links_info_cmps = get_objs(:cols => [:dangling_input_links_from_components])
-      dangling_links_info_nodes = get_objs(:cols => [:dangling_input_links_from_nodes])
-
-      # TODO: if only processing external links, more efficeint to filter in sql query
-      ndx_dangling_links_info = Hash.new
-      (dangling_links_info_cmps + dangling_links_info_nodes).each do |r|
-        link = r[:all_input_links]
-        if link[:type] == "external"
-          attr_id = link[:input_id]
-          p = ndx_dangling_links_info[attr_id] ||= {:input_attribute => r[:input_attribute], :other_links => Array.new}
-          new_el = {
-            :attribute_link_id => link[:id],
-            :index_map => link[:index_map],
-          }
-          if link[:id] == r[:attribute_link][:id]
-            p[:deleted_link] = new_el
-          else
-            p[:other_links] << new_el
-          end
-        end
-      end
-      attr_mh = model_handle_with_auth_info(:attribute)
-      # update attributes connected to dangling links on input side
-      updated_attrs = AttributeUpdateDerivedValues.update_for_delete_links(attr_mh,ndx_dangling_links_info.values)
-      # add state changes for updated attributes and see if any connected attributes
-      Attribute.propagate_and_optionally_add_state_changes(attr_mh,updated_attrs,:add_state_changes => true)
-    end
-    private :update_dangling_links
-
-
-    def self.get_port_links(id_handles,*port_types)
-      input_port_rows =  get_objs_in_set(id_handles,:columns => [:id, :display_name, :input_port_link_info]).select do |r|
-        port_types.include?((r[:port]||{})[:type])
-      end
-      # TODO: implement using PortLink.common_columns and materialize
-      input_port_rows.each do |r|
-        r[:port_link][:ui] ||= {
-          :type => R8::Config[:links][:default_type],
-          :style => R8::Config[:links][:default_style]
-        }
-      end
-
-      output_port_rows =  get_objs_in_set(id_handles,:columns => [:id, :display_name, :output_port_link_info]).select do |r|
-        port_types.include?((r[:port]||{})[:type])
-      end
-      # TODO: implement using PortLink.common_columns and materialize
-      output_port_rows.each do |r|
-        r[:port_link][:ui] ||= {
-          :type => R8::Config[:links][:default_type],
-          :style => R8::Config[:links][:default_style]
-        }
-      end
-
-      return Array.new if input_port_rows.empty? and output_port_rows.empty?
-
-      indexed_ret = Hash.new
-      input_port_rows.each do |r|
-        id = r[:id]
-        indexed_ret[id] ||= r.subset(:id, :display_name).merge(:input_port_links => Array.new, :output_port_links => Array.new)
-        indexed_ret[id][:input_port_links] << r[:port_link]
-      end
-      output_port_rows.each do |r|
-        id = r[:id]
-        indexed_ret[id] ||= r.subset(:id, :display_name).merge(:output_port_links => Array.new, :output_port_links => Array.new)
-        indexed_ret[id][:output_port_links] << r[:port_link]
-      end
-      indexed_ret.values
-    end
 
     def self.get_output_attrs_to_l4_input_ports(id_handles)
       rows = get_objs_in_set(id_handles,{:cols => [:output_attrs_to_l4_input_ports]},{:keep_ref_cols => true})

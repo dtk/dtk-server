@@ -1,13 +1,15 @@
+# TODO: move files to inside DTK::Attribute
 files =
   [
    'dependency_analysis',
    'group',
-   'complex_type',
-   'update_derived_values'
+   'complex_type'
   ]
 r8_nested_require('attribute',files)
 module DTK
   class Attribute < Model
+    set_relation_name(:attribute,:attribute)
+
     r8_nested_require('attribute','get_method')
     r8_nested_require('attribute','meta')
     r8_nested_require('attribute','datatype')
@@ -18,6 +20,8 @@ module DTK
     r8_nested_require('attribute','constant')
     r8_nested_require('attribute','print_form')
     r8_nested_require('attribute','semantic_datatype')
+    r8_nested_require('attribute','dangling_links_class_mixin')
+    r8_nested_require('attribute','update_derived_values')
 
     include GetMethod::Mixin
     extend GetMethod::ClassMixin
@@ -29,8 +33,8 @@ module DTK
     include PrintFormMixin
     extend PrintFormClassMixin
     extend PropagateChangesClassMixin
-    set_relation_name(:attribute,:attribute)
     extend MetaClassMixin
+    extend DanglingLinksClassMixin
 
     def self.common_columns()
       [:id,:display_name,:group_id,:hidden,:description,:component_component_id,:value_derived,:value_asserted,:semantic_data_type,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change,:port_type_asserted,:is_port,:external_ref,:read_only,:tags]

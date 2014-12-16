@@ -1,5 +1,5 @@
-# RICH-WF: right now mimicking ruote where have seperate workflow that mirrors task structure and pointer back to task 
-module DTK 
+# RICH-WF: right now mimicking ruote where have seperate workflow that mirrors task structure and pointer back to task
+module DTK
   module WorkflowAdapter
     class Simple < Workflow
       def initialize(top_task,task=nil)
@@ -48,7 +48,7 @@ module DTK
         def initialize(top_task,task)
           super
           @children = task.subtasks.map{|sub_task|self.class.generate_workflow(@top_task,sub_task)}
-        end 
+        end
         attr_reader :children
 
         def debug_summary()
@@ -86,9 +86,9 @@ follow_workflow for both classes; teh follow workflow for the concurrent one sho
             # TODO: Workflow#update_task has been removed
             subtask_wf.update_task(:status => "not_reached")
           else
-            subtask_status = subtask_wf.execute(top_task_idh) 
+            subtask_status = subtask_wf.execute(top_task_idh)
             # TODO: what to sent whole task status when failue but not task[:action_on_failure] == "abort"
-            if subtask_status == :failed 
+            if subtask_status == :failed
               status = :failed
               mark_as_not_reached = true if  task[:action_on_failure] == "abort"
             end
@@ -104,10 +104,10 @@ follow_workflow for both classes; teh follow workflow for the concurrent one sho
         # TODO: not killing concurrent subtasks if one failes
         user_object  = ::DTK::CurrentSession.new.user_object()
         threads = task.subtasks.map do |subtask|
-          CreateThread.defer_with_session(user_object) do 
+          CreateThread.defer_with_session(user_object, Ramaze::Current.session) do
             subtask_status = Simple.new(subtask).execute(top_task_idh)
             lock.synchronize do
-              status = :failed if subtask_status == :failed 
+              status = :failed if subtask_status == :failed
             end
           end
         end

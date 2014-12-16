@@ -17,6 +17,10 @@
 
 require ::File.expand_path('../app', __FILE__)
 
+rotating_logger = Logger.new("log/#{ENV['RACK_ENV']}.log", 'weekly', 5)
+Ramaze::Log.loggers = [rotating_logger]
+Ramaze::Log.level = Logger.const_get(R8::Config[:log][:level].upcase)
+
 Ramaze.options.mode = :live
 Ramaze.start(:root => __DIR__, :started => true)
 run Ramaze

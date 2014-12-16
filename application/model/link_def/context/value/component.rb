@@ -1,4 +1,4 @@
-module DTK; class LinkDefContext
+module DTK; class LinkDef::Context
   class Value 
     class Component < self
       def initialize(term)

@@ -1,5 +1,5 @@
 module XYZ
-  class DevtestController < AuthController 
+  class DevtestController < AuthController
     # using default layout
     layout :default
     def initialize
@@ -27,7 +27,7 @@ module XYZ
       raise Error.new("cannot find any #{ds_type} data source objects in #{container_uri}") if ds_object_objs.empty?
       # so that cache can be shared accross different ds_object_objs
       # TODO make more sophisticated
-      common_ds_connectors = Hash.new 
+      common_ds_connectors = Hash.new
       ds_object_objs.each{|x|x.set_and_share_ds_connector!(common_ds_connectors,container_uri)}
       ds_object_objs.each{|x|x.discover_and_update()}
       DataSource.set_collection_complete(IDHandle[:c => c, :uri => ds_uri])
@@ -41,7 +41,7 @@ module XYZ
       opts[:no_hrefs] ||= true
       opts[:depth] ||= :deep
       opts[:no_null_cols] = true
-      href_prefix = "http://" + http_host() + "/list" 
+      href_prefix = "http://" + http_host() + "/list"
       c = ret_session_context_id()
       @title = uri
       id_handle = IDHandle[:c => c,:uri => uri]
@@ -91,7 +91,7 @@ module XYZ
       http_opts = ret_parsed_query_string_from_uri()
       href_prefix = "http://" + http_host() + "/list"
       c = ret_session_context_id()
-      
+
       result_array = ActionSet::Singleton.dispatch_action(action,c,uri,href_prefix,http_opts)
       print JSON.pretty_generate(result_array) # stub
       # TODO: put in rendering
@@ -113,7 +113,7 @@ module XYZ
 
 # TODO: move out of here and modularize
 
-    # TODO: this fn getting too large; will modularize 
+    # TODO: this fn getting too large; will modularize
     def action_handler(action_x,*uri_array)
       error_405 unless request.post?
       action = action_x.to_sym
@@ -123,13 +123,13 @@ module XYZ
       c = ret_session_context_id()
 
       task = Task.create(ACTION_HANDLER_IS_ASYNCHRONOUS[action] ? c : nil)
-      redirect_uri = task[:uri] 
+      redirect_uri = task[:uri]
 
       # TODO: stubbing how variables obj, params, and redirect_uri set (would make this data driven; casing on action)
       obj = ACTION_HANDLER_OBJ[action]
       # TODO: wil replace with data driven logic
       params = nil; opts_added = nil
-      # TODO: what parameters below correspond to is getting obscurred so might have each action in model take one paramter which is a hash and then effect we can specific "call by value" 
+      # TODO: what parameters below correspond to is getting obscurred so might have each action in model take one paramter which is a hash and then effect we can specific "call by value"
       case action
         when :import_chef_recipes
       	  params = [
@@ -203,10 +203,10 @@ module XYZ
       user_object  = ::DTK::CurrentSession.new.user_object()
       # dispatcher line
       if ACTION_HANDLER_IS_ASYNCHRONOUS[action]
-        CreateThread.defer_with_session(user_object) {
+        CreateThread.defer_with_session(user_object, Ramaze::Current::session) {
           begin
             obj.send(ACTION_HANDLER_METHOD_NAME[action] || action,*params)
-            task.update_status(:complete) 
+            task.update_status(:complete)
           rescue Exception => err
             task.add_error_toplevel(err) if err.kind_of?(Error)
             task.update_status(:error)
@@ -232,7 +232,7 @@ module XYZ
 # TODO: move out of here
     def library__public
      error_405 unless request.get?
-     uri = "/library/public" 
+     uri = "/library/public"
      opts = ret_parsed_query_string_from_uri()
      href_prefix = "http://" + http_host() + "/list"
      c = ret_session_context_id()
@@ -241,10 +241,10 @@ module XYZ
     end
 
 # TODO: move out of here, this doesnt belong in the controller
-    # for list from id  
+    # for list from id
     def list_by_guid(guid)
-      error_405 unless request.get? 
-      href_prefix = "http://" + http_host() + "/list" 
+      error_405 unless request.get?
+      href_prefix = "http://" + http_host() + "/list"
       opts = ret_parsed_query_string_from_uri()
       c = ret_session_context_id()
       @title = "List from Guid"
@@ -253,7 +253,7 @@ module XYZ
 
     # TODO: temp
     def list_contained_attributes(*uri_array)
-      error_405 unless request.get? 
+      error_405 unless request.get?
       uri = "/" + uri_array.join("/")
       opts = ret_parsed_query_string_from_uri()
       type = opts[:value_type] || :value
@@ -265,7 +265,7 @@ module XYZ
 # TODO: move out of here
     # TODO: temp
     def list_node_attributes(*uri_array)
-      error_405 unless request.get? 
+      error_405 unless request.get?
       uri = "/" + uri_array.join("/")
       opts = ret_parsed_query_string_from_uri()
       c = ret_session_context_id()
@@ -275,7 +275,7 @@ module XYZ
 # TODO: move out of here, this seems to belong in the central model handler
     # TODO: temp
     def get_guid(*uri_array)
-      error_405 unless request.get? 
+      error_405 unless request.get?
       uri = "/" + uri_array.join("/")
       c = ret_session_context_id()
       @results = Object.get_guid(IDHandle[:c => c,:uri => uri])

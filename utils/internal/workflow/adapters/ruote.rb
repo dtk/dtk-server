@@ -1,5 +1,5 @@
 require 'ruote'
-module DTK 
+module DTK
   module WorkflowAdapter
     class Ruote < DTK::Workflow
       r8_nested_require('ruote','task_info')
@@ -11,7 +11,7 @@ module DTK
           @running = true
 
           user_object  = ::DTK::CurrentSession.new.user_object()
-          @run_thread = CreateThread.defer_with_session(user_object) { run }
+          @run_thread = CreateThread.defer_with_session(user_object, Ramaze::Current::session) { run }
         end
       end
 
@@ -36,7 +36,7 @@ module DTK
       def kill()
         Engine.kill_process(@wfid)
       end
-      
+
       TopTaskDefaultTimeOut = 60 * 20 # in seconds
 
       def execute(top_task_id)
@@ -45,8 +45,8 @@ module DTK
 
           # TODO: remove need to have to do Engine.wait_for and have last task trigger cleanup (which just 'wastes a  thread'
           Engine.wait_for(@wfid, :timeout => TopTaskDefaultTimeOut)
-          
-          # detect if wait for finished due to normal execution or errors 
+
+          # detect if wait for finished due to normal execution or errors
           errors = Engine.errors(@wfid)
           if errors.nil? or errors.empty?
             Log.info_pp :normal_completion
@@ -73,7 +73,7 @@ module DTK
         nil
       end
 
-     private 
+     private
       def initialize(top_task)
         super
         @process_def = nil
@@ -97,7 +97,7 @@ module Ruote
     end
 
     def do_threaded_dispatch(participant, msg)
-      
+
       msg = Rufus::Json.dup(msg)
 
       #
@@ -109,7 +109,7 @@ module Ruote
       # would be OK.
       # Or maybe it's the job of an extension / subclass
 
-      DTK::CreateThread.defer_with_session(retrive_user_info(msg)) do
+      DTK::CreateThread.defer_with_session(retrive_user_info(msg), Ramaze::Current.session) do
         begin
           do_dispatch(participant, msg)
         rescue => exception

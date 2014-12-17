@@ -104,9 +104,9 @@ module DTK
         adapter_repo.get_remote_diffs(remote_r, remote_u, remote_b)
       end
 
-      def get_local_branches_diffs(repo_name, module_branch, base_branch_name)
-        adapter_repo = get_adapter_repo(context(repo_name,module_branch))
-        adapter_repo.get_local_branches_diffs(repo_name, module_branch, base_branch_name)
+      def get_local_branches_diffs(repo_name, module_branch, base_branch, workspace_branch)
+        adapter_repo = get_adapter_repo(context(repo_name, module_branch))
+        adapter_repo.get_local_branches_diffs(repo_name, module_branch, base_branch, workspace_branch)
       end
 
       def push_to_remote_repo(repo_name,branch,remote_name,remote_branch=nil)

@@ -97,15 +97,15 @@ module DTK
 
     def rest__list_component_module_diffs()
       # repo_id = ret_request_param_id_optional(:repo_id, ::DTK::Repo)
-      module_id, assembly_name, branch, module_branch_id, repo_id = ret_request_params(:module_id, :assembly_name, :branch, :module_branch_id, :repo_id)
+      module_id, assembly_name, workspace_branch, module_branch_id, repo_id = ret_request_params(:module_id, :assembly_name, :workspace_branch, :module_branch_id, :repo_id)
       repo          = id_handle(repo_id,:repo).create_object()
       project       = get_default_project()
-      module_branch = id_handle(module_branch_id,:module_branch).create_object()
+      module_branch = id_handle(module_branch_id, :module_branch).create_object()
 
       project_idh = project.id_handle()
       opts = Opts.new(:project_idh => project_idh)
 
-      rest_ok_response AssemblyModule::Component.list_remote_diffs(model_handle(), module_id, repo, module_branch, opts)
+      rest_ok_response AssemblyModule::Component.list_remote_diffs(model_handle(), module_id, repo, module_branch, workspace_branch, opts)
     end
 
     def rest__get_component_modules()

@@ -431,10 +431,9 @@ module DTK
       get_diffs(remote_sha, local_sha)
     end
 
-    def get_local_branches_diffs(repo_name, module_branch, base_branch_name)
-      # base = @grit_repo.heads.find{|r|r.name.eql?(base_branch_name.to_s)}
-      base  = @grit_repo.remotes.find{|r|r.name.eql?("origin/#{base_branch_name.to_s}")}
-      local = @grit_repo.heads.first
+    def get_local_branches_diffs(repo_name, module_branch, base_branch, workspace_branch)
+      base  = @grit_repo.remotes.find{|r|r.name.eql?("origin/#{base_branch.to_s}")}
+      local = @grit_repo.heads.find{|r|r.name.eql?(workspace_branch.to_s)}
 
       raise Error.new("Cannot find base branch (#{base})") unless base
 

@@ -3,6 +3,7 @@ module DTK
     class Status
       r8_nested_require('status','table_form')
       r8_nested_require('status','list_form')
+
       def self.get_active_top_level_tasks(model_handle)
         # TODO: need protection so dont get stake tasks that never came out of executing mode
         filter = [:and, [:eq,:status,"executing"],[:or,[:neq,:assembly_id,nil],[:neq,:node_id,nil]]]
@@ -33,24 +34,19 @@ module DTK
           raise ErrorUsage.new("No tasks found for #{task_obj_type} (#{task_obj[:display_name]})")
         end
         
-        status_opts = Opts.new
-        status_opts[:no_components] = false
-        status_opts[:no_attributes] = true
-        if detail_level_opts = opts[:detail_level]
-          if detail_level_opts[:summarize_node_groups]
-            status_opts[:summarize_node_groups] = true
-          end
-        end
         task_structure = Task.get_hierarchical_structure(task_mh.createIDH(:id => task[:id]))
-
-        if opts[:format] == :table
-          TableForm.status(task_structure,status_opts)
-        elsif opts[:format] == :list
-          ListForm.status(task_structure,task_obj_idh.createMH(:node))
-        else
-          task_structure.status(status_opts)
+        status_opts = Opts.new(:no_components=>false,:no_attributes=>true)
+        status_opts.merge!(:summarize_node_groups => true) if (opts[:detail_level]||{})[:summarize_node_groups]
+        case opts[:format]
+          when :table
+            TableForm.status(task_structure,status_opts)
+          when :list
+            ListForm.status(task_structure,task_obj_idh.createMH(:node))
+          else
+            task_structure.status(status_opts)
         end
       end
+
       class Assembly < self
         def self.get_active_nodes(model_handle)
           find_nodes_that_are_active(model_handle)
@@ -153,7 +149,7 @@ module DTK
         subtasks.each{|st|st.set_and_return_types!()}
         self[:type] = type
       end
-      protected :set_and_return_types!
+
       ActionTypeCodes = {
         "ConfigNode" => "configure_node",
         "CreateNode" => "create_node"

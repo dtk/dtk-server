@@ -10,6 +10,7 @@ module DTK
     extend CreateClassMixin
     include StatusMixin
     include NodeGroupProcessingMixin
+    include Status::TableForm::Mixin
 
     def self.common_columns()
       [
@@ -75,7 +76,10 @@ module DTK
       get_children_objs(:task_error,sp_hash).map{|r|r[:content]}
     end
 
-    # indexed by tasks
+    # indexed by task ids
+    def get_ndx_errors()
+      self.class.get_ndx_errors(hier_task_idhs())
+    end
     def self.get_ndx_errors(task_idhs)
       ret = Array.new
       return ret if task_idhs.empty?

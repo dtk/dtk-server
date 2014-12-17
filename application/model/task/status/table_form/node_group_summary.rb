@@ -16,12 +16,15 @@ module DTK; class Task::Status
             # no op
            when "failed"
             ng_table_el[:status] = status_when_failed()
+            errors = summarize_errors?()
+            ng_table_el[:errors] = errors unless errors.empty?
            else
             Log.error("Unexpected status #{status}")
           end
         end
         ng_table_el
       end
+
      private
       def status_when_succeeded()
         status_with_subtask_size("succeeded")
@@ -53,10 +56,14 @@ module DTK; class Task::Status
       def subtask_count()
         @subtasks.size
       end
+
+      def subtask_status_rows()
+        @subtask_status_rows ||= (@block_for_subtasks && @block_for_subtasks.call())||[]
+      end
+
       def subtask_status_count()
-        subtask_rows =  (@block_for_subtasks && @block_for_subtasks.call())||[]
         ret = Hash.new
-        subtask_rows.each do |subtask_table_el|
+        subtask_status_rows().each do |subtask_table_el|
           if status = subtask_table_el[:status]
             ret[status] ||= 0
             ret[status] += 1
@@ -64,6 +71,40 @@ module DTK; class Task::Status
         end
         ret
       end
+      
+      def summarize_errors?()
+        all_errors = Array.new
+        subtask_status_rows().each do |st|
+          if errors = st[:errors]
+            if errors.kind_of?(Array)
+              all_errors += errors
+            else
+              all_errors << errors
+            end
+          end
+        end
+        summarize_errors(all_errors) unless all_errors.empty?
+      end
+
+      def summarize_errors(errors)
+        # assuming all fields are the same except :message
+        msgs_found = Array.new
+        errors.each do |err|
+          msg = err[:message]
+          if msg and !msg.empty?
+            unless msgs_found.include?(msg)
+              msgs_found << msg
+            end
+          end
+        end
+        if msgs_found.empty?
+          errors.first
+        else
+          summary_msg = (msgs_found.size == 1 ? msgs_found.first : "\n#{ErrIdent}#{msgs_found.join(ErrIdent)}")
+          errors.first.merge(:message => summary_msg)
+        end
+      end
+      ErrIdent = '  '
     end
   end
 end; end

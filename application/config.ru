@@ -15,6 +15,9 @@
 # You can choose the adapter like `ramaze start -s mongrel` or set it in the
 # 'start.rb' and use `ruby start.rb` instead.
 
+# To avoid "Proxy is invalid" message from excon gem when using passenger
+ENV.delete("https_proxy") if ENV.has_key?("https_proxy") && ENV["https_proxy"].empty?
+
 require ::File.expand_path('../app', __FILE__)
 
 unless  R8::Config[:log][:mode] == 'off'

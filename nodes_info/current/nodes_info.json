@@ -24,6 +24,18 @@
         "m1.medium"
       ]
     },
+    "ami-d23e53ba": {
+      "region": "us-east-1",
+      "type": "centos6",
+      "os_type": "centos",
+      "display_name": "Centos6",
+      "png": "centos6.png",
+      "sizes": [
+        "t1.micro",
+        "m1.small",
+        "m1.medium"
+      ]
+    },
     "ami-e2e97c8a": {
       "region": "us-east-1",
       "type": "trusty",
@@ -84,6 +96,18 @@
         "m1.medium"
       ]
     },
+    "ami-ad7b66e8": {
+      "region": "us-west-1",
+      "type": "centos6",
+      "os_type": "centos",
+      "display_name": "Centos6",
+      "png": "centos6.png",
+      "sizes": [
+        "t1.micro",
+        "m1.small",
+        "m1.medium"
+      ]
+    },
     "ami-adc0d6e8": {
       "region": "us-west-1",
       "type": "rhel6",
@@ -102,6 +126,18 @@
       "os_type": "redhat",
       "display_name": "Rhel6",
       "png": "rhel6.png",
+      "sizes": [
+        "t1.micro",
+        "m1.small",
+        "m1.medium"
+      ]
+    },
+    "ami-679bcb57": {
+      "region": "us-west-2",
+      "type": "centos6",
+      "os_type": "centos",
+      "display_name": "Centos6",
+      "png": "centos6.png",
       "sizes": [
         "t1.micro",
         "m1.small",
@@ -192,6 +228,30 @@
         "m1.medium"
       ]
     },
+    "ami-f0fa4287": {
+      "region": "eu-west-1",
+      "type": "centos6",
+      "os_type": "centos",
+      "display_name": "Centos6",
+      "png": "centos6.png",
+      "sizes": [
+        "t1.micro",
+        "m1.small",
+        "m1.medium"
+      ]
+    },
+    "ami-4ff5da1d": {
+      "region": "ap-southeast-1",
+      "type": "centos6",
+      "os_type": "centos",
+      "display_name": "Centos6",
+      "png": "centos6.png",
+      "sizes": [
+        "t1.micro",
+        "m1.small",
+        "m1.medium"
+      ]
+    },
     "ami-8086a5d2": {
       "region": "ap-southeast-1",
       "type": "wheezy",
@@ -234,6 +294,18 @@
       "os_type": "redhat",
       "display_name": "Rhel6",
       "png": "rhel6.png",
+      "sizes": [
+        "t1.micro",
+        "m1.small",
+        "m1.medium"
+      ]
+    },
+    "ami-8b365db1": {
+      "region": "ap-southeast-2",
+      "type": "centos6",
+      "os_type": "centos",
+      "display_name": "Centos6",
+      "png": "centos6.png",
       "sizes": [
         "t1.micro",
         "m1.small",
@@ -324,6 +396,18 @@
         "m1.medium"
       ]
     },
+    "ami-74404975": {
+      "region": "ap-northeast-1",
+      "type": "centos6",
+      "os_type": "centos",
+      "display_name": "Centos6",
+      "png": "centos6.png",
+      "sizes": [
+        "t1.micro",
+        "m1.small",
+        "m1.medium"
+      ]
+    },
     "ami-77f9c176": {
       "region": "ap-northeast-1",
       "type": "rhel6",
@@ -378,6 +462,18 @@
       "os_type": "ubuntu",
       "display_name": "Trusty",
       "png": "trusty.png",
+      "sizes": [
+        "t1.micro",
+        "m1.small",
+        "m1.medium"
+      ]
+    },
+    "ami-9dcc7f80": {
+      "region": "sa-east-1",
+      "type": "centos6",
+      "os_type": "centos",
+      "display_name": "Centos6",
+      "png": "centos6.png",
       "sizes": [
         "t1.micro",
         "m1.small",

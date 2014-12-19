@@ -14,7 +14,7 @@ module DTK
       # get associated assembly templates before do any updates and use this to see if any referential integrity
       # problems within transaction after do update; transaction is aborted if any errors found
       ref_integrity_snapshot = RefIntegrity.snapshot_associated_assembly_templates(component_module)
-      opts.merge!(:ref_integrity_snapshot => ref_integrity_snapshot)
+      opts.merge!(:ref_integrity_snapshot => ref_integrity_snapshot, :cmp_module => component_module)
       model_parsed = nil
       Transaction do
         component_dsl_obj = create_dsl_object_from_impl(impl_obj, opts)
@@ -124,9 +124,71 @@ module DTK
     def self.update_component_module_refs(module_class,module_branch,opts={})
       syntatic_parsed_info = module_class::DSLParser.parse_directory(module_branch,:component_module_refs,opts)
       return syntatic_parsed_info if ParsingError.is_error?(syntatic_parsed_info)
+      if opts[:match_hashes]
+        syntatic_parsed_info << opts[:match_hashes]
+        syntatic_parsed_info.flatten!
+      end
       parsed_info = ModuleRefs::Parse.semantic_parse(module_branch,syntatic_parsed_info)
       return parsed_info if ParsingError.is_error?(parsed_info)
       ModuleRefs::Parse.update_from_dsl_parsed_info(module_branch,parsed_info)
+    end
+
+    def self.validate_includes_and_update_module_refs(source_impl, cmp_module, opts={})
+      ret = Hash.new
+      target_impl = opts[:target_impl]||source_impl
+      info = get_dsl_file_raw_content_and_info(source_impl)
+
+      dsl_filename = info[:dsl_filename]
+      content = info[:content]
+      return nil unless isa_dsl_filename?(dsl_filename)
+
+      parsed_name = parse_dsl_filename(dsl_filename)
+      opts[:file_path] = dsl_filename
+      input_hash = convert_to_hash(content,parsed_name[:format_type],opts)
+      return input_hash if ParsingError.is_error?(input_hash)
+
+      includes = input_hash['includes']||[]
+      cmp_module ||= opts[:cmp_module]
+      container_idh = opts[:container_idh]||target_impl.id_handle().get_parent_id_handle_with_auth_info()
+
+      input_hash['components'].each do |k,v|
+        includes << v['includes'] if v['includes']
+      end
+      all_includes = includes.flatten.uniq
+
+      unless all_includes.empty?
+        multiple_namespaces = []
+        all_modules = cmp_module.class.get_all(container_idh,[:namespace_id,:namespace])
+        mapped = all_modules.select{|m| all_includes.include?(m[:display_name])}.map{|k| {:component_module=>k[:display_name],:remote_namespace=>k[:namespace][:name]}}
+        multiple_namespaces = mapped.group_by { |h| h[:component_module] }.values.select { |a| a.size > 1 }.flatten
+
+        mapped_names = mapped.map{|m| m[:component_module]}
+        missing = all_includes - mapped_names
+        ext_deps_hash = {
+          :possibly_missing => missing
+        }
+        external_deps = cmp_module.class::ExternalDependencies.new(ext_deps_hash)
+        if poss_problems = external_deps.possible_problems?()
+          opts.merge!(:external_dependencies => poss_problems)
+        end
+
+        unless multiple_namespaces.empty?
+          cmp_mods = multiple_namespaces.group_by { |h| h[:component_module] }#.values.flatten.map{|k| k[:component_module]}
+          cmp_mods.each do |k,v|
+            namespaces = v.map{|a| a[:remote_namespace]}
+
+            error_params = {
+              :module_type => 'component',
+              :module_name => k,
+              :namespaces => namespaces.compact # compact just to be safe
+            }
+            return ParsingError::AmbiguousModuleRef.new(error_params)
+          end
+        end
+
+        opts.merge!(:match_hashes => mapped)
+        update_component_module_refs(cmp_module.class,target_impl.get_module_branch(),opts)
+      end
     end
 
     def self.validate_module_ref_namespaces(module_branch,component_module_refs)

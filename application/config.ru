@@ -17,6 +17,7 @@
 
 # To avoid "Proxy is invalid" message from excon gem when using passenger
 ENV.delete("https_proxy") if ENV.has_key?("https_proxy") && ENV["https_proxy"].empty?
+ENV.delete("http_proxy") if ENV.has_key?("http_proxy") && ENV["http_proxy"].empty?
 
 require ::File.expand_path('../app', __FILE__)
 

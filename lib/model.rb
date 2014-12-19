@@ -370,6 +370,7 @@ module DTK
     # TODO: check calss to update with opts having :partial_value=>true to see whether shoudl use variant of update_hash_key instead
     # where there is a deep merge on the field's value
     def update(scalar_assignments,opts={})
+      scalar_assignments = {} if model_handle[:model_name] == :node && scalar_assignments.key?(:hidden) && scalar_assignments.key?(:value_asserted)
       scalar_assignments.each{|k,v| self[k] = v}
       raise Error.new("Cannot execute update without the object having an id") unless id()
       self.class.update_from_rows(model_handle,[scalar_assignments.merge(:id => id())],opts)
@@ -727,7 +728,14 @@ module DTK
       model_name = model_handle[:model_name]
       hash = sp_hash.merge(:relation => model_name)
       search_object = SearchObject.create_from_input_hash({"search_pattern" => hash},model_name,model_handle[:c])
-      ret = get_objects_from_search_object(search_object,opts)
+
+      # TODO: putting this in here so we can remove :keep_ref_cols at top level
+      opts_get_search_object = opts
+      if !opts.has_key?(:keep_ref_cols) and (sp_hash[:cols]||[]).include?(:ref)
+        opts_get_search_object = opts.merge(:keep_ref_cols => true)
+      end
+
+      ret = get_objects_from_search_object(search_object,opts_get_search_object)
       if subclass_model_name = opts[:subclass_model_name]
         ret.map{|r|r.create_subclass_obj(subclass_model_name)}
       else

@@ -257,8 +257,8 @@ lambda__instance_nodes_components_assembly_template =
       :hidden=>true,
       :remote_dependencies=>
         lambda__segments_nodes_components_assembly_template.call(
-          [:id,:display_name,:os_type,:admin_op_status,:external_ref],
-          [:id,:display_name,:component_type,:basic_type,:extended_base,:description,:version,:module_branch_id]
+          [:id,:group_id,:display_name,:type,:os_type,:admin_op_status,:external_ref],
+          [:id,:group_id,:display_name,:component_type,:basic_type,:extended_base,:description,:version,:module_branch_id]
         ) +
       [{
          :model_name=>:datacenter,
@@ -312,7 +312,7 @@ lambda__instance_nodes_components_assembly_template =
       :type=>:json,
       :hidden=>true,
       :remote_dependencies=>
-        lambda__segments_nodes_and_components.call([:id,:display_name,:group_id],[:id,:display_name,:component_type,:group_id,:only_one_per_node]) +
+        lambda__segments_nodes_and_components.call([:id,:display_name,:group_id,:type],[:id,:display_name,:component_type,:group_id,:only_one_per_node]) +
       [{
         :model_name=>:attribute,
         :convert => true,

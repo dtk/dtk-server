@@ -19,7 +19,7 @@
          :convert => true,
          :join_type=>:left_outer,
          :join_cond=>{:link_def_id =>:link_def__id},
-         :cols=>LinkDefLink.common_columns()
+         :cols=>LinkDef::Link.common_columns()
        }]
     }
   },

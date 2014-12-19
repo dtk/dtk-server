@@ -151,18 +151,38 @@ module DTK
     # args could be either file_path,hash_content,file_format(optional) or single element which is an array
     # having elements with keys :path, :hash_content, :format
     def serialize_and_save_to_repo?(*args)
+      opts = Hash.new
       files =
       if args.size == 1
         args[0]
       else
-        path,hash_content,format_type = args
-        [{:path => path,:hash_content => hash_content,:format_type => format_type||dsl_format_type_form_path(path)}]
+        path,hash_content,format_type,opts = args
+        format_type ||= dsl_format_type_form_path(path)
+        opts ||= Hash.new
+        [{:path => path,:hash_content => hash_content,:format_type => format_type}]
       end
 
       unless files.empty?
-        any_changes = false
+        any_changes, new_cmp_refs = false, nil
         files.each do |file_info|
           content = Aux.serialize(file_info[:hash_content],file_info[:format_type])
+
+          # check if module_refs.yaml exists already
+          existing_content = RepoManager.get_file_content({:path => file_info[:path]},self,{:no_error_if_not_found => true})
+          file_path = file_info[:path]
+
+          # if module_refs.yaml and content already exist then append new module_refs to existing
+          if existing_content && opts[:update_module_refs] && file_path.eql?("module_refs.#{file_info[:format_type].to_s}")
+            existing_c_hash = Aux.convert_to_hash(existing_content,file_info[:format_type])
+            new_cmp_refs = file_info[:hash_content].clone
+
+            if new_cmp_refs[:component_modules] && existing_c_hash['component_modules']
+              new_cmp_refs[:component_modules].merge!(existing_c_hash['component_modules'])
+            end
+
+            content = Aux.serialize(new_cmp_refs,file_info[:format_type]) if new_cmp_refs
+          end
+
           any_change = RepoManager.add_file({:path => file_info[:path]},content,self)
           any_changes = true if any_change
         end

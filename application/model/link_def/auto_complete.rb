@@ -14,9 +14,9 @@ module DTK; class LinkDef
       attr_links = Array.new
       relevant_link_defs.each do |link_def|
         if link_def_link = choose_internal_link(link_def,link_def[:possible_links],link_def[:component],strategy)
-          context = LinkDefContext.create(link_def_link,node_link_defs_info)
+          link_def_context = LinkDef::Context.create(link_def_link,node_link_defs_info)
           link_def_link.attribute_mappings.each do |attr_mapping|
-            attr_links << attr_mapping.ret_link(context).merge(:type => "internal")
+            attr_links << attr_mapping.ret_links__clone_if_needed(link_def_context).merge(:type => "internal")
           end
         end
       end

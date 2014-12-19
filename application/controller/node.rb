@@ -8,23 +8,23 @@ module XYZ
       node = create_node_obj(:node_id)
       queue = ActionResultsQueue.new
       # TODO: Move GetNetstas MColl action class to shared location between assembly and node controllers
-      Assembly::Instance::Action::GetNetstats.initiate([node], queue) 
+      Assembly::Instance::Action::GetNetstats.initiate([node], queue)
       rest_ok_response :action_results_id => queue.id
     end
-    
+
     def rest__initiate_get_ps()
       node = create_node_obj(:node_id)
       queue = ActionResultsQueue.new
-      
-      Assembly::Instance::Action::GetPs.initiate([node], queue, :node) 
+
+      Assembly::Instance::Action::GetPs.initiate([node], queue, :node)
       rest_ok_response :action_results_id => queue.id
     end
 
     def rest__initiate_execute_tests()
       node = create_node_obj(:node_id)
       queue = ActionResultsQueue.new
-      
-      Assembly::Instance::Action::ExecuteTestsV2.initiate([node], queue, :node) 
+
+      Assembly::Instance::Action::ExecuteTestsV2.initiate([node], queue, :node)
       rest_ok_response :action_results_id => queue.id
     end
 
@@ -79,7 +79,7 @@ module XYZ
       queue = SimpleActionQueue.new
 
       user_object  = ::DTK::CurrentSession.new.user_object()
-      CreateThread.defer_with_session(user_object) do
+      CreateThread.defer_with_session(user_object, Ramaze::Current::session) do
         # invoking command to start the nodes
         CommandAndControl.start_instances(nodes)
 
@@ -101,7 +101,7 @@ module XYZ
       unless is_valid
        return rest_ok_response(:errors => [error_msg])
       end
-      
+
       Node.stop_instances(nodes)
       rest_ok_response :status => :ok
     end
@@ -117,8 +117,8 @@ module XYZ
       if node.nil?
         return nodes, false, "There are no #{status_pattern} nodes with id '#{nodes.first[:id]}'"
       end
-      
-      return nodes, true, nil      
+
+      return nodes, true, nil
     end
 
     #### end: create and delete actions ###
@@ -164,7 +164,7 @@ module XYZ
     # {:pattern => PAT, :value => VAL}
     # pat can be one of three forms
     # 1 - an id
-    # 2 - a name of form ASSEM-LEVEL-ATTR or NODE/COMONENT/CMP-ATTR, or 
+    # 2 - a name of form ASSEM-LEVEL-ATTR or NODE/COMONENT/CMP-ATTR, or
     # 3 - a pattern (TODO: give syntax) that can pick out multiple vars
     # this returns same output as info about attributes, pruned for just new ones set
     def rest__set_attributes()
@@ -219,7 +219,7 @@ module XYZ
     def rest__image_upgrade()
       old_image_id,new_image_id = ret_non_null_request_params(:old_image_id,:new_image_id)
       Node::Template.image_upgrade(model_handle(),old_image_id,new_image_id)
-      rest_ok_response 
+      rest_ok_response
     end
 
     def rest__add_node_template()
@@ -227,7 +227,7 @@ module XYZ
       node_template_name,image_id = ret_non_null_request_params(:node_template_name,:image_id)
       opts = ret_params_hash(:operating_system,:size_array)
       Node::Template.create_or_update_node_template(target,node_template_name,image_id,opts)
-      rest_ok_response 
+      rest_ok_response
     end
 
     def rest__delete_node_template()
@@ -551,9 +551,9 @@ ie: get_components(['language'])
         pp 'id:'+component[:id].to_s
         component_name = component[:display_name].gsub('::','_')
 
-        component[:label] = component_i18n[(component[:ds_attributes]||{})[:ref].to_sym]  if (component[:ds_attributes]||{})[:ref]  
+        component[:label] = component_i18n[(component[:ds_attributes]||{})[:ref].to_sym]  if (component[:ds_attributes]||{})[:ref]
         component[:label] ||= component_i18n[component_name.to_sym] || "component"
-                             
+
         component[:onclick] = "R8.Workspace.Dock.loadDockPanel('component/wspace_dock_get_attributes/#{component[:id].to_s}');"
 #        component[:onclick] = "R8.Workspace.Dock.loadDockPanel('node/get_components/2147484111');"
       end

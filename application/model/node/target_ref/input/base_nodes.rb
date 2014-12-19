@@ -1,6 +1,7 @@
 module DTK; class Node; class TargetRef
   class Input 
     class BaseNodes < self
+      r8_nested_require('base_nodes','element')
 
       #This creates if needed a new target ref, links node to it and moves the node's attributes to the target ref
       def self.create_linked_target_ref?(target,node,assembly)
@@ -19,7 +20,7 @@ module DTK; class Node; class TargetRef
       end
 
       # TODO: need better name for create_linked_target_ref? vs create_linked_target_refs?
-      # since diffeernt in what they do with node attributes
+      # since different in what they do with node attributes
 
       # This creates if needed target refs and links nodes to them
       # returns new idhs indexed by node (id) they linked to
@@ -54,7 +55,8 @@ module DTK; class Node; class TargetRef
           all_idhs = Model.input_hash_content_into_model(target.id_handle(),create_objs_hash,:return_idhs => true)
           #all idhs have both nodes and node_group_rels
           ngr_idhs = all_idhs.select{|idh|idh[:model_name] == :node_group_relation}
-          copy_node_group_attrs_to_target_refs?(target,nodes,ngr_idhs)
+          # copy from node group to target refs 
+          copy_node_attributes?(target,nodes,ngr_idhs)
           ret.merge!(TargetRef.ndx_matching_target_ref_idhs(:node_group_relation_idhs => ngr_idhs))
         end
         ret
@@ -113,13 +115,14 @@ module DTK; class Node; class TargetRef
         Model.create_from_rows(attr_mh,create_rows,:convert => true)
       end
 
-      def self.copy_node_group_attrs_to_target_refs?(target,nodes,ngr_idhs)
+      # copy node attributes from node group to target refs 
+      def self.copy_node_attributes?(target,nodes,ngr_idhs)
         node_groups = nodes.select{|n|n.is_node_group?()}
         return if node_groups.empty?
         
         ng_idhs = node_groups.map{|ng|ng.id_handle()}
         ndx_ng_target_ref_attrs = Hash.new
-        ServiceNodeGroup.get_attributes_to_copy_to_target_refs(ng_idhs).each do |ng_attr|
+        ServiceNodeGroup.get_node_attributes_to_copy(ng_idhs).each do |ng_attr|
           node_group_id = ng_attr.delete(:node_node_id)
 
           target_ref_attr = Hash.new
@@ -136,7 +139,7 @@ module DTK; class Node; class TargetRef
         end
 
         sp_hash = {
-          :cols => [:node_id,:node_group_id],
+          :cols => [:node_group_id,:target_ref],
           :filter => [:oneof,:id,ngr_idhs.map{|idh|idh.get_id()}]
         }
         ngr_mh = target.model_handle(:node_group_relation)
@@ -147,15 +150,9 @@ module DTK; class Node; class TargetRef
             Log.error("Unexpected that node group id is not found in node_group_refs")
             next
           end
-          target_ref_id = ngr[:node_id]
-          target_ref_attrs.each do |attr|
-            create_rows << attr.merge(:node_node_id => target_ref_id)
-          end
+          add_target_ref_attrs!(create_rows,ngr[:target_ref],target_ref_attrs)
         end
         attr_mh = node_groups.first.model_handle.create_childMH(:attribute)
-
-        # TODO: see why below is not working and need to iterate over attributes names when calling Model.create_from_rows
-        #Model.create_from_rows(attr_mh,create_rows,:convert => true)
         ndx_create_rows = Hash.new
         create_rows.each do |r|
           ndx = r[:display_name]
@@ -163,6 +160,20 @@ module DTK; class Node; class TargetRef
         end
         ndx_create_rows.values.each{|rows| Model.create_from_rows(attr_mh,rows,:convert => true)}
         nil
+      end
+
+      def self.add_target_ref_attrs!(create_rows,target_ref,target_ref_attrs)
+        target_ref_id = target_ref.id
+        target_ref_attrs.each do |attr|
+          attr = attr.merge(:node_node_id => target_ref_id)
+          # any special processing for :value_asserted or :value_derived
+          case attr[:display_name]
+            when 'name'
+              # gsub is to strip off leading assembly name (if present)
+              attr[:value_asserted] = target_ref[:display_name].gsub(/^.+::/,'') 
+          end
+          create_rows << attr 
+        end
       end
 
       # node_instance and target_ref can be ids or be uri paths
@@ -179,46 +190,6 @@ module DTK; class Node; class TargetRef
         end
       end
       
-      class Element 
-        include ElementMixin
-        attr_reader :node,:num_needed
-        def initialize(node_info)
-          @node = node_info[:node]
-          @num_needed = node_info[:num_needed]
-          @offset = node_info[:offset]||1
-          @type = :base_node_link
-        end
-
-        def add_target_ref_and_ngr!(ret,target,assembly)
-          target_ref_hash = target_ref_hash(target,assembly)
-          unless target_ref_hash.empty?
-            (ret[:node] ||= Hash.new).merge!(target_ref_hash)
-            node_group_rel_hash = target_ref_hash.keys.inject(Hash.new) do |h,node_ref|
-              h.merge(BaseNodes.target_ref_link_hash(@node.id,"/node/#{node_ref}"))
-            end
-            (ret[:node_group_relation] ||= Hash.new).merge!(node_group_rel_hash)
-          end
-          ret
-        end
-
-        def target_ref_hash(target,assembly)
-          ret = Hash.new
-          unless display_name = @node.get_field?(:display_name)
-            raise Error.new("Unexpected that that node has no name field")
-          end
-          external_ref = @node.external_ref
-          (@offset...(@offset+@num_needed)).inject(Hash.new) do |h,index|
-            hash = {
-              :display_name => ret_display_name(display_name,:index => index,:assembly => assembly),
-              :os_type => @node.get_field?(:os_type),
-              :type => Type::Node.target_ref_staged,
-              :external_ref => external_ref.hash() 
-            }          
-            ref = ret_ref(display_name,:index => index,:assembly => assembly)
-            h.merge(ref => hash)
-          end
-        end
-      end
     end
   end
 end; end; end

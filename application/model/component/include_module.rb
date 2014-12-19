@@ -1,5 +1,9 @@
 module DTK; class Component
   class IncludeModule < Model
+    def self.common_columns()
+      [:id,:group_id,:display_name,:version_constraint,:implementation_id]
+    end
+
     # a version context element is hash with keys: :repo,:branch,:implementation, :sha (optional)
     def self.get_version_context_info(component_idhs,impl_idhs)
       ret = impls = get_implementations(impl_idhs)
@@ -127,7 +131,7 @@ module DTK; class Component
 
     def self.get_include_mods_with_impls(component_idhs)
       sp_hash = {
-        :cols => [:id,:group_id,:display_name,:module,:version_constraint,:implementation],
+        :cols => [:id,:group_id,:display_name,:version_constraint,:implementation],
         :filter => [:oneof,:component_id,component_idhs.map{|idh|idh.get_id()}]
       }
       incl_mod_mh = component_idhs.first.createMH(:component_include_module)

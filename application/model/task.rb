@@ -10,6 +10,7 @@ module DTK
     extend CreateClassMixin
     include StatusMixin
     include NodeGroupProcessingMixin
+    include Status::TableForm::Mixin
 
     def self.common_columns()
       [
@@ -75,7 +76,10 @@ module DTK
       get_children_objs(:task_error,sp_hash).map{|r|r[:content]}
     end
 
-    # indexed by tasks
+    # indexed by task ids
+    def get_ndx_errors()
+      self.class.get_ndx_errors(hier_task_idhs())
+    end
     def self.get_ndx_errors(task_idhs)
       ret = Array.new
       return ret if task_idhs.empty?
@@ -204,8 +208,8 @@ module DTK
       # compute new parent status
       subtask_status_array = children_status.values
       parent_status = 
-        if subtask_status_array.include?("failed") then "failed"
-        elsif subtask_status_array.include?("executing") then "executing"
+        if subtask_status_array.include?("executing") then "executing"
+        elsif subtask_status_array.include?("failed") then "failed"
         elsif subtask_status_array.include?("cancelled") then "cancelled"
         elsif not subtask_status_array.find{|s|s != "succeeded"} then "succeeded" #all succeeded
         else "executing" #if reach here must be some created and some finished

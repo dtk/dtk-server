@@ -10,12 +10,15 @@ r8_nested_require('component',files)
 r8_require('branch_names')
 module DTK
   class Component < Model
+    r8_nested_require('component','get_method')
     r8_nested_require('component','template')
     r8_nested_require('component','instance')
     r8_nested_require('component','dependency')
     r8_nested_require('component','test')
     r8_nested_require('component','resource_matching')
     r8_nested_require('component','include_module')
+    include GetMethod::Mixin
+    extend GetMethod::ClassMixin
     include Dependency::Mixin
     extend Dependency::ClassMixin
     include TemplateMixin
@@ -513,17 +516,6 @@ module DTK
       if is_assembly?()
         Assembly.create_assembly_subclass_object(self)
       end
-    end
-
-    def get_attributes_ports()
-      opts = {:keep_ref_cols => true}
-      rows = get_objects_from_sp_hash({:columns => [:ref,:ref_num,:attributes_ports]},opts)
-      return Array.new if rows.empty?
-      component_ref = rows.first[:ref]
-      component_ref_num = rows.first[:ref_num]
-      rows.map do |r|
-        r[:attribute].merge(:component_ref => component_ref,:component_ref_num => component_ref_num) if r[:attribute]
-      end.compact
     end
 
     def get_component_i18n_label()

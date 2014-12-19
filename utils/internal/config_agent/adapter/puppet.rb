@@ -53,6 +53,15 @@ module DTK
       # tries to normalize error received from node
       def interpret_error(error_in_result,components)
         ret = error_in_result
+
+        # if ends in 'on node NODEADDR' such as 'on node ip-10-28-77-115.ec2.internal'
+        # strip it off because context is not needed and when summarize in node group can use simple test
+        # to remove duplicate errors"
+        
+        if ret[:message] and ret[:message] =~ /(^.+) on node [^ ]+$/ 
+          ret[:message] = $1
+        end
+
         source = error_in_result["source"]
         # working under assumption that stage assignment same as order in components
         if source =~ Regexp.new("^/Stage\\[([0-9]+)\\]")

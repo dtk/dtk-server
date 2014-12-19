@@ -170,7 +170,7 @@ module DTK
       def self.each_link(aug_cmps,&block)
         aug_cmps.each do |cmp|
           (cmp[:dependencies]||[]).each do |dep|
-            if dep.kind_of?(Dependency::Link)
+            if dep.kind_of?(::DTK::Dependency::Link)
               block.call(cmp,dep.link_def)
             end
           end

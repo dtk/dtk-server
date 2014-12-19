@@ -23,6 +23,10 @@ module DTK; class  Assembly
     module DeleteMixin
       def destroy_and_reset_nodes()
         nodes = Delete.get_nodes_simple(model_handle(:node),[id()])
+# TODO: DTK-1857
+if nodes.find{|n|n.is_node_group?()}
+  raise ErrorUsage.new("destroy_and_reset_nodes not supported for service instances with node groups")
+end
         target_idh = get_target.id_handle()
         nodes.map{|node|node.destroy_and_reset(target_idh)}
       end
@@ -62,13 +66,13 @@ module DTK; class  Assembly
         node ||= component_idh.createIDH(:model_name => :node,:id => component[:node_node_id]).create_object()
         ret = nil
         Transaction do
+          node.update_dangling_links(:component_idhs => [component.id_handle()])
           Task::Template::ConfigComponents.update_when_deleted_component?(self,node,component)
           ret = Model.delete_instance(component_idh)
         end
         ret
       end
     end
-
 
     class Delete < self
       def Delete.contents(assembly_idhs,opts={})

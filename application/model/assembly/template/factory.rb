@@ -112,7 +112,10 @@ module DTK
         end
       end
 
-      attr_reader :assembly_instance,:project_idh,:service_module_branch
+      public
+      attr_reader :assembly_instance
+      private
+      attr_reader :project_idh,:service_module_branch
 
       def project_uri()
         @project_uri ||= @project_idh.get_uri()
@@ -131,7 +134,7 @@ module DTK
 
         task_templates = Task::Template::ConfigComponents.get_existing_or_stub_templates(:assembly,assembly_instance)
 
-        node_scalar_cols = FactoryObject::CommonCols + [:node_binding_rs_id]
+        node_scalar_cols = FactoryObject::CommonCols + [:type,:node_binding_rs_id]
         node_mh = node_idhs.first.createMH()
         node_ids = node_idhs.map{|idh|idh.get_id()}
 
@@ -217,9 +220,12 @@ module DTK
           assembly_level_attributes.mark_as_complete(:component_component_id=>assembly_template_id)
         end
 
-        @template_output = ServiceModule::AssemblyExport.create(project_idh,service_module_branch)
+        @template_output = ServiceModule::AssemblyExport.create(self,project_idh,service_module_branch)
         assembly_ref = self[:ref]
         assembly_hash = hash_subset(:display_name,:type,:ui,:module_branch_id,:component_type)
+        if description = @assembly_instance.get_field?(:description)
+          assembly_hash.merge!(:description => description)
+        end
         assembly_hash.merge!(:task_template => task_templates) unless task_templates.empty?
         assembly_hash.merge!(:attribute => assembly_level_attributes) unless assembly_level_attributes.empty?
         assembly_hash.merge!(:port_link => port_links) unless port_links.empty?
@@ -231,7 +237,7 @@ module DTK
           if module_refs_updated
             # TODO: see if need a @service_module_refs.save_to_model() method; may not be needed since 
             # the way that querying service module to get component module refs is through the component_modules
-            @service_module_refs.serialize_and_save_to_repo?()
+            @service_module_refs.serialize_and_save_to_repo?({:update_module_refs => true})
           end
           # serialize_and_save_to_repo? returns new_commit_sha
           @template_output.serialize_and_save_to_repo?()

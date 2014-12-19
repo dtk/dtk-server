@@ -8,6 +8,11 @@ module DTK
       def is_target_ref?()
         true
       end
+      # handling case where node.class may be a parent of TargetRef, but represents one
+      def self.is_target_ref?(node)
+        types.include?(node.get_field?(:type))
+      end
+
       # opts can have
       # {:not_deletable => true}
       def self.types(opts={})
@@ -28,12 +33,7 @@ module DTK
         if name =~ Regexp.new("^#{physical_node_prefix()}(.+$)")
           $1
         else
-          split = name.split(AssemblyDelim)
-          unless split.size == 2
-            Log.error("Display Name has unexpected form (#{name})")
-            return name
-          end
-          split[1]
+          name
         end
       end
 
@@ -42,9 +42,13 @@ module DTK
           when :physical
             "#{physical_node_prefix()}#{name}"
           when :base_node_link
-            ret = "#{opts[:assembly_name]}#{AssemblyDelim}#{target_ref_name}"
+            ret = target_ref_name
             if index = opts[:index]
-              ret << "#{IndexDelim}#{index.to_s}"
+              ret = "#{ret}#{IndexDelim}#{index.to_s}"
+            end
+            if assembly = opts[:assembly]
+              assembly_name = assembly.get_field?(:display_name)
+              ret = "#{assembly_name}#{AssemblyDelim}#{ret}"
             end
             ret
           else
@@ -140,47 +144,6 @@ module DTK
         Input.create_nodes_from_inventory_data(target, inventory_data)
       end
 
-      class Info
-        attr_reader :target_ref,:ref_count
-        def initialize(target_ref)
-          @target_ref = target_ref
-          @ref_count = 0
-        end
-        def increase_ref_count()
-          @ref_count +=1 
-        end
-      end
-      def self.get_linked_target_ref_info_single_node(node_instance)
-        info_array = get_linked_target_refs_info(node_instance)
-        if info_array.size > 1
-          raise Error.new("Unexpected that a (non group) node instance is linked to more than one target ref")
-        end
-        info_array.first||Info.new(nil)
-      end
-      def self.get_linked_target_refs_info(node_instance)
-        get_ndx_linked_target_refs_info([node_instance]).values.first||[]
-      end
-      def self.get_ndx_linked_target_refs_info(node_instances)
-        ret = Hash.new
-        if node_instances.empty?
-          return ret
-        end
-        sp_hash = {
-          :cols => [:node_group_id,:target_refs_with_links],
-          :filter => [:oneof,:node_group_id,node_instances.map{|n|n[:id]}]
-        }
-        ndx_ret = Hash.new
-        ngr_mh = node_instances.first.model_handle(:node_group_relation)
-        get_objs(ngr_mh,sp_hash).each do |r|
-          node_id = r[:node_group_id]
-          second_ndx = r[:target_ref].id
-          info = (ndx_ret[node_id] ||= Hash.new)[second_ndx] ||= Info.new(r[:target_ref])
-          info.increase_ref_count()
-        end
-        ndx_ret.inject(Hash.new){|h,(node_id,ndx_info)|h.merge(node_id => ndx_info.values)}
-      end
-
-
       # returns hash of form {NodeInstanceId -> [target_refe_idh1,...],,}
       # filter can be of form
       #  {:node_instance_idhs => [idh1,,]}, or
@@ -216,7 +179,50 @@ module DTK
         ret
       end
 
+      def self.get_reference_count(target_ref)
+        sp_hash = {
+          :cols => [:id,:group_id],
+          :filter => [:eq, :node_id, target_ref.id]
+        }
+        ngr_mh = target_ref.model_handle(:node_group_relation)
+        Model.get_objs(ngr_mh,sp_hash).size
+      end
+
+      class Info
+        attr_reader :target_ref,:ref_count
+        def initialize(target_ref)
+          @target_ref = target_ref
+          @ref_count = 0
+        end
+        def increase_ref_count()
+          @ref_count +=1 
+        end
+      end
+      # returns array of Info elements; should only be called on non target ref
+      def self.get_linked_target_refs_info(node_instance)
+        get_ndx_linked_target_refs_info([node_instance]).values.first||[]
+      end
+
      private
+      def self.get_ndx_linked_target_refs_info(node_instances)
+        ret = Hash.new
+        if node_instances.empty?
+          return ret
+        end
+        sp_hash = {
+          :cols => [:node_group_id,:target_refs_with_links],
+          :filter => [:oneof,:node_group_id,node_instances.map{|n|n[:id]}]
+        }
+        ndx_ret = Hash.new
+        ngr_mh = node_instances.first.model_handle(:node_group_relation)
+        get_objs(ngr_mh,sp_hash).each do |r|
+          node_id = r[:node_group_id]
+          second_ndx = r[:target_ref].id
+          info = (ndx_ret[node_id] ||= Hash.new)[second_ndx] ||= Info.new(r[:target_ref])
+          info.increase_ref_count()
+        end
+        ndx_ret.inject(Hash.new){|h,(node_id,ndx_info)|h.merge(node_id => ndx_info.values)}
+      end
 
       # returns hash of form {TargetRefId => [matching_node_instance1,,],}
       def self.ndx_target_refs_to_their_instances(node_target_ref_idhs)

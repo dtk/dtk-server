@@ -1,7 +1,10 @@
+# TODO: need to reconcile or have better names on this versus ServiceNodeGroup
 module DTK
+  # This class represents objects that are group of nodes in a target that are grouped together
+  # they leave seperately from assemblies
   class NodeGroup < Node
     r8_nested_require('node_group','clone')
-    include CloneMixin
+    include Clone::Mixin
 
     def self.get_component_list(nodes,opts={})
       ret = opts[:add_on_to]||opts[:seed]||Array.new
@@ -79,13 +82,13 @@ module DTK
     end
 
     # TODO: change to having node group having explicit links or using a saved search
-    def get_node_members()
+    def get_node_group_members()
       sp_hash = {
         :cols => [:node_members]
       }
       rows = get_objs(sp_hash)
       if target_idh = NodeGroupRelation.spans_target?(rows.map{|r|r[:node_group_relation]})
-        target_idh.create_object().get_node_members()
+        target_idh.create_object().get_node_group_members()
       else
         rows.map{|r|r[:node_member]}
       end
@@ -107,7 +110,7 @@ module DTK
         node_group = r.hash_subset(:id,:group_id,:display_name)
         if target_idh = r[:node_group_relation].spans_target?
           target_id = target_idh.get_id()
-          target_nodes[target_id] ||= node_filter.filter(target_idh.create_object().get_node_members()).map{|n|n[:id]} 
+          target_nodes[target_id] ||= node_filter.filter(target_idh.create_object().get_node_group_members()).map{|n|n[:id]} 
           target_nodes[target_id].each do |n_id|
             (node_to_ng[n_id] ||= Hash.new)[node_group[:id]] ||= node_group
           end
@@ -196,7 +199,7 @@ module DTK
     def delete()
       Model.delete_instance(id_handle())
     end
-    def destroy_and_delete
+    def destroy_and_delete(opts={})
       delete()
     end
   end

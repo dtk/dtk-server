@@ -4,9 +4,9 @@ module DTK
       class SyncAgentCode < NodeParticipants
 
         def consume(workitem)
-          params = get_params(workitem) 
+          params = get_params(workitem)
           task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
-          PerformanceService.start(name(),object_id)          
+          PerformanceService.start(name(),object_id)
 
           execution_context(task,workitem,task_start) do
             node = task[:executable_action][:node]
@@ -26,17 +26,17 @@ module DTK
             callbacks = {
               :on_msg_received => proc do |msg|
                 inspect_agent_response(msg)
-                CreateThread.defer_with_session(user_object) do
+                CreateThread.defer_with_session(user_object, Ramaze::Current.session) do
                   # Amar: PERFORMANCE
                   PerformanceService.end_measurement(name(),object_id)
-                  
+
                   result = msg[:body].merge("task_id" => task_id)
                   if result[:statuscode] != 0
                     event,errors = task.add_event_and_errors(:complete_failed,:config_agent,errors_in_result)
                     if event
                       log_participant.end(:complete_failed,:task_id=>task_id,:event => event, :errors => errors)
                     end
-                    # Amar: SyncAgentCode will be skipped 99% of times, 
+                    # Amar: SyncAgentCode will be skipped 99% of times,
                     #       So for this subtask, we want to leave upstream tasks executing ignoring any errors
                     # cancel_upstream_subtasks(workitem)
                     set_result_failed(workitem,result,task)
@@ -44,7 +44,7 @@ module DTK
                     agent_commit_id_helper.update_node()
                     task.add_event(:complete_succeeded,result)
                     log_participant.end(:complete_succeeded,:task_id=>task_id)
-                    set_result_succeeded(workitem,result,task,action) if task_end 
+                    set_result_succeeded(workitem,result,task,action) if task_end
                     action.get_and_propagate_dynamic_attributes(result)
                   end
                   # If there was a change on agents, wait for node's mcollective process to restart
@@ -56,9 +56,9 @@ module DTK
                 end
               end,
               :on_timeout => proc do
-                CreateThread.defer_with_session(user_object) do
+                CreateThread.defer_with_session(user_object, Ramaze::Current.session) do
                   result = {
-                    :status => "timeout" 
+                    :status => "timeout"
                   }
                   event,errors = task.add_event_and_errors(:complete_timeout,:server,["timeout"])
                   if event
@@ -72,7 +72,7 @@ module DTK
                 end
               end,
               :on_cancel => proc do
-                CreateThread.defer_with_session(user_object) do
+                CreateThread.defer_with_session(user_object, Ramaze::Current.session) do
                   log_participant.canceled(task_id)
                   set_result_canceled(workitem, task)
                   delete_task_info(workitem)
@@ -81,8 +81,8 @@ module DTK
               end
             }
             receiver_context = {
-              :callbacks => callbacks, 
-              :head_git_commit_id => agent_commit_id_helper.head_git_commit_id, 
+              :callbacks => callbacks,
+              :head_git_commit_id => agent_commit_id_helper.head_git_commit_id,
               :expected_count => 1
             }
             begin
@@ -99,9 +99,9 @@ module DTK
 
           # flavour will have 'kill' value if kill_process is invoked instead of cancel_process
           return if flavour
-          
+
           wi = workitem
-          params = get_params(wi) 
+          params = get_params(wi)
           task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
           task.add_internal_guards!(workflow.guards[:internal])
           log_participant.canceling(task_id)

@@ -45,7 +45,11 @@ module DTK
 
     def rest__delete_node()
       assembly = ret_assembly_instance_object()
-      node_idh = ret_node_id_handle(:node_id,assembly)
+      # node_idh = ret_node_id_handle(:node_id,assembly)
+
+      node_id = ret_non_null_request_params(:node_id)
+      node_idh = ret_node_or_group_member_id_handle(node_id,assembly)
+
       assembly.delete_node(node_idh,:destroy_nodes => true)
       rest_ok_response
     end
@@ -91,6 +95,19 @@ module DTK
       end
     end
 
+    def rest__list_component_module_diffs()
+      # repo_id = ret_request_param_id_optional(:repo_id, ::DTK::Repo)
+      module_id, assembly_name, workspace_branch, module_branch_id, repo_id = ret_request_params(:module_id, :assembly_name, :workspace_branch, :module_branch_id, :repo_id)
+      repo          = id_handle(repo_id,:repo).create_object()
+      project       = get_default_project()
+      module_branch = id_handle(module_branch_id, :module_branch).create_object()
+
+      project_idh = project.id_handle()
+      opts = Opts.new(:project_idh => project_idh)
+
+      rest_ok_response AssemblyModule::Component.list_remote_diffs(model_handle(), module_id, repo, module_branch, workspace_branch, opts)
+    end
+
     def rest__get_component_modules()
       assembly = ret_assembly_object()
       rest_ok_response assembly.get_component_modules({:get_version_info=>true})
@@ -100,13 +117,15 @@ module DTK
       assembly = ret_assembly_object()
       assembly_name = ret_non_null_request_params(:assembly_name)
       new_assembly_name = ret_non_null_request_params(:new_assembly_name)
-      
+
       rest_ok_response assembly.rename(model_handle(), assembly_name, new_assembly_name)
     end
 
     # TODO: may be cleaner if we break into list_nodes, list_components with some shared helper functions
     def rest__info_about()
       node_id, component_id, detail_level, detail_to_include = ret_request_params(:node_id, :component_id, :detail_level, :detail_to_include)
+      node_id = nil if node_id.kind_of?(String) and node_id.empty?
+      component_id = nil if component_id.kind_of?(String) and component_id.empty?
       assembly,subtype = ret_assembly_params_object_and_subtype()
       response_opts = Hash.new
       if format = ret_request_params(:format)
@@ -138,6 +157,14 @@ module DTK
           attr = e[:attribute]
           (!attr.kind_of?(Attribute)) or !attr.filter_when_listing?(additional_filter_opts)
         end
+      elsif about == :components
+        # if not at node level filter out components on node group members (target_refs)
+        unless node_id
+          additional_filter_proc = Proc.new do |e|
+            node = e[:node]
+            (!node.kind_of?(Node)) or !Node::TargetRef.is_target_ref?(node)
+          end
+        end
       end
 
       opts[:filter_proc] = Proc.new do |e|
@@ -154,10 +181,10 @@ module DTK
         opts.add_value_to_return!(:datatype)
       end
 
-      if node_id and !node_id.empty?
+      if node_id
         opts.merge!(:node_cmp_name => true)
       end
-      
+
       data = assembly.info_about(about, opts)
       datatype = opts.get_datatype
       response_opts = Hash.new
@@ -186,7 +213,7 @@ module DTK
 
     def rest__cancel_task()
       assembly = ret_assembly_instance_object()
-      unless top_task_id = ret_request_params(:task_id) 
+      unless top_task_id = ret_request_params(:task_id)
         unless top_task = get_most_recent_executing_task([:eq,:assembly_id,assembly.id()])
           raise ErrorUsage.new("No running tasks found")
         end
@@ -200,7 +227,7 @@ module DTK
       ids = ret_request_params(:assemblies)
       assembly_templates = get_assemblies_from_ids(ids)
       components = Assembly::Template.list_modules(assembly_templates)
-      
+
       rest_ok_response components
     end
 
@@ -208,7 +235,7 @@ module DTK
       assembly = ret_assembly_instance_object()
       module_type = ret_non_null_request_params(:module_type)
 
-      response = 
+      response =
         case module_type.to_sym
           when :component_module
             module_name = ret_non_null_request_params(:module_name)
@@ -230,7 +257,7 @@ module DTK
       module_type, module_name = ret_non_null_request_params(:module_type,:module_name)
 
       unless module_type.to_sym == :component_module
-        raise Error.new("promote_module_changes only treats component_module type") 
+        raise Error.new("promote_module_changes only treats component_module type")
       end
 
       namespace = AssemblyModule::Component.validate_component_module_ret_namespace(assembly,module_name)
@@ -243,7 +270,7 @@ module DTK
       assembly = ret_assembly_instance_object()
       cmp_template = ret_component_template(:component_template_id)
       antecedent_cmp_template = ret_component_template(:antecedent_component_template_id)
-      type = :simple 
+      type = :simple
       AssemblyModule::Component.create_component_dependency?(type,assembly,cmp_template,antecedent_cmp_template)
       rest_ok_response
     end
@@ -266,12 +293,12 @@ module DTK
         opts.merge!(:update_meta => true)
       end
       AttributeLink::AdHoc.create_adhoc_links(assembly,target_attr_term,source_attr_term,opts)
-      rest_ok_response 
+      rest_ok_response
     end
 
     def rest__delete_service_link()
       port_link = ret_port_link()
-      Model.delete_instance(port_link.id_handle())
+      Assembly::Instance::ServiceLink.delete(port_link.id_handle())
       rest_ok_response
     end
 
@@ -290,8 +317,8 @@ module DTK
       # TODO: stub
       ams = port_link.list_attribute_mappings()
       pp ams
-      rest_ok_response 
-    end 
+      rest_ok_response
+    end
 
     def rest__list_service_links()
       assembly = ret_assembly_instance_object()
@@ -335,19 +362,19 @@ module DTK
     def rest__workspace_object()
       rest_ok_response Assembly::Instance.get_workspace_object(model_handle(),{})
     end
-    
+
     def rest__list()
       subtype = ret_assembly_subtype()
-      result = 
-        if subtype == :instance 
+      result =
+        if subtype == :instance
           opts = ret_params_hash(:filter,:detail_level,:include_namespaces)
           Assembly::Instance.list(model_handle(),opts)
-        else 
+        else
           project = get_default_project()
           opts = {:version_suffix => true}.merge(ret_params_hash(:filter,:detail_level))
           Assembly::Template.list(model_handle(),opts.merge(:project_idh => project.id_handle()))
         end
-      rest_ok_response result 
+      rest_ok_response result
     end
 
     def rest__list_with_workspace()
@@ -371,7 +398,7 @@ module DTK
     # {:pattern => PAT, :value => VAL}
     # pat can be one of three forms
     # 1 - an id
-    # 2 - a name of form ASSEM-LEVEL-ATTR or NODE/COMONENT/CMP-ATTR, or 
+    # 2 - a name of form ASSEM-LEVEL-ATTR or NODE/COMONENT/CMP-ATTR, or
     # 3 - a pattern (TODO: give syntax) that can pick out multiple vars
     # this returns same output as info about attributes, pruned for just new ones set
     # TODO: this is a minsnomer in that it can be used to just create attributes
@@ -386,11 +413,11 @@ module DTK
         end
         create_options.merge!(:semantic_data_type => semantic_data_type)
       end
-      unless create_options.empty? 
+      unless create_options.empty?
         unless opts[:create]
           raise ErrorUsage.new("Options (#{create_options.values.join(',')}) can only be given if :create is true")
         end
-        opts.merge!(:attribute_properties => create_options) 
+        opts.merge!(:attribute_properties => create_options)
       end
       # update_meta == true is the default
       update_meta = ret_request_params(:update_meta)
@@ -399,7 +426,7 @@ module DTK
       end
 
       assembly.set_attributes(av_pairs,opts)
-      rest_ok_response 
+      rest_ok_response
     end
 
     #### actions to update and create assembly templates
@@ -459,14 +486,14 @@ module DTK
       assembly = ret_assembly_instance_object()
       assembly_template = ret_assembly_template_object(:assembly_template_id)
       assembly.add_assembly_template(assembly_template)
-      rest_ok_response 
+      rest_ok_response
     end
 
     def rest__add_service_add_on()
       assembly = ret_assembly_instance_object()
       add_on_name = ret_non_null_request_params(:service_add_on_name)
       new_sub_assembly_idh = assembly.service_add_on(add_on_name)
-      rest_ok_response(:sub_assembly_id => new_sub_assembly_idh.get_id()) 
+      rest_ok_response(:sub_assembly_id => new_sub_assembly_idh.get_id())
     end
 
     #### end: methods to modify the assembly instance
@@ -487,7 +514,7 @@ module DTK
 
       response = {
         :new_service_instance => {
-          :name => new_assembly_obj.display_name_print_form, 
+          :name => new_assembly_obj.display_name_print_form,
           :id => new_assembly_obj.id()
         }
       }
@@ -568,7 +595,7 @@ module DTK
       end
 
       if assembly.are_nodes_running?
-        raise ErrorUsage, "Task is already running on requested nodes. Please wait until task is complete" 
+        raise ErrorUsage, "Task is already running on requested nodes. Please wait until task is complete"
       end
 
       opts = ret_params_hash(:commit_msg)
@@ -581,7 +608,7 @@ module DTK
       # TODO: clean up this part since this is doing more than creating task
       nodes_to_start =  (opts[:ret_nodes]||[]).reject{|n|n[:admin_op_status] == "running"}
       unless nodes_to_start.empty?
-        CreateThread.defer_with_session(CurrentSession.new.user_object()) do
+        CreateThread.defer_with_session(CurrentSession.new.user_object(), Ramaze::Current::session) do
           # invoking command to start the nodes
           CommandAndControl.start_instances(nodes_to_start)
         end
@@ -623,7 +650,7 @@ module DTK
       # queue = SimpleActionQueue.new
 
       user_object  = CurrentSession.new.user_object()
-      CreateThread.defer_with_session(user_object) do
+      CreateThread.defer_with_session(user_object, Ramaze::Current::session) do
         # invoking command to start the nodes
         CommandAndControl.start_instances(nodes)
       end
@@ -642,7 +669,7 @@ module DTK
         Log.info(error_msg)
         return rest_ok_response(:errors => [error_msg])
       end
-      
+
       Node.stop_instances(nodes)
 
       rest_ok_response :status => :ok
@@ -738,12 +765,12 @@ module DTK
       params   = ret_params_hash(:rsa_pub_name, :rsa_pub_key, :system_user)
       agent_action = ret_non_null_request_params(:agent_action).to_sym
       target_nodes = ret_matching_nodes(assembly)
-      
+
       # check existance of key and system user in database
       system_user, key_name = params[:system_user], params[:rsa_pub_name]
       nodes = Component::Instance::Interpreted.find_candidates(assembly, system_user, key_name, agent_action, target_nodes)
 
-      queue = initiate_action_with_nodes(SSHAccess,nodes,params.merge(:agent_action => agent_action)) do 
+      queue = initiate_action_with_nodes(SSHAccess,nodes,params.merge(:agent_action => agent_action)) do
         # need to put sanity checking in block under initiate_action_with_nodes
         if target_nodes_option = ret_request_params(:target_nodes)
           unless target_nodes_option.empty?
@@ -787,13 +814,13 @@ module DTK
       if nodes.empty?
         return rest_ok_response(:errors => "Unable to execute tests. Provided node is not valid!")
       end
-      
+
       params = {:nodes => nodes, :component => component, :agent_action => :execute_tests, :project => project, :assembly_instance => assembly}
       queue = initiate_execute_tests(ExecuteTests, params)
       return rest_ok_response(:errors => queue.error) if queue.error
       rest_ok_response :action_results_id => queue.id
     end
-    
+
     def rest__get_action_results()
       # TODO: to be safe need to garbage collect on ActionResultsQueue in case miss anything
       action_results_id = ret_non_null_request_params(:action_results_id)
@@ -806,7 +833,7 @@ module DTK
       else
         if sort_key
           sort_key = sort_key.to_sym
-          rest_ok_response ActionResultsQueue.get_results(action_results_id,ret_only_if_complete,disable_post_processing, sort_key) 
+          rest_ok_response ActionResultsQueue.get_results(action_results_id,ret_only_if_complete,disable_post_processing, sort_key)
         else
           rest_ok_response ActionResultsQueue.get_results(action_results_id,ret_only_if_complete,disable_post_processing)
         end
@@ -854,7 +881,7 @@ module DTK
 #        name = component_list[index][:display_name]
         name = Assembly.pretty_print_name(component_list[index])
         title = name.nil? ? "" : i18n_string(i18n,:component,name)
-        
+
 # TODO: change after implementing all the new types and making generic icons for them
         model_type = 'service'
         model_sub_type = 'db'
@@ -888,9 +915,9 @@ module DTK
     def stage()
       target_idh = target_idh_with_default(request.params["target_id"])
       assembly_id = ret_request_param_id(:assembly_id,::DTK::Assembly::Template)
-      
+
       # TODO: if naem given and not unique either reject or generate a -n suffix
-      assembly_name = ret_request_params(:name) 
+      assembly_name = ret_request_params(:name)
 
       id_handle = id_handle(assembly_id)
 
@@ -953,14 +980,14 @@ module DTK
         parent_id = request.params["parent_id"]
         assembly_left_pos = request.params["assembly_left_pos"]
 #        node_list = get_objects(:node,{:assembly_id=>id})
-  
+
         dc_hash = get_object_by_id(parent_id,:datacenter)
         raise Error.new("Not implemented when parent_id is not a datacenter") if dc_hash.nil?
 
         # get the top most item in the list to set new positions
         top_node = {}
         top_most = 2000
-      
+
 #        node_list.each do |node|
         nested_objs[:nodes].each do |node|
 #          node = create_object_from_id(node_hash[:id],:node)
@@ -971,7 +998,7 @@ module DTK
             top_most = ui[:top]
           end
         end
-  
+
         nested_objs[:nodes].each_with_index do |node,i|
           ui = node.get_ui_info(dc_hash)
           Log.error("no coordinates for node with id #{node[:id].to_s} in #{parent_id.to_s}") unless ui

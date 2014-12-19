@@ -26,8 +26,8 @@ module DTK; class Assembly
       unless is_dsl_parsed = service_module.dsl_parsed?()
         raise ErrorUsage.new("An assembly template from an unparsed service-module ('#{service_module}') cannot be staged")
       end
-
-      override_attrs = Hash.new
+      # including :description here because it is not a field that gets copied by clone copy processor
+      override_attrs = {:description => get_field?(:description)}
       if assembly_name = opts[:assembly_name]
         override_attrs[:display_name] = assembly_name
       end

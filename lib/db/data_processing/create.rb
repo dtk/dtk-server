@@ -48,7 +48,7 @@ module XYZ
         add_cols_to_select!(select_info,{:c => user_info_assigns[:c]},{:from_self => [:end]})
 
         # parent_id_col can be null
-        parent_id_col = model_handle.parent_id_field_name()
+        parent_id_col = model_handle.parent_id_field_name?()
 
         db_rel = DB_REL_DEF[model_handle[:model_name]]
         ds = dataset(db_rel)

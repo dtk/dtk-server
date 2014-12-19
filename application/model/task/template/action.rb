@@ -76,8 +76,9 @@ module DTK; class Task; class Template
         !!ret
       end
 
-      def match_component_type?(component_type)
-        component_type == component_type(:without_title=>true)
+      def match_component_ref?(component_type,title=nil)
+        component_type == component_type(:without_title=>true) and
+          (title.nil? or title == component_title?())
       end
 
       def serialization_form(opts={})
@@ -113,6 +114,9 @@ module DTK; class Task; class Template
           end
         end
         cmp_type
+      end
+      def component_title?()
+        component()[:title]
       end
 
      private

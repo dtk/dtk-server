@@ -17,6 +17,32 @@
   },
   :many_to_one => [:datacenter,:library],
   :virtual_columns=>{
+    :service_node_group => {
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>
+      [{
+         :model_name=>:node,
+         :alias => :service_node_group,
+         :convert => true,
+         :join_type => :inner,
+         :join_cond=>{:id=>:node_group_relation__node_group_id},
+         :cols=>[:id,:group_id,:display_name,:type]
+       }]
+    },
+    :target_ref => {
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>
+      [{
+         :model_name=>:node,
+         :alias => :target_ref,
+         :convert => true,
+         :join_type => :inner,
+         :join_cond=>{:id=>:node_group_relation__node_id},
+         :cols=>[:id,:group_id,:display_name,:type,:external_ref]
+       }]
+    },
     :target_refs_with_links=> {
       :type=>:json,
       :hidden=>true,

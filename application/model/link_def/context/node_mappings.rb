@@ -1,7 +1,13 @@
 module DTK
-  class LinkDefContext
+  class LinkDef::Context
     class NodeMappings < Hash
-      def self.create_from_cmp_mappings(cmp_mappings)
+      def initialize(local,remote=nil)
+        super()
+        replace(:local => local, :remote => remote||local)
+      end
+      private :initialize
+
+      def self.create_from_component_mappings(cmp_mappings)
         ndx_node_ids = cmp_mappings.inject({}){|h,(k,v)|h.merge(k => v[:node_node_id])}
         node_mh = cmp_mappings[:local].model_handle(:node)
         ndx_node_info = Hash.new
@@ -9,8 +15,7 @@ module DTK
           node = tr_info.node
           ndx = node.id
           if node.is_node_group?
-            node = NodeGroup.create_as(node) 
-            node.merge!(:target_refs => tr_info.target_refs)
+            node = ServiceNodeGroup::Cache.create_as(node,tr_info.target_refs) 
           else
             #switch to pointing to target ref if it exists
             unless tr_info.target_refs.empty?
@@ -24,10 +29,7 @@ module DTK
         end
         new(ndx_node_info[ndx_node_ids[:local]],ndx_node_info[ndx_node_ids[:remote]])
       end
-      
-      def num_node_groups()
-        values.inject(0){|s,n|n.is_node_group? ? s+1 : s}
-      end
+
       def is_internal?()
         local[:id] == remote[:id]
       end
@@ -46,11 +48,6 @@ module DTK
       end
       def remote()
         self[:remote]
-      end
-     private
-      def initialize(local,remote=nil)
-        super()
-        replace(:local => local, :remote => remote||local)
       end
     end
   end

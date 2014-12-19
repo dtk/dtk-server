@@ -1,14 +1,15 @@
 module DTK; class  Assembly
   class Instance < self
+    r8_nested_require('instance','service_link_mixin')
+    r8_nested_require('instance','service_link')
     r8_nested_require('instance','action')
     r8_nested_require('instance','violation')
-    r8_nested_require('instance','service_link')
     r8_nested_require('instance','update')
     r8_nested_require('instance','list')
     r8_nested_require('instance','delete')
     r8_nested_require('instance','service_setting')
-    include ViolationMixin
     include ServiceLinkMixin
+    include ViolationMixin
     include ListMixin
     extend ListClassMixin
     include DeleteMixin
@@ -128,6 +129,21 @@ module DTK; class  Assembly
       get_obj_helper(:aug_service_add_ons_from_instance,:service_add_on,:filter_proc => filter_proc, :augmented => true)
     end
 
+    def get_node?(filter)
+      sp_hash = {
+        :cols => [:id,:display_name],
+        :filter => [:and,[:eq, :assembly_id, id()],filter]
+      }
+      rows = Model.get_objs(model_handle(:node),sp_hash)
+      if rows.size > 1
+        Log.error("Unexpected that more than one row returned for filter (#{filter.inspect})")
+        return nil
+      end
+      rows.first
+    end
+
+    # TODO: rename to reflect that not including node group members, just node groups themselves and top level nodes
+    # This is equivalent to saying that this does not return target_refs
     def self.get_nodes_simple(assembly_idhs,opts={})
       ret = Array.new
       return ret if assembly_idhs.empty?()
@@ -146,28 +162,16 @@ module DTK; class  Assembly
       end
     end
 
-    def get_node?(filter)
-      sp_hash = {
-        :cols => [:id,:display_name],
-        :filter => [:and,[:eq, :assembly_id, id()],filter]
-      }
-      rows = Model.get_objs(model_handle(:node),sp_hash)
-      if rows.size > 1
-        Log.error("Unexpected that more than one row returned for filter (#{filter.inspect})")
-        return nil
-      end
-      rows.first
-    end
-
+    # TODO: rename to reflect that not including node group members, just node groups themselves and top level nodes
+    # This is equivalent to saying that this does not return target_refs
     def get_nodes(*alt_cols)
       self.class.get_nodes([id_handle],*alt_cols)
     end
-
     def self.get_nodes(assembly_idhs,*alt_cols)
       ret = Array.new
       return ret if assembly_idhs.empty?
       sp_hash = {
-        :cols => [:id,:group_id,:node_node_id,:type],
+        :cols => [:id,:group_id,:node_node_id],
         :filter => [:oneof, :assembly_id, assembly_idhs.map{|idh|idh.get_id()}]
       }
       ndx_nodes = Hash.new
@@ -176,15 +180,22 @@ module DTK; class  Assembly
         ndx_nodes[cmp[:node_node_id]] ||= true
       end
 
-      cols = ([:id,:display_name,:group_id] + alt_cols).uniq
+      cols = ([:id,:display_name,:group_id,:type] + alt_cols).uniq
       sp_hash = {
         :cols => cols,
-        :filter => [:or,[:oneof, :id, ndx_nodes.keys],
-                    [:oneof,:assembly_id,assembly_idhs.map{|idh|idh.get_id()}]] #to catch nodes without any components
+        :filter => [:and, filter_out_target_refs(),
+                          [:or,[:oneof, :id, ndx_nodes.keys],
+                               #to catch nodes without any components
+                               [:oneof, :assembly_id,assembly_idhs.map{|idh|idh.get_id()}]]
+                   ]
       }
       node_mh = assembly_idhs.first.createMH(:node)
       get_objs(node_mh,sp_hash)
     end
+    def self.filter_out_target_refs()
+      @filter_out_target_ref ||= [:and] + Node::TargetRef.types.map{|t|[:neq, :type, t]}
+    end
+    private_class_method :filter_out_target_refs
 
     def get_leaf_nodes(opts={})
       get_nodes__expand_node_groups(opts.merge(:remove_node_groups=>true))
@@ -553,6 +564,8 @@ module DTK; class  Assembly
     def set_attributes(av_pairs,opts={})
       attr_patterns = nil
       Transaction do
+        # super does the processing that sets the actual attributes then if opts[:update_meta] set
+        # then if opts[:update_meta] set meta info can be changed on the assembly module
         attr_patterns = super
         if opts[:update_meta]
           created_cmp_level_attrs = attr_patterns.select{|r|r.type == :component_level and r.created?()}

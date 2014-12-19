@@ -1,7 +1,6 @@
-require  File.expand_path('link_def/context', File.dirname(__FILE__))
-module DTK
-  class LinkDefLink < Model
-    r8_nested_require('link_def_link','attribute_mapping')
+module DTK; class LinkDef
+  class Link < Model
+    r8_nested_require('link','attribute_mapping')
 
     def self.common_columns()
       [:id,:group_id,:display_name,:remote_component_type,:position,:content,:type,:temporal_order]
@@ -22,7 +21,7 @@ module DTK
       self
     end
 
-    # TODO: when add cardinality contrsaints on links, would check it here
+    # TODO: when add cardinality constraints on links, would check it here
     # assuming that augmented ports have :port_info
     def ret_matches(in_aug_port,out_aug_ports)
       ret = Array.new
@@ -36,7 +35,7 @@ module DTK
              when "internal"
               in_aug_port[:node_node_id] == out_port[:node_node_id]
              else
-              raise Error.new("unexpected type for LinkDefLink object")
+              raise Error.new("unexpected type for LinkDef::Link object")
             end
           if match
             ret << {:input_port => in_aug_port,:output_port => out_port}
@@ -56,24 +55,7 @@ module DTK
       create_from_rows(model_handle,rows)
     end
 
-    def process(parent_idh,components,opts={})
-      link_defs_info = components.map{|cmp| {:component => cmp}}
-      context = LinkDefContext.create(self,link_defs_info)
-
-      on_create_events.each{|ev|ev.process!(context)} 
-
-      links_array = AttributeMapping.ret_links_array(attribute_mappings,context,:raise_error => opts[:raise_error])
-      links_array.each do |links|
-        # ret_links returns nil only if error such as not being able to find input_id or output_id
-        next if links.empty?
-        if port_link_idh = opts[:port_link_idh]
-          port_link_id = port_link_idh.get_id()
-          links.each{|link|link[:port_link_id] = port_link_id}
-        end
-
-        AttributeLink.create_attribute_links(parent_idh,links)
-      end
-    end
+    # craetes attribute links and can clone if needed attributes on a service node group to its members 
 
     def update_attribute_mappings!(new_attribute_mappings)
       ret = self[:attribute_mappings] = new_attribute_mappings
@@ -112,7 +94,8 @@ module DTK
       end
 
       def process!(context)
-        base_component = context.find_component(self[:base_component])
+        raise Error.new("deprecated context.find_component")
+        # base_component = context.find_component(self[:base_component])
         raise Error.new("cannot find component with ref #{self[:base_component]} in context") unless base_component
         component_extension = base_component.get_extension_in_library(self[:extension_type])
         raise Error.new("cannot find library extension of type #{self[:extension_type]} to #{self[:base_component]} in library") unless component_extension
@@ -140,4 +123,4 @@ module DTK
       end
     end
   end
-end
+end; end

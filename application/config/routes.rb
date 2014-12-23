@@ -112,7 +112,7 @@ R8::ReactorRoute.draw do
   post  'component_module/get_workspace_branch_info' => 'component_module#get_workspace_branch_info'
   post  'component_module/update_from_initial_create' => 'component_module#update_from_initial_create'
   post  'component_module/list' => 'component_module#list'
-  post  'component_module/install_puppet_module' => 'component_module#install_puppet_module'
+  post  'component_module/install_puppet_forge_modules' => 'component_module#install_puppet_forge_modules'
   post  'component_module/list_remote_diffs' => 'component_module#list_remote_diffs'
 
    # TEST_MODULE

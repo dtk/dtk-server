@@ -13,6 +13,18 @@ module DTK
     class Error < Exception
     end
 
+    class LocalCopy < Hash
+      def initialize(output_hash,parent_install_dir,module_dependencies)
+        super()
+        merge!(output_hash).merge!('parent_install_dir' => parent_install_dir,'module_dependencies' => module_dependencies)
+      end
+
+      def self.random_install_dir()
+        "/tmp/puppet/#{SecureRandom.uuid}"
+      end
+    end
+
+
     class Client
       class << self
 
@@ -25,7 +37,7 @@ module DTK
 
           # dir name
           dir_name         = module_name.split(MODULE_NAME_SEPARATOR, 2).last
-          rand_install_dir = random_install_dir()
+          rand_install_dir = LocalCopy.random_install_dir()
 
           command  = "puppet _3.4.0_ module install #{module_name} --render-as json --target-dir #{rand_install_dir} --modulepath #{rand_install_dir}"
           command += " --version #{puppet_version}" if puppet_version && !puppet_version.empty?
@@ -35,44 +47,13 @@ module DTK
 
           # we remove invalid characters to get to JSON response
           output_s = normalize_output(output_s)
-          output   = JSON.parse(output_s)
-
-          # augment data with install_dir info
-          output['install_dir'] += "/#{dir_name}"
-          output['parent_install_dir']  = rand_install_dir
-          output['module_dependencies'] = check_for_dependencies(module_name, output)
-
-          unless 'success'.eql?(output['result'])
-            raise ErrorUsage, "Puppet Forge Error: #{output['error']['oneline']}"
+          output_hash   = JSON.parse(output_s)
+          output_hash['install_dir'] += "/#{dir_name}"
+          unless 'success'.eql?(output_hash['result'])
+            raise ErrorUsage, "Puppet Forge Error: #{output_hash['error']['oneline']}"
           end
-
-          output
-        end
-
-        #
-        # We use installed puppet forge gem and initialize git repo in it, after which we push it to gitolite.
-        #
-
-        def push_to_server(project, local_params, pf_module_location, gitolite_remote_url, pf_parent_location)
-          local = local_params.create_local(project) 
-          branch_name = local.branch_name 
-          repo = Grit::Repo.init(pf_module_location)
-
-          # after init we add all and push to our tenant
-          repo.remote_add('tenant_upstream', gitolite_remote_url)
-          repo.git.pull({},'tenant_upstream')
-          repo.git.checkout({:env => {'GIT_WORK_TREE' => pf_module_location} }, branch_name)
-          repo.git.add({:env => {'GIT_WORK_TREE' => pf_module_location} },'.')
-          repo.git.commit({:env => {'GIT_WORK_TREE' => pf_module_location} }, '-m','Initial Commit')
-          repo.git.push({},'-f', 'tenant_upstream', branch_name)
-
-          # get head commit sha
-          head_commit_sha = repo.head.commit.id
-
-          # we remove not needed folder after push
-          FileUtils.rm_rf(pf_parent_location)
-
-          head_commit_sha
+          module_dependencies = check_for_dependencies(module_name, output_hash)
+          LocalCopy.new(output_hash,rand_install_dir,module_dependencies)
         end
 
         #
@@ -92,10 +73,6 @@ module DTK
         end
 
       private
-
-        def random_install_dir
-          "/tmp/puppet/#{SecureRandom.uuid}"
-        end
 
         def check_for_dependencies(module_name, json)
           result = { :module_name => module_name, :dependencies => [] }
@@ -132,3 +109,33 @@ module DTK
 
   end
 end
+=begin
+TODO: deprecate or use in LoaclCopy
+
+
+        #
+        # We use installed puppet forge gem and initialize git repo in it, after which we push it to gitolite.
+        #
+
+        def push_to_server(project, local_params, pf_module_location, gitolite_remote_url, pf_parent_location)
+          local = local_params.create_local(project) 
+          branch_name = local.branch_name 
+          repo = Grit::Repo.init(pf_module_location)
+
+          # after init we add all and push to our tenant
+          repo.remote_add('tenant_upstream', gitolite_remote_url)
+          repo.git.pull({},'tenant_upstream')
+          repo.git.checkout({:env => {'GIT_WORK_TREE' => pf_module_location} }, branch_name)
+          repo.git.add({:env => {'GIT_WORK_TREE' => pf_module_location} },'.')
+          repo.git.commit({:env => {'GIT_WORK_TREE' => pf_module_location} }, '-m','Initial Commit')
+          repo.git.push({},'-f', 'tenant_upstream', branch_name)
+
+          # get head commit sha
+          head_commit_sha = repo.head.commit.id
+
+          # we remove not needed folder after push
+          FileUtils.rm_rf(pf_parent_location)
+
+          head_commit_sha
+        end
+=end

@@ -1,59 +1,112 @@
+# TODO: DTK-1794; in code that iterates over depenedncies; see if you have to look at dpendencies of dependenciee;
+# and if so assuming if want listof all modles and their dependencies wil have to throw out dups
+
 r8_require('errors')
-require 'grit'
+#require 'grit'
 require 'securerandom'
 require 'active_support/hash_with_indifferent_access'
 
 
 module DTK
   module PuppetForge
+    MODULE_NAME_SEPARATOR = '-'
+    def self.puppet_forge_namespace_and_module_name(pf_module_name)
+      pf_module_name.split(MODULE_NAME_SEPARATOR, 2)
+    end
+    def self.puppet_forge_module_name(pf_module_name)
+      puppet_forge_namespace_and_module_name(pf_module_name).last
+    end
 
-    #
-    # Wrapper around puppet CLI (distributed via puppet gem)
-    #
     class Error < Exception
     end
 
+    class Module
+      def initialize(hash)
+        @module  = hash['module']
+        @version = hash['version']
+        @file    = hash['file']
+        @path    = hash['path'] 
+      end
+
+      def default_local_module_name
+        PuppetForge.puppet_forge_module_name(@module)
+      end
+    end
+
     class LocalCopy < Hash
-      def initialize(output_hash,parent_install_dir,module_dependencies)
+      attr_reader :base_install_dir,:module_dependencies
+      def initialize(output_hash,base_install_dir,module_dependencies)
         super()
-        merge!(output_hash).merge!('parent_install_dir' => parent_install_dir,'module_dependencies' => module_dependencies)
+        merge!(output_hash)
+        @base_install_dir = base_install_dir
+        @module_dependencies = module_dependencies
+      end
+
+      def modules(opts={})
+        self.class.modules(self['installed_modules']||[],opts)
+      end
+
+      def delete_base_install_dir?()
+        self.class.delete_base_install_dir?(@base_install_dir)
+      end
+      def self.delete_base_install_dir?(base_install_dir)
+        FileUtils.rm_rf(base_install_dir)
       end
 
       def self.random_install_dir()
         "/tmp/puppet/#{SecureRandom.uuid}"
       end
+
+     private
+      def self.modules(installed_modules,opts={})
+        ret = Array.new
+        installed_modules.each do |installed_module|
+          # TODO: DTK-1794; put in logic that checks whether teh array :remove is inopts and if so does not put in any module that matches
+          ret << Module.new(installed_module)
+          deps = installed_module['dependencies']
+          if deps and ! deps.empty?
+            ret += modules(deps,opts)
+          end
+        end
+        ret
+      end
     end
 
-
+    #
+    # Wrapper around puppet CLI (distributed via puppet gem)
+    #
     class Client
       class << self
 
         # user and name sepparator used by puppetforge
-        MODULE_NAME_SEPARATOR = '-'
+        def install(pf_module_name, puppet_version=nil, force=false)
+          raise DTK::Puppet::ModuleNameMissing, "Puppet forge module name not provided" if pf_module_name.nil? || pf_module_name.empty?
 
+          dir_name         = PuppetForge.puppet_forge_module_name(pf_module_name)
+          base_install_dir = LocalCopy.random_install_dir()
 
-        def install(module_name, puppet_version=nil, force=false)
-          raise DTK::Puppet::ModuleNameMissing, "Puppet forge module name not provided" if module_name.nil? || module_name.empty?
-
-          # dir name
-          dir_name         = module_name.split(MODULE_NAME_SEPARATOR, 2).last
-          rand_install_dir = LocalCopy.random_install_dir()
-
-          command  = "puppet _3.4.0_ module install #{module_name} --render-as json --target-dir #{rand_install_dir} --modulepath #{rand_install_dir}"
+          command  = "puppet _3.4.0_ module install #{pf_module_name} --render-as json --target-dir #{base_install_dir} --modulepath #{base_install_dir}"
           command += " --version #{puppet_version}" if puppet_version && !puppet_version.empty?
           command += " --force"              if force
 
-          output_s = `#{command}`
+          ret = nil
+          begin 
+            output_s = `#{command}`
 
-          # we remove invalid characters to get to JSON response
-          output_s = normalize_output(output_s)
-          output_hash   = JSON.parse(output_s)
-          output_hash['install_dir'] += "/#{dir_name}"
-          unless 'success'.eql?(output_hash['result'])
-            raise ErrorUsage, "Puppet Forge Error: #{output_hash['error']['oneline']}"
+            # we remove invalid characters to get to JSON response
+            output_s = normalize_output(output_s)
+            output_hash   = JSON.parse(output_s)
+            output_hash['install_dir'] += "/#{dir_name}"
+            unless 'success'.eql?(output_hash['result'])
+              raise ErrorUsage, "Puppet Forge Error: #{output_hash['error']['oneline']}"
+            end
+            module_dependencies = check_for_dependencies(pf_module_name, output_hash)
+            ret = LocalCopy.new(output_hash,base_install_dir,module_dependencies)
+          rescue => e
+            LocalCopy.delete_base_install_dir?()
+            raise e
           end
-          module_dependencies = check_for_dependencies(module_name, output_hash)
-          LocalCopy.new(output_hash,rand_install_dir,module_dependencies)
+          ret
         end
 
         #
@@ -61,7 +114,7 @@ module DTK
         #
 
         def is_module_name_valid?(puppet_forge_name, module_name)
-          pf_module_name = puppet_forge_name.split(MODULE_NAME_SEPARATOR, 2).last
+          pf_module_name = PuppetForge.puppet_forge_module_name(puppet_forge_name)
 
           unless module_name
             raise ErrorUsage.new("Please provide module name")
@@ -75,12 +128,10 @@ module DTK
       private
 
         def check_for_dependencies(module_name, json)
-          result = { :module_name => module_name, :dependencies => [] }
-
           if json['installed_modules'] && main_module = json['installed_modules'].first
-            result[:dependencies] = main_module['dependencies'].collect do |dp|
+            main_module['dependencies'].collect do |dp|
               dp_name     = dp['module']
-              dp_module_namespace, dp_module_name = extrace_namespace_and_name(dp_name)
+              dp_module_namespace, dp_module_name = PuppetForge.puppet_forge_namespace_and_module_name(dp_name)
               dp_version  = dp['version'] ? dp['version']['vstring'] : nil
               dp_full_id  = "#{dp_name}"
               dp_full_id += " (#{dp_version})" if dp_version
@@ -91,12 +142,6 @@ module DTK
               })
             end
           end
-
-          return result
-        end
-
-        def extrace_namespace_and_name(pf_module_name)
-          pf_module_name.split(MODULE_NAME_SEPARATOR, 2)
         end
 
         def normalize_output(output_s)

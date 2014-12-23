@@ -193,55 +193,25 @@ module DTK
       # will raise exception if not valid
       PuppetForge::Client.is_module_name_valid?(puppet_module_name, module_name)
 
-      # will raise an exception in case of error
-      # This creates a temporary directory after using puppet forge client to import
-      local_copy = PuppetForge::Client.install(puppet_module_name, puppet_version)
+      puppet_forge_local_copy = nil
+      install_info = Hash.new
+      
+      begin
+        # will raise an exception in case of error
+        # This creates a temporary directory after using puppet forge client to import
+        puppet_forge_local_copy = PuppetForge::Client.install(puppet_module_name, puppet_version)
 
-      # local params encapsulates local module branch params                           
-      opts_local_params =  namespace ? {:namespace=>namespace} : {}
-      local_params = local_params(:component,module_name,opts_local_params)
-
-      opts_create_mod = Opts.new(
-        :local_params => local_params,                                 
-        :config_agent_type => ret_config_agent_type()
-      )
-      # module_info has has info about the specfic applicable branch
-      module_info = ComponentModule.create_module(project,module_name,opts_create_mod)[:module_repo_info]
-
-      commit_sha  = PuppetForge::Client.push_to_server(project,local_params,local_copy['install_dir'], module_info[:repo_url], local_copy['parent_install_dir'])
-
-      module_id   = module_info[:module_id]
-      full_module_name   = module_info[:full_module_name]
-
-      component_module = get_obj(module_id)
-
-      # Calculate dependencies
-      missing, found, dw = ComponentModule.cross_reference_modules(
-            Opts.new(:project_idh => get_default_project().id_handle()),
-            local_copy['module_dependencies'][:dependencies]
-            )
-
-      version = local_params.version
-
-      # DTK-1754: Rich: put in different call (update_from_initial_create_and_commit_dsl) 
-      # than update_from_initial_create which is combination of update_from_initial_create
-      # and update_model_from_clone_changes?
-#      dsl_info_response = component_module.update_from_initial_create(
-#          commit_sha,
-#          id_handle(module_info[:repo_id], :repo),
-#          version,
-#          { :scaffold_if_no_dsl => true, :do_not_raise => true, :process_external_refs => true }
-#        )
-      response = component_module.update_from_initial_create_and_commit_dsl(
-        commit_sha,
-        id_handle(module_info[:repo_id], :repo),                                                                         
-        module_info[:module_branch_idh],
-        local_params,
-        { :scaffold_if_no_dsl => true, :do_not_raise => true, :process_external_refs => true }
-      )
-raise ErrorUsage.new("got here")
-      rest_ok_response dsl_info_response.merge(:module_id => module_id, :version => version, :full_module_name => full_module_name, :missing_modules => missing, :found_modules => found)
+        opts = {:config_agent_type => ret_config_agent_type()}
+        if namespace
+          opts.merge!(:base_namespace => namespace)
+        end
+        install_info = ComponentModule::PuppetForge.install_module_and_missing_dependencies(project,puppet_forge_local_copy,opts)
+      ensure
+        puppet_forge_local_copy.delete_base_install_dir?() if puppet_forge_local_copy
+      end
+      rest_ok_response install_info
     end
+
 =begin
 #TODO: remove
     def rest__install_puppet_module()

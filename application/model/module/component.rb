@@ -2,6 +2,7 @@ r8_require('base_module')
 
 module DTK
   class ComponentModule < BaseModule
+    r8_nested_require('component_module','puppet_forge')
     def self.model_type()
       :component_module
     end

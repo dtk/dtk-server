@@ -2,7 +2,6 @@
 # and if so assuming if want listof all modles and their dependencies wil have to throw out dups
 
 r8_require('errors')
-#require 'grit'
 require 'securerandom'
 require 'active_support/hash_with_indifferent_access'
 
@@ -21,11 +20,12 @@ module DTK
     end
 
     class Module
+      attr_reader :path
       def initialize(hash)
         @module  = hash['module']
         @version = hash['version']
         @file    = hash['file']
-        @path    = hash['path'] 
+        @path    = "#{hash['path']}/#{PuppetForge.puppet_forge_module_name(@module)}"
       end
 
       def default_local_module_name
@@ -154,33 +154,3 @@ module DTK
 
   end
 end
-=begin
-TODO: deprecate or use in LoaclCopy
-
-
-        #
-        # We use installed puppet forge gem and initialize git repo in it, after which we push it to gitolite.
-        #
-
-        def push_to_server(project, local_params, pf_module_location, gitolite_remote_url, pf_parent_location)
-          local = local_params.create_local(project) 
-          branch_name = local.branch_name 
-          repo = Grit::Repo.init(pf_module_location)
-
-          # after init we add all and push to our tenant
-          repo.remote_add('tenant_upstream', gitolite_remote_url)
-          repo.git.pull({},'tenant_upstream')
-          repo.git.checkout({:env => {'GIT_WORK_TREE' => pf_module_location} }, branch_name)
-          repo.git.add({:env => {'GIT_WORK_TREE' => pf_module_location} },'.')
-          repo.git.commit({:env => {'GIT_WORK_TREE' => pf_module_location} }, '-m','Initial Commit')
-          repo.git.push({},'-f', 'tenant_upstream', branch_name)
-
-          # get head commit sha
-          head_commit_sha = repo.head.commit.id
-
-          # we remove not needed folder after push
-          FileUtils.rm_rf(pf_parent_location)
-
-          head_commit_sha
-        end
-=end

@@ -51,24 +51,6 @@ module DTK; class BaseModule
       parsed
     end
 
-    def update_from_initial_create_and_commit_dsl(commit_sha,repo_idh,module_branch_idh,local_params,opts={})
-      ret = DSLInfo.new()
-      module_branch = module_branch_idh.create_object(:cols => ModuleBranch.common_columns)
-
-      # DTK-1754: can we optimize by commiting from directory that is pulling to and avoid apull?
-      pull_was_needed = module_branch.pull_repo_changes?(commit_sha)
-
-      Log.error("DTK-1754: Rich: got here wrt to refactoring update_from_initial_create")
-      # DTK-1754: initially just copied update_from_initial_create, no going line by line and changing
-
-      # DTK-1754: modify so dont call teh deprecated version and also call method that commits dsl
-      # hacks so deprecate_create_needed_objects_and_dsl? has need params until we take 
-      # deprecate_create_needed_objects_and_dsl? out
-      repo = repo_idh.create_object()
-      version = local_params.version
-      deprecate_create_needed_objects_and_dsl?(repo,version,opts)
-    end
-
     def update_from_initial_create(commit_sha,repo_idh,version,opts={})
       ret = DSLInfo.new()
       module_branch = get_workspace_module_branch(version)
@@ -229,6 +211,8 @@ module DTK; class BaseModule
       ret.merge!(:module_branch_idh => module_branch_idh, :dsl_created_info => dsl_created_info, :match_hashes => matchig_for_module_refs)
       ret
     end
+    public :create_needed_objects_and_dsl?
+
     def update_model_objs_or_create_dsl?(diffs_summary,module_branch,version,opts={})
       ret = DSLInfo.new()
       dsl_created_info = DSLCreatedInfo.create_empty()

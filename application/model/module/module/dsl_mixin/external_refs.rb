@@ -98,7 +98,8 @@ module DTK; class BaseModule
 
                     if evaluated
                       if all_match_hashes.has_key?(dep_name)
-                        if all_ambiguous.empty?
+                        already_in_ambiguous = all_ambiguous.select{|amb| amb.values.include?(dep_name)}
+                        if already_in_ambiguous.empty?
                           namespace_info = all_match_hashes[dep_name].get_namespace_info
                           all_ambiguous << {:name => dep_name, :namespace => namespace_info[:namespace][:display_name]}
                         end

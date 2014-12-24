@@ -102,17 +102,19 @@ module DTK; class BaseModule
     def parse_dsl_and_update_model(impl_obj,module_branch_idh,version=nil,namespace=nil,opts={})
       set_dsl_parsed!(false)
 
-      includes = klass(self).validate_includes_and_update_module_refs(impl_obj, self, opts)
-      return includes if ModuleDSL::ParsingError.is_error?(includes)
+      # includes = klass(self).validate_includes_and_update_module_refs(impl_obj, self, opts)
+      # return includes if ModuleDSL::ParsingError.is_error?(includes)
 
       klass(self).parse_and_update_model(self,impl_obj,module_branch_idh,version,namespace,opts)
       module_branch = module_branch_idh.create_object()
 
-      ret_cmr = ModuleRefs.get_component_module_refs(module_branch)
-      if new_commit_sha = ret_cmr.serialize_and_save_to_repo?()
-        if opts[:ret_dsl_updated_info]
-          msg = "The module refs file was updated by the server"
-          opts[:ret_dsl_updated_info] = DSLUpdatedInfo.new(msg,new_commit_sha)
+      unless opts[:skip_module_ref_update]
+        ret_cmr = ModuleRefs.get_component_module_refs(module_branch)
+        if new_commit_sha = ret_cmr.serialize_and_save_to_repo?()
+          if opts[:ret_dsl_updated_info]
+            msg = "The module refs file was updated by the server"
+            opts[:ret_dsl_updated_info] = DSLUpdatedInfo.new(msg,new_commit_sha)
+          end
         end
       end
 

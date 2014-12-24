@@ -188,7 +188,7 @@ module DTK
       parse_needed = (opts[:force_parse] or !dsl_parsed?())
       return unless pull_was_needed or parse_needed
 
-      opts_update = Aux.hash_subset(opts,[:do_not_raise,:modification_type,:force_parse,:auto_update_module_refs,:dsl_parsed_false])
+      opts_update = Aux.hash_subset(opts,[:do_not_raise,:modification_type,:force_parse,:auto_update_module_refs,:dsl_parsed_false,:skip_module_ref_update])
       dsl_info = update_model_from_clone__type_specific?(commit_sha,diffs_summary,module_branch,version,opts_update)
       dsl_info
     end

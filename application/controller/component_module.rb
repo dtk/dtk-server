@@ -56,6 +56,9 @@ module DTK
       if ret_request_params(:set_parsed_false)
         opts.merge!(:dsl_parsed_false => true)
       end
+      if ret_request_params(:skip_module_ref_update)
+        opts.merge!(:skip_module_ref_update => true)
+      end
 
       dsl_created_info = component_module.update_model_from_clone_changes?(commit_sha,diffs_summary,version,opts)
       rest_ok_response dsl_created_info

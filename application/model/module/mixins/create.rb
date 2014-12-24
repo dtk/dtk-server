@@ -30,9 +30,12 @@ module DTK; module ModuleMixins
         :delete_if_exists => true,
         :namespace_name => namespace
       }
-
+      if copy_files_info = opts[:copy_files]
+        create_opts.merge!(:copy_files => copy_files_info)
+      end
       repo_user_acls = RepoUser.authorized_users_acls(project_idh)
-      local_repo_obj = Repo::WithBranch.create_empty_workspace_repo(project_idh,local,repo_user_acls,create_opts)
+      local_repo_obj = Repo::WithBranch.create_workspace_repo(project_idh,local,repo_user_acls,create_opts)
+
       repo_idh = local_repo_obj.id_handle()
       module_and_branch_info = create_module_and_branch_obj?(project,repo_idh,local)
 

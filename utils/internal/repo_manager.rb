@@ -139,7 +139,7 @@ module DTK
 
     ###### for repo admin functions, such as creating and deleting repositories
 
-    def self.create_empty_workspace_repo(repo_obj,repo_user_acls,opts)
+    def self.create_workspace_repo(repo_obj,repo_user_acls,opts)
       klass = load_and_return_adapter_class()
       # create repo on repo server
       klass.create_server_repo(repo_obj,repo_user_acls,opts)

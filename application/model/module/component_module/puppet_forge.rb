@@ -41,9 +41,16 @@ module DTK
         module_name = pf_module.default_local_module_name
         local_params = local_params(module_name,@base_namespace)
         
-        # create component module and module branch objects
+        # create component module, module branch, repo, and implementation objects
         # module_info has has info about the specfic applicable branch
-        module_and_branch_info = ComponentModule.create_module(@project,module_name,Opts.new(:local_params => local_params,:config_agent_type => :puppet))
+        # this function also copies and commits files from pf_module.path
+        opts_create_mod = Opts.new(
+          :local_params      => local_params,
+          :config_agent_type => :puppet,
+          :copy_files        => {:source_directory => pf_module.path}
+        )
+        module_and_branch_info = ComponentModule.create_module(@project,module_name,opts_create_mod)
+
         component_module = module_and_branch_info[:module_idh].create_object()
         repo_id = module_and_branch_info[:module_repo_info][:repo_id]
         repo = repo(repo_id)
@@ -61,8 +68,6 @@ module DTK
       end
 
       def create_needed_objects_and_dsl(pf_module,component_module,repo,local_params)
-        copy_from_puppet_forge_local_dir_to_repo(pf_module,repo)
-
         local = local_params.create_local(@project)
         opts = { 
           :scaffold_if_no_dsl    => true, 
@@ -77,11 +82,6 @@ module DTK
         @project.model_handle(:repo).createIDH(:id => repo_id).create_object()
       end
      
-      def copy_from_puppet_forge_local_dir_to_repo(pf_module,repo)
-        local_dir = repo.get_field?(:local_dir)
-        FileUtils.cp_r("#{pf_module.path}/.",local_dir)
-        Log.info("Copied files from temp Puppet Forge directory #{pf_module.path} to #{local_dir}")
-      end
     end
   end
 end

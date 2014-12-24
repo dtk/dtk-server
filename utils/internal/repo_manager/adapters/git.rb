@@ -23,10 +23,11 @@ module DTK
       local_repo = create_without_branch(local_repo_dir,:absolute_path => true, :repo_does_not_exist => true)
       local_repo.create_local_repo(repo_name,opts)
       if create_branch = opts[:create_branch]
+        opts_add_branch = {:empty=>true}.merge(Aux.hash_subset(opts,[:copy_files]))
         if opts[:push_created_branch]
-          local_repo.add_branch_and_push?(create_branch,:empty=>true)
+          local_repo.add_branch_and_push?(create_branch,opts_add_branch)
         else
-          local_repo.add_branch?(create_branch,:empty=>true)
+          local_repo.add_branch?(create_branch,opts_add_branch)
         end
       end
     end
@@ -131,10 +132,11 @@ module DTK
       end
     end
 
-    def add_all_files()
-      checkout(@branch) do
+    def add_all_files(branch=nil)
+      branch ||= @branch
+      checkout(branch) do
         git_command__add(".")
-        message = "Adding . in #{@branch}"
+        message = "Adding . in #{branch}"
         commit(message)
       end
     end
@@ -483,10 +485,13 @@ module DTK
 
     def add_branch?(new_branch,opts={})
       unless get_branches().include?(new_branch)
-        add_branch(new_branch,opts)
+        # if :copy_files; do it here and not in add_branch
+        add_branch(new_branch,opts.merge(:copy_files=>nil))
+      end
+      if copy_files_info = opts[:copy_files]
+        copy_and_add_all_files(new_branch,copy_files_info)
       end
     end
-
     def add_branch(new_branch,opts={})
       if opts[:empty]
         git_command__create_empty_branch(new_branch)
@@ -496,7 +501,18 @@ module DTK
           git_command__add_branch(new_branch)
         end
       end
+      if copy_files_info = opts[:copy_files]
+        copy_and_add_all_files(new_branch,copy_files_info)
+      end
     end
+
+    def copy_and_add_all_files(branch,copy_files_info)
+      source_dir = copy_files_info[:source_directory]
+      FileUtils.cp_r("#{source_dir}/.",@path)
+      Log.info("Copied files from temp Puppet Forge directory #{source_dir} to #{@path}")
+      add_all_files(branch)
+    end
+    private :copy_and_add_all_files
 
     # deletes both local and remote branch
     def delete_branch(remote_name=nil)

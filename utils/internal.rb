@@ -28,7 +28,8 @@ files =
    'async_response',
    'output_table',
    'rubygems_checker',
-   'hierarchical_tags'
+   'hierarchical_tags',
+   'puppet_forge',
   ]
 r8_nested_require('internal',files)
 

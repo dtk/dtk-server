@@ -31,7 +31,8 @@ module DTK
     # serializes and saves object to repo
     def serialize_and_save_to_repo?(opts={})
       dsl_hash_form = dsl_hash_form()
-      unless dsl_hash_form.empty?
+      ambiguous_dependencies = opts[:ambiguous]
+      if !dsl_hash_form.empty? || ambiguous_dependencies
         meta_filename_path = meta_filename_path()
         @parent.serialize_and_save_to_repo?(meta_filename_path,dsl_hash_form,nil,opts)
       end

@@ -163,6 +163,7 @@ module DTK
       end
 
       unless files.empty?
+        ambiguous_deps = opts[:ambiguous]
         any_changes, new_cmp_refs = false, nil
         files.each do |file_info|
           content = Aux.serialize(file_info[:hash_content],file_info[:format_type])
@@ -181,6 +182,15 @@ module DTK
             end
 
             content = Aux.serialize(new_cmp_refs,file_info[:format_type]) if new_cmp_refs
+          end
+
+          if ambiguous_deps
+            ambiguous = process_ambiguous_dependencies(ambiguous_deps, file_info[:hash_content])
+            if file_info[:hash_content].empty?
+              content = ambiguous
+            else
+              content << ambiguous
+            end
           end
 
           any_change = RepoManager.add_file({:path => file_info[:path]},content,self)
@@ -210,6 +220,25 @@ module DTK
       commit_sha = RepoManager.push_changes(self)
       set_sha(commit_sha) # returns commit_sha to calling fn
     end
+
+    def process_ambiguous_dependencies(ambiguous, hash_content)
+      content = ""
+      content << "---\ncomponent_modules:\n" if hash_content.empty?
+
+      ambiguous.each do |module_name,namespaces|
+        name = module_name.to_s.split('/').last
+        content << "  #{name}:\n"
+        count = 0
+        namespaces.each do |val|
+          count += 1
+          content << "#    namespace: #{val}\n"
+          content << "#  -- OR --  \n" if count < namespaces.size
+        end
+      end
+
+      content
+    end
+
     private :push_changes_to_repo
 
     def default_dsl_format_type()
@@ -322,6 +351,18 @@ module DTK
 
     def get_assemblies()
       get_objs(:cols => [:assemblies]).map{|r|r[:component]}
+    end
+
+    def get_module_refs()
+      sp_hash = {
+        :cols => [:id, :display_name, :namespace_info],
+        :filter => [:eq, :branch_id, self[:id]]
+      }
+      Model.get_objs(model_handle(:module_ref),sp_hash)
+    end
+
+    def get_namespace_info()
+      get_obj(:cols => [:component_module_namespace_info])
     end
 
     class << self

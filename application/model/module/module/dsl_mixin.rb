@@ -65,6 +65,15 @@ module DTK; class BaseModule
       component_module_refs = klass(self).update_component_module_refs(self.class,module_branch,opts)
       return component_module_refs if ModuleDSL::ParsingError.is_error?(component_module_refs)
 
+      opts.merge!(:ambiguous => ret[:ambiguous]) if ret[:ambiguous]
+      ret_cmr = ModuleRefs.get_component_module_refs(module_branch)
+      if new_commit_sha = ret_cmr.serialize_and_save_to_repo?(opts)
+        if opts[:ret_dsl_updated_info]
+          msg = "The module refs file was updated by the server"
+          ret.dsl_updated_info = DSLUpdatedInfo.new(msg,new_commit_sha)
+        end
+      end
+
       ret
     end
 
@@ -97,10 +106,8 @@ module DTK; class BaseModule
       return includes if ModuleDSL::ParsingError.is_error?(includes)
 
       klass(self).parse_and_update_model(self,impl_obj,module_branch_idh,version,namespace,opts)
-      # module_branch = module_branch_idh.create_object()
-      # component_module_refs = klass(self).update_component_module_refs(self.class,module_branch,opts)
-      # return component_module_refs if ModuleDSL::ParsingError.is_error?(component_module_refs)
       module_branch = module_branch_idh.create_object()
+
       ret_cmr = ModuleRefs.get_component_module_refs(module_branch)
       if new_commit_sha = ret_cmr.serialize_and_save_to_repo?()
         if opts[:ret_dsl_updated_info]
@@ -109,7 +116,7 @@ module DTK; class BaseModule
         end
       end
 
-      set_dsl_parsed!(true)
+      set_dsl_parsed!(true) unless opts[:dsl_parsed_false]
     end
 
     # TODO: for testing
@@ -176,6 +183,8 @@ module DTK; class BaseModule
           if poss_problems = external_deps.possible_problems?()
             ret.merge!(:external_dependencies => poss_problems)
           end
+          ambiguous = external_deps[:ambiguous]
+          ret.merge!(:ambiguous => ambiguous) if ambiguous
           matching_branches = external_deps.matching_module_branches?()
         end
       # opts[:set_external_refs] means to set external refs if they exist from parsing module files

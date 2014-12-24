@@ -44,8 +44,8 @@ module DTK
 
     def rest__update_model_from_clone()
       component_module = create_obj(:component_module_id)
-      commit_sha = ret_non_null_request_params(:commit_sha)
-      version = ret_version()
+      commit_sha    = ret_non_null_request_params(:commit_sha)
+      version       = ret_version()
       diffs_summary = ret_diffs_summary()
       opts =  Hash.new
       if ret_request_param_boolean(:internal_trigger)
@@ -53,6 +53,9 @@ module DTK
       end
       if ret_request_param_boolean(:force_parse)
         opts.merge!(:force_parse=> true)
+      end
+      if ret_request_params(:set_parsed_false)
+        opts.merge!(:dsl_parsed_false => true)
       end
 
       dsl_created_info = component_module.update_model_from_clone_changes?(commit_sha,diffs_summary,version,opts)

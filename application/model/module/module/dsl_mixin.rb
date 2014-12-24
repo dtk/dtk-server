@@ -162,7 +162,7 @@ module DTK; class BaseModule
       opts.merge!(:ret_dsl_updated_info => Hash.new)
       version = local.version
       project = local.project
-      config_agent_type = config_agent_type_default()
+      config_agent_type = opts[:config_agent_type] || config_agent_type_default()
       impl_obj = Implementation.create_workspace_impl?(project.id_handle(),repo,module_name,config_agent_type,branch_name,version,module_namespace)
       impl_obj.create_file_assets_from_dir_els()
 

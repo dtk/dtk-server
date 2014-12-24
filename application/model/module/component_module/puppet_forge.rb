@@ -61,11 +61,15 @@ module DTK
       end
 
       def create_needed_objects_and_dsl(pf_module,component_module,repo,local_params)
-        local = local_params.create_local(@project)
         copy_from_puppet_forge_local_dir_to_repo(pf_module,repo)
-        opts = { :scaffold_if_no_dsl => true, :do_not_raise => true, :process_external_refs => true }
-        # create_needed_objects_and_dsl? will commit any files that have been copied over to repo
-        #Rich: I still need to put in logic that adds dsl file on server
+
+        local = local_params.create_local(@project)
+        opts = { 
+          :scaffold_if_no_dsl    => true, 
+          :do_not_raise          => true, 
+          :process_external_refs => true,
+          :config_agent_type     => :puppet
+        }
         component_module.create_needed_objects_and_dsl?(repo,local,opts)
       end
      
@@ -74,9 +78,9 @@ module DTK
       end
      
       def copy_from_puppet_forge_local_dir_to_repo(pf_module,repo)
-       # TODO: DTK-1794 put in code that does a linux recursive copy from pf_module to repo
-        Log.info("copy -r from #{pf_module.path} to #{repo.get_field?(:local_dir)}")
-        raise Error.new("got here")
+        local_dir = repo.get_field?(:local_dir)
+        FileUtils.cp_r("#{pf_module.path}/.",local_dir)
+        Log.info("Copied files from temp Puppet Forge directory #{pf_module.path} to #{local_dir}")
       end
     end
   end

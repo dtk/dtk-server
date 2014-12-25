@@ -19,12 +19,12 @@ module DTK
       config_agent_type =  ret_config_agent_type()
       project = get_default_project()
 
-      # local_params encapsulates local module branch params                           
+      # local_params encapsulates local module branch params
       opts_local_params = (namespace ? {:namespace=>namespace} : {})
       local_params = local_params(:component,module_name,opts_local_params)
 
       opts_create_mod = Opts.new(
-        :local_params => local_params,                                 
+        :local_params => local_params,
         :config_agent_type => ret_config_agent_type()
       )
       module_repo_info = ComponentModule.create_module(project,module_name,opts_create_mod)[:module_repo_info]
@@ -184,17 +184,20 @@ module DTK
       puppet_module_name = ret_non_null_request_params(:puppetf_module_name)
       module_name = ret_non_null_request_params(:module_name)
       namespace = ret_request_param_module_namespace?()
-      # DTK-1754: Haris: assuming :module_version is puppet, not dtk, version 
-      # so renamed it here; we migt rename also in rest payload
-      puppet_version  = ret_request_params_force_nil(:module_version)
+      puppet_version  = ret_request_params_force_nil(:puppet_version)
       project = get_default_project()
+
+      # will raise exception if exists
+      ComponentModule.if_module_exists!(project.id_handle(), module_name, namespace,
+        "Cannot install '#{namespace}:#{module_name}' since it already exists!"
+        )
 
       # will raise exception if not valid
       PuppetForge::Client.is_module_name_valid?(puppet_module_name, module_name)
 
       puppet_forge_local_copy = nil
       install_info = Hash.new
-      
+
       begin
         # will raise an exception in case of error
         # This creates a temporary directory after using puppet forge client to import

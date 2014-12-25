@@ -95,7 +95,7 @@ module Ramaze::Helper
       remote_params = remote_params_dtkn(module_type,remote_namespace,remote_module_name,version)
 
       local_namespace = remote_params.namespace
-      local_module_name = ret_request_params(:local_module_name)||remote_params.module_name
+      local_module_name = ret_request_params(:local_module_name) || remote_params.module_name
       project = get_default_project()
       dtk_client_pub_key = ret_request_params(:rsa_pub_key)
 
@@ -146,7 +146,7 @@ module Ramaze::Helper
     # opts can have :version and :namespace
     def local_params(module_type,module_name,opts={})
       version = opts[:version]
-      namespace = opts[:namespace] || default_local_namespace_name() 
+      namespace = opts[:namespace] || default_local_namespace_name()
       ModuleBranch::Location::LocalParams::Server.new(
         :module_type => module_type,
         :module_name => module_name,
@@ -165,7 +165,7 @@ module Ramaze::Helper
       )
     end
 
-    def default_local_namespace_name() 
+    def default_local_namespace_name()
       namespace_mh =  get_default_project().model_handle(:namespace)
       namespace_obj = ::DTK::Namespace::default_namespace(namespace_mh)
       namespace_obj.get_field?(:display_name)

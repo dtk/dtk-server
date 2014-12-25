@@ -154,7 +154,7 @@ module DTK; class BaseModule
       )
       local_params.create_local(get_project())
     end
-    def create_needed_objects_and_dsl?(repo,local,opts={})
+    def create_needed_objects_and_dsl?(repo, local, opts={})
       ret = DSLInfo.new()
       module_name = local.module_name
       branch_name = local.branch_name
@@ -162,6 +162,14 @@ module DTK; class BaseModule
       opts.merge!(:ret_dsl_updated_info => Hash.new)
       version = local.version
       project = local.project
+
+      ret.merge!(
+        :name      => module_name,
+        :namespace => module_namespace,
+        :type      => self.module_type,
+        :version   => version
+      )
+
       config_agent_type = opts[:config_agent_type] || config_agent_type_default()
       impl_obj = Implementation.create_workspace_impl?(project.id_handle(),repo,module_name,config_agent_type,branch_name,version,module_namespace)
       impl_obj.create_file_assets_from_dir_els()
@@ -289,9 +297,12 @@ module DTK; class BaseModule
 
       matching_branches.each do |mb|
         m_module = mb.get_module()
+        next unless m_module
+
         m_namespace = m_module.module_namespace()
         matching << {:component_module => m_module[:display_name].to_s, :remote_namespace => m_namespace.to_s}
       end
+
       matching
     end
 

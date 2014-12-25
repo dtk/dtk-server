@@ -671,7 +671,17 @@ module DTK
       version ? "#{module_name} (#{version})" : module_name
     end
 
-    def module_exists?(project_idh,module_name,module_namespace)
+    def if_module_exists!(project_idh, module_name, module_namespace, error_message)
+      module_obj = module_exists?(project_idh, module_name, module_namespace)
+
+      if module_obj
+        raise ErrorUsage.new(error_message)
+      end
+
+      false
+    end
+
+    def module_exists?(project_idh, module_name, module_namespace)
       unless project_idh[:model_name] == :project
         raise Error.new("MOD_RESTRUCT:  module_exists? should take a project, not a (#{project_idh[:model_name]})")
       end
@@ -686,6 +696,7 @@ module DTK
                      [:eq, :namespace_id, namespace_obj.id()]
                    ]
       }
+
       get_obj(project_idh.createMH(model_name()),sp_hash)
     end
 

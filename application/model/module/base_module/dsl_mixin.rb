@@ -1,46 +1,5 @@
 #TODO: Aldin: think you want to replace cases where there is an instance function that uses ModuleDSL
 #with klass(self)
-module DTK
-  class DSLInfo < Hash
-    def initialize(hash={})
-      super()
-      replace(hash)
-    end
-    def dsl_parsed_info=(dsl_parsed_info)
-      merge!(:dsl_parsed_info => dsl_parsed_info)
-      dsl_parsed_info
-    end
-    def dsl_created_info=(dsl_created_info)
-      merge!(:dsl_created_info => dsl_created_info)
-      dsl_created_info
-    end
-    def dsl_updated_info=(dsl_updated_info)
-      merge!(:dsl_updated_info => dsl_updated_info)
-      dsl_updated_info
-    end
-  end
-  # has info if DSL file is created and being passed to
-  class DSLCreatedInfo < Hash
-    def self.create_empty()
-      new()
-    end
-    def self.create_with_path_and_content(path,content)
-      new(:path => path, :content => content)
-    end
-   private
-    def initialize(hash={})
-      super()
-      replace(hash)
-    end
-  end
-  class DSLUpdatedInfo < Hash
-    def initialize(msg,commit_sha)
-      super()
-      replace(:msg => msg, :commit_sha => commit_sha)
-    end
-  end
-end
-
 module DTK; class BaseModule
   module DSLMixin
     r8_nested_require('dsl_mixin','external_refs')
@@ -65,21 +24,25 @@ module DTK; class BaseModule
       component_module_refs = klass(self).update_component_module_refs(self.class,module_branch,opts)
       return component_module_refs if ModuleDSL::ParsingError.is_error?(component_module_refs)
 
+      opts.merge!(:ambiguous => ret[:ambiguous]) if ret[:ambiguous]
+      ret_cmr = ModuleRefs.get_component_module_refs(module_branch)
+      if new_commit_sha = ret_cmr.serialize_and_save_to_repo?(opts)
+        if opts[:ret_dsl_updated_info]
+          msg = "The module refs file was updated by the server"
+          ret.dsl_updated_info = DSLInfo::UpdatedInfo.new(msg,new_commit_sha)
+        end
+      end
       ret
     end
 
-    def create_new_dsl_version(new_dsl_integer_version,format_type,module_version)
-      unless new_dsl_integer_version == 2
-        raise Error.new("component_module.create_new_dsl_version only implemented when target version is 2")
-      end
-      previous_dsl_version = new_dsl_integer_version-1
-      module_branch = get_module_branch_matching_version(module_version)
-
-      # create in-memory dsl object using old version
-      component_dsl = ModuleDSL.create_dsl_object(module_branch,previous_dsl_version)
-      # create from component_dsl the new version dsl
-      dsl_paths_and_content = component_dsl.migrate(module_name(),new_dsl_integer_version,format_type)
-      module_branch.serialize_and_save_to_repo?(dsl_paths_and_content)
+    def parse_impl_to_create_and_add_dsl(config_agent_type,impl_obj)
+      dsl_created_info = parse_impl_to_create_dsl(config_agent_type,impl_obj)
+      pp [:dsl_created_info,dsl_created_info]
+      # TODO: DTK-1794; Rich: I need to add the content passed in dsl_created_info to the repo
+      # and then look at parse_dsl_and_update_model internals to
+      # us the part that updates_model from the dsl
+      # return is hack
+      {'new module created' => "#{module_namespace()}:#{module_name()}"}
     end
 
     def pull_from_remote__update_from_dsl(repo, module_and_branch_info,version=nil)
@@ -93,23 +56,23 @@ module DTK; class BaseModule
     def parse_dsl_and_update_model(impl_obj,module_branch_idh,version=nil,namespace=nil,opts={})
       set_dsl_parsed!(false)
 
-      includes = klass(self).validate_includes_and_update_module_refs(impl_obj, self, opts)
-      return includes if ModuleDSL::ParsingError.is_error?(includes)
+      # includes = klass(self).validate_includes_and_update_module_refs(impl_obj, self, opts)
+      # return includes if ModuleDSL::ParsingError.is_error?(includes)
 
       klass(self).parse_and_update_model(self,impl_obj,module_branch_idh,version,namespace,opts)
-      # module_branch = module_branch_idh.create_object()
-      # component_module_refs = klass(self).update_component_module_refs(self.class,module_branch,opts)
-      # return component_module_refs if ModuleDSL::ParsingError.is_error?(component_module_refs)
       module_branch = module_branch_idh.create_object()
-      ret_cmr = ModuleRefs.get_component_module_refs(module_branch)
-      if new_commit_sha = ret_cmr.serialize_and_save_to_repo?()
-        if opts[:ret_dsl_updated_info]
-          msg = "The module refs file was updated by the server"
-          opts[:ret_dsl_updated_info] = DSLUpdatedInfo.new(msg,new_commit_sha)
+
+      unless opts[:skip_module_ref_update]
+        ret_cmr = ModuleRefs.get_component_module_refs(module_branch)
+        if new_commit_sha = ret_cmr.serialize_and_save_to_repo?()
+          if opts[:ret_dsl_updated_info]
+            msg = "The module refs file was updated by the server"
+            opts[:ret_dsl_updated_info] = DSLInfo::UpdatedInfo.new(msg,new_commit_sha)
+          end
         end
       end
 
-      set_dsl_parsed!(true)
+      set_dsl_parsed!(true) unless opts[:dsl_parsed_false]
     end
 
     # TODO: for testing
@@ -140,7 +103,7 @@ module DTK; class BaseModule
     end
 
     def deprecate_create_needed_objects_and_dsl?(repo,version,opts={})
-      # TODO: used temporarily until get all callers to use local object
+      # TODO: used temporarily until get all callers to pass in local_params
       local = deprecate_ret_local(version)
 #      Log.info_pp(["TODO: Using deprecate_create_needed_objects_and_dsl?; local =",local,caller[0..4]])
       create_needed_objects_and_dsl?(repo,local,opts)
@@ -154,13 +117,10 @@ module DTK; class BaseModule
       )
       local_params.create_local(get_project())
     end
+
     def create_needed_objects_and_dsl?(repo, local, opts={})
       ret = DSLInfo.new()
-      module_name = local.module_name
-      branch_name = local.branch_name
-      module_namespace = local.module_namespace_name
       opts.merge!(:ret_dsl_updated_info => Hash.new)
-      version = local.version
       project = local.project
 
       ret.merge!(
@@ -171,7 +131,7 @@ module DTK; class BaseModule
       )
 
       config_agent_type = opts[:config_agent_type] || config_agent_type_default()
-      impl_obj = Implementation.create_workspace_impl?(project.id_handle(),repo,module_name,config_agent_type,branch_name,version,module_namespace)
+      impl_obj = Implementation.create?(project,local,repo,config_agent_type)
       impl_obj.create_file_assets_from_dir_els()
 
       module_and_branch_info = self.class.create_module_and_branch_obj?(project,repo.id_handle(),local,opts[:ancestor_branch_idh])
@@ -184,6 +144,8 @@ module DTK; class BaseModule
           if poss_problems = external_deps.possible_problems?()
             ret.merge!(:external_dependencies => poss_problems)
           end
+          ambiguous = external_deps[:ambiguous]
+          ret.merge!(:ambiguous => ambiguous) if ambiguous
           matching_branches = external_deps.matching_module_branches?()
         end
       # opts[:set_external_refs] means to set external refs if they exist from parsing module files
@@ -192,12 +154,13 @@ module DTK; class BaseModule
         set_external_ref?(module_branch,config_agent_type,impl_obj)
       end
 
-      dsl_created_info = DSLCreatedInfo.create_empty()
+      dsl_created_info = DSLInfo::CreatedInfo.create_empty()
       klass = klass(self)
       if klass.contains_dsl_file?(impl_obj)
-        if e = klass::ParsingError.trap{parse_dsl_and_update_model(impl_obj,module_branch_idh,version,module_namespace,opts)}
-          ret.dsl_parsed_info = e
+        err = klass::ParsingError.trap do
+          parse_dsl_and_update_model(impl_obj,module_branch_idh,local.version,local.module_namespace_name,opts)
         end
+        ret.dsl_parsed_info = err if err
       elsif opts[:scaffold_if_no_dsl]
         opts = Hash.new
         if matching_branches
@@ -215,15 +178,14 @@ module DTK; class BaseModule
         ret.dsl_updated_info = dsl_updated_info
       end
 
-      matchig_for_module_refs = prepare_for_module_refs(matching_branches)
-      ret.merge!(:module_branch_idh => module_branch_idh, :dsl_created_info => dsl_created_info, :match_hashes => matchig_for_module_refs)
+      matching_for_module_refs = prepare_for_module_refs(matching_branches)
+      ret.merge!(:module_branch_idh => module_branch_idh, :dsl_created_info => dsl_created_info, :match_hashes => matching_for_module_refs)
       ret
     end
-    public :create_needed_objects_and_dsl?
 
     def update_model_objs_or_create_dsl?(diffs_summary,module_branch,version,opts={})
       ret = DSLInfo.new()
-      dsl_created_info = DSLCreatedInfo.create_empty()
+      dsl_created_info = DSLInfo::CreatedInfo.create_empty()
       module_namespace = module_namespace()
       impl_obj = module_branch.get_implementation()
       # TODO: make more robust to handle situation where diffs dont cover all changes; think can detect by looking at shas
@@ -285,7 +247,7 @@ module DTK; class BaseModule
         format_type = ModuleDSL.default_format_type()
         content = render_hash.serialize(format_type)
         dsl_filename = ModuleDSL.dsl_filename(config_agent_type,format_type)
-        ret = DSLCreatedInfo.create_with_path_and_content(dsl_filename, content)
+        ret = DSLInfo::CreatedInfo.create_with_path_and_content(dsl_filename, content)
       end
       raise parsing_error if parsing_error
       ret
@@ -309,10 +271,10 @@ module DTK; class BaseModule
     def klass(klass)
       case klass
         when NodeModule
-          return NodeModuleDSL
+          NodeModuleDSL
         else
-          return ModuleDSL
-        end
+          ModuleDSL
+      end
     end
 
   end

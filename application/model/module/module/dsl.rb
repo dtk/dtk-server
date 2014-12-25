@@ -173,21 +173,31 @@ module DTK
         end
 
         unless multiple_namespaces.empty?
-          cmp_mods = multiple_namespaces.group_by { |h| h[:component_module] }#.values.flatten.map{|k| k[:component_module]}
-          cmp_mods.each do |k,v|
-            namespaces = v.map{|a| a[:remote_namespace]}
+          multi_missing = []
+          multiple_namespaces.each{|mn| mapped.delete(mn)}
 
-            error_params = {
-              :module_type => 'component',
-              :module_name => k,
-              :namespaces => namespaces.compact # compact just to be safe
-            }
-            return ParsingError::AmbiguousModuleRef.new(error_params)
-          end
+          existing_module_refs = target_impl.get_module_branch().get_module_refs()
+          existing_names = existing_module_refs.map{|ex|ex[:display_name]}
+
+          multiple_namespaces.delete_if{|mn| existing_names.include?(mn[:component_module])}
+          cmp_mods = multiple_namespaces.group_by { |h| h[:component_module] }
+          ret.merge!(:multiple_namespaces => cmp_mods) unless cmp_mods.empty?
+          # cmp_mods = multiple_namespaces.group_by { |h| h[:component_module] }#.values.flatten.map{|k| k[:component_module]}
+          # cmp_mods.each do |k,v|
+          #   namespaces = v.map{|a| a[:remote_namespace]}
+
+          #   error_params = {
+          #     :module_type => 'component',
+          #     :module_name => k,
+          #     :namespaces => namespaces.compact # compact just to be safe
+          #   }
+          #   return ParsingError::AmbiguousModuleRef.new(error_params)
+          # end
         end
 
         opts.merge!(:match_hashes => mapped)
         update_component_module_refs(cmp_module.class,target_impl.get_module_branch(),opts)
+        ret
       end
     end
 

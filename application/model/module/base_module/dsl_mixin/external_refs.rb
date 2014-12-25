@@ -7,7 +7,7 @@ module DTK; class BaseModule
     end
 
     def possible_problems?()
-      ret = Aux.hash_subset(self,[:inconsistent,:possibly_missing])
+      ret = Aux.hash_subset(self,[:inconsistent,:possibly_missing,:ambiguous])
       ret unless ret.empty? 
     end
 
@@ -26,7 +26,7 @@ module DTK; class BaseModule
       def process_external_refs(module_branch,config_agent_type,project,impl_obj)
         ret = nil
         if external_ref = set_external_ref?(module_branch,config_agent_type,impl_obj)
-          ret = check_and_ret_external_ref_dependencies?(external_ref,project)
+          ret = check_and_ret_external_ref_dependencies?(external_ref,project,module_branch)
         end
         ret
       end
@@ -42,7 +42,7 @@ module DTK; class BaseModule
      private
       # TODO: move matching logic under DTK::ConfigAgent::Adapter::Puppet::ExternalDependency::ParsedForm
       # move puppet specific to under config_agent/puppet
-      def check_and_ret_external_ref_dependencies?(external_ref,project)
+      def check_and_ret_external_ref_dependencies?(external_ref,project,module_branch=nil)
         ret = ExternalDependencies.new()
         return ret unless dependencies = external_ref[:dependencies]
 
@@ -50,7 +50,9 @@ module DTK; class BaseModule
         return ret if parsed_dependencies.empty?
 
         all_match_hashes, all_inconsistent, all_possibly_missing, all_inconsistent_names = {}, [], [], []
+        all_ambiguous, all_ambiguous_ns = [], []
         all_modules = self.class.get_all(project.id_handle()).map{|cmp_mod|ComponentModuleWrapper.new(cmp_mod)}
+        existing_module_refs = get_existing_module_refs(module_branch)
         parsed_dependencies.each do |parsed_dependency|
           dep_name = parsed_dependency[:name].strip()
           version_constraints = parsed_dependency[:version_constraints]
@@ -70,7 +72,7 @@ module DTK; class BaseModule
                 if (branch_name && branch_version)
                   matched_branch_version = branch_version.match(/(\d+\.\d+\.\d+)/)
                   branch_version = matched_branch_version[1]
-                  
+
                   evaluated, br_version, constraint_op, req_version, required_version = false, nil, nil, nil, nil
                   if dep_name.eql?(branch_name)
                     # version_constraints.nil? means no version consttaint
@@ -95,11 +97,31 @@ module DTK; class BaseModule
                     end
 
                     if evaluated
-                      all_match_hashes.merge!(dep_name  => branch)
+                      if all_match_hashes.has_key?(dep_name)
+                        already_in_ambiguous = all_ambiguous.select{|amb| amb.values.include?(dep_name)}
+                        if already_in_ambiguous.empty?
+                          namespace_info = all_match_hashes[dep_name].get_namespace_info
+                          all_ambiguous << {:name => dep_name, :namespace => namespace_info[:namespace][:display_name]}
+                        end
+                        namespace_info = branch.get_namespace_info
+                        all_ambiguous << {:name => dep_name, :namespace => namespace_info[:namespace][:display_name]}
+                      end
+
+                      if existing_module_refs.empty?
+                        all_match_hashes.merge!(dep_name  => branch)
+                      else
+                        name = dep_name.split('/').last
+                        namespace_info = branch.get_namespace_info
+                        existing_namespace = existing_module_refs['component_modules']["#{name}"]
+                        if existing_namespace && existing_namespace['namespace'].eql?(namespace_info[:namespace][:display_name])
+                          all_match_hashes.merge!(dep_name  => branch)
+                        end
+                      end
                     else
                       all_inconsistent << "#{dep_name} (current:#{branch_version}, required:#{constraint_op}#{required_version})"
                       all_inconsistent_names << dep_name
                     end
+
                   else
                     all_possibly_missing << dep_name
                   end   
@@ -108,17 +130,51 @@ module DTK; class BaseModule
                 all_possibly_missing << dep_name
               end
             end
-            
           end
         end
+
+        check_if_matching_or_ambiguous(module_branch, all_ambiguous)
+        all_ambiguous_ns = all_ambiguous.map{|am| am[:name]} unless all_ambiguous.empty?
+        unless all_ambiguous_ns.empty? || all_match_hashes.empty?
+          all_ambiguous_ns.uniq!
+          all_match_hashes.delete_if{|k,v|all_ambiguous_ns.include?(k)}
+        end
+
+        ambiguous_grouped = {}
+        unless all_ambiguous.empty?
+          ambiguous_g = all_ambiguous.group_by { |h| h[:name] }
+          ambiguous_g.each do |k,v|
+            namespaces = v.map{|a| a[:namespace]}
+            ambiguous_grouped.merge!(k => namespaces)
+          end
+        end
+
         all_inconsistent = (all_inconsistent - all_match_hashes.keys)
-        all_possibly_missing = (all_possibly_missing.uniq - all_inconsistent_names - all_match_hashes.keys)
+        all_possibly_missing = (all_possibly_missing.uniq - all_inconsistent_names - all_match_hashes.keys - all_ambiguous_ns.uniq)
         ext_deps_hash = {
           :match_hashes => all_match_hashes,
           :inconsistent => all_inconsistent.uniq,
           :possibly_missing => all_possibly_missing.uniq
         }
+        ext_deps_hash.merge!(:ambiguous => ambiguous_grouped) unless ambiguous_grouped.empty?
         ExternalDependencies.new(ext_deps_hash)
+      end
+
+      def check_if_matching_or_ambiguous(module_branch, ambiguous)
+        existing_c_hash = get_existing_module_refs(module_branch)
+        if existing = existing_c_hash['component_modules']
+          existing.each do |k,v|
+            amb = ambiguous.select{|a| a[:name].split('/').last.eql?(k) && a[:namespace].eql?(v['namespace'])}
+            ambiguous.delete_if{|amb| amb[:name].split('/').last.eql?(k)} unless amb.empty?
+          end
+        end
+      end
+
+      def get_existing_module_refs(module_branch)
+        existing_c_hash  = {}
+        existing_content = RepoManager.get_file_content({:path => "module_refs.yaml"}, module_branch, {:no_error_if_not_found => true})
+        existing_c_hash  = Aux.convert_to_hash(existing_content,:yaml) if existing_content
+        existing_c_hash
       end
       # for caching info
       class ComponentModuleWrapper

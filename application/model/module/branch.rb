@@ -191,6 +191,8 @@ module DTK
             else
               content << ambiguous
             end
+          elsif file_info[:hash_content].empty?
+            content = "---\ncomponent_modules:\n" unless existing_content
           end
 
           any_change = RepoManager.add_file({:path => file_info[:path]},content,self)

@@ -1,5 +1,5 @@
 module DTK
-  class ModuleRefs 
+  class ModuleRefs
     r8_nested_require('module_refs','mixin')
     r8_nested_require('module_refs','parse')
     r8_nested_require('module_refs','matching_templates')
@@ -32,7 +32,7 @@ module DTK
     def serialize_and_save_to_repo?(opts={})
       dsl_hash_form = dsl_hash_form()
       ambiguous_dependencies = opts[:ambiguous]
-      if !dsl_hash_form.empty? || ambiguous_dependencies
+      if !dsl_hash_form.empty? || ambiguous_dependencies || opts[:match_hashes]
         meta_filename_path = meta_filename_path()
         @parent.serialize_and_save_to_repo?(meta_filename_path,dsl_hash_form,nil,opts)
       end
@@ -53,7 +53,7 @@ module DTK
       end
       ret
     end
-    
+
     def update_component_template_ids(component_module)
       # first get filter so can call get_augmented_component_refs
       assembly_templates = component_module.get_associated_assembly_templates()
@@ -72,7 +72,7 @@ module DTK
 
 
     attr_reader :component_modules
-                                                                          
+
     def has_module_version?(cmp_module_name,version_string)
       if cmp_module_ref = component_module_ref?(cmp_module_name)
         cmp_module_ref.version_string() == version_string
@@ -147,7 +147,7 @@ module DTK
       if dsl_hash_form.empty?
         return ret
       end
-      
+
       sorted_dsl_hash_form = dsl_hash_form.keys.map{|x|x.to_s}.sort().inject(SimpleOrderedHash.new()) do |h,k|
         h.merge(k => dsl_hash_form[k])
       end

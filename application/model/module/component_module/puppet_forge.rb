@@ -54,7 +54,8 @@ module DTK
         impl_obj = module_objs[:implementation]
         impl_obj.create_file_assets_from_dir_els()
 
-        ret = module_objs[:component_module].parse_impl_to_create_and_add_dsl(@config_agent_type,impl_obj)
+        module_objs[:component_module].parse_impl_to_create_and_add_dsl(@config_agent_type,impl_obj)
+        module_objs[:component_module].set_dsl_parsed!(true)
 
         pf_module
       end
@@ -94,6 +95,7 @@ module DTK
 
       def format_response(installed_modules, found_modules)
         main_module = installed_modules.find { |im| !im.is_dependency }
+        main_module.namespace = @base_namespace
         {
           :main_module       => main_module.to_h,
           :installed_modules => (installed_modules - [main_module]).collect { |im| im.to_h },

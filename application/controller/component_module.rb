@@ -189,7 +189,7 @@ module DTK
     def rest__install_puppet_forge_modules()
       puppet_module_name = ret_non_null_request_params(:puppetf_module_name)
       module_name = ret_non_null_request_params(:module_name)
-      namespace = ret_request_param_module_namespace?()
+      namespace = ret_request_param_module_namespace?() || Namespace.default_namespace_name()
       puppet_version  = ret_request_params_force_nil(:puppet_version)
       project = get_default_project()
 

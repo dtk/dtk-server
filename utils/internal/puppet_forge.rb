@@ -16,7 +16,8 @@ module DTK
 
     class Module
 
-      attr_reader :path, :name, :namespace, :is_dependency
+      attr_reader   :path, :name, :is_dependency
+      attr_accessor :namespace
 
       def initialize(hash, is_dependency = false, type = :component_module, dtk_version = nil)
         m_namespace, m_name = PuppetForge.puppet_forge_namespace_and_module_name(hash['module'])

@@ -38,28 +38,36 @@ module XYZ
       get_objs(impl_mh,sp_hash)
     end
 
-    def self.create_workspace_impl?(project_idh,repo_obj,module_name, config_agent_type,branch,version=nil,module_namespace=nil)
-      repo_obj.update_object!(:repo_name)
-      impl_ref = ref(config_agent_type,module_name,branch)
-      impl_hash = {
-        :display_name => version ? "#{module_name}(#{version})" : module_name,
-        :type => ImplementationType[config_agent_type],
-        :repo => repo_obj[:repo_name],
-        :repo_id => repo_obj[:id],
-        :project_project_id => project_idh.get_id(),
-        :version => version_field(version)
+    def self.create?(project,local_params,repo,config_agent_type)
+      local = local_params.create_local(project)
+      project = local.project
+      version = local.version
+      module_name = local.module_name
+      module_namespace = local.module_namespace_name
+      branch = local.branch_name
+
+      match_assigns = {
+        :module_name      => module_name, 
+        :branch           => branch, 
+        :module_namespace => module_namespace
       }
-      impl_mh = project_idh.create_childMH(:implementation)
-      impl_idh = create_from_row?(impl_mh,impl_ref,{:module_name => module_name, :branch => branch, :module_namespace => module_namespace},impl_hash)
-      impl_idh.create_object().merge(impl_hash)
+      impl_hash = {
+        :display_name       => version ? "#{module_name}(#{version})" : module_name,
+        :type               => ImplementationType[config_agent_type],
+        :repo               => repo.get_field?(:repo_name),
+        :repo_id            => repo.id,
+        :project_project_id => project.id,
+        :version            => version_field(version)
+      }
+      impl_ref = ref(config_agent_type,module_name,branch)
+      impl_mh = project.id_handle().create_childMH(:implementation)
+      create_from_row?(impl_mh,impl_ref,match_assigns,impl_hash).create_object().merge(impl_hash)
     end
 
-    class << self
-      private
-      def ref(config_agent_type,module_name,branch)
-        "#{config_agent_type}-#{module_name}-#{branch}"
-      end
+    def self.ref(config_agent_type,module_name,branch)
+      "#{config_agent_type}-#{module_name}-#{branch}"
     end
+    private_class_method :ref
 
     def self.delete_repos_and_implementations(model_handle,module_name)
       sp_hash = {

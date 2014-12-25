@@ -32,22 +32,17 @@ module DTK; class BaseModule
           ret.dsl_updated_info = DSLInfo::UpdatedInfo.new(msg,new_commit_sha)
         end
       end
-
       ret
     end
 
-    def create_new_dsl_version(new_dsl_integer_version,format_type,module_version)
-      unless new_dsl_integer_version == 2
-        raise Error.new("component_module.create_new_dsl_version only implemented when target version is 2")
-      end
-      previous_dsl_version = new_dsl_integer_version-1
-      module_branch = get_module_branch_matching_version(module_version)
-
-      # create in-memory dsl object using old version
-      component_dsl = ModuleDSL.create_dsl_object(module_branch,previous_dsl_version)
-      # create from component_dsl the new version dsl
-      dsl_paths_and_content = component_dsl.migrate(module_name(),new_dsl_integer_version,format_type)
-      module_branch.serialize_and_save_to_repo?(dsl_paths_and_content)
+    def parse_impl_to_create_and_add_dsl(config_agent_type,impl_obj)
+      dsl_created_info = parse_impl_to_create_dsl(config_agent_type,impl_obj)
+      pp [:dsl_created_info,dsl_created_info]
+      # TODO: DTK-1794; Rich: I need to add the content passed in dsl_created_info to the repo
+      # and then look at parse_dsl_and_update_model internals to
+      # us the part that updates_model from the dsl
+      # return is hack
+      {'new module created' => "#{module_namespace()}:#{module_name()}"}
     end
 
     def pull_from_remote__update_from_dsl(repo, module_and_branch_info,version=nil)
@@ -108,7 +103,7 @@ module DTK; class BaseModule
     end
 
     def deprecate_create_needed_objects_and_dsl?(repo,version,opts={})
-      # TODO: used temporarily until get all callers to use local object
+      # TODO: used temporarily until get all callers to pass in local_params
       local = deprecate_ret_local(version)
 #      Log.info_pp(["TODO: Using deprecate_create_needed_objects_and_dsl?; local =",local,caller[0..4]])
       create_needed_objects_and_dsl?(repo,local,opts)
@@ -122,16 +117,13 @@ module DTK; class BaseModule
       )
       local_params.create_local(get_project())
     end
+
     def create_needed_objects_and_dsl?(repo,local,opts={})
       ret = DSLInfo.new()
-      module_name = local.module_name
-      branch_name = local.branch_name
-      module_namespace = local.module_namespace_name
       opts.merge!(:ret_dsl_updated_info => Hash.new)
-      version = local.version
       project = local.project
       config_agent_type = opts[:config_agent_type] || config_agent_type_default()
-      impl_obj = Implementation.create_workspace_impl?(project.id_handle(),repo,module_name,config_agent_type,branch_name,version,module_namespace)
+      impl_obj = Implementation.create?(local,repo,config_agent_type)
       impl_obj.create_file_assets_from_dir_els()
 
       module_and_branch_info = self.class.create_module_and_branch_obj?(project,repo.id_handle(),local,opts[:ancestor_branch_idh])
@@ -157,9 +149,10 @@ module DTK; class BaseModule
       dsl_created_info = DSLInfo::CreatedInfo.create_empty()
       klass = klass(self)
       if klass.contains_dsl_file?(impl_obj)
-        if e = klass::ParsingError.trap{parse_dsl_and_update_model(impl_obj,module_branch_idh,version,module_namespace,opts)}
-          ret.dsl_parsed_info = e
+        err = klass::ParsingError.trap do
+          parse_dsl_and_update_model(impl_obj,module_branch_idh,local.version,local.module_namespace_name,opts)
         end
+        ret.dsl_parsed_info = err if err
       elsif opts[:scaffold_if_no_dsl]
         opts = Hash.new
         if matching_branches
@@ -181,7 +174,6 @@ module DTK; class BaseModule
       ret.merge!(:module_branch_idh => module_branch_idh, :dsl_created_info => dsl_created_info, :match_hashes => matching_for_module_refs)
       ret
     end
-    public :create_needed_objects_and_dsl?
 
     def update_model_objs_or_create_dsl?(diffs_summary,module_branch,version,opts={})
       ret = DSLInfo.new()

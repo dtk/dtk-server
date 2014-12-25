@@ -4,6 +4,7 @@ module DTK
       def initialize(project,opts={})
         @project = project
         @base_namespace = opts[:base_namespace] || default_namespace()
+        @config_agent_type = :puppet
       end
       private :initialize
 
@@ -40,21 +41,16 @@ module DTK
         # and used just for top level module
         module_name = pf_module.default_local_module_name
         local_params = local_params(module_name,@base_namespace)
-        
+
         # create component module, module branch, repo, and implementation objects
         # module_info has has info about the specfic applicable branch
         # this function also copies and commits files from pf_module.path
-        opts_create_mod = Opts.new(
-          :local_params      => local_params,
-          :config_agent_type => :puppet,
-          :copy_files        => {:source_directory => pf_module.path}
-        )
-        module_and_branch_info = ComponentModule.create_module(@project,module_name,opts_create_mod)
+        module_objs = create_module_objects(local_params,pf_module)
 
-        component_module = module_and_branch_info[:module_idh].create_object()
-        repo_id = module_and_branch_info[:module_repo_info][:repo_id]
-        repo = repo(repo_id)
-        create_needed_objects_and_dsl(pf_module,component_module,repo,local_params)
+        impl_obj = module_objs[:implementation]
+        impl_obj.create_file_assets_from_dir_els()
+
+        module_objs[:component_module].parse_impl_to_create_and_add_dsl(@config_agent_type,impl_obj)
       end
       
       def local_params(module_name,namespace,opts={})
@@ -67,17 +63,25 @@ module DTK
         )
       end
 
-      def create_needed_objects_and_dsl(pf_module,component_module,repo,local_params)
-        local = local_params.create_local(@project)
-        opts = { 
-          :scaffold_if_no_dsl    => true, 
-          :do_not_raise          => true, 
-          :process_external_refs => false,
-          :config_agent_type     => :puppet
+      def create_module_objects(local_params,pf_module)
+        opts_create_mod = Opts.new(
+          :local_params      => local_params,
+          :config_agent_type => @config_agent_type,
+          :copy_files        => {:source_directory => pf_module.path}
+        )
+
+        module_and_branch_info = ComponentModule.create_module(@project,local_params.module_name,opts_create_mod)
+
+        # TODO: more efficient if we got ComponentModule.create_module to pass impl_obj
+        # to pass the implementation object that it creates
+        repo = repo(module_and_branch_info[:module_repo_info][:repo_id])
+        impl_obj = Implementation.create?(@project,local_params,repo,@config_agent_type)
+        {
+          :component_module => module_and_branch_info[:module_idh].create_object(),
+          :implementation   => impl_obj
         }
-        component_module.create_needed_objects_and_dsl?(repo,local,opts)
       end
-     
+
       def repo(repo_id)
         @project.model_handle(:repo).createIDH(:id => repo_id).create_object()
       end

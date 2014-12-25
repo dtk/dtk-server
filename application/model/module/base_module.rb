@@ -1,8 +1,8 @@
-r8_require('mixins')
-
 module DTK
   class BaseModule < Model
-    r8_nested_require('module','dsl_mixin')
+    r8_nested_require('base_module','dsl_info')
+    r8_nested_require('base_module','dsl_mixin')
+    # TODO: look through r8_nested_require('module'..,) and see which ones should be under instead base_module
     r8_nested_require('module','dsl')
     r8_nested_require('module','node_module_dsl')
     r8_nested_require('module','auto_import')

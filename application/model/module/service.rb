@@ -309,7 +309,7 @@ module DTK
         opts.merge!(:ret_dsl_updated_info => Hash.new)
         response = update_model_from_dsl(module_branch,opts)
         # TODO: move this into update_model_from_dsl when see all calling fns
-        ret = DSLInfo.new()
+        ret = BaseModule::DSLInfo.new()
         if ErrorUsage::Parsing.is_error?(response)
           ret.dsl_parsed_info = response
         else

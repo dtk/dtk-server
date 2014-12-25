@@ -1,46 +1,5 @@
 #TODO: Aldin: think you want to replace cases where there is an instance function that uses ModuleDSL
 #with klass(self)
-module DTK
-  class DSLInfo < Hash
-    def initialize(hash={})
-      super()
-      replace(hash)
-    end
-    def dsl_parsed_info=(dsl_parsed_info)
-      merge!(:dsl_parsed_info => dsl_parsed_info)
-      dsl_parsed_info
-    end
-    def dsl_created_info=(dsl_created_info)
-      merge!(:dsl_created_info => dsl_created_info)
-      dsl_created_info
-    end
-    def dsl_updated_info=(dsl_updated_info)
-      merge!(:dsl_updated_info => dsl_updated_info)
-      dsl_updated_info
-    end
-  end
-  # has info if DSL file is created and being passed to
-  class DSLCreatedInfo < Hash
-    def self.create_empty()
-      new()
-    end
-    def self.create_with_path_and_content(path,content)
-      new(:path => path, :content => content)
-    end
-   private
-    def initialize(hash={})
-      super()
-      replace(hash)
-    end
-  end
-  class DSLUpdatedInfo < Hash
-    def initialize(msg,commit_sha)
-      super()
-      replace(:msg => msg, :commit_sha => commit_sha)
-    end
-  end
-end
-
 module DTK; class BaseModule
   module DSLMixin
     r8_nested_require('dsl_mixin','external_refs')
@@ -70,7 +29,7 @@ module DTK; class BaseModule
       if new_commit_sha = ret_cmr.serialize_and_save_to_repo?(opts)
         if opts[:ret_dsl_updated_info]
           msg = "The module refs file was updated by the server"
-          ret.dsl_updated_info = DSLUpdatedInfo.new(msg,new_commit_sha)
+          ret.dsl_updated_info = DSLInfo::UpdatedInfo.new(msg,new_commit_sha)
         end
       end
 
@@ -113,7 +72,7 @@ module DTK; class BaseModule
         if new_commit_sha = ret_cmr.serialize_and_save_to_repo?()
           if opts[:ret_dsl_updated_info]
             msg = "The module refs file was updated by the server"
-            opts[:ret_dsl_updated_info] = DSLUpdatedInfo.new(msg,new_commit_sha)
+            opts[:ret_dsl_updated_info] = DSLInfo::UpdatedInfo.new(msg,new_commit_sha)
           end
         end
       end
@@ -195,7 +154,7 @@ module DTK; class BaseModule
         set_external_ref?(module_branch,config_agent_type,impl_obj)
       end
 
-      dsl_created_info = DSLCreatedInfo.create_empty()
+      dsl_created_info = DSLInfo::CreatedInfo.create_empty()
       klass = klass(self)
       if klass.contains_dsl_file?(impl_obj)
         if e = klass::ParsingError.trap{parse_dsl_and_update_model(impl_obj,module_branch_idh,version,module_namespace,opts)}
@@ -226,7 +185,7 @@ module DTK; class BaseModule
 
     def update_model_objs_or_create_dsl?(diffs_summary,module_branch,version,opts={})
       ret = DSLInfo.new()
-      dsl_created_info = DSLCreatedInfo.create_empty()
+      dsl_created_info = DSLInfo::CreatedInfo.create_empty()
       module_namespace = module_namespace()
       impl_obj = module_branch.get_implementation()
       # TODO: make more robust to handle situation where diffs dont cover all changes; think can detect by looking at shas
@@ -288,7 +247,7 @@ module DTK; class BaseModule
         format_type = ModuleDSL.default_format_type()
         content = render_hash.serialize(format_type)
         dsl_filename = ModuleDSL.dsl_filename(config_agent_type,format_type)
-        ret = DSLCreatedInfo.create_with_path_and_content(dsl_filename, content)
+        ret = DSLInfo::CreatedInfo.create_with_path_and_content(dsl_filename, content)
       end
       raise parsing_error if parsing_error
       ret
@@ -309,10 +268,10 @@ module DTK; class BaseModule
     def klass(klass)
       case klass
         when NodeModule
-          return NodeModuleDSL
+          NodeModuleDSL
         else
-          return ModuleDSL
-        end
+          ModuleDSL
+      end
     end
 
   end

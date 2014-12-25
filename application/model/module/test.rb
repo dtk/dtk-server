@@ -1,5 +1,3 @@
-r8_require('base_module')
-
 module DTK
   class TestModule < BaseModule
 

@@ -1,5 +1,4 @@
-r8_require('base_module')
-
+#TODO: this wil undergoe big changes Jan 2015
 module DTK
   class NodeModule < BaseModule
 

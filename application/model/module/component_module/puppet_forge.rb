@@ -49,30 +49,11 @@ module DTK
         namespace    = pf_module.is_dependency ? pf_module.namespace : @base_namespace
         local_params = local_params(module_name, namespace)
 
-
-        # create component module, module branch, repo, and implementation objects
-        # module_info has has info about the specfic applicable branch
-        # this function also copies and commits files from pf_module.path
-
-        # opts_create_mod = Opts.new(
-        #   :local_params      => local_params,
-        #   :config_agent_type => :puppet,
-        #   :copy_files        => { :source_directory => pf_module.path }
-        # )
-        # module_and_branch_info = ComponentModule.create_module(@project,module_name,opts_create_mod)
-
-        # component_module = module_and_branch_info[:module_idh].create_object()
-        # repo_id = module_and_branch_info[:module_repo_info][:repo_id]
-        # repo = repo(repo_id)
-        # create_needed_objects_and_dsl(pf_module, component_module, repo, local_params).merge(:is_dependency => pf_module.is_dependency)
-
         module_objs = create_module_objects(local_params,pf_module)
 
         impl_obj = module_objs[:implementation]
         impl_obj.create_file_assets_from_dir_els()
 
-        # DEBUG SNIPPET >>> REMOVE <<<
-        require (RUBY_VERSION.match(/1\.8\..*/) ? 'ruby-debug' : 'debugger');Debugger.start; debugger
         ret = module_objs[:component_module].parse_impl_to_create_and_add_dsl(@config_agent_type,impl_obj)
 
         pf_module
@@ -112,10 +93,10 @@ module DTK
       end
 
       def format_response(installed_modules, found_modules)
-        main_module = installed_modules.find { |im| !im[:is_dependency] }
+        main_module = installed_modules.find { |im| !im.is_dependency }
         {
-          :main_module       => main_module.slice(:name, :namespace, :version, :type),
-          :installed_modules => (installed_modules - [main_module]).collect { |im| im.slice(:name, :namespace, :version, :type) },
+          :main_module       => main_module.to_h,
+          :installed_modules => (installed_modules - [main_module]).collect { |im| im.to_h },
           :found_modules     => found_modules
         }
       end

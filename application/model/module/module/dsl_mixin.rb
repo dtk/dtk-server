@@ -218,8 +218,8 @@ module DTK; class BaseModule
         ret.dsl_updated_info = dsl_updated_info
       end
 
-      matchig_for_module_refs = prepare_for_module_refs(matching_branches)
-      ret.merge!(:module_branch_idh => module_branch_idh, :dsl_created_info => dsl_created_info, :match_hashes => matchig_for_module_refs)
+      matching_for_module_refs = prepare_for_module_refs(matching_branches)
+      ret.merge!(:module_branch_idh => module_branch_idh, :dsl_created_info => dsl_created_info, :match_hashes => matching_for_module_refs)
       ret
     end
     public :create_needed_objects_and_dsl?

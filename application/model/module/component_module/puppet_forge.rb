@@ -72,7 +72,7 @@ module DTK
         opts = { 
           :scaffold_if_no_dsl    => true, 
           :do_not_raise          => true, 
-          :process_external_refs => true,
+          :process_external_refs => false,
           :config_agent_type     => :puppet
         }
         component_module.create_needed_objects_and_dsl?(repo,local,opts)

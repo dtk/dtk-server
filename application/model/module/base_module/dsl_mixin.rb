@@ -123,7 +123,7 @@ module DTK; class BaseModule
       opts.merge!(:ret_dsl_updated_info => Hash.new)
       project = local.project
       config_agent_type = opts[:config_agent_type] || config_agent_type_default()
-      impl_obj = Implementation.create?(local,repo,config_agent_type)
+      impl_obj = Implementation.create?(project,local,repo,config_agent_type)
       impl_obj.create_file_assets_from_dir_els()
 
       module_and_branch_info = self.class.create_module_and_branch_obj?(project,repo.id_handle(),local,opts[:ancestor_branch_idh])

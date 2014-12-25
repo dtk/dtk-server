@@ -39,7 +39,9 @@ module XYZ
     end
 
     def self.create?(project,local_params,repo,config_agent_type)
-      local = local_params.create_local(project)
+      # was local = local_params.create_local(project) which is fine for import from puppet-forge
+      # for import-git we use local object, so this is a temp workaround
+      local = local_params.is_a?(XYZ::ModuleBranch::Location::Server::Local) ? local_params : local_params.create_local(project)
       project = local.project
       version = local.version
       module_name = local.module_name

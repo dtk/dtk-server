@@ -1,7 +1,3 @@
-# TODO: DTK-1794; in code that iterates over depenedncies; see if you have to look at dpendencies of dependenciee;
-# and if so assuming if want listof all modles and their dependencies wil have to throw out dups
-# TODO: DTK-1794: need to check taht not installing a module taht exists already
-
 require 'active_support/hash_with_indifferent_access'
 
 module DTK
@@ -15,13 +11,13 @@ module DTK
         def install(pf_module_name, puppet_version=nil, force=false)
           ret = nil
           base_install_dir = LocalCopy.random_install_dir()
-          begin 
+          begin
             output_hash = execute_puppet_forge_call(pf_module_name,base_install_dir,puppet_version,force)
             unless 'success'.eql?(output_hash['result'])
               raise ErrorUsage, "Puppet Forge Error: #{output_hash['error']['oneline']}"
             end
             module_dependencies = check_for_dependencies(pf_module_name, output_hash)
-            ret = LocalCopy.new(output_hash,base_install_dir,module_dependencies)
+            ret = LocalCopy.new(output_hash, base_install_dir, module_dependencies)
            rescue Exception => e
             LocalCopy.delete_base_install_dir?(base_install_dir)
             raise e

@@ -10,11 +10,14 @@ module DTK; class ModuleDSL; class V3
 
      private
       def module_refs(module_branches)
-        # TODO: more efficient to bulk up query 
+        # TODO: more efficient to bulk up query
         # TODO: checking verskion associated with module branch
+        ret = []
         unless module_branches.empty?()
-          module_branches.map{|mb|mb.get_module()[:display_name]}
+         ret = module_branches.map{ |mb| mb.get_module()[:display_name] if mb.get_module() }
         end
+
+        ret.compact
       end
     end
 
@@ -44,7 +47,7 @@ module DTK; class ModuleDSL; class V3
         unless ScaffoldingStrategy[:no_defaults]
           if ret = value(:default_info)
             ret
-          elsif has_default_variable?() 
+          elsif has_default_variable?()
             ExtRefPuppetHeader
           end
         end
@@ -64,7 +67,7 @@ module DTK; class ModuleDSL; class V3
         unless attr_name == value(:id)
           ret[ext_ref["type"]] = attr_name
         end
-        # catchall: ignore proceesed keys and default_variable 
+        # catchall: ignore proceesed keys and default_variable
         (ext_ref.keys - ["name","type","default_variable"]).each{|k|ret[k] = ext_ref[k]}
         ret.empty? ? nil : ret
       end

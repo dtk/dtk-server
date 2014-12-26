@@ -1,9 +1,12 @@
 require 'securerandom'
+
 module DTK
   module PuppetForge
     class LocalCopy < Hash
-      attr_reader :base_install_dir,:module_dependencies
-      def initialize(output_hash,base_install_dir,module_dependencies)
+
+      attr_reader :base_install_dir, :module_dependencies
+
+      def initialize(output_hash, base_install_dir, module_dependencies)
         super()
         merge!(output_hash)
         @base_install_dir = base_install_dir
@@ -26,14 +29,21 @@ module DTK
       end
 
      private
-      def self.modules(installed_modules,opts={})
+
+      def self.modules(installed_modules, opts={})
         ret = Array.new
         installed_modules.each do |installed_module|
-          # TODO: DTK-1794; put in logic that checks whether teh array :remove is inopts and if so does not put in any module that matches
-          ret << Module.new(installed_module)
+
+          if (modules_to_remove = opts[:remove])
+            next if modules_to_remove.find { |mr| "#{mr[:namespace]}-#{mr[:name]}".eql?(installed_module['module']) }
+          end
+
+          is_dependency = opts[:is_dependency] || false
+          ret << Module.new(installed_module, is_dependency)
+
           deps = installed_module['dependencies']
-          if deps and ! deps.empty?
-            ret += modules(deps,opts)
+          if deps and !deps.empty?
+            ret += modules(deps, opts.merge(:is_dependency => true))
           end
         end
         ret

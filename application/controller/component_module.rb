@@ -192,11 +192,14 @@ module DTK
     def rest__install_puppet_forge_modules()
       puppet_module_name = ret_non_null_request_params(:puppetf_module_name)
       module_name = ret_non_null_request_params(:module_name)
-      namespace = ret_request_param_module_namespace?()
-      # DTK-1754: Haris: assuming :module_version is puppet, not dtk, version
-      # so renamed it here; we migt rename also in rest payload
-      puppet_version  = ret_request_params_force_nil(:module_version)
+      namespace = ret_request_param_module_namespace?() || Namespace.default_namespace_name()
+      puppet_version  = ret_request_params_force_nil(:puppet_version)
       project = get_default_project()
+
+      # will raise exception if exists
+      ComponentModule.if_module_exists!(project.id_handle(), module_name, namespace,
+        "Cannot install '#{namespace}:#{module_name}' since it already exists!"
+        )
 
       # will raise exception if not valid
       PuppetForge::Client.is_module_name_valid?(puppet_module_name, module_name)

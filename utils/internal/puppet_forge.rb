@@ -5,25 +5,48 @@ module DTK
 
     # user and name sepparator used by puppetforge
     MODULE_NAME_SEPARATOR = '-'
+
     def self.puppet_forge_namespace_and_module_name(pf_module_name)
       pf_module_name.split(MODULE_NAME_SEPARATOR, 2)
     end
+
     def self.puppet_forge_module_name(pf_module_name)
       puppet_forge_namespace_and_module_name(pf_module_name).last
     end
 
     class Module
-      attr_reader :path
-      def initialize(hash)
-        @module  = hash['module']
-        @version = hash['version']
-        @file    = hash['file']
+
+      attr_reader   :path, :name, :is_dependency
+      attr_accessor :namespace
+
+      def initialize(hash, is_dependency = false, type = :component_module, dtk_version = nil)
+        m_namespace, m_name = PuppetForge.puppet_forge_namespace_and_module_name(hash['module'])
+
+        @name          = m_name
+        @namespace     = m_namespace
+        @is_dependency = is_dependency
+        @type          = type
+        @dtk_version   = dtk_version
+        @module        = hash['module']
+        @version       = hash['version']
+        @file          = hash['file']
+
         @path    = "#{hash['path']}/#{PuppetForge.puppet_forge_module_name(@module)}"
       end
 
       def default_local_module_name
         PuppetForge.puppet_forge_module_name(@module)
       end
+
+      def to_h
+        {
+          :name      => @name,
+          :namespace => @namespace,
+          :version   => @dtk_version,
+          :type      => @type
+        }
+      end
+
     end
   end
 end

@@ -124,10 +124,10 @@ module DTK; class BaseModule
       project = local.project
 
       ret.merge!(
-        :name      => module_name,
-        :namespace => module_namespace,
-        :type      => self.module_type,
-        :version   => version
+        :name      => module_name(),
+        :namespace => module_namespace(),
+        :type      => module_type(),
+        :version   => local.version
       )
 
       config_agent_type = opts[:config_agent_type] || config_agent_type_default()

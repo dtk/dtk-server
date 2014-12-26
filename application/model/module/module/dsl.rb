@@ -33,7 +33,7 @@ module DTK
     def self.create_dsl_object(module_branch,dsl_integer_version,format_type=nil)
       input_hash = get_dsl_file_hash_content_info(module_branch,dsl_integer_version,format_type)[:hash_content]
       config_agent_type = ret_config_agent_type(input_hash)
-      new(config_agent_type,impl.id_handle(),module_branch.id_handle(),input_hash) 
+      new(config_agent_type,impl.id_handle(),module_branch.id_handle(),input_hash)
     end
 
     def self.create_dsl_object_from_impl(source_impl,opts={})
@@ -134,7 +134,13 @@ module DTK
     end
 
     def self.validate_includes_and_update_module_refs(source_impl, cmp_module, opts={})
-      ret = Hash.new
+      ret               = Hash.new
+      project           = opts[:project]
+      module_branch     = opts[:module_branch]
+      config_agent_type = opts[:config_agent_type]
+
+      # if module contains metadata.json or Modulefile (git modules) then parse that files to check for dependencies
+      # otherwise check for dependencies in includes section in dtk.model.yaml
       target_impl = opts[:target_impl]||source_impl
       info = get_dsl_file_raw_content_and_info(source_impl)
 
@@ -167,39 +173,62 @@ module DTK
         ext_deps_hash = {
           :possibly_missing => missing
         }
-        external_deps = cmp_module.class::ExternalDependencies.new(ext_deps_hash)
-        if poss_problems = external_deps.possible_problems?()
-          opts.merge!(:external_dependencies => poss_problems)
-        end
 
         unless multiple_namespaces.empty?
-          multi_missing = []
+          multi_missing, ambiguous_grouped, existing_names = [], {}, []
           multiple_namespaces.each{|mn| mapped.delete(mn)}
 
+          check_if_matching_or_ambiguous(opts[:module_branch], multiple_namespaces)
           existing_module_refs = target_impl.get_module_branch().get_module_refs()
-          existing_names = existing_module_refs.map{|ex|ex[:display_name]}
+          existing_module_refs.each do |existing_ref|
+            existing_names << existing_ref[:display_name] if existing_ref[:namespace_info]
+          end
 
           multiple_namespaces.delete_if{|mn| existing_names.include?(mn[:component_module])}
           cmp_mods = multiple_namespaces.group_by { |h| h[:component_module] }
-          ret.merge!(:multiple_namespaces => cmp_mods) unless cmp_mods.empty?
-          # cmp_mods = multiple_namespaces.group_by { |h| h[:component_module] }#.values.flatten.map{|k| k[:component_module]}
-          # cmp_mods.each do |k,v|
-          #   namespaces = v.map{|a| a[:remote_namespace]}
+          cmp_mods.each do |k,v|
+            namespaces = v.map{|a| a[:remote_namespace]}
+            ambiguous_grouped.merge!(k => namespaces)
+          end
+          unless ambiguous_grouped.empty?
+            ret.merge!(:ambiguous => ambiguous_grouped)
+            ext_deps_hash.merge!(:ambiguous => ambiguous_grouped)
+          end
+        end
 
-          #   error_params = {
-          #     :module_type => 'component',
-          #     :module_name => k,
-          #     :namespaces => namespaces.compact # compact just to be safe
-          #   }
-          #   return ParsingError::AmbiguousModuleRef.new(error_params)
-          # end
+        external_deps = cmp_module.class::ExternalDependencies.new(ext_deps_hash)
+        if poss_problems = external_deps.possible_problems?()
+          ret.merge!(:external_dependencies => poss_problems)
         end
 
         opts.merge!(:match_hashes => mapped)
-        update_component_module_refs(cmp_module.class,target_impl.get_module_branch(),opts)
-        ret
+        ret.merge!(:match_hashes => mapped)
+        update_component_module_refs(cmp_module.class,target_impl.get_module_branch(),opts) unless mapped.empty?
       end
+      message = "The module refs file was updated by the server based on includes section from dtk.model.yaml"
+      ret.merge!(:message => message)
+
+      ret
     end
+
+    def self.check_if_matching_or_ambiguous(module_branch, ambiguous)
+        existing_c_hash = get_existing_module_refs(module_branch)
+        if existing = existing_c_hash['component_modules']
+          existing.each do |k,v|
+            if k && v
+              amb = ambiguous.select{|a| a[:component_module].split('/').last.eql?(k) && a[:remote_namespace].eql?(v['namespace'])}
+              ambiguous.delete_if{|amb| amb[:component_module].split('/').last.eql?(k)} unless amb.empty?
+            end
+          end
+        end
+      end
+
+      def self.get_existing_module_refs(module_branch)
+        existing_c_hash  = {}
+        existing_content = RepoManager.get_file_content({:path => "module_refs.yaml"}, module_branch, {:no_error_if_not_found => true})
+        existing_c_hash  = Aux.convert_to_hash(existing_content,:yaml) if existing_content
+        existing_c_hash
+      end
 
     def self.validate_module_ref_namespaces(module_branch,component_module_refs)
       cmp_modules = component_module_refs.component_modules
@@ -297,7 +326,7 @@ module DTK
     end
 
     def self.get_dsl_file_hash_content_info(impl_or_module_branch_obj,dsl_integer_version=nil,format_type=nil)
-      impl_obj = 
+      impl_obj =
         if impl_or_module_branch_obj.kind_of?(Implementation)
           impl_or_module_branch_obj
         elsif impl_or_module_branch_obj.kind_of?(ModuleBranch)
@@ -413,7 +442,7 @@ module DTK
         if filename =~ DSLFilenameRegexp[integer_version(dsl_integer_version)]
           file_extension = $1
           unless format_type = ExtensionToType[file_extension]
-            raise Error.new("illegal file extension #{file_extension}") 
+            raise Error.new("illegal file extension #{file_extension}")
           end
           {:format_type => format_type}
         else
@@ -430,7 +459,7 @@ module DTK
            when "serverspec" then ConfigAgentTypes[:serverspec]
            when "test" then ConfigAgentTypes[:test]
            when "node_module" then ConfigAgentTypes[:node_module]
-           else 
+           else
              ParsingError.new("Unexpected module_type (#{type})")
           end
         else

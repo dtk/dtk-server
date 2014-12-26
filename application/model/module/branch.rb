@@ -164,16 +164,21 @@ module DTK
 
       unless files.empty?
         ambiguous_deps = opts[:ambiguous]
-        any_changes, new_cmp_refs = false, nil
+        any_changes, new_cmp_refs, valid_existing = false, nil, nil
         files.each do |file_info|
           content = Aux.serialize(file_info[:hash_content],file_info[:format_type])
 
           # check if module_refs.yaml exists already
           existing_content = RepoManager.get_file_content({:path => file_info[:path]},self,{:no_error_if_not_found => true})
-          file_path = file_info[:path]
+          file_path        = file_info[:path]
+
+          if existing_content
+            existing_c_hash = Aux.convert_to_hash(existing_content,file_info[:format_type])
+            valid_existing = true if existing_c_hash['component_module']
+          end
 
           # if module_refs.yaml and content already exist then append new module_refs to existing
-          if existing_content && opts[:update_module_refs] && file_path.eql?("module_refs.#{file_info[:format_type].to_s}")
+          if valid_existing && opts[:update_module_refs] && file_path.eql?("module_refs.#{file_info[:format_type].to_s}")
             existing_c_hash = Aux.convert_to_hash(existing_content,file_info[:format_type])
             new_cmp_refs = file_info[:hash_content].clone
 
@@ -192,7 +197,7 @@ module DTK
               content << ambiguous
             end
           elsif file_info[:hash_content].empty?
-            content = "---\ncomponent_modules:\n" unless existing_content
+            content = "---\ncomponent_modules:\n" unless valid_existing
           end
 
           any_change = RepoManager.add_file({:path => file_info[:path]},content,self)

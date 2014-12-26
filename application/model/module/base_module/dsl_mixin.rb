@@ -55,24 +55,34 @@ module DTK; class BaseModule
 
     def parse_dsl_and_update_model(impl_obj,module_branch_idh,version=nil,namespace=nil,opts={})
       set_dsl_parsed!(false)
-
-      # includes = klass(self).validate_includes_and_update_module_refs(impl_obj, self, opts)
-      # return includes if ModuleDSL::ParsingError.is_error?(includes)
-
-      klass(self).parse_and_update_model(self,impl_obj,module_branch_idh,version,namespace,opts)
+      ret, tmp_opts = {}, {}
       module_branch = module_branch_idh.create_object()
 
+      if opts[:update_from_includes]
+        config_agent_type = opts[:config_agent_type] || config_agent_type_default()
+        opts.merge!(:module_branch => module_branch, :config_agent_type => config_agent_type)
+        ret = klass(self).validate_includes_and_update_module_refs(impl_obj, self, opts)
+        opts.merge!(:external_dependencies => ret[:external_dependencies], :ambiguous => ret[:ambiguous])
+        return ret if ModuleDSL::ParsingError.is_error?(ret)
+      end
+
+      klass(self).parse_and_update_model(self,impl_obj,module_branch_idh,version,namespace,opts)
+      tmp_opts.merge!(:ambiguous => ret[:ambiguous]) if ret[:ambiguous]
       unless opts[:skip_module_ref_update]
         ret_cmr = ModuleRefs.get_component_module_refs(module_branch)
-        if new_commit_sha = ret_cmr.serialize_and_save_to_repo?()
+        if new_commit_sha = ret_cmr.serialize_and_save_to_repo?(tmp_opts)
           if opts[:ret_dsl_updated_info]
-            msg = "The module refs file was updated by the server"
+            msg = ret[:message]||"The module refs file was updated by the server"
             opts[:ret_dsl_updated_info] = DSLInfo::UpdatedInfo.new(msg,new_commit_sha)
           end
         end
       end
 
-      set_dsl_parsed!(true) unless opts[:dsl_parsed_false]
+      # parsed will be true if there are no missing or ambiguous dependencies, or flag dsl_parsed_false is not sent from the client
+      dependencies = ret[:external_dependencies]||{}
+      set_parsed   = (dependencies[:possibly_missing]||{}).empty? && (ret[:ambiguous]||{}).empty? && !opts[:dsl_parsed_false]
+
+      set_dsl_parsed!(true) if set_parsed
     end
 
     # TODO: for testing
@@ -129,6 +139,7 @@ module DTK; class BaseModule
       module_and_branch_info = self.class.create_module_and_branch_obj?(project,repo.id_handle(),local,opts[:ancestor_branch_idh])
       module_branch_idh = module_and_branch_info[:module_branch_idh]
       external_dependencies = matching_branches = nil
+      opts.merge!(:project => project)
       # opts[:process_external_refs] means to see if external refs and then check againts existing loaded components
       if opts[:process_external_refs]
         module_branch = module_branch_idh.create_object()
@@ -180,6 +191,9 @@ module DTK; class BaseModule
       dsl_created_info = DSLInfo::CreatedInfo.create_empty()
       module_namespace = module_namespace()
       impl_obj = module_branch.get_implementation()
+      local = deprecate_ret_local(version)
+      project = local.project
+      opts.merge!(:project => project)
       # TODO: make more robust to handle situation where diffs dont cover all changes; think can detect by looking at shas
       impl_obj.modify_file_assets(diffs_summary)
 
@@ -205,6 +219,10 @@ module DTK; class BaseModule
       dsl_updated_info = opts[:ret_dsl_updated_info]
       unless dsl_updated_info.empty?
         ret.dsl_updated_info = dsl_updated_info
+      end
+
+      if ext_deps = opts[:external_dependencies]
+        ret.merge!(:external_dependencies => ext_deps) unless ret[:external_dependencies]
       end
 
       ret.dsl_created_info = dsl_created_info

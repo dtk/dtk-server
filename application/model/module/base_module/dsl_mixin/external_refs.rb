@@ -50,7 +50,7 @@ module DTK; class BaseModule
         return ret if parsed_dependencies.empty?
 
         all_match_hashes, all_inconsistent, all_possibly_missing, all_inconsistent_names = {}, [], [], []
-        all_ambiguous, all_ambiguous_ns = [], []
+        all_ambiguous, all_ambiguous_ns, temp_existing = [], [], {}
         all_modules = self.class.get_all(project.id_handle()).map{|cmp_mod|ComponentModuleWrapper.new(cmp_mod)}
         existing_module_refs = get_existing_module_refs(module_branch)
         parsed_dependencies.each do |parsed_dependency|
@@ -115,6 +115,13 @@ module DTK; class BaseModule
                         existing_namespace = existing_module_refs['component_modules']["#{name}"]
                         if existing_namespace && existing_namespace['namespace'].eql?(namespace_info[:namespace][:display_name])
                           all_match_hashes.merge!(dep_name  => branch)
+                        else
+                          if temp_existing.has_key?(dep_name)
+                            temp_namespace_info = temp_existing[dep_name].get_namespace_info
+                            all_ambiguous << {:name => dep_name, :namespace => temp_namespace_info[:namespace][:display_name]}
+                            all_ambiguous << {:name => dep_name, :namespace => namespace_info[:namespace][:display_name]}
+                          end
+                          temp_existing.merge!(dep_name => branch)
                         end
                       end
                     else
@@ -164,8 +171,10 @@ module DTK; class BaseModule
         existing_c_hash = get_existing_module_refs(module_branch)
         if existing = existing_c_hash['component_modules']
           existing.each do |k,v|
-            amb = ambiguous.select{|a| a[:name].split('/').last.eql?(k) && a[:namespace].eql?(v['namespace'])}
-            ambiguous.delete_if{|amb| amb[:name].split('/').last.eql?(k)} unless amb.empty?
+            if k && v
+              amb = ambiguous.select{|a| a[:name].split('/').last.eql?(k) && a[:namespace].eql?(v['namespace'])}
+              ambiguous.delete_if{|amb| amb[:name].split('/').last.eql?(k)} unless amb.empty?
+            end
           end
         end
       end

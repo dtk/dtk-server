@@ -28,9 +28,13 @@ module DTK
         # generate list of modules that need to be created from puppet_forge_local_copy
         pf_modules = pf_local_copy.modules(:remove => found_modules)
 
-        # want to pass back info about what was loaded from puppet forge, what was present but needed, adn any dependency_wanrings
         installed_modules = pf_modules.collect { |pf_module| install_module(pf_module) }
 
+        # pass back info about
+        # - what was loaded from puppet forge,
+        # - what was present but needed, and
+        # - any dependency_warnings
+        # TODO: DTK-1794; below does not deal with dependency warnings
         format_response(installed_modules, found_modules)
       end
 

@@ -24,10 +24,9 @@ module DTK
       local_params = local_params(:component,module_name,opts_local_params)
 
       opts_create_mod = Opts.new(
-        :local_params => local_params,
         :config_agent_type => ret_config_agent_type()
       )
-      module_repo_info = ComponentModule.create_module(project,module_name,opts_create_mod)[:module_repo_info]
+      module_repo_info = ComponentModule.create_module(project,local_params,opts_create_mod)[:module_repo_info]
       rest_ok_response module_repo_info
     end
 

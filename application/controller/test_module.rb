@@ -13,16 +13,10 @@ module DTK
     def rest__create()
       module_name = ret_non_null_request_params(:module_name)
       module_namespace = ret_request_params(:module_namespace)
-
-      config_agent_type =  ret_config_agent_type()
       project = get_default_project()
       version = nil #TODO: stub
-      opts = Opts.create?(
-        :config_agent_type => config_agent_type,
-        :version? => version,
-        :module_namespace => module_namespace
-      )
-      module_repo_info = TestModule.create_module(project,module_name,opts)[:module_repo_info]
+      local_params = local_params(:test,module_name,:namespace => module_namespace, :version => version)
+      module_repo_info = TestModule.create_module(project,local_params)[:module_repo_info]
       rest_ok_response module_repo_info
     end
 

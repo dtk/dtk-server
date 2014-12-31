@@ -2,15 +2,11 @@ module DTK; module ModuleMixins
   module Create
   end
   module Create::Class
-    # TODO: want to change to signature:
-    # create_module(project,local_params,opts={})
-    # where opts has key :config_agent_typ
-    # after converting all places that call this over to new signature can remove 
-    # deprecate_ret_local_params
-    def create_module(project,module_name,opts={})
-      local_params = opts[:local_params] || deprecate_ret_local_params(project,module_name)
+    # opts has key :config_agent_type
+    def create_module(project,local_params,opts={})
       local = local_params.create_local(project)
       namespace = local_params.namespace
+      module_name = local_params.module_name
       project_idh = project.id_handle()
 
       is_parsed   = false
@@ -41,17 +37,6 @@ module DTK; module ModuleMixins
 
       opts_info = { :version=>local.version, :module_namespace => local.namespace }
       module_and_branch_info.merge(:module_repo_info => module_repo_info(local_repo_obj,module_and_branch_info,opts_info))
-    end
-
-    def deprecate_ret_local_params(project,module_name,opts={})
-      # check if passed, if not use default namespace
-      module_namespace = Namespace.find_or_create_or_default(project.model_handle(:namespace), opts[:module_namespace])
-      ModuleBranch::Location::LocalParams::Server.new(
-        :module_type => module_type(),
-        :module_name => module_name,
-        :namespace   => module_namespace.name,
-        :version => opts[:version]
-      )
     end
 
     def create_module_and_branch_obj?(project,repo_idh,local,ancestor_branch_idh=nil)

@@ -76,12 +76,11 @@ module DTK
 
       def create_module_objects(local_params,pf_module)
         opts_create_mod = Opts.new(
-          :local_params      => local_params,
           :config_agent_type => @config_agent_type,
           :copy_files        => {:source_directory => pf_module.path}
         )
 
-        module_and_branch_info = ComponentModule.create_module(@project,local_params.module_name,opts_create_mod)
+        module_and_branch_info = ComponentModule.create_module(@project,local_params,opts_create_mod)
 
         # TODO: more efficient if we got ComponentModule.create_module to pass impl_obj
         # to pass the implementation object that it creates

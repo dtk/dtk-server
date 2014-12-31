@@ -12,14 +12,11 @@ module DTK
     #### create and delete actions ###
     def rest__create()
       module_name = ret_non_null_request_params(:module_name)
-      config_agent_type =  ret_config_agent_type()
       project = get_default_project()
       version = nil #TODO: stub
-      opts = Opts.create?(
-        :config_agent_type => config_agent_type,
-        :version? => version
-      )
-      module_repo_info = NodeModule.create_module(project,module_name,opts)[:module_repo_info]
+      local_params = local_params(:node,module_name,:version => version)
+      module_repo_info = NodeModule.create_module(project,local_params)[:module_repo_info]
+
       rest_ok_response module_repo_info
     end
 

@@ -18,8 +18,15 @@ module DTK
           if opts[:mode] == :update
             raise ErrorUsage.new("Service module (#{service_module_name}) does not exist")
           end
-          opts_create = {:config_agent_type => ConfigAgentType,:module_namespace => namespace}
-          module_and_branch_info = ServiceModule.create_module(project,service_module_name,opts_create)
+
+          local_params = ModuleBranch::Location::LocalParams::Server.new(
+            :module_type => :service_module,
+            :module_name => service_module_name,
+            :namespace   => Namespace.find_by_name(project.model_handle(:namespace), opts[:namespace]),
+            :version => nil
+          )
+
+          module_and_branch_info = ServiceModule.create_module(project,local_params,:config_agent_type => ConfigAgentType)
           module_and_branch_info[:module_idh].create_object()
         end
       end

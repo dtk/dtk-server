@@ -92,8 +92,14 @@ module DTK
         if service_module_branch = ServiceModule.get_workspace_module_branch(project,service_module_name,version,nil,:no_error_if_does_not_exist=>true)
           service_module_branch.id_handle()
         else
-          opts_create = {:config_agent_type => ConfigAgentType}
-          module_and_branch_info = ServiceModule.create_module(project,service_module_name,opts_create)
+          local_params = ModuleBranch::Location::LocalParams::Server.new(
+            :module_type => :service_module,
+            :module_name => service_module_name,
+            :namespace   => Namespace.default_namespace(project.model_handle(:namespace)),
+            :version     => version
+          )
+
+          module_and_branch_info = ServiceModule.create_module(project,local_params,:config_agent_type => ConfigAgentType)
           service_module = module_and_branch_info[:module_idh].create_object()
           service_module.update(:dsl_parsed => true)
           module_and_branch_info[:module_branch_idh]

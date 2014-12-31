@@ -21,7 +21,7 @@ module DTK
 
       # local_params encapsulates local module branch params
       opts_local_params = (namespace ? {:namespace=>namespace} : {})
-      local_params = local_params(:component,module_name,opts_local_params)
+      local_params = local_params(:component_module,module_name,opts_local_params)
 
       opts_create_mod = Opts.new(
         :config_agent_type => ret_config_agent_type()

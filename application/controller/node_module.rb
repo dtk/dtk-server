@@ -14,7 +14,7 @@ module DTK
       module_name = ret_non_null_request_params(:module_name)
       project = get_default_project()
       version = nil #TODO: stub
-      local_params = local_params(:node,module_name,:version => version)
+      local_params = local_params(:node_module,module_name,:version => version)
       module_repo_info = NodeModule.create_module(project,local_params)[:module_repo_info]
 
       rest_ok_response module_repo_info

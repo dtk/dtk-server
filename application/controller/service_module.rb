@@ -156,7 +156,7 @@ module DTK
       module_namespace = ret_request_params(:module_namespace)
       project = get_default_project()
       version = nil #TODO: stub
-      local_params = local_params(:service,module_name,:namespace => module_namespace, :version => version)
+      local_params = local_params(:service_module,module_name,:namespace => module_namespace, :version => version)
       init_hash_response = ServiceModule.create_module(project,local_params)
       rest_ok_response(:service_module_id => init_hash_response[:module_branch_idh].get_id(), :repo_info => init_hash_response[:module_repo_info])
     end

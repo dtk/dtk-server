@@ -6,6 +6,7 @@ module DTK
     # user and name sepparator used by puppetforge
     MODULE_NAME_SEPARATOR = '-'
 
+    # returns [pf_namespace,pf_module_name]
     def self.puppet_forge_namespace_and_module_name(pf_module_name)
       pf_module_name.split(MODULE_NAME_SEPARATOR, 2)
     end

@@ -195,6 +195,17 @@ module Ramaze::Helper
         end
       end
     end
+    
+    # returns [namespace,module_name] using pf_full_name param and module or namespace request params if they are given
+    def ret_namespace_and_module_name_for_puppet_forge(pf_full_name)
+      param_module_name = ret_request_params(:module_name)
+      pf_namespace,pf_module_name = ::DTK::PuppetForge.puppet_forge_namespace_and_module_name(pf_full_name)
+      if param_module_name and param_module_name != pf_module_name
+        raise ErrorUsage.new("Install with module name (#{param_module_name}) unequal to puppet forge module name (#{pf_module_name}) is currently not supported.")
+      end
+      # default is to use namespace associated with puppet forge
+      [ret_request_param_module_namespace?()||pf_namespace, pf_module_name]
+    end
 
     def ret_assembly_template_idh()
       assembly_template_id, subtype = ret_assembly_params_id_and_subtype()

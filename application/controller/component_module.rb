@@ -189,9 +189,8 @@ module DTK
     end
 
     def rest__install_puppet_forge_modules()
-      puppet_module_name = ret_non_null_request_params(:puppetf_module_name)
-      module_name = ret_non_null_request_params(:module_name)
-      namespace = ret_request_param_module_namespace?() || Namespace.default_namespace_name()
+      pf_full_name = ret_non_null_request_params(:puppetf_module_name)
+      namespace,module_name = ret_namespace_and_module_name_for_puppet_forge(pf_full_name)
       puppet_version  = ret_request_params_force_nil(:puppet_version)
       project = get_default_project()
 
@@ -200,16 +199,13 @@ module DTK
         "Cannot install '#{namespace}:#{module_name}' since it already exists!"
         )
 
-      # will raise exception if not valid
-      PuppetForge::Client.is_module_name_valid?(puppet_module_name, module_name)
-
       puppet_forge_local_copy = nil
       install_info = Hash.new
 
       begin
         # will raise an exception in case of error
         # This creates a temporary directory after using puppet forge client to import
-        puppet_forge_local_copy = PuppetForge::Client.install(puppet_module_name, puppet_version)
+        puppet_forge_local_copy = PuppetForge::Client.install(pf_full_name, puppet_version)
 
         opts = {:config_agent_type => ret_config_agent_type()}
         opts = namespace ? {:base_namespace => namespace} : {}

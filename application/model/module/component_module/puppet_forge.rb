@@ -45,8 +45,6 @@ module DTK
       end
 
       def install_module(pf_module)
-        # TODO: DTK-1754: this is ignoring the module name taht is passed onfor top level module; this should be passed in opts
-        # and used just for top level module
         module_name = pf_module.default_local_module_name
 
         # dependencies user their own namespace

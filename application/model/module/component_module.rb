@@ -23,10 +23,5 @@ module DTK
         ModuleDSL
       end
     end
-
-   private
-    def config_agent_type_default()
-      :puppet
-    end    
   end
 end

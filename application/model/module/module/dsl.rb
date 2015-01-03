@@ -10,6 +10,7 @@ module DTK
     extend UpdateModelClassMixin
     include UpdateModelMixin
 
+
     def self.parse_and_update_model(component_module,impl_obj,module_branch_idh,version,opts={})
       # get associated assembly templates before do any updates and use this to see if any referential integrity
       # problems within transaction after do update; transaction is aborted if any errors found
@@ -139,7 +140,6 @@ module DTK
       ret               = Hash.new
       project           = opts[:project]
       module_branch     = opts[:module_branch]
-      config_agent_type = opts[:config_agent_type]
 
       # if module contains metadata.json or Modulefile (git modules) then parse that files to check for dependencies
       # otherwise check for dependencies in includes section in dtk.model.yaml

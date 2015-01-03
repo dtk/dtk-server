@@ -5,7 +5,7 @@ module DTK
   r8_nested_require('module','module_refs')
   r8_nested_require('module','dsl_parser')
   r8_nested_require('module','base_module')
-  r8_nested_require('module','component')
+  r8_nested_require('module','component_module')
   r8_nested_require('module','service')
   r8_nested_require('module','test')
   r8_nested_require('module','node')

@@ -53,15 +53,16 @@ module DTK; class BaseModule
       set_dsl_parsed!(false)
       ret, tmp_opts = {}, {}
       module_branch = module_branch_idh.create_object()
+      config_agent_type = opts[:config_agent_type] || config_agent_type_default()
+      opts_dsl_proc = opts.merge(:module_branch => module_branch, :config_agent_type => config_agent_type)
       if opts[:update_from_includes]
-        config_agent_type = opts[:config_agent_type] || config_agent_type_default()
-        opts.merge!(:module_branch => module_branch, :config_agent_type => config_agent_type)
-        ret = klass(self).validate_includes_and_update_module_refs(impl_obj, self, opts)
-        opts.merge!(:external_dependencies => ret[:external_dependencies], :ambiguous => ret[:ambiguous])
+#        ret = module_dsl_object().validate_includes_and_update_module_refs(impl_obj, opts)
+        ret = klass(self).validate_includes_and_update_module_refs(impl_obj, self, opts_dsl_proc)
+        opts_dsl_proc.merge!(:ambiguous => ret[:ambiguous])
         return ret if ModuleDSL::ParsingError.is_error?(ret)
       end
 
-      klass(self).parse_and_update_model(self,impl_obj,module_branch_idh,version,opts)
+      klass(self).parse_and_update_model(self,impl_obj,module_branch_idh,version,opts_dsl_proc)
       tmp_opts.merge!(:ambiguous => ret[:ambiguous]) if ret[:ambiguous]
       unless opts[:skip_module_ref_update]
         ret_cmr = ModuleRefs.get_component_module_refs(module_branch)
@@ -267,6 +268,15 @@ module DTK; class BaseModule
       matching
     end
 
+    def module_dsl_object()
+      case self
+        when ComponentModule
+          ComponentModule::DSL.new(self)
+        else
+        raise Error.new("Not implemented yet for class (#{self.class})")
+      end
+    end
+    # TODO: deprecate below for above
     def klass(klass)
       case klass
         when NodeModule

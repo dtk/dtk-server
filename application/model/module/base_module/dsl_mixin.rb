@@ -61,7 +61,7 @@ module DTK; class BaseModule
         return ret if ModuleDSL::ParsingError.is_error?(ret)
       end
 
-      klass(self).parse_and_update_model(self,impl_obj,module_branch_idh,version,module_namespace(),opts)
+      klass(self).parse_and_update_model(self,impl_obj,module_branch_idh,version,opts)
       tmp_opts.merge!(:ambiguous => ret[:ambiguous]) if ret[:ambiguous]
       unless opts[:skip_module_ref_update]
         ret_cmr = ModuleRefs.get_component_module_refs(module_branch)

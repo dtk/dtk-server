@@ -22,8 +22,8 @@ module DTK
           local_params = ModuleBranch::Location::LocalParams::Server.new(
             :module_type => :service_module,
             :module_name => service_module_name,
-            :namespace   => Namespace.find_by_name(project.model_handle(:namespace), opts[:namespace]),
-            :version => nil
+            :namespace   => namespace,
+            :version     => nil
           )
 
           module_and_branch_info = ServiceModule.create_module(project,local_params,:config_agent_type => ConfigAgentType)

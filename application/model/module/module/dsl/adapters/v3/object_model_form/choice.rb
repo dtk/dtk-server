@@ -123,17 +123,22 @@ module DTK; class ModuleDSL; class V3
             dep_name_match = true
           end
           link_def_link_choices.each do |ldl_choice|
-            if dn = ldl_choice.dependency_name
-              unless dep_name_match
+            ndx = nil
+            dep_name = ldl_choice.dependency_name
+            if dep_name and !dep_name_match
+              if ldl_choice.explicit_dependency_ref
                 base_cmp_name = ldl_choice.base_cmp_print_form()
                 dep_cmp_name = ldl_choice.dep_cmp_print_form()
                 error_msg = "The link def segment on ?1: ?2\nreferences a dependency name (?3) that does not exist.\n"
-                raise ParsingError.new(error_msg,base_cmp_name,{dep_cmp_name => ldl_choice.print_form},dn)
+                raise ParsingError.new(error_msg,base_cmp_name,{dep_cmp_name => ldl_choice.print_form},dep_name)
               end
-            end
-            unless ndx = matching_dep_index?(ldl_choice,pruned_ndx_dep_choices)
               ldl_choice.required = false
-              ndx = ldl_choice.dep_cmp_ndx()
+              ndx = dep_name
+            else
+              unless ndx = matching_dep_index?(ldl_choice,pruned_ndx_dep_choices)
+                ldl_choice.required = false
+                ndx = ldl_choice.dep_cmp_ndx()
+              end
             end
             (ret[ndx] ||= Array.new) << ldl_choice
           end

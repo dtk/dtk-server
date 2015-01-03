@@ -1,7 +1,7 @@
 module DTK; class ModuleDSL; class V3
   class ObjectModelForm; class Choice
     class LinkDefLink < self
-      attr_reader :dependency_name
+      attr_reader :dependency_name, :explicit_dependency_ref
       attr_accessor :required
       def dep_cmp_ndx()
         @dep_cmp_name
@@ -9,6 +9,7 @@ module DTK; class ModuleDSL; class V3
       def initialize(raw,dep_cmp_name,base_cmp)
         super(raw,dep_cmp_name,base_cmp)
         @dependency_name = nil
+        @explicit_dependency_ref = false
         @required = true
       end
 
@@ -41,7 +42,11 @@ module DTK; class ModuleDSL; class V3
         ret_info["attribute_mappings"] = in_attr_mappings.map{|in_am|convert_attribute_mapping(in_am,base_cmp(),dep_cmp(),opts)}
         
         set_single_possible_link!(dep_cmp(),ret_info)
-        @dependency_name = link_def_link["dependency_name"]
+        if @dependency_name = link_def_link["dependency_name"]
+          @explicit_dependency_ref = true
+        else
+          @dependency_name = link_def_link["name"]
+        end
         [self]
       end
 

@@ -36,7 +36,7 @@ module DTK; class BaseModule
     end
 
     def parse_impl_to_create_and_add_dsl(config_agent_type,impl_obj)
-      dsl_created_info = parse_impl_to_create_dsl(config_agent_type,impl_obj,:ret_hash_content)
+      dsl_created_info = parse_impl_to_create_dsl(config_agent_type,impl_obj,:ret_hash_content=>true)
 
       set_dsl_parsed!(true)
     end

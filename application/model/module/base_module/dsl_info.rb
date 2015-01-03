@@ -35,7 +35,7 @@ module DTK; class BaseModule
       def raise_error_if_illegal_keys(keys)
         illegal_keys = keys - legal_keys
         unless illegal_keys.empty?
-          raise Error.new("Illegal keys (#illegal_keys.jon(')}")
+          raise Error.new("Illegal keys (#{illegal_keys.join(',')})")
         end
       end
     end
@@ -44,7 +44,7 @@ module DTK; class BaseModule
     class CreatedInfo < Info
      private
       def legal_keys()
-        [:path,:content]
+        [:path,:content,:hash_content]
       end
     end
     # has info about a DSL file that is being updated

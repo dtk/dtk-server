@@ -18,7 +18,8 @@ module DTK; class BaseModule
       parse_needed = !dsl_parsed?()
       return ret unless pull_was_needed or parse_needed
       repo = repo_idh.create_object()
-      ret = deprecate_create_needed_objects_and_dsl?(repo,version,opts)
+      local = ret_local(version)
+      ret = create_needed_objects_and_dsl?(repo,local,opts)
 
       opts.merge!(:match_hashes => ret[:match_hashes]) if ret[:match_hashes]
       component_module_refs = klass(self).update_component_module_refs(self.class,module_branch,opts)
@@ -38,22 +39,20 @@ module DTK; class BaseModule
     def parse_impl_to_create_and_add_dsl(config_agent_type,impl_obj)
       dsl_created_info = parse_impl_to_create_dsl(config_agent_type,impl_obj,:ret_hash_content=>true)
 
-      set_dsl_parsed!(true)
+      #set_dsl_parsed!(true)
     end
 
     def pull_from_remote__update_from_dsl(repo, module_and_branch_info,version=nil)
       info = module_and_branch_info #for succinctness
       module_branch_idh = info[:module_branch_idh]
       module_branch = module_branch_idh.create_object().merge(:repo => repo)
-
-      deprecate_create_needed_objects_and_dsl?(repo,version)
+      create_needed_objects_and_dsl?(repo,ret_local(version))
     end
 
-    def parse_dsl_and_update_model(impl_obj,module_branch_idh,version=nil,namespace=nil,opts={})
+    def parse_dsl_and_update_model(impl_obj,module_branch_idh,version,opts={})
       set_dsl_parsed!(false)
       ret, tmp_opts = {}, {}
       module_branch = module_branch_idh.create_object()
-
       if opts[:update_from_includes]
         config_agent_type = opts[:config_agent_type] || config_agent_type_default()
         opts.merge!(:module_branch => module_branch, :config_agent_type => config_agent_type)
@@ -62,7 +61,7 @@ module DTK; class BaseModule
         return ret if ModuleDSL::ParsingError.is_error?(ret)
       end
 
-      klass(self).parse_and_update_model(self,impl_obj,module_branch_idh,version,namespace,opts)
+      klass(self).parse_and_update_model(self,impl_obj,module_branch_idh,version,module_namespace(),opts)
       tmp_opts.merge!(:ambiguous => ret[:ambiguous]) if ret[:ambiguous]
       unless opts[:skip_module_ref_update]
         ret_cmr = ModuleRefs.get_component_module_refs(module_branch)
@@ -92,34 +91,16 @@ module DTK; class BaseModule
 
   private
     def create_new_version__type_specific(repo_for_new_branch,new_version,opts={})
-      # TODO: push use of local from calling fn
-      local_params = ModuleBranch::Location::LocalParams::Server.new(
-        :module_type => module_type(),
-        :module_name => module_name(),
-        :namespace   => module_namespace(),
-        :version => new_version
-      )
-      local = local_params.create_local(get_project())
+      local = ret_local(new_version)
       create_needed_objects_and_dsl?(repo_for_new_branch,local,opts)
     end
 
-    def update_model_from_clone__type_specific?(commit_sha,diffs_summary,module_branch,version,opts={})
-      opts.merge!(:ret_dsl_updated_info => Hash.new)
-      update_model_objs_or_create_dsl?(diffs_summary,module_branch,version,opts)
-    end
-
-    def deprecate_create_needed_objects_and_dsl?(repo,version,opts={})
-      # TODO: used temporarily until get all callers to pass in local_params
-      local = deprecate_ret_local(version)
-#      Log.info_pp(["TODO: Using deprecate_create_needed_objects_and_dsl?; local =",local,caller[0..4]])
-      create_needed_objects_and_dsl?(repo,local,opts)
-    end
-    def deprecate_ret_local(version)
+    def ret_local(version)
       local_params = ModuleBranch::Location::LocalParams::Server.new(
         :module_type => module_type(),
         :module_name => module_name(),
         :namespace   => module_namespace(),
-        :version => version
+        :version     => version
       )
       local_params.create_local(get_project())
     end
@@ -164,10 +145,9 @@ module DTK; class BaseModule
       dsl_created_info = DSLInfo::CreatedInfo.new()
       klass = klass(self)
       if klass.contains_dsl_file?(impl_obj)
-        err = klass::ParsingError.trap do
-          parse_dsl_and_update_model(impl_obj,module_branch_idh,local.version,local.module_namespace_name,opts)
+        if err = klass::ParsingError.trap{parse_dsl_and_update_model(impl_obj,module_branch_idh,local.version,opts)}
+          ret.dsl_parsed_info = err
         end
-        ret.dsl_parsed_info = err if err
       elsif opts[:scaffold_if_no_dsl]
         opts = Hash.new
         if matching_branches
@@ -190,12 +170,13 @@ module DTK; class BaseModule
       ret
     end
 
-    def update_model_objs_or_create_dsl?(diffs_summary,module_branch,version,opts={})
+    def update_model_from_clone__type_specific?(commit_sha,diffs_summary,module_branch,version,opts={})
       ret = DSLInfo.new()
+      opts.merge!(:ret_dsl_updated_info => Hash.new)
       dsl_created_info = DSLInfo::CreatedInfo.new()
       module_namespace = module_namespace()
       impl_obj = module_branch.get_implementation()
-      local = deprecate_ret_local(version)
+      local = ret_local(version)
       project = local.project
       opts.merge!(:project => project)
       # TODO: make more robust to handle situation where diffs dont cover all changes; think can detect by looking at shas
@@ -204,14 +185,14 @@ module DTK; class BaseModule
       if version.kind_of?(ModuleVersion::AssemblyModule)
 
         if meta_file_changed = diffs_summary.meta_file_changed?()
-          parse_dsl_and_update_model(impl_obj,module_branch.id_handle(),version,module_namespace,opts)
+          parse_dsl_and_update_model(impl_obj,module_branch.id_handle(),version,opts)
         end
         assembly = version.get_assembly(model_handle(:component))
         opts_finalize = (meta_file_changed ? {:meta_file_changed => true} : {})
         AssemblyModule::Component.finalize_edit(assembly,self,module_branch,opts_finalize)
       elsif ModuleDSL.contains_dsl_file?(impl_obj)
         if opts[:force_parse] or diffs_summary.meta_file_changed?() or (get_field?(:dsl_parsed) == false)
-          if e = ModuleDSL::ParsingError.trap{parse_dsl_and_update_model(impl_obj,module_branch.id_handle(),version,module_namespace,opts)}
+          if e = ModuleDSL::ParsingError.trap{parse_dsl_and_update_model(impl_obj,module_branch.id_handle(),version,opts)}
             ret.dsl_parsed_info = e
           end
         end

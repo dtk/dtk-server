@@ -89,8 +89,7 @@ module DTK
       impl_obj = get_implementation()
       impl_obj.modify_file_assets(diffs_summary)
       if diffs_summary.meta_file_changed?()
-        namespace = component_module.module_namespace()
-        if e = ErrorUsage::Parsing.trap{component_module.parse_dsl_and_update_model(impl_obj,id_handle(),version(),namespace)}
+        if e = ErrorUsage::Parsing.trap{component_module.parse_dsl_and_update_model(impl_obj,id_handle(),version())}
           ret.merge!(:dsl_parsing_errors => e)
         end
       end

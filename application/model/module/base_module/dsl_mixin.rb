@@ -1,5 +1,5 @@
-#TODO: Aldin: think you want to replace cases where there is an instance function that uses ModuleDSL
-#with klass(self)
+# TODO: Aldin: think you want to replace cases where there is an instance function that uses ModuleDSL
+# with klass(self)
 module DTK; class BaseModule
   module DSLMixin
     r8_nested_require('dsl_mixin','external_refs')
@@ -29,20 +29,16 @@ module DTK; class BaseModule
       if new_commit_sha = ret_cmr.serialize_and_save_to_repo?(opts)
         if opts[:ret_dsl_updated_info]
           msg = "The module refs file was updated by the server"
-          ret.dsl_updated_info = DSLInfo::UpdatedInfo.new(msg,new_commit_sha)
+          ret.dsl_updated_info = DSLInfo::UpdatedInfo.new(:msg => msg,:commit_sha => new_commit_sha)
         end
       end
       ret
     end
 
     def parse_impl_to_create_and_add_dsl(config_agent_type,impl_obj)
-      dsl_created_info = parse_impl_to_create_dsl(config_agent_type,impl_obj)
-      pp [:dsl_created_info,dsl_created_info]
-      # TODO: DTK-1794; Rich: I need to add the content passed in dsl_created_info to the repo
-      # and then look at parse_dsl_and_update_model internals to
-      # us the part that updates_model from the dsl
-      # return is hack
-      {'new module created' => "#{module_namespace()}:#{module_name()}"}
+      dsl_created_info = parse_impl_to_create_dsl(config_agent_type,impl_obj,:ret_hash_content)
+
+      set_dsl_parsed!(true)
     end
 
     def pull_from_remote__update_from_dsl(repo, module_and_branch_info,version=nil)
@@ -73,7 +69,7 @@ module DTK; class BaseModule
         if new_commit_sha = ret_cmr.serialize_and_save_to_repo?(tmp_opts)
           if opts[:ret_dsl_updated_info]
             msg = ret[:message]||"The module refs file was updated by the server"
-            opts[:ret_dsl_updated_info] = DSLInfo::UpdatedInfo.new(msg,new_commit_sha)
+            opts[:ret_dsl_updated_info] = DSLInfo::UpdatedInfo.new(:msg => msg,:commit_sha => new_commit_sha)
           end
         end
       end
@@ -165,7 +161,7 @@ module DTK; class BaseModule
         set_external_ref?(module_branch,config_agent_type,impl_obj)
       end
 
-      dsl_created_info = DSLInfo::CreatedInfo.create_empty()
+      dsl_created_info = DSLInfo::CreatedInfo.new()
       klass = klass(self)
       if klass.contains_dsl_file?(impl_obj)
         err = klass::ParsingError.trap do
@@ -196,7 +192,7 @@ module DTK; class BaseModule
 
     def update_model_objs_or_create_dsl?(diffs_summary,module_branch,version,opts={})
       ret = DSLInfo.new()
-      dsl_created_info = DSLInfo::CreatedInfo.create_empty()
+      dsl_created_info = DSLInfo::CreatedInfo.new()
       module_namespace = module_namespace()
       impl_obj = module_branch.get_implementation()
       local = deprecate_ret_local(version)
@@ -246,6 +242,7 @@ module DTK; class BaseModule
     # 1) what signatures get parsed (e.g., only top level puppet ones) and put in dtk
     # 2) what signatures get parsed and put in commented out
     def parse_impl_to_create_dsl(config_agent_type,impl_obj,opts={})
+      ret = DSLInfo::CreatedInfo.new()
       parsing_error = nil
       render_hash = nil
       begin
@@ -265,7 +262,10 @@ module DTK; class BaseModule
         format_type = ModuleDSL.default_format_type()
         content = render_hash.serialize(format_type)
         dsl_filename = ModuleDSL.dsl_filename(config_agent_type,format_type)
-        ret = DSLInfo::CreatedInfo.create_with_path_and_content(dsl_filename, content)
+        ret.merge!(:path=>dsl_filename, :content=> content)
+        if opts[:ret_hash_content]
+          ret.merge!(:hash_content => render_hash) 
+        end
       end
       raise parsing_error if parsing_error
       ret

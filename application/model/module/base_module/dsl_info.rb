@@ -17,25 +17,41 @@ module DTK; class BaseModule
       dsl_updated_info
     end
 
-    # has info if DSL file is created and being passed to
-    class CreatedInfo < Hash
-      def self.create_empty()
-        new()
-      end
-      def self.create_with_path_and_content(path,content)
-        new(:path => path, :content => content)
-      end
-      private
+    class Info < Hash
       def initialize(hash={})
+        raise_error_if_illegal_keys(hash.keys)
         super()
         replace(hash)
       end
+      def merge(hash)
+        raise_error_if_illegal_keys(hash.keys)
+        super(hash)
+      end
+      def merge!(hash)
+        raise_error_if_illegal_keys(hash.keys)
+        super(hash)
+      end
+     private
+      def raise_error_if_illegal_keys(keys)
+        illegal_keys = keys - legal_keys
+        unless illegal_keys.empty?
+          raise Error.new("Illegal keys (#illegal_keys.jon(')}")
+        end
+      end
     end
 
-    class UpdatedInfo < Hash
-      def initialize(msg,commit_sha)
-        super()
-        replace(:msg => msg, :commit_sha => commit_sha)
+    # has info about a DSL file that is being generated
+    class CreatedInfo < Info
+     private
+      def legal_keys()
+        [:path,:content]
+      end
+    end
+    # has info about a DSL file that is being updated
+    class UpdatedInfo < Info
+     private
+      def legal_keys()
+        [:msg,:commit_sha]
       end
     end
   end

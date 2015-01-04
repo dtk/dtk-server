@@ -76,9 +76,11 @@ module DTK; class BaseModule
 
       # parsed will be true if there are no missing or ambiguous dependencies, or flag dsl_parsed_false is not sent from the client
       dependencies = ret[:external_dependencies]||{}
-      set_parsed   = (dependencies[:possibly_missing]||{}).empty? && (ret[:ambiguous]||{}).empty? && !opts[:dsl_parsed_false]
-
-      set_dsl_parsed!(true) if set_parsed
+      if (dependencies[:possibly_missing]||{}).empty? and
+          (ret[:ambiguous]||{}).empty? and
+          !opts[:dsl_parsed_false]
+        set_dsl_parsed!(true)
+      end
       ret
     end
 

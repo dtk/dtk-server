@@ -2,10 +2,10 @@ module DTK; class ModuleDSL
   class RefIntegrity
     class Snapshot
       attr_reader :link_defs
-      def initialize(cmp_module)
-        @cmp_module = cmp_module
+      def initialize(component_module)
+        @component_module = component_module
         # aug_cmp_templates is array with component ref info augmented to it
-        @aug_cmp_templates = get_aug_cmp_templates(cmp_module)
+        @aug_cmp_templates = get_aug_cmp_templates(component_module)
         @ports = get_ports(@aug_cmp_templates)
         @port_links = get_port_links(@ports)
         @link_defs = get_link_defs(@aug_cmp_templates)
@@ -49,9 +49,9 @@ module DTK; class ModuleDSL
 
      private
       # writing the get function sso can be passed explicitly refernce object or can use the internal @ vars
-      def get_aug_cmp_templates(cmp_module=nil)
-        cmp_module ||= @cmp_module
-        cmp_module.get_associated_assembly_cmp_refs()
+      def get_aug_cmp_templates(component_module=nil)
+        component_module ||= @component_module
+        component_module.get_associated_assembly_cmp_refs()
       end
       def get_link_defs(aug_cmp_templates=nil)
         aug_cmp_templates ||= @aug_cmp_templates
@@ -94,7 +94,7 @@ module DTK; class ModuleDSL
       end
 
       def model_handle(model_name)
-        @cmp_module.model_handle(model_name)
+        @component_module.model_handle(model_name)
       end
 
       class ReferencedComponentTemplates < Array

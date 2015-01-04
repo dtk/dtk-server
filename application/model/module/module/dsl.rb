@@ -14,7 +14,6 @@ module DTK
     include ModuleRefsHelperMixin
 
     attr_reader :input_hash,:config_agent_type
-    attr_writer :component_module
     def initialize(config_agent_type,impl_idh,module_branch,version_specific_input_hash,opts={})
       @module_branch = module_branch
       @config_agent_type = config_agent_type
@@ -22,22 +21,14 @@ module DTK
       @impl_idh = impl_idh
       @project_idh = impl_idh.get_parent_id_handle_with_auth_info()
       @ref_integrity_snapshot = opts[:ref_integrity_snapshot]
+      @component_module = opts[:component_module]
     end
     private :initialize
-    def ref_integrity_snapshot()
-      unless @ref_integrity_snapshot
-        raise Error.new("Unexpected that @ref_integrity_snapshot is nil")
-      end
-      @ref_integrity_snapshot
-    end
-    private :ref_integrity_snapshot
 
     def self.parse_dsl(component_module,impl_obj,opts={})
       ref_integrity_snapshot = RefIntegrity.snapshot_associated_assembly_templates(component_module)
-      opts_create_dsl = opts.merge(:ref_integrity_snapshot => ref_integrity_snapshot, :cmp_module => component_module)
-      ret = create_dsl_object_from_impl(impl_obj,opts_create_dsl) 
-      ret.component_module = component_module
-      ret
+      opts_create_dsl = opts.merge(:ref_integrity_snapshot => ref_integrity_snapshot, :component_module => component_module)
+      create_dsl_object_from_impl(impl_obj,opts_create_dsl) 
     end
 
     def update_model_with_ref_integrity_check(opts={})
@@ -46,7 +37,7 @@ module DTK
       Model.Transaction do
         update_opts = {
           :override_attrs => {"module_branch_id" => @module_branch.id()},
-          :namespace      => @component_module.module_namespace()
+          :namespace      => component_module().module_namespace()
         }
         update_opts.merge!(:version => version) if opts[:version]
         update_model(update_opts)
@@ -176,6 +167,20 @@ module DTK
     end
 
    private
+    def ref_integrity_snapshot()
+      unless @ref_integrity_snapshot
+        raise Error.new("Unexpected that @ref_integrity_snapshot is nil")
+      end
+      @ref_integrity_snapshot
+    end
+
+    def component_module()
+      unless @component_module
+        raise Error.new("Unexpected that @component_module is nil")
+      end
+      @component_module
+    end
+
     class IncrementalGeneratorHelper < self
       def initialize(augmented_objects)
         @object_class = object_class(augmented_objects)

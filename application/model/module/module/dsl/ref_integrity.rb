@@ -2,8 +2,15 @@ module DTK
   class ModuleDSL
     class RefIntegrity
       r8_nested_require('ref_integrity','snapshot')
-      def self.snapshot_associated_assembly_templates(cmp_module)
-        new(cmp_module)
+
+      def initialize(component_module)
+        @component_module = component_module
+        @snapshot = Snapshot.new(component_module)
+      end
+      private :initialize
+
+      def self.snapshot_associated_assembly_templates(component_module)
+        new(component_module)
       end
 
       def raise_error_if_any_violations(opts={})
@@ -19,9 +26,9 @@ module DTK
       def raise_error_if_missing_from_module_refs(include_modules,module_refs_modules={})
         if inc_modules = include_modules['includes']
           missing = []
-          ref_cmp_modules = module_refs_modules.component_modules.keys
+          ref_component_modules = module_refs_modules.component_modules.keys
           inc_modules.each do |im|
-            missing << im unless ref_cmp_modules.include?(im.to_sym)
+            missing << im unless ref_component_modules.include?(im.to_sym)
           end
 
           raise ParsingError::MissingFromModuleRefs.new(:modules => missing) unless missing.empty?
@@ -29,11 +36,6 @@ module DTK
       end
 
      private
-      def initialize(cmp_module)
-        @cmp_module = cmp_module
-        @snapshot = Snapshot.new(cmp_module)
-      end
-
       def raise_error_if_dangling_cmp_ref(opts={})
         referenced_cmp_template_ids = @snapshot.component_template_ids()
         return if referenced_cmp_template_ids.empty?
@@ -62,7 +64,7 @@ module DTK
       def add_new_ports_on_component_templates()
         # find all assembly templates that reference a component template that has a new link def added
         # this is done by taking a new snapshot (one that is post changes) and seeing in any new link defs
-        new_snapshot = Snapshot.new(@cmp_module)
+        new_snapshot = Snapshot.new(@component_module)
         snapshot_link_def_ids = @snapshot.link_defs.map{|ld|ld[:id]}
         new_links_defs = new_snapshot.link_defs.reject{|ld|snapshot_link_def_ids.include?(ld[:id])}
         unless new_links_defs.empty?
@@ -72,7 +74,7 @@ module DTK
       end
 
       def model_handle(model_name)
-        @cmp_module.model_handle(model_name)
+        @component_module.model_handle(model_name)
       end
     end
   end

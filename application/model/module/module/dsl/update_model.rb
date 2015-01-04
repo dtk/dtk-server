@@ -10,14 +10,14 @@ module DTK; class ModuleDSL
           add_component_override_attrs(@input_hash,opts[:override_attrs])
         end
 
-      self.class.add_components_from_dsl(@container_idh,@config_agent_type,@impl_idh,input_hash,nil,opts)
+      self.class.add_components_from_dsl(@project_idh,@config_agent_type,@impl_idh,input_hash,nil,opts)
     end
 
     class Parser
-      def initialize(impl_idh,module_branch_idh,container_idh)
+      def initialize(impl_idh,module_branch_idh,project_idh)
         @impl_idh = impl_idh
         @module_branch_idh = module_branch_idh
-        @container_idh = container_idh
+        @project_idh = project_idh
         @remote_link_defs = Hash.new
         @components_hash = Hash.new
         @stored_components_hash = Hash.new
@@ -51,7 +51,7 @@ module DTK; class ModuleDSL
       end
 
      private
-      attr_reader :impl_idh, :module_branch_idh,:container_idh
+      attr_reader :impl_idh, :module_branch_idh,:project_idh
 
       def component_ref_from_cmp_type(config_agent_type,component_type)
         "#{config_agent_type}-#{component_type}"
@@ -86,28 +86,28 @@ module DTK; class ModuleDSL
   end
 
   module UpdateModelClassMixin
-    def add_components_from_dsl(container_idh,config_agent_type,impl_idh,dsl_hash,dsl_integer_version=nil,opts={})
+    def add_components_from_dsl(project_idh,config_agent_type,impl_idh,dsl_hash,dsl_integer_version=nil,opts={})
       dsl_integer_version ||= integer_version(dsl_integer_version)
       module_branch_idh = impl_idh.create_object().get_module_branch().id_handle()
-      parser_proc = create_parser_processor(dsl_integer_version,impl_idh,module_branch_idh,container_idh)
+      parser_proc = create_parser_processor(dsl_integer_version,impl_idh,module_branch_idh,project_idh)
       parser_proc.parse_components!(config_agent_type,dsl_hash,opts[:namespace])
       cmps_hash = parser_proc.components_hash()
       stored_cmps_hash = parser_proc.stored_components_hash()
 
       # data_source_update_hash form used so can annotate subcomponents with "is complete" so will delete items that are removed
       db_update_hash = db_update_form(cmps_hash,stored_cmps_hash,module_branch_idh)
-      Model.input_hash_content_into_model(container_idh,db_update_hash)
+      Model.input_hash_content_into_model(project_idh,db_update_hash)
       sp_hash =  {
         :cols => [:id,:display_name],
-        :filter => [:and,[:oneof,:ref,cmps_hash.keys],[:eq,:project_project_id,container_idh.get_id()]]
+        :filter => [:and,[:oneof,:ref,cmps_hash.keys],[:eq,:project_project_id,project_idh.get_id()]]
       }
-      Model.get_objs(container_idh.create_childMH(:component),sp_hash).map{|r|r.id_handle()}
+      Model.get_objs(project_idh.create_childMH(:component),sp_hash).map{|r|r.id_handle()}
     end
 
    private
-    def create_parser_processor(dsl_integer_version,impl_idh,module_branch_idh,container_idh)
+    def create_parser_processor(dsl_integer_version,impl_idh,module_branch_idh,project_idh)
       klass = load_and_return_version_adapter_class(dsl_integer_version)
-      klass.const_get("Parser").new(impl_idh,module_branch_idh,container_idh)
+      klass.const_get("Parser").new(impl_idh,module_branch_idh,project_idh)
     end
 
     def db_update_form(cmps_input_hash,non_complete_cmps_input_hash,module_branch_idh)

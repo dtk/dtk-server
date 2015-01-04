@@ -1,4 +1,4 @@
-module XYZ
+module DTK
   class FileAsset < Model
     # model apis
     def get_content()

@@ -7,7 +7,7 @@ module DTK; class NodeModuleDSL
       # TODO:
       # db_update_hash = ...
       #TODO:: this would do teh actual db insert 
-      # Model.input_hash_content_into_model(@container_idh,db_update_hash)      
+      # Model.input_hash_content_into_model(@project_idh,db_update_hash)      
     end
   end
 end; end

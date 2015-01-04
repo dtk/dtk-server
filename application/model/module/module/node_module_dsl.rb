@@ -1,3 +1,4 @@
+# TODO: this needs to be updated after refactor to parse_and_update_model
 module DTK
   class NodeModuleDSL < ModuleDSL
     r8_nested_require('node_module_dsl','update_model')

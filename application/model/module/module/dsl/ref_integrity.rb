@@ -38,7 +38,7 @@ module DTK
         referenced_cmp_template_ids = @snapshot.component_template_ids()
         return if referenced_cmp_template_ids.empty?
         # this is called within transaction after any deletes are performed (if any)
-        # TODO: have ModuleDSL.parse_and_update_model return if any deletes
+        # TODO: have ModuleDSL.update_model return if any deletes
         # below is the conservative thing to do if dont know if any deletes
         any_deletes = true
         any_deletes = false if opts[:no_deletes_performed]

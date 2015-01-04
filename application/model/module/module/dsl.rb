@@ -5,51 +5,70 @@ module DTK
     r8_nested_require('dsl','generate_from_impl')
     r8_nested_require('dsl','object_model_form')
     r8_nested_require('dsl','incremental_generator')
+    r8_nested_require('dsl','module_refs_helper')
     # TODO: this needs to be after object_model_form, because object_model_form loads errors; should move errors to parent and include first here
     r8_nested_require('dsl','ref_integrity')
     extend UpdateModelClassMixin
     include UpdateModelMixin
+    extend ModuleRefsHelperClassMixin
+    include ModuleRefsHelperMixin
 
+    attr_reader :input_hash,:config_agent_type
+    attr_writer :component_module
+    def initialize(config_agent_type,impl_idh,module_branch,version_specific_input_hash,opts={})
+      @module_branch = module_branch
+      @config_agent_type = config_agent_type
+      @input_hash = version_parse_check_and_normalize(version_specific_input_hash)
+      @impl_idh = impl_idh
+      @project_idh = impl_idh.get_parent_id_handle_with_auth_info()
+      @ref_integrity_snapshot = opts[:ref_integrity_snapshot]
+    end
+    private :initialize
+    def ref_integrity_snapshot()
+      unless @ref_integrity_snapshot
+        raise Error.new("Unexpected that @ref_integrity_snapshot is nil")
+      end
+      @ref_integrity_snapshot
+    end
+    private :ref_integrity_snapshot
 
-    def self.parse_and_update_model(component_module,impl_obj,module_branch_idh,version,opts={})
+    def self.parse_dsl(component_module,impl_obj,opts={})
+      ref_integrity_snapshot = RefIntegrity.snapshot_associated_assembly_templates(component_module)
+      opts_create_dsl = opts.merge(:ref_integrity_snapshot => ref_integrity_snapshot, :cmp_module => component_module)
+      ret = create_dsl_object_from_impl(impl_obj,opts_create_dsl) 
+      ret.component_module = component_module
+      ret
+    end
+
+    def update_model_with_ref_integrity_check(opts={})
       # get associated assembly templates before do any updates and use this to see if any referential integrity
       # problems within transaction after do update; transaction is aborted if any errors found
-      ref_integrity_snapshot = RefIntegrity.snapshot_associated_assembly_templates(component_module)
-      opts.merge!(:ref_integrity_snapshot => ref_integrity_snapshot, :cmp_module => component_module)
-      model_parsed = nil
-      Transaction do
-        component_dsl_obj = create_dsl_object_from_impl(impl_obj, opts)
-        raise component_dsl_obj if ParsingError.is_error?(component_dsl_obj)
-
+      Model.Transaction do
         update_opts = {
-          :override_attrs => {"module_branch_id" => module_branch_idh.get_id()},
-          :namespace      => component_module.module_namespace()
+          :override_attrs => {"module_branch_id" => @module_branch.id()},
+          :namespace      => @component_module.module_namespace()
         }
-        update_opts.merge!(:version => version) if version
-        component_dsl_obj.update_model(update_opts)
+        update_opts.merge!(:version => version) if opts[:version]
+        update_model(update_opts)
 
-        ref_integrity_snapshot.raise_error_if_any_violations(opts)
+        ref_integrity_snapshot.raise_error_if_any_violations()
         ref_integrity_snapshot.integrity_post_processing()
       end
     end
 
-    def self.create_dsl_object(module_branch,dsl_integer_version,format_type=nil)
-      input_hash = get_dsl_file_hash_content_info(module_branch,dsl_integer_version,format_type)[:hash_content]
-      config_agent_type = ret_config_agent_type(input_hash)
-      new(config_agent_type,impl.id_handle(),module_branch.id_handle(),input_hash)
+    def validate_includes_and_update_module_refs()
+      validate_includes_and_update_module_refs_aux()
     end
 
-    def self.create_dsl_object_from_impl(source_impl,opts={})
-      target_impl = opts[:target_impl]||source_impl
-      info = get_dsl_file_raw_content_and_info(source_impl)
-      create_from_file_obj_hash?(target_impl,info[:dsl_filename],info[:content],opts)
+    # parses and creates dsl_object form file in implementation
+    def self.create_dsl_object_from_impl(impl_obj,opts={})
+      info = get_dsl_file_raw_content_and_info(impl_obj)
+      create_from_file_obj_hash?(impl_obj,info[:dsl_filename],info[:content],opts)
     end
-    # creates a ModuleDSL if file_obj_hash is a dtk meta file
-    def self.create_from_file_obj_hash?(target_impl,dsl_filename,content,opts={})
-      container_idh = opts[:container_idh]
+    # parses and creates dsl_object form hash parsed in as target
+    def self.create_from_file_obj_hash?(impl_obj,dsl_filename,content,opts={})
       return nil unless isa_dsl_filename?(dsl_filename)
       parsed_name = parse_dsl_filename(dsl_filename)
-      module_branch_idh = target_impl.get_module_branch().id_handle()
       opts[:file_path] = dsl_filename
       input_hash = convert_to_hash(content,parsed_name[:format_type],opts)
       return input_hash if ParsingError.is_error?(input_hash)
@@ -60,11 +79,9 @@ module DTK
       name_attribute_check = name_attribute_integrity_check(input_hash['components'])
       return name_attribute_check if ParsingError.is_error?(name_attribute_check)
 
-      # ref_integrity_snapshot = opts[:ref_integrity_snapshot]
-      # integrity_check = ref_integrity_snapshot.raise_error_if_missing_from_module_refs(input_hash,opts[:component_module_refs])
-
       ParsingError.trap do
-        new(config_agent_type,target_impl.id_handle(),module_branch_idh,input_hash,container_idh)
+        module_branch = impl_obj.get_module_branch()
+        new(config_agent_type,impl_obj.id_handle(),module_branch,input_hash,opts)
       end
     end
 
@@ -107,14 +124,6 @@ module DTK
       R8::Config[:dsl][:component][:format_type][:default].to_sym
     end
 
-    attr_reader :input_hash,:config_agent_type
-    def initialize(config_agent_type,impl_idh,module_branch_idh,version_specific_input_hash,container_idh=nil)
-      @config_agent_type = config_agent_type
-      @input_hash = version_parse_check_and_normalize(version_specific_input_hash)
-      @impl_idh = impl_idh
-      @container_idh = container_idh||impl_idh.get_parent_id_handle_with_auth_info()
-    end
-
     def migrate_processor(module_name,new_integer_version,input_hash)
       self.class.load_and_return_version_adapter_class(new_integer_version).ret_migrate_processor(@config_agent_type,module_name,input_hash)
     end
@@ -122,129 +131,6 @@ module DTK
     def self.version(integer_version=nil)
       integer_version ||= integer_version()
       VersionIntegerToVersion[integer_version]
-    end
-
-    def self.update_component_module_refs(module_class,module_branch,opts={})
-      syntatic_parsed_info = module_class::DSLParser.parse_directory(module_branch,:component_module_refs,opts)
-      return syntatic_parsed_info if ParsingError.is_error?(syntatic_parsed_info)
-      if opts[:match_hashes]
-        syntatic_parsed_info << opts[:match_hashes]
-        syntatic_parsed_info.flatten!
-      end
-      parsed_info = ModuleRefs::Parse.semantic_parse(module_branch,syntatic_parsed_info)
-      return parsed_info if ParsingError.is_error?(parsed_info)
-      ModuleRefs::Parse.update_from_dsl_parsed_info(module_branch,parsed_info)
-    end
-
-    def self.validate_includes_and_update_module_refs(source_impl, cmp_module, opts={})
-      ret               = Hash.new
-      project           = opts[:project]
-      module_branch     = opts[:module_branch]
-
-      # if module contains metadata.json or Modulefile (git modules) then parse that files to check for dependencies
-      # otherwise check for dependencies in includes section in dtk.model.yaml
-      target_impl = opts[:target_impl]||source_impl
-      info = get_dsl_file_raw_content_and_info(source_impl)
-
-      dsl_filename = info[:dsl_filename]
-      content = info[:content]
-      return nil unless isa_dsl_filename?(dsl_filename)
-
-      parsed_name = parse_dsl_filename(dsl_filename)
-      opts[:file_path] = dsl_filename
-      input_hash = convert_to_hash(content,parsed_name[:format_type],opts)
-      return input_hash if ParsingError.is_error?(input_hash)
-
-      includes = input_hash['includes']||[]
-      cmp_module ||= opts[:cmp_module]
-      container_idh = opts[:container_idh]||target_impl.id_handle().get_parent_id_handle_with_auth_info()
-
-      input_hash['components'].each do |k,v|
-        includes << v['includes'] if v['includes']
-      end
-      all_includes = includes.flatten.uniq
-
-      unless all_includes.empty?
-        multiple_namespaces = []
-        all_modules = cmp_module.class.get_all(container_idh,[:namespace_id,:namespace])
-        mapped = all_modules.select{|m| all_includes.include?(m[:display_name])}.map{|k| {:component_module=>k[:display_name],:remote_namespace=>k[:namespace][:name]}}
-        multiple_namespaces = mapped.group_by { |h| h[:component_module] }.values.select { |a| a.size > 1 }.flatten
-
-        mapped_names = mapped.map{|m| m[:component_module]}
-        missing = all_includes - mapped_names
-        ext_deps_hash = {
-          :possibly_missing => missing
-        }
-
-        unless multiple_namespaces.empty?
-          multi_missing, ambiguous_grouped, existing_names = [], {}, []
-          multiple_namespaces.each{|mn| mapped.delete(mn)}
-
-          check_if_matching_or_ambiguous(opts[:module_branch], multiple_namespaces)
-          existing_module_refs = target_impl.get_module_branch().get_module_refs()
-          existing_module_refs.each do |existing_ref|
-            existing_names << existing_ref[:display_name] if existing_ref[:namespace_info]
-          end
-
-          multiple_namespaces.delete_if{|mn| existing_names.include?(mn[:component_module])}
-          cmp_mods = multiple_namespaces.group_by { |h| h[:component_module] }
-          cmp_mods.each do |k,v|
-            namespaces = v.map{|a| a[:remote_namespace]}
-            ambiguous_grouped.merge!(k => namespaces)
-          end
-          unless ambiguous_grouped.empty?
-            ret.merge!(:ambiguous => ambiguous_grouped)
-            ext_deps_hash.merge!(:ambiguous => ambiguous_grouped)
-          end
-        end
-
-        external_deps = cmp_module.class::ExternalDependencies.new(ext_deps_hash)
-        if poss_problems = external_deps.possible_problems?()
-          ret.merge!(:external_dependencies => poss_problems)
-        end
-
-        opts.merge!(:match_hashes => mapped)
-        ret.merge!(:match_hashes => mapped)
-        update_component_module_refs(cmp_module.class,target_impl.get_module_branch(),opts) unless mapped.empty?
-      end
-      message = "The module refs file was updated by the server based on includes section from dtk.model.yaml"
-      ret.merge!(:message => message)
-
-      ret
-    end
-
-    def self.check_if_matching_or_ambiguous(module_branch, ambiguous)
-        existing_c_hash = get_existing_module_refs(module_branch)
-        if existing = existing_c_hash['component_modules']
-          existing.each do |k,v|
-            if k && v
-              amb = ambiguous.select{|a| a[:component_module].split('/').last.eql?(k) && a[:remote_namespace].eql?(v['namespace'])}
-              ambiguous.delete_if{|amb| amb[:component_module].split('/').last.eql?(k)} unless amb.empty?
-            end
-          end
-        end
-      end
-
-      def self.get_existing_module_refs(module_branch)
-        existing_c_hash  = {}
-        existing_content = RepoManager.get_file_content({:path => "module_refs.yaml"}, module_branch, {:no_error_if_not_found => true})
-        existing_c_hash  = Aux.convert_to_hash(existing_content,:yaml) if existing_content
-        existing_c_hash
-      end
-
-    def self.validate_module_ref_namespaces(module_branch,component_module_refs)
-      cmp_modules = component_module_refs.component_modules
-      namespace_mh = module_branch.id_handle().createMH(:namespace)
-
-      sp_hash = {
-        :cols => [:id, :display_name]
-      }
-      namespaces = Model.get_objs(namespace_mh,sp_hash).map{|ns| ns[:display_name]}
-
-      cmp_modules.each do |k,v|
-        v_namespace = v[:namespace_info]
-        return ParsingError::BadNamespaceReference.new(:name => v_namespace) unless namespaces.include?(v_namespace)
-      end
     end
 
     def self.name_attribute_integrity_check(components)

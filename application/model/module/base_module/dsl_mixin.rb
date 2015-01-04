@@ -1,5 +1,5 @@
 # TODO: Aldin: think you want to replace cases where there is an instance function that uses ModuleDSL
-# with klass(self)
+# with klass()
 module DTK; class BaseModule
   module DSLMixin
     r8_nested_require('dsl_mixin','external_refs')
@@ -22,7 +22,7 @@ module DTK; class BaseModule
       ret = create_needed_objects_and_dsl?(repo,local,opts)
 
       opts.merge!(:match_hashes => ret[:match_hashes]) if ret[:match_hashes]
-      component_module_refs = klass(self).update_component_module_refs(self.class,module_branch,opts)
+      component_module_refs = klass().update_component_module_refs(self.class,module_branch,opts)
       return component_module_refs if ModuleDSL::ParsingError.is_error?(component_module_refs)
 
       opts.merge!(:ambiguous => ret[:ambiguous]) if ret[:ambiguous]
@@ -54,15 +54,15 @@ module DTK; class BaseModule
       ret, tmp_opts = {}, {}
       module_branch = module_branch_idh.create_object()
       config_agent_type = opts[:config_agent_type] || config_agent_type_default()
-      opts_dsl_proc = opts.merge(:module_branch => module_branch, :config_agent_type => config_agent_type)
+      opts_dsl_proc = opts.merge(:config_agent_type => config_agent_type)
+      dsl_obj = klass().parse_dsl(self,impl_obj,opts_dsl_proc)
       if opts[:update_from_includes]
-#        ret = module_dsl_object().validate_includes_and_update_module_refs(impl_obj, opts)
-        ret = klass(self).validate_includes_and_update_module_refs(impl_obj, self, opts_dsl_proc)
+        ret = dsl_obj.validate_includes_and_update_module_refs()
         opts_dsl_proc.merge!(:ambiguous => ret[:ambiguous])
         return ret if ModuleDSL::ParsingError.is_error?(ret)
       end
 
-      klass(self).parse_and_update_model(self,impl_obj,module_branch_idh,version,opts_dsl_proc)
+      dsl_obj.update_model_with_ref_integrity_check(:version => version)
       tmp_opts.merge!(:ambiguous => ret[:ambiguous]) if ret[:ambiguous]
       unless opts[:skip_module_ref_update]
         ret_cmr = ModuleRefs.get_component_module_refs(module_branch)
@@ -144,7 +144,7 @@ module DTK; class BaseModule
       end
 
       dsl_created_info = DSLInfo::CreatedInfo.new()
-      klass = klass(self)
+      klass = klass()
       if klass.contains_dsl_file?(impl_obj)
         if err = klass::ParsingError.trap{parse_dsl_and_update_model(impl_obj,module_branch_idh,local.version,opts)}
           ret.dsl_parsed_info = err
@@ -268,17 +268,8 @@ module DTK; class BaseModule
       matching
     end
 
-    def module_dsl_object()
-      case self
-        when ComponentModule
-          ComponentModule::DSL.new(self)
-        else
-        raise Error.new("Not implemented yet for class (#{self.class})")
-      end
-    end
-    # TODO: deprecate below for above
-    def klass(klass)
-      case klass
+    def klass()
+      case self.class
         when NodeModule
           NodeModuleDSL
         else

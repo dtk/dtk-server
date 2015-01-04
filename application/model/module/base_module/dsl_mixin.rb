@@ -80,8 +80,12 @@ module DTK; class BaseModule
           (ret[:ambiguous]||{}).empty? and
           !opts[:dsl_parsed_false]
         set_dsl_parsed!(true)
+        pp ["may be missing info want to pass back",ret]
+        
+        nil
+      else
+        ret
       end
-      ret
     end
 
     # TODO: for testing

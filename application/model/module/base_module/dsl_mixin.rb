@@ -54,11 +54,11 @@ module DTK; class BaseModule
       ret, tmp_opts = {}, {}
       module_branch = module_branch_idh.create_object()
       config_agent_type = opts[:config_agent_type] || config_agent_type_default()
-      opts_dsl_proc = opts.merge(:config_agent_type => config_agent_type)
-      dsl_obj = klass().parse_dsl(self,impl_obj,opts_dsl_proc)
+      dsl_obj = klass().parse_dsl(self,impl_obj,opts.merge(:config_agent_type => config_agent_type))
+      return dsl_obj if ModuleDSL::ParsingError.is_error?(dsl_obj)
+
       if opts[:update_from_includes]
         ret = dsl_obj.validate_includes_and_update_module_refs()
-        opts_dsl_proc.merge!(:ambiguous => ret[:ambiguous])
         return ret if ModuleDSL::ParsingError.is_error?(ret)
       end
 
@@ -79,6 +79,7 @@ module DTK; class BaseModule
       set_parsed   = (dependencies[:possibly_missing]||{}).empty? && (ret[:ambiguous]||{}).empty? && !opts[:dsl_parsed_false]
 
       set_dsl_parsed!(true) if set_parsed
+      ret
     end
 
     # TODO: for testing

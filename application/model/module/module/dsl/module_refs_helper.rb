@@ -62,10 +62,11 @@ module DTK; class ModuleDSL
         ret.merge!(:match_hashes => mapped)
         unless mapped.empty?
           ModuleDSL.update_component_module_refs(ComponentModule,@module_branch,:match_hashes => mapped) 
+          message = "The module refs file was updated by the server based on includes section from dtk.model.yaml"
+          ret.merge!(:message => message)
         end
       end
-      message = "The module refs file was updated by the server based on includes section from dtk.model.yaml"
-      ret.merge(:message => message)
+      ret
     end
 
    private

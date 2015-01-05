@@ -11,7 +11,6 @@ module DTK; class BaseModule
     end
 
     def update_from_initial_create(commit_sha,repo_idh,version,opts={})
-      # For Alsin: pass in opts[:commit_dsl] to use new form
       if opts[:commit_dsl]
         update_from_initial_create__new(commit_sha,repo_idh,version,opts)
       else
@@ -28,7 +27,7 @@ module DTK; class BaseModule
       return ret unless pull_was_needed or parse_needed
       repo = repo_idh.create_object()
       local = ret_local(version)
-      # info is hash with hkeys
+      # ret is hash with hkeys
       # :name=>"maven",
       # :namespace=>"dtk-user",
       # :type=>:component_module,
@@ -36,38 +35,47 @@ module DTK; class BaseModule
       # :external_dependencies=> {:inconsistent=>[], :possibly_missing=>["maestrodev/wget"]},
       # :match_hashes=>[]
       # :module_branch_idh=>...
-      # :impl_obj => 
+      # :impl_obj =>
       # :config_agent_type=>
       # :dsl_created_info=>
       #  :path=>"dtk.model.yaml",
-      #  :content=> string with dsl file      
+      #  :content=> string with dsl file
       #  
-      info = create_needed_objects_and_dsl?(repo,local,opts)
-      version = info[:version]
-      impl_obj = info[:impl_obj]
+      ret = create_needed_objects_and_dsl?(repo,local,opts)
+      version = ret[:version]
+      impl_obj = ret[:impl_obj]
 
-      # For Aldin: below this largely cut and paste from parse_dsl_and_update_model
-      # once we get this to work we can claen it up by having this share code with a updated parse_dsl_and_update_model
       set_dsl_parsed!(false)
       opts_parse = {
-        :dsl_created_info => info[:dsl_created_info],
-        :config_agent_type => info[:config_agent_type]
+        :dsl_created_info => ret[:dsl_created_info],
+        :config_agent_type => ret[:config_agent_type]
       }.merge(opts)
       dsl_obj = klass().parse_dsl(self,impl_obj,opts_parse)
       return dsl_obj if ModuleDSL::ParsingError.is_error?(dsl_obj)
 
-      ret = dsl_obj.validate_includes_and_update_module_refs()
-      return ret if ModuleDSL::ParsingError.is_error?(ret)
+      # For Rich:
+      # Think we don't need validate_includes_and_update_module_refs call when doing import-git;
+      # this should be used only when doing import or push because we will have modules without
+      # metadata.json or Modulefile and then we will use includes section from dtk.model.yaml
+      # to find dependencies
+      #
+      # ret = dsl_obj.validate_includes_and_update_module_refs()
+      # return ret if ModuleDSL::ParsingError.is_error?(ret)
+
+      opts.merge!(:match_hashes => ret[:match_hashes]) if ret[:match_hashes]
+      component_module_refs = klass().update_component_module_refs(self.class,module_branch,opts)
+      return component_module_refs if ModuleDSL::ParsingError.is_error?(component_module_refs)
 
       dsl_obj.update_model_with_ref_integrity_check(:version => version)
-      tmp_opts = Hash.new
-      tmp_opts.merge!(:ambiguous => ret[:ambiguous]) if ret[:ambiguous]
       unless opts[:skip_module_ref_update]
+        tmp_opts = Hash.new
+        tmp_opts.merge!(:ambiguous => ret[:ambiguous]) if ret[:ambiguous]
+        tmp_opts.merge!(:create_empty_module_refs => true)
         ret_cmr = ModuleRefs.get_component_module_refs(module_branch)
         if new_commit_sha = ret_cmr.serialize_and_save_to_repo?(tmp_opts)
           if opts[:ret_dsl_updated_info]
             msg = ret[:message]||"The module refs file was updated by the server"
-            opts[:ret_dsl_updated_info] = DSLInfo::UpdatedInfo.new(:msg => msg,:commit_sha => new_commit_sha)
+            ret[:dsl_updated_info] = DSLInfo::UpdatedInfo.new(:msg => msg,:commit_sha => new_commit_sha)
           end
         end
       end
@@ -79,7 +87,10 @@ module DTK; class BaseModule
         set_dsl_parsed!(true)
         pp ["may be missing info want to pass back",ret]
       end
-      ret unless no_errors
+
+      # For Rich:
+      # commented out 'unless no_errors' because we need 'ret' on client side to print messages to user
+      ret # unless no_errors
     end
 
     def update_from_initial_create__legacy(commit_sha,repo_idh,version,opts={})

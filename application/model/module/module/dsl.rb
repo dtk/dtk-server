@@ -52,9 +52,17 @@ module DTK
     end
 
     # parses and creates dsl_object form file in implementation
+    # or content if passed in opts
     def self.create_dsl_object_from_impl(impl_obj,opts={})
-      info = get_dsl_file_raw_content_and_info(impl_obj)
-      create_from_file_obj_hash?(impl_obj,info[:dsl_filename],info[:content],opts)
+      if dsl_created_info =  opts[:dsl_created_info]
+        dsl_filename = dsl_created_info[:path]
+        content = dsl_created_info[:content]
+      else
+        info = get_dsl_file_raw_content_and_info(impl_obj)
+        dsl_filename = info[:dsl_filename]
+        content = info[:content]
+      end
+      create_from_file_obj_hash?(impl_obj,dsl_filename,content,opts)
     end
     # parses and creates dsl_object form hash parsed in as target
     def self.create_from_file_obj_hash?(impl_obj,dsl_filename,content,opts={})

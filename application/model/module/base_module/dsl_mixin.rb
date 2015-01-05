@@ -36,12 +36,50 @@ module DTK; class BaseModule
       # :external_dependencies=> {:inconsistent=>[], :possibly_missing=>["maestrodev/wget"]},
       # :match_hashes=>[]
       # :module_branch_idh=>...
+      # :impl_obj => 
+      # :config_agent_type=>
       # :dsl_created_info=>
       #  :path=>"dtk.model.yaml",
       #  :content=> string with dsl file      
       #  
       info = create_needed_objects_and_dsl?(repo,local,opts)
-      
+      version = info[:version]
+      impl_obj = info[:impl_obj]
+
+      # For Aldin: below this largely cut and paste from parse_dsl_and_update_model
+      # once we get this to work we can claen it up by having this share code with a updated parse_dsl_and_update_model
+      set_dsl_parsed!(false)
+      opts_parse = {
+        :dsl_created_info => info[:dsl_created_info],
+        :config_agent_type => info[:config_agent_type]
+      }.merge(opts)
+      dsl_obj = klass().parse_dsl(self,impl_obj,opts_parse)
+      return dsl_obj if ModuleDSL::ParsingError.is_error?(dsl_obj)
+
+      ret = dsl_obj.validate_includes_and_update_module_refs()
+      return ret if ModuleDSL::ParsingError.is_error?(ret)
+
+      dsl_obj.update_model_with_ref_integrity_check(:version => version)
+      tmp_opts = Hash.new
+      tmp_opts.merge!(:ambiguous => ret[:ambiguous]) if ret[:ambiguous]
+      unless opts[:skip_module_ref_update]
+        ret_cmr = ModuleRefs.get_component_module_refs(module_branch)
+        if new_commit_sha = ret_cmr.serialize_and_save_to_repo?(tmp_opts)
+          if opts[:ret_dsl_updated_info]
+            msg = ret[:message]||"The module refs file was updated by the server"
+            opts[:ret_dsl_updated_info] = DSLInfo::UpdatedInfo.new(:msg => msg,:commit_sha => new_commit_sha)
+          end
+        end
+      end
+
+      # parsed will be true if there are no missing or ambiguous dependencies, or flag dsl_parsed_false is not sent from the client
+      dependencies = ret[:external_dependencies]||{}
+      no_errors = (dependencies[:possibly_missing]||{}).empty? and (ret[:ambiguous]||{}).empty?
+      if no_errors and !opts[:dsl_parsed_false]
+        set_dsl_parsed!(true)
+        pp ["may be missing info want to pass back",ret]
+      end
+      ret unless no_errors
     end
 
     def update_from_initial_create__legacy(commit_sha,repo_idh,version,opts={})
@@ -110,16 +148,12 @@ module DTK; class BaseModule
 
       # parsed will be true if there are no missing or ambiguous dependencies, or flag dsl_parsed_false is not sent from the client
       dependencies = ret[:external_dependencies]||{}
-      if (dependencies[:possibly_missing]||{}).empty? and
-          (ret[:ambiguous]||{}).empty? and
-          !opts[:dsl_parsed_false]
+      no_errors = (dependencies[:possibly_missing]||{}).empty? and (ret[:ambiguous]||{}).empty?
+      if no_errors and !opts[:dsl_parsed_false]
         set_dsl_parsed!(true)
         pp ["may be missing info want to pass back",ret]
-        
-        nil
-      else
-        ret
       end
+      ret unless no_errors
     end
 
     # TODO: for testing
@@ -152,16 +186,20 @@ module DTK; class BaseModule
       opts.merge!(:ret_dsl_updated_info => Hash.new)
       project = local.project
 
-      ret.merge!(
-        :name      => module_name(),
-        :namespace => module_namespace(),
-        :type      => module_type(),
-        :version   => local.version
-      )
-
       config_agent_type = opts[:config_agent_type] || config_agent_type_default()
       impl_obj = Implementation.create?(project,local,repo,config_agent_type)
       impl_obj.create_file_assets_from_dir_els()
+
+      ret_hash = {
+        :name              => module_name(),
+        :namespace         => module_namespace(),
+        :type              => module_type(),
+        :version           => local.version,
+        :impl_obj          => impl_obj,
+        :config_agent_type => config_agent_type
+      }
+      ret.merge!(ret_hash)
+
 
       module_and_branch_info = self.class.create_module_and_branch_obj?(project,repo.id_handle(),local,opts[:ancestor_branch_idh])
       module_branch_idh = module_and_branch_info[:module_branch_idh]
@@ -191,11 +229,14 @@ module DTK; class BaseModule
           ret.dsl_parsed_info = err
         end
       elsif opts[:scaffold_if_no_dsl]
-        opts = Hash.new
+        opts_parse = Hash.new
         if matching_branches
-          opts.merge!(:include_module_branches => matching_branches)
+          opts_parse.merge!(:include_module_branches => matching_branches)
         end
-        dsl_created_info = parse_impl_to_create_dsl(config_agent_type,impl_obj,opts)
+        dsl_created_info = parse_impl_to_create_dsl(config_agent_type,impl_obj,opts_parse)
+        if opts[:commit_dsl]
+          impl_obj.add_file_and_push_to_repo(dsl_created_info[:path],dsl_created_info[:content])
+        end
       end
 
       if ext_deps = opts[:external_dependencies]

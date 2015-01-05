@@ -37,6 +37,7 @@ module DTK
       version = ret_version()
       scaffold = ret_request_params(:scaffold_if_no_dsl)
       opts = {:scaffold_if_no_dsl => scaffold, :do_not_raise => true, :process_external_refs => true}
+      opts.merge!(:commit_dsl => true) if ret_request_params(:commit_dsl)
       rest_ok_response component_module.update_from_initial_create(commit_sha,repo_idh,version,opts)
     end
 

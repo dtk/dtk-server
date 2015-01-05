@@ -11,6 +11,40 @@ module DTK; class BaseModule
     end
 
     def update_from_initial_create(commit_sha,repo_idh,version,opts={})
+      # For Alsin: pass in opts[:commit_dsl] to use new form
+      if opts[:commit_dsl]
+        update_from_initial_create__new(commit_sha,repo_idh,version,opts)
+      else
+        update_from_initial_create__legacy(commit_sha,repo_idh,version,opts)
+      end
+    end
+
+    def update_from_initial_create__new(commit_sha,repo_idh,version,opts={})
+      ret = DSLInfo.new()
+      module_branch = get_workspace_module_branch(version)
+      pull_was_needed = module_branch.pull_repo_changes?(commit_sha)
+
+      parse_needed = !dsl_parsed?()
+      return ret unless pull_was_needed or parse_needed
+      repo = repo_idh.create_object()
+      local = ret_local(version)
+      # info is hash with hkeys
+      # :name=>"maven",
+      # :namespace=>"dtk-user",
+      # :type=>:component_module,
+      # :version=>nil,
+      # :external_dependencies=> {:inconsistent=>[], :possibly_missing=>["maestrodev/wget"]},
+      # :match_hashes=>[]
+      # :module_branch_idh=>...
+      # :dsl_created_info=>
+      #  :path=>"dtk.model.yaml",
+      #  :content=> string with dsl file      
+      #  
+      info = create_needed_objects_and_dsl?(repo,local,opts)
+      
+    end
+
+    def update_from_initial_create__legacy(commit_sha,repo_idh,version,opts={})
       ret = DSLInfo.new()
       module_branch = get_workspace_module_branch(version)
       pull_was_needed = module_branch.pull_repo_changes?(commit_sha)

@@ -19,30 +19,17 @@ module DTK; class BaseModule
     end
 
     def update_from_initial_create__new(commit_sha,repo_idh,version,opts={})
-      ret = DSLInfo.new()
-      module_branch = get_workspace_module_branch(version)
+      ret             = DSLInfo.new()
+      module_branch   = get_workspace_module_branch(version)
       pull_was_needed = module_branch.pull_repo_changes?(commit_sha)
 
       parse_needed = !dsl_parsed?()
       return ret unless pull_was_needed or parse_needed
-      repo = repo_idh.create_object()
+      repo  = repo_idh.create_object()
       local = ret_local(version)
-      # ret is hash with hkeys
-      # :name=>"maven",
-      # :namespace=>"dtk-user",
-      # :type=>:component_module,
-      # :version=>nil,
-      # :external_dependencies=> {:inconsistent=>[], :possibly_missing=>["maestrodev/wget"]},
-      # :match_hashes=>[]
-      # :module_branch_idh=>...
-      # :impl_obj =>
-      # :config_agent_type=>
-      # :dsl_created_info=>
-      #  :path=>"dtk.model.yaml",
-      #  :content=> string with dsl file
-      #  
-      ret = create_needed_objects_and_dsl?(repo,local,opts)
-      version = ret[:version]
+
+      ret      = create_needed_objects_and_dsl?(repo,local,opts)
+      version  = ret[:version]
       impl_obj = ret[:impl_obj]
 
       set_dsl_parsed!(false)
@@ -62,6 +49,8 @@ module DTK; class BaseModule
       # ret = dsl_obj.validate_includes_and_update_module_refs()
       # return ret if ModuleDSL::ParsingError.is_error?(ret)
 
+      # this will update module.module_ref table based on dependencies we found in metadata.json or Modulefile
+      # when doing import-git
       opts.merge!(:match_hashes => ret[:match_hashes]) if ret[:match_hashes]
       component_module_refs = klass().update_component_module_refs(self.class,module_branch,opts)
       return component_module_refs if ModuleDSL::ParsingError.is_error?(component_module_refs)

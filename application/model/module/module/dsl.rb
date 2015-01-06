@@ -10,7 +10,7 @@ module DTK
     extend UpdateModelClassMixin
     include UpdateModelMixin
 
-    attr_reader :input_hash,:config_agent_type
+    attr_reader :input_hash,:config_agent_type,:project_idh,:module_branch
     def initialize(config_agent_type,impl_idh,module_branch,version_specific_input_hash,opts={})
       @module_branch = module_branch
       @config_agent_type = config_agent_type

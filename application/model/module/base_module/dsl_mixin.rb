@@ -74,17 +74,18 @@ module DTK; class BaseModule
 
       # this will update module.module_ref table based on dependencies we found in metadata.json or Modulefile
       # when doing import-git
-      
-      component_module_refs = UpdateModuleRefs.update_component_module_refs(klass(),module_branch,ret[:matching_module_refs])
-      return component_module_refs if ModuleDSL::ParsingError.is_error?(component_module_refs)
 
       dsl_obj.update_model_with_ref_integrity_check(:version => version)
+      
+      component_module_refs = UpdateModuleRefs.update_component_module_refs(module_branch,ret[:matching_module_refs],self.class)
+      return component_module_refs if ModuleDSL::ParsingError.is_error?(component_module_refs)
       unless opts[:skip_module_ref_update]
-        tmp_opts = Hash.new
-        tmp_opts.merge!(:ambiguous => ret[:ambiguous]) if ret[:ambiguous]
-        tmp_opts.merge!(:create_empty_module_refs => true)
-        ret_cmr = ModuleRefs.get_component_module_refs(module_branch)
-        if new_commit_sha = ret_cmr.serialize_and_save_to_repo?(tmp_opts)
+        opts_serialize = Hash.new
+        opts_serialize.merge!(:ambiguous => ret[:ambiguous]) if ret[:ambiguous]
+        opts_serialize.merge!(:create_empty_module_refs => true)
+        #For Aldin: not high priority, but think that we should not need to pass in 
+        opts_serialize.merge!(:matching_module_refs => ret[:matching_module_refs]) if ret[:matching_module_refs]
+        if new_commit_sha = component_module_refs.serialize_and_save_to_repo?(opts_serialize)
           if opts[:ret_dsl_updated_info]
             msg = ret[:message]||"The module refs file was updated by the server"
             ret[:dsl_updated_info] = DSLInfo::UpdatedInfo.new(:msg => msg,:commit_sha => new_commit_sha)
@@ -113,7 +114,7 @@ module DTK; class BaseModule
       local = ret_local(version)
       ret = create_needed_objects_and_dsl?(repo,local,opts)
 
-      component_module_refs = UpdateModuleRefs.update_component_module_refs(klass(),module_branch,ret[:matching_module_refs])
+      component_module_refs = UpdateModuleRefs.update_component_module_refs(module_branch,ret[:matching_module_refs],self.class)
       return component_module_refs if ModuleDSL::ParsingError.is_error?(component_module_refs)
 
       opts.merge!(:ambiguous => ret[:ambiguous]) if ret[:ambiguous]
@@ -143,7 +144,7 @@ module DTK; class BaseModule
       return dsl_obj if ModuleDSL::ParsingError.is_error?(dsl_obj)
 
       if opts[:update_from_includes]
-        ret = UpdateModuleRefs.new(dsl_obj).validate_includes_and_update_module_refs()
+        ret = UpdateModuleRefs.new(dsl_obj,self.class).validate_includes_and_update_module_refs()
         return ret if ModuleDSL::ParsingError.is_error?(ret)
       end
 
@@ -243,7 +244,8 @@ module DTK; class BaseModule
       elsif opts[:scaffold_if_no_dsl]
         opts_parse = Hash.new
         if matching_branches
-          include_modules = matching_branches.map{ |mb| mb.get_module()[:display_name] if mb.get_module() }
+          # TODO: more efficient way to component this
+          include_modules = matching_branches.map{|mb|mb.get_module()[:display_name]}.uniq
           opts_parse.merge!(:include_modules => include_modules)
         end
         dsl_created_info = parse_impl_to_create_dsl(config_agent_type,impl_obj,opts_parse)

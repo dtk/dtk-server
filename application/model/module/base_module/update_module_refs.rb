@@ -1,23 +1,24 @@
 module DTK; class BaseModule
   class UpdateModuleRefs
-    def initialize(dsl_obj)
+    def initialize(dsl_obj,module_class)
       @input_hash    = dsl_obj.input_hash
       @project_idh   = dsl_obj.project_idh
       @module_branch = dsl_obj.module_branch
+      @module_class  = module_class
     end
 
-    def self.update_component_module_refs(module_class,module_branch,matching_module_refs)
+    def self.update_component_module_refs(module_branch,matching_module_refs,module_class)
       return if matching_module_refs.nil? or matching_module_refs.empty?
-      syntatic_parsed_info = module_class::DSLParser.parse_directory(module_branch,:component_module_refs)
-      return syntatic_parsed_info if ParsingError.is_error?(syntatic_parsed_info)
+      syntatic_parsed_info = dsl_parser_class(module_class).parse_directory(module_branch,:component_module_refs)
+      return syntatic_parsed_info if ModuleDSL::ParsingError.is_error?(syntatic_parsed_info)
       syntatic_parsed_info << matching_module_refs
       syntatic_parsed_info.flatten!
       parsed_info = ModuleRefs::Parse.semantic_parse(module_branch,syntatic_parsed_info)
-      return parsed_info if ParsingError.is_error?(parsed_info)
+      return parsed_info if ModuleDSL::ParsingError.is_error?(parsed_info)
       ModuleRefs::Parse.update_from_dsl_parsed_info(module_branch,parsed_info)
     end
 
-    def validate_includes_and_update_module_refs_aux()
+    def validate_includes_and_update_module_refs()
       ret = Hash.new
       
       # @input_hash is in normalized form
@@ -62,18 +63,22 @@ module DTK; class BaseModule
         if poss_problems = external_deps.possible_problems?()
           ret.merge!(:external_dependencies => poss_problems)
         end
-        
+
         ret.merge!(:matching_module_refs => mapped)
         unless mapped.empty?
-          ModuleDSL.update_component_module_refs(ComponentModule,@module_branch,mapped) 
+          self.class.update_component_module_refs(@module_branch,mapped,@module_class) 
           message = "The module refs file was updated by the server based on includes section from dtk.model.yaml"
           ret.merge!(:message => message)
         end
       end
-        ret
+      ret
     end
     
-    private
+   private
+    def self.dsl_parser_class(module_class)
+      module_class::DSLParser
+    end
+
     def check_if_matching_or_ambiguous(ambiguous)
       existing_c_hash = get_existing_module_refs()
       if existing = existing_c_hash['component_modules']

@@ -27,7 +27,7 @@ module DTK
       version = ret_version()
       scaffold = ret_request_params(:scaffold_if_no_dsl)
       opts = {:scaffold_if_no_dsl => scaffold, :do_not_raise => true, :process_external_refs => true}
-      rest_ok_response test_module.update_from_initial_create(commit_sha,repo_idh,version,opts)
+      rest_ok_response test_module.import_from_file(commit_sha,repo_idh,version,opts)
     end
 
     def rest__update_model_from_clone()

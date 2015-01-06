@@ -42,11 +42,10 @@ module DTK
 
       response =
         if git_import
-          component_module.update_from_initial_create__new(commit_sha,repo_idh,version,opts)
+          component_module.import_from_git(commit_sha,repo_idh,version,opts)
         else
-          component_module.update_from_initial_create__legacy(commit_sha,repo_idh,version,opts)
+          component_module.import_from_file(commit_sha,repo_idh,version,opts)
         end
-      # rest_ok_response component_module.update_from_initial_create(commit_sha,repo_idh,version,opts)
       rest_ok_response response
     end
 

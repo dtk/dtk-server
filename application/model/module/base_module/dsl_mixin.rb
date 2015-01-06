@@ -19,25 +19,7 @@ module DTK; class BaseModule
       set_dsl_parsed!(true)
     end
 
-    # called when doing an import or import from git
-    # For Aldin: currently update_from_initial_create__new called for import from git
-    # and update_from_initial_create__legacy called for import
-    # looking to have client change so opts[:commit_dsl] wil always be set for true; so for time being
-    # can have in controller have import call update_from_initial_create__legacy and
-    # import from git call update_from_initial_create__new
-    #
-    # For Rich: DONE
-    # I have changed component_module controller to user update_from_initial_create__new if import-git
-    # and update_from_initial_create__legacy if import; also added :commit_dsl param on client side for import
-    def update_from_initial_create(commit_sha,repo_idh,version,opts={})
-      if opts[:commit_dsl]
-        update_from_initial_create__new(commit_sha,repo_idh,version,opts)
-      else
-        update_from_initial_create__legacy(commit_sha,repo_idh,version,opts)
-      end
-    end
-
-    def update_from_initial_create__new(commit_sha,repo_idh,version,opts={})
+    def import_from_git(commit_sha,repo_idh,version,opts={})
       ret             = DSLInfo.new()
       module_branch   = get_workspace_module_branch(version)
       pull_was_needed = module_branch.pull_repo_changes?(commit_sha)
@@ -58,26 +40,6 @@ module DTK; class BaseModule
       }.merge(opts)
       dsl_obj = klass().parse_dsl(self,impl_obj,opts_parse)
       return dsl_obj if ModuleDSL::ParsingError.is_error?(dsl_obj)
-
-      # Think we don't need validate_includes_and_update_module_refs call when doing import-git;
-      # this should be used only when doing import or push because we will have modules without
-      # metadata.json or Modulefile and then we will use includes section from dtk.model.yaml
-      # to find dependencies
-      # ret = dsl_obj.validate_includes_and_update_module_refs()
-      # return ret if ModuleDSL::ParsingError.is_error?(ret)
-
-      # For Aldin: when we switch to having import use dsl_commited then this pah wil be taken, so want to
-      # conditionally call dsl_obj.validate_includes_and_update_module_refs()
-      # Initially we can have this be just for import git and use update_from_initial_create__legacy 
-      # be path taken when import used. After getting
-      # - this method to work for import git 
-      # - update_from_initial_create__legacy for import
-      # - import_from_puppet_forge for puppet forge
-      # - we can see if there are common parts we can collapse 
-
-      # For Rich:
-      # Agree with your statement above, for now it would be best to use update_from_initial_create__new for import-git
-      # and update_from_initial_create__legacy for import
 
       # this will update module.module_ref table based on dependencies we found in metadata.json or Modulefile
       # when doing import-git
@@ -114,7 +76,7 @@ module DTK; class BaseModule
       ret
     end
 
-    def update_from_initial_create__legacy(commit_sha,repo_idh,version,opts={})
+    def import_from_file(commit_sha,repo_idh,version,opts={})
       ret = DSLInfo.new()
       module_branch = get_workspace_module_branch(version)
       pull_was_needed = module_branch.pull_repo_changes?(commit_sha)

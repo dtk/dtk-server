@@ -1,15 +1,30 @@
-# TODO: Aldin: think you want to replace cases where there is an instance function that uses ModuleDSL
-# with klass()
 module DTK; class BaseModule
   module DSLMixin
     r8_nested_require('dsl_mixin','external_refs')
     include ExternalRefsMixin
 
+    # called when installing from dtkn catalog
     def install__process_dsl(repo,module_branch,local,opts={})
-      parsed = create_needed_objects_and_dsl?(repo,local,opts)
-      parsed
+      create_needed_objects_and_dsl?(repo,local,opts)
     end
 
+    # called when importing from puppet forge
+    def import_from_puppet_forge(config_agent_type,impl_obj,component_includes)
+      opts_parse = {
+        :ret_hash_content => true,
+        :include_modules  => component_includes
+      }
+      dsl_created_info = parse_impl_to_create_dsl(config_agent_type,impl_obj,opts_parse)
+      add_dsl_content_to_impl(impl_obj,dsl_created_info)
+      set_dsl_parsed!(true)
+    end
+
+    # called when doing an import or import from git
+    # For Aldin: currently update_from_initial_create__new called for import from git
+    # and update_from_initial_create__legacy called for import
+    # looking to have client change so opts[:commit_dsl] wil always be set for true; so for time being
+    # can have in controller have import call update_from_initial_create__legacy and
+    # import from git call update_from_initial_create__new
     def update_from_initial_create(commit_sha,repo_idh,version,opts={})
       if opts[:commit_dsl]
         update_from_initial_create__new(commit_sha,repo_idh,version,opts)
@@ -45,14 +60,22 @@ module DTK; class BaseModule
       # this should be used only when doing import or push because we will have modules without
       # metadata.json or Modulefile and then we will use includes section from dtk.model.yaml
       # to find dependencies
-      #
       # ret = dsl_obj.validate_includes_and_update_module_refs()
       # return ret if ModuleDSL::ParsingError.is_error?(ret)
 
+      # For Aldin: when we switch to having import use dsl_commited then this pah wil be taken, so want to
+      # conditionally call dsl_obj.validate_includes_and_update_module_refs()
+      # Initially we can have this be just for import git and use update_from_initial_create__legacy 
+      # be path taken when import used. After getting
+      # - this method to work for import git 
+      # - update_from_initial_create__legacy for import
+      # - import_from_puppet_forge for puppet forge
+      # - we can see if there are common parts we can collapse 
+
       # this will update module.module_ref table based on dependencies we found in metadata.json or Modulefile
       # when doing import-git
-      opts.merge!(:match_hashes => ret[:match_hashes]) if ret[:match_hashes]
-      component_module_refs = klass().update_component_module_refs(self.class,module_branch,opts)
+      
+      component_module_refs = klass().update_component_module_refs(self.class,module_branch,ret[:match_hashes])
       return component_module_refs if ModuleDSL::ParsingError.is_error?(component_module_refs)
 
       dsl_obj.update_model_with_ref_integrity_check(:version => version)
@@ -74,12 +97,9 @@ module DTK; class BaseModule
       no_errors = (dependencies[:possibly_missing]||{}).empty? and (ret[:ambiguous]||{}).empty?
       if no_errors and !opts[:dsl_parsed_false]
         set_dsl_parsed!(true)
-        pp ["may be missing info want to pass back",ret]
       end
 
-      # For Rich:
-      # commented out 'unless no_errors' because we need 'ret' on client side to print messages to user
-      ret # unless no_errors
+      ret
     end
 
     def update_from_initial_create__legacy(commit_sha,repo_idh,version,opts={})
@@ -93,8 +113,7 @@ module DTK; class BaseModule
       local = ret_local(version)
       ret = create_needed_objects_and_dsl?(repo,local,opts)
 
-      opts.merge!(:match_hashes => ret[:match_hashes]) if ret[:match_hashes]
-      component_module_refs = klass().update_component_module_refs(self.class,module_branch,opts)
+      component_module_refs = klass().update_component_module_refs(self.class,module_branch,ret[:match_hashes])
       return component_module_refs if ModuleDSL::ParsingError.is_error?(component_module_refs)
 
       opts.merge!(:ambiguous => ret[:ambiguous]) if ret[:ambiguous]
@@ -108,19 +127,13 @@ module DTK; class BaseModule
       ret
     end
 
-    def parse_impl_to_create_and_add_dsl(config_agent_type,impl_obj)
-      dsl_created_info = parse_impl_to_create_dsl(config_agent_type,impl_obj,:ret_hash_content=>true)
-
-      #set_dsl_parsed!(true)
-    end
-
     def pull_from_remote__update_from_dsl(repo, module_and_branch_info,version=nil)
       info = module_and_branch_info #for succinctness
       module_branch_idh = info[:module_branch_idh]
       module_branch = module_branch_idh.create_object().merge(:repo => repo)
       create_needed_objects_and_dsl?(repo,ret_local(version))
     end
-
+    # called from component-module push
     def parse_dsl_and_update_model(impl_obj,module_branch_idh,version,opts={})
       set_dsl_parsed!(false)
       ret, tmp_opts = {}, {}
@@ -151,7 +164,6 @@ module DTK; class BaseModule
       no_errors = (dependencies[:possibly_missing]||{}).empty? and (ret[:ambiguous]||{}).empty?
       if no_errors and !opts[:dsl_parsed_false]
         set_dsl_parsed!(true)
-        pp ["may be missing info want to pass back",ret]
       end
       ret unless no_errors
     end
@@ -231,11 +243,12 @@ module DTK; class BaseModule
       elsif opts[:scaffold_if_no_dsl]
         opts_parse = Hash.new
         if matching_branches
-          opts_parse.merge!(:include_module_branches => matching_branches)
+          include_modules = matching_branches.map{ |mb| mb.get_module()[:display_name] if mb.get_module() }
+          opts_parse.merge!(:include_modules => include_modules)
         end
         dsl_created_info = parse_impl_to_create_dsl(config_agent_type,impl_obj,opts_parse)
         if opts[:commit_dsl]
-          impl_obj.add_file_and_push_to_repo(dsl_created_info[:path],dsl_created_info[:content])
+          add_dsl_content_to_impl(impl_obj,dsl_created_info)
         end
       end
 
@@ -251,6 +264,10 @@ module DTK; class BaseModule
       matching_for_module_refs = prepare_for_module_refs(matching_branches)
       ret.merge!(:module_branch_idh => module_branch_idh, :dsl_created_info => dsl_created_info, :match_hashes => matching_for_module_refs)
       ret
+    end
+
+    def add_dsl_content_to_impl(impl_obj,dsl_created_info)
+      impl_obj.add_file_and_push_to_repo(dsl_created_info[:path],dsl_created_info[:content])
     end
 
     def update_model_from_clone__type_specific?(commit_sha,diffs_summary,module_branch,version,opts={})

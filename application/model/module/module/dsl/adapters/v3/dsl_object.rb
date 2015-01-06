@@ -3,21 +3,7 @@ module DTK; class ModuleDSL; class V3
   class DSLObject < DSLObjectBase
     class Module < DSLObjectBase::Module
       def set_include_modules!(ret,opts={})
-        if module_branches = opts[:include_module_branches]
-          ret.set_unless_nil("includes",module_refs(module_branches))
-        end
-      end
-
-     private
-      def module_refs(module_branches)
-        # TODO: more efficient to bulk up query
-        # TODO: checking verskion associated with module branch
-        ret = []
-        unless module_branches.empty?()
-         ret = module_branches.map{ |mb| mb.get_module()[:display_name] if mb.get_module() }
-        end
-
-        ret.compact
+        ret.set_unless_nil("includes",opts[:include_modules])
       end
     end
 

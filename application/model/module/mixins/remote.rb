@@ -5,7 +5,7 @@ module DTK; module ModuleMixins
   MODULE_REFS_FILE_NAME = 'module_refs.yaml'
 
   module Remote::Class
-    # install from a dtkn repo; directly in this method handles the module/branc and repo level items
+    # install from a dtkn repo; directly in this method handles the module/branch and repo level items
     # and then calls install__process_dsl to handle model and implementaion/files parts depending on what type of module it is
     def install(project, local_params, remote_params, client_rsa_pub_key, opts={})
       version = remote_params.version
@@ -70,16 +70,16 @@ module DTK; module ModuleMixins
         if module_type == :component_module
           opts_process_dsl.merge!(:set_external_refs => true)
         end
-        parsed = module_obj.install__process_dsl(repo_with_branch,module_branch,local,opts_process_dsl)
+        dsl_info = module_obj.install__process_dsl(repo_with_branch,module_branch,local,opts_process_dsl)
         module_branch.set_sha(commit_sha)
       end
       opts_info = {:version=>version, :module_namespace=>local_namespace}
       response = module_repo_info(repo_with_branch,module_and_branch_info,opts_info)
 
-      if ErrorUsage::Parsing.is_error?(parsed)
-        response[:dsl_parsed_info] = parsed
-      elsif parsed && !parsed.empty?
-        response[:dsl_parsed_info] = parsed[:dsl_parsed_info]
+      if ErrorUsage::Parsing.is_error?(dsl_info)
+        response[:dsl_parsed_info] = dsl_info
+      elsif dsl_info && !dsl_info.empty?
+        response[:dsl_parsed_info] = dsl_info[:dsl_parsed_info]
       end
       response
     end

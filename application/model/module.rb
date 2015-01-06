@@ -1,3 +1,4 @@
+# TODO: need to cleanup breaking into module, base_module and component_module
 module DTK
   # order is important
   r8_nested_require('module','mixins')

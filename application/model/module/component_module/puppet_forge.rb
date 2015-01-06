@@ -56,7 +56,7 @@ module DTK
         impl_obj = module_objs[:implementation]
         impl_obj.create_file_assets_from_dir_els()
 
-        module_objs[:component_module].parse_impl_to_create_and_add_dsl(@config_agent_type,impl_obj)
+        module_objs[:component_module].import_from_puppet_forge(@config_agent_type,impl_obj)
         pf_module
       end
 

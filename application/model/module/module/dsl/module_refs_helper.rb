@@ -1,10 +1,10 @@
 module DTK; class ModuleDSL
   module ModuleRefsHelperClassMixin
-    def update_component_module_refs(module_class,module_branch,opts={})
-      syntatic_parsed_info = module_class::DSLParser.parse_directory(module_branch,:component_module_refs,opts)
+    def update_component_module_refs(module_class,module_branch,match_hashes)
+      syntatic_parsed_info = module_class::DSLParser.parse_directory(module_branch,:component_module_refs)
       return syntatic_parsed_info if ParsingError.is_error?(syntatic_parsed_info)
-      if opts[:match_hashes]
-        syntatic_parsed_info << opts[:match_hashes]
+      if match_hashes
+        syntatic_parsed_info << match_hashes
         syntatic_parsed_info.flatten!
       end
       parsed_info = ModuleRefs::Parse.semantic_parse(module_branch,syntatic_parsed_info)
@@ -17,11 +17,12 @@ module DTK; class ModuleDSL
     def validate_includes_and_update_module_refs_aux()
       ret = Hash.new
 
-      # @input_hash is in normaized form
+      # @input_hash is in normalized form
       includes = @input_hash.values.map{|v|(v['component_include_module']||{}).keys}.flatten(1)
       includes.uniq!
       unless includes.empty?
         multiple_namespaces = []
+        # TODO: ComponentModule.get_all expensive call, better to do a filtered query
         all_modules = ComponentModule.get_all(@project_idh,[:namespace_id,:namespace])
         mapped = all_modules.select{|m| includes.include?(m[:display_name])}.map{|k| {:component_module=>k[:display_name],:remote_namespace=>k[:namespace][:name]}}
         multiple_namespaces = mapped.group_by { |h| h[:component_module] }.values.select { |a| a.size > 1 }.flatten

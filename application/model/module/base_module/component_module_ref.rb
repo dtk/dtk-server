@@ -6,9 +6,13 @@ module DTK; class BaseModule
     end
     private :initialize
 
-    # returns array of ModuleRefs
-    def self.create_from_module_branches(module_branches)
-      ret = Array.new
+    def component_module()
+      self[:component_module]
+    end
+    
+    # returns array of ComponentModuleRefs
+    def self.create_from_module_branches?(module_branches)
+      ret = nil
       if module_branches.nil? or module_branches.empty?
         return ret 
       end

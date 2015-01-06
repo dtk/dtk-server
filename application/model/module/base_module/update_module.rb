@@ -224,24 +224,17 @@ module DTK; class BaseModule; module UpdateModule
 
       module_and_branch_info = self.class.create_module_and_branch_obj?(project,repo.id_handle(),local,opts[:ancestor_branch_idh])
       module_branch_idh = module_and_branch_info[:module_branch_idh]
-      external_dependencies = matching_branches = nil
+      module_branch = module_branch_idh.create_object()
+
       opts.merge!(:project => project)
       # opts[:process_external_refs] means to see if external refs and then check againts existing loaded components
       if opts[:process_external_refs]
-        module_branch = module_branch_idh.create_object()
         if external_deps = process_external_refs(module_branch,config_agent_type,project,impl_obj)
-          if poss_problems = external_deps.possible_problems?()
-            ret.merge!(:external_dependencies => poss_problems)
-          end
-          ambiguous = external_deps[:ambiguous]
-          missing   = external_deps[:possibly_missing]
-          ret.merge!(:ambiguous => ambiguous) if ambiguous
-          ret.merge!(:missing   => missing) if missing
-          matching_branches = external_deps.matching_module_branches?()
+          # sets teh following fields if non null :external_dependencies, :ambiguous, :missing, :matching_module_refs
+          ret.merge!(external_deps.ret_hash_info())
         end
       # opts[:set_external_refs] means to set external refs if they exist from parsing module files
       elsif opts[:set_external_refs]
-        module_branch = module_branch_idh.create_object()
         set_external_ref?(module_branch,config_agent_type,impl_obj)
       end
 
@@ -253,10 +246,8 @@ module DTK; class BaseModule; module UpdateModule
         end
       elsif opts[:scaffold_if_no_dsl]
         opts_parse = Hash.new
-        if matching_branches
-          # TODO: more efficient way to component this
-          include_modules = matching_branches.map{|mb|mb.get_module()[:display_name]}.uniq
-          opts_parse.merge!(:include_modules => include_modules)
+        if ret[:matching_module_refs]
+          opts_parse.merge!(:include_modules => ret[:matching_module_refs].map{|r|r.component_module})
         end
         dsl_created_info = parse_impl_to_create_dsl(config_agent_type,impl_obj,opts_parse)
         if opts[:commit_dsl]
@@ -273,12 +264,7 @@ module DTK; class BaseModule; module UpdateModule
         ret.dsl_updated_info = dsl_updated_info
       end
 
-      ret_hash_add = {
-        :module_branch_idh    => module_branch_idh, 
-        :dsl_created_info     => dsl_created_info, 
-        :matching_module_refs => ComponentModuleRef.create_from_module_branches(matching_branches)
-      }
-      ret.merge(ret_hash_add)
+      ret.merge(:module_branch_idh => module_branch_idh, :dsl_created_info => dsl_created_info)
     end
 
     def add_dsl_content_to_impl(impl_obj,dsl_created_info)

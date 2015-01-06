@@ -75,7 +75,7 @@ module DTK; class BaseModule
       # this will update module.module_ref table based on dependencies we found in metadata.json or Modulefile
       # when doing import-git
       
-      component_module_refs = klass().update_component_module_refs(self.class,module_branch,ret[:match_hashes])
+      component_module_refs = klass().update_component_module_refs(self.class,module_branch,ret[:module_ref_hashes])
       return component_module_refs if ModuleDSL::ParsingError.is_error?(component_module_refs)
 
       dsl_obj.update_model_with_ref_integrity_check(:version => version)
@@ -113,7 +113,7 @@ module DTK; class BaseModule
       local = ret_local(version)
       ret = create_needed_objects_and_dsl?(repo,local,opts)
 
-      component_module_refs = klass().update_component_module_refs(self.class,module_branch,ret[:match_hashes])
+      component_module_refs = klass().update_component_module_refs(self.class,module_branch,ret[:module_ref_hashes])
       return component_module_refs if ModuleDSL::ParsingError.is_error?(component_module_refs)
 
       opts.merge!(:ambiguous => ret[:ambiguous]) if ret[:ambiguous]
@@ -261,9 +261,12 @@ module DTK; class BaseModule
         ret.dsl_updated_info = dsl_updated_info
       end
 
-      matching_for_module_refs = prepare_for_module_refs(matching_branches)
-      ret.merge!(:module_branch_idh => module_branch_idh, :dsl_created_info => dsl_created_info, :match_hashes => matching_for_module_refs)
-      ret
+      ret_hash_add = {
+        :module_branch_idh => module_branch_idh, 
+        :dsl_created_info  => dsl_created_info, 
+        :module_ref_hashes => module_ref_hashes(matching_branches)
+      }
+      ret.merge(ret_hash_add)
     end
 
     def add_dsl_content_to_impl(impl_obj,dsl_created_info)
@@ -352,7 +355,7 @@ module DTK; class BaseModule
       ret
     end
 
-    def prepare_for_module_refs(matching_branches)
+    def module_ref_hashes(matching_branches)
       matching = []
       return matching unless matching_branches
 

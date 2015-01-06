@@ -1,12 +1,11 @@
 module DTK; class ModuleDSL
   module ModuleRefsHelperClassMixin
-    def update_component_module_refs(module_class,module_branch,match_hashes)
+    def update_component_module_refs(module_class,module_branch,module_ref_hashes)
+      return if module_ref_hashes.nil? or module_ref_hashes.empty?
       syntatic_parsed_info = module_class::DSLParser.parse_directory(module_branch,:component_module_refs)
       return syntatic_parsed_info if ParsingError.is_error?(syntatic_parsed_info)
-      if match_hashes
-        syntatic_parsed_info << match_hashes
-        syntatic_parsed_info.flatten!
-      end
+      syntatic_parsed_info << module_ref_hashes
+      syntatic_parsed_info.flatten!
       parsed_info = ModuleRefs::Parse.semantic_parse(module_branch,syntatic_parsed_info)
       return parsed_info if ParsingError.is_error?(parsed_info)
       ModuleRefs::Parse.update_from_dsl_parsed_info(module_branch,parsed_info)
@@ -60,9 +59,9 @@ module DTK; class ModuleDSL
           ret.merge!(:external_dependencies => poss_problems)
         end
 
-        ret.merge!(:match_hashes => mapped)
+        ret.merge!(:module_ref_hashes => mapped)
         unless mapped.empty?
-          ModuleDSL.update_component_module_refs(ComponentModule,@module_branch,:match_hashes => mapped) 
+          ModuleDSL.update_component_module_refs(ComponentModule,@module_branch,mapped) 
           message = "The module refs file was updated by the server based on includes section from dtk.model.yaml"
           ret.merge!(:message => message)
         end

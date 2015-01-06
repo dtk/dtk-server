@@ -12,8 +12,8 @@ module DTK; class BaseModule
     end
 
     def matching_module_branches?()
-      if match_hashes = self[:match_hashes]
-        ndx_ret = match_hashes.values.inject(Hash.new) do |h,r|
+      if module_ref_hashes = self[:module_ref_hashes]
+        ndx_ret = module_ref_hashes.values.inject(Hash.new) do |h,r|
           h.merge(r.id() => r)
         end
         ndx_ret.values unless ndx_ret.empty?
@@ -159,7 +159,7 @@ module DTK; class BaseModule
         all_inconsistent = (all_inconsistent - all_match_hashes.keys)
         all_possibly_missing = (all_possibly_missing.uniq - all_inconsistent_names - all_match_hashes.keys - all_ambiguous_ns.uniq)
         ext_deps_hash = {
-          :match_hashes => all_match_hashes,
+          :module_ref_hashes => all_match_hashes,
           :inconsistent => all_inconsistent.uniq,
           :possibly_missing => all_possibly_missing.uniq
         }

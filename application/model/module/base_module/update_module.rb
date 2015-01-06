@@ -1,15 +1,65 @@
-module DTK; class BaseModule
-  module DSLMixin
-    r8_nested_require('dsl_mixin','external_refs')
+# TODO: trying to better isolate public methods from private ones. Want to go to solution where there is asmall mixin of the public methods
+# available on BaseModule subclasses and then these call an embedded object; but for time being keeping all as mixin and 
+# inserting __private members
+# TODO: useful to seperate out what applies to service modules as well as component,test, etc
+module DTK; class BaseModule; module UpdateModule
+  r8_nested_require('update_module','external_dependencies')
+  r8_nested_require('update_module','update_module_refs')
+  r8_nested_require('update_module','external_refs')
+
+  module Mixin
     include ExternalRefsMixin
+
+    ## TODO: see if any can be moved to being private                                
+    ####### public methods #########
 
     # called when installing from dtkn catalog
     def install__process_dsl(repo,module_branch,local,opts={})
       create_needed_objects_and_dsl?(repo,local,opts)
     end
-
-    # called when importing from puppet forge
+    
     def import_from_puppet_forge(config_agent_type,impl_obj,component_includes)
+      import_from_puppet_forge__private(config_agent_type,impl_obj,component_includes)
+    end
+    
+    def import_from_git(commit_sha,repo_idh,version,opts={})
+      import_from_git__private(commit_sha,repo_idh,version,opts)
+    end
+
+    def import_from_file(commit_sha,repo_idh,version,opts={})
+      import_from_file__private(commit_sha,repo_idh,version,opts)
+    end
+
+    def pull_from_remote__update_from_dsl(repo, module_and_branch_info,version=nil)
+      pull_from_remote__update_from_dsl__private(repo, module_and_branch_info,version)
+    end
+
+    def parse_dsl_and_update_model(impl_obj,module_branch_idh,version,opts={})
+      parse_dsl_and_update_model__private(impl_obj,module_branch_idh,version,opts)
+    end
+
+    def create_new_version__type_specific(repo_for_new_branch,new_version,opts={})
+      local = ret_local(new_version)
+      create_needed_objects_and_dsl?(repo_for_new_branch,local,opts)
+    end
+
+    ####### end: public methods #########
+
+    # TODO: update_model_from_clone__type_specific? is called from module/mixins from
+    # update_model_from_clone_changes?, which more naturally belongs here, but cant now because then would not
+    # apply to service modules. More generally need to seperate out what applies to service modules as well as component,test, etc
+
+    # TODO: for testing
+    def test_generate_dsl()
+      module_branch = get_module_branch_matching_version()
+      config_agent_type = :puppet
+      impl_obj = module_branch.get_implementation()
+      parse_impl_to_create_dsl(config_agent_type,impl_obj)
+    end
+    ### end: for testing
+
+  private    
+    def import_from_puppet_forge__private(config_agent_type,impl_obj,component_includes)
       opts_parse = {
         :ret_hash_content => true,
         :include_modules  => component_includes
@@ -18,12 +68,12 @@ module DTK; class BaseModule
       add_dsl_content_to_impl(impl_obj,dsl_created_info)
       set_dsl_parsed!(true)
     end
-
-    def import_from_git(commit_sha,repo_idh,version,opts={})
+    
+    def import_from_git__private(commit_sha,repo_idh,version,opts={})
       ret             = DSLInfo.new()
       module_branch   = get_workspace_module_branch(version)
       pull_was_needed = module_branch.pull_repo_changes?(commit_sha)
-
+      
       parse_needed = !dsl_parsed?()
       return ret unless pull_was_needed or parse_needed
       repo  = repo_idh.create_object()
@@ -76,7 +126,7 @@ module DTK; class BaseModule
       ret
     end
 
-    def import_from_file(commit_sha,repo_idh,version,opts={})
+    def import_from_file__private(commit_sha,repo_idh,version,opts={})
       ret = DSLInfo.new()
       module_branch = get_workspace_module_branch(version)
       pull_was_needed = module_branch.pull_repo_changes?(commit_sha)
@@ -102,14 +152,14 @@ module DTK; class BaseModule
       ret
     end
 
-    def pull_from_remote__update_from_dsl(repo, module_and_branch_info,version=nil)
+    def pull_from_remote__update_from_dsl__private(repo, module_and_branch_info,version=nil)
       info = module_and_branch_info #for succinctness
       module_branch_idh = info[:module_branch_idh]
       module_branch = module_branch_idh.create_object().merge(:repo => repo)
       create_needed_objects_and_dsl?(repo,ret_local(version))
     end
-    # called from component-module push
-    def parse_dsl_and_update_model(impl_obj,module_branch_idh,version,opts={})
+
+    def parse_dsl_and_update_model__private(impl_obj,module_branch_idh,version,opts={})
       set_dsl_parsed!(false)
       ret, tmp_opts = {}, {}
       module_branch = module_branch_idh.create_object()
@@ -143,21 +193,6 @@ module DTK; class BaseModule
       ret unless no_errors
     end
 
-    # TODO: for testing
-    def test_generate_dsl()
-      module_branch = get_module_branch_matching_version()
-      config_agent_type = :puppet
-      impl_obj = module_branch.get_implementation()
-      parse_impl_to_create_dsl(config_agent_type,impl_obj)
-    end
-    ### end: for testing
-
-  private
-    def create_new_version__type_specific(repo_for_new_branch,new_version,opts={})
-      local = ret_local(new_version)
-      create_needed_objects_and_dsl?(repo_for_new_branch,local,opts)
-    end
-
     def ret_local(version)
       local_params = ModuleBranch::Location::LocalParams::Server.new(
         :module_type => module_type(),
@@ -186,7 +221,6 @@ module DTK; class BaseModule
         :config_agent_type => config_agent_type
       }
       ret.merge!(ret_hash)
-
 
       module_and_branch_info = self.class.create_module_and_branch_obj?(project,repo.id_handle(),local,opts[:ancestor_branch_idh])
       module_branch_idh = module_and_branch_info[:module_branch_idh]
@@ -343,4 +377,4 @@ module DTK; class BaseModule
     end
 
   end
-end; end
+end; end; end

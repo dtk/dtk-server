@@ -1,4 +1,4 @@
-module DTK; class BaseModule
+module DTK; class BaseModule; module UpdateModule
   class UpdateModuleRefs
     def initialize(dsl_obj,module_class)
       @input_hash    = dsl_obj.input_hash
@@ -65,7 +65,7 @@ module DTK; class BaseModule
           end
         end
         
-        external_deps = ComponentModule::ExternalDependencies.new(ext_deps_hash)
+        external_deps = ExternalDependencies.new(ext_deps_hash)
         if poss_problems = external_deps.possible_problems?()
           ret.merge!(:external_dependencies => poss_problems)
         end
@@ -104,4 +104,4 @@ module DTK; class BaseModule
       existing_c_hash
     end
   end
-end; end
+end; end; end

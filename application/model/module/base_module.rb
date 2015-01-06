@@ -1,9 +1,8 @@
 module DTK
   class BaseModule < Model
     r8_nested_require('base_module','dsl_info')
-    r8_nested_require('base_module','dsl_mixin')
+    r8_nested_require('base_module','update_module')
     r8_nested_require('base_module','component_module_ref')
-    r8_nested_require('base_module','update_module_refs')
 
     # TODO: look through r8_nested_require('module'..,) and see which ones should be under instead base_module
     r8_nested_require('module','dsl')
@@ -17,7 +16,7 @@ module DTK
     extend ModuleClassMixin
     extend AutoImport
     include ModuleMixin
-    include DSLMixin
+    include UpdateModule::Mixin
 
 
     def get_associated_assembly_templates()

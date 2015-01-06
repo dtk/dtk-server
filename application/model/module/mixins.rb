@@ -182,6 +182,7 @@ module DTK
       matches.first
     end
 
+    # TODO: This more naturally belongs in base_module/update_module but then would not apply to service 
     def update_model_from_clone_changes?(commit_sha,diffs_summary,version,opts={})
       module_branch = get_workspace_module_branch(version)
       pull_was_needed = module_branch.pull_repo_changes?(commit_sha)

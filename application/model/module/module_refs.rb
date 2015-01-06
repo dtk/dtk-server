@@ -32,7 +32,7 @@ module DTK
     def serialize_and_save_to_repo?(opts={})
       dsl_hash_form = dsl_hash_form()
       ambiguous_dependencies = opts[:ambiguous]
-      if !dsl_hash_form.empty? || ambiguous_dependencies || opts[:module_ref_hashes] || opts[:create_empty_module_refs]
+      if !dsl_hash_form.empty? || ambiguous_dependencies || opts[:matching_module_refs] || opts[:create_empty_module_refs]
         meta_filename_path = meta_filename_path()
         @parent.serialize_and_save_to_repo?(meta_filename_path,dsl_hash_form,nil,opts)
       end

@@ -367,6 +367,15 @@ module DTK
       Model.get_objs(model_handle(:module_ref),sp_hash)
     end
 
+    def self.get_namespace_info(id_handles)
+      ret = Hash.new
+      return ret if id_handles.empty?
+      sp_hash = {
+        :cols => [:id,:component_module_namespace_info],
+        :filter => [:oneof,:id,id_handles.map{|idh|idh.get_id}]
+      }
+      get_objs(id_handles.first.createMH(),sp_hash)
+    end
     def get_namespace_info()
       get_obj(:cols => [:component_module_namespace_info])
     end

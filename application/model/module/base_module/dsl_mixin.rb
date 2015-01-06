@@ -75,7 +75,7 @@ module DTK; class BaseModule
       # this will update module.module_ref table based on dependencies we found in metadata.json or Modulefile
       # when doing import-git
       
-      component_module_refs = klass().update_component_module_refs(self.class,module_branch,ret[:module_ref_hashes])
+      component_module_refs = UpdateModuleRefs.update_component_module_refs(klass(),module_branch,ret[:matching_module_refs])
       return component_module_refs if ModuleDSL::ParsingError.is_error?(component_module_refs)
 
       dsl_obj.update_model_with_ref_integrity_check(:version => version)
@@ -113,7 +113,7 @@ module DTK; class BaseModule
       local = ret_local(version)
       ret = create_needed_objects_and_dsl?(repo,local,opts)
 
-      component_module_refs = klass().update_component_module_refs(self.class,module_branch,ret[:module_ref_hashes])
+      component_module_refs = UpdateModuleRefs.update_component_module_refs(klass(),module_branch,ret[:matching_module_refs])
       return component_module_refs if ModuleDSL::ParsingError.is_error?(component_module_refs)
 
       opts.merge!(:ambiguous => ret[:ambiguous]) if ret[:ambiguous]
@@ -143,7 +143,7 @@ module DTK; class BaseModule
       return dsl_obj if ModuleDSL::ParsingError.is_error?(dsl_obj)
 
       if opts[:update_from_includes]
-        ret = dsl_obj.validate_includes_and_update_module_refs()
+        ret = UpdateModuleRefs.new(dsl_obj).validate_includes_and_update_module_refs()
         return ret if ModuleDSL::ParsingError.is_error?(ret)
       end
 
@@ -262,9 +262,9 @@ module DTK; class BaseModule
       end
 
       ret_hash_add = {
-        :module_branch_idh => module_branch_idh, 
-        :dsl_created_info  => dsl_created_info, 
-        :module_ref_hashes => module_ref_hashes(matching_branches)
+        :module_branch_idh    => module_branch_idh, 
+        :dsl_created_info     => dsl_created_info, 
+        :matching_module_refs => ComponentModuleRef.create_from_module_branches(matching_branches)
       }
       ret.merge(ret_hash_add)
     end
@@ -353,21 +353,6 @@ module DTK; class BaseModule
       end
       raise parsing_error if parsing_error
       ret
-    end
-
-    def module_ref_hashes(matching_branches)
-      matching = []
-      return matching unless matching_branches
-
-      matching_branches.each do |mb|
-        m_module = mb.get_module()
-        next unless m_module
-
-        m_namespace = m_module.module_namespace()
-        matching << {:component_module => m_module[:display_name].to_s, :remote_namespace => m_namespace.to_s}
-      end
-
-      matching
     end
 
     def klass()

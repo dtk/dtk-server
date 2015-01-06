@@ -5,13 +5,10 @@ module DTK
     r8_nested_require('dsl','generate_from_impl')
     r8_nested_require('dsl','object_model_form')
     r8_nested_require('dsl','incremental_generator')
-    r8_nested_require('dsl','module_refs_helper')
     # TODO: this needs to be after object_model_form, because object_model_form loads errors; should move errors to parent and include first here
     r8_nested_require('dsl','ref_integrity')
     extend UpdateModelClassMixin
     include UpdateModelMixin
-    extend ModuleRefsHelperClassMixin
-    include ModuleRefsHelperMixin
 
     attr_reader :input_hash,:config_agent_type
     def initialize(config_agent_type,impl_idh,module_branch,version_specific_input_hash,opts={})
@@ -45,10 +42,6 @@ module DTK
         ref_integrity_snapshot.raise_error_if_any_violations()
         ref_integrity_snapshot.integrity_post_processing()
       end
-    end
-
-    def validate_includes_and_update_module_refs()
-      validate_includes_and_update_module_refs_aux()
     end
 
     # parses and creates dsl_object form file in implementation

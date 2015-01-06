@@ -8,11 +8,17 @@ module DTK; class BaseModule
     end
 
     def self.update_component_module_refs(module_branch,matching_module_refs,module_class)
-      return if matching_module_refs.nil? or matching_module_refs.empty?
+      # For Rich: I think we should not return if there are no matching_module_refs
+      # because we get module_refs from module.module_refs table for specific module_branch and append to them this matching_module_refs
+      # return if matching_module_refs.nil? or matching_module_refs.empty?
       syntatic_parsed_info = dsl_parser_class(module_class).parse_directory(module_branch,:component_module_refs)
       return syntatic_parsed_info if ModuleDSL::ParsingError.is_error?(syntatic_parsed_info)
-      syntatic_parsed_info << matching_module_refs
-      syntatic_parsed_info.flatten!
+
+      if matching_module_refs && !matching_module_refs.empty?
+        syntatic_parsed_info << matching_module_refs
+        syntatic_parsed_info.flatten!
+      end
+
       parsed_info = ModuleRefs::Parse.semantic_parse(module_branch,syntatic_parsed_info)
       return parsed_info if ModuleDSL::ParsingError.is_error?(parsed_info)
       ModuleRefs::Parse.update_from_dsl_parsed_info(module_branch,parsed_info)

@@ -11,8 +11,9 @@ module DTK; module ModuleMixins
       version = remote_params.version
 
       # Find information about module and see if it exists
-      local = local_params.create_local(project)
-      local_branch = local.branch_name
+      dsl_info          = nil
+      local             = local_params.create_local(project)
+      local_branch      = local.branch_name
       local_module_name = local.module_name
       local_namespace   = local.module_namespace_name
 

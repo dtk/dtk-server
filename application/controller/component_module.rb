@@ -33,12 +33,21 @@ module DTK
     def rest__update_from_initial_create()
       component_module = create_obj(:component_module_id)
       repo_id,commit_sha = ret_non_null_request_params(:repo_id,:commit_sha)
+      git_import = ret_request_params(:git_import)
       repo_idh = id_handle(repo_id,:repo)
       version = ret_version()
       scaffold = ret_request_params(:scaffold_if_no_dsl)
       opts = {:scaffold_if_no_dsl => scaffold, :do_not_raise => true, :process_external_refs => true}
       opts.merge!(:commit_dsl => true) if ret_request_params(:commit_dsl)
-      rest_ok_response component_module.update_from_initial_create(commit_sha,repo_idh,version,opts)
+
+      response =
+        if git_import
+          component_module.update_from_initial_create__new(commit_sha,repo_idh,version,opts)
+        else
+          component_module.update_from_initial_create__legacy(commit_sha,repo_idh,version,opts)
+        end
+      # rest_ok_response component_module.update_from_initial_create(commit_sha,repo_idh,version,opts)
+      rest_ok_response response
     end
 
     def rest__update_model_from_clone()

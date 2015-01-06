@@ -25,6 +25,10 @@ module DTK; class BaseModule
     # looking to have client change so opts[:commit_dsl] wil always be set for true; so for time being
     # can have in controller have import call update_from_initial_create__legacy and
     # import from git call update_from_initial_create__new
+    #
+    # For Rich: DONE
+    # I have changed component_module controller to user update_from_initial_create__new if import-git
+    # and update_from_initial_create__legacy if import; also added :commit_dsl param on client side for import
     def update_from_initial_create(commit_sha,repo_idh,version,opts={})
       if opts[:commit_dsl]
         update_from_initial_create__new(commit_sha,repo_idh,version,opts)
@@ -55,7 +59,6 @@ module DTK; class BaseModule
       dsl_obj = klass().parse_dsl(self,impl_obj,opts_parse)
       return dsl_obj if ModuleDSL::ParsingError.is_error?(dsl_obj)
 
-      # For Rich:
       # Think we don't need validate_includes_and_update_module_refs call when doing import-git;
       # this should be used only when doing import or push because we will have modules without
       # metadata.json or Modulefile and then we will use includes section from dtk.model.yaml
@@ -72,19 +75,27 @@ module DTK; class BaseModule
       # - import_from_puppet_forge for puppet forge
       # - we can see if there are common parts we can collapse 
 
+      # For Rich:
+      # Agree with your statement above, for now it would be best to use update_from_initial_create__new for import-git
+      # and update_from_initial_create__legacy for import
+
       # this will update module.module_ref table based on dependencies we found in metadata.json or Modulefile
       # when doing import-git
-
       dsl_obj.update_model_with_ref_integrity_check(:version => version)
-      
+
       component_module_refs = UpdateModuleRefs.update_component_module_refs(module_branch,ret[:matching_module_refs],self.class)
       return component_module_refs if ModuleDSL::ParsingError.is_error?(component_module_refs)
       unless opts[:skip_module_ref_update]
         opts_serialize = Hash.new
         opts_serialize.merge!(:ambiguous => ret[:ambiguous]) if ret[:ambiguous]
+        opts_serialize.merge!(:missing => ret[:missing]) if ret[:missing]
         opts_serialize.merge!(:create_empty_module_refs => true)
-        #For Aldin: not high priority, but think that we should not need to pass in 
-        opts_serialize.merge!(:matching_module_refs => ret[:matching_module_refs]) if ret[:matching_module_refs]
+        # For Aldin: not high priority, but think that we should not need to pass in
+        #
+        # For Rich: DONE
+        # I think :matching_module_refs was used for import and push if we add new includes or module_refs
+        # but think we don't need it for import-git
+        # opts_serialize.merge!(:matching_module_refs => ret[:matching_module_refs]) if ret[:matching_module_refs]
         if new_commit_sha = component_module_refs.serialize_and_save_to_repo?(opts_serialize)
           if opts[:ret_dsl_updated_info]
             msg = ret[:message]||"The module refs file was updated by the server"
@@ -118,6 +129,7 @@ module DTK; class BaseModule
       return component_module_refs if ModuleDSL::ParsingError.is_error?(component_module_refs)
 
       opts.merge!(:ambiguous => ret[:ambiguous]) if ret[:ambiguous]
+      opts.merge!(:missing => ret[:missing]) if ret[:missing]
       ret_cmr = ModuleRefs.get_component_module_refs(module_branch)
       if new_commit_sha = ret_cmr.serialize_and_save_to_repo?(opts)
         if opts[:ret_dsl_updated_info]
@@ -226,7 +238,9 @@ module DTK; class BaseModule
             ret.merge!(:external_dependencies => poss_problems)
           end
           ambiguous = external_deps[:ambiguous]
+          missing   = external_deps[:possibly_missing]
           ret.merge!(:ambiguous => ambiguous) if ambiguous
+          ret.merge!(:missing   => missing) if missing
           matching_branches = external_deps.matching_module_branches?()
         end
       # opts[:set_external_refs] means to set external refs if they exist from parsing module files

@@ -57,8 +57,10 @@ module DTK; class BaseModule
 
         all_match_hashes, all_inconsistent, all_possibly_missing, all_inconsistent_names = {}, [], [], []
         all_ambiguous, all_ambiguous_ns, temp_existing = [], [], {}
-        all_modules = self.class.get_all(project.id_handle()).map{|cmp_mod|ComponentModuleWrapper.new(cmp_mod)}
+
+        all_modules          = self.class.get_all(project.id_handle()).map{|cmp_mod|ComponentModuleWrapper.new(cmp_mod)}
         existing_module_refs = get_existing_module_refs(module_branch)
+
         parsed_dependencies.each do |parsed_dependency|
           dep_name = parsed_dependency[:name].strip()
           version_constraints = parsed_dependency[:version_constraints]
@@ -113,8 +115,8 @@ module DTK; class BaseModule
                         all_ambiguous << {:name => dep_name, :namespace => namespace_info[:namespace][:display_name]}
                       end
 
-                      if existing_module_refs.empty?
-                        all_match_hashes.merge!(dep_name  => branch)
+                      if existing_module_refs.empty? || existing_module_refs['component_modules'].nil?
+                        all_match_hashes.merge!(dep_name => branch)
                       else
                         name = dep_name.split('/').last
                         namespace_info = branch.get_namespace_info

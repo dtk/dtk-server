@@ -164,8 +164,9 @@ module DTK
       end
 
       unless files.empty?
-        ambiguous_deps = opts[:ambiguous]
-        any_changes, new_cmp_refs, valid_existing = false, nil, nil
+        ambiguous_deps = opts[:ambiguous]||[]
+        missing_deps   = opts[:missing]||[]
+        any_changes, new_cmp_refs, valid_existing, existing_names = false, nil, nil, []
         files.each do |file_info|
           content = Aux.serialize(file_info[:hash_content],file_info[:format_type])
 
@@ -175,7 +176,7 @@ module DTK
 
           if existing_content
             existing_c_hash = Aux.convert_to_hash(existing_content,file_info[:format_type])
-            valid_existing = true if existing_c_hash['component_module']
+            valid_existing = true if existing_c_hash['component_modules']
           end
 
           # if module_refs.yaml and content already exist then append new module_refs to existing
@@ -190,14 +191,41 @@ module DTK
             content = Aux.serialize(new_cmp_refs,file_info[:format_type]) if new_cmp_refs
           end
 
-          if ambiguous_deps
+          if valid_existing
+            existing_c_hash['component_modules'].each do |k,v|
+              existing_names << k if v
+            end
+          end
+
+          unless ambiguous_deps.empty?
             ambiguous = process_ambiguous_dependencies(ambiguous_deps, file_info[:hash_content])
             if file_info[:hash_content].empty?
               content = ambiguous
             else
+              if valid_existing
+                temp_ambiguous = ambiguous_deps.clone
+                temp_ambiguous.delete_if{|ad,n| existing_names.include?(ad.split('/').last)}
+                ambiguous = process_ambiguous_dependencies(temp_ambiguous, file_info[:hash_content])
+              end
               content << ambiguous
             end
-          elsif file_info[:hash_content].empty?
+          end
+
+          unless missing_deps.empty?
+            missing = process_missing_dependencies(missing_deps, hash_content)
+            if file_info[:hash_content].empty?
+              content = missing
+            else
+              if valid_existing
+                temp_missing = missing_deps.clone
+                temp_missing.delete_if{|md| existing_names.include?(md.split('/').last)}
+                missing = process_missing_dependencies(temp_missing, hash_content)
+              end
+              content << missing
+            end
+          end
+
+          if file_info[:hash_content].empty? && ambiguous_deps.empty? && missing_deps.empty?
             content = "---\ncomponent_modules:\n" unless valid_existing
           end
 
@@ -242,6 +270,20 @@ module DTK
           content << "#    namespace: #{val}\n"
           content << "#  -- OR --  \n" if count < namespaces.size
         end
+      end
+
+      content
+    end
+
+    def process_missing_dependencies(missing, hash_content)
+      content = ""
+      content << "---\ncomponent_modules:\n" if hash_content.empty?
+
+      missing.each do |module_name|
+        name = module_name.to_s.split('/').last
+        content << "#  dependency from git import: #{module_name}\n"
+        content << "#  #{name}:\n"
+        content << "#    namespace: NAMESPACE\n"
       end
 
       content

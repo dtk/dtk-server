@@ -10,7 +10,10 @@ module DTK; class BaseModule; module UpdateModule
     def self.update_component_module_refs(module_branch,matching_module_refs,module_class)
       # For Rich: I think we should not return if there are no matching_module_refs
       # because we get module_refs from module.module_refs table for specific module_branch and append to them this matching_module_refs
-      # return if matching_module_refs.nil? or matching_module_refs.empty?
+      # For Aldin: see call that expect this to return component_module_refs
+      # so puttingin the following TODO
+      # TODO: if matching_module_refs.nil? or matching_module_refs.empty?
+      # then for effiency we would just want to returm the existing component module refs
       syntatic_parsed_info = dsl_parser_class(module_class).parse_directory(module_branch,:component_module_refs)
       return syntatic_parsed_info if ModuleDSL::ParsingError.is_error?(syntatic_parsed_info)
 
@@ -24,6 +27,7 @@ module DTK; class BaseModule; module UpdateModule
       ModuleRefs::Parse.update_from_dsl_parsed_info(module_branch,parsed_info)
     end
 
+    #TODO: better unify with ExternalDependencies 
     def validate_includes_and_update_module_refs()
       ret = Hash.new
       
@@ -31,10 +35,7 @@ module DTK; class BaseModule; module UpdateModule
       includes = @input_hash.values.map{|v|(v['component_include_module']||{}).keys}.flatten(1)
       includes.uniq!
       unless includes.empty?
-        multiple_namespaces = []
-        # TODO: ComponentModule.get_all expensive call, better to do a filtered query
-        all_modules = ComponentModule.get_all(@project_idh,[:namespace_id,:namespace])
-        mapped = all_modules.select{|m| includes.include?(m[:display_name])}.map{|k| {:component_module=>k[:display_name],:remote_namespace=>k[:namespace][:name]}}
+        mapped = ComponentModuleRef.get_matching(@project_idh,includes)
         multiple_namespaces = mapped.group_by { |h| h[:component_module] }.values.select { |a| a.size > 1 }.flatten
         
         mapped_names = mapped.map{|m| m[:component_module]}
@@ -66,10 +67,7 @@ module DTK; class BaseModule; module UpdateModule
         end
         
         external_deps = ExternalDependencies.new(ext_deps_hash)
-        if poss_problems = external_deps.possible_problems?()
-          ret.merge!(:external_dependencies => poss_problems)
-        end
-
+        ret.merge!(external_deps.ret_hash_info())
         ret.merge!(:matching_module_refs => mapped)
         unless mapped.empty?
           self.class.update_component_module_refs(@module_branch,mapped,@module_class) 

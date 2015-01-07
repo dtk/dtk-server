@@ -9,6 +9,15 @@ module DTK; class BaseModule
     def component_module()
       self[:component_module]
     end
+
+    def self.get_matching(project_idh,module_names)
+      opts = {
+        :cols => [:namespace_id,:namespace],
+        :filter => [:oneof,:display_name,module_names]
+      }
+      matching_modules = ComponentModule.get_all_with_filter(project_idh,opts)
+      matching_modules.map{|m| new(m[:display_name],m[:namespace][:name])} 
+    end
     
     # returns array of ComponentModuleRefs
     def self.create_from_module_branches?(module_branches)

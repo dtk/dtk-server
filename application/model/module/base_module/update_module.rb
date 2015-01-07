@@ -91,23 +91,12 @@ module DTK; class BaseModule; module UpdateModule
       dsl_obj = klass().parse_dsl(self,impl_obj,opts_parse)
       return dsl_obj if ModuleDSL::ParsingError.is_error?(dsl_obj)
 
-      # this will update module.module_ref table based on dependencies we found in metadata.json or Modulefile
-      # when doing import-git
       dsl_obj.update_model_with_ref_integrity_check(:version => version)
 
       component_module_refs = UpdateModuleRefs.update_component_module_refs(module_branch,ret[:matching_module_refs],self.class)
       return component_module_refs if ModuleDSL::ParsingError.is_error?(component_module_refs)
       unless opts[:skip_module_ref_update]
-        opts_serialize = Hash.new
-        opts_serialize.merge!(:ambiguous => ret[:ambiguous]) if ret[:ambiguous]
-        opts_serialize.merge!(:missing => ret[:missing]) if ret[:missing]
-        opts_serialize.merge!(:create_empty_module_refs => true)
-        # For Aldin: not high priority, but think that we should not need to pass in
-        #
-        # For Rich: DONE
-        # I think :matching_module_refs was used for import and push if we add new includes or module_refs
-        # but think we don't need it for import-git
-        # opts_serialize.merge!(:matching_module_refs => ret[:matching_module_refs]) if ret[:matching_module_refs]
+        opts_serialize = {:create_empty_module_refs => true}.merge(Aux::hash_subset(ret,[:ambiguous,:missing]))
         if new_commit_sha = component_module_refs.serialize_and_save_to_repo?(opts_serialize)
           if opts[:ret_dsl_updated_info]
             msg = ret[:message]||"The module refs file was updated by the server"
@@ -257,9 +246,7 @@ module DTK; class BaseModule; module UpdateModule
         end
       end
 
-      if ext_deps = opts[:external_dependencies]
-        ret.merge!(:external_dependencies => ext_deps) unless ret[:external_dependencies]
-      end
+      ret.set_external_dependencies?(opts[:external_dependencies])
 
       dsl_updated_info = opts[:ret_dsl_updated_info]
       if dsl_updated_info && !dsl_updated_info.empty?
@@ -309,10 +296,7 @@ module DTK; class BaseModule; module UpdateModule
         ret.dsl_updated_info = dsl_updated_info
       end
 
-      if ext_deps = opts[:external_dependencies]
-        ret.merge!(:external_dependencies => ext_deps) unless ret[:external_dependencies]
-      end
-
+      ret.set_external_dependencies?(opts[:external_dependencies])
       ret.dsl_created_info = dsl_created_info
       ret
     end

@@ -528,9 +528,17 @@ module DTK
     end
 
     def get_all(project_idh,cols=nil)
+      get_all_with_filter(project_idh,:cols => cols)
+    end
+
+    def get_all_with_filter(project_idh,opts={})
+      filter = [:eq, :project_project_id, project_idh.get_id()]
+      if opts[:filter]
+        filter = [:and,filter,opts[:filter]]
+      end
       sp_hash = {
-        :cols => add_default_cols?(cols),
-        :filter => [:eq, :project_project_id, project_idh.get_id()]
+        :cols => add_default_cols?(opts[:cols]),
+        :filter => filter
       }
       mh = project_idh.createMH(model_type())
       get_objs(mh,sp_hash)

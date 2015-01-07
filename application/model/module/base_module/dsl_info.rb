@@ -16,6 +16,12 @@ module DTK; class BaseModule
       merge!(:dsl_updated_info => dsl_updated_info)
       dsl_updated_info
     end
+    
+    def set_external_dependencies?(ext_deps)
+      if ext_deps
+        self[:external_dependencies] ||= ext_deps
+      end
+    end
 
     class Info < Hash
       def initialize(hash={})

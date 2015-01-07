@@ -12,6 +12,9 @@ module DTK; class BaseModule
       KeysOk = [:ndx_matching_branches]
       LegalKeys = KeysProblems+KeysOk
 
+      # TODO: maybe useful to make a hash with keys below a return class since used in different places in 
+      # update_module
+
       # returns the following keys if they are non null
       # :external_dependencies
       # :ambiguous
@@ -19,6 +22,7 @@ module DTK; class BaseModule
       # :matching_module_refs
       def ret_hash_info()
         ret = Hash.new
+        # TODO: a little confusing this is caused :external_dependencies; it is really possible problems
         set_if_not_nil!(ret,:external_dependencies,possible_problems?())
         set_if_not_nil!(ret,:ambiguous,self[:ambiguous])
         set_if_not_nil!(ret,:missing,self[:possibly_missing])
@@ -32,6 +36,7 @@ module DTK; class BaseModule
 
       def possible_problems?()
         ret = Aux.hash_subset(self,KeysProblems)
+        ret.reject!{|k,v|v.kind_of?(Array) and v.empty?}
         ret unless ret.empty? 
       end
       def component_module_refs?()

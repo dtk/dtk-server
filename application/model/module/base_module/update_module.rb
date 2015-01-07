@@ -179,6 +179,8 @@ module DTK; class BaseModule; module UpdateModule
       if no_errors and !opts[:dsl_parsed_false]
         set_dsl_parsed!(true)
       end
+
+      opts[:external_dependencies] = dependencies unless dependencies.empty?
       ret unless no_errors
     end
 
@@ -273,7 +275,6 @@ module DTK; class BaseModule; module UpdateModule
       impl_obj.modify_file_assets(diffs_summary)
 
       if version.kind_of?(ModuleVersion::AssemblyModule)
-
         if meta_file_changed = diffs_summary.meta_file_changed?()
           parse_dsl_and_update_model(impl_obj,module_branch.id_handle(),version,opts)
         end

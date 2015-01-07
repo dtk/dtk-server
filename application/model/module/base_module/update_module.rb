@@ -226,22 +226,24 @@ module DTK; class BaseModule; module UpdateModule
       module_branch_idh = module_and_branch_info[:module_branch_idh]
       module_branch = module_branch_idh.create_object()
 
-      opts.merge!(:project => project)
-      # opts[:process_external_refs] means to see if external refs and then check againts existing loaded components
-      if opts[:process_external_refs]
-        if external_deps = process_external_refs(module_branch,config_agent_type,project,impl_obj)
-          # sets teh following fields if non null :external_dependencies, :ambiguous, :missing, :matching_module_refs
-          ret.merge!(external_deps.ret_hash_info())
+      # process any external refs if one of the flags :process_external_refs,:set_external_refs is true
+      opts_external_refs = Aux.hash_subset(opts,[:process_external_refs,:set_external_refs])
+      unless opts_external_refs.empty?
+        # external_ref if non null ,will have info from the config agent related meta files such as Puppert ModuleFile 
+        if external_ref = ConfigAgent.parse_external_ref?(config_agent_type,impl_obj) 
+          module_branch.update_external_ref(external_ref[:content]) if external_ref[:content]
+          if opts[:process_external_refs]
+            external_deps = check_and_ret_external_ref_dependencies?(external_ref,project,module_branch)
+            ret.merge!(external_deps.ret_hash_info())
+          end
         end
-      # opts[:set_external_refs] means to set external refs if they exist from parsing module files
-      elsif opts[:set_external_refs]
-        set_external_ref?(module_branch,config_agent_type,impl_obj)
       end
 
       dsl_created_info = DSLInfo::CreatedInfo.new()
       klass = klass()
       if klass.contains_dsl_file?(impl_obj)
-        if err = klass::ParsingError.trap{parse_dsl_and_update_model(impl_obj,module_branch_idh,local.version,opts)}
+        opts_parse = opts.merge(:project => project)
+        if err = klass::ParsingError.trap{parse_dsl_and_update_model(impl_obj,module_branch_idh,local.version,opts_parse)}
           ret.dsl_parsed_info = err
         end
       elsif opts[:scaffold_if_no_dsl]

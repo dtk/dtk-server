@@ -1,25 +1,6 @@
 module DTK; class BaseModule
   module UpdateModule
     module ExternalRefsMixin
-      def process_external_refs(module_branch,config_agent_type,project,impl_obj)
-        ret = nil
-        if external_ref = set_external_ref?(module_branch,config_agent_type,impl_obj)
-          ret = check_and_ret_external_ref_dependencies?(external_ref,project,module_branch)
-        end
-        ret
-      end
-
-      def set_external_ref?(module_branch,config_agent_type,impl_obj)
-        if external_ref = ConfigAgent.parse_external_ref?(config_agent_type,impl_obj) 
-          # update external_ref column in module.branch table with data parsed from Modulefile
-          module_branch.update_external_ref(external_ref[:content]) if external_ref[:content]
-          external_ref
-        end
-      end
-
-     private
-      # TODO: move matching logic under DTK::ConfigAgent::Adapter::Puppet::ExternalDependency::ParsedForm
-      # move puppet specific to under config_agent/puppet
       def check_and_ret_external_ref_dependencies?(external_ref,project,module_branch=nil)
         ret = ExternalDependencies.new()
         return ret unless dependencies = external_ref[:dependencies]

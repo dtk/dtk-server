@@ -14,8 +14,10 @@ module DTK; class BaseModule; module UpdateModule
     ####### public methods #########
 
     # called when installing from dtkn catalog
+    # returns nil or parsing error
     def install__process_dsl(repo,module_branch,local,opts={})
-      create_needed_objects_and_dsl?(repo,local,opts)
+      response = create_needed_objects_and_dsl?(repo,local,opts)
+      return response if is_parsing_error?(response)
     end
     
     def import_from_puppet_forge(config_agent_type,impl_obj,component_includes)
@@ -89,12 +91,12 @@ module DTK; class BaseModule; module UpdateModule
         :config_agent_type => ret[:config_agent_type]
       }.merge(opts)
       dsl_obj = klass().parse_dsl(self,impl_obj,opts_parse)
-      return dsl_obj if ModuleDSL::ParsingError.is_error?(dsl_obj)
+      return dsl_obj if is_parsing_error?(dsl_obj)
 
       dsl_obj.update_model_with_ref_integrity_check(:version => version)
 
       component_module_refs = UpdateModuleRefs.update_component_module_refs(module_branch,ret[:matching_module_refs],self.class)
-      return component_module_refs if ModuleDSL::ParsingError.is_error?(component_module_refs)
+      return component_module_refs if is_parsing_error?(component_module_refs)
       unless opts[:skip_module_ref_update]
         opts_serialize = {:create_empty_module_refs => true}.merge(Aux::hash_subset(ret,[:ambiguous,:missing]))
         if new_commit_sha = component_module_refs.serialize_and_save_to_repo?(opts_serialize)
@@ -127,7 +129,7 @@ module DTK; class BaseModule; module UpdateModule
       ret = create_needed_objects_and_dsl?(repo,local,opts)
 
       component_module_refs = UpdateModuleRefs.update_component_module_refs(module_branch,ret[:matching_module_refs],self.class)
-      return component_module_refs if ModuleDSL::ParsingError.is_error?(component_module_refs)
+      return component_module_refs if is_parsing_error?(component_module_refs)
 
       opts.merge!(:ambiguous => ret[:ambiguous]) if ret[:ambiguous]
       opts.merge!(:missing => ret[:missing]) if ret[:missing]
@@ -154,11 +156,11 @@ module DTK; class BaseModule; module UpdateModule
       module_branch = module_branch_idh.create_object()
       config_agent_type = opts[:config_agent_type] || config_agent_type_default()
       dsl_obj = klass().parse_dsl(self,impl_obj,opts.merge(:config_agent_type => config_agent_type))
-      return dsl_obj if ModuleDSL::ParsingError.is_error?(dsl_obj)
+      return dsl_obj if is_parsing_error?(dsl_obj)
 
       if opts[:update_from_includes]
         ret = UpdateModuleRefs.new(dsl_obj,self.class).validate_includes_and_update_module_refs()
-        return ret if ModuleDSL::ParsingError.is_error?(ret)
+        return ret if is_parsing_error?(ret)
       end
 
       dsl_obj.update_model_with_ref_integrity_check(:version => version)
@@ -338,6 +340,10 @@ module DTK; class BaseModule; module UpdateModule
       end
       raise parsing_error if parsing_error
       ret
+    end
+
+    def is_parsing_error?(response)
+      ModuleDSL::ParsingError.is_error?(response)
     end
 
     def klass()

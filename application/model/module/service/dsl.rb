@@ -144,7 +144,7 @@ module DTK
     end
 
     module DSLMixin
-      # returns dsl_info
+      # TODO: fix what update_model_from_dsl returns by looking at its usage
       def update_model_from_dsl(module_branch,opts={})
         set_dsl_parsed!(false)
 

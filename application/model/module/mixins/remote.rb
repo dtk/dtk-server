@@ -11,7 +11,6 @@ module DTK; module ModuleMixins
       version = remote_params.version
 
       # Find information about module and see if it exists
-      dsl_info          = nil
       local             = local_params.create_local(project)
       local_branch      = local.branch_name
       local_module_name = local.module_name
@@ -36,7 +35,7 @@ module DTK; module ModuleMixins
       remote.set_repo_name!(remote_repo_info[:git_repo_name])
 
       # so they are defined outside Transaction scope
-      module_and_branch_info = commit_sha = parsed = repo_with_branch = nil
+      non_nil_if_parsing_error = module_and_branch_info = commit_sha = parsed = repo_with_branch = nil
 
       # outside of transaction only doing read/check operations
       Transaction do
@@ -71,16 +70,15 @@ module DTK; module ModuleMixins
         if module_type == :component_module
           opts_process_dsl.merge!(:set_external_refs => true)
         end
-        dsl_info = module_obj.install__process_dsl(repo_with_branch,module_branch,local,opts_process_dsl)
+        non_nil_if_parsing_error = module_obj.install__process_dsl(repo_with_branch,module_branch,local,opts_process_dsl)
         module_branch.set_sha(commit_sha)
       end
       opts_info = {:version=>version, :module_namespace=>local_namespace}
       response = module_repo_info(repo_with_branch,module_and_branch_info,opts_info)
 
-      if ErrorUsage::Parsing.is_error?(dsl_info)
-        response[:dsl_parsed_info] = dsl_info
-      elsif dsl_info && !dsl_info.empty?
-        response[:dsl_parsed_info] = dsl_info[:dsl_parsed_info]
+      if ErrorUsage::Parsing.is_error?(non_nil_if_parsing_error)
+        # TODO: :dsl_parsed_info not best name; consider changing it to dsl_errors, but then would also haveto changeon client side
+        response[:dsl_parsed_info] = non_nil_if_parsing_error
       end
       response
     end

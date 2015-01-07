@@ -218,16 +218,6 @@ module DTK
       end
     end
 
-=begin
-    def get_ports()
-      module_branches = get_module_branches()
-      ndx_targets = self.class.get_ndx_targets(module_branches.map{|r|r.id_handle()})
-      ndx_ret = Hash.new
-      ndx_targets.each_value do |t|
-
-"component_external","component_internal_external")
-    end
-=end
     # targets indexed by service_module
     def self.get_ndx_targets(sm_branch_idhs)
       # TODO: right now: putting in all targets for all service modules;
@@ -267,6 +257,7 @@ module DTK
       get_objs(mh,sp_hash)
     end
 
+    # TODO: fix what this returns when fix what update_model_from_dsl returns
     def pull_from_remote__update_from_dsl(repo, module_and_branch_info, version=nil)
       info = module_and_branch_info #for succinctness
       module_branch_idh = info[:module_branch_idh]
@@ -275,15 +266,17 @@ module DTK
       update_model_from_dsl(module_branch)
     end
 
+    # returns either parsing error object or nil
     def install__process_dsl(repo,module_branch,local,opts = {})
       unless local.version.nil?
         raise Error.new("Not implemented yet ServiceModule#import__dsl with version not equal to nil")
       end
-      parsed = update_model_from_dsl(module_branch.merge(:repo => repo), opts) #repo added to avoid lookup in update_model_from_dsl
-      parsed
+      response = update_model_from_dsl(module_branch.merge(:repo => repo), opts) #repo added to avoid lookup in update_model_from_dsl
+      response if ParsingError.is_error?(response) 
     end
 
    private
+    # TODO: fix what this returns when fix what update_model_from_dsl returns
     def create_new_version__type_specific(repo_for_new_branch,new_version,opts={})
       project = get_project()
       repo_idh = repo_for_new_branch.id_handle()
@@ -300,6 +293,7 @@ module DTK
       is_parsed
     end
 
+    # TODO: may want to fix up what this returns after fixing up what update_model_from_dsl returns
     # returns dsl_info
     def update_model_from_clone__type_specific?(commit_sha,diffs_summary,module_branch,version,opts={})
       if version.kind_of?(ModuleVersion::AssemblyModule)
@@ -308,9 +302,8 @@ module DTK
       else
         opts.merge!(:ret_dsl_updated_info => Hash.new)
         response = update_model_from_dsl(module_branch,opts)
-        # TODO: move this into update_model_from_dsl when see all calling fns
         ret = BaseModule::DSLInfo.new()
-        if ErrorUsage::Parsing.is_error?(response)
+        if ParsingError.is_error?(response)
           ret.dsl_parsed_info = response
         else
           ret.merge!(response)

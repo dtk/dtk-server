@@ -1,4 +1,8 @@
-# TODO: need to cleanup breaking into module, base_module and component_module
+# TODO: need to cleanup breaking into  base_module, component_module, service_module and the DSL related classes
+# There is overlap between soem service module and otehr moduel code
+# Right now seems intuitive model is that we have
+# two types of modules: service module and the rest, the prime being the component module, and that for the rest there is much similarity
+# for the rest the classes used are 
 module DTK
   # order is important
   r8_nested_require('module','mixins')

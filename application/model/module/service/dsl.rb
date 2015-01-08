@@ -171,9 +171,7 @@ module DTK
       def update_component_module_refs(module_branch,opts={})
         syntatic_parsed_info = DSLParser.parse_directory(module_branch,:component_module_refs,opts) 
         return syntatic_parsed_info if ParsingError.is_error?(syntatic_parsed_info)
-        parsed_info = ModuleRefs::Parse.semantic_parse(module_branch,syntatic_parsed_info)
-        return parsed_info if ParsingError.is_error?(parsed_info)
-        ModuleRefs::Parse.update_from_dsl_parsed_info(module_branch,parsed_info)
+        ModuleRefs::Parse.update_from_syntatic_parse(module_branch,syntatic_parsed_info)
       end
 
       # returns[ parsed,new_component_module_refs]

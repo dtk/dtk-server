@@ -22,9 +22,7 @@ module DTK; class BaseModule; module UpdateModule
         syntatic_parsed_info.flatten!
       end
 
-      parsed_info = ModuleRefs::Parse.semantic_parse(module_branch,syntatic_parsed_info)
-      return parsed_info if ModuleDSL::ParsingError.is_error?(parsed_info)
-      ModuleRefs::Parse.update_from_dsl_parsed_info(module_branch,parsed_info)
+      ModuleRefs::Parse.update_from_syntatic_parse(module_branch,syntatic_parsed_info)
     end
 
     #TODO: better unify with ExternalDependencies 

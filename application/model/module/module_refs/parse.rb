@@ -1,6 +1,14 @@
 module DTK
   class ModuleRefs
     class Parse < self
+      def self.update_from_syntatic_parse(module_branch,syntatic_parse)
+        hash_content = semantic_parse(module_branch,syntatic_parse)
+        return hash_content if hash_content.kind_of?(ErrorUsage::Parsing)
+        update(module_branch,hash_content)
+        ModuleRefs.new(module_branch,hash_content,:content_hash_form_is_reified => true)
+      end
+
+     private
       def self.semantic_parse(branch,syntactic_parse_info)
         ret = nil
         begin
@@ -15,12 +23,6 @@ module DTK
         ret
       end
 
-      def self.update_from_dsl_parsed_info(branch,content_hash_content)
-        update(branch,content_hash_content)
-        ModuleRefs.new(branch,content_hash_content,:content_hash_form_is_reified => true)
-      end
-
-     private
       def self.reify_content(mh,object)
         # if Hash type then this comes from querying the model ref table
         if object.kind_of?(Hash)

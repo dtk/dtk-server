@@ -149,7 +149,8 @@ module DTK
     # updates repo if any changes and if so returns new commit_sha
     # args could be either file_path,hash_content,file_format(optional) or single element which is an array
     # having elements with keys :path, :hash_content, :format
-    # TODO: at this level this shoudl be more generic; shoudl enacpsulate logic for
+    # TODO: For Aldin; we can do thislater, but this shoiuld eb cleaned up
+    # at this level this shoudl be more generic; should enacpsulate logic for
     # particular file types in encpsulated places
     def serialize_and_save_to_repo?(*args)
       opts = Hash.new
@@ -165,7 +166,7 @@ module DTK
 
       unless files.empty?
         ambiguous_deps = opts[:ambiguous]||[]
-        missing_deps   = opts[:missing]||[]
+        missing_deps   = opts[:possibly_missing]||[]
         any_changes, new_cmp_refs, valid_existing, existing_names = false, nil, nil, []
         files.each do |file_info|
           content = Aux.serialize(file_info[:hash_content],file_info[:format_type])

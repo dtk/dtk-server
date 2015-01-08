@@ -1,3 +1,4 @@
+#TODO: this needs to be synced with DTK::UpdateModule::Output
 module DTK; class BaseModule
   class UpdateModule               
     class ExternalDependencies < Hash
@@ -18,14 +19,14 @@ module DTK; class BaseModule
       # returns the following keys if they are non null
       # :external_dependencies
       # :ambiguous
-      # :missing
+      # :possibly_missing
       # :matching_module_refs
       def ret_hash_info()
         ret = Hash.new
         # TODO: a little confusing this is caused :external_dependencies; it is really possible problems
         set_if_not_nil!(ret,:external_dependencies,possible_problems?())
         set_if_not_nil!(ret,:ambiguous,self[:ambiguous])
-        set_if_not_nil!(ret,:missing,self[:possibly_missing])
+        set_if_not_nil!(ret,:possibly_missing,self[:possibly_missing])
         set_if_not_nil!(ret,:matching_module_refs,component_module_refs?())
         ret
       end

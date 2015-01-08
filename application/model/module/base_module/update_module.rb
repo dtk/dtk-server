@@ -6,7 +6,6 @@
 # This is the new reformulated items
 module DTK; class BaseModule
   class UpdateModule
-    r8_nested_require('update_module','response')
     r8_nested_require('update_module','import')
     r8_nested_require('update_module','clone_changes')
 

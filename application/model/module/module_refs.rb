@@ -31,7 +31,7 @@ module DTK
     # serializes and saves object to repo
     def serialize_and_save_to_repo?(opts={})
       dsl_hash_form = dsl_hash_form()
-      if !dsl_hash_form.empty? || opts[:ambiguous] || opts[:missing] || opts[:create_empty_module_refs]
+      if !dsl_hash_form.empty? || opts[:ambiguous] || opts[:possibly_missing] || opts[:create_empty_module_refs]
         meta_filename_path = meta_filename_path()
         @parent.serialize_and_save_to_repo?(meta_filename_path,dsl_hash_form,nil,opts)
       end

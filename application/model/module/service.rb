@@ -304,7 +304,7 @@ module DTK
         response = update_model_from_dsl(module_branch,opts)
         ret = ModuleDSLInfo.new()
         if ParsingError.is_error?(response)
-          ret.dsl_parsed_info = response
+          ret.dsl_parse_error = response
         else
           ret.merge!(response)
         end

@@ -4,9 +4,9 @@ module DTK
       super()
       replace(hash)
     end
-    def dsl_parsed_info=(dsl_parsed_info)
-      merge!(:dsl_parse_error => dsl_parsed_info)
-      dsl_parsed_info
+    def dsl_parse_error=(dsl_parse_error)
+      merge!(:dsl_parse_error => dsl_parse_error)
+      dsl_parse_error
     end
     def dsl_created_info=(dsl_created_info)
       merge!(:dsl_created_info => dsl_created_info)

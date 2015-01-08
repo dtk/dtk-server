@@ -238,7 +238,7 @@ module DTK; class BaseModule; module UpdateModule
       if klass.contains_dsl_file?(impl_obj)
         opts_parse = opts.merge(:project => project)
         if err = klass::ParsingError.trap{parse_dsl_and_update_model(impl_obj,module_branch_idh,local.version,opts_parse)}
-          ret.dsl_parsed_info = err
+          ret.dsl_parse_error = err
         end
       elsif opts[:scaffold_if_no_dsl]
         opts_parse = Hash.new
@@ -287,7 +287,7 @@ module DTK; class BaseModule; module UpdateModule
       elsif ModuleDSL.contains_dsl_file?(impl_obj)
         if opts[:force_parse] or diffs_summary.meta_file_changed?() or (get_field?(:dsl_parsed) == false)
           if e = ModuleDSL::ParsingError.trap{parse_dsl_and_update_model(impl_obj,module_branch.id_handle(),version,opts)}
-            ret.dsl_parsed_info = e
+            ret.dsl_parse_error = e
           end
         end
       else

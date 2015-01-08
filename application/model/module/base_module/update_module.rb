@@ -2,12 +2,46 @@
 # available on BaseModule subclasses and then these call an embedded object; but for time being keeping all as mixin and 
 # inserting __private members
 # TODO: useful to seperate out what applies to service modules as well as component,test, etc
-module DTK; class BaseModule; module UpdateModule
-  r8_nested_require('update_module','response')
+
+# This is the new reformulated items
+module DTK; class BaseModule
+  class UpdateModule
+    r8_nested_require('update_module','response')
+    r8_nested_require('update_module','import')
+    def initialize(base_module)
+      @base_module = base_module
+    end
+   private
+    def parse_dsl(impl_obj,opts={})
+      @base_module.klass().parse_dsl(@base_module,impl_obj,opts)
+    end
+    def set_dsl_parsed!(boolean)
+      @base_module.set_dsl_parsed!(boolean)
+    end
+    def update_component_module_refs(module_branch,matching_module_refs)
+      UpdateModuleRefs.update_component_module_refs(module_branch,matching_module_refs,@base_module.class)
+    end
+
+    # TODO: when refactor done the methods on @base_module wil be moved to be private isnatnce methods on UpdateModule
+    # and these bridge methods removed
+    def ret_local(version)
+      @base_module.ret_local(version)
+    end
+
+    def is_parsing_error?(response)
+      @base_module.is_parsing_error?(response)
+    end
+
+    def create_needed_objects_and_dsl?(repo,local,opts={})
+      @base_module.create_needed_objects_and_dsl?(repo,local,opts)
+    end
+  end
+end; end
+# items to move to new style
+module DTK; class BaseModule; class UpdateModule
   r8_nested_require('update_module','external_dependencies')
   r8_nested_require('update_module','update_module_refs')
   r8_nested_require('update_module','external_refs')
-
   module Mixin
     include ExternalRefsMixin
 
@@ -22,15 +56,15 @@ module DTK; class BaseModule; module UpdateModule
     end
     
     def import_from_puppet_forge(config_agent_type,impl_obj,component_includes)
-      import_from_puppet_forge__private(config_agent_type,impl_obj,component_includes)
+      Import.new(self).import_from_puppet_forge(config_agent_type,impl_obj,component_includes)
     end
     
     def import_from_git(commit_sha,repo_idh,version,opts={})
-      import_from_git__private(commit_sha,repo_idh,version,opts)
+      Import.new(self).import_from_git(commit_sha,repo_idh,version,opts)
     end
 
     def import_from_file(commit_sha,repo_idh,version,opts={})
-      import_from_file__private(commit_sha,repo_idh,version,opts)
+      Import.new(self).import_from_file(commit_sha,repo_idh,version,opts)
     end
 
     def pull_from_remote__update_from_dsl(repo, module_and_branch_info,version=nil)
@@ -62,88 +96,6 @@ module DTK; class BaseModule; module UpdateModule
     ### end: for testing
 
   private    
-    def import_from_puppet_forge__private(config_agent_type,impl_obj,component_includes)
-      opts_parse = {
-        :ret_hash_content => true,
-        :include_modules  => component_includes
-      }
-      dsl_created_info = parse_impl_to_create_dsl(config_agent_type,impl_obj,opts_parse)
-      add_dsl_content_to_impl(impl_obj,dsl_created_info)
-      set_dsl_parsed!(true)
-    end
-    
-    def import_from_git__private(commit_sha,repo_idh,version,opts={})
-      ret             = ModuleDSLInfo.new()
-      module_branch   = get_workspace_module_branch(version)
-      pull_was_needed = module_branch.pull_repo_changes?(commit_sha)
-      
-      parse_needed = !dsl_parsed?()
-      return ret unless pull_was_needed or parse_needed
-      repo  = repo_idh.create_object()
-      local = ret_local(version)
-
-      ret      = create_needed_objects_and_dsl?(repo,local,opts)
-      version  = ret[:version]
-      impl_obj = ret[:impl_obj]
-
-      set_dsl_parsed!(false)
-      opts_parse = {
-        :dsl_created_info => ret[:dsl_created_info],
-        :config_agent_type => ret[:config_agent_type]
-      }.merge(opts)
-      dsl_obj = klass().parse_dsl(self,impl_obj,opts_parse)
-      return dsl_obj if is_parsing_error?(dsl_obj)
-
-      dsl_obj.update_model_with_ref_integrity_check(:version => version)
-
-      component_module_refs = UpdateModuleRefs.update_component_module_refs(module_branch,ret[:matching_module_refs],self.class)
-      return component_module_refs if is_parsing_error?(component_module_refs)
-      unless opts[:skip_module_ref_update]
-        opts_serialize = {:create_empty_module_refs => true}.merge(Aux::hash_subset(ret,[:ambiguous,:missing]))
-        if new_commit_sha = component_module_refs.serialize_and_save_to_repo?(opts_serialize)
-          if opts[:ret_dsl_updated_info]
-            msg = ret[:message]||"The module refs file was updated by the server"
-            ret[:dsl_updated_info] = ModuleDSLInfo::UpdatedInfo.new(:msg => msg,:commit_sha => new_commit_sha)
-          end
-        end
-      end
-
-      # parsed will be true if there are no missing or ambiguous dependencies, or flag dsl_parsed_false is not sent from the client
-      dependencies = ret[:external_dependencies]||{}
-      no_errors = (dependencies[:possibly_missing]||{}).empty? and (ret[:ambiguous]||{}).empty?
-      if no_errors and !opts[:dsl_parsed_false]
-        set_dsl_parsed!(true)
-      end
-
-      ret
-    end
-
-    def import_from_file__private(commit_sha,repo_idh,version,opts={})
-      ret = ModuleDSLInfo.new()
-      module_branch = get_workspace_module_branch(version)
-      pull_was_needed = module_branch.pull_repo_changes?(commit_sha)
-
-      parse_needed = !dsl_parsed?()
-      return ret unless pull_was_needed or parse_needed
-      repo = repo_idh.create_object()
-      local = ret_local(version)
-      ret = create_needed_objects_and_dsl?(repo,local,opts)
-
-      component_module_refs = UpdateModuleRefs.update_component_module_refs(module_branch,ret[:matching_module_refs],self.class)
-      return component_module_refs if is_parsing_error?(component_module_refs)
-
-      opts.merge!(:ambiguous => ret[:ambiguous]) if ret[:ambiguous]
-      opts.merge!(:missing => ret[:missing]) if ret[:missing]
-      ret_cmr = ModuleRefs.get_component_module_refs(module_branch)
-      if new_commit_sha = ret_cmr.serialize_and_save_to_repo?(opts)
-        if opts[:ret_dsl_updated_info]
-          msg = "The module refs file was updated by the server"
-          ret.dsl_updated_info = ModuleDSLInfo::UpdatedInfo.new(:msg => msg,:commit_sha => new_commit_sha)
-        end
-      end
-      ret
-    end
-
     def pull_from_remote__update_from_dsl__private(repo, module_and_branch_info,version=nil)
       info = module_and_branch_info #for succinctness
       module_branch_idh = info[:module_branch_idh]
@@ -187,79 +139,6 @@ module DTK; class BaseModule; module UpdateModule
       ret unless no_errors
     end
 
-    def ret_local(version)
-      local_params = ModuleBranch::Location::LocalParams::Server.new(
-        :module_type => module_type(),
-        :module_name => module_name(),
-        :namespace   => module_namespace(),
-        :version     => version
-      )
-      local_params.create_local(get_project())
-    end
-
-    def create_needed_objects_and_dsl?(repo, local, opts={})
-      ret = ModuleDSLInfo.new()
-      opts.merge!(:ret_dsl_updated_info => Hash.new)
-      project = local.project
-
-      config_agent_type = opts[:config_agent_type] || config_agent_type_default()
-      impl_obj = Implementation.create?(project,local,repo,config_agent_type)
-      impl_obj.create_file_assets_from_dir_els()
-
-      ret_hash = {
-        :name              => module_name(),
-        :namespace         => module_namespace(),
-        :type              => module_type(),
-        :version           => local.version,
-        :impl_obj          => impl_obj,
-        :config_agent_type => config_agent_type
-      }
-      ret.merge!(ret_hash)
-
-      module_and_branch_info = self.class.create_module_and_branch_obj?(project,repo.id_handle(),local,opts[:ancestor_branch_idh])
-      module_branch_idh = module_and_branch_info[:module_branch_idh]
-      module_branch = module_branch_idh.create_object()
-
-      # process any external refs if one of the flags :process_external_refs,:set_external_refs is true
-      opts_external_refs = Aux.hash_subset(opts,[:process_external_refs,:set_external_refs])
-      unless opts_external_refs.empty?
-        # external_ref if non null ,will have info from the config agent related meta files such as Puppert ModuleFile 
-        if external_ref = ConfigAgent.parse_external_ref?(config_agent_type,impl_obj) 
-          module_branch.update_external_ref(external_ref[:content]) if external_ref[:content]
-          if opts[:process_external_refs]
-            external_deps = check_and_ret_external_ref_dependencies?(external_ref,project,module_branch)
-            ret.merge!(external_deps.ret_hash_info())
-          end
-        end
-      end
-
-      dsl_created_info = ModuleDSLInfo::CreatedInfo.new()
-      klass = klass()
-      if klass.contains_dsl_file?(impl_obj)
-        opts_parse = opts.merge(:project => project)
-        if err = klass::ParsingError.trap{parse_dsl_and_update_model(impl_obj,module_branch_idh,local.version,opts_parse)}
-          ret.dsl_parse_error = err
-        end
-      elsif opts[:scaffold_if_no_dsl]
-        opts_parse = Hash.new
-        if ret[:matching_module_refs]
-          opts_parse.merge!(:include_modules => ret[:matching_module_refs].map{|r|r.component_module})
-        end
-        dsl_created_info = parse_impl_to_create_dsl(config_agent_type,impl_obj,opts_parse)
-        if opts[:commit_dsl]
-          add_dsl_content_to_impl(impl_obj,dsl_created_info)
-        end
-      end
-
-      ret.set_external_dependencies?(opts[:external_dependencies])
-
-      dsl_updated_info = opts[:ret_dsl_updated_info]
-      if dsl_updated_info && !dsl_updated_info.empty?
-        ret.dsl_updated_info = dsl_updated_info
-      end
-
-      ret.merge(:module_branch_idh => module_branch_idh, :dsl_created_info => dsl_created_info)
-    end
 
     def add_dsl_content_to_impl(impl_obj,dsl_created_info)
       impl_obj.add_file_and_push_to_repo(dsl_created_info[:path],dsl_created_info[:content])
@@ -343,10 +222,8 @@ module DTK; class BaseModule; module UpdateModule
       ret
     end
 
-    def is_parsing_error?(response)
-      ModuleDSL::ParsingError.is_error?(response)
-    end
-
+    # TODO: when recfactor finished these wil be moved to be private instance methods on UpdateModule
+   public
     def klass()
       case self.class
         when NodeModule
@@ -354,6 +231,84 @@ module DTK; class BaseModule; module UpdateModule
         else
           ModuleDSL
       end
+    end
+
+    def is_parsing_error?(response)
+      ModuleDSL::ParsingError.is_error?(response)
+    end
+
+    def ret_local(version)
+      local_params = ModuleBranch::Location::LocalParams::Server.new(
+        :module_type => module_type(),
+        :module_name => module_name(),
+        :namespace   => module_namespace(),
+        :version     => version
+      )
+      local_params.create_local(get_project())
+    end
+
+    def create_needed_objects_and_dsl?(repo, local, opts={})
+      ret = ModuleDSLInfo.new()
+      opts.merge!(:ret_dsl_updated_info => Hash.new)
+      project = local.project
+
+      config_agent_type = opts[:config_agent_type] || config_agent_type_default()
+      impl_obj = Implementation.create?(project,local,repo,config_agent_type)
+      impl_obj.create_file_assets_from_dir_els()
+
+      ret_hash = {
+        :name              => module_name(),
+        :namespace         => module_namespace(),
+        :type              => module_type(),
+        :version           => local.version,
+        :impl_obj          => impl_obj,
+        :config_agent_type => config_agent_type
+      }
+      ret.merge!(ret_hash)
+
+      module_and_branch_info = self.class.create_module_and_branch_obj?(project,repo.id_handle(),local,opts[:ancestor_branch_idh])
+      module_branch_idh = module_and_branch_info[:module_branch_idh]
+      module_branch = module_branch_idh.create_object()
+
+      # process any external refs if one of the flags :process_external_refs,:set_external_refs is true
+      opts_external_refs = Aux.hash_subset(opts,[:process_external_refs,:set_external_refs])
+      unless opts_external_refs.empty?
+        # external_ref if non null ,will have info from the config agent related meta files such as Puppert ModuleFile 
+        if external_ref = ConfigAgent.parse_external_ref?(config_agent_type,impl_obj) 
+          module_branch.update_external_ref(external_ref[:content]) if external_ref[:content]
+          if opts[:process_external_refs]
+            external_deps = check_and_ret_external_ref_dependencies?(external_ref,project,module_branch)
+            ret.merge!(external_deps.ret_hash_info())
+          end
+        end
+      end
+
+      dsl_created_info = ModuleDSLInfo::CreatedInfo.new()
+      klass = klass()
+      if klass.contains_dsl_file?(impl_obj)
+        opts_parse = opts.merge(:project => project)
+        if err = klass::ParsingError.trap{parse_dsl_and_update_model(impl_obj,module_branch_idh,local.version,opts_parse)}
+          ret.dsl_parse_error = err
+        end
+      elsif opts[:scaffold_if_no_dsl]
+        opts_parse = Hash.new
+        if ret[:matching_module_refs]
+          opts_parse.merge!(:include_modules => ret[:matching_module_refs].map{|r|r.component_module})
+        end
+        dsl_created_info = parse_impl_to_create_dsl(config_agent_type,impl_obj,opts_parse)
+        if opts[:commit_dsl]
+          add_dsl_content_to_impl(impl_obj,dsl_created_info)
+        end
+      end
+
+      ret.set_external_dependencies?(opts[:external_dependencies])
+
+      dsl_updated_info = opts[:ret_dsl_updated_info]
+      if dsl_updated_info && !dsl_updated_info.empty?
+        ret.dsl_updated_info = dsl_updated_info
+      end
+
+      ret.merge(:module_branch_idh => module_branch_idh, :dsl_created_info => dsl_created_info)
     end
 
   end

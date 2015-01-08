@@ -1,5 +1,5 @@
 module DTK; class BaseModule
-  module UpdateModule
+  class UpdateModule
     module ExternalRefsMixin
       def check_and_ret_external_ref_dependencies?(external_ref,project,module_branch=nil)
         ret = ExternalDependencies.new()

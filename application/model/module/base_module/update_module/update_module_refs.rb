@@ -1,4 +1,4 @@
-module DTK; class BaseModule; module UpdateModule
+module DTK; class BaseModule; class UpdateModule
   class UpdateModuleRefs
     def initialize(dsl_obj,module_class)
       @input_hash    = dsl_obj.input_hash

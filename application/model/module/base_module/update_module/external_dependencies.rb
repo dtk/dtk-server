@@ -1,5 +1,5 @@
 module DTK; class BaseModule
-  module UpdateModule               
+  class UpdateModule               
     class ExternalDependencies < Hash
       def initialize(hash={})
         unless (bad_keys = hash.keys - LegalKeys).empty?

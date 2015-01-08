@@ -49,6 +49,7 @@ module DTK
       # the possible keys in response are with the subkeys that are used
       #  :dsl_parse_error: ModuleDSL::ParsingError obj
       #  :dsl_updated_info:
+      #    :msg
       #    :commit_sha
       #  :dsl_created_info
       #    :path
@@ -85,6 +86,7 @@ module DTK
       # the possible keys in response are with the subkeys that are used
       #  :dsl_parse_error: ModuleDSL::ParsingError obj
       #  :dsl_updated_info:
+      #    :msg
       #    :commit_sha
       #  :dsl_created_info
       #    :path

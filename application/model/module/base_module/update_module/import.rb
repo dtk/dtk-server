@@ -72,8 +72,7 @@ module DTK; class BaseModule; class UpdateModule
 
       opts.merge!(:ambiguous => ret[:ambiguous]) if ret[:ambiguous]
       opts.merge!(:missing => ret[:missing]) if ret[:missing]
-      ret_cmr = ModuleRefs.get_component_module_refs(module_branch)
-      if new_commit_sha = ret_cmr.serialize_and_save_to_repo?(opts)
+      if new_commit_sha = component_module_refs.serialize_and_save_to_repo?(opts)
         if opts[:ret_dsl_updated_info]
           msg = "The module refs file was updated by the server"
           ret.dsl_updated_info = ModuleDSLInfo::UpdatedInfo.new(:msg => msg,:commit_sha => new_commit_sha)

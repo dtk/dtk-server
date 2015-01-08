@@ -8,9 +8,32 @@ module DTK; class BaseModule
   class UpdateModule
     r8_nested_require('update_module','response')
     r8_nested_require('update_module','import')
+    r8_nested_require('update_module','clone_changes')
+
+    ####### public methods #########
+    module Mixin
+      def import_from_puppet_forge(config_agent_type,impl_obj,component_includes)
+        Import.new(self).import_from_puppet_forge(config_agent_type,impl_obj,component_includes)
+      end
+      
+      def import_from_git(commit_sha,repo_idh,version,opts={})
+        Import.new(self).import_from_git(commit_sha,repo_idh,version,opts)
+      end
+      
+      def import_from_file(commit_sha,repo_idh,version,opts={})
+        Import.new(self).import_from_file(commit_sha,repo_idh,version,opts)
+      end
+
+      def update_model_from_clone_changes(commit_sha,diffs_summary,module_branch,version,opts={})
+        CloneChanges.new(self).update_from_clone_changes(commit_sha,diffs_summary,module_branch,version,opts)
+      end
+    end
+    ####### end: public methods #########
+
     def initialize(base_module)
       @base_module = base_module
     end
+
    private
     def parse_dsl(impl_obj,opts={})
       @base_module.klass().parse_dsl(@base_module,impl_obj,opts)
@@ -20,6 +43,12 @@ module DTK; class BaseModule
     end
     def update_component_module_refs(module_branch,matching_module_refs)
       UpdateModuleRefs.update_component_module_refs(module_branch,matching_module_refs,@base_module.class)
+    end
+    def module_namespace()
+      @base_module.module_namespace()
+    end
+    def config_agent_type_default()
+      @base_module.config_agent_type_default()
     end
 
     # TODO: when refactor done the methods on @base_module wil be moved to be private isnatnce methods on UpdateModule
@@ -31,12 +60,16 @@ module DTK; class BaseModule
     def is_parsing_error?(response)
       @base_module.is_parsing_error?(response)
     end
-
     def create_needed_objects_and_dsl?(repo,local,opts={})
       @base_module.create_needed_objects_and_dsl?(repo,local,opts)
     end
+    def parse_impl_to_create_dsl(config_agent_type,impl_obj,opts={})
+      @base_module.parse_impl_to_create_dsl(config_agent_type,impl_obj,opts)
+    end
+
   end
 end; end
+
 # items to move to new style
 module DTK; class BaseModule; class UpdateModule
   r8_nested_require('update_module','external_dependencies')
@@ -55,17 +88,6 @@ module DTK; class BaseModule; class UpdateModule
       return response if is_parsing_error?(response)
     end
     
-    def import_from_puppet_forge(config_agent_type,impl_obj,component_includes)
-      Import.new(self).import_from_puppet_forge(config_agent_type,impl_obj,component_includes)
-    end
-    
-    def import_from_git(commit_sha,repo_idh,version,opts={})
-      Import.new(self).import_from_git(commit_sha,repo_idh,version,opts)
-    end
-
-    def import_from_file(commit_sha,repo_idh,version,opts={})
-      Import.new(self).import_from_file(commit_sha,repo_idh,version,opts)
-    end
 
     def pull_from_remote__update_from_dsl(repo, module_and_branch_info,version=nil)
       pull_from_remote__update_from_dsl__private(repo, module_and_branch_info,version)
@@ -81,10 +103,6 @@ module DTK; class BaseModule; class UpdateModule
     end
 
     ####### end: public methods #########
-
-    # TODO: update_model_from_clone__type_specific? is called from module/mixins from
-    # update_model_from_clone_changes?, which more naturally belongs here, but cant now because then would not
-    # apply to service modules. More generally need to seperate out what applies to service modules as well as component,test, etc
 
     # TODO: for testing
     def test_generate_dsl()
@@ -144,45 +162,9 @@ module DTK; class BaseModule; class UpdateModule
       impl_obj.add_file_and_push_to_repo(dsl_created_info[:path],dsl_created_info[:content])
     end
 
-    def update_model_from_clone__type_specific?(commit_sha,diffs_summary,module_branch,version,opts={})
-      ret = ModuleDSLInfo.new()
-      opts.merge!(:ret_dsl_updated_info => Hash.new)
-      dsl_created_info = ModuleDSLInfo::CreatedInfo.new()
-      module_namespace = module_namespace()
-      impl_obj = module_branch.get_implementation()
-      local = ret_local(version)
-      project = local.project
-      opts.merge!(:project => project)
-      # TODO: make more robust to handle situation where diffs dont cover all changes; think can detect by looking at shas
-      impl_obj.modify_file_assets(diffs_summary)
+    # TODO: when refactor finished the methods below wil; be changed to be private instance methods on UpdateModule
+   public
 
-      if version.kind_of?(ModuleVersion::AssemblyModule)
-        if meta_file_changed = diffs_summary.meta_file_changed?()
-          parse_dsl_and_update_model(impl_obj,module_branch.id_handle(),version,opts)
-        end
-        assembly = version.get_assembly(model_handle(:component))
-        opts_finalize = (meta_file_changed ? {:meta_file_changed => true} : {})
-        AssemblyModule::Component.finalize_edit(assembly,self,module_branch,opts_finalize)
-      elsif ModuleDSL.contains_dsl_file?(impl_obj)
-        if opts[:force_parse] or diffs_summary.meta_file_changed?() or (get_field?(:dsl_parsed) == false)
-          if e = ModuleDSL::ParsingError.trap{parse_dsl_and_update_model(impl_obj,module_branch.id_handle(),version,opts)}
-            ret.dsl_parse_error = e
-          end
-        end
-      else
-        config_agent_type = config_agent_type_default()
-        dsl_created_info = parse_impl_to_create_dsl(config_agent_type,impl_obj)
-      end
-
-      dsl_updated_info = opts[:ret_dsl_updated_info]
-      unless dsl_updated_info.empty?
-        ret.dsl_updated_info = dsl_updated_info
-      end
-
-      ret.set_external_dependencies?(opts[:external_dependencies])
-      ret.dsl_created_info = dsl_created_info
-      ret
-    end
 
     # Rich: DTK-1754 pass in an (optional) option that indicates scaffolding strategy
     # will build in flexibility to support a number of varaints in how Puppet as an example
@@ -222,8 +204,6 @@ module DTK; class BaseModule; class UpdateModule
       ret
     end
 
-    # TODO: when recfactor finished these wil be moved to be private instance methods on UpdateModule
-   public
     def klass()
       case self.class
         when NodeModule

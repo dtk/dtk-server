@@ -133,10 +133,11 @@ module DTK
       get_objs_uniq(:target_instances)
     end
 
-   private
     def config_agent_type_default()
       :puppet
     end
+
+   private
 
     def publish_preprocess_raise_error?(module_branch_obj)
       unless get_field?(:dsl_parsed)

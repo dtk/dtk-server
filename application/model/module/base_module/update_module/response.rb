@@ -6,7 +6,7 @@ module DTK; class BaseModule; class UpdateModule
     end
     OutputForImportKeys = {
       :dsl_parse_error       => true,
-      :dsl_updated_info      => [:commit_sha], 
+      :dsl_updated_info      => [:commit_sha,:msg], 
       :dsl_created_info      => [:path,:content],
       :external_dependencies => [:inconsistent,:possibly_missing,:ambiguous]
     }

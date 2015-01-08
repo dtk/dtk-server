@@ -302,7 +302,7 @@ module DTK
       else
         opts.merge!(:ret_dsl_updated_info => Hash.new)
         response = update_model_from_dsl(module_branch,opts)
-        ret = BaseModule::DSLInfo.new()
+        ret = ModuleDSLInfo.new()
         if ParsingError.is_error?(response)
           ret.dsl_parsed_info = response
         else

@@ -1,5 +1,5 @@
-module DTK; class BaseModule
-  class DSLInfo < Hash
+module DTK
+  class ModuleDSLInfo < Hash
     def initialize(hash={})
       super()
       replace(hash)
@@ -61,4 +61,4 @@ module DTK; class BaseModule
       end
     end
   end
-end; end
+end

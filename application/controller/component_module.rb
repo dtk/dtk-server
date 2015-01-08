@@ -46,6 +46,16 @@ module DTK
         else
           component_module.import_from_file(commit_sha,repo_idh,version,opts)
         end
+      # the possible keys in response are with the subkeys that are used
+      #  :dsl_updated_info:
+      #    :commit_sha
+      #  :dsl_created_info
+      #    :path
+      #    :content - only if want this dsl file to be added on cleint side 
+      #  :external_dependencies
+      #    :inconsistent
+      #    :possibly_missing
+      #    :ambiguous 
       rest_ok_response response
     end
 

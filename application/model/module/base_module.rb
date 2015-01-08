@@ -1,6 +1,5 @@
 module DTK
   class BaseModule < Model
-    r8_nested_require('base_module','dsl_info')
     r8_nested_require('base_module','update_module')
     r8_nested_require('base_module','component_module_ref')
 

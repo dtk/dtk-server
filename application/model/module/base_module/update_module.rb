@@ -3,6 +3,7 @@
 # inserting __private members
 # TODO: useful to seperate out what applies to service modules as well as component,test, etc
 module DTK; class BaseModule; module UpdateModule
+  r8_nested_require('update_module','response')
   r8_nested_require('update_module','external_dependencies')
   r8_nested_require('update_module','update_module_refs')
   r8_nested_require('update_module','external_refs')
@@ -72,7 +73,7 @@ module DTK; class BaseModule; module UpdateModule
     end
     
     def import_from_git__private(commit_sha,repo_idh,version,opts={})
-      ret             = DSLInfo.new()
+      ret             = ModuleDSLInfo.new()
       module_branch   = get_workspace_module_branch(version)
       pull_was_needed = module_branch.pull_repo_changes?(commit_sha)
       
@@ -102,7 +103,7 @@ module DTK; class BaseModule; module UpdateModule
         if new_commit_sha = component_module_refs.serialize_and_save_to_repo?(opts_serialize)
           if opts[:ret_dsl_updated_info]
             msg = ret[:message]||"The module refs file was updated by the server"
-            ret[:dsl_updated_info] = DSLInfo::UpdatedInfo.new(:msg => msg,:commit_sha => new_commit_sha)
+            ret[:dsl_updated_info] = ModuleDSLInfo::UpdatedInfo.new(:msg => msg,:commit_sha => new_commit_sha)
           end
         end
       end
@@ -118,7 +119,7 @@ module DTK; class BaseModule; module UpdateModule
     end
 
     def import_from_file__private(commit_sha,repo_idh,version,opts={})
-      ret = DSLInfo.new()
+      ret = ModuleDSLInfo.new()
       module_branch = get_workspace_module_branch(version)
       pull_was_needed = module_branch.pull_repo_changes?(commit_sha)
 
@@ -137,7 +138,7 @@ module DTK; class BaseModule; module UpdateModule
       if new_commit_sha = ret_cmr.serialize_and_save_to_repo?(opts)
         if opts[:ret_dsl_updated_info]
           msg = "The module refs file was updated by the server"
-          ret.dsl_updated_info = DSLInfo::UpdatedInfo.new(:msg => msg,:commit_sha => new_commit_sha)
+          ret.dsl_updated_info = ModuleDSLInfo::UpdatedInfo.new(:msg => msg,:commit_sha => new_commit_sha)
         end
       end
       ret
@@ -170,7 +171,7 @@ module DTK; class BaseModule; module UpdateModule
         if new_commit_sha = ret_cmr.serialize_and_save_to_repo?(tmp_opts)
           if opts[:ret_dsl_updated_info]
             msg = ret[:message]||"The module refs file was updated by the server"
-            opts[:ret_dsl_updated_info] = DSLInfo::UpdatedInfo.new(:msg => msg,:commit_sha => new_commit_sha)
+            opts[:ret_dsl_updated_info] = ModuleDSLInfo::UpdatedInfo.new(:msg => msg,:commit_sha => new_commit_sha)
           end
         end
       end
@@ -197,7 +198,7 @@ module DTK; class BaseModule; module UpdateModule
     end
 
     def create_needed_objects_and_dsl?(repo, local, opts={})
-      ret = DSLInfo.new()
+      ret = ModuleDSLInfo.new()
       opts.merge!(:ret_dsl_updated_info => Hash.new)
       project = local.project
 
@@ -232,7 +233,7 @@ module DTK; class BaseModule; module UpdateModule
         end
       end
 
-      dsl_created_info = DSLInfo::CreatedInfo.new()
+      dsl_created_info = ModuleDSLInfo::CreatedInfo.new()
       klass = klass()
       if klass.contains_dsl_file?(impl_obj)
         opts_parse = opts.merge(:project => project)
@@ -265,9 +266,9 @@ module DTK; class BaseModule; module UpdateModule
     end
 
     def update_model_from_clone__type_specific?(commit_sha,diffs_summary,module_branch,version,opts={})
-      ret = DSLInfo.new()
+      ret = ModuleDSLInfo.new()
       opts.merge!(:ret_dsl_updated_info => Hash.new)
-      dsl_created_info = DSLInfo::CreatedInfo.new()
+      dsl_created_info = ModuleDSLInfo::CreatedInfo.new()
       module_namespace = module_namespace()
       impl_obj = module_branch.get_implementation()
       local = ret_local(version)
@@ -313,7 +314,7 @@ module DTK; class BaseModule; module UpdateModule
     # 1) what signatures get parsed (e.g., only top level puppet ones) and put in dtk
     # 2) what signatures get parsed and put in commented out
     def parse_impl_to_create_dsl(config_agent_type,impl_obj,opts={})
-      ret = DSLInfo::CreatedInfo.new()
+      ret = ModuleDSLInfo::CreatedInfo.new()
       parsing_error = nil
       render_hash = nil
       begin

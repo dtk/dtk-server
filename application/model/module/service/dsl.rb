@@ -158,7 +158,7 @@ module DTK
         if new_commit_sha = component_module_refs.serialize_and_save_to_repo?()
           if opts[:ret_dsl_updated_info]
             msg = "The module refs file was updated by the server"
-            opts[:ret_dsl_updated_info] = BaseModule::DSLInfo::UpdatedInfo.new(:msg => msg, :commit_sha => new_commit_sha)
+            opts[:ret_dsl_updated_info] = ModuleDSLInfo::UpdatedInfo.new(:msg => msg, :commit_sha => new_commit_sha)
           end
         end
         return parsed if ParsingError.is_error?(parsed)

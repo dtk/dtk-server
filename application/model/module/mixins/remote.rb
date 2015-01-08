@@ -77,8 +77,7 @@ module DTK; module ModuleMixins
       response = module_repo_info(repo_with_branch,module_and_branch_info,opts_info)
 
       if ErrorUsage::Parsing.is_error?(non_nil_if_parsing_error)
-        # TODO: :dsl_parsed_info not best name; consider changing it to dsl_errors, but then would also haveto changeon client side
-        response[:dsl_parsed_info] = non_nil_if_parsing_error
+        response[:dsl_parse_error] = non_nil_if_parsing_error
       end
       response
     end
@@ -264,9 +263,9 @@ TODO: needs to be redone taking into account versions are at same level as base
       response = get_workspace_branch_info(version)
 
       if ErrorUsage::Parsing.is_error?( parsed)
-        response[:dsl_parsed_info] = parsed
+        response[:dsl_parse_error] = parsed
       else
-        response[:dsl_parsed_info] = parsed[:dsl_parsed_info] if (parsed && !parsed.empty?)
+        response[:dsl_parse_error] = parsed[:dsl_parse_error] if (parsed && !parsed.empty?)
       end
 
       return response

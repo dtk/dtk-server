@@ -191,8 +191,7 @@ module DTK
       return unless pull_was_needed or parse_needed or update_from_includes
 
       opts_update = Aux.hash_subset(opts,[:do_not_raise,:modification_type,:force_parse,:auto_update_module_refs,:dsl_parsed_false,:skip_module_ref_update,:update_from_includes])
-      dsl_info = update_model_from_clone__type_specific?(commit_sha,diffs_summary,module_branch,version,opts_update)
-      dsl_info
+      update_model_from_clone__type_specific?(commit_sha,diffs_summary,module_branch,version,opts_update)
     end
 
     def get_project()

@@ -8,15 +8,11 @@ module DTK; class BaseModule; module UpdateModule
     end
 
     def self.update_component_module_refs(module_branch,matching_module_refs,module_class)
-      # For Rich: I think we should not return if there are no matching_module_refs
-      # because we get module_refs from module.module_refs table for specific module_branch and append to them this matching_module_refs
-      # For Aldin: see call that expect this to return component_module_refs
-      # so puttingin the following TODO
-      # TODO: if matching_module_refs.nil? or matching_module_refs.empty?
-      # then for effiency we would just want to returm the existing component module refs
+      # Get existing module_refs.yaml content to update module_ref dependencies
       syntatic_parsed_info = dsl_parser_class(module_class).parse_directory(module_branch,:component_module_refs)
       return syntatic_parsed_info if ModuleDSL::ParsingError.is_error?(syntatic_parsed_info)
 
+      # Append new matching module_refs to existing ones that are already in module_refs.yaml
       if matching_module_refs && !matching_module_refs.empty?
         syntatic_parsed_info << matching_module_refs
         syntatic_parsed_info.flatten!

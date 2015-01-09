@@ -287,7 +287,7 @@ module DTK; class BaseModule; class UpdateModule
       klass = klass()
       if klass.contains_dsl_file?(impl_obj)
         opts_parse = opts.merge(:project => project)
-        if err = klass::ParsingError.trap{parse_dsl_and_update_model(impl_obj,module_branch_idh,local.version,opts_parse)}
+        if err = klass::ParsingError.trap(:only_return_error=>true){parse_dsl_and_update_model(impl_obj,module_branch_idh,local.version,opts_parse)}
           ret.merge!(:dsl_parse_error => err)
         end
       elsif opts[:scaffold_if_no_dsl]

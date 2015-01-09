@@ -48,10 +48,11 @@ module DTK; class ErrorUsage
       super(processed_msg,opts_or_file_path)
     end
 
-    def self.trap(&block)
+    def self.trap(opts={},&block)
       ret = nil
       begin
         ret = yield
+        ret = nil if opts[:only_return_error]
       rescue ErrorUsage::Parsing => e
         ret = e
       end

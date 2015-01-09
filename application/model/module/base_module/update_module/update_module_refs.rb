@@ -21,7 +21,7 @@ module DTK; class BaseModule; class UpdateModule
       ModuleRefs::Parse.update_from_syntatic_parse(module_branch,syntatic_parsed_info)
     end
 
-    #TODO: better unify with ExternalDependencies 
+    #TODO: better unify with ModuleExternalDeps 
     def validate_includes_and_update_module_refs()
       ret = Hash.new
       
@@ -60,9 +60,8 @@ module DTK; class BaseModule; class UpdateModule
           end
         end
         
-        external_deps = ExternalDependencies.new(ext_deps_hash)
-        ret.merge!(external_deps.ret_hash_info())
-        ret.merge!(:matching_module_refs => mapped)
+        external_deps = ModuleExternalDeps.new(ext_deps_hash)
+        ret.merge!(external_deps.ret_hash_form(:matching_module_refs => mapped))
         unless mapped.empty?
           self.class.update_component_module_refs(@module_branch,mapped,@module_class) 
           message = "The module refs file was updated by the server based on includes section from dtk.model.yaml"

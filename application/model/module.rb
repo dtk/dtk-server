@@ -10,6 +10,7 @@ module DTK
   r8_nested_require('module','module_refs')
   r8_nested_require('module','dsl_parser')
   r8_nested_require('module','module_dsl_info') #TODO: this will get deprecated when all move over to update_module_output
+  r8_nested_require('module','module_external_deps')
   r8_nested_require('module','update_module_output')
   r8_nested_require('module','base_module')
   r8_nested_require('module','component_module')

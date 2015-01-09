@@ -2,7 +2,7 @@ module DTK; class BaseModule
   class UpdateModule
     module ExternalRefsMixin
       def check_and_ret_external_ref_dependencies?(external_ref,project,module_branch=nil)
-        ret = ExternalDependencies.new()
+        ret = ModuleExternalDeps.new()
         return ret unless dependencies = external_ref[:dependencies]
 
         parsed_dependencies = dependencies.map{|dep|dep.parsed_form?()}.compact
@@ -124,7 +124,7 @@ module DTK; class BaseModule
           :possibly_missing      => all_possibly_missing.uniq
         }
         ext_deps_hash.merge!(:ambiguous => ambiguous_grouped) unless ambiguous_grouped.empty?
-        ExternalDependencies.new(ext_deps_hash)
+        ModuleExternalDeps.new(ext_deps_hash)
       end
 
       def check_if_matching_or_ambiguous(module_branch, ambiguous)

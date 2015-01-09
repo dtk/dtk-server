@@ -25,6 +25,10 @@ module DTK
       ret
     end
 
+    def external_dependencies()
+      ModuleExternalDeps.new(self[:external_dependencies]||{})
+    end
+
     def dsl_created_info?()
       info = self[:dsl_created_info]
       unless info.nil? or info.empty?
@@ -38,25 +42,6 @@ module DTK
       end
     end
     
-    def external_dependencies()
-      ExternalDependencies.new(self[:external_dependencies]||{})
-    end
-    class ExternalDependencies < Hash
-      def initialize(hash)
-        super()
-        replace(hash)
-      end
-      def any_errors?()
-        !self[:ambiguous].nil? or !self[:possibly_missing].nil? or !self[:inconsistent].nil?
-      end
-      def ambiguous?()
-        self[:ambiguous]
-      end
-      def possibly_missing?()
-        self[:possibly_missing]
-      end
-    end
-
    private
     def ret_relevant_keys(hash)
       ret = Hash.new

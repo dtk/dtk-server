@@ -71,7 +71,6 @@ end; end
 
 # items to move to new style
 module DTK; class BaseModule; class UpdateModule
-  r8_nested_require('update_module','external_dependencies')
   r8_nested_require('update_module','update_module_refs')
   r8_nested_require('update_module','external_refs')
   module Mixin
@@ -227,7 +226,8 @@ module DTK; class BaseModule; class UpdateModule
     end
 
     def create_needed_objects_and_dsl?(repo, local, opts={})
-      ret = ModuleDSLInfo.new()
+      ret = Hash.new
+      # TODO: see if this should be merge! rather than merge
       opts.merge!(:ret_dsl_updated_info => Hash.new)
       project = local.project
 

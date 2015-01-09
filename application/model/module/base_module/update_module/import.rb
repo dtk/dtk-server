@@ -39,7 +39,6 @@ module DTK; class BaseModule; class UpdateModule
 
       component_module_refs = update_component_module_refs(module_branch,create_info[:matching_module_refs])
       return component_module_refs if is_parsing_error?(component_module_refs)
-
       
       unless opts[:skip_module_ref_update]
         opts_serialize = Aux::hash_subset(opts,[:ret_dsl_updated_info]).merge(:create_empty_module_refs => true)

@@ -1,8 +1,11 @@
 module DTK; class BaseModule
   class UpdateModule
     module ExternalRefsMixin
-      def check_and_ret_external_ref_dependencies?(external_ref,project,module_branch=nil)
-        ret = ExternalDependencies.new()
+      # returns a hash taht can have keys
+      #  :external_dependencies
+      #  :matching_module_refs
+      def check_and_ret_external_ref_dependencies?(external_ref,project,module_branch)
+        ret = Hash.new
         return ret unless dependencies = external_ref[:dependencies]
 
         parsed_dependencies = dependencies.map{|dep|dep.parsed_form?()}.compact
@@ -116,19 +119,20 @@ module DTK; class BaseModule
           end
         end
 
+        if component_module_refs = component_module_refs?(all_match_hashes)
+          ret.merge!(:matching_module_refs => component_module_refs)
+        end
+
         all_inconsistent = (all_inconsistent - all_match_hashes.keys)
         all_possibly_missing = (all_possibly_missing.uniq - all_inconsistent_names - all_match_hashes.keys - all_ambiguous_ns.uniq)
         ext_deps_hash = {
           :inconsistent          => all_inconsistent.uniq,
           :possibly_missing      => all_possibly_missing.uniq
         }
-        if component_module_refs = component_module_refs?(all_match_hashes)
-          ext_deps_hash.merge!(:component_module_refs => component_module_refs)
-        end
         unless ambiguous_grouped.empty?
           ext_deps_hash.merge!(:ambiguous => ambiguous_grouped)
         end
-        ExternalDependencies.new(ext_deps_hash)
+        ret.merge(:external_dependencies => ExternalDependencies.new(ext_deps_hash))
       end
 
       def check_if_matching_or_ambiguous(module_branch, ambiguous)

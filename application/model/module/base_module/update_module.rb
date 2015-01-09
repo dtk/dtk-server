@@ -120,8 +120,8 @@ module DTK; class BaseModule; class UpdateModule
     end
 
     def parse_dsl_and_update_model__private(impl_obj,module_branch_idh,version,opts={})
+      ret = Hash.new
       set_dsl_parsed!(false)
-      ret, tmp_opts = {}, {}
       module_branch = module_branch_idh.create_object()
       config_agent_type = opts[:config_agent_type] || config_agent_type_default()
       dsl_obj = klass().parse_dsl(self,impl_obj,opts.merge(:config_agent_type => config_agent_type))
@@ -133,10 +133,11 @@ module DTK; class BaseModule; class UpdateModule
       end
 
       dsl_obj.update_model_with_ref_integrity_check(:version => version)
-      tmp_opts.merge!(:ambiguous => ret[:ambiguous]) if ret[:ambiguous]
+
       unless opts[:skip_module_ref_update]
-        ret_cmr = ModuleRefs.get_component_module_refs(module_branch)
-        if new_commit_sha = ret_cmr.serialize_and_save_to_repo?(tmp_opts)
+        component_module_refs = ModuleRefs.get_component_module_refs(module_branch)
+        serialize_info_hash = (ret[:ambiguous] ? {:ambiguous => ret[:ambiguous]} : Hash.new)
+        if new_commit_sha = component_module_refs.serialize_and_save_to_repo?(serialize_info_hash)
           if opts[:ret_dsl_updated_info]
             msg = ret[:message]||"The module refs file was updated by the server"
             opts[:ret_dsl_updated_info] = ModuleDSLInfo::UpdatedInfo.new(:msg => msg,:commit_sha => new_commit_sha)
@@ -144,20 +145,41 @@ module DTK; class BaseModule; class UpdateModule
         end
       end
 
-      # parsed will be true if there are no missing or ambiguous dependencies, or flag dsl_parsed_false is not sent from the client
-      dependencies = ret[:external_dependencies]||{}
-      no_errors = (dependencies[:possibly_missing]||{}).empty? and (ret[:ambiguous]||{}).empty?
+      # ret is initially set to Hash.new and can only be changed if opts[:update_from_includes] meaning
+      # that validate_includes_and_update_module_refs wil be called
+      # for that reason we have the following short circuit
+      return ret unless opts[:update_from_includes]
+      
+      dependencies = ret[:external_dependencies]
+      no_errors = dependencies.nil? or !dependencies.any_errors?()
       if no_errors and !opts[:dsl_parsed_false]
         set_dsl_parsed!(true)
       end
-
-      opts[:external_dependencies] = dependencies unless dependencies.empty?
+      # TODO: can we find better way to pass :external_dependencies and passing ret rather than 'ret unless no_errors'
+      opts[:external_dependencies] = dependencies if dependencies
       ret unless no_errors
     end
 
 
     def add_dsl_content_to_impl(impl_obj,dsl_created_info)
       impl_obj.add_file_and_push_to_repo(dsl_created_info[:path],dsl_created_info[:content])
+    end
+
+   private
+    def include_modules?(matching_module_refs,external_dependencies)
+      ret = nil
+      return ret unless matching_module_refs or  external_dependencies
+      ret = Array.new
+      if matching_module_refs
+        matching_module_refs.each{|r|ret << r.component_module}
+      end
+      if external_dependencies
+        if missing = external_dependencies.possibly_missing?
+          # assuming that each element is of form ns/module
+          missing.each{|r|ret << r.split('/').last}
+        end
+      end
+      ret unless ret.empty?
     end
 
     # TODO: when refactor finished the methods below wil; be changed to be private instance methods on UpdateModule
@@ -226,8 +248,7 @@ module DTK; class BaseModule; class UpdateModule
     end
 
     def create_needed_objects_and_dsl?(repo, local, opts={})
-      ret = ModuleDSLInfo.new
-      # TODO: see if this should be merge! rather than merge
+      ret = Hash.new
       opts.merge!(:ret_dsl_updated_info => Hash.new)
       project = local.project
 
@@ -256,8 +277,8 @@ module DTK; class BaseModule; class UpdateModule
         if external_ref = ConfigAgent.parse_external_ref?(config_agent_type,impl_obj) 
           module_branch.update_external_ref(external_ref[:content]) if external_ref[:content]
           if opts[:process_external_refs]
-            external_deps = check_and_ret_external_ref_dependencies?(external_ref,project,module_branch)
-            ret.merge!(external_deps)
+            # check_and_ret_external_ref_dependencies? returns a hash that can have keys: :external_dependencies and :matching_module_refs
+            ret.merge!(check_and_ret_external_ref_dependencies?(external_ref,project,module_branch))
           end
         end
       end
@@ -267,12 +288,12 @@ module DTK; class BaseModule; class UpdateModule
       if klass.contains_dsl_file?(impl_obj)
         opts_parse = opts.merge(:project => project)
         if err = klass::ParsingError.trap{parse_dsl_and_update_model(impl_obj,module_branch_idh,local.version,opts_parse)}
-          ret.dsl_parse_error = err
+          ret.merge!(:dsl_parse_error => err)
         end
       elsif opts[:scaffold_if_no_dsl]
         opts_parse = Hash.new
-        if ret[:matching_module_refs]
-          opts_parse.merge!(:include_modules => ret[:matching_module_refs].map{|r|r.component_module})
+        if include_modules = include_modules?(ret[:matching_module_refs],ret[:external_dependencies])
+          opts_parse.merge!(:include_modules => include_modules)
         end
         dsl_created_info = parse_impl_to_create_dsl(config_agent_type,impl_obj,opts_parse)
         if opts[:commit_dsl]
@@ -280,15 +301,12 @@ module DTK; class BaseModule; class UpdateModule
         end
       end
 
-      ret.set_external_dependencies?(opts[:external_dependencies])
-
       dsl_updated_info = opts[:ret_dsl_updated_info]
       if dsl_updated_info && !dsl_updated_info.empty?
-        ret.dsl_updated_info = dsl_updated_info
+        ret.merge!(:dsl_updated_info => dsl_updated_info)
       end
-
+      
       ret.merge(:module_branch_idh => module_branch_idh, :dsl_created_info => dsl_created_info)
     end
-
   end
 end; end; end

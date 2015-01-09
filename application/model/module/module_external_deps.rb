@@ -10,13 +10,6 @@ module DTK
     def any_errors?()
       !!KeysProblems.find{|k|has_data_under_key?(k)}
     end
-    def possible_problems?()
-      ret = Array.new
-      KeysProblems.each do |k|
-        ret << self[k] if has_data_under_key?(k)
-      end
-      ret unless ret.empty?
-    end
 
     def ambiguous?()
       self[:ambiguous]

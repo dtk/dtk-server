@@ -61,7 +61,7 @@ module DTK; class BaseModule; class UpdateModule
         end
         
         external_deps = ModuleExternalDeps.new(ext_deps_hash)
-        ret.merge!(external_deps.ret_hash_form(:matching_module_refs => mapped))
+        ret.merge!(external_deps.ret_hash_form())
         unless mapped.empty?
           self.class.update_component_module_refs(@module_branch,mapped,@module_class) 
           message = "The module refs file was updated by the server based on includes section from dtk.model.yaml"

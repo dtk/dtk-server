@@ -155,7 +155,16 @@ module DTK; class BaseModule; class UpdateModule
       return ret unless opts[:update_from_includes]
       
       dependencies = ret[:external_dependencies]
-      no_errors = dependencies.nil? or !dependencies.any_errors?()
+      # For Rich: not sure if you use 'or' on purpose here but in this case when using 'or' instead of '||'
+      # no_errors will have value which is returned by dependencies.nil? because operator '=' is 'older'
+      # that 'or' (but 'younger' than '||')
+      # e.g. if dependencies.nil? is false, but !dependencies.any_errors?() is true, no_errors will still have value = false
+      # but if use '||' instead of 'or' then it will act like this no_errors = (dependencies.nil? or !dependencies.any_errors?())
+      # and for the example above no_errors will have value true, which is correct
+      #
+      # no_errors = dependencies.nil? or !dependencies.any_errors?()
+
+      no_errors = dependencies.nil? || !dependencies.any_errors?()
       if no_errors and !opts[:dsl_parsed_false]
         set_dsl_parsed!(true)
       end

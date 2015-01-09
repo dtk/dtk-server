@@ -1,7 +1,7 @@
 module DTK; class BaseModule
   class UpdateModule
-    module ExternalRefsMixin
-      # returns a hash taht can have keys
+    class ExternalRefs < self
+      # returns a hash that can have keys
       #  :external_dependencies
       #  :matching_module_refs
       def check_and_ret_external_ref_dependencies?(external_ref,project,module_branch)
@@ -13,7 +13,7 @@ module DTK; class BaseModule
 
         all_match_hashes, all_inconsistent, all_possibly_missing, all_inconsistent_names = {}, [], [], []
         all_ambiguous, all_ambiguous_ns, temp_existing = [], [], {}
-        all_modules          = self.class.get_all(project.id_handle()).map{|cmp_mod|ComponentModuleWrapper.new(cmp_mod)}
+        all_modules          = @base_module.class.get_all(project.id_handle()).map{|cmp_mod|ComponentModuleWrapper.new(cmp_mod)}
         existing_module_refs = get_existing_module_refs(module_branch)
 
         parsed_dependencies.each do |parsed_dependency|
@@ -22,7 +22,8 @@ module DTK; class BaseModule
           match, inconsistent, possibly_missing = nil, nil, nil
           
           # if there is no component_modules or just this one in database, mark all dependencies as possibly missing
-          all_modules_except_this = all_modules.reject{|cmp_mod_wrapper|cmp_mod_wrapper.id == id()}
+          base_module_id = @base_module.id()
+          all_modules_except_this = all_modules.reject{|cmp_mod_wrapper|cmp_mod_wrapper.id == base_module_id}
           all_possibly_missing << dep_name if all_modules_except_this.empty?
           
           all_modules_except_this.each do |cmp_mod_w|
@@ -157,7 +158,6 @@ module DTK; class BaseModule
           ComponentModuleRef.create_from_module_branches?(ndx_ret.values)
         end
       end
-      private :component_module_refs?
 
       def get_existing_module_refs(module_branch)
         existing_c_hash  = {}

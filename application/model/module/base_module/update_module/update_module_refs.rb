@@ -21,7 +21,6 @@ module DTK; class BaseModule; class UpdateModule
       ModuleRefs::Parse.update_from_syntatic_parse(module_branch,syntatic_parsed_info)
     end
 
-    #TODO: better unify with ExternalDependencies 
     def validate_includes_and_update_module_refs()
       ret = Hash.new
       

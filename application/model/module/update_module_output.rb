@@ -26,7 +26,7 @@ module DTK
     end
 
     def external_dependencies()
-      ModuleExternalDeps.new(self[:external_dependencies]||{})
+      ExternalDependencies.new(self[:external_dependencies]||{})
     end
 
     def dsl_created_info?()

@@ -21,7 +21,7 @@ module DTK; class BaseModule; class UpdateModule
       ModuleRefs::Parse.update_from_syntatic_parse(module_branch,syntatic_parsed_info)
     end
 
-    #TODO: better unify with ModuleExternalDeps 
+    #TODO: better unify with ExternalDependencies 
     def validate_includes_and_update_module_refs()
       ret = Hash.new
       
@@ -60,7 +60,7 @@ module DTK; class BaseModule; class UpdateModule
           end
         end
         
-        external_deps = ModuleExternalDeps.new(ext_deps_hash)
+        external_deps = ExternalDependencies.new(ext_deps_hash)
         ret.merge!(external_deps.ret_hash_form())
         unless mapped.empty?
           self.class.update_component_module_refs(@module_branch,mapped,@module_class) 

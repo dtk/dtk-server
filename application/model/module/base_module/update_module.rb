@@ -226,7 +226,7 @@ module DTK; class BaseModule; class UpdateModule
     end
 
     def create_needed_objects_and_dsl?(repo, local, opts={})
-      ret = Hash.new
+      ret = ModuleDSLInfo.new
       # TODO: see if this should be merge! rather than merge
       opts.merge!(:ret_dsl_updated_info => Hash.new)
       project = local.project
@@ -257,7 +257,7 @@ module DTK; class BaseModule; class UpdateModule
           module_branch.update_external_ref(external_ref[:content]) if external_ref[:content]
           if opts[:process_external_refs]
             external_deps = check_and_ret_external_ref_dependencies?(external_ref,project,module_branch)
-            ret.merge!(external_deps.ret_hash_info())
+            ret.merge!(external_deps)
           end
         end
       end

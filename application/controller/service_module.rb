@@ -152,12 +152,20 @@ module DTK
     end
 
     def rest__create()
-      module_name = ret_non_null_request_params(:module_name)
-      module_namespace = ret_request_params(:module_namespace)
-      project = get_default_project()
-      version = nil #TODO: stub
-      local_params = local_params(:service_module,module_name,:namespace => module_namespace, :version => version)
-      init_hash_response = ServiceModule.create_module(project,local_params)
+      module_name       = ret_non_null_request_params(:module_name)
+      namespace         = ret_request_param_module_namespace?()
+      config_agent_type =  ret_config_agent_type()
+      project           = get_default_project()
+      version           = nil #TODO: stub
+
+      opts_local_params = (namespace ? {:namespace=>namespace} : {})
+      local_params = local_params(:service_module, module_name, opts_local_params)
+
+      opts_create_mod = Opts.new(
+        :config_agent_type => ret_config_agent_type()
+      )
+      init_hash_response = ServiceModule.create_module(project, local_params, opts_create_mod)
+
       rest_ok_response(:service_module_id => init_hash_response[:module_branch_idh].get_id(), :repo_info => init_hash_response[:module_repo_info])
     end
 

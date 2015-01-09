@@ -74,6 +74,10 @@ module DTK; class BaseModule; class UpdateModule
       opts_serialize = Aux::hash_subset(opts,[:ret_dsl_updated_info,:create_empty_module_refs])
       serialize_module_refs_and_save_to_repo?(ret,component_module_refs,external_deps,opts_serialize)
 
+      if !external_deps.any_errors? and !opts[:dsl_parsed_false]
+        set_dsl_parsed!(true)
+      end
+
       ret
     end
 

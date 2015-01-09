@@ -36,7 +36,7 @@ module DTK
           :override_attrs => {"module_branch_id" => @module_branch.id()},
           :namespace      => component_module().module_namespace()
         }
-        update_opts.merge!(:version => version) if opts[:version]
+        update_opts.merge!(:version => opts[:version]) if opts[:version]
         update_model(update_opts)
 
         ref_integrity_snapshot.raise_error_if_any_violations()

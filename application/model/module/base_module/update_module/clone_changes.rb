@@ -16,9 +16,9 @@ module DTK; class BaseModule; class UpdateModule
         if meta_file_changed = diffs_summary.meta_file_changed?()
           parse_dsl_and_update_model(impl_obj,module_branch.id_handle(),version,opts)
         end
-        assembly = version.get_assembly(model_handle(:component))
+        assembly = version.get_assembly(@base_module.model_handle(:component))
         opts_finalize = (meta_file_changed ? {:meta_file_changed => true} : {})
-        AssemblyModule::Component.finalize_edit(assembly,self,module_branch,opts_finalize)
+        AssemblyModule::Component.finalize_edit(assembly,@base_module,module_branch,opts_finalize)
       elsif ModuleDSL.contains_dsl_file?(impl_obj)
         if opts[:force_parse] or diffs_summary.meta_file_changed?() or (get_field?(:dsl_parsed) == false)
           if e = ModuleDSL::ParsingError.trap(:only_return_error=>true){parse_dsl_and_update_model(impl_obj,module_branch.id_handle(),version,opts)}

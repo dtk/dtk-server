@@ -83,9 +83,13 @@ module DTK; class BaseModule; class UpdateModule
     # returns nil or parsing error
     def install__process_dsl(repo,module_branch,local,opts={})
       response = create_needed_objects_and_dsl?(repo,local,opts)
-      return response if is_parsing_error?(response)
+      if is_parsing_error?(response)
+        response
+      else
+        set_dsl_parsed!(true)
+        nil
+      end
     end
-    
 
     def pull_from_remote__update_from_dsl(repo, module_and_branch_info,version=nil)
       pull_from_remote__update_from_dsl__private(repo, module_and_branch_info,version)

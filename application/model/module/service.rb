@@ -295,7 +295,7 @@ module DTK
 
     # TODO: may want to fix up what this returns after fixing up what update_model_from_dsl returns
     # returns dsl_info
-    def update_model_from_clone_chamges(commit_sha,diffs_summary,module_branch,version,opts={})
+    def update_model_from_clone_changes(commit_sha,diffs_summary,module_branch,version,opts={})
       if version.kind_of?(ModuleVersion::AssemblyModule)
         assembly = version.get_assembly(model_handle(:component))
         AssemblyModule::Service.finalize_edit(assembly,opts[:modification_type],self,module_branch,diffs_summary)

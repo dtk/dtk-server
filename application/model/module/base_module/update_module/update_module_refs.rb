@@ -43,12 +43,15 @@ module DTK; class BaseModule; class UpdateModule
           multiple_namespaces.each{|mn| mapped.delete(mn)}
           
           check_if_matching_or_ambiguous(multiple_namespaces)
-          existing_module_refs = @module_branch.get_module_refs()
-          existing_module_refs.each do |existing_ref|
-              existing_names << existing_ref[:display_name] if existing_ref[:namespace_info]
-          end
+          # For Rich:
+          # possible solution for problem that Bakir sent in his last email
+          # uncomment these lines if caused any side effects
+          # existing_module_refs = @module_branch.get_module_refs()
+          # existing_module_refs.each do |existing_ref|
+          #     existing_names << existing_ref[:display_name] if existing_ref[:namespace_info]
+          # end
           
-          multiple_namespaces.delete_if{|mn| existing_names.include?(mn[:component_module])}
+          # multiple_namespaces.delete_if{|mn| existing_names.include?(mn[:component_module])}
           cmp_mods = multiple_namespaces.group_by { |h| h[:component_module] }
           cmp_mods.each do |k,v|
             namespaces = v.map{|a| a[:remote_namespace]}

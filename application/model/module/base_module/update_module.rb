@@ -86,7 +86,7 @@ module DTK; class BaseModule
       return dsl_obj if is_parsing_error?(dsl_obj)
 
       if opts[:update_from_includes]
-        ret = UpdateModuleRefs.new(dsl_obj,@base_class.class).validate_includes_and_update_module_refs()
+        ret = UpdateModuleRefs.new(dsl_obj,@base_module).validate_includes_and_update_module_refs()
         return ret if is_parsing_error?(ret)
       end
 
@@ -138,31 +138,6 @@ module DTK; class BaseModule
     end
 
    private
-    def ret_local(version)
-      self.class.ret_local(@base_module,version)
-    end
-
-    def parse_dsl(impl_obj,opts={})
-      klass().parse_dsl(@base_module,impl_obj,opts)
-    end
-    def set_dsl_parsed!(boolean)
-      @base_module.set_dsl_parsed!(boolean)
-    end
-    def update_component_module_refs(module_branch,matching_module_refs)
-      UpdateModuleRefs.update_component_module_refs(module_branch,matching_module_refs,@base_module.class)
-    end
-    def add_dsl_content_to_impl(impl_obj,dsl_created_info)
-      impl_obj.add_file_and_push_to_repo(dsl_created_info[:path],dsl_created_info[:content])
-    end
-
-    def klass()
-      case @base_module.class
-        when NodeModule
-          NodeModuleDSL
-        else
-          ModuleDSL
-      end
-    end
 
     # Rich: DTK-1754 pass in an (optional) option that indicates scaffolding strategy
     # will build in flexibility to support a number of varaints in how Puppet as an example
@@ -202,8 +177,33 @@ module DTK; class BaseModule
       ret
     end
 
+    def klass()
+      case @base_module.class
+        when NodeModule
+          NodeModuleDSL
+        else
+          ModuleDSL
+      end
+    end
+
+    def ret_local(version)
+      self.class.ret_local(@base_module,version)
+    end
     def is_parsing_error?(response)
       ModuleDSL::ParsingError.is_error?(response)
+    end
+    def parse_dsl(impl_obj,opts={})
+      klass().parse_dsl(@base_module,impl_obj,opts)
+    end
+    def update_component_module_refs(module_branch,matching_module_refs)
+      UpdateModuleRefs.update_component_module_refs(module_branch,matching_module_refs,@base_module)
+    end
+    def add_dsl_content_to_impl(impl_obj,dsl_created_info)
+      impl_obj.add_file_and_push_to_repo(dsl_created_info[:path],dsl_created_info[:content])
+    end
+
+    def set_dsl_parsed!(boolean)
+      @base_module.set_dsl_parsed!(boolean)
     end
     def module_namespace()
       @base_module.module_namespace()

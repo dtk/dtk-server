@@ -1,15 +1,15 @@
 module DTK; class BaseModule; class UpdateModule
   class UpdateModuleRefs
-    def initialize(dsl_obj,module_class)
+    def initialize(dsl_obj,base_module)
       @input_hash    = dsl_obj.input_hash
       @project_idh   = dsl_obj.project_idh
       @module_branch = dsl_obj.module_branch
-      @module_class  = module_class
+      @base_module  = base_module
     end
 
-    def self.update_component_module_refs(module_branch,matching_module_refs,module_class)
+    def self.update_component_module_refs(module_branch,matching_module_refs,base_module)
       # Get existing module_refs.yaml content to update module_ref dependencies
-      syntatic_parsed_info = dsl_parser_class(module_class).parse_directory(module_branch,:component_module_refs)
+      syntatic_parsed_info = dsl_parser_class(base_module).parse_directory(module_branch,:component_module_refs)
       return syntatic_parsed_info if ModuleDSL::ParsingError.is_error?(syntatic_parsed_info)
 
       # Append new matching module_refs to existing ones that are already in module_refs.yaml
@@ -64,7 +64,7 @@ module DTK; class BaseModule; class UpdateModule
         
         ret.merge!(:external_dependencies =>ExternalDependencies.new(ext_deps_hash))
         unless mapped.empty?
-          self.class.update_component_module_refs(@module_branch,mapped,@module_class) 
+          self.class.update_component_module_refs(@module_branch,mapped,@base_module) 
           message = "The module refs file was updated by the server based on includes section from dtk.model.yaml"
           ret.merge!(:message => message)
         end
@@ -73,8 +73,8 @@ module DTK; class BaseModule; class UpdateModule
     end
     
    private
-    def self.dsl_parser_class(module_class)
-      module_class::DSLParser
+    def self.dsl_parser_class(base_module)
+      base_module.class::DSLParser
     end
 
     def check_if_matching_or_ambiguous(ambiguous)

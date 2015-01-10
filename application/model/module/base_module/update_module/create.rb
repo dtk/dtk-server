@@ -65,18 +65,24 @@ module DTK; class BaseModule; class UpdateModule
    private
     def include_modules?(matching_module_refs,external_dependencies)
       ret = nil
-      return ret unless matching_module_refs or  external_dependencies
+      return ret unless matching_module_refs or external_dependencies
       ret = Array.new
       if matching_module_refs
         matching_module_refs.each{|r|ret << r.component_module}
       end
       if external_dependencies
         if missing = external_dependencies.possibly_missing?
-          # assuming that each element is of form ns/module
+          # assuming that each element is of form ns/module or module
           missing.each{|r|ret << r.split('/').last}
         end
+        if ambiguous = external_dependencies.ambiguous?
+          # ambiguous is has with keys ns/module or module
+          # example is {"puppetlabs/stdlib"=>["puppetlabs", "r8"]}}
+          ambiguous.each_key{|r|ret << r.split('/').last}
+        end
+        #TODO: add inconstent elements
       end
-      ret unless ret.empty?
+      ret.uniq unless ret.empty?
     end
 
   end

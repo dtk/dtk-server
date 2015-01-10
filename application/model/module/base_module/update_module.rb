@@ -85,21 +85,23 @@ module DTK; class BaseModule
       dsl_obj = parse_dsl(impl_obj,opts.merge(:config_agent_type => config_agent_type))
       return dsl_obj if is_parsing_error?(dsl_obj)
 
+      # TODO: check if this fails whether it raises a parsing error
+      # if outer layer catches these then this form ais good and want to remove otehrs
+      # to raise errors rather than passing error obejct
+      # with error
+      dsl_obj.update_model_with_ref_integrity_check(:version => version)
+
       if opts[:update_from_includes]
         ret = UpdateModuleRefs.new(dsl_obj,@base_module).validate_includes_and_update_module_refs()
         return ret if is_parsing_error?(ret)
       end
 
-      dsl_obj.update_model_with_ref_integrity_check(:version => version)
+      dependencies = ret[:external_dependencies]
 
       unless opts[:skip_module_ref_update]
-        component_module_refs = ModuleRefs.get_component_module_refs(module_branch)
-        serialize_info_hash = (ret[:ambiguous] ? {:ambiguous => ret[:ambiguous]} : Hash.new)
-        if new_commit_sha = component_module_refs.serialize_and_save_to_repo?(serialize_info_hash)
-          if opts[:ret_dsl_updated_info]
-            msg = ret[:message]||"The module refs file was updated by the server"
-            opts[:ret_dsl_updated_info] = ModuleDSLInfo::UpdatedInfo.new(:msg => msg,:commit_sha => new_commit_sha)
-          end
+        opts_dsl = Opts.create?(:message? => ret[:message],:ret_dsl_updated_info? => opts[:ret_dsl_updated_info])
+        if dsl_updated_info = UpdateModuleRefs.update_component_module_refs_dsl?(module_branch,dependencies,opts_dsl)
+          opts[:ret_dsl_updated_info] = dsl_updated_info
         end
       end
 
@@ -108,7 +110,6 @@ module DTK; class BaseModule
       # for that reason we have the following short circuit
       return ret unless opts[:update_from_includes]
       
-      dependencies = ret[:external_dependencies]
       # For Rich: not sure if you use 'or' on purpose here but in this case when using 'or' instead of '||'
       # no_errors will have value which is returned by dependencies.nil? because operator '=' is 'older'
       # that 'or' (but 'younger' than '||')

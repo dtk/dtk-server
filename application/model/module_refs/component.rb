@@ -19,7 +19,7 @@ module DTK; class ModuleRefs
       end
     end
 
-    def self.get_matching(project_idh,module_names)
+    def self.get_ones_that_match_module_names(project_idh,module_names)
       opts = {
         :cols => [:namespace_id,:namespace],
         :filter => [:oneof,:display_name,module_names]

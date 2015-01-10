@@ -8,34 +8,55 @@ module DTK; class BaseModule; class UpdateModule
       @module_branch = dsl_obj.module_branch
     end
 
+    # if an update is made it returns ModuleDSLInfo::UpdatedInfo object
+    # opts can have keys
+    # :message
+    # :ret_dsl_updated_info
+    def self.update_component_module_refs_dsl?(module_branch,external_deps,opts={})
+      component_module_refs = opts[:component_module_refs] || ModuleRefs.get_component_module_refs(module_branch)
+      #TODO: check for other things in external deps
+      serialize_info_hash = (external_deps[:ambiguous] ? {:ambiguous => external_deps[:ambiguous]} : Hash.new)
+      if new_commit_sha = component_module_refs.serialize_and_save_to_repo?(serialize_info_hash)
+        if opts[:ret_dsl_updated_info]
+          msg = opts[:message]||"The module refs file was updated by the server"
+          ModuleDSLInfo::UpdatedInfo.new(:msg => msg,:commit_sha => new_commit_sha)
+        end
+      end
+    end
+
+    #this updates the component module objects, not the dsl
+    def update_component_module_refs(dsl_info_to_add)
+      self.class.update_component_module_refs(@module_branch,dsl_info_to_add,@base_module)
+    end
     def self.update_component_module_refs(module_branch,dsl_info_to_add,base_module)
       ModuleRefs::Parse.update_component_module_refs(base_module.class,module_branch,:dsl_info_to_add => dsl_info_to_add)
     end
-
+    #this updates the component module objects, not the dsl
     def validate_includes_and_update_module_refs()
       ret = Hash.new
-      unless includes = component_include_modules?()
-        return ret
-      end
+      # gets what is in the module_refs.yaml dsl; this can differ from what is in object model if user just editted it
       existing_dsl_info = get_component_module_refs_dsl_info()      
       return existing_dsl_info if is_parsing_error?(existing_dsl_info)
+
+      include_module_names = component_module_names_in_include_statements?()
+
       # just keep existing_dsl_objs that have a namespace set
       existing_dsl_info.reject!{|r|!r.namespace?()}
       
+      #find existing component module refs that match the module_names in the modules in include statements
+      mapped_cmrs = ModuleRefs::Component.get_ones_that_match_module_names(@project_idh,include_module_names)
 
-      mapped = ModuleRefs::Component.get_matching(@project_idh,includes)
-
-      multiple_namespaces = mapped.group_by { |h| h[:component_module] }.values.select { |a| a.size > 1 }.flatten
+      multiple_namespaces = mapped_cmrs.group_by { |cmr| cmr.component_module}.values.select { |a| a.size > 1 }.flatten
       
-      mapped_names = mapped.map{|m| m[:component_module]}
-      missing = includes - mapped_names
+      mapped_names = mapped_cmrs.map{|cmr| cmr.component_module}
+      missing = include_module_names - mapped_names
       ext_deps_hash = {
         :possibly_missing => missing
       }
       
       unless multiple_namespaces.empty?
         multi_missing, ambiguous_grouped, existing_names = [], {}, []
-        multiple_namespaces.each{|mn| mapped.delete(mn)}
+        multiple_namespaces.each{|mn| mapped_names.delete(mn)}
         
         check_if_matching_or_ambiguous(multiple_namespaces)
         # For Rich:
@@ -59,8 +80,8 @@ module DTK; class BaseModule; class UpdateModule
       end
       
       ret.merge!(:external_dependencies => ExternalDependencies.new(ext_deps_hash))
-      unless mapped.empty?
-        self.class.update_component_module_refs(@module_branch,mapped,@base_module) 
+      unless mapped_cmrs.empty?
+        update_component_module_refs(mapped_cmrs) 
         message = "The module refs file was updated by the server based on includes section from dtk.model.yaml"
         ret.merge!(:message => message)
       end
@@ -68,8 +89,8 @@ module DTK; class BaseModule; class UpdateModule
     end
     
    private
-    # These are modules in teh component module include section of dtk.model.yaml
-    def component_include_modules?()
+    # These are modules in the component module include section of dtk.model.yaml
+    def component_module_names_in_include_statements?()
       # @input_hash is in normalized form
       ret = @input_hash.values.map{|v|(v['component_include_module']||{}).keys}.flatten(1).uniq
       ret unless ret.empty?

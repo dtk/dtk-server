@@ -1,5 +1,5 @@
-module DTK; class BaseModule
-  class ComponentModuleRef < Hash
+module DTK; class ModuleRefs
+  class Component < Hash
     def initialize(component_module,namespace)
       super()
       replace(:component_module => component_module, :remote_namespace => namespace)
@@ -8,6 +8,15 @@ module DTK; class BaseModule
 
     def component_module()
       self[:component_module]
+    end
+    def namespace?()
+      self[:remote_namespace]
+    end
+
+    def self.get_dsl_info(module_class,module_branch)
+      ModuleRefs::Parse.get_component_module_refs_dsl_info(module_class,module_branch).map do |r|
+        new(r[:component_module],r[:remote_namespace])
+      end
     end
 
     def self.get_matching(project_idh,module_names)
@@ -19,7 +28,6 @@ module DTK; class BaseModule
       matching_modules.map{|m| new(m[:display_name],m[:namespace][:name])} 
     end
     
-    # returns array of ComponentModuleRefs
     def self.create_from_module_branches?(module_branches)
       ret = nil
       if module_branches.nil? or module_branches.empty?
@@ -32,3 +40,4 @@ module DTK; class BaseModule
     end
   end
 end; end
+

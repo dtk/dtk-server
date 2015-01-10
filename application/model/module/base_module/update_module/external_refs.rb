@@ -155,7 +155,7 @@ module DTK; class BaseModule
           h.merge(r.id() => r)
         end
         unless ndx_ret.empty?
-          ComponentModuleRef.create_from_module_branches?(ndx_ret.values)
+          ModuleRef::Component.create_from_module_branches?(ndx_ret.values)
         end
       end
 

@@ -137,6 +137,8 @@ module DTK; class BaseModule
       local_params.create_local(base_module.get_project())
     end
 
+
+
    private
 
     # Rich: DTK-1754 pass in an (optional) option that indicates scaffolding strategy
@@ -189,9 +191,6 @@ module DTK; class BaseModule
     def ret_local(version)
       self.class.ret_local(@base_module,version)
     end
-    def is_parsing_error?(response)
-      ModuleDSL::ParsingError.is_error?(response)
-    end
     def parse_dsl(impl_obj,opts={})
       klass().parse_dsl(@base_module,impl_obj,opts)
     end
@@ -219,6 +218,9 @@ module DTK; class BaseModule
     end
     def get_project()
       @base_module.get_project()
+    end
+    def is_parsing_error?(response)
+      ModuleDSL::ParsingError.is_error?(response)
     end
 
   end

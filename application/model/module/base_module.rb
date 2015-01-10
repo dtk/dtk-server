@@ -1,7 +1,6 @@
 module DTK
   class BaseModule < Model
     r8_nested_require('base_module','update_module')
-    r8_nested_require('base_module','component_module_ref')
 
     # TODO: look through r8_nested_require('module'..,) and see which ones should be under instead base_module
     r8_nested_require('module','dsl')

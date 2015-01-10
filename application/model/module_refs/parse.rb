@@ -1,18 +1,32 @@
 module DTK
   class ModuleRefs
     class Parse < self
-      def self.update_from_syntatic_parse(module_branch,syntatic_parse)
-        hash_content = semantic_parse(module_branch,syntatic_parse)
+      def self.get_component_module_refs_dsl_info(module_class,module_branch,opts={})
+        module_class::DSLParser.parse_directory(module_branch,:component_module_refs,opts)
+      end
+
+      # updates component_module_refs from dsl file and from optionally provider content to add
+      def self.update_component_module_refs(module_class,module_branch,opts={})
+        dsl_info = get_component_module_refs_dsl_info(module_class,module_branch,opts)
+        return dsl_info if dsl_info.kind_of?(ErrorUsage::Parsing)
+        if dsl_info_to_add = opts[:dsl_info_to_add]
+          if !dsl_info_to_add.empty?
+            dsl_info << dsl_info_to_add
+            dsl_info.flatten!
+          end
+        end
+        hash_content = semantic_parse(module_branch,dsl_info)
         return hash_content if hash_content.kind_of?(ErrorUsage::Parsing)
+
         update(module_branch,hash_content)
         ModuleRefs.new(module_branch,hash_content,:content_hash_form_is_reified => true)
       end
 
      private
-      def self.semantic_parse(branch,syntactic_parse_info)
+      def self.semantic_parse(branch,dsl_info)
         ret = nil
         begin
-          ret = reify_content(branch.model_handle(:model_ref),syntactic_parse_info)
+          ret = reify_content(branch.model_handle(:model_ref),dsl_info)
          rescue ErrorUsage::Parsing => e
           return e
          rescue => e

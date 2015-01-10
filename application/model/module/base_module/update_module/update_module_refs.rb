@@ -7,18 +7,8 @@ module DTK; class BaseModule; class UpdateModule
       @base_module  = base_module
     end
 
-    def self.update_component_module_refs(module_branch,matching_module_refs,base_module)
-      # Get existing module_refs.yaml content to update module_ref dependencies
-      syntatic_parsed_info = dsl_parser_class(base_module).parse_directory(module_branch,:component_module_refs)
-      return syntatic_parsed_info if ModuleDSL::ParsingError.is_error?(syntatic_parsed_info)
-
-      # Append new matching module_refs to existing ones that are already in module_refs.yaml
-      if matching_module_refs && !matching_module_refs.empty?
-        syntatic_parsed_info << matching_module_refs
-        syntatic_parsed_info.flatten!
-      end
-
-      ModuleRefs::Parse.update_from_syntatic_parse(module_branch,syntatic_parsed_info)
+    def self.update_component_module_refs(module_branch,dsl_info_to_add,base_module)
+      ModuleRefs::Parse.update_component_module_refs(base_module.class,module_branch,:dsl_info_to_add => dsl_info_to_add)
     end
 
     def validate_includes_and_update_module_refs()
@@ -29,6 +19,13 @@ module DTK; class BaseModule; class UpdateModule
       includes.uniq!
       unless includes.empty?
         mapped = ComponentModuleRef.get_matching(@project_idh,includes)
+#=====
+syntatic_parsed_info = ModuleRefs::Parse.get_component_module_refs_dsl_info(@base_module.class,@module_branch)
+existing_module_refs = @module_branch.get_module_refs()
+pp(:syntatic_parsed_info => syntatic_parsed_info)
+pp(:existing_module_refs => existing_module_refs)
+pp(:mapped => mapped)
+# ====
         multiple_namespaces = mapped.group_by { |h| h[:component_module] }.values.select { |a| a.size > 1 }.flatten
         
         mapped_names = mapped.map{|m| m[:component_module]}
@@ -73,9 +70,6 @@ module DTK; class BaseModule; class UpdateModule
     end
     
    private
-    def self.dsl_parser_class(base_module)
-      base_module.class::DSLParser
-    end
 
     def check_if_matching_or_ambiguous(ambiguous)
       existing_c_hash = get_existing_module_refs()

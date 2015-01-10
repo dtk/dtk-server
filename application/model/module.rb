@@ -6,8 +6,6 @@
 module DTK
   # order is important
   r8_nested_require('module','mixins')
-  r8_nested_require('module','module_ref')
-  r8_nested_require('module','module_refs')
   r8_nested_require('module','dsl_parser')
   r8_nested_require('module','external_dependencies')
   r8_nested_require('module','module_dsl_info') #TODO: this will get deprecated when all move over to update_module_output

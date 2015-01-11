@@ -21,11 +21,11 @@ module DTK; class BaseModule
       end
       
       def import_from_git(commit_sha,repo_idh,version,opts={})
-        Import.new(self).import_from_git(commit_sha,repo_idh,version,opts)
+        Import.new(self,version).import_from_git(commit_sha,repo_idh,opts)
       end
       
       def import_from_file(commit_sha,repo_idh,version,opts={})
-        Import.new(self).import_from_file(commit_sha,repo_idh,version,opts)
+        Import.new(self,version).import_from_file(commit_sha,repo_idh,opts)
       end
 
       def update_model_from_clone_changes(commit_sha,diffs_summary,module_branch,version,opts={})
@@ -101,9 +101,11 @@ module DTK; class BaseModule
       dependencies = ret[:external_dependencies]
 
       unless opts[:skip_module_ref_update]
-        opts_dsl = Opts.create?(:message? => ret[:message],:ret_dsl_updated_info? => opts[:ret_dsl_updated_info])
-        if dsl_updated_info = UpdateModuleRefs.update_component_module_refs_dsl?(module_branch,dependencies,opts_dsl)
-          opts[:ret_dsl_updated_info] = dsl_updated_info
+        opts_dsl = Opts.create?(:message? => ret[:message],:extrenal_dependencies? => dependencies)
+        if dsl_updated_info = UpdateModuleRefs.serialize_and_save_to_repo?(module_branch,dependencies,opts_dsl)
+          if opts[:ret_dsl_updated_info]
+            opts[:ret_dsl_updated_info] = dsl_updated_info
+          end
         end
       end
 
@@ -120,7 +122,7 @@ module DTK; class BaseModule
       # and for the example above no_errors will have value true, which is correct
       #
       # no_errors = dependencies.nil? or !dependencies.any_errors?()
-
+      # TODO: Aldin: area to clean up
       no_errors = dependencies.nil? || !dependencies.any_errors?()
       if no_errors and !opts[:dsl_parsed_false]
         set_dsl_parsed!(true)

@@ -14,8 +14,8 @@ module DTK; class BaseModule; class UpdateModule
     #  :create_empty_module_refs
     #  :component_module_refs 
     #  :external_dependencies 
-    # TODO: for efficiency if have the parsed info can pass this to serialize_and_save_to_repo?
-    def self.serialize_and_save_to_repo?(module_branch,opts={})
+    # TODO: for efficiency if have the parsed info can pass this to save_dsl?
+    def self.save_dsl?(module_branch,opts={})
       component_module_refs = opts[:component_module_refs] || ModuleRefs.get_component_module_refs(module_branch)
       serialize_info_hash = Aux::hash_subset(opts,[:create_empty_module_refs])
       if external_deps = opts[:external_depependencies]
@@ -26,31 +26,12 @@ module DTK; class BaseModule; class UpdateModule
           serialize_info_hash.merge!(:possibly_missing => possibly_missing)
         end
       end
-      if new_commit_sha = component_module_refs.serialize_and_save_to_repo?(serialize_info_hash)
+      if new_commit_sha = component_module_refs.save_dsl?(serialize_info_hash)
         msg = opts[:message]||"The module refs file was updated by the server"
         ModuleDSLInfo::UpdatedInfo.new(:msg => msg,:commit_sha => new_commit_sha)
       end
     end
 
-    # opts can have keys
-    #   :create_empty_module_refs
-    #   :ret_dsl_updated_info
-    def serialize_module_refs_and_save_to_repo?(ret,component_module_refs,external_deps,opts={})
-      serialize_info_hash = Aux::hash_subset(opts,[:create_empty_module_refs])
-      if ambiguous = external_deps.ambiguous?
-        serialize_info_hash.merge!(:ambiguous => ambiguous)
-      end
-      if possibly_missing = external_deps.possibly_missing?
-        serialize_info_hash.merge!(:possibly_missing => possibly_missing)
-      end
-      if new_commit_sha = component_module_refs.serialize_and_save_to_repo?(serialize_info_hash)
-        if opts[:ret_dsl_updated_info]
-          msg = "The module refs file was updated by the server"
-          ret.set_dsl_updated_info!(msg,new_commit_sha)
-        end
-      end
-    end
-    
     def self.update_component_module_refs(module_branch,cmr_update_els,base_module)
       ModuleRefs::Parse.update_component_module_refs_from_parse_objects(base_module.class,module_branch,cmr_update_els)
     end

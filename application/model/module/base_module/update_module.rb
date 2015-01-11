@@ -101,8 +101,8 @@ module DTK; class BaseModule
       dependencies = ret[:external_dependencies]
 
       unless opts[:skip_module_ref_update]
-        opts_dsl = Opts.create?(:message? => ret[:message],:extrenal_dependencies? => dependencies)
-        if dsl_updated_info = UpdateModuleRefs.serialize_and_save_to_repo?(module_branch,dependencies,opts_dsl)
+        opts_dsl = Opts.create?(:message? => ret[:message],:external_dependencies? => dependencies)
+        if dsl_updated_info = UpdateModuleRefs.save_dsl?(module_branch,opts_dsl)
           if opts[:ret_dsl_updated_info]
             opts[:ret_dsl_updated_info] = dsl_updated_info
           end

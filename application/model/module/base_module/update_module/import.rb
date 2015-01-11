@@ -97,7 +97,7 @@ module DTK; class BaseModule; class UpdateModule
       if possibly_missing = external_deps.possibly_missing?
         serialize_info_hash.merge!(:possibly_missing => possibly_missing)
       end
-      if new_commit_sha = component_module_refs.serialize_and_save_to_repo?(serialize_info_hash)
+      if new_commit_sha = component_module_refs.save_dsl?(serialize_info_hash)
         if opts[:ret_dsl_updated_info]
           msg = "The module refs file was updated by the server"
           ret.set_dsl_updated_info!(msg,new_commit_sha)

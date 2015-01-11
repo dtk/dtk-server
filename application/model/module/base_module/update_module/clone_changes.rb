@@ -27,7 +27,7 @@ module DTK; class BaseModule; class UpdateModule
         end
       else
         config_agent_type = config_agent_type_default()
-        dsl_created_info = parse_impl_to_create_dsl(config_agent_type,impl_obj)
+        dsl_created_info = ScaffoldImplementation.create_dsl(module_name(),config_agent_type,impl_obj)
       end
       
       dsl_updated_info = opts[:ret_dsl_updated_info]

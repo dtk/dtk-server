@@ -48,7 +48,8 @@ module DTK; class ModuleRefs
 
       # find component modules (in parse form) that matches a component module found in dsl or
       # in opts; module_names are the relevant modle names to return info about
-      module_names = (cmp_mod_refs.map{|r|r.component_module} + opts[:include_module_names]||[]).uniq
+      module_names = (cmp_mod_refs.map{|r|r.component_module} + (opts[:include_module_names]||[])).uniq
+      return ret if module_names.empty?
       cmp_mods_dsl_form = get_matching_component_modules__dsl_form(project_idh,module_names)
 
       # for each element in cmp_mod_refs that has a namespace see if it matches an existing component module
@@ -90,9 +91,11 @@ module DTK; class ModuleRefs
         return ret 
       end
       mb_idhs = module_branches.map{|mb|mb.id_handle()}
-      ModuleBranch.get_namespace_info(mb_idhs).map do |r|
-        new(r[:component_module][:display_name],r[:namespace][:display_name])
+      ret = ComponentDSLForm::Elements.new
+      ModuleBranch.get_namespace_info(mb_idhs).each do |r|
+        ret << new(r[:component_module][:display_name],r[:namespace][:display_name])
       end
+      ret
     end
 
     def print_form()

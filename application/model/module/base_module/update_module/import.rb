@@ -1,11 +1,11 @@
 module DTK; class BaseModule; class UpdateModule
   class Import < self
     def import_from_puppet_forge__private(config_agent_type,impl_obj,component_includes)
-      opts_parse = {
+      opts_scaffold = {
         :ret_hash_content => true,
         :include_modules  => component_includes
       }
-      dsl_created_info = parse_impl_to_create_dsl(config_agent_type,impl_obj,opts_parse)
+      dsl_created_info = ScaffoldImplementation.create_dsl(module_name(),config_agent_type,impl_obj,opts_scaffold)
       add_dsl_content_to_impl(impl_obj,dsl_created_info)
       set_dsl_parsed!(true)
     end

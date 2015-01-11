@@ -3,7 +3,6 @@ module DTK; class BaseModule; class UpdateModule
 
     def initialize(dsl_obj,base_module)
       super(base_module)
-      @module_class  = base_module.class
       @input_hash    = dsl_obj.input_hash
       @project_idh   = dsl_obj.project_idh
       @module_branch = dsl_obj.module_branch
@@ -35,24 +34,27 @@ module DTK; class BaseModule; class UpdateModule
       external_deps = ExternalDependencies.new()
 
       include_module_names = component_module_names_in_include_statements?()
+      # ModuleRefs::ComponentDSLForm will also find any parsing errors in the module refs file
       ndx_cmr_info = ModuleRefs::ComponentDSLForm.get_ndx_module_info(@project_idh,@module_class,@module_branch,:include_module_names => include_module_names)
       return ndx_cmr_info if is_parsing_error?(ndx_cmr_info)
-      pp [:ndx_cmr_info,ndx_cmr_info]
 
-      # find component modules in include_module_names that are missing
-      missing = include_module_names - ndx_cmr_info.keys
-      external_deps.merge!(:possibly_missing => missing) unless missing.empty?
-      
-      # find any ambiguously mapped component modules
-      ambiguous = Hash.new
-      include_module_names.each do |module_name|
-        if match_info = ndx_cmr_info[module_name]
-          if match_info.match_type == :multiple_match
-            ambiguous[module_name] = match_info.match_array.map{|cmr|cmr.namespace}
+      # process includes (if they exist)
+      unless include_module_names.nil? or include_module_names.empty?
+        # find component modules in include_module_names that are missing
+        missing = include_module_names - ndx_cmr_info.keys
+        external_deps.merge!(:possibly_missing => missing) unless missing.empty?
+        
+        # find any ambiguously mapped component modules
+        ambiguous = Hash.new
+        include_module_names.each do |module_name|
+          if match_info = ndx_cmr_info[module_name]
+            if match_info.match_type == :multiple_match
+              ambiguous[module_name] = match_info.match_array.map{|cmr|cmr.namespace}
+            end
           end
         end
+        external_deps.merge!(:ambiguous => ambiguous) unless ambiguous.empty?
       end
-      external_deps.merge!(:ambiguous => ambiguous) unless ambiguous.empty?
 
       # update the component_module_ref objects from elements of ndx_cmr_info that are unique
       cmr_update_els = ModuleRefs::ComponentDSLForm::Elements.new

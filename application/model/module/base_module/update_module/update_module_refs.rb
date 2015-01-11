@@ -12,6 +12,7 @@ module DTK; class BaseModule; class UpdateModule
     # opts can have keys
     # :message
     # :ret_dsl_updated_info
+    # TODO: for efficiency if have the parsed info can pass this to serialize_and_save_to_repo?
     def self.update_component_module_refs_dsl?(module_branch,external_deps,opts={})
       component_module_refs = opts[:component_module_refs] || ModuleRefs.get_component_module_refs(module_branch)
       #TODO: check for other things in external deps
@@ -24,9 +25,13 @@ module DTK; class BaseModule; class UpdateModule
       end
     end
     
-    def self.update_component_module_refs(module_branch,dsl_info_to_add,base_module)
-      ModuleRefs::Parse.update_component_module_refs(base_module.class,module_branch,:dsl_info_to_add => dsl_info_to_add)
+    def self.update_component_module_refs(module_branch,cmr_update_els,base_module)
+      ModuleRefs::Parse.update_component_module_refs_from_parse_objects(base_module.class,module_branch,cmr_update_els)
     end
+    def update_component_module_refs(cmr_update_els)
+      self.class.update_component_module_refs(@module_branch,cmr_update_els,@base_module)
+    end
+    private :update_component_module_refs
 
     #this updates the component module objects, not the dsl
     def validate_includes_and_update_module_refs()
@@ -77,7 +82,7 @@ module DTK; class BaseModule; class UpdateModule
 
     end
 =end    
-   private
+
     # These are modules in the component module include section of dtk.model.yaml
     def component_module_names_in_include_statements?()
       # @input_hash is in normalized form

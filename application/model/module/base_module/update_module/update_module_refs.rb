@@ -55,14 +55,13 @@ module DTK; class BaseModule; class UpdateModule
       external_deps.merge!(:ambiguous => ambiguous) unless ambiguous.empty?
 
       # update the component_module_ref objects from elements of ndx_cmr_info that are unique
-      unique_cmp_parse_objs =  Array.new
+      cmr_update_els = ModuleRefs::ComponentDSLForm::Elements.new
       ndx_cmr_info.each_value do |match_info|
         if [:dsl,:unique_match].include?(match_info.match_type)
-          unique_cmp_parse_objs += match_info.match_array
+          cmr_update_els.add!(match_info.match_array)
         end
       end
-      pp [:unique_cmp_parse_objs,unique_cmp_parse_objs]
-      ModuleRefs::Parse.update_component_module_refs_from_parse_objects(@module_class,@module_branch,unique_cmp_parse_objs)
+      ModuleRefs::Parse.update_component_module_refs_from_parse_objects(@module_class,@module_branch,cmr_update_els)
 
       {:external_dependencies => external_deps}
     end

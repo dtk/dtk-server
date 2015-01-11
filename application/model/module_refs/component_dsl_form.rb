@@ -1,5 +1,17 @@
 module DTK; class ModuleRefs
   class ComponentDSLForm < Hash
+    # Elements of ComponentDSLForm
+    class Elements < Array
+      def initialize(*args)
+        args = [args] if args.size == 1 and !args.first.kind_of?(Array)
+        super(*args)
+      end
+      def add!(a)
+        a.each{|el|self << el}
+        self
+      end
+    end
+
     def initialize(component_module,namespace)
       super()
       replace(:component_module => component_module, :remote_namespace => namespace)
@@ -14,7 +26,7 @@ module DTK; class ModuleRefs
     end
     def namespace()
       unless ret = self[:remote_namespace]
-        Log.error("namespace shoudl not be called when self[:remote_namespace] is empty")
+        Log.error("namespace should not be called when self[:remote_namespace] is empty")
       end
       ret
     end
@@ -55,13 +67,13 @@ module DTK; class ModuleRefs
       end
 
       cmp_mod_refs.each do |cmr|
-        ret[cmr.component_module] = MatchInfo.new(:dsl,[cmr])
+        ret[cmr.component_module] = MatchInfo.new(:dsl,ComponentDSLForm::Elements.new(cmr))
       end
       if opts[:include_module_names]
         opts[:include_module_names].each do |module_name|
           # only add if not there already
           unless ret[module_name]
-            match_array = cmp_mods_dsl_form.select{|cmr|module_name == cmr.component_module()}
+            match_array = ComponentDSLForm::Elements.new(cmp_mods_dsl_form.select{|cmr|module_name == cmr.component_module()})
             unless match_array.empty?
               match_type = (match_array.size == 1 ? :single_match : :multiple_match)
               ret[module_name] = MatchInfo.new(match_type,match_array)
@@ -92,7 +104,7 @@ module DTK; class ModuleRefs
     end
     
     def match?(cmr)
-      namespace?() == cmr.namespace? and component_module() == cmr.component_module()
+      namespace() == cmr.namespace() and component_module() == cmr.component_module()
     end
 
    private

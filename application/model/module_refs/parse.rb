@@ -5,8 +5,8 @@ module DTK
         module_class::DSLParser.parse_directory(module_branch,:component_module_refs,opts)
       end
 
-      def self.update_component_module_refs_from_parse_objects(module_class,module_branch,cmp_parse_objs)
-        hash_content = semantic_parse(module_branch,cmp_parse_objs)
+      def self.update_component_module_refs_from_parse_objects(module_class,module_branch,cmp_dsl_form_els)
+        hash_content = semantic_parse(module_branch,cmp_dsl_form_els)
         return hash_content if hash_content.kind_of?(ErrorUsage::Parsing)
         update(module_branch,hash_content)
         ModuleRefs.new(module_branch,hash_content,:content_hash_form_is_reified => true)
@@ -52,7 +52,7 @@ module DTK
             end
           end
           #This comes from parsing the dsl file
-        elsif object.kind_of?(ServiceModule::DSLParser::Output)
+        elsif object.kind_of?(ServiceModule::DSLParser::Output) or object.kind_of?(ComponentDSLForm::Elements) 
           object.inject(Hash.new) do |h,r|
             internal_form = convert_parse_to_internal_form(r)
             h.merge(parse_form_module_name(r).to_sym => ModuleRef.reify(mh,internal_form))

@@ -2,7 +2,7 @@ module DTK
   class ModuleRefs
     r8_nested_require('module_refs','mixin')
     r8_nested_require('module_refs','parse')
-    r8_nested_require('module_refs','component')
+    r8_nested_require('module_refs','component_dsl_form')
     r8_nested_require('module_refs','matching_templates')
     include MatchingTemplatesMixin
 

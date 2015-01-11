@@ -34,29 +34,31 @@ module DTK; class BaseModule; class UpdateModule
     #this updates the component module objects, not the dsl
     def validate_includes_and_update_module_refs()
       ret = Hash.new
-      # gets what is in the module_refs.yaml dsl; this can differ from what is in object model if user just editted it
-      existing_dsl_info = get_component_module_refs_dsl_info()      
-      return existing_dsl_info if is_parsing_error?(existing_dsl_info)
+      external_deps = ExternalDependencies.new()
 
       include_module_names = component_module_names_in_include_statements?()
+      ndx_cmr_info = ModuleRefs::ComponentDSLForm.get_ndx_module_info(@project_idh,@base_module.class,@module_branch,:include_module_names => include_module_names)
+      return ndx_cmr_info if is_parsing_error?(ndx_cmr_info)
+      pp [:ndx_cmr_info,ndx_cmr_info]
+      raise Error.new('got here')
+    end
 
-      # just keep existing_dsl_objs that have a namespace set
-      existing_dsl_info.reject!{|r|!r.namespace?()}
-      
+=begin
+      # find namespaces in include_module_names that are missing
+
+      missing = include_module_names - existing_dsl_info.map{|r|r.component_module()}
+      external_deps.merge!(:possibly_missing => missing) unless missing.empty?
+
       #find existing component module refs that match the module_names in the modules in include statements
-      mapped_cmrs = ModuleRefs::Component.get_ones_that_match_module_names(@project_idh,include_module_names)
+      mapped_cmrs = ModuleRefs::ComponentDSLForm.get_ones_that_match_module_names(@project_idh,include_module_names)
+
 
       multiple_namespaces = mapped_cmrs.group_by { |cmr| cmr.component_module}.values.select { |a| a.size > 1 }.flatten
       
-      mapped_names = mapped_cmrs.map{|cmr| cmr.component_module}
-      missing = include_module_names - mapped_names
-      ext_deps_hash = {
-        :possibly_missing => missing
-      }
       
       unless multiple_namespaces.empty?
         multi_missing, ambiguous_grouped, existing_names = [], {}, []
-        multiple_namespaces.each{|mn| mapped_names.delete(mn)}
+        multiple_namespaces.each{|mn| mapped_cmrs.delete(mn)}
         
         check_if_matching_or_ambiguous(multiple_namespaces)
         # For Rich:
@@ -79,15 +81,14 @@ module DTK; class BaseModule; class UpdateModule
         end
       end
       
-      ret.merge!(:external_dependencies => ExternalDependencies.new(ext_deps_hash))
       unless mapped_cmrs.empty?
         update_component_module_refs(mapped_cmrs) 
         message = "The module refs file was updated by the server based on includes section from dtk.model.yaml"
         ret.merge!(:message => message)
       end
-      ret
+      ret.merge(:external_dependencies => external_deps) 
     end
-    
+=end    
    private
     # These are modules in the component module include section of dtk.model.yaml
     def component_module_names_in_include_statements?()
@@ -96,11 +97,6 @@ module DTK; class BaseModule; class UpdateModule
       ret unless ret.empty?
     end
     
-    # this is what is in dsl or parse error
-    def get_component_module_refs_dsl_info()
-      ModuleRefs::Component.get_dsl_info(@base_module.class,@module_branch)
-    end
-
 =begin
 TODO get rid of get_existing_module_refs() which returns
 {"component_modules"=>

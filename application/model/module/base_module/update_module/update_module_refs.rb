@@ -40,53 +40,32 @@ module DTK; class BaseModule; class UpdateModule
       ndx_cmr_info = ModuleRefs::ComponentDSLForm.get_ndx_module_info(@project_idh,@base_module.class,@module_branch,:include_module_names => include_module_names)
       return ndx_cmr_info if is_parsing_error?(ndx_cmr_info)
       pp [:ndx_cmr_info,ndx_cmr_info]
-      raise Error.new('got here')
+
+      # find component modules in include_module_names that are missing
+      missing = include_module_names - ndx_cmr_info.keys
+      external_deps.merge!(:possibly_missing => missing) unless missing.empty?
+
+      # find any ambiguously mapped component modules
+      ambiguous = Hash.new
+      include_module_names.each do |module_name|
+        if matched_cmrs = ndx_cmr_info[module_name]
+          if matched_cmrs.size > 1
+            ambiguous[module_name] = matched_cmrs.map{|cmr|cmr.namespace}
+          end
+        end
+      end
+      external_deps.merge!(:ambiguous => ambiguous) unless ambiguous.empty?
+
+      {:external_dependencies => external_deps}
     end
 
 =begin
-      # find namespaces in include_module_names that are missing
-
-      missing = include_module_names - existing_dsl_info.map{|r|r.component_module()}
-      external_deps.merge!(:possibly_missing => missing) unless missing.empty?
-
-      #find existing component module refs that match the module_names in the modules in include statements
-      mapped_cmrs = ModuleRefs::ComponentDSLForm.get_ones_that_match_module_names(@project_idh,include_module_names)
-
-
-      multiple_namespaces = mapped_cmrs.group_by { |cmr| cmr.component_module}.values.select { |a| a.size > 1 }.flatten
-      
-      
-      unless multiple_namespaces.empty?
-        multi_missing, ambiguous_grouped, existing_names = [], {}, []
-        multiple_namespaces.each{|mn| mapped_cmrs.delete(mn)}
-        
-        check_if_matching_or_ambiguous(multiple_namespaces)
-        # For Rich:
-        # possible solution for problem that Bakir sent in his last email
-        # uncomment these lines if caused any side effects
-        # existing_module_refs = @module_branch.get_module_refs()
-        # existing_module_refs.each do |existing_ref|
-        #     existing_names << existing_ref[:display_name] if existing_ref[:namespace_info]
-        # end
-        
-        # multiple_namespaces.delete_if{|mn| existing_names.include?(mn[:component_module])}
-        cmp_mods = multiple_namespaces.group_by { |h| h[:component_module] }
-        cmp_mods.each do |k,v|
-          namespaces = v.map{|a| a[:remote_namespace]}
-          ambiguous_grouped.merge!(k => namespaces)
-        end
-        unless ambiguous_grouped.empty?
-          ret.merge!(:ambiguous => ambiguous_grouped)
-          ext_deps_hash.merge!(:ambiguous => ambiguous_grouped)
-        end
-      end
-      
       unless mapped_cmrs.empty?
         update_component_module_refs(mapped_cmrs) 
         message = "The module refs file was updated by the server based on includes section from dtk.model.yaml"
         ret.merge!(:message => message)
       end
-      ret.merge(:external_dependencies => external_deps) 
+
     end
 =end    
    private
@@ -95,34 +74,6 @@ module DTK; class BaseModule; class UpdateModule
       # @input_hash is in normalized form
       ret = @input_hash.values.map{|v|(v['component_include_module']||{}).keys}.flatten(1).uniq
       ret unless ret.empty?
-    end
-    
-=begin
-TODO get rid of get_existing_module_refs() which returns
-{"component_modules"=>
-  {"concat"=>{"namespace"=>"puppetlabs"},
-   "staging"=>{"namespace"=>"r8"},
-   "stdlib"=>nil}}
-and instead use get_component_module_refs_dsl_info
-=end
-    
-    def check_if_matching_or_ambiguous(ambiguous)
-      existing_c_hash = get_existing_module_refs()
-      if existing = existing_c_hash['component_modules']
-        existing.each do |k,v|
-          if k && v
-            amb = ambiguous.select{|a| a[:component_module].split('/').last.eql?(k) && a[:remote_namespace].eql?(v['namespace'])}
-            ambiguous.delete_if{|amb| amb[:component_module].split('/').last.eql?(k)} unless amb.empty?
-          end
-        end
-      end
-    end
-    def get_existing_module_refs()
-      if existing_content = RepoManager.get_file_content({:path => "module_refs.yaml"}, @module_branch, {:no_error_if_not_found => true})
-        Aux.convert_to_hash(existing_content,:yaml) 
-      else
-        Hash.new
-      end
     end
   end
 end; end; end

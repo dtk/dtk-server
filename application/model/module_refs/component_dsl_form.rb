@@ -12,6 +12,12 @@ module DTK; class ModuleRefs
     def namespace?()
       self[:remote_namespace]
     end
+    def namespace()
+      unless ret = self[:remote_namespace]
+        Log.error("namespace shoudl not be called when self[:remote_namespace] is empty")
+      end
+      ret
+    end
 
     # returns a hash with keys component_module_name and
     # values is an array of ModuleRefs::Component objects that map to an actual component module ref
@@ -39,9 +45,10 @@ module DTK; class ModuleRefs
         end
       end
       unless dangling_cmp_mod_refs.empty?
+        # TODO: is this redundant with 'inconsistent external depenedency?
         cmrs_print_form = dangling_cmp_mod_refs.map{|cmr|cmr.print_form}.join(',')
         err_msg = "The following component module references in the module refs file do not exist: #{cmrs_print_form}"
-        return ErrorUsage::Parsing(err_msg)
+        return ErrorUsage::Parsing.new(err_msg)
       end
 
       cmp_mod_refs.each do |cmr|

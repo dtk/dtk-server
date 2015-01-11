@@ -52,7 +52,9 @@ module DTK; class ErrorUsage
       ret = nil
       begin
         ret = yield
-        ret = nil if opts[:only_return_error]
+        if opts[:only_return_error] and !ret.kind_of?(ErrorUsage::Parsing)
+          ret = nil 
+        end
       rescue ErrorUsage::Parsing => e
         ret = e
       end

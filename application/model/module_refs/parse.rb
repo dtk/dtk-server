@@ -5,6 +5,14 @@ module DTK
         module_class::DSLParser.parse_directory(module_branch,:component_module_refs,opts)
       end
 
+      def self.update_component_module_refs_from_parse_objects(module_class,module_branch,cmp_parse_objs)
+        hash_content = semantic_parse(module_branch,cmp_parse_objs)
+        return hash_content if hash_content.kind_of?(ErrorUsage::Parsing)
+        update(module_branch,hash_content)
+        ModuleRefs.new(module_branch,hash_content,:content_hash_form_is_reified => true)
+      end
+
+      # TODO: see if need below if have above
       # updates component_module_refs from dsl file and from optionally provider content to add
       def self.update_component_module_refs(module_class,module_branch,opts={})
         dsl_info = get_component_module_refs_dsl_info(module_class,module_branch,opts)
@@ -15,11 +23,7 @@ module DTK
             dsl_info.flatten!
           end
         end
-        hash_content = semantic_parse(module_branch,dsl_info)
-        return hash_content if hash_content.kind_of?(ErrorUsage::Parsing)
-
-        update(module_branch,hash_content)
-        ModuleRefs.new(module_branch,hash_content,:content_hash_form_is_reified => true)
+        update_component_module_refs_from_dsl_info(module_class,module_branch,dsl_info)
       end
 
      private

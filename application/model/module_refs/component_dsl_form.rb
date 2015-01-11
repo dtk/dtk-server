@@ -19,9 +19,12 @@ module DTK; class ModuleRefs
       ret
     end
 
-    # returns a hash with keys component_module_name and
-    # values is an array of ModuleRefs::Component objects that map to an actual component module ref
-    # returns error if parsing error or if there are component modules that are not mapped
+    # returns a hash with keys component_module_name and value MatchedInfo
+    # :match_type can be
+    #   :dsl - match with element in dsl
+    #   :single_match - match with unique component module
+    #   :multiple_match - match with more than one component modules
+    MatchInfo = Struct.new(:match_type,:match_array) # match_arrat is an array of ComponentDSLForm elements
     def self.get_ndx_module_info(project_idh,module_class,module_branch,opts={})
       ret = Hash.new
       raw_cmp_mod_refs = Parse.get_component_module_refs_dsl_info(module_class,module_branch)
@@ -52,12 +55,18 @@ module DTK; class ModuleRefs
       end
 
       cmp_mod_refs.each do |cmr|
-        ret[cmr.component_module] = cmr
+        ret[cmr.component_module] = MatchInfo.new(:dsl,[cmr])
       end
       if opts[:include_module_names]
         opts[:include_module_names].each do |module_name|
           # only add if not there already
-          ret[module_name] ||= cmp_mods_dsl_form.select{|cmr|module_name == cmr.component_module()}
+          unless ret[module_name]
+            match_array = cmp_mods_dsl_form.select{|cmr|module_name == cmr.component_module()}
+            unless match_array.empty?
+              match_type = (match_array.size == 1 ? :single_match : :multiple_match)
+              ret[module_name] = MatchInfo.new(match_type,match_array)
+            end
+          end
         end
       end
       ret

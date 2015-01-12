@@ -8,6 +8,24 @@ module DTK; class BaseModule; class UpdateModule
       @module_branch = dsl_obj.module_branch
     end
 
+    # opts can have keys
+    #  :message
+    #  :create_empty_module_refs
+    #  :external_dependencies 
+    def self.update_component_module_refs_and_save_dsl?(module_branch,cmr_update_els,base_module,opts={})
+      component_module_refs = update_component_module_refs(module_branch,cmr_update_els,base_module)
+      save_dsl?(module_branch,opts.merge(:component_module_refs => component_module_refs))
+    end
+
+    def self.update_component_module_refs(module_branch,cmr_update_els,base_module)
+      ModuleRefs::Parse.update_component_module_refs_from_parse_objects(base_module.class,module_branch,cmr_update_els)
+    end
+    def update_component_module_refs(cmr_update_els)
+      self.class.update_component_module_refs(@module_branch,cmr_update_els,@base_module)
+    end
+    private :update_component_module_refs
+
+
     # if an update is made it returns ModuleDSLInfo::UpdatedInfo object
     # opts can have keys
     #  :message
@@ -31,14 +49,6 @@ module DTK; class BaseModule; class UpdateModule
         ModuleDSLInfo::UpdatedInfo.new(:msg => msg,:commit_sha => new_commit_sha)
       end
     end
-
-    def self.update_component_module_refs(module_branch,cmr_update_els,base_module)
-      ModuleRefs::Parse.update_component_module_refs_from_parse_objects(base_module.class,module_branch,cmr_update_els)
-    end
-    def update_component_module_refs(cmr_update_els)
-      self.class.update_component_module_refs(@module_branch,cmr_update_els,@base_module)
-    end
-    private :update_component_module_refs
 
     #this updates the component module objects, not the dsl
     def validate_includes_and_update_module_refs()
@@ -81,6 +91,8 @@ module DTK; class BaseModule; class UpdateModule
     end
 
 =begin
+      TODO: For Aldin: this is fragment that was in old code above does not have message in ret; might
+      want to put in back in
       unless mapped_cmrs.empty?
         update_component_module_refs(mapped_cmrs) 
         message = "The module refs file was updated by the server based on includes section from dtk.model.yaml"

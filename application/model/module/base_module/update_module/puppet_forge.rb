@@ -17,34 +17,40 @@ module DTK; class BaseModule; class UpdateModule
       # generate list of modules that need to be created from puppet_forge_local_copy
       pf_modules = @pf_local_copy.modules(:remove => found_modules)
       
-      installed_modules = pf_modules.collect { |pf_module| import_module(pf_module) }
-      
+      installed_modules = pf_modules.collect{|pf_module|import_module(pf_module)}
+
       # pass back info about
       # - what was loaded from puppet forge,
       # - what was present but needed, and
       # - any dependency_warnings
-      # TODO: DTK-1794; below does not deal with dependency warnings
+      # TODO: For Aldin: below does not deal with dependency warnings
       format_response(installed_modules, found_modules)
     end
     
-     private
+   private
 
     def default_namespace()
       Namespace.default_namespace_name()
     end
-    
-    def import_module(pf_module)
+
+     def import_module(pf_module)
       module_name = pf_module.default_local_module_name
       
       # dependencies user their own namespace
       namespace        = pf_module.is_dependency ? pf_module.namespace : @base_namespace
       local_params     = local_params(module_name, namespace)
       source_directory = pf_module.path
-
-      Import.import_puppet_forge_module(@project,local_params,source_directory)
+      cmr_update_els   = component_module_refs_dsl_form_els(pf_module.dependencies)
+      Import.import_puppet_forge_module(@project,local_params,source_directory,cmr_update_els)
       pf_module
     end
-    
+ 
+   def component_module_refs_dsl_form_els(dependencies)
+     ret = ModuleRefs::ComponentDSLForm::Elements.new
+     dependencies.each{|dep|ret << ModuleRefs::ComponentDSLForm.new(dep.name,dep.namespace)}
+     ret
+    end
+
     def local_params(module_name,namespace,opts={})
       version = opts[:version]
       ModuleBranch::Location::LocalParams::Server.new(

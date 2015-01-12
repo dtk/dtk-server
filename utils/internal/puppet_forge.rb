@@ -15,10 +15,14 @@ module DTK
       puppet_forge_namespace_and_module_name(pf_module_name).last
     end
 
+    def self.index(namespace,name)
+      "#{namespace}-#{name}"
+    end
+
     class Module
 
       attr_reader   :path, :name, :is_dependency
-      attr_accessor :namespace
+      attr_accessor :namespace, :dependencies
 
       def initialize(hash, is_dependency = false, type = :component_module, dtk_version = nil)
         m_namespace, m_name = PuppetForge.puppet_forge_namespace_and_module_name(hash['module'])
@@ -31,8 +35,12 @@ module DTK
         @module        = hash['module']
         @version       = hash['version']
         @file          = hash['file']
+        @path          = "#{hash['path']}/#{PuppetForge.puppet_forge_module_name(@module)}"
+        @dependencies  = []
+      end
 
-        @path    = "#{hash['path']}/#{PuppetForge.puppet_forge_module_name(@module)}"
+      def index()
+        PuppetForge.index(@namespace,@name)
       end
 
       def default_local_module_name

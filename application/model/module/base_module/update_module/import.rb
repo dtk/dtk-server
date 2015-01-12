@@ -5,27 +5,30 @@ module DTK; class BaseModule; class UpdateModule
       @module_branch = base_module.get_workspace_module_branch(version)
     end
 
-    def self.import_puppet_forge_module(project,local_params,source_directory)
+    def self.import_puppet_forge_module(project,local_params,source_directory,cmr_update_els)
       config_agent_type = :puppet
       opts_create_mod = Opts.new(
         :config_agent_type => config_agent_type,
         :copy_files        => {:source_directory => source_directory}
       )
       module_and_branch_info = ComponentModule.create_module(project,local_params,opts_create_mod)
-
+      module_branch = module_and_branch_info[:module_branch_idh].create_object()
       repo_id = module_and_branch_info[:module_repo_info][:repo_id]
       repo = project.model_handle(:repo).createIDH(:id => repo_id).create_object()
       impl_obj = Implementation.create?(project,local_params,repo,config_agent_type)
       impl_obj.create_file_assets_from_dir_els()
 
       component_module = module_and_branch_info[:module_idh].create_object()
+      include_modules = cmr_update_els.map{|r|r.component_module}
       opts_scaffold = Opts.create?(
         :ret_hash_content  => true,
-        :include_modules?  => nil #TODO: stub
+        :include_modules?  => !include_modules.empty? && include_modules
       )
       dsl_created_info = ScaffoldImplementation.create_dsl(local_params.module_name(),config_agent_type,impl_obj,opts_scaffold)
       add_dsl_content_to_impl(impl_obj,dsl_created_info)
-      
+
+      UpdateModuleRefs.update_component_module_refs_and_save_dsl?(module_branch,cmr_update_els,component_module)
+
       component_module.set_dsl_parsed!(true)
     end
 

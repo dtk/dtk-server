@@ -31,19 +31,27 @@ module DTK
      private
 
       def self.modules(installed_modules, opts={})
-        ret = Array.new
+        ndx_modules(installed_modules,opts).values
+      end
+      def self.ndx_modules(installed_modules, opts={})
+        ret = Hash.new
         installed_modules.each do |installed_module|
-
           if (modules_to_remove = opts[:remove])
-            next if modules_to_remove.find { |mr| "#{mr[:namespace]}-#{mr[:name]}".eql?(installed_module['module']) }
+            next if modules_to_remove.find { |mr| PuppetForge.index(mr[:namespace],mr[:name]).eql?(installed_module['module']) }
           end
-
           is_dependency = opts[:is_dependency] || false
-          ret << Module.new(installed_module, is_dependency)
+          mod = Module.new(installed_module, is_dependency)
+          ndx = mod.index
+          next if ret[ndx]
 
+          ret[ndx] = mod
           deps = installed_module['dependencies']
-          if deps and !deps.empty?
-            ret += modules(deps, opts.merge(:is_dependency => true))
+          if deps and !deps.empty? 
+            # There is redundant computation here
+            mod.dependencies = deps.map{|dep_mod|Module.new(dep_mod,true)}
+            ndx_modules(deps,opts.merge(:is_dependency => true)).each_pair do |dep_ndx,dep_mod|
+              ret[dep_ndx] ||= dep_mod
+            end
           end
         end
         ret

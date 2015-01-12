@@ -32,6 +32,20 @@ shared_context "Create test module in specific namespace" do |test_module_name, 
   end
 end
 
+shared_context "Install test module" do |test_module_name|
+  it "installs #{test_module_name} test module from remote repo" do
+    puts "Import remote test module:", "----------------------------"
+    pass = true
+    value = `dtk test-module install #{test_module_name}`
+    puts value
+    pass = false if ((value.include? "ERROR") || (value.include? "exists on client") || (value.include? "denied") || (value.include? "Conflicts with existing server local module")) 
+    puts "Install of test module #{test_module_name} completed successfully!" if pass == true
+    puts "Install of test module #{test_module_name} did not complete successfully!" if pass == false
+    puts ""
+    pass.should eq(true)
+  end
+end
+
 shared_context "Check test module created on local filesystem" do |test_module_filesystem_location, test_module_name|
   it "checks that #{test_module_name} test module is created on local filesystem on location #{test_module_filesystem_location}" do
     puts "Check test module created on local filesystem:", "--------------------------------------------------"
@@ -65,5 +79,33 @@ shared_context "Delete test module from local filesystem" do |test_module_filesy
     puts "Test module #{test_module_name} was not deleted from local filesystem successfully!" if pass == false
     puts ""
     pass.should eq(true)
+  end
+end
+
+shared_context "List test modules with filter" do |dtk_common, namespace|
+  it "gets all modules from namespace #{namespace}" do
+    test_modules_retrieved = dtk_common.list_test_modules_with_filter(namespace)
+    test_modules_retrieved.should eq(true)
+  end
+end
+
+shared_context "NEG - List test modules with filter" do |dtk_common, namespace|
+  it "returns empty list of test modules because there are no test modules in namespace #{namespace}" do
+    test_modules_retrieved = dtk_common.list_test_modules_with_filter(namespace)
+    test_modules_retrieved.should eq(false)
+  end
+end
+
+shared_context "List test modules with filter on remote" do |dtk_common, namespace|
+  it "gets all modules from namespace #{namespace} on remote" do
+    test_modules_retrieved = dtk_common.list_remote_test_modules_with_filter(namespace)
+    test_modules_retrieved.should eq(true)
+  end
+end
+
+shared_context "NEG - List test modules with filter on remote" do |dtk_common, namespace|
+  it "returns empty list of test modules because there are no test modules in namespace #{namespace} on remote" do
+    test_modules_retrieved = dtk_common.list_remote_test_modules_with_filter(namespace)
+    test_modules_retrieved.should eq(false)
   end
 end

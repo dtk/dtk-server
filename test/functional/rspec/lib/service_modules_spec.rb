@@ -168,9 +168,30 @@ shared_context "Delete service module from remote repo" do |dtk_common, service_
   end
 end
 
-# shared_context "OLD - Delete service from remote repo" do |dtk_common, service_module_name, namespace|
-#  it "deletes #{service_module_name} service with #{namespace} namespace from remote repo" do
-#    service_deleted = dtk_common.delete_service_from_remote(service_module_name, namespace)
-#    service_deleted.should eq(true)
-#  end
-# end
+shared_context "List service modules with filter" do |dtk_common, namespace|
+  it "gets all modules from namespace #{namespace}" do
+    service_modules_retrieved = dtk_common.list_service_modules_with_filter(namespace)
+    service_modules_retrieved.should eq(true)
+  end
+end
+
+shared_context "NEG - List service modules with filter" do |dtk_common, namespace|
+  it "returns empty list of service modules because there are no service modules in namespace #{namespace}" do
+    service_modules_retrieved = dtk_common.list_service_modules_with_filter(namespace)
+    service_modules_retrieved.should eq(false)
+  end
+end
+
+shared_context "List service modules with filter on remote" do |dtk_common, namespace|
+  it "gets all modules from namespace #{namespace} on remote" do
+    service_modules_retrieved = dtk_common.list_remote_service_modules_with_filter(namespace)
+    service_modules_retrieved.should eq(true)
+  end
+end
+
+shared_context "NEG - List service modules with filter on remote" do |dtk_common, namespace|
+  it "returns empty list of service modules because there are no service modules in namespace #{namespace} on remote" do
+    service_modules_retrieved = dtk_common.list_remote_service_modules_with_filter(namespace)
+    service_modules_retrieved.should eq(false)
+  end
+end

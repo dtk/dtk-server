@@ -41,6 +41,10 @@ describe "(Modules, Services and Versioning) Test Case 47: Install service modul
     include_context "Get component module components list", dtk_common, component_module_1
   end
 
+  context "Install test module function" do
+    include_context "Install test module", namespace + "/" + test_component_module_name
+  end
+
   context "Add module_refs.yaml file" do
     include_context "Add module_refs.yaml file", component_module_name_1, file_for_change_location, file_for_add, r8_component_module_filesystem_location
   end
@@ -55,6 +59,14 @@ describe "(Modules, Services and Versioning) Test Case 47: Install service modul
 
   context "Delete component module from local filesystem" do
     include_context "Delete component module from local filesystem", r8_component_module_filesystem_location, component_module_name_1
+  end
+
+  context "Delete test module" do
+    include_context "Delete test module", dtk_common, test_component_module
+  end
+
+  context "Delete test module from local filesystem" do
+    include_context "Delete test module from local filesystem", r8_test_module_filesystem_location, test_component_module_name
   end
 
   context "Install service module function" do

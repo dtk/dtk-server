@@ -95,7 +95,7 @@ shared_context "NEG - Import component module with dependency from provided git 
     puts "dtk component-module import-git #{git_ssh_repo_url} #{component_module_name}"
     value = `dtk component-module import-git #{git_ssh_repo_url} #{component_module_name}`
     puts value
-    if (value.include? "There are some missing dependencies: [\"#{dependency_component_module}\"]")
+    if (value.include? "There are missing module dependencies mentioned in the git repo: #{dependency_component_module}")
       pass = true
     end
     puts "Component module #{component_module_name} was created successfully from provided git repo but with dependency missing warning!" if pass == true
@@ -551,5 +551,33 @@ shared_context "Set catalog credentials" do |dtk_common, catalog_username, catal
   it "sets catalog credentials for user #{catalog_username}" do
     catalog_credentials_set = dtk_common.set_catalog_credentials(catalog_username, catalog_password)
     catalog_credentials_set.should eq(true)
+  end
+end
+
+shared_context "List component modules with filter" do |dtk_common, namespace|
+  it "gets all modules from namespace #{namespace}" do
+    component_modules_retrieved = dtk_common.list_component_modules_with_filter(namespace)
+    component_modules_retrieved.should eq(true)
+  end
+end
+
+shared_context "NEG - List component modules with filter" do |dtk_common, namespace|
+  it "returns empty list of component modules because there are no component modules in namespace #{namespace}" do
+    component_modules_retrieved = dtk_common.list_component_modules_with_filter(namespace)
+    component_modules_retrieved.should eq(false)
+  end
+end
+
+shared_context "List component modules with filter on remote" do |dtk_common, namespace|
+  it "gets all modules from namespace #{namespace} on remote" do
+    component_modules_retrieved = dtk_common.list_remote_component_modules_with_filter(namespace)
+    component_modules_retrieved.should eq(true)
+  end
+end
+
+shared_context "NEG - List component modules with filter on remote" do |dtk_common, namespace|
+  it "returns empty list of component modules because there are no component modules in namespace #{namespace} on remote" do
+    component_modules_retrieved = dtk_common.list_remote_component_modules_with_filter(namespace)
+    component_modules_retrieved.should eq(false)
   end
 end

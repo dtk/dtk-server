@@ -35,7 +35,7 @@ describe "(Modules, Services and Versioning) Test Case 4: Get list of all assemb
 	end
 
 	context "Create assembly from existing service" do
-		include_context "Create assembly from service", dtk_common, service_module_name, new_assembly_name, nil
+		include_context "Create assembly from service", dtk_common, service_module_name, new_assembly_name, local_namespace
 	end
 
 	context "Check if #{new_assembly_name} assembly belongs to #{local_service_module_name} service module" do

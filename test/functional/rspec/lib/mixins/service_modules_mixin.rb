@@ -167,4 +167,44 @@ module ServiceModulesMixin
 		puts ""
 		return assembly_deleted
 	end
+
+	def list_service_modules_with_filter(namespace)
+		puts "List service modules with filter:", "---------------------------------"
+		service_modules_retrieved = true
+		service_modules_list = send_request('/rest/service_module/list', {:detail_to_include => [], :module_namespace => namespace})		
+		pretty_print_JSON(service_modules_list)
+
+		if service_modules_list['data'].empty?
+			service_modules_retrieved = false
+		else
+			service_modules_list['data'].each do |cmp|
+				if cmp['namespace']['display_name'] != namespace
+					service_modules_retrieved = false
+					break
+				end
+			end
+		end
+		puts ""
+		return service_modules_retrieved
+	end
+
+	def list_remote_service_modules_with_filter(namespace)
+		puts "List remote service modules with filter:", "------------------------------------"
+		service_modules_retrieved = true
+		service_modules_list = send_request('/rest/service_module/list_remote', {:rsa_pub_key => self.ssh_key, :module_namespace => namespace})		
+		pretty_print_JSON(service_modules_list)
+
+		if service_modules_list['data'].empty?
+			service_modules_retrieved = false
+		else
+			service_modules_list['data'].each do |cmp|
+				unless cmp['display_name'].include? namespace
+					service_modules_retrieved = false
+					break
+				end
+			end
+		end
+		puts ""
+		return service_modules_retrieved
+	end
 end

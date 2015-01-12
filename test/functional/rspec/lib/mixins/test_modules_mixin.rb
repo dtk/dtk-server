@@ -24,4 +24,44 @@ module TestModulesMixin
 		puts ""
 		return test_module_deleted
 	end
+
+	def list_test_modules_with_filter(namespace)
+		puts "List test modules with filter:", "---------------------------------"
+		test_modules_retrieved = true
+		test_modules_list = send_request('/rest/test_module/list', {:detail_to_include => [], :module_namespace => namespace})		
+		pretty_print_JSON(test_modules_list)
+
+		if test_modules_list['data'].empty?
+			test_modules_retrieved = false
+		else
+			test_modules_list['data'].each do |cmp|
+				if cmp['namespace']['display_name'] != namespace
+					test_modules_retrieved = false
+					break
+				end
+			end
+		end
+		puts ""
+		return test_modules_retrieved
+	end
+
+	def list_remote_test_modules_with_filter(namespace)
+		puts "List remote test modules with filter:", "------------------------------------"
+		test_modules_retrieved = true
+		test_modules_list = send_request('/rest/test_module/list_remote', {:rsa_pub_key => self.ssh_key, :module_namespace => namespace})		
+		pretty_print_JSON(test_modules_list)
+
+		if test_modules_list['data'].empty?
+			test_modules_retrieved = false
+		else
+			test_modules_list['data'].each do |cmp|
+				unless cmp['display_name'].include? namespace
+					test_modules_retrieved = false
+					break
+				end
+			end
+		end
+		puts ""
+		return test_modules_retrieved
+	end
 end

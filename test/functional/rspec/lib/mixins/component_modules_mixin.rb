@@ -446,4 +446,44 @@ module ComponentModulesMixin
 		puts ""
 		return component_module_imported
 	end
+
+	def list_component_modules_with_filter(namespace)
+		puts "List component modules with filter:", "---------------------------------"
+		component_modules_retrieved = true
+		component_modules_list = send_request('/rest/component_module/list', {:detail_to_include => [], :module_namespace => namespace})		
+		pretty_print_JSON(component_modules_list)
+
+		if component_modules_list['data'].empty?
+			component_modules_retrieved = false
+		else
+			component_modules_list['data'].each do |cmp|
+				if cmp['namespace']['display_name'] != namespace
+					component_modules_retrieved = false
+					break
+				end
+			end
+		end
+		puts ""
+		return component_modules_retrieved
+	end
+
+	def list_remote_component_modules_with_filter(namespace)
+		puts "List remote component modules with filter:", "------------------------------------"
+		component_modules_retrieved = true
+		component_modules_list = send_request('/rest/component_module/list_remote', {:rsa_pub_key => self.ssh_key, :module_namespace => namespace})		
+		pretty_print_JSON(component_modules_list)
+
+		if component_modules_list['data'].empty?
+			component_modules_retrieved = false
+		else
+			component_modules_list['data'].each do |cmp|
+				unless cmp['display_name'].include? namespace
+					component_modules_retrieved = false
+					break
+				end
+			end
+		end
+		puts ""
+		return component_modules_retrieved
+	end
 end

@@ -14,7 +14,6 @@ module DTK; class BaseModule; class UpdateModule
     #  :create_empty_module_refs
     #  :component_module_refs 
     #  :external_dependencies 
-    # TODO: for efficiency if have the parsed info can pass this to save_dsl?
     def self.save_dsl?(module_branch,opts={})
       component_module_refs = opts[:component_module_refs] || ModuleRefs.get_component_module_refs(module_branch)
       serialize_info_hash = Aux::hash_subset(opts,[:create_empty_module_refs])
@@ -26,7 +25,8 @@ module DTK; class BaseModule; class UpdateModule
           serialize_info_hash.merge!(:possibly_missing => possibly_missing)
         end
       end
-      if new_commit_sha = component_module_refs.save_dsl?(serialize_info_hash)
+      # TODO: for efficiency if have the parsed info can pass this to serialize_and_save_to_repo?
+      if new_commit_sha = component_module_refs.serialize_and_save_to_repo?(serialize_info_hash)
         msg = opts[:message]||"The module refs file was updated by the server"
         ModuleDSLInfo::UpdatedInfo.new(:msg => msg,:commit_sha => new_commit_sha)
       end

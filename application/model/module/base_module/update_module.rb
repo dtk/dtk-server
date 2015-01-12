@@ -98,11 +98,11 @@ module DTK; class BaseModule
         return ret if is_parsing_error?(ret)
       end
 
-      dependencies = ret[:external_dependencies]
+      external_deps = ret[:external_dependencies]
 
       unless opts[:skip_module_ref_update]
-        opts_dsl = Opts.create?(:message? => ret[:message],:external_dependencies? => dependencies)
-        if dsl_updated_info = UpdateModuleRefs.save_dsl?(module_branch,opts_dsl)
+        opts_save_dsl = Opts.create?(:message? => ret[:message],:external_dependencies? => external_deps)
+        if dsl_updated_info = UpdateModuleRefs.save_dsl?(module_branch,opts_save_dsl)
           if opts[:ret_dsl_updated_info]
             opts[:ret_dsl_updated_info] = dsl_updated_info
           end
@@ -122,13 +122,13 @@ module DTK; class BaseModule
       # and for the example above no_errors will have value true, which is correct
       #
       # no_errors = dependencies.nil? or !dependencies.any_errors?()
-      # TODO: Aldin: area to clean up
-      no_errors = dependencies.nil? || !dependencies.any_errors?()
+      # TODO: For Aldin: area to clean up
+      no_errors = external_deps.nil? || !external_deps.any_errors?()
       if no_errors and !opts[:dsl_parsed_false]
         set_dsl_parsed!(true)
       end
       # TODO: can we find better way to pass :external_dependencies and passing ret rather than 'ret unless no_errors'
-      opts[:external_dependencies] = dependencies if dependencies
+      opts[:external_dependencies] = external_deps if external_deps
       ret unless no_errors
     end
 

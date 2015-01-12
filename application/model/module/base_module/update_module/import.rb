@@ -25,8 +25,7 @@ module DTK; class BaseModule; class UpdateModule
       local = ret_local(@version)
 
       create_info   = create_needed_objects_and_dsl?(repo,local,opts)
-      # TODO: is this right or just user @version
-      version       = create_info[:version]
+      version       = create_info[:version] # TODO: is this right or just user @version where refer to 'version'
       impl_obj      = create_info[:impl_obj]
       ret           = UpdateModuleOutput.create_from_update_create_info(create_info)
       external_deps = ret.external_dependencies()
@@ -46,8 +45,15 @@ module DTK; class BaseModule; class UpdateModule
       return component_module_refs if is_parsing_error?(component_module_refs)
       
       unless opts[:skip_module_ref_update]
-        opts_serialize = Aux::hash_subset(opts,[:ret_dsl_updated_info]).merge(:create_empty_module_refs => true)
-        serialize_module_refs_and_save_to_repo?(ret,component_module_refs,external_deps,opts_serialize)
+        opts_save_dsl = Opts.create?(
+          :component_module_refs    => component_module_refs,
+          :create_empty_module_refs => true,
+          :external_dependencies?   => external_deps
+        )
+        dsl_updated_info = UpdateModuleRefs.save_dsl?(module_branch,opts_save_dsl)
+        if opts[:ret_dsl_updated_info]
+          ret.merge!(:dsl_updated_info => dsl_updated_info)
+        end
       end
 
       if !external_deps.any_errors? and !opts[:dsl_parsed_false]
@@ -75,8 +81,16 @@ module DTK; class BaseModule; class UpdateModule
       component_module_refs = update_component_module_refs(@module_branch,create_info[:matching_module_refs])
       return component_module_refs if is_parsing_error?(component_module_refs)
 
-      opts_serialize = Aux::hash_subset(opts,[:ret_dsl_updated_info,:create_empty_module_refs])
-      serialize_module_refs_and_save_to_repo?(ret,component_module_refs,external_deps,opts_serialize)
+      opts_save_dsl = Opts.create?(
+        :create_empty_module_refs => true,
+        :component_module_refs    => component_module_refs,
+        :external_deps?           => external_deps
+      )
+      if dsl_updated_info = UpdateModuleRefs.save_dsl?(@module_branch,opts_save_dsl)
+        if opts[:ret_dsl_updated_info]
+          opts[:ret_dsl_updated_info] = dsl_updated_info
+        end
+      end
 
       if !external_deps.any_errors? and !opts[:dsl_parsed_false]
         set_dsl_parsed!(true)
@@ -86,25 +100,6 @@ module DTK; class BaseModule; class UpdateModule
     end
 
    private
-    # opts can have keys
-    #   :create_empty_module_refs
-    #   :ret_dsl_updated_info
-    def serialize_module_refs_and_save_to_repo?(ret,component_module_refs,external_deps,opts={})
-      serialize_info_hash = Aux::hash_subset(opts,[:create_empty_module_refs])
-      if ambiguous = external_deps.ambiguous?
-        serialize_info_hash.merge!(:ambiguous => ambiguous)
-      end
-      if possibly_missing = external_deps.possibly_missing?
-        serialize_info_hash.merge!(:possibly_missing => possibly_missing)
-      end
-      if new_commit_sha = component_module_refs.save_dsl?(serialize_info_hash)
-        if opts[:ret_dsl_updated_info]
-          msg = "The module refs file was updated by the server"
-          ret.set_dsl_updated_info!(msg,new_commit_sha)
-        end
-      end
-    end
-
     def dsl_parsed?()
       @base_module.dsl_parsed?()
     end

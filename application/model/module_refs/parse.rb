@@ -12,18 +12,10 @@ module DTK
         ModuleRefs.new(module_branch,hash_content,:content_hash_form_is_reified => true)
       end
 
-      # TODO: see if need below if have above
-      # updates component_module_refs from dsl file and from optionally provider content to add
       def self.update_component_module_refs(module_class,module_branch,opts={})
         dsl_info = get_component_module_refs_dsl_info(module_class,module_branch,opts)
         return dsl_info if dsl_info.kind_of?(ErrorUsage::Parsing)
-        if dsl_info_to_add = opts[:dsl_info_to_add]
-          if !dsl_info_to_add.empty?
-            dsl_info << dsl_info_to_add
-            dsl_info.flatten!
-          end
-        end
-        update_component_module_refs_from_dsl_info(module_class,module_branch,dsl_info)
+        update_component_module_refs_from_parse_objects(module_class,module_branch,dsl_info)
       end
 
      private

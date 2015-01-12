@@ -51,7 +51,7 @@ module DTK; class BaseModule
 
       def create_new_version__type_specific(repo_for_new_branch,new_version,opts={})
         local = UpdateModule.ret_local(self,new_version)
-        create_needed_objects_and_dsl?(repo_for_new_branch,local,opts)
+        UpdateModule.new(self).create_needed_objects_and_dsl?(repo_for_new_branch,local,opts)
       end
     end
     ####### end: mixin public methods #########

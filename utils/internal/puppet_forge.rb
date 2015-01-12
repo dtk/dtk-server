@@ -22,7 +22,7 @@ module DTK
     class Module
 
       attr_reader   :path, :name, :is_dependency
-      attr_accessor :namespace, :dependencies
+      attr_accessor :namespace, :dependencies, :id
 
       def initialize(hash, is_dependency = false, type = :component_module, dtk_version = nil)
         m_namespace, m_name = PuppetForge.puppet_forge_namespace_and_module_name(hash['module'])
@@ -37,6 +37,7 @@ module DTK
         @file          = hash['file']
         @path          = "#{hash['path']}/#{PuppetForge.puppet_forge_module_name(@module)}"
         @dependencies  = []
+        @id            = nil
       end
 
       def index()
@@ -47,12 +48,17 @@ module DTK
         PuppetForge.puppet_forge_module_name(@module)
       end
 
+      def set_id(id)
+        @id = id
+      end
+
       def to_h
         {
           :name      => @name,
           :namespace => @namespace,
           :version   => @dtk_version,
-          :type      => @type
+          :type      => @type,
+          :id        => @id
         }
       end
 

@@ -28,8 +28,10 @@ module DTK; class BaseModule; class UpdateModule
       add_dsl_content_to_impl(impl_obj,dsl_created_info)
 
       UpdateModuleRefs.update_component_module_refs_and_save_dsl?(module_branch,cmr_update_els,component_module)
-
       component_module.set_dsl_parsed!(true)
+
+      # need component module id to be returned to client
+      component_module[:id]
     end
 
     # TODO: check why dont set_dsl_parsed!

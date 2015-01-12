@@ -9,12 +9,8 @@ module DTK; module ModuleMixins
       module_name = local_params.module_name
       project_idh = project.id_handle()
 
-      is_parsed   = false
-      if module_exists = module_exists?(project_idh, module_name, namespace)
-        is_parsed = module_exists[:dsl_parsed]
-      end
-
-      if is_parsed and not opts[:no_error_if_exists]
+      module_exists = module_exists?(project_idh, module_name, namespace)
+      if module_exists and not opts[:no_error_if_exists]
         full_module_name = Namespace.join_namespace(namespace,module_name)
         raise ErrorUsage.new("Module (#{full_module_name}) cannot be created since it exists already")
       end

@@ -41,7 +41,10 @@ module DTK; class BaseModule; class UpdateModule
       local_params     = local_params(module_name, namespace)
       source_directory = pf_module.path
       cmr_update_els   = component_module_refs_dsl_form_els(pf_module.dependencies)
-      Import.import_puppet_forge_module(@project,local_params,source_directory,cmr_update_els)
+      module_id        = Import.import_puppet_forge_module(@project,local_params,source_directory,cmr_update_els)
+
+      # set id for puppet-forge modules because they will be used on client side to clone modules to local machine
+      pf_module.set_id(module_id)
       pf_module
     end
  

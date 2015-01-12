@@ -15,7 +15,7 @@ module DTK
     extend AutoImport
     include ModuleMixin
     include UpdateModule::Mixin
-
+    extend UpdateModule::ClassMixin
 
     def get_associated_assembly_templates()
       ndx_ret = Hash.new

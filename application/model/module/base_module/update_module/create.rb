@@ -44,11 +44,8 @@ module DTK; class BaseModule; class UpdateModule
           ret.merge!(:dsl_parse_error => err)
         end
       elsif opts[:scaffold_if_no_dsl]
-        opts_parse = Hash.new
-        if include_modules = include_modules?(ret[:matching_module_refs],ret[:external_dependencies])
-          opts_parse.merge!(:include_modules => include_modules)
-        end
-        dsl_created_info = ScaffoldImplementation.create_dsl(module_name(),config_agent_type,impl_obj,opts_parse)
+        opts_scaffold = Opts.create?(:include_modules? => include_modules?(ret[:matching_module_refs],ret[:external_dependencies]))
+        dsl_created_info = ScaffoldImplementation.create_dsl(module_name(),config_agent_type,impl_obj,opts_scaffold)
         if opts[:commit_dsl]
           add_dsl_content_to_impl(impl_obj,dsl_created_info)
         end

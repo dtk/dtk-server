@@ -1,5 +1,6 @@
 module DTK; class BaseModule
   class UpdateModule
+    r8_nested_require('update_module','puppet_forge')
     r8_nested_require('update_module','import')
     r8_nested_require('update_module','clone_changes')
     r8_nested_require('update_module','update_module_refs')
@@ -15,11 +16,13 @@ module DTK; class BaseModule
     end
 
     ####### mixin public methods #########
-    module Mixin
-      def import_from_puppet_forge(config_agent_type,impl_obj,component_includes)
-        Import.new(self).import_from_puppet_forge(config_agent_type,impl_obj,component_includes)
+    module ClassMixin
+      def import_from_puppet_forge(project,puppet_forge_local_copy,opts={})
+        PuppetForge.new(project,puppet_forge_local_copy,opts).import_module_and_missing_dependencies()
       end
+    end      
       
+    module Mixin
       def import_from_git(commit_sha,repo_idh,version,opts={})
         Import.new(self,version).import_from_git(commit_sha,repo_idh,opts)
       end
@@ -142,9 +145,13 @@ module DTK; class BaseModule
       local_params.create_local(base_module.get_project())
     end
 
-
-
    private
+    def add_dsl_content_to_impl(impl_obj,dsl_created_info)
+      self.class.add_dsl_content_to_impl(impl_obj,dsl_created_info)
+    end
+    def self.add_dsl_content_to_impl(impl_obj,dsl_created_info)
+      impl_obj.add_file_and_push_to_repo(dsl_created_info[:path],dsl_created_info[:content])
+    end
 
     def klass()
       case @module_class
@@ -163,9 +170,6 @@ module DTK; class BaseModule
     end
     def update_component_module_refs(module_branch,matching_module_refs)
       UpdateModuleRefs.update_component_module_refs(module_branch,matching_module_refs,@base_module)
-    end
-    def add_dsl_content_to_impl(impl_obj,dsl_created_info)
-      impl_obj.add_file_and_push_to_repo(dsl_created_info[:path],dsl_created_info[:content])
     end
 
     def set_dsl_parsed!(boolean)

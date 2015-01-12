@@ -17,7 +17,7 @@ module DTK; class BaseModule; class UpdateModule
     def self.save_dsl?(module_branch,opts={})
       component_module_refs = opts[:component_module_refs] || ModuleRefs.get_component_module_refs(module_branch)
       serialize_info_hash = Aux::hash_subset(opts,[:create_empty_module_refs])
-      if external_deps = opts[:external_depependencies]
+      if external_deps = opts[:external_dependencies]
         if ambiguous = external_deps.ambiguous?
           serialize_info_hash.merge!(:ambiguous => ambiguous)
         end

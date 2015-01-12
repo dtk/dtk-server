@@ -22,7 +22,7 @@ module DTK; class BaseModule; class UpdateModule
       include_modules = cmr_update_els.map{|r|r.component_module}
       opts_scaffold = Opts.create?(
         :ret_hash_content  => true,
-        :include_modules?  => !include_modules.empty? && include_modules
+        :include_modules?  => include_modules.empty? ? nil : include_modules
       )
       dsl_created_info = ScaffoldImplementation.create_dsl(local_params.module_name(),config_agent_type,impl_obj,opts_scaffold)
       add_dsl_content_to_impl(impl_obj,dsl_created_info)

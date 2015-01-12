@@ -112,25 +112,13 @@ module DTK; class BaseModule
         end
       end
 
-      # ret is initially set to Hash.new and can only be changed if opts[:update_from_includes] meaning
-      # that validate_includes_and_update_module_refs wil be called
-      # for that reason we have the following short circuit
       return ret unless opts[:update_from_includes]
-      
-      # For Rich: not sure if you use 'or' on purpose here but in this case when using 'or' instead of '||'
-      # no_errors will have value which is returned by dependencies.nil? because operator '=' is 'older'
-      # that 'or' (but 'younger' than '||')
-      # e.g. if dependencies.nil? is false, but !dependencies.any_errors?() is true, no_errors will still have value = false
-      # but if use '||' instead of 'or' then it will act like this no_errors = (dependencies.nil? or !dependencies.any_errors?())
-      # and for the example above no_errors will have value true, which is correct
-      #
-      # no_errors = dependencies.nil? or !dependencies.any_errors?()
-      # TODO: For Aldin: area to clean up
+
       no_errors = external_deps.nil? || !external_deps.any_errors?()
       if no_errors and !opts[:dsl_parsed_false]
         set_dsl_parsed!(true)
       end
-      # TODO: can we find better way to pass :external_dependencies and passing ret rather than 'ret unless no_errors'
+
       opts[:external_dependencies] = external_deps if external_deps
       ret unless no_errors
     end

@@ -43,11 +43,13 @@ module DTK; class BaseModule; class UpdateModule
       repo = repo_idh.create_object()
       local = ret_local(@version)
 
-      create_info   = create_needed_objects_and_dsl?(repo,local,opts)
+      create_info = create_needed_objects_and_dsl?(repo,local,opts)
+      return create_info if create_info[:dsl_parse_error] && is_parsing_error?(create_info[:dsl_parse_error])
+
       ret           = UpdateModuleOutput.create_from_update_create_info(create_info)
       external_deps = ret.external_dependencies()
 
-      component_module_refs = update_component_module_refs(@module_branch,create_info[:matching_module_refs])
+      component_module_refs = update_component_module_refs(@module_branch, create_info[:matching_module_refs])
       return component_module_refs if is_parsing_error?(component_module_refs)
 
       opts_save_dsl = Opts.create?(
@@ -55,7 +57,7 @@ module DTK; class BaseModule; class UpdateModule
         :component_module_refs    => component_module_refs,
         :external_deps?           => external_deps
       )
-      if dsl_updated_info = UpdateModuleRefs.save_dsl?(@module_branch,opts_save_dsl)
+      if dsl_updated_info = UpdateModuleRefs.save_dsl?(@module_branch, opts_save_dsl)
         if opts[:ret_dsl_updated_info]
           opts[:ret_dsl_updated_info] = dsl_updated_info
         end
@@ -78,6 +80,8 @@ module DTK; class BaseModule; class UpdateModule
       local = ret_local(@version)
 
       create_info   = create_needed_objects_and_dsl?(repo,local,opts)
+      return create_info if create_info[:dsl_parse_error] && is_parsing_error?(create_info[:dsl_parse_error])
+
       version       = create_info[:version] # TODO: is this right or just user @version where refer to 'version'
       impl_obj      = create_info[:impl_obj]
       ret           = UpdateModuleOutput.create_from_update_create_info(create_info)

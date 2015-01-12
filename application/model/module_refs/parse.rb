@@ -34,6 +34,7 @@ module DTK
       end
 
       def self.reify_content(mh,object)
+        return {} unless object
         # if Hash type then this comes from querying the model ref table
         if object.kind_of?(Hash)
           object.inject(Hash.new) do |h,(k,v)|

@@ -11,7 +11,7 @@ module DTK; class BaseModule; class UpdateModule
     # opts can have keys
     #  :message
     #  :create_empty_module_refs
-    #  :external_dependencies 
+    #  :external_dependencies
     def self.update_component_module_refs_and_save_dsl?(module_branch,cmr_update_els,base_module,opts={})
       component_module_refs = update_component_module_refs(module_branch,cmr_update_els,base_module)
       save_dsl?(module_branch,opts.merge(:component_module_refs => component_module_refs))

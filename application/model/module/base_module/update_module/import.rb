@@ -103,7 +103,7 @@ module DTK; class BaseModule; class UpdateModule
           :create_empty_module_refs => true,
           :external_dependencies?   => external_deps
         )
-        dsl_updated_info = UpdateModuleRefs.save_dsl?(module_branch,opts_save_dsl)
+        dsl_updated_info = UpdateModuleRefs.save_dsl?(@module_branch,opts_save_dsl)
         if opts[:ret_dsl_updated_info]
           ret.merge!(:dsl_updated_info => dsl_updated_info)
         end

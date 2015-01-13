@@ -1,4 +1,5 @@
-# TODO: see ifcan better unify with the other import methods
+# This can import multiple modules; it uses Import.import_puppet_forge_module to import each moodule that
+# needs to be installed
 module DTK; class BaseModule; class UpdateModule
   class PuppetForge
     def initialize(project,pf_local_copy,opts={})

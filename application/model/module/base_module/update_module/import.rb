@@ -1,3 +1,4 @@
+# This imports a single module
 module DTK; class BaseModule; class UpdateModule
   class Import < self
     def initialize(base_module,version=nil)
@@ -12,29 +13,36 @@ module DTK; class BaseModule; class UpdateModule
         :copy_files        => {:source_directory => source_directory}
       )
       module_and_branch_info = ComponentModule.create_module(project,local_params,opts_create_mod)
-      module_branch = module_and_branch_info[:module_branch_idh].create_object()
-      repo_id = module_and_branch_info[:module_repo_info][:repo_id]
-      repo = project.model_handle(:repo).createIDH(:id => repo_id).create_object()
+      module_branch_idh      = module_and_branch_info[:module_branch_idh]
+      module_branch          = module_branch_idh.create_object()
+      repo_id                = module_and_branch_info[:module_repo_info][:repo_id]
+      repo                   = project.model_handle(:repo).createIDH(:id => repo_id).create_object()
+
       impl_obj = Implementation.create?(project,local_params,repo,config_agent_type)
       impl_obj.create_file_assets_from_dir_els()
 
       component_module = module_and_branch_info[:module_idh].create_object()
+
+      component_module.set_dsl_parsed!(false)
       include_modules = cmr_update_els.map{|r|r.component_module}
+
+      # scaffold Puppet manifests
       opts_scaffold = Opts.create?(
         :ret_hash_content  => true,
         :include_modules?  => include_modules.empty? ? nil : include_modules
       )
       dsl_created_info = ScaffoldImplementation.create_dsl(local_params.module_name(),config_agent_type,impl_obj,opts_scaffold)
-      add_dsl_content_to_impl(impl_obj,dsl_created_info)
+
+      # add dsl file and create DTK module objects from the dsl
+      UpdateModule.new(component_module).add_dsl_to_impl_and_create_objects(dsl_created_info,project,impl_obj,module_branch_idh,local_params.version)
 
       UpdateModuleRefs.update_component_module_refs_and_save_dsl?(module_branch,cmr_update_els,component_module)
-      component_module.set_dsl_parsed!(true)
 
+      component_module.set_dsl_parsed!(true)
       # need component module id to be returned to client
       component_module[:id]
     end
 
-    # TODO: check why dont set_dsl_parsed!
     def import_from_file(commit_sha,repo_idh,opts={})
       ret = UpdateModuleOutput.new()
       pull_was_needed = @module_branch.pull_repo_changes?(commit_sha)

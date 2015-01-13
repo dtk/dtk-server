@@ -1,3 +1,6 @@
+# TODO: may cleanup: in some methods raise parsing errors and others pass back errors
+# if dont want to find multiple errors on single pass we can simplify by having all raise errors and then remove all
+# the statements that check whether responds is a parsing error (an usually return imemdiately; so not detecting multiple erros)
 module DTK; class BaseModule
   class UpdateModule
     r8_nested_require('update_module','puppet_forge')
@@ -82,18 +85,19 @@ module DTK; class BaseModule
       create_needed_objects_and_dsl?(repo,ret_local(version))
     end
 
+    # only returns non nil if passring error; it traps parsing errors
+    def parse_dsl_and_update_model_with_err_trap(impl_obj,module_branch_idh,version,opts={})
+      klass()::ParsingError.trap(:only_return_error=>true){parse_dsl_and_update_model(impl_obj,module_branch_idh,version,opts)}
+    end
     def parse_dsl_and_update_model(impl_obj,module_branch_idh,version,opts={})
       ret = Hash.new
       set_dsl_parsed!(false)
       module_branch = module_branch_idh.create_object()
       config_agent_type = opts[:config_agent_type] || config_agent_type_default()
+      # TODO: for efficiency can change parse_dsl to take option opts[:dsl_created_info]
       dsl_obj = parse_dsl(impl_obj,opts.merge(:config_agent_type => config_agent_type))
       return dsl_obj if is_parsing_error?(dsl_obj)
 
-      # TODO: check if this fails whether it raises a parsing error
-      # if outer layer catches these then this form ais good and want to remove otehrs
-      # to raise errors rather than passing error obejct
-      # with error
       dsl_obj.update_model_with_ref_integrity_check(:version => version)
 
       if opts[:update_from_includes]
@@ -133,14 +137,12 @@ module DTK; class BaseModule
       local_params.create_local(base_module.get_project())
     end
 
-   private
-    def add_dsl_content_to_impl(impl_obj,dsl_created_info)
-      self.class.add_dsl_content_to_impl(impl_obj,dsl_created_info)
-    end
-    def self.add_dsl_content_to_impl(impl_obj,dsl_created_info)
+    def add_dsl_to_impl_and_create_objects(dsl_created_info,project,impl_obj,module_branch_idh,version)
       impl_obj.add_file_and_push_to_repo(dsl_created_info[:path],dsl_created_info[:content])
+      parse_dsl_and_update_model(impl_obj,module_branch_idh,version,:project => project,:dsl_created_info => dsl_created_info)
     end
 
+   private
     def klass()
       case @module_class
         when NodeModule

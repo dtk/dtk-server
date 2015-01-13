@@ -68,7 +68,7 @@ module DTK
     def self.find_by_name(namespace_mh, namespace_name)
       sp_hash = {
         :cols => common_columns(),
-        :filter => [:eq, :name, namespace_name.downcase]
+        :filter => [:eq, :name, namespace_name.to_s.downcase]
       }
 
       results = Model.get_objs(namespace_mh, sp_hash)

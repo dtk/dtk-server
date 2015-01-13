@@ -541,26 +541,28 @@ module DTK
     end
 
     # type is :local/:local_branch or :remote/:remote_branch
-    def sha_matching_branch_name(type,branch_name)
+    def sha_matching_branch_name(type, branch_name)
       ref_matching_branch_name(type,branch_name).commit.id
     end
-    def ref_matching_branch_name(type,branch_name)
+
+    def ref_matching_branch_name(type, branch_name)
       ref_matching_branch_name?(type,branch_name) ||
         raise(Error.new("Cannot find #{type} branch (#{branch_name})"))
     end
-    def ref_matching_branch_name?(type,branch_name)
-      refs = 
+
+    def ref_matching_branch_name?(type, branch_name)
+      refs =
         case type
           when :local,:local_branch then @grit_repo.heads
           when :remote,:remote_branch then @grit_repo.remotes
-          else raise Error.new("Illegal type (#{type})")
-        end        
+          else raise Error.new("Illegal branch type (#{type})")
+        end
       refs.find{|r|r.name == branch_name}
     end
 
     MutexesForRepos = Hash.new
 
-    def checkout(branch_name,&block)
+    def checkout(branch_name, &block)
       ret = nil
       # TODO: add garbage collection of these mutexs
       mutex = MutexesForRepos[@path] ||= Mutex.new
@@ -582,7 +584,8 @@ module DTK
     def git_command__empty_commit()
       commit("initial empty commit","--allow-empty")
     end
-    def commit(message,*array_opts)
+
+    def commit(message, *array_opts)
       Dir.chdir(@path) do
         set_author?()
         git_command.commit(cmd_opts(),'-m',message,*array_opts)

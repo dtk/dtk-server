@@ -1,4 +1,5 @@
 require 'active_support/hash_with_indifferent_access'
+require 'puppet'
 
 module DTK
   module PuppetForge
@@ -51,10 +52,14 @@ module DTK
               dp_version  = dp['version'] ? dp['version']['vstring'] : nil
               dp_full_id  = "#{dp_name}"
               dp_full_id += " (#{dp_version})" if dp_version
+              # For Rich:
+              # this is the part where I put dependencies of dependencies, but they are not propagated correctly
+              # so leaving this part for you to implement if you are more familiar with this
+              # dp['dependencies'] = parse_dependencies(dp_name, dp_full_id)
               ActiveSupport::HashWithIndifferentAccess.new({
                 :name => dp_name, :module_name => dp_module_name,
                 :module_namespace => dp_module_namespace, :version => dp_version,
-                :full_id => dp_full_id, :module_type => 'component_module'
+                :full_id => dp_full_id, :module_type => 'component_module', :dependencies => dp['dependencies']
               })
             end
           end
@@ -62,6 +67,32 @@ module DTK
 
         def normalize_output(output_s)
           output_s.split("\e[0m\n").last
+        end
+
+        # Parse all imported puppet forge modules and find their dependencies
+        def parse_dependencies(dp_name, dp_full_id)
+          yaml_output         = `puppet module list --tree --render-as yaml`
+          all_modules         = YAML.load(yaml_output)
+          final_dep_list      = []
+          all_imported        = all_modules.values.flatten
+          matching_dependency = nil
+
+          all_imported.each do |dependency|
+            if dependency.forge_name.eql?(dp_name.gsub('-','/'))
+              matching_dependency = dependency
+              break
+            end
+          end
+
+          return [] unless matching_dependency
+
+          nested_depencencies = matching_dependency.dependencies
+          nested_depencencies.each do |n_dep|
+            namespace, name = n_dep['name'].split('/')
+            final_dep_list << {:name => name, :namespace => namespace}
+          end
+
+          final_dep_list
         end
 
       end

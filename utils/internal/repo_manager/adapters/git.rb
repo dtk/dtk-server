@@ -228,7 +228,7 @@ module DTK
 
     def branch_sha(branch)
       if branch
-        if ref = @grit_repo.heads.find{|r|r.name == branch}
+        if ref = ref_matching_branch_name?(:local,branch)
           ref.commit.id
         end
       end
@@ -350,21 +350,8 @@ module DTK
         git_command__fetch(ref.split("/").first)
       end
 
-      other_grit_ref =
-        case type
-         when :remote_branch
-          @grit_repo.remotes.find{|r|r.name == ref}
-         when :local_branch
-          @grit_repo.heads.find{|r|r.name == ref}
-         else
-          raise Error.new("Illegal type parameter (#{type}) passed to ret_merge_relationship")
-        end
-      unless other_grit_ref
-        raise Error.new("Cannot find git ref (#{ref})")
-      end
-
-      other_sha = other_grit_ref.commit.id
-      local_sha = @grit_repo.heads.find{|r|r.name == @branch}.commit.id
+      other_sha = sha_matching_branch_name(type,ref)
+      local_sha = sha_matching_branch_name(:local_branch,@branch)
       ret_sha_relationship(local_sha,other_sha)
     end
 
@@ -396,13 +383,8 @@ module DTK
         git_command__fetch(remote_name)
       end
 
-      remote = @grit_repo.remotes.find{|r|r.name.include?(remote_name.to_s)}
-      local  = @grit_repo.heads.first
-
-      raise Error.new("Cannot find remote repo (#{remote_name})") unless remote
-
-      remote_sha = remote.commit.id
-      local_sha = local.commit.id
+      remote_sha = sha_matching_branch_name(:remote,"#{remote_name}/#{remote_branch}")
+      local_sha = sha_matching_branch_name(:local,@branch)
 
       if remote_sha == local_sha
         true
@@ -422,26 +404,15 @@ module DTK
         git_command__fetch(remote_name)
       end
 
-      remote = @grit_repo.remotes.find{|r|r.name.include?(remote_name.to_s)}
-      local  = @grit_repo.heads.first
-
-      raise Error.new("Cannot find remote repo (#{remote_name})") unless remote
-
-      remote_sha = remote.commit.id
-      local_sha = local.commit.id
+      remote_sha = sha_matching_branch_name(:remote,"#{remote_name}/#{remote_branch}")
+      local_sha = sha_matching_branch_name(:local,@branch)
 
       get_diffs(remote_sha, local_sha)
     end
 
     def get_local_branches_diffs(repo_name, module_branch, base_branch, workspace_branch)
-      base  = @grit_repo.remotes.find{|r|r.name.eql?("origin/#{base_branch.to_s}")}
-      local = @grit_repo.heads.find{|r|r.name.eql?(workspace_branch.to_s)}
-
-      raise Error.new("Cannot find base branch (#{base})") unless base
-
-      base_sha  = base.commit.id
-      local_sha = local.commit.id
-
+      base_sha  = sha_matching_branch_name(:remote,"origin/#{base_branch.to_s}")
+      local_sha = sha_matching_branch_name(:local,workspace_branch)
       get_diffs(local_sha, base_sha)
     end
 
@@ -569,6 +540,24 @@ module DTK
       @grit_repo.head.name
     end
 
+    # type is :local/:local_branch or :remote/:remote_branch
+    def sha_matching_branch_name(type,branch_name)
+      ref_matching_branch_name(type,branch_name).commit.id
+    end
+    def ref_matching_branch_name(type,branch_name)
+      ref_matching_branch_name?(type,branch_name) ||
+        raise(Error.new("Cannot find #{type} branch (#{branch_name})"))
+    end
+    def ref_matching_branch_name?(type,branch_name)
+      refs = 
+        case type
+          when :local,:local_branch then @grit_repo.heads
+          when :remote,:remote_branch then @grit_repo.remotes
+          else raise Error.new("Illegal type (#{type})")
+        end        
+      refs.find{|r|r.name == branch_name}
+    end
+
     MutexesForRepos = Hash.new
 
     def checkout(branch_name,&block)
@@ -621,13 +610,13 @@ module DTK
     end
 
     def branch_exists?(branch_name)
-      @grit_repo.heads.find{|h|h.name == branch_name} ? true : nil
+      ref_matching_branch_name?(:local,branch_name) ? true : nil
     end
 
     def remote_branch_exists?(branch_name,remote_name=nil)
       remote_name ||= default_remote_name()
       qualified_branch_name = "#{remote_name}/#{branch_name}"
-      @grit_repo.remotes.find{|h|h.name == qualified_branch_name} ? true : nil
+      ref_matching_branch_name?(:remote,qualified_branch_name) ? true : nil
     end
 
     def git_command()
@@ -732,7 +721,7 @@ module DTK
         args << '-f' if opts[:force]
         git_command.push(*args)
         remote_name = "#{remote_name}/#{remote_branch}"
-        ret = @grit_repo.remotes.find{|r|r.name == remote_name}.commit.id
+        ret = sha_matching_branch_name(:remote,remote_name)
       end
       ret
     end

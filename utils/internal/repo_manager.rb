@@ -133,7 +133,17 @@ module DTK
 
      private
       def context(repo_name,branch)
-        {:implementation => {:repo => repo_name, :branch => branch}}
+        if branch.kind_of?(ModuleBranch)
+          branch
+        else
+          unless repo_name.kind_of?(String) 
+            Log.error("unexpected type for repo_name: #{repo_name.inspect}")
+          end
+          unless branch.kind_of?(String) 
+            Log.error("unexpected type for branch: #{branch.inspect}")
+          end
+          {:implementation => {:repo => repo_name, :branch => branch}}
+        end
       end
     end
 

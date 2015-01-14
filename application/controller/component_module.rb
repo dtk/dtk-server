@@ -238,7 +238,6 @@ module DTK
         # will raise an exception in case of error
         # This creates a temporary directory after using puppet forge client to import
         puppet_forge_local_copy = PuppetForge::Client.install(pf_full_name, puppet_version)
-
         opts = {:config_agent_type => ret_config_agent_type()}
         opts = namespace ? {:base_namespace => namespace} : {}
         install_info = ComponentModule.import_from_puppet_forge(project,puppet_forge_local_copy,opts)

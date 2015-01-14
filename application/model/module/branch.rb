@@ -38,6 +38,11 @@ module DTK
     def get_module()
       row = get_obj(:cols => [:type,:parent_info])
       type = row[:type].to_sym
+# TODO: temp until for source of bug where component rather than component_module put in for type
+if type == :component
+  type = :component_module
+  Log.error("Bug :component from :component_module on (#{row.inspect})")
+end
       row[type]
     end
 
@@ -508,13 +513,20 @@ module DTK
     def self.ret_create_hash(repo_idh,local,opts={})
       ancestor_branch_idh = opts[:ancestor_branch_idh]
       branch =  local.branch_name
+      type = local.module_type.to_s
+# TODO: temp until for source of bug where component rather than component_module put in for type
+if type == 'component'
+  type = 'component_module'
+  Log.error_pp(["Bug :component from :component_module on",local,caller()[0..7]])
+end
+
       assigns = {
         :display_name => branch,
-        :branch => branch,
-        :repo_id => repo_idh.get_id(),
+        :branch       => branch,
+        :repo_id      => repo_idh.get_id(),
         :is_workspace => true,
-        :type => local.module_type.to_s,
-        :version => version_field(local.version)
+        :type         => local.module_type.to_s,
+        :version      => version_field(local.version)
       }
       assigns.merge!(:ancestor_id => ancestor_branch_idh.get_id()) if ancestor_branch_idh
       ref = branch

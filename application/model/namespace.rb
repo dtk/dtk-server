@@ -82,7 +82,6 @@ module DTK
       namespace = self.find_by_name(namespace_mh, namespace_name)
 
       unless namespace
-        # How to skip this?
         namespace = create_new(namespace_mh, namespace_name)
       end
 

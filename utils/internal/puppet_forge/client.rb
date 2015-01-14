@@ -1,3 +1,4 @@
+# TODO:; a possible enhancement is to calling puppet in process since we have puppet loaded already
 require 'active_support/hash_with_indifferent_access'
 require 'puppet'
 require 'open3'
@@ -94,7 +95,6 @@ module DTK
                 'path' => matching.modulepath
               }
             end
-            # h.merge(puppet_module.forge_name => puppet_module.dependencies)
             h.merge(puppet_module.forge_name => normalized_dependencies)
           end
         end

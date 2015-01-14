@@ -77,7 +77,7 @@ module DTK
     end
 
     def self.find_or_create(namespace_mh, namespace_name)
-      namespace_name = namespace_name.is_a?(Namespace) ? namespace_name.display_name : namespace_name
+      #namespace_name = namespace_name.is_a?(Namespace) ? namespace_name.display_name : namespace_name
       raise Error, "You need to provide namespace name where creating object" if namespace_name.nil? || namespace_name.empty?
       namespace = self.find_by_name(namespace_mh, namespace_name)
 

@@ -53,34 +53,17 @@ module DTK
         def check_for_dependencies(base_install_dir, module_name, hash_info)
           if dependencies = ((hash_info['installed_modules']||{}).first||{})['dependencies']
             nested_dependency_info = nested_dependency_info(base_install_dir)
-            pp [:nested_dependency_info,nested_dependency_info]
-            # For Aldin: here is dependency info that you use below
-            # example values
-            # [:nested_dependency_info,
-            # {"puppetlabs/concat"=>
-            #   [{"name"=>"puppetlabs/stdlib", "version_requirement"=>">= 3.2.0 < 5.0.0"}],
-            #  "nanliu/staging"=>[],
-            #  "puppetlabs/stdlib"=>[],
-            #  "puppetlabs/tomcat"=>
-            #   [{"name"=>"puppetlabs/stdlib", "version_requirement"=>">= 4.2.0"},
-            #    {"name"=>"puppetlabs/concat", "version_requirement"=>">= 1.0.4"},
-            #    {"name"=>"nanliu/staging", "version_requirement"=>">= 0.4.1"}]}]
-
             dependencies.collect do |dp|
               dp_name     = dp['module']
               dp_module_namespace, dp_module_name = PuppetForge.puppet_forge_namespace_and_module_name(dp_name)
               dp_version  = dp['version'] ? dp['version']['vstring'] : nil
               dp_full_id  = "#{dp_name}"
               dp_full_id += " (#{dp_version})" if dp_version
-              # For Rich:
-              # this is the part where I put dependencies of dependencies, but they are not propagated correctly
-              # so leaving this part for you to implement if you are more familiar with this
-              # dp['dependencies'] = parse_dependencies(dp_name, dp_full_id)
-              # /tmp/puppet/53b83eca-ea93-463e-990f-f736fc2306bb/staging/metadata.hash_info
+              dp['dependencies'] = nested_dependency_info[dp_name.gsub('-', '/')]
               ActiveSupport::HashWithIndifferentAccess.new({
                 :name => dp_name, :module_name => dp_module_name,
                 :module_namespace => dp_module_namespace, :version => dp_version,
-                :full_id => dp_full_id, :module_type => 'component_module', :dependencies => dp['dependencies']
+                :full_id => dp_full_id, :module_type => 'component_module'
               })
             end
          end
@@ -101,37 +84,19 @@ module DTK
           yaml_output = `puppet module list --tree --render-as yaml --modulepath #{base_install_dir}`
           all_imported = YAML.load(yaml_output).values.flatten
           all_imported.inject(Hash.new) do |h,puppet_module|
-            h.merge(puppet_module.forge_name => puppet_module.dependencies)
-          end
-        end
-        # For Aldin: use above, which is called once rather than below which we will deprecate
-        # also a change is --modulepath #{base_install_dir} so it searches in tmp area we installed in and by virtue gets only
-        # relevant info; now teh top level module's dependencies wil be called, but not needed since we have that alraedy
-        # no harm including this in what is returned
-        # Parse all imported puppet forge modules and find their dependencies
-        def parse_dependencies(dp_name, dp_full_id)
-          yaml_output         = `puppet module list --tree --render-as yaml`
-          all_modules         = YAML.load(yaml_output)
-          final_dep_list      = []
-          all_imported        = all_modules.values.flatten
-          matching_dependency = nil
-
-          all_imported.each do |dependency|
-            if dependency.forge_name.eql?(dp_name.gsub('-','/'))
-              matching_dependency = dependency
-              break
+            normalized_dependencies = []
+            puppet_module.dependencies.each do |deps|
+              matching = all_imported.detect{|imported| imported.forge_name.eql?(deps['name'])}
+              normalized_dependencies << {
+                # have to set 'module' and 'path' to be able to successfully create dependency
+                'module' => matching.forge_name.gsub('/', '-'),
+                'version' => matching.version,
+                'path' => matching.modulepath
+              }
             end
+            # h.merge(puppet_module.forge_name => puppet_module.dependencies)
+            h.merge(puppet_module.forge_name => normalized_dependencies)
           end
-
-          return [] unless matching_dependency
-
-          nested_depencencies = matching_dependency.dependencies
-          nested_depencencies.each do |n_dep|
-            namespace, name = n_dep['name'].split('/')
-            final_dep_list << {:name => name, :namespace => namespace}
-          end
-
-          final_dep_list
         end
 
       end

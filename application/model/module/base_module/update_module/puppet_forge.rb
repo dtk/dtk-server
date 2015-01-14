@@ -24,7 +24,6 @@ module DTK; class BaseModule; class UpdateModule
       # - what was loaded from puppet forge,
       # - what was present but needed, and
       # - any dependency_warnings
-      # TODO: For Aldin: below does not deal with dependency warnings
       format_response(installed_modules, found_modules)
     end
     

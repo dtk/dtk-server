@@ -1,5 +1,6 @@
 require 'active_support/hash_with_indifferent_access'
 require 'puppet'
+require 'open3'
 
 module DTK
   module PuppetForge
@@ -34,8 +35,13 @@ module DTK
           command  = "puppet _#{PUPPET_VERSION}_ module install #{pf_module_name} --render-as json --target-dir #{base_install_dir} --modulepath #{base_install_dir}"
           command += " --version #{puppet_version}" if puppet_version && !puppet_version.empty?
           command += " --force"              if force
-
-          output_s = `#{command}`
+          output_s = nil
+          output_err = nil
+          Open3.popen3(command) do |stdin, stdout, stderr, wait_thr|
+            output_s = stdout.read
+            output_err = stderr.read
+          end
+          raise_puppet_forge_error(output_err) unless output_err.empty?
 
           # we remove invalid characters to get to JSON response
           output_s = normalize_output(output_s)
@@ -65,8 +71,14 @@ module DTK
           end
         end
 
+        Remove = "\e[0m\n"
         def normalize_output(output_s)
-          output_s.split("\e[0m\n").last
+          output_s.split(Remove).last
+        end
+
+        def raise_puppet_forge_error(output_err)
+          puppet_forge_err = output_err.split(Remove).first
+          raise ErrorUsage, "Puppet Forge Error: #{puppet_forge_err}"
         end
 
         # Parse all imported puppet forge modules and find their dependencies

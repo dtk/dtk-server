@@ -61,7 +61,7 @@ module DTK; class BaseModule; class UpdateModule
       version     = opts[:version]
       source_name = opts[:source_name]
       ModuleBranch::Location::LocalParams::Server.new(
-        :module_type => :component,
+        :module_type => :component_module,
         :module_name => module_name,
         :version     => version,
         :namespace   => namespace,

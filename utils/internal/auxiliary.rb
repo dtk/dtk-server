@@ -59,6 +59,15 @@ module DTK
         end
       end  
 
+      # raises error if appropriate dev config flag is on
+      def stop_for_testing?(stop_point)
+        if stop_for_testing = R8::Config[:stop_for_testing]
+          if stop_for_testing[stop_point]
+            raise Error.new("stop for testing at #{stop_point}")
+          end
+        end
+      end
+
       def random_generate(opts={})
         length = opts[:length] || RandomGenerate::DefaultLength
         types = opts[:types] || (opts[:type] && [opts[:type]]) || [RandomGenerate::DefaultType]

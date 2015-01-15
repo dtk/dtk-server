@@ -48,15 +48,14 @@ module DTK
           opts.merge!(:service_add_on_proc => service_add_on_proc)
         end
         clone_post_copy_hook(clone_copy_output,opts)
-# TODO: for debugging
-stop = R8::Config[:stop_for_testing]
-if stop then raise ErrorUsage.new('stop for testing'); end
 
          unless opts[:no_violation_checking]
            if clone_source_object.class == Component and target_id_handle[:model_name] == :node
              Violation.update_violations([target_id_handle])
            end
          end
+
+Aux.stop_for_testing?(:stage) # TODO: for debugging
 
         if opts[:ret_clone_copy_output]
           clone_copy_output

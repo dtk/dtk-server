@@ -35,12 +35,15 @@ module DTK; class BaseModule; class UpdateModule
 
      def import_module(pf_module)
       module_name = pf_module.default_local_module_name
+      params_opts = {}
       
       # dependencies user their own namespace
       namespace        = pf_module.is_dependency ? pf_module.namespace : @base_namespace
-      local_params     = local_params(module_name, namespace)
       source_directory = pf_module.path
       cmr_update_els   = component_module_refs_dsl_form_els(pf_module.dependencies)
+
+      params_opts.merge!(:source_name => pf_module.module_source_name) if pf_module.module_source_name
+      local_params     = local_params(module_name, namespace, params_opts)
       module_id        = Import.import_puppet_forge_module(@project,local_params,source_directory,cmr_update_els)
 
       # set id for puppet-forge modules because they will be used on client side to clone modules to local machine
@@ -54,13 +57,15 @@ module DTK; class BaseModule; class UpdateModule
      ret
     end
 
-    def local_params(module_name,namespace,opts={})
-      version = opts[:version]
+    def local_params(module_name, namespace, opts={})
+      version     = opts[:version]
+      source_name = opts[:source_name]
       ModuleBranch::Location::LocalParams::Server.new(
         :module_type => :component,
         :module_name => module_name,
         :version     => version,
-        :namespace   => namespace
+        :namespace   => namespace,
+        :source_name => source_name
       )
     end
 

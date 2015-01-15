@@ -18,6 +18,10 @@ module DTK; class BaseModule; class UpdateModule
       repo_id                = module_and_branch_info[:module_repo_info][:repo_id]
       repo                   = project.model_handle(:repo).createIDH(:id => repo_id).create_object()
 
+      # add source to module branch external_refs
+      source = generate_source(local_params)
+      module_branch.update_external_ref(:source => source) if source
+
       impl_obj = Implementation.create?(project,local_params,repo,config_agent_type)
       impl_obj.create_file_assets_from_dir_els()
 
@@ -133,6 +137,11 @@ module DTK; class BaseModule; class UpdateModule
    private
     def dsl_parsed?()
       @base_module.dsl_parsed?()
+    end
+
+    def self.generate_source(local_params)
+      return unless local_params.source_name
+      "puppetforge://#{local_params.source_name}"
     end
   end
 end; end; end

@@ -52,6 +52,10 @@ module DTK
         @id = id
       end
 
+      def module_source_name()
+        @module
+      end
+
       def to_h
         {
           :name      => @name,

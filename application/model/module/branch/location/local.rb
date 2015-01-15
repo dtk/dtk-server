@@ -19,7 +19,7 @@ module DTK; class ModuleBranch
      private
 
       def legal_keys()
-        [:module_type,:component_type?,:module_name,:version?,:namespace?]
+        [:module_type,:component_type?,:module_name,:version?,:namespace?,:source_name?]
       end
       def ret_component_type(module_type)
         case module_type()

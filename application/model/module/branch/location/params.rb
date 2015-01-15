@@ -26,6 +26,9 @@ module DTK; class ModuleBranch
       def namespace()
         self[:namespace]
       end
+      def source_name()
+        self[:source_name]
+      end
       def initialize(params)
         unless params.kind_of?(self.class)
           validate(params)
@@ -49,7 +52,7 @@ module DTK; class ModuleBranch
         end
         missing_required = required_keys().select{|key|params[key].nil?}
         unless missing_required.empty?
-          raise Error.new("Required key(s): #{missing_requiredjoin(',')}")
+          raise Error.new("Required key(s): #{missing_required.join(',')}")
         end
       end
       def all_keys()

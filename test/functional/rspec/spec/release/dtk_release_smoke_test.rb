@@ -28,6 +28,7 @@ local_service_module_name = 'local:bootstrap'
 namespace = 'dtk16'
 local_default_namespace = 'local'
 component_module_filesystem_location = "~/dtk/component_modules"
+rvm_path = "/usr/local/rvm/wrappers/default"
 
 dtk_common = DtkCommon.new(service_name, assembly_name)
 
@@ -46,19 +47,19 @@ describe "DTK Server smoke test release" do
   end
 
   context "Import new component module function" do
-    include_context "Import component module", component_module_name
+    include_context "Import component module", rvm_path, component_module_name
   end
 
   context "Import new service module function" do
-    include_context "Import service module", service_module_name
+    include_context "Import service module", rvm_path, service_module_name
   end
 
   context "Export component module to #{namespace} namespace" do
-    include_context "Export component module", dtk_common, local_component_module_name, namespace
+    include_context "Export component module", rvm_path, dtk_common, local_component_module_name, namespace
   end
 
   context "Export service module to #{namespace} namespace" do
-    include_context "Export service module", dtk_common, local_service_module_name, namespace
+    include_context "Export service module", rvm_path, dtk_common, local_service_module_name, namespace
   end
 
   context "Get component module components list" do
@@ -100,11 +101,11 @@ describe "DTK Server smoke test release" do
   end
 
   context "Delete #{local_component_module_name} component module from remote" do
-    include_context "Delete component module from remote repo", dtk_common, local_component_module_name, namespace
+    include_context "Delete component module from remote repo", rvm_path, dtk_common, local_component_module_name, namespace
   end
 
   context "Delete #{local_service_module_name} service module from remote" do
-    include_context "Delete service module from remote repo", dtk_common, local_service_module_name, namespace
+    include_context "Delete service module from remote repo", rvm_path, dtk_common, local_service_module_name, namespace
   end
 
   after(:all) do

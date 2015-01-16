@@ -164,6 +164,9 @@ module DTK
         return parsed if ParsingError.is_error?(parsed)
 
         set_dsl_parsed!(true)
+
+        # return component modules required by this service module
+        parsed.merge!(:component_module_refs => component_module_refs.component_modules)
         parsed
       end
 

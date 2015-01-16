@@ -1,5 +1,5 @@
 r8_require('branch_names')
-module XYZ
+module DTK
   class Implementation < Model
     include BranchNamesMixin
     extend BranchNamesClassMixin
@@ -30,18 +30,10 @@ module XYZ
       end
     end
 
-    def self.list_from_workspace(impl_mh,opts={})
-      sp_hash = {
-        :cols => [:id, :display_name,:version],
-        :filter => [:neq, :project_project_id,nil]
-      }
-      get_objs(impl_mh,sp_hash)
-    end
-
     def self.create?(project,local_params,repo,config_agent_type)
       # was local = local_params.create_local(project) which is fine for import from puppet-forge
       # for import-git we use local object, so this is a temp workaround
-      local = local_params.is_a?(XYZ::ModuleBranch::Location::Server::Local) ? local_params : local_params.create_local(project)
+      local = local_params.is_a?(ModuleBranch::Location::Server::Local) ? local_params : local_params.create_local(project)
       project = local.project
       version = local.version
       module_name = local.module_name
@@ -61,13 +53,13 @@ module XYZ
         :project_project_id => project.id,
         :version            => version_field(version)
       }
-      impl_ref = ref(config_agent_type,module_name,branch)
+      impl_ref = ref(module_namespace,module_name,branch)
       impl_mh = project.id_handle().create_childMH(:implementation)
       create_from_row?(impl_mh,impl_ref,match_assigns,impl_hash).create_object().merge(impl_hash)
     end
 
-    def self.ref(config_agent_type,module_name,branch)
-      "#{config_agent_type}-#{module_name}-#{branch}"
+    def self.ref(namespace,module_name,branch)
+      "#{namespace}-#{module_name}-#{branch}"
     end
     private_class_method :ref
 
@@ -144,41 +136,6 @@ module XYZ
       get_obj(:cols => [:repo_id,:branch,:module_branch])[:module_branch]
     end
 
-    # TODO: unify with project#get_module_tree()
-    def get_module_tree(opts={})
-      sp_hash = {:cols => [:id,:display_name,:type,:project_project_id,:component_template]}
-      rows_with_cmps = get_objs(sp_hash)
-
-      i18n = get_i18n_mappings_for_models(:component)
-      cmps = rows_with_cmps.map do |r|
-        cmp = r[:component].materialize!(Component.common_columns())
-        # TODO: see if cleaner way to put in i18n names
-        cmp[:name] = i18n_string(i18n,:component, cmp[:name])
-        cmp
-      end
-      # all rows common on all columns expect for :component
-      ret_row = rows_with_cmps.first.reject{|k,v|k == :component}
-      ret_row.merge!(:components => cmps)
-      return [ret_row] unless opts[:include_file_assets]
-
-      indexed_asset_files = Implementation.get_indexed_asset_files([id_handle])
-      ret_row.merge!(:file_assets => indexed_asset_files.values.first)
-      [ret_row]
-    end
-
-    # TODO deprecate
-    def get_tree(opts={})
-      sp_hash = {:cols => [:id,:display_name,:component_template]}
-      rows = get_objs(sp_hash)
-      # all rows agree on everything but col
-      ret = rows.first.reject{|k,v|k == :component}
-      ret.merge!(:components => rows.map{|r|r[:component]})
-      if opts[:include_file_assets]
-        ret.merge!(:file_assets => self.class.get_indexed_asset_files([id_handle]))
-      end
-      ret
-    end
-
     def get_asset_files()
       flat_file_assets = get_objs_col({:cols => [:file_assets]},:file_asset).reject{|k,v|k == :implementation_implementation_id}
       FileAsset.ret_hierrachical_file_struct(flat_file_assets)
@@ -241,6 +198,45 @@ module XYZ
       "puppet_module" => "puppet_file",
       "chef_cookbook" => "chef_file"
     }
+
+    # ####### TODO below related to UI and may deprecate
+
+    # TODO: unify with project#get_module_tree()
+    def get_module_tree(opts={})
+      sp_hash = {:cols => [:id,:display_name,:type,:project_project_id,:component_template]}
+      rows_with_cmps = get_objs(sp_hash)
+
+      i18n = get_i18n_mappings_for_models(:component)
+      cmps = rows_with_cmps.map do |r|
+        cmp = r[:component].materialize!(Component.common_columns())
+        # TODO: see if cleaner way to put in i18n names
+        cmp[:name] = i18n_string(i18n,:component, cmp[:name])
+        cmp
+      end
+      # all rows common on all columns expect for :component
+      ret_row = rows_with_cmps.first.reject{|k,v|k == :component}
+      ret_row.merge!(:components => cmps)
+      return [ret_row] unless opts[:include_file_assets]
+
+      indexed_asset_files = Implementation.get_indexed_asset_files([id_handle])
+      ret_row.merge!(:file_assets => indexed_asset_files.values.first)
+      [ret_row]
+    end
+
+
+    def get_tree(opts={})
+      sp_hash = {:cols => [:id,:display_name,:component_template]}
+      rows = get_objs(sp_hash)
+      # all rows agree on everything but col
+      ret = rows.first.reject{|k,v|k == :component}
+      ret.merge!(:components => rows.map{|r|r[:component]})
+      if opts[:include_file_assets]
+        ret.merge!(:file_assets => self.class.get_indexed_asset_files([id_handle]))
+      end
+      ret
+    end
+
+
   end
 end
 

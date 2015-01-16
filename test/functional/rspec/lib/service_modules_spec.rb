@@ -6,7 +6,21 @@ require 'awesome_print'
 
 STDOUT.sync = true
 
-shared_context "Import service module" do |rvm_path="", service_module_name|
+shared_context "Import service module" do |service_module_name|
+  it "imports #{service_module_name} service module from local filesystem to server" do
+    puts "Import service module:", "----------------------"
+    pass = true
+    value = `dtk service-module import #{service_module_name}`
+    puts value
+    pass = false if ((value.include? "ERROR") || (value.include? "exists already"))
+    puts "Import of service module #{service_module_name} completed successfully!" if pass == true
+    puts "Import of service module #{service_module_name} did not complete successfully!" if pass == false
+    puts ""
+    pass.should eq(true)
+  end
+end
+
+shared_context "Import service module rvm" do |rvm_path, service_module_name|
   it "imports #{service_module_name} service module from local filesystem to server" do
     puts "Import service module:", "----------------------"
     pass = true
@@ -99,7 +113,22 @@ shared_context "List all service modules on remote" do |dtk_common, service_modu
   end
 end
 
-shared_context "Export service module" do |rvm_path="", dtk_common, service_module_name, namespace|
+shared_context "Export service module" do |dtk_common, service_module_name, namespace|
+  it "exports #{service_module_name} service module to #{namespace} namespace on remote repo" do
+    puts "Export service module to remote:", "--------------------------------"
+    pass = false
+    service_module = service_module_name.split(":").last
+    value = `dtk service-module #{service_module_name} publish #{namespace}/#{service_module}`
+    puts value
+    pass = true if (value.include? "Module has been successfully published")
+    puts "Publish of #{service_module} service module to #{namespace} namespace has been completed successfully!" if pass == true
+    puts "Publish of #{service_module} service module to #{namespace} namespace did not complete successfully!" if pass == false
+    puts ""
+    pass.should eq(true)
+  end
+end
+
+shared_context "Export service module rvm" do |rvm_path, dtk_common, service_module_name, namespace|
   it "exports #{service_module_name} service module to #{namespace} namespace on remote repo" do
     puts "Export service module to remote:", "--------------------------------"
     pass = false
@@ -141,7 +170,20 @@ shared_context "Delete service module from local filesystem" do |service_module_
   end
 end
 
-shared_context "Delete service module from remote repo" do |rvm_path, dtk_common, service_module_name, namespace|
+shared_context "Delete service module from remote repo" do |dtk_common, service_module_name, namespace|
+  it "deletes #{service_module_name} service module with #{namespace} namespace from remote repo" do
+    puts "Delete service module from remote (dtkn):", "-----------------------------------------"
+    pass = false
+    value = `dtk service-module delete-from-catalog #{namespace}/#{service_module_name} -y`
+    pass = true if (!value.include?("error") || !value.include?("cannot remove"))
+    puts "Service module #{service_module_name} deleted from remote (dtkn) successfully!" if pass == true
+    puts "Service module #{service_module_name} was not deleted from remote (dtkn) successfully!" if pass == false
+    puts ""
+    pass.should eq(true)
+  end
+end
+
+shared_context "Delete service module from remote repo rvm" do |rvm_path, dtk_common, service_module_name, namespace|
   it "deletes #{service_module_name} service module with #{namespace} namespace from remote repo" do
     puts "Delete service module from remote (dtkn):", "-----------------------------------------"
     pass = false

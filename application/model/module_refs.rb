@@ -4,6 +4,7 @@ module DTK
     r8_nested_require('module_refs','parse')
     r8_nested_require('module_refs','component_dsl_form')
     r8_nested_require('module_refs','matching_templates')
+    r8_nested_require('module_refs','tree')
     include MatchingTemplatesMixin
 
     def initialize(parent,content_hash_form,opts={})

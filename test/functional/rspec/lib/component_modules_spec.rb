@@ -121,11 +121,11 @@ shared_context "NEG - Import component module with version dependency from provi
   end
 end
 
-shared_context "Import component module" do |component_module_name|
+shared_context "Import component module" do |rvm_path="", component_module_name|
   it "imports #{component_module_name} component module from content on local machine" do
     puts "Import component module:", "------------------------"
     pass = false
-    value = `dtk component-module import #{component_module_name}`
+    value = `#{rvm_path}dtk component-module import #{component_module_name}`
     puts value
     pass = true unless value.include? "ERROR"
     puts "Component module #{component_module_name} imported successfully!" if pass == true
@@ -135,12 +135,12 @@ shared_context "Import component module" do |component_module_name|
   end
 end
 
-shared_context "Export component module" do |dtk_common, component_module_name, namespace|
+shared_context "Export component module" do |rvm_path="", dtk_common, component_module_name, namespace|
   it "exports #{component_module_name} component module to #{namespace} namespace on remote repo" do
     puts "Export component module:", "------------------------"
     pass = false
     cmp_module = component_module_name.split(":").last
-    value = `dtk component-module #{component_module_name} publish #{namespace}/#{cmp_module}`
+    value = `#{rvm_path}dtk component-module #{component_module_name} publish #{namespace}/#{cmp_module}`
     puts value
     pass = true if value.include? "Module has been successfully published"
     puts "Component module #{cmp_module} exported successfully!" if pass == true
@@ -300,11 +300,11 @@ shared_context "Delete versioned component module from local filesystem" do |com
   end
 end
 
-shared_context "Delete component module from remote repo" do |dtk_common, component_module_name, namespace|
+shared_context "Delete component module from remote repo" do |rvm_path="", dtk_common, component_module_name, namespace|
   it "deletes #{component_module_name} component module with #{namespace} namespace from remote repo" do
     puts "Delete component module from remote:", "------------------------------------"
     pass = false
-    value = `dtk component-module delete-from-catalog #{namespace}/#{component_module_name} -y`
+    value = `#{rvm_path}dtk component-module delete-from-catalog #{namespace}/#{component_module_name} -y`
     pass = !value.include?("error")
     puts "Component module #{component_module_name} deleted from dtkn (remote) successfully!" if pass == true
     puts "Component module #{component_module_name} was not deleted from dtkn (remote) successfully!" if pass == false

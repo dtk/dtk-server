@@ -1,13 +1,13 @@
 module DTK
   class BaseModule < Model
     r8_nested_require('base_module','update_module')
+    r8_nested_require('base_module','version_context_info')
 
     # TODO: look through r8_nested_require('module'..,) and see which ones should be under instead base_module
     r8_nested_require('module','dsl')
     r8_nested_require('module','node_module_dsl')
     r8_nested_require('module','auto_import')
 
-    r8_nested_require('module','version_context_info')
     r8_nested_require('module','delete_mixin')
 
     include DeleteMixin

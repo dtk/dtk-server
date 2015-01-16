@@ -221,7 +221,7 @@ module DTK
         def get_version_contexts(test_components)
           version_contexts =
             unless test_components.empty?
-              TestModule::VersionContextInfo.get_in_hash_form_from_templates(test_components)
+              TestModule::VersionContextInfo.get_in_hash_form(test_components)
             else
               Log.error("Unexpected that test_components is empty")
               nil

@@ -1,5 +1,5 @@
 # TODO: temp until move into meta directory
-module XYZ
+module DTK
   module ComponentMetaClassMixin
     def up()
       ds_column_defs :ds_attributes, :ds_key
@@ -194,6 +194,16 @@ module XYZ
          :cols => [:id,:display_name, :external_ref, :ordered_component_ids, :agent_git_commit_id]
        }]
 
+      virtual_column :implementation, :type => :json, :hidden => true,
+      :remote_dependencies =>
+        [
+         {
+           :model_name => :implementation,
+           :convert => true,
+           :join_type => :inner,
+           :join_cond=>{:id => q(:component,:implementation_id)},
+           :cols => Implementation.common_columns()
+         }]
       virtual_column :implementation_file_paths, :type => :json, :hidden => true,
       :remote_dependencies =>
         [

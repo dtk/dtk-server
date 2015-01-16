@@ -5,8 +5,9 @@ module DTK; class Component
     end
 
     # a version context element is hash with keys: :repo,:branch,:implementation, :sha (optional)
-    def self.get_version_context_info(component_idhs,impl_idhs)
-      ret = impls = get_implementations(impl_idhs)
+    def self.get_version_context_info(components)
+      component_idhs = components.map{|r|r.id_handle()}
+      ret = impls = get_implementations(components)
       include_modules = get_include_mods_with_impls(component_idhs)
       return ret if include_modules.empty?()
 
@@ -118,15 +119,14 @@ module DTK; class Component
     end
 
    private
-    def self.get_implementations(impl_idhs)
+    def self.get_implementations(components)
       ret = Array.new
-      return ret if impl_idhs.empty?
+      return ret if components.empty?
        sp_hash = {
-        :cols => [:id,:group_id,:display_name,:repo,:branch,:module_name,:version],
-         :filter => [:oneof,:id,impl_idhs.map{|idh|idh.get_id()}]
+        :cols => [:implementation],
+        :filter => [:oneof,:id,components.map{|r|r.id}]
        }
-      impl_mh = impl_idhs.first.createMH()
-      get_objs(impl_mh,sp_hash)
+      get_objs(components.first.model_handle(),sp_hash).map{|r|r[:implementation]}
     end
 
     def self.get_include_mods_with_impls(component_idhs)

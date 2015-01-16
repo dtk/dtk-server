@@ -6,6 +6,14 @@ module DTK
     r8_nested_require('module_refs','matching_templates')
     include MatchingTemplatesMixin
 
+    def initialize(parent,content_hash_form,opts={})
+      @parent = parent
+      @component_modules =  opts[:content_hash_form_is_reified] ?
+        content_hash_form :
+        Parse.reify_content(parent.model_handle(:model_ref),content_hash_form)
+    end
+    private :initialize
+    
     def self.get_component_module_refs(branch)
       content_hash_content = ModuleRef.get_component_module_refs(branch).inject(Hash.new) do |h,r|
         h.merge(key(r[:module_name]) => r)
@@ -111,13 +119,6 @@ module DTK
 
     def add_or_set_component_module_ref(cmp_module_name,mod_ref_hash)
       @component_modules[key(cmp_module_name)] = ModuleRef.reify(@parent.model_handle(),mod_ref_hash)
-    end
-
-    def initialize(parent,content_hash_form,opts={})
-      @parent = parent
-      @component_modules = opts[:content_hash_form_is_reified] ?
-      content_hash_form :
-        Parse.reify_content(parent.model_handle(:model_ref),content_hash_form)
     end
 
     def self.key(el)

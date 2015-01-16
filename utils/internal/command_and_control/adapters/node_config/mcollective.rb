@@ -239,28 +239,20 @@ module DTK
 
       def self.get_version_context(config_node)
         ret =  Array.new
-        return ret if config_node[:component_actions].empty?()
-        return ret unless (config_node[:state_change_types] & ["install_component","update_implementation","converge_component","setting"]).size > 0
-        
-        component_idhs = config_node[:component_actions].inject(Hash.new) do |h,r|
-          cmp = r[:component]
-          h.merge(cmp[:id] => cmp.id_handle())
-        end.values
+        component_actions = config_node[:component_actions]
+        if component_actions.empty?()
+          return ret 
+        end
+        unless (config_node[:state_change_types] & ["install_component","update_implementation","converge_component","setting"]).size > 0
+          return ret 
+        end
 
-        impl_idhs = get_impl_idhs(config_node)
-        ComponentModule::VersionContextInfo.get_in_hash_form(component_idhs,impl_idhs)
+        # want components to be unique
+        components = component_actions.inject(Hash.new){|h,r|h.merge(r[:component][:id] => r[:component])}.values
+        ComponentModule::VersionContextInfo.get_in_hash_form(components)
       end
-
-      def self.get_impl_idhs(config_node)
-        ret = Array.new
-        impl_ids = (config_node[:node][:implementation_ids_list] || config_node[:component_actions].map{|x|x[:component][:implementation_id]}).uniq
-        
-        return ret if impl_ids.empty?
-        sample_idh = config_node[:component_actions].first[:component].id_handle
-        impl_ids.map{|id|sample_idh.createIDH(:model_name => :implementation, :id => id)}
-      end
-
     end
   end
 end
+
 

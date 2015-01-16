@@ -4,6 +4,10 @@ module DTK
     include BranchNamesMixin
     extend BranchNamesClassMixin
 
+    def self.common_columns()
+      [:id,:group_id,:display_name,:type,:repo,:module_name,:module_namespace,:parse_state,:branch,:version,:updated,:repo_id,:assembly_id]
+    end
+
     def modify_file_assets(diff_summary)
       paths_to_delete = diff_summary.paths_to_delete
       paths_to_add = diff_summary.paths_to_add

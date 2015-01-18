@@ -4,6 +4,8 @@ module DTK; class Component
       [:id,:group_id,:display_name,:version_constraint,:implementation_id]
     end
 
+    # For all components in components, this method returns its implementation plus 
+    # does recursive anayslsis to follow the components includes to find otehr components that must be included also
     def self.get_matching_impls(components)
       component_idhs = components.map{|r|r.id_handle()}
       ret = impls = Component.get_implementations(component_idhs)

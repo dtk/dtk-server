@@ -12,7 +12,7 @@ module DTK; class Component
 
       # if any include_module is not linked to a implementation then find implementations for include_modules
       if include_modules.find{|incl_mod|incl_mod[:implementation].nil?}
-        mod_incl_viols = find_violations_and_set_impl(component_idhs,impls,include_modules)
+        mod_incl_viols = find_violations_and_set_impl(component_idhs,:impls => impls,:include_modules => include_modules)
         unless mod_incl_viols.empty?
           raise Error.new("Need to implement code that presents include_module violations (#{mod_incl_viols.inspect})")
         end
@@ -36,11 +36,15 @@ module DTK; class Component
     # this method looks for include_modules on a component in component_idhs
     # for each include_module it finds it looks to find a matching implementation if one does not exist
     # it returns an array of hashes that has an error code and params related to error key
-    def self.find_violations_and_set_impl(component_idhs,impls,incl_mods=nil)
+    # opts can have keys
+    #  :include_modules
+    #  :impls
+    def self.find_violations_and_set_impl(component_idhs,opts={})
       ret = Array.new()
       return ret if component_idhs.empty?
-      incl_mods ||= get_include_mods_with_impls(component_idhs)
+      incl_mods = opts[:include_modules] || get_include_mods_with_impls(component_idhs)
       return ret if incl_mods.empty?
+      impls = opts[:impls] || Component.get_implementations(component_idhs)
 
       impls_to_set_on_incl_mods = Array.new
       incl_mods_to_match = Array.new

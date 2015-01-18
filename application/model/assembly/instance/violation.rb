@@ -69,31 +69,18 @@ module DTK
         ret
       end
 
-      # thjis also serves to set implementation_id on module includes that are not set already
+      # this also serves to set implementation_id on module includes that are not set already
       def find_violations__module_includes(cmps)
         ret = Array.new
         return ret if cmps.empty?
-        impls = get_implementations(cmps)
-        cmp_idhs = cmps.map{|cmp|cmp.id_handle()}
         
-        if included_modules = Component::IncludeModule.find_violations_and_set_impl(cmp_idhs,impls)
+        if included_modules = Component::IncludeModule.find_violations_and_set_impl(cmps.map{|cmp|cmp.id_handle()})
           included_modules.each do |incl_mod|
             ret << Violation::MissingIncludedModule.new(incl_mod[:module_name], incl_mod[:version])
           end 
         end
 
         ret
-      end
-
-      def get_implementations(cmps)
-        ret = Array.new
-        return ret if cmps.empty?
-        sp_hash = {
-          :cols => [:id,:group_id,:display_name,:repo,:branch,:module_name,:version],
-          :filter => [:oneof,:id,cmps.map{|cmp|cmp[:implementation_id]}]
-        }
-        impl_mh = cmps.first.model_handle(:implementation)
-        get_objs(impl_mh,sp_hash)
       end
 
       def get_parsed_info(module_branch_id, type)

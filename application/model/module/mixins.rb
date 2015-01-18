@@ -167,18 +167,6 @@ module DTK
       self[:project_project_id] ||= row[:project_project_id]
       row[:repo]
     end
-    # MOD_RESTRUCT: deprecate below for above
-    def get_library_repo()
-      sp_hash = {
-        :cols => [:id,:display_name,:library_repo,:library_library_id]
-      }
-      row = get_obj(sp_hash)
-      # opportunistically set display name and library_library_id on module
-      self[:display_name] ||= row[:display_name]
-      self[:library_library_id] ||= row[:library_library_id]
-      row[:repo]
-    end
-
     def get_implementations()
       get_objs_uniq(:implementations)
     end

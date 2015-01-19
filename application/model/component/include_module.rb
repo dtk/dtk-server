@@ -1,8 +1,12 @@
 module DTK; class Component
   class IncludeModule < Model
+    r8_nested_require('include_module','recusrsive')
+
     def self.common_columns()
       [:id,:group_id,:display_name,:version_constraint,:implementation_id]
     end
+
+    def self.get_matching_
 
     # For all components in components, this method returns its implementation plus 
     # does recursive anayslsis to follow the components includes to find otehr components that must be included also

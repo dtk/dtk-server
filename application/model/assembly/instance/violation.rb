@@ -73,12 +73,13 @@ module DTK
       def find_violations__module_includes(cmps)
         ret = Array.new
         return ret if cmps.empty?
-        
-        if included_modules = Component::IncludeModule.find_violations_and_set_impl(cmps.map{|cmp|cmp.id_handle()})
+        cmp_idhs = cmps.map{|cmp|cmp.id_handle()}
+        if included_modules = Component::IncludeModule.find_violations_and_set_impl(cmp_idhs)
           included_modules.each do |incl_mod|
             ret << Violation::MissingIncludedModule.new(incl_mod[:module_name], incl_mod[:version])
           end 
         end
+        Component::IncludeModule.get_matching_stub(cmp_idhs)
 
         ret
       end

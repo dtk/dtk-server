@@ -3,9 +3,11 @@ module DTK; class Component
     class Recursive
       def initialize(parent)
         @parent = parent
-        @impls = Array.new()
+        # mappoing from module name to implementations
+        @module_mapping = Hash.new
       end
       def process_components!(components)
+      end
     end
   end
 end; end

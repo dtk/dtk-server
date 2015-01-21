@@ -154,9 +154,6 @@ end
     # updates repo if any changes and if so returns new commit_sha
     # args could be either file_path,hash_content,file_format(optional) or single element which is an array
     # having elements with keys :path, :hash_content, :format
-    # TODO: For Aldin; we can do thislater, but this shoiuld eb cleaned up
-    # at this level this shoudl be more generic; should enacpsulate logic for
-    # particular file types in encpsulated places
     def serialize_and_save_to_repo?(*args)
       opts = Hash.new
       files =

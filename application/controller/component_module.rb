@@ -53,11 +53,11 @@ module DTK
       #    :commit_sha
       #  :dsl_created_info
       #    :path
-      #    :content - only if want this dsl file to be added on cleint side 
+      #    :content - only if want this dsl file to be added on cleint side
       #  :external_dependencies
       #    :inconsistent
       #    :possibly_missing
-      #    :ambiguous 
+      #    :ambiguous
       rest_ok_response response
     end
 
@@ -90,11 +90,11 @@ module DTK
       #    :commit_sha
       #  :dsl_created_info
       #    :path
-      #    :content - only if want this dsl file to be added on cleint side 
+      #    :content - only if want this dsl file to be added on cleint side
       #  :external_dependencies
       #    :inconsistent
       #    :possibly_missing
-      #    :ambiguous 
+      #    :ambiguous
       rest_ok_response component_module.update_model_from_clone_changes?(commit_sha,diffs_summary,version,opts)
     end
 
@@ -115,6 +115,7 @@ module DTK
 
     #### list and info actions ###
     def rest__list()
+      Log.info(MessageQueue.object_id)
       diff             = ret_request_params(:diff)
       project          = get_default_project()
       namespace        = ret_request_params(:module_namespace)

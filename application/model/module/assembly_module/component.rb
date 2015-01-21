@@ -203,25 +203,24 @@ module DTK; class AssemblyModule
         unless workspace_mod_sha = workspace_branch[:current_sha]
           Log.error("Unexpected that workspace_mod_sha is nil")
         end
-        r[:local_copy_diff]  = (assembly_mod_sha != workspace_mod_sha)
+        r[:local_copy_diff] = (assembly_mod_sha != workspace_mod_sha)
 =begin
 TODO: code to put in when
 want to check case when :local_behind and :branchpoint
 In order to do this must ireate all branches, not just changed ones and
 need to do a refresh on workspace branch sha in case this was updated in another branch
+=end
         if r[:local_copy_diff]
-          sha_relationship = RepoManager.ret_sha_relationship(assembly_mod_sha,workspace_mod_sha,assembly_mod_branch)
+          sha_relationship = RepoManager.ret_sha_relationship(assembly_mod_sha, workspace_mod_sha, assembly_mod_branch)
           case sha_relationship
-            when :local_behind,:local_ahead,:branchpoint
+            when :local_behind, :local_ahead, :branchpoint
               r[:branch_relationship] = sha_relationship
             when :equal
-              # unequal shas but equal content
-              # TODO: is it possible to reach this
               r[:local_copy_diff]  = false
           end
         end
-=end
       end
+
       modules_with_branches
     end
 

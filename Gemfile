@@ -25,6 +25,7 @@ gem 'iconv'
 gem 'colorize','~> 0.5.8'
 # gem 'rack-contrib'
 gem 'awesome_print','1.1.0'
+gem 'celluloid'
 #TODO: can upgrade this after fix [#<NoMethodError: undefined method `attributes' for #<Excon::Response:0x0000000529aec8>>, ["/home/dtk18/server/utils/internal/cloud_connect.rb:27:in `hash_form'"
 gem 'excon', '0.16.10'
 
@@ -60,6 +61,7 @@ gem 'grit','2.5.0'
 gem 'innate','2012.03' #version compatible with ramaze','2012.04.14
 gem 'ruby_parser', '2.3.1' #found bug with ruote listen expression unless degrade to this version
 gem 'docile'
+gem 'redis'
 
 gem 'looksee'
 

@@ -99,25 +99,13 @@ module DTK
       namespace        = ret_request_params(:module_namespace)
       remote_repo_base = ret_remote_repo_base()
 
-      MessageQueue.store(:info, "Waiting for list to run ...")
-      sleep(4)
-
       opts = Opts.new(:project_idh => project.id_handle())
       if detail = ret_request_params(:detail_to_include)
         opts.merge!(:detail_to_include => detail.map{|r|r.to_sym})
       end
 
-      MessageQueue.store(:warning, "This is test warning message ...")
-      sleep(4)
-
-
       opts.merge!(:remote_repo_base => remote_repo_base, :diff => diff, :namespace => namespace)
       datatype = :module_diff if diff
-
-      MessageQueue.store(:info, "Waiting list to run ...")
-      sleep(4)
-      MessageQueue.store(:error, "This is test error message ...")
-      sleep(4)
 
       # rest_ok_response filter_by_namespace(ServiceModule.list(opts)), :datatype => datatype
       rest_ok_response ServiceModule.list(opts), :datatype => datatype

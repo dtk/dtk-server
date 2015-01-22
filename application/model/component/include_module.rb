@@ -6,25 +6,6 @@ module DTK; class Component
       [:id,:group_id,:display_name,:version_constraint,:implementation_id]
     end
 
-    def self.get_matching_stub(component_idhs)
-      ret = Array.new()
-      return ret if component_idhs.empty?
-      aug_incl_mods = get_include_mods_with_impls(component_idhs)
-      return ret if aug_incl_mods.empty?
-      ndx_impls = Hash.new
-      aug_incl_mods.each do |r|
-        if impl = r[:implementation]
-          ndx_impls[impl.id] ||= impl
-        end
-      end
-      pp [:incl_impl,ndx_impls.values.map{|r|r.hash_subset(:module_name,:module_namespace,:branch)}]
-      impls = Component.get_implementations(component_idhs)
-      pp [:impls,impls.map{|r|r.hash_subset(:module_name,:module_namespace,:branch)}]
-      pp [:incl_impl_ids,ndx_impls.values.map{|r|r.id}]
-      pp [:impl_ids,impls.map{|r|r.id}]
-      pp [:cmp_ids,component_idhs.map{|idh|idh.get_id}]
-    end
-
     # For all components in components, this method returns its implementation plus 
     # does recursive anayslsis to follow the components includes to find otehr components that must be included also
     def self.get_matching_impls(components)

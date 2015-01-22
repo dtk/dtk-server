@@ -79,7 +79,7 @@ module DTK
             ret << Violation::MissingIncludedModule.new(incl_mod[:module_name], incl_mod[:version])
           end 
         end
-        Component::IncludeModule.get_matching_stub(cmp_idhs)
+        Component::IncludeModule::Recursive.get_matching_stub(cmp_idhs)
 
         ret
       end

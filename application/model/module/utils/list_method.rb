@@ -70,23 +70,23 @@ module DTK
         ndx_ret.values
       end
 
+      # each branch_module_row has a nested :repo column
       def self.augment_with_remotes_info!(branch_module_rows,module_mh)
         # index by repo_id
         ndx_branch_module_rows = branch_module_rows.inject(Hash.new){|h,r|h.merge(r[:repo][:id] => r) if r[:repo]}
-        return unless ndx_branch_module_rows
-
-        sp_hash = {
-          :cols => [:id,:group_id,:display_name,:repo_id,:repo_name,:repo_namespace,:created_at,:is_default],
-          :filter => [:oneof, :repo_id, ndx_branch_module_rows.keys]
-        }
-
-        Model.get_objs(module_mh.createMH(:repo_remote),sp_hash).each do |r|
-          ndx = r[:repo_id]
-          (ndx_branch_module_rows[ndx][:ndx_repo_remotes] ||= Hash.new).merge!(r[:id] => r)
+        unless ndx_branch_module_rows.empty?
+          sp_hash = {
+            :cols => [:id,:group_id,:display_name,:repo_id,:repo_name,:repo_namespace,:created_at,:is_default],
+            :filter => [:oneof, :repo_id, ndx_branch_module_rows.keys]
+          }
+          
+          Model.get_objs(module_mh.createMH(:repo_remote),sp_hash).each do |r|
+            ndx = r[:repo_id]
+            (ndx_branch_module_rows[ndx][:ndx_repo_remotes] ||= Hash.new).merge!(r[:id] => r)
+          end
         end
-        branch_module_rows
       end
-
+      
       private
 
       def self.linked_remotes_print_form(repo_remotes,external_ref_source,opts={})

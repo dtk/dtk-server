@@ -120,6 +120,20 @@ module DTK; module ModuleMixins
   end
 
   module Remote::Instance
+    def list_remote_diffs(version=nil)
+      local_branch = get_module_branch_matching_version(version)
+      unless default_remote_repo = RepoRemote.default_from_module_branch?(local_branch)
+        raise ErrorUsage.new("Module '#{module_name()}' is not linked to remote repo!")
+      end
+
+      remote_branch = default_remote_repo.remote_dtkn_location(get_project(),module_type(),module_name())
+      diff_objs = local_branch.get_repo().get_remote_diffs(local_branch,remote_branch)
+      diff_objs.map do |diff_obj|
+        path = "diff --git a/#{diff_obj.a_path} b/#{diff_obj.b_path}\n"
+        path + "#{diff_obj.diff}\n"
+      end
+    end
+
     class Info < Hash
     end
     # raises an access rights usage error if user does not have access to the remote module

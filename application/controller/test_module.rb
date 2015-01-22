@@ -99,10 +99,9 @@ module DTK
     end
 
     def rest__list_remote_diffs()
-      module_id = ret_request_param_id_optional(:test_module_id, ::DTK::TestModule)
-      project   = get_default_project()
-      opts      = Opts.new(:project_idh => project.id_handle())
-      rest_ok_response TestModule.list_remote_diffs(model_handle(), module_id, opts)
+      test_module = create_obj(:test_module_id)
+      version = nil
+      rest_ok_response test_module.list_remote_diffs(version)
     end
 
     #

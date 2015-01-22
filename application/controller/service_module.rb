@@ -60,7 +60,7 @@ module DTK
     end
 
 
-    # get remote_module_info; throws an access rights usage eerror if user does not have access
+    # get remote_module_info; throws an access rights usage error if user does not have access
     def rest__get_remote_module_info()
       service_module = create_obj(:service_module_id)
       rest_ok_response get_remote_module_info_helper(service_module)
@@ -121,10 +121,9 @@ module DTK
     end
 
     def rest__list_remote_diffs()
-      module_id = ret_request_param_id_optional(:service_module_id, ::DTK::ServiceModule)
-      project   = get_default_project()
-      opts      = Opts.new(:project_idh => project.id_handle())
-      rest_ok_response ServiceModule.list_remote_diffs(model_handle(), module_id, opts)
+      service_module = create_obj(:service_module_id)
+      version = nil 
+      rest_ok_response service_module.list_remote_diffs(version)
     end
 
     def rest__info()

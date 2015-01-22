@@ -53,11 +53,11 @@ module DTK
       #    :commit_sha
       #  :dsl_created_info
       #    :path
-      #    :content - only if want this dsl file to be added on cleint side 
+      #    :content - only if want this dsl file to be added on cleint side
       #  :external_dependencies
       #    :inconsistent
       #    :possibly_missing
-      #    :ambiguous 
+      #    :ambiguous
       rest_ok_response response
     end
 
@@ -90,11 +90,11 @@ module DTK
       #    :commit_sha
       #  :dsl_created_info
       #    :path
-      #    :content - only if want this dsl file to be added on cleint side 
+      #    :content - only if want this dsl file to be added on cleint side
       #  :external_dependencies
       #    :inconsistent
       #    :possibly_missing
-      #    :ambiguous 
+      #    :ambiguous
       rest_ok_response component_module.update_model_from_clone_changes?(commit_sha,diffs_summary,version,opts)
     end
 
@@ -115,6 +115,7 @@ module DTK
 
     #### list and info actions ###
     def rest__list()
+      Log.info(MessageQueue.object_id)
       diff             = ret_request_params(:diff)
       project          = get_default_project()
       namespace        = ret_request_params(:module_namespace)
@@ -236,9 +237,11 @@ module DTK
       begin
         # will raise an exception in case of error
         # This creates a temporary directory after using puppet forge client to import
+        MessageQueue.store(:info, "Started puppet forge install of module '#{pf_full_name}' ...")
         puppet_forge_local_copy = PuppetForge::Client.install(pf_full_name, puppet_version)
         opts = {:config_agent_type => ret_config_agent_type()}
         opts = namespace ? {:base_namespace => namespace} : {}
+        MessageQueue.store(:info, "Puppet forge module installed, parsing content ...")
         install_info = ComponentModule.import_from_puppet_forge(project,puppet_forge_local_copy,opts)
       ensure
         puppet_forge_local_copy.delete_base_install_dir?() if puppet_forge_local_copy

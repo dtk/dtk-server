@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 # general initial
 require File.expand_path('common', File.dirname(__FILE__))
+
 options = Hash.new
 OptionParser.new do|opts|
    opts.banner = "Usage: initialize.rb [--delete]"

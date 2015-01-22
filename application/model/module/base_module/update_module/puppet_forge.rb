@@ -8,7 +8,7 @@ module DTK; class BaseModule; class UpdateModule
       @base_namespace    = opts[:base_namespace] || default_namespace()
       @config_agent_type = :puppet
     end
- 
+
     def import_module_and_missing_dependencies()
       # Check for dependencies; resturns missing_modules, found_modules, dependency_warnings
       missing, found_modules, dw = ComponentModule.cross_reference_modules(
@@ -17,16 +17,17 @@ module DTK; class BaseModule; class UpdateModule
       )
       # generate list of modules that need to be created from puppet_forge_local_copy
       pf_modules = @pf_local_copy.modules(:remove => found_modules)
-      
+
       installed_modules = pf_modules.collect{|pf_module|import_module(pf_module)}
 
       # pass back info about
       # - what was loaded from puppet forge,
       # - what was present but needed, and
       # - any dependency_warnings
+
       format_response(installed_modules, found_modules)
     end
-    
+
    private
 
     def default_namespace()
@@ -34,9 +35,11 @@ module DTK; class BaseModule; class UpdateModule
     end
 
      def import_module(pf_module)
-      module_name = pf_module.default_local_module_name
       params_opts = {}
-      
+      module_name = pf_module.default_local_module_name
+
+      MessageQueue.store(:info, "Parsing puppet forge module '#{module_name}' ...")
+
       # dependencies user their own namespace
       namespace        = pf_module.is_dependency ? pf_module.namespace : @base_namespace
       source_directory = pf_module.path
@@ -50,7 +53,7 @@ module DTK; class BaseModule; class UpdateModule
       pf_module.set_id(module_id)
       pf_module
     end
- 
+
    def component_module_refs_dsl_form_els(dependencies)
      ret = ModuleRefs::ComponentDSLForm::Elements.new
      dependencies.each{|dep|ret << ModuleRefs::ComponentDSLForm.new(dep.name,dep.namespace)}

@@ -19,6 +19,7 @@ module DTK
             unless 'success'.eql?(output_hash['result'])
               raise ErrorUsage, "Puppet Forge Error: #{output_hash['error']['oneline']}"
             end
+
             module_dependencies = check_for_dependencies(base_install_dir, pf_module_name, output_hash)
             ret = LocalCopy.new(output_hash, base_install_dir, module_dependencies)
            rescue Exception => e

@@ -23,6 +23,8 @@ GEM
     blankslate (2.1.2.4)
     builder (3.2.2)
     bunny (0.7.9)
+    celluloid (0.16.0)
+      timers (~> 4.0.0)
     chef (10.16.2)
       bunny (>= 0.6.0, < 0.8.0)
       erubis
@@ -79,6 +81,7 @@ GEM
     hiera (1.3.4)
       json_pure
     highline (1.6.21)
+    hitimes (1.2.2)
     i18n (0.6.1)
     iconv (1.0.4)
     innate (2012.03)
@@ -132,6 +135,7 @@ GEM
       innate (>= 2012.03)
     rdoc (4.1.2)
       json (~> 1.4)
+    redis (3.2.0)
     rest-client (1.6.8)
       mime-types (~> 1.16)
       rdoc (>= 2.4.2)
@@ -187,6 +191,8 @@ GEM
       eventmachine (>= 1.0.0)
       rack (>= 1.0.0)
     thread_safe (0.3.3)
+    timers (4.0.1)
+      hitimes
     tins (0.13.2)
     treetop (1.4.15)
       polyglot
@@ -203,6 +209,7 @@ DEPENDENCIES
   activesupport (~> 3.0.0)
   awesome_print (= 1.1.0)
   bundler (>= 1.1.5)
+  celluloid
   chef (= 10.16.2)
   colorize (~> 0.5.8)
   debugger
@@ -223,6 +230,7 @@ DEPENDENCIES
   pg (= 0.14.1)
   puppet (= 3.4.0)
   ramaze (= 2012.04.14)
+  redis
   rspec (= 2.11.0)
   ruby_parser (= 2.3.1)
   rugged (= 0.17.0.b7)

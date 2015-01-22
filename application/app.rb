@@ -38,6 +38,7 @@ UTILS_DIR = "#{UTILS_BASE_DIR}/internal"
 r8_require("#{UTILS_DIR}/log")
 r8_require("#{LIB_DIR}/error")
 r8_require("#{UTILS_DIR}/hash_object")
+r8_require("#{UTILS_DIR}/message_queue")
 
 r8_require("#{LIB_DIR}/configuration")
 DTK::Configuration.instance.set_configuration()

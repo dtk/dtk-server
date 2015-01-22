@@ -483,49 +483,6 @@ module DTK
       unsorted_ret.sort{|a,b|a[:display_name] <=> b[:display_name]}
     end
 
-    def list_remote_diffs(target_mh, id, opts={})
-      remote_repo_cols = [:id, :display_name, :version, :remote_repos, :dsl_parsed]
-      components_cols  = [:id, :display_name, :version, :dsl_parsed]
-      project_idh      = opts[:project_idh]
-
-      sp_hash = {
-        :cols => remote_repo_cols,
-        :filter => [:eq,:id,id]
-      }
-      response = get_objs(target_mh, sp_hash.merge(opts))
-
-      # if there are no remotes just get component info
-      if response.empty?
-        sp_hash[:cols] = components_cols
-        response = get_objs(target_mh, sp_hash.merge(opts))
-      end
-
-      project = project_idh.create_object()
-      module_mh = project_idh.createMH(model_type())
-      ModuleUtils::ListMethod.augment_with_remotes_info!(response,module_mh)
-      diffs, diff, module_name = [], nil, ''
-
-      response.each do |r|
-        module_branch = r[:module_branch]
-        module_name = r.module_name()
-        ndx_repo_remotes = r[:ndx_repo_remotes]
-        ndx = r[:id]
-
-        if default_remote_repo = RepoRemote.ret_default_remote_repo((ndx_repo_remotes||{}).values)
-          remote = default_remote_repo.remote_dtkn_location(project,model_type(),module_name)
-          diff = r[:repo].get_remote_diffs(module_branch,remote)
-        end
-      end
-
-      raise ErrorUsage.new("Module '#{module_name}' is not linked to remote repo!") if diff.nil?
-      diff.each do |diff_obj|
-        path = "diff --git a/#{diff_obj.a_path} b/#{diff_obj.b_path}\n"
-        diffs << (path + "#{diff_obj.diff}\n")
-      end
-
-      diffs
-    end
-
     def get_all(project_idh,cols=nil)
       get_all_with_filter(project_idh,:cols => cols)
     end

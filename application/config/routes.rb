@@ -6,7 +6,10 @@ R8::ReactorRoute.draw do
 
   # USER
   post 'user/process_login'    => "user#process_login"
-  get 'user/process_logout'   => "user#process_logout"
+  get  'user/process_logout'   => "user#process_logout"
+
+  # MESSAGES
+  get  'messages/retrieve'    => "messages#retrieve"
 
   # ACCOUNT
   post  'account/set_password' => 'account#set_password'

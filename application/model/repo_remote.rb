@@ -84,8 +84,17 @@ module DTK
         :remote_repo_base => self.class.repo_base()
       )
       remote_params.create_remote(project).set_repo_name!(get_field?(:repo_name))
-
     end
+
+    def self.default_from_module_branch?(module_branch)
+      sp_hash = {
+        :cols => [:id,:group_id,:display_name,:repo_name,:repo_namespace,:is_default,:created_at],
+        :filter => [:eq,:repo_id,module_branch.get_field?(:repo_id)]
+      }
+      ret = get_objs(module_branch.model_handle(:repo_remote),sp_hash)
+      1 == ret.size ? ret.first : ret_default_remote_repo(ret)
+    end
+
     def self.ret_default_remote_repo(repo_remotes)
       # Making robust in case multiple ones marked default
       pruned = repo_remotes.select{|r|r.get_field?(:is_default)}

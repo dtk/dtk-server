@@ -123,8 +123,9 @@ module DTK; class  Assembly
           if get_version_info
             unsorted_ret.each do |r|
             if r[:local_copy]
-              branch_rel = r[:branch_relationship]||''
-              r[:update_saved] = !(r[:local_copy_diff] && branch_rel.eql?(:local_ahead))
+              branch_relationship     = r[:branch_relationship]||''
+              local_ahead_or_branchpt = branch_relationship.eql?(:local_ahead) || branch_relationship.eql?(:branchpoint)
+              r[:update_saved] = !(r[:local_copy_diff] && local_ahead_or_branchpt)
             end
           end
         end

@@ -44,7 +44,7 @@ module DTK; class Component
         if cols_plus = opts[:cols_plus]
           cols = (cols + opts[:cols_plus]).uniq
         end
-        get_objs(mh,sp_hash(cols,mh.parent_id_field_namecomponent_idhs))
+        get_objs(mh,sp_hash(cols,mh.parent_id_field_name,component_idhs))
       end
 
       def sp_hash(cols,cmp_id_field,component_idhs)

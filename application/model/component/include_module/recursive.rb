@@ -6,19 +6,27 @@ module DTK; class Component
         # then a module name wil map to a single implementation
         @module_mapping = Hash.new
       end
-      def self.create_include_tree(assembly_instance,component_idhs)
+      # params are assembly insatnce and the component instances that are in the assembly isnatnce
+      # the method looks at all its include modules and for each it comparese this to
+      def self.create_include_tree(assembly_instance,components)
         ret = new()
-        unless cmrs = assembly_instance_component_module_refs(assembly_instance)
-          return ret
+        return ret if components.empty?
+        component_idhs = components.map{|r|r.id_handle()}
+        if cmrs = assembly_instance_component_module_refs(assembly_instance)
+          # TODO: should we prune cmrs by only including those that has at least one matching component insatnce
+          ret.add_component_module_refs!(cmrs)
         end
-        pp [:cmrs, cmrs]
-        return ret if component_idhs.empty?
+
         aug_incl_mods = IncludeModule.get_include_mods_with_impls(component_idhs)
-pp [:aug_incl_mods,aug_incl_mods]
+pp(:cmps => components,:aug_incl_mods => aug_incl_mods,:cmrs => cmrs)
         ret
       end
 
-      def process_modules!(module_branches)
+      def add_component_module_refs!(cmrs)
+      end
+
+      def violations?()
+        #TODO: stub
       end
 
      private

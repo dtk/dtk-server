@@ -79,7 +79,7 @@ module DTK
             ret << Violation::MissingIncludedModule.new(incl_mod[:module_name], incl_mod[:version])
           end 
         end
-        include_tree = Component::IncludeModule::Recursive.create_include_tree(self,cmp_idhs)
+        include_tree = Component::IncludeModule::Recursive.create_include_tree(self,cmps)
         if violations = include_tree.violations?
           ret += violations
         end

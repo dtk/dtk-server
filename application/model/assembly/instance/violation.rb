@@ -1,3 +1,5 @@
+#TODO: fix to have better sharing accross checks;
+# like rather than  get_obj(model_handle()); just update self 
 module DTK
   class Assembly::Instance
     module ViolationMixin

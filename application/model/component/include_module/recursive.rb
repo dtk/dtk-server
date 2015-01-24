@@ -70,10 +70,13 @@ pp @module_mapping
 
      private
       def add_assembly_instance_component_module_refs!(assembly_instance,components)
-        if cmrs = assembly_instance_component_module_refs(assembly_instance)
-          # TODO: should we prune cmrs by only including those that match at least one matching component instance
-          add_component_module_refs!(cmrs,assembly_instance)
-        end
+        sp_hash = {
+          :cols => ModuleBranch.common_columns(),
+          :filter => [:eq,:id,assembly_instance.get_field?(:module_branch_id)]
+        }
+        service_module_branch = Model.get_obj(assembly_instance.model_handle(:module_branch),sp_hash)
+        cmrs = ModuleRefs.get_component_module_refs(service_module_branch)
+        add_component_module_refs!(cmrs,assembly_instance)
       end
 
       def add_component_module_refs!(cmrs,context)
@@ -92,16 +95,6 @@ pp @module_mapping
         ModuleMappingEl.new(mod_ref,context)
       end
 
-      def assembly_instance_component_module_refs(assembly_instance)
-        ret = nil
-        branches = assembly_instance.get_service_module.get_module_branches()
-        unless branches.size == 1
-          Log.error("Unexpected that multiple service isntance branches found")
-          return ret
-        end
-        service_module_branch = branches.first
-        ModuleRefs.get_component_module_refs(service_module_branch)
-      end
 
       def get_unique_implementations(aug_incl_mods)
         ndx_ret = Hash.new    

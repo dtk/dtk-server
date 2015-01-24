@@ -1,3 +1,6 @@
+#TODO: general pattern is to use component module refs to go to next level unless have specfic components in which casew filter by
+#include module
+#TODO: hanlding include implementation fild not set or set inconsistently
 module DTK; class Component
   class IncludeModule
     class Recursive
@@ -17,15 +20,24 @@ module DTK; class Component
       def create_include_tree(assembly_instance,components)
         ret = self
         return ret if components.empty?
-        component_idhs = components.map{|r|r.id_handle()}
-        if cmrs = assembly_instance_component_module_refs(assembly_instance)
-          # TODO: should we prune cmrs by only including those that match at least one matching component instance
-          add_component_module_refs!(cmrs,assembly_instance)
+
+        # add component module refs associated with assembly instance
+        add_assembly_instance_component_module_refs!(assembly_instance,components)
+
+        # add component module refs associated top level components
+        sp_hash = {
+          :cols => ModuleBranch.common_columns(),
+          :filter => [:oneof,:id,components.map{|cmp|cmp.get_field?(:module_branch_id)}]
+        }
+        Model.get_objs(components.first.model_handle(:module_branch),sp_hash).each do |cmp_module_branch|
+          cmrs = ModuleRefs.get_component_module_refs(cmp_module_branch)
+          add_component_module_refs!(cmrs,cmp_module_branch)
         end
 
-        Log.error("Skipped level in this example not querying tomcat includes");
+
         #aug_inc_mods elements are include modules at top level and possibly the linked impementation
         #TODO: this is just rough cut
+        component_idhs = components.map{|cmp|cmp.id_handle()}
         aug_incl_mods = IncludeModule.get_include_mods_with_impls(component_idhs)
         reurn ret if aug_incl_mods.empty?
 
@@ -46,6 +58,8 @@ pp [:ndx_cmrs,ndx_cmrs]
       end
 
       def violations?()
+#long form
+pp @module_mapping
         @module_mapping.each_pair do |module_name,els| 
           pp(module_name => els.map{|el|[el.context.class,el.model_ref]})
         end
@@ -55,6 +69,13 @@ pp [:ndx_cmrs,ndx_cmrs]
 
 
      private
+      def add_assembly_instance_component_module_refs!(assembly_instance,components)
+        if cmrs = assembly_instance_component_module_refs(assembly_instance)
+          # TODO: should we prune cmrs by only including those that match at least one matching component instance
+          add_component_module_refs!(cmrs,assembly_instance)
+        end
+      end
+
       def add_component_module_refs!(cmrs,context)
         cmrs.component_modules.each_pair do |module_name,mod_ref|
           if mod_mapping_els = @module_mapping[module_name]

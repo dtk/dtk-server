@@ -25,8 +25,21 @@ module DTK
       merge!(:version_info => VersionInfo::Assignment.reify?(version))
       self
     end
-
-    def self.get_component_module_refs(branch)
+    
+    def self.get_ndx_component_module_ref_arrays(branches)
+      ret = Hash.new
+      return ret if branches.empty?
+      sp_hash = {
+        :cols => common_columns()+[:branch_id],
+        :filter => [:oneof,:branch_id,branches.map{|r|r.id()}]
+      }
+      mh = branches.first.model_handle(:module_ref)
+      get_objs(mh,sp_hash).each do |r|
+        (ret[r[:branch_id]] ||= Array.new) << r
+      end
+      ret
+    end
+    def self.get_component_module_ref_array(branch)
       sp_hash = {
         :cols => common_columns(),
         :filter => [:eq,:branch_id,branch.id()]

@@ -16,7 +16,7 @@ module DTK
     private :initialize
     
     def self.get_component_module_refs(branch)
-      content_hash_content = ModuleRef.get_component_module_refs(branch).inject(Hash.new) do |h,r|
+      content_hash_content = ModuleRef.get_component_module_ref_array(branch).inject(Hash.new) do |h,r|
         h.merge(key(r[:module_name]) => r)
       end
       new(branch,content_hash_content)

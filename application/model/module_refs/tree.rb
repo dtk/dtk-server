@@ -19,10 +19,10 @@ module DTK
         return ret if components.empty?
         
         # add component module refs associated with assembly instance
-        add_assembly_instance_module_refs!(assembly_instance,components)
+        add_assembly_instance_module_refs!(assembly_instance)
 
         # Find the top level component's unique module_branches
-        # and compute an ndx frm branches to components
+        # and compute an ndx from branches to components
         ndx_cmps = Hash.new
         components.each do |cmp|
           branch_id = cmp.get_field?(:module_branch_id)
@@ -49,7 +49,7 @@ pp @module_mapping
 
 
      private
-      def add_assembly_instance_module_refs!(assembly_instance,components)
+      def add_assembly_instance_module_refs!(assembly_instance)
         sp_hash = {
           :cols => ModuleBranch.common_columns(),
           :filter => [:eq,:id,assembly_instance.get_field?(:module_branch_id)]
@@ -60,6 +60,7 @@ pp @module_mapping
       end
       
       #TODO: need a way to make sure dont get in loop
+      # by checking which sources covered already
       # opts can have key :ndx_components
       # which is mapping from branch_id to array of components
       # this is used to do any further prurning using include modules

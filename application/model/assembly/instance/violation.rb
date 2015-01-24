@@ -10,9 +10,9 @@ module DTK
         cmp_constraint_viols = find_violations__cmp_constraints(nodes_and_cmps,cmps.map{|cmp|cmp.id_handle()})
         cmp_parsing_errors = find_violations__cmp_parsing_error(cmps)
         unconn_req_service_refs = find_violations__unconn_req_service_refs()
-        mod_incl_viols = find_violations__module_includes(cmps)
+        mod_refs_viols = find_violations__module_refs(cmps)
 
-        unset_attr_viols + cmp_constraint_viols + unconn_req_service_refs + mod_incl_viols + cmp_parsing_errors
+        unset_attr_viols + cmp_constraint_viols + unconn_req_service_refs + mod_refs_viols + cmp_parsing_errors
       end
      private
       def find_violations__unset_attrs()
@@ -71,7 +71,8 @@ module DTK
       end
 
       # this also serves to set implementation_id on module includes that are not set already
-      def find_violations__module_includes(cmps)
+      # TODO: seperelate check versuses setting implementation_id 
+      def find_violations__module_refs(cmps)
         ret = Array.new
         return ret if cmps.empty?
         cmp_idhs = cmps.map{|cmp|cmp.id_handle()}
@@ -80,8 +81,8 @@ module DTK
             ret << Violation::MissingIncludedModule.new(incl_mod[:module_name], incl_mod[:version])
           end 
         end
-        include_tree = Component::IncludeModule::Recursive.create_include_tree(self,cmps)
-        if violations = include_tree.violations?
+        module_refs_tree = ModuleRefs::Tree.create(self,cmps)
+        if violations = module_refs_tree.violations?
           ret += violations
         end
         ret

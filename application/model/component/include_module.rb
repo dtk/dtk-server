@@ -1,7 +1,5 @@
 module DTK; class Component
   class IncludeModule < Model
-    r8_nested_require('include_module','recursive')
-
     def self.common_columns()
       [:id,:group_id,:display_name,:version_constraint,:implementation_id]
     end

@@ -1,36 +1,77 @@
 module DTK; class Component
   class IncludeModule
     class Recursive
+      ModuleMappingEl = Struct.new(:model_ref,:context)
       def initialize()
-        # mapping from module name to implementations; if no conflict or missing includes 
-        # then a module name wil map to a single implementation
+        # mapping from module name to one or more ModuleMappingEls; problems indicated by havibng no match and more than one match 
         @module_mapping = Hash.new
       end
-      # params are assembly insatnce and the component instances that are in the assembly isnatnce
-      # the method looks at all its include modules and for each it comparese this to
+      private :initialize
+      
+      # params are assembly instance and the component instances that are in the assembly instance
+      #TODO: can compute this more efficiently
       def self.create_include_tree(assembly_instance,components)
-        ret = new()
+        new().create_include_tree(assembly_instance,components)
+      end
+
+      def create_include_tree(assembly_instance,components)
+        ret = self
         return ret if components.empty?
         component_idhs = components.map{|r|r.id_handle()}
         if cmrs = assembly_instance_component_module_refs(assembly_instance)
-          # TODO: should we prune cmrs by only including those that has at least one matching component insatnce
-          ret.add_component_module_refs!(cmrs)
+          # TODO: should we prune cmrs by only including those that match at least one matching component instance
+          add_component_module_refs!(cmrs,assembly_instance)
         end
 
+        Log.error("Skipped level in this example not querying tomcat includes");
+        #aug_inc_mods elements are include modules at top level and possibly the linked impementation
+        #TODO: this is just rough cut
         aug_incl_mods = IncludeModule.get_include_mods_with_impls(component_idhs)
-pp(:cmps => components,:aug_incl_mods => aug_incl_mods,:cmrs => cmrs)
+        reurn ret if aug_incl_mods.empty?
+
+        impls = get_unique_implementations(aug_incl_mods)
+        #TODO: this can be bulked up
+        ndx_cmrs = impls.inject(Hash.new) do |h,impl|
+          h.merge(impl[:id] => ModuleRefs.get_component_module_refs(impl.get_module_branch()))
+        end
+
+pp [:ndx_cmrs,ndx_cmrs]
+        aug_incl_mods.each do |incl_mod|
+          if cmrs = ndx_cmrs[incl_mod[:implementation_id]]
+            add_component_module_refs!(cmrs,incl_mod)
+          end
+        end
+        Log.error("Not recursive yet")
         ret
       end
 
-      def add_component_module_refs!(cmrs)
+      def violations?()
+        @module_mapping.each_pair do |module_name,els| 
+          pp(module_name => els.map{|el|[el.context.class,el.model_ref]})
+        end
+        #TODO: stub
+        nil
       end
 
-      def violations?()
-        #TODO: stub
-      end
 
      private
-      def self.assembly_instance_component_module_refs(assembly_instance)
+      def add_component_module_refs!(cmrs,context)
+        cmrs.component_modules.each_pair do |module_name,mod_ref|
+          if mod_mapping_els = @module_mapping[module_name]
+            mod_ref_id = mod_ref[:id]
+            unless mod_mapping_els.find{|el|el.model_ref[:id] == mod_ref_id}
+              @module_mapping[module_name] << module_mapping_el(mod_ref,context)
+            end
+          else
+            @module_mapping[module_name] = [module_mapping_el(mod_ref,context)]
+          end
+        end
+      end
+      def module_mapping_el(mod_ref,context)
+        ModuleMappingEl.new(mod_ref,context)
+      end
+
+      def assembly_instance_component_module_refs(assembly_instance)
         ret = nil
         branches = assembly_instance.get_service_module.get_module_branches()
         unless branches.size == 1
@@ -41,34 +82,16 @@ pp(:cmps => components,:aug_incl_mods => aug_incl_mods,:cmrs => cmrs)
         ModuleRefs.get_component_module_refs(service_module_branch)
       end
 
-      #TODO: just for testing
-      def self.component_module_refs(impl)
-        ModuleRefs.get_component_module_refs(impl.get_module_branch())
-      end
-      def self.get_matching_stub(component_idhs)
-        ret = Array.new()
-        return ret if component_idhs.empty?
-        aug_incl_mods = IncludeModule.get_include_mods_with_impls(component_idhs)
-        return ret if aug_incl_mods.empty?
-
-        ndx_impls = Hash.new
-        aug_incl_mods.each do |r|
-          if impl = r[:implementation]
-            ndx_impls[impl.id] ||= impl
+      def get_unique_implementations(aug_incl_mods)
+        ndx_ret = Hash.new    
+        aug_incl_mods.each do |aug_incl_mod|
+          unless impl = aug_incl_mod[:implementation]
+            raise Error.new("need to write code when aug_incl_mod[:implementation] is nil")
           end
+          ndx_ret[impl[:id]] ||= impl
         end
-
-        ndx_impls.values.map do |impl|
-          pp(:incl_impl => impl.hash_subset(:id,:module_name,:module_namespace,:branch),
-             :component_module_refs => component_module_refs(impl).component_modules)
-        end
-#        impls = Component.get_implementations(component_idhs)
-#        pp [:impls,impls.map{|r|r.hash_subset(:module_name,:module_namespace,:branch)}]
-#        pp [:incl_impl_ids,ndx_impls.values.map{|r|r.id}]
-#        pp [:impl_ids,impls.map{|r|r.id}]
-#        pp [:cmp_ids,component_idhs.map{|idh|idh.get_id}]
+        ndx_ret.values
       end
-      
     end
   end
 end; end

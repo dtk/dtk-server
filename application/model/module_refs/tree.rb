@@ -66,18 +66,16 @@ pp @module_mapping
       # this is used to do any further prurning using include modules
       def recursive_add_module_refs!(cmp_module_branches,opts={})
         if opts[:ndx_components]
-          process_component_include_moudules(opts[:ndx_components].values.flatten(1))
+          process_component_include_modules(opts[:ndx_components].values.flatten(1))
         end
         #TODO: need to figure out how to fit this section and above
-        cmp_module_branches.each do |cmp_module_branch|
-          #TODO: write method that takes cmp_module_branches so can bulk up
-          cmrs = ModuleRefs.get_component_module_refs(cmp_module_branch)
-          add_component_module_refs!(cmrs,cmp_module_branch)
+        ModuleRefs.get_multiple_component_module_refs(cmp_module_branches).each do |cmrs|
+          add_component_module_refs!(cmrs,cmrs.parent)
         end
         Log.error("Not recursive yet")
       end
 
-      def process_component_include_moudules(components)
+      def process_component_include_modules(components)
         #aug_inc_mods elements are include modules at top level and possibly the linked impementation
         component_idhs = components.map{|cmp|cmp.id_handle()}
         aug_incl_mods = Component::IncludeModule.get_include_mods_with_impls(component_idhs)

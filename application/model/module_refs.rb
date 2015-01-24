@@ -7,6 +7,7 @@ module DTK
     r8_nested_require('module_refs','tree')
     include MatchingTemplatesMixin
 
+    attr_reader :parent
     def initialize(parent,content_hash_form,opts={})
       @parent = parent
       @component_modules =  opts[:content_hash_form_is_reified] ?
@@ -15,6 +16,13 @@ module DTK
     end
     private :initialize
     
+    def self.get_multiple_component_module_refs(branches)
+      ndx_branches = branches.inject(Hash.new){|h,r|h.merge(r[:id] => r)}
+      ModuleRef.get_ndx_component_module_ref_arrays(branches).map do |(branch_id,cmr_array)|
+        content_hash_content = cmr_array.inject(Hash.new){|h,r|h.merge(key(r[:module_name]) => r)}
+        new(ndx_branches[branch_id],content_hash_content)
+      end
+    end
     def self.get_component_module_refs(branch)
       content_hash_content = ModuleRef.get_component_module_ref_array(branch).inject(Hash.new) do |h,r|
         h.merge(key(r[:module_name]) => r)

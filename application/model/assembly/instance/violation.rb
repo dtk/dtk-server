@@ -1,9 +1,8 @@
-#TODO: fix to have better sharing accross checks;
-# like rather than  get_obj(model_handle()); just update self 
 module DTK
   class Assembly::Instance
     module ViolationMixin
       def find_violations()
+        update_obj!(:module_branch_id)
         nodes_and_cmps = get_info__flat_list(:detail_level => "components").select{|r|r[:nested_component]}
         cmps = nodes_and_cmps.map{|r|r[:nested_component]}
 
@@ -64,7 +63,7 @@ module DTK
           end
         end
 
-        assembly_branch_id = get_obj(model_handle())[:module_branch_id]
+        assembly_branch_id = self[:module_branch_id]
         if service_module = get_parsed_info(assembly_branch_id, "Service")
           ret << Violation::ComponentParsingError.new(service_module[:display_name], "Service") unless service_module[:dsl_parsed]
         end

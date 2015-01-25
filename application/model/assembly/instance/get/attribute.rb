@@ -1,4 +1,4 @@
-module DTK::Assembly::Instance::Get
+module DTK; class Assembly; class Instance; module Get
   module AttributeMixin
     def get_attributes_print_form(opts={})
       if filter = opts[:filter]
@@ -63,4 +63,5 @@ module DTK::Assembly::Instance::Get
     end
 
   end
-end
+end; end; end; end
+

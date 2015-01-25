@@ -1,4 +1,4 @@
-class DTK::Assembly::Instance
+module DTK; class Assembly; class Instance
   module Get
     r8_nested_require('get','attribute')
   end
@@ -336,5 +336,5 @@ class DTK::Assembly::Instance
       @filter_out_target_ref ||= [:and] + Node::TargetRef.types.map{|t|[:neq, :type, t]}
     end
   end
-end
+end; end; end
 

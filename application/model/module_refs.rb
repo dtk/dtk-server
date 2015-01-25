@@ -7,7 +7,7 @@ module DTK
     r8_nested_require('module_refs','tree')
     include MatchingTemplatesMixin
 
-    attr_reader :parent
+    attr_reader :parent, :component_modules
     def initialize(parent,content_hash_form,opts={})
       @parent = parent
       @component_modules =  opts[:content_hash_form_is_reified] ?
@@ -86,9 +86,6 @@ module DTK
       cmp_ref_update_rows = aug_cmp_refs.map{|r|r.hash_subset(:id,:component_template_id)}
       Model.update_from_rows(component_module.model_handle(:component_ref),cmp_ref_update_rows)
     end
-
-
-    attr_reader :component_modules
 
     def has_module_version?(cmp_module_name,version_string)
       if cmp_module_ref = component_module_ref?(cmp_module_name)

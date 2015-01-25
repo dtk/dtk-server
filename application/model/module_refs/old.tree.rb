@@ -1,27 +1,28 @@
 #TODO: see how to treat include module's implementation_id; might deprecate
 module DTK
   class ModuleRefs
-    r8_nested_require('tree','link')
     # This class is used to build a hierarchical dependency tree and to detect conflicts
     class Tree 
-      def initialize(context)
-        @context = context
-        @links = Array.new #array of Links
+      ModuleMappingEl = Struct.new(:model_ref,:context)
+      def initialize()
+        # mapping from module name to one or more ModuleMappingEls; problems indicated by having no match and more than one match 
+        @module_mapping = Hash.new
       end
       private :initialize
       
       # params are assembly instance and the component instances that are in the assembly instance
       def self.create(assembly_instance,components)
-        new(assembly_instance).add_module_refs_starting_from_assembly!(assembly_instance,components)
+        new().add_module_refs_starting_from_assembly!(assembly_instance,components)
       end
 
       def add_module_refs_starting_from_assembly!(assembly_instance,components)
         ret = self
+        return ret if components.empty?
+        
         # add component module refs associated with assembly instance
         add_assembly_instance_module_refs!(assembly_instance)
 
-        # recursively add the rest
-        # First, find the top level component's unique module_branches
+        # Find the top level component's unique module_branches
         # and compute an ndx from branches to components
         ndx_cmps = Hash.new
         components.each do |cmp|
@@ -40,7 +41,10 @@ module DTK
       def violations?()
 #long form
 pp @module_mapping
-
+        @module_mapping.each_pair do |module_name,els| 
+          pp(module_name => els.map{|el|[el.context.class,el.model_ref]})
+        end
+        #TODO: stub
         nil
       end
 
@@ -55,17 +59,6 @@ pp @module_mapping
         cmrs = ModuleRefs.get_component_module_refs(service_module_branch)
         add_component_module_refs!(cmrs,assembly_instance)
       end
-
-      def add_component_module_refs!(cmrs,context)
-        ret = Array.new
-        cmrs.component_modules.each_value do |mod_ref|
-          link = Link.new(mod_ref)
-          @links << link
-          ret << link
-        end
-        ret
-      end
-      
       
       #TODO: need a way to make sure dont get in loop
       # by checking which sources covered already
@@ -73,21 +66,13 @@ pp @module_mapping
       # which is mapping from branch_id to array of components
       # this is used to do any further prurning using include modules
       def recursive_add_module_refs!(cmp_module_branches,opts={})
-        # if opts[:ndx_components]
-        #   process_component_include_modules(opts[:ndx_components].values.flatten(1))
-        # end
-        # TODO: need to figure out how to fit this section and above
-        #TODO: better to bulk up
-        ndx_cmp_modules = cmp_module_branches.inject(Hash.new) do |h,module_branch|
-          h.merge(module_branch[:id] => module_branch.get_module())
+        if opts[:ndx_components]
+          process_component_include_modules(opts[:ndx_components].values.flatten(1))
         end
+        #TODO: need to figure out how to fit this section and above
         ModuleRefs.get_multiple_component_module_refs(cmp_module_branches).each do |cmrs|
-          cmp_module = ndx_cmp_modules[cmrs.parent[:id]]
-          if matching_link = Link.match_component_module?(@links,cmp_module)
-            matching_link.add_children!(cmrs)
-          end
+          add_component_module_refs!(cmrs,cmrs.parent)
         end
-        pp self
         Log.error("Not recursive yet")
       end
 
@@ -109,6 +94,23 @@ pp @module_mapping
         end
       end
 
+      def add_component_module_refs!(cmrs,context)
+        cmrs.component_modules.each_pair do |module_name,mod_ref|
+          if mod_mapping_els = @module_mapping[module_name]
+            mod_ref_id = mod_ref[:id]
+            unless mod_mapping_els.find{|el|el.model_ref[:id] == mod_ref_id}
+              @module_mapping[module_name] << module_mapping_el(mod_ref,context)
+            end
+          else
+            @module_mapping[module_name] = [module_mapping_el(mod_ref,context)]
+          end
+        end
+      end
+      def module_mapping_el(mod_ref,context)
+        ModuleMappingEl.new(mod_ref,context)
+      end
+      
+      
       def get_unique_implementations(aug_incl_mods)
         ndx_ret = Hash.new    
         aug_incl_mods.each do |aug_incl_mod|

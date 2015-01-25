@@ -6,6 +6,7 @@ module DTK; class  Assembly
     r8_nested_require('instance','violation')
     r8_nested_require('instance','update')
     r8_nested_require('instance','list')
+    r8_nested_require('instance','get')
     r8_nested_require('instance','delete')
     r8_nested_require('instance','service_setting')
     include ServiceLinkMixin
@@ -14,66 +15,11 @@ module DTK; class  Assembly
     extend ListClassMixin
     include DeleteMixin
     extend DeleteClassMixin
-
-    def get_objs(sp_hash,opts={})
-      super(sp_hash,opts.merge(:model_handle => model_handle().createMH(:assembly_instance)))
-    end
-
-    def self.get_objs(mh,sp_hash,opts={})
-      if mh[:model_name] == :assembly_instance
-        get_these_objs(mh,sp_hash,opts)
-      else
-        super
-      end
-    end
+    include GetMixin
+    extend GetClassMixin
 
     def self.create_from_id_handle(idh)
       idh.create_object(:model_name => :assembly_instance)
-    end
-
-    ### standard get methods
-    def get_task_templates(opts={})
-      sp_hash = {
-        :cols => Task::Template.common_columns(),
-        :filter => [:eq,:component_component_id,id()]
-      }
-      Model.get_objs(model_handle(:task_template),sp_hash)
-    end
-
-    def get_parent()
-      Template.create_from_component(get_obj_helper(:instance_parent,:assembly_template))
-    end
-
-    def get_peer_component_instances(cmp_instance)
-      sp_hash = {
-        :cols => [:id,:group_id,:display_name,:component_type],
-        :filter => [:and,[:eq,:ancestor_id,cmp_instance.get_field?(:ancestor_id)],
-                    [:eq,:assembly_id,id()],
-                    [:neq,:id,cmp_instance.id()]]
-      }
-      Component::Instance.get_objs(model_handle(:component_instance),sp_hash)
-    end
-
-    def get_task_template(task_action=nil,opts={})
-      task_action ||= Task::Template.default_task_action()
-      sp_hash = {
-        :cols => opts[:cols]||Task::Template.common_columns(),
-        :filter => [:and,[:eq,:component_component_id,id()],
-                    [:eq,:task_action,task_action]]
-      }
-      Model.get_obj(model_handle(:task_template),sp_hash)
-    end
-
-    def get_parents_task_template(task_action=nil)
-      task_action ||= Task::Template.default_task_action()
-      get_objs_helper(:parents_task_templates,:task_template).select{|r|r[:task_action]==task_action}.first
-    end
-
-    def get_task_template_serialized_content(task_action=nil,opts={})
-      opts_task_gen = {:task_action => task_action,:dont_persist_generated_template => true}.merge(opts)
-      action_types = opts[:action_types]||[:assembly,:node_centric]
-      ret = Task::Template::ConfigComponents.get_or_generate_template_content(action_types,self,opts_task_gen)
-      ret && ret.serialization_form()
     end
 
     def rename(assembly_mh, name, new_name)
@@ -87,159 +33,6 @@ module DTK; class  Assembly
       update(:display_name => new_name)
     end
 
-    def get_component_list(opts={})
-      get_field?(:display_name)
-      assembly_source = {:type => "assembly", :object => hash_subset(:id,:display_name)}
-      rows = get_objs_helper(:instance_component_list,:nested_component,opts.merge(:augmented => true))
-      Component::Instance.add_title_fields?(rows)
-      ret = opts[:add_on_to]||opts[:seed]||Array.new
-      rows.each{|r|ret << r.merge(:source => assembly_source)}
-      ret
-    end
-
-    def get_augmented_node_attributes(filter_proc=nil)
-      get_objs_helper(:node_attributes,:attribute,:filter_proc => filter_proc,:augmented => true)
-    end
-
-    def get_augmented_nested_component_attributes(filter_proc=nil)
-      get_objs_helper(:instance_nested_component_attributes,:attribute,:filter_proc => filter_proc,:augmented => true)
-    end
-
-    def get_augmented_attribute_mappings()
-      # TODO: once field assembly_id is always populated on attribute.link, can do simpler query
-      ret = Array.new
-      sp_hash = {
-        :cols => [:id,:group_id],
-        :filter => [:eq,:assembly_id,id()]
-      }
-      port_links = Model.get_objs(model_handle(:port_link),sp_hash)
-      filter = [:or,[:oneof,:port_link_id,port_links.map{|r|r.id()}],[:eq,:assembly_id,id()]]
-      AttributeLink.get_augmented(model_handle(:attribute_link),filter)
-    end
-
-    def get_service_add_ons()
-      get_objs_helper(:service_add_ons_from_instance,:service_add_on)
-    end
-
-    def get_augmented_service_add_ons()
-      get_objs_helper(:aug_service_add_ons_from_instance,:service_add_on,:augmented => true)
-    end
-    def get_augmented_service_add_on(add_on_name)
-      filter_proc = lambda{|sao|sao[:service_add_on][:display_name] == add_on_name}
-      get_obj_helper(:aug_service_add_ons_from_instance,:service_add_on,:filter_proc => filter_proc, :augmented => true)
-    end
-
-    def get_node?(filter)
-      sp_hash = {
-        :cols => [:id,:display_name],
-        :filter => [:and,[:eq, :assembly_id, id()],filter]
-      }
-      rows = Model.get_objs(model_handle(:node),sp_hash)
-      if rows.size > 1
-        Log.error("Unexpected that more than one row returned for filter (#{filter.inspect})")
-        return nil
-      end
-      rows.first
-    end
-
-    # TODO: rename to reflect that not including node group members, just node groups themselves and top level nodes
-    # This is equivalent to saying that this does not return target_refs
-    def self.get_nodes_simple(assembly_idhs,opts={})
-      ret = Array.new
-      return ret if assembly_idhs.empty?()
-      sp_hash = {
-        :cols => opts[:cols] || [:id,:display_name,:group_id,:type,:assembly_id],
-        :filter => [:oneof,:assembly_id,assembly_idhs.map{|idh|idh.get_id()}]
-      }
-      node_mh = assembly_idhs.first.createMH(:node)
-      ret = get_objs(node_mh,sp_hash)
-      unless opts[:ret_subclasses]
-        ret
-      else
-        ret.map do |r|
-          r.is_node_group? ? r.id_handle().create_object(:model_name => :service_node_group).merge(r) : r
-        end
-      end
-    end
-
-    # TODO: rename to reflect that not including node group members, just node groups themselves and top level nodes
-    # This is equivalent to saying that this does not return target_refs
-    def get_nodes(*alt_cols)
-      self.class.get_nodes([id_handle],*alt_cols)
-    end
-    def self.get_nodes(assembly_idhs,*alt_cols)
-      ret = Array.new
-      return ret if assembly_idhs.empty?
-      sp_hash = {
-        :cols => [:id,:group_id,:node_node_id],
-        :filter => [:oneof, :assembly_id, assembly_idhs.map{|idh|idh.get_id()}]
-      }
-      ndx_nodes = Hash.new
-      component_mh = assembly_idhs.first.createMH(:component)
-      get_objs(component_mh,sp_hash).each do |cmp|
-        ndx_nodes[cmp[:node_node_id]] ||= true
-      end
-
-      cols = ([:id,:display_name,:group_id,:type] + alt_cols).uniq
-      sp_hash = {
-        :cols => cols,
-        :filter => [:and, filter_out_target_refs(),
-                          [:or,[:oneof, :id, ndx_nodes.keys],
-                               #to catch nodes without any components
-                               [:oneof, :assembly_id,assembly_idhs.map{|idh|idh.get_id()}]]
-                   ]
-      }
-      node_mh = assembly_idhs.first.createMH(:node)
-      get_objs(node_mh,sp_hash)
-    end
-    def self.filter_out_target_refs()
-      @filter_out_target_ref ||= [:and] + Node::TargetRef.types.map{|t|[:neq, :type, t]}
-    end
-    private_class_method :filter_out_target_refs
-
-    def get_leaf_nodes(opts={})
-      get_nodes__expand_node_groups(opts.merge(:remove_node_groups=>true))
-    end
-    def get_nodes__expand_node_groups(opts={})
-      cols = opts[:cols]||Node.common_columns()
-      node_or_ngs = get_nodes(*cols)
-      ServiceNodeGroup.expand_with_node_group_members?(node_or_ngs,opts)
-    end
-
-    def get_augmented_components(opts=Opts.new)
-      ret = Array.new
-      rows = get_objs(:cols => [:instance_nodes_and_cmps_summary_with_namespace])
-      if opts[:filter_proc]
-        rows.reject!{|r|!opts[:filter_proc].call(r)}
-      elsif opts[:filter_component] != ""
-        opts[:filter_component].sub!(/::/, "__")
-        rows.reject!{|r| r[:nested_component][:display_name] != opts[:filter_component] }
-      end
-
-      return ret if rows.empty?
-
-      components = Array.new
-      rows.each do |r|
-        if cmp = r[:nested_component]
-          # add node and namespace hash information to component hash
-          components << cmp.merge(r.hash_subset(:node))#.merge!(r.hash_subset(:namespace)))
-        end
-      end
-
-      if opts.array(:detail_to_include).include?(:component_dependencies)
-        Dependency::All.augment_component_instances!(self,components, Opts.new(:ret_statisfied_by => true))
-      end
-      components
-    end
-
-    def get_tasks(opts={})
-      rows = get_objs(:cols => [:tasks])
-      if opts[:filter_proc]
-        rows.reject!{|r|!opts[:filter_proc].call(r)}
-      end
-      rows.map{|r|r[:task]}
-    end
-
     def clear_tasks(opts={})
       opts_get_tasks = Hash.new
       unless opts[:include_executing_task]
@@ -251,66 +44,6 @@ module DTK; class  Assembly
       Model.delete_instances(task_idhs) unless task_idhs.empty?
       task_idhs
     end
-
-    def get_target()
-      get_obj_helper(:target,:target)
-    end
-
-    def get_target_idh()
-      id_handle().get_parent_id_handle_with_auth_info()
-    end
-
-    def self.get_sub_assemblies(assembly_idhs)
-      ret = Array.new
-      return ret if assembly_idhs.empty?
-      sp_hash = {
-        :cols => [:id,:group_id,:display_name],
-        :filter => [:and,[:oneof,:assembly_id,assembly_idhs.map{|idh|idh.get_id()}],[:eq,:type,"composite"]]
-      }
-      get_objs(assembly_idhs.first.createMH(),sp_hash).map{|a|a.copy_as_assembly_instance()}
-    end
-    def get_sub_assemblies()
-      self.class.get_sub_assemblies([id_handle()])
-    end
-
-    # augmented with node, :component  and link def info
-    def get_augmented_ports(opts={})
-      ndx_ret = Hash.new
-      ret = get_objs(:cols => [:augmented_ports]).map do |r|
-        link_def = r[:link_def]
-        if link_def.nil? or (link_def[:link_type] == r[:port].link_def_name())
-          if get_augmented_ports__matches_on_title?(r[:nested_component],r[:port])
-            r[:port].merge(r.slice(:node,:nested_component,:link_def))
-          end
-        end
-      end.compact
-      if opts[:mark_unconnected]
-        get_augmented_ports__mark_unconnected!(ret,opts)
-      end
-      ret
-    end
-
-    # TODO: more efficient if can do the 'title' match on sql side
-    def get_augmented_ports__matches_on_title?(component,port)
-      ret = true
-      if cmp_title = ComponentTitle.title?(component)
-        ret = (cmp_title == port.title?())
-      end
-      ret
-    end
-    private :get_augmented_ports__matches_on_title?
-
-    # TODO: there is a field on ports :connected, but it is not correctly updated so need to get ports links to find out what is connected
-    def get_augmented_ports__mark_unconnected!(aug_ports,opts={})
-      port_links = get_port_links()
-      connected_ports =  port_links.map{|r|[r[:input_id],r[:output_id]]}.flatten.uniq
-      aug_ports.each do |r|
-        if r[:direction] == "input"
-          r[:unconnected] = !connected_ports.include?(r[:id])
-        end
-      end
-    end
-    private :get_augmented_ports__mark_unconnected!
 
     def op_status()
       assembly_nodes = get_nodes(:admin_op_status)
@@ -387,50 +120,6 @@ module DTK; class  Assembly
       nodes
     end
 
-    # Simple get assembliy instances
-    def self.get(assembly_mh, opts={})
-      target_idhs = (opts[:target_idh] ? [opts[:target_idh]] : opts[:target_idhs])
-      target_filter = (target_idhs ? [:oneof, :datacenter_datacenter_id, target_idhs.map{|idh|idh.get_id()}] : [:neq, :datacenter_datacenter_id, nil])
-      filter = [:and, [:eq, :type, "composite"], target_filter,opts[:filter]].compact
-      sp_hash = {
-        :cols => opts[:cols]||[:id,:group_id,:display_name],
-        :filter => filter
-      }
-      get_these_objs(assembly_mh,sp_hash,:keep_ref_cols=>true) #:keep_ref_cols=>true just in case ref col
-    end
-
-    def self.get_info__flat_list(assembly_mh, opts={})
-      target_idh = opts[:target_idh]
-      target_filter = (target_idh ? [:eq, :datacenter_datacenter_id, target_idh.get_id()] : [:neq, :datacenter_datacenter_id, nil])
-      filter = [:and, [:eq, :type, "composite"], target_filter,opts[:filter]].compact
-      col,needs_empty_nodes = list_virtual_column?(opts[:detail_level])
-      cols = [:id,:ref,:display_name,:group_id,:component_type,:version,:created_at,col].compact
-      ret = get(assembly_mh,{:cols => cols}.merge(opts))
-      return ret unless needs_empty_nodes
-
-      # add in in assembly nodes without components on them
-      nodes_ids = ret.map{|r|(r[:node]||{})[:id]}.compact
-      sp_hash = {
-        :cols => [:id, :display_name,:component_type,:version,:instance_nodes_and_assembly_template],
-        :filter => filter
-      }
-      assembly_empty_nodes = get_objs(assembly_mh,sp_hash).reject{|r|nodes_ids.include?((r[:node]||{})[:id])}
-      ret + assembly_empty_nodes
-    end
-
-    def self.get_workspace_object(assembly_mh, opts={})
-      target_idh = opts[:target_idh]
-      target_filter = (target_idh ? [:eq, :datacenter_datacenter_id, target_idh.get_id()] : [:neq, :datacenter_datacenter_id, nil])
-      filter = [:and, [:eq, :type, "composite"],[:eq, :ref, '__workspace'], target_filter,opts[:filter]].compact
-      col,needs_empty_nodes = list_virtual_column?(opts[:detail_level])
-      sp_hash = {
-        :cols => [:id, :display_name,:group_id,:component_type,:version,col].compact,
-        :filter => filter
-      }
-      get_these_objs(assembly_mh,sp_hash)
-    end
-
-
     # returns column plus whether need to pull in empty assembly nodes (assembly nodes w/o any components)
     #[col,empty_assem_nodes]
     def self.list_virtual_column?(detail_level=nil)
@@ -451,11 +140,6 @@ module DTK; class  Assembly
       [col,empty_assem_nodes]
     end
     private_class_method :list_virtual_column?
-
-    def get_component_modules(opts={})
-      AssemblyModule::Component.get_for_assembly(self,opts)
-    end
-    ### end: standard get methods
 
     def add_node(node_name,node_binding_rs=nil)
       # check if node has been added already
@@ -577,62 +261,6 @@ module DTK; class  Assembly
       attr_patterns
     end
 
-    def get_attributes_print_form(opts={})
-      if filter = opts[:filter]
-        case filter
-          when :required_unset_attributes
-            opts.merge!(:filter_proc => FilterProc)
-          else
-            raise Error.new("not treating filter (#{filter}) in Assembly::Instance#get_attributes_print_form")
-        end
-      end
-      get_attributes_print_form_aux(opts)
-    end
-    FilterProc = lambda do |r|
-      attr =
-        if r.kind_of?(Attribute) then r
-        elsif r[:attribute] then r[:attribute]
-        else raise Error.new("Unexpected form for filtered element (#{r.inspect})")
-        end
-      attr.required_unset_attribute?()
-    end
-
-    def get_attributes_all_levels()
-      assembly_attrs = get_assembly_level_attributes()
-      component_attrs = get_augmented_nested_component_attributes()
-      node_attrs = get_augmented_node_attributes()
-      assembly_attrs + component_attrs + node_attrs
-    end
-
-    AttributesAllLevels = Struct.new(:assembly_attrs,:component_attrs,:node_attrs)
-    def get_attributes_all_levels_struct(filter_proc=nil)
-      assembly_attrs = get_assembly_level_attributes(filter_proc)
-      component_atttrs = get_augmented_nested_component_attributes(filter_proc).reject do |attr|
-        (not attr[:nested_component].get_field?(:only_one_per_node)) and attr.is_title_attribute?()
-      end
-      node_attrs = get_augmented_node_attributes(filter_proc)
-      AttributesAllLevels.new(assembly_attrs,component_atttrs,node_attrs)
-    end
-
-    def get_attributes_print_form_aux(opts=Opts.new)
-      filter_proc = opts[:filter_proc]
-      all_attrs = get_attributes_all_levels_struct(filter_proc)
-      filter_proc = opts[:filter_proc]
-      assembly_attrs = all_attrs.assembly_attrs.map do |attr|
-        attr.print_form(opts.merge(:level => :assembly))
-      end
-
-      opts_attr = opts.merge(:level => :component,:assembly => self)
-      component_attrs = Attribute.print_form(all_attrs.component_attrs,opts_attr)
-
-      node_attrs = all_attrs.node_attrs.map do |aug_attr|
-        aug_attr.print_form(opts.merge(:level => :node))
-      end
-      (assembly_attrs + node_attrs + component_attrs).sort{|a,b|a[:display_name] <=> b[:display_name]}
-    end
-    private :get_attributes_print_form_aux
-
-
     def self.check_valid_id(model_handle,id)
       filter =
         [:and,
@@ -668,26 +296,6 @@ module DTK; class  Assembly
     # TODO: probably move to Assembly
     def model_handle(mn=nil)
       super(mn||:component)
-    end
-
-   private
-    def get_associated_template?(library_idh=nil)
-      update_object!(:ancestor_id,:component_type,:version,:ui)
-      if self[:ancestor_id]
-        return id_handle(:id => self[:ancestor_id]).create_object().update_object!(:library_library_id,:ui)
-      end
-      sp_hash = {
-        :cols => [:id,:library_library_id,:ui],
-        :filter => [:and, [:eq, :component_type, self[:component_type]],
-                    [:neq, :library_library_id, library_idh && library_idh.get_id()],
-                    [:eq, :version, self[:version]]]
-      }
-      rows = Model.get_objs(model_handle(),sp_hash)
-      case rows.size
-       when 0 then nil
-       when 1 then rows.first
-       else raise Error.new("Unexpected result: cannot find unique matching assembly template")
-      end
     end
 
   end

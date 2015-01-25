@@ -1,10 +1,11 @@
+#TODO: see how to treat include module's implementation_id; might deprecate
 module DTK
   class ModuleRefs
     # This class is used to build a hierarchical dependency tree and to detect conflicts
     class Tree 
       ModuleMappingEl = Struct.new(:model_ref,:context)
       def initialize()
-        # mapping from module name to one or more ModuleMappingEls; problems indicated by havibng no match and more than one match 
+        # mapping from module name to one or more ModuleMappingEls; problems indicated by having no match and more than one match 
         @module_mapping = Hash.new
       end
       private :initialize

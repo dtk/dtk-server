@@ -81,10 +81,16 @@ module DTK
             ret << Violation::MissingIncludedModule.new(incl_mod[:module_name], incl_mod[:version])
           end 
         end
-        module_refs_tree = ModuleRefs::Tree.create(self,cmps)
-        if violations = module_refs_tree.violations?
-          ret += violations
-        end
+# For Aldin:
+# Uncomment this out to see how a module refs tree is created
+# this can be triggered by calling list-violations 
+#        module_refs_tree = ModuleRefs::Tree.create(self,cmps)
+# pp module_refs_tree
+
+# put this in when violation function works, which looks to see if tree has inconsistencies or missing items
+#        if violations = module_refs_tree.violations?
+#          ret += violations
+#        end
         ret
       end
 

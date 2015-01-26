@@ -382,6 +382,11 @@ module DTK
       rest_ok_response Assembly::Instance.list_with_workspace(model_handle(),opts)
     end
 
+    def rest__print_includes()
+      assembly = ret_assembly_instance_object()
+      rest_ok_response assembly.print_includes(), :encode_into => :yaml
+    end
+
     #### end: list and info actions ###
 
     def rest__apply_attribute_settings()

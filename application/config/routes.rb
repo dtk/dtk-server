@@ -53,6 +53,7 @@ R8::ReactorRoute.draw do
   post  'assembly/initiate_get_ps' => 'assembly#initiate_get_ps'
   post  'assembly/initiate_execute_tests' => 'assembly#initiate_execute_tests'
   post  'assembly/list_component_module_diffs' => 'assembly#list_component_module_diffs'
+  post  'assembly/print_includes' => 'assembly#print_includes'
 
   post  'assembly/start' => 'assembly#start'
   post  'assembly/stop' => 'assembly#stop'

@@ -190,6 +190,14 @@ module DTK; class  Assembly
         nodes_and_cmps.map{|r|r[:nested_component]}.select{|cmp|cmp[:basic_type] == "smoketest"}.map{|cmp|Aux::hash_subset(cmp,[:id,:display_name,:description])}
       end
 
+      def print_includes()
+        nodes_and_cmps = get_info__flat_list(:detail_level => "components").select{|r|r[:nested_component]}
+        cmps = nodes_and_cmps.map{|r|r[:nested_component]}
+
+        module_refs_tree = ModuleRefs::Tree.create(self, cmps)
+        module_refs_tree.debug_hash_form()
+      end
+
      private
       def list_tasks(opts={})
         tasks = []

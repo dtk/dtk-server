@@ -4,7 +4,8 @@ module DTK
     r8_nested_require('tree','link')
     # This class is used to build a hierarchical dependency tree and to detect conflicts
     class Tree 
-      def initialize(context)
+      def initialize(module_branch,context=nil)
+        @module_branch = module_branch
         @context = context
         @links = Array.new #array of Links
       end
@@ -12,29 +13,7 @@ module DTK
       
       # params are assembly instance and the component instances that are in the assembly instance
       def self.create(assembly_instance,components)
-        new(assembly_instance).add_module_refs_starting_from_assembly!(assembly_instance,components)
-      end
-
-      def add_module_refs_starting_from_assembly!(assembly_instance,components)
-        ret = self
-        # add component module refs associated with assembly instance
-        add_assembly_instance_module_refs!(assembly_instance)
-
-        # recursively add the rest
-        # First, find the top level component's unique module_branches
-        # and compute an ndx from branches to components
-        ndx_cmps = Hash.new
-        components.each do |cmp|
-          branch_id = cmp.get_field?(:module_branch_id)
-          (ndx_cmps[branch_id] ||= Array.new) << cmp
-        end
-        sp_hash = {
-          :cols => ModuleBranch.common_columns(),
-          :filter => [:oneof,:id,ndx_cmps.keys]
-        }
-        cmp_module_branches = Model.get_objs(components.first.model_handle(:module_branch),sp_hash)
-        recursive_add_module_refs!(cmp_module_branches,:ndx_components => ndx_cmps)
-        ret
+        create_module_refs_starting_from_assembly(assembly_instance,components)
       end
 
       def violations?()
@@ -43,53 +22,61 @@ pp @module_mapping
 
         nil
       end
-
-
-     private
-      def add_assembly_instance_module_refs!(assembly_instance)
-        sp_hash = {
-          :cols => ModuleBranch.common_columns(),
-          :filter => [:eq,:id,assembly_instance.get_field?(:module_branch_id)]
-        }
-        service_module_branch = Model.get_obj(assembly_instance.model_handle(:module_branch),sp_hash)
-        cmrs = ModuleRefs.get_component_module_refs(service_module_branch)
-        add_component_module_refs!(cmrs,assembly_instance)
+      
+      def add_link!(sub_tree)
+        @links << Link.new(sub_tree)
       end
 
-      def add_component_module_refs!(cmrs,context)
+     private
+      def self.create_module_refs_starting_from_assembly(assembly_instance,components)
+        # get relevant service and component module branches 
+        ndx_cmps = Hash.new #components indexed (grouped) by branch id
+        components.each do |cmp|
+          branch_id = cmp.get_field?(:module_branch_id)
+          (ndx_cmps[branch_id] ||= Array.new) << cmp
+        end
+        service_module_branch_id = assembly_instance.get_field?(:module_branch_id)
+        sp_hash = {
+          :cols => ModuleBranch.common_columns(),
+          :filter => [:or, [:eq,:id,service_module_branch_id],[:oneof,:id,ndx_cmps.keys]]
+        }
+        relevant_module_branches = Model.get_objs(assembly_instance.model_handle(:module_branch),sp_hash)
+        service_module_branch = relevant_module_branches.find{|r|r[:id] == service_module_branch_id}
+        cmp_module_branches   = relevant_module_branches.reject!{|r|r[:id] == service_module_branch_id}
+
+        ret = new(service_module_branch,assembly_instance)
+        get_module_refs_and_branches([service_module_branch],:next_level_branches => cmp_module_branches).each do |r|
+          child = new(r[:module_branch],r[:module_ref])
+          ret.add_link!(child)
+        end
+
+        ret
+      end
+
+      # returns array of hashes with keys
+      # module_ref
+      # module_branch
+      def self.get_module_refs_and_branches(module_branches,opts={})
         ret = Array.new
-        cmrs.component_modules.each_value do |mod_ref|
-          link = Link.new(mod_ref)
-          @links << link
-          ret << link
+        unless next_level_branches = opts[:next_level_branches]
+          raise Error.new("need to write code where we can work without this info")
+        end
+        #TODO: can bulk up getting this info
+        ndx_branches = next_level_branches.inject(Hash.new) do |h,module_branch|
+          h.merge(module_branch.get_module()[:display_name] => module_branch)
+        end
+        ModuleRefs.get_multiple_component_module_refs(module_branches).each do |cmrs|
+          cmrs.component_modules.each_pair do |module_name,module_ref|
+            unless matching_branch = ndx_branches[module_name.to_s]
+              Log.error("No match for #{module_name} in #{ndx_branches.inspect}")
+              next
+            end
+            ret << {:module_branch => matching_branch, :module_ref => module_ref} 
+          end
         end
         ret
       end
-      
-      
-      #TODO: need a way to make sure dont get in loop
-      # by checking which sources covered already
-      # opts can have key :ndx_components
-      # which is mapping from branch_id to array of components
-      # this is used to do any further prurning using include modules
-      def recursive_add_module_refs!(cmp_module_branches,opts={})
-        # if opts[:ndx_components]
-        #   process_component_include_modules(opts[:ndx_components].values.flatten(1))
-        # end
-        # TODO: need to figure out how to fit this section and above
-        #TODO: better to bulk up
-        ndx_cmp_modules = cmp_module_branches.inject(Hash.new) do |h,module_branch|
-          h.merge(module_branch[:id] => module_branch.get_module())
-        end
-        ModuleRefs.get_multiple_component_module_refs(cmp_module_branches).each do |cmrs|
-          cmp_module = ndx_cmp_modules[cmrs.parent[:id]]
-          if matching_link = Link.match_component_module?(@links,cmp_module)
-            matching_link.add_children!(cmrs)
-          end
-        end
-        pp self
-        Log.error("Not recursive yet")
-      end
+
 
       def process_component_include_modules(components)
         #aug_inc_mods elements are include modules at top level and possibly the linked impementation

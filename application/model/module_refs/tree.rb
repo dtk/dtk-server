@@ -18,9 +18,7 @@ module DTK
       end
 
       def violations?()
-#long form
-pp self
-
+        #TODO: stub
         nil
       end
       
@@ -28,6 +26,25 @@ pp self
         @links << Link.new(sub_tree)
       end
 
+      #For Aldin
+      def debug_hash_form()
+        ret = Hash.new
+        ret[:context] = {}
+        if @context.kind_of?(Assembly)
+          ret[:context][:type] = 'Assembly::Instance'
+          ret[:context][:name] = @context.get_field?(:display_name)
+        elsif @context.kind_of?(ModuleRef)
+          ret[:context][:type] = 'ModuleRef'
+          ret[:context][:ref] = "#{@context[:namespace_info]}:#{@context[:module_name]}"
+        else
+          ret[:context][:type] = @context.class
+          ret[:context][:content] = @context
+        end
+        @links.each do |link|
+          (ret[:links] ||= Array.new) << link.tree.debug_hash_form()
+        end
+        ret
+      end
      private
       def self.create_module_refs_starting_from_assembly(assembly_instance,components)
         # get relevant service and component module branches 
@@ -86,11 +103,12 @@ pp self
             h.merge(module_branch.get_module()[:display_name] => module_branch)
           end
         else
-          pp [:module_refs,module_refs]
-          raise ErrorUSage.new("got here")
-          ndx_mod_ref_branches = get_ndx_mod_ref_branches(module_refs)
+          ndx_mod_ref_branches = Hash.new
+          ModuleRef.find_ndx_matching_component_modules(module_refs).each_pair do |mod_ref_id,cmp_module|
+            version = nil #TODO: stub; need to change when treat service isnatnce branches
+            ndx_mod_ref_branches[mod_ref_id] = cmp_module.get_module_branch_matching_version(version)
+          end
         end
-
         # either ndx_mod_name_branches or ndx_mod_ref_branches wil be non null
         module_refs.each do |module_ref|
           matching_branch = nil
@@ -122,7 +140,6 @@ pp self
           h.merge(impl[:id] => ModuleRefs.get_component_module_refs(impl.get_module_branch()))
         end
 
-        pp [:ndx_cmrs,ndx_cmrs]
         aug_incl_mods.each do |incl_mod|
           if cmrs = ndx_cmrs[incl_mod[:implementation_id]]
             add_component_module_refs!(cmrs,incl_mod)
@@ -140,7 +157,6 @@ pp self
         end
         ndx_ret.values
       end
-      
       
     end
   end

@@ -15,7 +15,8 @@ module DTK
         Parse.reify_content(parent.model_handle(:model_ref),content_hash_form)
     end
     private :initialize
-    
+
+    # This finds module refs that matches branches
     def self.get_multiple_component_module_refs(branches)
       ndx_branches = branches.inject(Hash.new){|h,r|h.merge(r[:id] => r)}
       ModuleRef.get_ndx_component_module_ref_arrays(branches).map do |(branch_id,cmr_array)|

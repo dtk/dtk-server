@@ -25,7 +25,26 @@ module DTK
       merge!(:version_info => VersionInfo::Assignment.reify?(version))
       self
     end
-    
+
+    def self.find_ndx_matching_component_modules(cmp_module_refs)
+      ret = Hash.new
+      return ret if cmp_module_refs.empty?
+      sp_hash = {
+        :cols => [:id,:group_id,:display_name,:namespace_id,:namespace],
+        :filter => [:or] + cmp_module_refs.map{|r|[:eq,:display_name,r[:module_name]]}
+      }
+      cmp_modules = get_objs(cmp_module_refs.first.model_handle(:component_module),sp_hash)
+      cmp_module_refs.each do |cmr|
+        module_name = cmr[:module_name]
+        namespace = cmr.namespace
+        if cmp_module = cmp_modules.find{|mod|mod[:display_name] == module_name and (mod[:namespace]||{})[:display_name] == namespace}
+          ret[cmr[:id]] = cmp_module
+        end
+      end
+      ret
+    end
+
+    # this finds for each mocule branch the array of component model ref objects associated with the branch
     def self.get_ndx_component_module_ref_arrays(branches)
       ret = Hash.new
       return ret if branches.empty?

@@ -114,7 +114,7 @@ module DTK
           matching_branch = nil
           if ndx_mod_name_branches
             unless matching_branch = ndx_mod_name_branches[module_ref[:module_name]]
-              Log.error("No match for #{module_name} in #{ndx_branches.inspect}")
+              Log.error("No match for #{module_ref[:module_name]} in #{ndx_mod_name_branches.inspect}")
             end
           elsif ndx_mod_ref_branches
             unless matching_branch = ndx_mod_ref_branches[module_ref.id]

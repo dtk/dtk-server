@@ -4,6 +4,7 @@ module DTK
     r8_nested_require('tree','link')
     # This class is used to build a hierarchical dependency tree and to detect conflicts
     class Tree 
+      attr_reader :module_branch
       def initialize(module_branch,context=nil)
         @module_branch = module_branch
         @context = context
@@ -18,7 +19,7 @@ module DTK
 
       def violations?()
 #long form
-pp @module_mapping
+pp self
 
         nil
       end
@@ -45,38 +46,71 @@ pp @module_mapping
         cmp_module_branches   = relevant_module_branches.reject!{|r|r[:id] == service_module_branch_id}
 
         ret = new(service_module_branch,assembly_instance)
-        get_module_refs_and_branches([service_module_branch],:next_level_branches => cmp_module_branches).each do |r|
-          child = new(r[:module_branch],r[:module_ref])
+        leaves = Array.new
+        get_children([service_module_branch],:next_level_branches => cmp_module_branches).each do |child|
+          leaves << child
           ret.add_link!(child)
         end
-
+        recursive_add_module_refs!(ret,leaves)
         ret
       end
 
-      # returns array of hashes with keys
-      # module_ref
-      # module_branch
-      def self.get_module_refs_and_branches(module_branches,opts={})
+      def self.recursive_add_module_refs!(top,subtrees)
+        return if subtrees.empty?
+        leaves = Array.new
+        #TODO: can bulk up
+        subtrees.each do |subtree|
+          get_children([subtree.module_branch]).each do |child|
+            leaves << child
+            subtree.add_link!(child)
+          end
+        end
+        recursive_add_module_refs!(top,leaves)
+      end
+
+      def self.get_children(module_branches,opts={})
         ret = Array.new
-        unless next_level_branches = opts[:next_level_branches]
-          raise Error.new("need to write code where we can work without this info")
-        end
-        #TODO: can bulk up getting this info
-        ndx_branches = next_level_branches.inject(Hash.new) do |h,module_branch|
-          h.merge(module_branch.get_module()[:display_name] => module_branch)
-        end
+        
+        ndx_module_refs = Hash.new
         ModuleRefs.get_multiple_component_module_refs(module_branches).each do |cmrs|
-          cmrs.component_modules.each_pair do |module_name,module_ref|
-            unless matching_branch = ndx_branches[module_name.to_s]
+          cmrs.component_modules.each_value do |module_ref|
+            ndx_module_refs[module_ref[:id]] ||= module_ref
+          end
+        end
+        module_refs = ndx_module_refs.values
+
+        ndx_mod_name_branches = ndx_mod_ref_branches = nil
+        if next_level_branches = opts[:next_level_branches]
+          #TODO: can bulk up getting this info
+          ndx_mod_name_branches = next_level_branches.inject(Hash.new) do |h,module_branch|
+            h.merge(module_branch.get_module()[:display_name] => module_branch)
+          end
+        else
+          pp [:module_refs,module_refs]
+          raise ErrorUSage.new("got here")
+          ndx_mod_ref_branches = get_ndx_mod_ref_branches(module_refs)
+        end
+
+        # either ndx_mod_name_branches or ndx_mod_ref_branches wil be non null
+        module_refs.each do |module_ref|
+          matching_branch = nil
+          if ndx_mod_name_branches
+            unless matching_branch = ndx_mod_name_branches[module_ref[:module_name]]
               Log.error("No match for #{module_name} in #{ndx_branches.inspect}")
-              next
             end
-            ret << {:module_branch => matching_branch, :module_ref => module_ref} 
+          elsif ndx_mod_ref_branches
+            unless matching_branch = ndx_mod_ref_branches[module_ref.id]
+              Log.error("No match for #{module_ref.inspect} in #{ndx_mod_ref_branches}")
+            end
+          else
+            Log.error("Unexpected that both ndx_mod_name_branches and ndx_mod_ref_branches re nil")
+          end
+          if matching_branch
+            ret << new(matching_branch,module_ref)
           end
         end
         ret
       end
-
 
       def process_component_include_modules(components)
         #aug_inc_mods elements are include modules at top level and possibly the linked impementation

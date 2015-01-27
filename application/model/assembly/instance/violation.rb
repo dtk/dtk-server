@@ -73,21 +73,25 @@ module DTK
       # this also serves to set implementation_id on module includes that are not set already
       # TODO: seperelate check versuses setting implementation_id 
       def find_violations__module_refs(cmps)
-        ret = Array.new
+        ret = missing = Array.new
+        multiple_ns   = Hash.new
         return ret if cmps.empty?
-        cmp_idhs = cmps.map{|cmp|cmp.id_handle()}
-        if included_modules = Component::IncludeModule.find_violations_and_set_impl(cmp_idhs)
-          included_modules.each do |incl_mod|
-            ret << Violation::MissingIncludedModule.new(incl_mod[:module_name], incl_mod[:version])
-          end 
+
+        module_refs_tree   = ModuleRefs::Tree.create(self,cmps)
+        missing, multiple_ns = module_refs_tree.violations?
+
+        unless missing.empty?
+          missing.each do |miss|
+            ret << Violation::MissingIncludedModule.new(miss)
+          end
         end
-# For Aldin:
-# TODO: replace above by using teh following to compute _module_refs violations
-#        module_refs_tree = ModuleRefs::Tree.create(self,cmps)
-#      ... module_refs_tree.violations? ...
-# That is compute module_refs_tree and call violations? (which you wil need to write; it is stubbed now to return nil
-# module_refs_tree.violations? shoudl return info that if non nill can be used to add module_refs violations to ret
-# theer are two types: i) module names taht are missing refs and ii) case where module name maps to multiple namespaces
+
+        unless multiple_ns.empty?
+          multiple_ns.each do |k,v|
+            ret << Violation::MultipleNamespacesIncluded.new(k,v)
+          end
+        end
+
         ret
       end
 
@@ -167,7 +171,7 @@ module DTK
         end
       end
       class MissingIncludedModule < self
-        def initialize(included_module, version)
+        def initialize(included_module, version = nil)
           @included_module = included_module
           @version = version
         end
@@ -176,6 +180,18 @@ module DTK
         end
         def description()
           "Module '#{@included_module}#{@version.nil? ? '' : '-'+@version}' is included in dsl, but not installed."
+        end
+      end
+      class MultipleNamespacesIncluded < self
+        def initialize(included_module, namespaces)
+          @included_module = included_module
+          @namespaces = namespaces
+        end
+        def type()
+          :mapped_to_multiple_namespaces
+        end
+        def description()
+          "Module '#{@included_module}' included in dsl is mapped to multiple namespaces: #{@namespaces.join(', ')}."
         end
       end
     end

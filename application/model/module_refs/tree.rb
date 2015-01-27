@@ -58,21 +58,32 @@ module DTK
         # get relevant service and component module branches 
         ndx_cmps = Hash.new #components indexed (grouped) by branch id
         components.each do |cmp|
-          branch_id = cmp.get_field?(:module_branch_id)
+          unless branch_id = cmp.get_field?(:module_branch_id)
+            Log.error("Unexpected that :module_branch_id not in: #{cmp.inspect}")
+            next
+          end
           (ndx_cmps[branch_id] ||= Array.new) << cmp
         end
+        cmp_module_branch_ids = ndx_cmps.keys
+
         service_module_branch_id = assembly_instance.get_field?(:module_branch_id)
         sp_hash = {
           :cols => ModuleBranch.common_columns(),
-          :filter => [:or, [:eq,:id,service_module_branch_id],[:oneof,:id,ndx_cmps.keys]]
+          :filter => [:or, [:eq,:id,service_module_branch_id],[:oneof,:id,cmp_module_branch_ids]]
         }
         relevant_module_branches = Model.get_objs(assembly_instance.model_handle(:module_branch),sp_hash)
         service_module_branch = relevant_module_branches.find{|r|r[:id] == service_module_branch_id}
-        cmp_module_branches   = relevant_module_branches.reject!{|r|r[:id] == service_module_branch_id}
+        cmp_module_branches  = relevant_module_branches.reject!{|r|r[:id] == service_module_branch_id}
 
+        #TODO: extra check we can remove after we refine
+        missing_branches = cmp_module_branch_ids - cmp_module_branches.map{|r|r[:id]} 
+        unless missing_branches.empty?
+          Log.error("Unexpected that the following branches dont exist; branches with ids #{missing_branches.join(',')}") 
+        end
+        
         ret = new(service_module_branch,assembly_instance)
         leaves = Array.new
-        get_children_from_component_module_branches(cmp_module_branches,service_module_branch) do |module_name,child|
+        get_top_level_children(cmp_module_branches,service_module_branch) do |module_name,child|
           leaves << child if child
           ret.add_module_ref!(module_name,child)
         end
@@ -93,31 +104,27 @@ module DTK
         recursive_add_module_refs!(top,leaves)
       end
 
-      def self.get_children_from_component_module_branches(cmp_module_branches,service_module_branch,&block)
+      # TODO: fix this up because cmp_module_branches already has implict namespace so this is 
+      # effectively just checking consistency of component module refs
+      # and setting of module_branch_id in component insatnces
+      def self.get_top_level_children(cmp_module_branches,service_module_branch,&block)
+        # get component module refs indexed by module name
+        ndx_cmp_module_refs = Hash.new
+        ModuleRefs.get_component_module_refs(service_module_branch).component_modules.each_value do |module_ref|
+          ndx_cmp_module_refs[module_ref[:module_name]] ||= module_ref
+        end
+    
+        # get branches indexed by module_name
+        # TODO: can bulk up; look also at using 
+        # assembly_instance.get_objs(:cols=> [:instance_component_module_branches])
         ndx_mod_name_branches = cmp_module_branches.inject(Hash.new) do |h,module_branch|
-          # TODO: can bulk up; look also at using 
-          # assembly_instance.get_objs(:cols=> [:instance_component_module_branches])
           h.merge(module_branch.get_module()[:display_name] => module_branch)
         end
         
-        ndx_module_refs = Hash.new
-        ModuleRefs.get_component_module_refs(service_module_branch).component_modules.each_value do |module_ref|
-          ndx_module_refs[module_ref[:id]] ||= module_ref
-        end
-        module_refs = ndx_module_refs.values
-
-        # either ndx_mod_name_branches or ndx_mod_ref_branches wil be non null
-        module_refs.each do |module_ref|
-          matching_branch = nil
-          if ndx_mod_name_branches
-            unless matching_branch = ndx_mod_name_branches[module_ref[:module_name]]
-              Log.error("No match for #{module_ref[:module_name]} in #{ndx_mod_name_branches.inspect}")
-            end
-          end
-          if matching_branch
-            child = new(matching_branch,module_ref)
-            block.call(module_ref[:module_name],child)
-          end
+        ndx_mod_name_branches.each_pair do |module_name,module_branch| 
+          module_ref = ndx_cmp_module_refs[module_name] 
+          child = module_ref  && new(module_branch,module_ref)
+          block.call(module_ref[:module_name],child)
         end
       end
 

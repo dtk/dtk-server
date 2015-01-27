@@ -22,9 +22,9 @@ module DTK
       def violations?()
         # For Aldin
         # TODO: stub
-        # this shoudl return information that can be used in the assemblu insatnce violations that can be turned into two types of errors
-        # 1) error where theer is a module_name in @module_refs whos value is nil, meaning it is amissing reference
-        # 2) case where a module name points to two difefrent refs with different namespaces
+        # this should return information that can be used in the assemblu insatnce violations that can be turned into two types of errors
+        # 1) error where there is a module_name in @module_refs whose value is nil, meaning it is a missing reference
+        # 2) case where a module name points to two different refs with different namespaces
         nil
       end
       
@@ -109,9 +109,9 @@ module DTK
       # and setting of module_branch_id in component insatnces
       def self.get_top_level_children(cmp_module_branches,service_module_branch,&block)
         # get component module refs indexed by module name
-        ndx_cmp_module_refs = Hash.new
+        ndx_module_refs = Hash.new
         ModuleRefs.get_component_module_refs(service_module_branch).component_modules.each_value do |module_ref|
-          ndx_cmp_module_refs[module_ref[:module_name]] ||= module_ref
+          ndx_module_refs[module_ref[:module_name]] ||= module_ref
         end
     
         # get branches indexed by module_name
@@ -122,13 +122,16 @@ module DTK
         end
         
         ndx_mod_name_branches.each_pair do |module_name,module_branch| 
-          module_ref = ndx_cmp_module_refs[module_name] 
+          module_ref = ndx_module_refs[module_name] 
           child = module_ref  && new(module_branch,module_ref)
           block.call(module_ref[:module_name],child)
         end
       end
 
-      def self.get_children(module_branches,&block)
+      # TODO: use opts to pass in specfic components and then ise that to us einclude modules to 
+      # prune what is relevant
+      def self.get_children(module_branches,opts={},&block)
+        # get component module refs indexed by module name
         ndx_module_refs = Hash.new
         ModuleRefs.get_multiple_component_module_refs(module_branches).each do |cmrs|
           cmrs.component_modules.each_value do |module_ref|
@@ -137,23 +140,25 @@ module DTK
         end
         module_refs = ndx_module_refs.values
 
-        ndx_mod_ref_branches = Hash.new
+        #ndx_module_branches is compinet module branches indexed by module ref id
+        ndx_module_branches = Hash.new
         ModuleRef.find_ndx_matching_component_modules(module_refs).each_pair do |mod_ref_id,cmp_module|
           version = nil #TODO: stub; need to change when treat service isnatnce branches
-          ndx_mod_ref_branches[mod_ref_id] = cmp_module.get_module_branch_matching_version(version)
+          ndx_module_branches[mod_ref_id] = cmp_module.get_module_branch_matching_version(version)
         end
+
         module_refs.each do |module_ref|
-          matching_branch = nil
-          unless matching_branch = ndx_mod_ref_branches[module_ref.id]
-            Log.error("No match for #{module_ref.inspect} in #{ndx_mod_ref_branches}")
-          end
-          if matching_branch
-            child = new(matching_branch,module_ref)
-            block.call(module_ref[:module_name],child)
-          end
+          module_branch = ndx_module_branches[module_ref[:id]]
+          child = module_branch && new(module_branch,module_ref)
+          block.call(module_ref[:module_name],child)
         end
       end
 
+    end
+  end
+end
+=begin
+      # TODO: old methods that can be helpful if looking to use includes
       def process_component_include_modules(components)
         #aug_inc_mods elements are include modules at top level and possibly the linked impementation
         component_idhs = components.map{|cmp|cmp.id_handle()}
@@ -185,3 +190,4 @@ module DTK
     end
   end
 end
+=end

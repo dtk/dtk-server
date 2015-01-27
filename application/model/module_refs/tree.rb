@@ -1,14 +1,16 @@
 #TODO: see how to treat include module's implementation_id; might deprecate
 module DTK
   class ModuleRefs
-    r8_nested_require('tree','link')
     # This class is used to build a hierarchical dependency tree and to detect conflicts
     class Tree 
       attr_reader :module_branch
       def initialize(module_branch,context=nil)
         @module_branch = module_branch
         @context = context
-        @links = Array.new #array of Links
+        # module_refs is hash where key is module_name and
+        # value is either nil for a missing reference
+        # or it points to a Tree object
+        @module_refs = Hash.new 
       end
       private :initialize
       
@@ -18,33 +20,39 @@ module DTK
       end
 
       def violations?()
-        #TODO: stub
+        # For Aldin
+        # TODO: stub
+        # this shoudl return information that can be used in the assemblu insatnce violations that can be turned into two types of errors
+        # 1) error where theer is a module_name in @module_refs whos value is nil, meaning it is amissing reference
+        # 2) case where a module name points to two difefrent refs with different namespaces
         nil
       end
       
-      def add_link!(sub_tree)
-        @links << Link.new(sub_tree)
-      end
-
-      #For Aldin
       def debug_hash_form()
         ret = Hash.new
-        ret[:context] = {}
         if @context.kind_of?(Assembly)
-          ret[:context][:type] = 'Assembly::Instance'
-          ret[:context][:name] = @context.get_field?(:display_name)
+          ret[:type] = 'Assembly::Instance'
+          ret[:name] = @context.get_field?(:display_name)
         elsif @context.kind_of?(ModuleRef)
-          ret[:context][:type] = 'ModuleRef'
-          ret[:context][:ref] = "#{@context[:namespace_info]}:#{@context[:module_name]}"
+          ret[:type] = 'ModuleRef'
+          ret[:namespace] = @context[:namespace_info]
         else
-          ret[:context][:type] = @context.class
-          ret[:context][:content] = @context
+          ret[:type] = @context.class
+          ret[:content] = @context
         end
-        @links.each do |link|
-          (ret[:links] ||= Array.new) << link.tree.debug_hash_form()
+        
+        refs = @module_refs.inject(Hash.new) do |h,(module_name,subtree)|
+          h.merge(module_name => subtree && subtree.debug_hash_form())
         end
+        ret[:refs] = refs unless refs.empty?
+
         ret
       end
+
+      def add_module_ref!(module_name,child)
+        @module_refs[module_name] = child
+      end
+
      private
       def self.create_module_refs_starting_from_assembly(assembly_instance,components)
         # get relevant service and component module branches 
@@ -64,9 +72,9 @@ module DTK
 
         ret = new(service_module_branch,assembly_instance)
         leaves = Array.new
-        get_children([service_module_branch],:next_level_branches => cmp_module_branches).each do |child|
-          leaves << child
-          ret.add_link!(child)
+        get_children_from_component_module_branches(cmp_module_branches,service_module_branch) do |module_name,child|
+          leaves << child if child
+          ret.add_module_ref!(module_name,child)
         end
         recursive_add_module_refs!(ret,leaves)
         ret
@@ -77,17 +85,43 @@ module DTK
         leaves = Array.new
         #TODO: can bulk up
         subtrees.each do |subtree|
-          get_children([subtree.module_branch]).each do |child|
-            leaves << child
-            subtree.add_link!(child)
+          get_children([subtree.module_branch]) do |module_name,child|
+            leaves << child if child
+            subtree.add_module_ref!(module_name,child)
           end
         end
         recursive_add_module_refs!(top,leaves)
       end
 
-      def self.get_children(module_branches,opts={})
-        ret = Array.new
+      def self.get_children_from_component_module_branches(cmp_module_branches,service_module_branch,&block)
+        ndx_mod_name_branches = cmp_module_branches.inject(Hash.new) do |h,module_branch|
+          # TODO: can bulk up; look also at using 
+          # assembly_instance.get_objs(:cols=> [:instance_component_module_branches])
+          h.merge(module_branch.get_module()[:display_name] => module_branch)
+        end
         
+        ndx_module_refs = Hash.new
+        ModuleRefs.get_component_module_refs(service_module_branch).component_modules.each_value do |module_ref|
+          ndx_module_refs[module_ref[:id]] ||= module_ref
+        end
+        module_refs = ndx_module_refs.values
+
+        # either ndx_mod_name_branches or ndx_mod_ref_branches wil be non null
+        module_refs.each do |module_ref|
+          matching_branch = nil
+          if ndx_mod_name_branches
+            unless matching_branch = ndx_mod_name_branches[module_ref[:module_name]]
+              Log.error("No match for #{module_ref[:module_name]} in #{ndx_mod_name_branches.inspect}")
+            end
+          end
+          if matching_branch
+            child = new(matching_branch,module_ref)
+            block.call(module_ref[:module_name],child)
+          end
+        end
+      end
+
+      def self.get_children(module_branches,&block)
         ndx_module_refs = Hash.new
         ModuleRefs.get_multiple_component_module_refs(module_branches).each do |cmrs|
           cmrs.component_modules.each_value do |module_ref|
@@ -96,38 +130,21 @@ module DTK
         end
         module_refs = ndx_module_refs.values
 
-        ndx_mod_name_branches = ndx_mod_ref_branches = nil
-        if next_level_branches = opts[:next_level_branches]
-          #TODO: can bulk up getting this info
-          ndx_mod_name_branches = next_level_branches.inject(Hash.new) do |h,module_branch|
-            h.merge(module_branch.get_module()[:display_name] => module_branch)
-          end
-        else
-          ndx_mod_ref_branches = Hash.new
-          ModuleRef.find_ndx_matching_component_modules(module_refs).each_pair do |mod_ref_id,cmp_module|
-            version = nil #TODO: stub; need to change when treat service isnatnce branches
-            ndx_mod_ref_branches[mod_ref_id] = cmp_module.get_module_branch_matching_version(version)
-          end
+        ndx_mod_ref_branches = Hash.new
+        ModuleRef.find_ndx_matching_component_modules(module_refs).each_pair do |mod_ref_id,cmp_module|
+          version = nil #TODO: stub; need to change when treat service isnatnce branches
+          ndx_mod_ref_branches[mod_ref_id] = cmp_module.get_module_branch_matching_version(version)
         end
-        # either ndx_mod_name_branches or ndx_mod_ref_branches wil be non null
         module_refs.each do |module_ref|
           matching_branch = nil
-          if ndx_mod_name_branches
-            unless matching_branch = ndx_mod_name_branches[module_ref[:module_name]]
-              Log.error("No match for #{module_ref[:module_name]} in #{ndx_mod_name_branches.inspect}")
-            end
-          elsif ndx_mod_ref_branches
-            unless matching_branch = ndx_mod_ref_branches[module_ref.id]
-              Log.error("No match for #{module_ref.inspect} in #{ndx_mod_ref_branches}")
-            end
-          else
-            Log.error("Unexpected that both ndx_mod_name_branches and ndx_mod_ref_branches re nil")
+          unless matching_branch = ndx_mod_ref_branches[module_ref.id]
+            Log.error("No match for #{module_ref.inspect} in #{ndx_mod_ref_branches}")
           end
           if matching_branch
-            ret << new(matching_branch,module_ref)
+            child = new(matching_branch,module_ref)
+            block.call(module_ref[:module_name],child)
           end
         end
-        ret
       end
 
       def process_component_include_modules(components)

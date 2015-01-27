@@ -82,15 +82,12 @@ module DTK
           end 
         end
 # For Aldin:
-# Uncomment this out to see how a module refs tree is created
-# this can be triggered by calling list-violations 
+# TODO: replace above by using teh following to compute _module_refs violations
 #        module_refs_tree = ModuleRefs::Tree.create(self,cmps)
-#        pp module_refs_tree.debug_hash_form()
-
-# put this in when violation function works, which looks to see if tree has inconsistencies or missing items
-#        if violations = module_refs_tree.violations?
-#          ret += violations
-#        end
+#      ... module_refs_tree.violations? ...
+# That is compute module_refs_tree and call violations? (which you wil need to write; it is stubbed now to return nil
+# module_refs_tree.violations? shoudl return info that if non nill can be used to add module_refs violations to ret
+# theer are two types: i) module names taht are missing refs and ii) case where module name maps to multiple namespaces
         ret
       end
 

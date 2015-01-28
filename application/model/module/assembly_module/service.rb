@@ -1,5 +1,6 @@
 module DTK; class AssemblyModule
   class Service < self
+    r8_nested_require('service','workflow')
     # returns a ModuleRepoInfo object
     def self.prepare_for_edit(assembly,modification_type)
       modification_type_obj = create_modification_type_object(assembly,modification_type)
@@ -18,8 +19,6 @@ module DTK; class AssemblyModule
       service_module.delete_version?(am_version,:donot_delete_meta=>true)
     end
 
-    private_instance_method 'create_and_update_assembly_branch?'
-    private_instance_method :finalize_edit
    private
     # returns a ModuleRepoInfo object
     def create_and_update_assembly_branch?()

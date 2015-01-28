@@ -98,7 +98,8 @@ module DTK; module ModuleMixins
   end
 
   module Create::Instance
-    def create_new_version(new_version,opts={},client_rsa_pub_key=nil)
+    # returns module branch
+    def create_new_version(new_version,opts={})
       opts_get_aug = Opts.new
       if base_version = opts[:base_version]
         opts_get_aug.merge(:filter => {:version => base_version})
@@ -112,10 +113,10 @@ module DTK; module ModuleMixins
         raise ErrorUsage.new("Version exists already for module (#{pp_module_name(new_version)})")
       end
       repo_for_new_version = aug_ws_branch.create_new_branch_from_this_branch?(get_project(),aug_ws_branch[:repo],new_version)
-      opts_type_spec = opts.merge(:ancestor_branch_idh => aug_ws_branch.id_handle())
-      ret = create_new_version__type_specific(repo_for_new_version,new_version,opts_type_spec)
-      opts[:ret_module_branch] = opts_type_spec[:ret_module_branch] if  opts_type_spec[:ret_module_branch]
-      ret
+      opts_type_spec = opts.merge(:ancestor_branch_idh => aug_ws_branch.id_handle(),:ret_module_branch => true)
+      create_new_version__type_specific(repo_for_new_version,new_version,opts_type_spec)
+      #opts_type_spec[:ret_module_branch] will have the module branch
+      opts_type_spec[:ret_module_branch]
     end
   end
 end; end

@@ -1,15 +1,31 @@
 module DTK; class AssemblyModule
   class Service < self
     r8_nested_require('service','workflow')
+
+    def initialize(assembly,opts={})
+      super(assembly)
+      @assembly_template_name = assembly_template_name?(assembly)
+      @service_module = opts[:service_module] || get_service_module(assembly)
+      @am_version = assembly_module_version(assembly)
+    end
+    private :initialize
+
+    def self.get_or_create_assembly_branch(assembly)
+      new(assembly).get_or_create_assembly_branch()
+    end
+    def get_or_create_assembly_branch()
+      @service_module.get_module_branch_matching_version(@am_version) || create_assembly_branch()
+    end
+
     # returns a ModuleRepoInfo object
     def self.prepare_for_edit(assembly,modification_type)
       modification_type_obj = create_modification_type_object(assembly,modification_type)
-      modification_type_obj.private__create_and_update_assembly_branch?()
+      modification_type_obj.create_and_update_assembly_branch?()
     end
 
     def self.finalize_edit(assembly,modification_type,service_module,module_branch,diffs_summary)
       modification_type_obj = create_modification_type_object(assembly,modification_type,:service_module => service_module)
-      modification_type_obj.private__finalize_edit(module_branch,diffs_summary)
+      modification_type_obj.finalize_edit(module_branch,diffs_summary)
     end
 
     def delete_module?(opts={})
@@ -20,18 +36,14 @@ module DTK; class AssemblyModule
     end
 
    private
-    # returns a ModuleRepoInfo object
-    def create_and_update_assembly_branch?()
-      module_branch = @service_module.get_module_branch_matching_version(@am_version) || create_assembly_branch()
-      update_assembly_branch(module_branch)
-      @service_module.get_workspace_branch_info(@am_version).merge(:edit_file => meta_file_path())
-    end
-
-    def initialize(assembly,opts={})
-      super(assembly)
-      @assembly_template_name = assembly_template_name?(assembly)
-      @service_module = opts[:service_module] || get_service_module(assembly)
-      @am_version = assembly_module_version(assembly)
+    # returns new module branch
+    def create_assembly_branch()
+      opts = {
+        :base_version                => @service_module.get_field?(:version),
+        :assembly_module             => true,
+        :donot_update_model_from_dsl => true
+      }
+      @service_module.create_new_version(@am_version,opts)
     end
 
     def assembly_template_name?(assembly)
@@ -64,50 +76,5 @@ module DTK; class AssemblyModule
       ret
     end
 
-    def create_exact_copy_branch(opts={})
-      opts = opts.merge(:donot_update_model_from_dsl=>true,:ret_module_branch=>true)
-      @service_module.create_new_version(@am_version,opts)
-      opts[:ret_module_branch]
-    end
-
-    class Workflow < self
-      def create_assembly_branch(task_action=nil)
-        opts = {:base_version=>@service_module.get_field?(:version),:assembly_module=>true}
-        create_exact_copy_branch(opts)
-      end
-
-      def update_assembly_branch(module_branch,task_action=nil)
-        opts = {:donot_parse => true}
-        opts.merge!(:task_action => task_action) if task_action
-        template_content =  Task::Template::ConfigComponents.get_or_generate_template_content(:assembly,@assembly,opts)
-        splice_in_workflow(module_branch,template_content,task_action)
-      end
-
-     private
-      def finalize_edit(module_branch,diffs_summary,task_action=nil)
-        parse_errors = nil
-        file_path = meta_file_path(task_action)
-        if diffs_summary.file_changed?(file_path)
-          file_content = RepoManager.get_file_content(file_path,module_branch)
-          format_type = Aux.format_type(file_path)
-          hash_content = Aux.convert_to_hash(file_content,format_type)
-          return hash_content if ServiceModule::ParsingError.is_error?(hash_content)
-          parse_errors = Task::Template::ConfigComponents.find_parse_errors(hash_content,@assembly)
-          Task::Template.create_or_update_from_serialized_content?(@assembly.id_handle(),hash_content,task_action)
-        end
-        raise parse_errors if parse_errors
-      end
-
-      def splice_in_workflow(module_branch,template_content,task_action=nil)
-        hash_content = template_content.serialization_form()
-        module_branch.serialize_and_save_to_repo?(meta_file_path(task_action),hash_content)
-      end
-      def meta_file_path(task_action=nil)
-        task_action ||= DefaultTaskAction
-        ServiceModule.assembly_workflow_meta_filename_path(@assembly_template_name,task_action)
-      end
-      # TODO: unify this with code on task/template
-      DefaultTaskAction = 'converge'
-    end
   end
 end; end

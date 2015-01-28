@@ -140,7 +140,14 @@ eos
               :mcollective_restart => mcollective_restart(node),
               # TODO: will generalize so not just puppet                           
               :puppet_version => puppet_version(node),
-              :pbuilderid => pbuilderid
+              :pbuilderid => pbuilderid,
+	      :logstash_enable => R8::Config[:logstash][:enable],
+              :logstash_ca => get_logstash_ca,
+	      :logstash_host => R8::Config[:logstash][:host],
+	      :logstash_port => R8::Config[:logstash][:port],
+	      :logstash_log_file_list => R8::Config[:logstash][:log_file_list],
+	      :logstash_config_file_path => R8::Config[:logstash][:config_file_path],
+	      :logstash_tag => R8::Config[:logstash][:tag]
             )
           end
 
@@ -166,6 +173,10 @@ eos
 
           def install_script_erb()
             USER_DATA_SH_ERB
+          end
+
+          def get_logstash_ca()
+            File.open(R8::Config[:logstash][:ca_file_path], 'rb') { |f| f.read } if File.exists?(R8::Config[:logstash][:ca_file_path])
           end
 
           USER_DATA_SH_ERB = <<eos
@@ -213,6 +224,31 @@ EOF
 
 <% if mcollective_restart %>
 /etc/init.d/mcollective* restart
+<% end %>
+
+<% if logstash_enable %>
+mkdir -p `dirname <%= logstash_config_file_path %>`
+cat << EOF > /etc/logstash-forwarder/dtk.json
+{
+  "network": {
+    "servers": [ "<%= logstash_host %>:<%= logstash_port %>" ],
+    "timeout": 15,
+    "ssl ca": "/etc/ssl/certs/logstash-forwarder.crt"
+  },
+  "files": [
+    {
+      "paths": <%= logstash_log_file_list -%>,
+      "fields": { "type": "syslog", "tag": "<%= logstash_tag %>" }
+    }
+   ]
+}
+EOF
+
+cat << EOF > /etc/ssl/certs/logstash-forwarder.crt
+<%= logstash_ca %>
+EOF
+
+/etc/init.d/logstash-forwarder start
 <% end %>
 eos
 

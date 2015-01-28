@@ -2,7 +2,6 @@ module DTK
   class Assembly::Instance
     module ViolationMixin
       def find_violations()
-        update_obj!(:module_branch_id)
         nodes_and_cmps = get_info__flat_list(:detail_level => "components").select{|r|r[:nested_component]}
         cmps = nodes_and_cmps.map{|r|r[:nested_component]}
 
@@ -70,14 +69,12 @@ module DTK
         ret
       end
 
-      # this also serves to set implementation_id on module includes that are not set already
-      # TODO: seperelate check versuses setting implementation_id 
       def find_violations__module_refs(cmps)
         ret = missing = Array.new
         multiple_ns   = Hash.new
         return ret if cmps.empty?
-
-        module_refs_tree   = ModuleRefs::Tree.create(self,cmps)
+        assembly_branch = AssemblyModule::Service.get_assembly_branch(self)
+        module_refs_tree   = ModuleRefs::Tree.create(self,assembly_branch,cmps)
         missing, multiple_ns = module_refs_tree.violations?
 
         unless missing.empty?

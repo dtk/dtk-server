@@ -140,6 +140,10 @@ end
       has_default_version?() ? default_version_string : self[:version]
     end
 
+    def matches_base_version?()
+      matches_version?(BaseVersion)
+    end
+    BaseVersion = nil
     def matches_version?(version=nil)
       update_object!(:version)
       self[:version] == self.class.version_field(version)

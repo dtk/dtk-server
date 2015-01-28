@@ -20,12 +20,36 @@ module DTK
       end
 
       def violations?()
-        # For Aldin
-        # TODO: stub
-        # this should return information that can be used in the assemblu insatnce violations that can be turned into two types of errors
-        # 1) error where there is a module_name in @module_refs whose value is nil, meaning it is a missing reference
-        # 2) case where a module name points to two different refs with different namespaces
-        nil
+        missing   = Array.new
+        multi_ns  = Hash.new
+        refs      = debug_hash_form()
+
+        refs.each do |k,v|
+          if k == :refs
+            check_refs(v, missing, multi_ns)
+          end
+        end
+
+        multi_ns.delete_if{|k,v| v.size < 2}
+        return missing, multi_ns
+      end
+
+      def check_refs(refs, missing, multi_ns)
+        return unless refs
+
+        refs.each do |name,ref|
+          if ref
+            if val = multi_ns["#{name}"]
+              val << ref[:namespace]
+              multi_ns.merge!(name => val)
+            else
+              multi_ns.merge!(name => [ref[:namespace]])
+            end
+            check_refs(ref[:refs], missing, multi_ns) if ref.has_key?(:refs)
+          else
+            missing << name
+          end
+        end
       end
       
       def debug_hash_form()
@@ -123,8 +147,8 @@ module DTK
         
         ndx_mod_name_branches.each_pair do |module_name,module_branch| 
           module_ref = ndx_module_refs[module_name] 
-          child = module_ref  && new(module_branch,module_ref)
-          block.call(module_ref[:module_name],child)
+          child = module_ref && new(module_branch,module_ref)
+          block.call(module_name,child)
         end
       end
 

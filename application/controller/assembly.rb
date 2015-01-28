@@ -747,6 +747,14 @@ module DTK
       rest_ok_response :action_results_id => queue.id
     end
 
+    def initiate_action_agent()
+      node   = create_obj(:node_id, ::DTK::Node)
+      params = ret_params_hash(:bash_command)
+
+      queue  = initiate_action_with_nodes(ActionAgent, [node], params)
+      rest_ok_response :action_results_id => queue.id
+    end
+
     def rest__initiate_get_ps()
       assembly = ret_assembly_instance_object()
       params = Hash.new

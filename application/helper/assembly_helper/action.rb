@@ -8,13 +8,13 @@ module Ramaze::Helper
       def initiate_action(action_queue_class, assembly, params={}, node_pattern={})
         InitiateAction.block(action_queue_class,params) do |action_queue|
           nodes = ret_matching_nodes(assembly, node_pattern)
-          action_queue.initiate(nodes,params)
+          action_queue.initiate(nodes, params)
         end
       end
       def initiate_action_with_nodes(action_queue_class,nodes,params={},&block)
         InitiateAction.block(action_queue_class,params) do |action_queue|
           block.call if block
-          action_queue.initiate(nodes,params)
+          action_queue.initiate(nodes, params)
         end
       end
       def initiate_execute_tests(action_queue_class, params={})
@@ -44,7 +44,7 @@ module Ramaze::Helper
           action_queue
         end
       end
-      
+
       def ret_matching_nodes(assembly, node_pattern_x={})
         #removing and empty or nil filters
         node_pattern = (node_pattern_x ? node_pattern_x.reject{|k,v|v.nil? or v.empty?} : {})
@@ -53,7 +53,7 @@ module Ramaze::Helper
         if node_pattern.empty?
           nodes
         else
-          ret = 
+          ret =
             if node_pattern.kind_of?(Hash) and node_pattern.size == 1
               case node_pattern.keys.first
               when :node_name
@@ -88,9 +88,9 @@ module Ramaze::Helper
             raise ::DTK::ErrorUsage.new("No node matches name (#{node_name})")
           end
           [match]
-        end 
+        end
       end
-      
+
       # TODO: refactor below in terms of above
       ##
       # Method that will validate if nodes list is ready to started or stopped.
@@ -110,10 +110,10 @@ module Ramaze::Helper
         # check for pattern
         unless node_pattern.nil? || node_pattern.empty?
           regex = Regexp.new(node_pattern)
-          
+
           # temp nodes_list
           nodes_list = nodes
-          
+
           nodes = nodes.select { |node| regex =~ node.id.to_s}
           if nodes.size == 0
             nodes = nodes_list.select { |node| node_pattern.to_s.eql?(node.display_name.to_s)}
@@ -127,15 +127,15 @@ module Ramaze::Helper
             return nodes, false, "Nodes for assembly '#{assembly_name}' are 'staged' and as such cannot be started/stopped."
           end
         end
-        
+
         # check for status -> this will translate to /running|pending/ and /stopped|pending/ checks
         filtered_nodes = nodes.select { |node| node.get_field?(:admin_op_status) =~ Regexp.new("#{status_pattern.to_s}|pending") }
         if filtered_nodes.size == 0
           assembly_name = ::DTK::Assembly::Instance.pretty_print_name(assembly)
         return nodes, false, "There are no #{status_pattern} nodes for assembly '#{assembly_name}'."
         end
-        
-        return filtered_nodes, true, nil      
+
+        return filtered_nodes, true, nil
       end
       #TODO: collapse above and below
       def nodes_are_up?(assembly_name, nodes, status_pattern, opts={})
@@ -146,13 +146,13 @@ module Ramaze::Helper
             return nodes, false, "#{what} cannot be executed on nodes that are 'staged'."
           end
         end
-        
+
         # check for status -> this will translate to /running|pending/ and /stopped|pending/ checks
         filtered_nodes = nodes.select { |node| node.get_field?(:admin_op_status) =~ Regexp.new("#{status_pattern.to_s}|pending") }
         if filtered_nodes.size == 0
           return nodes, false, "There are no #{status_pattern} nodes for assembly '#{assembly_name}'."
         end
-        
+
         [filtered_nodes, true, nil]
       end
     end

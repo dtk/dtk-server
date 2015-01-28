@@ -27,6 +27,12 @@ module DTK
         end
       end
 
+      class ActionAgent < ActionResultsQueue
+        def action_hash()
+          { :agent => :action_agent, :method => :run_command }
+        end
+      end
+
       class GetNetstats < ActionResultsQueue
        private
         def action_hash()

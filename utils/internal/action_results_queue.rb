@@ -17,14 +17,14 @@ module DTK
     end
 
     ##
-    # Initiates commmand on nodes 
-    def initiate(nodes,params,opts={})
+    # Initiates commmand on nodes
+    def initiate(nodes, params, opts={})
       indexes = nodes.map{|r|r[:id]}
       set_indexes!(indexes)
       ndx_pbuilderid_to_node_info =  nodes.inject(Hash.new) do |h,n|
         h.merge(n.pbuilderid => {:id => n[:id], :display_name => n.assembly_node_print_form()})
       end
-        
+
       callbacks = {
         :on_msg_received => proc do |msg|
           response = CommandAndControl.parse_response__execute_action(nodes,msg)
@@ -49,11 +49,11 @@ module DTK
     # can be overwritten
     def process_data!(data,node_info)
       Result.normalize_data_to_utf8_output!(data)
-    end      
+    end
     private :process_data!
 
     # returns :is_complete => is_complete, :results => results
-    # since action result queue post processing is specific to netstats results, 
+    # since action result queue post processing is specific to netstats results,
     # you can disable mentioned post processing via flag :disable_post_processing
     def self.get_results(queue_id,ret_only_if_complete,disable_post_processing, sort_key = :port)
       is_complete = results = nil
@@ -77,7 +77,7 @@ module DTK
         end
       end
       {
-        :is_complete => is_complete, 
+        :is_complete => is_complete,
         :results => (disable_post_processing ? results : Result.post_process(results, sort_key))
       }
     end
@@ -106,9 +106,9 @@ module DTK
       # TODO: error message if @results.size > @indexes.size
       (@results.size >= @indexes.size) ? @results : nil
     end
-    
+
     def ret_whatever_is_complete()
-      @indexes.inject(Hash.new){|h,i| h.merge(i => @results[i])} 
+      @indexes.inject(Hash.new){|h,i| h.merge(i => @results[i])}
     end
 
     class Result
@@ -149,10 +149,13 @@ module DTK
       #
       # http://po-ru.com/diary/fixing-invalid-utf-8-in-ruby-revisited/
       def self.normalize_data_to_utf8_output!(data)
-
         if data
           ic = Iconv.new('UTF-8//IGNORE', 'UTF-8')
           output = data[:output]||''
+
+          # check if string
+          return data unless output.is_a?(String)
+
           valid_output = ic.iconv(output + ' ')[0..-2]
           data[:output] = ic.iconv(output + ' ')[0..-2]
         else

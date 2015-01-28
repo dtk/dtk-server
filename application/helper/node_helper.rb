@@ -27,7 +27,7 @@ module Ramaze::Helper
     end
 
     def create_node_obj(id_param)
-      create_obj(id_param,::DTK::Node)
+      create_obj(id_param, ::DTK::Node)
     end
 
     def create_node_template_obj(id_param)

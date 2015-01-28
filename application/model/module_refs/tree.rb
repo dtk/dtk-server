@@ -147,8 +147,8 @@ module DTK
         
         ndx_mod_name_branches.each_pair do |module_name,module_branch| 
           module_ref = ndx_module_refs[module_name] 
-          child = module_ref  && new(module_branch,module_ref)
-          block.call(module_ref[:module_name],child)
+          child = module_ref && new(module_branch,module_ref)
+          block.call(module_name,child)
         end
       end
 

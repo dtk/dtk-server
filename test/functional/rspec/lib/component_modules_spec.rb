@@ -623,3 +623,38 @@ shared_context "NEG - List component modules with filter on remote" do |dtk_comm
     component_modules_retrieved.should eq(false)
   end
 end
+
+shared_context "Import module from puppet forge" do |puppet_forge_module_name, namespace|
+  it "imports #{puppet_forge_module_name} component module from Puppet Forge" do
+    puts "Import module from puppet forge:", "-------------------------------"
+    pass = true
+    if namespace != nil
+      module_name = puppet_forge_module_name.split("-").last
+      value = `dtk component-module import-puppet-forge #{puppet_forge_module_name} #{namespace}/#{module_name}`
+    else
+      value = `dtk component-module import-puppet-forge #{puppet_forge_module_name}` 
+    end
+    puts value
+    pass = false if ((value.include? "ERROR") || (value.include? "exists on client") || (value.include? "denied") || (value.include? "Conflicts with existing server local module")) 
+    puts "Import of puppet forge module #{puppet_forge_module_name} completed successfully!" if pass == true
+    puts "Import of puppet forge module #{puppet_forge_module_name} did not complete successfully!" if pass == false
+    puts ""
+    pass.should eq(true)
+  end
+end
+
+shared_context "Check module_refs.yaml for imported module" do |component_module_filesystem_location, grep_patterns_for_module_refs|
+  it "finds all data #{grep_patterns_for_module_refs} in module_refs.yaml" do
+    puts "Check module_refs.yaml for imported module:", "-----------------------------------"
+    pass = true
+    grep_patterns_for_module_refs.each do |pattern|
+      value = `cat #{component_module_filesystem_location}/module_refs.yaml | grep "#{pattern}"`
+      if value == ""
+        pass = false
+        puts "Pattern #{pattern} has not been found in module_refs.yaml"
+        break
+      end
+    end
+    pass.should eq(true)
+  end
+end

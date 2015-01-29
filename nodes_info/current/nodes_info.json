@@ -1,30 +1,6 @@
 {
   "nodes_info": {
-    "ami-a4e97ccc": {
-      "region": "us-east-1",
-      "type": "rhel6",
-      "os_type": "redhat",
-      "display_name": "Rhel6",
-      "png": "rhel6.png",
-      "sizes": [
-        "t1.micro",
-        "m1.small",
-        "m1.medium"
-      ]
-    },
-    "ami-cae97ca2": {
-      "region": "us-east-1",
-      "type": "precise",
-      "os_type": "ubuntu",
-      "display_name": "Precise",
-      "png": "precise.png",
-      "sizes": [
-        "t1.micro",
-        "m1.small",
-        "m1.medium"
-      ]
-    },
-    "ami-d23e53ba": {
+    "ami-701d5a18": {
       "region": "us-east-1",
       "type": "centos6",
       "os_type": "centos",
@@ -36,7 +12,19 @@
         "m1.medium"
       ]
     },
-    "ami-e2e97c8a": {
+    "ami-b21e59da": {
+      "region": "us-east-1",
+      "type": "rhel6",
+      "os_type": "redhat",
+      "display_name": "Rhel6",
+      "png": "rhel6.png",
+      "sizes": [
+        "t1.micro",
+        "m1.small",
+        "m1.medium"
+      ]
+    },
+    "ami-c81e59a0": {
       "region": "us-east-1",
       "type": "trusty",
       "os_type": "ubuntu",
@@ -48,7 +36,19 @@
         "m1.medium"
       ]
     },
-    "ami-eee97c86": {
+    "ami-e01e5988": {
+      "region": "us-east-1",
+      "type": "precise",
+      "os_type": "ubuntu",
+      "display_name": "Precise",
+      "png": "precise.png",
+      "sizes": [
+        "t1.micro",
+        "m1.small",
+        "m1.medium"
+      ]
+    },
+    "ami-fe1e5996": {
       "region": "us-east-1",
       "type": "wheezy",
       "os_type": "debian",
@@ -60,7 +60,7 @@
         "m1.medium"
       ]
     },
-    "ami-91c0d6d4": {
+    "ami-90b1a8d5": {
       "region": "us-west-1",
       "type": "wheezy",
       "os_type": "debian",
@@ -72,7 +72,7 @@
         "m1.medium"
       ]
     },
-    "ami-99c0d6dc": {
+    "ami-92b1a8d7": {
       "region": "us-west-1",
       "type": "trusty",
       "os_type": "ubuntu",
@@ -84,7 +84,7 @@
         "m1.medium"
       ]
     },
-    "ami-a5c0d6e0": {
+    "ami-96b1a8d3": {
       "region": "us-west-1",
       "type": "precise",
       "os_type": "ubuntu",
@@ -96,19 +96,7 @@
         "m1.medium"
       ]
     },
-    "ami-ad7b66e8": {
-      "region": "us-west-1",
-      "type": "centos6",
-      "os_type": "centos",
-      "display_name": "Centos6",
-      "png": "centos6.png",
-      "sizes": [
-        "t1.micro",
-        "m1.small",
-        "m1.medium"
-      ]
-    },
-    "ami-adc0d6e8": {
+    "ami-a4b1a8e1": {
       "region": "us-west-1",
       "type": "rhel6",
       "os_type": "redhat",
@@ -120,20 +108,8 @@
         "m1.medium"
       ]
     },
-    "ami-2de7ac1d": {
-      "region": "us-west-2",
-      "type": "rhel6",
-      "os_type": "redhat",
-      "display_name": "Rhel6",
-      "png": "rhel6.png",
-      "sizes": [
-        "t1.micro",
-        "m1.small",
-        "m1.medium"
-      ]
-    },
-    "ami-679bcb57": {
-      "region": "us-west-2",
+    "ami-b4b1a8f1": {
+      "region": "us-west-1",
       "type": "centos6",
       "os_type": "centos",
       "display_name": "Centos6",
@@ -144,31 +120,7 @@
         "m1.medium"
       ]
     },
-    "ami-d1e0abe1": {
-      "region": "us-west-2",
-      "type": "wheezy",
-      "os_type": "debian",
-      "display_name": "Wheezy",
-      "png": "wheezy.png",
-      "sizes": [
-        "t1.micro",
-        "m1.small",
-        "m1.medium"
-      ]
-    },
-    "ami-d3e0abe3": {
-      "region": "us-west-2",
-      "type": "trusty",
-      "os_type": "ubuntu",
-      "display_name": "Trusty",
-      "png": "trusty.png",
-      "sizes": [
-        "t1.micro",
-        "m1.small",
-        "m1.medium"
-      ]
-    },
-    "ami-d9e0abe9": {
+    "ami-01164e31": {
       "region": "us-west-2",
       "type": "precise",
       "os_type": "ubuntu",
@@ -180,7 +132,55 @@
         "m1.medium"
       ]
     },
-    "ami-962195e1": {
+    "ami-09164e39": {
+      "region": "us-west-2",
+      "type": "wheezy",
+      "os_type": "debian",
+      "display_name": "Wheezy",
+      "png": "wheezy.png",
+      "sizes": [
+        "t1.micro",
+        "m1.small",
+        "m1.medium"
+      ]
+    },
+    "ami-0d164e3d": {
+      "region": "us-west-2",
+      "type": "trusty",
+      "os_type": "ubuntu",
+      "display_name": "Trusty",
+      "png": "trusty.png",
+      "sizes": [
+        "t1.micro",
+        "m1.small",
+        "m1.medium"
+      ]
+    },
+    "ami-45164e75": {
+      "region": "us-west-2",
+      "type": "centos6",
+      "os_type": "centos",
+      "display_name": "Centos6",
+      "png": "centos6.png",
+      "sizes": [
+        "t1.micro",
+        "m1.small",
+        "m1.medium"
+      ]
+    },
+    "ami-67164e57": {
+      "region": "us-west-2",
+      "type": "rhel6",
+      "os_type": "redhat",
+      "display_name": "Rhel6",
+      "png": "rhel6.png",
+      "sizes": [
+        "t1.micro",
+        "m1.small",
+        "m1.medium"
+      ]
+    },
+    "ami-118d0166": {
       "region": "eu-west-1",
       "type": "rhel6",
       "os_type": "redhat",
@@ -192,31 +192,7 @@
         "m1.medium"
       ]
     },
-    "ami-b22195c5": {
-      "region": "eu-west-1",
-      "type": "precise",
-      "os_type": "ubuntu",
-      "display_name": "Precise",
-      "png": "precise.png",
-      "sizes": [
-        "t1.micro",
-        "m1.small",
-        "m1.medium"
-      ]
-    },
-    "ami-c42195b3": {
-      "region": "eu-west-1",
-      "type": "wheezy",
-      "os_type": "debian",
-      "display_name": "Wheezy",
-      "png": "wheezy.png",
-      "sizes": [
-        "t1.micro",
-        "m1.small",
-        "m1.medium"
-      ]
-    },
-    "ami-cc2195bb": {
+    "ami-278d0150": {
       "region": "eu-west-1",
       "type": "trusty",
       "os_type": "ubuntu",
@@ -228,7 +204,31 @@
         "m1.medium"
       ]
     },
-    "ami-f0fa4287": {
+    "ami-398d014e": {
+      "region": "eu-west-1",
+      "type": "wheezy",
+      "os_type": "debian",
+      "display_name": "Wheezy",
+      "png": "wheezy.png",
+      "sizes": [
+        "t1.micro",
+        "m1.small",
+        "m1.medium"
+      ]
+    },
+    "ami-3d8d014a": {
+      "region": "eu-west-1",
+      "type": "precise",
+      "os_type": "ubuntu",
+      "display_name": "Precise",
+      "png": "precise.png",
+      "sizes": [
+        "t1.micro",
+        "m1.small",
+        "m1.medium"
+      ]
+    },
+    "ami-f78d0180": {
       "region": "eu-west-1",
       "type": "centos6",
       "os_type": "centos",
@@ -240,7 +240,7 @@
         "m1.medium"
       ]
     },
-    "ami-4ff5da1d": {
+    "ami-0282a950": {
       "region": "ap-southeast-1",
       "type": "centos6",
       "os_type": "centos",
@@ -252,43 +252,7 @@
         "m1.medium"
       ]
     },
-    "ami-8086a5d2": {
-      "region": "ap-southeast-1",
-      "type": "wheezy",
-      "os_type": "debian",
-      "display_name": "Wheezy",
-      "png": "wheezy.png",
-      "sizes": [
-        "t1.micro",
-        "m1.small",
-        "m1.medium"
-      ]
-    },
-    "ami-8686a5d4": {
-      "region": "ap-southeast-1",
-      "type": "trusty",
-      "os_type": "ubuntu",
-      "display_name": "Trusty",
-      "png": "trusty.png",
-      "sizes": [
-        "t1.micro",
-        "m1.small",
-        "m1.medium"
-      ]
-    },
-    "ami-8a86a5d8": {
-      "region": "ap-southeast-1",
-      "type": "precise",
-      "os_type": "ubuntu",
-      "display_name": "Precise",
-      "png": "precise.png",
-      "sizes": [
-        "t1.micro",
-        "m1.small",
-        "m1.medium"
-      ]
-    },
-    "ami-8c86a5de": {
+    "ami-1a82a948": {
       "region": "ap-southeast-1",
       "type": "rhel6",
       "os_type": "redhat",
@@ -300,7 +264,43 @@
         "m1.medium"
       ]
     },
-    "ami-8b365db1": {
+    "ami-6882a93a": {
+      "region": "ap-southeast-1",
+      "type": "wheezy",
+      "os_type": "debian",
+      "display_name": "Wheezy",
+      "png": "wheezy.png",
+      "sizes": [
+        "t1.micro",
+        "m1.small",
+        "m1.medium"
+      ]
+    },
+    "ami-6a82a938": {
+      "region": "ap-southeast-1",
+      "type": "precise",
+      "os_type": "ubuntu",
+      "display_name": "Precise",
+      "png": "precise.png",
+      "sizes": [
+        "t1.micro",
+        "m1.small",
+        "m1.medium"
+      ]
+    },
+    "ami-6e82a93c": {
+      "region": "ap-southeast-1",
+      "type": "trusty",
+      "os_type": "ubuntu",
+      "display_name": "Trusty",
+      "png": "trusty.png",
+      "sizes": [
+        "t1.micro",
+        "m1.small",
+        "m1.medium"
+      ]
+    },
+    "ami-397f0b03": {
       "region": "ap-southeast-2",
       "type": "centos6",
       "os_type": "centos",
@@ -312,7 +312,7 @@
         "m1.medium"
       ]
     },
-    "ami-dfc0afe5": {
+    "ami-c17e0afb": {
       "region": "ap-southeast-2",
       "type": "rhel6",
       "os_type": "redhat",
@@ -324,31 +324,7 @@
         "m1.medium"
       ]
     },
-    "ami-e1c0afdb": {
-      "region": "ap-southeast-2",
-      "type": "trusty",
-      "os_type": "ubuntu",
-      "display_name": "Trusty",
-      "png": "trusty.png",
-      "sizes": [
-        "t1.micro",
-        "m1.small",
-        "m1.medium"
-      ]
-    },
-    "ami-e3c0afd9": {
-      "region": "ap-southeast-2",
-      "type": "wheezy",
-      "os_type": "debian",
-      "display_name": "Wheezy",
-      "png": "wheezy.png",
-      "sizes": [
-        "t1.micro",
-        "m1.small",
-        "m1.medium"
-      ]
-    },
-    "ami-e5c0afdf": {
+    "ami-cb7e0af1": {
       "region": "ap-southeast-2",
       "type": "precise",
       "os_type": "ubuntu",
@@ -360,20 +336,8 @@
         "m1.medium"
       ]
     },
-    "ami-67f9c166": {
-      "region": "ap-northeast-1",
-      "type": "wheezy",
-      "os_type": "debian",
-      "display_name": "Wheezy",
-      "png": "wheezy.png",
-      "sizes": [
-        "t1.micro",
-        "m1.small",
-        "m1.medium"
-      ]
-    },
-    "ami-69f9c168": {
-      "region": "ap-northeast-1",
+    "ami-cd7e0af7": {
+      "region": "ap-southeast-2",
       "type": "trusty",
       "os_type": "ubuntu",
       "display_name": "Trusty",
@@ -384,19 +348,31 @@
         "m1.medium"
       ]
     },
-    "ami-6ff9c16e": {
-      "region": "ap-northeast-1",
-      "type": "precise",
-      "os_type": "ubuntu",
-      "display_name": "Precise",
-      "png": "precise.png",
+    "ami-cf7e0af5": {
+      "region": "ap-southeast-2",
+      "type": "wheezy",
+      "os_type": "debian",
+      "display_name": "Wheezy",
+      "png": "wheezy.png",
       "sizes": [
         "t1.micro",
         "m1.small",
         "m1.medium"
       ]
     },
-    "ami-74404975": {
+    "ami-06706907": {
+      "region": "ap-northeast-1",
+      "type": "rhel6",
+      "os_type": "redhat",
+      "display_name": "Rhel6",
+      "png": "rhel6.png",
+      "sizes": [
+        "t1.micro",
+        "m1.small",
+        "m1.medium"
+      ]
+    },
+    "ami-14706915": {
       "region": "ap-northeast-1",
       "type": "centos6",
       "os_type": "centos",
@@ -408,32 +384,8 @@
         "m1.medium"
       ]
     },
-    "ami-77f9c176": {
+    "ami-ea7168eb": {
       "region": "ap-northeast-1",
-      "type": "rhel6",
-      "os_type": "redhat",
-      "display_name": "Rhel6",
-      "png": "rhel6.png",
-      "sizes": [
-        "t1.micro",
-        "m1.small",
-        "m1.medium"
-      ]
-    },
-    "ami-4f75c352": {
-      "region": "sa-east-1",
-      "type": "rhel6",
-      "os_type": "redhat",
-      "display_name": "Rhel6",
-      "png": "rhel6.png",
-      "sizes": [
-        "t1.micro",
-        "m1.small",
-        "m1.medium"
-      ]
-    },
-    "ami-5575c348": {
-      "region": "sa-east-1",
       "type": "precise",
       "os_type": "ubuntu",
       "display_name": "Precise",
@@ -444,7 +396,31 @@
         "m1.medium"
       ]
     },
-    "ami-5975c344": {
+    "ami-ec7168ed": {
+      "region": "ap-northeast-1",
+      "type": "wheezy",
+      "os_type": "debian",
+      "display_name": "Wheezy",
+      "png": "wheezy.png",
+      "sizes": [
+        "t1.micro",
+        "m1.small",
+        "m1.medium"
+      ]
+    },
+    "ami-f07168f1": {
+      "region": "ap-northeast-1",
+      "type": "trusty",
+      "os_type": "ubuntu",
+      "display_name": "Trusty",
+      "png": "trusty.png",
+      "sizes": [
+        "t1.micro",
+        "m1.small",
+        "m1.medium"
+      ]
+    },
+    "ami-21873b3c": {
       "region": "sa-east-1",
       "type": "wheezy",
       "os_type": "debian",
@@ -456,7 +432,7 @@
         "m1.medium"
       ]
     },
-    "ami-5b75c346": {
+    "ami-23873b3e": {
       "region": "sa-east-1",
       "type": "trusty",
       "os_type": "ubuntu",
@@ -468,12 +444,36 @@
         "m1.medium"
       ]
     },
-    "ami-9dcc7f80": {
+    "ami-25873b38": {
+      "region": "sa-east-1",
+      "type": "precise",
+      "os_type": "ubuntu",
+      "display_name": "Precise",
+      "png": "precise.png",
+      "sizes": [
+        "t1.micro",
+        "m1.small",
+        "m1.medium"
+      ]
+    },
+    "ami-51873b4c": {
       "region": "sa-east-1",
       "type": "centos6",
       "os_type": "centos",
       "display_name": "Centos6",
       "png": "centos6.png",
+      "sizes": [
+        "t1.micro",
+        "m1.small",
+        "m1.medium"
+      ]
+    },
+    "ami-5b873b46": {
+      "region": "sa-east-1",
+      "type": "rhel6",
+      "os_type": "redhat",
+      "display_name": "Rhel6",
+      "png": "rhel6.png",
       "sizes": [
         "t1.micro",
         "m1.small",

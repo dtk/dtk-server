@@ -221,12 +221,16 @@ module DTK; class Component
       end
     end
 
-    def self.get_cmp_template_with_namespace(cmp_mh, cmp_name, namespace, assembly)
+    # This method returns a component augmented with keys having objects
+    # :module_branch
+    # :component_module
+    # :namespace
+    def self.get_augmented_component_template(cmp_mh, cmp_name, namespace, assembly)
       ret_cmp, match_cmps, cmp_module_ids = nil, [], []
       display_name = display_name_from_user_friendly_name(cmp_name)
       component_type,title =  ComponentTitle.parse_component_display_name(display_name)
       sp_hash = {
-        :cols => [:id, :group_id, :display_name, :module_branch_id, :type, :ref, :namespace_info_for_cmps,:version],
+        :cols => [:id, :group_id, :display_name, :module_branch_id, :type, :ref, :augmented_with_module_info,:version],
         :filter => [:and,
                     [:eq, :type, 'template'],
                     [:eq, :component_type, component_type],

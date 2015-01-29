@@ -32,7 +32,9 @@ module DTK
     end
 
     # returns true if an update made; this updates the ruby object
-    def update_if_needed(cmp_modules_with_namespaces)
+    # each element in the array cmp_modules_with_namespaces
+    # is a component module object with the added field :namespace_name
+    def update_object_if_needed!(cmp_modules_with_namespaces)
       ret = false
       cmp_modules_with_namespaces.each do |cmp_mod|
         [:display_name,:namespace_name].each do |key|
@@ -116,7 +118,21 @@ module DTK
         }
         @component_modules[key] = ModuleRef.reify(@parent.model_handle,hash_content)
       end
-      self.class.update(@parent,@component_modules)
+      ModuleRef.update(:create_or_update,@parent,@component_modules.values)
+    end
+    
+    def update()
+      module_ref_hash_array = @component_modules.map do |(key,hash)|
+        el = hash
+        unless hash[:module_name]
+          el = el.merge(:module_name => key.to_s)
+        end
+        unless hash[:module_type]
+          el = el.merge(:module_type => 'component')
+        end
+        el
+      end
+      ModuleRef.update(:create_or_update,@parent,module_ref_hash_array)
     end
 
    private
@@ -138,10 +154,6 @@ module DTK
     def meta_filename_path()
       ServiceModule::DSLParser.default_rel_path?(:component_module_refs) ||
         raise(Error.new("Unexpected that cannot compute a meta_filename_path for component_module_refs"))
-    end
-
-    def self.update(parent,cmp_modules)
-      ModuleRef.update(:create_or_update,parent,cmp_modules.values)
     end
 
     def dsl_hash_form()

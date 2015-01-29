@@ -50,7 +50,7 @@ module DTK
         @service_module = service_module
         @service_module_branch = service_module_branch
         @assembly_component_modules = assembly_instance.get_component_modules(:get_version_info=>true)
-        @service_module_refs = service_module.get_component_module_refs()
+        @component_module_refs = service_module.get_component_module_refs()
         self
       end
 
@@ -63,7 +63,7 @@ module DTK
         mismatched_cmp_mods = Array.new
         @assembly_component_modules.each do |cmp_mod|
           cmp_mod_name = cmp_mod[:display_name]
-          if namespace = @service_module_refs.matching_component_module_namespace?(cmp_mod_name)
+          if namespace = @component_module_refs.matching_component_module_namespace?(cmp_mod_name)
             if namespace != cmp_mod[:namespace_name]
               mismatch = {
                 :module_name => cmp_mod_name,
@@ -237,14 +237,14 @@ module DTK
         assembly_hash.merge!(:attribute => assembly_level_attributes) unless assembly_level_attributes.empty?
         assembly_hash.merge!(:port_link => port_links) unless port_links.empty?
         @template_output.merge!(:node => nodes,:component => {assembly_ref => assembly_hash})
-        module_refs_updated = @service_module_refs.update_if_needed(@assembly_component_modules)
+        module_refs_updated = @component_module_refs.update_object_if_needed!(@assembly_component_modules)
         
         Transaction do 
           @template_output.save_to_model()
           if module_refs_updated
-            # TODO: see if need a @service_module_refs.save_to_model() method; may not be needed since 
+            # TODO: see if need a @component_module_refs.update() call; may not be needed since 
             # the way that querying service module to get component module refs is through the component_modules
-            @service_module_refs.serialize_and_save_to_repo?(:update_module_refs => true)
+            @component_module_refs.serialize_and_save_to_repo?(:update_module_refs => true)
           end
           # serialize_and_save_to_repo? returns new_commit_sha
           @template_output.serialize_and_save_to_repo?()

@@ -145,39 +145,6 @@ eos
     }
   end
 
-  def migrate_metafile(module_name)
-    raise Error.new("Function has been deprecated")
-=begin
-# TODO: probably deprecate: it is also out of date so wil not work
-    component_module_mh = pre_execute(:component_module)
-    sp_hash = {
-      :cols => [:id,:dispaly_name],
-      :filter => [:eq,:display_name,module_name]
-    }
-    cm = Model.get_obj(component_module_mh,sp_hash)
-    repos = cm.get_repos()
-    unless repos.size == 1
-      raise Error.new("Cannot find unique repo")
-    end
-    repo = repos.first
-
-    impls = cm.get_library_implementations()
-    unless impls.size == 1
-      raise Error.new("Cannot find unique implementation")
-    end
-    impl = impls.first
-
-    dsl = ModuleDSL.create_dsl_object_from_impl(impl)
-    new_integer_version = 2
-    hash_content = DTK::ModuleDSL::migrate_processor(module_name,new_integer_version,dsl.input_hash).generate_new_version_hash()
-    content = JSON.pretty_generate(hash_content)
-    new_path = "dtk-meta.puppet.json"
-    impl.add_file_and_push_to_repo(new_path,content,:is_meta_file => true)
-    "#{repo[:local_dir]}/#{new_path}"
-=end
-  end
-
-
   def ret_idhs(mn,hash_content,container_idh)
     (hash_content[mn]||{}).keys.map do |key|
       ref = "/#{mn}/#{key}"

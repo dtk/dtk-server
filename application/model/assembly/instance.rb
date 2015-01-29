@@ -160,7 +160,11 @@ module DTK; class  Assembly
       new_obj && new_obj.id_handle()
     end
 
-    def add_component(node_idh,component_template,component_title,namespace=nil)
+    # aug_cmp_template is a component template augmented with keys having objects
+    # :module_branch
+    # :component_module
+    # :namespace
+    def add_component(node_idh,aug_cmp_template,component_title)
       # first check that node_idh is directly attached to the assembly instance
       # one reason it may not be is if its a node group member
       sp_hash = {
@@ -179,11 +183,22 @@ module DTK; class  Assembly
       cmp_instance_idh = nil
 
       Transaction do
-        cmp_instance_idh = node.add_component(component_template,component_title,namespace)
+        cmp_instance_idh = node.add_component(aug_cmp_template,component_title)
+        add_component__update_component_module_refs?(aug_cmp_template[:component_module],aug_cmp_template[:namespace])
         Task::Template::ConfigComponents.update_when_added_component?(self,node,cmp_instance_idh.create_object(),component_title,opts)
       end
       cmp_instance_idh
     end
+    def add_component__update_component_module_refs?(component_module,namespace)
+      assembly_branch = AssemblyModule::Service.get_or_create_assembly_branch(self)
+      component_module_refs = ModuleRefs.get_component_module_refs(assembly_branch)
+      cmp_modules_with_namespaces = component_module.merge(:namespace_name => namespace[:display_name])
+      if update_needed = component_module_refs.update_object_if_needed!([cmp_modules_with_namespaces])
+        # This saves teh upadte to the object model
+        component_module_refs.update()
+      end
+    end
+    private :add_component__update_component_module_refs?
 
     #rturns a node group object if node_idh is a node group member of this assembly instance
     def is_node_group_member?(node_idh)

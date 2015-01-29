@@ -476,13 +476,13 @@ module DTK
       assembly_idh = assembly.id_handle()
 
       cmp_mh = assembly_idh.createMH(:component)
-      unless component_template = Component::Template.get_cmp_template_with_namespace(cmp_mh, cmp_name, namespace, assembly)
+      unless aug_component_template = Component::Template.get_augmented_component_template(cmp_mh, cmp_name, namespace, assembly)
         raise ErrorUsage.new("Component with identifier #{namespace.nil? ? '\'' : ('\'' + namespace + ':')}#{cmp_name}' does not exist!")
       end
       component_title = ret_component_title?(cmp_name)
       # not checking here if node_id points to valid object; check is in add_component
       node_idh = ret_request_param_id_handle(:node_id,Node)
-      new_component_idh = assembly.add_component(node_idh,component_template,component_title,namespace)
+      new_component_idh = assembly.add_component(node_idh,aug_component_template,component_title)
 
       rest_ok_response(:component_id => new_component_idh.get_id())
     end

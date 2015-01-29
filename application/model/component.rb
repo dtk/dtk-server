@@ -429,7 +429,7 @@ module DTK
       display_name = display_name_from_user_friendly_name(cmp_name)
       # display_name = cmp_name.gsub(/::/,"__")
       sp_hash = {
-        :cols => [:id, :display_name, :module_branch_id, :type, :ref, :namespace_info_for_cmps],
+        :cols => [:id, :display_name, :module_branch_id, :type, :ref, :augmented_with_module_info],
         :filter => [:and,
                     [:eq, :display_name, display_name],
                     # [:eq, :type, 'instance'],

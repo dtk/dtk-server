@@ -527,7 +527,7 @@ lambda__instance_nodes_components_assembly_template =
          :cols=>[:id,:group_id,:display_name]
        }]
     },
-    :namespace_info_for_cmps=> {
+    :augmented_with_module_info=> {
       :type=>:json,
       :hidden=>true,
       :remote_dependencies=>

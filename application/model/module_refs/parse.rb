@@ -8,7 +8,7 @@ module DTK
       def self.update_component_module_refs_from_parse_objects(module_class,module_branch,cmp_dsl_form_els)
         hash_content = semantic_parse(module_branch,cmp_dsl_form_els)
         return hash_content if hash_content.kind_of?(ErrorUsage::Parsing)
-        update(module_branch,hash_content)
+        update(module_branch, hash_content)
         ModuleRefs.new(module_branch,hash_content,:content_hash_form_is_reified => true)
       end
 

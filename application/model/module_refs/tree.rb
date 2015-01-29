@@ -15,7 +15,7 @@ module DTK
       private :initialize
       
       # params are assembly instance and the component instances that are in the assembly instance
-      def self.create(assembly_instance,assembly_branch,components)
+      def self.create(assembly_instance, assembly_branch, components)
         create_module_refs_starting_from_assembly(assembly_instance,assembly_branch,components)
       end
 

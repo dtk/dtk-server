@@ -136,6 +136,10 @@ module DTK
     end
 
    private
+   def self.update(parent, cmp_modules)
+      ModuleRef.update(:create_or_update, parent, cmp_modules.values)
+    end
+
     def component_module_ref?(cmp_module_name)
       @component_modules[key(cmp_module_name)]
     end

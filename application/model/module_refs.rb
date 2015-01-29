@@ -132,12 +132,17 @@ module DTK
         end
         el
       end
-      ModuleRef.update(:create_or_update,@parent,module_ref_hash_array)
+      ModuleRef.create_or_update(@parent,module_ref_hash_array)
+    end
+
+    def self.clone_component_module_refs(base_branch,new_branch)
+      cmrs = get_component_module_refs(base_branch)
+      ModuleRef.create_or_update(new_branch,cmrs.component_modules.values)
     end
 
    private
    def self.update(parent, cmp_modules)
-      ModuleRef.update(:create_or_update, parent, cmp_modules.values)
+      ModuleRef.create_or_update( parent, cmp_modules.values)
     end
 
     def component_module_ref?(cmp_module_name)

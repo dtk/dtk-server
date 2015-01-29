@@ -242,10 +242,10 @@ module DTK
         Transaction do 
           @template_output.save_to_model()
           if module_refs_updated
-            # TODO: see if need a @component_module_refs.update() call; may not be needed since 
-            # the way that querying service module to get component module refs is through the component_modules
+            @component_module_refs.update() # update the object model
             @component_module_refs.serialize_and_save_to_repo?(:update_module_refs => true)
           end
+
           # serialize_and_save_to_repo? returns new_commit_sha
           @template_output.serialize_and_save_to_repo?()
         end

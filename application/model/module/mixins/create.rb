@@ -98,13 +98,9 @@ module DTK; module ModuleMixins
   end
 
   module Create::Instance
-    # returns module branch
-    def create_new_version(new_version,opts={})
-      opts_get_aug = Opts.new
-      if base_version = opts[:base_version]
-        opts_get_aug.merge(:filter => {:version => base_version})
-      end
-      unless aug_ws_branch = get_augmented_workspace_branch(opts_get_aug)
+    # returns new module branch
+    def create_new_version(base_version,new_version,opts={})
+      unless aug_base_branch = get_augmented_workspace_branch(Opts.new(:filter => {:version => base_version}))
         raise ErrorUsage.new("There is no module (#{pp_module_name()}) in the workspace")
       end
 
@@ -112,11 +108,11 @@ module DTK; module ModuleMixins
       if get_module_branch_matching_version(new_version)
         raise ErrorUsage.new("Version exists already for module (#{pp_module_name(new_version)})")
       end
-      repo_for_new_version = aug_ws_branch.create_new_branch_from_this_branch?(get_project(),aug_ws_branch[:repo],new_version)
-      opts_type_spec = opts.merge(:ancestor_branch_idh => aug_ws_branch.id_handle(),:ret_module_branch => true)
-      create_new_version__type_specific(repo_for_new_version,new_version,opts_type_spec)
-      #opts_type_spec[:ret_module_branch] will have the module branch
-      opts_type_spec[:ret_module_branch]
+      repo_for_new_version = aug_base_branch.create_new_branch_from_this_branch?(get_project(),aug_base_branch[:repo],new_version)
+      opts_type_spec = opts.merge(:ancestor_branch_idh => aug_base_branch.id_handle())
+      new_branch = create_new_version__type_specific(repo_for_new_version,new_version,opts_type_spec)
+      ModuleRefs.clone_component_module_refs(aug_base_branch,new_branch)
+      new_branch
     end
   end
 end; end

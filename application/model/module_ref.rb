@@ -67,6 +67,10 @@ module DTK
       get_objs(mh,sp_hash)
     end
 
+    def self.create_or_update(parent,module_ref_hash_array)
+      update(:create_or_update,parent,module_ref_hash_array)
+    end
+
     def self.update(operation,parent,module_ref_hash_array)
       return if module_ref_hash_array.empty?
       rows = ret_create_rows(parent,module_ref_hash_array)

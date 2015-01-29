@@ -99,9 +99,9 @@ module DTK; class AssemblyModule
     end
 
     def create_assembly_branch(component_module,am_version)
-      opts = {:base_version=>component_module.get_field?(:version),:assembly_module=>true}
+      base_version = component_module.get_field?(:version) #TODO: is this right; shouldnt version be on branch, not module
       # TODO: very expensive call; will refine
-      component_module.create_new_version(am_version,opts)
+      component_module.create_new_version(base_version,am_version,:assembly_module=>true)
     end
 
     def get_branch_template(module_branch,cmp_template)

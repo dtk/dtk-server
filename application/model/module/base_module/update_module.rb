@@ -55,7 +55,10 @@ module DTK; class BaseModule
       # returns the new module branch
       def create_new_version__type_specific(repo_for_new_branch,new_version,opts={})
         local = UpdateModule.ret_local(self,new_version)
-        response = UpdateModule.new(self).create_needed_objects_and_dsl?(repo_for_new_branch,local,opts)
+        # TODO: this is expensive in that it creates new version by parsing the dsl and reading back in;
+        # would be much less expsensive to clone from branch to branch
+        opts_update = {:skip_module_ref_update => true}.merge(opts)
+        response = UpdateModule.new(self).create_needed_objects_and_dsl?(repo_for_new_branch,local,opts_update)
         response[:module_branch_idh].create_object()
       end
     end

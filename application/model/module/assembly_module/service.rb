@@ -47,7 +47,7 @@ module DTK; class AssemblyModule
     # returns new module branch
     def create_assembly_branch()
       base_version = @service_module.get_field?(:version) #TODO: is this right; shouldnt version be on branch, not module
-      @service_module.create_new_version(base_version,@am_version,:assembly_module => true)
+      @service_module.create_new_version(base_version,@am_version)
     end
 
     def assembly_template_name?(assembly)

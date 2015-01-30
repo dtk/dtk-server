@@ -66,6 +66,15 @@ module DTK
         if service_module = get_parsed_info(assembly_branch_id, "Service")
           ret << Violation::ComponentParsingError.new(service_module[:display_name], "Service") unless service_module[:dsl_parsed]
         end
+
+        assembly_branch = AssemblyModule::Service.get_assembly_branch(self)
+
+        # if module_branch belongs to service instance assembly_module_version? will not be nil
+        if assembly_branch.assembly_module_version?
+          # add violation if module_branch[:dsl_parsed] == false
+          ret << Violation::ComponentParsingError.new(self[:display_name], "Service instance") unless assembly_branch[:dsl_parsed]
+        end
+
         ret
       end
 
@@ -73,8 +82,9 @@ module DTK
         ret = missing = Array.new
         multiple_ns   = Hash.new
         return ret if cmps.empty?
-        assembly_branch = AssemblyModule::Service.get_assembly_branch(self)
-        module_refs_tree   = ModuleRefs::Tree.create(self,assembly_branch,cmps)
+
+        assembly_branch      = AssemblyModule::Service.get_assembly_branch(self)
+        module_refs_tree     = ModuleRefs::Tree.create(self,assembly_branch,cmps)
         missing, multiple_ns = module_refs_tree.violations?
 
         unless missing.empty?

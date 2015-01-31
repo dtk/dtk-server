@@ -121,7 +121,11 @@ module DTK; class BaseModule
         end
       end
 
-      return ret unless opts[:update_from_includes]
+      # TODO: see if can simplify and make this an 'else' to opts[:update_from_includes above
+      unless opts[:update_from_includes]
+        set_dsl_parsed!(true) if !opts[:dsl_parsed_false]
+        return ret 
+      end
 
       no_errors = external_deps.nil? || !external_deps.any_errors?()
       if no_errors and !opts[:dsl_parsed_false]

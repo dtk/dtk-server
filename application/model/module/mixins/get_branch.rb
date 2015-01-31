@@ -12,7 +12,12 @@ module DTK
       def get_module_branch_matching_version(version=nil)
         get_module_branches().find{|mb|mb.matches_version?(version)}
       end
-      
+
+      def get_workspace_repo(version=nil)
+        aug_branch = get_augmented_workspace_branch(:filter => {:version => version})
+        aug_branch[:repo]
+      end      
+
       def get_workspace_branch_info(version=nil,opts={})
         if aug_branch = get_augmented_workspace_branch({:filter => {:version => version}}.merge(opts))
           module_name = aug_branch[:module_name]

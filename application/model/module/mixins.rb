@@ -157,16 +157,6 @@ module DTK
       get_objs_uniq(:repos)
     end
 
-    def get_workspace_repo()
-      sp_hash = {
-        :cols => [:id,:display_name,:workspace_info,:project_project_id]
-      }
-      row = get_obj(sp_hash)
-      # opportunistically set display name and project_project_id on module
-      self[:display_name] ||= row[:display_name]
-      self[:project_project_id] ||= row[:project_project_id]
-      row[:repo]
-    end
     def get_implementations()
       get_objs_uniq(:implementations)
     end

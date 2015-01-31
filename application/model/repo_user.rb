@@ -158,7 +158,7 @@ module DTK
       ret = nil
       repo_users = get_existing_repo_users(repo_user_mh,filters_keys,cols)
       if repo_users.size > 1
-        raise Error.new("Unexpected to have multiple matches of repo user when matching on (#{filters_keys.inspect})")
+        Log.error("Unexpected to have multiple matches of repo user when matching on (#{filters_keys.inspect})")
       end
       repo_users.first
     end

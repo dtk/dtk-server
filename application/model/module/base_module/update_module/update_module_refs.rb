@@ -82,7 +82,8 @@ module DTK; class BaseModule; class UpdateModule
       # update the component_module_ref objects from elements of ndx_cmr_info that are unique
       cmr_update_els = ModuleRefs::ComponentDSLForm::Elements.new
       ndx_cmr_info.each_value do |match_info|
-        if [:dsl,:unique_match].include?(match_info.match_type)
+        # TODO: better explanation why matching againts both :dsl and :single_match
+        if [:dsl,:single_match].include?(match_info.match_type)
           cmr_update_els.add!(match_info.match_array)
         end
       end
@@ -90,18 +91,6 @@ module DTK; class BaseModule; class UpdateModule
 
       {:external_dependencies => external_deps}
     end
-
-=begin
-      TODO: For Aldin: this is fragment that was in old code above does not have message in ret; might
-      want to put in back in
-      unless mapped_cmrs.empty?
-        update_component_module_refs(mapped_cmrs) 
-        message = "The module refs file was updated by the server based on includes section from dtk.model.yaml"
-        ret.merge!(:message => message)
-      end
-
-    end
-=end    
 
     # These are modules in the component module include section of dtk.model.yaml
     def component_module_names_in_include_statements?()

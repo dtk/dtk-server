@@ -38,7 +38,7 @@ module DTK; class BaseModule; class UpdateModule
 
       dsl_created_info = ModuleDSLInfo::CreatedInfo.new()
       if klass().contains_dsl_file?(impl_obj)
-        if err = parse_dsl_and_update_model_with_err_trap(impl_obj,module_branch_idh,version,opts.merge(:project => project))
+        if err = parse_dsl_and_update_model_with_err_trap(impl_obj,module_branch_idh,version,opts.merge!(:project => project))
           ret.merge!(:dsl_parse_error => err)
         end
       elsif opts[:scaffold_if_no_dsl]
@@ -46,7 +46,7 @@ module DTK; class BaseModule; class UpdateModule
         dsl_created_info = ScaffoldImplementation.create_dsl(module_name(),config_agent_type,impl_obj,opts_scaffold)
         if opts[:commit_dsl]
           # add dsl file and create DTK module objects from the dsl
-          add_dsl_to_impl_and_create_objects(dsl_created_info,project,impl_obj,module_branch_idh,version)
+          add_dsl_to_impl_and_create_objects(dsl_created_info,project,impl_obj,module_branch_idh,version,opts)
         else
           Log.error("Unexpected that opts[:commit_dsl] is false when opts[:scaffold_if_no_dsl] is true")
         end

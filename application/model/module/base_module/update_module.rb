@@ -146,9 +146,10 @@ module DTK; class BaseModule
       local_params.create_local(base_module.get_project())
     end
 
-    def add_dsl_to_impl_and_create_objects(dsl_created_info,project,impl_obj,module_branch_idh,version)
+    def add_dsl_to_impl_and_create_objects(dsl_created_info,project,impl_obj,module_branch_idh,version,opts={})
       impl_obj.add_file_and_push_to_repo(dsl_created_info[:path],dsl_created_info[:content])
-      parse_dsl_and_update_model(impl_obj,module_branch_idh,version,:project => project,:dsl_created_info => dsl_created_info)
+      opts.merge!(:project => project,:dsl_created_info => dsl_created_info)
+      parse_dsl_and_update_model(impl_obj,module_branch_idh,version,opts)
     end
 
    private

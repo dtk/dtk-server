@@ -3,8 +3,9 @@ require 'grit'
 require 'fileutils'
 r8_nested_require('git','manage_git_server')
 
-Grit.debug = R8::Config[:debug][:grit]
-
+Grit.debug = R8::Config[:grit][:debug]
+Grit::Git.git_timeout = R8::Config[:grit][:git_timeout]
+Grit::Git.git_max_size = R8::Config[:grit][:git_max_size]
 
 module DTK
   class RepoManagerGit < RepoManager

@@ -56,20 +56,18 @@ module DTK
         return ret if cmps.empty?
 
         cmps.each do |cmp|
-          cmp_module = get_parsed_info(cmp[:module_branch_id], "Component")
-          if cmp_module
-            ret << Violation::ComponentParsingError.new(cmp_module[:display_name], "Component") unless cmp_module[:dsl_parsed]
+          cmp_module_branch = get_parsed_info(cmp[:module_branch_id], "Branch")
+          if cmp_module_branch && cmp_module_branch[:component_module]
+            ret << Violation::ComponentParsingError.new(cmp_module_branch[:component_module][:display_name], "Component") unless cmp_module_branch[:dsl_parsed]
           end
         end
 
-        assembly_branch_id = self[:module_branch_id]
-        if service_module = get_parsed_info(assembly_branch_id, "Service")
-          ret << Violation::ComponentParsingError.new(service_module[:display_name], "Service") unless service_module[:dsl_parsed]
+        if service_module_branch = get_parsed_info(self[:module_branch_id], "Branch")
+          ret << Violation::ComponentParsingError.new(service_module_branch[:service_module][:display_name], "Service") unless service_module_branch[:dsl_parsed]
         end
 
-        assembly_branch = AssemblyModule::Service.get_assembly_branch(self)
-
         # if module_branch belongs to service instance assembly_module_version? will not be nil
+        assembly_branch = AssemblyModule::Service.get_assembly_branch(self)
         if assembly_branch.assembly_module_version?
           # add violation if module_branch[:dsl_parsed] == false
           ret << Violation::ComponentParsingError.new(self[:display_name], "Service instance") unless assembly_branch[:dsl_parsed]
@@ -105,13 +103,14 @@ module DTK
       def get_parsed_info(module_branch_id, type)
         ret = nil
         sp_hash = {
-          :cols => [:id, :type, :component_id, :service_id],
+          :cols => [:id, :type, :component_id, :service_id, :dsl_parsed, :component_module_info, :service_module],
           :filter => [:eq, :id, module_branch_id]
         }
         unless branch = Model.get_obj(model_handle(:module_branch),sp_hash)
-        # assembly, such as workspace does not have a branch associated with it
           return ret
         end
+
+        return branch if type.to_s.eql?("Branch")
 
         if (type == "Component")
           sp_cmp_hash = {

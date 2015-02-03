@@ -309,7 +309,8 @@ module DTK
     end
 
     def publish_preprocess_raise_error?(module_branch_obj)
-      unless get_field?(:dsl_parsed)
+      # unless get_field?(:dsl_parsed)
+      unless module_branch_obj.dsl_parsed?()
         raise ErrorUsage.new("Unable to publish module that has parsing errors. Please fix errors and try to publish again.")
       end
 

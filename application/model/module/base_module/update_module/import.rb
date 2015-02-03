@@ -27,7 +27,8 @@ module DTK; class BaseModule; class UpdateModule
 
       component_module = module_and_branch_info[:module_idh].create_object()
 
-      component_module.set_dsl_parsed!(false)
+      # component_module.set_dsl_parsed!(false)
+      module_branch.set_dsl_parsed!(false)
       include_modules = cmr_update_els.map{|r|r.component_module}
 
       # scaffold Puppet manifests
@@ -42,7 +43,8 @@ module DTK; class BaseModule; class UpdateModule
 
       UpdateModuleRefs.update_component_module_refs_and_save_dsl?(module_branch,cmr_update_els,component_module)
 
-      component_module.set_dsl_parsed!(true)
+      # component_module.set_dsl_parsed!(true)
+      module_branch.set_dsl_parsed!(true)
       # need component module id to be returned to client
       component_module[:id]
     end
@@ -51,7 +53,8 @@ module DTK; class BaseModule; class UpdateModule
       ret = UpdateModuleOutput.new()
       pull_was_needed = @module_branch.pull_repo_changes?(commit_sha)
 
-      parse_needed = !dsl_parsed?()
+      # parse_needed = !dsl_parsed?()
+      parse_needed = !@module_branch.dsl_parsed?()
       return ret unless pull_was_needed or parse_needed
 
       repo = repo_idh.create_object()
@@ -78,7 +81,8 @@ module DTK; class BaseModule; class UpdateModule
       end
 
       if !external_deps.any_errors? and !opts[:dsl_parsed_false]
-        set_dsl_parsed!(true)
+        # set_dsl_parsed!(true)
+        @module_branch.set_dsl_parsed!(true)
       end
 
       ret
@@ -88,7 +92,8 @@ module DTK; class BaseModule; class UpdateModule
       ret = UpdateModuleOutput.new()
       pull_was_needed = @module_branch.pull_repo_changes?(commit_sha)
       
-      parse_needed = !dsl_parsed?()
+      # parse_needed = !dsl_parsed?()
+      parse_needed = !@module_branch.dsl_parsed?()
       return ret unless pull_was_needed or parse_needed
       repo  = repo_idh.create_object()
       local = ret_local(@version)
@@ -101,7 +106,8 @@ module DTK; class BaseModule; class UpdateModule
       ret           = UpdateModuleOutput.create_from_update_create_info(create_info)
       external_deps = ret.external_dependencies()
 
-      set_dsl_parsed!(false)
+      # set_dsl_parsed!(false)
+      @module_branch.set_dsl_parsed!(false)
 
       opts_parse = {:config_agent_type => create_info[:config_agent_type]}.merge(opts)
       if dsl_created_info = ret.dsl_created_info?
@@ -128,7 +134,8 @@ module DTK; class BaseModule; class UpdateModule
       end
 
       if !external_deps.any_errors? and !opts[:dsl_parsed_false]
-        set_dsl_parsed!(true)
+        # set_dsl_parsed!(true)
+        @module_branch.set_dsl_parsed!(true)
       end
 
       ret

@@ -331,7 +331,8 @@ module DTK
         }
         cmp_module = Model.get_obj(model_handle(:component_module),sp_cmp_hash)
 
-        ret << NodeViolations::NodeComponentParsingError.new(cmp_module[:display_name], "Component") unless cmp_module[:dsl_parsed]
+        # ret << NodeViolations::NodeComponentParsingError.new(cmp_module[:display_name], "Component") unless cmp_module[:dsl_parsed]
+        ret << NodeViolations::NodeComponentParsingError.new(cmp_module[:display_name], "Component") unless branch.dsl_parsed?()
       end
 
       ret

@@ -27,6 +27,14 @@ module DTK
       get_field?(:type).to_sym
     end
 
+    def set_dsl_parsed!(boolean_val)
+      update(:dsl_parsed => boolean_val)
+    end
+
+    def dsl_parsed?()
+      get_field?(:dsl_parsed)
+    end
+
     def get_module_repo_info()
       repo = get_repo(:repo_name)
       module_obj = get_module()
@@ -119,6 +127,7 @@ end
     def is_set_to_sha?(commit_sha)
       commit_sha == get_field?(:current_sha)
     end
+
     def set_sha(commit_sha)
       update(:current_sha => commit_sha)
       commit_sha

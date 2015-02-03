@@ -20,7 +20,7 @@ module DTK; class BaseModule; class UpdateModule
         opts_finalize = (meta_file_changed ? {:meta_file_changed => true} : {})
         AssemblyModule::Component.finalize_edit(assembly,@base_module,module_branch,opts_finalize)
       elsif ModuleDSL.contains_dsl_file?(impl_obj)
-        if opts[:force_parse] or diffs_summary.meta_file_changed?() or (get_field?(:dsl_parsed) == false)
+        if opts[:force_parse] or diffs_summary.meta_file_changed?() or (module_branch.dsl_parsed?() == false)
           if e = parse_dsl_and_update_model_with_err_trap(impl_obj,module_branch.id_handle(),version,opts)
             ret.dsl_parse_error = e
           end

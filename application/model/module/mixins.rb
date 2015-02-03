@@ -124,7 +124,8 @@ module DTK
       # do pull and see if any changes need the model to be updated
       module_branch = get_workspace_module_branch(version)
       pull_was_needed = module_branch.pull_repo_changes?(commit_sha)
-      parse_needed = (opts[:force_parse] or !dsl_parsed?())
+      # parse_needed = (opts[:force_parse] or !dsl_parsed?())
+      parse_needed = (opts[:force_parse] or !module_branch.dsl_parsed?())
       update_from_includes = opts[:update_from_includes]
       return unless pull_was_needed or parse_needed or update_from_includes
 
@@ -346,7 +347,8 @@ module DTK
       include_versions   = opts.array(:detail_to_include).include?(:versions)
       include_any_detail = ((include_remotes or include_versions) ? true : nil)
 
-      cols = [:id, :display_name, :namespace_id, :dsl_parsed, :namespace, include_any_detail && :module_branches_with_repos].compact
+      # cols = [:id, :display_name, :namespace_id, :dsl_parsed, :namespace, include_any_detail && :module_branches_with_repos].compact
+      cols = [:id, :display_name, :namespace_id, :namespace, include_any_detail && :module_branches_with_repos].compact
       unsorted_ret = get_all(project_idh,cols)
 
       # if namespace provided with list command filter before aggregating details
@@ -359,7 +361,10 @@ module DTK
         if r[:namespace]
           r[:display_name] = Namespace.join_namespace(r[:namespace][:display_name], r[:display_name])
         end
+
+        r[:dsl_parsed] = r[:module_branch][:dsl_parsed] if r[:module_branch]
       end
+
       if include_any_detail
         opts_aggr = Opts.new(
           :include_remotes => include_remotes,

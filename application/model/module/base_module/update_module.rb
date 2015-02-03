@@ -78,7 +78,8 @@ module DTK; class BaseModule
       if is_parsing_error?(response)
         response
       else
-        set_dsl_parsed!(true)
+        # set_dsl_parsed!(true)
+        module_branch.set_dsl_parsed!(true)
         nil
       end
     end
@@ -96,8 +97,10 @@ module DTK; class BaseModule
     end
     def parse_dsl_and_update_model(impl_obj,module_branch_idh,version,opts={})
       ret = Hash.new
-      set_dsl_parsed!(false)
       module_branch = module_branch_idh.create_object()
+
+      # set_dsl_parsed!(false)
+      module_branch.set_dsl_parsed!(false)
       config_agent_type = opts[:config_agent_type] || config_agent_type_default()
       # TODO: for efficiency can change parse_dsl to take option opts[:dsl_created_info]
       dsl_obj = parse_dsl(impl_obj,opts.merge(:config_agent_type => config_agent_type))
@@ -123,13 +126,15 @@ module DTK; class BaseModule
 
       # TODO: see if can simplify and make this an 'else' to opts[:update_from_includes above
       unless opts[:update_from_includes]
-        set_dsl_parsed!(true) if !opts[:dsl_parsed_false]
+        # set_dsl_parsed!(true) if !opts[:dsl_parsed_false]
+        module_branch.set_dsl_parsed!(true) if !opts[:dsl_parsed_false]
         return ret 
       end
 
       no_errors = external_deps.nil? || !external_deps.any_errors?()
       if no_errors and !opts[:dsl_parsed_false]
-        set_dsl_parsed!(true)
+        # set_dsl_parsed!(true)
+        module_branch.set_dsl_parsed!(true)
       end
 
       opts[:external_dependencies] = external_deps if external_deps

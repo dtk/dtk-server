@@ -73,6 +73,7 @@ module DTK; class AssemblyModule
       @assembly.get_objs(:cols=> [:instance_component_module_branches]).each do |r|
         component_module = r[:component_module]
         component_module.merge!({:namespace_name => r[:namespace][:display_name]}) if r[:namespace]
+        component_module.merge!({:dsl_parsed => r[:module_branch][:dsl_parsed]}) if r[:module_branch]
         ndx_ret[component_module[:id]] ||= component_module.merge(add_module_branches ? r.hash_subset(:module_branch) : {})
       end
       ret = ndx_ret.values

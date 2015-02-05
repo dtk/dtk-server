@@ -11,10 +11,12 @@ module DTK; class BaseModule; class UpdateModule
       opts.merge!(:project => project)
       # TODO: make more robust to handle situation where diffs dont cover all changes; think can detect by looking at shas
       impl_obj.modify_file_assets(diffs_summary)
-      
+
       if version.kind_of?(ModuleVersion::AssemblyModule)
         if meta_file_changed = diffs_summary.meta_file_changed?()
-          parse_dsl_and_update_model(impl_obj,module_branch.id_handle(),version,opts)
+          if e = parse_dsl_and_update_model(impl_obj,module_branch.id_handle(),version,opts)
+            ret.dsl_parse_error = e
+          end
         end
         assembly = version.get_assembly(@base_module.model_handle(:component))
         opts_finalize = (meta_file_changed ? {:meta_file_changed => true} : {})
@@ -42,7 +44,8 @@ module DTK; class BaseModule; class UpdateModule
 
   private
    def parse_dsl_and_update_model(impl_obj,module_branch_idh,version,opts={})
-     @base_module.parse_dsl_and_update_model(impl_obj,module_branch_idh,version,opts)
+     # need to return dsl_parse_error to display error message when push module updates from service instance
+     klass()::ParsingError.trap(:only_return_error=>true){@base_module.parse_dsl_and_update_model(impl_obj,module_branch_idh,version,opts)}
    end
  end 
 end; end; end

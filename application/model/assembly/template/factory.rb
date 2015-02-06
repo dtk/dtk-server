@@ -232,7 +232,8 @@ module DTK
         assembly_ref = self[:ref]
         assembly_hash = hash_subset(:display_name,:type,:ui,:module_branch_id,:component_type)
 
-        description = self[:description]||@assembly_instance.get_field?(:description)
+        # description = self[:description]||@assembly_instance.get_field?(:description)
+        description = self[:description]||self[:display_name]
         assembly_hash.merge!(:description => description) if description
 
         assembly_hash.merge!(:task_template => task_templates) unless task_templates.empty?

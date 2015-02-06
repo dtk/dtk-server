@@ -451,6 +451,10 @@ module DTK
         opts.merge!(:namespace => module_namespace)
       end
 
+      if description = ret_request_params(:description)
+        opts.merge!(:description => description)
+      end
+
       if local_clone_dir_exists = ret_request_params(:local_clone_dir_exists)
         opts.merge!(:local_clone_dir_exists => local_clone_dir_exists)
       end

@@ -114,6 +114,7 @@ module DTK
             :module_branch_id => service_module_branch[:id],
             :component_type => Assembly.ret_component_type(service_module_name,assembly_name)
           }
+          hash_values.merge!(:description => opts[:description]) if opts[:description]
           ret = create(assembly_mh,hash_values)
           ret.set_object_attributes!(project_idh,assembly_instance,service_module,service_module_branch)
         end
@@ -230,9 +231,10 @@ module DTK
         @template_output = ServiceModule::AssemblyExport.create(self,project_idh,service_module_branch)
         assembly_ref = self[:ref]
         assembly_hash = hash_subset(:display_name,:type,:ui,:module_branch_id,:component_type)
-        if description = @assembly_instance.get_field?(:description)
-          assembly_hash.merge!(:description => description)
-        end
+
+        description = self[:description]||@assembly_instance.get_field?(:description)
+        assembly_hash.merge!(:description => description) if description
+
         assembly_hash.merge!(:task_template => task_templates) unless task_templates.empty?
         assembly_hash.merge!(:attribute => assembly_level_attributes) unless assembly_level_attributes.empty?
         assembly_hash.merge!(:port_link => port_links) unless port_links.empty?

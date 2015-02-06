@@ -215,6 +215,12 @@ module DTK
       return tenant_response
     end
 
+    def validate_catalog_credentials(username, password)
+      response = handle_error(:raise_error => true) do
+        RestClientWrapper.post("#{@rest_base_url}/v1/auth/login", {:username => username, :password => password} )
+      end
+    end
+
     ###
     ##  Legacy methods
     #

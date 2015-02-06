@@ -35,6 +35,10 @@ module DTK
         client.remove_client_access(username)
       end
 
+      def validate_catalog_credentials(username, password)
+        client.validate_catalog_credentials(username, password)
+      end
+
       def create_tenant_user()
         username        = dtk_instance_remote_repo_username()
         rsa_pub_key     = dtk_instance_rsa_pub_key()

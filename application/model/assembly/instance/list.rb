@@ -5,7 +5,7 @@ module DTK; class  Assembly
         target_idh = opts[:target_idh]
         target_filter = (target_idh ? [:eq, :datacenter_datacenter_id, target_idh.get_id()] : [:neq, :datacenter_datacenter_id, nil])
         filter = [:and, [:eq, :type, "composite"], target_filter,opts[:filter]].compact
-        
+
         sp_hash = {
           :cols => [:id, :display_name].compact,
           :filter => filter
@@ -61,7 +61,7 @@ module DTK; class  Assembly
           next unless task[:started_at]
           assembly_id = task[:assembly_id]
           if pntr = ndx_task_rows[assembly_id]
-            if task[:started_at] > pntr[:started_at] 
+            if task[:started_at] > pntr[:started_at]
               ndx_task_rows[assembly_id] =  task.slice(:status,:started_at)
             end
           else
@@ -82,7 +82,7 @@ module DTK; class  Assembly
 
     module ListMixin
       def info_about(about,opts=Opts.new)
-        case about 
+        case about
         when :attributes
           list_attributes(opts)
         when :components
@@ -133,7 +133,7 @@ module DTK; class  Assembly
       end
 
       def list_nodes(opts=Opts.new)
-        opts.merge!(:remove_node_groups=>true)
+        opts.merge!(:remove_node_groups=>false)
         nodes = get_nodes__expand_node_groups(opts)
         nodes.each do |node|
           set_node_display_name!(node)
@@ -146,9 +146,17 @@ module DTK; class  Assembly
               target[:iaas_properties][:security_group_set].join(',') if target[:iaas_properties][:security_group_set]
           end
           node.sanitize!()
+
+          # we set dtk-client-type since we need to distinguish between node / node-group
+          is_node_group = "node_group_staged".eql?(node[:type])
+          node[:dtk_client_type]   = is_node_group ? :node_group : :node
+          node[:dtk_client_hidden] = is_node_group
         end
+
         nodes.sort{|a,b| a[:display_name] <=> b[:display_name] }
       end
+
+
       private :list_nodes
       def set_node_display_name!(node)
         node[:display_name] = node.assembly_node_print_form()
@@ -169,7 +177,7 @@ module DTK; class  Assembly
           display_name = "#{node_cmp_name.nil? ? node_name : ''}#{Component::Instance.print_form(r, namespace)}"
           r.hash_subset(:id).merge({:display_name => display_name})
         end
-      
+
         sort = proc{|a,b|a[:display_name] <=> b[:display_name]}
         if opts.array(:detail_to_include).include?(:component_dependencies)
           opts.set_datatype!(:component_with_dependencies)
@@ -237,7 +245,7 @@ module DTK; class  Assembly
       def ret_ndx_component_print_form(aug_cmps,cmps_with_print_form)
         # has lookup that includes each satisfied_by_component
         ret = cmps_with_print_form.inject(Hash.new){|h,cmp|h.merge(cmp[:id] => cmp[:display_name])}
-        
+
         # see if theer is any components that are nreferenced but not in ret
         needed_cmp_ids = Array.new
         aug_cmps.each do |aug_cmp|
@@ -250,7 +258,7 @@ module DTK; class  Assembly
           end
         end
         return ret if needed_cmp_ids.empty?
-        
+
         filter_array = needed_cmp_ids.map{|cmp_id|[:eq,:id,cmp_id]}
         filter = (filter_array.size == 1 ? filter_array.first : [:or] + filter_array)
         additional_cmps = list_components(Opts.new(:filter => filter))

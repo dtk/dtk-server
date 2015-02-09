@@ -81,8 +81,15 @@ module DTK
         multiple_ns   = Hash.new
         return ret if cmps.empty?
 
-        assembly_branch      = AssemblyModule::Service.get_assembly_branch(self)
-        module_refs_tree     = ModuleRefs::Tree.create(self,assembly_branch,cmps)
+        assembly_branch = AssemblyModule::Service.get_assembly_branch(self)
+
+        begin
+          module_refs_tree = ModuleRefs::Tree.create(self,assembly_branch,cmps)
+        rescue ErrorUsage => e
+          ret << Violation::HasItselfAsDependency.new(e.message)
+          return ret
+        end
+
         missing, multiple_ns = module_refs_tree.violations?
 
         unless missing.empty?
@@ -206,6 +213,17 @@ module DTK
         end
         def description()
           "Module '#{@included_module}' included in dsl is mapped to multiple namespaces: #{@namespaces.join(', ')}."
+        end
+      end
+      class HasItselfAsDependency < self
+        def initialize(message)
+          @message = message
+        end
+        def type()
+          :has_itself_as_dependency
+        end
+        def description()
+          @message
         end
       end
     end

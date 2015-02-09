@@ -121,7 +121,9 @@ module DTK
         #TODO: can bulk up
         subtrees.each do |subtree|
           get_children([subtree.module_branch]) do |module_name,namespace,child|
-            raise ErrorUsage.new("Module '#{namespace}:#{module_name}' cannot have itself listed as dependency") if subtree.module_branch == child.module_branch 
+            if subtree && child
+              raise ErrorUsage.new("Module '#{namespace}:#{module_name}' cannot have itself listed as dependency") if subtree.module_branch == child.module_branch 
+            end
             leaves << child if child
             subtree.add_module_ref!(module_name,child)
           end

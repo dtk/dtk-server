@@ -94,15 +94,18 @@ module DTK; class Task; class Template
         (node()||{})[:display_name]
       end
       
-      def config_agent_type()
-        # TODO: for now all  elements have same config_agent_type, so can just pick first
-        first && first.config_agent_type()
-      end
       def components()
         ret = Array.new
         each{|exec_block|ret += exec_block.components()}
         ret
       end
+
+      def components_hash_with(opts={})
+        ret = Array.new
+        each{|exec_block|ret += exec_block.components_hash_with(opts)}
+        ret
+      end
+
      private
       def execution_block(execution_block_index)
         if execution_block_index == :last

@@ -201,12 +201,10 @@ module DTK; class Task
             hash = object
           when :execution_blocks
             exec_blocks = object
-            config_agent_type = exec_blocks.config_agent_type()
             hash = {
               :node => exec_blocks.node(),
               :state_change_types => ["converge_component"],
-              :config_agent_type => config_agent_type,
-              :component_actions => OnComponent.create_list_from_execution_blocks(exec_blocks,config_agent_type)
+              :component_actions => OnComponent.create_list_from_execution_blocks(exec_blocks)
             }
             hash.merge!(:assembly_idh => assembly_idh) if assembly_idh
             intra_node_stages = exec_blocks.intra_node_stages()

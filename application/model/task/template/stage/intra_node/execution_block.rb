@@ -6,18 +6,32 @@ module DTK; class Task; class Template
         # all the elements have same node so can just pick first
         first && first[:node]
       end
-      def config_agent_type()
-        # TODO: for now all  elements have same config_agent_type, so can just pick first
-        first && first.config_agent_type()
-      end
+
       def components()
-        map{|a|a.hash_subset(*Component::Instance.component_list_fields)}
+        map{|action|component(action)}
       end
-      def components_with_group_nums()
-        map{|a|{:component => a.hash_subset(*Component::Instance.component_list_fields),:component_group_num => a.component_group_num}}
+      def component(action)
+        action.hash_subset(*Component::Instance.component_list_fields)
       end
-      private :components_with_group_nums
-        
+      private :component
+
+      # opts can be
+      #  :group_nums
+      #  :action_methods
+      def components_hash_with(opts={})
+        map do |action| 
+          cmp_hash = {:component => component(action)}
+          if opts[:group_nums]
+            cmp_hash.merge!(:component_group_num => action.component_group_num)
+          end
+          if opts[:action_methods]
+            if action_method = action.action_method?()
+              cmp_hash.merge!(:action_method => action_method) 
+            end
+          end
+          cmp_hash
+        end
+      end
 
       def find_earliest_match?(action_match,action_indexes)
         each_action_with_position do |a,pos|
@@ -114,7 +128,7 @@ module DTK; class Task; class Template
         ret = Array.new
         component_group_num = 1
         component_group = nil
-        components_with_group_nums().map do |cmp_with_group_num|
+        components_hash_with(:group_nums=>true).map do |cmp_with_group_num|
           cmp = cmp_with_group_num[:component]
           if cgn = cmp_with_group_num[:component_group_num]
             unless cgn == component_group_num 

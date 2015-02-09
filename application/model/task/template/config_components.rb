@@ -110,8 +110,12 @@ module DTK; class Task
             assembly_action_content
           else #action_types has both and assembly and node_centric
             node_centric_content = generate_from_temporal_contraints(:node_centric,assembly,cmp_actions)
-            opts_splice = (node_centric_first_stage?() ? {:node_centric_first_stage => true} : Hash.new)
-            assembly_action_content.splice_in_at_beginning!(node_centric_content,opts_splice)
+            if node_centric_content.empty?
+              assembly_action_content
+            else
+              opts_splice = (node_centric_first_stage?() ? {:node_centric_first_stage => true} : Hash.new)
+              assembly_action_content.splice_in_at_beginning!(node_centric_content,opts_splice)
+            end
           end
         end
       end

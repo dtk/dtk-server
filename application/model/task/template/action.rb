@@ -12,9 +12,25 @@ module DTK; class Task; class Template
     end
     private :initialize
 
+    def self.find_action_in_list?(serialized_item,node_name,action_list,opts={})
+      # method_name could be nil
+      component_name_ref,method_name = WithMethod.parse(serialized_item)
+      if action = action_list.find_matching_action(node_name,:component_name_ref => component_name_ref)
+        if cgn = opts[:component_group_num]
+          action = action.in_component_group(cgn)
+        end
+        create(action,method_name ? {:method_name => method_name} : {})
+      end
+    end
+
     def self.create(object,opts={})
       if object.kind_of?(Component)
-        ComponentAction.new(object,opts)
+        base_action = ComponentAction.new(object,opts)
+        if method_name = opts[:method_name]
+          ComponentAction::WithMethod.new(base_action,method_name)
+        else
+          base_action
+        end
       else
         raise Error.new("Not yet implemented treatment of action of type {#{object.class.to_s})")
       end

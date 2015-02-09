@@ -181,24 +181,41 @@ module DTK; class Task
         end
       end
 
-      def self.create_list_from_execution_blocks(exec_blocks)
-        ret = Array.new
-        exec_blocks.components_hash_with(:action_methods=>true).each  do |cmp_hash|
+      # returns [action_array,config_agent_type]
+      def self.create_actions_from_execution_blocks(exec_blocks)
+        actions = Array.new
+        cmps_info = exec_blocks.components_hash_with(:action_methods=>true)
+        config_agent_type = config_agent_type(cmps_info)
+        cmps_info.each do |cmp_hash|
           cmp = cmp_hash[:component]
           action_method = cmp_hash[:action_method] # can be nil
           config_agent_type = (action_method||cmp).config_agent_type
           hash = {
             :attributes => Array.new,
-            :component => cmp,
-            :on_node_config_agent_type => config_agent_type
+            :component => cmp
           }
           if action_method
             hash.merge!(:action_method => action_method)
           end
-          ret << new(hash)
+          actions << new(hash)
         end
-        ret
+        [actions,config_agent_type]
       end
+      def self.config_agent_type(cmps_info)
+        ca_types = cmps_info.map do |cmp_hash|
+          cmp = cmp_hash[:component]
+          action_method = cmp_hash[:action_method] # can be nil
+          (action_method||cmp).config_agent_type
+        end.uniq
+        if ca_types.find{|r|r.nil?}
+          raise Error.new("Unexpected that nil is in config_agent_types: #{ca_types.inspect}")
+        end
+        unless ca_types.size == 1
+          raise ErrorUsage.new("Actions with different providers (#{ca_types.join(',')}) cannot be in the same workflow stage")
+        end
+        ca_types.first
+      end
+      private_class_method :config_agent_type
 
       def self.create_from_state_change(scs_same_cmp,deps)
         state_change = scs_same_cmp.first
@@ -207,8 +224,7 @@ module DTK; class Task
         hash = {
           :state_change_pointer_ids => pointer_ids, #this field used to update teh coorepdonsing state change after thsi action is run
           :attributes => Array.new,
-          :component => state_change[:component],
-          :on_node_config_agent_type => state_change.on_node_config_agent_type(),
+          :component => state_change[:component]
         }
         hash.merge!(:component_dependencies => deps) if deps
 

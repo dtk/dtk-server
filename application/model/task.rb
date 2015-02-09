@@ -305,8 +305,7 @@ module DTK
 
     def get_config_agent_type(executable_action=nil)
       executable_action ||= executable_action()
-      # just takes one sample since assumes all component actions have same config agent
-      (executable_action.component_actions().first||{})[:on_node_config_agent_type]
+      executable_action.component_actions().config_agent_type()
     end
     def get_config_agent()
       ConfigAgent.load(get_config_agent_type())

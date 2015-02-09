@@ -1,13 +1,11 @@
 module DTK; class Task; class Template
   class Action
     class WithMethod < self
-      # opts can have keys
-      # :method_name
-      def initialize(action,opts={})
+      # TODO: treat :params in opts
+      def initialize(action,method_name)
         @action = action
-        @method_name = opts[:method_name] || DefaultMethodName
+        @method_name = method_name
       end
-      DefaultMethodName = :create
 
       def method_missing(name,*args,&block)
         @action.send(name,*args,&block)
@@ -16,7 +14,7 @@ module DTK; class Task; class Template
         @action.respond_to?(name) || super
       end
 
-      # returns [component_name_ref,method_name]
+      # returns [component_name_ref,method_name] where method_name can be nil
       def self.parse(serialized_item)
         unless serialized_item.kind_of?(String)
           raise_action_ref_error(serialized_item)
@@ -24,7 +22,7 @@ module DTK; class Task; class Template
         if info = has_explicit_method?(serialized_item)
           [info[:component_name_ref],info[:method_name]]
         else
-          [serialized_item,DefaultMethodName]
+          [serialized_item,nil]
         end
       end
 

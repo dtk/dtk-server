@@ -1,6 +1,7 @@
 module DTK; class Task; class Template
   class Action
     r8_nested_require('action','component_action')
+    r8_nested_require('action','action_method')
     r8_nested_require('action','with_method')
 
     # opts can have keys
@@ -43,6 +44,11 @@ module DTK; class Task; class Template
     end
     def respond_to?(name)
       @action.respond_to?(name) || super
+    end
+
+    # this can be overwritten
+    def action_method?()
+      nil
     end
 
    private

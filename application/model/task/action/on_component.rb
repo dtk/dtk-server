@@ -181,15 +181,23 @@ module DTK; class Task
         end
       end
 
-      def self.create_list_from_execution_blocks(exec_blocks,config_agent_type)
-        exec_blocks.components.map do |cmp|
+      def self.create_list_from_execution_blocks(exec_blocks)
+        ret = Array.new
+        exec_blocks.components_hash_with(:action_methods=>true).each  do |cmp_hash|
+          cmp = cmp_hash[:component]
+          action_method = cmp_hash[:action_method] # can be nil
+          config_agent_type = (action_method||cmp).config_agent_type
           hash = {
             :attributes => Array.new,
             :component => cmp,
             :on_node_config_agent_type => config_agent_type
           }
-          new(hash)
+          if action_method
+            hash.merge!(:action_method => action_method)
+          end
+          ret << new(hash)
         end
+        ret
       end
 
       def self.create_from_state_change(scs_same_cmp,deps)

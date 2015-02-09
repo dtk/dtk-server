@@ -181,7 +181,7 @@ module DTK; class Task
         end
       end
 
-      # returns [action_array,config_agent_type]
+      # returns [actions,config_agent_type]
       def self.create_actions_from_execution_blocks(exec_blocks)
         actions = Array.new
         cmps_info = exec_blocks.components_hash_with(:action_methods=>true)

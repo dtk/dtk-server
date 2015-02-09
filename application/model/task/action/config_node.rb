@@ -191,10 +191,10 @@ module DTK; class Task
             node = sample_state_change[:node]
             component_actions,intra_node_stages = OnComponent.order_and_group_by_component(sc)
             hash = {
-              :node => node,
+              :node               => node,
               :state_change_types => sc.map{|sc|sc[:type]}.uniq,
-              :config_agent_type => sc.first.on_node_config_agent_type,
-              :component_actions => component_actions
+              :config_agent_type  => sc.first.on_node_config_agent_type,
+              :component_actions  => component_actions
             }
             hash.merge!(:assembly_idh => assembly_idh) if assembly_idh
           when :hash
@@ -206,10 +206,10 @@ module DTK; class Task
             exec_blocks = object
             actions,config_agent_type = OnComponent.create_actions_from_execution_blocks(exec_blocks)
             hash = {
-              :node => exec_blocks.node(),
+              :node               => exec_blocks.node(),
               :state_change_types => ["converge_component"],
-              :config_agent_type => actions,
-              :component_actions => config_agent_type
+              :config_agent_type  => config_agent_type,
+              :component_actions  => actions
             }
             hash.merge!(:assembly_idh => assembly_idh) if assembly_idh
             intra_node_stages = exec_blocks.intra_node_stages()

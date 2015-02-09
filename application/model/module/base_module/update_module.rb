@@ -52,9 +52,14 @@ module DTK; class BaseModule
         UpdateModule.new(self).pull_from_remote__update_from_dsl(repo, module_and_branch_info,version)
       end
 
+      # returns the new module branch
       def create_new_version__type_specific(repo_for_new_branch,new_version,opts={})
         local = UpdateModule.ret_local(self,new_version)
-        UpdateModule.new(self).create_needed_objects_and_dsl?(repo_for_new_branch,local,opts)
+        # TODO: this is expensive in that it creates new version by parsing the dsl and reading back in;
+        # would be much less expsensive to clone from branch to branch
+        opts_update = {:skip_module_ref_update => true}.merge(opts)
+        response = UpdateModule.new(self).create_needed_objects_and_dsl?(repo_for_new_branch,local,opts_update)
+        response[:module_branch_idh].create_object()
       end
     end
     ####### end: mixin public methods #########
@@ -73,7 +78,8 @@ module DTK; class BaseModule
       if is_parsing_error?(response)
         response
       else
-        set_dsl_parsed!(true)
+        # set_dsl_parsed!(true)
+        module_branch.set_dsl_parsed!(true)
         nil
       end
     end
@@ -91,8 +97,10 @@ module DTK; class BaseModule
     end
     def parse_dsl_and_update_model(impl_obj,module_branch_idh,version,opts={})
       ret = Hash.new
-      set_dsl_parsed!(false)
       module_branch = module_branch_idh.create_object()
+
+      # set_dsl_parsed!(false)
+      module_branch.set_dsl_parsed!(false)
       config_agent_type = opts[:config_agent_type] || config_agent_type_default()
       # TODO: for efficiency can change parse_dsl to take option opts[:dsl_created_info]
       dsl_obj = parse_dsl(impl_obj,opts.merge(:config_agent_type => config_agent_type))
@@ -116,11 +124,17 @@ module DTK; class BaseModule
         end
       end
 
-      return ret unless opts[:update_from_includes]
+      # TODO: see if can simplify and make this an 'else' to opts[:update_from_includes above
+      unless opts[:update_from_includes]
+        # set_dsl_parsed!(true) if !opts[:dsl_parsed_false]
+        module_branch.set_dsl_parsed!(true) if !opts[:dsl_parsed_false]
+        return ret 
+      end
 
       no_errors = external_deps.nil? || !external_deps.any_errors?()
       if no_errors and !opts[:dsl_parsed_false]
-        set_dsl_parsed!(true)
+        # set_dsl_parsed!(true)
+        module_branch.set_dsl_parsed!(true)
       end
 
       opts[:external_dependencies] = external_deps if external_deps
@@ -137,9 +151,10 @@ module DTK; class BaseModule
       local_params.create_local(base_module.get_project())
     end
 
-    def add_dsl_to_impl_and_create_objects(dsl_created_info,project,impl_obj,module_branch_idh,version)
+    def add_dsl_to_impl_and_create_objects(dsl_created_info,project,impl_obj,module_branch_idh,version,opts={})
       impl_obj.add_file_and_push_to_repo(dsl_created_info[:path],dsl_created_info[:content])
-      parse_dsl_and_update_model(impl_obj,module_branch_idh,version,:project => project,:dsl_created_info => dsl_created_info)
+      opts.merge!(:project => project,:dsl_created_info => dsl_created_info)
+      parse_dsl_and_update_model(impl_obj,module_branch_idh,version,opts)
     end
 
    private

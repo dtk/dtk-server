@@ -201,8 +201,8 @@ module DTK; class  Assembly
       def print_includes()
         nodes_and_cmps = get_info__flat_list(:detail_level => "components").select{|r|r[:nested_component]}
         cmps = nodes_and_cmps.map{|r|r[:nested_component]}
-
-        module_refs_tree = ModuleRefs::Tree.create(self, cmps)
+        assembly_branch  = AssemblyModule::Service.get_assembly_branch(self)
+        module_refs_tree = ModuleRefs::Tree.create(self, assembly_branch, cmps)
         module_refs_tree.debug_hash_form()
       end
 

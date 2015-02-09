@@ -204,14 +204,16 @@
       "namespace",
       "name",
       "updated",
-      "update saved"
+      "update saved",
+      "dsl_parsed"
     ],
     "mapping": {
       "id": "dtk_id",
       "namespace": "namespace_name",
       "name": "display_name",
       "updated": "local_copy",
-      "update saved": "update_saved"
+      "update saved": "update_saved",
+      "dsl_parsed": "dsl_parsed"
     }
   },
   "component_module": {

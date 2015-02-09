@@ -12,7 +12,12 @@ module DTK
       def get_module_branch_matching_version(version=nil)
         get_module_branches().find{|mb|mb.matches_version?(version)}
       end
-      
+
+      def get_workspace_repo(version=nil)
+        aug_branch = get_augmented_workspace_branch(:filter => {:version => version})
+        aug_branch[:repo]
+      end      
+
       def get_workspace_branch_info(version=nil,opts={})
         if aug_branch = get_augmented_workspace_branch({:filter => {:version => version}}.merge(opts))
           module_name = aug_branch[:module_name]
@@ -66,6 +71,28 @@ module DTK
         matches.first
       end
 
+
+      #
+      # Returns ModuleBranch object for given version
+      #
+      def get_workspace_module_branch(version=nil)
+        mb_mh = model_handle().create_childMH(:module_branch)
+        sp_hash = {
+        :cols => ModuleBranch.common_columns(),
+          :filter => [:and,[:eq,mb_mh.parent_id_field_name(),id()],
+                      [:eq,:is_workspace,true],
+                      [:eq,:version,ModuleBranch.version_field(version)]]
+      }
+        Model.get_obj(mb_mh,sp_hash)
+      end
+      # MOD_RESTRUCT: may replace below with above
+      def get_module_branch(branch)
+        sp_hash = {
+          :cols => [:module_branches]
+        }
+        module_branches = get_objs(sp_hash).map{|r|r[:module_branch]}
+        module_branches.find{|mb|mb[:branch] == branch}
+      end
     end
 
     module GetBranchClassMixin

@@ -200,7 +200,7 @@ lambda__segment_impls =
       :type=>:json,
       :hidden=>true,
       :remote_dependencies=>
-      [lambda__segment_module_branches.call(:cols => [:id,:repo_id,:version,:external_ref]),
+      [lambda__segment_module_branches.call(:cols => [:id,:repo_id,:version,:external_ref,:dsl_parsed]),
        lambda__segment_repos.call(:cols => [:id,:repo_name,:local_dir,:remote_repo_namespace])
      ]
     },

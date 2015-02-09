@@ -2,7 +2,6 @@ module DTK
   class Assembly::Instance
     module ViolationMixin
       def find_violations()
-        update_obj!(:module_branch_id)
         nodes_and_cmps = get_info__flat_list(:detail_level => "components").select{|r|r[:nested_component]}
         cmps = nodes_and_cmps.map{|r|r[:nested_component]}
 
@@ -57,27 +56,33 @@ module DTK
         return ret if cmps.empty?
 
         cmps.each do |cmp|
-          cmp_module = get_parsed_info(cmp[:module_branch_id], "Component")
-          if cmp_module
-            ret << Violation::ComponentParsingError.new(cmp_module[:display_name], "Component") unless cmp_module[:dsl_parsed]
+          cmp_module_branch = get_parsed_info(cmp[:module_branch_id], "ComponentBranch")
+          if cmp_module_branch && cmp_module_branch[:component_module]
+            ret << Violation::ComponentParsingError.new(cmp_module_branch[:component_module][:display_name], "Component") unless cmp_module_branch[:dsl_parsed]
           end
         end
 
-        assembly_branch_id = self[:module_branch_id]
-        if service_module = get_parsed_info(assembly_branch_id, "Service")
-          ret << Violation::ComponentParsingError.new(service_module[:display_name], "Service") unless service_module[:dsl_parsed]
+        if service_module_branch = get_parsed_info(self[:module_branch_id], "ServiceBranch")
+          ret << Violation::ComponentParsingError.new(service_module_branch[:service_module][:display_name], "Service") unless service_module_branch[:dsl_parsed]
         end
+
+        # if module_branch belongs to service instance assembly_module_version? will not be nil
+        assembly_branch = AssemblyModule::Service.get_assembly_branch(self)
+        if assembly_branch.assembly_module_version?
+          # add violation if module_branch[:dsl_parsed] == false
+          ret << Violation::ComponentParsingError.new(self[:display_name], "Service instance") unless assembly_branch[:dsl_parsed]
+        end
+
         ret
       end
 
-      # this also serves to set implementation_id on module includes that are not set already
-      # TODO: seperelate check versuses setting implementation_id 
       def find_violations__module_refs(cmps)
         ret = missing = Array.new
         multiple_ns   = Hash.new
         return ret if cmps.empty?
 
-        module_refs_tree   = ModuleRefs::Tree.create(self,cmps)
+        assembly_branch      = AssemblyModule::Service.get_assembly_branch(self)
+        module_refs_tree     = ModuleRefs::Tree.create(self,assembly_branch,cmps)
         missing, multiple_ns = module_refs_tree.violations?
 
         unless missing.empty?
@@ -97,14 +102,23 @@ module DTK
 
       def get_parsed_info(module_branch_id, type)
         ret = nil
+        cols = [:id, :type, :component_id, :service_id, :dsl_parsed]
+
+        if type.to_s.eql?("ComponentBranch")
+          cols << :component_module_info
+        elsif type.to_s.eql?("ServiceBranch")
+          cols << :service_module
+        end
+
         sp_hash = {
-          :cols => [:id, :type, :component_id, :service_id],
+          :cols => cols,
           :filter => [:eq, :id, module_branch_id]
         }
         unless branch = Model.get_obj(model_handle(:module_branch),sp_hash)
-        # assembly, such as workspace does not have a branch associated with it
           return ret
         end
+
+        return branch if type.to_s.eql?("ComponentBranch") || type.to_s.eql?("ServiceBranch")
 
         if (type == "Component")
           sp_cmp_hash = {

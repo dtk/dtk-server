@@ -144,7 +144,7 @@ assembly_nodes  =
       :type=>:json,
       :hidden=>true,
       :remote_dependencies=>
-      [lambda__segment_module_branches.call(:cols => [:id,:repo_id,:version]),
+      [lambda__segment_module_branches.call(:cols => [:id,:repo_id,:version,:dsl_parsed]),
        lambda__segment_repos.call(:cols => [:id,:repo_name,:local_dir])
      ]
     },

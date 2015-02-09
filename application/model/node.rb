@@ -331,13 +331,20 @@ module DTK
         }
         cmp_module = Model.get_obj(model_handle(:component_module),sp_cmp_hash)
 
-        ret << NodeViolations::NodeComponentParsingError.new(cmp_module[:display_name], "Component") unless cmp_module[:dsl_parsed]
+        # ret << NodeViolations::NodeComponentParsingError.new(cmp_module[:display_name], "Component") unless cmp_module[:dsl_parsed]
+        ret << NodeViolations::NodeComponentParsingError.new(cmp_module[:display_name], "Component") unless branch.dsl_parsed?()
       end
 
       ret
     end
 
+    #TODO: move to getting rid of namespace arg and using aug component template
+    # component_template can be augmented and have keys with objects:
+    # :module_branch
+    # :component_module
+    # :namespace
     def add_component(component_template,component_title=nil,namespace=nil)
+      namespace ||= component_template[:namespace] && component_template[:namespace][:display_name]
       component_template.update_with_clone_info!()
 
       if module_branch = component_template[:module_branch]

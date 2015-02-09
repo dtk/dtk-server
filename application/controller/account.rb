@@ -110,6 +110,11 @@ module DTK
 
     def rest__set_catalog_credentials()
       username, password = ret_non_null_request_params(:username, :password)
+      validate = ret_request_params(:validate)
+
+      # if validate param is sent - validate if credentials exist on repo manager
+      # used when creating new user on client and setting catalog credentials in initial step
+      Repo::Remote.new.validate_catalog_credentials(username, password) if validate
 
       user_object = CurrentSession.new.get_user_object()
       user_object.update(:catalog_username => username, :catalog_password => password)

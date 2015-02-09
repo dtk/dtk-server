@@ -6,7 +6,7 @@ module DTK
     extend BranchNamesClassMixin
 
     def self.common_columns()
-      [:id,:group_id,:display_name,:branch,:repo_id,:current_sha,:is_workspace,:type,:version,:ancestor_id,:external_ref]
+      [:id,:group_id,:display_name,:branch,:repo_id,:current_sha,:is_workspace,:type,:version,:ancestor_id,:external_ref,:dsl_parsed]
     end
 
     # TODO: should change type of self[:external_ref] to json
@@ -25,6 +25,14 @@ module DTK
 
     def get_type()
       get_field?(:type).to_sym
+    end
+
+    def set_dsl_parsed!(boolean_val)
+      update(:dsl_parsed => boolean_val)
+    end
+
+    def dsl_parsed?()
+      get_field?(:dsl_parsed)
     end
 
     def get_module_repo_info()
@@ -119,6 +127,7 @@ end
     def is_set_to_sha?(commit_sha)
       commit_sha == get_field?(:current_sha)
     end
+
     def set_sha(commit_sha)
       update(:current_sha => commit_sha)
       commit_sha
@@ -140,6 +149,10 @@ end
       has_default_version?() ? default_version_string : self[:version]
     end
 
+    def matches_base_version?()
+      matches_version?(BaseVersion)
+    end
+    BaseVersion = nil
     def matches_version?(version=nil)
       update_object!(:version)
       self[:version] == self.class.version_field(version)

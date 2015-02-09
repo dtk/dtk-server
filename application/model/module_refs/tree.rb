@@ -15,8 +15,8 @@ module DTK
       private :initialize
       
       # params are assembly instance and the component instances that are in the assembly instance
-      def self.create(assembly_instance,components)
-        create_module_refs_starting_from_assembly(assembly_instance,components)
+      def self.create(assembly_instance, assembly_branch, components)
+        create_module_refs_starting_from_assembly(assembly_instance,assembly_branch,components)
       end
 
       def violations?()
@@ -78,7 +78,7 @@ module DTK
       end
 
      private
-      def self.create_module_refs_starting_from_assembly(assembly_instance,components)
+      def self.create_module_refs_starting_from_assembly(assembly_instance,assembly_branch,components)
         # get relevant service and component module branches 
         ndx_cmps = Hash.new #components indexed (grouped) by branch id
         components.each do |cmp|
@@ -90,14 +90,11 @@ module DTK
         end
         cmp_module_branch_ids = ndx_cmps.keys
 
-        service_module_branch_id = assembly_instance.get_field?(:module_branch_id)
         sp_hash = {
           :cols => ModuleBranch.common_columns(),
-          :filter => [:or, [:eq,:id,service_module_branch_id],[:oneof,:id,cmp_module_branch_ids]]
+          :filter => [:oneof,:id,cmp_module_branch_ids]
         }
-        relevant_module_branches = Model.get_objs(assembly_instance.model_handle(:module_branch),sp_hash)
-        service_module_branch = relevant_module_branches.find{|r|r[:id] == service_module_branch_id}
-        cmp_module_branches  = relevant_module_branches.reject!{|r|r[:id] == service_module_branch_id}
+        cmp_module_branches = Model.get_objs(assembly_instance.model_handle(:module_branch),sp_hash)
 
         #TODO: extra check we can remove after we refine
         missing_branches = cmp_module_branch_ids - cmp_module_branches.map{|r|r[:id]} 
@@ -105,9 +102,9 @@ module DTK
           Log.error("Unexpected that the following branches dont exist; branches with ids #{missing_branches.join(',')}") 
         end
         
-        ret = new(service_module_branch,assembly_instance)
+        ret = new(assembly_branch,assembly_instance)
         leaves = Array.new
-        get_top_level_children(cmp_module_branches,service_module_branch) do |module_name,child|
+        get_top_level_children(cmp_module_branches,assembly_branch) do |module_name,child|
           leaves << child if child
           ret.add_module_ref!(module_name,child)
         end

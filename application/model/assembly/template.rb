@@ -23,22 +23,29 @@ module DTK; class Assembly
 
     def stage(target,opts={})
       service_module = get_service_module()
-      unless is_dsl_parsed = service_module.dsl_parsed?()
+
+      # unless is_dsl_parsed = service_module.dsl_parsed?()
+      service_module_branch = service_module.get_workspace_module_branch()
+      unless is_dsl_parsed = service_module_branch.dsl_parsed?()
         raise ErrorUsage.new("An assembly template from an unparsed service-module ('#{service_module}') cannot be staged")
       end
+
       # including :description here because it is not a field that gets copied by clone copy processor
       override_attrs = {:description => get_field?(:description)}
       if assembly_name = opts[:assembly_name]
         override_attrs[:display_name] = assembly_name
       end
+
       clone_opts = {:ret_new_obj_with_cols => [:id,:type]}
       if settings = opts[:service_settings]
         clone_opts.merge!(:service_settings => settings)
       end
+
       new_assembly_obj = nil
       Transaction do
         new_assembly_obj = target.clone_into(self,override_attrs,clone_opts)
       end
+
       Assembly::Instance.create_subclass_object(new_assembly_obj)
     end
 
@@ -48,7 +55,10 @@ module DTK; class Assembly
 
       service_module = Factory.get_or_create_service_module(project,service_module_name,opts)
       Factory.create_or_update_from_instance(assembly_instance,service_module,assembly_template_name,opts)
-      service_module.update(:dsl_parsed => true)
+
+      service_module_branch = service_module.get_workspace_module_branch()
+      service_module_branch.set_dsl_parsed!(true)
+      # service_module.update(:dsl_parsed => true)
 
       service_module
     end

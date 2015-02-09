@@ -102,7 +102,12 @@ module DTK
           module_and_branch_info = ServiceModule.create_module(project,local_params,:config_agent_type => ConfigAgentType)
           service_module = module_and_branch_info[:module_idh].create_object()
           service_module.update(:dsl_parsed => true)
-          module_and_branch_info[:module_branch_idh]
+
+          branch_idh = module_and_branch_info[:module_branch_idh]
+          branch = branch_idh.create_object()
+          branch.set_dsl_parsed!(true)
+
+          branch_idh
         end
       end
       ConfigAgentType = :puppet #TODO: stub

@@ -124,7 +124,8 @@ module DTK
       # do pull and see if any changes need the model to be updated
       module_branch = get_workspace_module_branch(version)
       pull_was_needed = module_branch.pull_repo_changes?(commit_sha)
-      parse_needed = (opts[:force_parse] or !dsl_parsed?())
+      # parse_needed = (opts[:force_parse] or !dsl_parsed?())
+      parse_needed = (opts[:force_parse] or !module_branch.dsl_parsed?())
       update_from_includes = opts[:update_from_includes]
       return unless pull_was_needed or parse_needed or update_from_includes
 
@@ -157,48 +158,12 @@ module DTK
       get_objs_uniq(:repos)
     end
 
-    def get_workspace_repo()
-      sp_hash = {
-        :cols => [:id,:display_name,:workspace_info,:project_project_id]
-      }
-      row = get_obj(sp_hash)
-      # opportunistically set display name and project_project_id on module
-      self[:display_name] ||= row[:display_name]
-      self[:project_project_id] ||= row[:project_project_id]
-      row[:repo]
-    end
     def get_implementations()
       get_objs_uniq(:implementations)
-    end
-    def get_library_implementations()
-      get_objs_uniq(:library_implementations)
     end
 
     def module_type()
       self.class.module_type()
-    end
-
-    #
-    # Returns ModuleBranch object for given version
-    #
-    def get_workspace_module_branch(version=nil)
-      mb_mh = model_handle().create_childMH(:module_branch)
-      sp_hash = {
-        :cols => ModuleBranch.common_columns(),
-        :filter => [:and,[:eq,mb_mh.parent_id_field_name(),id()],
-                    [:eq,:is_workspace,true],
-                    [:eq,:version,ModuleBranch.version_field(version)]]
-      }
-      Model.get_obj(mb_mh,sp_hash)
-    end
-
-    # MOD_RESTRUCT: may replace below with above
-    def get_module_branch(branch)
-      sp_hash = {
-        :cols => [:module_branches]
-      }
-      module_branches = get_objs(sp_hash).map{|r|r[:module_branch]}
-      module_branches.find{|mb|mb[:branch] == branch}
     end
 
     def module_name()
@@ -382,7 +347,8 @@ module DTK
       include_versions   = opts.array(:detail_to_include).include?(:versions)
       include_any_detail = ((include_remotes or include_versions) ? true : nil)
 
-      cols = [:id, :display_name, :namespace_id, :dsl_parsed, :namespace, include_any_detail && :module_branches_with_repos].compact
+      # cols = [:id, :display_name, :namespace_id, :dsl_parsed, :namespace, include_any_detail && :module_branches_with_repos].compact
+      cols = [:id, :display_name, :namespace_id, :namespace, include_any_detail && :module_branches_with_repos].compact
       unsorted_ret = get_all(project_idh,cols)
 
       # if namespace provided with list command filter before aggregating details
@@ -395,7 +361,10 @@ module DTK
         if r[:namespace]
           r[:display_name] = Namespace.join_namespace(r[:namespace][:display_name], r[:display_name])
         end
+
+        r[:dsl_parsed] = r[:module_branch][:dsl_parsed] if r[:module_branch]
       end
+
       if include_any_detail
         opts_aggr = Opts.new(
           :include_remotes => include_remotes,

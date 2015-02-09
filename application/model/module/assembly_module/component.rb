@@ -73,6 +73,7 @@ module DTK; class AssemblyModule
       @assembly.get_objs(:cols=> [:instance_component_module_branches]).each do |r|
         component_module = r[:component_module]
         component_module.merge!({:namespace_name => r[:namespace][:display_name]}) if r[:namespace]
+        component_module.merge!({:dsl_parsed => r[:module_branch][:dsl_parsed]}) if r[:module_branch]
         ndx_ret[component_module[:id]] ||= component_module.merge(add_module_branches ? r.hash_subset(:module_branch) : {})
       end
       ret = ndx_ret.values
@@ -151,9 +152,8 @@ module DTK; class AssemblyModule
     end
 
     def create_assembly_branch(component_module,am_version)
-      opts = {:base_version=>component_module.get_field?(:version),:assembly_module=>true}
-      # TODO: very expensive call; will refine
-      component_module.create_new_version(am_version,opts)
+      base_version = component_module.get_field?(:version) #TODO: is this right; shouldnt version be on branch, not module
+      component_module.create_new_version(base_version,am_version)
     end
 
     def get_branch_template(module_branch,cmp_template)

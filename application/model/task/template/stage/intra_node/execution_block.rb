@@ -91,7 +91,7 @@ module DTK; class Task; class Template
           end
 
         component_group_num = 1
-        ordered_items.each do |serialized_item|
+        (ordered_items||[]).each do |serialized_item|
           lvs = ParsingError::LegalValues.new()
           if lvs.add_and_match?(serialized_item,String)
             find_and_add_action!(ret,serialized_item,node_name,action_list,opts)

@@ -1,10 +1,15 @@
 module DTK; class Task; class Template
   class Action
     class WithMethod < self
-      # TODO: treat :params in opts
-      def initialize(action,method_name)
+      # opts will have keys
+      # :method_name
+      # TODO: treatkey(s) in opts for params on method
+      def initialize(action,opts={})
+        unless opts[:method_name]
+          raise Error.new("should not be called with opts[:method_name] nil")
+        end
         @action = action
-        @method_name = method_name
+        @method_name = opts[:method_name]
       end
 
       def method_missing(name,*args,&block)

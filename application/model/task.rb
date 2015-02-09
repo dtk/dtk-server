@@ -256,54 +256,7 @@ module DTK
       get_top_level_tasks(model_handle).sort{|a,b| b[:updated_at] <=> a[:updated_at]}.first
     end
 
-    def get_per_node_info_for_reporting()
-      exec_actions = Array.new
-      # if executable level then get its executable_action
-      if self.has_key?(:executable_action_type) 
-        # will have an executable action so if have it already
-        if self[:executable_action_type]
-          exec_actions << get_field?(:executable_action)
-        end
-      else
-        if exec_action = get_field?(:executable_action)
-          exec_actions <<  exec_action.merge(:task_id => id())
-        end
-      end
 
-      # if task does not have execuatble actions then get all subtasks
-      if exec_actions.empty?
-        exec_actions = get_all_subtasks().map do |t|
-          action = t[:executable_action]
-          action && action.merge(:task_id => t.id())
-        end.compact
-      end
-      
-      # get all unique nodes; looking for attribute :external_ref
-      indexed_nodes = Hash.new
-      exec_actions.each do |ea|
-        next unless node = ea[:node]
-        node_id = node[:id]
-        indexed_nodes[node_id] ||= node.merge(:task_id => ea[:task_id])
-        indexed_nodes[node_id][:external_ref] ||= node[:external_ref]
-        indexed_nodes[node_id][:config_agent_type] ||= get_config_agent_type(ea)
-      end
-
-      # need to query db if missing external_refs having instance_id
-      node_ids_missing_ext_refs = indexed_nodes.values.reject{|n|(n[:external_ref]||{})[:instance_id]}.map{|n|n[:id]}
-      unless node_ids_missing_ext_refs.empty?
-        sp_hash = {
-          :cols => [:id,:external_ref],
-          :filter => [:oneof, :id, node_ids_missing_ext_refs]
-        }
-        node_mh = model_handle.createMH(:node)
-        node_objs = Model.get_objs(node_mh,sp_hash)
-        node_objs.each{|r|indexed_nodes[r[:id]][:external_ref] = r[:external_ref]}
-      end
-      indexed_nodes.values
-    end
-
-    # TODO: may deprecate below and subsume by above
-    # this also provides the nodes task_id and config_agent_type as extra attribute values
     def get_associated_nodes()
       exec_actions = Array.new
       # if executable level then get its executable_action

@@ -174,9 +174,7 @@ module DTK; class Task; class Template
       def self.find_and_add_action!(ret,serialized_item,node_name,action_list,opts={})
         if action = Action.find_action_in_list?(serialized_item,node_name,action_list,opts)
           ret << action
-        else
-          raise ParsingError.new("The component reference ('#{component_name_ref}' on node '#{node_name}') in the workflow is not in the assembly; either add it to the assembly or delete it from the workflow") unless opts[:skip_if_not_found]
-        end        
+        end
       end
 
       def each_action_with_position(&block)

@@ -36,6 +36,10 @@ module DTK; class Task; class Template
           action = action.in_component_group(cgn)
         end
         create(action,method_name ? {:method_name => method_name} : {})
+      else
+        unless opts[:skip_if_not_found]
+          raise ParsingError.new("The component reference ('#{component_name_ref}' on node '#{node_name}') in the workflow is not in the assembly; either add it to the assembly or delete it from the workflow") unless opts[:skip_if_not_found]
+        end        
       end
     end
 

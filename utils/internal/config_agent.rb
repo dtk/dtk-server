@@ -1,5 +1,6 @@
 module DTK
   class ConfigAgent
+    r8_nested_require('config_agent','type')
     r8_nested_require('config_agent','adapter')
     r8_nested_require('config_agent','parse_error')
     r8_nested_require('config_agent','parse_errors_cache')

@@ -13,7 +13,7 @@ module DTK; class Task; class Template
       end
 
       def config_agent_type()
-        :dtk_provider
+        ConfigAgent::Type::Symbol.dtk_provider
       end
     end
   end

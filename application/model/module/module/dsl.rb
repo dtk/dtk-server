@@ -348,25 +348,18 @@ module DTK
         return input_hash if ParsingError.is_error?(input_hash)
         if type = input_hash["module_type"]
           case type
-           when "puppet_module" then ConfigAgentTypes[:puppet]
+           when "puppet_module" then ConfigAgent::Type::Symbol.puppet
            # Part of code to handle new serverspec type of module
-           when "serverspec" then ConfigAgentTypes[:serverspec]
-           when "test" then ConfigAgentTypes[:test]
-           when "node_module" then ConfigAgentTypes[:node_module]
+           when "serverspec" then ConfigAgent::Type::Symbol.serverspec
+           when "test" then ConfigAgent::Type::Symbol.test
+           when "node_module" then ConfigAgent::Type::Symbol.node_module
            else
              ParsingError.new("Unexpected module_type (#{type})")
           end
         else
-          DefaultConfigAgentType
+          ConfigAgent::Type.default_symbol()
         end
       end
-      ConfigAgentTypes = {
-        :puppet => :puppet,
-        :serverspec => :serverspec,
-        :test => :test,
-        :node_module => :node_module
-      }
-      DefaultConfigAgentType = ConfigAgentTypes[:puppet]
 
       def convert_to_hash(content,format_type,opts={})
         begin

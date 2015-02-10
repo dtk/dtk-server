@@ -11,7 +11,7 @@ module DTK
           end
           klass = const_get type.to_s.capitalize
         rescue LoadError
-          Log.error("cannot find config agent adapter; loading null config agent class")
+          raise Error.new("cannot find config agent adapter for type (#{type})")
         end
         Agents[type] = klass.new()
       end

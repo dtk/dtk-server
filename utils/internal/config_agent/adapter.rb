@@ -9,7 +9,7 @@ module DTK
           Lock.synchronize do
             r8_nested_require("adapter",type)
           end
-          klass = const_get type.to_s.capitalize
+          klass = const_get Aux.camelize(type.to_s)
         rescue LoadError
           raise Error.new("cannot find config agent adapter for type (#{type})")
         end

@@ -40,8 +40,11 @@ module DTK
         refs.each do |name,ref|
           if ref
             if val = multi_ns["#{name}"]
-              val << ref[:namespace]
-              multi_ns.merge!(name => val)
+              namespace = ref[:namespace]
+              unless val.include?(namespace)
+                val << namespace
+                multi_ns.merge!(name => val)
+              end
             else
               multi_ns.merge!(name => [ref[:namespace]])
             end
@@ -117,7 +120,10 @@ module DTK
         leaves = Array.new
         #TODO: can bulk up
         subtrees.each do |subtree|
-          get_children([subtree.module_branch]) do |module_name,child|
+          get_children([subtree.module_branch]) do |module_name,namespace,child|
+            if subtree && child
+              raise ErrorUsage.new("Module '#{namespace}:#{module_name}' cannot have itself listed as dependency") if subtree.module_branch == child.module_branch 
+            end
             leaves << child if child
             subtree.add_module_ref!(module_name,child)
           end
@@ -171,7 +177,7 @@ module DTK
         module_refs.each do |module_ref|
           module_branch = ndx_module_branches[module_ref[:id]]
           child = module_branch && new(module_branch,module_ref)
-          block.call(module_ref[:module_name],child)
+          block.call(module_ref[:module_name],module_ref[:namespace_info],child)
         end
       end
 

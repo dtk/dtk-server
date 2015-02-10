@@ -135,6 +135,7 @@ module DTK; class  Assembly
       def list_nodes(opts=Opts.new)
         opts.merge!(:remove_node_groups=>false)
         nodes = get_nodes__expand_node_groups(opts)
+
         nodes.each do |node|
           set_node_display_name!(node)
           set_node_admin_op_status!(node)
@@ -148,9 +149,11 @@ module DTK; class  Assembly
           node.sanitize!()
 
           # we set dtk-client-type since we need to distinguish between node / node-group
-          is_node_group = "node_group_staged".eql?(node[:type])
-          node[:dtk_client_type]   = is_node_group ? :node_group : :node
-          node[:dtk_client_hidden] = is_node_group
+          is_node_group_member     = is_node_group_member?(node.id_handle())
+
+          # if node is not part of node group we set nil
+          node[:dtk_client_type]   = node.is_node_group? ? :node_group : is_node_group_member ? :node_group_node : nil
+          node[:dtk_client_hidden] = node.is_node_group?
         end
 
         nodes.sort{|a,b| a[:display_name] <=> b[:display_name] }

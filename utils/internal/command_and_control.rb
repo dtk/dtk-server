@@ -43,21 +43,23 @@ module DTK
     end
 
     def self.discover(filter, timeout, limit, client)
-      adapter_name = R8::Config[:command_and_control][:node_config][:type]
-      klass = load_for_aux(:node_config,adapter_name)
+      klass = load_for_node_config()
       klass.discover(filter, timeout, limit, client)
     end
 
+    def self.errors_in_node_config_result?(result)
+      klass = load_for_node_config()
+      klass.errors_in_node_config_result?(result)
+    end
+
     def self.get_mcollective_client()
-      adapter_name = R8::Config[:command_and_control][:node_config][:type]
-      klass = load_for_aux(:node_config,adapter_name)
+      klass = load_for_node_config()
       klass.get_mcollective_client()
     end
 
     # This takes into account what is needed for the node_config_adapter
     def self.node_config_adapter_install_script(node,bindings)
-      adapter_name = R8::Config[:command_and_control][:node_config][:type]
-      klass = load_for_aux(:node_config,adapter_name)
+      klass = load_for_node_config()
       klass.install_script(node,bindings)
     end
 
@@ -150,36 +152,36 @@ module DTK
     end
 
     def self.request__execute_action(agent,action,nodes,callbacks,params={})
-      adapter_name = R8::Config[:command_and_control][:node_config][:type]
-      klass = load_for_aux(:node_config,adapter_name)
+      klass = load_for_node_config()
       klass.request__execute_action(agent,action,nodes,callbacks,params)
     end
 
     def self.request__execute_action_per_node(agent,action,nodes_hash,callbacks)
-      adapter_name = R8::Config[:command_and_control][:node_config][:type]
-      klass = load_for_aux(:node_config,adapter_name)
+      klass = load_for_node_config()
       klass.request_execute_action_per_node(agent,action,nodes_hash,callbacks)
     end
     
     def self.parse_response__execute_action(nodes,msg)
-      adapter_name = R8::Config[:command_and_control][:node_config][:type]
-      klass = load_for_aux(:node_config,adapter_name)
+      klass = load_for_node_config()
       klass.parse_response__execute_action(nodes,msg)
     end
 
     def self.initiate_node_action(method,node,callbacks,context)
-      adapter_name = R8::Config[:command_and_control][:node_config][:type]
-      klass = load_for_aux(:node_config,adapter_name)
+      klass = load_for_node_config()
       klass.send(method,node,callbacks,context)
     end
     # TODO: convert poll_to_detect_node_ready to use more general form above
     def self.poll_to_detect_node_ready(node,opts)
-      adapter_name = R8::Config[:command_and_control][:node_config][:type]
-      klass = load_for_aux(:node_config,adapter_name)
+      klass = load_for_node_config()
       klass.poll_to_detect_node_ready(node,opts)
     end
 
    private
+    def self.load_for_node_config()
+      adapter_name = R8::Config[:command_and_control][:node_config][:type]
+      load_for_aux(:node_config,adapter_name)
+    end
+
     def self.load_iaas_for(key_val)
       key = key_val.keys.first
       val = key_val.values.first

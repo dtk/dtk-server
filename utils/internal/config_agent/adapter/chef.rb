@@ -11,7 +11,7 @@ module XYZ
         {:attributes => recipes_and_attrs.attributes, :run_list => recipes_and_attrs.run_list}
       end
       def type()
-        :chef
+        Type::Symbol.chef
       end
       def ret_attribute_name_and_type(attribute)
         var_name_path = (attribute[:external_ref]||{})[:path]

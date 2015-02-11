@@ -202,15 +202,7 @@ module DTK
 
        private
         def errors_in_result?(result)
-          # result[:statuscode] is for transport errors and data is for errors for agent
-          if result[:statuscode] != 0
-            ["transport_error"]
-          else
-            data = result[:data]||{}
-            unless data[:status] == :succeeded
-              data[:error] ? [data[:error]] : (data[:errors]||[])
-            end
-          end
+          CommandAndControl.errors_in_node_config_result?(result)
         end
       end
 

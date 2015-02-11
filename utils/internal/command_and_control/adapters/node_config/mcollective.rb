@@ -209,7 +209,7 @@ module DTK
           [{:message => err_msg}]
         else
           data = result[:data]||{}
-          unless data[:status] == :succeeded
+          unless [:succeeded,:ok].include?(data[:status])
             data[:error] ? [data[:error]] : (data[:errors]||[])
           end
         end

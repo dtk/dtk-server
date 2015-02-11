@@ -42,6 +42,24 @@ module DTK
                       cancel_upstream_subtasks(workitem)
                       set_result_failed(workitem,result,task)
                     else
+                      # DTK-1892 For Aldin
+                      # The way that the dtk provider is implemented is that it uses this same ruote participant as the puppet agent
+                      # Below you see a conditional that fires only when the task corresponds to a dtk provider action
+                      # in contrast to puppet
+                      # you see that result from the action agent is printed out here; this is the existing action agent
+                      # which wil be updated (Haris has the details). It is fine to start with using this one to tarnsmit
+                      # results to client. The refined one wil have an array of what appears in these results for each command in execution list
+                      # where current agent has just result of one command. You see how teh results are stuffed as an event into
+                      # a task; so teh task object will have all info needed to render the stdout and stderr for an action
+                      # Now dont thnk code needs to be changed here; this is just to put in debug statement about what is being inserted
+                      # what neds to be changed is the task state command so that when the (sub task corresponds to a task action rather than
+                      # a puppet command we will include a footnode that shows the stdout and stderr (omitting either of it does not exist)
+                      if task[:executable_action].config_agent_type.to_sym == ConfigAgent::Type::Symbol.dtk_provider 
+                        pp [:result_added_when_dtk_action,result]
+                      else
+                        pp [:result_added_when_puppet,result]
+                      end
+
                       event = task.add_event(:complete_succeeded,result)
                       log_participant.end(:complete_succeeded,:task_id=>task_id)
                       set_result_succeeded(workitem,result,task,action) if task_end

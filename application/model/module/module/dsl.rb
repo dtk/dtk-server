@@ -10,15 +10,16 @@ module DTK
     extend UpdateModelClassMixin
     include UpdateModelMixin
 
-    attr_reader :input_hash,:config_agent_type,:project_idh,:module_branch
-    def initialize(config_agent_type,impl_idh,module_branch,version_specific_input_hash,opts={})
+    attr_reader :input_hash,:project_idh,:module_branch
+    def initialize(impl_idh,module_branch,version_specific_input_hash,opts={})
       @module_branch = module_branch
-      @config_agent_type = config_agent_type
       @input_hash = version_parse_check_and_normalize(version_specific_input_hash)
       @impl_idh = impl_idh
       @project_idh = impl_idh.get_parent_id_handle_with_auth_info()
       @ref_integrity_snapshot = opts[:ref_integrity_snapshot]
       @component_module = opts[:component_module]
+      # TODO: deprecate <config_agent_type>
+      @config_agent_type = ConfigAgent::Type.default_symbol
     end
     private :initialize
 
@@ -65,15 +66,12 @@ module DTK
       input_hash = convert_to_hash(content,parsed_name[:format_type],opts)
       return input_hash if ParsingError.is_error?(input_hash)
 
-      config_agent_type = ret_config_agent_type(input_hash)
-      return config_agent_type if ParsingError.is_error?(config_agent_type)
-
       name_attribute_check = name_attribute_integrity_check(input_hash['components'])
       return name_attribute_check if ParsingError.is_error?(name_attribute_check)
 
       ParsingError.trap do
         module_branch = impl_obj.get_module_branch()
-        new(config_agent_type,impl_obj.id_handle(),module_branch,input_hash,opts)
+        new(impl_obj.id_handle(),module_branch,input_hash,opts)
       end
     end
 
@@ -85,15 +83,6 @@ module DTK
       full_hash = info[:hash_content]
       fragment_hash = helper.update_full_hash!(full_hash,augmented_objects,context)
       [info[:dsl_filename],full_hash,fragment_hash]
-    end
-
-    # returns array where each element with keys :path,:hash_content
-    def migrate(module_name,new_dsl_integer_version,format_type)
-      ret = Array.new
-      migrate_proc = migrate_processor(module_name,new_dsl_integer_version,input_hash)
-      hash_content = migrate_proc.generate_new_version_hash()
-      ret << {:path => self.class.dsl_filename(@config_agent_type,format_type,new_dsl_integer_version),:hash_content => hash_content,:format_type => format_type}
-      ret
     end
 
     def self.contains_dsl_file?(impl_obj,dsl_integer_version=nil,format_type=nil)
@@ -114,10 +103,6 @@ module DTK
 
     def self.default_format_type()
       R8::Config[:dsl][:component][:format_type][:default].to_sym
-    end
-
-    def migrate_processor(module_name,new_integer_version,input_hash)
-      self.class.load_and_return_version_adapter_class(new_integer_version).ret_migrate_processor(@config_agent_type,module_name,input_hash)
     end
 
     def self.version(integer_version=nil)
@@ -252,19 +237,8 @@ module DTK
       ret
     end
 
-    def self.dsl_filename(config_agent_type,format_type,dsl_integer_version=nil)
-      unless [:puppet,:chef].include?(config_agent_type.to_sym)
-        raise Error.new("Illegal config agent type (#{config_agent_type})")
-      end
-      first_part =
-        case integer_version(dsl_integer_version)
-         when 1
-          "r8meta.#{config_agent_type}"
-         when 2,3,4
-          "dtk.model"
-        else
-          raise Error.new("DSL type not treated")
-        end
+    def self.dsl_filename(format_type,dsl_integer_version=nil)
+      first_part = 'dtk.model'
       "#{first_part}.#{TypeToExtension[format_type]}"
     end
 
@@ -344,6 +318,7 @@ module DTK
         end
       end
 
+      # TODO: deprecate <config_agent_type>
       def ret_config_agent_type(input_hash)
         return input_hash if ParsingError.is_error?(input_hash)
         if type = input_hash["module_type"]

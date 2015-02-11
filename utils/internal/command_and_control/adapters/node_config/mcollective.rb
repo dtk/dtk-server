@@ -25,7 +25,6 @@ module DTK
 
       # TODO: change signature to def self.async_execution(task_idh,top_task_idh,config_node,callbacks,context)
       def self.initiate_execution(task_idh,top_task_idh,config_node,opts)
-        version_context = get_version_context(config_node)
         config_agent = ConfigAgent.load(config_node[:config_agent_type])
 
         opts_ret_msg = Hash.new
@@ -33,21 +32,21 @@ module DTK
           assembly = assembly_id && task_idh.createIDH(:model_name => :assembly_instance,:id => assembly_id).create_object()
           opts_ret_msg.merge!(:assembly => assembly)
         end
-        msg_content = config_agent.ret_msg_content(config_node,opts_ret_msg)
 
-        agent_git_details = { :repo => "dtk-node-agent", :branch => "" }
-        msg_content.merge!( :task_id => task_idh.get_id(),
-                            :top_task_id => top_task_idh.get_id(), 
-                            :version_context => version_context, 
-                            :agent_git_details => agent_git_details,
-                            # TODO: not doing at this point puppet version per run; it just can be set when node is created
-                            :puppet_version => config_node[:node][:puppet_version]
-                          )
+        msg_content = config_agent.ret_msg_content(config_node,opts_ret_msg)
+        added_content = {
+          :task_id           => task_idh.get_id(),
+          :top_task_id       => top_task_idh.get_id(), 
+          :agent_git_details => {:repo => "dtk-node-agent", :branch => "" }
+        }
+        msg_content.merge!(added_content)
+
         pbuilderid = Node.pbuilderid(config_node[:node])
         filter = filter_single_fact("pbuilderid",pbuilderid)
         context = opts[:receiver_context]
         callbacks = context[:callbacks]
-        async_agent_call(mcollective_agent(config_agent),"run",msg_content,filter,callbacks,context)
+        mc_info = mc_info_for_config_agent(config_agent) 
+        async_agent_call(mc_info[:agent],mc_info[:action],msg_content,filter,callbacks,context)
       end
 
       # TODO: change signature to def self.async_execution(task_idh,top_task_idh,config_node,callbacks,context)
@@ -202,6 +201,21 @@ module DTK
         ret
       end
 
+      def self.errors_in_node_config_result?(result)
+        # result[:statuscode] is for transport errors and data is for errors for agent
+        if result[:statuscode] != 0
+          statusmsg = result[:statusmsg]
+          err_msg = (statusmsg ? "transport error: #{statusmsg}" : "transport error")
+          [{:message => err_msg}]
+        else
+          data = result[:data]||{}
+          unless data[:status] == :succeeded
+            data[:error] ? [data[:error]] : (data[:errors]||[])
+          end
+        end
+      end
+
+     private
       def self.async_agent_call(agent,method,params,filter_x,callbacks,context_x)
         msg = params ? handler.new_request(agent,method,params) : method
         filter = BlankFilter.merge(filter_x).merge("agent" => [agent])
@@ -227,30 +241,16 @@ module DTK
         {:fact=>fact,:value=>value.to_s,:operator=>operator}
       end
 
-      def self.mcollective_agent(config_agent)
-        case config_agent.type()
-         when :chef then "chef_solo"
-         when :puppet then "puppet_apply"
-         else raise Error.new("unexpected config adapter")
-        end
+      def self.mc_info_for_config_agent(config_agent) 
+        type = config_agent.type()
+        ConfigAgentTypeToMCInfo[type] || raise(Error.new("unexpected config adapter: #{type}"))
       end
+      ConfigAgentTypeToMCInfo = {
+        :puppet       => {:agent => 'puppet_apply', :action => 'run'},
+        :dtk_provider => {:agent => 'action_agent', :action => 'run_command'},
+        :chef         => {:agent => 'chef_solo', :action => 'run'}  
+      }
 
-      Lock = Mutex.new
-
-      def self.get_version_context(config_node)
-        ret =  Array.new
-        component_actions = config_node[:component_actions]
-        if component_actions.empty?()
-          return ret 
-        end
-        unless (config_node[:state_change_types] & ["install_component","update_implementation","converge_component","setting"]).size > 0
-          return ret 
-        end
-
-        # want components to be unique
-        components = component_actions.inject(Hash.new){|h,r|h.merge(r[:component][:id] => r[:component])}.values
-        ComponentModule::VersionContextInfo.get_in_hash_form(components)
-      end
     end
   end
 end

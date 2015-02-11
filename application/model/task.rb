@@ -121,7 +121,7 @@ module DTK
       # process errors and strip out from what is passed to add event
       normalized_errors = 
         if error_source == :config_agent
-          config_agent = get_config_agent
+          config_agent = get_config_agent()
           components = component_actions().map{|a|a[:component]}
           errors_in_result.map{|err|config_agent.interpret_error(err,components)}
         else
@@ -305,7 +305,7 @@ module DTK
 
     def get_config_agent_type(executable_action=nil)
       executable_action ||= executable_action()
-      executable_action.component_actions().config_agent_type()
+      executable_action.config_agent_type()
     end
     def get_config_agent()
       ConfigAgent.load(get_config_agent_type())

@@ -19,7 +19,7 @@ module DTK; class Component
     end
 
     def self.component_list_fields()
-      [:id,:group_id,:display_name,:component_type,:implementation_id,:basic_type,:version,:only_one_per_node,:external_ref,:node_node_id,:extended_base]
+      [:id,:group_id,:display_name,:component_type,:implementation_id,:basic_type,:version,:only_one_per_node,:external_ref,:node_node_id,:extended_base,:ancestor_id]
     end
 
     def self.get_matching?(node_idh,component_type,component_title)
@@ -86,6 +86,23 @@ module DTK; class Component
         end
       end
       ret
+    end
+
+    def self.add_action_defs!(cmp_instances,opts={})
+      # add action defs that are from the template it is linked to
+      ndx_template_idhs = Hash.new
+      ndx_template_id_to_instances = Hash.new
+      cmp_instances.each do |cmp_instance|
+        template_id = cmp_instance.get_field?(:ancestor_id)
+        ndx_template_idhs[template_id] ||= cmp_instance.id_handle(:id => template_id)
+        (ndx_template_id_to_instances[template_id] ||= Array.new) << cmp_instance
+      end
+
+      ActionDef.get_ndx_action_defs(ndx_template_idhs.values,opts).each_pair do |template_id,action_defs|
+        ndx_template_id_to_instances[template_id].each do |cmp_instance|
+          cmp_instance[:action_defs] = action_defs
+        end
+      end
     end
 
     # these are port links that are connected on either end to the components in component_idhs

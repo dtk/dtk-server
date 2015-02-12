@@ -179,6 +179,10 @@ module DTK
       ret
     end
 
+    def self.core_columns()
+      [:id,:display_name,:group_id]
+    end
+
     # parent_id field name for child_model_name with parent this
     def parent_id_field_name(child_model_name)
       id_handle().create_childMH(child_model_name).parent_id_field_name()

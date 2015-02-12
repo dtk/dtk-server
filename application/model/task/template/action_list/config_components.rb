@@ -4,9 +4,9 @@ module DTK; class Task; class Template
       def self.get(assembly,opts={})
         # component_list_filter_proc includes clause to make sure no target refs
         opts_assembly_cmps = {:seed => new(),:filter_proc => component_list_filter_proc(opts)}
-        assembly_cmps = assembly.get_component_list(opts_assembly_cmps)
-        # NodeGroup.get_component_list looks for any components in inventory node groups
-        ret = NodeGroup.get_component_list(assembly_cmps.nodes(),:add_on_to => assembly_cmps)
+        assembly_cmps = assembly.get_component_info_for_action_list(opts_assembly_cmps)
+        # NodeGroup.get_component_info_for_action_list looks for any components in inventory node groups
+        ret = NodeGroup.get_component_info_for_action_list(assembly_cmps.nodes(),:add_on_to => assembly_cmps)
         ret.set_action_indexes!()
       end
     end

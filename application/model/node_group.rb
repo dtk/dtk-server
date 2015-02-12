@@ -6,7 +6,8 @@ module DTK
     r8_nested_require('node_group','clone')
     include Clone::Mixin
 
-    def self.get_component_list(nodes,opts={})
+    def self.get_component_info_for_action_list(nodes,opts={})
+      #TODO: this would need to be updated to return action methods
       ret = opts[:add_on_to]||opts[:seed]||Array.new
       return ret if nodes.empty? 
       # find node_to_ng mapping

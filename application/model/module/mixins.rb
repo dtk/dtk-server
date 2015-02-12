@@ -350,6 +350,10 @@ module DTK
       # cols = [:id, :display_name, :namespace_id, :dsl_parsed, :namespace, include_any_detail && :module_branches_with_repos].compact
       cols = [:id, :display_name, :namespace_id, :namespace, include_any_detail && :module_branches_with_repos].compact
       unsorted_ret = get_all(project_idh,cols)
+      unless include_versions
+        # prune all but the base module branch
+        unsorted_ret.reject!{|r| r[:module_branch] and r[:module_branch][:version] != ModuleBranch.version_field_default()}
+      end
 
       # if namespace provided with list command filter before aggregating details
       unsorted_ret = filter_by_namespace(unsorted_ret,namespace) if namespace

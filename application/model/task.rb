@@ -101,6 +101,42 @@ module DTK
       get_children_objs(:task_event,sp_hash).sort{|a,b| a[:created_at] <=> b[:created_at]}
     end
 
+    def get_logs()
+      ret_logs = Hash.new
+      sp_hash = {:cols => [:task_id, :display_name, :content, :parent_task]}
+      ret = get_children_objs(:task_log, sp_hash).sort{|a,b| a[:created_at] <=> b[:created_at]}
+
+      ret.each do |r|
+        task_id = r[:task_id]
+        content = r[:content]
+        content.merge!({:label => r[:display_name], :task_name => r[:task][:display_name]})
+        ret_logs[task_id] = (ret_logs[task_id]||Array.new) + [content]
+      end
+
+      ret_logs
+    end
+
+    def get_ndx_logs()
+      self.class.get_ndx_logs(hier_task_idhs())
+    end
+    def self.get_ndx_logs(task_idhs)
+      ret = Array.new
+      return ret if task_idhs.empty?
+      sp_hash = {
+        :cols => [:task_id, :content, :display_name, :parent_task],
+        :filter => [:oneof, :task_id, task_idhs.map{|idh|idh.get_id()}]
+      }
+      task_log_mh = task_idhs.first.createMH(:task_log)
+      ret = Hash.new
+      Model.get_objs(task_log_mh, sp_hash).each do |r|
+        task_id = r[:task_id]
+        content = r[:content]
+        content.merge!({:label => r[:display_name], :task_name => r[:task][:display_name]})
+        ret[task_id] = (ret[task_id]||Array.new) + [content]
+      end
+      ret
+    end
+
     def add_event(event_type,result=nil)
       if event = TaskEvent.create_event?(event_type,self,result)
         type = event.delete(:type)||event_type
@@ -134,6 +170,12 @@ module DTK
       [event,errors]
     end
 
+    def add_event_and_logs(event_type, result=nil)
+      output = result[:data][:data].delete(:output)
+      add_logs(output)
+      add_event(event_type,{:data => {:logs => output}})
+    end
+
     def is_status?(status)
       return self[:status] == status || self[:subtasks].find{ |subtask| subtask[:status] == status }
     end
@@ -150,6 +192,21 @@ module DTK
       end
       Model.create_from_rows(child_model_handle(:task_error),rows,{:convert => true})
       normalized_errors 
+    end
+
+    def add_logs(logs)
+      rows = []
+      index = 1
+      logs.each do |log|
+        rows << {
+          :content => log,
+          :ref     => "task_log",
+          :task_id => id(),
+          :display_name => index.to_s
+        }
+        index += 1
+      end
+      Model.create_from_rows(child_model_handle(:task_log),rows,{:convert => true})
     end
 
     def update_task_subtask_status(status,result)
@@ -333,6 +390,28 @@ module DTK
       end
       ret
     end
+
+    def get_all_subtasks_with_logs()
+      self.class.get_all_subtasks_with_logs([id_handle])
+    end
+    def self.get_all_subtasks_with_logs(top_id_handles)
+      ret = Array.new
+      id_handles = top_id_handles
+      until id_handles.empty?
+        model_handle = id_handles.first.createMH()
+        sp_hash = {
+          :cols => [:id, :display_name],
+          :filter => [:oneof, :task_id, id_handles.map{|idh|idh.get_id}]
+        }
+        next_level_objs = get_objs(model_handle,sp_hash).reject{|k,v|k == :subtasks}
+        next_level_objs.each{|st|st.reify!()}
+        id_handles = next_level_objs.map{|obj|obj.id_handle}
+
+        ret += next_level_objs
+      end
+      ret
+    end
+
     def reify!()
       self[:executable_action] &&= Action::OnNode.create_from_hash(self[:executable_action_type],self[:executable_action],id_handle)
     end

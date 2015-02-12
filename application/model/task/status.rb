@@ -3,6 +3,7 @@ module DTK
     class Status
       r8_nested_require('status','table_form')
       r8_nested_require('status','list_form')
+      r8_nested_require('status','action_detail_form')
 
       def self.get_active_top_level_tasks(model_handle)
         # TODO: need protection so dont get stake tasks that never came out of executing mode
@@ -47,6 +48,38 @@ module DTK
         end
       end
 
+      def self.get_action_detail_aux(task_obj_idh, task_obj_type, filter, message_id, opts={})
+        log, ret = nil, nil
+        task_mh = task_obj_idh.createMH(:task)
+
+        unless task = Task.get_top_level_most_recent_task(task_mh,filter)
+          task_obj = task_obj_idh.create_object().update_object!(:display_name)
+          raise ErrorUsage.new("No tasks found for #{task_obj_type} (#{task_obj[:display_name]})")
+        end
+
+        subtasks = task.get_all_subtasks_with_logs()
+        task_log_mh = task_obj_idh.createMH(:task_log)
+        subtasks.each do |sub|
+          sp_hash = {
+          :cols => [:id, :display_name, :content],
+          :filter => [:and, [:eq, :display_name, message_id], [:eq, :task_id, sub[:id]]]
+          }
+          log = Model.get_obj(task_log_mh,sp_hash)
+          break if log
+        end
+
+        raise ErrorUsage.new("Task action with identifier '#{message_id}' does not exist for this service instance.") unless log
+
+        content = log[:content]
+        ret unless content
+
+        ret  = "STATUS: #{content[:status]} \n"
+        ret << "STDOUT: #{content[:stdout]}\n\n" if content[:stdout] && !content[:stdout].empty?
+        ret << "STDERR: #{content[:stderr]} \n" if content[:stderr] && !content[:stderr].empty?
+
+        ret
+      end
+
       class Assembly < self
         def self.get_active_nodes(model_handle)
           find_nodes_that_are_active(model_handle)
@@ -55,6 +88,11 @@ module DTK
         def self.get_status(assembly_idh,opts={})
           filter = [:eq, :assembly_id, assembly_idh.get_id()]
           get_status_aux(assembly_idh,:assembly,filter,opts)
+        end
+
+        def self.get_action_detail(assembly_idh, message_id, opts={})
+          filter = [:eq, :assembly_id, assembly_idh.get_id()]
+          get_action_detail_aux(assembly_idh, :assembly, filter, message_id, opts)
         end
       end
 

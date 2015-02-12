@@ -694,6 +694,12 @@ module DTK
       rest_ok_response response
     end
 
+    def rest__task_action_detail()
+      assembly = ret_assembly_instance_object()
+      message_id = ret_request_params(:message_id)
+      rest_ok_response Task::Status::Assembly.get_action_detail(assembly.id_handle, message_id)
+    end
+
     ### command and control actions
     def rest__initiate_get_log()
       assembly = ret_assembly_instance_object()

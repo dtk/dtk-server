@@ -57,6 +57,7 @@ module DTK
                       # a puppet command we will include a footnode that shows the stdout and stderr (omitting either of it does not exist)
                       if task[:executable_action].config_agent_type.to_sym == ConfigAgent::Type::Symbol.dtk_provider 
                         pp [:result_added_when_dtk_action,result]
+                        task.add_event_and_logs(:complete_succeeded, result)
                       else
                         pp [:result_added_when_puppet,result]
                       end

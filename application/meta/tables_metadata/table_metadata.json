@@ -462,7 +462,8 @@
       "node",
       "started_at",
       "ended_at",
-      "errors"
+      "errors",
+      "action"
     ],
     "mapping": {
       "task_type": "dtk_type",
@@ -470,7 +471,8 @@
       "node": "node.name",
       "started_at": "started_at.get_date",
       "ended_at": "ended_at.get_date",
-      "errors": "errors.message"
+      "errors": "errors.message",
+      "action": "logs.message"
     }
   },
   "assembly_task_status": {

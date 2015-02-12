@@ -3,7 +3,6 @@ module DTK
     class Status
       r8_nested_require('status','table_form')
       r8_nested_require('status','list_form')
-      r8_nested_require('status','action_detail_form')
 
       def self.get_active_top_level_tasks(model_handle)
         # TODO: need protection so dont get stake tasks that never came out of executing mode

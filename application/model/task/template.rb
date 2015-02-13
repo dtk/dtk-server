@@ -17,7 +17,21 @@ module DTK; class Task
         OrderedComponents = :ordered_components
         Components = :components
         ComponentGroup = :Component_group
+        # convert above to below form 
+        module Variations
+        end
+        AllApplicable = 'All_applicable'
+        Variations::AllApplicable = ['All_applicable','All','All_Applicable','AllApplicable']
+
+        def self.its_legal_values(single_or_set)
+          if single_or_set.kind_of?(Array)
+            "its legal values are: #{single_or_set.join(',')}"
+          else
+            "its legal value is: #{single_or_set}"
+          end
+        end
       end
+
       # TODO: if support ruby 1.8.7 need to make this fn of a hash class that perserves order 
       class OrderedHash < ::Hash
         def initialize(initial_val=nil)

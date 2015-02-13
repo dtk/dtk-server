@@ -41,7 +41,8 @@ module DTK; class Task; class Template; class Stage
           ret = self
           return ret unless action_list
           info_per_node = Hash.new #indexed by node_id
-          @ordered_components.each do |cmp_ref|
+          @ordered_components.each do |serialized_action|
+            cmp_ref,method_name = Action::WithMethod.parse(serialized_action)
             cmp_type,cmp_title = [cmp_ref,nil]
             if cmp_ref =~ CmpRefWithTitleRegexp
               cmp_type,cmp_title = [$1,$2]
@@ -50,7 +51,7 @@ module DTK; class Task; class Template; class Stage
             matching_actions.each do |a|
               node_id = a.node_id
               pntr = info_per_node[node_id] ||= {:actions => Array.new, :name => a.node_name, :id => node_id}
-              pntr[:actions] << cmp_ref
+              pntr[:actions] << serialized_action
             end
           end
           info_per_node.each_value do |n|

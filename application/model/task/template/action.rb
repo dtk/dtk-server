@@ -48,7 +48,7 @@ module DTK; class Task; class Template
 
       action_defs = action[:action_defs]||[]
       if action_def = action_defs.find{|ad|ad.get_field?(:method_name) == method_name}
-        return create(action,:method => action_def)
+        return create(action,:action_def => action_def)
       end
 
       unless opts[:skip_if_not_found]
@@ -68,6 +68,11 @@ module DTK; class Task; class Template
       @action.respond_to?(name) || super
     end
 
+    def method_name?()
+      if action_method = action_method?
+        action_method.method_name()
+      end
+    end
     # this can be overwritten
     def action_method?()
       nil
@@ -75,7 +80,7 @@ module DTK; class Task; class Template
 
    private
     def self.add_action_method?(base_action,opts={})
-      opts[:method] ? base_action.class::WithMethod.new(base_action,opts[:method]) : base_action
+      opts[:action_def] ? base_action.class::WithMethod.new(base_action,opts[:action_def]) : base_action
     end
   end
 end; end; end

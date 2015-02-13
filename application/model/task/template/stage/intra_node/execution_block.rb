@@ -164,8 +164,8 @@ module DTK; class Task; class Template
 
       def serialization_form_add_action?(ret,action,opts={})
         if item = action.serialization_form(opts)
-          if action_method = action.action_method?()
-            item << ".#{action_method[:name]}"
+          if method_name = action.method_name?()
+            item << ".#{method_name}"
           end
           ret << item
         end

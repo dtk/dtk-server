@@ -2,9 +2,9 @@ module DTK; class Task; class Template
   class Action
     # This represents an action with am explicit method on it method
     class WithMethod < self
-      def initialize(action,method)
+      def initialize(action,action_def)
         @action = action
-        @method = ActionMethod.new(method)
+        @method = ActionMethod.new(action_def)
       end
       def action_method?()
         @method

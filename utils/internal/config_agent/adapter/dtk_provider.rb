@@ -43,31 +43,9 @@ module DTK; class ConfigAgent; module Adapter
     end
 
     def each_command_given_component_action(component_action,&block)
-      if action_def = action_def(component_action)
+      if action_def = component_action.action_def()
         each_command_given_action_def(action_def,component_action,&block)
       end
-    end
-
-    #TODO: move to be method on DTK::Task::Action::OnComponent
-    def action_def(component_action)
-      ret = nil
-      component = component_action[:component]
-      unless action_def_ref = component_action[:action_method]
-        Log.error("Component Action with following component id #{component[:id].to_s} has no action_method")
-        return ret
-      end
-      sp_hash = {
-        :cols   => [:id,:method_name,:content],
-        :filter => [:eq,:id,action_def_ref[:action_def_id]]
-      }
-      action_def_mh = component.id_handle().create_childMH(:action_def)
-      action_defs = Model.get_objs(action_def_mh,sp_hash)
-      if action_defs.empty?
-        Log.error("Cannot find action def that matches with ref (#{action_def_ref.inspect})")
-        nil
-      else
-        action_defs.first
-      end      
     end
 
     def each_command_given_action_def(action_def,component_action,&block)

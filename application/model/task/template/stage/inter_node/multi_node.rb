@@ -53,7 +53,9 @@ module DTK; class Task; class Template; class Stage
             end
           end
           info_per_node.each_value do |n|
-            merge!(InterNode.parse_and_reify_node_actions({Constant::OrderedComponents => n[:actions]},n[:name],n[:id],action_list))
+            if node_actions = InterNode.parse_and_reify_node_actions?({Constant::OrderedComponents => n[:actions]},n[:name],n[:id],action_list) 
+              merge!(node_actions)
+            end
           end
           ret
         end

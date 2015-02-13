@@ -98,7 +98,7 @@ module DTK; class Task; class Template
         end
       end
       # action_list nil can be passed if just concerned with parsing
-      def self.parse_and_reify(serialized_content,action_list,opts={})
+      def self.parse_and_reify?(serialized_content,action_list,opts={})
         # content could be either 
         # 1) a concurrent block with multiple nodes, 
         # 2) a single node,
@@ -109,7 +109,7 @@ module DTK; class Task; class Template
         end
 
         normalized_content = serialized_content[Field::Subtasks]||[serialized_content]
-        normalized_content.inject(new(serialized_content[:name])) do |h,serialized_node_actions|
+        ret = normalized_content.inject(new(serialized_content[:name])) do |h,serialized_node_actions|
           unless node_name = serialized_node_actions[:node]
             if serialized_node_actions[:nodes]
               raise ParsingError.new("Within nested subtask only 'node' and not 'nodes' keyword can be used")
@@ -122,8 +122,10 @@ module DTK; class Task; class Template
               raise ParsingError.new("Node ref (#{node_name}) cannot be resolved")
             end
           end
-          h.merge(parse_and_reify_node_actions(serialized_node_actions,node_name,node_id,action_list,opts))
+          node_actions = parse_and_reify_node_actions?(serialized_node_actions,node_name,node_id,action_list,opts)
+          node_actions ? h.merge(node_actions) : {}
         end
+        !ret.empty? && ret
       end
 
       def add_new_execution_block_for_action!(action)
@@ -146,8 +148,13 @@ module DTK; class Task; class Template
         @name ? OrderedHash.new(:name => @name) : OrderedHash.new
       end
 
-      def self.parse_and_reify_node_actions(node_actions,node_name,node_id,action_list,opts={})
-        {node_id => Stage::IntraNode::ExecutionBlocks.parse_and_reify(node_actions,node_name,action_list,opts)}
+      def self.parse_and_reify_node_actions?(node_actions,node_name,node_id,action_list,opts={})
+        exec_blocks = Stage::IntraNode::ExecutionBlocks.parse_and_reify(node_actions,node_name,action_list,opts)
+        # remove empty blocks
+        exec_blocks.reject!{|exec_block|exec_block.empty?}
+        unless exec_blocks.empty?
+          {node_id => exec_blocks}
+        end
       end
 
       def each_node_actions(&block)

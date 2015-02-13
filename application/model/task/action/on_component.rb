@@ -12,6 +12,28 @@ module DTK; class Task
         end
       end
 
+      def action_def()
+        ret = nil
+        component = self[:component]
+        unless action_def_ref = self[:action_method]
+          Log.error("Component Action with following component id #{component[:id].to_s} has no action_method")
+          return ret
+        end
+        sp_hash = {
+          :cols   => [:id,:method_name,:content],
+          :filter => [:eq,:id,action_def_ref[:action_def_id]]
+        }
+        action_def_mh = component.id_handle().create_childMH(:action_def)
+        action_defs = Model.get_objs(action_def_mh,sp_hash)
+        if action_defs.empty?
+          Log.error("Cannot find action def that matches with ref (#{action_def_ref.inspect})")
+          nil
+        else
+          action_defs.first
+        end      
+      end
+
+
       # for debugging
       def self.pretty_print_hash(object)
         ret = PrettyPrintHash.new
@@ -210,10 +232,14 @@ module DTK; class Task
         if ca_types.find{|r|r.nil?}
           raise Error.new("Unexpected that nil is in config_agent_types: #{ca_types.inspect}")
         end
-        unless ca_types.size == 1
+
+        if ca_types.size == 1
+          ca_types.first
+        elsif ca_types.empty?
+          ConfigAgent::Type.default_symbol()
+        else
           raise ErrorUsage.new("Actions with different providers (#{ca_types.join(',')}) cannot be in the same workflow stage")
         end
-        ca_types.first
       end
       private_class_method :config_agent_type
 

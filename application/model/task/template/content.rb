@@ -199,7 +199,11 @@ module DTK; class Task
       end
 
       def create_stages_from_serialized_content!(serialized_content_array,actions,opts={})
-        serialized_content_array.each{|a| self << Stage::InterNode.parse_and_reify(a,actions,opts)}
+        serialized_content_array.each do |a| 
+          if stage = Stage::InterNode.parse_and_reify?(a,actions,opts)
+            self << stage
+          end
+        end
       end
 
       def create_stages_from_temporal_constraints!(temporal_constraints,actions,opts={})

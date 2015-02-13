@@ -20,5 +20,13 @@ module DTK
       ret
     end
     ColsToInclude = [:id,:group_id,:component_component_id]
+
+    def reify_content!()
+      content = get_field?(:content)
+      unless content.kind_of?(Content)
+        self[:content] = Content.new(content)
+      end
+      self[:content]
+    end
   end
 end

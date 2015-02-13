@@ -4,7 +4,7 @@ module DTK; class ConfigAgent; module Adapter
       #cmps_with_attrs = components_with_attributes(config_node)
       # assembly_attrs = assembly_attributes(config_node)
       # TODO: stub
-
+pp [:config_node,config_node]
       ret = {
         :bash_command => 'ls /usr'
       }

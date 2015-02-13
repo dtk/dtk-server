@@ -30,17 +30,35 @@ module DTK; class Task; class Template
 
     def self.find_action_in_list?(serialized_item,node_name,action_list,opts={})
       # method_name could be nil
+      ret = nil
       component_name_ref,method_name = WithMethod.parse(serialized_item)
-      if action = action_list.find_matching_action(node_name,:component_name_ref => component_name_ref)
-        if cgn = opts[:component_group_num]
-          action = action.in_component_group(cgn)
+      unless action = action_list.find_matching_action(node_name,:component_name_ref => component_name_ref)
+        if opts[:skip_if_not_found]
+          return ret
+        else
+          raise ParsingError.new("The component reference '#{component_name_ref}' on node '#{node_name}' in the workflow is not in the assembly; either add it to the assembly or delete it from the workflow") 
         end
-        create(action,method_name ? {:method_name => method_name} : {})
-      else
-        unless opts[:skip_if_not_found]
-          raise ParsingError.new("The component reference ('#{component_name_ref}' on node '#{node_name}') in the workflow is not in the assembly; either add it to the assembly or delete it from the workflow") unless opts[:skip_if_not_found]
-        end        
       end
+      
+      if cgn = opts[:component_group_num]
+        action = action.in_component_group(cgn)
+      end
+      
+      return create(action) unless method_name
+
+      action_defs = action[:action_defs]||[]
+      if action_def = action_defs.find{|ad|ad.get_field?(:method_name) == method_name}
+        return create(action,:method => action_def)
+      end
+
+      unless opts[:skip_if_not_found]
+        err_msg = "The action method '#{method_name}' is not defined on component '#{component_name_ref}'"
+        unless action_defs.empty?
+          legal_methods = action_defs.map{|ad|ad[:method_name]}
+          err_msg << "; legal method names are: #{legal_methods.join(',')}"
+        end
+        raise ParsingError.new(err_msg)
+      end 
     end
 
     def method_missing(name,*args,&block)
@@ -57,7 +75,7 @@ module DTK; class Task; class Template
 
    private
     def self.add_action_method?(base_action,opts={})
-      opts[:method_name] ? base_action.class::WithMethod.new(base_action,opts) : base_action
+      opts[:method] ? base_action.class::WithMethod.new(base_action,opts[:method]) : base_action
     end
   end
 end; end; end

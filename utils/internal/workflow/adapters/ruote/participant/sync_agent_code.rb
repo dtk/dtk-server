@@ -57,6 +57,17 @@ module DTK
               end,
               :on_timeout => proc do
                 CreateThread.defer_with_session(user_object, Ramaze::Current.session) do
+### DTK-1923 Temp workaround for https://reactor8.atlassian.net/browse/DTK-1923
+agent_commit_id_helper.update_node()
+result = {:status => "ok"}
+task.add_event(:complete_succeeded,result)
+log_participant.end(:timeout_override,:task_id=>task_id)
+set_result_succeeded(workitem,result,task,action) if task_end
+# If there was a change on agents, wait for node's mcollective process to restart
+unless R8::Config[:node_agent_git_clone][:no_delay_needed_on_server]
+  sleep(R8::Config[:node_agent_git_clone][:delay]||NodeAgentGitCloneDefaultDelay)
+end
+if false
                   result = {
                     :status => "timeout"
                   }
@@ -67,6 +78,9 @@ module DTK
                   #TODO: check why this commented out
                   # cancel_upstream_subtasks(workitem)
                   set_result_timeout(workitem,result,task)
+end
+#### end  DTK-1923 Temp workaround for https://reactor8.atlassian.net/browse/DTK-1923
+
                   delete_task_info(workitem)
                   reply_to_engine(workitem)
                 end
@@ -81,9 +95,10 @@ module DTK
               end
             }
             receiver_context = {
-              :callbacks => callbacks,
+              :timeout            => 5,
+              :callbacks          => callbacks,
               :head_git_commit_id => agent_commit_id_helper.head_git_commit_id,
-              :expected_count => 1
+              :expected_count     => 1
             }
             begin
               workflow.initiate_sync_agent_action(task,receiver_context)
@@ -92,7 +107,7 @@ module DTK
             end
           end
         end
-        NodeAgentGitCloneDefaultDelay = 10
+        NodeAgentGitCloneDefaultDelay = 5
 
         # Ruote dispatch call to this method in case of user's cancel task request
         def cancel(fei, flavour)

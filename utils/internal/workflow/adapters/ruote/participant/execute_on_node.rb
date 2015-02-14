@@ -2,9 +2,7 @@ module DTK
   module WorkflowAdapter
     module RuoteParticipant
       class ExecuteOnNode < NodeParticipants
-        # LockforDebug = Mutex.new
         def consume(workitem)
-          # LockforDebug.synchronize{pp [:in_consume, Thread.current, Thread.list];STDOUT.flush}
           params = get_params(workitem)
           PerformanceService.start("#{self.class.to_s.split("::").last}", self.object_id)
           task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
@@ -42,24 +40,9 @@ module DTK
                       cancel_upstream_subtasks(workitem)
                       set_result_failed(workitem,result,task)
                     else
-                      # DTK-1892 For Aldin
-                      # The way that the dtk_provider is implemented is that it uses this same ruote participant as the puppet agent
-                      # Below you see a conditional that cases between whether the task corresponds to a dtk provider action
-                      # in contrast to puppet
-                      # you see that results are printed out here; for result_added_when_dtk_action it is using the first implementation
-                      # that Haris put in for the dtk action agent. This wil be updated (Haris has the details). 
-                      # It is fine to start with using this one to tarnsmit
-                      # results to client. The refined one wil have an array of what appears in these results for each command in execution list
-                      # where current agent has just result of one command. You see how teh results are stuffed as an event into
-                      # a task; so teh task object will have all info needed to render the stdout and stderr for an action
-                      # Now dont thnk code needs to be changed here; this is just to put in debug statement about what is being inserted
-                      # ** What neds to be changed is the task state command so that when the (sub task corresponds to a task action rather than
-                      # a puppet command we will include a footnode that shows the stdout and stderr (omitting either of it does not exist)
-                      if task[:executable_action].config_agent_type.to_sym == ConfigAgent::Type::Symbol.dtk_provider 
+                      if has_action_results?(task,result)
                         pp [:result_added_when_dtk_action,result]
                         task.add_event_and_logs(:complete_succeeded, result)
-                      else
-                        pp [:result_added_when_puppet,result]
                       end
 
                       event = task.add_event(:complete_succeeded,result)
@@ -131,6 +114,10 @@ module DTK
         end
 
        private
+        def has_action_results?(task,results)
+          task[:executable_action].config_agent_type.to_sym == ConfigAgent::Type::Symbol.dtk_provider 
+        end
+
         def add_start_task_event?(task)
           task.add_event(:start)
         end

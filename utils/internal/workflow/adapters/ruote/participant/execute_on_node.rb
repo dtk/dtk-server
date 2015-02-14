@@ -6,7 +6,7 @@ module DTK
           params = get_params(workitem)
           PerformanceService.start("#{self.class.to_s.split("::").last}", self.object_id)
           task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
-
+          top_task = workflow.top_task
           task.update_input_attributes!() if task_start
           workitem.fields["guard_id"] = task_id # ${guard_id} is referenced if guard for execution of this
 
@@ -42,7 +42,7 @@ module DTK
                     else
                       if has_action_results?(task,result)
                         pp [:result_added_when_dtk_action,result]
-                        task.add_event_and_logs(:complete_succeeded, result)
+                        task.add_action_results(result,top_task)
                       end
 
                       event = task.add_event(:complete_succeeded,result)

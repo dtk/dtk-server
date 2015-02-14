@@ -6,11 +6,13 @@ module DTK
     r8_nested_require('task','template')
     r8_nested_require('task','stage')
     r8_nested_require('task','node_group_processing')
+    r8_nested_require('task','action_results')
 
     extend CreateClassMixin
     include StatusMixin
     include NodeGroupProcessingMixin
     include Status::TableForm::Mixin
+    include ActionResults::Mixin
 
     def self.common_columns()
       [
@@ -170,12 +172,6 @@ module DTK
       [event,errors]
     end
 
-    def add_event_and_logs(event_type, result=nil)
-      output = result[:data][:data].delete(:output)
-      add_logs(output)
-      add_event(event_type,{:data => {:logs => output}})
-    end
-
     def is_status?(status)
       return self[:status] == status || self[:subtasks].find{ |subtask| subtask[:status] == status }
     end
@@ -192,21 +188,6 @@ module DTK
       end
       Model.create_from_rows(child_model_handle(:task_error),rows,{:convert => true})
       normalized_errors 
-    end
-
-    def add_logs(logs)
-      rows = []
-      index = 1
-      logs.each do |log|
-        rows << {
-          :content => log,
-          :ref     => "task_log",
-          :task_id => id(),
-          :display_name => index.to_s
-        }
-        index += 1
-      end
-      Model.create_from_rows(child_model_handle(:task_log),rows,{:convert => true})
     end
 
     def update_task_subtask_status(status,result)

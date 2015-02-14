@@ -45,6 +45,12 @@ module DTK; class  Assembly
       task_idhs
     end
 
+    ### methods around node status
+    def any_stopped_nodes?()
+      !!get_leaf_nodes(:cols => [:id,:admin_op_status]).find{|node|node[:admin_op_status] == 'stopped'}
+    end
+
+    # TODO: check taht nelow correctly dont use get_leaf_nodes
     def op_status()
       assembly_nodes = get_nodes(:admin_op_status)
       self.class.op_status(assembly_nodes)
@@ -84,6 +90,8 @@ module DTK; class  Assembly
         status.nil? or status != 'pending'
       end.nil?
     end
+
+    ### end methods around node status
 
     def get_info__flat_list(opts={})
       filter = [:eq,:id,id()]

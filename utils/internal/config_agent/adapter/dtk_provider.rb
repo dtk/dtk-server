@@ -10,7 +10,11 @@ module DTK; class ConfigAgent; module Adapter
       # since it only takes now single bash command; stubbing by taking first one
 
       pp [:commands,commands]
-      bash_command = commands.first || 'ls /usr'
+      unless commands.first.is_syscall?
+        raise Error.new("commands.first.is_syscall? is fals")
+      end
+
+      bash_command = commands.first.string_form() || 'ls /usr'
       ret = {
         :bash_command => bash_command
       }
@@ -44,22 +48,9 @@ module DTK; class ConfigAgent; module Adapter
 
     def each_command_given_component_action(component_action,&block)
       if action_def = component_action.action_def()
-        each_command_given_action_def(action_def,component_action,&block)
-      end
-    end
-
-    def each_command_given_action_def(action_def,component_action,&block)
-      content = action_def.reify_content!()
-      (content[:commands]||[]).each do |raw_command|
-        #TODO: For Aldin; right now just getting raw commands, but will put objects in ActionDef::Content
-        # that distinguish between whether command is a syscallto execute or a file position
-        # if syscall here you wil have to case on whether there are mustach attributes in the command
-        # or not; if template vraibales then call to attribute_value_pairs(component_action)
-        # will give attribute values to substitute
-        
-        # TODO: stub
-        command = raw_command.gsub(/^RUN\s+/,'')
-        block.call(command)
+        action_def.commands().each do |command|
+          block.call(command)
+        end
       end
     end
 

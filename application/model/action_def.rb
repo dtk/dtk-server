@@ -21,10 +21,25 @@ module DTK
     end
     ColsToInclude = [:id,:group_id,:component_component_id]
 
-    def reify_content!()
+    def commands()
+      parse_and_reify_content?().commands()
+    end
+
+    # if parse does not go through; raises parse error
+    def self.parse(hash_content)
+      Content.parse(hash_content)
+    end
+
+    private
+    def parse_and_reify_content?()
       content = get_field?(:content)
       unless content.kind_of?(Content)
-        self[:content] = Content.new(content)
+        if content.kind_of?(Hash)
+          hash_content = content
+          self[:content] = Content.parse(hash_content)
+        else
+          raise Error.new("Unexpected class type (#{content.class}")
+        end
       end
       self[:content]
     end

@@ -22,15 +22,54 @@ module DTK; class Task
         end
         AllApplicable = 'All_applicable'
         Variations::AllApplicable = ['All_applicable','All','All_Applicable','AllApplicable']
+        
+        Node = 'node'
+        Variations::Node = ['node','node_group']
+        Nodes = 'nodes'
+        Variations::Nodes = ['nodes']
 
-        def self.its_legal_values(single_or_set)
+
+        def self.its_legal_values(constant)
+          single_or_set = variations(constant)
           if single_or_set.kind_of?(Array)
             "its legal values are: #{single_or_set.join(',')}"
           else
             "its legal value is: #{single_or_set}"
           end
         end
+
+        def self.matches?(object,constant)
+          unless object.nil?
+            variations = variations(constant)
+            if object.kind_of?(Hash)
+              hash_matches_key?(object,variations)
+            elsif object.kind_of?(String) or object.kind_of?(Symbol)
+               variations.include?(object.to_s)
+            else
+              raise Error.new("Unexpected object class (#{object.class})")
+            end            
+          end
+        end
+
+       private            
+        def self.variations(constant)
+          begin
+            variations = Variations.const_get(constant.to_s)
+            variations.map{|v|v.to_s} + variations.map{|v|v.to_sym}
+           rescue
+            # if Variations not defined
+            term = const_get(constant.to_s)
+            [term.to_s,term.to_sym]
+          end
+        end
+
+        def self.hash_matches_key?(hash,variations)
+          if match_key = variations.find{|key|hash.has_key?(key)}
+            hash[match_key]
+          end
+        end
       end
+
 
       # TODO: if support ruby 1.8.7 need to make this fn of a hash class that perserves order 
       class OrderedHash < ::Hash

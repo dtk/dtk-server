@@ -104,15 +104,15 @@ module DTK; class Task; class Template
         # 2) a single node,
         # 3) a multi-node specification
 
-        if multi_node_type = (serialized_content||{})[:nodes]
+        if multi_node_type = Constant.matches?(serialized_content,:Nodes)
           return MultiNode.parse_and_reify(multi_node_type,serialized_content,action_list)
         end
 
         normalized_content = serialized_content[Field::Subtasks]||[serialized_content]
         ret = normalized_content.inject(new(serialized_content[:name])) do |h,serialized_node_actions|
-          unless node_name = serialized_node_actions[:node]
-            if serialized_node_actions[:nodes]
-              raise ParsingError.new("Within nested subtask only 'node' and not 'nodes' keyword can be used")
+          unless node_name = Constant.matches?(serialized_node_actions,:Node)
+            if Constant.matches?(serialized_node_actions,:Nodes)
+              raise ParsingError.new("Within nested subtask only '#{Constant::Node}' and not '#{Constant::Nodes}' keyword can be used")
             end
             raise ParsingError.new("Missing node reference in: ?1",serialized_node_actions)
           end

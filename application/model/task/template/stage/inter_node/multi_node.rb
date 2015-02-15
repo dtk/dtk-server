@@ -27,10 +27,10 @@ module DTK; class Task; class Template; class Stage
 
      private
       def self.klass(multi_node_type)
-        if Constant::Variations::AllApplicable.include?(multi_node_type)
+        if Constant.matches?(multi_node_type,:AllApplicable)
           Applicable
         else 
-          raise ParsingError.new("Illegal multi node type (#{multi_node_type}); #{Constant.its_legal_values(Constant::AllApplicable)}")
+          raise ParsingError.new("Illegal multi node type (#{multi_node_type}); #{Constant.its_legal_values(:AllApplicable)}")
         end
       end
 

@@ -28,7 +28,6 @@ module DTK
                 :on_msg_received => proc do |msg|
                   inspect_agent_response(msg)
                   CreateThread.defer_with_session(user_object, Ramaze::Current.session) do
-                    # Amar: PERFORMANCE
                     PerformanceService.end_measurement("#{self.class.to_s.split("::").last}", self.object_id)
 
                     result = msg[:body].merge("task_id" => task_id)
@@ -41,8 +40,7 @@ module DTK
                       set_result_failed(workitem,result,task)
                     else
                       if has_action_results?(task,result)
-                        pp [:result_added_when_dtk_action,result]
-                        task.add_action_results(result,top_task)
+                        task.add_action_results(result,action,top_task)
                       end
 
                       event = task.add_event(:complete_succeeded,result)

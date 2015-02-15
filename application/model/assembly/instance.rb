@@ -9,6 +9,7 @@ module DTK; class  Assembly
     r8_nested_require('instance','get')
     r8_nested_require('instance','delete')
     r8_nested_require('instance','service_setting')
+    r8_nested_require('instance','op_status')
     include ServiceLinkMixin
     include ViolationMixin
     include ListMixin
@@ -17,6 +18,8 @@ module DTK; class  Assembly
     extend DeleteClassMixin
     include GetMixin
     extend GetClassMixin
+    include OpStatus::Mixin
+    include OpStatus::ClassMixin
 
     def self.create_from_id_handle(idh)
       idh.create_object(:model_name => :assembly_instance)
@@ -44,54 +47,6 @@ module DTK; class  Assembly
       Model.delete_instances(task_idhs) unless task_idhs.empty?
       task_idhs
     end
-
-    ### methods around node status
-    def any_stopped_nodes?()
-      !!get_leaf_nodes(:cols => [:id,:admin_op_status]).find{|node|node[:admin_op_status] == 'stopped'}
-    end
-
-    # TODO: check taht nelow correctly dont use get_leaf_nodes
-    def op_status()
-      assembly_nodes = get_nodes(:admin_op_status)
-      self.class.op_status(assembly_nodes)
-    end
-
-    def op_status_all_pending?()
-      assembly_nodes = get_nodes(:admin_op_status)
-      self.class.op_status_all_pending?(assembly_nodes)
-    end
-
-    # returns
-    #'running' - if at least one node is running
-    #'stopped' - if there is atleast one node stopped and no nodes running
-    #'pending' - if all nodes are pending or no nodes
-    # nil - if cant tell
-    def self.op_status(assembly_nodes)
-      return 'pending' if assembly_nodes.empty?
-      stop_found = false
-      assembly_nodes.each do |node|
-        case node[:admin_op_status]
-          when 'running'
-            return 'running'
-          when 'stopped'
-            stop_found = true
-          when 'pending'
-            # no op
-          else
-            return nil
-        end
-      end
-      stop_found ? 'stopped' : 'pending'
-    end
-
-    def self.op_status_all_pending?(assembly_nodes)
-      assembly_nodes.find do |node|
-        status = node[:admin_op_status]
-        status.nil? or status != 'pending'
-      end.nil?
-    end
-
-    ### end methods around node status
 
     def get_info__flat_list(opts={})
       filter = [:eq,:id,id()]

@@ -18,7 +18,7 @@ module DTK
     end
 
     # creates a ModuleDSL if file_obj_hash is a dtk meta file
-    def self.create_from_file_obj_hash?(target_impl,dsl_filename,content,opts={})
+    def self.create_from_file_obj_hash(target_impl,dsl_filename,content,opts={})
       container_idh = opts[:container_idh]
       return nil unless isa_dsl_filename?(dsl_filename)
       parsed_name = parse_dsl_filename(dsl_filename)

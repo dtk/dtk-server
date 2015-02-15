@@ -56,11 +56,13 @@ module DTK
         dsl_filename = info[:dsl_filename]
         content = info[:content]
       end
-      create_from_file_obj_hash?(impl_obj,dsl_filename,content,opts)
+      create_from_file_obj_hash(impl_obj,dsl_filename,content,opts)
     end
     # parses and creates dsl_object form hash parsed in as target
-    def self.create_from_file_obj_hash?(impl_obj,dsl_filename,content,opts={})
-      return nil unless isa_dsl_filename?(dsl_filename)
+    def self.create_from_file_obj_hash(impl_obj,dsl_filename,content,opts={})
+      unless isa_dsl_filename?(dsl_filename)
+        raise Error.new("The file path (#{dsl_filename}) does not refer to a dsl file name")
+      end
       parsed_name = parse_dsl_filename(dsl_filename)
       opts[:file_path] = dsl_filename
       input_hash = convert_to_hash(content,parsed_name[:format_type],opts)
@@ -239,7 +241,11 @@ module DTK
 
     def self.dsl_filename(format_type,dsl_integer_version=nil)
       first_part = 'dtk.model'
-      "#{first_part}.#{TypeToExtension[format_type]}"
+      unless extension = TypeToExtension[format_type]
+        legal_types = TypeToExtension.values.uniq.join(',')
+        raise Error.new("Illegal dsl_filename extension (#{format_type}); legal types are: #{legal_types}")
+      end
+      "#{first_part}.#{extension}"
     end
 
     def integer_version(version_specific_input_hash)

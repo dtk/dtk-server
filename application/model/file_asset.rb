@@ -30,8 +30,9 @@ module DTK
       impl_obj.set_to_indicate_updated()
 
       # special processing if this the meta file
-      target_impl = self[:implementation]
-      if component_dsl = ModuleDSL.create_from_file_obj_hash?(target_impl,self[:path],content)
+      if ModuleDSL.isa_dsl_filename?(self[:path])
+        target_impl = self[:implementation]
+        component_dsl = ModuleDSL.create_from_file_obj_hash(target_impl,self[:path],content)
         component_dsl.update_model()
       end
       impl_obj.create_pending_changes_and_clear_dynamic_attrs(self)

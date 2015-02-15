@@ -1,7 +1,7 @@
 files = 
   [
    'dynamic_loader',
-   'auxiliary', 
+   'aux', 
    'sql', 
    'aes', 
    'dataset_from_search_pattern', 

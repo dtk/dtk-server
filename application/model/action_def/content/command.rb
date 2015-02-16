@@ -11,6 +11,7 @@ module DTK; class ActionDef; class Content
     def is_syscall?()
       kind_of?(Syscall)
     end
+
   end
 end; end; end
               

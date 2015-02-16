@@ -19,7 +19,7 @@ module DTK; class  Assembly
     include GetMixin
     extend GetClassMixin
     include OpStatus::Mixin
-    include OpStatus::ClassMixin
+    extend OpStatus::ClassMixin
 
     def self.create_from_id_handle(idh)
       idh.create_object(:model_name => :assembly_instance)

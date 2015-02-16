@@ -5,8 +5,9 @@ module DTK; class ConfigAgent; module Adapter
       # reference to component attributes
       # assembly_attrs = assembly_attributes(config_node)
 
-      commands = commands(config_node)
-      # TODO: For Aldin: when action agent changes to signature that takes a list of commands then take this; 
+      commands = commands(config_node,:substitute_template_vars => true)
+      # For Aldin DTK-1911: DTK-1934
+      # when action agent changes to signature that takes a list of commands then take this; 
       # since it only takes now single bash command; stubbing by taking first one
 
       pp [:commands,commands]
@@ -14,7 +15,7 @@ module DTK; class ConfigAgent; module Adapter
         raise Error.new("commands.first.is_syscall? is fals")
       end
 
-      bash_command = commands.first.string_form() || 'ls /usr'
+      bash_command = commands.first.command_line() || 'ls /usr'
       ret = {
         :bash_command => bash_command
       }
@@ -36,10 +37,15 @@ module DTK; class ConfigAgent; module Adapter
     end
 
     private
-    def commands(config_node)
+    def commands(config_node,opts)
       ret = Array.new
       config_node[:component_actions].each do |component_action|
+        attr_val_pairs = nil
         each_command_given_component_action(component_action) do |command|
+          if opts[:substitute_template_vars] and command.needs_template_substitution?()
+            attr_val_pairs ||= attribute_value_pairs(component_action)
+            commands.substitute_template_vars!(attr_val_pairs)
+          end
           ret << command
         end
       end

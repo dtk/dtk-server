@@ -4,9 +4,9 @@ module DTK; class ActionDef
   class Content < Hash
     r8_nested_require('content','constant')
     r8_nested_require('content','command')
+    r8_nested_require('content','template_processor')
 
     attr_reader :commands
-
     def initialize(hash_content)
       super()
       replace(hash_content)

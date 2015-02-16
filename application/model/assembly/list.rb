@@ -12,8 +12,8 @@ module DTK
         assembly_rows = get_objs(sp_hash)
         Instance.get_last_task_run_status(assembly_rows,model_handle())
 
-        if(node_id.to_s.empty? && component_id.to_s.empty? && attribute_id.to_s.empty?)
-          nodes_info = (is_template ? get_nodes() : get_nodes(:id,:display_name,:admin_op_status,:os_type,:external_ref,:type))          
+        if (node_id.to_s.empty? && component_id.to_s.empty? && attribute_id.to_s.empty?)
+          nodes_info = (is_template ? get_nodes() : get_nodes(:id,:display_name,:admin_op_status,:os_type,:external_ref,:type))
           assembly_rows.first[:nodes] = nodes_info.sort{|a,b| a[:display_name] <=> b[:display_name] }
         end
 
@@ -102,6 +102,7 @@ module DTK
           if module_branch_id = r[:module_branch_id]
             pntr[:module_branch_id] ||= module_branch_id 
           end
+
           if target = (r[:target]||{})[:display_name]
             pntr[:target] ||= target
           end
@@ -129,9 +130,10 @@ module DTK
         end
         
         unsorted = ndx_ret.values.map do |r|
-          nodes = r[:ndx_nodes].values
+          # nodes = r[:ndx_nodes].values
+          nodes = [r[:ndx_nodes]]
           op_status = (op_status(nodes) if respond_to?(:op_status))
-          r.merge(:op_status => op_status,:nodes => nodes).slice(:id,:display_name,:op_status,:last_task_run_status,:execution_status,:module_branch_id,:version,:assembly_template,:nodes,:created_at,:target)
+          r.merge(:op_status => op_status,:nodes => nodes).slice(:id,:display_name,:op_status,:last_task_run_status,:execution_status,:module_branch_id,:version,:assembly_template,:target,:nodes,:created_at,:keypair,:security_groups)
         end
         
         sanitize!(unsorted) if opts[:sanitize]
@@ -153,18 +155,24 @@ module DTK
       def format_node!(ndx_nodes,raw_node,opts=Hash.new)
         node = nil
         if raw_node
-          node_id = raw_node[:id]
-          unless node = ndx_nodes[node_id] 
-            node = ndx_nodes[node_id] = {
-              :node_name  => raw_node[:display_name], 
-              :node_id    => node_id,
-              :os_type    => raw_node[:os_type],
-              :admin_op_status => raw_node[:admin_op_status]
+          node_name = raw_node[:display_name]
+          external_ref = {}
+          unless node = ndx_nodes[node_name]
+            if node_ext_ref = raw_node[:external_ref]
+              external_ref = node_external_ref_print_form(node_ext_ref,opts)
+              external_ref.delete(:git_authorized)
+            end
+            type = external_ref.delete(:type) if external_ref[:type]
+            node = ndx_nodes[node_name] = {
+              :node_properties => {
+                :type    => type,
+                :node_id => raw_node[:id],
+                :os_type => raw_node[:os_type],
+                :admin_op_status => raw_node[:admin_op_status]
+              }
             }
             node.reject!{|k,v|v.nil?}
-            if node_ext_ref = raw_node[:external_ref]
-              node[:external_ref]  = node_external_ref_print_form(node_ext_ref,opts)
-            end
+            node[:node_properties].merge!(external_ref)
             node[:components] = Array.new
           end
         end

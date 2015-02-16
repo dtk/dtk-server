@@ -304,7 +304,7 @@ lambda__instance_nodes_components_assembly_template =
          :convert => true,
          :join_type=>:left_outer,
          :join_cond=>{:id=>:component__datacenter_datacenter_id},
-         :cols => [:id,:group_id,:display_name]
+         :cols => [:id,:group_id,:display_name,:iaas_properties]
        }]
     },
     :instance_component_list=> lambda__instance_nodes_and_components.call(Node::Instance.component_list_fields(),Component::Instance.component_list_fields()),

@@ -44,7 +44,8 @@ module DTK; class ConfigAgent; module Adapter
         each_command_given_component_action(component_action) do |command|
           if opts[:substitute_template_vars] and command.needs_template_substitution?()
             attr_val_pairs ||= attribute_value_pairs(component_action)
-            commands.substitute_template_vars!(attr_val_pairs)
+            # commands.substitute_template_vars!(attr_val_pairs)
+            command.bind_template_attributes!(attr_val_pairs)
           end
           ret << command
         end

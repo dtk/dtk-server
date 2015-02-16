@@ -64,5 +64,6 @@ gem 'docile'
 gem 'redis'
 
 gem 'looksee'
+gem 'mustache', '~> 0.99.8'
 
 

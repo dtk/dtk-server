@@ -1,10 +1,11 @@
+require 'mustache'
+
 module DTK; class ActionDef; class Content
   class TemplateProcessor
     class Mustache < self
       def needs_template_substitution?(command_line)
-        # For Aldin DTK-1911: DTK-1930
-        # returns true if command_line has template variables
-        nil # TODO: stub
+        # will return true if command_line has mustache template attributes '{{ variable }}'
+        return command_line.match(/\{\{.+\}\}/)
       end
 
       def bind_template_attributes!(command_line,attr_val_pairs)

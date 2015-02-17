@@ -462,6 +462,7 @@
       "node",
       "started_at",
       "ended_at",
+      "duration",
       "errors",
       "action"
     ],
@@ -471,6 +472,7 @@
       "node": "node.name",
       "started_at": "started_at.get_date",
       "ended_at": "ended_at.get_date",
+      "duration": "duration",
       "errors": "errors.message",
       "action": "logs.message"
     }

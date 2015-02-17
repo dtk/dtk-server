@@ -20,6 +20,7 @@ module DTK; class Task; class Status
       ret = Array.new
       task.set_and_return_types!()
       el = task.hash_subset(:started_at,:ended_at)
+      el[:duration] = "#{el[:ended_at].to_i - el[:started_at].to_i}s"
       el[:status] = task[:status] unless task[:status] == 'created'
       el[:id] = task[:id]
       # For ALdin 'type' needs to be computed depeidningon whether it is a create node, craeet component or action

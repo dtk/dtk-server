@@ -103,6 +103,7 @@ GEM
     mixlib-shellout (1.4.0)
     moneta (0.7.20)
     multi_json (1.9.2)
+    mustache (0.99.8)
     net-scp (1.0.4)
       net-ssh (>= 1.99.1)
     net-ssh (2.2.2)
@@ -227,6 +228,7 @@ DEPENDENCIES
   json (= 1.5.2)
   looksee
   mcollective-client (= 2.2.3)
+  mustache (~> 0.99.8)
   pg (= 0.14.1)
   puppet (= 3.4.0)
   ramaze (= 2012.04.14)

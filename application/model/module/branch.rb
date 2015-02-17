@@ -192,7 +192,9 @@ end
 
           if existing_content
             existing_c_hash = Aux.convert_to_hash(existing_content,file_info[:format_type])
-            valid_existing = true if existing_c_hash['component_modules']
+            if !existing_c_hash.kind_of?(ErrorUsage::Parsing) and existing_c_hash['component_modules']
+              valid_existing = true 
+            end
           end
 
           # if module_refs.yaml and content already exist then append new module_refs to existing

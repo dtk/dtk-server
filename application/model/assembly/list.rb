@@ -59,6 +59,10 @@ module DTK
         if kind_of?(Template)
           [:op_status,:last_task_run_status].each{|k|ret.delete(k)}
         end
+        
+        ret[:nodes].each do |node|
+          node.reject!{|k|![:display_name,:node_properties,:components].include?(k)}
+        end
 
         # TODO: temp until get removes this attribute
         ret.delete(:execution_status)
@@ -130,8 +134,7 @@ module DTK
         end
         
         unsorted = ndx_ret.values.map do |r|
-          # nodes = r[:ndx_nodes].values
-          nodes = [r[:ndx_nodes]]
+          nodes = r[:ndx_nodes].values
           op_status = (op_status(nodes) if respond_to?(:op_status))
           r.merge(:op_status => op_status,:nodes => nodes).slice(:id,:display_name,:op_status,:last_task_run_status,:execution_status,:module_branch_id,:version,:assembly_template,:target,:nodes,:created_at,:keypair,:security_groups)
         end
@@ -152,31 +155,30 @@ module DTK
         r[:component_template]||r[:nested_component]||{}
       end
 
+      # format node adds :node_properties and empty array to ndx_nodes
       def format_node!(ndx_nodes,raw_node,opts=Hash.new)
-        node = nil
         if raw_node
           node_name = raw_node[:display_name]
-          external_ref = {}
-          unless node = ndx_nodes[node_name]
+          external_ref = nil
+          unless ndx_nodes[node_name]
             if node_ext_ref = raw_node[:external_ref]
               external_ref = node_external_ref_print_form(node_ext_ref,opts)
-              external_ref.delete(:git_authorized)
+              # remove :git_authorized
+              external_ref = external_ref.inject(Hash.new) do |h,(k,v)|
+                k == :git_authorized ? h : h.merge(k => v)
+              end
             end
-            type = external_ref.delete(:type) if external_ref[:type]
-            node = ndx_nodes[node_name] = {
-              :node_properties => {
-                :type    => type,
-                :node_id => raw_node[:id],
-                :os_type => raw_node[:os_type],
-                :admin_op_status => raw_node[:admin_op_status]
-              }
+            node_properties = {
+              :node_id         => raw_node[:id],
+              :os_type         => raw_node[:os_type],
+              :admin_op_status => raw_node[:admin_op_status]
             }
-            node.reject!{|k,v|v.nil?}
-            node[:node_properties].merge!(external_ref)
-            node[:components] = Array.new
+            node_properties.merge!(external_ref) if external_ref
+            node_properties.reject!{|k,v|v.nil?}
+            ndx_nodes[node_name] = raw_node.merge(:components =>  Array.new, :node_properties => node_properties)
           end
+          ndx_nodes[node_name]
         end
-        node
       end
 
       def node_external_ref_print_form(node_ext_ref,opts=Hash.new)

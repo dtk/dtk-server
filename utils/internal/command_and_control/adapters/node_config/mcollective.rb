@@ -36,7 +36,7 @@ module DTK
         msg_content = config_agent.ret_msg_content(config_node,opts_ret_msg)
         added_content = {
           :task_id           => task_idh.get_id(),
-          :top_task_id       => top_task_idh.get_id(), 
+          :top_task_id       => top_task_idh.get_id(),
           :agent_git_details => {:repo => "dtk-node-agent", :branch => "" }
         }
         msg_content.merge!(added_content)
@@ -45,7 +45,7 @@ module DTK
         filter = filter_single_fact("pbuilderid",pbuilderid)
         context = opts[:receiver_context]
         callbacks = context[:callbacks]
-        mc_info = mc_info_for_config_agent(config_agent) 
+        mc_info = mc_info_for_config_agent(config_agent)
         async_agent_call(mc_info[:agent],mc_info[:action],msg_content,filter,callbacks,context)
       end
 
@@ -81,7 +81,7 @@ module DTK
               agents[agent_name] = :deleted
             else
               File.open("#{agent_repo_dir}/#{diff.b_path}") { |file| agents[agent_name] = Base64.encode64(file.read) }
-            end          
+            end
           end
         elsif R8::Config[:node_agent_git_clone][:mode] == 'debug'
           node_agent_git_clone_debug_mode_set_agents!(agents)
@@ -104,11 +104,11 @@ module DTK
         debug_config = R8::Config[:node_agent_git_clone][:debug_mode]
         begin
           new_files_dir = debug_config[:new_files_dir]
-          new_files = 
+          new_files =
             if debug_config[:new_files]
               debug_config[:new_files].split(';').map{|fn|"#{new_files_dir}/#{fn}"}
             else
-              Dir.glob("#{new_files_dir}/*")  
+              Dir.glob("#{new_files_dir}/*")
             end
           new_files.each do |path|
             file_name = path.split('/').last
@@ -155,7 +155,7 @@ module DTK
             # is_task_canceled is set from participant cancel method
             rc[:callbacks][:on_msg_received].call(msg) unless (node[:is_task_canceled] || node[:is_task_failed])
           end,
-          :on_timeout => proc do 
+          :on_timeout => proc do
             if count < 1
               rc[:callbacks][:on_timeout].call
             else
@@ -164,7 +164,7 @@ module DTK
             end
           end
         }
-        
+
         context = {:timeout => opts[:poll_cycle]||PollCycleDefault}.merge(rc)
         pbuilderid = Node.pbuilderid(node)
         filter = filter_single_fact("pbuilderid",pbuilderid)
@@ -195,7 +195,7 @@ module DTK
         # TODO: conditionalize on status
         return ret.merge(:status => :notok) unless body = msg[:body]
         payload = body[:data]
-        ret[:status] = (body[:statuscode] == 0 and payload and payload[:status] == :ok) ? :ok : :notok 
+        ret[:status] = (body[:statuscode] == 0 and payload and payload[:status] == :ok) ? :ok : :notok
         ret[:pbuilderid] = payload && payload[:pbuilderid]
         ret[:log_content] = payload && payload[:data]
         ret
@@ -241,14 +241,14 @@ module DTK
         {:fact=>fact,:value=>value.to_s,:operator=>operator}
       end
 
-      def self.mc_info_for_config_agent(config_agent) 
+      def self.mc_info_for_config_agent(config_agent)
         type = config_agent.type()
         ConfigAgentTypeToMCInfo[type] || raise(Error.new("unexpected config adapter: #{type}"))
       end
       ConfigAgentTypeToMCInfo = {
         :puppet       => {:agent => 'puppet_apply', :action => 'run'},
         :dtk_provider => {:agent => 'action_agent', :action => 'run_command'},
-        :chef         => {:agent => 'chef_solo', :action => 'run'}  
+        :chef         => {:agent => 'chef_solo', :action => 'run'}
       }
 
     end

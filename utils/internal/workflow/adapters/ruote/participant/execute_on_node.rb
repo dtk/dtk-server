@@ -40,7 +40,7 @@ module DTK
                       set_result_failed(workitem,result,task)
                     else
                       if has_action_results?(task,result)
-                        task.add_action_results(result,action,top_task)
+                        task.add_action_results(result,action)
                       end
 
                       event = task.add_event(:complete_succeeded,result)

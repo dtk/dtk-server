@@ -7,6 +7,7 @@ module DTK
     r8_nested_require('task','stage')
     r8_nested_require('task','node_group_processing')
     r8_nested_require('task','action_results')
+    r8_nested_require('task','qualified_index')
 
     extend CreateClassMixin
     include StatusMixin
@@ -411,14 +412,14 @@ module DTK
       flat_subtask_list.each do |t|
         ndx_task_list[t.id] = t
         parent_id = t[:task_id]
-        subtask_index = subtask_count[parent_id] = (subtask_count[parent_id]||0) +1
-        subtask_indexes[t.id] = {:parent_id => parent_id,:index => subtask_index}
+        subtask_count[parent_id] = (subtask_count[parent_id]||0) +1
+        subtask_indexes[t.id] = {:parent_id => parent_id,:index => t[:position]}
       end
 
-      subtask_qualified_indexes = qualified_indexes!(subtask_indexes,top_task)
+      subtask_qualified_indexes = QualifiedIndex.compute!(subtask_indexes,top_task)
 
       flat_subtask_list.each do |subtask|
-        subtask[:qualified_index] = subtask_qualified_indexes[subtask[:id]][:qualified]
+        subtask[QualifiedIndex::Field] = subtask_qualified_indexes[subtask[:id]][QualifiedIndex::Field]
         parent_id = subtask[:task_id]
         parent = ndx_task_list[parent_id]
         if subtask.node_group_member?()
@@ -428,26 +429,6 @@ module DTK
       end
       top_task
     end
-    def self.qualified_indexes!(subtask_indexes,top_task)
-      qualified_indexes_aux!(subtask_indexes,top_task.id() => {})
-    end
-    def self.qualified_indexes_aux!(subtask_indexes,parents)
-      ret = Hash.new
-      parent_ids = parents.keys
-      subtask_indexes.each_pair do |subtask_id,info|
-        if parent = parents[info[:parent_id]]
-          subtask = subtask_indexes.delete(subtask_id)
-          subtask[:qualified] = (parent[:qualified]||[]) + [subtask[:index]]
-          ret.merge!(subtask_id => subtask)
-        end
-      end
-      if ret.empty? or subtask_indexes.empty?
-        ret
-      else
-        ret.merge(qualified_indexes_aux!(subtask_indexes,ret))
-      end
-    end
-    private_class_method :qualified_indexes!,:qualified_indexes_aux!
 
     def ret_command_and_control_adapter_info()
       # TODO: stub

@@ -22,7 +22,7 @@ module DTK; class ActionDef; class Content
       end
 
       def bind_template_attributes!(attr_val_pairs)
-        @template_processor.bind_template_attributes!(@command_line,attr_val_pairs)
+        @command_line = @template_processor.bind_template_attributes(@command_line, attr_val_pairs)
         @needs_template_substitution = false
         self
       end

@@ -757,6 +757,42 @@ module DTK
       node   = create_obj(:node_id, ::DTK::Node)
       params = ret_params_hash(:bash_command)
 
+      params.merge!(
+        :action_agent_request => {
+        :env_vars => { :HARIS => 'WORKS', :NESTO => 21 },
+        :execution_list => [
+          {
+            :type    => 'syscall',
+            :command => 'date',
+            :if      => 'echo works!'
+          },
+          {
+            :type    => 'syscall',
+            :command => '1date',
+            :unless      => 'echo "Does not works!"'
+          }],
+        :positioning => [{
+          :type => 'file',
+          :source => {
+            :type => 'git',
+            :url => "git101@dtkhost2.internal.r8network.com:dtk-examples-dtk-test-redis",
+            :ref => "workspace-private-dtk-examples"
+          },
+          :target => {
+            :path => "/etc/puppet/modules/redis"
+          },
+        },
+        {
+          :type => 'file',
+          :source => {
+            :type => 'in_payload',
+            :content => "Hello WORLD!"
+          },
+          :target => {
+            :path => "~/test-folder/site-stage-1-invocation-1.pp"
+          }
+        }]})
+
       queue  = initiate_action_with_nodes(ActionAgent, [node], params)
       rest_ok_response :action_results_id => queue.id
     end

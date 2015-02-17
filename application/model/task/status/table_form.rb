@@ -1,4 +1,4 @@
-module DTK; class Task::Status
+module DTK; class Task; class Status
   module TableForm
     r8_nested_require('table_form','node_group_summary')
     module Mixin
@@ -22,9 +22,14 @@ module DTK; class Task::Status
       el = task.hash_subset(:started_at,:ended_at)
       el[:status] = task[:status] unless task[:status] == 'created'
       el[:id] = task[:id]
+      # For ALdin 'type' needs to be computed depeidningon whether it is a create node, craeet component or action
+      # also can be different depending on whether it is a group
+      qualified_index = QualifiedIndex.string_form(task)
+      # for space after qualified index if not empty
+      qualified_index += ' ' unless qualified_index.empty?
       type = element_type(task,level)
       # putting idents in
-      el[:type] = "#{' '*(2*(level-1))}#{type}"
+      el[:type] = "#{' '*(2*(level-1))}#{qualified_index}#{type}"
       ndx_errors ||= task.get_ndx_errors()
       if ndx_errors[task[:id]]
         el[:errors] = format_errors(ndx_errors[task[:id]])
@@ -131,4 +136,4 @@ module DTK; class Task::Status
       end
     end
   end
-end; end
+end; end; end

@@ -1,5 +1,7 @@
 module DTK; class Task; class Status
   module TableForm
+    DURATION_ACCURACY = 1
+
     r8_nested_require('table_form','node_group_summary')
     module Mixin
       def status_table_form(opts)
@@ -20,7 +22,10 @@ module DTK; class Task; class Status
       ret = Array.new
       task.set_and_return_types!()
       el = task.hash_subset(:started_at,:ended_at)
-      el[:duration] = "#{el[:ended_at].to_i - el[:started_at].to_i}s"
+
+      duration = el[:ended_at] - el[:started_at] if el[:ended_at] && el[:started_at]
+      el[:duration] = "#{duration.round(DURATION_ACCURACY)}s" if duration
+
       el[:status] = task[:status] unless task[:status] == 'created'
       el[:id] = task[:id]
       # For ALdin 'type' needs to be computed depeidningon whether it is a create node, craeet component or action

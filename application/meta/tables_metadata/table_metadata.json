@@ -460,9 +460,9 @@
       "task_type",
       "status",
       "node",
+      "duration",
       "started_at",
       "ended_at",
-      "duration",
       "errors",
       "action"
     ],
@@ -470,9 +470,9 @@
       "task_type": "dtk_type",
       "status": "status",
       "node": "node.name",
+      "duration": "duration",
       "started_at": "started_at.get_date",
       "ended_at": "ended_at.get_date",
-      "duration": "duration",
       "errors": "errors.message",
       "action": "logs.message"
     }

@@ -113,7 +113,7 @@ module DTK; class Task; class Status
           log[:message] = temp
         end
 
-        ret[:message] << ("To see more detail about specific task action use 'task-action-detail <ACTION>'")
+        ret[:message] << ("To see more detail about specific task action use 'task-action-detail <TASK NUMBER>'")
         ret[:label]   = log[:label]
         ret[:type]    = log[:type]
       end
@@ -125,11 +125,21 @@ module DTK; class Task; class Status
       if level == 1
         task[:display_name] 
       elsif type = task[:type]
-        if ['configure_node','create_node'].include?(type)
-          if node = (task[:executable_action]||{})[:node]
-            type = "#{type}group" if node.is_node_group?()
+        node = (task[:executable_action]||{})[:node]
+        config_agent = task.get_config_agent_type(nil, {:no_error_if_nil => true})
+
+        if config_agent == 'dtk_provider'
+          if node && node.is_node_group?()
+            type = 'nodegroup actions'
+          else
+            type = 'action'
           end
         end
+
+        if ['configure_node','create_node'].include?(type)
+          type = "#{type}group" if node && node.is_node_group?()
+        end
+
         type
       else
         task[:display_name]|| "top"

@@ -342,14 +342,15 @@ module DTK
       indexed_nodes.values
     end
 
-    def get_config_agent_type(executable_action=nil)
-      executable_action ||= executable_action()
-      executable_action.config_agent_type()
+    def get_config_agent_type(executable_action=nil, opts={})
+      executable_action ||= executable_action(opts)
+      executable_action.config_agent_type() if executable_action && executable_action.respond_to?('config_agent_type')
     end
     def get_config_agent()
       ConfigAgent.load(get_config_agent_type())
     end
-    private :get_config_agent_type, :get_config_agent
+    private :get_config_agent
+    # private :get_config_agent_type, :get_config_agent
 
     # recursively walks structure, but returns them in flat list
     def get_all_subtasks()

@@ -40,6 +40,18 @@ module DTK; class ModuleDSL
       ::DTK::Component.display_name_print_form(cmp_internal_form)
     end
 
+    def matching_key?(key_or_keys,input_hash)
+      if key_or_keys.kind_of?(Array)
+        keys = key_or_keys
+        if match = keys.find{|k|input_hash.has_key?(k)}
+          input_hash[match]
+        end
+      else
+        key = key_or_keys
+        input_hash[key]
+      end
+    end
+
     class InputHash < Hash
       def initialize(hash={})
         unless hash.empty?()

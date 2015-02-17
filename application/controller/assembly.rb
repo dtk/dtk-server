@@ -96,8 +96,7 @@ module DTK
     end
 
     def rest__list_component_module_diffs()
-      # repo_id = ret_request_param_id_optional(:repo_id, ::DTK::Repo)
-      module_id, assembly_name, workspace_branch, module_branch_id, repo_id = ret_request_params(:module_id, :assembly_name, :workspace_branch, :module_branch_id, :repo_id)
+      module_id, workspace_branch, module_branch_id, repo_id = ret_request_params(:module_id, :workspace_branch, :module_branch_id, :repo_id)
       repo          = id_handle(repo_id,:repo).create_object()
       project       = get_default_project()
       module_branch = id_handle(module_branch_id, :module_branch).create_object()
@@ -597,13 +596,13 @@ module DTK
 
     def rest__create_task()
       assembly = ret_assembly_instance_object()
-      assembly_is_stopped = assembly.is_stopped?
+      assembly_is_stopped = assembly.any_stopped_nodes?()
 
       if assembly_is_stopped and ret_request_params(:start_assembly).nil?
         return rest_ok_response :confirmation_message=>true
       end
 
-      if assembly.are_nodes_running?
+      if assembly.are_nodes_running_in_task?()
         raise ErrorUsage, "Task is already running on requested nodes. Please wait until task is complete"
       end
 
@@ -639,7 +638,7 @@ module DTK
       task         = nil
 
       # filters only stopped nodes for this assembly
-      nodes, is_valid, error_msg = nodes_valid_for_stop_or_start?(assembly, node_pattern, :stopped)
+      nodes, is_valid, error_msg = assembly.nodes_valid_for_stop_or_start(node_pattern, :stopped)
 
       unless is_valid
         Log.info(error_msg)
@@ -672,7 +671,7 @@ module DTK
       assembly = ret_assembly_instance_object()
       node_pattern = ret_request_params(:node_pattern)
 
-      nodes, is_valid, error_msg = nodes_valid_for_stop_or_start?(assembly, node_pattern, :running)
+      nodes, is_valid, error_msg = assembly.nodes_valid_for_stop_or_start(node_pattern, :running)
 
       unless is_valid
         Log.info(error_msg)
@@ -686,12 +685,18 @@ module DTK
 
     def rest__task_status()
       assembly = ret_assembly_instance_object()
-      format = (ret_request_params(:format)||:hash).to_sym
-      opts = {:format => format}
-      #TODO: should :summarize_node_groups be the default?
-      opts.merge!(:detail_level => {:summarize_node_groups => true})
+      opts = {
+        :format       => (ret_request_params(:format)||:hash).to_sym,
+        :detail_level => ret_boolean_params_hash(:summarize_node_groups)
+      }
       response = Task::Status::Assembly.get_status(assembly.id_handle,opts)
       rest_ok_response response
+    end
+
+    def rest__task_action_detail()
+      assembly = ret_assembly_instance_object()
+      message_id = ret_request_params(:message_id)
+      rest_ok_response Task::Status::Assembly.get_action_detail(assembly.id_handle, message_id)
     end
 
     ### command and control actions
@@ -701,8 +706,7 @@ module DTK
       node_pattern = ret_params_hash(:node_identifier)
 
       nodes = ret_matching_nodes(assembly, node_pattern)
-      assembly_name = Assembly::Instance.pretty_print_name(assembly)
-      nodes, is_valid, error_msg = nodes_are_up?(assembly_name, nodes, :running, {:what => "Tail"})
+      nodes, is_valid, error_msg = assembly.nodes_are_up?(nodes, :running, {:what => "Tail"})
 
       unless is_valid
         Log.info(error_msg)
@@ -721,8 +725,7 @@ module DTK
       node_pattern = (np ? {:node_identifier => np} : {})
 
       nodes = ret_matching_nodes(assembly, node_pattern)
-      assembly_name = Assembly::Instance.pretty_print_name(assembly)
-      nodes, is_valid, error_msg = nodes_are_up?(assembly_name, nodes, :running, {:what => "Grep"})
+      nodes, is_valid, error_msg = assembly.nodes_are_up?(nodes, :running, {:what => "Grep"})
 
       unless is_valid
         Log.info(error_msg)
@@ -739,8 +742,7 @@ module DTK
       node_pattern = ret_params_hash(:node_id)
 
       nodes = ret_matching_nodes(assembly, node_pattern)
-      assembly_name = Assembly::Instance.pretty_print_name(assembly)
-      nodes, is_valid, error_msg = nodes_are_up?(assembly_name, nodes, :running, {:what => "Get netstats"})
+      nodes, is_valid, error_msg = assembly.nodes_are_up?(nodes, :running, {:what => "Get netstats"})
 
       unless is_valid
         Log.info(error_msg)
@@ -765,8 +767,7 @@ module DTK
       node_pattern = ret_params_hash(:node_id)
 
       nodes = ret_matching_nodes(assembly, node_pattern)
-      assembly_name = Assembly::Instance.pretty_print_name(assembly)
-      nodes, is_valid, error_msg = nodes_are_up?(assembly_name, nodes, :running, {:what => "Get ps"})
+      nodes, is_valid, error_msg = assembly.nodes_are_up?(nodes, :running, {:what => "Get ps"})
 
       unless is_valid
         Log.info(error_msg)
@@ -818,8 +819,7 @@ module DTK
 
       # Filter only running nodes for this assembly
       nodes = assembly.get_leaf_nodes(:cols => [:id,:display_name,:type,:external_ref,:hostname_external_ref, :admin_op_status])
-      assembly_name = Assembly::Instance.pretty_print_name(assembly)
-      nodes, is_valid, error_msg = nodes_are_up?(assembly_name, nodes, :running, {:what => "Serverspec tests"})
+      nodes, is_valid, error_msg = assembly.nodes_are_up?(nodes, :running, {:what => "Serverspec tests"})
 
       unless is_valid
         Log.info(error_msg)

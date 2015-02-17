@@ -6,11 +6,13 @@ module DTK
     r8_nested_require('task','template')
     r8_nested_require('task','stage')
     r8_nested_require('task','node_group_processing')
+    r8_nested_require('task','action_results')
 
     extend CreateClassMixin
     include StatusMixin
     include NodeGroupProcessingMixin
     include Status::TableForm::Mixin
+    include ActionResults::Mixin
 
     def self.common_columns()
       [
@@ -101,6 +103,42 @@ module DTK
       get_children_objs(:task_event,sp_hash).sort{|a,b| a[:created_at] <=> b[:created_at]}
     end
 
+    def get_logs()
+      ret_logs = Hash.new
+      sp_hash = {:cols => [:task_id, :display_name, :content, :parent_task]}
+      ret = get_children_objs(:task_log, sp_hash).sort{|a,b| a[:created_at] <=> b[:created_at]}
+
+      ret.each do |r|
+        task_id = r[:task_id]
+        content = r[:content]
+        content.merge!({:label => r[:display_name], :task_name => r[:task][:display_name]})
+        ret_logs[task_id] = (ret_logs[task_id]||Array.new) + [content]
+      end
+
+      ret_logs
+    end
+
+    def get_ndx_logs()
+      self.class.get_ndx_logs(hier_task_idhs())
+    end
+    def self.get_ndx_logs(task_idhs)
+      ret = Array.new
+      return ret if task_idhs.empty?
+      sp_hash = {
+        :cols => [:task_id, :content, :display_name, :parent_task],
+        :filter => [:oneof, :task_id, task_idhs.map{|idh|idh.get_id()}]
+      }
+      task_log_mh = task_idhs.first.createMH(:task_log)
+      ret = Hash.new
+      Model.get_objs(task_log_mh, sp_hash).each do |r|
+        task_id = r[:task_id]
+        content = r[:content]
+        content.merge!({:label => r[:display_name], :task_name => r[:task][:display_name]})
+        ret[task_id] = (ret[task_id]||Array.new) + [content]
+      end
+      ret
+    end
+
     def add_event(event_type,result=nil)
       if event = TaskEvent.create_event?(event_type,self,result)
         type = event.delete(:type)||event_type
@@ -121,7 +159,7 @@ module DTK
       # process errors and strip out from what is passed to add event
       normalized_errors = 
         if error_source == :config_agent
-          config_agent = get_config_agent
+          config_agent = get_config_agent()
           components = component_actions().map{|a|a[:component]}
           errors_in_result.map{|err|config_agent.interpret_error(err,components)}
         else
@@ -256,54 +294,7 @@ module DTK
       get_top_level_tasks(model_handle).sort{|a,b| b[:updated_at] <=> a[:updated_at]}.first
     end
 
-    def get_per_node_info_for_reporting()
-      exec_actions = Array.new
-      # if executable level then get its executable_action
-      if self.has_key?(:executable_action_type) 
-        # will have an executable action so if have it already
-        if self[:executable_action_type]
-          exec_actions << get_field?(:executable_action)
-        end
-      else
-        if exec_action = get_field?(:executable_action)
-          exec_actions <<  exec_action.merge(:task_id => id())
-        end
-      end
 
-      # if task does not have execuatble actions then get all subtasks
-      if exec_actions.empty?
-        exec_actions = get_all_subtasks().map do |t|
-          action = t[:executable_action]
-          action && action.merge(:task_id => t.id())
-        end.compact
-      end
-      
-      # get all unique nodes; looking for attribute :external_ref
-      indexed_nodes = Hash.new
-      exec_actions.each do |ea|
-        next unless node = ea[:node]
-        node_id = node[:id]
-        indexed_nodes[node_id] ||= node.merge(:task_id => ea[:task_id])
-        indexed_nodes[node_id][:external_ref] ||= node[:external_ref]
-        indexed_nodes[node_id][:config_agent_type] ||= get_config_agent_type(ea)
-      end
-
-      # need to query db if missing external_refs having instance_id
-      node_ids_missing_ext_refs = indexed_nodes.values.reject{|n|(n[:external_ref]||{})[:instance_id]}.map{|n|n[:id]}
-      unless node_ids_missing_ext_refs.empty?
-        sp_hash = {
-          :cols => [:id,:external_ref],
-          :filter => [:oneof, :id, node_ids_missing_ext_refs]
-        }
-        node_mh = model_handle.createMH(:node)
-        node_objs = Model.get_objs(node_mh,sp_hash)
-        node_objs.each{|r|indexed_nodes[r[:id]][:external_ref] = r[:external_ref]}
-      end
-      indexed_nodes.values
-    end
-
-    # TODO: may deprecate below and subsume by above
-    # this also provides the nodes task_id and config_agent_type as extra attribute values
     def get_associated_nodes()
       exec_actions = Array.new
       # if executable level then get its executable_action
@@ -352,8 +343,7 @@ module DTK
 
     def get_config_agent_type(executable_action=nil)
       executable_action ||= executable_action()
-      # just takes one sample since assumes all component actions have same config agent
-      (executable_action.component_actions().first||{})[:on_node_config_agent_type]
+      executable_action.config_agent_type()
     end
     def get_config_agent()
       ConfigAgent.load(get_config_agent_type())
@@ -381,6 +371,28 @@ module DTK
       end
       ret
     end
+
+    def get_all_subtasks_with_logs()
+      self.class.get_all_subtasks_with_logs([id_handle])
+    end
+    def self.get_all_subtasks_with_logs(top_id_handles)
+      ret = Array.new
+      id_handles = top_id_handles
+      until id_handles.empty?
+        model_handle = id_handles.first.createMH()
+        sp_hash = {
+          :cols => [:id, :display_name],
+          :filter => [:oneof, :task_id, id_handles.map{|idh|idh.get_id}]
+        }
+        next_level_objs = get_objs(model_handle,sp_hash).reject{|k,v|k == :subtasks}
+        next_level_objs.each{|st|st.reify!()}
+        id_handles = next_level_objs.map{|obj|obj.id_handle}
+
+        ret += next_level_objs
+      end
+      ret
+    end
+
     def reify!()
       self[:executable_action] &&= Action::OnNode.create_from_hash(self[:executable_action_type],self[:executable_action],id_handle)
     end

@@ -1,14 +1,65 @@
 module DTK; class Task; class Template
   class Action
-    def self.create(object)
+    r8_nested_require('action','component_action')
+    r8_nested_require('action','action_method')
+    r8_nested_require('action','with_method')
+
+    # opts can have keys
+    # :index
+    # :parent_action 
+    attr_accessor :index
+    def initialize(opts={})
+      @index = opts[:index] || opts[:parent_action] && opts[:parent_action].index
+    end
+    private :initialize
+
+    # opts can have keys
+    # :method_name
+    # :index
+    # :parent_action 
+
+    def self.create(object,opts={})
       if object.kind_of?(Component)
-        ComponentAction.new(object)
+        add_action_method?(ComponentAction.new(object,opts),opts)
+      elsif object.kind_of?(Action)
+        add_action_method?(object,opts)
       else
         raise Error.new("Not yet implemented treatment of action of type {#{object.class.to_s})")
       end
     end
 
-    attr_accessor :index
+    def self.find_action_in_list?(serialized_item,node_name,action_list,opts={})
+      # method_name could be nil
+      ret = nil
+      component_name_ref,method_name = WithMethod.parse(serialized_item)
+      unless action = action_list.find_matching_action(node_name,:component_name_ref => component_name_ref)
+        if opts[:skip_if_not_found]
+          return ret
+        else
+          raise ParsingError.new("The component reference '#{component_name_ref}' on node '#{node_name}' in the workflow is not in the assembly; either add it to the assembly or delete it from the workflow") 
+        end
+      end
+      
+      if cgn = opts[:component_group_num]
+        action = action.in_component_group(cgn)
+      end
+      
+      return create(action) unless method_name
+
+      action_defs = action[:action_defs]||[]
+      if action_def = action_defs.find{|ad|ad.get_field?(:method_name) == method_name}
+        return create(action,:action_def => action_def)
+      end
+
+      unless opts[:skip_if_not_found]
+        err_msg = "The action method '#{method_name}' is not defined on component '#{component_name_ref}'"
+        unless action_defs.empty?
+          legal_methods = action_defs.map{|ad|ad[:method_name]}
+          err_msg << "; legal method names are: #{legal_methods.join(',')}"
+        end
+        raise ParsingError.new(err_msg)
+      end 
+    end
 
     def method_missing(name,*args,&block)
       @action.send(name,*args,&block)
@@ -16,122 +67,20 @@ module DTK; class Task; class Template
     def respond_to?(name)
       @action.respond_to?(name) || super
     end
-    
-   private
-    attr_accessor :action
-    def initialize(action,index=nil)
-      @action = action
-      @index = index
+
+    def method_name?()
+      if action_method = action_method?
+        action_method.method_name()
+      end
+    end
+    # this can be overwritten
+    def action_method?()
+      nil
     end
 
-    class ComponentAction < self
-      def initialize(component,index=nil)
-        unless component[:node].kind_of?(Node)
-          raise Error.new("ComponentAction.new must be given component argument with :node key")
-        end
-        super(component,index)
-      end
-
-      def in_component_group(component_group_num)
-        InComponentGroup.new(action,index,component_group_num)
-      end
-
-      # overwritten by InComponentGroup
-      def component_group_num()
-        nil
-      end
-
-      def node()
-        component[:node]
-      end
-      def node_id()
-        if node = node()
-          node.get_field?(:id)
-        end
-      end
-      def node_name()
-        if node = node()
-          node.get_field?(:display_name)
-        end
-      end
-
-      def match_action?(action)
-        action.kind_of?(self.class) and 
-        node_name() == action.node_name and 
-        component_type() == action.component_type()
-      end
-
-      def match?(node_name,component_name_ref=nil)
-         ret = 
-          if node_name() == node_name
-            if component_name_ref.nil?
-              true
-            else
-              # strip off node_name prefix if it exists
-              # need to handle cases like apt::ppa[ppa:chris/node.js]
-              component_name_ref_x = component_name_ref.gsub(/^[^\[]+\//,'')
-              component_name_ref_x ==  serialization_form(:no_node_name_prefix => true)
-            end
-          end
-        !!ret
-      end
-
-      def match_component_ref?(component_type,title=nil)
-        component_type == component_type(:without_title=>true) and
-          (title.nil? or title == component_title?())
-      end
-
-      def serialization_form(opts={})
-        if filter = opts[:filter]
-          if filter.keys == [:source]
-            return nil unless filter[:source] == source_type()
-          else
-            raise Error.new("Not treating filter of form (#{filter.inspect})")
-          end
-        end
-        node_name = ((!opts[:no_node_name_prefix]) && component()[:node][:display_name])
-        component_type = component_type()
-        node_name ? "#{node_name}/#{component_type}" : component_type
-      end
-        
-      def source_type()
-        ret = (component()[:source]||{})[:type]
-        ret && ret.to_sym
-      end
-
-      def assembly_idh?()
-        if source_type() == :assembly
-          component()[:source][:object].id_handle()
-        end
-      end
-
-      def component_type(opts={})
-        cmp = component()
-        cmp_type = Component.component_type_print_form(cmp.get_field?(:component_type))
-        unless opts[:without_title] 
-          if title = cmp[:title]
-            cmp_type = ComponentTitle.print_form_with_title(cmp_type,title)
-          end
-        end
-        cmp_type
-      end
-      def component_title?()
-        component()[:title]
-      end
-
-     private
-      def component()
-        @action
-      end
-
-      class InComponentGroup < self
-        attr_reader :component_group_num
-        def initialize(component,index,component_group_num)
-          super(component,index)
-          @component_group_num = component_group_num
-        end
-      end
-      
+   private
+    def self.add_action_method?(base_action,opts={})
+      opts[:action_def] ? base_action.class::WithMethod.new(base_action,opts[:action_def]) : base_action
     end
   end
 end; end; end

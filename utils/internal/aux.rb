@@ -1,7 +1,8 @@
 require 'set'
 module DTK
   class Aux
-    r8_require('yaml_helper')
+    r8_nested_require('aux','yaml_helper')
+    r8_nested_require('aux','parsing_helper')
 
     module CommonClassMixin
       def private_instance_method(class_name)

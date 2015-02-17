@@ -38,11 +38,12 @@ module DTK; class Assembly; class Instance
     #### end: get methods around attribute mappings
 
     #### get methods around components
-    def get_component_list(opts={})
+    def get_component_info_for_action_list(opts={})
       get_field?(:display_name)
       assembly_source = {:type => "assembly", :object => hash_subset(:id,:display_name)}
       rows = get_objs_helper(:instance_component_list,:nested_component,opts.merge(:augmented => true))
       Component::Instance.add_title_fields?(rows)
+      Component::Instance.add_action_defs!(rows,:cols=>[:method_name])
       ret = opts[:add_on_to]||opts[:seed]||Array.new
       rows.each{|r|ret << r.merge(:source => assembly_source)}
       ret

@@ -55,6 +55,7 @@ R8::ReactorRoute.draw do
   post  'assembly/initiate_action_agent'  => 'assembly#initiate_action_agent'
   post  'assembly/list_component_module_diffs' => 'assembly#list_component_module_diffs'
   post  'assembly/print_includes' => 'assembly#print_includes'
+  post  'assembly/task_action_detail' => 'assembly#task_action_detail'
 
   post  'assembly/start' => 'assembly#start'
   post  'assembly/stop' => 'assembly#stop'

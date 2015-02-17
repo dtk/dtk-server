@@ -168,12 +168,7 @@ module DTK
       assembly[:version] && ModuleBranch.version_from_version_field(assembly[:version])
     end
 
-    def is_stopped?
-      filtered_nodes = get_nodes(:id,:admin_op_status).select { |node| node[:admin_op_status] == 'stopped' }
-      return (filtered_nodes.size > 0)
-    end
-
-    def are_nodes_running?
+    def are_nodes_running_in_task?()
       nodes = get_nodes(:id)
       running_nodes = Task::Status::Assembly.get_active_nodes(model_handle())
       

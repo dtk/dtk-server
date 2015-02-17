@@ -99,7 +99,8 @@ module DTK
             :version     => version
           )
 
-          module_and_branch_info = ServiceModule.create_module(project,local_params,:config_agent_type => ConfigAgentType)
+          # TODO: look to remove :config_agent_type
+          module_and_branch_info = ServiceModule.create_module(project,local_params,:config_agent_type => ConfigAgent::Type.default_symbol)
           service_module = module_and_branch_info[:module_idh].create_object()
           service_module.update(:dsl_parsed => true)
 
@@ -110,7 +111,7 @@ module DTK
           branch_idh
         end
       end
-      ConfigAgentType = :puppet #TODO: stub
+
     end
   end
 end

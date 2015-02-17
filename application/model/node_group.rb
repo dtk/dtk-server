@@ -6,8 +6,12 @@ module DTK
     r8_nested_require('node_group','clone')
     include Clone::Mixin
 
-    def self.get_component_list(nodes,opts={})
+    def self.get_component_info_for_action_list(nodes,opts={})
       ret = opts[:add_on_to]||opts[:seed]||Array.new
+      # TODO: <update-target-node-groups>
+      # currently not using so short circuiting
+      return ret
+
       return ret if nodes.empty? 
       # find node_to_ng mapping
       node_filter = opts[:node_filter] || Node::Filter::NodeList.new(nodes.map{|n|n.id_handle()})

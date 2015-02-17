@@ -28,7 +28,7 @@ module DTK; class BaseModule; class UpdateModule
       if render_hash
         format_type = ModuleDSL.default_format_type()
         content = render_hash.serialize(format_type)
-        dsl_filename = ModuleDSL.dsl_filename(config_agent_type,format_type)
+        dsl_filename = ModuleDSL.dsl_filename(format_type)
         ret.merge!(:path=>dsl_filename, :content=> content)
         if opts[:ret_hash_content]
           ret.merge!(:hash_content => render_hash) 

@@ -107,7 +107,7 @@ end
             end
           end
         end
-        NodeAgentGitCloneDefaultDelay = 5
+        NodeAgentGitCloneDefaultDelay = 10
 
         # Ruote dispatch call to this method in case of user's cancel task request
         def cancel(fei, flavour)

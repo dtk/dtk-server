@@ -2,13 +2,11 @@ module DTK
   module WorkflowAdapter
     module RuoteParticipant
       class ExecuteOnNode < NodeParticipants
-        # LockforDebug = Mutex.new
         def consume(workitem)
-          # LockforDebug.synchronize{pp [:in_consume, Thread.current, Thread.list];STDOUT.flush}
           params = get_params(workitem)
           PerformanceService.start("#{self.class.to_s.split("::").last}", self.object_id)
           task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
-
+          top_task = workflow.top_task
           task.update_input_attributes!() if task_start
           workitem.fields["guard_id"] = task_id # ${guard_id} is referenced if guard for execution of this
 
@@ -30,7 +28,6 @@ module DTK
                 :on_msg_received => proc do |msg|
                   inspect_agent_response(msg)
                   CreateThread.defer_with_session(user_object, Ramaze::Current.session) do
-                    # Amar: PERFORMANCE
                     PerformanceService.end_measurement("#{self.class.to_s.split("::").last}", self.object_id)
 
                     result = msg[:body].merge("task_id" => task_id)
@@ -42,6 +39,10 @@ module DTK
                       cancel_upstream_subtasks(workitem)
                       set_result_failed(workitem,result,task)
                     else
+                      if has_action_results?(task,result)
+                        task.add_action_results(result,action,top_task)
+                      end
+
                       event = task.add_event(:complete_succeeded,result)
                       log_participant.end(:complete_succeeded,:task_id=>task_id)
                       set_result_succeeded(workitem,result,task,action) if task_end
@@ -111,6 +112,10 @@ module DTK
         end
 
        private
+        def has_action_results?(task,results)
+          task[:executable_action].config_agent_type.to_sym == ConfigAgent::Type::Symbol.dtk_provider 
+        end
+
         def add_start_task_event?(task)
           task.add_event(:start)
         end

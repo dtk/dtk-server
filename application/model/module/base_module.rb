@@ -133,7 +133,7 @@ module DTK
     end
 
     def config_agent_type_default()
-      :puppet
+      ConfigAgent::Type.default_symbol()
     end
 
    private

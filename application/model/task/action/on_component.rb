@@ -12,6 +12,28 @@ module DTK; class Task
         end
       end
 
+      def action_def()
+        ret = nil
+        component = self[:component]
+        unless action_def_ref = self[:action_method]
+          Log.error("Component Action with following component id #{component[:id].to_s} has no action_method")
+          return ret
+        end
+        sp_hash = {
+          :cols   => [:id,:method_name,:content],
+          :filter => [:eq,:id,action_def_ref[:action_def_id]]
+        }
+        action_def_mh = component.id_handle().create_childMH(:action_def)
+        action_defs = Model.get_objs(action_def_mh,sp_hash)
+        if action_defs.empty?
+          Log.error("Cannot find action def that matches with ref (#{action_def_ref.inspect})")
+          nil
+        else
+          action_defs.first
+        end      
+      end
+
+
       # for debugging
       def self.pretty_print_hash(object)
         ret = PrettyPrintHash.new
@@ -181,16 +203,45 @@ module DTK; class Task
         end
       end
 
-      def self.create_list_from_execution_blocks(exec_blocks,config_agent_type)
-        exec_blocks.components.map do |cmp|
+      # returns [actions,config_agent_type]
+      def self.create_actions_from_execution_blocks(exec_blocks)
+        actions = Array.new
+        cmps_info = exec_blocks.components_hash_with(:action_methods=>true)
+        config_agent_type = config_agent_type(cmps_info)
+        cmps_info.each do |cmp_hash|
+          cmp = cmp_hash[:component]
+          action_method = cmp_hash[:action_method] # can be nil
+          config_agent_type = (action_method||cmp).config_agent_type
           hash = {
             :attributes => Array.new,
-            :component => cmp,
-            :on_node_config_agent_type => config_agent_type
+            :component => cmp
           }
-          new(hash)
+          if action_method
+            hash.merge!(:action_method => action_method)
+          end
+          actions << new(hash)
+        end
+        [actions,config_agent_type]
+      end
+      def self.config_agent_type(cmps_info)
+        ca_types = cmps_info.map do |cmp_hash|
+          cmp = cmp_hash[:component]
+          action_method = cmp_hash[:action_method] # can be nil
+          (action_method||cmp).config_agent_type
+        end.uniq
+        if ca_types.find{|r|r.nil?}
+          raise Error.new("Unexpected that nil is in config_agent_types: #{ca_types.inspect}")
+        end
+
+        if ca_types.size == 1
+          ca_types.first
+        elsif ca_types.empty?
+          ConfigAgent::Type.default_symbol()
+        else
+          raise ErrorUsage.new("Actions with different providers (#{ca_types.join(',')}) cannot be in the same workflow stage")
         end
       end
+      private_class_method :config_agent_type
 
       def self.create_from_state_change(scs_same_cmp,deps)
         state_change = scs_same_cmp.first
@@ -199,8 +250,7 @@ module DTK; class Task
         hash = {
           :state_change_pointer_ids => pointer_ids, #this field used to update teh coorepdonsing state change after thsi action is run
           :attributes => Array.new,
-          :component => state_change[:component],
-          :on_node_config_agent_type => state_change.on_node_config_agent_type(),
+          :component => state_change[:component]
         }
         hash.merge!(:component_dependencies => deps) if deps
 

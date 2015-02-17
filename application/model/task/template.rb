@@ -17,7 +17,22 @@ module DTK; class Task
         OrderedComponents = :ordered_components
         Components = :components
         ComponentGroup = :Component_group
+
+        # convert above to below form 
+        module Variations
+        end
+        extend Aux::ParsingingHelper::ClassMixin
+
+        AllApplicable = 'All_applicable'
+        Variations::AllApplicable = ['All_applicable','All','All_Applicable','AllApplicable']
+        
+        Node = 'node'
+        Variations::Node = ['node','node_group']
+        Nodes = 'nodes'
+        Variations::Nodes = ['nodes']
       end
+
+
       # TODO: if support ruby 1.8.7 need to make this fn of a hash class that perserves order 
       class OrderedHash < ::Hash
         def initialize(initial_val=nil)

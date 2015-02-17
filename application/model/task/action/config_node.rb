@@ -177,8 +177,11 @@ module DTK; class Task
         update_state_change_status_aux(task_mh,status,component_actions().map{|x|x[:state_change_pointer_ids]}.compact.flatten)
       end
 
+      def config_agent_type()
+        self[:config_agent_type] || raise(Error.new("self[:config_agent_type] should not be nil"))
+      end
+
      private
-      
       def initialize(type,object,task_idh=nil,assembly_idh=nil)
         intra_node_stages = hash = nil
         case type
@@ -188,10 +191,10 @@ module DTK; class Task
             node = sample_state_change[:node]
             component_actions,intra_node_stages = OnComponent.order_and_group_by_component(sc)
             hash = {
-              :node => node,
+              :node               => node,
               :state_change_types => sc.map{|sc|sc[:type]}.uniq,
-              :config_agent_type => sc.first.on_node_config_agent_type,
-              :component_actions => component_actions
+              :config_agent_type  => sc.first.on_node_config_agent_type,
+              :component_actions  => component_actions
             }
             hash.merge!(:assembly_idh => assembly_idh) if assembly_idh
           when :hash
@@ -201,12 +204,12 @@ module DTK; class Task
             hash = object
           when :execution_blocks
             exec_blocks = object
-            config_agent_type = exec_blocks.config_agent_type()
+            actions,config_agent_type = OnComponent.create_actions_from_execution_blocks(exec_blocks)
             hash = {
-              :node => exec_blocks.node(),
+              :node               => exec_blocks.node(),
               :state_change_types => ["converge_component"],
-              :config_agent_type => config_agent_type,
-              :component_actions => OnComponent.create_list_from_execution_blocks(exec_blocks,config_agent_type)
+              :config_agent_type  => config_agent_type,
+              :component_actions  => actions
             }
             hash.merge!(:assembly_idh => assembly_idh) if assembly_idh
             intra_node_stages = exec_blocks.intra_node_stages()

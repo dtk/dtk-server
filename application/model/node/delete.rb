@@ -14,11 +14,12 @@ module DTK; class Node
       end
 
       def destroy_and_reset(target_idh)
+         raise ErrorUsage.new("Command Not Supperetd")
 # TODO: DTK-1857
 if is_node_group?() or is_target_ref?()
   raise ErrorUsage.new("destroy_and_reset_nodes not supported for service instances with node groups")
 end
-        
+
         if CommandAndControl.destroy_node?(self,:reset => true)
           Model.delete_instance(target_ref.id_handle) if target_ref
           StateChange.create_pending_change_item(:new_item => id_handle(), :parent => target_idh)

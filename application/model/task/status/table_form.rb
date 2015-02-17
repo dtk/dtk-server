@@ -29,6 +29,11 @@ module DTK; class Task::Status
       if ndx_errors[task[:id]]
         el[:errors] = format_errors(ndx_errors[task[:id]])
       end
+
+      task_logs = task.get_logs()
+      if task_logs && task_logs[task[:id]]
+        el[:logs] = format_logs(task_logs[task[:id]])
+      end
         
       ea = nil
       if level == 1
@@ -85,6 +90,29 @@ module DTK; class Task::Status
         ret[:message] << error_msg
         ret[:type] = error[:type]
       end
+      ret
+    end
+
+    def self.format_logs(logs)
+      ret = nil
+
+      logs.each do |log|
+        if ret
+          ret[:message] << "\n\n"
+        else
+          ret = {:message => String.new}
+        end
+
+        if log.is_a? String
+          log,temp = {},log
+          log[:message] = temp
+        end
+
+        ret[:message] << ("To see more detail about specific task action use 'task-action-detail <ACTION>'")
+        ret[:label]   = log[:label]
+        ret[:type]    = log[:type]
+      end
+
       ret
     end
 

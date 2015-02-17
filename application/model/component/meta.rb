@@ -62,8 +62,8 @@ module DTK
       virtual_column :most_specific_type, :type => :varchar, :local_dependencies => [:specific_type,:basic_type]
 
       many_to_one :component, :library, :node, :datacenter, :project
-      one_to_many :component, :attribute_link, :attribute, :port_link, :monitoring_item, :dependency, :component_order, :layout, :file_asset, :link_def, :service_add_on, :component_include_module, :task_template, :node_bindings, :service_setting
-      one_to_many_clone_omit :layout, :service_add_on, :service_setting
+      one_to_many :component, :attribute_link, :attribute, :port_link, :monitoring_item, :dependency, :component_order, :layout, :file_asset, :link_def, :service_add_on, :component_include_module, :task_template, :node_bindings, :service_setting, :action_def
+      one_to_many_clone_omit :action_def, :service_setting, :service_add_on, :layout
 
       virtual_column :project_id, :type => ID_TYPES[:id], :local_dependencies => [:project_project_id]
       virtual_column :node_id, :type => ID_TYPES[:id], :local_dependencies => [:node_node_id]

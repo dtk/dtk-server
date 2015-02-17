@@ -37,8 +37,11 @@ module DTK
         puppet_manifests = NodeManifest.new(config_node).generate(cmps_with_attrs,assembly_attrs)
         ret = {
           :components_with_attributes => cmps_with_attrs, 
-          :node_manifest => puppet_manifests, 
-          :inter_node_stage => config_node.inter_node_stage()
+          :node_manifest              => puppet_manifests, 
+          :inter_node_stage           => config_node.inter_node_stage(),
+          :version_context            => get_version_context(config_node),
+          # TODO: agent not doing puppet version per run; it just can be set when node is created
+          :puppet_version             => config_node[:node][:puppet_version]
         }
         if assembly = opts[:assembly]
           ret.merge!(:service_id => assembly.id(), :service_name => assembly.get_field?(:display_name))
@@ -47,7 +50,7 @@ module DTK
       end
 
       def type()
-        :puppet
+        Type::Symbol.puppet
       end
 
       # tries to normalize error received from node
@@ -95,6 +98,21 @@ module DTK
       end
 
      private
+      def get_version_context(config_node)
+        ret =  Array.new
+        component_actions = config_node[:component_actions]
+        if component_actions.empty?()
+          return ret 
+        end
+        unless (config_node[:state_change_types] & ["install_component","update_implementation","converge_component","setting"]).size > 0
+          return ret 
+        end
+
+        # want components to be unique
+        components = component_actions.inject(Hash.new){|h,r|h.merge(r[:component][:id] => r[:component])}.values
+        ComponentModule::VersionContextInfo.get_in_hash_form(components)
+      end
+
       def assembly_attributes(config_node)
         ret = nil
         assembly_attrs = config_node[:assembly_attributes]

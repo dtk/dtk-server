@@ -5,19 +5,11 @@ module DTK; class ConfigAgent; module Adapter
       # reference to component attributes
       # assembly_attrs = assembly_attributes(config_node)
 
-      commands = commands(config_node,:substitute_template_vars => true)
-      # For Aldin DTK-1911: DTK-1934
-      # when action agent changes to signature that takes a list of commands then take this; 
-      # since it only takes now single bash command; stubbing by taking first one
-
-      pp [:commands,commands]
-      unless commands.first.is_syscall?
-        raise Error.new("commands.first.is_syscall? is fals")
-      end
-
-      bash_command = commands.first.command_line() || 'ls /usr'
+      commands = commands(config_node, :substitute_template_vars => true)
       ret = {
-        :bash_command => bash_command
+        :action_agent_request => {
+          :execution_list => commands,
+        }
       }
       if assembly = opts[:assembly]
         ret.merge!(:service_id => assembly.id(), :service_name => assembly.get_field?(:display_name))
@@ -49,7 +41,10 @@ module DTK; class ConfigAgent; module Adapter
             attr_val_pairs ||= attribute_value_pairs(component_action)
             command.bind_template_attributes!(attr_val_pairs)
           end
-          ret << command
+          ret << {
+            :type => command.type,
+            :command => command.command_line()
+          }
         end
       end
       ret

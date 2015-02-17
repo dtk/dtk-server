@@ -5,6 +5,10 @@ module DTK; class ActionDef; class Content
         # TODO: stub
       end
 
+      def type()
+        'file'
+      end
+
     end
   end
 end; end; end              

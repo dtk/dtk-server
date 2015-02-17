@@ -2,7 +2,7 @@ module DTK; class Task
   module ActionResults
     module Mixin
       def add_action_results(result,action)
-        unless action_results = result[:data][:data][:output]
+        unless action_results = result[:data][:data]['results']
           Log.error_pp(["Unexpected that result[:data][:data][:output] is nil",result])
         end
         # TODO: using task logs for storage; might introduce a new table

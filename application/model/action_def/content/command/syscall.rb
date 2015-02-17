@@ -26,6 +26,10 @@ module DTK; class ActionDef; class Content
         @needs_template_substitution = false
         self
       end
+
+      def type()
+        'syscall'
+      end
     end
   end
 end; end; end              

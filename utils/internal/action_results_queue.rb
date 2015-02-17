@@ -28,7 +28,7 @@ module DTK
       callbacks = {
         :on_msg_received => proc do |msg|
           response = CommandAndControl.parse_response__execute_action(nodes,msg)
-          if response and response[:pbuilderid] and response[:status] == :ok
+          if response and response[:pbuilderid]
             node_info = ndx_pbuilderid_to_node_info[response[:pbuilderid]]
             data = response[:data]
             data = process_data!(data,node_info)

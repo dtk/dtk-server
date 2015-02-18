@@ -13,7 +13,8 @@ module DTK
         Instance.get_last_task_run_status(assembly_rows,model_handle())
 
         if (node_id.to_s.empty? && component_id.to_s.empty? && attribute_id.to_s.empty?)
-          nodes_info = (is_template ? get_nodes() : get_nodes(:id,:display_name,:admin_op_status,:os_type,:external_ref,:type))
+          # nodes_info = (is_template ? get_nodes() : get_nodes(:id,:display_name,:admin_op_status,:os_type,:external_ref,:type))
+          nodes_info = (is_template ? get_nodes() : get_nodes__expand_node_groups({:remove_node_groups => true}))
           assembly_rows.first[:nodes] = nodes_info.sort{|a,b| a[:display_name] <=> b[:display_name] }
         end
 

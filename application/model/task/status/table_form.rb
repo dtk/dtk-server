@@ -106,11 +106,10 @@ module DTK; class Task; class Status
 
     def self.format_logs(logs)
       ret = nil
+      message = ''
 
       logs.each do |log|
-        if ret
-          ret[:message] << "\n\n"
-        else
+        unless ret
           ret = {:message => String.new}
         end
 
@@ -119,9 +118,12 @@ module DTK; class Task; class Status
           log[:message] = temp
         end
 
-        ret[:message] << ("To see more detail about specific task action use 'task-action-detail <TASK NUMBER>'")
-        ret[:label]   = log[:label]
-        ret[:type]    = log[:type]
+        if message.empty?
+          message << ("To see more detail about specific task action use 'task-action-detail <TASK NUMBER>'\n")
+          ret[:message] << message
+          ret[:label]   = log[:label]
+          ret[:type]    = log[:type]
+        end
       end
 
       ret

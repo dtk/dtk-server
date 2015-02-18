@@ -771,7 +771,7 @@ module DTK
             :command => '1date',
             :unless      => 'echo "Does not works!"'
           }],
-        :positioning => [{
+        :positioning2 => [{
           :type => 'file',
           :source => {
             :type => 'git',

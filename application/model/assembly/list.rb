@@ -107,17 +107,22 @@ module DTK
             pntr[:module_branch_id] ||= module_branch_id 
           end
 
-          if target = (r[:target]||{})[:display_name]
-            pntr[:target] ||= target
+          if target = r[:target]
+            sec_group_set = target[:iaas_properties][:security_group_set]
+            target[:iaas_properties][:security_group] ||= sec_group_set.join(',') if sec_group_set
+            pntr[:target] ||= target[:display_name]
+            opts.merge!(:target => target)
           end
-          
+
           if version = pretty_print_version(r)
             pntr.merge!(:version => version)
           end
+
           if template = r[:assembly_template]
             # just triggers for assembly instances; indicates the assembly template that spawned it
             pntr.merge!(:assembly_template => Template.pretty_print_name(template,assembly_template_opts))
           end
+
           if created_at = r[:created_at]
             pntr.merge!(:created_at => created_at) 
           end
@@ -158,8 +163,10 @@ module DTK
       # format node adds :node_properties and empty array to ndx_nodes
       def format_node!(ndx_nodes,raw_node,opts=Hash.new)
         if raw_node
-          node_name = raw_node[:display_name]
+          target       = opts[:target]
+          node_name    = raw_node[:display_name]
           external_ref = nil
+
           unless ndx_nodes[node_name]
             if node_ext_ref = raw_node[:external_ref]
               external_ref = node_external_ref_print_form(node_ext_ref,opts)
@@ -168,15 +175,23 @@ module DTK
                 k == :git_authorized ? h : h.merge(k => v)
               end
             end
+
             node_properties = {
               :node_id         => raw_node[:id],
               :os_type         => raw_node[:os_type],
               :admin_op_status => raw_node[:admin_op_status]
             }
             node_properties.merge!(external_ref) if external_ref
+
+            if target
+              iaas_properties = target[:iaas_properties]
+              node_properties.merge!(:keypair => iaas_properties[:keypair], :security_groups => iaas_properties[:security_group])
+            end
+
             node_properties.reject!{|k,v|v.nil?}
             ndx_nodes[node_name] = raw_node.merge(:components =>  Array.new, :node_properties => node_properties)
           end
+
           ndx_nodes[node_name]
         end
       end

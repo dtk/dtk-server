@@ -86,6 +86,7 @@ module DTK
 
           return unless content
 
+          ret << "RUN: #{content[:description]} \n"
           ret << "STATUS: #{content[:status]} \n"
           ret << "STDOUT: #{content[:stdout]}\n\n" if content[:stdout] && !content[:stdout].empty?
           ret << "STDERR: #{content[:stderr]} \n" if content[:stderr] && !content[:stderr].empty?

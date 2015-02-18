@@ -3,6 +3,10 @@ require 'iconv'
 module DTK
   # cross threads may be seperate requests for new action results queue, but no locking on allocated instance
   class ActionResultsQueue
+
+    r8_require('workflow/adapters/ruote/participant/mcollective_debug')
+    include McollectiveDebug
+
     Lock = Mutex.new
     Queues = Hash.new
     @@count = 0
@@ -27,6 +31,7 @@ module DTK
 
       callbacks = {
         :on_msg_received => proc do |msg|
+          inspect_agent_response(msg)
           response = CommandAndControl.parse_response__execute_action(nodes,msg)
 
           # if response and response[:pbuilderid]

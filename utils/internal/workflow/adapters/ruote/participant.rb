@@ -11,8 +11,9 @@ module DTK
         r8_nested_require('participant','install_agent')
         r8_nested_require('participant','execute_smoketest')
         r8_nested_require('participant','detect_created_node_is_ready')
+        r8_nested_require('participant','mcollective_debug')
 
-        DEBUG_AGENT_RESPONSE = false
+        include McollectiveDebug
 
         def initialize(opts=nil)
           @opts = opts
@@ -115,14 +116,6 @@ module DTK
         end
 
        protected
-
-        def inspect_agent_response(msg)
-          if DEBUG_AGENT_RESPONSE
-            Log.info "START: Debugging response from Mcollective"
-            Log.info_pp msg
-            Log.info "END: Debugging response from Mcollective"
-          end
-        end
 
         def poll_to_detect_node_ready(workflow, node, callbacks)
           # num_poll_cycles => number of times we are going to poll given node

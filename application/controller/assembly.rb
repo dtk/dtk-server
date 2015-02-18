@@ -763,23 +763,25 @@ module DTK
         :execution_list => [
           {
             :type    => 'syscall',
-            :command => 'date',
+            #:command => "script -qfc 'JAVA_HOME=\"/usr/lib/jvm/java-1.7.0-openjdk-1.7.0.75.x86_64\" HADOOP_HOME=\"/usr/lib/hadoop\" HADOOP_CONF_DIR=\"/etc/hadoop/conf/\" /usr/local/maven/bin/mvn verify -f /etc/puppet/modules/action_module/dtk/bigtop_tests/bigtop-tests/test-execution/smokes/hadoop/pom.xml'",
+            :command => "date",
             :if      => 'echo works!'
           },
-          {
-            :type    => 'syscall',
-            :command => '1date',
-            :unless      => 'echo "Does not works!"'
-          }],
-        :positioning2 => [{
+          # {
+          #   :type    => 'syscall',
+          #   :command => 'more /root/thor/README.md'
+          # }
+          ],
+        :positioning2 => [
+        {
           :type => 'file',
           :source => {
             :type => 'git',
-            :url => "git101@dtkhost2.internal.r8network.com:dtk-examples-dtk-test-redis",
-            :ref => "workspace-private-dtk-examples"
+            :url => "https://github.com/erikhuda/thor.git",
+            :ref => 'master'
           },
           :target => {
-            :path => "/etc/puppet/modules/redis"
+            :path => "/root/thor"
           },
         },
         {
@@ -789,7 +791,7 @@ module DTK
             :content => "Hello WORLD!"
           },
           :target => {
-            :path => "~/test-folder/site-stage-1-invocation-1.pp"
+            :path => "/root/test-folder/site-stage-1-invocation-1.pp"
           }
         }]})
 

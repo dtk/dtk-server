@@ -1,6 +1,6 @@
 require 'singleton'
 require File.expand_path('../../../protocol_multiplexer', File.dirname(__FILE__))
-module XYZ
+module DTK
   module CommandAndControlAdapter; class Mcollective
     class Multiplexer < ProtocolMultiplexer
       include Singleton

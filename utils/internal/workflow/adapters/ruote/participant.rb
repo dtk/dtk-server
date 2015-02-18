@@ -201,8 +201,8 @@ module DTK
         r8_nested_require('participant','power_on_node')
 
        private
-        def errors_in_result?(result)
-          CommandAndControl.errors_in_node_config_result?(result)
+        def errors_in_result?(result,action=nil)
+          CommandAndControl.errors_in_node_action_result?(result,action)
         end
       end
 

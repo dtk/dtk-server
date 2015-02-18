@@ -201,21 +201,54 @@ module DTK
         ret
       end
 
-      def self.errors_in_node_config_result?(result)
+      def self.action_results(result,action)
+        if config_agent = config_agent_for_action?(action)
+          if config_agent.respond_to?(:action_results)
+            config_agent.action_results(result,action)
+          else
+            Log.error_pp(["Config agent does not have action_results defined:",config_agent])
+            nil
+          end
+        end
+      end
+
+      def self.errors_in_node_action_result?(result,action=nil)
         # result[:statuscode] is for transport errors and data is for errors for agent
         if result[:statuscode] != 0
           statusmsg = result[:statusmsg]
           err_msg = (statusmsg ? "transport error: #{statusmsg}" : "transport error")
           [{:message => err_msg}]
         else
-          data = result[:data]||{}
-          unless [:succeeded,:ok].include?(data[:status])
-            data[:error] ? [data[:error]] : (data[:errors]||[])
+          payload = result[:data]||{}
+          unless [:succeeded,:ok].include?(payload[:status])
+            errors_in_node_action_payload?(payload,action)
           end
         end
       end
 
      private
+      def self.config_agent_for_action?(action)
+        if config_agent_type = action && action.config_agent_type
+          ConfigAgent.load(config_agent_type)
+        end
+      end
+
+      def self.errors_in_node_action_payload?(payload,action=nil)
+        ret = nil
+        answer_computed = false
+        if config_agent = config_agent_for_action?(action)
+          if config_agent.respond_to?(:errors_in_result?)
+            answer_computed = true
+            ret = config_agent.errors_in_result?(payload,action)
+          end
+        end
+        answer_computed ? ret : errors_in_node_action_payload_default?(payload)
+      end
+
+      def self.errors_in_node_action_payload_default?(payload)
+        payload[:error] ? [payload[:error]] : (payload[:errors]||[])
+      end
+
       def self.async_agent_call(agent,method,params,filter_x,callbacks,context_x)
         msg = params ? handler.new_request(agent,method,params) : method
         filter = BlankFilter.merge(filter_x).merge("agent" => [agent])

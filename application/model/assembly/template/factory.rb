@@ -242,7 +242,7 @@ module DTK
         @template_output.merge!(:node => nodes,:component => {assembly_ref => assembly_hash})
         module_refs_updated = @component_module_refs.update_object_if_needed!(@assembly_component_modules)
         
-        Transaction do 
+        Transaction do
           @template_output.save_to_model()
           if module_refs_updated
             @component_module_refs.update() # update the object model

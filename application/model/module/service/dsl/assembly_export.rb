@@ -56,7 +56,8 @@ module DTK
       end
       
       def assembly_description?()
-        @factory.assembly_instance.get_field?(:description)
+        # @factory.assembly_instance.get_field?(:description)
+        @factory[:description]||@factory[:display_name]
       end
 
       def component_output_form(component_hash)

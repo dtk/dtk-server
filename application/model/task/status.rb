@@ -48,7 +48,7 @@ module DTK
       end
 
       def self.get_action_detail_aux(task_obj_idh, task_obj_type, filter, message_id, opts={})
-        log, ret = nil, nil
+        log, ret = [], ""
         task_mh = task_obj_idh.createMH(:task)
 
         unless task = Task.get_top_level_most_recent_task(task_mh,filter)
@@ -60,21 +60,37 @@ module DTK
         task_log_mh = task_obj_idh.createMH(:task_log)
         subtasks.each do |sub|
           sp_hash = {
-          :cols => [:id, :display_name, :content],
-          :filter => [:and, [:eq, :display_name, message_id], [:eq, :task_id, sub[:id]]]
+            :cols => [:id, :display_name, :content],
+            :filter => [:and, [:eq, :display_name, message_id], [:eq, :task_id, sub[:id]]],
+            # :order_by => [{:field => :id, :order => "ASC"}]
+            :order_by => [{:field => :id, :order => "DESC"}]
           }
-          log = Model.get_obj(task_log_mh,sp_hash)
-          break if log
+          log = Model.get_objs(task_log_mh,sp_hash)
+          break unless log.empty?
         end
 
-        raise ErrorUsage.new("Task action with identifier '#{message_id}' does not exist for this service instance.") unless log
+        raise ErrorUsage.new("Task action with identifier '#{message_id}' does not exist for this service instance.") if log.empty?
 
-        content = log[:content]
-        ret unless content
+        if log.size > 1
+          log.each do |l|
+            content = l[:content]
+            ret << "==============================================================\n"
+            ret << "RUN: #{content[:description]} \n"
+            ret << "STATUS: #{content[:status]} \n"
+            ret << "STDOUT: #{content[:stdout]}\n\n" if content[:stdout] && !content[:stdout].empty?
+            ret << "STDERR: #{content[:stderr]} \n" if content[:stderr] && !content[:stderr].empty?
+          end
+        else
+          log     = log.first
+          content = log[:content]
 
-        ret  = "STATUS: #{content[:status]} \n"
-        ret << "STDOUT: #{content[:stdout]}\n\n" if content[:stdout] && !content[:stdout].empty?
-        ret << "STDERR: #{content[:stderr]} \n" if content[:stderr] && !content[:stderr].empty?
+          return unless content
+
+          ret << "RUN: #{content[:description]} \n"
+          ret << "STATUS: #{content[:status]} \n"
+          ret << "STDOUT: #{content[:stdout]}\n\n" if content[:stdout] && !content[:stdout].empty?
+          ret << "STDERR: #{content[:stderr]} \n" if content[:stderr] && !content[:stderr].empty?
+        end
 
         ret
       end

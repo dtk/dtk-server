@@ -20,67 +20,67 @@ module DTK
 
           task.add_internal_guards!(workflow.guards[:internal])
           execution_context(task,workitem,task_start) do
-            if action.long_running?
+            unless action.long_running?
+              raise Error.new("All config node action should be long running")
+            end
 
-              user_object  = CurrentSession.new.user_object()
+            user_object  = CurrentSession.new.user_object()
+            
+            callbacks = {
+              :on_msg_received => proc do |msg|
+                inspect_agent_response(msg)
+                CreateThread.defer_with_session(user_object, Ramaze::Current.session) do
+                  PerformanceService.end_measurement("#{self.class.to_s.split("::").last}", self.object_id)
 
-              callbacks = {
-                :on_msg_received => proc do |msg|
-                  inspect_agent_response(msg)
-                  CreateThread.defer_with_session(user_object, Ramaze::Current.session) do
-                    PerformanceService.end_measurement("#{self.class.to_s.split("::").last}", self.object_id)
+                  result = msg[:body].merge("task_id" => task_id)
 
-                    result = msg[:body].merge("task_id" => task_id)
-                    if errors_in_result = errors_in_result?(result)
-                      event,errors = task.add_event_and_errors(:complete_failed,:config_agent,errors_in_result)
-                      if event
-                        log_participant.end(:complete_failed,:task_id=>task_id,:event => event, :errors => errors)
-                      end
-                      cancel_upstream_subtasks(workitem)
-                      set_result_failed(workitem,result,task)
-                    else
-                      if has_action_results?(task,result)
-                        task.add_action_results(result,action)
-                      end
-
-                      event = task.add_event(:complete_succeeded,result)
-                      log_participant.end(:complete_succeeded,:task_id=>task_id)
-                      set_result_succeeded(workitem,result,task,action) if task_end
-                      action.get_and_propagate_dynamic_attributes(result)
-                    end
-                    delete_task_info(workitem)
-                    reply_to_engine(workitem)
+                  if has_action_results?(task,result)
+                    task.add_action_results(result,action)
                   end
-                end,
-                :on_timeout => proc do
-                  CreateThread.defer_with_session(user_object, Ramaze::Current.session) do
-                    result = {
-                      :status => "timeout"
-                    }
-                    event,errors = task.add_event_and_errors(:complete_timeout,:server,["timeout"])
+                  
+                  if errors_in_result = errors_in_result?(result,action)
+                    event,errors = task.add_event_and_errors(:complete_failed,:config_agent,errors_in_result)
                     if event
-                      log_participant.end(:timeout,:task_id=>task_id,:event => event, :errors => errors)
+                      log_participant.end(:complete_failed,:task_id=>task_id,:event => event, :errors => errors)
                     end
                     cancel_upstream_subtasks(workitem)
-                    set_result_timeout(workitem,result,task)
-                    delete_task_info(workitem)
-                    reply_to_engine(workitem)
+                    set_result_failed(workitem,result,task)
+                  else
+                    event = task.add_event(:complete_succeeded,result)
+                    log_participant.end(:complete_succeeded,:task_id=>task_id)
+                    set_result_succeeded(workitem,result,task,action) if task_end
+                    action.get_and_propagate_dynamic_attributes(result)
                   end
-                end,
-                :on_cancel => proc do
-                  CreateThread.defer_with_session(user_object, Ramaze::Current.session) do
-                    log_participant.canceled(task_id)
-                    set_result_canceled(workitem, task)
-                    delete_task_info(workitem)
-                    reply_to_engine(workitem)
+                  delete_task_info(workitem)
+                  reply_to_engine(workitem)
                   end
+              end,
+              :on_timeout => proc do
+                CreateThread.defer_with_session(user_object, Ramaze::Current.session) do
+                  result = {
+                    :status => "timeout"
+                  }
+                  event,errors = task.add_event_and_errors(:complete_timeout,:server,["timeout"])
+                  if event
+                    log_participant.end(:timeout,:task_id=>task_id,:event => event, :errors => errors)
+                  end
+                  cancel_upstream_subtasks(workitem)
+                  set_result_timeout(workitem,result,task)
+                  delete_task_info(workitem)
+                  reply_to_engine(workitem)
                 end
-              }
-              receiver_context = {:callbacks => callbacks, :expected_count => 1}
-              workflow.initiate_executable_action(task,receiver_context)
-            else
-              raise Error.new("TODO: if reach need to implement config node that is not long running")
-            end
+                end,
+              :on_cancel => proc do
+                CreateThread.defer_with_session(user_object, Ramaze::Current.session) do
+                  log_participant.canceled(task_id)
+                  set_result_canceled(workitem, task)
+                  delete_task_info(workitem)
+                  reply_to_engine(workitem)
+                end
+              end
+            }
+            receiver_context = {:callbacks => callbacks, :expected_count => 1}
+            workflow.initiate_executable_action(task,receiver_context)
           end
         end
 

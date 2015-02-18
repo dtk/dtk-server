@@ -53,6 +53,7 @@ module DTK
         Type::Symbol.puppet
       end
 
+
       # tries to normalize error received from node
       def interpret_error(error_in_result,components)
         ret = error_in_result

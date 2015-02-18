@@ -1,5 +1,7 @@
-module DTK; class Task::Status
+module DTK; class Task; class Status
   module TableForm
+    DURATION_ACCURACY = 1
+
     r8_nested_require('table_form','node_group_summary')
     module Mixin
       def status_table_form(opts)
@@ -20,11 +22,20 @@ module DTK; class Task::Status
       ret = Array.new
       task.set_and_return_types!()
       el = task.hash_subset(:started_at,:ended_at)
+
+      duration = el[:ended_at] - el[:started_at] if el[:ended_at] && el[:started_at]
+      el[:duration] = "#{duration.round(DURATION_ACCURACY)}s" if duration
+
       el[:status] = task[:status] unless task[:status] == 'created'
       el[:id] = task[:id]
+      # For ALdin 'type' needs to be computed depeidningon whether it is a create node, craeet component or action
+      # also can be different depending on whether it is a group
+      qualified_index = QualifiedIndex.string_form(task)
+      # for space after qualified index if not empty
+      qualified_index += ' ' unless qualified_index.empty?
       type = element_type(task,level)
       # putting idents in
-      el[:type] = "#{' '*(2*(level-1))}#{type}"
+      el[:type] = "#{' '*(2*(level-1))}#{qualified_index}#{type}"
       ndx_errors ||= task.get_ndx_errors()
       if ndx_errors[task[:id]]
         el[:errors] = format_errors(ndx_errors[task[:id]])
@@ -95,11 +106,10 @@ module DTK; class Task::Status
 
     def self.format_logs(logs)
       ret = nil
+      message = ''
 
       logs.each do |log|
-        if ret
-          ret[:message] << "\n\n"
-        else
+        unless ret
           ret = {:message => String.new}
         end
 
@@ -108,9 +118,12 @@ module DTK; class Task::Status
           log[:message] = temp
         end
 
-        ret[:message] << ("To see more detail about specific task action use 'task-action-detail <ACTION>'")
-        ret[:label]   = log[:label]
-        ret[:type]    = log[:type]
+        if message.empty?
+          message << ("To see more detail about specific task action use 'task-action-detail <TASK NUMBER>'\n")
+          ret[:message] << message
+          ret[:label]   = log[:label]
+          ret[:type]    = log[:type]
+        end
       end
 
       ret
@@ -120,15 +133,25 @@ module DTK; class Task::Status
       if level == 1
         task[:display_name] 
       elsif type = task[:type]
-        if ['configure_node','create_node'].include?(type)
-          if node = (task[:executable_action]||{})[:node]
-            type = "#{type}group" if node.is_node_group?()
+        node = (task[:executable_action]||{})[:node]
+        config_agent = task.get_config_agent_type(nil, {:no_error_if_nil => true})
+
+        if config_agent == 'dtk_provider'
+          if node && node.is_node_group?()
+            type = 'nodegroup actions'
+          else
+            type = 'action'
           end
         end
+
+        if ['configure_node','create_node'].include?(type)
+          type = "#{type}group" if node && node.is_node_group?()
+        end
+
         type
       else
         task[:display_name]|| "top"
       end
     end
   end
-end; end
+end; end; end

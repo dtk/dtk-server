@@ -2,8 +2,9 @@ module DTK; class Task
   module ActionResults
     module Mixin
       def add_action_results(result,action)
-        unless action_results = result[:data][:data][:output]
-          Log.error_pp(["Unexpected that result[:data][:data][:output] is nil",result])
+        unless action_results = CommandAndControl.node_action_results(result,action)
+          Log.error_pp(["Unexpected that cannot find data in results:",result])
+          return
         end
         # TODO: using task logs for storage; might introduce a new table
         rows = action_results.map do |action_result|
@@ -17,6 +18,7 @@ module DTK; class Task
         end
         Model.create_from_rows(child_model_handle(:task_log),rows,{:convert => true})
       end
+
     end
   end
 end; end

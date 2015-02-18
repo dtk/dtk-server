@@ -47,9 +47,14 @@ module DTK
       klass.discover(filter, timeout, limit, client)
     end
 
-    def self.errors_in_node_config_result?(result)
+    def self.node_action_results(result,action)
       klass = load_for_node_config()
-      klass.errors_in_node_config_result?(result)
+      klass.action_results(result,action)
+    end
+
+    def self.errors_in_node_action_result?(result,action=nil)
+      klass = load_for_node_config()
+      klass.errors_in_node_action_result?(result,action)
     end
 
     def self.get_mcollective_client()

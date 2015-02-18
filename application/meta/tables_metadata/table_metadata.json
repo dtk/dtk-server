@@ -7,9 +7,7 @@
       "size",
       "os",
       "op_status",
-      "dns_name",
-      "keypair",
-      "security_group(s)"
+      "dns_name"
     ],
     "mapping": {
       "name": "display_name",
@@ -21,9 +19,7 @@
       "os": "os_type",
       "op_status": "admin_op_status",
       "id": "dtk_id",
-      "managed": "managed",
-      "keypair": "target.iaas_properties.keypair",
-      "security_group(s)": "target.iaas_properties.security_group"
+      "managed": "managed"
     }
   },
   "node_group": {
@@ -460,6 +456,7 @@
       "task_type",
       "status",
       "node",
+      "duration",
       "started_at",
       "ended_at",
       "errors",
@@ -469,6 +466,7 @@
       "task_type": "dtk_type",
       "status": "status",
       "node": "node.name",
+      "duration": "duration",
       "started_at": "started_at.get_date",
       "ended_at": "ended_at.get_date",
       "errors": "errors.message",

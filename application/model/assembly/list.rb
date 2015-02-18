@@ -185,7 +185,10 @@ module DTK
 
             if target
               iaas_properties = target[:iaas_properties]
-              node_properties.merge!(:keypair => iaas_properties[:keypair], :security_groups => iaas_properties[:security_group])
+              node_properties[:keypair] ||= iaas_properties[:keypair]
+              # substitute node[:security_group] or node[:security_group_set] with node[:security_groups]
+              check_node_security_groups!(node_properties)
+              node_properties[:security_groups] ||= iaas_properties[:security_group]
             end
 
             node_properties.reject!{|k,v|v.nil?}
@@ -193,6 +196,16 @@ module DTK
           end
 
           ndx_nodes[node_name]
+        end
+      end
+
+      # substitute node[:security_group] or node[:security_group_set] with node[:security_groups]
+      # not deleting any keys just changing the name
+      def check_node_security_groups!(node_properties)
+        if security_group = node_properties.delete(:security_group)
+          node_properties[:security_groups] = security_group
+        elsif security_group_set = node_properties.delete(:security_group_set)
+          node_properties[:security_groups] = security_group_set.join(',')
         end
       end
 

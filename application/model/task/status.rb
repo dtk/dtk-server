@@ -71,28 +71,16 @@ module DTK
 
         raise ErrorUsage.new("Task action with identifier '#{message_id}' does not exist for this service instance.") if log.empty?
 
-        # this is code wi will use if need to output all commands when action with multiple commands
-        # if log.size > 1
-        #   index = 1
-        #   log.each do |l|
-        #     content = l[:content]
-        #     ret << "COMMAND#{index}: #{content[:description]} \n"
-        #     ret << "STATUS: #{content[:status]} \n"
-        #     ret << "STDOUT: #{content[:stdout]}\n\n" if content[:stdout] && !content[:stdout].empty?
-        #     ret << "STDERR: #{content[:stderr]} \n" if content[:stderr] && !content[:stderr].empty?
-        #     index += 1
-        #   end
-        # else
-        #   log     = log.first
-        #   content = log[:content]
-
-        #   return unless content
-
-        #   ret << "STATUS: #{content[:status]} \n"
-        #   ret << "STDOUT: #{content[:stdout]}\n\n" if content[:stdout] && !content[:stdout].empty?
-        #   ret << "STDERR: #{content[:stderr]} \n" if content[:stderr] && !content[:stderr].empty?
-        # end
-
+        if log.size > 1
+          log.each do |l|
+            content = l[:content]
+            ret << "==============================================================\n"
+            ret << "RUN: #{content[:description]} \n"
+            ret << "STATUS: #{content[:status]} \n"
+            ret << "STDOUT: #{content[:stdout]}\n\n" if content[:stdout] && !content[:stdout].empty?
+            ret << "STDERR: #{content[:stderr]} \n" if content[:stderr] && !content[:stderr].empty?
+          end
+        else
           log     = log.first
           content = log[:content]
 
@@ -101,6 +89,7 @@ module DTK
           ret << "STATUS: #{content[:status]} \n"
           ret << "STDOUT: #{content[:stdout]}\n\n" if content[:stdout] && !content[:stdout].empty?
           ret << "STDERR: #{content[:stderr]} \n" if content[:stderr] && !content[:stderr].empty?
+        end
 
         ret
       end

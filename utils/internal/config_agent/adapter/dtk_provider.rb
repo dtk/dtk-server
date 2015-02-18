@@ -1,5 +1,8 @@
 module DTK; class ConfigAgent; module Adapter
   class DtkProvider < ConfigAgent
+    r8_nested_require('dtk_provider','interpret_results')
+    include InterpretResults::Mixin
+
     def ret_msg_content(config_node,opts={})
       # TODO: right now noy using assembly attributes; if use, need way to distingusih between refernce to these and
       # reference to component attributes
@@ -21,31 +24,8 @@ module DTK; class ConfigAgent; module Adapter
       Type::Symbol.dtk_provider
     end
 
-    ### Methods that interpret results
-    def action_results(result,action)
-      data_field_in_results(result)['results']
-    end
-
-    def errors_in_result?(result,action)
-      #TODO: stub
-      nil
-    end
-
-    def interpret_error(error_in_result,components)
-      #TODO: stub
-      pp [error_in_result,components]
-      ret = error_in_result
-      ret
-    end
-    def data_field_in_results(result)
-      # TODO: will be deprecating the [:data][:data] form
-      result[:data][:data]||result[:data]||{}
-    end
-    private :data_field_in_results
-    ### end of Methods that interpret results
     
     private
-
     def commands(config_node,opts)
       ret = Array.new
       config_node[:component_actions].each do |component_action|

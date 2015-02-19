@@ -33,7 +33,20 @@ module DTK; class BaseModule; class UpdateModule
     #  :component_module_refs 
     #  :external_dependencies 
     def self.save_dsl?(module_branch,opts={})
+      # For Rich: DTK-1925
+      # think we should use code bellow because when import from file for some reason opts[:component_module_refs].component_modules
+      # will be empty but ModuleRefs.get_component_module_refs(module_branch) will return valid module_refs
+      #
+      # this line bellow
       component_module_refs = opts[:component_module_refs] || ModuleRefs.get_component_module_refs(module_branch)
+      # should be changed with this code:
+      # cmp_mod_refs = opts[:component_module_refs]
+      # if cmp_mod_refs && !cmp_mod_refs.component_modules.empty?
+      #   component_module_refs = cmp_mod_refs
+      # else
+      #   component_module_refs = ModuleRefs.get_component_module_refs(module_branch)
+      # end
+
       serialize_info_hash = Aux::hash_subset(opts,[:create_empty_module_refs])
       if external_deps = opts[:external_dependencies]
         if ambiguous = external_deps.ambiguous?

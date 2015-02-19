@@ -5,7 +5,7 @@ module DTK
       def serialize()
         assembly_hash = assembly_output_hash()
         node_bindings_hash = node_bindings_output_hash()
-        temporal_ordering = temporal_ordering_hash()
+        workflow = workflow_hash()
         dsl_version = dsl_version?()
         description = assembly_description?()
         SimpleOrderedHash.new(
@@ -15,7 +15,7 @@ module DTK
           dsl_version && {:dsl_version => dsl_version},
           node_bindings_hash.empty? ? nil : {:node_bindings => node_bindings_hash},
           {:assembly => assembly_hash},
-          temporal_ordering && {:workflow => temporal_ordering}
+          workflow && {:workflow => workflow}
          ].compact)
       end
 
@@ -95,7 +95,7 @@ module DTK
       end
       NodeAttributesInDSL = ['cardinality','root_device_size','puppet_version']
 
-      def temporal_ordering_hash()
+     def workflow_hash()
         if default_action_task_template = (assembly_hash()[:task_template]||{})[Task::Template.default_task_action()]
           SimpleOrderedHash.new(:assembly_action => "create").merge(default_action_task_template[:content])
         end

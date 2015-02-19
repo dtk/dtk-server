@@ -58,7 +58,6 @@ module DTK; class Assembly
 
       service_module_branch = service_module.get_workspace_module_branch()
       service_module_branch.set_dsl_parsed!(true)
-      # service_module.update(:dsl_parsed => true)
 
       service_module
     end

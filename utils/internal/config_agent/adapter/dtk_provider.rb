@@ -31,9 +31,6 @@ module DTK; class ConfigAgent; module Adapter
       config_node[:component_actions].each do |component_action|
         attr_val_pairs = nil
         each_command_given_component_action(component_action) do |command|
-          # For Rich:
-          # used this commented attributes for testing, need to set attributes when creating task
-          # component_action[:attributes] << {:display_name => "rspec_binary", :attribute_value => "/opt/pppet-omnibus/embedded/bin/rspec"}
           if opts[:substitute_template_vars] and command.needs_template_substitution?()
             attr_val_pairs ||= attribute_value_pairs(component_action)
             command.bind_template_attributes!(attr_val_pairs)

@@ -86,12 +86,13 @@ module DTK
     #### list and info actions ###
     def rest__info()
       assembly = ret_assembly_object()
-      node_id, component_id, attribute_id, return_json = ret_request_params(:node_id, :component_id, :attribute_id, :json_return)
+      node_id, component_id, attribute_id, return_json, only_node_group_info = ret_request_params(:node_id, :component_id, :attribute_id, :json_return, :only_node_group_info)
 
+      opts = {:only_node_group_info => true} if only_node_group_info
       if return_json.eql?('true')
-        rest_ok_response assembly.info(node_id, component_id, attribute_id)
+        rest_ok_response assembly.info(node_id, component_id, attribute_id, opts||{})
       else
-        rest_ok_response assembly.info(node_id, component_id, attribute_id), :encode_into => :yaml
+        rest_ok_response assembly.info(node_id, component_id, attribute_id, opts||{}), :encode_into => :yaml
       end
     end
 

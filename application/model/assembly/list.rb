@@ -1,8 +1,7 @@
 module DTK
   class Assembly
     module ListMixin
-      def info(node_id=nil, component_id=nil, attribute_id=nil)
-        opts = {}
+      def info(node_id=nil, component_id=nil, attribute_id=nil, opts={})
         is_template = kind_of?(Template)
 
         nested_virtual_attr = (is_template ? :template_nodes_and_cmps_summary : :instance_nodes_and_cmps_summary)
@@ -13,7 +12,8 @@ module DTK
         Instance.get_last_task_run_status(assembly_rows,model_handle())
 
         if (node_id.to_s.empty? && component_id.to_s.empty? && attribute_id.to_s.empty?)
-          nodes_info = (is_template ? get_nodes() : get_nodes(:id,:display_name,:admin_op_status,:os_type,:external_ref,:type))
+          # nodes_info = (is_template ? get_nodes() : get_nodes(:id,:display_name,:admin_op_status,:os_type,:external_ref,:type))
+          nodes_info = (is_template ? get_nodes() : get_nodes__expand_node_groups({:remove_node_groups => true}))
           assembly_rows.first[:nodes] = nodes_info.sort{|a,b| a[:display_name] <=> b[:display_name] }
         end
 
@@ -27,13 +27,13 @@ module DTK
           assembly_rows.first[:node] = node
 
           assembly_rows = assembly_rows.select { |node| node[:node][:id] == node_id.to_i } 
-          opts = {:component_info => true}
+          opts.merge!(:component_info => true)
         end
 
         # filter nodes by component_id if component_id is provided in request
         unless (component_id.nil? || component_id.empty?)
           assembly_rows = assembly_rows.select { |node| node[:nested_component][:id] == component_id.to_i } 
-          opts = {:component_info => true, :attribute_info => true}
+          opts.merge!(:component_info => true, :attribute_info => true)
         end
         
         # load attributes for assembly
@@ -131,6 +131,11 @@ module DTK
             format_components_and_attributes(node,r,ndx_attrs,opts)
           end
 
+          # if node group take only group members
+          if r[:node].is_node_group?()
+            r[:nodes] ||= r.get_nodes__expand_node_groups({:remove_node_groups => true}) unless opts[:only_node_group_info]
+          end
+
           if(r[:nodes])
             r[:nodes].each do |n|
               format_node!(pntr[:ndx_nodes],n,opts)
@@ -167,7 +172,8 @@ module DTK
           node_name    = raw_node[:display_name]
           external_ref = nil
 
-          unless ndx_nodes[node_name]
+          format_current_node = (!raw_node.is_node_group?() || opts[:only_node_group_info])
+          if ndx_nodes[node_name].nil? && format_current_node #!raw_node.is_node_group?()
             if node_ext_ref = raw_node[:external_ref]
               external_ref = node_external_ref_print_form(node_ext_ref,opts)
               # remove :git_authorized

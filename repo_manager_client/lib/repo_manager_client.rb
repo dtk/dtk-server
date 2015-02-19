@@ -69,6 +69,12 @@ module DTK
       response
     end
 
+    def notify_tenant_ready(tenant_owner_email, tenant_owner_username)
+      request_params = user_params(CurrentSession.catalog_username)
+      request_params.merge!(:tenant_owner_email => tenant_owner_email, :tenant_owner_username => tenant_owner_username)
+      post_rest_request_data('/v1/users/tenant_ready', request_params)
+    end
+
     def chmod(type, module_name, module_namespace, permission_selector, client_rsa_pub_key)
       repo_user = get_approved_repouser(client_rsa_pub_key)
       request_params = {

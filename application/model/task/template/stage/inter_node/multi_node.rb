@@ -3,9 +3,9 @@ module DTK; class Task; class Template; class Stage
     class MultiNode < self
       def initialize(serialized_multinode_action)
         super(serialized_multinode_action[:name])
-        unless @ordered_components = (serialized_multinode_action[Constant::OrderedComponents]||
-                                      serialized_multinode_action[Constant::Components])
-          msg = "Missing Component field (#{Constant::OrderedComponents} or #{Constant::Components})"
+        unless @ordered_components = components_or_actions(serialized_multinode_action)
+          all_legal = Constant.all_string_variations(*ComponantOrActionConstants).join(',')
+          msg = "Missing Component or Action field (#{all_legal})"
           if name = serialized_multinode_action[:name]
             msg << " in stage '#{name}'"
           end
@@ -26,6 +26,13 @@ module DTK; class Task; class Template; class Stage
       end
 
      private
+      ComponantOrActionConstants = [:OrderedComponents,:Components,:Actions]
+      def components_or_actions(serialized_el)
+        if match = ComponantOrActionConstants.find{|k|Constant.matches?(serialized_el,k)}
+          Constant.matches?(serialized_el,match)
+        end
+      end
+
       def self.klass(multi_node_type)
         if Constant.matches?(multi_node_type,:AllApplicable)
           Applicable

@@ -100,6 +100,9 @@ module DTK; class Task; class Template
           elsif lvs.add_and_match?(serialized_eb){HashWithKey(Constant::Components)}
             # normalize from component form into ordered_component_form
             [{Constant::ComponentGroup => serialized_eb[Constant::Components]}]
+          elsif lvs.add_and_match?(serialized_eb){HashWithKey(Constant::Actions)}
+            # normalize from action form into ordered_component_form
+            [{Constant::ComponentGroup => Constant.match?(serialized_eb,:Actions)}]
           else
             raise ParsingError::WrongType.new(serialized_eb,lvs)
           end

@@ -23,6 +23,9 @@ module DTK
           end
         end
 
+        def all_string_variations(*constants)
+          constants.map{|constant|variations(constant,:string_only=>true)}.flatten(1).uniq
+        end
         def its_legal_values(constant)
           single_or_set = variations(constant,:string_only=>true)
           if single_or_set.kind_of?(Array)

@@ -104,7 +104,7 @@ module DTK; class Task; class Template
         # 2) a single node,
         # 3) a multi-node specification
 
-        if multi_node_type = Constant.matches?(serialized_content,:Nodes)
+        if multi_node_type = parse_and_reify_is_multi_node_type?(serialized_content)
           return MultiNode.parse_and_reify(multi_node_type,serialized_content,action_list)
         end
 
@@ -146,6 +146,14 @@ module DTK; class Task; class Template
      private
       def serialized_form_with_name()
         @name ? OrderedHash.new(:name => @name) : OrderedHash.new
+      end
+
+      def self.parse_and_reify_is_multi_node_type?(serialized_content) 
+        if ret = Constant.matches?(serialized_content,:Nodes) 
+          ret
+        elsif !Constant.matches?(serialized_content,:Node)
+          Constant::AllApplicable
+        end          
       end
 
       def self.parse_and_reify_node_actions?(node_actions,node_name,node_id,action_list,opts={})

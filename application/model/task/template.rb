@@ -12,16 +12,20 @@ module DTK; class Task
         ExecutionBlocks = :exec_blocks
       end
       module Constant
+        module Variations
+        end
+        extend Aux::ParsingingHelper::ClassMixin
+
+        ComponentGroup = :Component_group
+
         Concurrent = :concurrent
         Sequential = :sequential
         OrderedComponents = :ordered_components
         Components = :components
-        ComponentGroup = :Component_group
 
-        # convert above to below form 
-        module Variations
-        end
-        extend Aux::ParsingingHelper::ClassMixin
+        ## TODO: above are in old form
+
+        Actions = 'actions'
 
         AllApplicable = 'All_applicable'
         Variations::AllApplicable = ['All_applicable','All','All_Applicable','AllApplicable']

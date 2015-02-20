@@ -220,9 +220,7 @@ module DTK
           [{:message => err_msg}]
         else
           payload = result[:data]||{}
-          unless [:succeeded,:ok].include?(payload[:status])
-            errors_in_node_action_payload?(payload,action)
-          end
+          errors_in_node_action_payload?(payload,action)
         end
       end
 
@@ -246,7 +244,9 @@ module DTK
       end
 
       def self.errors_in_node_action_payload_default?(payload)
-        payload[:error] ? [payload[:error]] : (payload[:errors]||[])
+        unless [:succeeded,:ok].include?(payload[:status])
+          payload[:error] ? [payload[:error]] : (payload[:errors]||[])
+        end
       end
 
       def self.async_agent_call(agent,method,params,filter_x,callbacks,context_x)

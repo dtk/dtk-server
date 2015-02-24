@@ -125,6 +125,11 @@ module DTK
       RepoManager.push_implementation(context)
     end
 
+    def move_to_provider_subdir(source, destination)
+      context = repo_manager_context()
+      RepoManager.move_content(source, destination, context)
+    end
+
     def repo_manager_context()
       update_object!(:repo,:branch)
       {

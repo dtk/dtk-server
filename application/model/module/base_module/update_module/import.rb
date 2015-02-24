@@ -38,6 +38,8 @@ module DTK; class BaseModule; class UpdateModule
       )
       dsl_created_info = ScaffoldImplementation.create_dsl(local_params.module_name(),config_agent_type,impl_obj,opts_scaffold)
 
+      move_content_to_provider_subdir(repo, impl_obj)
+
       # add dsl file and create DTK module objects from the dsl
       UpdateModule.new(component_module).add_dsl_to_impl_and_create_objects(dsl_created_info,project,impl_obj,module_branch_idh,local_params.version)
 
@@ -149,6 +151,12 @@ module DTK; class BaseModule; class UpdateModule
     def self.generate_source(local_params)
       return unless local_params.source_name
       "puppetforge://#{local_params.source_name}"
+    end
+
+    def self.move_content_to_provider_subdir(repo, impl_obj)
+      repo.update_object!(:local_dir)
+      local_dir = repo[:local_dir]
+      impl_obj.move_to_provider_subdir(local_dir, "#{local_dir}/puppet/")
     end
   end
 end; end; end

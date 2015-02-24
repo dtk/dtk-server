@@ -133,6 +133,13 @@ module DTK
       end
     end
 
+    def move_content(source, destination, branch = nil)
+      branch ||= @branch
+      checkout(branch) do
+        git_command__mv(source, destination)
+      end
+    end
+
     def add_all_files(branch=nil)
       branch ||= @branch
       checkout(branch) do
@@ -696,6 +703,13 @@ module DTK
     def git_command__rm_r(dir)
       git_command.rm(cmd_opts(),"-r","--cached",dir)
       FileUtils.rm_rf full_path(dir)
+    end
+
+    def git_command__mv(source, destination)
+      require 'fileutils'
+      FileUtils.mkdir_p(destination)
+      git_command.mv(cmd_opts(), "#{source}/*", destination)
+      git_command.add(cmd_opts(), '.')
     end
 
     def git_command__remote_add(remote_name,remote_url)

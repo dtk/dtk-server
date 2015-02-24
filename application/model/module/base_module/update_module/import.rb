@@ -38,6 +38,7 @@ module DTK; class BaseModule; class UpdateModule
       )
       dsl_created_info = ScaffoldImplementation.create_dsl(local_params.module_name(),config_agent_type,impl_obj,opts_scaffold)
 
+      # move top level folders/files in provider subfolder
       move_content_to_provider_subdir(repo, impl_obj)
 
       # add dsl file and create DTK module objects from the dsl
@@ -156,7 +157,7 @@ module DTK; class BaseModule; class UpdateModule
     def self.move_content_to_provider_subdir(repo, impl_obj)
       repo.update_object!(:local_dir)
       local_dir = repo[:local_dir]
-      impl_obj.move_to_provider_subdir(local_dir, "#{local_dir}/puppet/")
+      impl_obj.move_to_provider_subdir(local_dir, "#{local_dir}/puppet")
     end
   end
 end; end; end

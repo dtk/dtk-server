@@ -127,7 +127,9 @@ module DTK
 
     def move_to_provider_subdir(source, destination)
       context = repo_manager_context()
-      RepoManager.move_content(source, destination, context)
+      files   = RepoManager.ls_r(1, {:file_only=>true} ,self)
+      folders = RepoManager.ls_r(1, {:directory_only=>true} ,self)
+      RepoManager.move_content(source, destination, files, folders, context)
     end
 
     def repo_manager_context()

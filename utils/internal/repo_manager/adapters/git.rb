@@ -133,10 +133,10 @@ module DTK
       end
     end
 
-    def move_content(source, destination, branch = nil)
+    def move_content(source, destination, files, folders, branch = nil)
       branch ||= @branch
       checkout(branch) do
-        git_command__mv(source, destination)
+        git_command__mv(source, destination, files, folders)
       end
     end
 
@@ -705,11 +705,17 @@ module DTK
       FileUtils.rm_rf full_path(dir)
     end
 
-    def git_command__mv(source, destination)
+    def git_command__mv(source, destination, files, folders)
       require 'fileutils'
       FileUtils.mkdir_p(destination)
-      git_command.mv(cmd_opts(), "#{source}/*", destination)
-      git_command.add(cmd_opts(), '.')
+
+      files.each do |file|
+        git_command.mv(cmd_opts(), "--force", "#{source}/#{file}", "#{destination}/#{file}")
+      end
+
+      folders.each do |folder|
+        git_command.mv(cmd_opts(), "--force", "#{source}/#{folder}", "#{destination}/")
+      end
     end
 
     def git_command__remote_add(remote_name,remote_url)

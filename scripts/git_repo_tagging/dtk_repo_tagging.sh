@@ -17,12 +17,12 @@ dtk_repo_manager_admin="git@github.com:rich-reactor8/dtk-repoman-admin.git"
 dtk_server="git@github.com:rich-reactor8/server.git"
 
 dtk_repos=()
-dtk_repos+=($dtk_client)
-dtk_repos+=($dtk_common)
 dtk_repos+=($dtk_common_core)
+dtk_repos+=($dtk_common)
+dtk_repos+=($dtk_client)
 dtk_repos+=($dtk_node_agent)
-dtk_repos+=($dtk_repo_manager)
 dtk_repos+=($dtk_repo_manager_admin)
+dtk_repos+=($dtk_repo_manager)
 dtk_repos+=($dtk_server)
 
 function increase_version_number() {
@@ -74,10 +74,19 @@ function tag_code() {
 		tag=`echo $next_tag | sed 's/v//'`
 		echo "Needed bump of version for ${dtk_repo} to version ${next_tag}..."
 
-		if [[ $repo_name == "dtk-client" || $repo_name == "dtk-common" || $repo_name == "dtk-node-agent" ]]; then
+		if [[ $repo_name == "dtk-node-agent" ]]; then
 			cd lib/$repo_name
 			sed -i -e 's/VERSION=".*"/VERSION="'${tag}'"/' version.rb
 			cd ../..
+			git add .; git commit -m "bump version"; git push origin master
+			git tag $next_tag
+			git push --tags
+		elif [[ $repo_name == "dtk-common" || $repo_name == "dtk-client" ]]; then
+			cd lib/$repo_name
+			sed -i -e 's/VERSION=".*"/VERSION="'${tag}'"/' version.rb
+			cd ../..
+      cd ../dtk-common-repo && dtk_common_core_tag=`git tag | tail -1` && cd ../$repo_name
+			sed -i -e "s/'dtk-common-core','.*'/'dtk-common-core','${dtk_common_core_tag}'/" $repo_name.gemspec
 			git add .; git commit -m "bump version"; git push origin master
 			git tag $next_tag
 			git push --tags
@@ -91,22 +100,38 @@ function tag_code() {
 		elif [[ $repo_name == "server" ]]; then
 			set_release_yaml_file "not_set"
 			cd $repo_name
+			bundle update dtk-common # updates both dtk-common and dtk-common-core
 			git add .; git commit -m "bump versions for release.yml"; git push origin master
 			git tag $next_tag
 			git push --tags
-			cd ..
-		else 
-			git tag $next_tag
-			git push --tags
+			cd ..		
+		else
+			current_commit_msg=`git log --oneline -1`
+			git checkout $current_tag
+			current_commit_msg_on_tag=`git log --oneline -1`
+			git checkout master
+			if [[ $current_commit_msg != $current_commit_msg_on_tag ]]; then
+				git tag $next_tag
+				git push --tags
+			fi
 		fi
 	elif [[ $dtk_major_tag != "not_set" ]]; then
 		echo "Needed bump of version for ${dtk_repo} to version ${dtk_major_tag}..."
 		tag=`echo $dtk_major_tag | sed 's/v//'`
 
-		if [[ $repo_name == "dtk-client" || $repo_name == "dtk-common" || $repo_name == "dtk-node-agent" ]]; then
+		if [[ $repo_name == "dtk-node-agent" ]]; then
 			cd lib/$repo_name
 			sed -i -e 's/VERSION=".*"/VERSION="'${tag}'"/' version.rb
 			cd ../..
+			git add .; git commit -m "bump version"; git push origin master
+			git tag $dtk_major_tag
+			git push --tags
+		elif [[ $repo_name == "dtk-client" || $repo_name == "dtk-common" ]]; then
+			cd lib/$repo_name
+			sed -i -e 's/VERSION=".*"/VERSION="'${tag}'"/' version.rb
+			cd ../..
+      cd ../dtk-common-repo && dtk_common_core_tag=`git tag | tail -1` && cd ../$repo_name
+      sed -i -e "s/'dtk-common-core','.*'/'dtk-common-core','${dtk_common_core_tag}'/" $repo_name.gemspec
 			git add .; git commit -m "bump version"; git push origin master
 			git tag $dtk_major_tag
 			git push --tags
@@ -117,9 +142,11 @@ function tag_code() {
 			git add .; git commit -m "bump version"; git push origin master
 			git tag $dtk_major_tag
 			git push --tags
+			export DTK_COMMON_CORE=$next_tag
 		elif [[ $repo_name == "server" ]]; then
 			set_release_yaml_file $dtk_major_tag
 			cd $repo_name
+			bundle update dtk-common
 			git add .; git commit -m "bump versions for release.yml"; git push origin master
 			git tag $dtk_major_tag
 			git push --tags
@@ -137,15 +164,7 @@ for dtk_repo in ${dtk_repos[@]}; do
 	content=`ls $output_dir`
 	# get repo name from git repo url (for example: dtk-client)
 	repo_name=`echo ${dtk_repo} | cut -d/ -f2 | sed 's/.git//'`
-
-	if [[ $content == *$repo_name* ]]; then
-		echo "Tagging code for $repo_name repo..."
-		cd $output_dir/$repo_name && git pull origin master
-		tag_code $dtk_major_tag $dtk_repo $repo_name
-		cd ../..
-	else
-		cd $output_dir && git clone $dtk_repo && cd $repo_name
-		tag_code $dtk_major_tag $dtk_repo $repo_name
-		cd ../..
-	fi
+	cd $output_dir && git clone $dtk_repo && cd $repo_name
+	tag_code $dtk_major_tag $dtk_repo $repo_name
+	cd ../..
 done

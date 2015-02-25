@@ -2,12 +2,11 @@ module DTK; class ConfigAgent
   module Adapter; class Puppet
     module MetadataFile
       # used for parsing metadata.json when importing module from git (import-git)
-      def self.parse?(impl_obj)
+      def self.parse?(impl_obj, provider = nil)
         ret = nil
-        unless metadata_name = contains_metadata?(impl_obj)
+        unless metadata_name = contains_metadata?(impl_obj, provider)
           return ret
         end
-        
         type = impl_obj[:type]
         
         json_content = RepoManager.get_file_content(metadata_name,:implementation => impl_obj)
@@ -28,10 +27,10 @@ module DTK; class ConfigAgent
       end
       
      private
-      def self.contains_metadata?(impl_obj)
-        depth = 1
+      def self.contains_metadata?(impl_obj, provider = nil)
+        depth = provider.nil? ? 1 : 2
         RepoManager.ls_r(depth,{:file_only => true},impl_obj).find do |f|
-          f.eql?("metadata.json")
+          f.eql?("metadata.json") || f.eql?("#{provider}/metadata.json")
         end
       end
 

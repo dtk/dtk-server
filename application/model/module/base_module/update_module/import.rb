@@ -60,6 +60,8 @@ module DTK; class BaseModule; class UpdateModule
       repo = repo_idh.create_object()
       local = ret_local(@version)
 
+      # TODO: provider is hardcoded to puppet until we introduce more provider types
+      opts.merge!(:move_to_provider_subdir => true, :provider => 'puppet')
       create_info = create_needed_objects_and_dsl?(repo,local,opts)
       return create_info if create_info[:dsl_parse_error] && is_parsing_error?(create_info[:dsl_parse_error])
 

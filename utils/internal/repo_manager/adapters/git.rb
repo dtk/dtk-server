@@ -715,6 +715,7 @@ module DTK
 
       folders.each do |folder|
         git_command.mv(cmd_opts(), "--force", "#{source}/#{folder}", "#{destination}/")
+        FileUtils.rmdir("#{source}/#{folder}")
       end
     end
 

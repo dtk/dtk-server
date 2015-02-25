@@ -10,9 +10,9 @@ module DTK; class ConfigAgent; class Adapter::Puppet
   r8_nested_require('parser','metadata_file')
 
   module ParserMixin
-    def parse_external_ref?(impl_obj)
+    def parse_external_ref?(impl_obj, provider = nil)
       # use metadata file source over modulefile
-      MetadataFile.parse?(impl_obj) ||  Modulefile.parse?(impl_obj)
+      MetadataFile.parse?(impl_obj, provider) ||  Modulefile.parse?(impl_obj, provider)
     end
 
     def parse_given_module_directory(impl_obj)

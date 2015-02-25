@@ -52,6 +52,9 @@ module DTK; class BaseModule; class UpdateModule
         end
       end
 
+      # move top level folders/files in provider subfolder
+      Import.move_content_to_provider_subdir(repo, impl_obj) if opts[:move_to_provider_subdir]
+
       dsl_updated_info = opts[:ret_dsl_updated_info]
       if dsl_updated_info && !dsl_updated_info.empty?
         ret.merge!(:dsl_updated_info => dsl_updated_info)

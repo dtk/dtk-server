@@ -127,10 +127,12 @@ module DTK
 
     def move_to_provider_subdir(source, destination)
       context = repo_manager_context()
-      files   = RepoManager.ls_r(1, {:file_only=>true} ,self)
-      folders = RepoManager.ls_r(1, {:directory_only=>true} ,self)
+      files   = (RepoManager.ls_r(1, {:file_only=>true} ,self)||[]) - ExcludeFiles
+      folders = (RepoManager.ls_r(1, {:directory_only=>true} ,self)||[]) - ExcludeFolders
       RepoManager.move_content(source, destination, files, folders, context)
     end
+    ExcludeFiles = ["dtk.model.yaml", "module_refs.yaml"]
+    ExcludeFolders = ["puppet"]
 
     def repo_manager_context()
       update_object!(:repo,:branch)

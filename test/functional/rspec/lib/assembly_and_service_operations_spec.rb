@@ -11,6 +11,13 @@ shared_context "Stage" do |dtk_common|
   end
 end
 
+shared_context "Stage with namespace" do |dtk_common, namespace|
+  it "stages #{dtk_common.service_name} service from assembly in namespace #{namespace}" do
+    dtk_common.stage_service_with_namespace(namespace) 
+    dtk_common.service_id.should_not eq(nil)
+  end
+end
+
 shared_context "Rename service" do |dtk_common, new_service_name|
   it "renames #{dtk_common.service_name} service to #{new_service_name}" do
     service_renamed = dtk_common.rename_service(dtk_common.service_id, new_service_name)
@@ -249,5 +256,31 @@ shared_context "List ssh access" do |dtk_common, system_user, rsa_pub_name, node
   it "returns list for ssh access" do
     ssh_list = dtk_common.list_ssh_access(dtk_common.service_id, system_user, rsa_pub_name, nodes)
     expect(ssh_list).to include(rsa_pub_name)
+  end
+end
+
+shared_context "Get task action details" do |dtk_common, action_id, expected_output|
+  it "returns task action output and verifies it" do
+    correct_task_action_outputs = false
+    task_action_outputs = dtk_common.get_task_action_output(dtk_common.service_id, action_id)
+    expected_output.each_with_index do |output, idx|
+      if ((task_action_outputs[idx].include? "RUN: #{output[:command]}") && ((task_action_outputs[idx].include? "STATUS: #{output[:status]}") || (output[:status].nil?)))
+        puts "Returned expected task action details!"
+        if ((output[:stderr].nil?) && (!task_action_outputs[idx].include? "STDERR"))
+          correct_task_action_outputs = true
+        elsif task_action_outputs[idx].include? "STDERR: #{output[:stderr]}"
+          correct_task_action_outputs = true
+        else
+          puts "Returned stderr was not matched with expected one!"
+          correct_task_action_outputs = false
+          break
+        end
+      else
+        puts "Returned task action details is not the expected one!"
+        correct_task_action_outputs = false
+        break
+      end
+    end
+    expect(correct_task_action_outputs).to eq(true)
   end
 end

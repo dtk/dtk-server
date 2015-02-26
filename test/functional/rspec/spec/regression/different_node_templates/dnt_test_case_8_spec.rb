@@ -65,17 +65,17 @@ describe "(Different Node Templates) Test Case 8: Wordpress - Single node scenar
 		include_context "Converge service", dtk_common, 20
 	end
 
-	context "Grep command on puppet log" do
-		include_context "Grep log command", dtk_common, node_name, puppet_log_location, puppet_grep_pattern
-	end
+	#context "Grep command on puppet log" do
+	#	include_context "Grep log command", dtk_common, node_name, puppet_log_location, puppet_grep_pattern
+	#end
 
-	context "Wordpress app port #{wordpress_app_port}" do
-		include_context "Check if port avaliable", dtk_common, wordpress_app_port
-	end
+	#context "Wordpress app port #{wordpress_app_port}" do
+	#	include_context "Check if port avaliable", dtk_common, wordpress_app_port
+	#end
 
-	context "Wordpress db port #{wordpress_db_port}" do
-		include_context "Check if port avaliable", dtk_common, wordpress_db_port
-	end
+	#context "Wordpress db port #{wordpress_db_port}" do
+	#	include_context "Check if port avaliable", dtk_common, wordpress_db_port
+	#end
 
 	context "Check if wordpress page is up" do
 		it "checks that wordpress page is up and running" do

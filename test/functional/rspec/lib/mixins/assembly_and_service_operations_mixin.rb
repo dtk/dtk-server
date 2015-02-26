@@ -695,4 +695,20 @@ module AssemblyAndServiceOperationsMixin
 		puts ""
 		return list.map! { |x| x['attributes']['key_name']}
 	end
+
+	def get_task_action_output(service_id, action_id)
+		puts "Get task action output:", "------------------------"
+		response = send_request('/rest/assembly/task_action_detail', {:assembly_id=>service_id, :message_id=>action_id})
+		pretty_print_JSON(response)
+		runs = {}
+		if response['status'] == "ok"
+			output = response['data']
+			output.gsub!("=","") if response['data'].include? "="
+			runs = output.split(/\n \n\n|\n\n\n/)
+		else
+			puts "Task action details were not retrieved successfully!"
+		end
+		puts ""
+		return runs
+	end
 end

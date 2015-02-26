@@ -97,7 +97,7 @@ module DTK; class  Assembly; class Instance
 
       # TODO: collapse above and below
       def nodes_are_up?(nodes, status_pattern, opts={})
-        
+
         what = opts[:what]||"Command"
         # check if staged
         nodes.each do |node|
@@ -109,7 +109,8 @@ module DTK; class  Assembly; class Instance
         # check for status -> this will translate to /running|pending/ and /stopped|pending/ checks
         filtered_nodes = nodes.select { |node| node.get_field?(:admin_op_status) =~ Regexp.new("#{status_pattern.to_s}|pending") }
         if filtered_nodes.size == 0
-          return nodes, false, "There are no #{status_pattern} nodes for assembly '#{pretty_print_name(assembly)}'."
+          assembly_name = pretty_print_name()
+          return nodes, false, "There are no #{status_pattern} nodes for assembly '#{pretty_print_name(assembly_name)}'."
         end
 
         [filtered_nodes, true, nil]

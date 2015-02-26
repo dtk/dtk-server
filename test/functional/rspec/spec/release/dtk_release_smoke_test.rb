@@ -100,12 +100,12 @@ describe "DTK Server smoke test release" do
     include_context "Delete component module", dtk_common, local_component_module_name
   end
 
-  context "Delete #{local_component_module_name} component module from remote" do
-    include_context "Delete component module from remote repo rvm", rvm_path, dtk_common, local_component_module_name, namespace
+  context "Delete #{component_module_name} component module from remote" do
+    include_context "Delete component module from remote repo rvm", rvm_path, dtk_common, component_module_name, namespace
   end
 
-  context "Delete #{local_service_module_name} service module from remote" do
-    include_context "Delete service module from remote repo rvm", rvm_path, dtk_common, local_service_module_name, namespace
+  context "Delete #{service_module_name} service module from remote" do
+    include_context "Delete service module from remote repo rvm", rvm_path, dtk_common, service_module_name, namespace
   end
 
   after(:all) do

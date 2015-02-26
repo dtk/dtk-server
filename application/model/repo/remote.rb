@@ -101,7 +101,7 @@ module DTK
           ret = Aux.convert_keys_to_symbols(response_data)
         rescue Exception => e
           if opts[:raise_error]
-            raise ErrorUsage.new("Remote module (#{remote.pp_module_name()}) is not accessible, #{e.message}")
+            raise e
           else
             return nil
           end

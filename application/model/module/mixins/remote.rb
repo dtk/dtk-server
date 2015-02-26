@@ -31,7 +31,7 @@ module DTK; module ModuleMixins
       remote = remote_params.create_remote(project)
 
       remote_repo_handler = Repo::Remote.new(remote)
-      remote_repo_info = remote_repo_handler.get_remote_module_info?(client_rsa_pub_key,:raise_error=>true)
+      remote_repo_info = remote_repo_handler.get_remote_module_info?(client_rsa_pub_key, :raise_error=>true)
       remote.set_repo_name!(remote_repo_info[:git_repo_name])
 
       # so they are defined outside Transaction scope
@@ -192,11 +192,11 @@ module DTK; module ModuleMixins
       publish_preprocess_raise_error?(module_branch_obj)
 
       file_content = nil
-      if self.module_type() == :service_module
+      # if self.module_type() == :service_module
         # we need to send Repoman information about modules and we do it here
         module_branch = get_workspace_module_branch()
         file_content = repo_file_content(module_branch, MODULE_REFS_FILE_NAME)
-      end
+      # end
 
       # create module on remote repo manager
       # this wil raise error if it exists already or dont have accsss

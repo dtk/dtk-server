@@ -23,7 +23,7 @@ module Ramaze::Helper
       namespace = module_obj.get_field?(:namespace)
 
       version = ret_version()
-      remote_namespace = ret_request_params(:remote_namespace)||get_existing_default_namespace?(module_obj,version)||ret_request_params(:local_namespace)
+      remote_namespace = ret_request_params(:remote_namespace) || get_existing_default_namespace?(module_obj,version) || ret_request_params(:local_namespace)
       remote_params = remote_params_dtkn(module_obj.module_type(),remote_namespace,remote_module_name,version)
 
       access_rights = ret_access_rights()
@@ -195,7 +195,7 @@ module Ramaze::Helper
         end
       end
     end
-    
+
     # returns [namespace,module_name] using pf_full_name param and module or namespace request params if they are given
     def ret_namespace_and_module_name_for_puppet_forge(pf_full_name)
       param_module_name = ret_request_params(:module_name)

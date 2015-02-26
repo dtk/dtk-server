@@ -152,7 +152,7 @@ module DTK
     def publish_module(params_hash, client_rsa_pub_key = nil)
       route = collection_route_from_type(params_hash)
       body = user_params_delegated_client(client_rsa_pub_key, params_hash)
-      post_rest_request_data(route,body,:raise_error => true,:timeout => 30)
+      post_rest_request_data(route, body, :raise_error => true, :timeout => 30)
     end
 
     def delete_module(params_hash, client_rsa_pub_key = nil)
@@ -175,6 +175,7 @@ module DTK
 
     def get_module_info(params_hash)
       route = collection_route_from_type(params_hash) + '/module_info'
+
       response = get_rest_request_data(route,params_hash,:raise_error => true)
       # we flatten response (due to rest code expectin flat structure)
       response.symbolize_keys!

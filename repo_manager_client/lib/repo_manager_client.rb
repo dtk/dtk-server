@@ -412,7 +412,8 @@ module DTK
 
     def login_to_repoman()
       unless CurrentSession.are_catalog_credentilas_set?
-        raise ErrorUsage, "Catalog credentials are not set, you can set them via account context"
+        err = ErrorUsage.new("Catalog credentials are not set, you can set them via account context")
+        raise err.add_tag!(:raise_error)
       end
 
       response = handle_error(:raise_error => true) do

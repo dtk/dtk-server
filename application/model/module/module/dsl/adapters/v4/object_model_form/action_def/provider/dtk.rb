@@ -1,6 +1,6 @@
 module DTK; class ModuleDSL; class V4; class ObjectModelForm
-  class ActionDef 
-    class ProviderDtk 
+  class ActionDef; class Provider 
+    class Dtk  < self
       module Constant
         module Variations
         end
@@ -14,10 +14,10 @@ module DTK; class ModuleDSL; class V4; class ObjectModelForm
         !!Constant.matches?(input_hash,:Commands)
       end
 
-      def self.provider_specific_fields(input_hash)
+      def provider_specific_fields(input_hash)
         commands = Constant.matches?(input_hash,:Commands)
         {:commands => commands.kind_of?(Array) ? commands : [commands]}
       end
     end
-  end
+  end; end
 end; end; end; end

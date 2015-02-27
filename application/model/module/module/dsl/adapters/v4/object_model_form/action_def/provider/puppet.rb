@@ -1,6 +1,6 @@
 module DTK; class ModuleDSL; class V4; class ObjectModelForm
-  class ActionDef 
-    class ProviderPuppet 
+  class ActionDef; class Provider 
+    class Puppet < self 
       module Constant
         module Variations
         end
@@ -15,12 +15,12 @@ module DTK; class ModuleDSL; class V4; class ObjectModelForm
         !!AllKeys.find{|k|Constant.matches?(input_hash,k)}
       end
       
-      def self.provider_specific_fields(input_hash)
+      def provider_specific_fields(input_hash)
         AllKeys.inject(Hash.new) do |h,k|
           h.merge(Constant.matching_key_and_value?(input_hash,k)||{})
         end
       end
 
     end
-  end
+  end; end
 end; end; end; end

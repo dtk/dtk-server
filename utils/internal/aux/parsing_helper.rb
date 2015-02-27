@@ -7,12 +7,19 @@ module DTK
           unless object.nil?
             variations = variations(constant)
             if object.kind_of?(Hash)
-              hash_matches_key?(object,variations)
+              hash_value_of_matching_key?(object,variations)
             elsif object.kind_of?(String) or object.kind_of?(Symbol)
                variations.include?(object.to_s)
             else
               raise Error.new("Unexpected object class (#{object.class})")
             end            
+          end
+        end
+
+        def matching_key_and_value?(hash,constant)
+          variations = variations(constant)
+          if matching_key = hash_key_if_match?(hash,variations)
+            {matching_key => hash[matching_key]}
           end
         end
 
@@ -39,9 +46,13 @@ module DTK
           end
         end
 
-        def hash_matches_key?(hash,variations)
-          if match_key = variations.find{|key|hash.has_key?(key)}
-            hash[match_key]
+        def hash_key_if_match?(hash,variations)
+          variations.find{|key|hash.has_key?(key)}
+        end
+
+        def hash_value_of_matching_key?(hash,variations)
+          if matching_key = hash_key_if_match?(hash,variations)
+            hash[matching_key]
           end
         end
 

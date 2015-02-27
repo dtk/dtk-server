@@ -1,29 +1,26 @@
 module DTK; class ModuleDSL; class V4
   class ObjectModelForm
     class ActionDef < self
+      r8_nested_require('action_def','provider_puppet')
+      r8_nested_require('action_def','provider_dtk')
       module Constant
-        module Default
+        module Variations
         end
+        extend Aux::ParsingingHelper::ClassMixin
+        
+        ActionDefs = 'actions'
+        Variations::ActionDefs = ['actions','action']
 
-        ActionDefs = ['actions','action']
-        Default::ActionDefs = 'actions'
-
-        Commands = ['commands','command']
-        Default::Commands = 'commands'
-
-        Provider = ['provider']
-        Default::Provider ='provider'
+        Provider = 'provider'
       end
 
       def initialize(component_name)
         @component_name = component_name
-        # TODO: right now hard coded
-        @inherited_provider = ConfigAgent::Type::Symbol.dtk_provider
       end
       
       def convert_action_defs?(input_hash)
         ret = nil
-        unless action_defs = matching_key?(Constant::ActionDefs,input_hash)
+        unless action_defs = Constant.matches?(input_hash,:ActionDefs)
           return ret
         end
         unless action_defs.kind_of?(Hash)
@@ -58,19 +55,33 @@ module DTK; class ModuleDSL; class V4
         unless input_hash.kind_of?(Hash)
           raise_error_ill_formed('action definition',{action_name => input_hash})
         end
-        unless commands = matching_key?(Constant::Commands,input_hash)
-          err_msg = "The following action definition for '?1' on component '?2' is missing the '?3' key: ?4"
-          raise ParsingError.new(err_msg,action_name,cmp_print_form(),Constant::Default::Commands,input_hash)
+        provider_type = provider_type(input_hash,context)
+        unless provider_class = ProviderTypeToClass[provider_type.to_sym]
+          err_msg = "The action '?1' on component '?2' has illegal provider type: ?3"
+          raise ParsingError.new(err_msg,action_name,cmp_print_form(),provider_type)
         end
-        hash = {
-          :commands => commands.kind_of?(Array) ? commands : [commands],
-          :provider => convert_action_provider(input_hash)
-        }
-        OutputHash.new(hash)
+        provider_specific_fields = provider_class.provider_specific_fields(input_hash)
+        OutputHash.new(:provider => provider_type.to_s).merge(provider_specific_fields)
+      end
+      ProviderTypeToClass = {
+        :dtk    => ProviderDtk,
+        :puppet => ProviderPuppet 
+      }
+
+      def provider_type(input_hash,context={})
+        Constant.matches?(input_hash,:Provider) || compute_provider_type(input_hash,context)
       end
 
-      def convert_action_provider(input_hash)
-         matching_key?(Constant::Provider,input_hash) || @inherited_provider.to_s
+      def compute_provider_type(input_hash,contextt={})
+        ret = nil
+        if provider_class = ProviderTypeToClass.find{|provider,klass|klass.matches_input_hash?(input_hash)}
+          ret = provider_class[0]
+        end
+        unless ret
+          err_msg = "Cannot determine provider type associated with the action '?1' on component '?2'"
+          raise ParsingError.new(err_msg,action_name,cmp_print_form())
+        end
+        ret
       end
 
       def raise_error_ill_formed(section_type,obj)

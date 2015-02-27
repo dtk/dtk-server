@@ -19,10 +19,10 @@ module DTK
       load(type).treated_version?(semantic_version)
     end
 
-    def self.parse_external_ref?(type,impl_obj)
+    def self.parse_external_ref?(type, impl_obj, provider = nil)
       processor = load(type)
       if processor.respond_to?('parse_external_ref?'.to_sym)
-        processor.parse_external_ref?(impl_obj)
+        processor.parse_external_ref?(impl_obj, provider)
       end
     end
 

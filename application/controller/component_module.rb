@@ -40,13 +40,6 @@ module DTK
       opts = {:scaffold_if_no_dsl => scaffold, :do_not_raise => true, :process_external_refs => true}
       opts.merge!(:commit_dsl => true) if ret_request_params(:commit_dsl)
 
-      # For Rich: DTK-1925
-      # this will be used in /Users/aldin/Reactor8/server/application/model/module/base_module/update_module.rb:111
-      # to update module_refs from includes
-      #
-      # uncomment line bellow
-      # opts.merge!(:update_from_includes => true) if ret_request_params(:update_from_includes)
-
       response =
         if git_import
           component_module.import_from_git(commit_sha,repo_idh,version,opts)

@@ -10,6 +10,16 @@ module DTK
       super(msg,*args)
     end
 
+    def add_tag!(tag)
+      @tags ||= Array.new
+      @tags << tag unless @tags.include?(tag)
+      self
+    end
+
+    def has_tag?(tag)
+      (@tags||[]).include?(tag)
+    end
+
    private
     def add_line!(msg,line,ident=0)
       msg << "#{' ' * ident}#{line}\n"

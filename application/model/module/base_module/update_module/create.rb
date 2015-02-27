@@ -23,11 +23,12 @@ module DTK; class BaseModule; class UpdateModule
       module_branch_idh = module_and_branch_info[:module_branch_idh]
       module_branch = module_branch_idh.create_object()
 
+      provider = opts[:provider]
       # process any external refs if one of the flags :process_external_refs,:set_external_refs is true
       opts_external_refs = Aux.hash_subset(opts,[:process_external_refs,:set_external_refs])
       unless opts_external_refs.empty?
         # external_ref if non null ,will have info from the config agent related meta files such as Puppert ModuleFile 
-        if external_ref = ConfigAgent.parse_external_ref?(config_agent_type,impl_obj) 
+        if external_ref = ConfigAgent.parse_external_ref?(config_agent_type, impl_obj, provider)
           module_branch.update_external_ref(external_ref[:content]) if external_ref[:content]
           if opts[:process_external_refs]
             # check_and_ret_external_ref_dependencies? returns a hash that can have keys: :external_dependencies and :matching_module_refs
@@ -51,6 +52,9 @@ module DTK; class BaseModule; class UpdateModule
           Log.error("Unexpected that opts[:commit_dsl] is false when opts[:scaffold_if_no_dsl] is true")
         end
       end
+
+      # move top level folders/files in provider subfolder
+      Import.move_content_to_provider_subdir(repo, impl_obj) if opts[:move_to_provider_subdir]
 
       dsl_updated_info = opts[:ret_dsl_updated_info]
       if dsl_updated_info && !dsl_updated_info.empty?

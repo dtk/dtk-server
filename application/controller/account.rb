@@ -45,8 +45,12 @@ module DTK
           # update user so we know that rsa pub key was added
           matched_repo_user.update(:repo_manager_direct_access => true)
         rescue DTK::Error => e
-          # we ignore it and we fix it later when calling repomanager
-          Log.warn("We were not able to add user to Repo Manager, reason: #{e.message}")
+          # we conditionally ignore it and we fix it later when calling repomanager
+          err_msg = "We were not able to add user to Repo Manager, reason: #{e.message}"
+          if e.has_tag?(:raise_error)
+            raise ErrorUsage.new(err_msg)
+          end
+          Log.warn(err_msg)
           registered_with_repoman = false
         end
       end

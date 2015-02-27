@@ -10,14 +10,21 @@ module DTK; class ConfigAgent; class Adapter::Puppet
   r8_nested_require('parser','metadata_file')
 
   module ParserMixin
-    def parse_external_ref?(impl_obj)
+    def parse_external_ref?(impl_obj, provider = nil)
       # use metadata file source over modulefile
-      MetadataFile.parse?(impl_obj) ||  Modulefile.parse?(impl_obj)
+      MetadataFile.parse?(impl_obj, provider) ||  Modulefile.parse?(impl_obj, provider)
     end
 
     def parse_given_module_directory(impl_obj)
       # only handling parsing of .pp now
+      # DTK-1951 leave this to support backward compatibility
       manifest_file_paths = impl_obj.all_file_paths().select{|path|path =~ /^manifests.+\.pp$/}
+
+      # look for manifest files in puppet/manifests (DTK-1951)
+      if manifest_file_paths.empty?
+        manifest_file_paths = impl_obj.all_file_paths().select{|path|path =~ /^puppet\/manifests.+\.pp$/}        
+      end
+
       ret = ParseStructure::TopPS.new()
       opts = {:just_krt_code => true}
       errors_cache = nil

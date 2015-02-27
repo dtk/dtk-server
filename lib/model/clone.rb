@@ -15,7 +15,12 @@ module DTK
 
     #instance_template_links has type InstanceTemplate::Links
     def self.modify_instances(model_handle,instance_template_links)
-      ChildContext.modify_instances(model_handle,instance_template_links)
+      klass = 
+        case model_handle[:model_name]
+          when :attribute then IncrementalUpdate::Attribute
+          else ChildContext
+        end
+      klass.modify_instances(model_handle,instance_template_links)
     end
 
     # parent_links of type InstanceTemplate::Links

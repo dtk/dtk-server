@@ -22,7 +22,11 @@ module DTK; class ModuleDSL; class V4
 
       def set_action_def_and_external_ref!(ret,input_hash,cmp,context={})
         action_def = ActionDef.new(cmp).convert_action_defs?(input_hash)
-        ret.set_if_not_nil("action_def",action_def)
+        if create_action = action_def.delete_create_action!()
+        end
+        unless action_def.nil? or action_def.empty?
+          ret["action_def"] = action_def
+        end
         external_ref = external_ref(input_hash.req(:external_ref),cmp)
         ret["external_ref"] = external_ref(input_hash.req(:external_ref),cmp)
         ret

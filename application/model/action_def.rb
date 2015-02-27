@@ -4,6 +4,13 @@ module DTK
     def self.common_columns()
       core_columns()+[:method_name,:content,:component_component_id]
     end
+    
+    module Constant
+      module Variations
+      end
+      extend Aux::ParsingingHelper::ClassMixin
+      CreateActionName = 'create'
+    end
 
     def self.get_ndx_action_defs(cmp_template_idhs,opts={})
       ret = Hash.new

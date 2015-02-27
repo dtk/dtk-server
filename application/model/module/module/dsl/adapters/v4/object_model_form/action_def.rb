@@ -17,7 +17,18 @@ module DTK; class ModuleDSL; class V4
       def initialize(component_name)
         @component_name = component_name
       end
-      
+
+      class ActionDefOutputHash < OutputHash
+        def has_create_action?()
+          DTK::ActionDef::Constant.matches?(self,:CreateActionName)
+        end
+        def delete_create_action!()
+          if kv = DTK::ActionDef::Constant.matching_key_and_value?(self,:CreateActionName)
+            delete(kv.keys.first)
+          end
+        end
+      end
+
       def convert_action_defs?(input_hash)
         ret = nil
         unless action_defs = Constant.matches?(input_hash,:ActionDefs)
@@ -26,7 +37,7 @@ module DTK; class ModuleDSL; class V4
         unless action_defs.kind_of?(Hash)
           raise_error_ill_formed('actions section',action_defs)
         end
-        action_defs.inject(OutputHash.new) do |h,(action_name,action_body)|
+        action_defs.inject(ActionDefOutputHash.new) do |h,(action_name,action_body)|
           h.merge(convert_action_def(action_name,action_body))
         end
       end

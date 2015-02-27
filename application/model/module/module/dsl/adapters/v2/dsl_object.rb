@@ -53,10 +53,8 @@ module DTK; class ModuleDSL; class V2
         # ext_ref["type"] will be "puppet_class" or "puppet_definition" for pupppet config agent
         action_keys[ext_ref["type"]] = ext_ref["name"]
         (ext_ref.keys - ["name","type"]).each{|k|action_keys[k] = ext_ref[k]}
-        RenderHash.new(CreateActionName => action_keys)
+        RenderHash.new(ActionDef::Constant::CreateActionName => action_keys)
       end
-      #TODO: move this to common area for actions
-      CreateActionName = 'create'
 
       def type?()
         basic_type = value(:basic_type)

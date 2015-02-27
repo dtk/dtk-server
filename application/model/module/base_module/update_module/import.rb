@@ -18,12 +18,18 @@ module DTK; class BaseModule; class UpdateModule
       repo_id                = module_and_branch_info[:module_repo_info][:repo_id]
       repo                   = project.model_handle(:repo).createIDH(:id => repo_id).create_object()
 
-      # add source to module branch external_refs
-      source = generate_source(local_params)
-      module_branch.update_external_ref(:source => source) if source
-
+      source   = generate_source(local_params)
       impl_obj = Implementation.create?(project,local_params,repo,config_agent_type)
       impl_obj.create_file_assets_from_dir_els()
+
+      if external_ref = ConfigAgent.parse_external_ref?(config_agent_type, impl_obj)
+        if content = external_ref[:content]
+          content[:source] = source if source
+          module_branch.update_external_ref(content)
+        end
+      else
+        module_branch.update_external_ref(:source => source) if source
+      end
 
       component_module = module_and_branch_info[:module_idh].create_object()
 

@@ -22,11 +22,11 @@ memory_size = 't1.micro'
 memory_size_attribute = 'memory_size'
 node_name = 'node1'
 component_module_name = "test_module"
-local_component_module_name = 'local:test_module'
+local_component_module_name = 'dtk16:test_module'
 service_module_name = "bootstrap"
-local_service_module_name = 'local:bootstrap'
+local_service_module_name = 'dtk16:bootstrap'
 namespace = 'dtk16'
-local_default_namespace = 'local'
+local_default_namespace = 'dtk16'
 component_module_filesystem_location = "~/dtk/component_modules"
 rvm_path = "/usr/local/rvm/wrappers/default/"
 

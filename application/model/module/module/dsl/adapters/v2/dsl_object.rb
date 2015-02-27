@@ -35,25 +35,28 @@ module DTK; class ModuleDSL; class V2
         ret.set_unless_nil("display_name",display_name?())
         ret.set_unless_nil("label",label?())
         ret.set_unless_nil("description",value(:description))
-        ret["external_ref"] = converted_external_ref()
         ret.set_unless_nil("ui",value(:ui))
         ret.set_unless_nil("basic_type",basic_type?())
         ret.set_unless_nil("type",type?())
         ret.set_unless_nil("component_type",component_type?())
         ret.set_unless_nil("attributes",converted_attributes(opts))
         ret.set_unless_nil("link_defs",converted_link_defs(opts))
+        ret["actions"] = converted_create_action()
         ret
       end
 
      private
-      def converted_external_ref()
+      def converted_create_action()
+        # because of legacy; create action is under ext_ref
         ext_ref = required_value(:external_ref)
-        ret = RenderHash.new
+        action_keys = RenderHash.new
         # ext_ref["type"] will be "puppet_class" or "puppet_definition" for pupppet config agent
-        ret[ext_ref["type"]] = ext_ref["name"]
-        (ext_ref.keys - ["name","type"]).each{|k|ret[k] = ext_ref[k]}
-        ret
+        action_keys[ext_ref["type"]] = ext_ref["name"]
+        (ext_ref.keys - ["name","type"]).each{|k|action_keys[k] = ext_ref[k]}
+        RenderHash.new(CreateActionName => action_keys)
       end
+      #TODO: move this to common area for actions
+      CreateActionName = 'create'
 
       def type?()
         basic_type = value(:basic_type)

@@ -18,7 +18,6 @@ module DTK; class ModuleDSL
           ret = RenderHash.new
           ret.set_unless_nil("module",module_name?())
           ret.set_unless_nil("dsl_version",ModuleDSL.version(integer_version()))
-          ret.set_unless_nil("module_type",module_type?())
           self[:components].each_element(:skip_required_is_false => true) do |cmp|
             hash_key = render_cmp_ref(cmp.hash_key)
             unless (ScaffoldingStrategy[:ignore_components]||[]).include?(hash_key)

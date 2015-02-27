@@ -71,13 +71,17 @@ module DTK
     end
 
     def rest__remote_chmod()
-      chmod_from_remote_helper()
-      rest_ok_response
+      response = chmod_from_remote_helper()
+      rest_ok_response(response)
     end
 
     def rest__remote_chown()
       chown_from_remote_helper()
       rest_ok_response
+    end
+
+    def rest__confirm_make_public()
+      rest_ok_response confirm_make_public_helper()
     end
 
     def rest__remote_collaboration()
@@ -122,7 +126,7 @@ module DTK
 
     def rest__list_remote_diffs()
       service_module = create_obj(:service_module_id)
-      version = nil 
+      version = nil
       rest_ok_response service_module.list_remote_diffs(version)
     end
 

@@ -42,12 +42,22 @@ module Ramaze::Helper
 
     def chmod_from_remote_helper()
       component_module = create_obj(:module_id)
-      permission_selector, remote_namespace = ret_request_params(:permission_selector, :remote_module_namespace)
+      permission_selector, remote_namespace, chmod_action = ret_request_params(:permission_selector, :remote_module_namespace, :chmod_action)
       client_rsa_pub_key = ret_non_null_request_params(:rsa_pub_key)
 
       remote_namespace = check_remote_namespace(remote_namespace, component_module)
       repoman_client = Repo::Remote.new().repoman_client()
-      repoman_client.chmod(module_type(component_module), component_module.display_name, remote_namespace, permission_selector, client_rsa_pub_key)
+      repoman_client.chmod(module_type(component_module), component_module.display_name, remote_namespace, permission_selector, chmod_action, client_rsa_pub_key)
+    end
+
+    def confirm_make_public_helper()
+      component_module = create_obj(:module_id)
+      module_info, remote_namespace, public_action = ret_request_params(:module_info, :remote_module_namespace, :public_action)
+      client_rsa_pub_key = ret_non_null_request_params(:rsa_pub_key)
+
+      remote_namespace = check_remote_namespace(remote_namespace, component_module)
+      repoman_client = Repo::Remote.new().repoman_client()
+      repoman_client.confirm_make_public(module_type(component_module), module_info, public_action, client_rsa_pub_key)
     end
 
     def chown_from_remote_helper()

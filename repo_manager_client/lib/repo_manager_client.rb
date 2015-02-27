@@ -75,7 +75,7 @@ module DTK
       post_rest_request_data('/v1/users/tenant_ready', request_params)
     end
 
-    def chmod(type, module_name, module_namespace, permission_selector, client_rsa_pub_key)
+    def chmod(type, module_name, module_namespace, permission_selector, chmod_action, client_rsa_pub_key)
       repo_user = get_approved_repouser(client_rsa_pub_key)
       request_params = {
         :name => module_name,
@@ -84,8 +84,25 @@ module DTK
       }
 
       # url = type == :component_module ? '/v1/component_modules/chmod' : '/v1/service_modules/chmod'
-      url = collection_route_from_type({:type => type}) + '/chmod'
+      url_action = 'make_public'.eql?(chmod_action) ? '/make_public' : '/chmod'
+      url        = collection_route_from_type({:type => type}) + url_action
 
+      post_rest_request_data(
+        url,
+        request_params.merge(user_params_with_fingerprint(CurrentSession.catalog_username, client_rsa_pub_key)),
+        :raise_error => true
+        )
+    end
+
+    def confirm_make_public(type, module_info, public_action, client_rsa_pub_key)
+      repo_user = get_approved_repouser(client_rsa_pub_key)
+
+      request_params = {
+        :module_info   => module_info,
+        :public_action => public_action
+      }
+
+      url = collection_route_from_type({:type => type}) + '/confirm_make_public'
       post_rest_request_data(
         url,
         request_params.merge(user_params_with_fingerprint(CurrentSession.catalog_username, client_rsa_pub_key)),

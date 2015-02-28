@@ -170,7 +170,7 @@ module Ramaze::Helper
         :module_type => module_type,
         :module_name => module_name,
         :version => version,
-        :namespace => namespace||default_namespace_name(),
+        :namespace => namespace||Namespace.default_namespace_name(),
         :remote_repo_base => ret_remote_repo_base()
       )
     end

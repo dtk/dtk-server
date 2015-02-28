@@ -15,12 +15,16 @@ module DTK; class ModuleDSL; class V4; class ObjectModelForm
         !!AllKeys.find{|k|Constant.matches?(input_hash,k)}
       end
       
-      def provider_specific_fields(input_hash)
+      def provider_specific_fields(input_hash=nil)
+        input_hash ||= self
         AllKeys.inject(Hash.new) do |h,k|
           h.merge(Constant.matching_key_and_value?(input_hash,k)||{})
         end
       end
 
+      def external_ref_from_create_action()
+        provider_specific_fields()
+      end
     end
   end; end
 end; end; end; end

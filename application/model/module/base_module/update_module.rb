@@ -46,7 +46,7 @@ module DTK; class BaseModule
       # returns nil or parsing error
       def install__process_dsl(repo,module_branch,local,opts={})
         # Skipping module_ref_update since module being isntalled has this set already so just copy this in
-        opts = {:skip_module_ref_update => true}.merge(opts)
+        opts = {:update_module_refs_from_file => true}.merge(opts)
         UpdateModule.new(self).install__process_dsl(repo,module_branch,local,opts)
       end
 
@@ -60,7 +60,7 @@ module DTK; class BaseModule
         local = UpdateModule.ret_local(self,new_version)
         # TODO: this is expensive in that it creates new version by parsing the dsl and reading back in;
         # would be much less expsensive to clone from branch to branch
-        opts_update = {:skip_module_ref_update => true}.merge(opts)
+        opts_update = {:update_module_refs_from_file => true}.merge(opts)
         response = UpdateModule.new(self).create_needed_objects_and_dsl?(repo_for_new_branch,local,opts_update)
         response[:module_branch_idh].create_object()
       end
@@ -116,7 +116,7 @@ module DTK; class BaseModule
 
       external_deps = ret[:external_dependencies]
 
-      if opts[:skip_module_ref_update]
+      if opts[:update_module_refs_from_file]
         # updating module refs from the component_module_ref file
         ModuleRefs::Parse.update_component_module_refs(@module_class,module_branch)
       else

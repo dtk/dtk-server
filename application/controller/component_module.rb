@@ -65,9 +65,6 @@ module DTK
       if ret_request_params(:set_parsed_false)
         opts.merge!(:dsl_parsed_false => true)
       end
-      if ret_request_params(:skip_module_ref_update)
-        opts.merge!(:skip_module_ref_update => true)
-      end
       if ret_request_params(:update_from_includes)
         opts.merge!(:update_from_includes => true)
       end

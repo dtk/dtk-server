@@ -146,7 +146,6 @@ module DTK
     module DSLMixin
       # TODO: fix what update_model_from_dsl returns by looking at its usage
       def update_model_from_dsl(module_branch,opts={})
-        # set_dsl_parsed!(false)
         module_branch.set_dsl_parsed!(false)
 
         component_module_refs = update_component_module_refs(module_branch,opts)
@@ -164,7 +163,6 @@ module DTK
         end
         return parsed if ParsingError.is_error?(parsed)
 
-        # set_dsl_parsed!(true)
         module_branch.set_dsl_parsed!(true)
 
         # return component modules required by this service module

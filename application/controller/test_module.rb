@@ -32,7 +32,7 @@ module DTK
       repo_idh = id_handle(repo_id,:repo)
       version = ret_version()
       scaffold = ret_request_params(:scaffold_if_no_dsl)
-      opts = {:scaffold_if_no_dsl => scaffold, :do_not_raise => true, :process_external_refs => true}
+      opts = {:scaffold_if_no_dsl => scaffold, :do_not_raise => true, :process_provider_specific_dependencies => true}
       rest_ok_response test_module.import_from_file(commit_sha,repo_idh,version,opts)
     end
 

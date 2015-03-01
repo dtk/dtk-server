@@ -2,9 +2,9 @@ module DTK; class ConfigAgent
   module Adapter; class Puppet
     module Modulefile
       # used for parsing Modulefile when importing module from git (import-git)
-      def self.parse?(impl_obj, provider = nil)
+      def self.parse?(impl_obj)
         ret = nil
-        unless modulefile_name = contains_modulefile?(impl_obj, provider)
+        unless modulefile_name = contains_modulefile?(impl_obj)
           return ret
         end
         
@@ -30,10 +30,10 @@ module DTK; class ConfigAgent
       end
       
      private
-      def self.contains_modulefile?(impl_obj, provider = nil)
-        depth = provider.nil? ? 1 : 2
-        RepoManager.ls_r(depth,{:file_only => true},impl_obj).find do |f|
-          f.eql?("Modulefile") || f.eql?("#{provider}/Modulefile")
+      def self.contains_modulefile?(impl_obj)
+       depth = 2
+       RepoManager.ls_r(depth,{:file_only => true},impl_obj).find do |f|
+          f.eql?("Modulefile") || f.eql?("#{Puppet.provider_folder()}/Modulefile")
         end
       end
 

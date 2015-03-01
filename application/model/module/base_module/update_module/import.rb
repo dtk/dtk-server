@@ -22,7 +22,7 @@ module DTK; class BaseModule; class UpdateModule
       impl_obj = Implementation.create?(project,local_params,repo,config_agent_type)
       impl_obj.create_file_assets_from_dir_els()
 
-      if external_ref = ConfigAgent.parse_external_ref?(config_agent_type, impl_obj)
+      if external_ref = ConfigAgent.parse_provider_specific_dependencies?(config_agent_type, impl_obj)
         if content = external_ref[:content]
           content[:source] = source if source
           module_branch.update_external_ref(content)

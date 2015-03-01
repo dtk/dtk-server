@@ -37,7 +37,7 @@ module DTK
       repo_idh = id_handle(repo_id,:repo)
       version = ret_version()
       scaffold = ret_request_params(:scaffold_if_no_dsl)
-      opts = {:scaffold_if_no_dsl => scaffold, :do_not_raise => true, :process_external_refs => true}
+      opts = {:scaffold_if_no_dsl => scaffold, :do_not_raise => true, :process_provider_specific_dependencies => true}
       opts.merge!(:commit_dsl => true) if ret_request_params(:commit_dsl)
 
       response =

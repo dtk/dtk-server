@@ -9,6 +9,10 @@ module DTK
 
       include ParserMixin
 
+      def self.provider_folder()
+        ProviderFolder
+      end
+      ProviderFolder = 'puppet'
 
       def treated_version?(semantic_version)
         parts = x.split('.')

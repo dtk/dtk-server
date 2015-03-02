@@ -1,7 +1,6 @@
 # methods used to maintain the peristence of an assembly instance task template
 # The content can be both node centeric and assembly actions; the class Persistence is responsible for both
 # and class AssemblyActions is responsible for just the assembly actions
-# TODO: currently just persisting just the assembly action parts so there is no methods directly under Persistence  
 module DTK; class Task; class Template; class ConfigComponents 
   class Persistence
     class AssemblyActions

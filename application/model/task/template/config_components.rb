@@ -27,7 +27,7 @@ module DTK; class Task
         end
       end
 
-      def self.get_existing_or_stub_templates(action_types,assembly_instance)
+      def self.get_templates_in_serialized_form(action_types,assembly_instance)
         ret = Array.new
         # TODO: only returning now the task templates for the default (assembly create action)
         task_action = default_task_action()
@@ -36,7 +36,11 @@ module DTK; class Task
         # template object from assembly_instance.get_task_template of stub and spliciing in content 
         # with all but assembly actions filtered out
 
-        opts = {:component_type_filter => :service, :task_action => task_action, :dont_persist_generated_template => true}
+        opts = {
+          :component_type_filter           => :service, 
+          :task_action                     => task_action, 
+          :dont_persist_generated_template => true
+        }
         unless task_template_content = get_or_generate_template_content(action_types,assembly_instance,opts)
           return ret
         end

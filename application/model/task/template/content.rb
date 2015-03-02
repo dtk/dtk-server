@@ -108,10 +108,10 @@ module DTK; class Task
       end
 
       def self.reify(serialized_content)
-        NotParsed.new(serialized_content)
+        RawForm.new(serialized_content)
       end
 
-      class NotParsed
+      class RawForm
         def serialization_form(opts={})
           @serialized_content
         end

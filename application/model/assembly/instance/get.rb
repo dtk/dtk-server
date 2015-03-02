@@ -212,6 +212,44 @@ module DTK; class Assembly; class Instance
       ret && ret.serialization_form()
     end
 
+    def get_task_templates_serialized_content()
+      ret = Array.new
+      task_actions = [default_task_action()] # TODO: only returning now the task templates for the default (assembly create action)
+
+      task_actions.each do |task_action|
+        if serialized_task_template = get_task_template_serialized_content(task_action,opts)
+
+        default_action_task_template = assembly_instance.get_task_template(task_action,:cols => [:id,:group_id,:task_action])
+        default_action_task_template ||= create_stub(assembly_instance.model_handle(:task_template),:task_action => task_action)
+        ret << default_action_task_template.merge(:content => serialized_content)
+        ret
+        end
+      end
+    end
+
+        # getting content from Task::Template::ConfigComponents.get_or_generate and 
+        # template object from assembly_instance.get_task_template of stub and spliciing in content 
+        # with all but assembly actions filtered out
+
+        opts = {
+          :component_type_filter           => :service, 
+          :task_action                     => task_action, 
+          :dont_persist_generated_template => true
+        }
+        unless task_template_content = get_or_generate_template_content(action_types,assembly_instance,opts)
+          return ret
+        end
+        unless serialized_content = task_template_content.serialization_form(:filter => {:source => :assembly}, :allow_empty_task=>true)
+          return ret
+        end
+
+        default_action_task_template = assembly_instance.get_task_template(task_action,:cols => [:id,:group_id,:task_action])
+        default_action_task_template ||= create_stub(assembly_instance.model_handle(:task_template),:task_action => task_action)
+        ret << default_action_task_template.merge(:content => serialized_content)
+        ret
+      end
+
+
     def get_parents_task_template(task_action=nil)
       task_action ||= Task::Template.default_task_action()
       get_objs_helper(:parents_task_templates,:task_template).select{|r|r[:task_action]==task_action}.first

@@ -140,7 +140,7 @@ module DTK
         # TODO: raise error to user if dangling link
         Log.error("dangling links #{dangling_links.inspect}") unless dangling_links.empty?
 
-        task_templates = Task::Template::ConfigComponents.get_existing_or_stub_templates(:assembly,assembly_instance)
+        task_templates = Task::Template::ConfigComponents.get_templates_in_serialized_form(:assembly,assembly_instance)
 
         node_scalar_cols = FactoryObject::CommonCols + [:type,:node_binding_rs_id]
         node_mh = node_idhs.first.createMH()

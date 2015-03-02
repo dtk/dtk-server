@@ -132,11 +132,11 @@ module DTK
           end
 
           # if node group take only group members
-          if r[:node].is_node_group?()
+          if r[:node] and r[:node].is_node_group?()
             r[:nodes] ||= r.get_nodes__expand_node_groups({:remove_node_groups => true}) unless opts[:only_node_group_info]
           end
 
-          if(r[:nodes])
+          if r[:nodes]
             r[:nodes].each do |n|
               format_node!(pntr[:ndx_nodes],n,opts)
             end

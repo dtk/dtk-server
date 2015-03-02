@@ -36,14 +36,16 @@ module DTK; class ModuleDSL; class V4; class ObjectModelForm
         Constant.matches?(input_hash,:Provider) || compute_provider_type(input_hash,context)
       end
 
-      def self.compute_provider_type(input_hash,contextt={})
+      def self.compute_provider_type(input_hash,context={})
         ret = nil
         if provider_class = ProviderTypeToClass.find{|provider,klass|klass.matches_input_hash?(input_hash)}
           ret = provider_class[0]
         end
         unless ret
+          action_name = context[:action_name]
+          cmp_print_form = context[:cmp_print_form]
           err_msg = "Cannot determine provider type associated with the action '?1' on component '?2'"
-          raise ParsingError.new(err_msg,action_name,cmp_print_form())
+          raise ParsingError.new(err_msg,action_name,cmp_print_form)
         end
         ret
       end

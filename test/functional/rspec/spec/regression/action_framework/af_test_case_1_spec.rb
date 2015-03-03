@@ -40,18 +40,6 @@ expected_output_2_2 = {
 	:stderr => "ls: cannot access /some/non/existing/location: No such file or directory"
 }
 
-expected_output_3_1 = {
-	:command => "ls /usr",
-	:status => 0,
-	:stderr => nil,
-}
-
-expected_output_3_2 = {
-	:command => "ls -l /some/non/existing/location",
-	:status => nil,
-	:stderr => "ls: cannot access /some/non/existing/location: No such file or directory"
-}
-
 describe "(Action Framework) Test Case 1: Service with one node that contains cmp with actions with multiple commands in it" do
 
 	before(:all) do
@@ -77,10 +65,6 @@ describe "(Action Framework) Test Case 1: Service with one node that contains cm
 	context "Get task action details for action with two failure commands" do
 		include_context "Get task action details", dtk_common, "4.1", [expected_output_2_1, expected_output_2_2]
 	end	
-
-	context "Get task action details for action with one successfull and one failure command" do
-		include_context "Get task action details", dtk_common, "5.1", [expected_output_3_1, expected_output_3_2]
-	end
 
 	context "Delete and destroy service function" do
 		include_context "Delete services", dtk_common

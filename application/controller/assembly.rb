@@ -200,8 +200,7 @@ module DTK
     def rest__info_about_task()
       assembly = ret_assembly_instance_object()
       task_action = ret_request_params(:task_action)
-      opts = {:donot_parse => true,:action_types=>[:assembly]}
-      response = assembly.get_task_template_serialized_content(task_action,opts)
+      response = assembly.get_task_template_serialized_content(task_action)
       response_opts = Hash.new
       if response
         response_opts.merge!(:encode_into => :yaml)

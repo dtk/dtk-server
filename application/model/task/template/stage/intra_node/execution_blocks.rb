@@ -20,6 +20,10 @@ module DTK; class Task; class Template
         false
       end
 
+      def has_action_with_method?()
+        !!find{|eb|eb.has_action_with_method?()}
+      end
+
       def delete_action!(action_match)
         eb_index = action_match.execution_block_index()
         if :empty == execution_block(eb_index).delete_action!(action_match)

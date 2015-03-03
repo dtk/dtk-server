@@ -44,6 +44,13 @@ module DTK; class Task; class Template
         false
       end
 
+      def has_action_with_method?()
+        !!find{|a|a.kind_of?(Action::WithMethod)}
+      end
+      def all_actions_with_method?()
+        !find{|a|!(a.kind_of?(Action::WithMethod))}
+      end
+
       def delete_action!(action_match)
         delete_at(action_match.action_position()-1)
         :empty if empty?()
@@ -63,8 +70,12 @@ module DTK; class Task; class Template
         items = Array.new
         component_group_num = 1
         component_group = nil
+        all_actions = all_actions_with_method?()
         each do |a|
-          if cgn = a.component_group_num
+#          if cgn = a.component_group_num
+          # TODO: see if can avoid this by avoding actions be reified as component group
+          cgn = a.component_group_num
+          if cgn and !all_actions
             unless cgn == component_group_num 
               SerializedComponentGroup.add?(items,component_group)
               component_group = nil
@@ -80,8 +91,11 @@ module DTK; class Task; class Template
         end
         SerializedComponentGroup.add?(items,component_group)
         unless items.empty?
-          # look for special case where single component group
-          if items.size == 1 and items.first.kind_of?(SerializedComponentGroup)
+          # order of clauses important
+          # look for special cases where all actions with methods or single component group
+          if all_actions
+            {Constant::Actions => items}
+          elsif items.size == 1 and items.first.kind_of?(SerializedComponentGroup)
             {Constant::Components => items.first.components()}
           else
            {Constant::OrderedComponents => items} 

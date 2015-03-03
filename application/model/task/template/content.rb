@@ -63,7 +63,9 @@ module DTK; class Task
             internode_stage(action_match.internode_stage_index).splice_in_action!(action_match,:before_action_pos)
           when :end_last_internode_stage
             last_internode_stage = internode_stage(:last)
-            if last_internode_stage.kind_of?(Stage::InterNode::MultiNode)
+            # create new stage if last_internode_stage is multi node or has explicit actions
+            if last_internode_stage.kind_of?(Stage::InterNode::MultiNode) or
+                last_internode_stage.has_action_with_method?()
               new_internode_stage = Stage::InterNode.create_from_single_action(action_match.insert_action)
               self << new_internode_stage
             else

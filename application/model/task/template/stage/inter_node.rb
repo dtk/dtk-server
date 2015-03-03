@@ -39,6 +39,10 @@ module DTK; class Task; class Template
         false
       end
 
+      def has_action_with_method?()
+        !!values.find{|node_actions|node_actions.has_action_with_method?()}
+      end
+
       def delete_action!(action_match)
         node_id = action_match.action.node_id
         unless node_action = self[node_id]

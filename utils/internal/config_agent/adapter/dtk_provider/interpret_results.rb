@@ -23,15 +23,26 @@ module DTK; class ConfigAgent; module Adapter
        private
         def default_errors_action_status?(results)
           if results_data = results[:results]
-            # only last one can be failure
-            last_results = (results_data.kind_of?(Array) ? results_data.last : results_data)
-            status = last_results['status']
-            if status and last_results['status'].to_s != '0'
-              stderr = last_results['stderr']||''
-              err_msg = (stderr.empty? ? "Error in action; syscall status = #{status.to_s}" : stderr)
-              [err_msg]                
+            if results_data.kind_of?(Array)
+              err_msgs = []
+              results_data.each do |result|
+                status = result['status']
+                if status and result['status'].to_s != '0'
+                  stderr = result['stderr']||''
+                  err_msgs << (stderr.empty? ? "Error in action; syscall status = #{status.to_s}" : stderr)
+                end
+              end
+              err_msgs unless err_msgs.empty?
+            else
+              status = results_data['status']
+              if status and results_data['status'].to_s != '0'
+                stderr = results_data['stderr']||''
+                err_msg = (stderr.empty? ? "Error in action; syscall status = #{status.to_s}" : stderr)
+                [err_msg]                
+              end
             end
           end
+
         end
 
         def data_field_in_results(result)

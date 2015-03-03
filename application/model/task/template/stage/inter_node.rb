@@ -153,11 +153,18 @@ module DTK; class Task; class Template
       end
 
       def self.parse_and_reify_is_multi_node_type?(serialized_content) 
-        if ret = Constant.matches?(serialized_content,:Nodes) 
-          ret
-        elsif !Constant.matches?(serialized_content,:Node)
-          Constant::AllApplicable
-        end          
+        # only look at leaf subtasks tasks
+        unless leaf_subtask?(serialized_content)
+          if ret = Constant.matches?(serialized_content,:Nodes) 
+            ret
+          elsif !Constant.matches?(serialized_content,:Node)
+            Constant::AllApplicable
+          end        
+        end  
+      end
+
+      def self.leaf_subtask?(serialized_content)
+        Constant.matches?(serialized_content,:Subtasks)
       end
 
       def self.parse_and_reify_node_actions?(node_actions,node_name,node_id,action_list,opts={})

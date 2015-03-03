@@ -119,7 +119,7 @@ module DTK; class Task; class Template
           node_id = 0 #dummy value when just used for parsing
           if action_list
             unless node_id = action_list.find_matching_node_id(node_name)
-              raise ParsingError.new("Node ref (#{node_name}) cannot be resolved")
+              raise ParsingError.new("The following element(s) cannot be resolved with respect to the assembly's nodes and components: ?1",serialized_content)
             end
           end
           node_actions = parse_and_reify_node_actions?(serialized_node_actions,node_name,node_id,action_list,opts)

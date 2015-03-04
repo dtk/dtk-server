@@ -128,10 +128,17 @@ module DTK; module ModuleMixins
 
       remote_branch = default_remote_repo.remote_dtkn_location(get_project(),module_type(),module_name())
       diff_objs = local_branch.get_repo().get_remote_diffs(local_branch,remote_branch)
-      diff_objs.map do |diff_obj|
+      ret = diff_objs.map do |diff_obj|
         path = "diff --git a/#{diff_obj.a_path} b/#{diff_obj.b_path}\n"
         path + "#{diff_obj.diff}\n"
       end
+      # TODO: come up with better solution to JSON encoding problem of diffs
+      begin
+        ::JSON.generate(ret)
+       rescue
+        ret = "There are diffs between local module and remote one.\n"
+      end
+      ret
     end
 
     class Info < Hash

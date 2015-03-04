@@ -695,8 +695,8 @@ module DTK
 
     def rest__task_action_detail()
       assembly = ret_assembly_instance_object()
-      message_id = ret_request_params(:message_id)
-      rest_ok_response Task::Status::Assembly.get_action_detail(assembly.id_handle, message_id)
+      action_label = ret_request_params(:message_id)
+      rest_ok_response Task::ActionResults.get_action_detail(assembly, action_label)
     end
 
     ### command and control actions

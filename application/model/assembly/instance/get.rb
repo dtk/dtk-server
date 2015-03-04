@@ -230,7 +230,7 @@ module DTK; class Assembly; class Instance
       task_actions.each do |task_action|
         if serialized_content = get_task_template_serialized_content(task_action,opts)
           action_task_template = get_task_template(task_action,:cols => [:id,:group_id,:task_action]) 
-          action_task_template ||= create_stub(assembly_instance.model_handle(:task_template),:task_action => task_action)
+          action_task_template ||= Assembly::Instance.create_stub(model_handle(:task_template),:task_action => task_action)
           ret << action_task_template.merge(:content => serialized_content)
         end
       end

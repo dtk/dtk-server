@@ -113,7 +113,7 @@ module DTK; class AssemblyModule
         :cols => [:id, :group_id, :display_name, :component_type],
         :filter => [:and,
                     [:eq, :type, 'component_module'],
-                    [:eq, :version, ModuelBranch.version_field_default()],
+                    [:eq, :version, ModuleBranch.version_field_default()],
                     [:eq, :repo_id, repo.id()],
                     [:eq, :component_id, module_id]
                    ]

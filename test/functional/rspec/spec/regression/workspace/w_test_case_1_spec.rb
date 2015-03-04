@@ -16,7 +16,7 @@ node_template = 'precise-micro'
 component_name = 'stdlib'
 component_module_namespace = 'r8'
 info_to_check_1 = 'ec2_public_address'
-info_to_check_2 = 'node_name: test'
+info_to_check_2 = 'display_name: test'
 info_to_check_3 = 'stdlib'
 
 dtk_common = DtkCommon.new('', '')

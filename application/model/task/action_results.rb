@@ -41,7 +41,7 @@ module DTK; class Task
       if log_entries.empty?
         raise ErrorUsage.new("Task action with identifier '#{action_label}' does not exist for this service instance.")
       end
-      ordered_log_entries = log_entries.sort{|a,b|a[:position]||0 <=> b[:position]||0}
+      ordered_log_entries = log_entries.sort{|a,b|(a[:position]||0) <=> (b[:position]||0)}
       ordered_log_entries.each do |l|
         content = l[:content]
         ret << "==============================================================\n"

@@ -54,8 +54,8 @@ describe "(Action Framework) Test Case 1: Service with one node that contains cm
 		include_context "List services after stage", dtk_common
 	end
 
-	context "Converge function" do
-		include_context "Converge", dtk_common
+	context "NEG - Converge function" do
+		include_context "NEG - Converge", dtk_common
 	end
 
 	context "Get task action details for action with two successfull commands" do

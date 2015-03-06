@@ -32,8 +32,11 @@ module DTK; class Task
         
         Node = 'node'
         Variations::Node = ['node','node_group']
+        NodeGroup = 'node_group'
+
         Nodes = 'nodes'
-        Variations::Nodes = ['nodes']
+        Variations::Nodes = ['nodes'] #TODO: dont think we need this because single variation
+
         Subtasks = 'subtasks'
       end
 

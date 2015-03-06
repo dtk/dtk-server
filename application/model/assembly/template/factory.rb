@@ -321,9 +321,9 @@ module DTK
       def create_assembly_level_attributes(attr)
         ref = display_name = attr[:display_name]
         create_hash = {
-          :display_name => display_name,
+          :display_name   => display_name,
           :value_asserted => attr[:attribute_value],
-          :data_type => attr[:data_type]||Attribute::Datatype.default()
+          :data_type      => attr[:data_type]||Attribute::Datatype.default()
         }
         {ref => create_hash}
       end
@@ -336,10 +336,10 @@ module DTK
         node_hash = Aux::hash_subset(node,[:display_name,:node_binding_rs_id])
         node_hash.merge!(
           "*assembly_id" => "/component/#{self[:ref]}",
-          :type => Node::Type::Node.stub,
+          :type          => node.is_node_group?() ? Node::Type::NodeGroup.stub : Node::Type::Node.stub,
           :component_ref => cmp_refs, 
-          :port => ports,
-          :attribute => node_attrs
+          :port          => ports,
+          :attribute     => node_attrs
         )
         {node_ref => node_hash}
       end

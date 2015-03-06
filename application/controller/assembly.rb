@@ -473,6 +473,16 @@ module DTK
       rest_ok_response node_instance_idh
     end
 
+    def rest__add_node_group()
+      assembly        = ret_assembly_instance_object()
+      node_group_name = ret_non_null_request_params(:node_group_name)
+      node_binding_rs = node_binding_ruleset?(:node_template_identifier)
+      cardinality     = ret_non_null_request_params(:cardinality)
+      node_group_idh  = assembly.add_node_group(node_group_name, node_binding_rs, cardinality)
+
+      rest_ok_response node_group_idh
+    end
+
     def rest__add_component()
       assembly = ret_assembly_instance_object()
       cmp_name, namespace = ret_request_params(:component_template_id, :namespace)

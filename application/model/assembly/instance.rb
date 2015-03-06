@@ -123,6 +123,35 @@ module DTK; class  Assembly
       new_obj && new_obj.id_handle()
     end
 
+    def add_node_group(node_group_name, node_binding_rs, cardinality)
+      # check if node has been added already
+      if get_node?([:eq,:display_name, node_group_name])
+        raise ErrorUsage.new("Node (#{node_group_name}) already belongs to #{pp_object_type} (#{get_field?(:display_name)})")
+      end
+
+      target = get_target()
+      node_template = Node::Template.find_matching_node_template(target, :node_binding_ruleset => node_binding_rs)
+
+      self.update_object!(:display_name)
+      ref = SQL::ColRef.concat("assembly--", "#{self[:display_name]}--#{node_group_name}")
+
+      override_attrs = {
+        :display_name => node_group_name,
+        :assembly_id  => id(),
+        :type         => "node_group_staged",
+        :ref          => ref
+      }
+
+      clone_opts = node_template.source_clone_info_opts()
+      new_obj = target.clone_into(node_template,override_attrs,clone_opts)
+      Node::NodeAttribute.create_or_set_attributes?([new_obj], :cardinality, cardinality)
+
+      node_group_obj = new_obj.create_obj_optional_subclass()
+      node_group_obj.add_group_members(cardinality.to_i)
+
+      new_obj && new_obj.id_handle()
+    end
+
     # aug_cmp_template is a component template augmented with keys having objects
     # :module_branch
     # :component_module

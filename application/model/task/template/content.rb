@@ -61,16 +61,23 @@ module DTK; class Task
             end
           when :before_action_pos
             internode_stage(action_match.internode_stage_index).splice_in_action!(action_match,:before_action_pos)
+          # TODO: currently this cannot be reached because using :add_as_new_last_internode_stage instead
+          # if leave below in make it so under more cases a new stage is created
           when :end_last_internode_stage
             last_internode_stage = internode_stage(:last)
-            # create new stage if last_internode_stage is multi node or has explicit actions
+            # create new stage if last_internode_stage is 
+            # - multi node, or
+            # - has explicit actions
             if last_internode_stage.kind_of?(Stage::InterNode::MultiNode) or
                 last_internode_stage.has_action_with_method?()
               new_internode_stage = Stage::InterNode.create_from_single_action(action_match.insert_action)
               self << new_internode_stage
             else
-              internode_stage(:last).splice_in_action!(action_match,:end_last_execution_block) 
+              last_internode_stage.splice_in_action!(action_match,:end_last_execution_block) 
             end
+          when :add_as_new_last_internode_stage
+            new_internode_stage = Stage::InterNode.create_from_single_action(action_match.insert_action)
+            self << new_internode_stage
           else raise Error.new("Unexpected insert_point (#{insert_point})")
         end
       end

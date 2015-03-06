@@ -16,7 +16,10 @@ module DTK; class Task; class Template
             end
           end
           action_match = ActionMatch.new(@new_action)
-          template_content.splice_in_action!(action_match,:end_last_internode_stage)
+          # TODO: was using 
+          # template_content.splice_in_action!(action_match,:end_last_internode_stage)
+          # but switched to below because it would group together actions in same stage that probably should be seperate stages
+          template_content.splice_in_action!(action_match,:add_as_new_last_internode_stage)
           template_content
         end
       end

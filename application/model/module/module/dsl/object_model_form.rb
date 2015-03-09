@@ -7,14 +7,15 @@ module DTK; class ModuleDSL
     end
 
    private
-    def convert_to_hash_form(hash_or_array,&block)
-      self.class.convert_to_hash_form(hash_or_array,&block)
+    def convert_to_hash_form(obj,&block)
+      self.class.convert_to_hash_form(obj,&block)
     end
-    def self.convert_to_hash_form(hash_or_array,&block)
-      if hash_or_array.kind_of?(Hash)
-        hash_or_array.each_pair{|k,v|block.call(k,v)}
-      else #hash_or_array.kind_of?(Array)
-        hash_or_array.each do |el|
+    def self.convert_to_hash_form(obj,&block)
+      if obj.kind_of?(Hash)
+        obj.each_pair{|k,v|block.call(k,v)}
+      else 
+        obj = [obj] unless obj.kind_of?(Array)
+        obj.each do |el|
           if el.kind_of?(Hash)
             block.call(el.keys.first,el.values.first)
           else #el.kind_of?(String)

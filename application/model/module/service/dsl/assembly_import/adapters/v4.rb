@@ -67,7 +67,7 @@ module DTK; class ServiceModule
         action_under_key = workflow_hash.delete(Constant::WorkflowAction) 
 
         workflow_action ||= action_under_key 
-        if Constant.matches?(workflow_action,:CreateWorkflowAction)
+        if workflow_action.nil? or Constant.matches?(workflow_action,:CreateWorkflowAction)
           workflow_action = Task::Template.default_task_action()
         end
 

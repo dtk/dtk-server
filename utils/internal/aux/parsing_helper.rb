@@ -16,6 +16,11 @@ module DTK
           end
         end
 
+        def hash_subset(hash,*constants)
+          constants = constants.flatten(1)
+          Aux.hash_subset(hash,constants.map{|constant|variations(constant)}.flatten(1).uniq)
+        end
+
         def matching_key_and_value?(hash,constant)
           variations = variations(constant)
           if matching_key = hash_key_if_match?(hash,variations)
@@ -36,7 +41,7 @@ module DTK
         end
        private            
         def variations(constant,opts={})
-          # use of self:: and self. are important beacuse want to evalute wrt to module that pulls this in
+          # use of self:: and self. are important because want to evalute wrt to module that pulls this in
           begin
             variations = self::Variations.const_get(constant.to_s)
             string_variations = variations.map{|v|v.to_s} 

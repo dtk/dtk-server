@@ -265,6 +265,24 @@ module DTK
       rest_ok_response AssemblyModule::Component.promote_module_updates(assembly,component_module,opts)
     end
 
+    def rest__get_component_module_info()
+      assembly = ret_assembly_instance_object()
+      module_type, module_name = ret_non_null_request_params(:module_type,:module_name)
+
+      unless module_type.to_sym == :component_module
+        raise Error.new("promote_module_changes only treats component_module type")
+      end
+
+      namespace = AssemblyModule::Component.validate_component_module_ret_namespace(assembly,module_name)
+      component_module = create_obj(:module_name,ComponentModule,namespace)
+      opts = ret_boolean_params_hash(:force)
+
+      branch_info = AssemblyModule::Component.component_module_workspace_info(assembly, component_module)
+      branch_info.merge!(:assembly_name => assembly[:display_name])
+
+      rest_ok_response branch_info
+    end
+
     def rest__create_component_dependency()
       assembly = ret_assembly_instance_object()
       cmp_template = ret_component_template(:component_template_id)

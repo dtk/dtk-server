@@ -58,6 +58,7 @@ module DTK; class Task
     r8_nested_require('template','stage')
     r8_nested_require('template','content')
     r8_nested_require('template','config_components')
+    r8_nested_require('template','task_params')
 
     def self.common_columns()
       [:id,:group_id,:display_name,:task_action,:content]
@@ -67,14 +68,18 @@ module DTK; class Task
       ActionType::Create
     end
 
-    def serialized_content_hash_form()
+    def serialized_content_hash_form(opts={})
       if hash_content = get_field?(:content)
-        self.class.serialized_content_hash_form(hash_content)
+        self.class.serialized_content_hash_form(hash_content,opts)
       end
     end
 
-    def self.serialized_content_hash_form(hash)
-      Serialization::OrderedHash.new(hash)
+    def self.serialized_content_hash_form(hash,opts={})
+      ret = Serialization::OrderedHash.new(hash)
+      if task_params = opts[:task_params]
+        ret = TaskParams.bind_task_params(ret,task_params)
+      end
+      ret
     end
 
     # returns [ref,create_hash]

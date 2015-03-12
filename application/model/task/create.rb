@@ -14,7 +14,7 @@ module DTK; class Task
       target_idh = target_idh_from_assembly(assembly)
       task_mh = target_idh.create_childMH(:task)
       
-      ret = create_top_level_task(task_mh,assembly,Aux.hash_subset(opts,:commit_msg))
+      ret = create_top_level_task(task_mh,assembly,Aux.hash_subset(opts,[:commit_msg,:task_action]))
 
       create_or_start_nodes_task = 
         case component_type
@@ -31,7 +31,7 @@ module DTK; class Task
          else
           raise Error.new("Unexpected component_type (#{component_type})")
         end
-      opts_tt = {:component_type_filter => component_type}
+      opts_tt = opts.merge(:component_type_filter => component_type)
       task_template_content = Template::ConfigComponents.get_or_generate_template_content([:assembly,:node_centric],assembly,opts_tt)
       stages_config_nodes_task = task_template_content.create_subtask_instances(task_mh,assembly.id_handle())
 
@@ -53,8 +53,8 @@ module DTK; class Task
 
     def self.create_top_level_task(task_mh,assembly,opts={})
       task_info_hash = {
-        :assembly_id => assembly.id,
-        :display_name => "assembly_converge", 
+        :assembly_id    => assembly.id,
+        :display_name   => opts[:task_action] || "assembly_converge", 
         :temporal_order => "sequential",
       }
       if commit_msg = opts[:commit_msg]

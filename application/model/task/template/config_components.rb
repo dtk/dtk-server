@@ -47,11 +47,12 @@ module DTK; class Task
         raise_error_if_unsupported_action_types(action_types)
 
         task_action = opts[:task_action]||default_task_action()
-        action_list_opts = Aux.hash_subset(opts,[:component_type_filter])
-        cmp_actions = ActionList::ConfigComponents.get(assembly,action_list_opts)
+        opts_action_list = Aux.hash_subset(opts,[:component_type_filter])
+        cmp_actions = ActionList::ConfigComponents.get(assembly,opts_action_list)
 
         # first see if there is a persistent serialized task template for assembly instance and that it should be used
-        if template_content = get_template_content_aux?(action_types,assembly,cmp_actions,task_action,opts)
+        opts_get_template = Aux.hash_subset(opts,[:task_params])
+        if template_content = get_template_content_aux?(action_types,assembly,cmp_actions,task_action,opts_get_template)
           return template_content
         end
 

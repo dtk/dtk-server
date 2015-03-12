@@ -616,7 +616,7 @@ module DTK
         raise ErrorUsage, "Task is already running on requested nodes. Please wait until task is complete"
       end
 
-      opts = ret_params_hash(:commit_msg)
+      opts = ret_params_hash(:commit_msg,:task_action,:task_params)
       if assembly_is_stopped
         opts.merge!(:start_node_changes => true, :ret_nodes => Array.new)
       end

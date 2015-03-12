@@ -1,4 +1,4 @@
-module XYZ
+module DTK
   module CreateThread
 
     def self.defer_with_session(user_object, current_session, &block)

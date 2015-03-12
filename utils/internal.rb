@@ -30,6 +30,7 @@ files =
    'rubygems_checker',
    'hierarchical_tags',
    'puppet_forge',
+   'mustache_template_mixin',
   ]
 r8_nested_require('internal',files)
 

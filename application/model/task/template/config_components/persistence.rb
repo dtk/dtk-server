@@ -5,17 +5,23 @@ module DTK; class Task; class Template; class ConfigComponents
   class Persistence
     class AssemblyActions
       def self.get_content_for(assembly,cmp_actions,task_action=nil,opts={})
-        unless opts[:serialized_form]
+        # if task_params given cant use ReifiedObjectCache because params can differ from call to call
+        unless opts[:serialized_form] or opts[:task_params]
           if ret = ReifiedObjectCache.get(assembly,task_action)
             return ret
           end
         end
 
-        if serialized_content = get_serialized_content_from_assembly(assembly,task_action)
+        if serialized_content = get_serialized_content_from_assembly(assembly,task_action,opts)
           if opts[:serialized_form]
             Content.reify(serialized_content)
           else
             Content.parse_and_reify(serialized_content,cmp_actions,opts)
+          end
+        else
+          # raise error if explicit task_action is given and cant be found
+          if task_action
+            raise ErrorUsage.new("The Workflow action '#{task_action}' does not exist")
           end
         end
       end
@@ -36,16 +42,16 @@ module DTK; class Task; class Template; class ConfigComponents
       end
 
      private
-      def self.get_serialized_content_from_assembly(assembly,task_action=nil)
+      def self.get_serialized_content_from_assembly(assembly,task_action=nil,opts={})
         ret = assembly.get_task_template(task_action)
-        ret && ret.serialized_content_hash_form()
+        ret && ret.serialized_content_hash_form(opts)
       end
 
       class ReifiedObjectCache
         # using task_template_id is cache key
         @@cache = Hash.new
 
-###TODO: these are in no op mode until implememnt
+###TODO: these are in no op mode until implemement
         def self.get(assembly,task_action=nil)
           # TODO: stub; nothing in cache
           nil

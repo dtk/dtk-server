@@ -38,7 +38,7 @@ module DTK; class ModuleDSL
 
         def set_include_modules!(ret,opts={})
         end
-      
+
         def process_imported_resources()
           # first get all the exported resources and imported resources
           # TODO: more efficient to store these in first phase
@@ -62,8 +62,8 @@ module DTK; class ModuleDSL
           matches = attr_imp_colls.map do |attr_imp_coll|
             if match = matching_storeconfig_vars?(attr_imp_coll,attr_exp_rscs)
               {
-                :type => :imported_collection, 
-                :attr_imp_coll => attr_imp_coll, 
+                :type => :imported_collection,
+                :attr_imp_coll => attr_imp_coll,
                 :attr_exp_rsc => match[:attr_exp_rsc],
                 :matching_vars => match[:vars]
               }
@@ -82,12 +82,12 @@ module DTK; class ModuleDSL
         def matching_storeconfig_vars?(attr_imp_coll,attr_exp_rscs)
           attr_exp_rscs.each do |attr_exp_rsc|
             if matching_vars = attr_imp_coll.source_ref.match_exported?(attr_exp_rsc.source_ref)
-              return {:vars => matching_vars, :attr_exp_rsc => attr_exp_rsc} 
+              return {:vars => matching_vars, :attr_exp_rsc => attr_exp_rsc}
             end
           end
           nil
         end
-        
+
         def set_user_friendly_names_for_storeconfig_vars!(matches)
           translated_ids = Array.new
           matches.each do |match|
@@ -128,18 +128,18 @@ module DTK; class ModuleDSL
             prefix = $1
             unqual_name = $2
             unless prefix == module_name
-              raise ErrorUsage::Parsing.new("Component (#{processed_name}) has a module name unequal to the base module name (#{module_name})")
-            end 
+              raise ErrorUsage::Parsing.new("Component (#{processed_name}) has a module name not equal to the base module name (#{module_name})")
+            end
             processed_name = "#{module_name}__#{unqual_name}"
           end
-        
+
           set_hash_key(processed_name)
           self[:display_name] = t(processed_name) #TODO: might instead put in label
           self[:description] = unknown
           self[:ui_png] = unknown
           type = "#{component_ps.config_agent_type}_#{component_ps[:type]}"
           external_ref = create_external_ref(component_ps[:name],type)
-          self[:external_ref] = nailed(external_ref) 
+          self[:external_ref] = nailed(external_ref)
           self[:basic_type] = t("service") #TODO: stub
           self[:component_type] = t(processed_name)
           dependencies = dependencies(component_ps)
@@ -167,7 +167,7 @@ module DTK; class ModuleDSL
           attr_num = 0
           self[:attributes] = DSLArray.new
           (component_ps[:attributes]||[]).each{|attr_ps|add_attribute(attr_ps,component_ps,attr_num+=1)}
-          
+
           (component_ps[:children]||[]).each do |child_ps|
             if child_ps.is_imported_collection?()
               add_attribute(child_ps,component_ps,attr_num+=1)
@@ -195,7 +195,7 @@ module DTK; class ModuleDSL
 
         # for render_hash
         def display_name?()
-        end 
+        end
         def label?()
         end
         def basic_type?()
@@ -227,7 +227,7 @@ module DTK; class ModuleDSL
           ret
         end
       end
-      
+
       class Dependency < self
         def initialize(data,context,opts={})
           super(context,opts)
@@ -259,7 +259,7 @@ module DTK; class ModuleDSL
         def object_attributes()
           [:possible_links]
         end
-      
+
         def initialize__imported_collection(data)
           self[:include] = true
           self[:required] = nailed(true)
@@ -287,7 +287,7 @@ module DTK; class ModuleDSL
           [:attribute_mappings]
         end
       end
-    
+
       class LinkDefAttributeMapping < self
         def initialize(data,context,opts={})
           super(context,opts)
@@ -312,7 +312,7 @@ module DTK; class ModuleDSL
             initialize__from_imported_collection(parse_struct)
           else
             raise Error.new("Unexpected parse structure type (#{parse_struct.class.to_s})")
-          end  
+          end
         end
 
         def attr_num()
@@ -342,7 +342,7 @@ module DTK; class ModuleDSL
           set_hash_key(name)
           set_field_name(name)
           set_label(name)
-          self[:label] = t(name) 
+          self[:label] = t(name)
           self[:description] = unknown
           self[:type] = t("string") #default that can be overriten
           var_default = nil
@@ -350,7 +350,7 @@ module DTK; class ModuleDSL
             if default.set_default_value?()
               self[:type] = t(default.data_type)
               var_default = default.contains_variable?()
-              self[:default_info] = var_default ? unknown : t(default.default_value()) 
+              self[:default_info] = var_default ? unknown : t(default.default_value())
             end
           end
           if var_default
@@ -365,26 +365,26 @@ module DTK; class ModuleDSL
           ext_ref.merge!("default_variable" => default.to_s) if var_default
           self[:external_ref] = nailed(ext_ref)
         end
-      
+
         def set_field_name(name)
           self[:field_name] = t(name)
         end
-    
+
         def set_label(label)
           self[:label] = t(label)
         end
-        
+
         def set_external_ref_name(name)
           self[:external_ref] && self[:external_ref]["name"] = name
         end
-      
+
         def initialize__from_exported_resource(exp_rsc_ps)
           StoreConfigHandler.set_output_attribute!(self,exp_rsc_ps)
         end
         def initialize__from_imported_collection(imp_coll_ps)
           StoreConfigHandler.set_intput_attribute!(self,imp_coll_ps)
         end
-        
+
         def existing_hash_keys()
           ((parent||{})[:attributes]||[]).map{|a|a.hash_key}.compact
         end

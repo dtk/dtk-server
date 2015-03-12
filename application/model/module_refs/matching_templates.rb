@@ -1,19 +1,19 @@
 module DTK
   class ModuleRefs
     module MatchingTemplatesMixin
-      # component refs are augmented with :component_template key which points to 
-      # associated component template or nil 
+      # component refs are augmented with :component_template key which points to
+      # associated component template or nil
       # This method can be called when assembly is imported or staged
       # TODO: any other time this can be called
       def set_matching_component_template_info?(aug_cmp_refs,opts={})
         ret = aug_cmp_refs
         if aug_cmp_refs.empty?
-          return ret 
+          return ret
         end
         # determine which elements of aug_cmp_refs need to be matches
         cmp_types_to_check = determine_component_refs_needing_matches(aug_cmp_refs,opts)
         if cmp_types_to_check.empty?
-          return ret 
+          return ret
         end
         set_matching_component_template_info!(aug_cmp_refs,cmp_types_to_check,opts)
         ret
@@ -92,7 +92,7 @@ module DTK
           els.each do |el|
             cmp_type_info = mappings[cmp_type]
             if cmp_template = cmp_type_info[:component_template]
-              el[:pntr][:component_template_id] = cmp_template[:id] 
+              el[:pntr][:component_template_id] = cmp_template[:id]
               unless opts[:donot_set_component_templates]
                 el[:pntr][:component_template] = cmp_template
               end
@@ -100,7 +100,7 @@ module DTK
               # TODO: This should not be reached because if error then an error wil be raised by get_component_type_to_template_mappings? call
              Log.error("TODO: may put back in logic to accrue errors; until then this should not be reached")
 #              cmp_ref = {
-#                :component_type => cmp_type, 
+#                :component_type => cmp_type,
 #                :version => cmp_type_info[:version]
 #              }
 #              reference_errors << cmp_ref
@@ -108,7 +108,7 @@ module DTK
           end
         end
         unless reference_errors.empty?
-          raise ServiceModule::ParsingError::DanglingComponentRefs.new(reference_errors) 
+          raise ServiceModule::ParsingError::DanglingComponentRefs.new(reference_errors)
         end
         update_module_refs_dsl?(mappings)
         ret
@@ -121,7 +121,7 @@ module DTK
         ret = cmp_types.inject(Hash.new) do |h,cmp_type|
           version = version_string?(cmp_type)
           el = Component::Template::MatchElement.new(
-            :component_type => cmp_type, 
+            :component_type => cmp_type,
             :version_field => ModuleBranch.version_field(version)
           )
           if version
@@ -135,7 +135,7 @@ module DTK
 
         # get matching component template info and insert matches into ret
         Component::Template.get_matching_elements(project_idh(),ret.values,opts).each do |cmp_template|
-          ret[cmp_template[:component_type]].merge!(:component_template => cmp_template) 
+          ret[cmp_template[:component_type]].merge!(:component_template => cmp_template)
         end
         ret
       end
@@ -144,7 +144,7 @@ module DTK
         module_name_to_ns = Hash.new
         cmp_type_to_template_mappings.each do |cmp_type,cmp_info|
           module_name = module_name(cmp_type)
-          unless module_name_to_ns[module_name] 
+          unless module_name_to_ns[module_name]
             if namespace = (cmp_info[:component_template]||{})[:namespace]
               module_name_to_ns[module_name] = namespace
             end
@@ -154,7 +154,7 @@ module DTK
         module_name_to_ns.each do |cmp_module_name,namespace|
           if component_module_ref = component_module_ref?(cmp_module_name)
             unless component_module_ref.namespace() == namespace
-              raise Error.new("Unexpected that at this point component_module_ref.namespace() (#{component_module_ref.namespace()}) unequal to namespace (#{namespace})")
+              raise Error.new("Unexpected that at this point component_module_ref.namespace() (#{component_module_ref.namespace()}) not equal to namespace (#{namespace})")
             end
           else
             new_cmp_moule_ref = {
@@ -181,7 +181,7 @@ module DTK
           cmp_module_ref.namespace()
         end
       end
-      
+
       def module_name(component_type)
         Component.module_name(component_type)
       end

@@ -47,7 +47,7 @@ module DTK; class Attribute
           update_attribute_values_array_append(attr_mh,update_deltas,opts)
         when "OutputPartial"
           update_attribute_values_partial(attr_mh,update_deltas,opts)
-        else 
+        else
           update_attribute_values_simple(attr_mh,update_deltas,opts)
       end
     end
@@ -82,7 +82,7 @@ module DTK; class Attribute
           last_el = r[:array_slice].size-1
           index_map = r[:output_is_array] ?
           AttributeLink::IndexMap.generate_from_bounds(0,last_el,offset) :
-            AttributeLink::IndexMap.generate_for_output_scalar(last_el,offset) 
+            AttributeLink::IndexMap.generate_for_output_scalar(last_el,offset)
           attr_link_update = {
             :id => r[:attr_link_id],
             :index_map => index_map
@@ -93,9 +93,9 @@ module DTK; class Attribute
           ndx_existing_vals[attr_id] = new_val = existing_val + r[:array_slice]
           replacement_row = {:id => attr_id, :value_derived => new_val}
 
-          # if multiple entries pointing to same element then last one taken since it incorporates all of them  
+          # if multiple entries pointing to same element then last one taken since it incorporates all of them
 
-          # TODO: if multiple entries pointing to same element source_output_id will be the last one; 
+          # TODO: if multiple entries pointing to same element source_output_id will be the last one;
           # this may be be problematic because source_output_id may be used just for parent to use for change
           # objects; double check this
           ndx_ret.merge!(attr_id => replacement_row.merge(:source_output_id => r[:source_output_id], :old_value_derived => existing_val))
@@ -163,9 +163,9 @@ module DTK; class Attribute
         return ret
       end
       unless index_map.size == 1
-        Log.error("not treating update_for_delete_link when index_map size is unequal to 1; its value is #{index_map.inspect}")
+        Log.error("not treating update_for_delete_link when index_map size is not equal to 1; its value is #{index_map.inspect}")
         return ret
-      end   
+      end
       index_map.first && index_map.first[dir]
     end
 

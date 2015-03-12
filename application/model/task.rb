@@ -45,7 +45,7 @@ module DTK
         :sequential
       elsif self[:temporal_order] == "concurrent"
         :concurrent
-      end 
+      end
     end
 
     # can be :sequential, :concurrent, or :leaf
@@ -111,7 +111,7 @@ module DTK
 
       ret.each do |r|
         task_id = r[:task_id]
-        content = r[:content]
+        content = r[:content] || Hash.new
         content.merge!({:label => r[:display_name], :task_name => r[:task][:display_name]})
         ret_logs[task_id] = (ret_logs[task_id]||Array.new) + [content]
       end
@@ -144,8 +144,8 @@ module DTK
       if event = TaskEvent.create_event?(event_type,self,result)
         type = event.delete(:type)||event_type
         row = {
-          :content => event.to_hash, 
-          :ref => "task_event", 
+          :content => event.to_hash,
+          :ref => "task_event",
           :type => type.to_s,
           :task_id => id()
         }
@@ -153,12 +153,12 @@ module DTK
         event
       end
     end
-    
+
     # returns [event,error-array]
     def add_event_and_errors(event_type,error_source,errors_in_result)
       ret = [nil,nil]
       # process errors and strip out from what is passed to add event
-      normalized_errors = 
+      normalized_errors =
         if error_source == :config_agent
           config_agent = get_config_agent()
           components = component_actions().map{|a|a[:component]}
@@ -183,12 +183,12 @@ module DTK
       rows = normalized_errors.map do |err|
         {
           :content => err,
-          :ref => "task_error", 
+          :ref => "task_error",
           :task_id => id()
         }
       end
       Model.create_from_rows(child_model_handle(:task_error),rows,{:convert => true})
-      normalized_errors 
+      normalized_errors
     end
 
     def update_task_subtask_status(status,result)
@@ -208,13 +208,13 @@ module DTK
         :status => status,
         :result => result,
         :ended_at => Aux::now_time_stamp()
-      } 
+      }
       update(update_hash)
     end
     def update_at_task_start(opts={})
       update(:status => "executing", :started_at => Aux::now_time_stamp())
     end
-        
+
     def update_when_failed_preconditions(failed_antecedent_tasks)
       ts = Aux::now_time_stamp()
       update(:status => "preconditions_failed", :started_at => ts, :ended_at => ts)
@@ -246,7 +246,7 @@ module DTK
 
       # compute new parent status
       subtask_status_array = children_status.values
-      parent_status = 
+      parent_status =
         if subtask_status_array.include?("executing") then "executing"
         elsif subtask_status_array.include?("failed") then "failed"
         elsif subtask_status_array.include?("cancelled") then "cancelled"
@@ -299,7 +299,7 @@ module DTK
     def get_associated_nodes()
       exec_actions = Array.new
       # if executable level then get its executable_action
-      if self.has_key?(:executable_action_type) 
+      if self.has_key?(:executable_action_type)
         # will have an executable action so if have it already
         if self[:executable_action_type]
           exec_actions << get_field?(:executable_action)
@@ -317,7 +317,7 @@ module DTK
           action && action.merge(:task_id => t.id())
         end.compact
       end
-      
+
       # get all unique nodes; looking for attribute :external_ref
       indexed_nodes = Hash.new
       exec_actions.each do |ea|
@@ -363,7 +363,7 @@ module DTK
         model_handle = id_handles.first.createMH()
         sp_hash = {
           :cols => Task.common_columns(),
-          :filter => [:oneof,:task_id,id_handles.map{|idh|idh.get_id}] 
+          :filter => [:oneof,:task_id,id_handles.map{|idh|idh.get_id}]
         }
         next_level_objs = get_objs(model_handle,sp_hash).reject{|k,v|k == :subtasks}
         next_level_objs.each{|st|st.reify!()}
@@ -408,7 +408,7 @@ module DTK
       return nil unless top_task
       flat_subtask_list = top_task.get_all_subtasks()
       ndx_task_list = {top_task.id => top_task}
-      subtask_count = Hash.new 
+      subtask_count = Hash.new
       subtask_indexes = Hash.new
       flat_subtask_list.each do |t|
         ndx_task_list[t.id] = t
@@ -451,7 +451,7 @@ module DTK
           :executable_action_type => executable_action ? Aux.demodulize(executable_action.class.to_s) : nil,
           :executable_action => executable_action
         }
-        cols = [:status, :result, :action_on_failure, :position, :temporal_order, :commit_message] 
+        cols = [:status, :result, :action_on_failure, :position, :temporal_order, :commit_message]
         cols.each{|col|row.merge!(col => hash_row[col])}
         [:assembly_id,:node_id,:target_id].each do |col|
           row[col] = hash_row[col]||SQL::ColRef.null_id
@@ -464,7 +464,7 @@ module DTK
       # set parent relationship and use to set task_id (subtask parent) and children_status
       par_rel_rows_for_id_info = set_and_ret_parents_and_children_status!()
       par_rel_rows_for_task = par_rel_rows_for_id_info.map{|r|{:id => r[:id], :task_id => r[:parent_id], :children_status => r[:children_status]}}
-      
+
       Model.update_from_rows(model_handle,par_rel_rows_for_task) unless par_rel_rows_for_task.empty?
       IDInfoTable.update_instances(model_handle,par_rel_rows_for_id_info)
     end
@@ -525,7 +525,7 @@ module DTK
       else
         recursive_subtasks = subtasks.map{|st|st.set_and_ret_parents_and_children_status!(id)}.flatten
         children_status = subtasks.inject({}){|h,st|h.merge(st.id() => "created")}
-        [:parent_id => parent_id, :id => id, :children_status => children_status] + recursive_subtasks 
+        [:parent_id => parent_id, :id => id, :children_status => children_status] + recursive_subtasks
       end
     end
 
@@ -543,9 +543,9 @@ module DTK
     end
 
    protected
-    # protected, not private, because of recursive call 
+    # protected, not private, because of recursive call
      def render_form_flat(top=false)
-      # prune out all (sub)tasks except for top and  executable 
+      # prune out all (sub)tasks except for top and  executable
       return render_executable_tasks() if executable_action(:no_error_if_nil=>true)
       (top ? [render_top_task()] : []) + subtasks.map{|e|e.render_form_flat()}.flatten
     end
@@ -576,7 +576,7 @@ module DTK
           if indexed_nodes[t[:node_id]]
             indexed_nodes[t[:node_id]][:children] << t
           else
-            node_task = Task.render_task_on_node(:node_id => t[:node_id], :node_name => t[:node_name]) 
+            node_task = Task.render_task_on_node(:node_id => t[:node_id], :node_name => t[:node_name])
             node_task[:children] << t
             ret[:children] << node_task
             indexed_nodes[node_task[:node_id]] = node_task
@@ -608,7 +608,7 @@ module DTK
       elsif sc.include?("setting") then Task.render_tasks_setting(executable_action,common_vals)
       elsif sc.include?("update_implementation") then Task.render_tasks_component_op("update_implementation",executable_action,common_vals)
       elsif sc.include?("converge_component") then Task.render_tasks_component_op("converge_component",executable_action,common_vals)
-      else 
+      else
         Log.error("do not treat executable tasks of type(s) #{sc.join(',')}")
         nil
       end

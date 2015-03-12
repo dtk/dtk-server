@@ -143,7 +143,7 @@ module Ramaze::Helper
 
       # [Amar & Haris] this is temp restriction until rest of logic is properly fixed
       if local_module_name != remote_module_name
-        raise ErrorUsage.new("Publish with remote module name (#{remote_module_name}) unequal to local module name (#{local_module_name}) is currently not supported.")
+        raise ErrorUsage.new("Publish with remote module name (#{remote_module_name}) not equal to local module name (#{local_module_name}) is currently not supported.")
       end
 
       module_type = module_obj.module_type
@@ -211,7 +211,7 @@ module Ramaze::Helper
       param_module_name = ret_request_params(:module_name)
       pf_namespace,pf_module_name = ::DTK::PuppetForge.puppet_forge_namespace_and_module_name(pf_full_name)
       if param_module_name and param_module_name != pf_module_name
-        raise ErrorUsage.new("Install with module name (#{param_module_name}) unequal to puppet forge module name (#{pf_module_name}) is currently not supported.")
+        raise ErrorUsage.new("Install with module name (#{param_module_name}) not equal to puppet forge module name (#{pf_module_name}) is currently not supported.")
       end
       # default is to use namespace associated with puppet forge
       [ret_request_param_module_namespace?()||pf_namespace, pf_module_name]

@@ -7,9 +7,9 @@ GIT
 
 GIT
   remote: git://github.com/rich-reactor8/dtk-common.git
-  revision: 8e66fbce8047adaeeaf46ee75a5dc927a7ff0cb7
+  revision: 1ec262762b9debd874430688297db3e0c4c7eacb
   specs:
-    dtk-common (0.7.0)
+    dtk-common (0.7.1)
       colorize (~> 0.5.8)
       dtk-common-core (= 0.7.0)
       rugged (~> 0.17.0.b7)

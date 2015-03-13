@@ -46,7 +46,7 @@ module DTK; class Task
         action_types = Array(action_types)
         raise_error_if_unsupported_action_types(action_types)
 
-        task_action = opts[:task_action]||default_task_action()
+        task_action = opts[:task_action]
         opts_action_list = Aux.hash_subset(opts,[:component_type_filter])
         cmp_actions = ActionList::ConfigComponents.get(assembly,opts_action_list)
 

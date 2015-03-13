@@ -41,7 +41,7 @@ end
         component_filter = [:and, [:eq, :id, component_idh.get_id()], [:eq, :assembly_id, id()]]
         node = nil
         # first check that node belongs to this assebmly
-        unless !node_id.nil? && node_id.empty?
+        if node_id.kind_of?(Fixnum) 
           sp_hash = {
             :cols => [:id, :display_name,:group_id],
             :filter => [:and, [:eq, :id, node_id], [:eq, :assembly_id, id()]]

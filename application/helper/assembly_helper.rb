@@ -73,24 +73,29 @@ module Ramaze::Helper
       id_handle(id,:component)
     end
 
+    def ret_node_id(node_name_param,assembly)
+      ret_node_id_handle(node_name_param,assembly).get_id()
+    end
     def ret_node_id_handle(node_name_param,assembly)
       ret_request_param_id_handle(node_name_param,::DTK::Node,assembly.id())
     end
 
     def ret_node_or_group_member_id_handle(node_name_param,assembly)
-      if node_name_param =~ /^[0-9]+$/
-        ret_request_param_id_handle(:node_id,::DTK::Node,assembly.id())
+      node_name_or_id = ret_non_null_request_params(:node_id)
+      if node_name_or_id =~ /^[0-9]+$/
+        ret_request_param_id_handle(node_name_param,::DTK::Node,assembly.id())
       else
         nodes = assembly.info_about(:nodes)
-        matching_nodes = nodes.select{|node| node[:display_name].eql?(node_name_param)}
+        matching_nodes = nodes.select{|node| node[:display_name].eql?(node_name_or_id)}
 
-        if matching_nodes.size == 0
-          raise ::DTK::ErrorNameDoesNotExist.new(node_name_param,:node)
-        elsif matching_nodes.size > 2
-          raise ::DTK::ErrorNameAmbiguous.new(node_name_param,matching_nodes.map{|r|r[:id]},:node)
-        else
-          matching_id = matching_nodes.first[:id]
-        end
+        matching_id =
+          if matching_nodes.size == 1
+            matching_nodes.first[:id]
+          elsif matching_nodes.size > 2
+            raise ::DTK::ErrorNameAmbiguous.new(node_name_or_id,matching_nodes.map{|r|r[:id]},:node)
+          else
+            raise ::DTK::ErrorNameDoesNotExist.new(node_name_or_id,:node)
+          end
 
         id_handle(matching_id,:node)
       end

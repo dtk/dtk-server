@@ -45,20 +45,16 @@ module DTK
 
     def rest__delete_node()
       assembly = ret_assembly_instance_object()
-      # node_idh = ret_node_id_handle(:node_id,assembly)
-
-      node_id = ret_non_null_request_params(:node_id)
-      node_idh = ret_node_or_group_member_id_handle(node_id,assembly)
-
+      node_idh = ret_node_or_group_member_id_handle(:node_id,assembly)
       assembly.delete_node(node_idh,:destroy_nodes => true)
       rest_ok_response
     end
 
     def rest__delete_component()
-      # Retrieving node_id to validate if component belongs to node when delete-component invoked from component-level context
-      node_id = ret_non_null_request_params(:node_id)
-      component_id = ret_non_null_request_params(:component_id)
       assembly = ret_assembly_instance_object()
+      # Retrieving node_id to validate if component belongs to node when delete-component invoked from component-level context
+      node_id = ret_node_id(:node_id,assembly)
+      component_id = ret_non_null_request_params(:component_id)
       assembly_id = assembly.id()
       cmp_full_name = ret_request_params(:cmp_full_name)
 
@@ -494,7 +490,7 @@ module DTK
       end
       component_title = ret_component_title?(cmp_name)
       # not checking here if node_id points to valid object; check is in add_component
-      node_idh = ret_request_param_id_handle(:node_id,Node)
+      node_idh = ret_node_id_handle(:node_id,assembly)
       new_component_idh = assembly.add_component(node_idh,aug_component_template,component_title)
 
       rest_ok_response(:component_id => new_component_idh.get_id())

@@ -252,7 +252,8 @@ module DTK; class Component
         cmp_templates.select!{|cmp|cmp[:version] == assembly_version}
       end
       unless cmp_templates.size == 1
-        raise Error.new("Unexpected that more than one component template matches")
+        possible_names = cmp_templates.map{|r|r.display_name_print_form(:namespace_prefix=>true)}.join(',')
+        raise ErrorUsage.new("Multiple components with different namespaces match; pick one from: #{possible_names}")
       end
       ret_cmp = cmp_templates.first
 

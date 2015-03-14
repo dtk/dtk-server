@@ -156,7 +156,10 @@ module DTK; class  Assembly
     # :module_branch
     # :component_module
     # :namespace
-    def add_component(node_idh,aug_cmp_template,component_title)
+    # opts can have
+    #  :idempotent 
+    #  :donot_update_workflow
+    def add_component(node_idh,aug_cmp_template,component_title,opts={})
       # first check that node_idh is directly attached to the assembly instance
       # one reason it may not be is if its a node group member
       sp_hash = {
@@ -171,13 +174,14 @@ module DTK; class  Assembly
         end
       end
 
-      opts = {:skip_if_not_found => true}
       cmp_instance_idh = nil
 
       Transaction do
-        cmp_instance_idh = node.add_component(aug_cmp_template,component_title)
+        cmp_instance_idh = node.add_component(aug_cmp_template,opts.merge(:component_title => component_title))
         add_component__update_component_module_refs?(aug_cmp_template[:component_module],aug_cmp_template[:namespace])
-        Task::Template::ConfigComponents.update_when_added_component?(self,node,cmp_instance_idh.create_object(),component_title,opts)
+        unless opts[:donot_update_workflow]
+          Task::Template::ConfigComponents.update_when_added_component?(self,node,cmp_instance_idh.create_object(),component_title,:skip_if_not_found => true)
+        end
       end
       cmp_instance_idh
     end

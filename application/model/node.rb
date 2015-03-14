@@ -343,8 +343,14 @@ module DTK
     # :module_branch
     # :component_module
     # :namespace
-    def add_component(component_template,component_title=nil,namespace=nil)
-      namespace ||= component_template[:namespace] && component_template[:namespace][:display_name]
+    # opts can have
+    #  :namespace
+    #  :component_title
+    #  :idempotent
+    def add_component(component_template,opts={})
+      component_title =  opts[:component_title]
+      namespace = opts[:namespace] || (component_template[:namespace] && component_template[:namespace][:display_name])
+
       component_template.update_with_clone_info!()
 
       if module_branch = component_template[:module_branch]
@@ -352,8 +358,21 @@ module DTK
       end
 
       override_attrs = {:locked_sha => component_template.get_current_sha!()}
+
+      component_type = component_template.get_field?(:component_type)
+      if matching_cmp = Component::Instance.get_matching?(id_handle(),component_type,component_title)
+        if opts[:idempotent] 
+          return matching_cmp.id_handle()
+        else
+          if component_title
+            # Just doing check here when there is a title, and not treating singletones
+            # because there is later constraint that picks up the singleton components
+            raise ErrorUsage.new("Component (#{matching_cmp.print_form()}) already exists")
+          end
+        end
+      end
+
       if title_attr_name = check_and_ret_title_attribute_name?(component_template,component_title)
-        component_type = component_template.get_field?(:component_type)
         override_attrs = {
           :ref => SQL::ColRef.cast(ComponentTitle.ref_with_title(component_type,component_title),:text),
           :display_name => SQL::ColRef.cast(ComponentTitle.display_name_with_title(component_type,component_title),:text)

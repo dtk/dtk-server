@@ -491,7 +491,9 @@ module DTK
       component_title = ret_component_title?(cmp_name)
       # not checking here if node_id points to valid object; check is in add_component
       node_idh = ret_node_id_handle(:node_id,assembly)
-      new_component_idh = assembly.add_component(node_idh,aug_component_template,component_title)
+
+      opts = ret_boolean_params_hash(:idempotent,:donot_update_workflow)
+      new_component_idh = assembly.add_component(node_idh,aug_component_template,component_title,opts)
 
       rest_ok_response(:component_id => new_component_idh.get_id())
     end

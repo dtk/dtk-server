@@ -132,21 +132,14 @@ module DTK; class Node
       def check_and_ret_title_attribute_name?(component_template,component_title)
         title_attr_name = component_template.get_title_attribute_name?()
         if component_title and title_attr_name.nil?
-          raise ErrorUsage.new("Component (#{component_template.component_type_print_form()}) given a title but should not have one")
+          raise ErrorUsage.new("Component (#{component_template.component_type_print_form()}) is given a title, but should not have one")
         elsif component_title.nil? and title_attr_name
           cmp_name = component_template.component_type_print_form()
           raise ErrorUsage.new("Component (#{cmp_name}) needs a title; use form #{cmp_name}[TITLE]")
         end
-
-        if title_attr_name #and component_title
-          component_type = component_template.get_field?(:component_type)
-          if existing_cmp = Component::Instance.get_matching?(id_handle(),component_type,component_title)
-            raise ErrorUsage.new("Component (#{existing_cmp.print_form()}) already exists")
-          end
-        end
-
         title_attr_name
       end
+
     end
   end
 end; end

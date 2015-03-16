@@ -86,7 +86,8 @@ function tag_code() {
 			sed -i -e 's/VERSION=".*"/VERSION="'${tag}'"/' version.rb
 			cd ../..
       cd ../dtk-common-repo && dtk_common_core_tag=`git tag | tail -1` && cd ../$repo_name
-			sed -i -e "s/'dtk-common-core','.*'/'dtk-common-core','${dtk_common_core_tag}'/" $repo_name.gemspec
+      gemspec_tag=`echo $dtk_common_core_tag | sed 's/v//'`
+			sed -i -e "s/'dtk-common-core','.*'/'dtk-common-core','${gemspec_tag}'/" $repo_name.gemspec
 			git add .; git commit -m "bump version"; git push origin master
 			git tag $next_tag
 			git push --tags
@@ -131,7 +132,8 @@ function tag_code() {
 			sed -i -e 's/VERSION=".*"/VERSION="'${tag}'"/' version.rb
 			cd ../..
       cd ../dtk-common-repo && dtk_common_core_tag=`git tag | tail -1` && cd ../$repo_name
-      sed -i -e "s/'dtk-common-core','.*'/'dtk-common-core','${dtk_common_core_tag}'/" $repo_name.gemspec
+      gemspec_tag=`echo $dtk_common_core_tag | sed 's/v//'`
+      sed -i -e "s/'dtk-common-core','.*'/'dtk-common-core','${gemspec_tag}'/" $repo_name.gemspec
 			git add .; git commit -m "bump version"; git push origin master
 			git tag $dtk_major_tag
 			git push --tags

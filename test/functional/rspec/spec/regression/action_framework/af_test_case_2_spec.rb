@@ -17,13 +17,13 @@ assembly_name = 'action_module::multi-node-action'
 dtk_common = DtkCommon.new(service_name, assembly_name)
 
 expected_output_1 = {
-	:command => "ls /usr",
+	:command => "ls -l /usr/share/mcollective",
 	:status => 0,
 	:stderr => nil,
 }
 
 expected_output_2 = {
-	:command => "ls -l /usr/share/mcollective",
+	:command => "ls /usr",
 	:status => 0,
 	:stderr => nil,
 }

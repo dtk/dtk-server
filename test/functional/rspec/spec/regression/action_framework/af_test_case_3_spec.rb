@@ -23,13 +23,13 @@ expected_output_1 = {
 }
 
 expected_output_2_1 = {
-	:command => "ls -a /usr/share/mcollective",
+	:command => "ls -l /usr/share/mcollective",
 	:status => 0,
 	:stderr => nil,
 }
 
 expected_output_2_2 = {
-	:command => "ls -l /usr/share/mcollective",
+	:command => "ls -a /usr/share/mcollective",
 	:status => 0,
 	:stderr => nil,
 }

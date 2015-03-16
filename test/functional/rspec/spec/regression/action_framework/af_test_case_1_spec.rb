@@ -17,27 +17,27 @@ assembly_name = 'action_module::multiple-commands'
 dtk_common = DtkCommon.new(service_name, assembly_name)
 
 expected_output_1_1 = {
-	:command => "ls /usr",
-	:status => 0,
-	:stderr => nil,
-}
-
-expected_output_1_2 = {
 	:command => "ls -l /usr/share/mcollective",
 	:status => 0,
 	:stderr => nil,
 }
 
-expected_output_2_1 = {
-	:command => "cat /some/non/existing/file",
-	:status => nil,
-	:stderr => "cat: /some/non/existing/file: No such file or directory",
+expected_output_1_2 = {
+	:command => "ls /usr",
+	:status => 0,
+	:stderr => nil,
 }
 
-expected_output_2_2 = {
+expected_output_2_1 = {
 	:command => "ls -l /some/non/existing/location",
 	:status => nil,
 	:stderr => "ls: cannot access /some/non/existing/location: No such file or directory"
+}
+
+expected_output_2_2 = {
+	:command => "cat /some/non/existing/file",
+	:status => nil,
+	:stderr => "cat: /some/non/existing/file: No such file or directory",
 }
 
 describe "(Action Framework) Test Case 1: Service with one node that contains cmp with actions with multiple commands in it" do

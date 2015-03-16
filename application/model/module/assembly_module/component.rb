@@ -24,7 +24,7 @@ module DTK; class AssemblyModule
       local_branch = component_module.get_workspace_module_branch(am_version)
       raise ErrorUsage.new("Unable to find local branch") unless local_branch
 
-      base_branch.merge!(:version => am_version, :local_branch => local_branch[:display_name])
+      base_branch.merge!(:version => am_version, :local_branch => local_branch[:display_name], :current_branch_sha => local_branch[:current_sha])
       base_branch
     end
 
@@ -34,7 +34,18 @@ module DTK; class AssemblyModule
     def finalize_edit(component_module,module_branch,opts={})
       cmp_instances = get_applicable_component_instances(component_module)
       project_idh = component_module.get_project().id_handle()
-      Clone::IncrementalUpdate::Component.new(project_idh,module_branch).update?(cmp_instances,opts)
+      begin
+        Clone::IncrementalUpdate::Component.new(project_idh,module_branch).update?(cmp_instances,opts)
+      rescue Exception => e
+        sha = opts[:current_branch_sha]
+        if sha
+          repo = module_branch.get_repo()
+          repo.hard_reset_branch_to_sha(module_branch, sha)
+          module_branch.set_sha(sha)
+        end
+
+        raise e
+      end
     end
 
     def delete_modules?()

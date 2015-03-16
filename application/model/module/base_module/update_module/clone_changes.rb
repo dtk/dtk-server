@@ -20,6 +20,7 @@ module DTK; class BaseModule; class UpdateModule
         end
         assembly = version.get_assembly(@base_module.model_handle(:component))
         opts_finalize = (meta_file_changed ? {:meta_file_changed => true} : {})
+        opts_finalize.merge!(:current_branch_sha => opts[:current_branch_sha]) if opts[:current_branch_sha]
         AssemblyModule::Component.finalize_edit(assembly,@base_module,module_branch,opts_finalize)
       elsif ModuleDSL.contains_dsl_file?(impl_obj)
         if opts[:force_parse] or diffs_summary.meta_file_changed?() or (module_branch.dsl_parsed?() == false)

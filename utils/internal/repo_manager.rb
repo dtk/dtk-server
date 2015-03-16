@@ -109,6 +109,12 @@ module DTK
         adapter_repo.get_local_branches_diffs(repo_name, module_branch, base_branch, workspace_branch)
       end
 
+      def hard_reset_branch_to_sha(repo_name, module_branch, sha)
+        adapter_repo = get_adapter_repo(context(repo_name, module_branch))
+        # hard reset to specific sha in the branch
+        adapter_repo.hard_reset_to_branch(sha)
+      end
+
       def push_to_remote_repo(repo_name,branch,remote_name,remote_branch=nil)
         adapter_repo = get_adapter_repo(context(repo_name,branch))
         adapter_repo.push_changes({:remote_name=>remote_name,:remote_branch=>remote_branch})

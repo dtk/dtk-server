@@ -37,6 +37,10 @@ module DTK
       def get_local_branches_diffs(module_branch,base_branch, workspace_branch)
         RepoManager.get_local_branches_diffs(get_field?(:repo_name), module_branch, base_branch, workspace_branch)
       end
+
+      def hard_reset_branch_to_sha(module_branch, sha)
+        RepoManager.hard_reset_branch_to_sha(get_field?(:repo_name), module_branch, sha)
+      end
     end
   end
 end

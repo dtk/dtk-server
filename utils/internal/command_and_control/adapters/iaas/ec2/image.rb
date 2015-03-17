@@ -48,11 +48,12 @@ module DTK; module CommandAndControlAdapter
           'snapshotId' => 'Ebs.SnapshotId',
           'volumeSize' => 'Ebs.VolumeSize',
           'deleteOnTermination' => 'Ebs.DeleteOnTermination',
+          'virtualName' => 'VirtualName',
         }
         image_mappings.each do |image_mapping|
           mapping = {}
           name_mapping.each do |key, value|
-            mapping[value] = image_mapping[key]
+            mapping[value] = image_mapping[key] unless image_mapping[key].nil?
           end
           block_device_mapping << mapping
         end

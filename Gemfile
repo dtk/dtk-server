@@ -8,7 +8,7 @@ gem 'dtk-common-core', :github => 'rich-reactor8/dtk-common-repo'
 
 # required to start a server
 gem 'bundler','>= 1.1.5'
-gem 'fog','1.8.0'
+gem 'fog'
 gem 'ramaze','2012.04.14'
 gem 'sequel','3.25.0'
 gem 'activesupport','~> 3.0.0'
@@ -20,14 +20,14 @@ gem 'json','1.5.2'
 gem 'rspec','2.99.0'
 gem 'sshkey','1.6.1'
 gem 'sshkeyauth', '0.0.11'
-gem 'thin'
 gem 'iconv'
+gem 'thin'
 gem 'colorize','~> 0.5.8'
 # gem 'rack-contrib'
 gem 'awesome_print','1.1.0'
 gem 'celluloid'
 #TODO: can upgrade this after fix [#<NoMethodError: undefined method `attributes' for #<Excon::Response:0x0000000529aec8>>, ["/home/dtk18/server/utils/internal/cloud_connect.rb:27:in `hash_form'"
-gem 'excon', '0.16.10'
+gem 'excon'
 
 #TODO: moved back to 0.17.0.b7; looks like running into bug with 0.19.0 (7/27/13)
 gem 'rugged','0.17.0.b7'
@@ -52,7 +52,7 @@ end
 # Version That will work, bumped it so we could
 # bump fog as well.
 # gem 'chef','~>0.10.2' BuMP CHEF!!!!
-gem 'chef','10.16.2'
+gem 'chef'
 gem 'mcollective-client','2.2.3'
 #gem 'puppet','2.7.6'
 gem 'puppet','3.4.0'

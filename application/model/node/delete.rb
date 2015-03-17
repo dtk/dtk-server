@@ -4,7 +4,9 @@ module DTK; class Node
       # This wil be called only when self is non node group (i.e., top level node or target ref)
       def destroy_and_delete(opts={})
         if is_node_group?()
-          raise Error.new("Unexpected this is node group")
+          # TODO: support this; one way is to case on whether it has any members and if not
+          # allow it to be deleted; and if members indicate the syntax to delete an individual member"
+          raise ErrorUsage.new("Not supported: deleting a node group; its members can be deleted")
         end
         if is_target_ref?
           destroy_and_delete__target_ref(opts)

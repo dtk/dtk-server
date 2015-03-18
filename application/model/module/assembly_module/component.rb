@@ -38,8 +38,7 @@ module DTK; class AssemblyModule
       begin
         Clone::IncrementalUpdate::Component.new(project_idh,module_branch).update?(cmp_instances,opts)
       rescue Exception => e
-        sha = opts[:current_branch_sha]
-        if sha
+        if sha = opts[:current_branch_sha]
           repo = module_branch.get_repo()
           repo.hard_reset_branch_to_sha(module_branch, sha)
           module_branch.set_sha(sha)

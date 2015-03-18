@@ -66,4 +66,12 @@ gem 'redis'
 gem 'looksee'
 gem 'mustache', '~> 0.99.8'
 
-
+group :test do
+  gem 'mongo','1.9.2'
+  gem 'elasticsearch','1.0.6'
+  gem 'capybara','2.1.0'
+  gem 'rest-client'
+  gem 'headless','1.0.1'
+  gem 'selenium-webdriver','2.38.0'
+  gem 'capybara-webkit','1.1.1'
+end

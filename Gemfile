@@ -26,7 +26,6 @@ gem 'colorize','~> 0.5.8'
 # gem 'rack-contrib'
 gem 'awesome_print','1.1.0'
 gem 'celluloid'
-#TODO: can upgrade this after fix [#<NoMethodError: undefined method `attributes' for #<Excon::Response:0x0000000529aec8>>, ["/home/dtk18/server/utils/internal/cloud_connect.rb:27:in `hash_form'"
 gem 'excon'
 
 #TODO: moved back to 0.17.0.b7; looks like running into bug with 0.19.0 (7/27/13)

@@ -22,17 +22,7 @@ GEM
     activesupport (3.0.20)
     awesome_print (1.1.0)
     blankslate (2.1.2.4)
-    bson (1.9.2)
     builder (3.2.2)
-    capybara (2.1.0)
-      mime-types (>= 1.16)
-      nokogiri (>= 1.3.3)
-      rack (>= 1.0.0)
-      rack-test (>= 0.5.4)
-      xpath (~> 2.0)
-    capybara-webkit (1.1.1)
-      capybara (>= 2.0.2, < 2.2.0)
-      json
     celluloid (0.16.0)
       timers (~> 4.0.0)
     chef (11.6.2)
@@ -49,8 +39,6 @@ GEM
       ohai (>= 0.6.0, < 7.0.0)
       rest-client (>= 1.0.4, < 1.7.0)
       yajl-ruby (~> 1.1)
-    childprocess (0.5.5)
-      ffi (~> 1.0, >= 1.0.11)
     colorize (0.5.8)
     columnize (0.8.9)
     daemons (1.1.9)
@@ -62,14 +50,6 @@ GEM
     debugger-ruby_core_source (1.3.5)
     diff-lcs (1.2.5)
     docile (1.1.3)
-    elasticsearch (1.0.6)
-      elasticsearch-api (= 1.0.6)
-      elasticsearch-transport (= 1.0.6)
-    elasticsearch-api (1.0.6)
-      multi_json
-    elasticsearch-transport (1.0.6)
-      faraday
-      multi_json
     em-ssh (0.6.5)
       eventmachine
       net-ssh
@@ -77,9 +57,6 @@ GEM
     eventmachine (1.0.3)
     excon (0.44.4)
     facter (1.7.6)
-    faraday (0.9.1)
-      multipart-post (>= 1.2, < 3)
-    ffi (1.9.8)
     file-tail (1.0.12)
       tins (~> 0.5)
     fission (0.5.0)
@@ -169,7 +146,6 @@ GEM
       diff-lcs (~> 1.1)
       mime-types (~> 1.15)
       posix-spawn (~> 0.3.6)
-    headless (1.0.1)
     hiera (1.3.4)
       json_pure
     highline (1.7.1)
@@ -195,10 +171,7 @@ GEM
     mixlib-config (1.1.2)
     mixlib-log (1.6.0)
     mixlib-shellout (1.6.1)
-    mongo (1.9.2)
-      bson (~> 1.9.2)
     multi_json (1.11.0)
-    multipart-post (2.0.0)
     mustache (0.99.8)
     net-scp (1.2.1)
       net-ssh (>= 2.6.5)
@@ -227,8 +200,6 @@ GEM
       hiera (~> 1.0)
       rgen (~> 0.6.5)
     rack (1.4.5)
-    rack-test (0.6.3)
-      rack (>= 1.0)
     ramaze (2012.04.14)
       innate (>= 2012.03)
     rdoc (4.2.0)
@@ -251,7 +222,6 @@ GEM
       sexp_processor (~> 3.0)
     ruby_parser (2.3.1)
       sexp_processor (~> 3.0)
-    rubyzip (1.1.7)
     rufus-cloche (1.0.4)
       rufus-json (>= 1.0.3)
     rufus-dollar (1.0.4)
@@ -272,11 +242,6 @@ GEM
       rufus-scheduler (>= 2.0.16)
       rufus-treechecker (>= 1.0.8)
       sourcify (= 0.5.0)
-    selenium-webdriver (2.38.0)
-      childprocess (>= 0.2.5)
-      multi_json (~> 1.0)
-      rubyzip (~> 1.0)
-      websocket (~> 1.0.4)
     sequel (3.25.0)
     sexp_processor (3.2.0)
     sourcify (0.5.0)
@@ -299,9 +264,6 @@ GEM
     tins (0.13.2)
     tzinfo (1.1.0)
       thread_safe (~> 0.1)
-    websocket (1.0.7)
-    xpath (2.0.0)
-      nokogiri (~> 1.3)
     yajl-ruby (1.2.1)
 
 PLATFORMS
@@ -311,8 +273,6 @@ DEPENDENCIES
   activesupport (~> 3.0.0)
   awesome_print (= 1.1.0)
   bundler (>= 1.1.5)
-  capybara (= 2.1.0)
-  capybara-webkit (= 1.1.1)
   celluloid
   chef
   colorize (~> 0.5.8)
@@ -320,31 +280,26 @@ DEPENDENCIES
   docile
   dtk-common!
   dtk-common-core!
-  elasticsearch (= 1.0.6)
   em-ssh (= 0.6.5)
   eventmachine (= 1.0.3)
   excon
   fog
   grit (= 2.5.0)
-  headless (= 1.0.1)
   i18n
   iconv
   innate (= 2012.03)
   json (= 1.5.2)
   looksee
   mcollective-client (= 2.2.3)
-  mongo (= 1.9.2)
   mustache (~> 0.99.8)
   pg (= 0.14.1)
   puppet (= 3.4.0)
   ramaze (= 2012.04.14)
   redis
-  rest-client
   rspec (= 2.99.0)
   ruby_parser (= 2.3.1)
   rugged (= 0.17.0.b7)
   ruote (= 2.3.0.1)
-  selenium-webdriver (= 2.38.0)
   sequel (= 3.25.0)
   sshkey (= 1.6.1)
   sshkeyauth (= 0.0.11)

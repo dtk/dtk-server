@@ -421,7 +421,7 @@ module DTK
     def get_local_branches_diffs(repo_name, module_branch, base_branch, workspace_branch)
       base_sha  = sha_matching_branch_name(:remote,"origin/#{base_branch.to_s}")
       local_sha = sha_matching_branch_name(:local,workspace_branch)
-      get_diffs(local_sha, base_sha)
+      get_diffs(base_sha, local_sha)
     end
 
     def push_changes(opts={})

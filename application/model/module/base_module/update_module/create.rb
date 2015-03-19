@@ -53,7 +53,7 @@ module DTK; class BaseModule; class UpdateModule
       end
 
       # move top level folders/files in provider subfolder
-      Import.move_content_to_provider_subdir(repo, impl_obj) if opts[:move_to_provider_subdir]
+      Import.move_content_to_provider_subdir(repo, impl_obj) if Import::IMPORT_FORM.eql?('puppet_folder_form')
 
       dsl_updated_info = opts[:ret_dsl_updated_info]
       if dsl_updated_info && !dsl_updated_info.empty?

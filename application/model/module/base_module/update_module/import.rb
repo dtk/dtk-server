@@ -1,6 +1,11 @@
 # This imports a single module
 module DTK; class BaseModule; class UpdateModule
   class Import < self
+    # IMPORT_FORM can have values:
+    # 'flat_form' put all content in top level folder (default behavior)
+    # 'puppet_folder_form' put puppet content in puppet subfolder
+    IMPORT_FORM = 'flat_form'
+
     def initialize(base_module,version=nil)
       super(base_module)
       @module_branch = base_module.get_workspace_module_branch(version)
@@ -44,7 +49,7 @@ module DTK; class BaseModule; class UpdateModule
       dsl_created_info = ScaffoldImplementation.create_dsl(local_params.module_name(),config_agent_type,impl_obj,opts_scaffold)
 
       # move top level folders/files in provider subfolder
-      move_content_to_provider_subdir(repo, impl_obj)
+      move_content_to_provider_subdir(repo, impl_obj) if IMPORT_FORM.eql?('puppet_folder_form')
 
       # add dsl file and create DTK module objects from the dsl
       UpdateModule.new(component_module).add_dsl_to_impl_and_create_objects(dsl_created_info,project,impl_obj,module_branch_idh,local_params.version)
@@ -67,7 +72,7 @@ module DTK; class BaseModule; class UpdateModule
       local = ret_local(@version)
 
       # TODO: provider is hardcoded to puppet until we introduce more provider types
-      opts.merge!(:move_to_provider_subdir => true, :provider => 'puppet')
+      opts.merge!(:provider => 'puppet')
       create_info = create_needed_objects_and_dsl?(repo,local,opts)
       return create_info if create_info[:dsl_parse_error] && is_parsing_error?(create_info[:dsl_parse_error])
 
@@ -104,7 +109,6 @@ module DTK; class BaseModule; class UpdateModule
       repo  = repo_idh.create_object()
       local = ret_local(@version)
 
-      opts.merge!(:move_to_provider_subdir => true)
       create_info   = create_needed_objects_and_dsl?(repo,local,opts)
       return create_info if create_info[:dsl_parse_error] && is_parsing_error?(create_info[:dsl_parse_error])
 

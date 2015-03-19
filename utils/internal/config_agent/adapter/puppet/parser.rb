@@ -22,7 +22,7 @@ module DTK; class ConfigAgent; class Adapter::Puppet
 
       # look for manifest files in puppet/manifests (DTK-1951)
       if manifest_file_paths.empty?
-        manifest_file_paths = impl_obj.all_file_paths().select{|path|path =~ /^puppet\/manifests.+\.pp$/}        
+        manifest_file_paths = impl_obj.all_file_paths().select{|path|path =~ /^puppet\/manifests.+\.pp$/}
       end
 
       ret = ParseStructure::TopPS.new()

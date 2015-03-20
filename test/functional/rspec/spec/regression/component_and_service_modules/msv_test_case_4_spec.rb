@@ -30,7 +30,7 @@ describe "(Modules, Services and Versioning) Test Case 4: Get list of all assemb
 		include_context "Stage", dtk_common
 	end
 
-	context "List services after stage" do		
+	context "List services after stage" do
 		include_context "List services after stage", dtk_common
 	end
 
@@ -59,8 +59,8 @@ describe "(Modules, Services and Versioning) Test Case 4: Get list of all assemb
 	end
 
 	context "Delete service module from local filesystem" do
-    	include_context "Delete service module from local filesystem", service_module_filesystem_location, service_module_name
-  	end
+	include_context "Delete service module from local filesystem", service_module_filesystem_location, service_module_name
+	end
 
 	after(:all) do
 		puts "", ""

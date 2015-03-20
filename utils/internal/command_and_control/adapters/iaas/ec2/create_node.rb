@@ -129,7 +129,18 @@ module DTK; module CommandAndControlAdapter
             create_options.merge!(:availability_zone => avail_zone)
           end
           # end fix up
-          
+
+          # we check if assigned target has aws credentials assigned to it, if so we will use those
+          # credentials to create nodes
+          target_aws_creds = node.get_target_iaas_credentials()
+
+          # set VPC related options
+          if R8::Config[:ec2][:vpc_enable]
+            subnet_id = Ec2.conn(target_aws_creds).check_for_subnet(R8::Config[:ec2][:vpc][:subnet_id])
+            create_options.merge!(:subnet_id => subnet_id, :associate_public_ip => R8::Config[:ec2][:vpc][:associate_public_ip])
+            create_options.merge!(:groups => R8::Config[:ec2][:vpc][:security_group])
+          end
+ 
           unless create_options.has_key?(:user_data)
             if user_data = CommandAndControl.install_script(node)
               create_options[:user_data] = user_data
@@ -144,10 +155,6 @@ module DTK; module CommandAndControlAdapter
             end
 
           end
-            
-          # we check if assigned target has aws credentials assigned to it, if so we will use those
-          # credentials to create nodes
-          target_aws_creds = node.get_target_iaas_credentials()
             
           begin
             response = Ec2.conn(target_aws_creds).server_create(create_options)

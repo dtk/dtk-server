@@ -1,5 +1,6 @@
 source 'https://rubygems.org'
 
+gem 'require_all'
 gem 'awesome_print', '1.1.0'
 gem 'activerecord', '3.2.12'
 gem 'activerecord-postgresql-adapter', '0.0.1'

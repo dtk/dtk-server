@@ -11,12 +11,12 @@ require './lib/dtk_common'
 require './lib/service_modules_spec'
 require './lib/component_modules_spec'
 
-component_module_name_1 = "wget"
-git_ssh_repo_url_1 = "git@github.com:maestrodev/puppet-wget.git"
-local_component_module_name_1 = "local:wget"
-component_module_name_2 = "maven"
-git_ssh_repo_url_2 = "git@github.com:maestrodev/puppet-maven.git"
-local_component_module_name_2 = "local:maven"
+component_module_name_1 = "puppi"
+git_ssh_repo_url_1 = "git@github.com:example42/puppi.git"
+local_component_module_name_1 = "local:puppi"
+component_module_name_2 = "yum"
+git_ssh_repo_url_2 = "git@github.com:example42/puppet-yum.git"
+local_component_module_name_2 = "local:yum"
 component_module_filesystem_location = "~/dtk/component_modules/local"
 
 dtk_common = DtkCommon.new('', '')

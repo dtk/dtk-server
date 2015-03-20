@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-# Test Case 51: Import puppet forge (maven) but its dependency (maestrodev:wget) is already installed on server
+# Test Case 51: Import puppet forge (confluence) but its dependency (mkrakowitzer:deploy) is already installed on server
 
 require 'rubygems'
 require 'rest_client'
@@ -9,21 +9,21 @@ require 'awesome_print'
 require './lib/dtk_common'
 require './lib/component_modules_spec'
 
-puppet_forge_module_name = "maestrodev-maven"
-module_name = "maven"
-component_module_name = "maestrodev:maven"
-dependency_module_name = "wget"
-dependency_component_module_name = "maestrodev:wget"
-git_ssh_repo_url = "git@github.com:maestrodev/puppet-wget.git"
-namespace = "maestrodev"
+puppet_forge_module_name = "maestrodev-confluence"
+module_name = "confluence"
+component_module_name = "maestrodev:confluence"
+dependency_module_name = "deploy"
+dependency_component_module_name = "mkrakowitzer:deploy"
+git_ssh_repo_url = "git@github.com:mkrakowitzer/puppet-deploy.git"
+namespace = "mkrakowitzer"
 component_module_filesystem_location = '~/dtk/component_modules/maestrodev'
-grep_patterns_for_module_refs = ['wget:','namespace: maestrodev']
+grep_patterns_for_module_refs = ['deploy:','namespace: mkrakowitzer']
 dtk_common = DtkCommon.new('', '')
 
-describe "(Modules, Services and Versioning) Test Case 51: Import puppet forge (maven) but its dependency (maestrodev:wget) is already installed on server" do
+describe "(Modules, Services and Versioning) Test Case 51: Import puppet forge (confluence) but its dependency (mkrakowitzer:deploy) is already installed on server" do
 
   before(:all) do
-    puts "************************************************************************************************************************************************",""
+    puts "*********************************************************************************************************************************************************",""
   end
 
   context "Import component module from git repo to specific namespace" do

@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-# Test Case 50: Import puppet forge (maven) without specifying namespace and check its dependencies are installed correctly
+# Test Case 50: Import puppet forge (augeasproviders_apache) without specifying namespace and check its dependencies are installed correctly
 
 require 'rubygems'
 require 'rest_client'
@@ -9,19 +9,19 @@ require 'awesome_print'
 require './lib/dtk_common'
 require './lib/component_modules_spec'
 
-puppet_forge_module_name = "maestrodev-maven"
-module_name = "maven"
-component_module_name = "maestrodev:maven"
-dependency_module_name = "wget"
-dependency_component_module_name = "maestrodev:wget"
-component_module_filesystem_location = '~/dtk/component_modules/maestrodev'
-grep_patterns_for_module_refs = ['wget:','namespace: maestrodev']
+puppet_forge_module_name = "herculesteam-augeasproviders_apache"
+module_name = "augeasproviders_apache"
+component_module_name = "herculesteam:augeasproviders_apache"
+dependency_module_name = "augeasproviders_core"
+dependency_component_module_name = "herculesteam/augeasproviders_core"
+component_module_filesystem_location = '~/dtk/component_modules/herculesteam'
+grep_patterns_for_module_refs = ['augeasproviders_core:','namespace: herculesteam']
 dtk_common = DtkCommon.new('', '')
 
-describe "(Modules, Services and Versioning) Test Case 50: Import puppet forge (maven) without specifying namespace and check its dependencies are installed correctly" do
+describe "(Modules, Services and Versioning) Test Case 50: Import puppet forge (augeasproviders_apache) without specifying namespace and check its dependencies are installed correctly" do
 
   before(:all) do
-    puts "************************************************************************************************************************************************************",""
+    puts "***************************************************************************************************************************************************************************",""
   end
 
   context "Import module from puppet forge" do

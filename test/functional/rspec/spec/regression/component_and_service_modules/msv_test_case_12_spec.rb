@@ -21,9 +21,6 @@ component_module_filesystem_location = '~/dtk/component_modules/dtk17'
 service_filesystem_location = '~/dtk/service_modules/dtk17'
 default_service_filesystem_location = '~/dtk/service_modules'
 local_service_filesystem_location = '~/dtk/service_modules/local'
-component_module_namespace = "dtk17"
-component_module_name = "test_module"
-local_component_module_name = "dtk17:test_module"
 
 dtk_common = DtkCommon.new('', '')
 
@@ -31,10 +28,6 @@ describe "(Modules, Services and Versioning) Test Case 12: Export service module
 
   before(:all) do
     puts "***********************************************************************************************************************************************************",""
-  end
-
-  context "Import component module function" do
-    include_context "Import remote component module", component_module_namespace + "/" + component_module_name
   end
 
   context "Import service module function" do
@@ -101,14 +94,6 @@ describe "(Modules, Services and Versioning) Test Case 12: Export service module
 
   context "Delete #{existing_service_module_name} service module from local filesystem" do
     include_context "Delete service module from local filesystem", service_filesystem_location, existing_service_module_name
-  end
-
-  context "Delete component module" do
-    include_context "Delete component module", dtk_common, local_component_module_name
-  end
-
-  context "Delete component module from local filesystem" do
-    include_context "Delete component module from local filesystem", component_module_filesystem_location, component_module_name
   end
 
   after(:all) do

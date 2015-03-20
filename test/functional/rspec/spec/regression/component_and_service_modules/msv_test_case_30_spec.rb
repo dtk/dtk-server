@@ -11,10 +11,10 @@ require './lib/dtk_common'
 require './lib/service_modules_spec'
 require './lib/component_modules_spec'
 
-dependency_module = "maestrodev/wget"
-component_module_name = "maven"
-local_component_module_name = "local:maven"
-git_ssh_repo_url = "git@github.com:maestrodev/puppet-maven.git"
+dependency_module = "maestrodev/rvm"
+component_module_name = "geminabox"
+local_component_module_name = "local:geminabox"
+git_ssh_repo_url = "git@github.com:maestrodev/puppet-geminabox.git"
 component_module_filesystem_location = "~/dtk/component_modules/local"
 
 dtk_common = DtkCommon.new('', '')

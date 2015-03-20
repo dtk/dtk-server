@@ -9,8 +9,8 @@ require 'awesome_print'
 require './lib/dtk_common'
 require './lib/component_modules_spec'
 
-component_module_name = "tftp"
-git_ssh_repo_url = "git@github.com:puppetlabs/puppetlabs-tftp.git"
+component_module_name = "ntp"
+git_ssh_repo_url = "git@github.com:puppetlabs/puppetlabs-ntp.git"
 namespace_to_import_1 = "test_namespace_1"
 namespace_to_import_2 = "test_namespace_2"
 namespace_component_module_filesystem_location_1 = "~/dtk/component_modules/test_namespace_1"

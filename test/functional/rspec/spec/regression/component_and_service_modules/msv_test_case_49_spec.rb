@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-# Test Case 49: Import puppet forge (maven) with specifying namespace and check its dependencies are installed correctly
+# Test Case 49: Import puppet forge (erlang) with specifying namespace and check its dependencies are installed correctly
 
 require 'rubygems'
 require 'rest_client'
@@ -9,18 +9,18 @@ require 'awesome_print'
 require './lib/dtk_common'
 require './lib/component_modules_spec'
 
-puppet_forge_module_name = "maestrodev-maven"
-module_name = "maven"
+puppet_forge_module_name = "garethr-erlang"
+module_name = "erlang"
 namespace = "test"
-component_module_name = "test:maven"
-dependency_module_name = "wget"
-dependency_component_module_name = "maestrodev:wget"
+component_module_name = "test:erlang"
+dependency_module_name = "epel"
+dependency_component_module_name = "stahnma:epel"
 component_module_filesystem_location = '~/dtk/component_modules/test'
-dependency_component_module_filesystem_location = '~/dtk/component_modules/maestrodev'
-grep_patterns_for_module_refs = ['wget:','namespace: maestrodev']
+dependency_component_module_filesystem_location = '~/dtk/component_modules/stahnma'
+grep_patterns_for_module_refs = ['epel:','namespace: stahnma']
 dtk_common = DtkCommon.new('', '')
 
-describe "(Modules, Services and Versioning) Test Case 49: Import puppet forge (maven) with specifying namespace and check its dependencies are installed correctly" do
+describe "(Modules, Services and Versioning) Test Case 49: Import puppet forge (erlang) with specifying namespace and check its dependencies are installed correctly" do
 
   before(:all) do
     puts "*********************************************************************************************************************************************************",""

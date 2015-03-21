@@ -21,7 +21,7 @@ module DTK
       def violations?()
         missing   = Array.new
         multi_ns  = Hash.new
-        refs      = debug_hash_form()
+        refs      = hash_form()
 
         refs.each do |k,v|
           if k == :refs
@@ -53,8 +53,42 @@ module DTK
           end
         end
       end
+
+
+      # opts[:stratagy] can be
+      # - :stop_if_top_level_match (default)
+      # - :find_all_matches
+      def module_matches?(module_name,opts={})
+        ret = Array.new
+        strategy = opts[:strategy] || DefaultStratagy
+        @module_refs.each_pair do |ref_module_name,subtree|
+          if module_name == ref_module_name
+            if namespace = subtree.namespace?() 
+              ret << namespace unless ret.include?(namespace)
+              if strategy == :stop_if_top_level_match
+                return ret
+              end
+            else
+              Log.error("Unexpected that no namespace info")
+            end
+          end
+          if subtree
+            subtree.module_matches?(module_name,:strategy => :find_all_matches).each do |namespace|
+              ret << namespace unless ret.include?(namespace)
+            end
+          end
+        end
+        ret
+      end
+      DefaultStratagy = :stop_if_top_level_match
+
+      def namespace?()
+        if @context.kind_of?(ModuleRef)
+          (@context||{})[:namespace_info]
+        end
+      end
       
-      def debug_hash_form()
+      def hash_form()
         ret = Hash.new
         if @context.kind_of?(Assembly)
           ret[:type] = Workspace.is_workspace?(@context) ? 'Workspace' : 'Assembly::Instance'
@@ -68,7 +102,7 @@ module DTK
         end
         
         refs = @module_refs.inject(Hash.new) do |h,(module_name,subtree)|
-          h.merge(module_name => subtree && subtree.debug_hash_form())
+          h.merge(module_name => subtree && subtree.hash_form())
         end
         ret[:refs] = refs unless refs.empty?
 
@@ -80,6 +114,7 @@ module DTK
       end
 
      private
+
       def self.create_module_refs_starting_from_assembly(assembly_instance,assembly_branch,components)
         # get relevant service and component module branches 
         ndx_cmps = Hash.new #components indexed (grouped) by branch id

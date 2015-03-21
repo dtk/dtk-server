@@ -13,29 +13,19 @@ module DTK; class Component
 
     # TODO: need to determine when to clear the cached information which is stored by setting implementation_id on the
     # the includes_module objects
-    def self.get_matching_impls(components,opts={})
+    def self.get_matching_impls(components,assembly_instance)
       component_idhs = components.map{|r|r.id_handle()}
       ret = impls = Component.get_implementations(component_idhs)
       include_modules = get_include_mods_with_impls(component_idhs)
       return ret if include_modules.empty?()
 
       # if any include_module is not linked to a implementation then find implementations for include_modules
-      if include_modules.find{|incl_mod|incl_mod[:implementation].nil?}
-        module_refs_tree =
-          if assembly = opts[:assembly]
-            assembly_branch = AssemblyModule::Service.get_assembly_branch(assembly)
-            ModuleRefs::Tree.create(assembly,assembly_branch,components)
-          end
+      incl_mods_to_process = include_modules.select{|incl_mod|incl_mod[:implementation].nil?}
+      unless incl_mods_to_process.empty?
+        assembly_branch = AssemblyModule::Service.get_assembly_branch(assembly_instance)
+        module_refs_tree = ModuleRefs::Tree.create(assembly_instance,assembly_branch,components)
 
-module_refs_tree = nil
-        mod_incl_viols = module_refs_tree ? 
-          ModuleRefsTree.new(module_refs_tree,impls,include_modules).find_violations_and_set_impl(components) :
-          WithoutModuleRefsTree.find_violations_and_set_impl(components,impls,include_modules) 
-          
-        unless mod_incl_viols.empty?
-          raise Error.new("Need to implement code that presents include_module violations (#{mod_incl_viols.inspect})")
-        end
-          # TODO: there is more efficient way of doing this than calling get_include_mods_with_impls again
+        ModuleRefsTreeProcessing.new(module_refs_tree).set_implementation_on_include_modules(incl_mods_to_process)
         include_modules = get_include_mods_with_impls(component_idhs)
       end
 
@@ -75,6 +65,59 @@ module_refs_tree = nil
       }
       incl_mod_mh = component_idhs.first.createMH(:component_include_module)
       get_objs(incl_mod_mh,sp_hash)
+    end
+
+    class ModuleRefsTreeProcessing
+      def initialize(module_refs_tree)
+        @module_refs_tree = module_refs_tree
+      end
+      def set_implementation_on_include_modules(include_modules)
+        incl_mods_info = Array.new
+        include_modules.each do |incl_mod|
+          module_name = incl_mod.module_name()
+          matching_namespaces = @module_refs_tree.module_matches?(incl_mod.module_name())
+          if matching_namespaces.empty?
+            raise ErrorUsage.new("Cannot find namespace for module '#{module_name}'")
+          else
+            if matching_namespaces.size > 1
+              Log.error("multiple namespaces (#{matching_namespaces.join(',')}) match when trying to disambiguate include for '#{module_name}'; picking first")
+            end
+            namespace = matching_namespaces.first
+            version = nil
+            incl_mods_info << IncludeModuleInfo.new(module_name,namespace,version)
+          end
+        end
+        impls = matching_implementations(incl_mods_info)
+pp [impls]
+raise Error.new("got here")
+        impls_to_set_on_incl_mods = Array.new
+        unless impls_to_set_on_incl_mods.empty? 
+          # if ret is not empty then it will be indicating that there is an error
+          # not doing updates if any errors
+          if ret.empty?
+            incl_mod_mh = components.first.model_handle(:component_include_module)
+            IncludeModule.update_from_rows(incl_mod_mh,impls_to_set_on_incl_mods)
+          end
+        end
+        
+        ret
+      end
+      private
+      IncludeModuleInfo = Struct.new(:module_name,:module_namespace,:version)
+      def self.matching_implementations(incl_mods_info)
+        disjuncts = incl_mods_info.map do |incl_mod_info|
+          [:and, 
+           [:eq,:module_name,incl_mod_info[:module_name]],
+           [:eq,:module_namespace,incl_mod_info[:module_namespace]],
+           [:eq,:version,Implementation.version_field(incl_mod_info[:version])]]
+        end
+        filter = ((disjuncts.size == 1) ? disjuncts.first : ([:or] + disjuncts))
+        sp_hash = {
+          :cols => [:id,:group_id,:display_name,:repo,:branch,:module_name,:version],
+          :filter => filter
+        }
+        Model.get_objs(impl_mh,sp_hash)
+      end
     end
 
     # TODO: this is legacy and may be deprecated

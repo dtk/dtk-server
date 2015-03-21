@@ -44,7 +44,7 @@ module DTK
           :components_with_attributes => cmps_with_attrs, 
           :node_manifest              => puppet_manifests, 
           :inter_node_stage           => config_node.inter_node_stage(),
-          :version_context            => get_version_context(config_node,Aux.hash_subset(opts,[:assembly])),
+          :version_context            => get_version_context(config_node,opts[:assembly]),
           # TODO: agent not doing puppet version per run; it just can be set when node is created
           :puppet_version             => config_node[:node][:puppet_version]
         }
@@ -104,7 +104,7 @@ module DTK
       end
 
      private
-      def get_version_context(config_node,opts={})
+      def get_version_context(config_node,assembly_instance)
         ret =  Array.new
         component_actions = config_node[:component_actions]
         if component_actions.empty?()
@@ -116,7 +116,7 @@ module DTK
 
         # want components to be unique
         components = component_actions.inject(Hash.new){|h,r|h.merge(r[:component][:id] => r[:component])}.values
-        ComponentModule::VersionContextInfo.get_in_hash_form(components,opts)
+        ComponentModule::VersionContextInfo.get_in_hash_form(components,assembly_instance)
       end
 
       def assembly_attributes(config_node)

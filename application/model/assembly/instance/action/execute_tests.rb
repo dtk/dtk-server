@@ -219,14 +219,12 @@ module DTK
         end
 
         def get_version_contexts(test_components)
-          version_contexts =
-            unless test_components.empty?
-              TestModule::VersionContextInfo.get_in_hash_form(test_components)
-            else
-              Log.error("Unexpected that test_components is empty")
-              nil
-            end
-          version_contexts
+          unless test_components.empty?
+            TestModule::VersionContextInfo.get_in_hash_form(test_components,@assembly_instance)
+          else
+            Log.error("Unexpected that test_components is empty")
+            nil
+          end
         end
 
         #TODO: deprecate

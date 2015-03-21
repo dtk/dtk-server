@@ -206,7 +206,7 @@ module DTK; class  Assembly
         cmps = nodes_and_cmps.map{|r|r[:nested_component]}
         assembly_branch  = AssemblyModule::Service.get_assembly_branch(self)
         module_refs_tree = ModuleRefs::Tree.create(self, assembly_branch, cmps)
-        module_refs_tree.debug_hash_form()
+        module_refs_tree.hash_form()
       end
 
      private

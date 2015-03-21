@@ -2,8 +2,8 @@ module DTK
   class BaseModule < Model
     module VersionContextInfo 
       # returns a hash with keys: :repo,:branch,:implementation, :sha (optional)
-      def self.get_in_hash_form(components)
-        impls = Component::IncludeModule.get_matching_impls(components)
+      def self.get_in_hash_form(components,opts={})
+        impls = Component::IncludeModule.get_matching_impls(components,opts)
         sha_info = get_sha_indexed_by_impl(components)
         impls.map{|impl|hash_form(impl,sha_info[impl[:id]])}
       end

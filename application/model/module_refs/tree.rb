@@ -1,4 +1,3 @@
-#TODO: see how to treat include module's implementation_id; might deprecate
 module DTK
   class ModuleRefs
     # This class is used to build a hierarchical dependency tree and to detect conflicts

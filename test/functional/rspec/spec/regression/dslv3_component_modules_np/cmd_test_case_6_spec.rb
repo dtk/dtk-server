@@ -19,7 +19,7 @@ component_module_name = 'temp'
 component_module_namespace = 'dtk17'
 local_component_module_name = 'dtk17:temp'
 component_module_filesystem_location = "~/dtk/component_modules/dtk17"
-file_for_change_location = "./spec/regression/dslv3_component_modules/resources/cmd_test_case_6_dtk.model.yaml"
+file_for_change_location = "./spec/regression/dslv3_component_modules_np/resources/cmd_test_case_6_dtk.model.yaml"
 file_for_change = "dtk.model.yaml"
 
 dtk_common = DtkCommon.new(service_name, assembly_name)

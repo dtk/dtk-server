@@ -14,7 +14,7 @@ local_component_module_name = 'dtk17:temp'
 component_module_filesystem_location = "~/dtk/component_modules/dtk17"
 component_name = 'source'
 attribute_name = 'hash_attr'
-file_for_change_location = "./spec/regression/dslv3_component_modules/resources/cmd_test_case_15_dtk.model.yaml"
+file_for_change_location = "./spec/regression/dslv3_component_modules_np/resources/cmd_test_case_15_dtk.model.yaml"
 file_for_change = "dtk.model.yaml"
 attribute_value_hash = {"key1"=>nil}
 

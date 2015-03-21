@@ -16,7 +16,7 @@ component_name = 'source'
 attribute_name_1 = 'array_attr'
 attribute_name_2 = 'hash_attr'
 attribute_value = nil
-file_for_change_location = "./spec/regression/dslv3_component_modules/resources/cmd_test_case_14_dtk.model.yaml"
+file_for_change_location = "./spec/regression/dslv3_component_modules_np/resources/cmd_test_case_14_dtk.model.yaml"
 file_for_change = "dtk.model.yaml"
 
 dtk_common = DtkCommon.new("", "")

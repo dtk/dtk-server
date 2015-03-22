@@ -1,3 +1,8 @@
+# TODO: think best approach is to recursively add includes or to have a new object 
+# maybe better to just hang includes off of the component type as opposed to the cmponent instance
+# issue is after first level 'loose includes' because just know what component module to bring in.
+# so maybe have indirect ones hang off of assembly component module branches
+# also may return module branches not implementations since what relly need is the branch
 module DTK; class Component
   class IncludeModule < Model
     def self.common_columns()

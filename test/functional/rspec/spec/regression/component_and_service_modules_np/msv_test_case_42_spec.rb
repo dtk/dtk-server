@@ -19,8 +19,8 @@ service_module_name = "test_service_module_3"
 service_module = "r8:test_service_module_3"
 r8_service_module_filesystem_location = '~/dtk/service_modules/r8'
 r8_component_module_filesystem_location = '~/dtk/component_modules/r8'
-file_for_change_location_1 = "./spec/regression/component_and_service_modules/resources/msv_test_case_42_1_module_refs.yaml"
-file_for_change_location_2 = "./spec/regression/component_and_service_modules/resources/msv_test_case_42_2_module_refs.yaml"
+file_for_change_location_1 = "./spec/regression/component_and_service_modules_np/resources/msv_test_case_42_1_module_refs.yaml"
+file_for_change_location_2 = "./spec/regression/component_and_service_modules_np/resources/msv_test_case_42_2_module_refs.yaml"
 file_for_add = "module_refs.yaml"
 file_for_remove = "module_refs.yaml"
 

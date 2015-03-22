@@ -27,8 +27,7 @@ module DTK; class Component
       # if any include_module is not linked to a implementation then find implementations for include_modules
       incl_mods_to_process = include_modules.select{|incl_mod|incl_mod[:implementation].nil?}
       unless incl_mods_to_process.empty?
-        assembly_branch = AssemblyModule::Service.get_assembly_branch(assembly_instance)
-        module_refs_tree = ModuleRefs::Tree.create(assembly_instance,assembly_branch,components)
+        module_refs_tree = ModuleRefs::Tree.create(assembly_instance,:components => components)
 
         ModuleRefsTreeProcessing.new(module_refs_tree).set_implementation_on_include_modules(incl_mods_to_process)
         include_modules = get_include_mods_with_impls(component_idhs)

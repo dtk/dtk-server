@@ -1,24 +1,10 @@
-# TODO: think best approach is to recursively add includes or to have a new object 
-# maybe better to just hang includes off of the component type as opposed to the cmponent instance
-# issue is after first level 'loose includes' because just know what component module to bring in.
-# so maybe have indirect ones hang off of assembly component module branches
-# also may return module branches not implementations since what relly need is the branch
-module DTK; class Component
-  class IncludeModule < Model
-    def self.common_columns()
-      [:id,:group_id,:display_name,:version_constraint,:implementation_id]
-    end
-
-    def module_name()
-      get_field?(:display_name)
-    end
-
-    # For all components in components, this method returns its implementation plus 
-    # does recursive anaysis to follow the components includes to find other components that must be included also
-
-    # TODO: need to determine when to clear the cached information which is stored by setting implementation_id on the
-    # the includes_module objects
-    def self.get_matching_impls(components,assembly_instance)
+# TODO: first we can create on the fly and then we can handle persisting; we will create by
+# getting the whole locked set, the object that gets persisted, and then given set of components we filter out what is not relevant 
+module DTK
+  class ModuleRefs
+    class Lock
+      # 
+      def self.compute(assembly_instance)
       component_idhs = components.map{|r|r.id_handle()}
       ret = impls = Component.get_implementations(component_idhs)
       include_modules = get_include_mods_with_impls(component_idhs)

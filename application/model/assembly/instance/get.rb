@@ -59,6 +59,15 @@ module DTK; class Assembly; class Instance
       Component::Instance.get_objs(model_handle(:component_instance),sp_hash)
     end
 
+    def get_component_instances(opts={})
+      sp_hash = {
+        :cols => opts[:cols] || [:id,:group_id,:display_name,:component_type],
+        :filter => [:eq,:assembly_id,id()]
+      }
+      Component::Instance.get_objs(model_handle(:component_instance),sp_hash)
+    end
+
+
     def get_augmented_components(opts=Opts.new)
       ret = Array.new
       rows = get_objs(:cols => [:instance_nodes_and_cmps_summary_with_namespace])

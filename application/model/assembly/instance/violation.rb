@@ -84,10 +84,8 @@ module DTK
         multiple_ns   = Hash.new
         return ret if cmps.empty?
 
-        assembly_branch = AssemblyModule::Service.get_assembly_branch(self)
-
         begin
-          module_refs_tree = ModuleRefs::Tree.create(self,assembly_branch,cmps)
+          module_refs_tree = ModuleRefs::Tree.create(self,:components => cmps)
         rescue ErrorUsage => e
           ret << Violation::HasItselfAsDependency.new(e.message)
           return ret

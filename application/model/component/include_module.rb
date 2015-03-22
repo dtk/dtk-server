@@ -72,6 +72,7 @@ module DTK; class Component
         @module_refs_tree = module_refs_tree
       end
       def set_implementation_on_include_modules(include_modules)
+        # compute include mdoule info array
         incl_mods_info = Array.new
         include_modules.each do |incl_mod|
           module_name = incl_mod.module_name()
@@ -84,36 +85,46 @@ module DTK; class Component
             end
             namespace = matching_namespaces.first
             version = nil
-            incl_mods_info << IncludeModuleInfo.new(module_name,namespace,version)
+            incl_mods_info << IncludeModuleInfo.new(incl_mod.id,module_name,namespace,version)
           end
         end
-        impls = matching_implementations(incl_mods_info)
-pp [impls]
-raise Error.new("got here")
+
+        # compute implementations indexed by namespace and module name
+        ndx_impls = Hash.new
+        impl_mh = include_modules.first.model_handle(:implementation)
+        matching_implementations(impl_mh,incl_mods_info).each do |impl|
+         (ndx_impls[impl[:module_namespace]] ||= Hash.new)[impl[:module_name]] = impl
+        end
+
+
         impls_to_set_on_incl_mods = Array.new
-        unless impls_to_set_on_incl_mods.empty? 
-          # if ret is not empty then it will be indicating that there is an error
-          # not doing updates if any errors
-          if ret.empty?
-            incl_mod_mh = components.first.model_handle(:component_include_module)
-            IncludeModule.update_from_rows(incl_mod_mh,impls_to_set_on_incl_mods)
+        incl_mods_info.each do |info|
+          if impl = (ndx_impls[info.module_namespace]||{})[info.module_name]
+            impls_to_set_on_incl_mods << {:id => info.id, :implementation_id => impl[:id]}
+          else
+            Log.error("Cannot find implemenenation matching '#{info.module_namespace}:#{info.module_name}'; skipping this item")
           end
         end
-        
-        ret
+
+        # update the include rows with the implementation ids
+        unless impls_to_set_on_incl_mods.empty? 
+          incl_mod_mh = include_modules.first.model_handle(:component_include_module)
+          IncludeModule.update_from_rows(incl_mod_mh,impls_to_set_on_incl_mods)
+        end
       end
-      private
-      IncludeModuleInfo = Struct.new(:module_name,:module_namespace,:version)
-      def self.matching_implementations(incl_mods_info)
+
+     private
+      IncludeModuleInfo = Struct.new(:id,:module_name,:module_namespace,:version)
+      def matching_implementations(impl_mh,incl_mods_info)
         disjuncts = incl_mods_info.map do |incl_mod_info|
           [:and, 
-           [:eq,:module_name,incl_mod_info[:module_name]],
-           [:eq,:module_namespace,incl_mod_info[:module_namespace]],
-           [:eq,:version,Implementation.version_field(incl_mod_info[:version])]]
+           [:eq,:module_name,incl_mod_info.module_name],
+           [:eq,:module_namespace,incl_mod_info.module_namespace],
+           [:eq,:version,Implementation.version_field(incl_mod_info.version)]]
         end
         filter = ((disjuncts.size == 1) ? disjuncts.first : ([:or] + disjuncts))
         sp_hash = {
-          :cols => [:id,:group_id,:display_name,:repo,:branch,:module_name,:version],
+          :cols => [:id,:group_id,:display_name,:repo,:branch,:module_name,:module_namespace,:version],
           :filter => filter
         }
         Model.get_objs(impl_mh,sp_hash)

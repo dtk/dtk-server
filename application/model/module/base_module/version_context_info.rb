@@ -3,6 +3,12 @@ module DTK
     module VersionContextInfo 
       # returns a hash with keys: :repo,:branch,:implementation, :sha (optional)
       def self.get_in_hash_form(components,assembly_instance)
+        locked = ModuleRefs::Lock.compute(assembly_instance)
+        pp [:locked,locked]
+raise ErrorUsage.new()
+        # TODO: next use include information to prune
+        
+        # TODO: will deprecate below for above
         impls = Component::IncludeModule.get_matching_impls(components,assembly_instance)
         sha_info = get_sha_indexed_by_impl(components)
         impls.map{|impl|hash_form(impl,sha_info[impl[:id]])}

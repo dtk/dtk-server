@@ -2,6 +2,9 @@ module DTK
   class ModuleRefs
     # This class is used to build a hierarchical dependency tree and to detect conflicts
     class Tree 
+      r8_nested_require('tree','collapsed')
+      include Collapsed::Mixin
+
       attr_reader :module_branch
       def initialize(module_branch,context=nil)
         @module_branch = module_branch
@@ -57,40 +60,6 @@ module DTK
         end
       end
 
-
-      # opts[:stratagy] can be
-      # - :stop_if_top_level_match (default)
-      # - :find_all_matches
-      def module_matches?(module_name,opts={})
-        ret = Array.new
-        strategy = opts[:strategy] || DefaultStratagy
-        @module_refs.each_pair do |ref_module_name,subtree|
-          if module_name == ref_module_name
-            if namespace = subtree.namespace?() 
-              ret << namespace unless ret.include?(namespace)
-              if strategy == :stop_if_top_level_match
-                return ret
-              end
-            else
-              Log.error("Unexpected that no namespace info")
-            end
-          end
-          if subtree
-            subtree.module_matches?(module_name,:strategy => :find_all_matches).each do |namespace|
-              ret << namespace unless ret.include?(namespace)
-            end
-          end
-        end
-        ret
-      end
-      DefaultStratagy = :stop_if_top_level_match
-
-      def namespace?()
-        if @context.kind_of?(ModuleRef)
-          (@context||{})[:namespace_info]
-        end
-      end
-      
       def hash_form()
         ret = Hash.new
         if @context.kind_of?(Assembly)
@@ -116,8 +85,13 @@ module DTK
         @module_refs[module_name] = child
       end
 
-     private
+      def namespace?()
+        if @context.kind_of?(ModuleRef)
+          (@context||{})[:namespace_info]
+        end
+      end
 
+     private
       def self.create_module_refs_starting_from_assembly(assembly_instance,assembly_branch,components)
         # get relevant service and component module branches 
         ndx_cmps = Hash.new #components indexed (grouped) by branch id

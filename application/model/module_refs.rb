@@ -5,6 +5,7 @@ module DTK
     r8_nested_require('module_refs','component_dsl_form')
     r8_nested_require('module_refs','matching_templates')
     r8_nested_require('module_refs','tree')
+    r8_nested_require('module_refs','lock')
     include MatchingTemplatesMixin
 
     attr_reader :parent, :component_modules

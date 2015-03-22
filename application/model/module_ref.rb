@@ -3,7 +3,7 @@ module DTK
     r8_nested_require('module_ref','version_info')
 
     def self.common_columns()
-      [:id,:display_name,:group_id,:module_name,:module_type,:version_info,:namespace_info]
+      [:id,:display_name,:group_id,:module_name,:module_type,:version_info,:namespace_info,:branch_id]
     end
 
     def self.reify(mh,object)

@@ -1,5 +1,5 @@
-module DTK; class ModuleRefs; class Tree
-  class Collapsed
+module DTK; class ModuleRefs
+  class Lock
     class Element 
       attr_reader :namespace,:module_name,:level,:children_module_names
       attr_writer :implementation
@@ -16,4 +16,5 @@ module DTK; class ModuleRefs; class Tree
       end
     end
   end
-end; end; end
+end; end
+

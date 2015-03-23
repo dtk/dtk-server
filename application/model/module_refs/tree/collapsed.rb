@@ -1,8 +1,6 @@
 module DTK; class ModuleRefs
   class Tree
     class Collapsed < Hash
-      r8_nested_require('collapsed','element')
-
       module Mixin
         def collapse(opts={})
           ret = Collapsed.new
@@ -23,7 +21,7 @@ module DTK; class ModuleRefs
             end
             
             if namespace = subtree.namespace?() 
-              (ret[module_name] ||= Array.new) << Element.new(namespace,module_name,level,children_module_names)
+              (ret[module_name] ||= Array.new) << Lock::Element.new(namespace,module_name,level,children_module_names)
             else
               Log.error("Unexpected that no namespace info")
             end

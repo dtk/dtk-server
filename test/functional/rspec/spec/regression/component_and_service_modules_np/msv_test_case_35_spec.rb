@@ -69,6 +69,10 @@ describe "(Modules, Services and Versioning) Test Case 35: Install component mod
     include_context "Delete component module from local filesystem", dtk17_component_module_filesystem_location, component_module_name
   end
 
+  context "Delete component module from remote" do
+    include_context "Delete component module from remote repo", dtk_common, component_module_name, new_namespace
+  end
+
   after(:all) do
     puts "", ""
   end

@@ -1,7 +1,7 @@
 module DTK; class ModuleRefs
   class Tree
     class Collapsed < Hash
-      Element = Struct.new(:module_name,:namespace,:level,:implementation_id)
+      r8_nested_require('collapsed','element')
 
       module Mixin
         def collapse(opts={})
@@ -13,7 +13,7 @@ module DTK; class ModuleRefs
               next
             end
             
-            (ret[module_name] ||= Array.new) << Element.new(module_name,namespace,level,nil)
+            (ret[module_name] ||= Array.new) << Element.new(namespace,module_name,level)
             
             # process sub tree
             subtree.collapse(:level => level+1).each_pair do |subtree_module_name,subtree_els|
@@ -36,12 +36,64 @@ module DTK; class ModuleRefs
         if strategy == :pick_first_level
           choose_namespaces__pick_first_level!()
         else
-          raise Error.new("Curerntly not supporting namespace resolution strategy '#{strategy}'")
+          raise Error.new("Currently not supporting namespace resolution strategy '#{strategy}'")
         end
       end
       DefaultStrategy = :pick_first_level
 
+      def add_implementations!(assembly_instance)
+        ndx_impls = get_relevant_ndx_implementations(assembly_instance)
+        each_element do |el|
+          ndx = impl_index(el.namespace,el.module_name)
+          if impl = ndx_impls[ndx]
+            el.implementation = impl  
+          end
+        end
+        self
+      end
+
      private
+      def impl_index(namespace,module_name)
+        "#{namespace}:#{module_name}"
+      end
+
+      # returns implementations indexed by impl_index
+      def get_relevant_ndx_implementations(assembly_instance)
+        base_version_field = Implementation.version_field(BaseVersion)
+        assembly_version_field = Implementation.version_field(assembly_version(assembly_instance))
+        disjuncts = Array.new
+        each_element do |el|
+          disjunct =
+            [:and, 
+             [:eq,:module_name,el.module_name],
+             [:eq,:module_namespace,el.namespace],
+             [:oneof,:version,[base_version_field,assembly_version_field]]
+            ]
+          disjuncts << disjunct
+        end
+        filter = ((disjuncts.size == 1) ? disjuncts.first : ([:or] + disjuncts))
+        sp_hash = {
+          :cols => [:id,:group_id,:display_name,:repo,:branch,:module_name,:module_namespace,:version],
+          :filter => filter
+        }
+        # get the implementations that meet sp_hash, but if have two matches for a module_name/module_namespace pair
+        # return just one that matches the assembly version
+        ret = Hash.new
+        Model.get_objs(assembly_instance.model_handle(:implementation),sp_hash).each do |r|
+          ndx = impl_index(r[:module_namespace],r[:module_name])
+          # if ndx_ret[ndx], dont replace if what is there is the assembly branch
+          unless (ret[ndx]||{})[:version] == assembly_version_field
+            ret[ndx] = r
+          end
+        end
+        ret
+      end
+      BaseVersion = nil
+      
+      def assembly_version(assembly_instance)
+        ModuleVersion.ret(assembly_instance)
+      end
+                                                  
       def choose_namespaces__pick_first_level!(opts={})
         each_pair do |module_name,els|
           if els.size > 1
@@ -57,6 +109,10 @@ module DTK; class ModuleRefs
           end
         end
         self
+      end
+
+      def each_element(&block)
+        values.each{|els|els.each{|el|block.call(el)}}
       end
 
     end

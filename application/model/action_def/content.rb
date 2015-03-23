@@ -1,6 +1,6 @@
 module DTK; class ActionDef
   # Top class for content classes which as hash part store raw form and then have
-  # insatnce attributes for the parsed form             
+  # instance attributes for the parsed form             
   class Content < Hash
     r8_nested_require('content','constant')
     r8_nested_require('content','command')

@@ -7,7 +7,7 @@ module DTK
         module_refs_tree = ModuleRefs::Tree.create(assembly_instance)
         collapsed = module_refs_tree.collapse()
         collapsed.choose_namespaces!()
-        # TODO: next bind to implementation_ids 
+        collapsed.add_implementations!(assembly_instance)
         
       end
     end

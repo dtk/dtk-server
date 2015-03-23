@@ -8,21 +8,24 @@ module DTK; class ModuleRefs
           ret = Collapsed.new
           level = opts[:level] || 1
           @module_refs.each_pair do |module_name,subtree|
-            unless namespace = subtree.namespace?() 
-              Log.error("Unexpected that no namespace info")
-              next
-            end
-            
-            (ret[module_name] ||= Array.new) << Element.new(namespace,module_name,level)
-            
-            # process sub tree
+            children_module_names = Array.new
+
             subtree.collapse(:level => level+1).each_pair do |subtree_module_name,subtree_els|
               collapsed_tree_els = ret[subtree_module_name] ||= Array.new
               subtree_els.each do |subtree_el|
                 unless collapsed_tree_els.find{|el|el == subtree_el}
                   collapsed_tree_els << subtree_el
                 end 
+                subtree_el.children_and_this_module_names().each do |st_module_name|
+                  children_module_names << st_module_name unless children_module_names.include?(st_module_name)
+                end
               end
+            end
+            
+            if namespace = subtree.namespace?() 
+              (ret[module_name] ||= Array.new) << Element.new(namespace,module_name,level,children_module_names)
+            else
+              Log.error("Unexpected that no namespace info")
             end
           end
           ret

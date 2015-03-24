@@ -62,7 +62,7 @@ module DTK; class StateChange
    private
     def self.node_state_changes__create_nodes(assembly,target_idh,opts={})
       ret = Array.new
-      assembly_nodes = assembly.get_nodes()
+      assembly_nodes = opts[:nodes]||assembly.get_nodes()
       return ret if assembly_nodes.empty?
 
       added_state_change_filters = [[:oneof, :node_id, assembly_nodes.map{|r|r[:id]}]]
@@ -84,7 +84,7 @@ module DTK; class StateChange
       unless opts[:just_leaf_nodes]
         raise Error.new("Only supporting option :just_leaf_nodes")
       end
-      nodes = assembly.get_leaf_nodes(:cols => [:id,:display_name,:type,:external_ref,:admin_op_status])
+      nodes = opts[:nodes]||assembly.get_leaf_nodes(:cols => [:id,:display_name,:type,:external_ref,:admin_op_status])
       nodes_to_start = nodes.reject{|n|n[:admin_op_status] == "running"}
       return ret if nodes_to_start.empty?
 

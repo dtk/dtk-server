@@ -195,37 +195,3 @@ module DTK
     end
   end
 end
-=begin
-      # TODO: old methods that can be helpful if looking to use includes
-      def process_component_include_modules(components)
-        #aug_inc_mods elements are include modules at top level and possibly the linked impementation
-        component_idhs = components.map{|cmp|cmp.id_handle()}
-        aug_incl_mods = Component::IncludeModule.get_include_mods_with_impls(component_idhs)
-        impls = get_unique_implementations(aug_incl_mods)
-        #TODO: this can be bulked up
-        ndx_cmrs = impls.inject(Hash.new) do |h,impl|
-          h.merge(impl[:id] => ModuleRefs.get_component_module_refs(impl.get_module_branch()))
-        end
-
-        aug_incl_mods.each do |incl_mod|
-          if cmrs = ndx_cmrs[incl_mod[:implementation_id]]
-            add_component_module_refs!(cmrs,incl_mod)
-          end
-        end
-      end
-
-      def get_unique_implementations(aug_incl_mods)
-        ndx_ret = Hash.new    
-        aug_incl_mods.each do |aug_incl_mod|
-          unless impl = aug_incl_mod[:implementation]
-            raise Error.new("need to write code when aug_incl_mod[:implementation] is nil")
-          end
-          ndx_ret[impl[:id]] ||= impl
-        end
-        ndx_ret.values
-      end
-      
-    end
-  end
-end
-=end

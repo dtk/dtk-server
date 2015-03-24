@@ -16,9 +16,14 @@ module DTK; class Component
       ret =  Component.get_implementations(component_idhs)
       include_modules = get_include_modules(component_idhs)
       return ret if include_modules.empty?()
+      
+      unless assembly_instance
+        Log.error("Unexpected that assembly_instance is nil in IncludeModule.get_matching_implementations; not putting in includes")
+        return ret
+      end
 
       # Add to the impls in ret the ones gotten by following the include moulde links
-      # using nfx_ret to get rid of duplicates
+      # using ndx_ret to get rid of duplicates
       # includes are indexed on components, so at first level get component modules, but then can only see what component modules
       # are includes using ModuleRefs::Lock
       ndx_ret = ret.inject(Hash.new){|h,impl|h.merge(impl.id => impl)}      

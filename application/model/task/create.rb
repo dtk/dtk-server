@@ -15,30 +15,51 @@ module DTK; class Task
       task_mh = target_idh.create_childMH(:task)
       
       ret = create_top_level_task(task_mh,assembly,Aux.hash_subset(opts,[:commit_msg,:task_action]))
+      assembly_nodes = assembly.get_leaf_nodes(:cols => [:id,:display_name,:type,:external_ref,:admin_op_status])
 
-      create_or_start_nodes_task = 
-        case component_type
-         when :smoketest then nil # smoketest should not create a node
-         when :service 
-          start_node = opts[:start_node_changes]
-          action_type = (start_node ? :power_on_node : :create_node)
-          action_class = (start_node ? Action::PowerOnNode : Action::CreateNode)
-          node_scs = StateChange::Assembly.node_state_changes(action_type,assembly,target_idh,:just_leaf_nodes => true)
+      start_nodes, create_nodes = [], []
+      assembly_nodes.each do |a_node|
+        if a_node[:admin_op_status].eql?('pending')
+          create_nodes << a_node
+        else
+          start_nodes << a_node
+        end
+      end
+
+      case component_type
+       when :smoketest then nil # smoketest should not create a node
+       when :service
+        # start stopped nodes
+        if start_node = opts[:start_node_changes]
+          action_type = :power_on_node
+          action_class = Action::PowerOnNode
+          node_scs = StateChange::Assembly.node_state_changes(action_type,assembly,target_idh,{:just_leaf_nodes => true, :nodes => start_nodes})
           if nodes = opts[:ret_nodes]
             node_scs.each{|sc|nodes << sc[:node]}
           end
-          NodesTask.create_subtask(action_class,task_mh,node_scs)
-         else
-          raise Error.new("Unexpected component_type (#{component_type})")
+          start_nodes_task = NodesTask.create_subtask(action_class,task_mh,node_scs)
         end
+        # create nodes
+        unless create_nodes.empty?
+          action_type = :create_node
+          action_class = Action::CreateNode
+          node_scs = StateChange::Assembly.node_state_changes(action_type,assembly,target_idh,{:just_leaf_nodes => true, :nodes => create_nodes})
+          create_nodes_task = NodesTask.create_subtask(action_class,task_mh,node_scs)
+        end
+       else
+        raise Error.new("Unexpected component_type (#{component_type})")
+      end
+
       opts_tt = opts.merge(:component_type_filter => component_type)
       task_template_content = Template::ConfigComponents.get_or_generate_template_content([:assembly,:node_centric],assembly,opts_tt)
       stages_config_nodes_task = task_template_content.create_subtask_instances(task_mh,assembly.id_handle())
 
-      if create_or_start_nodes_task.nil? and stages_config_nodes_task.empty?
+      if start_nodes_task.nil? and create_nodes_task.nil? and stages_config_nodes_task.empty?
         raise ErrorUsage.new("There are no actions in the service instance")
       end
-      ret.add_subtask(create_or_start_nodes_task) if create_or_start_nodes_task
+
+      ret.add_subtask(create_nodes_task) if create_nodes_task
+      ret.add_subtask(start_nodes_task) if start_nodes_task
       ret.add_subtasks(stages_config_nodes_task) unless stages_config_nodes_task.empty?
       ret
     end

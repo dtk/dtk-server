@@ -88,7 +88,9 @@ module DTK; class AssemblyModule
           end
           assembly_mod_branch = r[:module_branch]
           unless assembly_mod_sha = assembly_mod_branch[:current_sha]
-            Log.error_pp(["Unexpected that assembly_mod_sha is nil",assembly_mod_branch])
+            # This can happend if user goes into edit mode, but makes no changes o a component module
+            # r.delete(:local_copy) is so it does not appear as editted
+            r.delete(:local_copy)
             next
           end
           unless workspace_mod_sha = workspace_branch[:current_sha]

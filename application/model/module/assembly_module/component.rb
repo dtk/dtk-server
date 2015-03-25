@@ -8,7 +8,7 @@ module DTK; class AssemblyModule
       new(assembly).prepare_for_edit(component_module)
     end
     def prepare_for_edit(component_module)
-      get_applicable_component_instances(component_module,:raise_error_if_empty => true)
+      get_applicable_component_instances(component_module)
       create_assembly_branch?(component_module)
     end
 
@@ -69,20 +69,10 @@ module DTK; class AssemblyModule
     end
 
     def self.validate_component_module_ret_namespace(assembly,module_name)
-      new(assembly).validate_component_module_ret_namespace(module_name)
-    end
-    def validate_component_module_ret_namespace(module_name)
       namespace, name = Namespace.full_module_name_parts?(module_name)
       return namespace if namespace
-
-      component_modules = get_for_assembly()
-      matching_by_name = component_modules.select{|cm| cm[:display_name].eql?(module_name)}
-
-      raise ErrorUsage.new("No object of type component module with name (#{module_name}) exists") if matching_by_name.empty?
-      raise ErrorUsage.new("Multiple components modules matching name you provided. Please use namespace::component_module format!") if matching_by_name.size > 1
-
-      namespace = matching_by_name.first[:namespace_name] if matching_by_name.size == 1
-      namespace
+      ModuleRefs::Lock.get(assembly).matcing_namesspace?(module_name) ||
+        raise(ErrorUsage.new("No object of type component module with name (#{module_name}) exists"))
     end
 
     def self.list_remote_diffs(model_handle, module_id, repo, module_branch, workspace_branch, opts)
@@ -150,13 +140,9 @@ module DTK; class AssemblyModule
 
     def get_applicable_component_instances(component_module,opts={})
       assembly_id = @assembly.id()
-      ret = component_module.get_associated_component_instances().select do |cmp|
+      component_module.get_associated_component_instances().select do |cmp|
         cmp[:assembly_id] == assembly_id
       end
-      if opts[:raise_error_if_empty] and ret.empty?()
-        raise ErrorNoComponentsInModule.new(@assembly,component_module)
-      end
-      ret
     end
 
     class ErrorComponentModule < ErrorUsage

@@ -42,6 +42,12 @@ module DTK
         self
       end
 
+      def matcing_namesspace?(module_name)
+        if el = self[module_name]
+          el.namespace
+        end
+      end
+
       def matching_impls_with_children(module_names)
         ret = Array.new
         module_names.each do |module_name|

@@ -30,7 +30,7 @@ module DTK
         return self if disjuncts.empty?
 
         sp_hash = {
-          :cols => ModuleBranch.common_columns(),
+          :cols => [:id,:group_id,:display_name,:component_id,:branch,:repo_id,:current_sha,:version,:dsl_parsed],
           :filter => [:or] + disjuncts
         }
         

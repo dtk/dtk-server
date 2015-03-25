@@ -14,7 +14,7 @@ module DTK
         compute(assembly_instance)
       end
 
-      def add_matching_module_branches!() 
+      def add_matching_module_branches!()
         ndx_els = Hash.new
         disjuncts = Array.new
         elements.each do |el|
@@ -28,7 +28,6 @@ module DTK
         end
 
         return self if disjuncts.empty?
-
         sp_hash = {
           :cols => [:id,:group_id,:display_name,:component_id,:branch,:repo_id,:current_sha,:version,:dsl_parsed],
           :filter => [:or] + disjuncts
@@ -56,11 +55,11 @@ module DTK
         ret
       end
 
-     private
       def elements()
         values()
       end
 
+     private
       def  matching_element(module_name)
         self[module_name] || (Log.error("Unexpected that no match for module name '#{module_name}'"); nil)
       end

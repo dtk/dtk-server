@@ -2,6 +2,7 @@ module DTK; class AssemblyModule
   class Component < self
     r8_nested_require('component','ad_hoc_link')
     r8_nested_require('component','attribute')
+    r8_nested_require('component','get_for_assembly')
 
     def self.prepare_for_edit(assembly,component_module)
       new(assembly).prepare_for_edit(component_module)
@@ -64,36 +65,7 @@ module DTK; class AssemblyModule
     end
 
     def self.get_for_assembly(assembly,opts={})
-      opts[:recursive] ? new(assembly).get_recursive_for_assembly(opts) : new(assembly).get_for_assembly(opts)
-    end
-
-    # Finds, not just dircetly refernced component modules, but the recursive clouse taking into account all locked component module refs
-    def get_recursive_for_assembly(opts={})
-      locked_module_refs = ModuleRefs::Lock.get(@assembly).add_matching_module_branches!()
-      
-      pp [:locked_module_refs,locked_module_refs]
-raise ErrorUsage.new("got here")
-    end
-    # TODO: make sure that where these two overlap they are consistent in namespace assignments
-    def get_for_assembly(opts={})
-      ndx_ret = Hash.new
-      add_module_branches = opts[:get_version_info]
-      # there is a row for each component; assumption is that all rows belonging to same component with have same branch
-      @assembly.get_objs(:cols=> [:instance_component_module_branches]).each do |r|
-        component_module = r[:component_module]
-        component_module.merge!({:namespace_name => r[:namespace][:display_name]}) if r[:namespace]
-        component_module.merge!({:dsl_parsed => r[:module_branch][:dsl_parsed]}) if r[:module_branch]
-        ndx_ret[component_module[:id]] ||= component_module.merge(add_module_branches ? r.hash_subset(:module_branch) : {})
-      end
-      ret = ndx_ret.values
-      if add_module_branches
-        add_version_info!(ret)
-      end
-
-      # remove branches; they are no longer needed
-      ret.each{|r|r.delete(:module_branch)}
-
-      ret
+      GetForAssembly.new(assembly).get_for_assembly(opts)
     end
 
     def self.validate_component_module_ret_namespace(assembly,module_name)
@@ -174,63 +146,6 @@ raise ErrorUsage.new("got here")
                     [:eq,:component_type,cmp_template.get_field?(:component_type)]]
       }
       Model.get_obj(cmp_template.model_handle(),sp_hash) || raise(Error.new("Unexpected that branch_cmp_template is nil"))
-    end
-
-    def add_version_info!(modules_with_branches)
-      local_copy_els = Array.new
-      modules_with_branches.each do |r|
-        if r[:module_branch].assembly_module_version?()
-          r[:local_copy] = true
-          local_copy_els << r
-        end
-      end
-
-      # for each item with local_copy, check for diff_from_base
-      if local_copy_els.empty?
-        return modules_with_branches
-      end
-      # TODO: check if we are missing anything; maybe when there is just a meta change we dont update what component pointing to
-      # but create a new branch, which we can check with ComponentModule.get_workspace_module_branches with idhs from all els in modules_with_branches
-      # this is related to DTK-1214
-
-      # get the associated master branch and see if there is any diff
-      mod_idhs = local_copy_els.map{|r|r.id_handle()}
-      ndx_workspace_branches = ComponentModule.get_workspace_module_branches(mod_idhs).inject(Hash.new) do |h,r|
-        h.merge(r[:module_id] => r)
-      end
-
-      local_copy_els.each do |r|
-        unless workspace_branch = ndx_workspace_branches[r[:id]]
-          Log.error("Unexpected that ndx_workspace_branchesr[r[:id]] is null")
-          next
-        end
-        assembly_mod_branch = r[:module_branch]
-        unless assembly_mod_sha = assembly_mod_branch[:current_sha]
-          Log.error("Unexpected that assembly_mod_sh is nil")
-          next
-        end
-        unless workspace_mod_sha = workspace_branch[:current_sha]
-          Log.error("Unexpected that workspace_mod_sha is nil")
-        end
-        r[:local_copy_diff] = (assembly_mod_sha != workspace_mod_sha)
-=begin
-TODO: code to put in when
-want to check case when :local_behind and :branchpoint
-In order to do this must ireate all branches, not just changed ones and
-need to do a refresh on workspace branch sha in case this was updated in another branch
-=end
-        if r[:local_copy_diff]
-          sha_relationship = RepoManager.ret_sha_relationship(assembly_mod_sha, workspace_mod_sha, assembly_mod_branch)
-          case sha_relationship
-            when :local_behind, :local_ahead, :branchpoint
-              r[:branch_relationship] = sha_relationship
-            when :equal
-              r[:local_copy_diff]  = false
-          end
-        end
-      end
-
-      modules_with_branches
     end
 
     def get_applicable_component_instances(component_module,opts={})

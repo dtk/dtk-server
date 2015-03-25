@@ -64,8 +64,17 @@ module DTK; class AssemblyModule
     end
 
     def self.get_for_assembly(assembly,opts={})
-      new(assembly).get_for_assembly(opts)
+      opts[:recursive] ? new(assembly).get_recursive_for_assembly(opts) : new(assembly).get_for_assembly(opts)
     end
+
+    # Finds, not just dircetly refernced component modules, but the recursive clouse taking into account all locked component module refs
+    def get_recursive_for_assembly(opts={})
+      locked_module_refs = ModuleRefs::Lock.get(@assembly).add_matching_module_branches!()
+      
+      pp [:locked_module_refs,locked_module_refs]
+raise ErrorUsage.new("got here")
+    end
+    # TODO: make sure that where these two overlap they are consistent in namespace assignments
     def get_for_assembly(opts={})
       ndx_ret = Hash.new
       add_module_branches = opts[:get_version_info]

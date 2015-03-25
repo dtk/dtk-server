@@ -114,7 +114,7 @@ module DTK; class  Assembly
       end
 
       def list_component_modules(opts=Opts.new)
-        component_modules_opts = Hash.new
+        component_modules_opts = {:recursive => true}
         if get_version_info = opts.array(:detail_to_include).include?(:version_info)
           opts.set_datatype!(:assembly_component_module)
           component_modules_opts.merge!(:get_version_info=>true)

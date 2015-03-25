@@ -74,7 +74,7 @@ module DTK; class ModuleRefs
         end
         filter = ((disjuncts.size == 1) ? disjuncts.first : ([:or] + disjuncts))
         sp_hash = {
-          :cols => [:id,:group_id,:display_name,:repo,:branch,:module_name,:module_namespace,:version],
+          :cols => [:id,:group_id,:display_name,:repo,:repo_id,:branch,:module_name,:module_namespace,:version],
           :filter => filter
         }
         # get the implementations that meet sp_hash, but if have two matches for a module_name/module_namespace pair

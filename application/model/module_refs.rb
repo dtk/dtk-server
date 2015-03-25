@@ -161,7 +161,13 @@ module DTK
       self.class.key(el)
     end
 
+    def self.isa_dsl_filename?(path)
+      path == meta_filename_path()
+    end
     def meta_filename_path()
+      self.class.meta_filename_path()
+    end
+    def self.meta_filename_path()
       ServiceModule::DSLParser.default_rel_path?(:component_module_refs) ||
         raise(Error.new("Unexpected that cannot compute a meta_filename_path for component_module_refs"))
     end

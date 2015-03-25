@@ -2,8 +2,6 @@ module DTK; module ModuleMixins
   module Remote
   end
 
-  MODULE_REFS_FILE_NAME = 'module_refs.yaml'
-
   module Remote::Class
     # install from a dtkn repo; directly in this method handles the module/branch and repo level items
     # and then calls install__process_dsl to handle model and implementaion/files parts depending on what type of module it is
@@ -214,11 +212,9 @@ module DTK; module ModuleMixins
       publish_preprocess_raise_error?(module_branch_obj)
 
       file_content = nil
-      # if self.module_type() == :service_module
-        # we need to send Repoman information about modules and we do it here
-        module_branch = get_workspace_module_branch()
-        file_content = repo_file_content(module_branch, MODULE_REFS_FILE_NAME)
-      # end
+      # we need to send Repoman information about modules and we do it here
+      module_branch = get_workspace_module_branch()
+      file_content = repo_file_content(module_branch, ModuleRefs.meta_filename_path())
 
       # create module on remote repo manager
       # this wil raise error if it exists already or dont have accsss

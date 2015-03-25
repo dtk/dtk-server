@@ -102,9 +102,10 @@ end
       impl_obj = get_implementation()
       impl_obj.modify_file_assets(diffs_summary)
       if diffs_summary.meta_file_changed?()
-        if e = ErrorUsage::Parsing.trap(:only_return_error=>true){component_module.parse_dsl_and_update_model(impl_obj,id_handle(),version())}
-          ret.merge!(:dsl_parsing_errors => e)
+        e = ErrorUsage::Parsing.trap(:only_return_error=>true) do
+          component_module.parse_dsl_and_update_model(impl_obj,id_handle(),version(),:update_module_refs_from_file => true)
         end
+        ret.merge!(:dsl_parsing_errors => e) if e
       end
       ret
     end
@@ -186,7 +187,7 @@ end
         files.each do |file_info|
           content = Aux.serialize(file_info[:hash_content],file_info[:format_type])
 
-          # check if module_refs.yaml exists already
+          # check if module_refs files exists already
           existing_content = RepoManager.get_file_content({:path => file_info[:path]},self,{:no_error_if_not_found => true})
           file_path        = file_info[:path]
 
@@ -197,7 +198,7 @@ end
             end
           end
 
-          # if module_refs.yaml and content already exist then append new module_refs to existing
+          # if module_refs file and content already exist then append new module_refs to existing
           if valid_existing && opts[:update_module_refs] && file_path.eql?("module_refs.#{file_info[:format_type].to_s}")
             existing_c_hash = Aux.convert_to_hash(existing_content,file_info[:format_type])
             new_cmp_refs = file_info[:hash_content].clone
@@ -326,57 +327,6 @@ end
       base_repo #bakes in that different versions share same git repo
     end
 
-    # MOD_RESTRUCT: TODO: deprecate
-    def self.update_library_from_workspace?(ws_branches,opts={})
-      ws_branches = [ws_branches] unless ws_branches.kind_of?(Array)
-      ret = Array.new
-      return ret if ws_branches.empty?
-      if opts[:ws_branch_augmented]
-        matching_branches = ws_branches
-      else
-        sample_ws_branch = ws_branches.first
-        type = sample_ws_branch.get_type()
-        sp_hash = {
-          :cols => cols_for_matching_library_branches(type),
-          :filter => [:oneof, :id, ws_branches.map{|r|r.id_handle().get_id()}]
-        }
-        matching_branches =  get_objs(sample_ws_branch.model_handle(),sp_hash)
-      end
-      if matching_branches.find{|r|r[:library_module_branch][:repo_id] != r[:repo_id]}
-        raise Error.new("Not implemented: case when ws and library branch differ in refering to distinct repos")
-      end
-      matching_branches.map{|augmented_branch|update_library_from_workspace_aux?(augmented_branch)}
-    end
-    # TODO: better collapse above and below
-    def self.update_workspace_from_library?(ws_branch_obj,lib_branch_obj,opts={})
-      ws_branch_obj.update_object!(:repo_id)
-      lib_branch_obj.update_object!(:repo_id,:branch)
-      if ws_branch_obj[:repo_id] != lib_branch_obj[:repo_id]
-        raise Error.new("Not implemented: case when ws and library branch differ in refering to distinct repos")
-      end
-      ws_impl = ws_branch_obj.get_implementation()
-      update_target_from_source?(ws_branch_obj,ws_impl,lib_branch_obj[:branch])
-    end
-
-    def self.cols_for_matching_library_branches(type)
-      # matching_lib_branches_col = (type.to_s == "component_module" ? :matching_component_library_branches : :matching_service_library_branches)
-      matching_lib_branches_col =
-        case type.to_s
-          when 'component_module'
-            return :matching_component_library_branches
-          when 'service_module'
-            reuturn :matching_service_library_branches
-          when 'test_module'
-            return :matching_test_library_branches
-          when 'node_module'
-            return :matching_node_library_branches
-          else
-            raise Error.new("Unexpected module type '#{type}'!")
-          end
-
-      [:id,:repo_id,:version,:branch,module_id_col(type),matching_lib_branches_col]
-    end
-
     def self.get_component_modules_info(module_branch_idhs)
       ret = Array.new
       return ret if module_branch_idhs.nil? or module_branch_idhs.empty?
@@ -440,57 +390,6 @@ end
     end
     def get_namespace_info()
       get_obj(:cols => [:component_module_namespace_info])
-    end
-
-    class << self
-     private
-      def update_library_from_workspace_aux?(augmented_branch)
-        lib_branch_obj = augmented_branch[:library_module_branch]
-        lib_branch_augment = {
-          :workspace_module_branch => Aux::hash_subset(augmented_branch,[:id,:repo_id]),
-        }
-        ret = lib_branch_obj.merge(lib_branch_augment)
-        ws_branch_name = augmented_branch[:branch]
-        # determine if there is any diffs between workspace and library branches
-        diff = RepoManager.diff(ws_branch_name,lib_branch_obj)
-        diff_summary = diff.ret_summary()
-        if diff_summary.no_diffs?()
-          return ret
-        end
-        unless diff_summary.no_added_or_deleted_files?()
-          # find matching implementation and modify file assets
-          augmented_branch[:implementation].modify_file_assets(diff_summary)
-        end
-        if diff_summary.meta_file_changed?()
-          component_dsl = ModuleDSL.create_dsl_object_from_impl(augmented_branch[:implementation])
-          component_dsl.update_model()
-        end
-
-        # update the repo
-        RepoManager.merge_from_branch(ws_branch_name,lib_branch_obj)
-        RepoManager.push_implementation(lib_branch_obj)
-        ret
-      end
-      # TODO: use below as basis to rewrite above
-      def update_target_from_source?(target_branch_obj,target_impl,source_branch_name)
-        # determine if there is any diffs between source and target branches
-        diff = RepoManager.diff(source_branch_name,target_branch_obj)
-        diff_summary = diff.ret_summary()
-        return if diff_summary.no_diffs?()
-
-        unless diff_summary.no_added_or_deleted_files?()
-          # find matching implementation and modify file assets
-          target_impl.modify_file_assets(diff_summary)
-        end
-        if diff_summary.meta_file_changed?()
-          component_dsl = ModuleDSL.create_dsl_object_from_impl(target_impl)
-          component_dsl.update_model()
-        end
-
-        # update the repo
-        RepoManager.merge_from_branch(source_branch_name,target_branch_obj)
-        RepoManager.push_implementation(target_branch_obj)
-      end
     end
 
     def self.get_component_workspace_branches(node_idhs)

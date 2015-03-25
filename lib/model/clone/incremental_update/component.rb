@@ -46,8 +46,12 @@ module DTK; class Clone
 
       def component_needs_update?(cmp,opts={})
         opts[:meta_file_changed] or
-        (cmp.get_field?(:module_branch_id) != @module_branch_id) or #TODO: check how this can happen
+        needs_to_be_moved_to_assembly_branch?(cmp) or
         has_locked_sha?(cmp)
+      end
+
+      def needs_to_be_moved_to_assembly_branch?(cmp)
+        (cmp.get_field?(:module_branch_id) != @module_branch_id)
       end
       
       def has_locked_sha?(cmp)

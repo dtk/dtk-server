@@ -29,12 +29,6 @@ module DTK; class Clone
       raise Error.new("Abstract method that should be overwritten")
     end
 
-    # can be overwritten; fori fields that dont want template to ovewrite isnatnce, copy from instance field
-    # to target fields to compensate
-    def sync_no_copy_fields!(instance,template)
-      nil
-    end
-
     # can be overwritten; used for detecting with an isnatnce and template are euqal and thus modification not needed
     def equal_so_dont_modify?(instance,template)
       false
@@ -83,7 +77,6 @@ module DTK; class Clone
           if template_match = ndx_templates[key]
             template = template_match[:template]
             unless equal_so_dont_modify?(instance,template)
-              sync_no_copy_fields!(instance,template)
               modify_instances.add(instance,template)
               template_match[:matched] = true
             end

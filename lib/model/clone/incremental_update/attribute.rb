@@ -1,12 +1,12 @@
 module DTK; class Clone
   class IncrementalUpdate
     class Attribute < self
-      FieldsThatDontChange = [:id,:display_name,:group_id,:component_component_id,:value_derived,:value_asserted]
+      FieldsToNotCopy = [:id,:ref,:display_name,:group_id,:component_component_id,:value_derived,:value_asserted,:is_port,:port_type_asserted]
       # instance_template_links has type InstanceTemplate::Links
       def self.modify_instances(model_handle,instance_template_links)
         parent_id_col = model_handle.parent_id_field_name()
         update_rows = instance_template_links.map do |l|
-          Aux.hash_subset(l.template,l.template.keys-FieldsThatDontChange).merge(:id => l.instance.id)
+          Aux.hash_subset(l.template,l.template.keys-FieldsToNotCopy).merge(:id => l.instance.id)
         end
         Model.update_from_rows(model_handle,update_rows)
       end

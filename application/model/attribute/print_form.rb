@@ -145,7 +145,7 @@ module DTK
               PrintValueNil
             else
               if @mark_unset_required and @aug_attr[:required]
-                # dont mark as required input ports since they wil be propagated
+                # dont mark as required input ports since they will be propagated
                 unless @aug_attr[:is_port] and @aug_attr[:port_type_asserted] == 'input'
                   PrintValueUnsetRequired
                 end

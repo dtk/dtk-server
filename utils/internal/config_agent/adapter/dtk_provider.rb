@@ -35,9 +35,20 @@ module DTK; class ConfigAgent; module Adapter
             attr_val_pairs ||= attribute_value_pairs(component_action)
             command.bind_template_attributes!(attr_val_pairs)
           end
+
+          # if stdout_and_stderr = true we return combined stdout and stderr in action results
+          # default value is true unless set otherwise in dsl
+          stdout_and_stderr = true
+          action_def = component_action.action_def()
+
+          if content = action_def[:content]
+            stdout_and_stderr = content[:stdout_and_stderr] unless content[:stdout_and_stderr].nil?
+          end
+
           ret << {
             :type => command.type,
-            :command => command.command_line()
+            :command => command.command_line(),
+            :stdout_redirect => stdout_and_stderr
           }
         end
       end

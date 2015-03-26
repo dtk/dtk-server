@@ -15,8 +15,16 @@ module DTK; class ModuleDSL; class V4; class ObjectModelForm
       end
 
       def provider_specific_fields(input_hash)
-        commands = Constant.matches?(input_hash,:Commands)
-        {:commands => commands.kind_of?(Array) ? commands : [commands]}
+        commands   = Constant.matches?(input_hash,:Commands)
+        ret        = {:commands => commands.kind_of?(Array) ? commands : [commands]}
+        stdout_err = input_hash['stdout_and_stderr']
+
+        unless stdout_err.nil?
+          raise ParsingError.new(":stdout_and_stderr has invalid value. Must be set to true or false") unless ['true','false'].include?(stdout_err.to_s)
+          ret.merge!(:stdout_and_stderr => stdout_err)
+        end
+
+        ret
       end
     end
   end; end

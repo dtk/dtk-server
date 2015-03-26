@@ -128,6 +128,15 @@ module DTK
       ndx_ret.values
     end
 
+    def self.get_node_groups?(node_or_ngs)
+      ndx_ret = Hash.new
+      node_or_ngs.each do |n|
+        ndx_ret.merge!(n.id => n) if n.is_node_group?
+      end
+
+      return (ndx_ret.empty? ? ndx_ret : ndx_ret.values)
+    end
+
     def self.get_node_attributes_to_copy(node_group_idhs)
       Node.get_target_ref_attributes(node_group_idhs,:cols=>NodeAttributesToCopy)
     end

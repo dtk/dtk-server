@@ -103,6 +103,12 @@ module DTK; class Assembly; class Instance
       ServiceNodeGroup.expand_with_node_group_members?(node_or_ngs,opts)
     end
 
+    def get_node_groups(opts={})
+      cols = opts[:cols]||Node.common_columns()
+      node_or_ngs = get_nodes(*cols)
+      ServiceNodeGroup.get_node_groups?(node_or_ngs)
+    end
+
     def get_node?(filter)
       sp_hash = {
         :cols => [:id,:display_name],

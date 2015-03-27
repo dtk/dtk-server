@@ -71,6 +71,7 @@ module DTK
         create_attribute_links__clone_if_needed(target,port_link_idhs)
 
         level = 2
+        ModuleRefs::Lock.compute_and_persist(assembly)
         component_child_hashes = clone_copy_output.children_hash_form(level,:component)
         return if component_child_hashes.empty?
         component_new_items = component_child_hashes.map do |child_hash|

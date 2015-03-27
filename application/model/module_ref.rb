@@ -1,6 +1,7 @@
 module DTK
   class ModuleRef < Model
     r8_nested_require('module_ref','version_info')
+    r8_nested_require('module_ref','lock')
 
     def self.common_columns()
       [:id,:display_name,:group_id,:module_name,:module_type,:version_info,:namespace_info,:branch_id]

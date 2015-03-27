@@ -1,8 +1,11 @@
 module DTK
   class ModuleRefs
     class Lock < Hash
-      r8_nested_require('lock','element')
-
+      # This object is hash of form
+      #  {MODULE_NAME1 => ModuleRef::Lock,
+      #   MODULE_NAME2 => ModuleRef::Lock,
+      #   .... 
+      # }
       def initialize(assembly_instance)
         super()
         @assembly_instance = assembly_instance
@@ -42,8 +45,8 @@ module DTK
         self
       end
 
-      def matcing_namesspace?(module_name)
-        if el = self[module_name]
+      def matching_namespace?(module_name)
+        if el = element?(module_name)
           el.namespace
         end
       end
@@ -51,8 +54,7 @@ module DTK
       def matching_impls_with_children(module_names)
         ret = Array.new
         module_names.each do |module_name|
-          if element = matching_element(module_name) 
-            
+          if element = element?(module_name) 
             implementations(children_elements(element)+[element]).each do |impl|
               ret << impl unless ret.include?(impl)
             end
@@ -62,24 +64,29 @@ module DTK
       end
 
       def elements()
-        values()
+        values().map{|module_ref_lock|module_ref_lock_element(module_ref_lock)}.compact
       end
 
      private
-      def  matching_element(module_name)
-        self[module_name] || (Log.error("Unexpected that no match for module name '#{module_name}'"); nil)
+      def element?(module_name)
+        module_ref_lock_element(self[module_name])
+      end
+      def element(module_name)
+        element?(module_name) || (Log.error("Unexpected that no match for module name '#{module_name}'"); nil)
+      end
+      def module_ref_lock_element(module_ref_lock)
+        module_ref_lock  && module_ref_lock.info
       end
 
       def children_elements(parent_element)
-        parent_element.children_module_names.map{|mn|matching_element(mn)}.compact
+        parent_element.children_module_names.map{|mn|element?(mn)}.compact
       end
 
       def implementations(elements)
-        elements.map{|el|implementation(el)}.compact
-      end
-      def implementation(element)
-        element.implementation ||
-          (Log.error("Unexpected that the module '#{matching_element.namespace}:#{module_name}' does not have an corresponding implementation object"); nil)
+        elements.map do |el|
+          el.implementation ||
+            (Log.error("Unexpected that the module '#{element.namespace}:#{module_name}' does not have an corresponding implementation object"); nil)
+        end.compact
       end
 
       def self.compute(assembly_instance)
@@ -96,7 +103,7 @@ module DTK
             if single_el_array.size > 1
               Log.error("Unexpected that single_el_array has size > 1; picking first")
             end
-            h.merge(module_name => single_el_array.first)
+            h.merge(module_name => ModuleRef::Lock.create_from_element(assembly_instance,single_el_array.first))
           end
         end
       end

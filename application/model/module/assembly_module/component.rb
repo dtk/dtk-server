@@ -71,7 +71,7 @@ module DTK; class AssemblyModule
     def self.validate_component_module_ret_namespace(assembly,module_name)
       namespace, name = Namespace.full_module_name_parts?(module_name)
       return namespace if namespace
-      ModuleRefs::Lock.get(assembly).matcing_namesspace?(module_name) ||
+      ModuleRefs::Lock.get(assembly).matching_namespace?(module_name) ||
         raise(ErrorUsage.new("No object of type component module with name (#{module_name}) exists"))
     end
 

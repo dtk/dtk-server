@@ -58,7 +58,7 @@ module DTK
       def debug_hash_form()
         ret = Hash.new
         if @context.kind_of?(Assembly)
-          ret[:type] = 'Assembly::Instance'
+          ret[:type] = Workspace.is_workspace?(@context) ? 'Workspace' : 'Assembly::Instance'
           ret[:name] = @context.get_field?(:display_name)
         elsif @context.kind_of?(ModuleRef)
           ret[:type] = 'ModuleRef'

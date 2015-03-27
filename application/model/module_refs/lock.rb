@@ -11,10 +11,27 @@ module DTK
         @assembly_instance = assembly_instance
       end
 
-      def self.get(assembly_instance)
-        # TODO: this is being computed on fly; we would also like to provide persistence and also tie
-        # it to a file the user can set if conflicts like a Gem.lock file
-        compute(assembly_instance)
+      def self.compute_and_persist(assembly_instance,opts={})
+        types = opts[:types] || AllTypes
+        module_refs_lock = compute_elements(assembly_instance)
+        pp [:module_refs_lock,module_refs_lock.inject(Hash.new){|h,(k,v)|h.merge(k => v.info)}]
+        Log.info("need to write code that computes locked shas and persists this")
+      end
+      def self.get(assembly_instance,opts={})
+        ret = nil
+        types = opts[:types] || AllTypes
+        # TODO: check if persisted first
+        
+        ret = compute_elements(assembly_instance)
+        if types.include?(:locked_branch_shas)
+          ret.add_locked_branch_shas!()
+        end
+        ret
+      end
+      AllTypes = [:elements,:locked_branch_shas]
+
+      def add_locked_branch_shas!()
+        raise Error.new("Need to write add_locked_branch_shas!()")
       end
 
       def add_matching_module_branches!()
@@ -89,7 +106,7 @@ module DTK
         end.compact
       end
 
-      def self.compute(assembly_instance)
+      def self.compute_elements(assembly_instance)
         module_refs_tree = ModuleRefs::Tree.create(assembly_instance)
         collapsed = module_refs_tree.collapse()
         collapsed.choose_namespaces!()

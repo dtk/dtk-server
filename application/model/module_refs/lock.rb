@@ -11,17 +11,12 @@ module DTK
         @assembly_instance = assembly_instance
       end
 
-      def self.compute_and_persist(assembly_instance,opts={})
-        types = opts[:types] || AllTypes
-        module_refs_lock = compute_elements(assembly_instance)
-        pp [:module_refs_lock,module_refs_lock.inject(Hash.new){|h,(k,v)|h.merge(k => v.info)}]
-        Log.info("need to write code that computes locked shas and persists this")
-      end
       def self.get(assembly_instance,opts={})
-        ret = nil
-        types = opts[:types] || AllTypes
-        # TODO: check if persisted first
-        
+        # TODO: first check if persisted
+        compute(assembly_instance,opts)
+      end
+
+      def self.compute(assembly_instance,opts={})
         ret = compute_elements(assembly_instance)
         if types.include?(:locked_branch_shas)
           ret.add_locked_branch_shas!()
@@ -30,8 +25,13 @@ module DTK
       end
       AllTypes = [:elements,:locked_branch_shas]
 
+      def persist()
+        Log.error("need to write persist")
+        self
+      end
+
       def add_locked_branch_shas!()
-        raise Error.new("Need to write add_locked_branch_shas!()")
+        Log.error("Need to write add_locked_branch_shas!()")
       end
 
       def add_matching_module_branches!()
@@ -85,6 +85,25 @@ module DTK
       end
 
      private
+      def self.compute_elements(assembly_instance,opts={})
+        module_refs_tree = ModuleRefs::Tree.create(assembly_instance)
+        collapsed = module_refs_tree.collapse()
+        collapsed.choose_namespaces!()
+        collapsed.add_implementations!(assembly_instance)
+        
+        collapsed.inject(new(assembly_instance)) do |h,(module_name,single_el_array)|
+          if single_el_array.empty?
+            Log.error("Unexpected that single_el_array is empty")
+            h
+          else
+            if single_el_array.size > 1
+              Log.error("Unexpected that single_el_array has size > 1; picking first")
+            end
+            h.merge(module_name => ModuleRef::Lock.create_from_element(assembly_instance,single_el_array.first))
+          end
+        end
+      end
+
       def element?(module_name)
         module_ref_lock_element(self[module_name])
       end
@@ -106,24 +125,7 @@ module DTK
         end.compact
       end
 
-      def self.compute_elements(assembly_instance)
-        module_refs_tree = ModuleRefs::Tree.create(assembly_instance)
-        collapsed = module_refs_tree.collapse()
-        collapsed.choose_namespaces!()
-        collapsed.add_implementations!(assembly_instance)
 
-        collapsed.inject(new(assembly_instance)) do |h,(module_name,single_el_array)|
-          if single_el_array.empty?
-            Log.error("Unexpected that single_el_array is empty")
-            h
-          else
-            if single_el_array.size > 1
-              Log.error("Unexpected that single_el_array has size > 1; picking first")
-            end
-            h.merge(module_name => ModuleRef::Lock.create_from_element(assembly_instance,single_el_array.first))
-          end
-        end
-      end
     end
   end
 end

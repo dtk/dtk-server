@@ -70,16 +70,18 @@ module DTK
         port_link_idhs = clone_copy_output.children_id_handles(level,:port_link)
         create_attribute_links__clone_if_needed(target,port_link_idhs)
 
+
+        if settings = opts[:service_settings]
+          settings.apply_settings(target,assembly)
+        end
+
+        ModuleRefs::Lock.compute(assembly).persist()
+
         level = 2
-        ModuleRefs::Lock.compute_and_persist(assembly)
         component_child_hashes = clone_copy_output.children_hash_form(level,:component)
         return if component_child_hashes.empty?
         component_new_items = component_child_hashes.map do |child_hash|
           {:new_item => child_hash[:id_handle], :parent => target.id_handle()}
-        end
-
-        if settings = opts[:service_settings]
-          settings.apply_settings(target,assembly)
         end
 
         StateChange.create_pending_change_items(component_new_items)

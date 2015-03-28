@@ -85,13 +85,35 @@ module DTK
         @module_refs[module_name] = child
       end
 
+      def namespace()
+        namespace?() || (Log.error_pp(["Unexpected that no namespace_info for",self]); nil)
+      end
       def namespace?()
         if @context.kind_of?(ModuleRef)
           (@context||{})[:namespace_info]
         end
       end
 
+      def recursive_add_module_refs!(parent_path=[])
+        get_children([module_branch()]) do |module_name,namespace,child|
+          ns_module_name = self.class.namespace_model_name_path_el(namespace,module_name)
+          path = parent_path+[ns_module_name]
+          if parent_path.include?(ns_module_name)
+            recursive_loop = path.join(' -> ')
+            raise ErrorUsage.new("Module '#{ns_module_name}' is in a recursive loop: #{recursive_loop}")
+          end
+          add_module_ref!(module_name,child)
+          child.recursive_add_module_refs!(path) if child
+        end
+        self
+      end
+
      private
+
+      def self.namespace_model_name_path_el(namespace,module_name)
+        namespace ? "#{namespace}:#{module_name}" : module_name
+      end
+
       def self.create_module_refs_starting_from_assembly(assembly_instance,assembly_branch,components)
         # get relevant service and component module branches 
         ndx_cmps = Hash.new #components indexed (grouped) by branch id
@@ -117,30 +139,17 @@ module DTK
         end
         
         ret = new(assembly_branch,assembly_instance)
-        leaves = Array.new
         get_top_level_children(cmp_module_branches,assembly_branch) do |module_name,child|
-          leaves << child if child
+          # child can be nil if no child
           ret.add_module_ref!(module_name,child)
+          if child
+            parent_path = [namespace_model_name_path_el(child.namespace,module_name)]
+            child.recursive_add_module_refs!(parent_path)
+          end
         end
-        recursive_add_module_refs!(ret,leaves)
         ret
       end
 
-      def self.recursive_add_module_refs!(top,subtrees)
-        return if subtrees.empty?
-        leaves = Array.new
-        #TODO: can bulk up
-        subtrees.each do |subtree|
-          get_children([subtree.module_branch]) do |module_name,namespace,child|
-            if subtree && child
-              raise ErrorUsage.new("Module '#{namespace}:#{module_name}' cannot have itself listed as dependency") if subtree.module_branch == child.module_branch 
-            end
-            leaves << child if child
-            subtree.add_module_ref!(module_name,child)
-          end
-        end
-        recursive_add_module_refs!(top,leaves)
-      end
 
       # TODO: fix this up because cmp_module_branches already has implict namespace so this is 
       # effectively just checking consistency of component module refs
@@ -166,9 +175,7 @@ module DTK
         end
       end
 
-      # TODO: use opts to pass in specfic components and then ise that to us einclude modules to 
-      # prune what is relevant
-      def self.get_children(module_branches,opts={},&block)
+      def get_children(module_branches,opts={},&block)
         # get component module refs indexed by module name
         ndx_module_refs = Hash.new
         ModuleRefs.get_multiple_component_module_refs(module_branches).each do |cmrs|
@@ -178,7 +185,7 @@ module DTK
         end
         module_refs = ndx_module_refs.values
 
-        #ndx_module_branches is compinet module branches indexed by module ref id
+        #ndx_module_branches is component module branches indexed by module ref id
         ndx_module_branches = Hash.new
         ModuleRef.find_ndx_matching_component_modules(module_refs).each_pair do |mod_ref_id,cmp_module|
           version = nil #TODO: stub; need to change when treat service isnatnce branches
@@ -187,7 +194,7 @@ module DTK
 
         module_refs.each do |module_ref|
           module_branch = ndx_module_branches[module_ref[:id]]
-          child = module_branch && new(module_branch,module_ref)
+          child = module_branch && self.class.new(module_branch,module_ref)
           block.call(module_ref[:module_name],module_ref[:namespace_info],child)
         end
       end

@@ -20,10 +20,8 @@ module DTK; class ModuleRefs
               end
             end
             
-            if namespace = subtree.namespace?() 
+            if namespace = subtree.namespace() 
               (ret[module_name] ||= Array.new) << ModuleRef::Lock::Info.new(namespace,module_name,level,children_module_names)
-            else
-              Log.error("Unexpected that no namespace info")
             end
           end
           ret

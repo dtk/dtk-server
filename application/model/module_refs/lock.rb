@@ -102,13 +102,23 @@ module DTK
       end
 
       def self.add_locked_branch_shas!(locked_module_refs)
-        ndx_implementations = Hash.new
-        locked_module_refs.elements().each do |el|
-          if impl = implementation(el)
-            ndx_implementations[impl.id] = {:implementation => impl, :element => el}
+        locked_module_refs.add_matching_module_branches!()
+        locked_module_refs.each_pair do |module_name,module_ref_lock|
+          found = false
+          if el = module_ref_lock_element(module_ref_lock)
+            if mb = el.module_branch
+              if sha = mb[:current_sha]
+                module_ref_lock[:locked_branch_sha] = sha
+                found = true
+              end
+            end
+          end
+
+          unless found 
+            Log.error_pp(["Unexpected that cannot find module_branch[:current_sha] for",module_name,module_ref_lock]) 
           end
         end
-        pp ndx_implementations
+        pp locked_module_refs
         locked_module_refs
       end
 
@@ -119,6 +129,9 @@ module DTK
         element?(module_name) || (Log.error("Unexpected that no match for module name '#{module_name}'"); nil)
       end
       def module_ref_lock_element(module_ref_lock)
+        self.class.module_ref_lock_element(module_ref_lock)
+      end
+      def self.module_ref_lock_element(module_ref_lock)
         module_ref_lock  && module_ref_lock.info
       end
 

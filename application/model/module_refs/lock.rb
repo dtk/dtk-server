@@ -17,21 +17,14 @@ module DTK
       end
 
       def self.compute(assembly_instance,opts={})
-        ret = compute_elements(assembly_instance)
-        if types.include?(:locked_branch_shas)
-          ret.add_locked_branch_shas!()
-        end
-        ret
+        types = opts[:types] || AllTypes
+        ret = compute_elements(assembly_instance,:types => types)
       end
       AllTypes = [:elements,:locked_branch_shas]
 
       def persist()
         Log.error("need to write persist")
         self
-      end
-
-      def add_locked_branch_shas!()
-        Log.error("Need to write add_locked_branch_shas!()")
       end
 
       def add_matching_module_branches!()
@@ -91,17 +84,32 @@ module DTK
         collapsed.choose_namespaces!()
         collapsed.add_implementations!(assembly_instance)
         
-        collapsed.inject(new(assembly_instance)) do |h,(module_name,single_el_array)|
+        ret = new(assembly_instance)
+        collapsed.each_pair do |module_name,single_el_array|
           if single_el_array.empty?
             Log.error("Unexpected that single_el_array is empty")
-            h
           else
             if single_el_array.size > 1
               Log.error("Unexpected that single_el_array has size > 1; picking first")
             end
-            h.merge(module_name => ModuleRef::Lock.create_from_element(assembly_instance,single_el_array.first))
+            ret[module_name] = ModuleRef::Lock.create_from_element(assembly_instance,single_el_array.first)
           end
         end
+        if opts[:types].nil? or opts[:types].include?(:locked_branch_shas)
+          add_locked_branch_shas!(ret)
+        end
+        ret
+      end
+
+      def self.add_locked_branch_shas!(locked_module_refs)
+        ndx_implementations = Hash.new
+        locked_module_refs.elements().each do |el|
+          if impl = implementation(el)
+            ndx_implementations[impl.id] = {:implementation => impl, :element => el}
+          end
+        end
+        pp ndx_implementations
+        locked_module_refs
       end
 
       def element?(module_name)
@@ -119,12 +127,12 @@ module DTK
       end
 
       def implementations(elements)
-        elements.map do |el|
-          el.implementation ||
-            (Log.error("Unexpected that the module '#{element.namespace}:#{module_name}' does not have an corresponding implementation object"); nil)
-        end.compact
+        elements.map{|el|self.class.implementation(el)}.compact
       end
-
+      def self.implementation(element)
+        element.implementation ||
+          (Log.error("Unexpected that the module '#{element.namespace}:#{element.module_name}' does not have an corresponding implementation object"); nil)
+      end
 
     end
   end

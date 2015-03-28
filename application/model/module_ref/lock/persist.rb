@@ -5,7 +5,7 @@ module DTK; class ModuleRef
         db_update_hash = db_update_hash_all_elements(module_refs_lock)
         db_update_hash.mark_as_complete()
         assembly_instance_idh = module_refs_lock.assembly_instance.id_handle()
-        Model.input_hash_content_into_model(assembly_instance_idh,:module_ref_lock  => db_update_hash)
+        Model.input_hash_content_into_model(assembly_instance_idh,:module_ref_lock => db_update_hash)
       end
       
       

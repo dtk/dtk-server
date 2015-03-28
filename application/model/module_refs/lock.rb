@@ -6,6 +6,7 @@ module DTK
       #   MODULE_NAME2 => ModuleRef::Lock,
       #   .... 
       # }
+      attr_reader :assembly_instance
       def initialize(assembly_instance)
         super()
         @assembly_instance = assembly_instance
@@ -23,7 +24,7 @@ module DTK
       AllTypes = [:elements,:locked_branch_shas]
 
       def persist()
-        Log.error("need to write persist")
+        ModuleRef::Lock.persist(self)
         self
       end
 
@@ -108,7 +109,7 @@ module DTK
           if el = module_ref_lock_element(module_ref_lock)
             if mb = el.module_branch
               if sha = mb[:current_sha]
-                module_ref_lock[:locked_branch_sha] = sha
+                module_ref_lock.locked_branch_sha = sha
                 found = true
               end
             end
@@ -118,7 +119,6 @@ module DTK
             Log.error_pp(["Unexpected that cannot find module_branch[:current_sha] for",module_name,module_ref_lock]) 
           end
         end
-        pp locked_module_refs
         locked_module_refs
       end
 

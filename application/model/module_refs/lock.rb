@@ -1,6 +1,8 @@
 module DTK
   class ModuleRefs
     class Lock < Hash
+      r8_nested_require('lock','missing_information')
+
       # This object is hash of form
       #  {MODULE_NAME1 => ModuleRef::Lock,
       #   MODULE_NAME2 => ModuleRef::Lock,
@@ -17,24 +19,29 @@ module DTK
       #   :types subset of AllTypes
       def self.get(assembly_instance,opts={})
         types = opts[:types] || AllTypes
-        types += [:module_branches] if opts[:with_module_branches]
-
+        opts_nested = Aux.hash_subset(opts,[:with_module_branches])
         # First check if persisted if not then compute it
         if persisted = get_module_refs_lock?(assembly_instance) 
-          if missing_information(persisted,types)
-            raise Error.new("Need to write this")
+          if missing_info = MissingInformation.missing_information?(persisted,types,opts_nested)
+            missing_info.fill_in_missing_information()
           else
             persisted
           end
         else
-          compute_elements(assembly_instance,types)
+          compute_elements(assembly_instance,types,opts_nested)
         end
       end
-      AllTypes = [:elements,:locked_branch_shas]
+      AllTypes = [:locked_dependencies,:locked_branch_shas]
       
       def self.compute(assembly_instance,opts={})
         types = opts[:types] || AllTypes
-        compute_elements(assembly_instance,types)
+        opts_nested = Aux.hash_subset(opts,[:with_module_branches])
+        compute_elements(assembly_instance,types,opts)
+      end
+
+
+      def clear_locked_dependencies()
+        ModuleRef::Lock.clear_locked_dependencies(self)
       end
 
       def persist()
@@ -65,11 +72,6 @@ module DTK
       end
 
      private
-      def self.missing_information(persisted,types)
-        Log.error("Need to write missing_information")
-        nil
-      end
-
       def self.get_module_refs_lock?(assembly_instance)
         module_ref_locks = ModuleRef::Lock.get(assembly_instance)
         unless  module_ref_locks.empty?
@@ -79,7 +81,7 @@ module DTK
         end
       end
       
-      def self.compute_elements(assembly_instance,types)
+      def self.compute_elements(assembly_instance,types,opts={})
         module_refs_tree = ModuleRefs::Tree.create(assembly_instance)
         collapsed = module_refs_tree.collapse()
         collapsed.choose_namespaces!()
@@ -97,7 +99,7 @@ module DTK
           end
         end
 
-        if types.include?(:locked_branch_shas) or types.include?(:module_branches)
+        if types.include?(:locked_branch_shas) or opts[:with_module_branches]
           add_matching_module_branches!(ret)
         end
         if types.include?(:locked_branch_shas) 

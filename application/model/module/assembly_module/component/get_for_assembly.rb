@@ -16,7 +16,7 @@ module DTK; class AssemblyModule
       # Finds, not just dircctly referenced component modules, but the recursive clouse taking into account all locked component module refs
       def get_with_branches_recursive(opts={})
         ret = Array.new
-        locked_module_refs = ModuleRefs::Lock.get(@assembly,:with_module_branches => true,:types => [:elements])
+        locked_module_refs = ModuleRefs::Lock.get(@assembly,:with_module_branches => true,:types => [:locked_dependencies])
         # get component modules by finding the component module id in locked_module_refs elements
         els_ndx_by_cmp_mod_ids = Hash.new
         locked_module_refs.elements.each do |el|

@@ -47,7 +47,7 @@ module DTK; class ModuleRef
           Log.error_pp(["Unexpected that hash does not have :id field",hash])
           return ret
         end
-        mh.createIDH(:id => id).create_object(hash)
+        mh.createIDH(:id => id).create_object().merge(hash)
       end
     end
   end

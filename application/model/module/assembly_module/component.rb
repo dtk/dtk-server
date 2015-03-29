@@ -4,12 +4,12 @@ module DTK; class AssemblyModule
     r8_nested_require('component','attribute')
     r8_nested_require('component','get_for_assembly')
 
-    def self.prepare_for_edit(assembly,component_module)
-      new(assembly).prepare_for_edit(component_module)
+    def self.prepare_for_edit(assembly,component_module,opts={})
+      new(assembly).prepare_for_edit(component_module,opts)
     end
-    def prepare_for_edit(component_module)
+    def prepare_for_edit(component_module,opts={})
       get_applicable_component_instances(component_module)
-      create_assembly_branch?(component_module)
+      create_assembly_branch?(component_module,opts)
     end
 
     def self.finalize_edit(assembly,component_module,module_branch,opts={})
@@ -68,11 +68,25 @@ module DTK; class AssemblyModule
       GetForAssembly.new(assembly).get_for_assembly(opts)
     end
 
-    def self.validate_component_module_ret_namespace(assembly,module_name)
+    # opts can have
+    # :ret_lock_branch_sha - in which cas this wil be set to locked sha if it exists
+    def self.validate_component_module_ret_namespace(assembly,module_name,opts={})
       namespace, name = Namespace.full_module_name_parts?(module_name)
-      return namespace if namespace
-      ModuleRefs::Lock.get(assembly,:types => [:elements]).matching_namespace?(module_name) ||
+      types = [:locked_dependencies]
+      if opts[:ret_locked_branch_sha]
+        types << :locked_branch_shas
+      else
+        return namespace if namespace
+      end
+      # TODO: DTK-2014; use modification of ModuleRefs::Lock that passs in module name that looking for
+      module_refs_lock = ModuleRefs::Lock.get(assembly,:types => types)
+      unless namespace ||= module_refs_lock.matching_namespace?(module_name)
         raise(ErrorUsage.new("No object of type component module with name (#{module_name}) exists"))
+      end
+      if opts[:ret_locked_branch_sha]
+        opts[:ret_locked_branch_sha] = module_refs_lock.matching_locked_branch_sha?(module_name)
+      end
+      namespace
     end
 
     def self.list_remote_diffs(model_handle, module_id, repo, module_branch, workspace_branch, opts)
@@ -112,7 +126,7 @@ module DTK; class AssemblyModule
     def create_assembly_branch?(component_module,opts={})
       am_version = assembly_module_version()
       unless component_module.get_workspace_module_branch(am_version)
-        create_assembly_branch(component_module,am_version)
+        create_assembly_branch(component_module,am_version,opts)
       end
       ret = component_module.get_workspace_branch_info(am_version)
       if opts[:ret_module_branch]
@@ -122,9 +136,9 @@ module DTK; class AssemblyModule
       end
     end
 
-    def create_assembly_branch(component_module,am_version)
-      base_version = component_module.get_field?(:version) #TODO: is this right; shouldnt version be on branch, not module
-      component_module.create_new_version(base_version,am_version)
+    def create_assembly_branch(component_module,am_version,opts={})
+      base_version = nil
+      component_module.create_new_version(base_version,am_version,opts)
     end
 
     def get_branch_template(module_branch,cmp_template)

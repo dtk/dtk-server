@@ -317,9 +317,11 @@ end
 
     # creates if necessary a new branch from this (so new branch and this branch share history)
     # returns repo for new branch; this just creates repo branch and does not update object model
-    def create_new_branch_from_this_branch?(project,base_repo,new_version)
+    # opts can have keys
+    #  :sha - sha on base branch to branch from
+    def create_new_branch_from_this_branch?(project,base_repo,new_version,opts={})
       branch_name = Location::Server::Local::workspace_branch_name(project,new_version)
-      RepoManager.add_branch_and_push?(branch_name,self)
+      RepoManager.add_branch_and_push?(branch_name,opts,self)
       repo_for_version(base_repo,new_version)
     end
 

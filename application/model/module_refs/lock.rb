@@ -14,6 +14,7 @@ module DTK
         @assembly_instance = assembly_instance
       end
 
+      AllTypes = [:locked_dependencies,:locked_branch_shas]
       # opts can have keys
       #   :with_module_branches - Boolean
       #   :types subset of AllTypes
@@ -31,7 +32,6 @@ module DTK
           compute_elements(assembly_instance,types,opts_nested)
         end
       end
-      AllTypes = [:locked_dependencies,:locked_branch_shas]
       
       def self.compute(assembly_instance,opts={})
         types = opts[:types] || AllTypes
@@ -50,9 +50,10 @@ module DTK
       end
 
       def matching_namespace?(module_name)
-        if el = element?(module_name)
-          el.namespace
-        end
+        (el = element?(module_name)) && el.namespace
+      end
+      def matching_locked_branch_sha?(module_name)
+        (module_ref_lock = module_ref_lock(module_name)) && module_ref_lock.locked_branch_sha
       end
 
       def matching_impls_with_children(module_names)
@@ -158,9 +159,11 @@ module DTK
         end
         ret
       end
-
+      def module_ref_lock(module_name)
+        self[module_name]
+      end
       def element?(module_name)
-        module_ref_lock_element(self[module_name])
+        module_ref_lock_element(module_ref_lock(module_name))
       end
       def element(module_name)
         element?(module_name) || (Log.error("Unexpected that no match for module name '#{module_name}'"); nil)

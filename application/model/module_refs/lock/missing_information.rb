@@ -24,11 +24,12 @@ module DTK; class ModuleRefs
           end
         end
         unless missing.empty?
-          new(assembly_instance,missing,complete,types,opts)
+          new(module_refs_lock.assembly_instance,missing,complete,types,opts)
         end
       end
 
       def fill_in_missing_information()
+        pp [:fill_in_missing_information,self]
         raise Error.new("Need to write fill_in_missing_information")
       end
      private
@@ -44,7 +45,7 @@ module DTK; class ModuleRefs
           end
         end
         if types.include?(:locked_branch_shas)
-          if module_ref_lock[:locked_branch_shas].nil?
+          unless module_ref_lock.locked_branch_sha
             return true 
           end
         end

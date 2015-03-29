@@ -12,9 +12,16 @@ module DTK
         @assembly_instance = assembly_instance
       end
 
+      # First check if persisted if not then compute it
       def self.get(assembly_instance,opts={})
-        # TODO: first check if persisted
+#        ModuleRef::Lock.get_module_refs_lock(assembly_instance) || compute(assembly_instance,opts)
         compute(assembly_instance,opts)
+
+      end
+
+      def persist()
+        ModuleRef::Lock.persist(self)
+        self
       end
 
       def self.compute(assembly_instance,opts={})
@@ -22,11 +29,6 @@ module DTK
         ret = compute_elements(assembly_instance,:types => types)
       end
       AllTypes = [:elements,:locked_branch_shas]
-
-      def persist()
-        ModuleRef::Lock.persist(self)
-        self
-      end
 
       def add_matching_module_branches!()
         ndx_els = Hash.new

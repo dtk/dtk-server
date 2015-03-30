@@ -457,8 +457,6 @@ module DTK
 
     def add_branch_and_push?(new_branch,opts={})
       add_branch?(new_branch,opts)
-      # TODO: DTK-2014; check if want to pass in both @branch and opts[:sha]
-      # see if in current code it goes back top what head was
       checkout(opts[:sha]||new_branch) do
         git_command__push(new_branch)
       end
@@ -478,8 +476,6 @@ module DTK
         git_command__create_empty_branch(new_branch)
         git_command__empty_commit()
       else
-        # TODO: DTK-2014; check if want to pass in both @branch and opts[:sha]
-        # see if in current code it goes back top what head was
         checkout(opts[:sha]||@branch) do
           git_command__add_branch(new_branch)
         end

@@ -3,6 +3,7 @@ require 'eventmachine'
 module DTK
   class Component_moduleController < AuthController
     helper :module_helper
+    helper :remotes_helper
 
     def rest__test_generate_dsl()
       component_module = create_obj(:component_module_id)
@@ -296,6 +297,26 @@ module DTK
       component_module = create_obj(:component_module_id)
       mirror_host = ret_non_null_request_params(:mirror_host)
       component_module.push_to_mirror(mirror_host)
+    end
+
+    def rest__info_git_remote()
+      component_module = create_obj(:component_module_id)
+      info_git_remote(component_module)
+    end
+
+    def rest__add_git_remote()
+      component_module = create_obj(:component_module_id)
+      add_git_remote(component_module)
+    end
+
+    def rest__remove_git_remote()
+      component_module = create_obj(:component_module_id)
+      remove_git_remote(component_module)
+    end
+
+    def rest__make_git_remote_active()
+      component_module = create_obj(:component_module_id)
+      make_git_remote_active(component_module)
     end
 
   end

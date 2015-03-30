@@ -29,6 +29,10 @@ module DTK
       Model.get_obj(model_handle(:repo_user_acl),sp_hash)
     end
 
+    def default_remote!()
+      RepoRemote.default_remote!(self.model_handle(:repo_remote), self.id)
+    end
+
     def self.delete(repo_idh)
       repo = repo_idh.create_object()
       RepoManager.delete_repo(repo)

@@ -1,0 +1,39 @@
+module Ramaze::Helper
+  module RemotesHelper
+
+    def info_git_remote(module_obj)
+      info = module_obj.get_linked_remote_repos.collect do |a|
+        a.merge(:url => a.git_remote_url, :git_provider => a.git_provider_name, :is_default_symbol => (a[:is_default] ? '   *  ' : '') )
+      end
+
+      rest_ok_response info
+    end
+
+    def add_git_remote(module_obj)
+      remote_name, remote_url = ret_non_null_request_params(:remote_name, :remote_url)
+      repo_remote_mh   = module_obj.model_handle(:repo_remote)
+
+      response = ::DTK::RepoRemote.create_git_remote(repo_remote_mh, module_obj.get_workspace_repo.id, remote_name, remote_url)
+
+      rest_ok_response response
+    end
+
+    def remove_git_remote(module_obj)
+      remote_name      = ret_non_null_request_params(:remote_name)
+      repo_remote_mh   = module_obj.model_handle(:repo_remote)
+
+      ::DTK::RepoRemote.delete_git_remote(repo_remote_mh, remote_name)
+
+      rest_ok_response
+    end
+
+    def make_git_remote_active(module_obj)
+      remote_name      = ret_non_null_request_params(:remote_name)
+      repo_remote_mh   = module_obj.model_handle(:repo_remote)
+
+      ::DTK::RepoRemote.set_default_remote(repo_remote_mh, module_obj.get_workspace_repo.id, remote_name)
+
+      rest_ok_response
+    end
+  end
+end

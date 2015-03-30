@@ -60,7 +60,7 @@
       "description",
       "type",
       "iaas_type"
-   ],   
+   ],
    "provider":[
       "display_name",
       "id",
@@ -111,5 +111,12 @@
       "node_name",
       "system_user",
       "key_name"
-   ]
+   ],
+   "remotes":[
+       "id",
+       "name",
+       "provider",
+       "url",
+       "active?"
+   ],
 }

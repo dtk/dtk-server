@@ -1,6 +1,7 @@
 module DTK
   class Test_moduleController < AuthController
     helper :module_helper
+    helper :remotes_helper
 
     def rest__test_generate_dsl()
       test_module = create_obj(:test_module_id)
@@ -234,6 +235,26 @@ module DTK
       test_module = create_obj(:test_module_id)
       mirror_host = ret_non_null_request_params(:mirror_host)
       test_module.push_to_mirror(mirror_host)
+    end
+
+    def rest__info_git_remote()
+      test_module = create_obj(:test_module_id)
+      info_git_remote(test_module)
+    end
+
+    def rest__add_git_remote()
+      test_module = create_obj(:test_module_id)
+      add_git_remote(test_module)
+    end
+
+    def rest__remove_git_remote()
+      test_module = create_obj(:test_module_id)
+      remove_git_remote(test_module)
+    end
+
+    def rest__make_git_remote_active()
+      test_module = create_obj(:test_module_id)
+      make_git_remote_active(test_module)
     end
 
   end

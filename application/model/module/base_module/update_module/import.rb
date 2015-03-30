@@ -130,7 +130,7 @@ module DTK; class BaseModule; class UpdateModule
 
       component_module_refs = update_component_module_refs(@module_branch,create_info[:matching_module_refs])
       return component_module_refs if is_parsing_error?(component_module_refs)
-      
+
       hash_opt_save_dsl = {
         :component_module_refs    => component_module_refs,
         :create_empty_module_refs => true,

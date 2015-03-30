@@ -143,9 +143,23 @@ module DTK; module ModuleMixins
 
     class Info < Hash
     end
+
+    def get_custom_git_remote_module_info(default_remote)
+      Info.new().merge(
+        :module_name => self.module_name,
+        :full_module_name => self.full_module_name,
+        # TODO: will change this key to :remote_ref when upstream uses this
+        :remote_repo => default_remote.remote_ref,
+        :remote_repo_url => default_remote.git_remote_url(),
+        :remote_branch => 'master',
+        :dependency_warnings => []
+      )
+    end
+
     # raises an access rights usage error if user does not have access to the remote module
     def get_linked_remote_module_info(project,action,remote_params,client_rsa_pub_key,access_rights,module_refs_content=nil)
       remote = remote_params.create_remote(project)
+
       repo_remote_handler = Repo::Remote.new(remote)
       remote_module_info = repo_remote_handler.get_remote_module_info?(
         client_rsa_pub_key, {
@@ -176,12 +190,13 @@ module DTK; module ModuleMixins
           :remote_repo => remote.remote_ref,
           :remote_repo_url => remote_module_info[:remote_repo_url],
           :remote_branch => remote.branch_name,
-          :workspace_branch => workspace_branch_obj[:branch],
           :dependency_warnings => remote_module_info[:dependency_warnings]
       )
+
       if version = remote.version
         ret.merge!(:version => version)
       end
+
       ret
     end
 

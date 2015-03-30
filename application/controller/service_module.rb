@@ -2,6 +2,7 @@ module DTK
   class Service_moduleController < AuthController
     helper :module_helper
     helper :assembly_helper
+    helper :remotes_helper
 
     # TODO: for debugging; will be removed
     def rest__debug_get_project_trees()
@@ -241,6 +242,26 @@ module DTK
       version = ret_version()
       clone_update_info = service_module.set_component_module_version(component_module,version)
       rest_ok_response clone_update_info
+    end
+
+    def rest__info_git_remote()
+      service_module = create_obj(:service_module_id)
+      info_git_remote(service_module)
+    end
+
+    def rest__add_git_remote()
+      service_module = create_obj(:service_module_id)
+      add_git_remote(service_module)
+    end
+
+    def rest__remove_git_remote()
+      service_module = create_obj(:service_module_id)
+      remove_git_remote(service_module)
+    end
+
+    def rest__make_git_remote_active()
+      service_module = create_obj(:service_module_id)
+      make_git_remote_active(service_module)
     end
 
   end

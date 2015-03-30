@@ -91,13 +91,13 @@
       "id",
       "name",
       "depends_on",
-      "satisfied_by"  
+      "satisfied_by"
     ],
     "mapping": {
       "id": "dtk_id",
       "name": "display_name",
       "depends_on":  "depends_on",
-      "satisfied_by": "satisfied_by"  
+      "satisfied_by": "satisfied_by"
     }
   },
   "component_instances": {
@@ -301,7 +301,7 @@
       "keypair": "iaas_properties.keypair",
       "security_group(s)": "iaas_properties.security_group"
     }
-  },  
+  },
   "provider": {
     "order": [
       "id",
@@ -628,6 +628,22 @@
     "mapping": {
       "id": "dtk_id",
       "name": "display_name"
+    }
+  },
+  "remotes": {
+    "order": [
+      "id",
+      "name",
+      "provider",
+      "url",
+      "active?"
+    ],
+    "mapping": {
+      "id": "dtk_id",
+      "name": "display_name",
+      "provider": "git_provider",
+      "url": "url",
+      "active?": "is_default_symbol"
     }
   }
   }

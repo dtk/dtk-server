@@ -31,7 +31,14 @@ module Ramaze::Helper
       project = get_default_project()
       module_ref_content = ret_request_params(:module_ref_content)
 
-      module_obj.get_linked_remote_module_info(project,action,remote_params,rsa_pub_key,access_rights,module_ref_content)
+      default_remote = module_obj.get_repo!().default_remote!()
+
+      # we check if we are using non-dtkn remote if so we bypass getting full linked remote module info
+      if default_remote.is_dtkn_provider?
+        module_obj.get_linked_remote_module_info(project,action,remote_params,rsa_pub_key,access_rights,module_ref_content)
+      else
+        module_obj.get_custom_git_remote_module_info(default_remote)
+      end
     end
 
     def get_service_dependencies(module_type, remote_params, client_rsa_pub_key=nil)

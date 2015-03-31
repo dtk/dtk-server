@@ -24,6 +24,13 @@ module DTK
         create_module_refs_starting_from_assembly(assembly_instance,assembly_branch,components)
       end
 
+      def isa_dangling_ref?()
+        @context.kind_of?(ModuleRef::Missing)
+      end
+      def isa_module_ref?()
+        @context.kind_of?(ModuleRef)
+      end
+
       def violations?()
         missing   = Array.new
         multi_ns  = Hash.new
@@ -65,9 +72,12 @@ module DTK
         if @context.kind_of?(Assembly)
           ret[:type] = Workspace.is_workspace?(@context) ? 'Workspace' : 'Assembly::Instance'
           ret[:name] = @context.get_field?(:display_name)
-        elsif @context.kind_of?(ModuleRef)
+        elsif isa_module_ref?()
           ret[:type] = 'ModuleRef'
-          ret[:namespace] = @context[:namespace_info]
+          ret[:namespace] = namespace()
+        elsif isa_dangling_ref?()
+          ret[:type] = '-- MISSING MODULE REF --'
+          ret[:namespace] = namespace()
         else
           ret[:type] = @context.class
           ret[:content] = @context
@@ -91,6 +101,8 @@ module DTK
       def namespace?()
         if @context.kind_of?(ModuleRef)
           (@context||{})[:namespace_info]
+        elsif @context.kind_of?(ModuleRef::Missing)
+          @context.namespace
         end
       end
 
@@ -102,8 +114,15 @@ module DTK
             recursive_loop = path.join(' -> ')
             raise ErrorUsage.new("Module '#{ns_module_name}' is in a recursive loop: #{recursive_loop}")
           end
-          add_module_ref!(module_name,child)
-          child.recursive_add_module_refs!(path) if child
+          if child
+            add_module_ref!(module_name,child)
+            child.recursive_add_module_refs!(path)
+          else
+            # missing ref to module_name,namespace
+            module_branch = nil
+            context = ModuleRef::Missing.new(module_name,namespace)
+            add_module_ref!(module_name,self.class.new(module_branch,context))
+          end
         end
         self
       end
@@ -140,11 +159,12 @@ module DTK
         
         ret = new(assembly_branch,assembly_instance)
         get_top_level_children(cmp_module_branches,assembly_branch) do |module_name,child|
-          # child can be nil if no child
-          ret.add_module_ref!(module_name,child)
           if child
+            ret.add_module_ref!(module_name,child)
             parent_path = [namespace_model_name_path_el(child.namespace,module_name)]
             child.recursive_add_module_refs!(parent_path)
+          else
+            Log.error_pp(["Unexpected that in get_top_level_children child can be nil",cmp_module_branches,assembly_branch])
           end
         end
         ret

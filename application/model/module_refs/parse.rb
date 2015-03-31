@@ -29,7 +29,7 @@ module DTK
           #TODO: Logging to make sure that it is parse error and not code error
           Log.info_pp([e,e.backtrace[0..5]])
           return ErrorUsage::Parsing.new('Module refs parsing error')
-        end 
+        end
         ret
       end
 
@@ -45,7 +45,7 @@ module DTK
             end
           end
           #This comes from parsing the dsl file
-        elsif object.kind_of?(ServiceModule::DSLParser::Output) or object.kind_of?(ComponentDSLForm::Elements) 
+        elsif object.kind_of?(ServiceModule::DSLParser::Output) or object.kind_of?(ComponentDSLForm::Elements)
           object.inject(Hash.new) do |h,r|
             internal_form = convert_parse_to_internal_form(r)
             h.merge(parse_form_module_name(r).to_sym => ModuleRef.reify(mh,internal_form))
@@ -74,6 +74,11 @@ module DTK
         if version_info = parse_form_hash[:version_info]
           ret[:version_info] = version_info
         end
+
+        if external_ref = parse_form_hash[:external_ref]
+          ret[:external_ref] = external_ref
+        end
+
         ret
       end
     end

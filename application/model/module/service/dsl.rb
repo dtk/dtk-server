@@ -108,7 +108,7 @@ module DTK
       # returns [meta_files,regexp,is_legacy_structure]
       def meta_files_regexp_and_is_legacy?(module_branch)
         # determine if new structure or not
-        is_legacy_structure = false 
+        is_legacy_structure = false
         meta_files,regexp = meta_files_and_regexp_aux?(AssemblyFilenamePathInfo,module_branch)
         if meta_files.empty?
           meta_files,regexp = meta_files_and_regexp_aux?(AssemblyFilenamePathInfoLegacy,module_branch)
@@ -189,7 +189,7 @@ module DTK
             file_content = RepoManager.get_file_content(meta_file,module_branch)
             format_type = meta_file_format_type(meta_file)
             opts.merge!(:file_path => meta_file,:default_assembly_name => default_assembly_name)
-            
+
             hash_content = Aux.convert_to_hash(file_content,format_type,opts)||{}
             return [hash_content,ret_cmr] if ParsingError.is_error?(hash_content)
 
@@ -217,7 +217,7 @@ module DTK
             return [response,ret_cmr]
           end
         end
-        
+
         if opts[:auto_update_module_refs]
           # TODO: should also update teh contents of component module refs
           ret_cmr = ModuleRefs.get_component_module_refs(module_branch)
@@ -230,7 +230,7 @@ module DTK
       def assembly_meta_file_paths(module_branch, &block)
         meta_files,regexp = ServiceModule.meta_files_and_regexp?(module_branch)
         ret_with_removed_variants(meta_files).each do |meta_file|
-          default_assembly_name = (if meta_file =~ regexp then $1; end) 
+          default_assembly_name = (if meta_file =~ regexp then $1; end)
           block.call(meta_file,default_assembly_name)
         end
       end
@@ -315,7 +315,7 @@ module DTK
       end
 
       def error_cleanup()
-        # TODO: this is wrong; 
+        # TODO: this is wrong;
         # ServiceModule.delete(id_handle())
         # determine if there is case where this is appropriate or have delete for other objects; can also case on dsl_parsed
         # TODO: may need to  write error cleanup for service module update that does not parse for service module (#{update_object!(:display_name,:dsl_parsed).inspect})")

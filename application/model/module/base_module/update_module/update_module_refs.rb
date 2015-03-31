@@ -30,8 +30,8 @@ module DTK; class BaseModule; class UpdateModule
     # opts can have keys
     #  :message
     #  :create_empty_module_refs
-    #  :component_module_refs 
-    #  :external_dependencies 
+    #  :component_module_refs
+    #  :external_dependencies
     def self.save_dsl?(module_branch,opts={})
       # For Rich: DTK-1925
       # think we should use code bellow because when import from file for some reason opts[:component_module_refs].component_modules
@@ -71,6 +71,7 @@ module DTK; class BaseModule; class UpdateModule
 
       include_module_names = component_module_names_in_include_statements?()
       # ModuleRefs::ComponentDSLForm will also find any parsing errors in the module refs file
+
       ndx_cmr_info = ModuleRefs::ComponentDSLForm.get_ndx_module_info(@project_idh,@module_class,@module_branch,:include_module_names => include_module_names)
       return ndx_cmr_info if is_parsing_error?(ndx_cmr_info)
 
@@ -79,7 +80,7 @@ module DTK; class BaseModule; class UpdateModule
         # find component modules in include_module_names that are missing
         missing = include_module_names - ndx_cmr_info.keys
         external_deps.merge!(:possibly_missing => missing) unless missing.empty?
-        
+
         # find any ambiguously mapped component modules
         ambiguous = Hash.new
         include_module_names.each do |module_name|
@@ -113,4 +114,4 @@ module DTK; class BaseModule; class UpdateModule
     end
   end
 end; end; end
-    
+

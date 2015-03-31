@@ -12,9 +12,9 @@ module DTK; class ModuleRefs
       end
     end
 
-    def initialize(component_module,namespace)
+    def initialize(component_module, namespace, external_ref = nil)
       super()
-      replace(:component_module => component_module, :remote_namespace => namespace)
+      replace(:component_module => component_module, :remote_namespace => namespace, :external_ref => external_ref)
     end
     private :initialize
 
@@ -42,7 +42,8 @@ module DTK; class ModuleRefs
       raw_cmp_mod_refs = Parse.get_component_module_refs_dsl_info(module_class,module_branch)
       return raw_cmp_mod_refs if raw_cmp_mod_refs.kind_of?(ErrorUsage::Parsing)
       # put in parse_form
-      cmp_mod_refs = raw_cmp_mod_refs.map{|r|new(r[:component_module],r[:remote_namespace])}
+      cmp_mod_refs = raw_cmp_mod_refs.map{|r|new(r[:component_module],r[:remote_namespace], r[:external_ref])}
+
       # prune out any that dont have namespace
       cmp_mod_refs.reject!{|cmr|!cmr.namespace?}
 
@@ -88,7 +89,7 @@ module DTK; class ModuleRefs
     def self.create_from_module_branches?(module_branches)
       ret = nil
       if module_branches.nil? or module_branches.empty?
-        return ret 
+        return ret
       end
       mb_idhs = module_branches.map{|mb|mb.id_handle()}
       ret = ComponentDSLForm::Elements.new
@@ -99,13 +100,13 @@ module DTK; class ModuleRefs
     end
 
     def print_form()
-      if ns = namespace?() 
+      if ns = namespace?()
         "#{ns}:#{component_module()}"
       else
         component_module()
       end
     end
-    
+
     def match?(cmr)
       namespace() == cmr.namespace() and component_module() == cmr.component_module()
     end
@@ -117,7 +118,7 @@ module DTK; class ModuleRefs
         :filter => [:oneof,:display_name,module_names]
       }
       matching_modules = ComponentModule.get_all_with_filter(project_idh,opts)
-      matching_modules.map{|m| new(m[:display_name],m[:namespace][:name])} 
+      matching_modules.map{|m| new(m[:display_name],m[:namespace][:name])}
     end
   end
 end; end

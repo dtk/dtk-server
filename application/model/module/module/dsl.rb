@@ -26,7 +26,7 @@ module DTK
     def self.parse_dsl(component_module,impl_obj,opts={})
       ref_integrity_snapshot = RefIntegrity.snapshot_associated_assembly_templates(component_module)
       opts_create_dsl = opts.merge(:ref_integrity_snapshot => ref_integrity_snapshot, :component_module => component_module)
-      create_dsl_object_from_impl(impl_obj,opts_create_dsl) 
+      create_dsl_object_from_impl(impl_obj,opts_create_dsl)
     end
 
     def update_model_with_ref_integrity_check(opts={})

@@ -31,12 +31,12 @@ module DTK; class BaseModule; class UpdateModule
         config_agent_type = config_agent_type_default()
         dsl_created_info = ScaffoldImplementation.create_dsl(module_name(),config_agent_type,impl_obj)
       end
-      
+
       dsl_updated_info = opts[:ret_dsl_updated_info]
       unless dsl_updated_info.empty?
         ret.dsl_updated_info = dsl_updated_info
       end
-      
+
       ret.set_external_dependencies?(opts[:external_dependencies])
       ret.dsl_created_info = dsl_created_info
       ret
@@ -47,5 +47,5 @@ module DTK; class BaseModule; class UpdateModule
      # need to return dsl_parse_error to display error message when push module updates from service instance
      klass()::ParsingError.trap(:only_return_error=>true){@base_module.parse_dsl_and_update_model(impl_obj,module_branch_idh,version,opts)}
    end
- end 
+ end
 end; end; end

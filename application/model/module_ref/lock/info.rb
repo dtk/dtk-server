@@ -7,7 +7,7 @@ module DTK; class ModuleRef
         @namespace             = namespace
         @module_name           = module_name
         @level                 = level
-        @children_module_names = extra_fields[:subtree_module_names] || []
+        @children_module_names = extra_fields[:children_module_names] || []
         @implementation        = extra_fields[:implementation]
         @module_branch         = extra_fields[:module_branch]
       end

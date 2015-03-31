@@ -24,11 +24,11 @@ module DTK
         create_module_refs_starting_from_assembly(assembly_instance,assembly_branch,components)
       end
 
-      def isa_dangling_ref?()
-        @context.kind_of?(ModuleRef::Missing)
+      def isa_missing_module_ref?()
+        @context.kind_of?(ModuleRef::Missing) && @context
       end
       def isa_module_ref?()
-        @context.kind_of?(ModuleRef)
+        @context.kind_of?(ModuleRef) && @context
       end
 
       def violations?()
@@ -75,7 +75,7 @@ module DTK
         elsif isa_module_ref?()
           ret[:type] = 'ModuleRef'
           ret[:namespace] = namespace()
-        elsif isa_dangling_ref?()
+        elsif isa_missing_module_ref?()
           ret[:type] = '-- MISSING MODULE REF --'
           ret[:namespace] = namespace()
         else

@@ -75,7 +75,7 @@ module DTK
           settings.apply_settings(target,assembly)
         end
 
-        ModuleRefs::Lock.compute(assembly).persist()
+        ModuleRefs::Lock.compute(assembly,:raise_errors => true).persist()
 
         level = 2
         component_child_hashes = clone_copy_output.children_hash_form(level,:component)

@@ -6,9 +6,17 @@ module DTK; class ModuleRefs
           ret = Collapsed.new
           level = opts[:level] || 1
           @module_refs.each_pair do |module_name,subtree|
-            children_module_names = Array.new
+            if missing_module_ref = subtree.isa_missing_module_ref?()
+              if opts[:raise_errors]
+                raise missing_module_ref.error()
+              else
+                next
+              end
+            end
 
-            subtree.collapse(:level => level+1).each_pair do |subtree_module_name,subtree_els|
+            children_module_names = Array.new
+            opts_subtree = Aux.hash_subset(opts,[:raise_errors]).merge(:level => level+1)
+            subtree.collapse(opts_subtree).each_pair do |subtree_module_name,subtree_els|
               collapsed_tree_els = ret[subtree_module_name] ||= Array.new
               subtree_els.each do |subtree_el|
                 unless collapsed_tree_els.find{|el|el == subtree_el}

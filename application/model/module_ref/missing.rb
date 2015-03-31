@@ -6,6 +6,16 @@ module DTK
         @module_name = module_name
         @namespace = namespace
       end
+
+      def error()
+       Error.new(@module_name,@namespace)
+      end
+
+      class Error < ErrorUsage
+        def initialize(module_name,namespace)
+          super("Missing module ref '#{namespace}:#{module_name}'")
+        end
+      end
     end
   end
 end

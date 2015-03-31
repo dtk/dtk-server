@@ -94,8 +94,8 @@ module DTK
         missing, multiple_ns = module_refs_tree.violations?
 
         unless missing.empty?
-          missing.each do |miss|
-            ret << Violation::MissingIncludedModule.new(miss)
+          missing.each do |k,v|
+            ret << Violation::MissingIncludedModule.new(k,v)
           end
         end
 
@@ -218,15 +218,17 @@ module DTK
         end
       end
       class MissingIncludedModule < self
-        def initialize(included_module, version = nil)
+        def initialize(included_module, namespace, version = nil)
           @included_module = included_module
+          @namespace = namespace
           @version = version
         end
         def type()
           :missing_included_module
         end
         def description()
-          "Module '#{@included_module}#{@version.nil? ? '' : '-'+@version}' is included in dsl, but not installed."
+          full_name = "#{@namespace}:#{@included_module}"
+          "Module '#{full_name}#{@version.nil? ? '' : '-'+@version}' is included in dsl, but not installed. To see more details you can use 'print-includes' command."
         end
       end
       class MultipleNamespacesIncluded < self

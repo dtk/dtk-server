@@ -5,6 +5,8 @@ module DTK
       r8_nested_require('tree','collapsed')
       include Collapsed::Mixin
 
+      MISSING_MODULE__REF_TYPE = '-- MISSING MODULE REF --'
+
       attr_reader :module_branch
       def initialize(module_branch,context=nil)
         @module_branch = module_branch
@@ -32,7 +34,7 @@ module DTK
       end
 
       def violations?()
-        missing   = Array.new
+        missing   = Hash.new
         multi_ns  = Hash.new
         refs      = hash_form()
 
@@ -51,18 +53,22 @@ module DTK
 
         refs.each do |name,ref|
           if ref
+            namespace = ref[:namespace]
+            type = ref[:type]
             if val = multi_ns["#{name}"]
-              namespace = ref[:namespace]
               unless val.include?(namespace)
                 val << namespace
                 multi_ns.merge!(name => val)
               end
+            elsif type && type.to_s.eql?(MISSING_MODULE__REF_TYPE)
+              missing.merge!(name => namespace)
             else
-              multi_ns.merge!(name => [ref[:namespace]])
+              multi_ns.merge!(name => [namespace])
             end
             check_refs(ref[:refs], missing, multi_ns) if ref.has_key?(:refs)
           else
-            missing << name
+            # we don't know which namespace this module belongs to, so sending empty namespace
+            missing.merge!(name => '')
           end
         end
       end
@@ -76,7 +82,7 @@ module DTK
           ret[:type] = 'ModuleRef'
           ret[:namespace] = namespace()
         elsif isa_missing_module_ref?()
-          ret[:type] = '-- MISSING MODULE REF --'
+          ret[:type] = MISSING_MODULE__REF_TYPE
           ret[:namespace] = namespace()
         else
           ret[:type] = @context.class

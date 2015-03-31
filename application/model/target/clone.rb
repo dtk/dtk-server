@@ -75,7 +75,14 @@ module DTK
           settings.apply_settings(target,assembly)
         end
 
-        ModuleRefs::Lock.compute(assembly,:raise_errors => true).persist()
+        begin
+          ModuleRefs::Lock.compute(assembly,:raise_errors => true).persist()
+        rescue ModuleRef::Missing::Error => e
+          includes = ModuleRefs::Tree.create(assembly).hash_form()
+          str_includes = keys_to_string(includes)
+          e.message << "\n#{str_includes.to_yaml}"
+          raise e
+        end
 
         level = 2
         component_child_hashes = clone_copy_output.children_hash_form(level,:component)
@@ -85,6 +92,17 @@ module DTK
         end
 
         StateChange.create_pending_change_items(component_new_items)
+      end
+
+      def self.keys_to_string(hash)
+        new_h = {}
+        hash.map do |key,value|
+          if value.is_a?(Hash)
+            value = keys_to_string(value)
+          end
+          new_h[key.to_s] = value
+        end        
+        return new_h
       end
 
       def self.create_state_changes_for_create_node?(target,nodes)

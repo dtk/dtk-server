@@ -228,7 +228,7 @@ module DTK
         end
         def description()
           full_name = "#{@namespace}:#{@included_module}"
-          "Module '#{full_name}#{@version.nil? ? '' : '-'+@version}' is included in dsl, but not installed. To see more details you can use 'print-includes' command."
+          "Module '#{full_name}#{@version.nil? ? '' : '-'+@version}' is included in dsl, but not installed. Use 'print-includes' to see more details."
         end
       end
       class MultipleNamespacesIncluded < self
@@ -240,7 +240,7 @@ module DTK
           :mapped_to_multiple_namespaces
         end
         def description()
-          "Module '#{@included_module}' included in dsl is mapped to multiple namespaces: #{@namespaces.join(', ')}."
+          "Module '#{@included_module}' included in dsl is mapped to multiple namespaces: #{@namespaces.join(', ')}. Use 'print-includes' to see more details."
         end
       end
       class HasItselfAsDependency < self

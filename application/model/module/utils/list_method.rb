@@ -64,6 +64,7 @@ module DTK
           ndx_repo_remotes = mdl.delete(:ndx_repo_remotes)
 
           if linked_remote = linked_remotes_print_form((ndx_repo_remotes||{}).values,external_ref_source,opts={})
+            linked_remote = "*** NOT PUBLISHED ***" if linked_remote.empty? && diff
             mdl.merge!(:linked_remotes => linked_remote)
           end
         end

@@ -22,7 +22,7 @@ module DTK
         types = opts[:types] || AllTypes
         opts_nested = Aux.hash_subset(opts,[:with_module_branches])
         # First check if persisted if not then compute it
-        if persisted = get_module_refs_lock?(assembly_instance) 
+        if persisted = (R8::Config[:module_refs_lock]||{})[:use_persistence] && get_module_refs_lock?(assembly_instance) 
           if missing_info = MissingInformation.missing_information?(persisted,types,opts_nested)
             missing_info.fill_in_missing_information()
           else

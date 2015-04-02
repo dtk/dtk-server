@@ -61,7 +61,7 @@ module DTK
             log(['end_action:',name,result_type] + args)
           end
           def event(event,*args)
-            log(['event',name,:event=>event] + args)
+            log(['event',name,:event=>sanitize_event(event)] + args)
           end
           def canceling(task_id)
             log(['canceling',name,:task_id=>task_id])
@@ -74,6 +74,20 @@ module DTK
           def log(*args)
             Log.info_pp(*args)
           end
+
+          def sanitize_event(event)
+            # if has list of components then remove attributes in case they have sensitive values
+            ret = event
+            if components = event[:components]
+              sanitized_components = components.map do |r|
+                # if r[:component_name]; removing everyting else, which is teh attribute values
+                r[:component_name] ? r[:component_name] : r
+              end
+              ret = ret.merge(:components => sanitized_components)
+            end
+            ret
+          end
+
         end
 
         def set_result_succeeded(workitem,new_result,task,action)

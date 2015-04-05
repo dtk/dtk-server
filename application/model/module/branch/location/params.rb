@@ -39,10 +39,10 @@ module DTK; class ModuleBranch
       def pp_module_name(opts={})
         ret = module_name
         if version
-          ret << ":#{version}"
+          ret << "(#{version})"
         end
 
-        module_namespace_name ? "#{module_namespace_name}/#{ret}" : ret
+        module_namespace_name ? "#{module_namespace_name}:#{ret}" : ret
       end
 
      private

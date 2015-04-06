@@ -25,11 +25,14 @@ module DTK
           ndx_repo_remotes = r[:ndx_repo_remotes]
           ndx = r[:id]
           is_equal = nil
+          not_published = nil
 
           if diff
             if default_remote_repo = RepoRemote.ret_default_remote_repo((ndx_repo_remotes||{}).values)
               remote = default_remote_repo.remote_dtkn_location(project,model_type,module_name)
               is_equal = r[:repo].ret_local_remote_diff(module_branch,remote)
+            else
+              not_published = true
             end
           end
 
@@ -39,6 +42,7 @@ module DTK
             mdl = ndx_ret[ndx] = r
           end
           mdl.merge!(:is_equal => is_equal)
+          mdl.merge!(:not_published => not_published)
 
           if opts[:include_versions]
             (mdl[:version_array] ||= Array.new) << module_branch.version_print_form(Opts.new(:default_version_string => DEFAULT_VERSION))
@@ -63,8 +67,7 @@ module DTK
           external_ref_source = mdl.delete(:external_ref_source)
           ndx_repo_remotes = mdl.delete(:ndx_repo_remotes)
 
-          if linked_remote = linked_remotes_print_form((ndx_repo_remotes||{}).values,external_ref_source,opts={})
-            linked_remote = "*** NOT PUBLISHED ***" if linked_remote.empty? && diff
+          if linked_remote = linked_remotes_print_form((ndx_repo_remotes||{}).values, external_ref_source, {:not_published => mdl[:not_published]})
             mdl.merge!(:linked_remotes => linked_remote)
           end
         end
@@ -90,7 +93,7 @@ module DTK
       
       private
 
-      def self.linked_remotes_print_form(repo_remotes,external_ref_source,opts={})
+      def self.linked_remotes_print_form(repo_remotes, external_ref_source, opts={})
         opts_pp = Opts.new(:dtkn_prefix => true)
         array =
           if repo_remotes.empty?
@@ -104,6 +107,7 @@ module DTK
           end
 
         array << external_ref_source if external_ref_source
+        array << "*** NOT PUBLISHED ***" if opts[:not_published]
 
         array.join(JoinDelimiter)
       end

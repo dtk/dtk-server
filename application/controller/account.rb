@@ -27,45 +27,47 @@ module DTK
         raise DTK::Error, "Invalid format of pub key name, characters allower are: '#{PUB_KEY_NAME_REGEX.source.gsub('\\','')}'"
       end
 
-      # Service call
-      match_service, repo_user_service = ServiceModule.add_user_direct_access(model_handle_with_private_group(:service_module), rsa_pub_key, username)
+      Model.Transaction do
+        # Service call
+        match_service, repo_user_service = ServiceModule.add_user_direct_access(model_handle_with_private_group(:service_module), rsa_pub_key, username)
 
-      # Module call
-      match_module, repo_user_module = ComponentModule.add_user_direct_access(model_handle_with_private_group(:component_module), rsa_pub_key, username)
+        # Module call
+        match_module, repo_user_module = ComponentModule.add_user_direct_access(model_handle_with_private_group(:component_module), rsa_pub_key, username)
 
-      # match is boolean to see if there has been natch
-      match = match_service && match_module
-      matched_repo_user = repo_user_service || repo_user_module
+        # match is boolean to see if there has been natch
+        match = match_service && match_module
+        matched_repo_user = repo_user_service || repo_user_module
 
-      if matched_repo_user && !matched_repo_user.has_repoman_direct_access?
-        begin
-          # Add Repo Manager user
-          response = Repo::Remote.new.add_client_access(rsa_pub_key)
+        if matched_repo_user && !matched_repo_user.has_repoman_direct_access?
+          begin
+            # Add Repo Manager user
+            response = Repo::Remote.new.add_client_access(rsa_pub_key)
 
-          # update user so we know that rsa pub key was added
-          matched_repo_user.update(:repo_manager_direct_access => true)
-        rescue DTK::Error => e
-          # we conditionally ignore it and we fix it later when calling repomanager
-          err_msg = "We were not able to add user to Repo Manager, reason: #{e.message}"
-          if e.has_tag?(:raise_error)
-            raise ErrorUsage.new(err_msg)
+            # update user so we know that rsa pub key was added
+            matched_repo_user.update(:repo_manager_direct_access => true)
+          rescue DTK::Error => e
+            # we conditionally ignore it and we fix it later when calling repomanager
+            err_msg = "We were not able to add user to Repo Manager, reason: #{e.message}"
+            if e.has_tag?(:raise_error)
+              raise ErrorUsage.new(err_msg)
+            end
+            Log.warn(err_msg)
+            registered_with_repoman = false
           end
-          Log.warn(err_msg)
-          registered_with_repoman = false
         end
+
+        # only if user exists already
+        Log.info("User ('#{matched_repo_user[:username]}') exists with given PUB key, not able to create a user. ") if match
+
+        rest_ok_response(
+          :repo_manager_fingerprint => RepoManager.repo_server_ssh_rsa_fingerprint(),
+          :repo_manager_dns => RepoManager.repo_server_dns(),
+          :match => match,
+          :new_username => matched_repo_user ? matched_repo_user[:username] : nil,
+          :matched_username => match && matched_repo_user ? matched_repo_user[:username] : nil,
+          :registered_with_repoman => registered_with_repoman
+        )
       end
-
-      # only if user exists already
-      Log.info("User ('#{matched_repo_user[:username]}') exists with given PUB key, not able to create a user. ") if match
-
-      rest_ok_response(
-        :repo_manager_fingerprint => RepoManager.repo_server_ssh_rsa_fingerprint(),
-        :repo_manager_dns => RepoManager.repo_server_dns(),
-        :match => match,
-        :new_username => matched_repo_user ? matched_repo_user[:username] : nil,
-        :matched_username => match && matched_repo_user ? matched_repo_user[:username] : nil,
-        :registered_with_repoman => registered_with_repoman
-      )
     end
 
     def rest__remove_user_direct_access()

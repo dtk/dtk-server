@@ -29,7 +29,7 @@ module DTK; module CommandAndControlAdapter
 
       module AttributeMapping
         def self.host_addresses_ipv4(ret,raw_state_info,node)
-          if ec2_public_address = raw_state_info[:dns_name]
+          if ec2_public_address = raw_state_info[:dns_name] || raw_state_info[:public_ip_address]
             node[:external_ref][:ec2_public_address] = ec2_public_address
             dns = node[:external_ref][:dns_name] = ret_dns_value(raw_state_info,node)
             [dns]
@@ -46,10 +46,9 @@ module DTK; module CommandAndControlAdapter
 
       private
         def self.ret_dns_value(raw_state_info,node)
-          node.persistent_dns() || node.elastic_ip() || raw_state_info[:dns_name]
+          node.persistent_dns() || node.elastic_ip() || raw_state_info[:dns_name] || raw_state_info[:public_ip_address]
         end
       end
-
       def ec2_public_address!(node)
         if raw_state_info = raw_state_info!(node)
           raw_state_info[:dns_name]

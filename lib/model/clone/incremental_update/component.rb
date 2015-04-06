@@ -51,7 +51,7 @@ module DTK; class Clone
       end
 
       def needs_to_be_moved_to_assembly_branch?(cmp)
-        (cmp.get_field?(:module_branch_id) != @module_branch_id) 
+        (cmp.get_field?(:module_branch_id) != @module_branch_id)
       end
       
       def has_locked_sha?(cmp)

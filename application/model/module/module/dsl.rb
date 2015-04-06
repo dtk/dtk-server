@@ -118,7 +118,7 @@ module DTK
 
       components.each do |name,value|
         # if component is 'puppet definition'
-        if (value['external_ref']||{}).has_key?('puppet_definition')
+        if (value['external_ref'].kind_of?(Hash) ? value['external_ref'] : {}).has_key?('puppet_definition')
           attributes = value['attributes']
           names = get_name_attributes(attributes)
           return ParsingError::BadPuppetDefinition.new(:component => name, :invalid_names => names) unless names.size == 1

@@ -59,6 +59,13 @@ module DTK
         return key_pair
       end
 
+      def check_for_subnet(subnet_id)
+        unless subnet = @conn.subnets.get(subnet_id).subnet_id
+          raise ErrorUsage.new("Not able to find IAAS subnet with id '#{subnet_id}' aborting action, please create necessery subnet_id")
+        end
+        return subnet
+      end
+
       def check_for_security_group(name, description = nil)
         unless sc = @conn.security_groups.get(name)
           # sc = @conn.security_groups.create(:name => name, :description => description)

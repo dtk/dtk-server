@@ -252,10 +252,5 @@ module DTK
       remove_git_remote(test_module)
     end
 
-    def rest__make_git_remote_active()
-      test_module = create_obj(:test_module_id)
-      make_git_remote_active(test_module)
-    end
-
   end
 end

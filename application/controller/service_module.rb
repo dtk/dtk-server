@@ -259,10 +259,5 @@ module DTK
       remove_git_remote(service_module)
     end
 
-    def rest__make_git_remote_active()
-      service_module = create_obj(:service_module_id)
-      make_git_remote_active(service_module)
-    end
-
   end
 end

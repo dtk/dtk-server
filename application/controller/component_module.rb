@@ -320,10 +320,5 @@ module DTK
       remove_git_remote(component_module)
     end
 
-    def rest__make_git_remote_active()
-      component_module = create_obj(:component_module_id)
-      make_git_remote_active(component_module)
-    end
-
   end
 end

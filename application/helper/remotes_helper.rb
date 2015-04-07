@@ -35,13 +35,5 @@ module Ramaze::Helper
       rest_ok_response
     end
 
-    def make_git_remote_active(module_obj)
-      remote_name      = ret_non_null_request_params(:remote_name)
-      repo_remote_mh   = module_obj.model_handle(:repo_remote)
-
-      ::DTK::RepoRemote.set_default_remote(repo_remote_mh, module_obj.get_workspace_repo.id, remote_name)
-
-      rest_ok_response
-    end
   end
 end

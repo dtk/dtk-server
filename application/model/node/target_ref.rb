@@ -124,6 +124,28 @@ module DTK
         ret
       end
 
+      def self.get_target_running_nodes(target, opts = {})
+        active_nodes = Array.new()
+        sp_hash = {
+          :cols => opts[:cols] || [:id, :display_name, :tags, :ref, :type, :assembly_id, :datacenter_datacenter_id, :managed],
+          :filter => [:and,
+                      # [:oneof, :type, [Type::Node.target_ref,Type::Node.physical]],
+                        [:eq, :datacenter_datacenter_id, target[:id]],
+                        opts[:managed] && [:eq, :managed, true]].compact
+        }
+        node_mh = target.model_handle(:node)
+        ret = get_objs(node_mh,sp_hash,:keep_ref_cols => true)
+
+        ret.each do |node|
+          op_status = node.get_admin_op_status()
+          if !node.is_node_group? && op_status.eql?('running')
+            active_nodes << node
+          end
+        end
+
+        active_nodes
+      end
+
       # The class method get_free_nodes returns  managed nodes without any assembly on them
       def self.get_free_nodes(target)
         ret = get_nodes(target,:mark_free_nodes=>true,:managed=>true)

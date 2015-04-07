@@ -1,5 +1,7 @@
 module DTK
   class Assembly::Instance
+    TARGET_BUILTIN_NODE_LIMIT = R8::Config[:dtk][:target][:builtin][:node_limit].to_i
+
     module ViolationMixin
       def find_violations()
         nodes_and_cmps = get_info__flat_list(:detail_level => "components").select{|r|r[:nested_component]}
@@ -10,8 +12,9 @@ module DTK
         cmp_parsing_errors = find_violations__cmp_parsing_error(cmps)
         unconn_req_service_refs = find_violations__unconn_req_service_refs()
         mod_refs_viols = find_violations__module_refs(cmps)
+        num_of_target_nodes = find_violations__num_of_target_nodes()
 
-        unset_attr_viols + cmp_constraint_viols + unconn_req_service_refs + mod_refs_viols + cmp_parsing_errors
+        unset_attr_viols + cmp_constraint_viols + unconn_req_service_refs + mod_refs_viols + cmp_parsing_errors + num_of_target_nodes
       end
      private
       def find_violations__unset_attrs()
@@ -102,6 +105,31 @@ module DTK
           multiple_ns.each do |k,v|
             ret << Violation::MultipleNamespacesIncluded.new(k,v)
           end
+        end
+
+        ret
+      end
+
+      def find_violations__num_of_target_nodes()
+        ret = Array.new
+
+        target_idh = self.get_target().id_handle()
+        target = target_idh.create_object(:model_name => :target_instance)
+
+        # check if allowed number of nodes is exceeded (only for builtin target)
+        if target.is_builtin_target?
+          new_nodes, current_nodes = [], []
+
+          self.get_leaf_nodes().each do |l_node|
+            # we need only nodes that are currently not running
+            new_nodes << l_node unless l_node[:admin_op_status] == 'running'
+          end
+
+          # running target nodes
+          current_nodes = target.get_target_running_nodes()
+          new_nodes_size = new_nodes.size
+          current_nodes_size = current_nodes.size
+          ret << Violation::NodesLimitExceeded.new(new_nodes_size, current_nodes_size) if (current_nodes_size + new_nodes_size) > TARGET_BUILTIN_NODE_LIMIT
         end
 
         ret
@@ -224,6 +252,19 @@ module DTK
         end
         def description()
           @message
+        end
+      end
+
+      class NodesLimitExceeded < self
+        def initialize(new_nodes, running)
+          @new = new_nodes
+          @running = running
+        end
+        def type()
+          :nodes_limit_exceeded
+        end
+        def description()
+          "There are #{@running} nodes currently running in builtin target. Unable to create #{@new} new nodes beacuse it will exceed number of nodes allowed in builtin target (#{TARGET_BUILTIN_NODE_LIMIT})"
         end
       end
     end

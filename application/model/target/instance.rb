@@ -7,6 +7,10 @@ module DTK
         IAASProperties.new(:target_instance => self)
       end
 
+      def get_target_running_nodes()
+        Node::TargetRef.get_target_running_nodes(self)
+      end
+
       def self.create_target(project_idh,provider,region,opts={})
         provider_properties = provider.get_field?(:iaas_properties).merge(:region => region)
         # # DTK-1735 DO NOT copy aws key and secret from provider to target

@@ -79,14 +79,16 @@ module DTK
             :cols => [:id,:group_id,:display_name,:repo_id,:repo_name,:repo_namespace,:created_at,:is_default],
             :filter => [:oneof, :repo_id, ndx_branch_module_rows.keys]
           }
-          
-          Model.get_objs(module_mh.createMH(:repo_remote),sp_hash).each do |r|
+
+          remotes = Model.get_objs(module_mh.createMH(:repo_remote),sp_hash)
+
+          remotes.each do |r|
             ndx = r[:repo_id]
             (ndx_branch_module_rows[ndx][:ndx_repo_remotes] ||= Hash.new).merge!(r[:id] => r)
           end
         end
       end
-      
+
       private
 
       def self.linked_remotes_print_form(repo_remotes,external_ref_source,opts={})

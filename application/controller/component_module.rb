@@ -16,18 +16,24 @@ module DTK
     def rest__create()
       # setup needed data
       module_name = ret_non_null_request_params(:module_name)
-      namespace = ret_request_param_module_namespace?()
+      namespace   = ret_request_param_module_namespace?()
       config_agent_type =  ret_config_agent_type()
       project = get_default_project()
 
       # local_params encapsulates local module branch params
-      opts_local_params = (namespace ? {:namespace=>namespace} : {})
+      opts_local_params = (namespace ? { :namespace => namespace } : {})
       local_params = local_params(:component_module,module_name,opts_local_params)
 
       opts_create_mod = Opts.new(
         :config_agent_type => ret_config_agent_type()
       )
       module_repo_info = ComponentModule.create_module(project,local_params,opts_create_mod)[:module_repo_info]
+
+      # only when creating via import-git command
+      if git_url = ret_request_params(:module_git_url)
+        add_git_url(project.model_handle(:repo_remote), module_repo_info[:repo_id], git_url)
+      end
+
       rest_ok_response module_repo_info
     end
 

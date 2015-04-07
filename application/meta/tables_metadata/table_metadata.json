@@ -635,15 +635,13 @@
       "id",
       "name",
       "provider",
-      "url",
-      "active?"
+      "url"
     ],
     "mapping": {
       "id": "dtk_id",
       "name": "display_name",
       "provider": "git_provider",
-      "url": "url",
-      "active?": "is_default_symbol"
+      "url": "url"
     }
   }
 }

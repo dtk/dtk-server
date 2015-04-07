@@ -9,6 +9,7 @@ module DTK
     end
 
     GIT_REPO_PROVIDERS = ['github','bitbucket','dtkn']
+    DTKN_PROVIDER      = 'dtkn'
 
     DTKNCatalogPrefix = 'dtkn://'
     RemoteRepoBase = :dtknet
@@ -18,18 +19,20 @@ module DTK
       RemoteRepoBase
     end
 
-    def url_ssh_access()
-      RepoManagerClient.repo_url_ssh_access(get_field?(:repo_name))
-    end
-
-    def git_provider_name()
-      url_of_provider = git_remote_url()
-
+    def self.git_provider_name(url_of_provider)
       GIT_REPO_PROVIDERS.each do |provider|
         return provider if url_of_provider.match(/(@|\/)#{provider}/)
       end
 
       GIT_REPO_PROVIDERS.last
+    end
+
+    def url_ssh_access()
+      RepoManagerClient.repo_url_ssh_access(get_field?(:repo_name))
+    end
+
+    def git_provider_name()
+      RepoRemote.git_provider_name(git_remote_url())
     end
 
     def is_dtkn_provider?
@@ -64,8 +67,8 @@ module DTK
         raise ErrorUsage, "Remote identifier '#{repo_name}' already exists"
       end
 
-      unless repo_url.start_with?('git@')
-        raise ErrorUsage, "We are sorry, we do not support HTTPS git remotes - please use SSH remote"
+      unless repo_url.match(/^git@.*:.*\.git$/)
+        raise ErrorUsage, "We are sorry, we only support SSH remotes - provided URL does not seem to be proper SSH url"
       end
 
       remote_repo_create_hash = {
@@ -138,6 +141,7 @@ module DTK
       end
       matches.first
     end
+
     def self.get_matching_remote_repos(repo_remote_mh,repo_id, module_name, repo_namespace=nil)
       sp_hash = {
         :cols   => [:id, :display_name, :repo_name],

@@ -116,7 +116,6 @@
        "id",
        "name",
        "provider",
-       "url",
-       "active?"
+       "url"
    ]
 }

@@ -50,6 +50,23 @@ module DTK
       rest_ok_response
     end
 
+    def rest__delete_node_group()
+      assembly = ret_assembly_instance_object()
+      node_idh = ret_node_or_group_member_id_handle(:node_id,assembly)
+      assembly.delete_node_group(node_idh)
+      rest_ok_response
+    end
+
+    def rest__get_node_groups()
+      assembly = ret_assembly_instance_object()
+      rest_ok_response assembly.get_node_groups()
+    end
+
+    def rest__get_nodes_without_node_groups()
+      assembly = ret_assembly_instance_object()
+      rest_ok_response assembly.get_nodes__expand_node_groups(:remove_node_groups=>true)
+    end
+
     def rest__delete_component()
       assembly = ret_assembly_instance_object()
       # Retrieving node_id to validate if component belongs to node when delete-component invoked from component-level context

@@ -486,6 +486,10 @@ module DTK
       get_field?(:external_ref)||{}
     end
 
+    def get_admin_op_status()
+      get_field?(:admin_op_status)||{}
+    end
+
     def get_iaas_type()
       ret = get_external_ref()[:type]
       ret && ret.to_sym

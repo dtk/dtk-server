@@ -60,6 +60,7 @@ describe "(Repoman Drupal API) Test Case 1: Create user with all correct params 
 			all_user_groups = repoman.get_user_groups
 			user_group_id = all_user_groups['data'].select { |group| group['name'] == user_info[:user_group] }.first['id']
 			response = repoman.delete_user_group(user_group_id)
+			sleep 10
 			ap response
 			if response['status'] == 'ok'
 				user_group_deleted = true if response['data']['success'] == true

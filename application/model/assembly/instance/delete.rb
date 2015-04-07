@@ -23,10 +23,10 @@ module DTK; class  Assembly
     module DeleteMixin
       def destroy_and_reset_nodes()
         nodes = Delete.get_nodes_simple(model_handle(:node),[id()])
-# TODO: DTK-1857
-if nodes.find{|n|n.is_node_group?()}
-  raise ErrorUsage.new("destroy_and_reset_nodes not supported for service instances with node groups")
-end
+        # TODO: DTK-1857
+        if nodes.find{|n|n.is_node_group?()}
+          raise ErrorUsage.new("destroy_and_reset_nodes not supported for service instances with node groups")
+        end
         target_idh = get_target.id_handle()
         nodes.map{|node|node.destroy_and_reset(target_idh)}
       end
@@ -34,7 +34,32 @@ end
       def delete_node(node_idh,opts={})
         node =  node_idh.create_object()
         # TODO: check if cleaning up dangling links when assembly node deleted
-        Delete.node(node,opts.merge(:update_task_template=>true,:assembly=>self))
+        if node.is_node_group?
+          node.update_object!(:display_name)
+          raise ErrorUsage.new("Node with name '#{node[:display_name]}' does not exist. If you want to delete node group you can use 'delete-node-group node-group-name'")
+        end
+
+        if node_group = is_node_group_member?(node_idh)
+          # if node-group member and last one then delete node group as well
+          node_group = node_group.create_obj_optional_subclass()
+          Delete.node(node,opts.merge(:update_task_template=>true,:assembly=>self))
+          node_group.delete_object() if node_group.get_node_group_members.size == 0
+        else
+          Delete.node(node,opts.merge(:update_task_template=>true,:assembly=>self))
+        end
+      end
+
+      def delete_node_group(node_group_idh)
+        node_group = node_group_idh.create_object()
+
+        unless node_group.is_node_group?
+          node_group.update_object!(:display_name)
+          raise ErrorUsage.new("Node group with name '#{node_group[:display_name]}' does not exist")
+        end
+
+        node_group = node_group.create_obj_optional_subclass()
+        node_group.delete_group_members(0)
+        node_group.delete_object()
       end
       
       def delete_component(component_idh, node_id=nil)

@@ -55,6 +55,12 @@ module DTK
       end
 
       def self.stop_instances(nodes)
+        donot_stop_nodes = nodes.select{|n|marked_donot_stop?(n)}
+        unless donot_stop_nodes.empty?
+          node_names = donot_stop_nodes.map{|n|n.get_field?(:display_name)}
+          raise ErrorUsage.new("Cannot stop the nodes (#{node_names.join(',')})")
+        end
+
         nodes.each do |node|
           conn(node.get_target_iaas_credentials()).server_stop(node.instance_id())
           node.update_admin_op_status!(:stopped)
@@ -129,6 +135,10 @@ module DTK
         node.update_obj!(:external_ref,:hostname_external_ref) 
         instance_id = external_ref(node)[:instance_id]
         return true unless instance_id #return if instance does not exist
+        
+        if marked_donot_delete?(node)
+          return true
+        end
 
         target_aws_creds = node.get_target_iaas_credentials()
 
@@ -143,6 +153,20 @@ module DTK
         end
         response
       end
+
+      # TODO: hacks to make sure dont delete or stop the router
+      def self.marked_donot_delete?(node)
+        if instance_id = external_ref(node)[:instance_id]
+          PerisistentIds.include?(instance_id)
+        end
+      end
+      def self.marked_donot_stop?(node)
+        marked_donot_delete?(node)
+      end
+      PerisistentIds = 
+        [
+         'i-23666703' #dtk router
+        ]
 
       def self.reset_node(node)
         update_hash = {

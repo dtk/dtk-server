@@ -80,7 +80,7 @@ describe "(Modules, Services and Versioning) Test Case 52: Import Puppet Forge (
   context "Delete component module from local filesystem" do
     include_context "Delete component module from local filesystem", component_module_filesystem_location_2, dependency_module_name
   end
-  
+
   after(:all) do
     puts "", ""
   end

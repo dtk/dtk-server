@@ -22,8 +22,8 @@ module DTK; module ModuleMixins
           if opts[:ignore_component_error]
             return module_obj
           else
-            message = "Conflicts with existing server local module (#{local_params.pp_module_name()})"
-            message += ". To ignore this conflict and use existing module please use -i switch (import-dtkn REMOTE-SERVICE-NAME -i)." if opts[:additional_message]
+            message = "Conflicts with already installed module (#{local_params.pp_module_name()})"
+            message += ". To ignore this conflict and use installed module please use -i switch (import-dtkn REMOTE-SERVICE-NAME -i)." if opts[:additional_message]
             raise ErrorUsage.new(message)
           end
         end

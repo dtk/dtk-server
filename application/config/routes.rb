@@ -84,6 +84,9 @@ R8::ReactorRoute.draw do
   post  'assembly/list_ssh_access' => 'assembly#list_ssh_access'
   post  'assembly/list_settings' => 'assembly#list_settings'
   post  'assembly/get_component_modules' => 'assembly#get_component_modules'
+  post  'assembly/delete_node_group' => 'assembly#delete_node_group'
+  post  'assembly/get_node_groups' => 'assembly#get_node_groups'
+  post  'assembly/get_nodes_without_node_groups' => 'assembly#get_nodes_without_node_groups'
 
    # ATTRIBUTE
   post  'attribute/set' => 'attribute#set'

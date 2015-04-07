@@ -11,16 +11,13 @@ end
 module XYZ
   module Log
     def self.info(msg, out = $stdout)
-      out << "info: "
-      out << format(msg)
+      ::Ramaze::Log.info(msg)
     end
     def self.debug(msg, out = $stdout)
-      out << "debug: "
-      out << format(msg)
+      ::Ramaze::Log.debug(msg)
     end
     def self.error(msg, out = $stdout)
-      out << "error: "
-      out << format(msg)
+      ::Ramaze::Log.error(msg)
     end
     def self.info_pp(obj, out = $stdout)
       out << "info: "
@@ -33,8 +30,7 @@ module XYZ
       obj
     end
     def self.warn(msg, out = $stdout)
-      out << "warn: "
-      out << format(msg)
+      ::Ramaze::Log.warn(msg)
     end
     def self.error_pp(obj, out = $stdout)
       out << "error: "

@@ -1,17 +1,17 @@
 GIT
   remote: git://github.com/rich-reactor8/dtk-common-repo.git
-  revision: 454823df7cca12858dc695316c5dcf791bb5ebe3
+  revision: c53091ed1aecec8733e14e01ad0841c6cc1286f3
   specs:
-    dtk-common-core (0.7.0)
-      rest-client (~> 1.6.7)
+    dtk-common-core (0.7.1)
+      rest-client (= 1.6.7)
 
 GIT
   remote: git://github.com/rich-reactor8/dtk-common.git
-  revision: 1ec262762b9debd874430688297db3e0c4c7eacb
+  revision: 102985c169d1c1dc5f5200c6d8b09c73ecedb8f4
   specs:
-    dtk-common (0.7.1)
+    dtk-common (0.7.2)
       colorize (~> 0.5.8)
-      dtk-common-core (= 0.7.0)
+      dtk-common-core (= 0.7.1)
       rugged (~> 0.17.0.b7)
 
 GEM
@@ -202,12 +202,9 @@ GEM
     rack (1.4.5)
     ramaze (2012.04.14)
       innate (>= 2012.03)
-    rdoc (4.2.0)
-      json (~> 1.4)
     redis (3.2.0)
-    rest-client (1.6.8)
-      mime-types (~> 1.16)
-      rdoc (>= 2.4.2)
+    rest-client (1.6.7)
+      mime-types (>= 1.16)
     rgen (0.6.6)
     rspec (2.99.0)
       rspec-core (~> 2.99.0)

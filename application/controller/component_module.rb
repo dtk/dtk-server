@@ -76,6 +76,9 @@ module DTK
       if ret_request_params(:update_from_includes)
         opts.merge!(:update_from_includes => true)
       end
+      if ret_request_params(:service_instance_module)
+        opts.merge!(:service_instance_module => true)
+      end
 
       # the possible keys in response are with the subkeys that are used
       #  :dsl_parse_error: ModuleDSL::ParsingError obj

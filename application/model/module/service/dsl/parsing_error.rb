@@ -3,6 +3,7 @@ module DTK
     class ParsingError < ErrorUsage::Parsing
       r8_nested_require('parsing_error','aggregate')
       r8_nested_require('parsing_error','dangling_component_refs')
+      r8_nested_require('parsing_error','removed_service_instance_cmp_ref')
       r8_nested_require('parsing_error','bad_component_link')
 
       # These can be ovewritten; default is simple behavior that ignores new errors (reports first one)

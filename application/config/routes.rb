@@ -59,6 +59,7 @@ R8::ReactorRoute.draw do
   post  'assembly/list_component_module_diffs' => 'assembly#list_component_module_diffs'
   post  'assembly/print_includes' => 'assembly#print_includes'
   post  'assembly/task_action_detail' => 'assembly#task_action_detail'
+  post  'assembly/add_node_group' => 'assembly#add_node_group'
   post  'assembly/get_component_module_info' => 'assembly#get_component_module_info'
 
   post  'assembly/start' => 'assembly#start'

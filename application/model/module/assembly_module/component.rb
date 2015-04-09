@@ -29,6 +29,23 @@ module DTK; class AssemblyModule
       base_branch
     end
 
+    def self.component_module_workspace_info(assembly, component_module)
+      new(assembly).component_module_workspace_info(component_module)
+    end
+    def component_module_workspace_info(component_module)
+      get_applicable_component_instances(component_module,:raise_error_if_empty => true)
+      am_version = assembly_module_version()
+
+      base_branch = component_module.get_workspace_branch_info()
+      raise ErrorNoChangesToModule.new(@assembly, component_module) unless base_branch
+
+      local_branch = component_module.get_workspace_module_branch(am_version)
+      raise ErrorUsage.new("Unable to find local branch") unless local_branch
+
+      base_branch.merge!(:version => am_version, :local_branch => local_branch[:display_name], :current_branch_sha => local_branch[:current_sha])
+      base_branch
+    end
+
     def self.finalize_edit(assembly,component_module,module_branch,opts={})
       new(assembly).finalize_edit(component_module,module_branch,opts)
     end

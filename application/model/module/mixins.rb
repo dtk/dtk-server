@@ -220,13 +220,6 @@ module DTK
 
       raw_module_rows.first.merge(:repo_remotes => repo_remotes)
     end
-
-   private
-    def library_branch_name(version=nil)
-      library_id = update_object!(:library_library_id)[:library_library_id]
-      library_idh = id_handle(:model_name => :library, :id => library_id)
-      ModuleBranch.library_branch_name(library_idh,version)
-    end
   end
 
   #

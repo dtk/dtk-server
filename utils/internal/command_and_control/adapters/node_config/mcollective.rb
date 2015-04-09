@@ -28,11 +28,10 @@ module DTK
         config_agent = ConfigAgent.load(config_node[:config_agent_type])
 
         opts_ret_msg = Hash.new
-        if assembly_id = (config_node[:assembly_idh]||{})[:guid]
-          assembly = assembly_id && task_idh.createIDH(:model_name => :assembly_instance,:id => assembly_id).create_object()
+        if assembly = assembly_instance(task_idh,config_node)
           opts_ret_msg.merge!(:assembly => assembly)
         end
-
+    
         msg_content = config_agent.ret_msg_content(config_node,opts_ret_msg)
         added_content = {
           :task_id           => task_idh.get_id(),
@@ -48,6 +47,31 @@ module DTK
         mc_info = mc_info_for_config_agent(config_agent)
         async_agent_call(mc_info[:agent],mc_info[:action],msg_content,filter,callbacks,context)
       end
+
+      # TODO: below is hack and should find more reliable way to pass in assembly
+      def self.assembly_instance(task_idh,config_node)
+        assembly_id = 
+          if assembly_idh = config_node[:assembly_idh]
+            if assembly_idh.kind_of?(IDHandle) then assembly_idh.get_id()
+            elsif assembly_idh.kind_of?(Hash) then assembly_idh[:guid]
+            end
+          else
+            # TODO: think this is reached for node group member; need to check if reached under any other condition
+            if component_actions = config_node[:component_actions]
+              if component = component_actions.first && component_actions.first[:component]
+                component.get_field?(:assembly_id)
+              end
+            end
+          end
+
+        if assembly_id
+          task_idh.createIDH(:model_name => :assembly_instance,:id => assembly_id).create_object()
+        else
+          Log.error("Could not find assembly id for task with id '#{task_idh.get_id()}'")
+          nil
+        end
+      end
+      private_class_method :assembly_instance
 
       # TODO: change signature to def self.async_execution(task_idh,top_task_idh,config_node,callbacks,context)
       def self.initiate_cancelation(task_idh,top_task_idh,config_node,opts)

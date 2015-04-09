@@ -76,7 +76,7 @@ module DTK; class BaseModule; class UpdateModule
       return ndx_cmr_info if is_parsing_error?(ndx_cmr_info)
 
       # process includes (if they exist)
-      unless include_module_names.nil? or include_module_names.empty?
+      unless include_module_names.empty?
         # find component modules in include_module_names that are missing
         missing = include_module_names - ndx_cmr_info.keys
         external_deps.merge!(:possibly_missing => missing) unless missing.empty?
@@ -94,11 +94,15 @@ module DTK; class BaseModule; class UpdateModule
       end
 
       # update the component_module_ref objects from elements of ndx_cmr_info that are unique
+      # cmr_update_els is set to content used to set module refs
       cmr_update_els = ModuleRefs::ComponentDSLForm::Elements.new
       ndx_cmr_info.each_value do |match_info|
-        # TODO: better explanation why matching againts both :dsl and :single_match
+        # TODO: put in explanation why matching against both :dsl and :single_match
         if [:dsl,:single_match].include?(match_info.match_type)
-          cmr_update_els.add!(match_info.match_array)
+          # do not put in module refs if not in included modules
+          if include_module_names.find{|module_name|matches_module?(match_info,module_name)}
+            cmr_update_els.add!(match_info.match_array)
+          end
         end
       end
       ModuleRefs::Parse.update_component_module_refs_from_parse_objects(@module_class,@module_branch,cmr_update_els)
@@ -106,11 +110,15 @@ module DTK; class BaseModule; class UpdateModule
       {:external_dependencies => external_deps}
     end
 
+    private
     # These are modules in the component module include section of dtk.model.yaml
     def component_module_names_in_include_statements?()
       # @input_hash is in normalized form
-      ret = @input_hash.values.map{|v|(v['component_include_module']||{}).keys}.flatten(1).uniq
-      ret unless ret.empty?
+      @input_hash.values.map{|v|(v['component_include_module']||{}).keys}.flatten(1).uniq
+    end
+
+    def matches_module?(match_info,module_name)
+      match_info.match_array.find{|r|r.component_module() == module_name}
     end
   end
 end; end; end

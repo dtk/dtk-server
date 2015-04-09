@@ -162,7 +162,7 @@ module DTK; class BaseModule
 
       def get_existing_module_refs(module_branch)
         existing_c_hash  = {}
-        existing_content = RepoManager.get_file_content({:path => "module_refs.yaml"}, module_branch, {:no_error_if_not_found => true})
+        existing_content = RepoManager.get_file_content({:path => ModuleRefs.meta_filename_path()}, module_branch, {:no_error_if_not_found => true})
         existing_c_hash  = Aux.convert_to_hash(existing_content,:yaml) if existing_content
         existing_c_hash
       end

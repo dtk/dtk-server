@@ -390,6 +390,8 @@ module DTK
     end
 
     def self.create_from_rows(model_handle,rows,opts={})
+      ret = Array.new
+      return ret if rows.empty?
       select_ds = SQL::ArrayDataset.create(db,rows,model_handle,opts[:convert] ? {:convert_for_create => true} : {})
       override_attrs = {}
       create_opts = Aux::hash_subset(opts,[:returning_sql_cols,:duplicate_refs])

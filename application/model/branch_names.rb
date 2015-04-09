@@ -30,13 +30,6 @@ module DTK
     end
 
     # TODO: deprecate
-    def library_branch_name(library_idh,version=nil)
-      # TODO: when have multiple libraries that can host same module will need to refine
-      #      library = library_idh.create_object().update_object!(:ref)
-      #     "library-#{library[:ref]}-v#{new_version.to_s}"
-      # version ? "v#{version}" : VersionFieldDefault
-      version_field(version)
-    end
 
     def workspace_branch_name(project,version=nil)
 #      Log.info_pp(["#TODO: ModuleBranch::Location: deprecate workspace_branch_name direct call",caller[0..4]])

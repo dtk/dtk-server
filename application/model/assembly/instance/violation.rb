@@ -84,10 +84,8 @@ module DTK
         multiple_ns   = Hash.new
         return ret if cmps.empty?
 
-        assembly_branch = AssemblyModule::Service.get_assembly_branch(self)
-
         begin
-          module_refs_tree = ModuleRefs::Tree.create(self,assembly_branch,cmps)
+          module_refs_tree = ModuleRefs::Tree.create(self,:components => cmps)
         rescue ErrorUsage => e
           ret << Violation::HasItselfAsDependency.new(e.message)
           return ret
@@ -96,8 +94,8 @@ module DTK
         missing, multiple_ns = module_refs_tree.violations?
 
         unless missing.empty?
-          missing.each do |miss|
-            ret << Violation::MissingIncludedModule.new(miss)
+          missing.each do |k,v|
+            ret << Violation::MissingIncludedModule.new(k,v)
           end
         end
 
@@ -220,15 +218,17 @@ module DTK
         end
       end
       class MissingIncludedModule < self
-        def initialize(included_module, version = nil)
+        def initialize(included_module, namespace, version = nil)
           @included_module = included_module
+          @namespace = namespace
           @version = version
         end
         def type()
           :missing_included_module
         end
         def description()
-          "Module '#{@included_module}#{@version.nil? ? '' : '-'+@version}' is included in dsl, but not installed."
+          full_name = "#{@namespace}:#{@included_module}"
+          "Module '#{full_name}#{@version.nil? ? '' : '-'+@version}' is included in dsl, but not installed. Use 'print-includes' to see more details."
         end
       end
       class MultipleNamespacesIncluded < self
@@ -240,7 +240,7 @@ module DTK
           :mapped_to_multiple_namespaces
         end
         def description()
-          "Module '#{@included_module}' included in dsl is mapped to multiple namespaces: #{@namespaces.join(', ')}."
+          "Module '#{@included_module}' included in dsl is mapped to multiple namespaces: #{@namespaces.join(', ')}. Use 'print-includes' to see more details."
         end
       end
       class HasItselfAsDependency < self

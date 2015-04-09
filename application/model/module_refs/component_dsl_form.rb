@@ -36,7 +36,7 @@ module DTK; class ModuleRefs
     #   :dsl - match with element in dsl
     #   :single_match - match with unique component module
     #   :multiple_match - match with more than one component modules
-    MatchInfo = Struct.new(:match_type,:match_array) # match_arrat is an array of ComponentDSLForm elements
+    MatchInfo = Struct.new(:match_type,:match_array) # match_array is an array of ComponentDSLForm elements
     def self.get_ndx_module_info(project_idh,module_class,module_branch,opts={})
       ret = Hash.new
       raw_cmp_mod_refs = Parse.get_component_module_refs_dsl_info(module_class,module_branch)

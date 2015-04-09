@@ -251,9 +251,12 @@ module DTK
         case module_type.to_sym
           when :component_module
             module_name = ret_non_null_request_params(:module_name)
-            namespace = AssemblyModule::Component.validate_component_module_ret_namespace(assembly,module_name)
+            opts_validate = {:ret_locked_branch_sha => true}
+            namespace = AssemblyModule::Component.validate_component_module_ret_namespace(assembly,module_name,opts_validate)
+            sha = opts_validate[:ret_locked_branch_sha]
             component_module = create_obj(:module_name,ComponentModule,namespace)
-            AssemblyModule::Component.prepare_for_edit(assembly,component_module)
+            opts = (sha ? {:sha => sha} : {})
+            AssemblyModule::Component.prepare_for_edit(assembly,component_module,opts)
           when :service_module
             modification_type = ret_non_null_request_params(:modification_type).to_sym
             AssemblyModule::Service.prepare_for_edit(assembly,modification_type)

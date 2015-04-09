@@ -110,8 +110,8 @@ module DTK; class ModuleDSL
       klass.const_get("Parser").new(impl_idh,module_branch_idh,project_idh)
     end
 
+    # This marks as complete applicable objects so if objects not present in cmps_input_hash they are deleted
     def db_update_form(cmps_input_hash,non_complete_cmps_input_hash,module_branch_idh)
-      # TODO: look at use of new recursive delete capability; this may be needed to handle attributes correctly
       mark_as_complete_constraint = {
         :module_branch_id=>module_branch_idh.get_id(), #so only delete extra components that belong to same module
         :node_node_id => nil #so only delete component templates and not component instances
@@ -123,7 +123,6 @@ module DTK; class ModuleDSL
     end
 
     def db_update_form_aux(model_name,hash_assigns)
-      # TODO: think the key -> key.to_sym is not needed because they are keys
       ret = DBUpdateHash.new
       children_model_names = DB_REL_DEF[model_name][:one_to_many]||[]
       hash_assigns.each do |key,child_hash|

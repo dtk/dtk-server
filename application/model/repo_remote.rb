@@ -61,7 +61,7 @@ module DTK
 
     def self.create_git_remote(repo_remote_mh, repo_id, repo_name, repo_url, is_default = false)
       # check to see if repo remote exists
-      repo_remotes = get_objs(repo_remote_mh, { :filter => [:eq, :display_name, repo_name]})
+      repo_remotes = get_objs(repo_remote_mh, { :filter => [:and, [:eq, :display_name, repo_name], [:eq, :repo_id, repo_id]]})
 
       unless repo_remotes.empty?
         raise ErrorUsage, "Remote identifier '#{repo_name}' already exists"
@@ -83,8 +83,8 @@ module DTK
       create_from_row(repo_remote_mh, remote_repo_create_hash)
     end
 
-    def self.delete_git_remote(repo_remote_mh, repo_name)
-      repo_remotes = get_objs(repo_remote_mh, { :filter => [:eq, :display_name, repo_name]})
+    def self.delete_git_remote(repo_remote_mh, repo_name, repo_id)
+      repo_remotes = get_objs(repo_remote_mh, { :filter => [:and, [:eq, :display_name, repo_name], [:eq, :repo_id, repo_id]] })
 
       if repo_remotes.empty?
         raise ErrorUsage, "Remote '#{repo_name}' not found"

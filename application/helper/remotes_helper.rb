@@ -30,7 +30,7 @@ module Ramaze::Helper
       remote_name      = ret_non_null_request_params(:remote_name)
       repo_remote_mh   = module_obj.model_handle(:repo_remote)
 
-      ::DTK::RepoRemote.delete_git_remote(repo_remote_mh, remote_name)
+      ::DTK::RepoRemote.delete_git_remote(repo_remote_mh, remote_name, module_obj.get_workspace_repo.id)
 
       rest_ok_response
     end

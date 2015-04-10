@@ -15,8 +15,7 @@ GIT
       rugged (~> 0.17.0.b7)
 
 GEM
-  remote: http://rubygems.org/
-  remote: http://gems.github.com/
+  remote: https://rubygems.org/
   specs:
     CFPropertyList (2.3.0)
     activesupport (3.0.20)

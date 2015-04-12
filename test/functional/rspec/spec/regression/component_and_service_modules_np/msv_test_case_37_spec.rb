@@ -12,9 +12,9 @@ require './lib/component_modules_spec'
 default_namespace = "local"
 new_default_namespace = "r8"
 
-component_module_name = "apache"
-component_module = "r8:apache"
-git_ssh_repo_url = "git@github.com:puppetlabs/puppetlabs-apache.git"
+component_module_name = "wget"
+component_module = "r8:wget"
+git_ssh_repo_url = "git@github.com:maestrodev/puppet-wget.git"
 r8_component_module_filesystem_location = '~/dtk/component_modules/r8'
 
 dtk_common = DtkCommon.new('', '')

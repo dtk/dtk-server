@@ -11,7 +11,7 @@ user_data = {
 }
 
 component_module = "r8:java"
-collaborators = "bakir_test,bakir_test2"
+collaborators = "bakir_test3,bakir_test4"
 collaborator_type = "groups"
 
 permissions = {

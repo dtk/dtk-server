@@ -79,7 +79,7 @@ module DTK
           mismatched_cmp_mods.each do |el|
             err_msg << " Component module (#{el[:module_name]}) in instance has namespace (#{el[:instance_ns]}), but namespace (#{el[:template_ns]}) in service module\n"
           end
-          err_msg << "Alternatives are to push to another service module or change the service module's module_refs.yaml file"
+          err_msg << "Alternatives are to push to another service module or change the service module's #{ModuleRefs.meta_filename_path()} file"
           raise ErrorUsage.new(err_msg)
         end
       end

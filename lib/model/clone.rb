@@ -1,5 +1,3 @@
-# TODO: this needs much cleanup: may spearete into parts fro assemblies and then teh rest which is containment based copying
-# TODO: try to move more to chidl context geenraizing to be object context and possibly using it to subsume cloneprocesseor
 module DTK
   class Clone
     module InstanceTemplate
@@ -8,7 +6,6 @@ module DTK
     end
 
     r8_nested_require('clone','child_context') 
-    #TODO: better to not need copy_processor and just make part of this class
     r8_nested_require('clone','copy_processor') 
     r8_nested_require('clone','global')
     r8_nested_require('clone','incremental_update')

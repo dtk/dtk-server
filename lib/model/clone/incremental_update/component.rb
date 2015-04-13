@@ -21,7 +21,7 @@ module DTK; class Clone
       def update(components,opts={})
         # get mapping between component instances and their templates
         # component templates indexed by component type
-        links = get_instance_template_links(components)
+        links = get_instance_template_links(components, opts)
         rows_to_update = components.map do |cmp|
           cmp_template = links.template(cmp)
           {
@@ -60,7 +60,7 @@ module DTK; class Clone
          !cmp.get_field?(:locked_sha).nil?
       end
 
-      def get_instance_template_links(cmps)
+      def get_instance_template_links(cmps, opts={})
         ret = InstanceTemplate::Links.new()
         component_types = cmps.map{|cmp|cmp.get_field?(:component_type)}.uniq
         version_field = @module_branch.get_field?(:version)
@@ -70,7 +70,7 @@ module DTK; class Clone
             :version_field => version_field
           )
         end
-        ndx_cmp_type_template = DTK::Component::Template.get_matching_elements(@project_idh,match_el_array).inject(Hash.new) do |h,r|
+        ndx_cmp_type_template = DTK::Component::Template.get_matching_elements(@project_idh,match_el_array,opts).inject(Hash.new) do |h,r|
           h.merge(r[:component_type] => r)
         end
         cmps.each do |cmp|

@@ -457,7 +457,7 @@ module DTK
 
     def add_branch_and_push?(new_branch,opts={})
       add_branch?(new_branch,opts)
-      checkout(new_branch) do
+      checkout(opts[:sha]||new_branch) do
         git_command__push(new_branch)
       end
     end
@@ -476,7 +476,7 @@ module DTK
         git_command__create_empty_branch(new_branch)
         git_command__empty_commit()
       else
-        checkout(@branch) do
+        checkout(opts[:sha]||@branch) do
           git_command__add_branch(new_branch)
         end
       end
@@ -545,7 +545,7 @@ module DTK
     end
 
     def current_branch()
-      @grit_repo.head.name
+      @grit_repo.head && @grit_repo.head.name
     end
 
     # type is :local/:local_branch or :remote/:remote_branch

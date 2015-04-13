@@ -7,7 +7,7 @@ module DTK; class AssemblyModule
       new(assembly).prepare_for_edit(component_module)
     end
     def prepare_for_edit(component_module)
-      get_applicable_component_instances(component_module,:raise_error_if_empty => true)
+      get_applicable_component_instances(component_module)
       create_assembly_branch?(component_module)
     end
 
@@ -220,13 +220,9 @@ need to do a refresh on workspace branch sha in case this was updated in another
 
     def get_applicable_component_instances(component_module,opts={})
       assembly_id = @assembly.id()
-      ret = component_module.get_associated_component_instances().select do |cmp|
+      component_module.get_associated_component_instances().select do |cmp|
         cmp[:assembly_id] == assembly_id
       end
-      if opts[:raise_error_if_empty] and ret.empty?()
-        raise ErrorNoComponentsInModule.new(@assembly,component_module)
-      end
-      ret
     end
 
     class ErrorComponentModule < ErrorUsage

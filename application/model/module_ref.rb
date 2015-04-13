@@ -1,9 +1,11 @@
 module DTK
   class ModuleRef < Model
     r8_nested_require('module_ref','version_info')
+    r8_nested_require('module_ref','lock')
+    r8_nested_require('module_ref','missing')
 
     def self.common_columns()
-      [:id,:display_name,:group_id,:module_name,:module_type,:version_info,:namespace_info]
+      [:id,:display_name,:group_id,:module_name,:module_type,:version_info,:namespace_info,:branch_id]
     end
 
     def self.reify(mh,object)
@@ -72,7 +74,7 @@ module DTK
     end
 
     def self.update(operation,parent,module_ref_hash_array)
-      return if module_ref_hash_array.empty?
+      return if module_ref_hash_array.empty? and operation == :add
       rows = ret_create_rows(parent,module_ref_hash_array)
       model_handle = parent.model_handle.create_childMH(:module_ref)
       case operation
@@ -85,26 +87,6 @@ module DTK
         raise Error.new("Unexpected operation (#{operation})")
       end
     end
-
-    def self.ret_create_rows(parent,module_ref_hash_array)
-      return if module_ref_hash_array.empty?
-      parent_id_assigns = {
-        parent.parent_id_field_name(:module_ref) => parent.id()
-      }
-      module_ref_hash_array.map do |module_ref_hash|
-        assigns = 
-          if version_info = module_ref_hash[:version_info]
-            parent_id_assigns.merge(:version_info => version_info.to_s)
-          else
-            assigns = parent_id_assigns
-          end
-        el = Aux.hash_subset(module_ref_hash,[:ref,:display_name,:module_name,:module_type,:namespace_info]).merge(assigns)
-        el[:display_name] ||= display_name(el)
-        el[:ref] ||= ref(el)
-        el
-      end
-    end
-    private_class_method :ret_create_rows
 
     def version_string()
       self[:version_info] && self[:version_info].version_string()
@@ -133,6 +115,26 @@ module DTK
     DSLHashCols = [:version_info,{:namespace_info => :namespace}]
 
    private
+    def self.ret_create_rows(parent,module_ref_hash_array)
+      ret = Array.new
+      return ret if module_ref_hash_array.empty?
+      parent_id_assigns = {
+        parent.parent_id_field_name(:module_ref) => parent.id()
+      }
+      module_ref_hash_array.map do |module_ref_hash|
+        assigns = 
+          if version_info = module_ref_hash[:version_info]
+            parent_id_assigns.merge(:version_info => version_info.to_s)
+          else
+            assigns = parent_id_assigns
+          end
+        el = Aux.hash_subset(module_ref_hash,[:ref,:display_name,:module_name,:module_type,:namespace_info]).merge(assigns)
+        el[:display_name] ||= display_name(el)
+        el[:ref] ||= ref(el)
+        el
+      end
+    end
+
     def self.display_name(module_ref_hash)
       [:module_name].each do |key|
         if module_ref_hash[key].nil?

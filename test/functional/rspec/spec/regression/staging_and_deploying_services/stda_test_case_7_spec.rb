@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-# Test Case 7: Stage and converge simple node group example, list nodes, delete nodes, check cardinality, list nodes/components/attributes after delete
+# Test Case 7: Stage simple node group example, list nodes, delete nodes, check cardinality, list nodes/components/attributes after delete
 
 require 'rubygems'
 require 'rest_client'
@@ -17,13 +17,13 @@ node_name = "slave"
 nodes = ['slave:1','slave:2']
 components = ['slave/stdlib']
 expected_cardinality_before_delete = 2
-expected_cardinality_after_delete = 0
+expected_cardinality_after_delete = 1
 dtk_common = DtkCommon.new(service_name, assembly_name)
 
-describe "(Staging And Deploying Assemblies) Test Case 7: Stage and converge simple node group example, list nodes, delete nodes, check cardinality, list nodes/components/attributes after delete" do
+describe "(Staging And Deploying Assemblies) Test Case 7: Stage simple node group example, list nodes, delete nodes, check cardinality, list nodes/components/attributes after delete" do
 
 	before(:all) do
-		puts "****************************************************************************************************************************************************************************************",""
+		puts "***************************************************************************************************************************************************************************",""
   end
 
 	context "Stage service function on #{assembly_name} assembly" do
@@ -50,12 +50,12 @@ describe "(Staging And Deploying Assemblies) Test Case 7: Stage and converge sim
 		include_context "Delete node", dtk_common, nodes[0]
 	end
 
-	context "Delete node on #{service_name} service" do
-		include_context "Delete node", dtk_common, nodes[1]
-	end
-
 	context "Check cardinality on #{service_name} service" do
 		include_context "Get cardinality", dtk_common, node_name, expected_cardinality_after_delete
+	end
+
+	context "Delete node on #{service_name} service" do
+		include_context "Delete node", dtk_common, nodes[1]
 	end
 
 	context "List node on #{service_name} service" do

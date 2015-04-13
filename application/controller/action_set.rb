@@ -110,7 +110,6 @@ module DTK
 
     # parent_model_name only set when top level action decomposed as opposed to when an action set of length one is created
     def run_action_set(action_set,parent_model_name=nil)
-      # For debugging pp(:operation => action_set.first[:route], :params => request.params)
       PerformanceService.log("OPERATION=#{action_set.first[:route]}")
       PerformanceService.log("REQUEST_PARAMS=#{request.params.to_json}")
       if rest_request?

@@ -144,7 +144,11 @@ module DTK; class Component
             :version => match_el.version
           }
         end
-        raise ServiceModule::ParsingError::DanglingComponentRefs.new(cmp_refs)
+        if opts[:service_instance_module]
+          raise ServiceModule::ParsingError::RemovedServiceInstanceCmpRef.new(cmp_refs, opts)
+        else
+          raise ServiceModule::ParsingError::DanglingComponentRefs.new(cmp_refs, opts)
+        end
       end
       ret
     end

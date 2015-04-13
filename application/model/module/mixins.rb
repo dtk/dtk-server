@@ -129,7 +129,7 @@ module DTK
       update_from_includes = opts[:update_from_includes]
       return unless pull_was_needed or parse_needed or update_from_includes
 
-      opts_update = Aux.hash_subset(opts,[:do_not_raise,:modification_type,:force_parse,:auto_update_module_refs,:dsl_parsed_false,:update_module_refs_from_file,:update_from_includes])
+      opts_update = Aux.hash_subset(opts,[:do_not_raise,:modification_type,:force_parse,:auto_update_module_refs,:dsl_parsed_false,:update_module_refs_from_file,:update_from_includes,:current_branch_sha,:service_instance_module])
       update_model_from_clone_changes(commit_sha,diffs_summary,module_branch,version,opts_update)
     end
 
@@ -219,13 +219,6 @@ module DTK
       end
 
       raw_module_rows.first.merge(:repo_remotes => repo_remotes)
-    end
-
-   private
-    def library_branch_name(version=nil)
-      library_id = update_object!(:library_library_id)[:library_library_id]
-      library_idh = id_handle(:model_name => :library, :id => library_id)
-      ModuleBranch.library_branch_name(library_idh,version)
     end
   end
 

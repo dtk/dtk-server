@@ -689,6 +689,7 @@ module AssemblyAndServiceOperationsMixin
 
 	def list_ssh_access(service_id, system_user, rsa_pub_name, nodes)
 		puts "List ssh access:", "---------------------"
+		sleep 5
 		response = send_request('/rest/assembly/list_ssh_access', {:assembly_id=>service_id})
 		pretty_print_JSON(response)
 		list = response['data'].select { |x| x['attributes']['linux_user'] == system_user && x['attributes']['key_name'] == rsa_pub_name && (nodes.include? x['node_name']) }

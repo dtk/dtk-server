@@ -3,6 +3,7 @@ module DTK
     class ParsingError < ErrorUsage::Parsing
       r8_nested_require('parsing_error','aggregate')
       r8_nested_require('parsing_error','dangling_component_refs')
+      r8_nested_require('parsing_error','removed_service_instance_cmp_ref')
       r8_nested_require('parsing_error','bad_component_link')
 
       # These can be ovewritten; default is simple behavior that ignores new errors (reports first one)
@@ -39,7 +40,7 @@ module DTK
 
       class BadComponentReference < self
         def initialize(params={})
-          err_msg = "The following component template (?component_name) required by node (?node_name) is not referenced in module_refs.yaml with its component module and namespace which it belongs to"
+          err_msg = "The following component template (?component_name) required by node (?node_name) is not referenced in #{ModuleRefs.meta_filename_path()} with its component module and namespace which it belongs to"
           err_params = Params.new(:component_name => params[:component_name], :node_name => params[:node_name])
           super(err_msg,err_params)
         end

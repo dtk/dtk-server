@@ -10,7 +10,6 @@ module DTK; class Repo
     # returns a hash with keys :file_renamed, :file_added, :file_deleted, :file_modified
     def ret_summary()
       DiffTypesAndMethods.inject(Summary.new) do |h,(diff_type, diff_method)|
-#        diff_type, diff_method = tm
         res = map{|diff|diff.send(diff_method)}.compact
         res.empty? ? h : h.merge(diff_type => res)
       end
@@ -35,9 +34,12 @@ module DTK; class Repo
         not (self[:files_renamed] or self[:files_added] or self[:files_deleted])
       end
 
-      def meta_file_changed?()
-        (self[:files_modified] and !!self[:files_modified].find{|r|ModuleDSL.isa_dsl_filename?(path(r))}) or
-        (self[:files_added] and !!self[:files_added].find{|r|ModuleDSL.isa_dsl_filename?(path(r))})
+      # opts can have
+      # :type which can be terms :module_dsl,:module_refs
+      #    indicated what type of meta file to look for
+      def meta_file_changed?(opts={})
+        contains_a_dsl_filename?(self[:files_modified],opts) or
+          contains_a_dsl_filename?(self[:files_added],opts)
       end
 
       def file_changed?(path)
@@ -59,6 +61,14 @@ module DTK; class Repo
         r["path"]||r[:path]
       end
 
+      def contains_a_dsl_filename?(files_info,opts={})
+        return unless files_info
+        types = (opts[:type] ? [opts[:type]] : [:module_dsl,:module_refs])
+        !!files_info.find do |r|
+          (types.include?(:module_dsl) and ModuleDSL.isa_dsl_filename?(path(r))) or
+            (types.include?(:module_refs) and ModuleRefs.isa_dsl_filename?(path(r)))
+        end
+      end
     end
 
     DiffTypesAndMethods = Summary::DiffNames.map{|n|["files_#{n}".to_sym,"file_#{n}".to_sym]}

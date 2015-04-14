@@ -63,6 +63,7 @@ module DTK
       commit_sha    = ret_non_null_request_params(:commit_sha)
       version       = ret_version()
       diffs_summary = ret_diffs_summary()
+
       opts =  Hash.new
       if ret_request_param_boolean(:internal_trigger)
         opts.merge!(:do_not_raise => true)

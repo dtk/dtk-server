@@ -21,7 +21,7 @@ module DTK
       rsa_pub_key = ret_non_null_request_params(:rsa_pub_key)
       # username in this context is rsa pub key name
       username = ret_request_params(:username)
-      registered_with_repoman = true
+      repoman_registration_success = true
 
       if username && !username.eql?(username.match(PUB_KEY_NAME_REGEX)[0])
         raise DTK::Error, "Invalid format of pub key name, characters allower are: '#{PUB_KEY_NAME_REGEX.source.gsub('\\','')}'"
@@ -51,7 +51,7 @@ module DTK
             raise ErrorUsage.new(err_msg)
           end
           Log.warn(err_msg)
-          registered_with_repoman = false
+          repoman_registration_success = false
         end
       end
 
@@ -64,7 +64,7 @@ module DTK
         :match => match,
         :new_username => matched_repo_user ? matched_repo_user[:username] : nil,
         :matched_username => match && matched_repo_user ? matched_repo_user[:username] : nil,
-        :registered_with_repoman => registered_with_repoman
+        :registered_with_repoman => repoman_registration_success
       )
     end
 

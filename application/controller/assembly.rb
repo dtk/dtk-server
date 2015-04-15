@@ -526,13 +526,20 @@ module DTK
       unless aug_component_template = Component::Template.get_augmented_component_template(cmp_mh, cmp_name, namespace, assembly)
         raise ErrorUsage.new("Component with identifier #{namespace.nil? ? '\'' : ('\'' + namespace + ':')}#{cmp_name}' does not exist!")
       end
+
       component_title = ret_component_title?(cmp_name)
-      # not checking here if node_id points to valid object; check is in add_component
-      node_idh = ret_node_id_handle(:node_id,assembly)
+      node_id = ret_request_params(:node_id)
+      opts = ret_boolean_params_hash(:idempotent, :donot_update_workflow)
 
-      opts = ret_boolean_params_hash(:idempotent,:donot_update_workflow)
-      new_component_idh = assembly.add_component(node_idh,aug_component_template,component_title,opts)
+      if node_id.empty?
+        node_idh = nil
+        opts.merge!(:donot_update_workflow => true)
+      else
+        # not checking here if node_id points to valid object; check is in add_component
+        node_idh = ret_node_id_handle(:node_id, assembly)
+      end
 
+      new_component_idh = assembly.add_component(node_idh, aug_component_template, component_title, opts)
       rest_ok_response(:component_id => new_component_idh.get_id())
     end
 

@@ -183,7 +183,7 @@ module DTK; class  Assembly
           end
         end
       else
-        node = create_assembly_wide_node?()
+        node = create_assembly_wide_node?(opts)
       end
 
       cmp_instance_idh = nil
@@ -210,7 +210,7 @@ module DTK; class  Assembly
     end
     private :add_component__update_component_module_refs?
 
-    def create_assembly_wide_node?()
+    def create_assembly_wide_node?(opts={})
       sp_hash = {
         :cols => [:id, :display_name,:group_id, :ordered_component_ids],
         :filter => [:and, [:eq, :type, 'assembly_wide'], [:eq, :assembly_id, id()]]
@@ -218,7 +218,7 @@ module DTK; class  Assembly
       node = Model.get_obj(model_handle(:node), sp_hash)
 
       unless node
-        node_idh = add_node('assembly_wide', nil, {:assembly_wide => true})
+        node_idh = add_node('assembly_wide', opts[:node_binding_rs], {:assembly_wide => true})
         node = node_idh.create_object()
       end
 

@@ -24,8 +24,8 @@ module DTK
         return client
       end
 
-      def add_client_access(client_rsa_pub_key)
-        response = client.add_client_access(client_rsa_pub_key)
+      def add_client_access(client_rsa_pub_key, client_rsa_key_name)
+        response = client.add_client_access(client_rsa_pub_key, client_rsa_key_name)
         # we also make sure that tenant user is created
         create_tenant_user()
         response
@@ -259,7 +259,7 @@ module DTK
         "dtk-instance-key"
       end
       def get_end_user_remote_repo_username(mh,ssh_rsa_pub_key)
-        RepoUser.match_by_ssh_rsa_pub_key(mh,ssh_rsa_pub_key).owner.username
+        RepoUser.match_by_ssh_rsa_pub_key!(mh,ssh_rsa_pub_key).owner.username
       end
 
     end

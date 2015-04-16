@@ -486,4 +486,37 @@ module ComponentModulesMixin
 		puts ""
 		return component_modules_retrieved
 	end
+
+	def check_if_remote_exists(component_module, provider_name, ssh_repo_url)
+		puts "Check if remote exists:", "---------------------------"
+		remote_exists = false
+		remotes_list = send_request('/rest/component_module/info_git_remote', {:component_module_id => component_module})
+		pretty_print_JSON(remotes_list)
+		found_remote = remotes_list['data'].find { |x| x['git_provider'] == provider_name && x['repo_url'] == ssh_repo_url }
+		if !found_remote.nil?
+			puts "Remote #{provider_name} has been found for component module #{component_module} with repo url #{ssh_repo_url}"
+			remote_exists = true
+		else
+			puts "Remote #{provider_name} has not been found for component module #{component_module} with repo url #{ssh_repo_url}"
+		end
+		puts ""
+		return remote_exists
+	end
+
+	def remove_remote(component_module, provider_name)
+		puts "Remove remote:", "----------------"
+		remote_removed = false
+		remotes_list = send_request('/rest/component_module/info_git_remote', {:component_module_id => component_module})
+		pretty_print_JSON(remotes_list)
+		response = send_request('/rest/component_module/remove_git_remote', {:component_module_id => component_module, :remote_name => provider_name})
+		pretty_print_JSON(response)
+		if response['status'] == 'ok'
+			puts "Remote #{provider_name} has been deleted from #{component_module} component module successfully"
+			remote_removed = true
+		else
+			puts "Remote #{provider_name} has not been deleted from #{component_module} component module successfully"
+		end
+		puts ""
+		return remote_removed
+	end
 end

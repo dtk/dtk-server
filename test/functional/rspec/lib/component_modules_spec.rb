@@ -658,3 +658,39 @@ shared_context "Check module_refs.yaml for imported module" do |component_module
     pass.should eq(true)
   end
 end
+
+shared_context "Check remotes and verify that expected remote exists" do |dtk_common, component_module, provider_name, ssh_repo_url|
+  it "verifies that expected remote #{provider_name} exists on #{component_module} component module" do
+    remote_found = dtk_common.check_if_remote_exists(component_module, provider_name, ssh_repo_url)
+    expect(remote_found).to eq(true)
+  end
+end
+
+shared_context "Remove remote" do |dtk_common, component_module, provider_name|
+  it "removes remote from #{component_module} component module" do
+    remote_removed = dtk_common.remove_remote(component_module, provider_name)
+    expect(remote_removed).to eq(true)
+  end
+end
+
+shared_context "Push to remote" do |component_module, provider_name|
+  it "pushes #{component_module} component module to remote" do
+    puts "Push to remote:", "--------------"
+    pass = false
+    value = `echo "cc component-module\ncc #{component_module}\ncc remotes\npush-remote #{provider_name} --force" | dtk-shell`
+    puts value
+    pass = true if value.include?("Pushing local content to remote")
+    expect(pass).to eq(true)
+  end
+end
+
+shared_context "NEG - Push to remote" do |component_module, provider_name, error_message|
+  it "does not push to remote changes for #{component_module} component module" do
+    puts "NEG - Push to remote:", "------------------"
+    pass = false
+    value = `echo "cc component-module\ncc #{component_module}\ncc remotes\npush-remote #{provider_name} --force" | dtk-shell`
+    puts value
+    pass = true if value.include?(error_message)
+    expect(pass).to eq(true)
+  end
+end

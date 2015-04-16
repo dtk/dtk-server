@@ -70,7 +70,7 @@ module DTK
         :match => match,
         :new_username => matched_repo_user ? matched_repo_user[:username] : nil,
         :matched_username => match && matched_repo_user ? matched_repo_user[:username] : nil,
-        :registered_with_repoman => registered_with_repoman
+        :registered_with_repoman => repoman_registration_success
       )
     end
 

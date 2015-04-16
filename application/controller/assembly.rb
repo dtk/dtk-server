@@ -533,7 +533,9 @@ module DTK
 
       if node_id.empty?
         node_idh = nil
-        opts.merge!(:donot_update_workflow => true)
+        # using precise-micro as defualt node-templata for assembly wide node
+        node_binding_rs = node_binding_ruleset?(:node_template_identifier, 'precise-micro')
+        opts.merge!(:node_binding_rs => node_binding_rs)
       else
         # not checking here if node_id points to valid object; check is in add_component
         node_idh = ret_node_id_handle(:node_id, assembly)

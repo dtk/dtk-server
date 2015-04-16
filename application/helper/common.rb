@@ -385,8 +385,8 @@ module Ramaze::Helper
       ret
     end
 
-    def node_binding_ruleset?(node_template_identifier_param)
-      if node_binding_identifier = ret_request_params(node_template_identifier_param)
+    def node_binding_ruleset?(node_template_identifier_param, node_binding_identifier=nil)
+      if node_binding_identifier ||= ret_request_params(node_template_identifier_param)
         unless node_binding_rs_id = NodeBindingRuleset.name_to_id(model_handle(:node_binding_ruleset),node_binding_identifier)
           raise ::DTK::ErrorUsage.new("Illegal node template indentifier (#{node_binding_identifier })")
         end

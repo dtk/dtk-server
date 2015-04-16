@@ -378,7 +378,7 @@ module DTK
           :display_name => SQL::ColRef.cast(ComponentTitle.display_name_with_title(component_type,component_title),:text)
         }
       end
-      clone_opts = {:no_post_copy_hook => true,:ret_new_obj_with_cols => [:id,:display_name],:namespace => namespace}
+      clone_opts = {:no_post_copy_hook => true, :ret_new_obj_with_cols => [:id,:display_name], :namespace => namespace}
       new_cmp = clone_into(component_template,override_attrs,clone_opts)
       new_cmp_idh = new_cmp.id_handle()
       if title_attr_name

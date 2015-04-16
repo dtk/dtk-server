@@ -528,18 +528,9 @@ module DTK
       end
 
       component_title = ret_component_title?(cmp_name)
-      node_id = ret_request_params(:node_id)
-      opts = ret_boolean_params_hash(:idempotent, :donot_update_workflow)
-
-      if node_id.empty?
-        node_idh = nil
-        # using precise-micro as defualt node-templata for assembly wide node
-        node_binding_rs = node_binding_ruleset?(:node_template_identifier, 'precise-micro')
-        opts.merge!(:node_binding_rs => node_binding_rs)
-      else
-        # not checking here if node_id points to valid object; check is in add_component
-        node_idh = ret_node_id_handle(:node_id, assembly)
-      end
+      node_id         = ret_request_params(:node_id)
+      opts            = ret_boolean_params_hash(:idempotent, :donot_update_workflow)
+      node_idh        = node_id.empty? ? nil : ret_node_id_handle(:node_id, assembly)
 
       new_component_idh = assembly.add_component(node_idh, aug_component_template, component_title, opts)
       rest_ok_response(:component_id => new_component_idh.get_id())

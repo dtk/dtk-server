@@ -191,7 +191,8 @@ module DTK
          :convert=>true,
          :join_type => :inner,
          :join_cond=>{:id => :component__node_node_id},
-         :cols => [:id,:display_name, :external_ref, :ordered_component_ids, :agent_git_commit_id]
+         :filter => [:neq,:type,'assembly_wide'],
+         :cols => [:id,:display_name, :type, :external_ref, :ordered_component_ids, :agent_git_commit_id]
        }]
 
       virtual_column :implementation, :type => :json, :hidden => true,

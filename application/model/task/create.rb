@@ -11,13 +11,14 @@ module DTK; class Task
   class Create
     def self.create_from_assembly_instance(assembly,opts={})
       component_type = opts[:component_type]||:service
-      target_idh = target_idh_from_assembly(assembly)
-      task_mh = target_idh.create_childMH(:task)
+      target_idh     = target_idh_from_assembly(assembly)
+      task_mh        = target_idh.create_childMH(:task)
       
       ret = create_top_level_task(task_mh,assembly,Aux.hash_subset(opts,[:commit_msg,:task_action]))
       assembly_nodes = assembly.get_leaf_nodes(:cols => [:id,:display_name,:type,:external_ref,:admin_op_status])
 
       start_nodes, create_nodes = [], []
+      assembly_nodes.reject!{|n| n[:type].eql?('assembly_wide')}
       assembly_nodes.each do |a_node|
         if a_node[:admin_op_status].eql?('pending')
           create_nodes << a_node

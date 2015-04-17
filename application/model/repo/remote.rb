@@ -252,12 +252,17 @@ module DTK
       end
 
       def dtk_instance_remote_repo_username()
-        "#{::DTK::Common::Aux.running_process_user()}-dtk-instance"
+        "#{dtk_instance_prefix()}-dtk-instance"
+      end
+
+      def dtk_instance_prefix()
+        ::R8::Config[:repo][:remote][:tenant_name] || ::DTK::Common::Aux.running_process_user()
       end
 
       def dtk_instance_remote_repo_key_name()
         "dtk-instance-key"
       end
+
       def get_end_user_remote_repo_username(mh,ssh_rsa_pub_key)
         RepoUser.match_by_ssh_rsa_pub_key!(mh,ssh_rsa_pub_key).owner.username
       end

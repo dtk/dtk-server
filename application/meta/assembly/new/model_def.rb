@@ -202,7 +202,7 @@ lambda__instance_nodes_components_assembly_template =
          :model_name=>:node,
          :join_type=>:inner,
          :join_cond=>{:assembly_id=>:component__id},
-         :cols=>[:id,:display_name,:group_id]
+         :cols=>[:id,:display_name,:group_id,:type]
        },
        {
          :model_name=>:attribute,

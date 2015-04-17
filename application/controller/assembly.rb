@@ -698,7 +698,7 @@ module DTK
         opts.merge!(:nodes => nodes)
       end
 
-      task = Task.task_when_nodes_ready_from_assembly(assembly,:assembly, opts)
+      task = Task.task_when_nodes_ready_from_assembly(assembly, :assembly, opts)
       task.save!()
 
       # queue = SimpleActionQueue.new

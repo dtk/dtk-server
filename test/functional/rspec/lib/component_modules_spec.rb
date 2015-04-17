@@ -666,6 +666,13 @@ shared_context "Check remotes and verify that expected remote exists" do |dtk_co
   end
 end
 
+shared_context "Add remote" do |dtk_common, component_module, provider_name, url|
+  it "adds remote to #{component_module} component module" do
+    remote_added = dtk_common.add_remote(component_module, provider_name, url)
+    expect(remote_added).to eq(true)
+  end  
+end
+
 shared_context "Remove remote" do |dtk_common, component_module, provider_name|
   it "removes remote from #{component_module} component module" do
     remote_removed = dtk_common.remove_remote(component_module, provider_name)

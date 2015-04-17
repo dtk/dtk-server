@@ -503,6 +503,21 @@ module ComponentModulesMixin
 		return remote_exists
 	end
 
+	def add_remote(component_module, provider_name, url)
+		puts "Add remote:", "------------"
+		remote_added = false
+		response = send_request('/rest/component_module/add_git_remote', {:component_module_id => component_module, :remote_name => provider_name, :remote_url => url})
+		pretty_print_JSON(response)
+		if response['status'] == 'ok'
+			puts "Remote #{provider_name} with url #{url} has been added to #{component_module} component module successfully"
+			remote_added = true
+		else
+			puts "Remote #{provider_name} with url #{url} has not been added to #{component_module} component module successfully"
+		end
+		puts ""
+		return remote_added
+	end
+
 	def remove_remote(component_module, provider_name)
 		puts "Remove remote:", "----------------"
 		remote_removed = false

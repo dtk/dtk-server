@@ -12,9 +12,13 @@ module DTK; class Task; class Template
       attr_accessor :name
 
       def self.create_from_single_action(action)
-        stage_name = "stage_#{action.component_type()}"
-        new(stage_name).add_new_execution_block_for_action!(action)
+        new(stage_name(action)).add_new_execution_block_for_action!(action)
       end
+
+      def self.stage_name(action)
+        "component #{action.component_type()}"
+      end
+      private_class_method :stage_name
 
       # returns all actions generated
       def add_subtasks!(parent_task,internode_stage_index,assembly_idh=nil)

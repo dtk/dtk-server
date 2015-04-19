@@ -18,7 +18,7 @@ module DTK
         ExecuteActionFieldsToCopy.each{|field|ea[field] = parent_ea[field]}
         ret
       end
-      ExecuteActionFieldsToCopy = [:component_actions,:state_change_types,:config_agent_type]
+      ExecuteActionFieldsToCopy = [:component_actions,:state_change_types,:config_agent_type,:assembly_idh]
     end
 
     module NodeGroupProcessing

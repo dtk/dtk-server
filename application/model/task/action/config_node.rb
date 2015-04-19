@@ -183,6 +183,8 @@ module DTK; class Task
 
      private
       def initialize(type,object,task_idh=nil,assembly_idh=nil)
+        # TODO: clean up so dont have to look for assembly_idh in two places
+        assembly_idh ||= object[:assembly_idh]
         intra_node_stages = hash = nil
         case type
           when :state_change

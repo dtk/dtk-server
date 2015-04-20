@@ -85,7 +85,7 @@ module DTK
         run_action_set(action_set_def[:action_set],model_name)
       else #create an action set of length one and run it
         action_set = compute_singleton_action_set(action_set_def,route_key,action_set_params)
-        run_action_set(action_set,model_name)
+        run_action_set(action_set)
       end
 
       Log.info("USER -- : '#{ramaze_user[:username]}'")
@@ -234,7 +234,7 @@ module DTK
       filter_params = processed_params.select{|p|p.kind_of?(Hash)}
       return nil if filter_params.empty?
       # for processing :parent_id
-      parent_id_field_name = ModelHandle.new(ret_session_context_id(),model_name,parent_model_name).parent_id_field_name()
+      parent_id_field_name = ModelHandle.new(ret_session_context_id(),model_name,parent_model_name).parent_id_field_name?()
       filter = [:and] + filter_params.map do |el|
         raw_pair = [el.keys.first,el.values.first]
         [:eq] +  raw_pair.map{|x| x == :parent_id ?  parent_id_field_name : x}

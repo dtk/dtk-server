@@ -85,7 +85,7 @@ module DTK
         run_action_set(action_set_def[:action_set],model_name)
       else #create an action set of length one and run it
         action_set = compute_singleton_action_set(action_set_def,route_key,action_set_params)
-        run_action_set(action_set)
+        run_action_set(action_set,model_name)
       end
 
       Log.info("USER -- : '#{ramaze_user[:username]}'")

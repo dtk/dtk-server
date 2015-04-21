@@ -5,7 +5,7 @@ module DTK
     r8_nested_require('module_ref','missing')
 
     def self.common_columns()
-      [:id,:display_name,:group_id,:module_name,:module_type,:version_info,:namespace_info,:branch_id]
+      [:id,:display_name,:group_id,:module_name,:module_type,:version_info,:namespace_info,:external_ref,:branch_id]
     end
 
     def self.reify(mh,object)
@@ -112,7 +112,7 @@ module DTK
       end
       ret
     end
-    DSLHashCols = [:version_info,{:namespace_info => :namespace}]
+    DSLHashCols = [:version_info,{:namespace_info => :namespace},:external_ref]
 
    private
     def self.ret_create_rows(parent,module_ref_hash_array)
@@ -128,7 +128,7 @@ module DTK
           else
             assigns = parent_id_assigns
           end
-        el = Aux.hash_subset(module_ref_hash,[:ref,:display_name,:module_name,:module_type,:namespace_info]).merge(assigns)
+        el = Aux.hash_subset(module_ref_hash,[:ref,:display_name,:module_name,:module_type,:namespace_info,:external_ref]).merge(assigns)
         el[:display_name] ||= display_name(el)
         el[:ref] ||= ref(el)
         el

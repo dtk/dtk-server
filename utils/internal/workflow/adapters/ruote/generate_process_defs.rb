@@ -37,6 +37,8 @@ module DTK
           if guard_tasks = context.get_guard_tasks(action)
             guards = ret_guards(guard_tasks)
           end
+          #DTK-2037 for Aldin: sync_agent_code and authorize_action should not be inserted when there is a node wide task
+          # so in this case sync_agent_code and authorize_action variables should be set to nil
           authorize_action = participant_executable_action(:authorize_node,task,context,:task_type => "authorize_node", :task_start => true)
           sync_agent_code =  
             if R8::Config[:node_agent_git_clone][:mode] != 'off'

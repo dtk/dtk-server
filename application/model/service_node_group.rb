@@ -120,7 +120,14 @@ module DTK
       node_or_ngs.each do |n|
         if n.is_node_group?
           ndx_ret.merge!(n.id => n) unless opts[:remove_node_groups]
-          (ndx_node_members[n[:id]]||[]).each{|n|ndx_ret.merge!(n.id => n)}
+          # (ndx_node_members[n[:id]]||[]).each{|n|ndx_ret.merge!(n.id => n)}
+          (ndx_node_members[n[:id]]||[]).each do |node|
+            if opts[:add_group_member_components]
+              components = n.info_about(:components)
+              node.merge!(:components => components) unless components.empty?
+            end
+            ndx_ret.merge!(node.id => node)
+          end
         else
           ndx_ret.merge!(n.id => n)
         end

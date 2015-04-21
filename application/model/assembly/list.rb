@@ -133,12 +133,14 @@ module DTK
 
           # if node group take only group members
           if r[:node] and r[:node].is_node_group?()
-            r[:nodes] ||= r.get_nodes__expand_node_groups({:remove_node_groups => true}) unless opts[:only_node_group_info]
+            r[:nodes] ||= r.get_nodes__expand_node_groups({:remove_node_groups => true, :add_group_member_components => true}) unless opts[:only_node_group_info]
+            opts.merge!(:add_group_member_components => true)
           end
 
           if r[:nodes]
             r[:nodes].each do |n|
               format_node!(pntr[:ndx_nodes],n,opts)
+              process_node_group_memeber_components(pntr[:ndx_nodes],n,opts) if opts[:add_group_member_components]
             end
           end
         end
@@ -202,6 +204,14 @@ module DTK
           end
 
           ndx_nodes[node_name]
+        end
+      end
+
+      def process_node_group_memeber_components(ndx_nodes,raw_node,opts=Hash.new)
+        if components = raw_node[:components]
+          cmp_names = components.map{|cmp| cmp[:display_name]}
+          node_name = raw_node[:display_name]
+          ndx_nodes[node_name].merge!(:components => cmp_names)
         end
       end
 

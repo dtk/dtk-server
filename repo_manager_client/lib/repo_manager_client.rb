@@ -215,18 +215,14 @@ module DTK
       nil
     end
 
-    def add_client_access(client_rsa_pub_key)
-      client_repo_user = get_repo_user(client_rsa_pub_key)
+    def add_client_access(client_rsa_pub_key, client_rsa_key_name)
+      response = post_rest_request_data(
+        '/v1/users/add_access',
+         user_params(CurrentSession.catalog_username, client_rsa_pub_key, client_rsa_key_name),
+        :raise_error => true
+      )
 
-      unless client_repo_user.has_repoman_direct_access?
-        response = post_rest_request_data(
-          '/v1/users/add_access',
-           user_params(CurrentSession.catalog_username, client_rsa_pub_key, client_repo_user.rsa_key_name),
-          :raise_error => true
-        )
-
-        client_repo_user.update(:repo_manager_direct_access => true) if response
-      end
+      response
     end
 
     def create_tenant_user(username, rsa_pub_key, rsa_key_name)
@@ -324,6 +320,7 @@ module DTK
     end
 
     UNAUTHORIZED_ERROR_CODE = 1001
+    NAME_NOT_ALLOWED_CODE   = 1011
 
     def handle_error(opts={},&rest_call_block)
       response = rest_call_block.call
@@ -348,8 +345,13 @@ module DTK
       elsif opts[:raise_error] and not response.ok?
         Log.error_pp(response)
         msg = error_msg(response)
+        code = error_code(response)
         if is_internal_error?(response)
           raise Error.new(msg)
+        elsif code == NAME_NOT_ALLOWED_CODE
+          error = ErrorUsage.new(msg)
+          error.add_tag!(:raise_error)
+          raise error
         else
           raise ErrorUsage.new("Repo Manager error: #{msg}")
         end
@@ -361,7 +363,7 @@ module DTK
     def get_repo_user(ssh_rsa_pub_key)
       raise ErrorUsage.new("Provided RSA pub key missing") if ssh_rsa_pub_key.nil?
       mh = ModelHandle.create_from_user(CurrentSession.new.get_user_object(),:repo_user)
-      RepoUser.match_by_ssh_rsa_pub_key(mh,ssh_rsa_pub_key)
+      RepoUser.match_by_ssh_rsa_pub_key!(mh,ssh_rsa_pub_key)
     end
 
     def get_repo_user_by_username(username)

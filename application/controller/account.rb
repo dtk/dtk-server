@@ -21,10 +21,31 @@ module DTK
       rsa_pub_key = ret_non_null_request_params(:rsa_pub_key)
       # username in this context is rsa pub key name
       username = ret_request_params(:username)
-      registered_with_repoman = true
+      repoman_registration_success = true
 
       if username && !username.eql?(username.match(PUB_KEY_NAME_REGEX)[0])
         raise DTK::Error, "Invalid format of pub key name, characters allower are: '#{PUB_KEY_NAME_REGEX.source.gsub('\\','')}'"
+      end
+
+      # we do this check in add user direct as well but for simplicity we will duplicate it here as well
+      if RepoUser.find_by_pub_key(model_handle_with_private_group(), rsa_pub_key)
+        raise ErrorUsage, RepoUser::SSH_KEY_EXISTS
+      end
+
+      begin
+        # Add Repo Manager user
+        response = Repo::Remote.new.add_client_access(rsa_pub_key, username)
+      rescue DTK::Error => e
+        # we conditionally ignore it and we fix it later when calling repomanager
+        Log.warn("We were not able to add user to Repo Manager, reason: #{e.message}")
+
+        # this is terrible practice but error/response classes are so tightly coupled to rest of the code
+        # that I do not dare change them
+        if e.message.include?("Name has already been taken")
+          raise ErrorUsage, "Please choose a different name for your key, name has been taken"
+        end
+
+        repoman_registration_success = false
       end
 
       # Service call
@@ -37,23 +58,8 @@ module DTK
       match = match_service && match_module
       matched_repo_user = repo_user_service || repo_user_module
 
-      if matched_repo_user && !matched_repo_user.has_repoman_direct_access?
-        begin
-          # Add Repo Manager user
-          response = Repo::Remote.new.add_client_access(rsa_pub_key)
-
-          # update user so we know that rsa pub key was added
-          matched_repo_user.update(:repo_manager_direct_access => true)
-        rescue DTK::Error => e
-          # we conditionally ignore it and we fix it later when calling repomanager
-          err_msg = "We were not able to add user to Repo Manager, reason: #{e.message}"
-          if e.has_tag?(:raise_error)
-            raise ErrorUsage.new(err_msg)
-          end
-          Log.warn(err_msg)
-          registered_with_repoman = false
-        end
-      end
+      # set a flag in database if this user has been registered to repoman
+      matched_repo_user.update(:repo_manager_direct_access => true) if repoman_registration_success
 
       # only if user exists already
       Log.info("User ('#{matched_repo_user[:username]}') exists with given PUB key, not able to create a user. ") if match
@@ -64,7 +70,7 @@ module DTK
         :match => match,
         :new_username => matched_repo_user ? matched_repo_user[:username] : nil,
         :matched_username => match && matched_repo_user ? matched_repo_user[:username] : nil,
-        :registered_with_repoman => registered_with_repoman
+        :registered_with_repoman => repoman_registration_success
       )
     end
 

@@ -1,6 +1,8 @@
 module DTK
   class RepoUser < Model
 
+    SSH_KEY_EXISTS = "Provided RSA public key already exists for another user"
+
     ### Attributes ###
 
     def self.common_columns()
@@ -79,16 +81,26 @@ module DTK
 
      # Find user by SSH PUB key
      #
-    def self.match_by_ssh_rsa_pub_key(mh,ssh_rsa_pub_key)
-      sp_hash = {
-        :cols => common_columns(),
-        :filter => [:eq,:ssh_rsa_pub_key,ssh_rsa_pub_key]
-      }
-      unless ret = get_obj(mh.createMH(:repo_user),sp_hash)
+    def self.match_by_ssh_rsa_pub_key!(mh, ssh_rsa_pub_key)
+      ret = find_by_pub_key(mh, ssh_rsa_pub_key)
+
+      unless ret
         raise ErrorUsage.new("The SSH public key for the client machine has not been registered, have you added SSH key for this client?")
       end
+
       ret
     end
+
+
+    def self.find_by_pub_key(model_handle, ssh_rsa_pub_key)
+      sp_hash = {
+        :cols => common_columns(),
+        :filter => [:eq, :ssh_rsa_pub_key, ssh_rsa_pub_key]
+      }
+
+      get_obj(model_handle.createMH(:repo_user), sp_hash)
+    end
+
 
     def self.authorized_users_acls(model_handle)
       authorized_users(model_handle).map do |repo_username|
@@ -104,8 +116,9 @@ module DTK
     end
     private_class_method :authorized_users
 
-    # returns an object or calls block (with new or existing object) 
-    def self.add_repo_user?(repo_user_type,repo_user_mh,ssh_rsa_keys={},username=nil)
+
+    # returns an object or calls block (with new or existing object)
+    def self.add_repo_user?(repo_user_type, repo_user_mh, ssh_rsa_keys={},username=nil)
       # for match on type; use following logic
       # if ssh public key given look for match on this
       # otherwise return error if there is multiple matches for node or admin type
@@ -118,12 +131,12 @@ module DTK
         # and raise exception if file with provided rsa_public_key exists already
         gitolite_admin_keydir = RepoManager.get_keydir()
         pub_keys = Dir.entries(gitolite_admin_keydir).select{|key| key.to_s.include?(".pub")}
-        
+
         pub_keys.each do |key|
           key_content = File.read("#{gitolite_admin_keydir}/#{key}")
           if (key_content == ssh_rsa_pub_key)
             Log.info("Provided RSA public key already exists for another user, other user's keydir (#{key.to_s})")
-            raise ErrorUsage.new("Provided RSA public key already exists for another user")
+            raise ErrorUsage.new(SSH_KEY_EXISTS)
           end
         end
       else
@@ -141,7 +154,7 @@ module DTK
       add_repo_user(repo_user_type,repo_user_mh,ssh_rsa_keys,existing_users,username)
     end
 
-    # ssh_rsa_keys[:public].nil? means that expected that key already exists in the gitolite admin db 
+    # ssh_rsa_keys[:public].nil? means that expected that key already exists in the gitolite admin db
     def self.add_repo_user(repo_user_type,repo_user_mh,ssh_rsa_keys={},existing_users=[],username=nil)
       repo_username,index =  ret_new_repo_username_and_index(repo_user_type,existing_users,username)
       if ssh_rsa_keys[:public]

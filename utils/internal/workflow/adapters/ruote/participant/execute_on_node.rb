@@ -20,6 +20,18 @@ module DTK
 
           task.add_internal_guards!(workflow.guards[:internal])
           execution_context(task,workitem,task_start) do
+            #DTK-2037 for Aldin; 
+            # this is the best point to intercept actions on the assembly wide node
+            # if it is an action on an assembly wide node; first protype by calling a stub function that passes back
+            # result in same form that it would com eback under callback :on_msg_received
+            # and then process it as in teh callback; you can first cut and paste and then we could write method so dont have to deuplicate code
+            # think you want code between what I marked as: DTK-2037 Marker 1 and 2     
+            # if get this working test case where the stub function fails
+            # after this you want to look at whether the execution of the task is blocking; 
+            # put a sleep in the teask so you can have it run as long as yu want
+            # the test to do is as this step is running try to do another command from dtk clent and see if it is blocked
+            # This protyping will determine whether we should call assembly wide node in this simple way or instead we should dispatch it to a worker
+            # process; if the later we can enlist Haris who knows this better than I do
             unless action.long_running?
               raise Error.new("All config node action should be long running")
             end
@@ -37,7 +49,7 @@ module DTK
                   if has_action_results?(task,result)
                     task.add_action_results(result,action)
                   end
-                  
+                  #DTK-2037 Marker 1      
                   if errors_in_result = errors_in_result?(result,action)
                     event,errors = task.add_event_and_errors(:complete_failed,:config_agent,errors_in_result)
                     if event
@@ -53,6 +65,7 @@ module DTK
                   end
                   delete_task_info(workitem)
                   reply_to_engine(workitem)
+                  #DTK-2037 Marker 2      
                   end
               end,
               :on_timeout => proc do

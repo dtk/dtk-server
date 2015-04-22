@@ -442,6 +442,11 @@ module DTK
 
     # adds or deletes children based on match_cols
     # returns the list of idhs that have been created or modified
+    # opts can include teh Booelan options
+    #  :no_delete
+    #  :update_matching
+    #  :convert (used if have field with json structure)
+    #  
     def self.modify_children_from_rows(model_handle,parent_idh,rows,match_cols=[:ref],opts={})
       parent_id_col = DB.parent_field(parent_idh[:model_name],model_handle[:model_name])
       parent_fields = {parent_id_col => parent_idh.get_id(), :group_id => parent_idh[:group_id]}
@@ -457,7 +462,8 @@ module DTK
         unless model_handle_with_par[:parent_model_name]
           model_handle_with_par = model_handle_with_par.merge(:parent_model_name => parent_idh[:model_name])
         end
-        return create_from_rows(model_handle_with_par,create_rows,:duplicate_refs => :no_check)
+        opts_create = Aux.hash_subset(opts,[:convert]).merge(:duplicate_refs => :no_check)
+        return create_from_rows(model_handle_with_par,create_rows,opts_create)
       end
 
       ret = Array.new

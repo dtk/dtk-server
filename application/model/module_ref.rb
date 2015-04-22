@@ -80,7 +80,7 @@ module DTK
       case operation
        when :create_or_update
         matching_cols = [:module_name]
-        modify_children_from_rows(model_handle,parent.id_handle(),rows,matching_cols,:update_matching => true)
+        modify_children_from_rows(model_handle,parent.id_handle(),rows,matching_cols,:update_matching => true,:convert => true)
        when :add
         create_from_rows(model_handle,rows)
        else

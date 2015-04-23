@@ -9,6 +9,7 @@ module DTK; module CommandAndControlAdapter
         conn().associate_elastic_ip(node.instance_id(),node.elastic_ip())
       end
 
+      #TODO: errors here should result in warning set to user that dns set wrong and will be ignored
       def associate_persistent_dns?(node)
         # check if it needs a persistent dns
         unless persistent_dns = node.persistent_dns()
@@ -20,14 +21,26 @@ module DTK; module CommandAndControlAdapter
           return
         end
         # we add record to DNS which links node's DNS to perssistent DNS
-        record = dns().get_record(node.persistent_dns())
+        dns = nil
+        begin 
+          dns = dns()
+        rescue  => e
+          err_msg = "cannot find ec2_address in associate_persistent_dns for node with ID '#{node[:id]}"
+          if e.kind_of?(::DTK::Error)
+            err_msg << ": #{e.to_s}"
+          end
+          Log.error(err_msg)
+          return
+        end
 
+        record = dns.get_record?(node.persistent_dns())
+        
         if record.nil?
           # there is no record we need to create it (first boot)
-          record = dns().create_record(node.persistent_dns(),ec2_address)
+          record = dns.create_record(node.persistent_dns(),ec2_address)
         else
           # we need to update it with new dns name
-          record = dns().update_record(record,ec2_address)
+          record = dns.update_record(record,ec2_address)
         end
 
         # in case there was no record created we raise error
@@ -81,8 +94,21 @@ module DTK; module CommandAndControlAdapter
           end
           
           if persistent_dns = node.persistent_dns()
-            success = dns().destroy_record(persistent_dns)
-            if success
+            success = nil
+
+            dns = nil
+            begin 
+              dns = dns()
+             rescue  => e
+              err_msg = "in process_addresses__terminate? for node with ID '#{node[:id]}"
+              if e.kind_of?(::DTK::Error)
+                err_msg << ": #{e.to_s}"
+              end
+              Log.error(err_msg)
+              return
+            end
+            
+            if success = dns.destroy_record(persistent_dns)
               Log.info "Persistent DNS has been released '#{node.persistent_dns()}', node termination continues."
             else
               Log.warn "System was not able to release '#{node.persistent_dns()}', for node ID '#{node[:id]}' look into this."

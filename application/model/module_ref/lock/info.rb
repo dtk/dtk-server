@@ -1,7 +1,7 @@
 module DTK; class ModuleRef
   class Lock
     class Info
-      attr_reader :namespace,:module_name,:level,:children_module_names
+      attr_reader :namespace,:module_name,:level,:children_module_names,:external_ref
       attr_accessor :implementation,:module_branch
       def initialize(namespace,module_name,level,extra_fields={})
         @namespace             = namespace
@@ -10,6 +10,7 @@ module DTK; class ModuleRef
         @children_module_names = extra_fields[:children_module_names] || []
         @implementation        = extra_fields[:implementation]
         @module_branch         = extra_fields[:module_branch]
+        @external_ref          = extra_fields[:external_ref]
       end
 
       def self.create_from_hash(mh,info_hash)
@@ -20,6 +21,9 @@ module DTK; class ModuleRef
           :implementation        => object_form(mh.createMH(:implementation),info_hash[:implementation]),
           :module_branch         => object_form(mh.createMH(:module_branch),info_hash[:module_branch])
         }
+        if external_ref = info_hash[:external_ref]
+          extra_fields.merge!(:external_ref => external_ref)
+        end
         new(info_hash[:namespace],info_hash[:module_name],info_hash[:level],extra_fields)
       end
 
@@ -32,6 +36,7 @@ module DTK; class ModuleRef
         }
         ret.merge!(:implementation => @implementation) if implementation
         ret.merge!(:module_branch => module_branch) if module_branch
+        ret.merge!(:external_ref => external_ref) if external_ref
         ret
       end
 

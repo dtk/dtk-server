@@ -247,7 +247,7 @@ module DTK
         opts = {:config_agent_type => ret_config_agent_type()}
         opts = namespace ? {:base_namespace => namespace} : {}
         MessageQueue.store(:info, "Puppet forge module installed, parsing content ...")
-        install_info = ComponentModule.import_from_puppet_forge(project,puppet_forge_local_copy,opts)
+        install_info = ComponentModule.import_from_puppet_forge(project, puppet_forge_local_copy, opts)
       ensure
         puppet_forge_local_copy.delete_base_install_dir?() if puppet_forge_local_copy
       end

@@ -140,36 +140,6 @@ module DTK
       get_target().get_aws_compute_params()
     end
 
-    def get_aug_node_with_dns_info()
-      # TODO: relying on the keys below being unique; more robust would be to check againts existing names
-      # TODO: to supporting this may want to put in logic that prevents assemblies with explicit names from having same name
-      sp_hash = {
-        :cols => [:r8_dns_info,:id,:group_id,:display_name,:ref,:ref_num]
-      }
-      # checking for multiple rows to handle case where multiple dns attributes given
-      aug_nodes = get_objs(sp_hash,:keep_ref_cols => true)
-      aug_nodes.sort do |a,b|
-        DNS.attr_rank(a[:attribute_r8_dns_enabled]) <=> DNS.attr_rank(b[:attribute_r8_dns_enabled])
-      end.first
-    end
-
-    module DNS
-      def self.attr_rank(attr)
-        ret = LowestRank
-        if attr_name = (attr||{})[:display_name]
-          if rank = RankPos[attr_name]
-            ret = rank
-          end
-        end
-        ret
-      end
-      # Assumes that AttributeKeys has been defined already
-      RankPos = AttributeKeys.inject(Hash.new) {|h,ak|
-        h.merge(ak => AttributeKeys.index(ak))
-      }
-      LowestRank = AttributeKeys.size
-    end
-
     def self.get_violations(id_handles)
       get_objs_in_set(id_handles,{:cols => [:violations]}).map{|r|r[:violation]}
     end

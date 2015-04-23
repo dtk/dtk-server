@@ -81,6 +81,9 @@ module DTK
         elsif isa_module_ref?()
           ret[:type] = 'ModuleRef'
           ret[:namespace] = namespace()
+          if external_ref = external_ref?()
+            ret[:external_ref]  = external_ref
+          end
         elsif isa_missing_module_ref?()
           ret[:type] = MISSING_MODULE__REF_TYPE
           ret[:namespace] = namespace()
@@ -106,9 +109,15 @@ module DTK
       end
       def namespace?()
         if @context.kind_of?(ModuleRef)
-          (@context||{})[:namespace_info]
+          @context[:namespace_info]
         elsif @context.kind_of?(ModuleRef::Missing)
           @context.namespace
+        end
+      end
+
+      def external_ref?()
+        if @context.kind_of?(ModuleRef)
+          @context[:external_ref]
         end
       end
 

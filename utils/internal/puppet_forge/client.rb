@@ -53,7 +53,9 @@ module DTK
         end
 
         def check_for_dependencies(base_install_dir, module_name, hash_info)
-          if dependencies = ((hash_info['installed_modules']||{}).first||{})['dependencies']
+          installed_module = (hash_info['installed_modules']||[]).first
+
+          if dependencies = full_recursive_dependencies(installed_module)
             nested_dependency_info = nested_dependency_info(base_install_dir)
             dependencies.collect do |dp|
               dp_name     = dp['module']
@@ -71,13 +73,22 @@ module DTK
          end
         end
 
-        Remove = "\e[0m\n"
+        def full_recursive_dependencies(installed_module)
+          return [] unless installed_module
+          result = installed_module['dependencies'].collect do |dependency|
+            [dependency].concat(full_recursive_dependencies(dependency))
+          end
+          result.flatten
+        end
+
+        REMOVE_PATTERN = "\e[0m\n"
+
         def normalize_output(output_s)
-          output_s.split(Remove).last
+          output_s.split(REMOVE_PATTERN).last
         end
 
         def raise_puppet_forge_error(output_err)
-          puppet_forge_err = output_err.split(Remove).first
+          puppet_forge_err = output_err.split(REMOVE_PATTERN).first
           raise ErrorUsage, "Puppet Forge Error: #{puppet_forge_err}"
         end
 

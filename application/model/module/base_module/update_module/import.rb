@@ -14,9 +14,11 @@ module DTK; class BaseModule; class UpdateModule
     def self.import_puppet_forge_module(project,local_params,source_directory,cmr_update_els)
       config_agent_type = :puppet
       opts_create_mod = Opts.new(
-        :config_agent_type => config_agent_type,
-        :copy_files        => {:source_directory => source_directory}
+        :config_agent_type  => config_agent_type,
+        :copy_files         => {:source_directory => source_directory},
+        :no_error_if_exists => true
       )
+
       module_and_branch_info = ComponentModule.create_module(project,local_params,opts_create_mod)
       module_branch_idh      = module_and_branch_info[:module_branch_idh]
       module_branch          = module_branch_idh.create_object()

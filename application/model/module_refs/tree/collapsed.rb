@@ -29,7 +29,11 @@ module DTK; class ModuleRefs
             end
             
             if namespace = subtree.namespace() 
-              (ret[module_name] ||= Array.new) << ModuleRef::Lock::Info.new(namespace,module_name,level,:children_module_names => children_module_names)
+              opts_create = {:children_module_names => children_module_names}
+              if external_ref = subtree.external_ref?()
+                opts_create.merge!(:external_ref => external_ref)
+              end
+              (ret[module_name] ||= Array.new) << ModuleRef::Lock::Info.new(namespace,module_name,level,opts_create)
             end
           end
           ret

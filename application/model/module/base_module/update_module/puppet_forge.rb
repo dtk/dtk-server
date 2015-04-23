@@ -15,10 +15,11 @@ module DTK; class BaseModule; class UpdateModule
         Opts.new(:project_idh => @project.id_handle()),
         @pf_local_copy.module_dependencies
       )
+
       # generate list of modules that need to be created from puppet_forge_local_copy
       pf_modules = @pf_local_copy.modules(:remove => found_modules)
 
-      installed_modules = pf_modules.collect{|pf_module|import_module(pf_module)}
+      installed_modules = pf_modules.collect{ |pf_module| import_module(pf_module) }
 
       # pass back info about
       # - what was loaded from puppet forge,

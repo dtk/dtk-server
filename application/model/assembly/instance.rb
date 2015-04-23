@@ -177,7 +177,7 @@ module DTK; class  Assembly
 
         unless node = Model.get_obj(model_handle(:node),sp_hash)
           if node_group = is_node_group_member?(node_idh)
-            raise ErrorUsage.new("Not implemented: adding a component to a node group member; a component can only be added to the node group (#{node_group[:display_name]}) itself")
+            raise ErrorUsage.new("Not implemented: adding a component to a node group member; a component can only be added to the node group (#{node_group[:display_name]}) itself") 
           else
             raise ErrorIdInvalid.new(node_idh.get_id(),:node)
           end

@@ -46,7 +46,7 @@ module DTK
             if node_type.eql?('assembly_wide')
               # method that returns mock response for assembly wide node
               mock_result = assembly_wide_node_response_mock()
-              result = mock_result.merge!("task_id" => task_id)
+              result = (mock_result||{}).merge!("task_id" => task_id)
 
               if errors_in_result = errors_in_result?(result,action)
                 event,errors = task.add_event_and_errors(:complete_failed,:config_agent,errors_in_result)

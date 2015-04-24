@@ -101,11 +101,12 @@ module DTK
       assembly = ret_assembly_object()
       node_id, component_id, attribute_id, return_json, only_node_group_info = ret_request_params(:node_id, :component_id, :attribute_id, :json_return, :only_node_group_info)
 
-      opts = {:only_node_group_info => true} if only_node_group_info
+      opts = {:remove_assembly_wide_node => true}
+      opts.merge!(:only_node_group_info => true) if only_node_group_info
       if return_json.eql?('true')
-        rest_ok_response assembly.info(node_id, component_id, attribute_id, opts||{})
+        rest_ok_response assembly.info(node_id, component_id, attribute_id, opts)
       else
-        rest_ok_response assembly.info(node_id, component_id, attribute_id, opts||{}), :encode_into => :yaml
+        rest_ok_response assembly.info(node_id, component_id, attribute_id, opts), :encode_into => :yaml
       end
     end
 

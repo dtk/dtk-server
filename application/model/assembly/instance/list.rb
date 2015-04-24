@@ -86,6 +86,7 @@ module DTK; class  Assembly
         when :attributes
           list_attributes(opts)
         when :components
+          opts.merge!(:remove_assembly_wide_node => true)
           list_components(opts)
         when :nodes
           opts.merge!(:cols => Node.common_columns()+[:target])

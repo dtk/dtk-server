@@ -14,6 +14,7 @@ module DTK
         if (node_id.to_s.empty? && component_id.to_s.empty? && attribute_id.to_s.empty?)
           # nodes_info = (is_template ? get_nodes() : get_nodes(:id,:display_name,:admin_op_status,:os_type,:external_ref,:type))
           nodes_info = (is_template ? get_nodes() : get_nodes__expand_node_groups({:remove_node_groups => true}))
+          nodes_info.reject!{|n| n[:type].eql?('assembly_wide')} if opts[:remove_assembly_wide_node]
           assembly_rows.first[:nodes] = nodes_info.sort{|a,b| a[:display_name] <=> b[:display_name] }
         end
 
@@ -45,7 +46,7 @@ module DTK
         end
 
         # reconfigure response fields that will be returned to the client
-        opts_list = {:print_form=>true,:sanitize=>true}.merge(opts)
+        opts_list = {:print_form=>true, :sanitize=>true}.merge(opts)
 
         if kind_of?(Instance)
           assembly_templates = assembly_rows.map{|a|a[:assembly_template] unless Workspace.is_workspace?(a)}.compact
@@ -147,6 +148,7 @@ module DTK
         
         unsorted = ndx_ret.values.map do |r|
           nodes = r[:ndx_nodes].values
+          nodes.reject!{|n| n[:type].eql?('assembly_wide')} if opts[:remove_assembly_wide_node]
           op_status = (op_status(nodes) if respond_to?(:op_status))
           r.merge(:op_status => op_status,:nodes => nodes).slice(:id,:display_name,:op_status,:last_task_run_status,:execution_status,:module_branch_id,:version,:assembly_template,:target,:nodes,:created_at,:keypair,:security_groups)
         end

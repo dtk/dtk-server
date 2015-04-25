@@ -30,8 +30,8 @@ module DTK
         end
         os_type = os_type.to_sym
         unless SupportedOSList.include?(os_type)
-          supported_list = SupportedOSList.join(',')
-          raise ErrorUsage.new("#{node_name_and_id()} has an unsupported OS type (#{os_type}); supported types are: #{supported_list} ")
+          supported_list = SupportedOSList.join(', ')
+          raise ErrorUsage.new("#{node_name_and_id()} has an unsupported OS type (#{os_type}); supported types are: #{supported_list}")
         end
         os_type
       end
@@ -51,10 +51,11 @@ eos
 #!/bin/sh 
 eos
       OSTemplates = {
-        :ubuntu => OSTemplateUbuntu,
-        :redhat => OSTemplateDefault,
-        :centos => OSTemplateDefault,
-        :debian => OSTemplateDefault
+        :ubuntu               => OSTemplateUbuntu,
+        :redhat               => OSTemplateDefault,
+        :centos               => OSTemplateDefault,
+        :debian               => OSTemplateDefault,
+        'amazon-linux'.to_sym => OSTemplateDefault,
       }
       SupportedOSList = OSTemplates.keys
     end

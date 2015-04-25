@@ -98,6 +98,8 @@ module DTK
       Transaction do
         current_default_target.update(:is_default_target => false) if current_default_target
         target.update(:is_default_target => true)
+        # also set the workspace with this target
+        Workspace.set_target(target,:raise_error => false)
       end
       ResponseInfo.info("Default target changed from ?current_default_target to ?new_default_target",
                         :current_default_target => current_default_target,

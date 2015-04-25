@@ -13,11 +13,11 @@ module DTK
       obj.kind_of?(self) or (AssemblyFields[:ref] == obj.get_field?(:ref))
     end
 
-    def self.get_workspace(project_idh,opts={})
+    def self.get_workspace(workspace_mh,opts={})
       opts_get = Aux.hash_subset(opts,:cols).merge(:filter => [:eq,:ref,AssemblyFields[:ref]])
-      rows = Workspace.get(project_idh.createMH(:assembly_workspace),opts)
+      rows = Workspace.get(workspace_mh,opts_get)
       unless rows.size == 1
-        Log.error("Unexpected that get_workspace returns '#{row.size.to_s}' rows")
+        Log.error_pp(["Unexpected that get_workspace does not return 1 row",rows])
         return nil
       end
       rows.first
@@ -30,13 +30,22 @@ module DTK
       delete_tasks()
     end
 
-    def set_target(target)
-      current_target = get_target()
-      if current_target.id ==  target.id
-        raise ErrorUsage::Warning.new("Target is already set to #{target.get_field?(:display_name)}")
+    def self.set_target(target,opts={})
+      if workspace = get_workspace(target.model_handle(:assembly_workspace))
+         workspace.set_target(target,opts)
       end
-      unless op_status_all_pending?()
-        raise ErrorUsage.new("The command 'set-target' can only be invoked before the workspace has been converged (i.e., is in 'pending' state)")
+    end
+
+    def set_target(target,opts={})
+      current_target = get_target()
+      # default is to raise error
+      if opts[:raise_error].nil? or opts[:raise_error]
+        if current_target.id ==  target.id
+          raise ErrorUsage::Warning.new("Target is already set to #{target.get_field?(:display_name)}")
+        end
+        unless op_status_all_pending?()
+          raise ErrorUsage.new("The command 'set-target' can only be invoked before the workspace has been converged (i.e., is in 'pending' state)")
+        end
       end
       update(:datacenter_datacenter_id => target.id)
     end

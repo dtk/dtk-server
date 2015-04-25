@@ -170,17 +170,19 @@ module DTK
       def self.get_builtin_target(target_mh)
         sp_hash = {
           :cols => [:id,:group_id,:display_name],
-          :filter => [:eq,:parent_id,nil]
+          :filter => [:and,[:eq,:parent_id,nil],[:eq,:type,'staging']]
         }
         rows = get_objs(target_mh,sp_hash)
         unless rows.size == 1
           Log.error("Unexpected that get_builtin_target returned '#{rows.size.to_s}' rows")
+          return nil
         end
         rows.first
       end
 
       def self.modify_workspace_target_if_points_to_deleted_one(deleted_target)
-        if workspace = Workspace.get_workspace(deleted_target.get_project.id_handle(),:cols => [:id,:group_id,:datacenter_datacenter_id])
+        workspace_mh = deleted_target.model_handle(:assembly_workspace)
+        if workspace = Workspace.get_workspace(workspace_mh,:cols => [:id,:group_id,:datacenter_datacenter_id])
           if workspace[:datacenter_datacenter_id] == deleted_target.id()
             if builtin_target = get_builtin_target(deleted_target.model_handle())
               workspace.set_target(builtin_target)

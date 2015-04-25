@@ -1,12 +1,26 @@
 module DTK
   class Workspace < Assembly::Instance
-  # creates both a service, module branch, assembly instance and assembly templaet for the workspace
+    def self.create_from_id_handle(idh)
+      idh.create_object(:model_name => :assembly_workspace)
+    end
+
+  # creates both a service, module branch, assembly instance and assembly template for the workspace
     def self.create?(target_idh,project_idh)
       Factory.create?(target_idh,project_idh)
     end
 
     def self.is_workspace?(obj)
       obj.kind_of?(self) or (AssemblyFields[:ref] == obj.get_field?(:ref))
+    end
+
+    def self.get_workspace(project_idh,opts={})
+      opts_get = Aux.hash_subset(opts,:cols).merge(:filter => [:eq,:ref,AssemblyFields[:ref]])
+      rows = Workspace.get(project_idh.createMH(:assembly_workspace),opts)
+      unless rows.size == 1
+        Log.error("Unexpected that get_workspace returns '#{row.size.to_s}' rows")
+        return nil
+      end
+      rows.first
     end
 
     def purge(opts={})

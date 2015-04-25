@@ -257,6 +257,7 @@ module DTK; class Assembly; class Instance
     def get_sub_assemblies()
       self.class.get_sub_assemblies([id_handle()])
     end
+
   end
 
   module GetClassMixin

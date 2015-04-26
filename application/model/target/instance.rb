@@ -101,7 +101,7 @@ module DTK
         delete_instance(target.id_handle())
       end
 
-      def self.edit_target(target,iaas_properties)
+      def self.update_target(target,iaas_properties)
         target.update_obj!(:iaas_properties)
         current_properties = target[:iaas_properties]
 

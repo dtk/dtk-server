@@ -22,8 +22,8 @@ module DTK
     end
 
     def rest__info()
-      target_id = ret_non_null_request_params(:target_id)
-      rest_ok_response Target.info(model_handle(), target_id)
+      target = create_obj(:target_id, Target::Instance)
+      rest_ok_response target.info(),:encode_into => :yaml
     end
 
     def rest__import_nodes()

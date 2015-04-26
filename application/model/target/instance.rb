@@ -3,6 +3,13 @@ module DTK
     class Instance < self
       subclass_model :target_instance, :target, :print_form => 'target'
 
+      def info()
+        target_info =  get_obj(:cols => [:display_name,:iaas_type,:iaas_properties,:is_default_target,:provider])
+        Log.error("Need to write sanitize_info an alos get provider properies and merge them")
+        target_info
+      end
+      #IAASPropertiesThatCanBePublic = [:region,] 
+
       def iaas_properties()
         IAASProperties.new(:target_instance => self)
       end

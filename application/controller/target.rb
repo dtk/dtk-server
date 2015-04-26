@@ -72,13 +72,20 @@ module DTK
 
     # create target instance
     def rest__create()
-      provider     = create_obj(:provider_id, ::DTK::Target::Template)
-      region       = ret_request_params(:region)
-      opts         = ret_params_hash(:target_name, :iaas_properties)
-      project_idh  = get_default_project().id_handle()
+      provider        = create_obj(:provider_id, Target::Template)
+      iaas_properties = ret_non_null_request_params(:iaas_properties).inject(Hash.new){|h,(k,v)|h.merge(k.to_sym => v)}
+      target_type     = (ret_request_params(:type) || :ec2_classic).to_sym
+      opts            = ret_params_hash(:target_name)
+      project_idh     = get_default_project().id_handle()
 
-      Target::Instance.create_target(project_idh, provider, region, opts)
-      rest_ok_response #TODO: may return info about objects created
+      #TODO: for legacy: can be removed when clients upgraded
+      iaas_properties[:region] ||= ret_request_params(:region)
+
+      unless [:ec2_classic,:ec2_vpc].include?(target_type)
+        raise ErrorUsage.new("Target type '#{target_type}' is not supported")
+      end
+      Target::Instance.create_target_ec2(project_idh, provider, target_type, iaas_properties, opts)
+      rest_ok_response 
     end
 
     # TODO: modify so no IAAS specfic params processed here (e.g., region)

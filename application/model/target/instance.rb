@@ -11,32 +11,22 @@ module DTK
         Node::TargetRef.get_target_running_nodes(self)
       end
 
-      def self.create_target(project_idh,provider,region,opts={})
-        provider_properties = provider.get_field?(:iaas_properties).merge(:region => region)
-        # # DTK-1735 DO NOT copy aws key and secret from provider to target
-        properties      = {:region => region}
-        provider_type   = provider.get_field?(:iaas_type)
-        iaas_properties = []
-
-        if iaas_props = opts[:iaas_properties]
-          # remove security_groups from provider and use params provided with create-target
-          properties.delete_if{|k,v| [:security_group, :security_group_set].include?(k)}
-
-          # convert params "keypair" to :keypair and "security_group" to :security_group and merge to properties
-          properties.merge!(iaas_props.inject({}){|prop,(k,v)| prop[k.to_sym] = v; prop})
-        end
-
-        unless region
-          raise ErrorUsage.new("Region is required for target created in '#{provider_type}' provider type!") unless provider_type.eql?('physical')
+      def self.create_target_ec2(project_idh,provider,target_type,properties,opts={})
+        provider_type = provider.get_field?(:iaas_type)
+        unless region = properties[:region]
+          raise ErrorUsage.new("Region is required for target created in '#{provider_type}' provider type!")
         end
 
         target_name = opts[:target_name]|| provider.default_target_name(:region => region)
+        provider_properties = provider.get_field?(:iaas_properties).merge(:region => region)
         availability_zones = CommandAndControl.get_and_process_availability_zones(provider_type, provider_properties, region)
 
+        iaas_properties = Array.new
         # add iaas_properties for target without availability zone
         iaas_properties << IAASProperties.new(:name => target_name, :iaas_properties => properties)
 
-        # add iass_properties for targets created separately for every availability zone
+        # TODO: might make this an option; or when delete main one dlete ones with avalability zones
+        # add iaas_properties for targets created separately for every availability zone
         availability_zones.each do |az|
           custom_properties = properties.clone
           custom_properties[:availability_zone] = az

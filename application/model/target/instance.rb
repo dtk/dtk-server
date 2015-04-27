@@ -21,8 +21,8 @@ module DTK
       # These properties are inherited ones for target instance: default provider -> target's provider -> target instance (most specific)
       InheritedProperties = [:iaas_type,:iaas_properties,:type,:description]
 
-      def self.create_target_ec2(project_idh,provider,target_type,properties,opts={})
-        unless region = properties[:region]
+      def self.create_target_ec2(project_idh,provider,ec2_type,property_hash,opts={})
+        unless region = property_hash[:region]
           raise ErrorUsage.new("Region is required for target created in '#{provider.get_field?(:iaas_type)}' provider type!")
         end
 
@@ -30,28 +30,18 @@ module DTK
 
         # proactively getting needed columns on provider
         provider.update_obj!(*InheritedProperties)
-        iaas_property_factory = IAASProperties::Ec2.create_factory(target_name,provider)
 
-        # Will be adding one or more targets, find iaas_properties for each 
-        iaas_properties = Array.new
-        # add iaas_properties for target without availability zone
-        iaas_properties << iaas_property_factory.create_target_propeties(properties)
+        iaas_properties_array = IAASProperties::Ec2.compute_needed_iaas_properties(target_name,ec2_type,provider,property_hash)
 
-        # TODO: might make whether add target for each az  an option; or when delete main one delete all its availability zones
-        # add iaas_properties for targets created separately for every availability zone
-        provider.get_availability_zones(region).each do |az|
-          iaas_properties << iaas_property_factory.create_target_propeties(properties,:availability_zone => az)
-        end
-
-        create_targets?(project_idh,provider,iaas_properties,:raise_error_if_exists=>true).first
+        create_targets?(project_idh,provider,iaas_properties_array,:raise_error_if_exists=>true).first
       end
 
-      def self.create_targets?(project_idh,provider,iaas_properties_list,opts={})
+      def self.create_targets?(project_idh,provider,iaas_properties_array,opts={})
         ret = Array.new
         target_mh = project_idh.createMH(:target) 
         provider.update_obj!(*InheritedProperties)
         provider_id = provider.id
-        create_rows = iaas_properties_list.map do |iaas_properties|
+        create_rows = iaas_properties_array.map do |iaas_properties|
           display_name = iaas_properties.name
           ref = display_name.downcase.gsub(/ /,"-")
           specific_params = {

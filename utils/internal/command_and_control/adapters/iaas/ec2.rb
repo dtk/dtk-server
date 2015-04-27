@@ -1,8 +1,6 @@
 module DTK
   module CommandAndControlAdapter
     class Ec2 < CommandAndControlIAAS
-      R8_KEY_PAIR = 'admin'
-
       r8_nested_require('ec2','node_state')
       r8_nested_require('ec2','address_management')
       r8_nested_require('ec2','image')

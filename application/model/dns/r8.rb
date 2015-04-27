@@ -62,8 +62,13 @@ module DTK
         aug_nodes = @node.get_objs(sp_hash)
 
         if aug_nodes.empty?
-          @node.update_object!(:display_name)
-          Log.error_pp(["unexpected that that following node not tied to assembly",@node])
+          # This can wil be empty only if no assembly tied to node
+          # This is expected if node is target ref
+          # TODO: dont think dns enabledment works with node groups
+          @node.update_obj!(:display_name,:type)
+          unless @node[:type] == 'target_ref'
+            Log.error_pp(["unexpected that that following node not tied to assembly",@node])
+          end
         end
 
         if ret = select_aug_node?(aug_nodes)

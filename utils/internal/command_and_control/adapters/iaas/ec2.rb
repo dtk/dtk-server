@@ -83,44 +83,20 @@ module DTK
         a_zones = response.body["availabilityZoneInfo"].map{|z| z['zoneName']}||[]
       end
 
-      def self.check_iaas_properties(iaas_properties)
+      # check_credentials in iaas_properties; if fails raises error; if success returns a conn object
+      def self.raise_error_if_bad_credentials(iaas_properties)
         begin
-          ec2_creds = get_ec2_credentials(iaas_properties)
-          connection = conn(ec2_creds)
-
-          # keypair
-          keypair_to_use = iaas_properties['keypair_name'] || R8::Config[:ec2][:keypair]
-          # TODO: WORKAROUND: DTK-1426; commented out
-          # connection.check_for_key_pair(keypair_to_use)
-          
-          Log.debug "Fetched needed R8 key pair (#{keypair_to_use}) for newly created target-template. (Default used: #{!iaas_properties['keypair_name'].nil?})"
-
-          # security group
-          security_group_set_to_use = iaas_properties['security_group_set']
-          security_group_to_use = iaas_properties['security_group'] || R8::Config[:ec2][:security_group]
-          # TODO: WORKAROUND: DTK-1426; commented out
-          # connection.check_for_security_group(security_group_to_use)
-
-          Log.debug "Fetched needed security group (#{security_group_to_use})  for newly created target-template. (Default used: #{!iaas_properties['security_group'].nil?})"
-          ret_hash = {
-            :key            => iaas_properties['key'],
-            :secret         => iaas_properties['secret'],
-            :keypair        => keypair_to_use,
-            # :security_group => security_group_to_use,
-            :region         => iaas_properties['region']
-          }
-
-          if security_group_set_to_use
-            ret_hash.merge!(:security_group_set => security_group_set_to_use)
-          else
-            ret_hash.merge!(:security_group => security_group_to_use)
-          end
-
-          ret_hash
-        rescue Fog::Compute::AWS::Error => e
-          # probabably this will handle credentials failure
-          raise ErrorUsage.new(e.message)
+          # as simple test see if can describe availability_zones for us-east-1
+          get_availability_zones(iaas_properties,'us-east-1')
+         rescue
+          raise ErrorUsage.new("Bad EC2 credentials")
         end
+        true
+      end
+
+      def self.check_iaas_properties(iaas_properties)
+        raise_error_if_bad_credentials(iaas_properties)
+        true
       end
 
       def self.get_ec2_credentials(iaas_credentials)

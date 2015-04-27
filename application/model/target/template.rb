@@ -37,6 +37,10 @@ module DTK
         create_from_row(target_mh,create_row,create_opts)
       end
 
+      def get_availability_zones(region)
+        CommandAndControl.get_and_process_availability_zones(get_field?(:iaas_type), get_field?(:iaas_properties).merge(:region => region),region)
+      end
+
       def self.delete(provider)
         assembly_instances = provider.get_assembly_instances()
         unless assembly_instances.empty?

@@ -103,7 +103,7 @@
          :join_type=>:left_outer,
          :convert=>true,
          :join_cond=>{:id => :target__parent_id},
-         :cols=>[:id,:display_name,:iaas_type]
+         :cols=>[:id,:group_id,:display_name,:iaas_type]
        }]
     },
     :node_ports=>{

@@ -118,10 +118,10 @@ module DTK
       rest_ok_response
     end
 
-    def rest__update_target()
+    def rest__set_properties()
       target_instance = create_obj(:target_id, ::DTK::Target::Instance)
       iaas_properties = ret_request_params(:iaas_properties)
-      Target::Instance.update_target(target_instance, iaas_properties)
+      Target::Instance.set_properties(target_instance, iaas_properties)
       rest_ok_response
     end
 

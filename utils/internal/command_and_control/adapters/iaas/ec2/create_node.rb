@@ -185,7 +185,7 @@ module DTK; module CommandAndControlAdapter
           # TO-DO: move the tenant name definition to server configuration
           tenant = ::DtkCommon::Aux::running_process_user()
           subs = {
-            :assembly => assembly && assembly.get_field?(:display_name),
+            :assembly => ec2_name_tag__get_assembly_name(node),
             :node     => node.get_field?(:display_name),
             :tenant   => tenant,
             :target   => target[:display_name],
@@ -203,6 +203,20 @@ module DTK; module CommandAndControlAdapter
           :tag => R8::Config[:ec2][:name_tag][:format]
         }
 
+        def ec2_name_tag__get_assembly_name(node)
+          if assembly = node.get_assembly?()
+            assembly.get_field?(:display_name)
+          else
+            node_ref = node.get_field?(:ref)
+            # looking for form base_node_link--ASSEMBLY::NODE-EDLEMENT-NAME
+            if node_ref =~ /^base_node_link--([^:]+):/
+              $1
+            else
+              Log.error_pp(["Unexepected that can not determine assembly name for node",node])
+            end
+          end
+        end
+          
         def node_print_form()
           "#{node[:display_name]} (#{node[:id]}"
         end

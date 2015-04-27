@@ -8,8 +8,16 @@ module DTK
       ret
     end
 
-    GIT_REPO_PROVIDERS = ['github','bitbucket','dtkn']
-    DTKN_PROVIDER      = 'dtkn'
+    GIT_REPO_PROVIDERS    = ['github','bitbucket','dtkn']
+    DTKN_PROVIDER         = 'dtkn'
+
+    #
+    # remote location regex is used to detrmine if we are using special case of SSH git url e.g.
+    # git@bitbucket.org:hkraji/stdlib.git/stdlib
+    #
+    # if so than we are pushing to URL but with location path provided after SSH git url (e.g. /stdlib)
+    #
+    REMOTE_LOCATION_REGEX = /(.*\.git)(\/.*)$/
 
     DTKNCatalogPrefix = 'dtkn://'
     RemoteRepoBase = :dtknet
@@ -43,6 +51,26 @@ module DTK
       get_field?(:repo_url) || self.url_ssh_access()
     end
 
+    def base_git_remote_url()
+      url = git_remote_url()
+      url = url.match(REMOTE_LOCATION_REGEX)[1] if is_there_remote_location?
+      url
+    end
+
+    #
+    # Based on git location - it sees if one is provided
+    #
+    def base_git_remote_location()
+      is_there_remote_location? ? git_remote_url().match(REMOTE_LOCATION_REGEX)[2] : nil
+    end
+
+    #
+    # Checks if git remote location is specified
+    #
+    def is_there_remote_location?()
+      !!git_remote_url().match(REMOTE_LOCATION_REGEX)
+    end
+
     def remote_ref()
       if is_dtkn_provider?
         Repo.remote_ref(RemoteRepoBase, get_field?(:repo_namespace))
@@ -67,7 +95,7 @@ module DTK
         raise ErrorUsage, "Remote identifier '#{repo_name}' already exists"
       end
 
-      unless repo_url.match(/^git@.*:.*\.git$/)
+      unless repo_url.match(/^git@.*:.*\.git\/?.*?$/)
         raise ErrorUsage, "We are sorry, we only support SSH remotes - provided URL does not seem to be proper SSH url"
       end
 
@@ -202,7 +230,7 @@ module DTK
       repo_remote
     end
 
-   private
+  private
 
     # TODO: deprecate once all data is migrated so :is_default is marked
     def self.compute_default_remote_repo(repo_remotes)

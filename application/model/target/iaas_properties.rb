@@ -1,6 +1,7 @@
 module DTK
   class Target
     class IAASProperties
+      r8_nested_require('iaas_properties','ec2')
       attr_reader :name
       # IAASProperties.new will be called with 
       #  :name and :iaas_properties, or with
@@ -15,11 +16,13 @@ module DTK
         iaas_properties()        
       end
 
-      
-      def self.sanitize!(iaas_properties)
-        iaas_properties.reject!{|k,v|not SanitizedProperties.include?(k)}
+
+      def self.sanitize!(type,iaas_properties)
+        case type()
+         when :ec2
+          Ec2.sanitize_type!(iaas_properties)
+        end
       end
-      SanitizedProperties = [:region,:keypair,:security_group,:security_group_set,:subnet_id]
 
       def self.check_and_process(iaas_type,iaas_properties)
         CommandAndControl.check_and_process_iaas_properties(iaas_type,iaas_properties)
@@ -49,12 +52,6 @@ module DTK
           when :ec2 then Ec2.equal?(i2)
           else raise Error.new("Unexpected iaas_properties type (#{type})")
         end
-      end
-      module Ec2
-        def self.equal?(i2)
-          i2.type == :ec2 and
-            iaas_properties[:region] == i2.iaas_properties[:region]
-          end
       end
     end
   end

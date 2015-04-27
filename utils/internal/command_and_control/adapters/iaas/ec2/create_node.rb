@@ -117,7 +117,7 @@ module DTK; module CommandAndControlAdapter
           create_options.merge!(:tags => {"Name" => ec2_name_tag()})
           
           # check priority of keypair
-          keypair = target.get_keypair_name() || R8::Config[:ec2][:keypair]
+          keypair = target.get_keypair() || R8::Config[:ec2][:keypair]
 
           target_ias_props = target[:iaas_properties]
           target_availability_zone = target_ias_props[:availability_zone] if target_ias_props

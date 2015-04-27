@@ -5,7 +5,7 @@ module DTK
 
       def info()
         target_info =  get_obj(:cols => [:display_name,:iaas_type,:iaas_properties,:is_default_target,:provider])
-        target_info.each{|t|InheritedProperties.sanitize!(t[:iaas_properties])}
+        target_info.each{|t|IAASProperties.sanitize!(t[:iaas_type],t[:iaas_properties])}
         # TODO: change to have just keys for display
         target_info
       end
@@ -30,23 +30,19 @@ module DTK
 
         # proactively getting needed columns on provider
         provider.update_obj!(*InheritedProperties)
-        provider_iaas_properties = provider[:iaas_properties].reject{|k,v|[:key,:secret]}
+        iaas_property_factory = IAASProperties::Ec2.create_factory(target_name,provider)
 
         # Will be adding one or more targets, find iaas_properties for each 
         iaas_properties = Array.new
         # add iaas_properties for target without availability zone
-        iaas_properties << IAASProperties.new(:name => target_name, :iaas_properties => provider_iaas_properties.merge(properties))
+        iaas_properties << iaas_property_factory.create_target_propeties(properties)
 
         # TODO: might make whether add target for each az  an option; or when delete main one delete all its availability zones
         # add iaas_properties for targets created separately for every availability zone
         provider.get_availability_zones(region).each do |az|
-          custom_properties = properties.clone
-          custom_properties[:availability_zone] = az
-          iaas_properties << IAASProperties.new(:name => "#{target_name}-#{az}", :iaas_properties => custom_properties)
+          iaas_properties << iaas_property_factory.create_target_propeties(properties,:availability_zone => az)
         end
 
-        # iaas_properties = IAASProperties.new(:name => target_name, :iaas_properties => properties)
-        # create_targets?(project_idh,provider,[iaas_properties],:raise_error_if_exists=>true).first
         create_targets?(project_idh,provider,iaas_properties,:raise_error_if_exists=>true).first
       end
 
@@ -144,10 +140,10 @@ module DTK
           if t[:iaas_properties]
             t[:iaas_properties][:security_group] ||=
               t[:iaas_properties][:security_group_set].join(',') if t[:iaas_properties][:security_group_set]
-            IAASProperties.sanitize!(t[:iaas_properties])
+            IAASProperties.sanitize!(t[:iaas_type],t[:iaas_properties])
           end
-          if (t[:provider]||{})[:iaas_properties]
-            IAASProperties.sanitize!(t[:provider][:iaas_properties])
+          if provider = t[:provider]
+            IAASProperties.sanitize!(provider[:iaas_type],provider[:iaas_properties])
           end
         end
         # sort by 1-whether default, 2-iaas_type, 3-display_name 

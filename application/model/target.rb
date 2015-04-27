@@ -140,7 +140,7 @@ module DTK
       get_iaas_properties()[:region]
     end
 
-    def get_keypair_name()
+    def get_keypair()
       get_iaas_properties()[:keypair]
     end
 

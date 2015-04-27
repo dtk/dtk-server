@@ -16,13 +16,22 @@ module DTK
         iaas_properties()        
       end
 
+      def self.sanitize_and_modify_for_print_form!(type,iaas_properties)
+        unless type.nil? or iaas_properties.nil?
+          case type.to_sym
+           when :ec2
+            Ec2.sanitize!(iaas_properties)
+            Ec2.modify_for_print_form!(iaas_properties)
+          end
+        end
+      end
 
-      def self.sanitize!(type,iaas_properties)
-        return unless iaas_properties
-        return unless type
-        case type.to_sym
-         when :ec2
-          Ec2.sanitize_type!(iaas_properties)
+      def self.more_specific_type?(type,iaas_properties)
+        unless type.nil? or iaas_properties.nil?
+          case type.to_sym
+          when :ec2
+            Ec2.more_specific_type?(iaas_properties)
+          end
         end
       end
 

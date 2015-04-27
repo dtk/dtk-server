@@ -70,10 +70,25 @@ module DTK; class Target
         ret
       end
 
-      def self.sanitize_type!(iaas_properties)
+      def self.modify_for_print_form!(iaas_properties)
+        if iaas_properties[:security_group_set]
+          iaas_properties[:security_group] ||= iaas_properties[:security_group_set].join(',')
+        end
+        iaas_properties
+      end
+
+      def self.sanitize!(iaas_properties)
         iaas_properties.reject!{|k,v|not SanitizedProperties.include?(k)}
       end
-      SanitizedProperties = [:region,:keypair,:security_group,:security_group_set,:subnet_id]
+      SanitizedProperties = [:region,:keypair,:security_group,:security_group_set,:subnet,:ec2_type]
+
+      def self.more_specific_type?(iaas_properties)
+        ec2_type = iaas_properties[:ec2_type]
+        case ec2_type && ec2_type.to_sym
+          when :ec2_vpc then :ec2_vpc
+        end
+      end
+
     end
   end
 end; end

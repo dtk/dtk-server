@@ -5,7 +5,7 @@ module DTK
 
       def info()
         target_info =  get_obj(:cols => [:display_name,:iaas_type,:iaas_properties,:is_default_target,:provider])
-        target_info.each{|t|IAASProperties.sanitize!(t[:iaas_type],t[:iaas_properties])}
+        target_info.each{|t|IAASProperties.sanitize_and_modify_for_print_form!(t[:iaas_type],t[:iaas_properties])}
         # TODO: change to have just keys for display
         target_info
       end
@@ -127,13 +127,13 @@ module DTK
           if t.is_builtin_target?()
             set_builtin_provider_display_fields!(t)
           end
-          if t[:iaas_properties]
-            t[:iaas_properties][:security_group] ||=
-              t[:iaas_properties][:security_group_set].join(',') if t[:iaas_properties][:security_group_set]
-            IAASProperties.sanitize!(t[:iaas_type],t[:iaas_properties])
-          end
+          IAASProperties.sanitize_and_modify_for_print_form!(t[:iaas_type],t[:iaas_properties])
           if provider = t[:provider]
-            IAASProperties.sanitize!(provider[:iaas_type],provider[:iaas_properties])
+            IAASProperties.sanitize_and_modify_for_print_form!(provider[:iaas_type],provider[:iaas_properties])
+            # modifies iaas_type to make more specfic
+            if specific_iaas_type = IAASProperties.more_specific_type?(t[:iaas_type],t[:iaas_properties])
+              provider[:iaas_type] = specific_iaas_type
+            end
           end
         end
         # sort by 1-whether default, 2-iaas_type, 3-display_name 

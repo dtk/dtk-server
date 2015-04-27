@@ -1,23 +1,26 @@
 module DTK; class Target
   class IAASProperties
     class Ec2 < self
-      def initialize(provider_iaas_props,hash_args)
+      def initialize(hash_args,provider_iaas_props=nil)
         super(hash_args)
         @provider_iaas_props = provider_iaas_props
       end
       
       def self.create_factory(target_name,provider)
-        provider_iaas_props = provider.get_field?(:iaas_properties).reject{|k,v|[:key,:secret]}
-        new(provider_iaas_props,:name => target_name)
+        provider_iaas_props = provider.get_field?(:iaas_properties).reject{|k,v|[:key,:secret].include?(k)}
+        new({:name => target_name},provider_iaas_props)
       end
 
       def create_target_propeties(target_iaas_props,params={})
-        name = @provider_iaas_props[:name]
+pp @provider_iaas_props
+        name = target_iaas_props[:name] || @provider_iaas_props[:name]
         if az = params[:availability_zone]
           name = availbility_zone_target_name(name,az)
         end
         iaas_properties = clone_and_check_manditory_params(target_iaas_props)
-        self.class.new(:name => name,:iaas_properties => iaas_properties)
+ret =         self.class.new(:name => name,:iaas_properties => iaas_properties)
+pp ret
+ret
       end
 
       def self.equal?(i2)
@@ -35,7 +38,7 @@ module DTK; class Target
         ret = target_iaas_props
         unless target_iaas_props[:keypair]
           if keypair = @provider_iaas_props[:keypair]
-            ret = ret.merge(:keypair => keypir)
+            ret = ret.merge(:keypair => keypair)
           else
             raise ErrorUsage.new("The target and its parent provider are both missing a specfied keypair")
           end

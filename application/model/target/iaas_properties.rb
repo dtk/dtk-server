@@ -18,7 +18,9 @@ module DTK
 
 
       def self.sanitize!(type,iaas_properties)
-        case type()
+        return unless iaas_properties
+        return unless type
+        case type.to_sym
          when :ec2
           Ec2.sanitize_type!(iaas_properties)
         end

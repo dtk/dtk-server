@@ -91,12 +91,11 @@ module DTK
          rescue
           raise ErrorUsage.new("Bad EC2 credentials")
         end
-        true
       end
 
       def self.check_iaas_properties(iaas_properties)
         raise_error_if_bad_credentials(iaas_properties)
-        true
+        iaas_properties
       end
 
       def self.get_ec2_credentials(iaas_credentials)

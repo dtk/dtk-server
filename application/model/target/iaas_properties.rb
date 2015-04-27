@@ -17,11 +17,9 @@ module DTK
 
       
       def self.sanitize!(iaas_properties)
-        pp ['sanitize_remove keys',iaas_properties.keys - SanitizedProperties]
-pp        iaas_properties.reject!{|k,v|not SanitizedProperties.include?(k)}
-        iaas_properties
+        iaas_properties.reject!{|k,v|not SanitizedProperties.include?(k)}
       end
-      SanitizedProperties = [:region,:keypair,:security_group,:security_group_set]
+      SanitizedProperties = [:region,:keypair,:security_group,:security_group_set,:subnet_id]
 
       def self.check_and_process(iaas_type,iaas_properties)
         CommandAndControl.check_and_process_iaas_properties(iaas_type,iaas_properties)

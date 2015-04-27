@@ -88,28 +88,26 @@ module DTK
       rest_ok_response 
     end
 
-    # TODO: modify so no IAAS specfic params processed here (e.g., region)
     def rest__create_provider()
-      iaas_type,provider_name = ret_non_null_request_params(:iaas_type,:provider_name)
-      selected_region = ret_request_params(:region)
-      no_bootstrap = ret_request_param_boolean(:no_bootstrap)
-      params_hash  = ret_params_hash(:description,:iaas_properties, :security_group, :security_group_set)
+      iaas_type       = ret_non_null_request_params(:iaas_type)
+      provider_name   = ret_non_null_request_params(:provider_name)
+      iaas_properties = ret_request_params(:iaas_properties)
+      params_hash     = ret_params_hash(:description)
+      no_bootstrap    = ret_request_param_boolean(:no_bootstrap) || true
 
-      # create provider (target template)
       project_idh  = get_default_project().id_handle()
       # setting :error_if_exists only if no bootstrap
       opts = {:raise_error_if_exists => no_bootstrap}
-      provider = Target::Template.create_provider?(project_idh,iaas_type,provider_name,params_hash,opts)
-      # get object since we will need iaas data to copy
+      provider = Target::Template.create_provider?(project_idh,iaas_type,provider_name,iaas_properties,params_hash,opts)
       response = {:provider_id => provider.id}
 
-      unless no_bootstrap
-        # select_region could be nil
-        created_targets_info = provider.create_bootstrap_targets?(project_idh,selected_region)
-        response.merge!(:created_targets => created_targets_info)
-      end
-      Log.info_pp([:create_provider_info,response])
-      rest_ok_response #TODO: may return info, which now is put in response
+      # TODO: removing until provides for fact that need to know when ec2 whether vpc or classic 
+      # unless no_bootstrap
+      #  # select_region could be nil
+      #  created_targets_info = provider.create_bootstrap_targets?(project_idh,selected_region)
+      #  response.merge!(:created_targets => created_targets_info)
+      # end
+      rest_ok_response response 
     end
 
     def rest__delete_provider()

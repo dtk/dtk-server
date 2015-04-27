@@ -12,13 +12,11 @@ module DTK; module CommandAndControlAdapter
      private
       def self.target_ref_nodes(task_action)
         nodes = task_action.nodes()
-        #TODO: more efficient to get these attributes initially
         nodes.each do |node|
           node.update_object!(:os_type,:external_ref,:hostname_external_ref,:display_name,:assembly_id)
         end
-
-        base_node = task_action[:node]
-        target = Target.get(base_node.model_handle(:target), task_action[:datacenter][:id])
+        target = task_action.target()
+        base_node = task_action.base_node()
         nodes.map{|node|TargetRef.new(base_node,node,target)}
       end
 

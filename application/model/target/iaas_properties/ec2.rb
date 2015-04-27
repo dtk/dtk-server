@@ -12,8 +12,7 @@ module DTK; class Target
       end
 
       def create_target_propeties(target_iaas_props,params={})
-pp @provider_iaas_props
-        name = target_iaas_props[:name] || @provider_iaas_props[:name]
+        name = name()
         if az = params[:availability_zone]
           name = availbility_zone_target_name(name,az)
         end

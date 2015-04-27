@@ -2,15 +2,7 @@ module DTK; class  Assembly
   class Instance
     module ListClassMixin
       def list_with_workspace(assembly_mh,opts={})
-        target_idh = opts[:target_idh]
-        target_filter = (target_idh ? [:eq, :datacenter_datacenter_id, target_idh.get_id()] : [:neq, :datacenter_datacenter_id, nil])
-        filter = [:and, [:eq, :type, "composite"], target_filter,opts[:filter]].compact
-
-        sp_hash = {
-          :cols => [:id, :display_name].compact,
-          :filter => filter
-        }
-        get_objs(assembly_mh.createMH(:assembly_instance),sp_hash)
+        get(assembly_mh,opts)
       end
 
       def list(assembly_mh,opts={})

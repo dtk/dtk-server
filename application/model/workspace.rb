@@ -36,30 +36,49 @@ module DTK
       delete_tasks()
     end
 
+    # opts has :mode
+    # three modes
+    #   :direct - direct command called (default)
+    #   :from_set_default_target
+    #   :from_delete_target  
     def self.set_target(target,opts={})
       if workspace = get_workspace(target.model_handle(:assembly_workspace))
          workspace.set_target(target,opts)
       end
     end
-
     def set_target(target,opts={})
       return unless target
+      mode = opts[:mode]|| :direct
       current_target = get_target()
       if current_target && current_target.id == target.id
-        if opts[:raise_error]
+        if mode == :direct
           raise ErrorUsage::Warning.new("Target is already set to #{target.get_field?(:display_name)}")
         end
         return
       end
 
+      update = true
       unless op_status_all_pending?()
-        if opts[:raise_error]
+        case mode
+         when :direct
           raise ErrorUsage.new("The command 'set-target' can only be invoked before the workspace has been converged (i.e., is in 'pending' state)")
+         when :from_set_default_target
+          # treated as no op (keep workspace as is)
+          update = false
+         when :from_delete_target
+          # want to update so deleting target does not have foreign key that causes the workspace object to be deleted
+          update = true
+         else 
+          raise Error.new("Unexpected mode '#{mode}'")
         end
-        return
       end
+      if update
+        update(:datacenter_datacenter_id => target.id)
+      end
+    end
 
-      update(:datacenter_datacenter_id => target.id)
+    def self.is_workspace_service_module?(service_module)
+      service_module.get_field?(:display_name) == ServiceModuleFields[:display_name]
     end
 
     def self.is_workspace_service_module?(service_module)

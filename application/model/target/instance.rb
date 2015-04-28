@@ -100,9 +100,9 @@ module DTK
           raise ErrorUsage.new("Cannot delete the builtin target") 
         end
 
-        target_mh                = target.model_handle()
-        builtin_target           = get_builtin_target(target_mh)
-        current_default_target   = DefaultTarget.get(target_mh)
+        target_mh              = target.model_handle()
+        builtin_target         = get_builtin_target(target_mh)
+        current_default_target = DefaultTarget.get(target_mh)
 
         Transaction do
           # change default target if pointing to this target
@@ -116,7 +116,7 @@ module DTK
               # modify workspace target if it points to the one being deleted
               if current_workspace_target = workspace.get_target()
                 if current_workspace_target.id == target.id
-                  workspace.set_target(builtin_target) 
+                  workspace.set_target(builtin_target, :mode => :from_delete_target) 
                 end
               end
 

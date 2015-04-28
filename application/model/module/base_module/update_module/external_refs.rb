@@ -40,8 +40,8 @@ module DTK; class BaseModule
 
                   evaluated, br_version, constraint_op, req_version, required_version = false, nil, nil, nil, nil
                   if dep_name.eql?(branch_name)
-                    # version_constraints.nil? means no version consttaint
-                    if version_constraints.nil?
+                    # version_constraints.nil? || empty? means no version constraint
+                    if version_constraints.nil? || version_constraints.empty?
                       evaluated = true
                     else
                       version_constraints.each do |vconst|

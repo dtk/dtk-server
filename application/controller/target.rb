@@ -28,7 +28,7 @@ module DTK
 
     def rest__import_nodes()
       target = create_obj(:target_id, Target::Instance)
-      #TODO: formatting to get right feilds is done on client side now; should be done on server side
+      #TODO: formatting to get right fields is done on client side now; should be done on server side
       #method Node::TargetRef:InventoryData.new can be removed or modified once that is done
       inventory_data_hash = ret_non_null_request_params(:inventory_data)
       inventory_data = Node::TargetRef::Input::InventoryData.new(inventory_data_hash)
@@ -36,17 +36,13 @@ module DTK
     end
 
     def rest__install_agents()
-      # target_instance = create_obj(:target_id, ::DTK::Target::Instance)
       target = create_obj(:target_id)
       target.install_agents()
-
       rest_ok_response
     end
 
     def rest__create_install_agents_task()
-      # target_instance = create_obj(:target_id, ::DTK::Target::Instance)
       target = create_obj(:target_id)
-      target_idh = target.id_handle()
 
       unmanaged_nodes = target.get_objs(:cols => [:unmanaged_nodes]).map{|r|r[:node]}
       return rest_ok_response if unmanaged_nodes.empty?
@@ -110,27 +106,30 @@ module DTK
       rest_ok_response response 
     end
 
-    def rest__delete_provider()
-      provider  = create_obj(:provider_id, ::DTK::Target::Template)
-      Target::Template.delete(provider)
+    def rest__delete_and_destroy()
+      type = (ret_request_params(:type)|| :instance).to_sym # can be :instance or :template
+      case type
+       when :template
+        provider  = create_obj(:target_id, Target::Template)
+        Target::Template.delete_and_destroy(provider)
+       when :instance
+        target_instance = create_obj(:target_id, Target::Instance) 
+        Target::Instance.delete_and_destroy(target_instance)
+       else
+        raise ErrorUsage.new("Illegal type '#{type}'")
+      end
       rest_ok_response
     end
 
     def rest__set_properties()
-      target_instance = create_obj(:target_id, ::DTK::Target::Instance)
+      target_instance = create_obj(:target_id, Target::Instance)
       iaas_properties = ret_request_params(:iaas_properties)
       Target::Instance.set_properties(target_instance, iaas_properties)
       rest_ok_response
     end
 
-    def rest__delete()
-      target_instance = create_obj(:target_id, ::DTK::Target::Instance) 
-      Target::Instance.delete(target_instance)
-      rest_ok_response
-    end
-
     def rest__set_default()
-      target_instance = create_obj(:target_id, ::DTK::Target::Instance)
+      target_instance = create_obj(:target_id, Target::Instance)
       Target.set_default_target(target_instance)
       rest_ok_response
     end

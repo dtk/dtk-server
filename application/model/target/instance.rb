@@ -93,12 +93,25 @@ module DTK
         create_from_rows(target_mh,create_rows,create_opts)
       end
 
-      def self.delete(target)
+      def self.delete_and_destroy(target)
         if target.is_builtin_target?()
           raise ErrorUsage.new("Cannot delete the builtin target")
         end
-        modify_workspace_target_if_points_to_deleted_one(target)
-        delete_instance(target.id_handle())
+        Transaction do
+          assemblies = Assembly::Instance.get(target.model_handle(:assembly_instance),:target_idh => target.id_handle())
+          assemblies.each do |assembly|
+            if workspace = Workspace.workspace?(assembly)
+              workspace.purge(:destroy_nodes => true)
+              #modify workspace target if it points to the one being deleted
+              if builtin_target = get_builtin_target(target.model_handle())
+                workspace.set_target(builtin_target)
+              end
+            else
+              Assembly::Instance.delete(assembly.id_handle,:destroy_nodes => true)
+            end
+          end
+          delete_instance(target.id_handle())
+        end
       end
 
       def self.set_properties(target,iaas_properties)
@@ -170,18 +183,6 @@ module DTK
         end
         rows.first
       end
-
-      def self.modify_workspace_target_if_points_to_deleted_one(deleted_target)
-        workspace_mh = deleted_target.model_handle(:assembly_workspace)
-        if workspace = Workspace.get_workspace(workspace_mh,:cols => [:id,:group_id,:datacenter_datacenter_id])
-          if workspace[:datacenter_datacenter_id] == deleted_target.id()
-            if builtin_target = get_builtin_target(deleted_target.model_handle())
-              workspace.set_target(builtin_target)
-            end
-          end
-        end
-      end
-
 
       # TODO: right now type can be different values for insatnce; may cleanup so its set to 'instance'
       def self.object_type_filter()

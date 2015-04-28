@@ -12,6 +12,12 @@ module DTK
     def self.is_workspace?(obj)
       obj.kind_of?(self) or (AssemblyFields[:ref] == obj.get_field?(:ref))
     end
+    # if is workspace it convents to workspace object
+    def self.workspace?(obj)
+      if is_workspace?(obj)
+        create_from_id_handle(obj.id_handle).merge(obj)
+      end
+    end
 
     def self.get_workspace(workspace_mh,opts={})
       opts_get = Aux.hash_subset(opts,:cols).merge(:filter => [:eq,:ref,AssemblyFields[:ref]])

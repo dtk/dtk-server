@@ -43,7 +43,7 @@ module TargetMixin
 		puts "Delete target from provider:", "----------------------------"
 		target_deleted = false
 
-		delete_target = send_request('/rest/target/delete', {:target_id => target_name})
+		delete_target = send_request('/rest/target/delete_and_destroy', {:target_id => target_name,:type => 'instance'})
 		if delete_target['status'] == "ok"
 			puts "Target #{target_name} has been deleted successfully!"
 			target_deleted = true

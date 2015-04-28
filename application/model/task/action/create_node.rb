@@ -22,6 +22,20 @@ module DTK; class Task
       end
       private :initialize
 
+      def base_node()
+        self[:node]
+      end
+      def target()
+        target_hash_or_obj = self[:datacenter]
+        if target_hash_or_obj.kind_of?(Target)
+          target_hash_or_obj
+        else
+          target_hash = target_hash_or_obj
+          target_idh = base_node.model_handle(:target_instance).createIDH(:id => target_hash[:id])
+          target_idh.create_object(target_hash)
+        end
+      end
+
       def self.stage_display_name()
         "create_nodes_stage"
       end

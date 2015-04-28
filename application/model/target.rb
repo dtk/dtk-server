@@ -60,23 +60,9 @@ module DTK
         raise Error.new("TODO: not implemented yet: processing of info_about(#{about})")
       end
     end
-2
-    def self.info(target_mh, id)
-      target_info = Target.get(target_mh, id)
-      target_info[:provider_name] = target_info[:provider][:display_name] if target_info[:provider]
-      target_info
-    end
 
     def self.check_valid_id(model_handle,id)
       check_valid_id_helper(model_handle,id,[:eq, :id, id])
-    end
-
-    def self.get(target_mh, id)
-      sp_hash = {
-        :cols => common_columns(),
-        :filter => [:eq, :id, id]
-      }
-      get_obj(target_mh, sp_hash)
     end
 
     def self.get_default_target(target_mh,cols=[]) 
@@ -154,7 +140,7 @@ module DTK
       get_iaas_properties()[:region]
     end
 
-    def get_keypair_name()
+    def get_keypair()
       get_iaas_properties()[:keypair]
     end
 

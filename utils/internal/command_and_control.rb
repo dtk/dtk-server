@@ -97,9 +97,9 @@ module DTK
       klass.stop_instances(nodes)
     end
 
-    def self.check_and_process_iaas_properties(iaas_type, iaas_properties)
+    def self.check_iaas_properties(iaas_type, iaas_properties, opts={})
       klass = load_for_aux(:iaas, iaas_type.to_s)
-      klass.check_iaas_properties(iaas_properties)
+      klass.check_iaas_properties(iaas_properties,opts)
     end
 
     def self.get_and_process_availability_zones(iaas_type, iaas_properties, region)

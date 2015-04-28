@@ -12,13 +12,11 @@ module DTK; module CommandAndControlAdapter
      private
       def self.target_ref_nodes(task_action)
         nodes = task_action.nodes()
-        #TODO: more efficient to get these attributes initially
         nodes.each do |node|
           node.update_object!(:os_type,:external_ref,:hostname_external_ref,:display_name,:assembly_id)
         end
-
-        base_node = task_action[:node]
-        target = Target.get(base_node.model_handle(:target), task_action[:datacenter][:id])
+        target = task_action.target()
+        base_node = task_action.base_node()
         nodes.map{|node|TargetRef.new(base_node,node,target)}
       end
 
@@ -36,7 +34,6 @@ module DTK; module CommandAndControlAdapter
         end
       end
 
-
       class TargetRef
         #using include on class mixins because this class is insatnce based, not class based
         include NodeStateClassMixin
@@ -50,7 +47,6 @@ module DTK; module CommandAndControlAdapter
           @target = target
           @external_ref = node[:external_ref]||{}
           @flavor_id = @external_ref[:size] || R8::Config[:command_and_control][:iaas][:ec2][:default_image_size]
-
         end
 
         def run()
@@ -100,64 +96,25 @@ module DTK; module CommandAndControlAdapter
         end
        private
         def create_ec2_instance()
-          response, target_availability_zone = nil, nil
+          response = nil
           unless ami = external_ref[:image_id]
-            raise ErrorUsage.new("Cannot find ami for node (#{node[:display_name]})")
-          end
-
-          block_device_mapping_from_image = image(ami).block_device_mapping_with_delete_on_termination()
-          create_options = {:image_id => ami,:flavor_id => flavor_id }
-          # only add block_device_mapping if it was fully generated
-          create_options.merge!({ :block_device_mapping => block_device_mapping_from_image }) if block_device_mapping_from_image
-          # check priority for security group
-
-          security_group = target.get_security_group() || target.get_security_group_set() || external_ref[:security_group_set]||[R8::Config[:ec2][:security_group]]||"default"
-          create_options.merge!(:groups => security_group )
-          
-          create_options.merge!(:tags => {"Name" => ec2_name_tag()})
-          
-          # check priority of keypair
-          keypair = target.get_keypair_name() || R8::Config[:ec2][:keypair]
-
-          target_ias_props = target[:iaas_properties]
-          target_availability_zone = target_ias_props[:availability_zone] if target_ias_props
-
-          create_options.merge!(:key_name => keypair)
-          avail_zone = R8::Config[:ec2][:availability_zone] || external_ref[:availability_zone] || target_availability_zone
-          
-          unless avail_zone.nil? or avail_zone == "automatic"
-            create_options.merge!(:availability_zone => avail_zone)
-          end
-          # end fix up
-
-          # we check if assigned target has aws credentials assigned to it, if so we will use those
-          # credentials to create nodes
-          target_aws_creds = node.get_target_iaas_credentials()
-
-          # set VPC related options
-          if R8::Config[:ec2][:vpc_enable]
-            subnet_id = Ec2.conn(target_aws_creds).check_for_subnet(R8::Config[:ec2][:vpc][:subnet_id])
-            create_options.merge!(:subnet_id => subnet_id, :associate_public_ip => R8::Config[:ec2][:vpc][:associate_public_ip])
-            create_options.merge!(:groups => R8::Config[:ec2][:vpc][:security_group])
-          end
- 
-          unless create_options.has_key?(:user_data)
-            if user_data = CommandAndControl.install_script(node)
-              create_options[:user_data] = user_data
-            end
+            raise ErrorUsage.new("Cannot find ami for node (#{@node[:display_name]})")
           end
           
-          if root_device_size = node.attribute.root_device_size()
-            if device_name = image(ami).block_device_mapping_device_name()
-              create_options[:block_device_mapping].first.merge!({'DeviceName' => device_name, 'Ebs.VolumeSize' => root_device_size})
-            else
-              Log.error("Cannot determine device name for ami (#{ami})")
-            end
+          conn = Ec2.conn(@node.get_target_iaas_credentials())
 
-          end
-            
+          create_options = CreateOptions.new(self,conn,ami)
+
+          create_options.update_security_group!()
+          create_options.update_tags!()
+          create_options.update_key_name()
+          create_options.update_availability_zone!()
+          create_options.update_vpc_info?()
+          create_options.update_block_device_mapping!(image(ami))
+          create_options.update_user_data!()
+
           begin
-            response = Ec2.conn(target_aws_creds).server_create(create_options)
+            response = conn.server_create(create_options)
             response[:status] ||= "succeeded"
            rescue => e
             # append region to error message
@@ -168,6 +125,133 @@ module DTK; module CommandAndControlAdapter
             return {:status => "failed", :error_object => e}
           end
           response
+        end
+
+        class CreateOptions < Hash
+          def initialize(target_ref,conn,ami)
+            super()
+            replace(:image_id => ami,:flavor_id => target_ref.flavor_id)
+            @conn         = conn
+            @target       = target_ref.target
+            @node         = target_ref.node
+            @external_ref = target_ref.external_ref||{}
+          end
+
+          def update_security_group!()
+            security_group = @target.get_security_group() || 
+              @target.get_security_group_set() || 
+              @external_ref[:security_group_set] ||
+              [R8::Config[:ec2][:security_group]] ||
+              'default'
+            merge!(:groups => security_group)
+          end
+
+          def update_tags!()
+            merge!(:tags => {"Name" => ec2_name_tag()})
+          end
+          
+          def update_key_name()
+            merge!(:key_name => @target.get_keypair() || R8::Config[:ec2][:keypair])
+          end
+
+          def update_availability_zone!()
+            target_availability_zone = (@target[:iaas_properties]||{})[:availability_zone]
+            avail_zone = @external_ref[:availability_zone] || 
+              (@target[:iaas_properties]||{})[:availability_zone] || 
+              R8::Config[:ec2][:availability_zone]
+            unless avail_zone.nil? or avail_zone == 'automatic'
+              merge!(:availability_zone => avail_zone)
+            end
+          end
+        
+          def update_vpc_info?()
+            if @target.is_builtin_target?()
+              #TODO: we wil get rid of this special case and just put the info in builtin target
+              if R8::Config[:ec2][:vpc_enable]
+                subnet_id = @conn.check_for_subnet(R8::Config[:ec2][:vpc][:subnet_id])
+                merge!(:subnet_id => subnet_id, :associate_public_ip => R8::Config[:ec2][:vpc][:associate_public_ip])
+                merge!(:groups => R8::Config[:ec2][:vpc][:security_group])
+                return
+              end
+            end
+
+            unless iaas_properties = @target[:iaas_properties]
+              Log.error_pp(["Unexpected that @target does not have :iaas_properties",@target])
+              return
+            end
+
+            unless iaas_properties[:ec2_type] == 'ec2_vpc'
+              return
+            end
+            
+            unless subnet = iaas_properties[:subnet]
+              Log.error_pp(["Unexpected that @target does not have :iaas_properties",@target])
+              return
+            end
+            
+            subnet_id = @conn.check_for_subnet(subnet)
+            associate_public_ip = true #TODO: stub vale
+            merge!(:subnet_id => subnet_id, :associate_public_ip => associate_public_ip) 
+          end
+
+          def update_block_device_mapping!(image)
+            # only add block_device_mapping if it was fully generated
+            if block_device_mapping_from_image = image.block_device_mapping_with_delete_on_termination()
+              block_device_mapping = self[:block_device_mapping] = block_device_mapping_from_image
+              # if root_device_size explicity given
+              
+              if root_device_size = @node.attribute.root_device_size() 
+                if device_name = image.block_device_mapping_device_name()
+                  block_device_mapping.first.merge!({'DeviceName' => device_name, 'Ebs.VolumeSize' => root_device_size})
+                else
+                  Log.error("Cannot determine device name for ami (#{ami})")
+                end
+              end
+            end  
+          end
+
+          def update_user_data!()
+            self[:user_data] ||= CommandAndControl.install_script(@node)
+            self
+          end
+
+         private
+          def ec2_name_tag()
+            # TO-DO: move the tenant name definition to server configuration
+            tenant = ::DtkCommon::Aux::running_process_user()
+            subs = {
+              :assembly => ec2_name_tag__get_assembly_name(),
+              :node     => @node.get_field?(:display_name),
+              :tenant   => tenant,
+              :target   => @target[:display_name],
+              :user     => CurrentSession.get_username()
+            }
+            ret = Ec2NameTag[:tag].dup
+            Ec2NameTag[:vars].each do |var|
+              val = subs[var]||var.to_s.upcase
+              ret.gsub!(Regexp.new("\\$\\{#{var}\\}"),val)
+            end
+            ret
+          end
+          Ec2NameTag = {
+            :vars => [:assembly, :node, :tenant, :target, :user],
+            :tag => R8::Config[:ec2][:name_tag][:format]
+          }
+
+          def ec2_name_tag__get_assembly_name()
+            if assembly = @node.get_assembly?()
+              assembly.get_field?(:display_name)
+            else
+              node_ref = @node.get_field?(:ref)
+              # looking for form base_node_link--ASSEMBLY::NODE-EDLEMENT-NAME
+              if node_ref =~ /^base_node_link--([^:]+):/
+                $1
+              else
+                Log.error_pp(["Unexepected that cannot determine assembly name for node",@node])
+              end
+            end
+          end
+
         end
 
         def get_node_status(instance_id)
@@ -181,29 +265,6 @@ module DTK; module CommandAndControlAdapter
           end
           ret
         end
-
-        def ec2_name_tag()
-          assembly = node.get_assembly?()
-          # TO-DO: move the tenant name definition to server configuration
-          tenant = ::DtkCommon::Aux::running_process_user()
-          subs = {
-            :assembly => assembly && assembly.get_field?(:display_name),
-            :node     => node.get_field?(:display_name),
-            :tenant   => tenant,
-            :target   => target[:display_name],
-            :user     => CurrentSession.get_username()
-          }
-          ret = Ec2NameTag[:tag].dup
-          Ec2NameTag[:vars].each do |var|
-            val = subs[var]||var.to_s.upcase
-            ret.gsub!(Regexp.new("\\$\\{#{var}\\}"),val)
-          end
-          ret
-        end
-        Ec2NameTag = {
-          :vars => [:assembly, :node, :tenant, :target, :user],
-          :tag => R8::Config[:ec2][:name_tag][:format]
-        }
 
         def node_print_form()
           "#{node[:display_name]} (#{node[:id]}"

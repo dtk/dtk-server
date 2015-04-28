@@ -3,6 +3,19 @@ module DTK
     class Instance < self
       subclass_model :target_instance, :target, :print_form => 'target'
 
+      def info()
+        target =  get_obj(:cols => [:display_name,:iaas_type,:iaas_properties,:is_default_target,:provider])
+        IAASProperties.sanitize_and_modify_for_print_form!(target[:iaas_type],target[:iaas_properties])
+        if provider_name = (target[:provider]||{})[:display_name]
+          target[:provider_name] = provider_name
+        end
+        OrderedInfoKeys.inject(Hash.new) do |h,k|
+          val = target[k]
+          val.nil? ? h : h.merge(k => val)
+        end
+      end
+      OrderedInfoKeys = [:display_name,:id,:provider_name,:iaas_properties,:is_default_target]
+
       def iaas_properties()
         IAASProperties.new(:target_instance => self)
       end
@@ -11,49 +24,31 @@ module DTK
         Node::TargetRef.get_target_running_nodes(self)
       end
 
-      def self.create_target(project_idh,provider,region,opts={})
-        provider_properties = provider.get_field?(:iaas_properties).merge(:region => region)
-        # # DTK-1735 DO NOT copy aws key and secret from provider to target
-        properties      = {:region => region}
-        provider_type   = provider.get_field?(:iaas_type)
-        iaas_properties = []
+      # These properties are inherited ones for target instance: default provider -> target's provider -> target instance (most specific)
+      InheritedProperties = [:iaas_type,:iaas_properties,:type,:description]
 
-        if iaas_props = opts[:iaas_properties]
-          # remove security_groups from provider and use params provided with create-target
-          properties.delete_if{|k,v| [:security_group, :security_group_set].include?(k)}
-
-          # convert params "keypair" to :keypair and "security_group" to :security_group and merge to properties
-          properties.merge!(iaas_props.inject({}){|prop,(k,v)| prop[k.to_sym] = v; prop})
-        end
-
-        unless region
-          raise ErrorUsage.new("Region is required for target created in '#{provider_type}' provider type!") unless provider_type.eql?('physical')
+      def self.create_target_ec2(project_idh,provider,ec2_type,property_hash,opts={})
+        unless region = property_hash[:region]
+          raise ErrorUsage.new("Region is required for target created in '#{provider.get_field?(:iaas_type)}' provider type!")
         end
 
         target_name = opts[:target_name]|| provider.default_target_name(:region => region)
-        availability_zones = CommandAndControl.get_and_process_availability_zones(provider_type, provider_properties, region)
 
-        # add iaas_properties for target without availability zone
-        iaas_properties << IAASProperties.new(:name => target_name, :iaas_properties => properties)
+        # proactively getting needed columns on provider
+        provider.update_obj!(*InheritedProperties)
 
-        # add iass_properties for targets created separately for every availability zone
-        availability_zones.each do |az|
-          custom_properties = properties.clone
-          custom_properties[:availability_zone] = az
-          iaas_properties << IAASProperties.new(:name => "#{target_name}-#{az}", :iaas_properties => custom_properties)
-        end
+        # raises errors if problems with any params
+        iaas_properties_array = IAASProperties::Ec2.check_and_compute_needed_iaas_properties(target_name,ec2_type,provider,property_hash)
 
-        # iaas_properties = IAASProperties.new(:name => target_name, :iaas_properties => properties)
-        # create_targets?(project_idh,provider,[iaas_properties],:raise_error_if_exists=>true).first
-        create_targets?(project_idh,provider,iaas_properties,:raise_error_if_exists=>true).first
+        create_targets?(project_idh,provider,iaas_properties_array,:raise_error_if_exists=>true).first
       end
 
-      def self.create_targets?(project_idh,provider,iaas_properties_list,opts={})
+      def self.create_targets?(project_idh,provider,iaas_properties_array,opts={})
         ret = Array.new
         target_mh = project_idh.createMH(:target) 
         provider.update_obj!(*InheritedProperties)
         provider_id = provider.id
-        create_rows = iaas_properties_list.map do |iaas_properties|
+        create_rows = iaas_properties_array.map do |iaas_properties|
           display_name = iaas_properties.name
           ref = display_name.downcase.gsub(/ /,"-")
           specific_params = {
@@ -63,9 +58,6 @@ module DTK
             :type => 'instance'
           }
 
-          # DTK-1735 and DTK-1711 DO NOT use iaas_properties from provider
-          # user region, keypair and security_groups provided by user
-          # el = provider.hash_subset(*InheritedProperties).merge(specific_params)
           el = provider.hash_subset(:iaas_type,:type,:description).merge(specific_params)
 
           # need deep merge for iaas_properties
@@ -100,8 +92,6 @@ module DTK
         create_opts = {:convert => true, :ret_obj => {:model_name => :target_instance}}
         create_from_rows(target_mh,create_rows,create_opts)
       end
-      # These properties are inherited ones for target instance: default provider -> target's provider -> target instance (most specific)
-      InheritedProperties = [:iaas_type,:iaas_properties,:type,:description]
 
       def self.delete(target)
         if target.is_builtin_target?()
@@ -111,7 +101,7 @@ module DTK
         delete_instance(target.id_handle())
       end
 
-      def self.edit_target(target,iaas_properties)
+      def self.set_properties(target,iaas_properties)
         target.update_obj!(:iaas_properties)
         current_properties = target[:iaas_properties]
 
@@ -141,13 +131,14 @@ module DTK
           if t.is_builtin_target?()
             set_builtin_provider_display_fields!(t)
           end
-          if t[:iaas_properties]
-            t[:iaas_properties][:security_group] ||=
-              t[:iaas_properties][:security_group_set].join(',') if t[:iaas_properties][:security_group_set]
+          IAASProperties.sanitize_and_modify_for_print_form!(t[:iaas_type],t[:iaas_properties])
+          if provider = t[:provider]
+            IAASProperties.sanitize_and_modify_for_print_form!(provider[:iaas_type],provider[:iaas_properties])
+            # modifies iaas_type to make more specfic
+            if specific_iaas_type = IAASProperties.more_specific_type?(t[:iaas_type],t[:iaas_properties])
+              provider[:iaas_type] = specific_iaas_type
+            end
           end
-          # if t.is_default?()
-          #   t[:display_name] << DefaultTargetMark
-          # end
         end
         # sort by 1-whether default, 2-iaas_type, 3-display_name 
         unsorted_rows.sort do |a,b|

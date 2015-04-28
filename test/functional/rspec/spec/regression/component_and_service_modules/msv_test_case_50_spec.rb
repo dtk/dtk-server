@@ -13,7 +13,7 @@ puppet_forge_module_name = "herculesteam-augeasproviders_apache"
 module_name = "augeasproviders_apache"
 component_module_name = "herculesteam:augeasproviders_apache"
 dependency_module_name = "augeasproviders_core"
-dependency_component_module_name = "herculesteam/augeasproviders_core"
+dependency_component_module_name = "herculesteam:augeasproviders_core"
 component_module_filesystem_location = '~/dtk/component_modules/herculesteam'
 grep_patterns_for_module_refs = ['augeasproviders_core:','namespace: herculesteam']
 dtk_common = DtkCommon.new('', '')
@@ -26,14 +26,6 @@ describe "(Modules, Services and Versioning) Test Case 50: Import puppet forge (
 
   context "Import module from puppet forge" do
     include_context "Import module from puppet forge", puppet_forge_module_name, nil
-  end
-
-  context "Get component module components list" do
-    include_context "Get component module components list", dtk_common, component_module_name
-  end
-
-  context "Get component module components list" do
-    include_context "Get component module components list", dtk_common, dependency_component_module_name
   end
 
   context "Check module_refs.yaml for imported module" do

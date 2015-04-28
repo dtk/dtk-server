@@ -35,8 +35,8 @@ module DTK
         end
       end
 
-      def self.check_and_process(iaas_type,iaas_properties)
-        CommandAndControl.check_and_process_iaas_properties(iaas_type,iaas_properties)
+      def self.check(iaas_type,iaas_properties,opts={})
+        CommandAndControl.check_iaas_properties(iaas_type,iaas_properties,opts)
       end
       
       def hash()

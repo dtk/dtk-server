@@ -26,7 +26,7 @@ module DTK
         true #vacuously succeeds
       end
 
-      def check_iaas_properties(iaas_properties)
+      def check_iaas_properties(iaas_properties,opts={})
         Hash.new
       end
 

@@ -37,7 +37,8 @@ module DTK
         # proactively getting needed columns on provider
         provider.update_obj!(*InheritedProperties)
 
-        iaas_properties_array = IAASProperties::Ec2.compute_needed_iaas_properties(target_name,ec2_type,provider,property_hash)
+        # raises errors if problems with any params
+        iaas_properties_array = IAASProperties::Ec2.check_and_compute_needed_iaas_properties(target_name,ec2_type,provider,property_hash)
 
         create_targets?(project_idh,provider,iaas_properties_array,:raise_error_if_exists=>true).first
       end
@@ -57,9 +58,6 @@ module DTK
             :type => 'instance'
           }
 
-          # DTK-1735 and DTK-1711 DO NOT use iaas_properties from provider
-          # user region, keypair and security_groups provided by user
-          # el = provider.hash_subset(*InheritedProperties).merge(specific_params)
           el = provider.hash_subset(:iaas_type,:type,:description).merge(specific_params)
 
           # need deep merge for iaas_properties

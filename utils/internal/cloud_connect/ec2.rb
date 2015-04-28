@@ -62,12 +62,12 @@ module DTK
       def check_for_subnet(subnet_id)
         subnets = @conn.subnets
         unless subnet_obj = subnets.get(subnet_id)
-          err_msg = "Not able to find IAAS subnet with id '#{subnet_id}' aborting action"
+          err_msg = "Not able to find IAAS subnet with id '#{subnet_id}'"
           if subnets.empty?
             err_msg << "; there are no subnets created in the vpc"
           else
             avail_subnets = subnets.map{|s|hash_form(s)[:subnet_id]}
-            err_msg << "; reset the target to use one of the avaialble subnets: #{avail_subnets.join(', ')}"
+            err_msg << "; set the target to use one of the available subnets: #{avail_subnets.join(', ')}"
           end
           raise ErrorUsage.new(err_msg)
         end

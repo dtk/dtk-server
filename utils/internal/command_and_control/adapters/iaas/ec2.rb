@@ -70,30 +70,64 @@ module DTK
         end
       end
 
-      def self.get_availability_zones(iaas_properties, region)
-        ec2_creds = get_ec2_credentials(iaas_properties)
-        ec2_creds.merge!(:region => region)
-        connection = conn(ec2_creds)
-
+      def self.get_availability_zones(iaas_properties, region, opts={})
+        connection = opts[:connection] || get_connection_from_iaas_properties(iaas_properties,region)
         response = connection.describe_availability_zones
         raise ErrorUsage.new("Unable to retreive availability zones!") unless response.status == 200
-
-        a_zones = response.body["availabilityZoneInfo"].map{|z| z['zoneName']}||[]
+        response.body["availabilityZoneInfo"].map{|z| z['zoneName']}||[]
       end
 
-      # check_credentials in iaas_properties; if fails raises error; if success returns a conn object
-      def self.raise_error_if_bad_credentials(iaas_properties)
-        begin
-          # as simple test see if can describe availability_zones for us-east-1
-          get_availability_zones(iaas_properties,'us-east-1')
-         rescue
-          raise ErrorUsage.new("Bad EC2 credentials")
+      def self.check_iaas_properties(iaas_properties,opts={})
+        ret = iaas_properties
+        specified_region = iaas_properties[:region]
+        region = specified_region||DefaultRegion
+        connection = get_connection_from_iaas_properties(iaas_properties,region)
+        raise_error_if = RaiseErrorIf.new(iaas_properties,region,connection)
+
+        raise_error_if.invalid_credentials()
+
+        # only do these checks if specified region
+        unless specified_region
+          return ret
+        end 
+        (opts[:properties_to_check]||[]).each do |property|
+          case property
+            when :subnet then raise_error_if.invalid_subnet(iaas_properties[:subnet])
+          else
+            Log.error("Not supporting check of property '#{property}'")
+          end
         end
+        ret
       end
+      DefaultRegion = 'us-east-1'
+      
+      def self.get_connection_from_iaas_properties(iaas_properties,region)
+        ec2_creds = get_ec2_credentials(iaas_properties)
+        conn(ec2_creds.merge(:region => region))
+      end
+      private_class_method :get_connection_from_iaas_properties
 
-      def self.check_iaas_properties(iaas_properties)
-        raise_error_if_bad_credentials(iaas_properties)
-        iaas_properties
+      class RaiseErrorIf
+        def initialize(iaas_properties,region,connection)
+          @iaas_properties = iaas_properties
+          @region          = region
+          @connection      = connection
+        end
+        def invalid_credentials()
+          begin
+            # as simple test see if can describe availability_zones 
+            Ec2.get_availability_zones(@iaas_properties,@region,:connection => @connection)
+           rescue => e
+            Log.info_pp(["Error_from get_availability_zones",e])
+            raise ErrorUsage.new("Invalid EC2 credentials")
+          end
+        end
+
+        def invalid_subnet(subnet)
+          if subnet
+            @connection.check_for_subnet(subnet)
+          end
+        end
       end
 
       def self.get_ec2_credentials(iaas_credentials)

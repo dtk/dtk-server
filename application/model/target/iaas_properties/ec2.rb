@@ -1,15 +1,19 @@
 module DTK; class Target
   class IAASProperties
     class Ec2 < self
-      def initialize(hash_args,provider_iaas_props=nil)
+      def initialize(hash_args,provider=nil)
         super(hash_args)
-        @provider_iaas_props = provider_iaas_props
+        if provider
+          @provider = provider
+          #sanitizing what goes in provider_iaas_props, which is used for cloning targets
+          @provider_iaas_props = (provider.get_field?(:iaas_properties)||{}).reject{|k,v|[:key,:secret].include?(k)}
+        end
       end
-      
+
       # returns an array of IAASProperties::Ec2 objects
-      def self.compute_needed_iaas_properties(target_name,ec2_type,provider,property_hash)
+      def self.check_and_compute_needed_iaas_properties(target_name,ec2_type,provider,property_hash)
         ret = Array.new
-        iaas_property_factory = create_factory(target_name,provider)
+        iaas_property_factory = new({:name => target_name},provider)
         ret << iaas_property_factory.create_target_propeties(ec2_type,property_hash)
         region = property_hash[:region]
         if Ec2TypesNeedingAZTargets.include?(ec2_type)
@@ -41,11 +45,6 @@ module DTK; class Target
       end
 
      private
-      def self.create_factory(target_name,provider)
-        provider_iaas_props = provider.get_field?(:iaas_properties).reject{|k,v|[:key,:secret].include?(k)}
-        new({:name => target_name},provider_iaas_props)
-      end
-
 
       def availbility_zone_target_name(name,availbility_zone)
         "#{name}-#{availbility_zone}"
@@ -70,8 +69,18 @@ module DTK; class Target
             raise ErrorUsage.new("The target and its parent provider are both missing any security groups")
           end
         end
+        # using @provider[:iaas_properties] because has credentials)
+        unless props_with_creds = @provider[:iaas_properties]
+          Log.error("Unexpected that @provider[:iaas_properties] is nil")
+          return ret
+        end
+        props_with_creds = props_with_creds.merge(target_property_hash)
+        self.class.check(:ec2,props_with_creds,:properties_to_check => PropertiesToCheck)
+
         ret
       end
+      PropertiesToCheck = [:subnet] #TODO: will add more properties to check
+
 
       def self.modify_for_print_form!(iaas_properties)
         if iaas_properties[:security_group_set]

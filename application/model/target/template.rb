@@ -21,7 +21,7 @@ module DTK
           end
         end
 
-        iaas_properties = IAASProperties.check_and_process(iaas_type,iaas_properties_hash)
+        iaas_properties = IAASProperties.check(iaas_type,iaas_properties_hash)
         
         target_mh = project_idh.createMH(:target)
         display_name = provider_display_name(provider_name)

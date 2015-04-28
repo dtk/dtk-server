@@ -242,7 +242,7 @@ module DTK; module CommandAndControlAdapter
             if assembly = @node.get_assembly?()
               assembly.get_field?(:display_name)
             else
-              node_ref = node.get_field?(:ref)
+              node_ref = @node.get_field?(:ref)
               # looking for form base_node_link--ASSEMBLY::NODE-EDLEMENT-NAME
               if node_ref =~ /^base_node_link--([^:]+):/
                 $1

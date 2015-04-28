@@ -39,7 +39,7 @@ module DTK
     def rest__set_target()
       workspace = ret_workspace_object?()
       target = create_obj(:target_id, Target::Instance)
-      workspace.set_target(target)
+      workspace.set_target(target, :raise_error => true)
       rest_ok_response
     end
 

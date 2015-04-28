@@ -1,6 +1,8 @@
 module DTK
   class Target
     class Instance < self
+      r8_nested_require('instance','default_target')
+
       subclass_model :target_instance, :target, :print_form => 'target'
 
       def info()
@@ -95,17 +97,30 @@ module DTK
 
       def self.delete_and_destroy(target)
         if target.is_builtin_target?()
-          raise ErrorUsage.new("Cannot delete the builtin target")
+          raise ErrorUsage.new("Cannot delete the builtin target") 
         end
+
+        target_mh                = target.model_handle()
+        builtin_target           = get_builtin_target(target_mh)
+        current_default_target   = DefaultTarget.get(target_mh)
+
         Transaction do
+          # change default target if pointing to this target
+          if current_default_target and current_default_target.id == target.id
+            DefaultTarget.set(builtin_target,:current_default_target => current_default_target,:update_workspace_target => false)
+          end
+
           assemblies = Assembly::Instance.get(target.model_handle(:assembly_instance),:target_idh => target.id_handle())
           assemblies.each do |assembly|
             if workspace = Workspace.workspace?(assembly)
-              workspace.purge(:destroy_nodes => true)
-              #modify workspace target if it points to the one being deleted
-              if builtin_target = get_builtin_target(target.model_handle())
-                workspace.set_target(builtin_target)
+              # modify workspace target if it points to the one being deleted
+              if current_workspace_target = workspace.get_target()
+                if current_workspace_target.id == target.id
+                  workspace.set_target(builtin_target) 
+                end
               end
+
+              workspace.purge(:destroy_nodes => true)
             else
               Assembly::Instance.delete(assembly.id_handle,:destroy_nodes => true)
             end
@@ -113,6 +128,18 @@ module DTK
           delete_instance(target.id_handle())
         end
       end
+
+      def self.set_default_target(target,opts={})
+        current_default_target = DefaultTarget.set(target,opts)
+        ResponseInfo.info("Default target changed from ?current_default_target to ?new_default_target",
+                          :current_default_target => current_default_target,
+                          :new_default_target => target)
+      end
+
+
+      def self.get_default_target(target_mh,cols=[]) 
+        DefaultTarget.get(target_mh,cols)
+      end      
 
       def self.set_properties(target,iaas_properties)
         target.update_obj!(:iaas_properties)

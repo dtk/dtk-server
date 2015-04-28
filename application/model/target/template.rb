@@ -39,26 +39,23 @@ module DTK
         create_from_row(target_mh,create_row,create_opts)
       end
 
-      def get_availability_zones(region)
-        CommandAndControl.get_and_process_availability_zones(get_field?(:iaas_type), get_field?(:iaas_properties).merge(:region => region),region)
-      end
-
-      def self.delete(provider)
-        assembly_instances = provider.get_assembly_instances()
-        unless assembly_instances.empty?
-          assembly_names = assembly_instances.map{|a|a[:display_name]}.join(',')
-          provider_name = provider.get_field?(:display_name)
-          raise ErrorUsage.new("Cannot delete provider '#{provider_name}' because service instance(s) (#{assembly_names}) are using one of its targets") 
+      def self.delete_and_destroy(provider,opts={})
+        unless opts[:force]
+          assembly_instances = provider.get_assembly_instances(:omit_empty_workspace => true)
+          unless assembly_instances.empty?
+            assembly_names = assembly_instances.map{|a|a[:display_name]}.join(',')
+            provider_name = provider.get_field?(:display_name)
+            raise ErrorUsage.new("Cannot delete provider '#{provider_name}' because service instance(s) (#{assembly_names}) are using one of its targets") 
+          end
         end
-        
-        target_instances = provider.get_target_instances(:cols => [:display_name,:is_default_target])
-        if default_target = target_instances.find{|t|t[:is_default_target]}
-          provider_name = provider.get_field?(:display_name)
-          default_target_name = default_target[:display_name]
-          raise ErrorUsage.new("Cannot delete provider '#{provider_name}' because it contains the default target (#{default_target_name})")
-        end 
 
-        delete_instance(provider.id_handle())
+        target_instances = provider.get_target_instances(:cols => [:display_name,:is_default_target])
+        Transaction do
+          target_instances.each do |target_instance|
+            Instance.delete_and_destroy(target_instance)
+          end 
+          delete_instance(provider.id_handle())
+        end
       end
 
       def create_bootstrap_targets?(project_idh,region_or_regions=nil)
@@ -82,11 +79,23 @@ module DTK
         Instance.create_targets?(project_idh,self,iaas_properties_list)
       end
 
-      def get_assembly_instances()
+      def get_availability_zones(region)
+        CommandAndControl.get_and_process_availability_zones(get_field?(:iaas_type), get_field?(:iaas_properties).merge(:region => region),region)
+      end
+
+
+      def get_assembly_instances(opts={})
         ret = Array.new
         target_instances = id_handle.create_object().get_target_instances()
         unless target_instances.empty?
           ret = Assembly::Instance.get(model_handle(:assembly_instance),:target_idhs => target_instances.map{|t|t.id_handle})
+          if opts[:omit_empty_workspace]
+            ret.reject! do |assembly|
+              if Workspace.is_workspace?(assembly)
+                assembly.get_nodes().empty?
+              end
+            end
+          end
         end
         ret
       end

@@ -108,10 +108,13 @@ module DTK
 
     def rest__delete_and_destroy()
       type = (ret_request_params(:type)|| :instance).to_sym # can be :instance or :template
+      # TODO: stubbed now to have force being true; now only Target::Template.delete_and_destroy supports non force; so not passing in 
+      # force param to Target::Instance.delete_and_destroy
+      force = true
       case type
        when :template
         provider  = create_obj(:target_id, Target::Template)
-        Target::Template.delete_and_destroy(provider)
+        Target::Template.delete_and_destroy(provider,:force => force)
        when :instance
         target_instance = create_obj(:target_id, Target::Instance) 
         Target::Instance.delete_and_destroy(target_instance)
@@ -130,7 +133,8 @@ module DTK
 
     def rest__set_default()
       target_instance = create_obj(:target_id, Target::Instance)
-      Target.set_default_target(target_instance)
+      update_workspace_target = true #TODO: stubbed might make this option passed by client
+      Target::Instance.set_default_target(target_instance,:update_workspace_target => update_workspace_target)
       rest_ok_response
     end
 

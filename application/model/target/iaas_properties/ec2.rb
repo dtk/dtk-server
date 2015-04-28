@@ -23,13 +23,16 @@ module DTK; class Target
       end
       Ec2TypesNeedingAZTargets = [:ec2_classic]
 
+
       def create_target_propeties(ec2_type,target_property_hash,params={})
+        iaas_properties = clone_and_check_manditory_params(target_property_hash)
+        iaas_properties = {:ec2_type => ec2_type}.merge(iaas_properties)
         name = name()
         if az = params[:availability_zone]
           name = availbility_zone_target_name(name,az)
+          iaas_properties = {:availability_zone => az}.merge(iaas_properties)
         end
-        iaas_properties = clone_and_check_manditory_params(target_property_hash)
-        self.class.new(:name => name,:iaas_properties => {:ec2_type => ec2_type}.merge(iaas_properties))
+        self.class.new(:name => name,:iaas_properties => iaas_properties)
       end
 
       def self.equal?(i2)
@@ -80,7 +83,7 @@ module DTK; class Target
       def self.sanitize!(iaas_properties)
         iaas_properties.reject!{|k,v|not SanitizedProperties.include?(k)}
       end
-      SanitizedProperties = [:region,:keypair,:security_group,:security_group_set,:subnet,:ec2_type]
+      SanitizedProperties = [:region,:keypair,:security_group,:security_group_set,:subnet,:ec2_type,:availability_zone]
 
       def self.more_specific_type?(iaas_properties)
         ec2_type = iaas_properties[:ec2_type]

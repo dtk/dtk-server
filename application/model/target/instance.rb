@@ -4,11 +4,17 @@ module DTK
       subclass_model :target_instance, :target, :print_form => 'target'
 
       def info()
-        target_info =  get_obj(:cols => [:display_name,:iaas_type,:iaas_properties,:is_default_target,:provider])
-        target_info.each{|t|IAASProperties.sanitize_and_modify_for_print_form!(t[:iaas_type],t[:iaas_properties])}
-        # TODO: change to have just keys for display
-        target_info
+        target =  get_obj(:cols => [:display_name,:iaas_type,:iaas_properties,:is_default_target,:provider])
+        IAASProperties.sanitize_and_modify_for_print_form!(target[:iaas_type],target[:iaas_properties])
+        if provider_name = (target[:provider]||{})[:display_name]
+          target[:provider_name] = provider_name
+        end
+        OrderedInfoKeys.inject(Hash.new) do |h,k|
+          val = target[k]
+          val.nil? ? h : h.merge(k => val)
+        end
       end
+      OrderedInfoKeys = [:display_name,:id,:provider_name,:iaas_properties,:is_default_target]
 
       def iaas_properties()
         IAASProperties.new(:target_instance => self)

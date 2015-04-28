@@ -173,25 +173,25 @@ module DTK; module CommandAndControlAdapter
                 merge!(:groups => R8::Config[:ec2][:vpc][:security_group])
                 return
               end
-
-              unless iaas_properties = @target[:iaas_properties]
-                Log.error_pp(["Unexpected that @target does not have :iaas_properties",@target])
-                return
-              end
-
-              unless iaas_properties[:ec2_type] == 'ec2_vpc'
-                return
-              end
-
-              unless subnet = iaas_properties[:subnet]
-                Log.error_pp(["Unexpected that @target does not have :iaas_properties",@target])
-                return
-              end
-
-              subnet_id = @conn.check_for_subnet(subnet)
-              associate_public_ip = true #TODO: stub vale
-              merge!(:subnet_id => subnet_id, :associate_public_ip => associate_public_ip) 
             end
+
+            unless iaas_properties = @target[:iaas_properties]
+              Log.error_pp(["Unexpected that @target does not have :iaas_properties",@target])
+              return
+            end
+
+            unless iaas_properties[:ec2_type] == 'ec2_vpc'
+              return
+            end
+            
+            unless subnet = iaas_properties[:subnet]
+              Log.error_pp(["Unexpected that @target does not have :iaas_properties",@target])
+              return
+            end
+            
+            subnet_id = @conn.check_for_subnet(subnet)
+            associate_public_ip = true #TODO: stub vale
+            merge!(:subnet_id => subnet_id, :associate_public_ip => associate_public_ip) 
           end
 
           def update_block_device_mapping!(image)

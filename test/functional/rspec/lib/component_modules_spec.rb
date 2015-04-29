@@ -448,7 +448,7 @@ end
 
 shared_context "Add module_refs.yaml file" do |component_module_name, file_for_change_location, file_for_add, component_module_filesystem_location|
   it "adds module_refs.yaml file" do
-    puts "Add module_refs.yaml file", "---------------------------"
+    puts "Add module_refs.yaml file:", "---------------------------"
     pass = false
     current_path = `pwd`
       `cd #{component_module_filesystem_location}/#{component_module_name};git pull;cd #{current_path}`
@@ -463,9 +463,39 @@ shared_context "Add module_refs.yaml file" do |component_module_name, file_for_c
   end
 end
 
+shared_context "Add includes to dtk.model.yaml" do |dtk_model_yaml_file_location, component_module_names|
+  it "adds includes to dtk.model.yaml file" do
+    puts "Add includes to dtk.model.yaml file:", "--------------------------------------"
+    pass = false
+    `echo "includes:" >> #{dtk_model_yaml_file_location}`
+     component_module_names.each do |cmp|
+      `echo "- #{cmp}" >> #{dtk_model_yaml_file_location}`
+     end
+    value = `cat #{dtk_model_yaml_file_location} | grep includes`
+    pass = true if !value.empty?
+    puts ""
+    pass.should eq(true)
+  end
+end
+
+shared_context "Remove includes from dtk.model.yaml" do |dtk_model_yaml_file_location, component_module_names|
+  it "removes includes from dtk.model.yaml file" do
+    puts "Remove includes from dtk.model.yaml file:", "--------------------------------------"
+    pass = false
+    `sed -i "s/includes://g" #{dtk_model_yaml_file_location}`
+     component_module_names.each do |cmp|
+      `sed -i "s/- #{cmp}//g" #{dtk_model_yaml_file_location}`
+     end
+    value = `cat #{dtk_model_yaml_file_location} | grep includes`
+    pass = true if value.empty?
+    puts ""
+    pass.should eq(true)
+  end
+end
+
 shared_context "Remove module_refs.yaml file" do |component_module_name, file_for_remove, component_module_filesystem_location|
   it "removes module_refs.yaml file" do
-    puts "Remove module_refs.yaml file", "-----------------------------"
+    puts "Remove module_refs.yaml file:", "-----------------------------"
     pass = false
       `rm #{component_module_filesystem_location}/#{component_module_name}/#{file_for_remove}`
     value = `ls #{component_module_filesystem_location}/#{component_module_name}/#{file_for_remove}`

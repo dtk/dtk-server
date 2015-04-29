@@ -25,6 +25,8 @@ r8_service_module_filesystem_location = '~/dtk/service_modules/r8'
 r8_component_module_filesystem_location = '~/dtk/component_modules/r8'
 file_for_change_location_1 = "./spec/regression/component_and_service_modules_np/resources/msv_test_case_46_1_module_refs.yaml"
 file_for_change_location_2 = "./spec/regression/component_and_service_modules_np/resources/msv_test_case_46_2_module_refs.yaml"
+dtk_model_yaml_file_location_1 = "~/dtk/component_modules/r8/tomcat/dtk.model.yaml"
+dtk_model_yaml_file_location_2 = "~/dtk/component_modules/r8/concat/dtk.model.yaml"
 file_for_add = "module_refs.yaml"
 file_for_remove = "module_refs.yaml"
 
@@ -74,6 +76,14 @@ describe "(Modules, Services and Versioning) Test Case 46: Install service modul
 
   context "Add module_refs.yaml file" do
     include_context "Add module_refs.yaml file", component_module_name_2, file_for_change_location_2, file_for_add, r8_component_module_filesystem_location
+  end
+
+  context "Add includes to dtk.model.yaml" do
+    include_context "Add includes to dtk.model.yaml", dtk_model_yaml_file_location_1, [component_module_name_3]
+  end
+
+  context "Add includes to dtk.model.yaml" do
+    include_context "Add includes to dtk.model.yaml", dtk_model_yaml_file_location_2, [component_module_name_4]
   end
 
   context "Push to remote changes for component module" do
@@ -147,6 +157,14 @@ describe "(Modules, Services and Versioning) Test Case 46: Install service modul
 
   context "Remove module_refs.yaml file" do
     include_context "Remove module_refs.yaml file", component_module_name_2, file_for_remove, r8_component_module_filesystem_location
+  end
+
+  context "Remove includes from dtk.model.yaml" do
+    include_context "Remove includes from dtk.model.yaml", dtk_model_yaml_file_location_1, [component_module_name_3]
+  end
+
+  context "Remove includes from dtk.model.yaml" do
+    include_context "Remove includes from dtk.model.yaml", dtk_model_yaml_file_location_2, [component_module_name_4]
   end
 
   context "Push to remote changes for component module" do

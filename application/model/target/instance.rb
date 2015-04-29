@@ -95,7 +95,45 @@ module DTK
         create_from_rows(target_mh,create_rows,create_opts)
       end
 
+      class DeleteResponseObject
+        def initialize(target)
+          @target_name = target.get_field?(:display_name)
+          @info        = Hash.new
+        end
+        def add_info_changed_default_target!(new_default_target)
+          @info[:changed_default_target] = new_default_target
+        end
+        def add_info_changed_workspace_target!(new_default_target)
+          @info[:changed_workspace_target] = new_default_target
+        end
+        
+        def hash_form()
+          ret = Hash.new
+          return ret if @info.empty?()
+          default_target = @info[:changed_default_target] 
+          workspace_target = @info[:changed_workspace_target]
+          if default_target and workspace_target and default_target.id == workspace_target.id 
+            add_changed_target!(ret,default_target,:default_and_workspace)
+          else
+            add_changed_target!(ret,default_target,:default) if default_target
+            add_changed_target!(ret,workspace_target,:workspace) if workspace_target
+          end
+          ret
+        end
+        private
+         def  add_changed_target!(ret,new_target,role)
+           new_target_name = new_target.get_field?(:display_name)
+           this_setting = (role == :default_and_target ? 'these target settings' : 'this target setting')
+           role_str = role.to_s.gsub(/_/,' ')
+           msg = "Deleted '#{@target_name}' that was #{role_str} target; changed #{this_setting} to '#{new_target_name}'"
+           (ret[:info] ||= Array.new) << msg
+           ret
+         end
+      end
+
+      # returns hash that has response info
       def self.delete_and_destroy(target)
+        response_obj = DeleteResponseObject.new(target)
         if target.is_builtin_target?()
           raise ErrorUsage.new("Cannot delete the builtin target") 
         end
@@ -107,6 +145,7 @@ module DTK
         Transaction do
           # change default target if pointing to this target
           if current_default_target and current_default_target.id == target.id
+            response_obj.add_info_changed_default_target!(builtin_target)
             DefaultTarget.set(builtin_target,:current_default_target => current_default_target,:update_workspace_target => false)
           end
 
@@ -116,6 +155,7 @@ module DTK
               # modify workspace target if it points to the one being deleted
               if current_workspace_target = workspace.get_target()
                 if current_workspace_target.id == target.id
+                  response_obj.add_info_changed_workspace_target!(builtin_target)
                   workspace.set_target(builtin_target, :mode => :from_delete_target) 
                 end
               end
@@ -127,6 +167,7 @@ module DTK
           end
           delete_instance(target.id_handle())
         end
+        response_obj.hash_form()
       end
 
       def self.set_default_target(target,opts={})

@@ -39,7 +39,14 @@ module DTK
         create_from_row(target_mh,create_row,create_opts)
       end
 
+      class DeleteResponse < Hash
+        def add_target_response(hash)
+          hash.each_pair{|k,v|(self[k] ||= Array.new) << v}
+          self
+        end
+      end
       def self.delete_and_destroy(provider,opts={})
+        response = DeleteResponse.new()
         unless opts[:force]
           assembly_instances = provider.get_assembly_instances(:omit_empty_workspace => true)
           unless assembly_instances.empty?
@@ -52,10 +59,12 @@ module DTK
         target_instances = provider.get_target_instances(:cols => [:display_name,:is_default_target])
         Transaction do
           target_instances.each do |target_instance|
-            Instance.delete_and_destroy(target_instance)
+            target_delete_response = Instance.delete_and_destroy(target_instance)
+            response.add_target_response(target_delete_respons)
           end 
           delete_instance(provider.id_handle())
         end
+        response
       end
 
       def create_bootstrap_targets?(project_idh,region_or_regions=nil)

@@ -111,17 +111,18 @@ module DTK
       # TODO: stubbed now to have force being true; now only Target::Template.delete_and_destroy supports non force; so not passing in 
       # force param to Target::Instance.delete_and_destroy
       force = true
+      response = {}
       case type
        when :template
         provider  = create_obj(:target_id, Target::Template)
-        Target::Template.delete_and_destroy(provider,:force => force)
+        response = Target::Template.delete_and_destroy(provider,:force => force)
        when :instance
         target_instance = create_obj(:target_id, Target::Instance) 
-        Target::Instance.delete_and_destroy(target_instance)
+        response = Target::Instance.delete_and_destroy(target_instance)
        else
         raise ErrorUsage.new("Illegal type '#{type}'")
       end
-      rest_ok_response
+      rest_ok_response response
     end
 
     def rest__set_properties()

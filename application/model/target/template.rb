@@ -41,7 +41,10 @@ module DTK
 
       class DeleteResponse < Hash
         def add_target_response(hash)
-          hash.each_pair{|k,v|(self[k] ||= Array.new) << v}
+          hash.each_pair do |msg_type,msg_array|
+            pntr = (self[msg_type] ||= Array.new)
+            msg_array.each{|msg|pntr << msg}
+          end
           self
         end
       end
@@ -60,7 +63,7 @@ module DTK
         Transaction do
           target_instances.each do |target_instance|
             target_delete_response = Instance.delete_and_destroy(target_instance)
-            response.add_target_response(target_delete_respons)
+            response.add_target_response(target_delete_response)
           end 
           delete_instance(provider.id_handle())
         end

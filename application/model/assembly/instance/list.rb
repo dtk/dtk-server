@@ -84,6 +84,7 @@ module DTK; class  Assembly
       def info_about(about,opts=Opts.new)
         case about
         when :attributes
+          opts.merge!(:remove_assembly_wide_node => true)
           list_attributes(opts)
         when :components
           opts.merge!(:remove_assembly_wide_node => true)

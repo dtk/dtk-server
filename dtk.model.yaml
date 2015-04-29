@@ -1,0 +1,255 @@
+---
+module: docker
+dsl_version: 1.0.0
+components:
+  docker:
+    attributes:
+      version:
+        type: string
+      ensure:
+        type: string
+      prerequired_packages:
+        type: string
+      tcp_bind:
+        type: string
+      socket_bind:
+        type: string
+      use_upstream_package_source:
+        type: string
+      package_source_location:
+        type: string
+      service_state:
+        type: string
+      service_enable:
+        type: string
+      root_dir:
+        type: string
+      tmp_dir:
+        type: string
+      manage_kernel:
+        type: string
+      dns:
+        type: string
+      dns_search:
+        type: string
+      socket_group:
+        type: string
+      extra_parameters:
+        type: string
+      shell_values:
+        type: string
+      proxy:
+        type: string
+      no_proxy:
+        type: string
+      storage_driver:
+        type: string
+      dm_basesize:
+        type: string
+      dm_fs:
+        type: string
+      dm_mkfsarg:
+        type: string
+      dm_mountopt:
+        type: string
+      dm_blocksize:
+        type: string
+      dm_loopdatasize:
+        type: string
+      dm_loopmetadatasize:
+        type: string
+      dm_datadev:
+        type: string
+      dm_metadatadev:
+        type: string
+      execdriver:
+        type: string
+      manage_package:
+        type: string
+      package_name:
+        type: string
+      service_name:
+        type: string
+      docker_command:
+        type: string
+    actions:
+      create:
+        puppet_class: docker
+  config:
+    actions:
+      create:
+        puppet_class: docker::config
+  systemd_reload:
+    actions:
+      create:
+        puppet_class: docker::systemd_reload
+  image:
+    attributes:
+      name:
+        type: string
+        required: true
+      ensure:
+        type: string
+      image:
+        type: string
+      image_tag:
+        type: string
+      force:
+        type: boolean
+      docker_file:
+        type: string
+      docker_dir:
+        type: string
+      docker_tar:
+        type: string
+    actions:
+      create:
+        puppet_definition: docker::image
+  exec:
+    attributes:
+      name:
+        type: string
+        required: true
+      detach:
+        type: boolean
+      interactive:
+        type: boolean
+      tty:
+        type: boolean
+      container:
+        type: string
+      command:
+        type: string
+    actions:
+      create:
+        puppet_definition: docker::exec
+  images:
+    attributes:
+      images:
+        type: string
+        required: true
+    actions:
+      create:
+        puppet_class: docker::images
+  service:
+    attributes:
+      docker_command:
+        type: string
+      service_name:
+        type: string
+      tcp_bind:
+        type: string
+      socket_bind:
+        type: string
+      socket_group:
+        type: string
+      dns:
+        type: string
+      dns_search:
+        type: string
+      service_state:
+        type: string
+      service_enable:
+        type: string
+      root_dir:
+        type: string
+      extra_parameters:
+        type: string
+      shell_values:
+        type: string
+      proxy:
+        type: string
+      no_proxy:
+        type: string
+      execdriver:
+        type: string
+      storage_driver:
+        type: string
+      tmp_dir:
+        type: string
+    actions:
+      create:
+        puppet_class: docker::service
+  run:
+    attributes:
+      name:
+        type: string
+        required: true
+      image:
+        type: string
+        required: true
+      command:
+        type: string
+      memory_limit:
+        type: string
+      cpuset:
+        type: array
+      ports:
+        type: array
+      expose:
+        type: array
+      volumes:
+        type: array
+      links:
+        type: array
+      use_name:
+        type: boolean
+      running:
+        type: boolean
+      volumes_from:
+        type: array
+      net:
+        type: string
+      username:
+        type: boolean
+      hostname:
+        type: boolean
+      env:
+        type: array
+      dns:
+        type: array
+      dns_search:
+        type: array
+      lxc_conf:
+        type: array
+      restart_service:
+        type: boolean
+      disable_network:
+        type: boolean
+      privileged:
+        type: boolean
+      detach:
+        type: string
+      extra_parameters:
+        type: string
+      pull_on_start:
+        type: boolean
+      depends:
+        type: array
+      tty:
+        type: boolean
+      socket_connect:
+        type: array
+      hostentries:
+        type: array
+      restart:
+        type: string
+    actions:
+      create:
+        puppet_definition: docker::run
+  install:
+    actions:
+      create:
+        puppet_class: docker::install
+  run_instance:
+    attributes:
+      instance:
+        type: string
+        required: true
+    actions:
+      create:
+        puppet_class: docker::run_instance
+includes:
+- epel
+- stdlib
+- apt

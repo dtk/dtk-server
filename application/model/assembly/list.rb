@@ -91,7 +91,7 @@ module DTK
         pp_opts = Aux.hash_subset(opts,[:no_module_prefix])
         assembly_template_opts = {:version_suffix => true}
         if opts[:include_namespaces]
-          assembly_template_opts.merge!(:include_namespace => true)
+          assembly_template_opts.merge!(:include_namespace => true, :service_module_context_path => true)
         end
         assembly_rows.each do |r|
           last_task_run_status = r[:last_task_run_status]

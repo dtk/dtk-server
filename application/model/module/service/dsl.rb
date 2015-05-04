@@ -116,15 +116,23 @@ module DTK
         end
         [meta_files,regexp,is_legacy_structure]
       end
-      AssemblyFilenamePathInfoLegacy = {
-        :regexp => Regexp.new("^assemblies/([^/]+)/assembly\.(json|yaml)$"),
-        :path_depth => 3
-      }
+
       AssemblyFilenamePathInfo = {
         :regexp => Regexp.new("^assemblies/(.*)\.dtk\.assembly\.(json|yaml)$"),
         :path_depth => 3
       }
 
+      AssemblyFilenamePathInfoLegacy = {
+        :regexp => Regexp.new("^assemblies/([^/]+)/assembly\.(json|yaml)$"),
+        :path_depth => 3
+      }
+
+      def meta_file_assembly_name(meta_file_path)
+        (meta_file_path.match(AssemblyFilenamePathInfo[:regexp])||[])[1] ||
+        (meta_file_path.match(AssemblyFilenamePathInfoLegacy[:regexp])||[])[1] 
+      end
+      public :meta_file_assembly_name
+ 
       # returns [meta_files, regexp]
       def meta_files_and_regexp_aux?(assembly_dsl_path_info,module_branch)
         depth = assembly_dsl_path_info[:path_depth]
@@ -199,9 +207,6 @@ module DTK
               response = validate_name_for_assembly(meta_file,hash_content['name'])
               return [response,ret_cmr] if ParsingError.is_error?(response)
             end
-            # TODO: ref DTK-1619: taking out for now
-            # cmp_names = validate_component_names(hash_content,component_module_refs)
-            # return [cmp_names,ret_cmr] if ParsingError.is_error?(cmp_names)
 
             parsed = assembly_import_helper.process(module_name,hash_content,opts)
             return [parsed,ret_cmr] if ParsingError.is_error?(parsed)
@@ -273,9 +278,10 @@ module DTK
 
       def validate_name_for_assembly(file_path,name)
         return unless (name || file_path)
-        file_name = file_path.split('/').last
-        assembly_name = file_name.split('.').first
-        return ParsingError::BadAssemblyReference.new(:file_path => file_path, :name => name) unless assembly_name.eql?(name)
+        assembly_name = ServiceModule.meta_file_assembly_name(file_path) || 'UNKMOWN'
+        unless assembly_name.eql?(name)
+          ParsingError::BadAssemblyReference.new(:file_path => file_path, :name => name) 
+        end
       end
 
       def validate_module_ref_namespaces(module_branch,component_module_refs)

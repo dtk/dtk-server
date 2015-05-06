@@ -1,66 +1,66 @@
 [submodule "dtk_modules/internal--cm--dtk_server"]
-	path = dtk_modules/internal--cm--dtk_server
+	path = dtk_modules/dtk_server
 	url = git@dtknet.servicecatalog.it:internal--cm--dtk_server
 [submodule "dtk_modules/internal--sm--dtk"]
 	path = dtk_modules/internal--sm--dtk
 	url = git@dtknet.servicecatalog.it:internal--sm--dtk
 [submodule "dtk_modules/internal--cm--apt"]
-	path = dtk_modules/internal--cm--apt
+	path = dtk_modules/apt
 	url = git@dtknet.servicecatalog.it:internal--cm--apt
 [submodule "dtk_modules/internal--cm--common_user"]
-	path = dtk_modules/internal--cm--common_user
+	path = dtk_modules/common_user
 	url = git@dtknet.servicecatalog.it:internal--cm--common_user
 [submodule "dtk_modules/internal--cm--dtk"]
-	path = dtk_modules/internal--cm--dtk
+	path = dtk_modules/dtk
 	url = git@dtknet.servicecatalog.it:internal--cm--dtk
 [submodule "dtk_modules/internal--cm--dtk_activemq"]
-	path = dtk_modules/internal--cm--dtk_activemq
+	path = dtk_modules/dtk_activemq
 	url = git@dtknet.servicecatalog.it:internal--cm--dtk_activemq
 [submodule "dtk_modules/internal--cm--dtk_addons"]
-	path = dtk_modules/internal--cm--dtk_addons
+	path = dtk_modules/dtk_addons
 	url = git@dtknet.servicecatalog.it:internal--cm--dtk_addons
 [submodule "dtk_modules/internal--cm--dtk_client"]
-	path = dtk_modules/internal--cm--dtk_client
+	path = dtk_modules/dtk_client
 	url = git@dtknet.servicecatalog.it:internal--cm--dtk_client
 [submodule "dtk_modules/internal--cm--dtk_java"]
-	path = dtk_modules/internal--cm--dtk_java
+	path = dtk_modules/dtk_java
 	url = git@dtknet.servicecatalog.it:internal--cm--dtk_java
 [submodule "dtk_modules/internal--cm--dtk_nginx"]
-	path = dtk_modules/internal--cm--dtk_nginx
+	path = dtk_modules/dtk_nginx
 	url = git@dtknet.servicecatalog.it:internal--cm--dtk_nginx
 [submodule "dtk_modules/internal--cm--dtk_postgresql"]
-	path = dtk_modules/internal--cm--dtk_postgresql
+	path = dtk_modules/dtk_postgresql
 	url = git@dtknet.servicecatalog.it:internal--cm--dtk_postgresql
 [submodule "dtk_modules/internal--cm--dtk_repo_manager"]
-	path = dtk_modules/internal--cm--dtk_repo_manager
+	path = dtk_modules/dtk_repo_manager
 	url = git@dtknet.servicecatalog.it:internal--cm--dtk_repo_manager
 [submodule "dtk_modules/internal--cm--dtk_thin"]
-	path = dtk_modules/internal--cm--dtk_thin
+	path = dtk_modules/dtk_thin
 	url = git@dtknet.servicecatalog.it:internal--cm--dtk_thin
 [submodule "dtk_modules/internal--cm--dtk_user"]
-	path = dtk_modules/internal--cm--dtk_user
+	path = dtk_modules/dtk_user
 	url = git@dtknet.servicecatalog.it:internal--cm--dtk_user
 [submodule "dtk_modules/internal--cm--gitolite"]
-	path = dtk_modules/internal--cm--gitolite
+	path = dtk_modules/gitolite
 	url = git@dtknet.servicecatalog.it:internal--cm--gitolite
 [submodule "dtk_modules/internal--cm--logrotate"]
-	path = dtk_modules/internal--cm--logrotate
+	path = dtk_modules/logrotate
 	url = git@dtknet.servicecatalog.it:internal--cm--logrotate
 [submodule "dtk_modules/internal--cm--nginx"]
-	path = dtk_modules/internal--cm--nginx
+	path = dtk_modules/nginx
 	url = git@dtknet.servicecatalog.it:internal--cm--nginx
 [submodule "dtk_modules/internal--cm--rvm"]
-	path = dtk_modules/internal--cm--rvm
+	path = dtk_modules/rvm
 	url = git@dtknet.servicecatalog.it:internal--cm--rvm
 [submodule "dtk_modules/internal--cm--stdlib"]
-	path = dtk_modules/internal--cm--stdlib
+	path = dtk_modules/stdlib
 	url = git@dtknet.servicecatalog.it:internal--cm--stdlib
 [submodule "dtk_modules/internal--cm--sysctl"]
-	path = dtk_modules/internal--cm--sysctl
+	path = dtk_modules/sysctl
 	url = git@dtknet.servicecatalog.it:internal--cm--sysctl
 [submodule "dtk_modules/internal--cm--thin"]
-	path = dtk_modules/internal--cm--thin
+	path = dtk_modules/thin
 	url = git@dtknet.servicecatalog.it:internal--cm--thin
 [submodule "dtk_modules/internal--cm--vcsrepo"]
-	path = dtk_modules/internal--cm--vcsrepo
+	path = dtk_modules/vcsrepo
 	url = git@dtknet.servicecatalog.it:internal--cm--vcsrepo

@@ -413,7 +413,7 @@ module DTK
             error_msg = "URI #{uri} is not in id table"
             if opts[:raise_error]
               raise Error.new(error_msg)
-            else
+            elsif opts[:log_error]
               Log.error(error_msg)
             end
 	    return nil

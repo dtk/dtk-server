@@ -52,7 +52,7 @@ module DTK
       # TODO Enable short circuit that conditionally avoids IDInfoTable
       # returns list of created uris
       def update_from_hash_assignments(id_handle,hash_assigns,opts={})
-        if id_info = IDInfoTable.get_row_from_id_handle(id_handle)
+        if id_info = IDInfoTable.get_row_from_id_handle(id_handle, :log_error => true)
           return update_from_hash_from_factory_id(id_info,id_handle,hash_assigns,opts) if id_info[:is_factory]
           update_from_hash_from_instance_id(id_info,id_handle,hash_assigns,opts)
         end
@@ -61,7 +61,7 @@ module DTK
       # TODO Enable short circuit that conditionally avoids IDInfoTable
       # TODO may remove below two public methods and subsume by above
       def update_instance(id_handle,scalar_assigns,opts={}) 
-        if id_info = IDInfoTable.get_row_from_id_handle(id_handle)
+        if id_info = IDInfoTable.get_row_from_id_handle(id_handle, :log_error => true)
           update_instance_from_id_info(id_handle,id_info,scalar_assigns,opts)
         end
       end

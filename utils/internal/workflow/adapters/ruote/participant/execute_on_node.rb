@@ -46,22 +46,14 @@ module DTK
 
             if node_type.eql?('assembly_wide')
               # method that returns mock response for assembly wide node
-              mock_result = assembly_wide_node_response_mock()
+              mock_result = execute_lambda_function(action)
               result = (mock_result||{}).merge!("task_id" => task_id)
 
-              if errors_in_result = errors_in_result?(result,action)
-                event,errors = task.add_event_and_errors(:complete_failed,:config_agent,errors_in_result)
-                if event
-                  log_participant.end(:complete_failed,:task_id=>task_id,:event => event, :errors => errors)
-                end
-                cancel_upstream_subtasks(workitem)
-                set_result_failed(workitem,result,task)
-              else
-                event = task.add_event(:complete_succeeded,result)
-                log_participant.end(:complete_succeeded,:task_id=>task_id)
-                set_result_succeeded(workitem,result,task,action) if task_end
-                action.get_and_propagate_dynamic_attributes(result)
-              end
+              event = task.add_event(:complete_succeeded,result)
+              log_participant.end(:complete_succeeded,:task_id=>task_id)
+              set_result_succeeded(workitem,result,task,action) if task_end
+              action.get_and_propagate_dynamic_attributes(result)
+
               delete_task_info(workitem)
               reply_to_engine(workitem)
             else
@@ -172,9 +164,30 @@ module DTK
           Model.get_objs(task.model_handle,sp_hash)
         end
 
-        def assembly_wide_node_response_mock()
+        def execute_lambda_function(action)
           sleep(10)
-          result = {:statuscode => 0, :statusmsg => "OK", :data => {:status => :succeeded}}
+          if action.config_agent_type == 'ruby_function'
+            # cmp_actions = action[:component_actions]
+
+            # cmp_actions.each do |cmp_action|
+            #   component = cmp_action[:component]
+            #   ext_ref = component[:external_ref]
+            #   ext_ref.each do |fn|
+            #     output = fn[:outputs][:ensemble_info]
+            #     require 'yaml'
+            #     a = YAML.load(output)
+            #     rez = eval(output)
+            #     rez.call([], 10)
+            #   end
+            #   # l = lambda { 1+1 }
+            #   # res = l.call
+            #   # ap res
+            # end
+
+            result = {:statuscode => 0, :statusmsg => "OK", :data => {:status => :succeeded}}
+          else
+            result = {:statuscode => 0, :statusmsg => "OK", :data => {:status => :succeeded}}
+          end
         end
 
         # TODO: need to turn threading off for now because if dont can have two threads

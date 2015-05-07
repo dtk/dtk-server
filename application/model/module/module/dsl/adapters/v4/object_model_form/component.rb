@@ -21,17 +21,25 @@ module DTK; class ModuleDSL; class V4
       end
 
       def set_action_def_and_external_ref!(ret,input_hash,cmp,context={})
-        create_action = nil
+        create_action, function = nil, nil
         if action_def = ActionDef.new(cmp).convert_action_defs?(input_hash)
-          create_action = action_def.delete_create_action!()
+          if validate_action_def_function(action_def)
+            function = action_def.delete_create_action!()
+          else
+            create_action = action_def.delete_create_action!()
+          end
         end
+
         unless action_def.nil? or action_def.empty?
           ret["action_def"] = action_def
         end
 
+        ret["action_def"] = {"create" => function} if function
+
         ret["external_ref"] =  
           if input_hash['external_ref'] then external_ref(input_hash['external_ref'],cmp) # this is for legacy
-          elsif create_action then external_ref_from_create_action?(create_action,cmp)
+          elsif create_action then external_ref_from_create_action?(create_action, cmp)
+          elsif function then external_ref_from_function?(function, cmp)
           end
         unless ret["external_ref"]
           err_msg = "Cannot determine the create action in component '?1'"
@@ -40,11 +48,26 @@ module DTK; class ModuleDSL; class V4
         ret
       end
 
-      def external_ref_from_create_action?(create_action,cmp)
+      def external_ref_from_create_action?(create_action, cmp)
         if DTK::ActionDef::Constant.matches?(create_action[:method_name],:CreateActionName)
           if create_action[:content].respond_to?(:external_ref_from_create_action)
             external_ref(create_action[:content].external_ref_from_create_action(),cmp)
           end
+        end
+      end
+
+      def external_ref_from_function?(function, cmp)
+        if DTK::ActionDef::Constant.matches?(function[:method_name],:CreateActionName)
+          if function[:content].respond_to?(:external_ref_from_function)
+            function[:content].external_ref_from_function()
+          end
+        end
+      end
+
+      def validate_action_def_function(action_def)
+        if kv = DTK::ActionDef::Constant.matching_key_and_value?(action_def, :CreateActionName)
+          create = kv.values.first
+          create[:content] && create[:content].has_key?(:functions)
         end
       end
 

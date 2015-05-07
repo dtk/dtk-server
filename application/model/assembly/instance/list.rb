@@ -156,8 +156,11 @@ module DTK; class  Assembly
           # if node is not part of node group we set nil
           node[:dtk_client_type]   = node.is_node_group? ? :node_group : is_node_group_member ? :node_group_node : nil
 
-          # remove node group or assembly wide node from list-nodes
+          # remove node group or assembly wide node from list commands
           node[:dtk_client_hidden] = node.is_node_group? || node[:type].eql?('assembly_wide')
+
+          # remove assembly wide node from dtk context
+          node[:dtk_context_hidden] = node[:type].eql?('assembly_wide')
         end
 
         nodes.sort{|a,b| a[:display_name] <=> b[:display_name] }

@@ -6,25 +6,38 @@ module DTK; class ModuleDSL; class V4; class ObjectModelForm
         end
         extend Aux::ParsingingHelper::ClassMixin
 
-        Commands = 'commands'        
+        Commands = 'commands'
         Variations::Commands = ['commands','command']
+
+        Functions = 'functions'
+        Variations::Functions = ['functions','function']
       end
 
       def self.matches_input_hash?(input_hash)
-        !!Constant.matches?(input_hash,:Commands)
+        !!Constant.matches?(input_hash,:Commands) || !!Constant.matches?(input_hash,:Functions)
       end
 
       def provider_specific_fields(input_hash)
-        commands   = Constant.matches?(input_hash,:Commands)
-        ret        = {:commands => commands.kind_of?(Array) ? commands : [commands]}
-        stdout_err = input_hash['stdout_and_stderr']
+        ret =
+          if commands = Constant.matches?(input_hash,:Commands)
+            {:commands => commands.kind_of?(Array) ? commands : [commands]}
+          elsif functions = Constant.matches?(input_hash,:Functions)
+            {:functions => functions.kind_of?(Array) ? functions : [functions]}
+          end
 
+        stdout_err = input_hash['stdout_and_stderr']
         unless stdout_err.nil?
           raise ParsingError.new(":stdout_and_stderr has invalid value. Must be set to true or false") unless ['true','false'].include?(stdout_err.to_s)
           ret.merge!(:stdout_and_stderr => stdout_err)
         end
 
         ret
+      end
+
+      def external_ref_from_function()
+        if functions = self[:functions]
+          type = functions.first.slice('type')
+        end
       end
     end
   end; end

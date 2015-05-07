@@ -258,6 +258,7 @@ module DTK
       case cmp_external_ref_type
        when "chef_recipe" then "chef"
        when "puppet_class","puppet_definition" then "puppet"
+       when "ruby_function" then "dtk_provider"
       end
     end
 

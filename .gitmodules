@@ -64,3 +64,6 @@
 [submodule "dtk_modules/internal--cm--vcsrepo"]
 	path = dtk_modules/vcsrepo
 	url = git@dtknet.servicecatalog.it:internal--cm--vcsrepo
+[submodule "dtk_modules/dtk_passenger"]
+	path = dtk_modules/dtk_passenger
+	url = git@dtknet.servicecatalog.it:internal--cm--dtk_passenger

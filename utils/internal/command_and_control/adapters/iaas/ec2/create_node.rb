@@ -196,9 +196,9 @@ raise Error.new()
           end
 
           def update_block_device_mapping!(image)
-            root_device_override_attrs = {'deleteOnTermination' => 'true'}
+            root_device_override_attrs = {'Ebs.DeleteOnTermination' => 'true'}
             if root_device_size = @node.attribute.root_device_size() 
-              root_device_override_attrs.merge!('volumeSize' => root_device_size)
+              root_device_override_attrs.merge!('Ebs.VolumeSize' => root_device_size)
             end
             # only add block_device_mapping if it was fully generated
             if block_device_mapping = image.block_device_mapping?(root_device_override_attrs)

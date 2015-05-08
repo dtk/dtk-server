@@ -24,7 +24,7 @@ module DTK; module CommandAndControlAdapter
       end
 
       def block_device_mapping?(root_device_override_attrs={})
-        if default_block_device_mappings = value(:block_device_mapping)
+        if default_block_device_mapping = value(:block_device_mapping)
           BlockDeviceMapping.ret(default_block_device_mapping,root_device_override_attrs)
         end
       end
@@ -36,25 +36,32 @@ module DTK; module CommandAndControlAdapter
 
       module BlockDeviceMapping
         def self.ret(default_block_device_mapping,root_device_override_attrs={})
-          block_device_mapping = update_root_device(block_device_mapping,root_device_override_attrs)
-          convert_keys(block_device_mapping)
+          block_device_mapping = convert_and_prune_keys(default_block_device_mapping)
+          update_root_device_with_overrides(block_device_mapping,root_device_override_attrs)
         end
        private
-        def self.update_root_device(block_device_mapping,root_device_override_attrs={})
+        def self.update_root_device_with_overrides(block_device_mapping,root_device_override_attrs={})
           ret = block_device_mapping
-          unless root_device_override_attrs.empty?
-            size = root_device_override_attrs.size
-            # TODO: assuming route device is first element in array default_block_device_mapping; need to further validate
-            [root_device_override_attrs.first.merge(root_device_override_attrs)] + root_device_override_attrs[1..size-1]
+          overrides = root_device_override_attrs.reject do |k,v|
+            unless TargetKeys.include?(k)
+              Log.error("Bad key '#{k}' in root_device_override_attrs")
+              true
+            end
+          end
+          unless overrides.empty?
+            size = block_device_mapping.size
+            # TODO: assuming route device is first element in array block_device_mapping; need to further validate
+            [block_device_mapping.first.merge(root_device_override_attrs)] + block_device_mapping[1..size]
           else
             ret
           end
         end
 
-        def self.convert_keys(block_device_mapping)
+        def self.convert_and_prune_keys(block_device_mapping)
           block_device_mapping.map do |one_mapping|
-            one_mapping.inject(Hash.new) do |h,(k,v)|
-            
+            KeyMapping.inject(Hash.new) do |h,(k1,k2)|
+              one_mapping.has_key?(k1) ? h.merge(k2 => one_mapping[k1]) : h
+            end
           end
         end
         KeyMapping = {
@@ -64,30 +71,8 @@ module DTK; module CommandAndControlAdapter
           'deleteOnTermination' => 'Ebs.DeleteOnTermination',
           'virtualName'         => 'VirtualName',
         }
-
-
-      def create_block_device_mapping(image_mappings)
-        block_device_mapping = []
-
-        image_mappings.each do |image_mapping|
-          mapping = {}
-          name_mapping.each do |key, value|
-            mapping[value] = image_mapping[key] unless image_mapping[key].nil?
-          end
-          block_device_mapping << mapping
-        end
-        block_device_mapping
+        TargetKeys = KeyMapping.values
       end
-
-
-          block_device_mapping = create_block_device_mapping(block_device_mappingvalue(:block_device_mapping))
-          block_device_mapping.first["Ebs.DeleteOnTermination"] = "true"
-          block_device_mapping
-        end
-      end
-    
-
-
     end
   end
 end; end

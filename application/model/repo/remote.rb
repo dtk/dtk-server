@@ -221,7 +221,7 @@ module DTK
 
       # example:
       # returns namespace, name, version (optional)
-      def self.split_qualified_name(qualified_name,opts={})
+      def self.split_qualified_name(qualified_name, opts={})
         raise ErrorUsage.new("Please provide module name to publish") if qualified_name.nil? || qualified_name.empty?
         namespace = opts[:namespace]||default_namespace()
 

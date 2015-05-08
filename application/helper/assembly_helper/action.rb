@@ -78,16 +78,18 @@ module Ramaze::Helper
       module MatchingNodes
         def self.filter_by_id(nodes,node_id)
           node_id = node_id.to_i
-          unless match = nodes.find{|n|n.id == node_id}
+          # unless match = nodes.find{|n|n.id == node_id}
+          unless match = nodes.select{|n|n.id.to_s.start_with?(node_id.to_s)}
             raise ::DTK::ErrorUsage.new("No node matches id (#{node_id})")
           end
-          [match]
+          match
         end
         def self.filter_by_name(nodes,node_name)
-          unless match = nodes.find{|n|n.assembly_node_print_form() == node_name}
+          # unless match = nodes.find{|n|n.assembly_node_print_form() == node_name}
+          unless match = nodes.select{|n|n.assembly_node_print_form().start_with?(node_name)}
             raise ::DTK::ErrorUsage.new("No node matches name (#{node_name})")
           end
-          [match]
+          match
         end
       end
 

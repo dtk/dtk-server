@@ -27,6 +27,8 @@ module DTK
           assembly_name,module_name = pretty_print_module_and_assembly(assembly_template,opts)
           if opts[:no_module_prefix] or module_name.nil?
             assembly_name
+          elsif opts[:service_module_context_path]
+            "#{module_name}/assembly/#{assembly_name}"
           else
             "#{module_name}#{PPServiceModuleAssemblyDelim}#{assembly_name}"
           end

@@ -318,14 +318,13 @@ R8::ReactorRoute.draw do
   post  'target/create_provider' => 'target#create_provider'
   post  'target/set_default' => 'target#set_default'
   post  'target/info_about' => 'target#info_about'
-  post  'target/delete_provider' => 'target#delete_provider'
   post  'target/import_nodes' => 'target#import_nodes'
-  post  'target/delete' => 'target#delete'
+  post  'target/delete_and_destroy' => 'target#delete_and_destroy'
   post  'target/info' => 'target#info'
   post  'target/install_agents' => 'target#install_agents'
   post  'target/create_install_agents_task' => 'target#create_install_agents_task'
   post  'target/task_status' => 'target#task_status'
-  post  'target/edit_target' => 'target#edit_target'
+  post  'target/set_properties' => 'target#set_properties'
 
    # TASK
   post  'task/cancel_task' => 'task#cancel_task'

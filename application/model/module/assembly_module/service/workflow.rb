@@ -2,9 +2,15 @@ module DTK; class AssemblyModule
   class Service
     class Workflow < self
       # returns a ModuleRepoInfo object
-      def create_and_update_assembly_branch?()
+      def create_and_update_assembly_branch?(opts={})
         module_branch = get_or_create_assembly_branch()
-        update_assembly_branch(module_branch)
+        if opts[:trap_error]
+          begin
+            update_assembly_branch(module_branch)
+          rescue => e
+            Log.info_pp(["trapped error in create_and_update_assembly_branch",e])
+          end
+        end
         @service_module.get_workspace_branch_info(@am_version).merge(:edit_file => meta_file_path())
       end
 

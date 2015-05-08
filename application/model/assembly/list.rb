@@ -92,7 +92,7 @@ module DTK
         pp_opts = Aux.hash_subset(opts,[:no_module_prefix])
         assembly_template_opts = {:version_suffix => true}
         if opts[:include_namespaces]
-          assembly_template_opts.merge!(:include_namespace => true)
+          assembly_template_opts.merge!(:include_namespace => true, :service_module_context_path => true)
         end
         assembly_rows.each do |r|
           last_task_run_status = r[:last_task_run_status]
@@ -134,7 +134,8 @@ module DTK
 
           # if node group take only group members
           if r[:node] and r[:node].is_node_group?()
-            r[:nodes] ||= r.get_nodes__expand_node_groups({:remove_node_groups => true, :add_group_member_components => true}) unless opts[:only_node_group_info]
+            r[:nodes] = r.get_nodes__expand_node_groups({:remove_node_groups => true, :add_group_member_components => true}) unless opts[:only_node_group_info]
+            r[:nodes].sort!{|a,b| a[:display_name] <=> b[:display_name] }
             opts.merge!(:add_group_member_components => true)
           end
 

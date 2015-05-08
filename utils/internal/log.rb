@@ -3,7 +3,6 @@
 # TODO: out is no longer used adn should be removed after checking no calls use it
 module DTK
   module Log
-    Config = Hash.new
     Config[:print_time] = false
     Config[:print_method] = false
     Config[:include_caller] = [:error]
@@ -52,11 +51,11 @@ module DTK
     def self.ramaze_log(type,msg)
       ::Ramaze::Log.send(type,msg)
     end
-  
+
     def self.include_caller_info?(type,msg)
       if (Config[:include_caller]||[]).include?(type)
         caller_depth = Config[:include_caller_depth] || 1
-        msg += "\n#{Aux::pp_form(caller[OffsetDepth...OffsetDepth+caller_depth])}\n" 
+        msg += "\n#{Aux::pp_form(caller[OffsetDepth...OffsetDepth+caller_depth])}\n"
       end
       msg
     end

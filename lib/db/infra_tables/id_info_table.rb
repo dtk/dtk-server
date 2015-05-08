@@ -410,7 +410,12 @@ module DTK
             if opts[:create_factory_if_needed] # should only be applied for factory uri
               return create_factory(uri,c,:raise_error => true) #not doing recursive create
             end
-	    raise Error::NotFound.new(:uri,uri) if opts[:raise_error]
+            error_msg = "URI #{uri} is not in id table"
+            if opts[:raise_error]
+              raise Error.new(error_msg)
+            elsif opts[:log_error]
+              Log.error(error_msg)
+            end
 	    return nil
 	  end
 	  unformated_row = ds.first

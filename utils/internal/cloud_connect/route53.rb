@@ -4,7 +4,9 @@ module DTK
       def initialize(dns_domain)
         @dns_domain = dns_domain
         dns = Fog::DNS::AWS.new(get_compute_params(:just_credentials=>true))
-        @r8zone = dns.zones().find { |z| z.domain.include? dns_domain}
+        unless @r8zone = dns.zones().find { |z| z.domain.include? dns_domain}
+          raise ::DTK::Error.new("Bad dns_domain '#{dns_domain}'")
+        end
       end
       
       def all_records()
@@ -13,7 +15,7 @@ module DTK
         end
       end
 
-      def get_record(name, type=nil)
+      def get_record?(name, type=nil)
         request_context do
           5.times do
             begin
@@ -30,7 +32,7 @@ module DTK
       end
 
       def destroy_record(name, type=nil)
-        record = get_record(name,type)
+        record = get_record?(name,type)
         request_context do
           record.nil? ? false : record.destroy
         end

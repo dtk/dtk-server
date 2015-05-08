@@ -43,7 +43,7 @@ module DTK; class  Assembly
           # if node-group member and last one then delete node group as well
           node_group = node_group.create_obj_optional_subclass()
           Delete.node(node,opts.merge(:update_task_template=>true,:assembly=>self))
-          node_group.delete_object() if node_group.get_node_group_members.size == 0
+          node_group.delete_object({:update_task_template=>true, :assembly=>self}) if node_group.get_node_group_members.size == 0
         else
           Delete.node(node,opts.merge(:update_task_template=>true,:assembly=>self))
         end
@@ -59,7 +59,7 @@ module DTK; class  Assembly
 
         node_group = node_group.create_obj_optional_subclass()
         node_group.delete_group_members(0)
-        node_group.delete_object()
+        node_group.delete_object({:update_task_template=>true, :assembly=>self})
       end
       
       def delete_component(component_idh, node_id=nil)

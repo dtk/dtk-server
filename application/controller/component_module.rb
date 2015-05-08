@@ -247,7 +247,7 @@ module DTK
         opts = {:config_agent_type => ret_config_agent_type()}
         opts = namespace ? {:base_namespace => namespace} : {}
         MessageQueue.store(:info, "Puppet forge module installed, parsing content ...")
-        install_info = ComponentModule.import_from_puppet_forge(project,puppet_forge_local_copy,opts)
+        install_info = ComponentModule.import_from_puppet_forge(project, puppet_forge_local_copy, opts)
       ensure
         puppet_forge_local_copy.delete_base_install_dir?() if puppet_forge_local_copy
       end
@@ -264,12 +264,18 @@ module DTK
 
     # TODO: ModuleBranch::Location: harmonize this signature with one for service module
     def rest__delete_remote()
-      remote_module_name = ret_non_null_request_params(:remote_module_name)
-      remote_namespace = ret_request_params(:remote_module_namespace)
-      remote_params = remote_params_dtkn(:component_module,remote_namespace,remote_module_name)
       client_rsa_pub_key = ret_request_params(:rsa_pub_key)
+      remote_namespace = ret_request_params(:remote_module_namespace)
+
+      opts = Hash.new
+      opts.merge!(:namespace => remote_namespace) unless remote_namespace.empty?
+
+      remote_namespace, remote_module_name = Repo::Remote::split_qualified_name(ret_non_null_request_params(:remote_module_name), opts)
+      remote_params = remote_params_dtkn(:component_module, remote_namespace, remote_module_name)
+
       project = get_default_project()
       ComponentModule.delete_remote(project,remote_params,client_rsa_pub_key)
+
       rest_ok_response
     end
 

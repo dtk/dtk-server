@@ -1,12 +1,32 @@
 module DTK
   class Workspace < Assembly::Instance
-  # creates both a service, module branch, assembly instance and assembly templaet for the workspace
+    def self.create_from_id_handle(idh)
+      idh.create_object(:model_name => :assembly_workspace)
+    end
+
+  # creates both a service, module branch, assembly instance and assembly template for the workspace
     def self.create?(target_idh,project_idh)
       Factory.create?(target_idh,project_idh)
     end
 
     def self.is_workspace?(obj)
       obj.kind_of?(self) or (AssemblyFields[:ref] == obj.get_field?(:ref))
+    end
+    # if is workspace it convents to workspace object
+    def self.workspace?(obj)
+      if is_workspace?(obj)
+        create_from_id_handle(obj.id_handle).merge(obj)
+      end
+    end
+
+    def self.get_workspace(workspace_mh,opts={})
+      opts_get = Aux.hash_subset(opts,:cols).merge(:filter => [:eq,:ref,AssemblyFields[:ref]])
+      rows = Workspace.get(workspace_mh,opts_get)
+      unless rows.size == 1
+        Log.error_pp(["Unexpected that get_workspace does not return 1 row",rows])
+        return nil
+      end
+      rows.first
     end
 
     def purge(opts={})
@@ -16,15 +36,49 @@ module DTK
       delete_tasks()
     end
 
-    def set_target(target)
+    # opts has :mode
+    # three modes
+    #   :direct - direct command called (default)
+    #   :from_set_default_target
+    #   :from_delete_target  
+    def self.set_target(target,opts={})
+      if workspace = get_workspace(target.model_handle(:assembly_workspace))
+         workspace.set_target(target,opts)
+      end
+    end
+    def set_target(target,opts={})
+      return unless target
+      mode = opts[:mode]|| :direct
       current_target = get_target()
-      if current_target.id ==  target.id
-        raise ErrorUsage::Warning.new("Target is already set to #{target.get_field?(:display_name)}")
+      if current_target && current_target.id == target.id
+        if mode == :direct
+          raise ErrorUsage::Warning.new("Target is already set to #{target.get_field?(:display_name)}")
+        end
+        return
       end
+
+      update = true
       unless op_status_all_pending?()
-        raise ErrorUsage.new("The command 'set-target' can only be invoked before the workspace has been converged (i.e., is in 'pending' state)")
+        case mode
+         when :direct
+          raise ErrorUsage.new("The command 'set-target' can only be invoked before the workspace has been converged (i.e., is in 'pending' state)")
+         when :from_set_default_target
+          # treated as no op (keep workspace as is)
+          update = false
+         when :from_delete_target
+          # want to update so deleting target does not have foreign key that causes the workspace object to be deleted
+          update = true
+         else 
+          raise Error.new("Unexpected mode '#{mode}'")
+        end
       end
-      update(:datacenter_datacenter_id => target.id)
+      if update
+        update(:datacenter_datacenter_id => target.id)
+      end
+    end
+
+    def self.is_workspace_service_module?(service_module)
+      service_module.get_field?(:display_name) == ServiceModuleFields[:display_name]
     end
 
     def self.is_workspace_service_module?(service_module)

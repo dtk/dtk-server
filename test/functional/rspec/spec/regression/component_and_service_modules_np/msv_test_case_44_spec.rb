@@ -22,6 +22,7 @@ service_module = "r8:test_service_module_3"
 r8_service_module_filesystem_location = '~/dtk/service_modules/r8'
 r8_component_module_filesystem_location = '~/dtk/component_modules/r8'
 file_for_change_location = "./spec/regression/component_and_service_modules_np/resources/msv_test_case_44_module_refs.yaml"
+dtk_model_yaml_file_location = "~/dtk/component_modules/r8/tomcat/dtk.model.yaml"
 file_for_add = "module_refs.yaml"
 file_for_remove = "module_refs.yaml"
 
@@ -59,6 +60,10 @@ describe "(Modules, Services and Versioning) Test Case 44: Install service modul
 
   context "Add module_refs.yaml file" do
     include_context "Add module_refs.yaml file", component_module_name_1, file_for_change_location, file_for_add, r8_component_module_filesystem_location
+  end
+
+  context "Add includes to dtk.model.yaml" do
+    include_context "Add includes to dtk.model.yaml", dtk_model_yaml_file_location, [component_module_name_2, component_module_name_3]
   end
 
   context "Push clone changes of component module from local copy to server" do
@@ -116,6 +121,10 @@ describe "(Modules, Services and Versioning) Test Case 44: Install service modul
   # Cleanup
   context "Remove module_refs.yaml file" do
     include_context "Remove module_refs.yaml file", component_module_name_1, file_for_remove, r8_component_module_filesystem_location
+  end
+
+  context "Remove includes from dtk.model.yaml" do
+    include_context "Remove includes from dtk.model.yaml", dtk_model_yaml_file_location, [component_module_name_2, component_module_name_3]
   end
 
   context "Push to remote changes for component module" do

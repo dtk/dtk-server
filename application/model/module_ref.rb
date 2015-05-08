@@ -5,7 +5,7 @@ module DTK
     r8_nested_require('module_ref','missing')
 
     def self.common_columns()
-      [:id,:display_name,:group_id,:module_name,:module_type,:version_info,:namespace_info,:branch_id]
+      [:id,:display_name,:group_id,:module_name,:module_type,:version_info,:namespace_info,:external_ref,:branch_id]
     end
 
     def self.reify(mh,object)
@@ -80,7 +80,7 @@ module DTK
       case operation
        when :create_or_update
         matching_cols = [:module_name]
-        modify_children_from_rows(model_handle,parent.id_handle(),rows,matching_cols,:update_matching => true)
+        modify_children_from_rows(model_handle,parent.id_handle(),rows,matching_cols,:update_matching => true,:convert => true)
        when :add
         create_from_rows(model_handle,rows)
        else
@@ -112,7 +112,7 @@ module DTK
       end
       ret
     end
-    DSLHashCols = [:version_info,{:namespace_info => :namespace}]
+    DSLHashCols = [:version_info,{:namespace_info => :namespace},:external_ref]
 
    private
     def self.ret_create_rows(parent,module_ref_hash_array)
@@ -128,7 +128,7 @@ module DTK
           else
             assigns = parent_id_assigns
           end
-        el = Aux.hash_subset(module_ref_hash,[:ref,:display_name,:module_name,:module_type,:namespace_info]).merge(assigns)
+        el = Aux.hash_subset(module_ref_hash,[:ref,:display_name,:module_name,:module_type,:namespace_info,:external_ref]).merge(assigns)
         el[:display_name] ||= display_name(el)
         el[:ref] ||= ref(el)
         el

@@ -5,6 +5,8 @@ module DTK; class ModuleDSL; class V4
       def body(input_hash,cmp,context={})
         ret = OutputHash.new
         cmp_type = ret["display_name"] = ret["component_type"] = qualified_component(cmp)
+        # version below refers to component brranch version not metafile version
+        ret["version"] = ::DTK::Component.default_version()
         ret["basic_type"] = "service"
         ret.set_if_not_nil("description",input_hash["description"])
         add_attributes!(ret,cmp_type,input_hash)

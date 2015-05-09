@@ -12,7 +12,6 @@ module DTK; class ModuleDSL; class V4
         add_attributes!(ret,cmp_type,input_hash)
         opts = Hash.new
         add_dependent_components!(ret,input_hash,cmp_type,opts)
-        section_name = "includes"
         ret.set_if_not_nil("component_include_module",include_modules?(input_hash,cmp_type,context))
         if opts[:constants]
           add_attributes!(ret,cmp_type,ret_input_hash_with_constants(opts[:constants]),:constant_attribute => true)

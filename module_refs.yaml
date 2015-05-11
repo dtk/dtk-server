@@ -1,0 +1,10 @@
+---
+component_modules:
+  dtk_secret:
+    namespace: internal
+  logrotate:
+    namespace: internal
+  nginx:
+    namespace: internal
+  stdlib:
+    namespace: internal

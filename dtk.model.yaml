@@ -1,0 +1,12 @@
+---
+module: stdlib
+dsl_version: 1.0.0
+module_type: puppet_module
+components:
+  stdlib:
+    external_ref:
+      puppet_class: stdlib
+  stages:
+    external_ref:
+      puppet_class: stdlib::stages
+

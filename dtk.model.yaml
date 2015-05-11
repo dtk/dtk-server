@@ -1,0 +1,13 @@
+---
+module: dtk_java
+dsl_version: 0.9.1
+module_type: puppet_module
+components: 
+    dtk_java: 
+      description: "Installs java"
+      external_ref: 
+        puppet_class: dtk_java
+      dependencies: 
+      - stdlib
+      - dtk
+

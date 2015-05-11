@@ -1,0 +1,14 @@
+---
+component_modules:
+  apt:
+    namespace: internal
+  dtk_secret:
+    namespace: internal
+  logrotate:
+    namespace: internal
+  nginx:
+    namespace: internal
+  rvm:
+    namespace: internal
+  vcsrepo:
+    namespace: internal

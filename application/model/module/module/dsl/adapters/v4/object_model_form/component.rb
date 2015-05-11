@@ -5,12 +5,13 @@ module DTK; class ModuleDSL; class V4
       def body(input_hash,cmp,context={})
         ret = OutputHash.new
         cmp_type = ret["display_name"] = ret["component_type"] = qualified_component(cmp)
+        # version below refers to component brranch version not metafile version
+        ret["version"] = ::DTK::Component.default_version()
         ret["basic_type"] = "service"
         ret.set_if_not_nil("description",input_hash["description"])
         add_attributes!(ret,cmp_type,input_hash)
         opts = Hash.new
         add_dependent_components!(ret,input_hash,cmp_type,opts)
-        section_name = "includes"
         ret.set_if_not_nil("component_include_module",include_modules?(input_hash,cmp_type,context))
         if opts[:constants]
           add_attributes!(ret,cmp_type,ret_input_hash_with_constants(opts[:constants]),:constant_attribute => true)

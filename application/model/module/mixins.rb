@@ -122,8 +122,9 @@ module DTK
 
     def update_model_from_clone_changes?(commit_sha,diffs_summary,version,opts={})
       # do pull and see if any changes need the model to be updated
+      force = opts[:force]
       module_branch = get_workspace_module_branch(version)
-      pull_was_needed = module_branch.pull_repo_changes?(commit_sha)
+      pull_was_needed = module_branch.pull_repo_changes?(commit_sha, force)
       # parse_needed = (opts[:force_parse] or !dsl_parsed?())
       parse_needed = (opts[:force_parse] or !module_branch.dsl_parsed?())
       update_from_includes = opts[:update_from_includes]

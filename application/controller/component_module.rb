@@ -83,6 +83,9 @@ module DTK
       if current_branch_sha = ret_request_params(:current_branch_sha)
         opts.merge!(:current_branch_sha => current_branch_sha)
       end
+      if force = ret_request_params(:force)
+        opts.merge!(:force => force)
+      end
 
       # the possible keys in response are with the subkeys that are used
       #  :dsl_parse_error: ModuleDSL::ParsingError obj

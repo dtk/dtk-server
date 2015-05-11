@@ -111,12 +111,12 @@ end
     end
 
     # returns true if actual pull was needed
-    def pull_repo_changes?(commit_sha)
+    def pull_repo_changes?(commit_sha, force = false)
       update_object!(:branch,:current_sha)
       if is_set_to_sha?(commit_sha)
         nil
       else
-        merge_result = RepoManager.fast_foward_pull(self[:branch],self)
+        merge_result = RepoManager.fast_foward_pull(self[:branch], force, self)
         if merge_result == :merge_needed
           raise Error.new("Merge problem exists between multiple clients editting the module (#{get_module().pp_module_name()})")
         end

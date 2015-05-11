@@ -1,0 +1,20 @@
+---
+module: dtk_passenger
+dsl_version: 0.9.1
+module_type: puppet_module
+components:
+  dtk_passenger:
+    external_ref:
+      puppet_class: dtk_passenger
+    attributes:
+      ruby_path:
+        type: string
+  repo:
+    external_ref:
+      puppet_definition: dtk_passenger::repo
+    attributes:
+      name:
+        type: string
+        required: true
+includes:
+- apt

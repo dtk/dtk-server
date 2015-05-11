@@ -77,9 +77,11 @@ end
     end
 
     def merge_changes_and_update_model?(component_module,branch_name_to_merge_from,opts={})
-      ret = get_module_repo_info()
-      diffs = RepoManager.diff(branch_name_to_merge_from,self)
+      current_sha   = self[:current_sha]
+      ret           = get_module_repo_info()
+      diffs         = RepoManager.diff(branch_name_to_merge_from,self)
       diffs_summary = diffs.ret_summary()
+
       # TODO: in addition to :any_updates or instead can send the updated sha and have client to use that to determine if client is up to date
       return ret if diffs_summary.no_diffs?()
       ret = ret.merge!(:any_updates => true, :fast_forward_change => true)
@@ -101,11 +103,21 @@ end
 
       impl_obj = get_implementation()
       impl_obj.modify_file_assets(diffs_summary)
+
       if diffs_summary.meta_file_changed?()
-        e = ErrorUsage::Parsing.trap(:only_return_error=>true) do
+        errors = ErrorUsage::Parsing.trap(:only_return_error=>true) do
           component_module.parse_dsl_and_update_model(impl_obj,id_handle(),version(),:update_module_refs_from_file => true)
         end
-        ret.merge!(:dsl_parsing_errors => e) if e
+
+        if errors
+          # reset base branch to previous sha
+          repo = self.get_repo()
+          repo.hard_reset_branch_to_sha(self, current_sha)
+          self.set_sha(current_sha)
+
+          # return parsing errors
+          ret.merge!(:dsl_parsing_errors => errors)
+        end
       end
       ret
     end

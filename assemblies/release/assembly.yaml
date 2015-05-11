@@ -1,0 +1,161 @@
+---
+name: release
+dsl_version: 0.9.1
+node_bindings:
+  repo_manager: precise-micro
+  tenant: precise-medium
+assembly:
+  nodes:
+    tenant:
+      components:
+      - common_user[dtk16-client]:
+          attributes:
+            user: dtk16-client
+      - dtk_client:
+          attributes:
+            dtk_client_unix_user: dtk16-client
+            dtk_client_username: dtk16
+            gem_source_location: http://dtkuser:g3msdtk@gems.r8network.com
+      - dtk_client::resources:
+          attributes:
+            user: dtk16-client
+      - dtk_addons::rspec2db:
+          attributes:
+            user: dtk16-client
+      - dtk_addons::remote:
+          attributes:
+            destination_host: backup.r8network.com
+            destination_user: dtk
+            source_user: dtk16-client
+      - dtk_addons::jenkins_swarm_client:
+          attributes:
+            master: http://jenkins.r8network.com/
+            name: release_node
+            user: dtk16-client
+            username: admin
+      - dtk_addons::test_scripts_setup:
+          attributes:
+            destination_user: dtk16-client
+            source_user: dtk16
+            log: /home/dtk16/server/current/application/log/production.log
+            database: dtk16
+            server_username: dtk16
+      - dtk
+      - dtk_server::ruby193install:
+          attributes:
+            install: 'true'
+            name: tenant
+      - dtk_server::cron_idle_instances[dtk16]:
+          attributes:
+            tenant_password: r8server
+            name: dtk16
+      - dtk_nginx::base
+      - dtk_nginx::vhost_for_tenant[dtk16]:
+          attributes:
+            instance_name: dtk16
+      - nginx::include
+      - dtk_activemq:
+          attributes:
+            user: mcollective
+            password: marionette
+            subcollective: mcollective
+      - common_user::common_user_ssh_config:
+          attributes:
+            user: dtk16
+            name: tenant
+      - dtk_postgresql::server
+      - dtk_server::add_user:
+          attributes:
+            tenant_db_user: dtk16
+            tenant_user: dtk16
+            name: tenant
+      - dtk_server::base
+      - dtk_server::tenant:
+          attributes:
+            gitolite_user: git16
+            server_branch: master
+            tenant_user: dtk16
+            name: tenant
+          component_links:
+            dtk_repo_manager: repo_manager/dtk_repo_manager
+      - gitolite:
+          attributes:
+            gitolite_user: git16
+            name: tenant
+      - vcsrepo::include
+      - stdlib
+      - dtk_postgresql::db:
+          attributes:
+            db_name: dtk16
+            name: tenant
+      - dtk_java
+      - gitolite::admin_client:
+          attributes:
+            client_name: dtk16
+            gitolite_user: git16
+            name: tenant
+      - common_user:
+          attributes:
+            user: git16
+            name: tenant
+      - logrotate::base
+      - dtk_passenger
+      - redis::install
+      - redis::instance:
+          attributes:
+            name: 6379
+    repo_manager:
+      components:
+      - dtk
+      - stdlib
+      - dtk_repo_manager
+      - dtk_postgresql::server
+      - gitolite:
+          attributes:
+            name: git
+      - common_user:
+          attributes:
+            name: git
+workflow:
+  assembly_action: create
+  subtask_order: sequential
+  subtasks:
+  - node: repo_manager
+    ordered_components:
+    - stdlib
+    - dtk
+    - common_user[git]
+    - gitolite[git]
+    - dtk_postgresql::server
+    - dtk_repo_manager
+  - node: tenant
+    ordered_components:
+    - stdlib
+    - dtk
+    - dtk_java
+    - dtk_activemq
+    - common_user[tenant]
+    - common_user[dtk16-client]
+    - gitolite[tenant]
+    - dtk_server::ruby193install[tenant]
+    - dtk_server::base
+    - dtk_postgresql::server
+    - dtk_postgresql::db[tenant]
+    - redis::install
+    - redis::instance[6379]
+    - dtk_server::tenant[tenant]
+    - dtk_server::cron_idle_instances[dtk16]
+    - gitolite::admin_client[tenant]
+    - logrotate::base
+    - dtk_passenger
+    - vcsrepo::include
+    - common_user::common_user_ssh_config[tenant]
+    - dtk_server::add_user[tenant]
+    - dtk_nginx::base
+    - dtk_nginx::vhost_for_tenant[dtk16]
+    - dtk_client
+    - dtk_client::resources
+    - dtk_addons::rspec2db
+    - dtk_addons::remote
+    - dtk_addons::test_scripts_setup
+    - dtk_addons::jenkins_swarm_client

@@ -1,0 +1,33 @@
+---
+name: repo-manager-admin
+dsl_version: 0.9.1
+node_bindings:
+  repo_manager: precise-micro
+assembly:
+  nodes:
+    repo_manager:
+      components:
+      - dtk
+      - stdlib
+      - dtk_repo_manager:
+          attributes:
+            repoman_dns_address: repoman-test.dtk.io
+            admin_dns_address: admin-test.dtk.io
+            repoman_tag: master
+      - dtk_postgresql::server
+      - gitolite:
+          attributes:
+            name: git
+      - common_user:
+          attributes:
+            name: git
+workflow:
+  assembly_action: create
+  node: repo_manager
+  ordered_components:
+  - stdlib
+  - dtk
+  - common_user[git]
+  - gitolite[git]
+  - dtk_postgresql::server
+  - dtk_repo_manager

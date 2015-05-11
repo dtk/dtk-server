@@ -1,0 +1,4 @@
+---
+component_modules:
+  vcsrepo:
+    namespace: internal

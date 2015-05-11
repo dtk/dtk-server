@@ -169,8 +169,32 @@ module DTK; class Task
         task.update(:bound_input_attrs => bound_input_attrs)
       end
 
+
+      def ruby_function_implementation?()
+        component_actions = self[:component_actions]||[]
+        unless component_actions.empty?
+          # check taht all elements have ruby function type
+          !component_actions.find{|a|'ruby_function' != ((a[:component]||{})[:external_ref]||{})[:type]}
+        end
+      end 
+
+      def assembly_wide_component?()
+        if node_type = (self[:node]||{})[:type]
+          node_type.eql?(AssemblyWideNodename)
+        end
+      end
+      AssemblyWideNodename = 'assembly_wide'
+
+      # returns [adapter_type,adapter_name]
+      # adapter_name can be null-> default is used
       def ret_command_and_control_adapter_info()
-        [:node_config,nil]
+        adapter_type = :node_config
+        adapter_name = 
+          if assembly_wide_component?()
+            # adapter_name indicating toe xecute on server, rather than dispatching to a node
+            :server
+          end
+        [adapter_type,adapter_name]
       end
 
       def update_state_change_status(task_mh,status)

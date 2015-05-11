@@ -1,0 +1,38 @@
+---
+module: common_user
+dsl_version: 1.0.0
+components:
+  common_user:
+    external_ref:
+      puppet_definition: common_user
+    attributes:
+      name:
+        type: string
+      user:
+        type: string
+        required: true
+  common_user_ssh_config:
+    external_ref:
+      puppet_definition: common_user::common_user_ssh_config
+    attributes:
+      name:
+        type: string
+      user:
+        type: string
+        required: true
+  user_list:
+    external_ref:
+      puppet_class: common_user::user_list
+    attributes:
+      users:
+        type: array
+        required: true
+  test:
+    external_ref:
+      puppet_definition: common_user::test
+    attributes:
+      name:
+        type: string
+      user:
+        type: string
+        required: true

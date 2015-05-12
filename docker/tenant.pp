@@ -74,6 +74,6 @@ class {"dtk_passenger": stage => 17}
 class {"dtk_nginx::base": stage => 18}
  
 class dtk_stage19 {
-  dtk_nginx::vhost_for_tenant {"dtk1": instance_name => "dtk1"}
+  dtk_nginx::vhost_for_tenant {"dtk1": instance_name => "dtk1", tenant_type => 'http'}
 }
 class {"dtk_stage19": stage => 19}

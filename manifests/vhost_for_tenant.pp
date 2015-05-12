@@ -1,6 +1,7 @@
 define dtk_nginx::vhost_for_tenant(
   $instance_name,
-  $docker_tenant = false,
+  # possible values are: https (sets up ssl), https (listens on port 80) and docker
+  $tenant_type   = 'https',
   $docker_socket = undef,
 )
 {
@@ -14,36 +15,52 @@ define dtk_nginx::vhost_for_tenant(
   #nginx::resource::upstream { $dtk_tenant_name:
   #  members => ["unix:/home/${dtk_tenant_name}/thin/thin.sock"]
   #}
-
-  if $docker_tenant != true {
-    nginx::resource::vhost { "${instance_name}.dtk.io":
-      listen_port           => $dtk_nginx::base::listen_port,
-      #proxy                 => "http://${dtk_tenant_name}",
-      www_root              => $dtk_tenant_www_root,
-      ssl		                => true,
-      ssl_cert              => "puppet:///modules/dtk_secret/dtk.io_combined.crt",
-      ssl_key               => "puppet:///modules/dtk_secret/wildcard.dtk.io.key",
-      ssl_protocols         => "TLSv1 TLSv1.1 TLSv1.2",
-      ssl_ciphers           => "ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA256:DHE-DSS-AES256-SHA:AES128-GCM-SHA256:AES256-GCM-SHA384:HIGH:!aNULL:!eNULL:!EXPORT:!DES:!3DES:!MD5:!PSK",
-      ssl_cache             => "shared:SSL:50m",
-      vhost_cfg_append      => {
-        'passenger_enabled' => 'on',
-        'rack_env'          => 'production',
+  
+  case $tenant_type {
+    'https': {
+      nginx::resource::vhost { "${instance_name}.dtk.io":
+        listen_port           => $dtk_nginx::base::listen_port,
+        #proxy                 => "http://${dtk_tenant_name}",
+        www_root              => $dtk_tenant_www_root,
+        ssl		                => true,
+        ssl_cert              => "puppet:///modules/dtk_secret/dtk.io_combined.crt",
+        ssl_key               => "puppet:///modules/dtk_secret/wildcard.dtk.io.key",
+        ssl_protocols         => "TLSv1 TLSv1.1 TLSv1.2",
+        ssl_ciphers           => "ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA256:DHE-DSS-AES256-SHA:AES128-GCM-SHA256:AES256-GCM-SHA384:HIGH:!aNULL:!eNULL:!EXPORT:!DES:!3DES:!MD5:!PSK",
+        ssl_cache             => "shared:SSL:50m",
+        vhost_cfg_append      => {
+          'passenger_enabled' => 'on',
+          'rack_env'          => 'production',
+        }
       }
     }
-  }
-  else {
-    nginx::resource::upstream { "docker-${instance_name}":
-       ensure  => present,
-       members => [
-         "unix:${docker_socket}", 
-       ],
-     }
-    nginx::resource::vhost { "${instance_name}.dtk.io":
-      ensure      => present,
-      listen_port => $dtk_nginx::base::listen_port_unsecure,
-      proxy       => "http://docker-${instance_name}",
+
+    'http': {
+      nginx::resource::vhost { "${instance_name}.dtk.io":
+        listen_port           => $dtk_nginx::base::listen_port_unsecure,
+        www_root              => $dtk_tenant_www_root,
+        vhost_cfg_append      => {
+          'passenger_enabled' => 'on',
+          'rack_env'          => 'production',
+        }
+      }
     }
+
+    'docker': {
+      nginx::resource::upstream { "docker-${instance_name}":
+         ensure  => present,
+         members => [
+           "unix:${docker_socket}", 
+         ],
+       }
+      nginx::resource::vhost { "${instance_name}.dtk.io":
+        ensure      => present,
+        listen_port => $dtk_nginx::base::listen_port_unsecure,
+        proxy       => "http://docker-${instance_name}",
+      }
+    }
+
+    default : { fail("Tenant type ${tenant_type} is not supported!")}
   }
 
 }

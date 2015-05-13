@@ -1,5 +1,5 @@
-\\--format Rspec2db
-\\--options ./config/rspec2db.yml
+--format Rspec2db
+--options ./config/rspec2db.yml
 --options LINUX_ENV
 --color
 --format documentation

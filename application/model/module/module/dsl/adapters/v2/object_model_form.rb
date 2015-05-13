@@ -46,12 +46,11 @@ module DTK; class ModuleDSL; class V2
     module ComponentChoiceMixin
       def add_dependency!(ret,dep_cmp,base_cmp)
         ret[dep_cmp] ||= { 
-          "type"=>"component",
-          "search_pattern"=>{":filter"=>[":eq", ":component_type", dep_cmp]},
-          "description"=>
-          "#{component_print_form(dep_cmp)} is required for #{component_print_form(base_cmp)}",
-          "display_name"=>dep_cmp,
-          "severity"=>"warning"
+          "type"           => "component",
+          "search_pattern" => {":filter"=>[":eq", ":component_type", dep_cmp]},
+          "description"    => "#{component_print_form(dep_cmp)} is required for #{component_print_form(base_cmp)}",
+          "display_name"   => dep_cmp,
+          "severity"       => "warning"
         }
       end
 
@@ -252,13 +251,37 @@ module DTK; class ModuleDSL; class V2
 
         # setting even when nil so on change can cancel old value
         ret['value_asserted'] = value_asserted(info,ret)
-        AttributeProps.each{|field|ret[field] = info[field]}
 
         side_effect_settings.each_pair{|field,value|ret[field] ||= value}
+
+        AttributeProps.add_defaults_for_nils!(ret,info)
+
         ret
       end
-      AttributeProps = %w{description dynamic required hidden}
-      
+
+      module AttributeProps
+        def self.add_defaults_for_nils!(ret,info)
+            Fields.each do |field|
+            val = info[field.to_s] 
+            ret[field] = val.nil? ? default(field) : val
+          end
+          ret
+        end
+
+        private
+        def self.default(field)
+         (Info[field]||{})[:default]
+        end
+        
+        Info = {
+          :description => {:type => :string,  :default => nil},
+          :dynamic     => {:type => :boolean, :default => false},
+          :required    => {:type => :boolean, :default => false},
+          :hidden      => {:type => :boolean, :default => false}
+        }
+        Fields = Info.keys
+      end
+
       def dynamic_default_variable?(info)
         !!(info["external_ref"]||{})["default_variable"]
       end

@@ -6,6 +6,6 @@ dbconnection:
   adapter: postgresql
   database: rspec_test_report
   username: postgres
-  password: password
+  password: jenkinspadrinorspecintegration
   host: backup.r8network.com
   port: 5432

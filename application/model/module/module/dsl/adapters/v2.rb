@@ -5,9 +5,6 @@ module DTK
       r8_nested_require('v2','dsl_object')
       r8_nested_require('v2','object_model_form')
       r8_nested_require('v2','incremental_generator')
-      def self.parse_check(input_hash)
-        # TODO: stub
-      end
       def self.normalize(input_hash)
         object_model_form.convert(object_model_form::InputHash.new(input_hash))
       end

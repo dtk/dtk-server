@@ -83,6 +83,9 @@ module DTK
       if current_branch_sha = ret_request_params(:current_branch_sha)
         opts.merge!(:current_branch_sha => current_branch_sha)
       end
+      if force = ret_request_params(:force)
+        opts.merge!(:force => force)
+      end
 
       # the possible keys in response are with the subkeys that are used
       #  :dsl_parse_error: ModuleDSL::ParsingError obj
@@ -264,12 +267,18 @@ module DTK
 
     # TODO: ModuleBranch::Location: harmonize this signature with one for service module
     def rest__delete_remote()
-      remote_module_name = ret_non_null_request_params(:remote_module_name)
-      remote_namespace = ret_request_params(:remote_module_namespace)
-      remote_params = remote_params_dtkn(:component_module,remote_namespace,remote_module_name)
       client_rsa_pub_key = ret_request_params(:rsa_pub_key)
+      remote_namespace = ret_request_params(:remote_module_namespace)
+
+      opts = Hash.new
+      opts.merge!(:namespace => remote_namespace) unless remote_namespace.empty?
+
+      remote_namespace, remote_module_name = Repo::Remote::split_qualified_name(ret_non_null_request_params(:remote_module_name), opts)
+      remote_params = remote_params_dtkn(:component_module, remote_namespace, remote_module_name)
+
       project = get_default_project()
       ComponentModule.delete_remote(project,remote_params,client_rsa_pub_key)
+
       rest_ok_response
     end
 

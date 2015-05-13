@@ -22,54 +22,56 @@ module DTK; module CommandAndControlAdapter
       def root_device_name()
         value(:root_device_name)
       end
-      def block_device_mapping_device_name()
-        if bdm = single_block_device_mapping?()
-          bdm['deviceName']
+
+      def block_device_mapping?(root_device_override_attrs={})
+        if default_block_device_mapping = value(:block_device_mapping)
+          BlockDeviceMapping.ret(default_block_device_mapping,root_device_override_attrs)
         end
       end
 
-      def block_device_mapping_with_delete_on_termination()
-        return nil unless value(:block_device_mapping)
-        block_device_mapping = create_block_device_mapping(value(:block_device_mapping))
-        block_device_mapping.first["Ebs.DeleteOnTermination"] = "true"
-        block_device_mapping
-      end
-
-      private
-
+     private
       def value(attr)
         (@ami||{})[attr]
       end
 
-      def create_block_device_mapping(image_mappings)
-        block_device_mapping = []
-        name_mapping = {
-          'deviceName' => 'DeviceName',
-          'snapshotId' => 'Ebs.SnapshotId',
-          'volumeSize' => 'Ebs.VolumeSize',
-          'deleteOnTermination' => 'Ebs.DeleteOnTermination',
-          'virtualName' => 'VirtualName',
-        }
-        image_mappings.each do |image_mapping|
-          mapping = {}
-          name_mapping.each do |key, value|
-            mapping[value] = image_mapping[key] unless image_mapping[key].nil?
-          end
-          block_device_mapping << mapping
+      module BlockDeviceMapping
+        def self.ret(default_block_device_mapping,root_device_override_attrs={})
+          block_device_mapping = convert_and_prune_keys(default_block_device_mapping)
+          update_root_device_with_overrides(block_device_mapping,root_device_override_attrs)
         end
-        block_device_mapping
-      end
+       private
+        def self.update_root_device_with_overrides(block_device_mapping,root_device_override_attrs={})
+          ret = block_device_mapping
+          overrides = root_device_override_attrs.reject do |k,v|
+            unless TargetKeys.include?(k)
+              Log.error("Bad key '#{k}' in root_device_override_attrs")
+              true
+            end
+          end
+          unless overrides.empty?
+            size = block_device_mapping.size
+            # TODO: assuming route device is first element in array block_device_mapping; need to further validate
+            [block_device_mapping.first.merge(root_device_override_attrs)] + block_device_mapping[1..size]
+          else
+            ret
+          end
+        end
 
-      def single_block_device_mapping?()
-        if bdm = value(:block_device_mapping)
-          case bdm.size
-            when 0 then nil
-            when 1 then bdm.first
-            else 
-              Log.error("Call to single_block_device_mapping? when more than one blocks defined")
-              nil
+        def self.convert_and_prune_keys(block_device_mapping)
+          block_device_mapping.map do |one_mapping|
+            KeyMapping.inject(Hash.new) do |h,(k1,k2)|
+              one_mapping.has_key?(k1) ? h.merge(k2 => one_mapping[k1]) : h
+            end
           end
         end
+        KeyMapping = {
+          'deviceName'          => 'DeviceName',
+          'snapshotId'          => 'Ebs.SnapshotId',
+          'volumeSize'          => 'Ebs.VolumeSize',
+          'deleteOnTermination' => 'Ebs.DeleteOnTermination',
+          'virtualName'         => 'VirtualName',
+        }
+        TargetKeys = KeyMapping.values
       end
     end
   end

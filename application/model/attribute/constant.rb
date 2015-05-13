@@ -17,6 +17,10 @@ module DTK
         !!constant_array.find{|c2|same_constant?(c2)}
       end
 
+      def self.side_effect_settings()
+        {'hidden' => true}
+      end
+
       ExternalRefType = "constant"
       def self.ret_external_ref()
         {"type" => ExternalRefType}

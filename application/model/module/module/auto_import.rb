@@ -23,6 +23,7 @@ module DTK
         name      = r_module["module_name"]
         type      = r_module["module_type"]
         version   = r_module["version_info"]
+        url       = r_module["module_url"]
         # we support both fields for namespace
         namespace = r_module["remote_namespace"]||r_module["module_namespace"]
 
@@ -34,7 +35,7 @@ module DTK
           (namespace.nil? or namespace.eql?(i_module.module_namespace))
         end
 
-        data = data_element(name, namespace||service_namespace, type, version)
+        data = data_element(name, namespace||service_namespace, type, version, url)
 
         if is_found
           found_modules << data
@@ -55,7 +56,7 @@ module DTK
               installed_ns   = i_module.module_namespace
 
               if (el['module_name'].eql?(installed_name) and el['module_namespace'].eql?(installed_ns))
-                found_modules << data_element(installed_name, installed_ns, el['module_type'], nil)
+                found_modules << data_element(installed_name, installed_ns, el['module_type'])
                 reject_it = true
                 break
               end
@@ -74,8 +75,8 @@ module DTK
 
   private
 
-    def data_element(name, namespace, type, version)
-      { :name => name, :version => version, :type => type, :namespace => namespace }
+    def data_element(name, namespace, type, version = nil, url = nil)
+      { :name => name, :version => version, :type => type, :namespace => namespace, :module_url => url }
     end
 
     def clear_cached()

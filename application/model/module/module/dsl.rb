@@ -231,12 +231,8 @@ module DTK
     def version_parse_check_and_normalize(version_specific_input_hash)
       integer_version = integer_version(version_specific_input_hash)
       klass = self.class.load_and_return_version_adapter_class(integer_version)
-      # parse_check raises errors if any errors found
-      klass.parse_check(version_specific_input_hash)
-      ret = klass.normalize(version_specific_input_hash)
-      # version below refers to component version not metafile version
-      ret.each_value{|cmp_info|cmp_info["version"] ||= Component.default_version()}
-      ret
+      # normalize also raises any parse errors
+      klass.normalize(version_specific_input_hash)
     end
 
     def self.dsl_filename(format_type,dsl_integer_version=nil)

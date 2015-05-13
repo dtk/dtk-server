@@ -79,7 +79,6 @@ module DTK; class  Assembly
           opts.merge!(:remove_assembly_wide_node => true)
           list_attributes(opts)
         when :components
-          opts.merge!(:remove_assembly_wide_node => true)
           list_components(opts)
         when :nodes
           opts.merge!(:cols => Node.common_columns()+[:target])
@@ -171,12 +170,15 @@ module DTK; class  Assembly
       private :set_node_display_name!,:set_node_admin_op_status!
 
       def list_components(opts=Opts.new)
-        aug_cmps = get_augmented_components(opts)
+        aug_cmps      = get_augmented_components(opts)
         node_cmp_name = opts[:node_cmp_name]
+
         cmps_print_form = aug_cmps.map do |r|
-          namespace = r[:namespace]
-          node_name = "#{r[:node][:display_name]}/"
-          display_name = "#{node_cmp_name.nil? ? node_name : ''}#{Component::Instance.print_form(r, namespace)}"
+          type           = r[:node][:type]
+          namespace      = r[:namespace]
+          node_name      = "#{r[:node][:display_name]}/"
+          hide_node_name = node_cmp_name || type.eql?('assembly_wide')
+          display_name   = "#{hide_node_name ? '' : node_name}#{Component::Instance.print_form(r, namespace)}"
           r.hash_subset(:id).merge({:display_name => display_name})
         end
 

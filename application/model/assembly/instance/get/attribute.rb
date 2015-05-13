@@ -50,9 +50,7 @@ module DTK; class Assembly; class Instance; module Get
       all_attrs = get_attributes_all_levels_struct(filter_proc)
 
       # remove all assembly_wide_node attributes
-      if opts[:remove_assembly_wide_node]
-        all_attrs.node_attrs.reject!{|r| r[:node] && r[:node][:type].eql?('assembly_wide')}
-      end
+      all_attrs.node_attrs.reject!{|r| r[:node] && r[:node][:type].eql?('assembly_wide')}
 
       filter_proc = opts[:filter_proc]
       assembly_attrs = all_attrs.assembly_attrs.map do |attr|

@@ -225,6 +225,14 @@ module DTK; class  Assembly
       node
     end
 
+    def has_assembly_wide_node?()
+      sp_hash = {
+        :cols => [:id, :display_name,:group_id, :ordered_component_ids],
+        :filter => [:and, [:eq, :type, 'assembly_wide'], [:eq, :assembly_id, id()]]
+      }
+      Model.get_obj(model_handle(:node), sp_hash)
+    end
+
     #rturns a node group object if node_idh is a node group member of this assembly instance
     def is_node_group_member?(node_idh)
       sp_hash = {

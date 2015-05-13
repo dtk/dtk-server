@@ -33,9 +33,11 @@ module DTK; class Attribute
     # set_attributes can create or set attributes depending on options in opts
     # returns attribute patterns
     def self.set_attributes(base_object,av_pairs,opts={})
-      ret = Array.new
-      attribute_rows = Array.new
+      ret             = Array.new
+      attribute_rows  = Array.new
       attr_properties = opts[:attribute_properties]||{}
+      attributes      = base_object.list_attributes(Opts.new(:with_assembly_wide_node => true))
+
       av_pairs.each do |av_pair|
         value = av_pair[:value]
         if semantic_data_type = attr_properties[:semantic_data_type]
@@ -45,6 +47,9 @@ module DTK; class Attribute
             end
           end
         end
+
+        av_pair[:pattern] = is_assembly_node_component(attributes, av_pair[:pattern]) if base_object.has_assembly_wide_node?()
+
         # if needed as indicated by opts, create_attr_pattern also creates attribute
         pattern = create_attr_pattern(base_object,av_pair[:pattern],opts)
         ret << pattern
@@ -101,6 +106,11 @@ module DTK; class Attribute
       SpecialProcessing::Update.handle_special_processing_attributes(existing_attrs,ndx_new_vals)
       Attribute.update_and_propagate_attributes(attr_mh,attribute_rows,opts)
       ret
+    end
+
+    def self.is_assembly_node_component(attributes, pattern)
+      matching_attr = attributes.find{|attr| attr[:display_name].eql?("assembly_wide/#{pattern}")}
+      matching_attr ? matching_attr[:display_name] : pattern
     end
 
   end

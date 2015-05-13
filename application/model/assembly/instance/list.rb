@@ -76,7 +76,6 @@ module DTK; class  Assembly
       def info_about(about,opts=Opts.new)
         case about
         when :attributes
-          opts.merge!(:remove_assembly_wide_node => true)
           list_attributes(opts)
         when :components
           list_components(opts)
@@ -92,7 +91,7 @@ module DTK; class  Assembly
         end
       end
 
-      def list_attributes(opts)
+      def list_attributes(opts=Opts.new)
         if opts[:settings_form]
           filter_proc = opts[:filter_proc]
           attrs_all_levels_struct = get_attributes_all_levels_struct(filter_proc)

@@ -442,22 +442,25 @@ module DTK
     # this returns same output as info about attributes, pruned for just new ones set
     # TODO: this is a minsnomer in that it can be used to just create attributes
     def rest__set_attributes()
-      assembly = ret_assembly_instance_object()
-      av_pairs = ret_params_av_pairs()
-      opts = ret_params_hash(:format,:context,:create)
+      assembly       = ret_assembly_instance_object()
+      av_pairs       = ret_params_av_pairs()
+      opts           = ret_params_hash(:format,:context,:create)
       create_options = ret_boolean_params_hash(:required,:dynamic)
+
       if semantic_data_type = ret_request_params(:datatype)
         unless Attribute::SemanticDatatype.isa?(semantic_data_type)
           raise ErrorUsage.new("The term (#{semantic_data_type}) is not a valid data type")
         end
         create_options.merge!(:semantic_data_type => semantic_data_type)
       end
+
       unless create_options.empty?
         unless opts[:create]
           raise ErrorUsage.new("Options (#{create_options.values.join(',')}) can only be given if :create is true")
         end
         opts.merge!(:attribute_properties => create_options)
       end
+
       # update_meta == true is the default
       update_meta = ret_request_params(:update_meta)
       unless !update_meta.nil? and !update_meta

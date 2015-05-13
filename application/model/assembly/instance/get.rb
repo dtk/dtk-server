@@ -71,7 +71,7 @@ module DTK; class Assembly; class Instance
     def get_augmented_components(opts=Opts.new)
       ret  = Array.new
       rows = get_objs(:cols => [:instance_nodes_and_cmps_summary_with_namespace])
-      rows.reject!{|r| r[:node] && r[:node][:type].eql?('assembly_wide')} if opts[:remove_assembly_wide_node]
+
       if opts[:filter_proc]
         rows.reject!{|r|!opts[:filter_proc].call(r)}
       elsif opts[:filter_component] != ""

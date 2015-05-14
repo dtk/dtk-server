@@ -68,9 +68,12 @@ module DTK
     end
 
     def rest__delete_component()
+      node_id  = nil
       assembly = ret_assembly_instance_object()
+
       # Retrieving node_id to validate if component belongs to node when delete-component invoked from component-level context
-      node_id = ret_node_id(:node_id,assembly)
+      node_id = ret_node_id(:node_id,assembly) if ret_request_params(:node_id)
+
       component_id = ret_non_null_request_params(:component_id)
       assembly_id = assembly.id()
       cmp_full_name = ret_request_params(:cmp_full_name)
@@ -81,7 +84,7 @@ module DTK
       assembly_idh = assembly.id_handle()
       cmp_mh = assembly_idh.createMH(:component)
 
-      if cmp_full_name
+      if cmp_full_name && node_id
         # cmp_idh = ret_component_id_handle(:cmp_full_name,:assembly_id => assembly_id)
         component = Component.ret_component_with_namespace_for_node(cmp_mh, cmp_name, node_id, namespace, assembly)
         raise ErrorUsage.new("Component with identifier (#{namespace.nil? ? '' : namespace + ':'}#{cmp_name}) does not exist!") unless component

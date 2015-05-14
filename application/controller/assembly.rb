@@ -467,8 +467,10 @@ module DTK
         opts.merge!(:update_meta => true)
       end
 
-      assembly.set_attributes(av_pairs,opts)
-      rest_ok_response
+      opts.merge!(:node_attribute => true) if ret_request_params(:node_attribute)
+      opts.merge!(:component_attribute => true) if ret_request_params(:component_attribute)
+
+      rest_ok_response assembly.set_attributes(av_pairs,opts)
     end
 
     #### actions to update and create assembly templates

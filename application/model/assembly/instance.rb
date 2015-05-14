@@ -299,6 +299,10 @@ module DTK; class  Assembly
         # super does the processing that sets the actual attributes then if opts[:update_meta] set
         # then if opts[:update_meta] set meta info can be changed on the assembly module
         attr_patterns = super
+
+        # return if ambiguous attributes (component and node have same name and attribute)
+        return attr_patterns if attr_patterns.is_a?(Hash) && attr_patterns[:ambiguous]
+
         if opts[:update_meta]
           created_cmp_level_attrs = attr_patterns.select{|r|r.type == :component_level and r.created?()}
           unless created_cmp_level_attrs.empty?

@@ -35,6 +35,7 @@ module DTK; class Attribute
     def self.set_attributes(base_object,av_pairs,opts={})
       ret             = Array.new
       attribute_rows  = Array.new
+      ambiguous       = Array.new
       attr_properties = opts[:attribute_properties]||{}
       attributes      = base_object.list_attributes(Opts.new(:with_assembly_wide_node => true))
 
@@ -48,7 +49,9 @@ module DTK; class Attribute
           end
         end
 
-        av_pair[:pattern] = is_assembly_node_component(attributes, av_pair[:pattern]) if base_object.has_assembly_wide_node?()
+        # if service instance has components check if there is a node with same name as component
+        # if true then it is ambiguous whether using node or component attribute
+        check_ambiguity(attributes, av_pair, ambiguous, opts) if base_object.has_assembly_wide_node?()
 
         # if needed as indicated by opts, create_attr_pattern also creates attribute
         pattern = create_attr_pattern(base_object,av_pair[:pattern],opts)
@@ -82,6 +85,9 @@ module DTK; class Attribute
         end
       end
 
+      # return if ambiguous whether component or node attribute (node and component have same name)
+      return {:ambiguous => ambiguous} unless ambiguous.empty?
+
       # attribute_rows can have multiple rows if pattern decomposes into multiple attributes
       # it should have at least one row or there is an error
       if attribute_rows.empty?
@@ -111,6 +117,27 @@ module DTK; class Attribute
     def self.is_assembly_node_component(attributes, pattern)
       matching_attr = attributes.find{|attr| attr[:display_name].eql?("assembly_wide/#{pattern}")}
       matching_attr ? matching_attr[:display_name] : pattern
+    end
+
+    def self.check_ambiguity(attributes, av_pair, ambiguous, opts)
+      return if opts[:node_attribute]
+      pattern = av_pair[:pattern]
+
+      # if user wants component-attribute we find attribute from assembly wide node
+      # if not specified then check for ambiguity, if ambiguous return error message
+      # else return node or component (assembly_wide) attribute
+      if opts[:component_attribute]
+        match = attributes.find{|attr| attr[:display_name].eql?("assembly_wide/#{pattern}")}
+        raise ErrorUsage.new("Service instance component attribute #{pattern} does not exist") unless match
+        av_pair[:pattern] = match[:display_name]
+      else
+        matching_attr = attributes.select{|attr| attr[:display_name].eql?(pattern) || attr[:display_name].eql?("assembly_wide/#{pattern}")}
+        if matching_attr.size > 1
+          ambiguous << pattern
+        else
+          av_pair[:pattern] = matching_attr.first[:display_name] if matching_attr.size == 1
+        end
+      end
     end
 
   end

@@ -153,6 +153,7 @@ function tag_code() {
 			git add .; git commit -m "bump versions for release.yml"; git push origin master
 			git tag $dtk_major_tag
 			git push --tags
+			export DTK_SERVER_TAG=$next_tag
 			cd ..
 		else 
 			git tag $dtk_major_tag

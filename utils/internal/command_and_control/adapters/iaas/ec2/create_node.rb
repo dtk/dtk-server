@@ -195,19 +195,14 @@ module DTK; module CommandAndControlAdapter
           end
 
           def update_block_device_mapping!(image)
+            root_device_override_attrs = {'Ebs.DeleteOnTermination' => 'true'}
+            if root_device_size = @node.attribute.root_device_size() 
+              root_device_override_attrs.merge!('Ebs.VolumeSize' => root_device_size)
+            end
             # only add block_device_mapping if it was fully generated
-            if block_device_mapping_from_image = image.block_device_mapping_with_delete_on_termination()
-              block_device_mapping = self[:block_device_mapping] = block_device_mapping_from_image
-              # if root_device_size explicity given
-              
-              if root_device_size = @node.attribute.root_device_size() 
-                if device_name = image.block_device_mapping_device_name()
-                  block_device_mapping.first.merge!({'DeviceName' => device_name, 'Ebs.VolumeSize' => root_device_size})
-                else
-                  Log.error("Cannot determine device name for ami (#{ami})")
-                end
-              end
-            end  
+            if block_device_mapping = image.block_device_mapping?(root_device_override_attrs)
+              merge!(:block_device_mapping => block_device_mapping)
+            end
           end
 
           def update_user_data!()

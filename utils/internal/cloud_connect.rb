@@ -8,6 +8,10 @@ class NilClass
 end
 ### end of monkey patch
 
+# Fog loads Excon
+# bumped up time out from 60 to 180
+Excon.defaults[:read_timeout] = 180
+
 module DTK
   class CloudConnect
     r8_nested_require('cloud_connect','ec2')

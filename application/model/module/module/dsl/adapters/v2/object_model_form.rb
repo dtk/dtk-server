@@ -46,12 +46,11 @@ module DTK; class ModuleDSL; class V2
     module ComponentChoiceMixin
       def add_dependency!(ret,dep_cmp,base_cmp)
         ret[dep_cmp] ||= { 
-          "type"=>"component",
-          "search_pattern"=>{":filter"=>[":eq", ":component_type", dep_cmp]},
-          "description"=>
-          "#{component_print_form(dep_cmp)} is required for #{component_print_form(base_cmp)}",
-          "display_name"=>dep_cmp,
-          "severity"=>"warning"
+          "type"           => "component",
+          "search_pattern" => {":filter"=>[":eq", ":component_type", dep_cmp]},
+          "description"    => "#{component_print_form(dep_cmp)} is required for #{component_print_form(base_cmp)}",
+          "display_name"   => dep_cmp,
+          "severity"       => "warning"
         }
       end
 
@@ -110,8 +109,8 @@ module DTK; class ModuleDSL; class V2
           el = {ca.attribute_name() => {
               "type"=>ca.datatype()||"string",
               "default" => ca.attribute_value(),
-              "hidden" => true
-            }}
+            }.merge(Attribute::Constant.side_effect_settings())
+          }
           h.merge(el)
         end
         InputHash.new("attributes" => attrs_hash)
@@ -200,43 +199,87 @@ module DTK; class ModuleDSL; class V2
       end
 
       def add_attributes!(ret,cmp_type,input_hash,opts={})
-        if in_attrs = input_hash["attributes"]
-          ParsingError.raise_error_if_not(in_attrs,Hash)
-          attrs = OutputHash.new
-          in_attrs.each_pair do |name,info|
-            unless info.kind_of?(Hash)
-              cmp_name = component_print_form(cmp_type)
-              raise ParsingError.new("Ill-formed attributes section for component (?1): ?2", cmp_name,{"attributes" => in_attrs})
-            end
-            dynamic_default_variable = dynamic_default_variable?(info)
-            external_ref = 
-              if opts[:constant_attribute] or info["constant"]
-                Attribute::Constant.ret_external_ref()
-              else
-                type = "puppet_attribute" #TODO: hard-wired
-                external_ref_name = (info["external_ref"]||{})[type]||name
-                {
-                  "type" => type,
-                  "path" => "node[#{cmp_type}][#{external_ref_name}]"
-                }.merge(dynamic_default_variable ? {"default_variable" => true} : {})
-              end
-            attr_props = OutputHash.new("display_name" => name,"external_ref" => external_ref)
-            add_attr_data_type_attrs!(attr_props,info)
-            # setting even when value_asserted() is nil so this can handle case where remove a default
-            attr_props["value_asserted"] = value_asserted(info,attr_props)
-            %w{description dynamic required hidden}.each{|field|attr_props.set_if_not_nil(field,info[field])}
-            if dynamic_default_variable
-              attr_props["dynamic"] ||= true
-            end
-            attrs.merge!(name => attr_props)
-          end
-          if ret["attribute"]
-            ret["attribute"].merge!(attrs)
+        unless in_attrs = input_hash["attributes"]
+          return ret
+        end
+
+        ParsingError.raise_error_if_not(in_attrs,Hash)
+
+        attrs = OutputHash.new
+        in_attrs.each_pair do |name,info|
+          if info.kind_of?(Hash)
+            attrs[name] = attribute_properties(cmp_type,name,info,opts)
           else
-            ret["attribute"] = attrs
+            cmp_name = component_print_form(cmp_type)
+            raise ParsingError.new("Ill-formed attributes section for component (?1): ?2", cmp_name,{"attributes" => in_attrs})
           end
         end
+
+        if ret["attribute"]
+          ret["attribute"].merge!(attrs)
+        else
+          ret["attribute"] = attrs
+        end
         ret
+      end
+
+      def attribute_properties(cmp_type,name,info,opts={})
+        ret = OutputHash.new('display_name' => name)
+
+        side_effect_settings = Hash.new
+        dynamic_default_variable = dynamic_default_variable?(info)
+
+        if dynamic_default_variable
+          side_effect_settings.merge!('dynamic' => true)
+        end
+
+        external_ref = 
+          if opts[:constant_attribute] or info["constant"]
+            side_effect_settings.merge!(Attribute::Constant.side_effect_settings())
+            Attribute::Constant.ret_external_ref()
+          else
+            type = "puppet_attribute" #TODO: hard-wired
+            external_ref_name = (info["external_ref"]||{})[type]||name
+            {
+            "type" => type,
+            "path" => "node[#{cmp_type}][#{external_ref_name}]",
+          }.merge(dynamic_default_variable ? {"default_variable" => true} : {})
+          end
+        ret.merge!('external_ref' => external_ref)
+
+        add_attr_data_type_attrs!(ret,info)
+
+        # setting even when nil so on change can cancel old value
+        ret['value_asserted'] = value_asserted(info,ret)
+
+        side_effect_settings.each_pair{|field,value|ret[field] ||= value}
+
+        AttributeProps.add_defaults_for_nils!(ret,info)
+
+        ret
+      end
+
+      module AttributeProps
+        def self.add_defaults_for_nils!(ret,info)
+            Fields.each do |field|
+            val = info[field.to_s] 
+            ret[field] = val.nil? ? default(field) : val
+          end
+          ret
+        end
+
+        private
+        def self.default(field)
+         (Info[field]||{})[:default]
+        end
+        
+        Info = {
+          :description => {:type => :string,  :default => nil},
+          :dynamic     => {:type => :boolean, :default => false},
+          :required    => {:type => :boolean, :default => false},
+          :hidden      => {:type => :boolean, :default => false}
+        }
+        Fields = Info.keys
       end
 
       def dynamic_default_variable?(info)

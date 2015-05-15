@@ -1,4 +1,4 @@
-FROM dduvnjak/precise-puppet:0.5
+FROM getdtk/precise-puppet:0.5
 MAINTAINER dduvnjak <dario@atlantbh.com>
 
 RUN mkdir -p /etc/puppet

@@ -34,6 +34,9 @@ module DTK; class ServiceSetting
         # merge the node and component attributes in a nested structure
         ndx_attrs = Hash.new
         all_attrs_struct.node_attrs.each do |node_attr|
+          # do not display node_attributes for assembly_wide node
+          next if node_attr[:node][:type].eql?('assembly_wide')
+
           node_info = ndx_attrs[node_attr[:node][:display_name]]||= {:attrs => Hash.new,:cmps => Hash.new}
           node_info[:attrs].merge!(node_attr[:display_name] => attribute_value(node_attr))
         end

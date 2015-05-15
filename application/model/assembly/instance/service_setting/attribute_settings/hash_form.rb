@@ -54,7 +54,9 @@ module DTK; class ServiceSetting
 
         # put node and component attributes in ret
         ndx_attrs.keys.sort().each do |node_name|
-          ret_node_pntr = ret["#{node_name}#{ContextDelim}"] = SimpleOrderedHash.new
+          is_assembly_wide = all_attrs_struct.node_attrs.find{|node| node[:node][:type].eql?('assembly_wide')} if node_name.eql?('assembly_wide')
+          ret_node_pntr = ret["#{is_assembly_wide ? 'ASSEMBLY-WIDE-COMPONENTS' : node_name}#{ContextDelim}"] = SimpleOrderedHash.new
+
           node_info = ndx_attrs[node_name]
           node_info[:attrs].keys.sort.each do |attr_name|
             ret_node_pntr.merge!(attr_name => node_info[:attrs][attr_name])

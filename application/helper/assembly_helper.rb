@@ -195,6 +195,10 @@ module Ramaze::Helper
   def ret_attribute_settings_hash()
     yaml_content = ret_non_null_request_params(:settings_yaml_content)
     response = ::DTK::Aux.convert_to_hash( yaml_content ,:yaml)
+
+    # we are assigning assembly wide components to assembly wide node
+    response['assembly_wide/'] = response.delete('ASSEMBLY-WIDE-COMPONENTS/') if response.has_key?('ASSEMBLY-WIDE-COMPONENTS/')
+
     raise response if response.kind_of?(::DTK::Error)
     response
   end

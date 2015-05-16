@@ -3,7 +3,7 @@
   :table=>:file_asset,
   :columns=>{
     :type => {:type=>:varchar, :size=>25},
-    :file_name => {:type=>:varchar, :size=>50},
+    :file_name => {:type=>:varchar},
     :path => {:type=>:varchar},
     :content=> {:type=>:text}
   },

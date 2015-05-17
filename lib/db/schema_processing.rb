@@ -34,7 +34,7 @@ module DTK
         # TODO: this only checks certain things; right now
         # just can modify a varhcar's size
         if args[1] == :varchar 
-          if size = args[2].kind_of?(Hash) && args[2][:size]
+          if size = args[2].kind_of?(Hash) && args[2].has_key?(:size)
             modify_column_varchar_size?(db_rel,args[0],size)
           end
         end

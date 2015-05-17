@@ -181,9 +181,10 @@ module DTK
         return
       end
       qualified_table = "#{db_rel[:schema]}.#{db_rel[:table]}"
-      sql = "ALTER TABLE #{qualified_table} ALTER COLUMN #{col_name} TYPE varchar(#{size.to_s})"
+      varchar_type = (size ? "varchar(#{size.to_s})" : "varchar")
+      sql = "ALTER TABLE #{qualified_table} ALTER COLUMN #{col_name} TYPE #{varchar_type}"
       db_run(sql)
-      Log.info("Changed table (#{qualified_table}) varchar column (#{col_name}) from size #{existing_size.to_s} to #{size.to_s}")
+      Log.info("Changed table (#{qualified_table}) varchar column (#{col_name}) from size #{existing_size.to_s} to #{size ? size.to_s : 'nil'}")
       nil
     end
 

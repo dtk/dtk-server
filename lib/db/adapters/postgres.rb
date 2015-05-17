@@ -170,13 +170,13 @@ module DTK
         column_name='#{col_name}' AND 
         not character_maximum_length IS NULL"
       results = db_fetch(query).all
-      if results.size == 0
+      if results.size == 0 and size.nil?
         return
       elsif results.size > 1
         Log.error("Unexpected that size > 1")
         return
       end
-      existing_size = results.first[:character_maximum_length]
+      existing_size = results.first && results.first[:character_maximum_length]
       if existing_size == size
         return
       end

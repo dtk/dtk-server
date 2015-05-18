@@ -195,11 +195,36 @@ module Ramaze::Helper
   def ret_attribute_settings_hash()
     yaml_content = ret_non_null_request_params(:settings_yaml_content)
     response = ::DTK::Aux.convert_to_hash( yaml_content ,:yaml)
-
-    # we are assigning assembly wide components to assembly wide node
-    response['assembly_wide/'] = response.delete('ASSEMBLY-WIDE-COMPONENTS/') if response.has_key?('ASSEMBLY-WIDE-COMPONENTS/')
-
+    process_attributes!(response)
     raise response if response.kind_of?(::DTK::Error)
+    response
+  end
+
+  def process_attributes!(response)
+    # we are assigning assembly wide components to assembly wide node
+    response['assembly_wide/'] = response.delete('components') if response.has_key?('components')
+
+    nodes = response.delete('nodes')||{}
+    nodes.each do |n_name, node|
+      node_cmps = node.delete('components')||{}
+      nodes[n_name] = node_cmps
+      node_cmps.each do |cmp_name, n_cmp|
+        n_cmp_attrs = n_cmp.delete('attributes')||{}
+        nodes[n_name][cmp_name] = n_cmp_attrs
+      end
+
+      node_attrs = node.delete('attributes')||{}
+      nodes[n_name].merge!(node_attrs)
+    end
+
+    assembly_wide = response.delete('assembly_wide/')||{}
+    assembly_wide.each do |cmp_name, n_cmp|
+      n_cmp_attrs = n_cmp.delete('attributes')||{}
+      assembly_wide[cmp_name] = n_cmp_attrs
+    end
+
+    response.merge!(nodes) if nodes
+    response.merge!(assembly_wide) if assembly_wide
     response
   end
 

@@ -12,4 +12,5 @@ application/config/newrelic.yml
 application/log/
 .gitattributes
 *.DS_Store
-
+/.bundle
+/vendor/bundle

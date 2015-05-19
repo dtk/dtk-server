@@ -32,7 +32,20 @@ module DTK
    private
     def hash_form(x)
       # this is supposed to fix [#<NoMethodError: undefined method `attributes' for #<Excon::Response:0x0000000529aec8>>,
-      x && x.respond_to?(:attributes) ? x.attributes : x.data 
+      ret = nil
+      if x 
+        if x.respond_to?(:attributes) 
+          ret = x.attributes 
+        elsif x.respond_to?(:data)
+          ret = x.data
+        end
+      end
+      if ret
+        ret
+      else
+        response = (x ? x.inspect : 'nil')
+        raise Error.new("Unexpected response: #{response}")
+      end
     end
 
     # each service has its own mutex

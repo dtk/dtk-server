@@ -168,10 +168,14 @@ module DTK
     def rest__delete_remote()
       remote_module_name = ret_non_null_request_params(:remote_module_name)
       remote_namespace = ret_request_params(:remote_module_namespace)
+      force_delete = ret_request_param_boolean(:force_delete)
+
+
       remote_params = remote_params_dtkn(:node_module,remote_namespace,remote_module_name)
       client_rsa_pub_key = ret_request_params(:rsa_pub_key)
       project = get_default_project()
-      NodeModule.delete_remote(project,remote_params,client_rsa_pub_key)
+
+      NodeModule.delete_remote(project, remote_params, client_rsa_pub_key, force_delete)
       rest_ok_response
     end
 

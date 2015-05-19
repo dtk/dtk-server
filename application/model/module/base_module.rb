@@ -67,6 +67,10 @@ module DTK
       when :attributes
         results = get_objs(:cols => [:attributes])
         results.delete_if { |e| !(e[:component][:id] == cmp_id.to_i) } if cmp_id && !cmp_id.empty?
+
+        # remove assembly branch attributes
+        results.delete_if { |e| e[:module_branch].assembly_module_version?() }
+
         ret = results.inject([]) do |transformed, element|
           attribute = element[:attribute]
           branch = element[:module_branch]

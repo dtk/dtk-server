@@ -205,8 +205,8 @@ end
 
           if existing_content
             existing_c_hash = Aux.convert_to_hash(existing_content,file_info[:format_type])
-            if !existing_c_hash.kind_of?(ErrorUsage::Parsing) and existing_c_hash['component_modules']
-              valid_existing = true 
+            if existing_c_hash && !existing_c_hash.kind_of?(ErrorUsage::Parsing) and existing_c_hash['component_modules']
+              valid_existing = true
             end
           end
 

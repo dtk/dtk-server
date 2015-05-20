@@ -364,7 +364,13 @@ module DTK
             @db.add_foreign_key? db_rel,col,DB_REL_DEF[fk_rel],other_col_info
           else
             other_col_info = col_info.reject{|k,v|k == :type}
+
             type = col_info[:type] == :json ? :text : col_info[:type]
+            # explicitly setting size to nil to handle dbrebuild which removes size restriction
+            if !other_col_info.has_key?(:size) and [:varchar].include?(type)
+              other_col_info = other_col_info.merge(:size => nil)
+            end
+
             @db.add_column? db_rel,col,type,other_col_info
           end
         }

@@ -197,6 +197,8 @@ module DTK
     def rest__delete_remote()
       client_rsa_pub_key = ret_request_params(:rsa_pub_key)
       remote_namespace = ret_request_params(:remote_module_namespace)
+      force_delete = ret_request_param_boolean(:force_delete)
+
 
       opts = Hash.new
       opts.merge!(:namespace => remote_namespace) unless remote_namespace.empty?
@@ -205,7 +207,7 @@ module DTK
       remote_params = remote_params_dtkn(:service_module,remote_namespace,remote_module_name,version)
 
       project = get_default_project()
-      ServiceModule.delete_remote(project,remote_params,client_rsa_pub_key)
+      ServiceModule.delete_remote(project, remote_params, client_rsa_pub_key, force_delete)
 
       rest_ok_response
     end

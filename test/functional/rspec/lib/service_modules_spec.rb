@@ -38,7 +38,7 @@ shared_context "Import remote service module" do |service_module_name|
   it "imports #{service_module_name} service module from remote repo" do
     puts "Import remote service module:", "-----------------------------"
     pass = true
-    value = `dtk service-module install #{service_module_name} -y`
+    value = `dtk service-module install #{service_module_name} --update-none -y`
     puts value
     pass = false if ((value.include? "ERROR") || (value.include? "exists on client"))
     puts "Import of remote service module #{service_module_name} completed successfully!" if pass == true
@@ -52,7 +52,7 @@ shared_context "NEG - Import remote service module" do |dtk_common, service_modu
   it "will not import #{service_module_name} service module from remote repo since there are referenced component modules on local filesystem which are not deleted" do
     puts "NEG - Import remote service module:", "-----------------------------------"
     pass = false
-    value = `dtk service-module install #{service_module_name}`
+    value = `dtk service-module install #{service_module_name} --update-none`
     puts value
     pass = true if (value.include? "exists on client")
     puts "Import of remote service module #{service_module_name} did not complete successfully because of the referenced component module that exists on local filesystem!" if pass == true

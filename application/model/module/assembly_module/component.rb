@@ -12,18 +12,20 @@ module DTK; class AssemblyModule
       create_assembly_branch?(component_module,opts)
     end
 
-    def self.component_module_workspace_info(assembly, component_module)
-      new(assembly).component_module_workspace_info(component_module)
+    def self.component_module_workspace_info(assembly, component_module, opts={})
+      new(assembly).component_module_workspace_info(component_module, opts)
     end
-    def component_module_workspace_info(component_module)
+    def component_module_workspace_info(component_module, opts={})
       get_applicable_component_instances(component_module,:raise_error_if_empty => true)
       am_version = assembly_module_version()
 
       base_branch = component_module.get_workspace_branch_info()
       raise ErrorNoChangesToModule.new(@assembly, component_module) unless base_branch
 
-      local_branch = component_module.get_workspace_module_branch(am_version)
-      raise ErrorNoComponentsInModule.new(@assembly, component_module) unless local_branch
+      unless local_branch = component_module.get_workspace_module_branch(am_version)
+        create_assembly_branch?(component_module,opts)
+        local_branch = component_module.get_workspace_module_branch(am_version)
+      end
 
       base_branch.merge!(:version => am_version, :local_branch => local_branch[:display_name], :current_branch_sha => local_branch[:current_sha])
       base_branch

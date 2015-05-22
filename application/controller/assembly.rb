@@ -293,7 +293,7 @@ module DTK
       component_module = create_obj(:module_name,ComponentModule,namespace)
       opts = ret_boolean_params_hash(:force)
 
-      branch_info = AssemblyModule::Component.component_module_workspace_info(assembly, component_module)
+      branch_info = AssemblyModule::Component.component_module_workspace_info(assembly, component_module, opts)
       branch_info.merge!(:assembly_name => assembly[:display_name])
 
       rest_ok_response branch_info

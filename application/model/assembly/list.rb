@@ -3,6 +3,7 @@ module DTK
     module ListMixin
       def info(node_id=nil, component_id=nil, attribute_id=nil, opts={})
         is_template = kind_of?(Template)
+        opts.merge!(:is_template => true) if is_template
 
         nested_virtual_attr = (is_template ? :template_nodes_and_cmps_summary : :instance_nodes_and_cmps_summary)
         sp_hash = {
@@ -12,7 +13,6 @@ module DTK
         Instance.get_last_task_run_status(assembly_rows,model_handle())
 
         if (node_id.to_s.empty? && component_id.to_s.empty? && attribute_id.to_s.empty?)
-          # nodes_info = (is_template ? get_nodes() : get_nodes(:id,:display_name,:admin_op_status,:os_type,:external_ref,:type))
           nodes_info = (is_template ? get_nodes() : get_nodes__expand_node_groups({:remove_node_groups => true}))
           nodes_info.reject!{|n| n[:type].eql?('assembly_wide')} if opts[:remove_assembly_wide_node]
           assembly_rows.first[:nodes] = nodes_info.sort{|a,b| a[:display_name] <=> b[:display_name] }
@@ -133,7 +133,7 @@ module DTK
           end
 
           # if node group take only group members
-          if r[:node] and r[:node].is_node_group?()
+          if r[:node] && r[:node].is_node_group?() && !opts[:is_template]
             r[:nodes] = r.get_nodes__expand_node_groups({:remove_node_groups => true, :add_group_member_components => true}) unless opts[:only_node_group_info]
             r[:nodes].sort!{|a,b| a[:display_name] <=> b[:display_name] }
             opts.merge!(:add_group_member_components => true)
@@ -178,7 +178,7 @@ module DTK
           external_ref = nil
 
           format_current_node = (!raw_node.is_node_group?() || opts[:only_node_group_info])
-          if ndx_nodes[node_name].nil? && format_current_node #!raw_node.is_node_group?()
+          if ndx_nodes[node_name].nil? && (format_current_node || opts[:is_template]) #!raw_node.is_node_group?()
             if node_ext_ref = raw_node[:external_ref]
               external_ref = node_external_ref_print_form(node_ext_ref,opts)
               # remove :git_authorized

@@ -190,6 +190,10 @@ module DTK
         module_name = module_name()
         module_branch_idh = module_branch.id_handle()
 
+        # check if service instances are using assembly template before changes
+        service_instances = get_assembly_instances()
+        validate_service_instance_references(service_instances, module_branch) unless service_instances.empty?
+
         assembly_import_helper = AssemblyImport.new(project_idh,module_branch,self,component_module_refs)
         aggregate_errors = ParsingError::Aggregate.new(:error_cleanup => proc{error_cleanup()})
         assembly_meta_file_paths(module_branch) do |meta_file,default_assembly_name|
@@ -240,6 +244,32 @@ module DTK
         end
       end
 
+      def validate_service_instance_references(service_instances, module_branch)
+        assembly_names = []
+        assembly_names_with_templates = {}
+
+        meta_files, regexp = ServiceModule.meta_files_and_regexp?(module_branch)
+        assembly_file_paths = ret_with_removed_variants(meta_files)
+        assembly_file_paths.each {|path| assembly_names << ServiceModule.meta_file_assembly_name(path)}
+
+        service_instances.each do |instance|
+          if parent = instance.copy_as_assembly_instance.get_parent
+            parent_name = parent[:display_name]
+            assembly_names_with_templates.merge!(instance[:display_name] => parent_name) unless assembly_names.include?(parent_name)
+          end
+        end
+
+        unless assembly_names_with_templates.empty?
+          instances = assembly_names_with_templates.keys
+          templates = assembly_names_with_templates.values.uniq
+
+          is = (instances.size == 1) ? 'is' : 'are'
+          it = (templates.size == 1) ? 'it' : 'them'
+
+          raise ErrorUsage.new("Cannot delete assembly template(s) '#{templates.join(', ')}' because service instance(s) '#{instances.join(', ')}' #{is} referencing #{it}.")
+        end
+      end
+
       def ret_with_removed_variants(paths)
         # if multiple files that match where one is json and one yaml, favor the default one
         two_variants_found = false
@@ -278,7 +308,7 @@ module DTK
 
       def validate_name_for_assembly(file_path,name)
         return unless (name || file_path)
-        assembly_name = ServiceModule.meta_file_assembly_name(file_path) || 'UNKMOWN'
+        assembly_name = ServiceModule.meta_file_assembly_name(file_path) || 'UNKNOWN'
         unless assembly_name.eql?(name)
           ParsingError::BadAssemblyReference.new(:file_path => file_path, :name => name) 
         end

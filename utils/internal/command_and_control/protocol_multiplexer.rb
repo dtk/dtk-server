@@ -32,23 +32,22 @@ module XYZ
         callbacks = nil
         begin
           callbacks = get_and_remove_reqid_callbacks?(request_id)
-          if (is_cancel_response(msg)) # Amar: added in case of user's cancel request
+          if (is_cancel_response(msg)) 
             callbacks.process_cancel()
           elsif callbacks
             callbacks.process_msg(msg,request_id)
           else
             Log.error "max count or timeout reached: dropping msg"
-            Log.error msg
           end
          rescue Exception => e
-          # TODO: this is last resort trap; if this is reached teh user will haev to manually cancel the task
+          # TODO: this is last resort trap; if this is reached the user will have to manually cancel the task
           Callbacks.process_error(callbacks,e)
         end
       end
 
      private
       def is_cancel_response(msg)
-        return false
+        false
         # return msg[:body] && msg[:body][:data] && msg[:body][:data][:status] && msg[:body][:data][:status] == :canceled
       end
 
@@ -102,7 +101,7 @@ module XYZ
 
         def self.process_error(callbacks,error_obj)
           unless callbacks and callbacks.process_error(error_obj)
-            Log.error("error in proceess_response: #{error_obj.inspect}")
+            Log.error("error in process_response: #{error_obj.inspect}")
             Log.error_pp(error_obj.backtrace)
           end
         end

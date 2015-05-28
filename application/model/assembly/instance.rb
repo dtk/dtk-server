@@ -104,20 +104,25 @@ module DTK; class  Assembly
     end
     private_class_method :list_virtual_column?
 
-    def add_node(node_name,node_binding_rs=nil)
+    def add_node(node_name, node_binding_rs=nil, opts={})
+      # if assembly_wide node (used to add component directly on service_instance/assembly_template/workspace)
+      # check if type = 'assembly_wide'
+      # or check by name if regular node
+      check = opts[:assembly_wide] ? [:eq, :type, 'assembly_wide'] : [:eq, :display_name, node_name]
+
       # check if node has been added already
-      if get_node?([:eq,:display_name,node_name])
+      if get_node?(check)
         raise ErrorUsage.new("Node (#{node_name}) already belongs to #{pp_object_type} (#{get_field?(:display_name)})")
       end
 
       target = get_target()
-
       node_template = Node::Template.find_matching_node_template(target,:node_binding_ruleset => node_binding_rs)
 
       override_attrs = {
         :display_name => node_name,
         :assembly_id => id(),
       }
+      override_attrs.merge!(:type => 'assembly_wide') if opts[:assembly_wide]
       clone_opts = node_template.source_clone_info_opts()
       new_obj = target.clone_into(node_template,override_attrs,clone_opts)
       new_obj && new_obj.id_handle()
@@ -159,25 +164,32 @@ module DTK; class  Assembly
     # opts can have
     #  :idempotent 
     #  :donot_update_workflow
-    def add_component(node_idh,aug_cmp_template,component_title,opts={})
-      # first check that node_idh is directly attached to the assembly instance
-      # one reason it may not be is if its a node group member
-      sp_hash = {
-        :cols => [:id, :display_name,:group_id, :ordered_component_ids],
-        :filter => [:and, [:eq, :id, node_idh.get_id()], [:eq, :assembly_id, id()]]
-      }
-      unless node = Model.get_obj(model_handle(:node),sp_hash)
-        if node_group = is_node_group_member?(node_idh)
-          raise ErrorUsage.new("Not implemented: adding a component to a node group member; a component can only be added to the node group (#{node_group[:display_name]}) itself") 
-        else
-          raise ErrorIdInvalid.new(node_idh.get_id(),:node)
+    def add_component(node_idh, aug_cmp_template, component_title, opts={})
+      # if node_idh it means we call add component from node context
+      # else we call from service instance/workspace and use assembly_wide node
+      if node_idh
+        # first check that node_idh is directly attached to the assembly instance
+        # one reason it may not be is if its a node group member
+        sp_hash = {
+          :cols => [:id, :display_name,:group_id, :ordered_component_ids],
+          :filter => [:and, [:eq, :id, node_idh.get_id()], [:eq, :assembly_id, id()]]
+        }
+
+        unless node = Model.get_obj(model_handle(:node),sp_hash)
+          if node_group = is_node_group_member?(node_idh)
+            raise ErrorUsage.new("Not implemented: adding a component to a node group member; a component can only be added to the node group (#{node_group[:display_name]}) itself") 
+          else
+            raise ErrorIdInvalid.new(node_idh.get_id(),:node)
+          end
         end
+      else
+        node = create_assembly_wide_node?()
       end
 
       cmp_instance_idh = nil
 
       Transaction do
-        cmp_instance_idh = node.add_component(aug_cmp_template,opts.merge(:component_title => component_title))
+        cmp_instance_idh = node.add_component(aug_cmp_template, opts.merge(:component_title => component_title))
         add_component__update_component_module_refs?(aug_cmp_template[:component_module],aug_cmp_template[:namespace])
         unless opts[:donot_update_workflow]
           Task::Template::ConfigComponents.update_when_added_component?(self,node,cmp_instance_idh.create_object(),component_title,:skip_if_not_found => true)
@@ -185,8 +197,10 @@ module DTK; class  Assembly
       end
       cmp_instance_idh
     end
+
     def add_component__update_component_module_refs?(component_module,namespace)
       assembly_branch = AssemblyModule::Service.get_or_create_assembly_branch(self)
+      assembly_branch.set_dsl_parsed!(true)
       component_module_refs = ModuleRefs.get_component_module_refs(assembly_branch)
       cmp_modules_with_namespaces = component_module.merge(:namespace_name => namespace[:display_name])
       if update_needed = component_module_refs.update_object_if_needed!([cmp_modules_with_namespaces])
@@ -195,6 +209,29 @@ module DTK; class  Assembly
       end
     end
     private :add_component__update_component_module_refs?
+
+    def create_assembly_wide_node?()
+      sp_hash = {
+        :cols => [:id, :display_name,:group_id, :ordered_component_ids],
+        :filter => [:and, [:eq, :type, 'assembly_wide'], [:eq, :assembly_id, id()]]
+      }
+      node = Model.get_obj(model_handle(:node), sp_hash)
+
+      unless node
+        node_idh = add_node('assembly_wide', nil, {:assembly_wide => true})
+        node = node_idh.create_object()
+      end
+
+      node
+    end
+
+    def has_assembly_wide_node?()
+      sp_hash = {
+        :cols => [:id, :display_name,:group_id, :ordered_component_ids],
+        :filter => [:and, [:eq, :type, 'assembly_wide'], [:eq, :assembly_id, id()]]
+      }
+      Model.get_obj(model_handle(:node), sp_hash)
+    end
 
     #rturns a node group object if node_idh is a node group member of this assembly instance
     def is_node_group_member?(node_idh)
@@ -262,6 +299,10 @@ module DTK; class  Assembly
         # super does the processing that sets the actual attributes then if opts[:update_meta] set
         # then if opts[:update_meta] set meta info can be changed on the assembly module
         attr_patterns = super
+
+        # return if ambiguous attributes (component and node have same name and attribute)
+        return attr_patterns if attr_patterns.is_a?(Hash) && attr_patterns[:ambiguous]
+
         if opts[:update_meta]
           created_cmp_level_attrs = attr_patterns.select{|r|r.type == :component_level and r.created?()}
           unless created_cmp_level_attrs.empty?

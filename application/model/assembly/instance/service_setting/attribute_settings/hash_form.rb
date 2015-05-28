@@ -34,6 +34,9 @@ module DTK; class ServiceSetting
         # merge the node and component attributes in a nested structure
         ndx_attrs = Hash.new
         all_attrs_struct.node_attrs.each do |node_attr|
+          # do not display node_attributes for assembly_wide node
+          next if node_attr[:node][:type].eql?('assembly_wide')
+
           node_info = ndx_attrs[node_attr[:node][:display_name]]||= {:attrs => Hash.new,:cmps => Hash.new}
           node_info[:attrs].merge!(node_attr[:display_name] => attribute_value(node_attr))
         end
@@ -51,20 +54,40 @@ module DTK; class ServiceSetting
 
         # put node and component attributes in ret
         ndx_attrs.keys.sort().each do |node_name|
-          ret_node_pntr = ret["#{node_name}#{ContextDelim}"] = SimpleOrderedHash.new
+          is_assembly_wide = all_attrs_struct.node_attrs.find{|node| node[:node][:type].eql?('assembly_wide')} if node_name.eql?('assembly_wide')
+
+          if is_assembly_wide
+            ret_node_pntr = ret['components'] = SimpleOrderedHash.new
+          else
+            ret['nodes'] ||= {}
+            ret_node_pntr = ret['nodes']["#{node_name}#{ContextDelim}"] = SimpleOrderedHash.new
+          end
+
           node_info = ndx_attrs[node_name]
           node_info[:attrs].keys.sort.each do |attr_name|
-            ret_node_pntr.merge!(attr_name => node_info[:attrs][attr_name])
+            ret_node_pntr['attributes'] ||= {}
+            ret_node_pntr['attributes'].merge!(attr_name => node_info[:attrs][attr_name])
           end
+
           node_info[:cmps].keys.sort.each do |cmp_name|
-            ret_cmp_pntr = ret_node_pntr["#{cmp_name}#{ContextDelim}"] = SimpleOrderedHash.new
+            if is_assembly_wide
+              ret_cmp_pntr = ret_node_pntr["#{cmp_name}#{ContextDelim}"] = SimpleOrderedHash.new
+            else
+              ret_node_pntr['components'] ||= {}
+              ret_cmp_pntr = ret_node_pntr['components']["#{cmp_name}#{ContextDelim}"] = SimpleOrderedHash.new
+            end
             cmp_info = node_info[:cmps][cmp_name]
+            ret_cmp_pntr['attributes'] ||= {}
             cmp_info.keys.sort.each do |attr_name|
-              ret_cmp_pntr.merge!(attr_name => cmp_info[attr_name])
+              ret_cmp_pntr['attributes'].merge!(attr_name => cmp_info[attr_name])
             end
           end
         end
-        ret
+        return ret unless ret['components']
+
+        # put assembly wide components on top
+        cmps = ret.delete('components')
+        ndx_ret = {'components' => cmps}.merge(ret)
       end
 
       def self.attribute_value(attr)

@@ -22,7 +22,16 @@ module DTK
         assembly_attr_viols = get_assembly_level_attributes(filter_proc).map{|a|Violation::ReqUnsetAttr.new(a,:assembly)}
         filter_proc = lambda{|r|r[:attribute].required_unset_attribute?()}
         component_attr_viols = get_augmented_nested_component_attributes(filter_proc).map{|a|Violation::ReqUnsetAttr.new(a,:component)}
-        node_attr_viols = get_augmented_node_attributes(filter_proc).map{|a|Violation::ReqUnsetAttr.new(a,:node)}
+
+        node_attributes = get_augmented_node_attributes(filter_proc)
+        # remove attribute violations if assembly wide node
+        node_attributes.delete_if do |n_attr|
+          if node = n_attr[:node]
+            node[:type].eql?('assembly_wide')
+          end
+        end
+        node_attr_viols = node_attributes.map{|a|Violation::ReqUnsetAttr.new(a,:node)}
+
         assembly_attr_viols + component_attr_viols + node_attr_viols
       end
 

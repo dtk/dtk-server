@@ -91,7 +91,7 @@ module DTK; class  Assembly
         end
       end
 
-      def list_attributes(opts)
+      def list_attributes(opts=Opts.new)
         if opts[:settings_form]
           filter_proc = opts[:filter_proc]
           attrs_all_levels_struct = get_attributes_all_levels_struct(filter_proc)
@@ -145,7 +145,12 @@ module DTK; class  Assembly
 
           # if node is not part of node group we set nil
           node[:dtk_client_type]   = node.is_node_group? ? :node_group : is_node_group_member ? :node_group_node : nil
-          node[:dtk_client_hidden] = node.is_node_group?
+
+          # remove node group or assembly wide node from list commands
+          node[:dtk_client_hidden] = node.is_node_group? || node[:type].eql?('assembly_wide')
+
+          # remove assembly wide node from dtk context
+          node[:dtk_context_hidden] = node[:type].eql?('assembly_wide')
         end
 
         nodes.sort{|a,b| a[:display_name] <=> b[:display_name] }
@@ -164,12 +169,15 @@ module DTK; class  Assembly
       private :set_node_display_name!,:set_node_admin_op_status!
 
       def list_components(opts=Opts.new)
-        aug_cmps = get_augmented_components(opts)
+        aug_cmps      = get_augmented_components(opts)
         node_cmp_name = opts[:node_cmp_name]
+
         cmps_print_form = aug_cmps.map do |r|
-          namespace = r[:namespace]
-          node_name = "#{r[:node][:display_name]}/"
-          display_name = "#{node_cmp_name.nil? ? node_name : ''}#{Component::Instance.print_form(r, namespace)}"
+          type           = r[:node][:type]
+          namespace      = r[:namespace]
+          node_name      = "#{r[:node][:display_name]}/"
+          hide_node_name = node_cmp_name || type.eql?('assembly_wide')
+          display_name   = "#{hide_node_name ? '' : node_name}#{Component::Instance.print_form(r, namespace)}"
           r.hash_subset(:id).merge({:display_name => display_name})
         end
 

@@ -89,7 +89,7 @@ module DTK
      private
       def initialize(aug_attr,opts=Opts.new)
         @aug_attr = aug_attr #needs to be done first
-        @display_name_prefix =  opts[:display_name_prefix] || display_name_prefix(opts.slice(:format).merge(:level => opts[:level]||find_level()))
+        @display_name_prefix =  opts[:display_name_prefix] || display_name_prefix(opts.slice(:format, :with_assembly_wide_node).merge(:level => opts[:level]||find_level()))
         @index_map = opts[:index_map]
         @truncate_attribute_value = opts[:truncate_attribute_values]
         @raw_attribute_value = opts[:raw_attribute_value] 
@@ -120,7 +120,12 @@ module DTK
          when :node
           format.gsub(/\$node/,node()[:display_name])
          when :component
-          format.gsub(/\$node/,node()[:display_name]).gsub(/\$component/,component().display_name_print_form())
+          node = node()
+          if node[:type].eql?('assembly_wide') && !opts[:with_assembly_wide_node]
+            format.gsub(/\$node\//,'').gsub(/\$component/,component().display_name_print_form())
+          else
+            format.gsub(/\$node/,node[:display_name]).gsub(/\$component/,component().display_name_print_form())
+          end
         end
       end
 

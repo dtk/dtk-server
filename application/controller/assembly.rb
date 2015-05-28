@@ -68,9 +68,12 @@ module DTK
     end
 
     def rest__delete_component()
+      node_id  = nil
       assembly = ret_assembly_instance_object()
+
       # Retrieving node_id to validate if component belongs to node when delete-component invoked from component-level context
-      node_id = ret_node_id(:node_id,assembly)
+      node_id = ret_node_id(:node_id,assembly) if ret_request_params(:node_id)
+
       component_id = ret_non_null_request_params(:component_id)
       assembly_id = assembly.id()
       cmp_full_name = ret_request_params(:cmp_full_name)
@@ -81,7 +84,7 @@ module DTK
       assembly_idh = assembly.id_handle()
       cmp_mh = assembly_idh.createMH(:component)
 
-      if cmp_full_name
+      if cmp_full_name && node_id
         # cmp_idh = ret_component_id_handle(:cmp_full_name,:assembly_id => assembly_id)
         component = Component.ret_component_with_namespace_for_node(cmp_mh, cmp_name, node_id, namespace, assembly)
         raise ErrorUsage.new("Component with identifier (#{namespace.nil? ? '' : namespace + ':'}#{cmp_name}) does not exist!") unless component
@@ -101,11 +104,12 @@ module DTK
       assembly = ret_assembly_object()
       node_id, component_id, attribute_id, return_json, only_node_group_info = ret_request_params(:node_id, :component_id, :attribute_id, :json_return, :only_node_group_info)
 
-      opts = {:only_node_group_info => true} if only_node_group_info
+      opts = {:remove_assembly_wide_node => true}
+      opts.merge!(:only_node_group_info => true) if only_node_group_info
       if return_json.eql?('true')
-        rest_ok_response assembly.info(node_id, component_id, attribute_id, opts||{})
+        rest_ok_response assembly.info(node_id, component_id, attribute_id, opts)
       else
-        rest_ok_response assembly.info(node_id, component_id, attribute_id, opts||{}), :encode_into => :yaml
+        rest_ok_response assembly.info(node_id, component_id, attribute_id, opts), :encode_into => :yaml
       end
     end
 
@@ -293,7 +297,7 @@ module DTK
       component_module = create_obj(:module_name,ComponentModule,namespace)
       opts = ret_boolean_params_hash(:force)
 
-      branch_info = AssemblyModule::Component.component_module_workspace_info(assembly, component_module)
+      branch_info = AssemblyModule::Component.component_module_workspace_info(assembly, component_module, opts)
       branch_info.merge!(:assembly_name => assembly[:display_name])
 
       rest_ok_response branch_info
@@ -441,30 +445,35 @@ module DTK
     # this returns same output as info about attributes, pruned for just new ones set
     # TODO: this is a minsnomer in that it can be used to just create attributes
     def rest__set_attributes()
-      assembly = ret_assembly_instance_object()
-      av_pairs = ret_params_av_pairs()
-      opts = ret_params_hash(:format,:context,:create)
+      assembly       = ret_assembly_instance_object()
+      av_pairs       = ret_params_av_pairs()
+      opts           = ret_params_hash(:format,:context,:create)
       create_options = ret_boolean_params_hash(:required,:dynamic)
+
       if semantic_data_type = ret_request_params(:datatype)
         unless Attribute::SemanticDatatype.isa?(semantic_data_type)
           raise ErrorUsage.new("The term (#{semantic_data_type}) is not a valid data type")
         end
         create_options.merge!(:semantic_data_type => semantic_data_type)
       end
+
       unless create_options.empty?
         unless opts[:create]
           raise ErrorUsage.new("Options (#{create_options.values.join(',')}) can only be given if :create is true")
         end
         opts.merge!(:attribute_properties => create_options)
       end
+
       # update_meta == true is the default
       update_meta = ret_request_params(:update_meta)
       unless !update_meta.nil? and !update_meta
         opts.merge!(:update_meta => true)
       end
 
-      assembly.set_attributes(av_pairs,opts)
-      rest_ok_response
+      opts.merge!(:node_attribute => true) if ret_request_params(:node_attribute)
+      opts.merge!(:component_attribute => true) if ret_request_params(:component_attribute)
+
+      rest_ok_response assembly.set_attributes(av_pairs,opts)
     end
 
     #### actions to update and create assembly templates
@@ -526,13 +535,13 @@ module DTK
       unless aug_component_template = Component::Template.get_augmented_component_template(cmp_mh, cmp_name, namespace, assembly)
         raise ErrorUsage.new("Component with identifier #{namespace.nil? ? '\'' : ('\'' + namespace + ':')}#{cmp_name}' does not exist!")
       end
+
       component_title = ret_component_title?(cmp_name)
-      # not checking here if node_id points to valid object; check is in add_component
-      node_idh = ret_node_id_handle(:node_id,assembly)
+      node_id         = ret_request_params(:node_id)
+      opts            = ret_boolean_params_hash(:idempotent, :donot_update_workflow)
+      node_idh        = node_id.empty? ? nil : ret_node_id_handle(:node_id, assembly)
 
-      opts = ret_boolean_params_hash(:idempotent,:donot_update_workflow)
-      new_component_idh = assembly.add_component(node_idh,aug_component_template,component_title,opts)
-
+      new_component_idh = assembly.add_component(node_idh, aug_component_template, component_title, opts)
       rest_ok_response(:component_id => new_component_idh.get_id())
     end
 
@@ -710,7 +719,7 @@ module DTK
         opts.merge!(:nodes => nodes)
       end
 
-      task = Task.task_when_nodes_ready_from_assembly(assembly,:assembly, opts)
+      task = Task.task_when_nodes_ready_from_assembly(assembly, :assembly, opts)
       task.save!()
 
       # queue = SimpleActionQueue.new

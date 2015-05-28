@@ -64,6 +64,10 @@ module DTK; class  Assembly; class Instance
       #
       def nodes_valid_for_stop_or_start(node_pattern, status_pattern)
         nodes = get_leaf_nodes()
+
+        # do not start/stop assembly wide nodes
+        nodes.delete_if{|n| n[:type].eql?('assembly_wide')}
+
         # check for pattern
         unless node_pattern.nil? || node_pattern.empty?
           regex = Regexp.new(node_pattern)

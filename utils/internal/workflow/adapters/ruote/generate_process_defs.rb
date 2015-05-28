@@ -37,14 +37,24 @@ module DTK
           if guard_tasks = context.get_guard_tasks(action)
             guards = ret_guards(guard_tasks)
           end
-          authorize_action = participant_executable_action(:authorize_node,task,context,:task_type => "authorize_node", :task_start => true)
-          sync_agent_code =  
-            if R8::Config[:node_agent_git_clone][:mode] != 'off'
-              participant_executable_action(:sync_agent_code,task,context,:task_type => "sync_agent_code")
-            end
-              main = participant_executable_action(:execute_on_node,task,context,:task_type => "config_node",:task_end => true)
-          sequence_tasks = [guards,sync_agent_code,authorize_action,main].compact
-          sequence(*sequence_tasks)
+
+          if node = action[:node]
+            assembly_wide_node = (node[:type]||'').eql?('assembly_wide')
+          end
+
+          if assembly_wide_node
+            main = participant_executable_action(:execute_on_node, task, context, :task_type => "config_node", :task_end => true, :task_start => true)
+            sequence([main])
+          else
+            authorize_action = participant_executable_action(:authorize_node,task,context,:task_type => "authorize_node", :task_start => true)
+            sync_agent_code =
+              if R8::Config[:node_agent_git_clone][:mode] != 'off'
+                participant_executable_action(:sync_agent_code,task,context,:task_type => "sync_agent_code")
+              end
+                main = participant_executable_action(:execute_on_node,task,context,:task_type => "config_node",:task_end => true)
+            sequence_tasks = [guards, sync_agent_code, authorize_action, main].compact
+            sequence(*sequence_tasks)
+          end
         end
       end
 

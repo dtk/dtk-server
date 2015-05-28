@@ -48,6 +48,10 @@ module DTK; class Assembly; class Instance; module Get
     def get_attributes_print_form_aux(opts=Opts.new)
       filter_proc = opts[:filter_proc]
       all_attrs = get_attributes_all_levels_struct(filter_proc)
+
+      # remove all assembly_wide_node attributes
+      all_attrs.node_attrs.reject!{|r| r[:node] && r[:node][:type].eql?('assembly_wide')}
+
       filter_proc = opts[:filter_proc]
       assembly_attrs = all_attrs.assembly_attrs.map do |attr|
         attr.print_form(opts.merge(:level => :assembly))

@@ -556,7 +556,19 @@ module DTK
     def rest__stage()
       target_id = ret_request_param_id_optional(:target_id, Target::Instance)
       target = target_idh_with_default(target_id).create_object(:model_name => :target_instance)
-      assembly_template = ret_assembly_template_object()
+
+      # Special case to support Jenikins CLI orders, since we are not using shell we do not have access
+      # to element IDs. This "workaround" helps with that.
+      if service_module_id = ret_request_params(:service_module_id)
+        # this is name of assembly template
+        assembly_id = ret_request_params(:assembly_id)
+        service_module = ServiceModule.find(model_handle(:service_module), service_module_id)
+        assembly_template = service_module.get_assembly_templates().find { |template| template[:display_name].eql?(assembly_id) || template[:id] == assembly_id.to_i }
+        raise ErrorUsage, "We are not able to find assembly '#{assembly_id}' for service module '#{service_module_id}'" unless assembly_template
+      else
+        assembly_template = ret_assembly_template_object()
+      end
+
       opts = Hash.new
       if assembly_name = ret_request_params(:name)
         opts[:assembly_name] = assembly_name

@@ -6,7 +6,7 @@ module DTK; class ActionDef
     r8_nested_require('content','command')
     r8_nested_require('content','template_processor')
 
-    attr_reader :commands
+    attr_reader :commands, :functions
     def initialize(hash_content)
       super()
       replace(hash_content)
@@ -17,6 +17,9 @@ module DTK; class ActionDef
     
     def parse_and_reify!()
       @commands = (self[Constant::Commands]||[]).map do |serialized_command|
+        Command.parse(serialized_command)
+      end
+      @functions = (self[Constant::Functions]||[]).map do |serialized_command|
         Command.parse(serialized_command)
       end
       self

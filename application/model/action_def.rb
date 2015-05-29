@@ -32,6 +32,10 @@ module DTK
       parse_and_reify_content?().commands()
     end
 
+    def functions()
+      parse_and_reify_content?().functions()
+    end
+
     # if parse does not go through; raises parse error
     def self.parse(hash_content)
       Content.parse(hash_content)

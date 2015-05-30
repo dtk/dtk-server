@@ -1,6 +1,9 @@
+# TODO: just selectively putting in lock; look to put it in
+# all calls by putting in facade object for conn and interecpting with a synvhronize
 module DTK
   class CloudConnect
     class EC2 < self
+
       WAIT_FOR_NODE = 10 # seconds
 
       def initialize(override_of_aws_params = nil)             
@@ -16,7 +19,54 @@ module DTK
       end
 
       def servers_all()
-        @conn.servers.all.map{|x|hash_form(x)}
+        lock_ec2_call{@conn.servers.all.map{|x|hash_form(x)}}
+      end
+
+      def server_get(id)
+        hash_form(wrap_servers_get(id))
+      end
+
+      def server_destroy(id)
+        request_context do
+          if server = wrap_servers_get(id)
+            lock_ec2_call{server.destroy}
+          else
+            :server_does_not_exist
+          end
+        end
+      end
+
+      def server_create(options)
+        request_context do
+          hash_form(lock_ec2_call{@conn.servers.create(options)})
+        end
+      end
+      def server_start(instance_id)
+        (tries=10).times do
+          begin
+            ret = nil
+            request_context do
+              ret = hash_form(lock_ec2_call{@conn.start_instances(instance_id)})
+            end
+            return ret
+          rescue Fog::Compute::AWS::Error => e
+            # expected error in case node is not stopped, wait try again
+            if (e.message.include? 'IncorrectInstanceState')
+              Log.debug "Node with instance ID '#{instance_id}' is not yet ready, waiting #{WAIT_FOR_NODE} seconds ..."
+              sleep(WAIT_FOR_NODE)
+              next
+            end
+            raise e
+          end
+        end # => 10 times loop end
+
+        raise Error, "Node (Instance ID: '#{instance_id}') not ready after #{tries*WAIT_FOR_NODE} seconds."
+      end
+
+      def server_stop(instance_id)
+        request_context do
+          hash_form(lock_ec2_call{@conn.stop_instances(instance_id)})
+        end
       end
 
       def security_groups_all()
@@ -37,19 +87,6 @@ module DTK
         end
       end
 
-      def server_get(id)
-        hash_form(wrap_servers_get(id))
-      end
-
-      def server_destroy(id)
-        request_context do
-          if server = wrap_servers_get(id)
-            server.destroy
-          else
-            :server_does_not_exist
-          end
-        end
-      end
 
       def check_for_key_pair(name)
         unless key_pair = @conn.key_pairs.get(name)
@@ -80,12 +117,6 @@ module DTK
           raise ErrorUsage.new("Not able to find IAAS security group with name '#{name}' aborting action, please create necessery security group")
         end
         sc
-      end
-
-      def server_create(options)
-        request_context do
-          hash_form(@conn.servers.create(options))
-        end
       end
 
       def allocate_elastic_ip
@@ -119,38 +150,22 @@ module DTK
           hash_form(@conn.associate_address(instance_id, elastic_ip))
         end
       end
-      def server_start(instance_id)
-        (tries=10).times do
-          begin
-            ret = nil
-            request_context do
-              ret = hash_form(@conn.start_instances(instance_id))
-            end
-            return ret
-          rescue Fog::Compute::AWS::Error => e
-            # expected error in case node is not stopped, wait try again
-            if (e.message.include? 'IncorrectInstanceState')
-              Log.debug "Node with instance ID '#{instance_id}' is not yet ready, waiting #{WAIT_FOR_NODE} seconds ..."
-              sleep(WAIT_FOR_NODE)
-              next
-            end
-            raise e
-          end
-        end # => 10 times loop end
 
-        raise Error, "Node (Instance ID: '#{instance_id}') not ready after #{tries*WAIT_FOR_NODE} seconds."
-      end
-
-      def server_stop(instance_id)
-        request_context do
-          hash_form(@conn.stop_instances(instance_id))
-        end
-      end
 
       private
+      LockEC2Call = Mutex.new
+
+      def lock_ec2_call(&block)
+        ret = nil
+        LockEC2Call.synchronize do
+          ret = block.call
+        end
+        ret
+      end
+
       def wrap_servers_get(id)
         begin
-          @conn.servers.get(id)
+          lock_ec2_call{@conn.servers.get(id)}
         rescue Fog::Compute::AWS::Error => e
           Log.info("fog error: #{e.message}")
           nil

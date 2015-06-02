@@ -28,6 +28,7 @@ R8::ReactorRoute.draw do
   post  'assembly/get_action_results' => 'assembly#get_action_results'
   post  'assembly/find_violations' => 'assembly#find_violations'
   post  'assembly/create_task' => 'assembly#create_task'
+  post  'assembly/execute_action' => 'assembly#execute_action'
   post  'assembly/add__service_add_on' => 'assembly#add__service_add_on'
   post  'assembly/create_smoketests_task' => 'assembly#create_smoketests_task'
   post  'assembly/list_attribute_mappings' => 'assembly#list_attribute_mappings'

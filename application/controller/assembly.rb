@@ -675,6 +675,14 @@ module DTK
     #### end: method(s) related to staging assembly template
 
     #### creates tasks to execute/converge assemblies and monitor status
+    def rest__execute_action()
+      assembly = ret_assembly_instance_object()
+      component_idh = ret_component_id_handle(:component_id,:assembly_id => assembly.id())
+      opts = ret_params_hash(:action_name,:action_paramters)
+      assembly.execute_component_action(component_idh,opts)
+      rest_ok_response 
+    end
+
     def rest__find_violations()
       assembly = ret_assembly_instance_object()
       violation_objects = assembly.find_violations()

@@ -6,6 +6,13 @@ module DTK; class Task
       #alters task if needed to decompose node groups into nodes
       NodeGroupProcessing.decompose_node_groups!(task)
     end
+
+    def create_for_component_action(assembly,component_idh,opts={})
+      pp [assembly,component_idh,opts]
+      #TODO: stub
+      nil
+    end
+
   end
 
   class Create

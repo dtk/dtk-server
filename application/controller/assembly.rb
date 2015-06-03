@@ -675,14 +675,6 @@ module DTK
     #### end: method(s) related to staging assembly template
 
     #### creates tasks to execute/converge assemblies and monitor status
-    def rest__execute_action()
-      assembly = ret_assembly_instance_object()
-      component_idh = ret_component_id_handle(:component_id,:assembly_id => assembly.id())
-      opts = ret_params_hash(:action_name,:action_paramters)
-      assembly.execute_component_action(component_idh,opts)
-      rest_ok_response 
-    end
-
     def rest__find_violations()
       assembly = ret_assembly_instance_object()
       violation_objects = assembly.find_violations()
@@ -692,6 +684,34 @@ module DTK
       end.sort{|a,b|a[:type].to_s <=> b[:type].to_s}
 
       rest_ok_response violation_table.uniq
+    end
+
+    def rest__execute_component_action()
+      assembly = ret_assembly_instance_object()
+      component_idh = ret_component_id_handle(:component_id,:assembly_id => assembly.id())
+      opts = ret_params_hash(:method_name,:action_params)
+
+      # create task
+      task = Task.create_for_component_action(assembly,component_idh,opts)
+      #task.save!()
+=begin
+
+      # TODO: this is simple but expensive way to get all teh embedded task ids filled out
+      # can replace with targeted method that does just this
+      task = Task.get_hierarchical_structure(task.id_handle())
+
+      # execute task
+      workflow = Workflow.create(task)
+      workflow.defer_execution()
+
+      response = {
+        :assembly_instance_id => assembly.id(),
+        :assembly_instance_name => assembly.display_name_print_form,
+        :task_id => task.id()
+      }
+      rest_ok_response response
+=end
+      rest_ok_response
     end
 
     def rest__create_task()

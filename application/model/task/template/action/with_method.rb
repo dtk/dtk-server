@@ -1,6 +1,6 @@
 module DTK; class Task; class Template
   class Action
-    # This represents an action with am explicit method on it method
+    # This represents an action with an explicit method, as opposed to other action terms, which just have component reference
     class WithMethod < self
       def initialize(action,action_def)
         @action = action

@@ -31,7 +31,11 @@ module DTK; class ServiceModule
           raise ParsingError.new("Ill-formed component link ?1",component_link_hash,err_opts)
         end
         link_def_ref = component_link_hash.keys.first
-        if component_link_hash.values.first =~ ServiceLinkTarget
+
+        cmp_link_value = component_link_hash.values.first
+        cmp_link_value = "assembly_wide#{Seperators[:node_component]}#{cmp_link_value}" unless cmp_link_value.include?(Seperators[:node_component])
+
+        if cmp_link_value =~ ServiceLinkTarget
           output_node = $1; output_cmp_name = $2
           input = parsed_endpoint(input_node,input_cmp_name,link_def_ref)
           output = parsed_endpoint(output_node,output_cmp_name,link_def_ref)

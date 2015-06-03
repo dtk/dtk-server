@@ -238,9 +238,10 @@ module DTK
 
       def self.errors_in_node_action_result?(result,action=nil)
         # result[:statuscode] is for mcollective agent errors and data is for errors for agent
+        error_type = result[:error_type]||'node agent error'
         if result[:statuscode] != 0
           statusmsg = result[:statusmsg]
-          err_msg = (statusmsg ? "node agent error: #{statusmsg}" : "node agent error")
+          err_msg = (statusmsg ? "#{error_type}: #{statusmsg}" : "#{error_type}")
           [{:message => err_msg}]
         else
           payload = result[:data]||{}

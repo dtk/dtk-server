@@ -54,6 +54,11 @@ module DTK
       TargetRef.types(opts).include?(get_field?(:type))
     end
 
+    def is_assembly_wide_node?()
+      update_object!(:type)
+      self[:type].eql?('assembly_wide')
+    end
+
     def self.assembly_node_print_form?(obj)
       if obj.kind_of?(Node)
         if obj.get_field?(:display_name)

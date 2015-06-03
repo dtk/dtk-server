@@ -29,7 +29,8 @@ module DTK
         aug_component_refs = get_augmented_component_refs(mh,sp_hash)
         aug_component_refs.map do |r|
           cmp_template = r[:component_template]
-          display_name = "#{r[:node][:display_name]}/#{r.display_name_print_form()}"
+          node_name    = r[:node].is_assembly_wide_node?() ? '' : "#{r[:node][:display_name]}/"
+          display_name = "#{node_name}#{r.display_name_print_form()}"
           version = ModuleBranch.version_from_version_field(cmp_template[:version])
           cmp_template.hash_subset(:id).merge(:display_name => display_name, :version => version)
         end.sort{|a,b|a[:display_name] <=> b[:display_name]}
@@ -39,6 +40,7 @@ module DTK
         sp_hash = {:cols => [:node_templates]}
         assembly_template.get_objs(sp_hash).map do |r|
           el = r[:node].hash_subset(:id,:display_name)
+          el[:dtk_client_hidden] = el.is_assembly_wide_node?()
           case r[:node][:type]
             when 'node_group_stub' 
               el.merge!(:type => 'node_group')

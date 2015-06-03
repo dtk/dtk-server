@@ -126,12 +126,14 @@ module DTK; class ServiceModule
             raise ParsingError.new("The content associated with key (#{node_hash_ref}) should be a hash representing assembly node info",opts_file_path(opts))
           end
           type,attributes = import_type_and_node_attributes(node_hash,opts)
+          type = node_hash_ref.eql?('assembly_wide') ? 'assembly_wide' : type
           node_output = {
             "display_name" => node_hash_ref, 
             "type" => type,
             "attribute" => attributes,
             "*assembly_id" => "/component/#{assembly_ref}"
           }
+
           if nb_rs = node_to_nb_rs[node_hash_ref]
             if nb_rs_id = nb_rs_to_id[nb_rs]
               node_output["node_binding_rs_id"] = nb_rs_id

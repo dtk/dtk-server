@@ -357,7 +357,7 @@ lambda__instance_nodes_components_assembly_template =
       :hidden => true,
       :remote_dependencies =>
       [
-       lambda__segment_node.call([:id,:group_id,:display_name,:os_type]),
+       lambda__segment_node.call([:id,:group_id,:display_name,:os_type,:type]),
        segment_component_ref,
        lambda__segment_component_template.call(:left_outer)
       ]

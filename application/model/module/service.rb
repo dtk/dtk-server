@@ -149,6 +149,7 @@ module DTK
       end
       ndx_ret = Assembly::Template.get(model_handle(:component),opts).inject(Hash.new){|h,r|h.merge(r[:id] => r)}
       Assembly::Template.get_nodes(ndx_ret.values.map{|r|r.id_handle}).each do |node|
+        next if node.is_assembly_wide_node?()
         assembly = ndx_ret[node[:assembly_id]]
         (assembly[:nodes] ||= Array.new)  << node
       end

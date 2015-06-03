@@ -26,6 +26,8 @@ module DTK; class Attribute
       def valid_value?(value,attribute_idh=nil)
         attr = attribute_stack(attribute_idh)[:attribute]
         if semantic_data_type = attr[:semantic_data_type]
+          # value comes as array inside string "[1, 2, 3]"; using JSON.parse to convert it to [1, 2, 3]
+          value = JSON.parse(value) if semantic_data_type.eql?('array')
           SemanticDatatype.is_valid?(semantic_data_type,value)
         else
           # vacuously true

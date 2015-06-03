@@ -15,7 +15,7 @@ module DTK
           Log.error("Not treating server execution of config_agent_type '#{config_agent_type}'")
         end
 
-        # TODO: right now just setting this as no op with no error
+        # unless response is returned from ruby function send status: OK
         response ||= {
           :statuscode => 0, 
           :statusmsg  => 'OK"', 

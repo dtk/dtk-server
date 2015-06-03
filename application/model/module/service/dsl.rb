@@ -212,6 +212,9 @@ module DTK
               return [response,ret_cmr] if ParsingError.is_error?(response)
             end
 
+            # check if assembly_wide_components exist and add them to assembly_wide node
+            parse_assembly_wide_components!(hash_content)
+
             parsed = assembly_import_helper.process(module_name,hash_content,opts)
             return [parsed,ret_cmr] if ParsingError.is_error?(parsed)
           end
@@ -326,6 +329,19 @@ module DTK
         cmp_modules.each do |k,v|
           v_namespace = v[:namespace_info]
           return ParsingError::BadNamespaceReference.new(:name => v_namespace) unless namespaces.include?(v_namespace)
+        end
+      end
+
+      def parse_assembly_wide_components!(hash_content)
+        return unless (hash_content['assembly'] && hash_content['assembly']['components'])
+
+        assembly_wide_cmps = hash_content['assembly']['components']
+        assembly_wide_cmps = assembly_wide_cmps.is_a?(Array) ? assembly_wide_cmps : [assembly_wide_cmps]
+
+        if hash_content['assembly']['nodes']
+          hash_content['assembly']['nodes'].merge!('assembly_wide' => {'components' => assembly_wide_cmps})
+        else
+          hash_content['assembly']['nodes'] = {'assembly_wide' => {'components' => assembly_wide_cmps}}
         end
       end
 

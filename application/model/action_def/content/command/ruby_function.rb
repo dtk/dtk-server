@@ -13,11 +13,19 @@ module DTK; class ActionDef; class Content
 
       def process_function_assign_attrs(attrs, dyn_attrs)
         @ruby_function.each_pair do |d_attr, fn|
-          parsed_function = YAML.load(fn)
-          attr_id         = (attrs.find{|a| a[:display_name].eql?(d_attr.to_s)}||{})[:id]
-          evaluated_fn    = eval(parsed_function)
-          attr_val        = calculate_dyn_attr_value(evaluated_fn, attrs)
-          dyn_attrs << {:attribute_id => attr_id, :attribute_val => attr_val}
+          begin
+            evaluated_fn = proc {
+              $SAFE = 4
+              eval(fn)
+            }.call
+
+            attr_id  = (attrs.find{|a| a[:display_name].eql?(d_attr.to_s)}||{})[:id]
+            attr_val = calculate_dyn_attr_value(evaluated_fn, attrs)
+            dyn_attrs << {:attribute_id => attr_id, :attribute_val => attr_val}
+          rescue SecurityError => e
+            pp [e,e.backtrace[0..5]]
+            return {:error => e}
+          end
         end
       end
 
@@ -52,9 +60,9 @@ module DTK; class ActionDef; class Content
         parsed_attrs = {}
         attrs.each do |attr|
           if attr[:data_type].eql?('integer')
-            parsed_attrs[attr[:display_name]] = attr[:value_asserted].to_i
+            parsed_attrs[attr[:display_name]] = (attr[:value_asserted]||attr[:value_derived]).to_i
           else
-            parsed_attrs[attr[:display_name]] = attr[:value_asserted]
+            parsed_attrs[attr[:display_name]] = attr[:value_asserted] || attr[:value_derived]
           end
         end
         parsed_attrs

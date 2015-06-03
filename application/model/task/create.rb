@@ -8,14 +8,25 @@ module DTK; class Task
     end
 
     def create_for_component_action(assembly,component_idh,opts={})
-      pp [assembly,component_idh,opts]
-      #TODO: stub
-      nil
+      task = Create.create_for_component_action(assembly,component_idh,opts)
+      NodeGroupProcessing.decompose_node_groups!(task)
     end
-
   end
 
   class Create
+    def self.create_for_component_action(assembly,component_idh,opts={})
+      target_idh     = target_idh_from_assembly(assembly)
+      task_mh        = target_idh.create_childMH(:task)
+      ret = create_top_level_task(task_mh,assembly)
+      task_template_content = Template::ConfigComponents::ComponentAction.generate_template_content(assembly,component_idh,opts)
+      stages_config_nodes_task = task_template_content.create_subtask_instances(task_mh,assembly.id_handle())
+      ret.add_subtasks(stages_config_nodes_task)
+      ret
+
+      #stub
+      create_top_level_task(task_mh,assembly)
+    end
+
     def self.create_from_assembly_instance(assembly,opts={})
       component_type = opts[:component_type]||:service
       target_idh     = target_idh_from_assembly(assembly)

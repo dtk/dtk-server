@@ -2,6 +2,7 @@ module DTK; class Task
   class Template
     class ConfigComponents < self
       r8_nested_require('config_components','persistence')
+      r8_nested_require('config_components','component_action')
 
       def self.update_when_added_component?(assembly,node,new_component,component_title,opts={})
         # only updating the create action task template and only if it is persisted

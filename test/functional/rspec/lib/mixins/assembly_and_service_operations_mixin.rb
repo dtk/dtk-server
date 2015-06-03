@@ -657,7 +657,8 @@ module AssemblyAndServiceOperationsMixin
 		content = YAML.load(cardinality['data'])
 		puts content
 		puts ""
-		return content["#{node_name}/"]['cardinality'].to_i
+                attributes = (content["#{node_name}/"]||{})['attributes']|{}
+		return attributes['cardinality'] && attributes['cardinality'].to_i
 	end
 
 	def get_workflow_info(service_id)

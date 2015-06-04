@@ -3,7 +3,7 @@ module DTK; class ActionDef; class Content
     class RubyFunction < self
       attr_reader :ruby_function
 
-      def needs_template_substitution?()
+      def needs_template_substitution?
         @needs_template_substitution
       end
 
@@ -14,23 +14,23 @@ module DTK; class ActionDef; class Content
       def process_function_assign_attrs(attrs, dyn_attrs)
         @ruby_function.each_pair do |d_attr, fn|
           begin
-            evaluated_fn = proc {
+            evaluated_fn = proc do
               $SAFE = 4
               eval(fn)
-            }.call
+            end.call
 
-            attr_id  = (attrs.find{|a| a[:display_name].eql?(d_attr.to_s)}||{})[:id]
+            attr_id  = (attrs.find { |a| a[:display_name].eql?(d_attr.to_s) } || {})[:id]
             attr_val = calculate_dyn_attr_value(evaluated_fn, attrs)
-            dyn_attrs << {:attribute_id => attr_id, :attribute_val => attr_val}
+            dyn_attrs << { attribute_id: attr_id, attribute_val: attr_val }
           rescue SecurityError => e
-            pp [e,e.backtrace[0..5]]
-            return {:error => e}
+            pp [e, e.backtrace[0..5]]
+            return { error: e }
           end
         end
       end
 
       def self.parse?(serialized_command)
-        if serialized_command.kind_of?(Hash) && serialized_command.has_key?(:outputs)
+        if serialized_command.is_a?(Hash) && serialized_command.key?(:outputs)
           ruby_function = serialized_command[:outputs]
           new(ruby_function)
         end
@@ -40,10 +40,10 @@ module DTK; class ActionDef; class Content
         value = nil
         parsed_attrs = parse_attributes(attrs)
         if evaluated_fn.is_a?(Proc) && evaluated_fn.lambda?
-          params = process_lambda_params(evaluated_fn, parsed_attrs)#evaluated_fn.parameters
+          params = process_lambda_params(evaluated_fn, parsed_attrs)
           value = evaluated_fn.call(*params)
         else
-          raise Error.new("Currently only lambda functions are supported")
+          raise Error.new('Currently only lambda functions are supported')
         end
         value
       end
@@ -60,7 +60,7 @@ module DTK; class ActionDef; class Content
         parsed_attrs = {}
         attrs.each do |attr|
           if attr[:data_type].eql?('integer')
-            parsed_attrs[attr[:display_name]] = (attr[:value_asserted]||attr[:value_derived]).to_i
+            parsed_attrs[attr[:display_name]] = (attr[:value_asserted] || attr[:value_derived]).to_i
           else
             parsed_attrs[attr[:display_name]] = attr[:value_asserted] || attr[:value_derived]
           end
@@ -68,7 +68,7 @@ module DTK; class ActionDef; class Content
         parsed_attrs
       end
 
-      def type()
+      def type
         'ruby_function'
       end
     end

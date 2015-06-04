@@ -3,9 +3,9 @@
   :table=>:user,
   :columns=>{
     :username => {:type=>:varchar, :size => 50},
-    :password => {:type=>:varchar, :size => 50},
+    :password => {:type=>:varchar, :size => 100},
     :catalog_username => {:type=>:varchar, :size => 50},
-    :catalog_password => {:type=>:varchar, :size => 50},
+    :catalog_password => {:type=>:varchar, :size => 100},
     :first_name => {:type=>:varchar, :size => 50},
     :last_name => {:type=>:varchar, :size => 50},
     :is_admin_user=> {:type=>:boolean},

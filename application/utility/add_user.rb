@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
-# adds user, his or her private 
+# adds user, his or her private
 require File.expand_path('common', File.dirname(__FILE__))
 options = Hash.new
-OptionParser.new do|opts|
+OptionParser.new do |opts|
 #   opts.banner = "Usage: add_user.rb USERNAME [EC2-REGION] [--create-private [MODULE_SEED_LIST]]"
    opts.banner = "Usage: add_user.rb USERNAME [EC2-REGION] [--password PASSWORD] [-f PARAM-FILE]"
 
@@ -12,10 +12,10 @@ OptionParser.new do|opts|
   end
   opts.on( '-f', '--param-file PARAM-FILE', "File with parameters") do |path|
     require 'yaml'
-    param_hash = 
+    param_hash =
       begin
         YAML.load(File.open(path).read) rescue nil
-      end  
+      end
     if param_hash
       ['password','catalog_username','catalog_password'].each do |k|
         if val = param_hash[k]

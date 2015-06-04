@@ -12,7 +12,7 @@ require Root + '/app'
 
 class R8Server
   include XYZ
-  def initialize(username,opts={})
+  def initialize(username, opts={})
     groupname = opts[:groupname]||"private"
     @user_mh = model_handle(:user)
     @user_obj = User.create_user_in_groups?(user_mh,username,opts)
@@ -64,9 +64,9 @@ class R8Server
     end
   end
 
- def create_public_library_nodes?()
+  def create_public_library_nodes?
     container_idh = pre_execute(:top)
-    hash_content = LibraryNodes.get_hash(:in_library => "public")
+    hash_content = LibraryNodes.get_hash(:in_library => 'public')
     hash_content["library"]["public"]["display_name"] ||= "public"
     Model.import_objects_from_hash(container_idh,hash_content)
   end

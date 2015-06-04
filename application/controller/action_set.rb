@@ -45,10 +45,6 @@ module DTK
                 begin
                   ramaze_user = User.get_user_by_id( { :model_name => :user, :c => c }, user_id)
                 rescue ::Sequel::DatabaseDisconnectError, ::Sequel::DatabaseConnectionError => e
-                  # DEBUG SNIPPET >>> REMOVE <<<
-                  require 'ap'
-                  ap "BECUASE RAMAZE SHIT: "
-                  ap e
                   respond(e, 403)
                 end
 

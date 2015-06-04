@@ -11,9 +11,6 @@ module Ramaze::Helper
     end
 
     def auth_violation_response()
-      # DEBUG SNIPPET >>> REMOVE <<<
-      require 'ap'
-      ap caller
       rest_request? ? respond('Forbidden',403) : redirect(R8::Config[:login][:path])
     end
 

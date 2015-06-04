@@ -657,7 +657,7 @@ module AssemblyAndServiceOperationsMixin
 		content = YAML.load(cardinality['data'])
 		puts content
 		puts ""
-                attributes = (content["#{node_name}/"]||{})['attributes']|{}
+        attributes = (content["nodes"]["#{node_name}/"]||{})['attributes']||{}
 		return attributes['cardinality'] && attributes['cardinality'].to_i
 	end
 

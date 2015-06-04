@@ -1,26 +1,30 @@
 module DTK; class ConfigAgent; module Adapter
   class RubyFunction < ConfigAgent
     def execute(task_action)
-      cmps_action_defs, attrs, dynamic_attrs = [], [], []
+      cmps_action_defs = []
+      attrs            = []
+      dynamic_attrs    = []
       actions = task_action.component_actions()
 
       actions.each do |action|
-        attrs            << action[:attributes]
-        cmp              =  action[:component]
-        template_idh     =  cmp.id_handle(:id => cmp[:ancestor_id])
+        attrs << action[:attributes]
+        cmp          =  action[:component]
+        template_idh =  cmp.id_handle(id: cmp[:ancestor_id])
         cmps_action_defs =  ActionDef.get_ndx_action_defs([template_idh])
       end
 
       rf_results = process_ruby_functions(cmps_action_defs, attrs, dynamic_attrs)
-      results    = parse_ruby_fn_results(rf_results, dynamic_attrs)
+      parse_ruby_fn_results(rf_results, dynamic_attrs)
     end
 
     private
+
     def process_ruby_functions(cmps_action_defs, attrs, dyn_attrs)
-      functions, results = [], []
+      functions = []
+      results   = []
 
       action_defs = cmps_action_defs.values.flatten
-      action_defs.each{|a_def| functions << a_def.functions()}
+      action_defs.each { |a_def| functions << a_def.functions() }
 
       functions.flatten.each do |fn|
         results << fn.process_function_assign_attrs(attrs.flatten, dyn_attrs)
@@ -30,13 +34,13 @@ module DTK; class ConfigAgent; module Adapter
     end
 
     def parse_ruby_fn_results(rf_results, dyn_attrs)
-      errors = ""
+      errors = ''
       results = {
-        :statuscode => 0,
-        :statusmsg  => 'OK',
-        :data       => {:status => :succeeded, :dynamic_attributes => dyn_attrs}
+        statuscode: 0,
+        statusmsg:  'OK',
+        data:       { status: :succeeded, dynamic_attributes: dyn_attrs }
       }
-      res_with_errors = rf_results.select{|r| r.has_key?(:error)}
+      res_with_errors = rf_results.select { |r| r.key?(:error) }
       return results if res_with_errors.empty?
 
       err_size = res_with_errors.size
@@ -50,7 +54,7 @@ module DTK; class ConfigAgent; module Adapter
         ruby_fn_errors = 'ruby function errors'
       end
 
-      results.merge!({:statuscode => 1, :statusmsg => errors, :error_type => ruby_fn_errors})
+      results.merge!(statuscode: 1, statusmsg: errors, error_type: ruby_fn_errors)
       results
     end
   end

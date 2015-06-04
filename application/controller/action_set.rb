@@ -8,12 +8,12 @@ module DTK
       route_key = route[0..1].join("/")
       action_set_params = route[2..route.size-1]||[]
       model_name = route[0].to_sym
-      
+
       route = R8::ReactorRoute.validate_route(request.request_method, route_key)
-      
+
       # return 404 Resource Not Found if route is not valid
       respond("#{route_key}!", 404) unless route
-      
+
       # we set new model
       model_name = route.first.to_sym
       # we rewrite route key to new mapped one
@@ -41,13 +41,13 @@ module DTK
               # make sure that cookie has not expired
               if (time_integer.to_i >= Time.now.to_i)
                 # due to tight coupling between model_handle and user_object we will set
-                # model handle manually 
+                # model handle manually
                 begin
                   ramaze_user = User.get_user_by_id( { :model_name => :user, :c => c }, user_id)
                 rescue ::Sequel::DatabaseDisconnectError, ::Sequel::DatabaseConnectionError => e
                   respond(e, 403)
                 end
-     
+
                 # TODO: [Haris] This is workaround to make sure that user is logged in, due to Ramaze design
                 # this is easiest way to do it. But does feel dirty.
                 # TODO: [Haris] This does not work since user is not persisted, look into this after cookie bug is resolved
@@ -69,7 +69,7 @@ module DTK
         login_first unless R8::Config[:development_test_user]
       end
 
-      @json_response = true if ajax_request? 
+      @json_response = true if ajax_request?
 
       # seperate route in 'route_key' (e.g., object/action, object) and its params 'action_set_params'
       # first two (or single items make up route_key; the rest are params
@@ -92,7 +92,7 @@ module DTK
     end
    private
     def compute_singleton_action_set(action_set_def,route_key,action_set_params)
-      action_params = action_set_params 
+      action_params = action_set_params
       query_string = ret_parsed_query_string_from_uri()
       action_params << query_string unless query_string.empty?
       action = {
@@ -135,9 +135,9 @@ module DTK
 
         if result and result.length > 0
           # if a hash is returned, turn make result an array list of one
-          if result.kind_of?(Hash) 
-            ctrl_result[:content] = [result] 
-          else 
+          if result.kind_of?(Hash)
+            ctrl_result[:content] = [result]
+          else
             ctrl_result = result
           end
           panel_content_track = {}
@@ -147,11 +147,11 @@ module DTK
             panel_name = (ctrl_result[:content][index][:panel] || action[:panel] || :main_body).to_sym
             panel_content_track[panel_name] ? panel_content_track[panel_name] +=1 : panel_content_track[panel_name] = 1
             ctrl_result[:content][index][:panel] = panel_name
-  
+
             (panel_content_track[panel_name] == 1) ? dflt_assign_type = :replace : dflt_assign_type = :append
             # set the appropriate render assignment type (append | prepend | replace)
             ctrl_result[:content][index][:assign_type] = (ctrl_result[:content][index][:assign_type] || action[:assign_type] || dflt_assign_type).to_sym
-  
+
             # set js with base cache uri path
             ctrl_result[:content][index][:src] = "#{R8::Config[:base_js_cache_uri]}/#{ctrl_result[:content][index][:src]}" if !ctrl_result[:content][index][:src].nil?
           end
@@ -173,6 +173,7 @@ module DTK
        result = call_action(action,parent_model_name)
       rescue SessionTimeout => e
         # TODO: see why dont have result = auth_forbidden_response(e.message)
+        Log.info "Session error: #{e.message}"
         auth_forbidden_response(e.message)
       rescue SessionError => e
         # TODO: see why dont have result = auth_unauthorized_response(e.message)
@@ -180,7 +181,7 @@ module DTK
       # rescue ErrorUsage::Warning => e
         # TODO: handke warnings sepcially; right now handling just like errors
       rescue Exception => e
-        if e.kind_of?(ErrorUsage) 
+        if e.kind_of?(ErrorUsage)
           # TODO: respond_to? is probably not needed
           unless e.respond_to?(:donot_log_error) and e.donot_log_error()
             Log.error_pp([e,e.backtrace[0]])
@@ -205,7 +206,7 @@ module DTK
         end
       end
       model_name = model.to_sym
-      processed_params = process_action_params(action[:action_params]) 
+      processed_params = process_action_params(action[:action_params])
       action_set_params = ret_search_object(processed_params,model_name,parent_model_name)
       uri_params = ret_uri_params(processed_params)
       variables = {:action_set_params => action_set_params}
@@ -244,7 +245,7 @@ module DTK
             :relation => model_name,
             :filter => filter
           }
-        } 
+        }
       }
     end
 
@@ -292,7 +293,7 @@ module DTK
   # enter the routes defined in config into Ramaze
 
     Ramaze::Route["route_to_actionset"] = lambda{ |path, request|
-      if path =~ Regexp.new("^/xyz") and not path =~ Regexp.new("^/xyz/devtest") 
+      if path =~ Regexp.new("^/xyz") and not path =~ Regexp.new("^/xyz/devtest")
         path.gsub(Regexp.new("^/xyz"),"/xyz/actionset/process")
       elsif path =~ Regexp.new("^/rest")
         path.gsub(Regexp.new("^/rest"),"/xyz/actionset/process")

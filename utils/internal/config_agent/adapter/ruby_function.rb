@@ -13,7 +13,22 @@ module DTK; class ConfigAgent; module Adapter
         cmps_action_defs =  ActionDef.get_ndx_action_defs([template_idh])
       end
 
-      rf_results = process_ruby_functions(cmps_action_defs, attrs, dynamic_attrs)
+      begin
+        rf_results = process_ruby_functions(cmps_action_defs, attrs, dynamic_attrs)
+      rescue StandardError => e
+        # remove internal object from error message;
+        # e.g for "undefined local variable or method `name' for #<XYZ::ActionDef:0x0>" display "undefined local variable or method `name'"
+        message = parse_exception_message(e.message)
+        rf_results = [{ :error => message }]
+      rescue ScriptError => e
+        # handle syntax errors in ruby_function dsl
+        message = parse_exception_message(e.message)
+        rf_results = [{ :error => message }]
+      rescue Exception => e
+        message = parse_exception_message(e.message)
+        rf_results = [{ :error => message }]
+      end
+
       parse_ruby_fn_results(rf_results, dynamic_attrs)
     end
 
@@ -56,6 +71,14 @@ module DTK; class ConfigAgent; module Adapter
 
       results.merge!(statuscode: 1, statusmsg: errors, error_type: ruby_fn_errors)
       results
+    end
+
+    def parse_exception_message(message)
+      if message.include?('for #<XYZ') || message.include?('for #<DTK')
+        message.split('for #')[0]
+      else
+        message
+      end
     end
   end
 end; end; end

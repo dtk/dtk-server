@@ -9,7 +9,8 @@ module DTK; class Node
          :staged,            # - in a service instance before actual node correspond to it
          :target_ref,        # - target_ref to actual node
          :target_ref_staged, # - target_ref to node not created yet
-         :physical           # - target_ref that corresponds to a physical node   
+         :physical,          # - target_ref that corresponds to a physical node
+         :assembly_wide      # - assembly_wide node hidden from context
         ]
       Types.each do |type|
         class_eval("def self.#{type}(); '#{type}'; end")

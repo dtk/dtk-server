@@ -33,13 +33,13 @@ module DTK
       end
 
       # creates a new assembly template if it does not exist
-      def self.create_or_update_from_instance(assembly_instance,service_module,assembly_name,opts={})
-        assembly_factory = create_assembly_factory(assembly_instance,service_module,assembly_name,opts)
+      def self.create_or_update_from_instance(assembly_instance, service_module, assembly_name, opts = {})
+        assembly_factory = create_assembly_factory(assembly_instance, service_module, assembly_name, opts)
         assembly_factory.raise_error_if_integrity_error()
         assembly_factory.create_assembly_template()
       end
 
-      def create_assembly_template()
+      def create_assembly_template
         add_content_for_clone!()
         create_assembly_template_aux()
       end
@@ -84,7 +84,7 @@ module DTK
         end
       end
 
-      def self.create_assembly_factory(assembly_instance,service_module,assembly_name,opts={})
+      def self.create_assembly_factory(assembly_instance, service_module, assembly_name, opts = {})
         service_module_name = service_module.get_field?(:display_name)
         local_params = ModuleBranch::Location::LocalParams::Server.new(
           :module_type => :service_module,
@@ -130,21 +130,21 @@ module DTK
       end
 
       def add_content_for_clone!()
-        node_idhs = assembly_instance.get_nodes().map{|r|r.id_handle()}
+        node_idhs = assembly_instance.get_nodes().map(&:id_handle)
         if node_idhs.empty?
           raise ErrorUsage.new("Cannot find any nodes associated with assembly (#{assembly_instance.get_field?(:display_name)})")
         end
 
         # 1) get a content object, 2) modify, and 3) persist
-        port_links,dangling_links = Node.get_conn_port_links(node_idhs)
+        port_links, dangling_links = Node.get_conn_port_links(node_idhs)
         # TODO: raise error to user if dangling link
         Log.error("dangling links #{dangling_links.inspect}") unless dangling_links.empty?
 
         task_templates = assembly_instance.get_task_templates_with_serialized_content()
 
-        node_scalar_cols = FactoryObject::CommonCols + [:type,:node_binding_rs_id]
+        node_scalar_cols = FactoryObject::CommonCols + [:type, :node_binding_rs_id]
         node_mh = node_idhs.first.createMH()
-        node_ids = node_idhs.map{|idh|idh.get_id()}
+        node_ids = node_idhs.map(&:get_id)
 
         # get assembly-level attributes
         assembly_level_attrs = assembly_instance.get_assembly_level_attributes().reject do |a|
@@ -152,59 +152,59 @@ module DTK
         end
 
         # get node-level attributes
-        ndx_node_level_attrs = Hash.new
+        ndx_node_level_attrs = {}
         Node.get_node_level_assembly_template_attributes(node_idhs).each do |r|
-          (ndx_node_level_attrs[r[:node_node_id]] ||= Array.new) << r
+          (ndx_node_level_attrs[r[:node_node_id]] ||= []) << r
         end
 
         # get contained ports
         sp_hash = {
-          :cols => [:id,:display_name,:ports_for_clone],
-          :filter => [:oneof,:id,node_ids]
+          :cols   => [:id, :display_name, :ports_for_clone],
+          :filter => [:oneof, :id, node_ids]
         }
-        @ndx_ports = Hash.new
-        node_port_mapping = Hash.new
-        Model.get_objs(node_mh,sp_hash,:keep_ref_cols => true).each do |r|
+        @ndx_ports = {}
+        node_port_mapping = {}
+        Model.get_objs(node_mh, sp_hash, :keep_ref_cols => true).each do |r|
           port = r[:port].merge(:link_def => r[:link_def])
-          (node_port_mapping[r[:id]] ||= Array.new) << port
+          (node_port_mapping[r[:id]] ||= []) << port
           @ndx_ports[port[:id]] = port
         end
 
         # get contained components-non-default attribute candidates
         sp_hash = {
           :cols => node_scalar_cols + [:cmps_and_non_default_attr_candidates],
-          :filter => [:oneof,:id,node_ids]
+          :filter => [:oneof, :id, node_ids]
         }
 
-        node_cmp_attr_rows = Model.get_objs(node_mh,sp_hash,:keep_ref_cols => true)
+        node_cmp_attr_rows = Model.get_objs(node_mh, sp_hash, :keep_ref_cols => true)
         if node_cmp_attr_rows.empty?
-          raise ErrorUsage.new("No components in the nodes being grouped to be an assembly template")
+          raise ErrorUsage.new('No components in the nodes being grouped to be an assembly template')
         end
         cmp_scalar_cols = node_cmp_attr_rows.first[:component].keys - [:non_default_attr_candidate]
-        @ndx_nodes = Hash.new
+        @ndx_nodes = {}
         node_cmp_attr_rows.each do |r|
           node_id = r[:id]
-          @ndx_nodes[node_id] ||= 
+          @ndx_nodes[node_id] ||=
             r.hash_subset(*node_scalar_cols).merge(
-              :components => Array.new,
+              :components => [],
               :ports => node_port_mapping[node_id],
-              :attributes=>ndx_node_level_attrs[node_id]
+              :attributes => ndx_node_level_attrs[node_id]
             )
           cmps = @ndx_nodes[node_id][:components]
           cmp_id = r[:component][:id]
-          unless matching_cmp = cmps.find{|cmp|cmp[:id] == cmp_id}
+          unless matching_cmp = cmps.find { |cmp| cmp[:id] == cmp_id }
             matching_cmp = r[:component].hash_subset(*cmp_scalar_cols).merge(:non_default_attributes => Array.new)
             cmps << matching_cmp
           end
           if attr_cand = r[:non_default_attr_candidate] 
-            if non_default_attr = NonDefaultAttribute.isa?(attr_cand,matching_cmp)
+            if non_default_attr = NonDefaultAttribute.isa?(attr_cand, matching_cmp)
               matching_cmp[:non_default_attributes] << non_default_attr
             end
           end
         end
         update_hash = {
-          :nodes => @ndx_nodes.values, 
-          :port_links => port_links, 
+          :nodes => @ndx_nodes.values,
+          :port_links => port_links,
           :assembly_level_attributes => assembly_level_attrs
         }
         merge!(update_hash)
@@ -213,33 +213,33 @@ module DTK
       end
 
       # TODO: can collapse above and below; aboves looks like extra intermediate level
-      def create_assembly_template_aux()
-        nodes = self[:nodes].inject(DBUpdateHash.new){|h,node|h.merge(create_node_content(node))}
-        port_links = self[:port_links].inject(DBUpdateHash.new){|h,pl|h.merge(create_port_link_content(pl))}
-        task_templates = self[:task_templates].inject(DBUpdateHash.new){|h,tt|h.merge(create_task_template_content(tt))}
-        assembly_level_attributes = self[:assembly_level_attributes].inject(DBUpdateHash.new){|h,a|h.merge(create_assembly_level_attributes(a))}
+      def create_assembly_template_aux
+        nodes = self[:nodes].inject(DBUpdateHash.new){ |h, node| h.merge(create_node_content(node)) }
+        port_links = self[:port_links].inject(DBUpdateHash.new){ |h, pl| h.merge(create_port_link_content(pl)) }
+        task_templates = self[:task_templates].inject(DBUpdateHash.new){ |h, tt| h.merge(create_task_template_content(tt)) }
+        assembly_level_attributes = self[:assembly_level_attributes].inject(DBUpdateHash.new){ |h, a| h.merge(create_assembly_level_attributes(a)) }
 
         # only need to mark as complete if assembly template exists already
         if assembly_template_idh = id_handle_if_object_exists?()
           assembly_template_id = assembly_template_idh.get_id()
-          nodes.mark_as_complete({:assembly_id=>assembly_template_id},:apply_recursively => true)
-          port_links.mark_as_complete(:assembly_id=>assembly_template_id)
-          task_templates.mark_as_complete(:component_component_id=>assembly_template_id)
-          assembly_level_attributes.mark_as_complete(:component_component_id=>assembly_template_id)
+          nodes.mark_as_complete({ :assembly_id => assembly_template_id }, :apply_recursively => true)
+          port_links.mark_as_complete(:assembly_id => assembly_template_id)
+          task_templates.mark_as_complete(:component_component_id => assembly_template_id)
+          assembly_level_attributes.mark_as_complete(:component_component_id => assembly_template_id)
         end
 
-        @template_output = ServiceModule::AssemblyExport.create(self,project_idh,service_module_branch)
+        @template_output = ServiceModule::AssemblyExport.create(self, project_idh, service_module_branch)
         assembly_ref = self[:ref]
-        assembly_hash = hash_subset(:display_name,:type,:ui,:module_branch_id,:component_type)
+        assembly_hash = hash_subset(:display_name, :type, :ui, :module_branch_id, :component_type)
 
         # description = self[:description]||@assembly_instance.get_field?(:description)
-        description = self[:description]||self[:display_name]
+        description = self[:description] || self[:display_name]
         assembly_hash.merge!(:description => description) if description
 
         assembly_hash.merge!(:task_template => task_templates) unless task_templates.empty?
         assembly_hash.merge!(:attribute => assembly_level_attributes) unless assembly_level_attributes.empty?
         assembly_hash.merge!(:port_link => port_links) unless port_links.empty?
-        @template_output.merge!(:node => nodes,:component => {assembly_ref => assembly_hash})
+        @template_output.merge!(:node => nodes, :component => { assembly_ref => assembly_hash })
         module_refs_updated = @component_module_refs.update_object_if_needed!(@assembly_component_modules)
         
         Transaction do
@@ -334,9 +334,15 @@ module DTK
         ports = (node[:ports]||[]).inject(Hash.new){|h,p|h.merge(create_port_content(p))}
         node_attrs = (node[:attributes]||[]).inject(Hash.new){|h,a|h.merge(create_node_attribute_content(a))}
         node_hash = Aux::hash_subset(node,[:display_name,:node_binding_rs_id])
+        node_type =
+          if node[:display_name].eql?('assembly_wide')
+            'assembly_wide'
+          else
+            node.is_node_group?() ? Node::Type::NodeGroup.stub : Node::Type::Node.stub
+          end
         node_hash.merge!(
           "*assembly_id" => "/component/#{self[:ref]}",
-          :type          => node.is_node_group?() ? Node::Type::NodeGroup.stub : Node::Type::Node.stub,
+          :type          => node_type,
           :component_ref => cmp_refs, 
           :port          => ports,
           :attribute     => node_attrs
@@ -372,8 +378,6 @@ module DTK
       def node_ref(node)
         assembly_template_node_ref(self[:ref],node[:display_name])
       end
-
-
     end
   end; end
 end

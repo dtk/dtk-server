@@ -49,12 +49,12 @@ module DTK; class Assembly
       Assembly::Instance.create_subclass_object(new_assembly_obj)
     end
 
-    def self.create_or_update_from_instance(project,assembly_instance,service_module_name,assembly_template_name,opts={})
-      namespace = opts[:namespace]||Namespace.default_namespace_name
+    def self.create_or_update_from_instance(project, assembly_instance, service_module_name, assembly_template_name, opts = {})
+      namespace = opts[:namespace] || Namespace.default_namespace_name
       opts.merge!(:namespace => namespace)
 
-      service_module = Factory.get_or_create_service_module(project,service_module_name,opts)
-      Factory.create_or_update_from_instance(assembly_instance,service_module,assembly_template_name,opts)
+      service_module = Factory.get_or_create_service_module(project, service_module_name, opts)
+      Factory.create_or_update_from_instance(assembly_instance, service_module, assembly_template_name, opts)
 
       service_module_branch = service_module.get_workspace_module_branch()
       service_module_branch.set_dsl_parsed!(true)

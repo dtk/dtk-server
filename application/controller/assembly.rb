@@ -478,12 +478,12 @@ module DTK
     end
 
     #### actions to update and create assembly templates
-    def rest__promote_to_template()
+    def rest__promote_to_template
       assembly = ret_assembly_instance_object()
-      assembly_template_name,service_module_name,module_namespace = get_template_and_service_names_params(assembly)
+      assembly_template_name, service_module_name, module_namespace = get_template_and_service_names_params(assembly)
 
-      if assembly_template_name.nil? or service_module_name.nil?
-        raise ErrorUsage.new("SERVICE-NAME/ASSEMBLY-NAME cannot be determined and must be explicitly given")
+      if assembly_template_name.nil? || service_module_name.nil?
+        raise ErrorUsage.new('SERVICE-NAME/ASSEMBLY-NAME cannot be determined and must be explicitly given')
       end
       project = get_default_project()
       opts = ret_symbol_params_hash(:mode)
@@ -502,7 +502,7 @@ module DTK
         opts.merge!(:local_clone_dir_exists => local_clone_dir_exists)
       end
 
-      service_module = Assembly::Template.create_or_update_from_instance(project,assembly,service_module_name,assembly_template_name,opts)
+      service_module = Assembly::Template.create_or_update_from_instance(project, assembly, service_module_name, assembly_template_name, opts)
       rest_ok_response service_module.ret_clone_update_info()
     end
     #### end: actions to update and create assembly templates

@@ -4,19 +4,21 @@ module DTK
      private
       def serialize()
         assembly_hash = assembly_output_hash()
+        serialize_assembly_wide_node!(assembly_hash) if assembly_hash[:nodes].key?('assembly_wide')
         node_bindings_hash = node_bindings_output_hash()
         workflow = workflow_hash()
         dsl_version = dsl_version?()
         description = assembly_description?()
         SimpleOrderedHash.new(
-         [
-          {:name => assembly_hash()[:display_name]},
-          description && {:description => description},
-          dsl_version && {:dsl_version => dsl_version},
-          node_bindings_hash.empty? ? nil : {:node_bindings => node_bindings_hash},
-          {:assembly => assembly_hash},
-          workflow && {:workflow => workflow}
-         ].compact)
+          [
+            { :name => assembly_hash()[:display_name] },
+            description && { :description => description },
+            dsl_version && { :dsl_version => dsl_version },
+            node_bindings_hash.empty? ? nil : { :node_bindings => node_bindings_hash },
+            { :assembly => assembly_hash },
+            workflow && { :workflow => workflow }
+          ].compact
+        )
       end
 
       def assembly_output_hash()
@@ -63,6 +65,11 @@ module DTK
         ret
       end
 
+      def serialize_assembly_wide_node!(assembly_hash)
+        assembly_components = assembly_hash[:nodes].delete('assembly_wide')
+        assembly_hash.merge!(assembly_components) if assembly_components.is_a?(Hash)
+      end
+
       def port_links(node_ref_to_name,&block)
         (self[:component]||{}).each_value do |cmp|
           (cmp[:port_link]||{}).each_value do |pl|
@@ -95,7 +102,7 @@ module DTK
       end
       NodeAttributesInDSL = ['cardinality','root_device_size','puppet_version']
 
-     def workflow_hash()
+      def workflow_hash()
         if default_action_task_template = (assembly_hash()[:task_template]||{})[Task::Template.default_task_action()]
           SimpleOrderedHash.new(:assembly_action => "create").merge(default_action_task_template[:content])
         end

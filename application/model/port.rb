@@ -53,17 +53,18 @@ module DTK
     end
     
     ###########
-    RefDelim = "___"
+    RefDelim = '___'
 
     # this is an augmented port that has keys: node and optionally :link_def and nested_component
-    def display_name_print_form()
+    def display_name_print_form(opts = {})
       info = parse_port_display_name()
       cmp_ref = ((info[:module] == info[:component]) ? info[:component] : "#{info[:module]}::#{info[:component]}")
       if title = self[:nested_component] && ComponentTitle.title?(self[:nested_component])
-        cmp_ref = ComponentTitle.display_name_with_title(cmp_ref,title)
+        cmp_ref = ComponentTitle.display_name_with_title(cmp_ref, title)
       end
       node = self[:node]
-      "#{node[:display_name]}/#{cmp_ref}"
+      hide_assembly_wide_node = opts[:hide_assembly_wide_node] && node[:display_name].eql?('assembly_wide')
+      hide_assembly_wide_node ? cmp_ref : "#{node[:display_name]}/#{cmp_ref}"
     end
 
     # this is an augmented port that has keys: node and optionally :link_def and nested_component
@@ -74,7 +75,7 @@ module DTK
         :service_ref => display_name_print_form()
       }
       if link_def = self[:link_def] 
-        ret.merge!(link_def.hash_subset(:required,:description))
+        ret.merge!(link_def.hash_subset(:required, :description))
       end
       ret
     end

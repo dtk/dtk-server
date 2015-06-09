@@ -6,11 +6,11 @@ module DTK
         ServiceLink::Factory.new(self,input_cmp_idh,output_cmp_idh,dependency_name).add?()
       end
       
-      def list_service_links(opts={})
-        get_opts = Aux.hash_subset(opts,[:filter])
-        pp_opts = Aux.hash_subset(opts,[:context])
-        get_augmented_port_links(get_opts).map{|r|ServiceLink.print_form_hash(r,pp_opts)} +
-          get_augmented_ports(:mark_unconnected=>true).select{|r|r[:unconnected]}.map{|r|ServiceLink.print_form_hash(r,pp_opts)}
+      def list_service_links(opts = {})
+        get_opts = Aux.hash_subset(opts, [:filter])
+        pp_opts = Aux.hash_subset(opts, [:context, :hide_assembly_wide_node])
+        get_augmented_port_links(get_opts).map { |r| ServiceLink.print_form_hash(r, pp_opts) } +
+          get_augmented_ports(:mark_unconnected => true).select { |r| r[:unconnected] }.map { |r| ServiceLink.print_form_hash(r, pp_opts) }
       end
       
       def list_connections__possible()

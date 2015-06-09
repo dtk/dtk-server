@@ -359,12 +359,11 @@ module DTK
 
     def rest__list_service_links()
       assembly = ret_assembly_instance_object()
-      component_id = ret_component_id?(:component_id,:assembly_id => assembly.id())
-      context = (ret_request_params(:context)||:assembly).to_sym
-      opts = {:context => context}
-      if component_id
-        opts.merge!(:filter => {:input_component_id => component_id})
-      end
+      component_id = ret_component_id?(:component_id, :assembly_id => assembly.id())
+      context = (ret_request_params(:context) || :assembly).to_sym
+      opts = { :context => context }
+      opts.merge!(:filter => { :input_component_id => component_id }) if component_id
+      opts.merge!(:hide_assembly_wide_node => true)
       ret = assembly.list_service_links(opts)
       rest_ok_response ret
     end
@@ -394,7 +393,6 @@ module DTK
       assembly = ret_assembly_instance_object()
       rest_ok_response assembly.get_attributes_print_form(Opts.new(:filter => filter))
     end
-
 
     def rest__workspace_object()
       rest_ok_response Assembly::Instance.get_workspace_object(model_handle(),{})

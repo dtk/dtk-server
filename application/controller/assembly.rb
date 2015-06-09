@@ -799,9 +799,9 @@ module DTK
     def rest__initiate_grep()
       assembly = ret_assembly_instance_object()
       params = ret_params_hash(:log_path, :grep_pattern, :stop_on_first_match)
-      #TODO: should use in rest call :node_identifier
+      # TODO: should use in rest call :node_identifier
       np = ret_request_params(:node_pattern)
-      node_pattern = (np ? {:node_identifier => np} : {})
+      node_pattern = (np ? { :node_identifier => np } : {})
 
       nodes = ret_matching_nodes(assembly, node_pattern)
       nodes, is_valid, error_msg = assembly.nodes_are_up?(nodes, :running, {:what => "Grep"})
@@ -816,12 +816,12 @@ module DTK
     end
 
     def rest__initiate_get_netstats()
-      assembly = ret_assembly_instance_object()
-      params = Hash.new
+      assembly     = ret_assembly_instance_object()
+      params       = {}
       node_pattern = ret_params_hash(:node_id)
 
       nodes = ret_matching_nodes(assembly, node_pattern)
-      nodes, is_valid, error_msg = assembly.nodes_are_up?(nodes, :running, {:what => "Get netstats"})
+      nodes, is_valid, error_msg = assembly.nodes_are_up?(nodes, :running, :what => 'Get netstats')
 
       unless is_valid
         Log.info(error_msg)

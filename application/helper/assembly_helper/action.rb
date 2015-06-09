@@ -45,29 +45,32 @@ module Ramaze::Helper
         end
       end
 
-      def ret_matching_nodes(assembly, node_pattern_x={})
-        #removing and empty or nil filters
-        node_pattern = (node_pattern_x ? node_pattern_x.reject{|k,v|v.nil? or v.empty?} : {})
-        #TODO: can handle more efficiently than getting all nodes and filtering
+      def ret_matching_nodes(assembly, node_pattern_x = {})
+        # removing and empty or nil filters
+        node_pattern = (node_pattern_x ? node_pattern_x.reject { |k, v| v.nil? || v.empty? } : {})
+
+        # TODO: can handle more efficiently than getting all nodes and filtering
         nodes = assembly.get_leaf_nodes()
+        nodes.delete_if { |node| node[:type].eql?('assembly_wide') }
+
         if node_pattern.empty?
           nodes
         else
           ret =
-            if node_pattern.kind_of?(Hash) and node_pattern.size == 1
+            if node_pattern.is_a?(Hash) && node_pattern.size == 1
               case node_pattern.keys.first
               when :node_name
                 node_name = node_pattern.values.first
-                MatchingNodes.filter_by_name(nodes,node_name)
+                MatchingNodes.filter_by_name(nodes, node_name)
               when :node_id
                 node_id = node_pattern.values.first
-                MatchingNodes.filter_by_id(nodes,node_id)
+                MatchingNodes.filter_by_id(nodes, node_id)
               when :node_identifier
                 node_identifier = node_pattern.values.first
                 if node_identifier =~ /^[0-9]+$/
-                  MatchingNodes.filter_by_id(nodes,node_identifier)
+                  MatchingNodes.filter_by_id(nodes, node_identifier)
                 else
-                  MatchingNodes.filter_by_name(nodes,node_identifier)
+                  MatchingNodes.filter_by_name(nodes, node_identifier)
                 end
               end
             end

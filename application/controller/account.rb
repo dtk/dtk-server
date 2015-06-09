@@ -21,7 +21,9 @@ module DTK
       rsa_pub_key = ret_non_null_request_params(:rsa_pub_key)
       # username in this context is rsa pub key name
       username = ret_request_params(:username)
-      repoman_registration_success = true
+
+      # also a flag to see if there were any errors
+      repoman_registration_error = nil
 
       if username && !username.eql?(username.match(PUB_KEY_NAME_REGEX)[0])
         raise DTK::Error, "Invalid format of pub key name, characters allower are: '#{PUB_KEY_NAME_REGEX.source.gsub('\\','')}'"
@@ -45,7 +47,7 @@ module DTK
           raise ErrorUsage, "Please choose a different name for your key, name has been taken"
         end
 
-        repoman_registration_success = false
+        repoman_registration_error   = e.message
       end
 
       # Service call
@@ -59,7 +61,7 @@ module DTK
       matched_repo_user = repo_user_service || repo_user_module
 
       # set a flag in database if this user has been registered to repoman
-      matched_repo_user.update(:repo_manager_direct_access => true) if repoman_registration_success
+      matched_repo_user.update(:repo_manager_direct_access => true) if repoman_registration_error.nil?
 
       # only if user exists already
       Log.info("User ('#{matched_repo_user[:username]}') exists with given PUB key, not able to create a user. ") if match
@@ -70,13 +72,13 @@ module DTK
         :match => match,
         :new_username => matched_repo_user ? matched_repo_user[:username] : nil,
         :matched_username => match && matched_repo_user ? matched_repo_user[:username] : nil,
-        :registered_with_repoman => repoman_registration_success
+        :repoman_registration_error => repoman_registration_error
       )
     end
 
     def rest__remove_user_direct_access()
       username = ret_non_null_request_params(:username)
-      unregistered_with_repoman = true
+      repoman_registration_error = nil
 
       # if id instead of username
       if username.to_s =~ /^[0-9]+$/
@@ -91,14 +93,14 @@ module DTK
       rescue DTK::Error => e
         # we ignore it and we fix it later when calling repomanager
         Log.warn("We were not able to remove user from Repo Manager, reason: #{e.message}")
-        unregistered_with_repoman = false
+        repoman_registration_error = e.message
       end
 
       ServiceModule.remove_user_direct_access(model_handle_with_private_group(:service_module),username)
       ComponentModule.remove_user_direct_access(model_handle_with_private_group(:component_module),username)
 
       rest_ok_response(
-          :unregistered_with_repoman => unregistered_with_repoman
+          :repoman_registration_error => repoman_registration_error
         )
     end
 

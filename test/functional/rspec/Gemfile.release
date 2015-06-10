@@ -1,0 +1,6 @@
+source 'https://rubygems.org'
+
+gem 'awesome_print', '1.1.0'
+gem 'rspec','2.99.0'
+gem 'rest-client'
+gem 'rspec2db', :github => 'ATLANTBH/rspec'

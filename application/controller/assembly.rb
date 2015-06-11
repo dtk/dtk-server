@@ -764,6 +764,7 @@ module DTK
 
     def rest__task_status()
       assembly = ret_assembly_instance_object()
+
       opts = {
         :format       => (ret_request_params(:format)||:hash).to_sym,
         :detail_level => ret_boolean_params_hash(:summarize_node_groups)

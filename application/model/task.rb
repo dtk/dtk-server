@@ -402,7 +402,7 @@ module DTK
     def self.get_hierarchical_structure(top_task_idh)
       sp_hash = {
         :cols => Task.common_columns(),
-        :filter => [:eq,:id,top_task_idh.get_id()]
+        :filter => [:eq, :id, top_task_idh.get_id()]
       }
       top_task = get_objs(top_task_idh.createMH(),sp_hash).first
       return nil unless top_task
@@ -433,7 +433,7 @@ module DTK
 
     def ret_command_and_control_adapter_info()
       # TODO: stub
-      [:node_config,nil]
+      [:node_config, nil]
     end
 
     # persists to db this and its sub tasks

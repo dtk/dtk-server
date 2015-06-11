@@ -1,5 +1,5 @@
 module DTK
-  class Task 
+  class Task
     class Status
       r8_nested_require('status','table_form')
       r8_nested_require('status','list_form')
@@ -15,7 +15,7 @@ module DTK
         model_handle = model_handle.createMH(:task)
         top_level_active = get_active_top_level_tasks(model_handle)
         return ret if top_level_active.empty?
-        # TODO: way to make call Task.get_all_subtasks faster 
+        # TODO: way to make call Task.get_all_subtasks faster
         ndx_ret = Hash.new
         Task.get_all_subtasks(top_level_active.map{|t|t.id_handle}).each do |sub_task|
           if node = (sub_task[:executable_action] && sub_task[:executable_action][:node])
@@ -33,9 +33,9 @@ module DTK
           task_obj = task_obj_idh.create_object().update_object!(:display_name)
           raise ErrorUsage.new("No tasks found for #{task_obj_type} (#{task_obj[:display_name]})")
         end
-        
+
         task_structure = Task.get_hierarchical_structure(task_mh.createIDH(:id => task[:id]))
-        status_opts = Opts.new(:no_components=>false,:no_attributes=>true)
+        status_opts = Opts.new(:no_components => false, :no_attributes => true)
         status_opts.merge!(:summarize_node_groups => true) if (opts[:detail_level]||{})[:summarize_node_groups]
         case opts[:format]
           when :table
@@ -54,7 +54,7 @@ module DTK
 
         def self.get_status(assembly_idh,opts={})
           filter = [:eq, :assembly_id, assembly_idh.get_id()]
-          get_status_aux(assembly_idh,:assembly,filter,opts)
+          get_status_aux(assembly_idh, :assembly, filter, opts)
         end
       end
 
@@ -86,7 +86,7 @@ module DTK
         end
       end
     end
-   
+
     module StatusMixin
     # TODO: move to own file
       def status_hash_form(opts,level=1)
@@ -107,11 +107,11 @@ module DTK
           end
         end
         case self[:executable_action_type]
-        when "ConfigNode" 
+        when "ConfigNode"
           if ea = self[:executable_action]
             ret.merge!(Action::ConfigNode.status(ea,opts))
           end
-        when "CreateNode" 
+        when "CreateNode"
           if ea = self[:executable_action]
             ret.merge!(Action::CreateNode.status(ea,opts))
           end
@@ -120,14 +120,14 @@ module DTK
         ret[:errors] = errors unless errors.empty?
         ret
       end
-      
+
       def hier_task_idhs()
         [id_handle()] + subtasks.map{|r|r.hier_task_idhs()}.flatten
       end
-      
+
       # TODO: probably better to set when creating
       def set_and_return_types!()
-        type = 
+        type =
           if self[:task_id].nil?
           self[:display_name]||"commit_cfg_changes"
           elsif action_type = self[:executable_action_type]
@@ -143,9 +143,9 @@ module DTK
                 suffix = /config_node(\w.+)/.match(self[:display_name])[1] if sample_st[:executable_action_type] == "ConfigNode"
                 sample_type && "#{sample_type}s#{suffix}" #make plural
               end
-            end 
+            end
           end
-        
+
         subtasks.each{|st|st.set_and_return_types!()}
         self[:type] = type
       end
@@ -174,10 +174,10 @@ module DTK
         end
         action_type = self[:executable_action_type]
         case action_type
-        when "ConfigNode" 
+        when "ConfigNode"
           ret.add(self,:executable_action_type)
           ret.add(self,:executable_action?){|ea|Action::ConfigNode.pretty_print_hash(ea)}
-        when "CreateNode" 
+        when "CreateNode"
           ret.add(self,:executable_action_type)
           ret.add(self,:executable_action?){|ea|Action::CreateNode.pretty_print_hash(ea)}
         else

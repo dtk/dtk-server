@@ -35,7 +35,8 @@ module DTK; class Task; class Status
       qualified_index += ' ' unless qualified_index.empty?
       type = element_type(task,level)
       # putting idents in
-      el[:type] = "#{' '*(2*(level-1))}#{qualified_index}#{type}"
+      el[:type]  = "#{' '*(2*(level-1))}#{qualified_index}#{type}"
+      el[:index], el[:sub_index] = qualified_index.split('.').collect(&:to_i)
       ndx_errors ||= task.get_ndx_errors()
       if ndx_errors[task[:id]]
         el[:errors] = format_errors(ndx_errors[task[:id]])
@@ -45,16 +46,16 @@ module DTK; class Task; class Status
       if task_logs && task_logs[task[:id]]
         el[:logs] = format_logs(task_logs[task[:id]])
       end
-        
+
       ea = nil
       if level == 1
         # no op
       else
         ea = task[:executable_action]
         case task[:executable_action_type]
-          when "ConfigNode" 
+          when "ConfigNode"
             el.merge!(Task::Action::ConfigNode.status(ea,opts)) if ea
-          when "CreateNode" 
+          when "CreateNode"
             el.merge!(Task::Action::CreateNode.status(ea,opts)) if ea
           when "PowerOnNode"
             el.merge!(Task::Action::PowerOnNode.status(ea,opts)) if ea
@@ -90,12 +91,12 @@ module DTK; class Task; class Status
         else
           ret = {:message => String.new}
         end
-        
+
         if error.is_a? String
           error,temp = {},error
           error[:message] = temp
         end
-        
+
         error_msg = (error[:component] ? "Component #{error[:component].gsub("__","::")}: " : "")
         error_msg << (error[:message]||"error")
         ret[:message] << error_msg
@@ -131,7 +132,7 @@ module DTK; class Task; class Status
 
     def self.element_type(task,level)
       if level == 1
-        task[:display_name] 
+        task[:display_name]
       elsif type = task[:type]
         node = (task[:executable_action]||{})[:node]
         config_agent = task.get_config_agent_type(nil, {:no_error_if_nil => true})

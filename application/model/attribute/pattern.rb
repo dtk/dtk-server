@@ -115,7 +115,7 @@ module DTK; class Attribute
     end
 
     def self.is_assembly_node_component(attributes, pattern)
-      matching_attr = attributes.find{|attr| attr[:display_name].eql?("assembly_wide/#{pattern}")}
+      matching_attr = attributes.find { |attr| attr[:display_name].eql?("assembly_wide/#{pattern}") }
       matching_attr ? matching_attr[:display_name] : pattern
     end
 
@@ -127,11 +127,11 @@ module DTK; class Attribute
       # if not specified then check for ambiguity, if ambiguous return error message
       # else return node or component (assembly_wide) attribute
       if opts[:component_attribute]
-        match = attributes.find{|attr| attr[:display_name].eql?("assembly_wide/#{pattern}")}
+        match = attributes.find { |attr| attr[:display_name].eql?("assembly_wide/#{pattern}") }
         raise ErrorUsage.new("Service instance component attribute #{pattern} does not exist") unless match
         av_pair[:pattern] = match[:display_name]
       else
-        matching_attr = attributes.select{|attr| attr[:display_name].eql?(pattern) || attr[:display_name].eql?("assembly_wide/#{pattern}")}
+        matching_attr = attributes.select { |attr| attr[:display_name].eql?(pattern) || attr[:display_name].eql?("assembly_wide/#{pattern}") }
         if matching_attr.size > 1
           ambiguous << pattern
         else
@@ -139,7 +139,5 @@ module DTK; class Attribute
         end
       end
     end
-
   end
 end; end
-

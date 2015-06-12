@@ -263,6 +263,8 @@ module DTK
             AssemblyModule::Component.prepare_for_edit(assembly,component_module,opts)
           when :service_module
             modification_type = ret_non_null_request_params(:modification_type).to_sym
+            task_action = ret_request_params(:task_action)
+
             AssemblyModule::Service.prepare_for_edit(assembly,modification_type)
           else
             raise ErrorUsage.new("Illegal module_type #{module_type}")

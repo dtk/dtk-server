@@ -26,14 +26,14 @@ module DTK; class AssemblyModule
     end
 
     # returns a ModuleRepoInfo object
-    def self.prepare_for_edit(assembly,modification_type)
-      modification_type_obj = create_modification_type_object(assembly,modification_type)
+    def self.prepare_for_edit(assembly,modification_type,opts={})
+      modification_type_obj = create_modification_type_object(assembly,modification_type,opts)
       # trapping any error when using prepare for edit
       modification_type_obj.create_and_update_assembly_branch?(:trap_error=>true)
     end
 
-    def self.finalize_edit(assembly,modification_type,service_module,module_branch,diffs_summary)
-      modification_type_obj = create_modification_type_object(assembly,modification_type,:service_module => service_module)
+    def self.finalize_edit(assembly,modification_type,service_module,module_branch,diffs_summary,opts={})
+      modification_type_obj = create_modification_type_object(assembly,modification_type,{:service_module => service_module}.merge(opts))
       modification_type_obj.finalize_edit(module_branch,diffs_summary)
     end
 

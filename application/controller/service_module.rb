@@ -230,9 +230,8 @@ module DTK
       commit_sha = ret_non_null_request_params(:commit_sha)
       version = ret_version()
       diffs_summary = ret_diffs_summary()
-      opts = Hash.new
-      # TODO: might make this contingent
-      opts.merge!(:auto_update_module_refs => true)
+      opts = ret_params_hash(:task_action)
+      opts.merge!(:auto_update_module_refs => true) # TODO: might make this contingent
       if ret_request_param_boolean(:internal_trigger)
         opts.merge!(:do_not_raise => true )
       end

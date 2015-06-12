@@ -130,7 +130,7 @@ module DTK
       update_from_includes = opts[:update_from_includes]
       return unless pull_was_needed or parse_needed or update_from_includes
 
-      opts_update = Aux.hash_subset(opts,[:do_not_raise,:modification_type,:force_parse,:auto_update_module_refs,:dsl_parsed_false,:update_module_refs_from_file,:update_from_includes,:current_branch_sha,:service_instance_module])
+      opts_update = Aux.hash_subset(opts,[:do_not_raise,:modification_type,:force_parse,:auto_update_module_refs,:dsl_parsed_false,:update_module_refs_from_file,:update_from_includes,:current_branch_sha,:service_instance_module,:task_action])
       update_model_from_clone_changes(commit_sha,diffs_summary,module_branch,version,opts_update)
     end
 

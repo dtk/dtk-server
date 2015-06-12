@@ -291,7 +291,8 @@ module DTK
     def update_model_from_clone_changes(commit_sha,diffs_summary,module_branch,version,opts={})
       if version.kind_of?(ModuleVersion::AssemblyModule)
         assembly = version.get_assembly(model_handle(:component))
-        AssemblyModule::Service.finalize_edit(assembly,opts[:modification_type],self,module_branch,diffs_summary)
+        opts_finalize = Aux.hash_subset(opts,[:task_action])
+        AssemblyModule::Service.finalize_edit(assembly,opts[:modification_type],self,module_branch,diffs_summary,opts_finalize)
       else
         opts.merge!(:ret_dsl_updated_info => Hash.new)
         response = update_model_from_dsl(module_branch,opts)

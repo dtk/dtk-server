@@ -14,7 +14,7 @@ module DTK; module ModuleMixins
       local_module_name = local.module_name
       local_namespace   = local.module_namespace_name
 
-      if module_obj = module_exists?(project.id_handle(),local_module_name, local_namespace)
+      if module_obj = module_exists?(project.id_handle(), local_module_name, local_namespace)
         if module_obj.get_module_branch(local_branch)
           # do not raise exception if user wants to ignore component import
           if opts[:ignore_component_error]

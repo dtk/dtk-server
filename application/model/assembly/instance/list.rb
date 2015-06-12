@@ -7,24 +7,24 @@ module DTK; class  Assembly
 
       def list(assembly_mh,opts={})
         assembly_mh = assembly_mh.createMH(:assembly_instance) # to insure right mh type
-        assembly_rows = get_info__flat_list(assembly_mh,opts)
-        assembly_rows.reject!{|r|Workspace.is_workspace?(r)} unless opts[:include_workspace]
+        assembly_rows = get_info__flat_list(assembly_mh, opts)
+        assembly_rows.reject! { |r| Workspace.is_workspace?(r) } unless opts[:include_workspace]
 
         if opts[:detail_level].nil?
           if opts[:include_namespaces]
-            Log.error("Unexpected that opts[:include_namespaces] is true")
+            Log.error('Unexpected that opts[:include_namespaces] is true')
           end
           list_aux__no_details(assembly_rows)
         else
-          get_attrs = [opts[:detail_level]].flatten.include?("attributes")
-          attr_rows = get_attrs ? get_default_component_attributes(assembly_mh,assembly_rows) : []
-          add_last_task_run_status!(assembly_rows,assembly_mh)
+          get_attrs = [opts[:detail_level]].flatten.include?('attributes')
+          attr_rows = get_attrs ? get_default_component_attributes(assembly_mh, assembly_rows) : []
+          add_last_task_run_status!(assembly_rows, assembly_mh)
 
           if opts[:include_namespaces]
-            assembly_templates = assembly_rows.map{|a|a[:assembly_template]}.compact
+            assembly_templates = assembly_rows.map { |a| a[:assembly_template] }.compact
             Template.augment_with_namespaces!(assembly_templates)
           end
-          list_aux(assembly_rows,attr_rows,opts)
+          list_aux(assembly_rows, attr_rows, opts)
         end
       end
 

@@ -403,8 +403,9 @@ module DTK
       subtype = ret_assembly_subtype()
       result =
         if subtype == :instance
-          opts = ret_params_hash(:filter,:detail_level,:include_namespaces)
-          Assembly::Instance.list(model_handle(),opts)
+          opts = ret_params_hash(:filter, :detail_level, :include_namespaces)
+          opts.merge!(:remove_assembly_wide_node => true)
+          Assembly::Instance.list(model_handle(), opts)
         else
           project = get_default_project()
           opts = {:version_suffix => true}.merge(ret_params_hash(:filter,:detail_level))

@@ -263,7 +263,13 @@ module DTK
             AssemblyModule::Component.prepare_for_edit(assembly,component_module,opts)
           when :service_module
             modification_type = ret_non_null_request_params(:modification_type).to_sym
-            opts = ret_params_hash(:task_action)
+            opts = ret_params_hash(:task_action,:create,:base_task_action)
+
+            # TODO: support
+            if opts[:create]
+              raise ErrorUsage.new("create-workflow is not yet supported")
+            end
+
             AssemblyModule::Service.prepare_for_edit(assembly,modification_type,opts)
           else
             raise ErrorUsage.new("Illegal module_type #{module_type}")

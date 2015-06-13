@@ -11,7 +11,8 @@ module DTK; class ModuleDSL; class V4; class ObjectModelForm
         action_name = context[:action_name]
         cmp_print_form = context[:cmp_print_form]
         unless input_hash.kind_of?(Hash)
-          raise_error_ill_formed('action definition',{action_name => input_hash})
+          err_msg = "The following action definition on component '?1' is ill-formed: ?2"
+          raise ParsingError.new(err_msg,cmp_print_form,{action_name => input_hash})
         end
         provider_type = provider_type(input_hash,context)
         unless provider_class = ProviderTypeToClass[provider_type.to_sym]

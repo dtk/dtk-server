@@ -293,7 +293,7 @@ module DTK; class  Assembly
       set_attributes([{:pattern => attribute,:value => value}],opts)
     end
 
-    def set_attributes(av_pairs,opts={})
+    def set_attributes(av_pairs, opts = {})
       attr_patterns = nil
       Transaction do
         # super does the processing that sets the actual attributes then if opts[:update_meta] set
@@ -304,9 +304,9 @@ module DTK; class  Assembly
         return attr_patterns if attr_patterns.is_a?(Hash) && attr_patterns[:ambiguous]
 
         if opts[:update_meta]
-          created_cmp_level_attrs = attr_patterns.select{|r|r.type == :component_level and r.created?()}
+          created_cmp_level_attrs = attr_patterns.select { |r| r.type == :component_level && r.created?() }
           unless created_cmp_level_attrs.empty?
-            AssemblyModule::Component::Attribute.update(self,created_cmp_level_attrs)
+            AssemblyModule::Component::Attribute.update(self, created_cmp_level_attrs)
           end
         end
       end

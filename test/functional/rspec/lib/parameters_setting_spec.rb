@@ -67,9 +67,23 @@ shared_context "Add specific component to service node" do |dtk_common, node_nam
   end
 end
 
+shared_context "Add specific component to service instance" do |dtk_common, component_name|
+  it "adds #{component_name} component to service instance" do
+    component_added = dtk_common.add_component_by_name_to_service_node(dtk_common.service_id, nil, component_name)
+    component_added.should eq(true)
+  end
+end
+
 shared_context "Set attribute" do |dtk_common, name, value|
   it "sets value #{value} for attribute #{name}" do
     attribute_value_set = dtk_common.set_attribute(dtk_common.service_id, name, value)
+    attribute_value_set.should eq(true)
+  end
+end
+
+shared_context "Set attribute on service level component" do |dtk_common, name, value|
+  it "sets value #{value} for attribute #{name} on service level component" do
+    attribute_value_set = dtk_common.set_attribute_on_service_level_component(dtk_common.service_id, name, value)
     attribute_value_set.should eq(true)
   end
 end

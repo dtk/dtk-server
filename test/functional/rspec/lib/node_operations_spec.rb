@@ -53,6 +53,13 @@ shared_context "list-task-info function on node" do |dtk_common, staged_node_nam
   end
 end
 
+shared_context "Delete component from service" do |dtk_common, node_name, component_name|
+  it "deletes component #{component_name}" do
+    component_deleted = dtk_common.delete_component_from_service(dtk_common.service_id, node_name, component_name)
+    expect(component_deleted).to eq(true)
+  end
+end
+
 shared_context "Destroy node" do |dtk_common, staged_node_name|
   it "destroys #{staged_node_name} node" do
     node_deleted = dtk_common.destroy_node(dtk_common.node_id)

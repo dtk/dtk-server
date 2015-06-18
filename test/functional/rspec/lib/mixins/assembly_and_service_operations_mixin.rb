@@ -268,6 +268,28 @@ module AssemblyAndServiceOperationsMixin
 		return is_attributes_set
 	end
 
+	def set_attribute_on_service_level_component(service_id, attribute_name, attribute_value)
+		#Set attribute on particular service
+		puts "Set attribute:", "--------------"
+		is_attributes_set = false
+
+		#Get attribute id for which value will be set
+		service_attributes = send_request('/rest/assembly/info_about', {:about=>'attributes', :filter=>nil, :subtype=>'instance', :assembly_id=>service_id})
+		attribute_id = service_attributes['data'].select { |x| x['display_name'].include? attribute_name }.first['id']
+
+		#Set attribute value for given attribute id
+		set_attribute_value_response = send_request('/rest/assembly/set_attributes', {:assembly_id=>service_id, :value=>attribute_value, :pattern=>attribute_id})
+		service_attributes = send_request('/rest/assembly/info_about', {:about=>'attributes', :filter=>nil, :subtype=>'instance', :assembly_id=>service_id})
+		extract_attribute_value = attribute_id = service_attributes['data'].select { |x| x['display_name'].include? attribute_name }.first['value']
+
+		if (extract_attribute_value == attribute_value)
+			puts "Setting of attribute #{attribute_name} completed successfully!"
+			is_attributes_set = true
+		end
+		puts ""
+		return is_attributes_set
+	end
+
 	def get_attribute_value(service_id, node_name, component_name, attribute_name)
 		puts "Get attribute value by name:", "----------------------------"
 		puts "List of service attributes:"
@@ -583,14 +605,21 @@ module AssemblyAndServiceOperationsMixin
 	end
 
 	def add_component_by_name_to_service_node(service_id, node_name, component_name)
-		puts "Add component to service node:", "------------------------------"
+		puts "Add component to service:", "--------------------------"
 		component_added = false
 		service_nodes = send_request('/rest/assembly/info_about', {:assembly_id=>service_id, :filter=>nil, :about=>'nodes', :subtype=>'instance'})
 
 		if (service_nodes['data'].select { |x| x['display_name'] == node_name }.first)
 			puts "Node #{node_name} exists in service. Get node id..."
 			node_id = service_nodes['data'].select { |x| x['display_name'] == node_name }.first['id']
-			component_add_response = send_request('/rest/assembly/add_component', {:node_id=>node_id, :component_template_id=>component_name, :assembly_id=>service_id})
+			component_add_response = send_request('/rest/assembly/add_component', {:node_id=>node_id, :component_template_id=>component_name.split(":").last, :assembly_id=>service_id, :namespace=>component_name.split(":").first})
+
+			if (component_add_response['status'] == 'ok')
+				puts "Component #{component_name} added to service!"
+				component_added = true
+			end
+		else
+			component_add_response = send_request('/rest/assembly/add_component', {:node_id=>nil, :component_template_id=>component_name.split(":").last, :assembly_id=>service_id, :namespace=>component_name.split(":").first})
 
 			if (component_add_response['status'] == 'ok')
 				puts "Component #{component_name} added to service!"
@@ -654,6 +683,8 @@ module AssemblyAndServiceOperationsMixin
 	def get_cardinality(service_id, node_name)
 		puts "Get cardinality from service:", "-----------------------------"
 		cardinality = send_request('/rest/assembly/info_about', {:assembly_id=>service_id, :node_id => nil, :component_id => nil, :subtype=>'instance', :about=>'attributes', :format=>'yaml'})
+		require 'pry'
+		binding.pry
 		content = YAML.load(cardinality['data'])
 		puts content
 		puts ""

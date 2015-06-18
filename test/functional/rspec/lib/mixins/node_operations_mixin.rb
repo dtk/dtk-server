@@ -107,27 +107,42 @@ module NodeOperationsMixin
 		return component_check
 	end
 
-	def delete_component_from_service_node(service_id, node_name, component_to_delete, namespace)
+	def delete_component_from_service(service_id, node_name, component_to_delete)
 		puts "Delete component from service node:", "-----------------------------------"
 		component_deleted = false
 		puts "List of service components:"
 		service_components = send_request('/rest/assembly/info_about', {:assembly_id=>service_id, :filter=>nil, :about=>'components', :subtype=>'instance'})
 		pretty_print_JSON(service_components)
 
-		component = service_components['data'].select { |x| x['display_name'] == "#{node_name}/#{component_to_delete}" }.first
+		if node_name.nil?
+			component = service_components['data'].select { |x| x['display_name'] == "#{component_to_delete}" }.first
+		else
+			component = service_components['data'].select { |x| x['display_name'] == "#{node_name}/#{component_to_delete}" }.first
+		end
 
 		if !component.nil?
-			node_list = send_request('/rest/assembly/info_about', {:assembly_id=>service_id, :subtype=>'instance', :about=>'nodes'})
-			node_id = node_list['data'].select { |x| x['display_name'] == node_name }.first['id']
-
-			puts "Deleting component #{component_to_delete} from node #{node_name}..."
-			component_delete_response = send_request('/rest/assembly/delete_component', {:assembly_id=>service_id, :node_id=>node_id, :component_id=>component['id'], :namespace=>namespace})
-			pretty_print_JSON(component_delete_response)
-			if component_delete_response['status'].include? 'ok'
-				puts "Component #{component_to_delete} has been deleted successfully!"
-				component_deleted = true
+			if !node_name.nil?
+				node_list = send_request('/rest/assembly/info_about', {:assembly_id=>service_id, :subtype=>'instance', :about=>'nodes'})
+				node_id = node_list['data'].select { |x| x['display_name'] == node_name }.first['id']
+				puts "Deleting component #{component_to_delete} from node #{node_name}..."
+				component_delete_response = send_request('/rest/assembly/delete_component', {:assembly_id=>service_id, :node_id=>node_id, :component_id=>component['id']})
+				pretty_print_JSON(component_delete_response)
+				if component_delete_response['status'].include? 'ok'
+					puts "Component #{component_to_delete} has been deleted successfully!"
+					component_deleted = true
+				else
+					puts "Component #{component_to_delete} has not been deleted successfully!"
+				end
 			else
-				puts "Component #{component_to_delete} has not been deleted successfully!"
+				puts "Deleting component #{component_to_delete} from service instance..."
+				component_delete_response = send_request('/rest/assembly/delete_component', {:assembly_id=>service_id, :component_id=>component['id']})
+				pretty_print_JSON(component_delete_response)
+				if component_delete_response['status'].include? 'ok'
+					puts "Component #{component_to_delete} has been deleted successfully!"
+					component_deleted = true
+				else
+					puts "Component #{component_to_delete} has not been deleted successfully!"
+				end
 			end
 		else
 			puts "Component #{component_to_delete} does not exist on #{node_name} and therefore cannot be deleted!"

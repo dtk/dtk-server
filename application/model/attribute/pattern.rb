@@ -32,18 +32,18 @@ module DTK; class Attribute
 
     # set_attributes can create or set attributes depending on options in opts
     # returns attribute patterns
-    def self.set_attributes(base_object,av_pairs,opts={})
-      ret             = Array.new
-      attribute_rows  = Array.new
-      ambiguous       = Array.new
-      attr_properties = opts[:attribute_properties]||{}
+    def self.set_attributes(base_object, av_pairs, opts = {})
+      ret             = []
+      attribute_rows  = []
+      ambiguous       = []
+      attr_properties = opts[:attribute_properties] || {}
       attributes      = base_object.list_attributes(Opts.new(:with_assembly_wide_node => true))
 
       av_pairs.each do |av_pair|
         value = av_pair[:value]
         if semantic_data_type = attr_properties[:semantic_data_type]
           if value
-            unless SemanticDatatype.is_valid?(semantic_data_type,value)
+            unless SemanticDatatype.is_valid?(semantic_data_type, value)
               raise ErrorUsage.new("The value (#{value.inspect}) is not of type (#{semantic_data_type})")
             end
           end
@@ -54,20 +54,20 @@ module DTK; class Attribute
         check_ambiguity(attributes, av_pair, ambiguous, opts) if base_object.has_assembly_wide_node?()
 
         # if needed as indicated by opts, create_attr_pattern also creates attribute
-        pattern = create_attr_pattern(base_object,av_pair[:pattern],opts)
+        pattern = create_attr_pattern(base_object, av_pair[:pattern], opts)
         ret << pattern
         # attribute_idhs are base level attribute id_handles; in contrast to
         # node_group_member_attribute_idhs, which gives non null set if attribute is on a node and node is a service_node_group
         # purpose of finding node_group_member_attribute_idhs is when explicitly setting node group attribute want to set
-        # all its members to same value; only checking for component level and not node level because 
+        # all its members to same value; only checking for component level and not node level because
         # node level attributes different for each node member
         attr_idhs = pattern.attribute_idhs
-        ngm_attr_idhs = pattern.kind_of?(Type::ComponentLevel) ? pattern.node_group_member_attribute_idhs : []
+        ngm_attr_idhs = pattern.is_a?(Type::ComponentLevel) ? pattern.node_group_member_attribute_idhs : []
         # TODO: modify; rather than checking datatype; convert attribute value, which might be in string form to right ruby data type
         # do not need to check value validity if opts[:create] (since checked already)
         unless opts[:create]
           attr_idhs.each do |attr_idh|
-            unless pattern.valid_value?(value,attr_idh)
+            unless pattern.valid_value?(value, attr_idh)
               raise ErrorUsage.new("The value (#{value.inspect}) is not of type (#{pattern.semantic_data_type(attr_idh)})")
             end
           end
@@ -75,42 +75,40 @@ module DTK; class Attribute
 
         all_attr_idhs = attr_idhs
         unless ngm_attr_idhs.empty?
-          if opts[:create]
-            raise ErrorUsage.new("Not supported creating attributes on a node group")
-          end
+          raise ErrorUsage.new('Not supported creating attributes on a node group') if opts[:create]
           all_attr_idhs += ngm_attr_idhs
         end
         all_attr_idhs.each do |idh|
-          attribute_rows << {:id => idh.get_id(),:value_asserted => value}.merge(attr_properties)
+          attribute_rows << { :id => idh.get_id(), :value_asserted => value }.merge(attr_properties)
         end
       end
 
       # return if ambiguous whether component or node attribute (node and component have same name)
-      return {:ambiguous => ambiguous} unless ambiguous.empty?
+      return { :ambiguous => ambiguous } unless ambiguous.empty?
 
       # attribute_rows can have multiple rows if pattern decomposes into multiple attributes
       # it should have at least one row or there is an error
       if attribute_rows.empty?
         if opts[:create]
-          raise ErrorUsage.new("Unable to create a new attribute")
+          raise ErrorUsage.new('Unable to create a new attribute')
         else
-          raise ErrorUsage.new("The attribute specified does not match an existing attribute in the assembly")
+          raise ErrorUsage.new('The attribute specified does not match an existing attribute in the assembly')
         end
       end
 
-      attr_ids = attribute_rows.map{|r|r[:id]}
+      attr_ids = attribute_rows.map { |r| r[:id] }
       attr_mh = base_object.model_handle(:attribute)
 
       sp_hash = {
-        :cols => [:id,:group_id,:display_name,:node_node_id,:component_component_id],
-        :filter => [:oneof,:id,attribute_rows.map{|a|a[:id]}]
+        :cols => [:id, :group_id, :display_name, :node_node_id, :component_component_id],
+        :filter => [:oneof, :id, attribute_rows.map { |a| a[:id] }]
       }
-      existing_attrs = Model.get_objs(attr_mh,sp_hash,opts)
-      ndx_new_vals = attribute_rows.inject(Hash.new){|h,r|h.merge(r[:id] => r[:value_asserted])}
-      LegalValue.raise_usage_errors?(existing_attrs,ndx_new_vals)
+      existing_attrs = Model.get_objs(attr_mh, sp_hash, opts)
+      ndx_new_vals = attribute_rows.inject(Hash.new) { |h, r| h.merge(r[:id] => r[:value_asserted]) }
+      LegalValue.raise_usage_errors?(existing_attrs, ndx_new_vals)
 
-      SpecialProcessing::Update.handle_special_processing_attributes(existing_attrs,ndx_new_vals)
-      Attribute.update_and_propagate_attributes(attr_mh,attribute_rows,opts)
+      SpecialProcessing::Update.handle_special_processing_attributes(existing_attrs, ndx_new_vals)
+      Attribute.update_and_propagate_attributes(attr_mh, attribute_rows, opts)
       ret
     end
 
@@ -128,7 +126,7 @@ module DTK; class Attribute
       # else return node or component (assembly_wide) attribute
       if opts[:component_attribute]
         match = attributes.find { |attr| attr[:display_name].eql?("assembly_wide/#{pattern}") }
-        raise ErrorUsage.new("Service instance component attribute #{pattern} does not exist") unless match
+        raise ErrorUsage.new("Service instance component attribute '#{pattern}' does not exist") unless match
         av_pair[:pattern] = match[:display_name]
       else
         matching_attr = attributes.select { |attr| attr[:display_name].eql?(pattern) || attr[:display_name].eql?("assembly_wide/#{pattern}") }

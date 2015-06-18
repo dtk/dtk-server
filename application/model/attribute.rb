@@ -113,7 +113,6 @@ module DTK
     end
     CreateFields = [:display_name,:data_type,:dynamic,:required,:semantic_data_type].map{|sym|{sym.to_s => sym}} + [{'default' => :value_asserted}]
 
-
     # TODO: collapse this and 4 fields used here
     def is_readonly?()
       update_object!(*(VirtulaDependency.port_type()+[:read_only,:dynamic,:cannot_change]))

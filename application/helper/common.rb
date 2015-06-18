@@ -372,15 +372,15 @@ module Ramaze::Helper
       end
     end
 
-    def ret_params_av_pairs()
-      pattern,value,av_pairs_hash = ret_request_params(:pattern,:value,:av_pairs_hash)
-      ret = Array.new
+    def ret_params_av_pairs
+      pattern, value, av_pairs_hash = ret_request_params(:pattern, :value, :av_pairs_hash)
+      ret = []
       if av_pairs_hash
-        av_pairs_hash.each{|k,v|ret << {:pattern => k, :value => v}}
+        av_pairs_hash.each { |k, v| ret << { :pattern => k, :value => v } }
       elsif pattern
-        ret = [{:pattern => pattern, :value => value}]
+        ret = [{ :pattern => pattern, :value => value }]
       else
-        raise ::DTK::ErrorUsage.new("Missing parameters")
+        raise ::DTK::ErrorUsage.new('Missing parameters')
       end
       ret
     end

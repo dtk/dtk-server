@@ -233,17 +233,17 @@ module DTK
       end
     end
 
-    def self.find(mh,service_module_name_full,library_idh=nil)
+    def self.find(mh, name_or_id, library_idh=nil)
       lib_filter = library_idh && [:and,:library_library_id,library_idh.get_id()]
       sp_hash = {
         :cols => [:id,:display_name,:library_library_id],
-        :filter => [:and, [:eq, :ref, service_module_name_full],lib_filter].compact
+        :filter => [:and, [:or, [:eq, :ref, name_or_id], [:eq, :id, name_or_id]], lib_filter].compact
       }
       rows = get_objs(mh,sp_hash)
       case rows.size
        when 0 then nil
        when 1 then rows.first
-       else raise ErrorUsage.new("Cannot find unique service module given service_module_name=#{service_module_name_full}")
+       else raise ErrorUsage.new("Cannot find unique service module given service_module_name=#{name_or_id}")
       end
     end
 

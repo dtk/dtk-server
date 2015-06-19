@@ -236,9 +236,17 @@ module DTK
     def self.find(mh, name_or_id, library_idh=nil)
       lib_filter = library_idh && [:and,:library_library_id,library_idh.get_id()]
       sp_hash = {
-        :cols => [:id,:display_name,:library_library_id],
-        :filter => [:and, [:or, [:eq, :ref, name_or_id], [:eq, :id, name_or_id]], lib_filter].compact
+        :cols => [:id,:display_name,:library_library_id]
       }
+
+      is_id = Integer(name_or_id) rescue nil
+
+      if is_id
+        sp_hash.merge!(:filter => [:and, [:eq, :id, name_or_id], lib_filter].compact)
+      else
+        sp_hash.merge!(:filter => [:and, [:eq, :ref, name_or_id], lib_filter].compact)
+      end
+
       rows = get_objs(mh,sp_hash)
       case rows.size
        when 0 then nil

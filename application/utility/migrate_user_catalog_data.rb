@@ -6,7 +6,7 @@ puts "\tWARNING!\tWARNING!\tWARNING!\tWARNING!"
 puts
 puts "Make sure that your run this script ONLY ONCE, multiple runs will cause data corruption. press ENTER key to continue OR CTRL^C to stop"
 a = $stdin.gets
-puts "Hashing passwords ..."
+puts "Hashing catalog passwords ..."
 
 require root + '/app'
 

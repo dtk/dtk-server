@@ -127,6 +127,7 @@ module DTK
       # if validate param is sent - validate if credentials exist on repo manager
       # used when creating new user on client and setting catalog credentials in initial step
       begin
+        password =  DataEncryption.hash_it(password)
         Repo::Remote.new.validate_catalog_credentials(username, password) if validate
       ensure
         # regardless of validation we will set catalog credentials3

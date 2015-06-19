@@ -45,7 +45,7 @@ module XYZ
 
     def self.catalog_credentials
       usr_obj = CurrentSession.new.get_user_object()
-      { :username => usr_obj.catalog_username, :password => usr_obj.catalog_password }
+      { :username => usr_obj.catalog_username, :password => usr_obj.catalog_password, :pre_hashed => true }
     end
 
     def self.catalog_username

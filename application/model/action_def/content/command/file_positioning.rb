@@ -6,7 +6,7 @@ module DTK; class ActionDef; class Content
       def initialize(serialized_command)
         @raw_form = serialized_command
         @command_line = serialized_command
-        @template_processor = Content::TemplateProcessor.default() # TODO: changed when have multiple choices for template processors
+        @template_processor = Content::TemplateProcessor.default # TODO: changed when have multiple choices for template processors
         @needs_template_substitution = !!@template_processor.needs_template_substitution?(serialized_command[:target]) || !!@template_processor.needs_template_substitution?(serialized_command[:source])
         @is_template = serialized_command[:template]
         @is_executable = serialized_command[:executable]
@@ -25,13 +25,10 @@ module DTK; class ActionDef; class Content
       end
 
       def self.parse?(serialized_command)
-        if serialized_command.is_a?(Hash) && serialized_command.key?(:ADD)
-          new(serialized_command)
-        end
+        new(serialized_command) if serialized_command.is_a?(Hash) && serialized_command.key?(:ADD)
       end
 
       def bind_template_attributes!(attr_val_pairs)
-        attr_val_pairs.merge!(:version => '9.4')
         if target = @command_line[:target]
           @command_line[:target] = @template_processor.bind_template_attributes(target, attr_val_pairs)
         end
@@ -40,9 +37,19 @@ module DTK; class ActionDef; class Content
           @command_line[:source] = @template_processor.bind_template_attributes(source, attr_val_pairs)
         end
 
-        # @command_line = @template_processor.bind_template_attributes(@command_line, attr_val_pairs)
         @needs_template_substitution = false
         self
+      end
+
+      def get_and_parse_template_content(local_dir, attr_val_pairs)
+        template_path = "#{local_dir}/#{@command_line[:source]}"
+        raise Error, "Template file '#{template_path}' does not exist." unless File.exist?(template_path)
+
+        file_content = File.open(template_path).read
+        substitute = !!@template_processor.needs_template_substitution?(file_content)
+
+        file_content = @template_processor.bind_template_attributes(file_content, attr_val_pairs) if substitute
+        file_content
       end
 
       def type

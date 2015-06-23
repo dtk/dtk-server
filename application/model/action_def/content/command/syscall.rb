@@ -1,23 +1,24 @@
 module DTK; class ActionDef; class Content
   class Command
     class Syscall < self
-      r8_nested_require('syscall','interpret_results')
+      r8_nested_require('syscall', 'interpret_results')
 
       attr_reader :command_line
-      def needs_template_substitution?()
+      def needs_template_substitution?
         @needs_template_substitution
       end
-      def initialize(raw_form,command_line)
+
+      def initialize(raw_form, command_line)
         @raw_form = raw_form
         @command_line = command_line
-        @template_processor = Content::TemplateProcessor.default() # TODO: changed when have multiple choices for template processors
+        @template_processor = Content::TemplateProcessor.default # TODO: changed when have multiple choices for template processors
         @needs_template_substitution = !!@template_processor.needs_template_substitution?(command_line) 
       end
 
       def self.parse?(serialized_command)
-        if serialized_command.kind_of?(String) and serialized_command =~ Constant::Command::RunRegexp
+        if serialized_command.is_a?(String) && serialized_command =~ Constant::Command::RunRegexp
           command_line = $1
-          new(serialized_command,command_line)
+          new(serialized_command, command_line)
         end
       end
 
@@ -27,7 +28,7 @@ module DTK; class ActionDef; class Content
         self
       end
 
-      def type()
+      def type
         'syscall'
       end
     end

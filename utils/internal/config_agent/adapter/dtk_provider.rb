@@ -9,6 +9,7 @@ module DTK; class ConfigAgent; module Adapter
       # assembly_attrs = assembly_attributes(config_node)
 
       commands = commands(config_node, :substitute_template_vars => true)
+
       ret = {
         :action_agent_request => {
           :execution_list => commands,
@@ -18,6 +19,7 @@ module DTK; class ConfigAgent; module Adapter
       if assembly = opts[:assembly]
         ret.merge!(:service_id => assembly.id(), :service_name => assembly.get_field?(:display_name))
       end
+
       ret
     end
 
@@ -25,8 +27,8 @@ module DTK; class ConfigAgent; module Adapter
       Type::Symbol.dtk_provider
     end
 
-    
     private
+
     def commands(config_node,opts)
       ret = []
       config_node[:component_actions].each do |component_action|
@@ -68,12 +70,13 @@ module DTK; class ConfigAgent; module Adapter
 
     def parse_ret_actions(command, stdout_and_stderr, component_action, attr_val_pairs, ret)
       cmd_line = command.command_line
+
       if command.file_positioning?
         cmp_module = component_action[:component].get_field?(:component_module)
         repo_info  = cmp_module.get_workspace_repo
         content    = command.get_and_parse_template_content(repo_info[:local_dir], attr_val_pairs)
 
-        ret << {
+        positioning = {
           :type => command.type,
           :source => {
             :type => 'in_payload',
@@ -83,12 +86,20 @@ module DTK; class ConfigAgent; module Adapter
             :path => cmd_line[:target]
           }
         }
+        positioning.merge!(:owner => command.owner) if command.owner
+
+        ret << positioning
       else
-        ret << {
+        run_command = {
           :type => command.type,
           :command => cmd_line,
           :stdout_redirect => stdout_and_stderr
         }
+        run_command.merge!(:if => command.if_condition) if command.if_condition
+        run_command.merge!(:unless => command.unless_condition) if command.unless_condition
+        run_command.merge!(:timeout => command.timeout) if command.timeout
+
+        ret << run_command
       end
     end
   end

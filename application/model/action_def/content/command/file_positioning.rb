@@ -1,15 +1,16 @@
 module DTK; class ActionDef; class Content
   class Command
     class FilePositioning < self
-      attr_reader :command_line
+      attr_reader :command_line, :owner
 
       def initialize(serialized_command)
-        @raw_form = serialized_command
-        @command_line = serialized_command
+        @raw_form           = serialized_command
+        @command_line       = serialized_command
         @template_processor = Content::TemplateProcessor.default # TODO: changed when have multiple choices for template processors
+        @is_template        = serialized_command[:template]
+        @is_executable      = serialized_command[:executable]
+        @owner              = serialized_command[:owner]
         @needs_template_substitution = !!@template_processor.needs_template_substitution?(serialized_command[:target]) || !!@template_processor.needs_template_substitution?(serialized_command[:source])
-        @is_template = serialized_command[:template]
-        @is_executable = serialized_command[:executable]
       end
 
       def needs_template_substitution?

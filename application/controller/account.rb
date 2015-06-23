@@ -19,11 +19,24 @@ module DTK
     # we use this method to add user access to modules / servier / repo manager
     def rest__add_user_direct_access
       rsa_pub_key = ret_non_null_request_params(:rsa_pub_key)
+      is_first_registration = ret_request_param_boolean(:first_registration)
       # username in this context is rsa pub key name
       username = ret_request_params(:username)
 
       # also a flag to see if there were any errors
       repoman_registration_error = nil
+
+      # we check if name is taken (this is mostly for default dtk-client name/username)
+      if is_first_registration
+        found_user = RepoUser.get_by_repo_username(model_handle(:repo_user), username)
+        username = "#{username}-01" if found_user
+
+        loop do
+          break unless RepoUser.get_by_repo_username(model_handle(:repo_user), username)
+          username = username.succ
+        end
+
+      end
 
       if username && !username.eql?(username.match(PUB_KEY_NAME_REGEX)[0])
         raise DTK::Error, "Invalid format of pub key name, characters allower are: '#{PUB_KEY_NAME_REGEX.source.gsub('\\','')}'"

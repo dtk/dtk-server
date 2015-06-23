@@ -122,7 +122,7 @@ module DTK
       # for match on type; use following logic
       # if ssh public key given look for match on this
       # otherwise return error if there is multiple matches for node or admin type
-      existing_users = get_existing_repo_users(repo_user_mh,:type => repo_user_type.to_s)
+      existing_users = get_existing_repo_users(repo_user_mh, :type => repo_user_type.to_s)
       if ssh_rsa_pub_key = ssh_rsa_keys[:public]
         match = existing_users.find{|r|r[:ssh_rsa_pub_key] == ssh_rsa_pub_key}
         return match, true if match
@@ -199,7 +199,7 @@ module DTK
 
     ### Private class methods ###
 
-    def self.get_existing_repo_users(repo_user_mh,filter_keys={},cols=nil)
+    def self.get_existing_repo_users(repo_user_mh, filter_keys={}, cols=nil)
       sp_hash = {
         :cols => cols ? (cols+[:id,:group_id]) : common_columns()
       }

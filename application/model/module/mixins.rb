@@ -406,8 +406,8 @@ module DTK
       end
     end
 
-    def add_user_direct_access(model_handle,rsa_pub_key,username=nil)
-      repo_user,match = RepoUser.add_repo_user?(:client, model_handle.createMH(:repo_user),{:public => rsa_pub_key},username)
+    def add_user_direct_access(model_handle, rsa_pub_key, username=nil)
+      repo_user, match = RepoUser.add_repo_user?(:client, model_handle.createMH(:repo_user), { :public => rsa_pub_key }, username)
       model_name = model_handle[:model_name]
 
       repo_user.update_direct_access(model_name,true)

@@ -87,6 +87,7 @@ module DTK; class ConfigAgent; module Adapter
           }
         }
         positioning.merge!(:owner => command.owner) if command.owner
+        positioning.merge!(:executable => true) if command.executable?
 
         ret << positioning
       else

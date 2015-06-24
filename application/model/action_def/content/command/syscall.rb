@@ -34,6 +34,8 @@ module DTK; class ActionDef; class Content
 
       def bind_template_attributes!(attr_val_pairs)
         @command_line = @template_processor.bind_template_attributes(@command_line, attr_val_pairs)
+        @if_condition = @template_processor.bind_template_attributes(@if_condition, attr_val_pairs) if @if_condition
+        @unless_condition = @template_processor.bind_template_attributes(@unless_condition, attr_val_pairs) if @unless_condition
         @needs_template_substitution = false
         self
       end

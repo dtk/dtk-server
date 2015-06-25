@@ -1,6 +1,8 @@
 #!/usr/bin/env ruby
 # adds user, his or her private
 require File.expand_path('common', File.dirname(__FILE__))
+require File.expand_path('../../utils/internal/opts', File.dirname(__FILE__))
+
 options = Hash.new
 OptionParser.new do |opts|
 #   opts.banner = "Usage: add_user.rb USERNAME [EC2-REGION] [--create-private [MODULE_SEED_LIST]]"

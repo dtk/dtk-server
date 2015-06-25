@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 # adds user, his or her private
 require File.expand_path('common', File.dirname(__FILE__))
-require File.expand_path('../../utils/internal/opts', File.dirname(__FILE__))
 
 options = Hash.new
 OptionParser.new do |opts|

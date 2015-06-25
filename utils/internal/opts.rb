@@ -9,7 +9,7 @@ module DTK
       if initial_val
         # add if non null; doing 'deep check for nil'
         initial_val.each_pair do |k,v|
-          processed_v = remove_nested_nil(v) 
+          processed_v = remove_nested_nil(v)
           merge!(k => processed_v) unless processed_v.nil?
         end
       end
@@ -85,7 +85,7 @@ module DTK
     end
 
     def remove_nested_nil(val)
-      unless val.class == Hash #using this test rather than val.kind_od?(Hash) because only want to match on Hash and not its children classes 
+      unless val.class == Hash #using this test rather than val.kind_od?(Hash) because only want to match on Hash and not its children classes
         val
       else
         val.inject(Hash.new) do |h,(k,child_v)|

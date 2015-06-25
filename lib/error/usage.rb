@@ -6,7 +6,7 @@ module DTK
     r8_nested_require('usage','warning')
     attr_reader :donot_log_error
     def initialize(msg='',*args)
-      @donot_log_error = (args.last.kind_of?(Opts) and args.last[:log_error] == false)
+      @donot_log_error = (args.last.kind_of?(::DTK::Opts) and args.last[:log_error] == false)
       super(msg,*args)
     end
 
@@ -24,7 +24,7 @@ module DTK
     def add_line!(msg,line,ident=0)
       msg << "#{' ' * ident}#{line}\n"
     end
-    
+
     def sentence_capitalize(line)
       split = line.split
       first = split.shift.capitalize
@@ -73,7 +73,7 @@ module DTK
         @errors.first.to_s()
       elsif @errors.size > 1
         "\n"+@errors.map{|err|err.to_s}.join("\n")
-      else #no errors shoudl not be called 
+      else #no errors shoudl not be called
         "No errors"
       end
     end
@@ -123,7 +123,7 @@ module DTK
       msg
     end
   end
-  
+
 
   class ErrorConstraintViolations < ErrorUsage
     def initialize(violations)

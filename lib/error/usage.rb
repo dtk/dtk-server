@@ -1,3 +1,4 @@
+require File.expand_path('../../utils/internal/opts', File.dirname(__FILE__))
 module DTK
   class ErrorUsage < Error
     r8_nested_require('usage','parsing')

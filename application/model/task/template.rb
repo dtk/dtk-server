@@ -51,6 +51,7 @@ module DTK; class Task
     end
 
     r8_nested_require('template','parsing_error')
+    r8_nested_require('template','task_action_not_found_error')
     r8_nested_require('template','temporal_constraint')
     r8_nested_require('template','temporal_constraints')
     r8_nested_require('template','action')

@@ -11,18 +11,18 @@ module DTK; class AssemblyModule
       def create_and_update_assembly_branch?(opts={})
         module_branch = get_or_create_assembly_branch()
 
-        if opts[:trap_error]
-        # TODO: removed trapped error so send error to client when the workflow name does not exist
-        #       see if can remove completely 
-         Log.info(':trap_error being ignored')
-          # begin
-          #  update_assembly_branch(module_branch)
-          # rescue => e
-          #  Log.info_pp(["trapped error in create_and_update_assembly_branch",e])
-          # end
+        unless opts[:trap_error]
+          update_assembly_branch(module_branch)
+        else
+          # trap all errors except case where task action does not
+          begin
+            update_assembly_branch(module_branch)
+           rescue Task::Template::TaskActionNotFoundError => e
+            raise e
+           rescue => e
+            Log.info_pp(["trapped error in create_and_update_assembly_branch",e])
+          end
         end
-
-        update_assembly_branch(module_branch)
 
         @service_module.get_workspace_branch_info(@am_version).merge(:edit_file => meta_file_path())
       end

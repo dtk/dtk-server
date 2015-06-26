@@ -21,7 +21,7 @@ module DTK; class Task; class Template; class ConfigComponents
         else
           # raise error if explicit task_action is given and cant be found
           if task_action
-            raise ErrorUsage.new("The Workflow action '#{task_action}' does not exist")
+            raise TaskActionNotFoundError.new(task_action)
           end
         end
       end

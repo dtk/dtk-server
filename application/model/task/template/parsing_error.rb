@@ -7,6 +7,7 @@ module DTK; class Task
       end
       ErrorPrefix = 'Workflow parsing error'
     end
+
   end
 end; end
 

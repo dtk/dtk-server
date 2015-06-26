@@ -65,6 +65,10 @@ module DTK; class Task
       [:id,:group_id,:display_name,:task_action,:content]
     end
 
+    def self.list_component_methods(assembly)
+      ConfigComponents::ComponentAction.list(assembly)
+    end
+
     class << self
       # internal name for default action
       def default_task_action()

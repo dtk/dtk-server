@@ -14,9 +14,12 @@ module DTK; class Task; class Template
         # TODO: prune cmp_actions using component_idh
         opts_action_list = Hash.new
         cmp_actions = ActionList::ConfigComponents.get(@assembly,opts_action_list)
-        ret = Content.parse_and_reify(serialized_content(),cmp_actions)
-pp ret
-ret
+        Content.parse_and_reify(serialized_content(),cmp_actions)
+      end
+
+      def self.list(assembly)
+        #TODO: stub
+        nil
       end
 
       private

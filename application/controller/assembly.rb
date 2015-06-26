@@ -686,7 +686,12 @@ module DTK
       rest_ok_response violation_table.uniq
     end
 
-    def rest__execute_component_action()
+    def rest__component_action_method_list()
+      assembly  = ret_assembly_instance_object()
+      rest_ok_response Task::Template.list_component_methods(assembly)
+    end
+
+    def rest__component_action_execute()
       assembly = ret_assembly_instance_object()
       component_idh = ret_component_id_handle(:component_id,:assembly_id => assembly.id())
       opts = ret_params_hash(:method_name,:action_params)

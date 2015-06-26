@@ -686,19 +686,18 @@ module DTK
       rest_ok_response violation_table.uniq
     end
 
-    def rest__component_action_method_list()
+    def rest__ad_hoc_action_list()
       assembly = ret_assembly_instance_object()
-      project  = get_default_project()
-      rest_ok_response Task::Template.list_component_methods(project,assembly)
+      rest_ok_response AdHocAction.list(assembly)
     end
 
-    def rest__component_action_execute()
+    def rest__ad_hoc_action_execute()
       assembly = ret_assembly_instance_object()
-      component_idh = ret_component_id_handle(:component_id,:assembly_id => assembly.id())
+      component = ret_component_id_handle(:component_id,:assembly_id => assembly.id()).create_object()
       opts = ret_params_hash(:method_name,:action_params)
 
       # create task
-      task = Task.create_for_component_action(assembly,component_idh,opts)
+      task = Task.create_for_ad_hoc_action(assembly,component,opts)
       #task.save!()
 =begin
 

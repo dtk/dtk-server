@@ -7,18 +7,18 @@ module DTK; class Task
       NodeGroupProcessing.decompose_node_groups!(task)
     end
 
-    def create_for_component_action(assembly,component_idh,opts={})
-      task = Create.create_for_component_action(assembly,component_idh,opts)
+    def create_for_ad_hoc_action(assembly,component_idh,opts={})
+      task = Create.create_for_ad_hoc_action(assembly,component_idh,opts)
       NodeGroupProcessing.decompose_node_groups!(task)
     end
   end
 
   class Create
-    def self.create_for_component_action(assembly,component_idh,opts={})
+    def self.create_for_ad_hoc_action(assembly,component,opts={})
       target_idh     = target_idh_from_assembly(assembly)
       task_mh        = target_idh.create_childMH(:task)
       ret = create_top_level_task(task_mh,assembly)
-      task_template_content = Template::ConfigComponents::ComponentAction.generate_template_content(assembly,component_idh,opts)
+      task_template_content = AdHocAction.generate_template_content(assembly,opts.merge(:component => component))
       stages_config_nodes_task = task_template_content.create_subtask_instances(task_mh,assembly.id_handle())
       ret.add_subtasks(stages_config_nodes_task)
       ret

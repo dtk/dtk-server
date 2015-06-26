@@ -17,7 +17,7 @@ module DTK; class Task; class Template
         Content.parse_and_reify(serialized_content(),cmp_actions)
       end
 
-      def self.list(assembly)
+      def self.list(project,assembly)
         #TODO: stub
         nil
       end

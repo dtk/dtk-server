@@ -79,7 +79,8 @@ module XYZ
         filter = [:eq, :library_library_id, id()]
         Node::Template.list(model_handle,:filter => filter)
       when :components
-        Component::Template.list(model_handle,:library_idh => id_handle())
+        raise Error.new("should not be reached")
+        # Component::Template.list(model_handle,:library_idh => id_handle())
        else
         raise Error.new("TODO: not implemented yet: processing of info_about(#{about})")        
       end.sort{|a,b|a[:display_name] <=> b[:display_name]}

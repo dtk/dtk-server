@@ -687,8 +687,9 @@ module DTK
     end
 
     def rest__component_action_method_list()
-      assembly  = ret_assembly_instance_object()
-      rest_ok_response Task::Template.list_component_methods(assembly)
+      assembly = ret_assembly_instance_object()
+      project  = get_default_project()
+      rest_ok_response Task::Template.list_component_methods(project,assembly)
     end
 
     def rest__component_action_execute()

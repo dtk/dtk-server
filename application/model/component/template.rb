@@ -153,16 +153,15 @@ module DTK; class Component
       ret
     end
       
-    def self.list(mh,opts=Opts.new)
-      project_idh = opts[:project_idh]
+    def self.list(project,opts={})
       assembly = opts[:assembly_instance]
       sp_hash = {
         :cols => [:id, :type, :display_name, :description, :component_type, :version, :refnum, :module_branch_id],
         :filter => [:and, [:eq, :type, "template"], 
                     [:oneof, :version, filter_on_versions(:assembly => assembly)],
-                    [:eq, :project_project_id, project_idh.get_id()]]
+                    [:eq, :project_project_id, project.id()]]
       }
-      cmps = get_objs(project_idh.createMH(:component),sp_hash,:keep_ref_cols => true)
+      cmps = get_objs(project.model_handle(:component),sp_hash,:keep_ref_cols => true)
 
       ingore_type = opts[:ignore]
       ret = []
@@ -171,7 +170,7 @@ module DTK; class Component
           :cols => [:id, :type, :display_name, :component_module_namespace_info],
           :filter => [:eq, :id, r[:module_branch_id]]
         }
-        m_branch = Model.get_obj(project_idh.createMH(:module_branch),sp_h)
+        m_branch = Model.get_obj(project.model_handle(:module_branch),sp_h)
         # ret << r unless m_branch[:type].eql?(ingore_type)
         if(m_branch && !m_branch[:type].eql?(ingore_type))
           branch_namespace = m_branch[:namespace]

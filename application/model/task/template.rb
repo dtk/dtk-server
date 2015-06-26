@@ -65,8 +65,8 @@ module DTK; class Task
       [:id,:group_id,:display_name,:task_action,:content]
     end
 
-    def self.list_component_methods(assembly)
-      ConfigComponents::ComponentAction.list(assembly)
+    def self.list_component_methods(project,assembly)
+      ConfigComponents::ComponentAction.list(project,assembly)
     end
 
     class << self

@@ -294,6 +294,16 @@
       "workflow_name": "task_action"
     }
   },
+  "ad_hoc_action": {
+    "order": [
+      "component_name",
+      "method_name"
+    ],
+    "mapping": {
+      "component_name": "component_name",
+      "method_name": "method_name"
+    }
+  },
   "target": {
     "order": [
       "id",

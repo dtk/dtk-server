@@ -34,6 +34,10 @@ module DTK; class Task; class Template
         end
       end
 
+      def action_defs()
+        self[:action_defs]||[]
+      end
+
       def match_action?(action)
         action.kind_of?(self.class) and 
         node_name() == action.node_name and 

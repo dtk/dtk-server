@@ -203,22 +203,16 @@ module DTK; class Assembly; class Instance
     end
 
     #### get methods around task templates
-    def get_task_templates(opts={})
-      sp_hash = {
-        :cols => Task::Template.common_columns(),
-        :filter => [:eq,:component_component_id,id()]
-      }
-      Model.get_objs(model_handle(:task_template),sp_hash)
+    def get_task_actions()
+      Task::Template.get_task_actions(self)
+    end
+      
+    def get_task_templates()
+      Task::Template.get_task_templates(self)
     end
 
     def get_task_template(task_action=nil,opts={})
-      task_action ||= Task::Template.default_task_action()
-      sp_hash = {
-        :cols => opts[:cols]||Task::Template.common_columns(),
-        :filter => [:and,[:eq,:component_component_id,id()],
-                    [:eq,:task_action,task_action]]
-      }
-      Model.get_obj(model_handle(:task_template),sp_hash)
+      Task::Template.get_task_template(self,task_action,opts)
     end
 
     def get_task_template_serialized_content(task_action=nil,opts={})

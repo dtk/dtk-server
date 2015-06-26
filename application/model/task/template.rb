@@ -64,8 +64,53 @@ module DTK; class Task
       [:id,:group_id,:display_name,:task_action,:content]
     end
 
-    def self.default_task_action()
-      ActionType::Create
+    class << self
+      # internal name for default action
+      def default_task_action()
+        ActionType::Create
+      end
+
+      def default_task_action_external_name()
+        DefaultTaskActionExternalName
+      end
+      DefaultTaskActionExternalName = 'create'
+
+      def get_task_actions(assembly)
+        get_task_templates(assembly,:cols=>[:id,:group_id,:task_action])
+      end
+
+      def get_task_templates(assembly,opts={})
+        sp_hash = {
+          :cols => opts[:cols]||common_columns(),
+          :filter => [:eq,:component_component_id,assembly.id()]
+        }
+        get_objs(assembly.model_handle(:task_template),sp_hash)
+      end
+      
+      def get_task_template(assembly,task_action=nil,opts={})
+        sp_hash = {
+          :cols => opts[:cols]||common_columns(),
+          :filter => [:and,[:eq,:component_component_id,assembly.id()],
+                      [:eq,:task_action,internal_task_action(task_action)]]
+        }
+        get_obj(assembly.model_handle(:task_template),sp_hash)
+      end
+
+     private
+      def internal_task_action(task_action=nil)
+        ret = task_action
+        if ret.nil? or ret == default_task_action_external_name()
+          ret = default_task_action()
+        end
+        ret
+      end
+    end
+
+    def convert_to_external_task_action_name?()
+      if get_field?(:task_action) == self.class.default_task_action()
+        self[:task_action] = self.class.default_task_action_external_name()
+      end
+      self
     end
 
     def serialized_content_hash_form(opts={})

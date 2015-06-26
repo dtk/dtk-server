@@ -214,6 +214,11 @@ module DTK
     end
     SupportedFormats = [:yaml]
 
+    def rest__task_action_list()
+      assembly = ret_assembly_instance_object()
+      rest_ok_response assembly.list_task_actions()
+    end
+
     def rest__info_about_task()
       assembly = ret_assembly_instance_object()
       task_action = ret_request_params(:task_action)

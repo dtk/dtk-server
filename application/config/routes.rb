@@ -39,6 +39,7 @@ R8::ReactorRoute.draw do
   post  'assembly/list_connections' => 'assembly#list_connections'
   post  'assembly/list_smoketests' => 'assembly#list_smoketests'
   post  'assembly/list_with_workspace' => 'assembly#list_with_workspace'
+  post  'assembly/task_action_list' => 'assembly#task_action_list'
   post  'assembly/info' => 'assembly#info'
   post  'assembly/rename' => 'assembly#rename'
   post  'assembly/delete' => 'assembly#delete'

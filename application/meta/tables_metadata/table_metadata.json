@@ -284,6 +284,16 @@
       "errors": "commit_message"
     }
   },
+  "task_action": {
+    "order": [
+      "id",
+      "workflow_name"
+    ],
+    "mapping": {
+      "id": "dtk_id",
+      "workflow_name": "task_action"
+    }
+  },
   "target": {
     "order": [
       "id",

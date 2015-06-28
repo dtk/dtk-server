@@ -46,7 +46,7 @@ describe "(Workspace) Test Case 6: Create one node, add two components in it (li
 	end
 
 	context "Delete component from workspace node" do
-		include_context "Delete component from workspace node", dtk_common, node_name, component_name_1, component_module_namespace
+		include_context "Delete component from workspace node", dtk_common, node_name, component_name_1
 	end
 
 	context "NEG - List components in workspace node" do

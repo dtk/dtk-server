@@ -683,12 +683,10 @@ module AssemblyAndServiceOperationsMixin
 	def get_cardinality(service_id, node_name)
 		puts "Get cardinality from service:", "-----------------------------"
 		cardinality = send_request('/rest/assembly/info_about', {:assembly_id=>service_id, :node_id => nil, :component_id => nil, :subtype=>'instance', :about=>'attributes', :format=>'yaml'})
-		require 'pry'
-		binding.pry
 		content = YAML.load(cardinality['data'])
 		puts content
-		puts ""
-        attributes = (content["nodes"]["#{node_name}/"]||{})['attributes']||{}
+    attributes = (content["nodes"]["#{node_name}/"]||{})['attributes']||{}
+    puts ""
 		return attributes['cardinality'] && attributes['cardinality'].to_i
 	end
 

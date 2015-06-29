@@ -39,6 +39,10 @@ module DTK; class ModuleDSL; class V4; class ObjectModelForm
           type = functions.first.slice('type')
         end
       end
+
+      def external_ref_from_bash_command()
+        {:type => 'bash_command'}
+      end
     end
   end; end
 end; end; end; end

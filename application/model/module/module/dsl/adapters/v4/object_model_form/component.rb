@@ -39,7 +39,7 @@ module DTK; class ModuleDSL; class V4
 
         ret["external_ref"] =  
           if input_hash['external_ref'] then external_ref(input_hash['external_ref'],cmp) # this is for legacy
-          elsif create_action then external_ref_from_create_action?(create_action, cmp)
+          elsif create_action then external_ref_from_create_action?(create_action, cmp, ret)
           elsif function then external_ref_from_function?(function, cmp)
           end
         unless ret["external_ref"]
@@ -49,10 +49,13 @@ module DTK; class ModuleDSL; class V4
         ret
       end
 
-      def external_ref_from_create_action?(create_action, cmp)
+      def external_ref_from_create_action?(create_action, cmp, ret)
         if DTK::ActionDef::Constant.matches?(create_action[:method_name],:CreateActionName)
           if create_action[:content].respond_to?(:external_ref_from_create_action)
             external_ref(create_action[:content].external_ref_from_create_action(),cmp)
+          elsif create_action[:content].respond_to?(:external_ref_from_bash_command)
+            ret["action_def"].merge!("create" => create_action)
+            create_action[:content].external_ref_from_bash_command()
           end
         end
       end

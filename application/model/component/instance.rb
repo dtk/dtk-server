@@ -1,9 +1,21 @@
-
-
 module DTK; class Component
   class Instance < self
-
     r8_nested_require('instance','interpreted')
+
+    def get_action_def?(method_name,opts={})
+      get_action_defs({:filter => [:eq,:method_name,method_name]}.merge(opts)).first
+    end
+    def get_action_defs(opts={})
+      filter = [:eq,:component_component_id,get_field?(:ancestor_id)]
+      if opts[:filter]
+        filter = [:and,filter,opts[:filter]]
+      end
+      sp_hash = {
+        :cols =>   opts[:cols] || ActionDef.common_columns(),
+        :filter => filter
+      }
+      Model.get_objs(model_handle(:action_def),sp_hash)
+    end
 
     def self.get_objs(mh,sp_hash,opts={})
       # TODO: might want to change to just :model_name == component_instance

@@ -9,8 +9,10 @@ module DTK
       new(assembly,opts.merge(:component => component)).component_action()
     end
     def component_action()
-      # TODO add component().merge(:node => node,:title => component_title)
       augmented_cmp = component().merge(:node => @component.get_node())
+      if title = component().has_title?()
+        augmented_cmp.merge!(:title => title)
+      end
       if action_def = get_action_def?()
         augmented_cmp.merge!(:action_def => action_def)
       end             
@@ -32,14 +34,14 @@ module DTK
 
    private
     def component()
-      @component || raise(Error.new("@component sho0uld be set"))
+      @component || raise(Error.new("@component should be set"))
     end
 
     def get_action_def?()
-      ret = nil
-      return ret unless @model_name
-      # TODO: get action def
-      ret
+      if @method_name
+        component().get_action_def?(@method_name,:cols => [:id,:group_id,:method_name]) ||
+          raise(ErrorUsage.new("Method '#{@method_name}' is not defined on component '#{component().display_name_print_form}'"))
+      end
     end
 
     def actions_pretty_print_form(config_component)

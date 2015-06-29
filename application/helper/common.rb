@@ -1,7 +1,7 @@
 # TODO: needs cleanup including around mechanism to get object associated with ids
 module Ramaze::Helper
   module Common
-    include XYZ #TODO: included because of ModelHandle and Model
+    include DTK
 
     def create_object_from_id(id,model_name_or_class=nil,opts={})
       model_name  =
@@ -27,7 +27,7 @@ module Ramaze::Helper
     def default_namespace()
       # CurrentSession.new().get_user_object().get_namespace()
       # we don't want username as default namespace, we will use tenant unique name instead
-      ::DTK::Common::Aux.running_process_user()
+      Common::Aux.running_process_user()
     end
 
     def model_handle(model_name_x=model_name())
@@ -45,7 +45,7 @@ module Ramaze::Helper
     # looks for default if no target is given
     def create_target_instance_with_default(target_id_field=:target_id,model_class=nil)
       if target_id = ret_request_params(target_id_field)
-        create_obj(target_id_field,::DTK::Target::Instance)
+        create_obj(target_id_field,Target::Instance)
       else
         Target::Instance.get_default_target(model_handle(:target))
       end

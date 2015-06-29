@@ -85,7 +85,6 @@ module DTK
       cmp_mh = assembly_idh.createMH(:component)
 
       if cmp_full_name && node_id
-        # cmp_idh = ret_component_id_handle(:cmp_full_name,:assembly_id => assembly_id)
         component = Component.ret_component_with_namespace_for_node(cmp_mh, cmp_name, node_id, namespace, assembly)
         raise ErrorUsage.new("Component with identifier (#{namespace.nil? ? '' : namespace + ':'}#{cmp_name}) does not exist!") unless component
 
@@ -353,9 +352,8 @@ module DTK
 
     def rest__add_service_link()
       assembly = ret_assembly_instance_object()
-      assembly_id = assembly.id()
-      input_cmp_idh = ret_component_id_handle(:input_component_id,:assembly_id => assembly_id)
-      output_cmp_idh = ret_component_id_handle(:output_component_id,:assembly_id => assembly_id)
+      input_cmp_idh = ret_component_id_handle(:input_component_id,assembly)
+      output_cmp_idh = ret_component_id_handle(:output_component_id,assembly)
       opts = ret_params_hash(:dependency_name)
       service_link_idh = assembly.add_service_link?(input_cmp_idh,output_cmp_idh,opts)
       rest_ok_response :service_link => service_link_idh.get_id()
@@ -371,7 +369,7 @@ module DTK
 
     def rest__list_service_links()
       assembly = ret_assembly_instance_object()
-      component_id = ret_component_id?(:component_id, :assembly_id => assembly.id())
+      component_id = ret_component_id?(:component_id,assembly)
       context = (ret_request_params(:context) || :assembly).to_sym
       opts = { :context => context }
       opts.merge!(:filter => { :input_component_id => component_id }) if component_id
@@ -693,7 +691,7 @@ module DTK
 
     def rest__ad_hoc_action_execute()
       assembly = ret_assembly_instance_object()
-      component = ret_component_id_handle(:component_id,:assembly_id => assembly.id()).create_object()
+      component = ret_component_instance(:component_id,assembly)
       opts = ret_params_hash(:method_name,:action_params)
 
       # create task

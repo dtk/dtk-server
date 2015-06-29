@@ -32,9 +32,16 @@ module DTK; class Task
         ret
       end
 
+      def self.create_from_component_action(new_cmp_action,assembly)
+        action_list = ActionList::ConfigComponents.get(assembly)
+        ret = new()
+        ret.insert_action?(new_cmp_action,action_list)
+        ret
+      end
+
       # if action is not included in task template than insert the action in this object and return updated object
       # else return nil
-      def insert_action?(new_action,action_list,gen_constraints_proc)
+      def insert_action?(new_action,action_list,gen_constraints_proc=nil)
         insert_action_helper = InsertActionHelper.create(new_action,action_list,gen_constraints_proc)
         insert_action_helper.insert_action?(self)
       end

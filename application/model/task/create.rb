@@ -15,19 +15,15 @@ module DTK; class Task
 
   class Create
     def self.create_for_ad_hoc_action(assembly,component,opts={})
-      target_idh     = target_idh_from_assembly(assembly)
-      task_mh        = target_idh.create_childMH(:task)
+      new_action = AdHocAction.component_action(assembly,component,opts)
+      task_template_content = Template::Content.create_from_component_action(new_action,assembly)
 
-      new_action = AdHocAction.get_action(assembly,component,opts)
-pp [ new_action.class, new_action]
-      task_template_content = Template::Content.new()
-      assembly_cmp_actions =  Template::ActionList::ConfigComponents.get(assembly)
-
-      task_template_content.insert_action?(new_action,assembly_cmp_actions)
-
+      # TODO: below needs to use action params if they exist
+      task_mh = target_idh_from_assembly(assembly).create_childMH(:task)
       stages_config_nodes_task = task_template_content.create_subtask_instances(task_mh,assembly.id_handle())
-
-      create_top_level_task(task_mh,assembly).add_subtasks!(stages_config_nodes_task)
+      ret = create_top_level_task(task_mh,assembly).add_subtasks(stages_config_nodes_task)
+pp ret
+raise ErrorUsage.new('got here')
     end
 
     def self.create_from_assembly_instance(assembly,opts={})

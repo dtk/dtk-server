@@ -5,13 +5,16 @@ module DTK
       @component     = opts[:component]
       @method_name   = opts[:method_name]
     end
-    def self.get_action(assembly,component,opts={})
-      new(assembly,opts.merge(:component => component)).get_action()
+    def self.component_action(assembly,component,opts={})
+      new(assembly,opts.merge(:component => component)).component_action()
     end
-    def get_action()
-#      Action.create(new_component.merge(:node => node,:title => component_title))
-# TODO add 
-      Task::Template::Action.create(@component.merge(:node => @component.get_node()))
+    def component_action()
+      # TODO add component().merge(:node => node,:title => component_title)
+      augmented_cmp = component().merge(:node => @component.get_node())
+      if action_def = get_action_def?()
+        augmented_cmp.merge!(:action_def => action_def)
+      end             
+      Task::Template::Action.create(augmented_cmp)
     end
 
     def self.list(assembly)
@@ -28,6 +31,17 @@ module DTK
     end
 
    private
+    def component()
+      @component || raise(Error.new("@component sho0uld be set"))
+    end
+
+    def get_action_def?()
+      ret = nil
+      return ret unless @model_name
+      # TODO: get action def
+      ret
+    end
+
     def actions_pretty_print_form(config_component)
       component_name = config_component.display_name_print_form
       config_component.action_defs().map do |action_def|

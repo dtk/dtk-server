@@ -3,7 +3,7 @@ module DTK; class Task; class Template
     class InsertActionHelper
       r8_nested_require('insert_action_helper','insert_at_end')
 
-      def self.create(new_action,action_list,gen_constraints_proc,insert_strategy=nil)
+      def self.create(new_action,action_list,gen_constraints_proc=nil,insert_strategy=nil)
         insert_strategy_class(insert_strategy).new(new_action,action_list,gen_constraints_proc)
       end
 
@@ -15,7 +15,7 @@ module DTK; class Task; class Template
       end
 
      private
-      def initialize(new_action,action_list,gen_constraints_proc,insert_strategy=nil)
+      def initialize(new_action,action_list,gen_constraints_proc=nil,insert_strategy=nil)
         @new_action = action_list.find{|a|a.match_action?(new_action)}
         @new_action_node_id = new_action.node_id
         @gen_constraints_proc = gen_constraints_proc
@@ -59,8 +59,8 @@ module DTK; class Task; class Template
           return
         end
 
-        temporal_constraints = @gen_constraints_proc.call()
-        return if temporal_constraints.empty? 
+        temporal_constraints = @gen_constraints_proc && @gen_constraints_proc.call()
+        return if (temporal_constraints||[]).empty? 
         
         temporal_constraints.each do |tc|
           if tc.before_action_index == new_action_index

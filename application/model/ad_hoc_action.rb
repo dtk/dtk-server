@@ -4,14 +4,14 @@ module DTK
       @assembly      = assembly
       @component     = opts[:component]
       @method_name   = opts[:method_name]
-      @action_params = opts[:action_params]
     end
-    def self.action(assembly,opts={})
-      new(assembly,opts).action()
+    def self.get_action(assembly,component,opts={})
+      new(assembly,opts.merge(:component => component)).get_action()
     end
     def get_action()
-      config_components = get_config_components()
-      Action.create(new_component.merge(:node => node,:title => component_title))
+#      Action.create(new_component.merge(:node => node,:title => component_title))
+# TODO add 
+      Task::Template::Action.create(@component.merge(:node => @component.get_node()))
     end
 
     def self.list(assembly)
@@ -19,8 +19,8 @@ module DTK
     end
 
     def list()
-      config_components = get_config_components()
       ret = Array.new
+      config_components = Task::Template::ActionList::ConfigComponents.get(@assembly)
       config_components.each do |config_component|
         add_non_dups!(ret,actions_pretty_print_form(config_component))
       end
@@ -28,29 +28,6 @@ module DTK
     end
 
    private
-    def get_config_components()
-      # TODO: for efficiency, can prune using @component when it is non null
-      #       to implement this wil have to update ConfigComponents.get to take pruning option
-      Task::Template::ActionList::ConfigComponents.get(@assembly)
-    end
-
-# TODO: OLD
-    def serialized_content()
-      {
-        :subtask_order=>"sequential",
-        :subtasks=>
-        [{
-           :name=>"component bigpetstore::spark_app[spark-1.3.1]",
-           :node=>"client",
-           :ordered_components=>["bigpetstore::spark_app[spark-1.3.1]"]
-         },
-         {:name=>"run app bigpetstore::spark_app[spark-1.3.1]",
-           :node=>"client",
-           :actions=>["bigpetstore::spark_app[spark-1.3.1].run_app"]
-         }]
-      }
-    end
-
     def actions_pretty_print_form(config_component)
       component_name = config_component.display_name_print_form
       config_component.action_defs().map do |action_def|

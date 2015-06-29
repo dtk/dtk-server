@@ -19,8 +19,10 @@ module DTK; class Task
       task_mh        = target_idh.create_childMH(:task)
 
       new_action = AdHocAction.get_action(assembly,component,opts)
-      assembly_cmp_actions = []
-      task_template_content = get_template_content_aux?([:assembly],assembly,assembly_cmp_actions)
+pp [ new_action.class, new_action]
+      task_template_content = Template::Content.new()
+      assembly_cmp_actions =  Template::ActionList::ConfigComponents.get(assembly)
+
       task_template_content.insert_action?(new_action,assembly_cmp_actions)
 
       stages_config_nodes_task = task_template_content.create_subtask_instances(task_mh,assembly.id_handle())

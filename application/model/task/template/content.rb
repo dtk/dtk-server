@@ -7,9 +7,11 @@ module DTK; class Task
       include Serialization
       include Stage::InterNode::Factory::StageName
 
-      def initialize(object,actions,opts={})
+      def initialize(object=nil,actions=[],opts={})
         super()
-        create_stages!(object,actions,opts)
+        if object
+          create_stages!(object,actions,opts)
+        end
       end
 
       def create_subtask_instances(task_mh,assembly_idh)

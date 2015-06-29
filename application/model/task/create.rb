@@ -17,14 +17,15 @@ module DTK; class Task
     def self.create_for_ad_hoc_action(assembly,component,opts={})
       target_idh     = target_idh_from_assembly(assembly)
       task_mh        = target_idh.create_childMH(:task)
-      ret = create_top_level_task(task_mh,assembly)
-      task_template_content = AdHocAction.generate_template_content(assembly,opts.merge(:component => component))
-      stages_config_nodes_task = task_template_content.create_subtask_instances(task_mh,assembly.id_handle())
-      ret.add_subtasks(stages_config_nodes_task)
-      ret
 
-      #stub
-      create_top_level_task(task_mh,assembly)
+      new_action = AdHocAction.get_action(assembly,component,opts)
+      assembly_cmp_actions = []
+      task_template_content = get_template_content_aux?([:assembly],assembly,assembly_cmp_actions)
+      task_template_content.insert_action?(new_action,assembly_cmp_actions)
+
+      stages_config_nodes_task = task_template_content.create_subtask_instances(task_mh,assembly.id_handle())
+
+      create_top_level_task(task_mh,assembly).add_subtasks!(stages_config_nodes_task)
     end
 
     def self.create_from_assembly_instance(assembly,opts={})

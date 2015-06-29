@@ -31,7 +31,7 @@ module DTK; class Task
       end
 
       # if action is not included in task template than insert the action in this object and return updated object
-      # else return  nil
+      # else return nil
       def insert_action?(new_action,action_list,gen_constraints_proc)
         insert_action_helper = InsertActionHelper.create(new_action,action_list,gen_constraints_proc)
         insert_action_helper.insert_action?(self)

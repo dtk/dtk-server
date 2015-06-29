@@ -505,7 +505,7 @@ module DTK
 
     def add_subtasks(new_subtasks)
       new_subtasks.each { |new_subtask| (self[:subtasks] ||= Array.new) << new_subtask }
-      new_subtasks
+      self
     end
 
     def set_positions!()

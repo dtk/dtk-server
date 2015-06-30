@@ -11,8 +11,8 @@ user_data = {
 }
 
 component_module = "r8:java"
-user_names = "bakir_test,bakir_test2"
-user_emails = "bakir@atlantbh.com,bakir2@atlantbh.com"
+user_names = "bakir_test"
+user_emails = "bakir@atlantbh.com"
 collaborator_type = "users"
 
 permissions = {

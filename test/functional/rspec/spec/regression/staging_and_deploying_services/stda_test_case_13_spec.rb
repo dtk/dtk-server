@@ -75,7 +75,7 @@ describe "(Staging And Deploying Assemblies) Test Case 13: Ability to create ass
   end
 
   context "Check that port #{port_to_check}" do
-		include_context "Check if port avaliable", dtk_common, port_to_check
+		include_context "Check if port avaliable", dtk_common2, port_to_check
 	end
 
   context "Delete and destroy service function" do

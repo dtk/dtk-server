@@ -3,6 +3,7 @@ module DTK; class Task; class Template
     r8_nested_require('action','component_action')
     r8_nested_require('action','action_method')
     r8_nested_require('action','with_method')
+    r8_nested_require('action','ad_hoc')
 
     # opts can have keys
     # :index

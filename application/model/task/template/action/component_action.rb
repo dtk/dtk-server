@@ -20,6 +20,10 @@ module DTK; class Task; class Template
         @component.respond_to?(name) || super
       end
 
+      def task_action_name()
+        @component.display_name_print_form()
+      end
+
       def node()
         @component[:node]
       end

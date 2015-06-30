@@ -686,7 +686,7 @@ module DTK
 
     def rest__ad_hoc_action_list()
       assembly = ret_assembly_instance_object()
-      rest_ok_response AdHocAction.list(assembly)
+      rest_ok_response Task::Template::Action::AdHoc.list(assembly)
     end
 
     def rest__ad_hoc_action_execute()
@@ -696,7 +696,7 @@ module DTK
 
       # create task
       task = Task.create_for_ad_hoc_action(assembly,component,opts)
-      #task.save!()
+      task.save!()
 =begin
 
       # TODO: this is simple but expensive way to get all teh embedded task ids filled out

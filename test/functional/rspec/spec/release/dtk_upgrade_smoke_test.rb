@@ -6,17 +6,21 @@ require 'rest_client'
 require 'pp'
 require 'json'
 require 'awesome_print'
-require './lib/dtk_common'
-require './lib/assembly_and_service_operations_spec'
-require './lib/parameters_setting_spec'
-require './lib/component_modules_spec'
-require './lib/service_modules_spec'
+require File.join(File.dirname(__FILE__), '../..', 'lib/dtk_common')
+require File.join(File.dirname(__FILE__), '../..', 'lib/assembly_and_service_operations_spec')
+require File.join(File.dirname(__FILE__), '../..', 'lib/parameters_setting_spec')
+require File.join(File.dirname(__FILE__), '../..', 'lib/component_modules_spec')
+require File.join(File.dirname(__FILE__), '../..', 'lib/service_modules_spec')
 
-catalog_username = "dtk16"
-catalog_password = "password"
+# assuming that the tenant is already linked to repoman
+#catalog_username = ENV['tenant_user'] || "dtk16"
+#catalog_password = ENV['tenant_user_password'] || "password"
+tenant_server = ENV['tenant_server'] || "dtk1.dtk.io"
+tenant_username = ENV['username'] || "dtk1"
+tenant_password = ENV['tenant_password'] || "password"
 service_name = 'dtk_release_smoke_test'
-assembly_name = 'bootstrap::node_with_params'
-os_templates = ['precise','rhel6']
+assembly_name = 'test_service::node_with_params'
+os_templates = ['precise']
 os_attribute = 'os_identifier'
 memory_size = 't1.micro'
 memory_size_attribute = 'memory_size'
@@ -31,6 +35,11 @@ component_module_filesystem_location = "~/dtk/component_modules"
 rvm_path = "/usr/local/rvm/wrappers/default/"
 
 dtk_common = DtkCommon.new(service_name, assembly_name)
+dtk_common.server = tenant_server
+dtk_common.endpoint = "https://#{tenant_server}:443"
+dtk_common.username = tenant_username
+dtk_common.password = tenant_password
+dtk_common.login
 
 describe "DTK Server smoke test release" do
 
@@ -39,7 +48,7 @@ describe "DTK Server smoke test release" do
   end
 
   context "Install service module" do
-    include_context "Import remote service module", service_module_name
+    include_context "Import remote service module", namespace + ':' + service_module_name
   end
 
   context "Get component module components list" do
@@ -63,9 +72,9 @@ describe "DTK Server smoke test release" do
       include_context "Set attribute", dtk_common, memory_size_attribute, memory_size
     end
 
-    context "Converge function" do
-      include_context "Converge service", dtk_common, 30
-    end
+#    context "Converge function" do
+#      include_context "Converge service", dtk_common, 30
+#    end
 
     context "Delete and destroy service function" do
       include_context "Delete services", dtk_common
@@ -80,13 +89,13 @@ describe "DTK Server smoke test release" do
     include_context "Delete component module", dtk_common, local_component_module_name
   end
 
-  context "Delete #{component_module_name} component module from remote" do
-    include_context "Delete component module from remote repo rvm", rvm_path, dtk_common, component_module_name, namespace
-  end
+ # context "Delete #{component_module_name} component module from remote" do
+ #   include_context "Delete component module from remote repo rvm", rvm_path, dtk_common, component_module_name, namespace
+ # end
 
-  context "Delete #{service_module_name} service module from remote" do
-    include_context "Delete service module from remote repo rvm", rvm_path, dtk_common, service_module_name, namespace
-  end
+#  context "Delete #{service_module_name} service module from remote" do
+#    include_context "Delete service module from remote repo rvm", rvm_path, dtk_common, service_module_name, namespace
+#  end
 
   after(:all) do
     puts "", ""

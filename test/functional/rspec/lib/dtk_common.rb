@@ -4,13 +4,13 @@ require 'pp'
 require 'json'
 require 'awesome_print'
 require 'yaml'
-require './lib/mixins/assembly_and_service_operations_mixin.rb'
-require './lib/mixins/node_operations_mixin.rb'
-require './lib/mixins/workspace_mixin.rb'
-require './lib/mixins/target_mixin.rb'
-require './lib/mixins/component_modules_mixin.rb'
-require './lib/mixins/service_modules_mixin.rb'
-require './lib/mixins/test_modules_mixin.rb'
+require File.join(File.dirname(__FILE__), 'mixins/assembly_and_service_operations_mixin.rb')
+require File.join(File.dirname(__FILE__), 'mixins/node_operations_mixin.rb')
+require File.join(File.dirname(__FILE__), 'mixins/workspace_mixin.rb')
+require File.join(File.dirname(__FILE__), 'mixins/target_mixin.rb')
+require File.join(File.dirname(__FILE__), 'mixins/component_modules_mixin.rb')
+require File.join(File.dirname(__FILE__), 'mixins/service_modules_mixin.rb')
+require File.join(File.dirname(__FILE__), 'mixins/test_modules_mixin.rb')
 
 STDOUT.sync = true
 
@@ -34,7 +34,7 @@ class DtkCommon
 	}
 
 	def initialize(service_name, assembly_name)
-		config_yml = YAML::load(File.open("./config/config.yml"))		
+		config_yml = YAML::load(File.open(File.join(File.dirname(__FILE__), '..', "config/config.yml")))		
 
 		@service_name = service_name
 		#Fixed current format of assembly name
@@ -51,13 +51,16 @@ class DtkCommon
 		#used as placeholders for component ids/names for specific module that are accumulated
 		@component_module_id_list = Array.new()
 		@component_module_name_list = Array.new()
-
-		#Login to dtk application
-		response_login = RestClient.post(@endpoint + '/rest/user/process_login', 'username' => @username, 'password' => @password, 'server_host' => @server, 'server_port' => @port)
-
-		$cookies = response_login.cookies
-		$opts[:cookies] = response_login.cookies
+                login
 	end
+
+        def login
+                #Login to dtk application
+                response_login = RestClient.post(@endpoint + '/rest/user/process_login', 'username' => @username, 'password' => @password, 'server_host' => @server, 'server_port' => @port)
+
+                $cookies = response_login.cookies
+                $opts[:cookies] = response_login.cookies
+        end
 
 	def server_log_print()
 		search_string = "Exiting!"

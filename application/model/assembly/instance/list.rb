@@ -217,12 +217,9 @@ module DTK; class  Assembly
         tasks = []
         rows = get_objs(:cols => [:tasks])
         rows.each do |row|
-          task = row[:task]
-          task_obj_idh = task.id_handle()
-          task_mh = task_obj_idh.createMH(:task)
-          task_structure = Task.get_hierarchical_structure(task_mh.createIDH(:id => task[:id]))
-          status_opts = {}
-          tasks << task_structure.status_table_form(status_opts)
+          task        = row[:task]
+          task[:type] = task[:display_name]
+          tasks       << task
         end
         tasks.flatten
       end

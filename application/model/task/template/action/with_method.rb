@@ -7,10 +7,6 @@ module DTK; class Task; class Template
         @method = ActionMethod.new(action_def)
       end
 
-      def task_action_name()
-        "#{@action.task_action_name()}.#{@method.method_name()}"
-      end
-
       def action_method?()
         @method
       end

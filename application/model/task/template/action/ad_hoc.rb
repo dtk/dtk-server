@@ -1,42 +1,70 @@
 module DTK; class Task; class Template
   class Action
-    module AdHoc
+    class AdHoc
       # opts can have
       #  :method_name
-      def self.ret_action(assembly,component,opts={})
-        augmented_cmp = component.merge(:node => component.get_node())
-        if title = component.has_title?()
-          augmented_cmp.merge!(:title => title)
-        end
-        
-        opts_create = Hash.new
-        if action_def = get_action_def?(component,opts)
-          opts_create.merge!(:action_def => action_def)
-        end             
-
-        Action.create(augmented_cmp,opts_create)
+      def initialize(assembly,component,opts={})
+        @assembly              = assembly
+        @component             = component
+        @method_name           = opts[:method_name]
+        @task_template_content = ret_task_template_content()
       end
-      
+
+      attr_reader :task_template_content
+
+      def task_action_name()
+        ret = component_name()
+        if @method_name
+          ret << ".#{@method_name}"
+        end
+        ret
+      end
+
       def self.list(assembly)
         ret = Array.new
-        config_components = ActionList::ConfigComponents.get(assembly)
-        config_components.each do |config_component|
-          add_non_dups!(ret,actions_pretty_print_form(config_component))
+        action_list = get_action_list(assembly)
+        action_list.each do |component_action|
+          add_non_dups!(ret,action_pretty_print_form(component_action))
         end
         ret
       end
       
      private
-      def self.get_action_def?(component,opts={})
-        if method_name = opts[:method_name]
-          component.get_action_def?(method_name,:cols => [:id,:group_id,:method_name]) ||
-            raise(ErrorUsage.new("Method '#{method_name}' is not defined on component '#{component.display_name_print_form()}'"))
-        end
+      def get_action_list()
+        self.class.get_action_list(@assembly)
+      end
+      def self.get_action_list(assembly)
+        ActionList::ConfigComponents.get(assembly)
       end
 
-      def self.actions_pretty_print_form(config_component)
-        component_name = config_component.display_name_print_form
-        config_component.action_defs().map do |action_def|
+      def ret_task_template_content()
+        action_list = get_action_list()
+        Content.parse_and_reify(serialized_content(),action_list)
+      end
+
+      def serialized_content()
+        ret = {:node => @component.get_node().get_field?(:display_name)}
+        ret.merge(@method_name ? with_method_name() : without_method_name())
+      end
+
+      # TODO: encapsulate the delimeters with parsing routines
+      def without_method_name()
+        {:components => [component_name()]}
+      end
+      def with_method_name()
+        {:actions => ["#{component_name()}.#{@method_name}"]}
+      end
+      def component_name()
+        ret = @component.display_name_print_form()
+        if title = @component.has_title?()
+          ret << "[#{title}]"
+        end
+        ret
+      end
+
+      def self.action_pretty_print_form(component_action)
+        component_name = component_action.display_name_print_form
+        component_action.action_defs().map do |action_def|
           {
             :component_name => component_name,
             :method_name    => action_def.get_field?(:method_name)

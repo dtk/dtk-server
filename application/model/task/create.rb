@@ -15,10 +15,9 @@ module DTK; class Task
 
   class Create
     def self.create_for_ad_hoc_action(assembly,component,opts={})
-      new_action = Template::Action::AdHoc.ret_action(assembly,component,opts)
-pp [:new_action,new_action]
-      task_action_name = new_action.task_action_name()
-      task_template_content = Template::Content.create_from_component_action(new_action,assembly)
+      ad_hoc_action = Template::Action::AdHoc.new(assembly,component,opts)
+      task_action_name = ad_hoc_action.task_action_name()
+      task_template_content = ad_hoc_action.task_template_content
 
       # TODO: below needs to use action params if they exist
       task_mh = target_idh_from_assembly(assembly).create_childMH(:task)

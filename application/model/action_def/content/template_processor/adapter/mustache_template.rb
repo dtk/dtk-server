@@ -14,7 +14,6 @@ module DTK; class ActionDef; class Content
           raise ErrorUsage.new("Template error in command (#{command_line}): #{e.error_message}")
         end
       end
-
     end
   end
 end; end; end

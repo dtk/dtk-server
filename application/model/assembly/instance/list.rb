@@ -91,13 +91,6 @@ module DTK; class  Assembly
         end
       end
 
-      def list_task_actions()
-        get_task_actions().map do |r|
-          r.convert_to_external_task_action_name?()
-        end
-      end
-
-
       def list_attributes(opts=Opts.new)
         if opts[:settings_form]
           filter_proc = opts[:filter_proc]

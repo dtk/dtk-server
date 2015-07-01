@@ -6,6 +6,7 @@ module DTK; class Dependency
       @node = node
      end
 
+    # TODO: Marked for removal [Haris]
     def self.create_dependency?(cmp_template,antec_cmp_template,opts={})
       ret = Hash.new
       unless dependency_exists?(cmp_template,antec_cmp_template)
@@ -44,7 +45,7 @@ module DTK; class Dependency
         [:id,:group_id,:component_component_id,:search_pattern,:type,:description,:severity]
       end
     end
-    
+
     def depends_on_print_form?()
       if cmp_type = @dependency_obj.is_simple_filter_component_type?()
         Component.component_type_print_form(cmp_type)
@@ -72,7 +73,7 @@ module DTK; class Dependency
       end
       if opts[:ret_statisfied_by] and not simple_deps.empty?()
         satisify_cmps = get_components_that_satisify_deps(simple_deps)
-        
+
         unless satisify_cmps.empty?
           simple_deps.each{|simple_dep|simple_dep.set_satisfied_by_component_ids?(satisify_cmps)}
         end
@@ -96,7 +97,7 @@ module DTK; class Dependency
         if filter = dep_obj.simple_filter_triplet?()
           [:and,[:eq,:node_node_id,simple_dep.node.id()],filter]
         else
-          Log.error("Ignoring a simple dependency that is not a simple filter (#{simple_dep.dependency_obj})") 
+          Log.error("Ignoring a simple dependency that is not a simple filter (#{simple_dep.dependency_obj})")
           nil
         end
       end.compact

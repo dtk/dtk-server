@@ -181,9 +181,6 @@ module DTK; class Assembly; class Instance
     #### end: get methods around ports
 
     #### get methods around service add ons
-    def get_service_add_ons()
-      get_objs_helper(:service_add_ons_from_instance,:service_add_on)
-    end
 
     def get_augmented_service_add_ons()
       get_objs_helper(:aug_service_add_ons_from_instance,:service_add_on,:augmented => true)
@@ -206,7 +203,7 @@ module DTK; class Assembly; class Instance
     def get_task_actions()
       Task::Template.get_task_actions(self)
     end
-      
+
     def get_task_templates()
       Task::Template.get_task_templates(self)
     end
@@ -228,7 +225,7 @@ module DTK; class Assembly; class Instance
       ret = Array.new
 
       opts = {
-        :component_type_filter => :service, 
+        :component_type_filter => :service,
         :serialization_form    => {:filter => {:source => :assembly}, :allow_empty_task=>true}
       }
 
@@ -292,18 +289,6 @@ module DTK; class Assembly; class Instance
       }
       assembly_empty_nodes = get_objs(assembly_mh,sp_hash).reject{|r|nodes_ids.include?((r[:node]||{})[:id])}
       ret + assembly_empty_nodes
-    end
-
-    def get_workspace_object(assembly_mh, opts={})
-      target_idh = opts[:target_idh]
-      target_filter = (target_idh ? [:eq, :datacenter_datacenter_id, target_idh.get_id()] : [:neq, :datacenter_datacenter_id, nil])
-      filter = [:and, [:eq, :type, "composite"],[:eq, :ref, '__workspace'], target_filter,opts[:filter]].compact
-      col,needs_empty_nodes = list_virtual_column?(opts[:detail_level])
-      sp_hash = {
-        :cols => [:id, :display_name,:group_id,:component_type,:version,col].compact,
-        :filter => filter
-      }
-      get_these_objs(assembly_mh,sp_hash)
     end
 
     #### get methods around nodes

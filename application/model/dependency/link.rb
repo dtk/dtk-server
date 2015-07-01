@@ -6,6 +6,7 @@ module DTK; class Dependency
       @link_def = link_def
     end
 
+    # TODO: Marked for removal [Haris]
     def self.create_dependency?(cmp_template,antec_cmp_template,opts={})
       result = Hash.new
       source_attr_pattern = opts[:source_attr_pattern]
@@ -44,7 +45,7 @@ module DTK; class Dependency
         link_deps = Array.new
         components.each do |cmp|
           cmp_id = cmp[:id]
-          matching_link_defs = link_defs.select{|ld|ld[:component_component_id] == cmp_id}            
+          matching_link_defs = link_defs.select{|ld|ld[:component_component_id] == cmp_id}
           matching_link_defs.each do |ld|
             dep = new(ld)
             link_deps << dep
@@ -89,10 +90,10 @@ module DTK; class Dependency
       end
       matches.first
     end
-    
+
     def self.create_link_def_and_link(external_or_internal,cmp_template,antec_cmp_template,am_serialized_form)
       antec_cmp_type = antec_cmp_template[:component_type]
-      serialized_link_def =  
+      serialized_link_def =
         {"type" => antec_cmp_template.display_name_print_form(),
         "required"=>true,
         "possible_links"=>

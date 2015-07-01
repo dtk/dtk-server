@@ -130,14 +130,6 @@ module DTK
       rest_ok_response assembly.get_component_modules({:get_version_info=>true})
     end
 
-    def rest__rename()
-      assembly = ret_assembly_object()
-      assembly_name = ret_non_null_request_params(:assembly_name)
-      new_assembly_name = ret_non_null_request_params(:new_assembly_name)
-
-      rest_ok_response assembly.rename(model_handle(), assembly_name, new_assembly_name)
-    end
-
     # TODO: may be cleaner if we break into list_nodes, list_components with some shared helper functions
     def rest__info_about()
       node_id, component_id, detail_level, detail_to_include = ret_request_params(:node_id, :component_id, :detail_level, :detail_to_include)
@@ -213,11 +205,6 @@ module DTK
       rest_ok_response data, response_opts
     end
     SupportedFormats = [:yaml]
-
-    def rest__task_action_list()
-      assembly = ret_assembly_instance_object()
-      rest_ok_response assembly.list_task_actions()
-    end
 
     def rest__info_about_task()
       assembly = ret_assembly_instance_object()
@@ -315,15 +302,6 @@ module DTK
       rest_ok_response branch_info
     end
 
-    def rest__create_component_dependency()
-      assembly = ret_assembly_instance_object()
-      cmp_template = ret_component_template(:component_template_id)
-      antecedent_cmp_template = ret_component_template(:antecedent_component_template_id)
-      type = :simple
-      AssemblyModule::Component.create_component_dependency?(type,assembly,cmp_template,antecedent_cmp_template)
-      rest_ok_response
-    end
-
     AboutEnum = {
       :instance => [:nodes,:components,:tasks,:attributes,:modules],
       :template => [:nodes,:components,:targets]
@@ -361,14 +339,6 @@ module DTK
       rest_ok_response :service_link => service_link_idh.get_id()
     end
 
-    def rest__list_attribute_mappings()
-      port_link = ret_port_link()
-      # TODO: stub
-      ams = port_link.list_attribute_mappings()
-      pp ams
-      rest_ok_response
-    end
-
     def rest__list_service_links()
       assembly = ret_assembly_instance_object()
       component_id = ret_component_id?(:component_id, :assembly_id => assembly.id())
@@ -379,6 +349,7 @@ module DTK
       ret = assembly.list_service_links(opts)
       rest_ok_response ret
     end
+
     # TODO: deprecate below for above
     def rest__list_connections()
       assembly = ret_assembly_instance_object()
@@ -394,20 +365,12 @@ module DTK
       rest_ok_response ret
     end
 
-    def rest__list_possible_add_ons()
-      assembly = ret_assembly_instance_object()
-      rest_ok_response assembly.get_service_add_ons()
-    end
 
     def rest__get_attributes()
       filter = ret_request_params(:filter)
       filter = filter && filter.to_sym
       assembly = ret_assembly_instance_object()
       rest_ok_response assembly.get_attributes_print_form(Opts.new(:filter => filter))
-    end
-
-    def rest__workspace_object()
-      rest_ok_response Assembly::Instance.get_workspace_object(model_handle(),{})
     end
 
     def rest__list()
@@ -434,8 +397,6 @@ module DTK
       assembly = ret_assembly_instance_object()
       rest_ok_response assembly.print_includes(), :encode_into => :yaml
     end
-
-    #### end: list and info actions ###
 
     def rest__apply_attribute_settings()
       assembly = ret_assembly_instance_object()
@@ -564,16 +525,6 @@ module DTK
       rest_ok_response
     end
 
-    def rest__add_service_add_on()
-      assembly = ret_assembly_instance_object()
-      add_on_name = ret_non_null_request_params(:service_add_on_name)
-      new_sub_assembly_idh = assembly.service_add_on(add_on_name)
-      rest_ok_response(:sub_assembly_id => new_sub_assembly_idh.get_id())
-    end
-
-    #### end: methods to modify the assembly instance
-
-    #### method(s) related to staging assembly template
     def rest__stage()
       target_id = ret_request_param_id_optional(:target_id, Target::Instance)
       target = target_idh_with_default(target_id).create_object(:model_name => :target_instance)
@@ -686,39 +637,6 @@ module DTK
       rest_ok_response violation_table.uniq
     end
 
-    def rest__ad_hoc_action_list()
-      assembly = ret_assembly_instance_object()
-      rest_ok_response AdHocAction.list(assembly)
-    end
-
-    def rest__ad_hoc_action_execute()
-      assembly = ret_assembly_instance_object()
-      component = ret_component_id_handle(:component_id,:assembly_id => assembly.id()).create_object()
-      opts = ret_params_hash(:method_name,:action_params)
-
-      # create task
-      task = Task.create_for_ad_hoc_action(assembly,component,opts)
-      #task.save!()
-=begin
-
-      # TODO: this is simple but expensive way to get all teh embedded task ids filled out
-      # can replace with targeted method that does just this
-      task = Task.get_hierarchical_structure(task.id_handle())
-
-      # execute task
-      workflow = Workflow.create(task)
-      workflow.defer_execution()
-
-      response = {
-        :assembly_instance_id => assembly.id(),
-        :assembly_instance_name => assembly.display_name_print_form,
-        :task_id => task.id()
-      }
-      rest_ok_response response
-=end
-      rest_ok_response
-    end
-
     def rest__create_task()
       assembly = ret_assembly_instance_object()
       assembly_is_stopped = assembly.any_stopped_nodes?()
@@ -756,7 +674,6 @@ module DTK
       rest_ok_response
     end
 
-    #TODO: cleanup
     def rest__start()
       assembly     = ret_assembly_instance_object()
       node_pattern = ret_request_params(:node_pattern)
@@ -876,52 +793,6 @@ module DTK
       end
 
       queue = initiate_action(GetNetstats, assembly, params, node_pattern)
-      rest_ok_response :action_results_id => queue.id
-    end
-
-    def initiate_action_agent()
-      node   = create_obj(:node_id, ::DTK::Node)
-      params = ret_params_hash(:bash_command)
-
-      params.merge!(
-        :action_agent_request => {
-        :env_vars => { :HARIS => 'WORKS', :NESTO => 21 },
-        :execution_list => [
-          {
-            :type    => 'syscall',
-            #:command => "script -qfc 'JAVA_HOME=\"/usr/lib/jvm/java-1.7.0-openjdk-1.7.0.75.x86_64\" HADOOP_HOME=\"/usr/lib/hadoop\" HADOOP_CONF_DIR=\"/etc/hadoop/conf/\" /usr/local/maven/bin/mvn verify -f /etc/puppet/modules/action_module/dtk/bigtop_tests/bigtop-tests/test-execution/smokes/hadoop/pom.xml'",
-            :command => "date",
-            :if      => 'echo works!'
-          },
-          # {
-          #   :type    => 'syscall',
-          #   :command => 'more /root/thor/README.md'
-          # }
-          ],
-        :positioning2 => [
-        {
-          :type => 'file',
-          :source => {
-            :type => 'git',
-            :url => "https://github.com/erikhuda/thor.git",
-            :ref => 'master'
-          },
-          :target => {
-            :path => "/root/thor"
-          },
-        },
-        {
-          :type => 'file',
-          :source => {
-            :type => 'in_payload',
-            :content => "Hello WORLD!"
-          },
-          :target => {
-            :path => "/root/test-folder/site-stage-1-invocation-1.pp"
-          }
-        }]})
-
-      queue  = initiate_action_with_nodes(ActionAgent, [node], params)
       rest_ok_response :action_results_id => queue.id
     end
 

@@ -1,7 +1,0 @@
-
-<div id="testjson_wrapper" style="width: 300px; height: 300px; border: 1px solid red;">
-	<h1>{%=testing%}</h1>
-	<div style="margin: 10px 10px 10px 150px; border: 1px solid blue; height: 100px; width: 100px;">
-		Hello
-	</div>
-</div>

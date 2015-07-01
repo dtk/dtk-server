@@ -35,7 +35,6 @@ R8::ReactorRoute.draw do
   post  'assembly/list_service_links' => 'assembly#list_service_links'
   post  'assembly/list_remote' => 'assembly#list_remote'
   post  'assembly/list_connections' => 'assembly#list_connections'
-  post  'assembly/list_smoketests' => 'assembly#list_smoketests'
   post  'assembly/list_with_workspace' => 'assembly#list_with_workspace'
   post  'assembly/info' => 'assembly#info'
   post  'assembly/delete' => 'assembly#delete'
@@ -337,35 +336,7 @@ end
 R8::Routes[:login] = {
   :alias => 'user/login',
 }
-# Routes that correspond to (non-trivial action sets)
-=begin
-R8::Routes["component/display"] = {
-  :layout => 'default',
-  :alias => '',
-  :params => [:id],
-  :action_set =>
-  [
-   {
-     :route => "component/display",
-     :action_params => ["$id$"],
-     :panel => "main_body"
-   },
-   {
-     :route => "attribute/list_for_component_display",
-     :action_params => [{:parent_id => "$id$"}],
-     :panel => "main_body",
-#      :assign_type => 'append | prepend | replace'
-     :assign_type => :append
-   },
-   {
-     :route => "monitoring_item/list_for_component_display",
-     :action_params => [{:parent_id => "$id$"}],
-     :panel => "main_body",
-     :assign_type => :append
-   }
-  ]
-}
-=end
+
 R8::Routes["node/display"] = {
   :layout => 'default',
   :alias => '',

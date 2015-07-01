@@ -195,12 +195,6 @@ module DTK; class  Assembly
         pretty_print_name()
       end
 
-      def list_smoketests()
-        Log.error("TODO: needs to be tested")
-        nodes_and_cmps = get_info__flat_list(:detail_level => "components")
-        nodes_and_cmps.map{|r|r[:nested_component]}.select{|cmp|cmp[:basic_type] == "smoketest"}.map{|cmp|Aux::hash_subset(cmp,[:id,:display_name,:description])}
-      end
-
       def print_includes()
         ModuleRefs::Tree.create(self).hash_form()
       end

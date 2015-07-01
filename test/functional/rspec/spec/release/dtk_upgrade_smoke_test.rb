@@ -13,8 +13,8 @@ require File.join(File.dirname(__FILE__), '../..', 'lib/component_modules_spec')
 require File.join(File.dirname(__FILE__), '../..', 'lib/service_modules_spec')
 
 # assuming that the tenant is already linked to repoman
-#catalog_username = ENV['tenant_user'] || "dtk16"
-#catalog_password = ENV['tenant_user_password'] || "password"
+catalog_username = "public-internal"
+catalog_password = "905^03N#V!a0"
 tenant_server = ENV['tenant_server'] || "dtk1.dtk.io"
 tenant_username = ENV['username'] || "dtk1"
 tenant_password = ENV['tenant_password'] || "password"
@@ -45,6 +45,10 @@ describe "DTK Server smoke test release" do
 
   before(:all) do
     puts "*****************************",""
+  end
+
+  context "Set catalog credentials" do
+    include_context "Set catalog credentials", dtk_common, catalog_username, catalog_password
   end
 
   context "Install service module" do

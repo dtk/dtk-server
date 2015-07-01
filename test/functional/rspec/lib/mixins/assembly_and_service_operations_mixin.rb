@@ -735,7 +735,7 @@ module AssemblyAndServiceOperationsMixin
 		if response['status'] == "ok"
 			output = response['data']
 			output.gsub!("=","") if response['data'].include? "="
-			runs = output.split(/\n \n\n|\n\n\n/)
+			runs = output.split(/\n \n\n|\n\n\n|\n\n/)
 		else
 			puts "Task action details were not retrieved successfully!"
 		end

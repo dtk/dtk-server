@@ -43,9 +43,10 @@ module DTK; class Task
       end
       ordered_log_entries = log_entries.sort{|a,b|(a[:position]||0) <=> (b[:position]||0)}
       ordered_log_entries.each do |l|
-        content = l[:content]
+        content     = l[:content]
+        description = parse_description(content[:description])
         ret << "==============================================================\n"
-        ret << "RUN: #{content[:description]} \n"
+        ret << "#{description} \n"
         ret << "STATUS: #{content[:status]} \n"
         ret << "STDOUT: #{content[:stdout]}\n\n" if content[:stdout] && !content[:stdout].empty?
         ret << "STDERR: #{content[:stderr]} \n" if content[:stderr] && !content[:stderr].empty?
@@ -53,5 +54,14 @@ module DTK; class Task
       ret
     end
 
+    private
+
+    def self.parse_description(description)
+      if match = description.match(/^(create )(.*)/)
+        return "ADD: #{match[2]}"
+      else
+        "RUN: #{description}"
+      end
+    end
   end
 end; end

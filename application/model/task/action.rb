@@ -1,5 +1,5 @@
 module DTK; class Task
-  class Action < HashObject 
+  class Action < HashObject
     def type()
       Aux.underscore(Aux.demodulize(self.class.to_s)).to_sym
     end
@@ -123,11 +123,11 @@ module DTK; class Task
       RetryMaxCount = 60
       RetrySleep = 1
       def values_non_null?(dyn_attr_val_info,keys)
-        keys.each do |k| 
+        keys.each do |k|
           is_non_null = nil
           if match = dyn_attr_val_info.find{|a|a[:display_name] == k}
             if val = match[:attribute_value]
-              is_non_null = (val.kind_of?(Array) ? val.find{|el|el} : true) 
+              is_non_null = (val.kind_of?(Array) ? val.find{|el|el} : true)
             end
           end
           return nil unless is_non_null
@@ -142,7 +142,7 @@ module DTK; class Task
         if name = node_status__name(node)
           ret[:name] = name
         end
-        if id = node[:id]  
+        if id = node[:id]
           ret[:id] = id
         end
         ret
@@ -157,6 +157,7 @@ module DTK; class Task
     class NodeLevel < OnNode
     end
 
+    # TODO: Marked for removal [Haris] - Not sure but better check
     class PhysicalNode < self
       def initialize(type,hash,task_idh=nil)
         unless hash[:node].kind_of?(Node)

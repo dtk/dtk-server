@@ -1,3 +1,4 @@
+# TODO: Marked for removal [Haris]
 module XYZ
   class State_changeController < AuthController
     def rest__list_pending_changes(target_id=nil)

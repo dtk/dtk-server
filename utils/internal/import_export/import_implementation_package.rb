@@ -1,3 +1,4 @@
+# TODO: Marked for removal [Haris]
 module XYZ
   module ImportImplementationPackage
     # this should be precded by fn that adds the component to R8::Config[:repo][:base_directory] location
@@ -28,7 +29,7 @@ module XYZ
       r8meta_type = opts[:r8meta_type]
       r8meta_file = find_r8meta_file(cmp_or_impl_name,r8meta_type)
       ret = nil
-      case r8meta_type 
+      case r8meta_type
        when :yaml
         require 'yaml'
         ret = YAML.load_file(r8meta_file)
@@ -53,7 +54,7 @@ module XYZ
     TypeMapping = {
       :yaml => "yml"
     }
-    
+
     def self.add_implementation_id!(component_hash,parent_idh,component_name)
       impl_display_name = component_name.gsub(/__.+$/,"")
       sp_hash = {

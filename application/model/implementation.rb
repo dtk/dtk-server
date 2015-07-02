@@ -94,6 +94,7 @@ module DTK
       RepoManager.ls_r('*',{:file_only=>true},self)
     end
 
+    # TODO: Marked for removal [Haris]
     def add_contained_files_and_push_to_repo()
       context = repo_manager_context()
       RepoManager.add_all_files(context)

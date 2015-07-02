@@ -305,7 +305,6 @@ R8::ReactorRoute.draw do
   post  'target/delete_and_destroy' => 'target#delete_and_destroy'
   post  'target/info' => 'target#info'
   post  'target/install_agents' => 'target#install_agents'
-  post  'target/create_install_agents_task' => 'target#create_install_agents_task'
   post  'target/task_status' => 'target#task_status'
   post  'target/set_properties' => 'target#set_properties'
 
@@ -477,10 +476,6 @@ R8::Routes["library/index"] = {
 }
 
 R8::Routes["node/list"] = {
-  :layout => 'inventory'
-}
-
-R8::Routes["datacenter/list"] = {
   :layout => 'inventory'
 }
 

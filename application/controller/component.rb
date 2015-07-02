@@ -12,5 +12,5 @@ module DTK
       opts.merge?(:ignore => ignore)
       rest_ok_response Component::Template.list(project,opts)
     end
-
+  end
 end

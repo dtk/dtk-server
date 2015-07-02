@@ -532,12 +532,6 @@ module DTK
         post_rest_request_data(route,body,:raise_error => true)
       end
 
-      def push_to_mirror(mirror_host)
-        route = "/rest/repo/push_to_mirror"
-        body = {:repo_name => @repo,:mirror_host => mirror_host}
-        post_rest_request_data(route,body,:raise_error => true)
-      end
-
     end
   end
 end

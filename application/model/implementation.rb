@@ -1,4 +1,5 @@
 r8_require('branch_names')
+
 module DTK
   class Implementation < Model
     include BranchNamesMixin
@@ -15,7 +16,7 @@ module DTK
       # find relevant existing files
       sp_hash = {
         :cols => [:id,:display_name,:path],
-          :filter => [:and,[:eq,:implementation_implementation_id,id()], [:oneof,:path,paths_to_delete+paths_to_add]]
+        :filter => [:and,[:eq,:implementation_implementation_id,id()], [:oneof,:path,paths_to_delete+paths_to_add]]
       }
       file_assets = Model.get_objs(model_handle(:file_asset),sp_hash)
       # delete relevant files
@@ -45,8 +46,8 @@ module DTK
       branch = local.branch_name
 
       match_assigns = {
-        :module_name      => module_name, 
-        :branch           => branch, 
+        :module_name      => module_name,
+        :branch           => branch,
         :module_namespace => module_namespace
       }
       impl_hash = {
@@ -65,34 +66,8 @@ module DTK
     def self.ref(namespace,module_name,branch)
       "#{namespace}-#{module_name}-#{branch}"
     end
+
     private_class_method :ref
-
-    def self.delete_repos_and_implementations(model_handle,module_name)
-      sp_hash = {
-        :cols => [:id,:module_name,:repo_id],
-        :filter => [:eq, :module_name, module_name]
-      }
-      impls = get_objs(model_handle,sp_hash)
-      return if impls.empty?
-
-      sp_hash = {
-        :cols => [:id,:repo_name,:local_dir],
-        :filter => [:oneof,:id,impls.map{|r|r[:repo_id]}.uniq]
-      }
-      repos = get_objs(model_handle.createMH(:repo),sp_hash)
-
-      sp_hash = {
-        :cols => [:id,:display_name],
-        :filter => [:oneof,:implementation_id,impls.map{|r|r[:id]}.uniq]
-      }
-      cmps = get_objs(model_handle.createMH(:component),sp_hash)
-
-      repos.each{|repo|RepoManager.delete_repo(repo)}
-
-      Model.delete_instances(cmps.map{|cmp|cmp.id_handle()})
-      Model.delete_instances(repos.map{|repo|repo.id_handle()})
-      Model.delete_instances(impls.map{|impl|impl.id_handle()})
-    end
 
     def add_file_and_push_to_repo(file_path,content,opts={})
       update_object!(:type,:repo,:branch)

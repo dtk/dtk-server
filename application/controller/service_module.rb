@@ -173,14 +173,6 @@ module DTK
       rest_ok_response(:service_module_id => init_hash_response[:module_branch_idh].get_id(), :repo_info => init_hash_response[:module_repo_info])
     end
 
-    def rest__create_new_version()
-      service_module = create_obj(:service_module_id)
-      version = ret_version()
-
-      service_module.create_new_version(version)
-      rest_ok_response
-    end
-
     def rest__delete()
       service_module = create_obj(:service_module_id)
       module_info = service_module.delete_object()

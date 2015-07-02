@@ -97,8 +97,6 @@ R8::ReactorRoute.draw do
   post  'component_module/update_model_from_clone' => 'component_module#update_model_from_clone'
   post  'component_module/delete' => 'component_module#delete'
   post  'component_module/delete_version' => 'component_module#delete_version'
-  post  'component_module/test_generate_dsl' => 'component_module#test_generate_dsl'
-  post  'component_module/create_new_dsl_version' => 'component_module#create_new_dsl_version'
   post  'component_module/info' => 'component_module#info'
   post  'component_module/list' => 'component_module#list'
   post  'component_module/pull_from_remote' => 'component_module#pull_from_remote'
@@ -115,7 +113,6 @@ R8::ReactorRoute.draw do
   post  'component_module/import_version' => 'component_module#import_version'
   post  'component_module/delete_remote' => 'component_module#delete_remote'
   post  'component_module/export' => 'component_module#export'
-  post  'component_module/create_new_version' => 'component_module#create_new_version'
   post  'component_module/get_remote_module_info' => 'component_module#get_remote_module_info'
   post  'component_module/get_workspace_branch_info' => 'component_module#get_workspace_branch_info'
   post  'component_module/update_from_initial_create' => 'component_module#update_from_initial_create'
@@ -134,8 +131,6 @@ R8::ReactorRoute.draw do
   post  'test_module/update_model_from_clone' => 'test_module#update_model_from_clone'
   post  'test_module/delete' => 'test_module#delete'
   post  'test_module/delete_version' => 'test_module#delete_version'
-  post  'test_module/test_generate_dsl' => 'test_module#test_generate_dsl'
-  post  'test_module/create_new_dsl_version' => 'test_module#create_new_dsl_version'
   post  'test_module/info' => 'test_module#info'
   post  'test_module/list' => 'test_module#list'
   post  'test_module/pull_from_remote' => 'test_module#pull_from_remote'
@@ -152,7 +147,6 @@ R8::ReactorRoute.draw do
   post  'test_module/import_version' => 'test_module#import_version'
   post  'test_module/delete_remote' => 'test_module#delete_remote'
   post  'test_module/export' => 'test_module#export'
-  post  'test_module/create_new_version' => 'test_module#create_new_version'
   post  'test_module/get_remote_module_info' => 'test_module#get_remote_module_info'
   post  'test_module/get_workspace_branch_info' => 'test_module#get_workspace_branch_info'
   post  'test_module/update_from_initial_create' => 'test_module#update_from_initial_create'
@@ -170,8 +164,6 @@ R8::ReactorRoute.draw do
   post  'node_module/update_model_from_clone' => 'node_module#update_model_from_clone'
   post  'node_module/delete' => 'node_module#delete'
   post  'node_module/delete_version' => 'node_module#delete_version'
-  post  'node_module/test_generate_dsl' => 'node_module#test_generate_dsl'
-  post  'node_module/create_new_dsl_version' => 'node_module#create_new_dsl_version'
   post  'node_module/info' => 'node_module#info'
   post  'node_module/list' => 'node_module#list'
   post  'node_module/pull_from_remote' => 'node_module#pull_from_remote'
@@ -187,7 +179,6 @@ R8::ReactorRoute.draw do
   post  'node_module/import_version' => 'node_module#import_version'
   post  'node_module/delete_remote' => 'node_module#delete_remote'
   post  'node_module/export' => 'node_module#export'
-  post  'node_module/create_new_version' => 'node_module#create_new_version'
   post  'node_module/get_remote_module_info' => 'node_module#get_remote_module_info'
   post  'node_module/get_workspace_branch_info' => 'node_module#get_workspace_branch_info'
   post  'node_module/update_from_initial_create' => 'node_module#update_from_initial_create'
@@ -284,7 +275,6 @@ R8::ReactorRoute.draw do
   post  'service_module/list_component_modules' => 'service_module#list_component_modules'
   post  'service_module/import_version' => 'service_module#import_version'
   post  'service_module/export' => 'service_module#export'
-  post  'service_module/create_new_version' => 'service_module#create_new_version'
   post  'service_module/set_component_module_version' => 'service_module#set_component_module_version'
   post  'service_module/delete' => 'service_module#delete'
   post  'service_module/delete_version' => 'service_module#delete_version'
@@ -325,9 +315,6 @@ R8::ReactorRoute.draw do
   post  'task/list' => 'task#list'
   post  'task/status' => 'task#status'
   post  'task/create_task_from_pending_changes' => 'task#create_task_from_pending_changes'
-
-  # DEVELOPER
-  post  'developer/inject_agent' => 'developer#inject_agent'
 
   # NAMESPACE
   post  'namespace/default_namespace_name' => 'namespace#default_namespace_name'
@@ -505,29 +492,6 @@ R8::Routes["editor/index"] = {
   :layout => 'editor'
 }
 
-R8::Routes["ide/index"] = {
-#  :layout => 'ide'
-  :layout => 'workspace2'
-}
-R8::Routes["ide/test_tree"] = {
-  :layout => 'ide'
-}
-
-R8::Routes["import/index"] = {
-  :layout => 'import'
-}
-R8::Routes["import/load_wizard"] = {
-  :layout => 'import'
-}
-R8::Routes["import/step_one"] = {
-  :layout => 'import'
-}
-R8::Routes["import/step_two"] = {
-  :layout => 'import'
-}
-R8::Routes["import/step_three"] = {
-  :layout => 'import'
-}
 
 R8::Routes.freeze
 

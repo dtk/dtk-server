@@ -686,7 +686,16 @@ module DTK
 
     def rest__ad_hoc_action_list()
       assembly = ret_assembly_instance_object()
-      rest_ok_response Task::Template::Action::AdHoc.list(assembly)
+      type     = (ret_request_params(:type) || :component_type).to_sym
+      datatype = 
+        case type
+          when :component_type     then :ad_hoc_action_by_component_type
+          when :component_instance then :ad_hoc_action_by_component_instance
+          else raise ErrorUsage.new("Illegal type (#{type})")
+        end  
+
+      response = Task::Template::Action::AdHoc.list(assembly,type)
+      rest_ok_response response,:datatype => datatype
     end
 
     def rest__ad_hoc_action_execute()
@@ -697,8 +706,6 @@ module DTK
       # create task
       task = Task.create_for_ad_hoc_action(assembly,component,opts)
       task.save!()
-=begin
-
       # TODO: this is simple but expensive way to get all teh embedded task ids filled out
       # can replace with targeted method that does just this
       task = Task.get_hierarchical_structure(task.id_handle())
@@ -713,8 +720,6 @@ module DTK
         :task_id => task.id()
       }
       rest_ok_response response
-=end
-      rest_ok_response
     end
 
     def rest__create_task()

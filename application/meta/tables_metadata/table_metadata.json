@@ -292,13 +292,23 @@
       "workflow_name": "task_action"
     }
   },
-  "ad_hoc_action": {
+  "ad_hoc_action_by_component_type": {
     "order": [
-      "component_name",
+      "component_type",
       "method_name"
     ],
     "mapping": {
-      "component_name": "component_name",
+      "component_type": "component_type",
+      "method_name": "method_name"
+    }
+  },
+  "ad_hoc_action_by_component_instance": {
+    "order": [
+      "component_instance",
+      "method_name"
+    ],
+    "mapping": {
+      "component_instance": "component_instance",
       "method_name": "method_name"
     }
   },

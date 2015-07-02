@@ -20,13 +20,8 @@ module DTK; class Task; class Template
         ret
       end
 
-      def self.list(assembly)
-        ret = Array.new
-        action_list = get_action_list(assembly)
-        action_list.each do |component_action|
-          add_non_dups!(ret,action_pretty_print_form(component_action))
-        end
-        ret
+      def self.list(assembly,type)
+        List.list(get_action_list(assembly),type)
       end
       
      private
@@ -62,23 +57,51 @@ module DTK; class Task; class Template
         ret
       end
 
-      def self.action_pretty_print_form(component_action)
-        component_name = component_action.display_name_print_form
-        component_action.action_defs().map do |action_def|
-          {
-            :component_name => component_name,
-            :method_name    => action_def.get_field?(:method_name)
-          }
-        end
-      end
-     
-      def self.add_non_dups!(ret,new_els)
-        new_els.each do |new_el|
-          unless ret.find{|r|r[:component_name] == new_el[:component_name] and r[:method_name] == new_el[:method_name]}
-            ret << new_el
+      module List
+        def self.list(action_list,type)
+          action_list_display_form = action_list_display_form(action_list,type)
+
+          case type
+            when :component_instance
+              action_list_display_form.sort{|a,b|a[type] <=> b[type]}
+            when :component_type    
+              just_component_types(action_list_display_form).sort{|a,b|a[type] <=> b[type]}
+            else raise ErrorUsage.new("Illegal type (#{type})")
           end
         end
-        ret
+
+       private
+        def self.action_list_display_form(action_list,type)
+          action_list.inject(Array.new) do |array,component_action|
+            array + action_display_form(component_action,type)
+          end
+        end
+
+        def self.action_display_form(component_action,type)
+          ret = Array.new
+          action_defs = component_action.action_defs()
+          unless action_defs.empty?
+            ret = action_defs.map do |action_def|
+              {
+                :component_instance => type == :component_instance && component_action.display_name_print_form(:node_prefix => true),
+                :component_type     => component_action.component_type_print_form(),
+                :method_name        => action_def.get_field?(:method_name)
+              }
+            end
+          end
+          ret
+        end
+
+        def self.just_component_types(action_list_display_form)
+          ret = Array.new
+          action_list_display_form.each do |new_el|
+            unless ret.find{|r|r[:component_type] == new_el[:component_type] and r[:method_name] == new_el[:method_name]}
+              ret << Aux.hash_subset(new_el,[:component_type,:method_name])
+            end
+          end
+          ret
+        end
+
       end
     end
   end

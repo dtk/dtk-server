@@ -648,11 +648,9 @@ module DTK
 
       # create task
       task = Task.create_from_assembly_instance(assembly_instance,ret_params_hash(:commit_msg))
-      task.save!()
+      # saves to db and returns task with top level and sub task ids filled out
+      task = task.save_and_add_ids()
 
-      # TODO: this is simple but expensive way to get all teh embedded task ids filled out
-      # can replace with targeted method that does just this
-      task = Task.get_hierarchical_structure(task.id_handle())
       # execute task
       workflow = Workflow.create(task)
       workflow.defer_execution()
@@ -703,12 +701,10 @@ module DTK
       component = ret_component_instance(:component_id,assembly)
       opts = ret_params_hash(:method_name,:action_params)
 
-      # create task
+      # create task, raising user error if task wide preconditions dont hold, which inthis case is mking sure all nodes in task are up
       task = Task.create_for_ad_hoc_action(assembly,component,opts)
-      task.save!()
-      # TODO: this is simple but expensive way to get all teh embedded task ids filled out
-      # can replace with targeted method that does just this
-      task = Task.get_hierarchical_structure(task.id_handle())
+      # saves to db and returns task with top level and sub task ids filled out
+      task = task.save_and_add_ids()
 
       # execute task
       workflow = Workflow.create(task)

@@ -295,51 +295,22 @@ module DTK
       get_top_level_tasks(model_handle).sort{|a,b| b[:updated_at] <=> a[:updated_at]}.first
     end
 
-
     def get_associated_nodes()
-      exec_actions = Array.new
-      # if executable level then get its executable_action
-      if self.has_key?(:executable_action_type)
-        # will have an executable action so if have it already
-        if self[:executable_action_type]
-          exec_actions << get_field?(:executable_action)
+      ndx_nodes = Hash.new
+      get_leaf_subtasks().each do |subtask|
+        if node = (subtask[:executable_action]||{})[:node]
+          ndx_nodes[node.id()] ||= node
         end
+      end
+      ndx_nodes.values
+    end
+
+    def get_leaf_subtasks()
+      if subtasks = self[:subtasks]
+        subtasks.inject(Array.new){|a,st|a+st.get_leaf_subtasks()}
       else
-        if exec_action = get_field?(:executable_action)
-          exec_actions <<  exec_action.merge(:task_id => id())
-        end
+        [self]
       end
-
-      # if task does not have execuatble actions then get all subtasks
-      if exec_actions.empty?
-        exec_actions = get_all_subtasks().map do |t|
-          action = t[:executable_action]
-          action && action.merge(:task_id => t.id())
-        end.compact
-      end
-
-      # get all unique nodes; looking for attribute :external_ref
-      indexed_nodes = Hash.new
-      exec_actions.each do |ea|
-        next unless node = ea[:node]
-        node_id = node[:id]
-        indexed_nodes[node_id] ||= node.merge(:task_id => ea[:task_id])
-        indexed_nodes[node_id][:external_ref] ||= node[:external_ref]
-        indexed_nodes[node_id][:config_agent_type] ||= get_config_agent_type(ea)
-      end
-
-      # need to query db if missing external_refs having instance_id
-      node_ids_missing_ext_refs = indexed_nodes.values.reject{|n|(n[:external_ref]||{})[:instance_id]}.map{|n|n[:id]}
-      unless node_ids_missing_ext_refs.empty?
-        sp_hash = {
-          :cols => [:id,:external_ref],
-          :filter => [:oneof, :id, node_ids_missing_ext_refs]
-        }
-        node_mh = model_handle.createMH(:node)
-        node_objs = Model.get_objs(node_mh,sp_hash)
-        node_objs.each{|r|indexed_nodes[r[:id]][:external_ref] = r[:external_ref]}
-      end
-      indexed_nodes.values
     end
 
     def get_config_agent_type(executable_action=nil, opts={})
@@ -434,6 +405,14 @@ module DTK
     def ret_command_and_control_adapter_info()
       # TODO: stub
       [:node_config, nil]
+    end
+
+    # saves hirerachical structure to db and returns task with top level and subtask ids filled out
+    def save_and_and_add_ids()
+      save!()
+      # TODO: this is simple but expensive way to get all teh embedded task ids filled out
+      # can replace with targeted method that does just this
+      self.class.get_hierarchical_structure(id_handle())
     end
 
     # persists to db this and its sub tasks

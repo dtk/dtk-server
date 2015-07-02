@@ -1,4 +1,4 @@
-#TODO: clean this file up; much cut and patse. moving methods we want to keep towards the top
+#TODO: clean this file up; much cut and paste. moving methods we want to keep towards the top
 module DTK; class Task
   module CreateClassMixin
     def create_from_assembly_instance(assembly,opts={})
@@ -9,7 +9,16 @@ module DTK; class Task
 
     def create_for_ad_hoc_action(assembly,component_idh,opts={})
       task = Create.create_for_ad_hoc_action(assembly,component_idh,opts)
-      NodeGroupProcessing.decompose_node_groups!(task)
+      ret = NodeGroupProcessing.decompose_node_groups!(task)
+
+      # raise error if any its nodes are not running
+      not_running_nodes = ret.get_associated_nodes().select{|n|n.get_and_update_operational_status!() != 'running'}
+      unless not_running_nodes.empty?
+        node_is = (not_running_nodes.size == 1 ? 'node is' : 'nodes are')
+        node_names = not_running_nodes.map{|n|n.display_name}.join(',')
+        raise ErrorUsage.new("Cannot execute the action because the following #{node_is} not running: #{node_names}")
+      end
+      ret
     end
   end
 

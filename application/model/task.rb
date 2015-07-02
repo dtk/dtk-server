@@ -408,7 +408,7 @@ module DTK
     end
 
     # saves hirerachical structure to db and returns task with top level and subtask ids filled out
-    def save_and_and_add_ids()
+    def save_and_add_ids()
       save!()
       # TODO: this is simple but expensive way to get all teh embedded task ids filled out
       # can replace with targeted method that does just this

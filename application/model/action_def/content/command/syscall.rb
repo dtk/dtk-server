@@ -15,20 +15,20 @@ module DTK; class ActionDef; class Content
         @if_condition       = additional_options[:if]
         @unless_condition   = additional_options[:unless]
         @timeout            = additional_options[:timeout]
-        @needs_template_substitution = !!@template_processor.needs_template_substitution?(command_line)
+        @needs_template_substitution = ret_needs_template_substitution?()
       end
 
       def self.parse?(serialized_command)
         if serialized_command.is_a?(String) && serialized_command =~ Constant::Command::RunRegexp
           command_line = $1
           new(serialized_command, command_line)
-        elsif serialized_command.is_a?(Hash) && serialized_command.key?(:RUN)
+        elsif command_line = serialized_command.is_a?(Hash) && serialized_command[:RUN]
           additional_options = {
-            :if => serialized_command[:if],
-            :unless => serialized_command[:unless],
+            :if      => serialized_command[:if],
+            :unless  => serialized_command[:unless],
             :timeout => serialized_command[:timeout]
           }
-          new(serialized_command, serialized_command[:command], additional_options)
+          new(serialized_command, command_line, additional_options)
         end
       end
 
@@ -42,6 +42,11 @@ module DTK; class ActionDef; class Content
 
       def type
         'syscall'
+      end
+
+     private
+      def ret_needs_template_substitution?()
+        !![@command_line,@if_condition,@unless_condition].find{|s|@template_processor.needs_template_substitution?(s)}
       end
     end
   end

@@ -105,26 +105,20 @@ module DTK
         end
         if types.include?(:locked_branch_shas) 
           # requires add_matching_module_branches!(ret)
-          add_locked_branch_shas!(ret)
+          add_locked_branch_shas?(ret)
         end
 
         ret
       end
 
-      def self.add_locked_branch_shas!(locked_module_refs)
+      def self.add_locked_branch_shas?(locked_module_refs)
         locked_module_refs.each_pair do |module_name,module_ref_lock|
-          found = false
           if el = module_ref_lock_element(module_ref_lock)
             if mb = el.module_branch
               if sha = mb[:current_sha]
                 module_ref_lock.locked_branch_sha = sha
-                found = true
               end
             end
-          end
-
-          unless found 
-            Log.error_pp(["Unexpected that cannot find module_branch[:current_sha] for",module_name,module_ref_lock]) 
           end
         end
         locked_module_refs

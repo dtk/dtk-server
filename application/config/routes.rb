@@ -28,6 +28,9 @@ R8::ReactorRoute.draw do
   post  'assembly/get_action_results' => 'assembly#get_action_results'
   post  'assembly/find_violations' => 'assembly#find_violations'
   post  'assembly/create_task' => 'assembly#create_task'
+  post  'assembly/ad_hoc_action_list' => 'assembly#ad_hoc_action_list'
+  post  'assembly/ad_hoc_action_execute' => 'assembly#ad_hoc_action_execute'
+
   post  'assembly/create_smoketests_task' => 'assembly#create_smoketests_task'
   post  'assembly/add_ad_hoc_attribute_links' => 'assembly#add_ad_hoc_attribute_links'
   post  'assembly/delete_service_link' => 'assembly#delete_service_link'
@@ -35,6 +38,7 @@ R8::ReactorRoute.draw do
   post  'assembly/list_service_links' => 'assembly#list_service_links'
   post  'assembly/list_remote' => 'assembly#list_remote'
   post  'assembly/list_connections' => 'assembly#list_connections'
+  post  'assembly/task_action_list' => 'assembly#task_action_list'
   post  'assembly/list_with_workspace' => 'assembly#list_with_workspace'
   post  'assembly/info' => 'assembly#info'
   post  'assembly/delete' => 'assembly#delete'

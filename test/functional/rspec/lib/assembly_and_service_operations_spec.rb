@@ -271,7 +271,7 @@ shared_context "Get task action details" do |dtk_common, action_id, expected_out
     correct_task_action_outputs = false
     task_action_outputs = dtk_common.get_task_action_output(dtk_common.service_id, action_id)
     expected_output.each_with_index do |output, idx|
-      if ((task_action_outputs[idx].include? "RUN: #{output[:command]}") && ((task_action_outputs[idx].include? "STATUS: #{output[:status]}") || (output[:status].nil?)))
+      if (((task_action_outputs[idx].include? "RUN: #{output[:command]}") || (task_action_outputs[idx].include? "ADD: #{output[:command]}")) && ((task_action_outputs[idx].include? "STATUS: #{output[:status]}") || (output[:status].nil?)))
         puts "Returned expected task action details!"
         if ((output[:stderr].nil?) && (!task_action_outputs[idx].include? "STDERR"))
           correct_task_action_outputs = true

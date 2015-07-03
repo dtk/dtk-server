@@ -29,7 +29,7 @@ expected_output_2 = {
 }
 
 expected_output_3_1 = {
-	:command => "create /tmp/test.txt with provided content",
+	:command => "/tmp/test.txt with provided content",
 	:status => 0,
 	:stderr => nil
 }
@@ -47,7 +47,7 @@ expected_output_3_3 = {
 }
 
 expected_output_4_1 = {
-	:command => "create /tmp/test.txt with provided content",
+	:command => "/tmp/test.txt with provided content",
 	:status => 0,
 	:stderr => nil,
 }
@@ -59,7 +59,7 @@ expected_output_4_2 = {
 }
 
 expected_output_5 = {
-	:command => "create /tmp/test.txt with provided content",
+	:command => "/tmp/test.txt with provided content",
 	:status => nil,
 	:stderr => "Permissions '0888' are not valid",
 }

@@ -1,5 +1,0 @@
-
-
-<li id="{%=leaf_item[:node_id]%}" rel="{%=leaf_item[:type]%}" class="{%=leaf_item[:class]%}">
-	<a id="leaf-body-{%=leaf_item[:node_id]%}" href="#" class="leaf-body" type="{%=leaf_item[:basic_type]%}"><span id="leaf-label-{%=leaf_item[:id]%}">{%=leaf_item[:name]%}</span></a>
-</li>

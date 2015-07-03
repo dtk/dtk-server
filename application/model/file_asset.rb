@@ -1,3 +1,4 @@
+# TODO: Marked for removal [Haris]
 module DTK
   class FileAsset < Model
     # model apis

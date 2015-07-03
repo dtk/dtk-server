@@ -23,13 +23,13 @@ module DTK; class BaseModule
       def import_from_puppet_forge(project,puppet_forge_local_copy,opts={})
         PuppetForge.new(project,puppet_forge_local_copy,opts).import_module_and_missing_dependencies()
       end
-    end      
-      
+    end
+
     module Mixin
       def import_from_git(commit_sha,repo_idh,version,opts={})
         Import.new(self,version).import_from_git(commit_sha,repo_idh,opts)
       end
-      
+
       def import_from_file(commit_sha,repo_idh,version,opts={})
         Import.new(self,version).import_from_file(commit_sha,repo_idh,opts)
       end
@@ -66,15 +66,6 @@ module DTK; class BaseModule
       end
     end
     ####### end: mixin public methods #########
-
-    # TODO: for testing
-    def test_generate_dsl()
-      module_branch = get_module_branch_matching_version()
-      config_agent_type = :puppet
-      impl_obj = module_branch.get_implementation()
-      ScaffoldImplementation.create_dsl(module_name(),config_agent_type,impl_obj)
-    end
-    ### end: for testing
 
     def install__process_dsl(repo,module_branch,local,opts={})
       response = create_needed_objects_and_dsl?(repo,local,opts)
@@ -131,7 +122,7 @@ module DTK; class BaseModule
       # TODO: see if can simplify and make this an 'else' to opts[:update_from_includes above
       unless opts[:update_from_includes]
         module_branch.set_dsl_parsed!(true) if !opts[:dsl_parsed_false]
-        return ret 
+        return ret
       end
 
       no_errors = external_deps.nil? || !external_deps.any_errors?()

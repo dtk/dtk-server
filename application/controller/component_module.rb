@@ -5,13 +5,6 @@ module DTK
     helper :module_helper
     helper :remotes_helper
 
-    def rest__test_generate_dsl()
-      component_module = create_obj(:component_module_id)
-      dsl_created_info = component_module.test_generate_dsl()
-      STDOUT << dsl_created_info[:content] << "\n"
-      rest_ok_response
-    end
-
     #### create and delete actions ###
     def rest__create()
       # setup needed data
@@ -295,33 +288,6 @@ module DTK
     end
 
     #### end: actions to interact with remote repo ###
-
-    #### actions to manage workspace
-
-    def rest__create_new_version()
-      component_module = create_obj(:component_module_id)
-      version = ret_version()
-
-      component_module.create_new_version(version)
-      rest_ok_response
-    end
-
-    def rest__create_new_dsl_version()
-      component_module = create_obj(:component_module_id)
-      dsl_version = ret_non_null_request_params(:dsl_version).to_i
-      module_version = ret_version()
-      format = :json
-      component_module.create_new_dsl_version(dsl_version,format,module_version)
-      rest_ok_response
-    end
-
-    #### end: actions to manage workspace and promote changes from workspace to library ###
-
-    def rest__push_to_mirror()
-      component_module = create_obj(:component_module_id)
-      mirror_host = ret_non_null_request_params(:mirror_host)
-      component_module.push_to_mirror(mirror_host)
-    end
 
     def rest__info_git_remote()
       component_module = create_obj(:component_module_id)

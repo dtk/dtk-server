@@ -1,6 +1,7 @@
 #TODO: clean this file up; much cut and paste. moving methods we want to keep towards the top
 module DTK; class Task
   module CreateClassMixin
+
     def create_from_assembly_instance(assembly,opts={})
       task = Create.create_from_assembly_instance(assembly,opts)
       #alters task if needed to decompose node groups into nodes
@@ -23,6 +24,7 @@ module DTK; class Task
   end
 
   class Create
+
     def self.create_for_ad_hoc_action(assembly,component,opts={})
       ad_hoc_action = Template::Action::AdHoc.new(assembly,component,opts)
       task_action_name = ad_hoc_action.task_action_name()
@@ -38,7 +40,7 @@ module DTK; class Task
       component_type = opts[:component_type]||:service
       target_idh     = target_idh_from_assembly(assembly)
       task_mh        = target_idh.create_childMH(:task)
-      
+
       ret = create_top_level_task(task_mh,assembly,Aux.hash_subset(opts,[:commit_msg,:task_action]))
       assembly_nodes = assembly.get_leaf_nodes(:cols => [:id,:display_name,:type,:external_ref,:admin_op_status])
 
@@ -101,7 +103,7 @@ module DTK; class Task
     def self.create_top_level_task(task_mh,assembly,opts={})
       task_info_hash = {
         :assembly_id    => assembly.id,
-        :display_name   => opts[:task_action] || "assembly_converge", 
+        :display_name   => opts[:task_action] || "assembly_converge",
         :temporal_order => "sequential",
       }
       if commit_msg = opts[:commit_msg]
@@ -132,15 +134,15 @@ module DTK; class Task
         action_class.add_attributes!(attr_mh,all_actions)
         ret
       end
-      
+
      private
       def self.concurrent_subtask(action_class)
         {
-          :display_name => action_class.stage_display_name(), 
+          :display_name => action_class.stage_display_name(),
           :temporal_order => "concurrent"
         }
       end
-      
+
       def self.subtask_hash(action_class,executable_action)
         {
           :display_name => action_class.task_display_name(),
@@ -150,13 +152,13 @@ module DTK; class Task
     end
   end
 
-  #TODO: move from below when decide whether needed; looking to generalize above so can subsume below 
+  #TODO: move from below when decide whether needed; looking to generalize above so can subsume below
   module CreateClassMixin
     def task_when_nodes_ready_from_assembly(assembly, component_type, opts)
       assembly_idh = assembly.id_handle()
       target_idh = target_idh_from_assembly(assembly)
       task_mh = target_idh.create_childMH(:task)
-      
+
       main_task = create_new_task(task_mh,:assembly_id => assembly_idh.get_id(),:display_name => "power_on_nodes", :temporal_order => "concurrent",:commit_message => nil)
       opts.merge!(:main_task => main_task)
 
@@ -189,7 +191,7 @@ module DTK; class Task
         ret.add_subtask(config_nodes_task)
       else
         if sub_task = create_nodes_task||config_nodes_task
-          ret.add_subtask(create_nodes_task||config_nodes_task) 
+          ret.add_subtask(create_nodes_task||config_nodes_task)
         else
           ret = nil
         end
@@ -217,7 +219,7 @@ module DTK; class Task
         ret.add_subtask(config_nodes_task)
       else
         if sub_task = create_nodes_task||config_nodes_task
-          ret.add_subtask(create_nodes_task||config_nodes_task) 
+          ret.add_subtask(create_nodes_task||config_nodes_task)
         else
           ret = nil
         end
@@ -270,57 +272,8 @@ module DTK; class Task
       end
     end
 
-    def create_install_agents_task(target, nodes,opts={})
-      stub_create_install_agents_task(target,nodes,opts)
-    end
+  private
 
-    def stub_create_install_agents_task(target, nodes, opts={})
-      target_idh = target.id_handle()
-      task_mh = target_idh.create_childMH(:task)
-      # executable_action = {:node=>
-      #   {
-      #     :id=>2147626569,
-      #     :display_name=>"imported_node_1",
-      #     :group_id=>2147483732,
-      #     :datacenter => target,
-      #     :external_ref=>{
-      #       "type"=>"physical",
-      #       "routable_host_address"=>"ec2-54-227-229-14.compute-1.amazonaws.com",
-      #       "ssh_credentials"=>{
-      #         "ssh_user"=>"ubuntu",
-      #         "ssh_password"=>"1ubuntu",
-      #         "ssh_rsa_private_key"=>"PRIVATE_KEY",
-      #         "sudo_password"=>"PASSWD"
-      #       }
-      #     }
-      #   }#,
-      #   # :state_change_types=>["install_agent"]
-      # }
-
-      main = create_new_task(task_mh, :executable_action_type => "InstallAgent", :target_id => target_idh.get_id(), :display_name => "install_agents", :temporal_order => "concurrent")
-      num_nodes = (opts[:debug_num_nodes]||3).to_i
-
-      subtasks = []
-      (1..num_nodes).each do |num|
-        if node = nodes.pop
-          ret = create_new_task(task_mh, :executable_action_type => "InstallAgent", :target_id => target_idh.get_id(), :display_name => "install_agent", :temporal_order => "sequential")
-
-          executable_action = Action::PhysicalNode.create_from_physical_nodes(target, node)
-          subtask = create_new_task(task_mh, :executable_action_type => "InstallAgent", :executable_action => executable_action, :display_name => "install_agent_#{num.to_s}")#, :temporal_order => "sequential")
-          ret.add_subtask(subtask)
-
-          executable_action = Action::PhysicalNode.create_smoketest_from_physical_nodes(target, node)
-          subtask = create_new_task(task_mh, :executable_action_type => "ExecuteSmoketest", :executable_action => executable_action, :display_name => "execute_smoketest_#{num.to_s}")#, :temporal_order => "sequential")
-          ret.add_subtask(subtask)
-
-          main.add_subtask(ret)
-        end
-      end
-
-      main
-    end
-
-   private
     def target_idh_from_assembly(assembly)
       Create.target_idh_from_assembly(assembly)
     end
@@ -333,7 +286,7 @@ module DTK; class Task
       if state_change_list.size == 1
         executable_action = Action::CreateNode.create_from_state_change(state_change_list.first.first)
         all_actions << executable_action
-        ret = create_new_task(task_mh,:executable_action => executable_action) 
+        ret = create_new_task(task_mh,:executable_action => executable_action)
       else
         ret = create_new_task(task_mh,:display_name => "create_node_stage", :temporal_order => "concurrent")
         state_change_list.each do |sc|
@@ -428,7 +381,7 @@ module DTK; class Task
       if state_change_list.size == 1
         executable_action = Action::PowerOnNode.create_from_state_change(state_change_list.first.first)
         all_actions << executable_action
-        ret = create_new_task(task_mh,:executable_action => executable_action) 
+        ret = create_new_task(task_mh,:executable_action => executable_action)
       else
         ret = create_new_task(task_mh,:display_name => "create_node_stage", :temporal_order => "concurrent")
         state_change_list.each do |sc|
@@ -442,7 +395,7 @@ module DTK; class Task
       ret
     end
 
-    # TODO: think asseumption is that each elemnt corresponds to changes to same node; if this is case may change input datastructure 
+    # TODO: think asseumption is that each elemnt corresponds to changes to same node; if this is case may change input datastructure
     # so node is not repeated for each element corresponding to same node
     def config_nodes_task(task_mh,state_change_list,assembly_idh=nil, stage_index=nil)
       return nil unless state_change_list and not state_change_list.empty?
@@ -479,7 +432,7 @@ module DTK; class Task
     def get_executable_action_from_state_change(state_change, assembly_idh, stage_index)
       executable_action = nil
       error_msg = nil
-      begin 
+      begin
         executable_action = Action::ConfigNode.create_from_state_change(state_change, assembly_idh)
         executable_action.set_inter_node_stage!(stage_index)
       rescue TSort::Cyclic => e
@@ -511,7 +464,7 @@ module DTK; class Task
       end
       indexed_ret.inject({}){|ret,o|ret.merge(o[0] => o[1].values)}
     end
-    
+
     def map_state_change_to_task_action(state_change)
       @mapping_sc_to_task_action ||= {
         "create_node" => Action::CreateNode,

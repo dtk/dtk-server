@@ -2,13 +2,6 @@ module DTK
   class Node_moduleController < AuthController
     helper :module_helper
 
-    def rest__test_generate_dsl()
-      node_module = create_obj(:node_module_id)
-      dsl_created_info = node_module.test_generate_dsl()
-      STDOUT << dsl_created_info[:content] << "\n"
-      rest_ok_response
-    end
-
     #### create and delete actions ###
     def rest__create()
       module_name = ret_non_null_request_params(:module_name)
@@ -190,33 +183,6 @@ module DTK
     end
 
     #### end: actions to interact with remote repo ###
-
-    #### actions to manage workspace
-
-    def rest__create_new_version()
-      node_module = create_obj(:node_module_id)
-      version = ret_version()
-
-      node_module.create_new_version(version)
-      rest_ok_response
-    end
-
-    def rest__create_new_dsl_version()
-      node_module = create_obj(:node_module_id)
-      dsl_version = ret_non_null_request_params(:dsl_version).to_i
-      module_version = ret_version()
-      format = :json
-      node_module.create_new_dsl_version(dsl_version,format,module_version)
-      rest_ok_response
-    end
-
-    #### end: actions to manage workspace and promote changes from workspace to library ###
-
-    def rest__push_to_mirror()
-      node_module = create_obj(:node_module_id)
-      mirror_host = ret_non_null_request_params(:mirror_host)
-      node_module.push_to_mirror(mirror_host)
-    end
 
   end
 end

@@ -29,7 +29,7 @@ module DTK; class Task
 
         AllApplicable = 'All_applicable'
         Variations::AllApplicable = ['All_applicable','All','All_Applicable','AllApplicable']
-        
+
         Node = 'node'
         Variations::Node = ['node','node_group']
         NodeGroup = 'node_group'
@@ -41,7 +41,7 @@ module DTK; class Task
       end
 
 
-      # TODO: if support ruby 1.8.7 need to make this fn of a hash class that perserves order 
+      # TODO: if support ruby 1.8.7 need to make this fn of a hash class that perserves order
       class OrderedHash < ::Hash
         def initialize(initial_val=nil)
           super()
@@ -91,7 +91,7 @@ module DTK; class Task
         }
         get_objs(assembly.model_handle(:task_template),sp_hash)
       end
-      
+
       def get_task_template(assembly,task_action=nil,opts={})
         sp_hash = {
           :cols => opts[:cols]||common_columns(),
@@ -109,13 +109,6 @@ module DTK; class Task
         end
         ret
       end
-    end
-
-    def convert_to_external_task_action_name?()
-      if get_field?(:task_action) == self.class.default_task_action()
-        self[:task_action] = self.class.default_task_action_external_name()
-      end
-      self
     end
 
     def serialized_content_hash_form(opts={})
@@ -155,7 +148,7 @@ module DTK; class Task
       else
         task_action ||= default_task_action()
         ref,create_hash = ref_and_create_hash(serialized_content,task_action)
-        create_hash.merge!(:ref => ref,:component_component_id => assembly_idh.get_id()) 
+        create_hash.merge!(:ref => ref,:component_component_id => assembly_idh.get_id())
         task_template_mh = assembly_idh.create_childMH(:task_template)
         create_from_row(task_template_mh,create_hash,:convert=>true)
       end

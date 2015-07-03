@@ -37,11 +37,6 @@ module DTK; class AssemblyModule
       end
     end
 
-
-    def self.create_component_dependency?(type,assembly,cmp_template,antecedent_cmp_template,opts={})
-      AdHocLink.new(assembly).create_dependency?(type,cmp_template,antecedent_cmp_template,opts)
-    end
-
     def self.promote_module_updates(assembly,component_module,opts={})
       new(assembly).promote_module_updates(component_module,opts)
     end
@@ -191,7 +186,7 @@ need to do a refresh on workspace branch sha in case this was updated in another
       version_field = module_branch.get_field?(:version)
       match_el_array = component_types.map do |ct|
         Component::Template::MatchElement.new(
-          :component_type => ct, 
+          :component_type => ct,
           :version_field => version_field
         )
       end

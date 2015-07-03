@@ -4,8 +4,9 @@ require File.expand_path('common_mixin.r8', File.dirname(__FILE__))
 #
 #
 #
+# TODO: Marked for removal [Haris]
 module R8Tpl
-  class TemplateR8 
+  class TemplateR8
     include CommonMixin
 
     # TODO: will refactor to this fn
@@ -113,7 +114,7 @@ module R8Tpl
       @ctrl_close_stack = []
 
       @element_count = 0
- 
+
       @template_vars = {}
 
       @template_dir = '.'
@@ -628,7 +629,7 @@ p 'Going to parse variables with ctr_vars:  '+@ctrl_vars.inspect
 #   used as flag then Template called within meta view cache generation where its not possible to have a metaview
   def set_view(path_type=nil)
     # TODO treating @model_name when it is nil or empty
-    # check paths in order 
+    # check paths in order
     ordered_paths = (path_type ? [path_type] : [:base, :meta])
     ordered_paths.each do |path_type|
       path = ret_existing_view_path(path_type)
@@ -718,7 +719,7 @@ class TplVarParser
 
   def advCur(num=1)
     while num > 0 do
-      if @cur < @length then 
+      if @cur < @length then
         @cur +=1
       else num = 0 end
       num -=1
@@ -772,10 +773,10 @@ p '   ctrlVarName:'+ctrl_var[:ctrlVarName]
 p '   js var header:'+@js_var_header
 p '   iteratorVar:'+ctrl_var[:iteratorVar]
 =end
-        if ctrl_var[:ctrlVarName] == @var_name then 
-#          (return @js_var_header + "['" + ctrl_var[:iteratorVar] + "']["+@var_name+"]") : 
-          (@is_hash) ? 
-          (return ctrl_var[:iteratorVarParsed] + "["+@var_name+"]") : 
+        if ctrl_var[:ctrlVarName] == @var_name then
+#          (return @js_var_header + "['" + ctrl_var[:iteratorVar] + "']["+@var_name+"]") :
+          (@is_hash) ?
+          (return ctrl_var[:iteratorVarParsed] + "["+@var_name+"]") :
           (return @var_name)
         end
       end
@@ -827,7 +828,7 @@ p '   iteratorVar:'+ctrl_var[:iteratorVar]
         :txt => '',
         :type => 'literal'
       }
-  
+
       while @char != ']' do
         case @char
           when ':','"',"'" then
@@ -888,7 +889,7 @@ class IfElsExpressionParser
 
   def advCur(num=1)
     while num > 0 do
-      if @cur < @length then 
+      if @cur < @length then
         @cur +=1
       else num = 0 end
       num -=1
@@ -1015,10 +1016,10 @@ class IfElsExpressionParser
 end
 
   class TemplateR8ForAction < TemplateR8
-    def initialize(js_tpl_name,css_require,js_require) 
+    def initialize(js_tpl_name,css_require,js_require)
       super(nil)
-      @js_tpl_callback = js_tpl_name 
-      @js_file_name = js_tpl_name+".js" 
+      @js_tpl_callback = js_tpl_name
+      @js_file_name = js_tpl_name+".js"
       # TBD: canned for testing
        @script = [
           {
@@ -1034,7 +1035,7 @@ end
        @scriptIncludes = js_require || []
     end
     def ret_result_array()
-      
+
       content = script_includes = nil
       if @js_templating_on
        content = []
@@ -1056,6 +1057,6 @@ end
        :data => @data,
        :scriptIncludes => script_includes
       }
-    end   
-  end 
+    end
+  end
 end

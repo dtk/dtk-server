@@ -14,3 +14,4 @@ application/log/
 *.DS_Store
 /.bundle
 /vendor/bundle
+list_of_files.txt

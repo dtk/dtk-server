@@ -69,13 +69,10 @@ module DTK; class AssemblyModule
       end
     end
 
-    def self.create_component_dependency?(type,assembly,cmp_template,antecedent_cmp_template,opts={})
-      AdHocLink.new(assembly).create_dependency?(type,cmp_template,antecedent_cmp_template,opts)
-    end
-
     def self.promote_module_updates(assembly,component_module,opts={})
       new(assembly).promote_module_updates(component_module,opts)
     end
+
     def promote_module_updates(component_module,opts={})
       am_version = assembly_module_version()
       unless branch = component_module.get_workspace_module_branch(am_version)

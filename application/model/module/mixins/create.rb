@@ -99,6 +99,7 @@ module DTK; module ModuleMixins
 
   module Create::Instance
     # returns new module branch
+    # TODO: Marked for removal [Haris]
     def create_new_version(base_version,new_version,opts={})
       unless aug_base_branch = get_augmented_workspace_branch(Opts.new(:filter => {:version => base_version}))
         raise ErrorUsage.new("There is no module (#{pp_module_name()}) in the workspace")

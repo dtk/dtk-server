@@ -1,6 +1,0 @@
-	<div id="content-wrapper" class="content-wrapper">
-		<div id="nodes-content" class="cat-content">{%=list_tpl_content%}</div>
-		<div id="components-content" class="cat-content" style="display: none;"></div>
-		<div id="environments-content" class="cat-content" style="display: none;"></div>
-		<div id="links-content" class="cat-content" style="display: none;"></div>
-	</div>

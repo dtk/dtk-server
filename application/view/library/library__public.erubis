@@ -1,6 +1,0 @@
-<h1>#{@title}</h1>
-<ul>
-  <% @results[:component].each do |ref,cmp| %>
-     <li><%= html_render_component_href(ref,cmp) %></li>
-  <% end %>
-</ul>

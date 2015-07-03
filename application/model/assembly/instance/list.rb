@@ -91,13 +91,6 @@ module DTK; class  Assembly
         end
       end
 
-      def list_task_actions()
-        get_task_actions().map do |r|
-          r.convert_to_external_task_action_name?()
-        end
-      end
-
-
       def list_attributes(opts=Opts.new)
         if opts[:settings_form]
           filter_proc = opts[:filter_proc]
@@ -200,12 +193,6 @@ module DTK; class  Assembly
 
       def display_name_print_form(opts={})
         pretty_print_name()
-      end
-
-      def list_smoketests()
-        Log.error("TODO: needs to be tested")
-        nodes_and_cmps = get_info__flat_list(:detail_level => "components")
-        nodes_and_cmps.map{|r|r[:nested_component]}.select{|cmp|cmp[:basic_type] == "smoketest"}.map{|cmp|Aux::hash_subset(cmp,[:id,:display_name,:description])}
       end
 
       def print_includes()

@@ -99,11 +99,6 @@ module DTK
       ret
     end
 
-    def get_events()
-      sp_hash = {:cols => [:created_at, :type, :content]}
-      get_children_objs(:task_event,sp_hash).sort{|a,b| a[:created_at] <=> b[:created_at]}
-    end
-
     def get_logs()
       ret_logs = Hash.new
       sp_hash = {:cols => [:task_id, :display_name, :content, :parent_task]}

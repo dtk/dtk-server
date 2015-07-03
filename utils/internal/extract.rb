@@ -1,17 +1,8 @@
+# TODO: Marked for removal [Haris]
 module XYZ
   class Extract
-    class << self 
-      def single_module_into_directory(compressed_file,repo_name,base_dir,opts)
-        raise Error.new("directory (#{base_dir}) does not exist") unless File.directory?(base_dir)
-        # TODO: rmove or make work with windows  raise Error.new("directory (#{base_dir}) is not fully qualified") unless fully_qualified_dir_path?(base_dir)
-        target_dir = "#{base_dir}/#{repo_name}"
-        if File.exists?(target_dir)
-          raise Error.new("Non-empty directory for repo (#{target_dir}) exists already") unless empty_dir?(target_dir)
-        else
-          Dir.mkdir(target_dir)
-        end
-        into_directory(compressed_file,target_dir,opts)
-      end
+    class << self
+
       def into_directory(compressed_file,target_dir,opts={})
         raise Error.new("directory (#{target_dir}) does not exist") unless File.directory?(target_dir)
         # TODO: rmove or make work with windows raise Error.new("directory (#{target_dir}) is not fully qualified") unless fully_qualified_dir_path?(target_dir)
@@ -23,12 +14,12 @@ module XYZ
         Dir.foreach(path){|f|return nil  unless f =~ /^\./}
         true
       end
-      # TODO: rmove or make work with windows 
+      # TODO: rmove or make work with windows
       def fully_qualified_dir_path?(path)
         path[0,1] == "/"
       end
       def load_and_return_adapter_class(compressed_file)
-        adapter_name = 
+        adapter_name =
           if compressed_file =~ /\.tar\.gz$/ then :tar_gz
           else
             raise Error.new("not treating compressed file (#{compressed_file})")

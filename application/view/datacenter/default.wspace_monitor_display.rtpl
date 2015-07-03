@@ -1,5 +1,0 @@
-
-	<div id="monitor-{%=monitor[:id]%}" data-status="pending_setup" data-id="{%=monitor[:id]%}" data-model="node" class="monitor small dg-component left">
-		<div id="monitor-{%=monitor[:id]%}-docked" class="item-display" style="">
-		</div>
-	</div>

@@ -1,3 +1,4 @@
+# TODO: Marked for removal [Haris]
 module XYZ
   module AttributeComplexType
     def self.has_required_fields_given_semantic_type?(obj,semantic_type)
@@ -11,7 +12,7 @@ module XYZ
       attr_list.each do |attr|
         value = attr[:attribute_value]
         if (value.nil? and not opts[:flatten_nil_value]) or not attr[:data_type] == "json"
-          ret << attr 
+          ret << attr
         else
           nested_type_pat = SemanticTypeSchema.create_from_semantic_type(attr[:semantic_type])
           flatten_attribute!(ret,value,attr,nested_type_pat,opts.merge(:top_level=> true))
@@ -40,7 +41,7 @@ module XYZ
 
     def self.item_path_token_array(attr)
       return nil unless attr[:item_path]
-      attr[:item_path].map{|indx| indx.kind_of?(Numeric) ? "#{Delim::NumericIndex}#{indx.to_s}" : indx.to_s} 
+      attr[:item_path].map{|indx| indx.kind_of?(Numeric) ? "#{Delim::NumericIndex}#{indx.to_s}" : indx.to_s}
     end
     def self.container_id(type,id)
       return nil if id.nil?
@@ -56,7 +57,7 @@ module XYZ
         ##TODO: see if parent_id is needed
         ret[id].merge!(DB.parent_field(:component,:attribute) => parent_id) if parent_id
 
-        if path.empty? 
+        if path.empty?
           ret[id][:value_asserted] = attr_hash
         else
           change_paths = ret[id][:change_paths] ||= Array.new
@@ -72,7 +73,7 @@ module XYZ
       if path =~ NumericIndexRegexp
         next_index, rest_path = [$1.to_i,$2]
         change_path << next_index
-        ret[index] ||= ArrayObject.new 
+        ret[index] ||= ArrayObject.new
         # make sure that  ret[index] has enough rows
         while ret[index].size <= next_index
           ret[index] << nil
@@ -138,7 +139,7 @@ module XYZ
       pattern.each do |k,child_pat|
         el = value_obj[k.to_sym]
         ret = has_required_fields?(el,child_pat)
-        return ret unless ret.kind_of?(TrueClass) 
+        return ret unless ret.kind_of?(TrueClass)
       end
       true
     end
@@ -146,11 +147,11 @@ module XYZ
     # TODO: add "index that will be used to tie unravvled attribute back to the base object and make sure
     # base object in the attribute
     def self.flatten_attribute!(ret,value_obj,attr,pattern,opts={})
-      if pattern.nil? 
+      if pattern.nil?
         flatten_attribute_when_nil_pattern!(ret,value_obj,attr,opts)
       elsif pattern.is_atomic?() and not (value_obj.kind_of?(Array) or value_obj.kind_of?(Hash))
         flatten_attribute_when_atomic_pattern!(ret,value_obj,attr,pattern,opts)
-      elsif value_obj.kind_of?(Array) or (pattern.is_array?() and value_obj.nil? and opts[:flatten_nil_value]) 
+      elsif value_obj.kind_of?(Array) or (pattern.is_array?() and value_obj.nil? and opts[:flatten_nil_value])
         flatten_attribute_when_array!(ret,value_obj,attr,pattern,opts.merge(:top_level=>false))
       elsif value_obj.kind_of?(Hash) or (pattern.is_hash?() and value_obj.nil? and opts[:flatten_nil_value])
         flatten_attribute_when_hash!(ret,value_obj,attr,pattern,opts.merge(:top_level=>false))
@@ -169,7 +170,7 @@ module XYZ
         ret << attr
       else
         ret << attr.merge(:attribute_value => value_obj,:data_type => "json")
-      end    
+      end
       nil
     end
 
@@ -180,7 +181,7 @@ module XYZ
         flatten_attr = attr.merge(:attribute_value => value_obj,:data_type => pattern[:type].to_s)
         [:required,:dynamic,:hidden].each{|k|flatten_attr.merge!(k => pattern[k]) unless pattern[k].nil?}
         ret << flatten_attr
-      end    
+      end
       nil
     end
 
@@ -190,10 +191,10 @@ module XYZ
       if pattern.nil?
         # TODO: this really not a mismatch, but code still handles correctly
         return flatten_attribute_when_mismatch!(ret,value_obj,attr,pattern,opts) if (value_obj||[]).empty?
-        child_list = value_obj        
+        child_list = value_obj
       elsif not pattern[:array]
-        return flatten_attribute_when_mismatch!(ret,value_obj,attr,pattern,opts) 
-      elsif (value_obj||[]).empty? and not opts[:flatten_nil_value] 
+        return flatten_attribute_when_mismatch!(ret,value_obj,attr,pattern,opts)
+      elsif (value_obj||[]).empty? and not opts[:flatten_nil_value]
         ret << attr.merge(:attribute_value => value_obj)
         return nil
       else
@@ -203,7 +204,7 @@ module XYZ
       end
 
       child_list.each_with_index do |child_val_obj,i|
-        child_attr = 
+        child_attr =
           if attr[:item_path]
             attr.merge(:display_name => "#{attr[:display_name]}#{display_name_num_delim(i)}", :item_path => attr[:item_path] + [i])
           else
@@ -224,11 +225,11 @@ module XYZ
       elsif pattern[:array] or ((value_obj||{}).empty? and not opts[:flatten_nil_value])
         return flatten_attribute_when_mismatch!(ret,value_obj,attr,pattern,opts)
       else
-        child_list = (value_obj||{}).empty? ? pattern.inject({}){|h,kv|h.merge(kv[0].to_sym => nil)} : value_obj 
+        child_list = (value_obj||{}).empty? ? pattern.inject({}){|h,kv|h.merge(kv[0].to_sym => nil)} : value_obj
       end
 
       child_list.each do |k,child_val_obj|
-        child_attr = 
+        child_attr =
           if attr[:item_path]
             attr.merge(:display_name => "#{attr[:display_name]}#{display_name_delim(k)}", :item_path => attr[:item_path] + [k.to_sym])
           else

@@ -1,3 +1,4 @@
+# TODO: Marked for removal [Haris] - Looks it is not being used and can be safely removed. But since it is peristed I would like to get second opnion from Rich.
 module XYZ
   class DataSource < Model
 #    set_relation_name(:data_source,:data_source)
@@ -19,7 +20,7 @@ module XYZ
         factory_id_handle = get_factory_id_handle(container_handle_id)
         id_handle = get_child_id_handle_from_qualified_ref(factory_id_handle,ref)
         raise Error.new("data source #{ref} exists already") if exists? id_handle
-        
+
         hash_with_defaults = fill_in_defaults(ref.to_sym,hash_content)
         create_from_hash(container_handle_id, {:data_source => {ref => hash_with_defaults}})
         container_handle_id
@@ -37,7 +38,7 @@ module XYZ
         end
         if hash_with_defaults[:data_source_object]
           hash_with_defaults[:data_source_object].each do |obj_type,child_hash_content|
-             hash_with_defaults[:data_source_object][obj_type.to_s] = 
+             hash_with_defaults[:data_source_object][obj_type.to_s] =
               DataSourceObject.fill_in_defaults(ds_name,obj_type.to_sym,child_hash_content)
           end
         end
@@ -54,7 +55,7 @@ module XYZ
     def discover_and_update()
       marked = Array.new
       hash_completeness_info = get_objects() do |source_obj|
-        normalize_and_update_db(@container_id_handle,source_obj,marked) 
+        normalize_and_update_db(@container_id_handle,source_obj,marked)
       end
       delete_unmarked(@container_id_handle,marked,hash_completeness_info)
     end
@@ -75,7 +76,7 @@ module XYZ
       load_ds_connector_class()
       load_ds_adapter_class()
       @ds_connector_instance = nil #gets set subsequently so sharing can be done accross instances
-    end   
+    end
     def obj_type()
       self[:obj_type].to_s
     end

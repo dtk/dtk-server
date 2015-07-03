@@ -44,7 +44,7 @@ module XYZ
         :postgres_db=>{},
         :mysql_db=>{},
         :oracle_db=>{},
-      }, 
+      },
 
       :user => {}
     }
@@ -55,11 +55,7 @@ module XYZ
         :database
       ]
     }
-    # TODO: stub implementation
-    # given link_def_type returns the basic type that can the endpoint
-    TypeHierarchyPossRemoteComponentTypes = {
-      :database => :database
-    }
+
   end
   class ComponentTypeHierarchy
     include TypeHierarchyDefMixin
@@ -70,23 +66,6 @@ module XYZ
       basic_type = component.update_object!(:basic_type)[:basic_type]
       return ret unless basic_type
       TypeHierarchyPossLinkDefs[basic_type.to_sym]||Array.new
-    end
-
-    # cmps_parent_idh can be a library or project
-    # returns an array (possibley empty of components
-    # TODO: stub; only uses one level; not hirerarchical structure
-    def self.possible_link_def_remote_components(link_def_type,cmps_parent_idh)
-      ret = Array.new
-      basic_type = TypeHierarchyPossRemoteComponentTypes[link_def_type.to_sym]
-      return ret unless basic_type
-      cmp_mh = cmps_parent_idh.create_childMH(:component) 
-      parent_col = cmp_mh.parent_id_field_name()
-      sp_hash = {
-        :cols => Component.common_columns(),
-        :filter => [:and, [:eq, parent_col, cmps_parent_idh.get_id()],
-                     [:eq, :basic_type, basic_type.to_s]]
-      }
-      Model.get_objs(cmp_mh,sp_hash)
     end
 
     def self.basic_type(specific_type)
@@ -123,7 +102,7 @@ module XYZ
     def self.keys_in_hierarchy(hier)
       hier.inject([]){|a,kv|a + [kv[0]] + keys_in_hierarchy(kv[1])}
     end
-    
+
     def self.find_hierarchy_under_key(key,hier=TypeHierarchy)
       return nil if hier.empty?
       return hier[key] if hier[key]

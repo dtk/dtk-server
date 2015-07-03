@@ -1,3 +1,4 @@
+# TODO: Marked for removal [Haris] - Probably needed but better check
 module DTK; class ModuleDSL
   class GenerateFromImpl
     r8_nested_require("generate_from_impl","dsl_object")
@@ -9,7 +10,7 @@ module DTK; class ModuleDSL
       new(integer_version)
     end
     SupportedIntegerVersions = [1,2,3,4]
-   
+
     def initialize(integer_version)
       @integer_version = integer_version
     end
@@ -42,7 +43,7 @@ module DTK; class ModuleDSL
       impl_idh = impl_obj.id_handle
       library_idh = impl_idh.createIDH(:model_name => :library,:id => impl_obj[:library_library_id])
       repo_obj = Model.get_obj(impl_idh.createMH(:repo),{:cols => [:id,:local_dir], :filter => [:eq, :id, impl_obj[:repo_id]]})
-                                       
+
       dsl_generator = create(integer_version)
       object_form = dsl_generator.reify(module_hash,module_name,config_agent_type)
       r8meta_hash = object_form.render_hash_form()
@@ -58,7 +59,7 @@ module DTK; class ModuleDSL
 
       impl_obj.add_contained_files_and_push_to_repo()
     end
-    
+
     def reify(hash,module_name,config_agent_type)
       context = {
         :integer_version => @integer_version,

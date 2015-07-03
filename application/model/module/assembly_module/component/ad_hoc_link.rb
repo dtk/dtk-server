@@ -1,9 +1,12 @@
+# TODO: Marked for removal [Haris]
 module DTK; class AssemblyModule
   class Component
     class AdHocLink < self
+
       def self.update(assembly,parsed_adhoc_link_info)
         new(assembly).update(parsed_adhoc_link_info)
       end
+
       def update(parsed_adhoc_link_info)
         parsed_adhoc_links = parsed_adhoc_link_info.links
         unless  parsed_adhoc_links.size == 1
@@ -29,29 +32,6 @@ module DTK; class AssemblyModule
         result
       end
 
-      def create_dependency?(type,cmp_template,antecedent_cmp_template,module_branch,opts={})
-        result = Hash.new
-        branch_cmp_template = get_branch_template(module_branch,cmp_template)
-
-        if opts[:update_dsl]
-          opts[:update_dsl] = {:module_branch => module_branch}
-        end
-        Model.Transaction do
-          result = dependency_class(type).create_dependency?(branch_cmp_template,antecedent_cmp_template,opts)
-        end
-        result
-      end
-
-     private
-      def dependency_class(type)
-        case type 
-          when :simple then DTK::Dependency::Simple 
-          when :link then DTK::Dependency::Link
-        else
-          raise Error.new("Illegal type")
-        end
-      end
-
     end
   end
-end;end
+end; end

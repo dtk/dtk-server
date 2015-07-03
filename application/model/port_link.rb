@@ -4,7 +4,7 @@ module DTK
       [:id,:group_id,:input_id,:output_id,:assembly_id,:temporal_order]
     end
 
-    def self.check_valid_id(model_handle,id,opts={}) 
+    def self.check_valid_id(model_handle,id,opts={})
       if opts.empty?()
         check_valid_id_default(model_handle,id)
       elsif Aux.has_just_these_keys?(opts,[:assembly_idh])
@@ -25,25 +25,15 @@ module DTK
       end
     end
 
-    def list_attribute_mappings()
-      filter = [:eq,:port_link_id,id()]
-      AttributeLink.get_augmented(model_handle(:attribute_link),filter).map do |al|
-        {
-          :input_attribute => al[:input].print_form(),
-          :output_attribute => al[:output].print_form()
-        }
-      end
-    end
-
     # create port link adn associated attribute links
-    # can clone if needed attributes on a service node group to its members 
+    # can clone if needed attributes on a service node group to its members
     def self.create_port_and_attr_links__clone_if_needed(target_idh,port_link_hash,opts={})
       unless link_def_context = get_link_def_context?(target_idh,port_link_hash)
         raise PortLinkError.new("Illegal link")
       end
       port_link_to_create = port_link_hash.merge(:temporal_order => link_def_context.temporal_order)
       port_link = nil
-      Transaction do 
+      Transaction do
         port_link = create_from_links_hash(target_idh,[port_link_to_create],opts).first
         AttributeLink.create_from_link_defs__clone_if_needed(target_idh,link_def_context,opts.merge(:port_link_idh => port_link.id_handle))
       end
@@ -55,14 +45,14 @@ module DTK
       # The reason to have create_attribute_links is to document callers from which we know no cloning will be needed
       create_attribute_links__clone_if_needed(parent_idh,opts)
     end
-    # can clone if needed attributes on a service node group to its members 
+    # can clone if needed attributes on a service node group to its members
     # this sets temporal order if have option :set_port_link_temporal_order
     def create_attribute_links__clone_if_needed(parent_idh,opts={})
       update_obj!(:input_id,:output_id)
       unless link_def_context = get_link_def_context?(parent_idh)
         raise PortLinkError.new("Illegal link")
       end
-      if opts[:set_port_link_temporal_order] 
+      if opts[:set_port_link_temporal_order]
         if temporal_order = link_def_context.temporal_order
           update(:temporal_order => temporal_order)
         end
@@ -133,7 +123,7 @@ module DTK
       components_coreside = (local_port_cmp_info[:node_node_id] == remote_port_cmp_info[:node_node_id])
       match = local_port_cmp_rows.find do |r|
         possible_link = r[:link_def_link]||{}
-        if possible_link[:remote_component_type] == remote_cmp_type 
+        if possible_link[:remote_component_type] == remote_cmp_type
           if components_coreside
             possible_link[:type] == "internal"
           else

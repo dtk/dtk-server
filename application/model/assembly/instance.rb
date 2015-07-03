@@ -25,17 +25,6 @@ module DTK; class  Assembly
       idh.create_object(:model_name => :assembly_instance)
     end
 
-    def rename(assembly_mh, name, new_name)
-      assembly_list = Assembly::Instance.list(assembly_mh)
-      raise ErrorUsage.new("You are not allowed to use keyword '#{new_name}' as #{pp_object_type()} name") if new_name.to_s.eql?("workspace")
-
-      assembly_list.each do |assembly|
-        raise ErrorUsage.new("#{pp_object_type().cap} with name '#{new_name}' exists already") if assembly[:display_name].to_s.eql?(new_name)
-      end
-
-      update(:display_name => new_name)
-    end
-
     def clear_tasks(opts={})
       opts_get_tasks = Hash.new
       unless opts[:include_executing_task]
@@ -162,7 +151,7 @@ module DTK; class  Assembly
     # :component_module
     # :namespace
     # opts can have
-    #  :idempotent 
+    #  :idempotent
     #  :donot_update_workflow
     def add_component(node_idh, aug_cmp_template, component_title, opts={})
       # if node_idh it means we call add component from node context
@@ -177,7 +166,7 @@ module DTK; class  Assembly
 
         unless node = Model.get_obj(model_handle(:node),sp_hash)
           if node_group = is_node_group_member?(node_idh)
-            raise ErrorUsage.new("Not implemented: adding a component to a node group member; a component can only be added to the node group (#{node_group[:display_name]}) itself") 
+            raise ErrorUsage.new("Not implemented: adding a component to a node group member; a component can only be added to the node group (#{node_group[:display_name]}) itself")
           else
             raise ErrorIdInvalid.new(node_idh.get_id(),:node)
           end
@@ -253,30 +242,6 @@ module DTK; class  Assembly
       new_assembly_part_obj = target.clone_into(assembly_template,override_attrs,clone_opts)
       self.class.delete_instance(new_assembly_part_obj.id_handle())
       id_handle()
-    end
-
-    def add_service_add_on(add_on_name, assembly_name=nil)
-      update_object!(:display_name)
-
-      unless aug_service_add_on = get_augmented_service_add_on(add_on_name)
-        raise ErrorUsage.new("Service add on (#{add_on_name}) is not a possible extension for assembly (#{self[:display_name]})")
-      end
-      sub_assembly_template = aug_service_add_on[:sub_assembly_template].copy_as_assembly_template()
-
-      override_attrs = {
-        :display_name => assembly_name||aug_service_add_on.new_sub_assembly_name(self,sub_assembly_template),
-        :assembly_id => id()
-      }
-      clone_opts = {
-        :ret_new_obj_with_cols => [:id,:type],
-        :service_add_on_info => {
-          :base_assembly => self,
-          :service_add_on => aug_service_add_on
-        }
-      }
-      target = get_target()
-      new_sub_assembly = target.clone_into(sub_assembly_template,override_attrs,clone_opts)
-      new_sub_assembly && new_sub_assembly.id_handle()
     end
 
     def create_or_update_template(service_module,template_name)

@@ -28,22 +28,15 @@ R8::ReactorRoute.draw do
   post  'assembly/get_action_results' => 'assembly#get_action_results'
   post  'assembly/find_violations' => 'assembly#find_violations'
   post  'assembly/create_task' => 'assembly#create_task'
-  post  'assembly/ad_hoc_action_list' => 'assembly#ad_hoc_action_list'
-  post  'assembly/ad_hoc_action_execute' => 'assembly#ad_hoc_action_execute'
-  post  'assembly/add__service_add_on' => 'assembly#add__service_add_on'
   post  'assembly/create_smoketests_task' => 'assembly#create_smoketests_task'
-  post  'assembly/list_attribute_mappings' => 'assembly#list_attribute_mappings'
   post  'assembly/add_ad_hoc_attribute_links' => 'assembly#add_ad_hoc_attribute_links'
   post  'assembly/delete_service_link' => 'assembly#delete_service_link'
   post  'assembly/add_service_link' => 'assembly#add_service_link'
   post  'assembly/list_service_links' => 'assembly#list_service_links'
   post  'assembly/list_remote' => 'assembly#list_remote'
   post  'assembly/list_connections' => 'assembly#list_connections'
-  post  'assembly/list_smoketests' => 'assembly#list_smoketests'
   post  'assembly/list_with_workspace' => 'assembly#list_with_workspace'
-  post  'assembly/task_action_list' => 'assembly#task_action_list'
   post  'assembly/info' => 'assembly#info'
-  post  'assembly/rename' => 'assembly#rename'
   post  'assembly/delete' => 'assembly#delete'
   post  'assembly/destroy_and_reset_nodes' => 'assembly#destroy_and_reset_nodes'
   post  'assembly/purge' => 'assembly#purge' #workspace command
@@ -58,7 +51,6 @@ R8::ReactorRoute.draw do
   post  'assembly/initiate_grep' => 'assembly#initiate_grep'
   post  'assembly/initiate_get_ps' => 'assembly#initiate_get_ps'
   post  'assembly/initiate_execute_tests' => 'assembly#initiate_execute_tests'
-  post  'assembly/initiate_action_agent'  => 'assembly#initiate_action_agent'
   post  'assembly/list_component_module_diffs' => 'assembly#list_component_module_diffs'
   post  'assembly/print_includes' => 'assembly#print_includes'
   post  'assembly/task_action_detail' => 'assembly#task_action_detail'
@@ -68,7 +60,6 @@ R8::ReactorRoute.draw do
   post  'assembly/start' => 'assembly#start'
   post  'assembly/stop' => 'assembly#stop'
   post  'assembly/list' => 'assembly#list'
-  post  'assembly/workspace_object' => 'assembly#workspace_object'
   post  'assembly/info_about' => 'assembly#info_about'
   post  'assembly/info_about_task' => 'assembly#info_about_task'
   post  'assembly/stage' => 'assembly#stage'
@@ -80,7 +71,6 @@ R8::ReactorRoute.draw do
   post  'assembly/delete_node' => 'assembly#delete_node'
   post  'assembly/delete_component' => 'assembly#delete_component'
   post  'assembly/prepare_for_edit_module' => 'assembly#prepare_for_edit_module'
-  post  'assembly/create_component_dependency' => 'assembly#create_component_dependency'
   post  'assembly/promote_module_updates' => 'assembly#promote_module_updates'
   post  'assembly/clear_tasks' => 'assembly#clear_tasks'
   post  'assembly/cancel_task' => 'assembly#cancel_task'
@@ -107,8 +97,6 @@ R8::ReactorRoute.draw do
   post  'component_module/update_model_from_clone' => 'component_module#update_model_from_clone'
   post  'component_module/delete' => 'component_module#delete'
   post  'component_module/delete_version' => 'component_module#delete_version'
-  post  'component_module/test_generate_dsl' => 'component_module#test_generate_dsl'
-  post  'component_module/create_new_dsl_version' => 'component_module#create_new_dsl_version'
   post  'component_module/info' => 'component_module#info'
   post  'component_module/list' => 'component_module#list'
   post  'component_module/pull_from_remote' => 'component_module#pull_from_remote'
@@ -125,7 +113,6 @@ R8::ReactorRoute.draw do
   post  'component_module/import_version' => 'component_module#import_version'
   post  'component_module/delete_remote' => 'component_module#delete_remote'
   post  'component_module/export' => 'component_module#export'
-  post  'component_module/create_new_version' => 'component_module#create_new_version'
   post  'component_module/get_remote_module_info' => 'component_module#get_remote_module_info'
   post  'component_module/get_workspace_branch_info' => 'component_module#get_workspace_branch_info'
   post  'component_module/update_from_initial_create' => 'component_module#update_from_initial_create'
@@ -144,8 +131,6 @@ R8::ReactorRoute.draw do
   post  'test_module/update_model_from_clone' => 'test_module#update_model_from_clone'
   post  'test_module/delete' => 'test_module#delete'
   post  'test_module/delete_version' => 'test_module#delete_version'
-  post  'test_module/test_generate_dsl' => 'test_module#test_generate_dsl'
-  post  'test_module/create_new_dsl_version' => 'test_module#create_new_dsl_version'
   post  'test_module/info' => 'test_module#info'
   post  'test_module/list' => 'test_module#list'
   post  'test_module/pull_from_remote' => 'test_module#pull_from_remote'
@@ -162,7 +147,6 @@ R8::ReactorRoute.draw do
   post  'test_module/import_version' => 'test_module#import_version'
   post  'test_module/delete_remote' => 'test_module#delete_remote'
   post  'test_module/export' => 'test_module#export'
-  post  'test_module/create_new_version' => 'test_module#create_new_version'
   post  'test_module/get_remote_module_info' => 'test_module#get_remote_module_info'
   post  'test_module/get_workspace_branch_info' => 'test_module#get_workspace_branch_info'
   post  'test_module/update_from_initial_create' => 'test_module#update_from_initial_create'
@@ -180,8 +164,6 @@ R8::ReactorRoute.draw do
   post  'node_module/update_model_from_clone' => 'node_module#update_model_from_clone'
   post  'node_module/delete' => 'node_module#delete'
   post  'node_module/delete_version' => 'node_module#delete_version'
-  post  'node_module/test_generate_dsl' => 'node_module#test_generate_dsl'
-  post  'node_module/create_new_dsl_version' => 'node_module#create_new_dsl_version'
   post  'node_module/info' => 'node_module#info'
   post  'node_module/list' => 'node_module#list'
   post  'node_module/pull_from_remote' => 'node_module#pull_from_remote'
@@ -197,7 +179,6 @@ R8::ReactorRoute.draw do
   post  'node_module/import_version' => 'node_module#import_version'
   post  'node_module/delete_remote' => 'node_module#delete_remote'
   post  'node_module/export' => 'node_module#export'
-  post  'node_module/create_new_version' => 'node_module#create_new_version'
   post  'node_module/get_remote_module_info' => 'node_module#get_remote_module_info'
   post  'node_module/get_workspace_branch_info' => 'node_module#get_workspace_branch_info'
   post  'node_module/update_from_initial_create' => 'node_module#update_from_initial_create'
@@ -294,7 +275,6 @@ R8::ReactorRoute.draw do
   post  'service_module/list_component_modules' => 'service_module#list_component_modules'
   post  'service_module/import_version' => 'service_module#import_version'
   post  'service_module/export' => 'service_module#export'
-  post  'service_module/create_new_version' => 'service_module#create_new_version'
   post  'service_module/set_component_module_version' => 'service_module#set_component_module_version'
   post  'service_module/delete' => 'service_module#delete'
   post  'service_module/delete_version' => 'service_module#delete_version'
@@ -325,7 +305,6 @@ R8::ReactorRoute.draw do
   post  'target/delete_and_destroy' => 'target#delete_and_destroy'
   post  'target/info' => 'target#info'
   post  'target/install_agents' => 'target#install_agents'
-  post  'target/create_install_agents_task' => 'target#create_install_agents_task'
   post  'target/task_status' => 'target#task_status'
   post  'target/set_properties' => 'target#set_properties'
 
@@ -336,236 +315,10 @@ R8::ReactorRoute.draw do
   post  'task/status' => 'task#status'
   post  'task/create_task_from_pending_changes' => 'task#create_task_from_pending_changes'
 
-  # DEVELOPER
-  post  'developer/inject_agent' => 'developer#inject_agent'
-
   # NAMESPACE
   post  'namespace/default_namespace_name' => 'namespace#default_namespace_name'
 end
 
-R8::Routes[:login] = {
-  :alias => 'user/login',
-}
-# Routes that correspond to (non-trivial action sets)
-=begin
-R8::Routes["component/display"] = {
-  :layout => 'default',
-  :alias => '',
-  :params => [:id],
-  :action_set =>
-  [
-   {
-     :route => "component/display",
-     :action_params => ["$id$"],
-     :panel => "main_body"
-   },
-   {
-     :route => "attribute/list_for_component_display",
-     :action_params => [{:parent_id => "$id$"}],
-     :panel => "main_body",
-#      :assign_type => 'append | prepend | replace'
-     :assign_type => :append
-   },
-   {
-     :route => "monitoring_item/list_for_component_display",
-     :action_params => [{:parent_id => "$id$"}],
-     :panel => "main_body",
-     :assign_type => :append
-   }
-  ]
-}
-=end
-R8::Routes["node/display"] = {
-  :layout => 'default',
-  :alias => '',
-  :params => [:id],
-  :action_set =>
-  [
-   {
-     :route => "node/display",
-     :action_params => ["$id$"],
-     :panel => "main_body"
-   },
-   {
-     :route => "node_interface/list",
-     :action_params => [{:parent_id => "$id$"}],
-     :panel => "main_body",
-     :assign_type => :append
-   },
-   {
-     :route => "monitoring_item/node_display",
-     :action_params => [{:parent_id => "$id$"}],
-     :panel => "main_body",
-     :assign_type => :append
-   }
-  ]
-}
-
-R8::Routes["state_change/list_pending"] = {
-  :layout => 'default',
-  :alias => '',
-  :params => [],
-  :action_set =>
-  [
-   {
-     :route => "state_change/list",
-     #:state_change_id => nil will only pick up top level state changes second condition just picks out pending changes
-     :action_params => [{:state_change_id => nil}, {:status => "pending"}],
-     :panel => "main_body"
-   }
-  ]
-}
-
-R8::Routes["state_change/display"] = {
-  :layout => 'default',
-  :alias => '',
-  :params => [:id],
-  :action_set =>
-  [
-   {
-     :route => "state_change/display",
-     :action_params => ["$id$"],
-     :panel => "main_body"
-   },
-   {
-     :route => "state_change/list",
-     :action_params => [{:parent_id => "$id$"}],
-     :panel => "main_body",
-     :assign_type => :append
-   }
-  ]
-}
-
-R8::Routes["task/list"] = {
-  :layout => 'default',
-  :alias => '',
-  :params => [],
-  :action_set =>
-  [
-   {
-     :route => "task/list",
-     #:task_id will only pick up top level tasks
-     :action_params => [{:task_id => nil}],
-     :panel => "main_body"
-   }
-  ]
-}
-
-R8::Routes["task/display"] = {
-  :layout => 'default',
-  :alias => '',
-  :params => [:id],
-  :action_set =>
-  [
-   {
-     :route => "task/display",
-     :action_params => ["$id$"],
-     :panel => "main_body"
-   },
-   {
-     :route => "task/list",
-     :action_params => [{:parent_id => "$id$"}],
-     :panel => "main_body",
-     :assign_type => :append
-   }
-  ]
-}
-
-R8::Routes["component/testjsonlayout"] = {
-  :layout => 'testjson'
-}
-
-R8::Routes["workspace"] = {
-  :layout => 'workspace'
-}
-R8::Routes["workspace/index"] = {
-#  :layout => 'workspace'
-  :layout => 'workspace2'
-}
-R8::Routes["workspace/loaddatacenter"] = {
-  :layout => 'workspace'
-}
-R8::Routes["workspace/list_items"] = {
-  :layout => 'workspace'
-}
-R8::Routes["workspace/list_items_new"] = {
-  :layout => 'workspace'
-}
-
-R8::Routes["workspace/list_items_2"] = {
-  :layout => 'workspace'
-}
-
-R8::Routes["user/login"] = {
-  :layout => 'login'
-}
-
-R8::Routes["user/register"] = {
-  :layout => 'login'
-}
-
-R8::Routes["datacenter/load_vspace"] = {
-  :layout => 'workspace'
-}
-
-
-R8::Routes["component/details"] = {
-  :layout => 'details2'
-}
-R8::Routes["component/details2"] = {
-  :layout => 'details2'
-}
-
-R8::Routes["datacenter/list"] = {
-  :layout => 'dashboard'
-}
-R8::Routes["component/list"] = {
-#  :layout => 'inventory'
-  :layout => 'library'
-}
-R8::Routes["library/index"] = {
-  :layout => 'library'
-}
-
-R8::Routes["node/list"] = {
-  :layout => 'inventory'
-}
-
-R8::Routes["datacenter/list"] = {
-  :layout => 'inventory'
-}
-
-R8::Routes["inventory/index"] = {
-  :layout => 'inventory'
-}
-
-R8::Routes["editor/index"] = {
-  :layout => 'editor'
-}
-
-R8::Routes["ide/index"] = {
-#  :layout => 'ide'
-  :layout => 'workspace2'
-}
-R8::Routes["ide/test_tree"] = {
-  :layout => 'ide'
-}
-
-R8::Routes["import/index"] = {
-  :layout => 'import'
-}
-R8::Routes["import/load_wizard"] = {
-  :layout => 'import'
-}
-R8::Routes["import/step_one"] = {
-  :layout => 'import'
-}
-R8::Routes["import/step_two"] = {
-  :layout => 'import'
-}
-R8::Routes["import/step_three"] = {
-  :layout => 'import'
-}
 
 R8::Routes.freeze
 

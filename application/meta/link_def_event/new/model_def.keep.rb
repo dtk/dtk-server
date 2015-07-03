@@ -1,3 +1,4 @@
+# TODO: Marked for removal [Haris]
 {
   :schema=>:link_def,
   :table=>:event,

@@ -110,6 +110,7 @@ module Ramaze::Helper
       dtk_client_pub_key = ret_request_params(:rsa_pub_key)
 
       do_not_raise = (ret_request_params(:do_not_raise) ? ret_request_params(:do_not_raise) : false)
+      skip_auto_install = (ret_request_params(:skip_auto_install) ? ret_request_params(:skip_auto_install) : false)
       ignore_component_error = (ret_request_params(:ignore_component_error) ? ret_request_params(:ignore_component_error) : false)
       additional_message = (ret_request_params(:additional_message) ? ret_request_params(:additional_message) : false)
       local_params = local_params(module_type,local_module_name,:namespace => local_namespace,:version => version)
@@ -120,7 +121,7 @@ module Ramaze::Helper
       if !do_not_raise
         missing_modules, required_modules, dependency_warnings = module_class(module_type).get_required_and_missing_modules(project, remote_params, dtk_client_pub_key)
         # return missing modules if any
-        return { :missing_module_components => missing_modules, :dependency_warnings => dependency_warnings, :required_modules => required_modules } unless (missing_modules.empty? && required_modules.empty?)
+        return { :missing_module_components => missing_modules, :dependency_warnings => dependency_warnings, :required_modules => required_modules } if !missing_modules.empty? || (!required_modules.empty? && !skip_auto_install)
       end
 
       opts = {:do_not_raise=>do_not_raise, :additional_message=>additional_message, :ignore_component_error=>ignore_component_error}

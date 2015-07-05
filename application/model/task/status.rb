@@ -3,9 +3,10 @@ module DTK
     class Status
       r8_nested_require('status','table_form')
       r8_nested_require('status','list_form')
+      r8_nested_require('status','stream_form')
 
       def self.get_active_top_level_tasks(model_handle)
-        # TODO: need protection so dont get stake tasks that never came out of executing mode
+        # TODO: need protection so dont get tasks that never came out of executing mode
         filter = [:and, [:eq,:status,"executing"],[:or,[:neq,:assembly_id,nil],[:neq,:node_id,nil]]]
         Task.get_top_level_tasks(model_handle,filter)
       end
@@ -27,25 +28,28 @@ module DTK
 
       private
 
-      def self.get_status_aux(task_obj_idh,task_obj_type,filter,opts={})
-        task_mh = task_obj_idh.createMH(:task)
-
-        unless task = Task.get_top_level_most_recent_task(task_mh,filter)
-          task_obj = task_obj_idh.create_object().update_object!(:display_name)
-          raise ErrorUsage.new("No tasks found for #{task_obj_type} (#{task_obj[:display_name]})")
-        end
-
-        task_structure = Task.get_hierarchical_structure(task_mh.createIDH(id: task[:id]))
-        status_opts = Opts.new(no_components: false, no_attributes: true)
-        status_opts.merge!(summarize_node_groups: true) if (opts[:detail_level]||{})[:summarize_node_groups]
+      def self.get_status_aux(ref_obj_idh,ref_obj_type,filter,opts={})
+        top_level_task = get_top_level_most_recent_task(ref_obj_idh,ref_obj_type,filter)
+        task_structure = top_level_task.get_hierarchical_structure()
+        status_opts = Opts.new(:no_components => false, :no_attributes => true)
+        status_opts.merge!(:summarize_node_groups => true) if (opts[:detail_level]||{})[:summarize_node_groups]
         case opts[:format]
           when :table
             TableForm.status(task_structure,status_opts)
           when :list
-            ListForm.status(task_structure,task_obj_idh.createMH(:node))
+            ListForm.status(task_structure,ref_obj_idh.createMH(:node))
           else
-            task_structure.status(status_opts)
+            raise ErrorUsage.new("Unexpected format '#{opts[:format]}'")
         end
+      end
+
+      def self.get_top_level_most_recent_task(ref_obj_idh,ref_obj_type,filter)
+        task_mh = ref_obj_idh.createMH(:task)
+        unless task = Task.get_top_level_most_recent_task(task_mh,filter)
+          task_obj = ref_obj_idh.create_object().update_object!(:display_name)
+          raise ErrorUsage.new("No tasks found for #{ref_obj_type} (#{task_obj[:display_name]})")
+        end
+        task
       end
 
       class Assembly < self
@@ -56,6 +60,14 @@ module DTK
         def self.get_status(assembly_idh,opts={})
           filter = [:eq, :assembly_id, assembly_idh.get_id()]
           get_status_aux(assembly_idh, :assembly, filter, opts)
+        end
+
+        module StreamForm
+          def self.get_status(assembly_idh,opts={})
+            filter = [:eq, :assembly_id, assembly_idh.get_id()]
+            top_level_task = Status.get_top_level_most_recent_task(assembly_idh,:service_instance,filter)
+            Status::StreamForm.status(top_level_task,opts)
+          end
         end
       end
 

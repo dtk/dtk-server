@@ -758,11 +758,16 @@ module DTK
     def rest__task_status
       assembly = ret_assembly_instance_object()
 
-      opts = {
-        format: (ret_request_params(:format)||:hash).to_sym,
-        detail_level: ret_boolean_params_hash(:summarize_node_groups)
-      }
-      response = Task::Status::Assembly.get_status(assembly.id_handle,opts)
+      response = 
+        if ret_request_params(:form) == 'stream_form'
+          Task::Status::Assembly::StreamForm.get_status(assembly.id_handle)
+        else
+          opts = {
+            :format       => (ret_request_params(:format)||:table).to_sym,
+            :detail_level => ret_boolean_params_hash(:summarize_node_groups)
+          }
+          Task::Status::Assembly.get_status(assembly.id_handle,opts)
+        end
       rest_ok_response response
     end
 

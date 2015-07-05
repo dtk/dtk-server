@@ -367,6 +367,10 @@ module DTK
       self[:executable_action] &&= Action::OnNode.create_from_hash(self[:executable_action_type],self[:executable_action],id_handle)
     end
 
+    # self should be top level task
+    def get_hierarchical_structure()
+      self.class.get_hierarchical_structure(id_handle())
+    end
     def self.get_hierarchical_structure(top_task_idh)
       sp_hash = {
         cols: Task.common_columns(),

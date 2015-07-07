@@ -1,10 +1,10 @@
 module DTK; class Component
   class IncludeModule < Model
-    def self.common_columns()
+    def self.common_columns
       [:id,:group_id,:display_name,:version_constraint]
     end
 
-    def module_name()
+    def module_name
       get_field?(:display_name)
     end
 
@@ -26,16 +26,17 @@ module DTK; class Component
       # using ndx_ret to get rid of duplicates
       # includes are indexed on components, so at first level get component modules, but then can only see what component modules
       # are includes using ModuleRefs::Lock
-      ndx_ret = ret.inject(Hash.new){|h,impl|h.merge(impl.id => impl)}      
-      locked_module_refs = ModuleRefs::Lock.get(assembly_instance,:types=>[:locked_dependencies,:locked_branch_shas])
+      ndx_ret = ret.inject({}){|h,impl|h.merge(impl.id => impl)}      
+      locked_module_refs = ModuleRefs::Lock.get(assembly_instance,types: [:locked_dependencies,:locked_branch_shas])
       included_impls = locked_module_refs.matching_impls_with_children(include_modules.map{|im|im.module_name()})
       ndx_ret = included_impls.inject(ndx_ret){|h,impl|h.merge(impl.id => impl)}
       ndx_ret.values
     end
 
-   private
+    private
+
     def self.get_include_modules(component_idhs)
-      Component.get_include_modules(component_idhs,:cols => common_columns())
+      Component.get_include_modules(component_idhs,cols: common_columns())
     end
   end
 end; end

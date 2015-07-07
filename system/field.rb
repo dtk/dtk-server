@@ -6,7 +6,7 @@ class FieldR8
 
   def initialize(r8_view_ref=nil)
     @r8_view_ref = r8_view_ref
-# TODO: enhance this once profiles are implemented
+    # TODO: enhance this once profiles are implemented
   end
 
   # This returns the contents for a provided field array and given view/render mode
@@ -23,14 +23,14 @@ class FieldR8
         # if view of type edit add the []'s to allow for array to be returned in request for mult selects
         field_meta[:options] = self.get_field_options(field_meta)
         if(view_type == 'edit' || view_type == 'search') then field_meta[:name] << '[]' end
-# TODO: enhance this once profiles are implemented
+        # TODO: enhance this once profiles are implemented
         load_field_file "field.select.rb"
     end
 
-# TODO: enhance this once profiles are implemented
+    # TODO: enhance this once profiles are implemented
     load_field_file "field.#{field_meta[:type]}.rb"
     fieldClass = 'Field' + field_meta[:type]
-# TBD: if wrapped in modeule M use form M.const_get
+    # TBD: if wrapped in modeule M use form M.const_get
     field_obj = Kernel.const_get(fieldClass).new(field_meta)
     field_obj.set_includes(@r8_view_ref)
 
@@ -38,28 +38,28 @@ class FieldR8
   end
 
   # This adds the js exe call for the given field meta
-  def add_validation(formId, field_meta)
+  def add_validation(_formId, field_meta)
     (field_meta[:required] == true) ? required = "true" : required = "false"
 
     case(field_meta[:type])
       when "radio","select"
-        # classRefId used b/c styling cant be applied to radio itself so applied to reference div wrapper
-#        content = 'R8.forms.addValidator("' + formId + '",{"id":"' + field_meta[:id] + '","classRefId":"' + field_meta[:id] + '-radio-wrapper","type":"' + field_meta[:type] + '","required":' + required + '});'
+      # classRefId used b/c styling cant be applied to radio itself so applied to reference div wrapper
+      #        content = 'R8.forms.addValidator("' + formId + '",{"id":"' + field_meta[:id] + '","classRefId":"' + field_meta[:id] + '-radio-wrapper","type":"' + field_meta[:type] + '","required":' + required + '});'
       else
-#        content = 'R8.forms.addValidator("' + formId + '",{"id":"' + field_meta[:id] + '","type":"' + field_meta[:type] + '","required":' + required + '});'
+      #        content = 'R8.forms.addValidator("' + formId + '",{"id":"' + field_meta[:id] + '","type":"' + field_meta[:type] + '","required":' + required + '});'
     end
-#    $GLOBALS['ctrl']->addJSExeScript(
-#      array(
-#        'content' => $content,
-#        'race_priority' => 'low'
-#      )
-#    );
+    #    $GLOBALS['ctrl']->addJSExeScript(
+    #      array(
+    #        'content' => $content,
+    #        'race_priority' => 'low'
+    #      )
+    #    );
   end
 
-# TODO: clean this up when option lists are fully implemented
+  # TODO: clean this up when option lists are fully implemented
   def get_field_options(field_meta)
     options_lists = get_model_options(field_meta[:model_name])
-# TODO: decide if list should just be key'd off of name, or a :options value?
+    # TODO: decide if list should just be key'd off of name, or a :options value?
     options = options_lists[field_meta[:name].to_sym]
 
 =begin
@@ -73,7 +73,9 @@ class FieldR8
 =end
     return options
   end
- private
+
+  private
+
   def self.load_field_file(file_name)
     r8_require("#{UTILS_DIR}/fields/#{file_name}")
   end 
@@ -82,5 +84,4 @@ class FieldR8
   end 
   load_field_file("field.base.rb")
 end
-
 end

@@ -1,5 +1,5 @@
 require 'fog'
-# TODO get Fog to correct this
+# TODO: get Fog to correct this
 # monkey patch
 class NilClass
   def blank?
@@ -23,13 +23,14 @@ module DTK
       ret = Fog.credentials()
       unless opts[:just_credentials]
         if region = R8::Config[:ec2][:region]
-          ret = ret.merge(:region => region)
+          ret = ret.merge(region: region)
         end
       end
       ret
     end
 
-   private
+    private
+
     def hash_form(x)
       # this is supposed to fix [#<NoMethodError: undefined method `attributes' for #<Excon::Response:0x0000000529aec8>>,
       ret = nil
@@ -49,8 +50,8 @@ module DTK
     end
 
     # each service has its own mutex
-    LockRequest = Hash.new
-    def request_context(&block)
+    LockRequest = {}
+    def request_context(&_block)
       # TODO: put up in here some handling of errors such as ones that should be handled by doing a retry
       lock = LockRequest[self.class] ||= Mutex.new
       lock.synchronize{yield}

@@ -18,7 +18,6 @@ component_name = 'rsync'
 dtk_common = DtkCommon.new('', '')
 
 describe "(Different Node Templates) Test Case 5: Stage node template, add rsync component, set attribute value, converge it and then check get-netstats and list-task-info" do
-
   before(:all) do
     puts "*****************************************************************************************************************************************************************"
     puts "(Different Node Templates) Test Case 5: Stage node template, add rsync component, set attribute value, converge it and then check get-netstats and list-task-info"

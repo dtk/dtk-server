@@ -2,7 +2,7 @@ module DTK; class LinkDef
   class Link < Model
     r8_nested_require('link','attribute_mapping')
 
-    def self.common_columns()
+    def self.common_columns
       [:id,:group_id,:display_name,:remote_component_type,:position,:content,:type,:temporal_order]
     end
 
@@ -24,7 +24,7 @@ module DTK; class LinkDef
     # TODO: when add cardinality constraints on links, would check it here
     # assuming that augmented ports have :port_info
     def ret_matches(in_aug_port,out_aug_ports)
-      ret = Array.new
+      ret = []
       cmp_type = self[:remote_component_type]
       out_aug_ports.each do |out_port|
         if out_port[:port_info][:component_type] == cmp_type
@@ -38,7 +38,7 @@ module DTK; class LinkDef
               raise Error.new("unexpected type for LinkDef::Link object")
             end
           if match
-            ret << {:input_port => in_aug_port,:output_port => out_port}
+            ret << {input_port: in_aug_port,output_port: out_port}
           end
         end
       end
@@ -59,18 +59,18 @@ module DTK; class LinkDef
 
     def update_attribute_mappings!(new_attribute_mappings)
       ret = self[:attribute_mappings] = new_attribute_mappings
-      self[:content] ||= Hash.new
+      self[:content] ||= {}
       self[:content][:attribute_mappings] = ret
-      update({:content => self[:content]},:convert => true)
+      update({content: self[:content]},convert: true)
       ret
     end
 
-    def attribute_mappings()
+    def attribute_mappings
       # TODO: may convert to using @attribute_mappings; need to make sure no side-effects
       self[:attribute_mappings] ||= (self[:content][:attribute_mappings]||[]).map{|am|AttributeMapping.reify(am)}
     end
 
-    def on_create_events()
+    def on_create_events
       self[:on_create_events]||= ((self[:content][:events]||{})[:on_create]||[]).map{|ev|Event.create(ev,self)}
     end
 
@@ -82,7 +82,7 @@ module DTK; class LinkDef
             raise Error.new("unexpecetd event type")
         end
       end
-      def process!(context)
+      def process!(_context)
         raise Error.new("Needs to be overwritten")
       end
     end
@@ -90,7 +90,7 @@ module DTK; class LinkDef
     class EventExtendComponent < Event
       def initialize(event,link_def_link)
         base_cmp = link_def_link[event[:node] == "remote" ? :remote_component_type : :local_component_type]
-        super(event.merge(:base_component =>  base_cmp))
+        super(event.merge(base_component: base_cmp))
       end
 
       def process!(context)
@@ -105,9 +105,9 @@ module DTK; class LinkDef
         raise Error.new("cannot find node of type #{self[:node]} in context") unless node
 
         # clone component into node
-        override_attrs = {:from_on_create_event => true}
+        override_attrs = {from_on_create_event: true}
         # TODO: may put in flags to tell clone operation not to do any constraint checking
-        clone_opts = {:ret_new_obj_with_cols => [:id,:display_name,:extended_base,:implementation_id]}
+        clone_opts = {ret_new_obj_with_cols: [:id,:display_name,:extended_base,:implementation_id]}
         new_cmp = node.clone_into(component_extension,override_attrs,clone_opts)
         
         # if alias is given, update context to reflect this
@@ -117,6 +117,7 @@ module DTK; class LinkDef
       end
 
       private
+
       def validate_top_level(hash)
         raise Error.new("node is set incorrectly") if hash[:node] and not [:local,:remote].include?(hash[:node].to_sym)
         raise Error.new("no extension_type is given") unless hash[:extension_type]

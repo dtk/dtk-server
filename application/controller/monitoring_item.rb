@@ -1,13 +1,13 @@
 module XYZ
   class Monitoring_itemController < AuthController
-
     # limit (hours) how long can nodes run
     UP_TIME_LIMIT = R8::Config[:idle][:up_time_hours]
 
-    def list_for_component_display()
+    def list_for_component_display
       component_or_node_display()
     end
-    def node_display()
+
+    def node_display
       component_or_node_display()
     end
 
@@ -16,11 +16,10 @@ module XYZ
     # 'up time'. If one of the nodes has been running more than 'UP_TIME_LIMIT'
     # all nodes of that assembly will be stopped.
     #
-    def rest__check_idle()
+    def rest__check_idle
       prefix_log = "[CRON JOB]"
  
       Log.info "#{prefix_log} Monitoring idle assemblies: START"
-
 
       assemblies = Assembly::Instance.list(model_handle(:assembly),{})
 
@@ -61,13 +60,13 @@ module XYZ
 
       Log.info "#{prefix_log} Monitoring idle assemblies: END"
 
-
-      rest_ok_response({ :status => :ok })
+      rest_ok_response(status: :ok)
     end
 
-   private
+    private
+
     # helper fn
-    def component_or_node_display()
+    def component_or_node_display
       search_object = ret_search_object_in_request()
       raise Error.new("no search object in request") unless search_object
 
@@ -80,10 +79,10 @@ module XYZ
       _model_var[:i18n] = get_model_i18n(model_name().to_s,user_context())
 
       set_template_defaults_for_list!(tpl)
-      tpl.assign("_#{model_name().to_s}",_model_var)
+      tpl.assign("_#{model_name()}",_model_var)
       tpl.assign("#{model_name()}_list",model_list)
 
-      return {:content => tpl.render()}
+      return {content: tpl.render()}
     end
   end
 end

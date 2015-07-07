@@ -16,7 +16,7 @@ end
 class ErrorParticipant
   include Ruote::LocalParticipant
  
-  def consume(workitem)
+  def consume(_workitem)
     puts "error"
     raise "Houston, something is wrong"
   end
@@ -45,13 +45,12 @@ Engine.register_participant 'error_handler', ErrorHandlerParticipant
 #  catchall DefaultParticipant
 # end
 
-
 pdef = Ruote.process_definition do
   concurrence do
     sequence do 
       sequence do
         alpha
-       participant 'bad', :on_error => 'error_handler'
+       participant 'bad', on_error: 'error_handler'
       end
       beta
     end

@@ -32,25 +32,26 @@ module DTK
 
       def apply_settings(assembly)
         av_pairs = map{|el|el.av_pair_form()}
-        opts_set = {:partial_value => false,:create=>[:node_level,:assembly_level]}
+        opts_set = {partial_value: false,create: [:node_level,:assembly_level]}
         assembly.set_attributes(av_pairs,opts_set)
       end
 
       def ret_just_diffs(existing_attr_settings)
         ret = self.class.new()
-        ndx_attr_settings = existing_attr_settings.inject(Hash.new) do |h,el|
+        ndx_attr_settings = existing_attr_settings.inject({}) do |h,el|
           h.merge(el.unique_index() => el)
         end
         each do |el|
           match = ndx_attr_settings[el.unique_index()]
-          unless match and el.equal_value?(match)
+          unless match && el.equal_value?(match)
             ret << el
           end
         end
         ret
       end
 
-     private
+      private
+
       def self.all_assemblies_attribute_settings(assembly,filter_proc=nil)
         new(HashForm.render(assembly.get_attributes_all_levels_struct(filter_proc)))
       end

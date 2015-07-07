@@ -1,5 +1,4 @@
 class Header < PageContainer
-
   def get_homepage_header
     @session.within(:header) do
       @session.find_link('DTK')

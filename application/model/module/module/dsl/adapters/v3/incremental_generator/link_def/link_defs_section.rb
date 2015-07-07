@@ -1,7 +1,7 @@
 module DTK; class ModuleDSL; class V3
   class IncrementalGenerator; class LinkDef
     class LinkDefsSection < self
-      def generate()
+      def generate
         link_def_links = @aug_link_def.required(:link_def_links)
         if link_def_links.empty?
           raise Error.new("Unexpected that link_def_links is empty")
@@ -27,7 +27,8 @@ module DTK; class ModuleDSL; class V3
         ret
       end
 
-     private
+      private
+
       # returns cmp,link
       def choice_info(link_def_link)
         link = Link.new

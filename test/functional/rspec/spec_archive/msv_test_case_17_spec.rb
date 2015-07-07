@@ -19,7 +19,6 @@ $assembly_id = 0
 dtk_common = DtkCommon.new('', '')
 
 describe "(Modules, Services and Versioning) Test Case 17: Import module from puppet forge" do
-
   before(:all) do
     puts "********************************************************************************"
     puts "(Modules, Services and Versioning) Test Case 17: Import module from puppet forge"

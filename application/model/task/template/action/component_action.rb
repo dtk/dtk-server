@@ -5,7 +5,7 @@ module DTK; class Task; class Template
       include InComponentGroupMixin
 
       def initialize(component,opts={})
-        unless component[:node].kind_of?(Node)
+        unless component[:node].is_a?(Node)
           raise Error.new("ComponentAction.new must be given component argument with :node key")
         end
         super(opts)
@@ -16,31 +16,34 @@ module DTK; class Task; class Template
       def method_missing(name,*args,&block)
         @component.send(name,*args,&block)
       end
+
       def respond_to?(name)
         @component.respond_to?(name) || super
       end
 
-      def node()
+      def node
         @component[:node]
       end
-      def node_id()
+
+      def node_id
         if node = node()
           node.get_field?(:id)
         end
       end
-      def node_name()
+
+      def node_name
         if node = node()
           node.get_field?(:display_name)
         end
       end
 
-      def action_defs()
+      def action_defs
         self[:action_defs]||[]
       end
 
       def match_action?(action)
-        action.kind_of?(self.class) and 
-        node_name() == action.node_name and 
+        action.is_a?(self.class) && 
+        node_name() == action.node_name && 
         component_type() == action.component_type()
       end
 
@@ -53,15 +56,15 @@ module DTK; class Task; class Template
               # strip off node_name prefix if it exists
               # need to handle cases like apt::ppa[ppa:chris/node.js]
               component_name_ref_x = component_name_ref.gsub(/^[^\[]+\//,'')
-              component_name_ref_x ==  serialization_form(:no_node_name_prefix => true)
+              component_name_ref_x ==  serialization_form(no_node_name_prefix: true)
             end
           end
         !!ret
       end
 
       def match_component_ref?(component_type,title=nil)
-        component_type == component_type(:without_title=>true) and
-          (title.nil? or title == component_title?())
+        component_type == component_type(without_title: true) &&
+          (title.nil? || title == component_title?())
       end
 
       def serialization_form(opts={})
@@ -77,12 +80,12 @@ module DTK; class Task; class Template
         node_name ? "#{node_name}/#{component_type}" : component_type
       end
         
-      def source_type()
+      def source_type
         ret = (@component[:source]||{})[:type]
         ret && ret.to_sym
       end
 
-      def assembly_idh?()
+      def assembly_idh?
         if source_type() == :assembly
           @component[:source][:object].id_handle()
         end
@@ -98,10 +101,9 @@ module DTK; class Task; class Template
         cmp_type
       end
 
-      def component_title?()
+      def component_title?
         @component[:title]
       end
-
     end
   end
 end; end; end

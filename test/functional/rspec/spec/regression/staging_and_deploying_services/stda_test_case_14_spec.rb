@@ -26,13 +26,12 @@ assembly_name = 'service_with_lambda::lambda'
 dtk_common = DtkCommon.new(service_name, assembly_name)
 
 expected_output_1 = {
-	:command => "cat /tmp/test | grep 55",
-	:status => 0,
-	:stderr => nil,
+	command: "cat /tmp/test | grep 55",
+	status: 0,
+	stderr: nil,
 }
 
 describe "(Staging And Deploying Assemblies) Test Case 14: Using lambda function in dtk.model.yaml" do
-
 	before(:all) do
 		puts "**************************************************************************************",""
   end

@@ -29,7 +29,6 @@ def get_metadata(module_name)
 end
 
 describe "(Modules, Services and Versioning) Test Case 28: Import new module from git (does not have dependencies) and check ModuleFile metadata" do
-
   before(:all) do
     puts "**************************************************************************************************************************************"
     puts "(Modules, Services and Versioning) Test Case 28: Import new module from git (does not have dependencies) and check ModuleFile metadata"

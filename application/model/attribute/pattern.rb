@@ -1,12 +1,11 @@
 module DTK; class Attribute
   class Pattern 
-
     r8_nested_require('pattern','type')
     r8_nested_require('pattern','assembly')
     r8_nested_require('pattern','node')
     r8_nested_require('pattern','term')
 
-    def self.node_name()
+    def self.node_name
       (pattern =~ NodeComponentRegexp ? $1 : raise_unexpected_pattern(pattern))
     end
     def self.component_fragment(pattern)
@@ -37,7 +36,7 @@ module DTK; class Attribute
       attribute_rows  = []
       ambiguous       = []
       attr_properties = opts[:attribute_properties] || {}
-      attributes      = base_object.list_attributes(Opts.new(:with_assembly_wide_node => true))
+      attributes      = base_object.list_attributes(Opts.new(with_assembly_wide_node: true))
 
       av_pairs.each do |av_pair|
         value = av_pair[:value]
@@ -79,12 +78,12 @@ module DTK; class Attribute
           all_attr_idhs += ngm_attr_idhs
         end
         all_attr_idhs.each do |idh|
-          attribute_rows << { :id => idh.get_id(), :value_asserted => value }.merge(attr_properties)
+          attribute_rows << { id: idh.get_id(), value_asserted: value }.merge(attr_properties)
         end
       end
 
       # return if ambiguous whether component or node attribute (node and component have same name)
-      return { :ambiguous => ambiguous } unless ambiguous.empty?
+      return { ambiguous: ambiguous } unless ambiguous.empty?
 
       # attribute_rows can have multiple rows if pattern decomposes into multiple attributes
       # it should have at least one row or there is an error
@@ -100,11 +99,11 @@ module DTK; class Attribute
       attr_mh = base_object.model_handle(:attribute)
 
       sp_hash = {
-        :cols => [:id, :group_id, :display_name, :node_node_id, :component_component_id],
-        :filter => [:oneof, :id, attribute_rows.map { |a| a[:id] }]
+        cols: [:id, :group_id, :display_name, :node_node_id, :component_component_id],
+        filter: [:oneof, :id, attribute_rows.map { |a| a[:id] }]
       }
       existing_attrs = Model.get_objs(attr_mh, sp_hash, opts)
-      ndx_new_vals = attribute_rows.inject(Hash.new) { |h, r| h.merge(r[:id] => r[:value_asserted]) }
+      ndx_new_vals = attribute_rows.inject({}) { |h, r| h.merge(r[:id] => r[:value_asserted]) }
       LegalValue.raise_usage_errors?(existing_attrs, ndx_new_vals)
 
       SpecialProcessing::Update.handle_special_processing_attributes(existing_attrs, ndx_new_vals)

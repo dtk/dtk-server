@@ -1,7 +1,8 @@
 module DTK; class ModuleDSL; class V2
   class IncrementalGenerator < ModuleDSL::IncrementalGenerator
-   private
-    def component()
+    private
+
+    def component
       Component
     end
     class Component < self
@@ -15,9 +16,10 @@ module DTK; class ModuleDSL; class V2
         ret
       end
 
-     private
+      private
+
       def self.hash_index(cmp_type)
-        ::DTK::Component.display_name_print_form(cmp_type,:no_module_name => true)
+        ::DTK::Component.display_name_print_form(cmp_type,no_module_name: true)
       end
     end
 
@@ -47,11 +49,12 @@ module DTK; class ModuleDSL; class V2
         full_hash
       end
 
-     private
+      private
+
       def type(data_type,semantic_type)
         ret = data_type
         if semantic_type
-          unless semantic_type.kind_of?(Hash) and semantic_type.size == 1 and semantic_type.keys.first == ":array"
+          unless semantic_type.is_a?(Hash) && semantic_type.size == 1 && semantic_type.keys.first == ":array"
             Log.error("Ignoring because unexpected semantic type (#{semantic_type})")
           else
             ret = "array(#{semantic_type.values.first})"
@@ -61,7 +64,7 @@ module DTK; class ModuleDSL; class V2
       end
 
       def update_attributes_fragment!(attributes_fragment,key,content)
-        (attributes_fragment[key] ||= Hash.new).merge!(content)
+        (attributes_fragment[key] ||= {}).merge!(content)
       end
     end
 
@@ -72,9 +75,9 @@ module DTK; class ModuleDSL; class V2
         if link_def_links.empty?
           raise Error.new("Unexpected that link_def_links is empty")
         end
-        opts_choice = Hash.new
+        opts_choice = {}
         if single_choice = (link_def_links.size == 1) 
-          opts_choice.merge!(:omit_component_ref => ref)
+          opts_choice.merge!(omit_component_ref: ref)
         end
         possible_links = aug_link_def[:link_def_links].map do |link_def_link|
           choice_info(aug_link_def,ObjectWrapper.new(link_def_link),opts_choice)
@@ -95,11 +98,12 @@ module DTK; class ModuleDSL; class V2
         full_hash
       end
 
-     private
+      private
+
       def update_depends_on_fragment!(depends_on_fragment,key,content)
         depends_on_fragment.each_with_index do |depends_on_el,i|
-          if (depends_on_el.kind_of?(Hash) and depends_on_el.keys.first == key) or
-              (depends_on_el.kind_of?(String) and depends_on_el == key)
+          if (depends_on_el.is_a?(Hash) && depends_on_el.keys.first == key) ||
+              (depends_on_el.is_a?(String) && depends_on_el == key)
             depends_on_fragment[i] = {key => content}
             return
           end
@@ -107,7 +111,7 @@ module DTK; class ModuleDSL; class V2
         depends_on_fragment << {key => content}
       end
 
-      def choice_info(link_def,link_def_link,opts={})
+      def choice_info(_link_def,link_def_link,opts={})
         ret = PrettyPrintHash.new
         remote_cmp_type = link_def_link.required(:remote_component_type)
         cmp_ref = Component.display_name_print_form(remote_cmp_type)
@@ -134,11 +138,11 @@ module DTK; class ModuleDSL; class V2
       def attribute_mapping(am,remote_cmp_type)
         input_attr,input_is_remote = mapping_attribute(:input,am,remote_cmp_type)
         output_attr,output_is_remote = mapping_attribute(:output,am,remote_cmp_type)
-        if (!input_is_remote) and (!output_is_remote)
+        if (!input_is_remote) && (!output_is_remote)
           raise Error.new("Cannot determine attribute mapping direction; both do not match remote component type")
-        elsif input_is_remote and output_is_remote
+        elsif input_is_remote && output_is_remote
           raise Error.new("Cannot determine attribute mapping direction; both match remote component type")
-        elsif (!input_is_remote) and output_is_remote
+        elsif (!input_is_remote) && output_is_remote
           "$#{output_attr} -> #{input_attr}"
         else #input_is_remote and (!output_is_remote)
           "#{input_attr} <- $#{output_attr}"

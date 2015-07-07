@@ -25,7 +25,6 @@ components_list_to_check = ['apache','stdlib']
 dtk_common = DtkCommon.new('', '')
 
 describe "(Modules, Services and Versioning) Test Case 24: Import new service module but all component modules for that service module already exist on server and locally" do
-
   before(:all) do
     puts "****************************************************************************************************************************************************************",""
   end

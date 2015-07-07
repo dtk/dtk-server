@@ -19,7 +19,6 @@ component_module_filesystem_location = "~/dtk/component_modules/local"
 dtk_common = DtkCommon.new('', '')
 
 describe "(Modules, Services and Versioning) Test Case 15: Import component module from git repo url" do
-
   before(:all) do
     puts "*******************************************************************************************",""
   end

@@ -1,4 +1,4 @@
-# TODO:; a possible enhancement is to calling puppet in process since we have puppet loaded already
+# TODO: ; a possible enhancement is to calling puppet in process since we have puppet loaded already
 require 'active_support/hash_with_indifferent_access'
 require 'puppet'
 require 'open3'
@@ -10,7 +10,6 @@ module DTK
     #
     class Client
       class << self
-
         def install(pf_module_name, puppet_version=nil, force=false)
           ret = nil
           base_install_dir = LocalCopy.random_install_dir()
@@ -29,7 +28,7 @@ module DTK
           ret
         end
 
-      private
+        private
 
         # returns output_hash
         PUPPET_VERSION = '3.4.0'
@@ -39,7 +38,7 @@ module DTK
           command += " --force"              if force
           output_s = nil
           output_err = nil
-          Open3.popen3(command) do |stdin, stdout, stderr, wait_thr|
+          Open3.popen3(command) do |_stdin, stdout, stderr, _wait_thr|
             output_s = stdout.read
             output_err = stderr.read
           end
@@ -52,7 +51,7 @@ module DTK
           output_hash
         end
 
-        def check_for_dependencies(base_install_dir, module_name, hash_info)
+        def check_for_dependencies(base_install_dir, _module_name, hash_info)
           installed_module = (hash_info['installed_modules']||[]).first
 
           if dependencies = full_recursive_dependencies(installed_module)
@@ -64,11 +63,9 @@ module DTK
               dp_full_id  = "#{dp_name}"
               dp_full_id += " (#{dp_version})" if dp_version
               dp['dependencies'] = nested_dependency_info[dp_name.gsub('-', '/')]
-              ActiveSupport::HashWithIndifferentAccess.new({
-                :name => dp_name, :module_name => dp_module_name,
-                :module_namespace => dp_module_namespace, :version => dp_version,
-                :full_id => dp_full_id, :module_type => 'component_module'
-              })
+              ActiveSupport::HashWithIndifferentAccess.new(                name: dp_name, module_name: dp_module_name,
+                module_namespace: dp_module_namespace, version: dp_version,
+                full_id: dp_full_id, module_type: 'component_module')
             end
          end
         end
@@ -96,7 +93,7 @@ module DTK
         def nested_dependency_info(base_install_dir)
           yaml_output = `puppet module list --tree --render-as yaml --modulepath #{base_install_dir}`
           all_imported = YAML.load(yaml_output).values.flatten
-          all_imported.inject(Hash.new) do |h,puppet_module|
+          all_imported.inject({}) do |h,puppet_module|
             normalized_dependencies = []
             puppet_module.dependencies.each do |deps|
               matching = all_imported.detect{|imported| imported.forge_name.eql?(deps['name'])}
@@ -110,7 +107,6 @@ module DTK
             h.merge(puppet_module.forge_name => normalized_dependencies)
           end
         end
-
       end
     end
   end

@@ -9,7 +9,9 @@ module DTK; class Attribute
           end
         end
       end
-     private
+
+      private
+
       def initialize(attr,new_val)
         @attr = attr
         @new_val = new_val
@@ -19,13 +21,14 @@ module DTK; class Attribute
         def initialize(attr,new_val)
           super(attr,new_val.to_i)
         end
-        def process()
+
+        def process
           @attr.update_object!(:value_asserted,:node_node_id)
           existing_val = (@attr[:value_asserted]||0).to_i
           if @new_val == existing_val
-            raise ErrorUsage.new("Value set equals existing value (#{existing_val.to_s})")
+            raise ErrorUsage.new("Value set equals existing value (#{existing_val})")
           end
-          node_group = @attr.get_service_node_group(:cols => [:id,:group_id,:display_name,:datacenter_datacenter_id,:assembly_id])
+          node_group = @attr.get_service_node_group(cols: [:id,:group_id,:display_name,:datacenter_datacenter_id,:assembly_id])
           if @new_val > existing_val
             node_group.add_group_members(@new_val)
           else @new_val < existing_val
@@ -35,7 +38,7 @@ module DTK; class Attribute
       end
 
       class OsIdentifier < self
-        def process()
+        def process
           os_identifier = @new_val
           node, target = get_node_and_target()
           image_id, os_type = Node::Template.find_image_id_and_os_type(os_identifier,target)
@@ -54,21 +57,23 @@ module DTK; class Attribute
             end
           end
         end
-       private
-        def get_node_and_target()
-          node = @attr.get_node(:cols => [:id,:group_id,:display_name,:type,:datacenter_datacenter_id])
+
+        private
+
+        def get_node_and_target
+          node = @attr.get_node(cols: [:id,:group_id,:display_name,:type,:datacenter_datacenter_id])
           [node,node.get_target()]
         end
 
         def update_node!(node,image_id,os_type)
           node.update_external_ref_field(:image_id,image_id)
-          node.update(:os_type => os_type)
+          node.update(os_type: os_type)
         end
       end
 
       class MemorySize < self
-        def process()
-          node = @attr.get_node(:cols => [:id,:group_id,:display_name,:type,:external_ref])
+        def process
+          node = @attr.get_node(cols: [:id,:group_id,:display_name,:type,:external_ref])
           node.update_external_ref_field(:size,@new_val)
           if node.is_node_group?()
             ServiceNodeGroup.get_node_group_members(node.id_handle()).each do |target_ref_node|

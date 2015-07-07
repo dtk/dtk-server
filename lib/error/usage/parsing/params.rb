@@ -8,7 +8,7 @@ module DTK; class ErrorUsage
 
       # array can have as last element a Params arg
       def self.add_to_array(array,hash_params)
-        if array.last().kind_of?(Params)
+        if array.last().is_a?(Params)
           array[0...array.size-1] + [array.last().dup.merge(hash_params)]
         else
           array + [new(hash_params)]
@@ -16,8 +16,8 @@ module DTK; class ErrorUsage
       end
       # TODO: collapse these two
       def self.add_opts(args_x,opts)
-        base_opts = (opts.kind_of?(Opts) ? opts : Opts.new(opts))
-        if args_x.last.kind_of?(Opts)
+        base_opts = (opts.is_a?(Opts) ? opts : Opts.new(opts))
+        if args_x.last.is_a?(Opts)
           args[0...-1] + [base_opts.merge(args.last)]
         else
           args_x + [base_opts]
@@ -31,14 +31,14 @@ module DTK; class ErrorUsage
         opts = Opts.new
 
         args.each_with_index do |arg, i|
-          if arg.kind_of?(Params)
+          if arg.is_a?(Params)
             # make sure that params,opts are at end
-            unless i == (args.size-1) or i == (args.size-2)
+            unless i == (args.size-1) || i == (args.size-2)
               raise Error.new("Args of type (#{arg.class}) must be one of last two args")
             end
             params = arg
             substitute_params!(processed_msg,params)
-          elsif arg.kind_of?(Opts)
+          elsif arg.is_a?(Opts)
             unless i == (args.size-1)
               raise Error.new("Args of type (#{arg.class}) must be end")
             end
@@ -53,7 +53,7 @@ module DTK; class ErrorUsage
       def self.substitute_file_path?(msg,file_path)
         ret = !!(msg =~ Regexp.new("\\?#{FilePathFreeVar}"))
         file_path_msg = "(in file #{file_path})"
-        substitute_params!(msg,{FilePathFreeVar => file_path_msg})
+        substitute_params!(msg,FilePathFreeVar => file_path_msg)
         ret
       end
       FilePathFreeVar = 'file_path'
@@ -66,7 +66,8 @@ module DTK; class ErrorUsage
       end
       FreeVariable = Regexp.new("(\\?[0-9a-z_]+)") 
         
-     private
+      private
+
       def self.substitute_num!(msg,num,arg)
         msg.gsub!(substitute_num_regexp(num),pp_format_arg(arg))
       end
@@ -79,12 +80,12 @@ module DTK; class ErrorUsage
       end
 
       def self.pp_format_arg(arg)
-        if arg.kind_of?(Array) or arg.kind_of?(Hash)
+        if arg.is_a?(Array) || arg.is_a?(Hash)
           format_type = DefaultNonScalarFormatType
           "\n\n#{Aux.serialize(arg,format_type)}"
-        elsif arg.kind_of?(String)
+        elsif arg.is_a?(String)
           arg
-        elsif arg.kind_of?(TrueClass) or arg.kind_of?(FalseClass) or arg.kind_of?(Fixnum) or arg.kind_of?(Symbol)
+        elsif arg.is_a?(TrueClass) || arg.is_a?(FalseClass) || arg.is_a?(Fixnum) || arg.is_a?(Symbol)
           arg.to_s
         else      
           arg.inspect
@@ -94,7 +95,7 @@ module DTK; class ErrorUsage
     
 
       def self.substitute_num_regexp(num)
-        Regexp.new("\\?#{num.to_s}")
+        Regexp.new("\\?#{num}")
       end
       def self.substitute_param_regexp(param)
         Regexp.new("\\?#{param}")

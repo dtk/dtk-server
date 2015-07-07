@@ -8,6 +8,7 @@ module DTK; class Clone
         @module_branch = module_branch
         @module_branch_id = @module_branch[:id]
       end
+
       def update?(components,opts={})
         cmps_needing_update = components.select{|cmp|component_needs_update?(cmp,opts)}
         return if cmps_needing_update.empty?
@@ -17,7 +18,8 @@ module DTK; class Clone
         end
       end
 
-     private
+      private
+
       def update(components,opts={})
         # get mapping between component instances and their templates
         # component templates indexed by component type
@@ -25,13 +27,13 @@ module DTK; class Clone
         rows_to_update = components.map do |cmp|
           cmp_template = links.template(cmp)
           {
-            :id => cmp[:id],
-            :module_branch_id => @module_branch_id,
-            :version => cmp_template[:version],
-            :locked_sha => nil, #this serves to let component instance get updated as this branch is updated
-            :implementation_id => cmp_template[:implementation_id],
-            :ancestor_id => cmp_template[:id],
-            :external_ref => cmp_template[:external_ref]
+            id: cmp[:id],
+            module_branch_id: @module_branch_id,
+            version: cmp_template[:version],
+            locked_sha: nil, #this serves to let component instance get updated as this branch is updated
+            implementation_id: cmp_template[:implementation_id],
+            ancestor_id: cmp_template[:id],
+            external_ref: cmp_template[:external_ref]
           }
         end
         Model.update_from_rows(@project_idh.createMH(:component),rows_to_update)
@@ -45,8 +47,8 @@ module DTK; class Clone
       end
 
       def component_needs_update?(cmp,opts={})
-        opts[:meta_file_changed] or
-        needs_to_be_moved_to_assembly_branch?(cmp) or
+        opts[:meta_file_changed] ||
+        needs_to_be_moved_to_assembly_branch?(cmp) ||
         has_locked_sha?(cmp)
       end
 
@@ -55,7 +57,7 @@ module DTK; class Clone
       end
       
       def has_locked_sha?(cmp)
-        (cmp.has_key?(:locked_sha) and !cmp[:locked_sha].nil?) or 
+        (cmp.key?(:locked_sha) && !cmp[:locked_sha].nil?) || 
          # added protection in case :locked_sha not in ruby object
          !cmp.get_field?(:locked_sha).nil?
       end
@@ -66,11 +68,11 @@ module DTK; class Clone
         version_field = @module_branch.get_field?(:version)
         match_el_array = component_types.map do |ct|
           DTK::Component::Template::MatchElement.new(
-           :component_type => ct,
-            :version_field => version_field
+           component_type: ct,
+            version_field: version_field
           )
         end
-        ndx_cmp_type_template = DTK::Component::Template.get_matching_elements(@project_idh,match_el_array,opts).inject(Hash.new) do |h,r|
+        ndx_cmp_type_template = DTK::Component::Template.get_matching_elements(@project_idh,match_el_array,opts).inject({}) do |h,r|
           h.merge(r[:component_type] => r)
         end
         cmps.each do |cmp|
@@ -80,7 +82,6 @@ module DTK; class Clone
         end
         ret
       end
-
     end
   end
 end; end

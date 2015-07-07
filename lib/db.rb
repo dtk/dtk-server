@@ -10,7 +10,7 @@ module DTK
     attr_reader :c
     attr_reader :db #TBD: for testing
 
-    def initialize()
+    def initialize
       @db = nil
       @c = 2 # TBD for testing hard wiring context
     end
@@ -27,7 +27,7 @@ module DTK
       @db.from(*([tbl]+from_clauses))
     end
 
-    def empty_dataset()
+    def empty_dataset
       @db.dataset()
     end
 
@@ -54,7 +54,7 @@ module DTK
       paging_opts =  opts[:page] || opts[:paging] #TBD: should switch over to just paging
       if paging_opts
         any_change[:changed] = true
-        if paging_opts[:limit] and  paging_opts[:start]
+        if paging_opts[:limit] &&  paging_opts[:start]
           ret = ret.limit(paging_opts[:limit],paging_opts[:start])
         elsif paging_opts[:limit]
           ret = ret.limit(paging_opts[:limit])
@@ -74,20 +74,20 @@ module DTK
       db_class.new(db_params)
     end
 
-    def self.create_for_migrate()
+    def self.create_for_migrate
       sequel_db = ::DB
       db_type = sequel_db.adapter_scheme 
       r8_nested_require('db',"adapters/#{db_type}")
       db_class = DTK.const_get db_type.to_s.capitalize
-      db_class.new({},Opts.new(:sequel_db => sequel_db))
+      db_class.new({},Opts.new(sequel_db: sequel_db))
     end
 
     # TODO: just temp until we get rid of need to convert keys to symbols; right now default is to do so 
     def self.ret_json_hash(raw_value,col_info,opts={})
       begin
         hash = JSON.parse(raw_value)
-        if (col_info.has_key?(:ret_keys_as_symbols) and col_info[:ret_keys_as_symbols].to_s == "false") or
-           (opts.has_key?(:ret_keys_as_symbols) and opts[:ret_keys_as_symbols].to_s == "false")
+        if (col_info.key?(:ret_keys_as_symbols) && col_info[:ret_keys_as_symbols].to_s == "false") ||
+           (opts.key?(:ret_keys_as_symbols) && opts[:ret_keys_as_symbols].to_s == "false")
           hash
         else
           ret_keys_as_symbols(hash)
@@ -100,14 +100,14 @@ module DTK
     
     def self.parent_field(parent_model_name,model_name,opts={})
       ret = ret_parent_id_field_name(DB_REL_DEF[parent_model_name],DB_REL_DEF[model_name])
-      if ret.nil? and !opts[:can_be_nil]
+      if ret.nil? && !opts[:can_be_nil]
         Log.error("Unexpectd that there is call to parent_field(#{parent_model_name},#{model_name}) which yields nil")
       end
       ret
     end
     # TODO: deprecate direct call of the two below
     def self.ret_parent_id_field_name(parent_db_rel,db_rel)
-      return nil unless parent_db_rel and db_rel
+      return nil unless parent_db_rel && db_rel
       parent_db_rel[:schema] == db_rel[:schema] ?
         (parent_db_rel[:table].to_s + "_id").to_sym :
         (parent_db_rel[:schema].to_s + "_" + parent_db_rel[:table].to_s + "_id").to_sym 
@@ -116,11 +116,11 @@ module DTK
       self.class.ret_parent_id_field_name(parent_db_rel,db_rel)
     end
 
-   private
+    private
 
     def self.ret_keys_as_symbols(obj)
-      return obj.map{|x|ret_keys_as_symbols(x)} if obj.kind_of?(Array)
-      return obj unless obj.kind_of?(Hash)
+      return obj.map{|x|ret_keys_as_symbols(x)} if obj.is_a?(Array)
+      return obj unless obj.is_a?(Hash)
       ret = {}
       obj.each_pair {|k,v| ret[k.to_sym] = ret_keys_as_symbols(v)}
       ret
@@ -139,7 +139,7 @@ class DBRel < Hash
   def initialize(x)
     super()
     
-    if x.kind_of?(Hash)
+    if x.is_a?(Hash)
         x.each_pair{|k,v|self[k.to_sym] = v}
     else
       self[:schema] = :public
@@ -166,32 +166,32 @@ class DBRel < Hash
 
   TOP_SCHEMA_NAME = :top
   TOP_RELATION_TYPE = :"__top"
-  ID_TYPES = {:id => :bigint, :local_id => :integer, :context_id => :integer}
-  TOP_LOCAL_ID_SEQ = {:schema => TOP_SCHEMA_NAME, :fn => :local_id_seq}
-  ID_INFO_TABLE = DBRel[:schema => TOP_SCHEMA_NAME, :table => :id_info, :id => :relation_id, :local_id => :relation_local_id,:parent_id => :parent_id, :relation_type => :id_info]
-  CLONE_HELPER_TABLE = DBRel[:schema => TOP_SCHEMA_NAME, :table => :clone_helper]
-  CONTEXT_TABLE = DBRel[:schema => :context, :table => :context]
-  USER_TABLE = DBRel[:schema => :app_user, :table => :user]
-  USER_GROUP_TABLE = DBRel[:schema => :app_user, :table => :group]
-  ELEMENT_UPDATE_TRIGGER = {:schema => TOP_SCHEMA_NAME, :fn => :element_update}
+  ID_TYPES = {id: :bigint, local_id: :integer, context_id: :integer}
+  TOP_LOCAL_ID_SEQ = {schema: TOP_SCHEMA_NAME, fn: :local_id_seq}
+  ID_INFO_TABLE = DBRel[schema: TOP_SCHEMA_NAME, table: :id_info, id: :relation_id, local_id: :relation_local_id,parent_id: :parent_id, relation_type: :id_info]
+  CLONE_HELPER_TABLE = DBRel[schema: TOP_SCHEMA_NAME, table: :clone_helper]
+  CONTEXT_TABLE = DBRel[schema: :context, table: :context]
+  USER_TABLE = DBRel[schema: :app_user, table: :user]
+  USER_GROUP_TABLE = DBRel[schema: :app_user, table: :group]
+  ELEMENT_UPDATE_TRIGGER = {schema: TOP_SCHEMA_NAME, fn: :element_update}
   FUNCTION_SCHEMA = TOP_SCHEMA_NAME
 
   CONTEXT_ID = :c
-  FK_CASCADE_OPT = {:on_delete => :cascade, :on_update => :cascade}
-  FK_SET_NULL_OPT = {:on_delete => :set_null, :on_update => :set_null}
-  DB_REL_DEF = {:id_info => ID_INFO_TABLE} #when models walked they get put in here
+  FK_CASCADE_OPT = {on_delete: :cascade, on_update: :cascade}
+  FK_SET_NULL_OPT = {on_delete: :set_null, on_update: :set_null}
+  DB_REL_DEF = {id_info: ID_INFO_TABLE} #when models walked they get put in here
   COMMON_REL_COLUMNS = {
-    CONTEXT_ID => {:type => ID_TYPES[:context_id]},
-    :id => {:type =>  ID_TYPES[:id]},
-    :local_id => {:type => ID_TYPES[:local_id], :hidden => true},
-    :ref => {:type => :string, :hidden => true},
-    :ref_num => {:type => :integer, :hidden => true},
-    :description => {:type => :string},
-    :display_name => {:type => :string},
-    :created_at => {:type => :timestamp},
-    :updated_at => {:type => :timestamp},
-    :owner_id => {:type => ID_TYPES[:id], :hidden => true},
-    :group_id => {:type => ID_TYPES[:id], :hidden => true}
+    CONTEXT_ID => {type: ID_TYPES[:context_id]},
+    :id => {type: ID_TYPES[:id]},
+    :local_id => {type: ID_TYPES[:local_id], hidden: true},
+    :ref => {type: :string, hidden: true},
+    :ref_num => {type: :integer, hidden: true},
+    :description => {type: :string},
+    :display_name => {type: :string},
+    :created_at => {type: :timestamp},
+    :updated_at => {type: :timestamp},
+    :owner_id => {type: ID_TYPES[:id], hidden: true},
+    :group_id => {type: ID_TYPES[:id], hidden: true}
   }
 end
 

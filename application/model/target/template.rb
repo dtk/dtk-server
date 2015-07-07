@@ -2,12 +2,12 @@ module DTK
   # This is a provider
   class Target
     class Template < self
-      subclass_model :target_template, :target, :print_form => 'provider'
+      subclass_model :target_template, :target, print_form: 'provider'
 
       def self.list(target_mh)
         sp_hash = {
-          :cols => common_columns(),
-          :filter => object_type_filter()
+          cols: common_columns(),
+          filter: object_type_filter()
         }
         get_these_objs(target_mh, sp_hash)
       end
@@ -27,22 +27,22 @@ module DTK
         display_name = provider_display_name(provider_name)
         ref = display_name.downcase.gsub(/ /,"-")
         create_row = {
-          :iaas_type       => iaas_type.to_s,
-          :project_id      => project_idh.get_id(),
-          :type            => 'template', 
-          :ref             => ref, 
-          :display_name    => display_name,
-          :description     => params_hash[:description],
-          :iaas_properties => iaas_properties
+          iaas_type: iaas_type.to_s,
+          project_id: project_idh.get_id(),
+          type: 'template', 
+          ref: ref, 
+          display_name: display_name,
+          description: params_hash[:description],
+          iaas_properties: iaas_properties
         }
-        create_opts = {:convert => true, :ret_obj => {:model_name => :target_template}}
+        create_opts = {convert: true, ret_obj: {model_name: :target_template}}
         create_from_row(target_mh,create_row,create_opts)
       end
 
       class DeleteResponse < Hash
         def add_target_response(hash)
           hash.each_pair do |msg_type,msg_array|
-            pntr = (self[msg_type] ||= Array.new)
+            pntr = (self[msg_type] ||= [])
             msg_array.each{|msg|pntr << msg}
           end
           self
@@ -51,7 +51,7 @@ module DTK
       def self.delete_and_destroy(provider,opts={})
         response = DeleteResponse.new()
         unless opts[:force]
-          assembly_instances = provider.get_assembly_instances(:omit_empty_workspace => true)
+          assembly_instances = provider.get_assembly_instances(omit_empty_workspace: true)
           unless assembly_instances.empty?
             assembly_names = assembly_instances.map{|a|a[:display_name]}.join(',')
             provider_name = provider.get_field?(:display_name)
@@ -59,7 +59,7 @@ module DTK
           end
         end
 
-        target_instances = provider.get_target_instances(:cols => [:display_name,:is_default_target])
+        target_instances = provider.get_target_instances(cols: [:display_name,:is_default_target])
         Transaction do
           target_instances.each do |target_instance|
             target_delete_response = Instance.delete_and_destroy(target_instance)
@@ -74,33 +74,32 @@ module DTK
         # for succinctness
         r = region_or_regions
         regions = 
-          if r.kind_of?(Array) then r
-          elsif r.kind_of?(String) then [r]
+          if r.is_a?(Array) then r
+          elsif r.is_a?(String) then [r]
           else R8::Config[:ec2][:regions]
           end
         
         common_iaas_properties = get_field?(:iaas_properties)
         # DTK-1735 DO NOT copy aws key and secret from provider to target
-        common_iaas_properties.delete_if{|k,v| [:key, :secret].include?(k)}
+        common_iaas_properties.delete_if{|k,_v| [:key, :secret].include?(k)}
 
         iaas_properties_list = regions.map do |region|
-          name = default_target_name(:region => region)
-          properties = common_iaas_properties.merge(:region => region)
-          IAASProperties.new(:name => name, :iaas_properties => properties)
+          name = default_target_name(region: region)
+          properties = common_iaas_properties.merge(region: region)
+          IAASProperties.new(name: name, iaas_properties: properties)
         end
         Instance.create_targets?(project_idh,self,iaas_properties_list)
       end
 
       def get_availability_zones(region)
-        CommandAndControl.get_and_process_availability_zones(get_field?(:iaas_type), get_field?(:iaas_properties).merge(:region => region),region)
+        CommandAndControl.get_and_process_availability_zones(get_field?(:iaas_type), get_field?(:iaas_properties).merge(region: region),region)
       end
 
-
       def get_assembly_instances(opts={})
-        ret = Array.new
+        ret = []
         target_instances = id_handle.create_object().get_target_instances()
         unless target_instances.empty?
-          ret = Assembly::Instance.get(model_handle(:assembly_instance),:target_idhs => target_instances.map{|t|t.id_handle})
+          ret = Assembly::Instance.get(model_handle(:assembly_instance),target_idhs: target_instances.map{|t|t.id_handle})
           if opts[:omit_empty_workspace]
             ret.reject! do |assembly|
               if Workspace.is_workspace?(assembly)
@@ -114,8 +113,8 @@ module DTK
 
       def get_target_instances(opts={})
         sp_hash = {
-          :cols => add_default_cols?(opts[:cols]),
-          :filter => [:eq,:parent_id,id()]
+          cols: add_default_cols?(opts[:cols]),
+          filter: [:eq,:parent_id,id()]
         }
         Target::Instance.get_objs(model_handle(:target_instance),sp_hash)
       end
@@ -128,13 +127,15 @@ module DTK
           raise Error.new("Not implemented when hash_parsm keys are: #{hash_params.keys.join(',')}")
         end
       end
-     private
-      def base_name()
+
+      private
+
+      def base_name
         # get_field?(:display_name).gsub(Regexp.new("#{DisplayNameSufix}$"),'')
         get_field?(:display_name)
       end
 
-      def self.object_type_filter()
+      def self.object_type_filter
         [:eq,:type,'template']
       end
       
@@ -147,13 +148,12 @@ module DTK
 
       def self.provider_exists?(project_idh,provider_name)
         sp_hash = {
-          :cols => [:id],
-          :filter => [:and,[:eq,:display_name,provider_display_name(provider_name)],
-                      [:eq,:project_id,project_idh.get_id()]]
+          cols: [:id],
+          filter: [:and,[:eq,:display_name,provider_display_name(provider_name)],
+                   [:eq,:project_id,project_idh.get_id()]]
         }
         get_obj(project_idh.createMH(:target_template),sp_hash)
       end
-
     end
   end
 end

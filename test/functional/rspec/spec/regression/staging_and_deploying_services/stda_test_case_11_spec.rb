@@ -19,7 +19,6 @@ rsa_pub_name = 'test'
 dtk_common = DtkCommon.new(service_name, assembly_name)
 
 describe "(Staging And Deploying Assemblies) Test Case 11: Stage multi node assembly, try to grant access and revoke non-existing access, converge assembly and then try grant and revoke access again" do
-
 	before(:all) do
 		puts "********************************************************************************************************************************************************************************************",""
   end

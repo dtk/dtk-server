@@ -17,7 +17,7 @@ end
 class ErrorParticipant
   include Ruote::LocalParticipant
  
-  def consume(workitem)
+  def consume(_workitem)
     puts "error"
     raise "Houston, something is wrong"
   end
@@ -32,7 +32,6 @@ engine.register_participant 'gamma', DefaultParticipant
 # engine.register do
 #  catchall DefaultParticipant
 # end
-
 
 pdef = Ruote.process_definition do
   concurrence do
@@ -54,13 +53,11 @@ wfid = nil
    Thread.new() { sleep 1; status = engine.process(wfid); pp status}
   ]
 threads.each { |aThread|  aThread.join }
-=begin
-wfid = engine.launch(pdef)
-status = engine.process(wfid)
-pp status 
-engine.wait_for(wfid)
-=end
-  # blocks until the process terminates or gets into an error
+# wfid = engine.launch(pdef)
+# status = engine.process(wfid)
+# pp status 
+# engine.wait_for(wfid)
+# blocks until the process terminates or gets into an error
  
 # err = engine.process(wfid).errors.first
 # puts "intercepted an error: #{err.message}..."

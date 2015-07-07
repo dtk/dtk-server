@@ -4,7 +4,6 @@ require 'readline'
 require 'awesome_print'
 
 class PerfLogParser
-
 	def self.parse
 		path = "/tmp/perf.out"
 		results = []
@@ -30,9 +29,9 @@ class PerfLogParser
 				record[:sql] << field
 			elsif field = get_field(line, /^MEASUREMENT=(.+)/)
 
-			# NEW KEY FOR AFTER DEMO elsif field = get_field(line, /^MEASUREMENT=(.+)/)
+			 # NEW KEY FOR AFTER DEMO elsif field = get_field(line, /^MEASUREMENT=(.+)/)
 				k,v = field.split(',')[0..1]
-				custom_results << { :measurement => k, :measurement_perf => v }
+				custom_results << { measurement: k, measurement_perf: v }
 			end
 		end
 		return results, custom_results
@@ -69,16 +68,16 @@ class PerfLogParser
 				results[results_unique_key][:tr_cnt] += 1
 			else
 				results[results_unique_key] = { 
-					:operation => record[:operation], 
-					:assembly_subtype => subtype, 
-					:about => about,
-					:db_call_cnt => record[:perf_sql] ? record[:perf_sql].size : 0,
-					:avg_tot_sql_dur => total_dur,
-					:avg_tot_oper_dur => record[:perf_operation].to_f,
-					:table_list => record[:table] || [],
-					:sql_list => record[:sql],
-					:sql_perf => record[:perf_sql],
-					:tr_cnt => 1
+					operation: record[:operation], 
+					assembly_subtype: subtype, 
+					about: about,
+					db_call_cnt: record[:perf_sql] ? record[:perf_sql].size : 0,
+					avg_tot_sql_dur: total_dur,
+					avg_tot_oper_dur: record[:perf_operation].to_f,
+					table_list: record[:table] || [],
+					sql_list: record[:sql],
+					sql_perf: record[:perf_sql],
+					tr_cnt: 1
 				}
 			end
 		end
@@ -90,9 +89,9 @@ class PerfLogParser
 				custom_results[unique_key][:tr_cnt] += 1
 			else
 				custom_results[unique_key] = { 
-					:measurement => record[:measurement], 
-					:avg_oper_dur => record[:measurement_perf].to_f,
-					:tr_cnt => 1
+					measurement: record[:measurement], 
+					avg_oper_dur: record[:measurement_perf].to_f,
+					tr_cnt: 1
 				}
 			end
 		end
@@ -127,7 +126,8 @@ class PerfLogParser
 		end
 	end
 
-	private
+	 private
+
 		def self.get_avg(tot, cnt)
 			return tot if tot == 0
 			return ((tot / cnt) * 10.0).round() / 10.0

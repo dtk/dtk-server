@@ -3,7 +3,6 @@ require 'ap'
 module XYZ
   # class methods
   module MigrationMethods #methods that can be called within a migration
-
     # if model_names given then just (re)building these tables
     def db_rebuild(model_names=nil,opts=Opts.new)
       db = opts[:db]||DB.create(R8::Config[:database])
@@ -57,7 +56,7 @@ module XYZ
         gitoliteMng.delete_repo(k)
       end
 
-      repo_info_hash.each do |k,v|
+      repo_info_hash.each do |_k,v|
         next unless File.directory?(v[:old_dir])
         puts "Deleting dir #{v[:old_dir]}"
         FileUtils.remove_dir(v[:old_dir])
@@ -67,13 +66,13 @@ module XYZ
     end
 
     def update_all_implementations(c)
-      implementations = Model.get_objs(ModelHandle.new(c, :implementation), { :cols => [:id, :display_name, :repo_id, :repo]})
+      implementations = Model.get_objs(ModelHandle.new(c, :implementation), cols: [:id, :display_name, :repo_id, :repo])
       repo_mh = ModelHandle.new(c, :repo)
       implementations.each do |impl|
-        repo = Model.get_by_id(impl[:repo_id], repo_mh, { :cols => [:id, :display_name, :ref, :repo_name]})
+        repo = Model.get_by_id(impl[:repo_id], repo_mh, cols: [:id, :display_name, :ref, :repo_name])
         impl.update(
-          :repo => repo[:repo_name]
-          )
+          repo: repo[:repo_name]
+        )
       end
     end
 
@@ -106,9 +105,9 @@ module XYZ
 
       # GET ALL THE MODULES
       columns = [ :id, :display_name, :c, :group_id, :repos, :remote_repos]
-      modules  = Model.get_objs(default_project.model_handle(:component_module), { :cols => columns})
-      services = Model.get_objs(default_project.model_handle(:service_module), { :cols => columns})
-      tests = Model.get_objs(default_project.model_handle(:test_module), { :cols => columns})
+      modules  = Model.get_objs(default_project.model_handle(:component_module), cols: columns)
+      services = Model.get_objs(default_project.model_handle(:service_module), cols: columns)
+      tests = Model.get_objs(default_project.model_handle(:test_module), cols: columns)
 
       components = modules + services + tests
       raise "No data to migrate, exiting ..." if components.empty?
@@ -126,7 +125,7 @@ module XYZ
         remote_namespace_obj = Namespace.find_or_create(default_project.model_handle(:namespace), remote_namespace)
 
         ref_name = "#{remote_namespace}::#{e[:display_name]}"
-        e.update(:namespace_id => remote_namespace_obj.id(), :ref => ref_name)
+        e.update(namespace_id: remote_namespace_obj.id(), ref: ref_name)
 
         if e[:repo]
           old_repo_name = e[:repo][:repo_name]
@@ -155,21 +154,19 @@ module XYZ
             new_repo.remove_group('tenants')
             old_repo.remove_group('tenants')
 
-            repos_changes.store(old_repo_name, {
-              :new_repo_name => new_repo_name,
-              :old_dir => "/home/#{tenant_name}/r8server-repo/#{old_repo_name}",
-              :new_dir => "/home/#{tenant_name}/r8server-repo/#{new_repo_name}",
-              :branch_name => "workspace-private-#{username}"
-              }
-            )
+            repos_changes.store(old_repo_name,               new_repo_name: new_repo_name,
+              old_dir: "/home/#{tenant_name}/r8server-repo/#{old_repo_name}",
+              new_dir: "/home/#{tenant_name}/r8server-repo/#{new_repo_name}",
+              branch_name: "workspace-private-#{username}"
+                               )
 
             e[:repo].update(
-              :ref => new_repo_name,
-              :display_name => new_repo_name,
-              :repo_name => new_repo_name,
-              :local_dir => "/home/#{tenant_name}/r8server-repo/#{new_repo_name}",
-              :remote_repo_namespace => remote_namespace,
-              :remote_repo_name => e[:repo_remote] ? e[:repo_remote][:repo_name] : nil
+              ref: new_repo_name,
+              display_name: new_repo_name,
+              repo_name: new_repo_name,
+              local_dir: "/home/#{tenant_name}/r8server-repo/#{new_repo_name}",
+              remote_repo_namespace: remote_namespace,
+              remote_repo_name: e[:repo_remote] ? e[:repo_remote][:repo_name] : nil
             )
           else
             puts "MISSSING USERNAME!!!!"
@@ -190,6 +187,5 @@ module XYZ
 
       ap "MIGRATE DATE - FINISHED"
     end
-
   end
 end

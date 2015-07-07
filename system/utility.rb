@@ -15,13 +15,13 @@ module R8Tpl
 
       def get_i18n_mappings_for_models(*model_names)
         models_to_cache = model_names.map{|m|(I18nMappingInfo[m]||{})[:models]||[]}.flatten.uniq
-        return Hash.new if models_to_cache.empty?
+        return {} if models_to_cache.empty?
         models_to_cache.inject({}){|h,m|h.merge(m => get_model_i18n(m))}
       end
 
       I18nMappingInfo = {
-        :component => {:models => [:component], :name_field => :component_name, :i18n_field => :component_i18n},
-        :attribute => {:models => [:attribute,:component], :name_field => :attribute_name, :i18n_field => :attribute_i18n,:aux_field => :component_name}
+        component: {models: [:component], name_field: :component_name, i18n_field: :component_i18n},
+        attribute: {models: [:attribute,:component], name_field: :attribute_name, i18n_field: :attribute_i18n,aux_field: :component_name}
       }
 
       def i18n_string(i18n,model_name,input_string,aux=nil)
@@ -42,19 +42,19 @@ module R8Tpl
         if [ "component_external", "component_internal_external"].include?(port[:type])
           "#{cmp_i18n} / #{attr_i18n}"
         else
-          "#{cmp_i18n} #{port.ref_num().to_s} / #{attr_i18n}"
+          "#{cmp_i18n} #{port.ref_num()} / #{attr_i18n}"
         end
       end
 
       module I18nAux
-        def self.i18n_string_component(i18n,input_string,aux=nil)
+        def self.i18n_string_component(i18n,input_string,_aux=nil)
           string = translate_input(i18n,:component,input_string)
           return string if string
           # otherwise use the following heuristic
           input_string.to_s.gsub(XYZ::Model::Delim::RegexpCommon, " ")
         end
 
-        def self.i18n_string_attribute(i18n,input_string,component_type=nil)
+        def self.i18n_string_attribute(i18n,input_string,_component_type=nil)
           # TODO: stub; not yet using component_type
           proc_input_string,index = ret_removed_array_index(input_string)
           translation = translate_input(i18n,:attribute,proc_input_string)
@@ -82,9 +82,8 @@ module R8Tpl
         def self.index_print_form(index)
           return nil if index.nil?
           return nil if index == 0
-          "[#{(index+1).to_s}]"
+          "[#{(index+1)}]"
         end
-
       end
 
       def build_js_model_caches(user=nil)
@@ -93,55 +92,54 @@ module R8Tpl
       end
 
       def get_model_i18n(model_name,user=nil)
-        language = ((user and user.respond_to?(:language)) ? user.language : nil) || R8::Config[:default_language]
-        return Cache[model_name][language] if (Cache[model_name] and Cache[model_name][language])
+        language = ((user && user.respond_to?(:language)) ? user.language : nil) || R8::Config[:default_language]
+        return Cache[model_name][language] if (Cache[model_name] && Cache[model_name][language])
 
-        content = Hash.new
+        content = {}
         file_name = "#{R8::Config[:i18n_base_dir]}/#{model_name}/#{language}.rb"
         if File.exists?(file_name) 
           content = eval(IO.read(file_name))
-#        else
-#          file_name = "#{R8::Config[:i18n_root]}/#{R8::Config[language]}.rb"
-#          content = eval(IO.read(file_name)) if File.exists?(file_name)
+          #        else
+          #          file_name = "#{R8::Config[:i18n_root]}/#{R8::Config[language]}.rb"
+          #          content = eval(IO.read(file_name)) if File.exists?(file_name)
         end
 
         file_name = "#{R8::Config[:i18n_base_dir]}/#{model_name}/#{language}.options.rb"
         if File.exists?(file_name) 
           content[:options_list] = eval(IO.read(file_name))
-#        else
-#          file_name = "#{R8::Config[:i18n_root]}/#{R8::Config[language]}.rb"
-#          content = eval(IO.read(file_name)) if File.exists?(file_name)
+          #        else
+          #          file_name = "#{R8::Config[:i18n_root]}/#{R8::Config[language]}.rb"
+          #          content = eval(IO.read(file_name)) if File.exists?(file_name)
         end
-        content[:options_list] = Hash.new if content[:options_list].nil?
+        content[:options_list] = {} if content[:options_list].nil?
         set_and_ret_cache(model_name,language,content)
       end
 
       def get_model_options(model_name,user=nil)
-        language = ((user and user.respond_to?(:language)) ? user.language : nil) || R8::Config[:default_language]
-        return Cache[model_name][language][:options_list] if (Cache[model_name] and Cache[model_name][language] and Cache[model_name][language][:options_list])
+        language = ((user && user.respond_to?(:language)) ? user.language : nil) || R8::Config[:default_language]
+        return Cache[model_name][language][:options_list] if (Cache[model_name] && Cache[model_name][language] && Cache[model_name][language][:options_list])
 
         return nil
       end
 
       def get_model_defs(model_name)
-        return Cache[model_name][:model_defs] if (Cache[model_name] and Cache[model_name][:model_defs])
+        return Cache[model_name][:model_defs] if (Cache[model_name] && Cache[model_name][:model_defs])
 
-        content = Hash.new
+        content = {}
         file_name = "#{R8::Config[:meta_base_dir]}/#{model_name}/model_def.rb"
         if File.exists?(file_name) 
           content = eval(IO.read(file_name))
         end
 
-        Cache[model_name] ||= Hash.new
+        Cache[model_name] ||= {}
         Cache[model_name][:model_defs] ||= content
       end
 
-
-# TODO: build role based cache versions
-      def build_model_defs_js_cache()
+      # TODO: build role based cache versions
+      def build_model_defs_js_cache
         set_app_def() unless Cache[:app]
 
-        model_defs = Hash.new
+        model_defs = {}
         Cache[:app][:model_list].each do |model|
             model_defs[model] = get_model_defs(model)
         end
@@ -150,11 +148,11 @@ module R8Tpl
         File.open(cache_file_name, 'w') {|fhandle|fhandle.write(cache_str)}
       end
 
-# TODO: build language based cache versions
+      # TODO: build language based cache versions
       def build_model_i18n_js_cache(user)
         set_app_def() unless Cache[:app]
 
-        model_i18n = Hash.new
+        model_i18n = {}
         Cache[:app][:model_list].each do |model|
             model_i18n[model] = get_model_i18n(model,user)
         end
@@ -164,9 +162,9 @@ module R8Tpl
         File.open(cache_file_name, 'w') {|fhandle|fhandle.write(cache_str)}
       end
 
-      def set_app_def()
+      def set_app_def
         if(!Cache[:app])
-          content = Hash.new
+          content = {}
           file_name = "#{R8::Config[:meta_base_dir]}/app_def.rb"
           if File.exists?(file_name) 
             content = eval(IO.read(file_name))
@@ -176,10 +174,11 @@ module R8Tpl
         end
       end
 
-     private
-      Cache = Hash.new
+      private
+
+      Cache = {}
       def set_and_ret_cache(model_name,language,content)
-        Cache[model_name] ||= Hash.new
+        Cache[model_name] ||= {}
         Cache[model_name][language] ||= content
       end
     end

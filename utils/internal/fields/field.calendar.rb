@@ -1,7 +1,6 @@
 
 
 class Fieldcalendar < Fieldbase
-
   attr_accessor :default_class,:read_only,:cal_type
 
   def initialize(field_meta)
@@ -12,7 +11,6 @@ class Fieldcalendar < Fieldbase
 
     (!field_meta['cols'].nil?) ? @columns = field_meta['cols'] : @columns = 40
     (!field_meta['cal_type'].nil?) ? @cal_type = field_meta['cal_type'] : @cal_type = 'basic'
-
   end
 
   def set_includes(r8_view_ref)
@@ -26,46 +24,46 @@ class Fieldcalendar < Fieldbase
      r8_view_ref.add_to_css_require("core/css/yui-cal.css");
   end
 
-   # This returns the Edit View of a input of type calendar in HTML form
-   # protected function
-  def get_field_edit_html()
+  # This returns the Edit View of a input of type calendar in HTML form
+  # protected function
+  def get_field_edit_html
     return '<HTML NOT IMPLEMENT YET>'
   end
 
-   # This returns the Edit View of a input of type calendar in Javascript form
-   # protected function
-  def get_field_edit_js()
-# TODO: add JS rendering when generating JS fields class for client side rendering
+  # This returns the Edit View of a input of type calendar in Javascript form
+  # protected function
+  def get_field_edit_js
+    # TODO: add JS rendering when generating JS fields class for client side rendering
     return '<JS NOT IMPLEMENT YET>'
   end
 
-   # This returns the View of type edit for an input of type calendar in TPL/Smarty form
-   # protected function
-  def get_field_edit_rtpl()
+  # This returns the View of type edit for an input of type calendar in TPL/Smarty form
+  # protected function
+  def get_field_edit_rtpl
     case @cal_type
       when"basic"
         return self.get_basic_edit_rtpl
     end
   end
 
-   # This returns the View of type edit for an input of type basic calendar in TPL/Smarty form
-   # protected function
-  def get_basic_edit_rtpl()
-# TODO: replace hardcoded calbutton image with dynamic call for to get base file path
-# also replace show calendar with Show "Field String" Calendar, call to i18N func
+  # This returns the View of type edit for an input of type basic calendar in TPL/Smarty form
+  # protected function
+  def get_basic_edit_rtpl
+    # TODO: replace hardcoded calbutton image with dynamic call for to get base file path
+    # also replace show calendar with Show "Field String" Calendar, call to i18N func
     size = 'size="' + @columns.to_s + '"'
     btn_id = 'show-' + @id + '-cal'
     btn_title = 'Show Calendar'
 
     # add the script to register the calendar
-# R8 DEBUG
-#    $GLOBALS['log']->log('debug',"R8.fields.registerCal('".$this->id."','".$btn_id."','".$this->id."-cal');");
-#    $GLOBALS['ctrl']->addJSExeScript(
-#        array(
-#          'content' => "R8.fields.registerCal('".$this->id."','".$btn_id."','".$this->id."-cal');",
-#          'race_priority' => 'low'
-#        )
-#    );
+    # R8 DEBUG
+    #    $GLOBALS['log']->log('debug',"R8.fields.registerCal('".$this->id."','".$btn_id."','".$this->id."-cal');");
+    #    $GLOBALS['ctrl']->addJSExeScript(
+    #        array(
+    #          'content' => "R8.fields.registerCal('".$this->id."','".$btn_id."','".$this->id."-cal');",
+    #          'race_priority' => 'low'
+    #        )
+    #    );
 
     return '
     <input type="text" id="' + @id + '" name="' + @name + '" class="' + @class_txt + '" value="{%=' + @model_name + '[:' + @name + ']%}" ' + size + ' />
@@ -75,32 +73,31 @@ class Fieldcalendar < Fieldbase
     ';
   end
 
-   # This returns the View of type view for an input of type calendar in TPL/Smarty form
-   # protected function
-  def get_field_display_rtpl()
+  # This returns the View of type view for an input of type calendar in TPL/Smarty form
+  # protected function
+  def get_field_display_rtpl
     return '{%=' + @model_name + '[:' + @name + ']%}'
   end
 
-  def get_field_display_html()
+  def get_field_display_html
     return @value
   end
 
-  def get_field_display_js()
+  def get_field_display_js
     return '<JS DISPLAY NOT IMPLEMENTED YET>'
   end
 
   # This returns the View of type list for an input of type calendar in TPL/Smarty form
   # protected function
-  def get_field_list_rtpl()
+  def get_field_list_rtpl
     return '{%=' + @model_name + '[:' + @name + ']%}'
   end
 
-  def get_field_list_html()
+  def get_field_list_html
     return @value
   end
 
-  def get_field_list_js()
+  def get_field_list_js
     return '<JS NOT IMPLEMENTED YET>'
   end
-
 end

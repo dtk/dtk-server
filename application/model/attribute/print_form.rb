@@ -18,7 +18,6 @@ module DTK
         end
         ret
       end
-
     end
 
     module Format
@@ -31,24 +30,24 @@ module DTK
         new(aug_attr,opts).print_form()
       end
 
-      def print_form()
+      def print_form
         attr_name = attr_name_special_processing() || attr_name_default()
 
         attr_info = {
-          :name => attr_name,
-          :display_name => "#{@display_name_prefix}#{attr_name}",
-          :datatype => datatype_print_form(),
-          :description => @aug_attr[:description]||@aug_attr[:display_name]
+          name: attr_name,
+          display_name: "#{@display_name_prefix}#{attr_name}",
+          datatype: datatype_print_form(),
+          description: @aug_attr[:description]||@aug_attr[:display_name]
         }
         value = value_print_form()
         unless value.nil?()
           if @truncate_attribute_value
-            truncate_size = (@truncate_attribute_value.kind_of?(Fixnum) ? @truncate_attribute_value : DefaultTruncateSize)
-            if value.kind_of?(String) and value.size > truncate_size
+            truncate_size = (@truncate_attribute_value.is_a?(Fixnum) ? @truncate_attribute_value : DefaultTruncateSize)
+            if value.is_a?(String) && value.size > truncate_size
               value = "#{value[0..truncate_size-1]} #{TruncateSymbols}"
             end
           end
-          attr_info.merge!(:value => value)
+          attr_info.merge!(value: value)
         end
         @aug_attr.hash_subset(*PrintForm::UnchangedDisplayCols).merge(attr_info)
       end
@@ -58,16 +57,16 @@ module DTK
       TruncateSymbols = '...'
 
       def self.augment_with_attribute_links!(ret,assembly,raw_attributes)
-        ndx_attrs = raw_attributes.inject(Hash.new){|h,a|h.merge(a[:id] => a)}
-        ndx_attr_mappings = Hash.new
+        ndx_attrs = raw_attributes.inject({}){|h,a|h.merge(a[:id] => a)}
+        ndx_attr_mappings = {}
         assembly.get_augmented_attribute_mappings().each do |r|
           ndx = r[:input_id]
-          pntr = ndx_attr_mappings[ndx] ||= Array.new
+          pntr = ndx_attr_mappings[ndx] ||= []
           output_id = r[:output_id]
           unless pntr.find{|m|m[:id] == output_id}
             opts = Opts.new
             if output_index_map = r[:output_index_map]
-              opts.merge!(:index_map => output_index_map)
+              opts.merge!(index_map: output_index_map)
             end
             ndx_attr_mappings[ndx] << r[:output].print_form(opts)
           end
@@ -75,21 +74,22 @@ module DTK
         ret.each do |r|
           attr_id = r[:id]
           if linked_to_obj = ndx_attr_mappings[attr_id]
-            r.merge!(:linked_to => linked_to_obj,:linked_to_display_form => linked_to_display_form(linked_to_obj))
+            r.merge!(linked_to: linked_to_obj,linked_to_display_form: linked_to_display_form(linked_to_obj))
           else
             ext_ref = (ndx_attrs[attr_id]||{})[:external_ref]||{}
-            if ext_ref[:default_variable] and ext_ref[:type] == 'puppet_attribute'
-              r.merge!(:linked_to_display_form => LinkedToPuppetHeader) 
+            if ext_ref[:default_variable] && ext_ref[:type] == 'puppet_attribute'
+              r.merge!(linked_to_display_form: LinkedToPuppetHeader) 
             end
           end
         end
         ret
       end
 
-     private
+      private
+
       def initialize(aug_attr,opts=Opts.new)
         @aug_attr = aug_attr #needs to be done first
-        @display_name_prefix =  opts[:display_name_prefix] || display_name_prefix(opts.slice(:format, :with_assembly_wide_node).merge(:level => opts[:level]||find_level()))
+        @display_name_prefix =  opts[:display_name_prefix] || display_name_prefix(opts.slice(:format, :with_assembly_wide_node).merge(level: opts[:level]||find_level()))
         @index_map = opts[:index_map]
         @truncate_attribute_value = opts[:truncate_attribute_values]
         @raw_attribute_value = opts[:raw_attribute_value] 
@@ -101,12 +101,13 @@ module DTK
       end
       LinkedToPuppetHeader = 'external_ref(puppet_header)'
 
-      def attr_name_default()
+      def attr_name_default
         index_map_string = (@index_map ? @index_map.inspect() : "")
         "#{@aug_attr[:display_name]}#{index_map_string}"
       end
-      def attr_name_special_processing()
-        if @aug_attr[:semantic_type_summary] == "host_address_ipv4" and @index_map == [0]
+
+      def attr_name_special_processing
+        if @aug_attr[:semantic_type_summary] == "host_address_ipv4" && @index_map == [0]
           "host_address"
         end
       end
@@ -130,28 +131,28 @@ module DTK
       end
 
       DisplayNamePrefixFormats = {
-        :simple => {
-          :assembly => "",
-          :node => "$node/",
-          :component => "$node/$component/"
+        simple: {
+          assembly: "",
+          node: "$node/",
+          component: "$node/$component/"
         },
-        :canonical => {
-          :assembly => "",
-          :node => "node[$node]/",
-          :component => "node[$node]/cmp[$component]/"
+        canonical: {
+          assembly: "",
+          node: "node[$node]/",
+          component: "node[$node]/cmp[$component]/"
         }
       }
 
       def value_print_form(opts={})
-        value = (opts.has_key?(:nested_val) ? opts[:nested_val] : @aug_attr[:attribute_value])
+        value = (opts.key?(:nested_val) ? opts[:nested_val] : @aug_attr[:attribute_value])
         if value.nil?
           ret = 
             if opts[:nested]
               PrintValueNil
             else
-              if @mark_unset_required and @aug_attr[:required]
+              if @mark_unset_required && @aug_attr[:required]
                 # dont mark as required input ports since they will be propagated
-                unless @aug_attr[:is_port] and @aug_attr[:port_type_asserted] == 'input'
+                unless @aug_attr[:is_port] && @aug_attr[:port_type_asserted] == 'input'
                   PrintValueUnsetRequired
                 end
               end
@@ -163,20 +164,20 @@ module DTK
           return SemanticDatatype.convert_to_internal_form(@aug_attr[:semantic_data_type],value)
         end
 
-        if value.kind_of?(Array)
-          "[#{value.map{|el|value_print_form(:nested_val=>el,:nested=>true)}.join(', ')}]"
+        if value.is_a?(Array)
+          "[#{value.map{|el|value_print_form(nested_val: el,nested: true)}.join(', ')}]"
           # value.inspect
-        elsif value.kind_of?(Hash)
+        elsif value.is_a?(Hash)
           comma = ''
-          internal = value.inject(String.new) do |s,(k,val)|
+          internal = value.inject('') do |s,(k,val)|
             item = s + comma
             comma = ', '
-            el = value_print_form(:nested_val=>val,:nested=>true)
+            el = value_print_form(nested_val: val,nested: true)
             "#{item}#{k}=>#{el}"
           end
           "{#{internal}}"
           # value.inspect
-        elsif [String,Fixnum,TrueClass,FalseClass].find{|t|value.kind_of?(t)}
+        elsif [String,Fixnum,TrueClass,FalseClass].find{|t|value.is_a?(t)}
           value
         else
           value.inspect
@@ -185,21 +186,23 @@ module DTK
       PrintValueUnsetRequired = '*REQUIRED*'
       PrintValueNil = 'nil'
 
-      def datatype_print_form()
+      def datatype_print_form
         # TODO: until will populate node/os_identifier attribute with the node_template_type datatype
-        if  @aug_attr[:display_name] == 'os_identifier' and @aug_attr[:node]
+        if  @aug_attr[:display_name] == 'os_identifier' && @aug_attr[:node]
           return 'node_template_type'
         end
         @aug_attr[:semantic_data_type]||@aug_attr[:data_type]
       end
 
-      def node()
+      def node
         @aug_attr[:node]
       end
-      def component()
+
+      def component
         @aug_attr[:component]||@aug_attr[:nested_component]
       end
-      def find_level()
+
+      def find_level
         if node()
           component() ? :component : :node
         else

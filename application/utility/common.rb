@@ -32,18 +32,18 @@ class R8Server
     Aux.convert_to_hash(content,:yaml)
   end
 
-  def create_repo_user_instance_admin?()
+  def create_repo_user_instance_admin?
     repo_user_mh = pre_execute(:repo_user)
     RepoUser.add_repo_user?(:admin,repo_user_mh)
   end
 
-  def create_repo_user_for_nodes?()
+  def create_repo_user_for_nodes?
     repo_user_mh = pre_execute(:repo_user)
-    unless RepoUser.get_matching_repo_user(repo_user_mh, :type => :node)
-      new_key =  ::SSHKey.generate(:type => "rsa")
+    unless RepoUser.get_matching_repo_user(repo_user_mh, type: :node)
+      new_key =  ::SSHKey.generate(type: "rsa")
       ssh_rsa_keys = {
-        :public => new_key.ssh_public_key,
-        :private => new_key.private_key
+        public: new_key.ssh_public_key,
+        private: new_key.private_key
       }
       # dtk-node-dtkX should be in group 'all'
       user_mh = model_handle(:user)
@@ -66,27 +66,27 @@ class R8Server
 
   def create_public_library_nodes?
     container_idh = pre_execute(:top)
-    hash_content = LibraryNodes.get_hash(:in_library => 'public')
+    hash_content = LibraryNodes.get_hash(in_library: 'public')
     hash_content["library"]["public"]["display_name"] ||= "public"
     Model.import_objects_from_hash(container_idh,hash_content)
   end
 
-  def create_users_private_library?()
+  def create_users_private_library?
     library_mh = pre_execute(:library)
     Library.create_users_private_library?(library_mh)
   end
 
-  def create_users_private_target?(import_file=nil,ec2_region=nil)
+  def create_users_private_target?(_import_file=nil,ec2_region=nil)
     container_idh = pre_execute(:top)
     users_ref = "private-#{username}"
-    json_content = PrivateTargetTemplate.result(:project_ref => users_ref,:target_ref => users_ref,:ec2_region => ec2_region||"us-east-1")
+    json_content = PrivateTargetTemplate.result(project_ref: users_ref,target_ref: users_ref,ec2_region: ec2_region||"us-east-1")
     hash_content = JSON.parse(json_content)
     Model.import_objects_from_hash(container_idh,hash_content)
 
     # return idhs of new targets and new projects
     ret = {
-      :target_idhs => ret_idhs("datacenter",hash_content,container_idh),
-      :project_idhs => ret_idhs("project",hash_content,container_idh)
+      target_idhs: ret_idhs("datacenter",hash_content,container_idh),
+      project_idhs: ret_idhs("project",hash_content,container_idh)
     }
 
     # create workspace
@@ -135,20 +135,20 @@ eos
     template = File.open(template_path){|f|f.read}
     erubis = Erubis::Eruby.new(template)
     users_ref = "private-#{username}"
-    json_content = erubis.result(:target_name => target_name,:project_ref => users_ref,:target_ref => target_name,:ec2_region => ec2_region||"us-east-1")
+    json_content = erubis.result(target_name: target_name,project_ref: users_ref,target_ref: target_name,ec2_region: ec2_region||"us-east-1")
     hash_content = JSON.parse(json_content)
     Model.import_objects_from_hash(container_idh,hash_content)
 
     # return idhs of new targets
     {
-      :target_idhs => ret_idhs("datacenter",hash_content,container_idh)
+      target_idhs: ret_idhs("datacenter",hash_content,container_idh)
     }
   end
 
   def ret_idhs(mn,hash_content,container_idh)
     (hash_content[mn]||{}).keys.map do |key|
       ref = "/#{mn}/#{key}"
-      container_idh.createIDH(:uri => ref, :model_name => mn.to_sym)
+      container_idh.createIDH(uri: ref, model_name: mn.to_sym)
     end
   end
   private :ret_idhs
@@ -158,16 +158,19 @@ eos
   end
 
   private
+
   attr_reader :user_mh, :user_obj
-  def username()
+  def username
     user_obj[:username]
   end
+
   def pre_execute(model_name=nil)
     CurrentSession.new.set_user_object(user_obj)
     if model_name
       model_name == :top ? user_mh.create_top() : user_mh.createMH(model_name)
     end
   end
+
   def model_handle(model_name)
     c = 2
     ModelHandle.new(c,model_name)

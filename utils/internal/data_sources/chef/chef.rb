@@ -11,7 +11,7 @@ module XYZ
     class Chef < Top
       include ChefMixinMetadata
       include ChefMixinAssembly
-      def initialize_extra()
+      def initialize_extra
         @conn = nil
         @chef_node_cache = Aux::Cache.new 
         @cookbook_metadata_cache = Aux::Cache.new
@@ -40,10 +40,11 @@ module XYZ
             block.call(ds_hash)
           end
         end
-        return HashIsComplete.new({:type => "template"}) #HashMayNotBeComplete.new()
+        return HashIsComplete.new({type: "template"}) #HashMayNotBeComplete.new()
       end
 
-     private        
+      private
+        
       def get_node_components(node)
         ret = DataSourceUpdateHash.new
         (recipes(node)||[]).each do |recipe_name|
@@ -62,9 +63,8 @@ module XYZ
         return ret
       end
 
-
       def get_recipes_assoc_cookbook(cookbook_name)
-        ret = Array.new
+        ret = []
         recipes = get_cookbook_recipes_metadata(cookbook_name)
         return ret unless recipes
 
@@ -94,7 +94,7 @@ module XYZ
         @chef_node_cache[node_name] ||= filter_to_only_relevant(get_rest("nodes/#{node_name}",false))
       end
 
-      def get_nodes()
+      def get_nodes
         # TODO: may be better to make rest call per node or use chef iterator functionality
         # TODO": this is increemntal yupdate; wil wil be in context where this is needed?
         search_string = "node?q=*:*"
@@ -107,8 +107,8 @@ module XYZ
         @chef_node_cache
       end
 
-      def get_node_recipe_assocs()
-        ret = Hash.new
+      def get_node_recipe_assocs
+        ret = {}
         get_nodes().each{|node_name,node|ret[node_name] = recipes(node)}
         ret
       end
@@ -118,13 +118,12 @@ module XYZ
         node ? recipes(node) : nil
       end
 
-
       # TODO: stub
       def filter_to_only_relevant(node)
         node
       end
 
-      def get_cookbook_names()
+      def get_cookbook_names
         # get_rest("cookbooks")
         # stub that just gets cookbooks from run list; it actually has recipes so can pass this in too
         get_node_recipe_assocs().values.flatten.map{|x|x.gsub(/::.+$/,"")}.uniq
@@ -163,40 +162,38 @@ module XYZ
         remove_subsuming_attributes!(ret)
       end
 
-
       # removes attributes like foo when teher also exists foo/k1, foo/k2
       def remove_subsuming_attributes!(metadata)
         return metadata unless metadata and metadata["attributes"]
         exploded_keys = metadata["attributes"].keys.map{|x|x.split("/")}
         return metadata if exploded_keys.empty?
-        metadata["attributes"].reject! do |k,v| 
+        metadata["attributes"].reject! do |k,_v| 
           ek = k.split("/")
           exploded_keys.find{|k2| ek.size < k2.size and ek == k2[0..ek.size-1]}
         end
         metadata
       end
 
-
       def get_cookbook_name_from_recipe_name(recipe_name)
         recipe_name.gsub(/::.+/,"")
       end
 
       def get_monitoring_items(metadata)
-        ret = Hash.new
+        ret = {}
         return ret unless metadata
         (metadata["services_info"]||[]).map{|s|(s[:conditions]||[]).map{|c|c[:to_monitor].map{|x|
               next unless x[:name]
-              ret[x[:name]] = x.merge({:service_name => s[:canonical_service_name],
-                        :condition_name => c[:name],
-                        :condition_description => c[:description],
-                        :enabled => true})
+              ret[x[:name]] = x.merge({service_name: s[:canonical_service_name],
+                        condition_name: c[:name],
+                        condition_description: c[:description],
+                        enabled: true})
             }}}
         ret
       end
 
       MaxRows = 1000
       def get_search_results(search_string,convert_to_hash=true)
-#        search_results = get_rest("search/#{search_string}",false) TODO: check if below only works with 9.x
+        #        search_results = get_rest("search/#{search_string}",false) TODO: check if below only works with 9.x
         search_results = get_rest("search/#{search_string}&start=0&rows=#{MaxRows}",false)
         return nil if search_results.nil?
         return nil unless search_results["rows"]
@@ -212,15 +209,15 @@ module XYZ
         end
         return raw_rest_results if raw_rest_results.nil?
         return raw_rest_results unless convert_to_hash
-        return raw_rest_results if raw_rest_results.kind_of?(Hash)
+        return raw_rest_results if raw_rest_results.is_a?(Hash)
         raw_rest_results.to_hash 
       end
 
-      def conn()
+      def conn
         @conn ||=  initialize_chef_connection()
       end
 
-      def initialize_chef_connection()
+      def initialize_chef_connection
         ::Chef::Config.from_file("/root/.chef/knife.rb") #TODO: stub; will replace by passing in relavant paramters
         ::Chef::Log.level(::Chef::Config[:log_level])
         # Mixlib::Authentication is a gem provided vy Opscode
@@ -231,7 +228,7 @@ module XYZ
       # if node is nil means that getting info just from metadata
       def get_attributes_with_values(recipe_name,metadata,node=nil)
         index = node ? node.name : :recipe
-        @attributes_with_values[index] ||= Hash.new
+        @attributes_with_values[index] ||= {}
         @attributes_with_values[index][recipe_name] ||= get_attributes_with_values_aux(recipe_name,metadata,node)
       end
 
@@ -260,7 +257,7 @@ module XYZ
             attribute_path = attr_name.split("/")
             first = attribute_path.shift
             value_x = NodeState.nested_value(node[first],attribute_path)
-            value_x.kind_of?(::Chef::Node::Attribute) ? value_x.to_hash : value_x
+            value_x.is_a?(::Chef::Node::Attribute) ? value_x.to_hash : value_x
           end
         ret[attr_name]["value"] = value if value
         value
@@ -276,7 +273,7 @@ module XYZ
         else
           normalize_attribute_values(ret[attr_name],{"value" => transform},node,metadata)
         end
-        ret[attr_name].has_key?("value") ? ret[attr_name]["value"] : nil
+        ret[attr_name].key?("value") ? ret[attr_name]["value"] : nil
       end
 
       def recipes(node)
@@ -288,7 +285,7 @@ module XYZ
         def initialize(chef_version=::Chef::VERSION)
           @chef_version = chef_version
         end
-        def self.current()
+        def self.current
           ChefVersion.new
         end
         def self.[](chef_version)
@@ -305,6 +302,7 @@ module XYZ
           end
           return 0
         end
+
         def >=(cv)
           (self <=>(cv)) >= 0
         end

@@ -2,15 +2,15 @@ module DTK; class NodeGroup
   module Clone; module Mixin
     def clone_post_copy_hook(clone_copy_output,opts={})
       return if opts[:no_post_copy_hook]
-      super_opts = opts.merge(:donot_create_pending_changes => true, :donot_create_internal_links => true)
+      super_opts = opts.merge(donot_create_pending_changes: true, donot_create_internal_links: true)
       super(clone_copy_output,super_opts)
       opts[:outermost_ports] = super_opts[:outermost_ports] if super_opts[:outermost_ports]
 
       clone_source_obj = clone_copy_output.source_object
       component = clone_copy_output.objects.first
-      override_attrs = {:ng_component_id => component[:id]}
+      override_attrs = {ng_component_id: component[:id]}
       node_clone_opts = [:ret_new_obj_with_cols].inject({}) do |h,k|
-        opts.has_key?(k) ? h.merge(k => opts[k]) : h
+        opts.key?(k) ? h.merge(k => opts[k]) : h
       end
       get_node_group_members().each{|node|node.clone_into(clone_source_obj,override_attrs,node_clone_opts)}
     end
@@ -18,23 +18,25 @@ module DTK; class NodeGroup
     # clone components and links on this node group to node
     def clone_into_node(node)
       # get the components on the node group (except those created through link def on create event since these wil be created in clone_external_attribute_links call
-      ng_cmps = get_objs(:cols => [:cmps_for_clone_into_node]).map{|r|r[:component]}
+      ng_cmps = get_objs(cols: [:cmps_for_clone_into_node]).map{|r|r[:component]}
       return if ng_cmps.empty?
       node_external_ports = clone_components(ng_cmps,node)
       clone_external_attribute_links(node_external_ports,node)
     end
-   private
+
+                  private
+
     def clone_components(node_group_cmps,node)
-      external_ports = Array.new
+      external_ports = []
       # order components to respect dependencies
       ComponentOrder.derived_order(node_group_cmps) do |ng_cmp| 
         clone_opts = {
-          :ret_new_obj_with_cols => [:id,:display_name],
-          :outermost_ports => Array.new,
-          :use_source_impl_and_template => true,
-          :no_constraint_checking => true
+          ret_new_obj_with_cols: [:id,:display_name],
+          outermost_ports: [],
+          use_source_impl_and_template: true,
+          no_constraint_checking: true
         }
-        override_attrs = {:ng_component_id => ng_cmp[:id]}
+        override_attrs = {ng_component_id: ng_cmp[:id]}
         node.clone_into(ng_cmp,override_attrs,clone_opts)
         external_ports += clone_opts[:outermost_ports]
       end
@@ -52,24 +54,24 @@ module DTK; class NodeGroup
     end
 
     def ret_port_link_info(node_external_ports)
-      ret = Array.new
+      ret = []
       return ret if node_external_ports.empty?
-      # TODO this makes asseumption that can find cooresponding port on node group by matching on port display_name
+      # TODO: this makes asseumption that can find cooresponding port on node group by matching on port display_name
       # get the node group ports that correspond to node_external_ports 
       # TODO: this can be more efficient if made into ajoin
       ng_id = id()
       raise Error.new("Need to check: semantics of :link_def_info has changed to use outer joins")
       sp_hash = {
-        :cols => [:id,:link_def_info,:display_name],
-        :filter => [:and, [:eq, :node_node_id, ng_id], [:oneof, :display_name, node_external_ports.map{|r|r[:display_name]}]]
+        cols: [:id,:link_def_info,:display_name],
+        filter: [:and, [:eq, :node_node_id, ng_id], [:oneof, :display_name, node_external_ports.map{|r|r[:display_name]}]]
       }
       ng_ports = Model.get_objs(model_handle(:port),sp_hash)
       ng_port_ids = ng_ports.map{|r|r[:id]}
       
       # get the ng_port links
       sp_hash = {
-        :cols => [:id, :group_id,:input_id,:output_id,:temporal_order],
-        :filter => [:or, [:oneof, :input_id, ng_port_ids], [:oneof, :output_id, ng_port_ids]]
+        cols: [:id, :group_id,:input_id,:output_id,:temporal_order],
+        filter: [:or, [:oneof, :input_id, ng_port_ids], [:oneof, :output_id, ng_port_ids]]
       }
       ng_port_links = Model.get_objs(model_handle(:port_link),sp_hash)
 
@@ -87,7 +89,7 @@ module DTK; class NodeGroup
         port_display_name = ndx_ng_ports[ng_port_id][:display_name]
         node_port_id = ndx_node_port_ids[port_display_name]
         other_index = (index == :input_id ? :output_id : :input_id)
-        {:node_group_port_link => ng_pl, :node_port_link_hash => {index => node_port_id, other_index => ng_pl[other_index]}}
+        {node_group_port_link: ng_pl, node_port_link_hash: {index => node_port_id, other_index => ng_pl[other_index]}}
       end
     end
   end; end

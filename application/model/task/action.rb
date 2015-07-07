@@ -1,22 +1,22 @@
 module DTK; class Task
   class Action < HashObject
-    def type()
+    def type
       Aux.underscore(Aux.demodulize(self.class.to_s)).to_sym
     end
 
     # implemented functions
-    def long_running?()
+    def long_running?
       nil
     end
 
     # returns [adapter_type,adapter_name], adapter name optional in which it wil be looked up from config
-    def ret_command_and_control_adapter_info()
+    def ret_command_and_control_adapter_info
      nil
     end
 
     class OnNode < self
       def self.create_from_node(node)
-        state_change = {:node => node}
+        state_change = {node: node}
         new(:state_change,state_change,nil)
       end
       def self.create_from_state_change(state_change,assembly_idh=nil)
@@ -33,26 +33,26 @@ module DTK; class Task
           else raise Error.new("Unexpected task_action_type (#{task_action_type})")
         end
       end
-      def self.task_action_type()
+      def self.task_action_type
         @task_action_type ||= to_s.split('::').last
       end
-      def task_action_type()
+      def task_action_type
         self.class.task_action_type()
       end
 
-      def initialize(type,hash,task_idh=nil)
-        unless hash[:node].kind_of?(Node)
-          hash[:node] &&= Node.create_from_model_handle(hash[:node],task_idh.createMH(:node),:subclass=>true)
+      def initialize(_type,hash,task_idh=nil)
+        unless hash[:node].is_a?(Node)
+          hash[:node] &&= Node.create_from_model_handle(hash[:node],task_idh.createMH(:node),subclass: true)
         end
         super(hash)
       end
 
       ###====== related to node(s); node can be a node group
-      def node_is_node_group?()
+      def node_is_node_group?
         self[:node].is_node_group?()
       end
 
-      def nodes()
+      def nodes
         node_or_ng = self[:node]
         if node_or_ng.is_node_group?()
           node_or_ng.get_node_group_members()
@@ -61,7 +61,7 @@ module DTK; class Task
         end
       end
 
-      def node_id()
+      def node_id
         self[:node][:id]
       end
 
@@ -74,28 +74,29 @@ module DTK; class Task
 
       ###====== end: related to node(s); node can be a node group
 
-      def attributes_to_set()
-        Array.new
+      def attributes_to_set
+        []
       end
 
       # virtual gets overwritten
       # updates object and the tasks in the model
-      def get_and_update_attributes!(task)
+      def get_and_update_attributes!(_task)
         # raise "You need to implement 'get_and_update_attributes!' method for class #{self.class}"
       end
 
       # virtual gets overwritten
-      def add_internal_guards!(guards)
+      def add_internal_guards!(_guards)
         # raise "You need to implement 'add_internal_guards!' method for class #{self.class}"
       end
 
       def update_state_change_status_aux(task_mh,status,state_change_ids)
-        rows = state_change_ids.map{|id|{:id => id, :status => status.to_s}}
+        rows = state_change_ids.map{|id|{id: id, status: status.to_s}}
         state_change_mh = task_mh.createMH(:state_change)
         Model.update_from_rows(state_change_mh,rows)
       end
 
-     private
+      private
+
       def node_create_obj_optional_subclass(node)
         node && node.create_obj_optional_subclass()
       end
@@ -127,7 +128,7 @@ module DTK; class Task
           is_non_null = nil
           if match = dyn_attr_val_info.find{|a|a[:display_name] == k}
             if val = match[:attribute_value]
-              is_non_null = (val.kind_of?(Array) ? val.find{|el|el} : true)
+              is_non_null = (val.is_a?(Array) ? val.find{|el|el} : true)
             end
           end
           return nil unless is_non_null
@@ -136,7 +137,7 @@ module DTK; class Task
       end
 
       # generic; can be overwritten
-      def self.node_status(object,opts)
+      def self.node_status(object,_opts)
         ret = PrettyPrintHash.new
         node = object[:node]||{}
         if name = node_status__name(node)
@@ -151,7 +152,6 @@ module DTK; class Task
       def self.node_status__name(node)
         node && Node.assembly_node_print_form?(node)
       end
-
     end
 
     class NodeLevel < OnNode
@@ -159,9 +159,9 @@ module DTK; class Task
 
     # TODO: Marked for removal [Haris] - Not sure but better check
     class PhysicalNode < self
-      def initialize(type,hash,task_idh=nil)
-        unless hash[:node].kind_of?(Node)
-          hash[:node] &&= Node.create_from_model_handle(hash[:node],task_idh.createMH(:node),:subclass=>true)
+      def initialize(_type,hash,task_idh=nil)
+        unless hash[:node].is_a?(Node)
+          hash[:node] &&= Node.create_from_model_handle(hash[:node],task_idh.createMH(:node),subclass: true)
         end
         super(hash)
       end
@@ -169,9 +169,9 @@ module DTK; class Task
       def self.create_from_physical_nodes(target, node)
         node[:datacenter] = target
         hash = {
-          :node => node,
-          :datacenter => target,
-          :user_object => CurrentSession.new.get_user_object()
+          node: node,
+          datacenter: target,
+          user_object: CurrentSession.new.get_user_object()
         }
 
         InstallAgent.new(:hash,hash)
@@ -180,9 +180,9 @@ module DTK; class Task
       def self.create_smoketest_from_physical_nodes(target, node)
         node[:datacenter] = target
         hash = {
-          :node => node,
-          :datacenter => target,
-          :user_object => CurrentSession.new.get_user_object()
+          node: node,
+          datacenter: target,
+          user_object: CurrentSession.new.get_user_object()
         }
 
         ExecuteSmoketest.new(:hash,hash)
@@ -190,16 +190,15 @@ module DTK; class Task
 
       # virtual gets overwritten
       # updates object and the tasks in the model
-      def get_and_update_attributes!(task)
+      def get_and_update_attributes!(_task)
         # raise "You need to implement 'get_and_update_attributes!' method for class #{self.class}"
       end
 
       # virtual gets overwritten
-      def add_internal_guards!(guards)
+      def add_internal_guards!(_guards)
         # raise "You need to implement 'add_internal_guards!' method for class #{self.class}"
       end
     end
-
 
     r8_nested_require('action','create_node')
     r8_nested_require('action','config_node')

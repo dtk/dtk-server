@@ -12,7 +12,7 @@ module DTK
             if errors_in_result = errors_in_result?(result)
               event,errors = task.add_event_and_errors(:initialize_failed,:create_node,errors_in_result)
               if event
-                log_participant.end(:initialize_failed,:task_id=>task_id,:event => event, :errors => errors)
+                log_participant.end(:initialize_failed,task_id: task_id,event: event, errors: errors)
               end
               cancel_upstream_subtasks(workitem)
               set_result_failed(workitem,result,task)
@@ -20,14 +20,14 @@ module DTK
               node = task[:executable_action][:node]
               node.update_operational_status!(:running)
               node.update_admin_op_status!(:running)
-              log_participant.end(:initialize_succeeded,:task_id=>task_id)
+              log_participant.end(:initialize_succeeded,task_id: task_id)
               set_result_succeeded(workitem,result,task,action) if task_end 
             end
             reply_to_engine(workitem)
           end
         end
 
-        def cancel(fei, flavour)
+        def cancel(_fei, flavour)
           # Don't execute cancel if ruote process is killed
           # flavour will have 'kill' value if kill_process is invoked instead of cancel_process
           return if flavour
@@ -42,10 +42,11 @@ module DTK
           reply_to_engine(wi)
         end
 
-       private
+        private
+
         def errors_in_result?(result)
           if result[:status] == "failed"
-            result[:error_object] ? [{:message => result[:error_object].to_s}] : []
+            result[:error_object] ? [{message: result[:error_object].to_s}] : []
           end
         end    
       end

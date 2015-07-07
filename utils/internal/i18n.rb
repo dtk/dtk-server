@@ -2,11 +2,11 @@
 
 class I18n 
   
-  def load_model_strings(model)
+  def load_model_strings(_model)
     
   end
 
-  def load_model_selects(model)
+  def load_model_selects(_model)
     
   end
 

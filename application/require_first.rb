@@ -1,44 +1,47 @@
 def r8_require(*files_x)
-  files = (files_x.first.kind_of?(Array) ? files_x.first : files_x)
+  files = (files_x.first.is_a?(Array) ? files_x.first : files_x)
   caller_dir = caller.first.gsub(/\/[^\/]+$/,"")
   files.each{|f|require File.expand_path(f,caller_dir)}
 end
+
 def r8_nested_require(dir,*files_x)
-  files = (files_x.first.kind_of?(Array) ? files_x.first : files_x)
+  files = (files_x.first.is_a?(Array) ? files_x.first : files_x)
   caller_dir = caller.first.gsub(/\/[^\/]+$/,"")
   files.each{|f|require File.expand_path("#{dir}/#{f}",caller_dir)}
 end
 
 def r8_nested_require_with_caller_dir(caller_dir,dir,*files_x)
-  files = (files_x.first.kind_of?(Array) ? files_x.first : files_x)
+  files = (files_x.first.is_a?(Array) ? files_x.first : files_x)
   files.each{|f|require File.expand_path("#{dir}/#{f}",caller_dir)}
 end
+
 def r8_require_common_lib(*files_x)
   files_x.each { |file| dtk_require_dtk_common_file(file) }
 end
 ##### TODO: deprecate forp above
 def dtk_require(*files_x)
-  files = (files_x.first.kind_of?(Array) ? files_x.first : files_x)
+  files = (files_x.first.is_a?(Array) ? files_x.first : files_x)
   caller_dir = caller.first.gsub(/\/[^\/]+$/,"")
   files.each{|f|require File.expand_path(f,caller_dir)}
 end
+
 def dtk_nested_require(dir,*files_x)
-  files = (files_x.first.kind_of?(Array) ? files_x.first : files_x)
+  files = (files_x.first.is_a?(Array) ? files_x.first : files_x)
   caller_dir = caller.first.gsub(/\/[^\/]+$/,"")
   files.each{|f|require File.expand_path("#{dir}/#{f}",caller_dir)}
 end
 
 def dtk_nested_require_with_caller_dir(caller_dir,dir,*files_x)
-  files = (files_x.first.kind_of?(Array) ? files_x.first : files_x)
+  files = (files_x.first.is_a?(Array) ? files_x.first : files_x)
   files.each{|f|require File.expand_path("#{dir}/#{f}",caller_dir)}
 end
+
 def dtk_require_common_lib(*files_x)
   files_x.each { |file| dtk_require_dtk_common_file(file) }
 end
 
 # Method will check if there is localy avaialbe l
-def dtk_require_common_library()
-
+def dtk_require_common_library
   common_folder = determine_common_folder()
 
   unless common_folder
@@ -48,8 +51,6 @@ def dtk_require_common_library()
   end
 end
 # determining if dtk-common is locally available
-
-
 
 private
 
@@ -68,8 +69,7 @@ def dtk_require_dtk_common_file(common_library)
   end
 end
 
-
-def gem_only_available?()
+def gem_only_available?
   return !determine_common_folder() && is_dtk_common_gem_installed?
 end
 
@@ -106,6 +106,7 @@ class Hash
     def select192(&block)
       select(&block)
     end
+
     def find192(&block)
       find(&block)
     end
@@ -113,6 +114,7 @@ class Hash
     def select192(&block)
       select(&block).inject({}){|h,kv|h.merge(kv[0] => kv[1])}
     end
+
     def find192(&block)
       find(&block).inject({}){|h,kv|h.merge(kv[0] => kv[1])}
     end

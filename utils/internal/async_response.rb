@@ -26,6 +26,7 @@ module DTK
       push_data(@response_procs[:ok].call(data))
       signal_eos()
     end
+
     def rest_notok_response(data)
       push_data(@response_procs[:notok].call(data))
       signal_eos()
@@ -36,7 +37,8 @@ module DTK
       @body_callback = blk
     end
 
-   private
+    private
+
     def initialize(response_procs)
       @response_procs = response_procs
       super()
@@ -48,7 +50,7 @@ module DTK
       end
     end
 
-    def signal_eos()
+    def signal_eos
       ::EventMachine::next_tick do
         succeed()
       end

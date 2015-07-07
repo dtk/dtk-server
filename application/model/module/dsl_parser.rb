@@ -13,7 +13,7 @@ module DTK
       
       file_type ? 
       Output.new(file_type,parsed_info) :
-        parsed_info.inject(Hash.new){|h,(file_type,v)|h.merge(file_type => Output.new(file_type,v))} 
+        parsed_info.inject({}){|h,(file_type,v)|h.merge(file_type => Output.new(file_type,v))} 
     end
     
     def self.default_rel_path?(file_type)
@@ -24,12 +24,13 @@ module DTK
       ExtMod::FileParser.generate_hash(file_type,output_array)
     end
     
-    def self.file_parser_output_array_class()
+    def self.file_parser_output_array_class
       ExtMod::FileParser::OutputArray
     end
 
-   private
-    def self.module_type()
+    private
+
+    def self.module_type
       raise Error.new("Abstract method that should not be called")
     end
     def self.module_class
@@ -40,12 +41,12 @@ module DTK
       def initialize(file_type,object)
         super()
         @file_type = file_type
-        if object.kind_of?(ExtMod::FileParser::OutputArray)
+        if object.is_a?(ExtMod::FileParser::OutputArray)
           object.each{|r|self << r}
-        elsif object.kind_of?(Hash)
+        elsif object.is_a?(Hash)
           # TODO: deprecate
           object.each_pair do |component_module,info|
-            self << info.merge(:component_module => component_module)
+            self << info.merge(component_module: component_module)
           end
         else
           raise Error.new("Not implemented yet: Output parser for #{object.class}")

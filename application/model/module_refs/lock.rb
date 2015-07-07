@@ -39,12 +39,11 @@ module DTK
         compute_elements(assembly_instance,types,opts)
       end
 
-
-      def clear_locked_dependencies()
+      def clear_locked_dependencies
         ModuleRef::Lock.clear_locked_dependencies(self)
       end
 
-      def persist()
+      def persist
         ModuleRef::Lock.persist(self)
         self
       end
@@ -52,12 +51,13 @@ module DTK
       def matching_namespace?(module_name)
         (el = element?(module_name)) && el.namespace
       end
+
       def matching_locked_branch_sha?(module_name)
         (module_ref_lock = module_ref_lock(module_name)) && module_ref_lock.locked_branch_sha
       end
 
       def matching_impls_with_children(module_names)
-        ret = Array.new
+        ret = []
         module_names.each do |module_name|
           if element = element?(module_name) 
             implementations(children_elements(element)+[element]).each do |impl|
@@ -68,11 +68,12 @@ module DTK
         ret
       end
 
-      def elements()
+      def elements
         values().map{|module_ref_lock|module_ref_lock_element(module_ref_lock)}.compact
       end
 
-     private
+      private
+
       def self.get_module_refs_lock?(assembly_instance)
         module_ref_locks = ModuleRef::Lock.get(assembly_instance)
         unless  module_ref_locks.empty?
@@ -100,7 +101,7 @@ module DTK
           end
         end
 
-        if types.include?(:locked_branch_shas) or opts[:with_module_branches]
+        if types.include?(:locked_branch_shas) || opts[:with_module_branches]
           add_matching_module_branches!(ret)
         end
         if types.include?(:locked_branch_shas) 
@@ -112,7 +113,7 @@ module DTK
       end
 
       def self.add_locked_branch_shas?(locked_module_refs)
-        locked_module_refs.each_pair do |module_name,module_ref_lock|
+        locked_module_refs.each_pair do |_module_name,module_ref_lock|
           if el = module_ref_lock_element(module_ref_lock)
             if mb = el.module_branch
               if sha = mb[:current_sha]
@@ -126,8 +127,8 @@ module DTK
 
       def self.add_matching_module_branches!(locked_module_refs)
         ret = locked_module_refs
-        ndx_els = Hash.new
-        disjuncts = Array.new
+        ndx_els = {}
+        disjuncts = []
         locked_module_refs.elements.each do |el|
           if impl = el.implementation
             unless el.module_branch
@@ -140,8 +141,8 @@ module DTK
 
         return ret if disjuncts.empty?
         sp_hash = {
-          :cols => [:id,:group_id,:display_name,:component_id,:branch,:repo_id,:current_sha,:version,:dsl_parsed],
-          :filter => [:or] + disjuncts
+          cols: [:id,:group_id,:display_name,:component_id,:branch,:repo_id,:current_sha,:version,:dsl_parsed],
+          filter: [:or] + disjuncts
         }
         
         mh = locked_module_refs.assembly_instance.model_handle(:module_branch)
@@ -156,12 +157,15 @@ module DTK
       def module_ref_lock(module_name)
         self[module_name]
       end
+
       def element?(module_name)
         module_ref_lock_element(module_ref_lock(module_name))
       end
+
       def element(module_name)
         element?(module_name) || (Log.error("Unexpected that no match for module name '#{module_name}'"); nil)
       end
+
       def module_ref_lock_element(module_ref_lock)
         self.class.module_ref_lock_element(module_ref_lock)
       end
@@ -180,7 +184,6 @@ module DTK
         element.implementation ||
           (Log.error("Unexpected that the module '#{element.namespace}:#{element.module_name}' does not have an corresponding implementation object"); nil)
       end
-
     end
   end
 end

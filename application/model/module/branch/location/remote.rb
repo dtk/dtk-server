@@ -2,7 +2,7 @@ module DTK; class ModuleBranch
   class Location
     class RemoteParams < Params
       # keys: :module_type,:module_name,:remote_repo_base,:namespace,:version?
-      def remote_repo_base()
+      def remote_repo_base
         self[:remote_repo_base]
       end
 
@@ -10,8 +10,10 @@ module DTK; class ModuleBranch
         def create_remote(project)
           Remote::DTKNCatalog.new(project,self)
         end
-       private
-        def legal_keys()
+
+        private
+
+        def legal_keys
           [:module_type,:module_name,:remote_repo_base,:namespace,:version?]
         end
       end
@@ -20,8 +22,10 @@ module DTK; class ModuleBranch
         def create_remote(project)
           Remote::TenantCatalog.new(project,self)
         end
-       private
-        def legal_keys()
+
+        private
+
+        def legal_keys
           [:module_type,:module_name,:remote_repo_base,:namespace?,:version?]
         end
       end
@@ -29,7 +33,7 @@ module DTK; class ModuleBranch
 
     class Remote
       def self.includes?(obj)
-        obj.kind_of?(DTKNCatalog) or obj.kind_of?(TenantCatalog)
+        obj.is_a?(DTKNCatalog) || obj.is_a?(TenantCatalog)
       end
 
       module RemoteMixin
@@ -38,15 +42,16 @@ module DTK; class ModuleBranch
           super(remote_params)
           @project = project
         end
-        def branch_name()
+
+        def branch_name
           @branch_name ||= ret_branch_name()
         end
 
-        def remote_ref()
+        def remote_ref
           @remote_ref ||= ret_remote_ref()
         end
 
-        def repo_url()
+        def repo_url
           @repo_url ||= ret_repo_url()
         end
 
@@ -57,7 +62,8 @@ module DTK; class ModuleBranch
           @repo_name = remote_repo_name
           self
         end
-        def repo_name()
+
+        def repo_name
           if @repo_name.nil?
             raise Error.new("Not expected that @repo_name is nil")
           end

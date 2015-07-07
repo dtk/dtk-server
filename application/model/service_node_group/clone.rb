@@ -15,21 +15,22 @@ module DTK; class ServiceNodeGroup
       ret
     end
 
-   private
+    private
+
     # returns a cloned component with a field :attributes, which has all the components attributes
     def self.clone_component(node_group_cmp,node_group_member)
       clone_opts = {
-        :include_list => [:attribute],
-        :ret_new_obj_with_cols => [:id,:group_id,:display_name],
-        :ret_clone_copy_output => true,
-        :no_violation_checking => true
+        include_list: [:attribute],
+        ret_new_obj_with_cols: [:id,:group_id,:display_name],
+        ret_clone_copy_output: true,
+        no_violation_checking: true
       }
-      override_attrs = {:attribute => {:hidden => true}}
+      override_attrs = {attribute: {hidden: true}}
       clone_copy_output = node_group_member.clone_into(node_group_cmp,override_attrs,clone_opts)
       node_member_cmp = clone_copy_output.objects.first
       level = 1
       attributes = clone_copy_output.children_objects(level,:attribute)
-      node_member_cmp.merge(:attributes => attributes)
+      node_member_cmp.merge(attributes: attributes)
     end
 
     ComponentNodePair = Struct.new(:node_group_component,:node_group_member)
@@ -45,16 +46,16 @@ module DTK; class ServiceNodeGroup
       return ret if node_members.empty?()
       node_group_id = node_group.id()
       sp_hash = {
-        :cols => [:id,:group_id,:display_name,:node_node_id,:ancestor_id],
-        :filter => [:oneof, :node_node_id, node_members.map{|n|n.id}+[node_group_id]]
+        cols: [:id,:group_id,:display_name,:node_node_id,:ancestor_id],
+        filter: [:oneof, :node_node_id, node_members.map{|n|n.id}+[node_group_id]]
       }
       # ndx_cmps is double indexed by [node_id][cmp_id]
-      ndx_cmps = Hash.new
+      ndx_cmps = {}
       cmp_mh = node_group.model_handle(:component)
       Model.get_objs(cmp_mh,sp_hash).each do |cmp|
         node_id = cmp[:node_node_id]
         cmp_id = cmp[:id]
-        (ndx_cmps[node_id] ||= Hash.new).merge!(cmp_id => cmp)
+        (ndx_cmps[node_id] ||= {}).merge!(cmp_id => cmp)
       end
 
       ndx_ng_cmps = ndx_cmps[node_group_id]||{}
@@ -73,7 +74,7 @@ module DTK; class ServiceNodeGroup
         # To enable this compute an ndx that takes ancestor_id to cmp_id;
         # this is possible because cmps_on_node has unique ancestor_ids
         cmps_on_node = (ndx_cmps[node.id]||{}).values
-        ndx_ancestor_id_to_cmp = cmps_on_node.inject(Hash.new){|h,r|h.merge(r[:ancestor_id] => r)}
+        ndx_ancestor_id_to_cmp = cmps_on_node.inject({}){|h,r|h.merge(r[:ancestor_id] => r)}
         ng_cmp_ids.each do |ng_cmp_id|
           if cloned_cmp = ndx_ancestor_id_to_cmp[ng_cmp_id]
             cloned_components << cloned_cmp
@@ -89,14 +90,14 @@ module DTK; class ServiceNodeGroup
     end
 
     def self.get_components_with_attributes(components)
-      ret = Array.new
+      ret = []
       return ret if components.empty?
-      ndx_cmps = components.inject(Hash.new) do |h,cmp|
-        h.merge(cmp[:id] => cmp.merge(:attributes => Array.new))
+      ndx_cmps = components.inject({}) do |h,cmp|
+        h.merge(cmp[:id] => cmp.merge(attributes: []))
       end
       sp_hash = {
-        :cols => [:id,:group_id,:display_name,:component_component_id],
-        :filter => [:oneof,:component_component_id,ndx_cmps.keys]
+        cols: [:id,:group_id,:display_name,:component_component_id],
+        filter: [:oneof,:component_component_id,ndx_cmps.keys]
       }
       attr_mh = components.first.model_handle(:attribute)
       Model.get_objs(attr_mh,sp_hash).each do |attr|
@@ -105,7 +106,6 @@ module DTK; class ServiceNodeGroup
       end
       ndx_cmps.values
     end
-
   end
 end; end
 

@@ -22,15 +22,14 @@ module DTK; class Task; class Template; class Stage
       module StageName
         DefaultNameProc = lambda do |index,is_single_stage|
           ret = "configure_nodes"
-          is_single_stage ? ret : (ret + "_stage_#{index.to_s}")
+          is_single_stage ? ret : (ret + "_stage_#{index}")
         end
         
         DefaultNodeGroupNameProc = lambda do |index,is_single_stage|
           ret = "config_node_group_components"
-          is_single_stage ? ret : (ret + "_stage_#{index.to_s}")
+          is_single_stage ? ret : (ret + "_stage_#{index}")
         end
       end
-
     end
   end
 end; end; end; end

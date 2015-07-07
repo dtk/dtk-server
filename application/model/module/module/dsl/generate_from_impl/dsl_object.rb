@@ -5,7 +5,8 @@ module DTK; class ModuleDSL
         self[:id] = key
         key
       end
-      def hash_key()
+
+      def hash_key
         self[:id]
       end
       
@@ -16,15 +17,18 @@ module DTK; class ModuleDSL
       def sanitize_attribute(attr)
         attr.gsub(/[^a-zA-Z0-9_-]/,"-")
       end
+
       def t(term)
         term
-        # TODO probably remove return nil if term.nil?
+        # TODO: probably remove return nil if term.nil?
         # DSLTerm.new(term)
       end
+
       def unknown
         nil
         # TODO: probably remove DSLTerm.create_unknown
       end
+
       def nailed(term)
         term #TODO: may also make this a DSLTerm obj
       end
@@ -36,14 +40,14 @@ module DTK; class ModuleDSL
     class DSLStructObject < SimpleOrderedHash
       def initialize(type,content,opts={})
         if opts[:reify]
-          super([{:type => type.to_s},{:required => opts[:required]},{:def => content}])
+          super([{type: type.to_s},{required: opts[:required]},{def: content}])
         else
-          super([{:type => type.to_s},{:required => nil},{:def => content}])
+          super([{type: type.to_s},{required: nil},{def: content}])
           self[:required] = content.delete(:include)
         end
       end
 
-      def hash_key()
+      def hash_key
         self[:def].hash_key()
       end
 
@@ -55,16 +59,16 @@ module DTK; class ModuleDSL
     class DSLArray < Array
       def each_element(opts={},&block)
         each do |el|
-          unless opts[:skip_required_is_false] and (not el.nil?) and not el
+          unless opts[:skip_required_is_false] && (not el.nil?) and not el
             block.call(el[:def]) 
           end
         end
       end
 
       def map_element(opts={},&block)
-        ret = Array.new
+        ret = []
         each do |el|
-          unless opts[:skip_required_is_false] and (not el.nil?) and not el
+          unless opts[:skip_required_is_false] && (not el.nil?) and not el
             ret << block.call(el[:def]) 
           end
         end
@@ -89,9 +93,9 @@ module DTK; class ModuleDSL
       end
       # TODO: make as part of context
       ScaffoldingStrategy = {
-        :no_dynamic_attributes => true,
-        :no_defaults => true,
-        :ignore_components => ['params']
+        no_dynamic_attributes: true,
+        no_defaults: true,
+        ignore_components: ['params']
       }
 
       def create(type,parse_struct,opts={})
@@ -100,13 +104,13 @@ module DTK; class ModuleDSL
 
       # dup used because yaml generation is upstream and dont want string refs
       def required_value(key)
-        unless has_key?(key)
+        unless key?(key)
           raise Error.new("meta object does not have key #{key}") 
         end
 
         value_term = self[key]
         raise Error.new("meta object with key #{key} is null") if value_term.nil? 
-        return value_term.dup unless value_term.kind_of?(DSLTerm)
+        return value_term.dup unless value_term.is_a?(DSLTerm)
         
         unless value_term.is_known?()
           raise Error.new("meta object with key #{key} has unknown value")
@@ -117,7 +121,7 @@ module DTK; class ModuleDSL
       def value(key)
         value_term = self[key]
         return nil if value_term.nil?
-        return value_term unless value_term.kind_of?(DSLTerm)
+        return value_term unless value_term.is_a?(DSLTerm)
         value_term.is_known?() ? value_term.value : nil
       end
 
@@ -128,26 +132,28 @@ module DTK; class ModuleDSL
       # functions to convert to object form
       def reify(hash)
         type = index(hash,:type)
-        content = klass(type).new(nil,@context,{:reify => true, :def => index(hash,:def)})
-        DSLStructObject.new(type,content,{:reify => true, :required => index(hash,:required)})
+        content = klass(type).new(nil,@context,reify: true, def: index(hash,:def))
+        DSLStructObject.new(type,content,reify: true, required: index(hash,:required))
       end
 
-     private
+      private
+
       # functions to treat object functions
       # can be overwritten
-      def object_attributes()
+      def object_attributes
         []
       end
+
       def index(hash,key)
-        if hash.has_key?(key.to_s)
+        if hash.key?(key.to_s)
           hash[key.to_s]
-        elsif hash.has_key?(key.to_sym)
+        elsif hash.key?(key.to_sym)
           hash[key.to_sym]
         end
       end
 
       def has_index?(hash,key)
-        hash.has_key?(key.to_s) or hash.has_key?(key.to_sym)
+        hash.key?(key.to_s) || hash.key?(key.to_sym)
       end
 
       def create_in_object_form(hash)
@@ -157,7 +163,7 @@ module DTK; class ModuleDSL
       def convert_value_if_needed(key,val)
         return val unless object_attributes().include?(key.to_sym)
         
-        if val.kind_of?(Array)
+        if val.is_a?(Array)
           ret = DSLArray.new
           val.each{|el_val| ret << reify(el_val) if selected?(el_val)}
           ret
@@ -186,23 +192,29 @@ module DTK; class ModuleDSL
       end
 
       # context
-      def integer_version()
+      def integer_version
         (@context||{})[:integer_version]
       end
-      def module_name()
+
+      def module_name
         (@context||{})[:module_name]
       end
-      def config_agent_type()
+
+      def config_agent_type
         (@context||{})[:config_agent_type]
       end
+
       public
-      def parent()
+
+      def parent
         (@context||{})[:parent]
       end
-      def parent_source()
+
+      def parent_source
         (@context||{})[:parent_source]
       end
-      def source_ref()
+
+      def source_ref
         (@context||{})[:source_ref]
       end
   
@@ -213,7 +225,7 @@ module DTK; class ModuleDSL
           self[:value] = value if state == :known
           self[:state] = state
         end
-        def self.create_unknown()
+        def self.create_unknown
           new(nil,:unknown)
         end
         
@@ -222,19 +234,21 @@ module DTK; class ModuleDSL
           self[:value] = v
         end
 
-        def value()
+        def value
           self[:value]
         end
-        def is_known?()
+
+        def is_known?
           self[:state] == :known
         end
       end
       
       class VarMatches < Array
         def add(input_var,output_var)
-          self << {:input_var => input_var,:output_var => output_var}
+          self << {input_var: input_var,output_var: output_var}
           self
         end
+
         def +(a2)
           ret = self.class.new
           each{|x|ret << x}
@@ -264,14 +278,14 @@ module DTK; class ModuleDSL
         def yaml_form(level=1)
           ret = RenderHash.new
           each do |k,v|
-            if level == 1 and k == "version"
+            if level == 1 && k == "version"
               next
             end
             converted_val = 
-              if v.kind_of?(RenderHash)
+              if v.is_a?(RenderHash)
                 v.yaml_form(level+1)
-              elsif v.kind_of?(Array)
-                v.map{|el|el.kind_of?(RenderHash) ? el.yaml_form(level+1) : el.dup?}
+              elsif v.is_a?(Array)
+                v.map{|el|el.is_a?(RenderHash) ? el.yaml_form(level+1) : el.dup?}
               else 
                 v.dup?
               end

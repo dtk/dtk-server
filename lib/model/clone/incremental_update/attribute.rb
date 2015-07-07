@@ -6,18 +6,19 @@ module DTK; class Clone
       def self.modify_instances(model_handle,instance_template_links)
         parent_id_col = model_handle.parent_id_field_name()
         update_rows = instance_template_links.map do |l|
-          Aux.hash_subset(l.template,l.template.keys-FieldsToNotCopy).merge(:id => l.instance.id)
+          Aux.hash_subset(l.template,l.template.keys-FieldsToNotCopy).merge(id: l.instance.id)
         end
         Model.update_from_rows(model_handle,update_rows)
       end
 
-     private
+      private
+
       # TODO: put in equality test so that does not need to do the modify equal objects
-      def equal_so_dont_modify?(instance,template)
+      def equal_so_dont_modify?(_instance,_template)
         false
       end
       
-      def update_opts()
+      def update_opts
         # TODO: can refine to allow deletes if instance has nil value and not in any attribute link
         # can do this by passing in a charachterstic fn
         #{:donot_allow_deletes => true}
@@ -25,13 +26,12 @@ module DTK; class Clone
       end
       
       def get_ndx_objects(component_idhs)
-        ret = Hash.new
-        ::DTK::Component.get_attributes(component_idhs,:cols_plus => [:component_component_id,:ref]).each do |r|
-          (ret[r[:component_component_id]] ||= Array.new) << r
+        ret = {}
+        ::DTK::Component.get_attributes(component_idhs,cols_plus: [:component_component_id,:ref]).each do |r|
+          (ret[r[:component_component_id]] ||= []) << r
         end
         ret
       end
-
     end
   end
 end; end

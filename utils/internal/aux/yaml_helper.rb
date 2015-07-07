@@ -9,7 +9,7 @@ module DTK
     end
     
     def self.parse(content,opts={})
-      ret = Hash.new
+      ret = {}
       if content.empty?
         ret
       else
@@ -21,7 +21,8 @@ module DTK
       end
     end
 
-   private
+    private
+
     def self.yaml_dump(o)
       visitor = Psych::Visitors::YAMLTree.new
       visitor << o
@@ -29,17 +30,17 @@ module DTK
     end
 
     def self.simple_form_aux(obj)
-      if obj.kind_of?(::Hash)
+      if obj.is_a?(::Hash)
         ret = ::Hash.new
         obj.each_pair{|k,v|ret[string_form(k.to_s)] = simple_form_aux(v)}
         ret
-      elsif obj.kind_of?(::Array)
+      elsif obj.is_a?(::Array)
         obj.map{|el|simple_form_aux(el)}
-      elsif obj.kind_of?(::String)
+      elsif obj.is_a?(::String)
         string_form(obj)
-      elsif obj.kind_of?(::Fixnum)
+      elsif obj.is_a?(::Fixnum)
         obj
-      elsif obj.kind_of?(TrueClass) or obj.kind_of?(FalseClass)
+      elsif obj.is_a?(TrueClass) || obj.is_a?(FalseClass)
         obj
       elsif obj.nil?
         obj

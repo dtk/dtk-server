@@ -1,7 +1,6 @@
 require 'erubis'
 module DTK
   class ManageGitServerGitolite < ManageGitServer
-
     ALLOWED_CHARACTERS = /[a-zA-Z0-9\-_\.]*/
 
     class << self
@@ -20,18 +19,18 @@ module DTK
         config_dir = repo_config_directory()
         Dir.mkdir(config_dir) unless File.directory?(config_dir)
         path = repo_config_file_relative_path(repo_name)
-        file_asset_hash = {:path => path}
+        file_asset_hash = {path: path}
         content = generate_config_file_content(repo_name,repo_user_acls)
         admin_repo.add_file(file_asset_hash,content)
         admin_repo.push_changes()
         ret
       end
 
-      def delete_all_server_repos()
+      def delete_all_server_repos
         admin_repo.pull_changes()
         repo_config_files().each do |repo_conf|
           repo_name = repo_conf.gsub(/\.conf/,"")
-          delete_server_repo(repo_name,:do_not_pull_changes => true,:do_not_push_changes => true)
+          delete_server_repo(repo_name,do_not_pull_changes: true,do_not_push_changes: true)
         end
         admin_repo.push_changes()
       end
@@ -78,7 +77,7 @@ module DTK
         end
 
         commit_msg = "adding rsa pub key for #{username}"
-        admin_repo.add_file({:path => key_path},rsa_pub_key,commit_msg)
+        admin_repo.add_file({path: key_path},rsa_pub_key,commit_msg)
         admin_repo.push_changes()
         ret
       end
@@ -100,8 +99,8 @@ module DTK
 
       # access_rights="" means remove access rights
       def set_user_rights_in_repos(username,repo_names,access_rights="R")
-        repo_names = [repo_names] unless repo_names.kind_of?(Array)
-        updated_repos = Array.new
+        repo_names = [repo_names] unless repo_names.is_a?(Array)
+        updated_repos = []
 
         repo_names.each do |repo_name|
           repo_user_acls = get_existing_repo_user_acls(repo_name)
@@ -118,64 +117,66 @@ module DTK
 
           augmented_repo_user_acls = repo_user_acls
           unless access_rights.empty?
-            augmented_repo_user_acls << {:repo_username => username, :access_rights => access_rights}
+            augmented_repo_user_acls << {repo_username: username, access_rights: access_rights}
           end
 
           content = generate_config_file_content(repo_name,augmented_repo_user_acls)
           repo_config_file_path = repo_config_file_relative_path(repo_name)
           commit_msg = "updating repo (#{repo_name}) to give access to user (#{username})"
-          admin_repo.add_file({:path => repo_config_file_path},content,commit_msg)
+          admin_repo.add_file({path: repo_config_file_path},content,commit_msg)
         end
         admin_repo.push_changes() unless updated_repos.empty?
         updated_repos
       end
 
       # get gitolite_admin keydir location
-      def get_keydir()
+      def get_keydir
         return "#{admin_directory()}keydir"
       end
 
-     private
-      def admin_directory()
+      private
+
+      def admin_directory
         @admin_directory ||= R8::Config[:repo][:git][:gitolite][:admin_directory]
       end
-      def admin_repo()
-        @admin_repo ||= @git_class.create(admin_directory(),"master",{:absolute_path => true})
+
+      def admin_repo
+        @admin_repo ||= @git_class.create(admin_directory(),"master",absolute_path: true)
       end
 
       def repo_user_public_key_relative_path(username)
         "#{repo_user_public_key_dir_relative_path}/#{username}.pub"
       end
 
-      def repo_user_public_key_dir_relative_path()
+      def repo_user_public_key_dir_relative_path
         "keydir"
       end
 
-      def repo_users_public_keys()
+      def repo_users_public_keys
         base_path = repo_user_public_key_dir_relative_path()
         ret_files_under_path(base_path)
       end
 
       def ret_files_under_path(base_path)
-        paths = admin_repo.ls_r(base_path.split("/").size+1, :files_only => true)
+        paths = admin_repo.ls_r(base_path.split("/").size+1, files_only: true)
         match_regexp = Regexp.new("^#{base_path}")
         paths.select{|p| p =~ match_regexp}
       end
 
-      def repo_config_relative_path()
+      def repo_config_relative_path
         "conf/repo-configs"
       end
 
-      def repo_config_directory()
+      def repo_config_directory
         "#{admin_directory}/#{repo_config_relative_path}"
       end
 
-      def repo_config_files()
-        return Array.new unless File.directory?(repo_config_directory)
+      def repo_config_files
+        return [] unless File.directory?(repo_config_directory)
         Dir.chdir(repo_config_directory){Dir["*.conf"]}
       end
 
-      def repos_having_config_files()
+      def repos_having_config_files
         repo_config_files().map{|fn|fn.gsub(/\.conf/,"")}
       end
 
@@ -184,8 +185,8 @@ module DTK
       end
 
       def get_existing_repo_user_acls(repo_name)
-        ret = Array.new
-        raw_content = admin_repo.get_file_content(:path => repo_config_file_relative_path(repo_name))
+        ret = []
+        raw_content = admin_repo.get_file_content(path: repo_config_file_relative_path(repo_name))
         unless raw_content
           raise Error.new("Repo (#{repo_name}) does not exist")
         end
@@ -203,7 +204,7 @@ module DTK
             access_rights = $1
             users = $2
             users.scan(/[^ ]+/)  do |user|
-              ret << {:access_rights => access_rights, :repo_username => user}
+              ret << {access_rights: access_rights, repo_username: user}
             end
           elsif l.empty?
             # no op
@@ -222,11 +223,11 @@ module DTK
 
       def generate_config_file_content(repo_name,repo_user_acls)
         # group users by user rights
-        users_rights = Hash.new
+        users_rights = {}
         repo_user_acls.each do |acl|
-          (users_rights[acl[:access_rights]] ||= Array.new) << acl[:repo_username]
+          (users_rights[acl[:access_rights]] ||= []) << acl[:repo_username]
         end
-        ConfigFileTemplate.result(:repo_name => repo_name,:user_rights => users_rights)
+        ConfigFileTemplate.result(repo_name: repo_name,user_rights: users_rights)
       end
 
 ConfigFileTemplate = Erubis::Eruby.new <<eos

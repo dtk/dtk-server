@@ -4,10 +4,12 @@ require File.expand_path('chef_server_connection', File.dirname(__FILE__))
 module XYZ
   class ChefProcessor
     class Metadata
-      def get(cookbooks_uris,&block)
-        raise Error::NotImplemented.new("get meta data for #{self.class.to_s}")
+      def get(_cookbooks_uris,&_block)
+        raise Error::NotImplemented.new("get meta data for #{self.class}")
       end
-     protected
+
+      protected
+
       def format_metadata(metadata)
 	 return nil if metadata.nil?
 	 return nil if metadata["name"].nil?
@@ -26,33 +28,33 @@ module XYZ
 	         values["type"]
 	     end
 	     attributes[ref] = {
-	       :display_name => values["display_name"],
-	       :value_asserted => values["default"],
-               :constraints => values["constraints"]
+	       display_name: values["display_name"],
+	       value_asserted: values["default"],
+               constraints: values["constraints"]
              }
 	     attributes_defs[ref] = {
-	       :external_attr_ref => recipe_ref.to_s,
-	       :port_type => values["port_type"],
-	       :semantic_type => values["semantic_type"] ?  values["semantic_type"].to_json : nil,
-	       :data_type => data_type,
-	       :display_name => values["display_name"],
-	       :description => values["description"],
-	       :default => values["default"],
-               :constraints => values["constraints"]
+	       external_attr_ref: recipe_ref.to_s,
+	       port_type: values["port_type"],
+	       semantic_type: values["semantic_type"] ?  values["semantic_type"].to_json : nil,
+	       data_type: data_type,
+	       display_name: values["display_name"],
+	       description: values["description"],
+	       default: values["default"],
+               constraints: values["constraints"]
              }
 	   }
 	 end
          component_obj =
            {metadata["name"].to_sym => 
-	     {:display_name => metadata["display_name"] ? metadata["display_name"] : metadata["name"],
-	      :description => metadata["description"],
-	      :attribute => attributes}}
+	     {display_name: metadata["display_name"] ? metadata["display_name"] : metadata["name"],
+	      description: metadata["description"],
+	      attribute: attributes}}
          component_def_obj = 
            {metadata["name"].to_sym =>
-	     {:external_type => "chef_recipe",
-              :external_cmp_ref => metadata["name"], 
-	      :attribute_def => attributes_defs, 
-	      :uri => nil }}#stub
+	     {external_type: "chef_recipe",
+              external_cmp_ref: metadata["name"], 
+	      attribute_def: attributes_defs, 
+	      uri: nil }}#stub
          [component_obj,component_def_obj]
       end
       
@@ -60,7 +62,7 @@ module XYZ
 
     class MetadataFromServer < Metadata
       include ChefServerConnection
-      def get(chef_server_uri,&block) #TBD: chef_server_uri is stub
+      def get(chef_server_uri,&_block) #TBD: chef_server_uri is stub
         initialize_chef_connection(chef_server_uri)
 	get_cookbook_list().each_key{|cookbook_name|
 	  component_object,implementation_object = get_cookbook_metadata(cookbook_name)
@@ -70,9 +72,10 @@ module XYZ
 	nil  
       end
 
-      def get_cookbook_list()
+      def get_cookbook_list
         get_rest("cookbooks").to_hash
       end
+
       def get_cookbook_metadata(cookbook_name)
         r = get_rest("cookbooks/#{cookbook_name}")
 	return nil if r.nil?
@@ -81,8 +84,8 @@ module XYZ
     end
 
     class MetadataFromFile < Metadata
-      def get(local_dir,&block)
-	#TBD: these should probably be done in task preconidtion that is part of synchronous a prior arguement checking
+      def get(local_dir,&_block)
+	       #TBD: these should probably be done in task preconidtion that is part of synchronous a prior arguement checking
         raise Error.new("#{local_dir} does not exist") unless  File.exists?(local_dir)
         raise Error.new("#{local_dir} is not a directory") unless  File.directory?(local_dir)
 	Dir.foreach(local_dir) do |cookbook_name| 
@@ -91,7 +94,7 @@ module XYZ
 	  begin 
 	   component_obj,component_def_obj = get_cookbook_metadata(cookbook_name,local_dir)
 	   rescue Exception => err
-	   #TBD: need to trap to assert which recipe this is associated with; want error that is json parsing error
+	    #TBD: need to trap to assert which recipe this is associated with; want error that is json parsing error
 	    yield cookbook_name,nil,nil,err
 	    next
 	  end
@@ -104,7 +107,9 @@ module XYZ
         end
 	nil
       end
-     private
+
+      private
+
       def get_cookbook_metadata(cookbook_name,local_dir)
 	metadata_file = "#{local_dir}/#{cookbook_name}/metadata.json"
 	return nil unless File.exists?(metadata_file)

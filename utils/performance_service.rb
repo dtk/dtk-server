@@ -49,7 +49,8 @@ module DTK
       log("MEASUREMENT=#{measure},#{duration}") if duration
     end
 
-   private
+    private
+
     def self.push_time_now(measure,unique_key)
       @@measure_lock.synchronize{@@timer_hash["#{measure}#{unique_key}"] = Time.now}
     end

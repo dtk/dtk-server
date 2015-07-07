@@ -11,19 +11,20 @@ module DTK; class Node; class TargetRef
       def create_nodes_from_inventory_data(target)
         target_ref_hash = target_ref_hash()
         target_idh = target.id_handle()
-        Model.import_objects_from_hash(target_idh, {:node => target_ref_hash}, :return_info => true)
+        Model.import_objects_from_hash(target_idh, {node: target_ref_hash}, return_info: true)
       end
 
       def self.pbuilderid?(node_external_ref)
-        node_external_ref ||= Hash.new
+        node_external_ref ||= {}
         if host_address = node_external_ref[:routable_host_address]||node_external_ref['routable_host_address']
           "#{TargetRef.physical_node_prefix()}#{host_address}"
         end
       end
 
-     private
-      def target_ref_hash()
-        inject(Hash.new){|h,el|h.merge(el.target_ref_hash())}
+      private
+
+      def target_ref_hash
+        inject({}){|h,el|h.merge(el.target_ref_hash())}
       end
     end
   end

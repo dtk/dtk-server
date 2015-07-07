@@ -16,7 +16,7 @@ end
 class ErrorParticipant
   include Ruote::LocalParticipant
  
-  def consume(workitem)
+  def consume(_workitem)
     puts "error"
     raise "Houston, something is wrong"
   end
@@ -31,7 +31,6 @@ engine.register_participant 'gamma', DefaultParticipant
 # engine.register do
 #  catchall DefaultParticipant
 # end
-
 
 pdef = Ruote.process_definition do
   concurrence do

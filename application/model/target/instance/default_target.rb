@@ -4,8 +4,8 @@ module DTK; class Target
       def self.get(target_mh,cols=[]) 
         cols = [:id,:display_name,:group_id] if cols.empty?
         sp_hash = {
-          :cols => cols,
-          :filter => [:eq,:is_default_target,true]
+          cols: cols,
+          filter: [:eq,:is_default_target,true]
         }
         ret = Target::Instance.get_obj(target_mh,sp_hash)
         ret && ret.create_subclass_obj(:target_instance)
@@ -24,11 +24,11 @@ module DTK; class Target
         end
         
         Model.Transaction do
-          current_default_target.update(:is_default_target => false) if current_default_target
-          target.update(:is_default_target => true)
+          current_default_target.update(is_default_target: false) if current_default_target
+          target.update(is_default_target: true)
           if opts[:update_workspace_target]
             # also set the workspace with this target
-            Workspace.set_target(target,:mode => :from_set_default_target)
+            Workspace.set_target(target,mode: :from_set_default_target)
           end
         end
         ret

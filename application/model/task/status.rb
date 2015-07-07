@@ -11,12 +11,12 @@ module DTK
       end
 
       def self.find_nodes_that_are_active(model_handle)
-        ret = Array.new
+        ret = []
         model_handle = model_handle.createMH(:task)
         top_level_active = get_active_top_level_tasks(model_handle)
         return ret if top_level_active.empty?
         # TODO: way to make call Task.get_all_subtasks faster
-        ndx_ret = Hash.new
+        ndx_ret = {}
         Task.get_all_subtasks(top_level_active.map{|t|t.id_handle}).each do |sub_task|
           if node = (sub_task[:executable_action] && sub_task[:executable_action][:node])
             ndx_ret[node[:id]] ||= node
@@ -25,7 +25,8 @@ module DTK
         ndx_ret.values
       end
 
-     private
+      private
+
       def self.get_status_aux(task_obj_idh,task_obj_type,filter,opts={})
         task_mh = task_obj_idh.createMH(:task)
 
@@ -34,9 +35,9 @@ module DTK
           raise ErrorUsage.new("No tasks found for #{task_obj_type} (#{task_obj[:display_name]})")
         end
 
-        task_structure = Task.get_hierarchical_structure(task_mh.createIDH(:id => task[:id]))
-        status_opts = Opts.new(:no_components => false, :no_attributes => true)
-        status_opts.merge!(:summarize_node_groups => true) if (opts[:detail_level]||{})[:summarize_node_groups]
+        task_structure = Task.get_hierarchical_structure(task_mh.createIDH(id: task[:id]))
+        status_opts = Opts.new(no_components: false, no_attributes: true)
+        status_opts.merge!(summarize_node_groups: true) if (opts[:detail_level]||{})[:summarize_node_groups]
         case opts[:format]
           when :table
             TableForm.status(task_structure,status_opts)
@@ -88,7 +89,7 @@ module DTK
     end
 
     module StatusMixin
-    # TODO: move to own file
+      # TODO: move to own file
       def status_hash_form(opts,level=1)
         set_and_return_types!()
         ret = PrettyPrintHash.new
@@ -121,12 +122,12 @@ module DTK
         ret
       end
 
-      def hier_task_idhs()
+      def hier_task_idhs
         [id_handle()] + subtasks.map{|r|r.hier_task_idhs()}.flatten
       end
 
       # TODO: probably better to set when creating
-      def set_and_return_types!()
+      def set_and_return_types!
         type =
           if self[:task_id].nil?
           self[:display_name]||"commit_cfg_changes"
@@ -155,13 +156,13 @@ module DTK
         "CreateNode" => "create_node"
       }
 
-      def hier_task_idhs()
+      def hier_task_idhs
         [id_handle()] + subtasks.map{|r|r.hier_task_idhs()}.flatten
       end
       protected :hier_task_idhs
 
       # for debugging
-      def pretty_print_hash()
+      def pretty_print_hash
         ret = PrettyPrintHash.new
         ret.add(self,:id,:status)
         num_subtasks = subtasks.size

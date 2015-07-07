@@ -9,8 +9,8 @@ module DTK
 
       def self.delete_node_template(node_binding_ruleset)
         sp_hash = {
-          :cols => [:id,:group_id,:display_name],
-          :filter => [:eq,:node_binding_rs_id,node_binding_ruleset.id]
+          cols: [:id,:group_id,:display_name],
+          filter: [:eq,:node_binding_rs_id,node_binding_ruleset.id]
         }
         node_images = get_objs(node_binding_ruleset.model_handle(:node),sp_hash)
         unless node_images.size == 1
@@ -21,25 +21,25 @@ module DTK
       end
 
       def self.list(model_handle,opts={})
-        ret = Array.new
+        ret = []
         node_bindings = nil
 
         if opts[:target_id]
-          sp_hash = { :cols => [:node_bindings], :filter => [:eq, :datacenter_datacenter_id, opts[:target_id].to_i]}
+          sp_hash = { cols: [:node_bindings], filter: [:eq, :datacenter_datacenter_id, opts[:target_id].to_i]}
           node_bindings = get_objs(model_handle.createMH(:node), sp_hash)
           unq_bindings = node_bindings.inject({}) { |tmp,nb| tmp.merge(nb[:node_binding_rs_id] => nb[:node_binding_ruleset])}
           node_bindings = unq_bindings.values
-        elsif opts[:is_list_all] and opts[:is_list_all].to_s == "true"
-          sp_hash = { :cols => [:node_bindings], :filter => [:neq, :datacenter_datacenter_id, nil]}
+        elsif opts[:is_list_all] && opts[:is_list_all].to_s == "true"
+          sp_hash = { cols: [:node_bindings], filter: [:neq, :datacenter_datacenter_id, nil]}
           node_bindings = get_objs(model_handle.createMH(:node), sp_hash)
           unq_bindings = node_bindings.inject({}) { |tmp,nb| tmp.merge(nb[:node_binding_rs_id] => nb[:node_binding_ruleset])}
           node_bindings = unq_bindings.values
         else
           sp_hash = {
-            :cols => [:id,:ref,:display_name,:rules,:os_type]
+            cols: [:id,:ref,:display_name,:rules,:os_type]
           }
-          sp_hash.merge!(:filter => opts[:filter]) if opts[:filter]
-          node_bindings = get_objs(model_handle.createMH(:node_binding_ruleset),sp_hash,:keep_ref_cols => true)
+          sp_hash.merge!(filter: opts[:filter]) if opts[:filter]
+          node_bindings = get_objs(model_handle.createMH(:node_binding_ruleset),sp_hash,keep_ref_cols: true)
         end
 
         node_bindings.each do |nb|
@@ -49,10 +49,10 @@ module DTK
             # Amar & Haris: Skipping node template in case when target name filter is sent in method request from CLI
             next if (opts[:target_id] && r[:datacenter_datacenter_id] == opts[:target_id].to_i)
             el = {
-              :display_name => nb[:display_name]||nb[:ref], #TODO: may just use display_name after fill in this column
-              :os_type => nb[:os_type],
+              display_name: nb[:display_name]||nb[:ref], #TODO: may just use display_name after fill in this column
+              os_type: nb[:os_type],
             }.merge(r[:node_template])
-            el.merge!(:id => unique_id) if unique_id
+            el.merge!(id: unique_id) if unique_id
             ret << el
           end
         end
@@ -71,8 +71,8 @@ module DTK
       def self.legal_os_identifiers(model_handle)
         public_library = get_public_library(model_handle)
         sp_hash = {
-          :cols => [:id,:os_identifier],
-          :filter => [:and,[:eq,:type,"image"],[:eq,:library_library_id,public_library[:id]]]
+          cols: [:id,:os_identifier],
+          filter: [:and,[:eq,:type,"image"],[:eq,:library_library_id,public_library[:id]]]
         }
         get_images(model_handle).map{|r|r[:os_identifier]}.compact.uniq
       end
@@ -80,8 +80,8 @@ module DTK
       def self.get_images(model_handle)
         public_library = Library.get_public_library(model_handle.createMH(:library))
         sp_hash = {
-          :cols => [:id,:group_id,:os_identifier,:external_ref],
-          :filter => [:and,[:eq,:type,"image"],[:eq,:library_library_id,public_library[:id]]]
+          cols: [:id,:group_id,:os_identifier,:external_ref],
+          filter: [:and,[:eq,:type,"image"],[:eq,:library_library_id,public_library[:id]]]
         }
         get_objs(model_handle.createMH(:node),sp_hash)
       end
@@ -90,8 +90,8 @@ module DTK
       # returns [image_id, os_type]
       def self.find_image_id_and_os_type(os_identifier,target)
         opts_get = {
-          :cols => [:id,:group_id,:rules,:os_type],
-          :filter => [:eq,:os_identifier,os_identifier]
+          cols: [:id,:group_id,:rules,:os_type],
+          filter: [:eq,:os_identifier,os_identifier]
         }
         ret = nil
         get_node_binding_rulesets(target,opts_get).find do |nb_rs|
@@ -103,10 +103,10 @@ module DTK
       end
 
       def self.get_matching_node_binding_rules(target,opts={})
-        ret = Array.new
+        ret = []
         get_node_binding_rulesets(target,opts).each do |nb_rs|
           if matching_rule = CommandAndControl.find_matching_node_binding_rule(nb_rs[:rules],target)
-            ret << nb_rs.merge(:matching_rule => matching_rule)
+            ret << nb_rs.merge(matching_rule: matching_rule)
           end
         end
         ret
@@ -119,18 +119,18 @@ module DTK
           filter = [:and,filter,opts[:filter]]
         end
         sp_hash = {
-          :cols => opts[:cols]||(NodeBindingRuleset.common_columns + [:ref]),
-          :filter => filter
+          cols: opts[:cols]||(NodeBindingRuleset.common_columns + [:ref]),
+          filter: filter
         }
-        get_objs(target.model_handle(:node_binding_ruleset),sp_hash,:keep_ref_cols => true)
+        get_objs(target.model_handle(:node_binding_ruleset),sp_hash,keep_ref_cols: true)
       end
       private_class_method :get_node_binding_rulesets
 
       def self.legal_memory_sizes(model_handle)
         public_library = Library.get_public_library(model_handle.createMH(:library))
         sp_hash = {
-          :cols => [:id,:external_ref],
-          :filter => [:and,[:eq,:type,"image"],[:eq,:library_library_id,public_library[:id]]]
+          cols: [:id,:external_ref],
+          filter: [:and,[:eq,:type,"image"],[:eq,:library_library_id,public_library[:id]]]
         }
         get_objs(model_handle.createMH(:node),sp_hash).map do |r|
           if external_ref = r[:external_ref]
@@ -152,8 +152,8 @@ module DTK
 
       def self.null_node_template(model_handle)
         sp_hash = {
-          :cols => [:id,:group_id,:display_name],
-          :filter => [:eq,:display_name, "null-node-template"]
+          cols: [:id,:group_id,:display_name],
+          filter: [:eq,:display_name, "null-node-template"]
         }
         node_mh = model_handle.createMH(:node)
         get_obj(node_mh,sp_hash)
@@ -162,7 +162,7 @@ module DTK
 
       def self.image_upgrade(model_handle,old_image_id,new_image_id)
         nb_mh = model_handle.createMH(:node_binding_ruleset)
-        matching_node_bindings = get_objs(nb_mh,:cols => [:id,:rules]).select do |nb|
+        matching_node_bindings = get_objs(nb_mh,cols: [:id,:rules]).select do |nb|
           nb[:rules].find{|r|r[:node_template][:image_id] == old_image_id}
         end
         if matching_node_bindings.empty?
@@ -190,8 +190,8 @@ module DTK
 
         # find and update nodes that are images
         sp_hash = {
-          :cols => [:id,:external_ref],
-          :filter => [:eq, :type, "image"]
+          cols: [:id,:external_ref],
+          filter: [:eq, :type, "image"]
         }
         matching_images = get_objs(model_handle,sp_hash).select do |r|
           r[:external_ref][:image_id] == old_image_id

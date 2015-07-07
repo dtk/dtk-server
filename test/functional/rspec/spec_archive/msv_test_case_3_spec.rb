@@ -20,7 +20,6 @@ $assembly_id = 0
 dtk_common = DtkCommon.new(assembly_name, assembly_template)
 
 describe "(Modules, Services and Versioning) Test Case 3: Import component module from remote, version it and clone it to local filesystem" do
-
 	before(:all) do
 		puts "********************************************************************************************************************************"
 		puts "(Modules, Services and Versioning) Test Case 3: Import component module from remote, version it and clone it to local filesystem"

@@ -19,7 +19,6 @@ namespace_component_module_filesystem_location_2 = "~/dtk/component_modules/test
 dtk_common = DtkCommon.new('', '')
 
 describe "(Modules, Services and Versioning) Test Case 33: Import git to two different namespaces" do
-
   before(:all) do
     puts "***************************************************************************************",""
   end

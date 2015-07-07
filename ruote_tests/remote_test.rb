@@ -4,13 +4,13 @@ require 'pp'
 # require 'ruote/storage/hash_storage'
 
 class WorkQueue
-  Queue = Array.new
+  Queue = []
   Sema = Mutex.new
   def self.push(msg)
     Sema.synchronize{Queue << msg}
   end
 
-  def self.pop()
+  def self.pop
     loop do 
       sleep 3
       msg = nil
@@ -69,22 +69,21 @@ engine.register_participant :report do |workitem|
   pp [:fields,workitem.fields]
 end
 
-engine.register_participant :start do |workitem|
+engine.register_participant :start do |_workitem|
   pp :start
 end
  
 receiver = Receiver.new(engine)
-pdef = Ruote.process_definition :name => 'test' do
+pdef = Ruote.process_definition name: 'test' do
   sequence do
     participant :start
-    concurrence :merge_type => :mix do
+    concurrence merge_type: :mix do
       participant :remote1
       participant :remote2
     end
     participant :report
   end
 end
-
 
 wfid = engine.launch(pdef)
 # receiver.thread.join

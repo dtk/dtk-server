@@ -15,7 +15,7 @@ module DTK
           @error = nil
         end
 
-        def initiate()
+        def initiate
           test_cmps = get_test_components_with_bindings()
           if test_cmps.empty?
             @error = "Unable to execute tests. There are no links to test components!"
@@ -23,7 +23,7 @@ module DTK
           end
 
           # Recognize if nodes are part of node group and map test components to nodes appropriately
-          node_names = @nodes.map { |n| { :name => n[:display_name], :id => n[:id]} }
+          node_names = @nodes.map { |n| { name: n[:display_name], id: n[:id]} }
           test_components = []
           test_cmps.each do |tc|
             node_names.each do |node|
@@ -41,7 +41,7 @@ module DTK
 
           test_components.select! { |tc| node_names.map{|n| n[:name]}.include? tc[:node_name] }
           
-          ndx_version_contexts = get_version_contexts(test_components).inject(Hash.new){|h,vc|h.merge(vc[:id]=>vc)}
+          ndx_version_contexts = get_version_contexts(test_components).inject({}){|h,vc|h.merge(vc[:id]=>vc)}
           version_contexts = ndx_version_contexts.values
 
           test_instances = test_components.map do |test_cmp|
@@ -51,17 +51,17 @@ module DTK
             attrib_array = test_cmp[:attributes].map{|a|{a[:display_name].to_sym =>a[:attribute_value]}}
             test_name = (test_cmp[:external_ref]||{})[:test_name]
             {
-              :module_name => version_context[:implementation],
-              :component => "#{test_cmp[:node_name]}/#{test_cmp[:component_name]}",
-              :test_component => test_cmp[:display_name],
-              :test_name => test_name,
-              :params => attrib_array
+              module_name: version_context[:implementation],
+              component: "#{test_cmp[:node_name]}/#{test_cmp[:component_name]}",
+              test_component: test_cmp[:display_name],
+              test_name: test_name,
+              params: attrib_array
             } 
           end
 
-          node_ids_with_tests = test_components.inject(Hash.new){|h,tc|h.merge(tc[:node_id] => true)}.keys
-          ndx_pbuilderid_to_node_info = nodes.inject(Hash.new) do |h,n|
-            h.merge(n.pbuilderid => {:id => n[:id].to_s, :display_name => n[:display_name]})
+          node_ids_with_tests = test_components.inject({}){|h,tc|h.merge(tc[:node_id] => true)}.keys
+          ndx_pbuilderid_to_node_info = nodes.inject({}) do |h,n|
+            h.merge(n.pbuilderid => {id: n[:id].to_s, display_name: n[:display_name]})
           end
 
           # filter nodes with tests
@@ -78,7 +78,7 @@ module DTK
                   components_array << comp
                 end                
               end
-              node_hash[node[:id]] = {:components => components_array, :instance_id => node[:external_ref][:instance_id], :version_context => version_contexts}
+              node_hash[node[:id]] = {components: components_array, instance_id: node[:external_ref][:instance_id], version_context: version_contexts}
             end
           end
 
@@ -87,9 +87,9 @@ module DTK
           set_indexes!(node_hash.keys)
 
           callbacks = {
-            :on_msg_received => proc do |msg|
+            on_msg_received: proc do |msg|
               response = CommandAndControl.parse_response__execute_action(nodes,msg)
-              if response and response[:pbuilderid] and response[:status] == :ok
+              if response && response[:pbuilderid] && response[:status] == :ok
                 node_info = ndx_pbuilderid_to_node_info[response[:pbuilderid]]
                 raw_data = response[:data].map{|r|node_info.merge(r)}
                 #TODO: find better place to put this
@@ -102,7 +102,7 @@ module DTK
                   end
                 end
                 #just for a safe side to filter out empty response, it causes further an error on the client side
-                unless response[:data].empty? or response[:data].nil?   
+                unless response[:data].empty? || response[:data].nil?   
                   packaged_data = DTK::ActionResultsQueue::Result.new(node_info[:display_name],raw_data)
                   push(node_info[:id], (type == :node) ? packaged_data.data : packaged_data)
                 end
@@ -110,10 +110,12 @@ module DTK
             end
           }
 
-          Log.info_pp(:execute_tests_v2 => node_hash)
+          Log.info_pp(execute_tests_v2: node_hash)
           CommandAndControl.request__execute_action_per_node(:execute_tests_v2,:execute_tests_v2,node_hash,callbacks)
         end
-       private
+
+        private
+
         attr_reader :project,:assembly_instance, :nodes, :action_results_queue, :type, :filter
         # returns array of augmented (test) components where augmented data 
         # {:attributes => ARRAY[attribute objs),
@@ -122,8 +124,8 @@ module DTK
         #  :component_name => STRING #base component name
         #  :component_id => ID
         # there can be multiple entries for same test component for each base component instance 
-        def get_test_components_with_bindings()
-          ret = Array.new
+        def get_test_components_with_bindings
+          ret = []
           test_cmp_attrs = get_test_component_attributes()
           if test_cmp_attrs.empty?
             return ret
@@ -161,8 +163,8 @@ module DTK
         #  :component_name=>String,
         #  :node_name=>String,
         #  :attributes=>[{:component_attribute_name=>String, :component_attribute_value=>String,:related_test_attribute=>String}
-        def get_test_component_attributes()
-          ret = Array.new
+        def get_test_component_attributes
+          ret = []
           linked_tests = Component::Test.get_linked_tests(assembly_instance, @project, @filter)
           if linked_tests.empty?
             return ret
@@ -185,32 +187,32 @@ module DTK
               test_component = linked_test.test_component
               # TODO: more efficient to get in bulk outside of test_params loop
               sp_hash = {
-                :cols => [:display_name, :attribute_value],
-                :filter => [:and,
-                            [:eq, :component_component_id,component_id],
-                            [:oneof, :display_name, attribute_names]]
+                cols: [:display_name, :attribute_value],
+                filter: [:and,
+                         [:eq, :component_component_id,component_id],
+                         [:oneof, :display_name, attribute_names]]
               }
-              ndx_attr_vals  = Model.get_objs(attr_mh,sp_hash).inject(Hash.new) do |h,a|
+              ndx_attr_vals  = Model.get_objs(attr_mh,sp_hash).inject({}) do |h,a|
                 h.merge(a[:display_name] => a[:attribute_value])
               end
-              attributes = Array.new
+              attributes = []
 
               attribute_names.each_with_index do |attribute_name, idx|
                 if val = ndx_attr_vals[attribute_name]
                   attributes << {
-                    :component_attribute_name => attribute_name,
-                    :component_attribute_value => val,
-                    :related_test_attribute => related_test_attribute[idx]
+                    component_attribute_name: attribute_name,
+                    component_attribute_value: val,
+                    related_test_attribute: related_test_attribute[idx]
                   }
                 end
               end
               hash = { 
-                :test_component => test_component,
-                :attributes => attributes, 
-                :component_id => component_id,
-                :component_name => component[:display_name], 
-                :node_id => node[:id],
-                :node_name => node[:display_name]
+                test_component: test_component,
+                attributes: attributes, 
+                component_id: component_id,
+                component_name: component[:display_name], 
+                node_id: node[:id],
+                node_name: node[:display_name]
               }
               all_test_params << hash
             end
@@ -230,19 +232,19 @@ module DTK
         #TODO: deprecate
         #TODO: rather than passing in strings, have controller/helper methods convert to ids and objects, rather than passing
         def get_augmented_component_templates(nodes,components)
-          ret = Array.new
+          ret = []
           if nodes.empty?
             return ret
           end
 
           sp_hash = {
-            :cols => [:id,:group_id,:instance_component_template_parent,:node_node_id],
-            :filter => [:oneof,:node_node_id,nodes.map{|n|n.id()}]
+            cols: [:id,:group_id,:instance_component_template_parent,:node_node_id],
+            filter: [:oneof,:node_node_id,nodes.map{|n|n.id()}]
           }
           ret = Model.get_objs(nodes.first.model_handle(:component),sp_hash).map do |r|
-            r[:component_template].merge(:node_node_id => r[:node_node_id], :component_instance_id => r[:id])
+            r[:component_template].merge(node_node_id: r[:node_node_id], component_instance_id: r[:id])
           end
-          if components.nil? or components.empty? or !components.include? "/"
+          if components.nil? || components.empty? or !components.include? "/"
             return ret
           end
 
@@ -250,21 +252,21 @@ module DTK
             if name_pairs.include? "/"
               split = name_pairs.split('/')
                 if split.size == 2
-                  {:node_name => split[0],:component_name => Component.display_name_from_user_friendly_name(split[1])}
+                  {node_name: split[0],component_name: Component.display_name_from_user_friendly_name(split[1])}
                 else
                   Log.error("unexpected component form: #{name_pairs}; skipping")
                   nil
                 end
             else
-                {:component_name => Component.display_name_from_user_friendly_name(name_pairs)}
+                {component_name: Component.display_name_from_user_friendly_name(name_pairs)}
             end
           end.compact
-          ndx_node_names = nodes.inject(Hash.new){|h,n|h.merge(n[:id] => n[:display_name])}
+          ndx_node_names = nodes.inject({}){|h,n|h.merge(n[:id] => n[:display_name])}
 
           #only keep matching ones
           ret.select do |cmp_template|
             cmp_node_names.find do |r|
-              r[:node_name] == ndx_node_names[cmp_template[:node_node_id]] and r[:component_name] == cmp_template[:display_name]
+              r[:node_name] == ndx_node_names[cmp_template[:node_node_id]] && r[:component_name] == cmp_template[:display_name]
             end
           end
         end

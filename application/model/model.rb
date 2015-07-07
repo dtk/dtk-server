@@ -7,9 +7,9 @@
 
 module XYZ
   module ClassMixinDataSourceExtensions
-    @@ds_class_objects ||= Hash.new
+    @@ds_class_objects ||= {}
     def ds_class_object(ds_type)
-      @@ds_class_objects[self] ||= Hash.new
+      @@ds_class_objects[self] ||= {}
       return @@ds_class_objects[self][ds_type] if @@ds_class_objects[self][ds_type]
       obj_class = Aux.demodulize(self.to_s)
       obj_type = Aux.underscore(obj_class)
@@ -19,7 +19,7 @@ module XYZ
     end
   end
 
-# TODO: why is this called object?
+  # TODO: why is this called object?
   # TBD: re-examine whether current scheme is best way to implement relationship between model top, specfic model classes and the XYZ::model utility class
   class Object < Model
     set_relation_as_top()
@@ -31,27 +31,27 @@ module XYZ
       end
       # idempotent
       def create_simple(new_uri,c,opts={})
-        create_simple_instance?(IDHandle[:uri => new_uri,:c => c],opts)
+        create_simple_instance?(IDHandle[uri: new_uri,c: c],opts)
       end
 
       # TODO: rewrite using join querey
 
       def get_contained_attribute_ids(id_handle,opts={})
         parent_id = IDInfoTable.get_id_from_id_handle(id_handle)
-        cmps = get_objects(ModelHandle.new(:c,:component),nil,:parent_id => parent_id)
-        nodes = get_objects(ModelHandle.new(:c,:node),nil,:parent_id => parent_id)
+        cmps = get_objects(ModelHandle.new(:c,:component),nil,parent_id: parent_id)
+        nodes = get_objects(ModelHandle.new(:c,:node),nil,parent_id: parent_id)
         (cmps||[]).map{|cmp|cmp.get_contained_attribute_ids(opts)}.flatten() +
         (nodes||[]).map{|node|node.get_contained_attribute_ids(opts)}.flatten()
       end
 
-# TODO: this seems like generic function but specifically works with nodes?
+      # TODO: this seems like generic function but specifically works with nodes?
       # type can be :asserted, :derived or :value
       def get_contained_attributes(type,id_handle,opts={})
         ret = {}
 
         parent_id = IDInfoTable.get_id_from_id_handle(id_handle)
-        cmps = get_objects(ModelHandle.new(:c,:component),nil,:parent_id => parent_id)
-        nodes = get_objects(ModelHandle.new(:c,:node),nil,:parent_id => parent_id)
+        cmps = get_objects(ModelHandle.new(:c,:component),nil,parent_id: parent_id)
+        nodes = get_objects(ModelHandle.new(:c,:node),nil,parent_id: parent_id)
 
         cmps.each{|cmp|
           values = cmp.get_contained_attribute_values(type,opts)
@@ -75,7 +75,7 @@ module XYZ
       # TBD: temp
       def get_guid(id_handle)
         id_info = IDInfoTable.get_row_from_id_handle(id_handle) 
-        {:guid => IDInfoTable.ret_guid_from_id_info(id_info)}
+        {guid: IDInfoTable.ret_guid_from_id_info(id_info)}
       end
     end
   end

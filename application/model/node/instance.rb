@@ -1,21 +1,21 @@
 module DTK
   class Node
     class Instance < self
-      def self.component_list_fields()
+      def self.component_list_fields
         [:id,:display_name,:group_id,:external_ref,:ordered_component_ids]
       end
       
       def self.get(mh,opts={})
         sp_hash = {
-          :cols => ([:id,:group_id,:display_name]+(opts[:cols]||[])).uniq,
-          :filter => [:neq,:datacenter_datacenter_id,nil]
+          cols: ([:id,:group_id,:display_name]+(opts[:cols]||[])).uniq,
+          filter: [:neq,:datacenter_datacenter_id,nil]
         }
         get_objs(mh,sp_hash)
       end
       
       def self.get_unique_instance_name(mh,display_name)
         display_name_regexp = Regexp.new("^#{display_name}")
-        matches = get(mh,:cols=>[:display_name]).select{|r|r[:display_name] =~ display_name_regexp}
+        matches = get(mh,cols: [:display_name]).select{|r|r[:display_name] =~ display_name_regexp}
         if matches.empty?
           return display_name
         end
@@ -29,7 +29,7 @@ module DTK
             end
           end
         end
-        "#{display_name}-#{index.to_s}"
+        "#{display_name}-#{index}"
       end
     end
   end

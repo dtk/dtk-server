@@ -4,15 +4,15 @@ module DTK
     r8_nested_require('node_module_dsl','update_model')
     include UpdateModelMixin
 
-    def self.parse_and_update_model(node_module,impl_obj,module_branch_idh,version=nil,opts={})
+    def self.parse_and_update_model(_node_module,impl_obj,module_branch_idh,version=nil,opts={})
       # get associated assembly templates before do any updates and use this to see if any referential integrity
       # problems within transaction after do update; transaction is aborted if any errors found
       Transaction do
         node_module_dsl_obj = create_dsl_object_from_impl(impl_obj, opts)
         raise node_module_dsl_obj if ParsingError.is_error?(node_module_dsl_obj)
 
-        update_opts = {:override_attrs => {"module_branch_id" => module_branch_idh.get_id()}}
-        update_opts.merge!(:version => version) if version
+        update_opts = {override_attrs: {"module_branch_id" => module_branch_idh.get_id()}}
+        update_opts.merge!(version: version) if version
         node_module_dsl_obj.update_model(update_opts)
       end
     end
@@ -31,7 +31,8 @@ module DTK
       end
     end
 
-   private
+    private
+
     def initialize(impl_idh,version_specific_input_hash,module_branch_idh,container_idh)
       @input_hash = version_parse_check_and_normalize(version_specific_input_hash)
       @impl_idh = impl_idh
@@ -48,10 +49,10 @@ module DTK
       klass.normalize(version_specific_input_hash)
     end
     # Set for load_and_return_version_adapter_class
-    def self.adapter_type()
+    def self.adapter_type
       "NodeModuleDSL"
     end
-    def self.adapter_dir()
+    def self.adapter_dir
       "node_module_dsl"
     end
   end

@@ -42,7 +42,6 @@ def change_module_metadata(module_name, new_module_metadata)
 end
 
 describe "(Modules, Services and Versioning) Test Case 31: NEG - Import Module A and Module B from git where Module B has dependency on Module A that is satisfied by name but not with version" do
-
   before(:all) do
     puts "*************************************************************************************************************************************************************************************"
     puts "(Modules, Services and Versioning) Test Case 31: NEG - Import Module A and Module B from git where Module B has dependency on Module A that is satisfied by name but not with version"

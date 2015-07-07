@@ -26,7 +26,7 @@ module DTK
       def clone_copy_top_level(source_id_handle_x,targets,recursive_override_attrs={})
         return @ret if targets.empty?
         source_model_name = Model.concrete_model_name(source_id_handle_x[:model_name])
-        source_id_handle = source_id_handle_x.createIDH(:model_name => source_model_name)
+        source_id_handle = source_id_handle_x.createIDH(model_name: source_model_name)
 
         source_model_handle = source_id_handle.createMH()
         source_parent_id_col = source_model_handle.parent_id_field_name()
@@ -40,7 +40,7 @@ module DTK
         targets_rows = targets.map{|id_handle|{target_parent_id_col => id_handle.get_id()}}
         targets_ds = SQL::ArrayDataset.create(db,targets_rows,ModelHandle.new(source_id_handle[:c],:target))
 
-        source_wc = {:id => source_id_handle.get_id()}
+        source_wc = {id: source_id_handle.get_id()}
 
         remove_cols = (source_parent_id_col == target_parent_id_col ? [:id,:local_id] : [:id,:local_id,source_parent_id_col])
         field_set_to_copy = Model::FieldSet.all_real(source_model_name).with_removed_cols(*remove_cols)
@@ -53,12 +53,12 @@ module DTK
         # process overrides
         override_attrs = ret_real_columns(source_model_handle,recursive_override_attrs)
         override_attrs = add_to_overrides_null_other_parents(override_attrs,target_mh[:model_name],target_parent_id_col)
-        create_override_attrs = override_attrs.merge(:ancestor_id => source_id_handle.get_id()) 
+        create_override_attrs = override_attrs.merge(ancestor_id: source_id_handle.get_id()) 
 
         new_objs_info = Model.create_from_select(target_mh,field_set_to_copy,select_ds,create_override_attrs,create_opts_for_top())
         return @ret if new_objs_info.empty?
         new_id_handles = @ret.set_new_objects!(new_objs_info,target_mh)
-        fk_info.add_id_mappings(source_model_handle,new_objs_info, :top => true)
+        fk_info.add_id_mappings(source_model_handle,new_objs_info, top: true)
 
         fk_info.add_id_handles(new_id_handles) #TODO: may be more efficient adding only id handles assciated with foreign keys
 
@@ -69,25 +69,26 @@ module DTK
         fk_info.shift_foregn_keys()
         @ret
       end
-      def get_nested_objects_top_level(model_handle,target_parent_mh,objs_info,recursive_override_attrs,&block)
-        opts_generate = Hash.new
+
+      def get_nested_objects_top_level(model_handle,_target_parent_mh,objs_info,recursive_override_attrs,&block)
+        opts_generate = {}
         if @include_list
-          opts_generate.merge!(:include_list => @include_list)
+          opts_generate.merge!(include_list: @include_list)
         end
 
         ChildContext.generate(self,model_handle,objs_info,recursive_override_attrs,opts_generate,&block)
       end
 
-      def output()
+      def output
         @ret
       end
 
       # optionally overwritten
-      def service_add_on_proc?()
+      def service_add_on_proc?
         nil
       end
 
-      def shift_foregn_keys()
+      def shift_foregn_keys
         fk_info.shift_foregn_keys()
       end
 
@@ -104,7 +105,7 @@ module DTK
         many_to_one = DB_REL_DEF[model_name][:many_to_one]||[]
         many_to_one.inject(overrides) do |ret_hash,par_mn|
           par_id_col = DB.parent_field(par_mn,model_name)
-          if selected_par_id_col == par_id_col or overrides.has_key?(par_id_col)
+          if selected_par_id_col == par_id_col || overrides.key?(par_id_col)
             ret_hash
           else
             ret_hash.merge(par_id_col => SQL::ColRef.null_id)
@@ -128,10 +129,10 @@ module DTK
         case model_name
          when :node then ret_sql_cols << :external_ref
         end
-        create_opts = {:duplicate_refs => :allow, :returning_sql_cols => ret_sql_cols}
-        parent_rels = id_handles.map{|idh|{:old_par_id => idh.get_id()}}
+        create_opts = {duplicate_refs: :allow, returning_sql_cols: ret_sql_cols}
+        parent_rels = id_handles.map{|idh|{old_par_id: idh.get_id()}}
 
-        ChildContext.create_from_hash(self,{:model_handle => model_handle, :clone_par_col => :id, :parent_rels => parent_rels, :override_attrs => override_attrs, :create_opts => create_opts})
+        ChildContext.create_from_hash(self,model_handle: model_handle, clone_par_col: :id, parent_rels: parent_rels, override_attrs: override_attrs, create_opts: create_opts)
       end
 
       def add_id_handle(id_handle)
@@ -146,18 +147,21 @@ module DTK
       
       def ret_real_columns(model_handle,recursive_override_attrs)
         fs = Model::FieldSet.all_real(model_handle[:model_name])
-        recursive_override_attrs.reject{|k,v| not fs.include_col?(k)}
+        recursive_override_attrs.reject{|k,_v| not fs.include_col?(k)}
       end
 
-      def cloning_assembly?()
+      def cloning_assembly?
         nil
       end
-      def clone_direction()
+
+      def clone_direction
         nil
       end
-     private
-      def create_opts_for_top()
-        dups_allowed_for_cmp = true #TODO stub
+
+      private
+
+      def create_opts_for_top
+        dups_allowed_for_cmp = true #TODO: stub
         
         returning_sql_cols = [:ancestor_id] 
         # TODO" may make what are returning sql columns methods in model classes liek do for clone post copy
@@ -166,7 +170,7 @@ module DTK
         end
 
         (@ret.ret_new_obj_with_cols||{}).each{|col| returning_sql_cols << col unless returning_sql_cols.include?(col)}
-        {:duplicate_refs => dups_allowed_for_cmp ? :allow : :prune_duplicates,:returning_sql_cols => returning_sql_cols}
+        {duplicate_refs: dups_allowed_for_cmp ? :allow : :prune_duplicates,returning_sql_cols: returning_sql_cols}
       end
     end
   end

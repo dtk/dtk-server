@@ -4,7 +4,7 @@ module XYZ
     def self.create(path,branch,opts={})
       new(path,branch,opts)
     end
-    def initialize(path,branch,opts={})
+    def initialize(path,branch,_opts={})
       raise Error.new("mock mode only supported when branch=='master'") unless  branch=="master"
       root = R8::Config[:repo][:base_directory]
       @path = "#{root}/#{path}"
@@ -14,9 +14,9 @@ module XYZ
       Dir.chdir(@path){File.open(file_asset[:path]){|f|f.read}}
     end
 
-    def self.repo_url()
+    def self.repo_url
     end
-    def self.repo_server_dns()
+    def self.repo_server_dns
     end
 
     def self.create_repo_clone(repo_obj,opts)
@@ -33,11 +33,11 @@ module XYZ
 
     # no ops if dont explicitly have method
     class << self
-      def method_missing(meth, *args, &block)
+      def method_missing(_meth, *_args, &_block)
         nil
       end
     end
-    def method_missing(meth, *args, &block)
+    def method_missing(_meth, *_args, &_block)
       nil
     end
   end

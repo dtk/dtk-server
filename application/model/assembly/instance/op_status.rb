@@ -27,23 +27,23 @@ module DTK; class  Assembly; class Instance
       def op_status_all_pending?(assembly_nodes)
         assembly_nodes.find do |node|
           status = node[:admin_op_status]
-          status.nil? or status != 'pending'
+          status.nil? || status != 'pending'
         end.nil?
       end
     end
 
     module Mixin
-      def any_stopped_nodes?()
-        !!get_leaf_nodes(:cols => [:id,:admin_op_status]).find{|node|node[:admin_op_status] == 'stopped'}
+      def any_stopped_nodes?
+        !!get_leaf_nodes(cols: [:id,:admin_op_status]).find{|node|node[:admin_op_status] == 'stopped'}
       end
       
       # TODO: check that nelow correctly dont use get_leaf_nodes
-      def op_status()
+      def op_status
         assembly_nodes = get_nodes(:admin_op_status)
         self.class.op_status(assembly_nodes)
       end
       
-      def op_status_all_pending?()
+      def op_status_all_pending?
         assembly_nodes = get_nodes(:admin_op_status)
         self.class.op_status_all_pending?(assembly_nodes)
       end
@@ -90,7 +90,7 @@ module DTK; class  Assembly; class Instance
         end
 
         # check for status -> this will translate to /running|pending/ and /stopped|pending/ checks
-        filtered_nodes = nodes.select { |node| node.get_field?(:admin_op_status) =~ Regexp.new("#{status_pattern.to_s}|pending") }
+        filtered_nodes = nodes.select { |node| node.get_field?(:admin_op_status) =~ Regexp.new("#{status_pattern}|pending") }
         if filtered_nodes.size == 0
           assembly_name = pretty_print_name()
         return nodes, false, "There are no #{status_pattern} nodes for assembly '#{assembly_name}'."
@@ -101,7 +101,6 @@ module DTK; class  Assembly; class Instance
 
       # TODO: collapse above and below
       def nodes_are_up?(nodes, status_pattern, opts={})
-
         what = opts[:what]||"Command"
         # check if staged
         nodes.each do |node|
@@ -111,7 +110,7 @@ module DTK; class  Assembly; class Instance
         end
 
         # check for status -> this will translate to /running|pending/ and /stopped|pending/ checks
-        filtered_nodes = nodes.select { |node| node.get_field?(:admin_op_status) =~ Regexp.new("#{status_pattern.to_s}|pending") }
+        filtered_nodes = nodes.select { |node| node.get_field?(:admin_op_status) =~ Regexp.new("#{status_pattern}|pending") }
         if filtered_nodes.size == 0
           assembly_name = pretty_print_name()
           return nodes, false, "There are no #{status_pattern} nodes for assembly '#{pretty_print_name(assembly_name)}'."
@@ -119,7 +118,6 @@ module DTK; class  Assembly; class Instance
 
         [filtered_nodes, true, nil]
       end
-
     end
   end
 end; end; end

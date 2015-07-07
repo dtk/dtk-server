@@ -33,6 +33,5 @@ module DTK
     def node_name(node)
       (node[:external_ref]||{})[:instance_id]
     end
-
   end
 end

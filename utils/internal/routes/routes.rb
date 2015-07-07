@@ -3,8 +3,8 @@ module R8
   Routes = XYZ::HashObject::AutoViv.create()
 
   class Mapper
-    def initialize()
-      @routes = Hash.new
+    def initialize
+      @routes = {}
     end
 
     def get(entry)
@@ -15,7 +15,7 @@ module R8
       @routes.merge!(transform_value("post",entry))
     end
 
-    def method_missing(name,*args,&block)
+    def method_missing(name,*_args,&_block)
       raise "REST method '#{name}' is not supported via Reactor Routes."
     end
 
@@ -30,7 +30,6 @@ module R8
     def transform_value(type, entry)
       { "#{type}_#{entry.keys.first}" => entry.values.first.split('#') }
     end
-
   end
 
   class ReactorRoute
@@ -44,17 +43,14 @@ module R8
       ReactorRoute.instance.mapper.validate_route(rest_type, route)
     end
 
-    def mapper()
+    def mapper
       @mapper
     end
 
     private
 
-    def initialize()
+    def initialize
       @mapper = Mapper.new
     end
-
-
   end
-
 end

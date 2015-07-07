@@ -2,7 +2,7 @@ module DTK
   class Clone; class CopyProcessor
     class ForeignKeyInfo
       def initialize(db)
-        @info = Hash.new
+        @info = {}
         @db = db
         @no_fk_processing = false
       end
@@ -14,7 +14,7 @@ module DTK
         end
       end
 
-      def shift_foregn_keys()
+      def shift_foregn_keys
         return if @no_fk_processing
         each_fk do |model_handle, fk_model_name, fk_cols|
           # get (if the set of id mappings for fk_model_name
@@ -39,16 +39,17 @@ module DTK
         # put in foreign keys that are not special keys like ancestor or assembly_id
         omit = Global::ForeignKeyOmissions[model_handle[:model_name]]||[]
         field_set.foreign_key_info().each do |fk,fk_info|
-          next if fk == :ancestor_id or omit.include?(fk)
-          pointer = fks[fk_info[:foreign_key_rel_type]] ||= Array.new
+          next if fk == :ancestor_id || omit.include?(fk)
+          pointer = fks[fk_info[:foreign_key_rel_type]] ||= []
           pointer << fk unless pointer.include?(fk)
         end
       end
-     private
+
+      private
 
       def avoid_fk_processing?(model_handle,objs_info,opts)
         return false unless opts[:top]
-        model_handle[:model_name] != :component or (objs_info.first||{})[:type] != "composite"
+        model_handle[:model_name] != :component || (objs_info.first||{})[:type] != "composite"
       end
       
       def shift_foregn_keys_aux(model_handle,fk_col,id_mappings)
@@ -58,7 +59,7 @@ module DTK
         base_ds = Model.get_objects_just_dataset(model_handle,base_wc,base_fs)
 
         mappping_rows = id_mappings.map{|r| {fk_col => r[:id], :old_key => r[:ancestor_id]}}
-        mapping_ds = SQL::ArrayDataset.create(@db,mappping_rows,model_handle.createMH(:model_name => :mappings))
+        mapping_ds = SQL::ArrayDataset.create(@db,mappping_rows,model_handle.createMH(model_name: :mappings))
         select_ds = base_ds.join_table(:inner,mapping_ds,[:old_key])
         
         field_set = Model::FieldSet.new(model_name,[fk_col])
@@ -66,8 +67,8 @@ module DTK
       end
       
       def model_handle_info(mh)
-        @info[mh[:c]] ||= Hash.new
-        @info[mh[:c]][mh[:model_name]] ||= {:id_mappings => Array.new, :fks => Hash.new, :new_ids => Array.new}
+        @info[mh[:c]] ||= {}
+        @info[mh[:c]][mh[:model_name]] ||= {id_mappings: [], fks: {}, new_ids: []}
       end
         
       def each_fk(&block)
@@ -81,7 +82,7 @@ module DTK
       end
       
       def get_id_mappings(mh,fk_model_name)
-        ((@info[mh[:c]]||{})[fk_model_name]||{})[:id_mappings] || Array.new
+        ((@info[mh[:c]]||{})[fk_model_name]||{})[:id_mappings] || []
       end
     end
   end; end

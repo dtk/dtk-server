@@ -33,7 +33,7 @@ module DTK
       assembly = get_assembly?() 
       new_tr_idhs = nil
       Transaction do
-        ndx_new_tr_idhs = TargetRef::Input::BaseNodes.create_linked_target_refs?(target,assembly,[self],:new_cardinality => new_cardinality)
+        ndx_new_tr_idhs = TargetRef::Input::BaseNodes.create_linked_target_refs?(target,assembly,[self],new_cardinality: new_cardinality)
         unless new_tr_idhs = ndx_new_tr_idhs && ndx_new_tr_idhs[id()]
           raise Error.new("Unexpected that new_tr_idhs is empty")
         end
@@ -42,9 +42,9 @@ module DTK
         create_attribute_links__clone_if_needed(target,new_tr_idhs)      
         
         # find or add state change for node group and then add state change objects for new node members
-        node_group_sc = StateChange.create_pending_change_item?(:new_item => id_handle(), :parent => target.id_handle())
+        node_group_sc = StateChange.create_pending_change_item?(new_item: id_handle(), parent: target.id_handle())
         node_group_sc_idh = node_group_sc.id_handle()
-        new_items_hash = new_tr_idhs.map{|idh|{:new_item => idh, :parent => node_group_sc_idh}}
+        new_items_hash = new_tr_idhs.map{|idh|{new_item: idh, parent: node_group_sc_idh}}
         StateChange.create_pending_change_items(new_items_hash)
       end
       new_tr_idhs
@@ -74,13 +74,13 @@ module DTK
       card = attribute.cardinality
       new_card = card - amount
       if new_card < 0
-        raise ErrorUsage.new("Existing cardinality (#{card.to_s}) is less than amount to decrease it by (#{amount.to_s})")
+        raise ErrorUsage.new("Existing cardinality (#{card}) is less than amount to decrease it by (#{amount})")
       end
       Node::NodeAttribute.create_or_set_attributes?([self],:cardinality,new_card)
       new_card
     end
 
-    def get_node_group_members()
+    def get_node_group_members
       self.class.get_node_group_members(id_handle())
     end
     def self.get_node_group_members(node_group_idh) 
@@ -88,22 +88,22 @@ module DTK
     end
 
     def self.get_ndx_node_group_members(node_group_idhs)
-      ret = Hash.new
+      ret = {}
       return ret if node_group_idhs.empty?
       sp_hash = {
-        :cols => [:id,:display_name,:node_members],
-        :filter => [:oneof,:id,node_group_idhs.map{|ng|ng.get_id()}]
+        cols: [:id,:display_name,:node_members],
+        filter: [:oneof,:id,node_group_idhs.map{|ng|ng.get_id()}]
       }
       mh = node_group_idhs.first.createMH()
       get_objs(mh,sp_hash).each do |ng|
         node_member = ng[:node_member]
         target = ng[:target]
-        node_member.merge!(:target => target) if target
+        node_member.merge!(target: target) if target
         if index = TargetRef.node_member_index(node_member)
-          node_member.merge!(:index => index)
+          node_member.merge!(index: index)
         end
         ndx = ng[:id]
-        (ret[ndx] ||= Array.new) << node_member
+        (ret[ndx] ||= []) << node_member
       end
       ret
     end
@@ -116,7 +116,7 @@ module DTK
         return ret
       end
       ndx_node_members = get_ndx_node_group_members(ng_idhs)
-      ndx_ret = Hash.new
+      ndx_ret = {}
       node_or_ngs.each do |n|
         if n.is_node_group?
           ndx_ret.merge!(n.id => n) unless opts[:remove_node_groups]
@@ -124,7 +124,7 @@ module DTK
           (ndx_node_members[n[:id]]||[]).each do |node|
             if opts[:add_group_member_components]
               components = n.info_about(:components)
-              node.merge!(:components => components) unless components.empty?
+              node.merge!(components: components) unless components.empty?
             end
             ndx_ret.merge!(node.id => node)
           end
@@ -136,7 +136,7 @@ module DTK
     end
 
     def self.get_node_groups?(node_or_ngs)
-      ndx_ret = Hash.new
+      ndx_ret = {}
       node_or_ngs.each do |n|
         ndx_ret.merge!(n.id => n) if n.is_node_group?
       end
@@ -145,14 +145,15 @@ module DTK
     end
 
     def self.get_node_attributes_to_copy(node_group_idhs)
-      Node.get_target_ref_attributes(node_group_idhs,:cols=>NodeAttributesToCopy)
+      Node.get_target_ref_attributes(node_group_idhs,cols: NodeAttributesToCopy)
     end
     NodeAttributesToCopy = (Attribute.common_columns + [:ref,:node_node_id]).uniq - [:id]
 
     def destroy_and_delete(opts={})
       get_node_group_members().map{|node|node.destroy_and_delete(opts)}
-      delete_object(:members_are_deleted=>true)
+      delete_object(members_are_deleted: true)
     end
+
     def delete_object(opts={})
       unless opts[:members_are_deleted]
         get_node_group_members().map{|node|node.delete_object(opts)}
@@ -160,11 +161,12 @@ module DTK
       super(opts)
     end
 
-   private
+    private
+
     def create_attribute_links__clone_if_needed(target,target_ref_idhs)
       port_links = get_port_links()
       return if port_links.empty?
-      opts_create_links = {:set_port_link_temporal_order=>true, :filter => {:target_ref_idhs => target_ref_idhs}}
+      opts_create_links = {set_port_link_temporal_order: true, filter: {target_ref_idhs: target_ref_idhs}}
       port_links.each do |port_link|
         port_link.create_attribute_links__clone_if_needed(target.id_handle,opts_create_links)
       end

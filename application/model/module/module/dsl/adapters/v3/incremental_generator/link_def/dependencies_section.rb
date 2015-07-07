@@ -1,15 +1,15 @@
 module DTK; class ModuleDSL; class V3
   class IncrementalGenerator; class LinkDef
     class DependenciesSection < self
-      def generate()
+      def generate
         ref = @aug_link_def.required(:link_type)
         link_def_links = @aug_link_def.required(:link_def_links)
         if link_def_links.empty?
           raise Error.new("Unexpected that link_def_links is empty")
         end
-        opts_choice = Hash.new
+        opts_choice = {}
         if single_choice = (link_def_links.size == 1) 
-          opts_choice.merge!(:omit_component_ref => ref)
+          opts_choice.merge!(omit_component_ref: ref)
         end
         possible_links = @aug_link_def[:link_def_links].map do |link_def_link|
           choice_info(ObjectWrapper.new(link_def_link),opts_choice)
@@ -23,7 +23,7 @@ module DTK; class ModuleDSL; class V3
         return ret unless fragment
         component_fragment = component_fragment(full_hash,context[:component_template])
         if dependencies_fragment = component_fragment['dependencies']
-          unless dependencies_fragment.kind_of?(Array)
+          unless dependencies_fragment.is_a?(Array)
             dependencies_fragment = component_fragment['dependencies'] = [dependencies_fragment]
           end
           fragment.each do |key,content|
@@ -35,7 +35,8 @@ module DTK; class ModuleDSL; class V3
         ret
       end
 
-     private
+      private
+
       def choice_info(link_def_link,opts={})
         ret = Link.new
         cmp_ref = link_component(link_def_link)
@@ -75,7 +76,7 @@ module DTK; class ModuleDSL; class V3
           choices = 
             if fragment_link.keys == ['choices']
               fragment_link['choices'].map do |choice|
-                 Dependency.new(choice.kind_of?(String) ? choice : {key => choice})
+                 Dependency.new(choice.is_a?(String) ? choice : {key => choice})
               end   
             else
               [Dependency.new(key => fragment_link)]
@@ -94,13 +95,16 @@ module DTK; class ModuleDSL; class V3
           ret['choices'] << link
           ret
         end
-        def external_form()
+
+        def external_form
           ext_form_choices = self['choices'].map do |r|
-            r.kind_of?(Dependency) ? r.external_form() : r
+            r.is_a?(Dependency) ? r.external_form() : r
           end
           {@key => self.merge('choices' => ext_form_choices)}
         end
-       private
+
+        private
+
         def initialize(key,fragment_link)
           super()
           @key = key
@@ -123,23 +127,26 @@ module DTK; class ModuleDSL; class V3
         def matches?(link)
           @link.matches?(link)
         end
-        def external_form()
+
+        def external_form
           if @is_default
             @key
           else
             @link
           end
         end
-       private
+
+        private
+
         def self.key__link__is_default(obj)
-          if obj.kind_of?(String)
+          if obj.is_a?(String)
             [obj,default_link(),true]
           else #obj.kind_of?(Hash)
             [obj.keys.first,Link.new(obj.values.first),false]
           end
         end
 
-        def default_link()
+        def default_link
           Link.new('location' => 'local')
         end
       end

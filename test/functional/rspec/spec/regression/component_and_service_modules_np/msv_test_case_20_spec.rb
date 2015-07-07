@@ -23,7 +23,6 @@ local_component_module_name = 'r8:apache'
 dtk_common = DtkCommon.new('', '')
 
 describe "(Modules, Services and Versioning) Test Case 20: Import service module from remote repo and check its corresponding assemblies" do
-
   before(:all) do
     puts "******************************************************************************************************************************",""
   end

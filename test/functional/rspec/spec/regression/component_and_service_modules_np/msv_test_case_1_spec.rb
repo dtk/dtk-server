@@ -24,7 +24,6 @@ component_module_filesystem_location = "~/dtk/component_modules/dtk17"
 dtk_common = DtkCommon.new(service_name, assembly_name)
 
 describe "(Modules, Services and Versioning) Test Case 1: Import component module from remote and use this component in assembly" do
-
 	before(:all) do
 		puts "**********************************************************************************************************************",""
 	end

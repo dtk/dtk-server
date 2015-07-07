@@ -26,7 +26,7 @@ module DTK; class ConfigAgent; class Adapter::Puppet
       end
 
       ret = ParseStructure::TopPS.new()
-      opts = {:just_krt_code => true}
+      opts = {just_krt_code: true}
       errors_cache = nil
       manifest_file_paths.each do |file_path|
         Log.info("Calling #{type()} and dtk processor on file #{file_path}")
@@ -36,7 +36,7 @@ module DTK; class ConfigAgent; class Adapter::Puppet
          rescue ParseErrorsCache => errors
           errors_cache = (errors_cache ? errors_cache.add(errors) : errors)
          rescue ParseError => error
-          errors_cache = (errors_cache ? errors_cache : ParseErrorsCache.new(type())).add(error,Opts.new(:file_path => file_path))
+          errors_cache = (errors_cache ? errors_cache : ParseErrorsCache.new(type())).add(error,Opts.new(file_path: file_path))
         end
       end
       raise errors_cache.create_error() if errors_cache
@@ -54,16 +54,17 @@ module DTK; class ConfigAgent; class Adapter::Puppet
       ret
     end
 
-   private
+    private
+
     PuppetParserLock = Mutex.new
 
     def parse_given_file_path__manifest(file_path,impl_obj,opts={})
-      file_content = RepoManager.get_file_content({:path => file_path},impl_obj)
-      parse_given_file_content__manifest(file_content,opts.merge(:file_path => file_path))
+      file_content = RepoManager.get_file_content({path: file_path},impl_obj)
+      parse_given_file_content__manifest(file_content,opts.merge(file_path: file_path))
     end
 
     def parse_given_file_content__manifest(file_content,opts={})
-      synchronize_and_handle_puppet_globals({:code => file_content, :ignoreimport => false},opts) do
+      synchronize_and_handle_puppet_globals({code: file_content, ignoreimport: false},opts) do
         environment = "production"
         node_env = ::Puppet::Node::Environment.new(environment)
         known_resource_types = ::Puppet::Resource::TypeCollection.new(node_env)
@@ -80,7 +81,7 @@ module DTK; class ConfigAgent; class Adapter::Puppet
       end
     end
 
-    def synchronize_and_handle_puppet_globals(global_assignments,opts={},&block)
+    def synchronize_and_handle_puppet_globals(global_assignments,opts={},&_block)
       ret = nil
       PuppetParserLock.synchronize do
         begin
@@ -105,10 +106,10 @@ module DTK; class ConfigAgent; class Adapter::Puppet
       file_path ||= puppet_error.file || find_file_path(puppet_error.message)
       # TODO: strip stuff off error message
       msg = strip_message(puppet_error.message)
-      opts = {:file_path => file_path}
+      opts = {file_path: file_path}
       unless msg_has_line_num?(msg)
         if line = (puppet_error.line || find_line(puppet_error.message))
-          opts.merge!(:line_num => line)
+          opts.merge!(line_num: line)
         end
       end
       ParseError.new(msg,opts)
@@ -122,8 +123,8 @@ module DTK; class ConfigAgent; class Adapter::Puppet
 
     def msg_has_line_num?(msg)
       # just heursitic
-      (!!find_line(msg)) or
-        (msg =~ /[0-9]+/ and msg =~ /at line/) 
+      (!!find_line(msg)) ||
+        (msg =~ /[0-9]+/ && msg =~ /at line/) 
     end
 
     def  find_line(msg)

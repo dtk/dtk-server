@@ -6,14 +6,14 @@ module Ramaze::Helper
     def create_object_from_id(id,model_name_or_class=nil,opts={})
       model_name  =
         if model_name_or_class.nil? then model_name()
-        elsif model_name_or_class.kind_of?(Symbol) then model_name_or_class
+        elsif model_name_or_class.is_a?(Symbol) then model_name_or_class
         else #it is a model class
           ret_module_name_from_class(model_name_or_class)
         end
-      id_handle(id,model_name).create_object(opts.merge(:controller_class => self.class))
+      id_handle(id,model_name).create_object(opts.merge(controller_class: self.class))
     end
 
-    def user_object()
+    def user_object
       ret = user
       if ret.class == nil
         if R8::Config[:development_test_user]
@@ -24,7 +24,7 @@ module Ramaze::Helper
       ret
     end
 
-    def default_namespace()
+    def default_namespace
       # CurrentSession.new().get_user_object().get_namespace()
       # we don't want username as default namespace, we will use tenant unique name instead
       Common::Aux.running_process_user()
@@ -39,17 +39,18 @@ module Ramaze::Helper
       user_obj = user_object()
       ret = ModelHandle.create_from_user(user_obj,model_name_x)
       group_obj = UserGroup.get_private_group(ret.createMH(:user_group),user_obj[:username])
-      ret.merge(:group_id => group_obj[:id])
+      ret.merge(group_id: group_obj[:id])
     end
 
     # looks for default if no target is given
-    def create_target_instance_with_default(target_id_field=:target_id,model_class=nil)
+    def create_target_instance_with_default(target_id_field=:target_id,_model_class=nil)
       if target_id = ret_request_params(target_id_field)
         create_obj(target_id_field,Target::Instance)
       else
         Target::Instance.get_default_target(model_handle(:target))
       end
     end
+
     def target_idh_with_default(target_id=nil)
       if target_id
         id_handle(target_id,:target)
@@ -62,7 +63,7 @@ module Ramaze::Helper
       end
     end
 
-    def get_default_project()
+    def get_default_project
       projects = ::DTK::Project.get_all(model_handle(:project))
       if projects.empty?
         raise DTK::Error.new("Cannot find any projects")
@@ -71,7 +72,8 @@ module Ramaze::Helper
       end
       projects.first
     end
-   private
+
+    private
 
     # helpers that interact with model
     def get_objects(model_name,where_clause={},opts={})
@@ -80,7 +82,7 @@ module Ramaze::Helper
     end
 
     def get_object_by_id(id,model_name_x=model_name())
-      get_objects(model_name_x,{:id => id}).first
+      get_objects(model_name_x,id: id).first
     end
 
     def update_from_hash(id,hash,opts={})
@@ -96,76 +98,76 @@ module Ramaze::Helper
 
     def delete_instance(id)
       c = ret_session_context_id()
-      Model.delete_instance(IDHandle[:c => c, :id => id,:model_name => model_name()])
+      Model.delete_instance(IDHandle[c: c, id: id,model_name: model_name()])
     end
 
     def id_handle(id,i_model_name=model_name(),display_name=nil)
       model_name = :datacenter if model_name == :target  #TODO: remove temp datacenter->target
       c = ret_session_context_id()
-      hash = {:c => c,:guid => id.to_i, :model_name => i_model_name.to_sym}
-      hash.merge!(:display_name => display_name) if display_name
-      idh = IDHandle.new(hash,{:set_parent_model_name => true})
+      hash = {c: c,guid: id.to_i, model_name: i_model_name.to_sym}
+      hash.merge!(display_name: display_name) if display_name
+      idh = IDHandle.new(hash,set_parent_model_name: true)
       obj = idh.create_object().update_object!(:group_id)
-      idh.merge!(:group_id => obj[:group_id]) if obj[:group_id]
+      idh.merge!(group_id: obj[:group_id]) if obj[:group_id]
       idh
     end
 
-    def top_level_factory_id_handle()
+    def top_level_factory_id_handle
       c = ret_session_context_id()
-      IDHandle[:c => c,:uri => "/#{model_name()}", :is_factory => true]
+      IDHandle[c: c,uri: "/#{model_name()}", is_factory: true]
     end
 
     def top_id_handle(opts={})
       c = ret_session_context_id()
-      idh = IDHandle[:c => c,:uri => "/"]
-      idh.merge!(:group_id => opts[:group_id]) if opts[:group_id]
+      idh = IDHandle[c: c,uri: "/"]
+      idh.merge!(group_id: opts[:group_id]) if opts[:group_id]
       idh
     end
 
     def ret_id_from_uri(uri)
       c = ret_session_context_id()
-      IDHandle[:c => c, :uri => uri].get_id()
+      IDHandle[c: c, uri: uri].get_id()
     end
 
     # request parsing fns
     # TODO: may deprecat; befoe so would have to remove from call in some list views in display
     def ret_where_clause(field_set=Model::FieldSet.all_real(model_name()))
       hash = ret_hash_for_where_clause()
-      hash ? field_set.ret_where_clause_for_search_string(hash.reject{|k,v|k == :parent_id}) : nil
+      hash ? field_set.ret_where_clause_for_search_string(hash.reject{|k,_v|k == :parent_id}) : nil
     end
 
-    def ret_parent_id()
+    def ret_parent_id
       (ret_hash_for_where_clause()||{})[:parent_id]
     end
 
-    def ret_order_by_list()
+    def ret_order_by_list
       # TODO: handle case when this is a get
       # TODO: filter fields to make sure real fields or treat virtual columns
       saved_search = ret_saved_search_in_request()
       return nil unless (saved_search||{})["order_by"]
-      saved_search["order_by"].map{|x|{:field => x["field"].to_sym, :order => x["order"]}}
+      saved_search["order_by"].map{|x|{field: x["field"].to_sym, order: x["order"]}}
     end
 
     # TODO: just for testing
     TestOveride = 100# nil
     LimitDefault = 20
     NumModelItemsDefault = 10000
-    def ret_paging_info()
+    def ret_paging_info
       # TODO: case on request_method_is_post?()
       # TODO: might be taht query is optimzied by not having start being 0 included
       saved_search = ret_saved_search_in_request()
       # TODO: just for testing
-      if TestOveride and (saved_search||{})["start"].nil?
-        return {:start => 0, :limit => TestOveride, :num_model_items => NumModelItemsDefault}
+      if TestOveride && (saved_search||{})["start"].nil?
+        return {start: 0, limit: TestOveride, num_model_items: NumModelItemsDefault}
       end
       return nil unless saved_search
-      return nil unless saved_search["start"] or saved_search["limit"]
+      return nil unless saved_search["start"] || saved_search["limit"]
       start = (saved_search["start"]||0).to_i
       limit = (saved_search["limit"] || R8::Config[:page_limit] || LimitDefault).to_i
       # TODO: just for testing
       limit = TestOveride if TestOveride
       num_model_items = (saved_search["num_model_items"] || NumModelItemsDefault)
-      {:start => start, :limit => limit, :num_model_items => num_model_items}
+      {start: start, limit: limit, num_model_items: num_model_items}
     end
 
     def ret_model_for_list_search(field_set)
@@ -173,19 +175,19 @@ module Ramaze::Helper
       field_set.cols.inject({}){|ret,field|ret.merge(field => request_params[field]||'')}
     end
 
-    def ret_request_params_filter()
+    def ret_request_params_filter
       json_form = (ret_request_params()||{})["search"]
       search = convert_search_item_from_json(json_form)
       search && check_and_convert_filter_form(search["filter"])
     end
 
-    def ret_saved_search_in_request()
+    def ret_saved_search_in_request
       json_form = (ret_request_params()||{})["saved_search"]
       convert_search_item_from_json(json_form)
     end
 
     def convert_search_item_from_json(item)
-      unless item.nil? or item.empty?
+      unless item.nil? || item.empty?
         JSON.parse(item)
       end
     end
@@ -197,28 +199,27 @@ module Ramaze::Helper
     end
 
     def convert_filter_form(filter)
-      if filter.kind_of?(Array) and filter.size == 3
-        if filter[0].to_sym == :eq and filter[2].to_s =~ /^[0-9]+$/
+      if filter.is_a?(Array) && filter.size == 3
+        if filter[0].to_sym == :eq && filter[2].to_s =~ /^[0-9]+$/
           [filter[0].to_sym, filter[1].to_sym, filter[2].to_i]
         end
       end
     end
 
-    def ret_hash_for_where_clause()
+    def ret_hash_for_where_clause
       request_method_is_get?() ? ret_parsed_query_string_when_get() : ret_request_params()
     end
 
-    def ret_parsed_query_string_when_get()
+    def ret_parsed_query_string_when_get
       explicit_qs = ret_parsed_query_string_from_uri()
-      return @parsed_query_string if explicit_qs.nil? or explicit_qs.empty?
-      return explicit_qs if @parsed_query_string.nil? or @parsed_query_string.empty?
+      return @parsed_query_string if explicit_qs.nil? || explicit_qs.empty?
+      return explicit_qs if @parsed_query_string.nil? || @parsed_query_string.empty?
       @parsed_query_string
     end
 
-
-    # TODO needs refinement
-    def ret_parsed_query_string_from_uri()
-      ret = Hash.new
+    # TODO: needs refinement
+    def ret_parsed_query_string_from_uri
+      ret = {}
       query_string = ret_query_string()
       return ret unless query_string
       # TBD: not yet looking for errors in the query string
@@ -233,13 +234,13 @@ module Ramaze::Helper
           ret[key] = value #should be converted into an integer
         else
           ret[key] = value
-       # TODO find where value shoudl be sym   ret[key] = value.to_sym
+          # TODO: find where value shoudl be sym   ret[key] = value.to_sym
         end #TBD: not complete; for example not for decimals
       end
       ret
     end
 
-    def ret_query_string()
+    def ret_query_string
       request.env["QUERY_STRING"]
     end
 
@@ -259,7 +260,7 @@ module Ramaze::Helper
       id = resolve_id_from_name_or_id(id_or_name_value, model_class, extra_context)
       id_handle(id,ret_module_name_from_class(model_class))
     end
-    # TODO One part of cleanup is to have name_to_id and check_valid return the object with keys :id and :group id
+    # TODO: One part of cleanup is to have name_to_id and check_valid return the object with keys :id and :group id
     # we can put in an option flag for this, but need to check we cover all instances of these
     # make this a speacte function called by create_obj and then have
     # ret_request_param_id_handle and ret_request_param_id call id and id_handle methods on it
@@ -271,6 +272,7 @@ module Ramaze::Helper
         resolve_id_from_name_or_id(id_or_name, model_class, extra_context)
       end
     end
+
     def ret_request_param_id(param, model_class=nil, extra_context=nil)
       id_or_name = ret_non_null_request_params(param)
       resolve_id_from_name_or_id(id_or_name, model_class, extra_context)
@@ -281,7 +283,7 @@ module Ramaze::Helper
       model_class ||= model_class(model_name)
       model_handle = model_handle(model_name)
 
-      if id_or_name.kind_of?(Fixnum) or id_or_name =~ /^[0-9]+$/
+      if id_or_name.is_a?(Fixnum) || id_or_name =~ /^[0-9]+$/
         id = id_or_name.to_i
         params = [model_handle,id]
         params << extra_context if extra_context
@@ -309,7 +311,6 @@ module Ramaze::Helper
     end
     private :ret_module_name_from_class
 
-
     def ret_request_params(*params)
       return nil unless request_method_is_post?()
       return request.params if params.size == 0
@@ -326,20 +327,23 @@ module Ramaze::Helper
     def ret_request_param_boolean(param)
       boolean_form(ret_request_params(param))
     end
+
     def ret_symbol_params_hash(*params)
-      ret_params_hash(*params).inject(Hash.new){|h,(k,v)|h.merge(k => v.to_s.to_sym)}
+      ret_params_hash(*params).inject({}){|h,(k,v)|h.merge(k => v.to_s.to_sym)}
     end
+
     def ret_boolean_params_hash(*params)
-      ret_params_hash(*params).inject(Hash.new){|h,(k,v)|h.merge(k => boolean_form(v))}
+      ret_params_hash(*params).inject({}){|h,(k,v)|h.merge(k => boolean_form(v))}
     end
+
     def boolean_form(v)
-      v.kind_of?(TrueClass) or (v.kind_of?(String) and v == "true")
+      v.is_a?(TrueClass) || (v.is_a?(String) && v == "true")
     end
     private :boolean_form
 
     def ret_non_null_request_params(*params)
       return nil unless request_method_is_post?()
-      null_params = Array.new
+      null_params = []
       ret = params.map do |p|
         unless val = request.params[p.to_s]
           null_params << p
@@ -351,10 +355,10 @@ module Ramaze::Helper
     end
 
     def ret_params_hash(*params)
-      ret = Hash.new
+      ret = {}
       return ret unless request_method_is_post?()
       return ret if params.size == 0
-      params.inject(Hash.new) do |h,p|
+      params.inject({}) do |h,p|
         val = request.params[p.to_s]
         (val ? h.merge(p.to_sym => val) : h)
       end
@@ -362,10 +366,10 @@ module Ramaze::Helper
 
     # method will use nil where param empty
     def ret_params_hash_with_nil(*params)
-      ret = Hash.new
+      ret = {}
       return ret unless request_method_is_post?()
       return ret if params.size == 0
-      params.inject(Hash.new) do |h,p|
+      params.inject({}) do |h,p|
         val = request.params[p.to_s]
         val = nil if val.empty?
         (val ? h.merge(p.to_sym => val) : h)
@@ -376,9 +380,9 @@ module Ramaze::Helper
       pattern, value, av_pairs_hash = ret_request_params(:pattern, :value, :av_pairs_hash)
       ret = []
       if av_pairs_hash
-        av_pairs_hash.each { |k, v| ret << { :pattern => k, :value => v } }
+        av_pairs_hash.each { |k, v| ret << { pattern: k, value: v } }
       elsif pattern
-        ret = [{ :pattern => pattern, :value => value }]
+        ret = [{ pattern: pattern, value: value }]
       else
         raise ::DTK::ErrorUsage.new('Missing parameters')
       end
@@ -405,13 +409,13 @@ module Ramaze::Helper
     def ret_component_template_and_title(param,opts={})
       version = opts[:versions]||opts[:version]
       component_template_idh = ret_request_param_id_handle(param,::DTK::Component::Template,version)
-      component_template = component_template_idh.create_object(:model_name => :component_template)
+      component_template = component_template_idh.create_object(model_name: :component_template)
       component_title = ::DTK::ComponentTitle.parse_title?(ret_non_null_request_params(param))
       [component_template,component_title]
     end
 
     def ret_component_template_and_title_for_assembly(param,assembly)
-      opts = {:versions => [::DTK::ModuleVersion.ret(assembly),nil]} #so first tries the assembly module context and then the component module context
+      opts = {versions: [::DTK::ModuleVersion.ret(assembly),nil]} #so first tries the assembly module context and then the component module context
       ret_component_template_and_title(param,opts)
     end
 
@@ -426,10 +430,11 @@ module Ramaze::Helper
       end
     end
 
-    def request_method_is_get?()
+    def request_method_is_get?
       request.env["REQUEST_METHOD"] == "GET"
     end
-    def request_method_is_post?()
+
+    def request_method_is_post?
       request.env["REQUEST_METHOD"] == "POST"
     end
 
@@ -444,7 +449,7 @@ module Ramaze::Helper
     end
 
     def set_template_paging_info!(tpl,paging_info)
-      if paging_info.empty? or paging_info.nil?
+      if paging_info.empty? || paging_info.nil?
         tpl.assign(:list_start_prev, 0)
         tpl.assign(:list_start_next, 0)
         return nil
@@ -472,14 +477,13 @@ module Ramaze::Helper
       end
     end
 
-
-    def app_common()
+    def app_common
       {
-        :base_uri => R8::Config[:base_uri],
-        :base_css_uri => R8::Config[:base_css_uri],
-        :base_js_uri => R8::Config[:base_js_uri],
-        :base_images_uri => R8::Config[:base_images_uri],
-        :avatar_base_uri => R8::Config[:avatar_base_uri]
+        base_uri: R8::Config[:base_uri],
+        base_css_uri: R8::Config[:base_css_uri],
+        base_js_uri: R8::Config[:base_js_uri],
+        base_images_uri: R8::Config[:base_images_uri],
+        avatar_base_uri: R8::Config[:avatar_base_uri]
       }
     end
 
@@ -500,8 +504,8 @@ module Ramaze::Helper
 
    # TODO: unify with  model/subclass_processing
    ConvertFromSubtypeModelName = {
-     :assembly => :component,
-     :node_group => :node
+     assembly: :component,
+     node_group: :node
    }
   end
 end

@@ -16,7 +16,6 @@ assembly_name = 'bootstrap::node_with_params'
 dtk_common = DtkCommon.new(service_name, assembly_name)
 
 describe "(Staging And Deploying Assemblies) Test Case 1: Stage existing assembly and then delete service" do
-
 	before(:all) do
 		puts "************************************************************************************************",""
   end

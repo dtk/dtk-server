@@ -12,16 +12,16 @@ module DTK; class Task
         end
       end
 
-      def action_def()
+      def action_def
         ret = nil
         component = self[:component]
         unless action_def_ref = self[:action_method]
-          Log.error("Component Action with following component id #{component[:id].to_s} has no action_method")
+          Log.error("Component Action with following component id #{component[:id]} has no action_method")
           return ret
         end
         sp_hash = {
-          :cols   => [:id,:method_name,:content],
-          :filter => [:eq,:id,action_def_ref[:action_def_id]]
+          cols: [:id,:method_name,:content],
+          filter: [:eq,:id,action_def_ref[:action_def_id]]
         }
         action_def_mh = component.id_handle().create_childMH(:action_def)
         action_defs = Model.get_objs(action_def_mh,sp_hash)
@@ -32,7 +32,6 @@ module DTK; class Task
           action_defs.first
         end      
       end
-
 
       # for debugging
       def self.pretty_print_hash(object)
@@ -49,7 +48,7 @@ module DTK; class Task
       end
       def self.create_from_hash(hash,task_idh=nil)
         if component = hash[:component]
-          unless component.kind_of?(Component)
+          unless component.is_a?(Component)
             unless task_idh
               raise Error.new("If hash[:component] is not of type Component then task_idh must be supplied")
             end
@@ -68,7 +67,7 @@ module DTK; class Task
       # returns component_actions,intra_node_stages
       def self.order_and_group_by_component(state_change_list)
         intra_node_stages = nil
-        ndx_cmp_idhs = Hash.new
+        ndx_cmp_idhs = {}
         state_change_list.each do |sc|
           cmp = sc[:component]
           ndx_cmp_idhs[cmp[:id]] ||= cmp.id_handle() 
@@ -93,8 +92,8 @@ module DTK; class Task
       def self.get_intra_node_stages(cmp_deps, state_change_list)
         cmp_ids_with_deps = get_cmp_ids_with_deps(cmp_deps).clone
         cd_ppt_stgs, scl_ppt_stgs = Stage::PuppetStageGenerator.generate_stages(cmp_ids_with_deps.dup, state_change_list.dup)
-        intra_node_stages = Array.new
-        cd_ppt_stgs.each_with_index do |cd, i|
+        intra_node_stages = []
+        cd_ppt_stgs.each_with_index do |_cd, i|
           cmp_ids_with_deps_ps = cd_ppt_stgs[i].dup
           state_change_list_ps = scl_ppt_stgs[i]
           intranode_stages_with_deps = Stage::IntraNode.generate_stages(cmp_ids_with_deps_ps, state_change_list_ps)
@@ -142,11 +141,11 @@ module DTK; class Task
       def self.get_cmp_ids_with_deps(cmp_deps)
         # TODO: assumption that only a singleton component can be a dependency -> match on component_type sufficient
         # first build index from component_type to id
-        cmp_type_to_id = Hash.new
-        cmp_deps.each do |id,info|
+        cmp_type_to_id = {}
+        cmp_deps.each do |_id,info|
           info[:component_dependencies].each do |ct|
-            unless cmp_type_to_id.has_key?(ct)
-              cmp_type_to_id[ct] = (cmp_deps.find{|id_x,info_x|info_x[:component_type] == ct}||[]).first
+            unless cmp_type_to_id.key?(ct)
+              cmp_type_to_id[ct] = (cmp_deps.find{|_id_x,info_x|info_x[:component_type] == ct}||[]).first
             end
           end
         end
@@ -173,14 +172,14 @@ module DTK; class Task
         self[:attributes] << attr
       end
 
-     private
+      private
 
       def self.component_name(object)
         ret = (object[:component]||{})[:display_name]
         ret && ret.gsub(/__/,"::")
       end
 
-      def self.component_status(object,opts)
+      def self.component_status(object,_opts)
         ret = PrettyPrintHash.new
         if name = component_name(object)
           ret[:name] = name
@@ -192,7 +191,7 @@ module DTK; class Task
         ret
       end
 
-      def self.attributes_status(object,opts)
+      def self.attributes_status(object,_opts)
         # need to query db to get up to date values
         (object[:attributes]||[]).map do |attr|
           ret_attr = PrettyPrintHash.new
@@ -205,19 +204,19 @@ module DTK; class Task
 
       # returns [actions,config_agent_type]
       def self.create_actions_from_execution_blocks(exec_blocks)
-        actions = Array.new
-        cmps_info = exec_blocks.components_hash_with(:action_methods=>true)
+        actions = []
+        cmps_info = exec_blocks.components_hash_with(action_methods: true)
         config_agent_type = config_agent_type(cmps_info)
         cmps_info.each do |cmp_hash|
           cmp = cmp_hash[:component]
           action_method = cmp_hash[:action_method] # can be nil
           config_agent_type = (action_method||cmp).config_agent_type
           hash = {
-            :attributes => Array.new,
-            :component => cmp
+            attributes: [],
+            component: cmp
           }
           if action_method
-            hash.merge!(:action_method => action_method)
+            hash.merge!(action_method: action_method)
           end
           actions << new(hash)
         end
@@ -248,16 +247,16 @@ module DTK; class Task
         # TODO: may deprecate need for ||[sc[:id]
         pointer_ids = scs_same_cmp.map{|sc|sc[:linked_ids]||[sc[:id]]}.flatten.compact
         hash = {
-          :state_change_pointer_ids => pointer_ids, #this field used to update teh coorepdonsing state change after thsi action is run
-          :attributes => Array.new,
-          :component => state_change[:component]
+          state_change_pointer_ids: pointer_ids, #this field used to update teh coorepdonsing state change after thsi action is run
+          attributes: [],
+          component: state_change[:component]
         }
-        hash.merge!(:component_dependencies => deps) if deps
+        hash.merge!(component_dependencies: deps) if deps
 
         # TODO: can get more sophsiticated and handle case where some components installed and other are incremental
         incremental_change = !scs_same_cmp.find{|sc|not sc[:type] == "setting"}
         if incremental_change
-          hash.merge!(:changed_attribute_ids => scs_same_cmp.map{|sc|sc[:attribute_id]}) 
+          hash.merge!(changed_attribute_ids: scs_same_cmp.map{|sc|sc[:attribute_id]}) 
         end
         new(hash)
       end

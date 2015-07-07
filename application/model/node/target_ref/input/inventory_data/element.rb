@@ -17,14 +17,14 @@ module DTK; class Node; class TargetRef
         end
       end
       
-      def target_ref_hash()
+      def target_ref_hash
         unless name = self['name']||self['display_name']
           raise Error.new("Unexpected that that element (#{inspect}) has no name field")
         end
         ret_hash = merge('display_name' => ret_display_name(name))
         
         external_ref = self['external_ref']||{}
-        ret_hash.merge!(:type => external_ref['type']||Type::Node.target_ref)
+        ret_hash.merge!(type: external_ref['type']||Type::Node.target_ref)
         
         host_address = nil
         if @type == :physical
@@ -37,10 +37,12 @@ module DTK; class Node; class TargetRef
         {ret_ref(name) => ret_hash}
       end
 
-     private
+      private
+
       def ret_display_name(name)
         TargetRef.ret_display_name(@type,name)
       end
+
       def ret_ref(name)
         "#{@type}--#{name}"
       end

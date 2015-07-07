@@ -13,7 +13,9 @@ module DTK
       r8_nested_require('location','client')
 
       attr_reader :local,:remote
-     private
+
+      private
+
       def initialize(project,local_params=nil,remote_params=nil)
         if local_params
           @local = self.class::Local.new(project,local_params)

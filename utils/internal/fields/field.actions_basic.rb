@@ -2,12 +2,11 @@
 require File.expand_path('field.text.rb', File.dirname(__FILE__))
 
 class Fieldactions_basic < Fieldbase
-
   def initialize(field_meta)
     super(field_meta)
   end
 
-  def get_field_list_rtpl()
+  def get_field_list_rtpl
     field_string = ''
 
     @field_meta[:action_list].each do |action|
@@ -20,5 +19,4 @@ class Fieldactions_basic < Fieldbase
 
     return field_string
   end
-
 end

@@ -25,7 +25,6 @@ attribute_name_2 = 'common_user::common_user_ssh_config[test]/user'
 dtk_common = DtkCommon.new('', '')
 
 describe "(Workspace) Test Case 11: Create two nodes, add components in both of them, link attributes between components on different nodes and check if value is propagated" do
-
 	before(:all) do
 		puts "******************************************************************************************************************************************************************"
 		puts "(Workspace) Test Case 11: Create two nodes, add components in both of them, link attributes between components on different nodes and check if value is propagated"

@@ -1,16 +1,15 @@
 require './spec/spec_helper'
 
 login = {
-	:username=>'dtk-admin',
-	:password=>'r8server'
+	username: 'dtk-admin',
+	password: 'r8server'
 }
 
 namespace_info = {
-	:name=>'dtk17'
+	name: 'dtk17'
 }
 
 describe "(Repoman Drupal API) Test Case 7: NEG - Get non-existing namespace and get all modules that belong to this namespace by incorrect namespace name/id" do
-
 	let(:repoman) { @repoman }
 
 	context "Login" do

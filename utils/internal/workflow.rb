@@ -8,21 +8,26 @@ module DTK
       def guards_mode?
         inter_node_temporal_coordination_mode() == "GUARDS"
       end
+
       def stages_mode?
         inter_node_temporal_coordination_mode() == "STAGES"
       end
+
       def intra_node_total_order?
         intra_node_temporal_coordination_mode() == "TOTAL_ORDER"
       end
+
       def intra_node_stages?
         intra_node_temporal_coordination_mode() == "STAGES"
       end
 
-     private
-      def inter_node_temporal_coordination_mode()
+      private
+
+      def inter_node_temporal_coordination_mode
         @inter_node_temporal_coordination_mode ||= R8::Config[:workflow][:temporal_coordination][:inter_node]
       end
-      def intra_node_temporal_coordination_mode()
+
+      def intra_node_temporal_coordination_mode
         @intra_node_temporal_coordination_mode ||= R8::Config[:workflow][:temporal_coordination][:intra_node]
       end
     end
@@ -33,10 +38,12 @@ module DTK
         # pp [:delete,task_id,caller[0..5]]
         super(task_id.to_i)
       end
+
       def [](task_id)
         # pp [:get,task_id,caller[0..5]]
         super(task_id.to_i)
       end
+
       def []=(task_id,wf)
         # pp [:set,task_id,caller[0..5]]
         super(task_id.to_i,wf)
@@ -49,16 +56,16 @@ module DTK
     @@active_workflows = ActiveWorkflow.new
     @@Lock = Mutex.new
 
-    def defer_execution()
+    def defer_execution
       # start EM for passanger
       R8EM.start_em_for_passenger?()
 
       user_object  = CurrentSession.new.user_object()
       CreateThread.defer_with_session(user_object, Ramaze::Current::session) do
-      #  pp [:new_thread_from_defer, Thread.current, Thread.list]
+        #  pp [:new_thread_from_defer, Thread.current, Thread.list]
         raise Error.new("not implemented: putting block in reactor loop when not using eventmachine web server") unless R8EM.reactor_running?
         begin
-          pp "starting top_task_id = #{@top_task.id.to_s}"
+          pp "starting top_task_id = #{@top_task.id}"
           # RICH-WF: for both Ruote and Simple think we dont need to pass in @top_task.id.to_s
           execute(@top_task.id.to_s)
          rescue Exception => e
@@ -72,7 +79,7 @@ module DTK
     end
 
     # virtual fns that get ovewritten
-    def execute()
+    def execute
     end
     ######
 
@@ -117,7 +124,8 @@ module DTK
 
     attr_reader :top_task, :guards
 
-   private
+    private
+
     class Adapter
       def self.klass(top_task=nil)
         # RICH-WF: not necssary to cache (ie., use @klass)
@@ -132,7 +140,9 @@ module DTK
           raise.Error.new("cannot find workflow adapter")
         end
       end
-     private
+
+      private
+
       # RICH-WF: stub function to call Simple when top_task is install_agents
       def self.type(top_task=nil)
         if (top_task||{})[:display_name] == "install_agents"
@@ -145,7 +155,7 @@ module DTK
 
     def initialize(top_task)
       @top_task = top_task
-      @guards = {:internal => Array.new, :external => Array.new}
+      @guards = {internal: [], external: []}
       if Workflow.guards_mode?
         Guard.ret_guards(top_task).each do |guard|
           @guards[guard.internal_or_external()] << guard
@@ -153,10 +163,9 @@ module DTK
       end
     end
 
-    def top_task_idh()
+    def top_task_idh
       @top_task.id_handle()
     end
-
   end
 end
 

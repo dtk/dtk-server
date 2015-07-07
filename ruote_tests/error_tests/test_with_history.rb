@@ -16,7 +16,7 @@ end
 class ErrorParticipant
   include Ruote::LocalParticipant
  
-  def consume(workitem)
+  def consume(_workitem)
     puts "error"
     raise "Houston, something is wrong"
   end
@@ -32,7 +32,6 @@ engine.register_participant 'gamma', DefaultParticipant
 #  catchall DefaultParticipant
 # end
 
-
 pdef = Ruote.process_definition do
   concurrence do
     sequence do 
@@ -47,7 +46,7 @@ pdef = Ruote.process_definition do
 end
 
 engine.add_service(
-#  'history', 'ruote/log/storage_history', 'Ruote::StorageHistory')
+  #  'history', 'ruote/log/storage_history', 'Ruote::StorageHistory')
   'history', 'ruote/log/storage_history', 'Ruote::StorageHistory')
 
 wfid = engine.launch(pdef)

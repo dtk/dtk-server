@@ -1,7 +1,7 @@
 module DTK
   class Task < Model
     module NodeGroupProcessingMixin
-      def node_group_member?()
+      def node_group_member?
         (self[:executable_action]||{})[:node_group_member]
       end
 
@@ -27,7 +27,9 @@ module DTK
         decompose!(task)
         task
       end
-     private
+
+      private
+
       def self.decompose!(task)
         case task.basic_type()
           when :executable_action
@@ -56,7 +58,7 @@ module DTK
 
       def self.node_group_member(node,parent_task)
         executable_action = parent_task[:executable_action].create_node_group_member(node)
-        Task.create_stub(parent_task.model_handle(),:executable_action => executable_action)
+        Task.create_stub(parent_task.model_handle(),executable_action: executable_action)
       end
     end
   end

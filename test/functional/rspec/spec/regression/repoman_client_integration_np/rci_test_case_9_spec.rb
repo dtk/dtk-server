@@ -6,31 +6,30 @@ require './lib/dtk_common'
 
 component_module = "r8:java"
 user_data = {
-	:usergroup => "bakir_test_group",
-	:user => "dtk17-client",
-	:another_user => "bakir_test",
-	:module_name => "r8/java"
+	usergroup: "bakir_test_group",
+	user: "dtk17-client",
+	another_user: "bakir_test",
+	module_name: "r8/java"
 }
 
 permissions = {
-	:user_r => true,
-	:user_w => true,
-	:user_d => true,
-	:user_p => true,
-	:user_group_r => true,
-	:user_group_w => true,
-	:user_group_d => true,
-	:user_group_p => false,
-	:other_r => false,
-	:other_w => false,
-	:other_d => false,
-	:other_p => false,
+	user_r: true,
+	user_w: true,
+	user_d: true,
+	user_p: true,
+	user_group_r: true,
+	user_group_w: true,
+	user_group_d: true,
+	user_group_p: false,
+	other_r: false,
+	other_w: false,
+	other_d: false,
+	other_p: false,
 }
 
 dtk_common = DtkCommon.new('', '')
 
 describe "(Repoman client integration) Test Case 9: NEG - Make public module A (User A is not owner but belongs to User group A which is set on module, permissions: RWDP/RWD/None)" do
-
 	let(:conf) { Configuration.instance }
 	let(:header) { @homepage.get_header }
 	let(:users) { @homepage.get_main.get_users }

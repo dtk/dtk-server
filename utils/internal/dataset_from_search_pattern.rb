@@ -6,9 +6,9 @@ module XYZ
         def create_dataset_from_search_object(search_object)
           search_pattern = search_object.search_pattern
           raise Error.new("search pattern is nil") unless search_pattern
-          raise Error::NotImplemented.new("processing of search pattern of type #{search_pattern.class.to_s}") unless search_pattern.kind_of?(SearchPatternSimple)
+          raise Error::NotImplemented.new("processing of search pattern of type #{search_pattern.class}") unless search_pattern.is_a?(SearchPatternSimple)
           relation_in_search_pattern = search_pattern.find_key(:relation)
-          mh_in_search_pattern = search_object.model_handle.createMH(:model_name => relation_in_search_pattern) 
+          mh_in_search_pattern = search_object.model_handle.createMH(model_name: relation_in_search_pattern) 
 
           raise Error.new("illegal model name (#{relation_in_search_pattern}) in search pattern") unless DB_REL_DEF[relation_in_search_pattern]
 
@@ -22,63 +22,66 @@ module XYZ
 
         def create_dataset_from_join_array(model_handle,base_search_pattern,join_array)
           db = model_handle.db
-          graph_ds = Dataset.new(model_handle,SimpleSearchPattern::ret_sequel_ds(model_handle,base_search_pattern)).from_self(:alias => model_handle[:model_name])
+          graph_ds = Dataset.new(model_handle,SimpleSearchPattern::ret_sequel_ds(model_handle,base_search_pattern)).from_self(alias: model_handle[:model_name])
           join_array.each do |join_info|
             right_ds = nil
-            right_ds_mh = model_handle.createMH(:model_name => join_info[:model_name])
+            right_ds_mh = model_handle.createMH(model_name: join_info[:model_name])
             if join_info[:sequel_def] #override with sequel def
               sequel_ds = join_info[:sequel_def].call(db.dataset(DB_REL_DEF[join_info[:model_name]]))
               right_ds = Dataset.new(right_ds_mh,sequel_ds)
             else
-              rs_opts = (join_info[:cols] ? Model::FieldSet.opt(join_info[:cols],join_info[:model_name]) : {}).merge :return_as_hash => true
+              rs_opts = (join_info[:cols] ? Model::FieldSet.opt(join_info[:cols],join_info[:model_name]) : {}).merge return_as_hash: true
               filter = join_info[:filter] ? SimpleSearchPattern::ret_sequel_filter(join_info[:filter],join_info[:model_name]) : nil
               right_ds = db.get_objects_just_dataset(right_ds_mh,filter,rs_opts)
             end
-            opts = join_info[:alias] ? {:table_alias => join_info[:alias]} : {}
-            opts.merge!(:convert => true) if join_info[:convert]
+            opts = join_info[:alias] ? {table_alias: join_info[:alias]} : {}
+            opts.merge!(convert: true) if join_info[:convert]
             graph_ds = graph_ds.graph(join_info[:join_type]||:left_outer,right_ds,join_info[:join_cond],opts)
           end
           graph_ds
         end
+
         def ret_sequel_filter(filter_hash,model_handle)
           SimpleSearchPattern::ret_sequel_filter(filter_hash,model_handle[:model_name])
         end
-       private
+
+        private
+
         def process_local_and_remote_dependencies(search_object,simple_dataset,remote_col_info=nil,vcol_sql_fns=nil)
           model_handle = simple_dataset.model_handle()
           base_field_set = search_object.field_set()
-          unless remote_col_info or vcol_sql_fns 
+          unless remote_col_info || vcol_sql_fns 
             opts = {} #TODO: stub
             return simple_dataset.paging_and_order(opts)
           end
 
           # join in any needed tables
-          graph_ds = simple_dataset.from_self(:alias => model_handle[:model_name])
+          graph_ds = simple_dataset.from_self(alias: model_handle[:model_name])
           (remote_col_info||[]).each do |join_info|
             right_ds = nil
-            right_ds_mh = model_handle.createMH(:model_name => join_info[:model_name])
+            right_ds_mh = model_handle.createMH(model_name: join_info[:model_name])
             if join_info[:sequel_def] #override with sequel def
               sequel_ds = join_info[:sequel_def].call(search_object.db.dataset(DB_REL_DEF[join_info[:model_name]]))
               right_ds = Dataset.new(right_ds_mh,sequel_ds)
             else
-              rs_opts = (join_info[:cols] ? Model::FieldSet.opt(join_info[:cols],join_info[:model_name]) : {}).merge :return_as_hash => true
+              rs_opts = (join_info[:cols] ? Model::FieldSet.opt(join_info[:cols],join_info[:model_name]) : {}).merge return_as_hash: true
               filter = join_info[:filter] ? SimpleSearchPattern::ret_sequel_filter(join_info[:filter],join_info[:model_name]) : nil
               right_ds = search_object.db.get_objects_just_dataset(right_ds_mh,filter,rs_opts)
             end
-            opts = join_info[:alias] ? {:table_alias => join_info[:alias]} : {}
-            opts.merge!(:convert => true) if join_info[:convert]
+            opts = join_info[:alias] ? {table_alias: join_info[:alias]} : {}
+            opts.merge!(convert: true) if join_info[:convert]
             graph_ds = graph_ds.graph(join_info[:join_type]||:left_outer,right_ds,join_info[:join_cond],opts)
           end
 
           # add any global columns or global where clauses
           if vcol_sql_fns 
-            wc_exprs = (vcol_sql_fns||[]).map{|vcol,vcol_info| vcol_info[:sql_fn] ? vcol_info[:expr] : nil}.compact
+            wc_exprs = (vcol_sql_fns||[]).map{|_vcol,vcol_info| vcol_info[:sql_fn] ? vcol_info[:expr] : nil}.compact
             wc = (wc_exprs.empty? ? nil : SimpleSearchPattern::ret_sequel_filter([:and] + wc_exprs, model_handle))
 
-            post_proc_exprs = (vcol_sql_fns||[]).map{|vcol,vcol_info| vcol_info[:sql_fn] ? nil : vcol_info[:expr]}.compact
+            post_proc_exprs = (vcol_sql_fns||[]).map{|_vcol,vcol_info| vcol_info[:sql_fn] ? nil : vcol_info[:expr]}.compact
             post_proc_filter = (post_proc_exprs.empty? ? nil : [:and] + post_proc_exprs)
 
-            vcol_values = (vcol_sql_fns||{}).map{|vcol,vcol_info|vcol_info[:sql_fn] ? {:column => vcol, :value => vcol_info[:sql_fn]} : nil}.compact
+            vcol_values = (vcol_sql_fns||{}).map{|vcol,vcol_info|vcol_info[:sql_fn] ? {column: vcol, value: vcol_info[:sql_fn]} : nil}.compact
 
             graph_ds = graph_ds.add_virtual_column_aliases(vcol_values)
             graph_ds = graph_ds.from_self.where(wc) if wc 
@@ -117,7 +120,7 @@ module XYZ
           def self.ret_sequel_filter_and_vcol_sql_fns(search_pattern,model_handle)
             filter_hash = search_pattern.find_key(:filter)
             return nil if filter_hash.empty?
-            vcol_sql_fns = Hash.new
+            vcol_sql_fns = {}
             sequel_filter = ret_sequel_filter(filter_hash,model_handle,vcol_sql_fns)
             return [sequel_filter,vcol_sql_fns.empty? ? nil : vcol_sql_fns]
           end
@@ -137,7 +140,7 @@ module XYZ
               args = [[op] + args]
               op = :and
             end
-            and_list = Array.new
+            and_list = []
             args.each do |el|
               el_op,el_args = get_filter_condition_op_and_args!(vcol_sql_fns,el,model_handle)
               # processes nested ands and ors
@@ -159,9 +162,9 @@ module XYZ
                  when :gte
                   el_args[0].to_s.lit >= el_args[1].to_s.lit
                  when "match-prefix".to_sym
-                  Sequel::SQL::StringExpression.like(el_args[0],"#{el_args[1]}%",{:case_insensitive=>true})
+                  Sequel::SQL::StringExpression.like(el_args[0],"#{el_args[1]}%",case_insensitive: true)
                  when :regex
-                  Sequel::SQL::StringExpression.like(el_args[0],Regexp.new(el_args[1]),{:case_insensitive=>true})
+                  Sequel::SQL::StringExpression.like(el_args[0],Regexp.new(el_args[1]),case_insensitive: true)
                  when :oneof
                   SQL.in(el_args[0],el_args[1])
                  else
@@ -180,12 +183,12 @@ module XYZ
             end
           end
 
-         private
+          private
 
           def self.ret_eq_comparison(arg1,arg2)
-            if arg2.kind_of?(TrueClass)
+            if arg2.is_a?(TrueClass)
               arg1
-            elsif arg2.kind_of?(FalseClass)
+            elsif arg2.is_a?(FalseClass)
               SQL.not(arg1)
             else
               {arg1 => arg2}
@@ -215,7 +218,7 @@ module XYZ
 
             # compute cols_to_add by looking at both local columns and ones that are in join conditions to enable remote columns to be joined in
             # do not have to worry about duplicates because with_added_cols will do that
-            cols_to_add = Array.new
+            cols_to_add = []
 
             if remote_col_info and not remote_col_info.empty?
               cols_to_add_remote = remote_col_info.map do |r|
@@ -245,7 +248,7 @@ module XYZ
           def self.ret_sequel_ds_with_order_by_and_paging(ds,search_pattern)
             order_by = search_pattern.find_key(:order_by)
             paging = search_pattern.find_key(:paging)
-            DB.ret_paging_and_order_added_to_dataset(ds,{:order_by => order_by, :paging => paging})
+            DB.ret_paging_and_order_added_to_dataset(ds,order_by: order_by, paging: paging)
           end
 
           # return op in symbol form and args
@@ -265,12 +268,12 @@ module XYZ
           # check if virtual column and if so substitute fn def if it exists
           def self.has_virtual_column_with_fn_def?(expr,model_handle)
             vcols = model_handle.get_virtual_columns()
-            ret = Hash.new
+            ret = {}
             expr[1..expr.size-1].each do |el|
-              next unless el.kind_of?(Symbol)
+              next unless el.is_a?(Symbol)
               next unless vcols[el]
               fn = vcols[el][:sql_fn]
-              ret[el] = {:sql_fn => fn, :expr => expr}
+              ret[el] = {sql_fn: fn, expr: expr}
             end
             ret.empty? ? nil : ret
           end

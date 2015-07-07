@@ -18,10 +18,10 @@ module DTK; class ModuleDSL
 
     def generate_refinement_hash(parse_struct,module_name,impl_idh)
       context = {
-        :integer_version => @integer_version,
-        :module_name => module_name,
-        :config_agent_type => parse_struct.config_agent_type,
-        :implementation_id => impl_idh.get_id()
+        integer_version: @integer_version,
+        module_name: module_name,
+        config_agent_type: parse_struct.config_agent_type,
+        implementation_id: impl_idh.get_id()
       }
       DSLObject.new(context).create(:module,parse_struct)
     end
@@ -35,14 +35,14 @@ module DTK; class ModuleDSL
       components = meta_info_hash["components"]
       impl_id = meta_info_hash["implementation_id"]
       module_hash = {
-        :required => true,
-        :type => "module",
-        :def => {"components" => components}
+        required: true,
+        type: "module",
+        def: {"components" => components}
       }
-      impl_obj = impl_mh.createIDH(:id => impl_id).create_object().update_object!(:id,:display_name,:type,:repo_id,:repo,:library_library_id)
+      impl_obj = impl_mh.createIDH(id: impl_id).create_object().update_object!(:id,:display_name,:type,:repo_id,:repo,:library_library_id)
       impl_idh = impl_obj.id_handle
-      library_idh = impl_idh.createIDH(:model_name => :library,:id => impl_obj[:library_library_id])
-      repo_obj = Model.get_obj(impl_idh.createMH(:repo),{:cols => [:id,:local_dir], :filter => [:eq, :id, impl_obj[:repo_id]]})
+      library_idh = impl_idh.createIDH(model_name: :library,id: impl_obj[:library_library_id])
+      repo_obj = Model.get_obj(impl_idh.createMH(:repo),cols: [:id,:local_dir], filter: [:eq, :id, impl_obj[:repo_id]])
 
       dsl_generator = create(integer_version)
       object_form = dsl_generator.reify(module_hash,module_name,config_agent_type)
@@ -62,10 +62,10 @@ module DTK; class ModuleDSL
 
     def reify(hash,module_name,config_agent_type)
       context = {
-        :integer_version => @integer_version,
+        integer_version: @integer_version,
         # TODO: do we neeed module_name and :config_agent_type for reify?
-        :module_name => module_name,
-        :config_agent_type => config_agent_type
+        module_name: module_name,
+        config_agent_type: config_agent_type
       }
       DSLObject.new(context).reify(hash)
     end

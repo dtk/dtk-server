@@ -11,7 +11,7 @@ module DTK; class ConfigAgent
         content_hash, dependencies = {}, []
         type = impl_obj[:type]
         
-        content = RepoManager.get_file_content(modulefile_name,:implementation => impl_obj)
+        content = RepoManager.get_file_content(modulefile_name,implementation: impl_obj)
         content.split("\n").each do |el|
           el.chomp!()
           next if (el.start_with?("#") || el.empty?)
@@ -25,14 +25,15 @@ module DTK; class ConfigAgent
           content_hash.merge!(key.to_sym=>value.to_s)
         end
         
-        content_hash.merge!(:type => type) if type
-        {:content => content_hash, :modulefile_name => modulefile_name, :dependencies => dependencies}
+        content_hash.merge!(type: type) if type
+        {content: content_hash, modulefile_name: modulefile_name, dependencies: dependencies}
       end
       
-     private
+      private
+
       def self.contains_modulefile?(impl_obj)
        depth = 2
-       RepoManager.ls_r(depth,{:file_only => true},impl_obj).find do |f|
+       RepoManager.ls_r(depth,{file_only: true},impl_obj).find do |f|
           f.eql?("Modulefile") || f.eql?("#{Puppet.provider_folder()}/Modulefile")
         end
       end
@@ -44,7 +45,6 @@ module DTK; class ConfigAgent
           super(name, version)
         end
       end
-
     end
   end; end
 end; end

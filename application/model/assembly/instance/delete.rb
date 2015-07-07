@@ -2,7 +2,7 @@ module DTK; class  Assembly
   class Instance
     module DeleteClassMixin
       def delete(assembly_idhs,opts={})
-        if assembly_idhs.kind_of?(Array)
+        if assembly_idhs.is_a?(Array)
           return if assembly_idhs.empty?
         else
           assembly_idhs = [assembly_idhs]
@@ -21,7 +21,7 @@ module DTK; class  Assembly
     end
 
     module DeleteMixin
-      def destroy_and_reset_nodes()
+      def destroy_and_reset_nodes
         nodes = Delete.get_nodes_simple(model_handle(:node),[id()])
         # TODO: DTK-1857
         if nodes.find{|n|n.is_node_group?()}
@@ -42,10 +42,10 @@ module DTK; class  Assembly
         if node_group = is_node_group_member?(node_idh)
           # if node-group member and last one then delete node group as well
           node_group = node_group.create_obj_optional_subclass()
-          Delete.node(node,opts.merge(:update_task_template=>true,:assembly=>self))
-          node_group.delete_object({:update_task_template=>true, :assembly=>self}) if node_group.get_node_group_members.size == 0
+          Delete.node(node,opts.merge(update_task_template: true,assembly: self))
+          node_group.delete_object(update_task_template: true, assembly: self) if node_group.get_node_group_members.size == 0
         else
-          Delete.node(node,opts.merge(:update_task_template=>true,:assembly=>self))
+          Delete.node(node,opts.merge(update_task_template: true,assembly: self))
         end
       end
 
@@ -59,17 +59,17 @@ module DTK; class  Assembly
 
         node_group = node_group.create_obj_optional_subclass()
         node_group.delete_group_members(0)
-        node_group.delete_object({:update_task_template=>true, :assembly=>self})
+        node_group.delete_object(update_task_template: true, assembly: self)
       end
       
       def delete_component(component_idh, node_id=nil)
         component_filter = [:and, [:eq, :id, component_idh.get_id()], [:eq, :assembly_id, id()]]
         node = nil
         # first check that node belongs to this assebmly
-        if node_id.kind_of?(Fixnum) 
+        if node_id.is_a?(Fixnum) 
           sp_hash = {
-            :cols => [:id, :display_name,:group_id],
-            :filter => [:and, [:eq, :id, node_id], [:eq, :assembly_id, id()]]
+            cols: [:id, :display_name,:group_id],
+            filter: [:and, [:eq, :id, node_id], [:eq, :assembly_id, id()]]
           }
           
           unless node = Model.get_obj(model_handle(:node),sp_hash)
@@ -80,18 +80,18 @@ module DTK; class  Assembly
         
         # also check that component_idh belongs to this instance and to this node
         sp_hash = {
-        #:only_one_per_node,:ref are put in for info needed when getting title
-          :cols => [:id, :display_name, :node_node_id,:only_one_per_node,:ref],
-          :filter => component_filter
+          #:only_one_per_node,:ref are put in for info needed when getting title
+          cols: [:id, :display_name, :node_node_id,:only_one_per_node,:ref],
+          filter: component_filter
         }
         component = Component::Instance.get_obj(model_handle(:component),sp_hash)
         unless component
           raise ErrorIdInvalid.new(component_idh.get_id(),:component)
         end
-        node ||= component_idh.createIDH(:model_name => :node,:id => component[:node_node_id]).create_object()
+        node ||= component_idh.createIDH(model_name: :node,id: component[:node_node_id]).create_object()
         ret = nil
         Transaction do
-          node.update_dangling_links(:component_idhs => [component.id_handle()])
+          node.update_dangling_links(component_idhs: [component.id_handle()])
           Task::Template::ConfigComponents.update_when_deleted_component?(self,node,component)
           ret = Model.delete_instance(component_idh)
         end
@@ -100,7 +100,7 @@ module DTK; class  Assembly
     end
 
     class Delete < self
-      def Delete.contents(assembly_idhs,opts={})
+      def self.contents(assembly_idhs,opts={})
         return if assembly_idhs.empty?
         delete(get_sub_assemblies(assembly_idhs).map{|r|r.id_handle()})
         assembly_ids = assembly_idhs.map{|idh|idh.get_id()}
@@ -112,20 +112,21 @@ module DTK; class  Assembly
       end
 
       def self.get_nodes_simple(node_mh,assembly_ids)
-        assembly_idhs = assembly_ids.map{|id|node_mh.createIDH(:id => id,:model_name => :assembly_instance)}
-        Assembly::Instance.get_nodes_simple(assembly_idhs,:ret_subclasses=>true)
+        assembly_idhs = assembly_ids.map{|id|node_mh.createIDH(id: id,model_name: :assembly_instance)}
+        Assembly::Instance.get_nodes_simple(assembly_idhs,ret_subclasses: true)
       end
 
-     private
-      def Delete.task_templates(task_template_mh,assembly_ids)
+      private
+
+      def self.task_templates(task_template_mh,assembly_ids)
         sp_hash = {
-          :cols => [:id,:display_name],
-          :filter => [:oneof,:component_component_id,assembly_ids] 
+          cols: [:id,:display_name],
+          filter: [:oneof,:component_component_id,assembly_ids] 
         }
         delete_instances(get_objs(task_template_mh,sp_hash).map{|tt|tt.id_handle()})
       end
 
-      def Delete.assembly_modules?(assembly_idhs,opts={})
+      def self.assembly_modules?(assembly_idhs,opts={})
         assembly_idhs.each do |assembly_idh|
           assembly = create_from_id_handle(assembly_idh)
           AssemblyModule.delete_modules?(assembly,opts)
@@ -133,17 +134,17 @@ module DTK; class  Assembly
       end
 
       # This only deletes the nodes that the assembly 'owns'; with sub-assemblies, the assembly base will own the node
-      def Delete.assembly_nodes(node_mh,assembly_ids,opts={})
+      def self.assembly_nodes(node_mh,assembly_ids,opts={})
         Delete.nodes(node_mh,assembly_ids,opts)
       end
 
-      def Delete.nodes(node_mh,assembly_ids,opts={})
+      def self.nodes(node_mh,assembly_ids,opts={})
         nodes = get_nodes_simple(node_mh,assembly_ids)
         nodes.map{|node|Delete.node(node,opts)}
       end
 
       # TODO: double check if Transaction needed; if so look at whether for same reason put in destoy and reset
-      def Delete.node(node,opts={})
+      def self.node(node,opts={})
         ret = nil
         Transaction do 
           ret = 

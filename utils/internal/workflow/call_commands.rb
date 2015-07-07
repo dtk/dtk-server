@@ -1,7 +1,6 @@
 module DTK
   class Workflow
     module CallCommandsMixin
-
       #synchronous
       def process_executable_action(task)
         CallCommands.execute_task_action(task,top_task_idh)
@@ -10,8 +9,8 @@ module DTK
       #asynchronous
       def initiate_executable_action(task,receiver_context)
         opts = {
-          :initiate_only => true,
-          :receiver_context => receiver_context
+          initiate_only: true,
+          receiver_context: receiver_context
         }
         CallCommands.initiate_task_action(task,top_task_idh,opts)
       end
@@ -19,16 +18,16 @@ module DTK
       
       def initiate_cancel_action(task,receiver_context)
         opts = {
-          :cancel_task => true,
-          :receiver_context => receiver_context
+          cancel_task: true,
+          receiver_context: receiver_context
         }
         CallCommands.initiate_task_action(task,top_task_idh,opts)
       end
       
       def initiate_sync_agent_action(task,receiver_context)
         opts = {
-          :sync_agent_task => true,
-          :receiver_context => receiver_context
+          sync_agent_task: true,
+          receiver_context: receiver_context
         }
         CallCommands.initiate_task_action(task,top_task_idh,opts)
       end
@@ -38,7 +37,7 @@ module DTK
       end
       
       def poll_to_detect_node_ready(node,receiver_context,opts={})
-        poll_opts = opts.merge(:receiver_context => receiver_context)
+        poll_opts = opts.merge(receiver_context: receiver_context)
         CallCommands.poll_to_detect_node_ready(node,poll_opts)
       end
     

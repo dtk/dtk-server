@@ -13,12 +13,14 @@ module DTK; class Attribute
       end
 
       attr_writer :created
-      def created?()
+      def created?
         @created
       end
-      def attribute_properties()
+
+      def attribute_properties
         @attribute_properties||{}
       end
+
       def set_attribute_properties!(attr_properties)
         @attribute_properties = attr_properties
       end
@@ -40,22 +42,21 @@ module DTK; class Attribute
       end
 
       # can be overwritten
-      def node_group_member_attribute_idhs()
-        Array.new 
+      def node_group_member_attribute_idhs
+        [] 
       end
 
-     private
+      private
+
       attr_reader :pattern, :id
 
       def create_this_type?(opts)
         if create = opts[:create]
-          create.kind_of?(TrueClass) or 
-            (create.kind_of?(String) and create == 'true') or
-            (create.kind_of?(Array) and create.include?(type()))
+          create.is_a?(TrueClass) || 
+            (create.is_a?(String) && create == 'true') ||
+            (create.is_a?(Array) && create.include?(type()))
         end
       end
-
-
 
       def attribute_stack(attribute_idh=nil)
         if attribute_idh
@@ -82,8 +83,8 @@ module DTK; class Attribute
           filter = [:and, filter, node_filter]
         end
         sp_hash = {
-          :cols => [:id,:group_id,:display_name],
-          :filter => filter
+          cols: [:id,:group_id,:display_name],
+          filter: filter
         }
         Model.get_objs(parent_idh.createMH(:node),sp_hash)
       end
@@ -94,8 +95,8 @@ module DTK; class Attribute
           filter = [:and, filter, cmp_filter]
         end
         sp_hash = {
-          :cols => [:id,:group_id,:display_name,:component_type,:node_node_id,:ancestor_id],
-          :filter => filter
+          cols: [:id,:group_id,:display_name,:component_type,:node_node_id,:ancestor_id],
+          filter: filter
         }
         cmp_mh = nodes.first.model_handle(:component)
         Model.get_objs(cmp_mh,sp_hash).map{|r|Component::Instance.create_from_component(r)}
@@ -107,15 +108,15 @@ module DTK; class Attribute
           filter = [:and, filter, attr_filter]
         end
         sp_hash = {
-          :cols => [:id,:group_id,:display_name,:external_ref,:semantic_data_type,TypeToIdField[type]],
-          :filter => filter
+          cols: [:id,:group_id,:display_name,:external_ref,:semantic_data_type,TypeToIdField[type]],
+          filter: filter
         }
         sample_idh = idhs.first
         Model.get_objs(sample_idh.createMH(:attribute),sp_hash)
       end
       TypeToIdField = {
-        :component => :component_component_id,
-        :node => :node_node_id
+        component: :component_component_id,
+        node: :node_node_id
       }
 
       def ret_filter(fragment,type)
@@ -126,18 +127,17 @@ module DTK; class Attribute
           return nil          
         end
         display_name = (type == :component ? ::DTK::Component::Instance.display_name_from_user_friendly_name(term) : term) 
-        if type == :node and  ::DTK::Node.legal_display_name?(display_name)
+        if type == :node &&  ::DTK::Node.legal_display_name?(display_name)
           [:eq,:display_name,display_name]
-        elsif type == :component and ::DTK::Component::Instance.legal_display_name?(display_name)
+        elsif type == :component && ::DTK::Component::Instance.legal_display_name?(display_name)
           [:eq,:display_name,display_name]
-        elsif type == :attribute and Attribute.legal_display_name?(display_name)
+        elsif type == :attribute && Attribute.legal_display_name?(display_name)
           [:eq,:display_name,display_name]
         else
           # TODO: check why have :component_segment
           raise ErrorUsage::Parsing::Term.new(term,:component_segment)
         end
       end
-
     end
   end
 end; end

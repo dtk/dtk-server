@@ -3,38 +3,37 @@ require 'iconv'
 module DTK
   # cross threads may be seperate requests for new action results queue, but no locking on allocated instance
   class ActionResultsQueue
-
     r8_require('workflow/adapters/ruote/participant/mcollective_debug')
     include McollectiveDebug
 
     Lock = Mutex.new
-    Queues = Hash.new
+    Queues = {}
     @@count = 0
-    def initialize(opts={})
+    def initialize(_opts={})
       Lock.synchronize do
         @indexes = []
         @@count += 1
         @id = @@count
-        @results = Hash.new
+        @results = {}
         Queues[@id] = self
       end
     end
 
     ##
     # Initiates commmand on nodes
-    def initiate(nodes, params, opts={})
+    def initiate(nodes, params, _opts={})
       indexes = nodes.map{|r|r[:id]}
       set_indexes!(indexes)
-      ndx_pbuilderid_to_node_info =  nodes.inject(Hash.new) do |h,n|
-        h.merge(n.pbuilderid => {:id => n[:id], :display_name => n.assembly_node_print_form()})
+      ndx_pbuilderid_to_node_info =  nodes.inject({}) do |h,n|
+        h.merge(n.pbuilderid => {id: n[:id], display_name: n.assembly_node_print_form()})
       end
 
       callbacks = {
-        :on_msg_received => proc do |msg|
+        on_msg_received: proc do |msg|
           inspect_agent_response(msg)
           response = CommandAndControl.parse_response__execute_action(nodes,msg)
 
-          # if response and response[:pbuilderid]
+            # if response and response[:pbuilderid]
             node_info = ndx_pbuilderid_to_node_info[response[:pbuilderid]]
             data = response[:data]
             data = process_data!(data,node_info)
@@ -53,7 +52,7 @@ module DTK
     end
 
     # can be overwritten
-    def process_data!(data,node_info)
+    def process_data!(data,_node_info)
       Result.normalize_data_to_utf8_output!(data)
     end
     private :process_data!
@@ -78,13 +77,13 @@ module DTK
       end
 
       unless results.nil?
-        results.each do |k,v|
+        results.each do |_k,v|
           disable_post_processing = true if v.is_a?(Hash)
         end
       end
       {
-        :is_complete => is_complete,
-        :results => (disable_post_processing ? results : Result.post_process(results, sort_key))
+        is_complete: is_complete,
+        results: (disable_post_processing ? results : Result.post_process(results, sort_key))
       }
     end
 
@@ -108,13 +107,13 @@ module DTK
       @results[index] = el
     end
 
-    def all_if_complete()
+    def all_if_complete
       # TODO: error message if @results.size > @indexes.size
       (@results.size >= @indexes.size) ? @results : nil
     end
 
-    def ret_whatever_is_complete()
-      @indexes.inject(Hash.new){|h,i| h.merge(i => @results[i])}
+    def ret_whatever_is_complete
+      @indexes.inject({}){|h,i| h.merge(i => @results[i])}
     end
 
     class Result
@@ -126,13 +125,13 @@ module DTK
       attr_reader :data, :node_name
 
       def self.post_process(results, sort_key = :port)
-        unless results.kind_of?(Hash) #and results.values.first.kind_of?(self)
+        unless results.is_a?(Hash) #and results.values.first.kind_of?(self)
           return results
         end
 
-        ret = Array.new
+        ret = []
         # sort by node name and prune out keys with no results
-        pruned_sorted_keys = results.reject{|k,v|v.nil?}.sort{|a,b|a[1].node_name <=> b[1].node_name}.map{|r|r.first}
+        pruned_sorted_keys = results.reject{|_k,v|v.nil?}.sort{|a,b|a[1].node_name <=> b[1].node_name}.map{|r|r.first}
         pruned_sorted_keys.each do |node_id|
           result = results[node_id]
           node_name = result.node_name
@@ -140,7 +139,7 @@ module DTK
 
           result.data.sort{|a,b|a[sort_key] <=> b[sort_key]}.each do |r|
             if first
-              ret << r.merge(:node_id => node_id,:node_name => node_name)
+              ret << r.merge(node_id: node_id,node_name: node_name)
               first = false
             else
               ret << r

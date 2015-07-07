@@ -4,7 +4,7 @@ module XYZ
 			 def self.generate_stages(component_dependencies, state_change_list)
 			 	return [component_dependencies] if component_dependencies.size == 1
 
-			 	stages = Array.new
+			 	stages = []
 			 	prev_deps_count = component_dependencies.size
 			 	while !(stage = generate_stage(component_dependencies)).empty?
 			        # Checks for inter node dependency cycle and throws error if cycle present
@@ -18,9 +18,10 @@ module XYZ
 				return stages
 			end
 
-			private
+			 private
+
 			def self.generate_stage(component_dependencies)
-				stage = Hash.new
+				stage = {}
 				parents = component_dependencies.keys
 				component_dependencies.map do |parent, children|
 					# If there are no component dependencies, add to stage
@@ -33,7 +34,7 @@ module XYZ
 					# add to stage
 					stage[parent] = children if (parents & children).empty?
 				end
-				stage.map { |k,v| component_dependencies.delete(k) }
+				stage.map { |k,_v| component_dependencies.delete(k) }
 				return stage
 			end
 
@@ -44,7 +45,7 @@ module XYZ
 		      	cmp_ids = component_dependencies.keys
 		      	node_id = state_change_list.first[:node][:id]
 		      	node_name = state_change_list.first[:node][:display_name]
-		      	cmp_dep_str = Array.new
+		      	cmp_dep_str = []
 		      	state_change_list.each do |cmp|
 		      		cmp_dep_str << "#{cmp[:component][:display_name]}(ID: #{cmp[:component][:id]})" if cmp_ids.include?(cmp[:component][:id])
 		      	end
@@ -53,7 +54,6 @@ module XYZ
 		      end
 		      return cur_deps_count
 		    end
-
 		end
 	end
 end

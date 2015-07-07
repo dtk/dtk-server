@@ -1,21 +1,20 @@
 require './spec/spec_helper'
 
 login = {
-	:username=>'dtk-admin',
-	:password=>'r8server'
+	username: 'dtk-admin',
+	password: 'r8server'
 }
 
 user_info = { 
-	:username=>'test', 
-	:email=>'test@r8network.com', 
-	:first_name=>'test_name', 
-	:last_name=>'test_last_name', 
-	:user_group=>'test', 
-	:namespace=>'test' 
+	username: 'test', 
+	email: 'test@r8network.com', 
+	first_name: 'test_name', 
+	last_name: 'test_last_name', 
+	user_group: 'test', 
+	namespace: 'test' 
 }
 
 describe "(Repoman Drupal API) Test Case 5: NEG - Get user by providing incorrect username/email combinations" do
-
 	let(:repoman) { @repoman }
 
 	context "Login" do

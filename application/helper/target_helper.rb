@@ -1,7 +1,6 @@
 module Ramaze::Helper
   module TargetHelper
-
-    def ret_target_subtype()
+    def ret_target_subtype
       (ret_request_params(:subtype)||:instance).to_sym
     end
 

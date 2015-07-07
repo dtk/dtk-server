@@ -12,7 +12,7 @@ module TimeoutMonkeyPatch
 
       begin
         x = Thread.current
-        debug_print(:timeout_info,{:timeout => sec, :current_thread => x})
+        debug_print(:timeout_info,{timeout: sec, current_thread: x})
         y = Thread.start {
           sleep sec
           x.raise exception, "execution expired" if x.alive?

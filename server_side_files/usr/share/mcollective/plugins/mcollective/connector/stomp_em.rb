@@ -4,7 +4,7 @@ module MCollective
     # monkey patch so that dont first load stomp
     class Base
       def self.inherited(klass)
-        PluginManager << {:type => "connector_plugin", :class => klass.to_s} unless klass == Stomp
+        PluginManager << {type: "connector_plugin", class: klass.to_s} unless klass == Stomp
       end
     end
     require File.expand_path('stomp', File.dirname(__FILE__))
@@ -17,21 +17,22 @@ module MCollective
         def initialize(*args)
           super(*args)
           # TODO: if cannot fidn user and log this shoudl be error
-          conn_opts = (args.last.kind_of?(Hash))? args.last : {}
+          conn_opts = (args.last.is_a?(Hash))? args.last : {}
           @login = conn_opts[:login]
           @passcode = conn_opts[:passcode]
           @connected = false
         end
 
         def connection_completed
-          connect :login => @login, :passcode => @passcode
+          connect login: @login, passcode: @passcode
         end
 
         def receive
           Log.error("Should not be called")
           nil
         end
-        def publish(msg)
+
+        def publish(_msg)
           Log.error("Should not be called")
           nil
         end
@@ -44,7 +45,7 @@ module MCollective
           end
         end
 
-        def is_connected?()
+        def is_connected?
           @connected
         end
       end
@@ -66,7 +67,7 @@ module MCollective
 
       # Connects to the Stomp middleware
       # TODO: write to use logic from super class
-      def connect(connector = ::Stomp::Connection)
+      def connect(_connector = ::Stomp::Connection)
         if @connection
           Log.debug("Already connection, not re-initializing connection")
           return
@@ -88,7 +89,7 @@ module MCollective
           password = get_env_or_option("STOMP_PASSWORD", "stomp.password")
 
           # TODO: assume reactor is running already
-          @connection = EM.connect host, port, StompClient, :login => user, :passcode => password
+          @connection = EM.connect host, port, StompClient, login: user, passcode: password
           Log.debug("Connecting to #{host}:#{port}")
          rescue Exception => e
           pp e.backtrace[0..5]
@@ -104,22 +105,19 @@ module MCollective
         end
       end
 
-
       def self.process(msg)
         # STOMP puts the payload in the body variable, pass that
         # into the payload of MCollective::Request and discard all the
         # other headers etc that stomp provides
-=begin
-        raw_msg =
-
-  # 1.3.2 CHANGE
-          if @@base64
-            Request.new(SSL.base64_decode(msg.body))
-          else
-            Request.new(msg.body)
-          end
-=end
-        raw_msg = Message.new(msg.body, msg, :base64 => @base64, :headers => msg.headers)
+        #         raw_msg =
+        #
+        #   # 1.3.2 CHANGE
+        #           if @@base64
+        #             Request.new(SSL.base64_decode(msg.body))
+        #           else
+        #             Request.new(msg.body)
+        #           end
+        raw_msg = Message.new(msg.body, msg, base64: @base64, headers: msg.headers)
         msg = @@decode_context.r8_decode_receive(raw_msg)
         begin
           @@multiplexer.process_response(msg,msg[:requestid])
@@ -141,6 +139,7 @@ module MCollective
           end
         end
       end
+
       def subscribe_and_send(source,destination,body,params={})
         EM::defer do
           wait_until_connected?
@@ -154,10 +153,12 @@ module MCollective
       end
 
       # Subscribe to a topic or queue
-      def unsubscribe(source)
+      def unsubscribe(_source)
         # TODO
       end
-     private
+
+      private
+
       def get_env_or_option(env, opt, default=nil)
         return ENV[env] if ENV.include?(env)
         return @config.pluginconf[opt] if @config.pluginconf.include?(opt)

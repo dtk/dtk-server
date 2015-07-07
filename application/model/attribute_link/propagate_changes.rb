@@ -4,12 +4,12 @@ module DTK; class AttributeLink
     # with **_attribute having :id,:value_asserted,:value_derived,:semantic_type
     #  :attribute_link having :function, :input_id, :output_id, :index_map
     def propagate(attr_mh,attrs_links_to_update)
-      ret = Hash.new
+      ret = {}
       # compute update deltas
       update_deltas = compute_update_deltas(attrs_links_to_update)
 
       # make actual changes
-      opts = {:update_only_if_change => [:value_derived],:returning_cols => [:id]}
+      opts = {update_only_if_change: [:value_derived],returning_cols: [:id]}
       
       changed_input_attrs = Attribute::UpdateDerivedValues.update(attr_mh,update_deltas,opts)
 
@@ -26,11 +26,11 @@ module DTK; class AttributeLink
       ndx_direct_change_hashes = changed_input_attrs.inject({}) do |h,r|
         id = r[:id]
         change = {
-          :new_item => attr_mh.createIDH(:id => id),
-          :change => {:old => r[:old_value_derived], :new => r[:value_derived]}
+          new_item: attr_mh.createIDH(id: id),
+          change: {old: r[:old_value_derived], new: r[:value_derived]}
         }
         if parent_idh = output_id__parent_idhs[r[:source_output_id]]
-          change.merge!(:parent => parent_idh)
+          change.merge!(parent: parent_idh)
         end
         h.merge(id => change)
       end
@@ -40,13 +40,15 @@ module DTK; class AttributeLink
       # return all changes
       ndx_direct_change_hashes.merge(ndx_propagated_changes)
     end
-   private
+
+    private
+
     def compute_update_deltas(attrs_links_to_update)
       attrs_links_to_update.map do |r|
         input_attr = r[:input_attribute]
         output_attr = r[:output_attribute]
         propagate_proc = PropagateProcessor.new(r[:attribute_link],input_attr,output_attr)
-        propagate_proc.propagate().merge(:id => input_attr[:id], :source_output_id => output_attr[:id])
+        propagate_proc.propagate().merge(id: input_attr[:id], source_output_id: output_attr[:id])
       end
     end
   end

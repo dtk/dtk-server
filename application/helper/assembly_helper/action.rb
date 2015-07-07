@@ -11,12 +11,14 @@ module Ramaze::Helper
           action_queue.initiate(nodes, params)
         end
       end
+
       def initiate_action_with_nodes(action_queue_class,nodes,params={},&block)
         InitiateAction.block(action_queue_class,params) do |action_queue|
           block.call if block
           action_queue.initiate(nodes, params)
         end
       end
+
       def initiate_execute_tests(action_queue_class, params={})
         InitiateAction.execute_tests_block(action_queue_class,params) do |action_queue|
           action_queue.initiate
@@ -47,7 +49,7 @@ module Ramaze::Helper
 
       def ret_matching_nodes(assembly, node_pattern_x = {})
         # removing and empty or nil filters
-        node_pattern = (node_pattern_x ? node_pattern_x.reject { |k, v| v.nil? || v.empty? } : {})
+        node_pattern = (node_pattern_x ? node_pattern_x.reject { |_k, v| v.nil? || v.empty? } : {})
 
         # TODO: can handle more efficiently than getting all nodes and filtering
         nodes = assembly.get_leaf_nodes()
@@ -95,8 +97,6 @@ module Ramaze::Helper
           match
         end
       end
-
-
     end
   end
 end

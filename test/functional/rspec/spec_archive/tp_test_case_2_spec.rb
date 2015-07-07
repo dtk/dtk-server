@@ -22,7 +22,6 @@ $assembly_id = 0
 dtk_common = DtkCommon.new(assembly_name, assembly_template)
 
 describe "(Targets and Providers) Test Case 2: Add new target to existing provider, stage and converge assembly in this target and then delete target" do
-
 	before(:all) do
 		puts "*******************************************************************************************************************************************"
 		puts "(Targets and Providers) Test Case 2: Add new target to existing provider, stage and converge assembly in this target and then delete target"

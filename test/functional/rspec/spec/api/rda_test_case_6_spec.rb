@@ -1,16 +1,15 @@
 require './spec/spec_helper'
 
 login = {
-	:username=>'dtk-admin',
-	:password=>'r8server'
+	username: 'dtk-admin',
+	password: 'r8server'
 }
 
 namespace_info = {
-	:name=>'dtk17'
+	name: 'dtk17'
 }
 
 describe "(Repoman Drupal API) Test Case 6: Get namespace and get all modules that belong to this namespace by namespace name/id" do
-
 	let(:repoman) { @repoman }
 
 	context "Login" do
@@ -56,7 +55,7 @@ describe "(Repoman Drupal API) Test Case 6: Get namespace and get all modules th
 		it "gets all modules" do
 			modules_retrieved_correctly = true
 			all_namespaces = repoman.get_namespaces
-			namespace_id = all_namespaces['data'].select { |namespace| namespace['name'] == namespace_info[:name] }.first['id']
+			namespace_id = all_namespaces['data'].find { |namespace| namespace['name'] == namespace_info[:name] }['id']
 			response = repoman.get_modules_by_namespace(namespace_id)
 			ap response
 			if response['status'] == 'ok'

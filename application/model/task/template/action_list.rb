@@ -4,7 +4,7 @@ module DTK; class Task; class Template
 
     def initialize(action_list=nil)
       super()
-      @action_index = Hash.new
+      @action_index = {}
       if action_list
         action_list.each do |a|
           unless i =  a.index
@@ -18,7 +18,7 @@ module DTK; class Task; class Template
 
     # sets @action_index on self and sets index on action if not set already
     # assumes that no indexs on action set or all or them, cannot be a mixture of these two cases 
-    def set_action_indexes!()
+    def set_action_indexes!
       each_with_index do |a,i|
         a.index ||= i
         @action_index[a.index] = a
@@ -51,8 +51,7 @@ module DTK; class Task; class Template
     end
 
     def <<(el)
-      super(el.kind_of?(Action) ? el : Action.create(el))
+      super(el.is_a?(Action) ? el : Action.create(el))
     end
-
   end
 end; end; end

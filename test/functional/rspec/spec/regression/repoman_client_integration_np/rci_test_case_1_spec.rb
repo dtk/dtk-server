@@ -6,30 +6,29 @@ require './lib/dtk_common'
 
 component_module = "r8:java"
 user_data = {
-	:usergroup => "bakir_test_group",
-	:user => "dtk17-client",
-	:module_name => "r8/java"
+	usergroup: "bakir_test_group",
+	user: "dtk17-client",
+	module_name: "r8/java"
 }
 
 permissions = {
-	:user_r => true,
-	:user_w => true,
-	:user_d => true,
-	:user_p => true,
-	:user_group_r => true,
-	:user_group_w => true,
-	:user_group_d => true,
-	:user_group_p => true,
-	:other_r => true,
-	:other_w => true,
-	:other_d => true,
-	:other_p => false,
+	user_r: true,
+	user_w: true,
+	user_d: true,
+	user_p: true,
+	user_group_r: true,
+	user_group_w: true,
+	user_group_d: true,
+	user_group_p: true,
+	other_r: true,
+	other_w: true,
+	other_d: true,
+	other_p: false,
 }
 
 dtk_common = DtkCommon.new('', '')
 
 describe "(Repoman client integration) Test Case 1: Make private module A (owner User A with User group A, permissions: RWDP/RWDP/RWD)" do
-
 	let(:conf) { Configuration.instance }
 	let(:header) { @homepage.get_header }
 	let(:users) { @homepage.get_main.get_users }

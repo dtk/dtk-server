@@ -9,7 +9,6 @@ r8_nested_require('utils','list_method')
 #
 
 module DTK
-
   #
   # Instance Mixins
   #
@@ -27,7 +26,7 @@ module DTK
     #
     # Get full module name
     #
-    def full_module_name()
+    def full_module_name
       self.class.ndx_full_module_names([id_handle]).values.first
     end
 
@@ -36,8 +35,8 @@ module DTK
     #
     def get_basic_info(opts=Opts.new)
       sp_hash = {
-        :cols => [:id, :display_name, :version, :remote_repos],
-        :filter => [:eq,:id, id()]
+        cols: [:id, :display_name, :version, :remote_repos],
+        filter: [:eq,:id, id()]
       }
 
       rows = get_objs(sp_hash)
@@ -64,7 +63,8 @@ module DTK
         end
       end
 
-     private
+      private
+
       def self.name_namespace_version(row)
         [row[:display_name], remote_namespace(row), (row[:module_branch]||{})[:version]]
       end
@@ -94,7 +94,7 @@ module DTK
       module_name, remote_versions = nil, []
 
       # get local versions list
-      local_versions = get_objs(:cols => [:version_info]).map do |r|
+      local_versions = get_objs(cols: [:version_info]).map do |r|
         v = r[:module_branch].version()
         v.nil? ? "CURRENT" : v
       end
@@ -103,8 +103,8 @@ module DTK
       module_name = info[:remote_repos].first[:repo_name].gsub(/\*/,'').strip() unless info[:remote_repos].empty?
       remote_versions = self.class.list_remotes(model_handle, client_rsa_pub_key).select{|r|r[:display_name]==module_name}.collect{|v_remote| ModuleBranch.version_from_version_field(v_remote[:versions])}.map!{|v| v.nil? ? "CURRENT" : v} if module_name
 
-      local_hash  = {:namespace => "local", :versions => local_versions.flatten}
-      remote_hash = {:namespace => "remote", :versions => remote_versions}
+      local_hash  = {namespace: "local", versions: local_versions.flatten}
+      remote_hash = {namespace: "remote", versions: remote_versions}
 
       versions = [local_hash]
       versions << remote_hash unless remote_versions.empty?
@@ -113,11 +113,11 @@ module DTK
     end
 
     def get_linked_remote_repos(opts={})
-      (get_augmented_workspace_branch(opts.merge(:include_repo_remotes => true))||{})[:repo_remotes]||[]
+      (get_augmented_workspace_branch(opts.merge(include_repo_remotes: true))||{})[:repo_remotes]||[]
     end
 
-    def default_linked_remote_repo()
-      get_linked_remote_repos(:is_default => true).first
+    def default_linked_remote_repo
+      get_linked_remote_repos(is_default: true).first
     end
 
     def update_model_from_clone_changes?(commit_sha,diffs_summary,version,opts={})
@@ -126,26 +126,26 @@ module DTK
       module_branch = get_workspace_module_branch(version)
       pull_was_needed = module_branch.pull_repo_changes?(commit_sha, force)
 
-      parse_needed = (opts[:force_parse] or !module_branch.dsl_parsed?())
+      parse_needed = (opts[:force_parse] || !module_branch.dsl_parsed?())
       update_from_includes = opts[:update_from_includes]
-      return unless pull_was_needed or parse_needed or update_from_includes
+      return unless pull_was_needed || parse_needed || update_from_includes
 
       opts_update = Aux.hash_subset(opts,[:do_not_raise,:modification_type,:force_parse,:auto_update_module_refs,:dsl_parsed_false,:update_module_refs_from_file,:update_from_includes,:current_branch_sha,:service_instance_module,:task_action])
       update_model_from_clone_changes(commit_sha,diffs_summary,module_branch,version,opts_update)
     end
 
-    def get_project()
+    def get_project
       # caching
       return self[:project] if self[:project]
       update_object!(:project_project_id,:display_name) #including :display_name is opportunistic
       if project_id = self[:project_project_id]
-        self[:project] = id_handle(:model_name => :project, :id => project_id).create_object()
+        self[:project] = id_handle(model_name: :project, id: project_id).create_object()
       end
     end
 
     # TODO: ModuleBranch::Location : need to paramterize this on branch
-     # raises exception if more repos found
-    def get_repo!()
+    # raises exception if more repos found
+    def get_repo!
       repos = get_repos()
 
       unless repos.size == 1
@@ -155,27 +155,27 @@ module DTK
       return repos.first()
     end
 
-    def get_repos()
+    def get_repos
       get_objs_uniq(:repos)
     end
 
-    def get_implementations()
+    def get_implementations
       get_objs_uniq(:implementations)
     end
 
-    def module_type()
+    def module_type
       self.class.module_type()
     end
 
-    def module_name()
+    def module_name
       get_field?(:display_name)
     end
 
-    def module_namespace()
+    def module_namespace
       get_field?(:namespace)[:display_name]
     end
 
-    def module_namespace_obj()
+    def module_namespace_obj
       get_field?(:namespace)
     end
 
@@ -190,10 +190,10 @@ module DTK
     end
 
     def set_dsl_parsed!(boolean_val)
-      update(:dsl_parsed => boolean_val)
+      update(dsl_parsed: boolean_val)
     end
 
-    def dsl_parsed?()
+    def dsl_parsed?
       get_field?(:dsl_parsed)
     end
 
@@ -208,18 +208,18 @@ module DTK
 
       repo_remotes = raw_module_rows.map do |e|
         if repo_remote = e.delete(:repo_remote)
-          if namespace.nil? or namespace == repo_remote[:repo_namespace]
+          if namespace.nil? || namespace == repo_remote[:repo_namespace]
             repo_remote
           end
         end
       end.compact
       # if filtering by namespace (tested by namespace is non-null) and nothing matched then return ret (which is nil)
       # TODO: should we return nil when just repo_remotes.empty?
-      if namespace and repo_remotes.empty?
+      if namespace && repo_remotes.empty?
         return ret
       end
 
-      raw_module_rows.first.merge(:repo_remotes => repo_remotes)
+      raw_module_rows.first.merge(repo_remotes: repo_remotes)
     end
   end
 
@@ -227,12 +227,11 @@ module DTK
   # Class Mixins
   #
   module ModuleClassMixin
-
     include ModuleMixins::Remote::Class
     include ModuleMixins::Create::Class
     include ModuleMixins::GetBranchClassMixin
 
-    def component_type()
+    def component_type
       Log.info_pp(["#TODO: ModuleBranch::Location: deprecate for this being in ModuleBranch::Location local params",caller[0..4]])
       case module_type()
        when :service_module
@@ -246,7 +245,7 @@ module DTK
       end
     end
 
-    def module_type()
+    def module_type
       model_name()
     end
 
@@ -264,22 +263,22 @@ module DTK
       raise ErrorUsage.new("Namespace (#{namespace_x}) does not exist!") unless namespace_obj
 
       sp_hash = {
-       :cols => [:id],
-        :filter => [:and,[:eq, :namespace_id, namespace_obj.id],[:eq, :display_name, name]]
+       cols: [:id],
+        filter: [:and,[:eq, :namespace_id, namespace_obj.id],[:eq, :display_name, name]]
       }
       name_to_id_helper(model_handle,name,sp_hash)
     end
 
     # arguments are module idhs
     def ndx_full_module_names(idhs)
-      ret = Hash.new
+      ret = {}
       return ret if idhs.empty?
       sp_hash =  {
-        :cols => [:id,:group_id,:display_name,:namespace],
-        :filter => [:oneof, :id,idhs.map{|idh|idh.get_id()}]
+        cols: [:id,:group_id,:display_name,:namespace],
+        filter: [:oneof, :id,idhs.map{|idh|idh.get_id()}]
       }
       mh = idhs.first.createMH()
-      get_objs(mh,sp_hash).inject(Hash.new) do |h,row|
+      get_objs(mh,sp_hash).inject({}) do |h,row|
         namespace   = row[:namespace]
         module_name = row[:display_name]
         full_module_name = (namespace ? Namespace.join_namespace(namespace[:display_name], module_name) : module_name)
@@ -294,8 +293,8 @@ module DTK
       namespaces = []
 
       sp_hash = {
-        :cols => remote_repo_cols,
-        :filter => [:eq,:id,id]
+        cols: remote_repo_cols,
+        filter: [:eq,:id,id]
       }
 
       response = get_objs(target_mh, sp_hash.merge(opts))
@@ -313,24 +312,23 @@ module DTK
         response.each_with_index do |e,i|
           display_name = (e[:repo_remote]||{})[:display_name]
           prefix = ( i == 0 ? "*" : " ")
-          namespaces << { :repo_name => "#{prefix} #{display_name}" }
+          namespaces << { repo_name: "#{prefix} #{display_name}" }
         end
       end
 
       filter_list!(response) if respond_to?(:filter_list!)
-      response.each{|r|r.merge!(:type => r.component_type()) if r.respond_to?(:component_type)}
-      response = ModuleUtils::ListMethod.aggregate_detail(response,project_idh,model_type(),Opts.new(:include_versions => true))
+      response.each{|r|r.merge!(type: r.component_type()) if r.respond_to?(:component_type)}
+      response = ModuleUtils::ListMethod.aggregate_detail(response,project_idh,model_type(),Opts.new(include_versions: true))
 
       ret = response.first || {}
       ret[:versions] = "CURRENT" unless ret[:versions]
-      ret.delete_if { |k,v| [:repo,:module_branch,:repo_remote].include?(k) }
+      ret.delete_if { |k,_v| [:repo,:module_branch,:repo_remote].include?(k) }
       # [Haris] Due to join condition with module.branch we can have situations where we have many versions
       # of module with same remote branch, with 'uniq' we iron that out
 
-      ret.merge!(:remote_repos => namespaces.uniq ) if namespaces
+      ret.merge!(remote_repos: namespaces.uniq ) if namespaces
       ret
     end
-
 
     def list(opts=opts.new)
       diff               = opts[:diff]
@@ -339,14 +337,14 @@ module DTK
       remote_repo_base   = opts[:remote_repo_base]
       include_remotes    = opts.array(:detail_to_include).include?(:remotes)
       include_versions   = opts.array(:detail_to_include).include?(:versions)
-      include_any_detail = ((include_remotes or include_versions) ? true : nil)
+      include_any_detail = ((include_remotes || include_versions) ? true : nil)
 
       # cols = [:id, :display_name, :namespace_id, :dsl_parsed, :namespace, include_any_detail && :module_branches_with_repos].compact
       cols = [:id, :display_name, :namespace_id, :namespace, include_any_detail && :module_branches_with_repos].compact
       unsorted_ret = get_all(project_idh,cols)
       unless include_versions
         # prune all but the base module branch
-        unsorted_ret.reject!{|r| r[:module_branch] and r[:module_branch][:version] != ModuleBranch.version_field_default()}
+        unsorted_ret.reject!{|r| r[:module_branch] && r[:module_branch][:version] != ModuleBranch.version_field_default()}
       end
 
       # if namespace provided with list command filter before aggregating details
@@ -354,7 +352,7 @@ module DTK
 
       filter_list!(unsorted_ret) if respond_to?(:filter_list!)
       unsorted_ret.each do |r|
-        r.merge!(:type => r.component_type()) if r.respond_to?(:component_type)
+        r.merge!(type: r.component_type()) if r.respond_to?(:component_type)
 
         if r[:namespace]
           r[:display_name] = Namespace.join_namespace(r[:namespace][:display_name], r[:display_name])
@@ -365,10 +363,10 @@ module DTK
 
       if include_any_detail
         opts_aggr = Opts.new(
-          :include_remotes => include_remotes,
-          :include_versions => include_versions,
-          :remote_repo_base => remote_repo_base,
-          :diff => diff
+          include_remotes: include_remotes,
+          include_versions: include_versions,
+          remote_repo_base: remote_repo_base,
+          diff: diff
         )
         unsorted_ret = ModuleUtils::ListMethod.aggregate_detail(unsorted_ret,project_idh,model_type(),opts_aggr)
       end
@@ -377,7 +375,7 @@ module DTK
     end
 
     def get_all(project_idh,cols=nil)
-      get_all_with_filter(project_idh,:cols => cols)
+      get_all_with_filter(project_idh,cols: cols)
     end
 
     def get_all_with_filter(project_idh,opts={})
@@ -386,8 +384,8 @@ module DTK
         filter = [:and,filter,opts[:filter]]
       end
       sp_hash = {
-        :cols => add_default_cols?(opts[:cols]),
-        :filter => filter
+        cols: add_default_cols?(opts[:cols]),
+        filter: filter
       }
       mh = project_idh.createMH(model_type())
       get_objs(mh,sp_hash)
@@ -407,7 +405,7 @@ module DTK
     end
 
     def add_user_direct_access(model_handle, rsa_pub_key, username=nil)
-      repo_user, match = RepoUser.add_repo_user?(:client, model_handle.createMH(:repo_user), { :public => rsa_pub_key }, username)
+      repo_user, match = RepoUser.add_repo_user?(:client, model_handle.createMH(:repo_user), { public: rsa_pub_key }, username)
       model_name = model_handle[:model_name]
 
       repo_user.update_direct_access(model_name,true)
@@ -424,7 +422,7 @@ module DTK
     DefaultAccessRights = "RW+"
 
     def remove_user_direct_access(model_handle, username)
-      repo_user = RepoUser.get_matching_repo_user(model_handle.createMH(:repo_user),:username => username)
+      repo_user = RepoUser.get_matching_repo_user(model_handle.createMH(:repo_user),username: username)
       raise ErrorUsage.new("User '#{username}' does not exist") unless repo_user
       # return unless repo_user
 
@@ -456,7 +454,7 @@ module DTK
 
     # can be overwritten
     # TODO: ModuleBranch::Location: deprecate
-    def module_specific_type(config_agent_type)
+    def module_specific_type(_config_agent_type)
       module_type()
     end
     private :module_specific_type
@@ -483,20 +481,21 @@ module DTK
       namespace_obj = Namespace.find_or_create(project_idh.createMH(:namespace), module_namespace)
 
       sp_hash = {
-        :cols => [:id, :display_name, :dsl_parsed],
-        :filter => [ :and,
-                     [:eq, :project_project_id, project_idh.get_id()],
-                     [:eq, :display_name, module_name],
-                     [:eq, :namespace_id, namespace_obj.id()]
+        cols: [:id, :display_name, :dsl_parsed],
+        filter: [ :and,
+                  [:eq, :project_project_id, project_idh.get_id()],
+                  [:eq, :display_name, module_name],
+                  [:eq, :namespace_id, namespace_obj.id()]
                    ]
       }
 
       get_obj(project_idh.createMH(model_name()),sp_hash)
     end
 
-   private
+    private
+
     def get_all_repos(mh)
-      get_objs(mh,{:cols => [:repos]}).inject(Hash.new) do |h,r|
+      get_objs(mh,cols: [:repos]).inject({}) do |h,r|
         repo = r[:repo]
         h[repo[:id]] ||= repo
         h
@@ -511,21 +510,21 @@ module DTK
       module_namespace =  opts[:module_namespace]
       full_module_name = module_namespace ? Namespace.join_namespace(module_namespace, module_name) : nil
       hash = {
-        :repo_id => repo[:id],
-        :repo_name => repo_name,
-        :module_id => module_idh.get_id(),
-        :module_name => module_name,
-        :module_namespace => module_namespace,
-        :full_module_name => full_module_name,
-        :module_branch_idh => branch_obj.id_handle(),
-        :repo_url => RepoManager.repo_url(repo_name),
-        :workspace_branch => branch_obj.get_field?(:branch),
-        :branch_head_sha => RepoManager.branch_head_sha(branch_obj)
+        repo_id: repo[:id],
+        repo_name: repo_name,
+        module_id: module_idh.get_id(),
+        module_name: module_name,
+        module_namespace: module_namespace,
+        full_module_name: full_module_name,
+        module_branch_idh: branch_obj.id_handle(),
+        repo_url: RepoManager.repo_url(repo_name),
+        workspace_branch: branch_obj.get_field?(:branch),
+        branch_head_sha: RepoManager.branch_head_sha(branch_obj)
       }
       if version = opts[:version]
-        hash.merge!(:version => version)
+        hash.merge!(version: version)
         if assembly_name = version.respond_to?(:assembly_name) && version.assembly_name()
-          hash.merge!(:assembly_name => assembly_name)
+          hash.merge!(assembly_name: assembly_name)
         end
       end
       replace(hash)
@@ -534,8 +533,8 @@ module DTK
 
   class CloneUpdateInfo < ModuleRepoInfo
     def initialize(module_obj,version=nil)
-      aug_branch = module_obj.get_augmented_workspace_branch(:filter => {:version => version})
-      opts = {:version => version, :module_namespace => module_obj.module_namespace()}
+      aug_branch = module_obj.get_augmented_workspace_branch(filter: {version: version})
+      opts = {version: version, module_namespace: module_obj.module_namespace()}
       super(aug_branch[:repo],aug_branch[:module_name],module_obj.id_handle(),aug_branch,opts)
       self[:commit_sha] = aug_branch[:current_sha]
     end

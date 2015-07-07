@@ -3,12 +3,13 @@ module DTK
   class Attribute 
     class SemanticDatatype
       module SemanticDatatypeClassMixin
-        def all_types()
-          @cache||Hash.new
+        def all_types
+          @cache||{}
         end
+
         def Type(name,&block)
           el = ::Docile.dsl_eval(new(name),&block).build
-          @cache ||= Hash.new
+          @cache ||= {}
           @cache.merge!(name.to_sym => el)
         end
       end
@@ -26,15 +27,16 @@ module DTK
         def parent(parent)
           @parent = parent.to_s
         end
+
         def validation(validation)
           @validation_proc =
-            if validation.kind_of?(Proc)
+            if validation.is_a?(Proc)
               validation
-            elsif validation.kind_of?(Regexp)
+            elsif validation.is_a?(Regexp)
               lambda do |v|
-                v.respond_to?(:to_s) and
-                (not v.kind_of?(Array)) and
-                (not v.kind_of?(Hash)) and
+                v.respond_to?(:to_s) &&
+                (not v.is_a?(Array)) &&
+                (not v.is_a?(Hash)) &&
                 v.to_s =~ validation
               end
             else
@@ -46,7 +48,7 @@ module DTK
           @internal_form_proc = internal_form_proc
         end
 
-        def build()
+        def build
           unless @datatype
             raise Error.new("Datatype must be specified")
           end

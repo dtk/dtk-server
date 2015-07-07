@@ -19,7 +19,7 @@ module DTK
         # raise_error_if_dangling_cmp_attr_ref()
       end
 
-      def integrity_post_processing()
+      def integrity_post_processing
         add_new_ports_on_component_templates()
       end
 
@@ -31,11 +31,12 @@ module DTK
             missing << im unless ref_component_modules.include?(im.to_sym)
           end
 
-          raise ParsingError::MissingFromModuleRefs.new(:modules => missing) unless missing.empty?
+          raise ParsingError::MissingFromModuleRefs.new(modules: missing) unless missing.empty?
         end
       end
 
-     private
+      private
+
       def raise_error_if_dangling_cmp_ref(opts={})
         referenced_cmp_template_ids = @snapshot.component_template_ids()
         return if referenced_cmp_template_ids.empty?
@@ -47,8 +48,8 @@ module DTK
         return unless any_deletes
         
         sp_hash = {
-          :cols => [:id,:display_name,:group_id],
-          :filter => [:oneof, :id, referenced_cmp_template_ids]
+          cols: [:id,:display_name,:group_id],
+          filter: [:oneof, :id, referenced_cmp_template_ids]
         }
         cmp_template_ids_still_present = Model.get_objs(model_handle(:component),sp_hash).map{|r|r[:id]}
         referenced_cmp_templates = @snapshot.referenced_cmp_templates(cmp_template_ids_still_present)
@@ -57,11 +58,11 @@ module DTK
         end
       end
 
-      def raise_error_if_dangling_port_link()
+      def raise_error_if_dangling_port_link
         # TODO: stub
       end
 
-      def add_new_ports_on_component_templates()
+      def add_new_ports_on_component_templates
         # find all assembly templates that reference a component template that has a new link def added
         # this is done by taking a new snapshot (one that is post changes) and seeing in any new link defs
         new_snapshot = Snapshot.new(@component_module)

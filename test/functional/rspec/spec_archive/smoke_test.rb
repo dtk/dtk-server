@@ -9,7 +9,6 @@ require 'fileutils'
 
 STDOUT.sync = true
 
-
 SERVER = 'dev10.r8network.com'
 ENDPOINT = "http://#{SERVER}"
 ASSEMBLY_ID = '2147500839'
@@ -27,9 +26,9 @@ responseLogin = RestClient.post(ENDPOINT + '/rest/user/process_login', 'username
 @cookies = responseLogin.cookies
 
 opts = {
-                 :timeout => 20,
-            :open_timeout => 5,
-                 :cookies => {}
+                 timeout: 20,
+            open_timeout: 5,
+                 cookies: {}
 }
 
 opts[:cookies] = responseLogin.cookies
@@ -75,7 +74,7 @@ def json_print(json)
 end
 
 # Method that prints DTK server lines since the last restart
-def log_print()
+def log_print
   start_line = 1
   search_string = "Exiting"
 
@@ -109,7 +108,6 @@ def log_print()
     puts "Server log data since the last restart:"
     puts lines[occurence..(lines.size - 2)]
   end
-
 end
 
 def execute_task(taskId, opts)
@@ -160,15 +158,15 @@ def deploy_test_assembly(opts)
 
     puts "", "Staged assembly ID: #{assemblyId}" 
 
-    attributes = JSON.parse(send_request('/rest/assembly/info_about', {:subtype=>"instance", :about=>"attributes", :assembly_id=>assemblyId, :filter=>nil}, opts))
+    attributes = JSON.parse(send_request('/rest/assembly/info_about', {subtype: "instance", about: "attributes", assembly_id: assemblyId, filter: nil}, opts))
 
-    memory_size_id = attributes['data'].select{ |x| x['display_name'].include? 'memory_size' }.first['id']
-    os_identifier_id = attributes['data'].select{ |x| x['display_name'].include? 'os_identifier' }.first['id']
+    memory_size_id = attributes['data'].find{ |x| x['display_name'].include? 'memory_size' }['id']
+    os_identifier_id = attributes['data'].find{ |x| x['display_name'].include? 'os_identifier' }['id']
 
-    set_memory_attribute_response = send_request('/rest/assembly/set_attributes', {:value=>MEMORY_SIZE, :pattern=>memory_size_id, :assembly_id=>assemblyId}, opts)
+    set_memory_attribute_response = send_request('/rest/assembly/set_attributes', {value: MEMORY_SIZE, pattern: memory_size_id, assembly_id: assemblyId}, opts)
     ap set_memory_attribute_response
 
-    set_os_identifier_attribute_response = send_request('/rest/assembly/set_attributes', {:value=>os_identifier, :pattern=>os_identifier_id, :assembly_id=>assemblyId}, opts)
+    set_os_identifier_attribute_response = send_request('/rest/assembly/set_attributes', {value: os_identifier, pattern: os_identifier_id, assembly_id: assemblyId}, opts)
     ap set_os_identifier_attribute_response
 
     # Create a task for the cloned assembly instance
@@ -222,24 +220,23 @@ def node_group_spin_up(opts)
   puts "", "Starting node group test"
   # get the selected component ID
   componentListResponse = send_request('/rest/component/list', {}, opts)
-  componentTemplateId = JSON.parse(componentListResponse)['data'].select{ |x| x['display_name'] == COMPONENT }.first['id']
+  componentTemplateId = JSON.parse(componentListResponse)['data'].find{ |x| x['display_name'] == COMPONENT }['id']
 
   # create the node group
-  nodeGroupResponse = send_request('/rest/node_group/create', {:spans_target=>true, :display_name=>"all-nodes-jenkins-testing"}, opts)
+  nodeGroupResponse = send_request('/rest/node_group/create', {spans_target: true, display_name: "all-nodes-jenkins-testing"}, opts)
   # ap JSON.parse(nodeGroupResponse)
 
   # add component to the node group
-  addComponentResponse = send_request('/rest/node_group/add_component', {:node_group_id=>"all-nodes-jenkins-testing", :component_template_id=>componentTemplateId}, opts)
+  addComponentResponse = send_request('/rest/node_group/add_component', {node_group_id: "all-nodes-jenkins-testing", component_template_id: componentTemplateId}, opts)
   # ap JSON.parse(addComponentResponse)
 
   # converge the node group
-  nodeConvergeResponse = send_request('/rest/node_group/create_task', {:node_group_id=>"all-nodes-jenkins-testing"}, opts)
+  nodeConvergeResponse = send_request('/rest/node_group/create_task', {node_group_id: "all-nodes-jenkins-testing"}, opts)
   # ap JSON.parse(nodeConvergeResponse)
   $success = execute_task(JSON.parse(nodeConvergeResponse)["data"]["task_id"], opts)
 
   # delete node group
-  nodeGroupDeleteResponse = send_request('/rest/node_group/delete', {:node_group_id=>"all-nodes-jenkins-testing"} , opts)
-
+  nodeGroupDeleteResponse = send_request('/rest/node_group/delete', {node_group_id: "all-nodes-jenkins-testing"} , opts)
 end
 
 def module_import(opts)
@@ -248,25 +245,24 @@ def module_import(opts)
   path_to_ssh_key = File.expand_path('~/.ssh/id_rsa.pub')
   user_ssh_key = File.open(path_to_ssh_key, 'rb') { |f| f.read.chomp }
 
-  add_user_direct_access_response = send_request('/rest/component_module/add_user_direct_access', {:rsa_pub_key=>user_ssh_key}, opts)
+  add_user_direct_access_response = send_request('/rest/component_module/add_user_direct_access', {rsa_pub_key: user_ssh_key}, opts)
   ap add_user_direct_access_response
 
-  import_module_response = send_request('/rest/component_module/import', {:remote_module_names=>["r8/test"]}, opts)
+  import_module_response = send_request('/rest/component_module/import', {remote_module_names: ["r8/test"]}, opts)
 
   list_modules_response = send_request('/rest/component_module/list', {}, opts)
   $success = false unless list_modules_response.include? 'test'
 
-  delete_module_response = send_request('/rest/component_module/delete', {:component_module_id=>"test"}, opts)
+  delete_module_response = send_request('/rest/component_module/delete', {component_module_id: "test"}, opts)
   ap delete_module_response
 
-  remove_user_direct_access_response = send_request('/rest/component_module/remove_user_direct_access', {:rsa_pub_key=>user_ssh_key}, opts)
+  remove_user_direct_access_response = send_request('/rest/component_module/remove_user_direct_access', {rsa_pub_key: user_ssh_key}, opts)
   ap remove_user_direct_access_response
 
   list_modules_response = send_request('/rest/component_module/list', {}, opts)
 
   $success = false if JSON.parse(list_modules_response)['data'].select{ |x| x['display_name'] == 'test' } != []
   #$success = false if list_modules_response.include? 'test'
-
 end
 
 def stage_assembly(opts)
@@ -278,22 +274,20 @@ def stage_assembly(opts)
 end
 
 def module_create(opts)
-=begin
-  module_create_response = send_request('/rest/component_module/create_empty_repo', {:component_module_name=>"test_module"}, opts)
-  repo_id = JSON.parse(module_create_response)["data"]["repo_id"]
-  library_id = JSON.parse(module_create_response)["data"]["library_id"]
-
-  update_repo_response = send_request('/rest/component_module/update_repo_and_add_dsl', {:repo_id=>repo_id, :module_name=>"test_module", :library_id=>library_id, :scaffold_if_no_dsl=>true}, opts)
-  ap update_repo_response
-=end
+  #   module_create_response = send_request('/rest/component_module/create_empty_repo', {:component_module_name=>"test_module"}, opts)
+  #   repo_id = JSON.parse(module_create_response)["data"]["repo_id"]
+  #   library_id = JSON.parse(module_create_response)["data"]["library_id"]
+  #
+  #   update_repo_response = send_request('/rest/component_module/update_repo_and_add_dsl', {:repo_id=>repo_id, :module_name=>"test_module", :library_id=>library_id, :scaffold_if_no_dsl=>true}, opts)
+  #   ap update_repo_response
   puts "", "Creating a new module from the local code..."
   ap `dtk module create "test_module"`
 
   puts "", "Exporting the module to the remote repo..."
-  module_export_response = send_request('/rest/component_module/export', {:component_module_id=>"test_module"}, opts)
+  module_export_response = send_request('/rest/component_module/export', {component_module_id: "test_module"}, opts)
 
   puts "", "Deleteing the local module..."
-  module_delete_response = send_request('/rest/component_module/delete', {:component_module_id=>"test_module"}, opts)
+  module_delete_response = send_request('/rest/component_module/delete', {component_module_id: "test_module"}, opts)
   ap module_delete_response
 
   puts "", "Removing the module directory..."
@@ -311,11 +305,11 @@ def module_create(opts)
   end
 
   puts "", "Deleteing the local module..."
-  module_delete_response = send_request('/rest/component_module/delete', {:component_module_id=>"test_module"}, opts)
+  module_delete_response = send_request('/rest/component_module/delete', {component_module_id: "test_module"}, opts)
   ap module_delete_response
 
   puts "", "Deleteing the remote module..."
-  module_delete_remote_response = send_request('/rest/component_module/delete_remote', {:remote_module_name=>"test_module"}, opts)
+  module_delete_remote_response = send_request('/rest/component_module/delete_remote', {remote_module_name: "test_module"}, opts)
   ap module_delete_remote_response
 
   puts "", "Make sure that the module is deleted."
@@ -335,42 +329,40 @@ deploy_test_assembly(opts)
 
 # stage_assembly(opts)
 
-
 abort("Job failed!") unless $success
 
-
-=begin 
-"http://ec2-184-72-164-154.compute-1.amazonaws.com:7000/rest/component_module/create_empty_repo"
-{:component_module_name=>"test_module"}
-"http://ec2-184-72-164-154.compute-1.amazonaws.com:7000/rest/component_module/update_repo_and_add_dsl"
-{:repo_id=>2147502620,
- :module_name=>"test_module",
- :library_id=>2147483655,
- :scaffold_if_no_dsl=>true}
-
-"http://ec2-184-72-164-154.compute-1.amazonaws.com:7000/rest/component_module/export"
-{:component_module_id=>"test_module"}
-
-"http://ec2-184-72-164-154.compute-1.amazonaws.com:7000/rest/component_module/delete"
-{:component_module_id=>"test_module"}
-
-rm -rf ~/component_modules/test_module
-
-"http://ec2-184-72-164-154.compute-1.amazonaws.com:7000/rest/component_module/import"
-{:remote_module_names=>["test_module"]}
-
-"http://ec2-184-72-164-154.compute-1.amazonaws.com:7000/rest/component_module/create_workspace_branch"
-{"component_module_id"=>"2147502647"}
-
-ls ~/component_modules/test_module
-
-"http://ec2-184-72-164-154.compute-1.amazonaws.com:7000/rest/component_module/delete"
-{:component_module_id=>"test_module"}
-
-"http://ec2-184-72-164-154.compute-1.amazonaws.com:7000/rest/component_module/export"
-{:component_module_id=>"test_module"}
-
-"http://ec2-184-72-164-154.compute-1.amazonaws.com:7000/rest/component_module/delete_remote"
-{:remote_module_name=>"test_module"}
-
-=end
+# 
+# "http://ec2-184-72-164-154.compute-1.amazonaws.com:7000/rest/component_module/create_empty_repo"
+# {:component_module_name=>"test_module"}
+# "http://ec2-184-72-164-154.compute-1.amazonaws.com:7000/rest/component_module/update_repo_and_add_dsl"
+# {:repo_id=>2147502620,
+#  :module_name=>"test_module",
+#  :library_id=>2147483655,
+#  :scaffold_if_no_dsl=>true}
+#
+# "http://ec2-184-72-164-154.compute-1.amazonaws.com:7000/rest/component_module/export"
+# {:component_module_id=>"test_module"}
+#
+# "http://ec2-184-72-164-154.compute-1.amazonaws.com:7000/rest/component_module/delete"
+# {:component_module_id=>"test_module"}
+#
+# rm -rf ~/component_modules/test_module
+#
+# "http://ec2-184-72-164-154.compute-1.amazonaws.com:7000/rest/component_module/import"
+# {:remote_module_names=>["test_module"]}
+#
+# "http://ec2-184-72-164-154.compute-1.amazonaws.com:7000/rest/component_module/create_workspace_branch"
+# {"component_module_id"=>"2147502647"}
+#
+# ls ~/component_modules/test_module
+#
+# "http://ec2-184-72-164-154.compute-1.amazonaws.com:7000/rest/component_module/delete"
+# {:component_module_id=>"test_module"}
+#
+# "http://ec2-184-72-164-154.compute-1.amazonaws.com:7000/rest/component_module/export"
+# {:component_module_id=>"test_module"}
+#
+# "http://ec2-184-72-164-154.compute-1.amazonaws.com:7000/rest/component_module/delete_remote"
+# {:remote_module_name=>"test_module"}
+#
+# =

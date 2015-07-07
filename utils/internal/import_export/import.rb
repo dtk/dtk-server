@@ -4,6 +4,7 @@ module DTK
     def uri_qualified_by_username(relation_type,ref,username)
       username ? "/#{relation_type}/#{ref}-#{username}" : "/#{relation_type}/#{ref}"
     end
+
     def modify_uri_with_user_name(uri,username)
       return uri unless username
       if uri =~ Regexp.new("^(/[^/]+/[^/]+)(/.+$)")
@@ -45,7 +46,7 @@ module DTK
       library_uri = "/library/#{library_ref}"
       impl_uri = "#{library_uri}/implementation/#{impl_ref}"
       [[:library,library_uri],[:implementation,impl_uri]].map do |mn,uri|
-        top_container_idh.createIDH(:model_name => mn, :uri => uri)
+        top_container_idh.createIDH(model_name: mn, uri: uri)
       end
     end
 
@@ -60,7 +61,7 @@ module DTK
     def import_objects_from_hash(container_id_handle,hash_content,opts={})
       create_prefix_object_if_needed(container_id_handle,opts)
       return nil unless hash_content
-      type_info = Hash.new
+      type_info = {}
       add_r8meta!(hash_content,opts[:r8meta]) if opts[:r8meta]
       if opts[:add_implementations]
         impl_info = opts[:add_implementations]
@@ -73,8 +74,8 @@ module DTK
     end
 
     def input_hash_content_into_model(container_id_handle,hash_content,opts_x={})
-      opts = (opts_x[:return_idhs] ? {:return_info => true}.merge(opts_x) : opts_x)
-      global_fks = Hash.new
+      opts = (opts_x[:return_idhs] ? {return_info: true}.merge(opts_x) : opts_x)
+      global_fks = {}
       return_info = nil
       unless container_id_handle.is_top?
         # TODO: do we need to factor in opts[:username] here?
@@ -87,9 +88,9 @@ module DTK
         hash_content.each do |relation_type,info|
           info.each do |ref,child_hash_content|
             child_uri = uri_qualified_by_username(relation_type,ref,opts[:username])
-            child_container_id_handle = container_id_handle.createIDH(:uri => child_uri)
+            child_container_id_handle = container_id_handle.createIDH(uri: child_uri)
             create_prefix_object_if_needed(child_container_id_handle,opts)
-            input_opts = {:ret_global_fks => true}.merge(opts.reject{|k,v| not [:username,:preserve_input_hash].include?(k)})
+            input_opts = {ret_global_fks: true}.merge(opts.reject{|k,_v| not [:username,:preserve_input_hash].include?(k)})
             if opts[:return_info]
               r, return_info = input_into_model(child_container_id_handle,child_hash_content,input_opts)
             else
@@ -101,7 +102,7 @@ module DTK
       end
 
       return return_info if return_info
-      process_global_keys(global_fks,container_id_handle[:c]) unless global_fks.nil? or global_fks.empty?
+      process_global_keys(global_fks,container_id_handle[:c]) unless global_fks.nil? || global_fks.empty?
     end
 
     def create_prefix_object_if_needed(container_id_handle,opts={})
@@ -118,7 +119,7 @@ module DTK
       if format_type == :yaml
         library_ref = r8meta[:library]
         require 'yaml'
-        remote_link_defs = Hash.new
+        remote_link_defs = {}
         r8meta[:files].each do |file|
           component_hash = YAML.load_file(file)
           repo, config_agent_type = (file =~ Regexp.new("([^/]+)/r8meta\.(.+)\.yml") && [$1,$2])
@@ -128,7 +129,7 @@ module DTK
             # TODO: right now; links defs just have internal
             if link_defs = v.delete("link_defs")
               parsed_link_def = LinkDef.parse_serialized_form_local(link_defs,config_agent_type,remote_link_defs)
-              (v["link_def"] ||= Hash.new).merge!(parsed_link_def)
+              (v["link_def"] ||= {}).merge!(parsed_link_def)
             end
             # TODO: when link_defs have externa;l deprecate below
             if ext_link_defs = v.delete("external_link_defs")
@@ -137,9 +138,9 @@ module DTK
                 (ld["possible_links"]||[]).each{|pl|pl.values.first["type"] = "external"}
               end
               parsed_link_def = LinkDef.parse_serialized_form_local(ext_link_defs,config_agent_type,remote_link_defs)
-              (v["link_def"] ||= Hash.new).merge!(parsed_link_def)
+              (v["link_def"] ||= {}).merge!(parsed_link_def)
               # TODO: deprecate below
-              v["link_defs"] ||= Hash.new
+              v["link_defs"] ||= {}
               v["link_defs"]["external"] = ext_link_defs
             end
             hash["library"][library_ref]["component"][cmp_ref] = v.merge("repo" => repo)
@@ -151,7 +152,7 @@ module DTK
           remote_cmp_ref = "#{config_agent_type}-#{remote_cmp_type}"
           cmp_pointer = hash["library"][library_ref]["component"][remote_cmp_ref]
           if cmp_pointer
-            (cmp_pointer["link_def"] ||= Hash.new).merge!(remote_link_def)
+            (cmp_pointer["link_def"] ||= {}).merge!(remote_link_def)
           else
             Log.error("link def references a remote component (#{remote_cmp_ref}) that does not exist")
           end
@@ -161,30 +162,29 @@ module DTK
       end
     end
 
-
     def add_implementations!(hash,version,library_ref,base_dir,impl_name=nil)
       Implementation::add_implementations!(hash,version,library_ref,base_dir,impl_name)
     end
 
     module Implementation
       def self.add_implementations!(hash,version,library_ref,base_dir,impl_name=nil)
-        file_paths = Array.new
+        file_paths = []
         Dir.chdir(base_dir) do
           pattern = impl_name ? "#{impl_name}/**/*" : "**/*"
           file_paths = Dir[pattern].select{|item|File.file?(item)}
         end
         return if file_paths.empty?
 
-        indexed_file_paths = Hash.new
+        indexed_file_paths = {}
         file_paths.each do |file_path|
           dir = file_path =~ Regexp.new("(^[^/]+)/") ? $1 : nil
-          (indexed_file_paths[dir] ||= Array.new) << file_path
+          (indexed_file_paths[dir] ||= []) << file_path
         end
         impl_repos = indexed_file_paths.keys
         return unless impl_repos
 
         # add implementation objects to hash
-        implementation_hash = hash["library"][library_ref]["implementation"] ||= Hash.new
+        implementation_hash = hash["library"][library_ref]["implementation"] ||= {}
         impl_repos.each do |repo|
           next unless file_paths = indexed_file_paths[repo]
 
@@ -201,10 +201,10 @@ module DTK
             file_path = repo ? file_path_x.gsub(Regexp.new("^#{repo}/"),"") : file_path_x
             file_name = file_path =~ Regexp.new("/([^/]+$)") ? $1 : file_path
             file_asset = {
-              :type => type[:file_type],
-              :display_name => file_name,
-              :file_name => file_name,
-              :path => file_path
+              type: type[:file_type],
+              display_name: file_name,
+              file_name: file_name,
+              path: file_path
             }
             file_asset_ref = file_path.gsub(Regexp.new("/"),"_") #removing "/" since they confuse processing
             h.merge(file_asset_ref => file_asset)
@@ -230,7 +230,7 @@ module DTK
 
       # TODO: deprecate
       def self.ret_library_implementation_hash(module_dir,module_name,config_agent_type)
-        file_paths = Array.new
+        file_paths = []
         Dir.chdir(module_dir) do
           pattern = "**/*"
           file_paths = Dir[pattern].select{|item|File.file?(item)}
@@ -240,10 +240,10 @@ module DTK
         file_assets = file_paths.inject({}) do |h,file_path|
           file_name = file_path =~ Regexp.new("/([^/]+$)") ? $1 : file_path
           file_asset = {
-            :type => file_type,
-            :display_name => file_name,
-            :file_name => file_name,
-            :path => file_path
+            type: file_type,
+            display_name: file_name,
+            file_name: file_name,
+            path: file_path
           }
           file_asset_ref = file_path.gsub(Regexp.new("/"),"_") #removing "/" since they confuse processing
           h.merge(file_asset_ref => file_asset)
@@ -261,13 +261,13 @@ module DTK
       end
 
       class ImportChefType < HashObject
-        def initialize()
-          super(:file_type => "chef_file", :implementation_type => "chef_cookbook")
+        def initialize
+          super(file_type: "chef_file", implementation_type: "chef_cookbook")
         end
       end
       class ImportPuppetType < HashObject
-        def initialize()
-          super(:file_type => "puppet_file", :implementation_type => "puppet_module")
+        def initialize
+          super(file_type: "puppet_file", implementation_type: "puppet_module")
         end
       end
     end

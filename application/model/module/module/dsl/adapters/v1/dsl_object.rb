@@ -4,7 +4,8 @@ module DTK; class ModuleDSL; class V1
   Base = ModuleDSL::GenerateFromImpl::DSLObject
   class DSLObject
     class Module < Base::Module
-     private
+      private
+
       def add_component!(ret,hash_key,content)
         ret[hash_key] = content
         ret
@@ -28,8 +29,9 @@ module DTK; class ModuleDSL; class V1
         ret
       end
 
-     private
-      def converted_external_ref()
+      private
+
+      def converted_external_ref
         ext_ref = required_value(:external_ref)
         ret = RenderHash.new
         ext_ref_key = 
@@ -44,25 +46,30 @@ module DTK; class ModuleDSL; class V1
         (ext_ref.keys - ["name","type"]).each{|k|ret[k] = ext_ref[k]}
         ret
       end
-      def display_name?()
+
+      def display_name?
         required_value(:display_name)
       end 
-      def label?()
+
+      def label?
         value(:label)
       end
-      def basic_type?()
+
+      def basic_type?
         value(:basic_type)
       end
-      def component_type?()
+
+      def component_type?
         required_value(:component_type)
       end
-      def only_one_per_node?()
+
+      def only_one_per_node?
         value(:only_one_per_node)
       end
     end
 
     class Dependency < Base::Dependency
-      def render_hash_form(opts={})
+      def render_hash_form(_opts={})
         # TODO: stub
         ret = RenderHash.new
         ret
@@ -74,8 +81,8 @@ module DTK; class ModuleDSL; class V1
         ret = RenderHash.new
         ret["type"] = required_value(:type)
         ret.set_unless_nil("required",value(:required))
-        self[:possible_links].each_element(:skip_required_is_false => true) do |link|
-          (ret["possible_links"] ||= Array.new) << {link.hash_key => link.render_hash_form(opts)}
+        self[:possible_links].each_element(skip_required_is_false: true) do |link|
+          (ret["possible_links"] ||= []) << {link.hash_key => link.render_hash_form(opts)}
         end
         ret
       end
@@ -92,7 +99,7 @@ module DTK; class ModuleDSL; class V1
     end
 
     class LinkDefAttributeMapping  < Base::LinkDefAttributeMapping
-      def render_hash_form(opts={})
+      def render_hash_form(_opts={})
         input = self[:input]
         output = self[:output]
         in_cmp = index(input,:component)
@@ -101,14 +108,16 @@ module DTK; class ModuleDSL; class V1
         out_attr = index(output,:attribute)
         RenderHash.new(attr_ref(out_cmp,out_attr) => attr_ref(in_cmp,in_attr))
       end
+
       private
+
       def attr_ref(cmp,attr)
         ":#{cmp}.#{attr}"
       end
     end
 
     class Attribute < Base::Attribute
-      def render_hash_form(opts={})
+      def render_hash_form(_opts={})
         ret = RenderHash.new
         ret.set_unless_nil("display_name",display_name?())
         ret.set_unless_nil("description",value(:description))
@@ -120,12 +129,13 @@ module DTK; class ModuleDSL; class V1
         ret
       end
         
-     private
-      def display_name?()
+      private
+
+      def display_name?
         required_value(:field_name)
       end
 
-      def converted_external_ref()
+      def converted_external_ref
         ext_ref = required_value(:external_ref)
         ret = RenderHash.new
         ret["type"] = ext_ref["type"]

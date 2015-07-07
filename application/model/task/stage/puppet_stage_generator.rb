@@ -1,6 +1,5 @@
 module XYZ
 	module Stage
-
 		# Amar: This class will generate part of the flow that enables multiple puppet calls
 		# 		within one puppet_agent execution
 
@@ -15,10 +14,10 @@ module XYZ
 		# 		TODO: Future implementation should allow user to manipulate component grouping...
 		class PuppetStageGenerator
 			def self.generate_stages(component_dependencies, state_change_list)
-			 	cd_group = Hash.new
-			 	scl_group = Hash.new
-			 	cd_assembly = Hash.new
-			 	scl_assembly = Array.new 
+			 	cd_group = {}
+			 	scl_group = {}
+			 	cd_assembly = {}
+			 	scl_assembly = [] 
 
 			 	# Go through all components
 			 	state_change_list.each do |sc|
@@ -27,11 +26,11 @@ module XYZ
 			 		# it means components comes from node group and not from assembly instance.
 			 		# make puppet stages and return grouped results.
 			 		unless sc[:node][:id] == component_node_id
-			 			scl_group[component_node_id] ||= Array.new
+			 			scl_group[component_node_id] ||= []
 						scl_group[component_node_id] << sc
-			 			cd_group[component_node_id] ||= Hash.new
+			 			cd_group[component_node_id] ||= {}
 						cd_group[component_node_id][sc[:component][:id]] = component_dependencies[sc[:component][:id]]
-					else
+					 else
 						cd_assembly[sc[:component][:id]] = component_dependencies[sc[:component][:id]]
 						scl_assembly << sc
 			 		end

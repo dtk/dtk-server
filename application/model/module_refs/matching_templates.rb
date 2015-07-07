@@ -19,7 +19,8 @@ module DTK
         ret
       end
 
-     private
+      private
+
       def determine_component_refs_needing_matches(aug_cmp_refs,opts={})
         # for each element in aug_cmp_ref, want to set cmp_template_id using following rules
         # 1) if key 'has_override_version' is set
@@ -27,7 +28,7 @@ module DTK
         #    b) otherwise look it up using given version
         # 2) else look it up and if lookup exists use this as the value to use; element marked required if it does not point to a component template
         # lookup based on matching both version and namespace, if namespace is given
-        cmp_types_to_check = Hash.new
+        cmp_types_to_check = {}
         aug_cmp_refs.each do |r|
           unless cmp_type = r[:component_type]||(r[:component_template]||{})[:component_type]
             ref =  ComponentRef.print_form(r)
@@ -40,7 +41,7 @@ module DTK
               unless r[:version]
                 raise Error.new("Component ref has override-version flag set, but no version")
               end
-              (cmp_types_to_check[cmp_type] ||= ComponentTypeToCheck.new) << {:pntr => r, :version => r[:version]}
+              (cmp_types_to_check[cmp_type] ||= ComponentTypeToCheck.new) << {pntr: r, version: r[:version]}
             end
           else
             add_item = true
@@ -52,7 +53,7 @@ module DTK
               end
             end
             if add_item
-              (cmp_types_to_check[cmp_type] ||= ComponentTypeToCheck.new) << {:pntr => r,:required => cmp_template_id.nil?}
+              (cmp_types_to_check[cmp_type] ||= ComponentTypeToCheck.new) << {pntr: r,required: cmp_template_id.nil?}
             end
           end
           r[:template_id_synched] = true #marking each item synchronized
@@ -61,7 +62,7 @@ module DTK
         # shortcut if no locked versions and no required elements
         if component_modules().empty? and not cmp_types_to_check.values.find{|r|r.mapping_required?()}
           # TODO: should we instead prune out all those that dont have mapping required
-          return Hash.new
+          return {}
         end
         cmp_types_to_check
       end
@@ -87,7 +88,7 @@ module DTK
           end
         end
 
-        reference_errors = Array.new
+        reference_errors = []
         cmp_types_to_check.each do |cmp_type,els|
           els.each do |el|
             cmp_type_info = mappings[cmp_type]
@@ -97,13 +98,13 @@ module DTK
                 el[:pntr][:component_template] = cmp_template
               end
             elsif el[:required]
-              # TODO: This should not be reached because if error then an error wil be raised by get_component_type_to_template_mappings? call
+             # TODO: This should not be reached because if error then an error wil be raised by get_component_type_to_template_mappings? call
              Log.error("TODO: may put back in logic to accrue errors; until then this should not be reached")
-#              cmp_ref = {
-#                :component_type => cmp_type,
-#                :version => cmp_type_info[:version]
-#              }
-#              reference_errors << cmp_ref
+              #              cmp_ref = {
+              #                :component_type => cmp_type,
+              #                :version => cmp_type_info[:version]
+              #              }
+              #              reference_errors << cmp_ref
             end
           end
         end
@@ -115,14 +116,14 @@ module DTK
       end
 
       def get_component_type_to_template_mappings?(cmp_types,opts={})
-        ret = Hash.new
+        ret = {}
         return ret if cmp_types.empty?
         # first put in ret info about component type and version
-        ret = cmp_types.inject(Hash.new) do |h,cmp_type|
+        ret = cmp_types.inject({}) do |h,cmp_type|
           version = version_string?(cmp_type)
           el = Component::Template::MatchElement.new(
-            :component_type => cmp_type,
-            :version_field => ModuleBranch.version_field(version)
+            component_type: cmp_type,
+            version_field: ModuleBranch.version_field(version)
           )
           if version
             el[:version] = version
@@ -135,13 +136,13 @@ module DTK
 
         # get matching component template info and insert matches into ret
         Component::Template.get_matching_elements(project_idh(),ret.values,opts).each do |cmp_template|
-          ret[cmp_template[:component_type]].merge!(:component_template => cmp_template)
+          ret[cmp_template[:component_type]].merge!(component_template: cmp_template)
         end
         ret
       end
 
       def update_module_refs_dsl?(cmp_type_to_template_mappings)
-        module_name_to_ns = Hash.new
+        module_name_to_ns = {}
         cmp_type_to_template_mappings.each do |cmp_type,cmp_info|
           module_name = module_name(cmp_type)
           unless module_name_to_ns[module_name]
@@ -150,7 +151,7 @@ module DTK
             end
           end
         end
-        cmp_module_refs_to_add = Array.new
+        cmp_module_refs_to_add = []
         module_name_to_ns.each do |cmp_module_name,namespace|
           if component_module_ref = component_module_ref?(cmp_module_name)
             unless component_module_ref.namespace() == namespace
@@ -158,9 +159,9 @@ module DTK
             end
           else
             new_cmp_moule_ref = {
-              :module_name=>cmp_module_name,
-              :module_type=>"component",
-              :namespace_info=>namespace
+              module_name: cmp_module_name,
+              module_type: "component",
+              namespace_info: namespace
             }
             cmp_module_refs_to_add <<  new_cmp_moule_ref
           end

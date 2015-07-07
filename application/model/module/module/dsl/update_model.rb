@@ -18,9 +18,9 @@ module DTK; class ModuleDSL
         @impl_idh = impl_idh
         @module_branch_idh = module_branch_idh
         @project_idh = project_idh
-        @remote_link_defs = Hash.new
-        @components_hash = Hash.new
-        @stored_components_hash = Hash.new
+        @remote_link_defs = {}
+        @components_hash = {}
+        @stored_components_hash = {}
       end
       attr_reader :components_hash,:stored_components_hash
 
@@ -30,17 +30,17 @@ module DTK; class ModuleDSL
 
         @components_hash = dsl_hash.inject({}) do |h, (r8_hash_cmp_ref,cmp_info)|
           cmp_ref = component_ref(config_agent_type,r8_hash_cmp_ref,namespace)
-          info = Hash.new
+          info = {}
           cmp_info.each do |k,v|
             case k
             # TODO: deprecate this case when remove v1
             when "external_link_defs"
               v.each{|ld|(ld["possible_links"]||[]).each{|pl|pl.values.first["type"] = "external"}} #TODO: temp hack to put in type = "external"
               parsed_link_def = LinkDef.parse_serialized_form_local(v,config_agent_type,@remote_link_defs,cmp_ref)
-              (info["link_def"] ||= Hash.new).merge!(parsed_link_def)
+              (info["link_def"] ||= {}).merge!(parsed_link_def)
             when "link_defs"
               parsed_link_def = LinkDef.parse_serialized_form_local(v,config_agent_type,@remote_link_defs,cmp_ref)
-              (info["link_def"] ||= Hash.new).merge!(parsed_link_def)
+              (info["link_def"] ||= {}).merge!(parsed_link_def)
             else
               info[k] = v
             end
@@ -50,23 +50,25 @@ module DTK; class ModuleDSL
         end
       end
 
-     private
+      private
+
       attr_reader :impl_idh, :module_branch_idh,:project_idh
 
       def component_ref_from_cmp_type(config_agent_type,component_type)
         "#{config_agent_type}-#{component_type}"
       end
+
       def component_ref(config_agent_type,hash_cmp_ref,namespace)
         ref_wo_ns = "#{config_agent_type}-#{hash_cmp_ref}"
         Namespace.join_namespace(namespace, ref_wo_ns)
       end
-
     end
 
-   private
+    private
+
     def add_component_override_attrs(input_hash,override_attrs)
       if override_attrs
-        input_hash.keys.inject(Hash.new()) do |h,k|
+        input_hash.keys.inject({}) do |h,k|
           h.merge(k => input_hash[k].merge(override_attrs))
         end
       else
@@ -77,7 +79,7 @@ module DTK; class ModuleDSL
     def modify_for_version_and_override_attrs(input_hash,version,override_attrs)
       (override_attrs ||= {})["version"] ||= version
 
-      input_hash.keys.inject(Hash.new()) do |h,k|
+      input_hash.keys.inject({}) do |h,k|
         cmp_info = input_hash[k]
         modified_cmp_info = cmp_info.merge(override_attrs).merge("display_name" => Component.name_with_version(cmp_info["display_name"],version))
         h.merge(Component.ref_with_version(k,version) => modified_cmp_info)
@@ -98,13 +100,14 @@ module DTK; class ModuleDSL
       db_update_hash = db_update_form(cmps_hash,stored_cmps_hash,module_branch_idh)
       Model.input_hash_content_into_model(project_idh,db_update_hash)
       sp_hash =  {
-        :cols => [:id,:display_name],
-        :filter => [:and,[:oneof,:ref,cmps_hash.keys],[:eq,:project_project_id,project_idh.get_id()]]
+        cols: [:id,:display_name],
+        filter: [:and,[:oneof,:ref,cmps_hash.keys],[:eq,:project_project_id,project_idh.get_id()]]
       }
       Model.get_objs(project_idh.create_childMH(:component),sp_hash).map{|r|r.id_handle()}
     end
 
-   private
+    private
+
     def create_parser_processor(dsl_integer_version,impl_idh,module_branch_idh,project_idh)
       klass = load_and_return_version_adapter_class(dsl_integer_version)
       klass.const_get("Parser").new(impl_idh,module_branch_idh,project_idh)
@@ -113,8 +116,8 @@ module DTK; class ModuleDSL
     # This marks as complete applicable objects so if objects not present in cmps_input_hash they are deleted
     def db_update_form(cmps_input_hash,non_complete_cmps_input_hash,module_branch_idh)
       mark_as_complete_constraint = {
-        :module_branch_id=>module_branch_idh.get_id(), #so only delete extra components that belong to same module
-        :node_node_id => nil #so only delete component templates and not component instances
+        module_branch_id: module_branch_idh.get_id(), #so only delete extra components that belong to same module
+        node_node_id: nil #so only delete component templates and not component instances
       }
       cmp_db_update_hash = cmps_input_hash.inject(DBUpdateHash.new) do |h,(ref,hash_assigns)|
         h.merge(ref => db_update_form_aux(:component,hash_assigns))

@@ -1,6 +1,5 @@
 module DTK; class Attribute
   class Pattern
-
     module Term
       def self.canonical_form(type,term)
         "#{type}#{LDelim}#{term}#{RDelim}"

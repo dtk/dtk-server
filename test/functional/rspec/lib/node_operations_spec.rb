@@ -46,7 +46,7 @@ shared_context "get-netstats function on node" do |dtk_common, staged_node_name,
   end
 end
 
-shared_context "list-task-info function on node" do |dtk_common, staged_node_name, component_name|
+shared_context "list-task-info function on node" do |dtk_common, _staged_node_name, component_name|
   it "checks task status contains #{component_name} component, source is instance and it does not belong to any node group" do
     task_info_status_success = dtk_common.check_list_task_info_status(dtk_common.node_id, component_name)
     task_info_status_success.should eq(true)

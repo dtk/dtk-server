@@ -20,41 +20,38 @@ module DTK; class ServiceModule
       def self.subtask_canonical_form(input_hash)
         ret = input_hash.class.new()
         input_hash.each_pair do |k,info|
-          # TODO: assuming that just one level workflow
+            # TODO: assuming that just one level workflow
             case k
              when :nodes
               if  Constant.matches?(info,:AllApplicable)
-                # remove no op
-             else
+              # remove no op
+              else
                 ret[k] = info
               end
-            else
+             else
               ret[k] = info
             end
         end
         ret
       end
-
     end
   end; end
 end; end
 
-=begin
-form to normalize returned by workflow_hash supper
-{:assembly_action=>"create",
- :subtask_order=>:sequential,
- :subtasks=>
-  [{:name=>"create component",
-    :node=>"node",
-    :ordered_components=>
-     ["java", "bigtop_toolchain::gradle", "action_module"]},
-   {:name=>"invoke bash test1",
-input_hash)    :nodes=>"All_applicable",
-    :ordered_components=>["action_module.bash_test1"]},
-   {:name=>"invoke rspec test1",
-    :nodes=>"All_applicable",
-    :ordered_components=>["action_module.rspec_test1"]},
-   {:name=>"invoke gradle test1",
-    :nodes=>"All_applicable",
-    :ordered_components=>["action_module.gradle_test1"]}]}
-=end
+# form to normalize returned by workflow_hash supper
+# {:assembly_action=>"create",
+#  :subtask_order=>:sequential,
+#  :subtasks=>
+#   [{:name=>"create component",
+#     :node=>"node",
+#     :ordered_components=>
+#      ["java", "bigtop_toolchain::gradle", "action_module"]},
+#    {:name=>"invoke bash test1",
+# input_hash)    :nodes=>"All_applicable",
+#     :ordered_components=>["action_module.bash_test1"]},
+#    {:name=>"invoke rspec test1",
+#     :nodes=>"All_applicable",
+#     :ordered_components=>["action_module.rspec_test1"]},
+#    {:name=>"invoke gradle test1",
+#     :nodes=>"All_applicable",
+#     :ordered_components=>["action_module.gradle_test1"]}]}

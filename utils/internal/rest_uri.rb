@@ -6,7 +6,7 @@ module XYZ
           parent_uri = $1 == "" ? "/" : $1
           relation_type = $2.to_sym
 
-	  raise Error.new("invalid relation type '#{relation_type.to_s}'") if DB_REL_DEF[relation_type].nil?
+	  raise Error.new("invalid relation type '#{relation_type}'") if DB_REL_DEF[relation_type].nil?
           [relation_type,parent_uri]
         else
 	  raise Error.new("factory_uri (#{factory_uri}) in incorrect form")
@@ -24,6 +24,7 @@ module XYZ
         uri =~ %r{^/([^/]+)}
         $1.to_sym
       end
+
       def ret_top_container_uri(uri)
         uri =~ %r{^(/[^/]+/[^/]+)/}
         $1

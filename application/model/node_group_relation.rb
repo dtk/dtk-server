@@ -2,17 +2,17 @@ module DTK
   class NodeGroupRelation < Model
     def self.get_node_member_assembly?(node_member_idh)
       sp_hash = {
-        :cols => [:id,:node_member_assembly],
-        :filter => [:eq,:node_id,node_member_idh.get_id()]
+        cols: [:id,:node_member_assembly],
+        filter: [:eq,:node_id,node_member_idh.get_id()]
       }
       ngr = get_obj(node_member_idh.createMH(:node_group_relation),sp_hash)
       ngr && ngr[:assembly]
     end
 
-    def spans_target?()
+    def spans_target?
       update_object!(:datacenter_datacenter_id,:node_id)
-      if self[:node_id].nil? and self[:datacenter_datacenter_id]
-        id_handle(:model_name => :target,:id => self[:datacenter_datacenter_id])
+      if self[:node_id].nil? && self[:datacenter_datacenter_id]
+        id_handle(model_name: :target,id: self[:datacenter_datacenter_id])
       end
     end
 
@@ -31,8 +31,8 @@ module DTK
       # check if not created already
       unless opts[:donot_check_if_exists]
         sp_hash = {
-          :cols => [:id,:node_id],
-          :filter => [:and, [:eq,:node_group_id,node_group_id],[:eq, :datacenter_datacenter_id,target_id ]] 
+          cols: [:id,:node_id],
+          filter: [:and, [:eq,:node_group_id,node_group_id],[:eq, :datacenter_datacenter_id,target_id ]] 
         }
         matches = get_objs(ngr_mh,sp_hash)
         error = nil
@@ -49,12 +49,12 @@ module DTK
           raise ErrorUsage.new("Cannot create a node group into spanning target if attached to spsecific nodes")
         end
       end
-      display_name = "spans-target-#{target_id.to_s}"
+      display_name = "spans-target-#{target_id}"
       create_row = {
-        :ref => display_name,
-        :display_name => display_name,
-        :datacenter_datacenter_id => target_id,
-        :node_group_id => node_group_id
+        ref: display_name,
+        display_name: display_name,
+        datacenter_datacenter_id: target_id,
+        node_group_id: node_group_id
       }
       create_from_row(ngr_mh,create_row)
     end

@@ -1,7 +1,7 @@
 module Ramaze::Helper
   module Rest
-    def rest_response()
-      unless @ctrl_results.kind_of?(BundleAndReturnHelper::ControllerResultsRest)
+    def rest_response
+      unless @ctrl_results.is_a?(BundleAndReturnHelper::ControllerResultsRest)
         raise Error.new("controller results are in wrong form; it should have 'rest' form")
       end
 
@@ -9,7 +9,7 @@ module Ramaze::Helper
     end
 
     def rest_ok_response(data=nil,opts={})
-      data ||= Hash.new
+      data ||= {}
       if encode_format = opts[:encode_into]
         # This might be a misnomer in taht payload is still a hash which then in RestResponse.new becomes json
         # for case of yaml, the data wil be a string formed by yaml encoding
@@ -20,8 +20,8 @@ module Ramaze::Helper
           end
       end
 
-      payload = { :status => :ok, :data => data}
-      payload.merge!(:datatype => opts[:datatype]) if opts[:datatype]
+      payload = { status: :ok, data: data}
+      payload.merge!(datatype: opts[:datatype]) if opts[:datatype]
 
       # set custom messages in response
       [:info, :warn, :error].each do |msg_type|
@@ -46,24 +46,22 @@ module Ramaze::Helper
     #]
 
     def rest_validate_response(message, actions_needed)
-      RestResponse.new({
-        :status => :notok,
-        :validation =>
-          {
-            :message => message,
-            :actions_needed => actions_needed
-          }
-        })
+      RestResponse.new(        status: :notok,
+        validation:           {
+            message: message,
+            actions_needed: actions_needed
+          })
     end
 
-    def rest_notok_response(errors=[{:code => :error}])
-      if errors.kind_of?(Hash)
+    def rest_notok_response(errors=[{code: :error}])
+      if errors.is_a?(Hash)
         errors = [errors]
       end
-      RestResponse.new(:status => :notok, :errors => errors)
+      RestResponse.new(status: :notok, errors: errors)
     end
 
-   private
+    private
+
     def encode_into_yaml(data,opts={})
       data_to_encode = data
       if opts[:remove_null_keys]
@@ -73,11 +71,11 @@ module Ramaze::Helper
     end
 
     def remove_null_keys(data)
-      if data.kind_of?(Hash)
-        ret = Hash.new
+      if data.is_a?(Hash)
+        ret = {}
         data.each_pair{|k,v|ret[k]=remove_null_keys(v) unless v.nil?}
         ret
-      elsif data.kind_of?(Array)
+      elsif data.is_a?(Array)
         data.map{|el|remove_null_keys(el)}
       else
         data
@@ -88,10 +86,12 @@ module Ramaze::Helper
       def initialize(hash)
         replace(hash)
       end
+
       def is_ok?
         self[:status] == :ok
       end
-      def data()
+
+      def data
         self[:data]
       end
     end

@@ -18,7 +18,6 @@ assembly_name = 'bootstrap::test1'
 dtk_common = DtkCommon.new(service_name_1, assembly_name)
 
 describe "(Staging And Deploying Assemblies) Test Case 4 6: Renaming service and renaming it to workspace" do
-
 	before(:all) do
 		puts "***********************************************************************************************",""
 	end

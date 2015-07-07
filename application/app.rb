@@ -50,7 +50,6 @@ r8_require("#{SYSTEM_DIR}/utility")
 r8_require("#{SYSTEM_DIR}/common_mixin")
 r8_require("#{UTILS_BASE_DIR}/utils")
 
-
 r8_require("#{LIB_DIR}/model")
 r8_require("#{LIB_DIR}/response_info")
 

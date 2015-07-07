@@ -10,17 +10,19 @@ module DTK; class Task
       attr_reader :before_action,:after_action
 
       # subclasses override
-      def intra_node?()
+      def intra_node?
         @before_action.node_id == @after_action.node_id
       end
-      def inter_node?()
+
+      def inter_node?
         @before_action.node_id != @after_action.node_id
       end
 
-      def before_action_index()
+      def before_action_index
         @before_action.index
       end
-      def after_action_index()
+
+      def after_action_index
         @after_action.index
       end
     end

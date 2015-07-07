@@ -17,7 +17,9 @@ module DTK
         raise Error.new("cannot find #{adapter_type} adapter (#{adapter_name})")
       end
     end
-   private
+
+    private
+
     Lock = Mutex.new
     def self.convert?(n,type,opts)
       (opts[:class_name]||{})[type] || cap_form(n)

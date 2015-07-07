@@ -8,31 +8,30 @@ component_module = "r8:java"
 permission_set_1 = "ugo+rwd"
 permission_set_2 = "ugo-wd"
 user_data = {
-	:usergroup => "bakir_test_group",
-	:user => "dtk17-client",
-	:module_name => "r8/java",
-	:another_user => "bakir_test"
+	usergroup: "bakir_test_group",
+	user: "dtk17-client",
+	module_name: "r8/java",
+	another_user: "bakir_test"
 }
 
 permissions = {
-	:user_r => false,
-	:user_w => false,
-	:user_d => false,
-	:user_p => false,
-	:user_group_r => true,
-	:user_group_w => true,
-	:user_group_d => true,
-	:user_group_p => true,
-	:other_r => false,
-	:other_w => false,
-	:other_d => false,
-	:other_p => false,
+	user_r: false,
+	user_w: false,
+	user_d: false,
+	user_p: false,
+	user_group_r: true,
+	user_group_w: true,
+	user_group_d: true,
+	user_group_p: true,
+	other_r: false,
+	other_w: false,
+	other_d: false,
+	other_p: false,
 }
 
 dtk_common = DtkCommon.new('', '')
 
 describe "(Repoman client integration) Test Case 12: chmod ugo+rwd and ugo-wd on module A (User A is not owner but belongs to User group A which is set on module, intial permissions are: None/RWDP/None, RWD/RWDP/RWD)" do
-
 	let(:conf) { Configuration.instance }
 	let(:header) { @homepage.get_header }
 	let(:users) { @homepage.get_main.get_users }

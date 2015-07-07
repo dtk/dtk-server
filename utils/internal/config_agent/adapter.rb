@@ -16,7 +16,7 @@ module DTK
         Agents[type] = klass.new()
       end
       Lock = Mutex.new
-      Agents = Hash.new
+      Agents = {}
     end
   end
 end

@@ -17,7 +17,7 @@ module XYZ
     end
     
     def process_user_info_aux!(scalar_assigns,model_or_id_handle,columns=nil)
-      to_add = Hash.new
+      to_add = {}
       # cleanup if everything should come from model or id handle
       user_obj = CurrentSession.new.get_user_object()
       if user_obj
@@ -26,37 +26,35 @@ module XYZ
       else
         update_if_needed!(to_add,columns,scalar_assigns,CONTEXT_ID,model_or_id_handle[:c])
       end
-      raise Error.new("model_or_id_handle[:group_id] not set for #{model_or_id_handle[:model_name]}") unless model_or_id_handle[:group_id] or [:user,:user_group,:user_group_relation].include?( model_or_id_handle[:model_name])#TODO: temp until make sure that this is alwats set
+      raise Error.new("model_or_id_handle[:group_id] not set for #{model_or_id_handle[:model_name]}") unless model_or_id_handle[:group_id] || [:user,:user_group,:user_group_relation].include?( model_or_id_handle[:model_name])#TODO: temp until make sure that this is alwats set
       update_if_needed!(to_add,columns,scalar_assigns,:group_id,model_or_id_handle[:group_id])
 
       scalar_assigns.merge(to_add)
     end
 
     def update_if_needed!(to_add,columns,scalar_assigns,col,val)
-      if val and not scalar_assigns.has_key?(col)
+      if val and not scalar_assigns.key?(col)
         to_add.merge!(col => val)
         columns << col if columns and not columns.include?(col)
       end   
     end
     
-    def auth_context()
+    def auth_context
       @auth_context ||= {
-        :c => [:c,CONTEXT_ID],
-        :user_id => [:id,:owner_id]
+        c: [:c,CONTEXT_ID],
+        user_id: [:id,:owner_id]
         # special process of :group_id
       }
     end
 
     def augment_for_authorization(where_clause,model_handle)
-      conjoin_set = where_clause ? [where_clause] : Array.new 
+      conjoin_set = where_clause ? [where_clause] : [] 
       session = CurrentSession.new
       auth_filters = NoAuth.include?(model_handle[:model_name]) ? nil : session.get_auth_filters()
       if auth_filters 
-=begin
-create_dataset_found = caller.select{|x|x =~ /create_dataset'/}
-caller_info = (create_dataset_found ? "CREATE_DATASET_FOUND" : caller[0..15])
-pp [:auth,model_handle[:model_name],auth_filters,caller_info]
-=end
+# create_dataset_found = caller.select{|x|x =~ /create_dataset'/}
+# caller_info = (create_dataset_found ? "CREATE_DATASET_FOUND" : caller[0..15])
+# pp [:auth,model_handle[:model_name],auth_filters,caller_info]
 #=begin
 controller_line = caller.find{|x|x =~ /application\/controller/}
 controller = controller_line
@@ -68,7 +66,7 @@ end
 unless ["target#get_nodes_status"].include?(controller) #ignore list
   pp [:auth,model_handle[:model_name],controller]
 end
-#=end
+        #=end
         conjoin_set += process_session_auth(session,auth_filters)
       else
         conjoin_set << {CONTEXT_ID => model_handle[:c]} if model_handle[:c]
@@ -82,7 +80,7 @@ end
     NoAuth = [:user,:user_group,:user_group_relation,:task_event]    
 
     def process_session_auth(session,auth_filters)
-      ret =  Array.new
+      ret =  []
       user_obj = session.get_user_object()
       return ret unless user_obj
       auth_filters.each do |auth_filter|
@@ -90,7 +88,7 @@ end
           ret << {auth[1] => user_obj[auth[0]]} if user_obj[auth[0]]
         elsif auth_filter == :group_ids
           if group_ids = user_obj[:group_ids]
-            ret << {:group_id => group_ids}
+            ret << {group_id: group_ids}
           end
         end
       end

@@ -19,13 +19,14 @@ module DTK
         def pp_display_name(component_type)
           component_type.gsub(Regexp.new(Template::ModuleTemplateSep),PPModuleTemplateSep)
         end
+
         def pp_name_to_component_type(pp_name)
           pp_name.gsub(Regexp.new(PPModuleTemplateSep),Template::ModuleTemplateSep)
         end
 
         def pretty_print_name(assembly_template,opts={})
           assembly_name,module_name = pretty_print_module_and_assembly(assembly_template,opts)
-          if opts[:no_module_prefix] or module_name.nil?
+          if opts[:no_module_prefix] || module_name.nil?
             assembly_name
           elsif opts[:service_module_context_path]
             "#{module_name}/assembly/#{assembly_name}"
@@ -59,9 +60,9 @@ module DTK
         def add_namespace_name(module_name,assembly_template)
           namespace_name = nil
           if namespace = assembly_template[:namespace]
-            if namespace.kind_of?(String)
+            if namespace.is_a?(String)
               namespace_name = namespace
-            elsif namespace.kind_of?(Hash) 
+            elsif namespace.is_a?(Hash) 
               namespace_name = namespace[:display_name]
             else
               raise Error.new("assembly_template[:namespace] is unexpected type")

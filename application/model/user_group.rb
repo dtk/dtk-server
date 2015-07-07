@@ -1,6 +1,6 @@
 module XYZ
   class UserGroup < Model
-    def self.all_groupname()
+    def self.all_groupname
       "all"
     end
 
@@ -18,8 +18,8 @@ module XYZ
 
     def self.get_by_groupname(model_handle,groupname)
       sp_hash = {
-        :cols => [:id, :groupname],
-        :filter => [:eq, :groupname,groupname]
+        cols: [:id, :groupname],
+        filter: [:eq, :groupname,groupname]
       }
       get_obj(model_handle,sp_hash)
     end

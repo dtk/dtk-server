@@ -10,7 +10,7 @@ module XYZ
           next if skip(relative_path,opts)
           full_path = "#{target_dir}/#{relative_path}"
           if entry.directory?()
-            # TODO:if can be sure that subdirectories allwos appear first and with pruning than dont need _p version
+            # TODO: if can be sure that subdirectories allwos appear first and with pruning than dont need _p version
             FileUtils.mkdir_p(full_path)
           elsif entry.file?()
             begin
@@ -22,7 +22,9 @@ module XYZ
         end
       end
     end
-   private
+
+    private
+
     def self.copy_file(entry,out_file_path)
       # TODO: for larger files need more increemntal way of doing this
       File.open(out_file_path,"w") do |out_file|

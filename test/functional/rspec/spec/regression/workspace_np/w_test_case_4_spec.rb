@@ -21,7 +21,6 @@ port_to_check = 22
 dtk_common = DtkCommon.new('', '')
 
 describe "(Workspace) Test Case 4: Create two nodes, add component in both of them, converge workspace and check netstats and task info output" do
-
 	before(:all) do
 		puts "************************************************************************************************************************************",""
   end

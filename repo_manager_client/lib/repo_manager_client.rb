@@ -2,15 +2,14 @@ require 'sshkey'
 
 module DTK
   class RepoManagerClient
-
     attr_reader :rest_base_url
 
-    def initialize()
+    def initialize
       remote = ::R8::Config[:repo][:remote]
       is_ssl = remote[:secure_connection]
       @host  = remote[:host]
 
-      @rest_base_url = "http#{is_ssl ? 's' : ''}://#{@host}:#{remote[:rest_port].to_s}"
+      @rest_base_url = "http#{is_ssl ? 's' : ''}://#{@host}:#{remote[:rest_port]}"
     end
 
     def self.repo_url_ssh_access(remote_repo_name,git_user=nil)
@@ -31,22 +30,22 @@ module DTK
     #
 
     def list_component_modules(username, client_rsa_pub_key)
-      response = get_rest_request_data('/v1/component_modules/list_remote', user_params_with_fingerprint(username, client_rsa_pub_key), :raise_error => true)
+      response = get_rest_request_data('/v1/component_modules/list_remote', user_params_with_fingerprint(username, client_rsa_pub_key), raise_error: true)
       response
     end
 
     def list_service_modules(username, client_rsa_pub_key)
-      response = get_rest_request_data('/v1/service_modules/list_remote', user_params_with_fingerprint(username, client_rsa_pub_key), :raise_error => true)
+      response = get_rest_request_data('/v1/service_modules/list_remote', user_params_with_fingerprint(username, client_rsa_pub_key), raise_error: true)
       response
     end
 
     def list_test_modules(username, client_rsa_pub_key)
-      response = get_rest_request_data('/v1/test_modules/list_remote', user_params_with_fingerprint(username, client_rsa_pub_key), :raise_error => true)
+      response = get_rest_request_data('/v1/test_modules/list_remote', user_params_with_fingerprint(username, client_rsa_pub_key), raise_error: true)
       response
     end
 
     def list_node_modules(username, client_rsa_pub_key)
-      response = get_rest_request_data('/v1/node_modules/list_remote', user_params_with_fingerprint(username, client_rsa_pub_key), :raise_error => true)
+      response = get_rest_request_data('/v1/node_modules/list_remote', user_params_with_fingerprint(username, client_rsa_pub_key), raise_error: true)
       response
     end
 
@@ -71,111 +70,111 @@ module DTK
 
     def notify_tenant_ready(tenant_owner_email, tenant_owner_username)
       request_params = user_params(CurrentSession.catalog_username)
-      request_params.merge!(:tenant_owner_email => tenant_owner_email, :tenant_owner_username => tenant_owner_username)
+      request_params.merge!(tenant_owner_email: tenant_owner_email, tenant_owner_username: tenant_owner_username)
       post_rest_request_data('/v1/users/tenant_ready', request_params)
     end
 
     def chmod(type, module_name, module_namespace, permission_selector, chmod_action, client_rsa_pub_key)
       repo_user = get_approved_repouser(client_rsa_pub_key)
       request_params = {
-        :name => module_name,
-        :namespace   => module_namespace,
-        :permission_selector => permission_selector
+        name: module_name,
+        namespace: module_namespace,
+        permission_selector: permission_selector
       }
 
       # url = type == :component_module ? '/v1/component_modules/chmod' : '/v1/service_modules/chmod'
       url_action = 'make_public'.eql?(chmod_action) ? '/make_public' : '/chmod'
-      url        = collection_route_from_type({:type => type}) + url_action
+      url        = collection_route_from_type({type: type}) + url_action
 
       post_rest_request_data(
         url,
         request_params.merge(user_params_with_fingerprint(CurrentSession.catalog_username, client_rsa_pub_key)),
-        :raise_error => true
-        )
+        raise_error: true
+      )
     end
 
     def confirm_make_public(type, module_info, public_action, client_rsa_pub_key)
       repo_user = get_approved_repouser(client_rsa_pub_key)
 
       request_params = {
-        :module_info   => module_info,
-        :public_action => public_action
+        module_info: module_info,
+        public_action: public_action
       }
 
-      url = collection_route_from_type({:type => type}) + '/confirm_make_public'
+      url = collection_route_from_type({type: type}) + '/confirm_make_public'
       post_rest_request_data(
         url,
         request_params.merge(user_params_with_fingerprint(CurrentSession.catalog_username, client_rsa_pub_key)),
-        :raise_error => true
-        )
+        raise_error: true
+      )
     end
 
     def chown(type, module_name, module_namespace, remote_user, client_rsa_pub_key)
       repo_user = get_approved_repouser(client_rsa_pub_key)
       request_params = {
-        :name => module_name,
-        :namespace   => module_namespace,
-        :remote_user => remote_user
+        name: module_name,
+        namespace: module_namespace,
+        remote_user: remote_user
       }
 
       # url = type == :component_module ? '/v1/component_modules/chown' : '/v1/service_modules/chown'
-      url = collection_route_from_type({:type => type}) + '/chown'
+      url = collection_route_from_type({type: type}) + '/chown'
 
       post_rest_request_data(
         url,
         request_params.merge(user_params_with_fingerprint(CurrentSession.catalog_username, client_rsa_pub_key)),
-        :raise_error => true
-        )
+        raise_error: true
+      )
     end
 
     def collaboration(type, action, module_name, module_namespace, users, groups, client_rsa_pub_key)
       repo_user = get_approved_repouser(client_rsa_pub_key)
       request_params = {
-        :name => module_name,
-        :namespace   => module_namespace,
-        :collaboration_action => action,
-        :collaboration_users => users,
-        :collaboration_groups => groups
+        name: module_name,
+        namespace: module_namespace,
+        collaboration_action: action,
+        collaboration_users: users,
+        collaboration_groups: groups
       }
 
       # url = type == :component_module ? '/v1/component_modules/collaboration' : '/v1/service_modules/collaboration'
-      url = collection_route_from_type({:type => type}) + '/collaboration'
+      url = collection_route_from_type({type: type}) + '/collaboration'
 
       post_rest_request_data(
         url,
         request_params.merge(user_params_with_fingerprint(CurrentSession.catalog_username, client_rsa_pub_key)),
-        :raise_error => true
-        )
+        raise_error: true
+      )
     end
 
     def list_collaboration(type, module_name, module_namespace, client_rsa_pub_key)
       repo_user = get_approved_repouser(client_rsa_pub_key)
       request_params = {
-        :name => module_name,
-        :namespace   => module_namespace
+        name: module_name,
+        namespace: module_namespace
       }
 
       # url = type == :component_module ? '/v1/component_modules/list_collaboration' : '/v1/service_modules/list_collaboration'
-      url = collection_route_from_type({:type => type}) + '/list_collaboration'
+      url = collection_route_from_type({type: type}) + '/list_collaboration'
 
       response = post_rest_request_data(
         url,
         request_params.merge(user_params_with_fingerprint(CurrentSession.catalog_username, client_rsa_pub_key)),
-        :raise_error => true
-        )
+        raise_error: true
+      )
       response['collaborators']
     end
 
     def publish_module(params_hash, client_rsa_pub_key = nil)
       route = collection_route_from_type(params_hash)
       body = user_params_delegated_client(client_rsa_pub_key, params_hash)
-      post_rest_request_data(route, body, :raise_error => true, :timeout => 30)
+      post_rest_request_data(route, body, raise_error: true, timeout: 30)
     end
 
     def delete_module(params_hash, client_rsa_pub_key = nil)
       route = collection_route_from_type(params_hash) + '/delete_by_name'
       body = user_params_delegated_client(client_rsa_pub_key, params_hash)
-      delete_rest_request_data(route, body, :raise_error => true)
+      delete_rest_request_data(route, body, raise_error: true)
     end
 
     def grant_user_access_to_module(params_hash, client_rsa_pub_key = nil)
@@ -187,21 +186,21 @@ module DTK
         body = update_user_params(params_hash)
       end
 
-      post_rest_request_data(route,body,:raise_error => true)
+      post_rest_request_data(route,body,raise_error: true)
     end
 
     def get_module_info(params_hash)
       route = collection_route_from_type(params_hash) + '/module_info'
 
-      response = get_rest_request_data(route,params_hash,:raise_error => true)
+      response = get_rest_request_data(route,params_hash,raise_error: true)
       # we flatten response (due to rest code expectin flat structure)
       response.symbolize_keys!
-      Hash.new.merge(response[:repo_module]).merge(:dependency_warnings => response[:dependency_warnings])
+      {}.merge(response[:repo_module]).merge(dependency_warnings: response[:dependency_warnings])
     end
 
     def get_components_info(params_hash, client_rsa_pub_key = nil)
-      route = collection_route_from_type({:type => params_hash[:type]}) + '/component_info'
-      get_rest_request_data(route, user_params_delegated_client(client_rsa_pub_key, params_hash),:raise_error => true)
+      route = collection_route_from_type({type: params_hash[:type]}) + '/component_info'
+      get_rest_request_data(route, user_params_delegated_client(client_rsa_pub_key, params_hash),raise_error: true)
     end
 
     def remove_client_access(username)
@@ -209,7 +208,7 @@ module DTK
 
       if client_repo_user && client_repo_user.has_repoman_direct_access?
         response = delete_user(CurrentSession.catalog_username, client_repo_user.rsa_pub_key)
-        client_repo_user.update(:repo_manager_direct_access => false) if response
+        client_repo_user.update(repo_manager_direct_access: false) if response
       end
 
       nil
@@ -219,7 +218,7 @@ module DTK
       response = post_rest_request_data(
         '/v1/users/add_access',
          user_params(CurrentSession.catalog_username, client_rsa_pub_key, client_rsa_key_name),
-        :raise_error => true
+        raise_error: true
       )
 
       response
@@ -230,14 +229,14 @@ module DTK
       route = "/v1/users/tenant"
       body = user_params(username, rsa_pub_key, rsa_key_name)
 
-      tenant_response = post_rest_request_data(route,body,:raise_error => true)
+      tenant_response = post_rest_request_data(route,body,raise_error: true)
 
       return tenant_response
     end
 
     def validate_catalog_credentials(username, password)
-      response = handle_error(:raise_error => true) do
-        RestClientWrapper.post("#{@rest_base_url}/v1/auth/login", {:username => username, :password => password, :pre_hashed => true } )
+      response = handle_error(raise_error: true) do
+        RestClientWrapper.post("#{@rest_base_url}/v1/auth/login", username: username, password: password, pre_hashed: true )
       end
     end
 
@@ -245,15 +244,12 @@ module DTK
     ##  Legacy methods
     #
 
-
     # This is more revokew access
     def delete_user(username, rsa_pub_key)
       route = "/v1/users/remove_access"
       body = user_params(username, rsa_pub_key)
-      delete_rest_request_data(route,body, :raise_error => true)
+      delete_rest_request_data(route,body, raise_error: true)
     end
-
-
 
     ###
     ##  Legacy methods (Admin)
@@ -261,8 +257,8 @@ module DTK
 
     def set_user_rights_in_repo(username,repo_name,access_rights="R")
       route = "/rest/admin/set_user_rights_in_repo"
-      body = user_params(username).merge(:repo_name => repo_name,:access_rights => access_rights)
-      post_rest_request_data(route,body,:raise_error => true)
+      body = user_params(username).merge(repo_name: repo_name,access_rights: access_rights)
+      post_rest_request_data(route,body,raise_error: true)
     end
 
     # Method will check if repouser exists, if so it will check if it has direct_access_for_repoman
@@ -277,8 +273,7 @@ module DTK
       repo_user
     end
 
-   private
-
+    private
 
     #
     # returns collection route for specific type
@@ -380,7 +375,7 @@ module DTK
 
     def error_msg(response)
       errors = response["errors"]
-      if response.kind_of?(Common::Response::Error) and errors
+      if response.is_a?(Common::Response::Error) && errors
         if errors.first && (errors.first['code'].eql?('unavailable') || errors.first['code'].eql?('RestClient::ServiceUnavailable'))
           'The DTK Repo service is currently down for maintenance'
         else
@@ -388,7 +383,7 @@ module DTK
         end
       else
         error_detail = nil
-        if errors.kind_of?(Array) and errors.size > 0
+        if errors.is_a?(Array) && errors.size > 0
           err_msgs = errors.map{|err|err["message"]}.compact
           unless err_msgs.empty?
             error_detail = err_msgs.join(', ')
@@ -405,7 +400,7 @@ module DTK
 
     def include_error_code?(errors,code)
       !!errors.find do |el|
-        el.kind_of?(Hash) and el["code"] == code
+        el.is_a?(Hash) && el["code"] == code
       end
     end
 
@@ -429,21 +424,20 @@ module DTK
       end
     end
 
-    def login_to_repoman()
+    def login_to_repoman
       unless CurrentSession.are_catalog_credentilas_set?
         err = ErrorUsage.new("Catalog credentials are not set, you can set them via account context")
         raise err.add_tag!(:raise_error)
       end
 
-      response = handle_error(:raise_error => true) do
+      response = handle_error(raise_error: true) do
         RestClientWrapper.post("#{@rest_base_url}/v1/auth/login", CurrentSession.catalog_credentials )
       end
       response['token']
     end
 
     def ret_opts(opts)
-
-      to_merge = DefaultTimeoutOpts.keys.inject(Hash.new) do |h,k|
+      to_merge = DefaultTimeoutOpts.keys.inject({}) do |h,k|
         opts[k] ? h.merge(k => opts[k]) : h
       end
 
@@ -462,24 +456,24 @@ module DTK
         session_obj.set_repoman_session_id(token_id)
       end
       # adding auth information
-      opts.merge(:headers => {"Authorization"=>"Token token=\"#{session_obj.repoman_session_id}\""})
+      opts.merge(headers: {"Authorization"=>"Token token=\"#{session_obj.repoman_session_id}\""})
     end
 
     if R8::Config.is_development_mode?
-      DefaultTimeoutOpts = {:timeout => 5000, :open_timeout => 0.5}
+      DefaultTimeoutOpts = {timeout: 5000, open_timeout: 0.5}
     else
-      DefaultTimeoutOpts = {:timeout => 120, :open_timeout => 0.5}
+      DefaultTimeoutOpts = {timeout: 120, open_timeout: 0.5}
     end
 
-    def dtk_instance_repo_username()
+    def dtk_instance_repo_username
       ::DtkCommon::Aux::dtk_instance_repo_username()
     end
 
     def user_params(username, rsa_pub_key=nil, rsa_key_name=nil)
-      ret = {:username => username,:dtk_instance_name => dtk_instance_repo_username()}
+      ret = {username: username,dtk_instance_name: dtk_instance_repo_username()}
 
-      rsa_pub_key  ? ret.merge!(:rsa_pub_key  => rsa_pub_key) : ret
-      rsa_key_name ? ret.merge!(:rsa_key_name => rsa_key_name) : ret
+      rsa_pub_key  ? ret.merge!(rsa_pub_key: rsa_pub_key) : ret
+      rsa_key_name ? ret.merge!(rsa_key_name: rsa_key_name) : ret
 
       ret
     end
@@ -493,7 +487,7 @@ module DTK
     def update_user_params(params_hash)
       if params_hash[:username]
         {
-          :default_namespace => Namespace.default_namespace_name
+          default_namespace: Namespace.default_namespace_name
         }.merge(params_hash)
       else
         params_hash
@@ -513,7 +507,7 @@ module DTK
 
     # repo access
     class BranchInstance < self
-      def initialize(rest_base_url,repo,branch,opts={})
+      def initialize(rest_base_url,repo,branch,_opts={})
         super(rest_base_url)
         @repo = repo
         @branch = branch
@@ -521,17 +515,16 @@ module DTK
 
       def get_file_content(file_asset)
         route = "/rest/repo/get_file_content"
-        body = {:repo_name => @repo,:path => file_asset[:path], :branch => @branch}
-        response_data = post_rest_request_data(route,body,:log_error => true)
+        body = {repo_name: @repo,path: file_asset[:path], branch: @branch}
+        response_data = post_rest_request_data(route,body,log_error: true)
         response_data["content"]
       end
 
       def update_file_content(file_asset,content)
         route = "/rest/repo/update_file_content"
-        body = {:repo_name => @repo,:path => file_asset[:path], :branch => @branch, :content => content}
-        post_rest_request_data(route,body,:raise_error => true)
+        body = {repo_name: @repo,path: file_asset[:path], branch: @branch, content: content}
+        post_rest_request_data(route,body,raise_error: true)
       end
-
     end
   end
 end

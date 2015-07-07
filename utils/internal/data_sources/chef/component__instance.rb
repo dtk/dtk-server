@@ -17,9 +17,11 @@ module XYZ
           def unique_keys(source)
             [:instance,source["normalized_recipe_name"]]
           end
+
           def relative_distinguished_name(source)
             source["normalized_recipe_name"]
           end
+
           def display_name(source)
             source["normalized_recipe_name"]
           end
@@ -27,11 +29,13 @@ module XYZ
           def component_type(source)
             source["normalized_recipe_name"]
           end
+
           def external_ref(recipe_name,node_name)
             {"type" => "chef_recipe_instance", "recipe_name" => recipe_name, "node_name" => node_name} 
           end
+
           def basic_type(basic_type)
-            return basic_type unless basic_type.kind_of?(Hash)
+            return basic_type unless basic_type.is_a?(Hash)
             basic_type.keys.first
           end
         end

@@ -14,6 +14,7 @@ module DTK
         end
       end
     end
+
     def merge?(hash)
       hash.each_pair{|k,v|merge!(k=>v) unless v.nil?}
     end
@@ -49,7 +50,7 @@ module DTK
 
     def set_return_value!(key,val)
       if rvs = self[:return_values]
-        if rvs.has_key?(key)
+        if rvs.key?(key)
           rvs[key] = val
         end
       end
@@ -59,18 +60,21 @@ module DTK
     def set_datatype!(val)
       set_return_value!(DatatypeKey,val)
     end
-    def get_datatype()
+
+    def get_datatype
       return_value(DatatypeKey)
     end
-    def add_return_datatype!()
+
+    def add_return_datatype!
       add_value_to_return!(DatatypeKey)
       self
     end
     DatatypeKey = :datatype
 
-   private
+    private
+
     def self.convert_for_create?(raw)
-      raw.inject(Hash.new) do |h,(k,v)|
+      raw.inject({}) do |h,(k,v)|
         if non_null_var = is_only_non_null_var?(k)
           v.nil? ? h : h.merge(non_null_var => v)
         else
@@ -88,7 +92,7 @@ module DTK
       unless val.class == Hash #using this test rather than val.kind_od?(Hash) because only want to match on Hash and not its children classes
         val
       else
-        val.inject(Hash.new) do |h,(k,child_v)|
+        val.inject({}) do |h,(k,child_v)|
           if processed_val = remove_nested_nil(child_v)
             h.merge(k => processed_val)
           else

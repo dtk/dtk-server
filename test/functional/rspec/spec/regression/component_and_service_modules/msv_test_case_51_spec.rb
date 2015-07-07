@@ -21,7 +21,6 @@ grep_patterns_for_module_refs = ['deploy:','namespace: mkrakowitzer']
 dtk_common = DtkCommon.new('', '')
 
 describe "(Modules, Services and Versioning) Test Case 51: Import puppet forge (confluence) but its dependency (mkrakowitzer:deploy) is already installed on server" do
-
   before(:all) do
     puts "*********************************************************************************************************************************************************",""
   end

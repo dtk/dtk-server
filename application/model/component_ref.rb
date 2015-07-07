@@ -1,6 +1,6 @@
 module DTK
   class ComponentRef < Model
-    def self.common_cols()
+    def self.common_cols
       [:id,:group_id,:display_name,:component_template_id,:has_override_version,:version,:component_type,:template_id_synched]
     end
 
@@ -18,7 +18,7 @@ module DTK
       title ? ComponentTitle.display_name_with_title(cmp_type,title) : cmp_type
     end
 
-    def display_name_print_form(opts={})
+    def display_name_print_form(_opts={})
       cols_to_get = [:component_type,:display_name,:ref_name]
       update_object!(*cols_to_get)
       component_type = self[:component_type] && self[:component_type].gsub(/__/,"::")
@@ -30,20 +30,19 @@ module DTK
       ret
     end
 
-
     def self.get_referenced_component_modules(project,component_refs)
-      ret = Array.new
+      ret = []
       return ret if component_refs.empty?
       sp_hash = {
-        :cols => [:id,:display_name,:group_id,:namespace_info],
-        :filter => [:oneof, :id, component_refs.map{|r|r[:component_template_id]}.uniq]
+        cols: [:id,:display_name,:group_id,:namespace_info],
+        filter: [:oneof, :id, component_refs.map{|r|r[:component_template_id]}.uniq]
       }
       aug_cmp_templates = get_objs(project.model_handle(:component),sp_hash)
-      ndx_ret = Hash.new
+      ndx_ret = {}
       aug_cmp_templates.each do |r|
         component_module = r[:component_module]
         ndx = component_module[:id]
-        ndx_ret[ndx] ||= component_module.merge(:namespace_name => r[:namespace][:display_name])
+        ndx_ret[ndx] ||= component_module.merge(namespace_name: r[:namespace][:display_name])
       end
       ndx_ret.values
     end
@@ -52,9 +51,8 @@ module DTK
       if cmp_ref__obj_or_hash[:component_type]
         Component.component_type_print_form(cmp_ref__obj_or_hash[:component_type])
       elsif cmp_ref__obj_or_hash[:id]
-        "id:#{cmp_ref__obj_or_hash[:id].to_s})"
+        "id:#{cmp_ref__obj_or_hash[:id]})"
       end
     end
-
   end
 end

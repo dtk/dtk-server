@@ -8,7 +8,8 @@ module DTK; class ServiceModule
         @cmp_ref_info_list = cmp_ref_info_list 
       end
 
-     private
+      private
+
       def err_msg(cmp_ref_info_list)
         what = (cmp_ref_info_list.size==1 ? "component" : "components")
         refs = cmp_ref_info_list.map{|cmp_ref_info|print_form(cmp_ref_info)}.compact.join(",")

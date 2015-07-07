@@ -11,14 +11,16 @@ module XYZ
       return ret if SavedAlready[type][view_def_key]
       view_meta_hash = convert_to_view_def_form(type,cmp_attrs_objs)
 
-      view = R8Tpl::ViewR8.new(:component,view_name,user,true,view_meta_hash,{:view_type => type})
+      view = R8Tpl::ViewR8.new(:component,view_name,user,true,view_meta_hash,view_type: type)
       view.update_cache_for_virtual_object()
       SavedAlready[type][view_def_key] = TRUE
       ret
     end
-   private 
-    SavedAlready = {:edit => Hash.new, :display => Hash.new}
-    def self.get_model_info(id_handle,opts={})
+
+    private
+ 
+    SavedAlready = {edit: {}, display: {}}
+    def self.get_model_info(id_handle,_opts={})
       id_handle.create_object().get_info_for_view_def()
     end
 
@@ -45,63 +47,60 @@ module XYZ
       ret
     end
 
-    def self.hidden_fields(type,cmp_attrs_objs)
+    def self.hidden_fields(type,_cmp_attrs_objs)
       HiddenFields[type].map do |hf|
         {hf.keys.first => Aux::ordered_hash_subset(hf.values.first,[:required,:type,:value])}
       end
     end
 
     HiddenFields = {
-      :list =>
-      [
-       {:id => {
-            :required => true,
-            :type => 'hidden',
+      list:       [
+       {id: {
+            required: true,
+            type: 'hidden',
          }}
       ],
-      :edit => 
-      [
+      edit:       [
        {
-         :id => {
-           :required => true,
-           :type => 'hidden',
+         id: {
+           required: true,
+           type: 'hidden',
          }
        },
        {
-         :model => {
-           :required => true,
-           :type => 'hidden',
-           :value => 'component',
+         model: {
+           required: true,
+           type: 'hidden',
+           value: 'component',
          }
        },
        {
-         :action => {
-           :required => true,
-           :type => 'hidden',
-           :value => 'save_attribute'
+         action: {
+           required: true,
+           type: 'hidden',
+           value: 'save_attribute'
          },
         }
      ],
-      :display => 
-      [
+      display:       [
        {
-         :id => {
-           :required => true,
-           :type => 'hidden',
+         id: {
+           required: true,
+           type: 'hidden',
          }
        },
        {
-         :obj => {
-           :required => true,
-           :type => 'hidden',
-           :value => 'component',
+         obj: {
+           required: true,
+           type: 'hidden',
+           value: 'component',
          }
        },
        {
-         :action => {
-           :required => true,
-           :type => 'hidden',
-           :value => 'edit',
+         action: {
+           required: true,
+           type: 'hidden',
+           value: 'edit',
          },
         }
      ]
@@ -114,27 +113,27 @@ module XYZ
       end
     end
     def self.field_list_display(attr_objs)
-      # TODO stub
+      # TODO: stub
       attr_objs.map do |attr|
         {attr[:display_name].to_sym =>{
-            :type => convert_type(attr[:data_type]),
-            :help => '',
-            :rows => 1,
-            :cols => 40
+            type: convert_type(attr[:data_type]),
+            help: '',
+            rows: 1,
+            cols: 40
           }
         }
       end
     end
     def self.field_list_edit(attr_objs)
-      # TODO stub
+      # TODO: stub
       attr_objs.map do |attr|
         {attr[:display_name].to_sym =>{
-            :type => convert_type(attr[:data_type]),
-            :help => '',
-            :rows => 1,
-            :cols => 40,
-            :id => "{%=component_id[:#{attr[:display_name]}]%}",
-            :override_name => "{%=component_id[:#{attr[:display_name]}]%}"
+            type: convert_type(attr[:data_type]),
+            help: '',
+            rows: 1,
+            cols: 40,
+            id: "{%=component_id[:#{attr[:display_name]}]%}",
+            override_name: "{%=component_id[:#{attr[:display_name]}]%}"
           }
         }
       end
@@ -143,9 +142,9 @@ module XYZ
     def self.field_groups(type,attr_objs)
       [
        {
-         :num_cols => 1,
-         :display_labels => true,
-         :fields => field_list(type,attr_objs)
+         num_cols: 1,
+         display_labels: true,
+         fields: field_list(type,attr_objs)
        }
       ]
     end

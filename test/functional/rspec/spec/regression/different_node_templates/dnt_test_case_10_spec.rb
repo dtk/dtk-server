@@ -28,9 +28,9 @@ def get_node_ec2_public_dns(service_name, node_name)
 	node_ec2_public_dns = ""
 	dtk_common = DtkCommon.new('','')
 
-	info_response = dtk_common.send_request('/rest/assembly/info_about', {:assembly_id => service_name, :subtype => :instance, :about => "nodes"})
+	info_response = dtk_common.send_request('/rest/assembly/info_about', assembly_id: service_name, subtype: :instance, about: "nodes")
 	ap info_response
-	node_info = info_response['data'].select { |x| x['display_name'] == node_name}.first
+	node_info = info_response['data'].find { |x| x['display_name'] == node_name}
 
 	if !node_info.nil?
 		node_ec2_public_dns = node_info['external_ref']['ec2_public_address']
@@ -53,13 +53,13 @@ def index_and_retrieve_document(elasticsearch_host, elasticsearch_http_port)
 	es = Elasticsearch::Client.new hosts: ["#{elasticsearch_host}:#{elasticsearch_http_port}"]
 	es.index index: 'my_index', type: 'blog', id: 1, body: { title: "My first blog", content: "This is some content..." }
 
-	5.downto(1) do |i|
+	5.downto(1) do |_i|
 		sleep 1
 		document = es.search index: 'my_index', type: 'blog', body: { query: { match: { title: 'My*' } } }
 		puts "Retrieved document:"
 		ap document
 		if !document.nil?
-			query_result = document['hits']['hits'].select { |x| x['_index'].include? 'my_index' and x['_type'].include? 'blog'}.first
+			query_result = document['hits']['hits'].find { |x| x['_index'].include?('my_index') && x['_type'].include?('blog')}
 			if !query_result.nil?
 				puts "Relevant document is retrieved!"
 				puts ""
@@ -78,7 +78,6 @@ def index_and_retrieve_document(elasticsearch_host, elasticsearch_http_port)
 end
 
 describe "(Different Node Templates) Test Case 10: Elasticsearch - Simple scenario" do
-
 	before(:all) do
 		puts "************************************************************************",""
   end

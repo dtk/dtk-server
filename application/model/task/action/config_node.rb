@@ -7,31 +7,35 @@ module DTK; class Task
       end
 
       def create_node_group_member(node)
-        self.class.new(:hash,:node => node,:node_group_member => true)
+        self.class.new(:hash,node: node,node_group_member: true)
       end
 
       def self.component_actions(obj)
         obj[:component_actions]||[]
       end
-      def component_actions()
+      def component_actions
         self.class.component_actions(self)
       end
 
       def set_intra_node_stages!(intra_node_stages)
         self[:intra_node_stages] = intra_node_stages
       end
-      def intra_node_stages()
+
+      def intra_node_stages
         self[:intra_node_stages]
       end
+
       def set_inter_node_stage!(internode_stage_index)
         self[:inter_node_stage] = internode_stage_index && internode_stage_index.to_s
       end
-      def inter_node_stage()
+
+      def inter_node_stage
         self[:inter_node_stage]
       end
-      def is_first_inter_node_stage?()
+
+      def is_first_inter_node_stage?
         inter_node_stage = inter_node_stage()
-        inter_node_stage.nil? or inter_node_stage == "1"
+        inter_node_stage.nil? || inter_node_stage == "1"
       end
 
       def self.status(object,opts)
@@ -55,32 +59,32 @@ module DTK; class Task
         ret
       end
 
-      def long_running?()
+      def long_running?
         true
       end
 
       def get_dynamic_attributes(result)
-        ret = Array.new
+        ret = []
         dyn_attrs = (result[:data]||{})[:dynamic_attributes]
-        return ret if dyn_attrs.nil? or dyn_attrs.empty?
-        dyn_attrs.map{|a|{:id => a[:attribute_id], :attribute_value => a[:attribute_val]}}
+        return ret if dyn_attrs.nil? || dyn_attrs.empty?
+        dyn_attrs.map{|a|{id: a[:attribute_id], attribute_value: a[:attribute_val]}}
       end
 
       def self.add_attributes!(attr_mh,action_list)
         # ndx_actions values is an array of actions to handel case wheer component on node group and multiple nodes refernce it
-        ndx_actions = Hash.new
+        ndx_actions = {}
         action_list.each do |config_node_action|
           component_actions(config_node_action).each do |a|
-            (ndx_actions[a[:component][:id]] ||= Array.new) << a
+            (ndx_actions[a[:component][:id]] ||= []) << a
           end
         end
         return nil if ndx_actions.empty?
 
         parent_field_name = DB.parent_field(:component,:attribute)
         sp_hash = {
-          :relation => :attribute,
-          :filter => [:oneof, parent_field_name, ndx_actions.keys],
-          :columns => [:id,:display_name,parent_field_name,:external_ref,:attribute_value,:required,:dynamic,:port_type,:port_is_external, :data_type, :semantic_type, :hidden]
+          relation: :attribute,
+          filter: [:oneof, parent_field_name, ndx_actions.keys],
+          columns: [:id,:display_name,parent_field_name,:external_ref,:attribute_value,:required,:dynamic,:port_type,:port_is_external, :data_type, :semantic_type, :hidden]
         }
         attrs = Model.get_objs(attr_mh,sp_hash)
 
@@ -112,7 +116,7 @@ module DTK; class Task
         unless ((self[:node]||{})[:external_ref]||{})[:instance_id]
           node_id = (self[:node]||{})[:id]
           if node_id
-            node_info = Model.get_object_columns(task_mh.createIDH(:id => node_id, :model_name => :node),[:external_ref])
+            node_info = Model.get_object_columns(task_mh.createIDH(id: node_id, model_name: :node),[:external_ref])
             self[:node][:external_ref] = node_info[:external_ref]
           else
             Log.error("cannot update task action's node id because do not have its id")
@@ -120,8 +124,8 @@ module DTK; class Task
         end
       end
 
-      def get_and_update_attributes__assembly_attrs!(task_mh)
-        if assembly = self[:assembly_idh] &&  IDHandle.new(self[:assembly_idh]).create_object(:model_name => :assembly)
+      def get_and_update_attributes__assembly_attrs!(_task_mh)
+        if assembly = self[:assembly_idh] &&  IDHandle.new(self[:assembly_idh]).create_object(model_name: :assembly)
         assembly_attr_vals = assembly.get_assembly_level_attributes()
           unless assembly_attr_vals.empty?
             self[:assembly_attributes] = assembly_attr_vals
@@ -132,7 +136,7 @@ module DTK; class Task
       def get_and_update_attributes__cmp_attrs!(task_mh)
         # find attributes that can be updated
         # TODO: right now being conservative in including attributes that may not need to be set
-        indexed_attrs_to_update = Hash.new
+        indexed_attrs_to_update = {}
         component_actions().each do |action|
           (action[:attributes]||[]).each do |attr|
             # TODO: more efficient to just get attributes that can be inputs; right now :is_port does not
@@ -146,31 +150,31 @@ module DTK; class Task
         end
         return if indexed_attrs_to_update.empty?
         sp_hash = {
-          :relation => :attribute,
-          :filter => [:and,[:oneof, :id, indexed_attrs_to_update.keys]],
-          :columns => [:id,:value_derived]
+          relation: :attribute,
+          filter: [:and,[:oneof, :id, indexed_attrs_to_update.keys]],
+          columns: [:id,:value_derived]
         }
-        new_attr_vals = Model.get_objs(task_mh.createMH(:model_name => :attribute),sp_hash)
+        new_attr_vals = Model.get_objs(task_mh.createMH(model_name: :attribute),sp_hash)
         new_attr_vals.each do |a|
           attr = indexed_attrs_to_update[a[:id]]
           attr[:value_derived] = a[:value_derived]
         end
       end
+
       def update_bound_input_attrs!(task)
-        bound_input_attrs = component_actions().map do |action|
+        bound_input_attrs = component_actions().flat_map do |action|
           (action[:attributes]||[]).map do |attr|
             {
-              :component_display_name => action[:component][:display_name],
-              :attribute_display_name => attr[:display_name],
-              :attribute_value => attr[:attribute_value]
+              component_display_name: action[:component][:display_name],
+              attribute_display_name: attr[:display_name],
+              attribute_value: attr[:attribute_value]
             }
           end
-        end.flatten(1)
-        task.update(:bound_input_attrs => bound_input_attrs)
+        end
+        task.update(bound_input_attrs: bound_input_attrs)
       end
 
-
-      def ruby_function_implementation?()
+      def ruby_function_implementation?
         component_actions = self[:component_actions]||[]
         unless component_actions.empty?
           # check taht all elements have ruby function type
@@ -178,7 +182,7 @@ module DTK; class Task
         end
       end 
 
-      def assembly_wide_component?()
+      def assembly_wide_component?
         if node_type = (self[:node]||{})[:type]
           node_type.eql?(AssemblyWideNodename)
         end
@@ -187,7 +191,7 @@ module DTK; class Task
 
       # returns [adapter_type,adapter_name]
       # adapter_name can be null-> default is used
-      def ret_command_and_control_adapter_info()
+      def ret_command_and_control_adapter_info
         adapter_type = :node_config
         adapter_name = 
           if assembly_wide_component?()
@@ -201,11 +205,12 @@ module DTK; class Task
         update_state_change_status_aux(task_mh,status,component_actions().map{|x|x[:state_change_pointer_ids]}.compact.flatten)
       end
 
-      def config_agent_type()
+      def config_agent_type
         self[:config_agent_type] || raise(Error.new("self[:config_agent_type] should not be nil"))
       end
 
-     private
+      private
+
       def initialize(type,object,task_idh=nil,assembly_idh=nil)
         # TODO: clean up so dont have to look for assembly_idh in two places
         assembly_idh ||= object[:assembly_idh]
@@ -217,12 +222,12 @@ module DTK; class Task
             node = sample_state_change[:node]
             component_actions,intra_node_stages = OnComponent.order_and_group_by_component(sc)
             hash = {
-              :node               => node,
-              :state_change_types => sc.map{|sc|sc[:type]}.uniq,
-              :config_agent_type  => sc.first.on_node_config_agent_type,
-              :component_actions  => component_actions
+              node: node,
+              state_change_types: sc.map{|sc|sc[:type]}.uniq,
+              config_agent_type: sc.first.on_node_config_agent_type,
+              component_actions: component_actions
             }
-            hash.merge!(:assembly_idh => assembly_idh) if assembly_idh
+            hash.merge!(assembly_idh: assembly_idh) if assembly_idh
           when :hash
             if component_actions = object[:component_actions]
               component_actions.each_with_index{|ca,i|component_actions[i] = OnComponent.create_from_hash(ca,task_idh)}
@@ -232,14 +237,14 @@ module DTK; class Task
             exec_blocks = object
             actions,config_agent_type = OnComponent.create_actions_from_execution_blocks(exec_blocks)
             hash = {
-              :node               => exec_blocks.node(),
-              :state_change_types => ["converge_component"],
-              :config_agent_type  => config_agent_type,
-              :component_actions  => actions
+              node: exec_blocks.node(),
+              state_change_types: ["converge_component"],
+              config_agent_type: config_agent_type,
+              component_actions: actions
             }
-            hash.merge!(:assembly_idh => assembly_idh) if assembly_idh
+            hash.merge!(assembly_idh: assembly_idh) if assembly_idh
             intra_node_stages = exec_blocks.intra_node_stages()
-           else
+          else
             raise Error.new("Unexpected ConfigNode.initialize type")
           end
         super(type,hash,task_idh)

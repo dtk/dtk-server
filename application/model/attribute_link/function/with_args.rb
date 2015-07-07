@@ -11,9 +11,9 @@ module DTK; class AttributeLink
       def self.with_args_link_function(base_fn,parse_info)
         outer_function = base_fn
         inner_expression = {
-          :function => {
-            :name => parse_info[:name],
-            :constants  => parse_info[:constants]
+          function: {
+            name: parse_info[:name],
+            constants: parse_info[:constants]
           }
         }
         Composite.composite_link_function(outer_function,inner_expression)
@@ -26,10 +26,10 @@ module DTK; class AttributeLink
       end
 
       private
-       def constants()
+
+       def constants
          @function_info.constants()
        end
-
     end
   end
 end; end

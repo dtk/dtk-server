@@ -7,7 +7,7 @@ module DTK
         @namespace = namespace
       end
 
-      def error()
+      def error
        Error.new(@module_name,@namespace)
       end
 

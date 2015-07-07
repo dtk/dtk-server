@@ -1,11 +1,8 @@
 
-=begin
-TODO: setup rdoc style
-This is the base field class that all form fields derive from
-<input>:   http://www.w3schools.com/tags/tag_input.asp
-=end
+# TODO: setup rdoc style
+# This is the base field class that all form fields derive from
+# <input>:   http://www.w3schools.com/tags/tag_input.asp
 class Fieldbase
-
   attr_accessor :name,:id,:model_name,:value,:disabled,:classes,:field_meta,:render_mode
 
   def initialize(field_meta) 
@@ -54,39 +51,39 @@ class Fieldbase
     end
   end
 
-  def get_field_edit()
+  def get_field_edit
     case @render_mode
       when "html" then
         field_string = self.get_field_edit_html()
       when "js" then
         field_string = self.get_field_edit_js()
-#     when "rtpl" then
+      #     when "rtpl" then
       else
         field_string = self.get_field_edit_rtpl()
     end
     return field_string
   end
 
-  def get_field_display()
+  def get_field_display
     case @render_mode
       when "html" then
         field_string = self.get_field_display_html
       when "js" then
         field_string = self.get_field_display_js
-#      when "tpl" then
+      #      when "tpl" then
       else
         field_string = self.get_field_display_rtpl
     end
     return field_string
   end
 
-  def get_field_list()
+  def get_field_list
     case @render_mode
       when "html" then
         field_string = self.get_field_list_html
       when "js" then
         field_string = self.get_field_list_js
-#      when "tpl" then
+      #      when "tpl" then
       else
         field_string = self.get_field_list_rtpl
     end
@@ -106,7 +103,7 @@ class Fieldbase
     @classes = tmp_array
   end
 
-  def set_class_txt()
+  def set_class_txt
     @class_txt = ''
 
     @classes.each do |the_class|

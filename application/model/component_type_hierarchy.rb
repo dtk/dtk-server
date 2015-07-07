@@ -1,71 +1,70 @@
 module XYZ
   module TypeHierarchyDefMixin
     TypeHierarchy = {
-      :service => {
-        :app_server=>{},
-        :web_server=>{},
-        :db_server => {
-          :postgres_db_server=>{},
-          :mysql_db_server=>{},
-          :oracle_db_server=>{},
+      service: {
+        app_server: {},
+        web_server: {},
+        db_server: {
+          postgres_db_server: {},
+          mysql_db_server: {},
+          oracle_db_server: {},
         },
-        :monitoring_server=>{},
-        :monitoring_agent=>{},
-        :msg_bus=>{},
-        :memory_cache=>{},
-        :load_balancer=>{},
-        :firewall=>{},
+        monitoring_server: {},
+        monitoring_agent: {},
+        msg_bus: {},
+        memory_cache: {},
+        load_balancer: {},
+        firewall: {},
       },
 
-      :language => {
-        :ruby=>{},
-        :php=>{},
-        :perl=>{},
-        :javascript=>{},
-        :java=>{},
-        :clojure=>{},
+      language: {
+        ruby: {},
+        php: {},
+        perl: {},
+        javascript: {},
+        java: {},
+        clojure: {},
       },
 
-      :application => {
-        :java_app => {
-          :java_spring=>{},
+      application: {
+        java_app: {
+          java_spring: {},
         },
-        :ruby_app => {
-          :ruby_rails=>{},
-          :ruby_ramaze=>{},
-          :ruby_sinatra=>{},
+        ruby_app: {
+          ruby_rails: {},
+          ruby_ramaze: {},
+          ruby_sinatra: {},
         },
-        :php_app => {},
+        php_app: {},
       },
 
-      :extension => {},
+      extension: {},
 
-      :database => {
-        :postgres_db=>{},
-        :mysql_db=>{},
-        :oracle_db=>{},
+      database: {
+        postgres_db: {},
+        mysql_db: {},
+        oracle_db: {},
       },
 
-      :user => {}
+      user: {}
     }
     # TODO: stub implementation
     # given basic type give lsits of link_def_types
     TypeHierarchyPossLinkDefs = {
-      :application => [
+      application: [
         :database
       ]
     }
-
   end
   class ComponentTypeHierarchy
     include TypeHierarchyDefMixin
 
     # TODO: stub; only uses one level; not hirerarchical structure
     def self.possible_link_defs(component)
-      ret = Array.new
+      ret = []
       basic_type = component.update_object!(:basic_type)[:basic_type]
       return ret unless basic_type
-      TypeHierarchyPossLinkDefs[basic_type.to_sym]||Array.new
+      TypeHierarchyPossLinkDefs[basic_type.to_sym]||[]
     end
 
     def self.basic_type(specific_type)
@@ -76,22 +75,23 @@ module XYZ
       type && specific_types.include?(type.to_sym)
     end
 
-   private
+    private
+
     # adapted from  http://www.ruby-forum.com/topic/163430
     def self.inherited(sub)
-      return if sub.to_s =~ /^#<Class/ #hack to get rid of anonymous classes
+      return if sub.to_s =~ /^#<Class/ #HACK: to get rid of anonymous classes
       add_to_subclass(sub)
     end
 
     def self.add_to_subclass(sub)
       subclass_name = Aux::demodulize(sub.to_s)
-      (@subclass_names ||= Array.new).push(subclass_name).uniq!
+      (@subclass_names ||= []).push(subclass_name).uniq!
     end
-    def self.subclass_names()
+    def self.subclass_names
       @subclass_names
     end
 
-    def self.ret_basic_type()
+    def self.ret_basic_type
       @basic_type ||= TypeHierarchy.inject({}){|h,kv|h.merge(ret_basic_type_aux(kv[0],kv[1]))}
     end
 
@@ -118,11 +118,11 @@ module XYZ
       subtype_hier ? keys_in_hierarchy(subtype_hier) : nil
     end
 
-    def self.key_associated_with_class()
+    def self.key_associated_with_class
       Aux.underscore(Aux.demodulize(self.to_s)).to_sym
     end
 
-    def self.specific_types()
+    def self.specific_types
       return @specific_types if @specific_types
       key = key_associated_with_class()
       @specific_types = [key] + keys_under_subtype(key)
@@ -144,7 +144,7 @@ module XYZ
 
     # dynamically create all other classes not explicitly defined
     def self.all_keys(x)
-      return Array.new unless x.kind_of?(Hash)
+      return [] unless x.is_a?(Hash)
       x.keys + x.values.map{|el|all_keys(el)}.flatten
     end
     existing_subclass_names = ComponentTypeHierarchy.subclass_names()

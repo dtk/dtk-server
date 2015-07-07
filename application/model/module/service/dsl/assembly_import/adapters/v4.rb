@@ -2,7 +2,6 @@ module DTK; class ServiceModule
   class AssemblyImport
     r8_require('v3')
     class V4 < V3
-
       module Constant
         module Variations
         end
@@ -40,18 +39,18 @@ module DTK; class ServiceModule
         end
       end
 
-     private
+      private
 
       def self.import_task_templates(assembly_hash)
         ret = DBUpdateHash.new()
         workflows_with_actions = 
           if workflow = Constant.matches?(assembly_hash,:Workflow)
-            [{:workflow => workflow}]
+            [{workflow: workflow}]
           elsif workflows = Constant.matches?(assembly_hash,:Workflows)
-            if workflows.kind_of?(Hash)
-              workflows.map{|(action,workflow)|{:workflow => workflow, :action => action}}
-            elsif workflows.kind_of?(Array)
-              workflows.map{|workflow|{:workflow => workflow}}
+            if workflows.is_a?(Hash)
+              workflows.map{|(action,workflow)|{workflow: workflow, action: action}}
+            elsif workflows.is_a?(Array)
+              workflows.map{|workflow|{workflow: workflow}}
             end
           end                                          
 
@@ -67,7 +66,7 @@ module DTK; class ServiceModule
         action_under_key = workflow_hash.delete(Constant::WorkflowAction) 
 
         workflow_action ||= action_under_key 
-        if workflow_action.nil? or Constant.matches?(workflow_action,:CreateWorkflowAction)
+        if workflow_action.nil? || Constant.matches?(workflow_action,:CreateWorkflowAction)
           workflow_action = Task::Template.default_task_action()
         end
 
@@ -78,7 +77,6 @@ module DTK; class ServiceModule
         }
         {task_template_ref => task_template}
       end
-
 
       def self.import_component_attribute_info(cmp_ref,cmp_input)
         super
@@ -94,9 +92,8 @@ module DTK; class ServiceModule
       end
       def self.add_attribute_tags(cmp_ref,attr_name,tags)
         attr_info = output_component_attribute_info(cmp_ref)
-        (attr_info[attr_name] ||= {:display_name => attr_name}).merge!(:tags => HierarchicalTags.new(tags))
+        (attr_info[attr_name] ||= {display_name: attr_name}).merge!(tags: HierarchicalTags.new(tags))
       end
-
     end
   end
 end; end

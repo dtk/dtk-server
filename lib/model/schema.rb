@@ -6,12 +6,13 @@
 require File.expand_path('schema/migration_methods', File.dirname(__FILE__))
 module DTK
   # class methods
-  # TODO partition into public and private
+  # TODO: partition into public and private
   module ModelSchemaClassMixins
-    def set_relation_as_top()
+    def set_relation_as_top
       @is_top = true
     end
-    def top?()
+
+    def top?
       @is_top
     end
 
@@ -28,7 +29,7 @@ module DTK
       @db_rel[:model_class] = self
     end
 
-    def up()
+    def up
       model_def = load_model_def()
       return unless model_def
 
@@ -46,7 +47,8 @@ module DTK
       end
     end
 
-   private
+    private
+
     def load_model_def(model_nm=model_name())
       # special case: base_module is superclass for modules (component_module, test_module, etc.)
       return if model_nm == :base_module
@@ -59,9 +61,10 @@ module DTK
         raise Error.new("parsing error in #{model_def_fn}: #{e.inspect}")
       end
     end
-   public
 
-    def db_rel()
+    public
+
+    def db_rel
       @db_rel ||= (superclass.respond_to?(:db_rel) && superclass.db_rel())
     end
 
@@ -78,7 +81,7 @@ module DTK
     end
 
     def column(col_name,col_type,opts={})
-      @db_rel[:columns][col_name] = {:type => col_type}.merge(opts)
+      @db_rel[:columns][col_name] = {type: col_type}.merge(opts)
     end
 
     def virtual_column(col_name,opts={})
@@ -87,22 +90,22 @@ module DTK
 
     # TODO: hardwired to ref column id on target table
     def foreign_key(col_name,target_rel_type,opts={})
-      @db_rel[:columns][col_name] = {:type => ID_TYPES[:id], :foreign_key_rel_type => target_rel_type}.merge(opts)
+      @db_rel[:columns][col_name] = {type: ID_TYPES[:id], foreign_key_rel_type: target_rel_type}.merge(opts)
       CloneHelper.add_foreign_key_info(@relation_type,col_name,target_rel_type)
     end
 
-    def has_ancestor_field()
+    def has_ancestor_field
       @db_rel[:has_ancestor_field] = true
       foreign_key(:ancestor_id,@relation_type,FK_SET_NULL_OPT)
     end
 
     def ret_relation_type(klass)
-      model_name_helper(klass,:no_subclass => true)
+      model_name_helper(klass,no_subclass: true)
     end
 
     #------common column defs -----------
     # for external refs
-    def external_ref_column_defs()
+    def external_ref_column_defs
       column :external_ref, :json
     end
 
@@ -110,16 +113,17 @@ module DTK
     def ds_column_defs(*names)
       names.each{|n|ds_column_def(n)}
     end
+
     def ds_column_def(name)
       if name == :ds_attributes
         column :ds_attributes, :json
       elsif  name == :ds_key
         # TODO: should this be commented out?: :default => '' so when do 'prune inventory' this column not null
-        column :ds_key, :varchar, :default => '', :hidden => true
+        column :ds_key, :varchar, default: '', hidden: true
       elsif  name == :data_source
-        column :data_source, :varchar, :size => 25
+        column :data_source, :varchar, size: 25
       elsif  name == :ds_source_obj_type
-        column :ds_source_obj_type, :varchar, :size => 25
+        column :ds_source_obj_type, :varchar, size: 25
       end
     end
     #------common column defs -----------
@@ -130,7 +134,7 @@ module DTK
        attr_list
       end
       # gets over written for classes that restrict children
-      def is_ds_subobject?(relation_type)
+      def is_ds_subobject?(_relation_type)
         true
       end
 
@@ -169,7 +173,7 @@ module DTK
         # order is important
         user_models = ret_user_models()
         user_models.each do |model|
-          model.create_column_defs_common_fields?(direction,:user_model=>true)
+          model.create_column_defs_common_fields?(direction,user_model: true)
         end
 
         concrete_models = ret_concrete_models(filter)
@@ -196,8 +200,10 @@ module DTK
         # returns model_names
         concrete_models.map{|klass|ret_relation_type(klass)}
       end
-     #######
-     protected
+    #######
+
+    protected
+
       def ret_concrete_models(filter=nil)
         # ret = models.reject {|m|m.top? or not m.superclass == Model}
         # count BaseModule as a Model superclass because it is used as a superclass for component_module, test_module, etc.
@@ -209,7 +215,7 @@ module DTK
         ret
       end
 
-      def ret_user_models()
+      def ret_user_models
         [XYZ::User,XYZ::UserGroup,XYZ::UserGroupRelation]
       end
 
@@ -232,7 +238,7 @@ module DTK
           when :up
             create_table_specific_fields?(@db_rel)
           when :down
-            # TODO: not implemented yet
+          # TODO: not implemented yet
         end
       end
 
@@ -241,18 +247,17 @@ module DTK
           when :up
             @db.create_table_associations?(@db_rel)
           when :down
-            # TODO: not implemented yet
+          # TODO: not implemented yet
         end
       end
 
-      def set_global_db_rel_info()
+      def set_global_db_rel_info
         DB_REL_DEF[@relation_type] = @db_rel
       end
 
       def set_db(db)
         @db = db
       end
-
 
       ###### for shortcuts in virtual column
       class VCShortcut
@@ -261,6 +266,7 @@ module DTK
         def initialize(parent_model_name)
           @parent_model_name = parent_model_name
         end
+
         def val(model_name)
           DB.parent_field(@parent_model_name,model_name)
         end
@@ -271,7 +277,8 @@ module DTK
           @parent_model_name = parent_model_name
           @model_name = model_name
         end
-        def val()
+
+        def val
           "#{@model_name}__#{DB.parent_field(@parent_model_name,@model_name)}".to_sym
         end
       end
@@ -289,19 +296,19 @@ module DTK
       end
 
       # TODO: this would be good place to do parsing to check for errors in vc defs
-      def preprocess!()
+      def preprocess!
         (@db_rel[:virtual_columns]||{}).each_value do |vc|
           remote_deps = vc[:remote_dependencies]
           next unless remote_deps
-          remote_deps = remote_deps.values.first if remote_deps.kind_of?(Hash)
+          remote_deps = remote_deps.values.first if remote_deps.is_a?(Hash)
           remote_deps.each do |join_info|
             (join_info[:cols]||[]).each_with_index do |col,i|
-              next unless col.kind_of?(VCShortcutID)
+              next unless col.is_a?(VCShortcutID)
               join_info[:cols][i] = col.val(join_info[:model_name])
             end
             # TODO: only applying translation  on {k => v} to v side, should apply to k side too
             (join_info[:join_cond]||{}).each do |k,v|
-              next unless v.kind_of?(VCShortcutParent)
+              next unless v.is_a?(VCShortcutParent)
               join_info[:join_cond][k] = v.val()
             end
             preprocess_add_needed_join_info_cols!(join_info)
@@ -311,7 +318,8 @@ module DTK
         self
       end
 
-     private
+    private
+
       def preprocess_add_needed_join_info_cols!(join_info)
         return unless join_info[:cols]
         (join_info[:join_cond]||{}).each_key do |k|
@@ -323,6 +331,7 @@ module DTK
           join_info[:cols] << local_col unless join_info[:cols].include?(local_col)
         end
       end
+
       def preprocess_substitutue_join_info_vcols!(join_info)
         return unless join_info[:cols]
         new_field_set = Model::FieldSet.new(join_info[:model_name],join_info[:cols]).with_replaced_local_columns?()
@@ -335,9 +344,9 @@ module DTK
         seq_ref = @db.ret_sequence_ref(TOP_LOCAL_ID_SEQ)
         @db.create_table?(db_rel) do
           # TODO: do we want user models indexed by context
-          foreign_key CONTEXT_ID, CONTEXT_TABLE.schema_table_symbol, FK_CASCADE_OPT.merge({:null => false,:type =>  ID_TYPES[:context_id]})
-          primary_key :id, :type => ID_TYPES[:id], :null => false
-          column :local_id, ID_TYPES[:local_id], :default => Sequel::LiteralString.new(seq_ref), :null => false
+          foreign_key CONTEXT_ID, CONTEXT_TABLE.schema_table_symbol, FK_CASCADE_OPT.merge({null: false,type: ID_TYPES[:context_id]})
+          primary_key :id, type: ID_TYPES[:id], null: false
+          column :local_id, ID_TYPES[:local_id], default: Sequel::LiteralString.new(seq_ref), null: false
           String :ref
           Integer :ref_num
           String :description
@@ -345,8 +354,8 @@ module DTK
           Timestamp :created_at
           Timestamp :updated_at
           unless opts[:user_model]
-            foreign_key :owner_id, USER_TABLE.schema_table_symbol, FK_CASCADE_OPT.merge({:type =>  ID_TYPES[:id]})
-            foreign_key :group_id, USER_GROUP_TABLE.schema_table_symbol, FK_CASCADE_OPT.merge({:type =>  ID_TYPES[:id]})
+            foreign_key :owner_id, USER_TABLE.schema_table_symbol, FK_CASCADE_OPT.merge({type: ID_TYPES[:id]})
+            foreign_key :group_id, USER_GROUP_TABLE.schema_table_symbol, FK_CASCADE_OPT.merge({type: ID_TYPES[:id]})
           end
         end
 
@@ -359,16 +368,16 @@ module DTK
         return nil if cols.nil?
         cols.each{ |col,col_info|
           if fk_rel = col_info[:foreign_key_rel_type]
-            other_col_info = col_info.reject{|k,v|k == :foreign_key_rel_type}
+            other_col_info = col_info.reject{|k,_v|k == :foreign_key_rel_type}
             raise Error.new("#{fk_rel} is in foreign key DSL and does not exist") if DB_REL_DEF[fk_rel].nil?
             @db.add_foreign_key? db_rel,col,DB_REL_DEF[fk_rel],other_col_info
           else
-            other_col_info = col_info.reject{|k,v|k == :type}
+            other_col_info = col_info.reject{|k,_v|k == :type}
 
             type = col_info[:type] == :json ? :text : col_info[:type]
             # explicitly setting size to nil to handle dbrebuild which removes size restriction
-            if !other_col_info.has_key?(:size) and [:varchar].include?(type)
-              other_col_info = other_col_info.merge(:size => nil)
+            if !other_col_info.key?(:size) and [:varchar].include?(type)
+              other_col_info = other_col_info.merge(size: nil)
             end
 
             @db.add_column? db_rel,col,type,other_col_info
@@ -387,9 +396,9 @@ module DTK
      def convert_to_db_rel_form(*arg)
         case arg.size
           when 1
-            DBRel[:schema => :public, :table => arg[0]]
+            DBRel[schema: :public, table: arg[0]]
           when 2
-            DBRel[:schema => arg[0], :table => arg[1]]
+            DBRel[schema: arg[0], table: arg[1]]
         end
       end
 

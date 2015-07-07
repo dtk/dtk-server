@@ -10,7 +10,9 @@ module DTK; class ErrorUsage
           end
           super(msg)
       end
-     private
+
+      private
+
       def type_print_form(type_as_symbol)
         type_as_symbol.to_s.gsub(/_/,' ')
       end

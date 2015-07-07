@@ -1,7 +1,7 @@
 module DTK; class Attribute
   class Pattern 
     class Node < self
-      def self.create(pattern,node,opts={})
+      def self.create(pattern,node,_opts={})
         if pattern =~ /^[0-9]+$/
           return Type::ExplicitId.new(pattern,node)
         end

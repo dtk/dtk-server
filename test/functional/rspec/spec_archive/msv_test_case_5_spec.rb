@@ -23,7 +23,6 @@ $assembly_id = 0
 dtk_common = DtkCommon.new(assembly_name, assembly_template)
 
 describe "(Modules, Services and Versioning) Test Case 5: Clone existing module to local filesystem, do some change on it and use push-clone-changes to push changes from local copy to server" do
-
 	before(:all) do
 		puts "************************************************************************************************************************************************************************************"
 		puts "(Modules, Services and Versioning) Test Case 5: Clone existing module to local filesystem, do some change on it and use push-clone-changes to push changes from local copy to server"

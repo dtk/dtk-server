@@ -6,9 +6,9 @@ module DTK
         def matches?(object,constant)
           unless object.nil?
             variations = variations(constant)
-            if object.kind_of?(Hash)
+            if object.is_a?(Hash)
               hash_value_of_matching_key?(object,variations)
-            elsif object.kind_of?(String) or object.kind_of?(Symbol)
+            elsif object.is_a?(String) || object.is_a?(Symbol)
                variations.include?(object.to_s)
             else
               raise Error.new("Unexpected object class (#{object.class})")
@@ -18,7 +18,7 @@ module DTK
 
         def hash_subset(hash,*constants)
           constants = constants.flatten(1)
-          Aux.hash_subset(hash,constants.map{|constant|variations(constant)}.flatten(1).uniq)
+          Aux.hash_subset(hash,constants.flat_map{|constant|variations(constant)}.uniq)
         end
 
         def matching_key_and_value?(hash,constant)
@@ -29,17 +29,20 @@ module DTK
         end
 
         def all_string_variations(*constants)
-          constants.map{|constant|variations(constant,:string_only=>true)}.flatten(1).uniq
+          constants.flat_map{|constant|variations(constant,string_only: true)}.uniq
         end
+
         def its_legal_values(constant)
-          single_or_set = variations(constant,:string_only=>true)
-          if single_or_set.kind_of?(Array)
+          single_or_set = variations(constant,string_only: true)
+          if single_or_set.is_a?(Array)
             "its legal values are: #{single_or_set.join(',')}"
           else
             "its legal value is: #{single_or_set}"
           end
         end
-       private            
+
+        private
+            
         def variations(constant,opts={})
           # use of self:: and self. are important because want to evalute wrt to module that pulls this in
           begin
@@ -55,7 +58,7 @@ module DTK
         end
 
         def hash_key_if_match?(hash,variations)
-          variations.find{|key|hash.has_key?(key)}
+          variations.find{|key|hash.key?(key)}
         end
 
         def hash_value_of_matching_key?(hash,variations)
@@ -63,7 +66,6 @@ module DTK
             hash[matching_key]
           end
         end
-
       end
     end
   end

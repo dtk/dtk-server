@@ -1,5 +1,4 @@
 class PageContainer
-
   attr_accessor :session
   
   def initialize(session)

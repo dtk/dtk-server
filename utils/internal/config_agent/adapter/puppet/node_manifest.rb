@@ -2,7 +2,7 @@ module DTK; class ConfigAgent; module Adapter
   class Puppet
     class NodeManifest
       def initialize(config_node,opts={})
-        @import_statement_modules = opts[:import_statement_modules]||Array.new
+        @import_statement_modules = opts[:import_statement_modules]||[]
         @config_node = config_node
       end
 
@@ -18,12 +18,13 @@ module DTK; class ConfigAgent; module Adapter
         end
       end
 
-     private
+      private
+
       # this configuration switch is whether anchors are used in generating teh 'class wrapper' for putting definitions in stages
       UseAnchorsForClassWrapper = false
       # TODO: best practice would be to use anchors so internal resources dont 'fall out', but to use this requires that stdlib is always include
       # so turning off now
-      def use_anchors_for_class_wrappers?()
+      def use_anchors_for_class_wrappers?
         UseAnchorsForClassWrapper
       end
 
@@ -36,7 +37,7 @@ module DTK; class ConfigAgent; module Adapter
       # in case 2, extra grouping shows how components are grouped into puppet stages
       def generate_with_stages(cmps_with_attrs,assembly_attrs,stages_ids)
         stages_ids.map do |stage_ids_exec_block|
-          exec_block = Array.new
+          exec_block = []
           add_global_defaults!(exec_block)
           add_assembly_attributes!(exec_block,assembly_attrs||[])
           exec_block << generate_stage_statements(stage_ids_exec_block.size)
@@ -59,7 +60,7 @@ module DTK; class ConfigAgent; module Adapter
       end      
 
       def generate_with_total_ordering(cmps_with_attrs,assembly_attrs=nil)
-        lines = Array.new
+        lines = []
         add_global_defaults!(lines)
         add_assembly_attributes!(lines,assembly_attrs||[])
         lines << generate_stage_statements(cmps_with_attrs.size)
@@ -76,15 +77,15 @@ module DTK; class ConfigAgent; module Adapter
       end
 
       def generate_stage_statements(size)
-        (1..size).map{|s|"stage{#{s.to_s}:}"}.join(" -> ")
+        (1..size).map{|s|"stage{#{s}:}"}.join(" -> ")
       end
 
       class PuppetStage < self
         def initialize(stage,config_node,import_statement_modules)
-          super(config_node,:import_statement_modules => import_statement_modules)
+          super(config_node,import_statement_modules: import_statement_modules)
           @stage = stage
-          @class_lines = Array.new
-          @def_lines = Array.new
+          @class_lines = []
+          @def_lines = []
         end
 
         def add_lines_for_stage!(ret)
@@ -137,7 +138,8 @@ module DTK; class ConfigAgent; module Adapter
           self
         end
 
-       private
+        private
+
         def add_definition_lines!(ret)
           unless @def_lines.empty?()
             # putting def in class because defs cannot go in stages
@@ -154,24 +156,25 @@ module DTK; class ConfigAgent; module Adapter
           end
         end
 
-        def class_wrapper()
-          "dtk_stage#{@stage.to_s}"
+        def class_wrapper
+          "dtk_stage#{@stage}"
         end
 
-        def stage_assign()
+        def stage_assign
           "stage => #{quote_form(@stage)}"
         end
 
         def anchor(type)
           "anchor{#{class_wrapper}::#{type}: }"
         end
+
         def anchor_ref(type)
           "Anchor[#{class_wrapper}::#{type}]"
         end
 
         # removes imported collections and puts them on global array
         def process_and_return_attr_name_val_pairs(cmp_with_attrs)
-          ret = Hash.new
+          ret = {}
           return ret unless attrs = cmp_with_attrs["attributes"]
           cmp_name = cmp_with_attrs["name"]
           attrs.each do |attr_info|
@@ -180,13 +183,13 @@ module DTK; class ConfigAgent; module Adapter
             case attr_info["type"] 
              when "attribute"
               ret[attr_name] = val
-            else raise Error.new("unexpected attribute type (#{attr_info["type"]})")
+             else raise Error.new("unexpected attribute type (#{attr_info["type"]})")
             end
           end
           ret
         end
 
-        def needs_import_statement?(cmp_or_def,module_name)
+        def needs_import_statement?(_cmp_or_def,module_name)
           # TODO: keeping in, in case we decide to do check for import; use of imports are now considered violating Puppet best practices
           # if wanted to actual check would need to know what manifest files are present
           return nil #TODO: would put conditional in if doing checks
@@ -197,7 +200,6 @@ module DTK; class ConfigAgent; module Adapter
           @import_statement_modules << module_name
           "import '#{module_name}'"
         end
-
       end
       def add_global_defaults!(lines)
         add_default_extlookup_config!(lines)
@@ -228,7 +230,7 @@ module DTK; class ConfigAgent; module Adapter
       end
 
       def get_attr_val_statements(cmps_with_attrs)
-        ret = Array.new
+        ret = []
         cmps_with_attrs.each do |cmp_with_attrs|
           (cmp_with_attrs["dynamic_attributes"]||[]).each do |dyn_attr|
             # only include if the dynamic attribute is connected
@@ -249,14 +251,14 @@ module DTK; class ConfigAgent; module Adapter
       def process_val(val_x)
         # TODO: see why non scalar vals are string form
         val = val_x
-        if val_x.kind_of?(String) and (val_x =~ /^\[/ or val_x =~ /^\{/ )
+        if val_x.is_a?(String) && (val_x =~ /^\[/ || val_x =~ /^\{/ )
           # string array or hash
           begin
             val = eval(val_x) rescue nil
           end
         end
         # a guarded val
-        if val.kind_of?(Hash) and val.size == 1 and val.keys.first == "__ref"
+        if val.is_a?(Hash) && val.size == 1 && val.keys.first == "__ref"
           "$#{val.values.join("::")}"
         else
           quote_form(val)
@@ -264,11 +266,11 @@ module DTK; class ConfigAgent; module Adapter
       end
 
       def quote_form(obj)
-        if obj.kind_of?(Hash) 
+        if obj.is_a?(Hash) 
           "{#{obj.map{|k,v|"#{quote_form(k)} => #{quote_form(v)}"}.join(",")}}"
-        elsif obj.kind_of?(Array)
+        elsif obj.is_a?(Array)
           "[#{obj.map{|el|quote_form(el)}.join(",")}]"
-        elsif obj.kind_of?(String)
+        elsif obj.is_a?(String)
           "\"#{obj}\""
         elsif obj.nil?
           "nil"
@@ -276,7 +278,6 @@ module DTK; class ConfigAgent; module Adapter
           obj.to_s
         end
       end
-
     end
   end
 end; end; end

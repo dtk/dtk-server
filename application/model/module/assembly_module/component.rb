@@ -16,7 +16,7 @@ module DTK; class AssemblyModule
       new(assembly).component_module_workspace_info(component_module, opts)
     end
     def component_module_workspace_info(component_module, opts={})
-      get_applicable_component_instances(component_module,:raise_error_if_empty => true)
+      get_applicable_component_instances(component_module,raise_error_if_empty: true)
       am_version = assembly_module_version()
 
       base_branch = component_module.get_workspace_branch_info()
@@ -27,7 +27,7 @@ module DTK; class AssemblyModule
         local_branch = component_module.get_workspace_module_branch(am_version)
       end
 
-      base_branch.merge!(:version => am_version, :local_branch => local_branch[:display_name], :current_branch_sha => local_branch[:current_sha])
+      base_branch.merge!(version: am_version, local_branch: local_branch[:display_name], current_branch_sha: local_branch[:current_sha])
       base_branch
     end
 
@@ -50,21 +50,21 @@ module DTK; class AssemblyModule
       end
     end
 
-    def delete_modules?()
+    def delete_modules?
       am_version = assembly_module_version()
       # do not want to use assembly.get_component_modules() to generate component_modules because there can be modules taht do not correspond to component instances
       sp_hash = {
-        :cols => [:id,:group_id,:display_name,:component_id],
-        :filter => [:eq,:version,am_version]
+        cols: [:id,:group_id,:display_name,:component_id],
+        filter: [:eq,:version,am_version]
       }
       component_module_mh = @assembly.model_handle(:component_module)
       Model.get_objs(@assembly.model_handle(:module_branch),sp_hash).each do |r|
         unless r[:component_id]
-#          Log.error("Unexpected that #{r.inspect} has :component_id nil; workaround is to delete this module branch")
+          #          Log.error("Unexpected that #{r.inspect} has :component_id nil; workaround is to delete this module branch")
           Model.delete_instance(r.id_handle())
           next
         end
-        component_module = component_module_mh.createIDH(:id => r[:component_id]).create_object()
+        component_module = component_module_mh.createIDH(id: r[:component_id]).create_object()
         component_module.delete_version?(am_version)
       end
     end
@@ -105,7 +105,7 @@ module DTK; class AssemblyModule
         return namespace if namespace
       end
       # TODO: DTK-2014; use modification of ModuleRefs::Lock that passs in module name that looking for
-      module_refs_lock = ModuleRefs::Lock.get(assembly,:types => types)
+      module_refs_lock = ModuleRefs::Lock.get(assembly,types: types)
       unless namespace ||= module_refs_lock.matching_namespace?(module_name)
         raise(ErrorUsage.new("No object of type component module with name (#{module_name}) exists"))
       end
@@ -115,18 +115,18 @@ module DTK; class AssemblyModule
       namespace
     end
 
-    def self.list_remote_diffs(model_handle, module_id, repo, module_branch, workspace_branch, opts)
+    def self.list_remote_diffs(_model_handle, module_id, repo, module_branch, workspace_branch, opts)
       diffs, diff = [], nil
       remote_repo_cols = [:id, :display_name, :version, :remote_repos, :dsl_parsed]
       project_idh      = opts[:project_idh]
 
       sp_hash = {
-        :cols => [:id, :group_id, :display_name, :component_type],
-        :filter => [:and,
-                    [:eq, :type, 'component_module'],
-                    [:eq, :version, ModuleBranch.version_field_default()],
-                    [:eq, :repo_id, repo.id()],
-                    [:eq, :component_id, module_id]
+        cols: [:id, :group_id, :display_name, :component_type],
+        filter: [:and,
+                 [:eq, :type, 'component_module'],
+                 [:eq, :version, ModuleBranch.version_field_default()],
+                 [:eq, :repo_id, repo.id()],
+                 [:eq, :component_id, module_id]
                    ]
       }
       base_branch = Model.get_obj(module_branch.model_handle(), sp_hash)
@@ -140,10 +140,11 @@ module DTK; class AssemblyModule
       diffs
     end
 
-   private
+    private
+
     def get_for_assembly__augment_name_with_namespace!(cmp_modules)
       return if cmp_modules.empty?
-      ndx_cmp_modules = cmp_modules.inject(Hash.new){|h,m|h.merge(m[:id] => m)}
+      ndx_cmp_modules = cmp_modules.inject({}){|h,m|h.merge(m[:id] => m)}
       ComponentModule.ndx_full_module_names(cmp_modules.map{|m|m.id_handle()}).each_pair do |ndx,full_module_name|
         ndx_cmp_modules[ndx][:display_name] = full_module_name
       end
@@ -169,16 +170,16 @@ module DTK; class AssemblyModule
 
     def get_branch_template(module_branch,cmp_template)
       sp_hash = {
-        :cols => [:id,:group_id,:display_name,:component_type],
-        :filter => [:and,[:eq,:module_branch_id,module_branch.id()],
-                    [:eq,:type,'template'],
-                    [:eq,:node_node_id,nil],
-                    [:eq,:component_type,cmp_template.get_field?(:component_type)]]
+        cols: [:id,:group_id,:display_name,:component_type],
+        filter: [:and,[:eq,:module_branch_id,module_branch.id()],
+                 [:eq,:type,'template'],
+                 [:eq,:node_node_id,nil],
+                 [:eq,:component_type,cmp_template.get_field?(:component_type)]]
       }
       Model.get_obj(cmp_template.model_handle(),sp_hash) || raise(Error.new("Unexpected that branch_cmp_template is nil"))
     end
 
-    def get_applicable_component_instances(component_module,opts={})
+    def get_applicable_component_instances(component_module,_opts={})
       assembly_id = @assembly.id()
       component_module.get_associated_component_instances().select do |cmp|
         cmp[:assembly_id] == assembly_id
@@ -193,14 +194,16 @@ module DTK; class AssemblyModule
       end
     end
     class ErrorNoChangesToModule < ErrorComponentModule
-     private
-      def error_msg()
+      private
+
+      def error_msg
         "Changes to component module (#{@module_name}) have not been made in assembly (#{@assembly_name})"
       end
     end
     class ErrorNoComponentsInModule < ErrorComponentModule
       private
-      def error_msg()
+
+      def error_msg
         "Assembly (#{@assembly_name}) does not have any components belonging to module (#{@module_name})"
       end
     end

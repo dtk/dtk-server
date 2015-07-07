@@ -14,16 +14,16 @@ module DTK; class BaseModule; class UpdateModule
     def self.import_puppet_forge_module(project,local_params,source_directory,cmr_update_els)
       config_agent_type = :puppet
       opts_create_mod = Opts.new(
-        :config_agent_type  => config_agent_type,
-        :copy_files         => {:source_directory => source_directory},
-        :no_error_if_exists => true
+        config_agent_type: config_agent_type,
+        copy_files: {source_directory: source_directory},
+        no_error_if_exists: true
       )
 
       module_and_branch_info = ComponentModule.create_module(project,local_params,opts_create_mod)
       module_branch_idh      = module_and_branch_info[:module_branch_idh]
       module_branch          = module_branch_idh.create_object()
       repo_id                = module_and_branch_info[:module_repo_info][:repo_id]
-      repo                   = project.model_handle(:repo).createIDH(:id => repo_id).create_object()
+      repo                   = project.model_handle(:repo).createIDH(id: repo_id).create_object()
 
       source   = generate_source(local_params)
       impl_obj = Implementation.create?(project,local_params,repo,config_agent_type)
@@ -35,7 +35,7 @@ module DTK; class BaseModule; class UpdateModule
           module_branch.update_external_ref(content)
         end
       else
-        module_branch.update_external_ref(:source => source) if source
+        module_branch.update_external_ref(source: source) if source
       end
 
       component_module = module_and_branch_info[:module_idh].create_object()
@@ -45,8 +45,8 @@ module DTK; class BaseModule; class UpdateModule
 
       # scaffold Puppet manifests
       opts_scaffold = Opts.create?(
-        :ret_hash_content  => true,
-        :include_modules?  => include_modules.empty? ? nil : include_modules
+        ret_hash_content: true,
+        include_modules?: include_modules.empty? ? nil : include_modules
       )
       dsl_created_info = ScaffoldImplementation.create_dsl(local_params.module_name(),config_agent_type,impl_obj,opts_scaffold)
 
@@ -68,13 +68,13 @@ module DTK; class BaseModule; class UpdateModule
       pull_was_needed = @module_branch.pull_repo_changes?(commit_sha)
 
       parse_needed = !@module_branch.dsl_parsed?()
-      return ret unless pull_was_needed or parse_needed
+      return ret unless pull_was_needed || parse_needed
 
       repo = repo_idh.create_object()
       local = ret_local(@version)
 
       # TODO: provider is hardcoded to puppet until we introduce more provider types
-      opts.merge!(:provider => 'puppet')
+      opts.merge!(provider: 'puppet')
       create_info = create_needed_objects_and_dsl?(repo,local,opts)
       return create_info if create_info[:dsl_parse_error] && is_parsing_error?(create_info[:dsl_parse_error])
 
@@ -85,17 +85,17 @@ module DTK; class BaseModule; class UpdateModule
       return component_module_refs if is_parsing_error?(component_module_refs)
 
       opts_save_dsl = Opts.create?(
-        :create_empty_module_refs => true,
-        :component_module_refs    => component_module_refs,
-        :external_deps?           => external_deps
+        create_empty_module_refs: true,
+        component_module_refs: component_module_refs,
+        external_deps?: external_deps
       )
       if dsl_updated_info = UpdateModuleRefs.save_dsl?(@module_branch, opts_save_dsl)
         if opts[:ret_dsl_updated_info]
-          ret.merge!(:dsl_updated_info => dsl_updated_info)
+          ret.merge!(dsl_updated_info: dsl_updated_info)
         end
       end
 
-      if !external_deps.any_errors? and !opts[:dsl_parsed_false]
+      if !external_deps.any_errors? && !opts[:dsl_parsed_false]
         @module_branch.set_dsl_parsed!(true)
       end
 
@@ -107,7 +107,7 @@ module DTK; class BaseModule; class UpdateModule
       pull_was_needed = @module_branch.pull_repo_changes?(commit_sha)
 
       parse_needed = !@module_branch.dsl_parsed?()
-      return ret unless pull_was_needed or parse_needed
+      return ret unless pull_was_needed || parse_needed
       repo  = repo_idh.create_object()
       local = ret_local(@version)
 
@@ -121,37 +121,38 @@ module DTK; class BaseModule; class UpdateModule
 
       @module_branch.set_dsl_parsed!(false)
 
-      opts_parse = {:config_agent_type => create_info[:config_agent_type]}.merge(opts)
+      opts_parse = {config_agent_type: create_info[:config_agent_type]}.merge(opts)
       if dsl_created_info = ret.dsl_created_info?
-        opts_parse.merge!(:dsl_created_info  => dsl_created_info)
+        opts_parse.merge!(dsl_created_info: dsl_created_info)
       end
       dsl_obj = parse_dsl(impl_obj,opts_parse)
       return dsl_obj if is_parsing_error?(dsl_obj)
 
-      dsl_obj.update_model_with_ref_integrity_check(:version => version)
+      dsl_obj.update_model_with_ref_integrity_check(version: version)
 
       component_module_refs = update_component_module_refs(@module_branch,create_info[:matching_module_refs])
       return component_module_refs if is_parsing_error?(component_module_refs)
 
       hash_opt_save_dsl = {
-        :component_module_refs    => component_module_refs,
-        :create_empty_module_refs => true,
-        :external_dependencies?   => external_deps
+        component_module_refs: component_module_refs,
+        create_empty_module_refs: true,
+        external_dependencies?: external_deps
       }
       dsl_updated_info = UpdateModuleRefs.save_dsl?(@module_branch, Opts.create?(hash_opt_save_dsl))
       if opts[:ret_dsl_updated_info]
-        ret.merge!(:dsl_updated_info => dsl_updated_info)
+        ret.merge!(dsl_updated_info: dsl_updated_info)
       end
 
-      if !external_deps.any_errors? and !opts[:dsl_parsed_false]
+      if !external_deps.any_errors? && !opts[:dsl_parsed_false]
         @module_branch.set_dsl_parsed!(true)
       end
 
       ret
     end
 
-   private
-    def dsl_parsed?()
+    private
+
+    def dsl_parsed?
       @base_module.dsl_parsed?()
     end
 

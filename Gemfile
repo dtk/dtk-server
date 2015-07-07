@@ -1,9 +1,9 @@
 source 'https://rubygems.org'
 
 # dtk gems
-#TODO commented until we solve issue with nee to get latest versions from our geminabox not rubygems
-gem 'dtk-common', :github => 'rich-reactor8/dtk-common' #, :tag => '>= 0.5.15'
-gem 'dtk-common-core', :github => 'rich-reactor8/dtk-common-repo'
+#TODO: commented until we solve issue with nee to get latest versions from our geminabox not rubygems
+gem 'dtk-common', github: 'rich-reactor8/dtk-common' #, :tag => '>= 0.5.15'
+gem 'dtk-common-core', github: 'rich-reactor8/dtk-common-repo'
 
 # required to start a server
 gem 'bundler','>= 1.1.5'
@@ -42,7 +42,6 @@ case RUBY_VERSION
     gem 'debugger'
     gem 'em-ssh', '0.6.5'
 end
-
 
 # required to successfully run it
 # Minor change

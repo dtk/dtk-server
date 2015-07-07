@@ -10,7 +10,8 @@ module DTK
         end
       end
 
-     private
+      private
+
       def check_valid_id_default(model_handle,id)
         filter = [:eq, :id, id]
         check_valid_id_helper(model_handle,id,filter)
@@ -18,11 +19,11 @@ module DTK
 
       def check_valid_id_helper(model_handle,id,filter,opts={})
         sp_hash = {
-          :cols => [:id],
-          :filter => filter
+          cols: [:id],
+          filter: filter
         }
         rows = get_objs(model_handle,sp_hash)
-        if rows.empty? and opts[:no_error_if_no_match]
+        if rows.empty? && opts[:no_error_if_no_match]
           return nil
         end
         raise ErrorIdInvalid.new(id,pp_object_type()) unless rows.size == 1
@@ -31,8 +32,8 @@ module DTK
 
       def name_to_id_default(model_handle,name)
         sp_hash =  {
-          :cols => [:id],
-          :filter => [:eq, :display_name, name]
+          cols: [:id],
+          filter: [:eq, :display_name, name]
         }
         name_to_id_helper(model_handle,name,sp_hash)
       end

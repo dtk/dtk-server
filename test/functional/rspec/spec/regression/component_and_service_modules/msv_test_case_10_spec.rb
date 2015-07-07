@@ -26,7 +26,6 @@ local_component_module_filesystem_location = "~/dtk/component_modules/local"
 dtk_common = DtkCommon.new('', '')
 
 describe "(Modules, Services and Versioning) Test Case 10: Export component module using full name #{component_module_name} to users default namespace and then delete it" do
-
   before(:all) do
     puts "***************************************************************************************************************************************************************",""
   end

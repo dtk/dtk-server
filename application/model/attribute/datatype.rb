@@ -1,6 +1,6 @@
 module DTK; class Attribute
   module DatatypeMixin
-    def ret_datatype()
+    def ret_datatype
       unless st_summary = self[:semantic_type_summary]
         self[:data_type]
       else
@@ -8,15 +8,15 @@ module DTK; class Attribute
       end
     end  
 
-    def ret_default_info()
+    def ret_default_info
       default = self[:value_asserted]
       return nil unless default
       if is_array?()
-        ret = Hash.new
+        ret = {}
         hash_semantic_type = semantic_type[:array]
         default.each_with_index do |d,i|
           el = ret_default_info__hash(hash_semantic_type,d)
-          el.each{|k,v|ret.merge!("#{k}[#{i.to_s}]" => v)}
+          el.each{|k,v|ret.merge!("#{k}[#{i}]" => v)}
         end
         ret
       else
@@ -24,25 +24,27 @@ module DTK; class Attribute
       end
     end
 
-    def convert_value_to_ruby_object()
+    def convert_value_to_ruby_object
       update_object!(:data_type,:value_asserted,:value_derived)
       Datatype.convert_value_to_ruby_object(self)
     end
 
-   private
-    def semantic_type()
+    private
+
+    def semantic_type
       @semantic_type ||= SemanticTypeSchema.create_from_attribute(self)
     end
-    def is_array?()
+
+    def is_array?
       semantic_type().is_array?()
     end
   end
 
   module Datatype
-    def self.ret_datatypes()
+    def self.ret_datatypes
       scalar_types = SemanticTypeSchema.ret_scalar_defined_datatypes()
       scalar_types += ret_builtin_scalar_types()
-      ret = Array.new
+      ret = []
       scalar_types.each do |t|
         ret << t
         ret << "array(#{t})"
@@ -51,11 +53,11 @@ module DTK; class Attribute
     end
 
     def self.datatype_from_ruby_object(obj)
-      if obj.kind_of?(TrueClass) or obj.kind_of?(FalseClass)
+      if obj.is_a?(TrueClass) || obj.is_a?(FalseClass)
         "boolean"
-      elsif obj.kind_of?(Fixnum)
+      elsif obj.is_a?(Fixnum)
         "integer"
-        elsif obj.kind_of?(Hash) or obj.kind_of?(Array)
+      elsif obj.is_a?(Hash) || obj.is_a?(Array)
         "json"
       else
         "string"
@@ -90,7 +92,7 @@ module DTK; class Attribute
     end 
 
     def self.attr_def_to_internal_form(hash)
-      ret = Hash.new
+      ret = {}
       # check if it is an array
       # TODO: stub fn to check if array
       datatype = hash[:datatype]
@@ -115,27 +117,27 @@ module DTK; class Attribute
         if v[:dynamic]
           h
         else
-          info = Hash.new
-          info.merge!(:required=> v[:required]) if v.has_key?(:required)
-          info.merge!(:type => v[:type])
-          info.merge!(:default_value => default[k]) if default.has_key?(k)
+          info = {}
+          info.merge!(required: v[:required]) if v.key?(:required)
+          info.merge!(type: v[:type])
+          info.merge!(default_value: default[k]) if default.key?(k)
           h.merge(k => info)
         end
       end
     end
 
-    def self.default()
+    def self.default
       "string"
     end
 
-   private
+    private
+
     def self.raise_error_msg(type,val,attr)
       val_print_form = (val.respond_to?(:to_s) ? val.to_s : val.inspect)
       raise ErrorUsage.new("Unexpected #{type.to_s.capitalize} Value (#{val_print_form}) for attribute (#{attr.print_form}); use set-attribute to change its value")
     end
 
-
-    def self.ret_builtin_scalar_types()
+    def self.ret_builtin_scalar_types
       [
        "string",
        "integer",

@@ -1,15 +1,15 @@
 module DTK; class Attribute
   class Pattern; class Type
     class AssemblyLevel < self
-      def type()
+      def type
         :assembly_level
       end
 
-      def attribute_idhs()
+      def attribute_idhs
         @attribute_stacks.map{|attr|attr[:attribute].id_handle()}
       end
       
-      def component_instance()
+      def component_instance
         nil
       end
       
@@ -51,8 +51,8 @@ module DTK; class Attribute
 
         @attribute_stacks = attributes.map do |attr| 
           {
-            :assembly => assembly,
-            :attribute => attr
+            assembly: assembly,
+            attribute: attr
           }
         end
 

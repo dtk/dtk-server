@@ -11,13 +11,13 @@ puts "Hashing passwords ... "
 require root + '/app'
 
 default_project = ::DTK::Project.get_all(::DTK::ModelHandle.new(c = 2, :project)).first
-::DTK::Model.get_objs(default_project.model_handle(:user), { :cols => ::DTK::User.common_columns })
+::DTK::Model.get_objs(default_project.model_handle(:user), { cols: ::DTK::User.common_columns })
 
 session = ::DTK::CurrentSession.new
 session.set_user_object(default_project.get_field?(:user))
 session.set_auth_filters(:c, :group_ids)
 
-users = ::DTK::Model.get_objs(default_project.model_handle(:user), { :cols => [:id, :password] })
+users = ::DTK::Model.get_objs(default_project.model_handle(:user), { cols: [:id, :password] })
 
 users.each do |user|
   user.update(password: ::DTK::DataEncryption.hash_it(user[:password]))

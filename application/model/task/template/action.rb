@@ -20,12 +20,12 @@ module DTK; class Task; class Template
     # :parent_action 
 
     def self.create(object,opts={})
-      if object.kind_of?(Component)
+      if object.is_a?(Component)
         add_action_method?(ComponentAction.new(object,opts),opts)
-      elsif object.kind_of?(Action)
+      elsif object.is_a?(Action)
         add_action_method?(object,opts)
       else
-        raise Error.new("Not yet implemented treatment of action of type {#{object.class.to_s})")
+        raise Error.new("Not yet implemented treatment of action of type {#{object.class})")
       end
     end
 
@@ -33,7 +33,7 @@ module DTK; class Task; class Template
       # method_name could be nil
       ret = nil
       component_name_ref,method_name = WithMethod.parse(serialized_item)
-      unless action = action_list.find_matching_action(node_name,:component_name_ref => component_name_ref)
+      unless action = action_list.find_matching_action(node_name,component_name_ref: component_name_ref)
         if opts[:skip_if_not_found]
           return ret
         else
@@ -49,7 +49,7 @@ module DTK; class Task; class Template
 
       action_defs = action[:action_defs]||[]
       if action_def = action_defs.find{|ad|ad.get_field?(:method_name) == method_name}
-        return create(action,:action_def => action_def)
+        return create(action,action_def: action_def)
       end
 
       unless opts[:skip_if_not_found]
@@ -67,21 +67,23 @@ module DTK; class Task; class Template
     def method_missing(name,*args,&block)
       @action.send(name,*args,&block)
     end
+
     def respond_to?(name)
       @action.respond_to?(name) || super
     end
 
-    def method_name?()
+    def method_name?
       if action_method = action_method?
         action_method.method_name()
       end
     end
     # this can be overwritten
-    def action_method?()
+    def action_method?
       nil
     end
 
-   private
+    private
+
     def self.add_action_method?(base_action,opts={})
       opts[:action_def] ? base_action.class::WithMethod.new(base_action,opts[:action_def]) : base_action
     end

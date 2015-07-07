@@ -17,29 +17,28 @@ module DTK; class Clone
 
       def match_instance(instance)
         instance_id = instance.id
-        unless match = find{|l|l.instance and l.instance.id == instance_id}
+        unless match = find{|l|l.instance && l.instance.id == instance_id}
           raise(Error.new("Cannot find match for instance (#{instance.inspect})"))
         end
         match
       end
 
-      def all_id_handles()
+      def all_id_handles
         templates().map{|r|r.id_handle()} + instances().map{|r|r.id_handle()}
       end
       
-      def templates()
+      def templates
         #removes dups
-        inject(Hash.new) do |h,l|
+        inject({}) do |h,l|
           template = l.template
           h.merge(template ? {template.id => template} : {})
         end.values
       end
      
-      def instances()
+      def instances
         #does not have dups
         map{|l|l.instance}.compact
       end
-
     end
   end
 end; end

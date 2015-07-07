@@ -33,7 +33,6 @@ rvm_path = "/usr/local/rvm/wrappers/default/"
 dtk_common = DtkCommon.new(service_name, assembly_name)
 
 describe "DTK Server smoke test release" do
-
   before(:all) do
     puts "*****************************",""
   end

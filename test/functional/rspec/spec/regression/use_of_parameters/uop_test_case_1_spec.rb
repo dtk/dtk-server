@@ -26,7 +26,6 @@ dtk_common = DtkCommon.new(service_name, assembly_name)
 dtk_common2 = DtkCommon.new(new_service_name, "#{service_module_name}::#{new_assembly}")
 
 describe "(Use Of Parameters) Test Case 1: Check possibility to create assembly from existing service and then to converge new assembly" do
-
   before(:all) do
     puts "*****************************************************************************************************************************",""
   end

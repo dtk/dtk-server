@@ -11,20 +11,23 @@ module DTK; class ModuleDSL; class V3
         @base_cmp  = base_cmp
       end
 
-      def print_form()
+      def print_form
         @raw || @possible_link.inject()
       end
-      def base_cmp_print_form()
+
+      def base_cmp_print_form
         component_print_form(base_cmp())
       end
-      def dep_cmp_print_form()
+
+      def dep_cmp_print_form
         component_print_form(dep_cmp())
       end
 
-      def remote_location?()
+      def remote_location?
         ret_single_possible_link_value()["type"] == "external"
       end
-      def set_to_local_location_as_default()
+
+      def set_to_local_location_as_default
         if ret_single_possible_link_value()["type"].nil?
           update_single_possible_link_value("type" => "internal")
         end
@@ -48,22 +51,27 @@ module DTK; class ModuleDSL; class V3
         end
       end
 
-      def ret_single_possible_link_key()
+      def ret_single_possible_link_key
         ret_single_possible_link(1).keys.first
       end
-     private
+
+      private
+
       def set_single_possible_link!(ndx,hash_value)
         unless @possible_link.empty?
           raise Error.new("Unexpected that @possible_link is not empty when adding an element")
         end
         @possible_link.merge!(ndx => hash_value)
       end
+
       def update_single_possible_link_value(hash_value)
         ret_single_possible_link(1).values.first.merge!(hash_value)
       end
-      def ret_single_possible_link_value()
+
+      def ret_single_possible_link_value
         ret_single_possible_link().values.first||{}
       end
+
       def ret_single_possible_link(sizes=nil)
         sizes = Array(sizes||[0,1])
         unless sizes.include?(@possible_link.size)
@@ -73,10 +81,11 @@ module DTK; class ModuleDSL; class V3
       end
 
       attr_reader :dep_cmp_name,:base_cmp
-      def dep_cmp()
+      def dep_cmp
         convert_to_internal_cmp_form(@dep_cmp_name)
       end
-      def dup()
+
+      def dup
         self.class.new(@raw,@dep_cmp_name,@base_cmp)
       end
 
@@ -87,7 +96,7 @@ module DTK; class ModuleDSL; class V3
       def matches_on_type?(hash_val1,hash_val2)
         type1 = hash_val1["type"]
         type2 = hash_val2["type"]
-        type1.nil? or type2.nil? or type1 == type2        
+        type1.nil? || type2.nil? || type1 == type2        
       end
 
       # returns spliced_ndx_link_def_links
@@ -114,7 +123,7 @@ module DTK; class ModuleDSL; class V3
       end
 
       def self.splice_link_def_and_dep_info(ndx_link_def_links,ndx_dep_choices)
-        ret = Hash.new
+        ret = {}
         ndx_link_def_links.each do |link_def_ndx,link_def_link_choices|
           pruned_ndx_dep_choices = ndx_dep_choices
           dep_name_match = false
@@ -125,7 +134,7 @@ module DTK; class ModuleDSL; class V3
           link_def_link_choices.each do |ldl_choice|
             ndx = nil
             dep_name = ldl_choice.dependency_name
-            if dep_name and !dep_name_match
+            if dep_name && !dep_name_match
               if ldl_choice.explicit_dependency_ref
                 base_cmp_name = ldl_choice.base_cmp_print_form()
                 dep_cmp_name = ldl_choice.dep_cmp_print_form()
@@ -140,7 +149,7 @@ module DTK; class ModuleDSL; class V3
                 ndx = ldl_choice.dep_cmp_ndx()
               end
             end
-            (ret[ndx] ||= Array.new) << ldl_choice
+            (ret[ndx] ||= []) << ldl_choice
           end
         end
         ret

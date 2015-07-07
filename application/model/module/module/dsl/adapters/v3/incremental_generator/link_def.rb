@@ -3,7 +3,7 @@ module DTK; class ModuleDSL; class V3
     class LinkDef < IGBase::LinkDef
       r8_nested_require('link_def','dependencies_section')
       r8_nested_require('link_def','link_defs_section')
-      def generate(aug_link_def,opts={})
+      def generate(aug_link_def,_opts={})
         dependencies = DependenciesSection.new(aug_link_def).generate()
         link_defs = LinkDefsSection.new(aug_link_def).generate()
         {'dependencies' => dependencies,'link_defs' => link_defs}
@@ -14,11 +14,12 @@ module DTK; class ModuleDSL; class V3
         LinkDefsSection.new.merge_fragment!(full_hash,fragment['link_defs'],context)
         full_hash
       end
-     private
+
+      private
+
       def initialize(aug_link_def=nil)
         @aug_link_def = aug_link_def
       end
-
 
       def link_component(link_def_link)
         Component.display_name_print_form(link_def_link.required(:remote_component_type))
@@ -42,7 +43,7 @@ module DTK; class ModuleDSL; class V3
         def deep_merge(cmp,link)
           new_cmp_val = 
             if target_links = self[cmp]
-              link.merge_into!(target_links.kind_of?(Array) ? target_links : [target_links])
+              link.merge_into!(target_links.is_a?(Array) ? target_links : [target_links])
             else
               link
             end
@@ -51,7 +52,7 @@ module DTK; class ModuleDSL; class V3
         
         def self.reify(possible_links)
           possible_links.inject(PossibleLinks.new()) do |h,(cmp,v)|
-            h.merge(cmp => v.kind_of?(Array) ? v.map{|el|Link.new(el)} : Link.new(v))
+            h.merge(cmp => v.is_a?(Array) ? v.map{|el|Link.new(el)} : Link.new(v))
           end
         end
       end
@@ -84,7 +85,6 @@ module DTK; class ModuleDSL; class V3
             false
           end
         end
-
       end
     end
   end

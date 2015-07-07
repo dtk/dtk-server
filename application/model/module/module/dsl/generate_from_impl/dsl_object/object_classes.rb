@@ -18,7 +18,7 @@ module DTK; class ModuleDSL
           ret = RenderHash.new
           ret.set_unless_nil("module",module_name?())
           ret.set_unless_nil("dsl_version",ModuleDSL.version(integer_version()))
-          self[:components].each_element(:skip_required_is_false => true) do |cmp|
+          self[:components].each_element(skip_required_is_false: true) do |cmp|
             hash_key = render_cmp_ref(cmp.hash_key)
             unless (ScaffoldingStrategy[:ignore_components]||[]).include?(hash_key)
               add_component!(ret,hash_key,cmp.render_hash_form(opts))
@@ -28,22 +28,23 @@ module DTK; class ModuleDSL
           ret
         end
 
-        def render_to_file(file,format)
+        def render_to_file(_file,_format)
         end
 
-       private
-        def object_attributes()
+        private
+
+        def object_attributes
           [:components]
         end
 
-        def set_include_modules!(ret,opts={})
+        def set_include_modules!(_ret,_opts={})
         end
 
-        def process_imported_resources()
+        def process_imported_resources
           # first get all the exported resources and imported resources
           # TODO: more efficient to store these in first phase
-          attr_exp_rscs = Array.new
-          attr_imp_colls = Array.new
+          attr_exp_rscs = []
+          attr_imp_colls = []
           self[:components].each_element do |cmp|
             cmp[:attributes].each_element do |attr|
               parse_struct = attr.source_ref
@@ -56,16 +57,16 @@ module DTK; class ModuleDSL
               end
             end
           end
-          return if attr_exp_rscs.empty? or attr_imp_colls.empty?
+          return if attr_exp_rscs.empty? || attr_imp_colls.empty?
           # get all teh matches
-          matches = Array.new
+          matches = []
           matches = attr_imp_colls.map do |attr_imp_coll|
             if match = matching_storeconfig_vars?(attr_imp_coll,attr_exp_rscs)
               {
-                :type => :imported_collection,
-                :attr_imp_coll => attr_imp_coll,
-                :attr_exp_rsc => match[:attr_exp_rsc],
-                :matching_vars => match[:vars]
+                type: :imported_collection,
+                attr_imp_coll: attr_imp_coll,
+                attr_exp_rsc: match[:attr_exp_rsc],
+                matching_vars: match[:vars]
               }
             end
           end.compact
@@ -79,17 +80,18 @@ module DTK; class ModuleDSL
             end
           end
         end
+
         def matching_storeconfig_vars?(attr_imp_coll,attr_exp_rscs)
           attr_exp_rscs.each do |attr_exp_rsc|
             if matching_vars = attr_imp_coll.source_ref.match_exported?(attr_exp_rsc.source_ref)
-              return {:vars => matching_vars, :attr_exp_rsc => attr_exp_rsc}
+              return {vars: matching_vars, attr_exp_rsc: attr_exp_rsc}
             end
           end
           nil
         end
 
         def set_user_friendly_names_for_storeconfig_vars!(matches)
-          translated_ids = Array.new
+          translated_ids = []
           matches.each do |match|
             imp_attr = match[:attr_imp_coll]
             exp_attr = match[:attr_exp_rsc]
@@ -105,11 +107,11 @@ module DTK; class ModuleDSL
         end
 
         # for render_hash
-        def module_name?()
+        def module_name?
           nil
         end
 
-        def module_type?()
+        def module_type?
           nil
         end
 
@@ -123,7 +125,7 @@ module DTK; class ModuleDSL
           super(context,opts)
           return if opts[:reify]
           processed_name = component_ps[:name]
-          # if qualified name make sure matches module name
+         # if qualified name make sure matches module name
          if processed_name =~ /(^[^:]+)::(.+$)/
             prefix = $1
             unqual_name = $2
@@ -143,21 +145,23 @@ module DTK; class ModuleDSL
           self[:basic_type] = t("service") #TODO: stub
           self[:component_type] = t(processed_name)
           dependencies = dependencies(component_ps)
-          if component_ps.has_key?(:only_one_per_node)
+          if component_ps.key?(:only_one_per_node)
             self[:only_one_per_node] = t(component_ps[:only_one_per_node])
           end
           self[:dependencies] = dependencies unless dependencies.empty?
           set_attributes(component_ps)
         end
 
-       private
-        def object_attributes()
+        private
+
+        def object_attributes
           [:attributes,:dependencies,:link_defs]
         end
+
         def dependencies(component_ps)
           ret = DSLArray.new
           ret += find_foreign_resource_names(component_ps).map do |name|
-            create(:dependency,{:type => :foreign_dependency, :name => name})
+            create(:dependency,type: :foreign_dependency, name: name)
           end
           # TODO: may be more  dependency types
           ret
@@ -178,12 +182,12 @@ module DTK; class ModuleDSL
         end
 
         def add_attribute(parse_structure,component_ps,attr_num)
-          opts = {:attr_num => attr_num, :parent => self, :parent_source => component_ps}
+          opts = {attr_num: attr_num, parent: self, parent_source: component_ps}
           self[:attributes] << create(:attribute,parse_structure,opts)
         end
 
         def find_foreign_resource_names(component_ps)
-          ret = Array.new
+          ret = []
           (component_ps[:children]||[]).each do |child|
             next unless child.is_defined_resource?()
             name = child[:name]
@@ -194,33 +198,38 @@ module DTK; class ModuleDSL
         end
 
         # for render_hash
-        def display_name?()
-        end
-        def label?()
-        end
-        def basic_type?()
-        end
-        def type?()
-        end
-        def component_type?()
-        end
-        def only_one_per_node?()
+        def display_name?
         end
 
-        def converted_dependencies(opts)
+        def label?
+        end
+
+        def basic_type?
+        end
+
+        def type?
+        end
+
+        def component_type?
+        end
+
+        def only_one_per_node?
+        end
+
+        def converted_dependencies(_opts)
           nil #TODO: stub
         end
 
         def converted_link_defs(opts)
           return nil unless lds = self[:link_defs]
-          lds.map_element(:skip_required_is_false => true){|ld|ld.render_hash_form(opts)}
+          lds.map_element(skip_required_is_false: true){|ld|ld.render_hash_form(opts)}
         end
 
         def converted_attributes(opts)
           attrs = self[:attributes]
-          return nil if attrs.nil? or attrs.empty?
+          return nil if attrs.nil? || attrs.empty?
           ret = RenderHash.new
-          attrs.each_element(:skip_required_is_false => true) do |attr|
+          attrs.each_element(skip_required_is_false: true) do |attr|
             hash_key = attr.hash_key
             ret[hash_key] = attr.render_hash_form(opts)
           end
@@ -255,8 +264,10 @@ module DTK; class ModuleDSL
 
       class LinkDef < self
         include LinkDefDSLMixin
-       private
-        def object_attributes()
+
+        private
+
+        def object_attributes
           [:possible_links]
         end
 
@@ -277,13 +288,16 @@ module DTK; class ModuleDSL
           self[:type] = nailed("external")
           StoreConfigHandler.add_attribute_mappings!(self,data)
         end
+
         def create_attribute_mapping(input,output,opts={})
-          data = {:input => input, :output => output}
-          data.merge!(:include => true) if opts[:include]
+          data = {input: input, output: output}
+          data.merge!(include: true) if opts[:include]
           create(:link_def_attribute_mapping,data)
         end
-       private
-        def object_attributes()
+
+        private
+
+        def object_attributes
           [:attribute_mappings]
         end
       end
@@ -298,7 +312,6 @@ module DTK; class ModuleDSL
         end
       end
 
-
       class Attribute < self
         def initialize(parse_struct,context,opts={})
           super(context,opts)
@@ -311,11 +324,11 @@ module DTK; class ModuleDSL
           elsif parse_struct.is_imported_collection?()
             initialize__from_imported_collection(parse_struct)
           else
-            raise Error.new("Unexpected parse structure type (#{parse_struct.class.to_s})")
+            raise Error.new("Unexpected parse structure type (#{parse_struct.class})")
           end
         end
 
-        def attr_num()
+        def attr_num
           (@context||[])[:attr_num]
         end
 
@@ -331,12 +344,13 @@ module DTK; class ModuleDSL
           num = 1
           existing_keys = existing_hash_keys()
           while existing_hash_keys().include?(key)
-            key = "#{key_x}#{(num+=1).to_s}"
+            key = "#{key_x}#{(num+=1)}"
           end
           super(key)
         end
 
-       private
+        private
+
         def initialize__from_attribute(attr_ps)
           name = sanitize_attribute(attr_ps[:name])
           set_hash_key(name)
@@ -356,7 +370,7 @@ module DTK; class ModuleDSL
           if var_default
             self[:required] = t(false)
           else
-            self[:required] = (attr_ps.has_key?(:required) ? nailed(attr_ps[:required]) : unknown)
+            self[:required] = (attr_ps.key?(:required) ? nailed(attr_ps[:required]) : unknown)
             self[:include] = true if attr_ps[:required]
           end
 
@@ -381,16 +395,17 @@ module DTK; class ModuleDSL
         def initialize__from_exported_resource(exp_rsc_ps)
           StoreConfigHandler.set_output_attribute!(self,exp_rsc_ps)
         end
+
         def initialize__from_imported_collection(imp_coll_ps)
           StoreConfigHandler.set_intput_attribute!(self,imp_coll_ps)
         end
 
-        def existing_hash_keys()
+        def existing_hash_keys
           ((parent||{})[:attributes]||[]).map{|a|a.hash_key}.compact
         end
 
         # render hash methods
-        def display_name?()
+        def display_name?
         end
       end
     end

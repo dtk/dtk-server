@@ -122,7 +122,7 @@ module MCollective
 
                         raise "No hosts found for the STOMP connection pool" if hosts.size == 0
 
-                        connection = {:hosts => hosts}
+                        connection = {hosts: hosts}
 
                         # Various STOMP gem options, defaults here matches defaults for 1.1.6 the meaning of
                         # these can be guessed, the documentation isn't clear
@@ -187,10 +187,11 @@ module MCollective
                 @subscriptions.delete(source)
             end
 
-                      private
+          private
+
             def msgheaders
                 headers = {}
-                headers = {"priority" => @msgpriority} if  (@msgpriority and @msgpriority > 0)
+                headers = {"priority" => @msgpriority} if  (@msgpriority && @msgpriority > 0)
 
                 return headers
             end

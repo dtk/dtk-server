@@ -4,14 +4,14 @@ require 'stomp'
 require 'pp'
 
 msg_types = {
-  :get_log_fragment => [:command],
-  :get_log_fragment => [],
-  :discovery => [],
-  :chef_solo => [],
-  :puppet_apply => [],
-  :git_access => [],
-  :netstat => [],
-  :tail => []
+  get_log_fragment: [:command],
+  get_log_fragment: [],
+  discovery: [],
+  chef_solo: [],
+  puppet_apply: [],
+  git_access: [],
+  netstat: [],
+  tail: []
 }
 def listen_for(msg_types)
   host = 'localhost'

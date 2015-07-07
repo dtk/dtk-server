@@ -21,7 +21,6 @@ attribute_value_hash = {"key1"=>nil}
 dtk_common = DtkCommon.new("", "")
 
 describe "(Component Module DSL) Test Case 15: dtk.model.yaml with hash type attribute that contains key without value" do
-
   before(:all) do
     puts "************************************************************************************************************",""
   end

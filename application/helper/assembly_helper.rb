@@ -3,23 +3,25 @@ module Ramaze::Helper
     r8_nested_require('assembly_helper','action')
     include ActionMixin
 
-    def ret_assembly_object()
+    def ret_assembly_object
       assembly_id,subtype = ret_assembly_params_id_and_subtype()
-      id_handle(assembly_id,:component).create_object(:model_name => (subtype == :instance) ? :assembly_instance : :assembly_template) 
+      id_handle(assembly_id,:component).create_object(model_name: (subtype == :instance) ? :assembly_instance : :assembly_template) 
     end
-    def ret_assembly_params_object_and_subtype()
+
+    def ret_assembly_params_object_and_subtype
       assembly_id,subtype = ret_assembly_params_id_and_subtype()
-      obj = id_handle(assembly_id,:component).create_object(:model_name => (subtype == :instance) ? :assembly_instance : :assembly_template) 
+      obj = id_handle(assembly_id,:component).create_object(model_name: (subtype == :instance) ? :assembly_instance : :assembly_template) 
       [obj,subtype]
     end
 
-    def ret_workspace_object?(id_param=nil,opts={})
-      ret_assembly_instance_or_workspace_object?(id_param,:only_workspace=>true)
+    def ret_workspace_object?(id_param=nil,_opts={})
+      ret_assembly_instance_or_workspace_object?(id_param,only_workspace: true)
     end
+
     def ret_assembly_instance_or_workspace_object?(id_param=nil,opts={})
       assembly_instance = ret_assembly_instance_object(id_param)
       if ::DTK::Workspace.is_workspace?(assembly_instance)
-        assembly_instance.id_handle().create_object(:model_name => :assembly_workspace)
+        assembly_instance.id_handle().create_object(model_name: :assembly_workspace)
       else
         if opts[:only_workspace]
           raise ::DTK::ErrorUsage.new("The command can ony be applied to a workspace")
@@ -31,37 +33,39 @@ module Ramaze::Helper
     def ret_assembly_instance_object?(id_param=nil)
       id_param ||= :assembly_id
       if assembly_id = ret_request_param_id?(id_param,::DTK::Assembly::Instance)
-        id_handle(assembly_id,:component).create_object(:model_name => :assembly_instance)
+        id_handle(assembly_id,:component).create_object(model_name: :assembly_instance)
       end
     end
+
     def ret_assembly_instance_object(id_param=nil)
       id_param ||= :assembly_id
       assembly_id = ret_request_param_id(id_param,::DTK::Assembly::Instance)
-      id_handle(assembly_id,:component).create_object(:model_name => :assembly_instance)
+      id_handle(assembly_id,:component).create_object(model_name: :assembly_instance)
     end
+
     def ret_assembly_template_object(id_param=nil)
       id_param ||= :assembly_id
       assembly_id = ret_request_param_id(id_param,::DTK::Assembly::Template)
-      id_handle(assembly_id,:component).create_object(:model_name => :assembly_template)
+      id_handle(assembly_id,:component).create_object(model_name: :assembly_template)
     end
 
-    def ret_assembly_params_id_and_subtype()
+    def ret_assembly_params_id_and_subtype
       subtype = (ret_request_params(:subtype)||:instance).to_sym
       assembly_id = ret_request_param_id(:assembly_id,subtype == :instance ? ::DTK::Assembly::Instance : ::DTK::Assembly::Template)
       [assembly_id,subtype]
     end
 
-    def ret_assembly_subtype()
+    def ret_assembly_subtype
       (ret_request_params(:subtype)||:instance).to_sym
     end
 
     def ret_port_object(param,assembly_idh,conn_type)
-      extra_context = {:assembly_idh => assembly_idh,:connection_type => conn_type}
+      extra_context = {assembly_idh: assembly_idh,connection_type: conn_type}
       create_obj(param,::DTK::Port,extra_context)
     end
 
     ### methods to return components
-    def ret_component_instance(param,assembly)
+    def ret_component_instance(_param,assembly)
       ret_component_id_handle(:component_id,assembly).create_object()
     end
 
@@ -77,15 +81,15 @@ module Ramaze::Helper
     end
 
     def ret_component_id(param,assembly)
-      ret_request_param_id(param,::DTK::Component,:assembly_id => assembly.id())
+      ret_request_param_id(param,::DTK::Component,assembly_id: assembly.id())
     end
     private :ret_component_id
     ### end: methods to return components
 
-
     def ret_node_id(node_name_param,assembly)
       ret_node_id_handle(node_name_param,assembly).get_id()
     end
+
     def ret_node_id_handle(node_name_param,assembly)
       ret_request_param_id_handle(node_name_param,::DTK::Node,assembly.id())
     end
@@ -137,14 +141,14 @@ module Ramaze::Helper
     def ret_port_link(assembly=nil)
       assembly ||= ret_assembly_instance_object()
       if ret_request_params(:service_link_id)
-        create_obj(:service_link_id,::DTK::PortLink,:assembly_idh => assembly.id_handle())
+        create_obj(:service_link_id,::DTK::PortLink,assembly_idh: assembly.id_handle())
       else
-        filter =  {:input_component_id => ret_component_id(:input_component_id,assembly)}
+        filter =  {input_component_id: ret_component_id(:input_component_id,assembly)}
         if service_type = (ret_request_params(:dependency_name)||ret_request_params(:service_type))
-          filter.merge!(:service_type => service_type)
+          filter.merge!(service_type: service_type)
         end
         if ret_request_params(:output_component_id)
-          filter.merge!(:output_component_id => ret_component_id(:output_component_id,assembly))
+          filter.merge!(output_component_id: ret_component_id(:output_component_id,assembly))
         end
         assembly.get_matching_port_link(filter)
       end
@@ -160,10 +164,10 @@ module Ramaze::Helper
       param_settings = ::DTK::Aux.json_parse(param_settings_json)
 
       # indexed by display_name
-      ndx_existing_settings = assembly_template.get_settings().inject(Hash.new) do |h,s|
+      ndx_existing_settings = assembly_template.get_settings().inject({}) do |h,s|
         h.merge(s[:display_name] => s)
       end
-      bad_settings = Array.new
+      bad_settings = []
       param_settings.each do |param_setting|
         unless setting_name = param_setting['name']
           raise ::DTK::ErrorUsage.new("Ill-formed service settings string")
@@ -188,7 +192,7 @@ module Ramaze::Helper
       assembly_template_name,service_module_name = ret_request_params(:assembly_template_name,:service_module_name)
       module_namespace = nil
       # either they both should be null or neither; however using 'or', rather than 'and' for robustness
-      if assembly_template_name.nil? or service_module_name.nil?
+      if assembly_template_name.nil? || service_module_name.nil?
         if parent_template = assembly.get_parent()
           assembly_template_name = parent_template[:display_name]
           if service_module = parent_template.get_service_module()
@@ -202,17 +206,17 @@ module Ramaze::Helper
     end
   end
 
-  def ret_attribute_settings_hash()
+  def ret_attribute_settings_hash
     yaml_content = ret_non_null_request_params(:settings_yaml_content)
     response = ::DTK::Aux.convert_to_hash( yaml_content ,:yaml)
     process_attributes!(response)
-    raise response if response.kind_of?(::DTK::Error)
+    raise response if response.is_a?(::DTK::Error)
     response
   end
 
   def process_attributes!(response)
     # we are assigning assembly wide components to assembly wide node
-    response['assembly_wide/'] = response.delete('components') if response.has_key?('components')
+    response['assembly_wide/'] = response.delete('components') if response.key?('components')
 
     nodes = response.delete('nodes')||{}
     nodes.each do |n_name, node|
@@ -238,7 +242,7 @@ module Ramaze::Helper
     response
   end
 
-      def info_about_filter()
+      def info_about_filter
       end
 
     # checks element through set of fields
@@ -252,7 +256,5 @@ module Ramaze::Helper
       end
       temp_element == element_id_val.to_i
     end
-
-
 end
 

@@ -8,8 +8,8 @@ module DTK; class LinkDef::Link; class AttributeMapping
             if output_var =~ /(^[^\$]*)\$\{[^\}]+\}(.*$)/
               text_parts = [$1,$2]
               {
-                :name => :var_embedded_in_text,
-                :constants  =>  {:text_parts => text_parts}
+                name: :var_embedded_in_text,
+                constants: {text_parts: text_parts}
               }
             end
           end

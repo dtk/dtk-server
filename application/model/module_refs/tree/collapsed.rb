@@ -14,10 +14,10 @@ module DTK; class ModuleRefs
               end
             end
 
-            children_module_names = Array.new
-            opts_subtree = Aux.hash_subset(opts,[:raise_errors]).merge(:level => level+1)
+            children_module_names = []
+            opts_subtree = Aux.hash_subset(opts,[:raise_errors]).merge(level: level+1)
             subtree.collapse(opts_subtree).each_pair do |subtree_module_name,subtree_els|
-              collapsed_tree_els = ret[subtree_module_name] ||= Array.new
+              collapsed_tree_els = ret[subtree_module_name] ||= []
               subtree_els.each do |subtree_el|
                 unless collapsed_tree_els.find{|el|el == subtree_el}
                   collapsed_tree_els << subtree_el
@@ -29,11 +29,11 @@ module DTK; class ModuleRefs
             end
             
             if namespace = subtree.namespace() 
-              opts_create = {:children_module_names => children_module_names}
+              opts_create = {children_module_names: children_module_names}
               if external_ref = subtree.external_ref?()
-                opts_create.merge!(:external_ref => external_ref)
+                opts_create.merge!(external_ref: external_ref)
               end
-              (ret[module_name] ||= Array.new) << ModuleRef::Lock::Info.new(namespace,module_name,level,opts_create)
+              (ret[module_name] ||= []) << ModuleRef::Lock::Info.new(namespace,module_name,level,opts_create)
             end
           end
           ret
@@ -63,7 +63,8 @@ module DTK; class ModuleRefs
         self
       end
 
-     private
+      private
+
       def impl_index(namespace,module_name)
         "#{namespace}:#{module_name}"
       end
@@ -72,7 +73,7 @@ module DTK; class ModuleRefs
       def get_relevant_ndx_implementations(assembly_instance)
         base_version_field = Implementation.version_field(BaseVersion)
         assembly_version_field = Implementation.version_field(assembly_version(assembly_instance))
-        disjuncts = Array.new
+        disjuncts = []
         each_element do |el|
           disjunct =
             [:and, 
@@ -84,12 +85,12 @@ module DTK; class ModuleRefs
         end
         filter = ((disjuncts.size == 1) ? disjuncts.first : ([:or] + disjuncts))
         sp_hash = {
-          :cols => [:id,:group_id,:display_name,:repo,:repo_id,:branch,:module_name,:module_namespace,:version],
-          :filter => filter
+          cols: [:id,:group_id,:display_name,:repo,:repo_id,:branch,:module_name,:module_namespace,:version],
+          filter: filter
         }
         # get the implementations that meet sp_hash, but if have two matches for a module_name/module_namespace pair
         # return just one that matches the assembly version
-        ret = Hash.new
+        ret = {}
         Model.get_objs(assembly_instance.model_handle(:implementation),sp_hash).each do |r|
           ndx = impl_index(r[:module_namespace],r[:module_name])
           # if ndx_ret[ndx], dont replace if what is there is the assembly branch
@@ -105,7 +106,7 @@ module DTK; class ModuleRefs
         ModuleVersion.ret(assembly_instance)
       end
                                                   
-      def choose_namespaces__pick_first_level!(opts={})
+      def choose_namespaces__pick_first_level!(_opts={})
         each_pair do |module_name,els|
           if els.size > 1
             first_el = els.sort{|a,b| a.level <=> b.level}.first
@@ -125,7 +126,6 @@ module DTK; class ModuleRefs
       def each_element(&block)
         values.each{|els|els.each{|el|block.call(el)}}
       end
-
     end
   end
 end; end

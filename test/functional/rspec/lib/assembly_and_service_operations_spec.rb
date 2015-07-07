@@ -25,7 +25,7 @@ shared_context "Rename service" do |dtk_common, new_service_name|
   end
 end
 
-shared_context "NEG - Rename service to existing name" do |dtk_common, service_name, new_service_name|
+shared_context "NEG - Rename service to existing name" do |_dtk_common, service_name, new_service_name|
   it "does not rename #{service_name} service to #{new_service_name} since #{new_service_name} already exists" do
     puts "NEG - Rename service to existing name:", "---------------------------------------"
     pass = false
@@ -39,7 +39,7 @@ shared_context "NEG - Rename service to existing name" do |dtk_common, service_n
   end
 end
 
-shared_context "NEG - Rename service to workspace name" do |dtk_common, service_name|
+shared_context "NEG - Rename service to workspace name" do |_dtk_common, service_name|
   it "does not rename #{service_name} service to workspace since workspace is special type of service" do
     puts "NEG - Rename service to workspace name:", "----------------------------------------"
     pass = false

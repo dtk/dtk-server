@@ -13,10 +13,10 @@ module DTK
         object_model_form.convert_attribute_mapping(input_am,base_cmp,dep_cmp,opts)
       end
 
-     private
+      private
 
       # 'self:: form' used below because for example v3 subclasses from v2 and it includes V3::ObjectModelForm
-      def self.object_model_form()
+      def self.object_model_form
         self::ObjectModelForm
       end
     end

@@ -9,36 +9,42 @@ module R8Tpl
       def initialize(path)
         super(path)
       end
-      def type()
+
+      def type
         :file
       end
-      def edit_time_as_int()
+
+      def edit_time_as_int
         File.mtime(self).to_i
       end
     end
 
     class ViewPathDB < ViewPath
       def initialize(virtual_model_ref)
-        super(String.new)
+        super('')
         @virtual_model_ref = virtual_model_ref
         @db_id = virtual_model_ref.to_i
       end
       attr_reader :type, :db_id
-      def type()
+      def type
         :db
       end
-      def edit_time_as_int()
+
+      def edit_time_as_int
         @virtual_model_ref.edit_time().to_i
       end
     end
 
     # TODO: may need to refactor slightly when this subsumes saved_search refs
     class VirtualModelRef < String
-     public
+      public
+
       def self.create(virtual_model_ref_str,view_type,user)
         virtual_model_ref_str && self.new(virtual_model_ref_str,:virtual_object,view_type,user) #TODO: hard wiring :virtual_object
       end
-     private
+
+      private
+
       def initialize(virtual_model_ref_str,type,view_type,user)
         super(virtual_model_ref_str)
         @user = user
@@ -47,37 +53,42 @@ module R8Tpl
         @view_meta_id = nil
         @edit_time = nil 
       end
-     public
+
+      public
+
       attr_reader :type
 
-      def view_meta_id()
+      def view_meta_id
         return @view_meta_id if @view_meta_id
         set_view_meta_info()
         @view_meta_id
       end
-      def edit_time()
+
+      def edit_time
         return @edit_time if @edit_time
         set_view_meta_info()
         @edit_time
       end
+
       def set_view_meta_info(*args)
         @view_meta_id,@edit_time = args.empty? ? @user.create_object_from_id(db_id).get_view_meta_info(@view_type) : args
       end
 
-     private
-      def db_id()
+      private
+
+      def db_id
         self.to_i
       end
     end
     
     # TODO: temp until deprecate @saved_search_ref
-    def virtual_model_ref()
+    def virtual_model_ref
       @virtual_model_ref || @saved_search_ref
     end
-    def virtual_model_ref_type()
+
+    def virtual_model_ref_type
       @virtual_model_ref ? @virtual_model_ref.type : :saved_search
     end
-
 
     # returns the appropriate view path
     # TODO: this bakes in some "ordering with a type; is this right place to put this?
@@ -99,7 +110,7 @@ module R8Tpl
         # TODO: fix so saved_search not hard coded
         if virtual_model_ref
           if virtual_model_ref_type() == :virtual_object
-            ViewPathFile.new("#{R8::Config[:app_cache_root]}/view/#{@model_name}/#{@profile}.#{@view_name}.#{virtual_model_ref.view_meta_id.to_s}.rtpl")
+            ViewPathFile.new("#{R8::Config[:app_cache_root]}/view/#{@model_name}/#{@profile}.#{@view_name}.#{virtual_model_ref.view_meta_id}.rtpl")
           else
             ViewPathFile.new("#{R8::Config[:app_cache_root]}/view/saved_search/#{@profile}.#{virtual_model_ref}.rtpl")
           end
@@ -129,25 +140,25 @@ module R8Tpl
       case path.type
         when :file then File.exists?(path) ? path : nil
         when :db then path
-      else 
+        else 
         Log.error("Unexpected type of path")
         nil
       end
     end
+
     def view_type(vn=nil)
       ViewTranslations[(vn||@view_name).to_sym]
     end
     ViewTranslations = {
-      :edit => 'edit',
-      :quick_edit => 'edit',
-      :list_edit_in_place => 'edit',
-      :display => 'display',
-      :hover => 'display',
-      :saved_search => 'list',
-      :list => 'list',
-      :related_panel => 'list',
-      :search => 'search'
+      edit: 'edit',
+      quick_edit: 'edit',
+      list_edit_in_place: 'edit',
+      display: 'display',
+      hover: 'display',
+      saved_search: 'list',
+      list: 'list',
+      related_panel: 'list',
+      search: 'search'
     }
-
   end
 end

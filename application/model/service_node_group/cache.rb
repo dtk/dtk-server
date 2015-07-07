@@ -1,6 +1,6 @@
 module DTK; class ServiceNodeGroup
   class Cache < self
-    def self.model_name()
+    def self.model_name
       :node
     end
     
@@ -20,18 +20,19 @@ module DTK; class ServiceNodeGroup
     # gets component attributes on node members, first cloning components from node group if needed 
     def get_component_attributes(node_group_component,opts={})
       # indexed by node_group_component_id
-      @ndx_component_attributes ||= Hash.new
+      @ndx_component_attributes ||= {}
       ndx = node_group_component.id()
       cmps_with_attrs = @ndx_component_attributes[ndx] ||= clone_and_get_components_with_attrs(node_group_component,opts)
-      cmps_with_attrs.inject(Array.new){|a,cmp|a + cmp[:attributes]}
+      cmps_with_attrs.inject([]){|a,cmp|a + cmp[:attributes]}
     end
     
-   private
+    private
+
     def get_node_attributes_aux(opts={})
       target_ref_ids = target_ref_ids?(opts[:filter]) || @target_refs.map{|n|n.id} 
       sp_hash = {
-        :cols => [:id,:group,:display_name,:node_node_id],
-        :filter => [:oneof, :node_node_id,target_ref_ids]
+        cols: [:id,:group,:display_name,:node_node_id],
+        filter: [:oneof, :node_node_id,target_ref_ids]
       }
       attr_mh = model_handle(:attribute)
       Model.get_objs(attr_mh,sp_hash)
@@ -44,7 +45,7 @@ module DTK; class ServiceNodeGroup
       if target_ref_ids = target_ref_ids?(opts[:filter])
         target_refs = target_refs.select{|r|target_ref_ids.include?(r[:id])}
       end
-      super(target_refs,:node_group_components => [node_group_component])
+      super(target_refs,node_group_components: [node_group_component])
     end
 
     def target_ref_ids?(filter=nil)

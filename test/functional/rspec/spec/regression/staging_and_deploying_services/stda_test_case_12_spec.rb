@@ -23,7 +23,6 @@ attribute_value = '2.1.2'
 dtk_common = DtkCommon.new(service_name, assembly_name)
 
 describe "(Staging And Deploying Assemblies) Test Case 12: Ability to add and delete components on assembly level and set their attributes" do
-
 	before(:all) do
 		puts "********************************************************************************************************************************",""
   end

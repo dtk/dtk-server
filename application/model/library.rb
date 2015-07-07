@@ -8,10 +8,10 @@ module XYZ
         full_filter = [:and,full_filter,filter]
       end
       sp_hash = {
-        :cols => [:id,:group_id,:ref],
-        :filter => full_filter
+        cols: [:id,:group_id,:ref],
+        filter: full_filter
       }
-      Model.get_objs(model_handle(:node_binding_ruleset),sp_hash,:keep_ref_cols => true)
+      Model.get_objs(model_handle(:node_binding_ruleset),sp_hash,keep_ref_cols: true)
     end
 
     ### end: get methods
@@ -20,31 +20,31 @@ module XYZ
       def create_users_private_library?(model_handle)
         user_obj = CurrentSession.new.get_user_object()
         private_group_obj = user_obj.get_private_group()
-        library_mh = model_handle.createMH(:model_name => :library, :group_id => private_group_obj[:id])
+        library_mh = model_handle.createMH(model_name: :library, group_id: private_group_obj[:id])
         username = user_obj[:username]
         ref = users_private_library_ref(username)
         lib_name = users_private_library_name(username)
-        Model.create_from_row?(library_mh,ref,{:display_name => lib_name})
+        Model.create_from_row?(library_mh,ref,display_name: lib_name)
       end
 
       def create_public_library?(model_handle)
         ref = lib_name = public_library_name()
-        Model.create_from_row?(model_handle,ref,{:display_name => lib_name})
+        Model.create_from_row?(model_handle,ref,display_name: lib_name)
       end
 
       def get_users_private_library(model_handle,username=nil)
         username ||=  CurrentSession.new.get_username()
         sp_hash = {
-          :cols => [:id,:display_name,:group_id],
-          :filter => [:eq,:display_name,users_private_library_name(username)] 
+          cols: [:id,:display_name,:group_id],
+          filter: [:eq,:display_name,users_private_library_name(username)] 
         }
         get_obj(model_handle,sp_hash)
       end
 
       def get_public_library(model_handle)
         sp_hash = {
-          :cols => [:id,:display_name,:group_id],
-          :filter => [:eq,:display_name,public_library_name()]
+          cols: [:id,:display_name,:group_id],
+          filter: [:eq,:display_name,public_library_name()]
         }
         get_obj(model_handle,sp_hash)
       end
@@ -57,31 +57,33 @@ module XYZ
         name_to_id_default(model_handle,name)
       end
 
-     private
-      def users_private_library_name(username)
+      private
+
+      def users_private_library_name(_username)
         "private"
       end
+
       def users_private_library_ref(username)
         "private-#{username}"
       end
 
-      def public_library_name()
+      def public_library_name
         "public"
       end
     end
 
-    def info_about(about,opts={})
+    def info_about(about,_opts={})
       case about
        when :assemblies
         filter = [:eq, :library_library_id, id()]
-        Assembly::Template.list(model_handle(:component),:filter => filter)
+        Assembly::Template.list(model_handle(:component),filter: filter)
        when :nodes
         filter = [:eq, :library_library_id, id()]
-        Node::Template.list(model_handle,:filter => filter)
+        Node::Template.list(model_handle,filter: filter)
       when :components
         raise Error.new("should not be reached")
-        # Component::Template.list(model_handle,:library_idh => id_handle())
-       else
+      # Component::Template.list(model_handle,:library_idh => id_handle())
+      else
         raise Error.new("TODO: not implemented yet: processing of info_about(#{about})")        
       end.sort{|a,b|a[:display_name] <=> b[:display_name]}
     end
@@ -100,28 +102,32 @@ module XYZ
         clone_post_copy_hook__child_nodes(node_mh,node_hash_list,new_assembly_obj) 
       end
     end
-   private
+
+    private
+
     def clone_post_copy_hook__child_nodes(node_mh,node_hash_list,new_assembly_obj)
       rows = node_hash_list.map do |r|
-        ext_ref = r[:external_ref] && r[:external_ref].reject{|k,v|k == :instance_id}.merge(:type => "ec2_image")
+        ext_ref = r[:external_ref] && r[:external_ref].reject{|k,_v|k == :instance_id}.merge(type: "ec2_image")
         update_row = {
-          :id => r[:id],
-          :external_ref =>  ext_ref,
-          :operational_status => nil,
-          :is_deployed => false
+          id: r[:id],
+          external_ref: ext_ref,
+          operational_status: nil,
+          is_deployed: false
         }
         assembly_name = new_assembly_obj[:display_name]
-        update_row[:display_name] = "#{assembly_name}-#{r[:display_name]}" if assembly_name and r[:display_name]
+        update_row[:display_name] = "#{assembly_name}-#{r[:display_name]}" if assembly_name && r[:display_name]
         update_row
       end
       Model.update_from_rows(node_mh,rows)
     end
 
-    def clear_dynamic_attributes(new_id_handle,opts)
+    def clear_dynamic_attributes(new_id_handle,_opts)
       attrs_to_clear = get_dynamic_attributes(:node,new_id_handle) + get_dynamic_attributes(:component,new_id_handle)
-      Attribute.clear_dynamic_attributes_and_their_dependents(attrs_to_clear,:add_state_changes => false)
+      Attribute.clear_dynamic_attributes_and_their_dependents(attrs_to_clear,add_state_changes: false)
     end
-   private
+
+    private
+
     # returns attributes that will be cleared
     def get_dynamic_attributes(model_name,new_id_handle)
       if model_name == :component
@@ -132,8 +138,8 @@ module XYZ
         raise Error.new("unexpected model_name #{model_name}")
       end
       sp_hash = {
-        :filter => [:and,[:eq, :id, new_id_handle.get_id()],[:eq, :type, "composite"]],
-        :columns => [col]
+        filter: [:and,[:eq, :id, new_id_handle.get_id()],[:eq, :type, "composite"]],
+        columns: [col]
       }
       cmp_mh = new_id_handle.createMH(:component)
       Model.get_objs(cmp_mh,sp_hash).map do |r|

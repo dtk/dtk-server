@@ -1,7 +1,8 @@
 module DTK; class ModuleDSL; class V3
   class ObjectModelForm 
     class Component < OMFBase::Component
-     private
+      private
+
       def body(input_hash,cmp,context={})
         ret = OutputHash.new
         cmp_type = ret["display_name"] = ret["component_type"] = qualified_component(cmp)
@@ -13,12 +14,12 @@ module DTK; class ModuleDSL; class V3
         ret["external_ref"] = external_ref
         ret.set_if_not_nil("only_one_per_node",only_one_per_node(external_ref))
         add_attributes!(ret,cmp_type,input_hash)
-        opts = Hash.new
+        opts = {}
         add_dependent_components!(ret,input_hash,cmp_type,opts)
         section_name = "includes"
         ret.set_if_not_nil("component_include_module",include_modules?(input_hash,cmp_type,context))
         if opts[:constants]
-          add_attributes!(ret,cmp_type,ret_input_hash_with_constants(opts[:constants]),:constant_attribute => true)
+          add_attributes!(ret,cmp_type,ret_input_hash_with_constants(opts[:constants]),constant_attribute: true)
         end
         ret
       end
@@ -35,9 +36,9 @@ module DTK; class ModuleDSL; class V3
         section_name = 'includes'
         cmp_level_includes = input_hash[section_name]
         module_level_includes = context[:module_level_includes]
-        if cmp_level_includes or module_level_includes
-          module_context = context.merge(:section_name => section_name)
-          component_context = module_context.merge(:component_type => cmp_type)
+        if cmp_level_includes || module_level_includes
+          module_context = context.merge(section_name: section_name)
+          component_context = module_context.merge(component_type: cmp_type)
           if module_level_includes
             more_specific_incls = super(cmp_level_includes,component_context)
             less_specific_incls = super(module_level_includes,module_context)
@@ -84,6 +85,7 @@ module DTK; class ModuleDSL; class V3
       def dynamic_default_variable?(info)
         default_indicates_dynamic_default_variable?(info)
       end
+
       def value_asserted(info,attr_props) 
         unless default_indicates_dynamic_default_variable?(info)
           ret = nil
@@ -91,7 +93,7 @@ module DTK; class ModuleDSL; class V3
           unless value.nil?
             if semantic_data_type = attr_props["semantic_data_type"]
               # TODO: currently converting 'integer' -> integer and 'booelan' -> boolean; this may be unnecesary since the object model stores everything as strings
-              ret = AttributeSemanticType.convert_and_raise_error_if_not_valid(semantic_data_type,value,:attribute_name => attr_props['display_name'])
+              ret = AttributeSemanticType.convert_and_raise_error_if_not_valid(semantic_data_type,value,attribute_name: attr_props['display_name'])
             end
             ret
           else
@@ -99,6 +101,7 @@ module DTK; class ModuleDSL; class V3
           end
         end
       end
+
       def default_indicates_dynamic_default_variable?(info)
         info["default"] == ExtRefDefaultPuppetHeader
       end
@@ -115,12 +118,12 @@ module DTK; class ModuleDSL; class V3
           apply(:convert_and_raise_error_if_not_valid,semantic_type,value,opts)
         end
 
-       private
+        private
+
         def self.apply(*method_then_args)
           ::DTK::Attribute::SemanticDatatype.send(*method_then_args)
         end
       end
-
     end
   end
 end; end; end

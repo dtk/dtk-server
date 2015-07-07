@@ -8,18 +8,19 @@ module DTK
         impls.map{|impl|hash_form(impl,sha_info[impl[:id]])}
       end
 
-     private
+      private
+
       def self.hash_form(impl,sha=nil)
-        hash = impl.hash_form_subset(:id,:repo,:branch,{:module_name=>:implementation})
-        sha ? hash.merge(:sha => sha) : hash
+        hash = impl.hash_form_subset(:id,:repo,:branch,{module_name: :implementation})
+        sha ? hash.merge(sha: sha) : hash
       end
       
       def self.get_sha_indexed_by_impl(components)
-        ret = Hash.new
+        ret = {}
         return ret if components.empty?
         sp_hash = {
-          :cols => [:id,:group_id,:display_name,:locked_sha,:implementation_id],
-          :filter => [:oneof,:id,components.map{|r|r.id()}]
+          cols: [:id,:group_id,:display_name,:locked_sha,:implementation_id],
+          filter: [:oneof,:id,components.map{|r|r.id()}]
         }
         Model.get_objs(components.first.model_handle(),sp_hash).each do |r|
           if sha = r[:locked_sha]

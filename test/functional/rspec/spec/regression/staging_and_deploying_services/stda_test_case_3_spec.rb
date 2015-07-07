@@ -21,7 +21,6 @@ memory_size_attribute = 'memory_size'
 dtk_common = DtkCommon.new(service_name, assembly_name)
 
 describe "(Staging And Deploying Assemblies) Test Case 3: Deploy from assembly (stage and converge), stop the running instance (nodes) and then delete service" do
-
 	before(:all) do
 		puts "****************************************************************************************************************************************************",""
 	end

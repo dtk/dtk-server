@@ -7,6 +7,7 @@ module DTK; class Task; class Template
         def initialize(temporal_constraints)
           @intra_node_contraints = temporal_constraints.select{|r|r.intra_node?()}
         end
+
         def process(intra_node_unordered)
           # first break unordered node into execution blocks          
           # then order each execution block
@@ -17,8 +18,8 @@ module DTK; class Task; class Template
       end
       # although in an array, order does not make a difference
       class Unordered < Array
-        def break_into_execution_blocks()
-          ndx_ret = Hash.new
+        def break_into_execution_blocks
+          ndx_ret = {}
           each do |action|
             (ndx_ret[execution_block_index(action)] ||= ExecutionBlock::Unordered.new) << action
           end
@@ -26,7 +27,9 @@ module DTK; class Task; class Template
           ndx_ret.keys.sort.each{|exec_block_index|ret << ndx_ret[exec_block_index]}
           ret
         end
+
         private
+
         def execution_block_index(action)
           unless source_type = action.source_type
             raise Error.new("Cannot find source type for action (#{action.inspect})")
@@ -37,9 +40,9 @@ module DTK; class Task; class Template
           ret
         end
         ExecBlockOrder = {
-          :node_group => 0,
-          :node => 0,
-          :assembly => 1
+          node_group: 0,
+          node: 0,
+          assembly: 1
         }
       end
     end

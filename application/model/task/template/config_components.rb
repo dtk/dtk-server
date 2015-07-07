@@ -7,7 +7,7 @@ module DTK; class Task
         # only updating the create action task template and only if it is persisted
         assembly_cmp_actions = ActionList::ConfigComponents.get(assembly)
         if task_template_content = get_template_content_aux?([:assembly],assembly,assembly_cmp_actions,nil,opts)
-          new_action = Action.create(new_component.merge(:node => node,:title => component_title))
+          new_action = Action.create(new_component.merge(node: node,title: component_title))
           gen_constraints_proc = proc{TemporalConstraints::ConfigComponents.get(assembly,assembly_cmp_actions)}
           if updated_template_content = task_template_content.insert_action?(new_action,assembly_cmp_actions,gen_constraints_proc)
             Persistence::AssemblyActions.persist(assembly,updated_template_content)
@@ -20,7 +20,7 @@ module DTK; class Task
         # makes sense to also automtically delete component in other actions
         assembly_cmp_actions = ActionList::ConfigComponents.get(assembly)
         if task_template_content = get_template_content_aux?([:assembly],assembly,assembly_cmp_actions)
-          action_to_delete = Action.create(component.add_title_field?().merge(:node => node))
+          action_to_delete = Action.create(component.add_title_field?().merge(node: node))
           if updated_template_content = task_template_content.delete_explicit_action?(action_to_delete,assembly_cmp_actions)
             Persistence::AssemblyActions.persist(assembly,updated_template_content)
           end
@@ -57,7 +57,7 @@ module DTK; class Task
         end
 
         # otherwise do the temporal processing to generate template_content
-        opts_generate = (node_centric_first_stage?() ? {:node_centric_first_stage => true} : Hash.new)
+        opts_generate = (node_centric_first_stage?() ? {node_centric_first_stage: true} : {})
         template_content = generate_from_temporal_contraints([:assembly,:node_centric],assembly,cmp_actions,opts_generate)
 
         unless opts[:serialized_form]
@@ -68,7 +68,8 @@ module DTK; class Task
         template_content
       end
 
-     private
+      private
+
       def self.raise_error_if_unsupported_action_types(action_types)
         unless action_types.include?(:assembly)
           raise Error.new("Not supported when action types does not contain :assembly")
@@ -78,7 +79,7 @@ module DTK; class Task
           raise Error.new("Illegal action type(s) (#{illegal_action_types.join(',')})")
         end
       end
-      def self.node_centric_first_stage?()
+      def self.node_centric_first_stage?
         true
       end
 
@@ -91,7 +92,7 @@ module DTK; class Task
             if node_centric_content.empty?
               assembly_action_content
             else
-              opts_splice = (node_centric_first_stage?() ? {:node_centric_first_stage => true} : Hash.new)
+              opts_splice = (node_centric_first_stage?() ? {node_centric_first_stage: true} : {})
               assembly_action_content.splice_in_at_beginning!(node_centric_content,opts_splice)
             end
           end

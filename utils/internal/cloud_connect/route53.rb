@@ -3,13 +3,13 @@ module DTK
     class Route53 < self
       def initialize(dns_domain)
         @dns_domain = dns_domain
-        dns = Fog::DNS::AWS.new(get_compute_params(:just_credentials=>true))
+        dns = Fog::DNS::AWS.new(get_compute_params(just_credentials: true))
         unless @r8zone = dns.zones().find { |z| z.domain.include? dns_domain}
           raise ::DTK::Error.new("Bad dns_domain '#{dns_domain}'")
         end
       end
       
-      def all_records()
+      def all_records
         request_context do
           @r8zone.records
         end
@@ -45,7 +45,7 @@ module DTK
       #
       def create_record(name, value, type = 'CNAME', ttl=300)
         request_context do
-          create_hash = { :type => type, :name => name, :value => value, :ttl => ttl }
+          create_hash = { type: type, name: name, value: value, ttl: ttl }
           @r8zone.records.create(create_hash)
         end
       end
@@ -56,7 +56,7 @@ module DTK
       def update_record(record, value)
         request_context do
           # record is changed via Fog's modify
-          record.modify(:value => value)
+          record.modify(value: value)
         end
       end
     end

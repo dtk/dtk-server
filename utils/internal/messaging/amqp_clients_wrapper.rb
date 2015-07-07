@@ -13,12 +13,14 @@ module XYZ
         @connection_opts = *args
         ::AMQP.start(*args,&blk)
       end
+
       def graceful_stop(msg=nil)
         ::AMQP.stop do
 	  Log.info(msg) if msg
          ::EM.stop
         end
       end	
+
       def fork(num_workers,&block)
 	::AMQP.fork(num_workers,&block)
       end
@@ -32,10 +34,12 @@ module XYZ
       @connection_opts = connection_opts || XYZ::R8EventLoop.connection_opts || {}
       @native_clients = {}
     end
+
    def reset_client(type)
      close_clients_connections(type)
      @native_clients[type] = create_native_client(type,@connection_opts)
    end
+
    def close_clients_connections(type)
      raise Error.new("channel of type #{type} not treated") unless MessageBusClient.legal_channel_type?(type)
      return nil if @native_clients[type].nil?
@@ -58,7 +62,7 @@ module XYZ
    end
 
    def bind(queue_name,exchange_name,exchange_type,bind_opts={})
-     exchange = exchange(exchange_name, :type => exchange_type)
+     exchange = exchange(exchange_name, type: exchange_type)
      publish_queue(queue_name).bind(exchange, bind_opts)
    end
 
@@ -71,11 +75,12 @@ module XYZ
      @native_clients[type] = create_native_client(type,@connection_opts)
    end
 
-   def self.generate_unique_id()
+   def self.generate_unique_id
      "uuid#{::Kernel.rand(999_999_999_999)}"
    end
 
-  private
+    private
+
    def create_native_client(type,connection_opts={})
      case type
        when :mq
@@ -104,7 +109,7 @@ module XYZ
       publish_opts = Aux::without_keys(publish_opts_x,[:uuid,:reply_timeout])
       raise Error.new("publish_with_callback whould not have opts[:reply_to] set") if publish_opts[:reply_to]
       publish_opts[:reply_to] = uuid
-      response_queue = @client.subscribe_queue(uuid, :auto_delete => true)
+      response_queue = @client.subscribe_queue(uuid, auto_delete: true)
 
       publish_proc = proc {
         publish(msg_bus_msg_out,publish_opts)
@@ -112,28 +117,30 @@ module XYZ
       }
       # publish put in callback to ensure executed after reply queue created
       if callback_block.arity == 1
-        response_queue.subscribe(:confirm => publish_proc) do |msg_bus_msg_in|
+        response_queue.subscribe(confirm: publish_proc) do |msg_bus_msg_in|
           @got_replies_from[uuid] = true
           callback_block.call(msg_bus_msg_in)
           response_queue.delete()
         end
       else #callback_block.arity == 2
-        response_queue.subscribe(:confirm => publish_proc) do |trans_info,msg_bus_msg_in|
+        response_queue.subscribe(confirm: publish_proc) do |trans_info,msg_bus_msg_in|
           @got_replies_from[uuid] = true
           callback_block.call(trans_info,msg_bus_msg_in)
           response_queue.delete()
         end
       end
     end
-   private
+
+    private
+
     def set_reply_timeout(reply_timeout,reply_queue_name)
       EM.add_timer(reply_timeout) {
         unless @got_replies_from[reply_queue_name]
-          # TBD: msg is stubbed
+         # TBD: msg is stubbed
          print "debug: sending cancled signal\n"
-          msg_bus_msg_out = ProcessorMsg.create(:msg_type => :time_out).marshal_to_message_bus_msg()
-          timeout_queue = @client.publish_queue(reply_queue_name,:passive => true)
-	  timeout_queue.publish(msg_bus_msg_out, :task => :canceled)
+          msg_bus_msg_out = ProcessorMsg.create(msg_type: :time_out).marshal_to_message_bus_msg()
+          timeout_queue = @client.publish_queue(reply_queue_name,passive: true)
+	  timeout_queue.publish(msg_bus_msg_out, task: :canceled)
         end
        }
     end
@@ -144,7 +151,9 @@ module XYZ
   class R8Exchange
     attr_reader :native_exchange
     include R8ExchangeQueueMixin
-   private
+
+    private
+
     def initialize(client)
      @client = client
      @got_replies_from = {}
@@ -158,6 +167,7 @@ module XYZ
       @opts = opts
       @native_exchange = client.native_client?(:bunny).exchange(name,opts)
     end
+
     def delete(opts={})
       @native_exchange.delete(opts)
     end
@@ -183,7 +193,9 @@ end
 module XYZ
   class R8Queue 
    include R8ExchangeQueueMixin
-   private
+
+    private
+
      def initialize(client)
        @client = client
        @got_replies_from = {}
@@ -195,9 +207,11 @@ module XYZ
       super(client)
       @mq_queue = client.native_client?(:mq).queue(name,opts)
     end
+
     def delete(opts={})
       @mq_queue.delete(opts)
     end
+
     def subscribe(opts={},&block)
        if block.arity == 1
          @mq_queue.subscribe(opts) do |raw_msg|
@@ -248,12 +262,11 @@ module XYZ
     end
 
     def bind(exchange,opts={})
-      raise Error.new("exchange is wrong type") unless exchange.kind_of?(R8ExchangeBunny)
+      raise Error.new("exchange is wrong type") unless exchange.is_a?(R8ExchangeBunny)
       @native_queue.bind(exchange.native_exchange,opts)
     end
   end
 end
-
 
 # TBD: not sure if needed now because explicitly seting connection within fork
 # monkey patch that is used when want to call AMPQ.fork and set params like :host

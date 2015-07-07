@@ -1,9 +1,9 @@
 {
-  :schema=>:node,
-  :table=>:bindings,
-  :columns=>{
-    :content => {:type=>:json}
+  schema: :node,
+  table: :bindings,
+  columns: {
+    content: {type: :json}
   },
-  :many_to_one=>[:component]
+  many_to_one: [:component]
 }
 

@@ -7,7 +7,7 @@ module DTK
       end
 
       # TODO: see if any better way than embedding, sorting, then expanding
-      embed = Array.new
+      embed = []
       main_table.each_with_index do |r,i|
         if jc = join_columns[i]
           embed << r.merge("__jc" => jc)
@@ -15,7 +15,7 @@ module DTK
           embed << r
         end
       end
-      ret = Array.new
+      ret = []
       embed.sort(&main_table_sort).each do |r|
         if jc = r.delete("__jc")
           ret << r.merge(jc.first)
@@ -39,6 +39,5 @@ module DTK
         end
       end
     end
-
   end
 end

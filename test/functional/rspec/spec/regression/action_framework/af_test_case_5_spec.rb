@@ -17,55 +17,54 @@ assembly_name = 'action_module::file-positioning-and-clauses'
 dtk_common = DtkCommon.new(service_name, assembly_name)
 
 expected_output_1 = {
-	:command => "mkdir /tmp/test1 && rm -rf /tmp/test1",
-	:status => 0,
-	:stderr => nil,
+	command: "mkdir /tmp/test1 && rm -rf /tmp/test1",
+	status: 0,
+	stderr: nil,
 }
 
 expected_output_2 = {
-	:command => "mkdir /tmp/test2 && rm -rf /tmp/test2",
-	:status => 0,
-	:stderr => nil,
+	command: "mkdir /tmp/test2 && rm -rf /tmp/test2",
+	status: 0,
+	stderr: nil,
 }
 
 expected_output_3_1 = {
-	:command => "/tmp/test.txt with provided content",
-	:status => 0,
-	:stderr => nil
+	command: "/tmp/test.txt with provided content",
+	status: 0,
+	stderr: nil
 }
 
 expected_output_3_2 = {
-	:command => "cat /tmp/test.txt | grep newtest",
-	:status => 0,
-	:stderr => nil
+	command: "cat /tmp/test.txt | grep newtest",
+	status: 0,
+	stderr: nil
 }
 
 expected_output_3_3 = {
-	:command => "rm -rf /tmp/test.txt",
-	:status => 0,
-	:stderr => nil
+	command: "rm -rf /tmp/test.txt",
+	status: 0,
+	stderr: nil
 }
 
 expected_output_4_1 = {
-	:command => "/tmp/test.txt with provided content",
-	:status => 0,
-	:stderr => nil,
+	command: "/tmp/test.txt with provided content",
+	status: 0,
+	stderr: nil,
 }
 
 expected_output_4_2 = {
-	:command => "rm -rf /tmp/test.txt",
-	:status => 0,
-	:stderr => nil,
+	command: "rm -rf /tmp/test.txt",
+	status: 0,
+	stderr: nil,
 }
 
 expected_output_5 = {
-	:command => "/tmp/test.txt with provided content",
-	:status => nil,
-	:stderr => "Permissions '0888' are not valid",
+	command: "/tmp/test.txt with provided content",
+	status: nil,
+	stderr: "Permissions '0888' are not valid",
 }
 
 describe "(Action Framework) Test Case 5: Service with one node that contains cmp with actions (unless/if/file position)" do
-
 	before(:all) do
 		puts "**************************************************************************************************************",""
   end

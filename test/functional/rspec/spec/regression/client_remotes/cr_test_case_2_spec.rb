@@ -21,7 +21,6 @@ github_2_component_module_filesystem_location = "~/dtk/component_modules/github2
 dtk_common = DtkCommon.new('', '')
 
 describe "(Client remotes) Test Case 2: Import from Github, check remotes, make changes and push-remote and make sure changes are pushed" do
-
   before(:all) do
     puts "******************************************************************************************************************************",""
   end

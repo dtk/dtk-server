@@ -25,7 +25,7 @@ module DTK
 
     def self.parse_dsl(component_module,impl_obj,opts={})
       ref_integrity_snapshot = RefIntegrity.snapshot_associated_assembly_templates(component_module)
-      opts_create_dsl = opts.merge(:ref_integrity_snapshot => ref_integrity_snapshot, :component_module => component_module)
+      opts_create_dsl = opts.merge(ref_integrity_snapshot: ref_integrity_snapshot, component_module: component_module)
       create_dsl_object_from_impl(impl_obj,opts_create_dsl)
     end
 
@@ -34,10 +34,10 @@ module DTK
       # problems within transaction after do update; transaction is aborted if any errors found
       Model.Transaction do
         update_opts = {
-          :override_attrs => {"module_branch_id" => @module_branch.id()},
-          :namespace      => component_module().module_namespace()
+          override_attrs: {"module_branch_id" => @module_branch.id()},
+          namespace: component_module().module_namespace()
         }
-        update_opts.merge!(:version => opts[:version]) if opts[:version]
+        update_opts.merge!(version: opts[:version]) if opts[:version]
         update_model(update_opts)
 
         ref_integrity_snapshot.raise_error_if_any_violations()
@@ -79,7 +79,7 @@ module DTK
 
     # returns [dsl_file_path,hash_content,fragment_hash]
     def self.incremental_generate(module_branch,augmented_objects,context={})
-      augmented_objects = [augmented_objects] unless augmented_objects.kind_of?(Array)
+      augmented_objects = [augmented_objects] unless augmented_objects.is_a?(Array)
       helper = IncrementalGeneratorHelper.new(augmented_objects)
       info = get_dsl_file_hash_content_info(module_branch)
       full_hash = info[:hash_content]
@@ -90,20 +90,20 @@ module DTK
     def self.contains_dsl_file?(impl_obj,dsl_integer_version=nil,format_type=nil)
       dsl_integer_version ||= integer_version(dsl_integer_version)
       unless regexp = DSLFilenameRegexp[dsl_integer_version]
-        raise Error.new("Do not treat Component DSL version: #{dsl_integer_version.to_s}")
+        raise Error.new("Do not treat Component DSL version: #{dsl_integer_version}")
       end
       format_ext_regexp = (format_type && Regexp.new("\.(#{ExtensionToType[format_type.to_sym]}$)"))
       depth = 1
-      RepoManager.ls_r(depth,{:file_only => true},impl_obj).find do |f|
-        (f =~ regexp) and (format_ext_regexp.nil? or f =~ format_ext_regexp)
+      RepoManager.ls_r(depth,{file_only: true},impl_obj).find do |f|
+        (f =~ regexp) && (format_ext_regexp.nil? || f =~ format_ext_regexp)
       end
     end
 
-    def self.default_integer_version()
+    def self.default_integer_version
       R8::Config[:dsl][:component][:integer_version][:default].to_i
     end
 
-    def self.default_format_type()
+    def self.default_format_type
       R8::Config[:dsl][:component][:format_type][:default].to_sym
     end
 
@@ -118,14 +118,14 @@ module DTK
 
       components.each do |name,value|
         # if component is 'puppet definition'
-        if (value['external_ref'].kind_of?(Hash) ? value['external_ref'] : {}).has_key?('puppet_definition')
+        if (value['external_ref'].is_a?(Hash) ? value['external_ref'] : {}).key?('puppet_definition')
           attributes = value['attributes']
           names = get_name_attributes(attributes)
-          return ParsingError::BadPuppetDefinition.new(:component => name, :invalid_names => names) unless names.size == 1
+          return ParsingError::BadPuppetDefinition.new(component: name, invalid_names: names) unless names.size == 1
           # if names.size == 1
-            # return ParsingError::BadPuppetDefinition.new(:component => name, :missing_req_or_def => missing_req_or_def) unless missing_req_or_def.empty?
+          # return ParsingError::BadPuppetDefinition.new(:component => name, :missing_req_or_def => missing_req_or_def) unless missing_req_or_def.empty?
           # else
-            # return ParsingError::BadPuppetDefinition.new(:component => name, :invalid_names => names)
+          # return ParsingError::BadPuppetDefinition.new(:component => name, :invalid_names => names)
           # end
         end
       end
@@ -140,7 +140,7 @@ module DTK
           names << n_name
           # missing_req_or_def << n_name unless (n_attr.has_key?('required') || n_attr.has_key?('default'))
         elsif ext_ref = n_attr['external_ref']
-          names << n_name if (ext_ref.has_key?('puppet_attribute') && ext_ref['puppet_attribute'].eql?('name'))
+          names << n_name if (ext_ref.key?('puppet_attribute') && ext_ref['puppet_attribute'].eql?('name'))
         end
       end
       return names
@@ -154,15 +154,16 @@ module DTK
       klass.convert_attribute_mapping_helper(input_am,base_cmp,dep_cmp,opts)
     end
 
-   private
-    def ref_integrity_snapshot()
+    private
+
+    def ref_integrity_snapshot
       unless @ref_integrity_snapshot
         raise Error.new("Unexpected that @ref_integrity_snapshot is nil")
       end
       @ref_integrity_snapshot
     end
 
-    def component_module()
+    def component_module
       unless @component_module
         raise Error.new("Unexpected that @component_module is nil")
       end
@@ -185,7 +186,7 @@ module DTK
       end
 
       def get_config_fragment_hash_form(augmented_objects)
-        augmented_objects.inject(Hash.new) do |h,aug_obj|
+        augmented_objects.inject({}) do |h,aug_obj|
           generated_hash = @version_klass.generate(aug_obj)
           h.merge(generated_hash)
         end
@@ -208,14 +209,14 @@ module DTK
 
     def self.get_dsl_file_hash_content_info(impl_or_module_branch_obj,dsl_integer_version=nil,format_type=nil)
       impl_obj =
-        if impl_or_module_branch_obj.kind_of?(Implementation)
+        if impl_or_module_branch_obj.is_a?(Implementation)
           impl_or_module_branch_obj
-        elsif impl_or_module_branch_obj.kind_of?(ModuleBranch)
+        elsif impl_or_module_branch_obj.is_a?(ModuleBranch)
           impl_or_module_branch_obj.get_implementation()
         else raise Error.new("Unexpected object type for impl_or_module_branch_obj (#{impl_or_module_branch_obj.class})")
         end
       info = get_dsl_file_raw_content_and_info(impl_obj,dsl_integer_version,format_type)
-      {:hash_content => convert_to_hash(info[:content],info[:format_type])}.merge(Aux::hash_subset(info,[:format_type,:dsl_filename]))
+      {hash_content: convert_to_hash(info[:content],info[:format_type])}.merge(Aux::hash_subset(info,[:format_type,:dsl_filename]))
     end
 
     def self.get_dsl_file_raw_content_and_info(impl_obj,dsl_integer_version=nil,format_type=nil)
@@ -224,8 +225,8 @@ module DTK
       end
       parsed_name = parse_dsl_filename(dsl_filename,dsl_integer_version)
       format_type ||= parsed_name[:format_type]
-      content = RepoManager.get_file_content(dsl_filename,:implementation => impl_obj)
-      {:content => content,:format_type => format_type,:dsl_filename => dsl_filename}
+      content = RepoManager.get_file_content(dsl_filename,implementation: impl_obj)
+      {content: content,format_type: format_type,dsl_filename: dsl_filename}
     end
 
     def version_parse_check_and_normalize(version_specific_input_hash)
@@ -235,7 +236,7 @@ module DTK
       klass.normalize(version_specific_input_hash)
     end
 
-    def self.dsl_filename(format_type,dsl_integer_version=nil)
+    def self.dsl_filename(format_type,_dsl_integer_version=nil)
       first_part = 'dtk.model'
       unless extension = TypeToExtension[format_type]
         legal_types = TypeToExtension.values.uniq.join(',')
@@ -257,7 +258,7 @@ module DTK
       "0.9.1" => 3,
       "1.0.0" => 4
     }
-    VersionIntegerToVersion = VersionToVersionInteger.inject(Hash.new) do |h,(v,vi)|
+    VersionIntegerToVersion = VersionToVersionInteger.inject({}) do |h,(v,vi)|
       h.merge(vi=>v)
     end
 
@@ -273,16 +274,16 @@ module DTK
       "yaml" => :yaml,
       "json" => :json
     }
-    TypeToExtension = ExtensionToType.inject(Hash.new){|h,(k,v)|h.merge(v => k)}
+    TypeToExtension = ExtensionToType.inject({}){|h,(k,v)|h.merge(v => k)}
 
     class << self
       def load_and_return_version_adapter_class(integer_version)
-        @cached_adapter_class ||= Hash.new
+        @cached_adapter_class ||= {}
         return @cached_adapter_class[integer_version] if @cached_adapter_class[integer_version]
-        adapter_name = "v#{integer_version.to_s}"
+        adapter_name = "v#{integer_version}"
         opts = {
-          :class_name => {:adapter_type => adapter_type()},
-          :subclass_adapter_name => true
+          class_name: {adapter_type: adapter_type()},
+          subclass_adapter_name: true
         }
         @cached_adapter_class[integer_version] = DynamicLoader.load_and_return_adapter_class(adapter_dir(),adapter_name,opts)
       end
@@ -291,11 +292,13 @@ module DTK
         filename =~ DSLFilenameRegexp[integer_version(dsl_integer_version)]
       end
 
-     private
-      def adapter_type()
+      private
+
+      def adapter_type
         "ModuleDSL"
       end
-      def adapter_dir()
+
+      def adapter_dir
         "dsl"
       end
 
@@ -314,7 +317,7 @@ module DTK
           unless format_type = ExtensionToType[file_extension]
             raise Error.new("illegal file extension #{file_extension}")
           end
-          {:format_type => format_type}
+          {format_type: format_type}
         else
           raise Error.new("Component filename (#{filename}) has illegal form")
         end
@@ -342,10 +345,9 @@ module DTK
         begin
           Aux.convert_to_hash(content,format_type,opts)
          rescue ArgumentError => e
-          raise ErrorUsage.new("Error parsing the component dsl file; #{e.to_s}")
+          raise ErrorUsage.new("Error parsing the component dsl file; #{e}")
         end
       end
-
     end
   end
 end

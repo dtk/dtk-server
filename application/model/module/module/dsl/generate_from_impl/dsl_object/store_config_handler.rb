@@ -17,7 +17,9 @@ module DTK; class ModuleDSL; class GenerateFromImpl
         klass.process_storeconfig_attr_mapping!(link_def_poss_link,data)
         klass.process_extra_attr_mappings!(link_def_poss_link,data)
       end
-     private
+
+      private
+
       def self.ret_klass(type)
         ret = nil
         begin
@@ -59,20 +61,20 @@ module DTK; class ModuleDSL; class GenerateFromImpl
 
       def self.process_storeconfig_attr_mapping!(link_def_poss_link,data)
         attr_mappings = link_def_poss_link[:attribute_mappings] ||= MetaArray.new
-        input = {:component => data[:attr_imp_coll].parent.hash_key, :attribute => data[:attr_imp_coll].hash_key}
-        output = {:component => data[:attr_exp_rsc].parent.hash_key, :attribute => data[:attr_exp_rsc].hash_key}
-        attr_mappings << link_def_poss_link.create_attribute_mapping(input,output,{:include => true})
+        input = {component: data[:attr_imp_coll].parent.hash_key, attribute: data[:attr_imp_coll].hash_key}
+        output = {component: data[:attr_exp_rsc].parent.hash_key, attribute: data[:attr_exp_rsc].hash_key}
+        attr_mappings << link_def_poss_link.create_attribute_mapping(input,output,include: true)
       end
 
       def self.process_extra_attr_mappings!(link_def_poss_link,data)
         matching_vars = data[:matching_vars]
-        return if matching_vars.nil? or matching_vars.empty?
+        return if matching_vars.nil? || matching_vars.empty?
         matching_vars.each{|match|process_extra_attr_mapping!(link_def_poss_link,match,data)}
       end
 
       def self.hash_key_for_output_attr(exp_rsc_ps)
         title_param = (exp_rsc_ps[:parameters]||[]).find{|exp|exp[:name] == "title"}
-        sanitize_attribute("#{exp_rsc_ps[:name]}--#{title_param[:value].to_s(:just_variable_name => true)}")
+        sanitize_attribute("#{exp_rsc_ps[:name]}--#{title_param[:value].to_s(just_variable_name: true)}")
       end
       def self.augment_ext_ref_for_output_attr!(ext_ref,exp_rsc_ps)
         title_param = (exp_rsc_ps[:parameters]||[]).find{|exp|exp[:name] == "title"}
@@ -83,7 +85,7 @@ module DTK; class ModuleDSL; class GenerateFromImpl
 
       def self.hash_key_for_input_attr(imp_coll_ps)
         attr_exprs = imp_coll_ps[:query].attribute_expressions()||[]
-        postfix = attr_exprs.map{|a|"#{a[:name]}__#{a[:value].to_s(:just_variable_name => true)}"}.join("--")
+        postfix = attr_exprs.map{|a|"#{a[:name]}__#{a[:value].to_s(just_variable_name: true)}"}.join("--")
         sanitize_attribute("#{imp_coll_ps[:type]}--#{postfix}")
       end
       def self.augment_ext_ref_for_input_attr!(ext_ref,imp_coll_ps)
@@ -94,23 +96,22 @@ module DTK; class ModuleDSL; class GenerateFromImpl
       end
 
       def self.param_values_to_s(params)
-        params.map{|p|SimpleOrderedHash.new([{:name => p[:name]},{:value => p[:value].to_s}])}
+        params.map{|p|SimpleOrderedHash.new([{name: p[:name]},{value: p[:value].to_s}])}
       end
       def self.attr_expr_values_to_s(attr_exprs)
-        attr_exprs.map{|a|SimpleOrderedHash.new([{:name => a[:name]},{:op => a[:op]},{:value => a[:value].to_s}])}
+        attr_exprs.map{|a|SimpleOrderedHash.new([{name: a[:name]},{op: a[:op]},{value: a[:value].to_s}])}
       end
-
 
       def self.content_variables_in_output_var(exp_rsc_ps,attr_meta)
         content = (exp_rsc_ps[:parameters]||[]).find{|exp|exp[:name] == "content"}
-        return Array.new unless content and content[:value]
+        return [] unless content && content[:value]
         
         if template = content[:value].template?()
-          pp "debug: handle content with template #{template.to_s}"
-          return Array.new
+          pp "debug: handle content with template #{template}"
+          return []
         end
         ret = content[:value].variable_list()
-        return Array.new if ret.empty?
+        return [] if ret.empty?
         # prune variables that appear already; need parent source
         existing_attr_names = (attr_meta.parent_source||{})[:attributes].map{|a|a[:name]}
         ret.reject{|v|existing_attr_names.include?(v)}
@@ -119,11 +120,11 @@ module DTK; class ModuleDSL; class GenerateFromImpl
     class FileERH < StoreConfigHandler
       def self.process_extra_attr_mapping!(link_def_poss_link,match,data)
         attr_mappings = link_def_poss_link[:attribute_mappings] ||= MetaArray.new
-        return unless match[:name] == "tag" and match[:input_var].is_variable? and match[:output_var].is_variable?
+        return unless match[:name] == "tag" && match[:input_var].is_variable? && match[:output_var].is_variable?
         input_component = data[:attr_imp_coll].parent.hash_key
-        input = {:component =>  input_component,:attribute => match[:input_var][:value]}
+        input = {component: input_component,attribute: match[:input_var][:value]}
         output_component = data[:attr_exp_rsc].parent.hash_key
-        output = {:component =>  output_component,:attribute => match[:output_var][:value]}
+        output = {component: output_component,attribute: match[:output_var][:value]}
         attr_mappings << link_def_poss_link.create_attribute_mapping(input,output) 
       end
     end 

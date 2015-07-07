@@ -3,12 +3,12 @@ module DTK; class Clone; class IncrementalUpdate
     class Links < Array
       def add?(instances,templates,parent_link)
         # do not add if both instances and templates are empty?
-        unless instances.empty? and templates.empty?
+        unless instances.empty? && templates.empty?
           self << Link.new(instances,templates,parent_link)
         end
       end
 
-      def instance_model_handle()
+      def instance_model_handle
         unless link = first()
           raise Error.new("Should not be called if this is empty")
         end

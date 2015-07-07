@@ -5,7 +5,7 @@ module DTK
         self.class.get_module_branch_from_local(local_params.create_local(get_project()))
       end
       
-      def get_module_branches()
+      def get_module_branches
         get_objs_helper(:module_branches,:module_branch)
       end
       
@@ -14,15 +14,15 @@ module DTK
       end
 
       def get_workspace_repo(version=nil)
-        aug_branch = get_augmented_workspace_branch(:filter => {:version => version})
+        aug_branch = get_augmented_workspace_branch(filter: {version: version})
         aug_branch[:repo]
       end      
 
       def get_workspace_branch_info(version=nil,opts={})
-        if aug_branch = get_augmented_workspace_branch({:filter => {:version => version}}.merge(opts))
+        if aug_branch = get_augmented_workspace_branch({filter: {version: version}}.merge(opts))
           module_name = aug_branch[:module_name]
           module_namespace = aug_branch[:module_namespace]
-          opts_info = {:version=>version, :module_namespace=>module_namespace}
+          opts_info = {version: version, module_namespace: module_namespace}
           ModuleRepoInfo.new(aug_branch[:repo],module_name,id_handle(),aug_branch,opts_info)
         end
       end
@@ -31,7 +31,7 @@ module DTK
         version = (opts[:filter]||{})[:version]
         version_field = ModuleBranch.version_field(version) #version can be nil
         sp_hash = {
-          :cols => [:display_name,:workspace_info_full,:namespace]
+          cols: [:display_name,:workspace_info_full,:namespace]
         }
         module_rows = get_objs(sp_hash).select do |r|
           r[:module_branch][:version] == version_field
@@ -49,9 +49,9 @@ module DTK
           raise ErrorUsage.new("The module (#{pp_module_name(version)}) is not tied to namespace '#{opts[:filter][:remote_namespace]}' on the repo manager")
         end
         
-        ret = module_obj[:module_branch].merge(:repo => module_obj[:repo],:module_name => module_obj[:display_name], :module_namespace => module_obj[:namespace][:display_name])
+        ret = module_obj[:module_branch].merge(repo: module_obj[:repo],module_name: module_obj[:display_name], module_namespace: module_obj[:namespace][:display_name])
         if opts[:include_repo_remotes]
-          ret.merge!(:repo_remotes => module_obj[:repo_remotes])
+          ret.merge!(repo_remotes: module_obj[:repo_remotes])
         end
         ret
       end
@@ -71,24 +71,23 @@ module DTK
         matches.first
       end
 
-
       #
       # Returns ModuleBranch object for given version
       #
       def get_workspace_module_branch(version=nil)
         mb_mh = model_handle().create_childMH(:module_branch)
         sp_hash = {
-        :cols => ModuleBranch.common_columns(),
-          :filter => [:and,[:eq,mb_mh.parent_id_field_name(),id()],
-                      [:eq,:is_workspace,true],
-                      [:eq,:version,ModuleBranch.version_field(version)]]
+        cols: ModuleBranch.common_columns(),
+          filter: [:and,[:eq,mb_mh.parent_id_field_name(),id()],
+                   [:eq,:is_workspace,true],
+                   [:eq,:version,ModuleBranch.version_field(version)]]
       }
         Model.get_obj(mb_mh,sp_hash)
       end
       # MOD_RESTRUCT: may replace below with above
       def get_module_branch(branch)
         sp_hash = {
-          :cols => [:module_branches]
+          cols: [:module_branches]
         }
         module_branches = get_objs(sp_hash).map{|r|r[:module_branch]}
         module_branches.find{|mb|mb[:branch] == branch}
@@ -136,7 +135,7 @@ module DTK
       end
       
       def get_workspace_module_branches(module_idhs)
-        ret = Array.new
+        ret = []
         if module_idhs.empty?
           return ret
         end
@@ -148,14 +147,14 @@ module DTK
       
       def get_matching_module_branches(mh_or_idh,filter,post_filter=nil,opts={})
         sp_hash = {
-            :cols => [:id,:display_name,:group_id,:module_branches],
-          :filter => filter
+            cols: [:id,:display_name,:group_id,:module_branches],
+          filter: filter
         }
         rows = get_objs(mh_or_idh.create_childMH(module_type()),sp_hash).map do |r|
-          r[:module_branch].merge(:module_id => r[:id])
+          r[:module_branch].merge(module_id: r[:id])
         end
         if rows.empty?
-          return Array.new if opts[:no_error_if_does_not_exist]
+          return [] if opts[:no_error_if_does_not_exist]
           raise ErrorUsage.new("Module does not exist")
         end
         post_filter ? rows.select{|r|post_filter.call(r)} : rows

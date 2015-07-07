@@ -5,7 +5,8 @@ module DTK
       def initialize(node_target)
         @node_target = node_target
       end
-      def node_target_image?()
+
+      def node_target_image?
         @node_target.respond_to?(:image) && @node_target.image
       end
     end

@@ -28,30 +28,29 @@ engine.register_participant :report do |workitem|
   pp [:fields,workitem.fields]
 end
 
-engine.register_participant :start do |workitem|
+engine.register_participant :start do |_workitem|
   pp :start
 end
  
-pdef = Ruote.process_definition :name => 'test' do
+pdef = Ruote.process_definition name: 'test' do
   sequence do
     participant :start
-    participant :remote, :label => 1
-    concurrence :merge_type => :stack do
-        participant :remote, :label => 2
-        participant :remote, :label => 3
-        participant :remote, :label => 4
+    participant :remote, label: 1
+    concurrence merge_type: :stack do
+        participant :remote, label: 2
+        participant :remote, label: 3
+        participant :remote, label: 4
       sequence do
         concurrence do
-          listen :to => 'remote', :where => '${label} == 3', :upon => "reply"
-          listen :to => 'remote', :where => '${label} == 2', :upon => "reply"
+          listen to: 'remote', where: '${label} == 3', upon: "reply"
+          listen to: 'remote', where: '${label} == 2', upon: "reply"
         end
-        participant :remote, :label => 5
+        participant :remote, label: 5
       end
     end
     participant :report
   end
 end
-
 
 wfid = engine.launch(pdef)
 engine.wait_for(wfid)

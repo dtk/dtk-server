@@ -6,11 +6,11 @@ module DTK; class Attribute
     end
     Type :array do
       basetype :json
-      validation lambda{|v|v.kind_of?(Array)}
+      validation lambda{|v|v.is_a?(Array)}
     end
     Type :hash do
       basetype :json
-      validation lambda{|v|v.kind_of?(Hash)}
+      validation lambda{|v|v.is_a?(Hash)}
     end
     Type :port do
       basetype :integer
@@ -41,9 +41,9 @@ module DTK; class Attribute
       basetype :boolean
       validation /true|false/
       internal_form lambda{|v|
-        if v.kind_of?(TrueClass) or v == 'true'
+        if v.is_a?(TrueClass) || v == 'true'
           true
-        elsif v.kind_of?(FalseClass) or v == 'false'
+        elsif v.is_a?(FalseClass) || v == 'false'
           false
         else
           raise Error.new("Bad boolean type (#{v.inspect})") #this should not be reached since v is validated before this fn called

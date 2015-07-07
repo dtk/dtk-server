@@ -10,29 +10,30 @@ module DTK
         get_opts = Aux.hash_subset(opts, [:filter])
         pp_opts = Aux.hash_subset(opts, [:context, :hide_assembly_wide_node])
         get_augmented_port_links(get_opts).map { |r| ServiceLink.print_form_hash(r, pp_opts) } +
-          get_augmented_ports(:mark_unconnected => true).select { |r| r[:unconnected] }.map { |r| ServiceLink.print_form_hash(r, pp_opts) }
+          get_augmented_ports(mark_unconnected: true).select { |r| r[:unconnected] }.map { |r| ServiceLink.print_form_hash(r, pp_opts) }
       end
       
-      def list_connections__possible()
-        ret = Array.new
-        output_ports = Array.new
-        unc_ports = Array.new
-        get_augmented_ports(:mark_unconnected=>true).each do |r|
+      def list_connections__possible
+        ret = []
+        output_ports = []
+        unc_ports = []
+        get_augmented_ports(mark_unconnected: true).each do |r|
           if r[:direction] == "output"
             output_ports << r 
           elsif r[:unconnected]
             unc_ports << r 
           end
         end
-        return ret if output_ports.nil? or unc_ports.nil?
+        return ret if output_ports.nil? || unc_ports.nil?
         poss_conns = LinkDef.find_possible_connections(unc_ports,output_ports)
         poss_conns.map do |r|
-          poss_conn = "#{r[:output_port][:id].to_s}:#{r[:output_port].display_name_print_form()}"
-          ServiceLink.print_form_hash(r[:input_port]).merge(:possible_connection => poss_conn)
+          poss_conn = "#{r[:output_port][:id]}:#{r[:output_port].display_name_print_form()}"
+          ServiceLink.print_form_hash(r[:input_port]).merge(possible_connection: poss_conn)
         end.sort{|a,b|a[:service_ref] <=> b[:service_ref]}
       end
       
       private
+
       def find_dep_name_raise_error_if_ambiguous(input_cmp_idh,output_cmp_idh,opts={})
         input_cmp = input_cmp_idh.create_object()
         output_cmp = output_cmp_idh.create_object()

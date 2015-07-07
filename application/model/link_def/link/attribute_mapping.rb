@@ -6,9 +6,9 @@ module DTK
       r8_nested_require('attribute_mapping','parse_helper')
                         
       def self.reify(object)
-        if object.kind_of?(AttributeMapping)
+        if object.is_a?(AttributeMapping)
           object
-        elsif object.kind_of?(Hash)
+        elsif object.is_a?(Hash)
           new(object)
         else
           raise Error.new("Unexpected object type (#{object.class})")
@@ -16,8 +16,8 @@ module DTK
       end
 
       def aug_attr_mappings__clone_if_needed(link_def_context,opts={})
-        ret = Array.new
-        err_msgs = Array.new
+        ret = []
+        err_msgs = []
         input_attr_obj,input_path = get_context_attr_obj_with_path(err_msgs,:input,link_def_context)
         output_attr_obj,output_path = get_context_attr_obj_with_path(err_msgs,:output,link_def_context)
         unless err_msgs.empty?
@@ -31,10 +31,10 @@ module DTK
         end
 
         attr_and_path_info = {
-          :input_attr_obj  => input_attr_obj,
-          :input_path      => input_path,
-          :output_attr_obj => output_attr_obj,
-          :output_path     => output_path
+          input_attr_obj: input_attr_obj,
+          input_path: input_path,
+          output_attr_obj: output_attr_obj,
+          output_path: output_path
         }
         NodeGroupProcessor.aug_attr_mappings__clone_if_needed(self,link_def_context,attr_and_path_info,opts)
       end
@@ -42,18 +42,19 @@ module DTK
       # returns a hash with args if this is a function that takes args
       #
       # 
-      def parse_function_with_args?()
+      def parse_function_with_args?
         ParseHelper::VarEmbeddedInText.isa?(self) # || other ones we add
       end
 
       def match_attribute_patterns?(dep_attr_pattern,antec_attr_pattern)
-        if dep_attr_pattern.match_attribute_mapping_endpoint?(self[:input]) and
+        if dep_attr_pattern.match_attribute_mapping_endpoint?(self[:input]) &&
             antec_attr_pattern.match_attribute_mapping_endpoint?(self[:output])
           self
         end
       end
           
-     private
+      private
+
       # returns [attribute_object,unravel_path] and updates error if any error
       def get_context_attr_obj_with_path(err_msgs,dir,context)
         attr_object = context.find_attribute_object?(self[dir][:term_index])
@@ -84,7 +85,6 @@ module DTK
           end
         end
       end
-
     end
   end
 end

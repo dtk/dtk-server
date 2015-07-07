@@ -12,7 +12,7 @@ module DTK; class AttributeLink
     r8_nested_require('function','var_embedded_in_text')
 
     include Propagate::Mixin 
-    def initialize(function_def,propagate_proc)
+    def initialize(_function_def,propagate_proc)
       # TODO: when get rid of lgacy fn processing can get rid of needing to copy all these vars
       @propagate_proc = propagate_proc
       @output_attr = propagate_proc.output_attr
@@ -34,22 +34,23 @@ module DTK; class AttributeLink
       ret
     end
 
-    def internal_hash_form(opts={})
+    def internal_hash_form(_opts={})
       raise Error.new("Should not be called")
     end
 
-    def value(opts={})
+    def value(_opts={})
       raise Error.new("Should not be called")
     end
     
-   private
+    private
+
     def self.internal_hash_form?(function_def,propagate_proc)
       fn_name = function_name(function_def)
       fn_klass = function_class_names().find{|k|k.name() == fn_name}
       fn_klass && fn_klass.new(function_def,propagate_proc).internal_hash_form()
     end
 
-    def self.function_class_names()
+    def self.function_class_names
       @function_class_names = [Eq,EqIndexed,ArrayAppend,Composite,VarEmbeddedInText]
     end
     
@@ -61,7 +62,7 @@ module DTK; class AttributeLink
       end
     end
 
-    def self.name()
+    def self.name
       Aux.underscore(self.to_s).split('/').last.to_sym
     end
     
@@ -69,7 +70,6 @@ module DTK; class AttributeLink
      Base.function_name?(function_def) || WithArgs.function_name?(function_def) ||
         raise(Error.new("Function def has illegal form: #{function_def.inspect}"))
     end
-
   end
 end; end
 

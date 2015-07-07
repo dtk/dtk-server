@@ -22,7 +22,7 @@ module DTK; class ActionDef; class Content
         if serialized_command.is_a?(String) && serialized_command =~ Constant::Command::RunRegexp
           command_line = $1
           new(serialized_command, command_line)
-        elsif command_line = serialized_command.is_a?(Hash) && serialized_command[:RUN]
+        elsif command_line = serialized_command.is_a?(Hash) && (serialized_command[:command] || serialized_command[:RUN])
           additional_options = {
             :if      => serialized_command[:if],
             :unless  => serialized_command[:unless],

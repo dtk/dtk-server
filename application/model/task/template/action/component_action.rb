@@ -102,6 +102,14 @@ module DTK; class Task; class Template
         @component[:title]
       end
 
+      def external_ref
+        @component[:external_ref]
+      end
+
+      def component_display_name
+        @component[:display_name]
+      end
+
     end
   end
 end; end; end

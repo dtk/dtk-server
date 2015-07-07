@@ -32,7 +32,13 @@ module DTK; class Task; class Template
     def self.find_action_in_list?(serialized_item,node_name,action_list,opts={})
       # method_name could be nil
       ret = nil
-      component_name_ref,method_name = WithMethod.parse(serialized_item)
+      component_ext_ref_type = nil
+      component_name_ref, method_name = WithMethod.parse(serialized_item)
+
+      # if component has external_ref[:type] = 'bash_command' it means it has bash command instead of puppet in create action
+      # here we set bash create action to be executed instead of puppet_apply
+      method_name ||= set_bash_create_action(action_list, component_name_ref)
+
       unless action = action_list.find_matching_action(node_name,:component_name_ref => component_name_ref)
         if opts[:skip_if_not_found]
           return ret
@@ -84,6 +90,13 @@ module DTK; class Task; class Template
    private
     def self.add_action_method?(base_action,opts={})
       opts[:action_def] ? base_action.class::WithMethod.new(base_action,opts[:action_def]) : base_action
+    end
+
+    def self.set_bash_create_action(action_list, component_name_ref)
+      cmp = action_list.find{|a_item| a_item.component_display_name.eql?(component_name_ref.gsub('::','__'))}
+      if cmp && (ext_ref = cmp.external_ref)
+        (ext_ref[:type]||'').eql?('bash_command') ? 'create' : nil
+      end
     end
   end
 end; end; end

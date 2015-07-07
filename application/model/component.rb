@@ -256,9 +256,9 @@ module DTK
     def config_agent_type()
       cmp_external_ref_type = (self[:external_ref]||{})[:type]
       case cmp_external_ref_type
-       when "chef_recipe" then "chef"
-       when "puppet_class","puppet_definition" then "puppet"
-       when "ruby_function" then "dtk_provider"
+       when 'chef_recipe' then 'chef'
+       when 'puppet_class', 'puppet_definition' then 'puppet'
+       when 'ruby_function', 'bash_command' then 'dtk_provider'
       end
     end
 

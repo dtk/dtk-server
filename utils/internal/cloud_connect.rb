@@ -10,7 +10,7 @@ end
 
 # Fog loads Excon
 # bumped up time out from 60 to 180
-Excon.defaults[:read_timeout] = 180
+Excon.defaults[:read_timeout] = 600
 
 module DTK
   class CloudConnect

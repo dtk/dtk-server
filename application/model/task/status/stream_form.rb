@@ -1,12 +1,17 @@
 module DTK; class Task
   class Status
-    module StreamForm
+    class StreamForm
+      r8_nested_require('stream_form','element')
       def self.status(top_level_task,opts={})
-        Log.info("stub for Status::StreamForm.status")
-        task_structure = top_level_task.get_hierarchical_structure()
-        status_opts = Opts.new(:no_components => false, :no_attributes => true)
-        status_opts.merge!(:summarize_node_groups => true) if (opts[:detail_level]||{})[:summarize_node_groups]
-        TableForm.status(task_structure,status_opts)
+        ret = Array.new
+        start_index = opts[:start_index]
+        end_index   = opts[:end_index]
+        if start_index == '0' and end_index == '0'
+          ret << Element::TaskStart.new(top_level_task).hash_form()
+        else
+          raise Error.new("not treated")
+        end
+        ret
       end
     end
   end

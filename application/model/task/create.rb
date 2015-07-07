@@ -15,7 +15,7 @@ module DTK; class Task
       not_running_nodes = ret.get_associated_nodes().select{|n|n.get_and_update_operational_status!() != 'running'}
       unless not_running_nodes.empty?
         node_is = (not_running_nodes.size == 1 ? 'node is' : 'nodes are')
-        node_names = not_running_nodes.map{|n|n.display_name}.join(',')
+        node_names = not_running_nodes.map{|n|n.display_name}.join(', ')
         raise ErrorUsage.new("Cannot execute the action because the following #{node_is} not running: #{node_names}")
       end
       ret

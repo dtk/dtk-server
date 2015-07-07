@@ -760,7 +760,11 @@ module DTK
 
       response = 
         if ret_request_params(:form) == 'stream_form'
-          Task::Status::Assembly::StreamForm.get_status(assembly.id_handle)
+          opts = {
+            :end_index   => ret_request_params(:end_index),
+            :start_index => ret_request_params(:start_index)
+          }
+          Task::Status::Assembly::StreamForm.get_status(assembly.id_handle,opts)
         else
           opts = {
             :format       => (ret_request_params(:format)||:table).to_sym,

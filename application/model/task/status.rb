@@ -31,7 +31,7 @@ module DTK
       def self.get_status_aux(ref_obj_idh,ref_obj_type,filter,opts={})
         top_level_task = get_top_level_most_recent_task(ref_obj_idh,ref_obj_type,filter)
         task_structure = top_level_task.get_hierarchical_structure()
-        status_opts = Opts.new(:no_components => false, :no_attributes => true)
+        status_opts = Hash.new.merge(:no_components => false, :no_attributes => true)
         status_opts.merge!(:summarize_node_groups => true) if (opts[:detail_level]||{})[:summarize_node_groups]
         case opts[:format]
           when :table
@@ -89,13 +89,6 @@ module DTK
         def self.get_status(target_idh, opts={})
           filter = [:eq, :target_id, target_idh.get_id()]
           get_status_aux(target_idh, :target, filter, opts)
-        end
-      end
-
-      class Opts < Hash
-        def initialize(hash_opts={})
-          super()
-          replace(hash_opts) unless hash_opts.empty?
         end
       end
     end

@@ -92,7 +92,7 @@ module DTK; class Task; class Template
     end
 
     def self.set_bash_create_action(action_list, component_name_ref)
-      cmp = action_list.find{|a_item| a_item.component_display_name.eql?(component_name_ref)}
+      cmp = action_list.find{|a_item| a_item.component_display_name.eql?(component_name_ref.gsub('::','__'))}
       if cmp && (ext_ref = cmp.external_ref)
         (ext_ref[:type]||'').eql?('bash_command') ? 'create' : nil
       end

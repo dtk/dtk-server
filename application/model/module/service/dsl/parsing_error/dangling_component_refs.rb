@@ -15,17 +15,17 @@ module DTK; class ServiceModule
       #
       # Returns list of missing modules with version
       #
-      def missing_module_list()
+      def missing_module_list
         # forming hash and then getting its vals to remove dups in same <module,version,namepsace>
-        module_hash = @cmp_ref_info_list.inject(Hash.new) do |h,r|
+        module_hash = @cmp_ref_info_list.inject({}) do |h,r|
           module_name = r[:component_type].split('__').first
           remote_namespace = r[:remote_namespace]
           ndx = "#{module_name}---#{r[:version]}---#{remote_namespace}"
           info = {
-            :name => module_name, 
-            :version => r[:version]
+            name: module_name, 
+            version: r[:version]
           }
-          info.merge!(:remote_namespace => remote_namespace) if remote_namespace
+          info.merge!(remote_namespace: remote_namespace) if remote_namespace
           h.merge!(ndx => info)
         end
         
@@ -36,16 +36,17 @@ module DTK; class ServiceModule
       def add_with(aggregate_error=nil)
         if aggregate_error.nil?
           self
-        elsif aggregate_error.kind_of?(DanglingComponentRefs)
+        elsif aggregate_error.is_a?(DanglingComponentRefs)
           self.class.new(ret_unique_union(@cmp_ref_info_list,aggregate_error.cmp_ref_info_list))
         else
           super
         end
       end
 
-     private
+      private
+
       def ret_unique_union(cmp_refs1,cmp_refs2)
-        ndx_ret = cmp_refs1.inject(Hash.new){|h,r|h.merge(ret_unique_union__ndx(r) => r)}
+        ndx_ret = cmp_refs1.inject({}){|h,r|h.merge(ret_unique_union__ndx(r) => r)}
         cmp_refs2.inject(ndx_ret){|h,r|h.merge(ret_unique_union__ndx(r) => r)}.values
       end
       

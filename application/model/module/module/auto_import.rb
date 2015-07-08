@@ -3,7 +3,7 @@ module DTK
     def get_required_and_missing_modules(project, remote_params, client_rsa_pub_key=nil)
       remote = remote_params.create_remote(project)
       response = Repo::Remote.new(remote).get_remote_module_components(client_rsa_pub_key)
-      opts = Opts.new(:project_idh => project.id_handle())
+      opts = Opts.new(project_idh: project.id_handle())
 
       # this method will return array with missing and required modules
       module_info_array = self.cross_reference_modules(opts, response['component_info'], remote.namespace, response['dependency_warnings'])
@@ -30,9 +30,9 @@ module DTK
         i_modules = installed_modules(type.to_sym, project_idh)
 
         is_found = i_modules.find do |i_module|
-          name.eql?(i_module.display_name) and
-          ModuleVersion.versions_same?(version, i_module.fetch(:module_branch,{})[:version]) and
-          (namespace.nil? or namespace.eql?(i_module.module_namespace))
+          name.eql?(i_module.display_name) &&
+          ModuleVersion.versions_same?(version, i_module.fetch(:module_branch,{})[:version]) &&
+          (namespace.nil? || namespace.eql?(i_module.module_namespace))
         end
 
         data = data_element(name, namespace||service_namespace, type, version, url)
@@ -55,7 +55,7 @@ module DTK
               installed_name = i_module.display_name
               installed_ns   = i_module.module_namespace
 
-              if (el['module_name'].eql?(installed_name) and el['module_namespace'].eql?(installed_ns))
+              if (el['module_name'].eql?(installed_name) && el['module_namespace'].eql?(installed_ns))
                 found_modules << data_element(installed_name, installed_ns, el['module_type'])
                 reject_it = true
                 break
@@ -73,13 +73,13 @@ module DTK
       [missing_modules, found_modules, dependency_warnings]
     end
 
-  private
+    private
 
     def data_element(name, namespace, type, version = nil, url = nil)
-      { :name => name, :version => version, :type => type, :namespace => namespace, :module_url => url }
+      { name: name, version: version, type: type, namespace: namespace, module_url: url }
     end
 
-    def clear_cached()
+    def clear_cached
       @cached_module_list = {}
     end
 
@@ -90,8 +90,8 @@ module DTK
 
       unless @cached_module_list[type]
         sp_hash = {
-          :cols => [:id, :display_name, :namespace].compact,
-          :filter => [:eq, :project_project_id, project_idh.get_id()]
+          cols: [:id, :display_name, :namespace].compact,
+          filter: [:eq, :project_project_id, project_idh.get_id()]
         }
         mh = project_idh.createMH(type)
         @cached_module_list[type] = get_objs(mh,sp_hash)
@@ -99,7 +99,6 @@ module DTK
 
       @cached_module_list[type]
     end
-
   end
 end
 

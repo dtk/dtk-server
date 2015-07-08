@@ -1,0 +1,33 @@
+inherit_from: .rubocop_todo.yml
+
+# strict rules
+Style/WordArray:
+  MinSize: 3
+
+# we ignore these rules
+Style/IndentHash:
+  Enabled: false
+Style/Semicolon:
+  Enabled: false
+Metrics/LineLength:
+  Enabled: false
+Lint/AssignmentInCondition:
+  Enabled: false
+Style/ClassAndModuleChildren:
+  Enabled: false
+Style/RedundantSelf:
+  Enabled: false
+Style/ParenthesesAroundCondition:
+  Enabled: false
+Style/DoubleNegation:
+  Enabled: false
+
+# tempeorary disabled due to bugs
+Metrics/ModuleLength:
+  Enabled: false
+
+
+# todo list
+# Offense count: 2
+Lint/RescueException:
+  Enabled: false

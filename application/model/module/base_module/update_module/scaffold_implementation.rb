@@ -30,9 +30,9 @@ module DTK; class BaseModule; class UpdateModule
         format_type = ModuleDSL.default_format_type()
         content = render_hash.serialize(format_type)
         dsl_filename = ModuleDSL.dsl_filename(format_type)
-        ret.merge!(:path=>dsl_filename, :content=> content)
+        ret.merge!(path: dsl_filename, content: content)
         if opts[:ret_hash_content]
-          ret.merge!(:hash_content => render_hash)
+          ret.merge!(hash_content: render_hash)
         end
       end
       raise parsing_error if parsing_error

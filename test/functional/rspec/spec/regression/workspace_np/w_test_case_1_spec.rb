@@ -22,7 +22,6 @@ info_to_check_3 = 'stdlib'
 dtk_common = DtkCommon.new('', '')
 
 describe "(Workspace) Test Case 1: Create one node, add component in it, converge workspace, inspect info output and task output and purge workspace content" do
-
 	before(:all) do
 		puts "**************************************************************************************************************************************************",""
   end

@@ -8,7 +8,7 @@ module DTK; class ModuleDSL; class V3
     end
 
     class Attribute < DSLObjectBase::Attribute
-      def render_hash_form(opts={})
+      def render_hash_form(_opts={})
         ret = RenderHash.new
         ret.set_unless_nil("description",value(:description))
         ret["type"] = required_value(:type)
@@ -19,8 +19,9 @@ module DTK; class ModuleDSL; class V3
         ret
       end
 
-     private
-      def converted_dynamic()
+      private
+
+      def converted_dynamic
         unless ScaffoldingStrategy[:no_dynamic_attributes]
           ret = value(:dynamic)
           if ret.nil? then (has_default_variable?() ? true : nil)
@@ -29,7 +30,7 @@ module DTK; class ModuleDSL; class V3
         end
       end
 
-      def converted_default()
+      def converted_default
         unless ScaffoldingStrategy[:no_defaults]
           if ret = value(:default_info)
             ret
@@ -40,13 +41,13 @@ module DTK; class ModuleDSL; class V3
       end
       ExtRefPuppetHeader = 'external_ref(puppet_header)'
 
-      def has_default_variable?()
+      def has_default_variable?
         unless ScaffoldingStrategy[:no_dynamic_attributes]
           !(value(:external_ref) ||{})["default_variable"].nil?
         end
       end
 
-      def converted_external_ref()
+      def converted_external_ref
         ret = RenderHash.new
         ext_ref = required_value(:external_ref)
         attr_name = ext_ref["name"]

@@ -4,13 +4,13 @@ module DTK
       def initialize(config_agent_type)
         @config_agent_type = config_agent_type
         # indexed by file_path
-        @ndx_error_list = Hash.new
+        @ndx_error_list = {}
       end
 
       def add(obj,opts=Opts.new)
-        if obj.kind_of?(ParseError)
+        if obj.is_a?(ParseError)
           add_error(obj,opts)
-        elsif obj.kind_of?(self.class)
+        elsif obj.is_a?(self.class)
           unless opts.empty?
             Log.error("Opts should be empty; it is set to: #{opts.inject}}")
           end
@@ -21,7 +21,7 @@ module DTK
         self
       end
 
-      def create_error()
+      def create_error
         msg = "\n"
         num_errs = 0
         @ndx_error_list.each_pair do |file_path,errors|
@@ -35,25 +35,27 @@ module DTK
             add_line!(msg,sentence_capitalize(error.to_s),ident)
           end
         end
-        opts = Opts.new(:error_prefix => error_prefix(num_errs), :log_error => false)
+        opts = Opts.new(error_prefix: error_prefix(num_errs), log_error: false)
         ErrorUsage::Parsing.new(msg,opts)
       end
       IdentInitial = 2
       IdentIncrease = 2
 
       attr_reader :ndx_error_list
-     private
+
+      private
+
       def add_error(error,opts=Opts.new)
         # opts[:file_path] could be nil
         ndx = opts[:file_path]
-        (@ndx_error_list[ndx] ||= Array.new) << error
+        (@ndx_error_list[ndx] ||= []) << error
         self
       end
 
       def add_errors(errors)
         errors.ndx_error_list.each_pair do |file_path,errors|
           ndx = file_path
-          opts = (file_path ? Opts.new(:file_path => file_path) : Opts.new)
+          opts = (file_path ? Opts.new(file_path: file_path) : Opts.new)
           errors.each{|error|add_error(error,opts)}
         end
       end 

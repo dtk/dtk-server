@@ -6,29 +6,30 @@ module DTK
           super()
           @agent_action = opts[:agent_action]
         end
-        def action_hash()
-          {:agent => :ssh_agent, :method => @agent_action}
+
+        def action_hash
+          {agent: :ssh_agent, method: @agent_action}
         end
         #TODO: write this in terms of its parent ActionResultsQueue#initiate or have arent method in terms of reusable fragments
-        def initiate(nodes,params,opts={})
+        def initiate(nodes,params,_opts={})
           indexes = nodes.map{|r|r[:id]}
           set_indexes!(indexes)
-          ndx_pbuilderid_to_node_info =  nodes.inject(Hash.new) do |h,n|
-            h.merge(n.pbuilderid => {:id => n[:id], :display_name => n.assembly_node_print_form()})
+          ndx_pbuilderid_to_node_info =  nodes.inject({}) do |h,n|
+            h.merge(n.pbuilderid => {id: n[:id], display_name: n.assembly_node_print_form()})
           end
           callbacks = {
-            :on_msg_received => proc do |msg|
+            on_msg_received: proc do |msg|
               
               response = CommandAndControl.parse_response__execute_action(nodes,msg)
-              if response and response[:pbuilderid] and response[:status] == :ok
+              if response && response[:pbuilderid] && response[:status] == :ok
                 node_info = ndx_pbuilderid_to_node_info[response[:pbuilderid]]
                 
                 unless response[:data][:error]
                   component_type = :authorized_ssh_public_key
                   attr_hash = {
-                    :linux_user => params[:system_user],
-                    :key_name => params[:rsa_pub_name],
-                    :key_content => params[:rsa_pub_key]
+                    linux_user: params[:system_user],
+                    key_name: params[:rsa_pub_name],
+                    key_content: params[:rsa_pub_key]
                   }
                   node = nodes.find { |n| n[:id] == node_info[:id] }
                   

@@ -5,9 +5,9 @@ module DTK; class ErrorUsage
       def self.reify(input_form,&legal_values_block)
         if legal_values_block
           class_eval(&legal_values_block)
-        elsif input_form.kind_of?(LegalValue)
+        elsif input_form.is_a?(LegalValue)
           input_form
-        elsif input_form.kind_of?(Class)
+        elsif input_form.is_a?(Class)
           Klass.new(input_form)
         else
           raise Error.new("Legal value type's class (#{input_form.class}) is not supported")
@@ -26,10 +26,12 @@ module DTK; class ErrorUsage
         def initialize(klass)
           @klass = klass
         end
+
         def matches?(object)
-          object.kind_of?(@klass)
+          object.is_a?(@klass)
         end
-        def print_form()
+
+        def print_form
           @klass.to_s
         end
       end
@@ -37,10 +39,12 @@ module DTK; class ErrorUsage
         def initialize(keys)
           @keys = Array(keys).map{|k|k.to_s}
         end
+
         def matches?(object)
-          object.kind_of?(Hash) and !!object.keys.find{|k|@keys.include?(k.to_s)}
+          object.is_a?(Hash) && !!object.keys.find{|k|@keys.include?(k.to_s)}
         end
-        def print_form()
+
+        def print_form
           "HashWithKey(#{@keys.join(',')})"
         end
       end
@@ -48,10 +52,12 @@ module DTK; class ErrorUsage
         def initialize(keys)
           @keys = Array(keys).map{|k|k.to_s}
         end
+
         def matches?(object)
-          object.kind_of?(Hash) and object.size == 1 and @keys.include?(object.keys.first.to_s)
+          object.is_a?(Hash) && object.size == 1 && @keys.include?(object.keys.first.to_s)
         end
-        def print_form()
+
+        def print_form
           "HashWithSingleKey(#{@keys.join(',')})"
         end
       end

@@ -22,7 +22,7 @@ module XYZ
 
         filter = DB.augment_for_authorization(where_clause,model_handle) #SQL.and({CONTEXT_ID => c},where_clause)
 	ds = ret_dataset_with_scalar_columns(db_rel,opts).filter(filter)
-        return SQL::Dataset.new(model_handle,ds.from_self(:alias => model_name)) if opts[:return_just_sequel_dataset]
+        return SQL::Dataset.new(model_handle,ds.from_self(alias: model_name)) if opts[:return_just_sequel_dataset]
 
         ds = DB.ret_paging_and_order_added_to_dataset(ds,opts)
 	ds.all.map do |raw_hash|
@@ -32,15 +32,14 @@ module XYZ
       end
 
       def get_objects_just_dataset(model_handle,where_clause=nil,opts={})
-        get_objects_scalar_columns(model_handle,where_clause,opts.merge({:return_just_sequel_dataset => true}))
+        get_objects_scalar_columns(model_handle,where_clause,opts.merge({return_just_sequel_dataset: true}))
       end
-
 
       # TODO: may be able to optimze seeing that curerntly uses get_objects
       def get_object_scalar_columns(id_handle,opts={})
-	id_info = IDInfoTable.get_row_from_id_handle id_handle, :raise_error => opts[:raise_error], :short_circuit_for_minimal_row => true
-	return unless id_info and id_info[:id]
-        get_objects_scalar_columns(id_handle.createMH(id_info[:relation_type]),{:id => id_info[:id]},opts).first
+	id_info = IDInfoTable.get_row_from_id_handle id_handle, raise_error: opts[:raise_error], short_circuit_for_minimal_row: true
+	return unless id_info && id_info[:id]
+        get_objects_scalar_columns(id_handle.createMH(id_info[:relation_type]),{id: id_info[:id]},opts).first
       end
 
       # TBD: convert so where clause could be hash or string       
@@ -50,14 +49,14 @@ module XYZ
         parent_fk_col = ret_parent_id_field_name(parent_id_info[:db_rel],db_rel)
         wc = SQL.and(where_clause,{parent_fk_col => parent_id_info[:id]})
 	ds = dataset(db_rel).select(:id).where(DB.augment_for_authorization(wc,model_handle))
-        ds.all.map{|raw_hash|
+        ds.all.map do|raw_hash|
 	  IDInfoTable.ret_guid_from_db_id(raw_hash[:id],db_rel[:relation_type])
-	}
+	end
       end
 
       def process_raw_db_row!(row,model_name,opts={})
         relation_type = model_name
-        return row unless relation_type and DB_REL_DEF[relation_type]
+        return row unless relation_type && DB_REL_DEF[relation_type]
         process_raw_scalar_hash!(row,DB_REL_DEF[relation_type],opts)
       end
 
@@ -66,13 +65,12 @@ module XYZ
         get_object_scalar_columns(parent_id_handle,opts)
       end
 
-
       # if uri is given, it is relative to href_prefix
       # TBD: may put href_prefix in opts or possible just provide one hash arg 'params'
       def get_instance_or_factory(id_handle,href_prefix=nil,opts_x={}) 
-	opts = href_prefix.nil? ? opts_x.merge({:no_hrefs=>true}) : opts_x 
+	opts = href_prefix.nil? ? opts_x.merge(no_hrefs: true) : opts_x 
 
-	id_info = IDInfoTable.get_row_from_id_handle id_handle,  :raise_error => true 
+	id_info = IDInfoTable.get_row_from_id_handle id_handle,  raise_error: true 
 
 	#check if instance or factory
 	return get_factory(href_prefix,id_info,opts) if id_info[:is_factory]
@@ -81,7 +79,7 @@ module XYZ
 
       # TBD: remove form where return {x => y}; just return y
       def get_instance_scalar_values(id_handle,opts={})
-	id_info = IDInfoTable.get_row_from_id_handle id_handle,  :raise_error => opts[:raise_error]
+	id_info = IDInfoTable.get_row_from_id_handle id_handle,  raise_error: opts[:raise_error]
 	return nil if id_info.nil? 
 	hash = get_scalar_values_given_id_info(id_info,opts)
 	{id_info.ret_qualified_ref() => hash}
@@ -92,7 +90,7 @@ module XYZ
         IDInfoTable.get_row_from_id_handle(id_handle) ? true : nil
       end
 
-     private
+      private
 
       # returns factory and additionally children if in opts {:depth == :deep)
       # TBD: should get_factory (like get_instance wrap everything in top level element?
@@ -103,13 +101,13 @@ module XYZ
 	return opts[:object_form] ? RefObjectPairs.new(hash) : hash if children_id_infos.nil?
 	
 	#case on whether want summary for children or all their attributes
-	if opts[:depth] == :deep or opts[:depth] == :scalar_detail	
+	if opts[:depth] == :deep || opts[:depth] == :scalar_detail	
 	  children_id_infos.each do |id_info|
 	    qualified_ref = id_info.ret_qualified_ref()
 	    hash[qualified_ref] = get_instance(href_prefix,id_info,false,opts)
 	  end
 	else
-  	  # get links to all children 
+  	# get links to all children 
 	  children_id_infos.each do |id_info| 
 	    key,value = RestContent.ret_instance_summary(id_info,href_prefix,opts)
 	    hash[key] = value
@@ -119,11 +117,10 @@ module XYZ
       end
 
       def get_instance(href_prefix,id_info,is_top_level=true,opts={})
-
 	#get scalar values
-	hash = (is_top_level and opts[:no_top_level_scalars]) ? {} : get_scalar_values_given_id_info(id_info,opts) 
+	hash = (is_top_level && opts[:no_top_level_scalars]) ? {} : get_scalar_values_given_id_info(id_info,opts) 
 
-        # get self link
+ # get self link
 	unless opts[:no_hrefs]
 	  link = RestContent.ret_link(:self,id_info[:uri],href_prefix) 	
           link.each{|k,v|hash[k]=v}
@@ -156,7 +153,7 @@ module XYZ
         if opts[:object_form]
           obj = DB_REL_DEF[id_info[:relation_type]][:model_class].new(hash,id_info[:c],id_info[:relation_type]) 
 	  is_top_level ? RefObjectPairs.new({id_info.ret_qualified_ref() => obj}) : obj
-         else
+        else
 	  is_top_level ? {id_info.ret_qualified_ref() => hash} : hash
          end
       end
@@ -164,14 +161,14 @@ module XYZ
       def get_scalar_values_given_id_info(id_info,opts={})
 	db_rel = DB_REL_DEF[id_info[:relation_type]]
 	ds = ret_dataset_with_scalar_columns(db_rel,opts)
-        hash = ds.where(:id => id_info[:id]).first
+        hash = ds.where(id: id_info[:id]).first
 	process_raw_scalar_hash!(hash,db_rel,opts)
 	hash
       end
        
       def ret_dataset_with_scalar_columns(db_rel,opts={})
         # if opts[:field_set] then this is taken as is as the selected columns 
-        return dataset(db_rel) if opts[:field_set] and opts[:field_set].kind_of?(Model::FieldSetAll)
+        return dataset(db_rel) if opts[:field_set] && opts[:field_set].is_a?(Model::FieldSetAll)
 
         select_cols = nil
         if opts[:field_set]
@@ -194,7 +191,7 @@ module XYZ
       # TODO!!! need to determine if this will be passed materialized virtual columns in which case we need to reformulate their types
       def process_raw_scalar_hash!(hash,db_rel,opts={})
 	cols_info = db_rel[:columns]
-        # process the table specific columns
+ # process the table specific columns
 	if cols_info
           hash.each_key do |col|
             next if hash[col].nil?
@@ -210,7 +207,7 @@ module XYZ
                 # add a "*" form if opts[:fk_as_ref] is prefix
                 if opts[:fk_as_ref] == "/"
                   hash[("*" + col.to_s).to_sym] = fk_id_info[:uri] 
-                elsif fk_id_info[:uri] =~ Regexp.new("^#{opts[:fk_as_ref].to_s}(/.+$)")
+                elsif fk_id_info[:uri] =~ Regexp.new("^#{opts[:fk_as_ref]}(/.+$)")
                   rebased_uri = $1
                   hash[("*" + col.to_s).to_sym] = rebased_uri 
                 end
@@ -221,17 +218,17 @@ module XYZ
           end
 	end
 
-        # common fields
+ # common fields
 	# fill in default display name if not there
-        # TODO: this does not work if dont retrieve :display_name but get :ret
-        # TODO: took out ebcause of error above; think shoudl eb removed permantly
-        # qualified_ref = DB.ret_qualified_ref_from_scalars(hash)
+ # TODO: this does not work if dont retrieve :display_name but get :ret
+ # TODO: took out ebcause of error above; think shoudl eb removed permantly
+ # qualified_ref = DB.ret_qualified_ref_from_scalars(hash)
 	#hash[:display_name] ||= qualified_ref if qualified_ref
 	
 	#fill in id unless :no_ids specified
 	if opts[:no_ids]
 	  hash.delete(:id)
-        elsif hash[:id]
+ elsif hash[:id]
 	  hash[:id] = IDInfoTable.ret_guid_from_db_id(hash[:id],db_rel[:relation_type])
         end
 

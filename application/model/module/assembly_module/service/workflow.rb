@@ -24,7 +24,7 @@ module DTK; class AssemblyModule
           end
         end
 
-        @service_module.get_workspace_branch_info(@am_version).merge(:edit_file => meta_file_path())
+        @service_module.get_workspace_branch_info(@am_version).merge(edit_file: meta_file_path())
       end
 
       def finalize_edit(module_branch,diffs_summary)
@@ -41,10 +41,11 @@ module DTK; class AssemblyModule
         raise parse_errors if parse_errors
       end
 
-     private
+      private
+
       def update_assembly_branch(module_branch)
-        opts = {:serialized_form => true}
-        opts.merge!(:task_action => @task_action) if @task_action
+        opts = {serialized_form: true}
+        opts.merge!(task_action: @task_action) if @task_action
         template_content =  Task::Template::ConfigComponents.get_or_generate_template_content(:assembly,@assembly,opts)
         splice_in_workflow(module_branch,template_content)
       end
@@ -54,12 +55,11 @@ module DTK; class AssemblyModule
         module_branch.serialize_and_save_to_repo?(meta_file_path(),hash_content)
       end
 
-      def meta_file_path()
+      def meta_file_path
         ServiceModule.assembly_workflow_meta_filename_path(@assembly_template_name,@task_action||DefaultTaskAction)
       end
       # TODO: unify this with code on task/template
       DefaultTaskAction = 'create'
-
     end
   end
 end; end

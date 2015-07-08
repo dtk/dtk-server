@@ -2,14 +2,14 @@ module DTK; class ModuleDSL; class V3
   class ObjectModelForm
     class LinkDef < OMFBase
       def self.ndx_link_def_links(in_link_defs,base_cmp,opts={})
-        ret = Hash.new
+        ret = {}
         return ret unless in_link_defs
         convert_to_hash_form(in_link_defs) do |dep_cmp_name,link_def_links|
-          link_def_links = [link_def_links] unless link_def_links.kind_of?(Array)
+          link_def_links = [link_def_links] unless link_def_links.is_a?(Array)
           link_def_links = convert_link_def_links(dep_cmp_name,link_def_links,base_cmp,opts)
           link_def_links.each do |ldl|
             ndx = ldl.dependency_name || dep_cmp_name
-            (ret[ndx] ||= Array.new) << ldl
+            (ret[ndx] ||= []) << ldl
           end
         end
         ret
@@ -18,12 +18,13 @@ module DTK; class ModuleDSL; class V3
       def self.link_defs?(spliced_ndx_link_def_links)
         ret = nil
         return ret if spliced_ndx_link_def_links.empty?
-        spliced_ndx_link_def_links.inject(Array.new) do |a,(link_def_type,link_def_links)|
+        spliced_ndx_link_def_links.inject([]) do |a,(link_def_type,link_def_links)|
           a + [link_def(link_def_type,link_def_links)]
         end
       end
 
-    private
+      private
+
       def self.link_def(link_def_type,link_def_links)
         OutputHash.new(
           "type" => link_def_type,
@@ -51,10 +52,10 @@ module DTK; class ModuleDSL; class V3
 
       #------ begin: related to ndx_link_def_links
       def self.convert_link_def_links(dep_cmp_name,link_def_links,base_cmp,opts={})
-        link_def_links.inject(Array.new) do |a,link|
-          unless link.kind_of?(Hash)
+        link_def_links.inject([]) do |a,link|
+          unless link.is_a?(Hash)
             err_msg = "The following link defs section on component '?1' is ill-formed: ?2"
-            raise ParsingError.new(err_msg,component_print_form(base_cmp),{dep_cmp_name => link_def_links})
+            raise ParsingError.new(err_msg,component_print_form(base_cmp),dep_cmp_name => link_def_links)
           end
           a + convert_link_def_link(link,dep_cmp_name,base_cmp,opts)
         end
@@ -63,7 +64,6 @@ module DTK; class ModuleDSL; class V3
       def self.convert_link_def_link(link_def_link,dep_cmp_name,base_cmp,opts={})
         Choice::LinkDefLink.new(link_def_link,dep_cmp_name,base_cmp).convert(link_def_link,opts)
       end
-
     end
   end
 end; end; end

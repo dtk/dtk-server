@@ -12,12 +12,12 @@ module DTK
             Clone.node(self,clone_copy_output,opts)
           else #TODO: catchall that will be expanded
             new_id_handle = clone_copy_output.id_handles.first
-            StateChange.create_pending_change_item(:new_item => new_id_handle, :parent => id_handle())
+            StateChange.create_pending_change_item(new_item: new_id_handle, parent: id_handle())
           end
         end
       end
 
-      def self.node(target,clone_copy_output,opts)
+      def self.node(target,clone_copy_output,_opts)
         target.update_object!(:iaas_type,:iaas_properties)
         new_id_handle = clone_copy_output.id_handles.first
         #add external ref values from target to node if node does not have them
@@ -26,23 +26,24 @@ module DTK
         node = clone_copy_output.objects.first
         node_ext_ref = node[:external_ref]
         target[:iaas_properties].each do |k,v|
-          unless node_ext_ref.has_key?(k)
+          unless node_ext_ref.key?(k)
             node_ext_ref[k] = v
           end
         end
-        node.update(:external_ref => node_ext_ref)
-        StateChange.create_pending_change_item(:new_item => new_id_handle, :parent => target.id_handle())
+        node.update(external_ref: node_ext_ref)
+        StateChange.create_pending_change_item(new_item: new_id_handle, parent: target.id_handle())
       end
 
       def self.component(target,clone_copy_output,opts)
-        if assembly = clone_copy_output.assembly?(:subclass_object=>true)
+        if assembly = clone_copy_output.assembly?(subclass_object: true)
           assembly(target,assembly,clone_copy_output,opts)
         else
           raise Error.new("Not implemented clone of non assembly component to target")
         end
       end
 
-     private
+      private
+
       def self.assembly(target,assembly,clone_copy_output,opts)
         #clone_copy_output will be of form: assembly - node - component
 
@@ -53,7 +54,7 @@ module DTK
         #TODO: currently not used; may deprecate create_add_on_port_and_attr_links?(target,clone_copy_output,opts)
 
         level = 1
-        nodes = clone_copy_output.children_objects(level,:node,:cols=>[:display_name,:external_ref,:type])
+        nodes = clone_copy_output.children_objects(level,:node,cols: [:display_name,:external_ref,:type])
         return if nodes.empty?
         SpecialNodeAttributes.process!(nodes)
 
@@ -70,13 +71,12 @@ module DTK
         port_link_idhs = clone_copy_output.children_id_handles(level,:port_link)
         create_attribute_links__clone_if_needed(target,port_link_idhs)
 
-
         if settings = opts[:service_settings]
           settings.apply_settings(target,assembly)
         end
 
         begin
-          ModuleRefs::Lock.compute(assembly,:raise_errors => true).persist()
+          ModuleRefs::Lock.compute(assembly,raise_errors: true).persist()
         rescue ModuleRef::Missing::Error => e
           includes = ModuleRefs::Tree.create(assembly).hash_form()
           str_includes = keys_to_string(includes)
@@ -88,7 +88,7 @@ module DTK
         component_child_hashes = clone_copy_output.children_hash_form(level,:component)
         return if component_child_hashes.empty?
         component_new_items = component_child_hashes.map do |child_hash|
-          {:new_item => child_hash[:id_handle], :parent => target.id_handle()}
+          {new_item: child_hash[:id_handle], parent: target.id_handle()}
         end
 
         StateChange.create_pending_change_items(component_new_items)
@@ -113,42 +113,42 @@ module DTK
         return if pruned_nodes.empty?
 
         target_idh = target.id_handle()
-        node_new_items = pruned_nodes.map{|node|{:new_item => node.id_handle(), :parent => target_idh}}
+        node_new_items = pruned_nodes.map{|node|{new_item: node.id_handle(), parent: target_idh}}
         sc_hashes = create_state_change_objects(target_idh,node_new_items)
         create_state_changes_for_node_group_members(target_idh,pruned_nodes,sc_hashes)
         nil
       end
 
       def self.create_state_changes_for_node_group_members(target_idh,nodes,sc_hashes)
-        ret = Array.new
+        ret = []
         node_groups = nodes.select{|n|n.is_node_group?()}
         return ret if node_groups.empty?
         ng_mh =  node_groups.first.model_handle()
-        ndx_sc_ids = sc_hashes.inject(Hash.new){|h,sc|h.merge(sc[:node_id] => sc[:id])}
+        ndx_sc_ids = sc_hashes.inject({}){|h,sc|h.merge(sc[:node_id] => sc[:id])}
         sc_mh = target_idh.createMH(:state_change)
-        new_items_hash = Array.new
+        new_items_hash = []
         ServiceNodeGroup.get_ndx_node_group_members(node_groups.map{|ng|ng.id_handle()}).each do |ng_id,node_members|
           unless ng_state_change_id = ndx_sc_ids[ng_id]
             Log.eror("Unexpected that ndx_sc_ihs[ng_id] is null")
             next
           end
-          ng_state_change_idh = sc_mh.createIDH(:id => ng_state_change_id)
+          ng_state_change_idh = sc_mh.createIDH(id: ng_state_change_id)
           node_members.each do |node|
-            new_items_hash << {:new_item => node.id_handle(), :parent => ng_state_change_idh}
+            new_items_hash << {new_item: node.id_handle(), parent: ng_state_change_idh}
           end
         end
         create_state_change_objects(target_idh,new_items_hash)
       end
 
       def self.create_state_change_objects(target_idh,new_items_hash)
-        opts_sc = {:target_idh => target_idh,:returning_sql_cols => [:id,:display_name,:group_id,:node_id]}
+        opts_sc = {target_idh: target_idh,returning_sql_cols: [:id,:display_name,:group_id,:node_id]}
         StateChange.create_pending_change_items(new_items_hash,opts_sc)
       end
 
       def self.create_add_on_port_and_attr_links?(target,clone_copy_output,opts)
         sao_proc = opts[:service_add_on_proc]
         pl_hashes = sao_proc && sao_proc.get_matching_ports_link_hashes_in_target(clone_copy_output.id_handles.first)
-        unless pl_hashes.nil? or pl_hashes.empty?
+        unless pl_hashes.nil? || pl_hashes.empty?
           # TODO: more efficient if had bulk create; also may consider better intergrating with creation of the assembly proper's port links
           target_idh = target.id_handle()
           pl_hashes.each do |port_link_hash|
@@ -173,11 +173,11 @@ module DTK
         sample_pl_idh = port_link_idhs.first
         port_link_mh =  sample_pl_idh.createMH()
         sp_hash = {
-          :cols => [:id,:display_name,:group_id,:input_id,:output_id],
-          :filter => [:oneof,:id, port_link_idhs.map{|pl_idh|pl_idh.get_id()}]
+          cols: [:id,:display_name,:group_id,:input_id,:output_id],
+          filter: [:oneof,:id, port_link_idhs.map{|pl_idh|pl_idh.get_id()}]
         }
         Model.get_objs(port_link_mh,sp_hash).each do |port_link|
-          port_link.create_attribute_links__clone_if_needed(target.id_handle,:set_port_link_temporal_order=>true)
+          port_link.create_attribute_links__clone_if_needed(target.id_handle,set_port_link_temporal_order: true)
         end
       end
     end

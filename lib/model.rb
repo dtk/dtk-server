@@ -32,26 +32,25 @@ module DTK
 
     class << self
       attr_reader :db
-      expose_methods_from_internal_object :db, %w{update_from_select update_from_hash_assignments update_instance execute_function get_instance_or_factory get_instance_scalar_values get_objects_just_dataset get_object_ids_wrt_parent get_parent_object exists? create_from_select create_from_select_for_migrate ret_id_handles_from_create_returning_ids create_from_hash create_simple_instance? delete_instance delete_instances delete_instances_wrt_parent process_raw_db_row!},:benchmark => :all #, :benchmark => %w{create_from_hash} # :all
+      expose_methods_from_internal_object :db, %w{update_from_select update_from_hash_assignments update_instance execute_function get_instance_or_factory get_instance_scalar_values get_objects_just_dataset get_object_ids_wrt_parent get_parent_object exists? create_from_select create_from_select_for_migrate ret_id_handles_from_create_returning_ids create_from_hash create_simple_instance? delete_instance delete_instances delete_instances_wrt_parent process_raw_db_row!},benchmark: :all #, :benchmark => %w{create_from_hash} # :all
     end
 
     def self.inherited(child_class)
       return unless self == Model
       model_name = child_class.model_name
-      (@model_classes ||= Hash.new)[model_name] = child_class
+      (@model_classes ||= {})[model_name] = child_class
     end
-
 
     #======hash index methods
 
     def [](x)
-      return super(x) if has_key?(x)
+      return super(x) if key?(x)
       vc_info = ret_info_if_is_virtual_column(x)
       if vc_info
         # first check if it has an explicit path or possible parents defined; otherwise look for fn
         if vc_info[:path]
           nested_value(*vc_info[:path])
-        elsif vc_info[:possible_parents] and x == :parent_name
+        elsif vc_info[:possible_parents] && x == :parent_name
           ret_parent_name(vc_info[:possible_parents])
         elsif respond_to?(x)
           send(x)
@@ -65,7 +64,7 @@ module DTK
       # TODO: is it better to see if can change the joining to not have teh "2" suffix
       possible_parents.each do |p|
         parent_obj = self[relation_type == p ? "#{p}2".to_sym : p]
-        return "#{p}/#{parent_obj[:display_name]}" if parent_obj and parent_obj[:display_name]
+        return "#{p}/#{parent_obj[:display_name]}" if parent_obj && parent_obj[:display_name]
       end
       nil
     end
@@ -73,7 +72,8 @@ module DTK
     def ret_info_if_is_virtual_column(col)
       virtual_columns[col]
     end
-    def virtual_columns()
+
+    def virtual_columns
       self.class.db_rel[:virtual_columns]||{}
     end
     private :ret_parent_name,:virtual_columns,:ret_info_if_is_virtual_column
@@ -84,12 +84,12 @@ module DTK
     def get_objs_helper(virtual_attr,result_col=nil,opts={})
       result_col ||= Aux.singular?(virtual_attr).to_sym
       sp_hash = {
-        :cols => [virtual_attr]
+        cols: [virtual_attr]
       }
       if opts[:sql_filter]
-        sp_hash.merge!(:filter => opts[:sql_filter])
+        sp_hash.merge!(filter: opts[:sql_filter])
       end
-      rows = get_objs(:cols => [virtual_attr])
+      rows = get_objs(cols: [virtual_attr])
       if filter_proc = opts[:filter_proc]
         rows.map do |r|
           # el = r[result_col]
@@ -121,7 +121,6 @@ module DTK
       @@debug_dev_flag = false
     end
 
-
     def self.pp_sql_debug(sql, title=nil)
       title ||= "Debugging SQL, generated SQL: "
       puts "::::::: #{title} :: (START) => "
@@ -132,7 +131,6 @@ module DTK
     #
     # Debug SQL methods (END)
     #
-
 
     def get_obj_helper(virtual_attr,result_col=nil,opts={})
       result_col ||= virtual_attr
@@ -145,9 +143,9 @@ module DTK
     end
 
     def augmented_form(r,result_col)
-      if r.kind_of?(Hash)
+      if r.is_a?(Hash)
         ret = r.delete(result_col)
-        return nil unless ret.kind_of?(Hash)
+        return nil unless ret.is_a?(Hash)
         result_col_keys = ret.keys
         r.each{|k,v|ret[k] = v unless result_col_keys.include?(k)}
         ret
@@ -157,15 +155,15 @@ module DTK
     end
     private :augmented_form
 
-    def self.model_name()
+    def self.model_name
       @model_name ||= model_name_helper(self)
     end
-    def model_name()
+    def model_name
       @relation_type || self.class.model_name()
     end
 
-    def self.model_name_with_subclass()
-      model_name_helper(self,:no_subclass => true)
+    def self.model_name_with_subclass
+      model_name_helper(self,no_subclass: true)
     end
 
     def self.model_class(model_name)
@@ -179,7 +177,7 @@ module DTK
       ret
     end
 
-    def self.core_columns()
+    def self.core_columns
       [:id,:display_name,:group_id]
     end
 
@@ -197,12 +195,12 @@ module DTK
 
     def hash_subset(*cols)
       # set seed to model class w/o any keys
-      Aux::hash_subset(self,cols,:seed=>self.class.create_stub(model_handle()))
+      Aux::hash_subset(self,cols,seed: self.class.create_stub(model_handle()))
     end
 
     def hash_form_subset(*cols)
       # set seed to model class w/o any keys
-      Aux::hash_subset(self,cols,:seed=>Hash.new())
+      Aux::hash_subset(self,cols,seed: {})
     end
 
     module Delim
@@ -253,7 +251,7 @@ module DTK
         if hash_scalar_values[:id]
           ret_id_handle_from_db_id(hash_scalar_values[:id],relation_type)
         elsif hash_scalar_values[:uri]
-          IDHandle[:c =>c, :uri => hash_scalar_values[:uri]]
+          IDHandle[c: c, uri: hash_scalar_values[:uri]]
         else
           nil
         end
@@ -266,7 +264,7 @@ module DTK
       self.new(hash_scalar_values,model_handle[:c],model_handle[:model_name])
     end
 
-    def i18n_language()
+    def i18n_language
       @id_handle ? @id_handle.i18n_language() : R8::Config[:default_language]
     end
 
@@ -284,32 +282,32 @@ module DTK
     attr_reader :relation_type,:c
 
     # id and mode_handle related methods
-    def id()
+    def id
       return self[:id] if self[:id] #short cicuit
       id_handle ? id_handle.get_id() : nil
     end
 
-    def display_name()
+    def display_name
       self[:display_name]||(update_object!(:display_name))[:display_name]
     end
 
     def set_id_handle(hash_or_idh)
-      @id_handle = (hash_or_idh.kind_of?(IDHandle) ? hash_or_idh : IDHandle[hash_or_idh])
+      @id_handle = (hash_or_idh.is_a?(IDHandle) ? hash_or_idh : IDHandle[hash_or_idh])
     end
 
     def id_handle(hash_info=nil)
       hash_info ? @id_handle.createIDH(hash_info) : @id_handle
     end
 
-    def id_handle_with_auth_info()
+    def id_handle_with_auth_info
       # TODO: can be made more efficient by putting this info in @id_handle during initial create
       return id_handle() if id_handle()[:group_id]
       group_id = group_id()||(update_object!(:group_id))[:group_id]
-      @id_handle.merge!(:group_id => group_id) if group_id
+      @id_handle.merge!(group_id: group_id) if group_id
       @id_handle
     end
 
-    def get_parent_id_handle()
+    def get_parent_id_handle
       id_handle.get_parent_id_handle()
     end
 
@@ -330,21 +328,23 @@ module DTK
 
     def model_handle(mn=nil)
       group_id = group_id()
-      user_info = (group_id ? {:group_id => group_id} : nil)
+      user_info = (group_id ? {group_id: group_id} : nil)
       mh = ModelHandle.new(@c,@relation_type,nil,user_info)
       mn ? mh.createMH(mn) : mh
     end
+
     def model_handle_with_auth_info(mn=nil)
       group_id = group_id() ||(update_object!(:group_id))[:group_id]
-      user_info = {:group_id => group_id}
+      user_info = {group_id: group_id}
       mh = ModelHandle.new(@c,@relation_type,nil,user_info)
       mn ? mh.createMH(mn) : mh
     end
+
     def child_model_handle(child_mn)
       model_handle().create_childMH(child_mn)
     end
 
-    def group_id()
+    def group_id
       self[:group_id] || (@id_handle && @id_handle[:group_id])
     end
     private :group_id
@@ -353,23 +353,23 @@ module DTK
     # can be overriten
     def self.list(model_handle)
       sp_hash = {
-        :cols => common_columns(),
+        cols: common_columns(),
       }
       get_objs(model_handle.createMH(model_name()),sp_hash)
     end
 
     def self.update_from_rows(model_handle,rows,opts={})
       return nil if rows.empty?
-      array_ds = SQL::ArrayDataset.create(db,rows,model_handle,opts.merge(:convert_for_update=>true))
+      array_ds = SQL::ArrayDataset.create(db,rows,model_handle,opts.merge(convert_for_update: true))
       field_set = Model::FieldSet.new(model_handle[:model_name],rows.first.keys - [:id])
       update_from_select(model_handle,field_set,array_ds)
     end
 
     def update_hash_key(field,hash_key,hash_key_val)
-      self[field] ||= Hash.new
+      self[field] ||= {}
       self[field].merge!(hash_key => hash_key_val)
       raise Error.new("Cannot execute update without the object having an id") unless id()
-      self.class.update_from_rows(model_handle,[{:id => id(),field => {hash_key => hash_key_val}}],:partial_value=>true)
+      self.class.update_from_rows(model_handle,[{:id => id(),field => {hash_key => hash_key_val}}],partial_value: true)
     end
     # TODO: check calss to update with opts having :partial_value=>true to see whether shoudl use variant of update_hash_key instead
     # where there is a deep merge on the field's value
@@ -377,7 +377,7 @@ module DTK
       scalar_assignments = {} if model_handle[:model_name] == :node && scalar_assignments.key?(:hidden) && scalar_assignments.key?(:value_asserted)
       scalar_assignments.each{|k,v| self[k] = v}
       raise Error.new("Cannot execute update without the object having an id") unless id()
-      self.class.update_from_rows(model_handle,[scalar_assignments.merge(:id => id())],opts)
+      self.class.update_from_rows(model_handle,[scalar_assignments.merge(id: id())],opts)
     end
 
     def self.update_rows_meeting_filter(model_handle,scalar_assignments,filter_hash,opts={})
@@ -390,9 +390,9 @@ module DTK
     end
 
     def self.create_from_rows(model_handle,rows,opts={})
-      ret = Array.new
+      ret = []
       return ret if rows.empty?
-      select_ds = SQL::ArrayDataset.create(db,rows,model_handle,opts[:convert] ? {:convert_for_create => true} : {})
+      select_ds = SQL::ArrayDataset.create(db,rows,model_handle,opts[:convert] ? {convert_for_create: true} : {})
       override_attrs = {}
       create_opts = Aux::hash_subset(opts,[:returning_sql_cols,:duplicate_refs])
       ret_obj = opts[:ret_obj]
@@ -424,7 +424,7 @@ module DTK
     end
 
     def self.create_from_rows_for_migrate(model_handle,rows)
-      select_ds = SQL::ArrayDataset.create(db,rows,model_handle,:convert_for_create => true)
+      select_ds = SQL::ArrayDataset.create(db,rows,model_handle,convert_for_create: true)
       field_set = FieldSet.new(model_handle[:model_name],rows.first.keys)
       create_from_select_for_migrate(model_handle,field_set,select_ds)
     end
@@ -452,29 +452,29 @@ module DTK
       parent_fields = {parent_id_col => parent_idh.get_id(), :group_id => parent_idh[:group_id]}
       basic_cols = (has_group_id_col?(model_handle) ? [:id,:group_id] : [:id])
       sp_hash = {
-        :cols => basic_cols + (match_cols - basic_cols),
-        :filter => [:eq, parent_id_col, parent_idh.get_id()]
+        cols: basic_cols + (match_cols - basic_cols),
+        filter: [:eq, parent_id_col, parent_idh.get_id()]
       }
-      existing = get_objs(model_handle,sp_hash,:keep_ref_cols => true)
+      existing = get_objs(model_handle,sp_hash,keep_ref_cols: true)
       if existing.empty? #shortcut
         create_rows = rows.map{|r|parent_fields.merge(r)}
         model_handle_with_par = model_handle
         unless model_handle_with_par[:parent_model_name]
-          model_handle_with_par = model_handle_with_par.merge(:parent_model_name => parent_idh[:model_name])
+          model_handle_with_par = model_handle_with_par.merge(parent_model_name: parent_idh[:model_name])
         end
-        opts_create = Aux.hash_subset(opts,[:convert]).merge(:duplicate_refs => :no_check)
+        opts_create = Aux.hash_subset(opts,[:convert]).merge(duplicate_refs: :no_check)
         return create_from_rows(model_handle_with_par,create_rows,opts_create)
       end
 
-      ret = Array.new
-      pruned_rows = Array.new
-      updated_rows = Array.new
+      ret = []
+      pruned_rows = []
+      updated_rows = []
       rows.each do |r|
         if match = match_found(r,existing,match_cols)
           match_id = match[:id]
-          ret << model_handle.createIDH(:id => match_id)
+          ret << model_handle.createIDH(id: match_id)
           if opts[:update_matching]
-            updated_rows << (r[:id] ? r : r.merge(:id => match_id))
+            updated_rows << (r[:id] ? r : r.merge(id: match_id))
           end
         else
           pruned_rows << r
@@ -488,28 +488,27 @@ module DTK
       # add only ones not existing
       unless pruned_rows.empty?
         create_rows = pruned_rows.map{|r|parent_fields.merge(r)}
-        ret += create_from_rows(model_handle,create_rows,:duplicate_refs => :no_check)
+        ret += create_from_rows(model_handle,create_rows,duplicate_refs: :no_check)
       end
 
       # delete ones that not in rows
       unless opts[:no_delete]
-        delete_idhs = existing.reject{|r|match_found(r,rows,match_cols)}.map{|r|model_handle.createIDH(:id => r[:id])}
+        delete_idhs = existing.reject{|r|match_found(r,rows,match_cols)}.map{|r|model_handle.createIDH(id: r[:id])}
         delete_instances(delete_idhs) unless delete_idhs.empty?
       end
       ret
     end
-
 
     # TODO: think may subsume below by above
     # creates if does not exist using match_assigns; in eitehr case returns id_handle
     # if block is given, called only if new row is created
     def self.create_from_row?(model_handle,ref,match_assigns,other_assigns={},opts={},&pre_create_row_block)
       sp_hash = {
-        :cols => (has_group_id_col?(model_handle) ? [:id,:group_id] : [:id])
+        cols: (has_group_id_col?(model_handle) ? [:id,:group_id] : [:id])
       }
       filter_els = match_assigns.map{|k,v|[:eq,k,v]}
       if filter_els.size > 0
-        sp_hash.merge!(:filter => filter_els.size == 1 ? filter_els.first : [:and] + filter_els)
+        sp_hash.merge!(filter: filter_els.size == 1 ? filter_els.first : [:and] + filter_els)
       end
       if matching_obj = get_obj(model_handle,sp_hash)
         matching_obj.id_handle()
@@ -517,7 +516,7 @@ module DTK
         if pre_create_row_block
           yield
         end
-        create_from_row(model_handle,{:ref => ref}.merge(match_assigns).merge(other_assigns),opts.merge(:duplicate_refs => :no_check))
+        create_from_row(model_handle,{ref: ref}.merge(match_assigns).merge(other_assigns),opts.merge(duplicate_refs: :no_check))
       end
     end
 
@@ -540,7 +539,7 @@ module DTK
     end
     private_class_method :match_found
 
-    def self.select_process_and_update(model_handle,cols_x,id_list,opts={},&block)
+    def self.select_process_and_update(model_handle,cols_x,id_list,_opts={},&block)
       cols = cols_x.include?(:id) ? cols_x : cols_x +[:id]
       fs = Model::FieldSet.opt(cols,model_handle[:model_name])
       wc = SQL.in(:id,id_list)
@@ -550,9 +549,7 @@ module DTK
       update_from_rows(model_handle,modified_rows)
     end
 
-
     def self.get_objects_from_search_object(search_object,opts={})
-
       PerformanceService.start("PERF_SQL", search_object.object_id)
       dataset = search_object.create_dataset()
 
@@ -595,11 +592,11 @@ module DTK
     def update_object!(*cols_x)
       cols = (cols_x.include?(:group_id) ? cols_x : cols_x + [:group_id]) #always good to get group_id
       cols = (cols.include?(:display_name) ? cols : cols + [:display_name]) #always good to get display_name
-      cols_to_get =  cols.reject{|col|self.has_key?(col)}
+      cols_to_get =  cols.reject{|col|self.key?(col)}
       return self if cols_to_get.empty?
       debug_mode_possible_extra_db_calls(cols_to_get,:update_object)
-      opts = (cols_to_get & [:ref,:ref_num]).empty? ? {} : {:keep_ref_cols => true}
-      if vals = get_objs({:cols => cols_to_get},opts).first
+      opts = (cols_to_get & [:ref,:ref_num]).empty? ? {} : {keep_ref_cols: true}
+      if vals = get_objs({cols: cols_to_get},opts).first
         vals.each do |k,v|
           if cols.include?(k)
             self[k] = v
@@ -611,11 +608,11 @@ module DTK
     end
     # TODO: deprecate above for below
     def update_obj!(*cols)
-      cols_to_get =  cols.reject{|col|self.has_key?(col)}
+      cols_to_get =  cols.reject{|col|self.key?(col)}
       return self if cols_to_get.empty?
-      opts = (cols_to_get & [:ref,:ref_num]).empty? ? {} : {:keep_ref_cols => true}
+      opts = (cols_to_get & [:ref,:ref_num]).empty? ? {} : {keep_ref_cols: true}
       debug_mode_possible_extra_db_calls(cols_to_get,:update_obj)
-      if vals = get_objs({:cols => cols_to_get},opts).first
+      if vals = get_objs({cols: cols_to_get},opts).first
         vals.each do |k,v|
           if cols.include?(k)
             self[k] = v
@@ -646,11 +643,11 @@ module DTK
         return objects
       end
       sp_hash = {
-        :cols => cols.include?(:id) ? cols : cols + [:id],
-        :filter => [:oneof,:id,objects.map{|obj|obj.id()}]
+        cols: cols.include?(:id) ? cols : cols + [:id],
+        filter: [:oneof,:id,objects.map{|obj|obj.id()}]
       }
       mh = objects.first.model_handle
-      ndx_rows = get_objs(mh,sp_hash).inject(Hash.new) do |h,r|
+      ndx_rows = get_objs(mh,sp_hash).inject({}) do |h,r|
         h.merge(r[:id] => r)
       end
       objects.each do |obj|
@@ -685,7 +682,7 @@ module DTK
 
     def get_objs_uniq(obj_col,col_in_result=nil)
       col_in_result ||= obj_col.to_s.gsub(/s$/,"").to_sym
-      get_objs(:cols => [obj_col]).inject(Hash.new) do |h,r|
+      get_objs(cols: [obj_col]).inject({}) do |h,r|
         obj = r[col_in_result]
         id = obj[:id]
         h[obj[:id]] ||= obj
@@ -695,8 +692,8 @@ module DTK
 
     def get_objs_col(sp_hash_x,col=nil,opts={})
       # if col not given assumption that sp_hash_x is of form {:cols => [col]} or symbol
-      if sp_hash_x.kind_of?(Symbol)
-        sp_hash_x = {:cols => [sp_hash_x]}
+      if sp_hash_x.is_a?(Symbol)
+        sp_hash_x = {cols: [sp_hash_x]}
       end
       col ||= sp_hash_x[:cols].first
       get_objs(sp_hash_x,opts).map{|r|r[col]}.compact
@@ -704,15 +701,15 @@ module DTK
     # TODO: removeg et_objects_col_from_sp_hash
     def get_objects_col_from_sp_hash(sp_hash_x,col=nil,opts={})
       # if col not given assumption that sp_hash_x is of form {:cols => [col]} or symbol
-      if sp_hash_x.kind_of?(Symbol)
-        sp_hash_x = {:cols => [sp_hash_x]}
+      if sp_hash_x.is_a?(Symbol)
+        sp_hash_x = {cols: [sp_hash_x]}
       end
       col ||= sp_hash_x[:cols].first
       get_objects_from_sp_hash(sp_hash_x,opts).map{|r|r[col]}.compact
     end
 
     def self.get_objs_in_set(id_handles,sp_hash_x,opts={})
-      return Array.new if id_handles.empty?
+      return [] if id_handles.empty?
       sample_idh = id_handles.first
       model_handle = sample_idh.createMH()
       sp_hash = HashSearchPattern.add_to_filter(sp_hash_x,[:oneof, :id, id_handles.map{|idh|idh.get_id()}])
@@ -721,7 +718,7 @@ module DTK
 
     # TODO: deprecate get_objects_in_set_from_sp_hash
     def self.get_objects_in_set_from_sp_hash(id_handles,sp_hash_x,opts={})
-      return Array.new if id_handles.empty?
+      return [] if id_handles.empty?
       sample_idh = id_handles.first
       model_handle = sample_idh.createMH()
       sp_hash = HashSearchPattern.add_to_filter(sp_hash_x,[:oneof, :id, id_handles.map{|idh|idh.get_id()}])
@@ -738,13 +735,13 @@ module DTK
 
     def self.get_objs(model_handle,sp_hash,opts={})
       model_name = model_handle[:model_name]
-      hash = sp_hash.merge(:relation => model_name)
+      hash = sp_hash.merge(relation: model_name)
       search_object = SearchObject.create_from_input_hash({"search_pattern" => hash},model_name,model_handle[:c])
 
       # TODO: putting this in here so we can remove :keep_ref_cols at top level
       opts_get_search_object = opts
-      if !opts.has_key?(:keep_ref_cols) and (sp_hash[:cols]||[]).include?(:ref)
-        opts_get_search_object = opts.merge(:keep_ref_cols => true)
+      if !opts.key?(:keep_ref_cols) && (sp_hash[:cols]||[]).include?(:ref)
+        opts_get_search_object = opts.merge(keep_ref_cols: true)
       end
 
       ret = get_objects_from_search_object(search_object,opts_get_search_object)
@@ -756,27 +753,27 @@ module DTK
     end
 
     def self.get_by_id(id, mh, sp_hash)
-      sp_hash.merge!(:filter => [:eq, :id, id])
+      sp_hash.merge!(filter: [:eq, :id, id])
       get_objs(mh, sp_hash).first
     end
 
     # TODO: remove below
     def self.get_objects_from_sp_hash(model_handle,sp_hash,opts={})
       model_name = model_handle[:model_name]
-      hash = sp_hash.merge(:relation => model_name)
+      hash = sp_hash.merge(relation: model_name)
       search_object = SearchObject.create_from_input_hash({"search_pattern" => hash},model_name,model_handle[:c])
       get_objects_from_search_object(search_object,opts)
     end
 
-    def get_object_columns(id_handle,columns)
+    def get_object_columns(_id_handle,columns)
       self.class.get_object_columns(id_handle(),columns)
     end
 
     def self.get_object_columns(id_handle,columns)
       sp_hash = {
-        :relation => id_handle[:model_name],
-        :filter => [:and,[:eq, :id, id_handle.get_id()]],
-        :columns => columns
+        relation: id_handle[:model_name],
+        filter: [:and,[:eq, :id, id_handle.get_id()]],
+        columns: columns
       }
       get_objects_from_sp_hash(id_handle.createMH(),sp_hash).first
     end
@@ -788,13 +785,14 @@ module DTK
     def self.get_object_scalar_columns(id_handle,cols)
       id = id_handle && id_handle.get_id()
       return nil unless id
-      @db.get_objects_scalar_columns(id_handle.createMH,{:id => id}, FieldSet.opt(cols,id_handle[:model_name])).first
+      @db.get_objects_scalar_columns(id_handle.createMH,{id: id}, FieldSet.opt(cols,id_handle[:model_name])).first
     end
 
-    def is_assembly?()
+    def is_assembly?
       nil
     end
-    def assembly?(opts={})
+
+    def assembly?(_opts={})
      nil
     end
 
@@ -802,7 +800,6 @@ module DTK
     def self.get_display_name(id_handle)
       get_object_scalar_column(id_handle,:display_name)
     end
-
 
     # TODO: deprecate or write in terms of get_objects_from_search_object
     # may do so by having constructor for search object that takes model_handle and filter
@@ -821,7 +818,7 @@ module DTK
       else
         graph_ds = get_objects_just_dataset(model_handle,where_clause,augmented_opts)
         related_col_info.each do |join_info|
-          rs_opts = (join_info[:cols] ? FieldSet.opt(join_info[:cols],join_info[:model_name]) : {}).merge :return_as_hash => true
+          rs_opts = (join_info[:cols] ? FieldSet.opt(join_info[:cols],join_info[:model_name]) : {}).merge return_as_hash: true
           right_ds = @db.get_objects_just_dataset(model_handle.createMH(join_info[:model_name]),nil,rs_opts)
           graph_ds = graph_ds.graph(:left_outer,right_ds,join_info[:join_cond])
         end
@@ -833,30 +830,30 @@ module DTK
 
     def self.get_object(id_handle,opts={})
       c = id_handle[:c]
-      id_info = IDInfoTable.get_row_from_id_handle id_handle, :raise_error => opts[:raise_error], :short_circuit_for_minimal_row => true
-      return unless id_info and id_info[:id]
-      get_objects(id_handle.createMH(id_info[:relation_type]),{:id => id_info[:id]},opts).first
+      id_info = IDInfoTable.get_row_from_id_handle id_handle, raise_error: opts[:raise_error], short_circuit_for_minimal_row: true
+      return unless id_info && id_info[:id]
+      get_objects(id_handle.createMH(id_info[:relation_type]),{id: id_info[:id]},opts).first
     end
 
     def self.get_object_deep(id_handle,opts={})
-      @db.get_instance_or_factory(id_handle,nil,opts.merge({:depth => :deep, :no_hrefs => true}))
+      @db.get_instance_or_factory(id_handle,nil,opts.merge(depth: :deep, no_hrefs: true))
     end
 
     def materialize!(cols)
-      cols.each{|col|self[col] = self[col] unless self.has_key?(col)}
+      cols.each{|col|self[col] = self[col] unless self.key?(col)}
       self
     end
 
+    protected
 
-   protected
     # inherited virtual coulmn defs
-    def parent_id()
-      return id_handle()[:guid] if id_handle() and id_handle()[:guid] #short circuit
+    def parent_id
+      return id_handle()[:guid] if id_handle() && id_handle()[:guid] #short circuit
       id_handle().get_parent_id_info()[:id]
     end
 
-    def parent_path()
-      return id_handle()[:uri] if id_handle() and id_handle()[:uri] #short circuit
+    def parent_path
+      return id_handle()[:uri] if id_handle() && id_handle()[:uri] #short circuit
       id_handle().get_parent_id_info()[:uri]
     end
   end

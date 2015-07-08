@@ -21,7 +21,6 @@ expected_error_message = "[ERROR] Attribute (integer_attr) has default value (\"
 dtk_common = DtkCommon.new("", "")
 
 describe "(Component Module DSL) Test Case 18: NEG - dtk.model.yaml with invalid integer type attribute value" do
-
   before(:all) do
     puts "***************************************************************************************************",""
   end

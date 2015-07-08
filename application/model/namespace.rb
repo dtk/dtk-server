@@ -10,11 +10,11 @@ module DTK
 
     NAMESPACE_DELIMITER = ':'
 
-    def self.namespace_delimiter()
+    def self.namespace_delimiter
       NAMESPACE_DELIMITER
     end
 
-    def self.common_columns()
+    def self.common_columns
       [
         :id,
         :group_id,
@@ -67,8 +67,8 @@ module DTK
 
     def self.find_by_name(namespace_mh, namespace_name)
       sp_hash = {
-        :cols => common_columns(),
-        :filter => [:eq, :name, namespace_name.to_s.downcase]
+        cols: common_columns(),
+        filter: [:eq, :name, namespace_name.to_s.downcase]
       }
 
       results = Model.get_objs(namespace_mh, sp_hash)
@@ -105,12 +105,12 @@ module DTK
     def self.create_new(namespace_mh, name, remote=nil)
       idh = create_from_rows(namespace_mh,
         [{
-          :name => name,
-          :display_name => name,
-          :ref => name,
-          :remote => remote
+          name: name,
+          display_name: name,
+          ref: name,
+          remote: remote
         }]
-        ).first
+                            ).first
 
       idh.create_object()
     end
@@ -119,6 +119,5 @@ module DTK
     def method_missing(m, *args, &block)
       get_field?(m) || super(m, *args, &block)
     end
-
   end
 end

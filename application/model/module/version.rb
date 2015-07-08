@@ -3,13 +3,13 @@ module DTK
     def self.ret(obj)
       if obj.nil?
         nil
-      elsif obj.kind_of?(String)
+      elsif obj.is_a?(String)
         if Semantic.legal_format?(obj)
           Semantic.create_from_string(obj)
         elsif AssemblyModule.legal_format?(obj)
           AssemblyModule.create_from_string(obj)
         end
-      elsif obj.kind_of?(Assembly)
+      elsif obj.is_a?(Assembly)
         AssemblyModule.new(obj.get_field?(:display_name))
       else
         raise Error.new("Unexpected object type passed to ModuleVersion.ret (#{obj.class})")
@@ -20,7 +20,7 @@ module DTK
       ret =
         if object.nil? 
           true
-        elsif object.kind_of?(String)
+        elsif object.is_a?(String)
           object.casecmp("master").eql?(0) || object.casecmp("default").eql?(0)
         end
       !!ret
@@ -47,8 +47,8 @@ module DTK
 
       def get_assembly(mh)
         sp_hash = {
-          :cols=> [:id,:group_id,:display_name],
-          :filter => [:and,[:eq,:display_name,@assembly_name],[:neq,:datacenter_datacenter_id,nil]]
+          cols: [:id,:group_id,:display_name],
+          filter: [:and,[:eq,:display_name,@assembly_name],[:neq,:datacenter_datacenter_id,nil]]
         }
         rows = Assembly::Instance.get_objs(mh.createMH(:assembly_instance),sp_hash)
         if rows.size == 1
@@ -56,7 +56,7 @@ module DTK
         elsif rows.size == 0
           raise Error.new("Unexpected that no assemblies associated with (#{inspect})" )
         else
-          raise Error.new("Unexpected that #{rows.size.to_s} assemblies are associated with (#{inspect})" )
+          raise Error.new("Unexpected that #{rows.size} assemblies are associated with (#{inspect})" )
         end
       end
 
@@ -71,7 +71,8 @@ module DTK
       end
       StringPattern = /^assembly--(.+$)/
 
-     private
+      private
+
       def initialize(assembly_name)
         @assembly_name = assembly_name
         super(version_string(assembly_name))

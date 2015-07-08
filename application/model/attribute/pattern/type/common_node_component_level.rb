@@ -1,27 +1,32 @@
 module DTK; class Attribute
   class Pattern; class Type
     module CommonNodeComponentLevel
-      def attribute_name()
+      def attribute_name
         attribute_stack()[:attribute][:display_name]
       end
-      def attribute_id()
+
+      def attribute_id
         attribute_stack()[:attribute].id()
       end
-      def component_instance()
+
+      def component_instance
         attribute_stack()[:component]
       end
-      def component_instances()
+
+      def component_instances
         @attribute_stacks.map{|as|as[:component]}.compact
       end
-      def node()
+
+      def node
         attribute_stack()[:node]
       end
 
-      def attribute_idhs()
+      def attribute_idhs
         @attribute_stacks.map{|r|r[:attribute].id_handle()}
       end
-      def node_group_member_attribute_idhs()
-        ret = Array.new
+
+      def node_group_member_attribute_idhs
+        ret = []
         @attribute_stacks.each do |r|
           if r[:node].is_node_group?()
             ret += attribute_idhs_on_service_node_group(r[:attribute])
@@ -30,10 +35,11 @@ module DTK; class Attribute
         ret
       end
       
-     private
+      private
+
       def create_attributes(attr_parents)
-        attribute_idhs = Array.new
-        attr_properties = attribute_properties().inject(Hash.new){|h,(k,v)|h.merge(k.to_s => v)}
+        attribute_idhs = []
+        attr_properties = attribute_properties().inject({}){|h,(k,v)|h.merge(k.to_s => v)}
         field_def = 
           {'display_name' => pattern_attribute_name()}.merge(attr_properties)
         attr_parents.each do |attr_parent|
@@ -44,8 +50,8 @@ module DTK; class Attribute
         
         # TODO: can make more efficient by having create_or_modify_field_def return object with cols, rather than id_handles
         sp_hash = {
-          :cols => [:id,:group_id,:display_name,:description,:component_component_id,:data_type,:semantic_type,:required,:dynamic,:external_ref,:semantic_data_type],
-          :filter => [:oneof,:id,attribute_idhs.map{|idh|idh.get_id()}]
+          cols: [:id,:group_id,:display_name,:description,:component_component_id,:data_type,:semantic_type,:required,:dynamic,:external_ref,:semantic_data_type],
+          filter: [:oneof,:id,attribute_idhs.map{|idh|idh.get_id()}]
         }
         attr_mh = attribute_idhs.first.createMH()
         Model.get_objs(attr_mh,sp_hash)
@@ -53,14 +59,14 @@ module DTK; class Attribute
 
       def attribute_idhs_on_service_node_group(node_group_attribute)
         sp_hash = {
-          :cols => [:id,:display_name,:group_id],
-          :filter => [:eq,:ancestor_id,node_group_attribute.id()]
+          cols: [:id,:display_name,:group_id],
+          filter: [:eq,:ancestor_id,node_group_attribute.id()]
         }
         attr_mh = node_group_attribute.model_handle()
         Model.get_objs(attr_mh,sp_hash).map{|r|r.id_handle()}
       end
 
-      def pattern_attribute_name()
+      def pattern_attribute_name
         first_name_in_fragment(pattern_attribute_fragment())
       end
       

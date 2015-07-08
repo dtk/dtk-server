@@ -4,7 +4,7 @@ module DTK
     r8_nested_require('service_setting','attribute_settings')
     r8_nested_require('service_setting','node_bindings')
     
-    def self.common_columns()
+    def self.common_columns
       [
        :id,
        :display_name,
@@ -25,11 +25,13 @@ module DTK
       apply_to_field?(:node_bindings){|node_bindings|node_bindings.set_node_bindings(target,assembly)}
     end
 
-    def reify!()
+    def reify!
       reify_field!(:attribute_settings,AttributeSettings)
       reify_field!(:node_bindings,NodeBindings)      
     end
-   private
+
+    private
+
     def apply_to_field?(field,&block)
       if content = self[field]
         block.call(content)
@@ -38,7 +40,7 @@ module DTK
 
     def reify_field!(field,klass)
       if content = self[field]
-        unless content.kind_of?(klass)
+        unless content.is_a?(klass)
           self[field] = klass.new(content)
         end
       end

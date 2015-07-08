@@ -7,32 +7,31 @@ require './lib/dtk_common'
 component_module = "r8:java"
 permission_set_1 = "go+rwd"
 user_data = {
-	:usergroup => "bakir_test_group",
-	:user => "dtk17-client",
-	:module_name => "r8/java",
-	:another_user => "bakir_test",
-	:another_usergroup => "bakir_test"
+	usergroup: "bakir_test_group",
+	user: "dtk17-client",
+	module_name: "r8/java",
+	another_user: "bakir_test",
+	another_usergroup: "bakir_test"
 }
 
 permissions = {
-	:user_r => true,
-	:user_w => true,
-	:user_d => true,
-	:user_p => true,
-	:user_group_r => true,
-	:user_group_w => false,
-	:user_group_d => false,
-	:user_group_p => false,
-	:other_r => true,
-	:other_w => false,
-	:other_d => false,
-	:other_p => false,
+	user_r: true,
+	user_w: true,
+	user_d: true,
+	user_p: true,
+	user_group_r: true,
+	user_group_w: false,
+	user_group_d: false,
+	user_group_p: false,
+	other_r: true,
+	other_w: false,
+	other_d: false,
+	other_p: false,
 }
 
 dtk_common = DtkCommon.new('', '')
 
 describe "(Repoman client integration) Test Case 13: NEG - chmod go+rwd on module A (User A is not owner but belongs to User group A which is not set on module, intial permissions are: RWDP/R/R)" do
-
 	let(:conf) { Configuration.instance }
 	let(:header) { @homepage.get_header }
 	let(:users) { @homepage.get_main.get_users }

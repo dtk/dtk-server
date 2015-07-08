@@ -1,7 +1,7 @@
 module DTK
   class Attribute
     module ConstantMixin
-      def is_constant?()
+      def is_constant?
         external_ref = get_field?(:external_ref)
         Constant.is_constant?(external_ref)
       end
@@ -11,18 +11,19 @@ module DTK
       attr_reader :datatype,:dependent_attribute,:dependent_component
 
       def same_constant?(c2)
-        dependent_attribute == c2.dependent_attribute and dependent_component ==  c2.dependent_component
+        dependent_attribute == c2.dependent_attribute && dependent_component ==  c2.dependent_component
       end
+
       def is_in?(constant_array)
         !!constant_array.find{|c2|same_constant?(c2)}
       end
 
-      def self.side_effect_settings()
+      def self.side_effect_settings
         {'hidden' => true}
       end
 
       ExternalRefType = "constant"
-      def self.ret_external_ref()
+      def self.ret_external_ref
         {"type" => ExternalRefType}
       end
       def self.is_constant?(external_ref)
@@ -46,15 +47,17 @@ module DTK
       end
 
       ConstantDelim = "___"
-      def attribute_name()
+      def attribute_name
         constant_val_for_attr_name = self.class.constant_val_for_attr_name(@constant)
         "#{ConstantDelim}constant#{ConstantDelim}#{@dependent_component}#{ConstantDelim}#{@dependent_attribute}#{ConstantDelim}#{constant_val_for_attr_name}"
       end
-      def attribute_value()
+
+      def attribute_value
         @constant
       end
 
-     private
+      private
+
       def self.constant_val_for_attr_name(constant)
         constant.gsub(OtherChars,OtherCharsReplacement)
       end

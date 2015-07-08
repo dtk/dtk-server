@@ -37,7 +37,7 @@ module XYZ
           return source["description"] if source["description"]
           required_cmp = source["required_component"]
           base_cmp = source["parent_display_name"]
-          raise Error.new("unexpected form for userdata dependency") unless required_cmp and base_cmp
+          raise Error.new("unexpected form for userdata dependency") unless required_cmp && base_cmp
           XYZ::Constraints::Macro::RequiredComponent.description(required_cmp,base_cmp)
         end
       end

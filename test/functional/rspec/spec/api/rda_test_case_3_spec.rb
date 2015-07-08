@@ -1,12 +1,11 @@
 require './spec/spec_helper'
 
 login = {
-	:username=>'dtk-admin',
-	:password=>'r8server'
+	username: 'dtk-admin',
+	password: 'r8server'
 }
 
 describe "(Repoman Drupal API) Test Case 3: NEG - Get all repos by non-existing username, non-existing user id" do
-
 	let(:repoman) { @repoman }
 
 	context "Login" do

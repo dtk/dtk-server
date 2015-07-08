@@ -28,7 +28,7 @@ module DTK; class  Assembly
         end
       end
 
-      def pretty_print_name(assembly,opts={})
+      def pretty_print_name(assembly,_opts={})
         assembly.get_field?(:display_name)
       end
 
@@ -36,19 +36,20 @@ module DTK; class  Assembly
         add_last_task_run_status!(assembly_rows,assembly_mh)
       end
 
-     private
+      private
+
       def list_aux__no_details(assembly_rows)
         assembly_rows.map do |r|
-          r.prune_with_values(:display_name => pretty_print_name(r))
+          r.prune_with_values(display_name: pretty_print_name(r))
         end
       end
 
       def add_last_task_run_status!(assembly_rows,assembly_mh)
         sp_hash = {
-          :cols => [:id,:started_at,:assembly_id,:status],
-          :filter => [:oneof,:assembly_id,assembly_rows.map{|r|r[:id]}]
+          cols: [:id,:started_at,:assembly_id,:status],
+          filter: [:oneof,:assembly_id,assembly_rows.map{|r|r[:id]}]
         }
-        ndx_task_rows = Hash.new
+        ndx_task_rows = {}
         get_objs(assembly_mh.createMH(:task),sp_hash).each do |task|
           next unless task[:started_at]
           assembly_id = task[:assembly_id]
@@ -69,7 +70,6 @@ module DTK; class  Assembly
         end
         assembly_rows
       end
-
     end
 
     module ListMixin
@@ -80,7 +80,7 @@ module DTK; class  Assembly
         when :components
           list_components(opts)
         when :nodes
-          opts.merge!(:cols => Node.common_columns()+[:target])
+          opts.merge!(cols: Node.common_columns()+[:target])
           list_nodes(opts)
         when :modules
           list_component_modules(opts)
@@ -101,15 +101,15 @@ module DTK; class  Assembly
           ret = get_attributes_print_form_aux(opts).map do |a|
             Aux::hash_subset(a,cols_to_get)
           end.sort{|a,b| a[:display_name] <=> b[:display_name] }
-          opts[:raw_attribute_value] ? ret.inject(Hash.new){|h,r|h.merge(r[:display_name] => r[:value])} : ret
+          opts[:raw_attribute_value] ? ret.inject({}){|h,r|h.merge(r[:display_name] => r[:value])} : ret
         end
       end
 
       def list_component_modules(opts=Opts.new)
-        component_modules_opts = {:recursive => true}
+        component_modules_opts = {recursive: true}
         if get_version_info = opts.array(:detail_to_include).include?(:version_info)
           opts.set_datatype!(:assembly_component_module)
-          component_modules_opts.merge!(:get_version_info=>true)
+          component_modules_opts.merge!(get_version_info: true)
         end
         unsorted_ret = get_component_modules(component_modules_opts)
           if get_version_info
@@ -125,7 +125,7 @@ module DTK; class  Assembly
       end
 
       def list_nodes(opts=Opts.new)
-        opts.merge!(:remove_node_groups=>false)
+        opts.merge!(remove_node_groups: false)
         nodes = get_nodes__expand_node_groups(opts)
 
         nodes.each do |node|
@@ -156,11 +156,11 @@ module DTK; class  Assembly
         nodes.sort{|a,b| a[:display_name] <=> b[:display_name] }
       end
 
-
       private :list_nodes
       def set_node_display_name!(node)
         node[:display_name] = node.assembly_node_print_form()
       end
+
       def set_node_admin_op_status!(node)
         if node.is_node_group?()
           node[:admin_op_status] = nil
@@ -178,7 +178,7 @@ module DTK; class  Assembly
           node_name      = "#{r[:node][:display_name]}/"
           hide_node_name = node_cmp_name || type.eql?('assembly_wide')
           display_name   = "#{hide_node_name ? '' : node_name}#{Component::Instance.print_form(r, namespace)}"
-          r.hash_subset(:id).merge({:display_name => display_name})
+          r.hash_subset(:id).merge(display_name: display_name)
         end
 
         sort = proc{|a,b|a[:display_name] <=> b[:display_name]}
@@ -191,18 +191,19 @@ module DTK; class  Assembly
         end
       end
 
-      def display_name_print_form(opts={})
+      def display_name_print_form(_opts={})
         pretty_print_name()
       end
 
-      def print_includes()
+      def print_includes
         ModuleRefs::Tree.create(self).hash_form()
       end
 
-     private
-      def list_tasks(opts={})
+      private
+
+      def list_tasks(_opts={})
         tasks = []
-        rows = get_objs(:cols => [:tasks])
+        rows = get_objs(cols: [:tasks])
         rows.each do |row|
           task        = row[:task]
           task[:type] = task[:display_name]
@@ -215,17 +216,17 @@ module DTK; class  Assembly
         ndx_component_print_form = ret_ndx_component_print_form(aug_cmps,cmps_print_form)
         join_columns = OutputTable::JoinColumns.new(aug_cmps) do |aug_cmp|
           if deps = aug_cmp[:dependencies]
-            ndx_els = Hash.new
+            ndx_els = {}
             deps.each do |dep|
               if depends_on = dep.depends_on_print_form?()
-                el = ndx_els[depends_on] ||= Array.new
+                el = ndx_els[depends_on] ||= []
                 sb_cmp_ids =  dep.satisfied_by_component_ids
                 ndx_els[depends_on] += (sb_cmp_ids - el)
               end
             end
             ndx_els.map do |depends_on,sb_cmp_ids|
               satisfied_by = (sb_cmp_ids.empty? ? nil : sb_cmp_ids.map{|cmp_id|ndx_component_print_form[cmp_id]}.join(', '))
-              {:depends_on => depends_on, :satisfied_by => satisfied_by}
+              {depends_on: depends_on, satisfied_by: satisfied_by}
             end
           end
         end
@@ -234,10 +235,10 @@ module DTK; class  Assembly
 
       def ret_ndx_component_print_form(aug_cmps,cmps_with_print_form)
         # has lookup that includes each satisfied_by_component
-        ret = cmps_with_print_form.inject(Hash.new){|h,cmp|h.merge(cmp[:id] => cmp[:display_name])}
+        ret = cmps_with_print_form.inject({}){|h,cmp|h.merge(cmp[:id] => cmp[:display_name])}
 
         # see if theer is any components that are nreferenced but not in ret
-        needed_cmp_ids = Array.new
+        needed_cmp_ids = []
         aug_cmps.each do |aug_cmp|
           if deps = aug_cmp[:dependencies]
             deps.map do |dep|
@@ -251,10 +252,9 @@ module DTK; class  Assembly
 
         filter_array = needed_cmp_ids.map{|cmp_id|[:eq,:id,cmp_id]}
         filter = (filter_array.size == 1 ? filter_array.first : [:or] + filter_array)
-        additional_cmps = list_components(Opts.new(:filter => filter))
+        additional_cmps = list_components(Opts.new(filter: filter))
         additional_cmps.inject(ret){|h,cmp|h.merge(cmp[:id] => cmp[:display_name])}
       end
-
     end
   end
 end; end

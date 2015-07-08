@@ -18,7 +18,6 @@ component_module_filesystem_location = "~/dtk/component_modules/r8"
 dtk_common = DtkCommon.new('', '')
 
 describe "(Modules, Services and Versioning) Test Case 22: Ability to list attributes that belong only to specific component in component module" do
-
   before(:all) do
     puts "**************************************************************************************************************************************",""
   end

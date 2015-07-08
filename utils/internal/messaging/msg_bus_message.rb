@@ -1,6 +1,6 @@
 module XYZ
   class MessageBusMsg 
-    def to_s()
+    def to_s
        return @body.inspect
     end
     def self.unmarshall_from_wire(raw_msg)
@@ -15,12 +15,14 @@ module XYZ
   end   
   class MessageBusMsgIn < MessageBusMsg
     # input so processor_msg can be formed
-    def parse()
-      {:msg_type => @body[:msg_type],
-       :msg_content => @body[:msg_content],
-       :target_object_id => @body[:target_object_id]}
+    def parse
+      {msg_type: @body[:msg_type],
+       msg_content: @body[:msg_content],
+       target_object_id: @body[:target_object_id]}
     end
-   private
+
+    private
+
     def initialize(unmarshalled_hash)
       @body = unmarshalled_hash[:body]
     end
@@ -33,7 +35,7 @@ module XYZ
    
     # return raw_body,raw_publish_opts
     def marshal_to_wire(publish_opts)
-      hash_body = {:body => @body}
+      hash_body = {body: @body}
       raw_publish_opts = {} 
       publish_opts.each do |k,v| 
         if MessageBusTransactionInfo::In_amqp_header.include?(k)

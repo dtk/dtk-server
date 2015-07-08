@@ -22,7 +22,7 @@ module DTK; class Task; class Template
 
       # returns all actions generated
       def add_subtasks!(parent_task,internode_stage_index,assembly_idh=nil)
-        ret = Array.new
+        ret = []
         each_node_actions do |node_actions|
           if action = node_actions.add_subtask!(parent_task,internode_stage_index,assembly_idh)
             ret << action
@@ -35,7 +35,7 @@ module DTK; class Task; class Template
         ndx_action_indexes.each_pair do |node_id,action_indexes|
           if node_actions = self[node_id]
             if node_actions.find_earliest_match?(action_match,action_indexes)
-              action_match.in_multinode_stage = true if kind_of?(MultiNode)
+              action_match.in_multinode_stage = true if is_a?(MultiNode)
               return true
             end
           end
@@ -43,7 +43,7 @@ module DTK; class Task; class Template
         false
       end
 
-      def has_action_with_method?()
+      def has_action_with_method?
         !!values.find{|node_actions|node_actions.has_action_with_method?()}
       end
 
@@ -79,7 +79,7 @@ module DTK; class Task; class Template
       end
       # TODO: have above subsume below  
       def splice_in_at_beginning!(internode_stage)
-        ndx_splice_in_node_ids = internode_stage.node_ids().inject(Hash.new){|h,node_id|h.merge(node_id => true)}
+        ndx_splice_in_node_ids = internode_stage.node_ids().inject({}){|h,node_id|h.merge(node_id => true)}
         each_node_id do |node_id|
           if matching = internode_stage[node_id]
             self[node_id].splice_in_at_beginning!(matching)
@@ -147,13 +147,15 @@ module DTK; class Task; class Template
       def each_node_id(&block)
         each_key{|node_id|block.call(node_id)}
       end
-      def node_ids()
+
+      def node_ids
         keys()
       end
 
-     private
-      def serialized_form_with_name()
-        @name ? OrderedHash.new(:name => @name) : OrderedHash.new
+      private
+
+      def serialized_form_with_name
+        @name ? OrderedHash.new(name: @name) : OrderedHash.new
       end
 
       def self.parse_and_reify_is_multi_node_type?(serialized_content) 

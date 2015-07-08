@@ -4,10 +4,10 @@ dtk_model_yaml_path = ARGV[0]
 module DTK
   module Utility
     def self.component_doc_generator(dtk_model_yaml_path)
-      server = R8Server.new("superuser",:groupname => "all")
+      server = R8Server.new("superuser",groupname: "all")
       parsed_as_hash = server.parse_dtk_model_file(dtk_model_yaml_path)
       template = File.open(File.expand_path('component_doc_generator.md.erb',File.dirname(__FILE__))).read
-      STDOUT << Erubis::Eruby.new(template).result(:cmp_module => ComponentModule.new(parsed_as_hash))
+      STDOUT << Erubis::Eruby.new(template).result(cmp_module: ComponentModule.new(parsed_as_hash))
     end
     class Top < Hash
       def initialize(hash)
@@ -16,18 +16,21 @@ module DTK
       end
     end
     class ComponentModule < Top
-      def name()
+      def name
         self["module"]
       end
-      def dsl_version()
+
+      def dsl_version
         self["dsl_version"]
       end
-      def type()
+
+      def type
         ret = self["module_type"]
         ret && ret.gsub(/_module/,'')
       end
-      def components()
-        ret = Array.new
+
+      def components
+        ret = []
         (self["components"]||{}).each_pair do |cmp_name,cmp_info|
           ret << Component.new(cmp_name,cmp_info)
         end
@@ -39,11 +42,13 @@ module DTK
       def initialize(cmp_name,cmp_info)
         super({"name" => cmp_name}.merge(cmp_info))
       end
-      def name()
+
+      def name
         self["name"]
       end
-      def attributes()
-        ret = Array.new
+
+      def attributes
+        ret = []
         (self["attributes"]||{}).each_pair do |attr_name,attr_info|
           ret << Attribute.new(attr_name,attr_info)
         end
@@ -55,17 +60,20 @@ module DTK
       def initialize(attr_name,attr_info)
         super({"name" => attr_name}.merge(attr_info))
       end
-      def name()
+
+      def name
         self["name"]
       end
-      def type()
+
+      def type
         self["type"]
       end
       #TODO: looks like Erubis bug when method called 'default' used
-      def default_value()
+      def default_value
         self["default"]
       end
-      def description()
+
+      def description
         self["description"]
       end
     end

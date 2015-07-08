@@ -26,8 +26,8 @@ module DTK; module CommandAndControlAdapter
           dns = dns()
         rescue  => e
           err_msg = "cannot find ec2_address in associate_persistent_dns for node with ID '#{node[:id]}"
-          if e.kind_of?(::DTK::Error)
-            err_msg << ": #{e.to_s}"
+          if e.is_a?(::DTK::Error)
+            err_msg << ": #{e}"
           end
           Log.error(err_msg)
           return
@@ -47,19 +47,21 @@ module DTK; module CommandAndControlAdapter
         raise Error, "Not able to set DNS hostname for node with ID '#{node[:id]}" if record.nil?
 
         # if all sucess we update the database
-        node.update(:hostname_external_ref => node[:hostname_external_ref])
+        node.update(hostname_external_ref: node[:hostname_external_ref])
 
         Log.info "Persistent DNS '#{node.persistent_dns()}' has been assigned to node and set as default DNS."
       end
-     private
+
+      private
+
       def process_addresses__first_boot?(node)
-        hostname_external_ref = {:iaas => :aws }
+        hostname_external_ref = {iaas: :aws }
         if node.persistent_hostname?()
           begin 
             # allocate elastic IP for this node
             elastic_ip = conn().allocate_elastic_ip()
-            hostname_external_ref.merge!(:elastic_ip => elastic_ip)
-            external_ref.merge!(:dns_name => elastic_ip) 
+            hostname_external_ref.merge!(elastic_ip: elastic_ip)
+            external_ref.merge!(dns_name: elastic_ip) 
             Log.info("Persistent hostname needed for node '#{node[:display_name]}', assigned #{elastic_ip}")
            rescue Fog::Compute::AWS::Error => e
             Log.error "Not able to set Elastic IP, reason: #{e.message}"
@@ -70,10 +72,10 @@ module DTK; module CommandAndControlAdapter
           persistent_dns = dns_assignment.address()
           
           # we create it on node ready since we still do not have that data
-          hostname_external_ref.merge!(:persistent_dns => persistent_dns)
+          hostname_external_ref.merge!(persistent_dns: persistent_dns)
           Log.info("Persistent DNS needed for node '#{node[:display_name]}', assigned '#{persistent_dns}'")
         end
-        node.update(:hostname_external_ref => hostname_external_ref)
+        node.update(hostname_external_ref: hostname_external_ref)
       end
 
       def process_addresses__restart(node)
@@ -101,8 +103,8 @@ module DTK; module CommandAndControlAdapter
               dns = dns()
              rescue  => e
               err_msg = "in process_addresses__terminate? for node with ID '#{node[:id]}"
-              if e.kind_of?(::DTK::Error)
-                err_msg << ": #{e.to_s}"
+              if e.is_a?(::DTK::Error)
+                err_msg << ": #{e}"
               end
               Log.error(err_msg)
               return
@@ -117,10 +119,9 @@ module DTK; module CommandAndControlAdapter
         end
       end
 
-      def dns()
+      def dns
         @dns ||= CloudConnect::Route53.new(::R8::Config[:dns][:r8][:domain])
       end
-
     end
   end
 end;end

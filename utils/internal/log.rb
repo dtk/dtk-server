@@ -12,30 +12,31 @@ end
 
 module DTK
   module Log
-    def self.info(msg, out = $stdout)
+    def self.info(msg, _out = $stdout)
       simple_form(:info,msg)
     end
-    def self.debug(msg, out = $stdout)
+    def self.debug(msg, _out = $stdout)
       simple_form(:debug,msg)
     end
-    def self.error(msg, out = $stdout)
+    def self.error(msg, _out = $stdout)
       simple_form(:error,msg)
     end
-    def self.warn(msg, out = $stdout)
+    def self.warn(msg, _out = $stdout)
       simple_form(:warn,msg)
     end
 
-    def self.info_pp(obj, out = $stdout)
+    def self.info_pp(obj, _out = $stdout)
       pp_form(:info,obj)
     end
-    def self.debug_pp(obj, out = $stdout)
+    def self.debug_pp(obj, _out = $stdout)
       pp_form(:debug,obj)
     end
-    def self.error_pp(obj, out = $stdout)
+    def self.error_pp(obj, _out = $stdout)
       pp_form(:error,obj)
     end
 
-   private
+    private
+
     def self.simple_form(type,msg)
       msg = include_caller_info?(type,msg)
       ramaze_log(type,msg)
@@ -62,10 +63,10 @@ module DTK
     OffsetDepth = 2 #so does not give caller info for errors itself
 
     def self.format(msg)
-      ret = String.new
+      ret = ''
       ret << "#{Time.now}: " if Config[:print_time]
       ret << "in fn: #{this_parent_method}: " if Config[:print_method]
-      if msg.kind_of?(String)
+      if msg.is_a?(String)
         ret << msg
       else
         ret << msg.inspect

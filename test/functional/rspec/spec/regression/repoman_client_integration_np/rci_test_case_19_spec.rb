@@ -5,9 +5,9 @@ require './lib/component_modules_spec'
 require './lib/dtk_common'
 
 user_data = {
-	:usergroup => "bakir_test_group",
-	:user => "dtk17-client",
-	:module_name => "r8/java",
+	usergroup: "bakir_test_group",
+	user: "dtk17-client",
+	module_name: "r8/java",
 }
 
 component_module = "r8:java"
@@ -16,24 +16,23 @@ user_emails = "bakir@atlantbh.com"
 collaborator_type = "users"
 
 permissions = {
-	:user_r => false,
-	:user_w => false,
-	:user_d => false,
-	:user_p => true,
-	:user_group_r => false,
-	:user_group_w => false,
-	:user_group_d => false,
-	:user_group_p => false,
-	:other_r => false,
-	:other_w => false,
-	:other_d => false,
-	:other_p => false,
+	user_r: false,
+	user_w: false,
+	user_d: false,
+	user_p: true,
+	user_group_r: false,
+	user_group_w: false,
+	user_group_d: false,
+	user_group_p: false,
+	other_r: false,
+	other_w: false,
+	other_d: false,
+	other_p: false,
 }
 
 dtk_common = DtkCommon.new('', '')
 
 describe "(Repoman client integration) Test Case 19: add/remove collaborators by users and useremails (User A is owner and belongs to User group A which is set on module, intial permissions are: P/None/None)" do
-
 	let(:conf) { Configuration.instance }
 	let(:header) { @homepage.get_header }
 	let(:users) { @homepage.get_main.get_users }

@@ -24,15 +24,15 @@ def converge_service_and_cancel_tasks(workspace_id)
 	tasks_cancelled = false
 
 	puts "Converge process for service with id #{workspace_id} started!"
-	create_task_response = dtk_common.send_request('/rest/assembly/create_task', {:assembly_id => workspace_id})
+	create_task_response = dtk_common.send_request('/rest/assembly/create_task', assembly_id: workspace_id)
 	task_id = create_task_response['data']['task_id']
 	puts "Task id: #{task_id}"
-	task_execute_response = dtk_common.send_request('/rest/task/execute', {:task_id => task_id})
+	task_execute_response = dtk_common.send_request('/rest/task/execute', task_id: task_id)
 
 	sleep 5
 
-	cancel_task_response = dtk_common.send_request('/rest/task/cancel_task', {:task_id => task_id})
-	task_status_response = dtk_common.send_request('/rest/task/status', {:task_id=> task_id})
+	cancel_task_response = dtk_common.send_request('/rest/task/cancel_task', task_id: task_id)
+	task_status_response = dtk_common.send_request('/rest/task/status', task_id: task_id)
 	ap task_execute_response
 
 	if task_status_response.to_s.include? 'cancelled'
@@ -46,7 +46,6 @@ def converge_service_and_cancel_tasks(workspace_id)
 end
 
 describe "(Workspace) Test Case 13: Create one node, add component in it, converge workspace and cancel tasks while converge is in execution" do
-
 	before(:all) do
 		puts "**********************************************************************************************************************************",""
   end

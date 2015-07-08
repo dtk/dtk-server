@@ -27,7 +27,6 @@ assembly_name = 'workspace_assembly'
 dtk_common = DtkCommon.new('', '')
 
 describe "(Workspace) Test Case 9: Create two nodes, add components in both of them, and create assembly from the workspace content in new service module" do
-
 	before(:all) do
 		puts "***********************************************************************************************************************************************",""
   end

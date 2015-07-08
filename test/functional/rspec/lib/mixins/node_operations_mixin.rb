@@ -4,12 +4,12 @@ module NodeOperationsMixin
 		attribute_check = false
 		#Get attribute and check if attribute name and attribute value exists
 		puts "List of service attributes:"
-		service_attributes = send_request('/rest/assembly/info_about', {:assembly_id=>service_id, :filter=>nil, :about=>'attributes', :subtype=>'instance'})
+		service_attributes = send_request('/rest/assembly/info_about', assembly_id: service_id, filter: nil, about: 'attributes', subtype: 'instance')
 		pretty_print_JSON(service_attributes)
 
-		if (service_attributes['data'].select { |x| x['display_name'] == "#{node_name}/#{attribute_name_to_check}" }.first)		
+		if (service_attributes['data'].find { |x| x['display_name'] == "#{node_name}/#{attribute_name_to_check}" })		
 			attribute_name = attribute_name_to_check
-			attribute_value = service_attributes['data'].select { |x| x['value'] == attribute_value_to_check }.first
+			attribute_value = service_attributes['data'].find { |x| x['value'] == attribute_value_to_check }
 
 			if (!attribute_value.nil?)
 				puts "Attribute #{attribute_name_to_check} with value #{attribute_value_to_check} exists!" 
@@ -34,14 +34,14 @@ module NodeOperationsMixin
 		attribute_check = false
 		#Get attribute and check if attribute name and attribute value exists
 		puts "List of service attributes:"
-		service_attributes = send_request('/rest/assembly/info_about', {:assembly_id=>service_id, :filter=>nil, :about=>'attributes', :subtype=>'instance'})
+		service_attributes = send_request('/rest/assembly/info_about', assembly_id: service_id, filter: nil, about: 'attributes', subtype: 'instance')
 		pretty_print_JSON(service_attributes)
 
 		puts "#{node_name}/#{component_name}/#{attribute_name_to_check}" 
 
-		if (service_attributes['data'].select { |x| x['display_name'] == "#{node_name}/#{component_name}/#{attribute_name_to_check}" }.first)		
+		if (service_attributes['data'].find { |x| x['display_name'] == "#{node_name}/#{component_name}/#{attribute_name_to_check}" })		
 			attribute_name = attribute_name_to_check
-			attribute_value = service_attributes['data'].select { |x| x['value'] == attribute_value_to_check }.first
+			attribute_value = service_attributes['data'].find { |x| x['value'] == attribute_value_to_check }
 
 			if (!attribute_value.nil?)
 				puts "Attribute #{attribute_name_to_check} with value #{attribute_value_to_check} exists!" 
@@ -66,9 +66,9 @@ module NodeOperationsMixin
 		puts "Check params presence in nodes:", "-------------------------------"
 		param_check = false
 		puts "List of service nodes:"
-		service_nodes = send_request('/rest/assembly/info_about', {:assembly_id=>service_id, :filter=>nil, :about=>'nodes', :subtype=>'instance'})
+		service_nodes = send_request('/rest/assembly/info_about', assembly_id: service_id, filter: nil, about: 'nodes', subtype: 'instance')
 		pretty_print_JSON(service_nodes)
-		node_content = service_nodes['data'].select { |x| x['display_name'] == node_name }.first
+		node_content = service_nodes['data'].find { |x| x['display_name'] == node_name }
 
  		if (!node_content.nil?)
 			parameter = node_content[param_name_to_check]
@@ -80,7 +80,7 @@ module NodeOperationsMixin
 				param_check = true
 				puts "Node param with name: #{param_name_to_check} and value: #{param_value_to_check} exists!"
 			end
-		else
+		 else
 			param_check = false
 			puts "Node with name #{node_name} does not exist!"
 		end
@@ -92,9 +92,9 @@ module NodeOperationsMixin
 		puts "Check components presence in nodes:", "-----------------------------------"
 		component_check = false
 		puts "List of assembly components:"
-		service_components = send_request('/rest/assembly/info_about', {:assembly_id=>service_id, :filter=>nil, :about=>'components', :subtype=>'instance'})
+		service_components = send_request('/rest/assembly/info_about', assembly_id: service_id, filter: nil, about: 'components', subtype: 'instance')
 		pretty_print_JSON(service_components)
-		component_name = service_components['data'].select { |x| x['display_name'] == "#{node_name}/#{component_name_to_check}" }.first
+		component_name = service_components['data'].find { |x| x['display_name'] == "#{node_name}/#{component_name_to_check}" }
 
 		if (!component_name.nil?)
 			component_check = true
@@ -111,21 +111,21 @@ module NodeOperationsMixin
 		puts "Delete component from service node:", "-----------------------------------"
 		component_deleted = false
 		puts "List of service components:"
-		service_components = send_request('/rest/assembly/info_about', {:assembly_id=>service_id, :filter=>nil, :about=>'components', :subtype=>'instance'})
+		service_components = send_request('/rest/assembly/info_about', assembly_id: service_id, filter: nil, about: 'components', subtype: 'instance')
 		pretty_print_JSON(service_components)
 
 		if node_name.nil?
-			component = service_components['data'].select { |x| x['display_name'] == "#{component_to_delete}" }.first
+			component = service_components['data'].find { |x| x['display_name'] == "#{component_to_delete}" }
 		else
-			component = service_components['data'].select { |x| x['display_name'] == "#{node_name}/#{component_to_delete}" }.first
+			component = service_components['data'].find { |x| x['display_name'] == "#{node_name}/#{component_to_delete}" }
 		end
 
 		if !component.nil?
 			if !node_name.nil?
-				node_list = send_request('/rest/assembly/info_about', {:assembly_id=>service_id, :subtype=>'instance', :about=>'nodes'})
-				node_id = node_list['data'].select { |x| x['display_name'] == node_name }.first['id']
+				node_list = send_request('/rest/assembly/info_about', assembly_id: service_id, subtype: 'instance', about: 'nodes')
+				node_id = node_list['data'].find { |x| x['display_name'] == node_name }['id']
 				puts "Deleting component #{component_to_delete} from node #{node_name}..."
-				component_delete_response = send_request('/rest/assembly/delete_component', {:assembly_id=>service_id, :node_id=>node_id, :component_id=>component['id']})
+				component_delete_response = send_request('/rest/assembly/delete_component', assembly_id: service_id, node_id: node_id, component_id: component['id'])
 				pretty_print_JSON(component_delete_response)
 				if component_delete_response['status'].include? 'ok'
 					puts "Component #{component_to_delete} has been deleted successfully!"
@@ -135,7 +135,7 @@ module NodeOperationsMixin
 				end
 			else
 				puts "Deleting component #{component_to_delete} from service instance..."
-				component_delete_response = send_request('/rest/assembly/delete_component', {:assembly_id=>service_id, :component_id=>component['id']})
+				component_delete_response = send_request('/rest/assembly/delete_component', assembly_id: service_id, component_id: component['id'])
 				pretty_print_JSON(component_delete_response)
 				if component_delete_response['status'].include? 'ok'
 					puts "Component #{component_to_delete} has been deleted successfully!"
@@ -155,9 +155,9 @@ module NodeOperationsMixin
 		puts "Stop running node:", "------------------"
 		node_stopped = false
 
-		node_list = send_request('/rest/assembly/info_about', {:assembly_id=>service_id, :subtype=>'instance', :about=>'nodes'})
-		node_id = node_list['data'].select { |x| x['display_name'] == node_name }.first['id']
-		stop_node_response = send_request('/rest/assembly/stop', {:assembly_id => service_id, :node_pattern => node_id})
+		node_list = send_request('/rest/assembly/info_about', assembly_id: service_id, subtype: 'instance', about: 'nodes')
+		node_id = node_list['data'].find { |x| x['display_name'] == node_name }['id']
+		stop_node_response = send_request('/rest/assembly/stop', assembly_id: service_id, node_pattern: node_id)
 
 		if (stop_node_response['data']['status'] == "ok")
 			puts "Node #{node_name} stopped successfully!"
@@ -173,11 +173,11 @@ module NodeOperationsMixin
 		puts "Start running node:", "-------------------"
 		node_started = false
 
-		node_list = send_request('/rest/assembly/info_about', {:assembly_id=>service_id, :subtype=>'instance', :about=>'nodes'})
-		node_id = node_list['data'].select { |x| x['display_name'] == node_name }.first['id']
-		response = send_request('/rest/assembly/start', {:assembly_id => service_id, :node_pattern=>node_id})
+		node_list = send_request('/rest/assembly/info_about', assembly_id: service_id, subtype: 'instance', about: 'nodes')
+		node_id = node_list['data'].find { |x| x['display_name'] == node_name }['id']
+		response = send_request('/rest/assembly/start', assembly_id: service_id, node_pattern: node_id)
 		task_id = response['data']['task_id']
-		response = send_request('/rest/task/execute', {:task_id=>task_id})
+		response = send_request('/rest/task/execute', task_id: task_id)
 
 		if (response['status'] == 'ok')
 			end_loop = false
@@ -187,9 +187,9 @@ module NodeOperationsMixin
 			while (end_loop == false)
 				sleep 10
 		    	count += 1
-				response = send_request('/rest/assembly/info_about', {:assembly_id => service_id, :subtype => 'instance', :about => 'tasks'})
+				response = send_request('/rest/assembly/info_about', assembly_id: service_id, subtype: 'instance', about: 'tasks')
 				puts "Start instance check:"
-				status = response['data'].select { |x| x['status'] == 'executing'}.first
+				status = response['data'].find { |x| x['status'] == 'executing'}
 				pretty_print_JSON(status)
 
 				if (count > max_num_of_retries)
@@ -220,7 +220,7 @@ module NodeOperationsMixin
 			sleep 10
 		  count += 1
 
-		  response = send_request('/rest/assembly/initiate_grep', {:assembly_id => service_id, :subtype=>'instance', :log_path=>log_location, :node_pattern=>node_name, :grep_pattern=>grep_pattern, :stop_on_first_match =>false})
+		  response = send_request('/rest/assembly/initiate_grep', assembly_id: service_id, subtype: 'instance', log_path: log_location, node_pattern: node_name, grep_pattern: grep_pattern, stop_on_first_match: false)
 			pretty_print_JSON(response)
 			action_results_id = response['data']['action_results_id']
 
@@ -229,9 +229,9 @@ module NodeOperationsMixin
 				end_loop = true
 			end
 
-			5.downto(1) do |i|
+			5.downto(1) do |_i|
 				sleep 1
-				response = send_request('/rest/assembly/get_action_results', {:return_only_if_complete=>true, :action_results_id=>action_results_id.to_i, :disable_post_processing => true})
+				response = send_request('/rest/assembly/get_action_results', return_only_if_complete: true, action_results_id: action_results_id.to_i, disable_post_processing: true)
 				puts "Starting grep command:"
 				pretty_print_JSON(response)
 
@@ -254,7 +254,7 @@ module NodeOperationsMixin
 		puts "Delete node:", "------------"
 		node_deleted = false
 
-		delete_node_response = send_request('/rest/assembly/delete_node', {:assembly_id=>service_id, :node_id=>node_name})
+		delete_node_response = send_request('/rest/assembly/delete_node', assembly_id: service_id, node_id: node_name)
 
 		if (delete_node_response['status'] == "ok")
 			puts "Node deleted successfully!"
@@ -268,7 +268,7 @@ module NodeOperationsMixin
 
 	def create_node(service_id, node_name, node_template)
 		puts "Create node:","------------"
-		create_node_response = send_request('/rest/assembly/add_node', {:assembly_id=>service_id, :assembly_node_name=>node_name, :node_template_identifier=>node_template})
+		create_node_response = send_request('/rest/assembly/add_node', assembly_id: service_id, assembly_node_name: node_name, node_template_identifier: node_template)
 		if create_node_response['status'].include? "ok"
 			puts "Node #{node_name} has been created successfully!"
 			puts ""
@@ -283,9 +283,9 @@ module NodeOperationsMixin
 	def check_if_node_exists_by_node_name(service_id, node_name)
 		puts "Check if node exists by name:", "-----------------------------"
 		node_exists = false
-		node_list = send_request('/rest/assembly/info_about', {:assembly_id=>service_id, :subtype=>'instance', :about=>'nodes'})
+		node_list = send_request('/rest/assembly/info_about', assembly_id: service_id, subtype: 'instance', about: 'nodes')
 		pretty_print_JSON(node_list)
-		node = node_list['data'].select { |x| x['display_name'] == node_name }.first	
+		node = node_list['data'].find { |x| x['display_name'] == node_name }	
 		
 		if !node.nil?
 			puts "Node #{node_name} exists!"
@@ -301,14 +301,14 @@ module NodeOperationsMixin
 		puts "Add component to node:", "----------------------"
 		component_added = false
 
-		node_list = send_request('/rest/assembly/info_about', {:assembly_id=>service_id, :subtype=>'instance', :about=>'nodes'})
+		node_list = send_request('/rest/assembly/info_about', assembly_id: service_id, subtype: 'instance', about: 'nodes')
 		puts "Node list:"
 		pretty_print_JSON(node_list)
-		node_id = node_list['data'].select { |x| x['display_name'] == node_name }.first['id']
-		component_add_response = send_request('/rest/assembly/add_component', {:assembly_id=>service_id, :node_id=>node_id, :component_template_id=>component_id, :namespace=>namespace})
+		node_id = node_list['data'].find { |x| x['display_name'] == node_name }['id']
+		component_add_response = send_request('/rest/assembly/add_component', assembly_id: service_id, node_id: node_id, component_template_id: component_id, namespace: namespace)
 
 		if (component_add_response['status'] == 'ok')
-			component_list_response = send_request('/rest/assembly/info_about', {:assembly_id=>service_id, :about=>'components', :subtype=>'instance'})
+			component_list_response = send_request('/rest/assembly/info_about', assembly_id: service_id, about: 'components', subtype: 'instance')
 			component = component_list_response['data'].select {|x| x['id'] == component_add_response['data']['component_id']}
 			if !component.empty?
 				puts "Component #{component.first['display_name']} has been added to assembly node!"
@@ -325,18 +325,18 @@ module NodeOperationsMixin
 		#Get list of node templates, extract selected template, stage node template and return its node id
 		puts "Stage node:", "-----------"
 		node_id = nil
-		node_template_list = send_request('/rest/node/list', {:subtype=>'template'})
+		node_template_list = send_request('/rest/node/list', subtype: 'template')
 
 		puts "List of avaliable node templates: "
 		pretty_print_JSON(node_template_list)
 
-		test_template = node_template_list['data'].select { |x| x['display_name'] == node_name }.first
+		test_template = node_template_list['data'].find { |x| x['display_name'] == node_name }
 
 		if (!test_template.nil?)
 			puts "Node template #{node_name} found!"
 			template_node_id = test_template['id']
 			puts "Node template id: #{template_node_id}"
-			stage_node_response = send_request('/rest/node/stage', {:node_template_identifier=>template_node_id, :name=>staged_node_name})		
+			stage_node_response = send_request('/rest/node/stage', node_template_identifier: template_node_id, name: staged_node_name)		
 
 			if (stage_node_response['data']['node_id'])
 				puts "Stage of #{node_name} node template completed successfully!"
@@ -380,12 +380,12 @@ module NodeOperationsMixin
 		puts "Converge node:", "--------------"
 		node_converged = false
 		puts "Converge process for node with id #{node_id} started!"
-		create_task_response = send_request('/rest/node/create_task', {'node_id' => node_id})
+		create_task_response = send_request('/rest/node/create_task', 'node_id' => node_id)
 
 		if (@error_message == "")
 			task_id = create_task_response['data']['task_id']
 			puts task_id
-			task_execute_response = send_request('/rest/task/execute', {'task_id' => task_id})
+			task_execute_response = send_request('/rest/task/execute', 'task_id' => task_id)
 			end_loop = false
 			count = 0
 			max_num_of_retries = 10
@@ -394,7 +394,7 @@ module NodeOperationsMixin
 			while task_status.include? 'executing' || end_loop == false
 				sleep 30
 				count += 1
-				response_task_status = send_request('/rest/task/status', {'task_id'=> task_id})
+				response_task_status = send_request('/rest/task/status', 'task_id'=> task_id)
 				status = response_task_status['data']['status']
 				if (status.include? 'succeeded')
 					task_status = status
@@ -425,7 +425,7 @@ module NodeOperationsMixin
 		#Cleanup step - Destroy node
 		puts "Destroy node:", "-------------"
 		node_deleted = false
-		delete_node_response = send_request('/rest/node/destroy_and_delete', {:node_id=>node_id})
+		delete_node_response = send_request('/rest/node/destroy_and_delete', node_id: node_id)
 
 		if (delete_node_response['status'] == "ok")
 			puts "Node deleted successfully!"
@@ -444,12 +444,12 @@ module NodeOperationsMixin
 		components_list = send_request('/rest/component/list', {})
 		pretty_print_JSON(components_list)
 
-		component = components_list['data'].select { |x| x['display_name'] == component_name }.first
+		component = components_list['data'].find { |x| x['display_name'] == component_name }
 		puts component
 
 		if (!component.nil?)
 			puts "Component #{component_name} exists! Add this component to node #{node_id}..."
-			component_add_response = send_request('/rest/node/add_component', {:node_id=>node_id, :component_template_name=>component['id']})
+			component_add_response = send_request('/rest/node/add_component', node_id: node_id, component_template_name: component['id'])
 
 			if (component_add_response['status'] == 'ok')
 				puts "Component #{component_name} added to node!"
@@ -469,13 +469,13 @@ module NodeOperationsMixin
 
 		#Get attribute id for which value will be set
 		puts "List of node attributes:"
-		node_attributes = send_request('/rest/node/info_about', {:about=>'attributes', :subtype=>'instance', :node_id=>node_id})
+		node_attributes = send_request('/rest/node/info_about', about: 'attributes', subtype: 'instance', node_id: node_id)
 		pretty_print_JSON(node_attributes)
 
-		if (node_attributes['data'].select { |x| x['display_name'].include? attribute_name }.first)
-			attribute_id = node_attributes['data'].select { |x| x['display_name'].include? attribute_name }.first['id']
+		if (node_attributes['data'].find { |x| x['display_name'].include? attribute_name })
+			attribute_id = node_attributes['data'].find { |x| x['display_name'].include? attribute_name }['id']
 			#Set attribute value for given attribute id
-			select_attribute_value_response = send_request('/rest/node/set_attributes', {:node_id=>node_id, :value=>attribute_value, :pattern=>attribute_id})
+			select_attribute_value_response = send_request('/rest/node/set_attributes', node_id: node_id, value: attribute_value, pattern: attribute_id)
 			extract_attribute_value = select_attribute_value_response['data'].first['value']
 
 			if (extract_attribute_value == attribute_value)
@@ -493,7 +493,7 @@ module NodeOperationsMixin
 		puts "Netstats check:", "---------------"
 		sleep 10 #Before initiating netstats check, wait for services to be up
  		netstats_check = false
-		response = send_request('/rest/node/initiate_get_netstats', {:node_id=>node_id})
+		response = send_request('/rest/node/initiate_get_netstats', node_id: node_id)
 		action_results_id = response['data']['action_results_id']
 
 		end_loop = false
@@ -503,7 +503,7 @@ module NodeOperationsMixin
 		while (end_loop == false)
 			sleep 10
 			count += 1
-			response = send_request('/rest/node/get_action_results', {:disable_post_processing=>false, :return_only_if_complete=>true, :action_results_id=>action_results_id, :sort_key=>"port"})
+			response = send_request('/rest/node/get_action_results', disable_post_processing: false, return_only_if_complete: true, action_results_id: action_results_id, sort_key: "port")
 			puts "Netstats check:"
 			pretty_print_JSON(response)
 
@@ -511,7 +511,7 @@ module NodeOperationsMixin
 				puts "Max number of retries for getting netstats reached..."
 				end_loop = true
 			elsif (response['data']['is_complete'])
-				port_to_check = response['data']['results'].select { |x| x['port'] == port}.first
+				port_to_check = response['data']['results'].find { |x| x['port'] == port}
 
 				if (!port_to_check.nil?)
 					puts "Netstats check completed! Port #{port} avaiable!"
@@ -532,14 +532,14 @@ module NodeOperationsMixin
 		puts "List task info check:", "---------------------"
 		list_task_info_check = false
 
-		response = send_request('/rest/node/task_status', {:node_id=>node_id, :format=>:list})
+		response = send_request('/rest/node/task_status', node_id: node_id, format: :list)
 		puts "List task info check:"
 		pretty_print_JSON(response)
 		config_node_content = response['data']['actions'].last
 		component_content = config_node_content['nodes'].first
 
-		if (component_content['components'].select { |x| x['component']['component_name'].include? component_name}.first)
-			component = component_content['components'].select { |x| x['component']['component_name'] == component_name && x['component']['source'] == 'instance' && x['component']['node_group'].nil?}.first
+		if (component_content['components'].find { |x| x['component']['component_name'].include? component_name})
+			component = component_content['components'].find { |x| x['component']['component_name'] == component_name && x['component']['source'] == 'instance' && x['component']['node_group'].nil?}
 			pretty_print_JSON(component)
 
 			if (!component.nil?)
@@ -558,9 +558,9 @@ module NodeOperationsMixin
 	def netstats_check_for_specific_node(service_id, node_name, port)
 		puts "Netstats check:", "---------------"
 
-		node_list = send_request('/rest/assembly/info_about', {:assembly_id=>service_id, :subtype=>'instance', :about=>'nodes'})
+		node_list = send_request('/rest/assembly/info_about', assembly_id: service_id, subtype: 'instance', about: 'nodes')
 		pretty_print_JSON(node_list)
-		node_id = node_list['data'].select { |x| x['display_name'] == node_name }.first['id']
+		node_id = node_list['data'].find { |x| x['display_name'] == node_name }['id']
  		
  		netstats_check = false
 		end_loop = false
@@ -576,17 +576,17 @@ module NodeOperationsMixin
 				end_loop = true
 			end
 
-			response = send_request('/rest/assembly/initiate_get_netstats', {:node_id=>node_id, :assembly_id=>service_id})
+			response = send_request('/rest/assembly/initiate_get_netstats', node_id: node_id, assembly_id: service_id)
 			action_results_id = response['data']['action_results_id']
 
-			5.downto(1) do |i|
+			5.downto(1) do |_i|
 				sleep 1
-				response = send_request('/rest/assembly/get_action_results', {:disable_post_processing=>false, :return_only_if_complete=>true, :action_results_id=>action_results_id})
+				response = send_request('/rest/assembly/get_action_results', disable_post_processing: false, return_only_if_complete: true, action_results_id: action_results_id)
 				puts "Netstats check:"
 				pretty_print_JSON(response)
 
 				if response['data']['is_complete']
-					port_to_check = response['data']['results'].select { |x| x['port'] == port}.first
+					port_to_check = response['data']['results'].find { |x| x['port'] == port}
 
 					if (!port_to_check.nil?)
 						puts "Netstats check completed! Port #{port} available!"

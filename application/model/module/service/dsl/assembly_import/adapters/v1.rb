@@ -3,7 +3,7 @@ module DTK; class ServiceModule
   class AssemblyImport
     class V1 < self
       def self.assembly_iterate(service_module,hash_content,&block)
-        assemblies_hash = hash_content["assemblies"].values.inject(Hash.new) do |h,assembly_info|
+        assemblies_hash = hash_content["assemblies"].values.inject({}) do |h,assembly_info|
           h.merge(service_module.assembly_ref(assembly_info["name"]) => assembly_info)
         end
         node_bindings_hash = hash_content["node_bindings"]
@@ -23,17 +23,18 @@ module DTK; class ServiceModule
           pl_hash = {"input_id" => input_id,"output_id" => output_id, "assembly_id" => assembly_idh.get_id()}
           h.merge(pl_ref => pl_hash)
         end
-        port_links.mark_as_complete(:assembly_id=>@existing_assembly_ids)
+        port_links.mark_as_complete(assembly_id: @existing_assembly_ids)
         {assembly_ref => {"port_link" => port_links}}
       end
 
-     private
+      private
+
       include ServiceDSLCommonMixin
 
-      def self.node_to_node_binding_rs(assembly_ref,node_bindings_hash,opts={})
+      def self.node_to_node_binding_rs(assembly_ref,node_bindings_hash,_opts={})
         an_sep = Seperators[:assembly_node]
-        (node_bindings_hash||{}).inject(Hash.new) do |h,(ser_assem_node,v)|
-          merge_hash = Hash.new
+        (node_bindings_hash||{}).inject({}) do |h,(ser_assem_node,v)|
+          merge_hash = {}
           if ser_assem_node =~ Regexp.new("(^[^#{an_sep}]+)#{an_sep}(.+$)")
             serialized_assembly_ref = $1
             node = $2
@@ -52,9 +53,8 @@ module DTK; class ServiceModule
       end
 
       def self.ret_attribute_overrides(cmp_input)
-        (cmp_input.kind_of?(Hash) && cmp_input.values.first)||{}
+        (cmp_input.is_a?(Hash) && cmp_input.values.first)||{}
       end
-
     end
   end
 end; end

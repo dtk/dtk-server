@@ -14,7 +14,7 @@ module DTK; class AttributeLink
     end
 
     # propagate from output var to input var
-    def propagate()
+    def propagate
       hash_ret = Function.internal_hash_form?(function,self) 
 
       # TODO: this returns nil if it is not (yet) processed by Function meaning its legacy or illegal
@@ -22,12 +22,13 @@ module DTK; class AttributeLink
         raise Error::NotImplemented.new("propagate value not implemented yet for fn #{function}")
       end
 
-      hash_ret.kind_of?(Output) ? hash_ret : Output.new(hash_ret)
+      hash_ret.is_a?(Output) ? hash_ret : Output.new(hash_ret)
     end
 
-   private
-    def legacy_internal_hash_form?()
-      if function.kind_of?(String)
+    private
+
+    def legacy_internal_hash_form?
+      if function.is_a?(String)
         case function
          when "select_one"
           propagate_when_select_one()
@@ -43,12 +44,10 @@ module DTK; class AttributeLink
       end
     end
 
-
-
     # TODO: need to simplify so we dont need all these one ofs
     #######function-specfic propagation
     # TODO: refactor to use  ret_cartesian_product()
-    def propagate_when_sap_config__l4()
+    def propagate_when_sap_config__l4
       output_v = 
         if output_semantic_type().is_array? 
           raise Error::NotImplemented.new("propagate_when_sap_config__l4 when output has empty list") if output_value.empty?
@@ -61,20 +60,20 @@ module DTK; class AttributeLink
       if input_semantic_type().is_array?
         # cartesian product with host_address 
         # TODO: may simplify and use flatten form
-        value = Array.new
+        value = []
         output_v.each do |sap_config|
-# TODO: euqivalent changes may be needed on other cartesion products: removing this for below          value += input_value.map{|input_item|sap_config.merge("host_address" => input_item["host_address"])}
+          # TODO: euqivalent changes may be needed on other cartesion products: removing this for below          value += input_value.map{|input_item|sap_config.merge("host_address" => input_item["host_address"])}
           value += input_value.map{|iv|iv["host_address"]}.uniq.map{|addr|sap_config.merge("host_address" => addr)}
         end
       else #not input_semantic_type().is_array?
         raise Error.new("propagate_when_sap_config__l4 does not support input scalar and output array with size > 1") if output_value.size > 1
         value = output_v.first.merge("host_address" => input_value["host_address"])
       end
-      {:value_derived => value}
+      {value_derived: value}
     end
 
     # TODO: refactor to use  ret_cartesian_product()
-    def propagate_when_host_address_ipv4()
+    def propagate_when_host_address_ipv4
       output_v = 
         if output_semantic_type().is_array? 
           raise Error::NotImplemented.new("propagate_when_host_address_ipv4 when output has empty list") if output_value.empty?
@@ -91,10 +90,10 @@ module DTK; class AttributeLink
         raise Error.new("propagate_when_host_address_ipv4 does not support input scalar and output array with size > 1") if output_value.size > 1
         value = output_v.first.merge("host_address" => input_value["host_address"])
       end
-      {:value_derived => value}
+      {value_derived: value}
     end
 
-    def propagate_when_sap_conn__l4__db()
+    def propagate_when_sap_conn__l4__db
       ret_cartesian_product()
     end
 
@@ -102,12 +101,12 @@ module DTK; class AttributeLink
       ret_cartesian_product()
     end
 
-    def propagate_when_select_one()
-      raise Error::NotImplemented.new("propagate_when_select_one when input has more than one elements") if output_value() and output_value().size > 1
-      {:value_derived => output_value ? output_value().first : nil}
+    def propagate_when_select_one
+      raise Error::NotImplemented.new("propagate_when_select_one when input has more than one elements") if output_value() && output_value().size > 1
+      {value_derived: output_value ? output_value().first : nil}
     end
 
-    def ret_cartesian_product()
+    def ret_cartesian_product
       output_v = 
         if output_semantic_type().is_array? 
           raise Error::NotImplemented.new("cartesian_product when output has empty list") if output_value.empty?
@@ -118,7 +117,7 @@ module DTK; class AttributeLink
 
       value = nil
       if input_semantic_type().is_array?
-        value = Array.new
+        value = []
         output_v.each do |sap_config|
           value += input_value.map{|input_item|input_item.merge(sap_config)}
         end
@@ -126,7 +125,7 @@ module DTK; class AttributeLink
         raise Error.new("cartesian_product does not support input scalar and output array with size > 1") if output_value.size > 1
         value =  input_value.merge(output_v.first)
       end
-      {:value_derived => value}
+      {value_derived: value}
     end
 
     #########instance var access fns

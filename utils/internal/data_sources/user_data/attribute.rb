@@ -24,7 +24,7 @@ module XYZ
         end
 
         def self.external_ref(source)
-          {:type => "attribute", :path => source[:ref]}
+          {type: "attribute", path: source[:ref]}
         end
       end
     end

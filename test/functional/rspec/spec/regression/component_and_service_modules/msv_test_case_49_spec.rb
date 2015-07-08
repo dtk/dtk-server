@@ -21,7 +21,6 @@ grep_patterns_for_module_refs = ['epel:','namespace: stahnma']
 dtk_common = DtkCommon.new('', '')
 
 describe "(Modules, Services and Versioning) Test Case 49: Import puppet forge (erlang) with specifying namespace and check its dependencies are installed correctly" do
-
   before(:all) do
     puts "*********************************************************************************************************************************************************",""
   end

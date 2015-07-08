@@ -1,19 +1,18 @@
 require './spec/spec_helper'
 
 login = {
-	:username=>'dtk-admin',
-	:password=>'r8server'
+	username: 'dtk-admin',
+	password: 'r8server'
 }
 
 user_info = { 
-	:username=>'test', 
-	:email=>'test@r8network.com', 
-	:user_group=>'test', 
-	:namespace=>'test' 
+	username: 'test', 
+	email: 'test@r8network.com', 
+	user_group: 'test', 
+	namespace: 'test' 
 }
 
 describe "(Repoman Drupal API) Test Case 2: Create user with only required params (username, email)" do
-
 	let(:repoman) { @repoman }
 
 	context "Login" do
@@ -54,7 +53,7 @@ describe "(Repoman Drupal API) Test Case 2: Create user with only required param
 		it "deletes user group" do
 			user_group_deleted = false
 			all_user_groups = repoman.get_user_groups
-			user_group_id = all_user_groups['data'].select { |group| group['name'] == user_info[:user_group] }.first['id']
+			user_group_id = all_user_groups['data'].find { |group| group['name'] == user_info[:user_group] }['id']
 			response = repoman.delete_user_group(user_group_id)
 			sleep 10
 			ap response
@@ -69,7 +68,7 @@ describe "(Repoman Drupal API) Test Case 2: Create user with only required param
 		it "deletes user" do
 			user_deleted = false
 			all_users = repoman.get_users
-			user_id = all_users['data'].select { |user| user['username'] == user_info[:username] }.first['id']
+			user_id = all_users['data'].find { |user| user['username'] == user_info[:username] }['id']
 			response = repoman.delete_user(user_id)
 			ap response
 			if response['status'] == 'ok'
@@ -83,7 +82,7 @@ describe "(Repoman Drupal API) Test Case 2: Create user with only required param
 		it "deletes user's namespace" do
 			namespace_deleted = false
 			all_namespaces = repoman.get_namespaces
-			namespace_id = all_namespaces['data'].select { |namespace| namespace['name'] == user_info[:namespace] }.first['id']
+			namespace_id = all_namespaces['data'].find { |namespace| namespace['name'] == user_info[:namespace] }['id']
 			response = repoman.delete_namespace(namespace_id)
 			ap response
 			if response['status'] == 'ok'

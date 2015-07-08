@@ -17,12 +17,12 @@ module DTK; class ModuleDSL; class V4; class ObjectModelForm
       
       def provider_specific_fields(input_hash=nil)
         input_hash ||= self
-        AllKeys.inject(Hash.new) do |h,k|
+        AllKeys.inject({}) do |h,k|
           h.merge(Constant.matching_key_and_value?(input_hash,k)||{})
         end
       end
 
-      def external_ref_from_create_action()
+      def external_ref_from_create_action
         provider_specific_fields()
       end
     end

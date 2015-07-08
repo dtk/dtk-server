@@ -17,7 +17,6 @@ target_name = "#{provider_name}-#{region}"
 dtk_common = DtkCommon.new('', '')
 
 describe "(Targets and Providers) Test Case 1: Add new target to existing provider, list targets and then delete target" do
-
 	before(:all) do
 		puts "*************************************************************************************************************"
 		puts "(Targets and Providers) Test Case 1: Add new target to existing provider, list targets and then delete target"

@@ -7,20 +7,21 @@ module DTK; class Task; class Template
         @method = ActionMethod.new(action_def)
       end
 
-      def action_method?()
+      def action_method?
         @method
       end
 
       def method_missing(name,*args,&block)
         @action.send(name,*args,&block)
       end
+
       def respond_to?(name)
         @action.respond_to?(name) || super
       end
 
       # returns [component_name_ref,method_name] where method_name can be nil
       def self.parse(serialized_item)
-        unless serialized_item.kind_of?(String)
+        unless serialized_item.is_a?(String)
           raise_action_ref_error(serialized_item)
         end
         if info = has_explicit_method?(serialized_item)
@@ -31,6 +32,7 @@ module DTK; class Task; class Template
       end
 
       private
+
       # returns hash with keys :component_name_ref,:method_name
       # if has explicit method otherwise returns nil
       # explicit form is 
@@ -46,7 +48,7 @@ module DTK; class Task; class Template
             nil
           elsif dot_method =~ /^\.(.+$)/
             method = $1
-            {:component_name_ref => cmp_with_title,:method_name => method}
+            {component_name_ref: cmp_with_title,method_name: method}
           else
             raise_action_ref_error(serialized_item)
           end
@@ -57,8 +59,8 @@ module DTK; class Task; class Template
            when 1 
             nil
            when 2
-            {:component_name_ref => split[0], :method_name => split[1]}
-          else
+            {component_name_ref: split[0], method_name: split[1]}
+           else
             raise_action_ref_error(serialized_item)
           end
         end

@@ -17,25 +17,24 @@ assembly_name = 'action_module::multi-node-with-mustache'
 dtk_common = DtkCommon.new(service_name, assembly_name)
 
 expected_output_1 = {
-	:command => "ls /usr/share/mcollective",
-	:status => 0,
-	:stderr => nil,
+	command: "ls /usr/share/mcollective",
+	status: 0,
+	stderr: nil,
 }
 
 expected_output_2_1 = {
-	:command => "ls -l /usr/share/mcollective",
-	:status => 0,
-	:stderr => nil,
+	command: "ls -l /usr/share/mcollective",
+	status: 0,
+	stderr: nil,
 }
 
 expected_output_2_2 = {
-	:command => "ls -a /usr/share/mcollective",
-	:status => 0,
-	:stderr => nil,
+	command: "ls -a /usr/share/mcollective",
+	status: 0,
+	stderr: nil,
 }
 
 describe "(Action Framework) Test Case 3: Service with two nodes that contain cmp with actions with parametrized commands (mustache)" do
-
 	before(:all) do
 		puts "************************************************************************************************************************",""
   end

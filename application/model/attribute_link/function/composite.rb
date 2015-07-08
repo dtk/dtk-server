@@ -10,11 +10,11 @@ module DTK; class AttributeLink
 
       def self.composite_link_function(outer_function,inner_expression)
         {
-          :function => {
-            :name => :composite,
-            :constants  => {
-              :outer_function => outer_function,
-              :inner_expression => inner_expression
+          function: {
+            name: :composite,
+            constants: {
+              outer_function: outer_function,
+              inner_expression: inner_expression
             }
           } 
         }
@@ -25,14 +25,16 @@ module DTK; class AttributeLink
           raise Error.new("Opts should be empty")
         end
         inner_value = inner_expression.value()
-        outer_function.internal_hash_form(:inner_value => inner_value) 
+        outer_function.internal_hash_form(inner_value: inner_value) 
       end
 
-      def value(opts={})
+      def value(_opts={})
         inner_value = inner_expression.value()
-        outer_function.value(:inner_value => inner_value) 
+        outer_function.value(inner_value: inner_value) 
       end
-     private
+
+      private
+
       def reify_constant!(constant_name,propagate_proc)
         nested_function_def = constants[constant_name]
         nested_fn_name = self.class.function_name(nested_function_def)
@@ -40,10 +42,11 @@ module DTK; class AttributeLink
         constants[constant_name] = nested_klass.new(nested_function_def,propagate_proc)
       end
 
-      def inner_expression()
+      def inner_expression
         constants[:inner_expression]
       end
-      def outer_function()
+
+      def outer_function
         constants[:outer_function]
       end
     end

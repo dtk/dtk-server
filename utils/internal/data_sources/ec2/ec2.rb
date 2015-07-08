@@ -3,7 +3,7 @@ require File.expand_path("mixins/security_group", File.dirname(__FILE__))
 module XYZ
   module DSConnector
     class Ec2 < Top
-      def initialize_extra()
+      def initialize_extra
         @flavor_cache = Aux::Cache.new
         @network_partition_cache = Aux::Cache.new
         @server_cache =  Aux::Cache.new
@@ -16,13 +16,13 @@ module XYZ
           block.call(DataSourceUpdateHash.new(server).freeze)
         end
         # TODO: qualify that comes from ec2 or chef-ec2
-        return HashIsComplete.new({:type => "instance"}) #TODO; this prunes chef dicovred instances that no longer exist
+        return HashIsComplete.new({type: "instance"}) #TODO; this prunes chef dicovred instances that no longer exist
       end
 
       def get_objects__node__image(&block)
         # TODO: stubbed so that just brings in images currently used
         servers = get_servers()
-        images = Hash.new
+        images = {}
         servers.each do |server|
           image_id = server[:image_id]
           unless images[image_id]
@@ -34,7 +34,7 @@ module XYZ
           block.call(DataSourceUpdateHash.new(image).freeze)
         end
         # TODO: qualify that comes from ec2
-        return HashIsComplete.new({:type => "image"})
+        return HashIsComplete.new({type: "image"})
       end
 
       def get_objects__network_partition(&block)
@@ -48,9 +48,9 @@ module XYZ
         get_network_partitions.each_key do |ref|
           security_groups = security_groups_from_network_partition_ref(ref)
           values = {
-            :ref => node_group_ref(ref),
-            :display_name => "ec2 security groups [#{security_groups.join(",")}]",
-            :security_groups => security_groups
+            ref: node_group_ref(ref),
+            display_name: "ec2 security groups [#{security_groups.join(",")}]",
+            security_groups: security_groups
           }
           block.call(DataSourceUpdateHash.new(values))
         end
@@ -64,20 +64,22 @@ module XYZ
           node_ref = server[:id]
           node_group_ref = node_group_ref(server[:network_partition_ref])
           values = {
-            :ref => "#{node_group_ref}--#{node_ref}",
-            :node_ref => node_ref,
-            :node_group_ref => node_group_ref
+            ref: "#{node_group_ref}--#{node_ref}",
+            node_ref: node_ref,
+            node_group_ref: node_group_ref
           }
           block.call(DataSourceUpdateHash.new(values))
         end
         return HashMayNotBeComplete.new()
       end
 
-      def get_servers()
+      def get_servers
         @server_cache[:servers] ||= get_servers_aux()
       end
-     private
-      def get_servers_aux()
+
+      private
+
+      def get_servers_aux
         ret = conn().servers_all()
         ret.each do |server|
           server[:flavor] = get_flavor(server)
@@ -90,7 +92,7 @@ module XYZ
         "ec2_sg_#{network_partition_ref}"
       end
 
-      def conn()
+      def conn
         @@conn ||= CloudConnect::EC2.new
       end
 

@@ -2,12 +2,13 @@ module DTK; class ModuleDSL; class V2
   Base = ModuleDSL::GenerateFromImpl::DSLObject
   class DSLObject
     class Module < Base::Module
-     private
-      def module_name?()
+      private
+
+      def module_name?
         module_name()
       end
 
-      def module_type?()
+      def module_type?
         config_agent_type = config_agent_type()
         case config_agent_type
           when :puppet then "puppet_module"
@@ -16,7 +17,7 @@ module DTK; class ModuleDSL; class V2
       end
 
       def add_component!(ret,hash_key,content)
-        (ret["components"] ||= Hash.new)[hash_key] = content
+        (ret["components"] ||= {})[hash_key] = content
         ret
       end
 
@@ -45,8 +46,9 @@ module DTK; class ModuleDSL; class V2
         ret
       end
 
-     private
-      def converted_create_action()
+      private
+
+      def converted_create_action
         # because of legacy; create action is under ext_ref
         ext_ref = required_value(:external_ref)
         action_keys = RenderHash.new
@@ -56,16 +58,15 @@ module DTK; class ModuleDSL; class V2
         RenderHash.new(ActionDef::Constant::CreateActionName => action_keys)
       end
 
-      def type?()
+      def type?
         basic_type = value(:basic_type)
         #'service' is default
         basic_type == "service" ? nil : basic_type
       end
-
     end
 
     class Dependency < Base::Dependency
-      def render_hash_form(opts={})
+      def render_hash_form(_opts={})
         # TODO: stub
         ret = RenderHash.new
         ret
@@ -77,8 +78,8 @@ module DTK; class ModuleDSL; class V2
         ret = RenderHash.new
         ret["type"] = required_value(:type)
         ret.set_unless_nil("required",value(:required))
-        self[:possible_links].each_element(:skip_required_is_false => true) do |link|
-          (ret["possible_links"] ||= Array.new) << {link.hash_key => link.render_hash_form(opts)}
+        self[:possible_links].each_element(skip_required_is_false: true) do |link|
+          (ret["possible_links"] ||= []) << {link.hash_key => link.render_hash_form(opts)}
         end
         ret
       end
@@ -95,7 +96,7 @@ module DTK; class ModuleDSL; class V2
     end
 
     class LinkDefAttributeMapping  < Base::LinkDefAttributeMapping
-      def render_hash_form(opts={})
+      def render_hash_form(_opts={})
         input = self[:input]
         output = self[:output]
         in_cmp = index(input,:component)
@@ -104,14 +105,16 @@ module DTK; class ModuleDSL; class V2
         out_attr = index(output,:attribute)
         RenderHash.new(attr_ref(out_cmp,out_attr) => attr_ref(in_cmp,in_attr))
       end
+
       private
+
       def attr_ref(cmp,attr)
         ":#{cmp}.#{attr}"
       end
     end
 
     class Attribute < Base::Attribute
-      def render_hash_form(opts={})
+      def render_hash_form(_opts={})
         ret = RenderHash.new
         ret.set_unless_nil("description",value(:description))
         ret["type"] = required_value(:type)
@@ -123,8 +126,9 @@ module DTK; class ModuleDSL; class V2
         ret
       end
 
-     private
-      def converted_external_ref()
+      private
+
+      def converted_external_ref
         ret = RenderHash.new
         ext_ref = required_value(:external_ref)
         attr_name = ext_ref["name"]

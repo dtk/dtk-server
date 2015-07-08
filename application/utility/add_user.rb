@@ -2,9 +2,9 @@
 # adds user, his or her private
 require File.expand_path('common', File.dirname(__FILE__))
 
-options = Hash.new
+options = {}
 OptionParser.new do |opts|
-#   opts.banner = "Usage: add_user.rb USERNAME [EC2-REGION] [--create-private [MODULE_SEED_LIST]]"
+   #   opts.banner = "Usage: add_user.rb USERNAME [EC2-REGION] [--create-private [MODULE_SEED_LIST]]"
    opts.banner = "Usage: add_user.rb USERNAME [EC2-REGION] [--password PASSWORD] [-f PARAM-FILE]"
 
   # Define the options, and what they do

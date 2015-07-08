@@ -22,7 +22,6 @@ file_for_change = "dtk.model.yaml"
 dtk_common = DtkCommon.new("", "")
 
 describe "(Component Module DSL) Test Case 14: dtk.model.yaml with empty array and hash type attribute" do
-
   before(:all) do
     puts "********************************************************************************************",""
   end

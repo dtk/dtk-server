@@ -17,19 +17,18 @@ assembly_name = 'action_module::node-group'
 dtk_common = DtkCommon.new(service_name, assembly_name)
 
 expected_output_1 = {
-	:command => "/bin/sh /etc/puppet/modules/action_module/dtk/bash_tests/test_bash.sh",
-	:status => 0,
-	:stderr => nil,
+	command: "/bin/sh /etc/puppet/modules/action_module/dtk/bash_tests/test_bash.sh",
+	status: 0,
+	stderr: nil,
 }
 
 expected_output_2 = {
-	:command => "/opt/puppet-omnibus/embedded/bin/rspec /etc/puppet/modules/action_module/dtk/rspec_tests/spec/test_spec.rb",
-	:status => 0,
-	:stderr => nil,
+	command: "/opt/puppet-omnibus/embedded/bin/rspec /etc/puppet/modules/action_module/dtk/rspec_tests/spec/test_spec.rb",
+	status: 0,
+	stderr: nil,
 }
 
 describe "(Action Framework) Test Case 4: Service with node (node groups = 2) that contains cmp with bash and rspec actions" do
-
 	before(:all) do
 		puts "*****************************************************************************************************************",""
   end

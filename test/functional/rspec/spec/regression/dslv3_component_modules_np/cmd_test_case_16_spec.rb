@@ -23,7 +23,6 @@ file_for_change = "dtk.model.yaml"
 dtk_common = DtkCommon.new("", "")
 
 describe "(Component Module DSL) Test Case 16: dtk.model.yaml with hash type attribute that contains two key value pairs and hash type attribute where key contains array as value" do
-
   before(:all) do
     puts "************************************************************************************************************************************************************************",""
   end

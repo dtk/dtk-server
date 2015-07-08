@@ -8,7 +8,7 @@ module DTK
           class_eval("def self.#{type}();:#{type};end")
         end
       end
-      def self.default_symbol()
+      def self.default_symbol
         Symbol::Default
       end
     end

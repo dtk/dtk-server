@@ -13,30 +13,34 @@ module DTK; class ModuleBranch
         ret
       end
 
-      def module_namespace_name()
+      def module_namespace_name
         self[:namespace]
       end
 
-      def module_type()
+      def module_type
         self[:module_type]
       end
-      def version()
+
+      def version
         self[:version]
       end
-      def namespace()
+
+      def namespace
         self[:namespace]
       end
-      def source_name()
+
+      def source_name
         self[:source_name]
       end
+
       def initialize(params)
-        unless params.kind_of?(self.class)
+        unless params.is_a?(self.class)
           validate(params)
         end
         replace(params)
       end
 
-      def pp_module_name(opts={})
+      def pp_module_name(_opts={})
         ret = module_name
         if version
           ret << "(#{version})"
@@ -45,7 +49,8 @@ module DTK; class ModuleBranch
         module_namespace_name ? "#{module_namespace_name}:#{ret}" : ret
       end
 
-     private
+      private
+
       def validate(params)
         unless (bad_keys = params.keys - all_keys()).empty?
           raise Error.new("Illegal key(s): #{bad_keys.join(',')}")
@@ -55,12 +60,15 @@ module DTK; class ModuleBranch
           raise Error.new("Required key(s): #{missing_required.join(',')}")
         end
       end
-      def all_keys()
+
+      def all_keys
         legal_keys().map{|k|optional?(k)||k}
       end
-      def required_keys()
+
+      def required_keys
         legal_keys().reject{|k|optional?(k)}
       end
+
       def optional?(k)
         k = k.to_s
         if k =~ /\?$/

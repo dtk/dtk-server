@@ -19,7 +19,7 @@ module XYZ
           end
         end
 
-        def self.filter_raw_source_objects(source)
+        def self.filter_raw_source_objects(_source)
           DBUpdateHash.new()
         end
 
@@ -53,12 +53,12 @@ module XYZ
         end
           
         def self.semantic_type(semantic_type)
-          (semantic_type.kind_of?(Array) or semantic_type.kind_of?(Hash)) ? semantic_type.to_json : semantic_type
+          (semantic_type.is_a?(Array) || semantic_type.is_a?(Hash)) ? semantic_type.to_json : semantic_type
         end
 
         def self.semantic_type_summary(semantic_type)
           return nil if semantic_type.nil?
-          return semantic_type unless semantic_type.kind_of?(Hash)
+          return semantic_type unless semantic_type.is_a?(Hash)
           key = semantic_type.keys.first
           return nil if key.empty?
           key.to_s =~ /^:/ ? semantic_type_summary(semantic_type.values.first) : key

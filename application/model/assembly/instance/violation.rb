@@ -3,8 +3,8 @@ module DTK
     TARGET_BUILTIN_NODE_LIMIT = R8::Config[:dtk][:target][:builtin][:node_limit].to_i
 
     module ViolationMixin
-      def find_violations()
-        nodes_and_cmps = get_info__flat_list(:detail_level => "components").select{|r|r[:nested_component]}
+      def find_violations
+        nodes_and_cmps = get_info__flat_list(detail_level: "components").select{|r|r[:nested_component]}
         cmps = nodes_and_cmps.map{|r|r[:nested_component]}
 
         unset_attr_viols = find_violations__unset_attrs()
@@ -16,8 +16,10 @@ module DTK
 
         unset_attr_viols + cmp_constraint_viols + unconn_req_service_refs + mod_refs_viols + cmp_parsing_errors + num_of_target_nodes
       end
-     private
-      def find_violations__unset_attrs()
+
+      private
+
+      def find_violations__unset_attrs
         filter_proc = lambda{|a|a.required_unset_attribute?()}
         assembly_attr_viols = get_assembly_level_attributes(filter_proc).map{|a|Violation::ReqUnsetAttr.new(a,:assembly)}
         filter_proc = lambda{|r|r[:attribute].required_unset_attribute?()}
@@ -36,9 +38,9 @@ module DTK
       end
 
       def find_violations__cmp_constraints(nodes_and_cmps,cmp_idhs)
-        ret = Array.new
+        ret = []
         return ret if cmp_idhs.empty?
-        ndx_constraints = Component.get_ndx_constraints(cmp_idhs,:when_evaluated => :after_cmp_added)
+        ndx_constraints = Component.get_ndx_constraints(cmp_idhs,when_evaluated: :after_cmp_added)
         # TODO: this is expensive in that it makes query for each constraint
         nodes_and_cmps.each do |r|
           if constraint_info = ndx_constraints[r[:nested_component][:id]]
@@ -53,10 +55,10 @@ module DTK
         ret
       end
 
-      def find_violations__unconn_req_service_refs()
-        ret = Array.new
-        get_augmented_ports(:mark_unconnected=>true).each do |aug_port|
-          if aug_port[:unconnected] and aug_port[:link_def][:required]
+      def find_violations__unconn_req_service_refs
+        ret = []
+        get_augmented_ports(mark_unconnected: true).each do |aug_port|
+          if aug_port[:unconnected] && aug_port[:link_def][:required]
             ret << Violation::UnconnReqServiceRef.new(aug_port)
           end
         end
@@ -64,7 +66,7 @@ module DTK
       end
 
       def find_violations__cmp_parsing_error(cmps)
-        ret = Array.new
+        ret = []
         return ret if cmps.empty?
 
         cmps.each do |cmp|
@@ -89,12 +91,12 @@ module DTK
       end
 
       def find_violations__module_refs(cmps)
-        ret = missing = Array.new
-        multiple_ns   = Hash.new
+        ret = missing = []
+        multiple_ns   = {}
         return ret if cmps.empty?
 
         begin
-          module_refs_tree = ModuleRefs::Tree.create(self,:components => cmps)
+          module_refs_tree = ModuleRefs::Tree.create(self,components: cmps)
         rescue ErrorUsage => e
           ret << Violation::HasItselfAsDependency.new(e.message)
           return ret
@@ -117,11 +119,11 @@ module DTK
         ret
       end
 
-      def find_violations__num_of_target_nodes()
-        ret = Array.new
+      def find_violations__num_of_target_nodes
+        ret = []
 
         target_idh = self.get_target().id_handle()
-        target = target_idh.create_object(:model_name => :target_instance)
+        target = target_idh.create_object(model_name: :target_instance)
 
         # check if allowed number of nodes is exceeded (only for builtin target)
         if target.is_builtin_target?
@@ -153,8 +155,8 @@ module DTK
         end
 
         sp_hash = {
-          :cols => cols,
-          :filter => [:eq, :id, module_branch_id]
+          cols: cols,
+          filter: [:eq, :id, module_branch_id]
         }
         unless branch = Model.get_obj(model_handle(:module_branch),sp_hash)
           return ret
@@ -164,30 +166,31 @@ module DTK
 
         if (type == "Component")
           sp_cmp_hash = {
-            :cols => [:id, :display_name, :dsl_parsed],
-            :filter => [:eq, :id, branch[:component_id]]
+            cols: [:id, :display_name, :dsl_parsed],
+            filter: [:eq, :id, branch[:component_id]]
           }
           Model.get_obj(model_handle(:component_module),sp_cmp_hash)
         else
           sp_cmp_hash = {
-            :cols => [:id, :display_name, :dsl_parsed],
-            :filter => [:eq, :id, branch[:service_id]]
+            cols: [:id, :display_name, :dsl_parsed],
+            filter: [:eq, :id, branch[:service_id]]
           }
           Model.get_obj(model_handle(:service_module),sp_cmp_hash)
         end
       end
-
     end
 
     class Violation 
       class ReqUnsetAttr < self
         def initialize(attr,type)
-          @attr_display_name = attr.print_form(Opts.new(:level=>type))[:display_name]
+          @attr_display_name = attr.print_form(Opts.new(level: type))[:display_name]
         end
-        def type()
+
+        def type
           :required_unset_attribute
         end
-        def description()
+
+        def description
           "Attribute (#{@attr_display_name}) is required, but unset"
         end
       end
@@ -196,10 +199,12 @@ module DTK
           @constraint = constraint
           @node = node
         end
-        def type()
+
+        def type
           :component_constraint
         end
-        def description()
+
+        def description
           "On assembly node (#{@node[:display_name]}): #{@constraint[:description]}"
         end
       end
@@ -207,10 +212,12 @@ module DTK
         def initialize(aug_port)
           @augmented_port = aug_port
         end
-        def type()
+
+        def type
           :unmet_dependency
         end
-        def description()
+
+        def description
           "Component (#{@augmented_port.display_name_print_form()}) has an unmet dependency"
         end
       end
@@ -219,10 +226,12 @@ module DTK
           @component = component
           @type = type
         end
-        def type()
+
+        def type
           :parsing_error
         end
-        def description()
+
+        def description
           "#{@type} '#{@component}' has syntax errors in DSL files."
         end
       end
@@ -232,10 +241,12 @@ module DTK
           @namespace = namespace
           @version = version
         end
-        def type()
+
+        def type
           :missing_included_module
         end
-        def description()
+
+        def description
           full_name = "#{@namespace}:#{@included_module}"
           "Module '#{full_name}#{@version.nil? ? '' : '-'+@version}' is included in dsl, but not installed. Use 'print-includes' to see more details."
         end
@@ -245,10 +256,12 @@ module DTK
           @included_module = included_module
           @namespaces = namespaces
         end
-        def type()
+
+        def type
           :mapped_to_multiple_namespaces
         end
-        def description()
+
+        def description
           "Module '#{@included_module}' included in dsl is mapped to multiple namespaces: #{@namespaces.join(', ')}. Use 'print-includes' to see more details."
         end
       end
@@ -256,10 +269,12 @@ module DTK
         def initialize(message)
           @message = message
         end
-        def type()
+
+        def type
           :has_itself_as_dependency
         end
-        def description()
+
+        def description
           @message
         end
       end
@@ -269,10 +284,12 @@ module DTK
           @new = new_nodes
           @running = running
         end
-        def type()
+
+        def type
           :nodes_limit_exceeded
         end
-        def description()
+
+        def description
           "There are #{@running} nodes currently running in builtin target. Unable to create #{@new} new nodes beacuse it will exceed number of nodes allowed in builtin target (#{TARGET_BUILTIN_NODE_LIMIT})"
         end
       end

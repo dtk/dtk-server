@@ -9,12 +9,12 @@ module DTK
 
     attr_reader :donot_log_error
     def initialize(msg='',*args)
-      @donot_log_error = (args.last.kind_of?(::DTK::Opts) and args.last[:log_error] == false)
+      @donot_log_error = (args.last.is_a?(::DTK::Opts) and args.last[:log_error] == false)
       super(msg,*args)
     end
 
     def add_tag!(tag)
-      @tags ||= Array.new
+      @tags ||= []
       @tags << tag unless @tags.include?(tag)
       self
     end
@@ -23,7 +23,8 @@ module DTK
       (@tags||[]).include?(tag)
     end
 
-   private
+    private
+
     def add_line!(msg,line,ident=0)
       msg << "#{' ' * ident}#{line}\n"
     end
@@ -39,7 +40,9 @@ module DTK
       def initialize(param,enum_vals=nil)
         super(msg(param,enum_vals))
       end
-     private
+
+      private
+
       def msg(param,enum_vals)
         msg = "Paramater '#{param}' has an illegal value"
         if enum_vals
@@ -62,16 +65,19 @@ module DTK
 
   # TODO: nest these also under ErrorUsage
   class ErrorsUsage < ErrorUsage
-    def initialize()
-      @errors = Array.new
+    def initialize
+      @errors = []
     end
+
     def <<(err)
       @errors << err
     end
-    def empty?()
+
+    def empty?
       @errors.empty?()
     end
-    def to_s()
+
+    def to_s
       if @errors.size == 1
         @errors.first.to_s()
       elsif @errors.size > 1
@@ -87,6 +93,7 @@ module DTK
     def initialize(id,object_type)
       super(msg(id,object_type))
     end
+
      def msg(id,object_type)
        "Illegal id (#{id}) for #{object_type}"
      end
@@ -95,6 +102,7 @@ module DTK
     def initialize(name,object_type)
       super(msg(name,object_type))
     end
+
      def msg(name,object_type)
        "Illegal name (#{name}) for #{object_type}"
      end
@@ -103,6 +111,7 @@ module DTK
     def initialize(name,matching_ids,object_type)
       super(msg(name,matching_ids,object_type))
     end
+
      def msg(name,matching_ids,object_type)
        "Ambiguous name (#{name}) for #{object_type} which matches ids: #{matching_ids.join(',')}"
      end
@@ -127,14 +136,15 @@ module DTK
     end
   end
 
-
   class ErrorConstraintViolations < ErrorUsage
     def initialize(violations)
        super(msg(violations),:ConstraintViolations)
     end
-   private
+
+    private
+
     def msg(violations)
-      return ("constraint violation: " + violations) if violations.kind_of?(String)
+      return ("constraint violation: " + violations) if violations.is_a?(String)
       v_with_text = violations.compact
       if v_with_text.size < 2
         return "constraint violations"
@@ -152,7 +162,8 @@ module DTK
       super()
       @needed_inputs = needed_inputs
     end
-    def to_s()
+
+    def to_s
       ret = "following inputs are needed:\n"
       @needed_inputs.each do |k,v|
         ret << "  #{k}: type=#{v[:type]}; description=#{v[:description]}\n"

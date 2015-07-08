@@ -22,7 +22,6 @@ puppet_grep_pattern = 'transaction'
 dtk_common = DtkCommon.new(service_name, assembly_name)
 
 describe "(Different Node Templates) Test Case 9: Redis - Master/Slave scenario" do
-
 	before(:all) do
 		puts "*********************************************************************",""
   end

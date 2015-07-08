@@ -20,7 +20,6 @@ $assembly_id = 0
 dtk_common = DtkCommon.new(assembly_name, assembly_template)
 
 describe "(Different Node Templates) Test Case 3: (OS: RedHat, Namenode: hdp) Check possibility to add OS and namenode components and deploy assembly" do
-
 	before(:all) do
     	puts "*******************************************************************************************************************************************"
     	puts "(Different Node Templates) Test Case 3: (OS: RedHat, Namenode: hdp) Check possibility to add OS and namenode components and deploy assembly"

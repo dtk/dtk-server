@@ -9,7 +9,6 @@ module DTK; class Task; class Template
 
       class DynamicAttribute < self
       end
-
     end
   end
 end; end; end

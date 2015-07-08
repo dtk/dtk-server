@@ -13,7 +13,7 @@ EM.run do
   host =  ARGV[0]
   user = ARGV[1]
   password = ARGV[2]
-  EM::Ssh.start(host, user, :password => password) do |connection|
+  EM::Ssh.start(host, user, password: password) do |connection|
     connection.errback do |err|
       $stderr.puts "#{err} (#{err.class})"
       EM.stop
@@ -33,7 +33,7 @@ EM.run do
       # ********************************************
 
       # making sure dtk-node-agent directory is deleted from node before uploading
-      ssh.exec!("rm -rf /tmp/dtk-node-agent") do |channel, stream, data|
+      ssh.exec!("rm -rf /tmp/dtk-node-agent") do |_channel, _stream, data|
         puts data #if stream == :stdout
       end
 
@@ -49,8 +49,8 @@ EM.run do
         home_path = Etc.getpwuid(Process.uid).dir
 
         # executing upload commands
-        Net::SCP.upload!(host, user, install_script_file.path, "/tmp", :ssh => { :password => password, :port => "22" }, :recursive => true)
-        Net::SCP.upload!(host, user, "#{home_path}/dtk-node-agent", "/tmp", :ssh => { :password => password, :port => "22" }, :recursive => true)
+        Net::SCP.upload!(host, user, install_script_file.path, "/tmp", ssh: { password: password, port: "22" }, recursive: true)
+        Net::SCP.upload!(host, user, "#{home_path}/dtk-node-agent", "/tmp", ssh: { password: password, port: "22" }, recursive: true)
       rescue Exception => e
         # if error when uploading dtk-node-agent or install_script then print error
         # close ssh connection and exit EM.run (do not continue with execution)
@@ -67,7 +67,7 @@ EM.run do
       install_command = user.eql?('root') ? "bash /tmp/dtk-node-agent/install_agent.sh" : "sudo bash /tmp/dtk-node-agent/install_agent.sh"
       
       puts "\nEXECUTING: #{install_command}"
-      ssh.exec!(install_command) do |channel, stream, data|
+      ssh.exec!(install_command) do |_channel, stream, data|
         if stream == :stderr
           errors << data
         else
@@ -80,7 +80,7 @@ EM.run do
 
       # delete dtk-node-agent folder from node
       puts "\nEXECUTING: 'rm -rf /tmp/dtk-node-agent'"
-      ssh.exec!("rm -rf /tmp/dtk-node-agent") do |channel, stream, data|
+      ssh.exec!("rm -rf /tmp/dtk-node-agent") do |_channel, _stream, data|
         puts data #if stream == :stdout
       end
 
@@ -90,7 +90,7 @@ EM.run do
       install_script_command = user.eql?('root') ? "bash #{install_script_file_path}" : "sudo bash #{install_script_file_path}"
 
       puts "\nEXECUTING: '#{install_script_command}'"
-      ssh.exec!(install_script_command) do |channel, stream, data|
+      ssh.exec!(install_script_command) do |_channel, stream, data|
         if stream == :stderr
           errors << data
         else
@@ -101,10 +101,9 @@ EM.run do
       # print all errors that happened while executing install_script
       puts "\nWarnings or errors occured while executing '#{install_script_command}':\n#{errors}" unless errors.empty?
 
-
       # delete install_script from node
       puts "\nEXECUTING: rm -rf #{install_script_file_path}"
-      ssh.exec!("rm -rf #{install_script_file_path}") do |channel, stream, data|
+      ssh.exec!("rm -rf #{install_script_file_path}") do |_channel, _stream, data|
         puts data #if stream == :stdout
       end
 

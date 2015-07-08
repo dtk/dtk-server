@@ -30,15 +30,14 @@ document = {"first_name" => "Bakir", "last_name" => "Jusufbegovic"}
 
 dtk_common = DtkCommon.new(service_name, assembly_name)
 
-
 def get_node_ec2_public_dns(service_name, node_name)
 	puts "Get node ec2 public dns:", "------------------------"
 	node_ec2_public_dns = ""
 	dtk_common = DtkCommon.new('','')
 
-	info_response = dtk_common.send_request('/rest/assembly/info_about', {:assembly_id => service_name, :subtype => :instance, :about => "nodes"})
+	info_response = dtk_common.send_request('/rest/assembly/info_about', assembly_id: service_name, subtype: :instance, about: "nodes")
 	ap info_response
-	node_info = info_response['data'].select { |x| x['display_name'] == node_name}.first
+	node_info = info_response['data'].find { |x| x['display_name'] == node_name}
 
 	if !node_info.nil?
 		node_ec2_public_dns = node_info['external_ref']['ec2_public_address']
@@ -70,13 +69,12 @@ def add_document_to_collection(mongodb_host, mongodb_port, database_name, collec
 	id = collection.insert(document)
 	puts "Document id: #{id}"
   puts "Collection added: #{collection.find.to_a}"
-	document_added = true if !collection.find({"_id" => id}).to_a.empty?
+	document_added = true if !collection.find("_id" => id).to_a.empty?
 	puts ""
 	return document_added
 end
 
 describe "(Different Node Templates) Test Case 6: MongoDB - Single node scenario" do
-
 	before(:all) do
 		puts "**********************************************************************",""
   end

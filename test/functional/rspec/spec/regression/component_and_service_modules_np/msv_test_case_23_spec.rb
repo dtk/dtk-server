@@ -22,7 +22,6 @@ components_list_to_check = ['apache']
 dtk_common = DtkCommon.new('', '')
 
 describe "(Modules, Services and Versioning) Test Case 23: Import new service module and import all component modules for that service module automatically" do
-
   before(:all) do
     puts "*************************************************************************************************************************************************",""
   end

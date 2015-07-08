@@ -22,7 +22,8 @@ module DTK
         super(base_msg(cmp_instance),Opts.new(opts).slice(:file_path))
       end
 
-     private
+      private
+
       def base_msg(cmp_instance)
         cmp_type_print_form = cmp_instance.component_type_print_form()
         raise ErrorUsage.new("Not supported: Attribute link involving same component type (#{cmp_type_print_form})")

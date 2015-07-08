@@ -16,7 +16,7 @@ module DTK
       # this must be placed here
       r8_nested_require('semantic_datatype','asserted_datatypes')
 
-      def self.default()
+      def self.default
         DefaultDatatype
       end
       DefaultDatatype = :string
@@ -36,7 +36,7 @@ module DTK
       end
 
       def self.is_valid?(semantic_data_type,value)
-        value.nil? or lookup(semantic_data_type).is_valid?(value)
+        value.nil? || lookup(semantic_data_type).is_valid?(value)
       end
 
       def self.datatype(semantic_data_type)
@@ -44,11 +44,11 @@ module DTK
       end
       
       def is_valid?(value)
-        @validation_proc.nil? or @validation_proc.call(value)
+        @validation_proc.nil? || @validation_proc.call(value)
       end
 
       def self.isa?(term)
-        all_types().has_key?(term.to_sym)
+        all_types().key?(term.to_sym)
       end
 
       def self.convert_to_internal_form(semantic_data_type,value)
@@ -62,7 +62,8 @@ module DTK
         @internal_form_proc ? @internal_form_proc.call(value) : value
       end
 
-     private
+      private
+
       def self.lookup(semantic_data_type)
         unless ret = all_types()[semantic_data_type.to_sym]
           raise ErrorUsage.new("Illegal datatype (#{semantic_data_type})")

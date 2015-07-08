@@ -9,7 +9,6 @@ r8_require("../../repo_manager_client/lib/repo_manager_client.rb")
 repo_host = 'ec2-50-16-199-149.compute-1.amazonaws.com' #ARGV[0]
 repo_base_url = "http://#{repo_host}:7000"
 
-
 include DTK
 
 client = RepoManagerClient.new(repo_base_url)
@@ -17,16 +16,16 @@ username='test_user'
 mod_name='test_repo2'
 rsa_pub_key = Common::Aux.get_ssh_rsa_pub_key()
 module_name_params = {
-  :name => mod_name,
-  :namespace => "r8",
-  :type => :component
+  name: mod_name,
+  namespace: "r8",
+  type: :component
 }
 create_module_params = {
-  :username => username,
-  :access_rights => "RW+",
-  :tags => {:internal_id => 1},
-  :noop_if_exists => true,
-#  :enable_all_users => true
+  username: username,
+  access_rights: "RW+",
+  tags: {internal_id: 1},
+  noop_if_exists: true,
+  #  :enable_all_users => true
 }.merge(module_name_params)
 
 client.create_module(create_module_params)

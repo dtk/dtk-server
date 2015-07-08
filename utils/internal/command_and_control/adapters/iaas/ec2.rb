@@ -11,23 +11,23 @@ module DTK
       extend AddressManagementClassMixin
       extend ImageClassMixin
 
-      def self.execute(task_idh,top_task_idh,task_action)
+      def self.execute(_task_idh,_top_task_idh,task_action)
         CreateNode.run(task_action)
       end
 
       def self.find_matching_node_binding_rule(node_binding_rules,target)
         node_binding_rules.find do |r|
           conditions = r[:conditions]
-          (conditions[:type] == "ec2_image") and (conditions[:region] == target[:iaas_properties][:region])
+          (conditions[:type] == "ec2_image") && (conditions[:region] == target[:iaas_properties][:region])
         end
       end
 
       def self.references_image?(node_external_ref)
-        node_external_ref[:type] == "ec2_image" and node_external_ref[:image_id]
+        node_external_ref[:type] == "ec2_image" && node_external_ref[:image_id]
       end
 
       def self.existing_image?(image_id,target)
-        image(image_id,:target => target).exists?()
+        image(image_id,target: target).exists?()
       end
 
       def self.raise_error_if_invalid_image?(image_id,target)
@@ -93,7 +93,7 @@ module DTK
         (opts[:properties_to_check]||[]).each do |property|
           case property
             when :subnet then raise_error_if.invalid_subnet(iaas_properties[:subnet])
-          else
+            else
             Log.error("Not supporting check of property '#{property}'")
           end
         end
@@ -103,7 +103,7 @@ module DTK
       
       def self.get_connection_from_iaas_properties(iaas_properties,region)
         ec2_creds = get_ec2_credentials(iaas_properties)
-        conn(ec2_creds.merge(:region => region))
+        conn(ec2_creds.merge(region: region))
       end
       private_class_method :get_connection_from_iaas_properties
 
@@ -113,10 +113,11 @@ module DTK
           @region          = region
           @connection      = connection
         end
-        def invalid_credentials()
+
+        def invalid_credentials
           begin
             # as simple test see if can describe availability_zones 
-            Ec2.get_availability_zones(@iaas_properties,@region,:connection => @connection)
+            Ec2.get_availability_zones(@iaas_properties,@region,connection: @connection)
            rescue => e
             Log.info_pp(["Error_from get_availability_zones",e])
             raise ErrorUsage.new("Invalid EC2 credentials")
@@ -132,7 +133,7 @@ module DTK
 
       def self.get_ec2_credentials(iaas_credentials)
         if iaas_credentials && (aws_key = iaas_credentials['key'] || aws_key = iaas_credentials[:key]) && (aws_secret = iaas_credentials['secret'] || aws_secret = iaas_credentials[:secret])
-          { :aws_access_key_id => aws_key, :aws_secret_access_key => aws_secret }
+          { aws_access_key_id: aws_key, aws_secret_access_key: aws_secret }
         end
       end
       private_class_method :get_ec2_credentials
@@ -150,7 +151,7 @@ module DTK
         target_aws_creds = node.get_target_iaas_credentials()
 
         response = conn(target_aws_creds).server_destroy(instance_id)
-        Log.info("operation to destroy ec2 instance #{instance_id} had response: #{response.to_s}")
+        Log.info("operation to destroy ec2 instance #{instance_id} had response: #{response}")
         process_addresses__terminate?(node)
 
         if opts[:reset]
@@ -177,10 +178,10 @@ module DTK
 
       def self.reset_node(node)
         update_hash = {
-          :external_ref => Aux.hash_subset(external_ref(node),ExternalRefPendingCols),
-          :type => 'staged',
-          :admin_op_status => 'pending',
-          :hostname_external_ref => nil
+          external_ref: Aux.hash_subset(external_ref(node),ExternalRefPendingCols),
+          type: 'staged',
+          admin_op_status: 'pending',
+          hostname_external_ref: nil
         }
         update_node!(node,update_hash)
       end
@@ -192,15 +193,15 @@ module DTK
         region = iaas_prop_hash[:region]
         unless target.is_builtin_target?()
           if region
-            CloudConnect::EC2.new.get_compute_params().merge(:region => region)
+            CloudConnect::EC2.new.get_compute_params().merge(region: region)
           else
-            unless iaas_prop_hash[:key] and iaas_prop_hash[:secret]
+            unless iaas_prop_hash[:key] && iaas_prop_hash[:secret]
               raise Error.new("Unexpected that no builtin target does not have needed fields")
               ret = {
-                :aws_access_key_id => iaas_prop_hash[:key],
-                :aws_secret_access_key => iaas_prop_hash[:secret]
+                aws_access_key_id: iaas_prop_hash[:key],
+                aws_secret_access_key: iaas_prop_hash[:secret]
               }
-              ret.merge!(:region => region) if region
+              ret.merge!(region: region) if region
               ret
             end
           end
@@ -217,7 +218,7 @@ module DTK
         @conn ||= CloudConnect::EC2.new
       end
 
-     private
+      private
 
       def self.update_node!(node,update_hash)
         node.merge!(update_hash) 
@@ -228,7 +229,6 @@ module DTK
       def self.external_ref(node)
         node.get_field?(:external_ref)||{}
       end
-
     end
   end
 end

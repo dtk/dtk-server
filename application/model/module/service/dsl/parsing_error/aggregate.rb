@@ -6,7 +6,7 @@ module DTK; class ServiceModule
         @error_cleanup = opts[:error_cleanup]
       end
       
-      def aggregate_errors!(ret_when_err=nil,&block)
+      def aggregate_errors!(ret_when_err=nil,&_block)
         begin
           yield
          rescue DanglingComponentRefs => e
@@ -24,7 +24,7 @@ module DTK; class ServiceModule
       def raise_error?(opts={})
         if @aggregate_error
           @error_cleanup.call() if @error_cleanup
-          error = @aggregate_error.add_error_opts(Opts.new(:log_error => false))  
+          error = @aggregate_error.add_error_opts(Opts.new(log_error: false))  
           opts[:do_not_raise] ? error : raise(error)
         end
       end

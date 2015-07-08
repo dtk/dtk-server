@@ -19,7 +19,9 @@ module DTK; class Attribute
       def initialize(attr,new_val,info={})
         super(error_msg(attr,new_val,info))
       end
-     private
+
+      private
+
       def error_msg(attr,new_val,info)
         attr_name = attr[:display_name]
         ret = "Attribute (#{attr}) has illegal value (#{new_val})" 

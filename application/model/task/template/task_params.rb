@@ -11,19 +11,20 @@ module DTK; class Task; class Template
     end
 
     def substitute_vars(object)
-      if object.kind_of?(Array)
+      if object.is_a?(Array)
         ret = object.class.new
         object.each{|el|ret << substitute_vars(el)}
         ret
-      elsif object.kind_of?(Hash)
+      elsif object.is_a?(Hash)
         object.inject(object.class.new){|h,(k,v)|h.merge(k => substitute_vars(v))}
-      elsif object.kind_of?(String)
+      elsif object.is_a?(String)
         substitute_vars_in_string(object)
       else
         object
       end
     end
-   private
+
+    private
 
     def substitute_vars_in_string(string)
       unless needs_template_substitution?(string)

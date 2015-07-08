@@ -1,6 +1,5 @@
 module DTK
   module McollectiveDebug
-
     DEBUG_AGENT_RESPONSE = R8::Config[:debug][:mcollective]
 
     def inspect_agent_response(msg)
@@ -10,6 +9,5 @@ module DTK
         Log.info "END: Debugging response from Mcollective"
       end
     end
-
   end
 end

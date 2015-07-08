@@ -26,13 +26,13 @@ module DTK
       end
 
       # can be overwritten
-      def is_node_attribute?()
+      def is_node_attribute?
         false
       end
 
       # can be overwritten
-      def get_ng_member_attributes__clone_if_needed(opts={})
-        Array.new
+      def get_ng_member_attributes__clone_if_needed(_opts={})
+        []
       end
 
       def set_component_remote_and_local_value!(link,cmp_mappings)
@@ -49,10 +49,10 @@ module DTK
       end
 
       # no op unless overwritetn
-      def update_component_attr_index!(component_attr_index)
+      def update_component_attr_index!(_component_attr_index)
       end
       # overwritten
-      def value()
+      def value
       end
     end
   end

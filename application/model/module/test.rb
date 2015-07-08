@@ -1,15 +1,14 @@
 module DTK
   class TestModule < BaseModule
-
-    def self.model_type()
+    def self.model_type
       :test_module
     end
 
-    def self.component_type()
+    def self.component_type
       :puppet #hardwired
     end
 
-    def component_type()
+    def component_type
       :puppet #hardwired
     end
 
@@ -18,7 +17,7 @@ module DTK
     end
 
     class DSLParser < DTK::ModuleDSLParser
-      def self.module_type()
+      def self.module_type
         :test_module
       end
       def self.module_class

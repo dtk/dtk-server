@@ -16,7 +16,6 @@ non_existing_modules_namespace_filter = "non_existing_namespace"
 dtk_common = DtkCommon.new('', '')
 
 describe "(Modules, Services and Versioning) Test Case 48: List component, service and test modules on local and remote with filter" do
-
   before(:all) do
     puts "*************************************************************************************************************************",""
   end

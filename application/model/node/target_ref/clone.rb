@@ -12,18 +12,18 @@ module DTK; class Node
       #  if node is a group then creating new target refs for it as function of its cardinality
       #  if node has been designated as matched to an existing target ref, need to create links to these
       #  otherwise returns a state change object in teh output array
-      def create_target_refs_and_links?()
-        tr_create = Array.new #node/node-groups that need target ref created
-        tr_link = Hash.new #node/node-groups that need to be linked to existing target refs
-        tr_link_candidates = Array.new
+      def create_target_refs_and_links?
+        tr_create = [] #node/node-groups that need target ref created
+        tr_link = {} #node/node-groups that need to be linked to existing target refs
+        tr_link_candidates = []
 
         # ndx_needs_sc is used to find nodes that need a state change object
         # meaning model is annoatted so these when a task is run will cause a node to be created
         # initiallly set ndx_needs_state_change to have all nodes and then in loop below remove ones 
         # that are linked to existing nodes
-        ndx_needs_sc = Hash.new
+        ndx_needs_sc = {}
         @nodes.each do |node|
-          if node.is_node_group?() and !node[:target_refs_exist]
+          if node.is_node_group?() && !node[:target_refs_exist]
             tr_create << node
           else
             tr_link_candidates << node
@@ -38,19 +38,20 @@ module DTK; class Node
         link_to_target_refs(to_link_array)
 
         # needed target_ref state changes
-        ndx_needs_sc.reject{|node,needs_sc|!needs_sc}.values
+        ndx_needs_sc.reject{|_node,needs_sc|!needs_sc}.values
       end
 
-     private
+      private
+
       ToLinkElement = Struct.new(:node_instance_id,:target_ref)
       # This method returns array of 
       # and also updates ndx_needs_sc
       def existing_target_refs_to_link(tr_link_candidates,ndx_needs_sc)
-        ret = Array.new
+        ret = []
         return ret if tr_link_candidates.empty?
         # See if nodes have target refs computed already; if so compute these
         # TODO: convert so that always case target refs computed already
-        trs_that_need_processing = Array.new
+        trs_that_need_processing = []
         tr_link_candidates.each do |node|
           trs = node[:target_refs_to_link]||[]
           unless trs.empty?
@@ -64,13 +65,13 @@ module DTK; class Node
         return ret if trs_that_need_processing.empty?
 
         # TODO: after 'convert so that always case' can remove below 
-        ndx_node_template__node = trs_that_need_processing.inject(Hash.new) do |h,n|
+        ndx_node_template__node = trs_that_need_processing.inject({}) do |h,n|
           n[:node_template_id] ? h.merge!(n[:node_template_id] => n[:id]) : h
         end
         unless ndx_node_template__node.empty?
           sp_hash = {
-            :cols => [:id,:display_name,:type],
-            :filter => [:oneof,:id,ndx_node_template__node.keys]
+            cols: [:id,:display_name,:type],
+            filter: [:oneof,:id,ndx_node_template__node.keys]
           }
           Model.get_objs(@target.model_handle(:node),sp_hash).each do |nt|
             if nt.is_target_ref?()
@@ -87,10 +88,10 @@ module DTK; class Node
       # to_link_array is array of ToLinkElements
       def link_to_target_refs(to_link_array)
         return if to_link_array.empty?
-        create_ngrs_objs_hash = to_link_array.inject(Hash.new) do |h,to_link_el|
+        create_ngrs_objs_hash = to_link_array.inject({}) do |h,to_link_el|
           h.merge(Input::BaseNodes.target_ref_link_hash(to_link_el.node_instance_id,to_link_el.target_ref.id))
         end
-        create_objs_hash = {:node_group_relation => create_ngrs_objs_hash}
+        create_objs_hash = {node_group_relation: create_ngrs_objs_hash}
         Model.input_hash_content_into_model(@target.id_handle(),create_objs_hash)
       end
     end

@@ -31,7 +31,6 @@ file_for_remove = "module_refs.yaml"
 dtk_common = DtkCommon.new('', '')
 
 describe "(Modules, Services and Versioning) Test Case 45: Install service module with dependency to two components and both of these components have dependency to same component" do
-
   before(:all) do
     puts "************************************************************************************************************************************************************************",""
   end

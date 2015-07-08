@@ -19,14 +19,14 @@ module DTK
 
     # This finds module refs that matches branches
     def self.get_multiple_component_module_refs(branches)
-      ndx_branches = branches.inject(Hash.new){|h,r|h.merge(r[:id] => r)}
+      ndx_branches = branches.inject({}){|h,r|h.merge(r[:id] => r)}
       ModuleRef.get_ndx_component_module_ref_arrays(branches).map do |(branch_id,cmr_array)|
-        content_hash_content = cmr_array.inject(Hash.new){|h,r|h.merge(key(r[:module_name]) => r)}
+        content_hash_content = cmr_array.inject({}){|h,r|h.merge(key(r[:module_name]) => r)}
         new(ndx_branches[branch_id],content_hash_content)
       end
     end
     def self.get_component_module_refs(branch)
-      content_hash_content = ModuleRef.get_component_module_ref_array(branch).inject(Hash.new) do |h,r|
+      content_hash_content = ModuleRef.get_component_module_ref_array(branch).inject({}) do |h,r|
         h.merge(key(r[:module_name]) => r)
       end
       new(branch,content_hash_content)
@@ -46,7 +46,7 @@ module DTK
         end
         cmp_mod_name = cmp_mod[:display_name]
         unless component_module_ref?(cmp_mod_name)
-          add_or_set_component_module_ref(cmp_mod_name,:namespace_info => cmp_mod[:namespace_name])
+          add_or_set_component_module_ref(cmp_mod_name,namespace_info: cmp_mod[:namespace_name])
           ret = true
         end
       end
@@ -68,8 +68,8 @@ module DTK
       end
     end
 
-    def version_objs_indexed_by_modules()
-      ret = Hash.new
+    def version_objs_indexed_by_modules
+      ret = {}
       component_modules.each_pair do |mod,cmr|
         if version_info =  cmr[:version_info]
           ret.merge!(mod.to_s => version_info)
@@ -84,9 +84,9 @@ module DTK
       return if assembly_templates.empty?
       filter = [:oneof, :id, assembly_templates.map{|r|r[:id]}]
       opts = {
-        :filter => filter,
-        :component_module_refs => self,
-        :force_compute_template_id => true
+        filter: filter,
+        component_module_refs: self,
+        force_compute_template_id: true
       }
       aug_cmp_refs = Assembly::Template.get_augmented_component_refs(component_module.model_handle(:component),opts)
       return if aug_cmp_refs.empty?
@@ -101,12 +101,12 @@ module DTK
     end
 
     def include_module?(cmp_module_name)
-      component_modules.has_key?(key(cmp_module_name))
+      component_modules.key?(key(cmp_module_name))
     end
 
-    def ret_service_module_info()
+    def ret_service_module_info
       sp_hash = {
-        :cols => [:service_module_info]
+        cols: [:service_module_info]
       }
       get_obj(sp_hash)
     end
@@ -117,22 +117,22 @@ module DTK
         cmr.set_module_version(version)
       else
         hash_content = {
-          :component_module => cmp_module_name,
-          :version_info => version
+          component_module: cmp_module_name,
+          version_info: version
         }
         @component_modules[key] = ModuleRef.reify(@parent.model_handle,hash_content)
       end
       ModuleRef.update(:create_or_update,@parent,@component_modules.values)
     end
     
-    def update()
+    def update
       module_ref_hash_array = @component_modules.map do |(key,hash)|
         el = hash
         unless hash[:module_name]
-          el = el.merge(:module_name => key.to_s)
+          el = el.merge(module_name: key.to_s)
         end
         unless hash[:module_type]
-          el = el.merge(:module_type => 'component')
+          el = el.merge(module_type: 'component')
         end
         el
       end
@@ -144,7 +144,8 @@ module DTK
       ModuleRef.create_or_update(new_branch,cmrs.component_modules.values)
     end
 
-   private
+    private
+
    def self.update(parent, cmp_modules)
       ModuleRef.create_or_update( parent, cmp_modules.values)
     end
@@ -167,17 +168,17 @@ module DTK
     def self.isa_dsl_filename?(path)
       path == meta_filename_path()
     end
-    def meta_filename_path()
+    def meta_filename_path
       self.class.meta_filename_path()
     end
-    def self.meta_filename_path()
+    def self.meta_filename_path
       ServiceModule::DSLParser.default_rel_path?(:component_module_refs) ||
         raise(Error.new("Unexpected that cannot compute a meta_filename_path for component_module_refs"))
     end
 
-    def dsl_hash_form()
+    def dsl_hash_form
       ret = SimpleOrderedHash.new()
-      dsl_hash_form = Hash.new
+      dsl_hash_form = {}
       component_modules.each_pair do |cmp_module_name,cmr|
         hf = cmr.dsl_hash_form()
         dsl_hash_form[cmp_module_name.to_s] = hf unless hf.empty?
@@ -190,25 +191,25 @@ module DTK
       sorted_dsl_hash_form = dsl_hash_form.keys.map{|x|x.to_s}.sort().inject(SimpleOrderedHash.new()) do |h,k|
         h.merge(k => dsl_hash_form[k])
       end
-      ret.merge(:component_modules => sorted_dsl_hash_form)
+      ret.merge(component_modules: sorted_dsl_hash_form)
     end
 
     class ComponentTypeToCheck < Array
-      def mapping_required?()
+      def mapping_required?
         find{|r|r[:required]}
       end
     end
 
-    def project_idh()
+    def project_idh
       return @project_idh if @project_idh
       unless service_id = @parent.get_field?(:service_id)
         raise Error.new("Cannot find project from parent object")
       end
-      service_module = @parent.model_handle(:service_module).createIDH(:id => service_id).create_object()
+      service_module = @parent.model_handle(:service_module).createIDH(id: service_id).create_object()
       unless project_id = service_module.get_field?(:project_project_id)
         raise Error.new("Cannot find project from parent object")
       end
-      @parent.model_handle(:project).createIDH(:id => project_id)
+      @parent.model_handle(:project).createIDH(id: project_id)
     end
   end
 end

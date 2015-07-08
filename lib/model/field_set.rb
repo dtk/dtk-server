@@ -5,7 +5,7 @@ module DTK
       include FieldSearchPatternInstanceMixin
       attr_reader :cols, :model_name
       # TODO: so fieldset can be more advanced than array of scalrs; can have netsed structure
-      def initialize(model_name,cols=Array.new,field_search_pattern=nil)
+      def initialize(model_name,cols=[],field_search_pattern=nil)
         @model_name = model_name.to_sym
         @cols = cols 
         @field_search_pattern = field_search_pattern
@@ -36,7 +36,7 @@ module DTK
       # difference between only_including and & is not sysmetric and provides for items in self which are form {alias => col}
       def only_including(field_set)
         # TODO: right now not checking non scalar
-        FieldSet.new(@model_name,@cols.reject{|col| col.kind_of?(Symbol) and not field_set.cols.include?(col)})
+        FieldSet.new(@model_name,@cols.reject{|col| col.is_a?(Symbol) and not field_set.cols.include?(col)})
       end
 
       def &(field_set)
@@ -45,7 +45,7 @@ module DTK
 
       def extra_local_columns(vcol_sql_fns=nil)
         return nil unless vcolumns = (DB_REL_DEF[model_name]||{})[:virtual_columns] 
-        extra_cols = Array.new
+        extra_cols = []
         cols = vcol_sql_fns ? (@cols + vcol_sql_fns.keys) : @cols
         cols.each do |f|
           field_extra_cols = parse_local_dependencies(vcolumns[f])
@@ -55,10 +55,10 @@ module DTK
         extra_cols.empty? ? nil : extra_cols
       end
 
-      def with_replaced_local_columns?()
+      def with_replaced_local_columns?
         return nil unless vcolumns = (DB_REL_DEF[model_name]||{})[:virtual_columns] 
-        extra_cols = Array.new
-        removed_cols = Array.new
+        extra_cols = []
+        removed_cols = []
         @cols.each do |f|
           field_extra_cols = parse_local_dependencies(vcolumns[f])
           next if field_extra_cols.empty?
@@ -69,19 +69,18 @@ module DTK
         FieldSet.new(@model_name,(@cols + extra_cols) - removed_cols)
       end
 
-      def with_related_local_columns()
+      def with_related_local_columns
         extra_local_cols = extra_local_columns()
         return self unless extra_local_cols 
         FieldSet.new(@model_name,@cols + extra_local_cols)
       end
 
-
       # TODO!!!: this does not work properly when two or more virtual attributes point to same column, but not tagged with same dependency def
       def related_remote_column_info(vcol_sql_fns=nil)
         return nil if @cols.empty?
         return nil unless vcolumns = DB_REL_DEF[model_name][:virtual_columns]
-        ret = Array.new
-        defs_seen = Array.new
+        ret = []
+        defs_seen = []
         cols = vcol_sql_fns ? (@cols + vcol_sql_fns.keys) : @cols
         cols.each do |f|
           next unless vcol_info = vcolumns[f] 
@@ -96,15 +95,14 @@ module DTK
         ret.empty? ? nil : ret
       end
 
-
       def ret_where_clause_for_search_string(name_value_pairs)
         @field_search_pattern ? @field_search_pattern.ret_where_clause_for_search_string(name_value_pairs) : {}
       end          
 
       # returns foreign key columns in fieldset
-      def foreign_key_info() 
+      def foreign_key_info 
         db_rel_cols = ((DB_REL_DEF[model_name]||{})[:columns]||[])
-        ret = Hash.new
+        ret = {}
         db_rel_cols.each do |col,col_info|
           ret[col] = col_info if (col_info[:foreign_key_rel_type] and cols.include?(col))
         end
@@ -114,15 +112,15 @@ module DTK
       # field set in option list
       def self.opt(x,model_name=nil)
         field_set = 
-          if x.kind_of?(Symbol) and x == :all
+          if x.is_a?(Symbol) and x == :all
             FieldSetAll.new()
-          elsif x.kind_of?(Array) 
+          elsif x.is_a?(Array) 
             raise Error.new("model_name is not given") unless model_name
             FieldSet.new(model_name,x) 
           else
             x
           end
-        {:field_set => field_set}
+        {field_set: field_set}
       end
 
       def self.default(model_name)
@@ -132,7 +130,7 @@ module DTK
       end
 
       def self.common(model_name)
-        ret_fieldset(model_name,:default) do |db_rel|
+        ret_fieldset(model_name,:default) do |_db_rel|
           non_hidden_columns(COMMON_REL_COLUMNS)
         end
       end
@@ -170,14 +168,15 @@ module DTK
         many_to_one_cols(db_rel).inject(ret){|h,k|h.merge(k => ID_TYPES[:id])}
       end
 
-     private
+      private
+
       # returns form [deps,def_name] where later can be null if no defs
       def parse_remote_dependencies(virtual_col_info)
         # special case is :possible_parents
         return [convert_to_remote_dependencies(virtual_col_info[:possible_parents]),nil] if virtual_col_info[:possible_parents]
         deps = virtual_col_info[:remote_dependencies]
         return nil unless deps
-        return [deps,nil] if deps.kind_of?(Array)
+        return [deps,nil] if deps.is_a?(Array)
         return [deps.values.first,deps.keys.first]
       end
 
@@ -192,10 +191,10 @@ module DTK
         possible_parents.map do |parent|
           fk_col = DB.ret_parent_id_field_name(DB_REL_DEF[parent],DB_REL_DEF[model_name])
           {
-            :model_name => parent,
-            :join_type => :left_outer,
-            :join_cond=>{:id=>"#{model_name}__#{fk_col}".to_sym},
-            :cols=>[:id, :display_name, :ref, :ref_num]
+            model_name: parent,
+            join_type: :left_outer,
+            join_cond: {id: "#{model_name}__#{fk_col}".to_sym},
+            cols: [:id, :display_name, :ref, :ref_num]
           }
         end
       end
@@ -207,20 +206,20 @@ module DTK
       def self.ret_fieldset(model_name_x,col_type,&block)
         model_name = Model.concrete_model_name(model_name_x.to_sym)
         db_rel = DB_REL_DEF[model_name]
-        Fieldsets[col_type] ||= Hash.new
+        Fieldsets[col_type] ||= {}
         col_info = Fieldsets[col_type]
         return col_info[model_name] if col_info[model_name]
         col_info[model_name] = FieldSet.new(model_name,block.call(db_rel),FieldSearchPattern.new(model_name,self))
       end
 
-      Fieldsets = Hash.new
+      Fieldsets = {}
 
       def self.non_hidden_columns(cols_def)
-        cols_def.reject{|k,v| v and v[:hidden]}.keys
+        cols_def.reject{|_k,v| v and v[:hidden]}.keys
       end
 
       def self.virtual_columns_in_fieldset(cols_def)
-        cols_def.reject{|k,v| v and v[:hidden]}.keys
+        cols_def.reject{|_k,v| v and v[:hidden]}.keys
       end
 
       def self.real_cols(db_rel)
@@ -238,17 +237,21 @@ module DTK
 
     class FieldSetAll < FieldSet
       def initalize(model_name=nil)
-        super(model_name,Array.new)
+        super(model_name,[])
       end
-      def include_col?(col)
+
+      def include_col?(_col)
         true
       end
-      def with_added_cols(*cols)
+
+      def with_added_cols(*_cols)
         self
       end
-      def with_removed_cols(*cols)
+
+      def with_removed_cols(*_cols)
         self
       end
+
       def &(field_set)
         FieldSet.new(field_set.model_name,field_set.cols)
       end

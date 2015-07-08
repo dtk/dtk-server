@@ -21,7 +21,6 @@ bitbucket_2_component_module_filesystem_location = "~/dtk/component_modules/bitb
 dtk_common = DtkCommon.new('', '')
 
 describe "(Client remotes) Test Case 1: Import from Bitbucket, check remotes, make changes and push-remote and make sure changes are pushed" do
-
   before(:all) do
     puts "*********************************************************************************************************************************",""
   end

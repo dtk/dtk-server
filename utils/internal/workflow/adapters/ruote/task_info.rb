@@ -2,7 +2,7 @@ module DTK; module WorkflowAdapter
   class Ruote
     # This works under the assumption that task_ids are never reused
     class TaskInfo 
-      Store = Hash.new
+      Store = {}
       Lock = Mutex.new
       
       def self.set(task_id,top_task_id,task_info,opts={})
@@ -26,7 +26,7 @@ module DTK; module WorkflowAdapter
       end
       
       def self.clean(top_task_id)
-        Lock.synchronize{ Store.delete_if { |key, value| key.match(Regexp.new("^#{top_task_id.to_s}#{TopTaskDelim}")) }}
+        Lock.synchronize{ Store.delete_if { |key, _value| key.match(Regexp.new("^#{top_task_id}#{TopTaskDelim}")) }}
         #TODO: this is not write in taht this can have values if concurrent service
         # instances running pp [:write_cleanup,Store.keys]
         # TODO: this needs to clean all keys associated with the task; some handle must be passed in
@@ -35,17 +35,18 @@ module DTK; module WorkflowAdapter
 
       TopTaskDelim = '-'
 
-     private
+      private
+
       def self.get_from_workitem(workitem)
         params = workitem.params
         task_id = params["task_id"]
         top_task_id = params["top_task_id"]
-        opts = Hash.new
+        opts = {}
         if task_type = params["task_type"]
-          opts.merge!(:task_type => task_type)
+          opts.merge!(task_type: task_type)
         end
         if override_node_id = params["override_node_id"]
-          opts.merge!(:override_node_id => override_node_id)
+          opts.merge!(override_node_id: override_node_id)
         end
         task_key(task_id,top_task_id,opts)
       end
@@ -54,7 +55,7 @@ module DTK; module WorkflowAdapter
       #  :task_type
       #  ::override_node_id 
       def self.task_key(task_id,top_task_id,opts={})
-        ret_key = "#{top_task_id.to_s}#{TopTaskDelim}#{task_id.to_s}"
+        ret_key = "#{top_task_id}#{TopTaskDelim}#{task_id}"
         if task_type = opts[:task_type]
           ret_key <<  "--#{task_type}"
         end

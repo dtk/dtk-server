@@ -20,7 +20,6 @@ component_module_filesystem_location = "~/dtk/component_modules/local"
 dtk_common = DtkCommon.new('', '')
 
 describe "(Modules, Services and Versioning) Test Case 30: NEG - Import component module A from git which has dependency on component module B that does not exist on server yet" do
-
   before(:all) do
     puts "**********************************************************************************************************************************************************************",""
   end

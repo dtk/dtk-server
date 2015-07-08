@@ -6,7 +6,7 @@ module DTK; class BaseModule
       #  :external_dependencies
       #  :matching_module_refs
       def check_and_ret_external_ref_dependencies?(external_ref,project,module_branch)
-        ret = Hash.new
+        ret = {}
         return ret unless dependencies = external_ref[:dependencies]
 
         parsed_dependencies = dependencies.map{|dep|dep.parsed_form?()}.compact
@@ -62,14 +62,14 @@ module DTK; class BaseModule
                     end
 
                     if evaluated
-                      if all_match_hashes.has_key?(dep_name)
+                      if all_match_hashes.key?(dep_name)
                         already_in_ambiguous = all_ambiguous.select{|amb| amb.values.include?(dep_name)}
                         if already_in_ambiguous.empty?
                           namespace_info = all_match_hashes[dep_name].get_namespace_info
-                          all_ambiguous << {:name => dep_name, :namespace => namespace_info[:namespace][:display_name]}
+                          all_ambiguous << {name: dep_name, namespace: namespace_info[:namespace][:display_name]}
                         end
                         namespace_info = branch.get_namespace_info
-                        all_ambiguous << {:name => dep_name, :namespace => namespace_info[:namespace][:display_name]}
+                        all_ambiguous << {name: dep_name, namespace: namespace_info[:namespace][:display_name]}
                       end
 
                       if existing_module_refs.empty? || existing_module_refs['component_modules'].nil?
@@ -81,10 +81,10 @@ module DTK; class BaseModule
                         if existing_namespace && existing_namespace['namespace'].eql?(namespace_info[:namespace][:display_name])
                           all_match_hashes.merge!(dep_name  => branch)
                         else
-                          if temp_existing.has_key?(dep_name)
+                          if temp_existing.key?(dep_name)
                             temp_namespace_info = temp_existing[dep_name].get_namespace_info
-                            all_ambiguous << {:name => dep_name, :namespace => temp_namespace_info[:namespace][:display_name]}
-                            all_ambiguous << {:name => dep_name, :namespace => namespace_info[:namespace][:display_name]}
+                            all_ambiguous << {name: dep_name, namespace: temp_namespace_info[:namespace][:display_name]}
+                            all_ambiguous << {name: dep_name, namespace: namespace_info[:namespace][:display_name]}
                           end
                           temp_existing.merge!(dep_name => branch)
                         end
@@ -109,7 +109,7 @@ module DTK; class BaseModule
         all_ambiguous_ns = all_ambiguous.map{|am| am[:name]} unless all_ambiguous.empty?
         unless all_ambiguous_ns.empty? || all_match_hashes.empty?
           all_ambiguous_ns.uniq!
-          all_match_hashes.delete_if{|k,v|all_ambiguous_ns.include?(k)}
+          all_match_hashes.delete_if{|k,_v|all_ambiguous_ns.include?(k)}
         end
 
         ambiguous_grouped = {}
@@ -122,19 +122,19 @@ module DTK; class BaseModule
         end
 
         if component_module_refs = component_module_refs?(all_match_hashes)
-          ret.merge!(:matching_module_refs => component_module_refs)
+          ret.merge!(matching_module_refs: component_module_refs)
         end
 
         all_inconsistent = (all_inconsistent - all_match_hashes.keys)
         all_possibly_missing = (all_possibly_missing.uniq - all_inconsistent_names - all_match_hashes.keys - all_ambiguous_ns.uniq)
         ext_deps_hash = {
-          :inconsistent          => all_inconsistent.uniq,
-          :possibly_missing      => all_possibly_missing.uniq
+          inconsistent: all_inconsistent.uniq,
+          possibly_missing: all_possibly_missing.uniq
         }
         unless ambiguous_grouped.empty?
-          ext_deps_hash.merge!(:ambiguous => ambiguous_grouped)
+          ext_deps_hash.merge!(ambiguous: ambiguous_grouped)
         end
-        ret.merge(:external_dependencies => ExternalDependencies.new(ext_deps_hash))
+        ret.merge(external_dependencies: ExternalDependencies.new(ext_deps_hash))
       end
 
       def check_if_matching_or_ambiguous(module_branch, ambiguous)
@@ -152,7 +152,7 @@ module DTK; class BaseModule
       def component_module_refs?(all_match_hashes)
         ret = nil
         return ret unless all_match_hashes
-        ndx_ret = all_match_hashes.values.inject(Hash.new) do |h,r|
+        ndx_ret = all_match_hashes.values.inject({}) do |h,r|
           h.merge(r.id() => r)
         end
         unless ndx_ret.empty?
@@ -162,7 +162,7 @@ module DTK; class BaseModule
 
       def get_existing_module_refs(module_branch)
         existing_c_hash  = {}
-        existing_content = RepoManager.get_file_content({:path => ModuleRefs.meta_filename_path()}, module_branch, {:no_error_if_not_found => true})
+        existing_content = RepoManager.get_file_content({path: ModuleRefs.meta_filename_path()}, module_branch, no_error_if_not_found: true)
         existing_c_hash  = Aux.convert_to_hash(existing_content,:yaml) if existing_content
         existing_c_hash
       end
@@ -171,10 +171,12 @@ module DTK; class BaseModule
         def initialize(cmp_mod)
           @cmp_mod = cmp_mod
         end
-        def id()
+
+        def id
           @cmp_mod.id()
         end
-        def module_branches()
+
+        def module_branches
           @module_branches ||= @cmp_mod.get_module_branches().map{|b|Branch.new(b)}
         end
 
@@ -183,26 +185,31 @@ module DTK; class BaseModule
           def initialize(branch)
             @branch = branch
           end
-          def has_external_ref?()
+
+          def has_external_ref?
             !external_ref.nil?
           end
-          def branch_name()
+
+          def branch_name
             (branch_hash[:name]||'').gsub('-','/').strip()
           end
+
           def branch_version
             branch_hash[:version]
           end
-         private
-          def external_ref()
+
+          private
+
+          def external_ref
             @branch[:external_ref]
           end
-          def branch_hash()
+
+          def branch_hash
             # TODO: get rid of use of eval; for metadata source dont turn into string in first place
             @branch_hash ||= (external_ref && eval(external_ref))||{}
           end
         end
       end
-
     end # ExternalRefsMixi
   end #ManagementMixin
 end; end

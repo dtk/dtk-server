@@ -22,7 +22,6 @@ test2_service_module_filesystem_location = '~/dtk/service_modules/test2'
 dtk_common = DtkCommon.new('', '')
 
 describe "(Modules, Services and Versioning) Test Case 39: Import to two different namespaces (service module)" do
-
   before(:all) do
     puts "****************************************************************************************************",""
   end

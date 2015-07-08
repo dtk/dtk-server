@@ -4,7 +4,7 @@ module DTK
   class CommandAndControl
     r8_nested_require('command_and_control','install_script')
 
-    def self.create_without_task()
+    def self.create_without_task
       new()
     end
     def initialize(task=nil,top_task_idh=nil)
@@ -19,9 +19,9 @@ module DTK
     attr_reader :task_idh,:top_task_idh,:task_action,:klass
 
     def self.execute_task_action(task,top_task_idh)
-      new(task,top_task_idh).execute().merge(:task_id => task.id())
+      new(task,top_task_idh).execute().merge(task_id: task.id())
     end
-    def execute()
+    def execute
       klass.execute(task_idh,top_task_idh,task_action)
     end
 
@@ -57,7 +57,7 @@ module DTK
       klass.errors_in_node_action_result?(result,action)
     end
 
-    def self.get_mcollective_client()
+    def self.get_mcollective_client
       klass = load_for_node_config()
       klass.get_mcollective_client()
     end
@@ -69,31 +69,31 @@ module DTK
     end
 
     def self.pbuilderid(node)
-      klass = load_iaas_for(:node => node)
+      klass = load_iaas_for(node: node)
       klass.pbuilderid(node)
     end
 
     def self.raise_error_if_invalid_image?(image_id,target)
-      klass = load_iaas_for(:target => target)
+      klass = load_iaas_for(target: target)
       klass.raise_error_if_invalid_image?(image_id,target)
     end
     def self.existing_image?(image_id,target)
-      klass = load_iaas_for(:target => target)
+      klass = load_iaas_for(target: target)
       klass.existing_image?(image_id,target)
     end
 
     def self.references_image?(target,node_external_ref)
-      klass = load_iaas_for(:target => target)
+      klass = load_iaas_for(target: target)
       klass.references_image?(node_external_ref)
     end
 
     def self.start_instances(nodes)
-      klass = load_iaas_for(:node => nodes.first)
+      klass = load_iaas_for(node: nodes.first)
       klass.start_instances(nodes)
     end
 
     def self.stop_instances(nodes)
-      klass = load_iaas_for(:node => nodes.first)
+      klass = load_iaas_for(node: nodes.first)
       klass.stop_instances(nodes)
     end
 
@@ -109,27 +109,27 @@ module DTK
 
     def self.find_matching_node_binding_rule(node_binding_rules,target)
       target.update_object!(:iaas_type,:iaas_properties)
-      klass = load_iaas_for(:target => target)
+      klass = load_iaas_for(target: target)
       klass.find_matching_node_binding_rule(node_binding_rules,target)
     end
 
-    def self.node_config_server_host()
+    def self.node_config_server_host
       klass = load_config_node_adapter()
       klass.server_host()
     end
 
     def self.destroy_node?(node,opts={})
-      klass = load_iaas_for(:node => node)
+      klass = load_iaas_for(node: node)
       klass.destroy_node?(node,opts)
     end
 
     def self.associate_persistent_dns?(node)
-      klass = load_iaas_for(:node => node)
+      klass = load_iaas_for(node: node)
       klass.associate_persistent_dns?(node)
     end
 
     def self.associate_elastic_ip(node)
-      klass = load_iaas_for(:node => node)
+      klass = load_iaas_for(node: node)
       klass.associate_elastic_ip(node)
     end
 
@@ -181,8 +181,9 @@ module DTK
       klass.poll_to_detect_node_ready(node,opts)
     end
 
-   private
-    def self.load_for_node_config()
+    private
+
+    def self.load_for_node_config
       adapter_name = R8::Config[:command_and_control][:node_config][:type]
       load_for_aux(:node_config,adapter_name)
     end
@@ -198,7 +199,7 @@ module DTK
               when :ec2_instance then :ec2
               when :ec2_image then :ec2 #TODO: kept in because staged node has this type, which should be changed
               when :physical then :physical
-            else raise Error.new("iaas type (#{iaas_type}) not treated")
+              else raise Error.new("iaas type (#{iaas_type}) not treated")
             end
           when :target
             target =  val
@@ -206,7 +207,7 @@ module DTK
             case iaas_type
               when "ec2" then :ec2
               when "physical" then :physical
-            else raise Error.new("iaas type (#{iaas_type}) not treated")
+              else raise Error.new("iaas type (#{iaas_type}) not treated")
             end
           when :image_type
             image_type = val
@@ -221,7 +222,7 @@ module DTK
       load_for_aux(adapter_type,adapter_name)
     end
     
-    def self.load_config_node_adapter()
+    def self.load_config_node_adapter
       adapter_type = :node_config
       adapter_name = R8::Config[:command_and_control][adapter_type][:type]
       load_for_aux(adapter_type,adapter_name)
@@ -230,12 +231,12 @@ module DTK
     def self.load_for(task_or_task_action)
       adapter_type,adapter_name = task_or_task_action.ret_command_and_control_adapter_info()
       adapter_name ||= R8::Config[:command_and_control][adapter_type][:type]
-      raise ErrorCannotLoadAdapter.new unless adapter_type and adapter_name
+      raise ErrorCannotLoadAdapter.new unless adapter_type && adapter_name
       load_for_aux(adapter_type,adapter_name)
     end
 
     def self.load_for_aux(adapter_type,adapter_name)
-      Adapters[adapter_type] ||= Hash.new
+      Adapters[adapter_type] ||= {}
       return Adapters[adapter_type][adapter_name] if Adapters[adapter_type][adapter_name]
       begin
         r8_nested_require("command_and_control","adapters/#{adapter_type}/#{adapter_name}")
@@ -248,20 +249,20 @@ module DTK
         raise e
       end
     end
-    Adapters = Hash.new
+    Adapters = {}
     Lock = Mutex.new
     # TODO: want to convert all adapters to new style to avoid setting stack error when adapter method not defined to have CommandAndControlAdapter self call instance
     def self.instance_style_adapter?(adapter_type,adapter_name)
       (InstanceStyleAdapters[adapter_type.to_sym]||[]).include?(adapter_name.to_sym)
     end
     InstanceStyleAdapters = {
-      :iaas => [:physical]
+      iaas: [:physical]
     }
 
     #### Error classes
     class Error < XYZ::Error
-      def to_hash()
-        {:error_type => Aux.demodulize(self.class.to_s)}
+      def to_hash
+        {error_type: Aux.demodulize(self.class.to_s)}
       end
       class CannotConnect < Error
       end
@@ -276,8 +277,9 @@ module DTK
           super()
           @error_msg = error_msg
         end
-        def to_hash()
-          super().merge(:error_msg => @error_msg)
+
+        def to_hash
+          super().merge(error_msg: @error_msg)
         end 
       end
       class CannotCreateNode < Error

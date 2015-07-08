@@ -14,8 +14,8 @@ module DTK; class ModuleRefs
       #  :with_module_branches - Boolean
       def self.missing_information?(module_refs_lock,types,opts={})
         # partition into rows that are missing info and ones that are not
-        missing = Hash.new
-        complete = Hash.new
+        missing = {}
+        complete = {}
         module_refs_lock.each_pair do |module_name,module_ref_lock|
           if el_missing_information?(module_ref_lock,types,opts)
             missing[module_name] = module_ref_lock
@@ -28,11 +28,13 @@ module DTK; class ModuleRefs
         end
       end
 
-      def fill_in_missing_information()
+      def fill_in_missing_information
         pp [:fill_in_missing_information,self]
         raise Error.new("Need to write fill_in_missing_information")
       end
-     private
+
+      private
+
       def self.el_missing_information?(module_ref_lock,types,opts={})
         if types.include?(:locked_dependencies)
           unless info = module_ref_lock.info

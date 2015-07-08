@@ -35,7 +35,7 @@ module DTK; class ErrorUsage
       # TODO: cleanup so parent takes opts, rather than opts_or_file_path
       opts_or_file_path =
         if opts.empty?
-          {:caller_info=>true}
+          {caller_info: true}
         elsif opts[:file_path]
           if opts.size > 1
             raise Error.new("Not supported yet, need to cleanup so parent takes opts, rather than opts file path")
@@ -48,11 +48,11 @@ module DTK; class ErrorUsage
       super(processed_msg,opts_or_file_path)
     end
 
-    def self.trap(opts={},&block)
+    def self.trap(opts={},&_block)
       ret = nil
       begin
         ret = yield
-        if opts[:only_return_error] and !ret.kind_of?(ErrorUsage::Parsing)
+        if opts[:only_return_error] && !ret.is_a?(ErrorUsage::Parsing)
           ret = nil 
         end
       rescue ErrorUsage::Parsing => e
@@ -80,14 +80,14 @@ module DTK; class ErrorUsage
 
     def self.raise_error_if_not(obj,klass,opts={})
       # TODO: put in pretty print of "#{klass}
-      unless obj.kind_of?(klass)
+      unless obj.is_a?(klass)
         fragment_type = opts[:type]||'fragment'
         for_text = (opts[:for] ? "for #{opts[:for]}; " : nil)
         err_msg = opts[:err_msg] || "Ill-formed #{fragment_type} #{error_obj_ref(obj)}#{for_text}it should be a #{klass}"
-        err_params = opts[:err_params] || Params.new(:obj => obj)
+        err_params = opts[:err_params] || Params.new(obj: obj)
         if context = opts[:context]
           err_msg << "; it appears in ?context"
-          err_params.merge!(:context => context)
+          err_params.merge!(context: context)
         end
         raise new(err_msg,err_params)
       end
@@ -102,9 +102,10 @@ module DTK; class ErrorUsage
       object
     end
 
-   private
+    private
+
     def self.error_obj_ref(obj)
-      if obj.kind_of?(Hash) or obj.kind_of?(Array)
+      if obj.is_a?(Hash) || obj.is_a?(Array)
         "?obj\n"
       else
         "(?obj) "

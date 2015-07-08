@@ -2,7 +2,7 @@
 # general initial
 require File.expand_path('common', File.dirname(__FILE__))
 
-options = Hash.new
+options = {}
 OptionParser.new do|opts|
    opts.banner = "Usage: initialize.rb [--delete]"
 
@@ -12,9 +12,9 @@ OptionParser.new do|opts|
    end
 end.parse!
 
-server = R8Server.new("superuser",:groupname => "all")
+server = R8Server.new("superuser",groupname: "all")
 server.create_repo_user_instance_admin?()
-server.create_public_library?(:include_default_nodes => true)
+server.create_public_library?(include_default_nodes: true)
 
 # TODO: not sure if better to go in bootstrap or clear
 XYZ::RepoManager.delete_all_repos() if options[:delete]

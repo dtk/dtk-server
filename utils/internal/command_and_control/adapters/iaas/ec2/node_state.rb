@@ -3,14 +3,14 @@ module DTK; module CommandAndControlAdapter
     module NodeStateClassMixin
       # assumed that node[:external_ref] and  node[:hostname_external_ref] are up to date  
       def get_and_update_node_state!(node,attribute_names)
-        ret = Hash.new
+        ret = {}
         unless raw_state_info = raw_state_info!(node)
           return ret 
         end
 
         # attribute_names in normalized form so need to convert
         change = nil
-        attribute_names.each do |normalized_attr_name|
+        attribute_names.each do |_normalized_attr_name|
           attribute_names.each do |attr_name|
             if AttributeMapping.respond_to?(attr_name)
               # TODO: if can legitimately have nil value then need to change logic
@@ -22,13 +22,13 @@ module DTK; module CommandAndControlAdapter
           end
         end
         if change
-          node.update(:external_ref => node[:external_ref])
+          node.update(external_ref: node[:external_ref])
         end
         ret
       end
 
       module AttributeMapping
-        def self.host_addresses_ipv4(ret,raw_state_info,node)
+        def self.host_addresses_ipv4(_ret,raw_state_info,node)
           if ec2_public_address = raw_state_info[:dns_name] || raw_state_info[:public_ip_address]
             node[:external_ref][:ec2_public_address] = ec2_public_address
             dns = node[:external_ref][:dns_name] = ret_dns_value(raw_state_info,node)
@@ -36,7 +36,7 @@ module DTK; module CommandAndControlAdapter
           end
         end
 
-        def self.fqdn(ret,raw_state_info,node)
+        def self.fqdn(_ret,raw_state_info,node)
           if ec2_private_address = raw_state_info[:private_dns_name]
             if dns = ret_dns_value(raw_state_info,node)
               node[:external_ref][:private_dns_name] = {dns => ec2_private_address}
@@ -44,7 +44,8 @@ module DTK; module CommandAndControlAdapter
           end
         end
 
-      private
+        private
+
         def self.ret_dns_value(raw_state_info,node)
           node.persistent_dns() || node.elastic_ip() || raw_state_info[:dns_name] || raw_state_info[:public_ip_address]
         end
@@ -67,7 +68,8 @@ module DTK; module CommandAndControlAdapter
         "shutting-down" => "stopping"
       } 
 
-     private
+      private
+
       def raw_state_info!(node)
         if instance_id = get_instance_id_from_object(node)
           node[:raw_ec2_state_info] ||= conn(node.get_target_iaas_credentials()).server_get(instance_id)

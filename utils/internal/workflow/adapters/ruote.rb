@@ -21,19 +21,19 @@ module DTK
       include RuoteGenerateProcessDefs
       Engine = ::Ruote::Engine.new(Worker.new(::Ruote::HashStorage.new))
       # register all the classes
-      ParticipantList = Array.new
+      ParticipantList = []
       ObjectSpace.each_object(Module) do |m|
-        next unless m.ancestors.include? Top and  m != Top
+        next unless m.ancestors.include?(Top) &&  m != Top
         participant = Aux.underscore(Aux.demodulize(m.to_s)).to_sym
         ParticipantList << participant
         Engine.register_participant participant, m
       end
 
-      def cancel()
+      def cancel
         Engine.cancel_process(@wfid)
       end
 
-      def kill()
+      def kill
         Engine.kill_process(@wfid)
       end
 
@@ -44,11 +44,11 @@ module DTK
           @wfid = Engine.launch(process_def())
 
           # TODO: remove need to have to do Engine.wait_for and have last task trigger cleanup (which just 'wastes a  thread'
-          Engine.wait_for(@wfid, :timeout => TopTaskDefaultTimeOut)
+          Engine.wait_for(@wfid, timeout: TopTaskDefaultTimeOut)
 
           # detect if wait for finished due to normal execution or errors
           errors = Engine.errors(@wfid)
-          if errors.nil? or errors.empty?
+          if errors.nil? || errors.empty?
             Log.info_pp :normal_completion
           else
             Log.error "-------- intercepted errors ------"
@@ -66,19 +66,21 @@ module DTK
          rescue Exception => e
           Log.error_pp "error trap in ruote#execute"
           Log.error_pp [e,e.backtrace[0..50]]
-          # TODO: if do following Engine.cancel_process(@wfid), need to update task; somhow need to detrmine what task triggered this
+         # TODO: if do following Engine.cancel_process(@wfid), need to update task; somhow need to detrmine what task triggered this
          ensure
           TaskInfo.clean(top_task_id)
         end
         nil
       end
 
-     private
+      private
+
       def initialize(top_task)
         super
         @process_def = nil
       end
-      def process_def()
+
+      def process_def
         @process_def ||= compute_process_def(@top_task,@guards[:external])
       end
     end
@@ -90,14 +92,12 @@ end
 # Amar: Additional monkey patching to support instant cancel of concurrent running subtasks on cancel task request
 module Ruote
   class DispatchPool
-
     def retrive_user_info(msg)
       # content generated here can be found in generate_process_defs#participant
       ::DTK::User.from_json(msg['workitem']['fields']['params']['user_info']['user'])
     end
 
     def do_threaded_dispatch(participant, msg)
-
       msg = Rufus::Json.dup(msg)
 
       #

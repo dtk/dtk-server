@@ -10,13 +10,13 @@ module DTK; class LinkDef::Context
         @node_mappings =  opts[:node_mappings]
       end
       
-      def pp_form()
+      def pp_form
         attr =  @attribute.get_field?(:display_name)
         node = node().get_field?(:display_name)
         "#{node}/#{attr}"
       end
 
-      def is_node_attribute?()
+      def is_node_attribute?
         true
       end      
 
@@ -28,8 +28,9 @@ module DTK; class LinkDef::Context
         node_group_attrs.select{|a|a[:display_name] == attr_name}
       end
       
-     private
-      def ret_node()
+      private
+
+      def ret_node
         @node_mappings[@node_ref.to_sym]
       end
     end

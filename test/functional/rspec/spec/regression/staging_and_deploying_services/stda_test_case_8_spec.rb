@@ -21,7 +21,6 @@ expected_cardinality_after_delete = 1
 dtk_common = DtkCommon.new(service_name, assembly_name)
 
 describe "(Staging And Deploying Assemblies) Test Case 8: Stage complex node group example, list nodes, delete nodes, check cardinality, list nodes/components/attributes after delete" do
-
 	before(:all) do
 		puts "****************************************************************************************************************************************************************************",""
   end

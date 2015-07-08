@@ -15,23 +15,25 @@ module XYZ
     def self.create(hash)
       ProcessorMsg.new(hash)
     end    
-    def marshal_to_message_bus_msg()
-      hash = {:msg_type => @msg_type, :msg_content => @msg_content}
-      hash.merge!({:target_object_id => @target_object_id}) if @target_object_id
+    def marshal_to_message_bus_msg
+      hash = {msg_type: @msg_type, msg_content: @msg_content}
+      hash.merge!({target_object_id: @target_object_id}) if @target_object_id
       MessageBusMsgOut.new(hash)
     end
 
-    def topic()
+    def topic
       type = ret_obj_type_assoc_with_msg_type(@msg_type)
       MessageBusMsgOut.topic(type)
     end
-    def key()
+
+    def key
       raise Error.new("missing target_object_id") if @target_object_id.nil?
       type = ret_obj_type_assoc_with_msg_type(@msg_type)
       MessageBusMsgOut.key(@target_object_id,type)
     end
 
-   private
+    private
+
     def ret_obj_type_assoc_with_msg_type(msg_type)
       case msg_type
         when :propagate_asserted_value,:propagated_value,:asserted_value

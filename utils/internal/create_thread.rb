@@ -1,6 +1,5 @@
 module DTK
   module CreateThread
-
     def self.defer_with_session(user_object, current_session, &block)
       Ramaze::defer(&wrap(user_object, current_session, &block))
     end
@@ -15,7 +14,7 @@ module DTK
     # in case there is some internal logic that expects some thread to fail error messages can be
     # ignored or this call
 
-    def self.wrap(user_object=nil, current_session, &block)
+    def self.wrap(user_object=nil, current_session, &_block)
       return lambda do
         begin
           # this part of code sets session information to make sure that newly created thread keeps its session
@@ -43,6 +42,5 @@ module DTK
         end
       end
     end
-
   end
 end

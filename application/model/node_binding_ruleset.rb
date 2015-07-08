@@ -2,7 +2,7 @@ module DTK
   class NodeBindingRuleset < Model
     r8_nested_require('node_binding_ruleset','factory')
 
-    def self.common_columns()
+    def self.common_columns
       [:id,:display_name,:type,:os_type,:rules, :ref]
     end
 
@@ -13,13 +13,13 @@ module DTK
     def self.name_to_id(model_handle, name)
       return name.to_i if name.match(/^[0-9]+$/)
       sp_hash =  {
-        :cols => [:id],
-        :filter => [:eq, :ref, name]
+        cols: [:id],
+        filter: [:eq, :ref, name]
       }
       name_to_id_helper(model_handle,name,sp_hash)
     end
 
-    def self.object_type_string()
+    def self.object_type_string
       "node template"
     end
 
@@ -35,13 +35,13 @@ module DTK
         clone(target,opts)
        when "match"
         match(target,opts)
-      else
+       else
         raise Error.new("Unexpected type (#{self[:type]}) in node binding ruleset")
       end
     end
 
-    def ret_common_fields_or_that_varies()
-      ret = Hash.new
+    def ret_common_fields_or_that_varies
+      ret = {}
       return ret unless self[:rules]
       first_time = true
       self[:rules].each do |rule|
@@ -63,18 +63,19 @@ module DTK
     end
     RuleSetFields = [:type,:image_id,:region,:size]
 
-   private
-    def match(target,opts={})
+    private
+
+    def match(_target,_opts={})
       raise Error.new("TODO: not implemented yet")
     end
     
     def clone(target,opts={})
       node_template = find_matching_node_template(target)
-      override_attrs = opts[:override_attrs]||Hash.new 
+      override_attrs = opts[:override_attrs]||{} 
 
       # special processing of :display_name
       display_name = override_attrs[:display_name]||get_field?(:ref)
-      override_attrs.merge!(:display_name => Node::Instance.get_unique_instance_name(model_handle(:node),display_name))
+      override_attrs.merge!(display_name: Node::Instance.get_unique_instance_name(model_handle(:node),display_name))
 
       clone_opts = node_template.source_clone_info_opts()
       new_obj = target.clone_into(node_template,override_attrs,clone_opts)
@@ -83,8 +84,8 @@ module DTK
 
     def get_node_template(node_template_ref)
       sp_hash = {
-        :cols => [:id, :display_name, :external_ref, :group_id],
-        :filter => [:and, [:eq,:node_binding_rs_id,id()], [:eq,:type,"image"]]
+        cols: [:id, :display_name, :external_ref, :group_id],
+        filter: [:and, [:eq,:node_binding_rs_id,id()], [:eq,:type,"image"]]
       }
       ret = Model.get_objs(id_handle.createMH(:node),sp_hash).find{|r|r[:external_ref][:image_id] == node_template_ref[:image_id]}
       raise Error.new("Cannot find associated node template") unless ret

@@ -10,7 +10,7 @@ module XYZ
         MetadataFromServer.new.get(cookbooks_uri,&block)
       end
     end
-    def self.get_nodes_data_from_server(chef_server_uri=nil,&block) #TBD nil is stub to use the default connection
+    def self.get_nodes_data_from_server(_chef_server_uri=nil,&block) #TBD nil is stub to use the default connection
       NodeDataFromServer.new.get_nodes_data(chef_server_uri=nil,&block)
     end
   end

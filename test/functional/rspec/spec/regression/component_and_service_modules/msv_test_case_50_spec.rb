@@ -19,7 +19,6 @@ grep_patterns_for_module_refs = ['augeasproviders_core:','namespace: herculestea
 dtk_common = DtkCommon.new('', '')
 
 describe "(Modules, Services and Versioning) Test Case 50: Import puppet forge (augeasproviders_apache) without specifying namespace and check its dependencies are installed correctly" do
-
   before(:all) do
     puts "***************************************************************************************************************************************************************************",""
   end

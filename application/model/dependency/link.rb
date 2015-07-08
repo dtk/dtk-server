@@ -8,10 +8,10 @@ module DTK; class Dependency
 
     # TODO: Marked for removal [Haris]
     def self.create_dependency?(cmp_template,antec_cmp_template,opts={})
-      result = Hash.new
+      result = {}
       source_attr_pattern = opts[:source_attr_pattern]
       target_attr_pattern = opts[:target_attr_pattern ]
-      unless source_attr_pattern and  target_attr_pattern
+      unless source_attr_pattern &&  target_attr_pattern
         raise Error.new("Not implemented: when opts does not include :source_attr_pattern and :target_attr_pattern")
       end
       external_or_internal = (target_attr_pattern.node().id() == source_attr_pattern.node().id() ? "internal" : "external")
@@ -21,18 +21,18 @@ module DTK; class Dependency
           # aug_link_defs gets updated as side effect
           link_def_link.add_attribute_mapping!(attribute_mapping_serialized_form(source_attr_pattern,target_attr_pattern))
           incrementally_update_component_dsl?(cmp_template,aug_link_defs,opts)
-          result.merge!(:component_module_updated => true)
+          result.merge!(component_module_updated: true)
         end
       else
         link_def_create_hash = create_link_def_and_link(external_or_internal,cmp_template,antec_cmp_template,attribute_mapping_serialized_form(source_attr_pattern,target_attr_pattern))
         aug_link_defs = cmp_template.get_augmented_link_defs()
         incrementally_update_component_dsl?(cmp_template,aug_link_defs,opts)
-        result.merge!(:component_module_updated => true, :link_def_created => {:hash_form => link_def_create_hash})
+        result.merge!(component_module_updated: true, link_def_created: {hash_form: link_def_create_hash})
       end
       result
     end
 
-    def depends_on_print_form?()
+    def depends_on_print_form?
       # link_type may be label or component_type
       # TODO: assumption that its safe to process label through component_type_print_form
       Component.component_type_print_form(@link_def[:link_type])
@@ -42,14 +42,14 @@ module DTK; class Dependency
       return components if components.empty?
       link_defs = LinkDef.get(components.map{|cmp|cmp.id_handle()})
       unless link_defs.empty?
-        link_deps = Array.new
+        link_deps = []
         components.each do |cmp|
           cmp_id = cmp[:id]
           matching_link_defs = link_defs.select{|ld|ld[:component_component_id] == cmp_id}
           matching_link_defs.each do |ld|
             dep = new(ld)
             link_deps << dep
-            (cmp[:dependencies] ||= Array.new) << dep
+            (cmp[:dependencies] ||= []) << dep
           end
         end
         if opts[:ret_statisfied_by] and not link_deps.empty?
@@ -70,14 +70,15 @@ module DTK; class Dependency
       @satisfied_by_component_ids
     end
 
-   private
+    private
+
     def self.attribute_mapping_serialized_form(source_attr_pattern,target_attr_pattern)
       {source_attr_pattern.am_serialized_form() => target_attr_pattern.am_serialized_form()}
     end
 
     def self.matching_link_def_link?(aug_link_defs,external_or_internal,antec_cmp_template)
       antec_cmp_type = antec_cmp_template.get_field?(:component_type)
-      matches = Array.new
+      matches = []
       aug_link_defs.each  do |link_def|
         (link_def[:link_def_links]||[]).each do |link|
           if link[:remote_component_type] == antec_cmp_type and link [:type] == external_or_internal
@@ -104,7 +105,7 @@ module DTK; class Dependency
          }]
       }
       link_def_create_hash = LinkDef.parse_from_create_dependency(serialized_link_def)
-      Model.input_hash_content_into_model(cmp_template.id_handle(),:link_def => link_def_create_hash)
+      Model.input_hash_content_into_model(cmp_template.id_handle(),link_def: link_def_create_hash)
       link_def_create_hash
     end
 
@@ -113,7 +114,7 @@ module DTK; class Dependency
         unless module_branch = update_dsl[:module_branch]
           raise Error.new("If update_dsl is specified then module_branch must be provided")
         end
-        module_branch.incrementally_update_component_dsl(aug_link_defs,:component_template=>cmp_template)
+        module_branch.incrementally_update_component_dsl(aug_link_defs,component_template: cmp_template)
       end
     end
   end

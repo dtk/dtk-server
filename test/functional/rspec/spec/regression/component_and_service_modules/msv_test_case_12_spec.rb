@@ -25,7 +25,6 @@ local_service_filesystem_location = '~/dtk/service_modules/local'
 dtk_common = DtkCommon.new('', '')
 
 describe "(Modules, Services and Versioning) Test Case 12: Export service module using full name #{service_module_name} to users default namespace and then delete it" do
-
   before(:all) do
     puts "***********************************************************************************************************************************************************",""
   end

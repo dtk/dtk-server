@@ -14,30 +14,31 @@ module DTK
       finalize()
     end
 
-    def default_config_base()
+    def default_config_base
       process_user = Common::Aux.running_process_user()
       user_specific_base = "#{BaseConfigDir}/#{process_user}"
       File.directory?(user_specific_base) ? user_specific_base : BaseConfigDir
     end
 
     private
-    def default_config_file_location()
+
+    def default_config_file_location
       process_user = Common::Aux.running_process_user()
       user_specific_config = "#{BaseConfigDir}/#{process_user}/server.conf"
       File.file?(user_specific_config) ? user_specific_config : "#{BaseConfigDir}/server.conf"
     end
     BaseConfigDir = "/etc/dtk"
 
-    def process_user()
+    def process_user
       Etc.getpwuid(Process.uid).name
     end
 
-    def set_defaults()
+    def set_defaults
       r8_nested_require('configuration','defaults')
       R8::Config[:dtk_instance_user] = process_user()
     end
     
-    def set_combined_vars()
+    def set_combined_vars
       r8_nested_require('configuration','combined')
     end
 
@@ -75,7 +76,8 @@ module DTK
       # TODO: need to check for legal values
       # STUB use RequiredNonDefaultKeys
     end
-    def finalize()
+
+    def finalize
       # freeze
       R8::Config.recursive_freeze
     end
@@ -85,8 +87,9 @@ module DTK
         super()
         replace(parse_key_value_file(file))
       end
+
       def parse_key_value_file(file)
-        ret = Hash.new
+        ret = {}
         raise ErrorUsage.new("Config file (#{file}) does not exists") unless File.exists?(file)
         File.open(file).each do |line|
           # strip blank spaces, tabs etc off the end of all lines

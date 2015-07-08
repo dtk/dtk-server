@@ -1,7 +1,7 @@
 module DTK
   module ComponentTitle
     def self.print_form_with_title(component_name,title)
-      "#{component_name}[#{title.to_s}]"
+      "#{component_name}[#{title}]"
     end
     
     # this is for field display_name
@@ -21,7 +21,6 @@ module DTK
       node_name = component_type = title = nil
       cmp_display_name = Component.display_name_from_user_friendly_name(user_friendly_name)
       cmp_node_part,title = parse_component_display_name(cmp_display_name,opts)
-
     end
 
     # parse_component_display_name
@@ -70,13 +69,12 @@ module DTK
     # component can be a hash or object
     def self.title?(component)
       return nil unless component #convienence so dont have to check argument being passed is nil
-      display_name = component[:display_name] || (component.kind_of?(Component) && component.get_field?(:display_name))
+      display_name = component[:display_name] || (component.is_a?(Component) && component.get_field?(:display_name))
       unless display_name
         raise Error.new("Parameter (component) should have :display_name field")
       end
       component_type,title = parse_component_display_name(display_name)
       title
     end
-
   end
 end

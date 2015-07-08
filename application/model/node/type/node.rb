@@ -15,7 +15,7 @@ module DTK; class Node
       Types.each do |type|
         class_eval("def self.#{type}(); '#{type}'; end")
       end
-      def self.types()
+      def self.types
         Types
       end
     end

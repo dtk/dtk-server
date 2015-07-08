@@ -5,17 +5,17 @@ module DTK
     include BranchNamesMixin
     extend BranchNamesClassMixin
 
-    def self.common_columns()
+    def self.common_columns
       [:id,:group_id,:display_name,:branch,:repo_id,:current_sha,:is_workspace,:type,:version,:ancestor_id,:external_ref,:dsl_parsed]
     end
 
     # TODO: should change type of self[:external_ref] to json
     # but before check any side effect of change
-    def external_ref()
+    def external_ref
       get_field?(:external_ref) && eval(self[:external_ref])
     end
 
-    def external_ref_source()
+    def external_ref_source
       if external_ref = external_ref()
         if source = external_ref[:source]
           source.gsub(/ /,'')
@@ -23,28 +23,28 @@ module DTK
       end
     end
 
-    def get_type()
+    def get_type
       get_field?(:type).to_sym
     end
 
     def set_dsl_parsed!(boolean_val)
-      update(:dsl_parsed => boolean_val)
+      update(dsl_parsed: boolean_val)
     end
 
-    def dsl_parsed?()
+    def dsl_parsed?
       get_field?(:dsl_parsed)
     end
 
-    def get_module_repo_info()
+    def get_module_repo_info
       repo = get_repo(:repo_name)
       module_obj = get_module()
       version = get_field?(:version)
-      opts = {:version => version, :module_namespace => module_obj.module_namespace()}
+      opts = {version: version, module_namespace: module_obj.module_namespace()}
       ModuleRepoInfo.new(repo,module_obj.module_name(),module_obj.id_handle(),self,opts)
     end
 
-    def get_module()
-      row = get_obj(:cols => [:type,:parent_info])
+    def get_module
+      row = get_obj(cols: [:type,:parent_info])
       type = row[:type].to_sym
 # TODO: temp until for source of bug where component rather than component_module put in for type
 if type == :component
@@ -54,25 +54,25 @@ end
       row[type]
     end
 
-    def get_module_name()
+    def get_module_name
       get_module().module_name()
     end
 
     # deletes both local and remore branch
-    def delete_instance_and_repo_branch()
+    def delete_instance_and_repo_branch
       RepoManager.delete_branch(self)
       delete_instance(id_handle())
     end
 
-    def update_current_sha_from_repo!()
+    def update_current_sha_from_repo!
       current_sha = RepoManager.branch_head_sha(self)
-      update(:current_sha => current_sha)
+      update(current_sha: current_sha)
       self[:current_sha] = current_sha
       current_sha
     end
 
     def update_external_ref(ext_ref)
-      update(:external_ref => ext_ref.to_s)
+      update(external_ref: ext_ref.to_s)
       self[:external_ref] = ext_ref
     end
 
@@ -84,13 +84,13 @@ end
 
       # TODO: in addition to :any_updates or instead can send the updated sha and have client to use that to determine if client is up to date
       return ret if diffs_summary.no_diffs?()
-      ret = ret.merge!(:any_updates => true, :fast_forward_change => true)
+      ret = ret.merge!(any_updates: true, fast_forward_change: true)
 
       result = RepoManager.fast_foward_merge_from_branch(branch_name_to_merge_from,self)
       if result == :merge_needed
         if opts[:force]
           RepoManager.hard_reset_to_branch(branch_name_to_merge_from,self)
-          ret.merge!(:fast_forward_change => false)
+          ret.merge!(fast_forward_change: false)
         else
           raise ErrorUsage.new("There is a merge conflict! Cannot push changes without using the --force option; THIS OPTION WILL WIPE OUT CHANGES IN THE BASE COMPONENT MODULE")
         end
@@ -99,14 +99,14 @@ end
       end
 
       self[:current_sha] =  diffs.b_sha
-      update(:current_sha => self[:current_sha])
+      update(current_sha: self[:current_sha])
 
       impl_obj = get_implementation()
       impl_obj.modify_file_assets(diffs_summary)
 
       if diffs_summary.meta_file_changed?()
-        errors = ErrorUsage::Parsing.trap(:only_return_error=>true) do
-          component_module.parse_dsl_and_update_model(impl_obj,id_handle(),version(),:update_module_refs_from_file => true)
+        errors = ErrorUsage::Parsing.trap(only_return_error: true) do
+          component_module.parse_dsl_and_update_model(impl_obj,id_handle(),version(),update_module_refs_from_file: true)
         end
 
         if errors
@@ -116,7 +116,7 @@ end
           self.set_sha(current_sha)
 
           # return parsing errors
-          ret.merge!(:dsl_parsing_errors => errors)
+          ret.merge!(dsl_parsing_errors: errors)
         end
       end
       ret
@@ -142,16 +142,17 @@ end
     end
 
     def set_sha(commit_sha)
-      update(:current_sha => commit_sha)
+      update(current_sha: commit_sha)
       commit_sha
     end
 
-    def version()
+    def version
       self.class.version_from_version_field(get_field?(:version))
     end
-    def assembly_module_version?()
+
+    def assembly_module_version?
       version_obj = version()
-      if version_obj.kind_of?(ModuleVersion::AssemblyModule)
+      if version_obj.is_a?(ModuleVersion::AssemblyModule)
         version_obj
       end
     end
@@ -162,7 +163,7 @@ end
       has_default_version?() ? default_version_string : self[:version]
     end
 
-    def matches_base_version?()
+    def matches_base_version?
       matches_version?(BaseVersion)
     end
     BaseVersion = nil
@@ -181,15 +182,15 @@ end
     # args could be either file_path,hash_content,file_format(optional) or single element which is an array
     # having elements with keys :path, :hash_content, :format
     def serialize_and_save_to_repo?(*args)
-      opts = Hash.new
+      opts = {}
       files =
       if args.size == 1
         args[0]
       else
         path,hash_content,format_type,opts = args
         format_type ||= dsl_format_type_form_path(path)
-        opts ||= Hash.new
-        [{:path => path,:hash_content => hash_content,:format_type => format_type}]
+        opts ||= {}
+        [{path: path,hash_content: hash_content,format_type: format_type}]
       end
 
       unless files.empty?
@@ -200,18 +201,18 @@ end
           content = Aux.serialize(file_info[:hash_content],file_info[:format_type])
 
           # check if module_refs files exists already
-          existing_content = RepoManager.get_file_content({:path => file_info[:path]},self,{:no_error_if_not_found => true})
+          existing_content = RepoManager.get_file_content({path: file_info[:path]},self,no_error_if_not_found: true)
           file_path        = file_info[:path]
 
           if existing_content
             existing_c_hash = Aux.convert_to_hash(existing_content,file_info[:format_type])
-            if existing_c_hash && !existing_c_hash.kind_of?(ErrorUsage::Parsing) and existing_c_hash['component_modules']
+            if existing_c_hash && !existing_c_hash.is_a?(ErrorUsage::Parsing) && existing_c_hash['component_modules']
               valid_existing = true
             end
           end
 
           # if module_refs file and content already exist then append new module_refs to existing
-          if valid_existing && opts[:update_module_refs] && file_path.eql?("module_refs.#{file_info[:format_type].to_s}")
+          if valid_existing && opts[:update_module_refs] && file_path.eql?("module_refs.#{file_info[:format_type]}")
             existing_c_hash = Aux.convert_to_hash(existing_content,file_info[:format_type])
             new_cmp_refs = file_info[:hash_content].clone
 
@@ -235,7 +236,7 @@ end
             else
               if valid_existing
                 temp_ambiguous = ambiguous_deps.clone
-                temp_ambiguous.delete_if{|ad,n| existing_names.include?(ad.split('/').last)}
+                temp_ambiguous.delete_if{|ad,_n| existing_names.include?(ad.split('/').last)}
                 ambiguous = process_ambiguous_dependencies(temp_ambiguous, file_info[:hash_content])
               end
               content << ambiguous
@@ -260,7 +261,7 @@ end
             content = "---\ncomponent_modules:\n" unless valid_existing
           end
 
-          any_change = RepoManager.add_file({:path => file_info[:path]},content,self)
+          any_change = RepoManager.add_file({path: file_info[:path]},content,self)
           any_changes = true if any_change
         end
         if any_changes
@@ -283,7 +284,7 @@ end
       "yaml" => :yaml
     }
 
-    def push_changes_to_repo()
+    def push_changes_to_repo
       commit_sha = RepoManager.push_changes(self)
       set_sha(commit_sha) # returns commit_sha to calling fn
     end
@@ -322,7 +323,7 @@ end
 
     private :push_changes_to_repo
 
-    def default_dsl_format_type()
+    def default_dsl_format_type
       index = (get_type() == :service_module ? :service : :component)
       R8::Config[:dsl][index][:format_type][:default].to_sym
     end
@@ -337,20 +338,20 @@ end
       repo_for_version(base_repo,new_version)
     end
 
-    def repo_for_version(base_repo,version)
+    def repo_for_version(base_repo,_version)
       base_repo #bakes in that different versions share same git repo
     end
 
     def self.get_component_modules_info(module_branch_idhs)
-      ret = Array.new
-      return ret if module_branch_idhs.nil? or module_branch_idhs.empty?
+      ret = []
+      return ret if module_branch_idhs.nil? || module_branch_idhs.empty?
       sp_hash = {
-        :cols => [:component_module_info],
-        :filter => [:oneof,:id,module_branch_idhs.map{|idh|idh.get_id()}]
+        cols: [:component_module_info],
+        filter: [:oneof,:id,module_branch_idhs.map{|idh|idh.get_id()}]
       }
       sample_mb_idh = module_branch_idhs.first
       get_objs(sample_mb_idh.createMH(),sp_hash).map do |r|
-        r[:component_module].merge(:repo => r[:repo])
+        r[:component_module].merge(repo: r[:repo])
       end
     end
 
@@ -359,8 +360,8 @@ end
       cols = [:id,:display_name,:repo,:branch,:group_id]
       cols += added_cols unless added_cols.empty?
       sp_hash = {
-        :cols => cols,
-        :filter => [:and,[:eq, :repo_id, self[:repo_id]],[:eq, :branch, self[:branch]]]
+        cols: cols,
+        filter: [:and,[:eq, :repo_id, self[:repo_id]],[:eq, :branch, self[:branch]]]
       }
       Model.get_obj(model_handle(:implementation),sp_hash)
     end
@@ -370,67 +371,67 @@ end
       cols = [:id,:display_name]
       cols += added_cols unless added_cols.empty?
       sp_hash = {
-        :cols => cols,
-        :filter => [:eq, :id, self[:repo_id]]
+        cols: cols,
+        filter: [:eq, :id, self[:repo_id]]
       }
       Model.get_obj(model_handle(:repo),sp_hash)
     end
 
-    def get_service_module()
-      row = get_obj(:cols => [:service_module])
+    def get_service_module
+      row = get_obj(cols: [:service_module])
       row && row[:service_module]
     end
 
-    def get_assemblies()
-      get_objs(:cols => [:assemblies]).map{|r|r[:component]}
+    def get_assemblies
+      get_objs(cols: [:assemblies]).map{|r|r[:component]}
     end
 
-    def get_module_refs()
+    def get_module_refs
       sp_hash = {
-        :cols => [:id, :display_name, :namespace_info],
-        :filter => [:eq, :branch_id, self[:id]]
+        cols: [:id, :display_name, :namespace_info],
+        filter: [:eq, :branch_id, self[:id]]
       }
       Model.get_objs(model_handle(:module_ref),sp_hash)
     end
 
     def self.get_namespace_info(id_handles)
-      ret = Hash.new
+      ret = {}
       return ret if id_handles.empty?
       sp_hash = {
-        :cols => [:id,:component_module_namespace_info],
-        :filter => [:oneof,:id,id_handles.map{|idh|idh.get_id}]
+        cols: [:id,:component_module_namespace_info],
+        filter: [:oneof,:id,id_handles.map{|idh|idh.get_id}]
       }
       get_objs(id_handles.first.createMH(),sp_hash)
     end
-    def get_namespace_info()
-      get_obj(:cols => [:component_module_namespace_info])
+    def get_namespace_info
+      get_obj(cols: [:component_module_namespace_info])
     end
 
     def self.get_component_workspace_branches(node_idhs)
       sp_hash = {
-    # MOD_RESTRUCT: after get rid of lib branches might use below
-#        :cols => [:id,:display_name,:component_ws_module_branches],
-        :cols => [:id,:display_name,:component_module_branches], #temp which can return lib branches
-        :filter => [:oneof, :id, node_idhs.map{|idh|idh.get_id()}]
+        # MOD_RESTRUCT: after get rid of lib branches might use below
+        #        :cols => [:id,:display_name,:component_ws_module_branches],
+        cols: [:id,:display_name,:component_module_branches], #temp which can return lib branches
+        filter: [:oneof, :id, node_idhs.map{|idh|idh.get_id()}]
       }
       sample_node_idh = node_idhs.first()
       node_rows = get_objs(sample_node_idh.createMH(),sp_hash)
       # get rid of dups
-      node_rows.inject(Hash.new) do |h,r|
+      node_rows.inject({}) do |h,r|
         module_branch = r[:module_branch]
         h[module_branch[:id]] ||= module_branch
         h
       end.values
     end
 
-    def get_ancestor_branch?()
+    def get_ancestor_branch?
       ret = nil
       unless ancestor_branch_id = get_field?(:ancestor_id)
         return ret
       end
       sp_hash = {
-        :cols => self.class.common_columns(),
-        :filter => [:eq,:id,ancestor_branch_id]
+        cols: self.class.common_columns(),
+        filter: [:eq,:id,ancestor_branch_id]
       }
       Model.get_obj(model_handle(),sp_hash)
     end
@@ -446,14 +447,14 @@ if type == 'component'
 end
 
       assigns = {
-        :display_name => branch,
-        :branch       => branch,
-        :repo_id      => repo_idh.get_id(),
-        :is_workspace => true,
-        :type         => local.module_type.to_s,
-        :version      => version_field(local.version)
+        display_name: branch,
+        branch: branch,
+        repo_id: repo_idh.get_id(),
+        is_workspace: true,
+        type: local.module_type.to_s,
+        version: version_field(local.version)
       }
-      assigns.merge!(:ancestor_id => ancestor_branch_idh.get_id()) if ancestor_branch_idh
+      assigns.merge!(ancestor_id: ancestor_branch_idh.get_id()) if ancestor_branch_idh
       ref = branch
       {ref => assigns}
     end
@@ -463,27 +464,27 @@ end
       ancestor_branch_idh = opts[:ancestor_branch_idh]
       branch =  workspace_branch_name(project,version)
       assigns = {
-        :display_name => branch,
-        :branch => branch,
-        :repo_id => repo_idh.get_id(),
-        :is_workspace => true,
-        :type => type,
-        :version => version_field(version)
+        display_name: branch,
+        branch: branch,
+        repo_id: repo_idh.get_id(),
+        is_workspace: true,
+        type: type,
+        version: version_field(version)
       }
-      assigns.merge!(:ancestor_id => ancestor_branch_idh.get_id()) if ancestor_branch_idh
+      assigns.merge!(ancestor_id: ancestor_branch_idh.get_id()) if ancestor_branch_idh
       ref = branch
       {ref => assigns}
     end
 
     # TODO: clean up; complication is that an augmented branch can be passed
-    def repo_and_branch()
+    def repo_and_branch
       repo = self[:repo]
       cols = (self[:repo] ? [:branch] : [:branch,:repo_id])
       update_object!(*cols)
       unless repo
         sp_hash = {
-          :cols => [:id,:display_name, :repo_name],
-          :filter => [:eq,:id,self[:repo_id]]
+          cols: [:id,:display_name, :repo_name],
+          filter: [:eq,:id,self[:repo_id]]
         }
         repo = Model.get_obj(model_handle(:repo),sp_hash)
       end

@@ -16,12 +16,12 @@ os = 'precise'
 memory_size = 't1.micro'
 node_name = 'node1'
 
-node_param_list = Array.new
+node_param_list = []
 node_param_list << 'dns_name'
 node_param_list << 'ec2_public_address'
 node_param_list << 'private_dns_name'
 
-attr_param_list = Array.new
+attr_param_list = []
 attr_param_list << 'memory_size'
 attr_param_list << 'os_identifier'
 
@@ -30,7 +30,7 @@ dtk_common = DtkCommon.new(service_name, assembly_name)
 def check_param_existance_on_node(dtk_common, node_name, param_name_list)
 	param_check = true
 	service_id = dtk_common.service_id
-	service_nodes = dtk_common.send_request('/rest/assembly/info_about', {:assembly_id=>service_id, :filter=>nil, :about=>'nodes', :subtype=>'instance'})
+	service_nodes = dtk_common.send_request('/rest/assembly/info_about', assembly_id: service_id, filter: nil, about: 'nodes', subtype: 'instance')
 
 	content = service_nodes['data'].select { |x| x['display_name'] == node_name }
 	ap content
@@ -40,7 +40,7 @@ def check_param_existance_on_node(dtk_common, node_name, param_name_list)
  			if (content.first['external_ref'].include? param_name_to_check)
 				puts "Parameter with name #{param_name_to_check} exists"
 				param_check = true
-			else
+			 else
 				puts "Parameter with name #{param_name_to_check} does not exist"
 				param_check = false
 				break
@@ -57,7 +57,7 @@ end
 def check_param_existance_on_attribute(dtk_common, node_name, param_name_list)
 	param_check = true
 	service_id = dtk_common.service_id
-	service_attributes = dtk_common.send_request('/rest/assembly/info_about', {:assembly_id=>service_id, :filter=>nil, :about=>'attributes', :subtype=>'instance'})
+	service_attributes = dtk_common.send_request('/rest/assembly/info_about', assembly_id: service_id, filter: nil, about: 'attributes', subtype: 'instance')
 
 	param_name_list.each do |param_name_to_check|
 		content = service_attributes['data'].select { |x| x['display_name'].include? "#{node_name}/#{param_name_to_check}" }
@@ -65,7 +65,7 @@ def check_param_existance_on_attribute(dtk_common, node_name, param_name_list)
  		if (!content.empty?)
 			puts "Parameter with name #{param_name_to_check} exists"
 			param_check = true
-		else
+		 else
 			puts "Parameter with name #{param_name_to_check} does not exist"
 			param_check = false
 			break
@@ -76,7 +76,6 @@ def check_param_existance_on_attribute(dtk_common, node_name, param_name_list)
 end
 
 describe "(Use Of Parameters) Test Case 6: Check possibility to query list of nodes/components/attributes of particular service" do
-
 	before(:all) do
 		puts "*********************************************************************************************************************",""
 	end

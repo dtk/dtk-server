@@ -24,7 +24,6 @@ file_for_change = "dtk.model.yaml"
 dtk_common = DtkCommon.new(service_name, assembly_name)
 
 describe "(Component Module DSL) Test Case 5: Rename existing component attribute in dtk.model.yaml file, push-clone-changes to server and check if component attribute present" do
-
   before(:all) do
     puts "*********************************************************************************************************************************************************************",""
   end

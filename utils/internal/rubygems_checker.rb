@@ -1,6 +1,5 @@
 module DTK
   class RubyGemsChecker
-
     def self.gem_exists?(name, version)
       begin
         response_raw = Common::Response::RestClientWrapper.get_raw "http://rubygems.org/api/v1/versions/#{name}.json"
@@ -12,6 +11,5 @@ module DTK
         return false
       end
     end
-
   end
 end

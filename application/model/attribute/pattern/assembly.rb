@@ -14,13 +14,13 @@ module DTK; class Attribute
           case format
             when :simple then Simple
             when :canonical_form then CanonicalForm
-          else raise Error.new("Unexpected format (#{format})")
+            else raise Error.new("Unexpected format (#{format})")
           end
         klass.create(attr_term,opts)
       end
 
       class Simple
-        def self.create(attr_term,opts={})
+        def self.create(attr_term,_opts={})
           tokens = attr_term.split("/")
           case tokens.size          
             when 1 
@@ -36,14 +36,16 @@ module DTK; class Attribute
               Type::ComponentLevel.new("#{t(:node,node_part)}/#{t(:component,cmp_part)}/#{t(:attribute,attr_part)}")
           end
         end
-       private 
+
+        private
+ 
         def self.t(type,term)
           Pattern::Term.canonical_form(type,term)
         end
       end
 
       class CanonicalForm
-        def self.create(attr_term,opts={})
+        def self.create(attr_term,_opts={})
           # can be an assembly, node or component level attribute
           if attr_term =~ /^attribute/
             Type::AssemblyLevel.new(attr_term)

@@ -29,7 +29,6 @@ dtk_common = DtkCommon.new(service_name, assembly_name)
 dtk_common2 = DtkCommon.new(new_service_name, "#{service_module_name}::#{new_assembly}")
 
 describe "(Staging And Deploying Assemblies) Test Case 13: Ability to create assembly with components on assembly level and then converge it" do
-
 	before(:all) do
 		puts "**********************************************************************************************************************************",""
   end

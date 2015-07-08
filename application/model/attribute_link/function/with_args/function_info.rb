@@ -14,9 +14,9 @@ module DTK; class AttributeLink
         ret
       end
       def self.create?(function_def)
-        if function_def.kind_of?(Hash) and function_def.has_key?(:function)
+        if function_def.is_a?(Hash) && function_def.key?(:function)
           fn_info_hash = function_def[:function]
-          unless fn_info_hash and fn_info_hash.has_key?(:name)
+          unless fn_info_hash && fn_info_hash.key?(:name)
             raise(Error.new("Function def has illegal form: #{function_def.inspect}"))
           end
           new(fn_info_hash[:name],fn_info_hash[:constants]||{})
@@ -28,8 +28,9 @@ module DTK; class AttributeLink
           super()
           replace(hash)
         end
+
         def [](k)
-          unless has_key?(k)
+          unless key?(k)
             raise Error.new("New constant (#{k}) found")
           end
           super

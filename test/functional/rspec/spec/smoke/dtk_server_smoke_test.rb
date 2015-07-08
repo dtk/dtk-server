@@ -11,7 +11,6 @@ require './lib/assembly_and_service_operations_spec'
 require './lib/parameters_setting_spec'
 require './lib/component_modules_spec'
 
-
 service_name = 'smoke_test_instance'
 assembly_name = 'bootstrap::node_with_params'
 os_templates = ['precise','rhel6']
@@ -27,7 +26,6 @@ component_module_filesystem_location = "~/dtk/component_modules/dtk17"
 dtk_common = DtkCommon.new(service_name, assembly_name)
 
 describe "DTK Server smoke test" do
-
   before(:all) do
     puts "*********************",""
   end

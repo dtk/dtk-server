@@ -1,7 +1,7 @@
 require 'rubygems'
 require 'ramaze'
 require 'eventmachine'
-Queues = Hash.new
+Queues = {}
 
 class DeferrableBody
   include EventMachine::Deferrable
@@ -50,4 +50,4 @@ class MyController < Ramaze::Controller
 end
 
 Ramaze::Log.level = Logger::WARN
-Ramaze.start(:adapter => :thin, :port => 3000, :file => __FILE__)
+Ramaze.start(adapter: :thin, port: 3000, file: __FILE__)

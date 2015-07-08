@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # general initial
 require File.expand_path('common', File.dirname(__FILE__))
-options = Hash.new
+options = {}
 OptionParser.new do|opts|
    opts.banner = "Usage: create_new_target.rb USER-NAME TARGET-NAME"
 end.parse!

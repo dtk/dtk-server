@@ -24,7 +24,6 @@ local_component_module_filesystem_location = "~/dtk/component_modules/local"
 dtk_common = DtkCommon.new('', '')
 
 describe "(Modules, Services and Versioning) Test Case 32: Set default namespace, do import and import-git, revert back to original namespace and do import, import-git again" do
-
   before(:all) do
     puts "*******************************************************************************************************************************************************************",""
   end

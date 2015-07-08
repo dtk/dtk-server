@@ -7,13 +7,12 @@ require 'awesome_print'
 STDOUT.sync = true
 
 class Tenant
-
   attr_accessor :ENDPOINT, :tenant, :error_message
 
   $opts = {
-    :timeout => 100,
-    :open_timeout => 50,
-    :cookies => {}
+    timeout: 100,
+    open_timeout: 50,
+    cookies: {}
   }
 
   def initialize(server, port, username, password, tenant_number)
@@ -58,19 +57,19 @@ class Tenant
     puts "Stage assembly:", "---------------"
     assembly_id = nil
     extract_id_regex = /id: (\d+)/
-    assembly_template_list = send_request('/rest/assembly/list', {:subtype=>'template'})
+    assembly_template_list = send_request('/rest/assembly/list', subtype: 'template')
  
     puts "List of avaliable assembly templates: "
     pretty_print_JSON(assembly_template_list)
 
-    test_template = assembly_template_list['data'].select { |x| x['display_name'] == assembly_template }.first
+    test_template = assembly_template_list['data'].find { |x| x['display_name'] == assembly_template }
 
     if (!test_template.nil?)
       puts "Assembly template #{assembly_template} found!"
       template_assembly_id = test_template['id']
       puts "Assembly template id: #{template_assembly_id}"
 
-      stage_assembly_response = send_request('/rest/assembly/stage', {:assembly_id=>template_assembly_id, :name=>assembly_name}) 
+      stage_assembly_response = send_request('/rest/assembly/stage', assembly_id: template_assembly_id, name: assembly_name) 
 
       pretty_print_JSON(stage_assembly_response)
 
@@ -92,12 +91,12 @@ class Tenant
   def add_component_to_assembly_node(assembly_id, node_name, component_name)
     puts "Add component to assembly node:", "-------------------------------"
     component_added = false
-    assembly_nodes = send_request('/rest/assembly/info_about', {:assembly_id=>assembly_id, :filter=>nil, :about=>'nodes', :subtype=>'instance'})
+    assembly_nodes = send_request('/rest/assembly/info_about', assembly_id: assembly_id, filter: nil, about: 'nodes', subtype: 'instance')
 
-    if (assembly_nodes['data'].select { |x| x['display_name'] == node_name }.first)
+    if (assembly_nodes['data'].find { |x| x['display_name'] == node_name })
       puts "Node #{node_name} exists in assembly. Get node id..."
-      node_id = assembly_nodes['data'].select { |x| x['display_name'] == node_name }.first['id']
-      component_add_response = send_request('/rest/assembly/add_component', {:node_id=>node_id, :component_template_id=>component_name, :assembly_id=>assembly_id})
+      node_id = assembly_nodes['data'].find { |x| x['display_name'] == node_name }['id']
+      component_add_response = send_request('/rest/assembly/add_component', node_id: node_id, component_template_id: component_name, assembly_id: assembly_id)
 
       if (component_add_response['status'] == 'ok')
         puts "Component #{component_name} added to assembly!"
@@ -114,12 +113,12 @@ class Tenant
     is_attributes_set = false
 
     # Get attribute id for which value will be set
-    assembly_attributes = send_request('/rest/assembly/info_about', {:about=>'attributes', :filter=>nil, :subtype=>'instance', :assembly_id=>assembly_id})
+    assembly_attributes = send_request('/rest/assembly/info_about', about: 'attributes', filter: nil, subtype: 'instance', assembly_id: assembly_id)
     pretty_print_JSON(assembly_attributes)
-    attribute_id = assembly_attributes['data'].select { |x| x['display_name'].include? attribute_name }.first['id']
+    attribute_id = assembly_attributes['data'].find { |x| x['display_name'].include? attribute_name }['id']
 
     # Set attribute value for given attribute id
-    set_attribute_value_response = send_request('/rest/assembly/set_attributes', {:assembly_id=>assembly_id, :value=>attribute_value, :pattern=>attribute_id})
+    set_attribute_value_response = send_request('/rest/assembly/set_attributes', assembly_id: assembly_id, value: attribute_value, pattern: attribute_id)
 
     if (set_attribute_value_response['status'] == 'ok')
       puts "Setting of #{attribute_name} attribute completed successfully!"
@@ -133,12 +132,12 @@ class Tenant
     puts "Converge assembly:", "------------------"
     assembly_converged = false
     puts "Converge process for assembly with id #{assembly_id} started!"
-    create_task_response = send_request('/rest/assembly/create_task', {'assembly_id' => assembly_id})
+    create_task_response = send_request('/rest/assembly/create_task', 'assembly_id' => assembly_id)
 
     if (create_task_response['status'].include? "ok")
       task_id = create_task_response['data']['task_id']
       puts "Task id: #{task_id}"
-      task_execute_response = send_request('/rest/task/execute', {'task_id' => task_id})
+      task_execute_response = send_request('/rest/task/execute', 'task_id' => task_id)
       end_loop = false
       count = 0
       max_num_of_retries = 30
@@ -149,7 +148,7 @@ class Tenant
         count += 1
         response_task_status = send_request('/rest/task/status', {'task_id'=> task_id})
         status = response_task_status['data']['status'] 
-        error_msg = response_task_status['data']['subtasks'].select { |x| x['type'].include? "configure_nodes"}.first['subtasks']
+        error_msg = response_task_status['data']['subtasks'].find { |x| x['type'].include? "configure_nodes"}['subtasks']
 
         if (status.include? 'succeeded')
           task_status = status
@@ -197,7 +196,6 @@ tenant_deploy = Tenant.new(host, port.to_i, user, pass, tenant)
 
 # Stage tenant assembly
 assembly_id = tenant_deploy.stage_assembly('dtk::tenant',"dtk#{tenant_deploy.tenant}tenant")
-
 
 # Add needed component and set attributes
 set_attributes_array = []

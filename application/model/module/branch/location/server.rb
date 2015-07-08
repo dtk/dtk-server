@@ -22,13 +22,13 @@ module DTK; class ModuleBranch
             end
         end
 
-       private
+        private
 
-        def ret_branch_name()
+        def ret_branch_name
           self.class.ret_branch_name(@project,version())
         end
 
-        def ret_private_user_repo_name()
+        def ret_private_user_repo_name
           username = CurrentSession.new.get_username()
           namespace_name = module_namespace_name() || Namespace.default_namespace_name
           Local.private_user_repo_name(username, @component_type, module_name(), namespace_name)
@@ -38,11 +38,11 @@ module DTK; class ModuleBranch
 
         def self.ret_branch_name(project,version)
           user_prefix = "workspace-#{project.get_field?(:ref)}"
-          if version.kind_of?(ModuleVersion::AssemblyModule)
+          if version.is_a?(ModuleVersion::AssemblyModule)
             assembly_suffix = "--assembly-#{version.assembly_name}"
             "#{user_prefix}#{assembly_suffix}"
           else
-            version_suffix = ((version and version != VersionFieldDefault)?  "-v#{version}" : "")
+            version_suffix = ((version && version != VersionFieldDefault)?  "-v#{version}" : "")
             "#{user_prefix}#{version_suffix}"
           end
         end

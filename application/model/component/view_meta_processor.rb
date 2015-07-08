@@ -18,9 +18,9 @@ module XYZ
 
       def self.field_groups(layout_def)
         (layout_def[:groups]||[]).map do |group|
-          {:num_cols => 1,
-            :display_labels => true,
-            :fields => group[:fields].map {|r|{r[:name].to_sym => r}}
+          {num_cols: 1,
+            display_labels: true,
+            fields: group[:fields].map {|r|{r[:name].to_sym => r}}
           }
         end
       end
@@ -31,61 +31,57 @@ module XYZ
         end
       end
       HiddenFields = {
-        :list =>
-        [
-         {:id => {
-             :required => true,
-             :type => 'hidden',
+        list:         [
+         {id: {
+             required: true,
+             type: 'hidden',
            }}
         ],
-        :edit => 
-        [
+        edit:         [
          {
-           :id => {
-             :required => true,
-             :type => 'hidden',
+           id: {
+             required: true,
+             type: 'hidden',
            }
          },
          {
-           :model => {
-             :required => true,
-             :type => 'hidden',
-             :value => 'component',
+           model: {
+             required: true,
+             type: 'hidden',
+             value: 'component',
            }
          },
          {
-           :action => {
-             :required => true,
-             :type => 'hidden',
-             :value => 'save_attribute'
+           action: {
+             required: true,
+             type: 'hidden',
+             value: 'save_attribute'
            },
          }
         ],
-        :display => 
-        [
+        display:         [
          {
-           :id => {
-             :required => true,
-             :type => 'hidden',
+           id: {
+             required: true,
+             type: 'hidden',
            }
          },
          {
-           :obj => {
-             :required => true,
-             :type => 'hidden',
-             :value => 'component',
+           obj: {
+             required: true,
+             type: 'hidden',
+             value: 'component',
            }
          },
          {
-           :action => {
-             :required => true,
-             :type => 'hidden',
-             :value => 'edit',
+           action: {
+             required: true,
+             type: 'hidden',
+             value: 'edit',
            },
          }
         ]
       }
-
     end
   end
 end

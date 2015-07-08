@@ -29,7 +29,7 @@ module DTK; module ModuleMixins
       remote = remote_params.create_remote(project)
 
       remote_repo_handler = Repo::Remote.new(remote)
-      remote_repo_info = remote_repo_handler.get_remote_module_info?(client_rsa_pub_key, :raise_error=>true)
+      remote_repo_info = remote_repo_handler.get_remote_module_info?(client_rsa_pub_key, raise_error: true)
       remote.set_repo_name!(remote_repo_info[:git_repo_name])
 
       # so they are defined outside Transaction scope
@@ -49,8 +49,8 @@ module DTK; module ModuleMixins
           # create empty repo on local repo manager;
           # need to make sure that tests above indicate whether module exists already since using :delete_if_exists
           create_opts = {
-            :donot_create_master_branch => true,
-            :delete_if_exists => true
+            donot_create_master_branch: true,
+            delete_if_exists: true
             }
           repo_user_acls = RepoUser.authorized_users_acls(project.id_handle())
           repo_with_branch = Repo::WithBranch.create_workspace_repo(project.id_handle(),local,repo_user_acls,create_opts)
@@ -64,14 +64,14 @@ module DTK; module ModuleMixins
         module_obj ||= module_and_branch_info[:module_idh].create_object()
         module_branch = module_and_branch_info[:module_branch_idh].create_object()
 
-        opts_process_dsl = {:do_not_raise => true}
+        opts_process_dsl = {do_not_raise: true}
         if module_type == :component_module
-          opts_process_dsl.merge!(:set_external_refs => true)
+          opts_process_dsl.merge!(set_external_refs: true)
         end
         non_nil_if_parsing_error = module_obj.install__process_dsl(repo_with_branch,module_branch,local,opts_process_dsl)
         module_branch.set_sha(commit_sha)
       end
-      opts_info = {:version=>version, :module_namespace=>local_namespace}
+      opts_info = {version: version, module_namespace: local_namespace}
       response = module_repo_info(repo_with_branch,module_and_branch_info,opts_info)
 
       if ErrorUsage::Parsing.is_error?(non_nil_if_parsing_error)
@@ -106,13 +106,13 @@ module DTK; module ModuleMixins
       nil
     end
 
-    def list_remotes(model_handle, rsa_pub_key = nil)
+    def list_remotes(_model_handle, rsa_pub_key = nil)
       Repo::Remote.new.list_module_info(module_type(), rsa_pub_key)
     end
 
     def create_repo_remote_object(repo,remote,remote_repo_name)
       repo_remote_mh = repo.model_handle(:repo_remote)
-      opts = Opts.new(:set_as_default_if_first => true)
+      opts = Opts.new(set_as_default_if_first: true)
       RepoRemote.create_repo_remote(repo_remote_mh, remote.module_name, remote_repo_name, remote.namespace, repo.id,opts)
     end
   end
@@ -144,26 +144,24 @@ module DTK; module ModuleMixins
 
     def get_custom_git_remote_module_info(default_remote)
       Info.new().merge(
-        :module_name => self.module_name,
-        :full_module_name => self.full_module_name,
+        module_name: self.module_name,
+        full_module_name: self.full_module_name,
         # TODO: will change this key to :remote_ref when upstream uses this
-        :remote_repo => default_remote.remote_ref,
-        :remote_repo_url => default_remote.git_remote_url(),
-        :remote_branch => 'master',
-        :dependency_warnings => []
+        remote_repo: default_remote.remote_ref,
+        remote_repo_url: default_remote.git_remote_url(),
+        remote_branch: 'master',
+        dependency_warnings: []
       )
     end
 
     # raises an access rights usage error if user does not have access to the remote module
-    def get_linked_remote_module_info(project,action,remote_params,client_rsa_pub_key,access_rights,module_refs_content=nil)
+    def get_linked_remote_module_info(project,action,remote_params,client_rsa_pub_key,_access_rights,module_refs_content=nil)
       remote = remote_params.create_remote(project)
 
       repo_remote_handler = Repo::Remote.new(remote)
       remote_module_info = repo_remote_handler.get_remote_module_info?(
-        client_rsa_pub_key, {
-          :raise_error => true,
-          :module_refs_content => module_refs_content
-        })
+        client_rsa_pub_key,           raise_error: true,
+          module_refs_content: module_refs_content)
 
       # we also check if user has required permissions
       # TODO: [Haris] We ignore access rights and force them on calls, this will need ot be refactored since it is security risk
@@ -182,17 +180,17 @@ module DTK; module ModuleMixins
       end
 
       ret = Info.new().merge(
-          :module_name => remote.module_name,
-          :full_module_name => self.full_module_name,
+          module_name: remote.module_name,
+          full_module_name: self.full_module_name,
           # TODO: will change this key to :remote_ref when upstream uses this
-          :remote_repo => remote.remote_ref,
-          :remote_repo_url => remote_module_info[:remote_repo_url],
-          :remote_branch => remote.branch_name,
-          :dependency_warnings => remote_module_info[:dependency_warnings]
+          remote_repo: remote.remote_ref,
+          remote_repo_url: remote_module_info[:remote_repo_url],
+          remote_branch: remote.branch_name,
+          dependency_warnings: remote_module_info[:dependency_warnings]
       )
 
       if version = remote.version
-        ret.merge!(:version => version)
+        ret.merge!(version: version)
       end
 
       ret
@@ -229,10 +227,11 @@ module DTK; module ModuleMixins
       repo.push_to_remote(local,remote)
 
       self.class.create_repo_remote_object(repo,remote,remote_repo_name)
-      repoman_response.merge(:remote_repo_name => remote[:module_name])
+      repoman_response.merge(remote_repo_name: remote[:module_name])
     end
 
-   private
+    private
+
     def raise_error_when_not_properly_linked(action,remote)
       if action == :push
         raise ErrorUsage.new("Cannot push module (#{module_name()}) to remote namespace (#{remote.namespace}) because it is currently not linked to it")
@@ -241,6 +240,5 @@ module DTK; module ModuleMixins
       end
     end
   end
-
 end; end
 

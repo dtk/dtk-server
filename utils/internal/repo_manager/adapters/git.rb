@@ -21,10 +21,10 @@ module DTK
           raise Error.new("trying to create a repo (#{repo_name}) that exists already on r8 server")
         end
       end
-      local_repo = create_without_branch(local_repo_dir,:absolute_path => true, :repo_does_not_exist => true)
+      local_repo = create_without_branch(local_repo_dir,absolute_path: true, repo_does_not_exist: true)
       local_repo.create_local_repo(repo_name,opts)
       if create_branch = opts[:create_branch]
-        opts_add_branch = {:empty=>true}.merge(Aux.hash_subset(opts,[:copy_files]))
+        opts_add_branch = {empty: true}.merge(Aux.hash_subset(opts,[:copy_files]))
         if opts[:push_created_branch]
           local_repo.add_branch_and_push?(create_branch,opts_add_branch)
         else
@@ -57,11 +57,11 @@ module DTK
       end
     end
 
-    def self.repo_server_dns()
+    def self.repo_server_dns
       @git_dns ||= R8::Config[:repo][:git][:dns]
     end
 
-    def self.repo_server_ssh_rsa_fingerprint()
+    def self.repo_server_ssh_rsa_fingerprint
       return @ssh_rsa_fingerprint if @ssh_rsa_fingerprint
       unless R8::Config[:git_server_on_dtk_server]
         raise Error.new("Not implemented yet: repo_server_fingerprint when R8::Config[:git_server_on_dtk_server] is not true")
@@ -78,7 +78,6 @@ module DTK
       !git_object.native('ls-remote',{},remote_url).empty?
     end
 
-
     def self.repo_url(repo_name=nil)
       @git_url ||= "#{R8::Config[:repo][:git][:server_username]}@#{repo_server_dns()}"
       if repo_name
@@ -87,7 +86,7 @@ module DTK
         @git_url
       end
     end
-    def repo_url()
+    def repo_url
       @git_url ||= self.class.repo_url()
     end
 
@@ -102,11 +101,11 @@ module DTK
 
     def ls_r(depth=nil,opts={})
       checkout(@branch) do
-        if depth.nil? or (depth.kind_of?(String) and depth == '*')
+        if depth.nil? || (depth.is_a?(String) && depth == '*')
           all_paths = Dir["**/*"]
         else
           pattern = "*"
-          all_paths = Array.new
+          all_paths = []
           depth.times do
             all_paths += Dir[pattern]
             pattern = "#{pattern}/*"
@@ -151,7 +150,7 @@ module DTK
 
     def add_file(file_asset,content,commit_msg=nil)
       ret = false
-      content ||= String.new
+      content ||= ''
       checkout(@branch) do
         path = file_asset[:path]
         recursive_create_dir?(path)
@@ -171,23 +170,28 @@ module DTK
     def delete_file?(file_path,opts={})
        delete_tree?(:file,file_path,opts)
     end
+
     def delete_file(file_path,opts={})
       delete_tree(:file,file_path,opts)
     end
+
     def delete_directory?(dir,opts={})
        delete_tree?(:directory,dir,opts)
     end
+
     def delete_directory(dir,opts={})
       delete_tree(:directory,dir,opts)
     end
+
     def delete_tree?(type,tree_path,opts={})
       ret = nil
       checkout(@branch) do
         ret = File.exists?(full_path(tree_path))
-        delete_tree(type,tree_path,opts.merge(:no_checkout=>true)) if ret
+        delete_tree(type,tree_path,opts.merge(no_checkout: true)) if ret
       end
       ret
     end
+
     def delete_tree(type,path,opts={})
       if opts[:no_checkout]
         delete_tree__body(type,path,opts)
@@ -197,6 +201,7 @@ module DTK
         end
       end
     end
+
     def delete_tree__body(type,path,opts={})
       message = "Deleting #{path} in #{@branch}"
       case type
@@ -224,7 +229,7 @@ module DTK
     def diff(other_branch)
       grit_diffs = @grit_repo.diff(@branch,other_branch)
       array_diff_hashes = grit_diffs.map do |diff|
-        DiffAttributes.inject(Hash.new) do |h,a|
+        DiffAttributes.inject({}) do |h,a|
           val = diff.send(a)
           val ?  h.merge(a => val) : h
         end
@@ -256,7 +261,7 @@ module DTK
     def fast_foward_pull(remote_branch, force = false, remote_name = nil)
       remote_name ||= default_remote_name()
       remote_ref = "#{remote_name}/#{remote_branch}"
-      merge_rel = ret_merge_relationship(:remote_branch,remote_ref,:fetch_if_needed => true)
+      merge_rel = ret_merge_relationship(:remote_branch,remote_ref,fetch_if_needed: true)
       ret =
         case merge_rel
          when :equal then :no_change
@@ -302,11 +307,11 @@ module DTK
     def hard_reset_to_branch(branch_to_reset_from)
       checkout(@branch) do
         git_command__hard_reset(branch_to_reset_from)
-        push_changes(:force=>true)
+        push_changes(force: true)
       end
     end
 
-    def initial_sync_with_remote_repo(remote_name,remote_url,remote_branch,opts={})
+    def initial_sync_with_remote_repo(remote_name,remote_url,remote_branch,_opts={})
       add_remote?(remote_name,remote_url)
 
       # create branch with history from remote and not merge
@@ -355,14 +360,14 @@ module DTK
       ret_config_keys().include?("remote.#{remote_name}.url")
     end
 
-    def branch_head_sha()
+    def branch_head_sha
       @grit_repo.commit(@branch).id
     end
 
     # returns :equal, :local_behind, :local_ahead, or :branchpoint
     # type can be :remote_branch or :local_branch
     def ret_merge_relationship(type,ref,opts={})
-      if (type == :remote_branch and opts[:fetch_if_needed])
+      if (type == :remote_branch && opts[:fetch_if_needed])
         # TODO: this fetches all branches on the remote; see if anyway to just fetch a specfic branch
         # ref will be of form remote_name/branch
         git_command__fetch(ref.split("/").first)
@@ -428,8 +433,8 @@ module DTK
       get_diffs(remote_sha, local_sha)
     end
 
-    def get_local_branches_diffs(repo_name, module_branch, base_branch, workspace_branch)
-      base_sha  = sha_matching_branch_name(:remote,"origin/#{base_branch.to_s}")
+    def get_local_branches_diffs(_repo_name, _module_branch, base_branch, workspace_branch)
+      base_sha  = sha_matching_branch_name(:remote,"origin/#{base_branch}")
       local_sha = sha_matching_branch_name(:local,workspace_branch)
       get_diffs(base_sha, local_sha)
     end
@@ -451,11 +456,11 @@ module DTK
       end
     end
 
-    def fetch_all()
+    def fetch_all
       git_command__fetch_all()
     end
 
-    def push_implementation()
+    def push_implementation
       git_command__push(@branch)
     end
 
@@ -475,12 +480,13 @@ module DTK
     def add_branch?(new_branch,opts={})
       unless get_branches().include?(new_branch)
         # if :copy_files; do it here and not in add_branch
-        add_branch(new_branch,opts.merge(:copy_files=>nil))
+        add_branch(new_branch,opts.merge(copy_files: nil))
       end
       if copy_files_info = opts[:copy_files]
         copy_and_add_all_files(new_branch,copy_files_info)
       end
     end
+
     def add_branch(new_branch,opts={})
       if opts[:empty]
         git_command__create_empty_branch(new_branch)
@@ -517,13 +523,14 @@ module DTK
         end
       end
     end
+
     def delete_branch_aux(remote_name=nil)
       git_command__delete_local_branch?(@branch)
       git_command__delete_remote_branch?(@branch,remote_name)
     end
     private :delete_branch_aux
 
-    def get_branches()
+    def get_branches
       @grit_repo.branches.map{|b|b.name}
     end
 
@@ -532,7 +539,7 @@ module DTK
       Grit::Repo.new(path).branches.map{|b|b.name}
     end
 
-    def ret_config_keys()
+    def ret_config_keys
       ::Grit::Config.new(@grit_repo).keys
     end
 
@@ -544,7 +551,8 @@ module DTK
       ::Grit::Config.new(@grit_repo)[key] = value
     end
 
-   private
+    private
+
     attr_reader :grit_repo
     def initialize(path,branch,opts={})
       @branch = branch
@@ -554,7 +562,7 @@ module DTK
       end
     end
 
-    def current_branch()
+    def current_branch
       @grit_repo.head && @grit_repo.head.name
     end
 
@@ -578,7 +586,7 @@ module DTK
       refs.find{|r|r.name == branch_name}
     end
 
-    MutexesForRepos = Hash.new
+    MutexesForRepos = {}
 
     def checkout(branch_name, &block)
       ret = nil
@@ -599,7 +607,7 @@ module DTK
       ret
     end
 
-    def git_command__empty_commit()
+    def git_command__empty_commit
       commit("initial empty commit","--allow-empty")
     end
 
@@ -610,7 +618,7 @@ module DTK
       end
     end
 
-    def default_remote_name()
+    def default_remote_name
       "origin"
     end
 
@@ -623,10 +631,11 @@ module DTK
       set_config_key_value('user.email',email)
     end
 
-    def default_author_name()
+    def default_author_name
       @default_author_name ||= Common::Aux.running_process_user()
     end
-    def default_author_email()
+
+    def default_author_email
       "#{default_author_name()}@reactor8.com"
     end
 
@@ -640,7 +649,7 @@ module DTK
       ref_matching_branch_name?(:remote,qualified_branch_name) ? true : nil
     end
 
-    def git_command()
+    def git_command
       # TODO: not sure why this does not work:
       # GitCommand.new(@grit_repo ? @grit_repo.git : Grit::Git.new(""))
       # only thing losing with below is visbility into failure on clone commands (where @grit_repo.nil? is true)
@@ -658,12 +667,13 @@ module DTK
       def initialize(grit_git)
         @grit_git=grit_git
       end
+
       def method_missing(name,*args,&block)
         begin
           @grit_git.send(name,*args,&block)
         rescue ::Grit::Git::CommandFailed => e
           # e.err empty is being interpretad as no error
-          if e.err.nil? or e.err.empty?
+          if e.err.nil? || e.err.empty?
             Log.info("Grit non zero exit status #{e.exitstatus} but grit err field is empty for command='#{e.command}'")
           else
             # write more info to server log, but to client return user friendly message
@@ -675,6 +685,7 @@ module DTK
           raise e
         end
       end
+
       def respond_to?(name)
         !!(@grit_git.respond_to?(name) || super)
       end
@@ -686,30 +697,37 @@ module DTK
   end
 
   class RepomanagerGitLinux < RepoManagerGit
-   private
+    private
+
     def git_command__clone(remote_repo,local_dir)
       git_command.clone(cmd_opts(),remote_repo,local_dir)
     end
+
     def git_command__checkout(branch_name)
       git_command.checkout(cmd_opts(),branch_name)
     end
+
     def git_command__add_branch(branch_name)
       git_command.branch(cmd_opts(),branch_name)
     end
+
     def git_command__create_empty_branch(branch_name)
       git_command.symbolic_ref(cmd_opts(),"HEAD","refs/heads/#{branch_name}")
     end
+
     def git_command__add(file_path)
       # put in -f to avoid error being thrown if try to add an ignored file
       git_command.add(cmd_opts(),file_path,"-f")
       # took out because could not pass in time out @grit_repo.add(file_path)
     end
+
     def git_command__rm(file_path)
       # git_command.rm uses form /usr/bin/git --git-dir=.. rm <file>; which does not delete the working directory file, so
       # need to use os comamdn to dleet file and just delete the file from the index
       git_command.rm(cmd_opts(),"--cached",file_path)
       FileUtils.rm_f full_path(file_path)
     end
+
     def git_command__rm_r(dir)
       git_command.rm(cmd_opts(),"-r","--cached",dir)
       FileUtils.rm_rf full_path(dir)
@@ -740,7 +758,8 @@ module DTK
     def git_command__fetch(remote_name)
       git_command.fetch(cmd_opts(),remote_name)
     end
-    def git_command__fetch_all()
+
+    def git_command__fetch_all
       git_command.fetch(cmd_opts(),"--all")
     end
 
@@ -793,11 +812,13 @@ module DTK
     def git_command__create_local_branch(branch_name)
       git_command.branch(cmd_opts(),branch_name)
     end
+
     def git_command__delete_local_branch?(branch_name)
       if get_branches().include?(branch_name)
         git_command__delete_local_branch(branch_name)
       end
     end
+
     def git_command__delete_local_branch(branch_name)
       git_command.branch(cmd_opts(),"-D",branch_name)
     end
@@ -807,12 +828,14 @@ module DTK
         git_command__delete_remote_branch(branch_name,remote_name)
       end
     end
+
     def git_command__delete_remote_branch(branch_name,remote_name)
       remote_name ||= default_remote_name()
       git_command.push(cmd_opts(),remote_name,":refs/heads/#{branch_name}")
     end
-    def cmd_opts()
-      {:raise => true, :timeout => 60}
+
+    def cmd_opts
+      {raise: true, timeout: 60}
     end
   end
 end

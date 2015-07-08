@@ -1,19 +1,18 @@
 module DTK
   class AccountController < AuthController
-
     PUB_KEY_NAME_REGEX = /[a-zA-Z0-9_\-]*/
 
-  	def rest__set_password()
+  	def rest__set_password
       password = ret_non_null_request_params(:new_password)
       user = CurrentSession.new.get_user_object()
 
       rest_ok_response user.update_password(password)
     end
 
-    def rest__list_ssh_keys()
+    def rest__list_ssh_keys
       username = ret_non_null_request_params(:username)
       model_handle = model_handle_with_private_group()
-      rest_ok_response RepoUser.get_matching_repo_users(model_handle.createMH(:repo_user), {:type => 'client'}, username, ["username"])
+      rest_ok_response RepoUser.get_matching_repo_users(model_handle.createMH(:repo_user), {type: 'client'}, username, ["username"])
     end
 
     # we use this method to add user access to modules / servier / repo manager
@@ -74,22 +73,22 @@ module DTK
       matched_repo_user = repo_user_service || repo_user_module
 
       # set a flag in database if this user has been registered to repoman
-      matched_repo_user.update(:repo_manager_direct_access => true) if repoman_registration_error.nil?
+      matched_repo_user.update(repo_manager_direct_access: true) if repoman_registration_error.nil?
 
       # only if user exists already
       Log.info("User ('#{matched_repo_user[:username]}') exists with given PUB key, not able to create a user. ") if match
 
       rest_ok_response(
-        :repo_manager_fingerprint => RepoManager.repo_server_ssh_rsa_fingerprint(),
-        :repo_manager_dns => RepoManager.repo_server_dns(),
-        :match => match,
-        :new_username => matched_repo_user ? matched_repo_user[:username] : nil,
-        :matched_username => match && matched_repo_user ? matched_repo_user[:username] : nil,
-        :repoman_registration_error => repoman_registration_error
+        repo_manager_fingerprint: RepoManager.repo_server_ssh_rsa_fingerprint(),
+        repo_manager_dns: RepoManager.repo_server_dns(),
+        match: match,
+        new_username: matched_repo_user ? matched_repo_user[:username] : nil,
+        matched_username: match && matched_repo_user ? matched_repo_user[:username] : nil,
+        repoman_registration_error: repoman_registration_error
       )
     end
 
-    def rest__remove_user_direct_access()
+    def rest__remove_user_direct_access
       username = ret_non_null_request_params(:username)
       repoman_registration_error = nil
 
@@ -113,27 +112,27 @@ module DTK
       ComponentModule.remove_user_direct_access(model_handle_with_private_group(:component_module),username)
 
       rest_ok_response(
-          :repoman_registration_error => repoman_registration_error
-        )
+          repoman_registration_error: repoman_registration_error
+      )
     end
 
-    def rest__set_default_namespace()
+    def rest__set_default_namespace
       namespace = ret_non_null_request_params(:namespace)
 
       user_object = CurrentSession.new.get_user_object()
-      user_object.update(:default_namespace => namespace)
+      user_object.update(default_namespace: namespace)
       CurrentSession.new.set_user_object(user_object)
 
       rest_ok_response
     end
 
-    def rest__check_catalog_credentials()
+    def rest__check_catalog_credentials
       rest_ok_response(
-        :catalog_credentials_set => CurrentSession.are_catalog_credentilas_set?
+        catalog_credentials_set: CurrentSession.are_catalog_credentilas_set?
       )
     end
 
-    def rest__set_catalog_credentials()
+    def rest__set_catalog_credentials
       username, password = ret_non_null_request_params(:username, :password)
       validate = ret_request_params(:validate)
 
@@ -145,7 +144,7 @@ module DTK
       ensure
         # regardless of validation we will set catalog credentials3
         user_object = CurrentSession.new.get_user_object()
-        user_object.update(:catalog_username => username, :catalog_password => password)
+        user_object.update(catalog_username: username, catalog_password: password)
         session_obj = CurrentSession.new
         session_obj.set_user_object(user_object)
         # we invalidate the session for repoman

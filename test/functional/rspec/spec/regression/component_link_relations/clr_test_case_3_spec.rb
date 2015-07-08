@@ -30,7 +30,6 @@ attribute_name = 'upstream'
 dtk_common = DtkCommon.new(service_name, assembly_name)
 
 describe "(Component link relations) Test Case 3: Fan-in scenario - $node.host_address from sink component are linked to upstream attributes of source components that exist on different nodes (source1, source2)" do
-
   before(:all) do
     puts "********************************************************************************************************************************************************************************************************",""
   end

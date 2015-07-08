@@ -7,7 +7,7 @@ module DTK
            subclass_model_handle = model_handle(:#{subclass_model_name})
            super(sp_hash,opts.merge(:model_handle => subclass_model_handle))
           end"
-         )
+                  )
          class_eval("
            def self.get_objs(mh,sp_hash,opts={})
              if mh[:model_name] == :#{subclass_model_name}
@@ -16,12 +16,12 @@ module DTK
                super(mh,sp_hash,opts)
              end
            end"
-         )
+                   )
          class_eval("
            def self.get_these_objs(mh,sp_hash,opts={})
              SubclassProcessing.get_objs(mh.createMH(:#{parent_model_name}),:#{subclass_model_name},sp_hash,opts)
            end"
-         )
+                   )
         SubclassProcessing.add_model_name_mapping(subclass_model_name,parent_model_name,self)
         SubclassProcessing.add_subclass_klass_mapping(self,subclass_model_name,opts)
       end
@@ -53,12 +53,13 @@ module DTK
         end
       end
 
-     private    
+      private
+    
       # so can use calling cobntroller to shortcut needing datbase lookup
       def subclass_controllers(model_name,opts)
-        if model_name == :node and opts[:controller_class] == Node_groupController 
+        if model_name == :node && opts[:controller_class] == Node_groupController 
           :node_group 
-        elsif model_name == :component and opts[:controller_class] == AssemblyController
+        elsif model_name == :component && opts[:controller_class] == AssemblyController
           :assembly
         end
       end
@@ -71,26 +72,26 @@ module DTK
         unless id = hash_row[:id]
           raise Error.new("Hash (#{hash.inspect}) must have id key")
         end
-        idh = model_handle.createIDH(:id => id)
-        opts_model_name = (subclass_model_name ? {:model_name => subclass_model_name} : {})
+        idh = model_handle.createIDH(id: id)
+        opts_model_name = (subclass_model_name ? {model_name: subclass_model_name} : {})
         obj_with_just_id = idh.create_object(opts_model_name)
         obj_with_just_id.merge(hash_row)
       end
     end
     module SubclassProcessingMixin
       def create_subclass_obj(subclass_model_name)
-        id_handle().create_object(:model_name => subclass_model_name).merge(self)
+        id_handle().create_object(model_name: subclass_model_name).merge(self)
       end
     end
 
     class SubclassProcessing
       def self.get_objs(mh,subclass_model_name,sp_hash,opts={})
-        Model.get_objs(mh,sp_hash,opts.merge(:subclass_model_name => subclass_model_name))
+        Model.get_objs(mh,sp_hash,opts.merge(subclass_model_name: subclass_model_name))
       end
 
       def self.add_model_name_mapping(subclass_model_name,concrete_model_name,subclass_klass)
-        @model_name_mapping ||= Hash.new
-        @model_name_mapping[subclass_model_name] ||= {:concrete_model_name => concrete_model_name,:subclass_klass => subclass_klass}
+        @model_name_mapping ||= {}
+        @model_name_mapping[subclass_model_name] ||= {concrete_model_name: concrete_model_name,subclass_klass: subclass_klass}
       end
       def self.models_to_add(model_name)
         ret = nil
@@ -122,22 +123,22 @@ module DTK
         end
         HardCodedSubClassRelations[model_name]
       end
-      def self.subclass_targets()
+      def self.subclass_targets
         @subclass_targets ||= (HardCodedSubClassRelations.values + @model_name_mapping.values.map{|r|r[:concrete_model_name]}).uniq
       end
       # TODO: move so that subclass_model generates these and get rid of HardCodedSubClassRelations
       HardCodedSubClassRelations = {
-        :assembly           => :component,
-        :assembly_workspace => :component,
-        :component_template => :component,
-        :component_instance => :component,
-        :node_group         => :node,
-        :service_node_group => :node
+        assembly: :component,
+        assembly_workspace: :component,
+        component_template: :component,
+        component_instance: :component,
+        node_group: :node,
+        service_node_group: :node
       }
 
       def self.add_subclass_klass_mapping(subclass_klass,model_name,opts={})
-        @subclass_klass_mapping ||= Hash.new
-        pntr = @subclass_klass_mapping[subclass_klass] ||= {:model_name => model_name}
+        @subclass_klass_mapping ||= {}
+        pntr = @subclass_klass_mapping[subclass_klass] ||= {model_name: model_name}
         pntr[:print_form] ||= opts[:print_form] || default_print_form(model_name)
       end
       def self.model_name(model_class)
@@ -165,7 +166,8 @@ module DTK
         end
       end
 
-     private
+      private
+
       def self.subclass_klass_info(model_class)
         (@subclass_klass_mapping||{})[model_class]||{}
       end

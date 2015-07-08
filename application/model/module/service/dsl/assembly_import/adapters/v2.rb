@@ -24,20 +24,20 @@ module DTK; class ServiceModule
           base_cmp_name = component_link_info[:base_cmp_name]
           input = parsed_component_link[:input]
           output = parsed_component_link[:output]
-          opts_matching_port = opts.merge(:do_not_throw_error => true,:base_cmp_name => base_cmp_name)
+          opts_matching_port = opts.merge(do_not_throw_error: true,base_cmp_name: base_cmp_name)
 
           input_port_hash = input.matching_port(ports,opts_matching_port)
           return input_port_hash if ParsingError.is_error?(input_port_hash)
           
-          output_port_hash = output.matching_port(ports,opts_matching_port.merge(:is_output => true))
+          output_port_hash = output.matching_port(ports,opts_matching_port.merge(is_output: true))
           return output_port_hash if ParsingError.is_error?(output_port_hash)
 
           port_link_ref_info =  {
-            :assembly_template_ref => assembly_idh.create_object().get_field?(:ref),
-            :in_node_ref => input_port_hash[:node].get_field?(:ref),
-            :in_port_ref => Port.ref_from_display_name(input_port_hash[:display_name]),
-            :out_node_ref => output_port_hash[:node].get_field?(:ref),
-            :out_port_ref => Port.ref_from_display_name(output_port_hash[:display_name])
+            assembly_template_ref: assembly_idh.create_object().get_field?(:ref),
+            in_node_ref: input_port_hash[:node].get_field?(:ref),
+            in_port_ref: Port.ref_from_display_name(input_port_hash[:display_name]),
+            out_node_ref: output_port_hash[:node].get_field?(:ref),
+            out_port_ref: Port.ref_from_display_name(output_port_hash[:display_name])
           }
           pl_ref = PortLink.port_link_ref(port_link_ref_info)
           pl_hash = {
@@ -47,11 +47,12 @@ module DTK; class ServiceModule
           }
           h.merge(pl_ref => pl_hash)
         end
-        port_links.mark_as_complete(:assembly_id=>@existing_assembly_ids)
+        port_links.mark_as_complete(assembly_id: @existing_assembly_ids)
         {assembly_ref => {"port_link" => port_links}}
       end
 
-     private
+      private
+
       include ServiceDSLCommonMixin
 
       def self.import_task_templates(assembly_hash)
@@ -87,33 +88,33 @@ module DTK; class ServiceModule
       end
 
       def self.component_ref_parse(cmp)
-        cmp_type_ext_form = (cmp.kind_of?(Hash) ?  cmp.keys.first : cmp)
+        cmp_type_ext_form = (cmp.is_a?(Hash) ?  cmp.keys.first : cmp)
         component_ref_info = InternalForm.component_ref_info(cmp_type_ext_form)
         type = component_ref_info[:component_type]
         title = component_ref_info[:title]
         version = component_ref_info[:version]
         ref = ComponentRef.ref(type,title)
         display_name = ComponentRef.display_name(type,title)
-        ret = {:component_type => type, :ref => ref, :display_name => display_name}
-        ret.merge!(:version => version) if version
-        ret.merge!(:component_title => title) if title
+        ret = {component_type: type, ref: ref, display_name: display_name}
+        ret.merge!(version: version) if version
+        ret.merge!(component_title: title) if title
         ret
       end
 
       # returns Array with each element being Hash with keys :parsed_component_link, :base_cmp_name
-      def self.parse_component_links(assembly_hash,opts={})
-        ret = Array.new
+      def self.parse_component_links(assembly_hash,_opts={})
+        ret = []
         (assembly_hash["nodes"]||{}).each_pair do |input_node_name,node_hash|
           components = node_hash["components"]||[]
-          components = [components] unless components.kind_of?(Array)
+          components = [components] unless components.is_a?(Array)
           components.each do |base_cmp|
-            if base_cmp.kind_of?(Hash) 
+            if base_cmp.is_a?(Hash) 
               base_cmp_name = base_cmp.keys.first
               (base_cmp.values.first["service_links"]||{}).each_pair do |link_def_type,targets|
                 Array(targets).each do |target|
                   component_link_hash = {link_def_type => target}
                   parsed_component_link = PortRef.parse_component_link(input_node_name,base_cmp_name,component_link_hash)
-                  ret << {:parsed_component_link => parsed_component_link, :base_cmp_name => base_cmp_name}
+                  ret << {parsed_component_link: parsed_component_link, base_cmp_name: base_cmp_name}
                 end
               end
             end
@@ -122,13 +123,13 @@ module DTK; class ServiceModule
         ret
       end
 
-      def self.node_to_node_binding_rs(assembly_ref,node_bindings_hash,opts={})
-        (node_bindings_hash||{}).inject(Hash.new) do |h,(node,v)|
+      def self.node_to_node_binding_rs(_assembly_ref,node_bindings_hash,opts={})
+        (node_bindings_hash||{}).inject({}) do |h,(node,v)|
           merge_hash = 
-            if v.kind_of?(String) then {node => v}
-            elsif v.kind_of?(Hash)
+            if v.is_a?(String) then {node => v}
+            elsif v.is_a?(Hash)
               Log.error("Not implemented yet have node bindings with explicit properties")
-              Hash.new
+              {}
             else
               raise ParsingError.new("Unexpected form of node binding",opts_file_path(opts))
             end
@@ -137,10 +138,10 @@ module DTK; class ServiceModule
       end
 
       def self.ret_component_hash(cmp_input)
-        ret = Hash.new
-        if cmp_input.kind_of?(Hash) 
+        ret = {}
+        if cmp_input.is_a?(Hash) 
           ret = cmp_input.values.first
-          unless ret.kind_of?(Hash)
+          unless ret.is_a?(Hash)
             err_msg = "Parsing error after component term (#{cmp_input.keys.first}) in: ?1"
             if ret.nil?
               err_msg << "\nThere is a nil value after this term"

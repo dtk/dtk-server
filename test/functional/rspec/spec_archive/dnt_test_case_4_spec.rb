@@ -17,7 +17,6 @@ staged_node_name = 'dnt_test_case_4_instance'
 dtk_common = DtkCommon.new('', '')
 
 describe "(Different Node Templates) Test Case 4: Stage node template and converge it (simple)" do
-
   before(:all) do
     puts "************************************************************************************"
     puts "(Different Node Templates) Test Case 4: Stage node template and converge it (simple)"

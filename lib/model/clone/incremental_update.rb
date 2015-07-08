@@ -1,6 +1,6 @@
 module DTK; class Clone
-  # The incremental update code explicitly has classes per sub object type in contrast to 
-  # initial clone, which aside from spacial processing has generic mecahnism for parent child processing
+ # The incremental update code explicitly has classes per sub object type in contrast to 
+ # initial clone, which aside from spacial processing has generic mecahnism for parent child processing
  class IncrementalUpdate
     # helper fns
     module InstancesTemplates
@@ -17,29 +17,31 @@ module DTK; class Clone
     def initialize(parent_links=nil)
       @parent_links = parent_links
     end
-    def update?()
+
+    def update?
       links = get_instances_templates_links()
       update_model?(links)
     end
 
    private
+
     # must be overwritten; this method returns a hash where key is parent id and value is array of objects under this
     # parent; the objects are both instances and templates
-    def get_ndx_objects(parent_idhs)
+    def get_ndx_objects(_parent_idhs)
       raise Error.new("Abstract method that should be overwritten")
     end
 
     # can be overwritten; used for detecting with an isnatnce and template are euqal and thus modification not needed
-    def equal_so_dont_modify?(instance,template)
+    def equal_so_dont_modify?(_instance,_template)
       false
     end
 
     # can be overwritten; this is options when updating (i.e., delete, modify, create) objects
-    def update_opts()
-      Hash.new
+    def update_opts
+      {}
     end
 
-    def get_instances_templates_links()
+    def get_instances_templates_links
       ret = InstancesTemplates::Links.new()
       parent_idhs = @parent_links.all_id_handles()
       ndx_objects = get_ndx_objects(parent_idhs)
@@ -56,18 +58,18 @@ module DTK; class Clone
     def update_model?(links)
       return if links.empty?
       opts = update_opts()
-      delete_instances = Array.new 
-      create_from_templates = Array.new
+      delete_instances = [] 
+      create_from_templates = []
       modify_instances = Clone::InstanceTemplate::Links.new()
       links.each do |link|
         # TODO: make sure all objects can use ref as key; if not make this a function of the class
         # indexed by ref
-        ndx_templates = link.templates.inject(Hash.new) do |h,t|
+        ndx_templates = link.templates.inject({}) do |h,t|
           unless key = t[:ref]
             Log.error("Unexpected that object (#{t.inspect}) does not have field :ref")
             next
           end
-          h.merge(key => {:template => t,:matched => false})
+          h.merge(key => {template: t,matched: false})
         end
         link.instances.each do |instance|
           unless key = instance[:ref]
@@ -86,7 +88,7 @@ module DTK; class Clone
         end
         ndx_templates.values.each do |r|
           unless r[:matched]
-            create_from_templates << {:template => r[:template], :parent_link => link.parent_link}
+            create_from_templates << {template: r[:template], parent_link: link.parent_link}
           end
         end
       end

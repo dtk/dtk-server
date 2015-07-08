@@ -11,27 +11,27 @@ module DTK
       new(create_info)
     end
     LegalKeysInfo = {
-      :dsl_parse_error       => true,
-      :dsl_updated_info      => [:commit_sha,:msg], 
-      :dsl_created_info      => [:path,:content],
-      :external_dependencies => [:inconsistent,:possibly_missing,:ambiguous]
+      dsl_parse_error: true,
+      dsl_updated_info: [:commit_sha,:msg], 
+      dsl_created_info: [:path,:content],
+      external_dependencies: [:inconsistent,:possibly_missing,:ambiguous]
     }
     LegalTopKeys = LegalKeysInfo.keys
 
     def set_dsl_updated_info!(msg,commit_sha)
-      ret = self[:dsl_updated_info] ||= Hash.new
-      ret.merge!(:msg => msg) unless msg.nil?
-      ret.merge!(:commit_sha => commit_sha) unless commit_sha.nil?
+      ret = self[:dsl_updated_info] ||= {}
+      ret.merge!(msg: msg) unless msg.nil?
+      ret.merge!(commit_sha: commit_sha) unless commit_sha.nil?
       ret
     end
 
-    def external_dependencies()
+    def external_dependencies
       ExternalDependencies.new(self[:external_dependencies]||{})
     end
 
-    def dsl_created_info?()
+    def dsl_created_info?
       info = self[:dsl_created_info]
-      unless info.nil? or info.empty?
+      unless info.nil? || info.empty?
         DSLCreatedInfo.new(info)
       end
     end
@@ -42,13 +42,14 @@ module DTK
       end
     end
     
-   private
+    private
+
     def ret_relevant_keys(hash)
-      ret = Hash.new
+      ret = {}
       LegalKeysInfo.each_pair do |top_key,nested_info|
-        if hash.has_key?(top_key)
+        if hash.key?(top_key)
           nested = hash[top_key]
-          if nested_info.kind_of?(Array) and nested.kind_of?(Hash)
+          if nested_info.is_a?(Array) && nested.is_a?(Hash)
             legal_nested_keys = nested_info
             info = Aux::hash_subset(nested,legal_nested_keys)
             ret[top_key] = info unless info.empty?
@@ -59,6 +60,5 @@ module DTK
       end
       ret
     end
-
   end
 end

@@ -9,7 +9,7 @@ module DTK
       # link as self does
       # 
       def update_and_propagate_attributes_for_delete_links(attr_mh,aug_attr_links,propagate_opts={}) 
-        ret = Array.new
+        ret = []
         links_delete_info = links_delete_info(aug_attr_links)
         return ret if links_delete_info.empty?
         # find updated attributes
@@ -18,9 +18,10 @@ module DTK
         propagate_and_optionally_add_state_changes(attr_mh,updated_attrs,propagate_opts)
       end
 
-     private
+      private
+
       def links_delete_info(aug_attr_links)
-        ndx_ret = Hash.new
+        ndx_ret = {}
         aug_attr_links.each do |link|
           a_link = link[:other_input_link]
           if a_link[:type] == "external"
@@ -28,8 +29,8 @@ module DTK
             attr_id = input_attribute[:id]
             l = ndx_ret[attr_id] ||= UpdateDerivedValues::Delete::LinkInfo.new(input_attribute)
             new_el = {
-              :attribute_link_id => a_link[:id],
-              :index_map => a_link[:index_map],
+              attribute_link_id: a_link[:id],
+              index_map: a_link[:index_map],
             }
             if a_link[:id] == link[:id]
               l.add_deleted_link!(new_el)
@@ -40,7 +41,6 @@ module DTK
         end
         ndx_ret.values
       end
-
     end
   end
 end

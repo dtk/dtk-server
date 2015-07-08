@@ -75,7 +75,7 @@ end
 def load_browser(full_host, target_browser)
   puts "Initializing browser " + target_browser.to_s
   Capybara.register_driver :selenium do |app|
-    Capybara::Selenium::Driver.new(app, :browser => target_browser.to_sym)
+    Capybara::Selenium::Driver.new(app, browser: target_browser.to_sym)
   end
   Capybara.current_driver = :selenium
   session = Capybara::Session.new :selenium

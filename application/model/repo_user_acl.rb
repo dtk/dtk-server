@@ -5,8 +5,8 @@ module XYZ
       if existing
         return if existing[:access_rights] == new_access_rights
         update_row = {
-          :id => existing[:id],
-          :access_rights => new_access_rights
+          id: existing[:id],
+          access_rights: new_access_rights
         }
         update_from_rows(repo.model_handle(:repo_user_acl),[update_row])
       else
@@ -33,13 +33,14 @@ module XYZ
     end
 
     private
+
     def self.ret_create_hash(repo_username,repo_id,repo_user_id,access_rights)
       {
-        :ref => repo_username,
-        :display_name => repo_username,
-        :repo_id => repo_id,
-        :repo_user_id => repo_user_id,
-        :access_rights => access_rights
+        ref: repo_username,
+        display_name: repo_username,
+        repo_id: repo_id,
+        repo_user_id: repo_user_id,
+        access_rights: access_rights
       }
     end
   end

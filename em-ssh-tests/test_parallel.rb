@@ -19,9 +19,9 @@ EM.run do
 
   # process multiple SSH connections in parallel
   connections = [
-    EM::Ssh.start(host1, user, :password => password),
-    EM::Ssh.start(host2, user, :password => password),
-    EM::Ssh.start(host3, user, :password => password)
+    EM::Ssh.start(host1, user, password: password),
+    EM::Ssh.start(host2, user, password: password),
+    EM::Ssh.start(host3, user, password: password)
   ]
 
   connections.each do |connection|
@@ -37,7 +37,7 @@ EM.run do
     connection.callback do |ssh|
       install_script_file_path, upload_error = nil, false
 
-      ssh.exec!("rm -rf /tmp/dtk-node-agent") do |channel, stream, data|
+      ssh.exec!("rm -rf /tmp/dtk-node-agent") do |_channel, stream, data|
         puts "#{conn_host}: #{data}" if stream == :stdout
       end
 
@@ -51,8 +51,8 @@ EM.run do
         home_path = Etc.getpwuid(Process.uid).dir
 
         # executing upload commands
-        Net::SCP.upload!(conn_host, user, install_script_file.path, "/tmp", :ssh => { :password => password, :port => "22" }, :recursive => true)
-        Net::SCP.upload!(conn_host, user, "#{home_path}/dtk-node-agent", "/tmp", :ssh => { :password => password, :port => "22" }, :recursive => true)
+        Net::SCP.upload!(conn_host, user, install_script_file.path, "/tmp", ssh: { password: password, port: "22" }, recursive: true)
+        Net::SCP.upload!(conn_host, user, "#{home_path}/dtk-node-agent", "/tmp", ssh: { password: password, port: "22" }, recursive: true)
       rescue Exception => e
         puts "\n[ERROR] Error occured in SCP.upload to host '#{conn_host}': #{e}.\n"
         puts "[ERROR] Rest of the commands will not be executed on this host!"
@@ -66,26 +66,22 @@ EM.run do
         connections.delete(connection)
       else
         install_command = user.eql?('root') ? "bash /tmp/dtk-node-agent/install_agent.sh" : "sudo bash /tmp/dtk-node-agent/install_agent.sh"
-        ssh.exec!(install_command) do |channel, stream, data|
+        ssh.exec!(install_command) do |_channel, stream, data|
           puts "#{conn_host}:#{data}" if stream == :stdout
         end
 
-
-        ssh.exec!("rm -rf /tmp/dtk-node-agent") do |channel, stream, data|
+        ssh.exec!("rm -rf /tmp/dtk-node-agent") do |_channel, _stream, data|
           puts "#{conn_host}: #{data}" #if stream == :stdout
         end
 
-
         install_script_command = user.eql?('root') ? "bash #{install_script_file_path}" : "sudo bash #{install_script_file_path}"
-        ssh.exec!(install_script_command) do |channel, stream, data|
+        ssh.exec!(install_script_command) do |_channel, stream, data|
           puts "#{conn_host}: #{data}" if stream == :stdout
         end
 
-
-        ssh.exec!("rm -rf #{install_script_file_path}") do |channel, stream, data|
+        ssh.exec!("rm -rf #{install_script_file_path}") do |_channel, stream, data|
           puts "#{conn_host}: #{data}" if stream == :stdout
         end
-
 
         puts "\n[INFO] '#{conn_host}' COMPLETED SUCCESSFULLY!"
         connections.delete(connection)
@@ -96,7 +92,5 @@ EM.run do
         EM.stop
       end
     end
-
-
   end
 end

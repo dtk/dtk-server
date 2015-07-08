@@ -39,7 +39,7 @@ module DTK
         client.validate_catalog_credentials(username, password)
       end
 
-      def create_tenant_user()
+      def create_tenant_user
         username        = dtk_instance_remote_repo_username()
         rsa_pub_key     = dtk_instance_rsa_pub_key()
         rsa_key_name    = dtk_instance_remote_repo_key_name()
@@ -56,45 +56,45 @@ module DTK
         end
 
         params = {
-          :username => username,
-          :name => remote.module_name(),
-          :type => type_for_remote_module(remote.module_type),
-          :namespace => namespace
+          username: username,
+          name: remote.module_name(),
+          type: type_for_remote_module(remote.module_type),
+          namespace: namespace
         }
 
-        params.merge!(:module_refs_content => module_refs_content) unless is_empty?(module_refs_content)
+        params.merge!(module_refs_content: module_refs_content) unless is_empty?(module_refs_content)
 
         response_data = client.publish_module(params, client_rsa_pub_key)
 
-        {:remote_repo_namespace => namespace}.merge(Aux.convert_keys_to_symbols(response_data))
+        {remote_repo_namespace: namespace}.merge(Aux.convert_keys_to_symbols(response_data))
       end
 
       def delete_remote_module(client_rsa_pub_key, force_delete = false)
         raise_error_if_module_is_not_accessible(client_rsa_pub_key)
         params = {
-          :username => dtk_instance_remote_repo_username(),
-          :name => remote.module_name,
-          :namespace => remote.namespace,
-          :type => type_for_remote_module(remote.module_type),
-          :force_delete => force_delete
+          username: dtk_instance_remote_repo_username(),
+          name: remote.module_name,
+          namespace: remote.namespace,
+          type: type_for_remote_module(remote.module_type),
+          force_delete: force_delete
         }
         client.delete_module(params, client_rsa_pub_key)
       end
 
       def raise_error_if_module_is_not_accessible(client_rsa_pub_key)
-        get_remote_module_info?(client_rsa_pub_key,:raise_error => true)
+        get_remote_module_info?(client_rsa_pub_key,raise_error: true)
       end
       private :raise_error_if_module_is_not_accessible
 
       def get_remote_module_info?(client_rsa_pub_key,opts={})
         client_params = {
-          :name => remote.module_name,
-          :type => type_for_remote_module(remote.module_type),
-          :namespace => remote.namespace,
-          :rsa_pub_key => client_rsa_pub_key
+          name: remote.module_name,
+          type: type_for_remote_module(remote.module_type),
+          namespace: remote.namespace,
+          rsa_pub_key: client_rsa_pub_key
         }
 
-        client_params.merge!(:module_refs_content => opts[:module_refs_content]) unless is_empty?(opts[:module_refs_content])
+        client_params.merge!(module_refs_content: opts[:module_refs_content]) unless is_empty?(opts[:module_refs_content])
 
         ret = nil
         begin
@@ -108,13 +108,13 @@ module DTK
           end
         end
 
-        ret.merge!(:remote_repo_url => RepoManagerClient.repo_url_ssh_access(ret[:git_repo_name]))
+        ret.merge!(remote_repo_url: RepoManagerClient.repo_url_ssh_access(ret[:git_repo_name]))
 
         if remote.version
           # TODO: ModuleBranch::Location:
           raise Error.new("Not versions not implemented")
           versions = branch_names_to_versions_stripped(ret[:branches])
-          unless versions and versions.include?(remote.version)
+          unless versions && versions.include?(remote.version)
             raise ErrorUsage.new("Remote module (#{remote.pp_module_name()}}) does not have version (#{remote.version||"CURRENT"})")
           end
         end
@@ -123,18 +123,17 @@ module DTK
 
       def get_remote_module_components(client_rsa_pub_key=nil)
         params = {
-          :name => remote.module_name,
-          :version => remote.version,
-          :namespace => remote.namespace,
-          :type => remote.module_type,
-          :do_not_raise => true,
-          :dependencies_info => true
+          name: remote.module_name,
+          version: remote.version,
+          namespace: remote.namespace,
+          type: remote.module_type,
+          do_not_raise: true,
+          dependencies_info: true
         }
         @client.get_components_info(params, client_rsa_pub_key)
       end
 
-
-      def remote()
+      def remote
         unless @remote
           raise Error.new("Should not be called if @remote is nill")
         end
@@ -144,16 +143,16 @@ module DTK
 
       def list_module_info(type=nil, rsa_pub_key = nil)
         new_repo = R8::Config[:repo][:remote][:new_client]
-        filter = type && {:type => type_for_remote_module(type)}
+        filter = type && {type: type_for_remote_module(type)}
         remote_modules = client.list_modules(filter, rsa_pub_key)
 
         unsorted = remote_modules.map do |r|
           el = {}
           last_updated = r['updated_at'] && Time.parse(r['updated_at']).strftime("%Y/%m/%d %H:%M:%S")
           permission_string = "#{r['permission_hash']['user']}/#{r['permission_hash']['user_group']}/#{r['permission_hash']['other']}"
-          el.merge!(:display_name => r['full_name'], :owner => r['owner_name'], :group_owners => r['user_group_names'], :permissions => permission_string, :last_updated => last_updated)
+          el.merge!(display_name: r['full_name'], owner: r['owner_name'], group_owners: r['user_group_names'], permissions: permission_string, last_updated: last_updated)
           if versions = branch_names_to_versions(r["branches"])
-            el.merge!(:versions => versions)
+            el.merge!(versions: versions)
           end
           el
         end
@@ -180,7 +179,7 @@ module DTK
       end
       def self.version_to_branch_name(version=nil)
         Log.info_pp(["#TODO: ModuleBranch::Location: deprecating: version_to_branch_name",caller[0..4]])
-        if version.nil? or version == HeadBranchName
+        if version.nil? || version == HeadBranchName
           HeadBranchName
         else
           "v#{version}"
@@ -188,22 +187,22 @@ module DTK
       end
       HeadBranchName = "master"
 
-      def default_remote_repo_base()
+      def default_remote_repo_base
         self.class.default_remote_repo_base()
       end
-      def self.default_remote_repo_base()
+      def self.default_remote_repo_base
         RepoRemote.repo_base()
       end
 
       # TODO: deprecate when remove all references to these
-      def default_remote_repo()
+      def default_remote_repo
         self.class.default_remote_repo_base()
       end
-      def self.default_remote_repo()
+      def self.default_remote_repo
         default_remote_repo_base()
       end
 
-      def self.default_user_namespace()
+      def self.default_user_namespace
         # CurrentSession.new.get_user_object().get_namespace()
         # we don't want username as default namespace, we will use tenant unique name instead
         # ::DTK::Common::Aux.running_process_user()
@@ -211,7 +210,7 @@ module DTK
       end
 
       # TODO: this needs to be cleaned up
-      def self.default_namespace()
+      def self.default_namespace
         self.default_user_namespace()
       end
 
@@ -230,13 +229,14 @@ module DTK
         case split.size
          when 1 then [namespace,qualified_name]
          when 2,3 then split
-        else
+         else
           qualified_name = "NOT PROVIDED" if qualified_name.nil? || qualified_name.empty?
           raise ErrorUsage.new("Module remote name (#{qualified_name}) ill-formed. Must be of form 'name', 'namespace/name' or 'name/namespace/version'")
         end
       end
 
-     private
+      private
+
       attr_reader :client
 
       def type_for_remote_module(module_type)
@@ -248,26 +248,25 @@ module DTK
         string_value.empty? ? true : false
       end
 
-      def dtk_instance_rsa_pub_key()
+      def dtk_instance_rsa_pub_key
         @dtk_instance_rsa_pub_key ||= Common::Aux.get_ssh_rsa_pub_key()
       end
 
-      def dtk_instance_remote_repo_username()
+      def dtk_instance_remote_repo_username
         "#{dtk_instance_prefix()}-dtk-instance"
       end
 
-      def dtk_instance_prefix()
+      def dtk_instance_prefix
         ::R8::Config[:repo][:remote][:tenant_name] || ::DTK::Common::Aux.running_process_user()
       end
 
-      def dtk_instance_remote_repo_key_name()
+      def dtk_instance_remote_repo_key_name
         "dtk-instance-key"
       end
 
       def get_end_user_remote_repo_username(mh,ssh_rsa_pub_key)
         RepoUser.match_by_ssh_rsa_pub_key!(mh,ssh_rsa_pub_key).owner.username
       end
-
     end
   end
 end

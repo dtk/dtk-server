@@ -1,9 +1,7 @@
 require 'fileutils'
 
 module DTK
-
   class RepoManager
-
     class << self
       # admin and repo methods that just pass to lower level object or class
       RepoMethods = [:add_all_files,:push_changes,:push_implementation,:add_branch,:add_branch?,:add_branch_and_push?,:merge_from_branch,:delete_branch,:add_remote,:pull_changes,:diff,:ls_r,:fast_foward_merge_from_branch,:hard_reset_to_branch,:fetch_all,:rebase_from_remote,:diff,:fast_foward_pull,:delete_file?,:delete_directory?,:branch_head_sha,:move_content]
@@ -19,12 +17,13 @@ module DTK
         end
         super
       end
+
       def respond_to?(name)
         !!(defined_method?(name) || super)
       end
 
       def get_file_content(file_obj_or_path,context,opts={})
-        file_obj_or_path = {:path => file_obj_or_path} if file_obj_or_path.kind_of?(String)
+        file_obj_or_path = {path: file_obj_or_path} if file_obj_or_path.is_a?(String)
         get_adapter_repo(context).get_file_content(file_obj_or_path,opts)
       end
 
@@ -32,18 +31,21 @@ module DTK
       def add_file(*args)
         context = args.pop
         file_obj_or_path,content,commit_msg = args
-        file_obj_or_path = {:path => file_obj_or_path} if file_obj_or_path.kind_of?(String)
+        file_obj_or_path = {path: file_obj_or_path} if file_obj_or_path.is_a?(String)
         get_adapter_repo(context).add_file(file_obj_or_path,content,commit_msg)
       end
+
       def update_file_content(file_obj_or_path,content,context)
-        file_obj_or_path = {:path => file_obj_or_path} if file_obj_or_path.kind_of?(String)
+        file_obj_or_path = {path: file_obj_or_path} if file_obj_or_path.is_a?(String)
         get_adapter_repo(context).update_file_content(file_obj_or_path,content)
       end
 
-     private
+      private
+
       def defined_method?(name)
-        RepoMethods.include?(name) or !!class_if_admin_method?(name)
+        RepoMethods.include?(name) || !!class_if_admin_method?(name)
       end
+
       def class_if_admin_method?(name)
         load_and_return_adapter_class() if AdminMethods.include?(name)
       end
@@ -62,9 +64,9 @@ module DTK
           next if branch == "master"
           pp "deleting branch (#{branch}) in repo (#{repo_name})"
           context = {
-            :implementation => {
-              :repo => repo_name,
-              :branch => branch
+            implementation: {
+              repo: repo_name,
+              branch: branch
             }
           }
           get_adapter_repo(context).delete_branch()
@@ -117,7 +119,7 @@ module DTK
 
       def push_to_remote_repo(repo_name,branch,remote_name,remote_branch=nil)
         adapter_repo = get_adapter_repo(context(repo_name,branch))
-        adapter_repo.push_changes({:remote_name=>remote_name,:remote_branch=>remote_branch})
+        adapter_repo.push_changes(remote_name: remote_name,remote_branch: remote_branch)
         repo_name
       end
 
@@ -137,18 +139,19 @@ module DTK
         adapter_repo.remove_remote?(remote_name)
       end
 
-     private
+      private
+
       def context(repo_name,branch)
-        if branch.kind_of?(ModuleBranch)
+        if branch.is_a?(ModuleBranch)
           branch
         else
-          unless repo_name.kind_of?(String) 
+          unless repo_name.is_a?(String) 
             Log.error("unexpected type for repo_name: #{repo_name.inspect}")
           end
-          unless branch.kind_of?(String) 
+          unless branch.is_a?(String) 
             Log.error("unexpected type for branch: #{branch.inspect}")
           end
-          {:implementation => {:repo => repo_name, :branch => branch}}
+          {implementation: {repo: repo_name, branch: branch}}
         end
       end
     end
@@ -168,7 +171,7 @@ module DTK
       end
     end
 
-    def self.delete_all_repos()
+    def self.delete_all_repos
       klass = load_and_return_adapter_class()
       # delete all repos on repo server
       klass.delete_all_server_repos()
@@ -186,7 +189,8 @@ module DTK
       def delete_local_repo(repo_local_dir)
         FileUtils.rm_rf repo_local_dir if File.directory?(repo_local_dir)
       end
-      def delete_all_local_repos()
+
+      def delete_all_local_repos
         repo_base_dir = R8::Config[:repo][:base_directory]
         if File.directory?(repo_base_dir)
           Dir.chdir(R8::Config[:repo][:base_directory]) do
@@ -201,7 +205,7 @@ module DTK
     def self.get_adapter_repo(context)
       repo_dir,branch = ret_repo_dir_and_branch(context)
       raise Error.new("cannot find branch in context") unless branch
-      CachedRepoObjects[repo_dir] ||= Hash.new
+      CachedRepoObjects[repo_dir] ||= {}
       CachedRepoObjects[repo_dir][branch] ||= load_and_create(repo_dir,branch)
     end
 
@@ -211,22 +215,23 @@ module DTK
       [adapter_class.repo_full_path(repo_rel_path),branch]
     end
 
-   private
-    CachedRepoObjects = Hash.new
+    private
+
+    CachedRepoObjects = {}
     def self.ret_repo_dir_and_branch(context)
       repo_dir = branch = nil
 
-      if context.kind_of?(ModuleBranch)
+      if context.is_a?(ModuleBranch)
         repo_dir,branch = context.repo_and_branch()
-      elsif context.kind_of?(Repo)
+      elsif context.is_a?(Repo)
         context.update_object!(:repo_name)
         repo_dir = context[:repo_name]
         branch = "master"
-      elsif context.kind_of?(Implementation)
+      elsif context.is_a?(Implementation)
         context.update_object!(:repo,:branch)
         repo_dir = context[:repo]
         branch = context[:branch]
-      elsif context.kind_of?(Hash) and context[:repo_dir] and context[:branch]
+      elsif context.is_a?(Hash) && context[:repo_dir] && context[:branch]
         repo_dir = context[:repo_dir]
         branch = context[:branch]
       else
@@ -239,7 +244,7 @@ module DTK
       [repo_dir,branch]
     end
 
-    def self.load_and_return_adapter_class()
+    def self.load_and_return_adapter_class
       return @cached_adapter_class if @cached_adapter_class
       adapter_name = (R8::Config[:repo]||{})[:type]
       raise Error.new("No repo adapter specified") unless adapter_name
@@ -257,7 +262,7 @@ module DTK
   end
 
   class RemoteRepoManager < RepoManager
-    def self.load_and_return_adapter_class()
+    def self.load_and_return_adapter_class
       return @cached_adapter_class if @cached_adapter_class
       adapter_name = "remote_repo"
       @cached_adapter_class = DynamicLoader.load_and_return_adapter_class("repo_manager",adapter_name)

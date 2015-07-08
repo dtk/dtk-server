@@ -15,11 +15,11 @@ module DTK; module CommandAndControlAdapter
         @ami = Ec2.conn(aws_creds).image_get(image_id)
       end
 
-      def exists?()
+      def exists?
         !!@ami
       end
         
-      def root_device_name()
+      def root_device_name
         value(:root_device_name)
       end
 
@@ -29,7 +29,8 @@ module DTK; module CommandAndControlAdapter
         end
       end
 
-     private
+      private
+
       def value(attr)
         (@ami||{})[attr]
       end
@@ -39,10 +40,12 @@ module DTK; module CommandAndControlAdapter
           block_device_mapping = convert_and_prune_keys(default_block_device_mapping)
           update_root_device_with_overrides(block_device_mapping,root_device_override_attrs)
         end
-       private
+
+        private
+
         def self.update_root_device_with_overrides(block_device_mapping,root_device_override_attrs={})
           ret = block_device_mapping
-          overrides = root_device_override_attrs.reject do |k,v|
+          overrides = root_device_override_attrs.reject do |k,_v|
             unless TargetKeys.include?(k)
               Log.error("Bad key '#{k}' in root_device_override_attrs")
               true
@@ -59,8 +62,8 @@ module DTK; module CommandAndControlAdapter
 
         def self.convert_and_prune_keys(block_device_mapping)
           block_device_mapping.map do |one_mapping|
-            KeyMapping.inject(Hash.new) do |h,(k1,k2)|
-              one_mapping.has_key?(k1) ? h.merge(k2 => one_mapping[k1]) : h
+            KeyMapping.inject({}) do |h,(k1,k2)|
+              one_mapping.key?(k1) ? h.merge(k2 => one_mapping[k1]) : h
             end
           end
         end

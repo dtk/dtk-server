@@ -1,8 +1,8 @@
 module DTK; class BaseModule; class UpdateModule
   module CreateMixin
     def create_needed_objects_and_dsl?(repo, local, opts={})
-      ret = Hash.new
-      opts.merge!(:ret_dsl_updated_info => Hash.new)
+      ret = {}
+      opts.merge!(ret_dsl_updated_info: {})
       project = local.project
       version = local.version
       config_agent_type = opts[:config_agent_type] || config_agent_type_default()
@@ -10,12 +10,12 @@ module DTK; class BaseModule; class UpdateModule
       impl_obj.create_file_assets_from_dir_els()
       
       ret_hash = {
-        :name              => module_name(),
-        :namespace         => module_namespace(),
-        :type              => module_type(),
-        :version           => version,
-        :impl_obj          => impl_obj,
-        :config_agent_type => config_agent_type
+        name: module_name(),
+        namespace: module_namespace(),
+        type: module_type(),
+        version: version,
+        impl_obj: impl_obj,
+        config_agent_type: config_agent_type
       }
       ret.merge!(ret_hash)
 
@@ -38,11 +38,11 @@ module DTK; class BaseModule; class UpdateModule
 
       dsl_created_info = ModuleDSLInfo::CreatedInfo.new()
       if klass().contains_dsl_file?(impl_obj)
-        if err = parse_dsl_and_update_model_with_err_trap(impl_obj,module_branch_idh,version,opts.merge!(:project => project))
-          ret.merge!(:dsl_parse_error => err)
+        if err = parse_dsl_and_update_model_with_err_trap(impl_obj,module_branch_idh,version,opts.merge!(project: project))
+          ret.merge!(dsl_parse_error: err)
         end
       elsif opts[:scaffold_if_no_dsl]
-        opts_scaffold = Opts.create?(:include_modules? => include_modules?(ret[:matching_module_refs],ret[:external_dependencies]))
+        opts_scaffold = Opts.create?(include_modules?: include_modules?(ret[:matching_module_refs],ret[:external_dependencies]))
         dsl_created_info = ScaffoldImplementation.create_dsl(module_name(),config_agent_type,impl_obj,opts_scaffold)
         if opts[:commit_dsl]
           # add dsl file and create DTK module objects from the dsl
@@ -57,17 +57,18 @@ module DTK; class BaseModule; class UpdateModule
 
       dsl_updated_info = opts[:ret_dsl_updated_info]
       if dsl_updated_info && !dsl_updated_info.empty?
-        ret.merge!(:dsl_updated_info => dsl_updated_info)
+        ret.merge!(dsl_updated_info: dsl_updated_info)
       end
       
-      ret.merge(:module_branch_idh => module_branch_idh, :dsl_created_info => dsl_created_info)
+      ret.merge(module_branch_idh: module_branch_idh, dsl_created_info: dsl_created_info)
     end
 
-   private
+    private
+
     def include_modules?(matching_module_refs,external_dependencies)
       ret = nil
-      return ret unless matching_module_refs or external_dependencies
-      ret = Array.new
+      return ret unless matching_module_refs || external_dependencies
+      ret = []
       if matching_module_refs
         matching_module_refs.each{|r|ret << r.component_module}
       end
@@ -85,6 +86,5 @@ module DTK; class BaseModule; class UpdateModule
       end
       ret.uniq unless ret.empty?
     end
-
   end
 end; end; end

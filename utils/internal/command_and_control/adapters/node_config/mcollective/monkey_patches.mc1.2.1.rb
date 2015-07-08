@@ -3,16 +3,16 @@ require 'mcollective'
 module MCollective
   class Client
     def r8_set_context(multiplexer)
-      @connection.set_context(:decode_context => self,:multiplexer => multiplexer)
+      @connection.set_context(decode_context: self,multiplexer: multiplexer)
     end
 
     # changed to specficall take an agent argument
     def r8_new_request(agent,action, data)
       callerid = @security.callerid
-      {:agent  => agent,
-        :action => action,
-        :caller => callerid,
-        :data   => data}
+      {agent: agent,
+        action: action,
+        caller: callerid,
+        data: data}
     end
 
     def r8_decode_receive(msg)
@@ -26,9 +26,9 @@ module MCollective
       msg
     end
 
-    def r8_generate_request_id(msg, agent, filter = {})
+    def r8_generate_request_id(_msg, agent, _filter = {})
       target = Util.make_target(agent, :command, collective)
-      reqid = Digest::MD5.hexdigest("#{@config.identity}-#{Time.now.to_f.to_s}-#{target}")
+      reqid = Digest::MD5.hexdigest("#{@config.identity}-#{Time.now.to_f}-#{target}")
     end
 
     def r8_sendreq_give_reqid(reqid,msg,agent,filter = {})

@@ -5,7 +5,7 @@ EM.run do
   host =  ARGV[0]
   user = ARGV[1]
   password = ARGV[2]
-  EM::Ssh.start(host, user, :password => password) do |connection|
+  EM::Ssh.start(host, user, password: password) do |connection|
     connection.errback do |err|
       $stderr.puts "#{err} (#{err.class})"
       EM.stop
@@ -16,7 +16,7 @@ EM.run do
 
       # capture only stdout matching a particular pattern
       stdout = ""
-      ssh.exec!("ls -l /home/#{user}") do |channel, stream, data|
+      ssh.exec!("ls -l /home/#{user}") do |_channel, stream, data|
         stdout << data if stream == :stdout
       end
       puts "\n#{stdout}"
@@ -32,12 +32,12 @@ EM.run do
           raise "could not execute command" unless success
 
           # "on_data" is called when the process writes something to stdout
-          ch.on_data do |c, data|
+          ch.on_data do |_c, data|
             $stdout.print data
           end
 
           # "on_extended_data" is called when the process writes something to stderr
-          ch.on_extended_data do |c, type, data|
+          ch.on_extended_data do |_c, _type, data|
             $stderr.print data
           end
 

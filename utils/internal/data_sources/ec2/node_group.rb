@@ -10,6 +10,7 @@ module XYZ
           def relative_distinguished_name(source)
             source[:ref]
           end
+
           def description(security_groups)
             "Group corresponding to ec2 security groups [#{security_groups.join(",")}]"
           end

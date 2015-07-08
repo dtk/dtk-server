@@ -7,7 +7,7 @@ module DTK; class Node
            :instance, # - in a service instance where actual nodes correspond to it
            :staged    # - in a service instance before actual nodes correspond to it
           ]
-      def self.types()
+      def self.types
           @types ||= Types.map{|r|type_from_name(r)}
       end
       
@@ -20,6 +20,7 @@ module DTK; class Node
       end
       
       private
+
       def self.type_from_name(type_name)
         "node_group_#{type_name}".to_sym
       end

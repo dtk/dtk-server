@@ -9,9 +9,10 @@ module DTK; class ModuleDSL
       full_hash
     end
 
-   private
+    private
+
     def self.klass(object_or_class)
-      klass = (object_or_class.kind_of?(Class) ? object_or_class : object_or_class.class)
+      klass = (object_or_class.is_a?(Class) ? object_or_class : object_or_class.class)
       class_last_part = klass.to_s.split('::').last
       ret = nil
       begin 
@@ -41,6 +42,7 @@ module DTK; class ModuleDSL
       def initialize(object)
         @object = object
       end
+
       def required(key)
         ret = @object[key]
         if ret.nil?
@@ -48,6 +50,7 @@ module DTK; class ModuleDSL
         end
         ret
       end
+
       def [](key)
         @object[key]
       end

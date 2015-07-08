@@ -14,10 +14,10 @@ module DTK
       # TODO: here or earlier check that bindings in this mention only logical nodes in the assembly
       content().find_target_specific_info(target).each_pair do |node,target_specific_info|
         if image_val = target_specific_info.node_target_image?()
-          assembly.set_attribute(assembly_node_attribute(:image,node),image_val, :create=>true)
+          assembly.set_attribute(assembly_node_attribute(:image,node),image_val, create: true)
         end
         if size_val = target_specific_info.size()
-          assembly.set_attribute(assembly_node_attribute(:size,node),size_val, :create=>true)
+          assembly.set_attribute(assembly_node_attribute(:size,node),size_val, create: true)
         end
       end
     end
@@ -27,14 +27,14 @@ module DTK
     end
     private :assembly_node_attribute
     MappingToAssemblyAttr = {
-      :image => :os_identifier,
-      :size  => :memory_size
+      image: :os_identifier,
+      size: :memory_size
     }
 
     def self.get_node_bindings(assembly_template_idh)
       sp_hash = {
-        :cols => [:id,:content],
-        :filter => [:eq,:component_component_id,assembly_template_idh.get_id()]
+        cols: [:id,:content],
+        filter: [:eq,:component_component_id,assembly_template_idh.get_id()]
       }
       nb_mh = assembly_template_idh.createMH(:node_bindings)
       get_obj(nb_mh,sp_hash)
@@ -51,20 +51,20 @@ module DTK
       end
     end
 
-   private
-    def content()
-      if self[:content].kind_of?(Content)
+    private
+
+    def content
+      if self[:content].is_a?(Content)
         self[:content]
       elsif content_hash = get_field?(:content)
-        self[:content] = Content.parse_and_reify(ParseInput.new(content_hash,:content_field=>true))
+        self[:content] = Content.parse_and_reify(ParseInput.new(content_hash,content_field: true))
       end
     end
 
     #since only one per assembly can use constant
-    def self.node_bindings_ref(content)
+    def self.node_bindings_ref(_content)
       NodeBindingRef
     end
     NodeBindingRef = 'node_bindings_ref'
-
   end
 end

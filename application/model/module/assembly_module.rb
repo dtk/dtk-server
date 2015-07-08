@@ -13,7 +13,8 @@ module DTK
       Service.new(assembly).delete_module?(opts)
     end
 
-   private
+    private
+
     def self.assembly_module_version(assembly)
       ModuleVersion.ret(assembly)
     end

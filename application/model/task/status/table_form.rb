@@ -17,9 +17,10 @@ module DTK; class Task; class Status
       status_table_form(task,opts)
     end
 
-   private
+    private
+
     def self.status_table_form(task,opts,level=1,ndx_errors=nil)
-      ret = Array.new
+      ret = []
       task.set_and_return_types!()
       el = task.hash_subset(:started_at,:ended_at)
 
@@ -70,14 +71,14 @@ module DTK; class Task; class Status
       subtasks = task.subtasks()
       num_subtasks = subtasks.size
       if num_subtasks > 0
-        if opts[:summarize_node_groups] and (ea and ea[:node].is_node_group?())
+        if opts[:summarize_node_groups] && (ea && ea[:node].is_node_group?())
           NodeGroupSummary.new(subtasks).add_summary_info!(el) do
-            subtasks.map{|st|status_table_form(st,opts,level+1)}.flatten(1)
+            subtasks.flat_map{|st|status_table_form(st,opts,level+1)}
           end
         else
-          ret += subtasks.sort{|a,b| (a[:position]||0) <=> (b[:position]||0)}.map do |st|
+          ret += subtasks.sort{|a,b| (a[:position]||0) <=> (b[:position]||0)}.flat_map do |st|
             status_table_form(st,opts,level+1,ndx_errors)
-          end.flatten(1)
+          end
         end
       end
       ret
@@ -89,7 +90,7 @@ module DTK; class Task; class Status
         if ret
           ret[:message] << "\n\n"
         else
-          ret = {:message => String.new}
+          ret = {message: ''}
         end
 
         if error.is_a? String
@@ -111,7 +112,7 @@ module DTK; class Task; class Status
 
       logs.each do |log|
         unless ret
-          ret = {:message => String.new}
+          ret = {message: ''}
         end
 
         if log.is_a? String
@@ -135,7 +136,7 @@ module DTK; class Task; class Status
         task[:display_name]
       elsif type = task[:type]
         node = (task[:executable_action]||{})[:node]
-        config_agent = task.get_config_agent_type(nil, {:no_error_if_nil => true})
+        config_agent = task.get_config_agent_type(nil, no_error_if_nil: true)
 
         if config_agent == 'dtk_provider'
           if node && node.is_node_group?()

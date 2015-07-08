@@ -21,7 +21,6 @@ centos_memory_size = 'm1.small'
 dtk_common = DtkCommon.new(service_name, assembly_name)
 
 describe "(Use Of Parameters) Test Case 5: Change optional params on existing attributes in service nodes (values were previously defined)" do
-
 	before(:all) do
 		puts "********************************************************************************************************************************",""
 	end

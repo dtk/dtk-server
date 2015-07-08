@@ -1,5 +1,4 @@
 class HomePage < PageContainer
-
   attr_accessor :host_url
 
   def get_loginpage

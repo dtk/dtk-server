@@ -18,7 +18,6 @@ file_for_change = "dtk.model.yaml"
 dtk_common = DtkCommon.new("", "")
 
 describe "(Component Module DSL) Test Case 2: Rename existing component from dtk.model.yaml file, push-clone-changes to server and list components to see the effect of rename" do
-
   before(:all) do
     puts "********************************************************************************************************************************************************************",""
   end

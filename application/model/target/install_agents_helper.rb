@@ -12,9 +12,9 @@ module DTK; class Target
     def self.install(target)
       new(target).install
     end
-    def install()
+    def install
       # we get all the nodes that are 'unmanaged', meaning they are physical nodes that does not have node agent installed
-      unmanaged_nodes = @target.get_objs(:cols => [:unmanaged_nodes]).map{|r|r[:node]}
+      unmanaged_nodes = @target.get_objs(cols: [:unmanaged_nodes]).map{|r|r[:node]}
       servers, install_script, mcollective_client = [], nil, nil
 
       # TODO: better to use tempfile library; see how it is used in ../server/utils/internal/command_and_control/adapters/node_config/mcollective/config.rb
@@ -76,6 +76,7 @@ module DTK; class Target
       Job = Struct.new(:worker, :params)
 
       module_function
+
       def enqueue(worker, *params)
           @queue << Job.new(worker, params)
       end
@@ -141,13 +142,12 @@ module DTK; class Target
         end
 
         params = {
-          :hostname => external_ref[:routable_host_address],
-          :user => ssh_credentials[:ssh_user],
-          :password => ssh_credentials[:ssh_password],
-          :port => ssh_credentials[:port]||"22",
-          :id => node.id()
+          hostname: external_ref[:routable_host_address],
+          user: ssh_credentials[:ssh_user],
+          password: ssh_credentials[:ssh_password],
+          port: ssh_credentials[:port]||"22",
+          id: node.id()
         }
-
 
         # just to test taht can connect
         begin
@@ -161,11 +161,11 @@ module DTK; class Target
 
         Net::SCP.upload!(params[:hostname], params[:user],
           "#{message["install_script_file_path"]}/#{message["install_script_file_name"]}", "/tmp",
-          :ssh => { :password => params[:password], :port => params[:port] }, :recursive => true)
+          ssh: { password: params[:password], port: params[:port] }, recursive: true)
 
         Net::SCP.upload!(params[:hostname], params[:user],
           message["dtk_node_agent_location"], "/tmp",
-          :ssh => { :password => params[:password], :port => params[:port] }, :recursive => true)
+          ssh: { password: params[:password], port: params[:port] }, recursive: true)
 
         # perform installation
         install_command = params[:user].eql?('root') ? "bash /tmp/dtk-node-agent/install_agent.sh" : "sudo bash /tmp/dtk-node-agent/install_agent.sh"
@@ -181,26 +181,27 @@ module DTK; class Target
 
         # send discover call filtered by 'pbuilderid'(node[:ref] == pbuilderid)
         # if empty array is returned, agent on node is not working as expected
-        filter = {"fact"=>[{:fact=>"pbuilderid",:value=>node[:ref],:operator=>"=="}], "cf_class"=>[], "agent"=>[], "identity"=>[], "compound"=>[]}
+        filter = {"fact"=>[{fact: "pbuilderid",value: node[:ref],operator: "=="}], "cf_class"=>[], "agent"=>[], "identity"=>[], "compound"=>[]}
         discovered_data = CommandAndControl.discover(filter, 3, 1, mcollective_client)
 
         # set managed = true only if mcollective from node returns valid response
         if discovered_data.is_a?(Array)
-          node.update(:managed => true) unless discovered_data.empty?
+          node.update(managed: true) unless discovered_data.empty?
         else
-          node.update(:managed => true) unless (discovered_data.nil? && discovered_data.payload.nil?)
+          node.update(managed: true) unless (discovered_data.nil? && discovered_data.payload.nil?)
         end
       end
 
-     private
+      private
+
       def name_and_id(node)
-        node.pp_name_and_id(:capitalize=>true)
+        node.pp_name_and_id(capitalize: true)
       end
 
       def execute_ssh_command(command, params={})
-        Net::SSH.start(params[:hostname], params[:user], :password => params[:password], :port => params[:port]) do |ssh|
+        Net::SSH.start(params[:hostname], params[:user], password: params[:password], port: params[:port]) do |ssh|
           # capture all stderr and stdout output from a remote process
-          ssh.exec!(command) do |channel, stream, line|
+          ssh.exec!(command) do |_channel, _stream, line|
             puts "#{params[:hostname]} > #{line}"
           end
         end

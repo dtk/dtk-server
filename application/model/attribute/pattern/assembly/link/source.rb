@@ -19,14 +19,16 @@ module DTK; class Attribute::Pattern
       end
       
       attr_reader :attribute_pattern,:fn
-      def attribute_idh()
+      def attribute_idh
         @attribute_pattern.attribute_idhs.first
       end
-      def component_instance()
+
+      def component_instance
         @attribute_pattern.component_instance()
       end
 
-     private
+      private
+
       def initialize(attr_pattern,fn,attr_term)
         attr_idhs = attr_pattern.attribute_idhs
         if attr_idhs.empty?
@@ -48,13 +50,14 @@ module DTK; class Attribute::Pattern
           end
         end
 
-       private
+        private
+
         # TODO: need better way to do this; there is alsso an ambiguity if component level attribute host_address
         # returns [attr_term,node_cmp_type] where last term can be nil
         def self.strip_special_symbols(attr_term)
           ret = [attr_term,nil]
           split = attr_term.split('/')
-          if split.size == 3 and split[2] == 'host_address'
+          if split.size == 3 && split[2] == 'host_address'
             node_part,cmp_part,attr_part = split
             ret = ["#{node_part}/#{attr_part}",cmp_part]
           end
@@ -70,10 +73,10 @@ module DTK; class Attribute::Pattern
             attr_term = $2
             str_part2 = $3
             fn = {
-              :function => {
-                :name => :var_embedded_in_text,
-                :constants => {
-                  :text_parts => [str_part1,str_part2]
+              function: {
+                name: :var_embedded_in_text,
+                constants: {
+                  text_parts: [str_part1,str_part2]
                 }
               }
             }

@@ -42,7 +42,6 @@ dtk_common.password = tenant_password
 dtk_common.login
 
 describe "DTK Server smoke test release" do
-
   before(:all) do
     puts "*****************************",""
   end
@@ -76,9 +75,9 @@ describe "DTK Server smoke test release" do
       include_context "Set attribute", dtk_common, memory_size_attribute, memory_size
     end
 
-#    context "Converge function" do
-#      include_context "Converge service", dtk_common, 30
-#    end
+    #    context "Converge function" do
+    #      include_context "Converge service", dtk_common, 30
+    #    end
 
     context "Delete and destroy service function" do
       include_context "Delete services", dtk_common
@@ -93,13 +92,13 @@ describe "DTK Server smoke test release" do
     include_context "Delete component module", dtk_common, local_component_module_name
   end
 
- # context "Delete #{component_module_name} component module from remote" do
- #   include_context "Delete component module from remote repo rvm", rvm_path, dtk_common, component_module_name, namespace
- # end
+  # context "Delete #{component_module_name} component module from remote" do
+  #   include_context "Delete component module from remote repo rvm", rvm_path, dtk_common, component_module_name, namespace
+  # end
 
-#  context "Delete #{service_module_name} service module from remote" do
-#    include_context "Delete service module from remote repo rvm", rvm_path, dtk_common, service_module_name, namespace
-#  end
+  #  context "Delete #{service_module_name} service module from remote" do
+  #    include_context "Delete service module from remote repo rvm", rvm_path, dtk_common, service_module_name, namespace
+  #  end
 
   after(:all) do
     puts "", ""

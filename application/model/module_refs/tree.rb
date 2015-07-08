@@ -14,7 +14,7 @@ module DTK
         # module_refs is hash where key is module_name and
         # value is either nil for a missing reference
         # or it points to a Tree object
-        @module_refs = Hash.new 
+        @module_refs = {} 
       end
       private :initialize
       
@@ -26,16 +26,17 @@ module DTK
         create_module_refs_starting_from_assembly(assembly_instance,assembly_branch,components)
       end
 
-      def isa_missing_module_ref?()
-        @context.kind_of?(ModuleRef::Missing) && @context
-      end
-      def isa_module_ref?()
-        @context.kind_of?(ModuleRef) && @context
+      def isa_missing_module_ref?
+        @context.is_a?(ModuleRef::Missing) && @context
       end
 
-      def violations?()
-        missing   = Hash.new
-        multi_ns  = Hash.new
+      def isa_module_ref?
+        @context.is_a?(ModuleRef) && @context
+      end
+
+      def violations?
+        missing   = {}
+        multi_ns  = {}
         refs      = hash_form()
 
         refs.each do |k,v|
@@ -44,7 +45,7 @@ module DTK
           end
         end
 
-        multi_ns.delete_if{|k,v| v.size < 2}
+        multi_ns.delete_if{|_k,v| v.size < 2}
         return missing, multi_ns
       end
 
@@ -65,7 +66,7 @@ module DTK
             else
               multi_ns.merge!(name => [namespace])
             end
-            check_refs(ref[:refs], missing, multi_ns) if ref.has_key?(:refs)
+            check_refs(ref[:refs], missing, multi_ns) if ref.key?(:refs)
           else
             # we don't know which namespace this module belongs to, so sending empty namespace
             missing.merge!(name => '')
@@ -73,9 +74,9 @@ module DTK
         end
       end
 
-      def hash_form()
-        ret = Hash.new
-        if @context.kind_of?(Assembly)
+      def hash_form
+        ret = {}
+        if @context.is_a?(Assembly)
           ret[:type] = Workspace.is_workspace?(@context) ? 'Workspace' : 'Assembly::Instance'
           ret[:name] = @context.get_field?(:display_name)
         elsif isa_module_ref?()
@@ -92,7 +93,7 @@ module DTK
           ret[:content] = @context
         end
         
-        refs = @module_refs.inject(Hash.new) do |h,(module_name,subtree)|
+        refs = @module_refs.inject({}) do |h,(module_name,subtree)|
           h.merge(module_name => subtree && subtree.hash_form())
         end
         ret[:refs] = refs unless refs.empty?
@@ -104,19 +105,20 @@ module DTK
         @module_refs[module_name] = child
       end
 
-      def namespace()
+      def namespace
         namespace?() || (Log.error_pp(["Unexpected that no namespace_info for",self]); nil)
       end
-      def namespace?()
-        if @context.kind_of?(ModuleRef)
+
+      def namespace?
+        if @context.is_a?(ModuleRef)
           @context[:namespace_info]
-        elsif @context.kind_of?(ModuleRef::Missing)
+        elsif @context.is_a?(ModuleRef::Missing)
           @context.namespace
         end
       end
 
-      def external_ref?()
-        if @context.kind_of?(ModuleRef)
+      def external_ref?
+        if @context.is_a?(ModuleRef)
           @context[:external_ref]
         end
       end
@@ -142,7 +144,7 @@ module DTK
         self
       end
 
-     private
+      private
 
       def self.namespace_model_name_path_el(namespace,module_name)
         namespace ? "#{namespace}:#{module_name}" : module_name
@@ -150,19 +152,19 @@ module DTK
 
       def self.create_module_refs_starting_from_assembly(assembly_instance,assembly_branch,components)
         # get relevant service and component module branches 
-        ndx_cmps = Hash.new #components indexed (grouped) by branch id
+        ndx_cmps = {} #components indexed (grouped) by branch id
         components.each do |cmp|
           unless branch_id = cmp.get_field?(:module_branch_id)
             Log.error("Unexpected that :module_branch_id not in: #{cmp.inspect}")
             next
           end
-          (ndx_cmps[branch_id] ||= Array.new) << cmp
+          (ndx_cmps[branch_id] ||= []) << cmp
         end
         cmp_module_branch_ids = ndx_cmps.keys
 
         sp_hash = {
-          :cols => ModuleBranch.common_columns(),
-          :filter => [:oneof,:id,cmp_module_branch_ids]
+          cols: ModuleBranch.common_columns(),
+          filter: [:oneof,:id,cmp_module_branch_ids]
         }
         cmp_module_branches = Model.get_objs(assembly_instance.model_handle(:module_branch),sp_hash)
 
@@ -185,13 +187,12 @@ module DTK
         ret
       end
 
-
       # TODO: fix this up because cmp_module_branches already has implict namespace so this is 
       # effectively just checking consistency of component module refs
       # and setting of module_branch_id in component insatnces
       def self.get_top_level_children(cmp_module_branches,service_module_branch,&block)
         # get component module refs indexed by module name
-        ndx_module_refs = Hash.new
+        ndx_module_refs = {}
         ModuleRefs.get_component_module_refs(service_module_branch).component_modules.each_value do |module_ref|
           ndx_module_refs[module_ref[:module_name]] ||= module_ref
         end
@@ -199,7 +200,7 @@ module DTK
         # get branches indexed by module_name
         # TODO: can bulk up; look also at using 
         # assembly_instance.get_objs(:cols=> [:instance_component_module_branches])
-        ndx_mod_name_branches = cmp_module_branches.inject(Hash.new) do |h,module_branch|
+        ndx_mod_name_branches = cmp_module_branches.inject({}) do |h,module_branch|
           h.merge(module_branch.get_module()[:display_name] => module_branch)
         end
         
@@ -210,9 +211,9 @@ module DTK
         end
       end
 
-      def get_children(module_branches,opts={},&block)
+      def get_children(module_branches,_opts={},&block)
         # get component module refs indexed by module name
-        ndx_module_refs = Hash.new
+        ndx_module_refs = {}
         ModuleRefs.get_multiple_component_module_refs(module_branches).each do |cmrs|
           cmrs.component_modules.each_value do |module_ref|
             ndx_module_refs[module_ref[:id]] ||= module_ref
@@ -221,7 +222,7 @@ module DTK
         module_refs = ndx_module_refs.values
 
         #ndx_module_branches is component module branches indexed by module ref id
-        ndx_module_branches = Hash.new
+        ndx_module_branches = {}
         ModuleRef.find_ndx_matching_component_modules(module_refs).each_pair do |mod_ref_id,cmp_module|
           version = nil #TODO: stub; need to change when treat service isnatnce branches
           ndx_module_branches[mod_ref_id] = cmp_module.get_module_branch_matching_version(version)
@@ -233,7 +234,6 @@ module DTK
           block.call(module_ref[:module_name],module_ref[:namespace_info],child)
         end
       end
-
     end
   end
 end

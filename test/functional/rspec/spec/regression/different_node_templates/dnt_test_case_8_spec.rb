@@ -28,10 +28,10 @@ def get_node_ec2_public_dns(service_name, node_name)
 	node_ec2_public_dns = ""
 	dtk_common = DtkCommon.new('','')
 
-	info_response = dtk_common.send_request('/rest/assembly/info_about', {:assembly_id => service_name, :subtype => :instance, :about => "nodes"})
+	info_response = dtk_common.send_request('/rest/assembly/info_about', assembly_id: service_name, subtype: :instance, about: "nodes")
 	ap info_response
 
-	node_info = info_response['data'].select { |x| x['display_name'] == node_name}.first
+	node_info = info_response['data'].find { |x| x['display_name'] == node_name}
 
 	if !node_info.nil?
 		node_ec2_public_dns = node_info['external_ref']['ec2_public_address']
@@ -48,7 +48,6 @@ def get_node_ec2_public_dns(service_name, node_name)
 end
 
 describe "(Different Node Templates) Test Case 8: Wordpress - Single node scenario" do
-
 	before(:all) do
 		puts "************************************************************************",""
   end

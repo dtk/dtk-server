@@ -7,11 +7,12 @@ module DTK
       end
 
       def set_node_bindings(target,assembly)
-        hash_content = inject(Hash.new){|h,el|h.merge(el.hash_form)}
+        hash_content = inject({}){|h,el|h.merge(el.hash_form)}
         ::DTK::NodeBindings::DSL.set_node_bindings(target,assembly,hash_content)
       end
 
-     private
+      private
+
       def self.each_element(content,&block)
         content.each_pair do |assembly_node,node_target|
           block.call(Element.new(assembly_node,node_target))
@@ -24,7 +25,8 @@ module DTK
           @assembly_node = assembly_node
           @node_target = node_target
         end
-        def hash_form()
+
+        def hash_form
           {@assembly_node => @node_target}
         end
       end

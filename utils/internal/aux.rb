@@ -25,26 +25,28 @@ module DTK
 
       # for hashs and arrays
       def deep_copy(obj)
-        if obj.kind_of?(Hash)
+        if obj.is_a?(Hash)
           obj.inject({}){|h,kv|h.merge(kv[0] => deep_copy(kv[1]))}
-        elsif obj.kind_of?(Array)
+        elsif obj.is_a?(Array)
           obj.map{|el|deep_copy(el)}
         else
           obj
         end
       end
 
-      def platform_is_linux?()
+      def platform_is_linux?
         RUBY_PLATFORM.downcase.include?("linux")
       end
-      def platform_is_windows?()
-        RUBY_PLATFORM.downcase.include?("mswin") or RUBY_PLATFORM.downcase.include?("mingw")
+
+      def platform_is_windows?
+        RUBY_PLATFORM.downcase.include?("mswin") || RUBY_PLATFORM.downcase.include?("mingw")
       end
-      def platform()
+
+      def platform
         RUBY_PLATFORM
       end
 
-      def now_time_stamp()
+      def now_time_stamp
         SQL.now
         # TODO: change to use app server clock
       end
@@ -72,7 +74,7 @@ module DTK
       def random_generate(opts={})
         length = opts[:length] || RandomGenerate::DefaultLength
         types = opts[:types] || (opts[:type] && [opts[:type]]) || [RandomGenerate::DefaultType]
-        charset = types.inject(String.new) do |str,type|
+        charset = types.inject('') do |str,type|
           unless cs = RandomGenerate::CharSet[type]
             raise Error.new("Type (#{type.inspect}) not treated")
           end
@@ -93,12 +95,13 @@ module DTK
       end
 
       def convert_keys_to_symbols(hash)
-        hash.keys.inject(Hash.new){|h,k|h.merge(k.to_sym => hash[k])}
+        hash.keys.inject({}){|h,k|h.merge(k.to_sym => hash[k])}
       end
+
       def convert_keys_to_symbols_recursive(obj)
-        if obj.kind_of?(Hash)
-          obj.keys.inject(Hash.new){|h,k|h.merge(k.to_sym => convert_keys_to_symbols_recursive(obj[k]))}
-        elsif obj.kind_of?(Array)
+        if obj.is_a?(Hash)
+          obj.keys.inject({}){|h,k|h.merge(k.to_sym => convert_keys_to_symbols_recursive(obj[k]))}
+        elsif obj.is_a?(Array)
           obj.map{|el|convert_keys_to_symbols_recursive(el)}
         else
           obj
@@ -125,28 +128,31 @@ module DTK
 
       # key can be symbol or of form {symbol => symbol} 
       def hash_subset(hash,keys,opts={},&block)
-        hash_subset_aux(opts[:seed]||Hash.new(),hash,keys,opts,&block)
+        hash_subset_aux(opts[:seed]||{},hash,keys,opts,&block)
       end
+
       def ordered_hash_subset(hash,keys,opts={},&block)
         seed = ActiveSupport::OrderedHash.new()
         seed.merge!(opts[:seed]) if opts[:seed]
         hash_subset_aux(seed,hash,keys,opts,&block)
       end
-     private
+
+      private
+
       def hash_subset_aux(seed,hash,keys,opts={},&block)
-        keys = [keys] unless keys.kind_of?(Array)
+        keys = [keys] unless keys.is_a?(Array)
         keys.inject(seed) do |ret,k|
-          index = k.kind_of?(Hash) ? k.keys.first : k
-          if opts[:only_non_nil] and hash[index].nil?
+          index = k.is_a?(Hash) ? k.keys.first : k
+          if opts[:only_non_nil] && hash[index].nil?
             ret
-          elsif not (hash.has_key?(index) or opts[:include_virtual_columns])
+          elsif not (hash.key?(index) || opts[:include_virtual_columns])
             ret
           else
-            key = k.kind_of?(Hash) ? k.values.first : k
+            key = k.is_a?(Hash) ? k.values.first : k
             val = 
-              if block and block.arity == 1
+              if block && block.arity == 1
                 block.call(hash[index])
-              elsif block and block.arity == 2
+              elsif block && block.arity == 2
                 block.call(key,hash[index])
               else  
                 hash[index]
@@ -156,27 +162,29 @@ module DTK
         end
       end
 
-     public
+      public
+
       # adds to array only if not included
       def array_add?(array,els)
         Array(els).inject(array){|a,el|a.include?(el) ? a : a + [el]}
       end
 
       def can_take_index?(x)
-        x.kind_of?(Hash) or x.kind_of?(Array)
+        x.is_a?(Hash) || x.is_a?(Array)
       end
 
       def ret_key(key_value)
-        return nil unless key_value.kind_of?(Hash)
+        return nil unless key_value.is_a?(Hash)
         key_value.keys.first
       end
+
       def ret_value(key_value)
-        return nil unless key_value.kind_of?(Hash)
+        return nil unless key_value.is_a?(Hash)
         key_value.values.first
       end
 
       def json_parse(json,opts={})
-        ret = Hash.new
+        ret = {}
         if json.empty?
           return ret
         end
@@ -262,7 +270,6 @@ module DTK
         end
       end
 
-
       ## Taken from Sequel
       def camelize(str_x,first_letter_in_uppercase = :upper)
         str = str_x.to_s
@@ -275,12 +282,13 @@ module DTK
         str.gsub(/::/, '/').gsub(/([A-Z]+)([A-Z][a-z])/,'\1_\2').
         gsub(/([a-z\d])([A-Z])/,'\1_\2').tr("-", "_").downcase
       end
+
       def demodulize(str)
         str.gsub(/^.*::/, '')
       end
 
       def without_keys(hash,array_with_keys_to_remove)
-        hash.reject{|k,v| array_with_keys_to_remove.include?(k)}
+        hash.reject{|k,_v| array_with_keys_to_remove.include?(k)}
       end
 
       # object or nesting is scalar, Hash or Array
@@ -289,31 +297,31 @@ module DTK
           y.nil?
         elsif y.nil?
           nil
-        elsif x.kind_of?(Hash)
-          return nil unless y.kind_of?(Hash)
+        elsif x.is_a?(Hash)
+          return nil unless y.is_a?(Hash)
           return nil unless x.size == y.size
-          x.each{|k,v|
+          x.each do|k,v|
             return nil unless objects_equal?(v,y[k])
-          }
+          end
           true
-        elsif x.kind_of?(Array)
-          return nil unless y.kind_of?(Array)
+        elsif x.is_a?(Array)
+          return nil unless y.is_a?(Array)
           return nil unless x.size == y.size
           for i in 0..x.size
             return nil unless objects_equal?(x[i],y[i])
           end
           true
         else
-          return nil if y.kind_of?(Hash) or y.kind_of?(Array)
+          return nil if y.is_a?(Hash) || y.is_a?(Array)
           x == y
         end
       end
 
       def merge_into_json_col!(base,key,update)
         basek = base[key]
-        if update.kind_of?(Hash) and basek.kind_of?(Hash)
+        if update.is_a?(Hash) && basek.is_a?(Hash)
           update.each{|k,v|merge_into_json_col!(basek,k,v)}
-        elsif update.kind_of?(Array) and basek.kind_of?(Array)
+        elsif update.is_a?(Array) && basek.is_a?(Array)
           if update.size == basek.size
             update.each_with_index{|upd,i|merge_into_json_col!(basek,i,upd)}
           else
@@ -328,9 +336,11 @@ module DTK
       def col_refs_to_keys(hash)
         hash.inject({}){|h,kv|h.merge(kv[0].to_sym => kv[1])}
       end
+
       def marshal_to_wire(obj)
         ::Marshal.dump(obj)
       end
+
       def unmarshal_from_wire(data)
         ::Marshal.load(data)
       end
@@ -345,9 +355,9 @@ module DTK
       end
 
       def convert_to_symbol_form_aux(item)
-        if item.kind_of?(Array)
+        if item.is_a?(Array)
           item.map{|x|convert_to_symbol_form_aux(x)} 
-        elsif item.kind_of?(Hash)
+        elsif item.is_a?(Hash)
           ret = {}
           item.each{|k,v|ret[k.to_sym] = convert_to_symbol_form_aux(v)}
           ret
@@ -368,7 +378,6 @@ module DTK
           plural #input not plural
         end
       end
-
     end
   end
 
@@ -388,7 +397,7 @@ class Class
   # transform inputs before applying to interval method var
   def expose_methods_from_internal_object(innervar,methods_to_expose,opts={})
     if R8::Config[:benchmark]
-      return expose_methods_with_benchmark(innervar,methods_to_expose,opts.merge(:benchmark => R8::Config[:benchmark]))
+      return expose_methods_with_benchmark(innervar,methods_to_expose,opts.merge(benchmark: R8::Config[:benchmark]))
     end 
     methods_to_expose.each do |m| 
       method_def = 
@@ -408,7 +417,7 @@ class Class
     post_hook = opts[:post_hook]
     methods_to_expose.each do |m| 
       exec = "@#{innervar}.#{m}(*args)"
-      exec = "XYZ::Aux.benchmark('#{m}'){#{exec}}" if b == :all or (b.respond_to?(:include?) and b.include?(m))
+      exec = "XYZ::Aux.benchmark('#{m}'){#{exec}}" if b == :all || (b.respond_to?(:include?) && b.include?(m))
       method_def = (post_hook ? "def #{m}(*args);#{post_hook}.call(#{exec});end" : "def #{m}(*args);#{exec};end")
       class_eval(method_def)
     end
@@ -422,48 +431,49 @@ end
 
 # for being able to determine the method name in the function call
 module Kernel
-private
+  private
+
    def this_method
-     caller[0] =~ /`([^']*)'/ and $1
+     caller[0] =~ /`([^']*)'/ && $1
    end
+
    def this_parent_method
-     caller[1] =~ /`([^']*)'/ and $1
+     caller[1] =~ /`([^']*)'/ && $1
    end
+
    def this_parent_parent_method
-     caller[2] =~ /`([^']*)'/ and $1
+     caller[2] =~ /`([^']*)'/ && $1
    end
 end
 
 # monkey patch
 class Object
   # dups only if object responds to dup
-  def dup?()
+  def dup?
     return self unless respond_to?(:dup)
     # put in because bug or unexpected result in respond_to? with boolean instances and nil
-    return self if nil? or kind_of?(TrueClass) or kind_of?(FalseClass)
+    return self if nil? || is_a?(TrueClass) || is_a?(FalseClass)
     dup
   end
 end
 
-=begin
-TODO: remove
-require 'rack'
-
-module Rack::Utils
-  def parse_nested_query(qs, d = nil)
-    params = {}
-    
-    (qs || '').split(d ? /[#{d}] */n : DEFAULT_SEP_MODIFIED).each do |p|
-      k, v = unescape(p).split('=', 2)
-      normalize_params(params, k, v)
-    end
-    
-    return params
-  end
- module_function :parse_nested_query
-  DEFAULT_SEP_MODIFIED = /[&] */n
-end
-=end
+# TODO: remove
+# require 'rack'
+#
+# module Rack::Utils
+#   def parse_nested_query(qs, d = nil)
+#     params = {}
+#     
+#     (qs || '').split(d ? /[#{d}] */n : DEFAULT_SEP_MODIFIED).each do |p|
+#       k, v = unescape(p).split('=', 2)
+#       normalize_params(params, k, v)
+#     end
+#     
+#     return params
+#   end
+#  module_function :parse_nested_query
+#   DEFAULT_SEP_MODIFIED = /[&] */n
+# end
 
 
 

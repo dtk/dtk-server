@@ -14,8 +14,9 @@ module DTK; class Task; class Template
         end
       end
 
-     private
-      def initialize(new_action,action_list,gen_constraints_proc=nil,insert_strategy=nil)
+      private
+
+      def initialize(new_action,action_list,gen_constraints_proc=nil,_insert_strategy=nil)
         @new_action = action_list.find{|a|a.match_action?(new_action)}
         @new_action_node_id = new_action.node_id
         @gen_constraints_proc = gen_constraints_proc
@@ -29,8 +30,9 @@ module DTK; class Task; class Template
         def get(inter_or_same,before_or_after)
           (self[inter_or_same]||{})[before_or_after]||{}
         end
+
         def add(inter_or_same,before_or_after,action)
-          pntr = ((self[inter_or_same] ||= Hash.new)[before_or_after] ||= Hash.new)
+          pntr = ((self[inter_or_same] ||= {})[before_or_after] ||= {})
           Content.add_ndx_action_index!(pntr,action)
           self
         end
@@ -49,10 +51,10 @@ module DTK; class Task; class Template
       end
 
       InsertStrategies = {
-        :insert_at_end => InsertAtEnd
+        insert_at_end: InsertAtEnd
       }
 
-      def compute_before_after_relations!()
+      def compute_before_after_relations!
         unless new_action_index = @new_action.index
           # if @new_action does not have an index it means that it is not in action list
           Log.error("Cannot find action in action list; using no constraints")
@@ -84,10 +86,10 @@ module DTK; class Task; class Template
       def get_ndx_action_indexes(inter_or_same,before_or_after)
         @ndx_action_indexes.get(inter_or_same,before_or_after)
       end
+
       def add_ndx_action_index(inter_or_same,before_or_after,action)
         @ndx_action_indexes.add(inter_or_same,before_or_after,action)
       end
-
     end
   end
 end;end;end

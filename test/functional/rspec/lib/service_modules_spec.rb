@@ -48,7 +48,7 @@ shared_context "Import remote service module" do |service_module_name|
   end
 end
 
-shared_context "NEG - Import remote service module" do |dtk_common, service_module_name|
+shared_context "NEG - Import remote service module" do |_dtk_common, service_module_name|
   it "will not import #{service_module_name} service module from remote repo since there are referenced component modules on local filesystem which are not deleted" do
     puts "NEG - Import remote service module:", "-----------------------------------"
     pass = false
@@ -99,7 +99,7 @@ shared_context "NEG - List all service modules" do |dtk_common, service_module_n
   end
 end
 
-shared_context "List all service modules on remote" do |dtk_common, service_module_name, namespace|
+shared_context "List all service modules on remote" do |_dtk_common, service_module_name, namespace|
   it "verifies that #{service_module_name} service module exists on remote" do
     puts "List all service modules on remote:", "-----------------------------------"
     pass = false
@@ -113,7 +113,7 @@ shared_context "List all service modules on remote" do |dtk_common, service_modu
   end
 end
 
-shared_context "Export service module" do |dtk_common, service_module_name, namespace|
+shared_context "Export service module" do |_dtk_common, service_module_name, namespace|
   it "exports #{service_module_name} service module to #{namespace} namespace on remote repo" do
     puts "Export service module to remote:", "--------------------------------"
     pass = false
@@ -128,7 +128,7 @@ shared_context "Export service module" do |dtk_common, service_module_name, name
   end
 end
 
-shared_context "Export service module rvm" do |rvm_path, dtk_common, service_module_name, namespace|
+shared_context "Export service module rvm" do |rvm_path, _dtk_common, service_module_name, namespace|
   it "exports #{service_module_name} service module to #{namespace} namespace on remote repo" do
     puts "Export service module to remote:", "--------------------------------"
     pass = false
@@ -170,7 +170,7 @@ shared_context "Delete service module from local filesystem" do |service_module_
   end
 end
 
-shared_context "Delete service module from remote repo" do |dtk_common, service_module_name, namespace|
+shared_context "Delete service module from remote repo" do |_dtk_common, service_module_name, namespace|
   it "deletes #{service_module_name} service module with #{namespace} namespace from remote repo" do
     puts "Delete service module from remote (dtkn):", "-----------------------------------------"
     pass = false
@@ -183,7 +183,7 @@ shared_context "Delete service module from remote repo" do |dtk_common, service_
   end
 end
 
-shared_context "Delete service module from remote repo rvm" do |rvm_path, dtk_common, service_module_name, namespace|
+shared_context "Delete service module from remote repo rvm" do |rvm_path, _dtk_common, service_module_name, namespace|
   it "deletes #{service_module_name} service module with #{namespace} namespace from remote repo" do
     puts "Delete service module from remote (dtkn):", "-----------------------------------------"
     pass = false

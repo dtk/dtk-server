@@ -3,7 +3,6 @@
 r8_require('../../utils/internal/routes/routes')
 
 R8::ReactorRoute.draw do
-
   # USER
   post 'user/process_login'      => "user#process_login"
   get  'user/process_logout'     => "user#process_logout"
@@ -23,7 +22,7 @@ R8::ReactorRoute.draw do
   post  'account/set_catalog_credentials' => 'account#set_catalog_credentials'
   post  'account/check_catalog_credentials' => 'account#check_catalog_credentials'
 
-   # ASSEMBLY
+  # ASSEMBLY
   post  'assembly/promote_to_template' => 'assembly#promote_to_template'
   post  'assembly/get_action_results' => 'assembly#get_action_results'
   post  'assembly/find_violations' => 'assembly#find_violations'
@@ -86,15 +85,15 @@ R8::ReactorRoute.draw do
   post  'assembly/get_node_groups' => 'assembly#get_node_groups'
   post  'assembly/get_nodes_without_node_groups' => 'assembly#get_nodes_without_node_groups'
 
-   # ATTRIBUTE
+  # ATTRIBUTE
   post  'attribute/set' => 'attribute#set'
 
-   # COMPONENT
+  # COMPONENT
   post  'component/info' => 'component#info'
   post  'component/list' => 'component#list'
   post  'component/stage' => 'component#stage'
 
-   # COMPONENT_MODULE
+  # COMPONENT_MODULE
   post  'component_module/add_user_direct_access' => 'account#add_user_direct_access'
   post  'component_module/info_about' => 'component_module#info_about'
   post  'component_module/pull_from_remote' => 'component_module#pull_from_remote'
@@ -128,7 +127,7 @@ R8::ReactorRoute.draw do
   post  'component_module/add_git_remote'         => 'component_module#add_git_remote'
   post  'component_module/remove_git_remote'      => 'component_module#remove_git_remote'
 
-   # TEST_MODULE
+  # TEST_MODULE
   post  'test_module/add_user_direct_access' => 'account#add_user_direct_access'
   post  'test_module/info_about' => 'test_module#info_about'
   post  'test_module/pull_from_remote' => 'test_module#pull_from_remote'
@@ -161,7 +160,7 @@ R8::ReactorRoute.draw do
   post  'test_module/add_git_remote'         => 'test_module#add_git_remote'
   post  'test_module/remove_git_remote'      => 'test_module#remove_git_remote'
 
-   # NODE_MODULE
+  # NODE_MODULE
   post  'node_module/add_user_direct_access' => 'account#add_user_direct_access'
   post  'node_module/info_about' => 'node_module#info_about'
   post  'node_module/pull_from_remote' => 'node_module#pull_from_remote'
@@ -188,17 +187,17 @@ R8::ReactorRoute.draw do
   post  'node_module/update_from_initial_create' => 'node_module#update_from_initial_create'
   post  'node_module/list' => 'node_module#list'
 
-   # DEPENDENCY
+  # DEPENDENCY
   post  'dependency/add_component_dependency' => 'dependency#add_component_dependency'
 
-   # LIBRARY
+  # LIBRARY
   post  'library/list' => 'library#list'
   post  'library/info_about' => 'library#info_about'
 
-   # METADATA
+  # METADATA
   get 'metadata/get_metadata' => 'metadata#get_metadata'
 
-   # MONITORING_ITEM
+  # MONITORING_ITEM
   post  'monitoring_item/check_idle' => 'monitoring_item#check_idle'
 
   # NODE TEMPLATE
@@ -211,54 +210,49 @@ R8::ReactorRoute.draw do
   post  'node/start' => 'node#start'
   post  'node/stop' => 'node#stop'
   # these commands right now should only be called wrt to assembly context
-=begin
-  post  'node/find_violations' => 'node#find_violations'
-  post  'node/get_attributes' => 'node#get_attributes'
-  post  'node/set_attributes' => 'node#set_attributes'
-  post  'node/add_component' => 'node#add_component'
-  post  'node/delete_component' => 'node#delete_component'
-  post  'node/create_task' => 'node#create_task'
+  #   post  'node/find_violations' => 'node#find_violations'
+  #   post  'node/get_attributes' => 'node#get_attributes'
+  #   post  'node/set_attributes' => 'node#set_attributes'
+  #   post  'node/add_component' => 'node#add_component'
+  #   post  'node/delete_component' => 'node#delete_component'
+  #   post  'node/create_task' => 'node#create_task'
+  #
+  #   post  'node/info' => 'node#info'
+  #   post  'node/info_about' => 'node#info_about'
+  #   post  'node/destroy_and_delete' => 'node#destroy_and_delete'
+  #   post  'node/get_op_status' => 'node#get_op_status'
+  #
+  #   post  'node/task_status' => 'node#task_status'
+  #   post  'node/stage' => 'node#stage'
+  #   post  'node/initiate_get_netstats' => 'node#initiate_get_netstats'
+  #   post  'node/get_action_results' => 'node#get_action_results'
+  #   post  'node/initiate_get_ps' => 'node#initiate_get_ps'
+  #   post  'node/initiate_execute_tests' => 'node#initiate_execute_tests'
 
-  post  'node/info' => 'node#info'
-  post  'node/info_about' => 'node#info_about'
-  post  'node/destroy_and_delete' => 'node#destroy_and_delete'
-  post  'node/get_op_status' => 'node#get_op_status'
+  # NODE_GROUP
+  #   post  'node_group/list' => 'node_group#list'
+  #   post  'node_group/get_attributes' => 'node_group#get_attributes '
+  #   post  'node_group/set_attributes' => 'node_group#set_attributes'
+  #   post  'node_group/task_status' => 'node_group#task_status'
+  #   post  'node_group/create' => 'node_group#create'
+  #   post  'node_group/delete' => 'node_group#delete'
+  #   post  'node_group/info_about' => 'node_group#info_about'
+  #   post  'node_group/get_members' => 'node_group#get_members'
+  #   post  'node_group/add_component' => 'node_group#add_component'
+  #   post  'node_group/delete_component' => 'node_group#delete_component'
+  #   post  'node_group/create_task' => 'node_group#create_task'
+  #   post  'node_group/set_default_template_node' => 'node_group#set_default_template_node'
+  #   post  'node_group/clone_and_add_template_node' => 'node_group#clone_and_add_template_node'
 
-  post  'node/task_status' => 'node#task_status'
-  post  'node/stage' => 'node#stage'
-  post  'node/initiate_get_netstats' => 'node#initiate_get_netstats'
-  post  'node/get_action_results' => 'node#get_action_results'
-  post  'node/initiate_get_ps' => 'node#initiate_get_ps'
-  post  'node/initiate_execute_tests' => 'node#initiate_execute_tests'
-=end
-
-
-   # NODE_GROUP
-=begin
-  post  'node_group/list' => 'node_group#list'
-  post  'node_group/get_attributes' => 'node_group#get_attributes '
-  post  'node_group/set_attributes' => 'node_group#set_attributes'
-  post  'node_group/task_status' => 'node_group#task_status'
-  post  'node_group/create' => 'node_group#create'
-  post  'node_group/delete' => 'node_group#delete'
-  post  'node_group/info_about' => 'node_group#info_about'
-  post  'node_group/get_members' => 'node_group#get_members'
-  post  'node_group/add_component' => 'node_group#add_component'
-  post  'node_group/delete_component' => 'node_group#delete_component'
-  post  'node_group/create_task' => 'node_group#create_task'
-  post  'node_group/set_default_template_node' => 'node_group#set_default_template_node'
-  post  'node_group/clone_and_add_template_node' => 'node_group#clone_and_add_template_node'
-=end
-
-   # PROJECT
+  # PROJECT
   post  'project/list' => 'project#list'
 
-   # REPO
+  # REPO
   post  'repo/list' => 'repo#list'
   post  'repo/delete' => 'repo#delete'
   post  'repo/synchronize_target_repo' => 'repo#synchronize_target_repo'
 
-   # SERVICE_MODULE
+  # SERVICE_MODULE
   post  'service_module/add_user_direct_access' => 'account#add_user_direct_access'
   post  'service_module/list_component_modules' => 'service_module#list_component_modules'
   post  'service_module/update_model_from_clone' => 'service_module#update_model_from_clone'
@@ -296,10 +290,10 @@ R8::ReactorRoute.draw do
 
   # get   'service_module/workspace_branch_info/#{service_module_id.to_s}' => 'service_module#workspace_branch_info/#{service_module_id.to_s}'
 
-   # STATE_CHANGE
+  # STATE_CHANGE
   get 'state_change/list_pending_changes' => 'state_change#list_pending_changes'
 
-   # TARGET
+  # TARGET
   post  'target/list' => 'target#list'
   post  'target/create' => 'target#create'
   post  'target/create_provider' => 'target#create_provider'
@@ -312,7 +306,7 @@ R8::ReactorRoute.draw do
   post  'target/task_status' => 'target#task_status'
   post  'target/set_properties' => 'target#set_properties'
 
-   # TASK
+  # TASK
   post  'task/cancel_task' => 'task#cancel_task'
   post  'task/execute' => 'task#execute'
   post  'task/list' => 'task#list'
@@ -322,7 +316,6 @@ R8::ReactorRoute.draw do
   # NAMESPACE
   post  'namespace/default_namespace_name' => 'namespace#default_namespace_name'
 end
-
 
 R8::Routes.freeze
 

@@ -9,7 +9,7 @@ module DTK
     include SettingsMixin
 
     module DSLVersionInfo
-      def self.default_integer_version()
+      def self.default_integer_version
         ret = R8::Config[:dsl][:service][:integer_version][:default]
         ret && ret.to_i
       end
@@ -42,11 +42,11 @@ module DTK
     module DSLClassMixin
       def delete_assembly_dsl?(assembly_template_idh)
         sp_hash = {
-          :cols => [:display_name, :module_branch],
-          :filter => [:eq,:id,assembly_template_idh.get_id()]
+          cols: [:display_name, :module_branch],
+          filter: [:eq,:id,assembly_template_idh.get_id()]
         }
         assembly_template_mh = assembly_template_idh.createMH()
-        ndx_module_branches = Hash.new
+        ndx_module_branches = {}
         Assembly::Template.get_objs(assembly_template_mh,sp_hash).each do |r|
           module_branch = r[:module_branch]
           assembly_name = r[:display_name]
@@ -83,7 +83,7 @@ module DTK
         end
       end
 
-      def assembly_meta_directory_path(assembly_name,module_branch)
+      def assembly_meta_directory_path(assembly_name,_module_branch)
         "assemblies/#{assembly_name}"
       end
 
@@ -103,7 +103,7 @@ module DTK
         is_legacy_structure
       end
 
-     private
+      private
 
       # returns [meta_files,regexp,is_legacy_structure]
       def meta_files_regexp_and_is_legacy?(module_branch)
@@ -118,13 +118,13 @@ module DTK
       end
 
       AssemblyFilenamePathInfo = {
-        :regexp => Regexp.new("^assemblies/(.*)\.dtk\.assembly\.(json|yaml)$"),
-        :path_depth => 3
+        regexp: Regexp.new("^assemblies/(.*)\.dtk\.assembly\.(json|yaml)$"),
+        path_depth: 3
       }
 
       AssemblyFilenamePathInfoLegacy = {
-        :regexp => Regexp.new("^assemblies/([^/]+)/assembly\.(json|yaml)$"),
-        :path_depth => 3
+        regexp: Regexp.new("^assemblies/([^/]+)/assembly\.(json|yaml)$"),
+        path_depth: 3
       }
 
       def meta_file_assembly_name(meta_file_path)
@@ -136,17 +136,17 @@ module DTK
       # returns [meta_files, regexp]
       def meta_files_and_regexp_aux?(assembly_dsl_path_info,module_branch)
         depth = assembly_dsl_path_info[:path_depth]
-        meta_files = RepoManager.ls_r(depth,{:file_only => true},module_branch)
+        meta_files = RepoManager.ls_r(depth,{file_only: true},module_branch)
         regexp = assembly_dsl_path_info[:regexp]
         [meta_files.select{|f|f =~ regexp},regexp]
       end
 
-      def dsl_files_format_type()
+      def dsl_files_format_type
         format_type_default = R8::Config[:dsl][:service][:format_type][:default]
         case format_type_default
         when "json" then "json"
         when "yaml" then "yaml"
-          else raise Error.new("Unexpected value for dsl.service.format_type.default: #{format_type_default}")
+        else raise Error.new("Unexpected value for dsl.service.format_type.default: #{format_type_default}")
         end
       end
     end
@@ -166,7 +166,7 @@ module DTK
         if new_commit_sha = component_module_refs.serialize_and_save_to_repo?()
           if opts[:ret_dsl_updated_info]
             msg = "The module refs file was updated by the server"
-            opts[:ret_dsl_updated_info] = ModuleDSLInfo::UpdatedInfo.new(:msg => msg, :commit_sha => new_commit_sha)
+            opts[:ret_dsl_updated_info] = ModuleDSLInfo::UpdatedInfo.new(msg: msg, commit_sha: new_commit_sha)
           end
         end
         return parsed if ParsingError.is_error?(parsed)
@@ -174,11 +174,12 @@ module DTK
         module_branch.set_dsl_parsed!(true)
 
         # return component modules required by this service module
-        parsed.merge!(:component_module_refs => component_module_refs.component_modules)
+        parsed.merge!(component_module_refs: component_module_refs.component_modules)
         parsed
       end
 
-     private
+      private
+
       def update_component_module_refs(module_branch,opts={})
         ModuleRefs::Parse.update_component_module_refs(ServiceModule,module_branch,opts)
       end
@@ -195,12 +196,12 @@ module DTK
         validate_service_instance_references(service_instances, module_branch) unless service_instances.empty?
 
         assembly_import_helper = AssemblyImport.new(project_idh,module_branch,self,component_module_refs)
-        aggregate_errors = ParsingError::Aggregate.new(:error_cleanup => proc{error_cleanup()})
+        aggregate_errors = ParsingError::Aggregate.new(error_cleanup: proc{error_cleanup()})
         assembly_meta_file_paths(module_branch) do |meta_file,default_assembly_name|
           aggregate_errors.aggregate_errors!()  do
             file_content = RepoManager.get_file_content(meta_file,module_branch)
             format_type = meta_file_format_type(meta_file)
-            opts.merge!(:file_path => meta_file,:default_assembly_name => default_assembly_name)
+            opts.merge!(file_path: meta_file,default_assembly_name: default_assembly_name)
 
             hash_content = Aux.convert_to_hash(file_content,format_type,opts)||{}
             return [hash_content,ret_cmr] if ParsingError.is_error?(hash_content)
@@ -219,7 +220,7 @@ module DTK
             return [parsed,ret_cmr] if ParsingError.is_error?(parsed)
           end
         end
-        errors = aggregate_errors.raise_error?(:do_not_raise => true)
+        errors = aggregate_errors.raise_error?(do_not_raise: true)
         return [errors,ret_cmr] if errors.is_a?(ParsingError)
 
         parsed = assembly_import_helper.import()
@@ -276,16 +277,16 @@ module DTK
       def ret_with_removed_variants(paths)
         # if multiple files that match where one is json and one yaml, favor the default one
         two_variants_found = false
-        common_paths = Hash.new
+        common_paths = {}
         paths.each do |path|
           if path  =~ /(^.+)\.([^\.]+$)/
             all_but_type,type = $1,$2
             if common_paths[all_but_type]
               two_variants_found = true
             else
-              common_paths[all_but_type] = Array.new
+              common_paths[all_but_type] = []
             end
-            common_paths[all_but_type] << {:type => type, :path => path}
+            common_paths[all_but_type] << {type: type, path: path}
           else
             Log.error("Path (#{path}) has unexpected form; skipping 'removing variants analysis'")
           end
@@ -293,7 +294,7 @@ module DTK
         # shortcut
         return paths unless two_variants_found
         format_type_default = R8::Config[:dsl][:service][:format_type][:default]
-        ret = Array.new
+        ret = []
         common_paths.each_value do |variant_info|
           if variant_info.size == 1
             ret << variant_info[:path]
@@ -313,7 +314,7 @@ module DTK
         return unless (name || file_path)
         assembly_name = ServiceModule.meta_file_assembly_name(file_path) || 'UNKNOWN'
         unless assembly_name.eql?(name)
-          ParsingError::BadAssemblyReference.new(:file_path => file_path, :name => name) 
+          ParsingError::BadAssemblyReference.new(file_path: file_path, name: name) 
         end
       end
 
@@ -322,13 +323,13 @@ module DTK
         namespace_mh = module_branch.id_handle().createMH(:namespace)
 
         sp_hash = {
-          :cols => [:id, :display_name]
+          cols: [:id, :display_name]
         }
         namespaces = Model.get_objs(namespace_mh,sp_hash).map{|ns| ns[:display_name]}
 
-        cmp_modules.each do |k,v|
+        cmp_modules.each do |_k,v|
           v_namespace = v[:namespace_info]
-          return ParsingError::BadNamespaceReference.new(:name => v_namespace) unless namespaces.include?(v_namespace)
+          return ParsingError::BadNamespaceReference.new(name: v_namespace) unless namespaces.include?(v_namespace)
         end
       end
 
@@ -348,25 +349,25 @@ module DTK
       # TODO: ref DTK-1619: if we put this back in we need to handle case where cmps has an element with a title like
       # cmp[title] or mod::cmp[title]; also would want to write or use a method in service/common that does not
       # hard code '::' put instead takes a component ref and returns a module name
-#      def validate_component_names(hash_content,component_module_refs)
-#        module_refs_cmps = component_module_refs.component_modules.map{|k,v| k.to_s}
-#        nodes = hash_content['assembly']['nodes']||{}
-#        nodes.each do |n_name,n_value|
-#          cmps = n_value['components']
-#          cmps.each do |c|
-#            c_name = c.split('::').first
-#            return ParsingError::BadComponentReference.new(:component_name => c, :node_name => n_name) unless module_refs_cmps.include?(c_name)
-#          end
-#        end
+      #      def validate_component_names(hash_content,component_module_refs)
+      #        module_refs_cmps = component_module_refs.component_modules.map{|k,v| k.to_s}
+      #        nodes = hash_content['assembly']['nodes']||{}
+      #        nodes.each do |n_name,n_value|
+      #          cmps = n_value['components']
+      #          cmps.each do |c|
+      #            c_name = c.split('::').first
+      #            return ParsingError::BadComponentReference.new(:component_name => c, :node_name => n_name) unless module_refs_cmps.include?(c_name)
+      #          end
+      #        end
 
-#        module_refs_cmps
-#      end
+      #        module_refs_cmps
+      #      end
 
       def meta_file_format_type(path)
         Aux.format_type(path)
       end
 
-      def error_cleanup()
+      def error_cleanup
         # TODO: this is wrong;
         # ServiceModule.delete(id_handle())
         # determine if there is case where this is appropriate or have delete for other objects; can also case on dsl_parsed

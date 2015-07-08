@@ -1,6 +1,6 @@
 module Ramaze::Helper
   module GeneralProcessing
-    def ret_session_context_id()
+    def ret_session_context_id
       # stub
       2
     end
@@ -10,7 +10,7 @@ module Ramaze::Helper
       auth_violation_response() unless logged_in?
     end
 
-    def auth_violation_response()
+    def auth_violation_response
       rest_request? ? respond('Forbidden',403) : redirect(R8::Config[:login][:path])
     end
 
@@ -22,8 +22,8 @@ module Ramaze::Helper
       rest_request? ? respond(message,403) : redirect(R8::Config[:login][:path])
     end
 
-    def get_user()
-      return nil unless user.kind_of?(Hash)
+    def get_user
+      return nil unless user.is_a?(Hash)
       @cached_user_obj ||= User.new(user,ret_session_context_id(),:user)
     end
 
@@ -57,9 +57,9 @@ module Ramaze::Helper
       # used when action set calls actions
       @parsed_query_string = nil
 
-      @css_includes = Array.new
-      @js_includes = Array.new
-      @js_exe_list = Array.new
+      @css_includes = []
+      @js_includes = []
+      @js_exe_list = []
 
       @user_context = nil
 
@@ -67,22 +67,25 @@ module Ramaze::Helper
 
       # if there is an action set then call by value is used to substitue in child actions; this var
       # will be set to have av pairs set from global params given in action set call
-      @action_set_param_map = Hash.new
+      @action_set_param_map = {}
 
       @ctrl_results = nil
     end
 
-    def json_response?()
+    def json_response?
       @json_response ||= rest_request?() or ajax_request?()
     end
-    def rest_request?()
+
+    def rest_request?
       # TODO: needs to be fixed up; issue is different envs (linux versus windows) give different values for request.env["REQUEST_URI"]
       @rest_request ||= (request.env["REQUEST_URI"] =~ Regexp.new("/rest/") ? true : nil)
     end
+
     def ajax_request?
       @ajax_request ||=  ajax_request_aux?()
     end
-    def ajax_request_aux?()
+
+    def ajax_request_aux?
       route_pieces = request.env["PATH_INFO"].split("/")
       last_piece = route_pieces[route_pieces.size-1]
       return true if /\.json/.match(last_piece)

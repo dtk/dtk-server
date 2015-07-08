@@ -4,15 +4,15 @@ module DTK
     class V4 < V3
       r8_nested_require('v4','workflow_hash')
       # update to support new canonical form where have action key word and nodes applicable is omitted
-      def workflow_hash()
+      def workflow_hash
         WorkflowHash.canonical_form(super())
       end
 
       def attr_overrides_output_form(non_def_attrs)
         ret = nil
         return ret unless non_def_attrs
-        value_overrides = Array.new
-        attribute_info = Array.new
+        value_overrides = []
+        attribute_info = []
         non_def_attrs.values.each do |attr|
           if attr.isa_value_override?()
             unless attr.is_title_attribute()
@@ -30,12 +30,12 @@ module DTK
       end
 
       def attr_tags_setting(tags)
-        tags.size == 1 ? {:tag => tags.first} : {:tags => tags}
+        tags.size == 1 ? {tag: tags.first} : {tags: tags}
       end
 
       def attribute_info_ouput_form(key,array)
         if array.empty?
-          Hash.new
+          {}
         else
           sorted = array.sort{|a,b|a.keys.first <=> b.keys.first}
           SimpleOrderedHash.new(key => SimpleOrderedHash.new(sorted))

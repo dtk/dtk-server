@@ -1,6 +1,5 @@
 module DTK
   class RepoRemote < Model
-
     def print_form(opts=Opts.new)
       ret = self[:display_name]||'' #'' just to be safe
       ret = "#{DTKNCatalogPrefix}#{ret}" if opts[:dtkn_prefix]
@@ -23,7 +22,7 @@ module DTK
     RemoteRepoBase = :dtknet
     DefaultMarker = '*'
 
-    def self.repo_base()
+    def self.repo_base
       RemoteRepoBase
     end
 
@@ -35,11 +34,11 @@ module DTK
       GIT_REPO_PROVIDERS.last
     end
 
-    def url_ssh_access()
+    def url_ssh_access
       RepoManagerClient.repo_url_ssh_access(get_field?(:repo_name))
     end
 
-    def git_provider_name()
+    def git_provider_name
       RepoRemote.git_provider_name(git_remote_url())
     end
 
@@ -47,11 +46,11 @@ module DTK
       GIT_REPO_PROVIDERS.last.eql?(git_provider_name())
     end
 
-    def git_remote_url()
+    def git_remote_url
       get_field?(:repo_url) || self.url_ssh_access()
     end
 
-    def base_git_remote_url()
+    def base_git_remote_url
       url = git_remote_url()
       url = url.match(REMOTE_LOCATION_REGEX)[1] if is_there_remote_location?
       url
@@ -60,18 +59,18 @@ module DTK
     #
     # Based on git location - it sees if one is provided
     #
-    def base_git_remote_location()
+    def base_git_remote_location
       is_there_remote_location? ? git_remote_url().match(REMOTE_LOCATION_REGEX)[2] : nil
     end
 
     #
     # Checks if git remote location is specified
     #
-    def is_there_remote_location?()
+    def is_there_remote_location?
       !!git_remote_url().match(REMOTE_LOCATION_REGEX)
     end
 
-    def remote_ref()
+    def remote_ref
       if is_dtkn_provider?
         Repo.remote_ref(RemoteRepoBase, get_field?(:repo_namespace))
       else
@@ -89,7 +88,7 @@ module DTK
 
     def self.create_git_remote(repo_remote_mh, repo_id, repo_name, repo_url, is_default = false)
       # check to see if repo remote exists
-      repo_remotes = get_objs(repo_remote_mh, { :filter => [:and, [:eq, :display_name, repo_name], [:eq, :repo_id, repo_id]]})
+      repo_remotes = get_objs(repo_remote_mh, filter: [:and, [:eq, :display_name, repo_name], [:eq, :repo_id, repo_id]])
 
       unless repo_remotes.empty?
         raise ErrorUsage, "Remote identifier '#{repo_name}' already exists"
@@ -100,19 +99,19 @@ module DTK
       end
 
       remote_repo_create_hash = {
-        :repo_name    => repo_name,
-        :display_name => repo_name,
-        :ref          => repo_name,
-        :repo_id      => repo_id,
-        :repo_url     => repo_url,
-        :is_default   => is_default
+        repo_name: repo_name,
+        display_name: repo_name,
+        ref: repo_name,
+        repo_id: repo_id,
+        repo_url: repo_url,
+        is_default: is_default
       }
 
       create_from_row(repo_remote_mh, remote_repo_create_hash)
     end
 
     def self.delete_git_remote(repo_remote_mh, repo_name, repo_id)
-      repo_remotes = get_objs(repo_remote_mh, { :filter => [:and, [:eq, :display_name, repo_name], [:eq, :repo_id, repo_id]] })
+      repo_remotes = get_objs(repo_remote_mh, filter: [:and, [:eq, :display_name, repo_name], [:eq, :repo_id, repo_id]])
 
       if repo_remotes.empty?
         raise ErrorUsage, "Remote '#{repo_name}' not found"
@@ -132,29 +131,29 @@ module DTK
         end
 
       remote_repo_create_hash = {
-        :repo_name => repo_name,
-        :display_name => "#{repo_namespace}/#{module_name}",
-        :repo_namespace => repo_namespace,
-        :repo_id => repo_id,
-        :ref => module_name,
-        :is_default => is_default
+        repo_name: repo_name,
+        display_name: "#{repo_namespace}/#{module_name}",
+        repo_namespace: repo_namespace,
+        repo_id: repo_id,
+        ref: module_name,
+        is_default: is_default
       }
 
       create_from_row(repo_remote_mh,remote_repo_create_hash)
     end
 
     def self.set_default_remote(repo_remote_mh, repo_id, repo_name)
-      repo_remote = get_obj(repo_remote_mh, { :filter => [:and, [:eq, :display_name, repo_name], [:eq, :repo_id, repo_id]] })
+      repo_remote = get_obj(repo_remote_mh, filter: [:and, [:eq, :display_name, repo_name], [:eq, :repo_id, repo_id]])
 
       raise ErrorUsage, "Not able to find remote '#{repo_name}', aborting action." unless repo_remote
 
-      default_repo_remote = get_obj(repo_remote_mh, { :filter => [:and, [:eq, :is_default, true], [:eq, :repo_id, repo_id]] })
+      default_repo_remote = get_obj(repo_remote_mh, filter: [:and, [:eq, :is_default, true], [:eq, :repo_id, repo_id]])
 
       # set as not active (default)
-      update_from_rows(repo_remote_mh, [ { :id => default_repo_remote.id, :is_default => false } ]) if default_repo_remote
+      update_from_rows(repo_remote_mh, [ { id: default_repo_remote.id, is_default: false } ]) if default_repo_remote
 
       # set as active (default)
-      update_from_rows(repo_remote_mh, [ { :id => repo_remote.id, :is_default => true } ])
+      update_from_rows(repo_remote_mh, [ { id: repo_remote.id, is_default: true } ])
     end
 
     def self.delete_repos(idh_list)
@@ -172,12 +171,11 @@ module DTK
 
     def self.get_matching_remote_repos(repo_remote_mh,repo_id, module_name, repo_namespace=nil)
       sp_hash = {
-        :cols   => [:id, :display_name, :repo_name],
-        :filter =>
-          [:and,
-           [:eq, :repo_id, repo_id],
-           repo_namespace && [:eq, :repo_namespace, repo_namespace],
-           [:eq, :ref, module_name]
+        cols: [:id, :display_name, :repo_name],
+        filter:           [:and,
+                           [:eq, :repo_id, repo_id],
+                           repo_namespace && [:eq, :repo_namespace, repo_namespace],
+                           [:eq, :ref, module_name]
           ].compact
       }
       get_objs(repo_remote_mh, sp_hash)
@@ -194,18 +192,18 @@ module DTK
 
     def remote_dtkn_location(project,module_type,module_name)
       remote_params = ModuleBranch::Location::RemoteParams::DTKNCatalog.new(
-        :module_type => module_type,
-        :module_name => module_name,
-        :namespace => get_field?(:repo_namespace),
-        :remote_repo_base => self.class.repo_base()
+        module_type: module_type,
+        module_name: module_name,
+        namespace: get_field?(:repo_namespace),
+        remote_repo_base: self.class.repo_base()
       )
       remote_params.create_remote(project).set_repo_name!(get_field?(:repo_name))
     end
 
     def self.default_from_module_branch?(module_branch)
       sp_hash = {
-        :cols => [:id,:group_id,:display_name,:repo_name,:repo_namespace,:is_default,:created_at],
-        :filter => [:eq,:repo_id,module_branch.get_field?(:repo_id)]
+        cols: [:id,:group_id,:display_name,:repo_name,:repo_namespace,:is_default,:created_at],
+        filter: [:eq,:repo_id,module_branch.get_field?(:repo_id)]
       }
       ret = get_objs(module_branch.model_handle(:repo_remote),sp_hash)
       1 == ret.size ? ret.first : ret_default_remote_repo(ret)
@@ -225,12 +223,12 @@ module DTK
     end
 
     def self.default_remote!(repo_remote_mh, repo_id)
-      repo_remote = get_obj(repo_remote_mh, { :filter => [:and, [:eq, :is_default, true], [:eq, :repo_id, repo_id]] })
+      repo_remote = get_obj(repo_remote_mh, filter: [:and, [:eq, :is_default, true], [:eq, :repo_id, repo_id]])
       raise ErrorUsage, "Not able to find default remote for given repo!" unless repo_remote
       repo_remote
     end
 
-  private
+    private
 
     # TODO: deprecate once all data is migrated so :is_default is marked
     def self.compute_default_remote_repo(repo_remotes)
@@ -242,10 +240,9 @@ module DTK
         # default is the one which is the oldest
         repo_remotes.each{|r|r.update_object!(:created_at)}
         default_repo_remote = repo_remotes.sort {|a,b| a[:created_at] <=>  b[:created_at]}.first
-        default_repo_remote.update(:is_default => true) #migrate it
+        default_repo_remote.update(is_default: true) #migrate it
         default_repo_remote
       end
     end
-
   end
 end

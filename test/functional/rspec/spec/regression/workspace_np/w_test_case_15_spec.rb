@@ -20,7 +20,6 @@ component_module_namespace = 'r8'
 dtk_common = DtkCommon.new('', '')
 
 describe "(Workspace) Test Case 15: Create two nodes, add components in it, converge, stop one node and then start again" do
-
 	before(:all) do
 		puts "**************************************************************************************************************",""
   end

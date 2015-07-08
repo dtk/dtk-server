@@ -18,10 +18,11 @@ module DTK; class ModuleDSL; class V4
       end
 
       class ActionDefOutputHash < OutputHash
-        def has_create_action?()
+        def has_create_action?
           DTK::ActionDef::Constant.matches?(self,:CreateActionName)
         end
-        def delete_create_action!()
+
+        def delete_create_action!
           if kv = DTK::ActionDef::Constant.matching_key_and_value?(self,:CreateActionName)
             delete(kv.keys.first)
           end
@@ -33,7 +34,7 @@ module DTK; class ModuleDSL; class V4
         unless action_defs = Constant.matches?(input_hash,:ActionDefs)
           return ret
         end
-        unless action_defs.kind_of?(Hash)
+        unless action_defs.is_a?(Hash)
           raise_error_ill_formed('actions section',action_defs)
         end
         action_defs.inject(ActionDefOutputHash.new) do |h,(action_name,action_body)|
@@ -41,13 +42,14 @@ module DTK; class ModuleDSL; class V4
         end
       end
 
-     private
+      private
+
       def convert_action_def(action_name,action_body)
         raise_error_if_illegal_action_name(action_name)
         action_body_hash = {
-          :method_name  => action_name,
-          :display_name => action_name,
-          :content      => Provider.create(action_body,:action_name => action_name,:cmp_print_form => cmp_print_form())
+          method_name: action_name,
+          display_name: action_name,
+          content: Provider.create(action_body,action_name: action_name,cmp_print_form: cmp_print_form())
         }
         {action_name => OutputHash.new(action_body_hash)}
       end
@@ -65,10 +67,9 @@ module DTK; class ModuleDSL; class V4
         raise ParsingError.new(err_msg,cmp_print_form(),obj)
       end
 
-      def cmp_print_form()
+      def cmp_print_form
         component_print_form(@component_name)
       end
-
     end
   end
 end; end; end

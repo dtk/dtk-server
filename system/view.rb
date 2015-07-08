@@ -9,7 +9,7 @@ module R8Tpl
     attr_reader :user
 
     def self.create(tpl,view_path)
-      all_args = 6.times.inject([]){|x,y|x << nil} + [tpl,view_path]
+      all_args = 6.times.inject([]){|x,_y|x << nil} + [tpl,view_path]
       self.new(*all_args)
     end
 
@@ -55,7 +55,7 @@ module R8Tpl
       initialize_vars()
     end
 
-    def initialize_vars()
+    def initialize_vars
       @override_meta_path = nil        #path where the overrides for a view should be located
 
       @js_cache_path = nil             #this is the path to the JS file that will process/render the view
@@ -66,7 +66,7 @@ module R8Tpl
       @js_require = []
     end
 
-    def update_cache_for_virtual_object()
+    def update_cache_for_virtual_object
       case @view_name 
         when :edit then render_edit_tpl_cache()
         when :display then render_display_tpl_cache()
@@ -75,13 +75,13 @@ module R8Tpl
       ret_existing_view_path(:cache)
     end
 
-    def update_cache_for_saved_search()
+    def update_cache_for_saved_search
       render_list_tpl_cache()
       ret_existing_view_path(:cache)
     end
 
     # updates cache if necssary and returns the path to the cache
-    def update_cache?()
+    def update_cache?
       unless cache_current?
         case view_type().to_sym
           when :edit
@@ -100,8 +100,7 @@ module R8Tpl
       ret_existing_view_path(:cache)
     end
 
-
-    def render()
+    def render
       if cache_current?
         @tpl_contents = get_view_tpl_cache()
         @css_require = get_css_require_from_cache()
@@ -133,8 +132,7 @@ module R8Tpl
     @js_require << js unless @js_require.includes(js)
   end
 
-
- private
+    private
 
   # TODO: may move this to utility.r8
   def i18n(*path)
@@ -146,24 +144,24 @@ module R8Tpl
 
   # if not set yet, this will grab/set the meta array for given object/viewType
   # TODO: should have extensible definition of viewName (ie: edit,quickEdit,editInline,etc)
-  def view_meta()
+  def view_meta
     @view_meta ||= get_view_meta
   end
 
-  def view_path_type()
+  def view_path_type
     @view_path ? @view_path.type : :file
   end
 
-  def get_view_meta()
+  def get_view_meta
     view_path_type() == :db ? get_view_meta__db() : get_view_meta__file()
   end
 
-  def get_view_meta__db()
+  def get_view_meta__db
     component = user.create_object_from_id(@view_path.db_id)
     component.get_view_meta(view_type().to_sym,@virtual_model_ref)
   end
 
-  def get_view_meta__file()
+  def get_view_meta__file
     # TODO: revisit to work on override possiblities and for profile handling
     # should check for all view locations, direct and override
     # TODO: figure out best way to do PHP style requires/loading of external meta hashes
@@ -171,17 +169,17 @@ module R8Tpl
     
     if path
       XYZ::Aux.convert_to_hash_symbol_form(eval(IO.read(path)))
-      # TODO check if ok to remove logic wrt to json
+      # TODO: check if ok to remove logic wrt to json
     else
-      # TODO: figure out handling of overrides
-      #      require $GLOBALS['ctrl']->getAppName().'/objects' . $this->objRef->getmodel_name() . '/meta/view.'.$this->profile.'.'.$this->viewName.'.php');
-      # require 'some path to require'
+     # TODO: figure out handling of overrides
+     #      require $GLOBALS['ctrl']->getAppName().'/objects' . $this->objRef->getmodel_name() . '/meta/view.'.$this->profile.'.'.$this->viewName.'.php');
+     # require 'some path to require'
      raise XYZ::Error::NotImplemented.new()
     end
   end
   
-  # This will check to see if the TPL view file exists and isnt stale compare to the base TPL and other factors
- def cache_current?()
+ # This will check to see if the TPL view file exists and isnt stale compare to the base TPL and other factors
+ def cache_current?
     cache_path = ret_existing_view_path(:cache)
     return nil unless cache_path
     meta_view_path = ret_existing_view_path(view_path_type() == :db ? :meta_db : :meta)
@@ -199,32 +197,32 @@ module R8Tpl
     end
   end
 
-  def get_system_rtpl_contents()
+  def get_system_rtpl_contents
     IO.read(ret_existing_view_path(:system))
   end
 
-  def get_view_tpl_cache()
+  def get_view_tpl_cache
     IO.read(ret_existing_view_path(:cache))
   end
 
-  def get_css_require_from_cache()
+  def get_css_require_from_cache
     path = ret_existing_view_path(:css_require)
     return nil unless path
-# TODO: collapse Aux and Utils together into whatever it will be called
+    # TODO: collapse Aux and Utils together into whatever it will be called
     XYZ::Aux.convert_to_hash_symbol_form(IO.read(path))
   end
 
-  def get_js_require_from_cache()
+  def get_js_require_from_cache
     path = ret_existing_view_path(:jss_require)
     return nil unless path
-# TODO: collapse Aux and Utils together into whatever it will be called
+    # TODO: collapse Aux and Utils together into whatever it will be called
     XYZ::Aux.convert_to_hash_symbol_form(IO.read(path))
   end
 
   # This function will generate the TPL cache for a view of type list
-  def render_list_tpl_cache()
-# TODO: can probably move most of this function to a general function call
-# and re-use between render_view_js_cache and renderViewHTML
+  def render_list_tpl_cache
+    # TODO: can probably move most of this function to a general function call
+    # and re-use between render_view_js_cache and renderViewHTML
     field_handler = FieldR8.new(self)
     r8TPL = R8Tpl::TemplateR8.new("#{@model_name}/#{@view_name}",@user,:system)
     r8TPL.js_templating_on = false   #template engine should catch non JS automatically, but forcing to be sure
@@ -235,7 +233,7 @@ module R8Tpl
     r8TPL.assign(:view_name, @view_name)
     # TODO: is this right?
     r8TPL.assign(:th_row_class,  @model_name)
-#    i18n = utils.get_model_i18n(@model_name)
+    #    i18n = utils.get_model_i18n(@model_name)
 
     list_cols = []
 
@@ -292,11 +290,11 @@ module R8Tpl
   # If the template/cache/path do not exist or is stale it will generate a new one
 
   # This will add js calls to add each field to form validation
-  def add_validation()
+  def add_validation
     field_handler = FieldR8.new(self)
 
-    (view_meta[:field_groups]||[]).each do |group_num,group_hash|
-      view_meta[:field_sets][group_num][:fields].each do |field_num,field_hash|
+    (view_meta[:field_groups]||[]).each do |group_num,_group_hash|
+      view_meta[:field_sets][group_num][:fields].each do |_field_num,field_hash|
         next if(fieldArray.length == 0)
 
         field_hash.each do |field_name,field_meta|
@@ -309,16 +307,15 @@ module R8Tpl
     end
   end
 
-
   # This function will generate the TPL cache for a view of type edit
-  def render_edit_tpl_cache()
-# TODO: can probably move most of this function to a general function call
-# and re-use between render_view_js_cache and renderViewHTML
+  def render_edit_tpl_cache
+    # TODO: can probably move most of this function to a general function call
+    # and re-use between render_view_js_cache and renderViewHTML
     field_handler = FieldR8.new(self)
     r8TPL = R8Tpl::TemplateR8.new("#{@model_name}/#{@view_name}",@user,:system)
     r8TPL.js_templating_on = false   #template engine should catch non JS automatically, but forcing to be sure
 
-#    i18n = utils.get_model_i18n(@model_name)
+    #    i18n = utils.get_model_i18n(@model_name)
     r8TPL.assign(:formId, @form_id)
     r8TPL.assign(:formAction, view_meta[:action])
 
@@ -337,7 +334,7 @@ module R8Tpl
     end
     r8TPL.assign(:h_field_list, hidden_fields)
 
-    rows = Array.new
+    rows = []
     group_num = 0
     (view_meta[:field_groups]||[]).each do |group_hash|
       row_count = 0
@@ -345,20 +342,20 @@ module R8Tpl
       num_cols = group_hash[:num_cols].to_i
       col_index = 0
       field_num = 0
-      rows[row_count] = Hash.new
-      rows[row_count][:cols] = Array.new
+      rows[row_count] = {}
+      rows[row_count][:cols] = []
 
       group_hash[:fields].each do |field_hash|
         field_num +=1
         rows[row_count][:row_id] = 'g'+group_num.to_s+'-r'+row_count.to_s
         # if size is 0 then its a blank spot in the form
         if field_hash.length == 0
-          rows[row_count][:cols][col_index] = Hash.new
+          rows[row_count][:cols][col_index] = {}
           rows[row_count][:cols][col_index][:class] = td_label_class
           rows[row_count][:cols][col_index][:content] = '&amp;nbsp;'
           rows[row_count][:cols][col_index][:col_id] = 'r'+row_count.to_s+'-c'+col_index.to_s+'-label'
           col_index+=1
-          rows[row_count][:cols][col_index] = Hash.new
+          rows[row_count][:cols][col_index] = {}
           rows[row_count][:cols][col_index][:class] =  td_field_class
           rows[row_count][:cols][col_index][:content] = '&amp;nbsp;'
           rows[row_count][:cols][col_index][:col_id] = 'r'+row_count.to_s+'-c'+col_index.to_s+'-field'
@@ -368,7 +365,7 @@ module R8Tpl
             field_meta[:id] ||= field_meta[:name] 
             field_meta[:model_name] = @model_name
             # do label
-            rows[row_count][:cols][col_index] = Hash.new
+            rows[row_count][:cols][col_index] = {}
 
             if display_labels
               if @i18n[(field_meta[:name].to_s+'_'+@view_name.to_s).to_sym] 
@@ -385,7 +382,7 @@ module R8Tpl
             rows[row_count][:cols][col_index][:class] = td_label_class
             rows[row_count][:cols][col_index][:col_id] = field_meta[:name].to_s+"-label"
             col_index+=1
-            rows[row_count][:cols][col_index] = Hash.new
+            rows[row_count][:cols][col_index] = {}
             # do field
             rows[row_count][:cols][col_index][:col_id] = field_meta[:name].to_s+"-field"
             rows[row_count][:cols][col_index][:content] = field_handler.get_field(view_type(), field_meta, 'tpl')
@@ -413,14 +410,14 @@ module R8Tpl
   end
 
   # This function will generate the TPL cache for a view of type display
-  def render_display_tpl_cache()
-# TODO: can probably move most of this function to a general function call
-# and re-use between render_view_js_cache and renderViewHTML
+  def render_display_tpl_cache
+    # TODO: can probably move most of this function to a general function call
+    # and re-use between render_view_js_cache and renderViewHTML
     field_handler = FieldR8.new(self)
     r8TPL = R8Tpl::TemplateR8.new("#{@model_name}/#{@view_name}",@user,:system)
     r8TPL.js_templating_on = false   #template engine should catch non JS automatically, but forcing to be sure
 
-#    i18n = utils.get_model_i18n(@model_name)
+    #    i18n = utils.get_model_i18n(@model_name)
     r8TPL.assign(:formId, @form_id)
     r8TPL.assign(:formAction, view_meta[:action])
     r8TPL.assign(:editId, "{%=#{@model_name}[:id]%}")
@@ -517,7 +514,7 @@ module R8Tpl
   end
 
   # writes template, js_include and css_include
-  def fwrite()
+  def fwrite
     files = {
      ret_view_path(:cache) => @tpl_contents,
      ret_view_path(:css_require) => @css_require ? JSON.pretty_generate(@css_require) : nil,
@@ -531,12 +528,12 @@ module R8Tpl
     end
   end
 
-  def render_search_tpl_cache()
+  def render_search_tpl_cache
     field_handler = FieldR8.new(self)
     r8TPL = R8Tpl::TemplateR8.new("#{@model_name}/#{@view_name}",@user,:system)
     r8TPL.js_templating_on = false   #template engine should catch non JS automatically, but forcing to be sure
 
-#    i18n = utils.get_model_i18n(@model_name)
+    #    i18n = utils.get_model_i18n(@model_name)
     r8TPL.assign(:model_name_literal, '{%=model_name%}')
     r8TPL.assign(:base_uri, '{%=_app[:base_uri]%}')
     r8TPL.assign(:formId, @form_id)
@@ -548,7 +545,7 @@ module R8Tpl
     r8TPL.assign(:search_cond_literal,'{%if num_saved_searches > 0%}')
     r8TPL.assign(:end_literal,'{%end%}')
 
-# TODO: temp hack until more fully implemented select/dropdown fields
+    # TODO: temp hack until more fully implemented select/dropdown fields
     r8TPL.assign(:saved_search_list_dropdown,'
       {%for saved_search in _saved_search_list%}
         <option value="{%=saved_search[:id]%}" {%=saved_search[:selected]%}>{%=saved_search[:display_name]%}</option>
@@ -570,7 +567,7 @@ module R8Tpl
     end
     r8TPL.assign(:h_field_list, hidden_fields)
 
-    rows = Array.new
+    rows = []
     group_num = 0
     (view_meta[:field_groups]||[]).each do |group_hash|
       row_count = 0
@@ -578,20 +575,20 @@ module R8Tpl
       num_cols = group_hash[:num_cols].to_i
       col_index = 0
       field_num = 0
-      rows[row_count] = Hash.new
-      rows[row_count][:cols] = Array.new
+      rows[row_count] = {}
+      rows[row_count][:cols] = []
 
       group_hash[:fields].each do |field_hash|
         field_num +=1
         rows[row_count][:row_id] = 'g'+group_num.to_s+'-r'+row_count.to_s
         # if size is 0 then its a blank spot in the form
         if field_hash.length == 0
-          rows[row_count][:cols][col_index] = Hash.new
+          rows[row_count][:cols][col_index] = {}
           rows[row_count][:cols][col_index][:class] = td_label_class
           rows[row_count][:cols][col_index][:content] = '&amp;nbsp;'
           rows[row_count][:cols][col_index][:col_id] = 'r'+row_count.to_s+'-c'+col_index.to_s+'-label'
           col_index+=1
-          rows[row_count][:cols][col_index] = Hash.new
+          rows[row_count][:cols][col_index] = {}
           rows[row_count][:cols][col_index][:class] =  td_field_class
           rows[row_count][:cols][col_index][:content] = '&amp;nbsp;'
           rows[row_count][:cols][col_index][:col_id] = 'r'+row_count.to_s+'-c'+col_index.to_s+'-field'
@@ -601,7 +598,7 @@ module R8Tpl
             field_meta[:id] ||= field_meta[:name] 
             field_meta[:model_name] = @model_name
             # do label
-            rows[row_count][:cols][col_index] = Hash.new
+            rows[row_count][:cols][col_index] = {}
 
             if display_labels
               if @i18n[(field_meta[:name].to_s+'_'+@view_name.to_s).to_sym] 
@@ -618,7 +615,7 @@ module R8Tpl
             rows[row_count][:cols][col_index][:class] = td_label_class
             rows[row_count][:cols][col_index][:col_id] = field_meta[:name].to_s+"-label"
             col_index+=1
-            rows[row_count][:cols][col_index] = Hash.new
+            rows[row_count][:cols][col_index] = {}
             # do field
             rows[row_count][:cols][col_index][:col_id] = field_meta[:name].to_s+"-field"
             rows[row_count][:cols][col_index][:content] = field_handler.get_field(view_type(), field_meta, 'rtpl')
@@ -645,15 +642,15 @@ module R8Tpl
     fwrite()
   end
 
-#------------------------------------------------------------------------------
-#---------------This will lay groundwork for next setup of views/tpls----------
-#------------------------------------------------------------------------------
-  def render_dock_display_tpl_cache()
+  #------------------------------------------------------------------------------
+  #---------------This will lay groundwork for next setup of views/tpls----------
+  #------------------------------------------------------------------------------
+  def render_dock_display_tpl_cache
     field_handler = FieldR8.new(self)
     r8TPL = R8Tpl::TemplateR8.new("#{@model_name}/#{@view_name}",@user,:system)
     r8TPL.js_templating_on = false   #template engine should catch non JS automatically, but forcing to be sure
 
-#    i18n = utils.get_model_i18n(@model_name)
+    #    i18n = utils.get_model_i18n(@model_name)
     r8TPL.assign(:formId, @form_id)
     r8TPL.assign(:formAction, view_meta[:action])
     r8TPL.assign(:editId, "{%=#{@model_name}[:id]%}")
@@ -748,11 +745,11 @@ module R8Tpl
     @tpl_contents = r8TPL.render(get_system_rtpl_contents())
     fwrite()
   end
-#------------------------------------------------------------------------------
+  #------------------------------------------------------------------------------
 
   # This will return the path for the JS cache file
-# TODO: revisit once randomizer js template naming is going a-la smarty caches
-  def get_view_js_cache_path()
+  # TODO: revisit once randomizer js template naming is going a-la smarty caches
+  def get_view_js_cache_path
     if @js_cache_path.nil?
       @js_cache_path = "#{R8::Config[:js_file_write_path]}/#{@profile}.#{@view_name}.js"
     end
@@ -760,18 +757,18 @@ module R8Tpl
   end
 
   # This will check to see if the JS form file exists and isnt stale compare to the TPL and other factors
-# TODO: make sure to return and rewrite after adding util/generic file access function
-# ex: should transparently check for either local file, or AWS, CDN, etc
-  def viewJSCurrent()
+  # TODO: make sure to return and rewrite after adding util/generic file access function
+  # ex: should transparently check for either local file, or AWS, CDN, etc
+  def viewJSCurrent
     if(File.exists?(get_view_js_cache_path())) then
-# TODO: make sure to return and rewrite after adding util/generic file access function
-# ex: should transparently check for either local file, or AWS, CDN, etc
+      # TODO: make sure to return and rewrite after adding util/generic file access function
+      # ex: should transparently check for either local file, or AWS, CDN, etc
       jsCacheEditTime = File.mtime(get_view_js_cache_path()).to_i
       tplCacheEditTime = File.mtime(view_tpl_cache_path()).to_i
       # adding this since rendering logic is in this file, might update it w/o changing template,
       # jsTpl should then be updated to reflect changes
-# TODO: switch this when functions moved to js compile class
-#      templateR8EditTime = File.mtime(getcwd()."/system/template.r8.php");
+      # TODO: switch this when functions moved to js compile class
+      #      templateR8EditTime = File.mtime(getcwd()."/system/template.r8.php");
       templateR8EditTime = File.mtime(Dir.pwd+"/template.rb")
       if(jsCacheEditTime < templateR8EditTime || jsCacheEditTime < tplCacheEditTime) then
         return false
@@ -784,10 +781,9 @@ module R8Tpl
   end
 
   # This function will generate the js cache for the form
-  def render_view_js_cache()
-  # TODO: nothing here yet, must revisit when deciding to create master field class for a profile
-  # that can render individual fields on the fly in the browser
+  def render_view_js_cache
+    # TODO: nothing here yet, must revisit when deciding to create master field class for a profile
+    # that can render individual fields on the fly in the browser
   end
-
 end
 end

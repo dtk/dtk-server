@@ -37,16 +37,16 @@ module MCollective
   end
   class Client
     def r8_set_context(multiplexer)
-      @connection.set_context(:decode_context => self,:multiplexer => multiplexer)
+      @connection.set_context(decode_context: self,multiplexer: multiplexer)
     end
 
     # changed to specficall take an agent argument
     def r8_new_request(agent,action, data)
       callerid = @security.callerid
-      {:agent  => agent,
-        :action => action,
-        :caller => callerid,
-        :data   => data}
+      {agent: agent,
+        action: action,
+        caller: callerid,
+        data: data}
     end
 
     def r8_decode_receive(msg)
@@ -64,7 +64,7 @@ module MCollective
       create_request_message(msg,agent,filter).create_reqid
     end
 
-    def r8_sendreq_give_reqid(reqid,msg,agent,filter = {},&block)
+    def r8_sendreq_give_reqid(reqid,msg,agent,filter = {},&_block)
       # TODO: see if can put in block form that first generates request id then calss functions that need it
       # then does subscribe and send
 
@@ -86,13 +86,16 @@ module MCollective
       @connection.subscribe_and_send(topic,target,req)
       reqid
     end
+
     private
+
     def make_target(agent, type, collective, target_node=nil)
       @connection.make_target(agent, type, collective, target_node)
     end
+
     def create_request_message(msg,agent,filter)
       type = :request #TODO: stub so can use direct types
-      Message.new(msg,nil,:agent => agent, :filter => filter, :collective => collective, :type => type)
+      Message.new(msg,nil,agent: agent, filter: filter, collective: collective, type: type)
     end
   end
 end

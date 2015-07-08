@@ -20,7 +20,6 @@ module DTK
     end
 
     class Module
-
       attr_reader   :path, :name, :is_dependency
       attr_accessor :namespace, :dependencies, :id
 
@@ -40,7 +39,7 @@ module DTK
         @id            = nil
       end
 
-      def index()
+      def index
         PuppetForge.index(@namespace,@name)
       end
 
@@ -52,20 +51,19 @@ module DTK
         @id = id
       end
 
-      def module_source_name()
+      def module_source_name
         @module
       end
 
       def to_h
         {
-          :name      => @name,
-          :namespace => @namespace,
-          :version   => @dtk_version,
-          :type      => @type,
-          :id        => @id
+          name: @name,
+          namespace: @namespace,
+          version: @dtk_version,
+          type: @type,
+          id: @id
         }
       end
-
     end
   end
 end

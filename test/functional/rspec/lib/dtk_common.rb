@@ -28,9 +28,9 @@ class DtkCommon
 	attr_accessor :component_module_id_list, :component_module_name_list
 
 	$opts = {
-		:timeout => 100,
-		:open_timeout => 50,
-		:cookies => {}
+		timeout: 100,
+		open_timeout: 50,
+		cookies: {}
 	}
 
 	def initialize(service_name, assembly_name)
@@ -49,8 +49,8 @@ class DtkCommon
 	  @ssh_key = config_yml['r8server']['ssh_key']
 
 		#used as placeholders for component ids/names for specific module that are accumulated
-		@component_module_id_list = Array.new()
-		@component_module_name_list = Array.new()
+		@component_module_id_list = []
+		@component_module_name_list = []
                 login
 	end
 
@@ -62,7 +62,7 @@ class DtkCommon
                 $opts[:cookies] = response_login.cookies
         end
 
-	def server_log_print()
+	def server_log_print
 		search_string = "Exiting!"
 		log_part_from_last_restart = []
 		log_part = []
@@ -134,7 +134,7 @@ class DtkCommon
 	def set_default_namespace(namespace)
 		puts "Set default namespace:", "---------------------"
 		default_namespace_set = false
-		response = send_request('/rest/account/set_default_namespace', {:namespace=>namespace})
+		response = send_request('/rest/account/set_default_namespace', {namespace: namespace})
 	  if response['status'] == 'ok'
 	  	puts "Default namespace is set to #{namespace}"
 	  	default_namespace_set = true
@@ -147,7 +147,7 @@ class DtkCommon
 	def set_catalog_credentials(catalog_username, catalog_password)
 		puts "Set catalog credentials:", "------------------------"
 		catalog_credentials_set = false
-		response = send_request('/rest/account/set_catalog_credentials', {:username=>catalog_username, :password=>catalog_password})
+		response = send_request('/rest/account/set_catalog_credentials', {username: catalog_username, password: catalog_password})
 	  if response['status'] == 'ok'
 	  	puts "Catalog credentials have been set"
 	  	catalog_credentials_set = true

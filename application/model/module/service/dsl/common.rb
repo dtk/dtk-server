@@ -1,19 +1,19 @@
 module DTK
   module ServiceDSLCommonMixin
     Seperators = {
-      :module_component       => "::", #TODO: if this changes need to change ModCompGsub
-      :component_version      => ":",
-      :component_port         => "/",
-      :assembly_node          => "/",
-      :node_component         => "/",
-      :component_link_def_ref => "/",
-      :title_before           => '[',
-      :title_after            => ']',
+      module_component: "::", #TODO: if this changes need to change ModCompGsub
+      component_version: ":",
+      component_port: "/",
+      assembly_node: "/",
+      node_component: "/",
+      component_link_def_ref: "/",
+      title_before: '[',
+      title_after: ']',
     }
     ModCompInternalSep = "__" #TODO: if this changes need to chage ModCompGsub[:sub]
     ModCompGsub = {
-      :pattern => /(^[^:]+)::/, 
-      :sub     => '\1__'
+      pattern: /(^[^:]+)::/, 
+      sub: '\1__'
     }
     CmpVersionRegexp = Regexp.new("(^.+)#{Seperators[:component_version]}([0-9]+.+$)")
 
@@ -42,9 +42,9 @@ module DTK
           ref = ComponentTitle.ref_with_title(type,title)
           display_name = ComponentTitle.display_name_with_title(type,title)
         end
-        ret = {:component_type => type}
-        ret.merge!(:version => version) if version
-        ret.merge!(:title => title) if title
+        ret = {component_type: type}
+        ret.merge!(version: version) if version
+        ret.merge!(title: title) if title
         ret
       end
     end

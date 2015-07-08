@@ -5,7 +5,8 @@ module XYZ
       each{|x|ret << block.call(x)}
       ret
     end
-    def freeze()
+
+    def freeze
       each{|x|x.freeze}
       super
     end

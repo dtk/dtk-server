@@ -8,23 +8,25 @@ module DTK
         @node = node
         @os_type = os_type()
       end
-      def install_script()
+
+      def install_script
         git_server_url = RepoManager.repo_url()
         git_server_dns = RepoManager.repo_server_dns()
         node_config_server_host = CommandAndControl.node_config_server_host()
         fingerprint = RepoManager.repo_server_ssh_rsa_fingerprint()
         template_bindings = {
-          :node_config_server_host => node_config_server_host,
-          :git_server_url => git_server_url, 
-          :git_server_dns => git_server_dns,
-          :fingerprint => fingerprint
+          node_config_server_host: node_config_server_host,
+          git_server_url: git_server_url, 
+          git_server_dns: git_server_dns,
+          fingerprint: fingerprint
         }
         install_script = CommandAndControl.node_config_adapter_install_script(@node,template_bindings)
         embed_in_os_specific_wrapper(install_script)
       end
 
-     private
-      def os_type()
+      private
+
+      def os_type
         unless os_type = @node.get_field?(:os_type)
           raise Error.new("#{node_name_and_id()} does not have an OS type specified")
         end
@@ -35,8 +37,9 @@ module DTK
         end
         os_type
       end
-      def node_name_and_id()
-        @node.pp_name_and_id(:capitalize => true)
+
+      def node_name_and_id
+        @node.pp_name_and_id(capitalize: true)
       end
 
       def embed_in_os_specific_wrapper(install_script)

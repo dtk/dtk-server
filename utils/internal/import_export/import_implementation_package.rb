@@ -7,7 +7,7 @@ module XYZ
       r8meta_type = :yaml #TODO: stub
 
       # put component meta info in hash
-      components_hash = get_r8meta_hash(impl_name,:r8meta_type => r8meta_type)
+      components_hash = get_r8meta_hash(impl_name,r8meta_type: r8meta_type)
       library = library_idh.create_object().update_object!(:ref)
 
       # put implement info in hash
@@ -24,7 +24,8 @@ module XYZ
       Model.input_into_model(parent_idh,{"component" => {component_name => component_hash}})
     end
 
-   private
+    private
+
     def self.get_r8meta_hash(cmp_or_impl_name,opts={})
       r8meta_type = opts[:r8meta_type]
       r8meta_file = find_r8meta_file(cmp_or_impl_name,r8meta_type)
@@ -52,19 +53,19 @@ module XYZ
       files.first
     end
     TypeMapping = {
-      :yaml => "yml"
+      yaml: "yml"
     }
 
     def self.add_implementation_id!(component_hash,parent_idh,component_name)
       impl_display_name = component_name.gsub(/__.+$/,"")
       sp_hash = {
-        :cols => [:id],
-        :filter => [:and, [:eq, :display_name, impl_display_name],
-                    [:eq, DB.parent_field(parent_idh[:model_name],:implementation), parent_idh.get_id()]]
+        cols: [:id],
+        filter: [:and, [:eq, :display_name, impl_display_name],
+                 [:eq, DB.parent_field(parent_idh[:model_name],:implementation), parent_idh.get_id()]]
       }
       rows = Model.get_objs(parent_idh.createMH(:implementation),sp_hash)
       raise Error.new("Error in finding implementation for component #{component_name}") unless rows.size = 1
-      component_hash.merge!(:implementation_id => rows.first[:id])
+      component_hash.merge!(implementation_id: rows.first[:id])
     end
 
     def self.update_implementation_ids(library_idh,impl_name,component_refs)
@@ -72,23 +73,23 @@ module XYZ
       library_id = library_idh.get_id()
       cmp_mh = library_idh.createMH(:component)
       sp_hash = {
-        :cols => [:id],
-        :filter => [:and, [:oneof, :ref, component_refs],
-                    [:eq, DB.parent_field(:library,:component), library_id]]
+        cols: [:id],
+        filter: [:and, [:oneof, :ref, component_refs],
+                 [:eq, DB.parent_field(:library,:component), library_id]]
       }
       cmps = Model.get_objs(cmp_mh,sp_hash)
 
       sp_hash = {
-        :cols => [:id],
-        :filter => [:and, [:eq, :display_name, impl_name],
-                    [:eq, DB.parent_field(:library,:implementation), library_id]]
+        cols: [:id],
+        filter: [:and, [:eq, :display_name, impl_name],
+                 [:eq, DB.parent_field(:library,:implementation), library_id]]
       }
       impl_id = Model.get_objs(library_idh.createMH(:implementation),sp_hash).first[:id]
 
       update_rows = cmps.map do |cmp|
         {
-          :id => cmp[:id],
-          :implemtation_id => impl_id
+          id: cmp[:id],
+          implemtation_id: impl_id
         }
       end
       Model.update_from_rows(cmp_mh,update_rows)

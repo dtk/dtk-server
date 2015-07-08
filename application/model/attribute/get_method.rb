@@ -2,9 +2,9 @@
 module DTK; class Attribute
   module GetMethod
     module Mixin
-      def get_attribute_def()
+      def get_attribute_def
         update_object!(:id,:display_name,:value_asserted,:required,:external_ref,:dyanmic,:data_type,:semantic_type,:semantic_type_summary,:config_agent_type)
-        ret = Hash.new
+        ret = {}
         [:id,:required,:dyanmic].each{|k|ret[k] = self[k] if self[k]}
         ret[:field_name] = self[:display_name]
         
@@ -13,8 +13,8 @@ module DTK; class Attribute
         # default is that implementation attribute name same as r8 attribute name; so omit if default
         unless self[:display_name] == impl_attr[:name]
           case impl_attr[:type].to_sym
-          when :puppet then ret.merge!(:puppet_attribute_name => impl_attr[:name])
-          when :chef then ret.merge!(:chef_attribute_name => impl_attr[:name])
+          when :puppet then ret.merge!(puppet_attribute_name: impl_attr[:name])
+          when :chef then ret.merge!(chef_attribute_name: impl_attr[:name])
           end
         end
         ret[:datatype] = ret_datatype()
@@ -27,7 +27,7 @@ module DTK; class Attribute
 
       def get_constraints!(opts={})
         Log.error("opts not implemented yet") unless opts.empty?
-        dependency_list = get_objects_col_from_sp_hash({:columns => [:dependencies]},:dependencies)
+        dependency_list = get_objects_col_from_sp_hash({columns: [:dependencies]},:dependencies)
         Constraints.new(:or,dependency_list.map{|dep|Constraint.create(dep)})
       end
 
@@ -36,8 +36,8 @@ module DTK; class Attribute
           raise Error.new("get_node should not be called if attribute not on a node")
         end
         sp_hash = {
-          :cols => opts[:cols]||[:id,:group_id,:display_name],
-          :filter => [:eq,:id,node_node_id]
+          cols: opts[:cols]||[:id,:group_id,:display_name],
+          filter: [:eq,:id,node_node_id]
         }
         ret = Node.get_obj(model_handle(:node),sp_hash)
         if subclass_model_name = opts[:subclass_model_name]
@@ -47,15 +47,16 @@ module DTK; class Attribute
       end
     
       def self.get_port_info(id_handles)
-        get_objects_in_set_from_sp_hash(id_handles,{:cols => [:port_info]},{:keep_ref_cols => true})
+        get_objects_in_set_from_sp_hash(id_handles,{cols: [:port_info]},keep_ref_cols: true)
       end
 
       def get_service_node_group(opts={})
-        get_node(opts.merge(:subclass_model_name => :service_node_group))
+        get_node(opts.merge(subclass_model_name: :service_node_group))
       end
 
-     private
-      def ret_implementation_attribute_name_and_type()
+      private
+
+      def ret_implementation_attribute_name_and_type
         config_agent = ConfigAgent.load(self[:config_agent_type])
         config_agent && config_agent.ret_attribute_name_and_type(self)
       end
@@ -66,8 +67,8 @@ module DTK; class Attribute
         valid_attribute = nil
         if identifier.to_s =~ /^[0-9]+$/
           sp_hash = {
-            :cols => Attribute.common_columns(),
-            :filter => [:eq,:id,identifier]
+            cols: Attribute.common_columns(),
+            filter: [:eq,:id,identifier]
           }
 
           valid_attribute = Model.get_obj(mh,sp_hash)
@@ -86,8 +87,8 @@ module DTK; class Attribute
           
           sp_hash = {
             # component_module_parent will return more info about attribute (component it belongs to and module branch which we can get component_module_id from)
-            :cols => common_columns + [:component_module_parent],
-            :filter => [:eq, :display_name, param_attr_name]
+            cols: common_columns + [:component_module_parent],
+            filter: [:eq, :display_name, param_attr_name]
           }
           matching_attributes = Model.get_objs(mh,sp_hash)
           
@@ -113,10 +114,10 @@ module DTK; class Attribute
       end
 
       def get_augmented(model_handle,filter)
-        ret = Array.new
+        ret = []
         sp_hash = {
-          :cols => common_columns + [:node_component_info],
-          :filter => filter
+          cols: common_columns + [:node_component_info],
+          filter: filter
         }
         attrs = get_objs(model_handle,sp_hash)
         return ret if attrs.empty?
@@ -124,13 +125,11 @@ module DTK; class Attribute
           r.delete(:component) if r[:component].nil? #get rid of nil :component cols
           
           if node = r.delete(:direct_node)||r.delete(:component_node)
-            r.merge!(:node => node)
+            r.merge!(node: node)
           end
         end
         attrs
       end
-
-
     end
   end
 end; end

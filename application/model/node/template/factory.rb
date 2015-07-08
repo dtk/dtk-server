@@ -7,8 +7,8 @@ module DTK; class Node
         size_array = raise_error_if_invalid_size_array(opts[:size_array])
 
         hash_content = {
-          :node => Hash.new,
-          :node_binding_ruleset => Hash.new
+          node: {},
+          node_binding_ruleset: {}
         }
         size_array.each do |size|
           factory = new(target,node_template_name,image_id,size,opts)
@@ -39,22 +39,23 @@ module DTK; class Node
           :type => 'image',
           :display_name => node_template_display_name(),
           :external_ref =>{
-            :image_id => @image_id, 
-            :type => node_template_type(),
-            :size => @size
+            image_id: @image_id, 
+            type: node_template_type(),
+            size: @size
           },
           :attribute => {
             'host_addresses_ipv4' => NodeAttribute::DefaultValue.host_addresses_ipv4(),
             'fqdn' => NodeAttribute::DefaultValue.fqdn(),
             'node_components' => NodeAttribute::DefaultValue.node_components()
           },
-          :node_interface => {'eth0' => {:type => 'ethernet', :display_name => 'eth0'}},
+          :node_interface => {'eth0' => {type: 'ethernet', display_name: 'eth0'}},
           "*node_binding_rs_id" => "/node_binding_ruleset/#{nbrs_factory.ref()}"
         }
         {node_template_ref() => hash_body}
       end
 
-     private
+      private
+
       def self.raise_error_if_invalid_image(image_id,target)
         CommandAndControl.raise_error_if_invalid_image?(image_id,target)
         image_id
@@ -82,13 +83,15 @@ module DTK; class Node
         size_array
       end
 
-      def node_template_ref()
+      def node_template_ref
         "#{@image_id}-#{@size}"
       end
-      def node_template_display_name()
+
+      def node_template_display_name
         "#{@os_identifier} #{@size}"
       end
-      def node_template_type()
+
+      def node_template_type
         Template.image_type(@target)
       end
     end

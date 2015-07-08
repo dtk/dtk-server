@@ -18,7 +18,6 @@ node_template = 'precise-micro'
 dtk_common = DtkCommon.new('', '')
 
 describe "(Workspace) Test Case 5: Create two nodes (list nodes), delete one node (list nodes again) and purge workspace content" do
-
 	before(:all) do
 		puts "**********************************************************************************************************************",""
   end

@@ -34,7 +34,8 @@ module DTK
         def set_task_to_executing(task)
           task.update_at_task_start()
         end
-        def add_start_task_event?(task)
+
+        def add_start_task_event?(_task)
           # can be overwritten
           nil
         end
@@ -43,33 +44,40 @@ module DTK
           task.update_when_failed_preconditions(failed_antecedent_tasks)
         end
 
-        def name()
+        def name
           self.class.to_s.split('::').last
         end
 
-        def log_participant()
+        def log_participant
           LogParticipant.new(self)
         end
         class LogParticipant
           def initialize(participant)
             @name = participant.name()
           end
+
           def start(*args)
             log(['start_action:',name] + args)
           end
+
           def end(result_type,*args)
             log(['end_action:',name,result_type] + args)
           end
+
           def event(event,*args)
-            log(['event',name,:event=>sanitize_event(event)] + args)
+            log(['event',name,event: sanitize_event(event)] + args)
           end
+
           def canceling(task_id)
-            log(['canceling',name,:task_id=>task_id])
+            log(['canceling',name,task_id: task_id])
           end
+
           def canceled(task_id)
-            log(['canceled',name,:task_id=>task_id])
+            log(['canceled',name,task_id: task_id])
           end
-         private
+
+          private
+
           attr_reader :name
           def log(*args)
             Log.info_pp(*args)
@@ -83,11 +91,10 @@ module DTK
                 # if r[:component_name]; removing everyting else, which is teh attribute values
                 r[:component_name] ? r[:component_name] : r
               end
-              ret = ret.merge(:components => sanitized_components)
+              ret = ret.merge(components: sanitized_components)
             end
             ret
           end
-
         end
 
         def set_result_succeeded(workitem,new_result,task,action)
@@ -96,7 +103,7 @@ module DTK
           set_result_succeeded__stack(workitem,new_result,task,action)
         end
 
-        def set_result_canceled(workitem, task)
+        def set_result_canceled(_workitem, task)
           # Amar: (TODO: Find better solution)
           # Flag that will be checked inside mcollective.poll_to_detect_node_ready and will indicate detection to stop
           # Due to asyc calls, it was the only way I could figure out how to stop node detection task
@@ -105,8 +112,7 @@ module DTK
           task.update_at_task_completion("cancelled",Task::Action::Result::Cancelled.new())
         end
 
-        def set_result_failed(workitem,new_result,task)
-
+        def set_result_failed(_workitem,new_result,task)
           # Amar: (TODO: Find better solution)
           # Flag that will be checked inside mcollective.poll_to_detect_node_ready and will indicate detection to stop
           # Due to asyc calls, it was the only way I could figure out how to stop node detection task
@@ -116,7 +122,7 @@ module DTK
               CommandAndControl::Error::Communication.new
             else
               data = new_result[:data]
-              if data and data[:status] == :failed and (data[:error]||{})[:formatted_exception]
+              if data && data[:status] == :failed && (data[:error]||{})[:formatted_exception]
                 CommandAndControl::Error::FailedResponse.new(data[:error][:formatted_exception])
               else
                 CommandAndControl::Error.new
@@ -125,41 +131,42 @@ module DTK
           task.update_at_task_completion("failed",Task::Action::Result::Failed.new(error))
         end
 
-        def set_result_timeout(workitem,new_result,task)
+        def set_result_timeout(_workitem,_new_result,task)
           task.update_at_task_completion("failed",Task::Action::Result::Failed.new(CommandAndControl::Error::Timeout.new))
         end
 
-       protected
+        protected
 
         def poll_to_detect_node_ready(workflow, node, callbacks)
           # num_poll_cycles => number of times we are going to poll given node
           # poll_cycles     => cycle of poll in seconds
           num_poll_cycles, poll_cycle = 50, 6
-          receiver_context = {:callbacks => callbacks, :expected_count => 1}
-          opts = {:count => num_poll_cycles,:poll_cycle => poll_cycle}
+          receiver_context = {callbacks: callbacks, expected_count: 1}
+          opts = {count: num_poll_cycles,poll_cycle: poll_cycle}
           workflow.poll_to_detect_node_ready(node,receiver_context,opts)
         end
 
-       private
+        private
+
         def execution_context(task,workitem,task_start=nil,&body)
           if task_start
             set_task_to_executing(task)
           end
-          log_participant.start(:task_id => task[:id])
+          log_participant.start(task_id: task[:id])
           if event = add_start_task_event?(task)
-            log_participant.event(event,:task_id => task[:id])
+            log_participant.event(event,task_id: task[:id])
           end
           execution_context_block(task,workitem,&body)
         end
 
-        def execution_context_block(task,workitem,&body)
+        def execution_context_block(task,workitem,&_body)
           begin
             yield
           rescue Exception => e
             if task_is_active?(workitem) #this needed because, for example teher can be a pending polling task
-              event,errors = task.add_event_and_errors(:complete_failed,:server,[{:message => e.to_s}])
-              log_participant.end(:execution_context_trap,:event => event, :errors => errors, :backtrace => e.backtrace)
-              task.update_at_task_completion("failed",{:errors => errors})
+              event,errors = task.add_event_and_errors(:complete_failed,:server,[{message: e.to_s}])
+              log_participant.end(:execution_context_trap,event: event, errors: errors, backtrace: e.backtrace)
+              task.update_at_task_completion("failed",errors: errors)
               cancel_upstream_subtasks(workitem)
               delete_task_info(workitem)
             end
@@ -174,22 +181,26 @@ module DTK
         end
 
         # if use must coordinate with concurrence merge type
-        def set_result_succeeded__stack(workitem,new_result,task,action)
-          workitem.fields["result"] = {:action_completed => action.type}
+        def set_result_succeeded__stack(workitem,_new_result,_task,action)
+          workitem.fields["result"] = {action_completed: action.type}
         end
 
         def get_task_info(workitem)
           Ruote::TaskInfo.get(workitem)
         end
+
         def delete_task_info(workitem)
           Ruote::TaskInfo.delete(workitem)
         end
+
         def get_top_task_id(workitem)
           workitem.params["top_task_id"]
         end
+
         def task_is_active?(workitem)
           Workflow.task_is_active?(get_top_task_id(workitem))
         end
+
         def cancel_upstream_subtasks(workitem)
           # begin-rescue block is required, as multiple concurrent subtasks can initiate this method and only first will do the canceling
           begin
@@ -207,7 +218,8 @@ module DTK
         r8_nested_require('participant','execute_on_node')
         r8_nested_require('participant','power_on_node')
 
-       private
+        private
+
         def errors_in_result?(result,action=nil)
           CommandAndControl.errors_in_node_action_result?(result,action)
         end
@@ -216,16 +228,17 @@ module DTK
       class DebugTask < Top
         def consume(workitem)
           count = 15
-          pp "debug task sleep for #{s.to_s} seconds"
+          pp "debug task sleep for #{s} seconds"
           @is_on = true
-          while @is_on and count > 0
+          while @is_on && count > 0
             sleep 1
             count -= 1
           end
           pp "debug task finished"
           reply_to_engine(workitem)
         end
-        def cancel(fei, flavour)
+
+        def cancel(_fei, _flavour)
           pp "cancel called on debug task"
           # TODO: shut off loop not working
           p @is_on

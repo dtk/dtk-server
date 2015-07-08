@@ -11,6 +11,7 @@ module DTK; class Task
     end
     
     private
+
     def self.convert_to_string_form(qualified_index)
       qualified_index  ? qualified_index.map{|r|r.to_s}.join(LabelIndexDelimeter) : ''
     end
@@ -19,7 +20,7 @@ module DTK; class Task
     # subtask_indexes hash form
     # {subtask_id => {:parent_id => ..., :index => ...}
     def self.compute_recursive!(subtask_indexes,parents)
-      ret = Hash.new
+      ret = {}
       parent_ids = parents.keys
       subtask_indexes.each_pair do |subtask_id,info|
         if parent = parents[info[:parent_id]]
@@ -28,7 +29,7 @@ module DTK; class Task
           ret.merge!(subtask_id => subtask)
         end
       end
-      if ret.empty? or subtask_indexes.empty?
+      if ret.empty? || subtask_indexes.empty?
         ret
       else
         ret.merge(compute_recursive!(subtask_indexes,ret))

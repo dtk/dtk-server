@@ -1,7 +1,8 @@
 module DTK; class ModuleDSL; class V4
   class ObjectModelForm 
     class Component < OMFBase::Component
-     private
+      private
+
       def body(input_hash,cmp,context={})
         ret = OutputHash.new
         cmp_type = ret["display_name"] = ret["component_type"] = qualified_component(cmp)
@@ -10,18 +11,18 @@ module DTK; class ModuleDSL; class V4
         ret["basic_type"] = "service"
         ret.set_if_not_nil("description",input_hash["description"])
         add_attributes!(ret,cmp_type,input_hash)
-        opts = Hash.new
+        opts = {}
         add_dependent_components!(ret,input_hash,cmp_type,opts)
         ret.set_if_not_nil("component_include_module",include_modules?(input_hash,cmp_type,context))
         if opts[:constants]
-          add_attributes!(ret,cmp_type,ret_input_hash_with_constants(opts[:constants]),:constant_attribute => true)
+          add_attributes!(ret,cmp_type,ret_input_hash_with_constants(opts[:constants]),constant_attribute: true)
         end
         set_action_def_and_external_ref!(ret,input_hash,cmp,context)
         ret.set_if_not_nil("only_one_per_node",only_one_per_node(ret['external_ref']))
         ret
       end
 
-      def set_action_def_and_external_ref!(ret,input_hash,cmp,context={})
+      def set_action_def_and_external_ref!(ret,input_hash,cmp,_context={})
         create_action, function = nil, nil
         if action_def = ActionDef.new(cmp).convert_action_defs?(input_hash)
           if validate_action_def_function(action_def)
@@ -31,7 +32,7 @@ module DTK; class ModuleDSL; class V4
           end
         end
 
-        unless action_def.nil? or action_def.empty?
+        unless action_def.nil? || action_def.empty?
           ret["action_def"] = action_def
         end
 
@@ -60,7 +61,7 @@ module DTK; class ModuleDSL; class V4
         end
       end
 
-      def external_ref_from_function?(function, cmp)
+      def external_ref_from_function?(function, _cmp)
         if DTK::ActionDef::Constant.matches?(function[:method_name],:CreateActionName)
           if function[:content].respond_to?(:external_ref_from_function)
             function[:content].external_ref_from_function()
@@ -71,10 +72,9 @@ module DTK; class ModuleDSL; class V4
       def validate_action_def_function(action_def)
         if kv = DTK::ActionDef::Constant.matching_key_and_value?(action_def, :CreateActionName)
           create = kv.values.first
-          create[:content] && create[:content].has_key?(:functions)
+          create[:content] && create[:content].key?(:functions)
         end
       end
-
     end
   end
 end; end; end

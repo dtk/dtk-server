@@ -7,6 +7,7 @@ module XYZ
         super
       end
     end
+
     def respond_to?(name)
       !!(git_server_class.respond_to?(name) || super)
     end
@@ -16,7 +17,7 @@ module XYZ
       git_server_class().create_server_repo(repo_obj,repo_user_acls,opts)
     end
 
-    def delete_all_server_repos()
+    def delete_all_server_repos
       git_server_class().delete_all_server_repos()
     end
 
@@ -24,8 +25,9 @@ module XYZ
       git_server_class().delete_server_repo(repo)
     end
 
-   private
-    def git_server_class()
+    private
+
+    def git_server_class
       return @git_server_class if @git_server_class
       adapter_name = ((R8::Config[:repo]||{})[:git]||{})[:server_type]
       raise Error.new("No repo git server adapter specified") unless adapter_name

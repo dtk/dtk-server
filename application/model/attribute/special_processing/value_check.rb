@@ -11,11 +11,12 @@ module DTK; class Attribute
         [special_processing,error]
       end
 
-     private
+      private
+
       def self.error?(attr,attr_info,new_val)
         if legal_values = LegalValues.create?(attr,attr_info)
           unless legal_values.include?(new_val)
-            LegalValue::Error.new(attr,new_val,:legal_values => legal_values.print_form)
+            LegalValue::Error.new(attr,new_val,legal_values: legal_values.print_form)
           end
         end
       end

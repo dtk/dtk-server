@@ -9,7 +9,8 @@ module DTK; module CommandAndControlAdapter
         aggregate_responses(single_run_responses)
       end
 
-     private
+      private
+
       def self.target_ref_nodes(task_action)
         nodes = task_action.nodes()
         nodes.each do |node|
@@ -49,7 +50,7 @@ module DTK; module CommandAndControlAdapter
           @flavor_id = @external_ref[:size] || R8::Config[:command_and_control][:iaas][:ec2][:default_image_size]
         end
 
-        def run()
+        def run
           create_node = true
           if instance_id = external_ref[:instance_id]
             # handle case where node is terminated and need to recreate
@@ -68,34 +69,34 @@ module DTK; module CommandAndControlAdapter
 
             instance_id = response[:id]
             state = response[:state]
-            updated_external_ref = external_ref.merge({
-              :instance_id => instance_id,
-              :type => "ec2_instance",
-              :size => flavor_id
-            })
+            updated_external_ref = external_ref.merge(              instance_id: instance_id,
+              type: "ec2_instance",
+              size: flavor_id)
 
             Log.info("#{node_print_form()} with ec2 instance id #{instance_id}; waiting for it to be available")
             node_update_hash = {
-              :external_ref => updated_external_ref,
-              :type => Node::Type.new_type_when_create_node(base_node),
-              :is_deployed => true,
+              external_ref: updated_external_ref,
+              type: Node::Type.new_type_when_create_node(base_node),
+              is_deployed: true,
               # TODO: better unify these below
-              :operational_status => "starting",
-              :admin_op_status => "pending"
+              operational_status: "starting",
+              admin_op_status: "pending"
             }
             Ec2.update_node!(node,node_update_hash)
           end
           
           process_addresses__first_boot?(node)
           
-          {:status => "succeeded",
-            :node => {
-              :external_ref => external_ref
+          {status: "succeeded",
+            node: {
+              external_ref: external_ref
             }
           }
         end
-       private
-        def create_ec2_instance()
+
+        private
+
+        def create_ec2_instance
           response = nil
           unless ami = external_ref[:image_id]
             raise ErrorUsage.new("Cannot find ami for node (#{@node[:display_name]})")
@@ -122,7 +123,7 @@ module DTK; module CommandAndControlAdapter
             e.message << ". Region: '#{region}'." if region
 
             Log.error_pp([e,e.backtrace[0..10]])
-            return {:status => "failed", :error_object => e}
+            return {status: "failed", error_object: e}
           end
           response
         end
@@ -130,47 +131,47 @@ module DTK; module CommandAndControlAdapter
         class CreateOptions < Hash
           def initialize(target_ref,conn,ami)
             super()
-            replace(:image_id => ami,:flavor_id => target_ref.flavor_id)
+            replace(image_id: ami,flavor_id: target_ref.flavor_id)
             @conn         = conn
             @target       = target_ref.target
             @node         = target_ref.node
             @external_ref = target_ref.external_ref||{}
           end
 
-          def update_security_group!()
+          def update_security_group!
             security_group = @target.get_security_group() || 
               @target.get_security_group_set() || 
               @external_ref[:security_group_set] ||
               [R8::Config[:ec2][:security_group]] ||
               'default'
-            merge!(:groups => security_group)
+            merge!(groups: security_group)
           end
 
-          def update_tags!()
-            merge!(:tags => {"Name" => ec2_name_tag()})
+          def update_tags!
+            merge!(tags: {"Name" => ec2_name_tag()})
           end
           
-          def update_key_name()
-            merge!(:key_name => @target.get_keypair() || R8::Config[:ec2][:keypair])
+          def update_key_name
+            merge!(key_name: @target.get_keypair() || R8::Config[:ec2][:keypair])
           end
 
-          def update_availability_zone!()
+          def update_availability_zone!
             target_availability_zone = (@target[:iaas_properties]||{})[:availability_zone]
             avail_zone = @external_ref[:availability_zone] || 
               (@target[:iaas_properties]||{})[:availability_zone] || 
               R8::Config[:ec2][:availability_zone]
-            unless avail_zone.nil? or avail_zone == 'automatic'
-              merge!(:availability_zone => avail_zone)
+            unless avail_zone.nil? || avail_zone == 'automatic'
+              merge!(availability_zone: avail_zone)
             end
           end
         
-          def update_vpc_info?()
+          def update_vpc_info?
             if @target.is_builtin_target?()
               #TODO: we wil get rid of this special case and just put the info in builtin target
               if R8::Config[:ec2][:vpc_enable]
                 subnet_id = @conn.check_for_subnet(R8::Config[:ec2][:vpc][:subnet_id])
-                merge!(:subnet_id => subnet_id, :associate_public_ip => R8::Config[:ec2][:vpc][:associate_public_ip])
-                merge!(:groups => R8::Config[:ec2][:vpc][:security_group])
+                merge!(subnet_id: subnet_id, associate_public_ip: R8::Config[:ec2][:vpc][:associate_public_ip])
+                merge!(groups: R8::Config[:ec2][:vpc][:security_group])
                 return
               end
             end
@@ -191,7 +192,7 @@ module DTK; module CommandAndControlAdapter
             
             subnet_id = @conn.check_for_subnet(subnet)
             associate_public_ip = true #TODO: stub vale
-            merge!(:subnet_id => subnet_id, :associate_public_ip => associate_public_ip) 
+            merge!(subnet_id: subnet_id, associate_public_ip: associate_public_ip) 
           end
 
           def update_block_device_mapping!(image)
@@ -201,25 +202,26 @@ module DTK; module CommandAndControlAdapter
             end
             # only add block_device_mapping if it was fully generated
             if block_device_mapping = image.block_device_mapping?(root_device_override_attrs)
-              merge!(:block_device_mapping => block_device_mapping)
+              merge!(block_device_mapping: block_device_mapping)
             end
           end
 
-          def update_user_data!()
+          def update_user_data!
             self[:user_data] ||= CommandAndControl.install_script(@node)
             self
           end
 
-         private
-          def ec2_name_tag()
+          private
+
+          def ec2_name_tag
             # TO-DO: move the tenant name definition to server configuration
             tenant = ::DtkCommon::Aux::running_process_user()
             subs = {
-              :assembly => ec2_name_tag__get_assembly_name(),
-              :node     => @node.get_field?(:display_name),
-              :tenant   => tenant,
-              :target   => @target[:display_name],
-              :user     => CurrentSession.get_username()
+              assembly: ec2_name_tag__get_assembly_name(),
+              node: @node.get_field?(:display_name),
+              tenant: tenant,
+              target: @target[:display_name],
+              user: CurrentSession.get_username()
             }
             ret = Ec2NameTag[:tag].dup
             Ec2NameTag[:vars].each do |var|
@@ -229,11 +231,11 @@ module DTK; module CommandAndControlAdapter
             ret
           end
           Ec2NameTag = {
-            :vars => [:assembly, :node, :tenant, :target, :user],
-            :tag => R8::Config[:ec2][:name_tag][:format]
+            vars: [:assembly, :node, :tenant, :target, :user],
+            tag: R8::Config[:ec2][:name_tag][:format]
           }
 
-          def ec2_name_tag__get_assembly_name()
+          def ec2_name_tag__get_assembly_name
             if assembly = @node.get_assembly?()
               assembly.get_field?(:display_name)
             else
@@ -246,7 +248,6 @@ module DTK; module CommandAndControlAdapter
               end
             end
           end
-
         end
 
         def get_node_status(instance_id)
@@ -261,7 +262,7 @@ module DTK; module CommandAndControlAdapter
           ret
         end
 
-        def node_print_form()
+        def node_print_form
           "#{node[:display_name]} (#{node[:id]}"
         end
       end

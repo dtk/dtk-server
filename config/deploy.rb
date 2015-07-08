@@ -50,7 +50,6 @@ namespace :git do
 end
 
 namespace :deploy do
-
   desc 'Restart thin'
   task :restart do
     on roles(:app), in: :groups do |role|
@@ -100,5 +99,4 @@ namespace :deploy do
       execute "cd #{release_path}/application; ./utility/dbrebuild.rb"
     end
   end
-
 end

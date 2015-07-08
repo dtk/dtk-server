@@ -28,7 +28,6 @@ node_name = 'node1'
 dtk_common = DtkCommon.new(assembly_name, assembly_template)
 
 describe "(Modules, Services and Versioning) Test Case 19: Import module from puppet forge, add its components and converge the assembly" do
-
   before(:all) do
     puts "******************************************************************************************************************************"
     puts "(Modules, Services and Versioning) Test Case 19: Import module from puppet forge, add its components and converge the assembly"

@@ -4,7 +4,7 @@ module DTK
       r8_nested_require('lock','info')
       r8_nested_require('lock','persist')
 
-      def self.common_columns()
+      def self.common_columns
         [:id,:display_name,:group_id,:module_name,:info,:locked_branch_sha]
       end
       
@@ -13,14 +13,16 @@ module DTK
         super
         @info = nil
       end
-      def locked_branch_sha()
+
+      def locked_branch_sha
         self[:locked_branch_sha]
       end
+
       def locked_branch_sha=(sha)
         self[:locked_branch_sha] = sha
       end
 
-      def module_name()
+      def module_name
         (@info && @info.module_name) || (Log.error_pp(["Unexpected that no module name",self]); nil)
       end
 
@@ -38,7 +40,7 @@ module DTK
         Persist.get(assembly_instance).map{|r|r.reify()}
       end
 
-      def reify()
+      def reify
         info_hash = self[:info]
         @info = info_hash && Info.create_from_hash(model_handle,info_hash)
         self

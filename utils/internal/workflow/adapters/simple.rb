@@ -7,13 +7,14 @@ module DTK
         @task = task||top_task
       end
 
-      def execute(top_task_id)
+      def execute(_top_task_id)
         workflow = self.class.generate_workflow(@top_task,@task)
         # RICH-WF: needs to be written by having each child class put in logic
         workflow.follow_workflow()
       end
 
-     private
+      private
+
       attr_reader :task
       # RICH-WF: this function can do the decomposition where there may be a base task that decomposes into multiple ones
       def self.generate_workflow(top_task,task)
@@ -29,16 +30,16 @@ module DTK
       end
 
       class ExecutableAction < self
-        def follow_workflow()
+        def follow_workflow
           #TODO: needs to call workflow#process_executable_action
           process_executable_action(task,top_task_idh)
         end
 
-        def debug_summary()
+        def debug_summary
           node = task[:executable_action][:node]||{}
           summary = {
-            :action_type => task[:executable_action_type],
-            :node => {:id => node[:id],:name => node[:display_name]}
+            action_type: task[:executable_action_type],
+            node: {id: node[:id],name: node[:display_name]}
           }
           [self.class,summary]
         end
@@ -51,13 +52,13 @@ module DTK
         end
         attr_reader :children
 
-        def debug_summary()
+        def debug_summary
           [self.class,@children.map{|wf|wf.debug_summary()}]
         end
       end
       class Sequential < self
         include NestedWFMixin
-        def follow_workflow()
+        def follow_workflow
           pp [:debug_print,debug_summary()]
           raise Error.new("fn must be written")
         end
@@ -65,7 +66,7 @@ module DTK
 
       class Concurrent < self
         include NestedWFMixin
-        def follow_workflow()
+        def follow_workflow
           pp [:debug_print,debug_summary()]
           raise Error.new("fn must be written")
         end

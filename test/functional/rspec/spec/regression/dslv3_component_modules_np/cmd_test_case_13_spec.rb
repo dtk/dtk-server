@@ -18,7 +18,6 @@ file_for_change = "dtk.model.yaml"
 dtk_common = DtkCommon.new("", "")
 
 describe "(Component Module DSL) Test Case 13: dtk.model.yaml with all correct values for supported types (string, integer, boolean, hash, array, port)" do
-
   before(:all) do
     puts "*********************************************************************************************************************************************",""
   end

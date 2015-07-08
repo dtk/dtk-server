@@ -13,12 +13,12 @@ module XYZ
     end
     def self.or(*args)
       ret = nil
-      args.reverse.each{|x|ret = or_aux(x,ret)}
+      args.reverse_each{|x|ret = or_aux(x,ret)}
       ret
     end
     def self.and(*args)
       ret = nil
-      args.reverse.each{|x|ret = and_aux(x,ret)}
+      args.reverse_each{|x|ret = and_aux(x,ret)}
       ret
     end
     # takes into accout a or b can be null
@@ -30,7 +30,7 @@ module XYZ
 
     #####
     ##### Sequel functions and column refs
-    def self.now()
+    def self.now
       :NOW.sql_function
     end
 
@@ -48,7 +48,7 @@ module XYZ
       def self.concat(*args,&block)
         # TODO: make sure to_a does not have side effect like falttening hashs inside
         return block.call(self).sql_string_join if block
-        return String.new if args.empty? 
+        return '' if args.empty? 
         args.sql_string_join
       end
       def self.coalesce(*args)
@@ -59,7 +59,7 @@ module XYZ
         x.to_s.lit + y
       end
 
-      def self.null_id()
+      def self.null_id
         cast(nil,ID_TYPES[:id])
       end
 
@@ -69,8 +69,8 @@ module XYZ
       end
 
       # TODO: use SQL.cast 
-      def self.qualified_ref()
-        [:ref,[[{:ref_num => nil},""]].case(["-",:ref_num.cast(:text)].sql_string_join)].sql_string_join
+      def self.qualified_ref
+        [:ref,[[{ref_num: nil},""]].case(["-",:ref_num.cast(:text)].sql_string_join)].sql_string_join
       end
 
       def self.cast(expr,type)
@@ -84,6 +84,7 @@ module XYZ
       def initialize(val)
         @val = val
       end
+
       def to_sequel(col,sql_operation)
         # sql_operation will be :update or :insert
         sql_operation == :update ? SQL::ColRef.coalesce(col,@val) : @val
@@ -94,23 +95,24 @@ module XYZ
       def self.like(l,r)
         Sequel::SQL::StringExpression.like(l,r)
       end
-
     end
-   private
+
+    private
+
     def self.or_aux(x,y)
-      return y if x.nil? or (x.kind_of?(Hash) and x.empty?)
-      return x if y.nil? or (y.kind_of?(Hash) and y.empty?)
+      return y if x.nil? || (x.is_a?(Hash) && x.empty?)
+      return x if y.nil? || (y.is_a?(Hash) && y.empty?)
       x | y
     end
     def self.and_aux(x,y)
-      return y if x.nil? or (x.kind_of?(Hash) and x.empty?)
-      return x if y.nil? or (y.kind_of?(Hash) and y.empty?)
+      return y if x.nil? || (x.is_a?(Hash) && x.empty?)
+      return x if y.nil? || (y.is_a?(Hash) && y.empty?)
       x & y
     end
 
     module DatatsetGraphMixin
       # for debugging
-      def ppsql()
+      def ppsql
         @sequel_ds.sql.gsub(/"/,'')
       end
 
@@ -120,7 +122,7 @@ module XYZ
         model_name_info = @model_name_info + [new_model_name_info]
         table_alias = new_model_name_info.ret_qualified_model_name()
         # TODO: think can make more efficient by adding in :select => [cols.]] for the rs table; without that it looks like sequel making a db call to find relevant columns for join result
-        sequel_graph = @sequel_ds.graph(right_ds.sequel_ds,join_conditions,opts.merge(:join_type => join_type, :table_alias => table_alias))
+        sequel_graph = @sequel_ds.graph(right_ds.sequel_ds,join_conditions,opts.merge(join_type: join_type, table_alias: table_alias))
         Graph.new(sequel_graph,model_name_info,@c)
       end
 
@@ -133,21 +135,24 @@ module XYZ
         where(vcol_info[:sql_fn] => value)
       end
 
-     private
-      def model_name()
+      private
+
+      def model_name
         model_name_info.first.model_name
       end
     end
 
     module FilterPostProcessingMixin 
       def add_filter_post_processing(filter)
-        raise ErrorPostProcFilterNotImpl.new(:filter,filter) unless (filter.kind_of?(Array) and filter.first == :and)
+        raise ErrorPostProcFilterNotImpl.new(:filter,filter) unless (filter.is_a?(Array) && filter.first == :and)
         filter_fn = filter[1..filter.size-1].map{|expr|parse_expression(expr)}.join(" and ")
-        @filter_post_processing = lambda{|obj|eval(filter_fn)}
+        @filter_post_processing = lambda{|_obj|eval(filter_fn)}
       end
-     private
+
+      private
+
       def parse_expression(expr)
-        raise ErrorPostProcFilterNotImpl.new(:expression,expr) unless expr.kind_of?(Array) and expr.size == 3 
+        raise ErrorPostProcFilterNotImpl.new(:expression,expr) unless expr.is_a?(Array) && expr.size == 3 
         case expr[0]
          when :eq
           "(#{parse_term(expr[1])} == #{parse_term(expr[2])})"
@@ -157,16 +162,17 @@ module XYZ
           raise ErrorPostProcFilterNotImpl.new(:operation,expr[0])
         end
       end
+
       def parse_term(x)
-        if x.kind_of?(Symbol) 
+        if x.is_a?(Symbol) 
           "obj[:#{x}]" 
-        elsif x.kind_of?(String)
+        elsif x.is_a?(String)
           '"'+x+'"'
-        elsif x.kind_of?(Numeric)
+        elsif x.is_a?(Numeric)
           x
-        elsif x.kind_of?(TrueClass)
+        elsif x.is_a?(TrueClass)
           true
-        elsif x.kind_of?(FalseClass)
+        elsif x.is_a?(FalseClass)
           false
         else
           raise Error.new("Unexpected term in post processing filter #{x.inspect}")
@@ -187,9 +193,11 @@ module XYZ
         @model_name_alias = model_name_alias
         @convert = convert
       end
-      def ret_qualified_model_name()
-        @model_name_alias || (@ref_num == 1 ? @model_name : "#{@model_name}#{@ref_num.to_s}").to_sym
+
+      def ret_qualified_model_name
+        @model_name_alias || (@ref_num == 1 ? @model_name : "#{@model_name}#{@ref_num}").to_sym
       end
+
       def create_unique(existing_name_info,opts={})
         model_name_alias = opts[:table_alias]
         @convert = true if opts[:convert]
@@ -204,7 +212,7 @@ module XYZ
       include FilterPostProcessingMixin 
       # TODO: needed to fully qualify Dataset; could this constraint be removed? by chaging expose?
       post_hook = "lambda{|x|XYZ::SQL::Dataset.new(model_handle,x,@filter_post_processing)}"
-      expose_methods_from_internal_object :sequel_ds, %w{where select from_self for_update}, :post_hook => post_hook
+      expose_methods_from_internal_object :sequel_ds, %w{where select from_self for_update}, post_hook: post_hook
       expose_methods_from_internal_object :sequel_ds, %w{sql}
       def initialize(model_handle,sequel_ds,filter_post_processing=nil)
         @model_name_info = [ModelNameInfo.new(model_handle[:model_name])]
@@ -232,7 +240,7 @@ module XYZ
       end
 
       def all(opts={})
-        ret = Array.new
+        ret = []
         @sequel_ds.all.map do |row|
           Model.process_raw_db_row!(row,model_name,opts)
           new_row = DB_REL_DEF[model_name][:model_class].new(row,@c,model_name)
@@ -242,10 +250,9 @@ module XYZ
         ret
       end
 
-      def model_handle()
+      def model_handle
         ModelHandle.new(@c,model_name)
       end
-
     end
 
     # creates a table dataset from rows, which is array with each element being a hash; each row has same keys
@@ -253,25 +260,27 @@ module XYZ
       def self.create(db,rows,model_handle,opts={})
         return nil if rows.empty?
         rows_processed = 
-          if opts[:convert_for_update] or opts[:convert_for_create]
+          if opts[:convert_for_update] || opts[:convert_for_create]
             sql_operation = opts[:convert_for_update] ? :update : :create
-            rows2 = (opts[:partial_value] and sql_operation == :update) ? ret_modified_for_partial_values(rows,db,model_handle) : rows 
+            rows2 = (opts[:partial_value] && sql_operation == :update) ? ret_modified_for_partial_values(rows,db,model_handle) : rows 
             rows2.map{|row| db.ret_convert_from_object_to_db_form(model_handle,row,sql_operation)}
           else
             rows
           end
         ArrayDataset.new(db,rows_processed,model_handle)
       end
-     private
+
+      private
+
       # TODO: deprecate when use instead the db side partial update
       def self.ret_modified_for_partial_values(rows,db,model_handle)
         ret = rows
         # need to get values if there are any json columns being updated and update value is array or hash
         db_rel = DB_REL_DEF[model_handle[:model_name]]
         # Assumes that all rows have exact same keys
-        cols_to_get = rows.first.reject{|k,v|not ((v.kind_of?(Hash) or v.kind_of?(Array)) and db.json_table_column?(k,db_rel))}.keys
+        cols_to_get = rows.first.reject{|k,v|not ((v.is_a?(Hash) || v.is_a?(Array)) && db.json_table_column?(k,db_rel))}.keys
         return ret if cols_to_get.empty?
-        unless rows.first.has_key?(:id)
+        unless rows.first.key?(:id)
           Log.error("partial value processing can only be handled when id is on each row")
           return ret
         end
@@ -301,17 +310,17 @@ module XYZ
         else
           rows.each do |row|
             sequel_select = empty_sequel_ds.select(*row.map{|x|{x[1] => x[0]}})
-            sequel_ds = sequel_ds ? sequel_ds.union(sequel_select,{:all => true}) : sequel_select
+            sequel_ds = sequel_ds ? sequel_ds.union(sequel_select,all: true) : sequel_select
           end
         end
-        super(model_handle,sequel_ds.from_self({:alias => aliaz}))
+        super(model_handle,sequel_ds.from_self(alias: aliaz))
       end
     end
     class Graph
       include DatatsetGraphMixin
       include FilterPostProcessingMixin 
       # TODO: needed to fully qualify Dataset; could this constraint be removed? by chaging expose?
-      expose_methods_from_internal_object :sequel_ds, %w{where select from_self}, :post_hook => "lambda{|x|XYZ::SQL::Graph.new(x,@model_name_info,@c,@filter_post_processing)}"
+      expose_methods_from_internal_object :sequel_ds, %w{where select from_self}, post_hook: "lambda{|x|XYZ::SQL::Graph.new(x,@model_name_info,@c,@filter_post_processing)}"
       expose_methods_from_internal_object :sequel_ds, %w{sql}
       def initialize(sequel_ds,model_name_info,c,filter_post_processing=nil)
         @sequel_ds = sequel_ds
@@ -333,14 +342,14 @@ module XYZ
       end
 
       def all(opts={})
-        # TODO may be more efficient if flatten by use something like Model.db.db[@sequel_ds.sql].all
+        # TODO: may be more efficient if flatten by use something like Model.db.db[@sequel_ds.sql].all
         # this avoids needing to reanchor each from primary table (which should be bulk of info
         # alterantive look at capability of Sequel to pass in row processing block
 
         # pull first element from under top level key
         primary_model_name = @model_name_info.first.model_name() 
         rest_model_indexes = @model_name_info[1..@model_name_info.size-1]
-        ret = Array.new
+        ret = []
         @sequel_ds.all.each do |row|
           primary_cols = row.delete(primary_model_name)
           Model.process_raw_db_row!(primary_cols,primary_model_name,opts)
@@ -349,7 +358,7 @@ module XYZ
             model_index = m.ret_qualified_model_name()
             next unless row[model_index]
             Model.process_raw_db_row!(row[model_index],m.model_name,opts)
-            if m.convert or opts[:convert_child_rows]
+            if m.convert || opts[:convert_child_rows]
               row[model_index] = DB_REL_DEF[m.model_name][:model_class].create(row[model_index],@c,m.model_name)
             end
           end

@@ -5,7 +5,7 @@ module XYZ
         ret = LogSegments.new
         current_segment = nil
         lines.each do |line|
-          if match = Pattern.find{|k,pat|line =~ pat}
+          if match = Pattern.find{|_k,pat|line =~ pat}
             ret << current_segment if current_segment
             current_segment = LogSegment.create(match[0],line)
           elsif current_segment
@@ -24,20 +24,23 @@ module XYZ
         end
         nil
       end
-     private
+
+      private
+
       # order is important because of subsumption
       Pattern =  Aux::ordered_hash(
-        [{:debug => /DEBUG:/},
-         {:error => /ERROR:/},
-         {:info_error => /INFO: error:/},
-         {:info_backtrace => /INFO: backtrace:/},
-         {:info => /INFO:/}]
+        [{debug: /DEBUG:/},
+         {error: /ERROR:/},
+         {info_error: /INFO: error:/},
+         {info_backtrace: /INFO: backtrace:/},
+         {info: /INFO:/}]
       )
-     public
-      class LogSegments < ::XYZ::LogSegments
 
+      public
+
+      class LogSegments < ::XYZ::LogSegments
         # TODO: may use just for testing; if so deprecate
-        def pp_form_summary()
+        def pp_form_summary
           if @complete
             if has_error?()
               error_segment = error_segment()
@@ -55,7 +58,7 @@ module XYZ
           end
         end
 
-        def post_process!()
+        def post_process!
           @complete = complete?()
           return self unless @complete
           error_pos =  find_error_position()
@@ -76,6 +79,7 @@ module XYZ
           self[error_pos] = specific_error if specific_error
           self
         end
+
         def ret_file_asset_if_error(model_handle)
           if has_error?()
             error_segment = error_segment()
@@ -83,11 +87,11 @@ module XYZ
           end
         end
 
-        def error_segment()
-          last if @complete and last.kind_of?(::XYZ::LogSegmentError)
+        def error_segment
+          last if @complete && last.is_a?(::XYZ::LogSegmentError)
         end
 
-        def has_error?()
+        def has_error?
           if @complete
             # short circuit when complete
             last.type == :error
@@ -96,16 +100,17 @@ module XYZ
           end
         end
 
-       private
+        private
+
         # TODO: need to unify with self.log_complete?(lines)
-        def complete?()
+        def complete?
           return false if empty?
           return true if last.line =~ /handlers complete/
           return false if size < 2
           self[size-2].line  =~ /handlers complete/ ? true : false
         end
 
-        def find_error_position()
+        def find_error_position
           each_with_index{|seg,i|return i if seg.type == :error}
           nil
         end
@@ -119,11 +124,13 @@ module XYZ
       end
 
       class ErrorGeneric < ErrorChefLog 
-        def self.isa?(segments_from_error)
+        def self.isa?(_segments_from_error)
           true
         end
-       private
-        def parse!(segments_from_error,prev_segment)
+
+        private
+
+        def parse!(segments_from_error,_prev_segment)
           line = segments_from_error[1] && segments_from_error[1].line
           if line =~ /INFO: error: (.+$)/
             @error_detail = $1
@@ -144,8 +151,10 @@ module XYZ
           line = segments_from_error.last.line
           line =~ /Chef::Exceptions::Exec/
         end
-       private
-        def parse!(segments_from_error,prev_segment)
+
+        private
+
+        def parse!(segments_from_error,_prev_segment)
           if segments_from_error.last.line =~ /Chef::Exceptions::Exec - (.+$)/
             @error_detail = "Exec error: #{$1}"
           else
@@ -180,14 +189,15 @@ module XYZ
         end
       end
 
-
       class ErrorTemplate < ErrorChefLog 
         def self.isa?(segments_from_error)
           line = segments_from_error.last.line
           line =~ /Chef::Mixin::Template::TemplateError/
         end
-       private
-        def parse!(segments_from_error,prev_segment)
+
+        private
+
+        def parse!(segments_from_error,_prev_segment)
           if segments_from_error.last.line =~ /Chef::Mixin::Template::TemplateError - (.+$)/
             @error_detail = "Template error: #{$1}".gsub(/ for #<Erubis::Context:[^>]+>/,"")
           else
@@ -220,8 +230,10 @@ module XYZ
           line = segments_from_error[0].line
           line =~ /ERROR: service/
         end
-       private
-        def parse!(segments_from_error,prev_segment)
+
+        private
+
+        def parse!(segments_from_error,_prev_segment)
           line = segments_from_error[0].line
           if line =~ /ERROR: (.+$)/
             @error_detail = $1
@@ -245,10 +257,12 @@ module XYZ
           end
           nil
         end
-       private
+
+        private
+
         RecipeCache = "/var/chef/cookbooks/"
         FromFilePat = Regexp.new("#{RecipeCache}([^/]+)/recipes/([^:]+):([0-9]+):in `from_file'") 
-        def parse!(segments_from_error,prev_segment)
+        def parse!(segments_from_error,_prev_segment)
           if segments_from_error.last.line =~ /DEBUG: Re-raising exception: (.+$)/
             @error_detail = $1.gsub(/ for #<Chef::Recipe:[^>]+>/,"")
           else
@@ -256,7 +270,7 @@ module XYZ
           end
           self.class.lines_to_check(segments_from_error).each do |line|
             if set_file_ref!(line)
-              @error_detail << " (line #{@error_line_num.to_s})" if @error_line_num and @error_detail
+              @error_detail << " (line #{@error_line_num})" if @error_line_num && @error_detail
               return
             end
           end
@@ -301,8 +315,10 @@ module XYZ
           line = segments_from_error[1].line
           line =~ /ArgumentError: Cannot find a recipe matching/
         end
-       private
-        def parse!(segments_from_error,prev_segment)
+
+        private
+
+        def parse!(segments_from_error,_prev_segment)
           line = segments_from_error[1].line
           if line =~ /ArgumentError: (.+$)/
             @error_detail = $1
@@ -316,8 +332,10 @@ module XYZ
           line = segments_from_error[1].line
           line =~ /Chef::Exceptions::CookbookNotFound/
         end
-       private
-        def parse!(segments_from_error,prev_segment)
+
+        private
+
+        def parse!(segments_from_error,_prev_segment)
           line = segments_from_error[1].line
           if line =~ /Chef::Exceptions::CookbookNotFound: (.+$)/
             @error_detail = $1
@@ -325,39 +343,40 @@ module XYZ
         end
       end
 
-
       # complication is that may not have uniq handle on file
       class ChefFileRef < HashObject
         def self.find_chef_template(segment)
           if segment.line =~ /looking for template (.+) in cookbook :(.+$)/
             hash = {
-              :type => :template,
-              :cookbook => $2,
-              :file_name => $1
+              type: :template,
+              cookbook: $2,
+              file_name: $1
             }
             self.new(hash)
           end
         end
         def self.recipe(cookbook,recipe_filename)
           hash = {
-            :type => :recipe,
-            :cookbook => cookbook,
-            :file_name => recipe_filename
+            type: :recipe,
+            cookbook: cookbook,
+            file_name: recipe_filename
           }
           self.new(hash)
         end
         def ret_file_asset(model_handle)
           file_asset_path = ret_file_asset_path()
-          return nil unless file_asset_path and self[:cookbook]
+          return nil unless file_asset_path && self[:cookbook]
           sp_hash = {
-            :filter => [:eq, :path, file_asset_path],
-            :cols => [:id,:path,:implementation_info]
+            filter: [:eq, :path, file_asset_path],
+            cols: [:id,:path,:implementation_info]
           }
           file_asset_mh = model_handle.createMH(:file_asset)
           Model.get_objects_from_sp_hash(file_asset_mh,sp_hash).find{|x|x[:implementation][:repo] == self[:cookbook]}
         end
-       private
-        def ret_file_asset_path()
+
+        private
+
+        def ret_file_asset_path
           return nil unless self[:file_name]
           case self[:type]
            when :template

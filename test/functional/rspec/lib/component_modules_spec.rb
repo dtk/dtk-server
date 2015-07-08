@@ -149,7 +149,7 @@ shared_context "Import component module rvm" do |rvm_path, component_module_name
   end
 end
 
-shared_context "Export component module" do |dtk_common, component_module_name, namespace|
+shared_context "Export component module" do |_dtk_common, component_module_name, namespace|
   it "exports #{component_module_name} component module to #{namespace} namespace on remote repo" do
     puts "Export component module:", "------------------------"
     pass = false
@@ -164,7 +164,7 @@ shared_context "Export component module" do |dtk_common, component_module_name, 
   end
 end
 
-shared_context "Export component module rvm" do |rvm_path, dtk_common, component_module_name, namespace|
+shared_context "Export component module rvm" do |rvm_path, _dtk_common, component_module_name, namespace|
   it "exports #{component_module_name} component module to #{namespace} namespace on remote repo" do
     puts "Export component module:", "------------------------"
     pass = false
@@ -329,7 +329,7 @@ shared_context "Delete versioned component module from local filesystem" do |com
   end
 end
 
-shared_context "Delete component module from remote repo" do |dtk_common, component_module_name, namespace|
+shared_context "Delete component module from remote repo" do |_dtk_common, component_module_name, namespace|
   it "deletes #{component_module_name} component module with #{namespace} namespace from remote repo" do
     puts "Delete component module from remote:", "------------------------------------"
     pass = false
@@ -342,7 +342,7 @@ shared_context "Delete component module from remote repo" do |dtk_common, compon
   end
 end
 
-shared_context "Delete component module from remote repo rvm" do |rvm_path, dtk_common, component_module_name, namespace|
+shared_context "Delete component module from remote repo rvm" do |rvm_path, _dtk_common, component_module_name, namespace|
   it "deletes #{component_module_name} component module with #{namespace} namespace from remote repo" do
     puts "Delete component module from remote:", "------------------------------------"
     pass = false
@@ -376,7 +376,7 @@ shared_context "Create new component module version" do |dtk_common, component_m
   end
 end
 
-shared_context "Clone versioned component module" do |dtk_common, component_module_name, module_version|
+shared_context "Clone versioned component module" do |_dtk_common, component_module_name, module_version|
   it "clones #{component_module_name} component module with version #{module_version} from server to local filesystem" do
     puts "Clone versioned component module:", "---------------------------------"
     pass = false
@@ -416,7 +416,7 @@ shared_context "NEG - Push clone changes to server" do |component_module_name, f
     end
 end
 
-shared_context "Push to remote changes for component module" do |dtk_common, component_module_name|
+shared_context "Push to remote changes for component module" do |_dtk_common, component_module_name|
   it "pushes #{component_module_name} component module changes from server to repoman" do
     puts "Push to remote component module changes:", "-----------------------------------"
     pass = false

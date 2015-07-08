@@ -3,7 +3,7 @@ module ComponentModulesMixin
 		puts "Delete component module from remote:", "----------------------------------"
 		component_module_deleted = false
 
-		response = send_request('/rest/component_module/delete_remote', {:remote_module_name => component_module, :remote_module_namespace => namespace, :rsa_pub_key => self.ssh_key})
+		response = send_request('/rest/component_module/delete_remote', remote_module_name: component_module, remote_module_namespace: namespace, rsa_pub_key: self.ssh_key)
 
 		if response['status'] == 'ok'
 			puts "Component module #{component_module} has been deleted from remote successfully!"
@@ -19,7 +19,7 @@ module ComponentModulesMixin
 	def make_component_module_private(component_module)
 		puts "Make component module private:", "------------------------------"
 		component_module_private = false
-		response = send_request('/rest/component_module/remote_chmod', {:module_id => component_module, :permission_selector => "o-rwd", :rsa_pub_key => self.ssh_key, :remote_module_namespace => nil})
+		response = send_request('/rest/component_module/remote_chmod', module_id: component_module, permission_selector: "o-rwd", rsa_pub_key: self.ssh_key, remote_module_namespace: nil)
 		if response['status'] == 'ok'
 			puts "Component module #{component_module} is now private"
 			component_module_private = true
@@ -34,7 +34,7 @@ module ComponentModulesMixin
 	def make_component_module_public(component_module)
 		puts "Make component module public:", "-----------------------------"
 		component_module_public = false
-		response = send_request('/rest/component_module/remote_chmod', {:module_id => component_module, :permission_selector => "o+r", :rsa_pub_key => self.ssh_key, :remote_module_namespace => nil})
+		response = send_request('/rest/component_module/remote_chmod', module_id: component_module, permission_selector: "o+r", rsa_pub_key: self.ssh_key, remote_module_namespace: nil)
 		if response['status'] == 'ok'
 			puts "Component module #{component_module} is now public"
 			component_module_public = true
@@ -49,7 +49,7 @@ module ComponentModulesMixin
 	def set_chmod_for_component_module(component_module, permission_set)
 		puts "Set chmod for component module:", "-------------------------------"
 		chmod_set = false
-		response = send_request('/rest/component_module/remote_chmod', {:module_id => component_module, :permission_selector => permission_set, :rsa_pub_key => self.ssh_key, :remote_module_namespace => nil})
+		response = send_request('/rest/component_module/remote_chmod', module_id: component_module, permission_selector: permission_set, rsa_pub_key: self.ssh_key, remote_module_namespace: nil)
 		if response['status'] == 'ok'
 			puts "Chmod #{permission_set} has been set for component module #{component_module} successfully"
 			chmod_set = true
@@ -66,7 +66,7 @@ module ComponentModulesMixin
 		collaborators_added = false
 
 		if collaborator_type == "groups"
-			response = send_request('/rest/component_module/remote_collaboration', {:module_id => component_module, :users => nil, :groups => collaborators, :action => :add, :remote_module_namespace => nil, :rsa_pub_key => self.ssh_key})			
+			response = send_request('/rest/component_module/remote_collaboration', module_id: component_module, users: nil, groups: collaborators, action: :add, remote_module_namespace: nil, rsa_pub_key: self.ssh_key)			
 			pretty_print_JSON(response)
 			if response['status'] == 'ok'
 				puts "Collaborators #{collaborators} have been added to component module #{component_module} successfully"
@@ -78,7 +78,7 @@ module ComponentModulesMixin
 		end
 
 		if collaborator_type == "users"
-			response = send_request('/rest/component_module/remote_collaboration', {:module_id => component_module, :users => collaborators, :groups => nil, :action => :add, :remote_module_namespace => nil, :rsa_pub_key => self.ssh_key})			
+			response = send_request('/rest/component_module/remote_collaboration', module_id: component_module, users: collaborators, groups: nil, action: :add, remote_module_namespace: nil, rsa_pub_key: self.ssh_key)			
 			pretty_print_JSON(response)
 			if response['status'] == 'ok'
 				puts "Collaborators #{collaborators} have been added to component module #{component_module} successfully"
@@ -97,7 +97,7 @@ module ComponentModulesMixin
 		collaborators_removed = false
 
 		if collaborator_type == "groups"
-			response = send_request('/rest/component_module/remote_collaboration', {:module_id => component_module, :users => nil, :groups => collaborators, :action => :remove, :remote_module_namespace => nil, :rsa_pub_key => self.ssh_key})			
+			response = send_request('/rest/component_module/remote_collaboration', module_id: component_module, users: nil, groups: collaborators, action: :remove, remote_module_namespace: nil, rsa_pub_key: self.ssh_key)			
 			pretty_print_JSON(response)
 			if response['status'] == 'ok'
 				puts "Collaborators #{collaborators} have been removed from component module #{component_module} successfully"
@@ -109,7 +109,7 @@ module ComponentModulesMixin
 		end
 
 		if collaborator_type == "users"
-			response = send_request('/rest/component_module/remote_collaboration', {:module_id => component_module, :users => collaborators, :groups => nil, :action => :remove, :remote_module_namespace => nil, :rsa_pub_key => self.ssh_key})			
+			response = send_request('/rest/component_module/remote_collaboration', module_id: component_module, users: collaborators, groups: nil, action: :remove, remote_module_namespace: nil, rsa_pub_key: self.ssh_key)			
 			pretty_print_JSON(response)
 			if response['status'] == 'ok'
 				puts "Collaborators #{collaborators} have been removed from component module #{component_module} successfully"
@@ -127,7 +127,7 @@ module ComponentModulesMixin
 		puts "Check collaborators on component module:", "----------------------------------------"
 		collaborators_exist = true
 
-		response = send_request('/rest/component_module/list_remote_collaboration', {:module_id => component_module, :remote_module_namespace => nil, :rsa_pub_key => self.ssh_key})		
+		response = send_request('/rest/component_module/list_remote_collaboration', module_id: component_module, remote_module_namespace: nil, rsa_pub_key: self.ssh_key)		
 		pretty_print_JSON(response)
 
 		if filter == :name
@@ -151,7 +151,7 @@ module ComponentModulesMixin
 	def check_if_component_module_visible_on_remote(component_module)
 		puts "Check if component module is visible on remote:", "--------------------------------------------"
 		component_module_visible = false
-		response = send_request('/rest/component_module/list_remote', {:rsa_pub_key => self.ssh_key, :diff => {}})
+		response = send_request('/rest/component_module/list_remote', rsa_pub_key: self.ssh_key, diff: {})
 		pretty_print_JSON(response)
 		component_module_found = response['data'].select { |x| x['display_name'] == component_module }
 		unless component_module_found.empty?
@@ -167,8 +167,8 @@ module ComponentModulesMixin
 	def check_module_permissions(component_module, permissions_set)
 		puts "Check module permissions:", "-------------------------"
 		module_permissions_set = false
-		response = send_request('/rest/component_module/list_remote', {:rsa_pub_key => self.ssh_key, :diff => {}})
-		component_module_found = response['data'].select { |x| x['display_name'] == component_module }.first
+		response = send_request('/rest/component_module/list_remote', rsa_pub_key: self.ssh_key, diff: {})
+		component_module_found = response['data'].find { |x| x['display_name'] == component_module }
 		unless component_module_found.nil?
 			puts "Component module #{component_module} exists. Check module permissions..."
 			pretty_print_JSON(component_module_found)
@@ -190,7 +190,7 @@ module ComponentModulesMixin
 		component_module_exists = false
 		component_modules_list = send_request('/rest/component_module/list', {})
 
-		if (component_modules_list['data'].select { |x| x['display_name'] == component_module_name }.first)
+		if (component_modules_list['data'].find { |x| x['display_name'] == component_module_name })
 			puts "Component module #{component_module_name} exists in module list."
 			component_module_exists = true
 		else
@@ -208,9 +208,9 @@ module ComponentModulesMixin
 		puts "List of remote component modules:"
 		pretty_print_JSON(remote_component_modules_list)
 
-		if (remote_component_modules_list['data'].select { |x| x['display_name'].include? "#{namespace}/#{component_module_name}" }.first)
+		if (remote_component_modules_list['data'].find { |x| x['display_name'].include? "#{namespace}/#{component_module_name}" })
 			puts "Component module #{component_module_name} in #{namespace} namespace exists. Proceed with deleting this component module..."
-			delete_remote_module = send_request('/rest/component_module/delete_remote', {:remote_module_name=>component_module_name, :remote_module_namespace=>namespace})
+			delete_remote_module = send_request('/rest/component_module/delete_remote', remote_module_name: component_module_name, remote_module_namespace: namespace)
 			if (delete_remote_module['status'] == 'ok')
 				puts "Component module #{component_module_name} in #{namespace} deleted from remote!"
 				component_module_deleted = true
@@ -228,13 +228,13 @@ module ComponentModulesMixin
 
 	def get_component_module_components_list(component_module_name, filter_version)
 		puts "Get component module components list:", "-------------------------------------"
-		component_ids_list = Array.new()
+		component_ids_list = []
 		component_modules_list = send_request('/rest/component_module/list', {})
 
-		if (component_modules_list['data'].select { |x| x['display_name'] == component_module_name}.first)
+		if (component_modules_list['data'].find { |x| x['display_name'] == component_module_name})
 			puts "Component module #{component_module_name} exists in the list. Get component module id..."
-			component_module_id = component_modules_list['data'].select { |x| x['display_name'] == component_module_name}.first['id']
-			module_components_list = send_request('/rest/component_module/info_about', {:about=>"components", :component_module_id=>component_module_id})
+			component_module_id = component_modules_list['data'].find { |x| x['display_name'] == component_module_name}['id']
+			module_components_list = send_request('/rest/component_module/info_about', about: "components", component_module_id: component_module_id)
 			puts "List of component module components:"
 			pretty_print_JSON(module_components_list)
 
@@ -256,13 +256,13 @@ module ComponentModulesMixin
 	def get_component_module_attributes_list(component_module_name, filter_component)
 		#Filter component used on client side after retrieving all attributes from all components
 		puts "Get module attributes list:", "---------------------------"
-		attribute_list = Array.new()
+		attribute_list = []
 		component_modules_list = send_request('/rest/component_module/list', {})
 
-		if (component_modules_list['data'].select { |x| x['display_name'] == component_module_name}.first)
+		if (component_modules_list['data'].find { |x| x['display_name'] == component_module_name})
 			puts "Component module #{component_module_name} exists in the list. Get component module id..."
-			component_module_id = component_modules_list['data'].select { |x| x['display_name'] == component_module_name}.first['id']
-			component_module_attributes_list = send_request('/rest/component_module/info_about', {:about=>"attributes", :component_module_id=>component_module_id})
+			component_module_id = component_modules_list['data'].find { |x| x['display_name'] == component_module_name}['id']
+			component_module_attributes_list = send_request('/rest/component_module/info_about', about: "attributes", component_module_id: component_module_id)
 			puts "List of component module attributes:"
 			pretty_print_JSON(component_module_attributes_list)
 
@@ -283,20 +283,20 @@ module ComponentModulesMixin
 	def get_component_module_attributes_list_by_component(component_module_name, component_name)
 		#Filter by component name used on server side to retrieve only attributes for specific component in component module
 		puts "Get component module attributes list by component:", "--------------------------------------------------"
-		attribute_list = Array.new()
+		attribute_list = []
 		component_modules_list = send_request('/rest/component_module/list', {})
 
-		if (component_modules_list['data'].select { |x| x['display_name'] == component_module_name}.first)
+		if (component_modules_list['data'].find { |x| x['display_name'] == component_module_name})
 			puts "Component module #{component_module_name} exists in the list. Get component module id..."
-			component_module_id = component_modules_list['data'].select { |x| x['display_name'] == component_module_name}.first['id']
-			module_components_list = send_request('/rest/component_module/info_about', {:about=>"components", :component_module_id=>component_module_id})
+			component_module_id = component_modules_list['data'].find { |x| x['display_name'] == component_module_name}['id']
+			module_components_list = send_request('/rest/component_module/info_about', about: "components", component_module_id: component_module_id)
 			puts "List of component module components:"
 			pretty_print_JSON(module_components_list)
 
-			if (module_components_list['data'].select { |x| x['display_name'] == component_name}.first)
+			if (module_components_list['data'].find { |x| x['display_name'] == component_name})
 				puts "Component #{component_name} exists in the list. Get component id..."
-				component_id = module_components_list['data'].select { |x| x['display_name'] == component_name}.first['id']
-				component_attributes_list = send_request('/rest/component_module/info_about', {:about=>"attributes", :component_module_id=>component_module_id, :component_template_id=>component_id})
+				component_id = module_components_list['data'].find { |x| x['display_name'] == component_name}['id']
+				component_attributes_list = send_request('/rest/component_module/info_about', about: "attributes", component_module_id: component_module_id, component_template_id: component_id)
 				puts "List of component attributes:"
 				pretty_print_JSON(component_attributes_list)
 
@@ -314,12 +314,12 @@ module ComponentModulesMixin
 		puts "Get attribute value from component module:", "------------------------------------------"
 		component_modules_list = send_request('/rest/component_module/list', {})
 
-		if (component_modules_list['data'].select { |x| x['display_name'] == component_module_name}.first)
+		if (component_modules_list['data'].find { |x| x['display_name'] == component_module_name})
 			puts "Component module #{component_module_name} exists in the list. Get component module id..."
-			component_module_id = component_modules_list['data'].select { |x| x['display_name'] == component_module_name}.first['id']
-			component_module_attribute_list = send_request('/rest/component_module/info_about', {:about=>"attributes", :component_module_id=>component_module_id})
+			component_module_id = component_modules_list['data'].find { |x| x['display_name'] == component_module_name}['id']
+			component_module_attribute_list = send_request('/rest/component_module/info_about', about: "attributes", component_module_id: component_module_id)
 			pretty_print_JSON(component_module_attribute_list)
-			attribute_value = component_module_attribute_list['data'].select { |x| x['display_name'] == "cmp[#{component_module_name.split(":").last}::#{component_name}]/#{attribute_name}" }.first['value']
+			attribute_value = component_module_attribute_list['data'].find { |x| x['display_name'] == "cmp[#{component_module_name.split(":").last}::#{component_name}]/#{attribute_name}" }['value']
 			puts attribute_value
 		end
 		
@@ -330,13 +330,13 @@ module ComponentModulesMixin
 	def check_if_component_exists_in_component_module(component_module_name, filter_version, component_name)
 		puts "Check if component exists in component module:", "----------------------------------------------"
 		component_exists_in_component_module = false
-		component_names_list = Array.new()
+		component_names_list = []
 		component_modules_list = send_request('/rest/component_module/list', {})
 
-		if (component_modules_list['data'].select { |x| x['display_name'] == component_module_name}.first)
+		if (component_modules_list['data'].find { |x| x['display_name'] == component_module_name})
 			puts "Component module #{component_module_name} exists in the list. Get component module id..."
-			component_module_id = component_modules_list['data'].select { |x| x['display_name'] == component_module_name}.first['id']
-			module_components_list = send_request('/rest/component_module/info_about', {:about=>"components", :component_module_id=>component_module_id})
+			component_module_id = component_modules_list['data'].find { |x| x['display_name'] == component_module_name}['id']
+			module_components_list = send_request('/rest/component_module/info_about', about: "components", component_module_id: component_module_id)
 			puts "List of component module components:"
 			pretty_print_JSON(module_components_list)
 
@@ -366,9 +366,9 @@ module ComponentModulesMixin
 		component_module_deleted = false
 		component_modules_list = send_request('/rest/component_module/list', {})
 
-		if (component_modules_list['data'].select { |x| x['display_name'] == component_module_to_delete }.first)
+		if (component_modules_list['data'].find { |x| x['display_name'] == component_module_to_delete })
 			puts "Component module #{component_module_to_delete} exists in component module list. Try to delete component module..."
-			delete_response = send_request('/rest/component_module/delete', {:component_module_id=>component_module_to_delete})
+			delete_response = send_request('/rest/component_module/delete', component_module_id: component_module_to_delete)
 			puts "Component module delete response:"
 			pretty_print_JSON(delete_response)
 
@@ -392,17 +392,17 @@ module ComponentModulesMixin
 		component_module_versioned = false
 		component_modules_list = send_request('/rest/component_module/list', {})
 
-		if (component_modules_list['data'].select { |x| x['display_name'] == component_module_name }.first)
+		if (component_modules_list['data'].find { |x| x['display_name'] == component_module_name })
 			puts "Component module #{component_module_name} exists in component module list. Try to version component module..."
-			component_module_id = component_modules_list['data'].select { |x| x['display_name'] == component_module_name }.first['id']
-			versioning_response = send_request('/rest/component_module/create_new_version', {:version=>version, :component_module_id=>component_module_id})
+			component_module_id = component_modules_list['data'].find { |x| x['display_name'] == component_module_name }['id']
+			versioning_response = send_request('/rest/component_module/create_new_version', version: version, component_module_id: component_module_id)
 			puts "Versioning response:"
 			pretty_print_JSON(versioning_response)
 			puts "Component module list response:"
-			component_modules_list = send_request('/rest/component_module/list', {:detail_to_include=>["versions"]})
+			component_modules_list = send_request('/rest/component_module/list', detail_to_include: ["versions"])
 			pretty_print_JSON(component_modules_list)
 
-			if (versioning_response['status'] == 'ok' && component_modules_list['data'].select { |x| (x['display_name'] == component_module_name) && (x['versions'].include? version) }.first)
+			if (versioning_response['status'] == 'ok' && component_modules_list['data'].find { |x| (x['display_name'] == component_module_name) && (x['versions'].include? version) })
 				puts "Component module #{component_module_name} versioned successfully."
 				component_module_versioned = true
 			else
@@ -422,17 +422,17 @@ module ComponentModulesMixin
 		component_module_imported = false
 		component_modules_list = send_request('/rest/component_module/list', {})
 
-		if (component_modules_list['data'].select { |x| x['display_name'] == component_module_name }.first)
+		if (component_modules_list['data'].find { |x| x['display_name'] == component_module_name })
 			puts "Component module #{component_module_name} exists in component module list. Try to import versioned component module..."
-			component_module_id = component_modules_list['data'].select { |x| x['display_name'] == component_module_name }.first['id']
-			import_response = send_request('/rest/component_module/import_version', {:version=>version, :component_module_id=>component_module_id})
+			component_module_id = component_modules_list['data'].find { |x| x['display_name'] == component_module_name }['id']
+			import_response = send_request('/rest/component_module/import_version', version: version, component_module_id: component_module_id)
 			puts "Import versioned component module response:"
 			pretty_print_JSON(import_response)
 			puts "Component module list response:"
-			component_modules_list = send_request('/rest/component_module/list', {:detail_to_include=>["versions"]})
+			component_modules_list = send_request('/rest/component_module/list', detail_to_include: ["versions"])
 			pretty_print_JSON(component_modules_list)
 
-			if (import_response['status'] == 'ok' && component_modules_list['data'].select { |x| (x['display_name'] == component_module_name) && (x['versions'].include? version) }.first)
+			if (import_response['status'] == 'ok' && component_modules_list['data'].find { |x| (x['display_name'] == component_module_name) && (x['versions'].include? version) })
 				puts "Versioned component module imported successfully."
 				component_module_imported = true
 			else
@@ -450,7 +450,7 @@ module ComponentModulesMixin
 	def list_component_modules_with_filter(namespace)
 		puts "List component modules with filter:", "---------------------------------"
 		component_modules_retrieved = true
-		component_modules_list = send_request('/rest/component_module/list', {:detail_to_include => [], :module_namespace => namespace})		
+		component_modules_list = send_request('/rest/component_module/list', detail_to_include: [], module_namespace: namespace)		
 		pretty_print_JSON(component_modules_list)
 
 		if component_modules_list['data'].empty?
@@ -470,7 +470,7 @@ module ComponentModulesMixin
 	def list_remote_component_modules_with_filter(namespace)
 		puts "List remote component modules with filter:", "------------------------------------"
 		component_modules_retrieved = true
-		component_modules_list = send_request('/rest/component_module/list_remote', {:rsa_pub_key => self.ssh_key, :module_namespace => namespace})		
+		component_modules_list = send_request('/rest/component_module/list_remote', rsa_pub_key: self.ssh_key, module_namespace: namespace)		
 		pretty_print_JSON(component_modules_list)
 
 		if component_modules_list['data'].empty?
@@ -490,7 +490,7 @@ module ComponentModulesMixin
 	def check_if_remote_exists(component_module, provider_name, ssh_repo_url)
 		puts "Check if remote exists:", "---------------------------"
 		remote_exists = false
-		remotes_list = send_request('/rest/component_module/info_git_remote', {:component_module_id => component_module})
+		remotes_list = send_request('/rest/component_module/info_git_remote', component_module_id: component_module)
 		pretty_print_JSON(remotes_list)
 		found_remote = remotes_list['data'].find { |x| x['git_provider'] == provider_name && x['repo_url'] == ssh_repo_url }
 		if !found_remote.nil?
@@ -506,7 +506,7 @@ module ComponentModulesMixin
 	def add_remote(component_module, provider_name, url)
 		puts "Add remote:", "------------"
 		remote_added = false
-		response = send_request('/rest/component_module/add_git_remote', {:component_module_id => component_module, :remote_name => provider_name, :remote_url => url})
+		response = send_request('/rest/component_module/add_git_remote', component_module_id: component_module, remote_name: provider_name, remote_url: url)
 		pretty_print_JSON(response)
 		if response['status'] == 'ok'
 			puts "Remote #{provider_name} with url #{url} has been added to #{component_module} component module successfully"
@@ -521,9 +521,9 @@ module ComponentModulesMixin
 	def remove_remote(component_module, provider_name)
 		puts "Remove remote:", "----------------"
 		remote_removed = false
-		remotes_list = send_request('/rest/component_module/info_git_remote', {:component_module_id => component_module})
+		remotes_list = send_request('/rest/component_module/info_git_remote', component_module_id: component_module)
 		pretty_print_JSON(remotes_list)
-		response = send_request('/rest/component_module/remove_git_remote', {:component_module_id => component_module, :remote_name => provider_name})
+		response = send_request('/rest/component_module/remove_git_remote', component_module_id: component_module, remote_name: provider_name)
 		pretty_print_JSON(response)
 		if response['status'] == 'ok'
 			puts "Remote #{provider_name} has been deleted from #{component_module} component module successfully"

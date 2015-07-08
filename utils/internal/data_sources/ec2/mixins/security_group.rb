@@ -1,7 +1,7 @@
 module XYZ
   module DSConnector
     module Ec2SecurityGroupInstanceMixin
-      def get_network_partitions()
+      def get_network_partitions
         @network_partition_cache[:network_partions] ||= Local.new(self).get_network_partitions()
       end
 
@@ -20,37 +20,38 @@ module XYZ
           @parent = parent
         end
 
-        def get_network_partitions()
+        def get_network_partitions
           network_partition_names = get_network_partition_refs()
 
           ret = DataSourceUpdateHash.new
           network_partition_names.each do |name|
-            network_partition = {:name => name} #TODO stub for putting more information in
+            network_partition = {name: name} #TODO: stub for putting more information in
             ret[name] = network_partition
           end
           ret
         end
 
-       private
+        private
 
-        def get_network_partition_refs()
+        def get_network_partition_refs
           @parent.get_servers().map{|s|s[:network_partition_ref]}.compact.uniq
         end
 
-        def conn()
+        def conn
           @parent.conn()
         end
 
         # determines whether security group allows unfettered connectivity between its members
         # TODO: factor this in
-        def get_unfettered_security_groups()
+        def get_unfettered_security_groups
           security_groups = conn().security_groups_all()
           security_groups.reject{|sg|not is_unfettered_security_group?(sg)}
         end
+
         def is_unfettered_security_group?(security_group)
           rules =  security_group[:ip_permissions]
           return nil unless rules
-          return true #TODO stub
+          return true #TODO: stub
           # TODO: need to replace; this is rule for right_aws, not fog rules.find{|x|x.has_key?(:group) and x[:group] == sg_name} ? true : nil
         end
       end

@@ -2,14 +2,15 @@ module DTK; class Task; class Template
   class Stage; class IntraNode
     class ExecutionBlock < Array
       include Serialization
-      def node()
+      def node
         # all the elements have same node so can just pick first
         first && first[:node]
       end
 
-      def components()
+      def components
         map{|action|component(action)}
       end
+
       def component(action)
         action.hash_subset(*Component::Instance.component_list_fields)
       end
@@ -20,13 +21,13 @@ module DTK; class Task; class Template
       #  :action_methods
       def components_hash_with(opts={})
         map do |action| 
-          cmp_hash = {:component => component(action)}
+          cmp_hash = {component: component(action)}
           if opts[:group_nums]
-            cmp_hash.merge!(:component_group_num => action.component_group_num)
+            cmp_hash.merge!(component_group_num: action.component_group_num)
           end
           if opts[:action_methods]
             if action_method = action.action_method?()
-              cmp_hash.merge!(:action_method => action_method) 
+              cmp_hash.merge!(action_method: action_method) 
             end
           end
           cmp_hash
@@ -44,11 +45,12 @@ module DTK; class Task; class Template
         false
       end
 
-      def has_action_with_method?()
-        !!find{|a|a.kind_of?(Action::WithMethod)}
+      def has_action_with_method?
+        !!find{|a|a.is_a?(Action::WithMethod)}
       end
-      def all_actions_with_method?()
-        !find{|a|!(a.kind_of?(Action::WithMethod))}
+
+      def all_actions_with_method?
+        !find{|a|!(a.is_a?(Action::WithMethod))}
       end
 
       def delete_action!(action_match)
@@ -67,21 +69,21 @@ module DTK; class Task; class Template
       end
         
       def serialization_form(opts={})
-        items = Array.new
+        items = []
         component_group_num = 1
         component_group = nil
         all_actions = all_actions_with_method?()
         each do |a|
-#          if cgn = a.component_group_num
+          #          if cgn = a.component_group_num
           # TODO: see if can avoid this by avoding actions be reified as component group
           cgn = a.component_group_num
-          if cgn and !all_actions
+          if cgn && !all_actions
             unless cgn == component_group_num 
               SerializedComponentGroup.add?(items,component_group)
               component_group = nil
               component_group_num = cgn
             end
-            component_group ||= Array.new
+            component_group ||= []
             serialization_form_add_action?(component_group,a,opts)
           else
             SerializedComponentGroup.add?(items,component_group)
@@ -95,7 +97,7 @@ module DTK; class Task; class Template
           # look for special cases where all actions with methods or single component group
           if all_actions
             {Constant::Actions => items}
-          elsif items.size == 1 and items.first.kind_of?(SerializedComponentGroup)
+          elsif items.size == 1 && items.first.is_a?(SerializedComponentGroup)
             {Constant::Components => items.first.components()}
           else
            {Constant::OrderedComponents => items} 
@@ -131,7 +133,7 @@ module DTK; class Task; class Template
             ParsingError.raise_error_unless(component_group,[String,Array])
             Array(component_group).each do |serialized_action|
               ParsingError.raise_error_unless(serialized_action,String)
-              find_and_add_action!(ret,serialized_action,node_name,action_list,opts.merge(:component_group_num => component_group_num))
+              find_and_add_action!(ret,serialized_action,node_name,action_list,opts.merge(component_group_num: component_group_num))
             end
             component_group_num += 1
           else
@@ -141,11 +143,11 @@ module DTK; class Task; class Template
         ret
       end
 
-      def intra_node_stages()
-        ret = Array.new
+      def intra_node_stages
+        ret = []
         component_group_num = 1
         component_group = nil
-        components_hash_with(:group_nums=>true).map do |cmp_with_group_num|
+        components_hash_with(group_nums: true).map do |cmp_with_group_num|
           cmp = cmp_with_group_num[:component]
           if cgn = cmp_with_group_num[:component_group_num]
             unless cgn == component_group_num 
@@ -153,7 +155,7 @@ module DTK; class Task; class Template
               component_group = nil
               component_group_num = cgn
             end
-            component_group ||= Array.new
+            component_group ||= []
             component_group << cmp[:id]
           else
             ret << component_group if component_group
@@ -165,7 +167,8 @@ module DTK; class Task; class Template
         ret
       end
 
-     private
+      private
+
       # has form {Constant::ComponentGroup => [cmp1,cmp2,..]
       class SerializedComponentGroup < Hash
         include Serialization
@@ -174,7 +177,7 @@ module DTK; class Task; class Template
             ret << new().merge(Constant::ComponentGroup => component_group)
           end
         end
-        def components()
+        def components
           values.first
         end
       end
@@ -199,14 +202,14 @@ module DTK; class Task; class Template
       end
 
       class Unordered < self
-        def order(intra_node_contraints,strawman_order=nil)
+        def order(intra_node_contraints,_strawman_order=nil)
           # short-cut, no ordering if singleton
           if size < 2
             return Ordered.new(self)
           end
           ret = Ordered.new()
           sorted_action_indexes = intra_node_contraints.ret_sorted_action_indexes(self)
-          ndx_action_list = inject(Hash.new){|h,a|h.merge(a.index => a)}
+          ndx_action_list = inject({}){|h,a|h.merge(a.index => a)}
           sorted_action_indexes.each{|index|ret << ndx_action_list[index]}
           ret
         end
@@ -221,6 +224,5 @@ module DTK; class Task; class Template
         end
       end
     end
-
   end; end
 end; end; end

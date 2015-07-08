@@ -21,7 +21,6 @@ expected_error_message = "ERROR"
 dtk_common = DtkCommon.new("", "")
 
 describe "(Component Module DSL) Test Case 20: NEG - dtk.model.yaml with invalid port type attribute value (>65535)" do
-
   before(:all) do
     puts "*********************************************************************************************************",""
   end

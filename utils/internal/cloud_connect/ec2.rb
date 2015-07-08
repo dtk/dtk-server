@@ -3,7 +3,6 @@
 module DTK
   class CloudConnect
     class EC2 < self
-
       WAIT_FOR_NODE = 10 # seconds
 
       def initialize(override_of_aws_params = nil)             
@@ -18,7 +17,7 @@ module DTK
         hash_form(@conn.images.get(id))
       end
 
-      def servers_all()
+      def servers_all
         lock_ec2_call{@conn.servers.all.map{|x|hash_form(x)}}
       end
 
@@ -41,6 +40,7 @@ module DTK
           hash_form(lock_ec2_call{@conn.servers.create(options)})
         end
       end
+
       def server_start(instance_id)
         (tries=10).times do
           begin
@@ -69,11 +69,11 @@ module DTK
         end
       end
 
-      def security_groups_all()
+      def security_groups_all
         @conn.security_groups.all.map{|x|hash_form(x)}
       end
 
-      def describe_availability_zones()
+      def describe_availability_zones
         @conn.describe_availability_zones()
       end
 
@@ -83,10 +83,9 @@ module DTK
         unless response.nil?
           status = response.body["reservationSet"].first["instancesSet"].first["instanceState"]["name"].to_sym
           launch_time = response.body["reservationSet"].first["instancesSet"].first["launchTime"]
-          { :status => status, :launch_time => launch_time, :up_time_hours => ((Time.now - launch_time)/1.hour).round }
+          { status: status, launch_time: launch_time, up_time_hours: ((Time.now - launch_time)/1.hour).round }
         end
       end
-
 
       def check_for_key_pair(name)
         unless key_pair = @conn.key_pairs.get(name)
@@ -111,7 +110,7 @@ module DTK
         subnet_obj.subnet_id
       end
 
-      def check_for_security_group(name, description = nil)
+      def check_for_security_group(name, _description = nil)
         unless sc = @conn.security_groups.get(name)
           # sc = @conn.security_groups.create(:name => name, :description => description)
           raise ErrorUsage.new("Not able to find IAAS security group with name '#{name}' aborting action, please create necessery security group")
@@ -151,8 +150,8 @@ module DTK
         end
       end
 
-
       private
+
       LockEC2Call = Mutex.new
 
       def lock_ec2_call(&block)

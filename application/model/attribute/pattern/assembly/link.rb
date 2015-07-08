@@ -9,16 +9,18 @@ module DTK; class Attribute::Pattern
           @links = parsed_adhoc_links
           @dep_component_instance = dep_component_instance
           @antec_component_instance = antec_component_instance
-          @meta_update_supported = (!dep_component_instance.nil? and !antec_component_instance.nil?)
+          @meta_update_supported = (!dep_component_instance.nil? && !antec_component_instance.nil?)
         end
         attr_reader :links,:dep_component_instance,:antec_component_instance
-        def meta_update_supported?()
+        def meta_update_supported?
           @meta_update_supported
         end
-        def dep_component_template()
+
+        def dep_component_template
           @dep_component_template ||= @dep_component_instance.get_component_template_parent()
         end
-        def antec_component_template()
+
+        def antec_component_template
           @antec_component_template ||= @antec_component_instance.get_component_template_parent()
         end
       end
@@ -44,22 +46,23 @@ module DTK; class Attribute::Pattern
         #  if has a relation set already and scalar conditionally reject or replace
         # if has relation set already and array, ...
         attr_info = {
-          :assembly_id =>  assembly_idh.get_id(),
-          :output_id => source_attr_pattern.attribute_idh.get_id()
+          assembly_id: assembly_idh.get_id(),
+          output_id: source_attr_pattern.attribute_idh.get_id()
         }
         if fn = source_attr_pattern.fn()
-          attr_info.merge!(:function => fn) 
+          attr_info.merge!(function: fn) 
         end
         
         parsed_adhoc_links = target_attr_pattern.attribute_idhs.map do |target_attr_idh|
-          hash = attr_info.merge(:input_id => target_attr_idh.get_id())
+          hash = attr_info.merge(input_id: target_attr_idh.get_id())
           parent.new(hash,target_attr_pattern.attribute_pattern,source_attr_pattern)
         end
         dep_cmp,antec_cmp = determine_dep_and_antec_components(target_attr_pattern,source_attr_pattern)
         Info.new(parsed_adhoc_links,dep_cmp,antec_cmp)
       end
 
-    private
+      private
+
       def self.determine_dep_and_antec_components(target_attr_pattern,source_attr_pattern)
         unless target_cmp = target_attr_pattern.component_instance()
           raise Error.new("Unexpected that target_attr_pattern.component() is nil")
@@ -74,7 +77,6 @@ module DTK; class Attribute::Pattern
           end
         [dep_cmp,antec_cmp]
       end    
-
     end
   end
 end; end

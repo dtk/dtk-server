@@ -29,7 +29,6 @@ module XYZ
           prefix[:semantic_type] = {":array" => "host_address_ipv4"}
           prefix[:semantic_type_summary] = "host_address_ipv4"
           prefix[:value_asserted] = [nil]
-
         end
         class << self
           def unique_keys(source)
@@ -39,10 +38,10 @@ module XYZ
           def relative_distinguished_name(source)
             source[:id]
           end
+
           def external_ref(image_id)
             {"type" => "ec2_image", "image_id" => image_id}
           end
-
         end
       end
     end

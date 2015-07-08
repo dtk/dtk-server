@@ -3,9 +3,10 @@ module DTK; class ModuleRefs
     # Elements of ComponentDSLForm
     class Elements < Array
       def initialize(*args)
-        args = [args] if args.size == 1 and !args.first.kind_of?(Array)
+        args = [args] if args.size == 1 && !args.first.is_a?(Array)
         super(*args)
       end
+
       def add!(a)
         a.each{|el|self << el}
         self
@@ -14,17 +15,19 @@ module DTK; class ModuleRefs
 
     def initialize(component_module, namespace, external_ref = nil)
       super()
-      replace(:component_module => component_module, :remote_namespace => namespace, :external_ref => external_ref)
+      replace(component_module: component_module, remote_namespace: namespace, external_ref: external_ref)
     end
     private :initialize
 
-    def component_module()
+    def component_module
       self[:component_module]
     end
-    def namespace?()
+
+    def namespace?
       self[:remote_namespace]
     end
-    def namespace()
+
+    def namespace
       unless ret = self[:remote_namespace]
         Log.error("namespace should not be called when self[:remote_namespace] is empty")
       end
@@ -38,9 +41,9 @@ module DTK; class ModuleRefs
     #   :multiple_match - match with more than one component modules
     MatchInfo = Struct.new(:match_type,:match_array) # match_array is an array of ComponentDSLForm elements
     def self.get_ndx_module_info(project_idh,module_class,module_branch,opts={})
-      ret = Hash.new
+      ret = {}
       raw_cmp_mod_refs = Parse.get_component_module_refs_dsl_info(module_class,module_branch)
-      return raw_cmp_mod_refs if raw_cmp_mod_refs.kind_of?(ErrorUsage::Parsing)
+      return raw_cmp_mod_refs if raw_cmp_mod_refs.is_a?(ErrorUsage::Parsing)
       # put in parse_form
       cmp_mod_refs = raw_cmp_mod_refs.map{|r|new(r[:component_module],r[:remote_namespace], r[:external_ref])}
 
@@ -55,7 +58,7 @@ module DTK; class ModuleRefs
 
       # for each element in cmp_mod_refs that has a namespace see if it matches an existing component module
       # if not return an error
-      dangling_cmp_mod_refs = Array.new
+      dangling_cmp_mod_refs = []
       cmp_mod_refs.each do |cmr|
         unless cmp_mods_dsl_form.find{|cmp_mod|cmp_mod.match?(cmr)}
           dangling_cmp_mod_refs << cmr
@@ -88,7 +91,7 @@ module DTK; class ModuleRefs
 
     def self.create_from_module_branches?(module_branches)
       ret = nil
-      if module_branches.nil? or module_branches.empty?
+      if module_branches.nil? || module_branches.empty?
         return ret
       end
       mb_idhs = module_branches.map{|mb|mb.id_handle()}
@@ -99,7 +102,7 @@ module DTK; class ModuleRefs
       ret
     end
 
-    def print_form()
+    def print_form
       if ns = namespace?()
         "#{ns}:#{component_module()}"
       else
@@ -108,14 +111,15 @@ module DTK; class ModuleRefs
     end
 
     def match?(cmr)
-      namespace() == cmr.namespace() and component_module() == cmr.component_module()
+      namespace() == cmr.namespace() && component_module() == cmr.component_module()
     end
 
-   private
+    private
+
     def self.get_matching_component_modules__dsl_form(project_idh,module_names)
       opts = {
-        :cols => [:namespace_id,:namespace],
-        :filter => [:oneof,:display_name,module_names]
+        cols: [:namespace_id,:namespace],
+        filter: [:oneof,:display_name,module_names]
       }
       matching_modules = ComponentModule.get_all_with_filter(project_idh,opts)
       matching_modules.map{|m| new(m[:display_name],m[:namespace][:name])}

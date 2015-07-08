@@ -11,36 +11,36 @@ module DTK
     def self.list_pending_changes(target_idh)
       # TODO: may pass in options so dont get all fields that are returned in flat_list_pending_changes
       pending_changes = flat_list_pending_changes(target_idh)
-      ndx_ret = Hash.new
+      ndx_ret = {}
       pending_changes.each do |ch|
         node_id = ch[:node][:id]
-        node = ndx_ret[node_id] ||= {:node_id => node_id, :node_name => ch[:node][:display_name], :node_changes => Array.new, :ndx_cmp_changes => Hash.new} 
+        node = ndx_ret[node_id] ||= {node_id: node_id, node_name: ch[:node][:display_name], node_changes: [], ndx_cmp_changes: {}} 
         if ch[:type] == "create_node"
-          node[:node_changes] << {:name => ret_display_name(ch)}
+          node[:node_changes] << {name: ret_display_name(ch)}
         else
           cmp_id = ch[:component][:id]
-          cmp = node[:ndx_cmp_changes][cmp_id] ||= {:component_id => cmp_id, :component_name => ch[:component][:display_name], :changes => Array.new}
-          # TODO stub
+          cmp = node[:ndx_cmp_changes][cmp_id] ||= {component_id: cmp_id, component_name: ch[:component][:display_name], changes: []}
+          # TODO: stub
           cmp[:changes] << ret_display_name(ch)
         end
       end
       ndx_ret.values.map do |n|
         changes = n[:node_changes] + n[:ndx_cmp_changes].values
-        el = {:node_id => n[:node_id], :node_name => n[:node_name]}
-        el.merge!(:node_changes => n[:node_changes]) unless n[:node_changes].empty?
-        el.merge!(:component_changes => n[:ndx_cmp_changes].values) unless n[:ndx_cmp_changes].empty?
+        el = {node_id: n[:node_id], node_name: n[:node_name]}
+        el.merge!(node_changes: n[:node_changes]) unless n[:node_changes].empty?
+        el.merge!(component_changes: n[:ndx_cmp_changes].values) unless n[:ndx_cmp_changes].empty?
         el
       end
     end
 
     # object processing and access functions
     #######################
-    def on_node_config_agent_type()
+    def on_node_config_agent_type
       ret = (self[:component]||{})[:config_agent_type]
       ret && ret.to_sym
     end
 
-    def create_node_config_agent_type()
+    def create_node_config_agent_type
       # TODO: stub
       :ec2
     end

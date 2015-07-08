@@ -2,10 +2,10 @@ module XYZ
   class Region < Model
     set_relation_name(:region,:region)
     class << self
-      def up()
+      def up
         column :ds_attributes, :json
-        column :is_deployed, :boolean, :default => false
-        column :type, :varchar, :size => 25 #type is availability_zone, datacenter, vdc
+        column :is_deployed, :boolean, default: false
+        column :type, :varchar, size: 25 #type is availability_zone, datacenter, vdc
         one_to_many :region
         many_to_one :library
       end
@@ -15,7 +15,7 @@ module XYZ
   class AssocRegionNetwork < Model
     set_relation_name(:region,:assoc_network_partition)
     class << self
-      def up()
+      def up
         foreign_key :network_partition_id, :network_partition, FK_CASCADE_OPT
         foreign_key :region_id, :region, FK_CASCADE_OPT
         many_to_one :library

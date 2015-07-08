@@ -15,13 +15,13 @@ module DTK; class Task
       end
 
       def create_subtask_instances(task_mh,assembly_idh)
-        ret = Array.new
+        ret = []
         return ret if empty?()
-        all_actions = Array.new
+        all_actions = []
         each_internode_stage do |internode_stage,stage_index|
           task_hash = {
-            :display_name => internode_stage.name || DefaultNameProc.call(stage_index,size == 1),
-            :temporal_order => "concurrent"
+            display_name: internode_stage.name || DefaultNameProc.call(stage_index,size == 1),
+            temporal_order: "concurrent"
           }
           internode_stage_task = Task.create_stub(task_mh,task_hash)
           all_actions += internode_stage.add_subtasks!(internode_stage_task,stage_index,assembly_idh)
@@ -77,7 +77,7 @@ module DTK; class Task
             # create new stage if last_internode_stage is 
             # - multi node, or
             # - has explicit actions
-            if last_internode_stage.kind_of?(Stage::InterNode::MultiNode) or
+            if last_internode_stage.is_a?(Stage::InterNode::MultiNode) ||
                 last_internode_stage.has_action_with_method?()
               new_internode_stage = Stage::InterNode.create_from_single_action(action_match.insert_action)
               self << new_internode_stage
@@ -130,9 +130,10 @@ module DTK; class Task
       end
 
       class RawForm
-        def serialization_form(opts={})
+        def serialization_form(_opts={})
           @serialized_content
         end
+
         def initialize(serialized_content)
           @serialized_content = serialized_content
         end
@@ -141,7 +142,7 @@ module DTK; class Task
       def self.parse_and_reify(serialized_content,actions,opts={})
         # normalize to handle case where single stage; test for single stage is whethet serialized_content[Field::TemporalOrder] == Constant::Sequential
         temporal_order = serialized_content[Field::TemporalOrder]
-        has_multi_internode_stages = (temporal_order and (temporal_order.to_sym == Constant::Sequential))
+        has_multi_internode_stages = (temporal_order && (temporal_order.to_sym == Constant::Sequential))
         subtasks = serialized_content[Field::Subtasks]
         normalized_subtasks = 
           if subtasks
@@ -167,12 +168,12 @@ module DTK; class Task
         self.class.add_ndx_action_index!(hash,action)
       end
       def self.add_ndx_action_index!(hash,action)
-        (hash[action.node_id] ||= Array.new) << action.index
+        (hash[action.node_id] ||= []) << action.index
         hash
       end
 
       def includes_action?(action)
-        ndx_action_indexes = add_ndx_action_index!(Hash.new,action)
+        ndx_action_indexes = add_ndx_action_index!({},action)
         return nil if ndx_action_indexes.empty?()
         each_internode_stage do |internode_stage,stage_index|
           action_match = ActionMatch.new(action)
@@ -184,7 +185,7 @@ module DTK; class Task
         nil
       end
 
-     private        
+      private        
 
       def delete_action!(action_match)
         internode_stage_index = action_match.internode_stage_index
@@ -207,9 +208,9 @@ module DTK; class Task
       end
 
       def create_stages!(object,actions,opts={})
-        if object.kind_of?(TemporalConstraints)
+        if object.is_a?(TemporalConstraints)
           create_stages_from_temporal_constraints!(object,actions,opts)
-        elsif object.kind_of?(SerializedContentArray)
+        elsif object.is_a?(SerializedContentArray)
           create_stages_from_serialized_content!(object,actions,opts)
         else
           raise Error.new("create_stages! does not treat argument of type (#{object.class})")
@@ -225,11 +226,11 @@ module DTK; class Task
       end
 
       def create_stages_from_temporal_constraints!(temporal_constraints,actions,opts={})
-        default_stage_name_proc = {:internode_stage_name_proc => DefaultNameProc}
+        default_stage_name_proc = {internode_stage_name_proc: DefaultNameProc}
         if opts[:node_centric_first_stage]
           node_centric_actions = actions.select{|a|a.source_type() == :node_group}
           # TODO:  get :internode_stage_name_proc from node group field  :task_template_stage_name
-          opts_x = {:internode_stage_name_proc => DefaultNodeGroupNameProc}.merge(opts)
+          opts_x = {internode_stage_name_proc: DefaultNodeGroupNameProc}.merge(opts)
           create_stages_from_temporal_constraints_aux!(temporal_constraints, node_centric_actions,opts_x)
 
           assembly_actions = actions.select{|a|a.source_type() == :assembly}
@@ -247,7 +248,7 @@ module DTK; class Task
         before_index_hash = inter_node_constraints.create_before_index_hash(actions)
         done = false
         existing_num_stages = size()
-        new_stages = Array.new
+        new_stages = []
         # before_index_hash gets destroyed in while loop
         while not done do
           if before_index_hash.empty?
@@ -277,7 +278,6 @@ module DTK; class Task
           end
         end
       end
-
     end
   end
 end; end

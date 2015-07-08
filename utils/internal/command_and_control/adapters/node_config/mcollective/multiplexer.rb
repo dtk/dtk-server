@@ -20,10 +20,10 @@ module DTK
 
       def sendreq_with_callback(msg,agent,context_with_callbacks,filter={})
         trigger = {
-          :generate_request_id => proc do |client|
+          generate_request_id: proc do |client|
             client.r8_generate_request_id(msg,agent,filter)
           end,
-          :send_message => proc do |client,reqid|
+          send_message: proc do |client,reqid|
             client.r8_sendreq_give_reqid(reqid,msg,agent,filter)
           end
         }

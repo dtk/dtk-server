@@ -9,27 +9,34 @@ module DTK
         Internal.new(err)
       end
     end
-    def initialize(err)
+    def initialize(_err)
       @code = nil
       @message = nil
       @backtrace = nil
     end
-    def hash_form()
-      ret = {:code => code||:error, :message => message||''}
-      ret.merge!(:backtrace => backtrace) if @backtrace
+
+    def hash_form
+      ret = {code: code||:error, message: message||''}
+      ret.merge!(backtrace: backtrace) if @backtrace
       ret
     end 
+
     private
+
      attr_reader :code, :message, :backtrace
+
     public
+
     # its either its a usage or and internal (application error) bug
     class Internal < RestError
-      def hash_form()
-        ret = super.merge(:internal => true)
-        ret.merge!(:backtrace => @backtrace) if @backtrace
+      def hash_form
+        ret = super.merge(internal: true)
+        ret.merge!(backtrace: @backtrace) if @backtrace
         ret
       end 
-     private
+
+      private
+
       def initialize(err)
         super
         # @message = "#{err.to_s} (#{err.backtrace.first})"
@@ -46,12 +53,12 @@ module DTK
         @message = err.to_s
       end
       def self.match?(err)
-        err.kind_of?(ErrorUsage)
+        err.is_a?(ErrorUsage)
       end
     end
     class NotFound < RestUsageError
       def self.match?(err)
-        err.kind_of?(::NoMethodError) and is_controller_method(err)
+        err.is_a?(::NoMethodError) && is_controller_method(err)
       end
       def initialize(err)
         super
@@ -61,7 +68,9 @@ module DTK
           @backtrace = err.backtrace
         end
       end
-     private
+
+      private
+
       def self.is_controller_method(err)
         err.to_s =~ /#<XYZ::.+Controller:/
       end

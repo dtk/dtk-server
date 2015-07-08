@@ -41,8 +41,8 @@ module DTK; class Task; class Template
         ret
       end
       DirField = {
-        before: {before_field: :input_port,  after_field: :output_port},  
-        after: {before_field: :output_port, after_field: :input_port}  
+        before: {before_field: :input_port,  after_field: :output_port},
+        after: {before_field: :output_port, after_field: :input_port}
       }
 
       def self.get_from_dynamic_attribute_rel(ndx_cmp_list)
@@ -72,12 +72,12 @@ module DTK; class Task; class Template
 
       def self.get_intra_node_rels(ndx_cmp_list)
         ret = new()
-        # TODO: more efficient way to do this; right now just leevraging existing methods; also these methods draw these relationships from 
+        # TODO: more efficient way to do this; right now just leevraging existing methods; also these methods draw these relationships from
         # component templates, not component instances
         cmp_deps = Component::Instance.get_ndx_intra_node_rels(ndx_cmp_list.component_idhs())
         cmp_deps.reject!{|_cmp_id,info|info[:component_dependencies].empty?}
         return ret if cmp_deps.empty?
-        
+
         # component dependencies just have component type;
         # TODO: may extend so that it can match on title
         cmp_deps.each do |cmp_id,dep_info|
@@ -96,12 +96,12 @@ module DTK; class Task; class Template
 
       def self.create_temporal_constraint?(type,before_cmp_list_el,after_cmp_list_el)
         if before_cmp_list_el && after_cmp_list_el
-          klass = 
-            case type 
+          klass =
+            case type
             when :intra_node then TCBase()::IntraNode
             when :port_link_order then TCBase()::PortLinkOrder
             when :dynamic_attribute then TCBase()::DynamicAttribute
-            end 
+            end
           klass.new(before_cmp_list_el,after_cmp_list_el) if klass
         end
       end
@@ -134,7 +134,7 @@ module DTK; class Task; class Template
         def component_idhs
           @component_id_info.values
         end
-        
+
         def el(node_id,cmp_id)
           (self[node_id]||{})[cmp_id]
         end

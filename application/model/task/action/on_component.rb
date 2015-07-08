@@ -1,12 +1,12 @@
 module DTK; class Task
-  class Action 
+  class Action
     class OnComponent < HashObject
       def self.status(object,opts)
         if opts[:no_attributes]
           component_name(object)
         else
           ret = PrettyPrintHash.new
-          ret[:component] = component_status(object,opts) 
+          ret[:component] = component_status(object,opts)
           ret[:attributes] = attributes_status(object,opts) unless opts[:no_attributes]
           ret
         end
@@ -30,7 +30,7 @@ module DTK; class Task
           nil
         else
           action_defs.first
-        end      
+        end
       end
 
       # for debugging
@@ -39,7 +39,7 @@ module DTK; class Task
         ret[:component] = (object[:component]||{})[:display_name]
 
         # TODO: should get attribute values from attribute object since task info can be stale
-        
+
         ret[:attributes]  = (object[:attributes]||[]).map do |attr|
           ret_attr = PrettyPrintHash.new
           ret_attr.add(attr,:display_name,:value_asserted,:value_derived)
@@ -70,7 +70,7 @@ module DTK; class Task
         ndx_cmp_idhs = {}
         state_change_list.each do |sc|
           cmp = sc[:component]
-          ndx_cmp_idhs[cmp[:id]] ||= cmp.id_handle() 
+          ndx_cmp_idhs[cmp[:id]] ||= cmp.id_handle()
         end
         components = Component::Instance.get_components_with_dependency_info(ndx_cmp_idhs.values)
         cmp_deps = ComponentOrder.get_ndx_cmp_type_and_derived_order(components)
@@ -78,12 +78,12 @@ module DTK; class Task
           cmp_order,intra_node_stages = get_intra_node_stages(cmp_deps, state_change_list)
         elsif Workflow.intra_node_total_order?
           node = state_change_list.first[:node]
-          cmp_order = get_total_component_order(cmp_deps, node) 
+          cmp_order = get_total_component_order(cmp_deps, node)
         else
           raise Error.new("No intra node ordering strategy found")
         end
         component_actions = cmp_order.map do |(component_id,deps)|
-          create_from_state_change(state_change_list.select{|a|a[:component][:id] == component_id},deps) 
+          create_from_state_change(state_change_list.select{|a|a[:component][:id] == component_id},deps)
         end
         [component_actions,intra_node_stages]
       end
@@ -99,7 +99,7 @@ module DTK; class Task
           intranode_stages_with_deps = Stage::IntraNode.generate_stages(cmp_ids_with_deps_ps, state_change_list_ps)
           intra_node_stages << intranode_stages_with_deps.map{|stage|stage.keys }
         end
-        # Amar: to enable multiple puppet calls inside one puppet_apply agent call, 
+        # Amar: to enable multiple puppet calls inside one puppet_apply agent call,
         # puppet_stages are added to intra node stages. Check PuppetStageGenerator class docs for more details
         [cmp_ids_with_deps,intra_node_stages]
       end
@@ -125,7 +125,7 @@ module DTK; class Task
         return false if order.empty?
         return false unless cmp_ids_with_deps.keys.sort == order.sort
         begin
-          cmp_ids_with_deps.map do |parent, children|  
+          cmp_ids_with_deps.map do |parent, children|
             unless children.empty?
               children.each do |child|
                   return false if order.index(child) > order.index(parent) # inconsistent if any child order is after parent
@@ -185,7 +185,7 @@ module DTK; class Task
           ret[:name] = name
         end
         component = object[:component]||{}
-        if id = component[:id]  
+        if id = component[:id]
           ret[:id] = id
         end
         ret
@@ -256,7 +256,7 @@ module DTK; class Task
         # TODO: can get more sophsiticated and handle case where some components installed and other are incremental
         incremental_change = !scs_same_cmp.find{|sc|not sc[:type] == "setting"}
         if incremental_change
-          hash.merge!(changed_attribute_ids: scs_same_cmp.map{|sc|sc[:attribute_id]}) 
+          hash.merge!(changed_attribute_ids: scs_same_cmp.map{|sc|sc[:attribute_id]})
         end
         new(hash)
       end

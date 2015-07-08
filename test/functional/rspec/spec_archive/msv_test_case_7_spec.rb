@@ -37,7 +37,7 @@ describe "(Modules, Services and Versioning) Test Case 7: Import new module from
 
 	context "Check if module imported on local filesystem" do
 		include_context "Check module imported on local filesystem", module_filesystem_location, module_name
-	end	
+	end
 
 	context "Import versioned module from remote function" do
 		include_context "Import versioned module from remote", dtk_common, module_name, module_version

@@ -10,7 +10,7 @@ module DTK; class NodeBindings
       end
       Type = :assembly_node
       def hash_form
-        {type: type().to_s, assembly_name: @assembly_name, node_name: @node_name} 
+        {type: type().to_s, assembly_name: @assembly_name, node_name: @node_name}
       end
 
       def self.parse_and_reify(parse_input,_opts={})
@@ -62,7 +62,7 @@ module DTK; class NodeBindings
         sp_hash = {
           cols: [:id,:display_name,:instance_parent],
           filter: [:eq,:datacenter_datacenter_id,target.id()]
-        }   
+        }
         Assembly::Instance.get_objs(target.model_handle(:assembly_instance),sp_hash).select do |r|
           if assembly_template = r[:assembly_template]
             @assembly_name_internal_form == Assembly::Template.pretty_print_name(assembly_template)

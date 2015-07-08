@@ -19,7 +19,7 @@ module XYZ
 	   metadata["attributes"].each{|recipe_ref,values|
 	     #to strip of recipe name prefix if that is the case
 	     ref_imploded = recipe_ref.split("/")
-	     ref = ((ref_imploded[0] == metadata["name"] and ref_imploded.size > 1) ? 
+	     ref = ((ref_imploded[0] == metadata["name"] and ref_imploded.size > 1) ?
 	       ref_imploded[1..ref_imploded.size-1].join("/") : recipe_ref).to_sym
 	     data_type = case values["type"]
 	       when "hash", "array"
@@ -45,19 +45,19 @@ module XYZ
 	   }
 	 end
          component_obj =
-           {metadata["name"].to_sym => 
+           {metadata["name"].to_sym =>
 	     {display_name: metadata["display_name"] ? metadata["display_name"] : metadata["name"],
 	      description: metadata["description"],
 	      attribute: attributes}}
-         component_def_obj = 
+         component_def_obj =
            {metadata["name"].to_sym =>
 	     {external_type: "chef_recipe",
-              external_cmp_ref: metadata["name"], 
-	      attribute_def: attributes_defs, 
+              external_cmp_ref: metadata["name"],
+	      attribute_def: attributes_defs,
 	      uri: nil }}#stub
          [component_obj,component_def_obj]
       end
-      
+
     end
 
     class MetadataFromServer < Metadata
@@ -69,7 +69,7 @@ module XYZ
 	  yield cookbook_name,component_object,implementation_object,nil
 	  Log.info("loaded recipe #{cookbook_name}")
 	}
-	nil  
+	nil
       end
 
       def get_cookbook_list
@@ -88,10 +88,10 @@ module XYZ
 	       #TBD: these should probably be done in task preconidtion that is part of synchronous a prior arguement checking
         raise Error.new("#{local_dir} does not exist") unless  File.exists?(local_dir)
         raise Error.new("#{local_dir} is not a directory") unless  File.directory?(local_dir)
-	Dir.foreach(local_dir) do |cookbook_name| 
+	Dir.foreach(local_dir) do |cookbook_name|
 	  next if !File.directory?(local_dir+"/"+cookbook_name) or cookbook_name =~ %r{^[.]}
 	  component_obj = component_def_obj = nil
-	  begin 
+	  begin
 	   component_obj,component_def_obj = get_cookbook_metadata(cookbook_name,local_dir)
 	   rescue Exception => err
 	    #TBD: need to trap to assert which recipe this is associated with; want error that is json parsing error

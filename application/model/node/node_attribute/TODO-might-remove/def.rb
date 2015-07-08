@@ -32,7 +32,7 @@ module DTK; class Node
       end
 
       private
-    
+
       def self.object(canonical_name=nil)
         unless ret = (canonical_name ? @@index_by_canonical_name[canonical_name] : @@interpreted_def[self])
           index = canonical_name||self
@@ -52,7 +52,7 @@ module DTK; class Node
 
         def types(type_description)
           # for types has a lambda function that if true means the value is legal; if in dsl user gives array we convert this to lambda function
-          lambda_fn = 
+          lambda_fn =
             if type_description.is_a?(Array)
               lambda{|x|type_description.include?(x)}
             else #assume is a lambda fn
@@ -64,39 +64,39 @@ module DTK; class Node
         def required(required_boolean_val)
           set_meta_property!(:required, required_boolean_val)
         end
-        
+
         def read_only(read_only_boolean_val)
           set_meta_property!(:read_only, read_only_boolean_val)
         end
-        
+
         def is_port(port_boolean_val)
           set_meta_property!(:is_port, port_boolean_val)
         end
-        
+
         def cannot_change(cannot_change_boolean_val)
           set_meta_property!(:cannot_change, cannot_change_boolean_val)
         end
-        
+
         def data_type(data_type_val)
           set_meta_property!(:data_type, data_type_val)
         end
-        
+
         def default_value(default_value)
           set_meta_property!(:value_asserted, default_value)
         end
-        
+
         def semantic_type_summary(semantic_type_summary_val)
           set_meta_property!(:semantic_type_summary, semantic_type_summary_val)
         end
-        
+
         def dynamic(dynamic_val)
           set_meta_property!(:dynamic, dynamic_val)
         end
-        
+
         def hidden(hidden_val)
           set_meta_property!(:hidden, hidden_val)
         end
-        
+
         def semantic_type(semantic_type_val)
           set_meta_property!(:semantic_type, semantic_type_val)
         end
@@ -104,7 +104,7 @@ module DTK; class Node
         def aliases(aliases)
           set_meta_property!(:aliases, aliases)
         end
-        
+
         private
 
         def set_meta_property!(prop,val)
@@ -115,7 +115,7 @@ module DTK; class Node
   end
 end; end
 
-#     class Def 
+#     class Def
 #     def self.attribute_fields(type)
 #       IAAS.hash(:ec2)[:attributes].inject(Hash.new) do |h,(name,attr_def)|
 #         # to prune out meta fields from ones that are fields on attribiute object

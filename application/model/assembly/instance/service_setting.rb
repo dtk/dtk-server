@@ -3,7 +3,7 @@ module DTK
     r8_nested_require('service_setting','array')
     r8_nested_require('service_setting','attribute_settings')
     r8_nested_require('service_setting','node_bindings')
-    
+
     def self.common_columns
       [
        :id,
@@ -18,7 +18,7 @@ module DTK
       reify!()
       apply_to_field?(:attribute_settings){|settings|settings.bind_parameters!(hash_params)}
     end
-    
+
     def apply_setting(target,assembly)
       reify!()
       apply_to_field?(:attribute_settings){|settings|settings.apply_settings(assembly)}
@@ -27,7 +27,7 @@ module DTK
 
     def reify!
       reify_field!(:attribute_settings,AttributeSettings)
-      reify_field!(:node_bindings,NodeBindings)      
+      reify_field!(:node_bindings,NodeBindings)
     end
 
     private

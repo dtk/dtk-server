@@ -21,7 +21,7 @@ module DTK; class LinkDef::Link
         @output_attr_obj.value()
       end
 
-      # returns Array of Augmented (AttributeMapping) objects 
+      # returns Array of Augmented (AttributeMapping) objects
       # clones component and their attributes from a node group if needed
       def self.aug_attr_mappings__clone_if_needed(attribute_mapping,link_def_context,attr_and_path_info,opts={})
         new(attribute_mapping,link_def_context,attr_and_path_info,opts).aug_attr_mappings__clone_if_needed(opts)
@@ -31,7 +31,7 @@ module DTK; class LinkDef::Link
         ret = []
         input_attr = input_attr()
         port_link_id = opts[:port_link_idh] && opts[:port_link_idh].get_id()
-        if cloning_node_group_members_needed?() 
+        if cloning_node_group_members_needed?()
           node_group_attrs = @output_attr_obj.get_ng_member_attributes__clone_if_needed(opts)
           node_group_attrs.each do |output_attr|
             ret << ret_single_link(input_attr,output_attr,port_link_id)
@@ -49,15 +49,15 @@ module DTK; class LinkDef::Link
         if port_link_id
           ret.merge!(port_link_id: port_link_id)
         end
-        ret        
+        ret
       end
 
-      def cloning_node_group_members_needed? 
+      def cloning_node_group_members_needed?
         num_ngs = [@input_attr_obj.node,@output_attr_obj.node].inject(0){|r,n|r +(n.is_node_group? ? 1 : 0)}
         if num_ngs == 0
-          return nil 
+          return nil
         elsif num_ngs == 2
-          raise ErrorUsage.new("Not treating links between components that are both on node groups") 
+          raise ErrorUsage.new("Not treating links between components that are both on node groups")
         end
         # determine if this manifests as single of multiple links; if single link just pass nil
         # when this is called there is one node group and one node
@@ -69,7 +69,7 @@ module DTK; class LinkDef::Link
         end
         if @output_attr_obj.is_node_attribute?() && !@input_attr_obj.is_array?()
           raise ErrorUsage.new("Node attributes on node groups (#{@output_attr_obj.pp_form()}) must connect to an array attribute, not '#{@input_attr_obj.pp_form()}'")
-        end          
+        end
         true
       end
     end

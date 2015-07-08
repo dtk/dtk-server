@@ -4,7 +4,7 @@ module TimeoutMonkeyPatch
   module Timeout
     include ::Timeout
     def self.timeout(sec, klass = nil,&block)
-      return TimerAdapterClass.timeout(sec,klass,&block) if TimerAdapterClass 
+      return TimerAdapterClass.timeout(sec,klass,&block) if TimerAdapterClass
 
       return yield if sec == nil or sec.zero?
       raise ThreadError, "timeout within critical session" if Thread.critical
@@ -53,7 +53,7 @@ module TimeoutMonkeyPatch
          rescue LoadError
           Log.error("cannot find system timer adapter; using default (Timeout)")
         end
-       when "debug_timeout" 
+       when "debug_timeout"
         timer_adapter = nil
        else
         Log.error("only treating now system_timer adapter")

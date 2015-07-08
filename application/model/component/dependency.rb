@@ -51,15 +51,15 @@ module DTK; class Component
         rows = get_objs(cols: [:dependencies] + cmp_cols)
         cmp_info = rows.first #just picking first since component info same for all rows
         cmp_cols.each{|col|self[col] = cmp_info[col]} if opts[:update_object]
-        
+
         constraints = rows.map{|r|Constraint.create(r[:dependencies]) if r[:dependencies]}.compact
         constraints << Constraint::Macro.only_one_per_node(cmp_info[:component_type]) if cmp_info[:only_one_per_node]
         constraints << Constraint::Macro.base_for_extension(cmp_info) if cmp_info[:extended_base]
-        
+
         return Constraints.new() if constraints.empty?
         Constraints.new(:and,constraints)
       end
     end
   end
 end; end
-    
+

@@ -86,7 +86,7 @@ describe "(Modules, Services and Versioning) Test Case 38: Import to two differe
 
   context "Check if component module imported on local filesystem" do
     include_context "Check component module imported on local filesystem", test2_component_module_filesystem_location, component_module_name
-  end  
+  end
 
   context "Delete component module" do
     include_context "Delete component module", dtk_common, component_module

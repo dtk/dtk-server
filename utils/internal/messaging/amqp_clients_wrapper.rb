@@ -6,7 +6,7 @@ require 'bunny'
 
 module XYZ
   # TBD: see if can do same by just doing an an include or extend AMQP
-  class R8EventLoop 
+  class R8EventLoop
     class << self
       attr_reader :connection_opts
       def start(*args,&blk)
@@ -19,7 +19,7 @@ module XYZ
 	  Log.info(msg) if msg
          ::EM.stop
         end
-      end	
+      end
 
       def fork(num_workers,&block)
 	::AMQP.fork(num_workers,&block)
@@ -46,7 +46,7 @@ module XYZ
      @native_clients[type].close()
    end
 
-   # using bunny for exchanges and publish queues 
+   # using bunny for exchanges and publish queues
    def exchange(name,opts={})
      R8ExchangeBunny.new(self,name,opts)
    end
@@ -66,11 +66,11 @@ module XYZ
      publish_queue(queue_name).bind(exchange, bind_opts)
    end
 
-   # returns native client, creates it if does not exist 
+   # returns native client, creates it if does not exist
    # TBD: should we fold reconnect logic into this fn?
    def native_client?(type)
      if @native_clients[type]
-       return @native_clients[type] 
+       return @native_clients[type]
      end
      @native_clients[type] = create_native_client(type,@connection_opts)
    end
@@ -171,13 +171,13 @@ module XYZ
     def delete(opts={})
       @native_exchange.delete(opts)
     end
-    # TBD: collapse with queue analog 
+    # TBD: collapse with queue analog
     def publish(msg_bus_msg_out,publish_opts={})
       raw_body_and_publish_opts = msg_bus_msg_out.marshal_to_wire(publish_opts)
       begin
         @native_exchange.publish(*raw_body_and_publish_opts)
        rescue Bunny::ConnectionError
-        begin 
+        begin
           @native_exchange = @client.reset_client(:bunny).exchange(@name,@opts)
           @native_exchange.publish(*raw_body_and_publish_opts)
          rescue Exception => e
@@ -191,7 +191,7 @@ module XYZ
 end
 
 module XYZ
-  class R8Queue 
+  class R8Queue
    include R8ExchangeQueueMixin
 
     private
@@ -250,7 +250,7 @@ module XYZ
       begin
         @native_queue.publish(*raw_body_and_publish_opts)
        rescue Bunny::ConnectionError
-        begin 
+        begin
           @native_queue = @client.reset_client(:bunny).queue(@name,@opts)
           @native_queue.publish(*raw_body_and_publish_opts)
          rescue Exception
@@ -276,5 +276,5 @@ AMQP.class_eval do
     settings #to set @settings with defaults
     opts.each{|k,v| @settings[k] = v}
   end
-end 
+end
 

@@ -17,14 +17,14 @@ module DTK
           h.merge(node_name => node_target.hash_form())
         end
       end
-      
+
       def self.parse_and_reify(parse_input)
         unless parse_input.type?(Hash)
           raise parse_input.error("Node Bindings section has an illegal form: ?input")
         end
 
         if parse_input.input.empty?
-          return nil 
+          return nil
         end
 
         #TODO: check each node belongs to assembly

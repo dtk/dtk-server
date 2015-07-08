@@ -40,8 +40,8 @@ module DTK
         assembly_attrs = assembly_attributes(config_node)
         puppet_manifests = NodeManifest.new(config_node).generate(cmps_with_attrs,assembly_attrs)
         ret = {
-          components_with_attributes: cmps_with_attrs, 
-          node_manifest: puppet_manifests, 
+          components_with_attributes: cmps_with_attrs,
+          node_manifest: puppet_manifests,
           inter_node_stage: config_node.inter_node_stage(),
           version_context: get_version_context(config_node,opts[:assembly]),
           # TODO: agent not doing puppet version per run; it just can be set when node is created
@@ -64,8 +64,8 @@ module DTK
         # if ends in 'on node NODEADDR' such as 'on node ip-10-28-77-115.ec2.internal'
         # strip it off because context is not needed and when summarize in node group can use simple test
         # to remove duplicate errors"
-        
-        if ret[:message] && ret[:message] =~ /(^.+) on node [^ ]+$/ 
+
+        if ret[:message] && ret[:message] =~ /(^.+) on node [^ ]+$/
           ret[:message] = $1
         end
 
@@ -87,7 +87,7 @@ module DTK
 
       def ret_attribute_name_and_type(attribute)
         var_name_path = (attribute[:external_ref]||{})[:path]
-        if var_name_path 
+        if var_name_path
           array_form = to_array_form(var_name_path)
           {name: array_form && array_form[1], type: type()}
         end
@@ -98,7 +98,7 @@ module DTK
         {
           type: "#{type}_attribute",
           path: "node[#{module_name}][#{hash[:field_name]}]"
-        }             
+        }
       end
 
       private
@@ -107,10 +107,10 @@ module DTK
         ret =  []
         component_actions = config_node[:component_actions]
         if component_actions.empty?()
-          return ret 
+          return ret
         end
         unless (config_node[:state_change_types] & %w(install_component update_implementation converge_component setting)).size > 0
-          return ret 
+          return ret
         end
 
         # want components to be unique
@@ -158,7 +158,7 @@ module DTK
         return ret unless cmp_deps and not cmp_deps.empty?
         ret.merge("component_dependencies" => cmp_deps.map{|cmp_id|component_external_ref(ndx_components[cmp_id])})
       end
-  
+
       def component_external_ref(component)
         ext_ref = component[:external_ref]
         case ext_ref[:type]
@@ -225,9 +225,9 @@ module DTK
         return node_components if attr[:display_name] == "__node_components" && node_components #TODO: clean-up
         ret = attr[:attribute_value]
         case attr[:data_type]
-         when "boolean" 
-          if ret == "true" then ret = true 
-          elsif ret == "false" then ret = false 
+         when "boolean"
+          if ret == "true" then ret = true
+          elsif ret == "false" then ret = false
           end
         end
         ret
@@ -267,15 +267,15 @@ module DTK
         array_form_path = array_form_path_x[1..array_form_path_x.size-1]
         extra_info = {}
         ndx = array_form_path.first
-        unless ndx_attributes.key?(ndx) 
-          extra_info = 
-            case ext_ref[:type] 
+        unless ndx_attributes.key?(ndx)
+          extra_info =
+            case ext_ref[:type]
              when "puppet_attribute"
               {"type" => "attribute"}
-             when "puppet_imported_collection" 
+             when "puppet_imported_collection"
               {"type" => "imported_collection",
               "resource_type" =>  ext_ref[:resource_type]}
-             else 
+             else
               raise Error.new("unexpected attribute type (#{ext_ref[:type]})")
             end
         end

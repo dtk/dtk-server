@@ -20,14 +20,14 @@ module DTK; class Task; class Template
       #  :group_nums
       #  :action_methods
       def components_hash_with(opts={})
-        map do |action| 
+        map do |action|
           cmp_hash = {component: component(action)}
           if opts[:group_nums]
             cmp_hash.merge!(component_group_num: action.component_group_num)
           end
           if opts[:action_methods]
             if action_method = action.action_method?()
-              cmp_hash.merge!(action_method: action_method) 
+              cmp_hash.merge!(action_method: action_method)
             end
           end
           cmp_hash
@@ -57,7 +57,7 @@ module DTK; class Task; class Template
         delete_at(action_match.action_position()-1)
         :empty if empty?()
       end
-       
+
       def splice_in_action!(action_match,insert_point)
         case insert_point
           when :end
@@ -67,7 +67,7 @@ module DTK; class Task; class Template
           else raise Error.new("Unexpected insert_point (#{insert_point})")
         end
       end
-        
+
       def serialization_form(opts={})
         items = []
         component_group_num = 1
@@ -78,7 +78,7 @@ module DTK; class Task; class Template
           # TODO: see if can avoid this by avoding actions be reified as component group
           cgn = a.component_group_num
           if cgn && !all_actions
-            unless cgn == component_group_num 
+            unless cgn == component_group_num
               SerializedComponentGroup.add?(items,component_group)
               component_group = nil
               component_group_num = cgn
@@ -100,7 +100,7 @@ module DTK; class Task; class Template
           elsif items.size == 1 && items.first.is_a?(SerializedComponentGroup)
             {Constant::Components => items.first.components()}
           else
-           {Constant::OrderedComponents => items} 
+           {Constant::OrderedComponents => items}
           end
         end
       end
@@ -110,7 +110,7 @@ module DTK; class Task; class Template
         ret = new()
         return ret unless action_list
         lvs = ParsingError::LegalValues.new()
-        ordered_items = 
+        ordered_items =
           if lvs.add_and_match?(serialized_eb){HashWithKey(Constant::OrderedComponents)}
             serialized_eb[Constant::OrderedComponents]
           elsif lvs.add_and_match?(serialized_eb){HashWithKey(Constant::Components)}
@@ -150,7 +150,7 @@ module DTK; class Task; class Template
         components_hash_with(group_nums: true).map do |cmp_with_group_num|
           cmp = cmp_with_group_num[:component]
           if cgn = cmp_with_group_num[:component_group_num]
-            unless cgn == component_group_num 
+            unless cgn == component_group_num
               ret << component_group if component_group
               component_group = nil
               component_group_num = cgn
@@ -214,7 +214,7 @@ module DTK; class Task; class Template
           ret
         end
       end
-    
+
       class Ordered < self
         def initialize(array=nil)
           super()

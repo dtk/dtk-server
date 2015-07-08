@@ -1,7 +1,7 @@
 module XYZ
   module DSNormalizer
     class UserData
-      class Component < Top 
+      class Component < Top
         definitions do
           target[:display_name] = source["ref"]
           target[:basic_type] = fn(:basic_type,source)

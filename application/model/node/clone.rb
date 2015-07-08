@@ -31,7 +31,7 @@ module DTK; class Node
         @component = component
         @relevant_nodes = get_relevant_nodes(node,component)
         @relevant_node_ids = @relevant_nodes.map{|n|n.id()}
-        @existing_ports = ExistingPorts.new() # for caching ports that exist already or ones that 
+        @existing_ports = ExistingPorts.new() # for caching ports that exist already or ones that
       end
 
       def process(opts={})
@@ -79,7 +79,7 @@ module DTK; class Node
           end
         end
 
-        if opts[:outermost_ports] 
+        if opts[:outermost_ports]
           opts[:outermost_ports] += materialize_ports!(new_ports)
         end
       end
@@ -92,7 +92,7 @@ module DTK; class Node
         }
         link_def_info_to_prune = Model.get_objs(@node.model_handle(),sp_hash)
         return ret if link_def_info_to_prune.empty?
-          
+
         component_type = @component.get_field?(:component_type)
         component_id = @component.id()
         ndx_ret = {}
@@ -129,7 +129,7 @@ module DTK; class Node
           if @existing_ports.add_if_does_not_exists?(possible_port)
             create_rows << possible_port
           end
-          
+
           if r[:direction] == "input"
             remote_cmp_type = r[:link_def_link][:remote_component_type]
             # TODO: need to see if this needs enhancement to treat components that take titles
@@ -158,7 +158,7 @@ module DTK; class Node
           end
         end
         return ret if ndx_remote_cmp_types.empty?()
-        
+
         sp_hash = {
           cols: [:id,:group_id,:display_name,:node_node_id,:component_type],
           filter: [:and, [:oneof, :node_node_id, @relevant_node_ids],
@@ -167,7 +167,7 @@ module DTK; class Node
         cmp_mh = @node.child_model_handle(:component)
         Model.get_objs(cmp_mh,sp_hash)
       end
-      
+
       def get_relevant_ports(cmps)
         ret = []
         sp_hash = {
@@ -183,7 +183,7 @@ module DTK; class Node
         def initialize
           @ndx_ports = {} #indexed by [node_id][display_name]
         end
-        
+
         def add_port(port)
           pntr = @ndx_ports[port[:node_node_id]] ||= {}
           pntr[port[:display_name]] ||= port

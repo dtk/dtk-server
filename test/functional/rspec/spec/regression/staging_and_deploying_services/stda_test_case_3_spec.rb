@@ -47,7 +47,7 @@ describe "(Staging And Deploying Assemblies) Test Case 3: Deploy from assembly (
 
 	context "Stop service function" do
 		include_context "Stop service", dtk_common
-	end	
+	end
 
 	context "Delete and destroy service function" do
 		include_context "Delete services", dtk_common

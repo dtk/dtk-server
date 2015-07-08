@@ -10,7 +10,7 @@ module DTK; class AttributeLink
 
       # make actual changes
       opts = {update_only_if_change: [:value_derived],returning_cols: [:id]}
-      
+
       changed_input_attrs = Attribute::UpdateDerivedValues.update(attr_mh,update_deltas,opts)
 
       # if no changes exit, otherwise recursively call propagate
@@ -34,7 +34,7 @@ module DTK; class AttributeLink
         end
         h.merge(id => change)
       end
-      
+
       # nested (recursive) propagatation call
       ndx_propagated_changes = Attribute.propagate_changes(ndx_direct_change_hashes.values)
       # return all changes

@@ -23,7 +23,7 @@ module DTK; class Task; class Template
       def self.list(assembly,type)
         List.list(get_action_list(assembly),type)
       end
-      
+
       private
 
       def get_action_list
@@ -67,7 +67,7 @@ module DTK; class Task; class Template
           case type
             when :component_instance
               action_list_display_form.sort{|a,b|a[type] <=> b[type]}
-            when :component_type    
+            when :component_type
               just_component_types(action_list_display_form).sort{|a,b|a[type] <=> b[type]}
             else raise ErrorUsage.new("Illegal type (#{type})")
           end

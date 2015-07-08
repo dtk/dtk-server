@@ -4,11 +4,11 @@ module DTK
       def get_module_branch_from_local_params(local_params)
         self.class.get_module_branch_from_local(local_params.create_local(get_project()))
       end
-      
+
       def get_module_branches
         get_objs_helper(:module_branches,:module_branch)
       end
-      
+
       def get_module_branch_matching_version(version=nil)
         get_module_branches().find{|mb|mb.matches_version?(version)}
       end
@@ -16,7 +16,7 @@ module DTK
       def get_workspace_repo(version=nil)
         aug_branch = get_augmented_workspace_branch(filter: {version: version})
         aug_branch[:repo]
-      end      
+      end
 
       def get_workspace_branch_info(version=nil,opts={})
         if aug_branch = get_augmented_workspace_branch({filter: {version: version}}.merge(opts))
@@ -43,12 +43,12 @@ module DTK
           end
           return nil
         end
-        
+
         # aggregate by remote_namespace, filtering by remote_namespace if remote_namespace is given
         unless module_obj = aggregate_by_remote_namespace(module_rows,opts)
           raise ErrorUsage.new("The module (#{pp_module_name(version)}) is not tied to namespace '#{opts[:filter][:remote_namespace]}' on the repo manager")
         end
-        
+
         ret = module_obj[:module_branch].merge(repo: module_obj[:repo],module_name: module_obj[:display_name], module_namespace: module_obj[:namespace][:display_name])
         if opts[:include_repo_remotes]
           ret.merge!(repo_remotes: module_obj[:repo_remotes])
@@ -133,7 +133,7 @@ module DTK
           raise Error.new("Matched rows has unexpected size (#{matches.size}) since its is >1")
         end
       end
-      
+
       def get_workspace_module_branches(module_idhs)
         ret = []
         if module_idhs.empty?
@@ -144,7 +144,7 @@ module DTK
         post_filter = proc{|mb|!mb.assembly_module_version?()}
         get_matching_module_branches(mh,filter,post_filter)
       end
-      
+
       def get_matching_module_branches(mh_or_idh,filter,post_filter=nil,opts={})
         sp_hash = {
             cols: [:id,:display_name,:group_id,:module_branches],
@@ -159,7 +159,7 @@ module DTK
         end
         post_filter ? rows.select{|r|post_filter.call(r)} : rows
       end
-      
+
     end
   end
 end

@@ -35,8 +35,8 @@ module DTK
     # returns true if an update made; this updates the ruby object
     # each element in the array cmp_modules_with_namespaces
     # is a component module object with the added field :namespace_name
-    # TODO: DTK-2046 
-    # make change here so argument has external_ref info; so might pass in as argument module_ref objects 
+    # TODO: DTK-2046
+    # make change here so argument has external_ref info; so might pass in as argument module_ref objects
     # This might require the persistent module refs to be there
     def update_object_if_needed!(cmp_modules_with_namespaces)
       ret = false
@@ -124,7 +124,7 @@ module DTK
       end
       ModuleRef.update(:create_or_update,@parent,@component_modules.values)
     end
-    
+
     def update
       module_ref_hash_array = @component_modules.map do |(key,hash)|
         el = hash

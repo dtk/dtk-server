@@ -15,12 +15,12 @@ module XYZ
        ret = ArrayObject.new
        return ret unless cookbook_meta
        cookbook_name = recipe_name.gsub(/::.+/,"")
-       meta = (eval($1) if cookbook_meta["long_description"] =~ /__(.+)__/m) #/m because there may be internal line breaks 
+       meta = (eval($1) if cookbook_meta["long_description"] =~ /__(.+)__/m) #/m because there may be internal line breaks
        (meta||[]).each do |meta_service_info|
          base_info = get_service_info(recipe_name,meta_service_info)
          next if base_info.empty?
          cookbook_meta["attributes"].each do |attr,info|
-           set_attribute_info(base_info,attr,info,cookbook_name,recipe_name,meta_service_info[:service_name]) 
+           set_attribute_info(base_info,attr,info,cookbook_name,recipe_name,meta_service_info[:service_name])
          end
          ret << base_info.freeze
        end
@@ -43,12 +43,12 @@ module XYZ
      def get_attribute_and_service_names(attr_name)
        if attr_name =~ Regexp.new("^(.+)/_service/(.+?)/(.+)$")
          ["#{$1}/#{$3}",$2]
-       else 
-         [attr_name,nil] 
+       else
+         [attr_name,nil]
        end
      end
 
-     def set_attribute_info(target,attr,attr_info,cookbook_name,recipe_name,service_name) 
+     def set_attribute_info(target,attr,attr_info,cookbook_name,recipe_name,service_name)
        return nil unless attr_info["is_service_attribute"]
        transform = attr_info["transform"]
        return nil unless transform
@@ -76,14 +76,14 @@ module XYZ
          end
        elsif transform.is_a?(Array)
          target[key] = transform.map do |child|
-           if child.is_a?(Hash) 
+           if child.is_a?(Hash)
              child_target = HashObject::AutoViv.create()
              child.each{|k,v|set_attribute_transform_info(child_target,k,v)}
              child_target
            else
-             child 
+             child
            end
-         end  
+         end
        else
          target[key] = transform
        end

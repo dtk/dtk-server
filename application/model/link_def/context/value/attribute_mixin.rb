@@ -1,5 +1,5 @@
 module DTK; class LinkDef::Context
-  class Value 
+  class Value
     module AttributeMixin
       def set_attribute_value!(attribute)
         @attribute = attribute

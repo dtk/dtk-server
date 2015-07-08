@@ -64,15 +64,15 @@ module DTK; class Attribute
         },
         cardinality: {
           legal_value_fn: lambda do |v|
-            val = 
-              if v.is_a?(Fixnum) then v 
+            val =
+              if v.is_a?(Fixnum) then v
               elsif v.is_a?(String) && v =~ /^[0-9]+$/ then v.to_i
               end
             val && val > 0
           end,
           legal_value_error_msg: "Value must be a positive integer",
           proc: lambda{|a,v|Update::GroupCardinality.new(a,v).process()}
-        } 
+        }
       },
       component: {
       }

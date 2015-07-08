@@ -5,7 +5,7 @@ module AssemblyAndServiceOperationsMixin
 		service_id = nil
 		extract_id_regex = /id: (\d+)/
 		assembly_list = send_request('/rest/assembly/list', subtype: 'template')
- 
+
 		puts "List of avaliable assemblies: "
 		pretty_print_JSON(assembly_list)
 		test_template = assembly_list['data'].find { |x| x['display_name'] == @assembly }
@@ -15,7 +15,7 @@ module AssemblyAndServiceOperationsMixin
 			assembly_id = test_template['id']
 			puts "Assembly id: #{assembly_id}"
 
-			stage_service_response = send_request('/rest/assembly/stage', assembly_id: assembly_id, name: @service_name)	
+			stage_service_response = send_request('/rest/assembly/stage', assembly_id: assembly_id, name: @service_name)
 
 			pretty_print_JSON(stage_service_response)
 
@@ -39,7 +39,7 @@ module AssemblyAndServiceOperationsMixin
 		service_id = nil
 		extract_id_regex = /id: (\d+)/
 		assembly_list = send_request('/rest/assembly/list', subtype: 'template')
- 
+
 		puts "List of avaliable assemblies: "
 		pretty_print_JSON(assembly_list)
 		test_template = assembly_list['data'].find { |x| x['display_name'] == @assembly && x['namespace'] == namespace }
@@ -49,7 +49,7 @@ module AssemblyAndServiceOperationsMixin
 			assembly_id = test_template['id']
 			puts "Assembly id: #{assembly_id}"
 
-			stage_service_response = send_request('/rest/assembly/stage', assembly_id: assembly_id, name: @service_name)	
+			stage_service_response = send_request('/rest/assembly/stage', assembly_id: assembly_id, name: @service_name)
 
 			pretty_print_JSON(stage_service_response)
 
@@ -88,7 +88,7 @@ module AssemblyAndServiceOperationsMixin
 
 		service_list = send_request('/rest/assembly/list', detail_level: 'nodes', subtype: 'instance')
 		service_name = service_list['data'].select { |x| x['id'] == service_id }
-		
+
 		if service_name.any?
 			puts "Old service name is: #{service_name}. Proceed with renaming it to #{new_service_name}..."
 			rename_status = send_request('/rest/assembly/rename', assembly_id: service_id, assembly_name: service_name, new_assembly_name: new_service_name)
@@ -174,7 +174,7 @@ module AssemblyAndServiceOperationsMixin
 		puts "Service with id #{service_id}: "
 		pretty_print_JSON(test_service)
 
-		if (test_service.any?)	
+		if (test_service.any?)
 			extract_service_id = test_service.first['id']
 			execution_status = test_service.first['execution_status']
 
@@ -231,16 +231,16 @@ module AssemblyAndServiceOperationsMixin
 					end_loop = true
 				else
 					puts "Service with id #{extract_service_id} still does not have current op status: #{status_to_check}"
-				end		
+				end
 			else
 				puts "Service with id #{service_id} not found in list"
-				end_loop = true		
+				end_loop = true
 			end
-			
+
 			if (count > max_num_of_retries)
 				puts "Max number of retries reached..."
-				end_loop = true 
-			end				
+				end_loop = true
+			end
 		end
 		puts ""
 		return service_exists
@@ -381,7 +381,7 @@ module AssemblyAndServiceOperationsMixin
 				if (count > max_num_of_retries)
 					puts "Max number of retries reached..."
 					puts "Converge process was not finished successfully!"
-					end_loop = true 
+					end_loop = true
 				end
 			end
 		else
@@ -480,7 +480,7 @@ module AssemblyAndServiceOperationsMixin
 				if (count > max_num_of_retries)
 					puts "Max number of retries reached..."
 					puts "Converge process was not finished successfully!"
-					end_loop = true 
+					end_loop = true
 				end
 			end
 		else
@@ -514,7 +514,7 @@ module AssemblyAndServiceOperationsMixin
 			puts "Assembly #{assembly_name} created in service module #{service_module_name}"
 			assembly_created = true
 		else
-			puts "Assembly #{assembly_name} was not created in service module #{service_module_name}" 
+			puts "Assembly #{assembly_name} was not created in service module #{service_module_name}"
 		end
 		puts ""
 		return assembly_created
@@ -555,12 +555,12 @@ module AssemblyAndServiceOperationsMixin
 						netstats_check = true
 						end_loop = true
 						break
-					else					
+					else
 						puts "Netstats check completed! Port #{port} is not available!"
 						netstats_check = false
 						break
 					end
-				end				
+				end
 			end
 		end
 		puts ""
@@ -595,7 +595,7 @@ module AssemblyAndServiceOperationsMixin
 					puts "Instance started!"
 					service_started = true
 					end_loop = true
-				end				
+				end
 			end
 		else
 			puts "Start instance is not completed successfully!"

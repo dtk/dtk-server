@@ -30,7 +30,7 @@ class Tenant
     response_JSON = JSON.parse(response)
 
     # If response contains errors, accumulate all errors to error_message
-    unless response_JSON["errors"].nil? 
+    unless response_JSON["errors"].nil?
       @error_message = ""
       response_JSON["errors"].each { |e| @error_message += "#{e['code']}: #{e['message']} "}
     end
@@ -39,7 +39,7 @@ class Tenant
     if (response_JSON["status"] == "notok")
       puts "", "Request failed!"
       puts @error_message
-      unless response_JSON["errors"].first["backtrace"].nil? 
+      unless response_JSON["errors"].first["backtrace"].nil?
         puts "", "Backtrace:"
         pretty_print_JSON(response_JSON["errors"].first["backtrace"])
       end
@@ -58,7 +58,7 @@ class Tenant
     assembly_id = nil
     extract_id_regex = /id: (\d+)/
     assembly_template_list = send_request('/rest/assembly/list', subtype: 'template')
- 
+
     puts "List of avaliable assembly templates: "
     pretty_print_JSON(assembly_template_list)
 
@@ -69,7 +69,7 @@ class Tenant
       template_assembly_id = test_template['id']
       puts "Assembly template id: #{template_assembly_id}"
 
-      stage_assembly_response = send_request('/rest/assembly/stage', assembly_id: template_assembly_id, name: assembly_name) 
+      stage_assembly_response = send_request('/rest/assembly/stage', assembly_id: template_assembly_id, name: assembly_name)
 
       pretty_print_JSON(stage_assembly_response)
 
@@ -147,7 +147,7 @@ class Tenant
         sleep 20
         count += 1
         response_task_status = send_request('/rest/task/status', {'task_id'=> task_id})
-        status = response_task_status['data']['status'] 
+        status = response_task_status['data']['status']
         error_msg = response_task_status['data']['subtasks'].find { |x| x['type'].include? "configure_nodes"}['subtasks']
 
         if (status.include? 'succeeded')
@@ -172,7 +172,7 @@ class Tenant
         if (count > max_num_of_retries)
           puts "Max number of retries reached..."
           puts "Converge process was not finished successfully!"
-          end_loop = true 
+          end_loop = true
         end
       end
     else

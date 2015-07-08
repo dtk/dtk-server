@@ -9,7 +9,7 @@ module DTK; class Node
     end
     class NodeList < self
       def initialize(node_idhs)
-        @node_ids = node_idhs.map{|n|n.get_id()} 
+        @node_ids = node_idhs.map{|n|n.get_id()}
       end
 
       def filter_aux?(nodes)

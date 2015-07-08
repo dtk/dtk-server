@@ -31,7 +31,7 @@ module XYZ
       # remove if in overrides or null val
       assigns.inject({}){|h,(col,val)| (val and not scalar_assigns.key?(col)) ? h.merge(col => val) : h}
     end
-    
+
     def auth_context
       @auth_context ||= {
         c: [:c,CONTEXT_ID],
@@ -41,9 +41,9 @@ module XYZ
     end
 
     def augment_for_authorization(where_clause,model_handle)
-      conjoin_set = where_clause ? [where_clause] : [] 
+      conjoin_set = where_clause ? [where_clause] : []
       auth_filters = NoAuth.include?(model_handle[:model_name]) ? nil : CurrentSession.new.get_auth_filters()
-      if auth_filters 
+      if auth_filters
         # controller_line = caller.find{|x|x =~ /application\/controller/}
         # controller = controller_line
         # if controller_line =~ /controller\/(.+)\.rb:.+`(.+)'/
@@ -60,13 +60,13 @@ module XYZ
       else
         conjoin_set << {CONTEXT_ID => model_handle[:c]} if model_handle[:c]
       end
-      case conjoin_set.size 
+      case conjoin_set.size
         when 0 then {}
         when 1 then conjoin_set.first
         else SQL.and(*conjoin_set)
       end
     end
-    NoAuth = [:user,:user_group,:user_group_relation,:task_event]    
+    NoAuth = [:user,:user_group,:user_group_relation,:task_event]
 
     def process_session_auth(session,auth_filters)
       ret =  []

@@ -5,7 +5,7 @@
   table: :project,
   columns: {
     type: {type: :varchar, size: 25}
-  },                   #TODO: should :implementation,:component be here?  
+  },                   #TODO: should :implementation,:component be here?
   one_to_many: [:task,:implementation,:component,:node,:component_module,:service_module,:test_module,:node_module,:port_link,:node_image,:node_image_attribute],
   virtual_columns: {
     user: {

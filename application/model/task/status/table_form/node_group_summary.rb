@@ -8,11 +8,11 @@ module DTK; class Task::Status
       def add_summary_info!(ng_table_el,&block_for_subtasks)
         @block_for_subtasks = block_for_subtasks
         if status = ng_table_el[:status]
-          case status 
+          case status
            when "succeeded"
-            ng_table_el[:status] = status_when_succeeded() 
+            ng_table_el[:status] = status_when_succeeded()
            when "executing"
-            ng_table_el[:status] = status_when_executing() 
+            ng_table_el[:status] = status_when_executing()
            when "cancelled"
            # no op
            when "failed"
@@ -74,7 +74,7 @@ module DTK; class Task::Status
         end
         ret
       end
-      
+
       def summarize_errors?
         all_errors = []
         subtask_status_rows().each do |st|

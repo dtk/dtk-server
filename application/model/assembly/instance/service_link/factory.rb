@@ -10,7 +10,7 @@ module DTK
           @input_cmp = input_cmp_idh.create_object()
           @output_cmp = output_cmp_idh.create_object()
         end
-        
+
         def add?
           port_link = nil
           input_port,output_port,new_port_created = add_or_ret_ports?()
@@ -26,26 +26,26 @@ module DTK
             end
           end
           port_link ||= create_new_port_and_attr_links(input_port,output_port)
-          port_link.id_handle() 
+          port_link.id_handle()
         end
-        
+
         private
 
         # returns input_port,output_port,new_port_created (boolean)
         def add_or_ret_ports?
           new_port_created = false
-          ndx_matching_ports = find_matching_ports?([@input_cmp_idh,@output_cmp_idh]).inject({}){|h,p|h.merge(p[:component_id] => p)} 
-          unless input_port = ndx_matching_ports[@input_cmp_idh.get_id()] 
+          ndx_matching_ports = find_matching_ports?([@input_cmp_idh,@output_cmp_idh]).inject({}){|h,p|h.merge(p[:component_id] => p)}
+          unless input_port = ndx_matching_ports[@input_cmp_idh.get_id()]
             input_port = create_port(:input)
             new_port_created = true
-          end 
-          unless output_port = ndx_matching_ports[@output_cmp_idh.get_id()] 
+          end
+          unless output_port = ndx_matching_ports[@output_cmp_idh.get_id()]
             output_port =  create_port(:output)
             new_port_created = true
           end
           [input_port,output_port,new_port_created]
         end
-        
+
         def find_matching_ports?(cmp_idhs)
           sp_hash = {
             cols: [:id,:group_id,:display_name,:component_id],
@@ -54,7 +54,7 @@ module DTK
           port_mh = cmp_idhs.first.createMH(:port)
           Model.get_objs(port_mh,sp_hash).select{|p|p.link_def_name() == @dependency_name}
         end
-        
+
         def create_port(direction)
           @input_cmp.update_object!(:node_node_id,:component_type)
           @output_cmp.update_object!(:node_node_id,:component_type)
@@ -88,7 +88,7 @@ module DTK
           end
           link_def_stub
         end
-        
+
         def create_new_port_and_attr_links(input_port,output_port)
           port_link_hash = {
             input_id: input_port.id(),

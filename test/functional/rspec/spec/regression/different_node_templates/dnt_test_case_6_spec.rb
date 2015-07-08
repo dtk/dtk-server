@@ -50,7 +50,7 @@ def get_node_ec2_public_dns(service_name, node_name)
 		puts "Info about #{node_name} node is not found!"
 		puts ""
 		return node_ec2_public_dns
-	end	
+	end
 end
 
 def add_document_to_collection(mongodb_host, mongodb_port, database_name, collection_name, document)
@@ -83,7 +83,7 @@ describe "(Different Node Templates) Test Case 6: MongoDB - Single node scenario
 		include_context "Stage", dtk_common
 	end
 
-	context "List services after stage" do		
+	context "List services after stage" do
 		include_context "List services after stage", dtk_common
 	end
 

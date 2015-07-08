@@ -4,7 +4,7 @@ module DTK
       def self.component_list_fields
         [:id,:display_name,:group_id,:external_ref,:ordered_component_ids]
       end
-      
+
       def self.get(mh,opts={})
         sp_hash = {
           cols: ([:id,:group_id,:display_name]+(opts[:cols]||[])).uniq,
@@ -12,7 +12,7 @@ module DTK
         }
         get_objs(mh,sp_hash)
       end
-      
+
       def self.get_unique_instance_name(mh,display_name)
         display_name_regexp = Regexp.new("^#{display_name}")
         matches = get(mh,cols: [:display_name]).select{|r|r[:display_name] =~ display_name_regexp}

@@ -34,14 +34,14 @@ module DTK; class ModuleDSL; class V3
           return ret
         end
         ret_info = {"type" => type.to_s}
-        
+
         # TODO: pass in order from what is on dependency
         if order = opts[:order]||order(link_def_link)
-          ret_info["order"] = order 
+          ret_info["order"] = order
         end
-        
+
         ret_info["attribute_mappings"] = in_attr_mappings.map{|in_am|convert_attribute_mapping(in_am,base_cmp(),dep_cmp(),opts)}
-        
+
         set_single_possible_link!(dep_cmp(),ret_info)
         if @dependency_name = link_def_link["dependency_name"]
           @explicit_dependency_ref = true

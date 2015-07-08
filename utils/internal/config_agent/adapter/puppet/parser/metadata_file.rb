@@ -8,11 +8,11 @@ module DTK; class ConfigAgent
           return ret
         end
         type = impl_obj[:type]
-        
+
         json_content = RepoManager.get_file_content(metadata_name,implementation: impl_obj)
 
         content_hash = nil
-        begin 
+        begin
           content_hash = Aux.convert_to_hash(json_content,:json)
         rescue => e
           return ret
@@ -25,7 +25,7 @@ module DTK; class ConfigAgent
         content = convert_to_internal_form(content_hash)
         {content: content, dependencies: dependencies}
       end
-      
+
       private
 
       def self.contains_metadata?(impl_obj, _provider = nil)

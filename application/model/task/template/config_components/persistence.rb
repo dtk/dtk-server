@@ -1,7 +1,7 @@
 # methods used to maintain the peristence of an assembly instance task template
 # The content can be both node centeric and assembly actions; the class Persistence is responsible for both
 # and class AssemblyActions is responsible for just the assembly actions
-module DTK; class Task; class Template; class ConfigComponents 
+module DTK; class Task; class Template; class ConfigComponents
   class Persistence
     class AssemblyActions
       def self.get_content_for(assembly,cmp_actions,task_action=nil,opts={})
@@ -25,7 +25,7 @@ module DTK; class Task; class Template; class ConfigComponents
           end
         end
       end
-      
+
       def self.persist(assembly,template_content,task_action=nil)
         if serialized_content = template_content.serialization_form(allow_empty_task: true,filter: {source: :assembly})
           task_template_idh = Template.create_or_update_from_serialized_content?(assembly.id_handle(),serialized_content,task_action)
@@ -36,7 +36,7 @@ module DTK; class Task; class Template; class ConfigComponents
           end
         end
       end
-    
+
       def self.remove_any_outdated_items(assembly_update)
         ReifiedObjectCache.remove_any_outdated_items(assembly_update)
       end
@@ -82,12 +82,12 @@ module DTK; class Task; class Template; class ConfigComponents
         def self.key(task_template_idh)
           task_template_idh.get_id()
         end
-          
+
         def self.find_impacted_template_idhs(assembly_update)
           ret = []
           all_templates = assembly_update.assembly_instance().get_task_templates()
           return ret if all.empty?
-          
+
           all_templates.select{|tt|should_be_removed?(tt,assembly_update)}.map{|tt|tt.id_handle()}
         end
 

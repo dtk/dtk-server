@@ -69,9 +69,9 @@ module DTK
       # rather than having or having two sap refs and user can remove or add to component
       #       "sap_ref__l4" => {
       #         :external => true,
-      #         :port_type => "input", 
-      #         :syntax => { 
-      #           :or => 
+      #         :port_type => "input",
+      #         :syntax => {
+      #           :or =>
       #           [{
       #              "port" => {:required => true, :type => :integer},
       #              "protocol" => {:required => true, :type => :string},
@@ -83,8 +83,8 @@ module DTK
       #       },
       "sap_ref__l4" => {
         external: true,
-        port_type: "input", 
-        syntax: { 
+        port_type: "input",
+        syntax: {
            "port" => {required: true, type: :integer},
            "protocol" => {required: true, type: :string},
            "host_address" => {required: true, type: :string}
@@ -100,7 +100,7 @@ module DTK
       "db_user_access" => {
         external: true,
         # TODO: need to rexamine use of :port_type => "input" in light of having attributes that can be read only vs read/write depending
-        # if they have alink; currently if marked as input then they are treated as readonly        
+        # if they have alink; currently if marked as input then they are treated as readonly
         #        :port_type => "input",
         syntax: {
           "username" => {required: true, type: :string},
@@ -162,7 +162,7 @@ module DTK
       return TranslationToSchema[key] if TranslationToSchema[key]
       return create_from_semantic_type(semantic_type) if semantic_type.is_a?(Hash)
     end
-    
+
     def self.create_from_semantic_type(semantic_type)
       return nil unless semantic_type
       key = semantic_type_key(semantic_type)
@@ -204,7 +204,7 @@ module DTK
       if TranslationToSchema[key]
         ret[index] = TranslationToSchema[key]
       elsif semantic_type.is_a?(Hash)
-        ret_schema_from_semantic_type_aux!(ret[index],key,semantic_type.values.first)        
+        ret_schema_from_semantic_type_aux!(ret[index],key,semantic_type.values.first)
       else
         ret[index] = create_json_type()
       end

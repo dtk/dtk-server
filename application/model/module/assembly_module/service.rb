@@ -15,7 +15,7 @@ module DTK; class AssemblyModule
       new(assembly).get_assembly_branch()
     end
     def get_assembly_branch
-      module_branches = @service_module.get_module_branches() 
+      module_branches = @service_module.get_module_branches()
       module_branches.find{|mb|mb.matches_version?(@am_version)} || module_branches.find{|mb|mb.matches_base_version?()}
     end
     def self.get_or_create_assembly_branch(assembly)

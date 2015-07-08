@@ -1,5 +1,5 @@
 module XYZ
-  class MessageBusMsg 
+  class MessageBusMsg
     def to_s
        return @body.inspect
     end
@@ -12,7 +12,7 @@ module XYZ
       [MessageBusTransactionInfo.new(raw_header,unmarshalled_hash),
        MessageBusMsgIn.new(unmarshalled_hash)]
     end
-  end   
+  end
   class MessageBusMsgIn < MessageBusMsg
     # input so processor_msg can be formed
     def parse
@@ -32,12 +32,12 @@ module XYZ
     def initialize(body)
       @body = body
     end
-   
+
     # return raw_body,raw_publish_opts
     def marshal_to_wire(publish_opts)
       hash_body = {body: @body}
-      raw_publish_opts = {} 
-      publish_opts.each do |k,v| 
+      raw_publish_opts = {}
+      publish_opts.each do |k,v|
         if MessageBusTransactionInfo::In_amqp_header.include?(k)
           raw_publish_opts[k] = v
         else

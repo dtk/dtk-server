@@ -5,12 +5,12 @@ module DTK
         result = frozen? ? (super if key?(x)) : super
         convert_type(result)
       end
-      
+
       def recursive_freeze
         each_value{|el| el.recursive_freeze if el.respond_to?(:recursive_freeze)}
         freeze
       end
-      
+
       def ArrayClass
         ArrayObject
       end

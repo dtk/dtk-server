@@ -73,7 +73,7 @@ describe "(Repoman client integration) Test Case 15: NEG - list --remote negativ
 	context "Usergroup #{user_data[:usergroup]}, user #{user_data[:another_user]} and R/None/None permissions" do
 		it "are set on module #{user_data[:module_name]}" do
 			permissions[:user_r] = true
-			
+
 			header.click_on_modules
 			modules.click_on_edit_module(user_data[:module_name])
 			modules.set_module_owner_user(user_data[:another_user])

@@ -18,7 +18,7 @@ module DTK; class BaseModule
       delete_instance(id_handle())
       {module_name: module_name()}
     end
-    
+
     def delete_version?(version)
       delete_version(version,no_error_if_does_not_exist: true)
     end
@@ -29,7 +29,7 @@ module DTK; class BaseModule
         if opts[:no_error_if_does_not_exist]
           return ret
         else
-          raise ErrorUsage.new("Version '#{version}' for specified component module does not exist") 
+          raise ErrorUsage.new("Version '#{version}' for specified component module does not exist")
         end
       end
 
@@ -54,7 +54,7 @@ module DTK; class BaseModule
       end
       refs = components.map do |r|
         cmp_ref = r.display_name_print_form(node_prefix: true,namespace_prefix: true)
-        ref = 
+        ref =
           if cmp_ref =~ /(^[^\/]+)\/([^\/]+$)/
             "Reference to '#{$2}' on node '#{$1}'"
           else
@@ -66,5 +66,5 @@ module DTK; class BaseModule
         ref
       end
       raise ErrorUsage.new("Cannot delete the component module because the following:\n  #{refs.join("\n  ")}")    end
-  end              
+  end
 end; end

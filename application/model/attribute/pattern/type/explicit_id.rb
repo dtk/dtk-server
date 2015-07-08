@@ -16,9 +16,9 @@ module DTK; class Attribute
       def type
         :explicit_id
       end
-      
+
       attr_reader :attribute_idhs
-      
+
       def set_parent_and_attributes!(parent_idh,_opts={})
         @attribute_idhs = [parent_idh.createIDH(model_name: :attribute, id: id())]
         self
@@ -29,7 +29,7 @@ module DTK; class Attribute
         # vacuously true
         true
       end
-      
+
       private
 
       def raise_error_if_not_node_attr_id(attr_id,node)

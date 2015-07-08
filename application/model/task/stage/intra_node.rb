@@ -30,7 +30,7 @@ module XYZ
 						next
 					end
 					# if all parrents and current children have no shared elements
-					# or in other words if dep comps are not present in any of the parents, 
+					# or in other words if dep comps are not present in any of the parents,
 					# add to stage
 					stage[parent] = children if (parents & children).empty?
 				end

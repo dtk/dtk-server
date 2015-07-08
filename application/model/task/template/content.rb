@@ -74,7 +74,7 @@ module DTK; class Task
           # if leave below in make it so under more cases a new stage is created
           when :end_last_internode_stage
             last_internode_stage = internode_stage(:last)
-            # create new stage if last_internode_stage is 
+            # create new stage if last_internode_stage is
             # - multi node, or
             # - has explicit actions
             if last_internode_stage.is_a?(Stage::InterNode::MultiNode) ||
@@ -82,7 +82,7 @@ module DTK; class Task
               new_internode_stage = Stage::InterNode.create_from_single_action(action_match.insert_action)
               self << new_internode_stage
             else
-              last_internode_stage.splice_in_action!(action_match,:end_last_execution_block) 
+              last_internode_stage.splice_in_action!(action_match,:end_last_execution_block)
             end
           when :add_as_new_last_internode_stage
             new_internode_stage = Stage::InterNode.create_from_single_action(action_match.insert_action)
@@ -90,7 +90,7 @@ module DTK; class Task
           else raise Error.new("Unexpected insert_point (#{insert_point})")
         end
       end
-      # TODO: have above subsume below  
+      # TODO: have above subsume below
       def splice_in_at_beginning!(template_content,opts={})
         if opts[:node_centric_first_stage]
           insert(0,*template_content)
@@ -100,7 +100,7 @@ module DTK; class Task
           end
           first.splice_in_at_beginning!(template_content.first)
         end
-        self  
+        self
       end
 
       def serialization_form(opts={})
@@ -144,7 +144,7 @@ module DTK; class Task
         temporal_order = serialized_content[Field::TemporalOrder]
         has_multi_internode_stages = (temporal_order && (temporal_order.to_sym == Constant::Sequential))
         subtasks = serialized_content[Field::Subtasks]
-        normalized_subtasks = 
+        normalized_subtasks =
           if subtasks
             has_multi_internode_stages ? subtasks : [{Field::Subtasks => subtasks}]
           else
@@ -162,7 +162,7 @@ module DTK; class Task
 
       def each_internode_stage(&block)
         each_with_index{|internode_stage,i|block.call(internode_stage,i+1)}
-      end        
+      end
 
       def add_ndx_action_index!(hash,action)
         self.class.add_ndx_action_index!(hash,action)
@@ -185,7 +185,7 @@ module DTK; class Task
         nil
       end
 
-      private        
+      private
 
       def delete_action!(action_match)
         internode_stage_index = action_match.internode_stage_index
@@ -218,7 +218,7 @@ module DTK; class Task
       end
 
       def create_stages_from_serialized_content!(serialized_content_array,actions,opts={})
-        serialized_content_array.each do |a| 
+        serialized_content_array.each do |a|
           if stage = Stage::InterNode.parse_and_reify?(a,actions,opts)
             self << stage
           end
@@ -243,14 +243,14 @@ module DTK; class Task
       def create_stages_from_temporal_constraints_aux!(temporal_constraints,actions,opts={})
         return if actions.empty?
         inter_node_constraints = temporal_constraints.select{|tc|tc.inter_node?()}
-        
+
         stage_factory = Stage::InterNode::Factory.new(actions,temporal_constraints)
         before_index_hash = inter_node_constraints.create_before_index_hash(actions)
         done = false
         existing_num_stages = size()
         new_stages = []
         # before_index_hash gets destroyed in while loop
-        while not done do
+        while not done
           if before_index_hash.empty?
             done = true
           else
@@ -272,7 +272,7 @@ module DTK; class Task
         return unless internode_stage_name_proc
         is_single_stage = (new_stages.size() == 1)
         new_stages.each_with_index do |internode_stage,i|
-          unless internode_stage.name           
+          unless internode_stage.name
             stage_index = i+1
             internode_stage.name = internode_stage_name_proc.call(stage_index,is_single_stage)
           end

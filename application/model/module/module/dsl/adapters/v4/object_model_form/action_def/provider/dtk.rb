@@ -1,5 +1,5 @@
 module DTK; class ModuleDSL; class V4; class ObjectModelForm
-  class ActionDef; class Provider 
+  class ActionDef; class Provider
     class Dtk  < self
       module Constant
         module Variations

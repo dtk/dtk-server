@@ -30,11 +30,11 @@ describe "(Workspace) Test Case 6: Create one node, add two components in it (li
 
 	context "Add component to the node in workspace" do
 		include_context "Add component to the node in workspace", dtk_common, node_name, component_name_1, component_module_namespace
-	end	
+	end
 
 	context "Add component to the node in workspace" do
 		include_context "Add component to the node in workspace", dtk_common, node_name, component_name_2, component_module_namespace
-	end	
+	end
 
 	context "List components in workspace node" do
 		include_context "List components in workspace node", dtk_common, node_name, component_name_1
@@ -58,7 +58,7 @@ describe "(Workspace) Test Case 6: Create one node, add two components in it (li
 
 	context "Purge workspace content" do
 		include_context "Purge workspace content", dtk_common
-	end	
+	end
 
 	after(:all) do
 		puts "", ""

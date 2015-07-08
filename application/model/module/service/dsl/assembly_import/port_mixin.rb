@@ -44,7 +44,7 @@ module DTK; class ServiceModule
     def self.create_assembly_template_ports?(link_defs_info,opts={})
       ret = []
       return ret if link_defs_info.empty?
-      port_mh = link_defs_info.first.model_handle(:port) 
+      port_mh = link_defs_info.first.model_handle(:port)
       ndx_existing_ports = get_ndx_existing_ports(port_mh,link_defs_info,opts)
       # create create-hashes for both local side and remote side ports
       # Need to index by node because create_from_rows can only insert under one parent
@@ -81,13 +81,13 @@ module DTK; class ServiceModule
           end
         end
       end
-      
+
       new_rows = []
       ndx_rows.values.each do |r|
         create_port_mh = r[:node].model_handle_with_auth_info.create_childMH(:port)
         new_rows += Model.create_from_rows(create_port_mh,r[:ndx_create_rows].values,opts)
       end
-      
+
       # delete any existing ports that match what is being put in now
       port_idhs_to_delete = []
       ndx_existing_ports.each_value do |inner_ndx_ports|
@@ -100,7 +100,7 @@ module DTK; class ServiceModule
       unless port_idhs_to_delete.empty?()
         Model.delete_instances(port_idhs_to_delete)
       end
-      
+
       # for new rows need to splice in node info
       unless new_rows.empty?
         sp_hash = {
@@ -114,13 +114,13 @@ module DTK; class ServiceModule
       end
       ret + new_rows
     end
-    
+
     private
 
     # returns hash where each key value has form
     # PortID:
     #  port: PORT
-    #  matched: false 
+    #  matched: false
     def self.get_ndx_existing_ports(port_mh,link_defs_info,opts={})
       ndx_existing_ports = {}
       nodes = link_defs_info.map{|ld|ld[:node]}
@@ -131,10 +131,10 @@ module DTK; class ServiceModule
         cols: ([:node_node_id,:ref,:node] + (opts[:returning_sql_cols]||[])).uniq,
         filter: [:oneof, :node_node_id, nodes.map{|n|n[:id]}]
       }
-      
+
       Model.get_objs(port_mh,sp_hash,keep_ref_cols: true).each do |r|
         (ndx_existing_ports[r[:node_node_id]] ||= {})[r[:ref]] = {port: r,matched: false}
-      end 
+      end
       ndx_existing_ports
     end
   end

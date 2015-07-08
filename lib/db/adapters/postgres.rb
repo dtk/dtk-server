@@ -22,8 +22,8 @@ module DTK
 
     def update_returning_sql(ds,update_set_clause,returning_list)
       sql = ds.update_sql(update_set_clause)
-      sql << " RETURNING " + returning_list.map do |x| 
-        if x.is_a?(Hash) 
+      sql << " RETURNING " + returning_list.map do |x|
+        if x.is_a?(Hash)
           "#{@db.literal(x.keys.first)} AS #{x.values.first}"
         else
           @db.literal(x)
@@ -36,14 +36,14 @@ module DTK
       create_language?(:plpgsql) # needed for triggers
       create_function_zzz_ret_id?()
       create_element_update_trigger?()
-      create_sequence?(TOP_LOCAL_ID_SEQ,ID_TYPES[:local_id]) 
-      
+      create_sequence?(TOP_LOCAL_ID_SEQ,ID_TYPES[:local_id])
+
       # custom functions
       # [none now]
     end
 
     def create_table_common_extras?(db_rel)
-      create_table_common_fields_trigger?(db_rel) 
+      create_table_common_fields_trigger?(db_rel)
     end
 
     def ret_sequence_ref(seq_name)
@@ -51,9 +51,9 @@ module DTK
       "nextval('#{seq_qualified_name}'::regclass)"
     end
 
-    protected     
+    protected
 
-    def create_function_zzz_ret_id? 
+    def create_function_zzz_ret_id?
       o =  ID_TYPES[:id] # fn output
       raise Error::NotImplemented.new("create_function_zzz_ret_id?") if !(o == :bigint && ID_TYPES[:context_id] == :integer && ID_TYPES[:local_id] == :integer)
       create_function?({schema: :top,fn: :zzz_ret_id},
@@ -70,12 +70,12 @@ module DTK
 
       create_function? ELEMENT_UPDATE_TRIGGER,
          "BEGIN
-            IF TG_OP = 'INSERT' THEN 
+            IF TG_OP = 'INSERT' THEN
               SELECT INTO new.id top.zzz_ret_id(NEW.#{c},NEW.local_id);
-              INSERT INTO #{uri_rel} (#{uri_id},#{uri_local_id},#{c},relation_name,ref,ref_num) 
+              INSERT INTO #{uri_rel} (#{uri_id},#{uri_local_id},#{c},relation_name,ref,ref_num)
               VALUES (NEW.id,NEW.local_id,NEW.#{c},TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME,NEW.ref,NEW.ref_num);
               RETURN NEW;
-            ELSIF TG_OP = 'UPDATE' THEN 
+            ELSIF TG_OP = 'UPDATE' THEN
 	      --TBD: not implemented
             RETURN NEW;
             END IF;
@@ -83,7 +83,7 @@ module DTK
             DELETE FROM #{uri_rel}
             WHERE #{uri_id} = OLD.id OR #{parent_id} = OLD.id;
             RETURN OLD;
-         END",  
+         END",
 	 returns: "trigger", language: "plpgsql"
     end
 
@@ -123,7 +123,7 @@ module DTK
       @db.create_language(language_name)
       nil
     end
- 
+
     def language_exists?(language_name)
       @db.from(:pg_language).where(lanname: language_name.to_s).empty? ?  nil : true
     end
@@ -144,7 +144,7 @@ module DTK
     def create_function(db_fn,definition,opts={})
       @db.create_function(fully_qualified_fn_name(db_fn),definition,opts)
       nil
-    end 		   
+    end
 
     def create_function?(db_fn,definition,opts={})
       create_function(db_fn,definition,opts) if !function_exists?(db_fn)
@@ -155,7 +155,7 @@ module DTK
       r = ret_schema_and_table(db_rel)
       query = "SELECT count(*)
                FROM  pg_class rel, pg_namespace s, pg_attribute col
-               WHERE rel.relnamespace =  s.oid AND 
+               WHERE rel.relnamespace =  s.oid AND
                      s.nspname = '#{r[:schema]}' AND rel.relname = '#{r[:table]}' AND
                      col.attrelid = rel.oid AND
                      col.attname = '#{column}'"
@@ -163,11 +163,11 @@ module DTK
     end
 
     def modify_column_varchar_size?(db_rel,col_name,size)
-      query = "SELECT character_maximum_length 
+      query = "SELECT character_maximum_length
   FROM INFORMATION_SCHEMA.COLUMNS
   WHERE table_schema='#{db_rel[:schema]}' AND
         table_name='#{db_rel[:table]}' AND
-        column_name='#{col_name}' AND 
+        column_name='#{col_name}' AND
         not character_maximum_length IS NULL"
       results = db_fetch(query).all
       if results.size == 0 && size.nil?
@@ -192,7 +192,7 @@ module DTK
       r = ret_schema_and_table(db_rel)
       p = ret_schema_and_table(db_rel_pointed_to)
       query = "SELECT count(*)
-               FROM pg_constraint fk, pg_class rel, pg_class parent_rel, pg_attribute f, 
+               FROM pg_constraint fk, pg_class rel, pg_class parent_rel, pg_attribute f,
                     pg_namespace rel_s,pg_namespace parent_rel_s
                WHERE fk.contype = 'f' AND fk.conrelid = rel.oid AND
                      fk.confrelid = parent_rel.oid AND
@@ -205,10 +205,10 @@ module DTK
     end
 
     def create_sequence(seq_name,type)
-      max_value = 
+      max_value =
         case type
           when :integer
-            9223372036854775807 
+            9223372036854775807
           when :bigint
             9223372036854775807
       	end
@@ -243,7 +243,7 @@ module DTK
     end
 
     public
-    
+
     def fully_qualified_rel_name(rel)
       rel.is_a?(Hash) ? (rel[:schema].to_s +  "." + rel[:table].to_s) : rel
     end

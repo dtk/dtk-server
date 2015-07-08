@@ -30,12 +30,12 @@ describe "(Different Node Templates) Test Case 4: Stage node template and conver
 
   context "List nodes after stage" do
     include_context "List nodes after stage", dtk_common, staged_node_name
-  end   
+  end
 
   context "Converge node function" do
     include_context "Converge node", dtk_common, staged_node_name
   end
-  
+
   context "Delete and destroy node function" do
     include_context "Destroy node", dtk_common, staged_node_name
   end

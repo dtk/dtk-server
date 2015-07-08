@@ -19,7 +19,7 @@ module DTK
       def self.apply_using_settings_hash(assembly,settings_hash)
         attr_settings = new(settings_hash)
         # get all existing attributes to find just the diffs
-        existing_attr_settings = all_assemblies_attribute_settings(assembly) 
+        existing_attr_settings = all_assemblies_attribute_settings(assembly)
         pruned_attr_settings = attr_settings.ret_just_diffs(existing_attr_settings)
         unless pruned_attr_settings.empty?
           pruned_attr_settings.apply_settings(assembly)

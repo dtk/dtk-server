@@ -1,5 +1,5 @@
 class Modules < Main
-    
+
   def click_on_edit_module(module_name)
     @session.fill_in 'search_term', with: module_name + "\n"
     @session.within(:table) do

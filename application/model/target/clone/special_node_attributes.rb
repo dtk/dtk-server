@@ -11,7 +11,7 @@ module DTK
 
         def self.process_name_attribute!(nodes)
           constant_attr_fields = {hidden: true}
-          nodes.each do |n| 
+          nodes.each do |n|
             name = n.get_field?(:display_name)
             Node::NodeAttribute.create_or_set_attributes?([n],:name,name,constant_attr_fields)
           end

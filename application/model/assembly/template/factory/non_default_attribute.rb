@@ -1,4 +1,4 @@
-module DTK; class Assembly; class Template 
+module DTK; class Assembly; class Template
   class Factory
     class NonDefaultAttribute < ::Hash
       attr_reader :is_title_attribute
@@ -42,7 +42,7 @@ module DTK; class Assembly; class Template
         end
         attr_override = cmp_ref_hash[:attribute_override] = {}
         non_def_attrs.each do |non_def_attr|
-          if attribute_template = ndx_attrs[non_def_attr[:display_name]] 
+          if attribute_template = ndx_attrs[non_def_attr[:display_name]]
             non_def_attr[:attribute_template_id] = attribute_template[:id]
             non_def_attr.merge!(Aux::hash_subset(attribute_template,[:data_type,:semantic_data_type]))
           else

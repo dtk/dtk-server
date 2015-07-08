@@ -28,7 +28,7 @@ module DTK; class LinkDef
       cmp_type = self[:remote_component_type]
       out_aug_ports.each do |out_port|
         if out_port[:port_info][:component_type] == cmp_type
-          match =  
+          match =
             case self[:type]
              when "external"
               in_aug_port[:node_node_id] != out_port[:node_node_id]
@@ -55,7 +55,7 @@ module DTK; class LinkDef
       create_from_rows(model_handle,rows)
     end
 
-    # craetes attribute links and can clone if needed attributes on a service node group to its members 
+    # craetes attribute links and can clone if needed attributes on a service node group to its members
 
     def update_attribute_mappings!(new_attribute_mappings)
       ret = self[:attribute_mappings] = new_attribute_mappings
@@ -109,7 +109,7 @@ module DTK; class LinkDef
         # TODO: may put in flags to tell clone operation not to do any constraint checking
         clone_opts = {ret_new_obj_with_cols: [:id,:display_name,:extended_base,:implementation_id]}
         new_cmp = node.clone_into(component_extension,override_attrs,clone_opts)
-        
+
         # if alias is given, update context to reflect this
         if self[:alias]
           context.add_component_ref_and_value!(self[:alias],new_cmp)

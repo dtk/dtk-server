@@ -8,11 +8,11 @@ module DTK; class Attribute
       def attribute_idhs
         @attribute_stacks.map{|attr|attr[:attribute].id_handle()}
       end
-      
+
       def component_instance
         nil
       end
-      
+
       def set_parent_and_attributes!(assembly_idh, opts = {})
         attributes = ret_matching_attributes(:component, [assembly_idh], pattern)
         # if does not exist then create the attribute if create option is true
@@ -49,7 +49,7 @@ module DTK; class Attribute
         assembly = assembly_idh.create_object()
         assembly.update_object!(:display_name)
 
-        @attribute_stacks = attributes.map do |attr| 
+        @attribute_stacks = attributes.map do |attr|
           {
             assembly: assembly,
             attribute: attr

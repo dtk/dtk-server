@@ -52,7 +52,7 @@ module ServiceModulesMixin
 			else
 				puts "Service module #{service_name} was not deleted successfully."
 				service_module_deleted = false
-			end			
+			end
 		else
 			puts "Service module #{service_name} does not exist in service module list and therefore cannot be deleted."
 			service_module_deleted = false
@@ -77,7 +77,7 @@ module ServiceModulesMixin
 				service_module_deleted = true
 			else
 				puts "Service module #{service_module_name} in #{namespace} was not deleted from remote!"
-				service_module_deleted = false				
+				service_module_deleted = false
 			end
 		else
 			puts "Service module #{service_module_name} in #{namespace} namespace does not exist on remote!"
@@ -150,7 +150,7 @@ module ServiceModulesMixin
 		assembly_deleted = false
 		assembly_list = send_request('/rest/assembly/list', subtype: "template")
 		assembly = assembly_list['data'].select { |x| x['display_name'] == assembly_name && x['namespace'] == namespace }
-		
+
 		if !assembly.nil?
 			puts "Assembly exists in assembly list. Proceed with deleting assembly..."
 			delete_assembly_response = send_request('/rest/service_module/delete_assembly_template', service_module_id: namespace + ":" + assembly_name.split("/").first, assembly_id: assembly.first['id'], subtype: :template)
@@ -171,7 +171,7 @@ module ServiceModulesMixin
 	def list_service_modules_with_filter(namespace)
 		puts "List service modules with filter:", "---------------------------------"
 		service_modules_retrieved = true
-		service_modules_list = send_request('/rest/service_module/list', detail_to_include: [], module_namespace: namespace)		
+		service_modules_list = send_request('/rest/service_module/list', detail_to_include: [], module_namespace: namespace)
 		pretty_print_JSON(service_modules_list)
 
 		if service_modules_list['data'].empty?
@@ -191,7 +191,7 @@ module ServiceModulesMixin
 	def list_remote_service_modules_with_filter(namespace)
 		puts "List remote service modules with filter:", "------------------------------------"
 		service_modules_retrieved = true
-		service_modules_list = send_request('/rest/service_module/list_remote', rsa_pub_key: self.ssh_key, module_namespace: namespace)		
+		service_modules_list = send_request('/rest/service_module/list_remote', rsa_pub_key: self.ssh_key, module_namespace: namespace)
 		pretty_print_JSON(service_modules_list)
 
 		if service_modules_list['data'].empty?

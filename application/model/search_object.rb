@@ -8,7 +8,7 @@ module XYZ
 
     def create_dataset
       SQL::DataSetSearchPattern.create_dataset_from_search_object(self)
-    end  
+    end
 
     attr_accessor :save_flag, :source
 
@@ -17,7 +17,7 @@ module XYZ
       sp = nil_if_empty(input_hash["search_pattern"])
       hash = {
         id: nil_if_empty(input_hash["id"]),
-        display_name: nil_if_empty(input_hash["display_name"]), 
+        display_name: nil_if_empty(input_hash["display_name"]),
         search_pattern: sp ? SearchPattern.create(sp) : nil
       }
       ret = SearchObject.new(hash,c)
@@ -37,7 +37,7 @@ module XYZ
       sp = self[:search_pattern]
 
       # TODO: this is for case when get back search objects from get objects; remove when process uniformally meaning non null will always be serach pattern object
-      hash_for_json_sp = sp ? (sp.is_a?(SearchPattern) ? sp.hash_for_json_generate() : sp) : nil 
+      hash_for_json_sp = sp ? (sp.is_a?(SearchPattern) ? sp.hash_for_json_generate() : sp) : nil
 
       hash_for_json_generate = {
         "display_name" => self[:display_name],
@@ -112,7 +112,7 @@ module XYZ
       raise Error.new("cannot update without an id") unless id()
       saved_object = self.class.get_objects(model_handle,{id: id()}).first
       raise Error.new("cannot find saved search with id (#{id})") unless saved_object
-      saved_object.each do |k,v| 
+      saved_object.each do |k,v|
         next unless v
         self[k] = k == :search_pattern ? SearchPattern.create(v) : v
       end

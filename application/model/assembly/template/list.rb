@@ -20,7 +20,7 @@ module DTK
         end
         components.flatten
       end
-      
+
       def self.list_components(assembly_template)
         sp_hash = {
           filter: [:eq,:id,assembly_template.id()]
@@ -42,9 +42,9 @@ module DTK
           el = r[:node].hash_subset(:id,:display_name)
           el[:dtk_client_hidden] = el.is_assembly_wide_node?()
           case r[:node][:type]
-            when 'node_group_stub' 
+            when 'node_group_stub'
               el.merge!(type: 'node_group')
-            when 'stub' 
+            when 'stub'
               el.merge!(type: 'node')
           end
           if binding = r[:node_binding]
@@ -63,7 +63,7 @@ module DTK
       def self.get_component_attributes(assembly_mh,template_assembly_rows,opts={})
         # get attributes on templates (these are defaults)
         ret = get_default_component_attributes(assembly_mh,template_assembly_rows,opts)
-        
+
         # get attribute overrides
         sp_hash = {
           cols: [:id,:display_name,:attribute_value,:attribute_template_id],
@@ -99,7 +99,7 @@ module DTK
           if namespace = Namespace.namespace_from_ref?(r[:service_module][:ref])
             pntr.merge!(namespace: namespace)
           end
-          
+
           if version = pretty_print_version(r)
             pntr.merge!(version: version)
           end

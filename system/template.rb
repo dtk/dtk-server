@@ -185,7 +185,7 @@ module R8Tpl
       str.gsub!(/&(?!amp;)/m){|match| match+'amp;'}
       matchStr = str
       cleanStr = ''
-      while matches = /\{%={0,1}\s*[a-zA-Z0-9\.@:'"\(\)\|\[\]\s\=&]*\s*%\}/.match(matchStr) do
+      while matches = /\{%={0,1}\s*[a-zA-Z0-9\.@:'"\(\)\|\[\]\s\=&]*\s*%\}/.match(matchStr)
         cleanStr << matches.pre_match
         subbedStr = matches.to_s.gsub('>','&gt;')
         subbedStr.gsub!('<','&lt;')
@@ -302,7 +302,7 @@ module R8Tpl
 
   def set_indentation
     i = 0
-    while i < @num_indents do
+    while i < @num_indents
       @indent << "\t"
       i += 1
     end
@@ -422,7 +422,7 @@ module R8Tpl
 
   def process_node_text(nodeText,parentVarName,parent_node_type)
     nodeText.strip!
-    while matches = CTRL_BLOCK_REGEX.match(nodeText) do
+    while matches = CTRL_BLOCK_REGEX.match(nodeText)
 =begin
 # R8 Debug
 p "Matched Value(s):"+matches.to_s
@@ -583,7 +583,7 @@ p "After Matched Value(s):"+matches.post_match
     varPostMatchText = varText
     returnText = ''
 
-    while matches = varRegex.match(varPostMatchText) do
+    while matches = varRegex.match(varPostMatchText)
       if matches.pre_match != '' then
          returnText == '' ? (returnText << '"' << matches.pre_match << '"') : (returnText << ' + "' << matches.pre_match << '"')
       end
@@ -699,7 +699,7 @@ class TplVarParser
   end
 
   def setVarName
-    while @char != '[' && @char != ']' && @cur < @length do
+    while @char != '[' && @char != ']' && @cur < @length
       @var_name << @char
       self.advCur
     end
@@ -707,7 +707,7 @@ class TplVarParser
   end
 
   def advCur(num=1)
-    while num > 0 do
+    while num > 0
       if @cur < @length then
         @cur +=1
       else num = 0 end
@@ -731,7 +731,7 @@ class TplVarParser
   end
 
   def process
-    while !self.eov? do
+    while !self.eov?
       if self.atHashStart?
         self.setHashKey
       end
@@ -789,7 +789,7 @@ class TplVarParser
   def getInnerVarString
     numOpenHashes = 1
     innerStr = ''
-    while @char != ']' && numOpenHashes > 0 do
+    while @char != ']' && numOpenHashes > 0
       innerStr << @char
       if @char == '[' then numOpenHashes +=1
       elsif @char == ']' then numOpenHashes -=1
@@ -816,7 +816,7 @@ class TplVarParser
         type: 'literal'
       }
 
-      while @char != ']' do
+      while @char != ']'
         case @char
           when ':','"',"'" then
             self.advCur
@@ -872,7 +872,7 @@ class IfElsExpressionParser
   end
 
   def advCur(num=1)
-    while num > 0 do
+    while num > 0
       if @cur < @length then
         @cur +=1
       else num = 0 end
@@ -977,7 +977,7 @@ class IfElsExpressionParser
   def getInnerExpressionString
     num_open_expressions = 1
     inner_str = ''
-    while num_open_expressions > 0 do
+    while num_open_expressions > 0
       case @char
         when '(' then
           num_open_expressions +=1

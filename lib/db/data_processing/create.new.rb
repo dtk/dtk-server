@@ -9,12 +9,12 @@ module XYZ
         if id_handle.is_top?()
           id_handle
         end
-	id_info = IDInfoTable.get_row_from_id_handle id_handle, raise_error: true 
+	id_info = IDInfoTable.get_row_from_id_handle id_handle, raise_error: true
 
 	       #check if instance or factory
         if id_info[:is_factory]
           factory_idh = id_handle.createIDH(uri: id_info[:uri], is_factory: true)
-	  create_from_hash_with_factory(factory_idh,hash,opts) 
+	  create_from_hash_with_factory(factory_idh,hash,opts)
         else
           hash.map do|relation_type,child_hash|
             factory_info = IDInfoTable.get_factory_id_handle(id_handle,relation_type)
@@ -62,7 +62,7 @@ module XYZ
             # TODO: not right yet
             duplicate_count = sequel_select.join_table(:inner,ds,match_cols).count
             if duplicate_count > 0
-              # TODO: make this a specfic error 
+              # TODO: make this a specfic error
               raise Error.new("found #{duplicate_count} duplicates")
             end
            when :allow
@@ -83,23 +83,23 @@ module XYZ
         ret = nil
         if ds.respond_to?(:insert_returning_sql)
           returning_ids = []
-          
+
           returning_sql_cols = [:id,:display_name]
           returning_sql_cols << parent_id_col.as(:parent_id) if parent_id_col
-          if opts[:returning_sql_cols] 
-            returning_sql_cols += opts[:returning_sql_cols] 
+          if opts[:returning_sql_cols]
+            returning_sql_cols += opts[:returning_sql_cols]
             returning_sql_cols.uniq!
           end
 
           sql = ds.insert_returning_sql(returning_sql_cols,columns,sequel_select_with_cols)
           fetch_raw_sql(sql){|row| returning_ids << row}
           IDInfoTable.update_instances(model_handle,returning_ids) unless opts[:do_not_update_info_table]
-          ret = opts[:returning_sql_cols] ? 
+          ret = opts[:returning_sql_cols] ?
             process_json_fields_in_returning_ids!(returning_ids,db_rel) :
             ret_id_handles_from_create_returning_ids(model_handle,returning_ids)
         else
           ds.import(columns,sequel_select_with_cols)
-          # TODO: need to get ids and set 
+          # TODO: need to get ids and set
           raise Error.new("have not implemented create_from_select when db adapter does not support insert_returning_sql  not set")
         end
         ret
@@ -119,7 +119,7 @@ module XYZ
              if col_info[:type] == :json
                row[k] = DB.ret_json_hash(v,col_info)
              end
-           end 
+           end
          end
          returning_ids
        end
@@ -149,9 +149,9 @@ module XYZ
 
       def create_from_hash_with_factory(factory_idh,hash,opts={})
         ret = []
-        hash.each do |ref,assignments| 
+        hash.each do |ref,assignments|
       	  new_item = create_instance(factory_idh,ref,assignments,opts)
-      	  Log.info("created new object: uri=#{new_item[:uri]}; id=#{new_item[:id]}")		   
+      	  Log.info("created new object: uri=#{new_item[:uri]}; id=#{new_item[:id]}")
       	  ret << new_item
         end
 
@@ -176,11 +176,11 @@ module XYZ
       	parent_relation_type = nil
         c = factory_idh[:c]
         if parent_uri == "/" ## if top level object
-          ref_num = compute_ref_num(db_rel,ref,c)          	  
+          ref_num = compute_ref_num(db_rel,ref,c)
       	  #TBD check that the assignments are legal, or trap
       	  new_id = insert_into_db(factory_idh,db_rel,scalar_assignments.merge(ref_num: ref_num))
         else
-      	  parent_id_info = IDInfoTable.get_row_from_uri parent_uri,c,raise_error: true 
+      	  parent_id_info = IDInfoTable.get_row_from_uri parent_uri,c,raise_error: true
       	  parent_id = parent_id_info[:id]
       	  parent_relation_type = parent_id_info[:relation_type]
 
@@ -193,7 +193,7 @@ module XYZ
             merge_attrs.merge!(display_name: "#{ref}-#{ref_num}")
           end
       	  new_id = insert_into_db(factory_idh,db_rel,scalar_assignments.merge(merge_attrs))
-        end              
+        end
 
 	raise Error.new("error while inserting element") if new_id.nil?
 
@@ -204,7 +204,7 @@ module XYZ
 	       ############# processing scalar columns by inserting a row in db_rel
         container_idh = factory_idh.createIDH(uri: new_uri, c: c, model_name: relation_type)
 	create_factory_uris_and_contained_objects(container_idh,new_id,obj_assignments,opts)
-	
+
 	{uri: new_uri, id: new_id}
       end
 

@@ -10,7 +10,7 @@ shared_context "Import remote component module" do |component_module_name|
     pass = true
     value = `dtk component-module install #{component_module_name}`
     puts value
-    pass = false if ((value.include? "ERROR") || (value.include? "exists on client") || (value.include? "denied") || (value.include? "Conflicts with existing server local module")) 
+    pass = false if ((value.include? "ERROR") || (value.include? "exists on client") || (value.include? "denied") || (value.include? "Conflicts with existing server local module"))
     puts "Import of remote component module #{component_module_name} completed successfully!" if pass == true
     puts "Import of remote component module #{component_module_name} did not complete successfully!" if pass == false
     puts ""
@@ -24,7 +24,7 @@ shared_context "NEG - Import remote component module" do |component_module_name|
     pass = false
     value = `dtk component-module install #{component_module_name}`
     puts value
-    pass = true if ((value.include? "ERROR") || (value.include? "exists on client") || (value.include? "denied") || (value.include? "Conflicts with existing server local module")) 
+    pass = true if ((value.include? "ERROR") || (value.include? "exists on client") || (value.include? "denied") || (value.include? "Conflicts with existing server local module"))
     puts "Import of remote component module #{component_module_name} did not complete successfully since component module from same namespace already exists!" if pass == true
     puts "Import of remote component module #{component_module_name} completed successfully even though it should not!" if pass == false
     puts ""
@@ -112,7 +112,7 @@ shared_context "NEG - Import component module with version dependency from provi
     value = `dtk component-module import-git #{git_ssh_repo_url} #{component_module_name}`
     puts value
     if (value.include? "There are some inconsistent dependencies")
-      pass = true 
+      pass = true
     end
     puts "Component module #{component_module_name} was created successfully from provided git repo but with version dependency missing error!" if pass == true
     puts "Component module #{component_module_name} was not created successfully from provided git repo or was created but without dependency error!" if pass == false
@@ -233,7 +233,7 @@ end
 shared_context "Get component module attributes list" do |dtk_common, component_module_name, filter_component|
   it "gets list of all attributes in #{component_module_name} component module" do
     attributes_list = dtk_common.get_component_module_attributes_list(component_module_name, filter_component)
-    empty_list = attributes_list.empty? 
+    empty_list = attributes_list.empty?
     empty_list.should eq(false)
   end
 end
@@ -241,7 +241,7 @@ end
 shared_context "Get component module attributes list by component" do |dtk_common, component_module_name, component_name|
   it "gets list of all attributes in #{component_module_name} component module that belong to #{component_name} component" do
     attributes_list = dtk_common.get_component_module_attributes_list_by_component(component_module_name, component_name)
-    empty_list = attributes_list.empty? 
+    empty_list = attributes_list.empty?
     empty_list.should eq(false)
   end
 end
@@ -260,7 +260,7 @@ shared_context "Check component module imported on local filesystem" do |compone
     `ls #{component_module_filesystem_location}/#{component_module_name}`
     pass = true if $?.exitstatus == 0
     if (pass == true)
-      puts "Component module #{component_module_name} imported on local filesystem successfully!" 
+      puts "Component module #{component_module_name} imported on local filesystem successfully!"
     else
       puts "Component module #{component_module_name} was not imported on local filesystem successfully!"
     end
@@ -400,7 +400,7 @@ shared_context "Push clone changes to server" do |component_module_name, file_fo
     puts "Clone changes pushed to server successfully!" if pass == true
     puts "Clone changes were not pushed to server successfully!" if pass == false
     puts ""
-    pass.should eq(true)  
+    pass.should eq(true)
   end
 end
 
@@ -412,7 +412,7 @@ shared_context "NEG - Push clone changes to server" do |component_module_name, f
       puts value
       fail = value.include?(expected_error_message)
       puts ""
-      fail.should eq(true)  
+      fail.should eq(true)
     end
 end
 
@@ -662,10 +662,10 @@ shared_context "Import module from puppet forge" do |puppet_forge_module_name, n
       module_name = puppet_forge_module_name.split("-").last
       value = `dtk component-module import-puppet-forge #{puppet_forge_module_name} #{namespace}/#{module_name}`
     else
-      value = `dtk component-module import-puppet-forge #{puppet_forge_module_name}` 
+      value = `dtk component-module import-puppet-forge #{puppet_forge_module_name}`
     end
     puts value
-    pass = false if ((value.include? "ERROR") || (value.include? "exists on client") || (value.include? "denied") || (value.include? "Conflicts with existing server local module")) 
+    pass = false if ((value.include? "ERROR") || (value.include? "exists on client") || (value.include? "denied") || (value.include? "Conflicts with existing server local module"))
     puts "Import of puppet forge module #{puppet_forge_module_name} completed successfully!" if pass == true
     puts "Import of puppet forge module #{puppet_forge_module_name} did not complete successfully!" if pass == false
     puts ""
@@ -700,7 +700,7 @@ shared_context "Add remote" do |dtk_common, component_module, provider_name, url
   it "adds remote to #{component_module} component module" do
     remote_added = dtk_common.add_remote(component_module, provider_name, url)
     expect(remote_added).to eq(true)
-  end  
+  end
 end
 
 shared_context "Remove remote" do |dtk_common, component_module, provider_name|

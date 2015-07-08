@@ -47,12 +47,12 @@ module DTK; class Clone
           end
         end
         child_context_hash = {
-          model_handle: child_mh, 
-          clone_par_col: parent_id_col, 
-          parent_rels: parent_rels, 
-          override_attrs: override_attrs, 
+          model_handle: child_mh,
+          clone_par_col: parent_id_col,
+          parent_rels: parent_rels,
+          override_attrs: override_attrs,
           create_opts: {
-            duplicate_refs: :no_check, 
+            duplicate_refs: :no_check,
             returning_sql_cols: returning_sql_cols(parent_id_col)
           },
           parent_objs_info: objs_info
@@ -80,10 +80,10 @@ module DTK; class Clone
       hash = {
         model_handle: child_mh,
         clone_par_col: parent_id_col,
-        parent_rels: parent_rels, 
+        parent_rels: parent_rels,
         where_clause: {id: template_child_idhs.map{|idh|idh.get_id()}},
         create_opts: {
-          duplicate_refs: :no_check, 
+          duplicate_refs: :no_check,
           returning_sql_cols: returning_sql_cols(parent_id_col)
         }
       }
@@ -104,7 +104,7 @@ module DTK; class Clone
       mappping_rows = instance_template_links.map do |l|
         {id: l.instance.id, template_id: l.template.id}
       end
-      mapping_mh = model_handle.createMH(:mappings) 
+      mapping_mh = model_handle.createMH(:mappings)
       mapping_ds = array_dataset(model_handle.db(),mappping_rows,mapping_mh)
 
       select_ds = base_ds.join_table(:inner,mapping_ds,[:template_id])
@@ -144,7 +144,7 @@ module DTK; class Clone
 
     def self.ret_special_child_context?(clone_proc,parent_model_name,model_name)
       if match = (SpecialContext[clone_proc.clone_direction()][parent_model_name]||{})[model_name]
-        if match.is_a?(Proc) 
+        if match.is_a?(Proc)
           match.call(clone_proc)
         else
           match
@@ -155,11 +155,11 @@ module DTK; class Clone
     SpecialContext = {
       library_to_target: {
         target: {
-          node: AssemblyNode, 
+          node: AssemblyNode,
           port_link: PortLink
         },
         node: {
-          attribute: AssemblyNodeAttribute, 
+          attribute: AssemblyNodeAttribute,
           component_ref: AssemblyComponentRef
         },
         # TODO: will put below back in after sort out issues on https://reactor8.atlassian.net/wiki/display/DTK/Component+Resource+matching
@@ -175,14 +175,14 @@ module DTK; class Clone
       }
     }
 
-    
+
     def initialize(clone_proc,hash)
       super(hash)
       @clone_proc = clone_proc
     end
 
     def db
-      # TODO: could probably simplify this to model_handle.db() 
+      # TODO: could probably simplify this to model_handle.db()
       (@clone_proc && @clone_proc.db()) || model_handle.db()
     end
 
@@ -208,7 +208,7 @@ module DTK; class Clone
 
       wc = self[:where_clause]
       ds = Model.get_objects_just_dataset(model_handle,wc,Model::FieldSet.opt(field_set_from_ancestor))
-        
+
       select_ds = ancestor_rel_ds.join_table(:inner,ds,[:old_par_id])
       Model.create_from_select(model_handle,field_set_to_copy,select_ds,create_override_attrs,create_opts)
     end

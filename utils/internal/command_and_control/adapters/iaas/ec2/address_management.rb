@@ -22,7 +22,7 @@ module DTK; module CommandAndControlAdapter
         end
         # we add record to DNS which links node's DNS to perssistent DNS
         dns = nil
-        begin 
+        begin
           dns = dns()
         rescue  => e
           err_msg = "cannot find ec2_address in associate_persistent_dns for node with ID '#{node[:id]}"
@@ -34,7 +34,7 @@ module DTK; module CommandAndControlAdapter
         end
 
         record = dns.get_record?(node.persistent_dns())
-        
+
         if record.nil?
           # there is no record we need to create it (first boot)
           record = dns.create_record(node.persistent_dns(),ec2_address)
@@ -57,11 +57,11 @@ module DTK; module CommandAndControlAdapter
       def process_addresses__first_boot?(node)
         hostname_external_ref = {iaas: :aws }
         if node.persistent_hostname?()
-          begin 
+          begin
             # allocate elastic IP for this node
             elastic_ip = conn().allocate_elastic_ip()
             hostname_external_ref.merge!(elastic_ip: elastic_ip)
-            external_ref.merge!(dns_name: elastic_ip) 
+            external_ref.merge!(dns_name: elastic_ip)
             Log.info("Persistent hostname needed for node '#{node[:display_name]}', assigned #{elastic_ip}")
            rescue Fog::Compute::AWS::Error => e
             Log.error "Not able to set Elastic IP, reason: #{e.message}"
@@ -70,7 +70,7 @@ module DTK; module CommandAndControlAdapter
         end
         if dns_assignment = DNS::R8.generate_node_assignment?(node)
           persistent_dns = dns_assignment.address()
-          
+
           # we create it on node ready since we still do not have that data
           hostname_external_ref.merge!(persistent_dns: persistent_dns)
           Log.info("Persistent DNS needed for node '#{node[:display_name]}', assigned '#{persistent_dns}'")
@@ -84,7 +84,7 @@ module DTK; module CommandAndControlAdapter
       end
 
       def process_addresses__terminate?(node)
-        unless node[:hostname_external_ref].nil? 
+        unless node[:hostname_external_ref].nil?
           if node.persistent_hostname?()
             unless elastic_ip = node.elastic_ip()
               Log.error("in process_addresses__terminate? call with node.persistent_hostname?, expecting an elastic ip for node with ID '#{node[:id]}")
@@ -94,12 +94,12 @@ module DTK; module CommandAndControlAdapter
             conn().release_elastic_ip(elastic_ip)
             Log.info "Elastic IP #{elastic_ip} has been released."
           end
-          
+
           if persistent_dns = node.persistent_dns()
             success = nil
 
             dns = nil
-            begin 
+            begin
               dns = dns()
              rescue  => e
               err_msg = "in process_addresses__terminate? for node with ID '#{node[:id]}"
@@ -109,7 +109,7 @@ module DTK; module CommandAndControlAdapter
               Log.error(err_msg)
               return
             end
-            
+
             if success = dns.destroy_record(persistent_dns)
               Log.info "Persistent DNS has been released '#{node.persistent_dns()}', node termination continues."
             else

@@ -3,8 +3,8 @@ require 'yaml'
 require 'active_record'
 
 class TestRun < ActiveRecord::Base
-  # "testrun" records time of the test execution, duration, pass rate 
-  # and contains build number as specified in the yml configuration file  
+  # "testrun" records time of the test execution, duration, pass rate
+  # and contains build number as specified in the yml configuration file
   has_many :testcases
   belongs_to :testsuite
 end

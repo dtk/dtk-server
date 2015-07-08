@@ -13,7 +13,7 @@ module XYZ
 	  @db.create_table? CONTEXT_TABLE do
 	    primary_key :id #TBD: more columns will be put in
           end
-        end  
+        end
         ###### end: SchemaProcessing
 
         ###### DataProcessing

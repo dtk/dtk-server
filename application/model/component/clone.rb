@@ -21,19 +21,19 @@ module DTK
       specified_target_id = specified_target_idh.get_id()
       cmp_ds = Model.get_objects_just_dataset(model_handle,{id: id()},cmp_fs)
       mapping_ds = SQL::ArrayDataset.create(self.class.db,SubComponentComponentMapping,model_handle.createMH(:mapping))
-                          
+
       first_join_ds =  cmp_ds.graph(:inner,mapping_ds,component: :component_type)
 
       parent_cmp_ds = Model.get_objects_just_dataset(model_handle,{node_node_id: specified_target_idh.get_id()},cmp_fs)
 
       final_join_ds = first_join_ds.graph(:inner,parent_cmp_ds,{component_type: :parent},convert: true)
-      
+
       target_info = final_join_ds.all().first
       return specified_target_idh unless target_info
       target_info[:component2].id_handle()
     end
 
-    SubComponentComponentMapping = 
+    SubComponentComponentMapping =
       [
         #       {:component => "postgresql__db", :parent => "postgresql__server"}
       ]
@@ -57,7 +57,7 @@ module DTK
       }
       component = component_idh.get_objects_from_sp_hash(sp_hash).first
       return nil unless component
-      
+
       basic_type_info = BasicTypeInfo[component[:basic_type]]
       sap_dep = basic_type_info[:sap_dependency]
 
@@ -90,7 +90,7 @@ module DTK
     protected
 
     def self.compute_sap_db(sap_config_val,par_vals)
-      # TODO: check if it is this simple; also may not need and propagate as byproduct of adding a link 
+      # TODO: check if it is this simple; also may not need and propagate as byproduct of adding a link
       par_vals.map{|par_val|sap_config_val.merge(par_val)}
     end
 

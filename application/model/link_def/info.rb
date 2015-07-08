@@ -3,16 +3,16 @@ module DTK
     # Each element has form
     #   <Assemby::Template>
     #   id: ID
-    #   node: NODE 
+    #   node: NODE
     #   component_ref: ComponentRef
     #   nested_component: ComponentTemplate
-    #   link_def: 
-    #     <LinkDef> 
+    #   link_def:
+    #     <LinkDef>
     #     link_def_links:
-    #     - LinkDef::Link 
+    #     - LinkDef::Link
     class Info < Array
       def self.component_ref_cols
-        ComponentRef.common_cols()        
+        ComponentRef.common_cols()
       end
       def self.nested_component_cols
         [:id,:display_name,:component_type, :extended_base, :implementation_id, :node_node_id,:only_one_per_node]
@@ -50,7 +50,7 @@ module DTK
           ndx = link_def[:id]
           unless ndx_ld_links_mark[ndx]
             ndx_ld_links_mark[ndx] = true
-            (link_def[:link_def_links]||{}).each{|link|body.call(link_def,link)} 
+            (link_def[:link_def_links]||{}).each{|link|body.call(link_def,link)}
           end
         end
       end
@@ -67,4 +67,4 @@ module DTK
     end
   end
 end
-    
+

@@ -58,7 +58,7 @@ module DTK
           opts = (file_path ? Opts.new(file_path: file_path) : Opts.new)
           errors.each{|error|add_error(error,opts)}
         end
-      end 
+      end
 
       def error_prefix(num_errs)
         error_or_errors = (num_errs > 1 ? 'errors' : 'error')

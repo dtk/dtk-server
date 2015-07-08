@@ -6,7 +6,7 @@ module DTK
     def initialize(error_message=nil)
       @error_message = error_message
     end
-    
+
     class MissingVar < self
       attr_reader :missing_var
       def initialize(missing_var)
@@ -24,11 +24,11 @@ module DTK
       end
     end
     HasMustacheVarsRegExp = /\{\{.+\}\}/
-    
+
     # block_for_err takes mustache_gem_err,string
     def bind_template_attributes_utility(string, attr_val_pairs)
       # using Mustache gem to extract attribute values; raise error if unbound attributes
-      begin 
+      begin
         ::Mustache.raise_on_context_miss = true
         ::Mustache.render(string, attr_val_pairs)
       rescue ::Mustache::ContextMiss => mustache_gem_err
@@ -41,6 +41,6 @@ module DTK
         end
       end
     end
-    
+
   end
 end

@@ -3,7 +3,7 @@ module DTK
   class Node
     module DNS
       # arranged in precedence order
-      AttributeKeys = 
+      AttributeKeys =
         [
          'dns_enabled',
          'dtk_dns_enabled',
@@ -12,7 +12,7 @@ module DTK
     end
   end
 
-  module NodeMetaClassMixin 
+  module NodeMetaClassMixin
     def up
       ds_column_defs :ds_attributes, :ds_key, :data_source, :ds_source_obj_type
       external_ref_column_defs()
@@ -46,9 +46,9 @@ module DTK
       virtual_column :parent_name, possible_parents: [:library,:datacenter]
       virtual_column :disk_size, path: [:ds_attributes,:flavor,:disk] #in megs
       # TODO: how to have this conditionally "show up"
-      virtual_column :ec2_security_groups, path: [:ds_attributes,:groups] 
+      virtual_column :ec2_security_groups, path: [:ds_attributes,:groups]
 
-      # can be null; points to the canonical member (a node template in the library) which is used by default when do node_group add_node 
+      # can be null; points to the canonical member (a node template in the library) which is used by default when do node_group add_node
       foreign_key :canonical_template_node_id, :node, FK_SET_NULL_OPT
 
       virtual_column :canonical_template_node, type: :json, hidden: true,
@@ -101,7 +101,7 @@ module DTK
                                     }]
 
       ##### for connection to ports and port link
-      virtual_column :node_link_defs_info, type: :json, hidden: true, 
+      virtual_column :node_link_defs_info, type: :json, hidden: true,
         remote_dependencies:         [
          {
            model_name: :component,
@@ -158,12 +158,12 @@ module DTK
         segment
       end
 
-      virtual_column :node_bindings, type: :json, hidden: true, 
+      virtual_column :node_bindings, type: :json, hidden: true,
         remote_dependencies:          [ lambda__segment_node_binding.call(NodeBindingRuleset.common_columns(),{}) ]
 
-      virtual_column :ports, type: :json, hidden: true, 
+      virtual_column :ports, type: :json, hidden: true,
         remote_dependencies:         [lambda__segment_port.call([:id,:type,id(:node),:containing_port_id,:external_attribute_id,:direction,:location,:ref,:display_name,:name,:description],{})] #TODO: should we unify with Port.common_columns
-      virtual_column :ports_for_clone, type: :json, hidden: true, 
+      virtual_column :ports_for_clone, type: :json, hidden: true,
         remote_dependencies:         [
          lambda__segment_port.call(FactoryObject::CommonCols+[:type,:link_def_id,:direction,:component_type,:link_type],{}),
          {
@@ -192,7 +192,7 @@ module DTK
            cols: [:id,id(:node)]
          }]
 
-      input_port_links_def = 
+      input_port_links_def =
         [{
            model_name: :port,
            join_type: :inner,
@@ -206,10 +206,10 @@ module DTK
             join_type: :inner,
             cols: [:id,:input_id,:output_id]
           }]
-      virtual_column :input_port_links, type: :json, hidden: true, 
-      remote_dependencies: input_port_links_def 
+      virtual_column :input_port_links, type: :json, hidden: true,
+      remote_dependencies: input_port_links_def
 
-      virtual_column :input_port_link_info, type: :json, hidden: true, 
+      virtual_column :input_port_link_info, type: :json, hidden: true,
       remote_dependencies:         input_port_links_def +
         [{
            model_name: :port,
@@ -234,9 +234,9 @@ module DTK
             cols: [:id,:input_id,:output_id]
           }]
 
-      virtual_column :output_port_links, type: :json, hidden: true, 
+      virtual_column :output_port_links, type: :json, hidden: true,
       remote_dependencies: output_port_links_def
-      virtual_column :output_port_links, type: :json, hidden: true, 
+      virtual_column :output_port_links, type: :json, hidden: true,
       remote_dependencies:         output_port_links_def +
          [{
            model_name: :port,
@@ -246,7 +246,7 @@ module DTK
            cols: [:id,:display_name,:type]
          }]
 
-      node_attrs_on_node_def = 
+      node_attrs_on_node_def =
         [{
            model_name: :attribute,
            join_type: :inner,
@@ -291,7 +291,7 @@ module DTK
                  cols: attr_cols
          }]
       end
-      virtual_column :component_ws_module_branches, type: :json, hidden: true, 
+      virtual_column :component_ws_module_branches, type: :json, hidden: true,
       remote_dependencies:         [lambda__segment_component.call([:id,:display_name,:module_branch_id]),
                                     {
                                       model_name: :module_branch,
@@ -299,28 +299,28 @@ module DTK
                                       join_type: :inner,
                                       join_cond: {id: q(:component,:module_branch_id)},
                                       filter: [:eq, :is_workspace, true],
-                                      cols: [:id,:display_name,:type,:component_id] 
-                                    }]         
-      virtual_column :component_module_branches, type: :json, hidden: true, 
+                                      cols: [:id,:display_name,:type,:component_id]
+                                    }]
+      virtual_column :component_module_branches, type: :json, hidden: true,
       remote_dependencies:         [lambda__segment_component.call([:id,:display_name,:module_branch_id]),
                                     {
                                       model_name: :module_branch,
                                       convert: true,
                                       join_type: :inner,
                                       join_cond: {id: q(:component,:module_branch_id)},
-                                      cols: [:id,:display_name,:type,:component_id] 
-                                    }]         
-      virtual_column :components_and_attrs, type: :json, hidden: true, 
+                                      cols: [:id,:display_name,:type,:component_id]
+                                    }]
+      virtual_column :components_and_attrs, type: :json, hidden: true,
       remote_dependencies:         lambda__components_and_attrs.call(
           cmp_cols: FactoryObject::CommonCols+[:component_type],
           attr_cols: FactoryObject::CommonCols+[:attribute_value,:required])
 
-      virtual_column :cmps_and_non_default_attr_candidates, type: :json, hidden: true, 
+      virtual_column :cmps_and_non_default_attr_candidates, type: :json, hidden: true,
       remote_dependencies:         lambda__cmps_and_non_default_attr_candidates.call(
           cmp_cols: FactoryObject::CommonCols+[:ancestor_id,:component_type,:only_one_per_node],
           attr_cols: FactoryObject::CommonCols+[:is_instance_value,:attribute_value,:external_ref,:data_type,:tags])
-        
-      virtual_column :input_attribute_links_cmp, type: :json, hidden: true, 
+
+      virtual_column :input_attribute_links_cmp, type: :json, hidden: true,
       remote_dependencies:         lambda__components_and_attrs.call(cmp_cols: [:id,:display_name, :component_type, id(:node)],attr_cols: [:id,:display_name]) +
         [
          {
@@ -330,7 +330,7 @@ module DTK
            join_cond: {input_id: q(:attribute,:id)},
            cols: [:id,:display_name, :type, :input_id,:output_id]
          }]
-      virtual_column :input_attribute_links_node, type: :json, hidden: true, 
+      virtual_column :input_attribute_links_node, type: :json, hidden: true,
       remote_dependencies:         node_attrs_on_node_def +
         [
          {
@@ -340,7 +340,7 @@ module DTK
            join_cond: {input_id: q(:attribute,:id)},
            cols: [:id,:display_name, :type, :input_id,:output_id]
          }]
-      virtual_column :output_attribute_links_cmp, type: :json, hidden: true, 
+      virtual_column :output_attribute_links_cmp, type: :json, hidden: true,
       remote_dependencies:         lambda__components_and_attrs.call(cmp_cols: [:id,:display_name, :component_type, id(:node)],attr_cols: [:id,:display_name]) +
         [
          {
@@ -350,7 +350,7 @@ module DTK
            join_cond: {output_id: q(:attribute,:id)},
            cols: [:id,:display_name, :type, :input_id,:output_id]
          }]
-      virtual_column :output_attribute_links_node, type: :json, hidden: true, 
+      virtual_column :output_attribute_links_node, type: :json, hidden: true,
       remote_dependencies:         node_attrs_on_node_def +
         [
          {
@@ -385,7 +385,7 @@ module DTK
            join_cond: {input_id: q(:attribute_link,:input_id)},
            cols: [:id,:type,:input_id,:index_map,:port_link_id]
          }]
-      virtual_column :dangling_input_links_from_components, type: :json, hidden: true, 
+      virtual_column :dangling_input_links_from_components, type: :json, hidden: true,
       remote_dependencies:         [{
            model_name: :component,
            join_type: :inner,
@@ -400,7 +400,7 @@ module DTK
                                       cols: [:id,:display_name]
                                     }] + for_dangling_links
 
-      virtual_column :dangling_input_links_from_nodes, type: :json, hidden: true, 
+      virtual_column :dangling_input_links_from_nodes, type: :json, hidden: true,
       remote_dependencies:          [{
            model_name: :attribute,
            alias: :output_attribute,
@@ -642,7 +642,7 @@ module DTK
          }
         ]
 
-      virtual_column :deprecate_port_links, type: :json, hidden: true, 
+      virtual_column :deprecate_port_links, type: :json, hidden: true,
       remote_dependencies:         [
          {
            model_name: :component,

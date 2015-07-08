@@ -38,27 +38,27 @@ module DTK; class Clone
       # for processing component refs in an assembly
       def ret_new_objs_info(field_set_to_copy,create_override_attrs)
         ret = []
-        # mapping from component ref to component template 
+        # mapping from component ref to component template
         component_mh = model_handle.createMH(:component)
         ndx_node_stub_to_instance = parent_rels.inject({}){|h,r|h.merge(r[:old_par_id] => r[:node_node_id])}
         ndx_to_find_cmp_ref_id = {}
 
-        cmp_mh = @clone_proc.project.model_handle(:component) 
+        cmp_mh = @clone_proc.project.model_handle(:component)
         cmp_template_idhs = matches.map{|m|m[:component_template_id]}.uniq.map{|id|cmp_mh.createIDH(id: id)}
         ndx_component_templates = Component::Template.get_info_for_clone(cmp_template_idhs).inject({}){|h,r|h.merge(r[:id]=>r)}
-        
+
         mapping_rows = matches.map do |m|
           node = m[:node]
           old_par_id = node[:id]
           unless node_node_id = (parent_rels.find{|r|r[:old_par_id] == old_par_id}||{})[:node_node_id]
-            raise Error.new("Cannot find old_par_id #{old_par_id} in parent_rels") 
+            raise Error.new("Cannot find old_par_id #{old_par_id} in parent_rels")
           end
           component_template = ndx_component_templates[m[:component_template_id]]
           component_template_id = component_template[:id]
 
           # set  ndx_to_find_cmp_ref_id
           # first index is the associated node instance, second is teh component template
-          pntr = ndx_to_find_cmp_ref_id[ndx_node_stub_to_instance[old_par_id]] ||= {} 
+          pntr = ndx_to_find_cmp_ref_id[ndx_node_stub_to_instance[old_par_id]] ||= {}
           if pntr[m[:display_name]]
             Log.error("unexpected that multiple matches when creating ndx_to_find_cmp_ref_id")
           end
@@ -75,7 +75,7 @@ module DTK; class Clone
           }
         end
         return ret if mapping_rows.empty?
- 
+
         mapping_ds = array_dataset(mapping_rows,:mapping)
         # all parent_rels will have same cols so taking a sample
         remove_cols = [:ancestor_id,:assembly_id,:display_name,:ref,:locked_sha] + parent_rels.first.keys
@@ -89,7 +89,7 @@ module DTK; class Clone
           component_ref_id = ndx_to_find_cmp_ref_id[r[:node_node_id]][r[:display_name]]
           raise Error.new("Variable component_ref_id should not be null") if component_ref_id.nil?
           r.merge!(component_ref_id: component_ref_id, component_template_id: r[:ancestor_id])
-        end 
+        end
         ret
       end
 
@@ -102,7 +102,7 @@ module DTK; class Clone
         end
         ret
       end
- 
+
    end
   end
 end; end

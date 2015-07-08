@@ -7,7 +7,7 @@ module DTK; class Attribute
         ret = {}
         [:id,:required,:dyanmic].each{|k|ret[k] = self[k] if self[k]}
         ret[:field_name] = self[:display_name]
-        
+
         # put in optional key that inidcates implementation attribute
         impl_attr = ret_implementation_attribute_name_and_type()
         # default is that implementation attribute name same as r8 attribute name; so omit if default
@@ -45,7 +45,7 @@ module DTK; class Attribute
         end
         ret
       end
-    
+
       def self.get_port_info(id_handles)
         get_objects_in_set_from_sp_hash(id_handles,{cols: [:port_info]},keep_ref_cols: true)
       end
@@ -60,7 +60,7 @@ module DTK; class Attribute
         config_agent = ConfigAgent.load(self[:config_agent_type])
         config_agent && config_agent.ret_attribute_name_and_type(self)
       end
-    end    
+    end
 
     module ClassMixin
       def get_attribute_from_identifier(identifier, mh, cmp_id)
@@ -77,21 +77,21 @@ module DTK; class Attribute
           # extracting component and attribute name from identifier
           # e.g. cmp[dtk_addons::rspec2db]/user => component_name = dtk_addons::rspec2db, attribute_name = user
           match_from_identifier = identifier.match(/.+\[(.*)\]\/(.*)/)
-          
+
           if match_from_identifier
             param_cmp_name  = match_from_identifier[1].gsub(/::/,'__')
             param_attr_name = match_from_identifier[2].gsub(/::/,'__')
           end
-          
+
           raise ErrorUsage.new("Illegal identifier '#{identifier}' for component-module attribute") unless param_attr_name && param_cmp_name
-          
+
           sp_hash = {
             # component_module_parent will return more info about attribute (component it belongs to and module branch which we can get component_module_id from)
             cols: common_columns + [:component_module_parent],
             filter: [:eq, :display_name, param_attr_name]
           }
           matching_attributes = Model.get_objs(mh,sp_hash)
-          
+
           # every component attribute has external_ref field with info ({"type":"puppet_attribute","path":"node[logrotate__rule][copytruncate]"})
           # using external_ref[:path] to extract component_name (logrotate__rule) and attribute_name (copytruncate)
           # and compare to data that user have sent as params
@@ -106,7 +106,7 @@ module DTK; class Attribute
               break if valid_attribute
             end
           end
-          
+
           raise ErrorUsage.new("Illegal identifier '#{identifier}' for component-module attribute") unless valid_attribute
         end
 
@@ -123,7 +123,7 @@ module DTK; class Attribute
         return ret if attrs.empty?
         attrs.each do |r|
           r.delete(:component) if r[:component].nil? #get rid of nil :component cols
-          
+
           if node = r.delete(:direct_node)||r.delete(:component_node)
             r.merge!(node: node)
           end

@@ -60,7 +60,7 @@ module DTK
         else
           hash
         end
-      end  
+      end
 
       # raises error if appropriate dev config flag is on
       def stop_for_testing?(stop_point)
@@ -107,7 +107,7 @@ module DTK
           obj
         end
       end
-      
+
       def equal_sets(array1,array2)
         Set.new(array1) == Set.new(array2)
       end
@@ -126,7 +126,7 @@ module DTK
         end
       end
 
-      # key can be symbol or of form {symbol => symbol} 
+      # key can be symbol or of form {symbol => symbol}
       def hash_subset(hash,keys,opts={},&block)
         hash_subset_aux(opts[:seed]||{},hash,keys,opts,&block)
       end
@@ -149,12 +149,12 @@ module DTK
             ret
           else
             key = k.is_a?(Hash) ? k.values.first : k
-            val = 
+            val =
               if block && block.arity == 1
                 block.call(hash[index])
               elsif block && block.arity == 2
                 block.call(key,hash[index])
-              else  
+              else
                 hash[index]
               end
             ret.merge(key => val) if ret.respond_to?(:merge)
@@ -188,7 +188,7 @@ module DTK
         if json.empty?
           return ret
         end
-        begin 
+        begin
           ::JSON.parse(json)
         rescue ::JSON::ParserError => e
           return ErrorUsage::Parsing.new("JSON parsing error #{e} in file",opts[:file_path]) if opts[:do_not_raise]
@@ -240,7 +240,7 @@ module DTK
            rescue Exception => err
             # use pure json to find parsing error
             require 'json/pure'
-            begin 
+            begin
               JSON::Pure::Parser.new(json).parse
              rescue Exception => detailed_err
               raise Error.new("file (#{file_name} has json parsing error: #{detailed_err}")
@@ -356,7 +356,7 @@ module DTK
 
       def convert_to_symbol_form_aux(item)
         if item.is_a?(Array)
-          item.map{|x|convert_to_symbol_form_aux(x)} 
+          item.map{|x|convert_to_symbol_form_aux(x)}
         elsif item.is_a?(Hash)
           ret = {}
           item.each{|k,v|ret[k.to_sym] = convert_to_symbol_form_aux(v)}
@@ -393,29 +393,29 @@ end
 
 ###for more succinctly handling pattern where class exposes methods on an internal object
 class Class
-  # TODO: consider variant where third argument passed which is lambda indicating how to 
+  # TODO: consider variant where third argument passed which is lambda indicating how to
   # transform inputs before applying to interval method var
   def expose_methods_from_internal_object(innervar,methods_to_expose,opts={})
     if R8::Config[:benchmark]
       return expose_methods_with_benchmark(innervar,methods_to_expose,opts.merge(benchmark: R8::Config[:benchmark]))
-    end 
-    methods_to_expose.each do |m| 
-      method_def = 
+    end
+    methods_to_expose.each do |m|
+      method_def =
         if opts[:post_hook]
           "def #{m}(*args);#{opts[:post_hook]}.call(@#{innervar}.#{m}(*args));end"
         else
           "def #{m}(*args);@#{innervar}.#{m}(*args);end"
         end
-      class_eval(method_def) 
+      class_eval(method_def)
     end
   end
 
-  # TODO: just for testing; 
+  # TODO: just for testing;
 
   def expose_methods_with_benchmark(innervar,methods_to_expose,opts={})
     b = opts[:benchmark]
     post_hook = opts[:post_hook]
-    methods_to_expose.each do |m| 
+    methods_to_expose.each do |m|
       exec = "@#{innervar}.#{m}(*args)"
       exec = "XYZ::Aux.benchmark('#{m}'){#{exec}}" if b == :all || (b.respond_to?(:include?) && b.include?(m))
       method_def = (post_hook ? "def #{m}(*args);#{post_hook}.call(#{exec});end" : "def #{m}(*args);#{exec};end")
@@ -424,7 +424,7 @@ class Class
   end
 
   def expose_all_methods_from_internal_object(innervar)
-    method_def = "def method_missing(method,*args);@#{innervar}.send(method,*args);end"  
+    method_def = "def method_missing(method,*args);@#{innervar}.send(method,*args);end"
     class_eval(method_def)
   end
 end
@@ -463,12 +463,12 @@ end
 # module Rack::Utils
 #   def parse_nested_query(qs, d = nil)
 #     params = {}
-#     
+#
 #     (qs || '').split(d ? /[#{d}] */n : DEFAULT_SEP_MODIFIED).each do |p|
 #       k, v = unescape(p).split('=', 2)
 #       normalize_params(params, k, v)
 #     end
-#     
+#
 #     return params
 #   end
 #  module_function :parse_nested_query

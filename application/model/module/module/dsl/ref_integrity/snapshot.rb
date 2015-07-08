@@ -23,12 +23,12 @@ module DTK; class ModuleDSL
 
       def create_link_def_info(new_links_defs)
         link_def_info = LinkDef::Info.new
-        
+
         # link defs indexed by component template
         ndx_link_defs = new_links_defs.inject({}) do |h,ld|
           h.merge(ld[:component_component_id] => ld)
         end
-        
+
         @aug_cmp_templates.each do |cmp_template|
           if link_def = ndx_link_defs[cmp_template[:id]]
             cmp_template[:component_refs].each do |cmp_ref|
@@ -38,7 +38,7 @@ module DTK; class ModuleDSL
                 node: node,
                 component_ref: cmp_ref.hash_subset(*LinkDef::Info.component_ref_cols()),
                 nested_component: cmp_template.hash_subset(*LinkDef::Info.nested_component_cols()),
-                link_def: link_def                                         
+                link_def: link_def
               )
               link_def_info << el
             end

@@ -3,7 +3,7 @@ module DTK; class DB
     # classes that support recursive delete
     class CreateStackArray < Array
       def self.create?(assigns)
-        if assigns.is_a?(HashObject) && assigns.apply_recursively? 
+        if assigns.is_a?(HashObject) && assigns.apply_recursively?
           new()
         end
       end
@@ -29,7 +29,7 @@ module DTK; class DB
         create_stack
       end
     end
-    
+
     class CreateStackBase
       def initialize(relation_type)
         @relation_type = relation_type
@@ -46,7 +46,7 @@ module DTK; class DB
         # no op
       end
     end
-      
+
     class CreateStack < CreateStackBase
       def initialize(relation_type,id)
         super(relation_type)
@@ -55,7 +55,7 @@ module DTK; class DB
       end
 
       attr_reader :children,:id
-      
+
       def add_to_index!(indexed_create_stack,level)
         @children.each do |child_create_stack|
           indexed_create_stack.add!(level,self,child_create_stack)
@@ -75,7 +75,7 @@ module DTK; class DB
           pntr << child_stack.id
         end
       end
-      
+
       def each_parent_child_pair(&block)
         each_value do |l1|
           l1.each do |parent_type,l2|

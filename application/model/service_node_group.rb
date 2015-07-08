@@ -1,7 +1,7 @@
 # TODO: need to reconcile or have better names on this versus NodeGroup
 module DTK
   # This class represents objects that are specfied by node groups in assembly templates and service insatnces
-  # TODO: double check this is accurate description; they capture what Input::BaseNodes is, 
+  # TODO: double check this is accurate description; they capture what Input::BaseNodes is,
   # but maybe not inventory data subclass
   class ServiceNodeGroup < Node
     r8_nested_require('service_node_group','id_name_helper')
@@ -21,7 +21,7 @@ module DTK
 
     # clone_components_to_members returns array with each element being a cloned component
     # on node_members with their attributes; it clones if necssary
-    # if opts[:node_group_components] then filter to only include components corresponding 
+    # if opts[:node_group_components] then filter to only include components corresponding
     # to these node_group_components
     def clone_and_get_components_with_attrs(node_members,opts={})
       Clone.clone_and_get_components_with_attrs(self,node_members,opts)
@@ -30,7 +30,7 @@ module DTK
     # called when bumping up cardinaility in a service instance
     def add_group_members(new_cardinality)
       target = get_target()
-      assembly = get_assembly?() 
+      assembly = get_assembly?()
       new_tr_idhs = nil
       Transaction do
         ndx_new_tr_idhs = TargetRef::Input::BaseNodes.create_linked_target_refs?(target,assembly,[self],new_cardinality: new_cardinality)
@@ -39,8 +39,8 @@ module DTK
         end
 
         # add attribute mappings, cloning if needed
-        create_attribute_links__clone_if_needed(target,new_tr_idhs)      
-        
+        create_attribute_links__clone_if_needed(target,new_tr_idhs)
+
         # find or add state change for node group and then add state change objects for new node members
         node_group_sc = StateChange.create_pending_change_item?(new_item: id_handle(), parent: target.id_handle())
         node_group_sc_idh = node_group_sc.id_handle()
@@ -53,10 +53,10 @@ module DTK
     def delete_group_members(new_cardinality)
       node_members = get_node_group_members()
       num_to_delete = node_members.size - new_cardinality
-      # to find ones to delete; 
+      # to find ones to delete;
       # first look for  :admin_op_status == pending"
       # then pick ones with highest index
-      #TODO: can be more efficient then needing to sort who thing 
+      #TODO: can be more efficient then needing to sort who thing
       sorted = node_members.sort do |a,b|
         a_op = (a[:admin_op_status] ? 1 : 0)
         b_op = (b[:admin_op_status] ? 1 : 0)
@@ -83,7 +83,7 @@ module DTK
     def get_node_group_members
       self.class.get_node_group_members(id_handle())
     end
-    def self.get_node_group_members(node_group_idh) 
+    def self.get_node_group_members(node_group_idh)
       get_ndx_node_group_members([node_group_idh]).values.first||[]
     end
 

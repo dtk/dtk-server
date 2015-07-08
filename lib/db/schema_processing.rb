@@ -26,7 +26,7 @@ module DTK
 
       def create_schema?(schema_name)
         create_schema(schema_name) if !schema_exists?(schema_name)
-	nil        
+	nil
       end
 
       def add_column(db_rel,*args)
@@ -36,7 +36,7 @@ module DTK
       def modify_column?(db_rel,*args)
         # TODO: this only checks certain things; right now
         # just can modify a varhcar's size
-        if args[1] == :varchar 
+        if args[1] == :varchar
           if args[2].is_a?(Hash) && args[2].key?(:size)
             size = args[2][:size]
             modify_column_varchar_size?(db_rel,args[0],size)
@@ -48,7 +48,7 @@ module DTK
         if column_exists?(db_rel,args[0])
           modify_column?(db_rel,*args)
         else
-          add_column(db_rel,*args) 
+          add_column(db_rel,*args)
         end
       end
     end

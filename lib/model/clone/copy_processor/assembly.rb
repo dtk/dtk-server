@@ -10,7 +10,7 @@ module DTK
         def clone_direction
           :library_to_target
         end
-        
+
         attr_reader :project,:component_module_refs
 
         def service_add_on_node_bindings
@@ -50,7 +50,7 @@ module DTK
           override_attrs = {}
           opts_generate = {include_list: [:attribute,:task_template],standard_child_context: true}
           ChildContext.generate(self,model_handle,[assembly_obj_info],override_attrs,opts_generate,&block)
-        end          
+        end
 
         def get_nested_objects_top_level_aux(model_handle,target_parent_mh,assembly_obj_info,recursive_override_attrs,&block)
           ancestor_id = assembly_obj_info[:ancestor_id]
@@ -68,7 +68,7 @@ module DTK
             parent_rel = (DB_REL_DEF[nested_model_name][:many_to_one]||[]).inject({old_par_id: ancestor_id}) do |hash,pos_par|
               hash.merge(Model.matching_models?(pos_par,target_parent_mn) ? new_par_assign : {DB.parent_field(pos_par,model_name) => SQL::ColRef.null_id})
             end
-            if Model.matching_models?(nested_model_name,:node) 
+            if Model.matching_models?(nested_model_name,:node)
               unless (override_attrs[:component]||{})[:assembly_id]
                 override_attrs.merge!(component: new_assembly_assign)
               end
@@ -76,12 +76,12 @@ module DTK
             target_idh = target_parent_mh.createIDH(id: assembly_obj_info[:parent_id])
             child_hash = {
               assembly_obj_info: assembly_obj_info,
-              model_handle: nested_mh, 
-              clone_par_col: :assembly_id, 
-              parent_rels: [parent_rel], 
-              override_attrs: override_attrs, 
-              create_opts: create_opts, 
-              ancestor_id: ancestor_id, 
+              model_handle: nested_mh,
+              clone_par_col: :assembly_id,
+              parent_rels: [parent_rel],
+              override_attrs: override_attrs,
+              create_opts: create_opts,
+              ancestor_id: ancestor_id,
               target_idh: target_idh
             }
             block.call(ChildContext.create_from_hash(self,child_hash))

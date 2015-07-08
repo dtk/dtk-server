@@ -20,10 +20,10 @@ module DTK
     include ComponentViewMetaProcessor
     include ComponentClone
     extend ComponentUserClassMixin
-    extend ComponentMetaClassMixin 
+    extend ComponentMetaClassMixin
     extend BranchNamesClassMixin
     include BranchNamesMixin
-    
+
     set_relation_name(:component,:component)
     def self.common_columns
       [
@@ -33,7 +33,7 @@ module DTK
        :name,
        :external_ref,
        :basic_type,
-       :type, 
+       :type,
        :component_type,
        :specific_type,
        :extended_base,
@@ -135,7 +135,7 @@ module DTK
       version_field_default()
     end
 
-    ### display name functions    
+    ### display name functions
     def self.display_name_from_user_friendly_name(user_friendly_name)
       # user_friendly_name.gsub(/::/,"__")
       # using sub instead of gsub because we need only first :: to change to __
@@ -146,19 +146,19 @@ module DTK
     # TODO: these methods in this section need to be cleaned up and also possibly partitioned into Component::Instance and Component::Template
     def display_name_print_form(opts={})
       cols_to_get = [:component_type,:display_name]
-      unless opts[:without_version] 
+      unless opts[:without_version]
         cols_to_get += [:version]
       end
       update_object!(*cols_to_get)
       component_type = component_type_print_form()
 
       # handle version
-      ret = 
+      ret =
         if opts[:without_version] || has_default_version?()
           component_type
         else
           self.class.name_with_version(component_type,self[:version])
-        end 
+        end
 
       # handle component title
       if title = ComponentTitle.title?(self)
@@ -176,7 +176,7 @@ module DTK
           ret = "#{node[:display_name]}/#{ret}"
         end
       end
-      ret 
+      ret
     end
 
     def self.name_with_version(name,version)
@@ -228,7 +228,7 @@ module DTK
       self[:display_name] = self.class.display_name_print_form(self[:display_name],namespace: self[:namespace])
       if has_default_version?()
         self[:version] = nil
-      end 
+      end
       self
     end
 
@@ -263,9 +263,9 @@ module DTK
     def instance_extended_base_id
       extended_base_id(is_instance: true)
     end
-    # TODO: expiremting with implementing this 'local def differently  
+    # TODO: expiremting with implementing this 'local def differently
     def extended_base_id(opts={})
-      if self[:extended_base] && self[:implementation_id] && (self[:node_node_id] or not opts[:is_instance]) 
+      if self[:extended_base] && self[:implementation_id] && (self[:node_node_id] or not opts[:is_instance])
         sp_hash = {
           cols: [:id],
           filter: [:and, [:eq, :implementation_id, self[:implementation_id]],
@@ -278,13 +278,13 @@ module DTK
           model_name: :component,
           cols: [:implementation_id,:extended_base,:node_node_id]
         }
-        join_array = 
+        join_array =
           [{
              model_name: :component,
              alias: :base_component,
              join_type: :inner,
              join_cond: {
-               implementation_id: :component__implementation_id, 
+               implementation_id: :component__implementation_id,
                component_node_node_id: :component__node_node_id,
                component_type: :component__extended_base},
              cols: [:id,:implementation_id,:component_type]
@@ -309,10 +309,10 @@ module DTK
     def connectivity_profile_internal
       (self[:link_defs]||{})["internal"] || LinkDefsInternal.find(self[:component_type])
     end
-    
+
     def multiple_instance_ref
-      (self[:ref_num]||1) - 1 
-    end   
+      (self[:ref_num]||1) - 1
+    end
 
     def containing_datacenter
       (self[:datacenter_direct]||{})[:display_name]||
@@ -390,14 +390,14 @@ module DTK
       }
       get_children_from_sp_hash(:attribute,sp_hash).first
     end
-    
+
     def is_extension?
       return false if self.is_a?(Assembly)
       Log.error("this should not be called if :extended_base is not set") unless self.key?(:extended_base)
       self[:extended_base] ? true : false
     end
 
-    # looks at 
+    # looks at
     # 1) directly directly connected attributes
     # 2) if extension then attributes on teh extenion's base
     # 3) if base then extensions on all its attributes (TODO: NOTE: in which case multiple_instance_clause may be needed)
@@ -522,14 +522,14 @@ module DTK
     def get_component_i18n_label
       ret = get_stored_component_i18n_label?()
       return ret if ret
-      i18n = get_i18n_mappings_for_models(:component)      
+      i18n = get_i18n_mappings_for_models(:component)
       i18n_string(i18n,:component,self[:display_name])
     end
 
     def get_attribute_i18n_label(attribute)
       ret = get_stored_attribute_i18n_label?(attribute)
       return ret if ret
-      i18n = get_i18n_mappings_for_models(:attribute,:component)      
+      i18n = get_i18n_mappings_for_models(:attribute,:component)
       i18n_string(i18n,:attribute,attribute[:display_name],self[:component_type])
     end
 
@@ -552,9 +552,9 @@ module DTK
         filter: [:eq, :id, self[:implementation_id]],
         cols: [:id,:ancestor_id]
       }
-      join_array = 
+      join_array =
         [
-         {          
+         {
            model_name: :component,
            alias: :library_template,
            join_type: :inner,
@@ -614,7 +614,7 @@ module DTK
 
     def self.get_components_related_by_mixins_from_base(component_mh,base_cmp_info,cols)
       return [] if base_cmp_info.empty?
-      filter = 
+      filter =
         if base_cmp_info.size == 1
           extended_base_id_filter(base_cmp_info.first)
         else
@@ -629,10 +629,10 @@ module DTK
     end
 
     def self.extended_base_id_filter(base_cmp_info_item)
-      if base_cmp_info_item[:extended_base] 
+      if base_cmp_info_item[:extended_base]
         [:and,[:eq, :implementation_id, base_cmp_info_item[:implementation_id]],
          [:eq,:node_node_id,base_cmp_info_item[:node_node_id]],
-         [:eq,:extended_base, base_cmp_info_item[:extended_base]]]  
+         [:eq,:extended_base, base_cmp_info_item[:extended_base]]]
       else
       [:eq, :id, base_cmp_info_item[:id]]
       end
@@ -643,8 +643,8 @@ module DTK
       base_id = self[:extended_base_id]
       sp_hash = {
         model_name: :attribute,
-        filter: [:and, 
-                 [:oneof, field_to_match, attribute_names], 
+        filter: [:and,
+                 [:oneof, field_to_match, attribute_names],
                  [:oneof, :component_component_id, [component_id,base_id]]],
         cols: Aux.array_add?(cols,[:component_component_id,field_to_match])
       }
@@ -657,13 +657,13 @@ module DTK
       component_id = self[:id]
       base_sp_hash = {
         model_name: :component,
-        filter: [:and, 
-                 [:eq, :node_node_id, self[:node_node_id]], 
+        filter: [:and,
+                 [:eq, :node_node_id, self[:node_node_id]],
                  [:eq, :implementation_id, self[:implementation_id]],
                  [:or, [:eq, :extended_base, self[:component_type]],[:eq, :id, self[:id]]]],
         cols: [:id,:extended_base,:implementation_id]
       }
-      join_array = 
+      join_array =
         [{
            model_name: :attribute,
            convert: true,
@@ -719,7 +719,7 @@ module DTK
     end
 
     def get_instance_layout_from_db(view_type)
-      # TODO: more efficient would be to use db limit 
+      # TODO: more efficient would be to use db limit
       instance_layout = get_layouts_from_db(view_type,:layouts).first
       return instance_layout if instance_layout
       instance_layout = get_layouts_from_db(view_type,:layouts_from_ancestor).first
@@ -742,7 +742,7 @@ module DTK
 
     def get_attributes_unraveled(to_set={},opts={})
       sp_hash = {
-        filter: [:and, 
+        filter: [:and,
                  [:eq, :hidden, false]],
         columns: [:id,:display_name,:component_component_id,:attribute_value,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change,:port_type,:read_only]
       }
@@ -782,9 +782,9 @@ module DTK
 
     def add_model_specific_override_attrs!(override_attrs,target_obj)
       # TODO: taking out below to accomidate fact that using ref to qialify whether chef or puppet
-      # TODO: think want to add way for components that can have many attributes to have this based on value of the 
+      # TODO: think want to add way for components that can have many attributes to have this based on value of the
       # attribut ethat serves as the key
-      # override_attrs[:display_name] ||= SQL::ColRef.qualified_ref 
+      # override_attrs[:display_name] ||= SQL::ColRef.qualified_ref
       into_node = (target_obj.model_handle[:model_name] == :node)
       override_attrs[:type] ||= (into_node ? "instance" : "template")
       override_attrs[:updated] ||= false

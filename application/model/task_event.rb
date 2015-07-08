@@ -9,16 +9,16 @@ module XYZ
         nil
       elsif action.is_a?(Task::Action::CreateNode)
         case event_type
-         when :start 
+         when :start
           StartCreateNode.create_start?(action)
          when :complete_succeeded,:complete_failed,:complete_timeout
           CompleteCreateNode.create_complete?(action,event_type,result)
         end
       elsif action.is_a?(Task::Action::ConfigNode)
         case event_type
-         when :start 
+         when :start
           StartConfigNode.create_start?(action)
-         when :complete_succeeded,:complete_failed,:complete_timeout 
+         when :complete_succeeded,:complete_failed,:complete_timeout
           CompleteConfigNode.create_complete?(action,event_type,result)
         end
       end
@@ -47,14 +47,14 @@ module XYZ
       end
       AttrIgnoreList = [:sap__l4]
     end
-  
+
     class StartCreateNode < Event
       # TODO: should encapsulate this at workflow or iaas level
       def self.is_no_op?(action)
         ext_ref = action[:node][:external_ref]
         ext_ref[:type] == "ec2_instance" && ext_ref[:instance_id]
       end
-      
+
       def initialize(action)
         node = action[:node]
         ext_ref = node[:external_ref]
@@ -68,7 +68,7 @@ module XYZ
         case ext_ref_type
         when "ec2_instance", "ec2_image" #TODO: may chaneg code so dont get ec2_image
           hash.merge!(image_id: ext_ref[:image_id])
-        else 
+        else
           Log.error("external ref type #{ext_ref_type} not treated")
         end
         hash.merge(attr_val_pairs(action[:attributes]))

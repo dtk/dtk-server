@@ -21,7 +21,7 @@ module XYZ
           instance_attr = {state: "pending", id: instance_id,created_at: created_at(instance_id),block_device_mapping: []}
           CommonCreateFields.merge(create_options).merge(instance_attr)
         end
-        
+
 
         def server_get(instance_id)
           # TODO: stub
@@ -40,7 +40,7 @@ module XYZ
                "deleteOnTermination"=>true,
                "attachTime"=>"Tue Jan 25 18:57:08 UTC 2011",
                "status"=>"attached"}]
-          
+
           instance_attr = {state: "running", id: instance_id,created_at: created_at(instance_id), block_device_mapping: block_device_mapping}
           stored_info = get_cache_info(instance_id)
           CommonCreateFields.merge(network_attrs).merge(instance_attr).merge(stored_info)

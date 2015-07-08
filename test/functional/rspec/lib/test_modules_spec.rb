@@ -10,7 +10,7 @@ shared_context "Create test module" do |test_module_name|
     pass = true
     value = `dtk test-module create #{test_module_name}`
     puts value
-    pass = false if ((value.include? "ERROR") || (value.include? "exists on client") || (value.include? "denied") || (value.include? "Conflicts with existing server local module")) 
+    pass = false if ((value.include? "ERROR") || (value.include? "exists on client") || (value.include? "denied") || (value.include? "Conflicts with existing server local module"))
     puts "Test module #{test_module_name} created successfully!" if pass == true
     puts "Test module #{test_module_name} has not been created successfully!" if pass == false
     puts ""
@@ -24,7 +24,7 @@ shared_context "Create test module in specific namespace" do |test_module_name, 
     pass = true
     value = `dtk test-module create #{namespace}:#{test_module_name}`
     puts value
-    pass = false if ((value.include? "ERROR") || (value.include? "exists on client") || (value.include? "denied") || (value.include? "Conflicts with existing server local module")) 
+    pass = false if ((value.include? "ERROR") || (value.include? "exists on client") || (value.include? "denied") || (value.include? "Conflicts with existing server local module"))
     puts "Test module #{test_module_name} created successfully in namespace #{namespace}!" if pass == true
     puts "Test module #{test_module_name} has not been created successfully in namespace #{namespace}!" if pass == false
     puts ""
@@ -38,7 +38,7 @@ shared_context "Install test module" do |test_module_name|
     pass = true
     value = `dtk test-module install #{test_module_name}`
     puts value
-    pass = false if ((value.include? "ERROR") || (value.include? "exists on client") || (value.include? "denied") || (value.include? "Conflicts with existing server local module")) 
+    pass = false if ((value.include? "ERROR") || (value.include? "exists on client") || (value.include? "denied") || (value.include? "Conflicts with existing server local module"))
     puts "Install of test module #{test_module_name} completed successfully!" if pass == true
     puts "Install of test module #{test_module_name} did not complete successfully!" if pass == false
     puts ""
@@ -53,7 +53,7 @@ shared_context "Check test module created on local filesystem" do |test_module_f
     `ls #{test_module_filesystem_location}/#{test_module_name}`
     pass = true if $?.exitstatus == 0
     if (pass == true)
-      puts "Test module #{test_module_name} created on local filesystem successfully!" 
+      puts "Test module #{test_module_name} created on local filesystem successfully!"
     else
       puts "Test module #{test_module_name} was not created on local filesystem successfully!"
     end

@@ -17,8 +17,8 @@ module DTK; class ModuleRef
             object[:version_info]
           end
 
-         if version_string 
-           if ModuleVersion::Semantic.legal_format?(version_string)  
+         if version_string
+           if ModuleVersion::Semantic.legal_format?(version_string)
              new(version_string)
            else
             raise Error.new("Unexpected form of version string (#{version_string})")

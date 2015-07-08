@@ -48,7 +48,7 @@ module DTK; class ModuleRefs
         end
         if types.include?(:locked_branch_shas)
           unless module_ref_lock.locked_branch_sha
-            return true 
+            return true
           end
         end
         false

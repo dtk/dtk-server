@@ -19,7 +19,7 @@ module DTK
       [:id,:group_id,:display_name,:input_id,:output_id,:type,:hidden,:function,:index_map,:assembly_id,:port_link_id]
     end
 
-    # virtual attribute defs    
+    # virtual attribute defs
     def output_index_map
       index_map_aux(:output)
     end
@@ -45,22 +45,22 @@ module DTK
       ret = []
       sp_hash = {
         cols: [:id,:group_id,:input_id,:output_id,:function,:index_map],
-        filter: filter 
+        filter: filter
       }
       attr_links = get_objs(model_handle,sp_hash)
       return ret if attr_links.empty?
-      
+
       attr_ids = attr_links.inject([]){|array,al|array + [al[:input_id],al[:output_id]]}
       filter = [:oneof,:id,attr_ids]
       ndx_attrs = Attribute.get_augmented(model_handle.createMH(:attribute),filter).inject({}){|h,r|h.merge(r[:id] => r)}
-      
+
       attr_links.map{|al|al.merge(input: ndx_attrs[al[:input_id]], output: ndx_attrs[al[:output_id]])}
     end
     ########################## end: get links ##################
 
     ##########################  add new links ##################
     def self.create_from_link_defs__clone_if_needed(parent_idh,link_def_context,opts={})
-      #TODO: might put back in on_create_events.each{|ev|ev.process!(context)} 
+      #TODO: might put back in on_create_events.each{|ev|ev.process!(context)}
 
       # ret_links__clone_if_needed returns array of type LinkDef::Link::AttributeMapping::AugmentedLinkContext
       # which has attribute_mapping plus needed context
@@ -97,7 +97,7 @@ module DTK
       # augment attributes with port info; this is needed only if port is external
       Attribute.update_port_info(attr_mh,rows_to_create) unless opts[:donot_update_port_info]
 
-      # want to use auth_info from parent_idh in case more specific than target 
+      # want to use auth_info from parent_idh in case more specific than target
       change_parent_idh = parent_idh.get_top_container_id_handle(:target,auth_info_from_self: true)
       # propagate attribute values
       ndx_nested_change_hashes = propagate_from_create(attr_mh,attr_info,rows_to_create,change_parent_idh)
@@ -145,7 +145,7 @@ module DTK
 
     def self.check_constraints(attr_mh,rows_to_create)
       # TODO: may modify to get all constraints from  conn_info_list
-      rows_to_create.each do |row| 
+      rows_to_create.each do |row|
         # TODO: right now constraints just on input, not output, attributes
         attr = attr_mh.createIDH(id: row[:input_id]).create_object()
         constraints = Constraints.new()
@@ -207,15 +207,15 @@ module DTK
          {attr_link_parent_id_handle.get_id() => attr_link_parent_col},
          {input__id: :input_id},
          {output__id: :output_id},
-         {"member" => :type},                                 
+         {"member" => :type},
          "eq" => :function)
       first_join_ds = i1_ds.join_table(:inner,node_attr_ds,{attr_parent_col => :id},table_alias: :input)
       attr_link_ds = first_join_ds.join_table(:inner,group_attr_ds,[:ref],table_alias: :output)
 
       attr_link_fs = FieldSet.new(:attribute,[:ref,attr_link_parent_col,:input_id,:output_id,:function,:type])
       override_attrs = {}
-            
-      opts = {duplicate_refs: :no_check,returning_sql_cols: [:input_id,:output_id]} 
+
+      opts = {duplicate_refs: :no_check,returning_sql_cols: [:input_id,:output_id]}
       create_from_select(attr_link_mh,attr_link_fs,attr_link_ds,override_attrs,opts)
     end
 
@@ -257,7 +257,7 @@ module DTK
     def self.create_links_l4_sap(new_sap_attr_idh,sap_config_attr_idh,ipv4_host_addrs_idh,node_idh)
       attr_link_mh = node_idh.createMH(model_name: :attribute_link, parent_model_name: :node)
       new_sap_id,sap_config_id,ipv4_id,node_id = [new_sap_attr_idh,sap_config_attr_idh,ipv4_host_addrs_idh,node_idh].map{|x|x.get_id()}
-      
+
       new_link_rows =
         [
          {
@@ -296,7 +296,7 @@ module DTK
       def self.convert_if_needed(x)
         x.is_a?(Array) ? create_from_array(x) : x
       end
-      
+
       def self.generate_from_paths(input_path,output_path)
         create_from_array([{input: input_path, output: output_path}])
       end
@@ -314,7 +314,7 @@ module DTK
         self.map do |el|
           raise Error.new("unexpected form in input_array_indexes") unless el[:input].is_singleton_array?()
           el[:input].first
-        end 
+        end
       end
 
       def self.resolve_input_paths!(index_map_list,component_mh)
@@ -329,7 +329,7 @@ module DTK
       def self.create_from_array(a)
         return nil unless a
         ret = new()
-        a.each do |el| 
+        a.each do |el|
           input = el[:input].is_a?(IndexMapPath) ? el[:input] : IndexMapPath.create_from_array(el[:input])
           output = el[:output].is_a?(IndexMapPath) ? el[:output] : IndexMapPath.create_from_array(el[:output])
           ret << {input: input, output: output}
@@ -396,7 +396,7 @@ module DTK
         path_list.each do |index_map_path|
           index_map_path.each_with_index do |el,i|
             next unless el.is_a?(Hash)
-            next unless id = (el[:create_component_index]||{})[:component_id] 
+            next unless id = (el[:create_component_index]||{})[:component_id]
             ndx_cmp_idhs[id] ||= {idh: component_mh.createIDH(id: id), elements: []}
             ndx_cmp_idhs[id][:elements] << {path: index_map_path, i: i}
           end
@@ -419,7 +419,7 @@ module DTK
       def self.create_from_array(a)
         ret = new()
         return ret unless a
-        a.each do |el| 
+        a.each do |el|
           if el.is_a?(String) && el =~ /^[0-9]+$/
             el = el.to_i
           end
@@ -460,8 +460,8 @@ module DTK
       return nil if o_sem.nil?
 
       # TBD: haven't put in any rules if they have different seamntic types
-      return nil unless i_sem.keys.first == o_sem.keys.first      
-      
+      return nil unless i_sem.keys.first == o_sem.keys.first
+
       sem_type = i_sem.keys.first
       ret_function_endpoints_same_type(i_sem[sem_type],o_sem[sem_type])
     end

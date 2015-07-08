@@ -19,15 +19,15 @@ module DTK
         rows = get_objs(model_handle,sp_hash)
         rows && rows.first[:display_name]
       end
-      
+
       private
 
       def self.filter(added_condition_hash)
         FilterBase + [[:eq, added_condition_hash.keys.first,added_condition_hash.values.first]]
       end
-      
+
       NodeType = 'service_node_group'
-      FilterBase = 
+      FilterBase =
         [:and,
          [:eq, :type, NodeType],
          [:neq, :datacenter_datacenter_id, nil]

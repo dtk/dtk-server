@@ -43,7 +43,7 @@ module R8Tpl
         @saved_search_ref = view_name
         @view_name = opts[:view_type] || :list #TODO: should not be hard-wired
       end
-      
+
       @form_id = "#{@model_name}-#{@view_name}-form"
       @user = user
       @profile = @user.current_profile || :default #profile will dictate the specific view to use/generate
@@ -67,7 +67,7 @@ module R8Tpl
     end
 
     def update_cache_for_virtual_object
-      case @view_name 
+      case @view_name
         when :edit then render_edit_tpl_cache()
         when :display then render_display_tpl_cache()
         when :list then render_list_tpl_cache()
@@ -110,20 +110,20 @@ module R8Tpl
 
       case (view_type())
         when "edit"
-          render_edit_tpl_cache() 
+          render_edit_tpl_cache()
           #       add_validation()
         when "display"
           render_display_tpl_cache()
         when "list"
-          render_list_tpl_cache() 
+          render_list_tpl_cache()
         when "search"
-          render_search_tpl_cache() 
+          render_search_tpl_cache()
         when "dock_display"
-          render_dock_display_tpl_cache() 
+          render_dock_display_tpl_cache()
         end
       self
     end
-  
+
   def add_to_css_require(css)
     @css_require << css unless @css_require.includes(css)
   end
@@ -166,7 +166,7 @@ module R8Tpl
     # should check for all view locations, direct and override
     # TODO: figure out best way to do PHP style requires/loading of external meta hashes
     path = ret_existing_view_path(:meta)
-    
+
     if path
       XYZ::Aux.convert_to_hash_symbol_form(eval(IO.read(path)))
       # TODO: check if ok to remove logic wrt to json
@@ -177,7 +177,7 @@ module R8Tpl
      raise XYZ::Error::NotImplemented.new()
     end
   end
-  
+
  # This will check to see if the TPL view file exists and isnt stale compare to the base TPL and other factors
  def cache_current?
     cache_path = ret_existing_view_path(:cache)
@@ -242,7 +242,7 @@ module R8Tpl
         field_meta[:model_name] = @model_name
         field_meta[:name] = field_name
 
-        if @i18n[(field_meta[:name].to_s+'_'+@view_name.to_s).to_sym] 
+        if @i18n[(field_meta[:name].to_s+'_'+@view_name.to_s).to_sym]
           field_meta[:label] = '{%=_'+@model_name.to_s+'[:i18n][:'+field_meta[:name].to_s+'_'+@view_name.to_s + ']%}'
         elsif @i18n[field_meta[:name].to_sym]
           field_meta[:label] = '{%=_'+@model_name.to_s+'[:i18n][:'+field_meta[:name].to_s+']%}'
@@ -258,8 +258,8 @@ module R8Tpl
         # might move later, putting sorting code here
         # TODO: look for better way to do find fields taht should not have sorting
         if (field_hash.values.first||{})[:type] == "actions_basic"
-          field_meta[:sort_call] = "" 
-          field_meta[:sort_class] = "" 
+          field_meta[:sort_call] = ""
+          field_meta[:sort_class] = ""
         else
           field_meta[:sort_call] = "onclick=\"R8.Search.sort('{%=search_context%}','#{field_name}','{%=#{field_name}_order%}');\""
           field_meta[:sort_class] = "{%=#{field_name}_order_class%}"
@@ -362,13 +362,13 @@ module R8Tpl
         else
           field_hash.each do |field_name,field_meta|
             field_meta[:name] = field_name.to_sym
-            field_meta[:id] ||= field_meta[:name] 
+            field_meta[:id] ||= field_meta[:name]
             field_meta[:model_name] = @model_name
             # do label
             rows[row_count][:cols][col_index] = {}
 
             if display_labels
-              if @i18n[(field_meta[:name].to_s+'_'+@view_name.to_s).to_sym] 
+              if @i18n[(field_meta[:name].to_s+'_'+@view_name.to_s).to_sym]
                 rows[row_count][:cols][col_index][:content] = '{%=_'+@model_name.to_s+'[:i18n][:'+field_meta[:name].to_s+'_'+@view_name.to_s + ']%}'
               elsif @i18n[field_meta[:name].to_sym]
                 rows[row_count][:cols][col_index][:content] = '{%=_'+@model_name.to_s+'[:i18n][:'+field_meta[:name].to_s+']%}'
@@ -395,7 +395,7 @@ module R8Tpl
           col_index = 0
           rows[row_count] = {}
           rows[row_count][:cols] = []
-        else 
+        else
           col_index+=1
         end
         # end of field interation
@@ -472,7 +472,7 @@ module R8Tpl
 
             # do label
             if display_labels
-              if @i18n[(field_meta[:name].to_s+'_'+@view_name.to_s).to_sym] 
+              if @i18n[(field_meta[:name].to_s+'_'+@view_name.to_s).to_sym]
                 rows[row_count][:cols][col_index][:content] = '{%=_'+@model_name.to_s+'[:i18n][:'+field_meta[:name].to_s+'_'+@view_name.to_s + ']%}'
               elsif @i18n[field_meta[:name].to_sym]
                 rows[row_count][:cols][col_index][:content] = '{%=_'+@model_name.to_s+'[:i18n][:'+field_meta[:name].to_s+']%}'
@@ -499,7 +499,7 @@ module R8Tpl
           col_index = 0
           rows[row_count] = {}
           rows[row_count][:cols] = []
-        else 
+        else
           col_index+=1
         end
         # end of field interation
@@ -521,7 +521,7 @@ module R8Tpl
      ret_view_path(:js_require) => @js_require ? JSON.pretty_generate(@js_require) : nil
     }
 
-    files.each do |path, content| 
+    files.each do |path, content|
       next unless content
       FileUtils.mkdir_p(File.dirname(path)) unless File.exists?(File.dirname(path))
       File.open(path, 'w') {|fhandle|fhandle.write(content)}
@@ -595,13 +595,13 @@ module R8Tpl
         else
           field_hash.each do |field_name,field_meta|
             field_meta[:name] = field_name.to_sym
-            field_meta[:id] ||= field_meta[:name] 
+            field_meta[:id] ||= field_meta[:name]
             field_meta[:model_name] = @model_name
             # do label
             rows[row_count][:cols][col_index] = {}
 
             if display_labels
-              if @i18n[(field_meta[:name].to_s+'_'+@view_name.to_s).to_sym] 
+              if @i18n[(field_meta[:name].to_s+'_'+@view_name.to_s).to_sym]
                 rows[row_count][:cols][col_index][:content] = '{%=_'+@model_name.to_s+'[:i18n][:'+field_meta[:name].to_s+'_'+@view_name.to_s + ']%}'
               elsif @i18n[field_meta[:name].to_sym]
                 rows[row_count][:cols][col_index][:content] = '{%=_'+@model_name.to_s+'[:i18n][:'+field_meta[:name].to_s+']%}'
@@ -628,7 +628,7 @@ module R8Tpl
           col_index = 0
           rows[row_count] = {}
           rows[row_count][:cols] = []
-        else 
+        else
           col_index+=1
         end
         # end of field interation
@@ -705,7 +705,7 @@ module R8Tpl
 
             # do label
             if display_labels
-              if @i18n[(field_meta[:name].to_s+'_'+@view_name.to_s).to_sym] 
+              if @i18n[(field_meta[:name].to_s+'_'+@view_name.to_s).to_sym]
                 rows[row_count][:cols][col_index][:content] = '{%=_'+@model_name.to_s+'[:i18n][:'+field_meta[:name].to_s+'_'+@view_name.to_s + ']%}'
               elsif @i18n[field_meta[:name].to_sym]
                 rows[row_count][:cols][col_index][:content] = '{%=_'+@model_name.to_s+'[:i18n][:'+field_meta[:name].to_s+']%}'
@@ -732,7 +732,7 @@ module R8Tpl
           col_index = 0
           rows[row_count] = {}
           rows[row_count][:cols] = []
-        else 
+        else
           col_index+=1
         end
         # end of field interation

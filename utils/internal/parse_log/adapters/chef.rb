@@ -9,16 +9,16 @@ module XYZ
             ret << current_segment if current_segment
             current_segment = LogSegment.create(match[0],line)
           elsif current_segment
-            current_segment << line 
+            current_segment << line
           end
         end
         ret << current_segment if current_segment
         ret.post_process!()
       end
-      
+
       def self.log_complete?(lines)
         # TODO: if need more specific strings to look for
-        # /ERROR: Exception handlers complete/ or /INFO: Report handlers complete/ 
+        # /ERROR: Exception handlers complete/ or /INFO: Report handlers complete/
         lines.reverse_each do |l|
           return true if l =~ /handlers complete/
         end
@@ -123,7 +123,7 @@ module XYZ
         end
       end
 
-      class ErrorGeneric < ErrorChefLog 
+      class ErrorGeneric < ErrorChefLog
         def self.isa?(_segments_from_error)
           true
         end
@@ -146,7 +146,7 @@ module XYZ
 
       # error in exec call can be from indirect call (like to load a package)
       # TODO: see if this is signature for direct exec call
-      class ErrorExec < ErrorChefLog 
+      class ErrorExec < ErrorChefLog
         def self.isa?(segments_from_error)
           line = segments_from_error.last.line
           line =~ /Chef::Exceptions::Exec/
@@ -158,7 +158,7 @@ module XYZ
           if segments_from_error.last.line =~ /Chef::Exceptions::Exec - (.+$)/
             @error_detail = "Exec error: #{$1}"
           else
-            @error_detail = "Exec error" 
+            @error_detail = "Exec error"
           end
           self.class.segments_to_check(segments_from_error).each do |segment|
             return if set_file_ref_and_error_lines!(segment)
@@ -173,7 +173,7 @@ module XYZ
           if segment.line =~ /\((.+)::(.+) line ([0-9]+)\) had an error/
             cookbook ||= $1
             recipe_filename ||= "#{$2}.rb"
-            @error_line_num ||= $3.to_i 
+            @error_line_num ||= $3.to_i
             @error_file_ref ||= ChefFileRef.recipe(cookbook,recipe_filename)
             started = nil
             (segment.aux_data||[]).each do |l|
@@ -189,7 +189,7 @@ module XYZ
         end
       end
 
-      class ErrorTemplate < ErrorChefLog 
+      class ErrorTemplate < ErrorChefLog
         def self.isa?(segments_from_error)
           line = segments_from_error.last.line
           line =~ /Chef::Mixin::Template::TemplateError/
@@ -201,7 +201,7 @@ module XYZ
           if segments_from_error.last.line =~ /Chef::Mixin::Template::TemplateError - (.+$)/
             @error_detail = "Template error: #{$1}".gsub(/ for #<Erubis::Context:[^>]+>/,"")
           else
-            @error_detail = "Template error" 
+            @error_detail = "Template error"
           end
           self.class.lines_to_check(segments_from_error).each do |line|
             return if set_file_ref_and_error_lines!(line)
@@ -218,13 +218,13 @@ module XYZ
             recipe = $2
             reciple_line_num = $3
             @error_lines << "template resource: #{template_resource}" if template_resource
-            @error_lines << "called from recipe: #{recipe} line #{reciple_line_num}" 
+            @error_lines << "called from recipe: #{recipe} line #{reciple_line_num}"
             true
           end
         end
       end
 
-      class ErrorService < ErrorChefLog 
+      class ErrorService < ErrorChefLog
         def self.isa?(segments_from_error)
           return nil unless segments_from_error.size > 1
           line = segments_from_error[0].line
@@ -247,12 +247,12 @@ module XYZ
       end
 
       # TODO: this is runtime vs syntactic error
-      class ErrorRecipe < ErrorChefLog 
+      class ErrorRecipe < ErrorChefLog
         def self.isa?(segments_from_error)
           line = segments_from_error.first.line
           return true if line =~ Regexp.new("has had an error")
           lines_to_check(segments_from_error).each do |line|
-            return true if line =~ Regexp.new("#{RecipeCache}[^/]+/recipes") 
+            return true if line =~ Regexp.new("#{RecipeCache}[^/]+/recipes")
             return true if line =~ FromFilePat
           end
           nil
@@ -261,7 +261,7 @@ module XYZ
         private
 
         RecipeCache = "/var/chef/cookbooks/"
-        FromFilePat = Regexp.new("#{RecipeCache}([^/]+)/recipes/([^:]+):([0-9]+):in `from_file'") 
+        FromFilePat = Regexp.new("#{RecipeCache}([^/]+)/recipes/([^:]+):([0-9]+):in `from_file'")
         def parse!(segments_from_error,_prev_segment)
           if segments_from_error.last.line =~ /DEBUG: Re-raising exception: (.+$)/
             @error_detail = $1.gsub(/ for #<Chef::Recipe:[^>]+>/,"")
@@ -278,7 +278,7 @@ module XYZ
 
         def self.lines_to_check(segs_from_err)
           # TODO: can make more efficient and omit some of these and focus on last line
-          [segs_from_err[0].line, 
+          [segs_from_err[0].line,
            (segs_from_err.last.aux_data||[]).find{|l|l =~ FromFilePat},
            segs_from_err[1] && (segs_from_err[1].aux_data||[])[0],
            segs_from_err[2] && segs_from_err[2].line,
@@ -290,26 +290,26 @@ module XYZ
           if line =~ FromFilePat
             cookbook ||= $1
             recipe_filename ||= $2
-            @error_line_num ||= $3.to_i 
+            @error_line_num ||= $3.to_i
             @error_file_ref ||= ChefFileRef.recipe(cookbook,recipe_filename)
             true
           elsif line =~ Regexp.new("#{RecipeCache}([^/]+)/recipes/([^:]+):([0-9]+):")
             cookbook ||= $1
             recipe_filename ||= $2
-            @error_line_num ||= $3.to_i 
+            @error_line_num ||= $3.to_i
             @error_file_ref ||= ChefFileRef.recipe(cookbook,recipe_filename)
             true
           elsif line =~ /\((.+)::(.+) line ([0-9]+)\) has had an error/
             cookbook ||= $1
             recipe_filename ||= "#{$2}.rb"
-            @error_line_num ||= $3.to_i 
+            @error_line_num ||= $3.to_i
             @error_file_ref ||= ChefFileRef.recipe(cookbook,recipe_filename)
             true
           end
         end
       end
 
-      class ErrorMissingRecipe < ErrorChefLog 
+      class ErrorMissingRecipe < ErrorChefLog
         def self.isa?(segments_from_error)
           return nil unless segments_from_error.size > 1
           line = segments_from_error[1].line
@@ -326,7 +326,7 @@ module XYZ
         end
       end
 
-      class ErrorMissingCookbook < ErrorChefLog 
+      class ErrorMissingCookbook < ErrorChefLog
         def self.isa?(segments_from_error)
           return nil unless segments_from_error.size > 1
           line = segments_from_error[1].line

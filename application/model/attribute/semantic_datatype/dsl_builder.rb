@@ -1,6 +1,6 @@
 require 'docile'
 module DTK
-  class Attribute 
+  class Attribute
     class SemanticDatatype
       module SemanticDatatypeClassMixin
         def all_types

@@ -9,7 +9,7 @@ module DTK
     def self.check_valid_id(model_handle,id)
       check_valid_id_default(model_handle,id)
     end
-    
+
     def self.name_to_id(model_handle, name)
       return name.to_i if name.match(/^[0-9]+$/)
       sp_hash =  {
@@ -27,7 +27,7 @@ module DTK
       match = CommandAndControl.find_matching_node_binding_rule(get_field?(:rules),target)
       match && get_node_template(match[:node_template])
     end
-    
+
     def clone_or_match(target,opts={})
       update_object!(:type,:rules,:ref)
       case self[:type]
@@ -68,10 +68,10 @@ module DTK
     def match(_target,_opts={})
       raise Error.new("TODO: not implemented yet")
     end
-    
+
     def clone(target,opts={})
       node_template = find_matching_node_template(target)
-      override_attrs = opts[:override_attrs]||{} 
+      override_attrs = opts[:override_attrs]||{}
 
       # special processing of :display_name
       display_name = override_attrs[:display_name]||get_field?(:ref)

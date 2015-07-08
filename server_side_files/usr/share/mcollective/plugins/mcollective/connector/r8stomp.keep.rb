@@ -65,14 +65,14 @@ module MCollective
           def initialize
             @config = Config.instance
             @subscriptions = []
-            ###BEGIN R8 CUSTOMIZATION 
+            ###BEGIN R8 CUSTOMIZATION
             if Thread.current[:stomp_client]
               @connection = Thread.current[:stomp_client]
             else
               connect()
               Thread.current[:stomp_client] = @connection
             end
-            ###END R8 CUSTOMIZATION 
+            ###END R8 CUSTOMIZATION
           end
 
           def disconnect

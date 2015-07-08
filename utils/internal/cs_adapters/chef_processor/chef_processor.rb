@@ -6,7 +6,7 @@ module XYZ
     def self.get_cookbooks_metadata(cookbooks_uri=nil,&block) #TBD nil is stub to use the default connection
       if cookbooks_uri =~ %r{^file://(.+$)}
         MetadataFromFile.new.get($1,&block)
-      else 
+      else
         MetadataFromServer.new.get(cookbooks_uri,&block)
       end
     end

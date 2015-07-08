@@ -55,7 +55,7 @@ module DTK
         ret
       end
     end
-    
+
     class Attribute  < Top
       def initialize(attr_name,attr_info)
         super({"name" => attr_name}.merge(attr_info))

@@ -32,7 +32,7 @@ module DTK
       def raise_error_if_invalid_puppet_version(puppet_version)
         unless puppet_version.nil? || puppet_version.empty?
           unless RubyGemsChecker.gem_exists?('puppet', puppet_version)
-            # TODO: took out because this is giving false posatives 
+            # TODO: took out because this is giving false posatives
             # raise ErrorUsage.new("Invalid Puppet version (#{puppet_version})")
             Log.error("RubyGemsChecker.gem_exists? test fails with Puppet version (#{puppet_version})")
           end
@@ -50,7 +50,7 @@ module DTK
           end
         end
       end
-      
+
       TargetRefAttributes = %w(host_addresses_ipv4 name fqdn node_components puppet_version root_device_size)
       TargetRefAttributeFilter = [:oneof,:display_name,TargetRefAttributes]
       NodeTemplateAttributes = ['host_addresses_ipv4','node_components','fqdn']
@@ -89,14 +89,14 @@ module DTK
       def self.create_or_set_attributes?(nodes,name,value,extra_fields={})
         node_idhs = nodes.map{|n|n.id_handle()}
         ndx_attrs = get_ndx_attributes(node_idhs,name)
-        
+
         to_create_on_node = []
         to_change_attrs = []
-        
+
         nodes.each do |node|
           if attr = ndx_attrs[node[:id]]
             existing_val = attr[:attribute_value]
-            # just for simplicity no checking whether extra_fields match in 
+            # just for simplicity no checking whether extra_fields match in
             # test of update needed
             unless extra_fields.empty? && existing_val == value
               to_change_attrs << attr
@@ -106,7 +106,7 @@ module DTK
           end
         end
         to_change_attrs.each{|attr|attr.update(extra_fields.merge(value_asserted: value))}
-        
+
         unless to_create_on_node.empty?
           create_rows = to_create_on_node.map{|n|attribute_create_hash(n.id,name,value,extra_fields)}
           attr_mh = to_create_on_node.first.model_handle().create_childMH(:attribute)

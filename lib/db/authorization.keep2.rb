@@ -6,16 +6,16 @@ module XYZ
 
     def update_create_info_for_user_info!(columns,sequel_select,overrides,model_handle)
       add_to = process_user_info_aux!(overrides,model_handle,columns)
-      return sequel_select if add_to.empty? 
+      return sequel_select if add_to.empty?
       add_to.inject(sequel_select){|ret,(col,val)|ret.select_more(val => col)}
     end
 
     def update_overrides_and_cols_for_user_info!(overrides,columns,model_handle)
       add_to = process_user_info_aux!(overrides,model_handle,columns)
-      overrides.merge!(add_to) unless add_to.empty? 
+      overrides.merge!(add_to) unless add_to.empty?
       overrides
     end
-    
+
     def process_user_info_aux!(scalar_assigns,model_or_id_handle,columns=nil)
       to_add = {}
       # cleanup if everything should come from model or id handle
@@ -36,9 +36,9 @@ module XYZ
       if val and not scalar_assigns.key?(col)
         to_add.merge!(col => val)
         columns << col if columns and not columns.include?(col)
-      end   
+      end
     end
-    
+
     def auth_context
       @auth_context ||= {
         c: [:c,CONTEXT_ID],
@@ -48,10 +48,10 @@ module XYZ
     end
 
     def augment_for_authorization(where_clause,model_handle)
-      conjoin_set = where_clause ? [where_clause] : [] 
+      conjoin_set = where_clause ? [where_clause] : []
       session = CurrentSession.new
       auth_filters = NoAuth.include?(model_handle[:model_name]) ? nil : session.get_auth_filters()
-      if auth_filters 
+      if auth_filters
 # create_dataset_found = caller.select{|x|x =~ /create_dataset'/}
 # caller_info = (create_dataset_found ? "CREATE_DATASET_FOUND" : caller[0..15])
 # pp [:auth,model_handle[:model_name],auth_filters,caller_info]
@@ -71,13 +71,13 @@ end
       else
         conjoin_set << {CONTEXT_ID => model_handle[:c]} if model_handle[:c]
       end
-      case conjoin_set.size 
+      case conjoin_set.size
         when 0 then {}
         when 1 then conjoin_set.first
         else SQL.and(*conjoin_set)
       end
     end
-    NoAuth = [:user,:user_group,:user_group_relation,:task_event]    
+    NoAuth = [:user,:user_group,:user_group_relation,:task_event]
 
     def process_session_auth(session,auth_filters)
       ret =  []

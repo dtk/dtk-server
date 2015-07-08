@@ -1,10 +1,10 @@
 module DTK; class Task; class Template
-  class Stage 
+  class Stage
     class InterNode < Hash
       r8_nested_require('inter_node','factory')
       r8_nested_require('inter_node','multi_node')
       include Serialization
-      
+
       def initialize(name=nil)
         super()
         @name = name
@@ -77,7 +77,7 @@ module DTK; class Task; class Template
           else raise Error.new("Unexpected insert_point (#{insert_point})")
         end
       end
-      # TODO: have above subsume below  
+      # TODO: have above subsume below
       def splice_in_at_beginning!(internode_stage)
         ndx_splice_in_node_ids = internode_stage.node_ids().inject({}){|h,node_id|h.merge(node_id => true)}
         each_node_id do |node_id|
@@ -95,9 +95,9 @@ module DTK; class Task; class Template
       def serialization_form(opts={})
         subtasks = map_node_actions{|node_actions|node_actions.serialization_form(opts)}.compact
         return nil if subtasks.empty?
-        
+
         ret = serialized_form_with_name()
-        
+
         # Dont put in concurrent block if there is just one node
         if subtasks.size == 1
           ret.merge(subtasks.first)
@@ -107,8 +107,8 @@ module DTK; class Task; class Template
       end
       # action_list nil can be passed if just concerned with parsing
       def self.parse_and_reify?(serialized_content,action_list,opts={})
-        # content could be either 
-        # 1) a concurrent block with multiple nodes, 
+        # content could be either
+        # 1) a concurrent block with multiple nodes,
         # 2) a single node,
         # 3) a multi-node specification
 
@@ -158,15 +158,15 @@ module DTK; class Task; class Template
         @name ? OrderedHash.new(name: @name) : OrderedHash.new
       end
 
-      def self.parse_and_reify_is_multi_node_type?(serialized_content) 
+      def self.parse_and_reify_is_multi_node_type?(serialized_content)
         # only look at leaf subtasks tasks
         unless leaf_subtask?(serialized_content)
-          if ret = Constant.matches?(serialized_content,:Nodes) 
+          if ret = Constant.matches?(serialized_content,:Nodes)
             ret
           elsif !Constant.matches?(serialized_content,:Node)
             Constant::AllApplicable
-          end        
-        end  
+          end
+        end
       end
 
       def self.leaf_subtask?(serialized_content)

@@ -1,5 +1,5 @@
 module DTK; class Task; class Template
-  class Stage 
+  class Stage
     class IntraNode
       r8_nested_require('intra_node','execution_block')
       r8_nested_require('intra_node','execution_blocks')
@@ -9,7 +9,7 @@ module DTK; class Task; class Template
         end
 
         def process(intra_node_unordered)
-          # first break unordered node into execution blocks          
+          # first break unordered node into execution blocks
           # then order each execution block
           # TODO: right now just ordering within each execution block; want to expand to look for global inconsistencies
           exec_blocks = intra_node_unordered.break_into_execution_blocks()

@@ -145,10 +145,10 @@ module DTK
         if branch.is_a?(ModuleBranch)
           branch
         else
-          unless repo_name.is_a?(String) 
+          unless repo_name.is_a?(String)
             Log.error("unexpected type for repo_name: #{repo_name.inspect}")
           end
-          unless branch.is_a?(String) 
+          unless branch.is_a?(String)
             Log.error("unexpected type for branch: #{branch.inspect}")
           end
           {implementation: {repo: repo_name, branch: branch}}

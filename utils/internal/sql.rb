@@ -3,7 +3,7 @@ module XYZ
   ##relies on Sequel overwriting ~ | and &
   # TODO: maybe otehr syntax to get around problems with these characters in ruby 1.9
   module SQL
-    ## Booelan expressions 
+    ## Booelan expressions
     def self.not(x)
       return nil if x.nil?
       ~x
@@ -48,7 +48,7 @@ module XYZ
       def self.concat(*args,&block)
         # TODO: make sure to_a does not have side effect like falttening hashs inside
         return block.call(self).sql_string_join if block
-        return '' if args.empty? 
+        return '' if args.empty?
         args.sql_string_join
       end
       def self.coalesce(*args)
@@ -68,7 +68,7 @@ module XYZ
         :Max.sql_function(arg)
       end
 
-      # TODO: use SQL.cast 
+      # TODO: use SQL.cast
       def self.qualified_ref
         [:ref,[[{ref_num: nil},""]].case(["-",:ref_num.cast(:text)].sql_string_join)].sql_string_join
       end
@@ -80,7 +80,7 @@ module XYZ
 
     ######
     # Objects that get translated to sql terms when being processed in a db/data_processing fn
-    class SetIfUnset 
+    class SetIfUnset
       def initialize(val)
         @val = val
       end
@@ -142,7 +142,7 @@ module XYZ
       end
     end
 
-    module FilterPostProcessingMixin 
+    module FilterPostProcessingMixin
       def add_filter_post_processing(filter)
         raise ErrorPostProcFilterNotImpl.new(:filter,filter) unless (filter.is_a?(Array) && filter.first == :and)
         filter_fn = filter[1..filter.size-1].map{|expr|parse_expression(expr)}.join(" and ")
@@ -152,7 +152,7 @@ module XYZ
       private
 
       def parse_expression(expr)
-        raise ErrorPostProcFilterNotImpl.new(:expression,expr) unless expr.is_a?(Array) && expr.size == 3 
+        raise ErrorPostProcFilterNotImpl.new(:expression,expr) unless expr.is_a?(Array) && expr.size == 3
         case expr[0]
          when :eq
           "(#{parse_term(expr[1])} == #{parse_term(expr[2])})"
@@ -164,8 +164,8 @@ module XYZ
       end
 
       def parse_term(x)
-        if x.is_a?(Symbol) 
-          "obj[:#{x}]" 
+        if x.is_a?(Symbol)
+          "obj[:#{x}]"
         elsif x.is_a?(String)
           '"'+x+'"'
         elsif x.is_a?(Numeric)
@@ -185,7 +185,7 @@ module XYZ
       end
     end
 
-    class ModelNameInfo 
+    class ModelNameInfo
       attr_reader :model_name,:ref_num, :convert
       def initialize(model_name,ref_num=1,model_name_alias=nil,convert=false)
         @model_name = model_name.to_sym
@@ -209,7 +209,7 @@ module XYZ
 
     class Dataset
       include DatatsetGraphMixin
-      include FilterPostProcessingMixin 
+      include FilterPostProcessingMixin
       # TODO: needed to fully qualify Dataset; could this constraint be removed? by chaging expose?
       post_hook = "lambda{|x|XYZ::SQL::Dataset.new(model_handle,x,@filter_post_processing)}"
       expose_methods_from_internal_object :sequel_ds, %w{where select from_self for_update}, post_hook: post_hook
@@ -259,10 +259,10 @@ module XYZ
     class ArrayDataset < Dataset
       def self.create(db,rows,model_handle,opts={})
         return nil if rows.empty?
-        rows_processed = 
+        rows_processed =
           if opts[:convert_for_update] || opts[:convert_for_create]
             sql_operation = opts[:convert_for_update] ? :update : :create
-            rows2 = (opts[:partial_value] && sql_operation == :update) ? ret_modified_for_partial_values(rows,db,model_handle) : rows 
+            rows2 = (opts[:partial_value] && sql_operation == :update) ? ret_modified_for_partial_values(rows,db,model_handle) : rows
             rows2.map{|row| db.ret_convert_from_object_to_db_form(model_handle,row,sql_operation)}
           else
             rows
@@ -287,7 +287,7 @@ module XYZ
         where_clause = SQL.in(:id,rows.map{|r|r[:id]})
         objects = db.get_objects_scalar_columns(model_handle,where_clause,Model::FieldSet.opt(cols_to_get+[:id],model_handle[:model_name]))
         indexed_objs = objects.inject({}){|h,r|h.merge(r[:id] => r)}
-        
+
         rows.map do |row|
           id = row[:id]
           unless to_merge = indexed_objs[id]
@@ -299,7 +299,7 @@ module XYZ
           end
         end
       end
-      
+
       def initialize(db,rows,model_handle)
         raise Error.new("ArrayDataset.new called with rows being empty") if rows.empty?
         aliaz = model_handle[:model_name]
@@ -318,7 +318,7 @@ module XYZ
     end
     class Graph
       include DatatsetGraphMixin
-      include FilterPostProcessingMixin 
+      include FilterPostProcessingMixin
       # TODO: needed to fully qualify Dataset; could this constraint be removed? by chaging expose?
       expose_methods_from_internal_object :sequel_ds, %w{where select from_self}, post_hook: "lambda{|x|XYZ::SQL::Graph.new(x,@model_name_info,@c,@filter_post_processing)}"
       expose_methods_from_internal_object :sequel_ds, %w{sql}
@@ -347,7 +347,7 @@ module XYZ
         # alterantive look at capability of Sequel to pass in row processing block
 
         # pull first element from under top level key
-        primary_model_name = @model_name_info.first.model_name() 
+        primary_model_name = @model_name_info.first.model_name()
         rest_model_indexes = @model_name_info[1..@model_name_info.size-1]
         ret = []
         @sequel_ds.all.each do |row|
@@ -369,5 +369,5 @@ module XYZ
         ret
       end
     end
-  end  
+  end
 end

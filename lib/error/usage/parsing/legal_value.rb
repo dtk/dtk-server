@@ -21,7 +21,7 @@ module DTK; class ErrorUsage
       def self.HashWithSingleKey(*keys)
         HashWithSingleKey.new(keys)
       end
-      
+
       class Klass < self
         def initialize(klass)
           @klass = klass

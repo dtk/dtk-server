@@ -27,7 +27,7 @@ describe "(Staging And Deploying Assemblies) Test Case 11: Stage multi node asse
 		include_context "Stage", dtk_common
 	end
 
-	context "List services after stage" do		
+	context "List services after stage" do
 		include_context "List services after stage", dtk_common
 	end
 
@@ -61,7 +61,7 @@ describe "(Staging And Deploying Assemblies) Test Case 11: Stage multi node asse
 
 	context "List ssh access and confirm is empty" do
 		include_context "List ssh access and confirm is empty", dtk_common, system_user, rsa_pub_name, nodes
-	end	
+	end
 
 	context "Delete and destroy service function" do
 		include_context "Delete services", dtk_common

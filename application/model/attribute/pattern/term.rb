@@ -6,7 +6,7 @@ module DTK; class Attribute
       end
       def self.extract_term?(canonical_form)
         if canonical_form =~ FilterFragmentRegexp
-          $1 
+          $1
         end
       end
       LDelim = '<'

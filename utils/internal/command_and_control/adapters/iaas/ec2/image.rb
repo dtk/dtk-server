@@ -18,7 +18,7 @@ module DTK; module CommandAndControlAdapter
       def exists?
         !!@ami
       end
-        
+
       def root_device_name
         value(:root_device_name)
       end

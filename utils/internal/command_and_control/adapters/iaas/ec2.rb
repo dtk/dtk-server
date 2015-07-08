@@ -89,7 +89,7 @@ module DTK
         # only do these checks if specified region
         unless specified_region
           return ret
-        end 
+        end
         (opts[:properties_to_check]||[]).each do |property|
           case property
             when :subnet then raise_error_if.invalid_subnet(iaas_properties[:subnet])
@@ -100,7 +100,7 @@ module DTK
         ret
       end
       DefaultRegion = 'us-east-1'
-      
+
       def self.get_connection_from_iaas_properties(iaas_properties,region)
         ec2_creds = get_ec2_credentials(iaas_properties)
         conn(ec2_creds.merge(region: region))
@@ -116,7 +116,7 @@ module DTK
 
         def invalid_credentials
           begin
-            # as simple test see if can describe availability_zones 
+            # as simple test see if can describe availability_zones
             Ec2.get_availability_zones(@iaas_properties,@region,connection: @connection)
            rescue => e
             Log.info_pp(["Error_from get_availability_zones",e])
@@ -140,10 +140,10 @@ module DTK
 
       # destroys the node if it exists
       def self.destroy_node?(node,opts={})
-        node.update_obj!(:external_ref,:hostname_external_ref) 
+        node.update_obj!(:external_ref,:hostname_external_ref)
         instance_id = external_ref(node)[:instance_id]
         return true unless instance_id #return if instance does not exist
-        
+
         if marked_donot_delete?(node)
           return true
         end
@@ -171,7 +171,7 @@ module DTK
       def self.marked_donot_stop?(node)
         marked_donot_delete?(node)
       end
-      PerisistentIds = 
+      PerisistentIds =
         [
          'i-23666703' #dtk router
         ]
@@ -221,7 +221,7 @@ module DTK
       private
 
       def self.update_node!(node,update_hash)
-        node.merge!(update_hash) 
+        node.merge!(update_hash)
         node.update(update_hash)
         node
       end

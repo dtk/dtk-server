@@ -28,14 +28,14 @@ module DTK; class StateChange
     end
 
     def pending_changes_one_level_raw(parent_mh,idh_list,opts={})
-      pending_create_node(parent_mh,idh_list,opts) + 
+      pending_create_node(parent_mh,idh_list,opts) +
         pending_changed_component(parent_mh,idh_list,opts) +
         pending_changed_attribute(parent_mh,idh_list,opts)
     end
 
     def pending_create_node(parent_mh,idh_list,opts={})
       parent_field_name = DB.parent_field(parent_mh[:model_name],:state_change)
-      filter = 
+      filter =
         [
          :and,
          [:oneof, parent_field_name,idh_list.map{|idh|idh.get_id()}],
@@ -66,7 +66,7 @@ module DTK; class StateChange
      pending_scs.reject{|sc|sc_ids_to_remove.include?(sc.id)}
     end
 
-    #returns ids for all that do not pending children 
+    #returns ids for all that do not pending children
     def find_any_without_pending_children?(sc_idhs)
       ret = []
       return ret if sc_idhs.empty?
@@ -108,7 +108,7 @@ module DTK; class StateChange
                  [:eq, :type, "setting"],
                  [:eq, :status, "pending"]],
         columns: [:id, :relative_order,:type,:changed_attribute,parent_field_name,:state_change_id].uniq
-      }      
+      }
       state_change_mh = parent_mh.createMH(:state_change)
       sc_with_direct_cmps = get_objs(state_change_mh,sp_hash)
       add_related_components(sc_with_direct_cmps)
@@ -121,7 +121,7 @@ module DTK; class StateChange
         unless component_index[cmp_id]
           component_index[cmp_id] = sc
         else
-          if sc[:type] == "install_component" 
+          if sc[:type] == "install_component"
             component_index[cmp_id] = sc
           end
         end

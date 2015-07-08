@@ -47,7 +47,7 @@ module DTK
                    [:eq,:ref,create_row[:ref]],
                    [:eq,:datacenter_datacenter_id,create_row[:datacenter_datacenter_id]]]
         }
-        
+
         model_handle = @target_idh.createMH(model_name: :state_change, parent_model_name: :target)
         if ret = Model.get_obj(model_handle,sp_hash)
           unless ret[:status] == 'pending'
@@ -67,13 +67,13 @@ module DTK
         opts_create = {convert: true}.merge(Aux.hash_subset(opts,:returning_sql_cols))
         Model.create_from_rows(model_handle,create_rows,opts_create)
       end
-      
+
       def change_item_create_row(item,_opts={})
         new_item = item[:new_item]
         model_name = new_item[:model_name]
         parent = item[:parent]
         object_id_col = "#{model_name}_id".to_sym
-        
+
         ret = {
           :ref => ref(model_name,item),
           :display_name => display_name(model_name,item),
@@ -92,7 +92,7 @@ module DTK
       end
 
       def display_name(model_name,item)
-        display_name_prefix = 
+        display_name_prefix =
           case model_name
             when :attribute then "setting-attribute"
             when :component then "install-component"
@@ -115,7 +115,7 @@ module DTK
           when :component then "install_component"
           when :node then "create_node"
           else raise Error::NotImplemented.new("when object type is #{object_model_name}")
-        end 
+        end
       end
 
       #TODO: ### may deprecate below
@@ -129,7 +129,7 @@ module DTK
         }
         new_item_hashes = Model.get_objs_in_set(node_idhs,sp_hash).map do |r|
           {
-            new_item: r[:component].id_handle(), 
+            new_item: r[:component].id_handle(),
             parent: sample_idh.createIDH(model_name: :datacenter, id: r[:datacenter_datacenter_id]),
             type: "converge_component"
           }

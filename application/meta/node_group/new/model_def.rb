@@ -1,6 +1,6 @@
 {
   columns: {
-    # TODO: think these may not be used; 
+    # TODO: think these may not be used;
     task_template_stage_name: {type: :varchar,size: 50},
     profile_template_id: {
       type: :bigint,

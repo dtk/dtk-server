@@ -76,7 +76,7 @@ module DTK; class ModuleDSL; class V2
           raise Error.new("Unexpected that link_def_links is empty")
         end
         opts_choice = {}
-        if single_choice = (link_def_links.size == 1) 
+        if single_choice = (link_def_links.size == 1)
           opts_choice.merge!(omit_component_ref: ref)
         end
         possible_links = aug_link_def[:link_def_links].map do |link_def_link|
@@ -118,7 +118,7 @@ module DTK; class ModuleDSL; class V2
         unless opts[:omit_component_ref] == cmp_ref
           ret['component'] = cmp_ref
         end
-        location = 
+        location =
           case link_def_link.required(:type)
             when 'internal' then 'local'
             when 'external' then 'remote'
@@ -126,15 +126,15 @@ module DTK; class ModuleDSL; class V2
           end
         ret['location'] = location
         if (not link_def_link[:required].nil?) and not link_def_link[:required]
-          ret['required'] = false 
+          ret['required'] = false
         end
-        ams = link_def_link.object.attribute_mappings() 
+        ams = link_def_link.object.attribute_mappings()
         if ams and not ams.empty?
           ret['attribute_mappings'] = ams.map{|am|attribute_mapping(ObjectWrapper.new(am),remote_cmp_type)}
         end
         ret
       end
-      
+
       def attribute_mapping(am,remote_cmp_type)
         input_attr,input_is_remote = mapping_attribute(:input,am,remote_cmp_type)
         output_attr,output_is_remote = mapping_attribute(:output,am,remote_cmp_type)
@@ -155,7 +155,7 @@ module DTK; class ModuleDSL; class V2
           when 'component_attribute' then mapping_attribute__component_type(var,remote_cmp_type)
           when 'node_attribute' then mapping_attribute__node_type(var)
           else raise Error.new("Unexpected mapping-attribute type (#{var.required(:var)})")
-        end  
+        end
       end
 
       def mapping_attribute__component_type(var,remote_cmp_type)

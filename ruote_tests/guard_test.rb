@@ -5,7 +5,7 @@ require 'pp'
 
 class MyRemoteParticipant
   include Ruote::LocalParticipant
- 
+
   def consume(workitem)
     pp "enterring #{workitem.params["label"]}"
     label = workitem.params["label"]
@@ -19,9 +19,9 @@ class MyRemoteParticipant
    reply_to_engine(workitem)
   end
  end
- 
+
 engine = Ruote::Engine.new(Ruote::Worker.new(Ruote::HashStorage.new))
- 
+
 engine.register_participant :remote, MyRemoteParticipant
 
 engine.register_participant :report do |workitem|
@@ -31,7 +31,7 @@ end
 engine.register_participant :start do |_workitem|
   pp :start
 end
- 
+
 pdef = Ruote.process_definition name: 'test' do
   sequence do
     participant :start

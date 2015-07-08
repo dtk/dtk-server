@@ -41,7 +41,7 @@ begin
 		set_attributes_array << dtk_common.set_attribute(dtk_common.service_id, 'repo_manager/dtk_repo_manager/dtk_common_tag', 'master')
 		set_attributes_array << dtk_common.set_attribute(dtk_common.service_id, 'repo_manager/dtk_repo_manager/dtk_common_core_tag', 'master')
 		set_attributes_array << dtk_common.set_attribute(dtk_common.service_id, 'tenant/dtk_server::tenant/server_branch', 'master')
-		
+
 		#If all attribures have been set, proceed with dtk::release converge
 		if !set_attributes_array.include? false
 	  		service_converged = dtk_common.converge_service(dtk_common.service_id, 120)

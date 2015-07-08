@@ -1,4 +1,4 @@
-module DTK; class Task 
+module DTK; class Task
   class Template
     class TemporalConstraints < Array
       r8_nested_require('temporal_constraints','config_components')
@@ -25,14 +25,14 @@ module DTK; class Task
         ret = BeforeIndexHash.new(action_indexes)
         each do |constraint|
           after_action_index = constraint.after_action_index
-          before_action_index = constraint.before_action_index 
+          before_action_index = constraint.before_action_index
           if action_indexes.include?(after_action_index) && action_indexes.include?(before_action_index)
             ret.add(after_action_index,before_action_index)
           end
         end
         ret
       end
-      
+
       private
 
       def initialize(array=nil)
@@ -50,7 +50,7 @@ module DTK; class Task
         def add(after_action_index,before_action_index)
           self[after_action_index][before_action_index] = true
         end
-        
+
         def tsort_form
           inject(TSortHash.new) do |h,(after_index,index_info)|
             h.merge(after_index => index_info.keys)

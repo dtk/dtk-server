@@ -14,7 +14,7 @@ module DTK; class AttributeLink
           OutputPartial.new(attr_link_id: @attr_link_id, output_value: output_value, index_map: index_map, index_map_persisted: index_map_persisted)
         end
       end
-      
+
     end
   end
 end; end

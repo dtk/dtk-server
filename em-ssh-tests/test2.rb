@@ -65,7 +65,7 @@ EM.run do
       # if some errors returned then store them to errors and print them after script is executed
       errors = ""
       install_command = user.eql?('root') ? "bash /tmp/dtk-node-agent/install_agent.sh" : "sudo bash /tmp/dtk-node-agent/install_agent.sh"
-      
+
       puts "\nEXECUTING: #{install_command}"
       ssh.exec!(install_command) do |_channel, stream, data|
         if stream == :stderr

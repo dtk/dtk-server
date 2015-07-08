@@ -31,7 +31,7 @@ module XYZ
           end
 
           def external_ref(recipe_name,node_name)
-            {"type" => "chef_recipe_instance", "recipe_name" => recipe_name, "node_name" => node_name} 
+            {"type" => "chef_recipe_instance", "recipe_name" => recipe_name, "node_name" => node_name}
           end
 
           def basic_type(basic_type)

@@ -16,14 +16,14 @@ module DTK; class Task; class Template
             end
           end
           action_match = ActionMatch.new(@new_action)
-          # TODO: was using 
+          # TODO: was using
           # template_content.splice_in_action!(action_match,:end_last_internode_stage)
           # but switched to below because it would group together actions in same stage that probably should be seperate stages
           template_content.splice_in_action!(action_match,:add_as_new_last_internode_stage)
           template_content
         end
       end
-        
+
       def find_earliest_match?(internode_stage,stage_index,inter_or_same,before_or_after)
         ndx_action_indexes = get_ndx_action_indexes(inter_or_same,before_or_after)
         return nil if ndx_action_indexes.empty?()

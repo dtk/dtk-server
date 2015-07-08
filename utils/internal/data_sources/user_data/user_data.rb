@@ -29,7 +29,7 @@ module XYZ
           qualified_ref = "#{@container_uri}/#{ref}"
           block.call(DataSourceUpdateHash.new(info.merge({"ref" => ref,"qualified_ref" => qualified_ref})))
         end
-        # HashMayNotBeComplete.new() TODO: so can prune what is included 
+        # HashMayNotBeComplete.new() TODO: so can prune what is included
         HashIsComplete.new()
       end
 
@@ -38,8 +38,8 @@ module XYZ
       end
 
       def nested_path(_hash_all_data)
-        @container_uri.gsub(Regexp.new("^/"),"").split("/") 
+        @container_uri.gsub(Regexp.new("^/"),"").split("/")
       end
     end
   end
-end       
+end

@@ -46,7 +46,7 @@ module DTK
 
       # returns [assembly_name,node_name]
       def parse_assembly_node_ref(assembly_node_ref)
-        # TODO: should also check that assembly_name is the service add on assembly or sub assembly  
+        # TODO: should also check that assembly_name is the service add on assembly or sub assembly
         if assembly_node_ref =~ Regexp.new("(^[^/]+)/([^/]+$)")
           [$1,$2]
         else
@@ -59,7 +59,7 @@ module DTK
 
     class ErrorParsing < ErrorUsage
     end
-    class ErrorIllFormedTerm < ErrorParsing 
+    class ErrorIllFormedTerm < ErrorParsing
       def initialize(term,val,alt_descript=nil)
         super(err_msg(term,val,alt_descript))
       end
@@ -67,7 +67,7 @@ module DTK
       private
 
       def err_msg(term,val,alt_descript)
-        last_part = 
+        last_part =
           if alt_descript then alt_descript
           elsif val.is_a?(String) then "(#{val})"
           else "(#{val.inspect})"

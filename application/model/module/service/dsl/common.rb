@@ -12,7 +12,7 @@ module DTK
     }
     ModCompInternalSep = "__" #TODO: if this changes need to chage ModCompGsub[:sub]
     ModCompGsub = {
-      pattern: /(^[^:]+)::/, 
+      pattern: /(^[^:]+)::/,
       sub: '\1__'
     }
     CmpVersionRegexp = Regexp.new("(^.+)#{Seperators[:component_version]}([0-9]+.+$)")

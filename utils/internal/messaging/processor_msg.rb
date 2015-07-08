@@ -11,10 +11,10 @@ module XYZ
       @msg_content = hash[:msg_content] || {}
       @target_object_id = hash[:target_object_id]
     end
-    # TBD: factory in case we want to have subclasses for diffeernt msg types 
+    # TBD: factory in case we want to have subclasses for diffeernt msg types
     def self.create(hash)
       ProcessorMsg.new(hash)
-    end    
+    end
     def marshal_to_message_bus_msg
       hash = {msg_type: @msg_type, msg_content: @msg_content}
       hash.merge!({target_object_id: @target_object_id}) if @target_object_id

@@ -5,7 +5,7 @@ module DTK
     class EC2 < self
       WAIT_FOR_NODE = 10 # seconds
 
-      def initialize(override_of_aws_params = nil)             
+      def initialize(override_of_aws_params = nil)
         @conn = Fog::Compute::AWS.new(override_of_aws_params||get_compute_params())
       end
 
@@ -168,8 +168,8 @@ module DTK
         rescue Fog::Compute::AWS::Error => e
           Log.info("fog error: #{e.message}")
           nil
-        end 
+        end
       end
-    end 
+    end
   end
 end

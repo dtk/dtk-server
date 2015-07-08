@@ -66,7 +66,7 @@ module ComponentModulesMixin
 		collaborators_added = false
 
 		if collaborator_type == "groups"
-			response = send_request('/rest/component_module/remote_collaboration', module_id: component_module, users: nil, groups: collaborators, action: :add, remote_module_namespace: nil, rsa_pub_key: self.ssh_key)			
+			response = send_request('/rest/component_module/remote_collaboration', module_id: component_module, users: nil, groups: collaborators, action: :add, remote_module_namespace: nil, rsa_pub_key: self.ssh_key)
 			pretty_print_JSON(response)
 			if response['status'] == 'ok'
 				puts "Collaborators #{collaborators} have been added to component module #{component_module} successfully"
@@ -78,7 +78,7 @@ module ComponentModulesMixin
 		end
 
 		if collaborator_type == "users"
-			response = send_request('/rest/component_module/remote_collaboration', module_id: component_module, users: collaborators, groups: nil, action: :add, remote_module_namespace: nil, rsa_pub_key: self.ssh_key)			
+			response = send_request('/rest/component_module/remote_collaboration', module_id: component_module, users: collaborators, groups: nil, action: :add, remote_module_namespace: nil, rsa_pub_key: self.ssh_key)
 			pretty_print_JSON(response)
 			if response['status'] == 'ok'
 				puts "Collaborators #{collaborators} have been added to component module #{component_module} successfully"
@@ -97,7 +97,7 @@ module ComponentModulesMixin
 		collaborators_removed = false
 
 		if collaborator_type == "groups"
-			response = send_request('/rest/component_module/remote_collaboration', module_id: component_module, users: nil, groups: collaborators, action: :remove, remote_module_namespace: nil, rsa_pub_key: self.ssh_key)			
+			response = send_request('/rest/component_module/remote_collaboration', module_id: component_module, users: nil, groups: collaborators, action: :remove, remote_module_namespace: nil, rsa_pub_key: self.ssh_key)
 			pretty_print_JSON(response)
 			if response['status'] == 'ok'
 				puts "Collaborators #{collaborators} have been removed from component module #{component_module} successfully"
@@ -109,7 +109,7 @@ module ComponentModulesMixin
 		end
 
 		if collaborator_type == "users"
-			response = send_request('/rest/component_module/remote_collaboration', module_id: component_module, users: collaborators, groups: nil, action: :remove, remote_module_namespace: nil, rsa_pub_key: self.ssh_key)			
+			response = send_request('/rest/component_module/remote_collaboration', module_id: component_module, users: collaborators, groups: nil, action: :remove, remote_module_namespace: nil, rsa_pub_key: self.ssh_key)
 			pretty_print_JSON(response)
 			if response['status'] == 'ok'
 				puts "Collaborators #{collaborators} have been removed from component module #{component_module} successfully"
@@ -127,7 +127,7 @@ module ComponentModulesMixin
 		puts "Check collaborators on component module:", "----------------------------------------"
 		collaborators_exist = true
 
-		response = send_request('/rest/component_module/list_remote_collaboration', module_id: component_module, remote_module_namespace: nil, rsa_pub_key: self.ssh_key)		
+		response = send_request('/rest/component_module/list_remote_collaboration', module_id: component_module, remote_module_namespace: nil, rsa_pub_key: self.ssh_key)
 		pretty_print_JSON(response)
 
 		if filter == :name
@@ -141,7 +141,7 @@ module ComponentModulesMixin
 				collaborators_exist = false if response['data'].select { |x| (x['owner_email'] == c) && (x['owner_type'] == collaborator_type)}.empty?
 			end
 		end
-		
+
 		puts "All collaborators exists in list of collaborators" if collaborators_exist == true
 		puts "All collaborators does not exist in list of collaborators" if collaborators_exist == false
 		puts ""
@@ -216,7 +216,7 @@ module ComponentModulesMixin
 				component_module_deleted = true
 			else
 				puts "Component module #{component_module_name} in #{namespace} was not deleted from remote!"
-				component_module_deleted = false				
+				component_module_deleted = false
 			end
 		else
 			puts "Component module #{component_module_name} in #{namespace} namespace does not exist!"
@@ -322,7 +322,7 @@ module ComponentModulesMixin
 			attribute_value = component_module_attribute_list['data'].find { |x| x['display_name'] == "cmp[#{component_module_name.split(":").last}::#{component_name}]/#{attribute_name}" }['value']
 			puts attribute_value
 		end
-		
+
 		puts ""
 		return attribute_value
 	end
@@ -450,7 +450,7 @@ module ComponentModulesMixin
 	def list_component_modules_with_filter(namespace)
 		puts "List component modules with filter:", "---------------------------------"
 		component_modules_retrieved = true
-		component_modules_list = send_request('/rest/component_module/list', detail_to_include: [], module_namespace: namespace)		
+		component_modules_list = send_request('/rest/component_module/list', detail_to_include: [], module_namespace: namespace)
 		pretty_print_JSON(component_modules_list)
 
 		if component_modules_list['data'].empty?
@@ -470,7 +470,7 @@ module ComponentModulesMixin
 	def list_remote_component_modules_with_filter(namespace)
 		puts "List remote component modules with filter:", "------------------------------------"
 		component_modules_retrieved = true
-		component_modules_list = send_request('/rest/component_module/list_remote', rsa_pub_key: self.ssh_key, module_namespace: namespace)		
+		component_modules_list = send_request('/rest/component_module/list_remote', rsa_pub_key: self.ssh_key, module_namespace: namespace)
 		pretty_print_JSON(component_modules_list)
 
 		if component_modules_list['data'].empty?

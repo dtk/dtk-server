@@ -9,7 +9,7 @@ module DTK; class Task
     def self.compute!(subtask_indexes,top_task)
       compute_recursive!(subtask_indexes,top_task.id() => {})
     end
-    
+
     private
 
     def self.convert_to_string_form(qualified_index)

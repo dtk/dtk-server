@@ -3,7 +3,7 @@ module DTK
   class Violation < Model
     def self.find_missing_required_attributes(_level,commit_task)
       component_actions = commit_task.component_actions
-      errors = [] 
+      errors = []
       component_actions.each do |action|
         AttributeComplexType.flatten_attribute_list(action[:attributes],flatten_nil_value: true).each do |attr|
           # TODO: need to distingusih between legitimate nil value and unset
@@ -20,7 +20,7 @@ module DTK
       expression_list = ret_expression_list(violation_expression)
       save_list(parent,expression_list,opts)
     end
-   
+
     def self.ret_violations(target_node_id_handles)
       ret = []
       return ret if target_node_id_handles.empty?
@@ -36,7 +36,7 @@ module DTK
       saved_violations.each do |v|
         raise Error.new("Not treating expression form") unless constraint_hash = v[:expression][:constraint]
         constraint = Constraint.create(constraint_hash)
-        vtttype = constraint[:target_type] 
+        vtttype = constraint[:target_type]
         target_idh = sample_idh.createIDH(model_name: vt_model_name(vtttype),id: constraint[:target_id])
         target = {vtttype => target_idh}
         if constraint.evaluate_given_target(target)
@@ -78,9 +78,9 @@ module DTK
       violation_mh = parent_idh.create_childMH(:violation)
       parent_id = parent_idh.get_id()
       parent_col = DB.parent_field(parent_mn,:violation)
-         
+
       create_rows = []
-      target_node_id_handles = [] 
+      target_node_id_handles = []
       expression_list.each do |e|
         sample_constraint = e.is_a?(Constraint) ? e : e.constraint_list.first
         vt = e[:violation_target]
@@ -137,7 +137,7 @@ module DTK
     end
 
     public
- 
+
     class ErrorViolation < ErrorUsage
     end
     class MissingRequiredAttribute < ErrorViolation
@@ -153,7 +153,7 @@ module DTK
       end
     end
 
-    class Expression < HashObject 
+    class Expression < HashObject
       def initialize(violation_target,logical_op)
         hash = {
           violation_target: Target.new(violation_target),
@@ -170,7 +170,7 @@ module DTK
 
       def constraint_list
         self[:elements].map do |e|
-          e.is_a?(Constraint) ? e : e.constraint_list() 
+          e.is_a?(Constraint) ? e : e.constraint_list()
         end.flatten
       end
 
@@ -185,15 +185,15 @@ module DTK
         exprs.each{|e|ret << e}
         ret
       end
-      
+
       def empty?
         self[:elements].empty?()
       end
-      
+
       def pp_form
         [] if self[:elements].empty?
         args = self[:elements].map{|x|x.is_a?(Constraint) ? x[:description] : x.pp_form}
-        args.size == 1 ? args.first : [self[:logical_op]] + args 
+        args.size == 1 ? args.first : [self[:logical_op]] + args
       end
     end
 

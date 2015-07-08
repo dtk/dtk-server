@@ -6,7 +6,7 @@ module DTK
   class Configuration
     include Singleton
     def set_configuration(config_file_location=nil)
-      config_file_location ||= default_config_file_location() 
+      config_file_location ||= default_config_file_location()
       set_defaults()
       load_config_file(config_file_location)
       set_combined_vars()
@@ -37,7 +37,7 @@ module DTK
       r8_nested_require('configuration','defaults')
       R8::Config[:dtk_instance_user] = process_user()
     end
-    
+
     def set_combined_vars
       r8_nested_require('configuration','combined')
     end

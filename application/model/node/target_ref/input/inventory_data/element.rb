@@ -16,16 +16,16 @@ module DTK; class Node; class TargetRef
           raise Error.new("Unexpected ref for inventory data ref: #{ref}")
         end
       end
-      
+
       def target_ref_hash
         unless name = self['name']||self['display_name']
           raise Error.new("Unexpected that that element (#{inspect}) has no name field")
         end
         ret_hash = merge('display_name' => ret_display_name(name))
-        
+
         external_ref = self['external_ref']||{}
         ret_hash.merge!(type: external_ref['type']||Type::Node.target_ref)
-        
+
         host_address = nil
         if @type == :physical
           unless host_address = external_ref['routable_host_address']

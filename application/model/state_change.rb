@@ -14,7 +14,7 @@ module DTK
       ndx_ret = {}
       pending_changes.each do |ch|
         node_id = ch[:node][:id]
-        node = ndx_ret[node_id] ||= {node_id: node_id, node_name: ch[:node][:display_name], node_changes: [], ndx_cmp_changes: {}} 
+        node = ndx_ret[node_id] ||= {node_id: node_id, node_name: ch[:node][:display_name], node_changes: [], ndx_cmp_changes: {}}
         if ch[:type] == "create_node"
           node[:node_changes] << {name: ret_display_name(ch)}
         else
@@ -55,7 +55,7 @@ module DTK
     def self.ret_display_name(flat_pending_ch)
       type = flat_pending_ch[:type]
       node_name = flat_pending_ch[:node][:display_name]
-      suffix = 
+      suffix =
         case type
          when "create_node"
           node_name

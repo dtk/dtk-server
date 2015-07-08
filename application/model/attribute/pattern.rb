@@ -1,5 +1,5 @@
 module DTK; class Attribute
-  class Pattern 
+  class Pattern
     r8_nested_require('pattern','type')
     r8_nested_require('pattern','assembly')
     r8_nested_require('pattern','node')

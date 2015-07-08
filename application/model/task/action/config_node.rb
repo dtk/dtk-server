@@ -180,7 +180,7 @@ module DTK; class Task
           # check taht all elements have ruby function type
           !component_actions.find{|a|'ruby_function' != ((a[:component]||{})[:external_ref]||{})[:type]}
         end
-      end 
+      end
 
       def assembly_wide_component?
         if node_type = (self[:node]||{})[:type]
@@ -193,7 +193,7 @@ module DTK; class Task
       # adapter_name can be null-> default is used
       def ret_command_and_control_adapter_info
         adapter_type = :node_config
-        adapter_name = 
+        adapter_name =
           if assembly_wide_component?()
             # adapter_name indicating toe xecute on server, rather than dispatching to a node
             :server

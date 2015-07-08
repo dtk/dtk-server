@@ -8,7 +8,7 @@ module DTK; class Node
       def self.create_nodes_from_inventory_data(target, inventory_data)
         inventory_data.create_nodes_from_inventory_data(target)
       end
-      
+
       #TODO: collapse with application/utility/library_nodes - node_info
       def self.child_objects(params={})
         {

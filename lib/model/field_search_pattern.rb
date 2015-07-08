@@ -10,13 +10,13 @@ module XYZ
         ret = nil
         name_value_pairs.each do |name_x,value|
           name = name_x.to_sym
-          # ignore if empty 
+          # ignore if empty
           next if (value && value.empty?)
           # ignore unless column has a basic type
           basic_type = @col_basic_types[name]
           next unless basic_type
-          new_el = 
-            if value.nil? || value == "UNSET" 
+          new_el =
+            if value.nil? || value == "UNSET"
               {name => nil}
             else
               case basic_type
@@ -56,8 +56,8 @@ module XYZ
         text: :string,
         varchar: :string,
         bigint: :numeric,
-        integer: :numeric, 
-        int: :numeric, 
+        integer: :numeric,
+        int: :numeric,
         numeric: :numeric,
         boolean: :boolen
       }

@@ -34,20 +34,20 @@ module DTK; class Attribute
         end
         ret
       end
-      
+
       private
 
       def create_attributes(attr_parents)
         attribute_idhs = []
         attr_properties = attribute_properties().inject({}){|h,(k,v)|h.merge(k.to_s => v)}
-        field_def = 
+        field_def =
           {'display_name' => pattern_attribute_name()}.merge(attr_properties)
         attr_parents.each do |attr_parent|
           attribute_idhs += Attribute.create_or_modify_field_def(attr_parent,field_def)
         end
-        
+
         return attribute_idhs if attribute_idhs.empty?
-        
+
         # TODO: can make more efficient by having create_or_modify_field_def return object with cols, rather than id_handles
         sp_hash = {
           cols: [:id,:group_id,:display_name,:description,:component_component_id,:data_type,:semantic_type,:required,:dynamic,:external_ref,:semantic_data_type],
@@ -69,7 +69,7 @@ module DTK; class Attribute
       def pattern_attribute_name
         first_name_in_fragment(pattern_attribute_fragment())
       end
-      
+
       def first_name_in_fragment(fragment)
         fragment =~ NameInFragmentRegexp
         $1

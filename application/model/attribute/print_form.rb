@@ -78,7 +78,7 @@ module DTK
           else
             ext_ref = (ndx_attrs[attr_id]||{})[:external_ref]||{}
             if ext_ref[:default_variable] && ext_ref[:type] == 'puppet_attribute'
-              r.merge!(linked_to_display_form: LinkedToPuppetHeader) 
+              r.merge!(linked_to_display_form: LinkedToPuppetHeader)
             end
           end
         end
@@ -92,7 +92,7 @@ module DTK
         @display_name_prefix =  opts[:display_name_prefix] || display_name_prefix(opts.slice(:format, :with_assembly_wide_node).merge(level: opts[:level]||find_level()))
         @index_map = opts[:index_map]
         @truncate_attribute_value = opts[:truncate_attribute_values]
-        @raw_attribute_value = opts[:raw_attribute_value] 
+        @raw_attribute_value = opts[:raw_attribute_value]
         @mark_unset_required = opts[:mark_unset_required]
       end
 
@@ -146,7 +146,7 @@ module DTK
       def value_print_form(opts={})
         value = (opts.key?(:nested_val) ? opts[:nested_val] : @aug_attr[:attribute_value])
         if value.nil?
-          ret = 
+          ret =
             if opts[:nested]
               PrintValueNil
             else

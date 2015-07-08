@@ -60,9 +60,9 @@ module DTK; class Component
       }
       rows = get_objs(cmp_tmpl_idhs.first.createMH(),sp_hash)
       return ret if rows.empty?
-      
+
       # rows will have element for each element of cmp_tmpl_idhs that is non-singleton
-      # element key :attribute will be nil if it does not use teh default key; for all 
+      # element key :attribute will be nil if it does not use teh default key; for all
       # these we need to make the more expensive call Attribute.get_title_attributes
       need_title_attrs_cmp_idhs = rows.select{|r|r[:attribute].nil?}.map{|r|r.id_handle()}
       ret = rows.map{|r|r[:attribute]}.compact
@@ -104,10 +104,10 @@ module DTK; class Component
       versions = match_element_array.map{|el|el.version_field}
       sp_hash = {
         cols: [:id,:group_id,:component_type,:version,:implementation_id,:external_ref],
-        filter: [:and, 
+        filter: [:and,
                  [:eq, :project_project_id, project_idh.get_id()],
                  [:oneof, :version, versions],
-                 [:eq, :assembly_id, nil], 
+                 [:eq, :assembly_id, nil],
                  [:eq, :node_node_id, nil],
                  [:oneof, :component_type, cmp_types]]
       }
@@ -117,7 +117,7 @@ module DTK; class Component
       unmatched = []
       match_element_array.each do |el|
         matches = component_rows.select do |r|
-          el.version_field == r[:version] && 
+          el.version_field == r[:version] &&
             el.component_type == r[:component_type] &&
             (el.namespace.nil? || el.namespace == r[:namespace])
         end
@@ -156,12 +156,12 @@ module DTK; class Component
       end
       ret
     end
-      
+
     def self.list(project,opts={})
       assembly = opts[:assembly_instance]
       sp_hash = {
         cols: [:id, :type, :display_name, :description, :component_type, :version, :refnum, :module_branch_id],
-        filter: [:and, [:eq, :type, "template"], 
+        filter: [:and, [:eq, :type, "template"],
                  [:oneof, :version, filter_on_versions(assembly: assembly)],
                  [:eq, :project_project_id, project.id()]]
       }
@@ -204,7 +204,7 @@ module DTK; class Component
     end
 
     def self.check_valid_id_aux(model_handle,id,version,opts={})
-      filter = 
+      filter =
         [:and,
          [:eq, :id, id],
          [:eq, :type, "template"],
@@ -280,7 +280,7 @@ module DTK; class Component
     end
 
     private
- 
+
     def self.assembly_version(assembly)
       ModuleVersion.ret(assembly)
     end
@@ -339,7 +339,7 @@ module DTK; class Component
         filter: [:eq, :ancestor_id, id()],
         cols: [:id]
       }
-      join_array = 
+      join_array =
         [{
            model_name: :attribute,
            convert: true,

@@ -34,11 +34,11 @@ describe "(Workspace) Test Case 14: Create two nodes, add components in it, conv
 
 	context "Add component to the node in workspace" do
 		include_context "Add component to the node in workspace", dtk_common, node_name_1, component_name, component_module_namespace
-	end	
+	end
 
 	context "Add component to the node in workspace" do
 		include_context "Add component to the node in workspace", dtk_common, node_name_2, component_name, component_module_namespace
-	end	
+	end
 
 	context "Converge workspace" do
 		include_context "Converge workspace", dtk_common
@@ -55,7 +55,7 @@ describe "(Workspace) Test Case 14: Create two nodes, add components in it, conv
 
 	context "Purge workspace content" do
 		include_context "Purge workspace content", dtk_common
-	end	
+	end
 
 	after(:all) do
 		puts "", ""

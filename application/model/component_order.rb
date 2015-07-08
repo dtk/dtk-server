@@ -16,7 +16,7 @@ module DTK
       update_with_order_info!(component_deps,cmps_with_order_info)
     end
 
-    # assumption that this is called with components having keys :id,:dependencies, :extended_base, :component_type 
+    # assumption that this is called with components having keys :id,:dependencies, :extended_base, :component_type
     # this can be either component template or component instance with :dependencies joined in from associated template
     # TODO: change :component_dependencies to :derived_order -> must chaneg all upstream uses of this return rest too
     def self.get_ndx_cmp_type_and_derived_order(components)
@@ -37,7 +37,7 @@ module DTK
       ComponentOrder.update_with_applicable_dependencies!(ret,components.map{|cmp|cmp.id_handle()}.uniq)
     end
 
-    # assumption that this is called with components having keys :id,:dependencies, :extended_base, :component_type 
+    # assumption that this is called with components having keys :id,:dependencies, :extended_base, :component_type
     # this can be either component template or component instance with :dependencies joined in from associated template
     def self.derived_order(components,&block)
       ndx_cmps = components.inject({}){|h,cmp|h.merge(cmp[:id] => cmp)}
@@ -67,7 +67,7 @@ module DTK
     def self.prune(cmps_with_order_info)
       # TODO: stub that just treats very specific form
       # assuming conditional of form :":attribute_value"=>[":eq", ":attribute.<var>", <val>]
-      attrs_to_get = {} 
+      attrs_to_get = {}
       cmps_with_order_info.each do |cmp|
         unexepected_form = true
         cnd = cmp[:component_order][:conditional]
@@ -79,7 +79,7 @@ module DTK
               val = eq_stmt[2]
               unexepected_form = false
               match_cond = [:eq,:attribute_value,val]
-              pntr = attrs_to_get[cmp[:id]] ||= {component: cmp, attr_info: []} 
+              pntr = attrs_to_get[cmp[:id]] ||= {component: cmp, attr_info: []}
               pntr[:attr_info] << {attr_name: attr_name, match_cond: match_cond, component_order: cmp[:component_order]}
             end
           end
@@ -96,7 +96,7 @@ module DTK
           match_cond = attr_info[:match_cond]
           raise Error.new("Unexpected form") unless match_cond.size == 3 && match_cond[0] == :eq && match_cond[1] == :attribute_value
           if attr_val_info[:attribute_value] == match_cond[2]
-            ret << info[:component].merge(component_order: attr_info[:component_order]) 
+            ret << info[:component].merge(component_order: attr_info[:component_order])
           end
         end
       end

@@ -6,7 +6,7 @@ module XYZ
       @ds_object_adapter_class.class_rules.each do |condition,top_level_assign|
         if condition.evaluate_condition(ds_hash)
           top_level_assign.each do |attr,assign|
-            process_assignment(target_obj,attr,assign,ds_hash) 
+            process_assignment(target_obj,attr,assign,ds_hash)
           end
         end
       end
@@ -21,10 +21,10 @@ module XYZ
 
     def load_ds_adapter_class
       rel_path = "#{ds_name()}/#{obj_type()}#{source_obj_type() ? "__" + source_obj_type() : ""}"
-      begin 
-        file_path = File.expand_path(rel_path, File.dirname(__FILE__)) 
+      begin
+        file_path = File.expand_path(rel_path, File.dirname(__FILE__))
         require file_path
-       rescue Exception => e 
+       rescue Exception => e
         raise Error.new("Adapter file (#{file_path}.rb) to process object #{obj_type()} for data source #{ds_name()} #{source_obj_type() ? "(using source object #{source_obj_type()}) " : ""} does not exist") unless File.exists?(file_path + ".rb")
         raise e
       end
@@ -44,14 +44,14 @@ module XYZ
       obj = normalize(ds_hash)
       obj[:ds_attributes] = filter_raw_source_objects(ds_hash)
       obj[:ds_key] = ds_key_value(ds_hash)
-      obj[:ds_source_obj_type] = source_obj_type() if source_obj_type()      
+      obj[:ds_source_obj_type] = source_obj_type() if source_obj_type()
       obj[:data_source] = ds_name()
       ret = DBUpdateHash.create()
       ret[relation_type()][ref(ds_hash)]= obj
       ret.freeze
     end
 
-    def process_assignment(target_obj,attr,assign,ds_hash) 
+    def process_assignment(target_obj,attr,assign,ds_hash)
       if assign.is_a?(DSNormalizer::Source)
         target_obj[attr] = assign.apply(ds_hash)
       elsif assign.is_a?(DSNormalizer::Function)
@@ -69,7 +69,7 @@ module XYZ
           # its peers; only including this conditionally is for optimization
           # dont overwrite will null if  target_obj[attr] already has a value
           if constraints and not target_obj.key?(attr)
-            target_obj[attr] = assign 
+            target_obj[attr] = assign
           end
         else
           assign.each do |nested_attr,nested_assign|
@@ -81,7 +81,7 @@ module XYZ
       end
     end
 
-    # only consider complete and thus perform deletes if source is marked as compleet as designated by 
+    # only consider complete and thus perform deletes if source is marked as compleet as designated by
     # hash_completeness_info and source is golden store
     def delete_unmarked(container_id_handle,marked,hash_completeness_info)
       return nil unless hash_completeness_info.is_complete?()
@@ -104,7 +104,7 @@ module XYZ
       relative_unique_key = @ds_object_adapter_class.unique_keys(ds_hash)
       qualified_key(relative_unique_key)
     end
-    
+
     def filter_raw_source_objects(ds_hash)
       @ds_object_adapter_class.filter_raw_source_objects(ds_hash)
     end

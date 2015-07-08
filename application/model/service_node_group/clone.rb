@@ -2,7 +2,7 @@ module DTK; class ServiceNodeGroup
   module Clone
     # clone_components_to_members returns array with each element being a cloned component
     # on node_members with their attributes; it clones if necssary
-    # if opts[:node_group_components] then filter to only include components corresponding 
+    # if opts[:node_group_components] then filter to only include components corresponding
     # to these node_group_components
     def self.clone_and_get_components_with_attrs(node_group,node_members,opts={})
       needs_cloning, cloned_components = determine_cloned_components(node_group,node_members,opts)
@@ -35,10 +35,10 @@ module DTK; class ServiceNodeGroup
 
     ComponentNodePair = Struct.new(:node_group_component,:node_group_member)
     # returns two arrays [needs_cloning, cloned_components]
-    # needs_cloning has elements of type ComponentNodePairs 
+    # needs_cloning has elements of type ComponentNodePairs
     #   where component is node group component and node is node member
-    # cloned_components is array with cloned components 
-    # if opts[:node_group_components] then filter to only include components corresponding 
+    # cloned_components is array with cloned components
+    # if opts[:node_group_components] then filter to only include components corresponding
     # to these node_group_components
     def self.determine_cloned_components(node_group,node_members,opts)
       needs_cloning, cloned_components = [], []
@@ -61,7 +61,7 @@ module DTK; class ServiceNodeGroup
       ndx_ng_cmps = ndx_cmps[node_group_id]||{}
       ng_cmp_ids = ndx_ng_cmps.keys
       if restricted_cmps = opts[:node_group_components]
-        ng_cmp_ids = ng_cmp_ids & restricted_cmps.map{|r|r.id} 
+        ng_cmp_ids = ng_cmp_ids & restricted_cmps.map{|r|r.id}
       end
 
       return ret if ng_cmp_ids.empty?

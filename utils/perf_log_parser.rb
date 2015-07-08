@@ -50,7 +50,7 @@ class PerfLogParser
 		raw_results, custom_results_raw = parse()
 		raw_results.each do |record|
 			next unless record[:operation]
-			
+
 			total_dur = 0.0
 			if record[:perf_sql]
 				record[:perf_sql].each { |dur| total_dur += dur.to_f}
@@ -67,9 +67,9 @@ class PerfLogParser
 				results[results_unique_key][:avg_tot_oper_dur] += record[:perf_operation].to_f
 				results[results_unique_key][:tr_cnt] += 1
 			else
-				results[results_unique_key] = { 
-					operation: record[:operation], 
-					assembly_subtype: subtype, 
+				results[results_unique_key] = {
+					operation: record[:operation],
+					assembly_subtype: subtype,
 					about: about,
 					db_call_cnt: record[:perf_sql] ? record[:perf_sql].size : 0,
 					avg_tot_sql_dur: total_dur,
@@ -88,8 +88,8 @@ class PerfLogParser
 				custom_results[unique_key][:avg_oper_dur] += record[:measurement_perf].to_f
 				custom_results[unique_key][:tr_cnt] += 1
 			else
-				custom_results[unique_key] = { 
-					measurement: record[:measurement], 
+				custom_results[unique_key] = {
+					measurement: record[:measurement],
 					avg_oper_dur: record[:measurement_perf].to_f,
 					tr_cnt: 1
 				}
@@ -138,22 +138,22 @@ class PerfLogParser
 end
 
 class Print
-	
+
 	@@output_format_header = [ "OPERATION", "TYPE", "ABOUT", "OP_CNT", "OP_AVG_DUR[ms]", "DB_CALL_CNT", "DB_AVG_DUR[ms]" ]
 	@@output_format_custom_header = [ "MEASUREMENT", "INVOC_CNT", "AVG_DUR[ms]" ]
 	@@row_sep = "----------------------------------------------------------------------------------------------------------------------\n"
-		
+
 	def self.to_console(results, custom_results, regex=nil)
 		output_format = " %-37s %-11s %-12s %-9s %-14s %-14s %s\n"
 		output_format_custom = " %-29s %-15s %s\n"
-		
+
 		output = "\nPerformance results:\n\n"
 		output += @@row_sep
 		output += output_format % @@output_format_header
 		output += @@row_sep
 
 		results.each do |record|
-			if regex.nil? || record[:operation].include?(regex) 
+			if regex.nil? || record[:operation].include?(regex)
 				output += output_format % [ record[:operation], record[:assembly_subtype], record[:about], record[:tr_cnt], record[:avg_tot_oper_dur], record[:db_call_cnt], record[:avg_tot_sql_dur] ]
 			end
 		end
@@ -175,7 +175,7 @@ class Print
 		results.each do |record|
 			output += [ record[:operation], record[:assembly_subtype], record[:about], record[:tr_cnt], record[:avg_tot_oper_dur], record[:db_call_cnt], record[:avg_tot_sql_dur] ].join(',') + "\n"
 		end
-		
+
 		output += "\n\n"
 
 		output += @@output_format_custom_header.join(',') + "\n"
@@ -185,7 +185,7 @@ class Print
 		puts @@row_sep
 		puts output
 		puts @@row_sep
-		
+
 		File.open(path, 'w') { |file| file.write(output) }
 	end
 end
@@ -195,7 +195,7 @@ class CLI
 		results, custom_results = PerfLogParser.get_results
 		while line = Readline.readline("perf-tool> ", true)
 			cmds = line.split(' ')
-			case cmds[0] 
+			case cmds[0]
 
 			when "exit"
 				break
@@ -214,7 +214,7 @@ class CLI
 				Print.to_csv(results, custom_results, cmds[1])
 
 			when "get_sql"
-				operation, assembly, about = cmds[1..3]				
+				operation, assembly, about = cmds[1..3]
 				puts "[ERROR] OPERATION parameter must be set. Check help for more details"; next unless operation
 				PerfLogParser.get_sql(results, operation, assembly, about)
 

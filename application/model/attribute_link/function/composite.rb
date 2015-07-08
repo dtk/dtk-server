@@ -16,7 +16,7 @@ module DTK; class AttributeLink
               outer_function: outer_function,
               inner_expression: inner_expression
             }
-          } 
+          }
         }
       end
 
@@ -25,12 +25,12 @@ module DTK; class AttributeLink
           raise Error.new("Opts should be empty")
         end
         inner_value = inner_expression.value()
-        outer_function.internal_hash_form(inner_value: inner_value) 
+        outer_function.internal_hash_form(inner_value: inner_value)
       end
 
       def value(_opts={})
         inner_value = inner_expression.value()
-        outer_function.value(inner_value: inner_value) 
+        outer_function.value(inner_value: inner_value)
       end
 
       private

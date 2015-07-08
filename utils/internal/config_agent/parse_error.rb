@@ -2,7 +2,7 @@ module DTK
   class ConfigAgent
     class ParseError < ErrorUsage::Parsing
       def initialize(msg_x,opts={})
-        msg = 
+        msg =
           if line_num = opts[:line_num]
             "#{msg_x} (on line #{line_num})"
           else
@@ -10,6 +10,6 @@ module DTK
           end
         super(msg,opts)
       end
-    end      
+    end
   end
 end

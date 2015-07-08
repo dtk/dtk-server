@@ -30,7 +30,7 @@ describe "(Different Node Templates) Test Case 3: (OS: RedHat, Namenode: hdp) Ch
 		include_context "Stage", dtk_common
 	end
 
-	context "List assemblies after stage" do		
+	context "List assemblies after stage" do
 		include_context "List assemblies after stage", dtk_common
 	end
 

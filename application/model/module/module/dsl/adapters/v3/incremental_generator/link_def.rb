@@ -41,7 +41,7 @@ module DTK; class ModuleDSL; class V3
       # where LINK(s) ::= LINK | [LINK,LINK,..]
       class PossibleLinks < Hash
         def deep_merge(cmp,link)
-          new_cmp_val = 
+          new_cmp_val =
             if target_links = self[cmp]
               link.merge_into!(target_links.is_a?(Array) ? target_links : [target_links])
             else
@@ -49,14 +49,14 @@ module DTK; class ModuleDSL; class V3
             end
           merge(cmp => new_cmp_val)
         end
-        
+
         def self.reify(possible_links)
           possible_links.inject(PossibleLinks.new()) do |h,(cmp,v)|
             h.merge(cmp => v.is_a?(Array) ? v.map{|el|Link.new(el)} : Link.new(v))
           end
         end
       end
-      
+
       class Link < PrettyPrintHash
         def merge_into!(links)
           ret = links

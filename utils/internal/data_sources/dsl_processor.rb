@@ -10,7 +10,7 @@ module XYZ
       def self.unique_keys(ds_hash)
         [relative_distinguished_name(ds_hash)]
       end
-      
+
       def self.class_rules
         @class_rules ||= DBUpdateHash.create()
       end
@@ -23,7 +23,7 @@ module XYZ
 
       def self.definitions(&block)
         context = Context.new(self,:no_conditions)
-        context.instance_eval(&block) 
+        context.instance_eval(&block)
         class_rules.freeze
       end
     end
@@ -32,13 +32,13 @@ module XYZ
      def initialize(parent,relation=:no_condition,condition=nil)
        @parent = parent
        @relation = relation
-       @condition = condition 
+       @condition = condition
      end
 
      # top level "conditionals"
      def if_exists(condition,&block)
        context = Context.new(self,:if_exists,condition)
-       context.instance_eval(&block) 
+       context.instance_eval(&block)
      end
      # sub commands
      def target
@@ -113,9 +113,9 @@ module XYZ
        ret.mark_as_complete if ds_object[:ds_is_golden_store]
       ret
     end
-  end    
+  end
 
-  class Source 
+  class Source
     def initialize(path=nil)
       @path = path ? Array.new(path) : []
     end
@@ -133,7 +133,7 @@ module XYZ
     end
   end
 
-  class ForeignKey 
+  class ForeignKey
     attr_reader :arg
     def initialize(arg)
       @arg = arg
@@ -150,10 +150,10 @@ module XYZ
       @args = args
       @context_parent = context_parent
     end
-      
+
     def apply(ds_hash)
       evaluated_args = @args.map{|term|apply_to_term(term,ds_hash)}
-      if @function_name 
+      if @function_name
         # resolve with respect class adapter
         # TODO: where do we put "wired" fns; can put it in DSNormalizerTop if using this path below
         # TODO: hack to handle when fn eval under if context

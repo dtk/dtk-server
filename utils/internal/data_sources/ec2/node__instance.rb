@@ -2,7 +2,7 @@ require  File.expand_path('mixins/monitoring_items', File.dirname(__FILE__))
 module XYZ
   module DSNormalizer
     class Ec2
-      class NodeInstance < Top 
+      class NodeInstance < Top
         extend MonitoringItemsClassMixin
         # TBD: could write 'lint checker that makes sure that target indexes correspond to schema described in models
         definitions do
@@ -16,11 +16,11 @@ module XYZ
           source_complete_for target[:monitoring_item]
           target[:monitoring_item] = fn(:default_node_monitoring_items)
 
-          source_complete_for target[:node_interface]          
+          source_complete_for target[:node_interface]
           prefix = target[:node_interface]
-          prefix[:eth0][:type] = 'ethernet' 
-          prefix[:eth0][:family] = 'ipv4' 
-          prefix[:eth0][:address] =  source[:private_ip_address] 
+          prefix[:eth0][:type] = 'ethernet'
+          prefix[:eth0][:family] = 'ipv4'
+          prefix[:eth0][:address] =  source[:private_ip_address]
           prefix[:eth0][:network_partition_id] = foreign_key :network_partition, source[:network_partition_ref]
 
           source_complete_for target[:address_access_point]
@@ -40,7 +40,7 @@ module XYZ
           def relative_distinguished_name(source)
             source[:id]
           end
-          
+
           def external_ref(instance_id)
             {"type" => "ec2_instance", "instance_id" => instance_id}
           end

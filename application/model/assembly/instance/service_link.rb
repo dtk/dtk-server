@@ -1,7 +1,7 @@
 module DTK
   class Assembly::Instance
     class ServiceLink
-      r8_nested_require('service_link','factory')    
+      r8_nested_require('service_link','factory')
 
       def initialize(assembly_instance)
         @assembly_instance = assembly_instance
@@ -13,7 +13,7 @@ module DTK
         else
           port_link_idhs = [port_link_idhs]
         end
-        
+
         aug_attr_links = get_augmented_attribute_links(port_link_idhs)
         attr_mh = port_link_idhs.first.createMH(:attribute)
         Model.Transaction do
@@ -53,7 +53,7 @@ module DTK
         else
           raise Error.new("Unexpected object type (#{object.class})")
         end
-        
+
         ret = {
           id: id,
           type: service_type,
@@ -64,7 +64,7 @@ module DTK
         ret.merge!(description: description) if description
         ret
       end
-      
+
       private
 
       def self.get_augmented_attribute_links(port_link_idhs)
@@ -77,7 +77,7 @@ module DTK
         attribute_link_mh = port_link_idhs.first.createMH(:attribute_link)
         Model.get_objs(attribute_link_mh,sp_hash)
       end
-      
+
       def self.print_form_hash__port(port, node, opts = {})
         port.merge(node: node).display_name_print_form(opts)
       end

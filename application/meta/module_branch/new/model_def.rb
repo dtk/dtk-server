@@ -12,7 +12,7 @@ lambda__matching_library_branches =
           :component_id
         end
   {
-    type: :json, 
+    type: :json,
     hidden: true,
     remote_dependencies:     [{
        model_name: :module_branch,
@@ -63,7 +63,7 @@ end
     version: {type: :varchar, size: 100},
     is_workspace: {type: :boolean},
     type: {type: :varchar, size: 20}, #service_module or component_module
-    current_sha: {type: :varchar, size: 50}, #indicates the sha of the branch that is currently synchronized with object model 
+    current_sha: {type: :varchar, size: 50}, #indicates the sha of the branch that is currently synchronized with object model
     external_ref: {type: :text},
     dsl_parsed: {type: :boolean, default: true},
     repo_id: {

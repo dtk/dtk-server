@@ -7,7 +7,7 @@ module XYZ
           filter: [:eq, :id, db_server_component[:ancestor_id]],
           cols: [:id,:library_library_id]
         }
-        join_array = 
+        join_array =
           [{
              model_name: :attribute,
              join_type: :inner,

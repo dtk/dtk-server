@@ -51,12 +51,12 @@ module DTK; class LinkDef
         remote_component_type = possible_link.keys.first
         possible_link_info = possible_link.values.first
         possible_link_type = possible_link_info["type"]
-        
+
         add_remote_link_def?(remote_link_defs,remote_component_type,link_def_type,possible_link_type)
-        
+
         has_external_internal[:has_internal_link] = true if %w{internal internal_external}.include?(possible_link_type)
         has_external_internal[:has_external_link] = true if %w{external internal_external}.include?(possible_link_type)
-        
+
         position += 1
         ref = "#{remote_component_type}___#{position}" #to make sure unqiue for case when same remote type
         el = {
@@ -120,7 +120,7 @@ module DTK; class LinkDef
         Log.error("unexpected event trigger: #{trigger}")
         nil
       end
-    end 
+    end
 
     def parse_events(events)
       ret = []
@@ -128,7 +128,7 @@ module DTK; class LinkDef
         ev_type = ev.keys.first
         ev_content = ev.values.first
         case ev_type
-         when "extend_component" 
+         when "extend_component"
           parsed_ev = parse_event_extend_component(ev_content)
           ret << parsed_ev if parsed_ev
          else
@@ -148,14 +148,14 @@ module DTK; class LinkDef
       ret.merge!(alias: ev_content["alias"]) if ev_content.key?("alias")
       ret
     end
-      
+
     # returns node_name, component_name, attribute_name, path; where component_name xor node_name is null depending on whether it is a node or component attribute
     def parse_attribute_term(term_x)
       ret = {}
       term = term_x.to_s.gsub(/^:/,"")
       ret[:term_index] = term
       split = term.split(SplitPat)
-      
+
       if split[0] =~ NodeTermRE
         ret[:type] = "node_attribute"
         ret[:node_name] = $1
@@ -165,7 +165,7 @@ module DTK; class LinkDef
       else
         raise Error.new("unexpected form (#{term_x.inspect})")
       end
-      
+
       unless split.size > 1
         raise Error.new("unexpected form (#{term_x.inspect})")
       end
@@ -177,18 +177,18 @@ module DTK; class LinkDef
       else
         raise Error.new("unexpected form (#{term_x.inspect})")
       end
-      
+
       if split.size > 2
         ret[:path] = split[2,split.size-2]
       end
       ret
-    end      
+    end
 
     SimpleTokenPat = 'a-zA-Z0-9_-'
     SplitPat = '.'
-      
-    NodeTermRE = Regexp.new("^(local|remote)_node$") 
-    ComponentTermRE = Regexp.new("^([#{SimpleTokenPat}]+$)") 
-    AttributeTermRE = Regexp.new("^([#{SimpleTokenPat}]+$)") 
+
+    NodeTermRE = Regexp.new("^(local|remote)_node$")
+    ComponentTermRE = Regexp.new("^([#{SimpleTokenPat}]+$)")
+    AttributeTermRE = Regexp.new("^([#{SimpleTokenPat}]+$)")
   end
 end; end

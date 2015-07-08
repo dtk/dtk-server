@@ -21,19 +21,19 @@ module DTK; class BaseModule
           dep_name = parsed_dependency[:name].strip()
           version_constraints = parsed_dependency[:version_constraints]
           match, inconsistent, possibly_missing = nil, nil, nil
-          
+
           # if there is no component_modules or just this one in database, mark all dependencies as possibly missing
           base_module_id = @base_module.id()
           all_modules_except_this = all_modules.reject{|cmp_mod_wrapper|cmp_mod_wrapper.id == base_module_id}
           all_possibly_missing << dep_name if all_modules_except_this.empty?
-          
+
           all_modules_except_this.each do |cmp_mod_w|
             cmp_mod_w.module_branches().each do |branch_w|
               if branch_w.has_external_ref?()
                 branch = branch_w.branch
                 branch_name = branch_w.branch_name
                 branch_version = branch_w.branch_version
-                
+
                 if (branch_name && branch_version)
                   matched_branch_version = branch_version.match(/(\d+\.\d+\.\d+)/)
                   branch_version = matched_branch_version[1]
@@ -49,7 +49,7 @@ module DTK; class BaseModule
                         br_version       = branch_version.gsub('.','')
                         constraint_op    = vconst[:constraint]
                         req_version      = required_version.gsub('.','')
-                        
+
                         # if version contraints in form of 4.x
                         if req_version.to_s.include?('x')
                           req_version.gsub!(/x/,'')
@@ -96,7 +96,7 @@ module DTK; class BaseModule
 
                   else
                     all_possibly_missing << dep_name
-                  end   
+                  end
                 end
               else
                 all_possibly_missing << dep_name

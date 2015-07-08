@@ -1,7 +1,7 @@
 module XYZ
   module DSNormalizer
     class Ec2
-      class NodeGroupMember < Top 
+      class NodeGroupMember < Top
         definitions do
           target[:node_id] = foreign_key :node, source[:node_ref]
           target[:node_group_id] = foreign_key :node_group, source[:node_group_ref]

@@ -7,13 +7,13 @@ module DTK; module WorkflowAdapter; module RuoteGenerateProcessDefs
         concurrence(*guard_tasks.map{|task|guard(task)})
       end
     end
-    
+
     def guard(task)
       participant = participants_for_tasks[task[:executable_action].class]
       raise Error.new("cannot find participant for task") unless participant
       ["listen",{"to"=>participant.to_s, "upon"=>"reply", "where"=>"${guard_id} == #{task.id()}"},[]]
     end
-    
+
     class Context
       def self.create(guards,top_task_idh,peer_tasks=nil)
         if guards and not guards.empty?
@@ -23,11 +23,11 @@ module DTK; module WorkflowAdapter; module RuoteGenerateProcessDefs
         end
       end
 
-      attr_reader :top_task_idh   
-      def initialize(top_task_idh)     
+      attr_reader :top_task_idh
+      def initialize(top_task_idh)
         @top_task_idh = top_task_idh
       end
-      
+
       class NoGuards < self
         def initialize(top_task_idh)
           super(top_task_idh)
@@ -69,7 +69,7 @@ module DTK; module WorkflowAdapter; module RuoteGenerateProcessDefs
             guarded[:task_type] == task_type && guarded[:node][:id] == node_id
           end.map{|g|g[:guard]}
           return nil if matching_guards.empty?
-          
+
           # see if any of the guards are peers
           ndx_ret = {}
           @peer_tasks.each do |t|

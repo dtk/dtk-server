@@ -15,7 +15,7 @@ module DTK; class ModuleDSL
       klass = (object_or_class.is_a?(Class) ? object_or_class : object_or_class.class)
       class_last_part = klass.to_s.split('::').last
       ret = nil
-      begin 
+      begin
         ret = const_get class_last_part
        rescue
         raise Error.new("Generation of type (#{class_last_part}) not treated")
@@ -26,7 +26,7 @@ module DTK; class ModuleDSL
     def set?(key,content,obj)
       val = obj[key]
       unless val.nil?
-        content[key.to_s] = val 
+        content[key.to_s] = val
       end
     end
 

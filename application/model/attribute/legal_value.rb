@@ -1,5 +1,5 @@
 module DTK; class Attribute
-  class LegalValue 
+  class LegalValue
     def self.raise_usage_errors?(existing_attrs,ndx_new_vals)
       errors = ErrorsUsage.new
       existing_attrs.each do |a|
@@ -15,7 +15,7 @@ module DTK; class Attribute
         raise errors
       end
     end
-    class Error < ErrorUsage 
+    class Error < ErrorUsage
       def initialize(attr,new_val,info={})
         super(error_msg(attr,new_val,info))
       end
@@ -24,11 +24,11 @@ module DTK; class Attribute
 
       def error_msg(attr,new_val,info)
         attr_name = attr[:display_name]
-        ret = "Attribute (#{attr}) has illegal value (#{new_val})" 
+        ret = "Attribute (#{attr}) has illegal value (#{new_val})"
         if legal_vals = info[:legal_values]
           ident = " "*2;
           sep = "--------------"
-          ret << "; legal values are: \n#{sep}\n#{ident}#{legal_vals.join("\n#{ident}")}" 
+          ret << "; legal values are: \n#{sep}\n#{ident}#{legal_vals.join("\n#{ident}")}"
           ret << "\n#{sep}\n"
         end
         ret

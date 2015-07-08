@@ -43,7 +43,7 @@ def get_node_ec2_public_dns(service_name, node_name)
 		puts "Info about #{node_name} node is not found!"
 		puts ""
 		return node_ec2_public_dns
-	end	
+	end
 end
 
 def index_and_retrieve_document(elasticsearch_host, elasticsearch_http_port)
@@ -74,7 +74,7 @@ def index_and_retrieve_document(elasticsearch_host, elasticsearch_http_port)
 		puts ""
 	end
 
-	return document_retrieved	
+	return document_retrieved
 end
 
 describe "(Different Node Templates) Test Case 10: Elasticsearch - Simple scenario" do
@@ -86,7 +86,7 @@ describe "(Different Node Templates) Test Case 10: Elasticsearch - Simple scenar
 		include_context "Stage", dtk_common
 	end
 
-	context "List services after stage" do		
+	context "List services after stage" do
 		include_context "List services after stage", dtk_common
 	end
 

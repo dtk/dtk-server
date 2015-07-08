@@ -1,4 +1,4 @@
-module DTK; class ErrorUsage 
+module DTK; class ErrorUsage
   class Parsing <  ErrorUsage::DSLParsing #TODO: cleanup this is coming from dtk_common
     r8_nested_require('parsing','yaml')
     r8_nested_require('parsing','term')
@@ -16,14 +16,14 @@ module DTK; class ErrorUsage
       processed_msg,params,opts = Params.process(msg,*args)
       @params = params
 
-      # if file_path is an option than see if there is an explicit variable in msg for file_path; if so substitue and deleet 
+      # if file_path is an option than see if there is an explicit variable in msg for file_path; if so substitue and deleet
       # so parent does not add it to end
       if file_path = opts[:file_path]
         if Params.substitute_file_path?(processed_msg,file_path)
           opts.delete(:file_path)
         end
       end
-        
+
       if free_var = Params.any_free_vars?(processed_msg)
         Log.error("The following error message has free variable: #{free_var}")
       end
@@ -31,7 +31,7 @@ module DTK; class ErrorUsage
       if error_prefix = opts.delete(:error_prefix)
         processed_msg = "#{error_prefix}: #{processed_msg}"
       end
-      
+
       # TODO: cleanup so parent takes opts, rather than opts_or_file_path
       opts_or_file_path =
         if opts.empty?
@@ -53,7 +53,7 @@ module DTK; class ErrorUsage
       begin
         ret = yield
         if opts[:only_return_error] && !ret.is_a?(ErrorUsage::Parsing)
-          ret = nil 
+          ret = nil
         end
       rescue ErrorUsage::Parsing => e
         ret = e
@@ -67,7 +67,7 @@ module DTK; class ErrorUsage
 
     def self.raise_error_if_value_nil(v,opts={})
       if v.nil?
-        if err_params = opts[:err_params] 
+        if err_params = opts[:err_params]
           err_msg = opts[:err_msg] || "Value of (?1) should not be nil"
           raise new(err_msg,err_params)
         else

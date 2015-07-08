@@ -9,7 +9,7 @@ class Fieldtext < Fieldbase
     @columns = 0
     @default_class = 'r8-text'
     @read_only = false
-  
+
     # these control textarea inputs ability to auto resize or be draggable resize
     @auto_expand = false
     @drag_expand = false
@@ -116,7 +116,7 @@ class Fieldtext < Fieldbase
   # protected function
   def get_field_edit_text_js
     # TODO: add JS rendering when generating JS fields class for client side rendering
-    (@columns >=1) ? size = 'size="' + @columns.to_s + '"' : size = '' 
+    (@columns >=1) ? size = 'size="' + @columns.to_s + '"' : size = ''
 
     return '<JS NOT IMPLEMENT YET>'
   end
@@ -152,7 +152,7 @@ class Fieldtext < Fieldbase
     #      return '<a href="javascript:R8.ctrl.request(\'list_by_guid={%=' + @model_name + '[:id]%}\');">{%=' + model_name + '[:' + @name + ']%}</a>'
     else
       return '{%=' + @model_name + '[:' + @name + ']%}'
-    end  
+    end
   end
 
   # This returns the Edit View of a input of type text in TPL/Smarty form

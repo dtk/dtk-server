@@ -35,11 +35,11 @@ module DTK; class Node
       def node_template(nbrs_factory)
         hash_body = {
           :os_type => @os_type,
-          :os_identifier => @os_identifier, 
+          :os_identifier => @os_identifier,
           :type => 'image',
           :display_name => node_template_display_name(),
           :external_ref =>{
-            image_id: @image_id, 
+            image_id: @image_id,
             type: node_template_type(),
             size: @size
           },
@@ -65,7 +65,7 @@ module DTK; class Node
         if os.nil?
           raise ErrorUsage.new("Operating system must be given")
         end
-        os = os.to_sym 
+        os = os.to_sym
         unless LegalOSs.include?(os)
           raise ErrorUsage.new("OS parameter (#{os}) is invalid; legal values are: #{LegalOSs.join(',')}")
         end

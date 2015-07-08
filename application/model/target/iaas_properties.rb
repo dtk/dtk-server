@@ -3,7 +3,7 @@ module DTK
     class IAASProperties
       r8_nested_require('iaas_properties','ec2')
       attr_reader :name
-      # IAASProperties.new will be called with 
+      # IAASProperties.new will be called with
       #  :name and :iaas_properties, or with
       # :target_instance
       def initialize(hash_args)
@@ -13,7 +13,7 @@ module DTK
       end
 
       def properties
-        iaas_properties()        
+        iaas_properties()
       end
 
       def self.sanitize_and_modify_for_print_form!(type,iaas_properties)
@@ -38,7 +38,7 @@ module DTK
       def self.check(iaas_type,iaas_properties,opts={})
         CommandAndControl.check_iaas_properties(iaas_type,iaas_properties,opts)
       end
-      
+
       def hash
         iaas_properties()
       end

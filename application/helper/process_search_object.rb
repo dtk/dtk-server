@@ -15,14 +15,14 @@ module Ramaze::Helper
       elsif @action_set_params and not @action_set_params.empty?
         source = :action_set
         hash = ret_hash_search_object_in_action_set_params(@action_set_params)
-      else 
+      else
         source = :get_request
         hash = ret_hash_search_object_in_get()
       end
       SearchObject.create_from_input_hash(hash,source,ret_session_context_id()) if hash
    end
 
- 
+
    def ret_hash_search_object_in_get
      # TODO: stub; incomplete
      filter = ret_filter_when_get()

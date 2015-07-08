@@ -8,7 +8,7 @@ module DTK; class BaseModule; class UpdateModule
       config_agent_type = opts[:config_agent_type] || config_agent_type_default()
       impl_obj = Implementation.create?(project,local,repo,config_agent_type)
       impl_obj.create_file_assets_from_dir_els()
-      
+
       ret_hash = {
         name: module_name(),
         namespace: module_namespace(),
@@ -26,7 +26,7 @@ module DTK; class BaseModule; class UpdateModule
       # process any external refs if one of the flags :process_provider_specific_dependencies,:set_external_refs is true
       opts_external_refs = Aux.hash_subset(opts,[:process_provider_specific_dependencies,:set_external_refs])
       unless opts_external_refs.empty?
-        # external_ref if non null ,will have info from the config agent related meta files such as Puppert ModuleFile 
+        # external_ref if non null ,will have info from the config agent related meta files such as Puppert ModuleFile
         if external_ref = ConfigAgent.parse_provider_specific_dependencies?(config_agent_type, impl_obj)
           module_branch.update_external_ref(external_ref[:content]) if external_ref[:content]
           if opts[:process_provider_specific_dependencies]
@@ -59,7 +59,7 @@ module DTK; class BaseModule; class UpdateModule
       if dsl_updated_info && !dsl_updated_info.empty?
         ret.merge!(dsl_updated_info: dsl_updated_info)
       end
-      
+
       ret.merge(module_branch_idh: module_branch_idh, dsl_created_info: dsl_created_info)
     end
 

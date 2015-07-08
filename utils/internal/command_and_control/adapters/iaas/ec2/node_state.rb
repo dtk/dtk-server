@@ -1,11 +1,11 @@
 module DTK; module CommandAndControlAdapter
   class Ec2
     module NodeStateClassMixin
-      # assumed that node[:external_ref] and  node[:hostname_external_ref] are up to date  
+      # assumed that node[:external_ref] and  node[:hostname_external_ref] are up to date
       def get_and_update_node_state!(node,attribute_names)
         ret = {}
         unless raw_state_info = raw_state_info!(node)
-          return ret 
+          return ret
         end
 
         # attribute_names in normalized form so need to convert
@@ -55,7 +55,7 @@ module DTK; module CommandAndControlAdapter
           raw_state_info[:dns_name]
         end
       end
-     
+
       def get_node_operational_status(node)
         instance_id = get_instance_id_from_object(node)
         # TODO: see if more targeted get to just get operational status
@@ -66,7 +66,7 @@ module DTK; module CommandAndControlAdapter
       StateTranslation = {
         "pending" => "starting",
         "shutting-down" => "stopping"
-      } 
+      }
 
       private
 

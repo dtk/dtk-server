@@ -8,7 +8,7 @@ module DTK
           raise ::DTK::Error.new("Bad dns_domain '#{dns_domain}'")
         end
       end
-      
+
       def all_records
         request_context do
           @r8zone.records

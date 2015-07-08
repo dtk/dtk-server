@@ -78,10 +78,10 @@ class FieldR8
 
   def self.load_field_file(file_name)
     r8_require("#{UTILS_DIR}/fields/#{file_name}")
-  end 
+  end
   def load_field_file(file_name)
     self.class.load_field_file(file_name)
-  end 
+  end
   load_field_file("field.base.rb")
 end
 end

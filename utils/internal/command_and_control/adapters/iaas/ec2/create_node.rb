@@ -1,5 +1,5 @@
 module DTK; module CommandAndControlAdapter
-  class Ec2 
+  class Ec2
     #TODO: these fns that execute per node group member will be put at more asbtract level
     class CreateNode < self
       def self.run(task_action)
@@ -84,9 +84,9 @@ module DTK; module CommandAndControlAdapter
             }
             Ec2.update_node!(node,node_update_hash)
           end
-          
+
           process_addresses__first_boot?(node)
-          
+
           {status: "succeeded",
             node: {
               external_ref: external_ref
@@ -101,7 +101,7 @@ module DTK; module CommandAndControlAdapter
           unless ami = external_ref[:image_id]
             raise ErrorUsage.new("Cannot find ami for node (#{@node[:display_name]})")
           end
-          
+
           conn = Ec2.conn(@node.get_target_iaas_credentials())
 
           create_options = CreateOptions.new(self,conn,ami)
@@ -139,8 +139,8 @@ module DTK; module CommandAndControlAdapter
           end
 
           def update_security_group!
-            security_group = @target.get_security_group() || 
-              @target.get_security_group_set() || 
+            security_group = @target.get_security_group() ||
+              @target.get_security_group_set() ||
               @external_ref[:security_group_set] ||
               [R8::Config[:ec2][:security_group]] ||
               'default'
@@ -150,21 +150,21 @@ module DTK; module CommandAndControlAdapter
           def update_tags!
             merge!(tags: {"Name" => ec2_name_tag()})
           end
-          
+
           def update_key_name
             merge!(key_name: @target.get_keypair() || R8::Config[:ec2][:keypair])
           end
 
           def update_availability_zone!
             target_availability_zone = (@target[:iaas_properties]||{})[:availability_zone]
-            avail_zone = @external_ref[:availability_zone] || 
-              (@target[:iaas_properties]||{})[:availability_zone] || 
+            avail_zone = @external_ref[:availability_zone] ||
+              (@target[:iaas_properties]||{})[:availability_zone] ||
               R8::Config[:ec2][:availability_zone]
             unless avail_zone.nil? || avail_zone == 'automatic'
               merge!(availability_zone: avail_zone)
             end
           end
-        
+
           def update_vpc_info?
             if @target.is_builtin_target?()
               #TODO: we wil get rid of this special case and just put the info in builtin target
@@ -184,20 +184,20 @@ module DTK; module CommandAndControlAdapter
             unless iaas_properties[:ec2_type] == 'ec2_vpc'
               return
             end
-            
+
             unless subnet = iaas_properties[:subnet]
               Log.error_pp(["Unexpected that @target does not have :iaas_properties",@target])
               return
             end
-            
+
             subnet_id = @conn.check_for_subnet(subnet)
             associate_public_ip = true #TODO: stub vale
-            merge!(subnet_id: subnet_id, associate_public_ip: associate_public_ip) 
+            merge!(subnet_id: subnet_id, associate_public_ip: associate_public_ip)
           end
 
           def update_block_device_mapping!(image)
             root_device_override_attrs = {'Ebs.DeleteOnTermination' => 'true'}
-            if root_device_size = @node.attribute.root_device_size() 
+            if root_device_size = @node.attribute.root_device_size()
               root_device_override_attrs.merge!('Ebs.VolumeSize' => root_device_size)
             end
             # only add block_device_mapping if it was fully generated
@@ -252,7 +252,7 @@ module DTK; module CommandAndControlAdapter
 
         def get_node_status(instance_id)
           ret = nil
-          begin 
+          begin
             target_aws_creds = node.get_target_iaas_credentials()
             response = Ec2.conn(target_aws_creds).get_instance_status(instance_id)
             ret = response[:status] && response[:status].to_sym

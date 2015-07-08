@@ -40,7 +40,7 @@ def send_request(path, body, opts)
   requestResponseJSON = JSON.parse(requestResponse)
   json_print requestResponseJSON
 
-  unless requestResponseJSON["errors"].nil? 
+  unless requestResponseJSON["errors"].nil?
     error_message = ""
     requestResponseJSON["errors"].each { |e| error_message += "#{e['code']}: #{e['message']} "}
   end
@@ -49,13 +49,13 @@ def send_request(path, body, opts)
     $success = false
     puts "", "Request failed."
     puts error_message
-    unless requestResponseJSON["errors"].first["backtrace"].nil? 
+    unless requestResponseJSON["errors"].first["backtrace"].nil?
       puts "", "Backtrace:"
       ap requestResponseJSON["errors"].first["backtrace"]
     end
-    
+
     log_print()
-    
+
   end
 
   return requestResponse
@@ -124,12 +124,12 @@ def execute_task(taskId, opts)
     json_print JSON.parse(responseTaskStatus)
   end
 
-  if taskStatus.include? 'fail' 
+  if taskStatus.include? 'fail'
     $success = false
     # Print error response from the service
     puts "", "Smoke test failed, response: "
     ap taskFullResponse
-    puts "Logs response:" 
+    puts "Logs response:"
     task_log_response = send_request('/rest/task/get_logs', {'task_id '=> taskId}, opts)
     ap JSON.parse(task_log_response)
 
@@ -143,20 +143,20 @@ def execute_task(taskId, opts)
 end
 
 def deploy_test_assembly(opts)
-  
+
   OS_IDENTIFIERS.each do |os_identifier|
     puts "================================================================================="
     puts "Using OS Identifier: #{os_identifier}"
-    puts "Using assembly template ID: #{ASSEMBLY_ID}" 
+    puts "Using assembly template ID: #{ASSEMBLY_ID}"
 
     # listAssembly = send_request('/rest/assembly/list', {},  opts)
 
-    # Stage the assembly 
+    # Stage the assembly
     stageAssembly = send_request('/rest/assembly/stage', {'assembly_id' => ASSEMBLY_ID}, opts)
 
     assemblyId = JSON.parse(stageAssembly)["data"]["assembly_id"]
 
-    puts "", "Staged assembly ID: #{assemblyId}" 
+    puts "", "Staged assembly ID: #{assemblyId}"
 
     attributes = JSON.parse(send_request('/rest/assembly/info_about', {subtype: "instance", about: "attributes", assembly_id: assemblyId, filter: nil}, opts))
 
@@ -188,12 +188,12 @@ def deploy_test_assembly(opts)
       json_print JSON.parse(responseTaskStatus)
     end
 
-    if taskStatus.include? 'fail' 
+    if taskStatus.include? 'fail'
       $success = false
       # Print error response from the service
       puts "", "Smoke test failed, response: "
       ap taskFullResponse
-      puts "Logs response:" 
+      puts "Logs response:"
       task_log_response = send_request('/rest/task/get_logs', {'task_id '=> taskId}, opts)
       ap JSON.parse(task_log_response)
 
@@ -208,7 +208,7 @@ def deploy_test_assembly(opts)
 
     # Test node group creation and reconverging
     # node_group_spin_up(opts)
-    
+
     # Delete the cloned assembly's instance, this is the must!
     deleteAssembly(assemblyId, opts)
 
@@ -331,7 +331,7 @@ deploy_test_assembly(opts)
 
 abort("Job failed!") unless $success
 
-# 
+#
 # "http://ec2-184-72-164-154.compute-1.amazonaws.com:7000/rest/component_module/create_empty_repo"
 # {:component_module_name=>"test_module"}
 # "http://ec2-184-72-164-154.compute-1.amazonaws.com:7000/rest/component_module/update_repo_and_add_dsl"

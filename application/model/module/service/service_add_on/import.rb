@@ -2,7 +2,7 @@ module DTK
   class ServiceAddOn
     private
 
-    class Import 
+    class Import
       include ServiceDSLCommonMixin
       def initialize(container_idh,module_name,dsl_file,hash_content,ports,aug_assembly_nodes)
         @container_idh = container_idh
@@ -29,7 +29,7 @@ module DTK
         unless port_links.empty?
           ao_input_hash.merge!(port_link: port_links)
         end
-        
+
         node_bindings = ServiceNodeBinding.import_add_on_node_bindings(@aug_assembly_nodes,hash_content["node_bindings"])
         unless node_bindings.empty?
           ao_input_hash.merge!(service_node_binding: node_bindings)
@@ -58,7 +58,7 @@ module DTK
           output_assembly,output_port = add_on_parse(link.keys.first,assembly_list)
           input_id = input_port.matching_id(ports)
           output_id = output_port.matching_id(ports)
-          output_is_local = (output_assembly == assembly[:display_name]) 
+          output_is_local = (output_assembly == assembly[:display_name])
           pl_hash = {"input_id" => input_id,"output_id" => output_id, "output_is_local" => output_is_local, "required" => ao_pl["required"]}
           ret.merge!(ao_pl_ref => pl_hash)
         end
@@ -68,12 +68,12 @@ module DTK
       def add_on_parse(add_on_port_ref,assembly_list)
         ServiceModule::AssemblyImport::PortRef::AddOn.parse(add_on_port_ref,assembly_list)
       end
-      
+
       def augment_with_assembly_ids!(_ports)
         nil
       end
 
-      DslRegExp = Regexp.new("add-ons/([^/]+)\.json$")    
+      DslRegExp = Regexp.new("add-ons/([^/]+)\.json$")
       attr_reader :container_idh, :module_name, :dsl_file, :hash_content, :ports
 
       def import_port_link(_port_link_info)

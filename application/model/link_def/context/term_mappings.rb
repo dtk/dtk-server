@@ -16,7 +16,7 @@ module DTK
           v.set_component_remote_and_local_value!(link,cmp_mappings)
         end
       end
-      
+
       def set_attribute_values!(_link,_link_defs_info,node_mappings)
         attrs_to_set = component_attributes_to_set()
         get_and_update_component_attributes!(attrs_to_set)
@@ -67,7 +67,7 @@ module DTK
       end
 
       def add_component_ref!(component)
-        component_type = component[:component_type] 
+        component_type = component[:component_type]
         term_index = component_type
         self[term_index] ||= Value::Component.new(component_type: component_type)
       end
@@ -106,7 +106,7 @@ module DTK
       end
 
       def add_ref!(node_mappings,component_attr_index,term)
-        # TODO: see if there can be name conflicts between different types in which nmay want to prefix with 
+        # TODO: see if there can be name conflicts between different types in which nmay want to prefix with
         # type (type's initials, like CA for componanet attribute)
         term_index = term[:term_index]
         value = self[term_index] ||= Value.create(term,node_mappings: node_mappings)

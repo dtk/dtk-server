@@ -767,7 +767,7 @@ Style/TrailingComma:
 # Offense count: 2532
 # Cop supports --auto-correct.
 Style/TrailingWhitespace:
-  Enabled: false
+  Enabled: true
 
 # Offense count: 4
 # Cop supports --auto-correct.
@@ -787,17 +787,6 @@ Style/VariableName:
 # Offense count: 2
 # Cop supports --auto-correct.
 Style/WhenThen:
-  Enabled: false
-
-# Offense count: 14
-# Cop supports --auto-correct.
-Style/WhileUntilDo:
-  Enabled: false
-
-# Offense count: 1
-# Cop supports --auto-correct.
-# Configuration parameters: MaxLineLength.
-Style/WhileUntilModifier:
   Enabled: true
 
 # Offense count: 193

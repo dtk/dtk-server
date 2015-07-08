@@ -4,10 +4,10 @@ module XYZ
 		# 		within one puppet_agent execution
 
 		# 		First implementation will do this staging type only for node groups.
-		# 		Components from one or more node groups will be extracted from list of all 
+		# 		Components from one or more node groups will be extracted from list of all
 		# 		components into coresponding stages. Components from assembly instance will
-		# 		be added as a last element of the group list. 
-		# 
+		# 		be added as a last element of the group list.
+		#
 		# 		Later in the flow, for this group list, each group will be intra node stage,
 		# 		based on which puppet manifest will be generated.
 		#
@@ -17,12 +17,12 @@ module XYZ
 			 	cd_group = {}
 			 	scl_group = {}
 			 	cd_assembly = {}
-			 	scl_assembly = [] 
+			 	scl_assembly = []
 
 			 	# Go through all components
 			 	state_change_list.each do |sc|
 			 		component_node_id = sc[:component][:node_node_id]
-			 		# If node id and component's node_node_id are different, 
+			 		# If node id and component's node_node_id are different,
 			 		# it means components comes from node group and not from assembly instance.
 			 		# make puppet stages and return grouped results.
 			 		unless sc[:node][:id] == component_node_id
@@ -40,7 +40,7 @@ module XYZ
 			 	cd_ret << cd_assembly
 			 	scl_ret = scl_group.values
 			 	scl_ret << scl_assembly
-			 	
+
 			 	return cd_ret, scl_ret
 			end
 		end

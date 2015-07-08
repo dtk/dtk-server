@@ -6,7 +6,7 @@ module DTK; class ModuleDSL; class V4
         module Variations
         end
         extend Aux::ParsingingHelper::ClassMixin
-        
+
         ActionDefs = 'actions'
         Variations::ActionDefs = ['actions','action']
 

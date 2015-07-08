@@ -37,7 +37,7 @@ describe "(Staging And Deploying Assemblies) Test Case 13: Ability to create ass
 		include_context "Stage", dtk_common
 	end
 
-	context "List services after stage" do		
+	context "List services after stage" do
 		include_context "List services after stage", dtk_common
 	end
 
@@ -65,7 +65,7 @@ describe "(Staging And Deploying Assemblies) Test Case 13: Ability to create ass
     include_context "Stage", dtk_common2
   end
 
-  context "List services after stage of new assembly" do 
+  context "List services after stage of new assembly" do
     include_context "List services after stage", dtk_common2
   end
 

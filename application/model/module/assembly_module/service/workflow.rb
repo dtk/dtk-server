@@ -49,7 +49,7 @@ module DTK; class AssemblyModule
         template_content =  Task::Template::ConfigComponents.get_or_generate_template_content(:assembly,@assembly,opts)
         splice_in_workflow(module_branch,template_content)
       end
-      
+
       def splice_in_workflow(module_branch,template_content)
         hash_content = template_content.serialization_form()
         module_branch.serialize_and_save_to_repo?(meta_file_path(),hash_content)

@@ -8,7 +8,7 @@ class HomePage < PageContainer
   def get_header
     return Header.new(@session)
   end
-  
+
   def get_main
     return Main.new(@session)
   end

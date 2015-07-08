@@ -17,14 +17,14 @@ module DTK; class Clone
       def equal_so_dont_modify?(_instance,_template)
         false
       end
-      
+
       def update_opts
         # TODO: can refine to allow deletes if instance has nil value and not in any attribute link
         # can do this by passing in a charachterstic fn
         #{:donot_allow_deletes => true}
         super
       end
-      
+
       def get_ndx_objects(component_idhs)
         ret = {}
         ::DTK::Component.get_attributes(component_idhs,cols_plus: [:component_component_id,:ref]).each do |r|

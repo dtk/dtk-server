@@ -7,7 +7,7 @@ module DTK
         @base_assembly = service_add_on_info[:base_assembly]
       end
       attr_reader :node_bindings
-      
+
       def get_mapped_nodes(create_override_attrs,create_opts)
         ret = []
         cols_needed = (create_opts[:returning_sql_cols]||[]) - create_override_attrs.keys
@@ -18,7 +18,7 @@ module DTK
           cols: [:id,:group_id,:ancestor_id],
           filter: [:and, [:eq,:assembly_id,@base_assembly[:id]],
                    [:oneof,:ancestor_id,@node_bindings.map{|nb|nb[:assembly_node_id]}]]
-          
+
         }
         node_mh = @base_assembly.model_handle(:node)
         ret = Model.get_objs(node_mh,sp_hash)
@@ -68,4 +68,4 @@ module DTK
     end
   end; end; end
 end
-    
+

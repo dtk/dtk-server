@@ -13,7 +13,7 @@ module XYZ
       include ChefMixinAssembly
       def initialize_extra
         @conn = nil
-        @chef_node_cache = Aux::Cache.new 
+        @chef_node_cache = Aux::Cache.new
         @cookbook_metadata_cache = Aux::Cache.new
         @recipe_service_info_cache =  Aux::Cache.new
         @attributes_with_values = Aux::Cache.new
@@ -44,7 +44,7 @@ module XYZ
       end
 
       private
-        
+
       def get_node_components(node)
         ret = DataSourceUpdateHash.new
         (recipes(node)||[]).each do |recipe_name|
@@ -53,7 +53,7 @@ module XYZ
           ref = recipe_name
           values = {
             "normalized_recipe_name" => normalized_recipe_name(recipe_name),
-            "recipe_name" => recipe_name, 
+            "recipe_name" => recipe_name,
             "basic_type" => metadata["basic_type"],
             "node_name" => node.name
           }
@@ -73,14 +73,14 @@ module XYZ
           next unless metadata
           values = {
             "normalized_recipe_name" => normalized_recipe_name(recipe_name),
-            "recipe_name" => recipe_name, 
+            "recipe_name" => recipe_name,
             "description" => description,
             "basic_type" => metadata["basic_type"]
           }
           mons = get_monitoring_items(metadata)
           attrs =  get_attributes_with_values(recipe_name,metadata)
           ds_hash = DataSourceUpdateHash.new(values.merge({"attributes" => attrs, "monitoring_items" => mons}))
-          ret << ds_hash.freeze 
+          ret << ds_hash.freeze
         end
         ret
       end
@@ -167,7 +167,7 @@ module XYZ
         return metadata unless metadata and metadata["attributes"]
         exploded_keys = metadata["attributes"].keys.map{|x|x.split("/")}
         return metadata if exploded_keys.empty?
-        metadata["attributes"].reject! do |k,_v| 
+        metadata["attributes"].reject! do |k,_v|
           ek = k.split("/")
           exploded_keys.find{|k2| ek.size < k2.size and ek == k2[0..ek.size-1]}
         end
@@ -202,7 +202,7 @@ module XYZ
 
       def get_rest(item,convert_to_hash=true)
         raw_rest_results = nil
-        begin 
+        begin
           raw_rest_results = conn().get_rest(item)
          rescue Exception => e
           Log.debug_pp [:error,e]
@@ -210,7 +210,7 @@ module XYZ
         return raw_rest_results if raw_rest_results.nil?
         return raw_rest_results unless convert_to_hash
         return raw_rest_results if raw_rest_results.is_a?(Hash)
-        raw_rest_results.to_hash 
+        raw_rest_results.to_hash
       end
 
       def conn
@@ -234,7 +234,7 @@ module XYZ
 
       def get_attributes_with_values_aux(recipe_name,metadata,node=nil)
         ret = DataSourceUpdateHash.create()
-        (metadata["attributes"]||{}).each do |raw_attr_name,attr_metadata| 
+        (metadata["attributes"]||{}).each do |raw_attr_name,attr_metadata|
           recipes = attr_metadata["recipes"]||[]
           next unless recipes.empty? or recipes.include?(recipe_name)
           attr_name,service_name = get_attribute_and_service_names(raw_attr_name)
@@ -244,10 +244,10 @@ module XYZ
           ##############
           set_attribute_value(ret,attr_name,attr_metadata,metadata,node)
         end
-        
+
         ret.freeze
       end
-    
+
       def set_attribute_value(ret,attr_name,attr_metadata,metadata,node=nil)
         return set_service_attribute_value(ret,attr_name,attr_metadata,metadata,node) if attr_metadata["is_service_attribute"]
         value =

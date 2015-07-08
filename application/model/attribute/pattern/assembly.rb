@@ -1,5 +1,5 @@
 module DTK; class Attribute
-  class Pattern 
+  class Pattern
     class Assembly < self
       r8_nested_require('assembly','link')
 
@@ -10,7 +10,7 @@ module DTK; class Attribute
         end
 
         format = opts[:format]||Format::Default
-        klass = 
+        klass =
           case format
             when :simple then Simple
             when :canonical_form then CanonicalForm
@@ -22,23 +22,23 @@ module DTK; class Attribute
       class Simple
         def self.create(attr_term,_opts={})
           tokens = attr_term.split("/")
-          case tokens.size          
-            when 1 
+          case tokens.size
+            when 1
               Type::AssemblyLevel.new(t(:attribute,tokens[0]))
-            when 2 
+            when 2
               Type::NodeLevel.new("#{t(:node,tokens[0])}/#{t(:attribute,tokens[1])}")
             else
               # handling in a way that can correctly parse the case where have node/cmp_type[title]/attr and title can have '/'
               # This needs to be coorinated with ComponentTitle.parse_component_display_name
               node_part = tokens.shift
               attr_part = tokens.pop
-              cmp_part = tokens.join('/') 
+              cmp_part = tokens.join('/')
               Type::ComponentLevel.new("#{t(:node,node_part)}/#{t(:component,cmp_part)}/#{t(:attribute,attr_part)}")
           end
         end
 
         private
- 
+
         def self.t(type,term)
           Pattern::Term.canonical_form(type,term)
         end

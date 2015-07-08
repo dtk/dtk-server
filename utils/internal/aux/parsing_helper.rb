@@ -12,7 +12,7 @@ module DTK
                variations.include?(object.to_s)
             else
               raise Error.new("Unexpected object class (#{object.class})")
-            end            
+            end
           end
         end
 
@@ -42,12 +42,12 @@ module DTK
         end
 
         private
-            
+
         def variations(constant,opts={})
           # use of self:: and self. are important because want to evalute wrt to module that pulls this in
           begin
             variations = self::Variations.const_get(constant.to_s)
-            string_variations = variations.map{|v|v.to_s} 
+            string_variations = variations.map{|v|v.to_s}
             opts[:string_only] ? string_variations : string_variations + variations.map{|v|v.to_sym}
            rescue
             # if Variations not defined

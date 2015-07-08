@@ -36,13 +36,13 @@ module DTK; class  Assembly; class Instance
       def any_stopped_nodes?
         !!get_leaf_nodes(cols: [:id,:admin_op_status]).find{|node|node[:admin_op_status] == 'stopped'}
       end
-      
+
       # TODO: check that nelow correctly dont use get_leaf_nodes
       def op_status
         assembly_nodes = get_nodes(:admin_op_status)
         self.class.op_status(assembly_nodes)
       end
-      
+
       def op_status_all_pending?
         assembly_nodes = get_nodes(:admin_op_status)
         self.class.op_status_all_pending?(assembly_nodes)
@@ -71,10 +71,10 @@ module DTK; class  Assembly; class Instance
         # check for pattern
         unless node_pattern.nil? || node_pattern.empty?
           regex = Regexp.new(node_pattern)
-          
+
           # temp nodes_list
           nodes_list = nodes
-          
+
           nodes = nodes.select { |node| regex =~ node.id.to_s}
           if nodes.size == 0
             nodes = nodes_list.select { |node| node_pattern.to_s.eql?(node.display_name.to_s)}

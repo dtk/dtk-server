@@ -5,7 +5,7 @@ module XYZ
         def default_node_monitoring_items
           DefaultChecks.inject(DBUpdateHash.new){|h,o|h.merge(o[:display_name] => o)}
         end
-        DefaultChecks = 
+        DefaultChecks =
           [
            {description: "ping",
            display_name: "check_ping",

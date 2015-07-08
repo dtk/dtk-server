@@ -18,7 +18,7 @@ module XYZ
     end
 
     private
- 
+
     SavedAlready = {edit: {}, display: {}}
     def self.get_model_info(id_handle,_opts={})
       id_handle.create_object().get_info_for_view_def()

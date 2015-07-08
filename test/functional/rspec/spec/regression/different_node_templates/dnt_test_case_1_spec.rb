@@ -37,7 +37,7 @@ describe "(Different Node Templates) Test Case 1: Stage existing assembly with O
 
 		context "For #{os} and #{memory} combination, list services after stage" do
 			include_context "List services after stage", dtk_common
-		end		
+		end
 
 		context "For #{os} and #{memory} combination, set OS attribute" do
 			include_context "Set attribute", dtk_common, os_attribute, os
@@ -50,7 +50,7 @@ describe "(Different Node Templates) Test Case 1: Stage existing assembly with O
 		context "For #{os} and #{memory} combination, converge function" do
 			include_context "Converge", dtk_common
 		end
-		
+
 		context "For #{os} and #{memory} combination, delete and destroy service function" do
 			include_context "Delete services", dtk_common
 		end

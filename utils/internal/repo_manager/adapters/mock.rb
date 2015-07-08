@@ -9,7 +9,7 @@ module XYZ
       root = R8::Config[:repo][:base_directory]
       @path = "#{root}/#{path}"
     end
-    
+
     def get_file_content(file_asset)
       Dir.chdir(@path){File.open(file_asset[:path]){|f|f.read}}
     end

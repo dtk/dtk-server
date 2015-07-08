@@ -1,5 +1,5 @@
 module DTK; class Clone
-  class ChildContext 
+  class ChildContext
     class AssemblyComponentAttribute < self
       private
 
@@ -15,7 +15,7 @@ module DTK; class Clone
       end
 
       def process_attribute_overrides(new_objs_info)
-        fs_select = 
+        fs_select =
           [
            :display_name,
            :component_ref_id,

@@ -51,7 +51,7 @@ module R8Tpl
         @type = type
         @view_type = view_type
         @view_meta_id = nil
-        @edit_time = nil 
+        @edit_time = nil
       end
 
       public
@@ -80,7 +80,7 @@ module R8Tpl
         self.to_i
       end
     end
-    
+
     # TODO: temp until deprecate @saved_search_ref
     def virtual_model_ref
       @virtual_model_ref || @saved_search_ref
@@ -94,9 +94,9 @@ module R8Tpl
     # TODO: this bakes in some "ordering with a type; is this right place to put this?
     def ret_view_path(type)
       case(type)
-       when :system 
+       when :system
         ViewPathFile.new("#{R8::Config[:system_views_dir]}/#{@profile}.#{@view_name}.rtpl")
-       when :base 
+       when :base
         ViewPathFile.new("#{R8::Config[:base_views_dir]}/#{@model_name}/#{@profile}.#{@view_name}.rtpl")
        when :meta
         # first see if there is a meta template for specfic profile type; if not look for default;
@@ -106,7 +106,7 @@ module R8Tpl
         ViewPathFile.new("#{R8::Config[:meta_templates_root]}/#{@model_name}/view.default.#{@view_name}.rb")
        when :meta_db
          ViewPathDB.new(virtual_model_ref)
-       when :cache 
+       when :cache
         # TODO: fix so saved_search not hard coded
         if virtual_model_ref
           if virtual_model_ref_type() == :virtual_object
@@ -140,7 +140,7 @@ module R8Tpl
       case path.type
         when :file then File.exists?(path) ? path : nil
         when :db then path
-        else 
+        else
         Log.error("Unexpected type of path")
         nil
       end

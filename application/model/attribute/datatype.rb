@@ -6,7 +6,7 @@ module DTK; class Attribute
       else
         is_array?() ? "array(#{st_summary})" : st_summary
       end
-    end  
+    end
 
     def ret_default_info
       default = self[:value_asserted]
@@ -69,7 +69,7 @@ module DTK; class Attribute
       raw_val = attr[attr_val_field]
       return nil if raw_val.nil?
       case (attr[:data_type]||"string")
-        when "string" 
+        when "string"
           raw_val
         when "boolean"
           case raw_val.to_s
@@ -80,16 +80,16 @@ module DTK; class Attribute
         when "integer"
           if raw_val =~ /^[0-9]+$/
             raw_val.to_i
-          else 
+          else
             raise_error_msg("integer",raw_val,attr)
           end
         when "json"
           # will be converted already
           raw_val
-        else 
+        else
         raise Error.new("Unexpected Datatype (#{attr[:data_type]}) for attribute (#{attr.print_form()})")
       end
-    end 
+    end
 
     def self.attr_def_to_internal_form(hash)
       ret = {}

@@ -51,14 +51,14 @@ module DTK; class Clone; class ChildContext
         end
         ret
       end
-      
+
       private
 
       def assign_by_group(stub_node,target_refs,_context={})
         ret = []
         is_node_group = stub_node.is_node_group?()
         num_free = target_refs.size
-        num_needed = (is_node_group ? 
+        num_needed = (is_node_group ?
                       stub_node.attribute.cardinality(no_default: true)||num_free :
                       1)
         if num_free < num_needed
@@ -66,7 +66,7 @@ module DTK; class Clone; class ChildContext
         end
 
         #sorting as heuristic to pick the needed target refs using when created as captured by id
-        needed_trs = 
+        needed_trs =
           if is_node_group
             target_refs.sort{|a,b|a[:id] <=> b[:id]}[0...num_needed]
           else

@@ -1,11 +1,11 @@
 module DTK; class ServiceModule
   class ParsingError
-    class Aggregate 
+    class Aggregate
       def initialize(opts={})
         @aggregate_error = nil
         @error_cleanup = opts[:error_cleanup]
       end
-      
+
       def aggregate_errors!(ret_when_err=nil,&_block)
         begin
           yield
@@ -20,11 +20,11 @@ module DTK; class ServiceModule
           raise e
         end
       end
-      
+
       def raise_error?(opts={})
         if @aggregate_error
           @error_cleanup.call() if @error_cleanup
-          error = @aggregate_error.add_error_opts(Opts.new(log_error: false))  
+          error = @aggregate_error.add_error_opts(Opts.new(log_error: false))
           opts[:do_not_raise] ? error : raise(error)
         end
       end

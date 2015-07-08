@@ -1,5 +1,5 @@
 # TODO: modify so that types like port can call tehir parents methods
-module DTK; class Attribute 
+module DTK; class Attribute
   class SemanticDatatype
     Type :object do
       basetype :json
@@ -30,7 +30,7 @@ module DTK; class Attribute
     # base types
     Type :string do
       basetype :string
-      validation /.*/ #so checks that it is scalar 
+      validation /.*/ #so checks that it is scalar
     end
     Type :integer do
       basetype :integer
@@ -56,4 +56,4 @@ module DTK; class Attribute
     end
   end
 end; end
-    
+

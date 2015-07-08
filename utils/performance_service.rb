@@ -1,5 +1,5 @@
 module DTK
-  # 
+  #
   # Amar: Class that collects specific performance details and writes output to a file
   # 			Later on, file is parsed and various performance stats are collected
   #
@@ -7,12 +7,12 @@ module DTK
     # Configuration
     @@file_path = "/tmp/perf_#{Common::Aux.running_process_user()}.out"
     @@perf_enabled = true
-    
-    
+
+
     @@timer_hash = {}
     @@measure_lock = Mutex.new
     @@file_lock = Mutex.new
-    
+
     # Logs performance related line into performance output file
     # Each line is predifined and reused in parsing output tool
     # For new lines, tool must be altered
@@ -20,7 +20,7 @@ module DTK
       return unless @@perf_enabled
       @@file_lock.synchronize { File.open(@@file_path, 'a') { |file| file.write(line + "\n") } }
     end
-    
+
     # Starts timer for provided measure
     # If called from multithreaded part, i.e. ruote, unique key must be provided to measure multiple measurements
     # I've used self.object_id successfully for unique_key
@@ -28,7 +28,7 @@ module DTK
       return unless @@perf_enabled
       push_time_now(measure,unique_key)
     end
-    
+
     # This method ends custom measurements that in order to work must be applied specifically in parsing tool
     # Ends timer for provided measure and logs the measurement in performance output file
     # If called from multithreaded part, i.e. ruote, unique key must be provided to measure multiple measurements
@@ -38,7 +38,7 @@ module DTK
       duration = duration_to_now(pop_time(measure,unique_key))
       log("#{measure}=#{duration}")
     end
-    
+
     # This method ends generic measurements that are being logged with format 'MEASUREMENT=#{measure},#{duration}'
     # Ends timer for provided measure and logs the measurement in performance output file
     # If called from multithreaded part, i.e. ruote, unique key must be provided to measure multiple measurements

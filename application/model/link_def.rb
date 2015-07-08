@@ -83,7 +83,7 @@ module DTK
         ld = r[:link_def]
         h.merge(ld[:id] => ld)
       end
-      ld_link_cols = [:id,:group_id,:display_name,:type,:position,:remote_component_type,:link_def_id] 
+      ld_link_cols = [:id,:group_id,:display_name,:type,:position,:remote_component_type,:link_def_id]
       ld_links = get_link_def_links(ndx_link_defs.values.map{|r|r.id_handle()},cols: ld_link_cols)
       ld_links.each do |r|
         (ndx_link_defs[r[:link_def_id]][:link_def_links] ||= []) << r

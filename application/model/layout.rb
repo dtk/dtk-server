@@ -47,7 +47,7 @@ module XYZ
         end
         indexed_groups.values
       end
-      
+
       def self.group_index(el)
         el[:component_id]
       end
@@ -62,7 +62,7 @@ module XYZ
       def self.group_name(el)
         group_i18n(el).gsub(/[^A-Za-z0-9_]/,"_")
       end
-      
+
       def self.field_list__edit(el)
         {name: el[:name],
           type: convert_type(el[:type]),

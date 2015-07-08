@@ -14,12 +14,12 @@ module DTK; class Clone
         assembly_template_idh = model_handle.createIDH(model_name: :component, id: hash[:ancestor_id])
         sao_node_bindings = clone_proc.service_add_on_node_bindings()
         target = hash[:target_idh].create_object(model_name: :target_instance)
-        matches = 
+        matches =
           unless target.iaas_properties.supports_create_image?()
             find_target_ref_matches(target,assembly_template_idh)
           else
             # can either be node templates, meaning spinning up node, or
-            #  a match to an existing node in which case the existing node target ref is returned 
+            #  a match to an existing node in which case the existing node target ref is returned
             find_matches_for_nodes(target,assembly_template_idh,sao_node_bindings)
           end
         merge!(matches: matches) if matches
@@ -29,7 +29,7 @@ module DTK; class Clone
       def ret_new_objs_info(field_set_to_copy,create_override_attrs)
         ret = []
         ancestor_rel_ds = array_dataset(parent_rels,:target)
-      
+
         # all parent_rels will have same cols so taking a sample
         remove_cols = [:ancestor_id,:display_name,:type,:ref,:canonical_template_node_id] + parent_rels.first.keys
         node_template_fs = field_set_to_copy.with_removed_cols(*remove_cols).with_added_cols(id: :node_template_id)
@@ -93,14 +93,14 @@ module DTK; class Clone
           mtr.find_free_nodes(target,stub_nodes,assembly_template_idh)
          when :match_tags
            mtr.match_tags(target,stub_nodes,assembly_template_idh)
-         else 
+         else
           raise Error.new("Unexpected matching strategy (#{matching_strategy})")
         end
       end
 
       def find_matches_for_nodes(target,assembly_template_idh,sao_node_bindings=nil)
         # find the assembly's stub nodes and then use the node binding to find the node templates
-        # as will as using, if non-empty, service_add_on_node_bindings to 
+        # as will as using, if non-empty, service_add_on_node_bindings to
         # see what nodes mapping to existing ones and thus shoudl be omitted in clone
         sp_hash = {
           cols: [:id,:display_name,:type,:node_binding_ruleset],
@@ -114,17 +114,17 @@ module DTK; class Clone
           end
         end
 
-        node_bindings = NodeBindings.get_node_bindings(assembly_template_idh) 
+        node_bindings = NodeBindings.get_node_bindings(assembly_template_idh)
         node_mh = target.model_handle(:node)
         node_info.map do |node|
           nb_ruleset = node[:node_binding_ruleset]
           node_target = node_bindings && node_bindings.has_node_target?(node.get_field?(:display_name))
           case match_or_create_node?(target,node,node_target,nb_ruleset)
-            when :create 
+            when :create
               opts_fm = {node_binding_ruleset: nb_ruleset, node_target: node_target}
               node_template = Node::Template.find_matching_node_template(target,opts_fm)
               hash_el_when_create(node,node_template)
-            when :match  
+            when :match
               if target_ref = NodeBindings.create_linked_target_ref?(target,node,node_target)
                 hash_el_when_match(node,target_ref)
               else
@@ -132,7 +132,7 @@ module DTK; class Clone
                 node_template = Node::Template.find_matching_node_template(target,node_binding_ruleset: nb_ruleset)
                 hash_el_when_create(node,node_template)
               end
-            else 
+            else
              raise Error.new("Unexpected return value from match_or_create_node")
           end
         end
@@ -152,7 +152,7 @@ module DTK; class Clone
         instance_type = node.is_assembly_wide_node?() ? 'assembly_wide' : node_class(node).staged
         {
           instance_type: instance_type,
-          node_stub_idh: node.id_handle, 
+          node_stub_idh: node.id_handle,
           instance_display_name: node[:display_name],
           instance_ref: instance_ref(node[:display_name]),
           node_template_idh: node_template.id_handle()
@@ -162,7 +162,7 @@ module DTK; class Clone
       def hash_el_when_match(node,target_ref,extra_fields={})
         ret = {
           instance_type: node_class(node).instance,
-          node_stub_idh: node.id_handle, 
+          node_stub_idh: node.id_handle,
           instance_display_name: node[:display_name],
           instance_ref: instance_ref(node[:display_name]),
           node_template_idh: target_ref.id_handle(),
@@ -172,7 +172,7 @@ module DTK; class Clone
         ret
       end
       public :hash_el_when_match
-      
+
       def node_class(node)
         node.is_node_group?() ? Node::Type::NodeGroup : Node::Type::Node
       end

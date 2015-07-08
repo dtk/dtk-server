@@ -129,10 +129,10 @@ module DTK
 
       def meta_file_assembly_name(meta_file_path)
         (meta_file_path.match(AssemblyFilenamePathInfo[:regexp])||[])[1] ||
-        (meta_file_path.match(AssemblyFilenamePathInfoLegacy[:regexp])||[])[1] 
+        (meta_file_path.match(AssemblyFilenamePathInfoLegacy[:regexp])||[])[1]
       end
       public :meta_file_assembly_name
- 
+
       # returns [meta_files, regexp]
       def meta_files_and_regexp_aux?(assembly_dsl_path_info,module_branch)
         depth = assembly_dsl_path_info[:path_depth]
@@ -314,7 +314,7 @@ module DTK
         return unless (name || file_path)
         assembly_name = ServiceModule.meta_file_assembly_name(file_path) || 'UNKNOWN'
         unless assembly_name.eql?(name)
-          ParsingError::BadAssemblyReference.new(file_path: file_path, name: name) 
+          ParsingError::BadAssemblyReference.new(file_path: file_path, name: name)
         end
       end
 

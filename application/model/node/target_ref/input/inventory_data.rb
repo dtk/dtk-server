@@ -1,5 +1,5 @@
 module DTK; class Node; class TargetRef
-  class Input 
+  class Input
     class InventoryData < self
       r8_nested_require('inventory_data','element')
 

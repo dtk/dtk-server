@@ -1,25 +1,25 @@
 module NodeOperationsMixin
 	def check_attribute_presence_in_nodes(service_id, node_name, attribute_name_to_check, attribute_value_to_check)
-		puts "Check attribute presence in nodes:", "----------------------------------"		
+		puts "Check attribute presence in nodes:", "----------------------------------"
 		attribute_check = false
 		#Get attribute and check if attribute name and attribute value exists
 		puts "List of service attributes:"
 		service_attributes = send_request('/rest/assembly/info_about', assembly_id: service_id, filter: nil, about: 'attributes', subtype: 'instance')
 		pretty_print_JSON(service_attributes)
 
-		if (service_attributes['data'].find { |x| x['display_name'] == "#{node_name}/#{attribute_name_to_check}" })		
+		if (service_attributes['data'].find { |x| x['display_name'] == "#{node_name}/#{attribute_name_to_check}" })
 			attribute_name = attribute_name_to_check
 			attribute_value = service_attributes['data'].find { |x| x['value'] == attribute_value_to_check }
 
 			if (!attribute_value.nil?)
-				puts "Attribute #{attribute_name_to_check} with value #{attribute_value_to_check} exists!" 
+				puts "Attribute #{attribute_name_to_check} with value #{attribute_value_to_check} exists!"
 				attribute_check = true
 			else
 				puts "For attribute #{attribute_name_to_check}, value #{attribute_value_to_check} does not exist!"
 			end
 
 			if (attribute_value_to_check == '')
-				puts "Attribute #{attribute_name_to_check} exists!" 
+				puts "Attribute #{attribute_name_to_check} exists!"
 				attribute_check = true
 			end
 		else
@@ -37,14 +37,14 @@ module NodeOperationsMixin
 		service_attributes = send_request('/rest/assembly/info_about', assembly_id: service_id, filter: nil, about: 'attributes', subtype: 'instance')
 		pretty_print_JSON(service_attributes)
 
-		puts "#{node_name}/#{component_name}/#{attribute_name_to_check}" 
+		puts "#{node_name}/#{component_name}/#{attribute_name_to_check}"
 
-		if (service_attributes['data'].find { |x| x['display_name'] == "#{node_name}/#{component_name}/#{attribute_name_to_check}" })		
+		if (service_attributes['data'].find { |x| x['display_name'] == "#{node_name}/#{component_name}/#{attribute_name_to_check}" })
 			attribute_name = attribute_name_to_check
 			attribute_value = service_attributes['data'].find { |x| x['value'] == attribute_value_to_check }
 
 			if (!attribute_value.nil?)
-				puts "Attribute #{attribute_name_to_check} with value #{attribute_value_to_check} exists!" 
+				puts "Attribute #{attribute_name_to_check} with value #{attribute_value_to_check} exists!"
 				attribute_check = true
 			else
 				puts "Attribute #{attribute_name_to_check} with value #{attribute_value_to_check} does not exist!"
@@ -52,7 +52,7 @@ module NodeOperationsMixin
 			end
 
 			if (attribute_value_to_check == '')
-				puts "Attribute #{attribute_name_to_check} exists!" 
+				puts "Attribute #{attribute_name_to_check} exists!"
 				attribute_check = true
 			end
 		else
@@ -199,7 +199,7 @@ module NodeOperationsMixin
 					puts "Node #{node_name} started!"
 					node_started = true
 					end_loop = true
-				end				
+				end
 			end
 		else
 			puts "Start #{node_name} node is not completed successfully!"
@@ -239,12 +239,12 @@ module NodeOperationsMixin
 					puts "Grep processing completed!"
 
 					if response['data']['results'].to_s.include? grep_pattern
-						grep_pattern_found = true 
+						grep_pattern_found = true
 					end
 					end_loop = true
 					break
-				end				
-			end			
+				end
+			end
 		end
 		puts ""
 		return grep_pattern_found
@@ -285,8 +285,8 @@ module NodeOperationsMixin
 		node_exists = false
 		node_list = send_request('/rest/assembly/info_about', assembly_id: service_id, subtype: 'instance', about: 'nodes')
 		pretty_print_JSON(node_list)
-		node = node_list['data'].find { |x| x['display_name'] == node_name }	
-		
+		node = node_list['data'].find { |x| x['display_name'] == node_name }
+
 		if !node.nil?
 			puts "Node #{node_name} exists!"
 			node_exists = true
@@ -336,7 +336,7 @@ module NodeOperationsMixin
 			puts "Node template #{node_name} found!"
 			template_node_id = test_template['id']
 			puts "Node template id: #{template_node_id}"
-			stage_node_response = send_request('/rest/node/stage', node_template_identifier: template_node_id, name: staged_node_name)		
+			stage_node_response = send_request('/rest/node/stage', node_template_identifier: template_node_id, name: staged_node_name)
 
 			if (stage_node_response['data']['node_id'])
 				puts "Stage of #{node_name} node template completed successfully!"
@@ -361,7 +361,7 @@ module NodeOperationsMixin
 		puts "Node with id #{node_id}: "
 		pretty_print_JSON(test_node)
 
-		if (test_node.any?)	
+		if (test_node.any?)
 			extract_node_id = test_node.first['id']
 			execution_status = test_node.first['type']
 
@@ -411,7 +411,7 @@ module NodeOperationsMixin
 				if (count > max_num_of_retries)
 					puts "Max number of retries reached..."
 					puts "Converge process was not finished successfully!"
-					end_loop = true 
+					end_loop = true
 				end
 			end
 		else
@@ -517,12 +517,12 @@ module NodeOperationsMixin
 					puts "Netstats check completed! Port #{port} avaiable!"
 					netstats_check = true
 					end_loop = true
-				else					
+				else
 					puts "Netstats check completed! Port #{port} is not avaiable!"
 					netstats_check = false
 					end_loop = true
 				end
-			end	
+			end
 		end
 		puts ""
 		return netstats_check
@@ -561,7 +561,7 @@ module NodeOperationsMixin
 		node_list = send_request('/rest/assembly/info_about', assembly_id: service_id, subtype: 'instance', about: 'nodes')
 		pretty_print_JSON(node_list)
 		node_id = node_list['data'].find { |x| x['display_name'] == node_name }['id']
- 		
+
  		netstats_check = false
 		end_loop = false
 		count = 0
@@ -593,13 +593,13 @@ module NodeOperationsMixin
 						netstats_check = true
 						end_loop = true
 						break
-					else					
+					else
 						puts "Netstats check completed! Port #{port} is not available!"
 						netstats_check = false
 						break
 					end
-				end				
-			end	
+				end
+			end
 		end
 		puts ""
 		return netstats_check

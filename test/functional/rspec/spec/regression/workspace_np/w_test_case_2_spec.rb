@@ -34,11 +34,11 @@ describe "(Workspace) Test Case 2: Create two nodes, add components in both of t
 
 	context "Add component to the node in workspace" do
 		include_context "Add component to the node in workspace", dtk_common, node_name_1, component_name, component_module_namespace
-	end	
+	end
 
 	context "Add component to the node in workspace" do
 		include_context "Add component to the node in workspace", dtk_common, node_name_2, component_name, component_module_namespace
-	end	
+	end
 
 	context "Converge workspace" do
 		include_context "Converge workspace", dtk_common

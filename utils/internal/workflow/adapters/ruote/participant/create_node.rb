@@ -5,7 +5,7 @@ module DTK
         # LockforDebug = Mutex.new
         def consume(workitem)
           # LockforDebug.synchronize{pp [:in_consume, Thread.current, Thread.list];STDOUT.flush}
-          params = get_params(workitem) 
+          params = get_params(workitem)
           task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
           execution_context(task,workitem,task_start) do
             result = workflow.process_executable_action(task)
@@ -21,7 +21,7 @@ module DTK
               node.update_operational_status!(:running)
               node.update_admin_op_status!(:running)
               log_participant.end(:initialize_succeeded,task_id: task_id)
-              set_result_succeeded(workitem,result,task,action) if task_end 
+              set_result_succeeded(workitem,result,task,action) if task_end
             end
             reply_to_engine(workitem)
           end
@@ -33,7 +33,7 @@ module DTK
           return if flavour
 
           wi = workitem
-          params = get_params(wi) 
+          params = get_params(wi)
           task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
           task.add_internal_guards!(workflow.guards[:internal])
           log_participant.canceling(task_id)
@@ -48,7 +48,7 @@ module DTK
           if result[:status] == "failed"
             result[:error_object] ? [{message: result[:error_object].to_s}] : []
           end
-        end    
+        end
       end
     end
   end

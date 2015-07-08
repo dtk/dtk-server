@@ -7,7 +7,7 @@ module DTK
       # TODO: so fieldset can be more advanced than array of scalrs; can have netsed structure
       def initialize(model_name,cols=[],field_search_pattern=nil)
         @model_name = model_name.to_sym
-        @cols = cols 
+        @cols = cols
         @field_search_pattern = field_search_pattern
       end
 
@@ -44,7 +44,7 @@ module DTK
       end
 
       def extra_local_columns(vcol_sql_fns=nil)
-        return nil unless vcolumns = (DB_REL_DEF[model_name]||{})[:virtual_columns] 
+        return nil unless vcolumns = (DB_REL_DEF[model_name]||{})[:virtual_columns]
         extra_cols = []
         cols = vcol_sql_fns ? (@cols + vcol_sql_fns.keys) : @cols
         cols.each do |f|
@@ -56,7 +56,7 @@ module DTK
       end
 
       def with_replaced_local_columns?
-        return nil unless vcolumns = (DB_REL_DEF[model_name]||{})[:virtual_columns] 
+        return nil unless vcolumns = (DB_REL_DEF[model_name]||{})[:virtual_columns]
         extra_cols = []
         removed_cols = []
         @cols.each do |f|
@@ -71,7 +71,7 @@ module DTK
 
       def with_related_local_columns
         extra_local_cols = extra_local_columns()
-        return self unless extra_local_cols 
+        return self unless extra_local_cols
         FieldSet.new(@model_name,@cols + extra_local_cols)
       end
 
@@ -83,10 +83,10 @@ module DTK
         defs_seen = []
         cols = vcol_sql_fns ? (@cols + vcol_sql_fns.keys) : @cols
         cols.each do |f|
-          next unless vcol_info = vcolumns[f] 
+          next unless vcol_info = vcolumns[f]
           deps, def_name = parse_remote_dependencies(vcol_info)
           next unless deps
-          if def_name 
+          if def_name
             next if defs_seen.include?(def_name)
             defs_seen << def_name
           end
@@ -97,10 +97,10 @@ module DTK
 
       def ret_where_clause_for_search_string(name_value_pairs)
         @field_search_pattern ? @field_search_pattern.ret_where_clause_for_search_string(name_value_pairs) : {}
-      end          
+      end
 
       # returns foreign key columns in fieldset
-      def foreign_key_info 
+      def foreign_key_info
         db_rel_cols = ((DB_REL_DEF[model_name]||{})[:columns]||[])
         ret = {}
         db_rel_cols.each do |col,col_info|
@@ -111,12 +111,12 @@ module DTK
 
       # field set in option list
       def self.opt(x,model_name=nil)
-        field_set = 
+        field_set =
           if x.is_a?(Symbol) and x == :all
             FieldSetAll.new()
-          elsif x.is_a?(Array) 
+          elsif x.is_a?(Array)
             raise Error.new("model_name is not given") unless model_name
-            FieldSet.new(model_name,x) 
+            FieldSet.new(model_name,x)
           else
             x
           end
@@ -134,7 +134,7 @@ module DTK
           non_hidden_columns(COMMON_REL_COLUMNS)
         end
       end
-               
+
       def self.all_real(model_name)
         ret_fieldset(model_name,:all_real) do |db_rel|
           real_cols(db_rel) + many_to_one_cols(db_rel)
@@ -143,7 +143,7 @@ module DTK
 
       def self.all_real_scalar(model_name)
         ret_fieldset(model_name,:all_real_scalar) do |db_rel|
-          real_cols(db_rel) 
+          real_cols(db_rel)
         end
       end
 
@@ -231,7 +231,7 @@ module DTK
       end
 
       def self.virtual_settable_cols(db_rel)
-        (db_rel[:virtual_columns]||[]).map{|vc,vc_info|vc if vc_info[:path]}.compact 
+        (db_rel[:virtual_columns]||[]).map{|vc,vc_info|vc if vc_info[:path]}.compact
       end
     end
 
@@ -259,4 +259,4 @@ module DTK
   end
 end
 
-  
+

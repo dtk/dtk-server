@@ -47,7 +47,7 @@ module DTK
 
       def self.create_targets?(project_idh,provider,iaas_properties_array,opts={})
         ret = []
-        target_mh = project_idh.createMH(:target) 
+        target_mh = project_idh.createMH(:target)
         provider.update_obj!(*InheritedProperties)
         provider_id = provider.id
         create_rows = iaas_properties_array.map do |iaas_properties|
@@ -55,7 +55,7 @@ module DTK
           ref = display_name.downcase.gsub(/ /,"-")
           specific_params = {
             parent_id: provider_id,
-            ref: ref, 
+            ref: ref,
             display_name: display_name,
             type: 'instance'
           }
@@ -68,7 +68,7 @@ module DTK
 
         # check if there are any matching target instances that are created already
         disjunct_array = create_rows.map do |r|
-          [:and, [:eq, :parent_id, r[:parent_id]], 
+          [:and, [:eq, :parent_id, r[:parent_id]],
            [:eq, :display_name, r[:display_name]]]
         end
         sp_hash = {
@@ -108,13 +108,13 @@ module DTK
         def add_info_changed_workspace_target!(new_default_target)
           @info[:changed_workspace_target] = new_default_target
         end
-        
+
         def hash_form
           ret = {}
           return ret if @info.empty?()
-          default_target = @info[:changed_default_target] 
+          default_target = @info[:changed_default_target]
           workspace_target = @info[:changed_workspace_target]
-          if default_target && workspace_target && default_target.id == workspace_target.id 
+          if default_target && workspace_target && default_target.id == workspace_target.id
             add_changed_target!(ret,default_target,:default_and_workspace)
           else
             add_changed_target!(ret,default_target,:default) if default_target
@@ -139,7 +139,7 @@ module DTK
       def self.delete_and_destroy(target)
         response_obj = DeleteResponseObject.new(target)
         if target.is_builtin_target?()
-          raise ErrorUsage.new("Cannot delete the builtin target") 
+          raise ErrorUsage.new("Cannot delete the builtin target")
         end
 
         target_mh              = target.model_handle()
@@ -160,7 +160,7 @@ module DTK
               if current_workspace_target = workspace.get_target()
                 if current_workspace_target.id == target.id
                   response_obj.add_info_changed_workspace_target!(builtin_target)
-                  workspace.set_target(builtin_target, mode: :from_delete_target) 
+                  workspace.set_target(builtin_target, mode: :from_delete_target)
                 end
               end
 
@@ -181,9 +181,9 @@ module DTK
                           new_default_target: target)
       end
 
-      def self.get_default_target(target_mh,cols=[]) 
+      def self.get_default_target(target_mh,cols=[])
         DefaultTarget.get(target_mh,cols)
-      end      
+      end
 
       def self.set_properties(target,iaas_properties)
         target.update_obj!(:iaas_properties)
@@ -200,7 +200,7 @@ module DTK
         hash_assignments = {iaas_properties: current_properties.merge(iaas_properties)}
         Model.update_from_hash_assignments(target.id_handle(),hash_assignments)
       end
-   
+
       def self.list(target_mh,opts={})
         filter = [:neq,:type,'template']
         if opts[:filter]
@@ -224,14 +224,14 @@ module DTK
             end
           end
         end
-        # sort by 1-whether default, 2-iaas_type, 3-display_name 
+        # sort by 1-whether default, 2-iaas_type, 3-display_name
         unsorted_rows.sort do |a,b|
           [a[:is_default_target] ? 0 : 1, a[:iaas_type], a[:display_name]] <=>
           [b[:is_default_target] ? 0 : 1, b[:iaas_type], b[:display_name]]
         end
       end
 
-      DefaultTargetMark = '*'      
+      DefaultTargetMark = '*'
 
       def is_builtin_target?
         get_field?(:parent_id).nil?
@@ -268,7 +268,7 @@ module DTK
       def self.set_builtin_provider_display_fields!(target)
         target.merge!(provider: BuiltinProviderDisplayHash)
       end
-      
+
       BuiltinProviderDisplayHash = {iaas_type: 'ec2', display_name: 'DTK-BUILTIN'}
     end
   end

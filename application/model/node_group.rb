@@ -12,7 +12,7 @@ module DTK
       # currently not using so short circuiting
       return ret
 
-      return ret if nodes.empty? 
+      return ret if nodes.empty?
       # find node_to_ng mapping
       node_filter = opts[:node_filter] || Node::Filter::NodeList.new(nodes.map{|n|n.id_handle()})
       node_to_ng = get_node_groups_containing_nodes(nodes.first.model_handle(:node_group),node_filter)
@@ -22,7 +22,7 @@ module DTK
         filter: [:oneof, :id, node_group_ids + nodes.map{|n|n[:id]}]
       }
       rows = get_objs(nodes.first.model_handle(),sp_hash)
-      
+
       ndx_cmps = {}
       ndx_node_ng_info = {}
       rows.each do |r|
@@ -114,7 +114,7 @@ module DTK
         node_group = r.hash_subset(:id,:group_id,:display_name)
         if target_idh = r[:node_group_relation].spans_target?
           target_id = target_idh.get_id()
-          target_nodes[target_id] ||= node_filter.filter(target_idh.create_object().get_node_group_members()).map{|n|n[:id]} 
+          target_nodes[target_id] ||= node_filter.filter(target_idh.create_object().get_node_group_members()).map{|n|n[:id]}
           target_nodes[target_id].each do |n_id|
             (node_to_ng[n_id] ||= {})[node_group[:id]] ||= node_group
           end
@@ -126,7 +126,7 @@ module DTK
     end
 
     def self.check_valid_id(model_handle,id)
-      filter = 
+      filter =
         [:and,
          [:eq, :id, id],
          [:eq, :type, "node_group_instance"],
@@ -162,7 +162,7 @@ module DTK
     end
 
     def clone_and_add_template_node(template_node)
-      # clone node into node group's target 
+      # clone node into node group's target
       target_idh = id_handle.get_top_container_id_handle(:target,auth_info_from_self: true)
       target = target_idh.create_object()
       cloned_node_id = target.add_item(template_node.id_handle)

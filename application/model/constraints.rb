@@ -15,7 +15,7 @@ module XYZ
       if opts[:raise_error_when_any_violation]
         all_violations = Violation::Expression(violations["error"],violations["warning"])
         raise ErrorConstraintViolations.new(all_violations.pp_form)
-      elsif opts[:raise_error_when_error_violation] 
+      elsif opts[:raise_error_when_error_violation]
         pp [:warnings, violations["warning"].pp_form]
         Violation.save(target_parent_obj,violations["warning"])
         raise ErrorConstraintViolations.new(violations["error"].pp_form) unless violations["error"].empty?
@@ -51,7 +51,7 @@ module XYZ
 
     def ret_violations(target)
       ret = {"error" => Violation::Expression.new(target,@logical_op), "warning" => Violation::Expression.new(target,@logical_op)}
-        
+
       self.each do |constraint|
         next if constraint.evaluate_given_target(target)
         severity = constraint[:severity] || "error"
@@ -74,7 +74,7 @@ module XYZ
             term
           elsif term.is_a?(Hash)
             term.inject({}){|h,kv|h.merge(string_symbol_form(kv[0]) => string_symbol_form(kv[1]))}
-          elsif term.is_a?(Array) 
+          elsif term.is_a?(Array)
             term.map{|t|string_symbol_form(t)}
           else
             Log.error("unexpected form for term #{term.inspect}")
@@ -182,12 +182,12 @@ module XYZ
 
     # overrwritten
     def update_object_from_info_gathered!(_object,_rows)
-      raise Error.new("not treating constraint update of object of type #{obj.class}") 
+      raise Error.new("not treating constraint update of object of type #{obj.class}")
     end
   end
 
   module ProcessVirtualComponentMixin
-    # converts from form that acts as if attributes are directly attached to component  
+    # converts from form that acts as if attributes are directly attached to component
     def ret_join_array(join_cond)
       real = []
       virtual = []
@@ -196,7 +196,7 @@ module XYZ
         parsed_comparision = SearchPatternSimple.ret_parsed_comparison(conjunction)
         if real_cols.include?(parsed_comparision[:col])
           real << conjunction
-        else 
+        else
           virtual << parsed_comparision
         end
       end
@@ -238,7 +238,7 @@ module XYZ
 
     include ProcessVirtualComponentMixin
     def create_dataset(target)
-      node_idh  = 
+      node_idh  =
         if target["target_node_id_handle"]
           target["target_node_id_handle"]
         elsif target["target_component_id_handle"]

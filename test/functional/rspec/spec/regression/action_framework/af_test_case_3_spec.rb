@@ -43,7 +43,7 @@ describe "(Action Framework) Test Case 3: Service with two nodes that contain cm
 		include_context "Stage with namespace", dtk_common, service_module_namespace
 	end
 
-	context "List services after stage" do		
+	context "List services after stage" do
 		include_context "List services after stage", dtk_common
 	end
 
@@ -57,7 +57,7 @@ describe "(Action Framework) Test Case 3: Service with two nodes that contain cm
 
 	context "Get task action details for action with two successfull commands" do
 		include_context "Get task action details", dtk_common, "5.1", [expected_output_2_1, expected_output_2_2]
-	end	
+	end
 
 	context "Get task action details for action with one successfull command" do
 		include_context "Get task action details", dtk_common, "6.1", [expected_output_1]

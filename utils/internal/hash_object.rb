@@ -10,7 +10,7 @@ module DTK
         replace(convert_initial ? convert_nested_hashes(initial_val) : initial_val)
       end
     end
-    
+
     def slice(*slice_keys)
       slice_keys.inject(HashObject.new()) do |h,k|
         if k.is_a?(Hash)
@@ -50,7 +50,7 @@ module DTK
         obj.each{|v|ret << convert_nested_hashes(v)}
         ret
       else
-        obj        
+        obj
       end
     end
 
@@ -79,7 +79,7 @@ module DTK
       elements = [elements] unless elements.is_a?(Array)
       elements.each{|el|self[el.keys.first] = el.values.first}
     end
-    
+
     # set unless value is nill
     def set_unless_nil(k,v)
       self[k] = v unless v.nil?
@@ -106,7 +106,7 @@ module DTK
           next unless model_object[key]
         end
         # special treatment of :id
-        val = (key == :id ? model_object.id : model_object[key]) 
+        val = (key == :id ? model_object.id : model_object[key])
         self[key] = (block ? block.call(val) : val)
       end
       self
@@ -132,7 +132,7 @@ module DTK
   end
 
   # Used as input to data source normalizer
-  class DataSourceUpdateHash < HashObject::AutoViv  
+  class DataSourceUpdateHash < HashObject::AutoViv
     # for efficiency not initializing @completeness_info = nil
     def constraints
       @completeness_info ? @completeness_info.constraints : nil
@@ -140,7 +140,7 @@ module DTK
 
     def is_complete?
       @completeness_info ? @completeness_info.is_complete? : nil
-    end    
+    end
 
     # TODO: may want to make :apply_recursively = true be the default
     def mark_as_complete(constraints={},opts={})
@@ -161,7 +161,7 @@ module DTK
       @completeness_info = HashIsComplete.new(constraints)
       self
     end
-  end 
+  end
 
   class HashCompletnessInfo
     def is_complete?
@@ -188,7 +188,7 @@ module DTK
     end
   end
 
-  # Used as input to db update from hash 
+  # Used as input to db update from hash
   class DBUpdateHash < DataSourceUpdateHash
     # for efficiency not initializing @do_not_extend = false
     def do_not_extend

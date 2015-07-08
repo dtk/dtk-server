@@ -53,7 +53,7 @@ module DTK
         filter: filter
       }
       Model.get_objs(model_handle(:port_link),sp_hash)
-    end      
+    end
 
     def get_matching_port_link(filter)
       opts = {filter: filter, ret_match_info: {}}
@@ -81,9 +81,9 @@ module DTK
     def get_augmented_port_links(opts={})
       rows = get_objs(cols: [:augmented_port_links])
       # TODO: remove when have all create port link calls set port_link display name to service type
-      rows.each{|r|r[:port_link][:display_name] ||= r[:input_port].link_def_name()}  
+      rows.each{|r|r[:port_link][:display_name] ||= r[:input_port].link_def_name()}
       if filter = opts[:filter]
-        post_filter =  port_link_filter_lambda_form(filter,opts) 
+        post_filter =  port_link_filter_lambda_form(filter,opts)
         rows.reject!{|r|!post_filter.call(r)}
       end
       rows.map do |r|
@@ -113,7 +113,7 @@ module DTK
           opts[:ret_match_info][:clause] = "service_type = '#{service_type}'"
         end
         lambda do |r|
-          (r[:input_port][:component_id] == input_component_id) && 
+          (r[:input_port][:component_id] == input_component_id) &&
             (service_type.nil? || (r[:port_link][:display_name] == service_type)) &&
             (output_component_id.nil? || (r[:output_port][:component_id] == output_component_id))
         end
@@ -170,7 +170,7 @@ module DTK
     def are_nodes_running_in_task?
       nodes = get_nodes(:id)
       running_nodes = Task::Status::Assembly.get_active_nodes(model_handle())
-      
+
       return false if running_nodes.empty?
       interrsecting_nodes = (running_nodes.map(&:id) & nodes.map(&:id))
 
@@ -186,7 +186,7 @@ module DTK
 
     #### for cloning
     def add_model_specific_override_attrs!(override_attrs,_target_obj)
-      override_attrs[:display_name] ||= SQL::ColRef.qualified_ref 
+      override_attrs[:display_name] ||= SQL::ColRef.qualified_ref
       override_attrs[:updated] ||= false
     end
 
@@ -247,7 +247,7 @@ module DTK
       # TODO: hack until basic_type is populated
       # component = sample.subset(:id,:display_name,:component_type,:basic_type)
       component = sample.subset(:id,:display_name,:component_type).merge(basic_type: "#{assembly_type()}_assembly")
-      node_attrs = {node_id: sample[:node][:id], node_name: sample[:node][:display_name]} 
+      node_attrs = {node_id: sample[:node][:id], node_name: sample[:node][:display_name]}
       filtered_attrs = component_and_attrs.map do |r|
         attr = r[:attribute]
         if attr and not attribute_is_filtered?(attr,attr_filters)

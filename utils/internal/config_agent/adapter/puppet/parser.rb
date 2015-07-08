@@ -91,7 +91,7 @@ module DTK; class ConfigAgent; class Adapter::Puppet
           Thread.current[:known_resource_types] = nil
           ret = yield
          rescue ::Puppet::Error => e
-          raise normalize_puppet_error(e,opts[:file_path]) 
+          raise normalize_puppet_error(e,opts[:file_path])
          rescue Exception => e
           raise e
          ensure
@@ -116,7 +116,7 @@ module DTK; class ConfigAgent; class Adapter::Puppet
     end
 
     def find_file_path(msg)
-      if msg =~ /at ([^ ]+):[0-9]+$/ 
+      if msg =~ /at ([^ ]+):[0-9]+$/
         $1
       end
     end
@@ -124,7 +124,7 @@ module DTK; class ConfigAgent; class Adapter::Puppet
     def msg_has_line_num?(msg)
       # just heursitic
       (!!find_line(msg)) ||
-        (msg =~ /[0-9]+/ && msg =~ /at line/) 
+        (msg =~ /[0-9]+/ && msg =~ /at line/)
     end
 
     def  find_line(msg)

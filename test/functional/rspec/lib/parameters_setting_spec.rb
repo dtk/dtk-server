@@ -53,7 +53,7 @@ shared_context "Add component to service node" do |dtk_common, node_name, compon
     dtk_common.component_module_name_list.each do |component_name|
       component_added_array << dtk_common.add_component_to_service_node(dtk_common.service_id, node_name, component_module + "::" + component_name, namespace)
     end
-    # Check if component_added_array contains any element with false value. 
+    # Check if component_added_array contains any element with false value.
     # That would indicate that particular component was not added successfully to the service node.
     pass = true if !component_added_array.include? false
     pass.should eq(true)

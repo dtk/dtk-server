@@ -43,7 +43,7 @@ module DTK
         CachedAdapterClasses[integer_version] = DynamicLoader.load_and_return_adapter_class("assembly_export",adapter_name,opts)
       end
       CachedAdapterClasses = {}
-      
+
       def assembly_meta_filename_path
         ServiceModule.assembly_meta_filename_path(assembly_hash()[:display_name],@service_module_branch)
       end
@@ -55,7 +55,7 @@ module DTK
       def dsl_version?
         ServiceModule::DSLVersionInfo.integer_version_to_version(@integer_version)
       end
-      
+
       def assembly_description?
         # @factory.assembly_instance.get_field?(:description)
         @factory[:description]||@factory[:display_name]
@@ -66,7 +66,7 @@ module DTK
         if attr_overrides = component_hash[:attribute_override]
           {name => attr_overrides_output_form(attr_overrides)}
         else
-          name 
+          name
         end
       end
 

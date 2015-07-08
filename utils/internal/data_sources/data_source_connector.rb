@@ -26,10 +26,10 @@ module XYZ
 
     def load_ds_connector_class
       rel_path = "#{ds_name()}/#{ds_name()}"
-      begin 
-        file_path = File.expand_path(rel_path, File.dirname(__FILE__)) 
+      begin
+        file_path = File.expand_path(rel_path, File.dirname(__FILE__))
         require file_path
-       rescue Exception => e 
+       rescue Exception => e
         raise Error.new("Connector file to process object data source #{ds_name()} does not exist") unless File.exists?(file_path + ".rb")
         raise e
       end

@@ -5,7 +5,7 @@ module DTK
     r8_nested_require('assembly_module','service')
 
     def initialize(assembly)
-      @assembly = assembly 
+      @assembly = assembly
     end
 
     def self.delete_modules?(assembly,opts={})

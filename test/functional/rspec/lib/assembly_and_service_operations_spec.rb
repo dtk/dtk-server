@@ -6,14 +6,14 @@ require 'awesome_print'
 
 shared_context "Stage" do |dtk_common|
   it "stages #{dtk_common.service_name} service from assembly" do
-    dtk_common.stage_service()    
+    dtk_common.stage_service()
     dtk_common.service_id.should_not eq(nil)
   end
 end
 
 shared_context "Stage with namespace" do |dtk_common, namespace|
   it "stages #{dtk_common.service_name} service from assembly in namespace #{namespace}" do
-    dtk_common.stage_service_with_namespace(namespace) 
+    dtk_common.stage_service_with_namespace(namespace)
     dtk_common.service_id.should_not eq(nil)
   end
 end

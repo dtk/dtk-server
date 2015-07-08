@@ -59,7 +59,7 @@ module DTK
     end
 
     def ext_ref_indicates_title?(ext_ref)
-      ret = 
+      ret =
         if ext_ref[:type] == "puppet_attribute"
           if path = ext_ref[:path]
             path =~ /\[name\]$/
@@ -115,7 +115,7 @@ module DTK
     # TODO: collapse this and 4 fields used here
     def is_readonly?
       update_object!(*(VirtulaDependency.port_type()+[:read_only,:dynamic,:cannot_change]))
-      (self[:port_type] == "input") || self[:read_only] || self[:dynamic] || self[:cannot_change] 
+      (self[:port_type] == "input") || self[:read_only] || self[:dynamic] || self[:cannot_change]
     end
 
     def attribute_value
@@ -186,7 +186,7 @@ module DTK
 
     def self.augmented_attribute_list_from_task(task,opts={})
       component_actions = task.component_actions
-      ret = [] 
+      ret = []
       ndx_nodes = {}
       component_actions.each do |action|
         AttributeComplexType.flatten_attribute_list(action[:attributes],flatten_nil_value: true).each do |attr|
@@ -252,8 +252,8 @@ module DTK
     def print_path(component)
       return "cmp[#{component[:display_name].gsub('__','::')}]/#{self[:display_name]}"
     end
-    
-    #============= 
+
+    #=============
     def self.update_port_info(attr_mh,attr_link_rows_created)
       attr_port_info = []
       attr_link_rows_created.each do |row|
@@ -261,7 +261,7 @@ module DTK
         if row[:type].nil? || row[:type] == "external"
           [["input",row[:input_id]],["output",row[:output_id]]].each do |(dir,id)|
             attr_port_info << {id: id, port_type_asserted: dir, is_port: true, is_external: true}
-          end 
+          end
         end
       end
       update_from_rows(attr_mh,attr_port_info) unless attr_port_info.empty?
@@ -278,7 +278,7 @@ module DTK
         end
       end
     end
-    
+
     private
 
     def has_input_link?
@@ -363,13 +363,13 @@ module DTK
         end
       end
 
-      description_prefix = (component[:display_name]||"").split("::").map{|x|x.capitalize}.join(" ") 
+      description_prefix = (component[:display_name]||"").split("::").map{|x|x.capitalize}.join(" ")
       description = description_prefix.empty? ? "Service Access Point" : "#{description_prefix} SAP"
 
       new_sap_attr_rows =
         [{
            ref: "sap__l4",
-           display_name: "sap__l4", 
+           display_name: "sap__l4",
            component_component_id: component_id,
            value_derived: new_sap_value_list,
            is_port: true,
@@ -383,7 +383,7 @@ module DTK
 
       attr_mh = sap_config_attr_idh.createMH()
       new_sap_attr_idh = create_from_rows(attr_mh,new_sap_attr_rows, convert: true).first
-      
+
       [sap_config_attr_idh,new_sap_attr_idh]
     end
 
@@ -407,7 +407,7 @@ module DTK
         update(function: fn)
         return nil
       end
-      raise Error.new("mismatched link") 
+      raise Error.new("mismatched link")
     end
 
     ### virtual column defs
@@ -417,13 +417,13 @@ module DTK
       attr_value = attribute_value()
       return true if attr_value.nil?
       return nil unless self[:is_array]
-      return nil unless attr_value.is_a?(Array) #TBD: this should be error      
+      return nil unless attr_value.is_a?(Array) #TBD: this should be error
       attr_value.each{|v| return true if v.nil?}
       return nil
     end
 
     def assoc_components_on_nodes
-      parent_obj = get_parent_object()	
+      parent_obj = get_parent_object()
       return [] if parent_obj.nil?
       case parent_obj.relation_type
         when :node
@@ -434,8 +434,8 @@ module DTK
           end
         else
           raise Error.new("unexpected parent of attribute")
-      end 
-    end    
+      end
+    end
   end
 end
 
@@ -454,7 +454,7 @@ module XYZ
           }
        }
       end
-      
+
       def sap_ref_from_sap(sap)
         return nil if sap.nil?
         # TBD: stubbed to only handle limited cases

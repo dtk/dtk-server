@@ -59,22 +59,22 @@ module R8Tpl
           proc_input_string,index = ret_removed_array_index(input_string)
           translation = translate_input(i18n,:attribute,proc_input_string)
           ret = (translation ? translation : proc_input_string.to_s)
-          if ndx = index_print_form(index) 
+          if ndx = index_print_form(index)
             ret += " #{ndx}"
-          end 
+          end
           ret
         end
-        
+
         def self.translate_input(i18n,model_name,input_string)
           return nil unless input_string and not input_string.empty?
           i18n[model_name][input_string.to_sym]
         end
-    
+
         # returns first array index
         def self.ret_removed_array_index(input_string)
           [input_string.to_s.sub(XYZ::Model::Delim::NumericIndexRegexp,""),$1 && $1.to_i]
         end
-    
+
         def self.capitalize_words(s)
           s.scan(/\w+/).map{|x|x.capitalize}.join(" ")
         end
@@ -97,7 +97,7 @@ module R8Tpl
 
         content = {}
         file_name = "#{R8::Config[:i18n_base_dir]}/#{model_name}/#{language}.rb"
-        if File.exists?(file_name) 
+        if File.exists?(file_name)
           content = eval(IO.read(file_name))
           #        else
           #          file_name = "#{R8::Config[:i18n_root]}/#{R8::Config[language]}.rb"
@@ -105,7 +105,7 @@ module R8Tpl
         end
 
         file_name = "#{R8::Config[:i18n_base_dir]}/#{model_name}/#{language}.options.rb"
-        if File.exists?(file_name) 
+        if File.exists?(file_name)
           content[:options_list] = eval(IO.read(file_name))
           #        else
           #          file_name = "#{R8::Config[:i18n_root]}/#{R8::Config[language]}.rb"
@@ -127,7 +127,7 @@ module R8Tpl
 
         content = {}
         file_name = "#{R8::Config[:meta_base_dir]}/#{model_name}/model_def.rb"
-        if File.exists?(file_name) 
+        if File.exists?(file_name)
           content = eval(IO.read(file_name))
         end
 
@@ -166,7 +166,7 @@ module R8Tpl
         if(!Cache[:app])
           content = {}
           file_name = "#{R8::Config[:meta_base_dir]}/app_def.rb"
-          if File.exists?(file_name) 
+          if File.exists?(file_name)
             content = eval(IO.read(file_name))
           end
 

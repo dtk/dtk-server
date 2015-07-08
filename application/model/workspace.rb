@@ -40,7 +40,7 @@ module DTK
     # three modes
     #   :direct - direct command called (default)
     #   :from_set_default_target
-    #   :from_delete_target  
+    #   :from_delete_target
     def self.set_target(target,opts={})
       if workspace = get_workspace(target.model_handle(:assembly_workspace))
          workspace.set_target(target,opts)
@@ -68,7 +68,7 @@ module DTK
          when :from_delete_target
           # want to update so deleting target does not have foreign key that causes the workspace object to be deleted
           update = true
-         else 
+         else
           raise Error.new("Unexpected mode '#{mode}'")
         end
       end

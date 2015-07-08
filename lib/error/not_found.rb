@@ -9,7 +9,7 @@ module DTK
 
       def to_s
         if obj_type.nil?
-          "NotFound error:" 
+          "NotFound error:"
         elsif obj_value.nil?
           "NotFound error: type = #{@obj_type}"
         else

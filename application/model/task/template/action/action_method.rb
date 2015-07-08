@@ -1,6 +1,6 @@
 module DTK; class Task; class Template
   class Action
-    class ActionMethod < Hash 
+    class ActionMethod < Hash
       def initialize(action_def)
         super()
         hash =  {

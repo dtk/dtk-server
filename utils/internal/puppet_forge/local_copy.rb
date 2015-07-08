@@ -45,7 +45,7 @@ module DTK
 
           ret[ndx] = mod
           deps = installed_module['dependencies']
-          if deps && !deps.empty? 
+          if deps && !deps.empty?
             # There is redundant computation here
             mod.dependencies = deps.map{|dep_mod|Module.new(dep_mod,true)}
             ndx_modules(deps,opts.merge(is_dependency: true)).each_pair do |dep_ndx,dep_mod|

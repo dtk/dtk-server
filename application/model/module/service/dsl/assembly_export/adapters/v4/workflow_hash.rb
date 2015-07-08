@@ -1,5 +1,5 @@
-module DTK; class ServiceModule  
-  class AssemblyExport; class V4 
+module DTK; class ServiceModule
+  class AssemblyExport; class V4
     module WorkflowHash
       include Task::Template::Serialization
       def self.canonical_form(input_hash)
@@ -13,7 +13,7 @@ module DTK; class ServiceModule
              else
               info
             end
-        end  
+        end
         ret
       end
 

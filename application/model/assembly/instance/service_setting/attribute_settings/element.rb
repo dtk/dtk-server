@@ -39,11 +39,11 @@ module DTK; class ServiceSetting
       def equal_value?(el)
         RawValue.equal?(@raw_value,el.raw_value)
       end
-      
+
       def unique_index
         @attribute_path
       end
-      
+
       module RawValue
         def self.value(val)
           (val.is_a?(::Hash) || val.is_a?(::Array)) ? val : val.to_s

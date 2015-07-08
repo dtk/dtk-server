@@ -21,7 +21,7 @@ module XYZ
           }}
         ]
       end
-      
+
       def self.field_list(columns,relation)
         fieldset_types = Model::FieldSet.scalar_cols_with_types(relation) || []
         (columns.empty? ? Model::FieldSet.default(relation).cols : columns).map do |col|
@@ -46,9 +46,9 @@ module XYZ
         text: :text,
         varchar: :text,
         bigint: :integer,
-        integer: :integer, 
-        int: :integer, 
-        numeric: :text, 
+        integer: :integer,
+        int: :integer,
+        numeric: :text,
         boolean: :text #TODO: stub
       }
     end

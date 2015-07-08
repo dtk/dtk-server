@@ -51,7 +51,7 @@ def get_node_ec2_public_dns(service_name, node_name)
 		puts "Info about #{node_name} node is not found!"
 		puts ""
 		return node_ec2_public_dns
-	end	
+	end
 end
 
 def add_document_to_collection(mongodb_host, mongodb_port, database_name, collection_name, document)
@@ -89,7 +89,7 @@ def get_collection(mongodb_host, mongodb_port, database_name, collection_name)
 	collection = db.collection(collection_name)
 
 	if !collection.find.to_a.empty?
-		collection_exists = true 
+		collection_exists = true
 		puts "Collection content: #{collection.find.to_a}"
 	end
 	puts ""
@@ -105,7 +105,7 @@ describe "(Different Node Templates) Test Case 7: MongoDB - Master/Slave scenari
 		include_context "Stage", dtk_common
 	end
 
-	context "List services after stage" do		
+	context "List services after stage" do
 		include_context "List services after stage", dtk_common
 	end
 

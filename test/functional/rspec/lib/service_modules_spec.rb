@@ -69,7 +69,7 @@ shared_context "Check service module imported on local filesystem" do |service_m
     `ls #{service_module_filesystem_location}/#{service_module_name}`
     pass = true if $?.exitstatus == 0
     if (pass == true)
-      puts "Service module #{service_module_name} imported on local filesystem successfully!" 
+      puts "Service module #{service_module_name} imported on local filesystem successfully!"
     else
       puts "Service module #{service_module_name} was not imported on local filesystem successfully!"
     end

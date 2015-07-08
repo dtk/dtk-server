@@ -7,7 +7,7 @@ module DTK
     def initialize(queue_id, available_ids)
       super("Simple Action queue could not find queue with ID #{queue_id}, available queues [#{available_ids.join(',')}]")
     end
-  
+
   end
 
   class SimpleActionQueue
@@ -20,7 +20,7 @@ module DTK
         response_results = queue.result
         delete(queue_id)
       end
-      
+
       return { result: response_results }
     end
 

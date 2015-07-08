@@ -6,5 +6,5 @@
     attribute_settings: {type: :json, ret_keys_as_symbols: false}
   },
   virtual_columns: {},
-  many_to_one: [:component] 
+  many_to_one: [:component]
 }

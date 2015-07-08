@@ -10,12 +10,12 @@ module DTK; class ConfigAgent; module Adapter
           end
           data[:results]
         end
-        
+
         def errors_in_result?(result,_action)
           # TODO: action passed in so can look to see at 'action action_status interpretation"
           default_errors_action_status?(result)
         end
-        
+
         def interpret_error(error_in_result,_components)
           error_in_result
         end
@@ -39,7 +39,7 @@ module DTK; class ConfigAgent; module Adapter
               if status && results_data['status'].to_s != '0'
                 stderr = results_data['stderr']||''
                 err_msg = (stderr.empty? ? "Error in action; syscall status = #{status}" : stderr)
-                [err_msg]                
+                [err_msg]
               end
             end
           end
@@ -49,7 +49,7 @@ module DTK; class ConfigAgent; module Adapter
           # TODO: will be deprecating the [:data][:data] form
           (result[:data]||{})[:data]||result[:data]||{}
         end
-      end 
+      end
     end
   end
 end; end; end

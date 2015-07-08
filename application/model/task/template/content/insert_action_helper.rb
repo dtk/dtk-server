@@ -40,7 +40,7 @@ module DTK; class Task; class Template
 
       def self.insert_strategy_class(insert_strategy=nil)
         # default insert strategy is to put the new action in the latest existing internode stage at the latest point
-        if insert_strategy 
+        if insert_strategy
           unless ret = InsertStrategies[insert_strategy]
             raise Error.new("Illegal insert action strategy (#{insert_strategy})")
           end
@@ -62,8 +62,8 @@ module DTK; class Task; class Template
         end
 
         temporal_constraints = @gen_constraints_proc && @gen_constraints_proc.call()
-        return if (temporal_constraints||[]).empty? 
-        
+        return if (temporal_constraints||[]).empty?
+
         temporal_constraints.each do |tc|
           if tc.before_action_index == new_action_index
             after_action = tc.after_action
@@ -73,7 +73,7 @@ module DTK; class Task; class Template
               add_ndx_action_index(:internode,:after,after_action)
             end
           elsif tc.after_action_index == new_action_index
-            before_action = tc.before_action 
+            before_action = tc.before_action
             if before_action.node_id == @new_action_node_id
               add_ndx_action_index(:samenode,:before,before_action)
             else

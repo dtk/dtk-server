@@ -33,7 +33,7 @@ describe "(Targets and Providers) Test Case 2: Add new target to existing provid
 		include_context "Create target", dtk_common, provider_name, region
 	end
 
-	context "Target #{provider_name}-#{region}" do		
+	context "Target #{provider_name}-#{region}" do
 		include_context "Check if target exists in provider", dtk_common, provider_name, target_name
 	end
 
@@ -49,11 +49,11 @@ describe "(Targets and Providers) Test Case 2: Add new target to existing provid
 		include_context "Delete target", dtk_common, target_name
 	end
 
-	context "Target #{provider_name}-#{region}" do		
+	context "Target #{provider_name}-#{region}" do
 		include_context "NEG - Check if target exists in provider", dtk_common, provider_name, target_name
 	end
 
-	context "List assemblies after delete of target" do    
+	context "List assemblies after delete of target" do
         include_context "NEG - List assemblies", dtk_common
     end
 

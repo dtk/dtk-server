@@ -5,13 +5,13 @@ login = {
 	password: 'r8server'
 }
 
-user_info = { 
-	username: 'test', 
-	email: 'test@r8network.com', 
-	first_name: 'test_name', 
-	last_name: 'test_last_name', 
-	user_group: 'test', 
-	namespace: 'test' 
+user_info = {
+	username: 'test',
+	email: 'test@r8network.com',
+	first_name: 'test_name',
+	last_name: 'test_last_name',
+	user_group: 'test',
+	namespace: 'test'
 }
 
 describe "(Repoman Drupal API) Test Case 5: NEG - Get user by providing incorrect username/email combinations" do
@@ -31,7 +31,7 @@ describe "(Repoman Drupal API) Test Case 5: NEG - Get user by providing incorrec
 			ap response
 			if response['status'] == 'ok'
 				user_exists = false if response['data']['exists'] == false
-			end	
+			end
 			expect(user_exists).to eq(false)
 		end
 	end
@@ -43,7 +43,7 @@ describe "(Repoman Drupal API) Test Case 5: NEG - Get user by providing incorrec
 			ap response
 			if response['status'] == 'ok'
 				user_exists = false if response['data']['exists'] == false
-			end	
+			end
 			expect(user_exists).to eq(false)
 		end
 	end
@@ -55,7 +55,7 @@ describe "(Repoman Drupal API) Test Case 5: NEG - Get user by providing incorrec
 			ap response
 			if response['status'] == 'ok'
 				user_exists = false if response['data']['exists'] == false
-			end	
+			end
 			expect(user_exists).to eq(false)
 		end
 	end

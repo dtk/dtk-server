@@ -23,7 +23,7 @@ module DTK; class ServiceModule
           new(hash)
         else
           raise ParsingError.new("Ill-formed port ref (#{port_ref})",err_opts)
-        end     
+        end
       end
       def self.parse_component_link(input_node,input_cmp_name,component_link_hash,opts={})
         err_opts = Opts.new(opts).slice(:file_path)
@@ -42,7 +42,7 @@ module DTK; class ServiceModule
           {input: input, output: output}
         else
           raise ParsingError.new("Ill-formed component link ?file_path ?1\nIt should have form: \n  ?2",component_link_hash,ServiceLinkLegalForm,err_opts)
-        end     
+        end
       end
       PortRefRegex = Regexp.new("(^.+)#{Seperators[:node_component]}(.+)#{Seperators[:component_link_def_ref]}(.+$)")
       ServiceLinkTarget = Regexp.new("(^.+)#{Seperators[:node_component]}(.+$)")
@@ -88,8 +88,8 @@ module DTK; class ServiceModule
 
         matching_port__match_on_assembly_id?(aug_port) &&
           self[:node] == node &&
-          self[:component_type] == p[:component_type] && 
-          self[:link_def_ref] == p[:link_def_ref] && 
+          self[:component_type] == p[:component_type] &&
+          self[:link_def_ref] == p[:link_def_ref] &&
           self[:title] == p[:title]
       end
 

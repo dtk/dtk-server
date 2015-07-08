@@ -1,7 +1,7 @@
 module XYZ
   module DSNormalizer
     class Ec2
-      class NodeGroup < Top 
+      class NodeGroup < Top
         definitions do
           target[:display_name] = source[:display_name]
           target[:description] = fn(:description,source[:security_groups])

@@ -1,7 +1,7 @@
 # TODO: temp until move into meta directory
 module XYZ; class Attribute
   # TOOD: hack taht can be removed when update_object allows virtual types
-  module VirtulaDependency              
+  module VirtulaDependency
     def self.port_type
       [:dynamic,:is_port,:port_type_asserted,:semantic_type_summary]
     end
@@ -26,7 +26,7 @@ module XYZ; class Attribute
       # columns related to the data/semantic type
       column :data_type, :varchar, size: 25
       column :semantic_data_type, :varchar, size: 25
-      column :semantic_type, :json #points to structural info for a json var 
+      column :semantic_type, :json #points to structural info for a json var
       column :semantic_type_summary, :varchar, size: 25 #for efficiency optional token that summarizes info from semantic_type
       virtual_column :semantic_type_object, type: :object, hidden: true, local_dependencies: [:semantic_type]
 
@@ -35,7 +35,7 @@ module XYZ; class Attribute
 
       ###cols that relate to who or what can or does change the attribute
       # TODO: need to clearly relate these four; may get rid of read_only
-      column :read_only, :boolean, default: false 
+      column :read_only, :boolean, default: false
       column :dynamic, :boolean, default: false #means dynamically set by an executable action
       column :cannot_change, :boolean, default: false
 
@@ -48,9 +48,9 @@ module XYZ; class Attribute
       column :is_port, :boolean, default: false
       column :port_type_asserted, :varchar, size: 10
       column :is_external, :boolean
-      
+
       virtual_column :port_type, type: :varchar, hidden: true, local_dependencies: VirtulaDependency.port_type()
-      
+
       virtual_column :port_is_external, type: :boolean, hidden: true, local_dependencies: [:is_port,:is_external,:semantic_type_summary]
 
       virtual_column :is_unset, type: :boolean, hidden: true, local_dependencies: [:value_asserted,:value_derived,:data_type,:semantic_type]
@@ -59,7 +59,7 @@ module XYZ; class Attribute
       many_to_one :component, :node
       one_to_many :dependency #for ports indicating what they can connect to
 
-      virtual_column :dependencies, type: :json, hidden: true, 
+      virtual_column :dependencies, type: :json, hidden: true,
         remote_dependencies:         [
          {
            model_name: :dependency,
@@ -122,7 +122,7 @@ module XYZ; class Attribute
                                         join_cond: {id: p(:component,:node)},
                                         cols: [:id,:display_name,:group_id]
                                       }]
-         
+
       virtual_column :port_info, type: :boolean, hidden: true,
       remote_dependencies:         [
          {
@@ -142,7 +142,7 @@ module XYZ; class Attribute
            cols: [:id,:type,id(:node),:containing_port_id,:external_attribute_id,:ref]
          }]
 
-      uri_remote_dependencies = 
+      uri_remote_dependencies =
         {uri:         [
          {
            model_name: :id_info,
@@ -160,7 +160,7 @@ module XYZ; class Attribute
       virtual_column :qualified_attribute_id_under_node, type: :varchar, hidden: true #TODO: put in depenedncies
       virtual_column :qualified_attribute_name, type: :varchar, hidden: true #not giving dependences because assuming right base_object included in col list
 
-      virtual_column :linked_attributes, type: :json, hidden: true, 
+      virtual_column :linked_attributes, type: :json, hidden: true,
         remote_dependencies:         [
          {
            model_name: :attribute_link,

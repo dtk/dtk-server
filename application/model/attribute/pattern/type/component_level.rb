@@ -23,11 +23,11 @@ module DTK; class Attribute
           am_endpoint[:component_type] == component_instance()[:component_type] &&
           am_endpoint[:attribute_name] == attribute_name()
       end
-      
+
       def am_serialized_form
         "#{component_instance()[:component_type]}.#{attribute_name()}"
       end
-      
+
       def set_parent_and_attributes!(parent_idh,opts={})
         ret = self
         @attribute_stacks = []
@@ -36,7 +36,7 @@ module DTK; class Attribute
           if create_this_type?(opts)
             raise ErrorUsage.new("Node name (#{pattern_node_name()}) in attribute does not match an existing node")
           end
-          return ret 
+          return ret
         end
 
         cmp_fragment = pattern_component_fragment()
@@ -45,9 +45,9 @@ module DTK; class Attribute
           if create_this_type?(opts)
             raise ErrorUsage.new("Component name (#{pattern_component_name()}) in attribute does not match an existing component in node (#{pattern_node_name()})")
           end
-          return ret 
+          return ret
         end
-        
+
         attr_fragment = pattern_attribute_fragment()
         attrs = ret_matching_attributes(:component,ndx_cmps.values.map{|r|r.id_handle()},attr_fragment)
         if attrs.empty? && create_this_type?(opts)
@@ -64,7 +64,7 @@ module DTK; class Attribute
             component: cmp,
             node: ndx_nodes[cmp[:node_node_id]]
           }
-        end 
+        end
         ret
       end
 

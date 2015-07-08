@@ -47,7 +47,7 @@ module DTK; class ServiceSetting
           cmp_info = node_info[:cmps][cmp_print_name] ||= {}
           cmp_info.merge!(cmp_attr[:display_name] => attribute_value(cmp_attr))
         end
-        
+
         # put assembly attributes in ret
         ret = all_attrs_struct.assembly_attrs.sort{|a,b|a[:display_name] <=> b[:display_name]}.inject(SimpleOrderedHash.new) do |h,attr|
           h.merge(attr[:display_name] => attribute_value(attr))

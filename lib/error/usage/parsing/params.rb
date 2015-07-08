@@ -47,7 +47,7 @@ module DTK; class ErrorUsage
             substitute_num!(processed_msg,i+1,arg)
           end
         end
-        [processed_msg,params,opts]        
+        [processed_msg,params,opts]
       end
 
       def self.substitute_file_path?(msg,file_path)
@@ -64,8 +64,8 @@ module DTK; class ErrorUsage
           $1
         end
       end
-      FreeVariable = Regexp.new("(\\?[0-9a-z_]+)") 
-        
+      FreeVariable = Regexp.new("(\\?[0-9a-z_]+)")
+
       private
 
       def self.substitute_num!(msg,num,arg)
@@ -87,12 +87,12 @@ module DTK; class ErrorUsage
           arg
         elsif arg.is_a?(TrueClass) || arg.is_a?(FalseClass) || arg.is_a?(Fixnum) || arg.is_a?(Symbol)
           arg.to_s
-        else      
+        else
           arg.inspect
         end
       end
       DefaultNonScalarFormatType = :yaml
-    
+
 
       def self.substitute_num_regexp(num)
         Regexp.new("\\?#{num}")
@@ -100,7 +100,7 @@ module DTK; class ErrorUsage
       def self.substitute_param_regexp(param)
         Regexp.new("\\?#{param}")
       end
-      
+
       def self.file_path_free_var?(msg)
         !!(msg =~ FilePathFreeVar)
       end

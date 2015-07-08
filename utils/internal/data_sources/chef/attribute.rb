@@ -35,7 +35,7 @@ module XYZ
           split.shift if split.size > 1
           split.join(name_delimiter())
         end
-        
+
         def self.external_ref(source)
           prefix = source[:service_name] ? "service[#{source[:service_name]}]" : "node[#{source[:ref].split("/").first}]"
           path = prefix+name_suffix(source)
@@ -51,7 +51,7 @@ module XYZ
           x = source[:ref].split("/");x.shift
           "[#{x.join("][")}]"
         end
-          
+
         def self.semantic_type(semantic_type)
           (semantic_type.is_a?(Array) || semantic_type.is_a?(Hash)) ? semantic_type.to_json : semantic_type
         end

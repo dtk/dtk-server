@@ -3,23 +3,23 @@ module XYZ
     module ChefMixinAssembly # TODO: unify with code in R8Cookbook
       def normalize_attribute_values(target,attr_val_hash,node,metadata=nil)
         attr_val_hash.each do |key,value|
-          if value.is_a?(Hash) 
+          if value.is_a?(Hash)
             if value.key?("external_ref")
               target[key] = process_external_ref(value["external_ref"],node,metadata)
-            else 
+            else
               # TODO: this can be a Mash; should probably convert before hand to avoid patch below
-              target[key] ||= HashObject::AutoViv.create() 
+              target[key] ||= HashObject::AutoViv.create()
               normalize_attribute_values(target[key],value,node,metadata)
             end
           elsif value.is_a?(Array)
             target[key] = value.map do |child|
-              if child.is_a?(Hash) 
+              if child.is_a?(Hash)
                 child_target = HashObject::AutoViv.create()
                 normalize_attribute_values(child_target,child,node,metadata)
               else
-                child 
+                child
               end
-            end  
+            end
           else
             target[key] = value
           end

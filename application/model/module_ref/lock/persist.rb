@@ -16,7 +16,7 @@ module DTK; class ModuleRef
         }
         Model.get_objs(assembly_instance.model_handle(:module_ref_lock),sp_hash)
       end
-      
+
       private
 
       def self.db_update_hash_all_elements(module_refs_lock)
@@ -30,7 +30,7 @@ module DTK; class ModuleRef
       end
 
       def self.module_ref_lock_hash_form(module_name,module_ref_lock)
-        unless info = module_ref_lock.info 
+        unless info = module_ref_lock.info
           raise_persistence_error('No Info object found on object',module_ref_lock)
         end
         hash_body = {
@@ -38,7 +38,7 @@ module DTK; class ModuleRef
           module_name: module_name,
           info: info.hash_form(),
           locked_branch_sha: module_ref_lock.locked_branch_sha
-        }  
+        }
         {module_name => hash_body}
       end
 

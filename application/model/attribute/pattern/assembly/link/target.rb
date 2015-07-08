@@ -5,7 +5,7 @@ module DTK; class Attribute::Pattern
         attr_pattern = super(base_object,strip_special_symbols(target_attr_term))
         new(attr_pattern,target_attr_term)
       end
-      
+
       attr_reader :attribute_pattern
       def attribute_idhs
         @attribute_pattern.attribute_idhs()

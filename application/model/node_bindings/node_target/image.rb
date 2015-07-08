@@ -27,7 +27,7 @@ module DTK; class NodeBindings
       end
 
       def hash_form
-        {type: type().to_s, image: @image, size: @size} 
+        {type: type().to_s, image: @image, size: @size}
       end
 
       Type = :image
@@ -54,7 +54,7 @@ module DTK; class NodeBindings
         elsif parse_input.type?(Hash)
           input = parse_input.input
           if Aux.has_only_these_keys?(input,Allkeys) && ! RequiredKeys.find{|k| !input.key?(k)}
-            internal_form_hash = input.inject({}){|h,(k,v)|h.merge(InputFormToInternal[k] => v)} 
+            internal_form_hash = input.inject({}){|h,(k,v)|h.merge(InputFormToInternal[k] => v)}
             ret = new(internal_form_hash)
           end
         end

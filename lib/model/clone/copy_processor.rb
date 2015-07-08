@@ -22,7 +22,7 @@ module DTK
       private :initialize
 
       # copy part of clone
-      # targets is a list of id_handles, each with same model_name 
+      # targets is a list of id_handles, each with same model_name
       def clone_copy_top_level(source_id_handle_x,targets,recursive_override_attrs={})
         return @ret if targets.empty?
         source_model_name = Model.concrete_model_name(source_id_handle_x[:model_name])
@@ -35,7 +35,7 @@ module DTK
         sample_target =  targets.first
         target_parent_mh = sample_target.createMH()
         target_mh = target_parent_mh.create_childMH(source_model_name)
-        
+
         target_parent_id_col = target_mh.parent_id_field_name()
         targets_rows = targets.map{|id_handle|{target_parent_id_col => id_handle.get_id()}}
         targets_ds = SQL::ArrayDataset.create(db,targets_rows,ModelHandle.new(source_id_handle[:c],:target))
@@ -47,13 +47,13 @@ module DTK
         fk_info.add_foreign_keys(source_model_handle,field_set_to_copy)
         source_fs = Model::FieldSet.opt(field_set_to_copy.with_removed_cols(target_parent_id_col))
         source_ds = Model.get_objects_just_dataset(source_model_handle,source_wc,source_fs)
-        
+
         select_ds = targets_ds.join_table(:inner,source_ds)
-        
+
         # process overrides
         override_attrs = ret_real_columns(source_model_handle,recursive_override_attrs)
         override_attrs = add_to_overrides_null_other_parents(override_attrs,target_mh[:model_name],target_parent_id_col)
-        create_override_attrs = override_attrs.merge(ancestor_id: source_id_handle.get_id()) 
+        create_override_attrs = override_attrs.merge(ancestor_id: source_id_handle.get_id())
 
         new_objs_info = Model.create_from_select(target_mh,field_set_to_copy,select_ds,create_override_attrs,create_opts_for_top())
         return @ret if new_objs_info.empty?
@@ -124,7 +124,7 @@ module DTK
         par_id_col = DB.parent_field(target_idh[:model_name],model_name)
         override_attrs = add_to_overrides_null_other_parents(existing_override_attrs,model_name,par_id_col)
         override_attrs.merge!(par_id_col => target_idh.get_id())
-          
+
         ret_sql_cols = [:ancestor_id]
         case model_name
          when :node then ret_sql_cols << :external_ref
@@ -144,7 +144,7 @@ module DTK
       end
 
       attr_reader :db,:fk_info, :model_name
-      
+
       def ret_real_columns(model_handle,recursive_override_attrs)
         fs = Model::FieldSet.all_real(model_handle[:model_name])
         recursive_override_attrs.reject{|k,_v| not fs.include_col?(k)}
@@ -162,8 +162,8 @@ module DTK
 
       def create_opts_for_top
         dups_allowed_for_cmp = true #TODO: stub
-        
-        returning_sql_cols = [:ancestor_id] 
+
+        returning_sql_cols = [:ancestor_id]
         # TODO" may make what are returning sql columns methods in model classes liek do for clone post copy
         case model_name
          when :component then returning_sql_cols << :type

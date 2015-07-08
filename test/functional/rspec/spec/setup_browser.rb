@@ -26,15 +26,15 @@ RSpec.configure do |config|
   end
 
   #close browser after each test
-  config.after(:all) do 
+  config.after(:all) do
     if @conf.headless
       puts "Destroying Headless"
       @headless.destroy
     else
       puts "Closing browser"
-      @homepage.close 
+      @homepage.close
     end
-  end 
+  end
 end
 
 def load_configs

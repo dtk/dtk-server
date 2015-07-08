@@ -9,7 +9,7 @@ module DTK; class ServiceModule
           components = (node_hash||{})["components"]||[]
           components = [components] unless components.is_a?(Array)
           components.each do |base_cmp|
-            if base_cmp.is_a?(Hash) 
+            if base_cmp.is_a?(Hash)
               base_cmp_name = base_cmp.keys.first
               component_links = base_cmp.values.first["component_links"]||{}
               ParsingError.raise_error_if_not(component_links,Hash,type: "component link",context: base_cmp)

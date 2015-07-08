@@ -8,17 +8,17 @@ module DTK
           @id_handles = []
           @objects = nil
           @children = {}
-          # TODO: more efficient than making this Boolean is structure that indicates what depth to save children 
+          # TODO: more efficient than making this Boolean is structure that indicates what depth to save children
           @include_children = opts[:include_children]
           @ret_new_obj_with_cols = opts[:ret_new_obj_with_cols]
         end
-        
+
         attr_reader :source_object, :id_handles, :ret_new_obj_with_cols, :objects
         def model_name
           # all id handles wil be of same type
           @id_handles.first && @id_handles.first[:model_name]
         end
-        
+
         def get_children_object_info(level,model_name)
           ((@children[level]||{})[model_name]||[]).map{|x|x[:obj_info]}
         end
@@ -74,7 +74,7 @@ module DTK
           return child_idhs unless @include_children
           level_p =  @children[level] ||= {}
           objs_info.each_with_index do |child_obj,i|
-            idh = child_idhs[i] 
+            idh = child_idhs[i]
             children = level_p[idh[:model_name]] ||= []
             # clone_parent_id can differ from parent_id if for example node is under an assembly
             children << {id_handle: idh, clone_parent_id: child_obj[parent_col], obj_info: child_obj}

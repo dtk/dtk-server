@@ -48,7 +48,7 @@ module DTK; class Repo
         self[:files_modified] && !!self[:files_modified].find{|r|path(r) == path}
       end
 
-      # note: in paths_to_add and paths_to_delete rename appears both since rename can be accomplsihed by a add + a delete 
+      # note: in paths_to_add and paths_to_delete rename appears both since rename can be accomplsihed by a add + a delete
       def paths_to_add
         (self[:files_added]||[]).map{|r|path(r)} + (self[:files_renamed]||[]).map{|r|r[:new_path]}
       end

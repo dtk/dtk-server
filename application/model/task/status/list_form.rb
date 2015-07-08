@@ -28,9 +28,9 @@ module DTK; class Task; class Status
           elsif l2[:executable_action_type] == "ConfigNode"
             level_2_ret[:task_name] = "config_node"
             level_2_ret[:components] = []
-            level_3 = l2[:executable_action][:component_actions]            
+            level_3 = l2[:executable_action][:component_actions]
             level_3.each do |l3|
-              # Amar: Following condition block checks if 'node_node_id' from component is identical to node's 'id' 
+              # Amar: Following condition block checks if 'node_node_id' from component is identical to node's 'id'
               #       If two values are different, it means component came from node_group, and not from assembly instance
               #       Result is printing component source
               #       Check DTK-738 ticket for more details
@@ -39,12 +39,12 @@ module DTK; class Task; class Status
                 node_group = NodeGroup.id_to_name(model_handle, l3[:component][:node_node_id])
                 source = "node_group"
               end
-              level_2_ret[:components] << 
+              level_2_ret[:components] <<
               { component:                 {
-                  component_name: l3[:component][:display_name], 
-                  source: source, 
-                  node_group: node_group 
-                } 
+                  component_name: l3[:component][:display_name],
+                  source: source,
+                  node_group: node_group
+                }
               }
             end
           end

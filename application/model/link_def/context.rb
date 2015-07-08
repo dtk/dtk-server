@@ -56,7 +56,7 @@ module DTK
       attrs_to_get = {cmp_id => {component: component, attribute_info: @component_attr_index[component_type]}}
       get_and_update_component_attributes!(attrs_to_get)
     end
-    
+
     private
 
     def component_mappings(link_defs_info)
@@ -75,4 +75,4 @@ module DTK
       ret
     end
   end
-end    
+end

@@ -8,27 +8,27 @@ module DTK
         conflicts = []
         ret = [matches,conflicts]
         return ret if aug_cmp_refs.empty?
-        # this is information about any possible relevant componet on a target node 
+        # this is information about any possible relevant componet on a target node
         cmp_with_attrs = get_matching_components_with_attributes(aug_cmp_refs)
-        
+
         # to determine if there is a match we need to first get attributes for any cmp_ref that may be involved in a match
         # these are ones where there is atleast one matching node/component_type pair
         pruned_cmp_refs = aug_cmp_refs.select do |cmp_ref|
           component_type = cmp_ref[:component_template][:component_type]
           target_node_id = cmp_ref[:target_node_id]
           cmp_with_attrs.find{|cmp|cmp[:component_type] == component_type && cmp[:node_node_id] == target_node_id}
-        end 
+        end
         return ret if pruned_cmp_refs.empty?
 
         # get attribute information for pruned_cmp_refs
         ndx_cmp_ref_attrs = get_ndx_component_ref_attributes(pruned_cmp_refs)
 
         # now del withj matching taht takes into account resource defs keys
-        
-        # this query finds the components and its attributes on the nodes 
+
+        # this query finds the components and its attributes on the nodes
         [matches,conflicts]
       end
-    
+
       private
 
       # each aug_cmp_ref is augmented with target_node_id indicating where it is to be deployed
@@ -56,7 +56,7 @@ module DTK
       def self.get_ndx_component_ref_attributes(cmp_refs)
         ret = {}
         return ret if cmp_refs.empty?
-      
+
         # get template attribute values
         sp_hash = {
           cols: [:id,:group_id,:display_name,:attribute_value,:component_component_id],
@@ -64,7 +64,7 @@ module DTK
         }
         attr_mh = cmp_refs.first.model_handle(:attribute)
         ndx_template_to_ref = cmp_refs.inject({}){|h,cmp_ref|h.merge(cmp_ref[:component_template_id] => cmp_ref[:id])}
-        
+
         ndx_attrs = Model.get_objs(attr_mh,sp_hash).inject({}) do |h,attr|
           cmp_ref_id = ndx_template_to_ref[attr[:component_component_id]]
           h.merge(attr[:id] => attr.merge(component_ref_id: cmp_ref_id))
@@ -82,12 +82,12 @@ module DTK
             attr[:attribute_value] = ovr_attr[:attribute_value]
           end
         end
-        
+
         ret = cmp_refs.inject({}){|h,cmp_ref|h.merge(cmp_ref[:id] => [])}
         ndx_attrs.each_value{|attr|ret[attr[:component_ref_id]] << attr}
         ret
       end
-      
+
       public
 
       class Matches < Array
@@ -114,5 +114,5 @@ end
 #       :id=>2147507829,
 #                :group_id=>2147483650},
 #              :id=>2147507830}],
-        
+
 

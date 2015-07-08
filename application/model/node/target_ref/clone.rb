@@ -19,7 +19,7 @@ module DTK; class Node
 
         # ndx_needs_sc is used to find nodes that need a state change object
         # meaning model is annoatted so these when a task is run will cause a node to be created
-        # initiallly set ndx_needs_state_change to have all nodes and then in loop below remove ones 
+        # initiallly set ndx_needs_state_change to have all nodes and then in loop below remove ones
         # that are linked to existing nodes
         ndx_needs_sc = {}
         @nodes.each do |node|
@@ -44,7 +44,7 @@ module DTK; class Node
       private
 
       ToLinkElement = Struct.new(:node_instance_id,:target_ref)
-      # This method returns array of 
+      # This method returns array of
       # and also updates ndx_needs_sc
       def existing_target_refs_to_link(tr_link_candidates,ndx_needs_sc)
         ret = []
@@ -64,7 +64,7 @@ module DTK; class Node
 
         return ret if trs_that_need_processing.empty?
 
-        # TODO: after 'convert so that always case' can remove below 
+        # TODO: after 'convert so that always case' can remove below
         ndx_node_template__node = trs_that_need_processing.inject({}) do |h,n|
           n[:node_template_id] ? h.merge!(n[:node_template_id] => n[:id]) : h
         end
@@ -80,7 +80,7 @@ module DTK; class Node
               ndx_needs_sc[node_id] = nil
             end
           end
-        end 
+        end
         ret
       end
 

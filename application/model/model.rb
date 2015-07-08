@@ -3,7 +3,7 @@
 # TBD: will seperate into seperate files
 # TBD: looks like much shared on relationship between Library, Project, and Deployment (they are all containers; so might refactor as one object that has type)
 
-# TODO: whatever is going on here, very unclear why ClassMixinDataSourceExtensions is def inside of Model.rb 
+# TODO: whatever is going on here, very unclear why ClassMixinDataSourceExtensions is def inside of Model.rb
 
 module XYZ
   module ClassMixinDataSourceExtensions
@@ -55,10 +55,10 @@ module XYZ
 
         cmps.each{|cmp|
           values = cmp.get_contained_attribute_values(type,opts)
-  
+
           if values
             ret[:component]||= {}
-            ret[:component][cmp.get_qualified_ref.to_sym] = values 
+            ret[:component][cmp.get_qualified_ref.to_sym] = values
           end
         }
 
@@ -66,7 +66,7 @@ module XYZ
       	  values = node.get_direct_attribute_values(type,opts)
       	  if values
       	    ret[:node]||= {}
-      	    ret[:node][node.get_qualified_ref.to_sym] = values 
+      	    ret[:node][node.get_qualified_ref.to_sym] = values
           end
         }
         ret
@@ -74,7 +74,7 @@ module XYZ
 
       # TBD: temp
       def get_guid(id_handle)
-        id_info = IDInfoTable.get_row_from_id_handle(id_handle) 
+        id_info = IDInfoTable.get_row_from_id_handle(id_handle)
         {guid: IDInfoTable.ret_guid_from_id_info(id_info)}
       end
     end

@@ -72,7 +72,7 @@ module XYZ
 
   module AttributeGroupInstanceMixin
     def attribute_value_type
-      type = 
+      type =
         # TODO: need to clean up special processing of sap__l4 because marked as output port but also input port (from internal connections)
         if self[:semantic_type_summary] == "sap__l4" then :linked
         elsif self[:dynamic] then :dynamic

@@ -8,7 +8,7 @@ module XYZ
           raise Error.new("search pattern is nil") unless search_pattern
           raise Error::NotImplemented.new("processing of search pattern of type #{search_pattern.class}") unless search_pattern.is_a?(SearchPatternSimple)
           relation_in_search_pattern = search_pattern.find_key(:relation)
-          mh_in_search_pattern = search_object.model_handle.createMH(model_name: relation_in_search_pattern) 
+          mh_in_search_pattern = search_object.model_handle.createMH(model_name: relation_in_search_pattern)
 
           raise Error.new("illegal model name (#{relation_in_search_pattern}) in search pattern") unless DB_REL_DEF[relation_in_search_pattern]
 
@@ -50,7 +50,7 @@ module XYZ
         def process_local_and_remote_dependencies(search_object,simple_dataset,remote_col_info=nil,vcol_sql_fns=nil)
           model_handle = simple_dataset.model_handle()
           base_field_set = search_object.field_set()
-          unless remote_col_info || vcol_sql_fns 
+          unless remote_col_info || vcol_sql_fns
             opts = {} #TODO: stub
             return simple_dataset.paging_and_order(opts)
           end
@@ -74,7 +74,7 @@ module XYZ
           end
 
           # add any global columns or global where clauses
-          if vcol_sql_fns 
+          if vcol_sql_fns
             wc_exprs = (vcol_sql_fns||[]).map{|_vcol,vcol_info| vcol_info[:sql_fn] ? vcol_info[:expr] : nil}.compact
             wc = (wc_exprs.empty? ? nil : SimpleSearchPattern::ret_sequel_filter([:and] + wc_exprs, model_handle))
 
@@ -84,7 +84,7 @@ module XYZ
             vcol_values = (vcol_sql_fns||{}).map{|vcol,vcol_info|vcol_info[:sql_fn] ? {column: vcol, value: vcol_info[:sql_fn]} : nil}.compact
 
             graph_ds = graph_ds.add_virtual_column_aliases(vcol_values)
-            graph_ds = graph_ds.from_self.where(wc) if wc 
+            graph_ds = graph_ds.from_self.where(wc) if wc
             graph_ds.add_filter_post_processing(post_proc_filter) if post_proc_filter
           end
           opts = {} #TODO: stub
@@ -96,7 +96,7 @@ module XYZ
             ds = model_handle.db.empty_dataset()
             ds_add = ret_sequel_ds_with_relation(ds,search_pattern)
             return nil unless ds_add; ds = ds_add
-        
+
             ds_add = ret_sequel_ds_with_columns(ds,search_pattern,model_handle,remote_col_info,vcol_sql_fns)
             return nil unless ds_add; ds = ds_add
 
@@ -108,7 +108,7 @@ module XYZ
             ds = model_handle.db.empty_dataset()
             ds_add = ret_sequel_ds_with_relation(ds,search_pattern)
             return nil unless ds_add; ds = ds_add
-        
+
             ds_add = ret_sequel_ds_with_columns(ds,search_pattern,model_handle)
             return nil unless ds_add; ds = ds_add
 
@@ -168,7 +168,7 @@ module XYZ
                  when :oneof
                   SQL.in(el_args[0],el_args[1])
                  else
-                  raise ErrorPatternNotImplemented.new(:comparison_op,el_op) 
+                  raise ErrorPatternNotImplemented.new(:comparison_op,el_op)
                 end
               end
             end
@@ -199,7 +199,7 @@ module XYZ
             relation = search_pattern.find_key(:relation)
             sql_tbl_name = DB.sequel_table_name(relation)
             unless sql_tbl_name
-              Log.error("illegal relation given #{relation}") 
+              Log.error("illegal relation given #{relation}")
               return nil
             end
             ds.from(sql_tbl_name)
@@ -209,7 +209,7 @@ module XYZ
             base_field_set = search_pattern.field_set()
             model_name = model_handle[:model_name]
             columns = base_field_set.cols
-            return ds if columns.empty? 
+            return ds if columns.empty?
 
             # first prune out all non scalar real columns
             # TODO: make sure no side effects of thios switch
@@ -224,7 +224,7 @@ module XYZ
               cols_to_add_remote = remote_col_info.map do |r|
                 qualified_col = r[:join_cond].values.first
                 # strip off model_name__ prefix and discard non matching prefixes
-                (qualified_col.to_s =~ Regexp.new("^(.+)__(.+)$")) ? ($1.to_sym == model_name ? $2.to_sym : nil) : qualified_col  
+                (qualified_col.to_s =~ Regexp.new("^(.+)__(.+)$")) ? ($1.to_sym == model_name ? $2.to_sym : nil) : qualified_col
               end.compact
               cols_to_add = cols_to_add + cols_to_add_remote
             end
@@ -233,11 +233,11 @@ module XYZ
             cols_to_add_local = base_field_set.extra_local_columns(vcol_sql_fns)
             cols_to_add = cols_to_add + cols_to_add_local if cols_to_add_local
 
-            processed_field_set = processed_field_set.with_added_cols(*cols_to_add) 
+            processed_field_set = processed_field_set.with_added_cols(*cols_to_add)
             # always include id column
             processed_field_set.add_col!(:id)
 
-            
+
             ds.select(*(processed_field_set.cols))
           end
 
@@ -258,7 +258,7 @@ module XYZ
 
           # it returns cols and also adds hash elements for vcolumns that have fn defs
           def self.get_filter_condition_op_and_args!(vcol_sql_fns,expr,model_handle)
-            return get_op_and_args(expr) unless vcol_sql_fns 
+            return get_op_and_args(expr) unless vcol_sql_fns
             new_vcol_sql_fns = has_virtual_column_with_fn_def?(expr,model_handle)
             return get_op_and_args(expr) unless new_vcol_sql_fns
             vcol_sql_fns.merge!(new_vcol_sql_fns)

@@ -24,7 +24,7 @@ module XYZ
     public
 
     def add_reply_to_info(caller_channel,msg_bus_client)
-      @caller_channel = caller_channel 
+      @caller_channel = caller_channel
       @msg_bus_client = msg_bus_client
       extend InstanceMixinReplyToCaller
     end
@@ -94,7 +94,7 @@ module XYZ
     attr_reader :subtasks
     def self.create(input_msg,opts={})
       temporal_sequencing = opts[:temporal_sequencing] || :concurrent
-      case temporal_sequencing 
+      case temporal_sequencing
 	when :concurrent
           WorkerTaskSetConcurrent.new(input_msg,opts)
 	when :sequential
@@ -107,7 +107,7 @@ module XYZ
     private
 
     def initialize(input_msg,opts={})
-      super(input_msg,opts)      
+      super(input_msg,opts)
       @subtasks = []
       @num_tasks_not_complete = 0
     end
@@ -115,7 +115,7 @@ module XYZ
     public
 
     def add_task(task)
-    
+
       task.set_so_can_run_concurrently if self.is_a?(WorkerTaskSetConcurrent)
       @subtasks << task
       task.parent_task = self
@@ -131,7 +131,7 @@ module XYZ
     end
   end
 
-  class WorkerTaskSetConcurrent < WorkerTaskSet 
+  class WorkerTaskSetConcurrent < WorkerTaskSet
     def execute
       if @subtasks.size > 0
         # process_task_finished() triggered by last complete subtasks
@@ -143,7 +143,7 @@ module XYZ
 
     def process_child_task_finished
       @num_tasks_not_complete = @num_tasks_not_complete - 1
-      if @num_tasks_not_complete < 1 
+      if @num_tasks_not_complete < 1
         #        Log.debug_pp [:finished,WorkerTaskWireSubset.new(self)]
         Log.debug_pp [:finished,WorkerTaskWireSubset.new(self).flatten()]
         process_task_finished()
@@ -151,7 +151,7 @@ module XYZ
     end
   end
 
-  class WorkerTaskSetSequential < WorkerTaskSet 
+  class WorkerTaskSetSequential < WorkerTaskSet
     def execute
       if @subtasks.size > 0
         # start first sub task and this will set chain that callss subsequent ones
@@ -201,13 +201,13 @@ module XYZ
 
     def extend_as_remote
       @task_type = :remote
-      extend MixinWorkerTaskRemote if self.class == WorkerTaskBasic 
+      extend MixinWorkerTaskRemote if self.class == WorkerTaskBasic
       initialize_remote()
     end
 
     def extend_as_local
       @task_type = :local
-      extend MixinWorkerTaskLocal if self.class == WorkerTaskBasic 
+      extend MixinWorkerTaskLocal if self.class == WorkerTaskBasic
       initialize_local()
     end
   end
@@ -224,7 +224,7 @@ module XYZ
 
       # legal values: [:key, :reply_timeout]
       @publish_opts = {}
-  
+
       # gets task status results back from delagated worker
       @delegated_task = nil
     end
@@ -237,7 +237,7 @@ module XYZ
         @queue_name = @input_msg.key()
         @create_opts[:passive] = true
       else
-        @exchange_name = @input_msg.topic() 
+        @exchange_name = @input_msg.topic()
         @create_opts[:type] = :topic
         @publish_opts[:key] = @input_msg.key()
       end
@@ -245,11 +245,11 @@ module XYZ
 
     def execute
       begin
-        queue_or_exchange = ret_queue_or_exchange() 
+        queue_or_exchange = ret_queue_or_exchange()
         @status = :started
         msg_bus_msg_out = @input_msg.marshal_to_message_bus_msg()
-        Log.debug_pp [:sending_to, 
-                      @queue_name ? "queue #{@queue_name}" : "exchange #{@exchange_name}", 
+        Log.debug_pp [:sending_to,
+                      @queue_name ? "queue #{@queue_name}" : "exchange #{@exchange_name}",
                       msg_bus_msg_out]
         queue_or_exchange.publish_with_callback(msg_bus_msg_out,@publish_opts) do |trans_info,msg_bus_msg_in|
           Log.debug_pp [:received_from, trans_info,msg_bus_msg_in]
@@ -307,7 +307,7 @@ module XYZ
           :failed
         end
       end
-      @run_in_new_thread_or_fork = opts[:run_in_new_thread_or_fork] 
+      @run_in_new_thread_or_fork = opts[:run_in_new_thread_or_fork]
     end
 
     def set_so_can_run_concurrently
@@ -316,7 +316,7 @@ module XYZ
 
     def execute
       # modified from design pattern from right_link
-      callback = proc do |results| 
+      callback = proc do |results|
          @results = results
          @return_code = @errors.empty?() ? :succeeded : :failed
          process_task_finished()
@@ -364,7 +364,7 @@ module XYZ
   end
 end
 
-# TBD: reconcile this, what is above in task in db model; this might be same as what is in db; or this may be object in 
+# TBD: reconcile this, what is above in task in db model; this might be same as what is in db; or this may be object in
 # TBD: may rename WorkTaskStatus, although may be better word because not exactly "snapshot"
 module XYZ
   class WorkerTaskWireSubset < HashObject
@@ -391,16 +391,16 @@ module XYZ
     # TBD: may write so that if subtasks or delegated parts falttened already its a no op
     # flatten removes the links to delegated
     def flatten
-      ret = 
-        if self[:delegated_task] 
+      ret =
+        if self[:delegated_task]
           self[:delegated_task].flatten()
         else
           {}
       end
-      
-      input_msg = nil 
-      if self[:input_msg].is_a?(ProcessorMsg) 
-        input_msg = {msg_type: self[:input_msg].msg_type} 
+
+      input_msg = nil
+      if self[:input_msg].is_a?(ProcessorMsg)
+        input_msg = {msg_type: self[:input_msg].msg_type}
         input_msg[:msg_content] =  self[:input_msg].msg_content unless self[:input_msg].msg_content.empty?
       else
          input_msg = self[:input_msg]
@@ -410,7 +410,7 @@ module XYZ
       ret[:return_code] ||= self[:return_code] if self[:return_code]
       ret[:errors] ||= self[:errors] if self[:errors]
       ret[:log_entries] ||= self[:log_entries] if self[:log_entries]
-      ret[:results] ||= self[:results] if self[:results]       
+      ret[:results] ||= self[:results] if self[:results]
       ret[:subtasks] ||= self[:subtasks].map{|t|t.flatten()} if self[:subtasks] and !self[:subtasks].empty?
       ret
     end

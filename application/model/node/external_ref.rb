@@ -21,7 +21,7 @@ module DTK
         @node = node
         @hash = @node.get_field?(:external_ref)||{}
       end
-      
+
       def references_image?(target)
         CommandAndControl.references_image?(target,hash())
       end

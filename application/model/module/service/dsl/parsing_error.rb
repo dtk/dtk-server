@@ -1,5 +1,5 @@
 module DTK
-  class ServiceModule 
+  class ServiceModule
     class ParsingError < ErrorUsage::Parsing
       r8_nested_require('parsing_error','aggregate')
       r8_nested_require('parsing_error','dangling_component_refs')
@@ -50,7 +50,7 @@ module DTK
       class AmbiguousModuleRef < self
         def initialize(params={})
           err_msg = "Reference to ?module_type module (?module_name) is ambiguous; it belongs to the namespaces (?namespaces); one of these namespaces should be selected by editing the module_refs file"
-          
+
           err_params = Params.new(
             module_type: params[:module_type],
             module_name: params[:module_name],

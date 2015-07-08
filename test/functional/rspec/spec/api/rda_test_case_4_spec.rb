@@ -5,13 +5,13 @@ login = {
 	password: 'r8server'
 }
 
-user_info = { 
-	username: 'test', 
-	email: 'test@r8network.com', 
-	first_name: 'test_name', 
-	last_name: 'test_last_name', 
-	user_group: 'test', 
-	namespace: 'test' 
+user_info = {
+	username: 'test',
+	email: 'test@r8network.com',
+	first_name: 'test_name',
+	last_name: 'test_last_name',
+	user_group: 'test',
+	namespace: 'test'
 }
 
 describe "(Repoman Drupal API) Test Case 4: Create user and check if it is possible to get user by providing valid username/email combinations" do
@@ -50,7 +50,7 @@ describe "(Repoman Drupal API) Test Case 4: Create user and check if it is possi
 			ap response
 			if response['status'] == 'ok'
 				user_exists = true if response['data']['exists'] == true
-			end	
+			end
 			expect(user_exists).to eq(true)
 		end
 	end
@@ -62,7 +62,7 @@ describe "(Repoman Drupal API) Test Case 4: Create user and check if it is possi
 			ap response
 			if response['status'] == 'ok'
 				user_exists = true if response['data']['exists'] == true
-			end	
+			end
 			expect(user_exists).to eq(true)
 		end
 	end
@@ -74,7 +74,7 @@ describe "(Repoman Drupal API) Test Case 4: Create user and check if it is possi
 			ap response
 			if response['status'] == 'ok'
 				user_exists = true if response['data']['exists'] == true
-			end	
+			end
 			expect(user_exists).to eq(true)
 		end
 	end

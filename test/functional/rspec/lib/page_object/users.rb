@@ -1,5 +1,5 @@
 class Users < Main
-    
+
   def click_on_edit_user(user)
     @session.within(:table) do
       @session.find("//tr[td[.=\"#{user}\"]]/td/a/span[.=\"Edit\"]").click

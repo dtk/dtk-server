@@ -1,5 +1,5 @@
 module DTK
-  class RestError  
+  class RestError
     def self.create(err)
       if RestUsageError.match?(err)
         RestUsageError.new(err)
@@ -19,7 +19,7 @@ module DTK
       ret = {code: code||:error, message: message||''}
       ret.merge!(backtrace: backtrace) if @backtrace
       ret
-    end 
+    end
 
     private
 
@@ -33,7 +33,7 @@ module DTK
         ret = super.merge(internal: true)
         ret.merge!(backtrace: @backtrace) if @backtrace
         ret
-      end 
+      end
 
       private
 
@@ -41,7 +41,7 @@ module DTK
         super
         # @message = "#{err.to_s} (#{err.backtrace.first})"
         # Do not see value of exposing single line to client, we will still need logs to trace the error
-        @message = err.to_s 
+        @message = err.to_s
         if R8::Config[:debug][:show_backtrace] == true
           @backtrace = err.backtrace
         end

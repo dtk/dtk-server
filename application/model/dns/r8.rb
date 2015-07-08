@@ -12,7 +12,7 @@ module DTK
         unless aug_node = aug_node_when_dns_enabled?()
           return nil
         end
-        
+
         unless domain = ::R8::Config[:dns][:r8][:domain]
           raise Error.new("Server config variable (dns.r8.domain) has not been set")
         end
@@ -77,7 +77,7 @@ module DTK
         if ret = select_aug_node?(aug_nodes)
           return ret
         end
-        
+
         sp_hash = {
           cols: [:dns_enabled_on_assembly,:id,:group_id,:display_name]
         }
@@ -91,7 +91,7 @@ module DTK
           DNS.attr_rank(n2[:dns_enabled_attribute]) <=> DNS.attr_rank(n1[:dns_enabled_attribute])
         end.first
       end
-      
+
       def attr_rank(attr)
         ret = LowestRank
         if attr_name = (attr||{})[:display_name]
@@ -101,7 +101,7 @@ module DTK
         end
         ret
       end
-      
+
       AttributeKeys = Node::DNS::AttributeKeys
       # Assumes that AttributeKeys has been defined already
       RankPos = AttributeKeys.inject({}) do|h,ak|

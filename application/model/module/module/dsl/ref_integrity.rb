@@ -46,7 +46,7 @@ module DTK
         any_deletes = true
         any_deletes = false if opts[:no_deletes_performed]
         return unless any_deletes
-        
+
         sp_hash = {
           cols: [:id,:display_name,:group_id],
           filter: [:oneof, :id, referenced_cmp_template_ids]

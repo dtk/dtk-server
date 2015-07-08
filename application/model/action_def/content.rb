@@ -14,7 +14,7 @@ module DTK; class ActionDef
     def self.parse(hash)
       new(hash).parse_and_reify!
     end
-    
+
     def parse_and_reify!
       @commands = (self[Constant::Commands] || []).map do |serialized_command|
         Command.parse(serialized_command)

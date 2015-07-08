@@ -18,7 +18,7 @@ module DTK
 
     def self.string_master_or_empty?(object)
       ret =
-        if object.nil? 
+        if object.nil?
           true
         elsif object.is_a?(String)
           object.casecmp("master").eql?(0) || object.casecmp("default").eql?(0)
@@ -31,7 +31,7 @@ module DTK
       return true if (string_master_or_empty?(str1) && string_master_or_empty?(str2))
       # ignore prefix 'v' if present e.g. v4.2.3
       return (str1||'').gsub(/^v/,'').eql?((str2||'').gsub(/^v/,''))
-    end 
+    end
 
     class Semantic < self
       def self.create_from_string(str)

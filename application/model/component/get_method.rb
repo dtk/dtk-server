@@ -13,12 +13,12 @@ module DTK; class Component
         ret.each{|r|r[:link_def_links].sort!{|a,b|a[:position] <=> b[:position]}}
         ret
       end
-      
+
       def get_node
         get_obj_helper(:node)
       end
     end
-    
+
     module ClassMixin
       def get_include_modules(component_idhs,opts={})
         get_component_children(component_idhs,IncludeModule,:component_include_module,opts)

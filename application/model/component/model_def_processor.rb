@@ -35,9 +35,9 @@ module DTK
       Model.modify_children_from_rows(attr_mh,component.id_handle,[attr_hash],[:ref],update_matching: true,no_delete: true)
     end
     CreateFields = [:display_name,:data_type,:dynamic,:required,:semantic_data_type].map{|sym|{sym.to_s => sym}} + [{'default' => :value_asserted}]
-  
+
     def self.update_field_def(component,field_def_update)
-      # compute default 
+      # compute default
       default_assign = AttributeComplexType.ravel_raw_post_hash({field_def_update["id"] => field_def_update["default"]},:attribute,component[:id]).first
       attr_mh = component.model_handle.createMH(:attribute)
       attr_hash = Aux::hash_subset(field_def_update,UpdateFields - %w{default i18n}).merge(default_assign)
@@ -68,7 +68,7 @@ module DTK
     end
     #     def self.convert_to_model_def_form(cmp_attrs_obj)
     #       i18n = get_i18n_mappings_for_models(:attribute,:component)
-    #       component_type = cmp_attrs_obj[:component_type] 
+    #       component_type = cmp_attrs_obj[:component_type]
     #       ret = Aux::ordered_hash_subset(cmp_attrs_obj,ComponentMappings){|v|v.kind_of?(String) ? v.to_sym : v}
     #
     #       ret[:columns] = cmp_attrs_obj[:attributes].map do |col_info|
@@ -90,7 +90,7 @@ module DTK
        {component_type: :model_name},
        :id
       ]
-    ColumnMappings = 
+    ColumnMappings =
       [
        :node_id,
        :node_name,
@@ -105,11 +105,11 @@ module DTK
        {dynamic: :read_only},
        :cannot_change
       ]
-  
+
     def self.convert_value_if_needed(k,v,col_info)
       case k
         when :type then v.to_sym
-        when :default then type_convert_value(v,col_info[:data_type]) 
+        when :default then type_convert_value(v,col_info[:data_type])
         else v
       end
     end

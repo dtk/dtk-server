@@ -1,6 +1,6 @@
 module DTK; class Node; class TargetRef
   class Input; class BaseNodes
-    class Element 
+    class Element
       attr_reader :node,:num_needed
       def initialize(node_info)
         @node = node_info[:node]
@@ -8,7 +8,7 @@ module DTK; class Node; class TargetRef
         @offset = node_info[:offset]||1
         @type = :base_node_link
       end
-      
+
       def add_target_ref_and_ngr!(ret,target,assembly)
         target_ref_hash = target_ref_hash(target,assembly)
         unless target_ref_hash.empty?
@@ -20,7 +20,7 @@ module DTK; class Node; class TargetRef
         end
         ret
       end
-      
+
       def target_ref_hash(_target,assembly)
         ret = {}
         unless display_name = @node.get_field?(:display_name)
@@ -32,8 +32,8 @@ module DTK; class Node; class TargetRef
             display_name: ret_display_name(display_name,index: index),
             os_type: @node.get_field?(:os_type),
             type: Type::Node.target_ref_staged,
-            external_ref: external_ref.hash() 
-          }          
+            external_ref: external_ref.hash()
+          }
           ref = ret_ref(display_name,index: index,assembly: assembly)
           h.merge(ref => hash)
         end

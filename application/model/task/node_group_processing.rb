@@ -44,12 +44,12 @@ module DTK
             Log.error("do not have rules to process task")
         end
       end
-      
+
       def self.decompose_executable_action!(task)
-        # noop if this is not a node group that decomposes 
+        # noop if this is not a node group that decomposes
         ea = task[:executable_action]
         return unless ea.node_is_node_group?()
-        
+
         #modify task so that it is a concurrent decomposed task
         task[:temporal_order] = "concurrent"
         ea[:decomposed_node_group] = true

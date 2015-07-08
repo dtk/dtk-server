@@ -14,11 +14,11 @@ module XYZ
       include DataProcessingGet unless included_modules.include?(DataProcessingGet)
       include DataProcessingDelete unless included_modules.include?(DataProcessingDelete)
       include DataProcessingUpdate unless included_modules.include?(DataProcessingUpdate)
-      
+
       def ret_convert_from_object_to_db_form(model_handle,scalar_assigns,sql_operation,opts={})
         ret = scalar_assigns
         db_rel = DB_REL_DEF[model_handle[:model_name]]
-        return ret unless db_rel #to take into account model_name can be an artificial one, for example for array datasets 
+        return ret unless db_rel #to take into account model_name can be an artificial one, for example for array datasets
         # shallow copy here is sufficienct because modify_to_reflect_special_processing! only modofies at the top key level
         ret = scalar_assigns.dup
         modify_to_reflect_special_processing!(ret,db_rel,sql_operation,opts)
@@ -37,7 +37,7 @@ module XYZ
       end
 
       def modify_to_reflect_special_processing!(scalar_assigns,db_rel,sql_operation,opts={})
-        # TODO: below should be deprecated and use update from select form 
+        # TODO: below should be deprecated and use update from select form
         if opts[:shift_id_to_ancestor] and db_rel[:has_ancestor_field]
 	  scalar_assigns[:ancestor_id] = scalar_assigns[:id]
         end
@@ -56,7 +56,7 @@ module XYZ
             cols_to_get = scalar_assigns.reject{|k,v|not ((v.is_a?(Hash) or v.is_a?(Array)) and json_table_column?(k,db_rel))}.keys
             unless cols_to_get.empty?
               object = get_object_scalar_columns(opts[:id_handle],Model::FieldSet.opt(cols_to_get,opts[:id_handle][:model_name]))
-              object.each_key do |k| 
+              object.each_key do |k|
                 Aux.merge_into_json_col!(object,k,scalar_assigns[k])
                 scalar_assigns[k] = object[k]
               end
@@ -68,7 +68,7 @@ module XYZ
         end
 
 	scalar_assigns.each_pair do |k,v|
-	  if (v.is_a?(Hash) or v.is_a?(Array)) and json_table_column?(k,db_rel) 
+	  if (v.is_a?(Hash) or v.is_a?(Array)) and json_table_column?(k,db_rel)
 	    scalar_assigns[k] = SerializeToJSON.serialize(v)
    elsif v.respond_to?(:to_sequel)
             scalar_assigns[k] = v.to_sequel(k,sql_operation)
@@ -89,7 +89,7 @@ module XYZ
         update_set_clause[:created_at] ||= Aux::now_time_stamp()
       end
 
-      # if any virtual columns need to remove and populate the actual table 
+      # if any virtual columns need to remove and populate the actual table
       def modify_for_virtual_columns!(scalar_assigns,db_rel,sql_operation,id_handle)
         # TODO: see if can leverage FieldSet
         return nil unless db_rel[:virtual_columns]
@@ -113,7 +113,7 @@ module XYZ
           vc_val = scalar_assigns.delete(vc)
           path = virtual_col_defs[vc][:path]
           unless path
-            Log.info("no path definition for virtual column #{vc}") 
+            Log.info("no path definition for virtual column #{vc}")
             next
           end
           HashObject.set_nested_value!(scalar_assigns,path,vc_val)
@@ -124,21 +124,21 @@ module XYZ
       def ret_settable_scalar_assignments(assignments,db_rel)
         ret = {}
         settable_scalar_cols = Model::FieldSet.all_settable_scalar(db_rel[:relation_type])
-        assignments.each_pair do |k,v| 
+        assignments.each_pair do |k,v|
           next unless settable_scalar_cols.include_col?(k.to_sym)
-          ret[k] = v 
+          ret[k] = v
         end
         ret
-      end	
-      
+      end
+
       def ret_object_assignments(assignments,db_rel)
 	ret = {}
-	assignments.each_pair do |k,v| 
+	assignments.each_pair do |k,v|
           next unless (db_rel[:one_to_many]||[]).include?(k.to_sym) and (v.is_a?(Hash) or v.is_a?(Array))
           ret[k] = v
         end
         ret
-      end	
+      end
 
       def ret_table_column_info(col,db_rel)
 	return nil if db_rel[:columns].nil?

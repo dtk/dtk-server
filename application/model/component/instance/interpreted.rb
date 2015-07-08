@@ -53,7 +53,7 @@ module DTK; class Component
           end
           is_rejected
         end
-        
+
         nodes
       end
 
@@ -67,7 +67,7 @@ module DTK; class Component
             cols: [:id, :display_name],
             filter: [:and,[:eq,:node_node_id,node.id],[:eq, :component_type, component_type.to_s]]
           }
-        
+
           components = get_objs(assembly.model_handle(:component_instance),sp_hash)
 
           components.each do |cmp|
@@ -91,7 +91,7 @@ module DTK; class Component
 
       class AttributeHash < Hash
       end
-      class HashForm 
+      class HashForm
         def self.convert_to_internal(component_name, component_type, node_id,attr_hash)
           {
             component: {
@@ -108,7 +108,7 @@ module DTK; class Component
         private
 
         def self.attributes(input_attr_hash, _node_id)
-          # what this does is to capture that what is in this is the complete set of attribute 
+          # what this does is to capture that what is in this is the complete set of attribute
           results = input_attr_hash.inject(DBUpdateHash.new().mark_as_complete()) do |h,(k,v)|
             attr_fields = {
               display_name: k.to_s,

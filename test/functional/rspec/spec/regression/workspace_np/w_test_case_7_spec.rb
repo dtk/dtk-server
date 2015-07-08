@@ -27,11 +27,11 @@ describe "(Workspace) Test Case 7: Create attribute on workspace (list attribute
 
 	context "Set attribute value in workspace" do
 		include_context "Set attribute value in workspace", dtk_common, attribute_name, attribute_value
-	end	
+	end
 
 	context "Purge workspace content" do
 		include_context "Purge workspace content", dtk_common
-	end	
+	end
 
 	after(:all) do
 		puts "", ""

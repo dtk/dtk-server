@@ -1,4 +1,4 @@
-module DTK; class Task; class Template; class Stage 
+module DTK; class Task; class Template; class Stage
   class InterNode
     class Factory
       def initialize(action_list,temporal_constraints)
@@ -13,7 +13,7 @@ module DTK; class Task; class Template; class Stage
           action = @action_list.index(i)
           (ret[action.node_id] ||= IntraNode::Unordered.new()) << action
         end
-          
+
         intra_node_proc = Stage::IntraNode::Processor.new(@temporal_constraints)
         ret.each_node_id{|node_id|ret[node_id] = intra_node_proc.process(ret[node_id])}
         ret
@@ -24,7 +24,7 @@ module DTK; class Task; class Template; class Stage
           ret = "configure_nodes"
           is_single_stage ? ret : (ret + "_stage_#{index}")
         end
-        
+
         DefaultNodeGroupNameProc = lambda do |index,is_single_stage|
           ret = "config_node_group_components"
           is_single_stage ? ret : (ret + "_stage_#{index}")

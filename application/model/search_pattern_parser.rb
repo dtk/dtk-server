@@ -34,12 +34,12 @@ module XYZ
     def self.augment_filter(hash_filter,hash_filter_addition)
       to_add = [hash_filter_addition]
       if hash_filter.nil?
-        [:and] + to_add  
+        [:and] + to_add
       elsif match(hash_filter.first,:and)
           hash_filter + to_add
       else
         [:and] + [hash_filter] + to_add
-      end 
+      end
     end
 
     def self.symbol_persistent_form(symbol,opts={})
@@ -51,7 +51,7 @@ module XYZ
      end
 
     def self.select_index_form(hash,symbol_index,opts={})
-      return symbol_index if hash[symbol_index] 
+      return symbol_index if hash[symbol_index]
       symbol_persistent_form = symbol_persistent_form(symbol_index,opts)
       hash[symbol_persistent_form] ? symbol_persistent_form : symbol_index
     end
@@ -60,7 +60,7 @@ module XYZ
       hash[symbol_index]||hash[symbol_persistent_form(symbol_index,opts)]
     end
     def self.match(term,symbol,opts={})
-      term == symbol || term == symbol_persistent_form(symbol,opts) 
+      term == symbol || term == symbol_persistent_form(symbol,opts)
     end
   end
 
@@ -83,7 +83,7 @@ module XYZ
     private
 
     def break_into_conjunctions(expr)
-      return [expr] unless expr.first == :and 
+      return [expr] unless expr.first == :and
       expr[1..expr.size-1].inject([]) do |a,x|
         a + break_into_conjunctions(x)
       end
@@ -105,8 +105,8 @@ module XYZ
     def field_set
       # TBD: stub; must take out non scalars
       model_name = relation.is_a?(Symbol) ? relation : nil
-      if columns.empty? 
-        model_name ? Model::FieldSet.default(model_name) : nil 
+      if columns.empty?
+        model_name ? Model::FieldSet.default(model_name) : nil
       else
         Model::FieldSet.new(model_name,columns)
       end
@@ -136,7 +136,7 @@ module XYZ
       # TODO: this is very simple; this will be enhanced
       generate_list_meta_view(columns,relation)
     end
-    
+
     def ret_form_for_db
       process_symbols(self)
     end
@@ -185,9 +185,9 @@ module XYZ
       columns = find_key_from_input(:columns,hash_input)||find_key_from_input(:cols,hash_input)
       return [] if columns.nil? || columns.empty?
       raise ErrorParsing.new(:columns,columns) unless columns.is_a?(Array)
-      # form will be an array with each term either token or {:foo => :alias}; 
+      # form will be an array with each term either token or {:foo => :alias};
       # TODO: right now only treating col as string or term
-      columns.map do |col| 
+      columns.map do |col|
         if col.is_a?(Symbol) || col.is_a?(String)
           ret_symbol(col)
         elsif col.is_a?(Hash) && col.size == 1
@@ -250,7 +250,7 @@ module XYZ
       order_by.map do |el|
         raise ErrorParsing.new(:order_by_element,el) unless el.is_a?(Hash) && el.size <= 2
         field = (el.find{|k,_v|ret_symbol(k) == :field}||[nil,nil])[1]
-        raise ErrorParsing.new(:order_by_element,el) unless field 
+        raise ErrorParsing.new(:order_by_element,el) unless field
         order = (el.find{|k,_v|ret_symbol(k) == :order}||[nil,"ASC"])[1]
         raise ErrorParsing.new(:order_by_order_direction,order) unless ["ASC","DESC"].include?(order)
         {field: ret_symbol(field), order: order}
@@ -262,7 +262,7 @@ module XYZ
       return {} if paging.nil? || paging.empty?
       raise ErrorParsing.new(:paging,paging) unless paging.is_a?(Hash) && paging.size <= 2
       start = (paging.find{|k,_v|ret_symbol(k) == :start}||[nil,nil])[1]
-      raise ErrorParsing.new(:paging_start,paging) unless start 
+      raise ErrorParsing.new(:paging_start,paging) unless start
       limit = (paging.find{|k,_v|ret_symbol(k) == :limit}||[nil,nil])[1]
       {start: start.to_i}.merge(limit ? {limit: limit.to_i} : {})
     end
@@ -280,9 +280,9 @@ module XYZ
 # TODO: remove patch
 return :eq if term_in_json == ":"
       # complexity due to handle case where have form :":columns"
-      term_in_json.to_s.gsub(/^[:]+/,'').to_sym 
+      term_in_json.to_s.gsub(/^[:]+/,'').to_sym
     end
-    
+
     def ret_scalar(term_in_json)
       raise ErrorParsing.new(:symbol,term_in_json) if [Array,Hash].detect{|t|term_in_json.is_a?(t)}
       # complexity due to handle case where have form :":columns"

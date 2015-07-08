@@ -22,7 +22,7 @@ module DTK; class NodeBindingRuleset
       end
       create_hash(existing_rules: matching_nbrs[:rules])
     end
-    
+
     def create_hash(opts={})
       hash_body = {
         type: 'clone',
@@ -42,7 +42,7 @@ module DTK; class NodeBindingRuleset
 
     def matching_node_binding_ruleset?
       if @nbrs_calculated
-        @matching_node_binding_ruleset 
+        @matching_node_binding_ruleset
       else
         @nbrs_calculated = true
         sp_hash = {
@@ -87,5 +87,5 @@ module DTK; class NodeBindingRuleset
     end
   end
 end; end
-    
+
 

@@ -54,11 +54,11 @@ module DTK
       end
 
       private
-    
+
       # so can use calling cobntroller to shortcut needing datbase lookup
       def subclass_controllers(model_name,opts)
-        if model_name == :node && opts[:controller_class] == Node_groupController 
-          :node_group 
+        if model_name == :node && opts[:controller_class] == Node_groupController
+          :node_group
         elsif model_name == :component && opts[:controller_class] == AssemblyController
           :assembly
         end
@@ -98,7 +98,7 @@ module DTK
         if ret = model_name_info(model_name)[:subclass_klass]
           return ret
         end
-        # TODO: move over all models to use data-driven form       
+        # TODO: move over all models to use data-driven form
         case model_name
           when :assembly then Assembly
           when :assembly_template then Assembly::Template
@@ -145,7 +145,7 @@ module DTK
         if ret = subclass_klass_info(model_class)[:model_name]
           return ret
         end
-        # TODO: move over all models to use data-driven form       
+        # TODO: move over all models to use data-driven form
         if model_class == Component::Template then :component_template
         elsif model_class == Assembly::Instance then :assembly_instance
         elsif model_class == Assembly::Template then :assembly_template
@@ -158,7 +158,7 @@ module DTK
         if ret = subclass_klass_info(model_class)[:print_form]
           return ret
         end
-        # TODO: move over all models to use data-driven form       
+        # TODO: move over all models to use data-driven form
         if model_class == NodeGroup then 'node group'
         elsif model_class == Assembly::Instance then 'service'
         elsif model_class == Assembly::Template then 'service module'

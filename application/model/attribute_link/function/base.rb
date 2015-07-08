@@ -11,7 +11,7 @@ module DTK; class AttributeLink
         LinkFunctionMatrix[output_type][input_type]
       end
       # first index is output type, second one is input type
-      # TODO: DTK-2062; thnk want to get rod of select_one and have an 'error' one that leads to 
+      # TODO: DTK-2062; thnk want to get rod of select_one and have an 'error' one that leads to
       # violation in service instance
       LinkFunctionMatrix = {
         scalar: {
@@ -33,7 +33,7 @@ module DTK; class AttributeLink
         else attr[:semantic_type_object].is_array?() ? :array : :scalar
         end
       end
-      
+
       def self.attribute_index_type__output(attr)
         # TODO: may need to look at data type inside array
         if attr[:output_path] then :indexed

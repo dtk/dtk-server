@@ -23,10 +23,10 @@ module DTK; class ModuleDSL; class V4; class ObjectModelForm
       end
 
       private
-      
+
       ProviderTypeToClass = {
         dtk: Dtk,
-        puppet: Puppet 
+        puppet: Puppet
       }
 
       # gets overwritten

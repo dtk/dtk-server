@@ -2,7 +2,7 @@ require  File.expand_path('mixins/monitoring_items', File.dirname(__FILE__))
 module XYZ
   module DSNormalizer
     class Ec2
-      class NodeImage < Top 
+      class NodeImage < Top
         extend MonitoringItemsClassMixin
 
         definitions do
@@ -12,14 +12,14 @@ module XYZ
           target[:external_ref] = fn(:external_ref,source[:id])
           source_complete_for target[:monitoring_item]
           target[:monitoring_item] = fn(:default_node_monitoring_items)
-          
-          source_complete_for target[:node_interface]          
+
+          source_complete_for target[:node_interface]
           prefix = target[:node_interface]
           prefix[:eth0][:display_name] = 'eth0'
-          prefix[:eth0][:type] = 'ethernet' 
-          prefix[:eth0][:family] = 'ipv4' 
+          prefix[:eth0][:type] = 'ethernet'
+          prefix[:eth0][:family] = 'ipv4'
 
-          source_complete_for target[:attribute]          
+          source_complete_for target[:attribute]
           prefix = target[:attribute][:host_addresses_ipv4]
           prefix[:display_name] = "host_addresses_ipv4"
           prefix[:is_port] = true

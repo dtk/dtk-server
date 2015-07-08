@@ -156,7 +156,7 @@ module DTK; class Target
           Log.info_pp(['SshJob#call',:error,e, :params, params])
           return
         end
-        
+
         execute_ssh_command("rm -rf /tmp/dtk-node-agent", params)
 
         Net::SCP.upload!(params[:hostname], params[:user],

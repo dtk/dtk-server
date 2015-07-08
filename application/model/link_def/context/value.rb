@@ -1,6 +1,6 @@
 module DTK
   class LinkDef::Context
-    class Value 
+    class Value
       r8_nested_require('value','component')
       r8_nested_require('value','attribute_mixin') # must be before component_attribute and node_attribute
       r8_nested_require('value','component_attribute')
@@ -10,7 +10,7 @@ module DTK
         @component_ref = component_ref
         @component = nil
       end
-      
+
       def self.create(term,opts={})
         case term[:type].to_sym
          when :component

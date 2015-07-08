@@ -5,12 +5,12 @@ module Ramaze::Helper
 
     def ret_assembly_object
       assembly_id,subtype = ret_assembly_params_id_and_subtype()
-      id_handle(assembly_id,:component).create_object(model_name: (subtype == :instance) ? :assembly_instance : :assembly_template) 
+      id_handle(assembly_id,:component).create_object(model_name: (subtype == :instance) ? :assembly_instance : :assembly_template)
     end
 
     def ret_assembly_params_object_and_subtype
       assembly_id,subtype = ret_assembly_params_id_and_subtype()
-      obj = id_handle(assembly_id,:component).create_object(model_name: (subtype == :instance) ? :assembly_instance : :assembly_template) 
+      obj = id_handle(assembly_id,:component).create_object(model_name: (subtype == :instance) ? :assembly_instance : :assembly_template)
       [obj,subtype]
     end
 
@@ -127,7 +127,7 @@ module Ramaze::Helper
       target_nodes_str = ret_request_params(node_name_param)
       return [] unless target_nodes_str
       # if node names exist, split them and remove extra spaces
-      target_nodes = target_nodes_str.split(',').collect do |node_name| 
+      target_nodes = target_nodes_str.split(',').collect do |node_name|
         ret_id_handle_from_value(node_name.strip, ::DTK::Node, assembly.id())
       end
 

@@ -18,7 +18,7 @@ module XYZ
     #
     def rest__check_idle
       prefix_log = "[CRON JOB]"
- 
+
       Log.info "#{prefix_log} Monitoring idle assemblies: START"
 
       assemblies = Assembly::Instance.list(model_handle(:assembly),{})
@@ -30,7 +30,7 @@ module XYZ
 
       # check statuses
       assemblies.each do |assembly|
-        
+
         nodes = Assembly::Instance.get_nodes([assembly.id_handle], :type)
         # flag to indicate if assembly nodes need to be stopped
         stop_this_assembly = false

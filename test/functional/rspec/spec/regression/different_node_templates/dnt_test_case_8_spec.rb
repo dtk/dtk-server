@@ -44,7 +44,7 @@ def get_node_ec2_public_dns(service_name, node_name)
 		puts "Info about #{node_name} node is not found!"
 		puts ""
 		return node_ec2_public_dns
-	end	
+	end
 end
 
 describe "(Different Node Templates) Test Case 8: Wordpress - Single node scenario" do
@@ -56,7 +56,7 @@ describe "(Different Node Templates) Test Case 8: Wordpress - Single node scenar
 		include_context "Stage", dtk_common
 	end
 
-	context "List services after stage" do		
+	context "List services after stage" do
 		include_context "List services after stage", dtk_common
 	end
 

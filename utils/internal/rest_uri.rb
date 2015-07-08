@@ -2,7 +2,7 @@ module XYZ
   module RestURI
     class << self
       def parse_factory_uri(factory_uri)
-        if factory_uri =~ %r{(.*)/(.+)} 
+        if factory_uri =~ %r{(.*)/(.+)}
           parent_uri = $1 == "" ? "/" : $1
           relation_type = $2.to_sym
 

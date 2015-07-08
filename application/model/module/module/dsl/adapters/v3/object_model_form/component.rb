@@ -1,5 +1,5 @@
 module DTK; class ModuleDSL; class V3
-  class ObjectModelForm 
+  class ObjectModelForm
     class Component < OMFBase::Component
       private
 
@@ -23,7 +23,7 @@ module DTK; class ModuleDSL; class V3
         end
         ret
       end
-      
+
       # processes "link_defs, "dependencies", and "component_order"
       def add_dependent_components!(ret,input_hash,base_cmp,opts={})
         dependencies,link_defs = Choice.deps_and_link_defs(input_hash,base_cmp,opts)
@@ -55,7 +55,7 @@ module DTK; class ModuleDSL; class V3
           nested_type = 'string'
           if type == 'array'
             type = 'array(string)'
-          elsif type =~ /^array\((.+)\)$/ 
+          elsif type =~ /^array\((.+)\)$/
             nested_type = $1
           else
             raise ParsingError.new("Ill-formed attribute data type (?1)",type)
@@ -86,10 +86,10 @@ module DTK; class ModuleDSL; class V3
         default_indicates_dynamic_default_variable?(info)
       end
 
-      def value_asserted(info,attr_props) 
+      def value_asserted(info,attr_props)
         unless default_indicates_dynamic_default_variable?(info)
           ret = nil
-          value = info["default"] 
+          value = info["default"]
           unless value.nil?
             if semantic_data_type = attr_props["semantic_data_type"]
               # TODO: currently converting 'integer' -> integer and 'booelan' -> boolean; this may be unnecesary since the object model stores everything as strings

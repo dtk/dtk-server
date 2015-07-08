@@ -84,7 +84,7 @@ describe "(Use Of Parameters) Test Case 6: Check possibility to query list of no
 		include_context "Stage", dtk_common
 	end
 
-	context "List services after stage" do		
+	context "List services after stage" do
 		include_context "List services after stage", dtk_common
 	end
 

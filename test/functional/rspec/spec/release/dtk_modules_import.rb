@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#This script is importing latest DTK modules from community repoman. 
+#This script is importing latest DTK modules from community repoman.
 #These modules will be used for dtk release deployment test
 
 require 'rubygems'

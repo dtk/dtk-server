@@ -28,7 +28,7 @@ module TestModulesMixin
 	def list_test_modules_with_filter(namespace)
 		puts "List test modules with filter:", "---------------------------------"
 		test_modules_retrieved = true
-		test_modules_list = send_request('/rest/test_module/list', detail_to_include: [], module_namespace: namespace)		
+		test_modules_list = send_request('/rest/test_module/list', detail_to_include: [], module_namespace: namespace)
 		pretty_print_JSON(test_modules_list)
 
 		if test_modules_list['data'].empty?
@@ -48,7 +48,7 @@ module TestModulesMixin
 	def list_remote_test_modules_with_filter(namespace)
 		puts "List remote test modules with filter:", "------------------------------------"
 		test_modules_retrieved = true
-		test_modules_list = send_request('/rest/test_module/list_remote', rsa_pub_key: self.ssh_key, module_namespace: namespace)		
+		test_modules_list = send_request('/rest/test_module/list_remote', rsa_pub_key: self.ssh_key, module_namespace: namespace)
 		pretty_print_JSON(test_modules_list)
 
 		if test_modules_list['data'].empty?

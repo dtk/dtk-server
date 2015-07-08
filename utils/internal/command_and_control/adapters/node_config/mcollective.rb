@@ -31,7 +31,7 @@ module DTK
         if assembly = assembly_instance(task_idh,config_node)
           opts_ret_msg.merge!(assembly: assembly)
         end
-    
+
         msg_content = config_agent.ret_msg_content(config_node,opts_ret_msg)
         added_content = {
           task_id: task_idh.get_id(),
@@ -50,7 +50,7 @@ module DTK
 
       # TODO: below is hack and should find more reliable way to pass in assembly
       def self.assembly_instance(task_idh,config_node)
-        assembly_id = 
+        assembly_id =
           if assembly_idh = config_node[:assembly_idh]
             if assembly_idh.is_a?(IDHandle) then assembly_idh.get_id()
             elsif assembly_idh.is_a?(Hash) then assembly_idh[:guid]

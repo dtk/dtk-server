@@ -17,8 +17,8 @@ module DTK; class ConfigAgent
         # added protection in case we get unexpected form
         begin
           @parsed_dependency = ParsedForm.new.merge(
-            name: name, 
-            version_constraints: parse_constraints_string(version_constraints_string) 
+            name: name,
+            version_constraints: parse_constraints_string(version_constraints_string)
           )
          rescue Exception => e
           Log.error("error parsing version constraints string: #{version_constraints_string}")
@@ -75,4 +75,4 @@ module DTK; class ConfigAgent
     end
   end
 end; end
-    
+

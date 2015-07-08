@@ -28,7 +28,7 @@ module DTK; class ModuleDSL; class V2
       self.class::Choice
     end
 
-    # returns a subset or hash for all keys listed; if an extyra keys then null signifying error condition is returned 
+    # returns a subset or hash for all keys listed; if an extyra keys then null signifying error condition is returned
     # '*' means required
     # e.g., keys ["*module","version"]
     def hash_contains?(hash,keys)
@@ -40,14 +40,14 @@ module DTK; class ModuleDSL; class V2
         ret.merge!(k => v)
       end
       # return nil if there is a required key not found
-      unless req_keys.values.find{|x|x == 1} 
+      unless req_keys.values.find{|x|x == 1}
         ret
       end
     end
 
     module ComponentChoiceMixin
       def add_dependency!(ret,dep_cmp,base_cmp)
-        ret[dep_cmp] ||= { 
+        ret[dep_cmp] ||= {
           "type"           => "component",
           "search_pattern" => {":filter"=>[":eq", ":component_type", dep_cmp]},
           "description"    => "#{component_print_form(dep_cmp)} is required for #{component_print_form(base_cmp)}",
@@ -127,11 +127,11 @@ module DTK; class ModuleDSL; class V2
           raise ParsingError.new("Component (?1) external_ref is ill-formed (?2)",cmp,input_hash)
         end
         type = input_hash.keys.first
-        name_key = 
+        name_key =
           case type
-            when "puppet_class" then "class_name" 
-            when "puppet_definition" then "definition_name" 
-            when "serverspec_test" then "test_name" 
+            when "puppet_class" then "class_name"
+            when "puppet_definition" then "definition_name"
+            when "serverspec_test" then "test_name"
             else raise ParsingError.new("Component (?1) external_ref has illegal type (?2)",cmp,type)
           end
         name = input_hash.values.first
@@ -158,7 +158,7 @@ module DTK; class ModuleDSL; class V2
         end
         ret = OutputHash.new
         incl_module_array.each do |incl_module|
-          el = 
+          el =
             if incl_module.is_a?(String)
               {"display_name" => incl_module}
             elsif incl_module.is_a?(Hash)
@@ -188,12 +188,12 @@ module DTK; class ModuleDSL; class V2
       IncludeModVersionOps = [">="]
       IncludeModVersionNumRegexp = /^[0-9]+\.[0-9]+\.[0-9]+/
       def include_module_version_constraint(version)
-        no_error = 
+        no_error =
           if version.is_a?(String)
             if version =~ IncludeModVersionNumRegexp
               true
             end
-          elsif version.is_a?(Array) 
+          elsif version.is_a?(Array)
             if version.size == 2 && IncludeModVersionOps.include?(version[0]) && version[1] =~ IncludeModVersionNumRegexp
               true
             end
@@ -239,7 +239,7 @@ module DTK; class ModuleDSL; class V2
           side_effect_settings.merge!('dynamic' => true)
         end
 
-        external_ref = 
+        external_ref =
           if opts[:constant_attribute] || info["constant"]
             side_effect_settings.merge!(Attribute::Constant.side_effect_settings())
             Attribute::Constant.ret_external_ref()
@@ -268,7 +268,7 @@ module DTK; class ModuleDSL; class V2
       module AttributeProps
         def self.add_defaults_for_nils!(ret,info)
             Fields.each do |field|
-            val = info[field.to_s] 
+            val = info[field.to_s]
             ret[field] = val.nil? ? default(field) : val
           end
           ret
@@ -279,7 +279,7 @@ module DTK; class ModuleDSL; class V2
         def self.default(field)
          (Info[field]||{})[:default]
         end
-        
+
         Info = {
           description: {type: :string,  default: nil},
           dynamic: {type: :boolean, default: false},
@@ -293,8 +293,8 @@ module DTK; class ModuleDSL; class V2
         !!(info["external_ref"]||{})["default_variable"]
       end
 
-      def value_asserted(info,_attr_props) 
-        info["default"] 
+      def value_asserted(info,_attr_props)
+        info["default"]
       end
 
       def add_attr_data_type_attrs!(attr_props,info)
@@ -304,7 +304,7 @@ module DTK; class ModuleDSL; class V2
         elsif type =~ /^array\((.+)\)$/
           scalar_type = $1
           if ScalarTypes.include?(scalar_type)
-            semantic_type = {":array" => scalar_type} 
+            semantic_type = {":array" => scalar_type}
             attr_props.merge!("data_type" => "json","semantic_type_summary" => type,"semantic_type" => semantic_type)
           end
         end
@@ -334,7 +334,7 @@ module DTK; class ModuleDSL; class V2
             # determine if create a link def and/or a dependency
             # creaet a dependency if just single choice and base adn depnedncy on same node
             # TODO: only handling addition of dependencies if single choice; consider adding just temporal if multiple choices
-            if choices.size == 1 
+            if choices.size == 1
               choice = choices.first
               if choice.is_internal?()
                 pntr = ret[:dependencies] ||= OutputHash.new
@@ -425,7 +425,7 @@ module DTK; class ModuleDSL; class V2
         dep_cmp = convert_to_internal_cmp_form(dep_cmp_raw)
         ret_info = {"type" => link_type(dep_cmp_info,parent_info,opts)}
         if order = order(dep_cmp_info)
-          ret_info["order"] = order 
+          ret_info["order"] = order
         end
         in_attr_mappings = (dep_cmp_info["attribute_mappings"]||[]) + (parent_info["attribute_mappings"]||[])
         unless in_attr_mappings.empty?
@@ -496,7 +496,7 @@ module DTK; class ModuleDSL; class V2
           attr = $2
           case prefix
           when "$node" then (dep_or_base == :dep) ? "remote_node" : "local_node"
-          else raise ParsingError.new("Attribute reference (?1) is ill-formed",attr_ref)  
+          else raise ParsingError.new("Attribute reference (?1) is ill-formed",attr_ref)
           end + ".#{attr.gsub(/host_address$/,"host_addresses_ipv4.0")}"
         else
           has_dollar_sign = has_variable?(attr_ref)
@@ -512,7 +512,7 @@ module DTK; class ModuleDSL; class V2
           "#{convert_to_internal_cmp_form(cmp)}.#{var_name}"
         end
       end
-      
+
       def convert_attr_ref_base(attr_ref,base_cmp,dep_attr_ref,dep_cmp,input_or_output,opts={})
         is_constant?(attr_ref,base_cmp,dep_attr_ref,dep_cmp,opts) || convert_attr_ref_simple(attr_ref,:base,base_cmp,input_or_output)
       end
@@ -523,7 +523,7 @@ module DTK; class ModuleDSL; class V2
 
       def is_constant?(attr_ref,base_cmp,dep_attr_ref,dep_cmp,opts={})
         return nil if has_variable?(attr_ref)
-          
+
         datatype = :string
         const = nil
         if attr_ref =~ /^'(.+)'$/
@@ -541,7 +541,7 @@ module DTK; class ModuleDSL; class V2
         unless constant_assign = (const && Attribute::Constant.create?(const,dep_attr_ref,dep_cmp,datatype))
           raise ParsingError.new("Attribute reference (?1) is ill-formed",attr_ref)
         end
-        constants = opts[:constants] ||= [] 
+        constants = opts[:constants] ||= []
         unless constant_assign.is_in?(constants)
           constants << constant_assign
         end

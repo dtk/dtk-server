@@ -53,7 +53,7 @@ describe "(Component Module DSL) Test Case 6: Add new component attribute in dtk
     include_context "Stage", dtk_common
   end
 
-  context "List services after stage" do    
+  context "List services after stage" do
     include_context "List services after stage", dtk_common
   end
 

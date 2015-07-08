@@ -1,7 +1,7 @@
 module XYZ
   module DSNormalizer
     class UserData
-      class Node < Top 
+      class Node < Top
         definitions do
           target[:display_name] = fn(:display_name,source)
           %w{tag disk_size ui}.each do |key|

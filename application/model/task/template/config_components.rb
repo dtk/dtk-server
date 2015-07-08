@@ -101,7 +101,7 @@ module DTK; class Task
 
       def self.generate_from_temporal_contraints(action_types,assembly,cmp_actions,opts={})
         action_types =  Array(action_types)
-        relevant_actions = 
+        relevant_actions =
           if action_types == [:assembly]
             cmp_actions.select{|a|a.source_type() == :assembly}
           elsif action_types == [:node_centric]
@@ -112,7 +112,7 @@ module DTK; class Task
         temporal_constraints = TemporalConstraints::ConfigComponents.get(assembly,relevant_actions)
         Content.new(temporal_constraints,relevant_actions,opts)
       end
-        
+
     end
   end
 end; end

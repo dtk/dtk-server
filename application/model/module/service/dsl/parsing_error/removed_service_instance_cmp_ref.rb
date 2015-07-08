@@ -5,7 +5,7 @@ module DTK; class ServiceModule
       def initialize(cmp_ref_info_list,opts={})
         super(err_msg(cmp_ref_info_list),opts)
         # each element can be a component ref object or a hash
-        @cmp_ref_info_list = cmp_ref_info_list 
+        @cmp_ref_info_list = cmp_ref_info_list
       end
 
       private
@@ -17,7 +17,7 @@ module DTK; class ServiceModule
         does = (cmp_ref_info_list.size==1 ? "does" : "do")
         "You are not allowed to delete #{what} (#{refs}) that #{is} referenced in component module used in this service instance"
       end
-      
+
       def print_form(cmp_ref_info)
         ret = ComponentRef.print_form(cmp_ref_info)
         if version = cmp_ref_info[:version]

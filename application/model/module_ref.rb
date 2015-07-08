@@ -14,7 +14,7 @@ module DTK
       if object.is_a?(ModuleRef)
         ret = object
         version_info = VersionInfo::Assignment.reify?(object)
-      else #object.kind_of?(Hash)  
+      else #object.kind_of?(Hash)
         ret = ModuleRef.create_stub(mr_mh,object)
         if v = object[:version_info]
           version_info = VersionInfo::Assignment.reify?(v)
@@ -103,7 +103,7 @@ module DTK
     end
 
     def dsl_hash_form
-      ret = Aux.hash_subset(self,DSLHashCols,only_non_nil: true) 
+      ret = Aux.hash_subset(self,DSLHashCols,only_non_nil: true)
       if version_string = version_string()
         ret.merge!(version_info: version_string)
       end
@@ -123,7 +123,7 @@ module DTK
         parent.parent_id_field_name(:module_ref) => parent.id()
       }
       module_ref_hash_array.map do |module_ref_hash|
-        assigns = 
+        assigns =
           if version_info = module_ref_hash[:version_info]
             parent_id_assigns.merge(version_info: version_info.to_s)
           else
@@ -144,7 +144,7 @@ module DTK
       end
       module_ref_hash[:module_name]
     end
-    
+
     def self.ref(module_ref_hash)
       [:module_type,:module_name].each do |key|
         if module_ref_hash[key].nil?

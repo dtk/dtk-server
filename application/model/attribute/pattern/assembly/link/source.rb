@@ -3,7 +3,7 @@ module DTK; class Attribute::Pattern
     # for attribute relation sources
     class Source < self
       def self.create_attr_pattern(base_object,source_attr_term,source_is_antecdent)
-        attr_term,fn,node_cmp_type = Simple.parse(source_attr_term) || 
+        attr_term,fn,node_cmp_type = Simple.parse(source_attr_term) ||
                        VarEmbeddedInText.parse(source_attr_term)
         unless attr_term
           raise ErrorUsage::Parsing::Term.new(source_attr_term,:source_attribute)
@@ -17,7 +17,7 @@ module DTK; class Attribute::Pattern
 
         new(attr_pattern,fn,attr_term)
       end
-      
+
       attr_reader :attribute_pattern,:fn
       def attribute_idh
         @attribute_pattern.attribute_idhs.first
@@ -82,9 +82,9 @@ module DTK; class Attribute::Pattern
             }
             node_cmp_type =  nil
             [attr_term,fn,node_cmp_type]
-          end        
+          end
         end
-        
+
       end
     end
   end; end

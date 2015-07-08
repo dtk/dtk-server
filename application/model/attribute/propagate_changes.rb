@@ -6,8 +6,8 @@ module DTK; class Attribute
       return ret if attribute_rows.empty?
       sample = attribute_rows.first
       val_field = (sample.key?(:value_asserted) ? :value_asserted : :value_derived)
-      old_val_field = "old_#{val_field}".to_sym 
-      
+      old_val_field = "old_#{val_field}".to_sym
+
       attr_idhs = attribute_rows.map{|r|attr_mh.createIDH(id: r[:id])}
       ndx_existing_values = get_objs_in_set(attr_idhs,columns: [:id,val_field]).inject({}) do |h,r|
         h.merge(r[:id] => r)
@@ -31,7 +31,7 @@ module DTK; class Attribute
             ndx_ch_attr_info[id][:change_paths] << path
           end
         elsif not (existing_val == new_val)
-          ndx_ch_attr_info[id] = Aux::hash_subset(r,[:id,val_field]).merge(old_val_field => existing_val) 
+          ndx_ch_attr_info[id] = Aux::hash_subset(r,[:id,val_field]).merge(old_val_field => existing_val)
         end
       end
 
@@ -97,12 +97,12 @@ module DTK; class Attribute
       AttributeLink.propagate(attr_mh,attrs_links_to_update)
     end
 
-    def clear_dynamic_attributes_and_their_dependents(attrs,opts={})    
+    def clear_dynamic_attributes_and_their_dependents(attrs,opts={})
       ret = []
       return ret if attrs.empty?
       attribute_rows = attrs.map do |attr|
         {
-          :id => attr[:id], 
+          :id => attr[:id],
           dynamic_attribute_value_field() => dynamic_attribute_clear_value(attr)
         }
       end

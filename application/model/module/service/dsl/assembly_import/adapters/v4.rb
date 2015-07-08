@@ -6,20 +6,20 @@ module DTK; class ServiceModule
         module Variations
         end
         extend Aux::ParsingingHelper::ClassMixin
-        
+
         Name = 'name'
 
         Assembly = 'assembly'
-        
+
         Description = 'description'
 
         NodeBindings = 'node_bindings'
 
         WorkflowAction = 'workflow_action'
         Variations::WorkflowAction = ['workflow_action','assembly_action']
-        
+
         CreateWorkflowAction = 'create'
-          
+
         Workflows = 'workflows'
         Workflow = 'workflow'
       end
@@ -33,7 +33,7 @@ module DTK; class ServiceModule
       end
       AssemblyKeys = [:Name,:Description,:Workflows,:Workflow]
 
-      def self.parse_node_bindings_hash!(node_bindings_hash,opts={})      
+      def self.parse_node_bindings_hash!(node_bindings_hash,opts={})
         if hash = NodeBindings::DSL.parse!(node_bindings_hash,opts)
           DBUpdateHash.new(hash)
         end
@@ -43,7 +43,7 @@ module DTK; class ServiceModule
 
       def self.import_task_templates(assembly_hash)
         ret = DBUpdateHash.new()
-        workflows_with_actions = 
+        workflows_with_actions =
           if workflow = Constant.matches?(assembly_hash,:Workflow)
             [{workflow: workflow}]
           elsif workflows = Constant.matches?(assembly_hash,:Workflows)
@@ -52,20 +52,20 @@ module DTK; class ServiceModule
             elsif workflows.is_a?(Array)
               workflows.map{|workflow|{workflow: workflow}}
             end
-          end                                          
+          end
 
         if workflows_with_actions
           ret = workflows_with_actions.inject(ret){|h,r| h.merge(parse_workflow(r[:workflow],r[:action]))}
         end
-        
+
         ret.mark_as_complete()
       end
 
       def self.parse_workflow(workflow_hash,workflow_action=nil)
         # we explicitly want to delete from workflow_hash; workflow_action can be nil
-        action_under_key = workflow_hash.delete(Constant::WorkflowAction) 
+        action_under_key = workflow_hash.delete(Constant::WorkflowAction)
 
-        workflow_action ||= action_under_key 
+        workflow_action ||= action_under_key
         if workflow_action.nil? || Constant.matches?(workflow_action,:CreateWorkflowAction)
           workflow_action = Task::Template.default_task_action()
         end
@@ -86,7 +86,7 @@ module DTK; class ServiceModule
           end
         end
       end
-      
+
       def self.ret_input_attribute_info(cmp_input)
         ret_component_hash(cmp_input)["attribute_info"]||{}
       end

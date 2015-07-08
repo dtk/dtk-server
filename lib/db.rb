@@ -64,7 +64,7 @@ module DTK
     end
 
     def self.ret_qualified_ref_from_scalars(scalars)
-      return nil if scalars[:ref].nil? 
+      return nil if scalars[:ref].nil?
       scalars[:ref].to_s + (scalars[:ref_num] ? "-" + scalars[:ref_num].to_s : "")
     end
 
@@ -76,13 +76,13 @@ module DTK
 
     def self.create_for_migrate
       sequel_db = ::DB
-      db_type = sequel_db.adapter_scheme 
+      db_type = sequel_db.adapter_scheme
       r8_nested_require('db',"adapters/#{db_type}")
       db_class = DTK.const_get db_type.to_s.capitalize
       db_class.new({},Opts.new(sequel_db: sequel_db))
     end
 
-    # TODO: just temp until we get rid of need to convert keys to symbols; right now default is to do so 
+    # TODO: just temp until we get rid of need to convert keys to symbols; right now default is to do so
     def self.ret_json_hash(raw_value,col_info,opts={})
       begin
         hash = JSON.parse(raw_value)
@@ -97,7 +97,7 @@ module DTK
         raw_value
       end
     end
-    
+
     def self.parent_field(parent_model_name,model_name,opts={})
       ret = ret_parent_id_field_name(DB_REL_DEF[parent_model_name],DB_REL_DEF[model_name])
       if ret.nil? && !opts[:can_be_nil]
@@ -110,7 +110,7 @@ module DTK
       return nil unless parent_db_rel && db_rel
       parent_db_rel[:schema] == db_rel[:schema] ?
         (parent_db_rel[:table].to_s + "_id").to_sym :
-        (parent_db_rel[:schema].to_s + "_" + parent_db_rel[:table].to_s + "_id").to_sym 
+        (parent_db_rel[:schema].to_s + "_" + parent_db_rel[:table].to_s + "_id").to_sym
     end
     def ret_parent_id_field_name(parent_db_rel,db_rel)
       self.class.ret_parent_id_field_name(parent_db_rel,db_rel)
@@ -128,17 +128,17 @@ module DTK
 
     def db_fetch(sql,*args,&block)
       @db.fetch(sql,*args,&block)
-    end        
+    end
 
     def db_run(sql,opts={})
       @db.run(sql,opts)
-    end        
+    end
   end
 
 class DBRel < Hash
   def initialize(x)
     super()
-    
+
     if x.is_a?(Hash)
         x.each_pair{|k,v|self[k.to_sym] = v}
     else
@@ -156,8 +156,8 @@ class DBRel < Hash
   end
 
   def schema_table_symbol(table_alias=nil)
-    table_no_alias =  self[:schema] == :public ? 
-    self[:table] : (self[:schema].to_s +  "__" + self[:table].to_s).to_sym 
+    table_no_alias =  self[:schema] == :public ?
+    self[:table] : (self[:schema].to_s +  "__" + self[:table].to_s).to_sym
 
     return table_no_alias if table_alias.nil?
       (table_no_alias.to_s + "___" +  table_alias.to_s).to_sym

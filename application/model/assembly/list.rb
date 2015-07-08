@@ -27,22 +27,22 @@ module DTK
           node = Model.get_obj(model_handle(:node),sp_hash)
           assembly_rows.first[:node] = node
 
-          assembly_rows = assembly_rows.select { |node| node[:node][:id] == node_id.to_i } 
+          assembly_rows = assembly_rows.select { |node| node[:node][:id] == node_id.to_i }
           opts.merge!(component_info: true)
         end
 
         # filter nodes by component_id if component_id is provided in request
         unless (component_id.nil? || component_id.empty?)
-          assembly_rows = assembly_rows.select { |node| node[:nested_component][:id] == component_id.to_i } 
+          assembly_rows = assembly_rows.select { |node| node[:nested_component][:id] == component_id.to_i }
           opts.merge!(component_info: true, attribute_info: true)
         end
-        
+
         # load attributes for assembly
         attr_rows = self.class.get_default_component_attributes(model_handle(), assembly_rows)
-        
+
         # filter attributes by attribute_name if attribute_name is provided in request
         if attribute_id
-          attr_rows.reject! { |attr| attr[:id] != attribute_id.to_i }  
+          attr_rows.reject! { |attr| attr[:id] != attribute_id.to_i }
         end
 
         # reconfigure response fields that will be returned to the client
@@ -56,11 +56,11 @@ module DTK
           end
         end
 
-        ret = self.class.list_aux(assembly_rows,attr_rows, opts_list).first      
+        ret = self.class.list_aux(assembly_rows,attr_rows, opts_list).first
         if is_a?(Template)
           [:op_status,:last_task_run_status].each{|k|ret.delete(k)}
         end
-        
+
         ret[:nodes].each do |node|
           node.reject!{|k|![:display_name,:node_properties,:components].include?(k)}
         end
@@ -79,14 +79,14 @@ module DTK
       def list_aux(assembly_rows,attr_rows=[],opts={})
         ndx_attrs = {}
 
-        if opts[:attribute_info] 
+        if opts[:attribute_info]
           attr_rows.each do |attr|
             if (attr[:attribute_value] && !attr[:attribute_value].empty?)
               (ndx_attrs[attr[:component_component_id]] ||= []) << attr
             end
           end
         end
-        
+
         ndx_ret = {}
         pp_opts = Aux.hash_subset(opts,[:no_module_prefix])
         assembly_template_opts = {version_suffix: true}
@@ -96,15 +96,15 @@ module DTK
         assembly_rows.each do |r|
           last_task_run_status = r[:last_task_run_status]
           pntr = ndx_ret[r[:id]] ||= r.prune_with_values(
-              display_name: r.pretty_print_name(pp_opts), 
-              last_task_run_status: last_task_run_status,                                                         
-              # TODO: will deprecate :execution_status after removing it from smoketests                                                         
+              display_name: r.pretty_print_name(pp_opts),
+              last_task_run_status: last_task_run_status,
+              # TODO: will deprecate :execution_status after removing it from smoketests
               execution_status: last_task_run_status||'staged',
               ndx_nodes: {}
           )
 
           if module_branch_id = r[:module_branch_id]
-            pntr[:module_branch_id] ||= module_branch_id 
+            pntr[:module_branch_id] ||= module_branch_id
           end
 
           if target = r[:target]
@@ -124,7 +124,7 @@ module DTK
           end
 
           if created_at = r[:created_at]
-            pntr.merge!(created_at: created_at) 
+            pntr.merge!(created_at: created_at)
           end
 
           if node = format_node!(pntr[:ndx_nodes],r[:node],opts)
@@ -145,14 +145,14 @@ module DTK
             end
           end
         end
-        
+
         unsorted = ndx_ret.values.map do |r|
           nodes = r[:ndx_nodes].values
           nodes.reject!{|n| n[:type].eql?('assembly_wide')} if opts[:remove_assembly_wide_node]
           op_status = (op_status(nodes) if respond_to?(:op_status))
           r.merge(op_status: op_status,nodes: nodes).slice(:id,:display_name,:op_status,:last_task_run_status,:execution_status,:module_branch_id,:version,:assembly_template,:target,:nodes,:created_at,:keypair,:security_groups)
         end
-        
+
         sanitize!(unsorted) if opts[:sanitize]
 
         unsorted.sort{|a,b|a[:display_name] <=> b[:display_name]}
@@ -237,9 +237,9 @@ module DTK
           elsif not has_print_form
             ret[k] = v
           else
-            if [:dns_name].include?(k) 
+            if [:dns_name].include?(k)
               # no op
-            elsif k == :private_dns_name && v.is_a?(Hash)            
+            elsif k == :private_dns_name && v.is_a?(Hash)
               ret[k] = v.values.first
             else
               ret[k] = v
@@ -252,14 +252,14 @@ module DTK
       def format_components_and_attributes(node,raw_row,ndx_attrs,opts)
         cmp_hash = list_aux__component_template(raw_row)
         if cmp_type =  cmp_hash[:component_type] && cmp_hash[:component_type].gsub(/__/,"::")
-          cmp = 
+          cmp =
             if opts[:component_info]
               version = ModuleBranch.version_from_version_field(cmp_hash[:version])
               {
               component_name: cmp_type,
-              component_id: cmp_hash[:id], 
-              basic_type: cmp_hash[:basic_type], 
-              description: cmp_hash[:description], 
+              component_id: cmp_hash[:id],
+              basic_type: cmp_hash[:basic_type],
+              description: cmp_hash[:description],
               version: version
             }
             elsif not ndx_attrs.empty?
@@ -267,7 +267,7 @@ module DTK
             else
               cmp_type
             end
-            
+
           if attrs = ndx_attrs[list_aux__component_template(raw_row)[:id]]
             processed_attrs = attrs.map do |attr|
               proc_attr = {attribute_name: attr[:display_name], value: attr[:attribute_value]}

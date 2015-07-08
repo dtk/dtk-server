@@ -89,7 +89,7 @@ describe "(Component Module DSL) Test Case 7: Converge assembly with modified mo
     include_context "Stage", dtk_common
   end
 
-  context "List assemblies after stage" do    
+  context "List assemblies after stage" do
     include_context "List assemblies after stage", dtk_common
   end
 

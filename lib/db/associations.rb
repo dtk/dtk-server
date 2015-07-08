@@ -5,7 +5,7 @@ require File.expand_path('schema_processing', File.dirname(__FILE__))
 module XYZ
   class DB
     module Associations
-      
+
         ########### SchemaProcessing
         include SchemaProcessing unless included_modules.include?(SchemaProcessing)
         def create_table_associations?(db_rel)
@@ -30,7 +30,7 @@ module XYZ
 
         def add_foreign_key?(db_rel,foreign_key_field,db_rel_pointed_to,opts={})
           unless foreign_key_exists?(db_rel,foreign_key_field,db_rel_pointed_to)
-            add_foreign_key(db_rel,foreign_key_field,db_rel_pointed_to,opts) 
+            add_foreign_key(db_rel,foreign_key_field,db_rel_pointed_to,opts)
 	  end
         end
       ########### end: SchemaProcessing
@@ -39,7 +39,7 @@ module XYZ
 
   # used during clone operation to help appropriately set foreign key refs
   class CloneHelper
-    @@fk_refs = {} 
+    @@fk_refs = {}
     def self.add_foreign_key_info(fk_relation_type,fk_col,fk_ref_relation_type)
       # ancestor_id is processed in special way
       return nil if fk_col == :ancestor_id
@@ -54,7 +54,7 @@ module XYZ
       @id_mapping_in_clone = {}
     end
 
-    def update(c,db_rel,old_id,new_id,_scalar_assignments) 
+    def update(c,db_rel,old_id,new_id,_scalar_assignments)
       relation_type = db_rel[:relation_type]
       enter_id_mapping_if_fk_ref(relation_type,old_id,new_id,c)
     end

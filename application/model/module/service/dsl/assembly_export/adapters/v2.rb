@@ -122,7 +122,7 @@ module DTK
       end
 
       def match_component?(component_in_ret,parsed_port)
-        match_term = 
+        match_term =
           if component_in_ret.is_a?(Hash)
             component_in_ret.keys.first
           else # it will be a string
@@ -142,7 +142,7 @@ module DTK
           ret = component_in_ret
           service_links = ret.values.first[:service_links] ||= {}
         else # it will be a string
-          service_links = {}  
+          service_links = {}
           ret = {component_in_ret => {service_links: service_links}}
         end
         output_target = "#{out_parsed_port[:node_name]}#{Seperators[:node_component]}#{out_parsed_port[:component_name]}"
@@ -157,7 +157,7 @@ module DTK
         else
           service_links.merge!(link_def_ref => output_target)
         end
-        ret 
+        ret
       end
 
       def node_bindings_output_hash
@@ -179,7 +179,7 @@ module DTK
         if attr_overrides_output_form = attr_overrides_output_form(component_hash[:attribute_override])
           {name => attr_overrides_output_form}
         else
-          name 
+          name
         end
       end
 

@@ -15,7 +15,7 @@ module DTK; class AttributeLink
 
     # propagate from output var to input var
     def propagate
-      hash_ret = Function.internal_hash_form?(function,self) 
+      hash_ret = Function.internal_hash_form?(function,self)
 
       # TODO: this returns nil if it is not (yet) processed by Function meaning its legacy or illegal
       unless hash_ret ||= legacy_internal_hash_form?()
@@ -32,11 +32,11 @@ module DTK; class AttributeLink
         case function
          when "select_one"
           propagate_when_select_one()
-         when "sap_config__l4" 
+         when "sap_config__l4"
           propagate_when_sap_config__l4()
          when "host_address_ipv4"
           propagate_when_host_address_ipv4()
-         when "sap_conn__l4__db" 
+         when "sap_conn__l4__db"
           propagate_when_sap_conn__l4__db()
          when "sap_config_conn__db"
           propagate_when_sap_config_conn__db()
@@ -48,8 +48,8 @@ module DTK; class AttributeLink
     #######function-specfic propagation
     # TODO: refactor to use  ret_cartesian_product()
     def propagate_when_sap_config__l4
-      output_v = 
-        if output_semantic_type().is_array? 
+      output_v =
+        if output_semantic_type().is_array?
           raise Error::NotImplemented.new("propagate_when_sap_config__l4 when output has empty list") if output_value.empty?
           output_value
         else
@@ -58,7 +58,7 @@ module DTK; class AttributeLink
 
       value = nil
       if input_semantic_type().is_array?
-        # cartesian product with host_address 
+        # cartesian product with host_address
         # TODO: may simplify and use flatten form
         value = []
         output_v.each do |sap_config|
@@ -74,8 +74,8 @@ module DTK; class AttributeLink
 
     # TODO: refactor to use  ret_cartesian_product()
     def propagate_when_host_address_ipv4
-      output_v = 
-        if output_semantic_type().is_array? 
+      output_v =
+        if output_semantic_type().is_array?
           raise Error::NotImplemented.new("propagate_when_host_address_ipv4 when output has empty list") if output_value.empty?
           output_value
         else
@@ -84,8 +84,8 @@ module DTK; class AttributeLink
 
       value = nil
       if input_semantic_type().is_array?
-        # cartesian product with host_address 
-        value = output_v.map{|host_address|input_value.map{|input_item|input_item.merge("host_address" => host_address)}}.flatten     
+        # cartesian product with host_address
+        value = output_v.map{|host_address|input_value.map{|input_item|input_item.merge("host_address" => host_address)}}.flatten
       else #not input_semantic_type().is_array?
         raise Error.new("propagate_when_host_address_ipv4 does not support input scalar and output array with size > 1") if output_value.size > 1
         value = output_v.first.merge("host_address" => input_value["host_address"])
@@ -107,8 +107,8 @@ module DTK; class AttributeLink
     end
 
     def ret_cartesian_product
-      output_v = 
-        if output_semantic_type().is_array? 
+      output_v =
+        if output_semantic_type().is_array?
           raise Error::NotImplemented.new("cartesian_product when output has empty list") if output_value.empty?
           output_value
         else

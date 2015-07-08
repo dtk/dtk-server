@@ -34,7 +34,7 @@ class DtkCommon
 	}
 
 	def initialize(service_name, assembly_name)
-		config_yml = YAML::load(File.open(File.join(File.dirname(__FILE__), '..', "config/config.yml")))		
+		config_yml = YAML::load(File.open(File.join(File.dirname(__FILE__), '..', "config/config.yml")))
 
 		@service_name = service_name
 		#Fixed current format of assembly name
@@ -70,7 +70,7 @@ class DtkCommon
 
 		#read server log to an array
 		server_log = File.readlines(@server_log)
-		
+
 		#reverse the array content and go through the log and break when first occurence of restarted server found!
 		#write that part of the log to server_log array
 		server_log.reverse!
@@ -108,7 +108,7 @@ class DtkCommon
 		response_JSON = JSON.parse(response)
 
 		#If response contains errors, accumulate all errors to error_message
-		unless response_JSON["errors"].nil? 
+		unless response_JSON["errors"].nil?
 			@error_message = ""
 			response_JSON["errors"].each { |e| @error_message += "#{e['code']}: #{e['message']} "}
 		end
@@ -117,9 +117,9 @@ class DtkCommon
 		if (response_JSON["status"] == "notok")
 			puts "", "Request failed!"
 			puts @error_message
-			unless response_JSON["errors"].first["backtrace"].nil? 
+			unless response_JSON["errors"].first["backtrace"].nil?
 				puts "", "Backtrace:"
-				pretty_print_JSON(response_JSON["errors"].first["backtrace"])				
+				pretty_print_JSON(response_JSON["errors"].first["backtrace"])
 			end
 		else
 			@error_message = ""

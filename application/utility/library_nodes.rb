@@ -1,4 +1,4 @@
-#TODO: plug in new method in Node::Template 
+#TODO: plug in new method in Node::Template
 module XYZ
   class LibraryNodes
     def self.get_hash(opts={})
@@ -40,7 +40,7 @@ module XYZ
            ret[ref] = {
              os_identifier: info["type"],
              ami: ami,
-             display_name: "#{info["display_name"]} #{size}", 
+             display_name: "#{info["display_name"]} #{size}",
              os_type: info["os_type"],
              size: ec2_size,
              png: info["png"]
@@ -73,7 +73,7 @@ module XYZ
      #            }
      #          end
      #        end
-     #        ret 
+     #        ret
      #      end
      def self.ret_node_bindings_from_config_file
        unless content = ret_nodes_info_content_from_config_file()
@@ -140,7 +140,7 @@ module XYZ
      def self.ret_nodes_info_content_from_config_file
        return @content if @content
        config_base = Configuration.instance.default_config_base()
-       node_config_file  = "#{config_base}/nodes_info.json" 
+       node_config_file  = "#{config_base}/nodes_info.json"
        return nil unless File.file?(node_config_file)
        @content = JSON.parse(File.open(node_config_file).read)["nodes_info"]
      end
@@ -195,7 +195,7 @@ module XYZ
        "node_interface"=>
        {"eth0"=>{"type"=>"ethernet", "display_name"=>"eth0"}}
      }
-   
+
      if node_binding_rs_id = node_info_binding_ruleset_id(info,opts)
        ret["*node_binding_rs_id"] =  node_binding_rs_id
      end
@@ -207,7 +207,7 @@ module XYZ
      (ret["attribute"] ||= {}).merge!(null_node_info_attributes(opts))
      ret
    end
- 
+
    def self.null_node_info_attributes(_opts={})
      {
        "os_identifier"=>{
@@ -374,7 +374,7 @@ Bindings = {"centos-5.6-small"=>{type: "clone",
      size: "m1.small",
      region: "us-east-1"}}]},
  "rh5.7-64-large"=>{type: "clone",
-  os_type: "redhat",    
+  os_type: "redhat",
   rules: [{conditions: {type: "ec2_image", region: "us-east-1"},
     node_template: {type: "ec2_image",
      image_id: "ami-0f42f666",
@@ -402,7 +402,7 @@ Bindings = {"centos-5.6-small"=>{type: "clone",
      size: "t1.micro",
      region: "us-east-1"}}]},
  "rh5.7-64-micro"=>{type: "clone",
-  os_type: "redhat",    
+  os_type: "redhat",
   rules:        [
         {conditions: {type: "ec2_image", region: "us-east-1"},
           node_template: {type: "ec2_image",
@@ -417,7 +417,7 @@ Bindings = {"centos-5.6-small"=>{type: "clone",
        ]
      },
  "rh5.7-64-medium"=>{type: "clone",
-  os_type: "redhat",    
+  os_type: "redhat",
   rules:        [
         {conditions: {type: "ec2_image", region: "us-east-1"},
           node_template: {type: "ec2_image",

@@ -50,9 +50,9 @@ module DTK; class Attribute::Pattern
           output_id: source_attr_pattern.attribute_idh.get_id()
         }
         if fn = source_attr_pattern.fn()
-          attr_info.merge!(function: fn) 
+          attr_info.merge!(function: fn)
         end
-        
+
         parsed_adhoc_links = target_attr_pattern.attribute_idhs.map do |target_attr_idh|
           hash = attr_info.merge(input_id: target_attr_idh.get_id())
           parent.new(hash,target_attr_pattern.attribute_pattern,source_attr_pattern)
@@ -69,14 +69,14 @@ module DTK; class Attribute::Pattern
         end
         source_cmp = source_attr_pattern.component_instance()
 
-        antec_cmp,dep_cmp = 
+        antec_cmp,dep_cmp =
           if target_attr_pattern.is_antecedent?()
             [target_cmp,source_cmp]
           else
             [source_cmp,target_cmp]
           end
         [dep_cmp,antec_cmp]
-      end    
+      end
     end
   end
 end; end

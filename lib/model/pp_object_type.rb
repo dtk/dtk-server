@@ -4,7 +4,7 @@ module DTK
       # format below can be
       # :s - singular (default)
       # :p - plural
-      # :pos - plural or singular    
+      # :pos - plural or singular
       module Mixin
         def pp_object_type(format=nil)
           self.class.pp_object_type(format)
@@ -22,10 +22,10 @@ module DTK
 
       def self.render(model_class,format_or_cardinality=nil)
         print_form = SubclassProcessing.print_form(model_class) || model_class.object_type_string()
-        string = 
+        string =
           if format_or_cardinality.is_a?(Fixnum)
             cardinality = format_or_cardinality
-            if cardinality > 1 
+            if cardinality > 1
               make_plural(print_form)
             else
               print_form

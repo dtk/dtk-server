@@ -6,7 +6,7 @@ require 'awesome_print'
 
 shared_context "Stage node template" do |dtk_common, node_name, staged_node_name|
   it "stages #{node_name} node template to #{staged_node_name} node" do
-    dtk_common.stage_node_template(node_name, staged_node_name)    
+    dtk_common.stage_node_template(node_name, staged_node_name)
     dtk_common.node_id.should_not eq(nil)
   end
 end

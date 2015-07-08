@@ -21,14 +21,14 @@ module DTK; class ModuleRefs
               subtree_els.each do |subtree_el|
                 unless collapsed_tree_els.find{|el|el == subtree_el}
                   collapsed_tree_els << subtree_el
-                end 
+                end
                 subtree_el.children_and_this_module_names().each do |st_module_name|
                   children_module_names << st_module_name unless children_module_names.include?(st_module_name)
                 end
               end
             end
-            
-            if namespace = subtree.namespace() 
+
+            if namespace = subtree.namespace()
               opts_create = {children_module_names: children_module_names}
               if external_ref = subtree.external_ref?()
                 opts_create.merge!(external_ref: external_ref)
@@ -57,7 +57,7 @@ module DTK; class ModuleRefs
         each_element do |el|
           ndx = impl_index(el.namespace,el.module_name)
           if impl = ndx_impls[ndx]
-            el.implementation = impl  
+            el.implementation = impl
           end
         end
         self
@@ -76,7 +76,7 @@ module DTK; class ModuleRefs
         disjuncts = []
         each_element do |el|
           disjunct =
-            [:and, 
+            [:and,
              [:eq,:module_name,el.module_name],
              [:eq,:module_namespace,el.namespace],
              [:oneof,:version,[base_version_field,assembly_version_field]]
@@ -101,17 +101,17 @@ module DTK; class ModuleRefs
         ret
       end
       BaseVersion = nil
-      
+
       def assembly_version(assembly_instance)
         ModuleVersion.ret(assembly_instance)
       end
-                                                  
+
       def choose_namespaces__pick_first_level!(_opts={})
         each_pair do |module_name,els|
           if els.size > 1
             first_el = els.sort{|a,b| a.level <=> b.level}.first
             #warning only if first_el does not have level 1 and multiple namesapces
-            unless first_el.level == 1 
+            unless first_el.level == 1
               namespaces = els.map{|el|el.namespace}.uniq
               if namespaces.size > 1
                 Log.error("Multiple namespaces (#{namespaces.join(',')}) for '#{module_name}'; picking one '#{first_el.namespace}'")

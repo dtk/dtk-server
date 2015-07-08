@@ -1,5 +1,5 @@
 module XYZ
-  class DB 
+  class DB
     module RestContent
       def self.ret_instance_summary(id_info_row,href_prefix,opts={})
         qualified_ref = id_info_row.ret_qualified_ref()

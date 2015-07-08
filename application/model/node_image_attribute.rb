@@ -18,7 +18,7 @@ module DTK
         match = matching_nbrs.find do |nbr|
           nbr[:ref] =~ Regexp.new("-#{logical_size}$")
         end
-        if match 
+        if match
           match[:matching_rule][:node_template][:size]
         end
       end

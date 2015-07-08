@@ -1,5 +1,5 @@
 module DTK; class Clone
- # The incremental update code explicitly has classes per sub object type in contrast to 
+ # The incremental update code explicitly has classes per sub object type in contrast to
  # initial clone, which aside from spacial processing has generic mecahnism for parent child processing
  class IncrementalUpdate
     # helper fns
@@ -58,7 +58,7 @@ module DTK; class Clone
     def update_model?(links)
       return if links.empty?
       opts = update_opts()
-      delete_instances = [] 
+      delete_instances = []
       create_from_templates = []
       modify_instances = Clone::InstanceTemplate::Links.new()
       links.each do |link|
@@ -92,7 +92,7 @@ module DTK; class Clone
           end
         end
       end
-      delete_instances(delete_instances,opts) unless delete_instances.empty? 
+      delete_instances(delete_instances,opts) unless delete_instances.empty?
       modify_instances(links.instance_model_handle(),modify_instances) unless modify_instances.empty?
       create_from_templates(create_from_templates) unless create_from_templates.empty?
     end
@@ -106,7 +106,7 @@ module DTK; class Clone
         Model.delete_instances(instances.map{|r|r.id_handle})
       end
     end
-      
+
     def modify_instances(instance_model_handle,instance_template_links)
       Clone.modify_instances(instance_model_handle,instance_template_links)
     end

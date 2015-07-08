@@ -34,7 +34,7 @@ describe "(Component link relations) Test Case 1: Simple link scenario - $node.h
     include_context "Stage", dtk_common
   end
 
-  context "List services after stage" do    
+  context "List services after stage" do
     include_context "List services after stage", dtk_common
   end
 

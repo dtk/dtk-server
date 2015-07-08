@@ -5,11 +5,11 @@ login = {
 	password: 'r8server'
 }
 
-user_info = { 
-	username: 'test', 
-	email: 'test@r8network.com', 
-	user_group: 'test', 
-	namespace: 'test' 
+user_info = {
+	username: 'test',
+	email: 'test@r8network.com',
+	user_group: 'test',
+	namespace: 'test'
 }
 
 describe "(Repoman Drupal API) Test Case 2: Create user with only required params (username, email)" do

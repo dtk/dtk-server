@@ -48,11 +48,11 @@ describe "(Workspace) Test Case 5: Create two nodes (list nodes), delete one nod
 
 	context "Check node in workspace" do
 		include_context "Check node in workspace", dtk_common, node_name_2
-	end	
+	end
 
 	context "Purge workspace content" do
 		include_context "Purge workspace content", dtk_common
-	end	
+	end
 
 	after(:all) do
 		puts "", ""

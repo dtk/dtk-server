@@ -1,7 +1,7 @@
 module DTK
   class ModuleRefs
     # This class is used to build a hierarchical dependency tree and to detect conflicts
-    class Tree 
+    class Tree
       r8_nested_require('tree','collapsed')
       include Collapsed::Mixin
 
@@ -14,10 +14,10 @@ module DTK
         # module_refs is hash where key is module_name and
         # value is either nil for a missing reference
         # or it points to a Tree object
-        @module_refs = {} 
+        @module_refs = {}
       end
       private :initialize
-      
+
       # opts can have
       # :components - a set of component instances to contrain what is returned
       def self.create(assembly_instance, opts={})
@@ -92,7 +92,7 @@ module DTK
           ret[:type] = @context.class
           ret[:content] = @context
         end
-        
+
         refs = @module_refs.inject({}) do |h,(module_name,subtree)|
           h.merge(module_name => subtree && subtree.hash_form())
         end
@@ -151,7 +151,7 @@ module DTK
       end
 
       def self.create_module_refs_starting_from_assembly(assembly_instance,assembly_branch,components)
-        # get relevant service and component module branches 
+        # get relevant service and component module branches
         ndx_cmps = {} #components indexed (grouped) by branch id
         components.each do |cmp|
           unless branch_id = cmp.get_field?(:module_branch_id)
@@ -169,11 +169,11 @@ module DTK
         cmp_module_branches = Model.get_objs(assembly_instance.model_handle(:module_branch),sp_hash)
 
         #TODO: extra check we can remove after we refine
-        missing_branches = cmp_module_branch_ids - cmp_module_branches.map{|r|r[:id]} 
+        missing_branches = cmp_module_branch_ids - cmp_module_branches.map{|r|r[:id]}
         unless missing_branches.empty?
-          Log.error("Unexpected that the following branches dont exist; branches with ids #{missing_branches.join(',')}") 
+          Log.error("Unexpected that the following branches dont exist; branches with ids #{missing_branches.join(',')}")
         end
-        
+
         ret = new(assembly_branch,assembly_instance)
         get_top_level_children(cmp_module_branches,assembly_branch) do |module_name,child|
           if child
@@ -187,7 +187,7 @@ module DTK
         ret
       end
 
-      # TODO: fix this up because cmp_module_branches already has implict namespace so this is 
+      # TODO: fix this up because cmp_module_branches already has implict namespace so this is
       # effectively just checking consistency of component module refs
       # and setting of module_branch_id in component insatnces
       def self.get_top_level_children(cmp_module_branches,service_module_branch,&block)
@@ -196,16 +196,16 @@ module DTK
         ModuleRefs.get_component_module_refs(service_module_branch).component_modules.each_value do |module_ref|
           ndx_module_refs[module_ref[:module_name]] ||= module_ref
         end
-    
+
         # get branches indexed by module_name
-        # TODO: can bulk up; look also at using 
+        # TODO: can bulk up; look also at using
         # assembly_instance.get_objs(:cols=> [:instance_component_module_branches])
         ndx_mod_name_branches = cmp_module_branches.inject({}) do |h,module_branch|
           h.merge(module_branch.get_module()[:display_name] => module_branch)
         end
-        
-        ndx_mod_name_branches.each_pair do |module_name,module_branch| 
-          module_ref = ndx_module_refs[module_name] 
+
+        ndx_mod_name_branches.each_pair do |module_name,module_branch|
+          module_ref = ndx_module_refs[module_name]
           child = module_ref && new(module_branch,module_ref)
           block.call(module_name,child)
         end

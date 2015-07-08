@@ -68,7 +68,7 @@ describe "(Modules, Services and Versioning) Test Case 19: Import module from pu
 
   context "Stop assembly function" do
     include_context "Stop assembly", dtk_common
-  end 
+  end
 
   context "Delete and destroy assembly function" do
     include_context "Delete assemblies", dtk_common

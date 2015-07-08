@@ -60,12 +60,12 @@ module DTK
 
       # TODO: Enable short circuit that conditionally avoids IDInfoTable
       # TODO: may remove below two public methods and subsume by above
-      def update_instance(id_handle,scalar_assigns,opts={}) 
+      def update_instance(id_handle,scalar_assigns,opts={})
         if id_info = IDInfoTable.get_row_from_id_handle(id_handle, log_error: true)
           update_instance_from_id_info(id_handle,id_info,scalar_assigns,opts)
         end
       end
-    
+
       def update(relation_type,c,scalar_assigns,where_clause={})
         db_rel = DB_REL_DEF[relation_type]
         ds = dataset(db_rel).where(SQL.and(where_clause,{CONTEXT_ID => c}))
@@ -77,7 +77,7 @@ module DTK
       private
 
       def update_given_sequel_dataset(id_info,update_ds,update_set_clause,opts={})
-        unless opts[:returning_cols] 
+        unless opts[:returning_cols]
           update_ds.update(update_set_clause)
           return nil
         end
@@ -127,18 +127,18 @@ module DTK
             child_opts = opts
             if create_stack_array
               child_create_stack = create_stack_array.add!(child_id_info[:relation_type],child_id_info[:id])
-              child_opts = opts.merge(create_stack_array: child_create_stack.children()) 
+              child_opts = opts.merge(create_stack_array: child_create_stack.children())
             end
 	    update_from_hash_from_instance_id(child_id_info,child_idh,child_assigns,child_opts)
             # TODO: may better unify with create stack
             child_id_list << child_id_info[:id] if delete_not_matching
           else
             unless assigns.is_a?(HashObject) && assigns.do_not_extend
-              factory_id_handle = id_handle.createIDH(uri: factory_id_info[:uri], is_factory: true) 
+              factory_id_handle = id_handle.createIDH(uri: factory_id_info[:uri], is_factory: true)
               create_results = create_from_hash(factory_id_handle,qualified_ref => child_assigns)
 
               # TODO: no need above to pass in handle on create stack; just for things nested down the stack -> using opts[:create_stack_array] in conditional
-              if opts[:create_stack_array] 
+              if opts[:create_stack_array]
                 create_results.each do |child_create_res|
                   opts[:create_stack_array] << CreateStack.new(child_idh[:model_name],child_create_res[:id])
                 end
@@ -151,7 +151,7 @@ module DTK
           # at this point child_list will just have existing items; need to add new items
           new_child_ids = new_uris.map{|uri| IDHandle[c: c, uri: uri].get_id()}
           child_id_list = child_id_list + new_child_ids
-          delete_not_matching_children(child_id_list,factory_id_info,assigns,create_stack_array,opts) 
+          delete_not_matching_children(child_id_list,factory_id_info,assigns,create_stack_array,opts)
         end
         new_uris
       end
@@ -171,7 +171,7 @@ module DTK
       end
 
       # TODO: make more efficient by allowing a multiple insert/update
-      
+
       # id_handle used to pass context such as user_id and group_id
       # TODO: may collapse id_info and id_handle
       def update_from_hash_from_instance_id(id_info,id_handle,assigns,opts={})
@@ -185,7 +185,7 @@ module DTK
           factory_uri = RestURI.ret_factory_uri(id_info[:uri],relation_type)
           #         factory_idh = IDHandle[:c => c, :uri => factory_uri, :is_factory => true]
           factory_idh = id_handle.createIDH(uri: factory_uri, is_factory: true)
-          factory_id_info = IDInfoTable.get_row_from_id_handle factory_idh, create_factory_if_needed: true	 
+          factory_id_info = IDInfoTable.get_row_from_id_handle factory_idh, create_factory_if_needed: true
           new_uris = new_uris + update_from_hash_from_factory_id(factory_id_info,factory_idh,child_assigns,opts)
         end
         new_uris

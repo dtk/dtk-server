@@ -1,10 +1,10 @@
 module DTK; class Attribute
-  class Pattern 
+  class Pattern
     class Type
-      r8_nested_require('type','explicit_id')      
-      r8_nested_require('type','assembly_level')      
+      r8_nested_require('type','explicit_id')
+      r8_nested_require('type','assembly_level')
       # common_node_component_level must be before node_level and component_level
-      r8_nested_require('type','common_node_component_level')      
+      r8_nested_require('type','common_node_component_level')
       r8_nested_require('type','node_level')
       r8_nested_require('type','component_level')
 
@@ -43,7 +43,7 @@ module DTK; class Attribute
 
       # can be overwritten
       def node_group_member_attribute_idhs
-        [] 
+        []
       end
 
       private
@@ -52,7 +52,7 @@ module DTK; class Attribute
 
       def create_this_type?(opts)
         if create = opts[:create]
-          create.is_a?(TrueClass) || 
+          create.is_a?(TrueClass) ||
             (create.is_a?(String) && create == 'true') ||
             (create.is_a?(Array) && create.include?(type()))
         end
@@ -124,9 +124,9 @@ module DTK; class Attribute
           return nil #without qualification means all (no filter)
         end
         if term == "*"
-          return nil          
+          return nil
         end
-        display_name = (type == :component ? ::DTK::Component::Instance.display_name_from_user_friendly_name(term) : term) 
+        display_name = (type == :component ? ::DTK::Component::Instance.display_name_from_user_friendly_name(term) : term)
         if type == :node &&  ::DTK::Node.legal_display_name?(display_name)
           [:eq,:display_name,display_name]
         elsif type == :component && ::DTK::Component::Instance.legal_display_name?(display_name)

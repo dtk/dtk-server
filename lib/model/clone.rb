@@ -5,14 +5,14 @@ module DTK
       r8_nested_require('clone','instance_template/links')
     end
 
-    r8_nested_require('clone','child_context') 
-    r8_nested_require('clone','copy_processor') 
+    r8_nested_require('clone','child_context')
+    r8_nested_require('clone','copy_processor')
     r8_nested_require('clone','global')
     r8_nested_require('clone','incremental_update')
 
     #instance_template_links has type InstanceTemplate::Links
     def self.modify_instances(model_handle,instance_template_links)
-      klass = 
+      klass =
         case model_handle[:model_name]
           when :attribute then IncrementalUpdate::Attribute
           else ChildContext
@@ -41,10 +41,10 @@ module DTK
         clone_source_object.add_model_specific_override_attrs!(override_attrs,self)
         proc = Clone::CopyProcessor.create(self,clone_source_object,opts.merge(include_children: true))
         clone_copy_output = proc.clone_copy_top_level(clone_source_object.id_handle,[target_id_handle],override_attrs)
-        
+
         new_id_handle = clone_copy_output.id_handles.first
         return nil unless new_id_handle
-        
+
         # calling with respect to target
         if service_add_on_proc = proc.service_add_on_proc?()
           opts.merge!(service_add_on_proc: service_add_on_proc)
@@ -67,31 +67,31 @@ Aux.stop_for_testing?(:stage) # TODO: for debugging
           new_id_handle.get_id()
         end
       end
-      
+
       def get_constraints
         get_constraints!()
       end
-      
+
       # this gets optionally overwritten
       def source_clone_info_opts
         {ret_new_obj_with_cols: [:id]}
       end
-      
+
       protected
 
       # to be optionally overwritten by object representing the source
       def add_model_specific_override_attrs!(_override_attrs,_target_obj)
       end
-      
+
       # to be optionally overwritten by object representing the target
       def clone_pre_copy_hook(clone_source_object,_opts={})
         clone_source_object
-      end 
-      
+      end
+
       # to be optionally overwritten by object representing the target
       def clone_post_copy_hook(_clone_copy_output,_opts={})
       end
-      
+
       # to be overwritten
       # opts can be {:update_object => true} to update object
       def get_constraints!(_opts={})

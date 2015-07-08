@@ -8,7 +8,7 @@ module XYZ
       add_to = process_user_info_aux!(:sequel_select,{},model_handle,columns)
       add_to.empty? ? sequel_select : sequel_select.select_more(add_to).from_self
     end
-    
+
     def process_user_info_aux!(type,scalar_assignments,model_or_id_handle,columns=nil)
       to_add = {}
       # cleanup if everything should come from model or id handle
@@ -29,9 +29,9 @@ module XYZ
       if val and not (columns && columns.include?(col))
         to_add.merge!(type == :sequel_select ? {val => col} : {col => val})
         columns << col if columns
-      end   
+      end
     end
-    
+
     def auth_context
       @auth_context ||= {
         c: [:c,CONTEXT_ID],
@@ -41,9 +41,9 @@ module XYZ
     end
 
     def augment_for_authorization(where_clause,model_handle)
-      conjoin_set = where_clause ? [where_clause] : [] 
+      conjoin_set = where_clause ? [where_clause] : []
       auth_filters = NoAuth.include?(model_handle[:model_name]) ? nil : CurrentSession.new.get_auth_filters()
-      if auth_filters 
+      if auth_filters
 # create_dataset_found = caller.select{|x|x =~ /create_dataset'/}
 # caller_info = (create_dataset_found ? "CREATE_DATASET_FOUND" : caller[0..15])
 # pp [:auth,model_handle[:model_name],auth_filters,caller_info]
@@ -63,13 +63,13 @@ end
       else
         conjoin_set << {CONTEXT_ID => model_handle[:c]} if model_handle[:c]
       end
-      case conjoin_set.size 
+      case conjoin_set.size
         when 0 then {}
         when 1 then conjoin_set.first
         else SQL.and(*conjoin_set)
       end
     end
-    NoAuth = [:user,:user_group,:user_group_relation,:task_event]    
+    NoAuth = [:user,:user_group,:user_group_relation,:task_event]
 
     def process_session_auth(auth_filters)
       ret =  []

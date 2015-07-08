@@ -6,7 +6,7 @@ module DTK
       # This object is hash of form
       #  {MODULE_NAME1 => ModuleRef::Lock,
       #   MODULE_NAME2 => ModuleRef::Lock,
-      #   .... 
+      #   ....
       # }
       attr_reader :assembly_instance
       def initialize(assembly_instance)
@@ -22,7 +22,7 @@ module DTK
         types = opts[:types] || AllTypes
         opts_nested = Aux.hash_subset(opts,[:with_module_branches])
         # First check if persisted if not then compute it
-        if persisted = (R8::Config[:module_refs_lock]||{})[:use_persistence] && get_module_refs_lock?(assembly_instance) 
+        if persisted = (R8::Config[:module_refs_lock]||{})[:use_persistence] && get_module_refs_lock?(assembly_instance)
           if missing_info = MissingInformation.missing_information?(persisted,types,opts_nested)
             missing_info.fill_in_missing_information()
           else
@@ -32,7 +32,7 @@ module DTK
           compute_elements(assembly_instance,types,opts_nested)
         end
       end
-      
+
       def self.compute(assembly_instance,opts={})
         types = opts[:types] || AllTypes
         opts_nested = Aux.hash_subset(opts,[:with_module_branches])
@@ -59,7 +59,7 @@ module DTK
       def matching_impls_with_children(module_names)
         ret = []
         module_names.each do |module_name|
-          if element = element?(module_name) 
+          if element = element?(module_name)
             implementations(children_elements(element)+[element]).each do |impl|
               ret << impl unless ret.include?(impl)
             end
@@ -82,13 +82,13 @@ module DTK
           end
         end
       end
-      
+
       def self.compute_elements(assembly_instance,types,opts={})
         module_refs_tree = ModuleRefs::Tree.create(assembly_instance)
         collapsed = module_refs_tree.collapse(Aux.hash_subset(opts,[:raise_errors]))
         collapsed.choose_namespaces!()
         collapsed.add_implementations!(assembly_instance)
-        
+
         ret = new(assembly_instance)
         collapsed.each_pair do |module_name,single_el_array|
           if single_el_array.empty?
@@ -104,7 +104,7 @@ module DTK
         if types.include?(:locked_branch_shas) || opts[:with_module_branches]
           add_matching_module_branches!(ret)
         end
-        if types.include?(:locked_branch_shas) 
+        if types.include?(:locked_branch_shas)
           # requires add_matching_module_branches!(ret)
           add_locked_branch_shas?(ret)
         end
@@ -144,7 +144,7 @@ module DTK
           cols: [:id,:group_id,:display_name,:component_id,:branch,:repo_id,:current_sha,:version,:dsl_parsed],
           filter: [:or] + disjuncts
         }
-        
+
         mh = locked_module_refs.assembly_instance.model_handle(:module_branch)
         Model.get_objs(mh,sp_hash).each do |mb|
           ndx = "#{mb[:repo_id]}:#{mb[:branch]}"

@@ -21,13 +21,13 @@
     index_map: {type: :json},
     assembly_id: {
       type: :bigint,
-      foreign_key_rel_type: :component, 
+      foreign_key_rel_type: :component,
       on_delete: :set_null,
       on_update: :set_null
     },
     port_link_id: { #optional; used when generated from port link
       type: :bigint,
-      foreign_key_rel_type: :port_link, 
+      foreign_key_rel_type: :port_link,
       on_delete: :cascade,
       on_update: :cascade
     }

@@ -30,7 +30,7 @@ describe "(Different Node Templates) Test Case 9: Redis - Master/Slave scenario"
 		include_context "Stage", dtk_common
 	end
 
-	context "List services after stage" do		
+	context "List services after stage" do
 		include_context "List services after stage", dtk_common
 	end
 

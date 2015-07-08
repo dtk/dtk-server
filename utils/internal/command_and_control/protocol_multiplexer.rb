@@ -35,7 +35,7 @@ module XYZ
         callbacks = nil
         begin
           callbacks = get_and_remove_reqid_callbacks?(request_id)
-          if (is_cancel_response(msg)) 
+          if (is_cancel_response(msg))
             callbacks.process_cancel()
           elsif callbacks
             callbacks.process_msg(msg,request_id)
@@ -58,14 +58,14 @@ module XYZ
       def process_request_timeout(request_id)
         callbacks = get_and_remove_reqid_callbacks(request_id)
         if callbacks
-          callbacks.process_timeout(request_id) 
+          callbacks.process_timeout(request_id)
         end
       end
 
       def add_reqid_callbacks(request_id,callbacks,timeout,expected_count)
-        @lock.synchronize do 
+        @lock.synchronize do
           timer = R8EM.add_timer(timeout){process_request_timeout(request_id)}
-          @callbacks_list[request_id] = callbacks.merge(timer: timer) 
+          @callbacks_list[request_id] = callbacks.merge(timer: timer)
           @count_info[request_id] = expected_count
         end
       end
@@ -77,7 +77,7 @@ module XYZ
       def get_and_remove_reqid_callbacks?(request_id,opts={})
         ret = nil
         @lock.synchronize do
-          if opts[:force_delete] 
+          if opts[:force_delete]
             count = @count_info[request_id] = 0
           else
             # TODO: protection from obscure error
@@ -113,7 +113,7 @@ module XYZ
         def process_msg(msg,request_id)
           callback = self[:on_msg_received]
           if callback
-            callback.call(msg) 
+            callback.call(msg)
           else
             Log.error("could not find process msg callback for request_id #{request_id}")
           end

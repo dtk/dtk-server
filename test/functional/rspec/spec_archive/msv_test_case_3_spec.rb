@@ -37,7 +37,7 @@ describe "(Modules, Services and Versioning) Test Case 3: Import component modul
 
 	context "Check if module imported on local filesystem" do
 		include_context "Check module imported on local filesystem", module_filesystem_location, module_name
-	end	
+	end
 
 	context "Create new version of module #{module_name}" do
 		include_context "Create new module version", dtk_common, module_name, module_version
@@ -49,7 +49,7 @@ describe "(Modules, Services and Versioning) Test Case 3: Import component modul
 
 	context "Clone versioned module" do
 		include_context "Clone versioned module", dtk_common, module_name, module_version
-	end	
+	end
 
 	context "Check if versioned module cloned on local filesystem" do
 		include_context "Check versioned module imported on local filesystem", module_filesystem_location, module_name, module_version

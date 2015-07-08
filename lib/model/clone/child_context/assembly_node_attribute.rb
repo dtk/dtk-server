@@ -1,5 +1,5 @@
 module DTK; class Clone
-  class ChildContext 
+  class ChildContext
     class AssemblyNodeAttribute < self
       private
 

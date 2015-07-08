@@ -1,6 +1,6 @@
 module DTK
   class ModuleDSL
-    class ParsingError 
+    class ParsingError
       class RefComponentTemplates < self
         def initialize(ref_cmp_templates)
           super(err_msg(ref_cmp_templates))

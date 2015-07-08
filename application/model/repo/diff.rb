@@ -19,11 +19,11 @@ class DTK::Repo
     end
 
     def file_modified
-      ((@new_file || @deleted_file || @renamed_file) ? nil : true) && {path: @a_path} 
+      ((@new_file || @deleted_file || @renamed_file) ? nil : true) && {path: @a_path}
     end
 
     private
 
-    attr_writer(*Attributes) 
+    attr_writer(*Attributes)
   end
 end

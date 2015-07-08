@@ -23,7 +23,7 @@ module XYZ
     end
 
     def add_processor(processor)
-      @processors[processor.object_id] ||= processor 
+      @processors[processor.object_id] ||= processor
     end
     # TBD: either rename to reflect that this is just attribute queues or generalize
     def self.bind_queues(host_addr,object_ids_assigns)
@@ -32,7 +32,7 @@ module XYZ
          object_ids_assigns.each{|object_id,unique_name|
            topic_name = MessageBusMsgOut.topic(:attribute)
            key = MessageBusMsgOut.key(object_id,:attribute)
-           @msg_bus_client.bind(unique_name,topic_name,:topic,key: key)    
+           @msg_bus_client.bind(unique_name,topic_name,:topic,key: key)
          }
          R8EventLoop::graceful_stop()
        end
@@ -52,7 +52,7 @@ module XYZ
 
 	  object_id = proc_msg.target_object_id
           next if @processors[object_id].nil? #TBD: should this be an error?
-          # TBD: might refactor to use more standard form like dispatching to nanite or controller like actions; 
+          # TBD: might refactor to use more standard form like dispatching to nanite or controller like actions;
           task_set = @processors[object_id].process_message(proc_msg)
           task_set.determine_local_and_remote_tasks!(self)
           if trans_info[:reply_to]

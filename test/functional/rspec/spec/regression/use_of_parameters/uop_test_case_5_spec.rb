@@ -29,7 +29,7 @@ describe "(Use Of Parameters) Test Case 5: Change optional params on existing at
 		include_context "Stage", dtk_common
 	end
 
-	context "List services after stage" do		
+	context "List services after stage" do
 		include_context "List services after stage", dtk_common
 	end
 
@@ -63,7 +63,7 @@ describe "(Use Of Parameters) Test Case 5: Change optional params on existing at
 
 	context "Converge function again" do
 		include_context "Converge", dtk_common
-	end	
+	end
 
 	context "Check changed os attribute after converge" do
 		include_context "Check attribute", dtk_common, node_name, 'os_identifier', cent_os
@@ -76,7 +76,7 @@ describe "(Use Of Parameters) Test Case 5: Change optional params on existing at
 	context "Delete and destroy service function" do
 		include_context "Delete services", dtk_common
 	end
-	
+
 	after(:all) do
 		puts "", ""
 	end

@@ -1,4 +1,4 @@
-module DTK; class ErrorUsage 
+module DTK; class ErrorUsage
   class Parsing
     class Term < self
       def initialize(term,type_as_symbol=nil)

@@ -1,11 +1,11 @@
 module DTK
   class Port < Model
     ####################
-    def self.common_columns 
+    def self.common_columns
       [:id,:group_id,:display_name,:name,:description,:direction,:type,:location,:containing_port_id,:node_id,:component_id,:link_def_id]
     end
 
-    def self.check_valid_id(model_handle,id,opts={}) 
+    def self.check_valid_id(model_handle,id,opts={})
       if opts[:assembly_idh]
         sp_hash = {
           cols: [:id,:node],
@@ -43,7 +43,7 @@ module DTK
       name_to_id_helper(model_handle,name,augmented_sp_hash)
     end
 
-    # virtual attribute defs    
+    # virtual attribute defs
     def name
       self[:display_name]
     end
@@ -51,7 +51,7 @@ module DTK
     def node_id
       self[:node_node_id]
     end
-    
+
     ###########
     RefDelim = '___'
 
@@ -74,7 +74,7 @@ module DTK
         type: link_def_name,
         service_ref: display_name_print_form()
       }
-      if link_def = self[:link_def] 
+      if link_def = self[:link_def]
         ret.merge!(link_def.hash_subset(:required, :description))
       end
       ret
@@ -99,9 +99,9 @@ module DTK
 
     def title?
       parse_port_display_name()[:title]
-    end 
+    end
 
-    # TODO: this should be deprecated; 
+    # TODO: this should be deprecated;
     def ref_num
       #      self[:display_name].split(RefDelim)[3].to_i
       raise Error.new("using deprecated method port#ref_num")
@@ -150,7 +150,7 @@ module DTK
       else
         raise Error.new("unexpected display name (#{port_display_name})")
       end
-      
+
       component_type = ret[:component_type]
       if component_type =~ Regexp.new("(^.+)__(.+$)")
         ret.merge!(module: $1,component: $2)
@@ -161,7 +161,7 @@ module DTK
       ret
     end
     # end: methods related to internal form of display_name/ref
-    
+
     # this function maps from service ref to internal display name
     # node_display_name,poss_port_display_names
     # input is of form form <node>/<component>, like server/rsyslog::server
@@ -238,7 +238,7 @@ module DTK
       ref_num = (attr[:component_ref_num]||1).to_s
       "#{type}#{RefDelim}#{attr[:component_ref]}#{RefDelim}#{attr[:display_name]}#{RefDelim}#{ref_num}"
     end
-    
+
     def self.strip_type(ref)
       ref.gsub(Regexp.new("^[^_]+#{RefDelim}"),"")
     end
@@ -251,10 +251,10 @@ module DTK
 
     # returns nil if filtered
     def filter_and_process!(i18n,*types)
-      unless types.empty?  
+      unless types.empty?
         return nil unless types.include?(self[:type])
         if types.include?("external") #TODO: this special case may go away
-          return nil if self[:containing_port_id].nil? 
+          return nil if self[:containing_port_id].nil?
         end
       end
 
@@ -276,18 +276,18 @@ module DTK
       node_id = node.id()
       port_mh = node.model_handle_with_auth_info.create_childMH(:port)
       component_type = component.get_field?(:component_type)
-      type = 
+      type =
         if link_def[:has_external_link]
           link_def[:has_internal_link] ? "component_internal_external" : "component_external"
         else #will be just link_def[:has_internal_link]
           "component_internal"
         end
-          
+
       # TODO: clean up direction to make it cleaner how you set it
       dir = opts[:direction]||direction_from_local_remote(link_def[:local_or_remote],opts)
       cmp_ref = opts[:component_ref]
       # TODO: cleanup logic aroudn when cmp_ref is passed vs when it is not
-      title = 
+      title =
         if cmp_ref
           ComponentTitle.title?(cmp_ref)
         elsif component
@@ -308,7 +308,7 @@ module DTK
       }
       row.merge!(location_asserted: location_asserted) if location_asserted
       # TODO: not sure if we need opts[:remote_side]
-      unless dir == "output" || opts[:remote_side] || link_def[:id].nil? 
+      unless dir == "output" || opts[:remote_side] || link_def[:id].nil?
         row.merge!(link_def_id: link_def[:id])
       end
       row
@@ -320,13 +320,13 @@ module DTK
       def direction_from_local_remote(local_or_remote,opts={})
         # TODO: just heuristc for computing dir; also need to upport "<>" (bidirectional)
         if opts[:remote_side]
-          case local_or_remote 
-            when "local" then "output" 
+          case local_or_remote
+            when "local" then "output"
             when "remote" then "input"
           end
         else
-          case local_or_remote 
-            when "local" then "input" 
+          case local_or_remote
+            when "local" then "input"
             when "remote" then "output"
           end
         end
@@ -344,7 +344,7 @@ module DTK
           master_connection: "west"
         }
       }
-      
+
     end
 
     # virtual attribute defs

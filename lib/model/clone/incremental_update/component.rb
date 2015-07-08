@@ -1,6 +1,6 @@
 module DTK; class Clone
   class IncrementalUpdate
-    # This module is responsible for incremental clone (incremental update) when component module 
+    # This module is responsible for incremental clone (incremental update) when component module
     # in a service instance are updated the compoennt instance needs to be updated
     class Component < self
       def initialize(project_idh,module_branch)
@@ -13,7 +13,7 @@ module DTK; class Clone
         cmps_needing_update = components.select{|cmp|component_needs_update?(cmp,opts)}
         return if cmps_needing_update.empty?
         # putting this here but not in other update functions in IncrementalUpdate because this is top level entry point
-        Model.Transaction do 
+        Model.Transaction do
           update(cmps_needing_update,opts)
         end
       end
@@ -55,9 +55,9 @@ module DTK; class Clone
       def needs_to_be_moved_to_assembly_branch?(cmp)
         (cmp.get_field?(:module_branch_id) != @module_branch_id)
       end
-      
+
       def has_locked_sha?(cmp)
-        (cmp.key?(:locked_sha) && !cmp[:locked_sha].nil?) || 
+        (cmp.key?(:locked_sha) && !cmp[:locked_sha].nil?) ||
          # added protection in case :locked_sha not in ruby object
          !cmp.get_field?(:locked_sha).nil?
       end

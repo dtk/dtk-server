@@ -30,7 +30,7 @@ module DTK; class  Assembly
         target_idh = get_target.id_handle()
         nodes.map{|node|node.destroy_and_reset(target_idh)}
       end
-      
+
       def delete_node(node_idh,opts={})
         node =  node_idh.create_object()
         # TODO: check if cleaning up dangling links when assembly node deleted
@@ -61,23 +61,23 @@ module DTK; class  Assembly
         node_group.delete_group_members(0)
         node_group.delete_object(update_task_template: true, assembly: self)
       end
-      
+
       def delete_component(component_idh, node_id=nil)
         component_filter = [:and, [:eq, :id, component_idh.get_id()], [:eq, :assembly_id, id()]]
         node = nil
         # first check that node belongs to this assebmly
-        if node_id.is_a?(Fixnum) 
+        if node_id.is_a?(Fixnum)
           sp_hash = {
             cols: [:id, :display_name,:group_id],
             filter: [:and, [:eq, :id, node_id], [:eq, :assembly_id, id()]]
           }
-          
+
           unless node = Model.get_obj(model_handle(:node),sp_hash)
             raise ErrorIdInvalid.new(node_id,:node)
           end
           component_filter << [:eq, :node_node_id, node_id]
         end
-        
+
         # also check that component_idh belongs to this instance and to this node
         sp_hash = {
           #:only_one_per_node,:ref are put in for info needed when getting title
@@ -121,7 +121,7 @@ module DTK; class  Assembly
       def self.task_templates(task_template_mh,assembly_ids)
         sp_hash = {
           cols: [:id,:display_name],
-          filter: [:oneof,:component_component_id,assembly_ids] 
+          filter: [:oneof,:component_component_id,assembly_ids]
         }
         delete_instances(get_objs(task_template_mh,sp_hash).map{|tt|tt.id_handle()})
       end
@@ -146,8 +146,8 @@ module DTK; class  Assembly
       # TODO: double check if Transaction needed; if so look at whether for same reason put in destoy and reset
       def self.node(node,opts={})
         ret = nil
-        Transaction do 
-          ret = 
+        Transaction do
+          ret =
             if opts[:destroy_nodes]
               node.destroy_and_delete(opts)
             else

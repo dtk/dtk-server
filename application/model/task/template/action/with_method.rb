@@ -35,7 +35,7 @@ module DTK; class Task; class Template
 
       # returns hash with keys :component_name_ref,:method_name
       # if has explicit method otherwise returns nil
-      # explicit form is 
+      # explicit form is
       #   component.method_name, or
       #   component[title].method_name
       # complication is that title can have a '.' in it
@@ -56,7 +56,7 @@ module DTK; class Task; class Template
           # no title
           split = serialized_item.split('.')
           case split.size
-           when 1 
+           when 1
             nil
            when 2
             {component_name_ref: split[0], method_name: split[1]}

@@ -101,7 +101,7 @@ module DTK
             value = keys_to_string(value)
           end
           new_h[key.to_s] = value
-        end        
+        end
         return new_h
       end
 

@@ -73,7 +73,7 @@ module DTK; class Attribute; class UpdateDerivedValues
         array_integer(input_index(link))
       end.sort{|a,b|b <=> a}
       Model.select_process_and_update(attr_mh,[:id,:value_derived],[input_attribute[:id]]) do |rows|
-        # will only be one row; 
+        # will only be one row;
         row = rows.first
         val = row[:value_derived]
         ret = {id: row[:id], old_value_derived: val.dup?}

@@ -9,7 +9,7 @@ class Header < PageContainer
     @session.within(:header) do
       @session.click_link('User Groups')
     end
-  end 
+  end
 
   def click_on_users
   	@session.within(:header) do

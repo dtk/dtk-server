@@ -56,7 +56,7 @@ describe "(Workspace) Test Case 13: Create one node, add component in it, conver
 
 	context "Add component to the node in workspace" do
 		include_context "Add component to the node in workspace", dtk_common, node_name, component_name, component_module_namespace
-	end		
+	end
 
 	context "Converge and cancel workspace" do
 		it "converges and then cancel workspace execution" do

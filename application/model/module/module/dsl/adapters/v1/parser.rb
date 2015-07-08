@@ -33,7 +33,7 @@ module DTK; class ModuleDSL; class V1
           @remote_link_defs.delete(remote_cmp_type)
         end
       end
-      
+
       # if any @remote_link_defs left they are dangling refs
       @remote_link_defs.each do |remote_cmp_type,remote_cmp_info|
         set_to_dangling_link?(remote_cmp_type,remote_cmp_info)

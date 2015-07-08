@@ -1,5 +1,5 @@
 module DTK; class Node; class TargetRef
-  class Input 
+  class Input
     class BaseNodes < self
       r8_nested_require('base_nodes','element')
 
@@ -55,7 +55,7 @@ module DTK; class Node; class TargetRef
           all_idhs = Model.input_hash_content_into_model(target.id_handle(),create_objs_hash,return_idhs: true)
           #all idhs have both nodes and node_group_rels
           ngr_idhs = all_idhs.select{|idh|idh[:model_name] == :node_group_relation}
-          # copy from node group to target refs 
+          # copy from node group to target refs
           copy_node_attributes?(target,nodes,ngr_idhs)
           ret.merge!(TargetRef.ndx_matching_target_ref_idhs(node_group_relation_idhs: ngr_idhs))
         end
@@ -116,11 +116,11 @@ module DTK; class Node; class TargetRef
         Model.create_from_rows(attr_mh,create_rows,convert: true)
       end
 
-      # copy node attributes from node group to target refs 
+      # copy node attributes from node group to target refs
       def self.copy_node_attributes?(target,nodes,ngr_idhs)
         node_groups = nodes.select{|n|n.is_node_group?()}
         return if node_groups.empty?
-        
+
         ng_idhs = node_groups.map{|ng|ng.id_handle()}
         ndx_ng_target_ref_attrs = {}
         ServiceNodeGroup.get_node_attributes_to_copy(ng_idhs).each do |ng_attr|
@@ -171,9 +171,9 @@ module DTK; class Node; class TargetRef
           case attr[:display_name]
             when 'name'
               # gsub is to strip off leading assembly name (if present)
-              attr[:value_asserted] = target_ref[:display_name].gsub(/^.+::/,'') 
+              attr[:value_asserted] = target_ref[:display_name].gsub(/^.+::/,'')
           end
-          create_rows << attr 
+          create_rows << attr
         end
       end
 
@@ -190,7 +190,7 @@ module DTK; class Node; class TargetRef
           "#{target_ref}--#{node_instance}"
         end
       end
-      
+
     end
   end
 end; end; end

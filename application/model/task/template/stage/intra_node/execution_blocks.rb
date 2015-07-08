@@ -41,7 +41,7 @@ module DTK; class Task; class Template
           else raise Error.new("Unexpected insert_point (#{insert_point})")
         end
       end
-      # TODO: have above subsume below  
+      # TODO: have above subsume below
       def splice_in_at_beginning!(execution_blocks)
         insert(0,*execution_blocks)
         self
@@ -60,7 +60,7 @@ module DTK; class Task; class Template
         if execution_blocks.size == 1
           # if single execution block then we remove this level of nesting
           ret.merge(execution_blocks.first)
-        else          
+        else
           ret.merge(Field::ExecutionBlocks =>  execution_blocks)
         end
       end
@@ -80,7 +80,7 @@ module DTK; class Task; class Template
         end
         ret
       end
-      
+
       def intra_node_stages
         ret = []
         return ret if empty?()
@@ -89,16 +89,16 @@ module DTK; class Task; class Template
         end
         map{|eb|eb.intra_node_stages()}
       end
-      
+
       def node
         # all the elements have same node so can just pick first
         first && first.node()
       end
-      
+
       def node_name
         (node()||{})[:display_name]
       end
-      
+
       def components
         ret = []
         each{|exec_block|ret += exec_block.components()}

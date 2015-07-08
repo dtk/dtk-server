@@ -9,7 +9,7 @@ module DTK; class ConfigAgent; module Adapter
       # TODO: cleaner to make cmps_with_attrs,assembly_attrs class attributes, but to do so would maen need to also
       # modify PuppetStage
       def generate(cmps_with_attrs,assembly_attrs)
-        # if intra node stages configured 'stages_ids' will not be nil, 
+        # if intra node stages configured 'stages_ids' will not be nil,
         # if stages_ids is nil use generation with total ordering (old implementation)
         if stages_ids = @config_node.intra_node_stages()
           generate_with_stages(cmps_with_attrs,assembly_attrs,stages_ids)
@@ -45,8 +45,8 @@ module DTK; class ConfigAgent; module Adapter
             stage = i+1
             exec_block << " " #space between stages
             puppet_stage = PuppetStage.new(stage,@config_node,@import_statement_modules)
-            Array(stage_ids).each do |cmp_id| 
-              cmp_with_attrs = cmps_with_attrs.find { |cmp| cmp["id"] == cmp_id }       
+            Array(stage_ids).each do |cmp_id|
+              cmp_with_attrs = cmps_with_attrs.find { |cmp| cmp["id"] == cmp_id }
               puppet_stage.generate_manifest!(cmp_with_attrs)
             end
             puppet_stage.add_lines_for_stage!(exec_block)
@@ -57,7 +57,7 @@ module DTK; class ConfigAgent; module Adapter
           end
           exec_block
         end
-      end      
+      end
 
       def generate_with_total_ordering(cmps_with_attrs,assembly_attrs=nil)
         lines = []
@@ -101,7 +101,7 @@ module DTK; class ConfigAgent; module Adapter
             cmp = cmp_with_attrs["name"]
             raise Error.new("No component name") unless cmp
             if imp_stmt = needs_import_statement?(cmp,module_name)
-              @class_lines << imp_stmt 
+              @class_lines << imp_stmt
             end
             # TODO: see if need \" and quote form
             attr_str_array = attrs.map{|k,v|"#{k} => #{process_val(v)}"} + [stage_assign()]
@@ -109,7 +109,7 @@ module DTK; class ConfigAgent; module Adapter
             @class_lines << "class {\"#{cmp}\": #{attr_str}}"
            when "definition"
             unless defn_cmp = cmp_with_attrs["name"]
-              raise ErrorUsage.new("No definition name") 
+              raise ErrorUsage.new("No definition name")
             end
 
             name_attr = nil
@@ -122,7 +122,7 @@ module DTK; class ConfigAgent; module Adapter
               end
             end.compact
             unless name_attr
-              raise ErrorUsage.new("No name attribute for definition component (#{defn_cmp})") 
+              raise ErrorUsage.new("No name attribute for definition component (#{defn_cmp})")
             end
 
             if use_anchors_for_class_wrappers?()
@@ -180,7 +180,7 @@ module DTK; class ConfigAgent; module Adapter
           attrs.each do |attr_info|
             attr_name = attr_info["name"]
             val = attr_info["value"]
-            case attr_info["type"] 
+            case attr_info["type"]
              when "attribute"
               ret[attr_name] = val
              else raise Error.new("unexpected attribute type (#{attr_info["type"]})")
@@ -247,7 +247,7 @@ module DTK; class ConfigAgent; module Adapter
         ret.empty? ? nil : ret
       end
 
-      
+
       def process_val(val_x)
         # TODO: see why non scalar vals are string form
         val = val_x
@@ -266,7 +266,7 @@ module DTK; class ConfigAgent; module Adapter
       end
 
       def quote_form(obj)
-        if obj.is_a?(Hash) 
+        if obj.is_a?(Hash)
           "{#{obj.map{|k,v|"#{quote_form(k)} => #{quote_form(v)}"}.join(",")}}"
         elsif obj.is_a?(Array)
           "[#{obj.map{|el|quote_form(el)}.join(",")}]"

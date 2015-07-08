@@ -73,7 +73,7 @@ describe "(Action Framework) Test Case 5: Service with one node that contains cm
 		include_context "Stage with namespace", dtk_common, service_module_namespace
 	end
 
-	context "List services after stage" do		
+	context "List services after stage" do
 		include_context "List services after stage", dtk_common
 	end
 
@@ -99,7 +99,7 @@ describe "(Action Framework) Test Case 5: Service with one node that contains cm
 
 	context "Get task action details for action with failed create command (fake permissions)" do
 		include_context "Get task action details", dtk_common, "7.1", [expected_output_5]
-	end	
+	end
 
 	context "Delete and destroy service function" do
 		include_context "Delete services", dtk_common

@@ -4,7 +4,7 @@ module XYZ
 
     def get_node_binding_rulesets(filter=nil)
       full_filter = [:eq,:library_library_id,id()]
-      if filter 
+      if filter
         full_filter = [:and,full_filter,filter]
       end
       sp_hash = {
@@ -16,7 +16,7 @@ module XYZ
 
     ### end: get methods
 
-    class << self 
+    class << self
       def create_users_private_library?(model_handle)
         user_obj = CurrentSession.new.get_user_object()
         private_group_obj = user_obj.get_private_group()
@@ -36,7 +36,7 @@ module XYZ
         username ||=  CurrentSession.new.get_username()
         sp_hash = {
           cols: [:id,:display_name,:group_id],
-          filter: [:eq,:display_name,users_private_library_name(username)] 
+          filter: [:eq,:display_name,users_private_library_name(username)]
         }
         get_obj(model_handle,sp_hash)
       end
@@ -84,7 +84,7 @@ module XYZ
         raise Error.new("should not be reached")
       # Component::Template.list(model_handle,:library_idh => id_handle())
       else
-        raise Error.new("TODO: not implemented yet: processing of info_about(#{about})")        
+        raise Error.new("TODO: not implemented yet: processing of info_about(#{about})")
       end.sort{|a,b|a[:display_name] <=> b[:display_name]}
     end
 
@@ -99,7 +99,7 @@ module XYZ
       node_hash_list = clone_copy_output.get_children_object_info(level,:node)
       unless node_hash_list.empty?
         node_mh = new_id_handle.createMH(:node)
-        clone_post_copy_hook__child_nodes(node_mh,node_hash_list,new_assembly_obj) 
+        clone_post_copy_hook__child_nodes(node_mh,node_hash_list,new_assembly_obj)
       end
     end
 

@@ -5,7 +5,7 @@ module DTK
         node.update_object!(:ref,:external_ref)
         if node[:ref] =~ Regexp.new("^#{Node::TargetRef.physical_node_prefix()}")
           node[:ref]
-        else 
+        else
           if ret = Node::TargetRef::Input::InventoryData.pbuilderid?(node[:external_ref])
             ret
           else

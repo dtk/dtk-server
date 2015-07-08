@@ -9,7 +9,7 @@ module DTK
           top_task = workflow.top_task
           task.update_input_attributes!() if task_start
           workitem.fields["guard_id"] = task_id # ${guard_id} is referenced if guard for execution of this
-          
+
           failed_tasks = ret_failed_precondition_tasks(task,workflow.guards[:external])
           unless failed_tasks.empty?
             set_task_to_failed_preconditions(task,failed_tasks)
@@ -17,7 +17,7 @@ module DTK
             delete_task_info(workitem)
             return reply_to_engine(workitem)
           end
-          
+
           task.add_internal_guards!(workflow.guards[:internal])
           execution_context(task,workitem,task_start) do
             if action.assembly_wide_component?()
@@ -26,7 +26,7 @@ module DTK
               delete_task_info(workitem)
               return reply_to_engine(workitem)
             end
-            
+
             user_object  = CurrentSession.new.user_object()
             callbacks = {
               on_msg_received: proc do |msg|
@@ -71,12 +71,12 @@ module DTK
             workflow.initiate_executable_action(task,receiver_context)
           end
         end
-        
+
         # Ruote dispatch call to this method in case of user's cancel task request
         def cancel(_fei, flavour)
           # flavour will have 'kill' value if kill_process is invoked instead of cancel_process
           return if flavour
-          
+
           begin
             wi = workitem
             params = get_params(wi)
@@ -103,11 +103,11 @@ module DTK
         def has_action_results?(task,_results)
           task[:executable_action].config_agent_type.to_sym == ConfigAgent::Type::Symbol.dtk_provider
         end
-        
+
         def add_start_task_event?(task)
           task.add_event(:start)
         end
-        
+
         def ret_failed_precondition_tasks(task,external_guards)
           ret = []
           guard_task_idhs = task.guarded_by(external_guards)
@@ -118,7 +118,7 @@ module DTK
           }
           Model.get_objs(task.model_handle,sp_hash)
         end
-        
+
         def process_action_result!(workitem,action,result,task,task_id,task_end)
           if errors_in_result = errors_in_result?(result,action)
             event,errors = task.add_event_and_errors(:complete_failed,:config_agent,errors_in_result)
@@ -134,7 +134,7 @@ module DTK
             action.get_and_propagate_dynamic_attributes(result)
           end
         end
-        
+
         # TODO: need to turn threading off for now because if dont can have two threads
         # eat ech others messages; may solve with existing mechism or go straight to
         # using stomp event machine

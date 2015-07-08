@@ -27,7 +27,7 @@ describe "(Different Node Templates) Test Case 2: (OS: CentOS, Namenode: BigTop)
 		include_context "Stage", dtk_common
 	end
 
-	context "List services after stage" do		
+	context "List services after stage" do
 		include_context "List services after stage", dtk_common
 	end
 

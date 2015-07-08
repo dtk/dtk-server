@@ -20,7 +20,7 @@ module DTK
           TypesNotDeletable
         else
           Types
-        end 
+        end
      end
       Types = [Type::Node.target_ref,Type::Node.target_ref_staged,Type::Node.physical]
       TypesNotDeletable = [Type::Node.physical]
@@ -65,7 +65,7 @@ module DTK
             ret = $1.to_i
           end
         end
-        unless ret 
+        unless ret
           Log.error("Unexpected cannot find an index number")
         end
         ret
@@ -96,7 +96,7 @@ module DTK
         ret
       end
 
-      # The class method get_nodes(target) gets the target refs 
+      # The class method get_nodes(target) gets the target refs
       # opts keys:
       #  :managed
       #  :mark_free_nodes
@@ -149,7 +149,7 @@ module DTK
       # The class method get_free_nodes returns  managed nodes without any assembly on them
       def self.get_free_nodes(target)
         ret = get_nodes(target,mark_free_nodes: true,managed: true)
-        ret.select{|r|r[:free_node]} 
+        ret.select{|r|r[:free_node]}
       end
 
       def self.list(target)
@@ -218,7 +218,7 @@ module DTK
         end
 
         def increase_ref_count
-          @ref_count +=1 
+          @ref_count +=1
         end
       end
       # returns array of Info elements; should only be called on non target ref

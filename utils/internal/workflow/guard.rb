@@ -16,7 +16,7 @@ module DTK; class Workflow
     class Element < SimpleHashObject
       def initialize(node,component,task_id,other_vals={})
         el = {
-          node: node.hash_subset(:id,:display_name), 
+          node: node.hash_subset(:id,:display_name),
           component: component.hash_subset(:id,:display_name),
           task_id: task_id
         }.merge(other_vals)
@@ -53,7 +53,7 @@ module DTK; class Workflow
       InputKeys = {node: :input_node, cmp: :input_component}
       OutputKeys = {node: :output_node, cmp: :output_component}
       DirIndex = {
-        before: {before_index: InputKeys,  after_index: OutputKeys},  
+        before: {before_index: InputKeys,  after_index: OutputKeys},
         after: {before_index: OutputKeys, after_index: InputKeys}
       }
     end
@@ -75,22 +75,22 @@ module DTK; class Workflow
       def self.create(guarded_attr,link,guard_attr)
         # guard_attr can be null if guard refers to node level attr
         # TODO: are there any other cases where it can be null; previous text said 'this can happen if guard attribute is in component that ran already'
-        unless guard_attr 
+        unless guard_attr
           # TODO: below works if guard is node level attr
-          return nil 
+          return nil
         end
-        # guarding attributes that are unset and are feed by dynamic attribute 
+        # guarding attributes that are unset and are feed by dynamic attribute
         # TODO: should we assume that what gets here are only requierd attributes
         # TODO: removed clause (not guard_attr[:attribute_value]) in case has value that needs to be recomputed
         unless guard_attr[:dynamic] && unset_guarded_attr?(guarded_attr,link)
           return nil
         end
-        
+
         # TODO: not sure if still needed
         guard_task_type = (guard_attr[:semantic_type_summary] == "sap__l4" && (guard_attr[:item_path]||[]).include?(:host_address)) ? Task::Action::CreateNode : Task::Action::ConfigNode
         # right now only using config node to config node guards
         return nil if guard_task_type == Task::Action::CreateNode
-        
+
         guard = element(guard_attr,guard_task_type)
         guarded = element(guarded_attr)
         new(guarded: guarded, guard: guard, link: link)
@@ -105,7 +105,7 @@ module DTK; class Workflow
           unset_guarded_attr__array_append?(val,link)
         end
       end
-      
+
       def self.unset_guarded_attr__array_append?(guarded_attr_val,link)
         if input_map = link[:index_map]
           unless input_map.size == 1

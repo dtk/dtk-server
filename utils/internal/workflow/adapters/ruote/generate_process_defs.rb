@@ -98,7 +98,7 @@ module DTK
           "task" => task,
           "top_task_idh" => context.top_task_idh
         }
-        
+
         task_id = task.id()
         Ruote::TaskInfo.set(task_id,context.top_task_idh.get_id(),task_info,task_type: opts[:task_type])
         participant_params = opts.merge(

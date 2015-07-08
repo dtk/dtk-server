@@ -15,4 +15,4 @@ module Ramaze::Helper
       ::DTK::AsyncResponse.create(async_callback,content_type,response_procs,&blk)
     end
   end
-end    
+end

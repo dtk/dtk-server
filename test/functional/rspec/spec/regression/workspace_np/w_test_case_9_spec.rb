@@ -41,11 +41,11 @@ describe "(Workspace) Test Case 9: Create two nodes, add components in both of t
 
 	context "Add component to the node in workspace" do
 		include_context "Add component to the node in workspace", dtk_common, node_name_1, component_name, component_module_namespace
-	end	
+	end
 
 	context "Add component to the node in workspace" do
 		include_context "Add component to the node in workspace", dtk_common, node_name_2, component_name, component_module_namespace
-	end	
+	end
 
 	context "NEG - List all service modules" do
 		include_context "NEG - List all service modules", dtk_common, service_module_name
@@ -73,7 +73,7 @@ describe "(Workspace) Test Case 9: Create two nodes, add components in both of t
 
 	context "Purge workspace content" do
 		include_context "Purge workspace content", dtk_common
-	end	
+	end
 
 	after(:all) do
 		puts "", ""

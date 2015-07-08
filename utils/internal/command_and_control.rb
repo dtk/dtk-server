@@ -11,7 +11,7 @@ module DTK
       @top_task_idh = top_task_idh
       if task
         @task_idh =  task.id_handle()
-        
+
         @task_action = task[:executable_action]
         @klass = self.class.load_for(@task_action)
       end
@@ -30,9 +30,9 @@ module DTK
     end
     def initiate(opts={})
       if opts[:cancel_task]
-        klass.initiate_cancelation(task_idh,top_task_idh,task_action,opts)   
+        klass.initiate_cancelation(task_idh,top_task_idh,task_action,opts)
       elsif opts[:sync_agent_task]
-        klass.initiate_sync_agent_code(task_idh,top_task_idh,task_action,opts)         
+        klass.initiate_sync_agent_code(task_idh,top_task_idh,task_action,opts)
       else
         klass.initiate_execution(task_idh,top_task_idh,task_action,opts)
       end
@@ -136,13 +136,13 @@ module DTK
     def self.get_and_update_node_state!(node,attribute_names)
       # TODO: Haris - Test more this change
       adapter_name = node.get_target_iaas_type() || R8::Config[:command_and_control][:iaas][:type]
-      klass = load_for_aux(:iaas,adapter_name)      
+      klass = load_for_aux(:iaas,adapter_name)
       klass.get_and_update_node_state!(node,attribute_names)
     end
 
     def self.get_node_operational_status(node)
       adapter_name = R8::Config[:command_and_control][:iaas][:type]
-      klass = load_for_aux(:iaas,adapter_name)      
+      klass = load_for_aux(:iaas,adapter_name)
       klass.get_node_operational_status(node)
     end
 
@@ -165,7 +165,7 @@ module DTK
       klass = load_for_node_config()
       klass.request_execute_action_per_node(agent,action,nodes_hash,callbacks)
     end
-    
+
     def self.parse_response__execute_action(nodes,msg)
       klass = load_for_node_config()
       klass.parse_response__execute_action(nodes,msg)
@@ -191,7 +191,7 @@ module DTK
     def self.load_iaas_for(key_val)
       key = key_val.keys.first
       val = key_val.values.first
-      adapter_name = 
+      adapter_name =
         case key
           when :node
             node = val
@@ -221,7 +221,7 @@ module DTK
       adapter_type = :iaas
       load_for_aux(adapter_type,adapter_name)
     end
-    
+
     def self.load_config_node_adapter
       adapter_type = :node_config
       adapter_name = R8::Config[:command_and_control][adapter_type][:type]
@@ -280,7 +280,7 @@ module DTK
 
         def to_hash
           super().merge(error_msg: @error_msg)
-        end 
+        end
       end
       class CannotCreateNode < Error
       end

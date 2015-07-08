@@ -446,7 +446,7 @@ module DTK
     #  :no_delete
     #  :update_matching
     #  :convert (used if have field with json structure)
-    #  
+    #
     def self.modify_children_from_rows(model_handle,parent_idh,rows,match_cols=[:ref],opts={})
       parent_id_col = DB.parent_field(parent_idh[:model_name],model_handle[:model_name])
       parent_fields = {parent_id_col => parent_idh.get_id(), :group_id => parent_idh[:group_id]}

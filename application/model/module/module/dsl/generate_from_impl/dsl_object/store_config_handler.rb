@@ -27,7 +27,7 @@ module DTK; class ModuleDSL; class GenerateFromImpl
         rescue
           raise Error.new("processor for builtin type (#{type}) not treated yet")
         end
-        ret  
+        ret
       end
 
       def self.process_output_attr!(attr_meta,exp_rsc_ps)
@@ -105,7 +105,7 @@ module DTK; class ModuleDSL; class GenerateFromImpl
       def self.content_variables_in_output_var(exp_rsc_ps,attr_meta)
         content = (exp_rsc_ps[:parameters]||[]).find{|exp|exp[:name] == "content"}
         return [] unless content && content[:value]
-        
+
         if template = content[:value].template?()
           pp "debug: handle content with template #{template}"
           return []
@@ -125,8 +125,8 @@ module DTK; class ModuleDSL; class GenerateFromImpl
         input = {component: input_component,attribute: match[:input_var][:value]}
         output_component = data[:attr_exp_rsc].parent.hash_key
         output = {component: output_component,attribute: match[:output_var][:value]}
-        attr_mappings << link_def_poss_link.create_attribute_mapping(input,output) 
+        attr_mappings << link_def_poss_link.create_attribute_mapping(input,output)
       end
-    end 
+    end
   end
 end; end; end

@@ -29,13 +29,13 @@ end
         update_agent_git_commit_id(nil)
         attribute.clear_host_addresses()
       end
-      
+
       def delete_object(opts={})
         if target_ref_idh = opts[:delete_target_ref]
           Model.delete_instance(target_ref_idh)
         end
 
-        update_dangling_links() 
+        update_dangling_links()
 
         if is_target_ref?()
           # This wil be a node group member; need to bump down is assocaited node groups cardinality
@@ -72,7 +72,7 @@ end
           true
         end
       end
-        
+
       def destroy_and_delete__top_level_node(opts)
         # see if there are any target refs this points to this
         # if none then destroy and delete

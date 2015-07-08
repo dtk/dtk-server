@@ -34,7 +34,7 @@ module DTK; class ModuleDSL; class V1
       def converted_external_ref
         ext_ref = required_value(:external_ref)
         ret = RenderHash.new
-        ext_ref_key = 
+        ext_ref_key =
           case ext_ref["type"]
           when "puppet_class" then "class_name"
           when "puppet_definition" then "definition_name"
@@ -49,7 +49,7 @@ module DTK; class ModuleDSL; class V1
 
       def display_name?
         required_value(:display_name)
-      end 
+      end
 
       def label?
         value(:label)
@@ -128,7 +128,7 @@ module DTK; class ModuleDSL; class V1
         ret.set_unless_nil("external_ref",converted_external_ref())
         ret
       end
-        
+
       private
 
       def display_name?

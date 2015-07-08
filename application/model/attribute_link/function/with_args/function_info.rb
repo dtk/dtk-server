@@ -6,7 +6,7 @@ module DTK; class AttributeLink
         @name = name.to_sym
         @constants = Constants.new(constants_hash)
       end
-      
+
       def self.create(function_def)
         unless ret = create?(function_def)
           raise Error.new("Error creating (#{function_def.inspect})")
@@ -22,7 +22,7 @@ module DTK; class AttributeLink
           new(fn_info_hash[:name],fn_info_hash[:constants]||{})
         end
       end
-      
+
       class Constants < Hash
         def initialize(hash)
           super()

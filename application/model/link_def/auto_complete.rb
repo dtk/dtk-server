@@ -1,12 +1,12 @@
 module DTK; class LinkDef
   class AutoComplete
-    # TODO: AUTO-COMPLETE-LINKS: this needs to be enhanced to be a general mechanism to auto complete links 
+    # TODO: AUTO-COMPLETE-LINKS: this needs to be enhanced to be a general mechanism to auto complete links
     def self.create_internal_links(_node,component,node_link_defs_info)
       # get link_defs in node_link_defs_info that relate to internal links not linked already that connect to component
       # on either end. what is returned are link defs annotated with their possible links
       relevant_link_defs = get_annotated_internal_link_defs(component,node_link_defs_info)
       return if relevant_link_defs.empty?
-      # for each link def with multiple possibel link defs find the match; 
+      # for each link def with multiple possibel link defs find the match;
       # TODO: find good mechanism to get user input if there is a choice such as whether it is internal or external
       # below is exeperimenting with passing in "stratagy" object, which for example can indicate to make all "internal_external internal"
       strategy = {internal_external_becomes_internal: true,select_first: true}
@@ -45,7 +45,7 @@ module DTK; class LinkDef
       return ret if node_link_defs_info.size < 2
 
       #### get relevant link def possible links
-      # find all link def ids that can be internal, local, and not connected already 
+      # find all link def ids that can be internal, local, and not connected already
       component_id = component.id
       component_type = (component.update_object!(:component_type))[:component_type]
       relevant_link_def_ids = []
@@ -72,7 +72,7 @@ module DTK; class LinkDef
       end
       return ret if relevant_link_def_ids.empty?
 
-      # get relevant possible_link link defs; these are ones that 
+      # get relevant possible_link link defs; these are ones that
       # are children of relevant_link_def_ids and
       # internal_external have link_def_id in cmp_link_def_ids or remote_component_type == component_type
       sp_hash = {
@@ -89,11 +89,11 @@ module DTK; class LinkDef
       poss_links.each do |poss_link|
         (ndx_relevant_link_defs[poss_link[:link_def_id]][:possible_links] ||= []) << poss_link
       end
-      
+
       # relevant link defs are ones that are in ndx_relevant_link_defs_info and have a possible link
       ret = ndx_relevant_link_defs.reject{|_k,v|not v.key?(:possible_links)}.values
       ret
     end
   end
 end; end
-    
+

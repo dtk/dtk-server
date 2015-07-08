@@ -11,8 +11,8 @@ module DTK; class AttributeLink
 
       def output_value(opts={})
         if opts.key?(:inner_value)
-          opts[:inner_value] 
-        else 
+          opts[:inner_value]
+        else
           @output_attr[:value_asserted] || @output_attr[:value_derived]
         end
       end

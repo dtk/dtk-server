@@ -11,7 +11,7 @@ module DTK; class ModuleDSL; class V3
           pl.deep_merge(cmp,link)
         end
       end
-      
+
       def merge_fragment!(full_hash,fragment,context={})
         ret = full_hash
         return ret unless fragment
@@ -40,9 +40,9 @@ module DTK; class ModuleDSL; class V3
           end
         end
         if link_required_is_false?(link_def_link)
-          ret['required'] = false 
+          ret['required'] = false
         end
-        ams = link_def_link.object.attribute_mappings() 
+        ams = link_def_link.object.attribute_mappings()
         if ams and not ams.empty?
           remote_cmp_type = link_def_link.required(:remote_component_type)
           link['attribute_mappings'] = ams.map{|am|attribute_mapping(ObjectWrapper.new(am),remote_cmp_type)}

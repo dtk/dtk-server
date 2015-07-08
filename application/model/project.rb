@@ -33,7 +33,7 @@ module DTK
         index = r[:component][:component_type]
         cmp = ret_hash[index]
         # TODO: dont think ids are used; but for consistency using lowest id instance
-        if cmp.nil? || r[:component][:id] < cmp[:id] 
+        if cmp.nil? || r[:component][:id] < cmp[:id]
           cmp = ret_hash[index] = r[:component].materialize!(Component.common_columns())
           # TODO: see if cleaner way to put in i18n names
           cmp[:name] = i18n_string(i18n,:component, cmp[:name])
@@ -44,7 +44,7 @@ module DTK
       end
       ret = ret_hash.values.map{|ct|ct.merge(implementations: ct[:implementations].values)}
       return ret unless opts[:include_file_assets]
-      
+
       impl_idhs = ret.flat_map{|ct|ct[:implementations].map{|impl|impl.id_handle}}
       indexed_asset_files = Implementation.get_indexed_asset_files(impl_idhs)
       ret.each{|ct|ct[:implementations].each{|impl|impl.merge!(file_assets: indexed_asset_files[impl[:id]])}}
@@ -68,7 +68,7 @@ module DTK
       end
       ret = ndx_ret.values
       return ret unless opts[:include_file_assets]
-      
+
       impl_idhs = ret.map{|impl|impl.id_handle}
       indexed_asset_files = Implementation.get_indexed_asset_files(impl_idhs)
       ret.each{|impl|impl.merge!(file_assets: indexed_asset_files[impl[:id]]||[])}
@@ -93,9 +93,9 @@ module DTK
         end
         nodes = target[:nodes] ||= {}
         next unless r[:node]
-        unless node = nodes[r[:node][:id]] 
+        unless node = nodes[r[:node][:id]]
           node = nodes[r[:node][:id]] = r[:node].materialize!(Node.common_columns())
-          if node.is_node_group? 
+          if node.is_node_group?
             node_group_members = (ndx_ng_members[target_id]||{})[node[:id]]|| []
             node.merge!(node_group_members: node_group_members)
           end

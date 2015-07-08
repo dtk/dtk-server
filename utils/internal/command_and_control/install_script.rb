@@ -16,7 +16,7 @@ module DTK
         fingerprint = RepoManager.repo_server_ssh_rsa_fingerprint()
         template_bindings = {
           node_config_server_host: node_config_server_host,
-          git_server_url: git_server_url, 
+          git_server_url: git_server_url,
           git_server_dns: git_server_dns,
           fingerprint: fingerprint
         }
@@ -51,7 +51,7 @@ module DTK
 
 eos
       OSTemplateUbuntu = <<eos
-#!/bin/sh 
+#!/bin/sh
 eos
       OSTemplates = {
         :ubuntu               => OSTemplateUbuntu,

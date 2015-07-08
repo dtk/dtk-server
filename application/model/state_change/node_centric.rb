@@ -24,9 +24,9 @@ module DTK; class StateChange
         return ret
       end
 
-      # find components associated with each node or node group      
+      # find components associated with each node or node group
       ndx_cmps = {}
-   
+
       sp_hash = {
         cols: [:id,:display_name,:node_centric_components],
         filter: [:oneof, :id, ret_node_group_ids(node_to_ng) + nodes.map{|n|n[:id]}]

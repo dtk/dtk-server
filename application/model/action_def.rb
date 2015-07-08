@@ -4,7 +4,7 @@ module DTK
     def self.common_columns
       core_columns()+[:method_name,:content,:component_component_id]
     end
-    
+
     module Constant
       module Variations
       end
@@ -15,7 +15,7 @@ module DTK
     def self.get_ndx_action_defs(cmp_template_idhs,opts={})
       ret = {}
       return ret if cmp_template_idhs.empty?
-      
+
       sp_hash = {
         cols: opts[:cols] ? (opts[:cols]+core_columns()+[:component_component_id]).uniq : common_columns(),
         filter: [:oneof,:component_component_id,cmp_template_idhs.map{|cmp|cmp.get_id{}}]

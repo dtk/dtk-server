@@ -42,11 +42,11 @@ describe "(Workspace) Test Case 11: Create two nodes, add components in both of 
 
 	context "Add component to the node in workspace" do
 		include_context "Add component to the node in workspace", dtk_common, node_name_1, component_name_1
-	end	
+	end
 
 	context "Add component to the node in workspace" do
 		include_context "Add component to the node in workspace", dtk_common, node_name_2, component_name_2
-	end	
+	end
 
 	context "Check if attribute exists in workspace" do
 		include_context "Check if attribute exists in workspace", dtk_common, "#{node_name_1}/#{attribute_name_1}"
@@ -56,7 +56,7 @@ describe "(Workspace) Test Case 11: Create two nodes, add components in both of 
 		include_context "Check if attribute exists in workspace", dtk_common, "#{node_name_2}/#{attribute_name_2}"
 	end
 
-	context "Link attributes" do		
+	context "Link attributes" do
 		include_context "Link attributes", dtk_common, "#{node_name_1}/#{attribute_name_1}", "#{node_name_2}/#{attribute_name_2}"
 	end
 
@@ -70,11 +70,11 @@ describe "(Workspace) Test Case 11: Create two nodes, add components in both of 
 
 	context "Check if value for attribute is set" do
 		include_context "Check if value for attribute is set", dtk_common, node_name_2, attribute_name_2, attribute_value
-	end	
+	end
 
 	context "Purge workspace content" do
 		include_context "Purge workspace content", dtk_common
-	end	
+	end
 
 	after(:all) do
 		puts "", ""

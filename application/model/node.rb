@@ -169,7 +169,7 @@ module DTK
       port_ids = ports.map{|p|p[:id]}
       sp_hash = {
         cols: PortLink.common_columns(),
-        filter: [:or, [:oneof, :input_id, port_ids], [:oneof, :output_id, port_ids]] 
+        filter: [:or, [:oneof, :input_id, port_ids], [:oneof, :output_id, port_ids]]
       }
       port_link_mh = ports.first.model_handle(:port_link)
       Model.get_objs(port_link_mh,sp_hash)
@@ -337,7 +337,7 @@ module DTK
 
       component_type = component_template.get_field?(:component_type)
       if matching_cmp = Component::Instance.get_matching?(id_handle(),component_type,component_title)
-        if opts[:idempotent] 
+        if opts[:idempotent]
           return matching_cmp.id_handle()
         else
           if component_title
@@ -390,7 +390,7 @@ module DTK
     def self.check_valid_id__node_member(model_handle,id,assembly_id)
       assembly = NodeGroupRelation.get_node_member_assembly?(model_handle.createIDH(id: id))
       unless assembly && assembly.id == assembly_id
-        raise ErrorIdInvalid.new(id,pp_object_type()) 
+        raise ErrorIdInvalid.new(id,pp_object_type())
       end
       id
     end

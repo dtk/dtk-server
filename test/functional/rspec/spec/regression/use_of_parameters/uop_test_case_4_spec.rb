@@ -27,7 +27,7 @@ describe "(Use Of Parameters) Test Case 4: Add optional params on existing attri
 		include_context "Stage", dtk_common
 	end
 
-	context "List services after stage" do		
+	context "List services after stage" do
 		include_context "List services after stage", dtk_common
 	end
 

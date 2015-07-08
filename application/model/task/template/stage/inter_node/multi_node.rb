@@ -1,4 +1,4 @@
-module DTK; class Task; class Template; class Stage 
+module DTK; class Task; class Template; class Stage
   class InterNode
     class MultiNode < self
       def initialize(serialized_multinode_action)
@@ -37,7 +37,7 @@ module DTK; class Task; class Template; class Stage
       def self.klass(multi_node_type)
         if Constant.matches?(multi_node_type,:AllApplicable)
           Applicable
-        else 
+        else
           raise ParsingError.new("Illegal multi node type (#{multi_node_type}); #{Constant.its_legal_values(:AllApplicable)}")
         end
       end
@@ -63,7 +63,7 @@ module DTK; class Task; class Template; class Stage
             end
           end
           info_per_node.each_value do |n|
-            if node_actions = InterNode.parse_and_reify_node_actions?({Constant::OrderedComponents => n[:actions]},n[:name],n[:id],action_list) 
+            if node_actions = InterNode.parse_and_reify_node_actions?({Constant::OrderedComponents => n[:actions]},n[:name],n[:id],action_list)
               merge!(node_actions)
             end
           end

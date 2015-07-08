@@ -8,7 +8,7 @@ module DTK; class ModuleDSL; class V3
           raise Error.new("Unexpected that link_def_links is empty")
         end
         opts_choice = {}
-        if single_choice = (link_def_links.size == 1) 
+        if single_choice = (link_def_links.size == 1)
           opts_choice.merge!(omit_component_ref: ref)
         end
         possible_links = @aug_link_def[:link_def_links].map do |link_def_link|
@@ -45,7 +45,7 @@ module DTK; class ModuleDSL; class V3
         end
         ret['location'] = link_location(link_def_link)
         if link_required_is_false?(link_def_link)
-          ret['required'] = false 
+          ret['required'] = false
         end
         ret
       end
@@ -73,11 +73,11 @@ module DTK; class ModuleDSL; class V3
 
       class Choices < Hash
         def self.reify(key,fragment_link)
-          choices = 
+          choices =
             if fragment_link.keys == ['choices']
               fragment_link['choices'].map do |choice|
                  Dependency.new(choice.is_a?(String) ? choice : {key => choice})
-              end   
+              end
             else
               [Dependency.new(key => fragment_link)]
             end
@@ -123,7 +123,7 @@ module DTK; class ModuleDSL; class V3
         def self.link(obj)
           key__link__is_default(obj)[1]
         end
-        
+
         def matches?(link)
           @link.matches?(link)
         end

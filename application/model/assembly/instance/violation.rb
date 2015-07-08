@@ -180,7 +180,7 @@ module DTK
       end
     end
 
-    class Violation 
+    class Violation
       class ReqUnsetAttr < self
         def initialize(attr,type)
           @attr_display_name = attr.print_form(Opts.new(level: type))[:display_name]

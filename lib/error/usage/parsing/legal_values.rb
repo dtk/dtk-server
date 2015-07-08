@@ -2,7 +2,7 @@ module DTK; class ErrorUsage
   class Parsing
     class LegalValues < Array
       def self.reify(input_form=nil,&legal_values_block)
-        input_form.is_a?(LegalValues) ? input_form : new(input_form,&legal_values_block) 
+        input_form.is_a?(LegalValues) ? input_form : new(input_form,&legal_values_block)
       end
       def match?(object)
         !!find{|el|el.matches?(object)}

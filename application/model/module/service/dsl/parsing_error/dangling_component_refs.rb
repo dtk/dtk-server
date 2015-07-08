@@ -5,7 +5,7 @@ module DTK; class ServiceModule
       def initialize(cmp_ref_info_list,opts={})
         super(err_msg(cmp_ref_info_list),opts)
         # each element can be a component ref object or a hash
-        @cmp_ref_info_list = cmp_ref_info_list 
+        @cmp_ref_info_list = cmp_ref_info_list
       end
 
       def add_error_opts(error_opts={})
@@ -22,16 +22,16 @@ module DTK; class ServiceModule
           remote_namespace = r[:remote_namespace]
           ndx = "#{module_name}---#{r[:version]}---#{remote_namespace}"
           info = {
-            name: module_name, 
+            name: module_name,
             version: r[:version]
           }
           info.merge!(remote_namespace: remote_namespace) if remote_namespace
           h.merge!(ndx => info)
         end
-        
+
         module_hash.values
       end
-      
+
       # aggregate_error can be nil, a anglingComponentRefs error or other error
       def add_with(aggregate_error=nil)
         if aggregate_error.nil?
@@ -49,7 +49,7 @@ module DTK; class ServiceModule
         ndx_ret = cmp_refs1.inject({}){|h,r|h.merge(ret_unique_union__ndx(r) => r)}
         cmp_refs2.inject(ndx_ret){|h,r|h.merge(ret_unique_union__ndx(r) => r)}.values
       end
-      
+
       def ret_unique_union__ndx(cmp_ref_info)
         ret = cmp_ref_info[:component_type]
         if version = cmp_ref_info[:version]
@@ -65,7 +65,7 @@ module DTK; class ServiceModule
         does = (cmp_ref_info_list.size==1 ? "does" : "do")
         "The following #{what} (#{refs}) that #{is} referenced by assemblies in the service module #{does} not exist; this can be rectified by invoking the 'push' command after manually loading appropriate component module(s) or by removing references in the service DSL file(s)"
       end
-      
+
       def print_form(cmp_ref_info)
         ret = ComponentRef.print_form(cmp_ref_info)
         if version = cmp_ref_info[:version]

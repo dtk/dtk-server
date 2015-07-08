@@ -1,15 +1,15 @@
 module DTK; module WorkflowAdapter
   class Ruote
     # This works under the assumption that task_ids are never reused
-    class TaskInfo 
+    class TaskInfo
       Store = {}
       Lock = Mutex.new
-      
+
       def self.set(task_id,top_task_id,task_info,opts={})
         key = task_key(task_id,top_task_id,opts)
         Lock.synchronize{Store[key] = task_info}
       end
-      
+
       def self.get(workitem)
         key = get_from_workitem(workitem)
         ret = nil
@@ -19,12 +19,12 @@ module DTK; module WorkflowAdapter
         end
         ret
       end
-      
+
       def self.delete(workitem)
         key = get_from_workitem(workitem)
         Lock.synchronize{Store.delete(key)}
       end
-      
+
       def self.clean(top_task_id)
         Lock.synchronize{ Store.delete_if { |key, _value| key.match(Regexp.new("^#{top_task_id}#{TopTaskDelim}")) }}
         #TODO: this is not write in taht this can have values if concurrent service
@@ -53,7 +53,7 @@ module DTK; module WorkflowAdapter
 
       # opts can have keys
       #  :task_type
-      #  ::override_node_id 
+      #  ::override_node_id
       def self.task_key(task_id,top_task_id,opts={})
         ret_key = "#{top_task_id}#{TopTaskDelim}#{task_id}"
         if task_type = opts[:task_type]

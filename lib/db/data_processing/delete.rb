@@ -23,7 +23,7 @@ module XYZ
       end
 
       # assumes taht all id_handles have same model_handle
-      def delete_instances_wrt_parent(relation_type,parent_id_handle,where_clause=nil,_opts={}) 
+      def delete_instances_wrt_parent(relation_type,parent_id_handle,where_clause=nil,_opts={})
         parent_id_info = IDInfoTable.get_row_from_id_handle(parent_id_handle)
         parent_fk_col = ret_parent_id_field_name(parent_id_info[:db_rel],DB_REL_DEF[relation_type])
         c = parent_id_handle[:c]

@@ -1,5 +1,5 @@
 module DTK; class LinkDef::Context
-  class Value 
+  class Value
     class Component < self
       def initialize(term)
         super(term[:component_type])
@@ -10,4 +10,4 @@ module DTK; class LinkDef::Context
       end
     end
   end
-end; end      
+end; end

@@ -11,13 +11,13 @@ module XYZ
             ret << current_segment if current_segment
             current_segment = LogSegment.create(match[0],line)
           elsif current_segment
-            current_segment << line 
+            current_segment << line
           end
         end
         ret << current_segment if current_segment
         ret.post_process!()
       end
-      
+
       def self.log_complete?(lines)
         lines.reverse_each do |l|
           return true if l =~ /Finished catalog run/
@@ -114,7 +114,7 @@ module XYZ
         end
       end
 
-      class ErrorGeneric < ErrorPuppetLog 
+      class ErrorGeneric < ErrorPuppetLog
         def self.isa?(_segments_from_error)
           true
         end

@@ -34,7 +34,7 @@ module DTK; class ModuleDSL; class V3
       end
 
       # returns [dependencies,link_defs]
-      def self.deps_and_link_defs(input_hash,base_cmp,opts={}) 
+      def self.deps_and_link_defs(input_hash,base_cmp,opts={})
         ndx_dep_choices = Dependency.ndx_dep_choices(input_hash["dependencies"],base_cmp,opts)
         ndx_link_def_links = LinkDef.ndx_link_def_links(input_hash["link_defs"],base_cmp,opts)
         spliced_ndx_link_def_links = integrate_deps_and_link_defs!(ndx_dep_choices,ndx_link_def_links)
@@ -96,7 +96,7 @@ module DTK; class ModuleDSL; class V3
       def matches_on_type?(hash_val1,hash_val2)
         type1 = hash_val1["type"]
         type2 = hash_val2["type"]
-        type1.nil? || type2.nil? || type1 == type2        
+        type1.nil? || type2.nil? || type1 == type2
       end
 
       # returns spliced_ndx_link_def_links

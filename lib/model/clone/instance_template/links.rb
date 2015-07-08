@@ -26,7 +26,7 @@ module DTK; class Clone
       def all_id_handles
         templates().map{|r|r.id_handle()} + instances().map{|r|r.id_handle()}
       end
-      
+
       def templates
         #removes dups
         inject({}) do |h,l|
@@ -34,7 +34,7 @@ module DTK; class Clone
           h.merge(template ? {template.id => template} : {})
         end.values
       end
-     
+
       def instances
         #does not have dups
         map{|l|l.instance}.compact

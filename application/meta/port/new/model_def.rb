@@ -109,7 +109,7 @@
       hidden: true,
       remote_dependencies:       [{
          model_name: :attribute,
-         alias: :attribute_direct, 
+         alias: :attribute_direct,
          join_type: :left_outer,
          join_cond: {id: :port__external_attribute_id},
          cols: [:id,:display_name]
@@ -123,7 +123,7 @@
                                   },
                                   {
                                     model_name: :attribute,
-                                    alias: :attribute_nested, 
+                                    alias: :attribute_nested,
                                     join_type: :left_outer,
                                     join_cond: {id: :port_nested__external_attribute_id},
                                     cols: [:id,:display_name]

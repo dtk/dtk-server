@@ -34,6 +34,6 @@ module DTK
     def has_data?(val)
       !val.nil? && (!val.is_a?(Array) || !val.empty?())
     end
-  end              
+  end
 end
 

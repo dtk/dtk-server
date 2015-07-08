@@ -102,7 +102,7 @@ module DTK
           self[:model_name]
         end
       ret = Model.model_class(model_name).new({id: get_id()},self[:c],nil,self)
-      ret.update_object!(*opts[:cols]) if opts[:cols] 
+      ret.update_object!(*opts[:cols]) if opts[:cols]
       ret
     end
 
@@ -172,7 +172,7 @@ module DTK
     end
 
     def update_group_id_if_needed!
-      unless self[:group_id] 
+      unless self[:group_id]
         if group_id = get_field?(:group_id)
           merge!(group_id: group_id)
         end
@@ -313,7 +313,7 @@ module DTK
       parent_model_name ||= self[:parent_model_name]||(arg && (arg.is_a?(Symbol) ? arg : arg[:model_name]))
       if parent_model_name.nil? && !opts[:can_be_nil]
         Log.error("Unexpected that object's (#{inspect}) parent_model_name is nil")
-        return nil 
+        return nil
       end
       DB.parent_field(parent_model_name,self[:model_name],opts)
     end

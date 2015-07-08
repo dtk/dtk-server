@@ -28,7 +28,7 @@ module DTK; class ServiceModule
 
           input_port_hash = input.matching_port(ports,opts_matching_port)
           return input_port_hash if ParsingError.is_error?(input_port_hash)
-          
+
           output_port_hash = output.matching_port(ports,opts_matching_port.merge(is_output: true))
           return output_port_hash if ParsingError.is_error?(output_port_hash)
 
@@ -108,7 +108,7 @@ module DTK; class ServiceModule
           components = node_hash["components"]||[]
           components = [components] unless components.is_a?(Array)
           components.each do |base_cmp|
-            if base_cmp.is_a?(Hash) 
+            if base_cmp.is_a?(Hash)
               base_cmp_name = base_cmp.keys.first
               (base_cmp.values.first["service_links"]||{}).each_pair do |link_def_type,targets|
                 Array(targets).each do |target|
@@ -125,7 +125,7 @@ module DTK; class ServiceModule
 
       def self.node_to_node_binding_rs(_assembly_ref,node_bindings_hash,opts={})
         (node_bindings_hash||{}).inject({}) do |h,(node,v)|
-          merge_hash = 
+          merge_hash =
             if v.is_a?(String) then {node => v}
             elsif v.is_a?(Hash)
               Log.error("Not implemented yet have node bindings with explicit properties")
@@ -139,7 +139,7 @@ module DTK; class ServiceModule
 
       def self.ret_component_hash(cmp_input)
         ret = {}
-        if cmp_input.is_a?(Hash) 
+        if cmp_input.is_a?(Hash)
           ret = cmp_input.values.first
           unless ret.is_a?(Hash)
             err_msg = "Parsing error after component term (#{cmp_input.keys.first}) in: ?1"

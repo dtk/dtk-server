@@ -1,5 +1,5 @@
 require 'mcollective'
-######## Monkey patches for version 1.2 
+######## Monkey patches for version 1.2
 module MCollective
   class Client
     def r8_set_context(multiplexer)

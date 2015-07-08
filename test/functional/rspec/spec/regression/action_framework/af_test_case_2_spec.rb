@@ -37,7 +37,7 @@ describe "(Action Framework) Test Case 2: Service with two nodes that contain cm
 		include_context "Stage with namespace", dtk_common, service_module_namespace
 	end
 
-	context "List services after stage" do		
+	context "List services after stage" do
 		include_context "List services after stage", dtk_common
 	end
 

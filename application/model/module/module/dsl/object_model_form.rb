@@ -14,7 +14,7 @@ module DTK; class ModuleDSL
     def self.convert_to_hash_form(obj,&block)
       if obj.is_a?(Hash)
         obj.each_pair{|k,v|block.call(k,v)}
-      else 
+      else
         obj = [obj] unless obj.is_a?(Array)
         obj.each do |el|
           if el.is_a?(Hash)
@@ -60,7 +60,7 @@ module DTK; class ModuleDSL
           replace(convert(hash))
         end
       end
-      
+
       def req(key)
         key = key.to_s
         unless key?(key)

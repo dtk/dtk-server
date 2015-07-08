@@ -38,7 +38,7 @@ module DTK; class Component
     def self.get_matching?(node_idh,component_type,component_title)
       sp_hash = {
         cols: [:id,:display_name,:component_type,:ref],
-        filter: [:and,[:eq,:node_node_id,node_idh.get_id()], 
+        filter: [:and,[:eq,:node_node_id,node_idh.get_id()],
                  filter(component_type,component_title)
                    ]
       }

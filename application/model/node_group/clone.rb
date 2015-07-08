@@ -29,7 +29,7 @@ module DTK; class NodeGroup
     def clone_components(node_group_cmps,node)
       external_ports = []
       # order components to respect dependencies
-      ComponentOrder.derived_order(node_group_cmps) do |ng_cmp| 
+      ComponentOrder.derived_order(node_group_cmps) do |ng_cmp|
         clone_opts = {
           ret_new_obj_with_cols: [:id,:display_name],
           outermost_ports: [],
@@ -57,7 +57,7 @@ module DTK; class NodeGroup
       ret = []
       return ret if node_external_ports.empty?
       # TODO: this makes asseumption that can find cooresponding port on node group by matching on port display_name
-      # get the node group ports that correspond to node_external_ports 
+      # get the node group ports that correspond to node_external_ports
       # TODO: this can be more efficient if made into ajoin
       ng_id = id()
       raise Error.new("Need to check: semantics of :link_def_info has changed to use outer joins")
@@ -67,7 +67,7 @@ module DTK; class NodeGroup
       }
       ng_ports = Model.get_objs(model_handle(:port),sp_hash)
       ng_port_ids = ng_ports.map{|r|r[:id]}
-      
+
       # get the ng_port links
       sp_hash = {
         cols: [:id, :group_id,:input_id,:output_id,:temporal_order],
@@ -75,11 +75,11 @@ module DTK; class NodeGroup
       }
       ng_port_links = Model.get_objs(model_handle(:port_link),sp_hash)
 
-      # form the node_port_link_hashes by subsitituting corresponding node port sfor ng ports 
+      # form the node_port_link_hashes by subsitituting corresponding node port sfor ng ports
       ndx_node_port_ids = node_external_ports.inject({}){|h,r|h.merge(r[:display_name] => r[:id])}
       ndx_ng_ports = ng_ports.inject({}){|h,r|h.merge(r[:id] => r)}
       ng_port_links.map do |ng_pl|
-        if ng_port_ids.include?(ng_pl[:input_id]) 
+        if ng_port_ids.include?(ng_pl[:input_id])
           index = :input_id
           ng_port_id = ng_pl[:input_id]
         else
@@ -98,8 +98,8 @@ end; end
 =begin
 TODO: ***; may want to put in version of this for varaibles taht are not input ports; so change to var at node group level propagates to teh node members; for matching would not leverage the component ng_component_id
 
-TODO: currently not used because instead treating node group more like proxy for node members; keeping in 
-for now in case turns out taking this approach will be more efficient 
+TODO: currently not used because instead treating node group more like proxy for node members; keeping in
+for now in case turns out taking this approach will be more efficient
       node_components = get_node_group_members().map{|node|node.clone_into(clone_source_obj,override_attrs,node_clone_opts)}
 
       unless node_components.empty?
@@ -142,7 +142,7 @@ alternative is adding links at time that node to ng link is added and special pr
            :function => "eq"
          }
        end
-       opts = {:donot_create_pending_changes => true, :attr_rows => attrs} 
+       opts = {:donot_create_pending_changes => true, :attr_rows => attrs}
        parent_idh =  id_handle().get_top_container_id_handle(:target,:auth_info_from_self => true)
        AttributeLink.create_attribute_links(parent_idh,attr_link_rows,opts)
      end

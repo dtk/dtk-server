@@ -32,7 +32,7 @@ describe "(Workspace) Test Case 1: Create one node, add component in it, converg
 
 	context "Add component to the node in workspace" do
 		include_context "Add component to the node in workspace", dtk_common, node_name, component_name, component_module_namespace
-	end		
+	end
 
 	context "Converge workspace" do
 		include_context "Converge workspace", dtk_common

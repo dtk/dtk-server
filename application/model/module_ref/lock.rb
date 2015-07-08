@@ -7,7 +7,7 @@ module DTK
       def self.common_columns
         [:id,:display_name,:group_id,:module_name,:info,:locked_branch_sha]
       end
-      
+
       attr_accessor :info
       def initialize(*args,&block)
         super
@@ -45,7 +45,7 @@ module DTK
         @info = info_hash && Info.create_from_hash(model_handle,info_hash)
         self
       end
-      
+
     end
   end
 end

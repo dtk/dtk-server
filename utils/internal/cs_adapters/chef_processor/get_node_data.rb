@@ -9,7 +9,7 @@ module XYZ
 	  yield node_name,get_node_data(node_name),nil
 	  Log.info("loaded node #{node_name}")
 	}
-	nil  
+	nil
       end
 
       def get_node_list
@@ -28,24 +28,24 @@ module XYZ
 	return nil if attrs.nil?
 	#TBD: stubbed to just return interfaces
 	attributes = {}
-        return {} unless attrs["network"] 
-        return {} unless interfaces = attrs["network"]["interfaces"] 
-	attributes[:node_interface] = {} 
+        return {} unless attrs["network"]
+        return {} unless interfaces = attrs["network"]["interfaces"]
+	attributes[:node_interface] = {}
 	interfaces.each{|int_name,int_config|
 	  info = int_config.reject{|k,_v| k == "addresses"}
-          attributes[:node_interface][int_name.to_sym] = {info: info} 
+          attributes[:node_interface][int_name.to_sym] = {info: info}
           if addrs = format_node_addresses(int_config["addresses"])
-	    attributes[:node_interface][int_name.to_sym][:node_interface_address] = addrs 
+	    attributes[:node_interface][int_name.to_sym][:node_interface_address] = addrs
           end
 	}
 	attributes
       end
 
-      def format_node_addresses(addrs)      
+      def format_node_addresses(addrs)
 	return nil if addrs.nil?
 	addrs.map{|addr,info|
-	  {addr: {address: addr, family: info["family"], 
-                     info: info.reject{|k,_v| k == "family"}}} 
+	  {addr: {address: addr, family: info["family"],
+                     info: info.reject{|k,_v| k == "family"}}}
         }
       end
 

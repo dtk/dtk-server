@@ -17,13 +17,13 @@ module DTK
 
         # unless response is returned from ruby function send status: OK
         response ||= {
-          statuscode: 0, 
-          statusmsg: 'OK"', 
+          statuscode: 0,
+          statusmsg: 'OK"',
           data: {status: :succeeded}
         }
         response
       end
     end
   end
-end        
+end
 

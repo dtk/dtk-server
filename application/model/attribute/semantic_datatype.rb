@@ -1,6 +1,6 @@
 # TODO: initially enterred through the simple dsl; may then put in model that uses db persistence, but caches this
 module DTK
-  class Attribute 
+  class Attribute
     class SemanticDatatype
       r8_nested_require('semantic_datatype','dsl_builder')
       extend SemanticDatatypeClassMixin
@@ -42,7 +42,7 @@ module DTK
       def self.datatype(semantic_data_type)
         lookup(semantic_data_type).datatype()
       end
-      
+
       def is_valid?(value)
         @validation_proc.nil? || @validation_proc.call(value)
       end

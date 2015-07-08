@@ -1,6 +1,6 @@
 module XYZ
   class ParseLog
-    
+
     def self.parse(adapter_type,lines)
       get_adapter(adapter_type).parse(lines)
     end
@@ -41,7 +41,7 @@ module XYZ
     end
   end
 
-  class LogSegment 
+  class LogSegment
     def self.create(type,line)
       LogSegmentGeneric.new(type,line)
     end
@@ -57,7 +57,7 @@ module XYZ
     end
   end
 
-  class LogSegmentGeneric < LogSegment 
+  class LogSegmentGeneric < LogSegment
     attr_reader :line,:aux_data
     def hash_form
       added = {
@@ -69,7 +69,7 @@ module XYZ
 
     def initialize(type,line)
       super(type)
-      @line = line 
+      @line = line
       @aux_data = []
     end
 

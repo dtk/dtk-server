@@ -37,7 +37,7 @@ describe "(Action Framework) Test Case 4: Service with node (node groups = 2) th
 		include_context "Stage with namespace", dtk_common, service_module_namespace
 	end
 
-	context "List services after stage" do		
+	context "List services after stage" do
 		include_context "List services after stage", dtk_common
 	end
 
@@ -59,7 +59,7 @@ describe "(Action Framework) Test Case 4: Service with node (node groups = 2) th
 
 	context "Get task action details for action with rspec test command" do
 		include_context "Get task action details", dtk_common, "4.1.2", [expected_output_2]
-	end	
+	end
 
 	context "Delete and destroy service function" do
 		include_context "Delete services", dtk_common

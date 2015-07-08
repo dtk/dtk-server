@@ -27,10 +27,10 @@ module DTK; class Node
     def self.isa?(type)
       type && types().include?(type.to_sym)
     end
-    
+
     def self.new_type_when_create_node(node)
       type = node.get_field?(:type)
-        ret = 
+        ret =
         case type
         when Node.staged then Node.instance
         when Node.target_ref_staged then Node.target_ref

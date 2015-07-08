@@ -46,7 +46,7 @@ module DTK
 
       def set_object_attributes!(project_idh,assembly_instance,service_module,service_module_branch)
         @project_idh = project_idh
-        @assembly_instance = assembly_instance 
+        @assembly_instance = assembly_instance
         @service_module = service_module
         @service_module_branch = service_module_branch
         @assembly_component_modules = assembly_instance.get_component_modules(get_version_info: true)
@@ -200,7 +200,7 @@ module DTK
             matching_cmp = r[:component].hash_subset(*cmp_scalar_cols).merge(non_default_attributes: [])
             cmps << matching_cmp
           end
-          if attr_cand = r[:non_default_attr_candidate] 
+          if attr_cand = r[:non_default_attr_candidate]
             if non_default_attr = NonDefaultAttribute.isa?(attr_cand, matching_cmp)
               matching_cmp[:non_default_attributes] << non_default_attr
             end
@@ -245,7 +245,7 @@ module DTK
         assembly_hash.merge!(port_link: port_links) unless port_links.empty?
         @template_output.merge!(node: nodes, component: { assembly_ref => assembly_hash })
         module_refs_updated = @component_module_refs.update_object_if_needed!(@assembly_component_modules)
-        
+
         Transaction do
           @template_output.save_to_model()
           if module_refs_updated
@@ -346,7 +346,7 @@ module DTK
         node_hash.merge!(
           "*assembly_id" => "/component/#{self[:ref]}",
           :type          => node_type,
-          :component_ref => cmp_refs, 
+          :component_ref => cmp_refs,
           :port          => ports,
           :attribute     => node_attrs
         )

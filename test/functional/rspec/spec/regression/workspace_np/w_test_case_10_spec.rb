@@ -42,11 +42,11 @@ describe "(Workspace) Test Case 10: Create two nodes, add components in both of 
 
 	context "Add component to the node in workspace" do
 		include_context "Add component to the node in workspace", dtk_common, node_name_1, component_name, component_module_namespace
-	end	
+	end
 
 	context "Add component to the node in workspace" do
 		include_context "Add component to the node in workspace", dtk_common, node_name_2, component_name, component_module_namespace
-	end	
+	end
 
 	context "Create assembly from workspace content" do
 		include_context "Create assembly from workspace content", dtk_common, service_module_name, assembly, namespace
@@ -60,7 +60,7 @@ describe "(Workspace) Test Case 10: Create two nodes, add components in both of 
 		include_context "Stage", dtk_common
 	end
 
-	context "List services after stage" do		
+	context "List services after stage" do
 		include_context "List services after stage", dtk_common
 	end
 
@@ -78,7 +78,7 @@ describe "(Workspace) Test Case 10: Create two nodes, add components in both of 
 
 	context "Purge workspace content" do
 		include_context "Purge workspace content", dtk_common
-	end	
+	end
 
 	after(:all) do
 		puts "", ""

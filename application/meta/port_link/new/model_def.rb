@@ -22,9 +22,9 @@
       on_update: :cascade
     },
     # these two used when parent is service_add_on
-    required: {type: :boolean}, 
+    required: {type: :boolean},
     temporal_order: {type: :varchar,size: 20}, #output_first | #input_first
-    output_is_local: {type: :boolean} 
+    output_is_local: {type: :boolean}
   },
   virtual_columns: {
     ports: {

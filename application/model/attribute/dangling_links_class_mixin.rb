@@ -3,12 +3,12 @@ module DTK
     module DanglingLinksClassMixin
       # aug_attr_links is an array of attribute links (where a specfic one can appear multiple times
       # aug_attr_links has the dangling link info
-      # it is augmented with 
+      # it is augmented with
       # :input_attribute - attribute that is on input side of attribute link
       # :other_input_link - an atribute link that connects to :input_attribute attribute; can refer to same
       # link as self does
-      # 
-      def update_and_propagate_attributes_for_delete_links(attr_mh,aug_attr_links,propagate_opts={}) 
+      #
+      def update_and_propagate_attributes_for_delete_links(attr_mh,aug_attr_links,propagate_opts={})
         ret = []
         links_delete_info = links_delete_info(aug_attr_links)
         return ret if links_delete_info.empty?

@@ -1,5 +1,5 @@
 require 'mcollective'
-######## Monkey patches for version 1.3.2 
+######## Monkey patches for version 1.3.2
 module MCollective
   class Discovery
     class Mc

@@ -29,7 +29,7 @@ describe "(Staging And Deploying Assemblies) Test Case 7: Stage simple node grou
 		include_context "Stage", dtk_common
 	end
 
-	context "List services after stage" do		
+	context "List services after stage" do
 		include_context "List services after stage", dtk_common
 	end
 

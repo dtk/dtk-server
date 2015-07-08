@@ -35,7 +35,7 @@ module DTK; class Task
       sp_hash = {
         cols: [:id, :display_name, :content, :position],
         filter: [:and, [:eq, :display_name, action_label], [:oneof, :task_id, subtasks.map{|t|t.id()}]]
-      }      
+      }
 
       log_entries = Model.get_objs(task_log_mh,sp_hash)
       if log_entries.empty?

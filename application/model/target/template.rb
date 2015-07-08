@@ -22,15 +22,15 @@ module DTK
         end
 
         iaas_properties = IAASProperties.check(iaas_type,iaas_properties_hash)
-        
+
         target_mh = project_idh.createMH(:target)
         display_name = provider_display_name(provider_name)
         ref = display_name.downcase.gsub(/ /,"-")
         create_row = {
           iaas_type: iaas_type.to_s,
           project_id: project_idh.get_id(),
-          type: 'template', 
-          ref: ref, 
+          type: 'template',
+          ref: ref,
           display_name: display_name,
           description: params_hash[:description],
           iaas_properties: iaas_properties
@@ -55,7 +55,7 @@ module DTK
           unless assembly_instances.empty?
             assembly_names = assembly_instances.map{|a|a[:display_name]}.join(',')
             provider_name = provider.get_field?(:display_name)
-            raise ErrorUsage.new("Cannot delete provider '#{provider_name}' because service instance(s) (#{assembly_names}) are using one of its targets") 
+            raise ErrorUsage.new("Cannot delete provider '#{provider_name}' because service instance(s) (#{assembly_names}) are using one of its targets")
           end
         end
 
@@ -64,7 +64,7 @@ module DTK
           target_instances.each do |target_instance|
             target_delete_response = Instance.delete_and_destroy(target_instance)
             response.add_target_response(target_delete_response)
-          end 
+          end
           delete_instance(provider.id_handle())
         end
         response
@@ -73,12 +73,12 @@ module DTK
       def create_bootstrap_targets?(project_idh,region_or_regions=nil)
         # for succinctness
         r = region_or_regions
-        regions = 
+        regions =
           if r.is_a?(Array) then r
           elsif r.is_a?(String) then [r]
           else R8::Config[:ec2][:regions]
           end
-        
+
         common_iaas_properties = get_field?(:iaas_properties)
         # DTK-1735 DO NOT copy aws key and secret from provider to target
         common_iaas_properties.delete_if{|k,_v| [:key, :secret].include?(k)}
@@ -138,7 +138,7 @@ module DTK
       def self.object_type_filter
         [:eq,:type,'template']
       end
-      
+
       def self.provider_display_name(provider_name)
         # "#{provider_name}#{DisplayNameSufix}"
         provider_name

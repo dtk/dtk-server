@@ -2,7 +2,7 @@
   schema: :task,
   table: :task,
   columns: {
-    status: {type: :varchar, size: 20, default: "created"}, # = "created" | "executing" | "succeeded" | "failed" | "timed_out" | "preconditions_failed" | "canceled" 
+    status: {type: :varchar, size: 20, default: "created"}, # = "created" | "executing" | "succeeded" | "failed" | "timed_out" | "preconditions_failed" | "canceled"
     started_at: {type: :timestamp},
     ended_at: {type: :timestamp},
     result: {type: :json}, # gets serialized version of TaskAction::Result

@@ -24,7 +24,7 @@ module DTK
 
         # add assembly level attributes
         # TODO: stub
-      
+
         # add nodes and components
         ret[:nodes] = self[:node].inject(SimpleOrderedHash.new()) do |h,(_node_ref,node_hash)|
           node_name = node_hash[:display_name]

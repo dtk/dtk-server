@@ -2,7 +2,7 @@ module DTK; class Task
 class Action
   class InstallAgent < PhysicalNode
       def initialize(type,object,task_idh=nil,_assembly_idh=nil)
-        hash = 
+        hash =
           case type
            when :state_change
             {
@@ -81,7 +81,7 @@ class Action
       end
 
       def update_state_change_status(task_mh,status)
-        # no op if no associated state change 
+        # no op if no associated state change
         if self[:state_change_id]
           update_state_change_status_aux(task_mh,status,[self[:state_change_id]])
         end
@@ -117,7 +117,7 @@ class Action
       def self.node_status(object,_opts)
         node = object[:node]||{}
         ext_ref = node[:external_ref]||{}
-        kv_array = 
+        kv_array =
           [{name: node_status__name(node)},
            {id: node[:id]},
            {type: ext_ref[:type]},

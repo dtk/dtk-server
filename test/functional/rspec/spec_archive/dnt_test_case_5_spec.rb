@@ -31,7 +31,7 @@ describe "(Different Node Templates) Test Case 5: Stage node template, add rsync
 
   context "List nodes after stage" do
     include_context "List nodes after stage", dtk_common, staged_node_name
-  end   
+  end
 
   context "Add component to node function" do
     include_context "Add component to node", dtk_common, staged_node_name, component_name
@@ -48,7 +48,7 @@ describe "(Different Node Templates) Test Case 5: Stage node template, add rsync
   context "Check list-task-info output" do
     include_context "list-task-info function on node", dtk_common, staged_node_name, component_name
   end
-  
+
   context "Delete and destroy node function" do
     include_context "Destroy node", dtk_common, staged_node_name
   end

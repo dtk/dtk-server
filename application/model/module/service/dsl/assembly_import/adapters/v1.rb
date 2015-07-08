@@ -1,4 +1,4 @@
-# TODO: this version is deprecated 
+# TODO: this version is deprecated
 module DTK; class ServiceModule
   class AssemblyImport
     class V1 < self
@@ -13,7 +13,7 @@ module DTK; class ServiceModule
       def self.import_port_links(assembly_idh,assembly_ref,assembly_hash,ports)
         # augment ports with parsed display_name
         augment_with_parsed_port_names!(ports)
-        
+
         port_links = (assembly_hash["port_links"]||[]).inject(DBUpdateHash.new) do |h,pl|
           input = PortRef.parse(pl.values.first)
           output = PortRef.parse(pl.keys.first)
@@ -45,7 +45,7 @@ module DTK; class ServiceModule
           h.merge(merge_hash)
         end
       end
-      
+
       def self.internal_assembly_ref__without_version(serialized_assembly_ref)
         module_name,assembly_name = parse_serialized_assembly_ref(serialized_assembly_ref)
         Log.error("since this dsl version is depcated, was no problem removing  Assembly.internal_assembly_ref")

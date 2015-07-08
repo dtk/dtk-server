@@ -42,7 +42,7 @@ module DTK
 
         def self.create
           type = (R8::Config[:mcollective][:auth_type]||:default).to_sym
-          klass = 
+          klass =
             case type
             when :ssh then Ssh
             else Default
@@ -86,7 +86,7 @@ module DTK
           def install_script_erb
             USER_DATA_SH_ERB
           end
-          
+
           def install_script_bindings(_node,bindings)
             bindings
           end
@@ -142,7 +142,7 @@ eos
               mcollective_password: R8::Config[:mcollective][:password],
               mcollective_collective: R8::Config[:mcollective][:collective],
               mcollective_restart: mcollective_restart(node),
-              # TODO: will generalize so not just puppet                           
+              # TODO: will generalize so not just puppet
               puppet_version: puppet_version(node),
               pbuilderid: pbuilderid,
 	      logstash_enable: R8::Config[:logstash][:enable],

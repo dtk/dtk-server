@@ -40,7 +40,7 @@ module DTK
           test_components.uniq!
 
           test_components.select! { |tc| node_names.map{|n| n[:name]}.include? tc[:node_name] }
-          
+
           ndx_version_contexts = get_version_contexts(test_components).inject({}){|h,vc|h.merge(vc[:id]=>vc)}
           version_contexts = ndx_version_contexts.values
 
@@ -56,7 +56,7 @@ module DTK
               test_component: test_cmp[:display_name],
               test_name: test_name,
               params: attrib_array
-            } 
+            }
           end
 
           node_ids_with_tests = test_components.inject({}){|h,tc|h.merge(tc[:node_id] => true)}.keys
@@ -76,7 +76,7 @@ module DTK
               test_instances.each do |comp|
                 if comp[:component].include? node[:display_name]
                   components_array << comp
-                end                
+                end
               end
               node_hash[node[:id]] = {components: components_array, instance_id: node[:external_ref][:instance_id], version_context: version_contexts}
             end
@@ -102,7 +102,7 @@ module DTK
                   end
                 end
                 #just for a safe side to filter out empty response, it causes further an error on the client side
-                unless response[:data].empty? || response[:data].nil?   
+                unless response[:data].empty? || response[:data].nil?
                   packaged_data = DTK::ActionResultsQueue::Result.new(node_info[:display_name],raw_data)
                   push(node_info[:id], (type == :node) ? packaged_data.data : packaged_data)
                 end
@@ -117,13 +117,13 @@ module DTK
         private
 
         attr_reader :project,:assembly_instance, :nodes, :action_results_queue, :type, :filter
-        # returns array of augmented (test) components where augmented data 
+        # returns array of augmented (test) components where augmented data
         # {:attributes => ARRAY[attribute objs),
         #  :node_name => STRING #node associated with base component name
         #  :node_id => ID
         #  :component_name => STRING #base component name
         #  :component_id => ID
-        # there can be multiple entries for same test component for each base component instance 
+        # there can be multiple entries for same test component for each base component instance
         def get_test_components_with_bindings
           ret = []
           test_cmp_attrs = get_test_component_attributes()
@@ -134,7 +134,7 @@ module DTK
           # and augmented columns :node_name and component_name
           test_cmp_attrs.each do |r|
             if test_cmp = r[:test_component]
-              #substitute in values from test_cmp_attrs               
+              #substitute in values from test_cmp_attrs
               ret << dup_and_substitute_attribute_values(test_cmp,r)
             else
               Log.error("Dangling reference to test components (#{test_component_name})")
@@ -178,7 +178,7 @@ module DTK
             component = t.component
             component_id = component.id
             linked_test_array = t.find_relevant_linked_test_array()
-          
+
             linked_test_array.each do |linked_test|
               var_mappings_hash = linked_test.var_mappings_hash
               k, v = var_mappings_hash.first
@@ -206,11 +206,11 @@ module DTK
                   }
                 end
               end
-              hash = { 
+              hash = {
                 test_component: test_component,
-                attributes: attributes, 
+                attributes: attributes,
                 component_id: component_id,
-                component_name: component[:display_name], 
+                component_name: component[:display_name],
                 node_id: node[:id],
                 node_name: node[:display_name]
               }

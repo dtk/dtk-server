@@ -12,7 +12,7 @@ module DTK
     end
     LegalKeysInfo = {
       dsl_parse_error: true,
-      dsl_updated_info: [:commit_sha,:msg], 
+      dsl_updated_info: [:commit_sha,:msg],
       dsl_created_info: [:path,:content],
       external_dependencies: [:inconsistent,:possibly_missing,:ambiguous]
     }
@@ -41,7 +41,7 @@ module DTK
         replace(hash)
       end
     end
-    
+
     private
 
     def ret_relevant_keys(hash)

@@ -45,14 +45,14 @@ module DTK
             end
           end
           assembly_name ||= assembly_template.get_field?(:display_name) # heurstic
-          
+
           if opts[:version_suffix]
             if version = pretty_print_version(assembly_template)
               assembly_name << "-v#{version}"
             end
           end
           if opts[:include_namespace]
-            module_name = add_namespace_name(module_name,assembly_template) 
+            module_name = add_namespace_name(module_name,assembly_template)
           end
           [assembly_name,module_name]
         end
@@ -62,7 +62,7 @@ module DTK
           if namespace = assembly_template[:namespace]
             if namespace.is_a?(String)
               namespace_name = namespace
-            elsif namespace.is_a?(Hash) 
+            elsif namespace.is_a?(Hash)
               namespace_name = namespace[:display_name]
             else
               raise Error.new("assembly_template[:namespace] is unexpected type")

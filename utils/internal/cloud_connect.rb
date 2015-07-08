@@ -34,9 +34,9 @@ module DTK
     def hash_form(x)
       # this is supposed to fix [#<NoMethodError: undefined method `attributes' for #<Excon::Response:0x0000000529aec8>>,
       ret = nil
-      if x 
-        if x.respond_to?(:attributes) 
-          ret = x.attributes 
+      if x
+        if x.respond_to?(:attributes)
+          ret = x.attributes
         elsif x.respond_to?(:data)
           ret = x.data
         end
@@ -56,5 +56,5 @@ module DTK
       lock = LockRequest[self.class] ||= Mutex.new
       lock.synchronize{yield}
     end
-  end 
+  end
 end

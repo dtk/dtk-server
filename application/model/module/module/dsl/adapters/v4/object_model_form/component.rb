@@ -1,5 +1,5 @@
 module DTK; class ModuleDSL; class V4
-  class ObjectModelForm 
+  class ObjectModelForm
     class Component < OMFBase::Component
       private
 
@@ -38,7 +38,7 @@ module DTK; class ModuleDSL; class V4
 
         ret["action_def"] = {"create" => function} if function
 
-        ret["external_ref"] =  
+        ret["external_ref"] =
           if input_hash['external_ref'] then external_ref(input_hash['external_ref'],cmp) # this is for legacy
           elsif create_action then external_ref_from_create_action?(create_action, cmp, ret)
           elsif function then external_ref_from_function?(function, cmp)

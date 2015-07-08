@@ -32,7 +32,7 @@ module DTK; class ServiceModule
             db_updates_cmp = version_proc_class.import_assembly_top(ref,assem,@module_branch,@module_name,opts)
             @db_updates_assemblies["component"].merge!(db_updates_cmp)
 
-            # parse_node_bindings_hash! with opts below 
+            # parse_node_bindings_hash! with opts below
             # removes elements of node_bindings_hash that are not of form: {node => node_template}
             if db_updates_node_bindings = version_proc_class.parse_node_bindings_hash!(node_bindings_hash,remove_non_legacy: true)
               db_updates_cmp.values.first.merge!("node_bindings" => db_updates_node_bindings.mark_as_complete())
@@ -47,7 +47,7 @@ module DTK; class ServiceModule
                 return parse_errors
               end
             end
-            @db_updates_assemblies["node"].merge!(imported_nodes) 
+            @db_updates_assemblies["node"].merge!(imported_nodes)
             @ndx_assembly_hashes[ref] ||= assem
             @ndx_version_proc_classes[ref] ||= version_proc_class
           end
@@ -128,7 +128,7 @@ module DTK; class ServiceModule
           type,attributes = import_type_and_node_attributes(node_hash,opts)
           type = node_hash_ref.eql?('assembly_wide') ? 'assembly_wide' : type
           node_output = {
-            "display_name" => node_hash_ref, 
+            "display_name" => node_hash_ref,
             "type" => type,
             "attribute" => attributes,
             "*assembly_id" => "/component/#{assembly_ref}"
@@ -146,10 +146,10 @@ module DTK; class ServiceModule
           else
             node_output["node_binding_rs_id"] = nil
           end
- 
+
           cmps_output = import_component_refs(container_idh,assembly_hash["name"],node_hash["components"],component_module_refs,opts)
           return cmps_output if ParsingError.is_error?(cmps_output)
-          
+
             unless cmps_output.empty?
               node_output["component_ref"] = cmps_output
             end
@@ -200,7 +200,7 @@ module DTK; class ServiceModule
     end
     CachedAdapterClasses = {}
 
-    def self.parse_node_bindings_hash!(_node_bindings_hash,_opts={})      
+    def self.parse_node_bindings_hash!(_node_bindings_hash,_opts={})
       nil
     end
 
@@ -219,10 +219,10 @@ module DTK; class ServiceModule
           if cmp_ref[:version]
             cmp_ref[:has_override_version] = true
           end
-          if cmp_title = parse[:component_title] 
+          if cmp_title = parse[:component_title]
             cmps_with_titles << {cmp_ref: cmp_ref, cmp_title: cmp_title}
           end
-          
+
           import_component_attribute_info(cmp_ref,cmp_input)
 
          rescue ParsingError => e
@@ -314,7 +314,7 @@ module DTK; class ServiceModule
         end
       end
       return ret if filter_disjuncts.empty?
-      
+
       filter = (filter_disjuncts.size == 1 ? filter_disjuncts.first : ([:or] + filter_disjuncts))
       sp_hash = {
         cols: [:id,:display_name,:component_component_id],
@@ -327,20 +327,20 @@ module DTK; class ServiceModule
           match.merge!(attribute_template_id: r[:id])
         end
       end
-      
-      # now check attributes not matched; 
+
+      # now check attributes not matched;
       bad_attrs = []
       ndx_attrs.each_value do |r|
         r[:attrs].each_pair do |_ref,info|
           unless info[:attribute_template_id]
             bad_attrs << info.merge(component_display_name: r[:cmp_ref][:display_name])
-          end 
+          end
         end
       end
       unless bad_attrs.empty?
         # TODO: include namespace info
         bad_attrs_list = bad_attrs.map do |attr_info|
-          cmp_name = Component.display_name_print_form(attr_info[:component_display_name])          
+          cmp_name = Component.display_name_print_form(attr_info[:component_display_name])
           "#{cmp_name}/#{attr_info[:display_name]}"
         end
         attribute = (bad_attrs.size == 1 ? "attribute" : "attributes")

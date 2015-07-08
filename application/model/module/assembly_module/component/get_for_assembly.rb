@@ -4,7 +4,7 @@ module DTK; class AssemblyModule
       def get_for_assembly(opts={})
         add_module_branches = opts[:get_version_info]
         ret = (opts[:recursive] ? get_with_branches_recursive(opts) : get_with_branches(opts))
-        
+
         add_version_info!(ret) if add_module_branches
 
         # remove branches; they are no longer needed
@@ -26,7 +26,7 @@ module DTK; class AssemblyModule
           end
         end
         return ret if els_ndx_by_cmp_mod_ids.empty?
-        
+
         sp_hash = {
           cols: [:id,:display_name,:group_id,:namespace_id],
           filter: [:oneof,:id, els_ndx_by_cmp_mod_ids.keys]
@@ -35,7 +35,7 @@ module DTK; class AssemblyModule
         ret.each do |r|
           if el = els_ndx_by_cmp_mod_ids[r[:id]]
             to_add = {
-              namespace_name: el.namespace, 
+              namespace_name: el.namespace,
               dsl_parsed: (el.module_branch||{})[:dsl_parsed],
               module_branch: el.module_branch
             }
@@ -67,7 +67,7 @@ module DTK; class AssemblyModule
             local_copy_els << r
           end
         end
-        
+
         # for each item with local_copy, check for diff_from_base
         if local_copy_els.empty?
           return modules_with_branches
@@ -75,13 +75,13 @@ module DTK; class AssemblyModule
         # TODO: check if we are missing anything; maybe when there is just a meta change we dont update what component pointing to
         # but create a new branch, which we can check with ComponentModule.get_workspace_module_branches with idhs from all els in modules_with_branches
         # this is related to DTK-1214
-        
+
         # get the associated master branch and see if there is any diff
         mod_idhs = local_copy_els.map{|r|r.id_handle()}
         ndx_workspace_branches = ComponentModule.get_workspace_module_branches(mod_idhs).inject({}) do |h,r|
           h.merge(r[:module_id] => r)
         end
-        
+
         local_copy_els.each do |r|
           unless workspace_branch = ndx_workspace_branches[r[:id]]
             Log.error("Unexpected that ndx_workspace_branches[r[:id]] is null")

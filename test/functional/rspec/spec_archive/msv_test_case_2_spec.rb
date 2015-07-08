@@ -42,7 +42,7 @@ describe "(Modules, Services and Versioning) Test Case 2: Import component modul
 
 	context "Check if module imported on local filesystem" do
 		include_context "Check module imported on local filesystem", module_filesystem_location, module_name
-	end	
+	end
 
 	context "Create new version of module #{module_name}" do
 		include_context "Create new module version", dtk_common, module_name, module_version
@@ -56,7 +56,7 @@ describe "(Modules, Services and Versioning) Test Case 2: Import component modul
 		include_context "Stage", dtk_common
 	end
 
-	context "List assemblies after stage" do		
+	context "List assemblies after stage" do
 		include_context "List assemblies after stage", dtk_common
 	end
 

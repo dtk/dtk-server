@@ -85,7 +85,7 @@ module DTK
 
         private
 
-        def find_mapped_component_test_attributes(cmp_attr_vals)        
+        def find_mapped_component_test_attributes(cmp_attr_vals)
           @test_array.select {|test|test.find_mapped_component_test_attributes(cmp_attr_vals)}
         end
       end
@@ -159,7 +159,7 @@ module DTK
         ret = {}
         sp_hash = {
           cols: [:id,:group_id,:display_name,:attributes,:component_type,:external_ref,:module_branch_id],
-          filter: [:and, 
+          filter: [:and,
                    [:eq,:assembly_id,nil],
                    [:eq,:project_project_id,project.id],
                    [:oneof,:component_type,possible_test_cmp_types]]

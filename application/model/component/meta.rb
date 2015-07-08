@@ -6,12 +6,12 @@ module DTK
       external_ref_column_defs()
       virtual_column :name, type: :varchar, local_dependencies: [:display_name]
       virtual_column :config_agent_type, type: :string, local_dependencies: [:external_ref]
-      
+
       # columns related to name/labels
       # specfic labels of components and its attributes
       column :keys, :json #only used if only_one_per_node is false; array of keys for displaying component name
       column :i18n_labels, :json, ret_keys_as_symbols: false
-      
+
       # columns related to version
       # TODO: think we want to deprecate these; versioning is at module level
       column :version, :varchar, size: 100 #non-normalized: comes from module_branch
@@ -21,15 +21,15 @@ module DTK
       column :type, :varchar, size: 15, default: "template" # instance | composite | template
       # top level in component type hiererarchy
       column :basic_type, :varchar, size: 25 #service, application, language, application, extension, database, user
-      # leaf type in component type 
-      column :specific_type, :varchar, size: 30 
+      # leaf type in component type
+      column :specific_type, :varchar, size: 30
       column :component_type, :varchar, size: 50 #this is the exact component type; two instances taht share this can differ by things like defaults
 
       column :locked_sha, :varchar, size: 50
 
       # if set to true only one instance of a component (using component_type to determine 'same') can be on a node
       column :only_one_per_node, :boolean, default: true
-      # refernce used when multiple isnatnces of same component type 
+      # refernce used when multiple isnatnces of same component type
       # TODO: make sure that this is preserved under clone; case to watch out fro is when cloning for example more dbs in something with dbs
       virtual_column :multiple_instance_ref, type: :integer ,local_dependencies: [:ref_num]
       foreign_key :ng_component_id, :component, FK_SET_NULL_OPT #set when created by cloning from component node group
@@ -69,7 +69,7 @@ module DTK
       virtual_column :library_id, type: ID_TYPES[:id], local_dependencies: [:library_library_id]
       virtual_column :parent_name, possible_parents: [:component,:library,:node,:project]
 
-      virtual_column :view_def_key, type: :varchar, hidden: true, local_dependencies: [:id,:view_def_ref,:component_type] 
+      virtual_column :view_def_key, type: :varchar, hidden: true, local_dependencies: [:id,:view_def_ref,:component_type]
 
     virtual_column :namespace_info, type: :json, hidden: true,
         remote_dependencies:         [
@@ -99,16 +99,16 @@ module DTK
           join_cond: {component_component_id: q(:component,:id)} #TODO: want to use p(:component,:attribute) on left hand side
         }
 
-        virtual_column :attributes, type: :json, hidden: true, 
+        virtual_column :attributes, type: :json, hidden: true,
         remote_dependencies:         [attributes_def.merge(
            cols: [:id,:display_name,:hidden,:description,id(:component),:attribute_value,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change]
         )]
-        virtual_column :attribute_values, type: :json, hidden: true, 
+        virtual_column :attribute_values, type: :json, hidden: true,
         remote_dependencies:         [attributes_def.merge(
            cols: [:id,:group_id,:display_name,:attribute_value]
         )]
 
-        virtual_column :attributes_view_def_info, type: :json, hidden: true, 
+        virtual_column :attributes_view_def_info, type: :json, hidden: true,
         remote_dependencies:         [attributes_def.merge(
            filter: [:eq, :hidden, false],
            cols: [:id,:display_name,:view_def_key,id(:component),:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change]
@@ -243,7 +243,7 @@ module DTK
            cols: [:id,:group_id,:display_name,:dsl_parsed]
          }
         ]
-        virtual_column :instance_component_template_parent, type: :json, hidden: true, 
+        virtual_column :instance_component_template_parent, type: :json, hidden: true,
         remote_dependencies:         [
          {
            model_name: :component,
@@ -254,19 +254,19 @@ module DTK
            cols: [:id,:group_id,:display_name,:component_type,:implementation_id]
          }]
 
-        virtual_column :dependencies, type: :json, hidden: true, 
+        virtual_column :dependencies, type: :json, hidden: true,
         remote_dependencies:         [
          {
            model_name: :dependency,
            alias: :dependencies,
            convert: true,
            join_type: :left_outer,
-           join_cond: {component_component_id: q(:component,:id)}, 
+           join_cond: {component_component_id: q(:component,:id)},
            cols: [:id,:display_name,:group_id,:ref,:search_pattern,:type,:description,:severity,:ancestor_id]
          }
         ]
         # above is direct dependencies; below is inherited ones
-        virtual_column :inherited_dependencies, type: :json, hidden: true, 
+        virtual_column :inherited_dependencies, type: :json, hidden: true,
         remote_dependencies:         [
          {
            model_name: :component,
@@ -280,23 +280,23 @@ module DTK
            alias: :dependencies,
            convert: true,
            join_type: :left_outer,
-           join_cond: {component_component_id: q(:parent_component,:id)}, 
+           join_cond: {component_component_id: q(:parent_component,:id)},
            cols: [:id,:search_pattern,:type,:description,:severity]
          }
         ]
 
-        virtual_column :component_order_objs, type: :json, hidden: true, 
+        virtual_column :component_order_objs, type: :json, hidden: true,
         remote_dependencies:         [
          {
            model_name: :component_order,
            convert: true,
            join_type: :inner,
-           join_cond: {component_component_id: q(:component,:id)}, 
+           join_cond: {component_component_id: q(:component,:id)},
            cols: [:id,:after,:conditional,:component_component_id]
          }
         ]
         # above is direct dependencies; below is inheited ones
-        virtual_column :inherited_component_order_objs, type: :json, hidden: true, 
+        virtual_column :inherited_component_order_objs, type: :json, hidden: true,
         remote_dependencies:         [
          {
            model_name: :component,
@@ -309,7 +309,7 @@ module DTK
            model_name: :component_order,
            convert: true,
            join_type: :inner,
-           join_cond: {component_component_id: q(:parent_component,:id)}, 
+           join_cond: {component_component_id: q(:parent_component,:id)},
            cols: [:id,:after,:conditional,:component_component_id]
          }
         ]
@@ -416,7 +416,7 @@ module DTK
                                         }
           ]
 
-        
+
         virtual_column :layouts, type: :json, hidden: true,
         remote_dependencies:           [{
              model_name: :layout,

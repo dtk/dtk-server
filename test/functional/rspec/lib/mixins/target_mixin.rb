@@ -5,7 +5,7 @@ module TargetMixin
 		list_providers = send_request('/rest/target/list', subtype: :template)
 		if (list_providers['data'].find { |x| x['display_name'].include? provider_name})
 			puts "Provider #{provider_name} exists! Create target for provider..."
-			provider_id = list_providers['data'].find { |x| x['display_name'].include? provider_name}['id']	
+			provider_id = list_providers['data'].find { |x| x['display_name'].include? provider_name}['id']
 			create_target_response = send_request('/rest/target/create', target_name: provider_name, target_template_id: provider_id, region: region)
 			target_created = create_target_response['data']['success']
 			puts "Target #{provider_name}-#{region} created successfully!"
@@ -23,7 +23,7 @@ module TargetMixin
 
 		if (list_providers['data'].find { |x| x['display_name'].include? provider_name})
 			puts "Provider #{provider_name} exists! Get provider's targets..."
-			provider_id = list_providers['data'].find { |x| x['display_name'].include? provider_name}['id']	
+			provider_id = list_providers['data'].find { |x| x['display_name'].include? provider_name}['id']
 			list_targets = send_request('/rest/target/list', subtype: :instance, parent_id: provider_id)
 
 			if (list_targets['data'].find { |x| x['display_name'].include? target_name})
@@ -58,7 +58,7 @@ module TargetMixin
 		puts "Check if assembly exists in target:", "-----------------------------------"
 		assembly_exists = false
 		assembly_list = send_request('/rest/target/info_about', target_id: target_name, about: "assemblies")
-		
+
 		if (assembly_list['data'].find { |x| x['display_name'].include? assembly_name})
 			puts "Assembly #{assembly_name} exists in target #{target_name}!"
 			assembly_exists = true
@@ -73,7 +73,7 @@ module TargetMixin
 		puts "Check if node exists in target:", "-------------------------------"
 		node_exists = false
 		node_list = send_request('/rest/target/info_about', target_id: target_name, about: "nodes")
-		
+
 		if (node_list['data'].find { |x| x['display_name'].include? node_name})
 			puts "Node #{node_name} exists in target #{target_name}!"
 			node_exists = true
@@ -82,7 +82,7 @@ module TargetMixin
 		end
 		puts ""
 		return node_exists
-	end	
+	end
 
 	def stage_service_in_specific_target(target_name)
 		#Get list of assemblies, extract selected assembly, stage service to defined target and return its service id
@@ -90,7 +90,7 @@ module TargetMixin
 		service_id = nil
 		extract_id_regex = /id: (\d+)/
 		assembly_list = send_request('/rest/assembly/list', subtype: 'template')
- 
+
 		puts "List of avaliable assemblies: "
 		pretty_print_JSON(assembly_list)
 

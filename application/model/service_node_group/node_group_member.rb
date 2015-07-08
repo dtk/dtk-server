@@ -25,7 +25,7 @@ module DTK
           raise Error.new("Unexpected that rows.size (#{nodes.size}) does not equal 1")
         end
         ret = nodes.first
-        unless ret.is_node_group?() 
+        unless ret.is_node_group?()
           raise Error.new("Unexpected that node (#{ret.inspect}) connected to node group member (#{get_field?(:display_name)}) is not a node group")
         end
         @service_node_group = ServiceNodeGroup.create_as(ret)
@@ -34,13 +34,13 @@ module DTK
   end
 end
 
-# TODO: dtermine whether to handle ng component to ng member using links or by having processing 
+# TODO: dtermine whether to handle ng component to ng member using links or by having processing
 # change to node group component specially, which is implemented now
 # This would replace no op above
 #      def clone_post_copy_hook(clone_copy_output,opts={})
 # add attribute links between source components and the ones generated
 #        level = 1
-#        cols_to_get = [:id,:group_id,:display_name,:ancestor_id] 
+#        cols_to_get = [:id,:group_id,:display_name,:ancestor_id]
 #        cloned_attributes = clone_copy_output.children_objects(level,:attribute, :cols => cols_to_get)
 #        link_node_group_attributes_to_clone_ones(cloned_attributes)
 #      end

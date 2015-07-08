@@ -5,7 +5,7 @@
 class Fieldbase
   attr_accessor :name,:id,:model_name,:value,:disabled,:classes,:field_meta,:render_mode
 
-  def initialize(field_meta) 
+  def initialize(field_meta)
     @field_meta = field_meta
 
     @id = (@field_meta[:id].nil? == true ? '' : @field_meta[:id].to_s)
@@ -14,10 +14,10 @@ class Fieldbase
 
     @value = ''
     @disabled = (@field_meta[:read_only] || false)
-  
+
     @classes = []           #array of CSS classes to add by default
     @class_txt = ''         #the string for the class="class_names" text
-  
+
     @render_mode = 'rtpl'   #rtpl will render erubis style output, also 'html' available for raw html
     @r8_view_ref = nil       # pointer to calling view; used to pass back css includes
   end
@@ -25,7 +25,7 @@ class Fieldbase
   def set_includes(r8_view_ref)
     @r8_view_ref = r8_view_ref
   end
-  
+
   #  The view mode represents how to render the field for a given user interaction
   #     -rtpl:   return field rendered in RTPL/Erubis format
   #     -js:  return field rendered in Javascript format

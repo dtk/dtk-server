@@ -3,7 +3,7 @@ module DTK
     def self.print_form_with_title(component_name,title)
       "#{component_name}[#{title}]"
     end
-    
+
     # this is for field display_name
     def self.display_name_with_title(component_type,title)
       "#{component_type}[#{title}]"
@@ -55,7 +55,7 @@ module DTK
       end
     end
 
-    
+
     LegalComponentType = /^[^\/]+$/ #TODO: make more restricting
     SplitNodeComponentType = /(^[^\/]+)\/([^\/]+$)/
 

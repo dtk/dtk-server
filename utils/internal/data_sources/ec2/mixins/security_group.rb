@@ -6,7 +6,7 @@ module XYZ
       end
 
       def get_network_partition_ref(server)
-        return nil unless server[:groups] and not server[:groups].empty? 
+        return nil unless server[:groups] and not server[:groups].empty?
         server[:groups].sort.join("__")
       end
 

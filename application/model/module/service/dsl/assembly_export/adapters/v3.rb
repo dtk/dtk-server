@@ -10,7 +10,7 @@ module DTK
           ret = component_in_ret
           component_links = ret.values.first[:component_links] ||= {}
         else # it will be a string
-          component_links = {}  
+          component_links = {}
           ret = {component_in_ret => {component_links: component_links}}
         end
         output_target = component_link_output_target(out_parsed_port)
@@ -25,7 +25,7 @@ module DTK
         else
           component_links.merge!(link_def_ref => output_target)
         end
-        ret 
+        ret
       end
 
       def component_link_output_target(parsed_port)
@@ -35,7 +35,7 @@ module DTK
         end
         ret
       end
-      
+
     end
   end; end
 end

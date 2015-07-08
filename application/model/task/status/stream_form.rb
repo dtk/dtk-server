@@ -4,14 +4,26 @@ module DTK; class Task
       r8_nested_require('stream_form','element')
       def self.status(top_level_task,opts={})
         ret = Array.new
-        start_index = opts[:start_index]
-        end_index   = opts[:end_index]
-        if start_index == '0' and end_index == '0'
-          ret << Element::TaskStart.new(top_level_task).hash_form()
+        start_index = integer(opts[:start_index],:start_index)
+        end_index   = integer(opts[:end_index],:end_index)
+        
+        if start_index == 0 and end_index == 0
+          ret << Element.get_task_start_element(top_level_task).hash_form()
+        elsif start_index <= end_index
+          ret += Element.get_stage_elements(top_level_task,start_index,end_index).map{|r|r.hash_form()}
         else
-          raise Error.new("not treated")
+          raise ErrorUsage.new("start_index (#{start_index} must be less than or equal to end_index (#{end_index})")
         end
         ret
+      end
+     private
+      def self.integer(index,type)
+        integer?(index) || raise(ErrorUsage.new("#{type} should be an integer; its value is: #{index}"))
+      end
+      def self.integer?(index)
+        if index =~ /^[0-9]+$/
+          index.to_i
+        end
       end
     end
   end

@@ -1,5 +1,6 @@
 module DTK
   class Task < Model
+    r8_nested_require('task','get')
     r8_nested_require('task','create')
     r8_nested_require('task','status')
     r8_nested_require('task','action')
@@ -8,7 +9,8 @@ module DTK
     r8_nested_require('task','node_group_processing')
     r8_nested_require('task','action_results')
     r8_nested_require('task','qualified_index')
-
+    include GetMixin
+    extend GetClassMixin
     extend CreateClassMixin
     include StatusMixin
     include NodeGroupProcessingMixin
@@ -70,69 +72,6 @@ module DTK
       if assembly_id = get_field?(:assembly_id)
         id_handle(model_name: :assembly,id: assembly_id).create_object()
       end
-    end
-
-    def get_errors
-      sp_hash = {
-        cols: [:content]
-      }
-      get_children_objs(:task_error,sp_hash).map{|r|r[:content]}
-    end
-
-    # indexed by task ids
-    def get_ndx_errors
-      self.class.get_ndx_errors(hier_task_idhs())
-    end
-    def self.get_ndx_errors(task_idhs)
-      ret = []
-      return ret if task_idhs.empty?
-      sp_hash = {
-        cols: [:task_id,:content],
-        filter: [:oneof,:task_id,task_idhs.map{|idh|idh.get_id()}]
-      }
-      task_error_mh = task_idhs.first.createMH(:task_error)
-      ret = {}
-      Model.get_objs(task_error_mh,sp_hash).each do |r|
-        task_id = r[:task_id]
-        ret[task_id] = (ret[task_id]||[]) + [r[:content]]
-      end
-      ret
-    end
-
-    def get_logs
-      ret_logs = {}
-      sp_hash = {cols: [:task_id, :display_name, :content, :parent_task]}
-      ret = get_children_objs(:task_log, sp_hash).sort{|a,b| a[:created_at] <=> b[:created_at]}
-
-      ret.each do |r|
-        task_id = r[:task_id]
-        content = r[:content] || {}
-        content.merge!(label: r[:display_name], task_name: r[:task][:display_name])
-        ret_logs[task_id] = (ret_logs[task_id]||[]) + [content]
-      end
-
-      ret_logs
-    end
-
-    def get_ndx_logs
-      self.class.get_ndx_logs(hier_task_idhs())
-    end
-    def self.get_ndx_logs(task_idhs)
-      ret = []
-      return ret if task_idhs.empty?
-      sp_hash = {
-        cols: [:task_id, :content, :display_name, :parent_task],
-        filter: [:oneof, :task_id, task_idhs.map{|idh|idh.get_id()}]
-      }
-      task_log_mh = task_idhs.first.createMH(:task_log)
-      ret = {}
-      Model.get_objs(task_log_mh, sp_hash).each do |r|
-        task_id = r[:task_id]
-        content = r[:content]
-        content.merge!(label: r[:display_name], task_name: r[:task][:display_name])
-        ret[task_id] = (ret[task_id]||[]) + [content]
-      end
-      ret
     end
 
     def add_event(event_type,result=nil)
@@ -272,6 +211,7 @@ module DTK
       executable_action().add_internal_guards!(guards)
     end
 
+<<<<<<< HEAD
     def self.get_top_level_most_recent_task(model_handle,filter=nil)
       # TODO: can be more efficient if do sql query with order and limit 1
       tasks = get_top_level_tasks(model_handle,filter).sort{|a,b| b[:updated_at] <=> a[:updated_at]}

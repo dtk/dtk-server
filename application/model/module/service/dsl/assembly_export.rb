@@ -1,6 +1,8 @@
 module DTK
   class ServiceModule
     class AssemblyExport < Hash
+      r8_nested_require('assembly_export','components_hash')
+
       attr_reader :factory
       def self.create(factory,container_idh,service_module_branch,integer_version=nil)
         integer_version ||= DSLVersionInfo.default_integer_version()
@@ -24,8 +26,32 @@ module DTK
       def serialize_and_save_to_repo?()
         path = assembly_meta_filename_path()
         ordered_hash_serialized_content = serialize()
-        @service_module_branch.serialize_and_save_to_repo?(path,ordered_hash_serialized_content)
+require 'debugger'
+Debugger.wait_connection = true
+Debugger.start_remote
+debugger
+        hash_assembly = ordered_hash_serialized_content[:assembly]
+        if hash_nodes = hash_assembly && hash_assembly[:nodes]
+          validate_components_order(path, hash_nodes)
+        end
+
+        # old_assembly_yaml = @service_module_branch.get_file_content(path, ordered_hash_serialized_content)
+        @service_module_branch.serialize_and_save_to_repo?(path, ordered_hash_serialized_content)
         path
+      end
+
+      def validate_components_order(path, hash_nodes)
+        raw_content    = @service_module_branch.get_raw_file_content(path)
+        parsed_content = YAML.load(raw_content)
+        assembly       = parsed_content['assembly']
+        ordered_hash   = {}
+
+        if nodes = assembly && assembly['nodes']
+          cmp_hash = ComponentsHash.new(nodes)
+          ordered_hash = cmp_hash.order_components_hash(hash_nodes)
+        end
+
+        ordered_hash
       end
 
      private

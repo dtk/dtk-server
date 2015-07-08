@@ -270,6 +270,54 @@ end
       end
     end
 
+    def get_raw_file_content(path)
+      RepoManager.get_file_content({:path => path}, self, { :no_error_if_not_found => true })
+    end
+
+    def get_file_content(path, hash_content)
+      require 'debugger'
+      Debugger.wait_connection = true
+      Debugger.start_remote
+      debugger
+      content = RepoManager.get_file_content({:path => path}, self, { :no_error_if_not_found => true })
+      yaml_content = YAML.load(content)
+      yaml_nodes = yaml_content['assembly']['nodes']
+
+      hash_content.each do |k, v|
+        if nodes = v.is_a?(Hash) && v[:nodes]
+          nodes.each do |k, v|
+            if components = v[:components]
+              components = parse_components(components, yaml_nodes[k])
+            end
+          end
+        end
+      end
+      ap "AAAAAAAAAAAAAAAAAAAAAAAAAAA"
+      ap hash_content
+    end
+
+    def parse_components(components, yaml_content)
+      require 'debugger'
+      Debugger.wait_connection = true
+      Debugger.start_remote
+      debugger
+      new_cmps = []
+
+      yaml_content['components'].each do |content|
+        test = nil
+        if content.is_a?(Hash)
+          test = components.find{ |a| a.is_a?(Hash) ? (a.keys.first == content.keys.first) : (a == content.keys.first) }
+        end
+
+        new_cmps << components.delete(test||content)
+      end
+      ap "::::::::::::::::::::::::: COMPONENTS :::::::::::::::::"
+      ap components
+      ap "------------------------- NEW CMPS -------------------"
+      ap new_cmps
+      new_cmps
+    end
+
     def dsl_format_type_form_path(path)
       extension = (path =~ /\.([^\.]+$)/; $1)
       unless ret = FormatTypeFromExtension[extension]

@@ -202,7 +202,9 @@ module DTK
       end
     #######
 
-    protected
+      def set_global_db_rel_info
+        DB_REL_DEF[@relation_type] = @db_rel
+      end
 
       def ret_concrete_models(filter=nil)
         # ret = models.reject {|m|m.top? or not m.superclass == Model}
@@ -249,10 +251,6 @@ module DTK
           when :down
           # TODO: not implemented yet
         end
-      end
-
-      def set_global_db_rel_info
-        DB_REL_DEF[@relation_type] = @db_rel
       end
 
       def set_db(db)

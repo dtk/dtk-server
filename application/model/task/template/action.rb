@@ -40,7 +40,7 @@ module DTK; class Task; class Template
       # here we set bash create action to be executed instead of puppet_apply
       method_name ||= set_bash_create_action(action_list, component_name_ref)
 
-      unless action = action_list.find_matching_action(node_name,:component_name_ref => component_name_ref)
+      unless action = action_list.find_matching_action(node_name,component_name_ref: component_name_ref)
         if opts[:skip_if_not_found]
           return ret
         else

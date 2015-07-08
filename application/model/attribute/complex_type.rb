@@ -76,9 +76,7 @@ module XYZ
         change_path << next_index
         ret[index] ||= ArrayObject.new
         # make sure that  ret[index] has enough rows
-        while ret[index].size <= next_index
-          ret[index] << nil
-        end
+        ret[index] << nil while ret[index].size <= next_index
       elsif path =~ KeyWithRestRegexp
         next_index, rest_path = [$1,$2]
         change_path << next_index

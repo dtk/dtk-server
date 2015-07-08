@@ -343,9 +343,7 @@ module DTK; class ModuleDSL
           key = key_x
           num = 1
           existing_keys = existing_hash_keys()
-          while existing_hash_keys().include?(key)
-            key = "#{key_x}#{(num+=1)}"
-          end
+          key = "#{key_x}#{(num+=1)}" while existing_hash_keys().include?(key)
           super(key)
         end
 

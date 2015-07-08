@@ -67,7 +67,15 @@ module DTK; class Task
         ret = []
         dyn_attrs = (result[:data]||{})[:dynamic_attributes]
         return ret if dyn_attrs.nil? || dyn_attrs.empty?
-        dyn_attrs.map{|a|{id: a[:attribute_id], attribute_value: a[:attribute_val]}}
+        dyn_attrs.map{|a|{id: a[:attribute_id], attribute_value: sanitize_attribute_val(a[:attribute_val])}}
+      end
+
+      def sanitize_attribute_val(val)
+        if val.kind_of?(Symbol)
+          val.to_s
+        else
+          val
+        end
       end
 
       def self.add_attributes!(attr_mh,action_list)

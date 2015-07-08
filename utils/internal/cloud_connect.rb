@@ -9,8 +9,8 @@ end
 ### end of monkey patch
 
 # Fog loads Excon
-# bumped up time out from 60 to 180
-Excon.defaults[:read_timeout] = 600
+# bumped up time out from 60 to 120
+Excon.defaults[:read_timeout] = 120
 
 module DTK
   class CloudConnect

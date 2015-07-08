@@ -94,7 +94,7 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
       resource_defaults: ::Puppet::Parser::AST::ResourceDefaults,
       ast_array: ::Puppet::Parser::AST::ASTArray,
       ast_hash: ::Puppet::Parser::AST::ASTHash,
-      resource_override: ::Puppet::Parser::AST::ResourceOverride,
+      resource_override: ::Puppet::Parser::AST::ResourceOverride
     }
     AstTerm = [:string,:name,:variable,:concat,:function,:boolean,:undef,:ast_array,:ast_hash]
 
@@ -897,7 +897,7 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
       end
 
       def structured_form
-        ["fn","concat"] + self[:terms].map{|t|t.structured_form()}
+        ["fn","concat"] + self[:terms].map(&:structured_form)
       end
 
       def can_match?(ast_term)
@@ -931,7 +931,7 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
       end
 
        def structured_form
-         ["fn",self[:name]] + self[:terms].map{|t|t.structured_form()}
+         ["fn",self[:name]] + self[:terms].map(&:structured_form)
       end
 
       def template?

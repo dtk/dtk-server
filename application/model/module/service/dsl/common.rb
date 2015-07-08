@@ -8,7 +8,7 @@ module DTK
       node_component: "/",
       component_link_def_ref: "/",
       title_before: '[',
-      title_after: ']',
+      title_after: ']'
     }
     ModCompInternalSep = "__" #TODO: if this changes need to chage ModCompGsub[:sub]
     ModCompGsub = {

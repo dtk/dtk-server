@@ -281,5 +281,3 @@ module DTK; class ConfigAgent; module Adapter
     end
   end
 end; end; end
-
-

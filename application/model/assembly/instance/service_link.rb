@@ -72,7 +72,7 @@ module DTK
         return ret if port_link_idhs.empty?
         sp_hash = {
           cols: [:id,:group_id,:port_link_id,:input_id,:output_id,:dangling_link_info],
-          filter: [:oneof,:port_link_id,port_link_idhs.map{|idh|idh.get_id}]
+          filter: [:oneof,:port_link_id,port_link_idhs.map(&:get_id)]
         }
         attribute_link_mh = port_link_idhs.first.createMH(:attribute_link)
         Model.get_objs(attribute_link_mh,sp_hash)

@@ -49,7 +49,7 @@ module XYZ
         if external_ref["ref"] =~ %r{^search\[(.+)\]\[(.+)\]$}
           object_type = $1.to_sym
           search_pattern = $2
-          return Search.get_list(object_type,search_pattern).map{|n|n.name}
+          return Search.get_list(object_type,search_pattern).map(&:name)
         end
         raise Error.new("search_pattern (#{external_ref["ref"]}) has incorrect syntax")
       end

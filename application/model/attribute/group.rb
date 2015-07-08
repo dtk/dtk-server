@@ -67,7 +67,7 @@ module XYZ
     required: AttrValTypeRequired,
     not_required: AttrValTypeNotRequired,
     dynamic: AttrValTypeDynamic,
-    linked: AttrValTypeLinked,
+    linked: AttrValTypeLinked
   }
 
   module AttributeGroupInstanceMixin

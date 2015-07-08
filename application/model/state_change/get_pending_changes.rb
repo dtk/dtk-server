@@ -22,7 +22,7 @@ module DTK; class StateChange
       state_change_mh = target_mh.create_childMH(:state_change)
       while not last_level.empty?
         ret += last_level
-        last_level = pending_changes_one_level_raw(state_change_mh,last_level.map{|obj|obj.id_handle()},opts)
+        last_level = pending_changes_one_level_raw(state_change_mh,last_level.map(&:id_handle),opts)
       end
       remove_dups_and_proc_related_components(ret)
     end
@@ -38,7 +38,7 @@ module DTK; class StateChange
       filter =
         [
          :and,
-         [:oneof, parent_field_name,idh_list.map{|idh|idh.get_id()}],
+         [:oneof, parent_field_name,idh_list.map(&:get_id)],
          [:eq, :type, "create_node"],
          [:eq, :status, "pending"]]
       filter += opts[:added_filters] if opts[:added_filters]
@@ -60,7 +60,7 @@ module DTK; class StateChange
       # no changes under it
       node_group_scs = pending_scs.select{|sc|sc[:node].is_node_group?()}
       return pending_scs if node_group_scs.empty?
-      sc_ids_to_remove = find_any_without_pending_children?(node_group_scs.map{|sc|sc.id_handle()})
+      sc_ids_to_remove = find_any_without_pending_children?(node_group_scs.map(&:id_handle))
       #remove any sc in pending_scs that is in ndx_ng_sc_idhs but not in ndx_to_keep
       return pending_scs if sc_ids_to_remove.empty? #shortcut
      pending_scs.reject{|sc|sc_ids_to_remove.include?(sc.id)}
@@ -90,7 +90,7 @@ module DTK; class StateChange
       parent_field_name = DB.parent_field(parent_mh[:model_name],:state_change)
       sp_hash = {
         filter: [:and,
-                 [:oneof, parent_field_name,idh_list.map{|idh|idh.get_id()}],
+                 [:oneof, parent_field_name,idh_list.map(&:get_id)],
                  [:oneof, :type, ["install_component", "update_implementation","converge_component"]],
                  [:eq, :status, "pending"]],
         columns: [:id, :relative_order,:type,:changed_component,parent_field_name,:state_change_id].uniq
@@ -104,7 +104,7 @@ module DTK; class StateChange
       parent_field_name = DB.parent_field(parent_mh[:model_name],:state_change)
       sp_hash = {
         filter: [:and,
-                 [:oneof, parent_field_name,idh_list.map{|idh|idh.get_id()}],
+                 [:oneof, parent_field_name,idh_list.map(&:get_id)],
                  [:eq, :type, "setting"],
                  [:eq, :status, "pending"]],
         columns: [:id, :relative_order,:type,:changed_attribute,parent_field_name,:state_change_id].uniq
@@ -171,4 +171,3 @@ module DTK; class StateChange
     end
   end
 end; end
-

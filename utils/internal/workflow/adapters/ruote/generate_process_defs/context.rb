@@ -103,4 +103,3 @@ module DTK; module WorkflowAdapter; module RuoteGenerateProcessDefs
     end
   end
 end; end; end
-

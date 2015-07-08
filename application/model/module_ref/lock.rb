@@ -37,7 +37,7 @@ module DTK
       end
 
       def self.get(assembly_instance)
-        Persist.get(assembly_instance).map{|r|r.reify()}
+        Persist.get(assembly_instance).map(&:reify)
       end
 
       def reify

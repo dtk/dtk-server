@@ -32,7 +32,7 @@ module DTK; class  Assembly
           r[:task][:status] != 'executing'
         end
       end
-      task_idhs = get_tasks(opts_get_tasks).map{|r|r.id_handle()}
+      task_idhs = get_tasks(opts_get_tasks).map(&:id_handle)
       Model.delete_instances(task_idhs) unless task_idhs.empty?
       task_idhs
     end
@@ -109,7 +109,7 @@ module DTK; class  Assembly
 
       override_attrs = {
         display_name: node_name,
-        assembly_id: id(),
+        assembly_id: id()
       }
       override_attrs.merge!(type: 'assembly_wide') if opts[:assembly_wide]
       clone_opts = node_template.source_clone_info_opts()
@@ -247,7 +247,7 @@ module DTK; class  Assembly
     def create_or_update_template(service_module,template_name)
       service_module_name = service_module.get_field?(:display_name)
       project = service_module.get_project()
-      node_idhs = get_nodes().map{|r|r.id_handle()}
+      node_idhs = get_nodes().map(&:id_handle)
       if node_idhs.empty?
         raise ErrorUsage.new("Cannot find any nodes associated with assembly (#{get_field?(:display_name)})")
       end
@@ -319,4 +319,3 @@ end
 # TODO: hack to get around error in lib/model.rb:31:in `const_get
 AssemblyInstance = Assembly::Instance
 end
-

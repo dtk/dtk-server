@@ -62,7 +62,7 @@ module XYZ
         hash = {
           event: "initiating_create_node",
           node_name: node[:display_name],
-          node_type: ext_ref_type.to_s,
+          node_type: ext_ref_type.to_s
         }
         # TODO: should encapsulate this in call to iaas sdapter
         case ext_ref_type

@@ -13,7 +13,7 @@ module DTK; class ErrorUsage
         if size == 1
           msg << "type (#{first.print_form()})"
         else
-          msg << "a type from (#{map{|el|el.print_form()}.join(',')})"
+          msg << "a type from (#{map(&:print_form).join(',')})"
         end
         msg
       end

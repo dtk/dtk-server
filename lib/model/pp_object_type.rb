@@ -43,7 +43,7 @@ module DTK
       end
 
       def cap
-        split(' ').map{|word|word.capitalize}.join(' ')
+        split(' ').map(&:capitalize).join(' ')
       end
 
       private

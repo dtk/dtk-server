@@ -174,7 +174,7 @@ end
 
 shared_context "Check if port avaliable" do |dtk_common, port|
   it "is avaliable" do
-  	workspace_id = dtk_common.get_workspace_id
+    workspace_id = dtk_common.get_workspace_id
     netstat_response = dtk_common.netstats_check(workspace_id, port)
     netstat_response.should eq(true)
   end
@@ -182,7 +182,7 @@ end
 
 shared_context "Check if port avaliable on specific node" do |dtk_common, node_name, port|
   it "is avaliable on #{node_name} node" do
-  	workspace_id = dtk_common.get_workspace_id
+    workspace_id = dtk_common.get_workspace_id
     netstat_response = dtk_common.netstats_check_for_specific_node(workspace_id, node_name, port)
     netstat_response.should eq(true)
   end
@@ -190,7 +190,7 @@ end
 
 shared_context "Create assembly from workspace content" do |dtk_common, service_module_name, assembly_name, namespace|
   it "creates assembly #{assembly_name} in #{service_module_name} service module" do
-  	workspace_id = dtk_common.get_workspace_id
+    workspace_id = dtk_common.get_workspace_id
     assembly_created = dtk_common.create_assembly_from_service(workspace_id, service_module_name, assembly_name, namespace)
     assembly_created.should eq(true)
   end

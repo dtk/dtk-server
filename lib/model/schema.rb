@@ -181,8 +181,8 @@ module DTK
           model.create_column_defs_common_fields?(direction)
         end
         concrete_models.each{|model| model.apply_migration_defs(direction)}
-        concrete_models.each{|model| model.set_global_db_rel_info()}
-        concrete_models.each{|model| model.preprocess!()}
+        concrete_models.each(&:set_global_db_rel_info)
+        concrete_models.each(&:preprocess!)
 
         concrete_models.each do |model|
           model.create_column_defs_specific_fields?(direction)
@@ -194,9 +194,9 @@ module DTK
         set_db_for_all_models(db)
         concrete_models = ret_concrete_models()
         concrete_models.each{|model| model.apply_migration_defs(:up)}
-        concrete_models.each{|model| model.set_global_db_rel_info()}
+        concrete_models.each(&:set_global_db_rel_info)
         DB_REL_DEF[:datacenter] = DB_REL_DEF[:target] #TODO: remove temp datacenter->target
-        concrete_models.each{|model| model.preprocess!()}
+        concrete_models.each(&:preprocess!)
         # returns model_names
         concrete_models.map{|klass|ret_relation_type(klass)}
       end
@@ -419,4 +419,3 @@ module DTK
       end
   end
 end
-

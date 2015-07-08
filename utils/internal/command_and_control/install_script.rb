@@ -58,10 +58,9 @@ eos
         :redhat               => OSTemplateDefault,
         :centos               => OSTemplateDefault,
         :debian               => OSTemplateDefault,
-        'amazon-linux'.to_sym => OSTemplateDefault,
+        'amazon-linux'.to_sym => OSTemplateDefault
       }
       SupportedOSList = OSTemplates.keys
     end
   end
 end
-

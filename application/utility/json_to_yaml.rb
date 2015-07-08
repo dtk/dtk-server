@@ -32,4 +32,3 @@ hash_content = Aux.json_parse(json_content,json_source_path)
 yaml_content = Aux.serialize(hash_content,:yaml)
 File.open(yaml_file_path,'w'){|f|f << yaml_content}
 puts "YAML file located at: #{yaml_file_path}\n"
-

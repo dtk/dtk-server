@@ -10,7 +10,7 @@ module DTK; class StateChange
       state_change_mh = target_mh.create_childMH(:state_change)
       while not last_level.empty?
         ret += last_level
-        last_level = pending_create_node(state_change_mh,last_level.map{|obj|obj.id_handle()},added_filters: [added_sc_filter])
+        last_level = pending_create_node(state_change_mh,last_level.map(&:id_handle),added_filters: [added_sc_filter])
       end
       ##group by node id (and using fact that each wil be unique id)
       ret.map{|ch|[ch]}
@@ -51,7 +51,7 @@ module DTK; class StateChange
             hash = {
               type: "converge_component",
               component: cmp,
-              node: node,
+              node: node
             }
             node_cmps << create_stub(state_change_mh,hash)
           end
@@ -81,7 +81,7 @@ module DTK; class StateChange
         unless nodes = opts[:nodes]
           raise Error.new("Expecting opts[:nodes]")
         end
-        node_filter = opts[:node_filter] || DTK::Node::Filter::NodeList.new(nodes.map{|n|n.id_handle()})
+        node_filter = opts[:node_filter] || DTK::Node::Filter::NodeList.new(nodes.map(&:id_handle))
         node_to_ng = DTK::NodeGroup.get_node_groups_containing_nodes(mh,node_filter)
         [nodes,node_to_ng]
       end

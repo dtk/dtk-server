@@ -90,10 +90,10 @@ module DTK
       end
       repos = get_repos()
       repos.each{|repo|RepoManager.delete_repo(repo)}
-      delete_instances(repos.map{|repo|repo.id_handle()})
+      delete_instances(repos.map(&:id_handle))
 
       # need to explicitly delete nodes since nodes' parents are not the assembly
-      Assembly::Template.delete_assemblies_nodes(assembly_templates.map{|a|a.id_handle()})
+      Assembly::Template.delete_assemblies_nodes(assembly_templates.map(&:id_handle))
 
       delete_instance(id_handle())
       {module_name: module_name}
@@ -120,7 +120,7 @@ module DTK
           assembly_names = assoc_assemblies.map{|a|a[:display_name]}
           raise ErrorUsage.new("Cannot delete a service module if one or more of its service instances exist in a target (#{assembly_names.join(',')})")
         end
-        Assembly::Template.delete_assemblies_nodes(assembly_templates.map{|a|a.id_handle()})
+        Assembly::Template.delete_assemblies_nodes(assembly_templates.map(&:id_handle))
       end
 
       id_handle = module_branch.id_handle()
@@ -145,13 +145,13 @@ module DTK
       }
       mb_idhs = get_objs(sp_hash).map{|r|r[:module_branch].id_handle()}
       opts = {
-        filter: [:oneof, :module_branch_id,mb_idhs.map{|idh|idh.get_id()}]
+        filter: [:oneof, :module_branch_id,mb_idhs.map(&:get_id)]
       }
       if project = get_project()
         opts.merge!(project_idh: project.id_handle())
       end
       ndx_ret = Assembly::Template.get(model_handle(:component),opts).inject({}){|h,r|h.merge(r[:id] => r)}
-      Assembly::Template.get_nodes(ndx_ret.values.map{|r|r.id_handle}).each do |node|
+      Assembly::Template.get_nodes(ndx_ret.values.map(&:id_handle)).each do |node|
         next if node.is_assembly_wide_node?()
         assembly = ndx_ret[node[:assembly_id]]
         (assembly[:nodes] ||= [])  << node
@@ -164,7 +164,7 @@ module DTK
        when "assembly-templates".to_sym
         mb_idhs = get_objs(cols: [:module_branches]).map{|r|r[:module_branch].id_handle()}
         opts = {
-          filter: [:oneof, :module_branch_id,mb_idhs.map{|idh|idh.get_id()}],
+          filter: [:oneof, :module_branch_id,mb_idhs.map(&:get_id)],
           detail_level: "nodes",
           no_module_prefix: true
         }
@@ -201,7 +201,7 @@ module DTK
         h.merge(mb_id => content)
       end
 
-      filter = [:oneof, :module_branch_id,mb_idhs.map{|idh|idh.get_id()}]
+      filter = [:oneof, :module_branch_id,mb_idhs.map(&:get_id)]
       assembly_mh = mh.createMH(:component)
       Assembly::Template.list(assembly_mh,filter: filter,component_info: true).each do |r|
         index = r[:module_branch_id]

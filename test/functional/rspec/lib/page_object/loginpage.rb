@@ -6,7 +6,7 @@ class LoginPage < PageContainer
   end
 
   def logout_user
-  	@session.click_link('Log Out')
-  	@session.find("//div/legend[.=\"DTK Admin Panel\"]")
+    @session.click_link('Log Out')
+    @session.find("//div/legend[.=\"DTK Admin Panel\"]")
   end
 end

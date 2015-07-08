@@ -7,7 +7,7 @@ module XYZ
     end
 
     def freeze
-      each{|x|x.freeze}
+      each(&:freeze)
       super
     end
   end

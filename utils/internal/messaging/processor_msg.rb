@@ -41,7 +41,7 @@ module XYZ
         when :execute_on_node
           :node
         else
-	  raise Error.new("unexpected msg_type: #{msg_type}")
+    raise Error.new("unexpected msg_type: #{msg_type}")
       end
     end
   end

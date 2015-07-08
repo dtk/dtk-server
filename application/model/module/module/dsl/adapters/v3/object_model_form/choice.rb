@@ -111,11 +111,11 @@ module DTK; class ModuleDSL; class V3
             ndx_dep_choices.delete(ndx)
           else
             # this relies on assumption that if in dsl there is no location given for dep, it is set to location local
-            if remote_dep_choice = dep_choices.find{|dep_choice|dep_choice.remote_location?()}
+            if remote_dep_choice = dep_choices.find(&:remote_location?)
               error_msg = "The following dependency on component '?base_cmp' has a remote location, but there is no matching link def: ?dep"
               raise ParsingError::Dependency.create(error_msg,remote_dep_choice)
             else
-              dep_choices.each{|dep_choice|dep_choice.set_to_local_location_as_default()}
+              dep_choices.each(&:set_to_local_location_as_default)
             end
           end
         end
@@ -169,5 +169,3 @@ module DTK; class ModuleDSL; class V3
     end
   end
 end; end; end
-
-

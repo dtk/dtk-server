@@ -47,7 +47,7 @@ module DTK; class ServiceNodeGroup
       node_group_id = node_group.id()
       sp_hash = {
         cols: [:id,:group_id,:display_name,:node_node_id,:ancestor_id],
-        filter: [:oneof, :node_node_id, node_members.map{|n|n.id}+[node_group_id]]
+        filter: [:oneof, :node_node_id, node_members.map(&:id)+[node_group_id]]
       }
       # ndx_cmps is double indexed by [node_id][cmp_id]
       ndx_cmps = {}
@@ -61,7 +61,7 @@ module DTK; class ServiceNodeGroup
       ndx_ng_cmps = ndx_cmps[node_group_id]||{}
       ng_cmp_ids = ndx_ng_cmps.keys
       if restricted_cmps = opts[:node_group_components]
-        ng_cmp_ids = ng_cmp_ids & restricted_cmps.map{|r|r.id}
+        ng_cmp_ids = ng_cmp_ids & restricted_cmps.map(&:id)
       end
 
       return ret if ng_cmp_ids.empty?
@@ -108,4 +108,3 @@ module DTK; class ServiceNodeGroup
     end
   end
 end; end
-

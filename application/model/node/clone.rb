@@ -30,7 +30,7 @@ module DTK; class Node
         @node = node
         @component = component
         @relevant_nodes = get_relevant_nodes(node,component)
-        @relevant_node_ids = @relevant_nodes.map{|n|n.id()}
+        @relevant_node_ids = @relevant_nodes.map(&:id)
         @existing_ports = ExistingPorts.new() # for caching ports that exist already or ones that
       end
 
@@ -173,7 +173,7 @@ module DTK; class Node
         sp_hash = {
           cols: [:id,:group_id,:display_name,:node_node_id,:component_id],
           filter: [:and,[:oneof, :node_node_id, @relevant_node_ids],
-                   [:oneof,:component_id,cmps.map{|cmp|cmp.id()}]]
+                   [:oneof,:component_id,cmps.map(&:id)]]
         }
         port_mh = @node.child_model_handle(:port)
         Model.get_objs(port_mh,sp_hash)

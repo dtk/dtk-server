@@ -85,7 +85,7 @@ module DTK
         return true
       end
       if filter_base_tags = opts[:tags]
-        common_tags = (base_tags?()||[]) & filter_base_tags.map{|x|x.to_sym}
+        common_tags = (base_tags?()||[]) & filter_base_tags.map(&:to_sym)
         return common_tags.empty?
       end
       false
@@ -204,7 +204,7 @@ module DTK
           node = action[:node]
           ndx_nodes[node[:id]] ||= node
         end
-        node_idhs = ndx_nodes.values.map{|n|n.id_handle()}
+        node_idhs = ndx_nodes.values.map(&:id_handle)
         add_filter = [:eq,:required,true]
         cols = [:id,:group_id,:display_name,:node_node_id,:required,:value_derived,:value_asserted,:dynamic,:port_type_asserted,:is_port,:semantic_type_summary]
         Node.get_node_level_attributes(node_idhs,cols: cols,add_filter: add_filter).each do |attr|
@@ -363,7 +363,7 @@ module DTK
         end
       end
 
-      description_prefix = (component[:display_name]||"").split("::").map{|x|x.capitalize}.join(" ")
+      description_prefix = (component[:display_name]||"").split("::").map(&:capitalize).join(" ")
       description = description_prefix.empty? ? "Service Access Point" : "#{description_prefix} SAP"
 
       new_sap_attr_rows =

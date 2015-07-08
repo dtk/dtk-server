@@ -149,7 +149,7 @@ module DTK
       "sap_ref__db" => {
         external: true,
         port_type: "input"
-      },
+      }
     }
   end
 

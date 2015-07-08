@@ -66,4 +66,3 @@ describe "(Component Module DSL) Test Case 14: dtk.model.yaml with empty array a
     puts "", ""
   end
 end
-

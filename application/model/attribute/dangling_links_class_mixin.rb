@@ -30,7 +30,7 @@ module DTK
             l = ndx_ret[attr_id] ||= UpdateDerivedValues::Delete::LinkInfo.new(input_attribute)
             new_el = {
               attribute_link_id: a_link[:id],
-              index_map: a_link[:index_map],
+              index_map: a_link[:index_map]
             }
             if a_link[:id] == link[:id]
               l.add_deleted_link!(new_el)

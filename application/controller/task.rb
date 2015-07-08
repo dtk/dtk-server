@@ -83,7 +83,7 @@ Aux.stop_for_testing?(:converge) # TODO: for debugging
           cols: [:id, :display_name],
           filter: [:neq, :datacenter_datacenter_id, nil]
         }
-        node_idhs = Model.get_objs(model_handle(:node),sp_hash).map{|r|r.id_handle}
+        node_idhs = Model.get_objs(model_handle(:node),sp_hash).map(&:id_handle)
       end
       StateChange.create_converge_state_changes(node_idhs)
       rest_ok_response

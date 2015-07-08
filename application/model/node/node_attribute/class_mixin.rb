@@ -22,14 +22,14 @@ module DTK; class Node
       def get_node_level_attributes(node_idhs,opts={})
         ret = []
         return ret if node_idhs.empty?()
-        filter = [:oneof,:node_node_id,node_idhs.map{|idh|idh.get_id()}]
+        filter = [:oneof,:node_node_id,node_idhs.map(&:get_id)]
         if add_filter = opts[:add_filter]
           filter = [:and,filter,add_filter]
         end
         cols = opts[:cols] || [:id,:group_id,:display_name,:required]
         sp_hash = {
           cols: cols,
-          filter: filter,
+          filter: filter
         }
         attr_mh = node_idhs.first.createMH(:attribute)
         opts = (cols.include?(:ref) ? {keep_ref_cols: true} : {})
@@ -55,19 +55,19 @@ module DTK; class Node
 
       # TODO: need tp fix up below; maybe able to deprecate
       def get_node_attribute_values(id_handle,opts={})
-	c = id_handle[:c]
+  c = id_handle[:c]
         node_obj = get_object(id_handle,opts)
         raise Error.new("node associated with (#{id_handle}) not found") if node_obj.nil?
-	ret = node_obj.get_direct_attribute_values(:value) || {}
+  ret = node_obj.get_direct_attribute_values(:value) || {}
 
-	cmps = node_obj.get_objects_associated_components()
-	cmps.each do|cmp|
-	  ret[:component]||= {}
-	  cmp_ref = cmp.get_qualified_ref.to_sym
-	  ret[:component][cmp_ref] =
-	    cmp[:external_ref] ? {external_ref: cmp[:external_ref]} : {}
-	  values = cmp.get_direct_attribute_values(:value,{attr_include: [:external_ref]})
-	  ret[:component][cmp_ref][:attribute] = values if values
+  cmps = node_obj.get_objects_associated_components()
+  cmps.each do|cmp|
+    ret[:component]||= {}
+    cmp_ref = cmp.get_qualified_ref.to_sym
+    ret[:component][cmp_ref] =
+      cmp[:external_ref] ? {external_ref: cmp[:external_ref]} : {}
+    values = cmp.get_direct_attribute_values(:value,{attr_include: [:external_ref]})
+    ret[:component][cmp_ref][:attribute] = values if values
         end
         ret
       end

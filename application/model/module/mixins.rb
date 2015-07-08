@@ -275,7 +275,7 @@ module DTK
       return ret if idhs.empty?
       sp_hash =  {
         cols: [:id,:group_id,:display_name,:namespace],
-        filter: [:oneof, :id,idhs.map{|idh|idh.get_id()}]
+        filter: [:oneof, :id,idhs.map(&:get_id)]
       }
       mh = idhs.first.createMH()
       get_objs(mh,sp_hash).inject({}) do |h,row|

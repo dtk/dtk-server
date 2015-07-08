@@ -25,7 +25,7 @@ module DTK; class Task; class Template
         return ret if ordered_port_links.empty?
         sp_hash = {
           cols: [:ports,:temporal_order],
-          filter: [:oneof, :id, ordered_port_links.map{|r|r.id}]
+          filter: [:oneof, :id, ordered_port_links.map(&:id)]
         }
 
         aug_port_links = Model.get_objs(assembly.model_handle(:port_link),sp_hash)
@@ -159,4 +159,3 @@ module DTK; class Task; class Template
     end
   end
 end; end; end
-

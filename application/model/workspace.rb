@@ -94,7 +94,7 @@ module DTK
     def delete_assembly_level_attributes
       assembly_attrs = get_assembly_level_attributes()
       return if assembly_attrs.empty?()
-      Model.delete_instances(assembly_attrs.map{|r|r.id_handle()})
+      Model.delete_instances(assembly_attrs.map(&:id_handle))
     end
 
     AssemblyFields = {

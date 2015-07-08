@@ -53,4 +53,3 @@ describe "(Component Module DSL) Test Case 8: Rename existing attribute mapping 
     puts "", ""
   end
 end
-

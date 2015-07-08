@@ -71,7 +71,7 @@ module DTK; class Assembly
       return ret if assembly_idhs.empty?()
       sp_hash = {
         cols: opts[:cols]||[:id, :group_id, :display_name, :assembly_id],
-        filter: [:oneof, :assembly_id, assembly_idhs.map{|idh|idh.get_id()}]
+        filter: [:oneof, :assembly_id, assembly_idhs.map(&:get_id)]
       }
       node_mh = assembly_idhs.first.createMH(:node)
       get_objs(node_mh,sp_hash)
@@ -107,7 +107,7 @@ module DTK; class Assembly
       return ret if assembly_templates.empty?
       sp_hash = {
         cols: [:id,:group_id,:display_name,:module_branch_id,:assembly_template_namespace_info],
-        filter: [:oneof,:id,assembly_templates.map{|a|a.id()}]
+        filter: [:oneof,:id,assembly_templates.map(&:id)]
       }
       mh = assembly_templates.first.model_handle()
       get_objs(mh,sp_hash).inject({}) do |h,r|
@@ -224,7 +224,7 @@ module DTK; class Assembly
     def self.delete_assemblies_nodes(assembly_idhs)
       ret = []
       return ret if assembly_idhs.empty?
-      node_idhs = get_nodes(assembly_idhs).map{|n|n.id_handle()}
+      node_idhs = get_nodes(assembly_idhs).map(&:id_handle)
       Model.delete_instances(node_idhs)
     end
 

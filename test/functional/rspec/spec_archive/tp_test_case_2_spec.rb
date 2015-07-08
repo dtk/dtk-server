@@ -22,42 +22,42 @@ $assembly_id = 0
 dtk_common = DtkCommon.new(assembly_name, assembly_template)
 
 describe "(Targets and Providers) Test Case 2: Add new target to existing provider, stage and converge assembly in this target and then delete target" do
-	before(:all) do
-		puts "*******************************************************************************************************************************************"
-		puts "(Targets and Providers) Test Case 2: Add new target to existing provider, stage and converge assembly in this target and then delete target"
-		puts "*******************************************************************************************************************************************"
-		puts ""
-  	end
+  before(:all) do
+    puts "*******************************************************************************************************************************************"
+    puts "(Targets and Providers) Test Case 2: Add new target to existing provider, stage and converge assembly in this target and then delete target"
+    puts "*******************************************************************************************************************************************"
+    puts ""
+    end
 
-	context "Create target command" do
-		include_context "Create target", dtk_common, provider_name, region
-	end
+  context "Create target command" do
+    include_context "Create target", dtk_common, provider_name, region
+  end
 
-	context "Target #{provider_name}-#{region}" do
-		include_context "Check if target exists in provider", dtk_common, provider_name, target_name
-	end
+  context "Target #{provider_name}-#{region}" do
+    include_context "Check if target exists in provider", dtk_common, provider_name, target_name
+  end
 
-	context "Stage assembly in specific target" do
-    	include_context "Stage assembly in specific target", dtk_common, target_name
-  	end
+  context "Stage assembly in specific target" do
+      include_context "Stage assembly in specific target", dtk_common, target_name
+    end
 
-  	context "Converge function" do
-    	include_context "Converge", dtk_common
-  	end
+    context "Converge function" do
+      include_context "Converge", dtk_common
+    end
 
-	context "Delete target command" do
-		include_context "Delete target", dtk_common, target_name
-	end
+  context "Delete target command" do
+    include_context "Delete target", dtk_common, target_name
+  end
 
-	context "Target #{provider_name}-#{region}" do
-		include_context "NEG - Check if target exists in provider", dtk_common, provider_name, target_name
-	end
+  context "Target #{provider_name}-#{region}" do
+    include_context "NEG - Check if target exists in provider", dtk_common, provider_name, target_name
+  end
 
-	context "List assemblies after delete of target" do
+  context "List assemblies after delete of target" do
         include_context "NEG - List assemblies", dtk_common
     end
 
-	after(:all) do
-		puts "", ""
-	end
+  after(:all) do
+    puts "", ""
+  end
 end

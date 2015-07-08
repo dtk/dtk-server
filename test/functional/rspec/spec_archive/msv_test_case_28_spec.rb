@@ -19,13 +19,13 @@ $metadata = ""
 dtk_common = DtkCommon.new('', '')
 
 def get_metadata(module_name)
-	db_config = YAML::load(File.open('./config/config.yml'))
-	ActiveRecord::Base.establish_connection(db_config["dtkserverdbconnection"])
-	sql1 = "select id from module.component where ref = '#{module_name}'"
-	module_id = ActiveRecord::Base.connection.execute(sql1)
-	sql2 = "select external_ref from module.branch where component_id = #{module_id.first['id']}"
-	module_metadata = ActiveRecord::Base.connection.execute(sql2)
-	return module_metadata.first['external_ref']
+  db_config = YAML::load(File.open('./config/config.yml'))
+  ActiveRecord::Base.establish_connection(db_config["dtkserverdbconnection"])
+  sql1 = "select id from module.component where ref = '#{module_name}'"
+  module_id = ActiveRecord::Base.connection.execute(sql1)
+  sql2 = "select external_ref from module.branch where component_id = #{module_id.first['id']}"
+  module_metadata = ActiveRecord::Base.connection.execute(sql2)
+  return module_metadata.first['external_ref']
 end
 
 describe "(Modules, Services and Versioning) Test Case 28: Import new module from git (does not have dependencies) and check ModuleFile metadata" do
@@ -52,45 +52,45 @@ describe "(Modules, Services and Versioning) Test Case 28: Import new module fro
   end
 
   context "ModuleFile metadata - name with value puppetlabs-firewall" do
-  	it "is correctly parsed and saved into the tenant database" do
-  		expect($metadata).to include(":name=>\"puppetlabs-firewall\"")
-  	end
+    it "is correctly parsed and saved into the tenant database" do
+      expect($metadata).to include(":name=>\"puppetlabs-firewall\"")
+    end
   end
 
   context "ModuleFile metadata - version with value 0.4.2" do
-  	it "is correctly parsed and saved into the tenant database" do
-  		expect($metadata).to include(":version=>\"0.4.2\"")
-  	end
+    it "is correctly parsed and saved into the tenant database" do
+      expect($metadata).to include(":version=>\"0.4.2\"")
+    end
   end
 
   context "ModuleFile metadata - source with value git://github.com/puppetlabs/puppetlabs-firewall.git" do
-  	it "is correctly parsed and saved into the tenant database" do
-  		expect($metadata).to include(":source=>\"git://github.com/puppetlabs/puppetlabs-firewall.git\"")
-  	end
+    it "is correctly parsed and saved into the tenant database" do
+      expect($metadata).to include(":source=>\"git://github.com/puppetlabs/puppetlabs-firewall.git\"")
+    end
   end
 
   context "ModuleFile metadata - author with value puppetlabs" do
-  	it "is correctly parsed and saved into the tenant database" do
-  		expect($metadata).to include(":author=>\"puppetlabs\"")
-  	end
+    it "is correctly parsed and saved into the tenant database" do
+      expect($metadata).to include(":author=>\"puppetlabs\"")
+    end
   end
 
   context "ModuleFile metadata - summary" do
-  	it "is correctly parsed and saved into the tenant database" do
-  		expect($metadata).to include(":summary")
-  	end
+    it "is correctly parsed and saved into the tenant database" do
+      expect($metadata).to include(":summary")
+    end
   end
 
   context "ModuleFile metadata - description" do
-  	it "is correctly parsed and saved into the tenant database" do
-  		expect($metadata).to include(":description")
-  	end
+    it "is correctly parsed and saved into the tenant database" do
+      expect($metadata).to include(":description")
+    end
   end
 
   context "ModuleFile metadata - project_page with value http://forge.puppetlabs.com/puppetlabs/firewall" do
-  	it "is correctly parsed and saved into the tenant database" do
-  		expect($metadata).to include(":project_page=>\"http://forge.puppetlabs.com/puppetlabs/firewall\"")
-  	end
+    it "is correctly parsed and saved into the tenant database" do
+      expect($metadata).to include(":project_page=>\"http://forge.puppetlabs.com/puppetlabs/firewall\"")
+    end
   end
 
   context "Delete module" do

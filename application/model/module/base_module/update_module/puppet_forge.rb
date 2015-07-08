@@ -78,10 +78,9 @@ module DTK; class BaseModule; class UpdateModule
       main_module.namespace = @base_namespace
       {
         main_module: main_module.to_h,
-        installed_modules: (installed_modules - [main_module]).collect { |im| im.to_h },
+        installed_modules: (installed_modules - [main_module]).collect(&:to_h),
         found_modules: found_modules
       }
     end
   end
 end; end; end
-

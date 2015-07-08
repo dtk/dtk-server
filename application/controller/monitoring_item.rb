@@ -52,7 +52,7 @@ module XYZ
 
         # if one of the nodees is running to long we stop all nodes
         if stop_this_assembly
-          str_identifer = (nodes.map { |n| n.name }).join(', ')
+          str_identifer = (nodes.map(&:name)).join(', ')
           Log.info "#{prefix_log} Stopping assembly '#{assembly[:display_name]}', with nodes: '#{str_identifer}'"
           CommandAndControl.stop_instances(nodes)
         end

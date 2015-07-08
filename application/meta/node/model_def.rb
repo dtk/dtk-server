@@ -5,11 +5,11 @@
   field_defs: {
     display_name: {
         type: :text,
-        size: 50,
+        size: 50
     },
     tag: {
         type: 'text',
-        size: 25,
+        size: 25
     },
     type: {
         type: 'select',
@@ -18,14 +18,14 @@
     },
     os: {
         type: 'text',
-        size: 25,
+        size: 25
     },
     is_deployed: {
-        type: 'boolean',
+        type: 'boolean'
     },
     architecture: {
         type: 'text',
-        size: 10,
+        size: 10
     },
     image_size: {
         type: 'numeric',
@@ -36,14 +36,14 @@
         size: 50
     },
     disk_size: {
-        type: 'numeric',
+        type: 'numeric'
     },
     ui: {
         type: 'json',
         omit: %w(list display edit filter order_by)
     },
     has_pending_change: {
-        type: :boolean,
+        type: :boolean
     },
     parent_name: {
         type: 'text',
@@ -55,10 +55,9 @@
     },
     ordered_component_ids: {
         type: 'text'
-    },
+    }
   },
   relationships: {
 
   }
 }
-

@@ -399,7 +399,7 @@ module DTK; class ModuleDSL
         end
 
         def existing_hash_keys
-          ((parent||{})[:attributes]||[]).map{|a|a.hash_key}.compact
+          ((parent||{})[:attributes]||[]).map(&:hash_key).compact
         end
 
         # render hash methods

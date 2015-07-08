@@ -87,5 +87,3 @@ module DTK; class NodeBindingRuleset
     end
   end
 end; end
-
-

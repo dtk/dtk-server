@@ -67,4 +67,3 @@ describe "(Component Module DSL) Test Case 16: dtk.model.yaml with hash type att
     puts "", ""
   end
 end
-

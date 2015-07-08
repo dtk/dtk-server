@@ -6,9 +6,9 @@ module XYZ
     class << self
       @@cache = nil
       def set_cache_servers(server_list)
-	       #TBD: hard wired port
+         #TBD: hard wired port
         if server_list.empty?
-	  @@cache = nil
+    @@cache = nil
           return nil
         end
         @@cache = MemCache.new(server_list.map{|s|s+":11211"})

@@ -60,7 +60,7 @@ describe "(Modules, Services and Versioning) Test Case 40: Install service modul
   end
 
   context "Push to remote changes for component module" do
-  	include_context "Push to remote changes for component module", dtk_common, component_module_1
+    include_context "Push to remote changes for component module", dtk_common, component_module_1
   end
 
   context "Delete component module" do
@@ -105,7 +105,7 @@ describe "(Modules, Services and Versioning) Test Case 40: Install service modul
   end
 
   context "Push to remote changes for component module" do
-  	include_context "Push to remote changes for component module", dtk_common, component_module_1
+    include_context "Push to remote changes for component module", dtk_common, component_module_1
   end
 
   context "Delete service module" do

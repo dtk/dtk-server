@@ -2,7 +2,7 @@ module DTK
   class AccountController < AuthController
     PUB_KEY_NAME_REGEX = /[a-zA-Z0-9_\-]*/
 
-  	def rest__set_password
+    def rest__set_password
       password = ret_non_null_request_params(:new_password)
       user = CurrentSession.new.get_user_object()
 

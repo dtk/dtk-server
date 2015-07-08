@@ -30,7 +30,7 @@ module XYZ
 
       Prune =
         [
-         /\/File\[\//,
+         /\/File\[\//
         ]
 
       # order is important because of subsumption
@@ -39,7 +39,7 @@ module XYZ
          {debug: /\(debug\)/},
          {info: /\(info\)/},
          {notice: /\(notice\)/},
-         {error: /\(err\)/},
+         {error: /\(err\)/}
         ]
       )
 

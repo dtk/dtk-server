@@ -11,10 +11,10 @@ module DTK; class BaseModule
       raise_error_component_refs(components) unless components.empty?
 
       impls = get_implementations()
-      delete_instances(impls.map{|impl|impl.id_handle()})
+      delete_instances(impls.map(&:id_handle))
       repos = get_repos()
       repos.each{|repo|RepoManager.delete_repo(repo)}
-      delete_instances(repos.map{|repo|repo.id_handle()})
+      delete_instances(repos.map(&:id_handle))
       delete_instance(id_handle())
       {module_name: module_name()}
     end

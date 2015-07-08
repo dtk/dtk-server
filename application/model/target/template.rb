@@ -99,7 +99,7 @@ module DTK
         ret = []
         target_instances = id_handle.create_object().get_target_instances()
         unless target_instances.empty?
-          ret = Assembly::Instance.get(model_handle(:assembly_instance),target_idhs: target_instances.map{|t|t.id_handle})
+          ret = Assembly::Instance.get(model_handle(:assembly_instance),target_idhs: target_instances.map(&:id_handle))
           if opts[:omit_empty_workspace]
             ret.reject! do |assembly|
               if Workspace.is_workspace?(assembly)

@@ -49,4 +49,3 @@ module MCollective
     end
   end
 end
-

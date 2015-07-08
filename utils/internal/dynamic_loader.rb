@@ -26,7 +26,7 @@ module DTK
     end
 
     def self.cap_form(x)
-      x.to_s.split("_").map{|t|t.capitalize}.join("")
+      x.to_s.split("_").map(&:capitalize).join("")
     end
   end
 end

@@ -202,7 +202,7 @@ module XYZ
         model_name_alias = opts[:table_alias]
         @convert = true if opts[:convert]
         # check whether model_name is in existing_name_info if so bump up by 1
-        new_ref_num =  1 + (existing_name_info.find_all{|x|x.model_name == @model_name}.map{|y|y.ref_num}.max || 0)
+        new_ref_num =  1 + (existing_name_info.find_all{|x|x.model_name == @model_name}.map(&:ref_num).max || 0)
         ModelNameInfo.new(@model_name,new_ref_num,model_name_alias,convert)
       end
     end

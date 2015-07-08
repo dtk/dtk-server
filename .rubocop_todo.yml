@@ -739,30 +739,30 @@ Style/StringLiteralsInInterpolation:
 # Offense count: 1
 # Cop supports --auto-correct.
 Style/SymbolLiteral:
-  Enabled: false
+  Enabled: true
 
 # Offense count: 248
 # Cop supports --auto-correct.
 # Configuration parameters: IgnoredMethods.
 Style/SymbolProc:
-  Enabled: false
+  Enabled: true
 
 # Offense count: 6811
 # Cop supports --auto-correct.
 Style/Tab:
-  Enabled: false
+  Enabled: true
 
 # Offense count: 413
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle, SupportedStyles.
 Style/TrailingBlankLines:
-  Enabled: false
+  Enabled: true
 
 # Offense count: 305
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyleForMultiline, SupportedStyles.
 Style/TrailingComma:
-  Enabled: false
+  Enabled: true
 
 # Offense count: 2532
 # Cop supports --auto-correct.

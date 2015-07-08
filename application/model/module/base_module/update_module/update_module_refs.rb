@@ -84,7 +84,7 @@ module DTK; class BaseModule; class UpdateModule
         include_module_names.each do |module_name|
           if match_info = ndx_cmr_info[module_name]
             if match_info.match_type == :multiple_match
-              ambiguous[module_name] = match_info.match_array.map{|cmr|cmr.namespace}
+              ambiguous[module_name] = match_info.match_array.map(&:namespace)
             end
           end
         end
@@ -121,4 +121,3 @@ module DTK; class BaseModule; class UpdateModule
     end
   end
 end; end; end
-

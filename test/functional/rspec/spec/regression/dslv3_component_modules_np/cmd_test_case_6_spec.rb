@@ -89,4 +89,3 @@ describe "(Component Module DSL) Test Case 6: Add new component attribute in dtk
     puts "", ""
   end
 end
-

@@ -221,7 +221,7 @@ module DTK
 
     def self.create_links_sap(link_info,sap_attr_idh,sap_config_attr_idh,par_idh,node_idh)
       attr_link_mh = sap_attr_idh.createMH(model_name: :attribute_link, parent_model_name: :node)
-      sap_id,sap_config_id,par_id,node_id = [sap_attr_idh,sap_config_attr_idh,par_idh,node_idh].map{|x|x.get_id()}
+      sap_id,sap_config_id,par_id,node_id = [sap_attr_idh,sap_config_attr_idh,par_idh,node_idh].map(&:get_id)
 
       sap_config_name = link_info[:sap_config]
       sap_name = link_info[:sap]
@@ -256,7 +256,7 @@ module DTK
     # TODO: deprecate below after subsuming from above
     def self.create_links_l4_sap(new_sap_attr_idh,sap_config_attr_idh,ipv4_host_addrs_idh,node_idh)
       attr_link_mh = node_idh.createMH(model_name: :attribute_link, parent_model_name: :node)
-      new_sap_id,sap_config_id,ipv4_id,node_id = [new_sap_attr_idh,sap_config_attr_idh,ipv4_host_addrs_idh,node_idh].map{|x|x.get_id()}
+      new_sap_id,sap_config_id,ipv4_id,node_id = [new_sap_attr_idh,sap_config_attr_idh,ipv4_host_addrs_idh,node_idh].map(&:get_id)
 
       new_link_rows =
         [

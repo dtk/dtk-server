@@ -47,6 +47,3 @@ module DTK; class ConfigAgent
     end
   end; end
 end; end
-
-
-

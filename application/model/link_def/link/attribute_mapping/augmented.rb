@@ -16,4 +16,3 @@ module DTK; class LinkDef::Link
     end
   end
 end; end
-

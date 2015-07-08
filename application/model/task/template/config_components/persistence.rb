@@ -88,7 +88,7 @@ module DTK; class Task; class Template; class ConfigComponents
           all_templates = assembly_update.assembly_instance().get_task_templates()
           return ret if all.empty?
 
-          all_templates.select{|tt|should_be_removed?(tt,assembly_update)}.map{|tt|tt.id_handle()}
+          all_templates.select{|tt|should_be_removed?(tt,assembly_update)}.map(&:id_handle)
         end
 
         def self.should_be_removed?(_task_template,_assembly_update)

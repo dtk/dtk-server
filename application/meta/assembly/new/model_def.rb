@@ -477,7 +477,7 @@ end
                                     join_type: :inner,
                                     join_cond: {component_component_id: :template__id},
                                     cols: [:id,:display_name,:type,:description]
-                                  }],
+                                  }]
     },
     aug_service_add_ons_from_instance: {
       type: :json,

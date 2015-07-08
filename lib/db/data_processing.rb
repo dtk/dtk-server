@@ -26,8 +26,8 @@ module XYZ
       end
 
       def json_table_column?(col,db_rel)
-	return nil unless col_info = ret_table_column_info(col,db_rel)
-	col_info[:type] == :json
+  return nil unless col_info = ret_table_column_info(col,db_rel)
+  col_info[:type] == :json
       end
 
       private
@@ -39,7 +39,7 @@ module XYZ
       def modify_to_reflect_special_processing!(scalar_assigns,db_rel,sql_operation,opts={})
         # TODO: below should be deprecated and use update from select form
         if opts[:shift_id_to_ancestor] and db_rel[:has_ancestor_field]
-	  scalar_assigns[:ancestor_id] = scalar_assigns[:id]
+    scalar_assigns[:ancestor_id] = scalar_assigns[:id]
         end
 
         if opts[:remove_ids] or opts[:shift_id_to_ancestor]
@@ -67,9 +67,9 @@ module XYZ
           end
         end
 
-	scalar_assigns.each_pair do |k,v|
-	  if (v.is_a?(Hash) or v.is_a?(Array)) and json_table_column?(k,db_rel)
-	    scalar_assigns[k] = SerializeToJSON.serialize(v)
+  scalar_assigns.each_pair do |k,v|
+    if (v.is_a?(Hash) or v.is_a?(Array)) and json_table_column?(k,db_rel)
+      scalar_assigns[k] = SerializeToJSON.serialize(v)
    elsif v.respond_to?(:to_sequel)
             scalar_assigns[k] = v.to_sequel(k,sql_operation)
           end
@@ -78,7 +78,7 @@ module XYZ
         set_updated_at!(scalar_assigns) if sql_operation == :update
         set_created_at!(scalar_assigns) if sql_operation == :create
 
-	scalar_assigns
+  scalar_assigns
       end
 
       def set_updated_at!(update_set_clause)
@@ -132,8 +132,8 @@ module XYZ
       end
 
       def ret_object_assignments(assignments,db_rel)
-	ret = {}
-	assignments.each_pair do |k,v|
+  ret = {}
+  assignments.each_pair do |k,v|
           next unless (db_rel[:one_to_many]||[]).include?(k.to_sym) and (v.is_a?(Hash) or v.is_a?(Array))
           ret[k] = v
         end
@@ -141,8 +141,8 @@ module XYZ
       end
 
       def ret_table_column_info(col,db_rel)
-	return nil if db_rel[:columns].nil?
-	db_rel[:columns][col.to_sym] || COMMON_REL_COLUMNS[col.to_sym]
+  return nil if db_rel[:columns].nil?
+  db_rel[:columns][col.to_sym] || COMMON_REL_COLUMNS[col.to_sym]
       end
     end
   end

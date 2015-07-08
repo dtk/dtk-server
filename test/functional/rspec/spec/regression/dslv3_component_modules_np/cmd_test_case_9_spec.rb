@@ -53,4 +53,3 @@ describe "(Component Module DSL) Test Case 9: Add new attribute mapping in depen
     puts "", ""
   end
 end
-

@@ -90,7 +90,7 @@ module DTK; class Attribute
       end
 
       def ret_matching_components(nodes,cmp_fragment)
-        filter = [:oneof, :node_node_id, nodes.map{|r|r.id()}]
+        filter = [:oneof, :node_node_id, nodes.map(&:id)]
         if cmp_filter = ret_filter(cmp_fragment,:component)
           filter = [:and, filter, cmp_filter]
         end
@@ -103,7 +103,7 @@ module DTK; class Attribute
       end
 
       def ret_matching_attributes(type,idhs,attr_fragment)
-        filter = [:oneof, TypeToIdField[type], idhs.map{|idh|idh.get_id()}]
+        filter = [:oneof, TypeToIdField[type], idhs.map(&:get_id)]
         if attr_filter = ret_filter(attr_fragment,:attribute)
           filter = [:and, filter, attr_filter]
         end
@@ -141,4 +141,3 @@ module DTK; class Attribute
     end
   end
 end; end
-

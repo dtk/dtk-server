@@ -219,5 +219,3 @@ unless RUBY_VERSION =~ /^1\.9/ then ::Hash
     end
   end
 end
-
-

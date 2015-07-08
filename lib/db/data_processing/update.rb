@@ -111,25 +111,25 @@ module DTK
         delete_not_matching = (assigns.is_a?(HashObject) && assigns.is_complete?)
         create_stack_array = opts[:create_stack_array]|| CreateStackArray.create?(assigns)
 
-	c = factory_id_info[:c]
+  c = factory_id_info[:c]
         child_id_list = []
         if create_stack_array && assigns.empty?()
           # this means that need to update create_stack_array to indicate that there is a child that should have no elements
           create_stack_array.add_empty!(factory_id_info[:relation_type])
         end
-	       #each assigns key should be qualified ref wrt factory_id
+         #each assigns key should be qualified ref wrt factory_id
         assigns.each_pair do |qualified_ref,child_assigns|
-	  child_uri = RestURI.ret_child_uri_from_qualified_ref(factory_id_info[:uri],qualified_ref)
+    child_uri = RestURI.ret_child_uri_from_qualified_ref(factory_id_info[:uri],qualified_ref)
           child_idh = IDHandle[c: c, uri: child_uri]
           child_idh[:group_id] = id_handle[:group_id] if id_handle[:group_id]
-	  child_id_info = IDInfoTable.get_row_from_id_handle child_idh
+    child_id_info = IDInfoTable.get_row_from_id_handle child_idh
           if child_id_info
             child_opts = opts
             if create_stack_array
               child_create_stack = create_stack_array.add!(child_id_info[:relation_type],child_id_info[:id])
               child_opts = opts.merge(create_stack_array: child_create_stack.children())
             end
-	    update_from_hash_from_instance_id(child_id_info,child_idh,child_assigns,child_opts)
+      update_from_hash_from_instance_id(child_id_info,child_idh,child_assigns,child_opts)
             # TODO: may better unify with create stack
             child_id_list << child_id_info[:id] if delete_not_matching
           else
@@ -146,7 +146,7 @@ module DTK
               new_uris = new_uris + create_results.map{|r|r[:uri]}
             end
           end
-	end
+  end
         if delete_not_matching
           # at this point child_list will just have existing items; need to add new items
           new_child_ids = new_uris.map{|uri| IDHandle[c: c, uri: uri].get_id()}

@@ -176,4 +176,3 @@ eos
     ModelHandle.new(c,model_name)
   end
 end
-

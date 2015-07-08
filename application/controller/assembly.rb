@@ -185,7 +185,7 @@ module DTK
       end
       opts.add_return_datatype!()
       if detail_to_include
-        opts.merge!(detail_to_include: detail_to_include.map{|r|r.to_sym})
+        opts.merge!(detail_to_include: detail_to_include.map(&:to_sym))
         opts.add_value_to_return!(:datatype)
       end
 
@@ -936,4 +936,3 @@ module DTK
     end
   end
 end
-

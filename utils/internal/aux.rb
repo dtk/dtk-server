@@ -88,8 +88,8 @@ module DTK
         DefaultLength = 8
         DefaultType = /[a-z]/
         CharSet = {
-          /[a-z]/ => (97..97+25).map{|n|n.chr}.join(''),
-          /[A-Z]/ => (65..65+25).map{|n|n.chr}.join(''),
+          /[a-z]/ => (97..97+25).map(&:chr).join(''),
+          /[A-Z]/ => (65..65+25).map(&:chr).join(''),
           /[0-9]/ => '01234567989'
         }
       end
@@ -474,6 +474,3 @@ end
 #  module_function :parse_nested_query
 #   DEFAULT_SEP_MODIFIED = /[&] */n
 # end
-
-
-

@@ -124,7 +124,7 @@ module DTK; class Component
       return ret if component_idhs.empty?
       sp_hash = {
         cols: [:id],
-        filter: [:oneof, :component_id, component_idhs.map{|idh|idh.get_id()}]
+        filter: [:oneof, :component_id, component_idhs.map(&:get_id)]
       }
       port_mh = component_idhs.first.createMH(:port)
       port_ids = Model.get_objs(port_mh,sp_hash).map{|r|r[:id]}
@@ -156,7 +156,7 @@ module DTK; class Component
       return ret if cmp_idhs.empty?
       sp_hash = {
         cols: [:id,:inherited_dependencies, :extended_base, :component_type],
-        filter: [:oneof, :id, cmp_idhs.map{|idh|idh.get_id()}]
+        filter: [:oneof, :id, cmp_idhs.map(&:get_id)]
       }
       cmp_mh = cmp_idhs.first.createMH()
       Model.get_objs(cmp_mh,sp_hash)

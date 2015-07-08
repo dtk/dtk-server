@@ -145,7 +145,7 @@ module DTK; class AssemblyModule
     def get_for_assembly__augment_name_with_namespace!(cmp_modules)
       return if cmp_modules.empty?
       ndx_cmp_modules = cmp_modules.inject({}){|h,m|h.merge(m[:id] => m)}
-      ComponentModule.ndx_full_module_names(cmp_modules.map{|m|m.id_handle()}).each_pair do |ndx,full_module_name|
+      ComponentModule.ndx_full_module_names(cmp_modules.map(&:id_handle)).each_pair do |ndx,full_module_name|
         ndx_cmp_modules[ndx][:display_name] = full_module_name
       end
     end
@@ -209,4 +209,3 @@ module DTK; class AssemblyModule
     end
   end
 end; end
-

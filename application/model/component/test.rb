@@ -138,7 +138,7 @@ module DTK
 
         # get the link def links
         cols = [:id,:group_id,:display_name,:remote_component_type,:position,:content,:type,:link_def_id]
-        link_def_links = LinkDef.get_link_def_links(link_defs.map{|ld|ld.id_handle()},cols: cols)
+        link_def_links = LinkDef.get_link_def_links(link_defs.map(&:id_handle),cols: cols)
         # remove any link def link not associated with a test
         # first remove any link that is not internal (link on same compoennt)
         link_def_links.reject!{|ldl|ldl[:type] != "internal"}

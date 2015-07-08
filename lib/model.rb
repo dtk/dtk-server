@@ -353,7 +353,7 @@ module DTK
     # can be overriten
     def self.list(model_handle)
       sp_hash = {
-        cols: common_columns(),
+        cols: common_columns()
       }
       get_objs(model_handle.createMH(model_name()),sp_hash)
     end
@@ -644,7 +644,7 @@ module DTK
       end
       sp_hash = {
         cols: cols.include?(:id) ? cols : cols + [:id],
-        filter: [:oneof,:id,objects.map{|obj|obj.id()}]
+        filter: [:oneof,:id,objects.map(&:id)]
       }
       mh = objects.first.model_handle
       ndx_rows = get_objs(mh,sp_hash).inject({}) do |h,r|
@@ -712,7 +712,7 @@ module DTK
       return [] if id_handles.empty?
       sample_idh = id_handles.first
       model_handle = sample_idh.createMH()
-      sp_hash = HashSearchPattern.add_to_filter(sp_hash_x,[:oneof, :id, id_handles.map{|idh|idh.get_id()}])
+      sp_hash = HashSearchPattern.add_to_filter(sp_hash_x,[:oneof, :id, id_handles.map(&:get_id)])
       get_objs(model_handle,sp_hash,opts)
     end
 
@@ -721,7 +721,7 @@ module DTK
       return [] if id_handles.empty?
       sample_idh = id_handles.first
       model_handle = sample_idh.createMH()
-      sp_hash = HashSearchPattern.add_to_filter(sp_hash_x,[:oneof, :id, id_handles.map{|idh|idh.get_id()}])
+      sp_hash = HashSearchPattern.add_to_filter(sp_hash_x,[:oneof, :id, id_handles.map(&:get_id)])
       get_objects_from_sp_hash(model_handle,sp_hash,opts)
     end
 
@@ -861,4 +861,3 @@ module DTK
   class RefObjectPairs < HashObject
   end
 end
-

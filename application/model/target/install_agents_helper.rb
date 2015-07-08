@@ -106,7 +106,7 @@ module DTK; class Target
         t_out = R8::Config[:workflow][:install_agents][:timeout].to_i||600
         Timeout.timeout(t_out) do
           loop do
-            break unless @workers.any?{|w| w.alive?}
+            break unless @workers.any?(&:alive?)
             sleep 1
           end
         end

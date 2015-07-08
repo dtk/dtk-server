@@ -31,7 +31,7 @@ module DTK; class Assembly; class Instance
         filter: [:eq,:assembly_id,id()]
       }
       port_links = Model.get_objs(model_handle(:port_link),sp_hash)
-      filter = [:or,[:oneof,:port_link_id,port_links.map{|r|r.id()}],[:eq,:assembly_id,id()]]
+      filter = [:or,[:oneof,:port_link_id,port_links.map(&:id)],[:eq,:assembly_id,id()]]
       AttributeLink.get_augmented(model_handle(:attribute_link),filter)
     end
     #### end: get methods around attribute mappings
@@ -261,7 +261,7 @@ module DTK; class Assembly; class Instance
 
     def get(assembly_mh, opts={})
       target_idhs = (opts[:target_idh] ? [opts[:target_idh]] : opts[:target_idhs])
-      target_filter = (target_idhs ? [:oneof, :datacenter_datacenter_id, target_idhs.map{|idh|idh.get_id()}] : [:neq, :datacenter_datacenter_id, nil])
+      target_filter = (target_idhs ? [:oneof, :datacenter_datacenter_id, target_idhs.map(&:get_id)] : [:neq, :datacenter_datacenter_id, nil])
       filter = [:and, [:eq, :type, "composite"], target_filter,opts[:filter]].compact
       sp_hash = {
         cols: opts[:cols]||[:id,:group_id,:display_name],
@@ -295,7 +295,7 @@ module DTK; class Assembly; class Instance
       return ret if assembly_idhs.empty?
       sp_hash = {
         cols: [:id,:group_id,:node_node_id],
-        filter: [:oneof, :assembly_id, assembly_idhs.map{|idh|idh.get_id()}]
+        filter: [:oneof, :assembly_id, assembly_idhs.map(&:get_id)]
       }
       ndx_nodes = {}
       component_mh = assembly_idhs.first.createMH(:component)
@@ -309,7 +309,7 @@ module DTK; class Assembly; class Instance
         filter: [:and, filter_out_target_refs(),
                  [:or,[:oneof, :id, ndx_nodes.keys],
                   #to catch nodes without any components
-                  [:oneof, :assembly_id,assembly_idhs.map{|idh|idh.get_id()}]]
+                  [:oneof, :assembly_id,assembly_idhs.map(&:get_id)]]
                    ]
       }
       node_mh = assembly_idhs.first.createMH(:node)
@@ -323,7 +323,7 @@ module DTK; class Assembly; class Instance
       return ret if assembly_idhs.empty?()
       sp_hash = {
         cols: opts[:cols] || [:id,:display_name,:group_id,:type,:assembly_id],
-        filter: [:oneof,:assembly_id,assembly_idhs.map{|idh|idh.get_id()}]
+        filter: [:oneof,:assembly_id,assembly_idhs.map(&:get_id)]
       }
       node_mh = assembly_idhs.first.createMH(:node)
       ret = get_objs(node_mh,sp_hash)
@@ -342,9 +342,9 @@ module DTK; class Assembly; class Instance
       return ret if assembly_idhs.empty?
       sp_hash = {
         cols: [:id,:group_id,:display_name],
-        filter: [:and,[:oneof,:assembly_id,assembly_idhs.map{|idh|idh.get_id()}],[:eq,:type,"composite"]]
+        filter: [:and,[:oneof,:assembly_id,assembly_idhs.map(&:get_id)],[:eq,:type,"composite"]]
       }
-      get_objs(assembly_idhs.first.createMH(),sp_hash).map{|a|a.copy_as_assembly_instance()}
+      get_objs(assembly_idhs.first.createMH(),sp_hash).map(&:copy_as_assembly_instance)
     end
 
     private
@@ -354,4 +354,3 @@ module DTK; class Assembly; class Instance
     end
   end
 end; end; end
-

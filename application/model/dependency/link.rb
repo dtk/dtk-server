@@ -40,7 +40,7 @@ module DTK; class Dependency
 
     def self.augment_component_instances!(assembly,components,opts=Opts.new)
       return components if components.empty?
-      link_defs = LinkDef.get(components.map{|cmp|cmp.id_handle()})
+      link_defs = LinkDef.get(components.map(&:id_handle))
       unless link_defs.empty?
         link_deps = []
         components.each do |cmp|
@@ -119,4 +119,3 @@ module DTK; class Dependency
     end
   end
 end; end
-

@@ -112,7 +112,7 @@ module DTK; class ModuleRefs
             first_el = els.sort{|a,b| a.level <=> b.level}.first
             #warning only if first_el does not have level 1 and multiple namesapces
             unless first_el.level == 1
-              namespaces = els.map{|el|el.namespace}.uniq
+              namespaces = els.map(&:namespace).uniq
               if namespaces.size > 1
                 Log.error("Multiple namespaces (#{namespaces.join(',')}) for '#{module_name}'; picking one '#{first_el.namespace}'")
               end

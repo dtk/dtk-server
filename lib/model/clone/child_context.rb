@@ -81,7 +81,7 @@ module DTK; class Clone
         model_handle: child_mh,
         clone_par_col: parent_id_col,
         parent_rels: parent_rels,
-        where_clause: {id: template_child_idhs.map{|idh|idh.get_id()}},
+        where_clause: {id: template_child_idhs.map(&:get_id)},
         create_opts: {
           duplicate_refs: :no_check,
           returning_sql_cols: returning_sql_cols(parent_id_col)
@@ -98,7 +98,7 @@ module DTK; class Clone
       field_set = Model::FieldSet.all_real(concrete_model_name).with_removed_cols(:id,:local_id,parent_id_col)
 
       base_fs = Model::FieldSet.opt(field_set.cols + [{id: :template_id}],model_handle[:model_name])
-      base_wc = SQL.in(:id,instance_template_links.templates.map{|r|r.id})
+      base_wc = SQL.in(:id,instance_template_links.templates.map(&:id))
       base_ds = Model.get_objects_just_dataset(model_handle,base_wc,base_fs)
 
       mappping_rows = instance_template_links.map do |l|
@@ -270,4 +270,3 @@ module DTK; class Clone
     end
   end
 end; end
-

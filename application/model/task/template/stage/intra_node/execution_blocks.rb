@@ -21,7 +21,7 @@ module DTK; class Task; class Template
       end
 
       def has_action_with_method?
-        !!find{|eb|eb.has_action_with_method?()}
+        !!find(&:has_action_with_method?)
       end
 
       def delete_action!(action_match)
@@ -87,7 +87,7 @@ module DTK; class Task; class Template
         if find{|eb|!eb.is_a?(ExecutionBlock::Ordered)}
           raise Error.new("The method ExecutionBlocks#intra_node_stages can only be called if all its elements are ordered")
         end
-        map{|eb|eb.intra_node_stages()}
+        map(&:intra_node_stages)
       end
 
       def node

@@ -31,7 +31,7 @@ module DTK
       end
 
       def apply_settings(assembly)
-        av_pairs = map{|el|el.av_pair_form()}
+        av_pairs = map(&:av_pair_form)
         opts_set = {partial_value: false,create: [:node_level,:assembly_level]}
         assembly.set_attributes(av_pairs,opts_set)
       end

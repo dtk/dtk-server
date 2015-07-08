@@ -27,4 +27,3 @@ module XYZ
     end
   end
 end
-

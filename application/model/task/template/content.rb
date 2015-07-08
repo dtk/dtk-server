@@ -242,7 +242,7 @@ module DTK; class Task
 
       def create_stages_from_temporal_constraints_aux!(temporal_constraints,actions,opts={})
         return if actions.empty?
-        inter_node_constraints = temporal_constraints.select{|tc|tc.inter_node?()}
+        inter_node_constraints = temporal_constraints.select(&:inter_node?)
 
         stage_factory = Stage::InterNode::Factory.new(actions,temporal_constraints)
         before_index_hash = inter_node_constraints.create_before_index_hash(actions)

@@ -13,7 +13,7 @@ module DTK; class ModuleDSL
 
       def component_template_ids(aug_cmp_templates=nil)
         aug_cmp_templates ||= @aug_cmp_templates
-        aug_cmp_templates.map{|cmp_template|cmp_template.id()}
+        aug_cmp_templates.map(&:id)
       end
 
       def referenced_cmp_templates(exclude_cmp_template_ids)
@@ -133,4 +133,3 @@ module DTK; class ModuleDSL
     end
   end
 end; end
-

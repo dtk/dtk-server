@@ -48,6 +48,3 @@ wfid = engine.launch(pdef)
 engine.wait_for(wfid)
 storage = engine.storage
 pp engine.storage.find_expressions(wfid)
-
-
-

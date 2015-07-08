@@ -72,7 +72,7 @@ module DTK; module CommandAndControlAdapter
           'snapshotId'          => 'Ebs.SnapshotId',
           'volumeSize'          => 'Ebs.VolumeSize',
           'deleteOnTermination' => 'Ebs.DeleteOnTermination',
-          'virtualName'         => 'VirtualName',
+          'virtualName'         => 'VirtualName'
         }
         TargetKeys = KeyMapping.values
       end

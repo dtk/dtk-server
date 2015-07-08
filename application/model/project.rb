@@ -45,7 +45,7 @@ module DTK
       ret = ret_hash.values.map{|ct|ct.merge(implementations: ct[:implementations].values)}
       return ret unless opts[:include_file_assets]
 
-      impl_idhs = ret.flat_map{|ct|ct[:implementations].map{|impl|impl.id_handle}}
+      impl_idhs = ret.flat_map{|ct|ct[:implementations].map(&:id_handle)}
       indexed_asset_files = Implementation.get_indexed_asset_files(impl_idhs)
       ret.each{|ct|ct[:implementations].each{|impl|impl.merge!(file_assets: indexed_asset_files[impl[:id]])}}
       ret
@@ -69,7 +69,7 @@ module DTK
       ret = ndx_ret.values
       return ret unless opts[:include_file_assets]
 
-      impl_idhs = ret.map{|impl|impl.id_handle}
+      impl_idhs = ret.map(&:id_handle)
       indexed_asset_files = Implementation.get_indexed_asset_files(impl_idhs)
       ret.each{|impl|impl.merge!(file_assets: indexed_asset_files[impl[:id]]||[])}
       ret
@@ -113,7 +113,7 @@ module DTK
 
     def destroy_and_delete_nodes
       targets = get_objs(cols: [:targets]).map{|r|r[:target]}
-      targets.each{|t|t.destroy_and_delete_nodes()}
+      targets.each(&:destroy_and_delete_nodes)
     end
 
     def delete_projects_repo_branches
@@ -127,4 +127,3 @@ module DTK
     end
   end
 end
-

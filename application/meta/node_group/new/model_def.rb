@@ -36,6 +36,6 @@
                                     join_cond: {id: :node_group_relation__datacenter_datacenter_id},
                                     cols: [:id,:group_id,:display_name,:iaas_properties]
                                   }]
-    },
+    }
   }
 }

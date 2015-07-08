@@ -38,4 +38,3 @@
   many_to_one: [:project,:task],
   one_to_many: [:task, :task_log, :task_event, :task_error]
 }
-

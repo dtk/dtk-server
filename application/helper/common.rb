@@ -509,4 +509,3 @@ module Ramaze::Helper
    }
   end
 end
-

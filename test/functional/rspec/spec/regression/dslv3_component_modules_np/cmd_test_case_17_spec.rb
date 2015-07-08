@@ -57,4 +57,3 @@ describe "(Component Module DSL) Test Case 17: NEG - dtk.model.yaml with invalid
     puts "", ""
   end
 end
-

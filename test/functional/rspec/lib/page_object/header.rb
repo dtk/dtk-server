@@ -12,9 +12,9 @@ class Header < PageContainer
   end
 
   def click_on_users
-  	@session.within(:header) do
-  		@session.click_link('Users')
-  	end
+    @session.within(:header) do
+      @session.click_link('Users')
+    end
   end
 
   def click_on_namespaces
@@ -24,8 +24,8 @@ class Header < PageContainer
   end
 
   def click_on_modules
-  	@session.within(:header) do
-  		@session.click_link('Modules')
-  	end
+    @session.within(:header) do
+      @session.click_link('Modules')
+    end
   end
 end

@@ -36,7 +36,7 @@ module XYZ
     def hash_form
       {
         complete: @complete,
-        log_segments: map{|l|l.hash_form()}
+        log_segments: map(&:hash_form)
       }
     end
   end

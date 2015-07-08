@@ -7,14 +7,14 @@ module XYZ
         db_server: {
           postgres_db_server: {},
           mysql_db_server: {},
-          oracle_db_server: {},
+          oracle_db_server: {}
         },
         monitoring_server: {},
         monitoring_agent: {},
         msg_bus: {},
         memory_cache: {},
         load_balancer: {},
-        firewall: {},
+        firewall: {}
       },
 
       language: {
@@ -23,19 +23,19 @@ module XYZ
         perl: {},
         javascript: {},
         java: {},
-        clojure: {},
+        clojure: {}
       },
 
       application: {
         java_app: {
-          java_spring: {},
+          java_spring: {}
         },
         ruby_app: {
           ruby_rails: {},
           ruby_ramaze: {},
-          ruby_sinatra: {},
+          ruby_sinatra: {}
         },
-        php_app: {},
+        php_app: {}
       },
 
       extension: {},
@@ -43,7 +43,7 @@ module XYZ
       database: {
         postgres_db: {},
         mysql_db: {},
-        oracle_db: {},
+        oracle_db: {}
       },
 
       user: {}

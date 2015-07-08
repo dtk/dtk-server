@@ -141,4 +141,3 @@ describe "(Component Module DSL) Test Case 7: Converge assembly with modified mo
     puts "", ""
   end
 end
-

@@ -36,4 +36,3 @@ server = R8Server.new(username,options)
 server.create_repo_user_for_nodes?()
 
 idhs = server.create_users_private_target?(nil,ec2_region)
-

@@ -165,7 +165,7 @@ class DBRel < Hash
   end
 
   TOP_SCHEMA_NAME = :top
-  TOP_RELATION_TYPE = :"__top"
+  TOP_RELATION_TYPE = :__top
   ID_TYPES = {id: :bigint, local_id: :integer, context_id: :integer}
   TOP_LOCAL_ID_SEQ = {schema: TOP_SCHEMA_NAME, fn: :local_id_seq}
   ID_INFO_TABLE = DBRel[schema: TOP_SCHEMA_NAME, table: :id_info, id: :relation_id, local_id: :relation_local_id,parent_id: :parent_id, relation_type: :id_info]
@@ -194,4 +194,3 @@ class DBRel < Hash
     :group_id => {type: ID_TYPES[:id], hidden: true}
   }
 end
-

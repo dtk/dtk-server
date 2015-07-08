@@ -140,7 +140,7 @@ module DTK
           return ret
         end
         mh = module_idhs.first.createMH()
-        filter = [:oneof,:id,module_idhs.map{|idh|idh.get_id()}]
+        filter = [:oneof,:id,module_idhs.map(&:get_id)]
         post_filter = proc{|mb|!mb.assembly_module_version?()}
         get_matching_module_branches(mh,filter,post_filter)
       end
@@ -163,6 +163,3 @@ module DTK
     end
   end
 end
-
-
-

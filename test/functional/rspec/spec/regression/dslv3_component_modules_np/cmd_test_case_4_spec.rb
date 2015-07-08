@@ -80,4 +80,3 @@ describe "(Component Module DSL) Test Case 4: Remove existing component attribut
     puts "", ""
   end
 end
-

@@ -80,7 +80,7 @@ module DTK; class LinkDef
         display_name: ref,
         config_agent_type: config_agent_type,
         local_or_remote: "remote",
-        link_type: link_def_type,
+        link_type: link_def_type
       }
       pointer[ref][:has_internal_link] = true if %w{internal internal_external}.include?(possible_link_type)
       pointer[ref][:has_external_link] = true if %w{external internal_external}.include?(possible_link_type)
@@ -143,7 +143,7 @@ module DTK; class LinkDef
       ret = {
         event_type: "extend_component",
         node: remote_or_local,
-        extension_type: ev_content["extension_type"],
+        extension_type: ev_content["extension_type"]
       }
       ret.merge!(alias: ev_content["alias"]) if ev_content.key?("alias")
       ret

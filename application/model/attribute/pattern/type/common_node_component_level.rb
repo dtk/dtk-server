@@ -51,7 +51,7 @@ module DTK; class Attribute
         # TODO: can make more efficient by having create_or_modify_field_def return object with cols, rather than id_handles
         sp_hash = {
           cols: [:id,:group_id,:display_name,:description,:component_component_id,:data_type,:semantic_type,:required,:dynamic,:external_ref,:semantic_data_type],
-          filter: [:oneof,:id,attribute_idhs.map{|idh|idh.get_id()}]
+          filter: [:oneof,:id,attribute_idhs.map(&:get_id)]
         }
         attr_mh = attribute_idhs.first.createMH()
         Model.get_objs(attr_mh,sp_hash)
@@ -63,7 +63,7 @@ module DTK; class Attribute
           filter: [:eq,:ancestor_id,node_group_attribute.id()]
         }
         attr_mh = node_group_attribute.model_handle()
-        Model.get_objs(attr_mh,sp_hash).map{|r|r.id_handle()}
+        Model.get_objs(attr_mh,sp_hash).map(&:id_handle)
       end
 
       def pattern_attribute_name
@@ -78,4 +78,3 @@ module DTK; class Attribute
     end
   end; end
 end; end
-

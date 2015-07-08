@@ -5,7 +5,7 @@ module DTK; class Task; class Template
       r8_nested_require('intra_node','execution_blocks')
       class Processor
         def initialize(temporal_constraints)
-          @intra_node_contraints = temporal_constraints.select{|r|r.intra_node?()}
+          @intra_node_contraints = temporal_constraints.select(&:intra_node?)
         end
 
         def process(intra_node_unordered)

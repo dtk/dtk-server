@@ -9,4 +9,3 @@
   },
   many_to_one: [:library]
 }
-

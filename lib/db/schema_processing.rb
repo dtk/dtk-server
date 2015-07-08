@@ -26,7 +26,7 @@ module DTK
 
       def create_schema?(schema_name)
         create_schema(schema_name) if !schema_exists?(schema_name)
-	nil
+  nil
       end
 
       def add_column(db_rel,*args)
@@ -54,4 +54,3 @@ module DTK
     end
   end
 end
-

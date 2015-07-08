@@ -121,13 +121,13 @@ module DTK
 
       def self.create_state_changes_for_node_group_members(target_idh,nodes,sc_hashes)
         ret = []
-        node_groups = nodes.select{|n|n.is_node_group?()}
+        node_groups = nodes.select(&:is_node_group?)
         return ret if node_groups.empty?
         ng_mh =  node_groups.first.model_handle()
         ndx_sc_ids = sc_hashes.inject({}){|h,sc|h.merge(sc[:node_id] => sc[:id])}
         sc_mh = target_idh.createMH(:state_change)
         new_items_hash = []
-        ServiceNodeGroup.get_ndx_node_group_members(node_groups.map{|ng|ng.id_handle()}).each do |ng_id,node_members|
+        ServiceNodeGroup.get_ndx_node_group_members(node_groups.map(&:id_handle)).each do |ng_id,node_members|
           unless ng_state_change_id = ndx_sc_ids[ng_id]
             Log.eror("Unexpected that ndx_sc_ihs[ng_id] is null")
             next
@@ -174,7 +174,7 @@ module DTK
         port_link_mh =  sample_pl_idh.createMH()
         sp_hash = {
           cols: [:id,:display_name,:group_id,:input_id,:output_id],
-          filter: [:oneof,:id, port_link_idhs.map{|pl_idh|pl_idh.get_id()}]
+          filter: [:oneof,:id, port_link_idhs.map(&:get_id)]
         }
         Model.get_objs(port_link_mh,sp_hash).each do |port_link|
           port_link.create_attribute_links__clone_if_needed(target.id_handle,set_port_link_temporal_order: true)

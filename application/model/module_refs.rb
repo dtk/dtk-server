@@ -188,7 +188,7 @@ module DTK
         return ret
       end
 
-      sorted_dsl_hash_form = dsl_hash_form.keys.map{|x|x.to_s}.sort().inject(SimpleOrderedHash.new()) do |h,k|
+      sorted_dsl_hash_form = dsl_hash_form.keys.map(&:to_s).sort().inject(SimpleOrderedHash.new()) do |h,k|
         h.merge(k => dsl_hash_form[k])
       end
       ret.merge(component_modules: sorted_dsl_hash_form)

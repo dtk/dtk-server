@@ -73,7 +73,7 @@ module DTK; class StateChange
       state_change_mh = target_mh.create_childMH(:state_change)
       while not last_level.empty?
         ret += last_level
-        last_level = pending_create_node(state_change_mh,last_level.map{|obj|obj.id_handle()})
+        last_level = pending_create_node(state_change_mh,last_level.map(&:id_handle))
       end
       ret
       if opts[:just_leaf_nodes]

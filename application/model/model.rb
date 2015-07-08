@@ -63,10 +63,10 @@ module XYZ
         }
 
         nodes.each{|node|
-      	  values = node.get_direct_attribute_values(type,opts)
-      	  if values
-      	    ret[:node]||= {}
-      	    ret[:node][node.get_qualified_ref.to_sym] = values
+          values = node.get_direct_attribute_values(type,opts)
+          if values
+            ret[:node]||= {}
+            ret[:node][node.get_qualified_ref.to_sym] = values
           end
         }
         ret
@@ -80,6 +80,3 @@ module XYZ
     end
   end
 end
-
-
-

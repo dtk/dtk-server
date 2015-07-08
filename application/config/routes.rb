@@ -318,4 +318,3 @@ R8::ReactorRoute.draw do
 end
 
 R8::Routes.freeze
-

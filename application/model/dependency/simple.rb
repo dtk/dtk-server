@@ -58,7 +58,7 @@ module DTK; class Dependency
       return components if components.empty?
       sp_hash = {
         cols: [:id,:group_id,:component_component_id,:search_pattern,:type,:description,:severity],
-        filter: [:oneof,:component_component_id,components.map{|cmp|cmp.id()}]
+        filter: [:oneof,:component_component_id,components.map(&:id)]
       }
       dep_mh = components.first.model_handle(:dependency)
 

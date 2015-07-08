@@ -6,7 +6,7 @@ module DTK; class Component
       cmp_cols = [:id,:group_id,:only_one_per_node,:component_type,:extended_base,:implementation_id]
       sp_hash = {
         cols: [:dependencies] + cmp_cols,
-        filter: [:oneof,:id,component_idhs.map{|idh|idh.get_id()}]
+        filter: [:oneof,:id,component_idhs.map(&:get_id)]
       }
       cmp_mh = component_idhs.first.createMH()
       # if agree on component id thean all attributes same execpet for dependencies
@@ -62,4 +62,3 @@ module DTK; class Component
     end
   end
 end; end
-

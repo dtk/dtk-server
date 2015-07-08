@@ -34,21 +34,21 @@ module XYZ
         list:         [
          {id: {
              required: true,
-             type: 'hidden',
+             type: 'hidden'
            }}
         ],
         edit:         [
          {
            id: {
              required: true,
-             type: 'hidden',
+             type: 'hidden'
            }
          },
          {
            model: {
              required: true,
              type: 'hidden',
-             value: 'component',
+             value: 'component'
            }
          },
          {
@@ -56,29 +56,29 @@ module XYZ
              required: true,
              type: 'hidden',
              value: 'save_attribute'
-           },
+           }
          }
         ],
         display:         [
          {
            id: {
              required: true,
-             type: 'hidden',
+             type: 'hidden'
            }
          },
          {
            obj: {
              required: true,
              type: 'hidden',
-             value: 'component',
+             value: 'component'
            }
          },
          {
            action: {
              required: true,
              type: 'hidden',
-             value: 'edit',
-           },
+             value: 'edit'
+           }
          }
         ]
       }

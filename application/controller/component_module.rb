@@ -121,7 +121,7 @@ module DTK
 
       opts = Opts.new(project_idh: project.id_handle())
       if detail = ret_request_params(:detail_to_include)
-        opts.merge!(detail_to_include: detail.map{|r|r.to_sym})
+        opts.merge!(detail_to_include: detail.map(&:to_sym))
       end
 
       opts.merge!(remote_repo_base: remote_repo_base, diff: diff, namespace: namespace)

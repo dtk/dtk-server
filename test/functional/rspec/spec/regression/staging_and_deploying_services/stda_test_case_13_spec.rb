@@ -29,39 +29,39 @@ dtk_common = DtkCommon.new(service_name, assembly_name)
 dtk_common2 = DtkCommon.new(new_service_name, "#{service_module_name}::#{new_assembly}")
 
 describe "(Staging And Deploying Assemblies) Test Case 13: Ability to create assembly with components on assembly level and then converge it" do
-	before(:all) do
-		puts "**********************************************************************************************************************************",""
+  before(:all) do
+    puts "**********************************************************************************************************************************",""
   end
 
-	context "Stage service function on #{assembly_name} assembly" do
-		include_context "Stage", dtk_common
-	end
+  context "Stage service function on #{assembly_name} assembly" do
+    include_context "Stage", dtk_common
+  end
 
-	context "List services after stage" do
-		include_context "List services after stage", dtk_common
-	end
+  context "List services after stage" do
+    include_context "List services after stage", dtk_common
+  end
 
-	context "Add components to service instance" do
+  context "Add components to service instance" do
     include_context "Add specific component to service instance", dtk_common, component_name
   end
 
-	context "List components on #{service_name} service" do
-		include_context "List components", dtk_common, components
-	end
+  context "List components on #{service_name} service" do
+    include_context "List components", dtk_common, components
+  end
 
-	context "Create new assembly from existing service" do
+  context "Create new assembly from existing service" do
     include_context "Create assembly from service", dtk_common, service_module_name, new_assembly, local_namespace
   end
 
-	context "Delete and destroy service function" do
-		include_context "Delete services", dtk_common
-	end
+  context "Delete and destroy service function" do
+    include_context "Delete services", dtk_common
+  end
 
-	context "List services after delete" do
-		include_context "List services after delete", dtk_common
-	end
+  context "List services after delete" do
+    include_context "List services after delete", dtk_common
+  end
 
-	context "Stage new service function on #{assembly_name} assembly" do
+  context "Stage new service function on #{assembly_name} assembly" do
     include_context "Stage", dtk_common2
   end
 
@@ -74,8 +74,8 @@ describe "(Staging And Deploying Assemblies) Test Case 13: Ability to create ass
   end
 
   context "Check that port #{port_to_check}" do
-		include_context "Check if port avaliable", dtk_common2, port_to_check
-	end
+    include_context "Check if port avaliable", dtk_common2, port_to_check
+  end
 
   context "Delete and destroy service function" do
     include_context "Delete services", dtk_common2
@@ -85,7 +85,7 @@ describe "(Staging And Deploying Assemblies) Test Case 13: Ability to create ass
     include_context "Delete assembly", dtk_common2, "#{service_module_name}/#{new_assembly}", local_namespace
   end
 
-	after(:all) do
-		puts "", ""
-	end
+  after(:all) do
+    puts "", ""
+  end
 end

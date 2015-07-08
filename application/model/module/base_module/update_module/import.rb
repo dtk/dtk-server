@@ -41,7 +41,7 @@ module DTK; class BaseModule; class UpdateModule
       component_module = module_and_branch_info[:module_idh].create_object()
 
       module_branch.set_dsl_parsed!(false)
-      include_modules = cmr_update_els.map{|r|r.component_module}
+      include_modules = cmr_update_els.map(&:component_module)
 
       # scaffold Puppet manifests
       opts_scaffold = Opts.create?(
@@ -168,4 +168,3 @@ module DTK; class BaseModule; class UpdateModule
     end
   end
 end; end; end
-

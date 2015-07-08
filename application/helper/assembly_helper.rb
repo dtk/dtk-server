@@ -257,4 +257,3 @@ module Ramaze::Helper
       temp_element == element_id_val.to_i
     end
 end
-

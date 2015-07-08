@@ -147,4 +147,3 @@ class Puppet::Parser::AST::Definition
   attr_reader :name
 end
 ####
-

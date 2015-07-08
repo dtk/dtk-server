@@ -52,7 +52,7 @@ module XYZ
       rescue Exception => err
         raise Error.new("Error writing exported data to file #{json_file}: #{err}")
       ensure
-       	f.close
+         f.close
       end
     end
   end

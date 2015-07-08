@@ -21,7 +21,7 @@ module DTK; class Task
       end
       # only uses a constraint if both members belong to action_list
       def create_before_index_hash(action_list)
-        action_indexes =  action_list.map{|a|a.index}
+        action_indexes =  action_list.map(&:index)
         ret = BeforeIndexHash.new(action_indexes)
         each do |constraint|
           after_action_index = constraint.after_action_index
@@ -80,4 +80,3 @@ module DTK; class Task
     end
   end
 end; end
-

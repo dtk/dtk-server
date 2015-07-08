@@ -66,4 +66,3 @@ describe "(Component Module DSL) Test Case 2: Rename existing component from dtk
     puts "", ""
   end
 end
-

@@ -41,5 +41,3 @@ module DTK; class Clone
     end
   end
 end; end
-
-

@@ -10,28 +10,28 @@ module XYZ
         include SchemaProcessing unless included_modules.include?(SchemaProcessing)
         def create_table_associations?(db_rel)
           return nil if db_rel[:many_to_one].nil?
-  	  db_rel[:many_to_one].each{|parent_rel_type|
-	     #TDB error messages if anything null
- 	    parent_db_rel = DB_REL_DEF[parent_rel_type]
-	    foreign_key_field = ret_parent_id_field_name(parent_db_rel,db_rel)
-	    #TBD: may put in null constraints, but this must be conditional
-	    add_foreign_key? db_rel,foreign_key_field,parent_db_rel,on_delete: :cascade, on_update: :cascade,type: ID_TYPES[:id]
-	  }
-	  nil
+      db_rel[:many_to_one].each{|parent_rel_type|
+       #TDB error messages if anything null
+       parent_db_rel = DB_REL_DEF[parent_rel_type]
+      foreign_key_field = ret_parent_id_field_name(parent_db_rel,db_rel)
+      #TBD: may put in null constraints, but this must be conditional
+      add_foreign_key? db_rel,foreign_key_field,parent_db_rel,on_delete: :cascade, on_update: :cascade,type: ID_TYPES[:id]
+    }
+    nil
         end
 
         def add_foreign_key(db_rel,foreign_key_field,db_rel_pointed_to,opts={})
           table_pt = db_rel_pointed_to.schema_table_symbol()
           @db.alter_table(db_rel.schema_table_symbol) do
-	     add_foreign_key foreign_key_field,table_pt,opts
-	  end
-	  nil
+       add_foreign_key foreign_key_field,table_pt,opts
+    end
+    nil
         end
 
         def add_foreign_key?(db_rel,foreign_key_field,db_rel_pointed_to,opts={})
           unless foreign_key_exists?(db_rel,foreign_key_field,db_rel_pointed_to)
             add_foreign_key(db_rel,foreign_key_field,db_rel_pointed_to,opts)
-	  end
+    end
         end
       ########### end: SchemaProcessing
     end
@@ -61,10 +61,10 @@ module XYZ
 
     def set_foreign_keys_to_right_values
       @id_mapping_in_clone.each_pair{|old_id,info|
-	 next unless fk_info = @@fk_refs[info[:relation_type]]
-	 fk_info.each_pair{|fk_relation_type,cols|
-	   cols.keys.each{|col|
-	     @db.update(fk_relation_type, info[:c],{col => info[:new_id]}, {col => old_id})
+   next unless fk_info = @@fk_refs[info[:relation_type]]
+   fk_info.each_pair{|fk_relation_type,cols|
+     cols.keys.each{|col|
+       @db.update(fk_relation_type, info[:c],{col => info[:new_id]}, {col => old_id})
            }
          }
       }

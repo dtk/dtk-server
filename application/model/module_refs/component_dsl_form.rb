@@ -52,7 +52,7 @@ module DTK; class ModuleRefs
 
       # find component modules (in parse form) that matches a component module found in dsl or
       # in opts; module_names are the relevant modle names to return info about
-      module_names = (cmp_mod_refs.map{|r|r.component_module} + (opts[:include_module_names]||[])).uniq
+      module_names = (cmp_mod_refs.map(&:component_module) + (opts[:include_module_names]||[])).uniq
       return ret if module_names.empty?
       cmp_mods_dsl_form = get_matching_component_modules__dsl_form(project_idh,module_names)
 
@@ -66,7 +66,7 @@ module DTK; class ModuleRefs
       end
       unless dangling_cmp_mod_refs.empty?
         # TODO: is this redundant with 'inconsistent external depenedency?
-        cmrs_print_form = dangling_cmp_mod_refs.map{|cmr|cmr.print_form}.join(',')
+        cmrs_print_form = dangling_cmp_mod_refs.map(&:print_form).join(',')
         err_msg = "The following component module references in the module refs file do not exist: #{cmrs_print_form}"
         return ErrorUsage::Parsing.new(err_msg)
       end
@@ -94,7 +94,7 @@ module DTK; class ModuleRefs
       if module_branches.nil? || module_branches.empty?
         return ret
       end
-      mb_idhs = module_branches.map{|mb|mb.id_handle()}
+      mb_idhs = module_branches.map(&:id_handle)
       ret = ComponentDSLForm::Elements.new
       ModuleBranch.get_namespace_info(mb_idhs).each do |r|
         ret << new(r[:component_module][:display_name],r[:namespace][:display_name])
@@ -126,4 +126,3 @@ module DTK; class ModuleRefs
     end
   end
 end; end
-

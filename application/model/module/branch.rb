@@ -347,7 +347,7 @@ end
       return ret if module_branch_idhs.nil? || module_branch_idhs.empty?
       sp_hash = {
         cols: [:component_module_info],
-        filter: [:oneof,:id,module_branch_idhs.map{|idh|idh.get_id()}]
+        filter: [:oneof,:id,module_branch_idhs.map(&:get_id)]
       }
       sample_mb_idh = module_branch_idhs.first
       get_objs(sample_mb_idh.createMH(),sp_hash).map do |r|
@@ -399,7 +399,7 @@ end
       return ret if id_handles.empty?
       sp_hash = {
         cols: [:id,:component_module_namespace_info],
-        filter: [:oneof,:id,id_handles.map{|idh|idh.get_id}]
+        filter: [:oneof,:id,id_handles.map(&:get_id)]
       }
       get_objs(id_handles.first.createMH(),sp_hash)
     end
@@ -412,7 +412,7 @@ end
         # MOD_RESTRUCT: after get rid of lib branches might use below
         #        :cols => [:id,:display_name,:component_ws_module_branches],
         cols: [:id,:display_name,:component_module_branches], #temp which can return lib branches
-        filter: [:oneof, :id, node_idhs.map{|idh|idh.get_id()}]
+        filter: [:oneof, :id, node_idhs.map(&:get_id)]
       }
       sample_node_idh = node_idhs.first()
       node_rows = get_objs(sample_node_idh.createMH(),sp_hash)

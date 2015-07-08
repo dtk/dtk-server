@@ -96,4 +96,3 @@ module DTK; class LinkDef
     end
   end
 end; end
-

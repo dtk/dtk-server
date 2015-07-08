@@ -28,7 +28,7 @@ module DTK; class Component
       # are includes using ModuleRefs::Lock
       ndx_ret = ret.inject({}){|h,impl|h.merge(impl.id => impl)}
       locked_module_refs = ModuleRefs::Lock.get(assembly_instance,types: [:locked_dependencies,:locked_branch_shas])
-      included_impls = locked_module_refs.matching_impls_with_children(include_modules.map{|im|im.module_name()})
+      included_impls = locked_module_refs.matching_impls_with_children(include_modules.map(&:module_name))
       ndx_ret = included_impls.inject(ndx_ret){|h,impl|h.merge(impl.id => impl)}
       ndx_ret.values
     end

@@ -34,7 +34,7 @@ module DTK; class Node
               "data_type"=>"string",
               "display_name"=>"fqdn",
               "dynamic"=>true,
-              "hidden"=>true,
+              "hidden"=>true
             },
             "node_components"=>{
               "required"=>false,
@@ -44,7 +44,7 @@ module DTK; class Node
               "data_type"=>"json",
               "display_name"=>"node_components",
               "dynamic"=>true,
-              "hidden"=>true,
+              "hidden"=>true
             }
           },
           "node_interface"=>{
@@ -55,4 +55,3 @@ module DTK; class Node
     end
   end
 end; end
-

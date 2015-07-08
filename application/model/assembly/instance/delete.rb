@@ -24,7 +24,7 @@ module DTK; class  Assembly
       def destroy_and_reset_nodes
         nodes = Delete.get_nodes_simple(model_handle(:node),[id()])
         # TODO: DTK-1857
-        if nodes.find{|n|n.is_node_group?()}
+        if nodes.find(&:is_node_group?)
           raise ErrorUsage.new("destroy_and_reset_nodes not supported for service instances with node groups")
         end
         target_idh = get_target.id_handle()
@@ -102,8 +102,8 @@ module DTK; class  Assembly
     class Delete < self
       def self.contents(assembly_idhs,opts={})
         return if assembly_idhs.empty?
-        delete(get_sub_assemblies(assembly_idhs).map{|r|r.id_handle()})
-        assembly_ids = assembly_idhs.map{|idh|idh.get_id()}
+        delete(get_sub_assemblies(assembly_idhs).map(&:id_handle))
+        assembly_ids = assembly_idhs.map(&:get_id)
         idh = assembly_idhs.first
         Delete.assembly_modules?(assembly_idhs,opts)
         # Delete.assembly_modules? needs to be done before Delete.assembly_nodes
@@ -123,7 +123,7 @@ module DTK; class  Assembly
           cols: [:id,:display_name],
           filter: [:oneof,:component_component_id,assembly_ids]
         }
-        delete_instances(get_objs(task_template_mh,sp_hash).map{|tt|tt.id_handle()})
+        delete_instances(get_objs(task_template_mh,sp_hash).map(&:id_handle))
       end
 
       def self.assembly_modules?(assembly_idhs,opts={})

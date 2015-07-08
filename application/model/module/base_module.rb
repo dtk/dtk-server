@@ -86,7 +86,7 @@ module DTK
           component_instance = el[:component_instance]
           display_name_parts = {
             node: el[:node][:display_name],
-            component: Component::Instance.print_form(component_instance),
+            component: Component::Instance.print_form(component_instance)
           }
           display_name = "#{display_name_parts[:node]}/#{display_name_parts[:component]}"
           if assembly = el[:assembly]

@@ -3,9 +3,7 @@ module DTK; module CommandAndControlAdapter
     #TODO: these fns that execute per node group member will be put at more asbtract level
     class CreateNode < self
       def self.run(task_action)
-        single_run_responses = target_ref_nodes(task_action).map do |create_single_node|
-          create_single_node.run()
-        end
+        single_run_responses = target_ref_nodes(task_action).map(&:run)
         aggregate_responses(single_run_responses)
       end
 

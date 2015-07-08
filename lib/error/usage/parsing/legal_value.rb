@@ -37,7 +37,7 @@ module DTK; class ErrorUsage
       end
       class HashWithKey
         def initialize(keys)
-          @keys = Array(keys).map{|k|k.to_s}
+          @keys = Array(keys).map(&:to_s)
         end
 
         def matches?(object)
@@ -50,7 +50,7 @@ module DTK; class ErrorUsage
       end
       class HashWithSingleKey
         def initialize(keys)
-          @keys = Array(keys).map{|k|k.to_s}
+          @keys = Array(keys).map(&:to_s)
         end
 
         def matches?(object)

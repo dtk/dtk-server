@@ -17,7 +17,7 @@ module DTK
         return ret if top_level_active.empty?
         # TODO: way to make call Task.get_all_subtasks faster
         ndx_ret = {}
-        Task.get_all_subtasks(top_level_active.map{|t|t.id_handle}).each do |sub_task|
+        Task.get_all_subtasks(top_level_active.map(&:id_handle)).each do |sub_task|
           if node = (sub_task[:executable_action] && sub_task[:executable_action][:node])
             ndx_ret[node[:id]] ||= node
           end
@@ -123,7 +123,7 @@ module DTK
       end
 
       def hier_task_idhs
-        [id_handle()] + subtasks.map{|r|r.hier_task_idhs()}.flatten
+        [id_handle()] + subtasks.map(&:hier_task_idhs).flatten
       end
 
       # TODO: probably better to set when creating
@@ -147,7 +147,7 @@ module DTK
             end
           end
 
-        subtasks.each{|st|st.set_and_return_types!()}
+        subtasks.each(&:set_and_return_types!)
         self[:type] = type
       end
 
@@ -157,7 +157,7 @@ module DTK
       }
 
       def hier_task_idhs
-        [id_handle()] + subtasks.map{|r|r.hier_task_idhs()}.flatten
+        [id_handle()] + subtasks.map(&:hier_task_idhs).flatten
       end
       protected :hier_task_idhs
 
@@ -170,7 +170,7 @@ module DTK
         ret.add(self,:temporal_order) if num_subtasks > 1
         if num_subtasks > 0
           ret.add(self,:subtasks) do |subtasks|
-            subtasks.sort{|a,b| (a[:position]||0) <=> (b[:position]||0)}.map{|st|st.pretty_print_hash()}
+            subtasks.sort{|a,b| (a[:position]||0) <=> (b[:position]||0)}.map(&:pretty_print_hash)
           end
         end
         action_type = self[:executable_action_type]

@@ -26,14 +26,14 @@ assembly_name = 'service_with_lambda::lambda'
 dtk_common = DtkCommon.new(service_name, assembly_name)
 
 expected_output_1 = {
-	command: "cat /tmp/test | grep 55",
-	status: 0,
-	stderr: nil,
+  command: "cat /tmp/test | grep 55",
+  status: 0,
+  stderr: nil
 }
 
 describe "(Staging And Deploying Assemblies) Test Case 14: Using lambda function in dtk.model.yaml" do
-	before(:all) do
-		puts "**************************************************************************************",""
+  before(:all) do
+    puts "**************************************************************************************",""
   end
 
   context "Import service module function" do
@@ -44,31 +44,31 @@ describe "(Staging And Deploying Assemblies) Test Case 14: Using lambda function
     include_context "List all service modules", dtk_common, imported_service_module_name
   end
 
-	context "Stage service function on #{assembly_name} assembly" do
-		include_context "Stage", dtk_common
-	end
+  context "Stage service function on #{assembly_name} assembly" do
+    include_context "Stage", dtk_common
+  end
 
-	context "List services after stage" do
-		include_context "List services after stage", dtk_common
-	end
+  context "List services after stage" do
+    include_context "List services after stage", dtk_common
+  end
 
-	context "Converge function" do
-		include_context "Converge", dtk_common
-	end
+  context "Converge function" do
+    include_context "Converge", dtk_common
+  end
 
-	context "Get task action details for action with bash script command" do
-		include_context "Get task action details", dtk_common, "4.1", [expected_output_1]
-	end
+  context "Get task action details for action with bash script command" do
+    include_context "Get task action details", dtk_common, "4.1", [expected_output_1]
+  end
 
-	context "Delete and destroy service function" do
-		include_context "Delete services", dtk_common
-	end
+  context "Delete and destroy service function" do
+    include_context "Delete services", dtk_common
+  end
 
-	context "List services after delete" do
-		include_context "List services after delete", dtk_common
-	end
+  context "List services after delete" do
+    include_context "List services after delete", dtk_common
+  end
 
-	context "Delete #{imported_service_module_name} service module" do
+  context "Delete #{imported_service_module_name} service module" do
     include_context "Delete service module", dtk_common, imported_service_module_name
   end
 
@@ -84,7 +84,7 @@ describe "(Staging And Deploying Assemblies) Test Case 14: Using lambda function
     include_context "Delete component module from local filesystem", component_module_filesystem_location, component_module_name
   end
 
-	after(:all) do
-		puts "", ""
-	end
+  after(:all) do
+    puts "", ""
+  end
 end

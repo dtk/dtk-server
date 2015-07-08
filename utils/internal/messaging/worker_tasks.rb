@@ -95,9 +95,9 @@ module XYZ
     def self.create(input_msg,opts={})
       temporal_sequencing = opts[:temporal_sequencing] || :concurrent
       case temporal_sequencing
-	when :concurrent
+  when :concurrent
           WorkerTaskSetConcurrent.new(input_msg,opts)
-	when :sequential
+  when :sequential
           WorkerTaskSetSequential.new(input_msg,opts)
  else
           raise Error.new("#{temporal_sequencing} is an illegal temporal sequencing type")
@@ -135,7 +135,7 @@ module XYZ
     def execute
       if @subtasks.size > 0
         # process_task_finished() triggered by last complete subtasks
-        @subtasks.each{|task|task.execute()}
+        @subtasks.each(&:execute)
       else
         process_task_finished()
       end
@@ -275,9 +275,9 @@ module XYZ
     # can throw an error (e.g., if passive and queue does not exist)
     def ret_queue_or_exchange
       if @queue_name
-	@msg_bus_client.publish_queue(@queue_name,@create_opts||{})
+  @msg_bus_client.publish_queue(@queue_name,@create_opts||{})
       else # #@exchange_name
-	@msg_bus_client.exchange(@exchange_name,@create_opts||{})
+  @msg_bus_client.exchange(@exchange_name,@create_opts||{})
       end
     end
   end
@@ -411,7 +411,7 @@ module XYZ
       ret[:errors] ||= self[:errors] if self[:errors]
       ret[:log_entries] ||= self[:log_entries] if self[:log_entries]
       ret[:results] ||= self[:results] if self[:results]
-      ret[:subtasks] ||= self[:subtasks].map{|t|t.flatten()} if self[:subtasks] and !self[:subtasks].empty?
+      ret[:subtasks] ||= self[:subtasks].map(&:flatten) if self[:subtasks] and !self[:subtasks].empty?
       ret
     end
   end

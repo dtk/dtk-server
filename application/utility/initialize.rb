@@ -18,5 +18,3 @@ server.create_public_library?(include_default_nodes: true)
 
 # TODO: not sure if better to go in bootstrap or clear
 XYZ::RepoManager.delete_all_repos() if options[:delete]
-
-

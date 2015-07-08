@@ -117,5 +117,3 @@ module DTK; class ErrorUsage
     end
   end
 end; end
-
-

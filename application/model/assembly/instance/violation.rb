@@ -8,7 +8,7 @@ module DTK
         cmps = nodes_and_cmps.map{|r|r[:nested_component]}
 
         unset_attr_viols = find_violations__unset_attrs()
-        cmp_constraint_viols = find_violations__cmp_constraints(nodes_and_cmps,cmps.map{|cmp|cmp.id_handle()})
+        cmp_constraint_viols = find_violations__cmp_constraints(nodes_and_cmps,cmps.map(&:id_handle))
         cmp_parsing_errors = find_violations__cmp_parsing_error(cmps)
         unconn_req_service_refs = find_violations__unconn_req_service_refs()
         mod_refs_viols = find_violations__module_refs(cmps)

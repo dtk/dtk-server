@@ -84,4 +84,3 @@ describe "(Component Module DSL) Test Case 5: Rename existing component attribut
     puts "", ""
   end
 end
-

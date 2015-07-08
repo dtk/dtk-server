@@ -50,7 +50,7 @@ module DTK
             next if (opts[:target_id] && r[:datacenter_datacenter_id] == opts[:target_id].to_i)
             el = {
               display_name: nb[:display_name]||nb[:ref], #TODO: may just use display_name after fill in this column
-              os_type: nb[:os_type],
+              os_type: nb[:os_type]
             }.merge(r[:node_template])
             el.merge!(id: unique_id) if unique_id
             ret << el

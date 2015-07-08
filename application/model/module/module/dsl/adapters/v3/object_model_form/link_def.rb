@@ -29,7 +29,7 @@ module DTK; class ModuleDSL; class V3
         OutputHash.new(
           "type" => link_def_type,
           "required" =>  link_def_required?(link_def_links),
-          "possible_links" => link_def_links.map{|link_def_link|link_def_link.possible_link()}
+          "possible_links" => link_def_links.map(&:possible_link)
         )
       end
 

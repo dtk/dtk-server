@@ -24,7 +24,7 @@ module DTK; class Clone
       end
 
       def all_id_handles
-        templates().map{|r|r.id_handle()} + instances().map{|r|r.id_handle()}
+        templates().map(&:id_handle) + instances().map(&:id_handle)
       end
 
       def templates
@@ -37,7 +37,7 @@ module DTK; class Clone
 
       def instances
         #does not have dups
-        map{|l|l.instance}.compact
+        map(&:instance).compact
       end
     end
   end

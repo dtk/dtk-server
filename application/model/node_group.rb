@@ -14,9 +14,9 @@ module DTK
 
       return ret if nodes.empty?
       # find node_to_ng mapping
-      node_filter = opts[:node_filter] || Node::Filter::NodeList.new(nodes.map{|n|n.id_handle()})
+      node_filter = opts[:node_filter] || Node::Filter::NodeList.new(nodes.map(&:id_handle))
       node_to_ng = get_node_groups_containing_nodes(nodes.first.model_handle(:node_group),node_filter)
-      node_group_ids = node_to_ng.values.map{|r|r.keys}.flatten.uniq
+      node_group_ids = node_to_ng.values.map(&:keys).flatten.uniq
       sp_hash = {
         cols: Node::Instance.component_list_fields() + [:component_list],
         filter: [:oneof, :id, node_group_ids + nodes.map{|n|n[:id]}]
@@ -208,4 +208,3 @@ module DTK
     end
   end
 end
-

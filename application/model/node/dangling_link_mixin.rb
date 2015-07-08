@@ -23,7 +23,7 @@ module DTK; class Node
       def get_dangling_links__for_component(cmp_idhs)
         # TODO: more efficient way of doing this ratehr than using the same methods used for node; instead can
         # index from component
-        cmp_ids = cmp_idhs.map{|idh|idh.get_id()}
+        cmp_ids = cmp_idhs.map(&:get_id)
         ret = get_objs(cols: [:dangling_input_links_from_components]).select{|r|cmp_ids.include?(r[:component][:id])}
         port_link_ids = Component::Instance.get_port_links(cmp_idhs).map{|r|r[:id]}
         unless port_link_ids.empty?

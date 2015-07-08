@@ -49,7 +49,7 @@ module DTK
         def find_matching_ports?(cmp_idhs)
           sp_hash = {
             cols: [:id,:group_id,:display_name,:component_id],
-            filter: [:oneof,:component_id,cmp_idhs.map{|idh|idh.get_id()}]
+            filter: [:oneof,:component_id,cmp_idhs.map(&:get_id)]
           }
           port_mh = cmp_idhs.first.createMH(:port)
           Model.get_objs(port_mh,sp_hash).select{|p|p.link_def_name() == @dependency_name}
@@ -92,7 +92,7 @@ module DTK
         def create_new_port_and_attr_links(input_port,output_port)
           port_link_hash = {
             input_id: input_port.id(),
-            output_id: output_port.id(),
+            output_id: output_port.id()
           }
           override_attrs = {
             assembly_id: @assembly_instance.id()
@@ -104,5 +104,3 @@ module DTK
     end
   end
 end
-
-

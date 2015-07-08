@@ -132,4 +132,3 @@ module DTK; class AttributeLink
     attr_reader :function
   end
 end; end
-

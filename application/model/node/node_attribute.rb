@@ -87,7 +87,7 @@ module DTK
       # - if attribute exists but has vlaue differing from 'value' then it is updated
       # - otherwise no-op
       def self.create_or_set_attributes?(nodes,name,value,extra_fields={})
-        node_idhs = nodes.map{|n|n.id_handle()}
+        node_idhs = nodes.map(&:id_handle)
         ndx_attrs = get_ndx_attributes(node_idhs,name)
 
         to_create_on_node = []
@@ -117,7 +117,7 @@ module DTK
       def self.cache_attribute_values!(nodes,name)
         nodes_to_query = nodes.reject{|node|Cache.attr_is_set?(node,name)}
         return if nodes_to_query.empty?
-        node_idhs = nodes_to_query.map{|n|n.id_handle()}
+        node_idhs = nodes_to_query.map(&:id_handle)
         ndx_attrs = get_ndx_attributes(node_idhs,name)
 
         field_info = field_info(name)

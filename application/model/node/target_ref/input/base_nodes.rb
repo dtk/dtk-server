@@ -29,7 +29,7 @@ module DTK; class Node; class TargetRef
       def self.create_linked_target_refs?(target,assembly,nodes,opts={})
         ret = {}
         return ret if nodes.empty?
-        ndx_target_ref_idhs = TargetRef.ndx_matching_target_ref_idhs(node_instance_idhs: nodes.map{|n|n.id_handle})
+        ndx_target_ref_idhs = TargetRef.ndx_matching_target_ref_idhs(node_instance_idhs: nodes.map(&:id_handle))
 
         create_objs_hash = {}
         nodes.each do |node|
@@ -118,10 +118,10 @@ module DTK; class Node; class TargetRef
 
       # copy node attributes from node group to target refs
       def self.copy_node_attributes?(target,nodes,ngr_idhs)
-        node_groups = nodes.select{|n|n.is_node_group?()}
+        node_groups = nodes.select(&:is_node_group?)
         return if node_groups.empty?
 
-        ng_idhs = node_groups.map{|ng|ng.id_handle()}
+        ng_idhs = node_groups.map(&:id_handle)
         ndx_ng_target_ref_attrs = {}
         ServiceNodeGroup.get_node_attributes_to_copy(ng_idhs).each do |ng_attr|
           node_group_id = ng_attr.delete(:node_node_id)
@@ -141,7 +141,7 @@ module DTK; class Node; class TargetRef
 
         sp_hash = {
           cols: [:node_group_id,:target_ref],
-          filter: [:oneof,:id,ngr_idhs.map{|idh|idh.get_id()}]
+          filter: [:oneof,:id,ngr_idhs.map(&:get_id)]
         }
         ngr_mh = target.model_handle(:node_group_relation)
         create_rows = []

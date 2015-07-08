@@ -42,7 +42,7 @@ module DTK
         # find the matching attributes on the peer components
         sp_hash = {
           cols: [:id,:group_id,:display_name],
-          filter: [:and,[:oneof,:component_component_id,peer_cmps.map{|cmp|cmp.id()}],
+          filter: [:and,[:oneof,:component_component_id,peer_cmps.map(&:id)],
                    [:eq,:display_name,attribute_pattern(dep_side).attribute_name]]
         }
         assembly_id = assembly.id()
@@ -124,4 +124,3 @@ module DTK
     end
   end
 end
-

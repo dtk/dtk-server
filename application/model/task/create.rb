@@ -15,7 +15,7 @@ module DTK; class Task
       not_running_nodes = ret.get_associated_nodes().select{|n|n.get_and_update_operational_status!() != 'running'}
       unless not_running_nodes.empty?
         node_is = (not_running_nodes.size == 1 ? 'node is' : 'nodes are')
-        node_names = not_running_nodes.map{|n|n.display_name}.join(',')
+        node_names = not_running_nodes.map(&:display_name).join(',')
         raise ErrorUsage.new("Cannot execute the action because the following #{node_is} not running: #{node_names}")
       end
       ret
@@ -102,7 +102,7 @@ module DTK; class Task
       task_info_hash = {
         assembly_id: assembly.id,
         display_name: opts[:task_action] || "assembly_converge",
-        temporal_order: "sequential",
+        temporal_order: "sequential"
       }
       if commit_msg = opts[:commit_msg]
         task_info_hash.merge!(commit_message: commit_msg)
@@ -480,6 +480,3 @@ module DTK; class Task
     end
   end
 end; end
-
-
-

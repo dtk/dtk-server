@@ -806,9 +806,9 @@ module DTK
 
       ret = {}
       (nested_cmps||[]).each do |cmp|
-	values = cmp.get_contained_attribute_values(type,opts)
-	if values
-	  ret[:component] ||= {}
+  values = cmp.get_contained_attribute_values(type,opts)
+  if values
+    ret[:component] ||= {}
           ret[:component][cmp.get_qualified_ref.to_sym] = values
         end
       end
@@ -856,4 +856,3 @@ module DTK
     end
   end
 end
-

@@ -68,5 +68,3 @@ if (R8::Config[:timer]||{})[:type]
     include TimeoutMonkeyPatch
   end
 end
-
-

@@ -50,7 +50,7 @@ module XYZ
           Log.info_pp [:received, trans_info,msg_bus_msg_in]
           proc_msg = ProcessorMsg.new(msg_bus_msg_in.parse())
 
-	  object_id = proc_msg.target_object_id
+    object_id = proc_msg.target_object_id
           next if @processors[object_id].nil? #TBD: should this be an error?
           # TBD: might refactor to use more standard form like dispatching to nanite or controller like actions;
           task_set = @processors[object_id].process_message(proc_msg)
@@ -69,14 +69,13 @@ module XYZ
           proc_msg = ProcessorMsg.create(
             {msg_type: :propagate_asserted_value,
             target_object_id: object_id})
-	  topic_name = proc_msg.topic()
-	  key = proc_msg.key()
+    topic_name = proc_msg.topic()
+    key = proc_msg.key()
           msg_bus_msg = proc_msg.marshal_to_message_bus_msg()
           exchange = @msg_bus_client.exchange(topic_name, type: :topic)
-	  exchange.publish(msg_bus_msg,key: key)
+    exchange.publish(msg_bus_msg,key: key)
         end
       end
     end
   end
 end
-

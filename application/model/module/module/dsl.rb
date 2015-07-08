@@ -198,9 +198,9 @@ module DTK
       end
 
       def object_class(augmented_objects)
-        object_classes = augmented_objects.map{|obj|obj.class}.uniq
+        object_classes = augmented_objects.map(&:class).uniq
         unless object_classes.size == 1
-          object_classes_print_form = object_classes.map{|r|r.to_s}.join(',')
+          object_classes_print_form = object_classes.map(&:to_s).join(',')
           raise Error.new("augmented_objects must have the same type rather than (#{object_classes_print_form})")
         end
         object_classes.first
@@ -266,7 +266,7 @@ module DTK
       1 => /^r8meta\.[a-z]+\.([a-z]+$)/,
       2 => /^dtk\.model\.([a-z]+$)/,
       3 => /^dtk\.model\.([a-z]+$)/,
-      4 => /^dtk\.model\.([a-z]+$)/,
+      4 => /^dtk\.model\.([a-z]+$)/
     }
 
     VersionsTreated = DSLFilenameRegexp.keys

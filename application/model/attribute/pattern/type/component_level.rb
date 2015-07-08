@@ -49,7 +49,7 @@ module DTK; class Attribute
         end
 
         attr_fragment = pattern_attribute_fragment()
-        attrs = ret_matching_attributes(:component,ndx_cmps.values.map{|r|r.id_handle()},attr_fragment)
+        attrs = ret_matching_attributes(:component,ndx_cmps.values.map(&:id_handle),attr_fragment)
         if attrs.empty? && create_this_type?(opts)
           @created = true
           set_attribute_properties!(opts[:attribute_properties]||{})
@@ -102,4 +102,3 @@ module DTK; class Attribute
     end
   end; end
 end; end
-

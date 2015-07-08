@@ -34,7 +34,7 @@
       foreign_key_rel_type: :project,
       on_delete: :set_null,
       on_update: :set_null
-    },
+    }
   },
   one_to_many:   [
    :data_source,

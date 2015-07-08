@@ -599,7 +599,7 @@ module DTK
            join_type: :inner,
            join_cond: {node_node_id: q(:node,:id)},
            cols: monitoring_items_cols_def
-         },
+         }
         ]
       virtual_column :monitoring_items__component, type: :json, hidden: true,
       remote_dependencies:         [
@@ -615,7 +615,7 @@ module DTK
            join_type: :inner,
            join_cond: {component_component_id: q(:component,:id)},
            cols: monitoring_items_cols_def
-         },
+         }
         ]
 
       # TODO: just for testing

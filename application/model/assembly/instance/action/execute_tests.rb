@@ -239,7 +239,7 @@ module DTK
 
           sp_hash = {
             cols: [:id,:group_id,:instance_component_template_parent,:node_node_id],
-            filter: [:oneof,:node_node_id,nodes.map{|n|n.id()}]
+            filter: [:oneof,:node_node_id,nodes.map(&:id)]
           }
           ret = Model.get_objs(nodes.first.model_handle(:component),sp_hash).map do |r|
             r[:component_template].merge(node_node_id: r[:node_node_id], component_instance_id: r[:id])
@@ -274,4 +274,3 @@ module DTK
     end
   end
 end
-

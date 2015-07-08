@@ -9,7 +9,7 @@ module DTK
       sp_hash = {
         #        :cols => [:id,:component_order_objs]+cols_for_get_virtual_attrs_call,
         cols: [:id,:inherited_component_order_objs]+cols_for_get_virtual_attrs_call,
-        filter: [:oneof, :id, component_idhs.map{|idh|idh.get_id()}]
+        filter: [:oneof, :id, component_idhs.map(&:get_id)]
       }
       cmps_with_order_info = prune_if_not_applicable(get_objs(sample_idh.createMH,sp_hash))
       # cmps_with_order_info can have a component appear multiple fo each order relation
@@ -34,7 +34,7 @@ module DTK
           end
         end
       end
-      ComponentOrder.update_with_applicable_dependencies!(ret,components.map{|cmp|cmp.id_handle()}.uniq)
+      ComponentOrder.update_with_applicable_dependencies!(ret,components.map(&:id_handle).uniq)
     end
 
     # assumption that this is called with components having keys :id,:dependencies, :extended_base, :component_type
@@ -112,5 +112,3 @@ module DTK
     end
   end
 end
-
-

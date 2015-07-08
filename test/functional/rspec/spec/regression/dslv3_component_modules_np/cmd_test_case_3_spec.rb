@@ -66,4 +66,3 @@ describe "(Component Module DSL) Test Case 3: Add new component from dtk.model.y
     puts "", ""
   end
 end
-

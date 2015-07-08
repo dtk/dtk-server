@@ -76,7 +76,7 @@ module R8Tpl
         end
 
         def self.capitalize_words(s)
-          s.scan(/\w+/).map{|x|x.capitalize}.join(" ")
+          s.scan(/\w+/).map(&:capitalize).join(" ")
         end
 
         def self.index_print_form(index)
@@ -184,6 +184,3 @@ module R8Tpl
     end
   end
 end
-
-
-

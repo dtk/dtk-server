@@ -13,7 +13,7 @@ module DTK; class Task
     private
 
     def self.convert_to_string_form(qualified_index)
-      qualified_index  ? qualified_index.map{|r|r.to_s}.join(LabelIndexDelimeter) : ''
+      qualified_index  ? qualified_index.map(&:to_s).join(LabelIndexDelimeter) : ''
     end
     LabelIndexDelimeter = '.'
 

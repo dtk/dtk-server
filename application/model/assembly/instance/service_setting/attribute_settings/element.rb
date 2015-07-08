@@ -73,4 +73,3 @@ module DTK; class ServiceSetting
     end
   end
 end; end
-

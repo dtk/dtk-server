@@ -103,7 +103,7 @@ module DTK; class Clone
         instance_names = instances.map{|r|r[:display_name]}.join(',')
         raise ErrorUsage.new("The change to the dtk.model.yaml for would case the #{mn} objects (#{instance_names}) to be deleted")
       else
-        Model.delete_instances(instances.map{|r|r.id_handle})
+        Model.delete_instances(instances.map(&:id_handle))
       end
     end
 

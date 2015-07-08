@@ -179,7 +179,7 @@ module XYZ
              "data_type"=>"string",
              "display_name"=>"fqdn",
              "dynamic"=>true,
-             "hidden"=>true,
+             "hidden"=>true
           },
           "node_components"=>
             {"required"=>false,
@@ -189,7 +189,7 @@ module XYZ
              "data_type"=>"json",
              "display_name"=>"node_components",
              "dynamic"=>true,
-             "hidden"=>true,
+             "hidden"=>true
           }
        },
        "node_interface"=>
@@ -218,7 +218,7 @@ module XYZ
        "memory_size"=>{
          "required"=>false,
          "data_type"=>"string",
-         "display_name"=>"memory_size",
+         "display_name"=>"memory_size"
        }
      }
    end
@@ -435,4 +435,3 @@ Bindings = {"centos-5.6-small"=>{type: "clone",
    Bindings.each{|k,v|v[:display_name] = k.gsub(/-/,' ')}
   end
 end
-

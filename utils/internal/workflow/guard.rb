@@ -34,7 +34,7 @@ module DTK; class Workflow
         return ret if ordered_port_links.empty?
         sp_hash = {
           cols: [:augmented_ports,:temporal_order],
-          filter: [:oneof, :id, ordered_port_links.map{|r|r.id}]
+          filter: [:oneof, :id, ordered_port_links.map(&:id)]
         }
         aug_port_links = Model.get_objs(assembly.model_handle(:port_link),sp_hash)
         pp aug_port_links

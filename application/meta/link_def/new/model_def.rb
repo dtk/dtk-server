@@ -25,4 +25,3 @@
   many_to_one: [:component],
   one_to_many: [:link_def_link]
 }
-

@@ -128,7 +128,7 @@ module DTK; class AssemblyModule
       # this is related to DTK-1214
 
       # get the associated master branch and see if there is any diff
-      mod_idhs = local_copy_els.map{|r|r.id_handle()}
+      mod_idhs = local_copy_els.map(&:id_handle)
       ndx_workspace_branches = TestModule.get_workspace_module_branches(mod_idhs).inject({}) do |h,r|
         h.merge(r[:module_id] => r)
       end

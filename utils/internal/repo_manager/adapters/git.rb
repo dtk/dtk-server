@@ -531,12 +531,12 @@ module DTK
     private :delete_branch_aux
 
     def get_branches
-      @grit_repo.branches.map{|b|b.name}
+      @grit_repo.branches.map(&:name)
     end
 
     def self.get_branches(repo)     #TODO: deprecate
       path = "#{R8::Config[:repo][:base_directory]}/#{repo}"
-      Grit::Repo.new(path).branches.map{|b|b.name}
+      Grit::Repo.new(path).branches.map(&:name)
     end
 
     def ret_config_keys

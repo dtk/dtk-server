@@ -44,7 +44,7 @@ module DTK; class Task; class Template
       end
 
       def has_action_with_method?
-        !!values.find{|node_actions|node_actions.has_action_with_method?()}
+        !!values.find(&:has_action_with_method?)
       end
 
       def delete_action!(action_match)
@@ -176,7 +176,7 @@ module DTK; class Task; class Template
       def self.parse_and_reify_node_actions?(node_actions,node_name,node_id,action_list,opts={})
         exec_blocks = Stage::IntraNode::ExecutionBlocks.parse_and_reify(node_actions,node_name,action_list,opts)
         # remove empty blocks
-        exec_blocks.reject!{|exec_block|exec_block.empty?}
+        exec_blocks.reject!(&:empty?)
         unless exec_blocks.empty?
           {node_id => exec_blocks}
         end
@@ -192,4 +192,3 @@ module DTK; class Task; class Template
     end
   end
 end; end; end
-

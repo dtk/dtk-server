@@ -22,13 +22,13 @@ new_module_metadata = "{:name=>\"puppetlabs-firewall\", :version=>\"0.0.2\", :so
 dtk_common = DtkCommon.new('', '')
 
 def get_metadata(module_name)
-	db_config = YAML::load(File.open('./config/config.yml'))
-	ActiveRecord::Base.establish_connection(db_config["dtkserverdbconnection"])
-	sql1 = "select id from module.component where ref = '#{module_name}'"
-	module_id = ActiveRecord::Base.connection.execute(sql1)
-	sql2 = "select external_ref from module.branch where component_id = #{module_id.first['id']}"
-	module_metadata = ActiveRecord::Base.connection.execute(sql2)
-	return module_metadata.first['external_ref']
+  db_config = YAML::load(File.open('./config/config.yml'))
+  ActiveRecord::Base.establish_connection(db_config["dtkserverdbconnection"])
+  sql1 = "select id from module.component where ref = '#{module_name}'"
+  module_id = ActiveRecord::Base.connection.execute(sql1)
+  sql2 = "select external_ref from module.branch where component_id = #{module_id.first['id']}"
+  module_metadata = ActiveRecord::Base.connection.execute(sql2)
+  return module_metadata.first['external_ref']
 end
 
 def change_module_metadata(module_name, new_module_metadata)
@@ -65,10 +65,10 @@ describe "(Modules, Services and Versioning) Test Case 31: NEG - Import Module A
   end
 
   context "Change ModuleFile metadata - version" do
-  	it "changes version from 0.4.2 to 0.0.2" do
+    it "changes version from 0.4.2 to 0.0.2" do
       changed_metadata = change_module_metadata(module_name_1, new_module_metadata)
-  		expect(changed_metadata).not_to be_nil
-  	end
+      expect(changed_metadata).not_to be_nil
+    end
   end
 
   context "NEG - Import module with version dependency from provided git repo" do

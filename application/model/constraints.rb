@@ -99,7 +99,7 @@ module XYZ
 
         def self.print_form(cmp_display_name)
           i18n = Model.i18n_string(component_i18n,:component,cmp_display_name)
-          i18n || cmp_display_name.split(name_delimiter()).map{|x|x.capitalize()}.join(" ")
+          i18n || cmp_display_name.split(name_delimiter()).map(&:capitalize).join(" ")
         end
       end
     end
@@ -136,7 +136,7 @@ module XYZ
           severity: "error",
           negate: true,
           search_pattern: {
-            filter: [:eq, :component_type, component_type],
+            filter: [:eq, :component_type, component_type]
           }
         }
         ComponentConstraint.new(dep)
@@ -284,6 +284,3 @@ module XYZ
     end
   end
 end
-
-
-

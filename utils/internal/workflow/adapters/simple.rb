@@ -53,7 +53,7 @@ module DTK
         attr_reader :children
 
         def debug_summary
-          [self.class,@children.map{|wf|wf.debug_summary()}]
+          [self.class,@children.map(&:debug_summary)]
         end
       end
       class Sequential < self

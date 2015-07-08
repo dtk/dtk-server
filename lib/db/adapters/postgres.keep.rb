@@ -72,7 +72,7 @@ module XYZ
               VALUES (NEW.id,NEW.local_id,NEW.#{c},TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME,NEW.ref,NEW.ref_num);
               RETURN NEW;
             ELSIF TG_OP = 'UPDATE' THEN
-	      --TBD: not implemented
+        --TBD: not implemented
             RETURN NEW;
             END IF;
             -- else TG_OP = DELETE
@@ -80,7 +80,7 @@ module XYZ
             WHERE #{uri_id} = OLD.id OR #{parent_id} = OLD.id;
             RETURN OLD;
          END",
-	 returns: "trigger", language: "plpgsql"
+   returns: "trigger", language: "plpgsql"
     end
 
     def create_table_common_fields_trigger?(db_rel)
@@ -97,7 +97,7 @@ module XYZ
       x = ret_schema_and_table(db_rel)
       query = "SELECT count(*) FROM pg_trigger t, pg_class r, pg_namespace s
          WHERE t.tgrelid = r.oid AND r.relnamespace = s.oid AND
-	       t.tgname = '#{trigger_name}' AND r.relname = '#{x[:table]}' AND s.nspname = '#{x[:schema]}'"
+         t.tgname = '#{trigger_name}' AND r.relname = '#{x[:table]}' AND s.nspname = '#{x[:schema]}'"
       db_fetch(query) {|r| return r[:count] == 1 ? true : nil}
     end
 
@@ -169,8 +169,8 @@ module XYZ
                      fk.conkey[1] = f.attnum AND f.attrelid = rel.oid AND
                      rel.relnamespace =  rel_s.oid AND parent_rel.relnamespace = parent_rel_s.oid AND
                      rel_s.nspname = '#{r[:schema]}' AND rel.relname = '#{r[:table]}' AND
-		     parent_rel_s.nspname = '#{p[:schema]}' AND parent_rel.relname = '#{p[:table]}' AND
-		     f.attname = '#{foreign_key_field}'"
+         parent_rel_s.nspname = '#{p[:schema]}' AND parent_rel.relname = '#{p[:table]}' AND
+         f.attname = '#{foreign_key_field}'"
       db_fetch(query) {|r| return r[:count] == 1 ? true : nil}
     end
 
@@ -181,17 +181,17 @@ module XYZ
             9223372036854775807
           when :bigint
             9223372036854775807
-      	end
+        end
 
       raise Error::NotImplemented.new("sequence for type #{type}") if max_value.nil?
 
       seq_qualified_name = fully_qualified_fn_name(seq_name)
       db_run "CREATE SEQUENCE #{seq_qualified_name}
                INCREMENT 1
-  	       MINVALUE 1
-  	       MAXVALUE #{max_value}
-  	       START 1
-  	       CACHE 1"
+           MINVALUE 1
+           MAXVALUE #{max_value}
+           START 1
+           CACHE 1"
       nil
     end
 

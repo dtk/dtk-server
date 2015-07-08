@@ -38,7 +38,7 @@ module DTK; class Clone; class ChildContext
         free_nodes = Node::TargetRef.get_free_nodes(target)
         # assuming the free nodes are interchangable; pick one for each match
         num_free = free_nodes.size
-        if stub_nodes.find{|n|n.is_node_group?()}
+        if stub_nodes.find(&:is_node_group?)
           raise Error.new("Not implemented: looking for free nodes with a node group")
         end
         num_needed = stub_nodes.size

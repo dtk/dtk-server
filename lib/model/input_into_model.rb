@@ -62,13 +62,13 @@ module XYZ
     def remove_fks_and_return_fks!(obj,fks,opts={},path="")
       obj.each_pair do |k,v|
         if v.is_a?(Hash)
-	  remove_fks_and_return_fks!(v,fks,opts,path + "/" + k.to_s)
+    remove_fks_and_return_fks!(v,fks,opts,path + "/" + k.to_s)
         elsif v.is_a?(Array)
-	  next
+    next
         elsif is_foreign_key_attr?(k)
-	  fks[path] ||= {}
-	  fks[path][foreign_key_attr_form(k)] = modify_uri_with_user_name(v,opts[:username])
-	  obj.delete(k)
+    fks[path] ||= {}
+    fks[path][foreign_key_attr_form(k)] = modify_uri_with_user_name(v,opts[:username])
+    obj.delete(k)
         end
       end
       obj
@@ -109,17 +109,17 @@ module XYZ
       ret_global_fks = nil
       fks.each_pair do |fk_rel_uri_x,info|
         fk_rel_uri = ret_rebased_uri(fk_rel_uri_x ,prefixes,container_uri)
-	fk_rel_id_handle = IDHandle[c: c, uri: fk_rel_uri]
-	info.each_pair do |col,ref_uri_x|
+  fk_rel_id_handle = IDHandle[c: c, uri: fk_rel_uri]
+  info.each_pair do |col,ref_uri_x|
           ref_uri = ret_rebased_uri(ref_uri_x,prefixes,container_uri)
-	  ref_id_info = get_row_from_id_handle(IDHandle[c: c, uri: ref_uri])
+    ref_id_info = get_row_from_id_handle(IDHandle[c: c, uri: ref_uri])
           unless ref_id_info && ref_id_info[:id]
             if col.create_ref_object
               # TODO: check whether should also populate ds_key; may not be needed because
               # of relation between ds_key and relative distinguished name
               idh = IDHandle[c: c, uri: ref_uri]
               create_simple_instance?(idh,set_display_name: true)
-	      ref_id_info = get_row_from_id_handle(idh)
+        ref_id_info = get_row_from_id_handle(idh)
             else
               unless opts[:ret_global_fks]
                 Log.error("In import_into_model cannot find object with uri #{ref_uri}")
@@ -132,7 +132,7 @@ module XYZ
               next
             end
           end
-	  update_instance(fk_rel_id_handle,col.to_sym =>  ref_id_info[:id])
+    update_instance(fk_rel_id_handle,col.to_sym =>  ref_id_info[:id])
         end
       end
       ret_global_fks
@@ -140,22 +140,22 @@ module XYZ
 
     def process_global_keys(global_fks,c)
       global_fks.each_pair do |fk_rel_uri,info|
-	    fk_rel_id_handle = IDHandle[c: c, uri: fk_rel_uri]
-	    info.each_pair do |col,ref_uri|
-	      ref_id_info = get_row_from_id_handle(IDHandle[c: c, uri: ref_uri])
+      fk_rel_id_handle = IDHandle[c: c, uri: fk_rel_uri]
+      info.each_pair do |col,ref_uri|
+        ref_id_info = get_row_from_id_handle(IDHandle[c: c, uri: ref_uri])
           unless ref_id_info && ref_id_info[:id]
             if col.create_ref_object
               # TODO: check whether should also populate ds_key; may not be needed because
               # of relation between ds_key and relative distinguished name
               idh = IDHandle[c: c, uri: ref_uri]
               create_simple_instance?(idh,set_display_name: true)
-	            ref_id_info = get_row_from_id_handle(idh)
+              ref_id_info = get_row_from_id_handle(idh)
             else
               Log.error("In process_global_keys cannot find object with uri #{ref_uri}")
               next
             end
           end
-	        update_instance(fk_rel_id_handle,col.to_sym =>  ref_id_info[:id])
+          update_instance(fk_rel_id_handle,col.to_sym =>  ref_id_info[:id])
         end
       end
     end
@@ -178,12 +178,12 @@ module XYZ
       # TODO: don't think this is exactly right
       prefix_matches = []
       prefixes.each do|prefix|
-	prefix =~ %r{^.+/(.+?)/(.+?$)}
-	raise Error unless prefix_ref = $2
+  prefix =~ %r{^.+/(.+?)/(.+?$)}
+  raise Error unless prefix_ref = $2
         prefix_rt = $1
-	if relation_type_string == prefix_rt
-	  if ref == prefix_ref
-	    return prefix + stripped_uri
+  if relation_type_string == prefix_rt
+    if ref == prefix_ref
+      return prefix + stripped_uri
    elsif fks_have_common_base(ref,prefix_ref)
            prefix_matches << prefix
           end
@@ -201,4 +201,3 @@ module XYZ
     end
   end
 end
-

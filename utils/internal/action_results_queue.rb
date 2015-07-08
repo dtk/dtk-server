@@ -131,7 +131,7 @@ module DTK
 
         ret = []
         # sort by node name and prune out keys with no results
-        pruned_sorted_keys = results.reject{|_k,v|v.nil?}.sort{|a,b|a[1].node_name <=> b[1].node_name}.map{|r|r.first}
+        pruned_sorted_keys = results.reject{|_k,v|v.nil?}.sort{|a,b|a[1].node_name <=> b[1].node_name}.map(&:first)
         pruned_sorted_keys.each do |node_id|
           result = results[node_id]
           node_name = result.node_name

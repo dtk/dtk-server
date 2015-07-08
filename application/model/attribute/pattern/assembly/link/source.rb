@@ -89,4 +89,3 @@ module DTK; class Attribute::Pattern
     end
   end; end
 end; end
-

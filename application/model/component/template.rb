@@ -17,11 +17,11 @@ module DTK; class Component
       return ret if cmp_template_idhs.empty?
       sp_hash = {
         cols: [:id,:group_id,:display_name,:project_project_id,:component_type,:version,:module_branch],
-        filter: [:oneof,:id,cmp_template_idhs.map{|idh|idh.get_id()}]
+        filter: [:oneof,:id,cmp_template_idhs.map(&:get_id)]
       }
       mh = cmp_template_idhs.first.createMH(:component_template)
       ret = get_objs(mh,sp_hash)
-      ret.each{|r|r.get_current_sha!()}
+      ret.each(&:get_current_sha!)
       ret
     end
 
@@ -56,7 +56,7 @@ module DTK; class Component
       sp_hash = {
         cols: [:attribute_default_title_field],
         filter: [:and,[:eq,:only_one_per_node,false],
-                 [:oneof,:id,cmp_tmpl_idhs.map{|idh|idh.get_id()}]]
+                 [:oneof,:id,cmp_tmpl_idhs.map(&:get_id)]]
       }
       rows = get_objs(cmp_tmpl_idhs.first.createMH(),sp_hash)
       return ret if rows.empty?
@@ -64,11 +64,11 @@ module DTK; class Component
       # rows will have element for each element of cmp_tmpl_idhs that is non-singleton
       # element key :attribute will be nil if it does not use teh default key; for all
       # these we need to make the more expensive call Attribute.get_title_attributes
-      need_title_attrs_cmp_idhs = rows.select{|r|r[:attribute].nil?}.map{|r|r.id_handle()}
+      need_title_attrs_cmp_idhs = rows.select{|r|r[:attribute].nil?}.map(&:id_handle)
       ret = rows.map{|r|r[:attribute]}.compact
       unless need_title_attrs_cmp_idhs.empty?
         attr_cols = [:id,:group_id,:display_name,:external_ref,:component_component_id]
-        title_attrs = get_attributes(need_title_attrs_cmp_idhs,cols: attr_cols).select{|a|a.is_title_attribute?()}
+        title_attrs = get_attributes(need_title_attrs_cmp_idhs,cols: attr_cols).select(&:is_title_attribute?)
         unless title_attrs.empty?
           ret += title_attrs
         end
@@ -100,8 +100,8 @@ module DTK; class Component
     end
     def self.get_matching_elements(project_idh,match_element_array,opts={})
       ret = []
-      cmp_types = match_element_array.map{|el|el.component_type}.uniq
-      versions = match_element_array.map{|el|el.version_field}
+      cmp_types = match_element_array.map(&:component_type).uniq
+      versions = match_element_array.map(&:version_field)
       sp_hash = {
         cols: [:id,:group_id,:component_type,:version,:implementation_id,:external_ref],
         filter: [:and,
@@ -186,7 +186,7 @@ module DTK; class Component
       if constraint = opts[:component_version_constraints]
         ret = ret.select{|r|constraint.meets_constraint?(r)}
       end
-      ret.each{|r|r.convert_to_print_form!()}
+      ret.each(&:convert_to_print_form!)
       ret.sort{|a,b|a[:display_name] <=> b[:display_name]}
     end
 
@@ -310,7 +310,7 @@ module DTK; class Component
       return ret if component_templates.empty?
       sp_hash = {
         cols: [:id,:namespace_info],
-        filter: [:oneof, :id, component_templates.map{|r|r.id()}]
+        filter: [:oneof, :id, component_templates.map(&:id)]
       }
       mh = component_templates.first.model_handle()
       ndx_namespace_info = get_objs(mh,sp_hash).inject({}) do |h,r|
@@ -357,4 +357,3 @@ module DTK; class Component
     end
   end
 end; end
-

@@ -33,5 +33,3 @@ module DTK; class Task; class Template; class Stage
     end
   end
 end; end; end; end
-
-

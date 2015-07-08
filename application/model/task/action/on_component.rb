@@ -97,7 +97,7 @@ module DTK; class Task
           cmp_ids_with_deps_ps = cd_ppt_stgs[i].dup
           state_change_list_ps = scl_ppt_stgs[i]
           intranode_stages_with_deps = Stage::IntraNode.generate_stages(cmp_ids_with_deps_ps, state_change_list_ps)
-          intra_node_stages << intranode_stages_with_deps.map{|stage|stage.keys }
+          intra_node_stages << intranode_stages_with_deps.map(&:keys)
         end
         # Amar: to enable multiple puppet calls inside one puppet_apply agent call,
         # puppet_stages are added to intra node stages. Check PuppetStageGenerator class docs for more details
@@ -228,7 +228,7 @@ module DTK; class Task
           action_method = cmp_hash[:action_method] # can be nil
           (action_method||cmp).config_agent_type
         end.uniq
-        if ca_types.find{|r|r.nil?}
+        if ca_types.find(&:nil?)
           raise Error.new("Unexpected that nil is in config_agent_types: #{ca_types.inspect}")
         end
 

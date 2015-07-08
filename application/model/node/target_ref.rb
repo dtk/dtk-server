@@ -112,7 +112,7 @@ module DTK
         node_mh = target.model_handle(:node)
         ret = get_objs(node_mh,sp_hash,keep_ref_cols: true)
         if opts[:mark_free_nodes]
-          ndx_matched_target_refs = ndx_target_refs_to_their_instances(ret.map{|r|r.id_handle})
+          ndx_matched_target_refs = ndx_target_refs_to_their_instances(ret.map(&:id_handle))
           unless ndx_matched_target_refs.empty?
             ret.each do |r|
               unless ndx_matched_target_refs[r[:id]]
@@ -189,7 +189,7 @@ module DTK
         #node_group_id matches on instance side and node_id on target ref side
         sp_hash = {
           cols: [:node_id,:node_group_id],
-          filter: [:oneof,filter_field,idhs.map{|n|n.get_id}]
+          filter: [:oneof,filter_field,idhs.map(&:get_id)]
         }
         sample_idh = idhs.first
         target_ref_mh = sample_idh.createMH(:node)
@@ -255,7 +255,7 @@ module DTK
         # object model structure that relates instance to target refs is where instance's :canonical_template_node_id field point to target_ref
         sp_hash = {
           cols: [:id, :display_name,:canonical_template_node_id],
-          filter: [:oneof,:canonical_template_node_id,node_target_ref_idhs.map{|idh|idh.get_id()}]
+          filter: [:oneof,:canonical_template_node_id,node_target_ref_idhs.map(&:get_id)]
         }
 Log.error("see why this is using :canonical_template_node_id and not node_group_relation")
         node_mh = node_target_ref_idhs.first.createMH()

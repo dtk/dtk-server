@@ -9,7 +9,7 @@ module DTK; class BaseModule
         ret = {}
         return ret unless dependencies = external_ref[:dependencies]
 
-        parsed_dependencies = dependencies.map{|dep|dep.parsed_form?()}.compact
+        parsed_dependencies = dependencies.map(&:parsed_form?).compact
         return ret if parsed_dependencies.empty?
 
         all_match_hashes, all_inconsistent, all_possibly_missing, all_inconsistent_names = {}, [], [], []

@@ -60,7 +60,7 @@ module DTK
         end
 
         # shortcut if no locked versions and no required elements
-        if component_modules().empty? and not cmp_types_to_check.values.find{|r|r.mapping_required?()}
+        if component_modules().empty? and not cmp_types_to_check.values.find(&:mapping_required?)
           # TODO: should we instead prune out all those that dont have mapping required
           return {}
         end
@@ -193,4 +193,3 @@ module DTK
     end
   end
 end
-

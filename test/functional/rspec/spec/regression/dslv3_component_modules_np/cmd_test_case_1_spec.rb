@@ -63,4 +63,3 @@ describe "(Component Module DSL) Test Case 1: Remove existing component from dtk
     puts "", ""
   end
 end
-

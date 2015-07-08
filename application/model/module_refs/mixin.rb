@@ -5,7 +5,7 @@ module DTK
         cmp_module_name = component_module.module_name()
         # make sure that component_module has version defined
         unless component_mb = component_module.get_module_branch_matching_version(component_version)
-          defined_versions = component_module.get_module_branches().map{|r|r.version_print_form()}.compact
+          defined_versions = component_module.get_module_branches().map(&:version_print_form).compact
           version_info =
             if defined_versions.empty?
               "there are no versions loaded"

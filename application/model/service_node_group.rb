@@ -67,7 +67,7 @@ module DTK
         end
       end
       to_delete = (0...num_to_delete).map{|i|sorted[i]}
-      to_delete.each{|node_group_member|node_group_member.destroy_and_delete()}
+      to_delete.each(&:destroy_and_delete)
     end
 
     def bump_down_cardinality(amount=1)
@@ -92,7 +92,7 @@ module DTK
       return ret if node_group_idhs.empty?
       sp_hash = {
         cols: [:id,:display_name,:node_members],
-        filter: [:oneof,:id,node_group_idhs.map{|ng|ng.get_id()}]
+        filter: [:oneof,:id,node_group_idhs.map(&:get_id)]
       }
       mh = node_group_idhs.first.createMH()
       get_objs(mh,sp_hash).each do |ng|
@@ -111,7 +111,7 @@ module DTK
     # making robust so checks if node_or_ngs has node groups already
     def self.expand_with_node_group_members?(node_or_ngs,opts={})
       ret = node_or_ngs
-      ng_idhs = node_or_ngs.select{|n|n.is_node_group?}.map{|n|n.id_handle()}
+      ng_idhs = node_or_ngs.select(&:is_node_group?).map(&:id_handle)
       if ng_idhs.empty?
         return ret
       end
@@ -173,4 +173,3 @@ module DTK
     end
   end
 end
-

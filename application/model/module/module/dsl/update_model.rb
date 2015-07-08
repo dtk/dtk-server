@@ -103,7 +103,7 @@ module DTK; class ModuleDSL
         cols: [:id,:display_name],
         filter: [:and,[:oneof,:ref,cmps_hash.keys],[:eq,:project_project_id,project_idh.get_id()]]
       }
-      Model.get_objs(project_idh.create_childMH(:component),sp_hash).map{|r|r.id_handle()}
+      Model.get_objs(project_idh.create_childMH(:component),sp_hash).map(&:id_handle)
     end
 
     private
@@ -141,11 +141,10 @@ module DTK; class ModuleDSL
         end
       end
       # mark as complete any child that does not appear in hash_assigns
-      (children_model_names - hash_assigns.keys.map{|k|k.to_sym}).each do |key|
+      (children_model_names - hash_assigns.keys.map(&:to_sym)).each do |key|
         ret[key] = DBUpdateHash.new().mark_as_complete()
       end
       ret
     end
   end
 end; end
-

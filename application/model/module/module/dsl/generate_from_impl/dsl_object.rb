@@ -187,7 +187,7 @@ module DTK; class ModuleDSL
 
       def klass(type)
         version_class = ModuleDSL.load_and_return_version_adapter_class(integer_version())
-        cap_type = type.to_s.split("_").map{|t|t.capitalize}.join("")
+        cap_type = type.to_s.split("_").map(&:capitalize).join("")
         version_class.const_get("DSLObject").const_get(cap_type)
       end
 
@@ -297,4 +297,3 @@ module DTK; class ModuleDSL
     end
   end
 end; end
-

@@ -31,7 +31,7 @@ module XYZ
             ip_address: addr,
             private_dns_name: "domU-12-31-39-02-D8-05.compute-1.internal",
             private_ip_address: "10.248.223.243",
-            dns_name: "ec2-#{addr.gsub(".","-")}.compute-1.amazonaws.com",
+            dns_name: "ec2-#{addr.gsub(".","-")}.compute-1.amazonaws.com"
           }
           # TODO: stub
           block_device_mapping =

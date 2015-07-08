@@ -277,7 +277,7 @@ module DTK
                              # with same name (does not have ancestor_id)
                              [:eq, :ancestor_id, nil],
                              [:eq, :component_type, component_type],
-                             [:oneof, :module_branch_id, module_branches.map{|r|r.id()}]]
+                             [:oneof, :module_branch_id, module_branches.map(&:id)]]
         }
         if row = get_obj(assembly_mh,sp_hash,keep_ref_cols: true)
           subclass_model(row) # so that what is returned is object of type Assembly::Template::Factory

@@ -16,13 +16,13 @@ module XYZ
 
       def graceful_stop(msg=nil)
         ::AMQP.stop do
-	  Log.info(msg) if msg
+    Log.info(msg) if msg
          ::EM.stop
         end
       end
 
       def fork(num_workers,&block)
-	::AMQP.fork(num_workers,&block)
+  ::AMQP.fork(num_workers,&block)
       end
     end
   end
@@ -140,7 +140,7 @@ module XYZ
          print "debug: sending cancled signal\n"
           msg_bus_msg_out = ProcessorMsg.create(msg_type: :time_out).marshal_to_message_bus_msg()
           timeout_queue = @client.publish_queue(reply_queue_name,passive: true)
-	  timeout_queue.publish(msg_bus_msg_out, task: :canceled)
+    timeout_queue.publish(msg_bus_msg_out, task: :canceled)
         end
        }
     end
@@ -277,4 +277,3 @@ AMQP.class_eval do
     opts.each{|k,v| @settings[k] = v}
   end
 end
-

@@ -122,7 +122,7 @@ class Action
            {id: node[:id]},
            {type: ext_ref[:type]},
            {image_id: ext_ref[:image_id]},
-           {size: ext_ref[:size]},
+           {size: ext_ref[:size]}
           ]
         PrettyPrintHash.new.set?(*kv_array)
       end

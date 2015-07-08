@@ -12,7 +12,7 @@ module DTK; class ConfigAgent; module Adapter
 
       ret = {
         action_agent_request: {
-          execution_list: commands,
+          execution_list: commands
         }
       }
 

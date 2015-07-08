@@ -22,7 +22,7 @@ module DTK
       # delete relevant files
       files_to_delete = file_assets.select{|r|paths_to_delete.include?(r[:path])}
       unless files_to_delete.empty?
-        Model.delete_instances(files_to_delete.map{|r|r.id_handle()})
+        Model.delete_instances(files_to_delete.map(&:id_handle))
       end
 
       # add files not already added
@@ -113,7 +113,7 @@ module DTK
     DSLFilenameRegexp = {
       1 => /^r8meta\.[a-z]+\.([a-z]+$)/,
       2 => /^dtk\.model\.([a-z_]+$)/,
-      3 => /^module_refs\.([a-z]+$)/,
+      3 => /^module_refs\.([a-z]+$)/
     }
     ExcludeFolders = ["puppet"]
 
@@ -232,4 +232,3 @@ module DTK
     end
   end
 end
-

@@ -54,4 +54,3 @@ describe "(Component Module DSL) Test Case 13: dtk.model.yaml with all correct v
     puts "", ""
   end
 end
-

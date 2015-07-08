@@ -114,7 +114,7 @@ module DTK; class ModuleDSL; class V2
         attrs_hash = constant_assigns.inject(InputHash.new) do |h,ca|
           el = {ca.attribute_name() => {
               "type"=>ca.datatype()||"string",
-              "default" => ca.attribute_value(),
+              "default" => ca.attribute_value()
             }.merge(Attribute::Constant.side_effect_settings())
           }
           h.merge(el)
@@ -248,7 +248,7 @@ module DTK; class ModuleDSL; class V2
             external_ref_name = (info["external_ref"]||{})[type]||name
             {
             "type" => type,
-            "path" => "node[#{cmp_type}][#{external_ref_name}]",
+            "path" => "node[#{cmp_type}][#{external_ref_name}]"
           }.merge(dynamic_default_variable ? {"default_variable" => true} : {})
           end
         ret.merge!('external_ref' => external_ref)
@@ -347,7 +347,7 @@ module DTK; class ModuleDSL; class V2
               link_def = OutputHash.new(
                 "type" => get_connection_label(conn_ref,conn_info),
                 "required" =>  true, #will be putting optional elements under a key that is peer to 'depends_on'
-                "possible_links" => choices.map{|choice|choice.possible_link()}
+                "possible_links" => choices.map(&:possible_link)
               )
               link_def.set_if_not_nil("description",conn_info["description"])
               link_defs << link_def
@@ -558,4 +558,3 @@ module DTK; class ModuleDSL; class V2
     end
   end
 end; end; end
-

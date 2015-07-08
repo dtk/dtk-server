@@ -26,7 +26,7 @@ module DTK; class Node
           data_type: 'string',
           display_name: 'fqdn',
           dynamic: true,
-          hidden: true,
+          hidden: true
         }
       end
 
@@ -39,7 +39,7 @@ module DTK; class Node
           data_type: 'json',
           display_name: 'node_components',
           dynamic: true,
-          hidden: true,
+          hidden: true
         }
       end
     end

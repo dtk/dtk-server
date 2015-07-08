@@ -6,9 +6,9 @@ module XYZ
 
     def get_child_id_handle_from_qualified_ref(factory_id_handle,qualified_ref)
       unless factory_uri = factory_id_handle[:uri]
-    	  factory_id_info = IDInfoTable.get_row_from_id_handle(factory_id_handle)
-    	  return nil if factory_id_info.nil?
-    	  factory_uri = factory_id_info[:uri]
+        factory_id_info = IDInfoTable.get_row_from_id_handle(factory_id_handle)
+        return nil if factory_id_info.nil?
+        factory_uri = factory_id_info[:uri]
       end
 
       child_uri = RestURI.ret_child_uri_from_qualified_ref(factory_uri,qualified_ref)

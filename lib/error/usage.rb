@@ -81,7 +81,7 @@ module DTK
       if @errors.size == 1
         @errors.first.to_s()
       elsif @errors.size > 1
-        "\n"+@errors.map{|err|err.to_s}.join("\n")
+        "\n"+@errors.map(&:to_s).join("\n")
       else #no errors shoudl not be called
         "No errors"
       end
@@ -172,4 +172,3 @@ module DTK
     end
   end
 end
-

@@ -88,7 +88,7 @@ module DTK
       return ret if task_idhs.empty?
       sp_hash = {
         cols: [:task_id,:content],
-        filter: [:oneof,:task_id,task_idhs.map{|idh|idh.get_id()}]
+        filter: [:oneof,:task_id,task_idhs.map(&:get_id)]
       }
       task_error_mh = task_idhs.first.createMH(:task_error)
       ret = {}
@@ -122,7 +122,7 @@ module DTK
       return ret if task_idhs.empty?
       sp_hash = {
         cols: [:task_id, :content, :display_name, :parent_task],
-        filter: [:oneof, :task_id, task_idhs.map{|idh|idh.get_id()}]
+        filter: [:oneof, :task_id, task_idhs.map(&:get_id)]
       }
       task_log_mh = task_idhs.first.createMH(:task_log)
       ret = {}
@@ -331,11 +331,11 @@ module DTK
         model_handle = id_handles.first.createMH()
         sp_hash = {
           cols: Task.common_columns(),
-          filter: [:oneof,:task_id,id_handles.map{|idh|idh.get_id}]
+          filter: [:oneof,:task_id,id_handles.map(&:get_id)]
         }
         next_level_objs = get_objs(model_handle,sp_hash).reject{|k,_v|k == :subtasks}
-        next_level_objs.each{|st|st.reify!()}
-        id_handles = next_level_objs.map{|obj|obj.id_handle}
+        next_level_objs.each(&:reify!)
+        id_handles = next_level_objs.map(&:id_handle)
 
         ret += next_level_objs
       end
@@ -352,11 +352,11 @@ module DTK
         model_handle = id_handles.first.createMH()
         sp_hash = {
           cols: [:id, :display_name],
-          filter: [:oneof, :task_id, id_handles.map{|idh|idh.get_id}]
+          filter: [:oneof, :task_id, id_handles.map(&:get_id)]
         }
         next_level_objs = get_objs(model_handle,sp_hash).reject{|k,_v|k == :subtasks}
-        next_level_objs.each{|st|st.reify!()}
-        id_handles = next_level_objs.map{|obj|obj.id_handle}
+        next_level_objs.each(&:reify!)
+        id_handles = next_level_objs.map(&:id_handle)
 
         ret += next_level_objs
       end
@@ -455,7 +455,7 @@ module DTK
         action = executable_action()
         action.component_actions().map{|ca| action[:node] ? ca.merge(node: action[:node]) : ca}
       else
-        subtasks.map{|obj|obj.component_actions()}.flatten
+        subtasks.map(&:component_actions).flatten
       end
     end
 
@@ -464,7 +464,7 @@ module DTK
         action = executable_action()
         return action.component_actions().map{|ca| action[:node] ? ca.merge(node: action[:node]) : ca}
       else
-        subtasks.map{|obj|obj.node_level_actions()}.flatten
+        subtasks.map(&:node_level_actions).flatten
       end
     end
 
@@ -506,7 +506,7 @@ module DTK
     end
 
     def unroll_tasks
-      [self] + subtasks.map{|e|e.unroll_tasks()}.flatten
+      [self] + subtasks.map(&:unroll_tasks).flatten
     end
 
     #### for rending tasks
@@ -526,7 +526,7 @@ module DTK
      def render_form_flat(top=false)
       # prune out all (sub)tasks except for top and  executable
       return render_executable_tasks() if executable_action(no_error_if_nil: true)
-      (top ? [render_top_task()] : []) + subtasks.map{|e|e.render_form_flat()}.flatten
+      (top ? [render_top_task()] : []) + subtasks.map(&:render_form_flat).flatten
     end
 
     private
@@ -580,7 +580,7 @@ module DTK
       sc = executable_action[:state_change_types]
       common_vals = {
         task_id: id(),
-        status: self[:status],
+        status: self[:status]
       }
       # order is important
       if sc.include?("create_node") then Task.render_tasks_create_node(executable_action,common_vals)
@@ -687,5 +687,3 @@ module DTK
     end
   end
 end
-
-

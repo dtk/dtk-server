@@ -197,7 +197,7 @@ module XYZ
         search_results = get_rest("search/#{search_string}&start=0&rows=#{MaxRows}",false)
         return nil if search_results.nil?
         return nil unless search_results["rows"]
-        convert_to_hash ? search_results["rows"].map{|x|x.to_hash} : search_results["rows"]
+        convert_to_hash ? search_results["rows"].map(&:to_hash) : search_results["rows"]
       end
 
       def get_rest(item,convert_to_hash=true)
@@ -294,8 +294,8 @@ module XYZ
 
         def <=>(cv)
           # assume form is "x.y.z"
-          v1 = self.chef_version.split(".").map{|x|x.to_i}
-          v2 = cv.chef_version.split(".").map{|x|x.to_i}
+          v1 = self.chef_version.split(".").map(&:to_i)
+          v2 = cv.chef_version.split(".").map(&:to_i)
           for i in 0..2
             ret = v1[i] <=> v2[i]
             return ret unless ret == 0
@@ -310,5 +310,3 @@ module XYZ
     end
   end
 end
-
-

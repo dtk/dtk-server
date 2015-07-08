@@ -6,5 +6,3 @@ server = R8Server.new("superuser",groupname: "all")
 new_meta_full_path = server.migrate_metafile(module_name)
 STDOUT << new_meta_full_path
 STDOUT << "\n"
-
-

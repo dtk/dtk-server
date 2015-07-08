@@ -155,7 +155,7 @@ module DTK
 
     def destroy_and_delete_nodes
       nodes = get_objs(cols: [:nodes]).map{|r|r[:node]}
-      nodes.each{|n|n.destroy_and_delete()}
+      nodes.each(&:destroy_and_delete)
     end
 
     def get_violation_info(severity=nil)
@@ -184,4 +184,3 @@ module DTK
   end
   Datacenter = Target #TODO: remove temp datacenter->target
 end
-

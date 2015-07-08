@@ -21,4 +21,3 @@ module DTK; class Task; class Template
     end
   end
 end;end;end
-

@@ -123,4 +123,3 @@ end
 
 # Adding active support
 require 'active_support/core_ext/hash'
-

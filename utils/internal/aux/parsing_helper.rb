@@ -47,8 +47,8 @@ module DTK
           # use of self:: and self. are important because want to evalute wrt to module that pulls this in
           begin
             variations = self::Variations.const_get(constant.to_s)
-            string_variations = variations.map{|v|v.to_s}
-            opts[:string_only] ? string_variations : string_variations + variations.map{|v|v.to_sym}
+            string_variations = variations.map(&:to_s)
+            opts[:string_only] ? string_variations : string_variations + variations.map(&:to_sym)
            rescue
             # if Variations not defined
             # self:: is important beacuse want to evalute wrt to module that pulss this in

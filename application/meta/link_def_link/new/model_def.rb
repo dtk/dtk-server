@@ -10,4 +10,3 @@
   },
   many_to_one: [:link_def]
 }
-

@@ -34,7 +34,7 @@ module DTK; class Task
       task_log_mh = task_mh.createMH(:task_log)
       sp_hash = {
         cols: [:id, :display_name, :content, :position],
-        filter: [:and, [:eq, :display_name, action_label], [:oneof, :task_id, subtasks.map{|t|t.id()}]]
+        filter: [:and, [:eq, :display_name, action_label], [:oneof, :task_id, subtasks.map(&:id)]]
       }
 
       log_entries = Model.get_objs(task_log_mh,sp_hash)

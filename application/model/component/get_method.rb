@@ -51,11 +51,9 @@ module DTK; class Component
       def sp_hash(cols,cmp_id_field,component_idhs)
         {
           cols: cols,
-          filter: [:oneof, cmp_id_field, component_idhs.map{|idh|idh.get_id()}]
+          filter: [:oneof, cmp_id_field, component_idhs.map(&:get_id)]
         }
       end
     end
   end
 end; end
-
-

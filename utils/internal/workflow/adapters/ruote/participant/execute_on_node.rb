@@ -114,7 +114,7 @@ module DTK
           return ret if guard_task_idhs.empty?
           sp_hash = {
             cols: [:id,:status,:display_name],
-            filter: [:and, [:eq,:status,"failed"],[:oneof,:id,guard_task_idhs.map{|idh|idh.get_id}]]
+            filter: [:and, [:eq,:status,"failed"],[:oneof,:id,guard_task_idhs.map(&:get_id)]]
           }
           Model.get_objs(task.model_handle,sp_hash)
         end

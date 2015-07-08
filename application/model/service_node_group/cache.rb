@@ -29,7 +29,7 @@ module DTK; class ServiceNodeGroup
     private
 
     def get_node_attributes_aux(opts={})
-      target_ref_ids = target_ref_ids?(opts[:filter]) || @target_refs.map{|n|n.id}
+      target_ref_ids = target_ref_ids?(opts[:filter]) || @target_refs.map(&:id)
       sp_hash = {
         cols: [:id,:group,:display_name,:node_node_id],
         filter: [:oneof, :node_node_id,target_ref_ids]
@@ -49,8 +49,7 @@ module DTK; class ServiceNodeGroup
     end
 
     def target_ref_ids?(filter=nil)
-      filter && (filter[:target_ref_idhs]||[]).map{|idh|idh.get_id()}
+      filter && (filter[:target_ref_idhs]||[]).map(&:get_id)
     end
   end
 end; end
-

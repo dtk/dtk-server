@@ -18,7 +18,7 @@ module DTK
       end
 
       def servers_all
-        lock_ec2_call{@conn.servers.all.map{|x|hash_form(x)}}
+        @conn.servers.all.map{|x|hash_form(x)}
       end
 
       def server_get(id)
@@ -28,7 +28,7 @@ module DTK
       def server_destroy(id)
         request_context do
           if server = wrap_servers_get(id)
-            lock_ec2_call{server.destroy}
+            server.destroy
           else
             :server_does_not_exist
           end
@@ -37,7 +37,7 @@ module DTK
 
       def server_create(options)
         request_context do
-          hash_form(lock_ec2_call{@conn.servers.create(options)})
+          hash_form(@conn.servers.create(options))
         end
       end
 
@@ -46,7 +46,7 @@ module DTK
           begin
             ret = nil
             request_context do
-              ret = hash_form(lock_ec2_call{@conn.start_instances(instance_id)})
+              ret = hash_form(@conn.start_instances(instance_id))
             end
             return ret
           rescue Fog::Compute::AWS::Error => e
@@ -65,7 +65,7 @@ module DTK
 
       def server_stop(instance_id)
         request_context do
-          hash_form(lock_ec2_call{@conn.stop_instances(instance_id)})
+          hash_form(@conn.stop_instances(instance_id))
         end
       end
 
@@ -152,19 +152,9 @@ module DTK
 
       private
 
-      LockEC2Call = Mutex.new
-
-      def lock_ec2_call(&block)
-        ret = nil
-        LockEC2Call.synchronize do
-          ret = block.call
-        end
-        ret
-      end
-
       def wrap_servers_get(id)
         begin
-          lock_ec2_call{@conn.servers.get(id)}
+          @conn.servers.get(id)
         rescue Fog::Compute::AWS::Error => e
           Log.info("fog error: #{e.message}")
           nil

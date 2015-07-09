@@ -32,7 +32,7 @@ class Tenant
     # If response contains errors, accumulate all errors to error_message
     unless response_JSON['errors'].nil?
       @error_message = ''
-      response_JSON['errors'].each { |e| @error_message += "#{e['code']}: #{e['message']} "}
+      response_JSON['errors'].each { |e| @error_message += "#{e['code']}: #{e['message']} " }
     end
 
     # If response status notok, show error_message
@@ -146,9 +146,9 @@ class Tenant
       while task_status.include? 'executing' || end_loop == false
         sleep 20
         count += 1
-        response_task_status = send_request('/rest/task/status', {'task_id'=> task_id})
+        response_task_status = send_request('/rest/task/status', { 'task_id' => task_id })
         status = response_task_status['data']['status']
-        error_msg = response_task_status['data']['subtasks'].find { |x| x['type'].include? 'configure_nodes'}['subtasks']
+        error_msg = response_task_status['data']['subtasks'].find { |x| x['type'].include? 'configure_nodes' }['subtasks']
 
         if (status.include? 'succeeded')
           task_status = status
@@ -195,7 +195,7 @@ tenant = ARGV[4]
 tenant_deploy = Tenant.new(host, port.to_i, user, pass, tenant)
 
 # Stage tenant assembly
-assembly_id = tenant_deploy.stage_assembly('dtk::tenant',"dtk#{tenant_deploy.tenant}tenant")
+assembly_id = tenant_deploy.stage_assembly('dtk::tenant', "dtk#{tenant_deploy.tenant}tenant")
 
 # Add needed component and set attributes
 set_attributes_array = []

@@ -6,13 +6,13 @@ module DTK
   module BranchNamesMixin
     def has_default_version?
       version = update_object!(:version)[:version]
-      version.nil? ||  (version == VersionFieldDefault)
+      version.nil? || (version == VersionFieldDefault)
     end
 
     protected
 
     def workspace_branch_name(project)
-      self.class.workspace_branch_name(project,self[:version])
+      self.class.workspace_branch_name(project, self[:version])
     end
   end
   module BranchNamesClassMixin
@@ -32,9 +32,9 @@ module DTK
 
     # TODO: deprecate
 
-    def workspace_branch_name(project,version=nil)
+    def workspace_branch_name(project, version = nil)
       #      Log.info_pp(["#TODO: ModuleBranch::Location: deprecate workspace_branch_name direct call",caller[0..4]])
-      ModuleBranch::Location::Server::Local::workspace_branch_name(project,version)
+      ModuleBranch::Location::Server::Local::workspace_branch_name(project, version)
     end
   end
 end

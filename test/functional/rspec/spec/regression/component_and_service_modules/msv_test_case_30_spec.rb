@@ -21,7 +21,7 @@ dtk_common = DtkCommon.new('', '')
 
 describe '(Modules, Services and Versioning) Test Case 30: NEG - Import component module A from git which has dependency on component module B that does not exist on server yet' do
   before(:all) do
-    puts '**********************************************************************************************************************************************************************',''
+    puts '**********************************************************************************************************************************************************************', ''
   end
 
   context 'NEG - Import component module with dependency from provided git repo' do

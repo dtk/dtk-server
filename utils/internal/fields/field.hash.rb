@@ -23,8 +23,8 @@ class Fieldhash < Fieldbase
     rows = 10
     cols = 50
     value = hash_to_string_fn()
-    name = @field_meta[:override_name]||@name
-    field_string =  '<textarea id="' + @id + '" name="' + name + '" class="' + @class_txt + '" rows=' + rows.to_s +  ' cols=' + cols.to_s + '>' + value + '</textarea>'
+    name = @field_meta[:override_name] || @name
+    field_string =  '<textarea id="' + @id + '" name="' + name + '" class="' + @class_txt + '" rows=' + rows.to_s + ' cols=' + cols.to_s + '>' + value + '</textarea>'
     return field_string
   end
 

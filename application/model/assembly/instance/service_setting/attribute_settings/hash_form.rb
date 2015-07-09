@@ -8,26 +8,26 @@ module DTK; class ServiceSetting
       private
 
       ContextDelim = '/'
-      def self.each_element(settings_hash,attr_prefix=nil,&block)
-        settings_hash.each_pair do |key,body|
+      def self.each_element(settings_hash, attr_prefix = nil, &block)
+        settings_hash.each_pair do |key, body|
           if key =~ Regexp.new("(^.+)#{ContextDelim}$")
             attr_part = $1
-            nested_attr_prefix = compose_attr(attr_prefix,attr_part)
+            nested_attr_prefix = compose_attr(attr_prefix, attr_part)
             if body.is_a?(Hash)
-              each_element(body,nested_attr_prefix,&block)
+              each_element(body, nested_attr_prefix, &block)
             else
-              Log.error_pp(['Unexpected form in AttributeSettings::HashForm.each_element:',key,body, 'ignoring; should be caught in better parsing of settings'])
+              Log.error_pp(['Unexpected form in AttributeSettings::HashForm.each_element:', key, body, 'ignoring; should be caught in better parsing of settings'])
             end
           else
-            attr = compose_attr(attr_prefix,key)
+            attr = compose_attr(attr_prefix, key)
             value = body
-            block.call(Element.new(attr,value))
+            block.call(Element.new(attr, value))
           end
         end
       end
 
       AttrPartDelim = '/'
-      def self.compose_attr(attr_prefix,attr_part)
+      def self.compose_attr(attr_prefix, attr_part)
         attr_prefix ? "#{attr_prefix}#{AttrPartDelim}#{attr_part}" : attr_part.to_s
       end
 
@@ -38,24 +38,24 @@ module DTK; class ServiceSetting
           # do not display node_attributes for assembly_wide node
           next if node_attr[:node][:type].eql?('assembly_wide')
 
-          node_info = ndx_attrs[node_attr[:node][:display_name]]||= {attrs: {},cmps: {}}
+          node_info = ndx_attrs[node_attr[:node][:display_name]] ||= { attrs: {}, cmps: {} }
           node_info[:attrs].merge!(node_attr[:display_name] => attribute_value(node_attr))
         end
         all_attrs_struct.component_attrs.each do |cmp_attr|
-          node_info = ndx_attrs[cmp_attr[:node][:display_name]]||= {attrs: {},cmps: {}}
+          node_info = ndx_attrs[cmp_attr[:node][:display_name]] ||= { attrs: {}, cmps: {} }
           cmp_print_name = cmp_attr[:nested_component].display_name_print_form()
           cmp_info = node_info[:cmps][cmp_print_name] ||= {}
           cmp_info.merge!(cmp_attr[:display_name] => attribute_value(cmp_attr))
         end
 
         # put assembly attributes in ret
-        ret = all_attrs_struct.assembly_attrs.sort{|a,b|a[:display_name] <=> b[:display_name]}.inject(SimpleOrderedHash.new) do |h,attr|
+        ret = all_attrs_struct.assembly_attrs.sort { |a, b| a[:display_name] <=> b[:display_name] }.inject(SimpleOrderedHash.new) do |h, attr|
           h.merge(attr[:display_name] => attribute_value(attr))
         end
 
         # put node and component attributes in ret
         ndx_attrs.keys.sort().each do |node_name|
-          is_assembly_wide = all_attrs_struct.node_attrs.find{|node| node[:node][:type].eql?('assembly_wide')} if node_name.eql?('assembly_wide')
+          is_assembly_wide = all_attrs_struct.node_attrs.find { |node| node[:node][:type].eql?('assembly_wide') } if node_name.eql?('assembly_wide')
 
           if is_assembly_wide
             ret_node_pntr = ret['components'] = SimpleOrderedHash.new
@@ -88,7 +88,7 @@ module DTK; class ServiceSetting
 
         # put assembly wide components on top
         cmps = ret.delete('components')
-        ndx_ret = {'components' => cmps}.merge(ret)
+        ndx_ret = { 'components' => cmps }.merge(ret)
       end
 
       def self.attribute_value(attr)

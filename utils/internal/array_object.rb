@@ -2,7 +2,7 @@ module XYZ
   class ArrayObject < Array
     def map(&block)
       ret = ArrayObject.new
-      each{|x|ret << block.call(x)}
+      each { |x| ret << block.call(x) }
       ret
     end
 

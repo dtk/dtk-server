@@ -19,7 +19,7 @@ module XYZ
         ###### DataProcessing
         def create_default_contexts?
     #TBD : hard coding contexts 1 and 2
-    [1,2].each do|id|
+    [1, 2].each do|id|
       context_ds().insert(id: id) if context_ds().where(id: id).empty?
           end
   end

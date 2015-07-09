@@ -1,6 +1,6 @@
 module DTK
   class ModuleDSLInfo < Hash
-    def initialize(hash={})
+    def initialize(hash = {})
       super()
       replace(hash)
     end
@@ -27,7 +27,7 @@ module DTK
     end
 
     class Info < Hash
-      def initialize(hash={})
+      def initialize(hash = {})
         raise_error_if_illegal_keys(hash.keys)
         super()
         replace(hash)
@@ -58,7 +58,7 @@ module DTK
       private
 
       def legal_keys
-        [:path,:content,:hash_content]
+        [:path, :content, :hash_content]
       end
     end
     # has info about a DSL file that is being updated
@@ -66,7 +66,7 @@ module DTK
       private
 
       def legal_keys
-        [:msg,:commit_sha]
+        [:msg, :commit_sha]
       end
     end
   end

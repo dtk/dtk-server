@@ -6,27 +6,27 @@ module DTK; class Component
     class Interpreted < self
       # idempotent; if reassert twice with same valeus it does not change
       # also if assert with less keys; it delete those ones omitted
-      def self.create_or_update?(node,component_type,attr_hash)
+      def self.create_or_update?(node, component_type, attr_hash)
         component_type = component_type.to_s
         raise ErrorUsage.new("Not able to find 'key_name' in provided data, 'key_name' is required field") unless attr_hash[:key_name]
-        internal_hash = HashForm.convert_to_internal(attr_hash[:key_name], component_type,node.id, attr_hash)
-        update_from_hash_assignments(node.id_handle(),internal_hash)
-        get_component(node,attr_hash[:key_name],component_type).id_handle()
+        internal_hash = HashForm.convert_to_internal(attr_hash[:key_name], component_type, node.id, attr_hash)
+        update_from_hash_assignments(node.id_handle(), internal_hash)
+        get_component(node, attr_hash[:key_name], component_type).id_handle()
       end
 
       def self.delete(node, component_type, attr_hash)
         raise ErrorUsage.new("Not able to find 'key_name' in provided data, 'key_name' is required field") unless attr_hash[:key_name]
-        cmp = get_component(node,attr_hash[:key_name], component_type.to_s)
+        cmp = get_component(node, attr_hash[:key_name], component_type.to_s)
 
         Model.delete_instance(cmp.id_handle()) if cmp
       end
 
       def self.get_attribute_hash(node, component_id)
         sp_hash = {
-          cols: [:id,:display_name,:group_id,:value_asserted],
-          filter: [:and, [:eq,:component_component_id, component_id], [:neq,:display_name, 'key_content']]
+          cols: [:id, :display_name, :group_id, :value_asserted],
+          filter: [:and, [:eq, :component_component_id, component_id], [:neq, :display_name, 'key_content']]
         }
-        get_objs(node.model_handle(:attribute),sp_hash).inject(AttributeHash.new) do |h,r|
+        get_objs(node.model_handle(:attribute), sp_hash).inject(AttributeHash.new) do |h, r|
           h.merge(r[:display_name] => r[:value_asserted])
         end
       end
@@ -34,7 +34,7 @@ module DTK; class Component
       def self.find_candidates(assembly, system_user, pub_name, agent_action, target_nodes = [])
         results = list_ssh_access(assembly)
 
-        nodes = target_nodes.empty? ? assembly.get_nodes(:id,:display_name,:external_ref) : target_nodes
+        nodes = target_nodes.empty? ? assembly.get_nodes(:id, :display_name, :external_ref) : target_nodes
 
         #
         # if :grant_access  than rejected_bool ==> false (keep if not matched)
@@ -65,10 +65,10 @@ module DTK; class Component
         nodes.each do |node|
           sp_hash = {
             cols: [:id, :display_name],
-            filter: [:and,[:eq,:node_node_id,node.id],[:eq, :component_type, component_type.to_s]]
+            filter: [:and, [:eq, :node_node_id, node.id], [:eq, :component_type, component_type.to_s]]
           }
 
-          components = get_objs(assembly.model_handle(:component_instance),sp_hash)
+          components = get_objs(assembly.model_handle(:component_instance), sp_hash)
 
           components.each do |cmp|
             result_array << { node_name: node.display_name, attributes: get_attribute_hash(node, cmp.id) }
@@ -81,18 +81,18 @@ module DTK; class Component
       private
 
       # TODO: probably better if this returns a Component::Instance:Interpreted object
-      def self.get_component(node,component_name,component_type)
+      def self.get_component(node, component_name, component_type)
         sp_hash = {
-          cols: [:id,:display_name,:group_id],
-          filter: [:and,[:eq,:display_name,component_name],[:eq,:node_node_id,node.id()],[:eq, :component_type, component_type.to_s]]
+          cols: [:id, :display_name, :group_id],
+          filter: [:and, [:eq, :display_name, component_name], [:eq, :node_node_id, node.id()], [:eq, :component_type, component_type.to_s]]
         }
-        get_obj(node.model_handle(:component_instance),sp_hash)
+        get_obj(node.model_handle(:component_instance), sp_hash)
       end
 
       class AttributeHash < Hash
       end
       class HashForm
-        def self.convert_to_internal(component_name, component_type, node_id,attr_hash)
+        def self.convert_to_internal(component_name, component_type, node_id, attr_hash)
           {
             component: {
               "#{component_type}-#{component_name}" => {
@@ -109,7 +109,7 @@ module DTK; class Component
 
         def self.attributes(input_attr_hash, _node_id)
           # what this does is to capture that what is in this is the complete set of attribute
-          results = input_attr_hash.inject(DBUpdateHash.new().mark_as_complete()) do |h,(k,v)|
+          results = input_attr_hash.inject(DBUpdateHash.new().mark_as_complete()) do |h, (k, v)|
             attr_fields = {
               display_name: k.to_s,
               value_asserted: v.to_s,

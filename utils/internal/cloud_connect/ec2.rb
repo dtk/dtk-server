@@ -6,7 +6,7 @@ module DTK
       WAIT_FOR_NODE = 10 # seconds
 
       def initialize(override_of_aws_params = nil)
-        @conn = Fog::Compute::AWS.new(override_of_aws_params||get_compute_params())
+        @conn = Fog::Compute::AWS.new(override_of_aws_params || get_compute_params())
       end
 
       def flavor_get(id)
@@ -18,7 +18,7 @@ module DTK
       end
 
       def servers_all
-        lock_ec2_call{@conn.servers.all.map{|x|hash_form(x)}}
+        lock_ec2_call { @conn.servers.all.map { |x| hash_form(x) } }
       end
 
       def server_get(id)
@@ -28,7 +28,7 @@ module DTK
       def server_destroy(id)
         request_context do
           if server = wrap_servers_get(id)
-            lock_ec2_call{server.destroy}
+            lock_ec2_call { server.destroy }
           else
             :server_does_not_exist
           end
@@ -37,16 +37,16 @@ module DTK
 
       def server_create(options)
         request_context do
-          hash_form(lock_ec2_call{@conn.servers.create(options)})
+          hash_form(lock_ec2_call { @conn.servers.create(options) })
         end
       end
 
       def server_start(instance_id)
-        (tries=10).times do
+        (tries = 10).times do
           begin
             ret = nil
             request_context do
-              ret = hash_form(lock_ec2_call{@conn.start_instances(instance_id)})
+              ret = hash_form(lock_ec2_call { @conn.start_instances(instance_id) })
             end
             return ret
           rescue Fog::Compute::AWS::Error => e
@@ -60,17 +60,17 @@ module DTK
           end
         end # => 10 times loop end
 
-        raise Error, "Node (Instance ID: '#{instance_id}') not ready after #{tries*WAIT_FOR_NODE} seconds."
+        raise Error, "Node (Instance ID: '#{instance_id}') not ready after #{tries * WAIT_FOR_NODE} seconds."
       end
 
       def server_stop(instance_id)
         request_context do
-          hash_form(lock_ec2_call{@conn.stop_instances(instance_id)})
+          hash_form(lock_ec2_call { @conn.stop_instances(instance_id) })
         end
       end
 
       def security_groups_all
-        @conn.security_groups.all.map{|x|hash_form(x)}
+        @conn.security_groups.all.map { |x| hash_form(x) }
       end
 
       def describe_availability_zones
@@ -83,7 +83,7 @@ module DTK
         unless response.nil?
           status = response.body['reservationSet'].first['instancesSet'].first['instanceState']['name'].to_sym
           launch_time = response.body['reservationSet'].first['instancesSet'].first['launchTime']
-          { status: status, launch_time: launch_time, up_time_hours: ((Time.now - launch_time)/1.hour).round }
+          { status: status, launch_time: launch_time, up_time_hours: ((Time.now - launch_time) / 1.hour).round }
         end
       end
 
@@ -102,7 +102,7 @@ module DTK
           if subnets.empty?
             err_msg << '; there are no subnets created in the vpc'
           else
-            avail_subnets = subnets.map{|s|hash_form(s)[:subnet_id]}
+            avail_subnets = subnets.map { |s| hash_form(s)[:subnet_id] }
             err_msg << "; set the target to use one of the available subnets: #{avail_subnets.join(', ')}"
           end
           raise ErrorUsage.new(err_msg)
@@ -164,7 +164,7 @@ module DTK
 
       def wrap_servers_get(id)
         begin
-          lock_ec2_call{@conn.servers.get(id)}
+          lock_ec2_call { @conn.servers.get(id) }
         rescue Fog::Compute::AWS::Error => e
           Log.info("fog error: #{e.message}")
           nil

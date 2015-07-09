@@ -22,7 +22,7 @@ dtk_common = DtkCommon.new('', '')
 
 describe '(Component Module DSL) Test Case 17: NEG - dtk.model.yaml with invalid port type attribute value' do
   before(:all) do
-    puts '************************************************************************************************',''
+    puts '************************************************************************************************', ''
   end
 
   context 'Import component module function' do

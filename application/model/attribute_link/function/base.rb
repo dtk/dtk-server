@@ -5,7 +5,7 @@ module DTK; class AttributeLink
         function_def.is_a?(String) && function_def.to_sym
       end
 
-      def self.base_link_function(input_attr,output_attr)
+      def self.base_link_function(input_attr, output_attr)
         input_type = attribute_index_type__input(input_attr)
         output_type = attribute_index_type__output(output_attr)
         LinkFunctionMatrix[output_type][input_type]

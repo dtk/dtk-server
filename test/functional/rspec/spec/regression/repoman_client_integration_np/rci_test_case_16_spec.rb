@@ -50,7 +50,7 @@ describe '(Repoman client integration) Test Case 16: delete-from-catalog positiv
   let(:conf) { Configuration.instance }
   let(:header) { @homepage.get_header }
   let(:users) { @homepage.get_main.get_users }
-  let(:modules) { @homepage.get_main.get_modules}
+  let(:modules) { @homepage.get_main.get_modules }
 
   context 'Import component module function' do
     include_context 'Import remote component module', user_data[:module_name]

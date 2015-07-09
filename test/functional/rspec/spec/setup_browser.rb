@@ -21,7 +21,7 @@ RSpec.configure do |config|
     else
       puts "Host: #{@conf.host}"
       puts "Browser: #{@conf.browser}"
-      @homepage = load_browser(@conf.host,@conf.browser)
+      @homepage = load_browser(@conf.host, @conf.browser)
     end
   end
 

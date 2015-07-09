@@ -2,7 +2,7 @@ module DTK; class ErrorUsage
   class Parsing
     class LegalValue
       # either input_form or legal_values_block will be nil
-      def self.reify(input_form,&legal_values_block)
+      def self.reify(input_form, &legal_values_block)
         if legal_values_block
           class_eval(&legal_values_block)
         elsif input_form.is_a?(LegalValue)
@@ -41,7 +41,7 @@ module DTK; class ErrorUsage
         end
 
         def matches?(object)
-          object.is_a?(Hash) && !!object.keys.find{|k|@keys.include?(k.to_s)}
+          object.is_a?(Hash) && !!object.keys.find { |k| @keys.include?(k.to_s) }
         end
 
         def print_form

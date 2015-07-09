@@ -1,7 +1,7 @@
 module DTK
   class ModuleRefs
     module Mixin
-      def set_component_module_version(component_module,component_version,service_version=nil)
+      def set_component_module_version(component_module, component_version, service_version = nil)
         cmp_module_name = component_module.module_name()
         # make sure that component_module has version defined
         unless component_mb = component_module.get_module_branch_matching_version(component_version)
@@ -18,12 +18,12 @@ module DTK
         cmp_module_refs = get_component_module_refs(service_version)
 
         # check if set to this version already; if so no-op
-        if cmp_module_refs.has_module_version?(cmp_module_name,component_version)
+        if cmp_module_refs.has_module_version?(cmp_module_name, component_version)
           return ret_clone_update_info(service_version)
         end
 
         # set in cmp_module_refs the module have specfied value and update both model and service's global refs
-        cmp_module_refs.set_module_version(cmp_module_name,component_version)
+        cmp_module_refs.set_module_version(cmp_module_name, component_version)
 
         # update the component refs with the new component_template_ids
         cmp_module_refs.update_component_template_ids(component_module)
@@ -31,7 +31,7 @@ module DTK
         ret_clone_update_info(service_version)
       end
 
-      def get_component_module_refs(service_version=nil)
+      def get_component_module_refs(service_version = nil)
         branch = get_module_branch_matching_version(service_version)
         ModuleRefs.get_component_module_refs(branch)
       end

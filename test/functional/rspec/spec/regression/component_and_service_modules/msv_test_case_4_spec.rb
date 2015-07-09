@@ -22,7 +22,7 @@ dtk_common = DtkCommon.new(service_name, assembly_name)
 
 describe '(Modules, Services and Versioning) Test Case 4: Get list of all assemblies for particular service module' do
   before(:all) do
-    puts '********************************************************************************************************',''
+    puts '********************************************************************************************************', ''
   end
 
   context "Stage service on #{assembly_name} assembly" do

@@ -8,25 +8,25 @@ module DTK; class ModuleBranch
 
       class DTKNCatalog < self
         def create_remote(project)
-          Remote::DTKNCatalog.new(project,self)
+          Remote::DTKNCatalog.new(project, self)
         end
 
         private
 
         def legal_keys
-          [:module_type,:module_name,:remote_repo_base,:namespace,:version?]
+          [:module_type, :module_name, :remote_repo_base, :namespace, :version?]
         end
       end
 
       class TenantCatalog < self
         def create_remote(project)
-          Remote::TenantCatalog.new(project,self)
+          Remote::TenantCatalog.new(project, self)
         end
 
         private
 
         def legal_keys
-          [:module_type,:module_name,:remote_repo_base,:namespace?,:version?]
+          [:module_type, :module_name, :remote_repo_base, :namespace?, :version?]
         end
       end
     end
@@ -38,7 +38,7 @@ module DTK; class ModuleBranch
 
       module RemoteMixin
         attr_reader :project
-        def initialize(project,remote_params)
+        def initialize(project, remote_params)
           super(remote_params)
           @project = project
         end
@@ -70,8 +70,8 @@ module DTK; class ModuleBranch
           @repo_name
         end
       end
-      r8_nested_require('remote','dtkn_catalog')
-      r8_nested_require('remote','tenant_catalog')
+      r8_nested_require('remote', 'dtkn_catalog')
+      r8_nested_require('remote', 'tenant_catalog')
     end
   end
 end; end

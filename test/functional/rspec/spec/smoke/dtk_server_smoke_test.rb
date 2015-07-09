@@ -13,7 +13,7 @@ require './lib/component_modules_spec'
 
 service_name = 'smoke_test_instance'
 assembly_name = 'bootstrap::node_with_params'
-os_templates = ['precise','rhel6']
+os_templates = ['precise', 'rhel6']
 os_attribute = 'os_identifier'
 memory_size = 't1.micro'
 memory_size_attribute = 'memory_size'
@@ -27,7 +27,7 @@ dtk_common = DtkCommon.new(service_name, assembly_name)
 
 describe 'DTK Server smoke test' do
   before(:all) do
-    puts '*********************',''
+    puts '*********************', ''
   end
 
   context 'Import component module function' do

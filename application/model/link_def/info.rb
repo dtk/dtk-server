@@ -15,7 +15,7 @@ module DTK
         ComponentRef.common_cols()
       end
       def self.nested_component_cols
-        [:id,:display_name,:component_type, :extended_base, :implementation_id, :node_node_id,:only_one_per_node]
+        [:id, :display_name, :component_type, :extended_base, :implementation_id, :node_node_id, :only_one_per_node]
       end
 
       def self.get_link_def_info(assembly_template)
@@ -27,11 +27,11 @@ module DTK
         link_defs = link_defs()
         return self if link_defs.empty?()
         sp_hash = {
-          cols: [:id,:group_id,:link_def_id,:remote_component_type],
-          filter: [:oneof, :link_def_id, link_defs.map{|ld|ld[:id]}]
+          cols: [:id, :group_id, :link_def_id, :remote_component_type],
+          filter: [:oneof, :link_def_id, link_defs.map { |ld| ld[:id] }]
         }
         link_def_link_mh = link_defs.first.model_handle(:link_def_link)
-        ndx_link_def_links = Model.get_objs(link_def_link_mh,sp_hash).inject({}) do |h,r|
+        ndx_link_def_links = Model.get_objs(link_def_link_mh, sp_hash).inject({}) do |h, r|
           h.merge(r[:link_def_id] => r)
         end
 
@@ -50,7 +50,7 @@ module DTK
           ndx = link_def[:id]
           unless ndx_ld_links_mark[ndx]
             ndx_ld_links_mark[ndx] = true
-            (link_def[:link_def_links]||{}).each{|link|body.call(link_def,link)}
+            (link_def[:link_def_links] || {}).each { |link| body.call(link_def, link) }
           end
         end
       end

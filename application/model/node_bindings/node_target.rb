@@ -1,8 +1,8 @@
 module DTK
   class NodeBindings
     class NodeTarget
-      r8_nested_require('node_target','assembly_node')
-      r8_nested_require('node_target','image')
+      r8_nested_require('node_target', 'assembly_node')
+      r8_nested_require('node_target', 'image')
 
       attr_reader :type
       def initialize(type)

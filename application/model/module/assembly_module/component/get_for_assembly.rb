@@ -1,42 +1,42 @@
 module DTK; class AssemblyModule
   class Component
     class GetForAssembly < self
-      def get_for_assembly(opts={})
+      def get_for_assembly(opts = {})
         add_module_branches = opts[:get_version_info]
         ret = (opts[:recursive] ? get_with_branches_recursive(opts) : get_with_branches(opts))
 
         add_version_info!(ret) if add_module_branches
 
         # remove branches; they are no longer needed
-        ret.each{|r|r.delete(:module_branch)}
+        ret.each { |r| r.delete(:module_branch) }
         ret
       end
 
       private
 
       # Finds, not just dircctly referenced component modules, but the recursive clouse taking into account all locked component module refs
-      def get_with_branches_recursive(_opts={})
+      def get_with_branches_recursive(_opts = {})
         ret = []
-        locked_module_refs = ModuleRefs::Lock.get(@assembly,with_module_branches: true,types: [:locked_dependencies])
+        locked_module_refs = ModuleRefs::Lock.get(@assembly, with_module_branches: true, types: [:locked_dependencies])
         # get component modules by finding the component module id in locked_module_refs elements
         els_ndx_by_cmp_mod_ids = {}
         locked_module_refs.elements.each do |el|
-          if component_id = (el.module_branch||{})[:component_id]
+          if component_id = (el.module_branch || {})[:component_id]
             els_ndx_by_cmp_mod_ids[component_id] =  el
           end
         end
         return ret if els_ndx_by_cmp_mod_ids.empty?
 
         sp_hash = {
-          cols: [:id,:display_name,:group_id,:namespace_id],
-          filter: [:oneof,:id, els_ndx_by_cmp_mod_ids.keys]
+          cols: [:id, :display_name, :group_id, :namespace_id],
+          filter: [:oneof, :id, els_ndx_by_cmp_mod_ids.keys]
         }
-        ret = Model.get_objs(@assembly.model_handle(:component_module),sp_hash)
+        ret = Model.get_objs(@assembly.model_handle(:component_module), sp_hash)
         ret.each do |r|
           if el = els_ndx_by_cmp_mod_ids[r[:id]]
             to_add = {
               namespace_name: el.namespace,
-              dsl_parsed: (el.module_branch||{})[:dsl_parsed],
+              dsl_parsed: (el.module_branch || {})[:dsl_parsed],
               module_branch: el.module_branch
             }
             r.merge!(to_add)
@@ -45,7 +45,7 @@ module DTK; class AssemblyModule
         ret
       end
       # TODO: make sure that where these two overlap they are consistent in namespace assignments
-      def get_with_branches(opts={})
+      def get_with_branches(opts = {})
         ndx_ret = {}
         add_module_branches = opts[:get_version_info]
         # there is a row for each component; assumption is that all rows belonging to same component with have same branch
@@ -78,7 +78,7 @@ module DTK; class AssemblyModule
 
         # get the associated master branch and see if there is any diff
         mod_idhs = local_copy_els.map(&:id_handle)
-        ndx_workspace_branches = ComponentModule.get_workspace_module_branches(mod_idhs).inject({}) do |h,r|
+        ndx_workspace_branches = ComponentModule.get_workspace_module_branches(mod_idhs).inject({}) do |h, r|
           h.merge(r[:module_id] => r)
         end
 
@@ -117,4 +117,4 @@ module DTK; class AssemblyModule
       end
     end
   end
-end;end
+end; end

@@ -4,7 +4,7 @@ module DTK
       begin
         response_raw = Common::Response::RestClientWrapper.get_raw "http://rubygems.org/api/v1/versions/#{name}.json"
         response = JSON.parse(response_raw)
-        matched = response.select {|v| v['number'] == version}
+        matched = response.select { |v| v['number'] == version }
         return matched != []
       rescue Exception => e
         Log.error "We were not able to check if the specified gem exists, reason: #{e.message}"

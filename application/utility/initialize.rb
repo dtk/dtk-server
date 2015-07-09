@@ -7,12 +7,12 @@ OptionParser.new do|opts|
    opts.banner = 'Usage: initialize.rb [--delete]'
 
    # Define the options, and what they do
-   opts.on( '-d', '--delete', 'Delete module repos' ) do
+   opts.on('-d', '--delete', 'Delete module repos') do
      options[:delete] = true
    end
 end.parse!
 
-server = R8Server.new('superuser',groupname: 'all')
+server = R8Server.new('superuser', groupname: 'all')
 server.create_repo_user_instance_admin?()
 server.create_public_library?(include_default_nodes: true)
 

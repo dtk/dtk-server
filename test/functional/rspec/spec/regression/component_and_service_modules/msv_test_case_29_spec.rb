@@ -23,7 +23,7 @@ dtk_common = DtkCommon.new('', '')
 
 describe '(Modules, Services and Versioning) Test Case 29: Import component module A and then component module B when component module B has dependency on component module A' do
   before(:all) do
-    puts '*******************************************************************************************************************************************************************',''
+    puts '*******************************************************************************************************************************************************************', ''
   end
 
   context 'Import component module from git repo' do

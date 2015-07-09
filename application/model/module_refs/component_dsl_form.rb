@@ -8,7 +8,7 @@ module DTK; class ModuleRefs
       end
 
       def add!(a)
-        a.each{|el|self << el}
+        a.each { |el| self << el }
         self
       end
     end
@@ -39,28 +39,28 @@ module DTK; class ModuleRefs
     #   :dsl - match with element in dsl
     #   :single_match - match with unique component module
     #   :multiple_match - match with more than one component modules
-    MatchInfo = Struct.new(:match_type,:match_array) # match_array is an array of ComponentDSLForm elements
-    def self.get_ndx_module_info(project_idh,module_class,module_branch,opts={})
+    MatchInfo = Struct.new(:match_type, :match_array) # match_array is an array of ComponentDSLForm elements
+    def self.get_ndx_module_info(project_idh, module_class, module_branch, opts = {})
       ret = {}
-      raw_cmp_mod_refs = Parse.get_component_module_refs_dsl_info(module_class,module_branch)
+      raw_cmp_mod_refs = Parse.get_component_module_refs_dsl_info(module_class, module_branch)
       return raw_cmp_mod_refs if raw_cmp_mod_refs.is_a?(ErrorUsage::Parsing)
       # put in parse_form
-      cmp_mod_refs = raw_cmp_mod_refs.map{|r|new(r[:component_module],r[:remote_namespace], r[:external_ref])}
+      cmp_mod_refs = raw_cmp_mod_refs.map { |r| new(r[:component_module], r[:remote_namespace], r[:external_ref]) }
 
       # prune out any that dont have namespace
-      cmp_mod_refs.reject!{|cmr|!cmr.namespace?}
+      cmp_mod_refs.reject! { |cmr| !cmr.namespace? }
 
       # find component modules (in parse form) that matches a component module found in dsl or
       # in opts; module_names are the relevant modle names to return info about
-      module_names = (cmp_mod_refs.map(&:component_module) + (opts[:include_module_names]||[])).uniq
+      module_names = (cmp_mod_refs.map(&:component_module) + (opts[:include_module_names] || [])).uniq
       return ret if module_names.empty?
-      cmp_mods_dsl_form = get_matching_component_modules__dsl_form(project_idh,module_names)
+      cmp_mods_dsl_form = get_matching_component_modules__dsl_form(project_idh, module_names)
 
       # for each element in cmp_mod_refs that has a namespace see if it matches an existing component module
       # if not return an error
       dangling_cmp_mod_refs = []
       cmp_mod_refs.each do |cmr|
-        unless cmp_mods_dsl_form.find{|cmp_mod|cmp_mod.match?(cmr)}
+        unless cmp_mods_dsl_form.find { |cmp_mod| cmp_mod.match?(cmr) }
           dangling_cmp_mod_refs << cmr
         end
       end
@@ -72,16 +72,16 @@ module DTK; class ModuleRefs
       end
 
       cmp_mod_refs.each do |cmr|
-        ret[cmr.component_module] = MatchInfo.new(:dsl,ComponentDSLForm::Elements.new(cmr))
+        ret[cmr.component_module] = MatchInfo.new(:dsl, ComponentDSLForm::Elements.new(cmr))
       end
       if opts[:include_module_names]
         opts[:include_module_names].each do |module_name|
           # only add if not there already
           unless ret[module_name]
-            match_array = ComponentDSLForm::Elements.new(cmp_mods_dsl_form.select{|cmr|module_name == cmr.component_module()})
+            match_array = ComponentDSLForm::Elements.new(cmp_mods_dsl_form.select { |cmr| module_name == cmr.component_module() })
             unless match_array.empty?
               match_type = (match_array.size == 1 ? :single_match : :multiple_match)
-              ret[module_name] = MatchInfo.new(match_type,match_array)
+              ret[module_name] = MatchInfo.new(match_type, match_array)
             end
           end
         end
@@ -97,7 +97,7 @@ module DTK; class ModuleRefs
       mb_idhs = module_branches.map(&:id_handle)
       ret = ComponentDSLForm::Elements.new
       ModuleBranch.get_namespace_info(mb_idhs).each do |r|
-        ret << new(r[:component_module][:display_name],r[:namespace][:display_name])
+        ret << new(r[:component_module][:display_name], r[:namespace][:display_name])
       end
       ret
     end
@@ -116,13 +116,13 @@ module DTK; class ModuleRefs
 
     private
 
-    def self.get_matching_component_modules__dsl_form(project_idh,module_names)
+    def self.get_matching_component_modules__dsl_form(project_idh, module_names)
       opts = {
-        cols: [:namespace_id,:namespace],
-        filter: [:oneof,:display_name,module_names]
+        cols: [:namespace_id, :namespace],
+        filter: [:oneof, :display_name, module_names]
       }
-      matching_modules = ComponentModule.get_all_with_filter(project_idh,opts)
-      matching_modules.map{|m| new(m[:display_name],m[:namespace][:name])}
+      matching_modules = ComponentModule.get_all_with_filter(project_idh, opts)
+      matching_modules.map { |m| new(m[:display_name], m[:namespace][:name]) }
     end
   end
 end; end

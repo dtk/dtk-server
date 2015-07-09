@@ -33,7 +33,7 @@ expected_output_1 = {
 
 describe '(Staging And Deploying Assemblies) Test Case 14: Using lambda function in dtk.model.yaml' do
   before(:all) do
-    puts '**************************************************************************************',''
+    puts '**************************************************************************************', ''
   end
 
   context 'Import service module function' do

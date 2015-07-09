@@ -8,7 +8,7 @@ module DTK
         service_node_group().bump_down_cardinality()
       end
 
-      def clone_post_copy_hook(_clone_copy_output,_opts={})
+      def clone_post_copy_hook(_clone_copy_output, _opts = {})
         # no op
       end
 
@@ -17,10 +17,10 @@ module DTK
       def service_node_group
         return @service_node_group if @service_node_group
         sp_hash = {
-          cols: [:id,:service_node_group],
-          filter: [:eq,:node_id,id()]
+          cols: [:id, :service_node_group],
+          filter: [:eq, :node_id, id()]
         }
-        nodes = Model.get_objs(model_handle(:node_group_relation),sp_hash).map{|r|r[:service_node_group]}
+        nodes = Model.get_objs(model_handle(:node_group_relation), sp_hash).map { |r| r[:service_node_group] }
         unless nodes.size == 1
           raise Error.new("Unexpected that rows.size (#{nodes.size}) does not equal 1")
         end

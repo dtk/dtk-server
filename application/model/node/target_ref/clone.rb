@@ -2,7 +2,7 @@ module DTK; class Node
   class TargetRef
     # Clone has methods used when staging (cloning) taht involves target refs
     class Clone
-      def initialize(target,assembly,nodes)
+      def initialize(target, assembly, nodes)
         @target = target
         @assembly = assembly
         @nodes = nodes
@@ -32,31 +32,31 @@ module DTK; class Node
           ndx_needs_sc.merge!(node[:id] => node)
         end
 
-        Input::BaseNodes.create_linked_target_refs?(@target,@assembly,tr_create)
+        Input::BaseNodes.create_linked_target_refs?(@target, @assembly, tr_create)
 
-        to_link_array = existing_target_refs_to_link(tr_link_candidates,ndx_needs_sc)
+        to_link_array = existing_target_refs_to_link(tr_link_candidates, ndx_needs_sc)
         link_to_target_refs(to_link_array)
 
         # needed target_ref state changes
-        ndx_needs_sc.reject{|_node,needs_sc|!needs_sc}.values
+        ndx_needs_sc.reject { |_node, needs_sc| !needs_sc }.values
       end
 
       private
 
-      ToLinkElement = Struct.new(:node_instance_id,:target_ref)
+      ToLinkElement = Struct.new(:node_instance_id, :target_ref)
       # This method returns array of
       # and also updates ndx_needs_sc
-      def existing_target_refs_to_link(tr_link_candidates,ndx_needs_sc)
+      def existing_target_refs_to_link(tr_link_candidates, ndx_needs_sc)
         ret = []
         return ret if tr_link_candidates.empty?
         # See if nodes have target refs computed already; if so compute these
         # TODO: convert so that always case target refs computed already
         trs_that_need_processing = []
         tr_link_candidates.each do |node|
-          trs = node[:target_refs_to_link]||[]
+          trs = node[:target_refs_to_link] || []
           unless trs.empty?
             node_id = node[:id]
-            ret += trs.map{|target_ref|ToLinkElement.new(node_id,target_ref)}
+            ret += trs.map { |target_ref| ToLinkElement.new(node_id, target_ref) }
           else
             trs_that_need_processing << node
           end
@@ -65,18 +65,18 @@ module DTK; class Node
         return ret if trs_that_need_processing.empty?
 
         # TODO: after 'convert so that always case' can remove below
-        ndx_node_template__node = trs_that_need_processing.inject({}) do |h,n|
+        ndx_node_template__node = trs_that_need_processing.inject({}) do |h, n|
           n[:node_template_id] ? h.merge!(n[:node_template_id] => n[:id]) : h
         end
         unless ndx_node_template__node.empty?
           sp_hash = {
-            cols: [:id,:display_name,:type],
-            filter: [:oneof,:id,ndx_node_template__node.keys]
+            cols: [:id, :display_name, :type],
+            filter: [:oneof, :id, ndx_node_template__node.keys]
           }
-          Model.get_objs(@target.model_handle(:node),sp_hash).each do |nt|
+          Model.get_objs(@target.model_handle(:node), sp_hash).each do |nt|
             if nt.is_target_ref?()
               node_id = ndx_node_template__node[nt[:id]]
-              ret << ToLinkElement.new(node_id,nt)
+              ret << ToLinkElement.new(node_id, nt)
               ndx_needs_sc[node_id] = nil
             end
           end
@@ -88,11 +88,11 @@ module DTK; class Node
       # to_link_array is array of ToLinkElements
       def link_to_target_refs(to_link_array)
         return if to_link_array.empty?
-        create_ngrs_objs_hash = to_link_array.inject({}) do |h,to_link_el|
-          h.merge(Input::BaseNodes.target_ref_link_hash(to_link_el.node_instance_id,to_link_el.target_ref.id))
+        create_ngrs_objs_hash = to_link_array.inject({}) do |h, to_link_el|
+          h.merge(Input::BaseNodes.target_ref_link_hash(to_link_el.node_instance_id, to_link_el.target_ref.id))
         end
-        create_objs_hash = {node_group_relation: create_ngrs_objs_hash}
-        Model.input_hash_content_into_model(@target.id_handle(),create_objs_hash)
+        create_objs_hash = { node_group_relation: create_ngrs_objs_hash }
+        Model.input_hash_content_into_model(@target.id_handle(), create_objs_hash)
       end
     end
   end

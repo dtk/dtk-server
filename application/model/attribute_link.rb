@@ -1,10 +1,10 @@
 module DTK
   class AttributeLink < Model
-    r8_nested_require('attribute_link','propagate_mixins')
-    r8_nested_require('attribute_link','propagate_changes')
-    r8_nested_require('attribute_link','function')
-    r8_nested_require('attribute_link','propagate_processor')
-    r8_nested_require('attribute_link','ad_hoc')
+    r8_nested_require('attribute_link', 'propagate_mixins')
+    r8_nested_require('attribute_link', 'propagate_changes')
+    r8_nested_require('attribute_link', 'function')
+    r8_nested_require('attribute_link', 'propagate_processor')
+    r8_nested_require('attribute_link', 'ad_hoc')
 
     extend PropagateChangesClassMixin
 
@@ -16,7 +16,7 @@ module DTK
     end
 
     def self.common_columns
-      [:id,:group_id,:display_name,:input_id,:output_id,:type,:hidden,:function,:index_map,:assembly_id,:port_link_id]
+      [:id, :group_id, :display_name, :input_id, :output_id, :type, :hidden, :function, :index_map, :assembly_id, :port_link_id]
     end
 
     # virtual attribute defs
@@ -41,40 +41,40 @@ module DTK
     private :index_map_aux
 
     ##########################  get links ##################
-    def self.get_augmented(model_handle,filter)
+    def self.get_augmented(model_handle, filter)
       ret = []
       sp_hash = {
-        cols: [:id,:group_id,:input_id,:output_id,:function,:index_map],
+        cols: [:id, :group_id, :input_id, :output_id, :function, :index_map],
         filter: filter
       }
-      attr_links = get_objs(model_handle,sp_hash)
+      attr_links = get_objs(model_handle, sp_hash)
       return ret if attr_links.empty?
 
-      attr_ids = attr_links.inject([]){|array,al|array + [al[:input_id],al[:output_id]]}
-      filter = [:oneof,:id,attr_ids]
-      ndx_attrs = Attribute.get_augmented(model_handle.createMH(:attribute),filter).inject({}){|h,r|h.merge(r[:id] => r)}
+      attr_ids = attr_links.inject([]) { |array, al| array + [al[:input_id], al[:output_id]] }
+      filter = [:oneof, :id, attr_ids]
+      ndx_attrs = Attribute.get_augmented(model_handle.createMH(:attribute), filter).inject({}) { |h, r| h.merge(r[:id] => r) }
 
-      attr_links.map{|al|al.merge(input: ndx_attrs[al[:input_id]], output: ndx_attrs[al[:output_id]])}
+      attr_links.map { |al| al.merge(input: ndx_attrs[al[:input_id]], output: ndx_attrs[al[:output_id]]) }
     end
     ########################## end: get links ##################
 
     ##########################  add new links ##################
-    def self.create_from_link_defs__clone_if_needed(parent_idh,link_def_context,opts={})
+    def self.create_from_link_defs__clone_if_needed(parent_idh, link_def_context, opts = {})
       #TODO: might put back in on_create_events.each{|ev|ev.process!(context)}
 
       # ret_links__clone_if_needed returns array of type LinkDef::Link::AttributeMapping::AugmentedLinkContext
       # which has attribute_mapping plus needed context
       aug_am_links = link_def_context.aug_attr_mappings__clone_if_needed(opts)
-      create_attribute_links(parent_idh,aug_am_links)
+      create_attribute_links(parent_idh, aug_am_links)
    end
 
-    def self.create_attribute_links(parent_idh,rows_to_create,opts={})
+    def self.create_attribute_links(parent_idh, rows_to_create, opts = {})
       return [] if rows_to_create.empty?
       attr_mh = parent_idh.create_childMH(:attribute)
       attr_link_mh = parent_idh.create_childMH(:attribute_link)
 
-      attr_info = create_attribute_links__attr_info(attr_mh,rows_to_create,opts)
-      add_link_fns!(rows_to_create,attr_info)
+      attr_info = create_attribute_links__attr_info(attr_mh, rows_to_create, opts)
+      add_link_fns!(rows_to_create, attr_info)
 
       # add parent_col and ref
       parent_col = attr_link_mh.parent_id_field_name()
@@ -85,32 +85,32 @@ module DTK
       end
 
       # actual create of new attribute_links
-      rows_for_array_ds = rows_to_create.map{|row|Aux::hash_subset(row,row.keys - remove_keys)}
-      select_ds = SQL::ArrayDataset.create(db,rows_for_array_ds,attr_link_mh,convert_for_create: true)
+      rows_for_array_ds = rows_to_create.map { |row| Aux::hash_subset(row, row.keys - remove_keys) }
+      select_ds = SQL::ArrayDataset.create(db, rows_for_array_ds, attr_link_mh, convert_for_create: true)
       override_attrs = {}
-      field_set = FieldSet.new(model_name,rows_for_array_ds.first.keys)
-      returning_ids = create_from_select(attr_link_mh,field_set,select_ds,override_attrs,returning_sql_cols: [:id])
+      field_set = FieldSet.new(model_name, rows_for_array_ds.first.keys)
+      returning_ids = create_from_select(attr_link_mh, field_set, select_ds, override_attrs, returning_sql_cols: [:id])
 
       # insert the new ids into rows_to_create
-      returning_ids.each_with_index{|id_info,i|rows_to_create[i][:id] = id_info[:id]}
+      returning_ids.each_with_index { |id_info, i| rows_to_create[i][:id] = id_info[:id] }
 
       # augment attributes with port info; this is needed only if port is external
-      Attribute.update_port_info(attr_mh,rows_to_create) unless opts[:donot_update_port_info]
+      Attribute.update_port_info(attr_mh, rows_to_create) unless opts[:donot_update_port_info]
 
       # want to use auth_info from parent_idh in case more specific than target
-      change_parent_idh = parent_idh.get_top_container_id_handle(:target,auth_info_from_self: true)
+      change_parent_idh = parent_idh.get_top_container_id_handle(:target, auth_info_from_self: true)
       # propagate attribute values
-      ndx_nested_change_hashes = propagate_from_create(attr_mh,attr_info,rows_to_create,change_parent_idh)
+      ndx_nested_change_hashes = propagate_from_create(attr_mh, attr_info, rows_to_create, change_parent_idh)
       StateChange.create_pending_change_items(ndx_nested_change_hashes.values) unless opts[:donot_create_pending_changes]
     end
 
     def self.attribute_info_cols
-      [:id,:attribute_value,:semantic_type_object,:component_parent]
+      [:id, :attribute_value, :semantic_type_object, :component_parent]
     end
 
     private
 
-    def  self.propagate_from_create(attr_mh,attr_info,attr_links,change_parent_idh)
+    def  self.propagate_from_create(attr_mh, attr_info, attr_links, change_parent_idh)
       attrs_links_to_update = attr_links.map do |attr_link|
         input_attr = attr_info[attr_link[:input_id]]
         output_attr = attr_info[attr_link[:output_id]]
@@ -121,7 +121,7 @@ module DTK
           parent_idh: change_parent_idh
         }
       end
-      propagate(attr_mh,attrs_links_to_update)
+      propagate(attr_mh, attrs_links_to_update)
     end
 
     # mechanism to compensate for fact that cols are being added by processing fns to rows_to_create that
@@ -131,19 +131,19 @@ module DTK
       RemoveKeys
     end
     def self.add_to_remove_keys(*keys)
-      keys.each{|k|RemoveKeys << k unless RemoveKeys.include?(k)}
+      keys.each { |k| RemoveKeys << k unless RemoveKeys.include?(k) }
     end
 
-    def self.get_attribute_info(attr_mh,rows_to_create)
-      endpoint_ids = rows_to_create.map{|r|[r[:input_id],r[:output_id]]}.flatten.uniq
+    def self.get_attribute_info(attr_mh, rows_to_create)
+      endpoint_ids = rows_to_create.map { |r| [r[:input_id], r[:output_id]] }.flatten.uniq
       sp_hash = {
         cols: attribute_info_cols(),
         filter: [:oneof, :id, endpoint_ids]
       }
-      get_objs(attr_mh,sp_hash)
+      get_objs(attr_mh, sp_hash)
     end
 
-    def self.check_constraints(attr_mh,rows_to_create)
+    def self.check_constraints(attr_mh, rows_to_create)
       # TODO: may modify to get all constraints from  conn_info_list
       rows_to_create.each do |row|
         # TODO: right now constraints just on input, not output, attributes
@@ -155,47 +155,47 @@ module DTK
           end
         end
         next if constraints.empty?
-        target = {target_port_id_handle: attr_mh.createIDH(id: row[:output_id])}
+        target = { target_port_id_handle: attr_mh.createIDH(id: row[:output_id]) }
         # TODO: may treat differently if rows_to_create has multiple rows
         constraints.evaluate_given_target(target, raise_error_when_error_violation: true)
       end
     end
 
-    def self.create_attribute_links__attr_info(attr_mh,rows_to_create,opts={})
-      attr_rows = opts[:attr_rows]||get_attribute_info(attr_mh,rows_to_create)
-      attr_rows.inject({}){|h,attr|h.merge(attr[:id] => attr)}
+    def self.create_attribute_links__attr_info(attr_mh, rows_to_create, opts = {})
+      attr_rows = opts[:attr_rows] || get_attribute_info(attr_mh, rows_to_create)
+      attr_rows.inject({}) { |h, attr| h.merge(attr[:id] => attr) }
     end
 
-    def self.add_link_fns!(rows_to_create,attr_info)
+    def self.add_link_fns!(rows_to_create, attr_info)
       rows_to_create.each do |r|
-        input_attr = attr_info[r[:input_id]].merge(r[:input_path] ? {input_path: r[:input_path]} : {})
-        output_attr = attr_info[r[:output_id]].merge(r[:output_path] ? {output_path: r[:output_path]} : {})
-        r[:function] ||= Function.link_function(r,input_attr,output_attr)
+        input_attr = attr_info[r[:input_id]].merge(r[:input_path] ? { input_path: r[:input_path] } : {})
+        output_attr = attr_info[r[:output_id]].merge(r[:output_path] ? { output_path: r[:output_path] } : {})
+        r[:function] ||= Function.link_function(r, input_attr, output_attr)
       end
     end
 
-    add_to_remove_keys :input_path,:output_path
+    add_to_remove_keys :input_path, :output_path
 
     ####################
 
     public
 
     ### special purpose create links ###
-    def self.create_links_node_group_members(node_group_id_handle,ng_cmp_id_handle,node_cmp_id_handles)
+    def self.create_links_node_group_members(node_group_id_handle, ng_cmp_id_handle, node_cmp_id_handles)
       node_cmp_mh = node_cmp_id_handles.first.createMH
-      node_cmp_wc = {ancestor_id: ng_cmp_id_handle.get_id()}
-      node_cmp_fs = FieldSet.opt([:id],:component)
-      node_cmp_ds = get_objects_just_dataset(node_cmp_mh,node_cmp_wc,node_cmp_fs)
+      node_cmp_wc = { ancestor_id: ng_cmp_id_handle.get_id() }
+      node_cmp_fs = FieldSet.opt([:id], :component)
+      node_cmp_ds = get_objects_just_dataset(node_cmp_mh, node_cmp_wc, node_cmp_fs)
 
       attr_mh = node_cmp_mh.create_childMH(:attribute)
 
       attr_parent_col = attr_mh.parent_id_field_name()
-      node_attr_fs = FieldSet.opt([attr_parent_col,:id,:ref],:attribute)
-      node_attr_ds = get_objects_just_dataset(attr_mh,nil,node_attr_fs)
+      node_attr_fs = FieldSet.opt([attr_parent_col, :id, :ref], :attribute)
+      node_attr_ds = get_objects_just_dataset(attr_mh, nil, node_attr_fs)
 
-      group_attr_wc = {attr_parent_col => ng_cmp_id_handle.get_id()}
-      group_attr_fs = FieldSet.opt([:id,:ref],:attribute)
-      group_attr_ds = get_objects_just_dataset(attr_mh,group_attr_wc,group_attr_fs)
+      group_attr_wc = { attr_parent_col => ng_cmp_id_handle.get_id() }
+      group_attr_fs = FieldSet.opt([:id, :ref], :attribute)
+      group_attr_ds = get_objects_just_dataset(attr_mh, group_attr_wc, group_attr_fs)
 
       # attribute link has same parent as node_group
       attr_link_mh = node_group_id_handle.create_peerMH(:attribute_link)
@@ -203,25 +203,25 @@ module DTK
       attr_link_parent_col = attr_link_mh.parent_id_field_name()
       ref_prefix = 'attribute_link:'
       i1_ds = node_cmp_ds.select(
-         {SQL::ColRef.concat(ref_prefix,:input__id.cast(:text),'-',:output__id.cast(:text)) => :ref},
-         {attr_link_parent_id_handle.get_id() => attr_link_parent_col},
-         {input__id: :input_id},
-         {output__id: :output_id},
-         {'member' => :type},
+         { SQL::ColRef.concat(ref_prefix, :input__id.cast(:text), '-', :output__id.cast(:text)) => :ref },
+         { attr_link_parent_id_handle.get_id() => attr_link_parent_col },
+         { input__id: :input_id },
+         { output__id: :output_id },
+         { 'member' => :type },
          'eq' => :function)
-      first_join_ds = i1_ds.join_table(:inner,node_attr_ds,{attr_parent_col => :id},table_alias: :input)
-      attr_link_ds = first_join_ds.join_table(:inner,group_attr_ds,[:ref],table_alias: :output)
+      first_join_ds = i1_ds.join_table(:inner, node_attr_ds, { attr_parent_col => :id }, table_alias: :input)
+      attr_link_ds = first_join_ds.join_table(:inner, group_attr_ds, [:ref], table_alias: :output)
 
-      attr_link_fs = FieldSet.new(:attribute,[:ref,attr_link_parent_col,:input_id,:output_id,:function,:type])
+      attr_link_fs = FieldSet.new(:attribute, [:ref, attr_link_parent_col, :input_id, :output_id, :function, :type])
       override_attrs = {}
 
-      opts = {duplicate_refs: :no_check,returning_sql_cols: [:input_id,:output_id]}
-      create_from_select(attr_link_mh,attr_link_fs,attr_link_ds,override_attrs,opts)
+      opts = { duplicate_refs: :no_check, returning_sql_cols: [:input_id, :output_id] }
+      create_from_select(attr_link_mh, attr_link_fs, attr_link_ds, override_attrs, opts)
     end
 
-    def self.create_links_sap(link_info,sap_attr_idh,sap_config_attr_idh,par_idh,node_idh)
+    def self.create_links_sap(link_info, sap_attr_idh, sap_config_attr_idh, par_idh, node_idh)
       attr_link_mh = sap_attr_idh.createMH(model_name: :attribute_link, parent_model_name: :node)
-      sap_id,sap_config_id,par_id,node_id = [sap_attr_idh,sap_config_attr_idh,par_idh,node_idh].map(&:get_id)
+      sap_id, sap_config_id, par_id, node_id = [sap_attr_idh, sap_config_attr_idh, par_idh, node_idh].map(&:get_id)
 
       sap_config_name = link_info[:sap_config]
       sap_name = link_info[:sap]
@@ -250,13 +250,13 @@ module DTK
            node_node_id: node_id
          }
         ]
-      create_from_rows(attr_link_mh,new_link_rows)
+      create_from_rows(attr_link_mh, new_link_rows)
     end
 
     # TODO: deprecate below after subsuming from above
-    def self.create_links_l4_sap(new_sap_attr_idh,sap_config_attr_idh,ipv4_host_addrs_idh,node_idh)
+    def self.create_links_l4_sap(new_sap_attr_idh, sap_config_attr_idh, ipv4_host_addrs_idh, node_idh)
       attr_link_mh = node_idh.createMH(model_name: :attribute_link, parent_model_name: :node)
-      new_sap_id,sap_config_id,ipv4_id,node_id = [new_sap_attr_idh,sap_config_attr_idh,ipv4_host_addrs_idh,node_idh].map(&:get_id)
+      new_sap_id, sap_config_id, ipv4_id, node_id = [new_sap_attr_idh, sap_config_attr_idh, ipv4_host_addrs_idh, node_idh].map(&:get_id)
 
       new_link_rows =
         [
@@ -281,15 +281,15 @@ module DTK
            node_node_id: node_id
          }
         ]
-      create_from_rows(attr_link_mh,new_link_rows)
+      create_from_rows(attr_link_mh, new_link_rows)
     end
 
     ########################## end add new links ##################
     class IndexMap < Array
-      def merge_into(source,output_var)
-        self.inject(source) do |ret,el|
+      def merge_into(source, output_var)
+        self.inject(source) do |ret, el|
           delta = el[:output].take_slice(output_var)
-          el[:input].merge_into(ret,delta)
+          el[:input].merge_into(ret, delta)
         end
       end
 
@@ -297,16 +297,16 @@ module DTK
         x.is_a?(Array) ? create_from_array(x) : x
       end
 
-      def self.generate_from_paths(input_path,output_path)
-        create_from_array([{input: input_path, output: output_path}])
+      def self.generate_from_paths(input_path, output_path)
+        create_from_array([{ input: input_path, output: output_path }])
       end
 
-      def self.generate_from_bounds(lower_bound,upper_bound,offset)
-        create_from_array((lower_bound..upper_bound).map{|i|{output: [i], input: [i+offset]}})
+      def self.generate_from_bounds(lower_bound, upper_bound, offset)
+        create_from_array((lower_bound..upper_bound).map { |i| { output: [i], input: [i + offset] } })
       end
       # TODO: may be able to be simplified because may only called be caleld with upper_bound == 0
-      def self.generate_for_output_scalar(upper_bound,offset)
-        create_from_array((0..upper_bound).map{|i|{output: [], input: [i+offset]}})
+      def self.generate_for_output_scalar(upper_bound, offset)
+        create_from_array((0..upper_bound).map { |i| { output: [], input: [i + offset] } })
       end
 
       def input_array_indexes
@@ -317,11 +317,11 @@ module DTK
         end
       end
 
-      def self.resolve_input_paths!(index_map_list,component_mh)
+      def self.resolve_input_paths!(index_map_list, component_mh)
         return if index_map_list.empty?
         paths = []
-        index_map_list.each{|im|im.each{|im_el|paths << im_el[:input]}}
-        IndexMapPath.resolve_paths!(paths,component_mh)
+        index_map_list.each { |im| im.each { |im_el| paths << im_el[:input] } }
+        IndexMapPath.resolve_paths!(paths, component_mh)
       end
 
       private
@@ -332,7 +332,7 @@ module DTK
         a.each do |el|
           input = el[:input].is_a?(IndexMapPath) ? el[:input] : IndexMapPath.create_from_array(el[:input])
           output = el[:output].is_a?(IndexMapPath) ? el[:output] : IndexMapPath.create_from_array(el[:output])
-          ret << {input: input, output: output}
+          ret << { input: input, output: output }
         end
         ret
       end
@@ -364,16 +364,16 @@ module DTK
         end
       end
 
-      def merge_into(source,delta)
+      def merge_into(source, delta)
         return delta if self.empty?
         el = self.first
         if is_array_el?(el)
           if source.is_a?(Array) || source.nil?()
             ret = source ? source.dup : []
             if ret.size <= el
-              ret += (0.. el - ret.size).map{nil}
+              ret += (0..el - ret.size).map { nil }
             end
-            ret[el] = rest().merge_into(ret[el],delta)
+            ret[el] = rest().merge_into(ret[el], delta)
             ret
           else
             Log.error('array expected')
@@ -382,7 +382,7 @@ module DTK
         else
           if source.is_a?(Hash) || source.nil?()
             ret = source || {}
-            ret.merge(el.to_s => rest().merge_into(ret[el.to_s],delta))
+            ret.merge(el.to_s => rest().merge_into(ret[el.to_s], delta))
           else
             Log.error('hash expected')
             nil
@@ -391,21 +391,21 @@ module DTK
       end
 
       # TODO: more efficient and not needed if can be resolved when get index
-      def self.resolve_paths!(path_list,component_mh)
+      def self.resolve_paths!(path_list, component_mh)
         ndx_cmp_idhs = {}
         path_list.each do |index_map_path|
-          index_map_path.each_with_index do |el,i|
+          index_map_path.each_with_index do |el, i|
             next unless el.is_a?(Hash)
-            next unless id = (el[:create_component_index]||{})[:component_id]
-            ndx_cmp_idhs[id] ||= {idh: component_mh.createIDH(id: id), elements: []}
-            ndx_cmp_idhs[id][:elements] << {path: index_map_path, i: i}
+            next unless id = (el[:create_component_index] || {})[:component_id]
+            ndx_cmp_idhs[id] ||= { idh: component_mh.createIDH(id: id), elements: [] }
+            ndx_cmp_idhs[id][:elements] << { path: index_map_path, i: i }
           end
         end
         return if ndx_cmp_idhs.empty?
-        cmp_idhs =  ndx_cmp_idhs.values.map{|x|x[:idh]}
-        sp_hash = {cols: [:id,:multiple_instance_ref]}
-        opts = {keep_ref_cols: true}
-        cmp_info = Model.get_objects_in_set_from_sp_hash(cmp_idhs,sp_hash,opts)
+        cmp_idhs =  ndx_cmp_idhs.values.map { |x| x[:idh] }
+        sp_hash = { cols: [:id, :multiple_instance_ref] }
+        opts = { keep_ref_cols: true }
+        cmp_info = Model.get_objects_in_set_from_sp_hash(cmp_idhs, sp_hash, opts)
         cmp_info.each do |r|
           ref = r[:multiple_instance_ref]
           ndx_cmp_idhs[r[:id]][:elements].each do |el|
@@ -429,7 +429,7 @@ module DTK
       end
 
       def rest
-        self[1..self.size-1]
+        self[1..self.size - 1]
       end
 
       def is_array_el?(el)
@@ -441,19 +441,19 @@ module DTK
     def self.get_legal_connections(parent_id_handle)
       c = parent_id_handle[:c]
       parent_id = IDInfoTable.get_id_from_id_handle(parent_id_handle)
-      component_ds = get_objects_just_dataset(ModelHandle.new(c,:component),nil,{parent_id: parent_id}.merge(FieldSet.opt([:id,:external_ref],:component)))
-      attribute_ds = get_objects_just_dataset(ModelHandle.new(c,:attribute),nil,FieldSet.opt([:id,:external_ref,:component_component_id],:attribute))
+      component_ds = get_objects_just_dataset(ModelHandle.new(c, :component), nil, { parent_id: parent_id }.merge(FieldSet.opt([:id, :external_ref], :component)))
+      attribute_ds = get_objects_just_dataset(ModelHandle.new(c, :attribute), nil, FieldSet.opt([:id, :external_ref, :component_component_id], :attribute))
 
-      attribute_link_ds = get_objects_just_dataset(ModelHandle.new(c,:attribute_link))
-      component_ds.graph(:inner,attribute_ds,{component_component_id: :id}).graph(:left_outer,attribute_link_ds,input_id: :id).where(attribute_link__id: nil).all
+      attribute_link_ds = get_objects_just_dataset(ModelHandle.new(c, :attribute_link))
+      component_ds.graph(:inner, attribute_ds, { component_component_id: :id }).graph(:left_outer, attribute_link_ds, input_id: :id).where(attribute_link__id: nil).all
     end
 
-    def self.get_legal_connections_wrt_endpoint(_attribute_id_handle,_parent_id_handle)
+    def self.get_legal_connections_wrt_endpoint(_attribute_id_handle, _parent_id_handle)
     end
 
     private
 
-    def self.ret_function_if_can_determine(input_obj,output_obj)
+    def self.ret_function_if_can_determine(input_obj, output_obj)
       i_sem = input_obj[:semantic_type]
       return nil if i_sem.nil?
       o_sem = output_obj[:semantic_type]
@@ -463,10 +463,10 @@ module DTK
       return nil unless i_sem.keys.first == o_sem.keys.first
 
       sem_type = i_sem.keys.first
-      ret_function_endpoints_same_type(i_sem[sem_type],o_sem[sem_type])
+      ret_function_endpoints_same_type(i_sem[sem_type], o_sem[sem_type])
     end
 
-    def self.ret_function_endpoints_same_type(i,o)
+    def self.ret_function_endpoints_same_type(i, o)
       # TBD: more robust is allowing for example output to be "database", which matches with "postgresql" and also to have version info, etc
       raise Error.new('mismatched input and output types') unless i[:type] == o[:type]
       return :equal if !i[:is_array] && !o[:is_array]
@@ -476,14 +476,14 @@ module DTK
       nil
     end
 
-    def get_input_attribute(_opts={})
+    def get_input_attribute(_opts = {})
       return nil if self[:input_id].nil?
-      get_object_from_db_id(self[:input_id],:attribute)
+      get_object_from_db_id(self[:input_id], :attribute)
     end
 
-    def get_output_attribute(_opts={})
+    def get_output_attribute(_opts = {})
       return nil if self[:output_id].nil?
-      get_object_from_db_id(self[:output_id],:attribute)
+      get_object_from_db_id(self[:output_id], :attribute)
     end
   end
 end

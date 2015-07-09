@@ -1,6 +1,6 @@
 
 class Fieldselect < Fieldbase
-  attr_accessor :default_class,:option_str
+  attr_accessor :default_class, :option_str
 
   def initialize(field_meta)
     super(field_meta)
@@ -14,9 +14,9 @@ class Fieldselect < Fieldbase
 
   def set_options(options)
     @option_str = ''
-    options.each do |value,display|
+    options.each do |value, display|
       #      @option_str << '<option value="' + value + '" selected="{%=' + @model_name + '[:' + @name + ']%}">' + display + '</option>'
-      @option_str << '<option value="' + value + '" {%=' + @model_name + '[:' + @name + '_options_list][:'+value+'_selected]%}">' + display + '</option>'
+      @option_str << '<option value="' + value + '" {%=' + @model_name + '[:' + @name + '_options_list][:' + value + '_selected]%}">' + display + '</option>'
     end
   end
 
@@ -38,7 +38,7 @@ class Fieldselect < Fieldbase
   def get_field_edit_rtpl
     (!@multiple.nil? && @multiple != '') ? multiple = @multiple : multiple = ''
 
-    select_str = '<select id="' + @id + '" name="' + @name + '" '+ multiple + '>'
+    select_str = '<select id="' + @id + '" name="' + @name + '" ' + multiple + '>'
     select_str << @option_str
     select_str << '</select>'
 

@@ -27,7 +27,7 @@ module DTK
 
     def self.convert_hash(item)
       return item unless item.is_a?(Hash)
-      item.inject({}) do |h,kv|
+      item.inject({}) do |h, kv|
         new_key = kv[0].to_s =~ /^:(.+$)/ ? $1.to_sym : kv[0].to_s
         h.merge(new_key =>  convert_hash(kv[1]))
       end
@@ -52,18 +52,18 @@ module DTK
       {
       'sap_config__l4' => {
         syntax: {
-          'port' =>  {required: true, type: :integer},
-          'protocol' => {required: true, type: :string},
-          'binding_addr_constraints' => {type: :json}
+          'port' =>  { required: true, type: :integer },
+          'protocol' => { required: true, type: :string },
+          'binding_addr_constraints' => { type: :json }
         }
       },
       'sap__l4' => {
         external: true,
         port_type: 'output',
         syntax: {
-          'port' => {required: true, type: :integer},
-          'protocol' => {required: true, type: :string},
-          'host_address' => {required: true, dynamic: true, type: :string}
+          'port' => { required: true, type: :integer },
+          'protocol' => { required: true, type: :string },
+          'host_address' => { required: true, dynamic: true, type: :string }
         }
       },
       # rather than having or having two sap refs and user can remove or add to component
@@ -85,15 +85,15 @@ module DTK
         external: true,
         port_type: 'input',
         syntax: {
-           'port' => {required: true, type: :integer},
-           'protocol' => {required: true, type: :string},
-           'host_address' => {required: true, type: :string}
+           'port' => { required: true, type: :integer },
+           'protocol' => { required: true, type: :string },
+           'host_address' => { required: true, type: :string }
         }
       },
 
       'sap__socket' => {
         syntax: {
-          'socket_file' => {required: true, type: :string}
+          'socket_file' => { required: true, type: :string }
         }
       },
 
@@ -103,10 +103,10 @@ module DTK
         # if they have alink; currently if marked as input then they are treated as readonly
         #        :port_type => "input",
         syntax: {
-          'username' => {required: true, type: :string},
-          'password' => {required: false, type: :string},
-          'inet_access' => {required: true, type: :boolean},
-          'client_host_addr' => {required: true, type: :string}
+          'username' => { required: true, type: :string },
+          'password' => { required: false, type: :string },
+          'inet_access' => { required: true, type: :boolean },
+          'client_host_addr' => { required: true, type: :string }
         }
       },
 
@@ -116,18 +116,18 @@ module DTK
         external: true,
         port_type: 'output',
         syntax: {
-          'database' => {required: true, type: :string},
-          'username' => {required: true, type: :string},
-          'password' => {required: true, type: :string}
+          'database' => { required: true, type: :string },
+          'username' => { required: true, type: :string },
+          'password' => { required: true, type: :string }
         }
       },
       'db_params' => {
         external: true,
         port_type: 'input',
         syntax: {
-          'database' => {required: true, type: :string},
-          'username' => {required: true, type: :string},
-          'password' => {required: true, type: :string}
+          'database' => { required: true, type: :string },
+          'username' => { required: true, type: :string },
+          'password' => { required: true, type: :string }
         }
       },
       'db_ref' => {
@@ -172,7 +172,7 @@ module DTK
       if semantic_type.is_a?(Hash)
         val = semantic_type.values.first
         return create_json_type() if val.is_a?(Hash) && val.keys.first == :application
-        ret_schema_from_semantic_type_aux!(ret,key,val)
+        ret_schema_from_semantic_type_aux!(ret, key, val)
       end
       return nil if ret.empty?
       ret.freeze
@@ -185,7 +185,7 @@ module DTK
     # returns [array_body_pattern, whether_can_be_empty]
     def parse_array
       # TODO: may have :array+ and :array* to distingusih whether array can be empty
-      [values.first,false]
+      [values.first, false]
     end
 
     def self.ret_scalar_defined_datatypes
@@ -199,12 +199,12 @@ module DTK
       ret == ':array' ? :array : ret
     end
 
-    def self.ret_schema_from_semantic_type_aux!(ret,index,semantic_type)
+    def self.ret_schema_from_semantic_type_aux!(ret, index, semantic_type)
       key = semantic_type_key(semantic_type)
       if TranslationToSchema[key]
         ret[index] = TranslationToSchema[key]
       elsif semantic_type.is_a?(Hash)
-        ret_schema_from_semantic_type_aux!(ret[index],key,semantic_type.values.first)
+        ret_schema_from_semantic_type_aux!(ret[index], key, semantic_type.values.first)
       else
         ret[index] = create_json_type()
       end
@@ -214,6 +214,6 @@ module DTK
       SemanticTypeSchema.new(type: :json)
     end
 
-    TranslationToSchema = self.new(AttributeSemantic::Info.inject({}){|h,kv|h.merge(kv[0] => kv[1][:syntax])},true)
+    TranslationToSchema = self.new(AttributeSemantic::Info.inject({}) { |h, kv| h.merge(kv[0] => kv[1][:syntax]) }, true)
   end
 end

@@ -39,7 +39,7 @@ class Modules < Main
     end
   end
 
-  def set_module_permissions(permissions={})
+  def set_module_permissions(permissions = {})
     permissions.each do |key, value|
       if value
         @session.check(key.to_s)

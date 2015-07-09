@@ -1,39 +1,39 @@
 # TODO: simplify by changing target arg to be just idh
 module XYZ
   class Constraints < Array
-    def initialize(logical_op=:and,constraints=[])
+    def initialize(logical_op = :and, constraints = [])
       super(constraints)
       @logical_op = logical_op
     end
 
-    def evaluate_given_target(target,opts={})
-      ret = evaluate_given_target_just_eval(target,opts)
+    def evaluate_given_target(target, opts = {})
+      ret = evaluate_given_target_just_eval(target, opts)
       return ret if ret
 
       target_parent_obj = target.values.first.get_parent_id_handle().create_object
       violations = ret_violations(target)
       if opts[:raise_error_when_any_violation]
-        all_violations = Violation::Expression(violations['error'],violations['warning'])
+        all_violations = Violation::Expression(violations['error'], violations['warning'])
         raise ErrorConstraintViolations.new(all_violations.pp_form)
       elsif opts[:raise_error_when_error_violation]
         pp [:warnings, violations['warning'].pp_form]
-        Violation.save(target_parent_obj,violations['warning'])
+        Violation.save(target_parent_obj, violations['warning'])
         raise ErrorConstraintViolations.new(violations['error'].pp_form) unless violations['error'].empty?
       else
         pp [:errors, violations['error'].pp_form]
-        Violation.save(target_parent_obj,violations['error'])
+        Violation.save(target_parent_obj, violations['error'])
         pp [:warnings, violations['warning'].pp_form]
-        Violation.save(target_parent_obj,violations['warning'])
+        Violation.save(target_parent_obj, violations['warning'])
       end
       ret
     end
 
     private
 
-    def evaluate_given_target_just_eval(target,opts={})
+    def evaluate_given_target_just_eval(target, opts = {})
       return true if self.empty?
       self.each do |constraint|
-        constraint_holds = constraint.evaluate_given_target(target,opts)
+        constraint_holds = constraint.evaluate_given_target(target, opts)
         case @logical_op
           when :or
             return true if constraint_holds
@@ -50,7 +50,7 @@ module XYZ
     public
 
     def ret_violations(target)
-      ret = {'error' => Violation::Expression.new(target,@logical_op), 'warning' => Violation::Expression.new(target,@logical_op)}
+      ret = { 'error' => Violation::Expression.new(target, @logical_op), 'warning' => Violation::Expression.new(target, @logical_op) }
 
       self.each do |constraint|
         next if constraint.evaluate_given_target(target)
@@ -73,9 +73,9 @@ module XYZ
           elsif term.is_a?(String)
             term
           elsif term.is_a?(Hash)
-            term.inject({}){|h,kv|h.merge(string_symbol_form(kv[0]) => string_symbol_form(kv[1]))}
+            term.inject({}) { |h, kv| h.merge(string_symbol_form(kv[0]) => string_symbol_form(kv[1])) }
           elsif term.is_a?(Array)
-            term.map{|t|string_symbol_form(t)}
+            term.map { |t| string_symbol_form(t) }
           else
             Log.error("unexpected form for term #{term.inspect}")
           end
@@ -91,14 +91,14 @@ module XYZ
           }
          string_symbol_form(hash)
         end
-        def self.description(required_component,base_component)
+        def self.description(required_component, base_component)
           "#{print_form(required_component)} is required for #{print_form(base_component)}"
         end
 
         private
 
         def self.print_form(cmp_display_name)
-          i18n = Model.i18n_string(component_i18n,:component,cmp_display_name)
+          i18n = Model.i18n_string(component_i18n, :component, cmp_display_name)
           i18n || cmp_display_name.split(name_delimiter()).map(&:capitalize).join(' ')
         end
       end
@@ -115,14 +115,14 @@ module XYZ
         raise Error.new('unexpected dependency type')
       end
     end
-    def evaluate_given_target(target,opts={})
+    def evaluate_given_target(target, opts = {})
       # if no :search_pattern then this is a 'necessary fail'
       return false unless search_pattern
       dataset = create_dataset(target)
       rows = dataset.all
 
       # opportunistic gathering of info
-      update_object_from_info_gathered!(opts[:update_object],rows) if opts[:update_object]
+      update_object_from_info_gathered!(opts[:update_object], rows) if opts[:update_object]
 
       is_empty = rows.empty?
       self[:negate] ? is_empty : (not is_empty)
@@ -181,7 +181,7 @@ module XYZ
     end
 
     # overrwritten
-    def update_object_from_info_gathered!(_object,_rows)
+    def update_object_from_info_gathered!(_object, _rows)
       raise Error.new("not treating constraint update of object of type #{obj.class}")
     end
   end
@@ -201,7 +201,7 @@ module XYZ
         end
       end
 
-      cols = [:id,:display_name]
+      cols = [:id, :display_name]
       cols << join_cond.keys.first unless cols.include?(join_cond.keys.first)
       direct_component = {
         model_name: :component,
@@ -219,10 +219,10 @@ module XYZ
           {
             model_name: :attribute,
             alias: v[:col],
-            filter: [v[:op],v[:col],v[:constant]],
+            filter: [v[:op], v[:col], v[:constant]],
             join_type: :inner,
-            join_cond: {component_component_id: :component__id},
-            cols: [:id,:display_name]
+            join_cond: { component_component_id: :component__id },
+            cols: [:id, :display_name]
           }
         end
       end
@@ -246,22 +246,22 @@ module XYZ
         else
           raise Error.new('unexpected target')
         end
-      join_cond = {node_node_id: :node__id}
+      join_cond = { node_node_id: :node__id }
       join_array = ret_join_array(join_cond)
       model_handle = node_idh.createMH(:node)
       base_sp_hash = {
         model_name: :node,
-        filter: [:and,[:eq,:id, node_idh.get_id()]],
+        filter: [:and, [:eq, :id, node_idh.get_id()]],
         cols: [:id]
       }
       base_sp = SearchPatternSimple.new(base_sp_hash)
-      SQL::DataSetSearchPattern.create_dataset_from_join_array(model_handle,base_sp,join_array)
+      SQL::DataSetSearchPattern.create_dataset_from_join_array(model_handle, base_sp, join_array)
     end
 
-    def update_object_from_info_gathered!(object,rows)
+    def update_object_from_info_gathered!(object, rows)
       row = rows.first
       return unless self[:info_gathered] && row && row[:component]
-      self[:info_gathered].each{|obj_key,k| object[obj_key] = row[:component][k]}
+      self[:info_gathered].each { |obj_key, k| object[obj_key] = row[:component][k] }
     end
   end
 
@@ -271,16 +271,16 @@ module XYZ
     include ProcessVirtualComponentMixin
     def create_dataset(target)
       other_end_idh  = target[:target_port_id_handle]
-      join_cond = {id: :attribute__component_component_id}
+      join_cond = { id: :attribute__component_component_id }
       join_array = ret_join_array(join_cond)
       model_handle = other_end_idh.createMH(:attribute)
       base_sp_hash = {
         model_name: :attribute,
-        filter: [:and,[:eq,:id, other_end_idh.get_id()]],
-        cols: [:id,:component_component_id]
+        filter: [:and, [:eq, :id, other_end_idh.get_id()]],
+        cols: [:id, :component_component_id]
       }
       base_sp = SearchPatternSimple.new(base_sp_hash)
-      SQL::DataSetSearchPattern.create_dataset_from_join_array(model_handle,base_sp,join_array)
+      SQL::DataSetSearchPattern.create_dataset_from_join_array(model_handle, base_sp, join_array)
     end
   end
 end

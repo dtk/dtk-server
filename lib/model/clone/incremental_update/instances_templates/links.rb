@@ -1,10 +1,10 @@
 module DTK; class Clone; class IncrementalUpdate
   module InstancesTemplates
     class Links < Array
-      def add?(instances,templates,parent_link)
+      def add?(instances, templates, parent_link)
         # do not add if both instances and templates are empty?
         unless instances.empty? && templates.empty?
-          self << Link.new(instances,templates,parent_link)
+          self << Link.new(instances, templates, parent_link)
         end
       end
 

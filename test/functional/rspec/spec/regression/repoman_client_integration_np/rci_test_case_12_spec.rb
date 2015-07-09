@@ -35,7 +35,7 @@ describe '(Repoman client integration) Test Case 12: chmod ugo+rwd and ugo-wd on
   let(:conf) { Configuration.instance }
   let(:header) { @homepage.get_header }
   let(:users) { @homepage.get_main.get_users }
-  let(:modules) { @homepage.get_main.get_modules}
+  let(:modules) { @homepage.get_main.get_modules }
 
   context 'User is' do
     it 'logged in' do

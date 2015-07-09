@@ -4,8 +4,8 @@ module DTK; class ModuleDSL
       klass(aug_object).new().generate(ObjectWrapper.new(aug_object))
     end
 
-    def self.merge_fragment_into_full_hash!(full_hash,object_class,fragment,context={})
-      klass(object_class).new().merge_fragment!(full_hash,fragment,context)
+    def self.merge_fragment_into_full_hash!(full_hash, object_class, fragment, context = {})
+      klass(object_class).new().merge_fragment!(full_hash, fragment, context)
       full_hash
     end
 
@@ -23,18 +23,18 @@ module DTK; class ModuleDSL
       ret
     end
 
-    def set?(key,content,obj)
+    def set?(key, content, obj)
       val = obj[key]
       unless val.nil?
         content[key.to_s] = val
       end
     end
 
-    def component_fragment(full_hash,component_template)
+    def component_fragment(full_hash, component_template)
       unless component_type = component_template && component_template.get_field?(:component_type)
         raise Error.new('The method merge_fragment needs the context :component_template')
       end
-      component().get_fragment(full_hash,component_type)
+      component().get_fragment(full_hash, component_type)
     end
 
     class ObjectWrapper

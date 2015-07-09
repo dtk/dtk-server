@@ -22,7 +22,7 @@ module DTK
 
     module InternalForm
       def self.component_ref(cmp_type_ext_form)
-        cmp_type_ext_form.gsub(ModCompGsub[:pattern],ModCompGsub[:sub])
+        cmp_type_ext_form.gsub(ModCompGsub[:pattern], ModCompGsub[:sub])
       end
 
       # returns hash with keys
@@ -39,10 +39,10 @@ module DTK
         if type =~ DSLComponentTitleRegex
           type = $1
           title = $2
-          ref = ComponentTitle.ref_with_title(type,title)
-          display_name = ComponentTitle.display_name_with_title(type,title)
+          ref = ComponentTitle.ref_with_title(type, title)
+          display_name = ComponentTitle.display_name_with_title(type, title)
         end
-        ret = {component_type: type}
+        ret = { component_type: type }
         ret.merge!(version: version) if version
         ret.merge!(title: title) if title
         ret

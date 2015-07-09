@@ -30,7 +30,7 @@ class PerfLogParser
       elsif field = get_field(line, /^MEASUREMENT=(.+)/)
 
        # NEW KEY FOR AFTER DEMO elsif field = get_field(line, /^MEASUREMENT=(.+)/)
-        k,v = field.split(',')[0..1]
+        k, v = field.split(',')[0..1]
         custom_results << { measurement: k, measurement_perf: v }
       end
     end
@@ -53,7 +53,7 @@ class PerfLogParser
 
       total_dur = 0.0
       if record[:perf_sql]
-        record[:perf_sql].each { |dur| total_dur += dur.to_f}
+        record[:perf_sql].each { |dur| total_dur += dur.to_f }
       end
 
       jsn = JSON.parse(record[:request_params])
@@ -107,7 +107,7 @@ class PerfLogParser
     end
 
     puts 'Parsing done.'
-    return results.values.sort { |a,b| a[:operation] <=> b[:operation]}, custom_results.values.sort { |a,b| a[:measurement] <=> b[:measurement]}
+    return results.values.sort { |a, b| a[:operation] <=> b[:operation] }, custom_results.values.sort { |a, b| a[:measurement] <=> b[:measurement] }
   end
 
   def self.get_sql(results, operation, assembly, about)
@@ -139,11 +139,11 @@ end
 
 class Print
 
-  @@output_format_header = [ 'OPERATION', 'TYPE', 'ABOUT', 'OP_CNT', 'OP_AVG_DUR[ms]', 'DB_CALL_CNT', 'DB_AVG_DUR[ms]' ]
-  @@output_format_custom_header = [ 'MEASUREMENT', 'INVOC_CNT', 'AVG_DUR[ms]' ]
+  @@output_format_header = ['OPERATION', 'TYPE', 'ABOUT', 'OP_CNT', 'OP_AVG_DUR[ms]', 'DB_CALL_CNT', 'DB_AVG_DUR[ms]']
+  @@output_format_custom_header = ['MEASUREMENT', 'INVOC_CNT', 'AVG_DUR[ms]']
   @@row_sep = "----------------------------------------------------------------------------------------------------------------------\n"
 
-  def self.to_console(results, custom_results, regex=nil)
+  def self.to_console(results, custom_results, regex = nil)
     output_format = " %-37s %-11s %-12s %-9s %-14s %-14s %s\n"
     output_format_custom = " %-29s %-15s %s\n"
 
@@ -154,7 +154,7 @@ class Print
 
     results.each do |record|
       if regex.nil? || record[:operation].include?(regex)
-        output += output_format % [ record[:operation], record[:assembly_subtype], record[:about], record[:tr_cnt], record[:avg_tot_oper_dur], record[:db_call_cnt], record[:avg_tot_sql_dur] ]
+        output += output_format % [record[:operation], record[:assembly_subtype], record[:about], record[:tr_cnt], record[:avg_tot_oper_dur], record[:db_call_cnt], record[:avg_tot_sql_dur]]
       end
     end
     output += @@row_sep
@@ -163,7 +163,7 @@ class Print
     output += output_format_custom % @@output_format_custom_header
     output += @@row_sep
     custom_results.each do |record|
-      output += output_format_custom % [ record[:measurement], record[:tr_cnt], record[:avg_oper_dur] ]
+      output += output_format_custom % [record[:measurement], record[:tr_cnt], record[:avg_oper_dur]]
     end
     output += @@row_sep
     puts "#{output}\n"
@@ -173,14 +173,14 @@ class Print
     path = '/tmp/perf_analysis_results.csv' unless path
     output = @@output_format_header.join(',') + "\n"
     results.each do |record|
-      output += [ record[:operation], record[:assembly_subtype], record[:about], record[:tr_cnt], record[:avg_tot_oper_dur], record[:db_call_cnt], record[:avg_tot_sql_dur] ].join(',') + "\n"
+      output += [record[:operation], record[:assembly_subtype], record[:about], record[:tr_cnt], record[:avg_tot_oper_dur], record[:db_call_cnt], record[:avg_tot_sql_dur]].join(',') + "\n"
     end
 
     output += "\n\n"
 
     output += @@output_format_custom_header.join(',') + "\n"
     custom_results.each do |record|
-      output += [ record[:measurement], record[:tr_cnt], record[:avg_oper_dur] ].join(',') + "\n"
+      output += [record[:measurement], record[:tr_cnt], record[:avg_oper_dur]].join(',') + "\n"
     end
     puts @@row_sep
     puts output
@@ -227,11 +227,11 @@ class CLI
   def self.get_help
     output_format_custom = "\t%-37s %s\n"
     help = "\nHelp:\n\n"
-    help += output_format_custom % [ 'exit', '']
-    help += output_format_custom % [ 'get_sql OPERATION [TYPE] [ABOUT]', '- Returns SQL queries used in this operation']
-    help += output_format_custom % [ 'parse', '- Parses performance output log']
-    help += output_format_custom % [ 'print [REGEX]', '- Prints results to console']
-    help += output_format_custom % [ 'print_csv [PATH]', '- Prints results to CSV file']
+    help += output_format_custom % ['exit', '']
+    help += output_format_custom % ['get_sql OPERATION [TYPE] [ABOUT]', '- Returns SQL queries used in this operation']
+    help += output_format_custom % ['parse', '- Parses performance output log']
+    help += output_format_custom % ['print [REGEX]', '- Prints results to console']
+    help += output_format_custom % ['print_csv [PATH]', '- Prints results to CSV file']
     help += "\n\n"
     return help
   end

@@ -1,13 +1,13 @@
 module DTK
   class RepoRemote < Model
-    def print_form(opts=Opts.new)
-      ret = self[:display_name]||'' #'' just to be safe
+    def print_form(opts = Opts.new)
+      ret = self[:display_name] || '' #'' just to be safe
       ret = "#{DTKNCatalogPrefix}#{ret}" if opts[:dtkn_prefix]
       ret = "#{DefaultMarker}#{ret}" if opts[:is_default_namespace]
       ret
     end
 
-    GIT_REPO_PROVIDERS    = ['github','bitbucket','dtkn']
+    GIT_REPO_PROVIDERS    = ['github', 'bitbucket', 'dtkn']
     DTKN_PROVIDER         = 'dtkn'
 
     #
@@ -77,7 +77,7 @@ module DTK
         remote_url = git_remote_url()
 
         if remote_url.start_with?('git')
-          repo_name =remote_url.split(':').last().split('/').join('-').gsub(/\.git/, '')
+          repo_name = remote_url.split(':').last().split('/').join('-').gsub(/\.git/, '')
         else
           repo_name = remote_url.split('/').last(2).join('-').gsub(/\.git/, '')
         end
@@ -120,12 +120,12 @@ module DTK
       repo_remotes.each { |rr| rr.delete_instance(rr.id_handle) }
     end
 
-    def self.create_repo_remote(repo_remote_mh, module_name, repo_name, repo_namespace, repo_id, opts=Opts.new)
+    def self.create_repo_remote(repo_remote_mh, module_name, repo_name, repo_namespace, repo_id, opts = Opts.new)
       is_default =
         if opts[:set_as_default]
           true
         elsif opts[:set_as_default_if_first]
-          get_matching_remote_repos(repo_remote_mh,repo_id, module_name).size == 0
+          get_matching_remote_repos(repo_remote_mh, repo_id, module_name).size == 0
         else
           false
         end
@@ -139,7 +139,7 @@ module DTK
         is_default: is_default
       }
 
-      create_from_row(repo_remote_mh,remote_repo_create_hash)
+      create_from_row(repo_remote_mh, remote_repo_create_hash)
     end
 
     def self.set_default_remote(repo_remote_mh, repo_id, repo_name)
@@ -150,18 +150,18 @@ module DTK
       default_repo_remote = get_obj(repo_remote_mh, filter: [:and, [:eq, :is_default, true], [:eq, :repo_id, repo_id]])
 
       # set as not active (default)
-      update_from_rows(repo_remote_mh, [ { id: default_repo_remote.id, is_default: false } ]) if default_repo_remote
+      update_from_rows(repo_remote_mh, [{ id: default_repo_remote.id, is_default: false }]) if default_repo_remote
 
       # set as active (default)
-      update_from_rows(repo_remote_mh, [ { id: repo_remote.id, is_default: true } ])
+      update_from_rows(repo_remote_mh, [{ id: repo_remote.id, is_default: true }])
     end
 
     def self.delete_repos(idh_list)
       delete_instances(idh_list)
     end
 
-    def self.get_remote_repo(repo_remote_mh,repo_id, module_name, repo_namespace)
-      matches = get_matching_remote_repos(repo_remote_mh,repo_id, module_name, repo_namespace)
+    def self.get_remote_repo(repo_remote_mh, repo_id, module_name, repo_namespace)
+      matches = get_matching_remote_repos(repo_remote_mh, repo_id, module_name, repo_namespace)
       if matches.size > 1
         Log.error("Unexpected to have multiple matches in get_remote_repo (#{matches.inspect})")
         # will pick first one
@@ -169,7 +169,7 @@ module DTK
       matches.first
     end
 
-    def self.get_matching_remote_repos(repo_remote_mh,repo_id, module_name, repo_namespace=nil)
+    def self.get_matching_remote_repos(repo_remote_mh, repo_id, module_name, repo_namespace = nil)
       sp_hash = {
         cols: [:id, :display_name, :repo_name],
         filter:           [:and,
@@ -190,7 +190,7 @@ module DTK
       create_repo_remote(repo_remote_mh, module_name, repo_name, repo_namespace, repo_id)
     end
 
-    def remote_dtkn_location(project,module_type,module_name)
+    def remote_dtkn_location(project, module_type, module_name)
       remote_params = ModuleBranch::Location::RemoteParams::DTKNCatalog.new(
         module_type: module_type,
         module_name: module_name,
@@ -202,22 +202,22 @@ module DTK
 
     def self.default_from_module_branch?(module_branch)
       sp_hash = {
-        cols: [:id,:group_id,:display_name,:repo_name,:repo_namespace,:is_default,:created_at],
-        filter: [:eq,:repo_id,module_branch.get_field?(:repo_id)]
+        cols: [:id, :group_id, :display_name, :repo_name, :repo_namespace, :is_default, :created_at],
+        filter: [:eq, :repo_id, module_branch.get_field?(:repo_id)]
       }
-      ret = get_objs(module_branch.model_handle(:repo_remote),sp_hash)
+      ret = get_objs(module_branch.model_handle(:repo_remote), sp_hash)
       1 == ret.size ? ret.first : ret_default_remote_repo(ret)
     end
 
     def self.ret_default_remote_repo(repo_remotes)
       # Making robust in case multiple ones marked default
-      pruned = repo_remotes.select{|r|r.get_field?(:is_default)}
+      pruned = repo_remotes.select { |r| r.get_field?(:is_default) }
       if pruned.empty?
         compute_default_remote_repo(repo_remotes)
       elsif pruned.size == 1
         pruned.first
       else
-        Log.error("Multiple default remotes found (#{pruned.map{|r|r[:display_name]}.join('')})")
+        Log.error("Multiple default remotes found (#{pruned.map { |r| r[:display_name] }.join('')})")
         compute_default_remote_repo(pruned)
       end
     end
@@ -232,14 +232,14 @@ module DTK
 
     # TODO: deprecate once all data is migrated so :is_default is marked
     def self.compute_default_remote_repo(repo_remotes)
-      Log.info("Calling compute_default_remote_repo on (#{repo_remotes.map{|r|r.get_field?(:display_name)}.join(',')})")
-      unless (repo_remotes||[]).empty?
+      Log.info("Calling compute_default_remote_repo on (#{repo_remotes.map { |r| r.get_field?(:display_name) }.join(',')})")
+      unless (repo_remotes || []).empty?
         # TODO: enhance so that default is one taht matche's user's default namespace
         # set on augmented_module_branch[:repo] fields associated with the default namespace
         # we sort descending by created date
         # default is the one which is the oldest
-        repo_remotes.each{|r|r.update_object!(:created_at)}
-        default_repo_remote = repo_remotes.sort {|a,b| a[:created_at] <=>  b[:created_at]}.first
+        repo_remotes.each { |r| r.update_object!(:created_at) }
+        default_repo_remote = repo_remotes.sort { |a, b| a[:created_at] <=> b[:created_at] }.first
         default_repo_remote.update(is_default: true) #migrate it
         default_repo_remote
       end

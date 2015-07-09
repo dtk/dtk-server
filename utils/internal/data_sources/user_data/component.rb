@@ -4,8 +4,8 @@ module XYZ
       class Component < Top
         definitions do
           target[:display_name] = source['ref']
-          target[:basic_type] = fn(:basic_type,source)
-          (column_names(:component) - [:display_name,:basic_type]).each do |v|
+          target[:basic_type] = fn(:basic_type, source)
+          (column_names(:component) - [:display_name, :basic_type]).each do |v|
             if_exists(source[v.to_s]) do
               target[v.to_sym] = source[v.to_s]
             end
@@ -14,7 +14,7 @@ module XYZ
             nested_definition :attribute, source['attribute']
           end
           if_exists(source['dependency']) do
-            nested_definition :dependency, fn(:dependency,source)
+            nested_definition :dependency, fn(:dependency, source)
           end
         end
         def self.unique_keys(source)
@@ -23,7 +23,7 @@ module XYZ
 
         def self.dependency(source)
           dep = source['dependency']
-          dep.inject({}){|h,kv|h.merge(kv[0] => kv[1].merge('parent_display_name' => source['ref']))}
+          dep.inject({}) { |h, kv| h.merge(kv[0] => kv[1].merge('parent_display_name' => source['ref'])) }
         end
 
         def self.relative_distinguished_name(source)

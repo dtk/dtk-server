@@ -31,13 +31,13 @@ module DTK
       column :only_one_per_node, :boolean, default: true
       # refernce used when multiple isnatnces of same component type
       # TODO: make sure that this is preserved under clone; case to watch out fro is when cloning for example more dbs in something with dbs
-      virtual_column :multiple_instance_ref, type: :integer ,local_dependencies: [:ref_num]
+      virtual_column :multiple_instance_ref, type: :integer, local_dependencies: [:ref_num]
       foreign_key :ng_component_id, :component, FK_SET_NULL_OPT #set when created by cloning from component node group
 
       # used when this component is an extension
       column :extended_base, :varchar, size: 30
-      virtual_column :extended_base_id, type: ID_TYPES[:id] ,local_dependencies: [:extended_base,:implementation_id]
-      virtual_column :instance_extended_base_id, type: ID_TYPES[:id] ,local_dependencies: [:extended_base,:implementation_id,:node_node_id]
+      virtual_column :extended_base_id, type: ID_TYPES[:id], local_dependencies: [:extended_base, :implementation_id]
+      virtual_column :instance_extended_base_id, type: ID_TYPES[:id], local_dependencies: [:extended_base, :implementation_id, :node_node_id]
       column :extension_type, :varchar, size: 30
 
       column :from_on_create_event, :boolean, default: false
@@ -56,9 +56,9 @@ module DTK
       column :link_defs, :json
       # deprecate below for above
       # TODO: for efficiency materialize and if so have two variants of :component_parent for attribute; one for input, which brings in :connectivity_profile and other for output which deos not
-      virtual_column :link_defs_external, type: :json, local_dependencies: [:link_defs,:component_type,:specific_type,:basic_type]
-      virtual_column :connectivity_profile_internal, type: :json, local_dependencies: [:link_defs,:component_type,:specific_type,:basic_type]
-      virtual_column :most_specific_type, type: :varchar, local_dependencies: [:specific_type,:basic_type]
+      virtual_column :link_defs_external, type: :json, local_dependencies: [:link_defs, :component_type, :specific_type, :basic_type]
+      virtual_column :connectivity_profile_internal, type: :json, local_dependencies: [:link_defs, :component_type, :specific_type, :basic_type]
+      virtual_column :most_specific_type, type: :varchar, local_dependencies: [:specific_type, :basic_type]
 
       many_to_one :component, :library, :node, :datacenter, :project
       one_to_many :component, :attribute_link, :attribute, :port_link, :monitoring_item, :dependency, :component_order, :layout, :file_asset, :link_def, :service_add_on, :component_include_module, :task_template, :node_bindings, :service_setting, :action_def, :module_ref_lock
@@ -67,28 +67,28 @@ module DTK
       virtual_column :project_id, type: ID_TYPES[:id], local_dependencies: [:project_project_id]
       virtual_column :node_id, type: ID_TYPES[:id], local_dependencies: [:node_node_id]
       virtual_column :library_id, type: ID_TYPES[:id], local_dependencies: [:library_library_id]
-      virtual_column :parent_name, possible_parents: [:component,:library,:node,:project]
+      virtual_column :parent_name, possible_parents: [:component, :library, :node, :project]
 
-      virtual_column :view_def_key, type: :varchar, hidden: true, local_dependencies: [:id,:view_def_ref,:component_type]
+      virtual_column :view_def_key, type: :varchar, hidden: true, local_dependencies: [:id, :view_def_ref, :component_type]
 
     virtual_column :namespace_info, type: :json, hidden: true,
         remote_dependencies:         [
          { model_name: :module_branch,
            join_type: :inner,
-           join_cond: {id: q(:component,:module_branch_id)},
-           cols: [:id,:group_id,:component_id]
+           join_cond: { id: q(:component, :module_branch_id) },
+           cols: [:id, :group_id, :component_id]
          },
          { model_name: :component_module,
            convert: true,
            join_type: :inner,
-           join_cond: {id: q(:module_branch,:component_id)},
-           cols: [:id,:group_id,:display_name,:namespace_id]
+           join_cond: { id: q(:module_branch, :component_id) },
+           cols: [:id, :group_id, :display_name, :namespace_id]
          },
          { model_name: :namespace,
            convert: true,
            join_type: :inner,
-           join_cond: {id: q(:component_module,:namespace_id)},
-           cols: [:id,:group_id,:display_name]
+           join_cond: { id: q(:component_module, :namespace_id) },
+           cols: [:id, :group_id, :display_name]
          }]
 
         ###### virtual columns related to attributes
@@ -96,22 +96,22 @@ module DTK
           model_name: :attribute,
           join_type: :left_outer,
           convert: true,
-          join_cond: {component_component_id: q(:component,:id)} #TODO: want to use p(:component,:attribute) on left hand side
+          join_cond: { component_component_id: q(:component, :id) } #TODO: want to use p(:component,:attribute) on left hand side
         }
 
         virtual_column :attributes, type: :json, hidden: true,
         remote_dependencies:         [attributes_def.merge(
-           cols: [:id,:display_name,:hidden,:description,id(:component),:attribute_value,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change]
+           cols: [:id, :display_name, :hidden, :description, id(:component), :attribute_value, :semantic_type, :semantic_type_summary, :data_type, :required, :dynamic, :cannot_change]
         )]
         virtual_column :attribute_values, type: :json, hidden: true,
         remote_dependencies:         [attributes_def.merge(
-           cols: [:id,:group_id,:display_name,:attribute_value]
+           cols: [:id, :group_id, :display_name, :attribute_value]
         )]
 
         virtual_column :attributes_view_def_info, type: :json, hidden: true,
         remote_dependencies:         [attributes_def.merge(
            filter: [:eq, :hidden, false],
-           cols: [:id,:display_name,:view_def_key,id(:component),:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change]
+           cols: [:id, :display_name, :view_def_key, id(:component), :semantic_type, :semantic_type_summary, :data_type, :required, :dynamic, :cannot_change]
         )]
 
       virtual_column :dynamic_attributes, type: :json, hidden: true,
@@ -119,9 +119,9 @@ module DTK
          { model_name: :attribute,
            convert: true,
            join_type: :inner,
-           filter: [:eq,:dynamic, true],
-           join_cond: {component_component_id: q(:component,:id)} ,
-           cols: [:id,:group_id,:display_name]
+           filter: [:eq, :dynamic, true],
+           join_cond: { component_component_id: q(:component, :id) },
+           cols: [:id, :group_id, :display_name]
          }]
 
      # this wil match if the component has an attribute that uses the default field
@@ -130,9 +130,9 @@ module DTK
          { model_name: :attribute,
            convert: true,
            join_type: :left_outer,
-           filter: [:eq,:display_name,Attribute.default_title_field()],
-           join_cond: {component_component_id: q(:component,:id)} ,
-           cols: [:id,:group_id,:display_name]
+           filter: [:eq, :display_name, Attribute.default_title_field()],
+           join_cond: { component_component_id: q(:component, :id) },
+           cols: [:id, :group_id, :display_name]
          }]
 
     virtual_column :link_def_links, type: :json, hidden: true,
@@ -140,13 +140,13 @@ module DTK
          { model_name: :link_def,
            convert: true,
            join_type: :inner,
-           join_cond: {component_component_id: q(:component,:id)},
+           join_cond: { component_component_id: q(:component, :id) },
            cols: LinkDef.common_columns()
          },
          { model_name: :link_def_link,
            convert: true,
            join_type: :inner,
-           join_cond: {link_def_id: q(:link_def,:id)},
+           join_cond: { link_def_id: q(:link_def, :id) },
            cols: LinkDef::Link.common_columns()
          }]
 
@@ -157,8 +157,8 @@ module DTK
        {
          model_name: :library,
          join_type: :inner,
-         join_cond: {id: :component__library_library_id},
-         cols: [:id,:display_name]
+         join_cond: { id: :component__library_library_id },
+         cols: [:id, :display_name]
        }]
 
     virtual_column :node, type: :json, hidden: true,
@@ -167,8 +167,8 @@ module DTK
          model_name: :node,
          convert: true,
          join_type: :inner,
-         join_cond: {id: :component__node_node_id},
-         cols: [:id,:display_name, :group_id]
+         join_cond: { id: :component__node_node_id },
+         cols: [:id, :display_name, :group_id]
        }]
 
     virtual_column :node_for_state_change_info, type: :json, hidden: true,
@@ -177,9 +177,9 @@ module DTK
          model_name: :node,
          convert: true,
          join_type: :inner,
-         join_cond: {id: :component__node_node_id},
-         filter: [:neq,:type,'assembly_wide'],
-         cols: [:id,:display_name, :type, :external_ref, :ordered_component_ids, :agent_git_commit_id]
+         join_cond: { id: :component__node_node_id },
+         filter: [:neq, :type, 'assembly_wide'],
+         cols: [:id, :display_name, :type, :external_ref, :ordered_component_ids, :agent_git_commit_id]
        }]
 
       virtual_column :implementation, type: :json, hidden: true,
@@ -188,7 +188,7 @@ module DTK
            model_name: :implementation,
            convert: true,
            join_type: :inner,
-           join_cond: {id: q(:component,:implementation_id)},
+           join_cond: { id: q(:component, :implementation_id) },
            cols: Implementation.common_columns()
          }]
       virtual_column :implementation_file_paths, type: :json, hidden: true,
@@ -196,15 +196,15 @@ module DTK
          {
            model_name: :implementation,
            join_type: :inner,
-           join_cond: {id: q(:component,:implementation_id)},
-           cols: [:id,:display_name,:type]
+           join_cond: { id: q(:component, :implementation_id) },
+           cols: [:id, :display_name, :type]
          },
          {
            model_name: :file_asset,
            convert: true,
            join_type: :inner,
-           join_cond: {implementation_implementation_id: q(:implementation,:id)},
-           cols: [:id,:file_name,:type,:path]
+           join_cond: { implementation_implementation_id: q(:implementation, :id) },
+           cols: [:id, :file_name, :type, :path]
          }]
 
       virtual_column :module_name, type: :json, hidden: true,
@@ -212,8 +212,8 @@ module DTK
          {
            model_name: :implementation,
            join_type: :inner,
-           join_cond: {id: q(:component,:implementation_id)},
-           cols: [:id,:module_name]
+           join_cond: { id: q(:component, :implementation_id) },
+           cols: [:id, :module_name]
          }
         ]
 
@@ -223,8 +223,8 @@ module DTK
            model_name: :module_branch,
            convert: true,
            join_type: :inner,
-           join_cond: {id: q(:component,:module_branch_id)},
-           cols: [:id,:display_name,:group_id,:branch,:repo_id,:version,:current_sha,:type,:is_workspace]
+           join_cond: { id: q(:component, :module_branch_id) },
+           cols: [:id, :display_name, :group_id, :branch, :repo_id, :version, :current_sha, :type, :is_workspace]
          }]
 
       virtual_column :component_module, type: :json, hidden: true,
@@ -232,15 +232,15 @@ module DTK
          {
            model_name: :module_branch,
            join_type: :inner,
-           join_cond: {id: q(:component,:module_branch_id)},
-           cols: [:id,:component_id]
+           join_cond: { id: q(:component, :module_branch_id) },
+           cols: [:id, :component_id]
          },
          {
            model_name: :component_module,
            convert: true,
            join_type: :inner,
-           join_cond: {id: q(:module_branch,:component_id)},
-           cols: [:id,:group_id,:display_name,:dsl_parsed]
+           join_cond: { id: q(:module_branch, :component_id) },
+           cols: [:id, :group_id, :display_name, :dsl_parsed]
          }
         ]
         virtual_column :instance_component_template_parent, type: :json, hidden: true,
@@ -250,8 +250,8 @@ module DTK
            alias: :component_template,
            convert: true,
            join_type: :inner,
-           join_cond: {id: q(:component,:ancestor_id)},
-           cols: [:id,:group_id,:display_name,:component_type,:implementation_id]
+           join_cond: { id: q(:component, :ancestor_id) },
+           cols: [:id, :group_id, :display_name, :component_type, :implementation_id]
          }]
 
         virtual_column :dependencies, type: :json, hidden: true,
@@ -261,8 +261,8 @@ module DTK
            alias: :dependencies,
            convert: true,
            join_type: :left_outer,
-           join_cond: {component_component_id: q(:component,:id)},
-           cols: [:id,:display_name,:group_id,:ref,:search_pattern,:type,:description,:severity,:ancestor_id]
+           join_cond: { component_component_id: q(:component, :id) },
+           cols: [:id, :display_name, :group_id, :ref, :search_pattern, :type, :description, :severity, :ancestor_id]
          }
         ]
         # above is direct dependencies; below is inherited ones
@@ -272,7 +272,7 @@ module DTK
            model_name: :component,
            alias: :parent_component,
            join_type: :inner,
-           join_cond: {id: q(:component,:ancestor_id)},
+           join_cond: { id: q(:component, :ancestor_id) },
            cols: [:id]
          },
          {
@@ -280,8 +280,8 @@ module DTK
            alias: :dependencies,
            convert: true,
            join_type: :left_outer,
-           join_cond: {component_component_id: q(:parent_component,:id)},
-           cols: [:id,:search_pattern,:type,:description,:severity]
+           join_cond: { component_component_id: q(:parent_component, :id) },
+           cols: [:id, :search_pattern, :type, :description, :severity]
          }
         ]
 
@@ -291,8 +291,8 @@ module DTK
            model_name: :component_order,
            convert: true,
            join_type: :inner,
-           join_cond: {component_component_id: q(:component,:id)},
-           cols: [:id,:after,:conditional,:component_component_id]
+           join_cond: { component_component_id: q(:component, :id) },
+           cols: [:id, :after, :conditional, :component_component_id]
          }
         ]
         # above is direct dependencies; below is inheited ones
@@ -302,23 +302,23 @@ module DTK
            model_name: :component,
            alias: :parent_component,
            join_type: :inner,
-           join_cond: {id: q(:component,:ancestor_id)},
+           join_cond: { id: q(:component, :ancestor_id) },
            cols: [:id]
          },
          {
            model_name: :component_order,
            convert: true,
            join_type: :inner,
-           join_cond: {component_component_id: q(:parent_component,:id)},
-           cols: [:id,:after,:conditional,:component_component_id]
+           join_cond: { component_component_id: q(:parent_component, :id) },
+           cols: [:id, :after, :conditional, :component_component_id]
          }
         ]
 
         node_assembly_parts = {
           model_name: :node,
           join_type: :inner,
-          join_cond: {assembly_id: q(:component,:id)},
-          cols: [:id,:display_name,:assembly_id]
+          join_cond: { assembly_id: q(:component, :id) },
+          cols: [:id, :display_name, :assembly_id]
         }
 
         virtual_column :node_assembly_parts, type: :json, hidden: true,
@@ -331,8 +331,8 @@ module DTK
              model_name: :attribute,
              convert: true,
              join_type: :inner,
-             join_cond: {node_node_id: q(:node,:id)},
-             cols: [:id,:display_name,:dynamic,:attribute_value]
+             join_cond: { node_node_id: q(:node, :id) },
+             cols: [:id, :display_name, :dynamic, :attribute_value]
            }
           ]
         virtual_column :node_assembly_parts_cmp_attrs, type: :json, hidden: true,
@@ -342,15 +342,15 @@ module DTK
              model_name: :component,
              alias: :component_part,
              join_type: :inner,
-             join_cond: {node_node_id: q(:node,:id)},
+             join_cond: { node_node_id: q(:node, :id) },
              cols: [:id]
            },
            {
              model_name: :attribute,
              convert: true,
              join_type: :inner,
-             join_cond: {component_component_id: q(:component_part,:id)},
-             cols: [:id,:display_name,:dynamic,:attribute_value]
+             join_cond: { component_component_id: q(:component_part, :id) },
+             cols: [:id, :display_name, :dynamic, :attribute_value]
            }
           ]
 
@@ -360,8 +360,8 @@ module DTK
             model_name: :component,
             alias: :parent_component,
             join_type: :left_outer,
-            join_cond: {id: p(:component,:component)},
-            cols: [:id,:display_name,id(:node)]
+            join_cond: { id: p(:component, :component) },
+            cols: [:id, :display_name, id(:node)]
           }
          ]
 
@@ -370,15 +370,15 @@ module DTK
           {
             model_name: :state_change,
             # TODO: avoiding use of :component_component
-            sequel_def: lambda{|ds|ds.where(state: 'pending').join(:attribute__attribute,id: :attribute_id).group_and_count(:attribute__component_component_id)},
+            sequel_def: lambda { |ds| ds.where(state: 'pending').join(:attribute__attribute, id: :attribute_id).group_and_count(:attribute__component_component_id) },
             join_type: :left_outer,
-            join_cond: {component_component_id: :component__id}
+            join_cond: { component_component_id: :component__id }
           },
           {
             model_name: :state_change,
-            sequel_def: lambda{|ds|ds.where(state: 'pending').group_and_count(:component_id)},
+            sequel_def: lambda { |ds| ds.where(state: 'pending').group_and_count(:component_id) },
             join_type: :left_outer,
-            join_cond: {component_id: :component__id}
+            join_cond: { component_id: :component__id }
             }
          ]
 
@@ -388,31 +388,31 @@ module DTK
              convert: true,
              filter: [:and, [:eq, :semantic_type_summary, 'sap_config__db']],
              join_type: :inner,
-             join_cond: {component_component_id: q(:component,:id)},
-             cols: [:id,:display_name,:value_asserted,:value_derived,id(:component)]
+             join_cond: { component_component_id: q(:component, :id) },
+             cols: [:id, :display_name, :value_asserted, :value_derived, id(:component)]
            },
                                         {
                                           model_name: :component,
                                           alias: :parent_component,
                                           join_type: :inner,
-                                          join_cond: {id: p(:component,:component)},
-                                          cols: [:id,:display_name,id(:node)]
+                                          join_cond: { id: p(:component, :component) },
+                                          cols: [:id, :display_name, id(:node)]
                                         },
                                         {
                                           model_name: :attribute,
                                           alias: :parent_attribute,
                                           convert: true,
-                                          filter: [:and, [:eq,:display_name,'sap__l4']],
+                                          filter: [:and, [:eq, :display_name, 'sap__l4']],
                                           join_type: :inner,
-                                          join_cond: {component_component_id: q(:parent_component,:id)},
-                                          cols: [:id,:display_name,:value_asserted,:value_derived,id(:component)]
+                                          join_cond: { component_component_id: q(:parent_component, :id) },
+                                          cols: [:id, :display_name, :value_asserted, :value_derived, id(:component)]
                                         },
                                         {
                                           model_name: :node,
                                           convert: true,
                                           join_type: :inner,
-                                          join_cond: {id: :parent_component__node_node_id},
-                                          cols: [:id,:display_name]
+                                          join_cond: { id: :parent_component__node_node_id },
+                                          cols: [:id, :display_name]
                                         }
           ]
 
@@ -422,8 +422,8 @@ module DTK
              model_name: :layout,
              convert: true,
              join_type: :inner,
-             join_cond: {component_component_id: q(:component,:id)},
-             cols: [:id,:display_name,id(:component),:def,:type,:is_active,:description,:updated_at]
+             join_cond: { component_component_id: q(:component, :id) },
+             cols: [:id, :display_name, id(:component), :def, :type, :is_active, :description, :updated_at]
            }]
 
         virtual_column :layouts_from_ancestor, type: :json, hidden: true,
@@ -431,15 +431,15 @@ module DTK
              model_name: :component,
              alias: :template,
              join_type: :inner,
-             join_cond: {id: q(:component,:ancestor_id)},
-             cols: [:id,:display_name]
+             join_cond: { id: q(:component, :ancestor_id) },
+             cols: [:id, :display_name]
            },
                                         {
                                           model_name: :layout,
                                           convert: true,
                                           join_type: :inner,
-                                          join_cond: {component_component_id: q(:template,:id)},
-                                          cols: [:id,:display_name,id(:component),:def,:type,:is_active,:description,:updated_at]
+                                          join_cond: { component_component_id: q(:template, :id) },
+                                          cols: [:id, :display_name, id(:component), :def, :type, :is_active, :description, :updated_at]
                                         }]
 
         set_submodel(:assembly)

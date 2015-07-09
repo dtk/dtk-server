@@ -37,8 +37,8 @@ module DTK
         # TODO: should validate ::R8::Config[:dns][:r8][:format]
         format = ::R8::Config[:dns][:r8][:format] || DefaultFormat
         ret = format.dup
-        [:node,:assembly,:user,:tenant,:domain].each do |part|
-          ret.gsub!(Regexp.new("\\${#{part}}"),info[part])
+        [:node, :assembly, :user, :tenant, :domain].each do |part|
+          ret.gsub!(Regexp.new("\\${#{part}}"), info[part])
         end
         ret
       end
@@ -47,7 +47,7 @@ module DTK
       def aug_node_when_dns_enabled?
         if aug_node = get_aug_node_when_dns_info?()
           # check it has a true value; to be robust looking for a string or a Boolean
-          if val = (aug_node[:dns_enabled_attribute]||{})[:attribute_value]
+          if val = (aug_node[:dns_enabled_attribute] || {})[:attribute_value]
             if val.is_a?(String)
               aug_node if (val =~ /^(t|T)/)
             else
@@ -59,7 +59,7 @@ module DTK
 
       def get_aug_node_when_dns_info?
         sp_hash = {
-          cols: [:dns_enabled_on_node,:id,:group_id,:display_name]
+          cols: [:dns_enabled_on_node, :id, :group_id, :display_name]
         }
         # checking for multiple rows to handle case where multiple dns attributes given
         aug_nodes = @node.get_objs(sp_hash)
@@ -68,9 +68,9 @@ module DTK
           # This can wil be empty only if no assembly tied to node
           # This is expected if node is target ref
           # TODO: dont think dns enabledment works with node groups
-          @node.update_obj!(:display_name,:type)
+          @node.update_obj!(:display_name, :type)
           unless @node[:type] == 'target_ref'
-            Log.error_pp(['unexpected that that following node not tied to assembly',@node])
+            Log.error_pp(['unexpected that that following node not tied to assembly', @node])
           end
         end
 
@@ -79,7 +79,7 @@ module DTK
         end
 
         sp_hash = {
-          cols: [:dns_enabled_on_assembly,:id,:group_id,:display_name]
+          cols: [:dns_enabled_on_assembly, :id, :group_id, :display_name]
         }
 
         aug_nodes = @node.get_objs(sp_hash)
@@ -87,14 +87,14 @@ module DTK
       end
 
       def select_aug_node?(aug_nodes)
-        aug_nodes.reject{|n|n[:dns_enabled_attribute].nil?}.sort do |n1,n2|
+        aug_nodes.reject { |n| n[:dns_enabled_attribute].nil? }.sort do |n1, n2|
           DNS.attr_rank(n2[:dns_enabled_attribute]) <=> DNS.attr_rank(n1[:dns_enabled_attribute])
         end.first
       end
 
       def attr_rank(attr)
         ret = LowestRank
-        if attr_name = (attr||{})[:display_name]
+        if attr_name = (attr || {})[:display_name]
           if rank = RankPos[attr_name]
             ret = rank
           end
@@ -104,7 +104,7 @@ module DTK
 
       AttributeKeys = Node::DNS::AttributeKeys
       # Assumes that AttributeKeys has been defined already
-      RankPos = AttributeKeys.inject({}) do|h,ak|
+      RankPos = AttributeKeys.inject({}) do|h, ak|
         h.merge(ak => AttributeKeys.index(ak))
       end
       LowestRank = AttributeKeys.size

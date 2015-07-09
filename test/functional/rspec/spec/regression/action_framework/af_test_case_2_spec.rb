@@ -30,7 +30,7 @@ expected_output_2 = {
 
 describe '(Action Framework) Test Case 2: Service with two nodes that contain cmp with action with multiple success commands in it' do
   before(:all) do
-    puts '************************************************************************************************************************',''
+    puts '************************************************************************************************************************', ''
   end
 
   context "Stage service function on #{assembly_name} assembly" do

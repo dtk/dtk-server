@@ -4,7 +4,7 @@ module DTK
       def initialize(dns_domain)
         @dns_domain = dns_domain
         dns = Fog::DNS::AWS.new(get_compute_params(just_credentials: true))
-        unless @r8zone = dns.zones().find { |z| z.domain.include? dns_domain}
+        unless @r8zone = dns.zones().find { |z| z.domain.include? dns_domain }
           raise ::DTK::Error.new("Bad dns_domain '#{dns_domain}'")
         end
       end
@@ -15,11 +15,11 @@ module DTK
         end
       end
 
-      def get_record?(name, type=nil)
+      def get_record?(name, type = nil)
         request_context do
           5.times do
             begin
-              return @r8zone.records.get(name,type)
+              return @r8zone.records.get(name, type)
             rescue Excon::Errors::SocketError => e
               Log.warn "Handled Excon Socket Error: #{e.message}"
             end
@@ -31,8 +31,8 @@ module DTK
         end
       end
 
-      def destroy_record(name, type=nil)
-        record = get_record?(name,type)
+      def destroy_record(name, type = nil)
+        record = get_record?(name, type)
         request_context do
           record.nil? ? false : record.destroy
         end
@@ -43,7 +43,7 @@ module DTK
       # value          => URL, DNS, IP, etc.. which it links to
       # type           => DNS Record type supports A, AAA, CNAME, NS, etc.
       #
-      def create_record(name, value, type = 'CNAME', ttl=300)
+      def create_record(name, value, type = 'CNAME', ttl = 300)
         request_context do
           create_hash = { type: type, name: name, value: value, ttl: ttl }
           @r8zone.records.create(create_hash)

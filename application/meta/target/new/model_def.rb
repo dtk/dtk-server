@@ -28,7 +28,7 @@
     iaas_properties: {
       type: :json
     },
-    is_default_target: {type: :boolean,default: false},
+    is_default_target: { type: :boolean, default: false },
     project_id: { #TODO: should project be a parent?
       type: :bigint,
       foreign_key_rel_type: :project,
@@ -61,7 +61,7 @@
          model_name: :node,
          convert: true,
          join_type: :inner,
-         join_cond: {datacenter_datacenter_id: :datacenter__id},
+         join_cond: { datacenter_datacenter_id: :datacenter__id },
          cols: Node.common_columns
        }]
     },
@@ -72,7 +72,7 @@
          model_name: :node,
          convert: true,
          join_type: :inner,
-         join_cond: {datacenter_datacenter_id: :datacenter__id, managed: false},
+         join_cond: { datacenter_datacenter_id: :datacenter__id, managed: false },
          cols: Node.common_columns
        }]
     },
@@ -84,9 +84,9 @@
          convert: true,
          alias: :node_member,
          join_type: :inner,
-         join_cond: {datacenter_datacenter_id: :datacenter__id},
-         filter: [:oneof, :type, ['staged','instance']],
-         cols: [:id,:group_id,:display_name,:type,:external_ref,:os_type]
+         join_cond: { datacenter_datacenter_id: :datacenter__id },
+         filter: [:oneof, :type, ['staged', 'instance']],
+         cols: [:id, :group_id, :display_name, :type, :external_ref, :os_type]
        }]
     },
     provider: {
@@ -97,8 +97,8 @@
          alias: :provider,
          join_type: :left_outer,
          convert: true,
-         join_cond: {id: :target__parent_id},
-         cols: [:id,:group_id,:display_name,:iaas_type]
+         join_cond: { id: :target__parent_id },
+         cols: [:id, :group_id, :display_name, :iaas_type]
        }]
     },
     node_ports: {
@@ -107,20 +107,20 @@
       remote_dependencies:       [{
          model_name: :node,
          join_type: :inner,
-         join_cond: {datacenter_datacenter_id: :datacenter__id},
+         join_cond: { datacenter_datacenter_id: :datacenter__id },
          cols: [:id]
        },
                                   {
                                     model_name: :port,
                                     convert: true,
                                     join_type: :inner,
-                                    join_cond: {node_node_id: :node__id},
-                                    cols: Port.common_columns+[:link_def_id]
+                                    join_cond: { node_node_id: :node__id },
+                                    cols: Port.common_columns + [:link_def_id]
                                   },
                                   {
                                     model_name: :link_def,
                                     join_type: :inner,
-                                    join_cond: {id: :port__link_def_id},
+                                    join_cond: { id: :port__link_def_id },
                                     cols: [:component_component_id]
                                   }]
     },
@@ -131,14 +131,14 @@
          model_name: :violation,
          convert: true,
          join_type: :inner,
-         join_cond: {datacenter_datacenter_id: :datacenter__id},
-         cols: [:id,:display_name,:severity,:description,:target_node_id,:updated_at]
+         join_cond: { datacenter_datacenter_id: :datacenter__id },
+         cols: [:id, :display_name, :severity, :description, :target_node_id, :updated_at]
        },
                                   {
                                     model_name: :node,
                                     join_type: :left_outer,
-                                    join_cond: {id: :violation__target_node_id},
-                                    cols: [:id,:display_name]
+                                    join_cond: { id: :violation__target_node_id },
+                                    cols: [:id, :display_name]
                                   }]
     }
   }

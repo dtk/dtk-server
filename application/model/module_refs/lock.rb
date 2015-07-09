@@ -1,7 +1,7 @@
 module DTK
   class ModuleRefs
     class Lock < Hash
-      r8_nested_require('lock','missing_information')
+      r8_nested_require('lock', 'missing_information')
 
       # This object is hash of form
       #  {MODULE_NAME1 => ModuleRef::Lock,
@@ -14,29 +14,29 @@ module DTK
         @assembly_instance = assembly_instance
       end
 
-      AllTypes = [:locked_dependencies,:locked_branch_shas]
+      AllTypes = [:locked_dependencies, :locked_branch_shas]
       # opts can have keys
       #   :with_module_branches - Boolean
       #   :types subset of AllTypes
-      def self.get(assembly_instance,opts={})
+      def self.get(assembly_instance, opts = {})
         types = opts[:types] || AllTypes
-        opts_nested = Aux.hash_subset(opts,[:with_module_branches])
+        opts_nested = Aux.hash_subset(opts, [:with_module_branches])
         # First check if persisted if not then compute it
-        if persisted = (R8::Config[:module_refs_lock]||{})[:use_persistence] && get_module_refs_lock?(assembly_instance)
-          if missing_info = MissingInformation.missing_information?(persisted,types,opts_nested)
+        if persisted = (R8::Config[:module_refs_lock] || {})[:use_persistence] && get_module_refs_lock?(assembly_instance)
+          if missing_info = MissingInformation.missing_information?(persisted, types, opts_nested)
             missing_info.fill_in_missing_information()
           else
             persisted
           end
         else
-          compute_elements(assembly_instance,types,opts_nested)
+          compute_elements(assembly_instance, types, opts_nested)
         end
       end
 
-      def self.compute(assembly_instance,opts={})
+      def self.compute(assembly_instance, opts = {})
         types = opts[:types] || AllTypes
-        opts_nested = Aux.hash_subset(opts,[:with_module_branches])
-        compute_elements(assembly_instance,types,opts)
+        opts_nested = Aux.hash_subset(opts, [:with_module_branches])
+        compute_elements(assembly_instance, types, opts)
       end
 
       def clear_locked_dependencies
@@ -60,7 +60,7 @@ module DTK
         ret = []
         module_names.each do |module_name|
           if element = element?(module_name)
-            implementations(children_elements(element)+[element]).each do |impl|
+            implementations(children_elements(element) + [element]).each do |impl|
               ret << impl unless ret.include?(impl)
             end
           end
@@ -69,7 +69,7 @@ module DTK
       end
 
       def elements
-        values().map{|module_ref_lock|module_ref_lock_element(module_ref_lock)}.compact
+        values().map { |module_ref_lock| module_ref_lock_element(module_ref_lock) }.compact
       end
 
       private
@@ -77,27 +77,27 @@ module DTK
       def self.get_module_refs_lock?(assembly_instance)
         module_ref_locks = ModuleRef::Lock.get(assembly_instance)
         unless  module_ref_locks.empty?
-          module_ref_locks.inject(new(assembly_instance)) do |h,module_ref_lock|
+          module_ref_locks.inject(new(assembly_instance)) do |h, module_ref_lock|
             h.merge(module_ref_lock.module_name => module_ref_lock)
           end
         end
       end
 
-      def self.compute_elements(assembly_instance,types,opts={})
+      def self.compute_elements(assembly_instance, types, opts = {})
         module_refs_tree = ModuleRefs::Tree.create(assembly_instance)
-        collapsed = module_refs_tree.collapse(Aux.hash_subset(opts,[:raise_errors]))
+        collapsed = module_refs_tree.collapse(Aux.hash_subset(opts, [:raise_errors]))
         collapsed.choose_namespaces!()
         collapsed.add_implementations!(assembly_instance)
 
         ret = new(assembly_instance)
-        collapsed.each_pair do |module_name,single_el_array|
+        collapsed.each_pair do |module_name, single_el_array|
           if single_el_array.empty?
             Log.error('Unexpected that single_el_array is empty')
           else
             if single_el_array.size > 1
               Log.error('Unexpected that single_el_array has size > 1; picking first')
             end
-            ret[module_name] = ModuleRef::Lock.create_from_element(assembly_instance,single_el_array.first)
+            ret[module_name] = ModuleRef::Lock.create_from_element(assembly_instance, single_el_array.first)
           end
         end
 
@@ -113,7 +113,7 @@ module DTK
       end
 
       def self.add_locked_branch_shas?(locked_module_refs)
-        locked_module_refs.each_pair do |_module_name,module_ref_lock|
+        locked_module_refs.each_pair do |_module_name, module_ref_lock|
           if el = module_ref_lock_element(module_ref_lock)
             if mb = el.module_branch
               if sha = mb[:current_sha]
@@ -132,7 +132,7 @@ module DTK
         locked_module_refs.elements.each do |el|
           if impl = el.implementation
             unless el.module_branch
-              disjuncts << [:and, [:eq,:repo_id,impl[:repo_id]], [:eq,:branch,impl[:branch]]]
+              disjuncts << [:and, [:eq, :repo_id, impl[:repo_id]], [:eq, :branch, impl[:branch]]]
               ndx = "#{impl[:repo_id]}:#{impl[:branch]}"
               ndx_els[ndx] = el
             end
@@ -141,12 +141,12 @@ module DTK
 
         return ret if disjuncts.empty?
         sp_hash = {
-          cols: [:id,:group_id,:display_name,:component_id,:branch,:repo_id,:current_sha,:version,:dsl_parsed],
+          cols: [:id, :group_id, :display_name, :component_id, :branch, :repo_id, :current_sha, :version, :dsl_parsed],
           filter: [:or] + disjuncts
         }
 
         mh = locked_module_refs.assembly_instance.model_handle(:module_branch)
-        Model.get_objs(mh,sp_hash).each do |mb|
+        Model.get_objs(mh, sp_hash).each do |mb|
           ndx = "#{mb[:repo_id]}:#{mb[:branch]}"
           if el = ndx_els[ndx]
             el.module_branch = mb
@@ -170,15 +170,15 @@ module DTK
         self.class.module_ref_lock_element(module_ref_lock)
       end
       def self.module_ref_lock_element(module_ref_lock)
-        module_ref_lock  && module_ref_lock.info
+        module_ref_lock && module_ref_lock.info
       end
 
       def children_elements(parent_element)
-        parent_element.children_module_names.map{|mn|element?(mn)}.compact
+        parent_element.children_module_names.map { |mn| element?(mn) }.compact
       end
 
       def implementations(elements)
-        elements.map{|el|self.class.implementation(el)}.compact
+        elements.map { |el| self.class.implementation(el) }.compact
       end
       def self.implementation(element)
         element.implementation ||

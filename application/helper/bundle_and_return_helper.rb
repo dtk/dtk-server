@@ -15,7 +15,7 @@ module Ramaze::Helper
         replace(as_run_list: [])
       end
 
-      def add(action_namespace,ctrl_result)
+      def add(action_namespace, ctrl_result)
         self[action_namespace] = ctrl_result
         self[:as_run_list] << action_namespace
       end

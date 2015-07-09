@@ -3,8 +3,8 @@ require 'timeout'
 module TimeoutMonkeyPatch
   module Timeout
     include ::Timeout
-    def self.timeout(sec, klass = nil,&block)
-      return TimerAdapterClass.timeout(sec,klass,&block) if TimerAdapterClass
+    def self.timeout(sec, klass = nil, &block)
+      return TimerAdapterClass.timeout(sec, klass, &block) if TimerAdapterClass
 
       return yield if sec == nil or sec.zero?
       raise ThreadError, 'timeout within critical session' if Thread.critical
@@ -12,7 +12,7 @@ module TimeoutMonkeyPatch
 
       begin
         x = Thread.current
-        debug_print(:timeout_info,{timeout: sec, current_thread: x})
+        debug_print(:timeout_info, { timeout: sec, current_thread: x })
         y = Thread.start {
           sleep sec
           x.raise exception, 'execution expired' if x.alive?
@@ -20,9 +20,9 @@ module TimeoutMonkeyPatch
         yield sec
         #    return true
       rescue exception => e
-        debug_print(:time_out_triggered_for,x)
-        rej = /\A#{Regexp.quote(__FILE__)}:#{__LINE__-4}\z/o
-        (bt = e.backtrace).reject! {|m| rej =~ m}
+        debug_print(:time_out_triggered_for, x)
+        rej = /\A#{Regexp.quote(__FILE__)}:#{__LINE__ - 4}\z/o
+        (bt = e.backtrace).reject! { |m| rej =~ m }
         level = -caller(CALLER_OFFSET).size
         while THIS_FILE =~ bt[level]
           bt.delete_at(level)
@@ -34,12 +34,12 @@ module TimeoutMonkeyPatch
       ensure
         y.kill if y and y.alive?
       end
-      debug_print(:time_out_not_needed_for,x)
+      debug_print(:time_out_not_needed_for, x)
     end
 
     Lock = Mutex.new
-    def self.debug_print(tag,msg)
-      Lock.synchronize{pp [tag,msg]}
+    def self.debug_print(tag, msg)
+      Lock.synchronize { pp [tag, msg] }
     end
 
     timer_adapter = nil
@@ -63,7 +63,7 @@ module TimeoutMonkeyPatch
   end
 end
 # TODO: if enable need to conditiuonally add require 'mcollective'
-if (R8::Config[:timer]||{})[:type]
+if (R8::Config[:timer] || {})[:type]
   class MCollective::Client
     include TimeoutMonkeyPatch
   end

@@ -12,7 +12,7 @@ module XYZ
 
         Chef::Config[:node_name] = 'chef-webui' #TDB: stub until pass in auth
         Chef::Config[:client_key] = '/etc/chef/webui.pem'
-        @rest = Chef::REST.new(Chef::Config[:chef_server_url], Chef::Config[:node_name],Chef::Config[:client_key])
+        @rest = Chef::REST.new(Chef::Config[:chef_server_url], Chef::Config[:node_name], Chef::Config[:client_key])
       end
 
       def get_rest(item)

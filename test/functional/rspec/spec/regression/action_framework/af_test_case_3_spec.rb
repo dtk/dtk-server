@@ -36,7 +36,7 @@ expected_output_2_2 = {
 
 describe '(Action Framework) Test Case 3: Service with two nodes that contain cmp with actions with parametrized commands (mustache)' do
   before(:all) do
-    puts '************************************************************************************************************************',''
+    puts '************************************************************************************************************************', ''
   end
 
   context "Stage service function on #{assembly_name} assembly" do

@@ -8,12 +8,12 @@ module DTK; class Node
            :staged    # - in a service instance before actual nodes correspond to it
           ]
       def self.types
-          @types ||= Types.map{|r|type_from_name(r)}
+          @types ||= Types.map { |r| type_from_name(r) }
       end
 
       def self.model_name(type)
         case type.to_sym
-        when :node_group_stub,:node_group_staged then :service_node_group
+        when :node_group_stub, :node_group_staged then :service_node_group
         when :node_group_instance then :node_group
         else raise Error.new("Unexpected node group type (#{type})")
         end

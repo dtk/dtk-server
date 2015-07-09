@@ -39,13 +39,13 @@ module R8Tpl
     class VirtualModelRef < String
       public
 
-      def self.create(virtual_model_ref_str,view_type,user)
-        virtual_model_ref_str && self.new(virtual_model_ref_str,:virtual_object,view_type,user) #TODO: hard wiring :virtual_object
+      def self.create(virtual_model_ref_str, view_type, user)
+        virtual_model_ref_str && self.new(virtual_model_ref_str, :virtual_object, view_type, user) #TODO: hard wiring :virtual_object
       end
 
       private
 
-      def initialize(virtual_model_ref_str,type,view_type,user)
+      def initialize(virtual_model_ref_str, type, view_type, user)
         super(virtual_model_ref_str)
         @user = user
         @type = type
@@ -71,7 +71,7 @@ module R8Tpl
       end
 
       def set_view_meta_info(*args)
-        @view_meta_id,@edit_time = args.empty? ? @user.create_object_from_id(db_id).get_view_meta_info(@view_type) : args
+        @view_meta_id, @edit_time = args.empty? ? @user.create_object_from_id(db_id).get_view_meta_info(@view_type) : args
       end
 
       private
@@ -93,7 +93,7 @@ module R8Tpl
     # returns the appropriate view path
     # TODO: this bakes in some "ordering with a type; is this right place to put this?
     def ret_view_path(type)
-      case(type)
+      case (type)
        when :system
         ViewPathFile.new("#{R8::Config[:system_views_dir]}/#{@profile}.#{@view_name}.rtpl")
        when :base
@@ -146,8 +146,8 @@ module R8Tpl
       end
     end
 
-    def view_type(vn=nil)
-      ViewTranslations[(vn||@view_name).to_sym]
+    def view_type(vn = nil)
+      ViewTranslations[(vn || @view_name).to_sym]
     end
     ViewTranslations = {
       edit: 'edit',

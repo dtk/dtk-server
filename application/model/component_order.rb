@@ -1,19 +1,19 @@
 module DTK
   class ComponentOrder < Model
-    def self.update_with_applicable_dependencies!(component_deps,component_idhs)
+    def self.update_with_applicable_dependencies!(component_deps, component_idhs)
       sample_idh = component_idhs.first
-      cols_for_get_virtual_attrs_call = [:component_type,:implementation_id,:extended_base]
+      cols_for_get_virtual_attrs_call = [:component_type, :implementation_id, :extended_base]
       # TODO: switched to use inherited component_order_objs; later will allow component_order_objs directly on component instances and have
       # them override
       # TODO: should also modifying cloning so  component instances not getting the component_order_objs
       sp_hash = {
         #        :cols => [:id,:component_order_objs]+cols_for_get_virtual_attrs_call,
-        cols: [:id,:inherited_component_order_objs]+cols_for_get_virtual_attrs_call,
+        cols: [:id, :inherited_component_order_objs] + cols_for_get_virtual_attrs_call,
         filter: [:oneof, :id, component_idhs.map(&:get_id)]
       }
-      cmps_with_order_info = prune_if_not_applicable(get_objs(sample_idh.createMH,sp_hash))
+      cmps_with_order_info = prune_if_not_applicable(get_objs(sample_idh.createMH, sp_hash))
       # cmps_with_order_info can have a component appear multiple fo each order relation
-      update_with_order_info!(component_deps,cmps_with_order_info)
+      update_with_order_info!(component_deps, cmps_with_order_info)
     end
 
     # assumption that this is called with components having keys :id,:dependencies, :extended_base, :component_type
@@ -24,7 +24,7 @@ module DTK
       return ret if components.empty?
       components.each do |cmp|
         unless pntr = ret[cmp[:id]]
-          pntr = ret[cmp[:id]] = {component_type: cmp[:component_type], component_dependencies: []}
+          pntr = ret[cmp[:id]] = { component_type: cmp[:component_type], component_dependencies: [] }
         end
         if cmp[:extended_base]
           pntr[:component_dependencies] << cmp[:extended_base]
@@ -34,15 +34,15 @@ module DTK
           end
         end
       end
-      ComponentOrder.update_with_applicable_dependencies!(ret,components.map(&:id_handle).uniq)
+      ComponentOrder.update_with_applicable_dependencies!(ret, components.map(&:id_handle).uniq)
     end
 
     # assumption that this is called with components having keys :id,:dependencies, :extended_base, :component_type
     # this can be either component template or component instance with :dependencies joined in from associated template
-    def self.derived_order(components,&block)
-      ndx_cmps = components.inject({}){|h,cmp|h.merge(cmp[:id] => cmp)}
+    def self.derived_order(components, &block)
+      ndx_cmps = components.inject({}) { |h, cmp| h.merge(cmp[:id] => cmp) }
       cmp_deps = get_ndx_cmp_type_and_derived_order(components)
-      Task::Action::OnComponent.generate_component_order(cmp_deps).each do |(component_id,_deps)|
+      Task::Action::OnComponent.generate_component_order(cmp_deps).each do |(component_id, _deps)|
         block.call(ndx_cmps[component_id])
       end
     end
@@ -78,9 +78,9 @@ module DTK
               attr_name = $1
               val = eq_stmt[2]
               unexepected_form = false
-              match_cond = [:eq,:attribute_value,val]
-              pntr = attrs_to_get[cmp[:id]] ||= {component: cmp, attr_info: []}
-              pntr[:attr_info] << {attr_name: attr_name, match_cond: match_cond, component_order: cmp[:component_order]}
+              match_cond = [:eq, :attribute_value, val]
+              pntr = attrs_to_get[cmp[:id]] ||= { component: cmp, attr_info: [] }
+              pntr[:attr_info] << { attr_name: attr_name, match_cond: match_cond, component_order: cmp[:component_order] }
             end
           end
         end
@@ -88,10 +88,10 @@ module DTK
       end
       ret = []
       # TODO: more efficienct is getting this in bulk
-      attrs_to_get.each do |_cmp_id,info|
+      attrs_to_get.each do |_cmp_id, info|
         info[:attr_info].each do |attr_info|
           # if component order appears twice then taht means disjunction
-          next unless  attr_val_info = info[:component].get_virtual_attribute(attr_info[:attr_name],[:attribute_value])
+          next unless  attr_val_info = info[:component].get_virtual_attribute(attr_info[:attr_name], [:attribute_value])
           # TODO: stubbed form treating
           match_cond = attr_info[:match_cond]
           raise Error.new('Unexpected form') unless match_cond.size == 3 && match_cond[0] == :eq && match_cond[1] == :attribute_value
@@ -102,9 +102,9 @@ module DTK
       end
       ret
     end
-    def self.update_with_order_info!(component_deps,cmps_with_order_info)
+    def self.update_with_order_info!(component_deps, cmps_with_order_info)
       cmps_with_order_info.each do |info|
-        pntr = component_deps[info[:id]] ||= {component_type: order_info[:component_type], component_dependencies: []}
+        pntr = component_deps[info[:id]] ||= { component_type: order_info[:component_type], component_dependencies: [] }
         dep = info[:component_order][:after]
         pntr[:component_dependencies] << dep unless pntr[:component_dependencies].include?(dep)
       end

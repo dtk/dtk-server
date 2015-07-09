@@ -23,7 +23,7 @@ dtk_common = DtkCommon.new('', '')
 
 describe '(Modules, Services and Versioning) Test Case 38: Import to two different namespaces (component module)' do
   before(:all) do
-    puts '******************************************************************************************************',''
+    puts '******************************************************************************************************', ''
   end
 
   context 'Import component module function' do

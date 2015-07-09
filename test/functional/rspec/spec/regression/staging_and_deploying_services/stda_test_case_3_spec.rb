@@ -22,7 +22,7 @@ dtk_common = DtkCommon.new(service_name, assembly_name)
 
 describe '(Staging And Deploying Assemblies) Test Case 3: Deploy from assembly (stage and converge), stop the running instance (nodes) and then delete service' do
   before(:all) do
-    puts '****************************************************************************************************************************************************',''
+    puts '****************************************************************************************************************************************************', ''
   end
 
   context "Stage service function on #{assembly_name} assembly" do

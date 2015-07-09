@@ -23,14 +23,14 @@ module DTK; class NodeBindingRuleset
       create_hash(existing_rules: matching_nbrs[:rules])
     end
 
-    def create_hash(opts={})
+    def create_hash(opts = {})
       hash_body = {
         type: 'clone',
         os_type: @os_type,
         os_identifier: @os_identifier,
-        rules: (opts[:existing_rules]||[]) + Rules.create(@top_factory)
+        rules: (opts[:existing_rules] || []) + Rules.create(@top_factory)
       }
-      {ref() => hash_body}
+      { ref() => hash_body }
     end
 
     def ref
@@ -47,9 +47,9 @@ module DTK; class NodeBindingRuleset
         @nbrs_calculated = true
         sp_hash = {
           cols: NodeBindingRuleset.common_columns(),
-          filter: [:eq,:ref,ref()]
+          filter: [:eq, :ref, ref()]
         }
-        @matching_node_binding_ruleset = Model.get_obj(model_handle(),sp_hash)
+        @matching_node_binding_ruleset = Model.get_obj(model_handle(), sp_hash)
       end
     end
 
@@ -63,20 +63,20 @@ module DTK; class NodeBindingRuleset
         type = Node::Template.image_type(target)
         region = target.iaas_properties.hash[:region]
         el = {
-          conditions: conditions(type,region),
-          node_template: node_template(top_factory,type,region)
+          conditions: conditions(type, region),
+          node_template: node_template(top_factory, type, region)
         }
         [el]
       end
 
-      def self.conditions(type,region)
+      def self.conditions(type, region)
         {
           type: type,
           region: region
         }
       end
 
-      def self.node_template(top_factory,type,region)
+      def self.node_template(top_factory, type, region)
         {
           type: type,
           region: region,

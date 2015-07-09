@@ -1,8 +1,8 @@
 {
   schema: :node,
   table: :image_attribute,
-  attribute: {type: :varchar, size: 40},
-  mappings: {type: :json},
+  attribute: { type: :varchar, size: 40 },
+  mappings: { type: :json },
   module_branch_id: {
     type: :bigint,
     foreign_key_rel_type: :module_branch,

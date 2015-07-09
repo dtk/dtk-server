@@ -13,7 +13,7 @@ module DTK; class Node
           display_name: 'host_addresses_ipv4',
           dynamic: true,
           hidden: true,
-          semantic_type: {':array'=>'host_address_ipv4'}
+          semantic_type: { ':array' => 'host_address_ipv4' }
         }
       end
 

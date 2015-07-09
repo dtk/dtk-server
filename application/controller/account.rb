@@ -12,7 +12,7 @@ module DTK
     def rest__list_ssh_keys
       username = ret_non_null_request_params(:username)
       model_handle = model_handle_with_private_group()
-      rest_ok_response RepoUser.get_matching_repo_users(model_handle.createMH(:repo_user), {type: 'client'}, username, ['username'])
+      rest_ok_response RepoUser.get_matching_repo_users(model_handle.createMH(:repo_user), { type: 'client' }, username, ['username'])
     end
 
     # we use this method to add user access to modules / servier / repo manager
@@ -38,7 +38,7 @@ module DTK
       end
 
       if username && !username.eql?(username.match(PUB_KEY_NAME_REGEX)[0])
-        raise DTK::Error, "Invalid format of pub key name, characters allower are: '#{PUB_KEY_NAME_REGEX.source.gsub('\\','')}'"
+        raise DTK::Error, "Invalid format of pub key name, characters allower are: '#{PUB_KEY_NAME_REGEX.source.gsub('\\', '')}'"
       end
 
       # we do this check in add user direct as well but for simplicity we will duplicate it here as well
@@ -96,7 +96,7 @@ module DTK
       if username.to_s =~ /^[0-9]+$/
         model_handle = model_handle_with_private_group()
         user_mh = model_handle.createMH(:repo_user)
-        user = User.get_user_by_id( user_mh, username)
+        user = User.get_user_by_id(user_mh, username)
         username = user[:username] if user
       end
 
@@ -108,8 +108,8 @@ module DTK
         repoman_registration_error = e.message
       end
 
-      ServiceModule.remove_user_direct_access(model_handle_with_private_group(:service_module),username)
-      ComponentModule.remove_user_direct_access(model_handle_with_private_group(:component_module),username)
+      ServiceModule.remove_user_direct_access(model_handle_with_private_group(:service_module), username)
+      ComponentModule.remove_user_direct_access(model_handle_with_private_group(:component_module), username)
 
       rest_ok_response(
           repoman_registration_error: repoman_registration_error

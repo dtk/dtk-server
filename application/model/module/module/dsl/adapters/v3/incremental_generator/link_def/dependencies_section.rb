@@ -12,22 +12,22 @@ module DTK; class ModuleDSL; class V3
           opts_choice.merge!(omit_component_ref: ref)
         end
         possible_links = @aug_link_def[:link_def_links].map do |link_def_link|
-          choice_info(ObjectWrapper.new(link_def_link),opts_choice)
+          choice_info(ObjectWrapper.new(link_def_link), opts_choice)
         end
-        content = (single_choice ? possible_links.first : {'choices' => possible_links})
-        {ref => content}
+        content = (single_choice ? possible_links.first : { 'choices' => possible_links })
+        { ref => content }
       end
 
-      def merge_fragment!(full_hash,fragment,context={})
+      def merge_fragment!(full_hash, fragment, context = {})
         ret = full_hash
         return ret unless fragment
-        component_fragment = component_fragment(full_hash,context[:component_template])
+        component_fragment = component_fragment(full_hash, context[:component_template])
         if dependencies_fragment = component_fragment['dependencies']
           unless dependencies_fragment.is_a?(Array)
             dependencies_fragment = component_fragment['dependencies'] = [dependencies_fragment]
           end
-          fragment.each do |key,content|
-            update_fragment!(dependencies_fragment,key,content)
+          fragment.each do |key, content|
+            update_fragment!(dependencies_fragment, key, content)
           end
         else
           component_fragment['dependencies'] = [fragment]
@@ -37,7 +37,7 @@ module DTK; class ModuleDSL; class V3
 
       private
 
-      def choice_info(link_def_link,opts={})
+      def choice_info(link_def_link, opts = {})
         ret = Link.new
         cmp_ref = link_component(link_def_link)
         unless opts[:omit_component_ref] == cmp_ref
@@ -50,43 +50,43 @@ module DTK; class ModuleDSL; class V3
         ret
       end
 
-      def update_fragment!(fragment,key,link)
-        fragment.each_with_index do |fragment_el,i|
+      def update_fragment!(fragment, key, link)
+        fragment.each_with_index do |fragment_el, i|
           if key == Dependency.key(fragment_el)
-             update_matching_fragment_el!(fragment,i,key,link)
+             update_matching_fragment_el!(fragment, i, key, link)
             return
           end
         end
-        fragment << {key => link}
+        fragment << { key => link }
       end
 
-      def update_matching_fragment_el!(fragment,i,key,link)
+      def update_matching_fragment_el!(fragment, i, key, link)
         fragment_el = fragment[i]
         if Dependency.new(fragment_el).matches?(link)
           return
         end
 
-        choices = Choices.reify(key,Dependency.link(fragment_el))
+        choices = Choices.reify(key, Dependency.link(fragment_el))
         choices.update!(link)
         fragment[i] = choices.external_form()
       end
 
       class Choices < Hash
-        def self.reify(key,fragment_link)
+        def self.reify(key, fragment_link)
           choices =
             if fragment_link.keys == ['choices']
               fragment_link['choices'].map do |choice|
-                 Dependency.new(choice.is_a?(String) ? choice : {key => choice})
+                 Dependency.new(choice.is_a?(String) ? choice : { key => choice })
               end
             else
               [Dependency.new(key => fragment_link)]
             end
-          new(key,'choices' => choices)
+          new(key, 'choices' => choices)
         end
 
         def update!(link)
           ret = self
-          ret['choices'].each_with_index do |choice,i|
+          ret['choices'].each_with_index do |choice, i|
             if choice.matches?(link)
               ret['choices'][i] = link
               return ret
@@ -100,12 +100,12 @@ module DTK; class ModuleDSL; class V3
           ext_form_choices = self['choices'].map do |r|
             r.is_a?(Dependency) ? r.external_form() : r
           end
-          {@key => self.merge('choices' => ext_form_choices)}
+          { @key => self.merge('choices' => ext_form_choices) }
         end
 
         private
 
-        def initialize(key,fragment_link)
+        def initialize(key, fragment_link)
           super()
           @key = key
           replace(fragment_link)
@@ -114,7 +114,7 @@ module DTK; class ModuleDSL; class V3
 
       class Dependency
         def initialize(obj)
-          @key,@link,@is_default = self.class.key__link__is_default(obj)
+          @key, @link, @is_default = self.class.key__link__is_default(obj)
         end
 
         def self.key(obj)
@@ -140,9 +140,9 @@ module DTK; class ModuleDSL; class V3
 
         def self.key__link__is_default(obj)
           if obj.is_a?(String)
-            [obj,default_link(),true]
+            [obj, default_link(), true]
           else #obj.kind_of?(Hash)
-            [obj.keys.first,Link.new(obj.values.first),false]
+            [obj.keys.first, Link.new(obj.values.first), false]
           end
         end
 

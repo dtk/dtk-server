@@ -1,20 +1,20 @@
 module DTK; class ConfigAgent; module Adapter
   class Puppet
     class NodeManifest
-      def initialize(config_node,opts={})
-        @import_statement_modules = opts[:import_statement_modules]||[]
+      def initialize(config_node, opts = {})
+        @import_statement_modules = opts[:import_statement_modules] || []
         @config_node = config_node
       end
 
       # TODO: cleaner to make cmps_with_attrs,assembly_attrs class attributes, but to do so would maen need to also
       # modify PuppetStage
-      def generate(cmps_with_attrs,assembly_attrs)
+      def generate(cmps_with_attrs, assembly_attrs)
         # if intra node stages configured 'stages_ids' will not be nil,
         # if stages_ids is nil use generation with total ordering (old implementation)
         if stages_ids = @config_node.intra_node_stages()
-          generate_with_stages(cmps_with_attrs,assembly_attrs,stages_ids)
+          generate_with_stages(cmps_with_attrs, assembly_attrs, stages_ids)
         else
-          generate_with_total_ordering(cmps_with_attrs,assembly_attrs)
+          generate_with_total_ordering(cmps_with_attrs, assembly_attrs)
         end
       end
 
@@ -35,16 +35,16 @@ module DTK; class ConfigAgent; module Adapter
       # In both cases teh top leevl shows sepearte puppet runs
       # in the first case for each puppet run, each comp wil be in sepearte puppet stage
       # in case 2, extra grouping shows how components are grouped into puppet stages
-      def generate_with_stages(cmps_with_attrs,assembly_attrs,stages_ids)
+      def generate_with_stages(cmps_with_attrs, assembly_attrs, stages_ids)
         stages_ids.map do |stage_ids_exec_block|
           exec_block = []
           add_global_defaults!(exec_block)
-          add_assembly_attributes!(exec_block,assembly_attrs||[])
+          add_assembly_attributes!(exec_block, assembly_attrs || [])
           exec_block << generate_stage_statements(stage_ids_exec_block.size)
           stage_ids_exec_block.each_with_index do |stage_ids, i|
-            stage = i+1
+            stage = i + 1
             exec_block << ' ' #space between stages
-            puppet_stage = PuppetStage.new(stage,@config_node,@import_statement_modules)
+            puppet_stage = PuppetStage.new(stage, @config_node, @import_statement_modules)
             Array(stage_ids).each do |cmp_id|
               cmp_with_attrs = cmps_with_attrs.find { |cmp| cmp['id'] == cmp_id }
               puppet_stage.generate_manifest!(cmp_with_attrs)
@@ -59,15 +59,15 @@ module DTK; class ConfigAgent; module Adapter
         end
       end
 
-      def generate_with_total_ordering(cmps_with_attrs,assembly_attrs=nil)
+      def generate_with_total_ordering(cmps_with_attrs, assembly_attrs = nil)
         lines = []
         add_global_defaults!(lines)
-        add_assembly_attributes!(lines,assembly_attrs||[])
+        add_assembly_attributes!(lines, assembly_attrs || [])
         lines << generate_stage_statements(cmps_with_attrs.size)
-        cmps_with_attrs.each_with_index do |cmp_with_attrs,i|
-          stage = i+1
+        cmps_with_attrs.each_with_index do |cmp_with_attrs, i|
+          stage = i + 1
           lines << ' ' #space between stages
-          PuppetStage.new(stage,@config_node,@import_statement_modules).generate_manifest!(cmp_with_attrs).add_lines_for_stage!(lines)
+          PuppetStage.new(stage, @config_node, @import_statement_modules).generate_manifest!(cmp_with_attrs).add_lines_for_stage!(lines)
         end
 
         if attr_val_stmts = get_attr_val_statements(cmps_with_attrs)
@@ -77,19 +77,19 @@ module DTK; class ConfigAgent; module Adapter
       end
 
       def generate_stage_statements(size)
-        (1..size).map{|s|"stage{#{s}:}"}.join(' -> ')
+        (1..size).map { |s| "stage{#{s}:}" }.join(' -> ')
       end
 
       class PuppetStage < self
-        def initialize(stage,config_node,import_statement_modules)
-          super(config_node,import_statement_modules: import_statement_modules)
+        def initialize(stage, config_node, import_statement_modules)
+          super(config_node, import_statement_modules: import_statement_modules)
           @stage = stage
           @class_lines = []
           @def_lines = []
         end
 
         def add_lines_for_stage!(ret)
-          @class_lines.each{|line|ret << line}
+          @class_lines.each { |line| ret << line }
           add_definition_lines!(ret)
         end
 
@@ -100,11 +100,11 @@ module DTK; class ConfigAgent; module Adapter
            when 'class'
             cmp = cmp_with_attrs['name']
             raise Error.new('No component name') unless cmp
-            if imp_stmt = needs_import_statement?(cmp,module_name)
+            if imp_stmt = needs_import_statement?(cmp, module_name)
               @class_lines << imp_stmt
             end
             # TODO: see if need \" and quote form
-            attr_str_array = attrs.map{|k,v|"#{k} => #{process_val(v)}"} + [stage_assign()]
+            attr_str_array = attrs.map { |k, v| "#{k} => #{process_val(v)}" } + [stage_assign()]
             attr_str = attr_str_array.join(', ')
             @class_lines << "class {\"#{cmp}\": #{attr_str}}"
            when 'definition'
@@ -113,7 +113,7 @@ module DTK; class ConfigAgent; module Adapter
             end
 
             name_attr = nil
-            attr_str_array = attrs.map do |k,v|
+            attr_str_array = attrs.map do |k, v|
               if k == 'name'
                 name_attr = quote_form(v)
                 nil
@@ -130,7 +130,7 @@ module DTK; class ConfigAgent; module Adapter
               attr_str_array << "before => #{anchor_ref(:end)}"
             end
             attr_str = attr_str_array.join(', ')
-            if imp_stmt = needs_import_statement?(defn_cmp,module_name)
+            if imp_stmt = needs_import_statement?(defn_cmp, module_name)
               @def_lines << imp_stmt
             end
             @def_lines << "#{defn_cmp} {#{name_attr}: #{attr_str}}"
@@ -147,7 +147,7 @@ module DTK; class ConfigAgent; module Adapter
             if use_anchors_for_class_wrappers?()
               ret << "  #{anchor(:begin)}"
             end
-            @def_lines.each{|line|ret << "  #{line}"}
+            @def_lines.each { |line| ret << "  #{line}" }
             if use_anchors_for_class_wrappers?()
               ret << "  #{anchor(:end)}"
             end
@@ -189,7 +189,7 @@ module DTK; class ConfigAgent; module Adapter
           ret
         end
 
-        def needs_import_statement?(_cmp_or_def,module_name)
+        def needs_import_statement?(_cmp_or_def, module_name)
           # TODO: keeping in, in case we decide to do check for import; use of imports are now considered violating Puppet best practices
           # if wanted to actual check would need to know what manifest files are present
           return nil #TODO: would put conditional in if doing checks
@@ -213,26 +213,26 @@ module DTK; class ConfigAgent; module Adapter
       DefaultExtlookupDatadir = "'/etc/puppet/manifests/extdata'"
       DefaultExtlookupPrecedence = "['common']"
 
-      def add_assembly_attributes!(lines,assembly_attrs)
+      def add_assembly_attributes!(lines, assembly_attrs)
         assembly_attrs.each do |attr|
-          add_top_level_assignment!(lines,attr['name'],attr['value'])
+          add_top_level_assignment!(lines, attr['name'], attr['value'])
         end
       end
 
       def add_dtk_globals!(lines)
         if node = @config_node[:node]
-          add_top_level_assignment!(lines,'dtk_assembly_node',node.get_field?(:display_name))
+          add_top_level_assignment!(lines, 'dtk_assembly_node', node.get_field?(:display_name))
         end
       end
 
-      def add_top_level_assignment!(lines,name,value)
+      def add_top_level_assignment!(lines, name, value)
         lines << "$#{name} = #{process_val(value)}"
       end
 
       def get_attr_val_statements(cmps_with_attrs)
         ret = []
         cmps_with_attrs.each do |cmp_with_attrs|
-          (cmp_with_attrs['dynamic_attributes']||[]).each do |dyn_attr|
+          (cmp_with_attrs['dynamic_attributes'] || []).each do |dyn_attr|
             # only include if the dynamic attribute is connected
             # TODO: this is mechanism used to avoid duplicate r8::export_variable declarations: making sure downstream that
             # definitions cannot be connected
@@ -251,7 +251,7 @@ module DTK; class ConfigAgent; module Adapter
       def process_val(val_x)
         # TODO: see why non scalar vals are string form
         val = val_x
-        if val_x.is_a?(String) && (val_x =~ /^\[/ || val_x =~ /^\{/ )
+        if val_x.is_a?(String) && (val_x =~ /^\[/ || val_x =~ /^\{/)
           # string array or hash
           begin
             val = eval(val_x) rescue nil
@@ -267,9 +267,9 @@ module DTK; class ConfigAgent; module Adapter
 
       def quote_form(obj)
         if obj.is_a?(Hash)
-          "{#{obj.map{|k,v|"#{quote_form(k)} => #{quote_form(v)}"}.join(',')}}"
+          "{#{obj.map { |k, v| "#{quote_form(k)} => #{quote_form(v)}" }.join(',')}}"
         elsif obj.is_a?(Array)
-          "[#{obj.map{|el|quote_form(el)}.join(',')}]"
+          "[#{obj.map { |el| quote_form(el) }.join(',')}]"
         elsif obj.is_a?(String)
           "\"#{obj}\""
         elsif obj.nil?

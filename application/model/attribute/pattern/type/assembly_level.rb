@@ -6,7 +6,7 @@ module DTK; class Attribute
       end
 
       def attribute_idhs
-        @attribute_stacks.map{|attr|attr[:attribute].id_handle()}
+        @attribute_stacks.map { |attr| attr[:attribute].id_handle() }
       end
 
       def component_instance

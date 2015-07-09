@@ -9,7 +9,7 @@ module DTK; class Clone; class ChildContext
           return
         end
 
-        ndx_template_to_instance_nodes = self[:parent_rels].inject({}){|h,r|h.merge(r[:old_par_id] => r[:node_node_id])}
+        ndx_template_to_instance_nodes = self[:parent_rels].inject({}) { |h, r| h.merge(r[:old_par_id] => r[:node_node_id]) }
         aug_cmp_refs.each do |cmp_ref|
           target_node_id = ndx_template_to_instance_nodes[cmp_ref.delete(:node_node_id)]
           cmp_ref.merge!(target_node_id: target_node_id)
@@ -22,7 +22,7 @@ module DTK; class Clone; class ChildContext
         # remove the matches
         unless matches.empty?
           matching_ids = matches.ids()
-          aug_cmp_refs.reject!{|cmp| matching_ids.include?(cmp[:id])}
+          aug_cmp_refs.reject! { |cmp| matching_ids.include?(cmp[:id]) }
         end
         merge!(matches: aug_cmp_refs)
       end

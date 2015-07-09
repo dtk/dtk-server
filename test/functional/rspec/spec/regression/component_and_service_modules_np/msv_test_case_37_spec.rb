@@ -21,7 +21,7 @@ dtk_common = DtkCommon.new('', '')
 
 describe '(Modules, Services and Versioning) Test Case 37: NEG - Install component module from r8 namespace, but local copy of this module already exists and it is in r8 namespace' do
   before(:all) do
-    puts '*************************************************************************************************************************************************************************',''
+    puts '*************************************************************************************************************************************************************************', ''
   end
 
   context 'Set new default namespace' do

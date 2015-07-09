@@ -1,7 +1,7 @@
 module WorkspaceMixin
   def get_workspace_id
     response = send_request('/rest/assembly/list_with_workspace', {})
-    workspace = response['data'].find { |x| x['display_name'] == 'workspace'}['id']
+    workspace = response['data'].find { |x| x['display_name'] == 'workspace' }['id']
     return workspace
   end
 

@@ -14,7 +14,7 @@ module DTK
     # in case there is some internal logic that expects some thread to fail error messages can be
     # ignored or this call
 
-    def self.wrap(user_object=nil, current_session, &_block)
+    def self.wrap(user_object = nil, current_session, &_block)
       return lambda do
         begin
           # this part of code sets session information to make sure that newly created thread keeps its session
@@ -38,7 +38,7 @@ module DTK
 
           # end
         rescue Exception => e
-          Log.error_pp(['ERROR IN THREAD', e.message,e.backtrace])
+          Log.error_pp(['ERROR IN THREAD', e.message, e.backtrace])
         end
       end
     end

@@ -132,13 +132,13 @@ module ComponentModulesMixin
 
     if filter == :name
       collaborators.each do |c|
-        collaborators_exist = false if response['data'].select { |x| (x['owner_name'] == c) && (x['owner_type'] == collaborator_type)}.empty?
+        collaborators_exist = false if response['data'].select { |x| (x['owner_name'] == c) && (x['owner_type'] == collaborator_type) }.empty?
       end
     end
 
     if filter == :email
       collaborators.each do |c|
-        collaborators_exist = false if response['data'].select { |x| (x['owner_email'] == c) && (x['owner_type'] == collaborator_type)}.empty?
+        collaborators_exist = false if response['data'].select { |x| (x['owner_email'] == c) && (x['owner_type'] == collaborator_type) }.empty?
       end
     end
 
@@ -231,9 +231,9 @@ module ComponentModulesMixin
     component_ids_list = []
     component_modules_list = send_request('/rest/component_module/list', {})
 
-    if (component_modules_list['data'].find { |x| x['display_name'] == component_module_name})
+    if (component_modules_list['data'].find { |x| x['display_name'] == component_module_name })
       puts "Component module #{component_module_name} exists in the list. Get component module id..."
-      component_module_id = component_modules_list['data'].find { |x| x['display_name'] == component_module_name}['id']
+      component_module_id = component_modules_list['data'].find { |x| x['display_name'] == component_module_name }['id']
       module_components_list = send_request('/rest/component_module/info_about', about: 'components', component_module_id: component_module_id)
       puts 'List of component module components:'
       pretty_print_JSON(module_components_list)
@@ -259,9 +259,9 @@ module ComponentModulesMixin
     attribute_list = []
     component_modules_list = send_request('/rest/component_module/list', {})
 
-    if (component_modules_list['data'].find { |x| x['display_name'] == component_module_name})
+    if (component_modules_list['data'].find { |x| x['display_name'] == component_module_name })
       puts "Component module #{component_module_name} exists in the list. Get component module id..."
-      component_module_id = component_modules_list['data'].find { |x| x['display_name'] == component_module_name}['id']
+      component_module_id = component_modules_list['data'].find { |x| x['display_name'] == component_module_name }['id']
       component_module_attributes_list = send_request('/rest/component_module/info_about', about: 'attributes', component_module_id: component_module_id)
       puts 'List of component module attributes:'
       pretty_print_JSON(component_module_attributes_list)
@@ -286,16 +286,16 @@ module ComponentModulesMixin
     attribute_list = []
     component_modules_list = send_request('/rest/component_module/list', {})
 
-    if (component_modules_list['data'].find { |x| x['display_name'] == component_module_name})
+    if (component_modules_list['data'].find { |x| x['display_name'] == component_module_name })
       puts "Component module #{component_module_name} exists in the list. Get component module id..."
-      component_module_id = component_modules_list['data'].find { |x| x['display_name'] == component_module_name}['id']
+      component_module_id = component_modules_list['data'].find { |x| x['display_name'] == component_module_name }['id']
       module_components_list = send_request('/rest/component_module/info_about', about: 'components', component_module_id: component_module_id)
       puts 'List of component module components:'
       pretty_print_JSON(module_components_list)
 
-      if (module_components_list['data'].find { |x| x['display_name'] == component_name})
+      if (module_components_list['data'].find { |x| x['display_name'] == component_name })
         puts "Component #{component_name} exists in the list. Get component id..."
-        component_id = module_components_list['data'].find { |x| x['display_name'] == component_name}['id']
+        component_id = module_components_list['data'].find { |x| x['display_name'] == component_name }['id']
         component_attributes_list = send_request('/rest/component_module/info_about', about: 'attributes', component_module_id: component_module_id, component_template_id: component_id)
         puts 'List of component attributes:'
         pretty_print_JSON(component_attributes_list)
@@ -314,9 +314,9 @@ module ComponentModulesMixin
     puts 'Get attribute value from component module:', '------------------------------------------'
     component_modules_list = send_request('/rest/component_module/list', {})
 
-    if (component_modules_list['data'].find { |x| x['display_name'] == component_module_name})
+    if (component_modules_list['data'].find { |x| x['display_name'] == component_module_name })
       puts "Component module #{component_module_name} exists in the list. Get component module id..."
-      component_module_id = component_modules_list['data'].find { |x| x['display_name'] == component_module_name}['id']
+      component_module_id = component_modules_list['data'].find { |x| x['display_name'] == component_module_name }['id']
       component_module_attribute_list = send_request('/rest/component_module/info_about', about: 'attributes', component_module_id: component_module_id)
       pretty_print_JSON(component_module_attribute_list)
       attribute_value = component_module_attribute_list['data'].find { |x| x['display_name'] == "cmp[#{component_module_name.split(':').last}::#{component_name}]/#{attribute_name}" }['value']
@@ -333,9 +333,9 @@ module ComponentModulesMixin
     component_names_list = []
     component_modules_list = send_request('/rest/component_module/list', {})
 
-    if (component_modules_list['data'].find { |x| x['display_name'] == component_module_name})
+    if (component_modules_list['data'].find { |x| x['display_name'] == component_module_name })
       puts "Component module #{component_module_name} exists in the list. Get component module id..."
-      component_module_id = component_modules_list['data'].find { |x| x['display_name'] == component_module_name}['id']
+      component_module_id = component_modules_list['data'].find { |x| x['display_name'] == component_module_name }['id']
       module_components_list = send_request('/rest/component_module/info_about', about: 'components', component_module_id: component_module_id)
       puts 'List of component module components:'
       pretty_print_JSON(module_components_list)

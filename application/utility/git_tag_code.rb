@@ -21,7 +21,7 @@ a = $stdin.gets
 
 # ['dtk-common-repo','dtk-common',
 
-['dtk-common-repo','dtk-common','server','dtk-repo-manager','dtk-repoman-admin', 'dtk-node-agent'].each do |entry|
+['dtk-common-repo', 'dtk-common', 'server', 'dtk-repo-manager', 'dtk-repoman-admin', 'dtk-node-agent'].each do |entry|
   if File.directory? File.join('.', entry)
     puts "Skipping '#{entry}' already exists"
   else

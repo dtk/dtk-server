@@ -38,7 +38,7 @@ class DtkCommon
 
     @service_name = service_name
     #Fixed current format of assembly name
-    @assembly = assembly_name.gsub!('::','/')
+    @assembly = assembly_name.gsub!('::', '/')
 
     @server = config_yml['r8server']['server']
     @port = config_yml['r8server']['port']
@@ -84,7 +84,7 @@ class DtkCommon
     #search for the error that happened in log_part_from_last_restart array and print out next 20 lines in it
     log_part_from_last_restart.each_with_index do |line, index|
       if line.include? 'error'
-        for i in index-20..index
+        for i in index - 20..index
           log_part << log_part_from_last_restart[i]
         end
         break
@@ -110,7 +110,7 @@ class DtkCommon
     #If response contains errors, accumulate all errors to error_message
     unless response_JSON['errors'].nil?
       @error_message = ''
-      response_JSON['errors'].each { |e| @error_message += "#{e['code']}: #{e['message']} "}
+      response_JSON['errors'].each { |e| @error_message += "#{e['code']}: #{e['message']} " }
     end
 
     #If response status notok, show error_message
@@ -134,7 +134,7 @@ class DtkCommon
   def set_default_namespace(namespace)
     puts 'Set default namespace:', '---------------------'
     default_namespace_set = false
-    response = send_request('/rest/account/set_default_namespace', {namespace: namespace})
+    response = send_request('/rest/account/set_default_namespace', { namespace: namespace })
     if response['status'] == 'ok'
       puts "Default namespace is set to #{namespace}"
       default_namespace_set = true
@@ -147,7 +147,7 @@ class DtkCommon
   def set_catalog_credentials(catalog_username, catalog_password)
     puts 'Set catalog credentials:', '------------------------'
     catalog_credentials_set = false
-    response = send_request('/rest/account/set_catalog_credentials', {username: catalog_username, password: catalog_password})
+    response = send_request('/rest/account/set_catalog_credentials', { username: catalog_username, password: catalog_password })
     if response['status'] == 'ok'
       puts 'Catalog credentials have been set'
       catalog_credentials_set = true

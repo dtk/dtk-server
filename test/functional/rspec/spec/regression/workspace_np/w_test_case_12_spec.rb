@@ -22,7 +22,7 @@ dtk_common = DtkCommon.new('', '')
 
 describe '(Workspace) Test Case 12: Create one node, add component in it, converge workspace and grep puppet log from node' do
   before(:all) do
-    puts '****************************************************************************************************************',''
+    puts '****************************************************************************************************************', ''
   end
 
   context 'Create node in workspace' do

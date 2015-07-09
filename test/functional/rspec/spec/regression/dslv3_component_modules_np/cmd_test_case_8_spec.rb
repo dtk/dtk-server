@@ -18,7 +18,7 @@ dtk_common = DtkCommon.new('', '')
 
 describe '(Component Module DSL) Test Case 8: Rename existing attribute mapping in dependencies section in dtk.model.yaml file and push-clone-changes to server' do
   before(:all) do
-    puts '*****************************************************************************************************************************************************',''
+    puts '*****************************************************************************************************************************************************', ''
   end
 
   context 'Import component module function' do

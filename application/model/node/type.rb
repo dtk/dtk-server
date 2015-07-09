@@ -1,7 +1,7 @@
 module DTK; class Node
   class Type
-    r8_nested_require('type','node')
-    r8_nested_require('type','node_group')
+    r8_nested_require('type', 'node')
+    r8_nested_require('type', 'node_group')
     module Mixin
       def is_node?
         Type::Node.isa?(get_field?(:type))

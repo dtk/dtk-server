@@ -6,7 +6,7 @@ module DTK; module CommandAndControlAdapter
           Log.error("associate_elastic_ip called but there is not allocated elastic ip for node with ID '#{node[:id]}")
           return
         end
-        conn().associate_elastic_ip(node.instance_id(),node.elastic_ip())
+        conn().associate_elastic_ip(node.instance_id(), node.elastic_ip())
       end
 
       #TODO: errors here should result in warning set to user that dns set wrong and will be ignored
@@ -37,10 +37,10 @@ module DTK; module CommandAndControlAdapter
 
         if record.nil?
           # there is no record we need to create it (first boot)
-          record = dns.create_record(node.persistent_dns(),ec2_address)
+          record = dns.create_record(node.persistent_dns(), ec2_address)
         else
           # we need to update it with new dns name
-          record = dns.update_record(record,ec2_address)
+          record = dns.update_record(record, ec2_address)
         end
 
         # in case there was no record created we raise error
@@ -55,7 +55,7 @@ module DTK; module CommandAndControlAdapter
       private
 
       def process_addresses__first_boot?(node)
-        hostname_external_ref = {iaas: :aws }
+        hostname_external_ref = { iaas: :aws }
         if node.persistent_hostname?()
           begin
             # allocate elastic IP for this node
@@ -124,4 +124,4 @@ module DTK; module CommandAndControlAdapter
       end
     end
   end
-end;end
+end; end

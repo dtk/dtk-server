@@ -1,7 +1,7 @@
 module DTK
   class Assembly::Instance
     class ServiceLink
-      r8_nested_require('service_link','factory')
+      r8_nested_require('service_link', 'factory')
 
       def initialize(assembly_instance)
         @assembly_instance = assembly_instance
@@ -17,8 +17,8 @@ module DTK
         aug_attr_links = get_augmented_attribute_links(port_link_idhs)
         attr_mh = port_link_idhs.first.createMH(:attribute)
         Model.Transaction do
-          Attribute.update_and_propagate_attributes_for_delete_links(attr_mh,aug_attr_links)
-          port_link_idhs.map{|port_link_idh|Model.delete_instance(port_link_idh)}
+          Attribute.update_and_propagate_attributes_for_delete_links(attr_mh, aug_attr_links)
+          port_link_idhs.map { |port_link_idh| Model.delete_instance(port_link_idh) }
         end
       end
 
@@ -71,11 +71,11 @@ module DTK
         ret = []
         return ret if port_link_idhs.empty?
         sp_hash = {
-          cols: [:id,:group_id,:port_link_id,:input_id,:output_id,:dangling_link_info],
-          filter: [:oneof,:port_link_id,port_link_idhs.map(&:get_id)]
+          cols: [:id, :group_id, :port_link_id, :input_id, :output_id, :dangling_link_info],
+          filter: [:oneof, :port_link_id, port_link_idhs.map(&:get_id)]
         }
         attribute_link_mh = port_link_idhs.first.createMH(:attribute_link)
-        Model.get_objs(attribute_link_mh,sp_hash)
+        Model.get_objs(attribute_link_mh, sp_hash)
       end
 
       def self.print_form_hash__port(port, node, opts = {})

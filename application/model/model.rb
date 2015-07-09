@@ -26,46 +26,46 @@ module XYZ
     class << self
       #### Actions
       # idempotent
-      def delete(id_handle,opts={})
-        delete_instance(id_handle,opts) if exists? id_handle
+      def delete(id_handle, opts = {})
+        delete_instance(id_handle, opts) if exists? id_handle
       end
       # idempotent
-      def create_simple(new_uri,c,opts={})
-        create_simple_instance?(IDHandle[uri: new_uri,c: c],opts)
+      def create_simple(new_uri, c, opts = {})
+        create_simple_instance?(IDHandle[uri: new_uri, c: c], opts)
       end
 
       # TODO: rewrite using join querey
 
-      def get_contained_attribute_ids(id_handle,opts={})
+      def get_contained_attribute_ids(id_handle, opts = {})
         parent_id = IDInfoTable.get_id_from_id_handle(id_handle)
-        cmps = get_objects(ModelHandle.new(:c,:component),nil,parent_id: parent_id)
-        nodes = get_objects(ModelHandle.new(:c,:node),nil,parent_id: parent_id)
-        (cmps||[]).map{|cmp|cmp.get_contained_attribute_ids(opts)}.flatten() +
-        (nodes||[]).map{|node|node.get_contained_attribute_ids(opts)}.flatten()
+        cmps = get_objects(ModelHandle.new(:c, :component), nil, parent_id: parent_id)
+        nodes = get_objects(ModelHandle.new(:c, :node), nil, parent_id: parent_id)
+        (cmps || []).map { |cmp| cmp.get_contained_attribute_ids(opts) }.flatten() +
+        (nodes || []).map { |node| node.get_contained_attribute_ids(opts) }.flatten()
       end
 
       # TODO: this seems like generic function but specifically works with nodes?
       # type can be :asserted, :derived or :value
-      def get_contained_attributes(type,id_handle,opts={})
+      def get_contained_attributes(type, id_handle, opts = {})
         ret = {}
 
         parent_id = IDInfoTable.get_id_from_id_handle(id_handle)
-        cmps = get_objects(ModelHandle.new(:c,:component),nil,parent_id: parent_id)
-        nodes = get_objects(ModelHandle.new(:c,:node),nil,parent_id: parent_id)
+        cmps = get_objects(ModelHandle.new(:c, :component), nil, parent_id: parent_id)
+        nodes = get_objects(ModelHandle.new(:c, :node), nil, parent_id: parent_id)
 
-        cmps.each{|cmp|
-          values = cmp.get_contained_attribute_values(type,opts)
+        cmps.each {|cmp|
+          values = cmp.get_contained_attribute_values(type, opts)
 
           if values
-            ret[:component]||= {}
+            ret[:component] ||= {}
             ret[:component][cmp.get_qualified_ref.to_sym] = values
           end
         }
 
-        nodes.each{|node|
-          values = node.get_direct_attribute_values(type,opts)
+        nodes.each {|node|
+          values = node.get_direct_attribute_values(type, opts)
           if values
-            ret[:node]||= {}
+            ret[:node] ||= {}
             ret[:node][node.get_qualified_ref.to_sym] = values
           end
         }
@@ -75,7 +75,7 @@ module XYZ
       # TBD: temp
       def get_guid(id_handle)
         id_info = IDInfoTable.get_row_from_id_handle(id_handle)
-        {guid: IDInfoTable.ret_guid_from_id_info(id_info)}
+        { guid: IDInfoTable.ret_guid_from_id_info(id_info) }
       end
     end
   end

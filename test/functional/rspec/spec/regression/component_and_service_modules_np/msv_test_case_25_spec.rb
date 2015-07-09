@@ -19,13 +19,13 @@ local_component_module_name2 = 'r8:stdlib'
 local_component_module_name3 = 'r8:apache'
 service_module_filesystem_location = '~/dtk/service_modules/r8'
 component_module_filesystem_location = '~/dtk/component_modules/r8'
-components_list_to_check = ['apache','stdlib']
+components_list_to_check = ['apache', 'stdlib']
 
 dtk_common = DtkCommon.new('', '')
 
 describe '(Modules, Services and Versioning) Test Case 25: Import new service module but some component modules already exists for that service module on server and locally' do
   before(:all) do
-    puts '******************************************************************************************************************************************************************',''
+    puts '******************************************************************************************************************************************************************', ''
   end
 
   context 'Check that component module exists' do

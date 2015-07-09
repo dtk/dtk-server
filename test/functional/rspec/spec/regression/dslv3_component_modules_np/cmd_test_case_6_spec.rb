@@ -26,7 +26,7 @@ dtk_common = DtkCommon.new(service_name, assembly_name)
 
 describe '(Component Module DSL) Test Case 6: Add new component attribute in dtk.model.yaml file, push-clone-changes to server and check if component attribute present' do
   before(:all) do
-    puts '*************************************************************************************************************************************************************',''
+    puts '*************************************************************************************************************************************************************', ''
   end
 
   context 'Import component module function' do

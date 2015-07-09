@@ -4,25 +4,25 @@ module R8Tpl
 class FieldR8
   include Utility::I18n
 
-  def initialize(r8_view_ref=nil)
+  def initialize(r8_view_ref = nil)
     @r8_view_ref = r8_view_ref
     # TODO: enhance this once profiles are implemented
   end
 
   # This returns the contents for a provided field array and given view/render mode
-  def get_field(view_type, field_meta, renderMode='rtpl')
+  def get_field(view_type, field_meta, renderMode = 'rtpl')
     # convert any values that are symbols to strings
-    field_meta.each do |key,value|
+    field_meta.each do |key, value|
       if value.is_a?(Symbol) then field_meta[key] = value.to_s end
     end
 
-    case(field_meta[:type])
-      when 'select','radio'
+    case (field_meta[:type])
+      when 'select', 'radio'
         field_meta[:options] = self.get_field_options(field_meta)
       when 'multiselect'
         # if view of type edit add the []'s to allow for array to be returned in request for mult selects
         field_meta[:options] = self.get_field_options(field_meta)
-        if(view_type == 'edit' || view_type == 'search') then field_meta[:name] << '[]' end
+        if (view_type == 'edit' || view_type == 'search') then field_meta[:name] << '[]' end
         # TODO: enhance this once profiles are implemented
         load_field_file 'field.select.rb'
     end
@@ -41,8 +41,8 @@ class FieldR8
   def add_validation(_formId, field_meta)
     (field_meta[:required] == true) ? required = 'true' : required = 'false'
 
-    case(field_meta[:type])
-      when 'radio','select'
+    case (field_meta[:type])
+      when 'radio', 'select'
       # classRefId used b/c styling cant be applied to radio itself so applied to reference div wrapper
       #        content = 'R8.forms.addValidator("' + formId + '",{"id":"' + field_meta[:id] + '","classRefId":"' + field_meta[:id] + '-radio-wrapper","type":"' + field_meta[:type] + '","required":' + required + '});'
       else

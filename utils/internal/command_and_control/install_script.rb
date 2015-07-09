@@ -20,7 +20,7 @@ module DTK
           git_server_dns: git_server_dns,
           fingerprint: fingerprint
         }
-        install_script = CommandAndControl.node_config_adapter_install_script(@node,template_bindings)
+        install_script = CommandAndControl.node_config_adapter_install_script(@node, template_bindings)
         embed_in_os_specific_wrapper(install_script)
       end
 

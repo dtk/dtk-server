@@ -58,7 +58,7 @@ module MCollective
         #
         #     plugin.stomp.priority = 4
         #
-        class Stomp<Base
+        class Stomp < Base
           attr_reader :connection
 
           # modifications so connect at initialization and there is not multiple connections per thread
@@ -122,7 +122,7 @@ module MCollective
 
                         raise 'No hosts found for the STOMP connection pool' if hosts.size == 0
 
-                        connection = {hosts: hosts}
+                        connection = { hosts: hosts }
 
                         # Various STOMP gem options, defaults here matches defaults for 1.1.6 the meaning of
                         # these can be guessed, the documentation isn't clear
@@ -191,7 +191,7 @@ module MCollective
 
             def msgheaders
                 headers = {}
-                headers = {'priority' => @msgpriority} if  (@msgpriority && @msgpriority > 0)
+                headers = { 'priority' => @msgpriority } if  (@msgpriority && @msgpriority > 0)
 
                 return headers
             end
@@ -200,7 +200,7 @@ module MCollective
             # for a specific option, accepts an optional default.
             #
             # raises an exception when it cant find a value anywhere
-            def get_env_or_option(env, opt, default=nil)
+            def get_env_or_option(env, opt, default = nil)
                 return ENV[env] if ENV.include?(env)
                 return @config.pluginconf[opt] if @config.pluginconf.include?(opt)
                 return default if default
@@ -211,7 +211,7 @@ module MCollective
             # looks for a config option, accepts an optional default
             #
             # raises an exception when it cant find a value anywhere
-            def get_option(opt, default=nil)
+            def get_option(opt, default = nil)
                 return @config.pluginconf[opt] if @config.pluginconf.include?(opt)
                 return default if default
 

@@ -3,9 +3,9 @@ module TargetMixin
     puts 'Create target:', '--------------'
     target_created = false
     list_providers = send_request('/rest/target/list', subtype: :template)
-    if (list_providers['data'].find { |x| x['display_name'].include? provider_name})
+    if (list_providers['data'].find { |x| x['display_name'].include? provider_name })
       puts "Provider #{provider_name} exists! Create target for provider..."
-      provider_id = list_providers['data'].find { |x| x['display_name'].include? provider_name}['id']
+      provider_id = list_providers['data'].find { |x| x['display_name'].include? provider_name }['id']
       create_target_response = send_request('/rest/target/create', target_name: provider_name, target_template_id: provider_id, region: region)
       target_created = create_target_response['data']['success']
       puts "Target #{provider_name}-#{region} created successfully!"
@@ -21,12 +21,12 @@ module TargetMixin
     target_exists = false
     list_providers = send_request('/rest/target/list', subtype: :template)
 
-    if (list_providers['data'].find { |x| x['display_name'].include? provider_name})
+    if (list_providers['data'].find { |x| x['display_name'].include? provider_name })
       puts "Provider #{provider_name} exists! Get provider's targets..."
-      provider_id = list_providers['data'].find { |x| x['display_name'].include? provider_name}['id']
+      provider_id = list_providers['data'].find { |x| x['display_name'].include? provider_name }['id']
       list_targets = send_request('/rest/target/list', subtype: :instance, parent_id: provider_id)
 
-      if (list_targets['data'].find { |x| x['display_name'].include? target_name})
+      if (list_targets['data'].find { |x| x['display_name'].include? target_name })
         puts "Target #{target_name} exists in #{provider_name} provider!"
         target_exists = true
       else
@@ -43,7 +43,7 @@ module TargetMixin
     puts 'Delete target from provider:', '----------------------------'
     target_deleted = false
 
-    delete_target = send_request('/rest/target/delete_and_destroy', target_id: target_name,type: 'instance')
+    delete_target = send_request('/rest/target/delete_and_destroy', target_id: target_name, type: 'instance')
     if delete_target['status'] == 'ok'
       puts "Target #{target_name} has been deleted successfully!"
       target_deleted = true
@@ -59,7 +59,7 @@ module TargetMixin
     assembly_exists = false
     assembly_list = send_request('/rest/target/info_about', target_id: target_name, about: 'assemblies')
 
-    if (assembly_list['data'].find { |x| x['display_name'].include? assembly_name})
+    if (assembly_list['data'].find { |x| x['display_name'].include? assembly_name })
       puts "Assembly #{assembly_name} exists in target #{target_name}!"
       assembly_exists = true
     else
@@ -74,7 +74,7 @@ module TargetMixin
     node_exists = false
     node_list = send_request('/rest/target/info_about', target_id: target_name, about: 'nodes')
 
-    if (node_list['data'].find { |x| x['display_name'].include? node_name})
+    if (node_list['data'].find { |x| x['display_name'].include? node_name })
       puts "Node #{node_name} exists in target #{target_name}!"
       node_exists = true
     else

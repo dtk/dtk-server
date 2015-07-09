@@ -12,11 +12,11 @@ module DTK; module CommandAndControlAdapter
       def self.target_ref_nodes(task_action)
         nodes = task_action.nodes()
         nodes.each do |node|
-          node.update_object!(:os_type,:external_ref,:hostname_external_ref,:display_name,:assembly_id)
+          node.update_object!(:os_type, :external_ref, :hostname_external_ref, :display_name, :assembly_id)
         end
         target = task_action.target()
         base_node = task_action.base_node()
-        nodes.map{|node|TargetRef.new(base_node,node,target)}
+        nodes.map { |node| TargetRef.new(base_node, node, target) }
       end
 
       def self.aggregate_responses(single_run_responses)
@@ -24,7 +24,7 @@ module DTK; module CommandAndControlAdapter
           single_run_responses.first
         else
           #TODO: just finds first error now
-          if first_error = single_run_responses.find{|r|r[:status] == 'failed'}
+          if first_error = single_run_responses.find { |r| r[:status] == 'failed' }
             first_error
           else
             #assuming all ok responses are the same
@@ -39,12 +39,12 @@ module DTK; module CommandAndControlAdapter
         include AddressManagementClassMixin
         include ImageClassMixin
 
-        attr_reader :base_node,:node,:target,:flavor_id,:external_ref
-        def initialize(base_node,node,target)
+        attr_reader :base_node, :node, :target, :flavor_id, :external_ref
+        def initialize(base_node, node, target)
           @base_node = base_node
           @node = node
           @target = target
-          @external_ref = node[:external_ref]||{}
+          @external_ref = node[:external_ref] || {}
           @flavor_id = @external_ref[:size] || R8::Config[:command_and_control][:iaas][:ec2][:default_image_size]
         end
 
@@ -67,7 +67,7 @@ module DTK; module CommandAndControlAdapter
 
             instance_id = response[:id]
             state = response[:state]
-            updated_external_ref = external_ref.merge(              instance_id: instance_id,
+            updated_external_ref = external_ref.merge(instance_id: instance_id,
               type: 'ec2_instance',
               size: flavor_id)
 
@@ -80,12 +80,12 @@ module DTK; module CommandAndControlAdapter
               operational_status: 'starting',
               admin_op_status: 'pending'
             }
-            Ec2.update_node!(node,node_update_hash)
+            Ec2.update_node!(node, node_update_hash)
           end
 
           process_addresses__first_boot?(node)
 
-          {status: 'succeeded',
+          { status: 'succeeded',
             node: {
               external_ref: external_ref
             }
@@ -102,7 +102,7 @@ module DTK; module CommandAndControlAdapter
 
           conn = Ec2.conn(@node.get_target_iaas_credentials())
 
-          create_options = CreateOptions.new(self,conn,ami)
+          create_options = CreateOptions.new(self, conn, ami)
 
           create_options.update_security_group!()
           create_options.update_tags!()
@@ -120,20 +120,20 @@ module DTK; module CommandAndControlAdapter
             region = target.get_region() if target
             e.message << ". Region: '#{region}'." if region
 
-            Log.error_pp([e,e.backtrace[0..10]])
-            return {status: 'failed', error_object: e}
+            Log.error_pp([e, e.backtrace[0..10]])
+            return { status: 'failed', error_object: e }
           end
           response
         end
 
         class CreateOptions < Hash
-          def initialize(target_ref,conn,ami)
+          def initialize(target_ref, conn, ami)
             super()
-            replace(image_id: ami,flavor_id: target_ref.flavor_id)
+            replace(image_id: ami, flavor_id: target_ref.flavor_id)
             @conn         = conn
             @target       = target_ref.target
             @node         = target_ref.node
-            @external_ref = target_ref.external_ref||{}
+            @external_ref = target_ref.external_ref || {}
           end
 
           def update_security_group!
@@ -146,7 +146,7 @@ module DTK; module CommandAndControlAdapter
           end
 
           def update_tags!
-            merge!(tags: {'Name' => ec2_name_tag()})
+            merge!(tags: { 'Name' => ec2_name_tag() })
           end
 
           def update_key_name
@@ -154,9 +154,9 @@ module DTK; module CommandAndControlAdapter
           end
 
           def update_availability_zone!
-            target_availability_zone = (@target[:iaas_properties]||{})[:availability_zone]
+            target_availability_zone = (@target[:iaas_properties] || {})[:availability_zone]
             avail_zone = @external_ref[:availability_zone] ||
-              (@target[:iaas_properties]||{})[:availability_zone] ||
+              (@target[:iaas_properties] || {})[:availability_zone] ||
               R8::Config[:ec2][:availability_zone]
             unless avail_zone.nil? || avail_zone == 'automatic'
               merge!(availability_zone: avail_zone)
@@ -175,7 +175,7 @@ module DTK; module CommandAndControlAdapter
             end
 
             unless iaas_properties = @target[:iaas_properties]
-              Log.error_pp(['Unexpected that @target does not have :iaas_properties',@target])
+              Log.error_pp(['Unexpected that @target does not have :iaas_properties', @target])
               return
             end
 
@@ -184,7 +184,7 @@ module DTK; module CommandAndControlAdapter
             end
 
             unless subnet = iaas_properties[:subnet]
-              Log.error_pp(['Unexpected that @target does not have :iaas_properties',@target])
+              Log.error_pp(['Unexpected that @target does not have :iaas_properties', @target])
               return
             end
 
@@ -194,7 +194,7 @@ module DTK; module CommandAndControlAdapter
           end
 
           def update_block_device_mapping!(image)
-            root_device_override_attrs = {'Ebs.DeleteOnTermination' => 'true'}
+            root_device_override_attrs = { 'Ebs.DeleteOnTermination' => 'true' }
             if root_device_size = @node.attribute.root_device_size()
               root_device_override_attrs.merge!('Ebs.VolumeSize' => root_device_size)
             end
@@ -223,8 +223,8 @@ module DTK; module CommandAndControlAdapter
             }
             ret = Ec2NameTag[:tag].dup
             Ec2NameTag[:vars].each do |var|
-              val = subs[var]||var.to_s.upcase
-              ret.gsub!(Regexp.new("\\$\\{#{var}\\}"),val)
+              val = subs[var] || var.to_s.upcase
+              ret.gsub!(Regexp.new("\\$\\{#{var}\\}"), val)
             end
             ret
           end
@@ -242,7 +242,7 @@ module DTK; module CommandAndControlAdapter
               if node_ref =~ /^base_node_link--([^:]+):/
                 $1
               else
-                Log.error_pp(['Unexepected that cannot determine assembly name for node',@node])
+                Log.error_pp(['Unexepected that cannot determine assembly name for node', @node])
               end
             end
           end
@@ -255,7 +255,7 @@ module DTK; module CommandAndControlAdapter
             response = Ec2.conn(target_aws_creds).get_instance_status(instance_id)
             ret = response[:status] && response[:status].to_sym
            rescue => e
-             Log.error_pp([e,e.backtrace[0..10]])
+             Log.error_pp([e, e.backtrace[0..10]])
           end
           ret
         end

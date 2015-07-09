@@ -64,7 +64,7 @@ module XYZ
       ret = []
       basic_type = component.update_object!(:basic_type)[:basic_type]
       return ret unless basic_type
-      TypeHierarchyPossLinkDefs[basic_type.to_sym]||[]
+      TypeHierarchyPossLinkDefs[basic_type.to_sym] || []
     end
 
     def self.basic_type(specific_type)
@@ -92,22 +92,22 @@ module XYZ
     end
 
     def self.ret_basic_type
-      @basic_type ||= TypeHierarchy.inject({}){|h,kv|h.merge(ret_basic_type_aux(kv[0],kv[1]))}
+      @basic_type ||= TypeHierarchy.inject({}) { |h, kv| h.merge(ret_basic_type_aux(kv[0], kv[1])) }
     end
 
-    def self.ret_basic_type_aux(basic_type,hier)
-      keys_in_hierarchy(hier).inject({}){|h,x| h.merge(x => basic_type)}
+    def self.ret_basic_type_aux(basic_type, hier)
+      keys_in_hierarchy(hier).inject({}) { |h, x| h.merge(x => basic_type) }
     end
 
     def self.keys_in_hierarchy(hier)
-      hier.inject([]){|a,kv|a + [kv[0]] + keys_in_hierarchy(kv[1])}
+      hier.inject([]) { |a, kv| a + [kv[0]] + keys_in_hierarchy(kv[1]) }
     end
 
-    def self.find_hierarchy_under_key(key,hier=TypeHierarchy)
+    def self.find_hierarchy_under_key(key, hier = TypeHierarchy)
       return nil if hier.empty?
       return hier[key] if hier[key]
       hier.values.each do |child|
-        ret = find_hierarchy_under_key(key,child)
+        ret = find_hierarchy_under_key(key, child)
         return ret if ret
       end
       nil
@@ -145,14 +145,14 @@ module XYZ
     # dynamically create all other classes not explicitly defined
     def self.all_keys(x)
       return [] unless x.is_a?(Hash)
-      x.keys + x.values.map{|el|all_keys(el)}.flatten
+      x.keys + x.values.map { |el| all_keys(el) }.flatten
     end
     existing_subclass_names = ComponentTypeHierarchy.subclass_names()
     include TypeHierarchyDefMixin
     all_keys(TypeHierarchy).each do |key|
       klass_name = Aux::camelize(key)
       unless existing_subclass_names.include?(klass_name)
-        ComponentTypeHierarchy.add_to_subclass(const_set(klass_name,Class.new(ComponentTypeHierarchy)) )
+        ComponentTypeHierarchy.add_to_subclass(const_set(klass_name, Class.new(ComponentTypeHierarchy)))
       end
     end
   end

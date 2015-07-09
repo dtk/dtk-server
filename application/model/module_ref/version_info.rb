@@ -40,7 +40,7 @@ module DTK; class ModuleRef
         end
       end
 
-      def self.reify?(constraint=nil)
+      def self.reify?(constraint = nil)
         if constraint.nil? then new()
         elsif constraint.is_a?(Constraint) then constraint
         elsif constraint.is_a?(String) then new(constraint)
@@ -79,7 +79,7 @@ module DTK; class ModuleRef
 
       private
 
-      def initialize(scalar=nil)
+      def initialize(scalar = nil)
         @type = (scalar ? :scalar : :empty)
         @value = scalar
       end

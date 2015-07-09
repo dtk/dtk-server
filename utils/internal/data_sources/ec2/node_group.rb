@@ -4,7 +4,7 @@ module XYZ
       class NodeGroup < Top
         definitions do
           target[:display_name] = source[:display_name]
-          target[:description] = fn(:description,source[:security_groups])
+          target[:description] = fn(:description, source[:security_groups])
         end
         class << self
           def relative_distinguished_name(source)

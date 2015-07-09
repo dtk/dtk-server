@@ -16,18 +16,18 @@ module DTK; class Attribute
         "#{local_or_remote()}_node.#{attribute_name()}"
       end
 
-      def set_parent_and_attributes!(parent_idh,opts={})
+      def set_parent_and_attributes!(parent_idh, opts = {})
         ret = self
         @attribute_stacks = []
-        ndx_nodes = ret_matching_nodes(parent_idh).inject({}){|h,r|h.merge(r[:id] => r)}
+        ndx_nodes = ret_matching_nodes(parent_idh).inject({}) { |h, r| h.merge(r[:id] => r) }
         return ret if ndx_nodes.empty?
 
         pattern =~ /^node[^\/]*\/(attribute.+$)/
         attr_fragment = attr_name_special_processing($1)
-        attrs = ret_matching_attributes(:node,ndx_nodes.values.map(&:id_handle),attr_fragment)
+        attrs = ret_matching_attributes(:node, ndx_nodes.values.map(&:id_handle), attr_fragment)
         if attrs.empty? && create_this_type?(opts)
           @created = true
-          set_attribute_properties!(opts[:attribute_properties]||{})
+          set_attribute_properties!(opts[:attribute_properties] || {})
           attrs = create_attributes(ndx_nodes.values)
         end
 
@@ -41,8 +41,8 @@ module DTK; class Attribute
       end
 
       def set_component_instance!(component_type)
-        cmp_fragment = Term.canonical_form(:component,component_type)
-        matching_cmps = ret_matching_components([node()],cmp_fragment)
+        cmp_fragment = Term.canonical_form(:component, component_type)
+        matching_cmps = ret_matching_components([node()], cmp_fragment)
         if matching_cmps.empty?
           raise ErrorUsage.new("Illegal component reference (#{component_type})")
         elsif matching_cmps.size > 1
@@ -78,8 +78,8 @@ module DTK; class Attribute
 
       def attr_name_special_processing(attr_fragment)
         # TODO: make this obtained from shared logic
-        if attr_fragment == Pattern::Term.canonical_form(:attribute,'host_address')
-          Pattern::Term.canonical_form(:attribute,'host_addresses_ipv4')
+        if attr_fragment == Pattern::Term.canonical_form(:attribute, 'host_address')
+          Pattern::Term.canonical_form(:attribute, 'host_addresses_ipv4')
         else
           attr_fragment
         end

@@ -1,10 +1,10 @@
 # TODO: This needed to be simplified and cleaned up
 module DTK
   class HashObject < ::Hash
-    r8_nested_require('hash_object','model')
-    r8_nested_require('hash_object','auto_viv')
+    r8_nested_require('hash_object', 'model')
+    r8_nested_require('hash_object', 'auto_viv')
 
-    def initialize(initial_val=nil,convert_initial=false,&block)
+    def initialize(initial_val = nil, convert_initial = false, &block)
       block ? super(&block) : super()
       if initial_val
         replace(convert_initial ? convert_nested_hashes(initial_val) : initial_val)
@@ -12,7 +12,7 @@ module DTK
     end
 
     def slice(*slice_keys)
-      slice_keys.inject(HashObject.new()) do |h,k|
+      slice_keys.inject(HashObject.new()) do |h, k|
         if k.is_a?(Hash)
           source_key = k.keys.first
           target_key = k.values.first
@@ -23,7 +23,7 @@ module DTK
       end
     end
 
-    def set?(k,v)
+    def set?(k, v)
       self[k] = v unless key?(k)
     end
 
@@ -43,11 +43,11 @@ module DTK
         obj #no encoding needed
       elsif obj.is_a?(Hash)
         ret = self.class.new()
-        obj.each{|k,v| ret[k] = convert_nested_hashes(v)}
+        obj.each { |k, v| ret[k] = convert_nested_hashes(v) }
         ret
       elsif obj.is_a?(Array)
         ret = ArrayClass().new
-        obj.each{|v|ret << convert_nested_hashes(v)}
+        obj.each { |v| ret << convert_nested_hashes(v) }
         ret
       else
         obj
@@ -60,7 +60,7 @@ module DTK
   end
 
   class SimpleHashObject < ::Hash
-    def initialize(initial_val=nil,&block)
+    def initialize(initial_val = nil, &block)
       block ? super(&block) : super()
       replace(initial_val) if initial_val
     end
@@ -74,14 +74,14 @@ module DTK
     end
 
   class SimpleOrderedHash < simple_ordered_hash_parent
-    def initialize(elements=[])
+    def initialize(elements = [])
       super()
       elements = [elements] unless elements.is_a?(Array)
-      elements.each{|el|self[el.keys.first] = el.values.first}
+      elements.each { |el| self[el.keys.first] = el.values.first }
     end
 
     # set unless value is nill
-    def set_unless_nil(k,v)
+    def set_unless_nil(k, v)
       self[k] = v unless v.nil?
     end
 
@@ -89,7 +89,7 @@ module DTK
       kv_array.each do |kv|
         k = kv.keys.first
         v = kv.values.first
-        set_unless_nil(k,v)
+        set_unless_nil(k, v)
       end
       self
     end
@@ -98,7 +98,7 @@ module DTK
   class PrettyPrintHash < SimpleOrderedHash
     # field with '?' suffix means optioanlly add depending on whether name present and non-null in source
     # if block is given then apply to source[name] rather than returning just source[name]
-    def add(model_object,*keys,&block)
+    def add(model_object, *keys, &block)
       keys.each do |key|
         # if marked as optional skip if not present
         if key.to_s =~ /(^.+)\?$/
@@ -113,7 +113,7 @@ module DTK
     end
 
     def slice(*keys)
-      keys.inject(self.class.new){|h,k|h.merge(k => self[k])}
+      keys.inject(self.class.new) { |h, k| h.merge(k => self[k]) }
     end
   end
 
@@ -121,7 +121,7 @@ module DTK
   class TSortHash < ::Hash
     # defining tsort on this
     include TSort
-    def initialize(initial_val=nil)
+    def initialize(initial_val = nil)
       super()
       replace(initial_val) if initial_val
     end
@@ -143,7 +143,7 @@ module DTK
     end
 
     # TODO: may want to make :apply_recursively = true be the default
-    def mark_as_complete(constraints={},opts={})
+    def mark_as_complete(constraints = {}, opts = {})
       if constraints.empty?
         @completeness_info ||= HashIsComplete.new()
       else
@@ -175,7 +175,7 @@ module DTK
   class HashMayNotBeComplete < HashCompletnessInfo
   end
   class HashIsComplete < HashCompletnessInfo
-    def initialize(constraints={})
+    def initialize(constraints = {})
       @constraints = constraints
     end
 
@@ -204,7 +204,7 @@ unless RUBY_VERSION =~ /^1\.9/ then ::Hash
     class OrderedHash < ::Hash
       def pretty_print(q)
         #      q.group(0, "#<OrderedHash", "}>") {
-        q.group(0,'','}') do
+        q.group(0, '', '}') do
           #        q.breakable " "
           q.text '{'
           q.group(1) do

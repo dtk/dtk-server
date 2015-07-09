@@ -6,7 +6,7 @@ module Ramaze::Helper
 
       # Get the headers out there asap, let the client know we're alive...
       EM.next_tick do
-        request.env['async.callback'].call [200, {'Content-Type' => 'text/plain'}, body]
+        request.env['async.callback'].call [200, { 'Content-Type' => 'text/plain' }, body]
       end
 
       user_object  = CurrentSession.new.user_object()
@@ -23,18 +23,18 @@ module Ramaze::Helper
       namespace = module_obj.get_field?(:namespace)
 
       version = ret_version()
-      remote_namespace = ret_request_params(:remote_namespace) || get_existing_default_namespace?(module_obj,version) || ret_request_params(:local_namespace)
-      remote_params = remote_params_dtkn(module_obj.module_type(),remote_namespace,remote_module_name,version)
+      remote_namespace = ret_request_params(:remote_namespace) || get_existing_default_namespace?(module_obj, version) || ret_request_params(:local_namespace)
+      remote_params = remote_params_dtkn(module_obj.module_type(), remote_namespace, remote_module_name, version)
 
       access_rights = ret_access_rights()
-      rsa_pub_key,action = ret_non_null_request_params(:rsa_pub_key,:action)
+      rsa_pub_key, action = ret_non_null_request_params(:rsa_pub_key, :action)
       project = get_default_project()
       module_ref_content = ret_request_params(:module_ref_content)
 
-      module_obj.get_linked_remote_module_info(project,action,remote_params,rsa_pub_key,access_rights,module_ref_content)
+      module_obj.get_linked_remote_module_info(project, action, remote_params, rsa_pub_key, access_rights, module_ref_content)
     end
 
-    def get_service_dependencies(module_type, remote_params, client_rsa_pub_key=nil)
+    def get_service_dependencies(module_type, remote_params, client_rsa_pub_key = nil)
       project = get_default_project()
       missing_modules, required_modules, dependency_warnings = module_class(module_type).get_required_and_missing_modules(project, remote_params, client_rsa_pub_key)
       { missing_modules: missing_modules, required_modules: required_modules, dependency_warnings: dependency_warnings }
@@ -72,7 +72,7 @@ module Ramaze::Helper
 
     def collaboration_from_remote_helper
       component_module = create_obj(:module_id)
-      users, groups,remote_namespace = ret_request_params(:users, :groups, :remote_module_namespace)
+      users, groups, remote_namespace = ret_request_params(:users, :groups, :remote_module_namespace)
       action, client_rsa_pub_key = ret_non_null_request_params(:action, :rsa_pub_key)
 
       remote_namespace = check_remote_namespace(remote_namespace, component_module)
@@ -101,8 +101,8 @@ module Ramaze::Helper
     end
 
     def install_from_dtkn_helper(module_type)
-      remote_namespace,remote_module_name,version = Repo::Remote::split_qualified_name(ret_non_null_request_params(:remote_module_name))
-      remote_params = remote_params_dtkn(module_type,remote_namespace,remote_module_name,version)
+      remote_namespace, remote_module_name, version = Repo::Remote::split_qualified_name(ret_non_null_request_params(:remote_module_name))
+      remote_params = remote_params_dtkn(module_type, remote_namespace, remote_module_name, version)
 
       local_namespace = remote_params.namespace
       local_module_name = ret_request_params(:local_module_name) || remote_params.module_name
@@ -113,7 +113,7 @@ module Ramaze::Helper
       skip_auto_install = (ret_request_params(:skip_auto_install) ? ret_request_params(:skip_auto_install) : false)
       ignore_component_error = (ret_request_params(:ignore_component_error) ? ret_request_params(:ignore_component_error) : false)
       additional_message = (ret_request_params(:additional_message) ? ret_request_params(:additional_message) : false)
-      local_params = local_params(module_type,local_module_name,namespace: local_namespace,version: version)
+      local_params = local_params(module_type, local_module_name, namespace: local_namespace, version: version)
 
       dependency_warnings = []
 
@@ -124,22 +124,22 @@ module Ramaze::Helper
         return { missing_module_components: missing_modules, dependency_warnings: dependency_warnings, required_modules: required_modules } if !missing_modules.empty? || (!required_modules.empty? && !skip_auto_install)
       end
 
-      opts = {do_not_raise: do_not_raise, additional_message: additional_message, ignore_component_error: ignore_component_error}
-      response = module_class(module_type).install(project,local_params,remote_params,dtk_client_pub_key,opts)
+      opts = { do_not_raise: do_not_raise, additional_message: additional_message, ignore_component_error: ignore_component_error }
+      response = module_class(module_type).install(project, local_params, remote_params, dtk_client_pub_key, opts)
       return response if response[:does_not_exist]
 
-      response.merge( namespace: remote_namespace, dependency_warnings: dependency_warnings )
+      response.merge(namespace: remote_namespace, dependency_warnings: dependency_warnings)
     end
 
     def publish_to_dtkn_helper(module_obj)
       client_rsa_pub_key = ret_non_null_request_params(:rsa_pub_key)
       qualified_remote_name = ret_request_params(:remote_component_name)
 
-      module_obj.update_object!(:display_name,:namespace)
-      opts = {namespace: module_obj[:namespace][:display_name]}
+      module_obj.update_object!(:display_name, :namespace)
+      opts = { namespace: module_obj[:namespace][:display_name] }
       qualified_remote_name = module_obj[:display_name] if qualified_remote_name.to_s.empty?
 
-      namespace, remote_module_name,version = Repo::Remote.split_qualified_name(qualified_remote_name,opts)
+      namespace, remote_module_name, version = Repo::Remote.split_qualified_name(qualified_remote_name, opts)
       local_module_name = module_obj.module_name()
 
       # [Amar & Haris] this is temp restriction until rest of logic is properly fixed
@@ -148,14 +148,14 @@ module Ramaze::Helper
       end
 
       module_type = module_obj.module_type
-      remote_params = remote_params_dtkn(module_type,namespace,remote_module_name,version)
+      remote_params = remote_params_dtkn(module_type, namespace, remote_module_name, version)
       namespace = module_obj.module_namespace()
-      local_params = local_params(module_type,local_module_name,namespace: namespace,version: version)
-      module_obj.publish(local_params,remote_params,client_rsa_pub_key)
+      local_params = local_params(module_type, local_module_name, namespace: namespace, version: version)
+      module_obj.publish(local_params, remote_params, client_rsa_pub_key)
     end
 
     # opts can have :version and :namespace
-    def local_params(module_type,module_name,opts={})
+    def local_params(module_type, module_name, opts = {})
       version = opts[:version]
       namespace = opts[:namespace] || default_local_namespace_name()
       ModuleBranch::Location::LocalParams::Server.new(
@@ -166,12 +166,12 @@ module Ramaze::Helper
       )
     end
 
-    def remote_params_dtkn(module_type,namespace,module_name,version=nil)
+    def remote_params_dtkn(module_type, namespace, module_name, version = nil)
       ModuleBranch::Location::RemoteParams::DTKNCatalog.new(
         module_type: module_type,
         module_name: module_name,
         version: version,
-        namespace: namespace||Namespace.default_namespace_name(),
+        namespace: namespace || Namespace.default_namespace_name(),
         remote_repo_base: ret_remote_repo_base()
       )
     end
@@ -184,8 +184,8 @@ module Ramaze::Helper
 
     # this looks at connected remote repos to make an assessment; default_namespace() above is static
     # if this is used; it is inserted by controller method
-    def get_existing_default_namespace?(module_obj,version=nil)
-      linked_remote_repos = module_obj.get_linked_remote_repos(filter: {version: version})
+    def get_existing_default_namespace?(module_obj, version = nil)
+      linked_remote_repos = module_obj.get_linked_remote_repos(filter: { version: version })
       default_remote_repo = RepoRemote.ret_default_remote_repo(linked_remote_repos)
       if default_remote_repo
         Log.info("Found default namespace (#{default_remote_repo[:display_name]})")
@@ -210,12 +210,12 @@ module Ramaze::Helper
     # returns [namespace,module_name] using pf_full_name param and module or namespace request params if they are given
     def ret_namespace_and_module_name_for_puppet_forge(pf_full_name)
       param_module_name = ret_request_params(:module_name)
-      pf_namespace,pf_module_name = ::DTK::PuppetForge.puppet_forge_namespace_and_module_name(pf_full_name)
+      pf_namespace, pf_module_name = ::DTK::PuppetForge.puppet_forge_namespace_and_module_name(pf_full_name)
       if param_module_name && param_module_name != pf_module_name
         raise ErrorUsage.new("Install with module name (#{param_module_name}) not equal to puppet forge module name (#{pf_module_name}) is currently not supported.")
       end
       # default is to use namespace associated with puppet forge
-      [ret_request_param_module_namespace?()||pf_namespace, pf_module_name]
+      [ret_request_param_module_namespace?() || pf_namespace, pf_module_name]
     end
 
     def ret_assembly_template_idh
@@ -223,30 +223,30 @@ module Ramaze::Helper
       unless subtype == :template
         raise ::DTK::Error.new("Unexpected that subtype has value (#{subtype})")
       end
-      id_handle(assembly_template_id,:assembly_template)
+      id_handle(assembly_template_id, :assembly_template)
     end
 
-    def ret_request_param_module_namespace?(param=:module_namespace)
+    def ret_request_param_module_namespace?(param = :module_namespace)
       ret = ret_request_params(param)
       # TODO: remove need for this by on client side not passing empty strings when no namespace
       (ret.is_a?(String) && ret.empty?) ? nil : ret
     end
 
     def ret_config_agent_type
-      ret_request_params(:config_agent_type)|| :puppet #TODO: puppet hardwired
+      ret_request_params(:config_agent_type) || :puppet #TODO: puppet hardwired
     end
 
     def ret_diffs_summary
       json_diffs = ret_request_params(:json_diffs)
-      Repo::Diffs::Summary.new(json_diffs &&  (!json_diffs.empty?) && JSON.parse(json_diffs))
+      Repo::Diffs::Summary.new(json_diffs && (!json_diffs.empty?) && JSON.parse(json_diffs))
     end
 
     def ret_remote_repo_base
-      (ret_request_params(:remote_repo_base)||Repo::Remote.default_remote_repo_base()).to_sym
+      (ret_request_params(:remote_repo_base) || Repo::Remote.default_remote_repo_base()).to_sym
     end
     # TODO: deprecate below when all uses removed;
     def ret_remote_repo
-      (ret_request_params(:remote_repo)||Repo::Remote.default_remote_repo()).to_sym
+      (ret_request_params(:remote_repo) || Repo::Remote.default_remote_repo()).to_sym
     end
 
     def ret_access_rights
@@ -259,7 +259,7 @@ module Ramaze::Helper
 
     def ret_library_idh_or_default
       if ret_request_params(:library_id)
-        ret_request_param_id_handle(:library_id,Library)
+        ret_request_param_id_handle(:library_id, Library)
       else
         Library.get_public_library(model_handle(:library)).id_handle()
       end
@@ -271,7 +271,7 @@ module Ramaze::Helper
       repo_module = create_obj(:module_id)
       opts = Opts.create?(remote_namespace?: ret_request_params(:remote_namespace))
       module_name, namespace, version = repo_module.get_basic_info(opts)
-      remote_params = remote_params_dtkn(module_type,namespace,module_name,version)
+      remote_params = remote_params_dtkn(module_type, namespace, module_name, version)
       client_rsa_pub_key   = ret_request_params(:rsa_pub_key)
 
       get_service_dependencies(module_type, remote_params, client_rsa_pub_key)
@@ -315,7 +315,7 @@ module Ramaze::Helper
     end
 
     # override to include namespace in given calculations
-    def create_obj(param, model_class=nil,extra_context=nil)
+    def create_obj(param, model_class = nil, extra_context = nil)
       id_or_name = ret_non_null_request_params(param)
       namespace_delimiter = ::DTK::Namespace.namespace_delimiter()
       if id_or_name.include?(namespace_delimiter)
@@ -327,7 +327,7 @@ module Ramaze::Helper
       create_object_from_id(id_resolved, model_class)
     end
 
-    def get_obj(id, model_class=nil)
+    def get_obj(id, model_class = nil)
       create_object_from_id(id, model_class)
     end
   end

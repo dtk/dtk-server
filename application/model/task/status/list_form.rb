@@ -1,7 +1,7 @@
 module DTK; class Task; class Status
   module ListForm
     # This method will return task details in form of list. It is used when CLI list-task-info is invoked
-    def self.status(task_structure,model_handle)
+    def self.status(task_structure, model_handle)
       ret = {}
 
       ret[:task_id] = task_structure[:id]

@@ -2,7 +2,7 @@ module DTK; module CommandAndControlAdapter
   class Ec2
     module NodeStateClassMixin
       # assumed that node[:external_ref] and  node[:hostname_external_ref] are up to date
-      def get_and_update_node_state!(node,attribute_names)
+      def get_and_update_node_state!(node, attribute_names)
         ret = {}
         unless raw_state_info = raw_state_info!(node)
           return ret
@@ -14,7 +14,7 @@ module DTK; module CommandAndControlAdapter
           attribute_names.each do |attr_name|
             if AttributeMapping.respond_to?(attr_name)
               # TODO: if can legitimately have nil value then need to change logic
-              if val = AttributeMapping.send(attr_name,ret,raw_state_info,node)
+              if val = AttributeMapping.send(attr_name, ret, raw_state_info, node)
                 ret[attr_name] = val
                 change = true
               end
@@ -28,25 +28,25 @@ module DTK; module CommandAndControlAdapter
       end
 
       module AttributeMapping
-        def self.host_addresses_ipv4(_ret,raw_state_info,node)
+        def self.host_addresses_ipv4(_ret, raw_state_info, node)
           if ec2_public_address = raw_state_info[:dns_name] || raw_state_info[:public_ip_address]
             node[:external_ref][:ec2_public_address] = ec2_public_address
-            dns = node[:external_ref][:dns_name] = ret_dns_value(raw_state_info,node)
+            dns = node[:external_ref][:dns_name] = ret_dns_value(raw_state_info, node)
             [dns]
           end
         end
 
-        def self.fqdn(_ret,raw_state_info,node)
+        def self.fqdn(_ret, raw_state_info, node)
           if ec2_private_address = raw_state_info[:private_dns_name]
-            if dns = ret_dns_value(raw_state_info,node)
-              node[:external_ref][:private_dns_name] = {dns => ec2_private_address}
+            if dns = ret_dns_value(raw_state_info, node)
+              node[:external_ref][:private_dns_name] = { dns => ec2_private_address }
             end
           end
         end
 
         private
 
-        def self.ret_dns_value(raw_state_info,node)
+        def self.ret_dns_value(raw_state_info, node)
           node.persistent_dns() || node.elastic_ip() || raw_state_info[:dns_name] || raw_state_info[:public_ip_address]
         end
       end
@@ -78,7 +78,7 @@ module DTK; module CommandAndControlAdapter
 
       def get_instance_id_from_object(node)
         node.update_object!(:external_ref)
-        instance_id = (node[:external_ref]||{})[:instance_id]
+        instance_id = (node[:external_ref] || {})[:instance_id]
         unless instance_id
           Log.error("get_node_state called when #{node_print_form(node)} does not have instance id")
           return nil

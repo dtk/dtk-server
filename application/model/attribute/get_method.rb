@@ -3,9 +3,9 @@ module DTK; class Attribute
   module GetMethod
     module Mixin
       def get_attribute_def
-        update_object!(:id,:display_name,:value_asserted,:required,:external_ref,:dyanmic,:data_type,:semantic_type,:semantic_type_summary,:config_agent_type)
+        update_object!(:id, :display_name, :value_asserted, :required, :external_ref, :dyanmic, :data_type, :semantic_type, :semantic_type_summary, :config_agent_type)
         ret = {}
-        [:id,:required,:dyanmic].each{|k|ret[k] = self[k] if self[k]}
+        [:id, :required, :dyanmic].each { |k| ret[k] = self[k] if self[k] }
         ret[:field_name] = self[:display_name]
 
         # put in optional key that inidcates implementation attribute
@@ -25,21 +25,21 @@ module DTK; class Attribute
         ret
       end
 
-      def get_constraints!(opts={})
+      def get_constraints!(opts = {})
         Log.error('opts not implemented yet') unless opts.empty?
-        dependency_list = get_objects_col_from_sp_hash({columns: [:dependencies]},:dependencies)
-        Constraints.new(:or,dependency_list.map{|dep|Constraint.create(dep)})
+        dependency_list = get_objects_col_from_sp_hash({ columns: [:dependencies] }, :dependencies)
+        Constraints.new(:or, dependency_list.map { |dep| Constraint.create(dep) })
       end
 
-      def get_node(opts={})
+      def get_node(opts = {})
         unless node_node_id = get_field?(:node_node_id)
           raise Error.new('get_node should not be called if attribute not on a node')
         end
         sp_hash = {
-          cols: opts[:cols]||[:id,:group_id,:display_name],
-          filter: [:eq,:id,node_node_id]
+          cols: opts[:cols] || [:id, :group_id, :display_name],
+          filter: [:eq, :id, node_node_id]
         }
-        ret = Node.get_obj(model_handle(:node),sp_hash)
+        ret = Node.get_obj(model_handle(:node), sp_hash)
         if subclass_model_name = opts[:subclass_model_name]
         ret = ret.create_subclass_obj(subclass_model_name)
         end
@@ -47,10 +47,10 @@ module DTK; class Attribute
       end
 
       def self.get_port_info(id_handles)
-        get_objects_in_set_from_sp_hash(id_handles,{cols: [:port_info]},keep_ref_cols: true)
+        get_objects_in_set_from_sp_hash(id_handles, { cols: [:port_info] }, keep_ref_cols: true)
       end
 
-      def get_service_node_group(opts={})
+      def get_service_node_group(opts = {})
         get_node(opts.merge(subclass_model_name: :service_node_group))
       end
 
@@ -68,10 +68,10 @@ module DTK; class Attribute
         if identifier.to_s =~ /^[0-9]+$/
           sp_hash = {
             cols: Attribute.common_columns(),
-            filter: [:eq,:id,identifier]
+            filter: [:eq, :id, identifier]
           }
 
-          valid_attribute = Model.get_obj(mh,sp_hash)
+          valid_attribute = Model.get_obj(mh, sp_hash)
           raise ErrorUsage.new("Illegal identifier '#{identifier}' for component-module attribute") unless valid_attribute
         else
           # extracting component and attribute name from identifier
@@ -79,8 +79,8 @@ module DTK; class Attribute
           match_from_identifier = identifier.match(/.+\[(.*)\]\/(.*)/)
 
           if match_from_identifier
-            param_cmp_name  = match_from_identifier[1].gsub(/::/,'__')
-            param_attr_name = match_from_identifier[2].gsub(/::/,'__')
+            param_cmp_name  = match_from_identifier[1].gsub(/::/, '__')
+            param_attr_name = match_from_identifier[2].gsub(/::/, '__')
           end
 
           raise ErrorUsage.new("Illegal identifier '#{identifier}' for component-module attribute") unless param_attr_name && param_cmp_name
@@ -90,7 +90,7 @@ module DTK; class Attribute
             cols: common_columns + [:component_module_parent],
             filter: [:eq, :display_name, param_attr_name]
           }
-          matching_attributes = Model.get_objs(mh,sp_hash)
+          matching_attributes = Model.get_objs(mh, sp_hash)
 
           # every component attribute has external_ref field with info ({"type":"puppet_attribute","path":"node[logrotate__rule][copytruncate]"})
           # using external_ref[:path] to extract component_name (logrotate__rule) and attribute_name (copytruncate)
@@ -113,18 +113,18 @@ module DTK; class Attribute
         valid_attribute
       end
 
-      def get_augmented(model_handle,filter)
+      def get_augmented(model_handle, filter)
         ret = []
         sp_hash = {
           cols: common_columns + [:node_component_info],
           filter: filter
         }
-        attrs = get_objs(model_handle,sp_hash)
+        attrs = get_objs(model_handle, sp_hash)
         return ret if attrs.empty?
         attrs.each do |r|
           r.delete(:component) if r[:component].nil? #get rid of nil :component cols
 
-          if node = r.delete(:direct_node)||r.delete(:component_node)
+          if node = r.delete(:direct_node) || r.delete(:component_node)
             r.merge!(node: node)
           end
         end

@@ -11,12 +11,12 @@ module DTK; class Repo
         rsa_key_name = dtk_instance_remote_repo_key_name()
         access_rights ||= ACCESS_READ
 
-        authorize_user(username, rsa_pub_key, rsa_key_name, access_rights,remote.module_name,remote.namespace,remote.module_type,client_rsa_pub_key)
+        authorize_user(username, rsa_pub_key, rsa_key_name, access_rights, remote.module_name, remote.namespace, remote.module_type, client_rsa_pub_key)
       end
 
-      def authorize_end_user(mh,module_name,module_namespace,type,rsa_pub_key,access_rights)
-        username = get_end_user_remote_repo_username(mh,rsa_pub_key)
-        authorize_user(username,rsa_pub_key,access_rights.remote_repo_form(),module_name,module_namespace,type)
+      def authorize_end_user(mh, module_name, module_namespace, type, rsa_pub_key, access_rights)
+        username = get_end_user_remote_repo_username(mh, rsa_pub_key)
+        authorize_user(username, rsa_pub_key, access_rights.remote_repo_form(), module_name, module_namespace, type)
       end
 
       private
@@ -42,13 +42,13 @@ module DTK; class Repo
     end
 
     class AccessError < ErrorUsage
-      def initialize(remote_repo,access_rights=nil)
-        super(error_msg(remote_repo,access_rights))
+      def initialize(remote_repo, access_rights = nil)
+        super(error_msg(remote_repo, access_rights))
       end
 
       private
 
-      def error_msg(remote_repo,access_rights=nil)
+      def error_msg(remote_repo, access_rights = nil)
         if access_rights
           "#{access_rights.pp_form()} access rights denied to remote repo #{remote_repo}"
         else

@@ -6,33 +6,33 @@ module DTK; class Task
       convert_to_string_form(task[Field])
     end
 
-    def self.compute!(subtask_indexes,top_task)
-      compute_recursive!(subtask_indexes,top_task.id() => {})
+    def self.compute!(subtask_indexes, top_task)
+      compute_recursive!(subtask_indexes, top_task.id() => {})
     end
 
     private
 
     def self.convert_to_string_form(qualified_index)
-      qualified_index  ? qualified_index.map(&:to_s).join(LabelIndexDelimeter) : ''
+      qualified_index ? qualified_index.map(&:to_s).join(LabelIndexDelimeter) : ''
     end
     LabelIndexDelimeter = '.'
 
     # subtask_indexes hash form
     # {subtask_id => {:parent_id => ..., :index => ...}
-    def self.compute_recursive!(subtask_indexes,parents)
+    def self.compute_recursive!(subtask_indexes, parents)
       ret = {}
       parent_ids = parents.keys
-      subtask_indexes.each_pair do |subtask_id,info|
+      subtask_indexes.each_pair do |subtask_id, info|
         if parent = parents[info[:parent_id]]
           subtask = subtask_indexes.delete(subtask_id)
-          subtask[Field] = (parent[Field]||[]) + [subtask[:index]]
+          subtask[Field] = (parent[Field] || []) + [subtask[:index]]
           ret.merge!(subtask_id => subtask)
         end
       end
       if ret.empty? || subtask_indexes.empty?
         ret
       else
-        ret.merge(compute_recursive!(subtask_indexes,ret))
+        ret.merge(compute_recursive!(subtask_indexes, ret))
       end
     end
   end

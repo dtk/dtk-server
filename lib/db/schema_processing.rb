@@ -3,16 +3,16 @@ module DTK
   class DB
     # schema creation methods
     module SchemaProcessing
-      def create_table?(db_rel,&block)
-        @db.create_table?(db_rel.schema_table_symbol(),&block)
+      def create_table?(db_rel, &block)
+        @db.create_table?(db_rel.schema_table_symbol(), &block)
       end
 
-      def create_table(db_rel,&block)
-        @db.create_table(db_rel.schema_table_symbol(),&block)
+      def create_table(db_rel, &block)
+        @db.create_table(db_rel.schema_table_symbol(), &block)
       end
 
-      def table_exists?(db_rel,&block)
-        @db.table_exists?(db_rel.schema_table_symbol(),&block)
+      def table_exists?(db_rel, &block)
+        @db.table_exists?(db_rel.schema_table_symbol(), &block)
       end
 
       # for creating schema
@@ -29,26 +29,26 @@ module DTK
   nil
       end
 
-      def add_column(db_rel,*args)
-        @db.add_column(db_rel.schema_table_symbol(),*args)
+      def add_column(db_rel, *args)
+        @db.add_column(db_rel.schema_table_symbol(), *args)
       end
 
-      def modify_column?(db_rel,*args)
+      def modify_column?(db_rel, *args)
         # TODO: this only checks certain things; right now
         # just can modify a varhcar's size
         if args[1] == :varchar
           if args[2].is_a?(Hash) && args[2].key?(:size)
             size = args[2][:size]
-            modify_column_varchar_size?(db_rel,args[0],size)
+            modify_column_varchar_size?(db_rel, args[0], size)
           end
         end
       end
 
-      def add_column?(db_rel,*args)
-        if column_exists?(db_rel,args[0])
-          modify_column?(db_rel,*args)
+      def add_column?(db_rel, *args)
+        if column_exists?(db_rel, args[0])
+          modify_column?(db_rel, *args)
         else
-          add_column(db_rel,*args)
+          add_column(db_rel, *args)
         end
       end
     end

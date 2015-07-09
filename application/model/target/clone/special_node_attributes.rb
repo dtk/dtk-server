@@ -10,10 +10,10 @@ module DTK
         private
 
         def self.process_name_attribute!(nodes)
-          constant_attr_fields = {hidden: true}
+          constant_attr_fields = { hidden: true }
           nodes.each do |n|
             name = n.get_field?(:display_name)
-            Node::NodeAttribute.create_or_set_attributes?([n],:name,name,constant_attr_fields)
+            Node::NodeAttribute.create_or_set_attributes?([n], :name, name, constant_attr_fields)
           end
         end
 
@@ -27,10 +27,10 @@ module DTK
               end
             end
           end
-          ndx_cardinality.each_pair do |card,nodes_to_set_card|
-            Node::NodeAttribute.create_or_set_attributes?(nodes_to_set_card,:cardinality,card)
+          ndx_cardinality.each_pair do |card, nodes_to_set_card|
+            Node::NodeAttribute.create_or_set_attributes?(nodes_to_set_card, :cardinality, card)
           end
-          Node.cache_attribute_values!(nodes,:cardinality)
+          Node.cache_attribute_values!(nodes, :cardinality)
         end
       end
     end

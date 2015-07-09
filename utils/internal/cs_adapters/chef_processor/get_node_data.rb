@@ -3,10 +3,10 @@ module XYZ
   class ChefProcessor
     class NodeDataFromServer
       include ChefServerConnection
-      def get_nodes_data(chef_server_uri,&_block) #TBD: chef_server_uri is stub
+      def get_nodes_data(chef_server_uri, &_block) #TBD: chef_server_uri is stub
         initialize_chef_connection(chef_server_uri)
-  get_node_list().each_key{|node_name|
-    yield node_name,get_node_data(node_name),nil
+  get_node_list().each_key {|node_name|
+    yield node_name, get_node_data(node_name), nil
     Log.info("loaded node #{node_name}")
   }
   nil
@@ -31,9 +31,9 @@ module XYZ
         return {} unless attrs['network']
         return {} unless interfaces = attrs['network']['interfaces']
   attributes[:node_interface] = {}
-  interfaces.each{|int_name,int_config|
-    info = int_config.reject{|k,_v| k == 'addresses'}
-          attributes[:node_interface][int_name.to_sym] = {info: info}
+  interfaces.each {|int_name, int_config|
+    info = int_config.reject { |k, _v| k == 'addresses' }
+          attributes[:node_interface][int_name.to_sym] = { info: info }
           if addrs = format_node_addresses(int_config['addresses'])
       attributes[:node_interface][int_name.to_sym][:node_interface_address] = addrs
           end
@@ -43,9 +43,9 @@ module XYZ
 
       def format_node_addresses(addrs)
   return nil if addrs.nil?
-  addrs.map{|addr,info|
-    {addr: {address: addr, family: info['family'],
-                     info: info.reject{|k,_v| k == 'family'}}}
+  addrs.map {|addr, info|
+    { addr: { address: addr, family: info['family'],
+                     info: info.reject { |k, _v| k == 'family' } } }
         }
       end
 

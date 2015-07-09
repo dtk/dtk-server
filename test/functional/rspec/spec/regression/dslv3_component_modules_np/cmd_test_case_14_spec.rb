@@ -23,7 +23,7 @@ dtk_common = DtkCommon.new('', '')
 
 describe '(Component Module DSL) Test Case 14: dtk.model.yaml with empty array and hash type attribute' do
   before(:all) do
-    puts '********************************************************************************************',''
+    puts '********************************************************************************************', ''
   end
 
   context 'Import component module function' do

@@ -28,7 +28,7 @@ dtk_common = DtkCommon.new('', '')
 
 describe '(Modules, Services and Versioning) Test Case 40: Install service module with dependency to one component and that component has dependency to another component' do
   before(:all) do
-    puts '***************************************************************************************************************************************************************',''
+    puts '***************************************************************************************************************************************************************', ''
   end
 
   context 'Import component module function' do

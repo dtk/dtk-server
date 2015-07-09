@@ -20,7 +20,7 @@ dtk_common = DtkCommon.new('', '')
 
 describe '(Component Module DSL) Test Case 10: NEG - Have attribute with required field set to - falsee in dtk.model.yaml file and push-clone-changes to server' do
   before(:all) do
-    puts '*****************************************************************************************************************************************************',''
+    puts '*****************************************************************************************************************************************************', ''
   end
 
   context 'Import component module function' do

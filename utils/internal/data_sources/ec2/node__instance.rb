@@ -1,4 +1,4 @@
-require  File.expand_path('mixins/monitoring_items', File.dirname(__FILE__))
+require File.expand_path('mixins/monitoring_items', File.dirname(__FILE__))
 module XYZ
   module DSNormalizer
     class Ec2
@@ -8,7 +8,7 @@ module XYZ
         definitions do
           target[:type] = 'instance'
           target[:display_name] = source[:id]
-          target[:external_ref] = fn(:external_ref,source[:id])
+          target[:external_ref] = fn(:external_ref, source[:id])
           target[:operational_status] = source[:state]
           target[:image_size] = source[:flavor][:ram]
           target[:is_deployed] = true
@@ -34,7 +34,7 @@ module XYZ
         end
         class << self
           def unique_keys(source)
-            [:instance,source[:id]]
+            [:instance, source[:id]]
           end
 
           def relative_distinguished_name(source)
@@ -42,13 +42,13 @@ module XYZ
           end
 
           def external_ref(instance_id)
-            {'type' => 'ec2_instance', 'instance_id' => instance_id}
+            { 'type' => 'ec2_instance', 'instance_id' => instance_id }
           end
 
           def filter_raw_source_objects(source)
             ret = DBUpdateHash.new
             # TODO: make this data driven from model -> dependent on what is needed for virtual columns
-            [:groups, :flavor].each{|k|ret[k] = source[k] if source[k]}
+            [:groups, :flavor].each { |k| ret[k] = source[k] if source[k] }
             ret
           end
         end

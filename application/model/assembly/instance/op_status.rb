@@ -34,7 +34,7 @@ module DTK; class  Assembly; class Instance
 
     module Mixin
       def any_stopped_nodes?
-        !!get_leaf_nodes(cols: [:id,:admin_op_status]).find{|node|node[:admin_op_status] == 'stopped'}
+        !!get_leaf_nodes(cols: [:id, :admin_op_status]).find { |node| node[:admin_op_status] == 'stopped' }
       end
 
       # TODO: check that nelow correctly dont use get_leaf_nodes
@@ -66,7 +66,7 @@ module DTK; class  Assembly; class Instance
         nodes = get_leaf_nodes()
 
         # do not start/stop assembly wide nodes
-        nodes.delete_if{|n| n[:type].eql?('assembly_wide')}
+        nodes.delete_if { |n| n[:type].eql?('assembly_wide') }
 
         # check for pattern
         unless node_pattern.nil? || node_pattern.empty?
@@ -75,9 +75,9 @@ module DTK; class  Assembly; class Instance
           # temp nodes_list
           nodes_list = nodes
 
-          nodes = nodes.select { |node| regex =~ node.id.to_s}
+          nodes = nodes.select { |node| regex =~ node.id.to_s }
           if nodes.size == 0
-            nodes = nodes_list.select { |node| node_pattern.to_s.eql?(node.display_name.to_s)}
+            nodes = nodes_list.select { |node| node_pattern.to_s.eql?(node.display_name.to_s) }
             return nodes, false, "No nodes have been matched via ID ~ '#{node_pattern}'." if nodes.size == 0
           end
         end
@@ -100,8 +100,8 @@ module DTK; class  Assembly; class Instance
       end
 
       # TODO: collapse above and below
-      def nodes_are_up?(nodes, status_pattern, opts={})
-        what = opts[:what]||'Command'
+      def nodes_are_up?(nodes, status_pattern, opts = {})
+        what = opts[:what] || 'Command'
         # check if staged
         nodes.each do |node|
           if node.get_field?(:type) == Node::Type::Node.staged

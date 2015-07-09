@@ -4,12 +4,12 @@ module MCollective
     # monkey patch so that dont first load stomp
     class Base
       def self.inherited(klass)
-        PluginManager << {type: 'connector_plugin', class: klass.to_s} unless klass == Stomp
+        PluginManager << { type: 'connector_plugin', class: klass.to_s } unless klass == Stomp
       end
     end
     require File.expand_path('stomp', File.dirname(__FILE__))
 
-    class Stomp_em<Stomp
+    class Stomp_em < Stomp
       # this is effectively a singleton, but not mixin in Singleton beacuse mcollective isstantiates with new
       # TODO: may look at making singleton and patching with making :new public, recognizing that will only be called once
       module StompClient
@@ -17,7 +17,7 @@ module MCollective
         def initialize(*args)
           super(*args)
           # TODO: if cannot fidn user and log this shoudl be error
-          conn_opts = (args.last.is_a?(Hash))? args.last : {}
+          conn_opts = (args.last.is_a?(Hash)) ? args.last : {}
           @login = conn_opts[:login]
           @passcode = conn_opts[:passcode]
           @connected = false
@@ -120,7 +120,7 @@ module MCollective
         raw_msg = Message.new(msg.body, msg, base64: @base64, headers: msg.headers)
         msg = @@decode_context.r8_decode_receive(raw_msg)
         begin
-          @@multiplexer.process_response(msg,msg[:requestid])
+          @@multiplexer.process_response(msg, msg[:requestid])
         rescue => e
           puts e.backtrace[0..5]
           Log.error('Something went wrong while processing the message; possibly an auth issue with MCollective')
@@ -140,7 +140,7 @@ module MCollective
         end
       end
 
-      def subscribe_and_send(source,destination,body,params={})
+      def subscribe_and_send(source, destination, body, params = {})
         EM::defer do
           wait_until_connected?
           unless @subscriptions.include?(source)
@@ -148,7 +148,7 @@ module MCollective
             @connection.subscribe(source)
             @subscriptions << source
           end
-          @connection.send(destination,body,params)
+          @connection.send(destination, body, params)
         end
       end
 
@@ -159,7 +159,7 @@ module MCollective
 
       private
 
-      def get_env_or_option(env, opt, default=nil)
+      def get_env_or_option(env, opt, default = nil)
         return ENV[env] if ENV.include?(env)
         return @config.pluginconf[opt] if @config.pluginconf.include?(opt)
         return default if default
@@ -170,7 +170,7 @@ module MCollective
       # looks for a config option, accepts an optional default
       #
       # raises an exception when it cant find a value anywhere
-      def get_option(opt, default=nil)
+      def get_option(opt, default = nil)
         return @config.pluginconf[opt] if @config.pluginconf.include?(opt)
         return default if default
 

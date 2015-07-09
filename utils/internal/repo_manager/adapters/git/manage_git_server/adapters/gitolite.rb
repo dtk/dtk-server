@@ -4,7 +4,7 @@ module DTK
     ALLOWED_CHARACTERS = /[a-zA-Z0-9\-_\.]*/
 
     class << self
-      def create_server_repo(repo_obj,repo_user_acls,opts={})
+      def create_server_repo(repo_obj, repo_user_acls, opts = {})
         ret = repo_name = repo_obj[:repo_name]
 
         validate_repo_module_name!(repo_name)
@@ -19,9 +19,9 @@ module DTK
         config_dir = repo_config_directory()
         Dir.mkdir(config_dir) unless File.directory?(config_dir)
         path = repo_config_file_relative_path(repo_name)
-        file_asset_hash = {path: path}
-        content = generate_config_file_content(repo_name,repo_user_acls)
-        admin_repo.add_file(file_asset_hash,content)
+        file_asset_hash = { path: path }
+        content = generate_config_file_content(repo_name, repo_user_acls)
+        admin_repo.add_file(file_asset_hash, content)
         admin_repo.push_changes()
         ret
       end
@@ -29,8 +29,8 @@ module DTK
       def delete_all_server_repos
         admin_repo.pull_changes()
         repo_config_files().each do |repo_conf|
-          repo_name = repo_conf.gsub(/\.conf/,'')
-          delete_server_repo(repo_name,do_not_pull_changes: true,do_not_push_changes: true)
+          repo_name = repo_conf.gsub(/\.conf/, '')
+          delete_server_repo(repo_name, do_not_pull_changes: true, do_not_push_changes: true)
         end
         admin_repo.push_changes()
       end
@@ -39,7 +39,7 @@ module DTK
         @git_class = git_class
       end
 
-      def delete_server_repo(repo_name,opts={})
+      def delete_server_repo(repo_name, opts = {})
         admin_repo.pull_changes() unless opts[:do_not_pull_changes]
         file_path = repo_config_file_relative_path(repo_name)
         file_deleted = admin_repo.delete_file?(file_path)
@@ -63,7 +63,7 @@ module DTK
         "#{R8::Config[:git_user_home]}/repositories/#{repo_name}.git"
       end
 
-      def add_user(username,rsa_pub_key,opts={})
+      def add_user(username, rsa_pub_key, opts = {})
         ret = username
         key_path = repo_user_public_key_relative_path(username)
         if repo_users_public_keys().include?(key_path)
@@ -77,7 +77,7 @@ module DTK
         end
 
         commit_msg = "adding rsa pub key for #{username}"
-        admin_repo.add_file({path: key_path},rsa_pub_key,commit_msg)
+        admin_repo.add_file({ path: key_path }, rsa_pub_key, commit_msg)
         admin_repo.push_changes()
         ret
       end
@@ -93,22 +93,22 @@ module DTK
         ret
       end
 
-      def remove_user_rights_in_repos(username,repo_names)
-        set_user_rights_in_repos(username,repo_names,'')
+      def remove_user_rights_in_repos(username, repo_names)
+        set_user_rights_in_repos(username, repo_names, '')
       end
 
       # access_rights="" means remove access rights
-      def set_user_rights_in_repos(username,repo_names,access_rights='R')
+      def set_user_rights_in_repos(username, repo_names, access_rights = 'R')
         repo_names = [repo_names] unless repo_names.is_a?(Array)
         updated_repos = []
 
         repo_names.each do |repo_name|
           repo_user_acls = get_existing_repo_user_acls(repo_name)
-          match = repo_user_acls.find{|r|r[:repo_username] == username}
+          match = repo_user_acls.find { |r| r[:repo_username] == username }
           if match
             # no op if username has specified rights
             next if match[:access_rights] == access_rights
-            repo_user_acls.reject!{|r|r[:repo_username] == username}
+            repo_user_acls.reject! { |r| r[:repo_username] == username }
           else
             # no op if username does not appear in repo and access_rights="", meaning remove access rights
             next if access_rights.empty?
@@ -117,13 +117,13 @@ module DTK
 
           augmented_repo_user_acls = repo_user_acls
           unless access_rights.empty?
-            augmented_repo_user_acls << {repo_username: username, access_rights: access_rights}
+            augmented_repo_user_acls << { repo_username: username, access_rights: access_rights }
           end
 
-          content = generate_config_file_content(repo_name,augmented_repo_user_acls)
+          content = generate_config_file_content(repo_name, augmented_repo_user_acls)
           repo_config_file_path = repo_config_file_relative_path(repo_name)
           commit_msg = "updating repo (#{repo_name}) to give access to user (#{username})"
-          admin_repo.add_file({path: repo_config_file_path},content,commit_msg)
+          admin_repo.add_file({ path: repo_config_file_path }, content, commit_msg)
         end
         admin_repo.push_changes() unless updated_repos.empty?
         updated_repos
@@ -141,7 +141,7 @@ module DTK
       end
 
       def admin_repo
-        @admin_repo ||= @git_class.create(admin_directory(),'master',absolute_path: true)
+        @admin_repo ||= @git_class.create(admin_directory(), 'master', absolute_path: true)
       end
 
       def repo_user_public_key_relative_path(username)
@@ -158,9 +158,9 @@ module DTK
       end
 
       def ret_files_under_path(base_path)
-        paths = admin_repo.ls_r(base_path.split('/').size+1, files_only: true)
+        paths = admin_repo.ls_r(base_path.split('/').size + 1, files_only: true)
         match_regexp = Regexp.new("^#{base_path}")
-        paths.select{|p| p =~ match_regexp}
+        paths.select { |p| p =~ match_regexp }
       end
 
       def repo_config_relative_path
@@ -173,11 +173,11 @@ module DTK
 
       def repo_config_files
         return [] unless File.directory?(repo_config_directory)
-        Dir.chdir(repo_config_directory){Dir['*.conf']}
+        Dir.chdir(repo_config_directory) { Dir['*.conf'] }
       end
 
       def repos_having_config_files
-        repo_config_files().map{|fn|fn.gsub(/\.conf/,'')}
+        repo_config_files().map { |fn| fn.gsub(/\.conf/, '') }
       end
 
       def repo_config_file_relative_path(repo_name)
@@ -204,7 +204,7 @@ module DTK
             access_rights = $1
             users = $2
             users.scan(/[^ ]+/)  do |user|
-              ret << {access_rights: access_rights, repo_username: user}
+              ret << { access_rights: access_rights, repo_username: user }
             end
           elsif l.empty?
             # no op
@@ -221,13 +221,13 @@ module DTK
         end
       end
 
-      def generate_config_file_content(repo_name,repo_user_acls)
+      def generate_config_file_content(repo_name, repo_user_acls)
         # group users by user rights
         users_rights = {}
         repo_user_acls.each do |acl|
           (users_rights[acl[:access_rights]] ||= []) << acl[:repo_username]
         end
-        ConfigFileTemplate.result(repo_name: repo_name,user_rights: users_rights)
+        ConfigFileTemplate.result(repo_name: repo_name, user_rights: users_rights)
       end
 
 ConfigFileTemplate = Erubis::Eruby.new <<eos

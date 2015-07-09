@@ -18,7 +18,7 @@ dtk_common = DtkCommon.new('', '')
 
 describe '(Workspace) Test Case 7: Create attribute on workspace (list attributes), set value for this attribute and then unset the value and purge workspace' do
   before(:all) do
-    puts '***************************************************************************************************************************************************',''
+    puts '***************************************************************************************************************************************************', ''
   end
 
   context 'Create attribute in workspace' do

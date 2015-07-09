@@ -49,8 +49,8 @@ wfid = nil
 
   threads =
   [
-   Thread.new() {wfid = engine.launch(pdef)},
-   Thread.new() { sleep 1; status = engine.process(wfid); pp status}
+   Thread.new() { wfid = engine.launch(pdef) },
+   Thread.new() { sleep 1; status = engine.process(wfid); pp status }
   ]
 threads.each(&:join)
 # wfid = engine.launch(pdef)

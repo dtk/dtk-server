@@ -17,7 +17,7 @@ dtk_common = DtkCommon.new('', '')
 
 describe '(Modules, Services and Versioning) Test Case 48: List component, service and test modules on local and remote with filter' do
   before(:all) do
-    puts '*************************************************************************************************************************',''
+    puts '*************************************************************************************************************************', ''
   end
 
   context 'List component modules with filter' do

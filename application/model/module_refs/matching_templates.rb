@@ -5,23 +5,23 @@ module DTK
       # associated component template or nil
       # This method can be called when assembly is imported or staged
       # TODO: any other time this can be called
-      def set_matching_component_template_info?(aug_cmp_refs,opts={})
+      def set_matching_component_template_info?(aug_cmp_refs, opts = {})
         ret = aug_cmp_refs
         if aug_cmp_refs.empty?
           return ret
         end
         # determine which elements of aug_cmp_refs need to be matches
-        cmp_types_to_check = determine_component_refs_needing_matches(aug_cmp_refs,opts)
+        cmp_types_to_check = determine_component_refs_needing_matches(aug_cmp_refs, opts)
         if cmp_types_to_check.empty?
           return ret
         end
-        set_matching_component_template_info!(aug_cmp_refs,cmp_types_to_check,opts)
+        set_matching_component_template_info!(aug_cmp_refs, cmp_types_to_check, opts)
         ret
       end
 
       private
 
-      def determine_component_refs_needing_matches(aug_cmp_refs,opts={})
+      def determine_component_refs_needing_matches(aug_cmp_refs, opts = {})
         # for each element in aug_cmp_ref, want to set cmp_template_id using following rules
         # 1) if key 'has_override_version' is set
         #    a) if it points to a component template, use this
@@ -30,7 +30,7 @@ module DTK
         # lookup based on matching both version and namespace, if namespace is given
         cmp_types_to_check = {}
         aug_cmp_refs.each do |r|
-          unless cmp_type = r[:component_type]||(r[:component_template]||{})[:component_type]
+          unless cmp_type = r[:component_type] || (r[:component_template] || {})[:component_type]
             ref =  ComponentRef.print_form(r)
             ref = (ref ? "(#{ref})" : '')
             raise Error.new("Component ref #{ref} must either point to a component template or have component_type set")
@@ -41,7 +41,7 @@ module DTK
               unless r[:version]
                 raise Error.new('Component ref has override-version flag set, but no version')
               end
-              (cmp_types_to_check[cmp_type] ||= ComponentTypeToCheck.new) << {pntr: r, version: r[:version]}
+              (cmp_types_to_check[cmp_type] ||= ComponentTypeToCheck.new) << { pntr: r, version: r[:version] }
             end
           else
             add_item = true
@@ -53,7 +53,7 @@ module DTK
               end
             end
             if add_item
-              (cmp_types_to_check[cmp_type] ||= ComponentTypeToCheck.new) << {pntr: r,required: cmp_template_id.nil?}
+              (cmp_types_to_check[cmp_type] ||= ComponentTypeToCheck.new) << { pntr: r, required: cmp_template_id.nil? }
             end
           end
           r[:template_id_synched] = true #marking each item synchronized
@@ -67,7 +67,7 @@ module DTK
         cmp_types_to_check
       end
 
-      def set_matching_component_template_info!(aug_cmp_refs,cmp_types_to_check,opts={})
+      def set_matching_component_template_info!(aug_cmp_refs, cmp_types_to_check, opts = {})
         ret = aug_cmp_refs
         # Lookup up modules mapping
         # mappings will have key for each component type referenced and for each key will return hash with keys :component_template and :version;
@@ -89,7 +89,7 @@ module DTK
         end
 
         reference_errors = []
-        cmp_types_to_check.each do |cmp_type,els|
+        cmp_types_to_check.each do |cmp_type, els|
           els.each do |el|
             cmp_type_info = mappings[cmp_type]
             if cmp_template = cmp_type_info[:component_template]
@@ -115,11 +115,11 @@ module DTK
         ret
       end
 
-      def get_component_type_to_template_mappings?(cmp_types,opts={})
+      def get_component_type_to_template_mappings?(cmp_types, opts = {})
         ret = {}
         return ret if cmp_types.empty?
         # first put in ret info about component type and version
-        ret = cmp_types.inject({}) do |h,cmp_type|
+        ret = cmp_types.inject({}) do |h, cmp_type|
           version = version_string?(cmp_type)
           el = Component::Template::MatchElement.new(
             component_type: cmp_type,
@@ -135,7 +135,7 @@ module DTK
         end
 
         # get matching component template info and insert matches into ret
-        Component::Template.get_matching_elements(project_idh(),ret.values,opts).each do |cmp_template|
+        Component::Template.get_matching_elements(project_idh(), ret.values, opts).each do |cmp_template|
           ret[cmp_template[:component_type]].merge!(component_template: cmp_template)
         end
         ret
@@ -143,16 +143,16 @@ module DTK
 
       def update_module_refs_dsl?(cmp_type_to_template_mappings)
         module_name_to_ns = {}
-        cmp_type_to_template_mappings.each do |cmp_type,cmp_info|
+        cmp_type_to_template_mappings.each do |cmp_type, cmp_info|
           module_name = module_name(cmp_type)
           unless module_name_to_ns[module_name]
-            if namespace = (cmp_info[:component_template]||{})[:namespace]
+            if namespace = (cmp_info[:component_template] || {})[:namespace]
               module_name_to_ns[module_name] = namespace
             end
           end
         end
         cmp_module_refs_to_add = []
-        module_name_to_ns.each do |cmp_module_name,namespace|
+        module_name_to_ns.each do |cmp_module_name, namespace|
           if component_module_ref = component_module_ref?(cmp_module_name)
             unless component_module_ref.namespace() == namespace
               raise Error.new("Unexpected that at this point component_module_ref.namespace() (#{component_module_ref.namespace()}) not equal to namespace (#{namespace})")
@@ -163,11 +163,11 @@ module DTK
               module_type: 'component',
               namespace_info: namespace
             }
-            cmp_module_refs_to_add <<  new_cmp_moule_ref
+            cmp_module_refs_to_add << new_cmp_moule_ref
           end
         end
         unless cmp_module_refs_to_add.empty?
-          ModuleRef.update(:add,@parent,cmp_module_refs_to_add)
+          ModuleRef.update(:add, @parent, cmp_module_refs_to_add)
         end
       end
 

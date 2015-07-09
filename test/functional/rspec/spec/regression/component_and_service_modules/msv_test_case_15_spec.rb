@@ -20,7 +20,7 @@ dtk_common = DtkCommon.new('', '')
 
 describe '(Modules, Services and Versioning) Test Case 15: Import component module from git repo url' do
   before(:all) do
-    puts '*******************************************************************************************',''
+    puts '*******************************************************************************************', ''
   end
 
   context 'Import component module from git repo' do

@@ -23,7 +23,7 @@ dtk_common = DtkCommon.new('', '')
 
 describe '(Modules, Services and Versioning) Test Case 23: Import new service module and import all component modules for that service module automatically' do
   before(:all) do
-    puts '*************************************************************************************************************************************************',''
+    puts '*************************************************************************************************************************************************', ''
   end
 
   context 'Check that component module does not exist' do

@@ -1,6 +1,6 @@
 module DTK; class StateChange
   class Assembly < self
-    def self.component_state_changes(assembly,component_type=nil)
+    def self.component_state_changes(assembly, component_type = nil)
       filter = [:and, [:eq, :assembly_id, assembly[:id]]]
       if (component_type == :smoketest)
         filter << [:eq, :basic_type, 'smoketest']
@@ -13,14 +13,14 @@ module DTK; class StateChange
       }
       state_change_mh = assembly.model_handle(:state_change)
 
-      changes = get_objs(assembly.model_handle(:component),sp_hash).map do |cmp|
+      changes = get_objs(assembly.model_handle(:component), sp_hash).map do |cmp|
         node = cmp.delete(:node)
         hash = {
           type: 'converge_component',
           component: cmp,
           node: node
         }
-        create_stub(state_change_mh,hash)
+        create_stub(state_change_mh, hash)
       end
       ##group by node id
       ndx_ret = {}
@@ -49,12 +49,12 @@ module DTK; class StateChange
 
     ##
     # The method node_state_changes returns state changes related to nodes
-    def self.node_state_changes(task_action_type,assembly,target_idh,opts={})
+    def self.node_state_changes(task_action_type, assembly, target_idh, opts = {})
       case task_action_type
        when :create_node
-        node_state_changes__create_nodes(assembly,target_idh,opts)
+        node_state_changes__create_nodes(assembly, target_idh, opts)
        when :power_on_node
-        node_state_changes__power_on_nodes(assembly,target_idh,opts)
+        node_state_changes__power_on_nodes(assembly, target_idh, opts)
        else
         raise Error.new("Unexpcted task_action_class (#{task_action_class})")
       end
@@ -62,32 +62,32 @@ module DTK; class StateChange
 
     private
 
-    def self.node_state_changes__create_nodes(assembly,target_idh,opts={})
+    def self.node_state_changes__create_nodes(assembly, target_idh, opts = {})
       ret = []
-      assembly_nodes = opts[:nodes]||assembly.get_nodes()
+      assembly_nodes = opts[:nodes] || assembly.get_nodes()
       return ret if assembly_nodes.empty?
 
-      added_state_change_filters = [[:oneof, :node_id, assembly_nodes.map{|r|r[:id]}]]
+      added_state_change_filters = [[:oneof, :node_id, assembly_nodes.map { |r| r[:id] }]]
       target_mh = target_idh.createMH()
-      last_level = pending_create_node(target_mh,[target_idh],added_filters: added_state_change_filters)
+      last_level = pending_create_node(target_mh, [target_idh], added_filters: added_state_change_filters)
       state_change_mh = target_mh.create_childMH(:state_change)
       while not last_level.empty?
         ret += last_level
-        last_level = pending_create_node(state_change_mh,last_level.map(&:id_handle))
+        last_level = pending_create_node(state_change_mh, last_level.map(&:id_handle))
       end
       ret
       if opts[:just_leaf_nodes]
-        ret.reject{|sc|sc[:node].is_node_group?()}
+        ret.reject { |sc| sc[:node].is_node_group?() }
       end
     end
 
-    def self.node_state_changes__power_on_nodes(assembly,_target_idh,opts={})
+    def self.node_state_changes__power_on_nodes(assembly, _target_idh, opts = {})
       ret = []
       unless opts[:just_leaf_nodes]
         raise Error.new('Only supporting option :just_leaf_nodes')
       end
-      nodes = opts[:nodes]||assembly.get_leaf_nodes(cols: [:id,:display_name,:type,:external_ref,:admin_op_status])
-      nodes_to_start = nodes.reject{|n|n[:admin_op_status] == 'running'}
+      nodes = opts[:nodes] || assembly.get_leaf_nodes(cols: [:id, :display_name, :type, :external_ref, :admin_op_status])
+      nodes_to_start = nodes.reject { |n| n[:admin_op_status] == 'running' }
       return ret if nodes_to_start.empty?
 
       state_change_mh = assembly.model_handle(:state_change)
@@ -96,7 +96,7 @@ module DTK; class StateChange
           type: 'power_on_node',
           node: node
         }
-        create_stub(state_change_mh,hash)
+        create_stub(state_change_mh, hash)
       end
     end
   end

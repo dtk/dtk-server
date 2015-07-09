@@ -2,7 +2,7 @@ module DTK
   class Task < Model
     module NodeGroupProcessingMixin
       def node_group_member?
-        (self[:executable_action]||{})[:node_group_member]
+        (self[:executable_action] || {})[:node_group_member]
       end
 
       def set_node_group_member_executable_action!(parent)
@@ -15,10 +15,10 @@ module DTK
           Log.error('Unexpected that parent does not have field :executable_action')
           return ret
         end
-        ExecuteActionFieldsToCopy.each{|field|ea[field] = parent_ea[field]}
+        ExecuteActionFieldsToCopy.each { |field| ea[field] = parent_ea[field] }
         ret
       end
-      ExecuteActionFieldsToCopy = [:component_actions,:state_change_types,:config_agent_type,:assembly_idh,:inter_node_stage]
+      ExecuteActionFieldsToCopy = [:component_actions, :state_change_types, :config_agent_type, :assembly_idh, :inter_node_stage]
     end
 
     module NodeGroupProcessing
@@ -37,9 +37,9 @@ module DTK
           when :decomposed_node_group
             #no op
           when :sequential
-            task.subtasks.map{|st|decompose!(st)}
+            task.subtasks.map { |st| decompose!(st) }
           when :concurrent
-            task.subtasks.map{|st|decompose!(st)}
+            task.subtasks.map { |st| decompose!(st) }
           else
             Log.error('do not have rules to process task')
         end
@@ -53,12 +53,12 @@ module DTK
         #modify task so that it is a concurrent decomposed task
         task[:temporal_order] = 'concurrent'
         ea[:decomposed_node_group] = true
-        task[:subtasks] = ea.nodes.map{|node|node_group_member(node,task)}
+        task[:subtasks] = ea.nodes.map { |node| node_group_member(node, task) }
       end
 
-      def self.node_group_member(node,parent_task)
+      def self.node_group_member(node, parent_task)
         executable_action = parent_task[:executable_action].create_node_group_member(node)
-        Task.create_stub(parent_task.model_handle(),executable_action: executable_action)
+        Task.create_stub(parent_task.model_handle(), executable_action: executable_action)
       end
     end
   end

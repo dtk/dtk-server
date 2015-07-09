@@ -6,16 +6,16 @@ module DTK; class Attribute
     end
     Type :array do
       basetype :json
-      validation lambda{|v|v.is_a?(Array)}
+      validation lambda { |v| v.is_a?(Array) }
     end
     Type :hash do
       basetype :json
-      validation lambda{|v|v.is_a?(Hash)}
+      validation lambda { |v| v.is_a?(Hash) }
     end
     Type :port do
       basetype :integer
       validation /^[0-9]+$/
-      internal_form lambda{|v|v.to_i}
+      internal_form lambda { |v| v.to_i }
     end
     Type :log_file do
       basetype :string
@@ -35,12 +35,12 @@ module DTK; class Attribute
     Type :integer do
       basetype :integer
       validation /^[0-9]+$/
-      internal_form lambda{|v|v.to_i}
+      internal_form lambda { |v| v.to_i }
     end
     Type :boolean do
       basetype :boolean
       validation /true|false/
-      internal_form lambda{|v|
+      internal_form lambda {|v|
         if v.is_a?(TrueClass) || v == 'true'
           true
         elsif v.is_a?(FalseClass) || v == 'false'

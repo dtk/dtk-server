@@ -20,7 +20,7 @@ dtk_common = DtkCommon.new('', '')
 
 describe '(Modules, Services and Versioning) Test Case 33: Import git to two different namespaces' do
   before(:all) do
-    puts '***************************************************************************************',''
+    puts '***************************************************************************************', ''
   end
 
   context 'Import component module from git repo to specific namespace' do

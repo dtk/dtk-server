@@ -25,7 +25,7 @@ engine = Ruote::Engine.new(Ruote::Worker.new(Ruote::HashStorage.new))
 engine.register_participant :remote, MyRemoteParticipant
 
 engine.register_participant :report do |workitem|
-  pp [:fields,workitem.fields]
+  pp [:fields, workitem.fields]
 end
 
 engine.register_participant :start do |_workitem|

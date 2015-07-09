@@ -4,11 +4,11 @@ module DTK
     class SemanticDatatype
       module SemanticDatatypeClassMixin
         def all_types
-          @cache||{}
+          @cache || {}
         end
 
-        def Type(name,&block)
-          el = ::Docile.dsl_eval(new(name),&block).build
+        def Type(name, &block)
+          el = ::Docile.dsl_eval(new(name), &block).build
           @cache ||= {}
           @cache.merge!(name.to_sym => el)
         end
@@ -22,7 +22,7 @@ module DTK
           end
           @datatype = datatype
         end
-        DataTypes = [:json,:string,:integer,:integer,:boolean]
+        DataTypes = [:json, :string, :integer, :integer, :boolean]
 
         def parent(parent)
           @parent = parent.to_s

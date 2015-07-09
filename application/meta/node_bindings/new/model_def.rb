@@ -2,7 +2,7 @@
   schema: :node,
   table: :bindings,
   columns: {
-    content: {type: :json}
+    content: { type: :json }
   },
   many_to_one: [:component]
 }

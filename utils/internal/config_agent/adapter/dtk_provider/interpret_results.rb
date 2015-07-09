@@ -2,21 +2,21 @@ module DTK; class ConfigAgent; module Adapter
   class DtkProvider
     module InterpretResults
       module Mixin
-        def action_results(result,_action)
+        def action_results(result, _action)
           data = data_field_in_results(result)
           unless data.is_a?(Hash)
-            Log.error_pp(['Unexpected that data field is not a hash:',data])
+            Log.error_pp(['Unexpected that data field is not a hash:', data])
             return nil
           end
           data[:results]
         end
 
-        def errors_in_result?(result,_action)
+        def errors_in_result?(result, _action)
           # TODO: action passed in so can look to see at 'action action_status interpretation"
           default_errors_action_status?(result)
         end
 
-        def interpret_error(error_in_result,_components)
+        def interpret_error(error_in_result, _components)
           error_in_result
         end
 
@@ -29,7 +29,7 @@ module DTK; class ConfigAgent; module Adapter
               results_data.each do |result|
                 status = result['status']
                 if status && result['status'].to_s != '0'
-                  stderr = result['stderr']||''
+                  stderr = result['stderr'] || ''
                   err_msgs << (stderr.empty? ? "Error in action; syscall status = #{status}" : stderr)
                 end
               end
@@ -37,7 +37,7 @@ module DTK; class ConfigAgent; module Adapter
             else
               status = results_data['status']
               if status && results_data['status'].to_s != '0'
-                stderr = results_data['stderr']||''
+                stderr = results_data['stderr'] || ''
                 err_msg = (stderr.empty? ? "Error in action; syscall status = #{status}" : stderr)
                 [err_msg]
               end
@@ -47,7 +47,7 @@ module DTK; class ConfigAgent; module Adapter
 
         def data_field_in_results(result)
           # TODO: will be deprecating the [:data][:data] form
-          (result[:data]||{})[:data]||result[:data]||{}
+          (result[:data] || {})[:data] || result[:data] || {}
         end
       end
     end

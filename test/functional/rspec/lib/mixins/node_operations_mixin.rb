@@ -189,7 +189,7 @@ module NodeOperationsMixin
           count += 1
         response = send_request('/rest/assembly/info_about', assembly_id: service_id, subtype: 'instance', about: 'tasks')
         puts 'Start instance check:'
-        status = response['data'].find { |x| x['status'] == 'executing'}
+        status = response['data'].find { |x| x['status'] == 'executing' }
         pretty_print_JSON(status)
 
         if (count > max_num_of_retries)
@@ -209,7 +209,7 @@ module NodeOperationsMixin
   end
 
   def grep_node(service_id, node_name, log_location, grep_pattern)
-    puts 'Grep node:','----------'
+    puts 'Grep node:', '----------'
     grep_pattern_found = false
 
     end_loop = false
@@ -267,7 +267,7 @@ module NodeOperationsMixin
   end
 
   def create_node(service_id, node_name, node_template)
-    puts 'Create node:','------------'
+    puts 'Create node:', '------------'
     create_node_response = send_request('/rest/assembly/add_node', assembly_id: service_id, assembly_node_name: node_name, node_template_identifier: node_template)
     if create_node_response['status'].include? 'ok'
       puts "Node #{node_name} has been created successfully!"
@@ -309,7 +309,7 @@ module NodeOperationsMixin
 
     if (component_add_response['status'] == 'ok')
       component_list_response = send_request('/rest/assembly/info_about', assembly_id: service_id, about: 'components', subtype: 'instance')
-      component = component_list_response['data'].select {|x| x['id'] == component_add_response['data']['component_id']}
+      component = component_list_response['data'].select { |x| x['id'] == component_add_response['data']['component_id'] }
       if !component.empty?
         puts "Component #{component.first['display_name']} has been added to assembly node!"
         component_added = true
@@ -394,7 +394,7 @@ module NodeOperationsMixin
       while task_status.include? 'executing' || end_loop == false
         sleep 30
         count += 1
-        response_task_status = send_request('/rest/task/status', 'task_id'=> task_id)
+        response_task_status = send_request('/rest/task/status', 'task_id' => task_id)
         status = response_task_status['data']['status']
         if (status.include? 'succeeded')
           task_status = status
@@ -511,7 +511,7 @@ module NodeOperationsMixin
         puts 'Max number of retries for getting netstats reached...'
         end_loop = true
       elsif (response['data']['is_complete'])
-        port_to_check = response['data']['results'].find { |x| x['port'] == port}
+        port_to_check = response['data']['results'].find { |x| x['port'] == port }
 
         if (!port_to_check.nil?)
           puts "Netstats check completed! Port #{port} avaiable!"
@@ -538,8 +538,8 @@ module NodeOperationsMixin
     config_node_content = response['data']['actions'].last
     component_content = config_node_content['nodes'].first
 
-    if (component_content['components'].find { |x| x['component']['component_name'].include? component_name})
-      component = component_content['components'].find { |x| x['component']['component_name'] == component_name && x['component']['source'] == 'instance' && x['component']['node_group'].nil?}
+    if (component_content['components'].find { |x| x['component']['component_name'].include? component_name })
+      component = component_content['components'].find { |x| x['component']['component_name'] == component_name && x['component']['source'] == 'instance' && x['component']['node_group'].nil? }
       pretty_print_JSON(component)
 
       if (!component.nil?)
@@ -586,7 +586,7 @@ module NodeOperationsMixin
         pretty_print_JSON(response)
 
         if response['data']['is_complete']
-          port_to_check = response['data']['results'].find { |x| x['port'] == port}
+          port_to_check = response['data']['results'].find { |x| x['port'] == port }
 
           if (!port_to_check.nil?)
             puts "Netstats check completed! Port #{port} available!"

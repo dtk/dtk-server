@@ -19,7 +19,7 @@ describe '(Repoman Drupal API) Test Case 5: NEG - Get user by providing incorrec
 
   context 'Login' do
     it 'passed successfully' do
-      repoman.login(login[:username],login[:password])
+      repoman.login(login[:username], login[:password])
       expect(repoman.authorization_token).not_to be_empty
     end
   end

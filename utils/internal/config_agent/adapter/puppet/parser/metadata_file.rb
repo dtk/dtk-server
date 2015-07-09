@@ -9,11 +9,11 @@ module DTK; class ConfigAgent
         end
         type = impl_obj[:type]
 
-        json_content = RepoManager.get_file_content(metadata_name,implementation: impl_obj)
+        json_content = RepoManager.get_file_content(metadata_name, implementation: impl_obj)
 
         content_hash = nil
         begin
-          content_hash = Aux.convert_to_hash(json_content,:json)
+          content_hash = Aux.convert_to_hash(json_content, :json)
         rescue => e
           return ret
         end
@@ -21,27 +21,27 @@ module DTK; class ConfigAgent
           content_hash.merge!(type: type)
         end
         content_hash.merge!(type: type) if type
-        dependencies = (content_hash['dependencies']||[]).map{|hash_dep|ExternalDependency.new(hash_dep)}
+        dependencies = (content_hash['dependencies'] || []).map { |hash_dep| ExternalDependency.new(hash_dep) }
         content = convert_to_internal_form(content_hash)
-        {content: content, dependencies: dependencies}
+        { content: content, dependencies: dependencies }
       end
 
       private
 
       def self.contains_metadata?(impl_obj, _provider = nil)
         depth = 2
-        RepoManager.ls_r(depth,{file_only: true},impl_obj).find do |f|
+        RepoManager.ls_r(depth, { file_only: true }, impl_obj).find do |f|
           f.eql?('metadata.json') || f.eql?("#{Puppet.provider_folder()}/metadata.json")
         end
       end
 
       def self.convert_to_internal_form(content_hash)
-        content_hash.inject({}){|h,(k,v)|h.merge(k.to_sym => v)}
+        content_hash.inject({}) { |h, (k, v)| h.merge(k.to_sym => v) }
       end
 
       class ExternalDependency < Puppet::ExternalDependency
         def initialize(hash_content)
-          super(hash_content['name'],hash_content['version_requirement'])
+          super(hash_content['name'], hash_content['version_requirement'])
         end
       end
     end

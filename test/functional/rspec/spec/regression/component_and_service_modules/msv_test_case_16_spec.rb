@@ -19,7 +19,7 @@ dtk_common = DtkCommon.new('', '')
 
 describe '(Modules, Services and Versioning) Test Case 16: NEG - Import component module from incorrect git repo url' do
   before(:all) do
-    puts '**********************************************************************************************************',''
+    puts '**********************************************************************************************************', ''
   end
 
   context 'Import component module from incorrect git repo' do

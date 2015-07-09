@@ -6,21 +6,21 @@ module DTK
       # :p - plural
       # :pos - plural or singular
       module Mixin
-        def pp_object_type(format=nil)
+        def pp_object_type(format = nil)
           self.class.pp_object_type(format)
         end
       end
       module ClassMixin
-        def pp_object_type(format=nil)
-          PPObjectType.render(self,format)
+        def pp_object_type(format = nil)
+          PPObjectType.render(self, format)
         end
 
         def object_type_string
-          to_s.split('::').last.gsub(/([a-z])([A-Z])/,'\1 \2').downcase
+          to_s.split('::').last.gsub(/([a-z])([A-Z])/, '\1 \2').downcase
         end
       end
 
-      def self.render(model_class,format_or_cardinality=nil)
+      def self.render(model_class, format_or_cardinality = nil)
         print_form = SubclassProcessing.print_form(model_class) || model_class.object_type_string()
         string =
           if format_or_cardinality.is_a?(Fixnum)
@@ -31,11 +31,11 @@ module DTK
               print_form
             end
           else
-            format = format_or_cardinality||:s
+            format = format_or_cardinality || :s
             case format
               when :s then print_form
               when :p then make_plural(print_form)
-              when :pos then make_plural(print_form,plural_or_singular: true)
+              when :pos then make_plural(print_form, plural_or_singular: true)
               else raise Error.new("Unexpected format (#{format})")
             end
           end
@@ -48,7 +48,7 @@ module DTK
 
       private
 
-      def self.make_plural(term,opts={})
+      def self.make_plural(term, opts = {})
         if term =~ /y$/
           opts[:plural_or_singular] ? "#{term[0...-1]}(ies)" : "#{term[0...-1]}ies"
         else

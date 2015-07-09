@@ -20,12 +20,12 @@ namespace_1 = 'maestrodev'
 namespace_2 = 'r8'
 component_module_filesystem_location = '~/dtk/component_modules/maestrodev'
 component_module_filesystem_location_2 = '~/dtk/component_modules/r8'
-grep_patterns_for_module_refs = ['wget:','namespace: maestrodev']
+grep_patterns_for_module_refs = ['wget:', 'namespace: maestrodev']
 dtk_common = DtkCommon.new('', '')
 
 describe '(Modules, Services and Versioning) Test Case 52: Import Puppet Forge (maven) but there are multiple (ambiguous) wget dependencies (maestrodev/wget, r8/wget)' do
   before(:all) do
-    puts '**********************************************************************************************************************************************************',''
+    puts '**********************************************************************************************************************************************************', ''
   end
 
   context 'Import component module from git repo to specific namespace' do

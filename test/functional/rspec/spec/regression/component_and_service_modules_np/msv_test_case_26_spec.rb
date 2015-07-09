@@ -23,7 +23,7 @@ dtk_common = DtkCommon.new('', '')
 
 describe '(Modules, Services and Versioning) Test Case 26: NEG - Import new service module but its referenced component module exists locally but not on server' do
   before(:all) do
-    puts '*****************************************************************************************************************************************************',''
+    puts '*****************************************************************************************************************************************************', ''
   end
 
   context 'Import component module function' do

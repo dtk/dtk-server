@@ -1,14 +1,14 @@
 module DTK
   class BaseModule < Model
-    r8_nested_require('base_module','update_module')
-    r8_nested_require('base_module','version_context_info')
+    r8_nested_require('base_module', 'update_module')
+    r8_nested_require('base_module', 'version_context_info')
 
     # TODO: look through r8_nested_require('module'..,) and see which ones should be under instead base_module
-    r8_nested_require('module','dsl')
-    r8_nested_require('module','node_module_dsl')
-    r8_nested_require('module','auto_import')
+    r8_nested_require('module', 'dsl')
+    r8_nested_require('module', 'node_module_dsl')
+    r8_nested_require('module', 'auto_import')
 
-    r8_nested_require('module','delete_mixin')
+    r8_nested_require('module', 'delete_mixin')
 
     include DeleteMixin
     extend ModuleClassMixin
@@ -38,7 +38,7 @@ module DTK
       get_objs(cols: [:assembly_templates]).each do |r|
         component_template = r[:component_template]
         pntr = ndx_ret[component_template[:id]] ||= component_template.merge(component_refs: [])
-        pntr[:component_refs] << r[:component_ref].merge(r.hash_subset(:id,:display_name,:node,:assembly_template))
+        pntr[:component_refs] << r[:component_ref].merge(r.hash_subset(:id, :display_name, :node, :assembly_template))
       end
       ndx_ret.values
     end
@@ -53,17 +53,17 @@ module DTK
      ndx_ret.values
     end
 
-    def info_about(about, cmp_id=nil)
+    def info_about(about, cmp_id = nil)
       case about.to_sym
       when :components
         get_objs(cols: [:components]).map do |r|
           cmp = r[:component]
           branch = r[:module_branch]
           unless branch.assembly_module_version?()
-            display_name = Component::Template.component_type_print_form(cmp[:component_type],Opts.new(no_module_name: true))
-            {id: cmp[:id], display_name: display_name,version: branch.version_print_form() }
+            display_name = Component::Template.component_type_print_form(cmp[:component_type], Opts.new(no_module_name: true))
+            { id: cmp[:id], display_name: display_name, version: branch.version_print_form() }
           end
-        end.compact.sort{|a,b|"#{a[:version]}-#{a[:display_name]}" <=>"#{b[:version]}-#{b[:display_name]}"}
+        end.compact.sort { |a, b| "#{a[:version]}-#{a[:display_name]}" <=> "#{b[:version]}-#{b[:display_name]}" }
       when :attributes
         results = get_objs(cols: [:attributes])
         results.delete_if { |e| !(e[:component][:id] == cmp_id.to_i) } if cmp_id && !cmp_id.empty?
@@ -74,9 +74,9 @@ module DTK
         ret = results.inject([]) do |transformed, element|
           attribute = element[:attribute]
           branch = element[:module_branch]
-          transformed << { id: attribute[:id], display_name: attribute.print_path(element[:component]), value: attribute[:value_asserted], version: branch.version_print_form()}
+          transformed << { id: attribute[:id], display_name: attribute.print_path(element[:component]), value: attribute[:value_asserted], version: branch.version_print_form() }
         end
-        return ret.sort{|a,b|a[:display_name] <=> b[:display_name]}
+        return ret.sort { |a, b| a[:display_name] <=> b[:display_name] }
       when :instances
         results = get_objs(cols: [:component_module_instances_assemblies])
         # another query to get component instances that do not have assembly
@@ -129,7 +129,7 @@ module DTK
     end
 
     def get_repos
-      get_objs_helper(:repos,:repo)
+      get_objs_helper(:repos, :repo)
     end
 
     def get_associated_target_instances

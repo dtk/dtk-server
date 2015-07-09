@@ -4,7 +4,7 @@ module XYZ
       class Dependency < Top
         definitions do
           [:display_name, :type, :search_pattern, :description, :severity].each do |k|
-            target[k] = fn(k,source)
+            target[k] = fn(k, source)
           end
         end
 
@@ -38,7 +38,7 @@ module XYZ
           required_cmp = source['required_component']
           base_cmp = source['parent_display_name']
           raise Error.new('unexpected form for userdata dependency') unless required_cmp && base_cmp
-          XYZ::Constraints::Macro::RequiredComponent.description(required_cmp,base_cmp)
+          XYZ::Constraints::Macro::RequiredComponent.description(required_cmp, base_cmp)
         end
       end
     end

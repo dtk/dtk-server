@@ -1,7 +1,7 @@
 module XYZ
   module AttributeGroupClassMixin
     # marked with "!" because augments info
-    def ret_grouped_attributes!(augmented_attr_list,opts={})
+    def ret_grouped_attributes!(augmented_attr_list, opts = {})
       prune_set = opts[:types_to_keep]
       add_missing_info_for_group_attrs!(augmented_attr_list)
 
@@ -17,7 +17,7 @@ module XYZ
 
     # adds port type info and required
     def add_missing_info_for_group_attrs!(augmented_attr_list)
-      dependency_analysis(augmented_attr_list) do |attr_in,_link,attr_out|
+      dependency_analysis(augmented_attr_list) do |attr_in, _link, attr_out|
         attr_in.merge!(port_type: 'input')
         if attr_in[:required] && attr_out and not attr_out[:dynamic]
           attr_out.merge!(required: true)
@@ -27,9 +27,9 @@ module XYZ
   end
 
   class AttrValType
-    def self.create(type,attr)
+    def self.create(type, attr)
       klass = AttrValTypeMap[type.to_sym]
-      if klass then klass.new(type,attr)
+      if klass then klass.new(type, attr)
       else raise Error.new("attribute value type (#{type}) not treated")
       end
     end
@@ -47,8 +47,8 @@ module XYZ
 
     private
 
-    def initialize(type,attr)
-      @type=type.to_sym
+    def initialize(type, attr)
+      @type = type.to_sym
       @is_set = attr[:attribute_value] ? true : false #TODO: handling legitimate nil values
     end
   end
@@ -81,7 +81,7 @@ module XYZ
         else :not_required
        end
       raise Error.new('Cannot detect type of attribute') unless type
-      AttrValType.create(type,self)
+      AttrValType.create(type, self)
     end
   end
 end

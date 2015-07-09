@@ -2,9 +2,9 @@ require 'ruote'
 module DTK
   module WorkflowAdapter
     class Ruote < DTK::Workflow
-      r8_nested_require('ruote','task_info')
-      r8_nested_require('ruote','participant')
-      r8_nested_require('ruote','generate_process_defs')
+      r8_nested_require('ruote', 'task_info')
+      r8_nested_require('ruote', 'participant')
+      r8_nested_require('ruote', 'generate_process_defs')
       class Worker < ::Ruote::Worker
         def run_in_thread
           Thread.abort_on_exception = true
@@ -23,7 +23,7 @@ module DTK
       # register all the classes
       ParticipantList = []
       ObjectSpace.each_object(Module) do |m|
-        next unless m.ancestors.include?(Top) &&  m != Top
+        next unless m.ancestors.include?(Top) && m != Top
         participant = Aux.underscore(Aux.demodulize(m.to_s)).to_sym
         ParticipantList << participant
         Engine.register_participant participant, m
@@ -65,7 +65,7 @@ module DTK
           end
          rescue Exception => e
           Log.error_pp 'error trap in ruote#execute'
-          Log.error_pp [e,e.backtrace[0..50]]
+          Log.error_pp [e, e.backtrace[0..50]]
          # TODO: if do following Engine.cancel_process(@wfid), need to update task; somhow need to detrmine what task triggered this
          ensure
           TaskInfo.clean(top_task_id)
@@ -81,7 +81,7 @@ module DTK
       end
 
       def process_def
-        @process_def ||= compute_process_def(@top_task,@guards[:external])
+        @process_def ||= compute_process_def(@top_task, @guards[:external])
       end
     end
   end

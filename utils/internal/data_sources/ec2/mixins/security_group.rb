@@ -25,7 +25,7 @@ module XYZ
 
           ret = DataSourceUpdateHash.new
           network_partition_names.each do |name|
-            network_partition = {name: name} #TODO: stub for putting more information in
+            network_partition = { name: name } #TODO: stub for putting more information in
             ret[name] = network_partition
           end
           ret
@@ -34,7 +34,7 @@ module XYZ
         private
 
         def get_network_partition_refs
-          @parent.get_servers().map{|s|s[:network_partition_ref]}.compact.uniq
+          @parent.get_servers().map { |s| s[:network_partition_ref] }.compact.uniq
         end
 
         def conn
@@ -45,7 +45,7 @@ module XYZ
         # TODO: factor this in
         def get_unfettered_security_groups
           security_groups = conn().security_groups_all()
-          security_groups.reject{|sg|not is_unfettered_security_group?(sg)}
+          security_groups.reject { |sg| not is_unfettered_security_group?(sg) }
         end
 
         def is_unfettered_security_group?(security_group)

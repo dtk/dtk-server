@@ -1,17 +1,17 @@
 module DTK; class Attribute::Pattern
   class Assembly
     class Link < self
-      r8_nested_require('link','source')
-      r8_nested_require('link','target')
+      r8_nested_require('link', 'source')
+      r8_nested_require('link', 'target')
 
       class Info
-        def initialize(parsed_adhoc_links,dep_component_instance,antec_component_instance)
+        def initialize(parsed_adhoc_links, dep_component_instance, antec_component_instance)
           @links = parsed_adhoc_links
           @dep_component_instance = dep_component_instance
           @antec_component_instance = antec_component_instance
           @meta_update_supported = (!dep_component_instance.nil? && !antec_component_instance.nil?)
         end
-        attr_reader :links,:dep_component_instance,:antec_component_instance
+        attr_reader :links, :dep_component_instance, :antec_component_instance
         def meta_update_supported?
           @meta_update_supported
         end
@@ -26,14 +26,14 @@ module DTK; class Attribute::Pattern
       end
 
       # returns object of type Info
-      def self.parsed_adhoc_link_info(parent,assembly,target_attr_term,source_attr_term)
+      def self.parsed_adhoc_link_info(parent, assembly, target_attr_term, source_attr_term)
         assembly_idh = assembly.id_handle()
-        target_attr_pattern = Target.create_attr_pattern(assembly,target_attr_term)
+        target_attr_pattern = Target.create_attr_pattern(assembly, target_attr_term)
         if target_attr_pattern.attribute_idhs.empty?
           raise ErrorUsage.new("No matching attribute to target term (#{target_attr_term})")
         end
         source_is_antecdent = !target_attr_pattern.is_antecedent?()
-        source_attr_pattern = Source.create_attr_pattern(assembly,source_attr_term,source_is_antecdent)
+        source_attr_pattern = Source.create_attr_pattern(assembly, source_attr_term, source_is_antecdent)
         unless source_component_instance = source_attr_pattern.component_instance
           raise DSLNotSupported::LinkToNonComponent.new()
         end
@@ -55,27 +55,27 @@ module DTK; class Attribute::Pattern
 
         parsed_adhoc_links = target_attr_pattern.attribute_idhs.map do |target_attr_idh|
           hash = attr_info.merge(input_id: target_attr_idh.get_id())
-          parent.new(hash,target_attr_pattern.attribute_pattern,source_attr_pattern)
+          parent.new(hash, target_attr_pattern.attribute_pattern, source_attr_pattern)
         end
-        dep_cmp,antec_cmp = determine_dep_and_antec_components(target_attr_pattern,source_attr_pattern)
-        Info.new(parsed_adhoc_links,dep_cmp,antec_cmp)
+        dep_cmp, antec_cmp = determine_dep_and_antec_components(target_attr_pattern, source_attr_pattern)
+        Info.new(parsed_adhoc_links, dep_cmp, antec_cmp)
       end
 
       private
 
-      def self.determine_dep_and_antec_components(target_attr_pattern,source_attr_pattern)
+      def self.determine_dep_and_antec_components(target_attr_pattern, source_attr_pattern)
         unless target_cmp = target_attr_pattern.component_instance()
           raise Error.new('Unexpected that target_attr_pattern.component() is nil')
         end
         source_cmp = source_attr_pattern.component_instance()
 
-        antec_cmp,dep_cmp =
+        antec_cmp, dep_cmp =
           if target_attr_pattern.is_antecedent?()
-            [target_cmp,source_cmp]
+            [target_cmp, source_cmp]
           else
-            [source_cmp,target_cmp]
+            [source_cmp, target_cmp]
           end
-        [dep_cmp,antec_cmp]
+        [dep_cmp, antec_cmp]
       end
     end
   end

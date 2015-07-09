@@ -15,8 +15,8 @@ class Params
       new_key =  ::SSHKey.generate(type: 'rsa')
       agent_public_key = new_key.ssh_public_key
       agent_private_key = new_key.private_key
-      File.open('/tmp/git_access_client_key','w'){|f| f << agent_private_key}
-      File.open('/tmp/git_access_client_key_pub','w'){|f| f << agent_public_key}
+      File.open('/tmp/git_access_client_key', 'w') { |f| f << agent_private_key }
+      File.open('/tmp/git_access_client_key_pub', 'w') { |f| f << agent_public_key }
       {
         agent_ssh_key_public: agent_public_key,
         agent_ssh_key_private: agent_private_key,

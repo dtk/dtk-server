@@ -9,11 +9,11 @@ module DTK
       super()
       replace_hash =
         if obj.is_a?(String)
-          {obj.to_sym => nil}
+          { obj.to_sym => nil }
         elsif obj.is_a?(Hash)
-          obj.inject({}){|h,(k,v)|h.merge(k.to_sym => v.is_a?(Hash) ? self.new(v) : v)}
-        elsif obj.is_a?(Array) && !obj.find{|el|!el.is_a?(String)}
-          obj.inject({}){|h,k|h.merge(k.to_sym => nil)}
+          obj.inject({}) { |h, (k, v)| h.merge(k.to_sym => v.is_a?(Hash) ? self.new(v) : v) }
+        elsif obj.is_a?(Array) && !obj.find { |el| !el.is_a?(String) }
+          obj.inject({}) { |h, k| h.merge(k.to_sym => nil) }
         else
           raise Error.new("Illegal input to form hierarchical hash (#{obj.inspect})")
         end

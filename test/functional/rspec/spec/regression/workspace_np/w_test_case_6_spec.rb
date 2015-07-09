@@ -21,7 +21,7 @@ dtk_common = DtkCommon.new('', '')
 
 describe '(Workspace) Test Case 6: Create one node, add two components in it (list components), delete one component (list components again) and purge workspace content' do
   before(:all) do
-    puts '**************************************************************************************************************************************************************',''
+    puts '**************************************************************************************************************************************************************', ''
   end
 
   context 'Create node in workspace' do

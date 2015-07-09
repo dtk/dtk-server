@@ -9,7 +9,7 @@ module DTK; class AttributeLink
         SemanticType.create_from_attribute(@input_attr)
       end
 
-      def output_value(opts={})
+      def output_value(opts = {})
         if opts.key?(:inner_value)
           opts[:inner_value]
         else

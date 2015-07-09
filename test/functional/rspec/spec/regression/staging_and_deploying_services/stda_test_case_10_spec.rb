@@ -14,7 +14,7 @@ STDOUT.sync = true
 service_name = 'stda_test_case_10_instance'
 assembly_name = 'mongodb_test::mongo_master_slave'
 subtask_order = 'sequential'
-subtasks = [{'node' => 'master', 'ordered_components' => ['mongodb', 'stdlib']}, {'node' => 'slave', 'ordered_components' => ['mongodb::mongodb_slave', 'stdlib']}]
+subtasks = [{ 'node' => 'master', 'ordered_components' => ['mongodb', 'stdlib'] }, { 'node' => 'slave', 'ordered_components' => ['mongodb::mongodb_slave', 'stdlib'] }]
 module_name = 'r8:mongodb'
 service_module = 'r8:mongodb_test'
 dependency_component = 'slave/mongodb::mongodb_slave'
@@ -24,7 +24,7 @@ dtk_common = DtkCommon.new(service_name, assembly_name)
 
 describe '(Staging And Deploying Assemblies) Test Case 10: Stage assembly, check workflow info, list components with deps, push assembly updates, push component module updates' do
   before(:all) do
-    puts '*********************************************************************************************************************************************************************',''
+    puts '*********************************************************************************************************************************************************************', ''
   end
 
   context "Stage service function on #{assembly_name} assembly" do

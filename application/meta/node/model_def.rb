@@ -29,7 +29,7 @@
     },
     image_size: {
         type: 'numeric',
-        size: [8,3]
+        size: [8, 3]
     },
     operational_status: {
         type: 'select',

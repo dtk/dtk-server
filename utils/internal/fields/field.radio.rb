@@ -1,6 +1,6 @@
 
 class Fieldradio < Fieldbase
-  attr_accessor :default_class,:options,:option_str
+  attr_accessor :default_class, :options, :option_str
 
   def initialize(field_meta)
     super(field_meta)
@@ -34,10 +34,10 @@ class Fieldradio < Fieldbase
     count = 0
     # add div wrapper for radio buttons, used on form validation
     radio_str << '<div id="' + @id + '-radio-wrapper">'
-    @options.each do |key,value|
-      count +=1
+    @options.each do |key, value|
+      count += 1
       radio_str << '<input type="radio" id="' + @id + '" name="' + @name + '" class="' + @class_txt + '" value="' + key + '" checked="{%=' + @model_name + '[:' + @name + ']%}" />' + value
-      if(count < num_options) then radio_str << '<br/>' end
+      if (count < num_options) then radio_str << '<br/>' end
     end
     radio_str << '</div>'
 

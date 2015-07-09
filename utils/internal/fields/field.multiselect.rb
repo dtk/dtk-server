@@ -1,6 +1,6 @@
 
 class Fieldmultiselect < Fieldselect
-  attr_accessor :default_class,:multiple
+  attr_accessor :default_class, :multiple
 
   def initialize(field_meta)
     super(field_meta)
@@ -12,7 +12,7 @@ class Fieldmultiselect < Fieldselect
   # for correct compiling of the js template
   def set_options(options)
     @option_str = ''
-    options.each do |value,display|
+    options.each do |value, display|
       @option_str << '<option value="' + value + '" multiselected="{%=' + @model_name + '[:' + @name + ']%}">' + display + '</option>'
     end
   end

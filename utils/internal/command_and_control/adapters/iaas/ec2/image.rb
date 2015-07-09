@@ -1,13 +1,13 @@
 module DTK; module CommandAndControlAdapter
   class Ec2
     module ImageClassMixin
-      def image(image_id,opts={})
-        Image.new(image_id,opts)
+      def image(image_id, opts = {})
+        Image.new(image_id, opts)
       end
     end
 
     class Image
-      def initialize(image_id,opts={})
+      def initialize(image_id, opts = {})
         aws_creds = nil
         if target = opts[:target]
           aws_creds = Ec2.target_non_default_aws_creds?(target)
@@ -23,29 +23,29 @@ module DTK; module CommandAndControlAdapter
         value(:root_device_name)
       end
 
-      def block_device_mapping?(root_device_override_attrs={})
+      def block_device_mapping?(root_device_override_attrs = {})
         if default_block_device_mapping = value(:block_device_mapping)
-          BlockDeviceMapping.ret(default_block_device_mapping,root_device_override_attrs)
+          BlockDeviceMapping.ret(default_block_device_mapping, root_device_override_attrs)
         end
       end
 
       private
 
       def value(attr)
-        (@ami||{})[attr]
+        (@ami || {})[attr]
       end
 
       module BlockDeviceMapping
-        def self.ret(default_block_device_mapping,root_device_override_attrs={})
+        def self.ret(default_block_device_mapping, root_device_override_attrs = {})
           block_device_mapping = convert_and_prune_keys(default_block_device_mapping)
-          update_root_device_with_overrides(block_device_mapping,root_device_override_attrs)
+          update_root_device_with_overrides(block_device_mapping, root_device_override_attrs)
         end
 
         private
 
-        def self.update_root_device_with_overrides(block_device_mapping,root_device_override_attrs={})
+        def self.update_root_device_with_overrides(block_device_mapping, root_device_override_attrs = {})
           ret = block_device_mapping
-          overrides = root_device_override_attrs.reject do |k,_v|
+          overrides = root_device_override_attrs.reject do |k, _v|
             unless TargetKeys.include?(k)
               Log.error("Bad key '#{k}' in root_device_override_attrs")
               true
@@ -62,7 +62,7 @@ module DTK; module CommandAndControlAdapter
 
         def self.convert_and_prune_keys(block_device_mapping)
           block_device_mapping.map do |one_mapping|
-            KeyMapping.inject({}) do |h,(k1,k2)|
+            KeyMapping.inject({}) do |h, (k1, k2)|
               one_mapping.key?(k1) ? h.merge(k2 => one_mapping[k1]) : h
             end
           end

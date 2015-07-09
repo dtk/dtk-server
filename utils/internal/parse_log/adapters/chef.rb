@@ -5,9 +5,9 @@ module XYZ
         ret = LogSegments.new
         current_segment = nil
         lines.each do |line|
-          if match = Pattern.find{|_k,pat|line =~ pat}
+          if match = Pattern.find { |_k, pat| line =~ pat }
             ret << current_segment if current_segment
-            current_segment = LogSegment.create(match[0],line)
+            current_segment = LogSegment.create(match[0], line)
           elsif current_segment
             current_segment << line
           end
@@ -29,11 +29,11 @@ module XYZ
 
       # order is important because of subsumption
       Pattern =  Aux::ordered_hash(
-        [{debug: /DEBUG:/},
-         {error: /ERROR:/},
-         {info_error: /INFO: error:/},
-         {info_backtrace: /INFO: backtrace:/},
-         {info: /INFO:/}]
+        [{ debug: /DEBUG:/ },
+         { error: /ERROR:/ },
+         { info_error: /INFO: error:/ },
+         { info_backtrace: /INFO: backtrace:/ },
+         { info: /INFO:/ }]
       )
 
       public
@@ -63,19 +63,19 @@ module XYZ
           return self unless @complete
           error_pos =  find_error_position()
           return self unless error_pos
-          segments_from_error = self[error_pos,1+size-error_pos]
-          prev_segment =  self[error_pos-1]
+          segments_from_error = self[error_pos, 1 + size - error_pos]
+          prev_segment =  self[error_pos - 1]
           # try to find specific error
           specific_error = nil
           PossibleErrors.each do |err|
             if err.isa?(segments_from_error)
-              specific_error = err.new(segments_from_error,prev_segment)
+              specific_error = err.new(segments_from_error, prev_segment)
               break
             end
           end
 
           # cut off everything after error and replace last item with specfic error
-          slice!(error_pos+1,size-error_pos)
+          slice!(error_pos + 1, size - error_pos)
           self[error_pos] = specific_error if specific_error
           self
         end
@@ -96,7 +96,7 @@ module XYZ
             # short circuit when complete
             last.type == :error
           else
-            find{|s|s.type == :error}
+            find { |s| s.type == :error }
           end
         end
 
@@ -107,19 +107,19 @@ module XYZ
           return false if empty?
           return true if last.line =~ /handlers complete/
           return false if size < 2
-          self[size-2].line  =~ /handlers complete/ ? true : false
+          self[size - 2].line =~ /handlers complete/ ? true : false
         end
 
         def find_error_position
-          each_with_index{|seg,i|return i if seg.type == :error}
+          each_with_index { |seg, i| return i if seg.type == :error }
           nil
         end
       end
 
       class ErrorChefLog < ::XYZ::LogSegmentError
-        def initialize(segments_from_error,prev_segment)
+        def initialize(segments_from_error, prev_segment)
           super()
-          parse!(segments_from_error,prev_segment)
+          parse!(segments_from_error, prev_segment)
         end
       end
 
@@ -130,7 +130,7 @@ module XYZ
 
         private
 
-        def parse!(segments_from_error,_prev_segment)
+        def parse!(segments_from_error, _prev_segment)
           line = segments_from_error[1] && segments_from_error[1].line
           if line =~ /INFO: error: (.+$)/
             @error_detail = $1
@@ -154,7 +154,7 @@ module XYZ
 
         private
 
-        def parse!(segments_from_error,_prev_segment)
+        def parse!(segments_from_error, _prev_segment)
           if segments_from_error.last.line =~ /Chef::Exceptions::Exec - (.+$)/
             @error_detail = "Exec error: #{$1}"
           else
@@ -174,9 +174,9 @@ module XYZ
             cookbook ||= $1
             recipe_filename ||= "#{$2}.rb"
             @error_line_num ||= $3.to_i
-            @error_file_ref ||= ChefFileRef.recipe(cookbook,recipe_filename)
+            @error_file_ref ||= ChefFileRef.recipe(cookbook, recipe_filename)
             started = nil
-            (segment.aux_data||[]).each do |l|
+            (segment.aux_data || []).each do |l|
               if started
                 return true if l =~ /---- End/
                 @error_lines << l
@@ -197,9 +197,9 @@ module XYZ
 
         private
 
-        def parse!(segments_from_error,_prev_segment)
+        def parse!(segments_from_error, _prev_segment)
           if segments_from_error.last.line =~ /Chef::Mixin::Template::TemplateError - (.+$)/
-            @error_detail = "Template error: #{$1}".gsub(/ for #<Erubis::Context:[^>]+>/,'')
+            @error_detail = "Template error: #{$1}".gsub(/ for #<Erubis::Context:[^>]+>/, '')
           else
             @error_detail = 'Template error'
           end
@@ -233,7 +233,7 @@ module XYZ
 
         private
 
-        def parse!(segments_from_error,_prev_segment)
+        def parse!(segments_from_error, _prev_segment)
           line = segments_from_error[0].line
           if line =~ /ERROR: (.+$)/
             @error_detail = $1
@@ -262,9 +262,9 @@ module XYZ
 
         RecipeCache = '/var/chef/cookbooks/'
         FromFilePat = Regexp.new("#{RecipeCache}([^/]+)/recipes/([^:]+):([0-9]+):in `from_file'")
-        def parse!(segments_from_error,_prev_segment)
+        def parse!(segments_from_error, _prev_segment)
           if segments_from_error.last.line =~ /DEBUG: Re-raising exception: (.+$)/
-            @error_detail = $1.gsub(/ for #<Chef::Recipe:[^>]+>/,'')
+            @error_detail = $1.gsub(/ for #<Chef::Recipe:[^>]+>/, '')
           else
             @error_detail = 'recipe error'
           end
@@ -279,11 +279,11 @@ module XYZ
         def self.lines_to_check(segs_from_err)
           # TODO: can make more efficient and omit some of these and focus on last line
           [segs_from_err[0].line,
-           (segs_from_err.last.aux_data||[]).find{|l|l =~ FromFilePat},
-           segs_from_err[1] && (segs_from_err[1].aux_data||[])[0],
+           (segs_from_err.last.aux_data || []).find { |l| l =~ FromFilePat },
+           segs_from_err[1] && (segs_from_err[1].aux_data || [])[0],
            segs_from_err[2] && segs_from_err[2].line,
-           segs_from_err[2] && (segs_from_err[2].aux_data||[])[0],
-           segs_from_err[2] && (segs_from_err[2].aux_data||[])[1]].compact
+           segs_from_err[2] && (segs_from_err[2].aux_data || [])[0],
+           segs_from_err[2] && (segs_from_err[2].aux_data || [])[1]].compact
         end
 
         def set_file_ref!(line)
@@ -291,19 +291,19 @@ module XYZ
             cookbook ||= $1
             recipe_filename ||= $2
             @error_line_num ||= $3.to_i
-            @error_file_ref ||= ChefFileRef.recipe(cookbook,recipe_filename)
+            @error_file_ref ||= ChefFileRef.recipe(cookbook, recipe_filename)
             true
           elsif line =~ Regexp.new("#{RecipeCache}([^/]+)/recipes/([^:]+):([0-9]+):")
             cookbook ||= $1
             recipe_filename ||= $2
             @error_line_num ||= $3.to_i
-            @error_file_ref ||= ChefFileRef.recipe(cookbook,recipe_filename)
+            @error_file_ref ||= ChefFileRef.recipe(cookbook, recipe_filename)
             true
           elsif line =~ /\((.+)::(.+) line ([0-9]+)\) has had an error/
             cookbook ||= $1
             recipe_filename ||= "#{$2}.rb"
             @error_line_num ||= $3.to_i
-            @error_file_ref ||= ChefFileRef.recipe(cookbook,recipe_filename)
+            @error_file_ref ||= ChefFileRef.recipe(cookbook, recipe_filename)
             true
           end
         end
@@ -318,7 +318,7 @@ module XYZ
 
         private
 
-        def parse!(segments_from_error,_prev_segment)
+        def parse!(segments_from_error, _prev_segment)
           line = segments_from_error[1].line
           if line =~ /ArgumentError: (.+$)/
             @error_detail = $1
@@ -335,7 +335,7 @@ module XYZ
 
         private
 
-        def parse!(segments_from_error,_prev_segment)
+        def parse!(segments_from_error, _prev_segment)
           line = segments_from_error[1].line
           if line =~ /Chef::Exceptions::CookbookNotFound: (.+$)/
             @error_detail = $1
@@ -355,7 +355,7 @@ module XYZ
             self.new(hash)
           end
         end
-        def self.recipe(cookbook,recipe_filename)
+        def self.recipe(cookbook, recipe_filename)
           hash = {
             type: :recipe,
             cookbook: cookbook,
@@ -368,10 +368,10 @@ module XYZ
           return nil unless file_asset_path && self[:cookbook]
           sp_hash = {
             filter: [:eq, :path, file_asset_path],
-            cols: [:id,:path,:implementation_info]
+            cols: [:id, :path, :implementation_info]
           }
           file_asset_mh = model_handle.createMH(:file_asset)
-          Model.get_objects_from_sp_hash(file_asset_mh,sp_hash).find{|x|x[:implementation][:repo] == self[:cookbook]}
+          Model.get_objects_from_sp_hash(file_asset_mh, sp_hash).find { |x| x[:implementation][:repo] == self[:cookbook] }
         end
 
         private
@@ -389,7 +389,7 @@ module XYZ
       end
 
       # order makes a difference for parsing
-      PossibleErrors = [ErrorTemplate,ErrorExec,ErrorRecipe,ErrorMissingRecipe,ErrorMissingCookbook,ErrorService,ErrorGeneric]
+      PossibleErrors = [ErrorTemplate, ErrorExec, ErrorRecipe, ErrorMissingRecipe, ErrorMissingCookbook, ErrorService, ErrorGeneric]
     end
   end
 end

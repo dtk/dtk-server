@@ -13,7 +13,7 @@ SERVER = 'dev10.r8network.com'
 ENDPOINT = "http://#{SERVER}"
 ASSEMBLY_ID = '2147500839'
 MEMORY_SIZE = 't1.micro'
-OS_IDENTIFIERS = ['natty']#, 'oneiric', 'rh5.7-64']#ENV['operating_system']
+OS_IDENTIFIERS = ['natty'] #, 'oneiric', 'rh5.7-64']#ENV['operating_system']
 LOG = '/home/dtk10/thin/log/thin.log'
 COMPONENT = 'dtk_user::base'
 # controling 'pretty-print' in log file
@@ -42,7 +42,7 @@ def send_request(path, body, opts)
 
   unless requestResponseJSON['errors'].nil?
     error_message = ''
-    requestResponseJSON['errors'].each { |e| error_message += "#{e['code']}: #{e['message']} "}
+    requestResponseJSON['errors'].each { |e| error_message += "#{e['code']}: #{e['message']} " }
   end
 
   if requestResponseJSON['status'] == 'notok'
@@ -63,7 +63,7 @@ end
 
 # Method for deleting assembly instances
 def deleteAssembly(assemblyId, opts)
-  responseAssemblyDelete = send_request('/rest/assembly/delete', {'assembly_id' => assemblyId}, opts)
+  responseAssemblyDelete = send_request('/rest/assembly/delete', { 'assembly_id' => assemblyId }, opts)
   puts '', "Assembly has been deleted! Response: #{responseAssemblyDelete}"
 end
 
@@ -89,7 +89,7 @@ def log_print
 
   # search through the reversed-array, for the first occurence
   reverse_occurence = nil
-  lines.each_with_index do |line,index|
+  lines.each_with_index do |line, index|
     if line.include?(search_string)
       reverse_occurence = index
       break
@@ -112,12 +112,12 @@ end
 
 def execute_task(taskId, opts)
   puts '', "Starting task id: #{taskId}"
-  responseTaskExecute = send_request('/rest/task/execute', {'task_id' => taskId}, opts)
+  responseTaskExecute = send_request('/rest/task/execute', { 'task_id' => taskId }, opts)
 
   taskStatus = 'executing'
   while taskStatus.include? 'executing'
     sleep 20
-    responseTaskStatus = send_request('/rest/task/status', {'task_id'=> taskId}, opts)
+    responseTaskStatus = send_request('/rest/task/status', { 'task_id' => taskId }, opts)
     taskFullResponse = JSON.parse(responseTaskStatus)
     taskStatus = taskFullResponse['data']['status']
     puts "Task status: #{taskStatus}"
@@ -130,7 +130,7 @@ def execute_task(taskId, opts)
     puts '', 'Smoke test failed, response: '
     ap taskFullResponse
     puts 'Logs response:'
-    task_log_response = send_request('/rest/task/get_logs', {'task_id '=> taskId}, opts)
+    task_log_response = send_request('/rest/task/get_logs', { 'task_id ' => taskId }, opts)
     ap JSON.parse(task_log_response)
 
     log_print()
@@ -152,36 +152,36 @@ def deploy_test_assembly(opts)
     # listAssembly = send_request('/rest/assembly/list', {},  opts)
 
     # Stage the assembly
-    stageAssembly = send_request('/rest/assembly/stage', {'assembly_id' => ASSEMBLY_ID}, opts)
+    stageAssembly = send_request('/rest/assembly/stage', { 'assembly_id' => ASSEMBLY_ID }, opts)
 
     assemblyId = JSON.parse(stageAssembly)['data']['assembly_id']
 
     puts '', "Staged assembly ID: #{assemblyId}"
 
-    attributes = JSON.parse(send_request('/rest/assembly/info_about', {subtype: 'instance', about: 'attributes', assembly_id: assemblyId, filter: nil}, opts))
+    attributes = JSON.parse(send_request('/rest/assembly/info_about', { subtype: 'instance', about: 'attributes', assembly_id: assemblyId, filter: nil }, opts))
 
-    memory_size_id = attributes['data'].find{ |x| x['display_name'].include? 'memory_size' }['id']
-    os_identifier_id = attributes['data'].find{ |x| x['display_name'].include? 'os_identifier' }['id']
+    memory_size_id = attributes['data'].find { |x| x['display_name'].include? 'memory_size' }['id']
+    os_identifier_id = attributes['data'].find { |x| x['display_name'].include? 'os_identifier' }['id']
 
-    set_memory_attribute_response = send_request('/rest/assembly/set_attributes', {value: MEMORY_SIZE, pattern: memory_size_id, assembly_id: assemblyId}, opts)
+    set_memory_attribute_response = send_request('/rest/assembly/set_attributes', { value: MEMORY_SIZE, pattern: memory_size_id, assembly_id: assemblyId }, opts)
     ap set_memory_attribute_response
 
-    set_os_identifier_attribute_response = send_request('/rest/assembly/set_attributes', {value: os_identifier, pattern: os_identifier_id, assembly_id: assemblyId}, opts)
+    set_os_identifier_attribute_response = send_request('/rest/assembly/set_attributes', { value: os_identifier, pattern: os_identifier_id, assembly_id: assemblyId }, opts)
     ap set_os_identifier_attribute_response
 
     # Create a task for the cloned assembly instance
-    responseTask = send_request('/rest/assembly/create_task', {'assembly_id' => assemblyId}, opts)
+    responseTask = send_request('/rest/assembly/create_task', { 'assembly_id' => assemblyId }, opts)
 
     # Extract task id
     taskId = JSON.parse(responseTask)['data']['task_id']
     # Execute the task
     puts '', "Starting task id: #{taskId}"
-    responseTaskExecute = send_request('/rest/task/execute', {'task_id' => taskId}, opts)
+    responseTaskExecute = send_request('/rest/task/execute', { 'task_id' => taskId }, opts)
 
     taskStatus = 'executing'
     while taskStatus.include? 'executing'
       sleep 20
-      responseTaskStatus = send_request('/rest/task/status', {'task_id'=> taskId}, opts)
+      responseTaskStatus = send_request('/rest/task/status', { 'task_id' => taskId }, opts)
       taskFullResponse = JSON.parse(responseTaskStatus)
       taskStatus = taskFullResponse['data']['status']
       puts "Task status: #{taskStatus}"
@@ -194,7 +194,7 @@ def deploy_test_assembly(opts)
       puts '', 'Smoke test failed, response: '
       ap taskFullResponse
       puts 'Logs response:'
-      task_log_response = send_request('/rest/task/get_logs', {'task_id '=> taskId}, opts)
+      task_log_response = send_request('/rest/task/get_logs', { 'task_id ' => taskId }, opts)
       ap JSON.parse(task_log_response)
 
       log_print()
@@ -220,23 +220,23 @@ def node_group_spin_up(opts)
   puts '', 'Starting node group test'
   # get the selected component ID
   componentListResponse = send_request('/rest/component/list', {}, opts)
-  componentTemplateId = JSON.parse(componentListResponse)['data'].find{ |x| x['display_name'] == COMPONENT }['id']
+  componentTemplateId = JSON.parse(componentListResponse)['data'].find { |x| x['display_name'] == COMPONENT }['id']
 
   # create the node group
-  nodeGroupResponse = send_request('/rest/node_group/create', {spans_target: true, display_name: 'all-nodes-jenkins-testing'}, opts)
+  nodeGroupResponse = send_request('/rest/node_group/create', { spans_target: true, display_name: 'all-nodes-jenkins-testing' }, opts)
   # ap JSON.parse(nodeGroupResponse)
 
   # add component to the node group
-  addComponentResponse = send_request('/rest/node_group/add_component', {node_group_id: 'all-nodes-jenkins-testing', component_template_id: componentTemplateId}, opts)
+  addComponentResponse = send_request('/rest/node_group/add_component', { node_group_id: 'all-nodes-jenkins-testing', component_template_id: componentTemplateId }, opts)
   # ap JSON.parse(addComponentResponse)
 
   # converge the node group
-  nodeConvergeResponse = send_request('/rest/node_group/create_task', {node_group_id: 'all-nodes-jenkins-testing'}, opts)
+  nodeConvergeResponse = send_request('/rest/node_group/create_task', { node_group_id: 'all-nodes-jenkins-testing' }, opts)
   # ap JSON.parse(nodeConvergeResponse)
   $success = execute_task(JSON.parse(nodeConvergeResponse)['data']['task_id'], opts)
 
   # delete node group
-  nodeGroupDeleteResponse = send_request('/rest/node_group/delete', {node_group_id: 'all-nodes-jenkins-testing'} , opts)
+  nodeGroupDeleteResponse = send_request('/rest/node_group/delete', { node_group_id: 'all-nodes-jenkins-testing' }, opts)
 end
 
 def module_import(opts)
@@ -245,28 +245,28 @@ def module_import(opts)
   path_to_ssh_key = File.expand_path('~/.ssh/id_rsa.pub')
   user_ssh_key = File.open(path_to_ssh_key, 'rb') { |f| f.read.chomp }
 
-  add_user_direct_access_response = send_request('/rest/component_module/add_user_direct_access', {rsa_pub_key: user_ssh_key}, opts)
+  add_user_direct_access_response = send_request('/rest/component_module/add_user_direct_access', { rsa_pub_key: user_ssh_key }, opts)
   ap add_user_direct_access_response
 
-  import_module_response = send_request('/rest/component_module/import', {remote_module_names: ['r8/test']}, opts)
+  import_module_response = send_request('/rest/component_module/import', { remote_module_names: ['r8/test'] }, opts)
 
   list_modules_response = send_request('/rest/component_module/list', {}, opts)
   $success = false unless list_modules_response.include? 'test'
 
-  delete_module_response = send_request('/rest/component_module/delete', {component_module_id: 'test'}, opts)
+  delete_module_response = send_request('/rest/component_module/delete', { component_module_id: 'test' }, opts)
   ap delete_module_response
 
-  remove_user_direct_access_response = send_request('/rest/component_module/remove_user_direct_access', {rsa_pub_key: user_ssh_key}, opts)
+  remove_user_direct_access_response = send_request('/rest/component_module/remove_user_direct_access', { rsa_pub_key: user_ssh_key }, opts)
   ap remove_user_direct_access_response
 
   list_modules_response = send_request('/rest/component_module/list', {}, opts)
 
-  $success = false if JSON.parse(list_modules_response)['data'].select{ |x| x['display_name'] == 'test' } != []
+  $success = false if JSON.parse(list_modules_response)['data'].select { |x| x['display_name'] == 'test' } != []
   #$success = false if list_modules_response.include? 'test'
 end
 
 def stage_assembly(opts)
-  stageAssembly = send_request('/rest/assembly/stage', {'assembly_id' => ASSEMBLY_ID}, opts)
+  stageAssembly = send_request('/rest/assembly/stage', { 'assembly_id' => ASSEMBLY_ID }, opts)
 
   assemblyId = JSON.parse(stageAssembly)['data']['assembly_id']
 
@@ -284,10 +284,10 @@ def module_create(opts)
   ap `dtk module create "test_module"`
 
   puts '', 'Exporting the module to the remote repo...'
-  module_export_response = send_request('/rest/component_module/export', {component_module_id: 'test_module'}, opts)
+  module_export_response = send_request('/rest/component_module/export', { component_module_id: 'test_module' }, opts)
 
   puts '', 'Deleteing the local module...'
-  module_delete_response = send_request('/rest/component_module/delete', {component_module_id: 'test_module'}, opts)
+  module_delete_response = send_request('/rest/component_module/delete', { component_module_id: 'test_module' }, opts)
   ap module_delete_response
 
   puts '', 'Removing the module directory...'
@@ -305,21 +305,21 @@ def module_create(opts)
   end
 
   puts '', 'Deleteing the local module...'
-  module_delete_response = send_request('/rest/component_module/delete', {component_module_id: 'test_module'}, opts)
+  module_delete_response = send_request('/rest/component_module/delete', { component_module_id: 'test_module' }, opts)
   ap module_delete_response
 
   puts '', 'Deleteing the remote module...'
-  module_delete_remote_response = send_request('/rest/component_module/delete_remote', {remote_module_name: 'test_module'}, opts)
+  module_delete_remote_response = send_request('/rest/component_module/delete_remote', { remote_module_name: 'test_module' }, opts)
   ap module_delete_remote_response
 
   puts '', 'Make sure that the module is deleted.'
   list_modules_response = send_request('/rest/component_module/list', {}, opts)
 
-  $success = false if JSON.parse(list_modules_response)['data'].select{ |x| x['display_name'] == 'test_module' } != []
+  $success = false if JSON.parse(list_modules_response)['data'].select { |x| x['display_name'] == 'test_module' } != []
 end
 ##############################################################################################################################
 
-puts '','Script has been started.'
+puts '', 'Script has been started.'
 
 deploy_test_assembly(opts)
 

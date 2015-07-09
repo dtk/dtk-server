@@ -1,18 +1,18 @@
 def r8_require(*files_x)
   files = (files_x.first.is_a?(Array) ? files_x.first : files_x)
-  caller_dir = caller.first.gsub(/\/[^\/]+$/,'')
-  files.each{|f|require File.expand_path(f,caller_dir)}
+  caller_dir = caller.first.gsub(/\/[^\/]+$/, '')
+  files.each { |f| require File.expand_path(f, caller_dir) }
 end
 
-def r8_nested_require(dir,*files_x)
+def r8_nested_require(dir, *files_x)
   files = (files_x.first.is_a?(Array) ? files_x.first : files_x)
-  caller_dir = caller.first.gsub(/\/[^\/]+$/,'')
-  files.each{|f|require File.expand_path("#{dir}/#{f}",caller_dir)}
+  caller_dir = caller.first.gsub(/\/[^\/]+$/, '')
+  files.each { |f| require File.expand_path("#{dir}/#{f}", caller_dir) }
 end
 
-def r8_nested_require_with_caller_dir(caller_dir,dir,*files_x)
+def r8_nested_require_with_caller_dir(caller_dir, dir, *files_x)
   files = (files_x.first.is_a?(Array) ? files_x.first : files_x)
-  files.each{|f|require File.expand_path("#{dir}/#{f}",caller_dir)}
+  files.each { |f| require File.expand_path("#{dir}/#{f}", caller_dir) }
 end
 
 def r8_require_common_lib(*files_x)
@@ -21,19 +21,19 @@ end
 ##### TODO: deprecate forp above
 def dtk_require(*files_x)
   files = (files_x.first.is_a?(Array) ? files_x.first : files_x)
-  caller_dir = caller.first.gsub(/\/[^\/]+$/,'')
-  files.each{|f|require File.expand_path(f,caller_dir)}
+  caller_dir = caller.first.gsub(/\/[^\/]+$/, '')
+  files.each { |f| require File.expand_path(f, caller_dir) }
 end
 
-def dtk_nested_require(dir,*files_x)
+def dtk_nested_require(dir, *files_x)
   files = (files_x.first.is_a?(Array) ? files_x.first : files_x)
-  caller_dir = caller.first.gsub(/\/[^\/]+$/,'')
-  files.each{|f|require File.expand_path("#{dir}/#{f}",caller_dir)}
+  caller_dir = caller.first.gsub(/\/[^\/]+$/, '')
+  files.each { |f| require File.expand_path("#{dir}/#{f}", caller_dir) }
 end
 
-def dtk_nested_require_with_caller_dir(caller_dir,dir,*files_x)
+def dtk_nested_require_with_caller_dir(caller_dir, dir, *files_x)
   files = (files_x.first.is_a?(Array) ? files_x.first : files_x)
-  files.each{|f|require File.expand_path("#{dir}/#{f}",caller_dir)}
+  files.each { |f| require File.expand_path("#{dir}/#{f}", caller_dir) }
 end
 
 def dtk_require_common_lib(*files_x)
@@ -54,7 +54,7 @@ end
 
 private
 
-POSSIBLE_COMMON_CORE_FOLDERS = ['dtk-common','common','dtk_common']
+POSSIBLE_COMMON_CORE_FOLDERS = ['dtk-common', 'common', 'dtk_common']
 
 def dtk_require_dtk_common_file(common_library)
   # use common folder else common gem
@@ -65,7 +65,7 @@ def dtk_require_dtk_common_file(common_library)
   elsif is_dtk_common_gem_installed?
     # already loaded so do not do anything
   else
-    raise DTK::Client::DtkError,'Common directory/gem not found, please make sure that you have cloned dtk-common folder or installed dtk common gem!'
+    raise DTK::Client::DtkError, 'Common directory/gem not found, please make sure that you have cloned dtk-common folder or installed dtk common gem!'
   end
 end
 
@@ -91,7 +91,7 @@ end
 # Checks for expected names of dtk-common folder and returns name of existing common folder
 def determine_common_folder
   POSSIBLE_COMMON_CORE_FOLDERS.each do |folder|
-    path = File.join(File.dirname(__FILE__),'..','..',folder)
+    path = File.join(File.dirname(__FILE__), '..', '..', folder)
     return folder if File.directory?(path)
   end
 
@@ -112,11 +112,11 @@ class Hash
     end
   else
     def select192(&block)
-      select(&block).inject({}){|h,kv|h.merge(kv[0] => kv[1])}
+      select(&block).inject({}) { |h, kv| h.merge(kv[0] => kv[1]) }
     end
 
     def find192(&block)
-      find(&block).inject({}){|h,kv|h.merge(kv[0] => kv[1])}
+      find(&block).inject({}) { |h, kv| h.merge(kv[0] => kv[1]) }
     end
   end
 end

@@ -7,14 +7,14 @@ class WorkQueue
   Queue = []
   Sema = Mutex.new
   def self.push(msg)
-    Sema.synchronize{Queue << msg}
+    Sema.synchronize { Queue << msg }
   end
 
   def self.pop
     loop do
       sleep 3
       msg = nil
-      Sema.synchronize{msg = Queue.shift}
+      Sema.synchronize { msg = Queue.shift }
       return msg if msg
     end
   end
@@ -28,7 +28,7 @@ class MyRemoteParticipant
   end
 
   def on_reply(workitem)
-    pp [:reply_from,workitem.participant_name]
+    pp [:reply_from, workitem.participant_name]
     workitem.fields[workitem.participant_name] = "response from #{workitem.participant_name}"
   end
 
@@ -66,7 +66,7 @@ engine.register_participant :remote1, MyRemoteParticipant
 engine.register_participant :remote2, MyRemoteParticipant
 
 engine.register_participant :report do |workitem|
-  pp [:fields,workitem.fields]
+  pp [:fields, workitem.fields]
 end
 
 engine.register_participant :start do |_workitem|

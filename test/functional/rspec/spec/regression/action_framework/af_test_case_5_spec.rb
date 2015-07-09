@@ -66,7 +66,7 @@ expected_output_5 = {
 
 describe '(Action Framework) Test Case 5: Service with one node that contains cmp with actions (unless/if/file position)' do
   before(:all) do
-    puts '**************************************************************************************************************',''
+    puts '**************************************************************************************************************', ''
   end
 
   context "Stage service function on #{assembly_name} assembly" do

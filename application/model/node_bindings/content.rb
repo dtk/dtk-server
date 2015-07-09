@@ -6,14 +6,14 @@ module DTK
       end
 
       def find_target_specific_info(target)
-        inject({}) do |h,(assembly_node_name,node_target)|
+        inject({}) do |h, (assembly_node_name, node_target)|
           target_specific_info = node_target.find_target_specific_info(target)
           h.merge(assembly_node_name => node_target.find_target_specific_info(target))
         end
       end
 
       def hash_form
-        inject({}) do |h,(node_name,node_target)|
+        inject({}) do |h, (node_name, node_target)|
           h.merge(node_name => node_target.hash_form())
         end
       end
@@ -28,7 +28,7 @@ module DTK
         end
 
         #TODO: check each node belongs to assembly
-        parse_input.input.inject(new()) do |h,(node,node_target)|
+        parse_input.input.inject(new()) do |h, (node, node_target)|
           h.merge(node => NodeTarget.parse_and_reify(parse_input.child(node_target)))
         end
       end

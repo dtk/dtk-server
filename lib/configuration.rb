@@ -5,7 +5,7 @@ module DTK
   # Methods to set configuration
   class Configuration
     include Singleton
-    def set_configuration(config_file_location=nil)
+    def set_configuration(config_file_location = nil)
       config_file_location ||= default_config_file_location()
       set_defaults()
       load_config_file(config_file_location)
@@ -34,24 +34,24 @@ module DTK
     end
 
     def set_defaults
-      r8_nested_require('configuration','defaults')
+      r8_nested_require('configuration', 'defaults')
       R8::Config[:dtk_instance_user] = process_user()
     end
 
     def set_combined_vars
-      r8_nested_require('configuration','combined')
+      r8_nested_require('configuration', 'combined')
     end
 
     def load_config_file(config_file_location)
       parsed_file = ParsedFile.new(config_file_location)
-      parsed_file.each do |key,value|
-        update_config_value!(key,value)
+      parsed_file.each do |key, value|
+        update_config_value!(key, value)
       end
     end
 
-    def update_config_value!(config_file_key,value)
-      internal_key = (Mappings[config_file_key]||config_file_key).split('.')
-      update_config_value_aux!(R8::Config,internal_key,value)
+    def update_config_value!(config_file_key, value)
+      internal_key = (Mappings[config_file_key] || config_file_key).split('.')
+      update_config_value_aux!(R8::Config, internal_key, value)
     end
 
     Mappings = {
@@ -62,12 +62,12 @@ module DTK
       'mcollective.host' => 'command_and_control.node_config.mcollective.host'
     }
 
-    def update_config_value_aux!(base,internal_key,value)
+    def update_config_value_aux!(base, internal_key, value)
       index = internal_key.first.to_sym
       if internal_key.size == 1
         base[index] = value
       else
-        update_config_value_aux!(base[index],internal_key[1,internal_key.size-1],value)
+        update_config_value_aux!(base[index], internal_key[1, internal_key.size - 1], value)
       end
     end
 

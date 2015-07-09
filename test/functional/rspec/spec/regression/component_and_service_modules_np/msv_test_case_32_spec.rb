@@ -25,7 +25,7 @@ dtk_common = DtkCommon.new('', '')
 
 describe '(Modules, Services and Versioning) Test Case 32: Set default namespace, do import and import-git, revert back to original namespace and do import, import-git again' do
   before(:all) do
-    puts '*******************************************************************************************************************************************************************',''
+    puts '*******************************************************************************************************************************************************************', ''
   end
 
   context 'Set new default namespace' do

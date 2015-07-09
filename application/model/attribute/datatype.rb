@@ -14,18 +14,18 @@ module DTK; class Attribute
       if is_array?()
         ret = {}
         hash_semantic_type = semantic_type[:array]
-        default.each_with_index do |d,i|
-          el = ret_default_info__hash(hash_semantic_type,d)
-          el.each{|k,v|ret.merge!("#{k}[#{i}]" => v)}
+        default.each_with_index do |d, i|
+          el = ret_default_info__hash(hash_semantic_type, d)
+          el.each { |k, v| ret.merge!("#{k}[#{i}]" => v) }
         end
         ret
       else
-        Datatype.ret_default_info__hash(semantic_type,default)
+        Datatype.ret_default_info__hash(semantic_type, default)
       end
     end
 
     def convert_value_to_ruby_object
-      update_object!(:data_type,:value_asserted,:value_derived)
+      update_object!(:data_type, :value_asserted, :value_derived)
       Datatype.convert_value_to_ruby_object(self)
     end
 
@@ -64,24 +64,24 @@ module DTK; class Attribute
       end
     end
 
-    def self.convert_value_to_ruby_object(attr,opts={})
-      attr_val_field = opts[:value_field]||:attribute_value
+    def self.convert_value_to_ruby_object(attr, opts = {})
+      attr_val_field = opts[:value_field] || :attribute_value
       raw_val = attr[attr_val_field]
       return nil if raw_val.nil?
-      case (attr[:data_type]||'string')
+      case (attr[:data_type] || 'string')
         when 'string'
           raw_val
         when 'boolean'
           case raw_val.to_s
             when 'true' then true
             when 'false' then false
-            else raise_error_msg('boolean',raw_val,attr)
+            else raise_error_msg('boolean', raw_val, attr)
           end
         when 'integer'
           if raw_val =~ /^[0-9]+$/
             raw_val.to_i
           else
-            raise_error_msg('integer',raw_val,attr)
+            raise_error_msg('integer', raw_val, attr)
           end
         when 'json'
           # will be converted already
@@ -107,13 +107,13 @@ module DTK; class Attribute
       else
         ret[:data_type] = 'json'
         ret[:semantic_type_summary] = datatype
-        ret[:semantic_type] = is_array ? {':array'.to_sym => datatype} : datatype
+        ret[:semantic_type] = is_array ? { ':array'.to_sym => datatype } : datatype
       end
       ret
     end
 
-    def self.ret_default_info__hash(hash_semantic_type,default)
-      hash_semantic_type.inject({}) do |h,(k,v)|
+    def self.ret_default_info__hash(hash_semantic_type, default)
+      hash_semantic_type.inject({}) do |h, (k, v)|
         if v[:dynamic]
           h
         else
@@ -132,7 +132,7 @@ module DTK; class Attribute
 
     private
 
-    def self.raise_error_msg(type,val,attr)
+    def self.raise_error_msg(type, val, attr)
       val_print_form = (val.respond_to?(:to_s) ? val.to_s : val.inspect)
       raise ErrorUsage.new("Unexpected #{type.to_s.capitalize} Value (#{val_print_form}) for attribute (#{attr.print_form}); use set-attribute to change its value")
     end

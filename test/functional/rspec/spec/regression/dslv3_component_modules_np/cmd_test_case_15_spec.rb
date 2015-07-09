@@ -16,13 +16,13 @@ component_name = 'source'
 attribute_name = 'hash_attr'
 file_for_change_location = './spec/regression/dslv3_component_modules_np/resources/cmd_test_case_15_dtk.model.yaml'
 file_for_change = 'dtk.model.yaml'
-attribute_value_hash = {'key1'=>nil}
+attribute_value_hash = { 'key1' => nil }
 
 dtk_common = DtkCommon.new('', '')
 
 describe '(Component Module DSL) Test Case 15: dtk.model.yaml with hash type attribute that contains key without value' do
   before(:all) do
-    puts '************************************************************************************************************',''
+    puts '************************************************************************************************************', ''
   end
 
   context 'Import component module function' do

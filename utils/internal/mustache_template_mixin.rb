@@ -3,7 +3,7 @@ require 'mustache'
 module DTK
   class MustacheTemplateError < Exception
     attr_reader :error_message
-    def initialize(error_message=nil)
+    def initialize(error_message = nil)
       @error_message = error_message
     end
 

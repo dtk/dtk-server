@@ -22,7 +22,7 @@ dtk_common = DtkCommon.new('', '')
 
 describe '(Client remotes) Test Case 1: Import from Bitbucket, check remotes, make changes and push-remote and make sure changes are pushed' do
   before(:all) do
-    puts '*********************************************************************************************************************************',''
+    puts '*********************************************************************************************************************************', ''
   end
 
   context 'Import component module from git repo (bitbucket)' do

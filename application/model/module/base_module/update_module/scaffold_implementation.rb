@@ -9,21 +9,21 @@ module DTK; class BaseModule; class UpdateModule
     # As we progress we can identiy two pieces of info
     # 1) what signatures get parsed (e.g., only top level puppet ones) and put in dtk
     # 2) what signatures get parsed and put in commented out
-    def self.create_dsl(module_name,config_agent_type,impl_obj,opts={})
+    def self.create_dsl(module_name, config_agent_type, impl_obj, opts = {})
       ret = ModuleDSLInfo::CreatedInfo.new()
       parsing_error = nil
       render_hash = nil
       begin
-        impl_parse = ConfigAgent.parse_given_module_directory(config_agent_type,impl_obj)
+        impl_parse = ConfigAgent.parse_given_module_directory(config_agent_type, impl_obj)
         dsl_generator = ModuleDSL::GenerateFromImpl.create()
         # refinement_hash is version neutral form gotten from version specfic dsl_generator
-        refinement_hash = dsl_generator.generate_refinement_hash(impl_parse,module_name,impl_obj.id_handle())
+        refinement_hash = dsl_generator.generate_refinement_hash(impl_parse, module_name, impl_obj.id_handle())
         render_hash = refinement_hash.render_hash_form(opts)
        rescue ErrorUsage => e
         # parsing_error = ErrorUsage.new("Error parsing #{config_agent_type} files to generate meta data")
         parsing_error = e
        rescue => e
-        Log.error_pp([:parsing_error,e,e.backtrace[0..10]])
+        Log.error_pp([:parsing_error, e, e.backtrace[0..10]])
         raise e
       end
       if render_hash

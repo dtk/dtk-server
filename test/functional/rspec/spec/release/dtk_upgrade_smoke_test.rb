@@ -43,7 +43,7 @@ dtk_common.login
 
 describe 'DTK Server smoke test release' do
   before(:all) do
-    puts '*****************************',''
+    puts '*****************************', ''
   end
 
   context 'Set catalog credentials' do

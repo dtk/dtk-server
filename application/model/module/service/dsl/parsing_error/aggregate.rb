@@ -1,12 +1,12 @@
 module DTK; class ServiceModule
   class ParsingError
     class Aggregate
-      def initialize(opts={})
+      def initialize(opts = {})
         @aggregate_error = nil
         @error_cleanup = opts[:error_cleanup]
       end
 
-      def aggregate_errors!(ret_when_err=nil,&_block)
+      def aggregate_errors!(ret_when_err = nil, &_block)
         begin
           yield
          rescue DanglingComponentRefs => e
@@ -21,7 +21,7 @@ module DTK; class ServiceModule
         end
       end
 
-      def raise_error?(opts={})
+      def raise_error?(opts = {})
         if @aggregate_error
           @error_cleanup.call() if @error_cleanup
           error = @aggregate_error.add_error_opts(Opts.new(log_error: false))

@@ -1,7 +1,7 @@
 
 
 class Fieldcalendar < Fieldbase
-  attr_accessor :default_class,:read_only,:cal_type
+  attr_accessor :default_class, :read_only, :cal_type
 
   def initialize(field_meta)
     super(field_meta)

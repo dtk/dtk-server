@@ -47,7 +47,7 @@ module DTK; class ActionDef; class Content
       private
 
       def ret_needs_template_substitution?
-        !![@command_line,@if_condition,@unless_condition].find{|s|@template_processor.needs_template_substitution?(s)}
+        !![@command_line, @if_condition, @unless_condition].find { |s| @template_processor.needs_template_substitution?(s) }
       end
     end
   end

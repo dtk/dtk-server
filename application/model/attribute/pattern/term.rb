@@ -1,7 +1,7 @@
 module DTK; class Attribute
   class Pattern
     module Term
-      def self.canonical_form(type,term)
+      def self.canonical_form(type, term)
         "#{type}#{LDelim}#{term}#{RDelim}"
       end
       def self.extract_term?(canonical_form)

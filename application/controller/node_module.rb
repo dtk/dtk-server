@@ -7,20 +7,20 @@ module DTK
       module_name = ret_non_null_request_params(:module_name)
       project = get_default_project()
       version = nil #TODO: stub
-      local_params = local_params(:node_module,module_name,version: version)
-      module_repo_info = NodeModule.create_module(project,local_params)[:module_repo_info]
+      local_params = local_params(:node_module, module_name, version: version)
+      module_repo_info = NodeModule.create_module(project, local_params)[:module_repo_info]
 
       rest_ok_response module_repo_info
     end
 
     def rest__update_from_initial_create
       node_module = create_obj(:node_module_id)
-      repo_id,commit_sha = ret_non_null_request_params(:repo_id,:commit_sha)
-      repo_idh = id_handle(repo_id,:repo)
+      repo_id, commit_sha = ret_non_null_request_params(:repo_id, :commit_sha)
+      repo_idh = id_handle(repo_id, :repo)
       version = ret_version()
       scaffold = ret_request_params(:scaffold_if_no_dsl)
-      opts = {scaffold_if_no_dsl: scaffold, do_not_raise: true, process_provider_specific_dependencies: false}
-      rest_ok_response node_module.import_from_file(commit_sha,repo_idh,version,opts)
+      opts = { scaffold_if_no_dsl: scaffold, do_not_raise: true, process_provider_specific_dependencies: false }
+      rest_ok_response node_module.import_from_file(commit_sha, repo_idh, version, opts)
     end
 
     def rest__update_model_from_clone
@@ -35,7 +35,7 @@ module DTK
       if ret_request_param_boolean(:force_parse)
         opts.merge!(force_parse: true)
       end
-      dsl_created_info = node_module.update_model_from_clone_changes?(commit_sha,diffs_summary,version,opts)
+      dsl_created_info = node_module.update_model_from_clone_changes?(commit_sha, diffs_summary, version, opts)
       rest_ok_response dsl_created_info
     end
 
@@ -127,7 +127,7 @@ module DTK
       about = ret_non_null_request_params(:about).to_sym
       component_template_id = ret_request_params(:component_template_id)
       unless AboutEnum.include?(about)
-        raise ErrorUsage::BadParamValue.new(:about,AboutEnum)
+        raise ErrorUsage::BadParamValue.new(:about, AboutEnum)
       end
       rest_ok_response node_module.info_about(about, component_template_id)
     end
@@ -153,7 +153,7 @@ module DTK
       node_module = create_obj(:node_module_id)
       remote_repo = ret_remote_repo()
       version = ret_version()
-      rest_ok_response node_module.import_version(remote_repo,version)
+      rest_ok_response node_module.import_version(remote_repo, version)
     end
 
     # TODO: ModuleBranch::Location: harmonize this signature with one for service module
@@ -162,7 +162,7 @@ module DTK
       remote_namespace = ret_request_params(:remote_module_namespace)
       force_delete = ret_request_param_boolean(:force_delete)
 
-      remote_params = remote_params_dtkn(:node_module,remote_namespace,remote_module_name)
+      remote_params = remote_params_dtkn(:node_module, remote_namespace, remote_module_name)
       client_rsa_pub_key = ret_request_params(:rsa_pub_key)
       project = get_default_project()
 

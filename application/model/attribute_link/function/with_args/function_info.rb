@@ -1,8 +1,8 @@
 module DTK; class AttributeLink
   class Function::WithArgs
     class FunctionInfo
-      attr_reader :name,:constants
-      def initialize(name,constants_hash)
+      attr_reader :name, :constants
+      def initialize(name, constants_hash)
         @name = name.to_sym
         @constants = Constants.new(constants_hash)
       end
@@ -19,7 +19,7 @@ module DTK; class AttributeLink
           unless fn_info_hash && fn_info_hash.key?(:name)
             raise(Error.new("Function def has illegal form: #{function_def.inspect}"))
           end
-          new(fn_info_hash[:name],fn_info_hash[:constants]||{})
+          new(fn_info_hash[:name], fn_info_hash[:constants] || {})
         end
       end
 

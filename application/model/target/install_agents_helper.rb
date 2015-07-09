@@ -14,7 +14,7 @@ module DTK; class Target
     end
     def install
       # we get all the nodes that are 'unmanaged', meaning they are physical nodes that does not have node agent installed
-      unmanaged_nodes = @target.get_objs(cols: [:unmanaged_nodes]).map{|r|r[:node]}
+      unmanaged_nodes = @target.get_objs(cols: [:unmanaged_nodes]).map { |r| r[:node] }
       servers, install_script, mcollective_client = [], nil, nil
 
       # TODO: better to use tempfile library; see how it is used in ../server/utils/internal/command_and_control/adapters/node_config/mcollective/config.rb
@@ -68,7 +68,7 @@ module DTK; class Target
     # we just ignore it
     module Work
       @queue     = Queue.new
-      @n_threads = R8::Config[:workflow][:install_agents][:threads].to_i||10
+      @n_threads = R8::Config[:workflow][:install_agents][:threads].to_i || 10
       @workers   = []
       @running   = true
       @servers_per_thread = 0
@@ -82,11 +82,11 @@ module DTK; class Target
       end
 
       def start
-        @servers_per_thread = (@queue.size/@n_threads) + 1
+        @servers_per_thread = (@queue.size / @n_threads) + 1
         @n_threads.times do
           @workers << Thread.new do
             begin
-              @servers_per_thread.times.map {process_jobs}
+              @servers_per_thread.times.map { process_jobs }
             ensure
               Thread.current.exit
             end
@@ -103,7 +103,7 @@ module DTK; class Target
       end
 
       def drain
-        t_out = R8::Config[:workflow][:install_agents][:timeout].to_i||600
+        t_out = R8::Config[:workflow][:install_agents][:timeout].to_i || 600
         Timeout.timeout(t_out) do
           loop do
             break unless @workers.any?(&:alive?)
@@ -124,7 +124,7 @@ module DTK; class Target
     # and after that we execute some commands on the node itself using execute_ssh_command() method
     class SshJob
       def call(message)
-        Log.info_pp(['SshJob#call',:message,message[:node]])
+        Log.info_pp(['SshJob#call', :message, message[:node]])
         node = message['node']
         mcollective_client = message['mcollective_client']
         external_ref = node.get_external_ref()
@@ -135,7 +135,7 @@ module DTK; class Target
         unless ssh_credentials = external_ref[:ssh_credentials]
           raise ErrorUsage.new("#{name_and_id(node)} is missing ssh_credentials")
         end
-        [:ssh_user,:ssh_password].each do |ssh_attr|
+        [:ssh_user, :ssh_password].each do |ssh_attr|
           unless ssh_credentials[ssh_attr]
             raise ErrorUsage.new("#{name_and_id(node)} is missing ssh_credentials field #{ssh_attr}")
           end
@@ -145,7 +145,7 @@ module DTK; class Target
           hostname: external_ref[:routable_host_address],
           user: ssh_credentials[:ssh_user],
           password: ssh_credentials[:ssh_password],
-          port: ssh_credentials[:port]||'22',
+          port: ssh_credentials[:port] || '22',
           id: node.id()
         }
 
@@ -153,7 +153,7 @@ module DTK; class Target
         begin
           execute_ssh_command('ls /', params)
         rescue Exception => e
-          Log.info_pp(['SshJob#call',:error,e, :params, params])
+          Log.info_pp(['SshJob#call', :error, e, :params, params])
           return
         end
 
@@ -181,7 +181,7 @@ module DTK; class Target
 
         # send discover call filtered by 'pbuilderid'(node[:ref] == pbuilderid)
         # if empty array is returned, agent on node is not working as expected
-        filter = {'fact'=>[{fact: 'pbuilderid',value: node[:ref],operator: '=='}], 'cf_class'=>[], 'agent'=>[], 'identity'=>[], 'compound'=>[]}
+        filter = { 'fact' => [{ fact: 'pbuilderid', value: node[:ref], operator: '==' }], 'cf_class' => [], 'agent' => [], 'identity' => [], 'compound' => [] }
         discovered_data = CommandAndControl.discover(filter, 3, 1, mcollective_client)
 
         # set managed = true only if mcollective from node returns valid response
@@ -198,7 +198,7 @@ module DTK; class Target
         node.pp_name_and_id(capitalize: true)
       end
 
-      def execute_ssh_command(command, params={})
+      def execute_ssh_command(command, params = {})
         Net::SSH.start(params[:hostname], params[:user], password: params[:password], port: params[:port]) do |ssh|
           # capture all stderr and stdout output from a remote process
           ssh.exec!(command) do |_channel, _stream, line|

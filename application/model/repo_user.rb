@@ -46,7 +46,7 @@ module DTK
 
     # Returns flag which indicates if this user has access to component_modules or service_modules
     #
-    def has_direct_access?(module_model_name,opts={})
+    def has_direct_access?(module_model_name, opts = {})
       direct_access_col = direct_access_col(module_model_name)
       update_object!(direct_access_col) unless opts[:donot_update]
       self[direct_access_col]
@@ -67,7 +67,7 @@ module DTK
     #   module_model_name (sym)
     #   val (boolean)
     #
-    def update_direct_access(module_model_name,val)
+    def update_direct_access(module_model_name, val)
       direct_access_col = direct_access_col(module_model_name)
       update(direct_access_col => val)
       self[direct_access_col] = val
@@ -107,24 +107,24 @@ module DTK
     end
     AuthorizedUserDefaultRights = 'RW+'
     def self.authorized_users(model_handle)
-      get_objs(model_handle.createMH(:repo_user), cols: [:id,:username]).map{|r|r[:username]}
+      get_objs(model_handle.createMH(:repo_user), cols: [:id, :username]).map { |r| r[:username] }
     end
     private_class_method :authorized_users
 
     # returns an object or calls block (with new or existing object)
-    def self.add_repo_user?(repo_user_type, repo_user_mh, ssh_rsa_keys={},username=nil)
+    def self.add_repo_user?(repo_user_type, repo_user_mh, ssh_rsa_keys = {}, username = nil)
       # for match on type; use following logic
       # if ssh public key given look for match on this
       # otherwise return error if there is multiple matches for node or admin type
       existing_users = get_existing_repo_users(repo_user_mh, type: repo_user_type.to_s)
       if ssh_rsa_pub_key = ssh_rsa_keys[:public]
-        match = existing_users.find{|r|r[:ssh_rsa_pub_key] == ssh_rsa_pub_key}
+        match = existing_users.find { |r| r[:ssh_rsa_pub_key] == ssh_rsa_pub_key }
         return match, true if match
 
         # get all public key files from gitolite_admin keydir
         # and raise exception if file with provided rsa_public_key exists already
         gitolite_admin_keydir = RepoManager.get_keydir()
-        pub_keys = Dir.entries(gitolite_admin_keydir).select{|key| key.to_s.include?('.pub')}
+        pub_keys = Dir.entries(gitolite_admin_keydir).select { |key| key.to_s.include?('.pub') }
 
         pub_keys.each do |key|
           key_content = File.read("#{gitolite_admin_keydir}/#{key}")
@@ -139,43 +139,43 @@ module DTK
          when 1
           return existing_users.first
          else
-          if [:admin,:node].include?(repo_user_type)
+          if [:admin, :node].include?(repo_user_type)
             raise Error.new("Unexpected to have multiple matches of repo user type (#{repo_user_type})")
           end
         end
       end
 
-      add_repo_user(repo_user_type,repo_user_mh,ssh_rsa_keys,existing_users,username)
+      add_repo_user(repo_user_type, repo_user_mh, ssh_rsa_keys, existing_users, username)
     end
 
     # ssh_rsa_keys[:public].nil? means that expected that key already exists in the gitolite admin db
-    def self.add_repo_user(repo_user_type,repo_user_mh,ssh_rsa_keys={},existing_users=[],username=nil)
-      repo_username,index =  ret_new_repo_username_and_index(repo_user_type,existing_users,username)
+    def self.add_repo_user(repo_user_type, repo_user_mh, ssh_rsa_keys = {}, existing_users = [], username = nil)
+      repo_username, index =  ret_new_repo_username_and_index(repo_user_type, existing_users, username)
       if ssh_rsa_keys[:public]
-        RepoManager.add_user(repo_username,ssh_rsa_keys[:public],noop_if_exists: true)
+        RepoManager.add_user(repo_username, ssh_rsa_keys[:public], noop_if_exists: true)
       end
-      create_instance(repo_user_mh,repo_user_type,repo_username,index,ssh_rsa_keys)
+      create_instance(repo_user_mh, repo_user_type, repo_username, index, ssh_rsa_keys)
     end
 
-    def self.get_matching_repo_users(repo_user_mh,filters_keys,_username,cols=nil)
-      repo_users = get_existing_repo_users(repo_user_mh,filters_keys,cols)
+    def self.get_matching_repo_users(repo_user_mh, filters_keys, _username, cols = nil)
+      repo_users = get_existing_repo_users(repo_user_mh, filters_keys, cols)
     end
 
-    def self.get_matching_repo_user(repo_user_mh,filters_keys,cols=nil)
+    def self.get_matching_repo_user(repo_user_mh, filters_keys, cols = nil)
       ret = nil
-      repo_users = get_existing_repo_users(repo_user_mh,filters_keys,cols)
+      repo_users = get_existing_repo_users(repo_user_mh, filters_keys, cols)
       if repo_users.size > 1
         Log.error("Unexpected to have multiple matches of repo user when matching on (#{filters_keys.inspect})")
       end
       repo_users.first
     end
 
-    def self.get_by_repo_username(model_handle,repo_username)
+    def self.get_by_repo_username(model_handle, repo_username)
       sp_hash = {
-        cols: [:id,:username,:repo_manager_direct_access],
-        filter: [:eq,:username,repo_username]
+        cols: [:id, :username, :repo_manager_direct_access],
+        filter: [:eq, :username, repo_username]
       }
-      get_obj(model_handle,sp_hash)
+      get_obj(model_handle, sp_hash)
     end
 
     private
@@ -192,21 +192,21 @@ module DTK
 
     ### Private class methods ###
 
-    def self.get_existing_repo_users(repo_user_mh, filter_keys={}, cols=nil)
+    def self.get_existing_repo_users(repo_user_mh, filter_keys = {}, cols = nil)
       sp_hash = {
-        cols: cols ? (cols+[:id,:group_id]) : common_columns()
+        cols: cols ? (cols + [:id, :group_id]) : common_columns()
       }
       unless filter_keys.empty?
-        filter_list = filter_keys.map{|k,v|[:eq,k,v.to_s]}
+        filter_list = filter_keys.map { |k, v| [:eq, k, v.to_s] }
         sp_hash[:filter] = (filter_list.size == 1 ? filter_list.first : ([:and] + filter_list))
       end
-      get_objs(repo_user_mh,sp_hash)
+      get_objs(repo_user_mh, sp_hash)
     end
 
-    def self.ret_new_repo_username_and_index(type,existing_matches,username)
+    def self.ret_new_repo_username_and_index(type, existing_matches, username)
       if type == :admin
         # TODO: r8sserver will eb deprecated
-        new_repo_username = R8::Config[:admin_repo_user]||"dtk-admin-#{R8::Config[:dtk_instance_user]}"
+        new_repo_username = R8::Config[:admin_repo_user] || "dtk-admin-#{R8::Config[:dtk_instance_user]}"
         new_index = 1
       elsif username
         new_repo_username = username
@@ -218,15 +218,15 @@ module DTK
             max = m[:index]
           end
         end
-        new_index = max+1
+        new_index = max + 1
         suffix = (new_index == 1 ? '' : "-#{new_index}")
         username = CurrentSession.new.get_username()
         new_repo_username = "dtk-#{type}-#{username}#{suffix}"
       end
-      [new_repo_username,new_index]
+      [new_repo_username, new_index]
     end
 
-    def self.create_instance(model_handle,type,repo_username,index,ssh_rsa_keys={})
+    def self.create_instance(model_handle, type, repo_username, index, ssh_rsa_keys = {})
       create_row = {
         ref: repo_username,
         display_name: repo_username,
@@ -236,7 +236,7 @@ module DTK
         ssh_rsa_pub_key: ssh_rsa_keys[:public],
         ssh_rsa_private_key: ssh_rsa_keys[:private]
       }
-      new_idh = create_from_row(model_handle,create_row)
+      new_idh = create_from_row(model_handle, create_row)
       new_idh.create_object.merge(create_row)
     end
   end

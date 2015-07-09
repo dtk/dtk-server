@@ -22,7 +22,7 @@ dtk_common = DtkCommon.new('', '')
 
 describe '(Client remotes) Test Case 2: Import from Github, check remotes, make changes and push-remote and make sure changes are pushed' do
   before(:all) do
-    puts '******************************************************************************************************************************',''
+    puts '******************************************************************************************************************************', ''
   end
 
   context 'Import component module from git repo (github)' do

@@ -12,7 +12,7 @@ EM.run do
     end
     connection.callback do |ssh|
       # capture all stderr and stdout output from a remote process
-      ssh.exec!('uname -a').tap {|r| puts "\nuname: #{r}"}
+      ssh.exec!('uname -a').tap { |r| puts "\nuname: #{r}" }
 
       # capture only stdout matching a particular pattern
       stdout = ''

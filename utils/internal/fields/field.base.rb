@@ -3,7 +3,7 @@
 # This is the base field class that all form fields derive from
 # <input>:   http://www.w3schools.com/tags/tag_input.asp
 class Fieldbase
-  attr_accessor :name,:id,:model_name,:value,:disabled,:classes,:field_meta,:render_mode
+  attr_accessor :name, :id, :model_name, :value, :disabled, :classes, :field_meta, :render_mode
 
   def initialize(field_meta)
     @field_meta = field_meta
@@ -33,7 +33,7 @@ class Fieldbase
   def render(view_type, render_mode)
     self.set_class_txt
 
-    if(render_mode != '') then @render_mode = render_mode end
+    if (render_mode != '') then @render_mode = render_mode end
 
     case view_type.downcase
       when 'edit' then
@@ -46,7 +46,7 @@ class Fieldbase
         return (defined? self.get_field_search) ? self.get_field_search : self.get_field_edit
       # if getting to default then its calling a custom view
       else
-        cstm_view_method = 'get_field_'+ view_type
+        cstm_view_method = 'get_field_' + view_type
         return self.send(cstm_view_method.to_sym)
     end
   end
@@ -98,7 +98,7 @@ class Fieldbase
     tmp_array = []
 
     @classes.each do |the_class|
-      if(the_class != class_to_remove) then tmp_array << the_class end
+      if (the_class != class_to_remove) then tmp_array << the_class end
     end
     @classes = tmp_array
   end

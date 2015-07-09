@@ -17,7 +17,7 @@ describe '(Repoman Drupal API) Test Case 2: Create user with only required param
 
   context 'Login' do
     it 'passed successfully' do
-      repoman.login(login[:username],login[:password])
+      repoman.login(login[:username], login[:password])
       expect(repoman.authorization_token).not_to be_empty
     end
   end

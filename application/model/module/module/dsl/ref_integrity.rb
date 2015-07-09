@@ -1,7 +1,7 @@
 module DTK
   class ModuleDSL
     class RefIntegrity
-      r8_nested_require('ref_integrity','snapshot')
+      r8_nested_require('ref_integrity', 'snapshot')
 
       def initialize(component_module)
         @component_module = component_module
@@ -13,7 +13,7 @@ module DTK
         new(component_module)
       end
 
-      def raise_error_if_any_violations(opts={})
+      def raise_error_if_any_violations(opts = {})
         raise_error_if_dangling_cmp_ref(opts)
         raise_error_if_dangling_port_link()
         # raise_error_if_dangling_cmp_attr_ref()
@@ -23,7 +23,7 @@ module DTK
         add_new_ports_on_component_templates()
       end
 
-      def raise_error_if_missing_from_module_refs(include_modules,module_refs_modules={})
+      def raise_error_if_missing_from_module_refs(include_modules, module_refs_modules = {})
         if inc_modules = include_modules['includes']
           missing = []
           ref_component_modules = module_refs_modules.component_modules.keys
@@ -37,7 +37,7 @@ module DTK
 
       private
 
-      def raise_error_if_dangling_cmp_ref(opts={})
+      def raise_error_if_dangling_cmp_ref(opts = {})
         referenced_cmp_template_ids = @snapshot.component_template_ids()
         return if referenced_cmp_template_ids.empty?
         # this is called within transaction after any deletes are performed (if any)
@@ -48,10 +48,10 @@ module DTK
         return unless any_deletes
 
         sp_hash = {
-          cols: [:id,:display_name,:group_id],
+          cols: [:id, :display_name, :group_id],
           filter: [:oneof, :id, referenced_cmp_template_ids]
         }
-        cmp_template_ids_still_present = Model.get_objs(model_handle(:component),sp_hash).map{|r|r[:id]}
+        cmp_template_ids_still_present = Model.get_objs(model_handle(:component), sp_hash).map { |r| r[:id] }
         referenced_cmp_templates = @snapshot.referenced_cmp_templates(cmp_template_ids_still_present)
         unless referenced_cmp_templates.empty?
           raise ParsingError::RefComponentTemplates.new(referenced_cmp_templates)
@@ -66,8 +66,8 @@ module DTK
         # find all assembly templates that reference a component template that has a new link def added
         # this is done by taking a new snapshot (one that is post changes) and seeing in any new link defs
         new_snapshot = Snapshot.new(@component_module)
-        snapshot_link_def_ids = @snapshot.link_defs.map{|ld|ld[:id]}
-        new_links_defs = new_snapshot.link_defs.reject{|ld|snapshot_link_def_ids.include?(ld[:id])}
+        snapshot_link_def_ids = @snapshot.link_defs.map { |ld| ld[:id] }
+        new_links_defs = new_snapshot.link_defs.reject { |ld| snapshot_link_def_ids.include?(ld[:id]) }
         unless new_links_defs.empty?
           link_def_info = new_snapshot.create_link_def_info(new_links_defs)
           ServiceModule::PortProcessing.create_assembly_template_ports?(link_def_info)

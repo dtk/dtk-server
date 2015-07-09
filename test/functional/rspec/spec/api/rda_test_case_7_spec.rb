@@ -14,7 +14,7 @@ describe '(Repoman Drupal API) Test Case 7: NEG - Get non-existing namespace and
 
   context 'Login' do
     it 'passed successfully' do
-      repoman.login(login[:username],login[:password])
+      repoman.login(login[:username], login[:password])
       expect(repoman.authorization_token).not_to be_empty
     end
   end

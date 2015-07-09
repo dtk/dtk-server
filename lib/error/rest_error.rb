@@ -16,7 +16,7 @@ module DTK
     end
 
     def hash_form
-      ret = {code: code||:error, message: message||''}
+      ret = { code: code || :error, message: message || '' }
       ret.merge!(backtrace: backtrace) if @backtrace
       ret
     end

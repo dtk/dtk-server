@@ -3,24 +3,24 @@ module DTK; class Clone
     # This module is responsible for incremental clone (incremental update) when component module
     # in a service instance are updated the compoennt instance needs to be updated
     class Component < self
-      def initialize(project_idh,module_branch)
+      def initialize(project_idh, module_branch)
         @project_idh = project_idh
         @module_branch = module_branch
         @module_branch_id = @module_branch[:id]
       end
 
-      def update?(components,opts={})
-        cmps_needing_update = components.select{|cmp|component_needs_update?(cmp,opts)}
+      def update?(components, opts = {})
+        cmps_needing_update = components.select { |cmp| component_needs_update?(cmp, opts) }
         return if cmps_needing_update.empty?
         # putting this here but not in other update functions in IncrementalUpdate because this is top level entry point
         Model.Transaction do
-          update(cmps_needing_update,opts)
+          update(cmps_needing_update, opts)
         end
       end
 
       private
 
-      def update(components,opts={})
+      def update(components, opts = {})
         # get mapping between component instances and their templates
         # component templates indexed by component type
         links = get_instance_template_links(components, opts)
@@ -36,7 +36,7 @@ module DTK; class Clone
             external_ref: cmp_template[:external_ref]
           }
         end
-        Model.update_from_rows(@project_idh.createMH(:component),rows_to_update)
+        Model.update_from_rows(@project_idh.createMH(:component), rows_to_update)
         update_children(links)
       end
 
@@ -46,7 +46,7 @@ module DTK; class Clone
         Attribute.new(links).update?()
       end
 
-      def component_needs_update?(cmp,opts={})
+      def component_needs_update?(cmp, opts = {})
         opts[:meta_file_changed] ||
         needs_to_be_moved_to_assembly_branch?(cmp) ||
         has_locked_sha?(cmp)
@@ -62,9 +62,9 @@ module DTK; class Clone
          !cmp.get_field?(:locked_sha).nil?
       end
 
-      def get_instance_template_links(cmps, opts={})
+      def get_instance_template_links(cmps, opts = {})
         ret = InstanceTemplate::Links.new()
-        component_types = cmps.map{|cmp|cmp.get_field?(:component_type)}.uniq
+        component_types = cmps.map { |cmp| cmp.get_field?(:component_type) }.uniq
         version_field = @module_branch.get_field?(:version)
         match_el_array = component_types.map do |ct|
           DTK::Component::Template::MatchElement.new(
@@ -72,12 +72,12 @@ module DTK; class Clone
             version_field: version_field
           )
         end
-        ndx_cmp_type_template = DTK::Component::Template.get_matching_elements(@project_idh,match_el_array,opts).inject({}) do |h,r|
+        ndx_cmp_type_template = DTK::Component::Template.get_matching_elements(@project_idh, match_el_array, opts).inject({}) do |h, r|
           h.merge(r[:component_type] => r)
         end
         cmps.each do |cmp|
           if template = ndx_cmp_type_template[cmp[:component_type]] # this should be non null; "if" just for protection
-            ret.add(cmp,template)
+            ret.add(cmp, template)
           end
         end
         ret

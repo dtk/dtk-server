@@ -21,7 +21,7 @@ dtk_common = DtkCommon.new('', '')
 
 describe '(Modules, Services and Versioning) Test Case 14: Import component module from r8 repo and export to default tenant namespace' do
   before(:all) do
-    puts '****************************************************************************************************************************',''
+    puts '****************************************************************************************************************************', ''
   end
 
   context 'Import component module function' do

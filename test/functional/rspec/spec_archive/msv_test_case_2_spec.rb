@@ -33,7 +33,7 @@ describe '(Modules, Services and Versioning) Test Case 2: Import component modul
   end
 
   context 'Import module function' do
-    include_context 'Import remote module', module_namespace + '/' +module_name
+    include_context 'Import remote module', module_namespace + '/' + module_name
   end
 
   context 'Get module components list' do

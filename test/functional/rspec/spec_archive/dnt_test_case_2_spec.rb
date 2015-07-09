@@ -20,7 +20,7 @@ dtk_common = DtkCommon.new(service_name, assembly_name)
 
 describe '(Different Node Templates) Test Case 2: (OS: CentOS, Namenode: BigTop) Check possibility to add OS and namenode components and deploy assembly' do
   before(:all) do
-    puts '**********************************************************************************************************************************************',''
+    puts '**********************************************************************************************************************************************', ''
   end
 
   context "Stage service function on #{assembly_name} assembly" do

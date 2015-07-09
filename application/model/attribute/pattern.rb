@@ -1,9 +1,9 @@
 module DTK; class Attribute
   class Pattern
-    r8_nested_require('pattern','type')
-    r8_nested_require('pattern','assembly')
-    r8_nested_require('pattern','node')
-    r8_nested_require('pattern','term')
+    r8_nested_require('pattern', 'type')
+    r8_nested_require('pattern', 'assembly')
+    r8_nested_require('pattern', 'node')
+    r8_nested_require('pattern', 'term')
 
     def self.node_name
       (pattern =~ NodeComponentRegexp ? $1 : raise_unexpected_pattern(pattern))
@@ -25,8 +25,8 @@ module DTK; class Attribute
     end
     private_class_method :raise_unexpected_pattern
 
-    def self.create_attr_pattern(base_object,attr_term,opts={})
-      create(attr_term,base_object,opts).set_parent_and_attributes!(base_object.id_handle(),opts)
+    def self.create_attr_pattern(base_object, attr_term, opts = {})
+      create(attr_term, base_object, opts).set_parent_and_attributes!(base_object.id_handle(), opts)
     end
 
     # set_attributes can create or set attributes depending on options in opts

@@ -4,12 +4,12 @@ module DTK; class ServiceModule
       include Task::Template::Serialization
       def self.canonical_form(input_hash)
         ret = input_hash.class.new()
-        input_hash.each_pair do |k,info|
+        input_hash.each_pair do |k, info|
           # TODO: assuming that just one level workflow
           ret[k] =
             case k
              when :subtasks
-              info.map{|subtask|subtask_canonical_form(subtask)}
+              info.map { |subtask| subtask_canonical_form(subtask) }
              else
               info
             end
@@ -19,11 +19,11 @@ module DTK; class ServiceModule
 
       def self.subtask_canonical_form(input_hash)
         ret = input_hash.class.new()
-        input_hash.each_pair do |k,info|
+        input_hash.each_pair do |k, info|
             # TODO: assuming that just one level workflow
             case k
              when :nodes
-              if  Constant.matches?(info,:AllApplicable)
+              if  Constant.matches?(info, :AllApplicable)
               # remove no op
               else
                 ret[k] = info

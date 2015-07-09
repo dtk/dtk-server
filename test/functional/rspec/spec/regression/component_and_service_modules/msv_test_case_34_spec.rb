@@ -22,7 +22,7 @@ dtk_common = DtkCommon.new('', '')
 
 describe '(Modules, Services and Versioning) Test Case 34: Create test module in default namespace and in two different namespaces' do
   before(:all) do
-    puts '************************************************************************************************************************',''
+    puts '************************************************************************************************************************', ''
   end
 
   context 'Create test module' do

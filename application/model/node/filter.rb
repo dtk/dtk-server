@@ -13,7 +13,7 @@ module DTK; class Node
       end
 
       def filter_aux?(nodes)
-        nodes.select{|n|@node_ids.include?(n[:id])}
+        nodes.select { |n| @node_ids.include?(n[:id]) }
       end
     end
   end

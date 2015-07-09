@@ -5,15 +5,15 @@ module DTK; module WorkflowAdapter
       Store = {}
       Lock = Mutex.new
 
-      def self.set(task_id,top_task_id,task_info,opts={})
-        key = task_key(task_id,top_task_id,opts)
-        Lock.synchronize{Store[key] = task_info}
+      def self.set(task_id, top_task_id, task_info, opts = {})
+        key = task_key(task_id, top_task_id, opts)
+        Lock.synchronize { Store[key] = task_info }
       end
 
       def self.get(workitem)
         key = get_from_workitem(workitem)
         ret = nil
-        Lock.synchronize{ret = Store[key]}
+        Lock.synchronize { ret = Store[key] }
         unless ret
           Log.error("cannot find match for key: #{key}")
         end
@@ -22,11 +22,11 @@ module DTK; module WorkflowAdapter
 
       def self.delete(workitem)
         key = get_from_workitem(workitem)
-        Lock.synchronize{Store.delete(key)}
+        Lock.synchronize { Store.delete(key) }
       end
 
       def self.clean(top_task_id)
-        Lock.synchronize{ Store.delete_if { |key, _value| key.match(Regexp.new("^#{top_task_id}#{TopTaskDelim}")) }}
+        Lock.synchronize { Store.delete_if { |key, _value| key.match(Regexp.new("^#{top_task_id}#{TopTaskDelim}")) } }
         #TODO: this is not write in taht this can have values if concurrent service
         # instances running pp [:write_cleanup,Store.keys]
         # TODO: this needs to clean all keys associated with the task; some handle must be passed in
@@ -48,16 +48,16 @@ module DTK; module WorkflowAdapter
         if override_node_id = params['override_node_id']
           opts.merge!(override_node_id: override_node_id)
         end
-        task_key(task_id,top_task_id,opts)
+        task_key(task_id, top_task_id, opts)
       end
 
       # opts can have keys
       #  :task_type
       #  ::override_node_id
-      def self.task_key(task_id,top_task_id,opts={})
+      def self.task_key(task_id, top_task_id, opts = {})
         ret_key = "#{top_task_id}#{TopTaskDelim}#{task_id}"
         if task_type = opts[:task_type]
-          ret_key <<  "--#{task_type}"
+          ret_key << "--#{task_type}"
         end
         if override_node_id = opts[:override_node_id]
           ret_key << "---#{override_node_id}"

@@ -4,8 +4,8 @@ module XYZ
   # class methods
   module MigrationMethods #methods that can be called within a migration
     # if model_names given then just (re)building these tables
-    def db_rebuild(model_names=nil,opts=Opts.new)
-      db = opts[:db]||DB.create(R8::Config[:database])
+    def db_rebuild(model_names = nil, opts = Opts.new)
+      db = opts[:db] || DB.create(R8::Config[:database])
       # if model_naems check all are defined
       if model_names
         model_names.each do |model_name|
@@ -24,7 +24,7 @@ module XYZ
       end
       # associate database handle DBInstance with all models
       if model_names
-        set_db_for_specfic_models(db,model_names)
+        set_db_for_specfic_models(db, model_names)
       else
         set_db_for_all_models(db)
       end
@@ -35,7 +35,7 @@ module XYZ
       # create the domain-related tables if tehy don't exist already
       dir = :up
       if model_names
-        migrate_specfic_models(dir,model_names)
+        migrate_specfic_models(dir, model_names)
       else
         migrate_all_models(dir)
       end
@@ -45,7 +45,7 @@ module XYZ
     end
 
     def clone_data(git_tenant_name, repo_info_hash, gitoliteMng)
-      repo_info_hash.each do |k,v|
+      repo_info_hash.each do |k, v|
         new_url  = "#{git_tenant_name}@localhost:#{v[:new_repo_name]}"
         cmd      = "git --git-dir=#{v[:old_dir]}/.git --work-tree=#{v[:old_dir]} remote add migrate_remote #{new_url}"
         push_cmd = "git --git-dir=#{v[:old_dir]}/.git --work-tree=#{v[:old_dir]} push migrate_remote"
@@ -56,7 +56,7 @@ module XYZ
         gitoliteMng.delete_repo(k)
       end
 
-      repo_info_hash.each do |_k,v|
+      repo_info_hash.each do |_k, v|
         next unless File.directory?(v[:old_dir])
         puts "Deleting dir #{v[:old_dir]}"
         FileUtils.remove_dir(v[:old_dir])
@@ -77,14 +77,14 @@ module XYZ
     end
 
     # TODO: this is specific migration; will have this subsumed and removed
-    def migrate_data_new(opts, tenant_name, c=2)
+    def migrate_data_new(opts, tenant_name, c = 2)
       ap 'TENANT NAME' + tenant_name
       # PREP VARS
       repos_changes = {}
-      db = opts[:db]||DB.create(R8::Config[:database])
+      db = opts[:db] || DB.create(R8::Config[:database])
       match_username_regex = /^(sm|tm)?\-?(\w+)\-/
       admin_tenant_name     = "dtk-admin-#{tenant_name}"
-      git_tenant_name = tenant_name.gsub('dtk','git')
+      git_tenant_name = tenant_name.gsub('dtk', 'git')
 
       # SETUP GITOLITE MANAGER
       puts 'Migrating data ... '
@@ -101,10 +101,10 @@ module XYZ
 
       session = CurrentSession.new
       session.set_user_object(default_project.get_field?(:user))
-      session.set_auth_filters(:c,:group_ids)
+      session.set_auth_filters(:c, :group_ids)
 
       # GET ALL THE MODULES
-      columns = [ :id, :display_name, :c, :group_id, :repos, :remote_repos]
+      columns = [:id, :display_name, :c, :group_id, :repos, :remote_repos]
       modules  = Model.get_objs(default_project.model_handle(:component_module), cols: columns)
       services = Model.get_objs(default_project.model_handle(:service_module), cols: columns)
       tests = Model.get_objs(default_project.model_handle(:test_module), cols: columns)

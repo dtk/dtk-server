@@ -19,7 +19,7 @@ dtk_common = DtkCommon.new('', '')
 
 describe '(Component Module DSL) Test Case 3: Add new component from dtk.model.yaml file, push-clone-changes to server and list components to see the effect of add' do
   before(:all) do
-    puts '*********************************************************************************************************************************************************',''
+    puts '*********************************************************************************************************************************************************', ''
   end
 
   context 'Import component module function' do

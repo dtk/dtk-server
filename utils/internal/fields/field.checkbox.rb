@@ -12,12 +12,12 @@ class Fieldcheckbox < Fieldbase
   # protected function
   def get_field_edit_html
     #    if(!@value.nil? && (@value == '1' || @value == 1)) then
-    if(!@value.nil? && @value == true) then
+    if (!@value.nil? && @value == true) then
       checked = 'checked="true"'
     else
       checked = ''
     end
-    return '<input type="checkbox" id="'+ @id + '" name="' + @name + '" value="1" class="' + @class_txt + '" '+ @checked + ' />'
+    return '<input type="checkbox" id="' + @id + '" name="' + @name + '" value="1" class="' + @class_txt + '" ' + @checked + ' />'
   end
 
   # This returns the Edit View of a input of type text in Javascript form

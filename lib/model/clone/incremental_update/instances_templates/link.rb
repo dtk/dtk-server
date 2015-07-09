@@ -1,8 +1,8 @@
 module DTK; class Clone; class IncrementalUpdate
   module InstancesTemplates
     class Link
-      attr_reader :instances,:templates,:parent_link
-      def initialize(instances,templates,parent_link)
+      attr_reader :instances, :templates, :parent_link
+      def initialize(instances, templates, parent_link)
         @instances = instances
         @templates = templates
         @parent_link = parent_link

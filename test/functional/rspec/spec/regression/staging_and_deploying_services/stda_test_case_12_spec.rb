@@ -17,14 +17,14 @@ service_name = 'stda_test_case_12_instance'
 assembly_name = 'bootstrap::test1'
 node_name = 'test1'
 component_name = 'r8:ruby'
-components = ['ruby','test1/ruby']
+components = ['ruby', 'test1/ruby']
 attribute_name = 'ruby/version'
 attribute_value = '2.1.2'
 dtk_common = DtkCommon.new(service_name, assembly_name)
 
 describe '(Staging And Deploying Assemblies) Test Case 12: Ability to add and delete components on assembly level and set their attributes' do
   before(:all) do
-    puts '********************************************************************************************************************************',''
+    puts '********************************************************************************************************************************', ''
   end
 
   context "Stage service function on #{assembly_name} assembly" do

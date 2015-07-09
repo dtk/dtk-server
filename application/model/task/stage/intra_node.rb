@@ -34,7 +34,7 @@ module XYZ
           # add to stage
           stage[parent] = children if (parents & children).empty?
         end
-        stage.map { |k,_v| component_dependencies.delete(k) }
+        stage.map { |k, _v| component_dependencies.delete(k) }
         return stage
       end
 

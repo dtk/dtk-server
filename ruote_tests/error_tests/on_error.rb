@@ -29,7 +29,7 @@ class ErrorHandlerParticipant
 puts 'error handler'
 # pp Engine.process(Wfid)
 error = workitem.error
-pp [error.class,error]
+pp [error.class, error]
     reply_to_engine(workitem)
   end
 end

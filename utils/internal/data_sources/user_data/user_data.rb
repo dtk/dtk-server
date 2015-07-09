@@ -6,28 +6,28 @@ module XYZ
       end
 
       def get_objects__node(&block)
-        get_user_data_objects(:node,&block)
+        get_user_data_objects(:node, &block)
       end
 
       def get_objects__component(&block)
-        get_user_data_objects(:component,&block)
+        get_user_data_objects(:component, &block)
       end
 
       private
 
-      def get_user_data_objects(type,&block)
+      def get_user_data_objects(type, &block)
         data_file_path = R8::Config[:app_cache_root] + '/data_source.json' #TODO: stub
         # no op if file does not exists
         hash_all_data = get_user_data_from_file(data_file_path)
         return HashMayNotBeComplete.new() unless hash_all_data
 
         # find contents under container uri
-        hash = HashObject.nested_value(hash_all_data,nested_path(hash_all_data))
+        hash = HashObject.nested_value(hash_all_data, nested_path(hash_all_data))
         return HashMayNotBeComplete.new() unless hash
 
-        (hash[type.to_s]||{}).each do |ref,info|
+        (hash[type.to_s] || {}).each do |ref, info|
           qualified_ref = "#{@container_uri}/#{ref}"
-          block.call(DataSourceUpdateHash.new(info.merge({'ref' => ref,'qualified_ref' => qualified_ref})))
+          block.call(DataSourceUpdateHash.new(info.merge({ 'ref' => ref, 'qualified_ref' => qualified_ref })))
         end
         # HashMayNotBeComplete.new() TODO: so can prune what is included
         HashIsComplete.new()
@@ -38,7 +38,7 @@ module XYZ
       end
 
       def nested_path(_hash_all_data)
-        @container_uri.gsub(Regexp.new('^/'),'').split('/')
+        @container_uri.gsub(Regexp.new('^/'), '').split('/')
       end
     end
   end

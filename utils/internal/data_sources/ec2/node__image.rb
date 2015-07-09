@@ -1,4 +1,4 @@
-require  File.expand_path('mixins/monitoring_items', File.dirname(__FILE__))
+require File.expand_path('mixins/monitoring_items', File.dirname(__FILE__))
 module XYZ
   module DSNormalizer
     class Ec2
@@ -9,7 +9,7 @@ module XYZ
           target[:type] = 'image'
           target[:is_deployed] = true
           target[:display_name] = source[:id]
-          target[:external_ref] = fn(:external_ref,source[:id])
+          target[:external_ref] = fn(:external_ref, source[:id])
           source_complete_for target[:monitoring_item]
           target[:monitoring_item] = fn(:default_node_monitoring_items)
 
@@ -26,13 +26,13 @@ module XYZ
           prefix[:read_only] = true
           prefix[:dynamic] = true
           prefix[:data_type] = 'json'
-          prefix[:semantic_type] = {':array' => 'host_address_ipv4'}
+          prefix[:semantic_type] = { ':array' => 'host_address_ipv4' }
           prefix[:semantic_type_summary] = 'host_address_ipv4'
           prefix[:value_asserted] = [nil]
         end
         class << self
           def unique_keys(source)
-            [:image,source[:id]]
+            [:image, source[:id]]
           end
 
           def relative_distinguished_name(source)
@@ -40,7 +40,7 @@ module XYZ
           end
 
           def external_ref(image_id)
-            {'type' => 'ec2_image', 'image_id' => image_id}
+            { 'type' => 'ec2_image', 'image_id' => image_id }
           end
         end
       end

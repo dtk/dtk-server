@@ -47,7 +47,7 @@ end
 
 describe '(Workspace) Test Case 13: Create one node, add component in it, converge workspace and cancel tasks while converge is in execution' do
   before(:all) do
-    puts '**********************************************************************************************************************************',''
+    puts '**********************************************************************************************************************************', ''
   end
 
   context 'Create node in workspace' do

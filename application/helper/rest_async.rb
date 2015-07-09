@@ -12,7 +12,7 @@ module Ramaze::Helper
       }
       async_callback = request.env['async.callback']
       content_type = 'text/html'
-      ::DTK::AsyncResponse.create(async_callback,content_type,response_procs,&blk)
+      ::DTK::AsyncResponse.create(async_callback, content_type, response_procs, &blk)
     end
   end
 end

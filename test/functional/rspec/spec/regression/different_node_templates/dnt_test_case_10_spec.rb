@@ -26,11 +26,11 @@ dtk_common = DtkCommon.new(service_name, assembly_name)
 def get_node_ec2_public_dns(service_name, node_name)
   puts 'Get node ec2 public dns:', '------------------------'
   node_ec2_public_dns = ''
-  dtk_common = DtkCommon.new('','')
+  dtk_common = DtkCommon.new('', '')
 
   info_response = dtk_common.send_request('/rest/assembly/info_about', assembly_id: service_name, subtype: :instance, about: 'nodes')
   ap info_response
-  node_info = info_response['data'].find { |x| x['display_name'] == node_name}
+  node_info = info_response['data'].find { |x| x['display_name'] == node_name }
 
   if !node_info.nil?
     node_ec2_public_dns = node_info['external_ref']['ec2_public_address']
@@ -59,7 +59,7 @@ def index_and_retrieve_document(elasticsearch_host, elasticsearch_http_port)
     puts 'Retrieved document:'
     ap document
     if !document.nil?
-      query_result = document['hits']['hits'].find { |x| x['_index'].include?('my_index') && x['_type'].include?('blog')}
+      query_result = document['hits']['hits'].find { |x| x['_index'].include?('my_index') && x['_type'].include?('blog') }
       if !query_result.nil?
         puts 'Relevant document is retrieved!'
         puts ''
@@ -79,7 +79,7 @@ end
 
 describe '(Different Node Templates) Test Case 10: Elasticsearch - Simple scenario' do
   before(:all) do
-    puts '************************************************************************',''
+    puts '************************************************************************', ''
   end
 
   context "Stage service function on #{assembly_name} assembly" do

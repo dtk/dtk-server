@@ -21,9 +21,9 @@ module XYZ
 
       Log.info "#{prefix_log} Monitoring idle assemblies: START"
 
-      assemblies = Assembly::Instance.list(model_handle(:assembly),{})
+      assemblies = Assembly::Instance.list(model_handle(:assembly), {})
 
-      str_identifer = (assemblies.map { |a| a[:display_name]}).join(', ')
+      str_identifer = (assemblies.map { |a| a[:display_name] }).join(', ')
 
       Log.info "#{prefix_log} Monitoring assemblies: #{str_identifer}"
       aws_connection = CloudConnect::EC2.new
@@ -74,15 +74,15 @@ module XYZ
 
       # TODO: should we be using default action name
       action_name = :list
-      tpl = R8Tpl::TemplateR8.new("#{model_name()}/#{action_name}",user_context())
+      tpl = R8Tpl::TemplateR8.new("#{model_name()}/#{action_name}", user_context())
       _model_var = {}
-      _model_var[:i18n] = get_model_i18n(model_name().to_s,user_context())
+      _model_var[:i18n] = get_model_i18n(model_name().to_s, user_context())
 
       set_template_defaults_for_list!(tpl)
-      tpl.assign("_#{model_name()}",_model_var)
-      tpl.assign("#{model_name()}_list",model_list)
+      tpl.assign("_#{model_name()}", _model_var)
+      tpl.assign("#{model_name()}_list", model_list)
 
-      return {content: tpl.render()}
+      return { content: tpl.render() }
     end
   end
 end

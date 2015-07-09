@@ -1,12 +1,12 @@
 module DTK; class ModuleBranch
   class Location
     class Server < self
-      def initialize(project,local_params=nil,remote_params=nil)
+      def initialize(project, local_params = nil, remote_params = nil)
         super
       end
       class Local < Location::Local
-        def self.workspace_branch_name(project,version=nil)
-          ret_branch_name(project,version)
+        def self.workspace_branch_name(project, version = nil)
+          ret_branch_name(project, version)
         end
 
         def self.private_user_repo_name(username, module_type, module_name, module_namespace)
@@ -25,7 +25,7 @@ module DTK; class ModuleBranch
         private
 
         def ret_branch_name
-          self.class.ret_branch_name(@project,version())
+          self.class.ret_branch_name(@project, version())
         end
 
         def ret_private_user_repo_name
@@ -36,13 +36,13 @@ module DTK; class ModuleBranch
 
         #===== helper methods
 
-        def self.ret_branch_name(project,version)
+        def self.ret_branch_name(project, version)
           user_prefix = "workspace-#{project.get_field?(:ref)}"
           if version.is_a?(ModuleVersion::AssemblyModule)
             assembly_suffix = "--assembly-#{version.assembly_name}"
             "#{user_prefix}#{assembly_suffix}"
           else
-            version_suffix = ((version && version != VersionFieldDefault)?  "-v#{version}" : '')
+            version_suffix = ((version && version != VersionFieldDefault) ? "-v#{version}" : '')
             "#{user_prefix}#{version_suffix}"
           end
         end

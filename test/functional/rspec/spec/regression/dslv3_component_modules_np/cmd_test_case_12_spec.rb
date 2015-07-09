@@ -20,7 +20,7 @@ dtk_common = DtkCommon.new('', '')
 
 describe '(Component Module DSL) Test Case 12: NEG - Ill-formed yaml content (type: integersss instead of integer) in dtk.model.yaml file and push-clone-changes to server' do
   before(:all) do
-    puts '****************************************************************************************************************************************************************',''
+    puts '****************************************************************************************************************************************************************', ''
   end
 
   context 'Import component module function' do

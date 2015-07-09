@@ -5,7 +5,7 @@ module DTK; class Task::Status
         @subtasks = subtasks
       end
 
-      def add_summary_info!(ng_table_el,&block_for_subtasks)
+      def add_summary_info!(ng_table_el, &block_for_subtasks)
         @block_for_subtasks = block_for_subtasks
         if status = ng_table_el[:status]
           case status
@@ -45,15 +45,15 @@ module DTK; class Task::Status
         if st_status_count.empty?
           status
         else
-          st_status_count.inject('') do |st,(status,count)|
-            status_string = status_with_subtask_size(status,count)
+          st_status_count.inject('') do |st, (status, count)|
+            status_string = status_with_subtask_size(status, count)
             st.empty? ? status_string : "#{st},#{status_string}"
           end
         end
       end
 
-      def status_with_subtask_size(status,count=nil)
-        "#{status}(#{(count||subtask_count())})"
+      def status_with_subtask_size(status, count = nil)
+        "#{status}(#{(count || subtask_count())})"
       end
 
       def subtask_count
@@ -61,7 +61,7 @@ module DTK; class Task::Status
       end
 
       def subtask_status_rows
-        @subtask_status_rows ||= (@block_for_subtasks && @block_for_subtasks.call())||[]
+        @subtask_status_rows ||= (@block_for_subtasks && @block_for_subtasks.call()) || []
       end
 
       def subtask_status_count

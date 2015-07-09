@@ -2,7 +2,7 @@
   schema: :component,
   table: :relation,
   columns: {
-    relation_name: {type: :varchar, size: 50},
+    relation_name: { type: :varchar, size: 50 },
     source_component_id: {
       type: :bigint,
       foreign_key_rel_type: :component,

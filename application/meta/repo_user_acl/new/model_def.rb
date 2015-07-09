@@ -8,7 +8,7 @@
       on_delete: :cascade,
       on_update: :cascade
     },
-    access_rights: {type: :json}
+    access_rights: { type: :json }
   },
   many_to_one: [:repo]
 }

@@ -1,6 +1,6 @@
 module XYZ
   class TaskEvent < Model
-    def self.create_event?(event_type,task,result)
+    def self.create_event?(event_type, task, result)
       action = task[:executable_action]
       return nil unless action
       if action.is_a?(Task::Action::PowerOnNode)
@@ -11,15 +11,15 @@ module XYZ
         case event_type
          when :start
           StartCreateNode.create_start?(action)
-         when :complete_succeeded,:complete_failed,:complete_timeout
-          CompleteCreateNode.create_complete?(action,event_type,result)
+         when :complete_succeeded, :complete_failed, :complete_timeout
+          CompleteCreateNode.create_complete?(action, event_type, result)
         end
       elsif action.is_a?(Task::Action::ConfigNode)
         case event_type
          when :start
           StartConfigNode.create_start?(action)
-         when :complete_succeeded,:complete_failed,:complete_timeout
-          CompleteConfigNode.create_complete?(action,event_type,result)
+         when :complete_succeeded, :complete_failed, :complete_timeout
+          CompleteConfigNode.create_complete?(action, event_type, result)
         end
       end
     end
@@ -28,8 +28,8 @@ module XYZ
       def self.create_start?(action)
         is_no_op?(action) ? nil : new(action)
       end
-      def self.create_complete?(action,status,result)
-        is_no_op?(action) ? nil : new(action,status,result)
+      def self.create_complete?(action, status, result)
+        is_no_op?(action) ? nil : new(action, status, result)
       end
 
       private
@@ -40,7 +40,7 @@ module XYZ
       end
 
       def attr_val_pairs(attributes)
-        (attributes||[]).inject({}) do |h,a|
+        (attributes || []).inject({}) do |h, a|
           name = a[:display_name].to_sym
           AttrIgnoreList.include?(name) ? h : h.merge(name => a[:attribute_value])
         end
@@ -77,7 +77,7 @@ module XYZ
     end
 
     class CompleteCreateNode < Event
-      def initialize(action,status,result)
+      def initialize(action, status, result)
         node = action[:node]
         ext_ref = node[:external_ref]
         ext_ref_type = ext_ref[:type]
@@ -109,8 +109,8 @@ module XYZ
     class StartConfigNode < Event
       def initialize(action)
         cmp_info = action.component_actions().map do |cmp_attrs|
-          attr_info = attr_val_pairs(cmp_attrs[:attributes].reject{|a|a[:dynamic]})
-          {component_name: cmp_attrs[:component][:display_name]}.merge(attr_info)
+          attr_info = attr_val_pairs(cmp_attrs[:attributes].reject { |a| a[:dynamic] })
+          { component_name: cmp_attrs[:component][:display_name] }.merge(attr_info)
         end
         hash = {
           event: 'initiating_config_node',
@@ -122,26 +122,26 @@ module XYZ
     end
 
     class CompleteConfigNode < Event
-      def initialize(action,status,result)
+      def initialize(action, status, result)
         hash = {
           event: status.to_s,
           node_name: action[:node][:display_name],
-          components: action.component_actions().map{|cmp_attrs| cmp_attrs[:component][:display_name]}
+          components: action.component_actions().map { |cmp_attrs| cmp_attrs[:component][:display_name] }
         }
-        if errors = (result[:data]||{})[:errors]
+        if errors = (result[:data] || {})[:errors]
           hash.merge!(errors: errors)
         end
-        dyn_attrs = dynamic_attributes(status,result)
+        dyn_attrs = dynamic_attributes(status, result)
         hash.merge!(dynamic_attributes: dyn_attrs) unless dyn_attrs.empty?
         super(hash)
       end
 
       private
 
-      def dynamic_attributes(status,result)
+      def dynamic_attributes(status, result)
         ret = {}
         return ret unless status == :complete_succeeeded
-        return ret unless dyn_attrs = (result[:data]||{})[:dynamic_attributes]
+        return ret unless dyn_attrs = (result[:data] || {})[:dynamic_attributes]
         dyn_attrs.each do |da|
           cmp = ret[da[:component_name]] ||= {}
           cmp[da[:attribute_name]] = da[:attribute_val]

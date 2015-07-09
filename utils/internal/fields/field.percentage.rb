@@ -20,7 +20,7 @@ class Fieldpercentage < Fieldtext
     # TODO: revisit when implementing new request params, such as a=amp, app=amp, v=list (view=list)
     # TODO: revisit to not hard code contact
     # TODO: replace objLink with model_link
-    if(!@field_meta['objLink'].nil? && @field_meta['objLink'] == true) then
+    if (!@field_meta['objLink'].nil? && @field_meta['objLink'] == true) then
       return '<a href="javascript:R8.ctrl.request(\'obj=' + @model_name + '&amp;action=' + @field_meta['objLinkView'] + '&amp;id={%=' + @model_name + '[:id]%}\');">{%=' + @model_name + '[:' + @name + ']%}%</a>'
     else
       return '{%=' + @model_name + '[:' + @name + ']%}%'

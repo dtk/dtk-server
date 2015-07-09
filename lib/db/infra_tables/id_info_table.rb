@@ -7,17 +7,17 @@ module DTK
 
     # used when first creating without id (i.e. created before saving)
     def create_stubIDH
-      args = {model_name: self[:model_name], c: self[:c]}
+      args = { model_name: self[:model_name], c: self[:c] }
       args.merge!(group_id: self[:group_id]) if self[:group_id]
-      IDHandle.new(args,no_id: true)
+      IDHandle.new(args, no_id: true)
     end
 
     def createIDH(x)
       args = x
       if x[:uri]
-        each{|k,v|args[k] ||= v unless k == :guid}
+        each { |k, v| args[k] ||= v unless k == :guid }
       elsif x[:id] || x[:guid]
-        each{|k,v|args[k] ||= v unless k == :uri}
+        each { |k, v| args[k] ||= v unless k == :uri }
       else
         args = self.merge(x)
       end
@@ -25,34 +25,34 @@ module DTK
     end
 
     def create_top
-      IDHandle.new(reject{|k,_v|[:uri,:guid].include?(k)}.merge(uri: '/'))
+      IDHandle.new(reject { |k, _v| [:uri, :guid].include?(k) }.merge(uri: '/'))
     end
 
     # has form hash or if just symbol then its the attribute :model_name
-    def createMH(x={})
-      x = {model_name: x} if x.is_a?(Symbol)
-      vals = [:c,:model_name,:parent_model_name].inject({}){|h,k|h.merge(k => self[k])}
+    def createMH(x = {})
+      x = { model_name: x } if x.is_a?(Symbol)
+      vals = [:c, :model_name, :parent_model_name].inject({}) { |h, k| h.merge(k => self[k]) }
       vals.merge!(x)
       vals[:parent_model_name] ||= get_parent_model_name()
       vals[:model_name] ||= get_model_name()
-      user_info = {group_id: self[:group_id]||vals[:group_id]}
-      ModelHandle.new(vals[:c],vals[:model_name],vals[:parent_model_name],user_info)
+      user_info = { group_id: self[:group_id] || vals[:group_id] }
+      ModelHandle.new(vals[:c], vals[:model_name], vals[:parent_model_name], user_info)
     end
 
     def create_childMH(child_model_name)
-      user_info = {group_id: self[:group_id]}
-      ModelHandle.new(self[:c],child_model_name,self[:model_name],user_info)
+      user_info = { group_id: self[:group_id] }
+      ModelHandle.new(self[:c], child_model_name, self[:model_name], user_info)
     end
 
     def create_peerMH(model_name)
-      user_info = {group_id: self[:group_id]}
-      ModelHandle.new(self[:c],model_name,self[:parent_model_name],user_info)
+      user_info = { group_id: self[:group_id] }
+      ModelHandle.new(self[:c], model_name, self[:parent_model_name], user_info)
     end
 
-    def get_children_model_handles(opts={})
+    def get_children_model_handles(opts = {})
       get_children_model_names(opts).map do |child_model_name|
-        user_info = {group_id: self[:group_id]}
-        ModelHandle.new(self[:c],child_model_name,self[:model_name],user_info)
+        user_info = { group_id: self[:group_id] }
+        ModelHandle.new(self[:c], child_model_name, self[:model_name], user_info)
       end
     end
 
@@ -61,7 +61,7 @@ module DTK
     end
 
     def to_s
-      model_name = "model_name=#{self[:model_name]||'UNKNOWN'}"
+      model_name = "model_name=#{self[:model_name] || 'UNKNOWN'}"
       uri_or_guid =
         if is_a?(IDHandle)
           self[:guid] ? "; guid=#{self[:guid]}" : "; uri=#{self[:uri]}"
@@ -74,9 +74,9 @@ module DTK
 
                         private
 
-    def get_children_model_names(opts={})
-      ret = db_rel[:one_to_many]||[]
-      ret = ret - (db_rel[:one_to_many_clone_omit]||[]) if opts[:clone_context]
+    def get_children_model_names(opts = {})
+      ret = db_rel[:one_to_many] || []
+      ret = ret - (db_rel[:one_to_many_clone_omit] || []) if opts[:clone_context]
       ret
     end
 
@@ -92,16 +92,16 @@ module DTK
   class IDHandle < Hash
     include IdInfoTable::Mixin
 
-    def create_object(opts={})
+    def create_object(opts = {})
       model_name =
         if opts[:model_name]
           opts[:model_name]
         elsif not opts[:donot_find_subtype]
-          Model.find_subtype_model_name(self,opts)
+          Model.find_subtype_model_name(self, opts)
         else
           self[:model_name]
         end
-      ret = Model.model_class(model_name).new({id: get_id()},self[:c],nil,self)
+      ret = Model.model_class(model_name).new({ id: get_id() }, self[:c], nil, self)
       ret.update_object!(*opts[:cols]) if opts[:cols]
       ret
     end
@@ -115,22 +115,22 @@ module DTK
        R8::Config[:default_language]
     end
 
-    def get_objects_from_sp_hash(sp_hash,opts={})
-      create_object().get_objects_from_sp_hash(sp_hash,opts)
+    def get_objects_from_sp_hash(sp_hash, opts = {})
+      create_object().get_objects_from_sp_hash(sp_hash, opts)
     end
 
     def get_id
-      (IDInfoTable.get_row_from_id_handle(self,short_circuit_for_minimal_row: true)||{})[:id]
+      (IDInfoTable.get_row_from_id_handle(self, short_circuit_for_minimal_row: true) || {})[:id]
     end
 
     def get_uri
       self[:uri] || IDInfoTable.get_row_from_id_handle(self)[:uri]
     end
 
-    def get_child_id_handle(child_relation_type,qualified_child_ref)
-      factory_uri = RestURI.ret_factory_uri(get_uri(),child_relation_type)
-      child_uri = RestURI.ret_child_uri_from_qualified_ref(factory_uri,qualified_child_ref)
-      createIDH(model_name: child_relation_type,uri: child_uri)
+    def get_child_id_handle(child_relation_type, qualified_child_ref)
+      factory_uri = RestURI.ret_factory_uri(get_uri(), child_relation_type)
+      child_uri = RestURI.ret_child_uri_from_qualified_ref(factory_uri, qualified_child_ref)
+      createIDH(model_name: child_relation_type, uri: child_uri)
     end
 
     def get_parent_id_handle
@@ -153,18 +153,18 @@ module DTK
     end
 
     # returns nil if model_name given and top does not mactch it
-    def get_top_container_id_handle(model_name=nil,opts={})
-      model_name = :datacenter if model_name==:target #TODO: with change to Model.matching_models? in place of == may not need this
-      if model_name && Model.matching_models?(model_name,self[:model_name])
+    def get_top_container_id_handle(model_name = nil, opts = {})
+      model_name = :datacenter if model_name == :target #TODO: with change to Model.matching_models? in place of == may not need this
+      if model_name && Model.matching_models?(model_name, self[:model_name])
         return update_group_id_if_needed!()
       end
 
       uri = get_uri()
       top_model_name = RestURI.ret_top_container_relation_type(uri)
-      return nil if model_name and not Model.matching_models?(model_name,top_model_name)
+      return nil if model_name and not Model.matching_models?(model_name, top_model_name)
       c = self[:c]
       top_container_uri = RestURI.ret_top_container_uri(uri)
-      hash_info = {c: c, model_name: top_model_name, uri: top_container_uri}
+      hash_info = { c: c, model_name: top_model_name, uri: top_container_uri }
       if opts[:auth_info_from_self]
         hash_info.merge!(group_id: self[:group_id]) if self[:group_id]
       end
@@ -189,7 +189,7 @@ module DTK
       self[:uri] == '/'
     end
 
-    def initialize(x,opts={})
+    def initialize(x, opts = {})
       super()
       # TODO: cleanup to take into account of this can be factory and whether enforce this must has model_name and parent_model_nmae
       if x[:id_info]
@@ -197,7 +197,7 @@ module DTK
         if id_info[:c] && id_info[:relation_type] && id_info[:id]
           self[:c] = id_info[:c]
           model_name = id_info[:relation_type]
-          self[:guid] = IDInfoTable.ret_guid_from_db_id(id_info[:id],model_name)
+          self[:guid] = IDInfoTable.ret_guid_from_db_id(id_info[:id], model_name)
           self[:model_name] = model_name
           self[:parent_model_name] = get_parent_id_handle()[:model_name] if opts[:set_parent_model_name]
           return
@@ -213,11 +213,11 @@ module DTK
 
       if x[:id] && x[:model_name]
         model_name = x[:model_name].to_sym
-        self[:guid] = IDInfoTable.ret_guid_from_db_id(x[:id],model_name)
+        self[:guid] = IDInfoTable.ret_guid_from_db_id(x[:id], model_name)
       elsif x[:guid]
-        self[:guid]= x[:guid].to_i
+        self[:guid] = x[:guid].to_i
       elsif x[:uri]
-        self[:uri]= x[:uri]
+        self[:uri] = x[:uri]
         unless x[:model_name]
           # TODO: cleanup; probably removing id_handle staht can be factory ids
           unless x[:is_factory]
@@ -254,17 +254,17 @@ module DTK
     private
 
     def get_parent_model_name
-      self[:parent_model_name] || (get_parent_id_handle()||{})[:model_name]
+      self[:parent_model_name] || (get_parent_id_handle() || {})[:model_name]
     end
 
     def get_model_name
-      self[:model_name] || (IDInfoTable.get_row_from_id_handle(self)||{})[:relation_type]
+      self[:model_name] || (IDInfoTable.get_row_from_id_handle(self) || {})[:relation_type]
     end
   end
 
   class ModelHandle < Hash
     include IdInfoTable::Mixin
-    def initialize(c,model_name,parent_model_name=nil,user=nil)
+    def initialize(c, model_name, parent_model_name = nil, user = nil)
       super()
       self[:c] = c
       self[:model_name] = model_name.to_sym
@@ -277,23 +277,23 @@ module DTK
       # TODO: removed freeze
     end
 
-    def self.create_from_user(user,model_name)
-      parent_model_name=nil
-      self.new(user[:c],model_name,parent_model_name,user)
+    def self.create_from_user(user, model_name)
+      parent_model_name = nil
+      self.new(user[:c], model_name, parent_model_name, user)
     end
 
-    def create_object_from_hash(hash,opts={})
+    def create_object_from_hash(hash, opts = {})
       unless hash[:id]
         raise Error.new('hash must contain:id key')
       end
       idh = createIDH(id: hash[:id])
       model_name =
        if not opts[:donot_find_subtype]
-         Model.find_subtype_model_name(idh,opts)
+         Model.find_subtype_model_name(idh, opts)
        else
          self[:model_name]
        end
-      Model.model_class(model_name).new(hash,self[:c],nil,idh)
+      Model.model_class(model_name).new(hash, self[:c], nil, idh)
     end
 
     def get_virtual_columns
@@ -304,18 +304,18 @@ module DTK
       DB_REL_DEF[self[:model_name]][:columns]
     end
 
-    def parent_id_field_name?(parent_model_name_or_idh=nil)
-      parent_id_field_name(parent_model_name_or_idh,can_be_nil: true)
+    def parent_id_field_name?(parent_model_name_or_idh = nil)
+      parent_id_field_name(parent_model_name_or_idh, can_be_nil: true)
     end
 
-    def parent_id_field_name(parent_model_name_or_idh=nil,opts={})
+    def parent_id_field_name(parent_model_name_or_idh = nil, opts = {})
       arg = parent_model_name_or_idh #shorthand
-      parent_model_name ||= self[:parent_model_name]||(arg && (arg.is_a?(Symbol) ? arg : arg[:model_name]))
+      parent_model_name ||= self[:parent_model_name] || (arg && (arg.is_a?(Symbol) ? arg : arg[:model_name]))
       if parent_model_name.nil? && !opts[:can_be_nil]
         Log.error("Unexpected that object's (#{inspect}) parent_model_name is nil")
         return nil
       end
-      DB.parent_field(parent_model_name,self[:model_name],opts)
+      DB.parent_field(parent_model_name, self[:model_name], opts)
     end
 
     private
@@ -364,7 +364,7 @@ module DTK
     @db.create_schema?(TOP_SCHEMA_NAME)
     @db.create_table? ID_INFO_TABLE do
       String :uri # non null because filled in later
-      foreign_key CONTEXT_ID,  CONTEXT_TABLE.schema_table_symbol, FK_CASCADE_OPT.merge(null: false,type: ID_TYPES[:context_id])
+      foreign_key CONTEXT_ID,  CONTEXT_TABLE.schema_table_symbol, FK_CASCADE_OPT.merge(null: false, type: ID_TYPES[:context_id])
       String :relation_name
       column ID_INFO_TABLE[:id], ID_TYPES[:id]
             column ID_INFO_TABLE[:local_id], ID_TYPES[:local_id]
@@ -381,14 +381,14 @@ module DTK
  ###### Initial data
   # TODO: must make so that does not add if there already
   def add_top_factories?
-    DB_REL_DEF.each do|key,db_info|
+    DB_REL_DEF.each do|key, db_info|
       if db_info[:many_to_one].nil? || db_info[:many_to_one].empty? ||
                (db_info[:many_to_one] ? db_info[:many_to_one] == [db_info[:relation_type]] : nil)
         uri = '/' + key.to_s
         context = 2 #TODO : hard wired
-        if get_row_from_uri(uri,context).nil?
+        if get_row_from_uri(uri, context).nil?
           Log.info("adding to top level factory for: #{key}")
-          insert_factory(key,uri,TOP_RELATION_TYPE.to_s,0,context)
+          insert_factory(key, uri, TOP_RELATION_TYPE.to_s, 0, context)
         end
       end
     end
@@ -397,28 +397,28 @@ module DTK
 
         ###### DataProcessing
         def get_rows_just_dataset(c)
-          SQL::Dataset.new(ID_INFO_TABLE[:table],ds().select(CONTEXT_ID,ID_INFO_TABLE[:id],ID_INFO_TABLE[:parent_id],:uri).where(CONTEXT_ID => c))
+          SQL::Dataset.new(ID_INFO_TABLE[:table], ds().select(CONTEXT_ID, ID_INFO_TABLE[:id], ID_INFO_TABLE[:parent_id], :uri).where(CONTEXT_ID => c))
         end
 
         def join_condition
-          {relation_id: :id}
+          { relation_id: :id }
         end
 
-  def get_row_from_id_handle(id_handle,opts={})
+  def get_row_from_id_handle(id_handle, opts = {})
           ret = get_minimal_row_from_id_handle(id_handle) if opts[:short_circuit_for_minimal_row]
           return ret if ret
     c = id_handle[:c]
-    return get_row_from_uri(id_handle[:uri],c,opts) if id_handle[:uri]
-    return get_row_from_guid(id_handle[:guid],opts) if id_handle[:guid]
+    return get_row_from_uri(id_handle[:uri], c, opts) if id_handle[:uri]
+    return get_row_from_guid(id_handle[:guid], opts) if id_handle[:guid]
     raise Error.new('no uri or guid given') if opts[:raise_error]
           nil
         end
 
-        def get_row_from_uri(uri,c,opts={})
+        def get_row_from_uri(uri, c, opts = {})
           ds = ds().where(:uri => uri, CONTEXT_ID => c)
     if ds.empty?
             if opts[:create_factory_if_needed] # should only be applied for factory uri
-              return create_factory(uri,c,raise_error: true) #not doing recursive create
+              return create_factory(uri, c, raise_error: true) #not doing recursive create
             end
             error_msg = "URI #{uri} is not in id table"
             if opts[:raise_error]
@@ -432,22 +432,22 @@ module DTK
     format_row(unformated_row)
         end
 
-        def create_factory(factory_uri,c,opts={})
-          relation_type,parent_uri = RestURI.parse_factory_uri(factory_uri)
-          par_id_info = get_row_from_uri(parent_uri,c,opts)
+        def create_factory(factory_uri, c, opts = {})
+          relation_type, parent_uri = RestURI.parse_factory_uri(factory_uri)
+          par_id_info = get_row_from_uri(parent_uri, c, opts)
           if par_id_info
-            insert_factory(relation_type,factory_uri,par_id_info[:relation_type],par_id_info[:id],c)
+            insert_factory(relation_type, factory_uri, par_id_info[:relation_type], par_id_info[:id], c)
             # TODO: more effiienct would be if insert_factory returns new row
-            get_row_from_uri(factory_uri,c,raise_error: true)
+            get_row_from_uri(factory_uri, c, raise_error: true)
           end
         end
         private :create_factory
 
-        def get_row_from_guid(guid,opts={})
+        def get_row_from_guid(guid, opts = {})
           # NOTE: contingent on id scheme where guid uniquely picks out row
           ds = ds().where(ID_INFO_TABLE[:id] => db_id_from_guid(guid))
      if ds.empty?
-            raise Error::NotFound.new(:guid,guid) if opts[:raise_error]
+            raise Error::NotFound.new(:guid, guid) if opts[:raise_error]
             return nil
           end
     return nil if ds.empty?
@@ -461,30 +461,30 @@ module DTK
           r ? r[:id] : nil
         end
 
-        def update_instances(model_handle,returning_cols)
+        def update_instances(model_handle, returning_cols)
           return nil if returning_cols.empty?
           sample_parent_id = returning_cols.first[:parent_id]
-          return update_top_instances(model_handle,returning_cols) if sample_parent_id.nil? || sample_parent_id == 0
-          pairs_ds =  SQL::ArrayDataset.create(@db,returning_cols.map{|y|{pair_id: y[:id], pair_parent_id: y[:parent_id]||0}},ModelHandle.new(model_handle[:c],:pairs)).sequel_ds
-          parent_ds_wo_alias =  ds().select(:relation_id.as(:prt_relation_id),:relation_type.as(:prt_relation_type), :uri.as(:prt_uri))
-          parent_ds = SQL::aliased_expression(parent_ds_wo_alias,:parents)
+          return update_top_instances(model_handle, returning_cols) if sample_parent_id.nil? || sample_parent_id == 0
+          pairs_ds =  SQL::ArrayDataset.create(@db, returning_cols.map { |y| { pair_id: y[:id], pair_parent_id: y[:parent_id] || 0 } }, ModelHandle.new(model_handle[:c], :pairs)).sequel_ds
+          parent_ds_wo_alias =  ds().select(:relation_id.as(:prt_relation_id), :relation_type.as(:prt_relation_type), :uri.as(:prt_uri))
+          parent_ds = SQL::aliased_expression(parent_ds_wo_alias, :parents)
 
-          update_ds = ds_with_from(parent_ds).join(pairs_ds,pair_parent_id: :parents__prt_relation_id).where(pair_id: :relation_id)
+          update_ds = ds_with_from(parent_ds).join(pairs_ds, pair_parent_id: :parents__prt_relation_id).where(pair_id: :relation_id)
 
-          uri = SQL::ColRef.concat{|o|[:prt_uri,"/#{model_handle[:model_name]}/",:ref,o.case{[[{ref_num: nil},''],o.concat('-',:ref_num)]}]}
-          update_ds.update(             uri: uri,
+          uri = SQL::ColRef.concat { |o| [:prt_uri, "/#{model_handle[:model_name]}/", :ref, o.case { [[{ ref_num: nil }, ''], o.concat('-', :ref_num)] }] }
+          update_ds.update(uri: uri,
              relation_type: model_handle[:model_name].to_s,
              parent_id: :pair_parent_id,
              parent_relation_type: :prt_relation_type)
         end
 
-        def update_top_instances(model_handle,returning_cols)
-          update_ds = ds().where(relation_id: returning_cols.map{|r|r[:id]})
-          uri = SQL::ColRef.concat{|o|["/#{model_handle[:model_name]}/",:ref,o.case{[[{ref_num: nil},''],o.concat('-',:ref_num)]}]}
-          update_ds.update(uri: uri,relation_type: model_handle[:model_name].to_s)
+        def update_top_instances(model_handle, returning_cols)
+          update_ds = ds().where(relation_id: returning_cols.map { |r| r[:id] })
+          uri = SQL::ColRef.concat { |o| ["/#{model_handle[:model_name]}/", :ref, o.case { [[{ ref_num: nil }, ''], o.concat('-', :ref_num)] }] }
+          update_ds.update(uri: uri, relation_type: model_handle[:model_name].to_s)
         end
         # TODO: see if bug below to set :parent_relation_type when parent_relation_type.nil?, but not above
-        def update_instance(db_rel,id,uri,relation_type,parent_id_x,parent_relation_type)
+        def update_instance(db_rel, id, uri, relation_type, parent_id_x, parent_relation_type)
     #  to fill in uri ##TODO: this is split between trigger, which creates it and this code which updates it; may better encapsulate
     parent_id = parent_id_x ? parent_id_x : 0
     rel_qn = @db.fully_qualified_rel_name(db_rel)
@@ -498,7 +498,7 @@ module DTK
     uri_id
         end
 
-  def insert_factory(child_type,factory_uri,relation_type,id_x,c)
+  def insert_factory(child_type, factory_uri, relation_type, id_x, c)
     id = id_x ? id_x : 0
     ds().insert(
            CONTEXT_ID => c,
@@ -510,7 +510,7 @@ module DTK
     nil
   end
 
-        def get_factory_id_handle(parent_id_handle,relation_type)
+        def get_factory_id_handle(parent_id_handle, relation_type)
           parent_uri = parent_id_handle[:uri]
           if parent_uri.nil?
             parent_id_info = get_row_from_id_handle(parent_id_handle)
@@ -518,7 +518,7 @@ module DTK
             parent_uri = parent_id_info[:uri]
           end
 
-          factory_uri = RestURI.ret_factory_uri(parent_uri,relation_type)
+          factory_uri = RestURI.ret_factory_uri(parent_uri, relation_type)
           IDHandle[c: parent_id_handle[:c], uri: factory_uri, is_factory: true]
         end
 
@@ -528,27 +528,27 @@ module DTK
     prt = factory_id_info[:parent_relation_type] ? factory_id_info[:parent_relation_type].to_s : nil
     c = factory_id_info[CONTEXT_ID]
     unformated_rows = ds().where(CONTEXT_ID => c, :relation_type => rt, :parent_id => parent_id, :parent_relation_type => prt, :is_factory => false).all
-    unformated_rows.map{|unformated_row|format_row(unformated_row)}
+    unformated_rows.map { |unformated_row| format_row(unformated_row) }
   end
 
          #### map the db representation of id to guid form
          # currently set so to reflect that a db id is a guid; other possibilities are when guid is id_db_relation + db_id
 
-        def get_id_handles_matching_uris(parent_idh,fully_qual_uris)
-          unformated_rows = ds().where(CONTEXT_ID => parent_idh[CONTEXT_ID], :uri => fully_qual_uris, :is_factory=>false).all()
+        def get_id_handles_matching_uris(parent_idh, fully_qual_uris)
+          unformated_rows = ds().where(CONTEXT_ID => parent_idh[CONTEXT_ID], :uri => fully_qual_uris, :is_factory => false).all()
           unformated_rows.map do |r|
             mh = parent_idh.create_childMH(r[:relation_type].to_sym)
             mh.createIDH(id: r[:relation_id])
           end
         end
 
-        def get_ndx_ids_matching_relative_uris(parent_idh,parent_uri,child_relative_uris)
-          ndx_uris = child_relative_uris.inject({}) do |h,child_uri|
-            uri = RestURI.ret_child_uri_from_qualified_ref(parent_uri,child_uri)
+        def get_ndx_ids_matching_relative_uris(parent_idh, parent_uri, child_relative_uris)
+          ndx_uris = child_relative_uris.inject({}) do |h, child_uri|
+            uri = RestURI.ret_child_uri_from_qualified_ref(parent_uri, child_uri)
             h.merge(uri => child_uri)
           end
-    unformated_rows = ds().where(CONTEXT_ID => parent_idh[CONTEXT_ID], :uri => ndx_uris.keys, :is_factory=>false).all()
-          unformated_rows.inject({}){|h,r|h.merge(ndx_uris[r[:uri]] => r[:relation_id])}
+    unformated_rows = ds().where(CONTEXT_ID => parent_idh[CONTEXT_ID], :uri => ndx_uris.keys, :is_factory => false).all()
+          unformated_rows.inject({}) { |h, r| h.merge(ndx_uris[r[:uri]] => r[:relation_id]) }
         end
 
   def db_id_from_guid(guid)
@@ -561,11 +561,11 @@ module DTK
     id_info[:id]
         end
 
-  def ret_guid_from_db_id(db_id,_relation_type)
+  def ret_guid_from_db_id(db_id, _relation_type)
     db_id
         end
 
-  def ret_foreign_key_guid(db_id,_relation_type)
+  def ret_foreign_key_guid(db_id, _relation_type)
     db_id
         end
       #######
@@ -591,7 +591,7 @@ module DTK
 
         def get_minimal_row_from_id_handle(id_handle)
           return nil unless id_handle[:model_name] && id_handle[:guid] && id_handle[:c]
-          IDInfoRow[CONTEXT_ID => id_handle[:c],:id => db_id_from_guid(id_handle[:guid]),:relation_type => id_handle[:model_name]]
+          IDInfoRow[CONTEXT_ID => id_handle[:c], :id => db_id_from_guid(id_handle[:guid]), :relation_type => id_handle[:model_name]]
         end
 
   def ds
@@ -599,7 +599,7 @@ module DTK
         end
 
   def ds_with_from(*from_clauses)
-          @db.dataset(ID_INFO_TABLE,nil,*from_clauses)
+          @db.dataset(ID_INFO_TABLE, nil, *from_clauses)
         end
       end
     end

@@ -11,11 +11,11 @@ module DTK
           end
         end
 
-        def self.install_script(node,bindings)
-          create().install_script(node,bindings)
+        def self.install_script(node, bindings)
+          create().install_script(node, bindings)
         end
-        def install_script(node,bindings)
-          all_bindings = install_script_bindings(node,bindings)
+        def install_script(node, bindings)
+          all_bindings = install_script_bindings(node, bindings)
           erubis_object(install_script_erb()).result(all_bindings)
         end
 
@@ -41,7 +41,7 @@ module DTK
         end
 
         def self.create
-          type = (R8::Config[:mcollective][:auth_type]||:default).to_sym
+          type = (R8::Config[:mcollective][:auth_type] || :default).to_sym
           klass =
             case type
             when :ssh then Ssh
@@ -87,7 +87,7 @@ module DTK
             USER_DATA_SH_ERB
           end
 
-          def install_script_bindings(_node,bindings)
+          def install_script_bindings(_node, bindings)
             bindings
           end
 
@@ -127,11 +127,11 @@ eos
 
           private
 
-          def install_script_bindings(node,bindings)
+          def install_script_bindings(node, bindings)
             # TODO: clean up to have error checking
-            ssh_remote_public_key=File.open(R8::Config[:mcollective][:ssh][:remote][:public_key], 'rb') { |f| f.read }
-            ssh_remote_private_key=File.open(R8::Config[:mcollective][:ssh][:remote][:private_key], 'rb') { |f| f.read }
-            ssh_local_public_key=File.open(R8::Config[:mcollective][:ssh][:local][:public_key], 'rb') { |f| f.read }
+            ssh_remote_public_key = File.open(R8::Config[:mcollective][:ssh][:remote][:public_key], 'rb') { |f| f.read }
+            ssh_remote_private_key = File.open(R8::Config[:mcollective][:ssh][:remote][:private_key], 'rb') { |f| f.read }
+            ssh_local_public_key = File.open(R8::Config[:mcollective][:ssh][:local][:public_key], 'rb') { |f| f.read }
             pbuilderid = (node.pbuilderid() if node.get_iaas_type() == :physical)
             # order of merge does not matter; keys wont conflict
             bindings.merge(
@@ -172,7 +172,7 @@ eos
           end
 
           def get_puppet_version(node)
-            node.attribute().puppet_version(raise_error_if_invalid: true)||''
+            node.attribute().puppet_version(raise_error_if_invalid: true) || ''
           end
 
           def install_script_erb

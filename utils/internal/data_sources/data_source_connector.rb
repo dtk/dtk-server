@@ -9,15 +9,15 @@ module XYZ
       def initialize_extra
       end
 
-      def get_objects(obj_type,source_obj_type,&block)
+      def get_objects(obj_type, source_obj_type, &block)
         method_name = "get_objects__#{obj_type}#{source_obj_type ? '__' + source_obj_type : ''}".to_sym
-        send(method_name){|source_obj|block.call(source_obj)}
+        send(method_name) { |source_obj| block.call(source_obj) }
       end
     end
   end
   module DataSourceConnectorInstanceMixin
-    def set_and_share_ds_connector!(common_ds_connectors,container_uri)
-      common_ds_connectors[container_uri] ||=  {}
+    def set_and_share_ds_connector!(common_ds_connectors, container_uri)
+      common_ds_connectors[container_uri] ||= {}
       common_ds_connectors[container_uri][@ds_connector_class] ||= @ds_connector_class.new(container_uri)
       @ds_connector_instance = common_ds_connectors[container_uri][@ds_connector_class]
     end
@@ -38,7 +38,7 @@ module XYZ
     end
 
     def get_objects(&block)
-      @ds_connector_instance.get_objects(obj_type(),source_obj_type(),&block)
+      @ds_connector_instance.get_objects(obj_type(), source_obj_type(), &block)
     end
   end
 end

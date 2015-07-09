@@ -1,8 +1,8 @@
 module DTK; class Task; class Template
   class Stage
     class IntraNode
-      r8_nested_require('intra_node','execution_block')
-      r8_nested_require('intra_node','execution_blocks')
+      r8_nested_require('intra_node', 'execution_block')
+      r8_nested_require('intra_node', 'execution_blocks')
       class Processor
         def initialize(temporal_constraints)
           @intra_node_contraints = temporal_constraints.select(&:intra_node?)
@@ -24,7 +24,7 @@ module DTK; class Task; class Template
             (ndx_ret[execution_block_index(action)] ||= ExecutionBlock::Unordered.new) << action
           end
           ret = ExecutionBlocks.new
-          ndx_ret.keys.sort.each{|exec_block_index|ret << ndx_ret[exec_block_index]}
+          ndx_ret.keys.sort.each { |exec_block_index| ret << ndx_ret[exec_block_index] }
           ret
         end
 

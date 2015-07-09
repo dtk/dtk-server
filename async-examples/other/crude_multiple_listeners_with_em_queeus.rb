@@ -25,9 +25,9 @@ class MyController < Ramaze::Controller
     Queues[self] = q = EM::Queue.new
     # Get the headers out there asap, let the client know we're alive...
     EM.next_tick do
-      request.env['async.callback'].call [200, {'Content-Type' => 'text/plain'}, body]
+      request.env['async.callback'].call [200, { 'Content-Type' => 'text/plain' }, body]
     end
-    q_pop_proc = proc{
+    q_pop_proc = proc {
       q.pop do |msg|
         if msg == 'end'
           Queues.delete(self)
@@ -44,7 +44,7 @@ class MyController < Ramaze::Controller
 
   def send
     msg = request['msg']
-    Queues.each_value{|q|q.push(msg)}
+    Queues.each_value { |q| q.push(msg) }
     nil
   end
 end

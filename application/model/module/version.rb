@@ -30,7 +30,7 @@ module DTK
     def self.versions_same?(str1, str2)
       return true if (string_master_or_empty?(str1) && string_master_or_empty?(str2))
       # ignore prefix 'v' if present e.g. v4.2.3
-      return (str1||'').gsub(/^v/,'').eql?((str2||'').gsub(/^v/,''))
+      return (str1 || '').gsub(/^v/, '').eql?((str2 || '').gsub(/^v/, ''))
     end
 
     class Semantic < self
@@ -47,21 +47,21 @@ module DTK
 
       def get_assembly(mh)
         sp_hash = {
-          cols: [:id,:group_id,:display_name],
-          filter: [:and,[:eq,:display_name,@assembly_name],[:neq,:datacenter_datacenter_id,nil]]
+          cols: [:id, :group_id, :display_name],
+          filter: [:and, [:eq, :display_name, @assembly_name], [:neq, :datacenter_datacenter_id, nil]]
         }
-        rows = Assembly::Instance.get_objs(mh.createMH(:assembly_instance),sp_hash)
+        rows = Assembly::Instance.get_objs(mh.createMH(:assembly_instance), sp_hash)
         if rows.size == 1
            rows.first
         elsif rows.size == 0
-          raise Error.new("Unexpected that no assemblies associated with (#{inspect})" )
+          raise Error.new("Unexpected that no assemblies associated with (#{inspect})")
         else
-          raise Error.new("Unexpected that #{rows.size} assemblies are associated with (#{inspect})" )
+          raise Error.new("Unexpected that #{rows.size} assemblies are associated with (#{inspect})")
         end
       end
 
       def self.legal_format?(str)
-        !!(str =~StringPattern)
+        !!(str =~ StringPattern)
       end
       def self.create_from_string(str)
         if str =~ StringPattern

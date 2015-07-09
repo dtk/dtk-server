@@ -1,13 +1,13 @@
 module DTK; class Clone
   module InstanceTemplate
     class Links < Array
-      def add(instance,template)
-        self << Link.new(instance,template)
+      def add(instance, template)
+        self << Link.new(instance, template)
       end
 
       def parent_rels(child_mh)
         parent_id_col = child_mh.parent_id_field_name()
-        map{|link|{parent_id_col => link.instance.id, :old_par_id => link.template.id}}
+        map { |link| { parent_id_col => link.instance.id, :old_par_id => link.template.id } }
       end
 
       def template(instance)
@@ -17,7 +17,7 @@ module DTK; class Clone
 
       def match_instance(instance)
         instance_id = instance.id
-        unless match = find{|l|l.instance && l.instance.id == instance_id}
+        unless match = find { |l| l.instance && l.instance.id == instance_id }
           raise(Error.new("Cannot find match for instance (#{instance.inspect})"))
         end
         match
@@ -29,9 +29,9 @@ module DTK; class Clone
 
       def templates
         #removes dups
-        inject({}) do |h,l|
+        inject({}) do |h, l|
           template = l.template
-          h.merge(template ? {template.id => template} : {})
+          h.merge(template ? { template.id => template } : {})
         end.values
       end
 

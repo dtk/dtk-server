@@ -2,45 +2,45 @@ module DTK
   class Port < Model
     ####################
     def self.common_columns
-      [:id,:group_id,:display_name,:name,:description,:direction,:type,:location,:containing_port_id,:node_id,:component_id,:link_def_id]
+      [:id, :group_id, :display_name, :name, :description, :direction, :type, :location, :containing_port_id, :node_id, :component_id, :link_def_id]
     end
 
-    def self.check_valid_id(model_handle,id,opts={})
+    def self.check_valid_id(model_handle, id, opts = {})
       if opts[:assembly_idh]
         sp_hash = {
-          cols: [:id,:node],
-          filter: [:eq,:id,id]
+          cols: [:id, :node],
+          filter: [:eq, :id, id]
         }
-        rows = get_objs(model_handle,sp_hash)
+        rows = get_objs(model_handle, sp_hash)
         unless port = rows.first
-          raise ErrorIdInvalid.new(id,pp_object_type())
+          raise ErrorIdInvalid.new(id, pp_object_type())
         end
         unless port[:node][:assembly_id] == opts[:assembly_idh].get_id()
           Raise ErrorUsage.new("Port with id (#{id}) does not belong to assembly")
         end
         id
       else
-        check_valid_id_default(model_handle,id)
+        check_valid_id_default(model_handle, id)
       end
     end
 
     # name should be of form <node>/<component>, like server/rsyslog::server
-    def self.name_to_id(model_handle,name,opts={})
+    def self.name_to_id(model_handle, name, opts = {})
       unless opts[:assembly_idh] && opts[:connection_type]
         raise Error.new("Unexpected options given in Port.name_to_id (#{opts.inspect}")
       end
       assembly_id = opts[:assembly_idh].get_id()
       conn_type = opts[:connection_type]
-      node_display_name,poss_port_display_names = Port.parse_to_ret_display_name(name,conn_type,opts)
+      node_display_name, poss_port_display_names = Port.parse_to_ret_display_name(name, conn_type, opts)
       unless node_display_name
         raise ErrorUsage.new("Port name (#{name}) is ill-formed")
       end
       augmented_sp_hash = {
-        cols: [:id,:node],
-        filter: [:oneof,:display_name,poss_port_display_names],
-        post_filter: lambda{|r|r[:node][:assembly_id] == assembly_id && r[:node][:display_name] == node_display_name}
+        cols: [:id, :node],
+        filter: [:oneof, :display_name, poss_port_display_names],
+        post_filter: lambda { |r| r[:node][:assembly_id] == assembly_id && r[:node][:display_name] == node_display_name }
       }
-      name_to_id_helper(model_handle,name,augmented_sp_hash)
+      name_to_id_helper(model_handle, name, augmented_sp_hash)
     end
 
     # virtual attribute defs
@@ -121,7 +121,7 @@ module DTK
     class << self
       private
 
-      def ret_encoded_port_name(type,component_type,link_def,dir,title=nil)
+      def ret_encoded_port_name(type, component_type, link_def, dir, title = nil)
         link_def_ref = link_def[:link_type]
         ret = "#{dir}#{RefDelim}#{type}#{RefDelim}#{component_type}#{RefDelim}#{link_def_ref}"
         title ? "#{ret}#{RefDelim}#{title}" : ret
@@ -144,18 +144,18 @@ module DTK
       end
 
       if port_display_name =~ ParseRegex[:with_title]
-        ret.merge!(port_type: $1,component_type: $2,link_def_ref: $3, title: $4)
+        ret.merge!(port_type: $1, component_type: $2, link_def_ref: $3, title: $4)
       elsif port_display_name =~ ParseRegex[:without_title]
-        ret.merge!(port_type: $1,component_type: $2,link_def_ref: $3)
+        ret.merge!(port_type: $1, component_type: $2, link_def_ref: $3)
       else
         raise Error.new("unexpected display name (#{port_display_name})")
       end
 
       component_type = ret[:component_type]
       if component_type =~ Regexp.new('(^.+)__(.+$)')
-        ret.merge!(module: $1,component: $2)
+        ret.merge!(module: $1, component: $2)
       else
-        ret.merge!(module: component_type,component: component_type)
+        ret.merge!(module: component_type, component: component_type)
       end
 
       ret
@@ -166,24 +166,24 @@ module DTK
     # node_display_name,poss_port_display_names
     # input is of form form <node>/<component>, like server/rsyslog::server
     # if error, returns nil
-    def self.parse_to_ret_display_name(service_ref_name,conn_type,opts={})
+    def self.parse_to_ret_display_name(service_ref_name, conn_type, opts = {})
       if service_ref_name =~ Regexp.new('(^[^/]+)/([^/]+$)')
         node_display_name = $1
         cmp_ref = $2
-        cmp_ref_internal_form = cmp_ref.gsub(/::/,'__')
-        dirs = (opts[:direction] ? [options[:direction]] : ['input','output'])
+        cmp_ref_internal_form = cmp_ref.gsub(/::/, '__')
+        dirs = (opts[:direction] ? [options[:direction]] : ['input', 'output'])
         int_or_ext = opts[:internal_or_external]
-        int_or_ext =  (int_or_ext ? [int_or_ext] : ['internal','external'])
+        int_or_ext =  (int_or_ext ? [int_or_ext] : ['internal', 'external'])
         poss_p_names = dirs.map do |dir|
           int_or_ext.map do |ie|
             "#{dir}#{RefDelim}component_#{ie}#{RefDelim}#{cmp_ref_internal_form}#{RefDelim}#{conn_type}"
           end
         end.flatten
-        [node_display_name,poss_p_names]
+        [node_display_name, poss_p_names]
       end
     end
 
-    def self.set_ports_link_def_and_cmp_ids(port_mh,ports,cmps,link_defs)
+    def self.set_ports_link_def_and_cmp_ids(port_mh, ports, cmps, link_defs)
       update_rows = ports.map do |port|
         parsed_port_name = parse_port_display_name(port[:display_name])
         cmp_type =  parsed_port_name[:component_type]
@@ -205,8 +205,8 @@ module DTK
           raise Error.new("Cannot find matching component for cloned port with id (#{port[:id]})")
         end
         cmp_id = cmp_match[:id]
-        el = {id: port[:id],component_id: cmp_id}
-        if link_def_match = link_defs.find{|ld|link_def_match?(ld,cmp_id,link_def_ref,parsed_port_name[:direction])}
+        el = { id: port[:id], component_id: cmp_id }
+        if link_def_match = link_defs.find { |ld| link_def_match?(ld, cmp_id, link_def_ref, parsed_port_name[:direction]) }
           el.merge(link_def_id: link_def_match[:id])
         else
           # TODO: check why after refactor of link_def/deps this before casting nil started causing a postgres problem; looks like this clause always fired so
@@ -214,14 +214,14 @@ module DTK
           el.merge(link_def_id: SQL::ColRef.null_id)
         end
       end
-      update_from_rows(port_mh,update_rows)
+      update_from_rows(port_mh, update_rows)
     end
 
     private
 
-    def self.link_def_match?(ld,cmp_id,link_def_ref,dir)
-      if ld[:component_component_id] ==  cmp_id &&
-          ld[:display_name].gsub(/^remote_/,'').gsub(/^local_/,'') == link_def_ref
+    def self.link_def_match?(ld, cmp_id, link_def_ref, dir)
+      if ld[:component_component_id] == cmp_id &&
+          ld[:display_name].gsub(/^remote_/, '').gsub(/^local_/, '') == link_def_ref
         if dir
           if ld[:display_name] =~ /^remote_/
             dir.to_s == direction_from_local_remote('remote')
@@ -234,23 +234,23 @@ module DTK
       end
     end
 
-    def self.port_ref(type,attr)
-      ref_num = (attr[:component_ref_num]||1).to_s
+    def self.port_ref(type, attr)
+      ref_num = (attr[:component_ref_num] || 1).to_s
       "#{type}#{RefDelim}#{attr[:component_ref]}#{RefDelim}#{attr[:display_name]}#{RefDelim}#{ref_num}"
     end
 
     def self.strip_type(ref)
-      ref.gsub(Regexp.new("^[^_]+#{RefDelim}"),'')
+      ref.gsub(Regexp.new("^[^_]+#{RefDelim}"), '')
     end
 
-    def self.add_type(type,stripped_ref)
+    def self.add_type(type, stripped_ref)
       "#{type}#{RefDelim}#{stripped_ref}"
     end
 
     public
 
     # returns nil if filtered
-    def filter_and_process!(i18n,*types)
+    def filter_and_process!(i18n, *types)
       unless types.empty?
         return nil unless types.include?(self[:type])
         if types.include?('external') #TODO: this special case may go away
@@ -258,21 +258,21 @@ module DTK
         end
       end
 
-      merge!(display_name: get_i18n_port_name(i18n,self)) if i18n
+      merge!(display_name: get_i18n_port_name(i18n, self)) if i18n
       merge!(port_type: self[:direction]) #TODO: should probably deprecate after get rid of using in front end
       materialize!(self.class.common_columns())
     end
 
     def self.get_attribute_info(port_id_handles)
-      get_objects_in_set_from_sp_hash(port_id_handles,columns: [:id,:attribute]).map do |r|
+      get_objects_in_set_from_sp_hash(port_id_handles, columns: [:id, :attribute]).map do |r|
         {
           id: r[:id],
-          attribute: r[:attribute_direct]||r[:attribute_nested]
+          attribute: r[:attribute_direct] || r[:attribute_nested]
         }
       end
     end
 
-    def self.ret_port_create_hash(link_def,node,component,opts={})
+    def self.ret_port_create_hash(link_def, node, component, opts = {})
       node_id = node.id()
       port_mh = node.model_handle_with_auth_info.create_childMH(:port)
       component_type = component.get_field?(:component_type)
@@ -284,7 +284,7 @@ module DTK
         end
 
       # TODO: clean up direction to make it cleaner how you set it
-      dir = opts[:direction]||direction_from_local_remote(link_def[:local_or_remote],opts)
+      dir = opts[:direction] || direction_from_local_remote(link_def[:local_or_remote], opts)
       cmp_ref = opts[:component_ref]
       # TODO: cleanup logic aroudn when cmp_ref is passed vs when it is not
       title =
@@ -294,8 +294,8 @@ module DTK
           ComponentTitle.title?(component)
         end
 
-      display_name = ref = ret_encoded_port_name(type,component_type,link_def,dir,title)
-      location_asserted = ret_location_asserted(component_type,link_def[:link_type])
+      display_name = ref = ret_encoded_port_name(type, component_type, link_def, dir, title)
+      location_asserted = ret_location_asserted(component_type, link_def[:link_type])
       row = {
         ref: ref,
         display_name: display_name,
@@ -317,7 +317,7 @@ module DTK
     class << self
       private
 
-      def direction_from_local_remote(local_or_remote,opts={})
+      def direction_from_local_remote(local_or_remote, opts = {})
         # TODO: just heuristc for computing dir; also need to upport "<>" (bidirectional)
         if opts[:remote_side]
           case local_or_remote
@@ -333,8 +333,8 @@ module DTK
       end
 
       # TODO: this should be in link defs
-      def ret_location_asserted(component_type,link_type)
-        (LocationMapping[component_type.to_sym]||{})[link_type.to_sym]
+      def ret_location_asserted(component_type, link_type)
+        (LocationMapping[component_type.to_sym] || {})[link_type.to_sym]
       end
       LocationMapping = {
         mysql__master: {

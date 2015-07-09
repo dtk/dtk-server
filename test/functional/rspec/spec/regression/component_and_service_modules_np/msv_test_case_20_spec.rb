@@ -24,7 +24,7 @@ dtk_common = DtkCommon.new('', '')
 
 describe '(Modules, Services and Versioning) Test Case 20: Import service module from remote repo and check its corresponding assemblies' do
   before(:all) do
-    puts '******************************************************************************************************************************',''
+    puts '******************************************************************************************************************************', ''
   end
 
   context 'Import service module function' do

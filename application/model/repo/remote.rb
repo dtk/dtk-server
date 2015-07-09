@@ -3,10 +3,10 @@ module DTK
   class Repo
     # TODO: may have better class name; this is really a remote repo server handler
     class Remote
-      r8_nested_require('remote','auth')
+      r8_nested_require('remote', 'auth')
       include AuthMixin
 
-      def initialize(remote_or_repo_base=nil)
+      def initialize(remote_or_repo_base = nil)
         arg = remote_or_repo_base #for succinctness
         if ModuleBranch::Location::Remote.includes?(arg)
           @remote = arg
@@ -66,7 +66,7 @@ module DTK
 
         response_data = client.publish_module(params, client_rsa_pub_key)
 
-        {remote_repo_namespace: namespace}.merge(Aux.convert_keys_to_symbols(response_data))
+        { remote_repo_namespace: namespace }.merge(Aux.convert_keys_to_symbols(response_data))
       end
 
       def delete_remote_module(client_rsa_pub_key, force_delete = false)
@@ -82,11 +82,11 @@ module DTK
       end
 
       def raise_error_if_module_is_not_accessible(client_rsa_pub_key)
-        get_remote_module_info?(client_rsa_pub_key,raise_error: true)
+        get_remote_module_info?(client_rsa_pub_key, raise_error: true)
       end
       private :raise_error_if_module_is_not_accessible
 
-      def get_remote_module_info?(client_rsa_pub_key,opts={})
+      def get_remote_module_info?(client_rsa_pub_key, opts = {})
         client_params = {
           name: remote.module_name,
           type: type_for_remote_module(remote.module_type),
@@ -115,13 +115,13 @@ module DTK
           raise Error.new('Not versions not implemented')
           versions = branch_names_to_versions_stripped(ret[:branches])
           unless versions && versions.include?(remote.version)
-            raise ErrorUsage.new("Remote module (#{remote.pp_module_name()}}) does not have version (#{remote.version||'CURRENT'})")
+            raise ErrorUsage.new("Remote module (#{remote.pp_module_name()}}) does not have version (#{remote.version || 'CURRENT'})")
           end
         end
         ret
       end
 
-      def get_remote_module_components(client_rsa_pub_key=nil)
+      def get_remote_module_components(client_rsa_pub_key = nil)
         params = {
           name: remote.module_name,
           version: remote.version,
@@ -141,9 +141,9 @@ module DTK
       end
       private :remote
 
-      def list_module_info(type=nil, rsa_pub_key = nil)
+      def list_module_info(type = nil, rsa_pub_key = nil)
         new_repo = R8::Config[:repo][:remote][:new_client]
-        filter = type && {type: type_for_remote_module(type)}
+        filter = type && { type: type_for_remote_module(type) }
         remote_modules = client.list_modules(filter, rsa_pub_key)
 
         unsorted = remote_modules.map do |r|
@@ -157,28 +157,28 @@ module DTK
           el
         end
 
-        unsorted.sort{|a,b|a[:display_name] <=> b[:display_name]}
+        unsorted.sort { |a, b| a[:display_name] <=> b[:display_name] }
       end
 
       def branch_names_to_versions(branch_names)
         return nil unless branch_names and not branch_names == [HeadBranchName]
-        (branch_names.include?(HeadBranchName) ? ['CURRENT'] : []) + branch_names.reject{|b|b == HeadBranchName}.sort
+        (branch_names.include?(HeadBranchName) ? ['CURRENT'] : []) + branch_names.reject { |b| b == HeadBranchName }.sort
       end
 
       #
       # method will not return 'v' in version name, when used for comparison
       def branch_names_to_versions_stripped(branch_names)
         versions = branch_names_to_versions(branch_names)
-        versions ? versions.collect { |v| v.gsub(/^v/,'') } : nil
+        versions ? versions.collect { |v| v.gsub(/^v/, '') } : nil
       end
 
       private :branch_names_to_versions
 
-      def version_to_branch_name(version=nil)
+      def version_to_branch_name(version = nil)
         self.class.version_to_branch_name(version)
       end
-      def self.version_to_branch_name(version=nil)
-        Log.info_pp(['#TODO: ModuleBranch::Location: deprecating: version_to_branch_name',caller[0..4]])
+      def self.version_to_branch_name(version = nil)
+        Log.info_pp(['#TODO: ModuleBranch::Location: deprecating: version_to_branch_name', caller[0..4]])
         if version.nil? || version == HeadBranchName
           HeadBranchName
         else
@@ -221,14 +221,14 @@ module DTK
 
       # example:
       # returns namespace, name, version (optional)
-      def self.split_qualified_name(qualified_name, opts={})
+      def self.split_qualified_name(qualified_name, opts = {})
         raise ErrorUsage.new('Please provide module name to publish') if qualified_name.nil? || qualified_name.empty?
-        namespace = opts[:namespace]||default_namespace()
+        namespace = opts[:namespace] || default_namespace()
 
         split = qualified_name.split('/')
         case split.size
-         when 1 then [namespace,qualified_name]
-         when 2,3 then split
+         when 1 then [namespace, qualified_name]
+         when 2, 3 then split
          else
           qualified_name = 'NOT PROVIDED' if qualified_name.nil? || qualified_name.empty?
           raise ErrorUsage.new("Module remote name (#{qualified_name}) ill-formed. Must be of form 'name', 'namespace/name' or 'name/namespace/version'")
@@ -240,7 +240,7 @@ module DTK
       attr_reader :client
 
       def type_for_remote_module(module_type)
-        module_type.to_s.gsub(/_module$/,'')
+        module_type.to_s.gsub(/_module$/, '')
       end
 
       def is_empty?(string_value)
@@ -264,8 +264,8 @@ module DTK
         'dtk-instance-key'
       end
 
-      def get_end_user_remote_repo_username(mh,ssh_rsa_pub_key)
-        RepoUser.match_by_ssh_rsa_pub_key!(mh,ssh_rsa_pub_key).owner.username
+      def get_end_user_remote_repo_username(mh, ssh_rsa_pub_key)
+        RepoUser.match_by_ssh_rsa_pub_key!(mh, ssh_rsa_pub_key).owner.username
       end
     end
   end

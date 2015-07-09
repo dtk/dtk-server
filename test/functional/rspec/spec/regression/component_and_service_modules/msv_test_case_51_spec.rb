@@ -17,12 +17,12 @@ dependency_component_module_name = 'mkrakowitzer:deploy'
 git_ssh_repo_url = 'git@github.com:mkrakowitzer/puppet-deploy.git'
 namespace = 'mkrakowitzer'
 component_module_filesystem_location = '~/dtk/component_modules/maestrodev'
-grep_patterns_for_module_refs = ['deploy:','namespace: mkrakowitzer']
+grep_patterns_for_module_refs = ['deploy:', 'namespace: mkrakowitzer']
 dtk_common = DtkCommon.new('', '')
 
 describe '(Modules, Services and Versioning) Test Case 51: Import puppet forge (confluence) but its dependency (mkrakowitzer:deploy) is already installed on server' do
   before(:all) do
-    puts '*********************************************************************************************************************************************************',''
+    puts '*********************************************************************************************************************************************************', ''
   end
 
   context 'Import component module from git repo to specific namespace' do

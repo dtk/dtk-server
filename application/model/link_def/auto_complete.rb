@@ -1,31 +1,31 @@
 module DTK; class LinkDef
   class AutoComplete
     # TODO: AUTO-COMPLETE-LINKS: this needs to be enhanced to be a general mechanism to auto complete links
-    def self.create_internal_links(_node,component,node_link_defs_info)
+    def self.create_internal_links(_node, component, node_link_defs_info)
       # get link_defs in node_link_defs_info that relate to internal links not linked already that connect to component
       # on either end. what is returned are link defs annotated with their possible links
-      relevant_link_defs = get_annotated_internal_link_defs(component,node_link_defs_info)
+      relevant_link_defs = get_annotated_internal_link_defs(component, node_link_defs_info)
       return if relevant_link_defs.empty?
       # for each link def with multiple possibel link defs find the match;
       # TODO: find good mechanism to get user input if there is a choice such as whether it is internal or external
       # below is exeperimenting with passing in "stratagy" object, which for example can indicate to make all "internal_external internal"
-      strategy = {internal_external_becomes_internal: true,select_first: true}
+      strategy = { internal_external_becomes_internal: true, select_first: true }
       parent_idh = component.id_handle.get_parent_id_handle_with_auth_info()
       attr_links = []
       relevant_link_defs.each do |link_def|
-        if link_def_link = choose_internal_link(link_def,link_def[:possible_links],link_def[:component],strategy)
-          link_def_context = LinkDef::Context.create(link_def_link,node_link_defs_info)
+        if link_def_link = choose_internal_link(link_def, link_def[:possible_links], link_def[:component], strategy)
+          link_def_context = LinkDef::Context.create(link_def_link, node_link_defs_info)
           link_def_link.attribute_mappings.each do |attr_mapping|
             attr_links << attr_mapping.ret_links__clone_if_needed(link_def_context).merge(type: 'internal')
           end
         end
       end
-      AttributeLink.create_attribute_links(parent_idh,attr_links)
+      AttributeLink.create_attribute_links(parent_idh, attr_links)
     end
 
     private
 
-    def self.choose_internal_link(_link_def,possible_links,link_base_cmp,strategy)
+    def self.choose_internal_link(_link_def, possible_links, link_base_cmp, strategy)
       # TODO: mostly stubbed fn
       # TODO: need to check if has contraint
       ret = nil
@@ -39,7 +39,7 @@ module DTK; class LinkDef
       ret.merge(local_component_type: link_base_cmp[:component_type])
     end
 
-    def self.get_annotated_internal_link_defs(component,node_link_defs_info)
+    def self.get_annotated_internal_link_defs(component, node_link_defs_info)
       ret = []
       # shortcut; no links to create if less than two internal ports
       return ret if node_link_defs_info.size < 2
@@ -76,14 +76,14 @@ module DTK; class LinkDef
       # are children of relevant_link_def_ids and
       # internal_external have link_def_id in cmp_link_def_ids or remote_component_type == component_type
       sp_hash = {
-        cols: [:link_def_id, :remote_component_type,:position,:content,:type],
+        cols: [:link_def_id, :remote_component_type, :position, :content, :type],
         filter: [:and, [:oneof, :type, %w{internal internal_external}],
                  [:oneof, :link_def_id, relevant_link_def_ids],
-                 [:or, [:eq,:remote_component_type,component_type],
-                  [:oneof, :link_def_id,cmp_link_def_ids]]],
-        order_by: [{field: :position, order: 'ASC'}]
+                 [:or, [:eq, :remote_component_type, component_type],
+                  [:oneof, :link_def_id, cmp_link_def_ids]]],
+        order_by: [{ field: :position, order: 'ASC' }]
       }
-      poss_links = Model.get_objs(component.model_handle(:link_def_link),sp_hash)
+      poss_links = Model.get_objs(component.model_handle(:link_def_link), sp_hash)
       return ret if poss_links.empty?
       # splice in possible links
       poss_links.each do |poss_link|
@@ -91,7 +91,7 @@ module DTK; class LinkDef
       end
 
       # relevant link defs are ones that are in ndx_relevant_link_defs_info and have a possible link
-      ret = ndx_relevant_link_defs.reject{|_k,v|not v.key?(:possible_links)}.values
+      ret = ndx_relevant_link_defs.reject { |_k, v| not v.key?(:possible_links) }.values
       ret
     end
   end

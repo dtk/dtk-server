@@ -15,12 +15,12 @@ module DTK
 
       # local_params encapsulates local module branch params
       opts_local_params = (namespace ? { namespace: namespace } : {})
-      local_params = local_params(:component_module,module_name,opts_local_params)
+      local_params = local_params(:component_module, module_name, opts_local_params)
 
       opts_create_mod = Opts.new(
         config_agent_type: ret_config_agent_type()
       )
-      module_repo_info = ComponentModule.create_module(project,local_params,opts_create_mod)[:module_repo_info]
+      module_repo_info = ComponentModule.create_module(project, local_params, opts_create_mod)[:module_repo_info]
 
       # only when creating via import-git command
       git_url = ret_request_params(:module_git_url)
@@ -33,19 +33,19 @@ module DTK
 
     def rest__update_from_initial_create
       component_module = create_obj(:component_module_id)
-      repo_id,commit_sha = ret_non_null_request_params(:repo_id,:commit_sha)
+      repo_id, commit_sha = ret_non_null_request_params(:repo_id, :commit_sha)
       git_import = ret_request_params(:git_import)
-      repo_idh = id_handle(repo_id,:repo)
+      repo_idh = id_handle(repo_id, :repo)
       version = ret_version()
       scaffold = ret_request_params(:scaffold_if_no_dsl)
-      opts = {scaffold_if_no_dsl: scaffold, do_not_raise: true, process_provider_specific_dependencies: true}
+      opts = { scaffold_if_no_dsl: scaffold, do_not_raise: true, process_provider_specific_dependencies: true }
       opts.merge!(commit_dsl: true) if ret_request_params(:commit_dsl)
 
       response =
         if git_import
-          component_module.import_from_git(commit_sha,repo_idh,version,opts)
+          component_module.import_from_git(commit_sha, repo_idh, version, opts)
         else
-          component_module.import_from_file(commit_sha,repo_idh,version,opts)
+          component_module.import_from_file(commit_sha, repo_idh, version, opts)
         end
 
       rest_ok_response response
@@ -92,7 +92,7 @@ module DTK
       #    :inconsistent
       #    :possibly_missing
       #    :ambiguous
-      rest_ok_response component_module.update_model_from_clone_changes?(commit_sha,diffs_summary,version,opts)
+      rest_ok_response component_module.update_model_from_clone_changes?(commit_sha, diffs_summary, version, opts)
     end
 
     def rest__delete
@@ -200,7 +200,7 @@ module DTK
       about = ret_non_null_request_params(:about).to_sym
       component_template_id = ret_request_params(:component_template_id)
       unless AboutEnum.include?(about)
-        raise ErrorUsage::BadParamValue.new(:about,AboutEnum)
+        raise ErrorUsage::BadParamValue.new(:about, AboutEnum)
       end
       rest_ok_response component_module.info_about(about, component_template_id)
     end
@@ -223,7 +223,7 @@ module DTK
 
     def rest__install_puppet_forge_modules
       pf_full_name = ret_non_null_request_params(:puppetf_module_name)
-      namespace,module_name = ret_namespace_and_module_name_for_puppet_forge(pf_full_name)
+      namespace, module_name = ret_namespace_and_module_name_for_puppet_forge(pf_full_name)
       puppet_version  = ret_request_params_force_nil(:puppet_version)
       project = get_default_project()
 
@@ -240,8 +240,8 @@ module DTK
         # This creates a temporary directory after using puppet forge client to import
         MessageQueue.store(:info, "Started puppet forge install of module '#{pf_full_name}' ...")
         puppet_forge_local_copy = PuppetForge::Client.install(pf_full_name, puppet_version)
-        opts = {config_agent_type: ret_config_agent_type()}
-        opts = namespace ? {base_namespace: namespace} : {}
+        opts = { config_agent_type: ret_config_agent_type() }
+        opts = namespace ? { base_namespace: namespace } : {}
         MessageQueue.store(:info, 'Puppet forge module installed, parsing content ...')
         install_info = ComponentModule.import_from_puppet_forge(project, puppet_forge_local_copy, opts)
       ensure
@@ -255,7 +255,7 @@ module DTK
       component_module = create_obj(:component_module_id)
       remote_repo = ret_remote_repo()
       version = ret_version()
-      rest_ok_response component_module.import_version(remote_repo,version)
+      rest_ok_response component_module.import_version(remote_repo, version)
     end
 
     # TODO: ModuleBranch::Location: harmonize this signature with one for service module

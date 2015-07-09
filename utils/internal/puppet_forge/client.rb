@@ -10,11 +10,11 @@ module DTK
     #
     class Client
       class << self
-        def install(pf_module_name, puppet_version=nil, force=false)
+        def install(pf_module_name, puppet_version = nil, force = false)
           ret = nil
           base_install_dir = LocalCopy.random_install_dir()
           begin
-            output_hash = execute_puppet_forge_call(pf_module_name,base_install_dir,puppet_version,force)
+            output_hash = execute_puppet_forge_call(pf_module_name, base_install_dir, puppet_version, force)
             unless 'success'.eql?(output_hash['result'])
               raise ErrorUsage, "Puppet Forge Error: #{output_hash['error']['oneline']}"
             end
@@ -32,7 +32,7 @@ module DTK
 
         # returns output_hash
         PUPPET_VERSION = '3.4.0'
-        def execute_puppet_forge_call(pf_module_name,base_install_dir,puppet_version=nil, force=false)
+        def execute_puppet_forge_call(pf_module_name, base_install_dir, puppet_version = nil, force = false)
           command  = "puppet _#{PUPPET_VERSION}_ module install #{pf_module_name} --render-as json --target-dir #{base_install_dir} --modulepath #{base_install_dir}"
           command += " --version #{puppet_version}" if puppet_version && !puppet_version.empty?
           command += ' --force'              if force
@@ -52,7 +52,7 @@ module DTK
         end
 
         def check_for_dependencies(base_install_dir, _module_name, hash_info)
-          installed_module = (hash_info['installed_modules']||[]).first
+          installed_module = (hash_info['installed_modules'] || []).first
 
           if dependencies = full_recursive_dependencies(installed_module)
             nested_dependency_info = nested_dependency_info(base_install_dir)
@@ -63,7 +63,7 @@ module DTK
               dp_full_id  = "#{dp_name}"
               dp_full_id += " (#{dp_version})" if dp_version
               dp['dependencies'] = nested_dependency_info[dp_name.gsub('-', '/')]
-              ActiveSupport::HashWithIndifferentAccess.new(                name: dp_name, module_name: dp_module_name,
+              ActiveSupport::HashWithIndifferentAccess.new(name: dp_name, module_name: dp_module_name,
                 module_namespace: dp_module_namespace, version: dp_version,
                 full_id: dp_full_id, module_type: 'component_module')
             end
@@ -93,10 +93,10 @@ module DTK
         def nested_dependency_info(base_install_dir)
           yaml_output = `puppet module list --tree --render-as yaml --modulepath #{base_install_dir}`
           all_imported = YAML.load(yaml_output).values.flatten
-          all_imported.inject({}) do |h,puppet_module|
+          all_imported.inject({}) do |h, puppet_module|
             normalized_dependencies = []
             puppet_module.dependencies.each do |deps|
-              matching = all_imported.detect{|imported| imported.forge_name.eql?(deps['name'])}
+              matching = all_imported.detect { |imported| imported.forge_name.eql?(deps['name']) }
               normalized_dependencies << {
                 # have to set 'module' and 'path' to be able to successfully create dependency
                 'module' => matching.forge_name.gsub('/', '-'),

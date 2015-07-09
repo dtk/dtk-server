@@ -1,41 +1,41 @@
 module DTK; class Target
   class IAASProperties
     class Ec2 < self
-      def initialize(hash_args,provider=nil)
+      def initialize(hash_args, provider = nil)
         super(hash_args)
         if provider
           @provider = provider
           #sanitizing what goes in provider_iaas_props, which is used for cloning targets
-          @provider_iaas_props = (provider.get_field?(:iaas_properties)||{}).reject{|k,_v|[:key,:secret].include?(k)}
+          @provider_iaas_props = (provider.get_field?(:iaas_properties) || {}).reject { |k, _v| [:key, :secret].include?(k) }
         end
       end
 
       # returns an array of IAASProperties::Ec2 objects
-      def self.check_and_compute_needed_iaas_properties(target_name,ec2_type,provider,property_hash)
+      def self.check_and_compute_needed_iaas_properties(target_name, ec2_type, provider, property_hash)
         ret = []
-        iaas_property_factory = new({name: target_name},provider)
-        ret << iaas_property_factory.create_target_propeties(ec2_type,property_hash)
+        iaas_property_factory = new({ name: target_name }, provider)
+        ret << iaas_property_factory.create_target_propeties(ec2_type, property_hash)
         region = property_hash[:region]
         if Ec2TypesNeedingAZTargets.include?(ec2_type)
           # TODO: when have nested targets will nest availability zone targets in the one justa ssociarted with region
           # add iaas_properties for targets created separately for every availability zone
           provider.get_availability_zones(region).each do |az|
-            ret << iaas_property_factory.create_target_propeties(ec2_type,property_hash,availability_zone: az)
+            ret << iaas_property_factory.create_target_propeties(ec2_type, property_hash, availability_zone: az)
           end
         end
         ret
       end
       Ec2TypesNeedingAZTargets = [:ec2_classic]
 
-      def create_target_propeties(ec2_type,target_property_hash,params={})
+      def create_target_propeties(ec2_type, target_property_hash, params = {})
         iaas_properties = clone_and_check_manditory_params(target_property_hash)
-        iaas_properties = {ec2_type: ec2_type}.merge(iaas_properties)
+        iaas_properties = { ec2_type: ec2_type }.merge(iaas_properties)
         name = name()
         if az = params[:availability_zone]
-          name = availbility_zone_target_name(name,az)
-          iaas_properties = {availability_zone: az}.merge(iaas_properties)
+          name = availbility_zone_target_name(name, az)
+          iaas_properties = { availability_zone: az }.merge(iaas_properties)
         end
-        self.class.new(name: name,iaas_properties: iaas_properties)
+        self.class.new(name: name, iaas_properties: iaas_properties)
       end
 
       def self.equal?(i2)
@@ -45,7 +45,7 @@ module DTK; class Target
 
       private
 
-      def availbility_zone_target_name(name,availbility_zone)
+      def availbility_zone_target_name(name, availbility_zone)
         "#{name}-#{availbility_zone}"
       end
 
@@ -74,7 +74,7 @@ module DTK; class Target
           return ret
         end
         props_with_creds = props_with_creds.merge(target_property_hash)
-        self.class.check(:ec2,props_with_creds,properties_to_check: PropertiesToCheck)
+        self.class.check(:ec2, props_with_creds, properties_to_check: PropertiesToCheck)
 
         ret
       end
@@ -88,9 +88,9 @@ module DTK; class Target
       end
 
       def self.sanitize!(iaas_properties)
-        iaas_properties.reject!{|k,_v|not SanitizedProperties.include?(k)}
+        iaas_properties.reject! { |k, _v| not SanitizedProperties.include?(k) }
       end
-      SanitizedProperties = [:region,:keypair,:security_group,:security_group_set,:subnet,:ec2_type,:availability_zone]
+      SanitizedProperties = [:region, :keypair, :security_group, :security_group_set, :subnet, :ec2_type, :availability_zone]
 
       def self.more_specific_type?(iaas_properties)
         ec2_type = iaas_properties[:ec2_type]

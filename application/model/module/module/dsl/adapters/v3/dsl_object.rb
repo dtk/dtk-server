@@ -2,20 +2,20 @@ module DTK; class ModuleDSL; class V3
   DSLObjectBase = ModuleDSL::V2::DSLObject
   class DSLObject < DSLObjectBase
     class Module < DSLObjectBase::Module
-      def set_include_modules!(ret,opts={})
-        ret.set_unless_nil('includes',opts[:include_modules])
+      def set_include_modules!(ret, opts = {})
+        ret.set_unless_nil('includes', opts[:include_modules])
       end
     end
 
     class Attribute < DSLObjectBase::Attribute
-      def render_hash_form(_opts={})
+      def render_hash_form(_opts = {})
         ret = RenderHash.new
-        ret.set_unless_nil('description',value(:description))
+        ret.set_unless_nil('description', value(:description))
         ret['type'] = required_value(:type)
         ret['required'] = true if value(:required)
-        ret.set_unless_nil('dynamic',converted_dynamic())
-        ret.set_unless_nil('default',converted_default())
-        ret.set_unless_nil('external_ref',converted_external_ref())
+        ret.set_unless_nil('dynamic', converted_dynamic())
+        ret.set_unless_nil('default', converted_default())
+        ret.set_unless_nil('external_ref', converted_external_ref())
         ret
       end
 
@@ -43,7 +43,7 @@ module DTK; class ModuleDSL; class V3
 
       def has_default_variable?
         unless ScaffoldingStrategy[:no_dynamic_attributes]
-          !(value(:external_ref) ||{})['default_variable'].nil?
+          !(value(:external_ref) || {})['default_variable'].nil?
         end
       end
 
@@ -55,7 +55,7 @@ module DTK; class ModuleDSL; class V3
           ret[ext_ref['type']] = attr_name
         end
         # catchall: ignore proceesed keys and default_variable
-        (ext_ref.keys - ['name','type','default_variable']).each{|k|ret[k] = ext_ref[k]}
+        (ext_ref.keys - ['name', 'type', 'default_variable']).each { |k| ret[k] = ext_ref[k] }
         ret.empty? ? nil : ret
       end
     end

@@ -10,7 +10,7 @@ module DTK; class ConfigAgent
         @parsed_dependency
       end
 
-      def initialize(name,version_constraints_string)
+      def initialize(name, version_constraints_string)
         @name = name
         @version_constraints_string = version_constraints_string
         @parsed_dependency = nil
@@ -22,7 +22,7 @@ module DTK; class ConfigAgent
           )
          rescue Exception => e
           Log.error("error parsing version constraints string: #{version_constraints_string}")
-          Log.error_pp([e,e.backtrace[0..5]])
+          Log.error_pp([e, e.backtrace[0..5]])
         end
       end
 
@@ -32,9 +32,9 @@ module DTK; class ConfigAgent
       def parse_constraints_string(versions_string)
         ret = []
         return ret if versions_string.nil?
-        rest_string = parse_one_constraint!(ret,versions_string)
+        rest_string = parse_one_constraint!(ret, versions_string)
         if rest_string
-          parse_one_constraint!(ret,rest_string)
+          parse_one_constraint!(ret, rest_string)
         end
         ret
       end
@@ -43,14 +43,14 @@ module DTK; class ConfigAgent
       ConstraintRegex2 = /^\s*(\d)\.x\s*$/
       # returns rest of string after parsing
       # :rest, :match, which has keys :version, :constraint
-      def parse_one_constraint!(ret,versions_string)
+      def parse_one_constraint!(ret, versions_string)
         rest_string = nil
         if match = versions_string.match(ConstraintRegex1)
-          ret << {version: normalize_to_three_parts(match[2]), constraint: match[1]}
+          ret << { version: normalize_to_three_parts(match[2]), constraint: match[1] }
           rest_string =  match[3] unless match[3].empty?
         elsif match = versions_string.match(ConstraintRegex2)
-          ret << {version: normalize_to_three_parts(match[1]), constraint: '>='}
-          ret << {version: normalize_to_three_parts(match[1].to_i+1), constraint: '<'}
+          ret << { version: normalize_to_three_parts(match[1]), constraint: '>=' }
+          ret << { version: normalize_to_three_parts(match[1].to_i + 1), constraint: '<' }
         else
           raise Error.new("error parsing version constraints string: #{versions_string})")
         end

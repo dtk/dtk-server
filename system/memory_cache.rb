@@ -11,11 +11,11 @@ module XYZ
     @@cache = nil
           return nil
         end
-        @@cache = MemCache.new(server_list.map{|s|s+':11211'})
+        @@cache = MemCache.new(server_list.map { |s| s + ':11211' })
       end
 
-      def set(key,value)
-        @@cache.set(key,value) unless  @@cache.nil?
+      def set(key, value)
+        @@cache.set(key, value) unless  @@cache.nil?
       end
 
       def get(key)

@@ -11,9 +11,9 @@ module DTK; class Node
         super()
         merge!(canonical_name: canonical_name)
       end
-      def self.Attribute(canonical_attr_name,klass=nil,&block)
+      def self.Attribute(canonical_attr_name, klass = nil, &block)
         @@index_by_canonical_name ||= {}
-        Add.new(@@index_by_canonical_name,canonical_attr_name,klass,&block)
+        Add.new(@@index_by_canonical_name, canonical_attr_name, klass, &block)
         if klass
           # Interprted def is a node attribute that has additional methods defined on it
           (@@interpreted_def ||= {})[klass] = @@index_by_canonical_name[canonical_attr_name]
@@ -27,25 +27,25 @@ module DTK; class Node
       def self.canonical_name
         object()[:canonical_name]
       end
-      def self.aliases(canonical_name=nil)
-        object(canonical_name)[:aliases]||[]
+      def self.aliases(canonical_name = nil)
+        object(canonical_name)[:aliases] || []
       end
 
       private
 
-      def self.object(canonical_name=nil)
+      def self.object(canonical_name = nil)
         unless ret = (canonical_name ? @@index_by_canonical_name[canonical_name] : @@interpreted_def[self])
-          index = canonical_name||self
+          index = canonical_name || self
           raise Error.new("Bad index given (#{index.inspect}")
         end
         ret
       end
 
       class Add < Hash
-        def initialize(attrs,attr,klass=nil,&block)
+        def initialize(attrs, attr, klass = nil, &block)
           @attr = attr
           @attrs = attrs
-          @klass = klass||Def
+          @klass = klass || Def
           instance_eval(&block)
           attrs[attr]
         end
@@ -54,11 +54,11 @@ module DTK; class Node
           # for types has a lambda function that if true means the value is legal; if in dsl user gives array we convert this to lambda function
           lambda_fn =
             if type_description.is_a?(Array)
-              lambda{|x|type_description.include?(x)}
+              lambda { |x| type_description.include?(x) }
             else #assume is a lambda fn
               type_description
             end
-          set_meta_property!(:is_type?,lambda_fn)
+          set_meta_property!(:is_type?, lambda_fn)
         end
 
         def required(required_boolean_val)
@@ -107,7 +107,7 @@ module DTK; class Node
 
         private
 
-        def set_meta_property!(prop,val)
+        def set_meta_property!(prop, val)
           (@attrs[@attr] ||= @klass.new(@attr))[prop] = val
         end
       end

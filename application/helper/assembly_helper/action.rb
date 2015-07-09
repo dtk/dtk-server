@@ -5,38 +5,38 @@ module Ramaze::Helper
     module ActionMixin
       # creates a queue object, initiates action that will push results on queue
       # if any errors, it wil just push error conditions on queue
-      def initiate_action(action_queue_class, assembly, params={}, node_pattern={})
-        InitiateAction.block(action_queue_class,params) do |action_queue|
+      def initiate_action(action_queue_class, assembly, params = {}, node_pattern = {})
+        InitiateAction.block(action_queue_class, params) do |action_queue|
           nodes = ret_matching_nodes(assembly, node_pattern)
           action_queue.initiate(nodes, params)
         end
       end
 
-      def initiate_action_with_nodes(action_queue_class,nodes,params={},&block)
-        InitiateAction.block(action_queue_class,params) do |action_queue|
+      def initiate_action_with_nodes(action_queue_class, nodes, params = {}, &block)
+        InitiateAction.block(action_queue_class, params) do |action_queue|
           block.call if block
           action_queue.initiate(nodes, params)
         end
       end
 
-      def initiate_execute_tests(action_queue_class, params={})
-        InitiateAction.execute_tests_block(action_queue_class,params) do |action_queue|
+      def initiate_execute_tests(action_queue_class, params = {})
+        InitiateAction.execute_tests_block(action_queue_class, params) do |action_queue|
           action_queue.initiate
         end
       end
       module InitiateAction
-        def self.block(action_queue_class,params,&block)
-          opts = ::DTK::Aux.hash_subset(params,:agent_action)
+        def self.block(action_queue_class, params, &block)
+          opts = ::DTK::Aux.hash_subset(params, :agent_action)
           action_queue = action_queue_class.new(opts)
           begin
             block.call(action_queue)
           rescue ::DTK::ErrorUsage => e
-            action_queue.push(:error,e.message)
+            action_queue.push(:error, e.message)
           end
           action_queue
         end
 
-        def self.execute_tests_block(action_queue_class,params,&block)
+        def self.execute_tests_block(action_queue_class, params, &block)
           action_queue = action_queue_class.new(params)
           begin
             block.call(action_queue)
@@ -81,17 +81,17 @@ module Ramaze::Helper
       end
 
       module MatchingNodes
-        def self.filter_by_id(nodes,node_id)
+        def self.filter_by_id(nodes, node_id)
           node_id = node_id.to_i
           # unless match = nodes.find{|n|n.id == node_id}
-          unless match = nodes.select{|n|n.id.to_s.start_with?(node_id.to_s)}
+          unless match = nodes.select { |n| n.id.to_s.start_with?(node_id.to_s) }
             raise ::DTK::ErrorUsage.new("No node matches id (#{node_id})")
           end
           match
         end
-        def self.filter_by_name(nodes,node_name)
+        def self.filter_by_name(nodes, node_name)
           # unless match = nodes.find{|n|n.assembly_node_print_form() == node_name}
-          unless match = nodes.select{|n|n.assembly_node_print_form().start_with?(node_name)}
+          unless match = nodes.select { |n| n.assembly_node_print_form().start_with?(node_name) }
             raise ::DTK::ErrorUsage.new("No node matches name (#{node_name})")
           end
           match

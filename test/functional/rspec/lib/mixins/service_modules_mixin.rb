@@ -128,7 +128,7 @@ module ServiceModulesMixin
       pretty_print_JSON(component_modules_list)
 
       components_list_to_check.each do |component|
-        if (component_modules_list['data'].find {|x| x['display_name'] == component})
+        if (component_modules_list['data'].find { |x| x['display_name'] == component })
           components_exist << true
         else
           components_exist << false
@@ -145,7 +145,7 @@ module ServiceModulesMixin
     return all_components_exist_in_service_module
   end
 
-  def delete_assembly(assembly_name, namespace=nil)
+  def delete_assembly(assembly_name, namespace = nil)
     puts 'Delete assembly:', '----------------'
     assembly_deleted = false
     assembly_list = send_request('/rest/assembly/list', subtype: 'template')

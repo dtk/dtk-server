@@ -1,12 +1,12 @@
 require File.expand_path('amqp_clients_wrapper', File.dirname(__FILE__))
 module XYZ
   class WorkerTask
-    attr_reader :input_msg,:status,:return_code,:errors,:log_entries
-    attr_accessor :parent_task,:results
+    attr_reader :input_msg, :status, :return_code, :errors, :log_entries
+    attr_accessor :parent_task, :results
 
     private
 
-    def initialize(input_msg,opts)
+    def initialize(input_msg, opts)
       @input_msg = input_msg
       @caller_channel = nil
       @msg_bus_client = nil
@@ -23,26 +23,26 @@ module XYZ
 
     public
 
-    def add_reply_to_info(caller_channel,msg_bus_client)
+    def add_reply_to_info(caller_channel, msg_bus_client)
       @caller_channel = caller_channel
       @msg_bus_client = msg_bus_client
       extend InstanceMixinReplyToCaller
     end
 
-    def add_log_entry(type,params={})
-      @log_entries << WorkerTaskLogEntry.create(type,params)
+    def add_log_entry(type, params = {})
+      @log_entries << WorkerTaskLogEntry.create(type, params)
     end
 
-    def self.create(type,input_msg,opts={})
+    def self.create(type, input_msg, opts = {})
       case type
         when :basic
-          WorkerTaskBasic.create(input_msg,opts)
+          WorkerTaskBasic.create(input_msg, opts)
         when :local
-          WorkerTaskLocal.new(input_msg,opts)
+          WorkerTaskLocal.new(input_msg, opts)
         when :remote
-          WorkerTaskRemote.new(input_msg,opts)
+          WorkerTaskRemote.new(input_msg, opts)
         when :task_set
-          WorkerTaskSet.create(input_msg,opts)
+          WorkerTaskSet.create(input_msg, opts)
         else
          raise Error.new("#{type} is not a legal worker task type")
       end
@@ -80,25 +80,25 @@ module XYZ
     def reply_to_caller
       raise Error.new('cannot call reply_to_caller() if caller_channel not set') unless @caller_channel
       raise Error.new('cannot call reply_to_caller() if msg_bus_client not set') unless @msg_bus_client
-      reply_queue = @msg_bus_client.publish_queue(@caller_channel,passive: true)
-      input_msg_reply = ProcessorMsg.create({msg_type: :task})
+      reply_queue = @msg_bus_client.publish_queue(@caller_channel, passive: true)
+      input_msg_reply = ProcessorMsg.create({ msg_type: :task })
       # TBD: stub; want to strip out a number of these fields
       # only send a subset of task info
       task = WorkerTaskWireSubset.new(self)
       reply_queue.publish(input_msg_reply.marshal_to_message_bus_msg(),
-        {message_id: @caller_channel, task: task})
+        { message_id: @caller_channel, task: task })
     end
   end
 
   class WorkerTaskSet < WorkerTask
     attr_reader :subtasks
-    def self.create(input_msg,opts={})
+    def self.create(input_msg, opts = {})
       temporal_sequencing = opts[:temporal_sequencing] || :concurrent
       case temporal_sequencing
   when :concurrent
-          WorkerTaskSetConcurrent.new(input_msg,opts)
+          WorkerTaskSetConcurrent.new(input_msg, opts)
   when :sequential
-          WorkerTaskSetSequential.new(input_msg,opts)
+          WorkerTaskSetSequential.new(input_msg, opts)
  else
           raise Error.new("#{temporal_sequencing} is an illegal temporal sequencing type")
       end
@@ -106,8 +106,8 @@ module XYZ
 
     private
 
-    def initialize(input_msg,opts={})
-      super(input_msg,opts)
+    def initialize(input_msg, opts = {})
+      super(input_msg, opts)
       @subtasks = []
       @num_tasks_not_complete = 0
     end
@@ -123,11 +123,11 @@ module XYZ
     end
 
     def add_routing_info(opts)
-      @subtasks.each{|t|t.add_routing_info(opts)}
+      @subtasks.each { |t| t.add_routing_info(opts) }
     end
 
     def determine_local_and_remote_tasks!(worker)
-      @subtasks.each{|t|t.determine_local_and_remote_tasks!(worker)}
+      @subtasks.each { |t| t.determine_local_and_remote_tasks!(worker) }
     end
   end
 
@@ -145,7 +145,7 @@ module XYZ
       @num_tasks_not_complete = @num_tasks_not_complete - 1
       if @num_tasks_not_complete < 1
         #        Log.debug_pp [:finished,WorkerTaskWireSubset.new(self)]
-        Log.debug_pp [:finished,WorkerTaskWireSubset.new(self).flatten()]
+        Log.debug_pp [:finished, WorkerTaskWireSubset.new(self).flatten()]
         process_task_finished()
       end
     end
@@ -165,7 +165,7 @@ module XYZ
       @num_tasks_not_complete = @num_tasks_not_complete - 1
       if @num_tasks_not_complete < 1
         #        Log.debug_pp [:finished,WorkerTaskWireSubset.new(self)]
-        Log.debug_pp [:finished,WorkerTaskWireSubset.new(self).flatten()]
+        Log.debug_pp [:finished, WorkerTaskWireSubset.new(self).flatten()]
         process_task_finished()
       else
         i = @subtasks.size - @num_tasks_not_complete
@@ -179,15 +179,15 @@ module XYZ
 
     private
 
-    def initialize(input_msg,opts={})
-      super(input_msg,opts)
+    def initialize(input_msg, opts = {})
+      super(input_msg, opts)
       @task_type = nil
     end
 
     public
 
-    def self.create(input_msg,opts={})
-      WorkerTaskBasic.new(input_msg,opts)
+    def self.create(input_msg, opts = {})
+      WorkerTaskBasic.new(input_msg, opts)
     end
 
     def determine_local_and_remote_tasks!(_worker)
@@ -251,8 +251,8 @@ module XYZ
         Log.debug_pp [:sending_to,
                       @queue_name ? "queue #{@queue_name}" : "exchange #{@exchange_name}",
                       msg_bus_msg_out]
-        queue_or_exchange.publish_with_callback(msg_bus_msg_out,@publish_opts) do |trans_info,msg_bus_msg_in|
-          Log.debug_pp [:received_from, trans_info,msg_bus_msg_in]
+        queue_or_exchange.publish_with_callback(msg_bus_msg_out, @publish_opts) do |trans_info, msg_bus_msg_in|
+          Log.debug_pp [:received_from, trans_info, msg_bus_msg_in]
           @delegated_task = trans_info[:task]
           process_task_finished()
         end
@@ -275,24 +275,24 @@ module XYZ
     # can throw an error (e.g., if passive and queue does not exist)
     def ret_queue_or_exchange
       if @queue_name
-  @msg_bus_client.publish_queue(@queue_name,@create_opts||{})
+  @msg_bus_client.publish_queue(@queue_name, @create_opts || {})
       else # #@exchange_name
-  @msg_bus_client.exchange(@exchange_name,@create_opts||{})
+  @msg_bus_client.exchange(@exchange_name, @create_opts || {})
       end
     end
   end
 
   class WorkerTaskRemote < WorkerTaskBasic
     include MixinWorkerTaskRemote
-    def initialize(input_msg,opts={})
-      super(input_msg,opts)
+    def initialize(input_msg, opts = {})
+      super(input_msg, opts)
       extend_as_remote()
     end
   end
 
   module MixinWorkerTaskLocal
     def initialize_local
-      @work = proc{}
+      @work = proc {}
       @run_in_new_thread_or_fork = nil
     end
 
@@ -301,7 +301,7 @@ module XYZ
         begin
           opts[:work].call()
          rescue  Exception => e
-          Log.debug_pp [e,e.backtrace]
+          Log.debug_pp [e, e.backtrace]
           # TBD: since this can be arbitrary error as stop gap measure converting to_s; ?: should I do same for errors with different tasks or only needed here because can get arbitrary for example chef errors
           @errors << WorkerTaskError.new(e.to_s)
           :failed
@@ -322,19 +322,19 @@ module XYZ
          process_task_finished()
       end
       if @run_in_new_thread_or_fork
-        EM.defer(@work,callback)
+        EM.defer(@work, callback)
       else
         # TBD: using next_tick is from rightlink design pattern; need to work through all shuffles to
         # see if this is what we want
-        EM.next_tick {callback.call(@work.call())}
+        EM.next_tick { callback.call(@work.call()) }
       end
     end
   end
 
   class WorkerTaskLocal < WorkerTaskBasic
     include MixinWorkerTaskLocal
-    def initialize(input_msg,opts={})
-      super(input_msg,opts)
+    def initialize(input_msg, opts = {})
+      super(input_msg, opts)
       extend_as_local()
       add_work_info(opts)
     end
@@ -352,13 +352,13 @@ module XYZ
   end
 
   class WorkerTaskLogEntry < HashObject
-    def self.create(type,params={})
-      WorkerTaskLogEntry.new(type,params)
+    def self.create(type, params = {})
+      WorkerTaskLogEntry.new(type, params)
     end
 
     private
 
-    def initialize(type,params={})
+    def initialize(type, params = {})
       super(params.merge(type: type))
     end
   end
@@ -379,7 +379,7 @@ module XYZ
       if tsk.is_a?(WorkerTaskBasic) and tsk.task_type == :remote
         self[:delegated_task] = tsk.delegated_task
       elsif tsk.is_a?(WorkerTaskSet)
-        self[:subtasks] = tsk.subtasks.map{|t|WorkerTaskWireSubset.new(t)}
+        self[:subtasks] = tsk.subtasks.map { |t| WorkerTaskWireSubset.new(t) }
       end
 
       # TBD: whether results should come back in task info or in other spot, such as
@@ -400,7 +400,7 @@ module XYZ
 
       input_msg = nil
       if self[:input_msg].is_a?(ProcessorMsg)
-        input_msg = {msg_type: self[:input_msg].msg_type}
+        input_msg = { msg_type: self[:input_msg].msg_type }
         input_msg[:msg_content] =  self[:input_msg].msg_content unless self[:input_msg].msg_content.empty?
       else
          input_msg = self[:input_msg]

@@ -23,7 +23,7 @@ dtk_common = DtkCommon.new(service_name, assembly_name)
 
 describe '(Different Node Templates) Test Case 9: Redis - Master/Slave scenario' do
   before(:all) do
-    puts '*********************************************************************',''
+    puts '*********************************************************************', ''
   end
 
   context "Stage service function on #{assembly_name} assembly" do

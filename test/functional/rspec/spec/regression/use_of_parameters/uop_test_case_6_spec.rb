@@ -77,7 +77,7 @@ end
 
 describe '(Use Of Parameters) Test Case 6: Check possibility to query list of nodes/components/attributes of particular service' do
   before(:all) do
-    puts '*********************************************************************************************************************',''
+    puts '*********************************************************************************************************************', ''
   end
 
   context "Stage service function on #{assembly_name} assembly" do

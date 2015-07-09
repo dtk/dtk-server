@@ -14,7 +14,7 @@ STDOUT.sync = true
 service_name = 'stda_test_case_7_instance'
 assembly_name = 'node_group_test::simple'
 node_name = 'slave'
-nodes = ['slave:1','slave:2']
+nodes = ['slave:1', 'slave:2']
 components = ['slave/stdlib']
 expected_cardinality_before_delete = 2
 expected_cardinality_after_delete = 1
@@ -22,7 +22,7 @@ dtk_common = DtkCommon.new(service_name, assembly_name)
 
 describe '(Staging And Deploying Assemblies) Test Case 7: Stage simple node group example, list nodes, delete nodes, check cardinality, list nodes/components/attributes after delete' do
   before(:all) do
-    puts '***************************************************************************************************************************************************************************',''
+    puts '***************************************************************************************************************************************************************************', ''
   end
 
   context "Stage service function on #{assembly_name} assembly" do

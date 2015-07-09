@@ -1,10 +1,10 @@
 module DTK
   class AsyncResponse
     include ::EventMachine::Deferrable
-    def self.create(async_callback,content_type,response_procs,&blk)
+    def self.create(async_callback, content_type, response_procs, &blk)
       deferred_body = new(response_procs)
       ::EventMachine::next_tick do #TODO: is next_tick necessary?
-        async_callback.call [200, {'Content-Type' => content_type},deferred_body]
+        async_callback.call [200, { 'Content-Type' => content_type }, deferred_body]
       end
 
       user_object  = ::DTK::CurrentSession.new.user_object()

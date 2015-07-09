@@ -8,7 +8,7 @@ module DTK
       yaml_dump(simple_form)
     end
 
-    def self.parse(content,opts={})
+    def self.parse(content, opts = {})
       ret = {}
       if content.empty?
         ret
@@ -16,7 +16,7 @@ module DTK
         begin
           ::YAML.load(content)
          rescue Exception => e
-          ErrorUsage::Parsing::YAML.new("YAML #{e} in file",opts[:file_path])
+          ErrorUsage::Parsing::YAML.new("YAML #{e} in file", opts[:file_path])
         end
       end
     end
@@ -32,10 +32,10 @@ module DTK
     def self.simple_form_aux(obj)
       if obj.is_a?(::Hash)
         ret = ::Hash.new
-        obj.each_pair{|k,v|ret[string_form(k.to_s)] = simple_form_aux(v)}
+        obj.each_pair { |k, v| ret[string_form(k.to_s)] = simple_form_aux(v) }
         ret
       elsif obj.is_a?(::Array)
-        obj.map{|el|simple_form_aux(el)}
+        obj.map { |el| simple_form_aux(el) }
       elsif obj.is_a?(::String)
         string_form(obj)
       elsif obj.is_a?(::Fixnum)

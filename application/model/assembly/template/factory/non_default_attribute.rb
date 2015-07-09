@@ -4,7 +4,7 @@ module DTK; class Assembly; class Template
       attr_reader :is_title_attribute
       def initialize(attr, cmp)
         super()
-        replace(Aux::hash_subset(attr, [:display_name, :description, :ref, :tags, :is_instance_value]))
+        replace(Aux.hash_subset(attr, [:display_name, :description, :ref, :tags, :is_instance_value]))
         self[:attribute_value] = attr[:attribute_value] # virtual attributes do not work in Aux::hash_subset
         @is_title_attribute = ((not cmp[:only_one_per_node]) && attr.is_title_attribute?())
       end
@@ -44,7 +44,7 @@ module DTK; class Assembly; class Template
         non_def_attrs.each do |non_def_attr|
           if attribute_template = ndx_attrs[non_def_attr[:display_name]]
             non_def_attr[:attribute_template_id] = attribute_template[:id]
-            non_def_attr.merge!(Aux::hash_subset(attribute_template, [:data_type, :semantic_data_type]))
+            non_def_attr.merge!(Aux.hash_subset(attribute_template, [:data_type, :semantic_data_type]))
           else
             component_type = Component.display_name_print_form(cmp_ref_hash[:component_type])
             module_name = Component.module_name(cmp_ref_hash[:component_type])

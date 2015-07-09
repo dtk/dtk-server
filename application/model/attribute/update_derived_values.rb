@@ -33,7 +33,7 @@ module DTK; class Attribute
       # break up by type of row and process and aggregate
       return [] if update_deltas.empty?
       ndx_update_deltas = update_deltas.inject({}) do |h, r|
-        index = Aux::demodulize(r.class.to_s)
+        index = Aux.demodulize(r.class.to_s)
         (h[index] ||= []) << r
         h
       end

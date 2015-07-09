@@ -11,7 +11,7 @@ module XYZ
         end
   id_info = IDInfoTable.get_row_from_id_handle id_handle, raise_error: true
 
-         #check if instance or factory
+        #check if instance or factory
         if id_info[:is_factory]
           factory_idh = id_handle.createIDH(uri: id_info[:uri], is_factory: true)
     create_from_hash_with_factory(factory_idh, hash, opts)
@@ -271,11 +271,11 @@ module XYZ
 
   fail Error.new('error while inserting element') if new_id.nil?
 
-  new_uri  = RestURI::ret_new_uri(factory_idh[:uri], ref, ref_num)
+  new_uri  = RestURI.ret_new_uri(factory_idh[:uri], ref, ref_num)
 
   #need to fill in extra columns in associated uri table entry
   IDInfoTable.update_instance(db_rel, new_id, new_uri, relation_type, parent_id, parent_relation_type)
-         ############# processing scalar columns by inserting a row in db_rel
+        ############# processing scalar columns by inserting a row in db_rel
         container_idh = factory_idh.createIDH(uri: new_uri, c: c, model_name: relation_type)
   create_factory_uris_and_contained_objects(container_idh, new_id, obj_assignments, opts)
 

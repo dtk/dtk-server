@@ -120,7 +120,7 @@ module XYZ
   #get scalar values
   hash = (is_top_level && opts[:no_top_level_scalars]) ? {} : get_scalar_values_given_id_info(id_info, opts)
 
- # get self link
+  # get self link
   unless opts[:no_hrefs]
     link = RestContent.ret_link(:self, id_info[:uri], href_prefix)
           link.each { |k, v| hash[k] = v }
@@ -191,7 +191,7 @@ module XYZ
       # TODO!!! need to determine if this will be passed materialized virtual columns in which case we need to reformulate their types
       def process_raw_scalar_hash!(hash, db_rel, opts = {})
   cols_info = db_rel[:columns]
- # process the table specific columns
+  # process the table specific columns
   if cols_info
           hash.each_key do |col|
             next if hash[col].nil?
@@ -218,11 +218,11 @@ module XYZ
           end
   end
 
- # common fields
+  # common fields
   # fill in default display name if not there
- # TODO: this does not work if dont retrieve :display_name but get :ret
- # TODO: took out ebcause of error above; think shoudl eb removed permantly
- # qualified_ref = DB.ret_qualified_ref_from_scalars(hash)
+  # TODO: this does not work if dont retrieve :display_name but get :ret
+  # TODO: took out ebcause of error above; think shoudl eb removed permantly
+  # qualified_ref = DB.ret_qualified_ref_from_scalars(hash)
   #hash[:display_name] ||= qualified_ref if qualified_ref
 
   #fill in id unless :no_ids specified

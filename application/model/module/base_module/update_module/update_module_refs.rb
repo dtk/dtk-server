@@ -45,7 +45,7 @@ module DTK; class BaseModule; class UpdateModule
       #   component_module_refs = ModuleRefs.get_component_module_refs(module_branch)
       # end
 
-      serialize_info_hash = Aux::hash_subset(opts, [:create_empty_module_refs])
+      serialize_info_hash = Aux.hash_subset(opts, [:create_empty_module_refs])
       if external_deps = opts[:external_dependencies]
         if ambiguous = external_deps.ambiguous?
           serialize_info_hash.merge!(ambiguous: ambiguous)

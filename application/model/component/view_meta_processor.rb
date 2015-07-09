@@ -27,7 +27,7 @@ module XYZ
 
       def self.hidden_fields(type)
         HiddenFields[type].map do |hf|
-          { hf.keys.first => Aux::ordered_hash_subset(hf.values.first, [:required, :type, :value]) }
+          { hf.keys.first => Aux.ordered_hash_subset(hf.values.first, [:required, :type, :value]) }
         end
       end
       HiddenFields = {

@@ -12,17 +12,17 @@ module XYZ
 
           fail Error.new("illegal model name (#{relation_in_search_pattern}) in search pattern") unless DB_REL_DEF[relation_in_search_pattern]
 
-          sequel_filter_wo_auth, vcol_sql_fns = SimpleSearchPattern::ret_sequel_filter_and_vcol_sql_fns(search_pattern, mh_in_search_pattern)
+          sequel_filter_wo_auth, vcol_sql_fns = SimpleSearchPattern.ret_sequel_filter_and_vcol_sql_fns(search_pattern, mh_in_search_pattern)
           sequel_filter = DB.augment_for_authorization(sequel_filter_wo_auth, mh_in_search_pattern)
           remote_col_info = search_object.related_remote_column_info(vcol_sql_fns)
-          sequel_ds = SimpleSearchPattern::ret_sequel_ds_with_sequel_filter(mh_in_search_pattern, search_pattern, sequel_filter, remote_col_info, vcol_sql_fns)
+          sequel_ds = SimpleSearchPattern.ret_sequel_ds_with_sequel_filter(mh_in_search_pattern, search_pattern, sequel_filter, remote_col_info, vcol_sql_fns)
           return nil unless sequel_ds
           process_local_and_remote_dependencies(search_object, self.new(mh_in_search_pattern, sequel_ds), remote_col_info, vcol_sql_fns)
         end
 
         def create_dataset_from_join_array(model_handle, base_search_pattern, join_array)
           db = model_handle.db
-          graph_ds = Dataset.new(model_handle, SimpleSearchPattern::ret_sequel_ds(model_handle, base_search_pattern)).from_self(alias: model_handle[:model_name])
+          graph_ds = Dataset.new(model_handle, SimpleSearchPattern.ret_sequel_ds(model_handle, base_search_pattern)).from_self(alias: model_handle[:model_name])
           join_array.each do |join_info|
             right_ds = nil
             right_ds_mh = model_handle.createMH(model_name: join_info[:model_name])
@@ -31,7 +31,7 @@ module XYZ
               right_ds = Dataset.new(right_ds_mh, sequel_ds)
             else
               rs_opts = (join_info[:cols] ? Model::FieldSet.opt(join_info[:cols], join_info[:model_name]) : {}).merge return_as_hash: true
-              filter = join_info[:filter] ? SimpleSearchPattern::ret_sequel_filter(join_info[:filter], join_info[:model_name]) : nil
+              filter = join_info[:filter] ? SimpleSearchPattern.ret_sequel_filter(join_info[:filter], join_info[:model_name]) : nil
               right_ds = db.get_objects_just_dataset(right_ds_mh, filter, rs_opts)
             end
             opts = join_info[:alias] ? { table_alias: join_info[:alias] } : {}
@@ -42,7 +42,7 @@ module XYZ
         end
 
         def ret_sequel_filter(filter_hash, model_handle)
-          SimpleSearchPattern::ret_sequel_filter(filter_hash, model_handle[:model_name])
+          SimpleSearchPattern.ret_sequel_filter(filter_hash, model_handle[:model_name])
         end
 
         private
@@ -65,7 +65,7 @@ module XYZ
               right_ds = Dataset.new(right_ds_mh, sequel_ds)
             else
               rs_opts = (join_info[:cols] ? Model::FieldSet.opt(join_info[:cols], join_info[:model_name]) : {}).merge return_as_hash: true
-              filter = join_info[:filter] ? SimpleSearchPattern::ret_sequel_filter(join_info[:filter], join_info[:model_name]) : nil
+              filter = join_info[:filter] ? SimpleSearchPattern.ret_sequel_filter(join_info[:filter], join_info[:model_name]) : nil
               right_ds = search_object.db.get_objects_just_dataset(right_ds_mh, filter, rs_opts)
             end
             opts = join_info[:alias] ? { table_alias: join_info[:alias] } : {}
@@ -76,7 +76,7 @@ module XYZ
           # add any global columns or global where clauses
           if vcol_sql_fns
             wc_exprs = (vcol_sql_fns || []).map { |_vcol, vcol_info| vcol_info[:sql_fn] ? vcol_info[:expr] : nil }.compact
-            wc = (wc_exprs.empty? ? nil : SimpleSearchPattern::ret_sequel_filter([:and] + wc_exprs, model_handle))
+            wc = (wc_exprs.empty? ? nil : SimpleSearchPattern.ret_sequel_filter([:and] + wc_exprs, model_handle))
 
             post_proc_exprs = (vcol_sql_fns || []).map { |_vcol, vcol_info| vcol_info[:sql_fn] ? nil : vcol_info[:expr] }.compact
             post_proc_filter = (post_proc_exprs.empty? ? nil : [:and] + post_proc_exprs)

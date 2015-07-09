@@ -50,7 +50,7 @@ module DTK
           if binding = r[:node_binding]
             binding_fields = binding.hash_subset(:os_type, display_name: :template_name)
             common_fields = binding.ret_common_fields_or_that_varies()
-            common_fields_to_add = Aux::hash_subset(common_fields, [{ type: :template_type }, :image_id, :size, :region]).reject { |_k, v| v == :varies }
+            common_fields_to_add = Aux.hash_subset(common_fields, [{ type: :template_type }, :image_id, :size, :region]).reject { |_k, v| v == :varies }
             binding_fields.merge!(common_fields_to_add)
             el.merge!(binding_fields)
           end

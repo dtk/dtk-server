@@ -191,7 +191,7 @@ module XYZ
         if col.is_a?(Symbol) || col.is_a?(String)
           ret_symbol(col)
         elsif col.is_a?(Hash) && col.size == 1
-          { ret_scalar(col.keys.first) => ret_symbol(Aux::ret_value(col)) }
+          { ret_scalar(col.keys.first) => ret_symbol(Aux.ret_value(col)) }
         else
           fail ErrorPatternNotImplemented.new(:column, col)
         end
@@ -292,7 +292,7 @@ return :eq if term_in_json == ':'
     end
 
     def ret_symbol_key(obj)
-      ret_symbol(Aux::ret_key(obj))
+      ret_symbol(Aux.ret_key(obj))
     end
 
     def log_parsing_error_to_skip(type, object)

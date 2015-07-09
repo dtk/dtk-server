@@ -689,7 +689,7 @@ module DTK
       # TODO: clean up this part since this is doing more than creating task
       nodes_to_start =  (opts[:ret_nodes] || []).reject { |n| n[:admin_op_status] == 'running' }
       unless nodes_to_start.empty?
-        CreateThread.defer_with_session(CurrentSession.new.user_object(), Ramaze::Current::session) do
+        CreateThread.defer_with_session(CurrentSession.new.user_object(), Ramaze::Current.session) do
           # invoking command to start the nodes
           CommandAndControl.start_instances(nodes_to_start)
         end
@@ -730,7 +730,7 @@ module DTK
       # queue = SimpleActionQueue.new
 
       user_object  = CurrentSession.new.user_object()
-      CreateThread.defer_with_session(user_object, Ramaze::Current::session) do
+      CreateThread.defer_with_session(user_object, Ramaze::Current.session) do
         # invoking command to start the nodes
         CommandAndControl.start_instances(nodes)
       end

@@ -90,7 +90,7 @@ module XYZ
       end
 
       def cache
-        @@cache_contents ||= File.exists?(CacheFile) ? JSON.parse(IO.read(CacheFile)) : {}
+        @@cache_contents ||= File.exist?(CacheFile) ? JSON.parse(IO.read(CacheFile)) : {}
       end
 
       def save_cache

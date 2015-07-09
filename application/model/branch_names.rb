@@ -34,7 +34,7 @@ module DTK
 
     def workspace_branch_name(project, version = nil)
       #      Log.info_pp(["#TODO: ModuleBranch::Location: deprecate workspace_branch_name direct call",caller[0..4]])
-      ModuleBranch::Location::Server::Local::workspace_branch_name(project, version)
+      ModuleBranch::Location::Server::Local.workspace_branch_name(project, version)
     end
   end
 end

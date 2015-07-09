@@ -2,7 +2,7 @@ module DTK; class ServiceModule
   class AssemblyImport
     class V2 < self
       def self.assembly_iterate(service_module, hash_content, &block)
-        assembly_hash = (hash_content['assembly'] || {}).merge(Aux::hash_subset(hash_content, ['name', 'description', 'workflow']))
+        assembly_hash = (hash_content['assembly'] || {}).merge(Aux.hash_subset(hash_content, ['name', 'description', 'workflow']))
         assembly_ref = service_module.assembly_ref(hash_content['name'])
         assemblies_hash = { assembly_ref => assembly_hash }
         node_bindings_hash = hash_content['node_bindings']

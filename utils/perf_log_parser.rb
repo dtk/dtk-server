@@ -29,7 +29,7 @@ class PerfLogParser
         record[:sql] << field
       elsif field = get_field(line, /^MEASUREMENT=(.+)/)
 
-       # NEW KEY FOR AFTER DEMO elsif field = get_field(line, /^MEASUREMENT=(.+)/)
+        # NEW KEY FOR AFTER DEMO elsif field = get_field(line, /^MEASUREMENT=(.+)/)
         k, v = field.split(',')[0..1]
         custom_results << { measurement: k, measurement_perf: v }
       end

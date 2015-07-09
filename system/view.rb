@@ -523,7 +523,7 @@ module R8Tpl
 
     files.each do |path, content|
       next unless content
-      FileUtils.mkdir_p(File.dirname(path)) unless File.exists?(File.dirname(path))
+      FileUtils.mkdir_p(File.dirname(path)) unless File.exist?(File.dirname(path))
       File.open(path, 'w') { |fhandle| fhandle.write(content) }
     end
   end
@@ -760,7 +760,7 @@ module R8Tpl
   # TODO: make sure to return and rewrite after adding util/generic file access function
   # ex: should transparently check for either local file, or AWS, CDN, etc
   def viewJSCurrent
-    if (File.exists?(get_view_js_cache_path())) then
+    if (File.exist?(get_view_js_cache_path())) then
       # TODO: make sure to return and rewrite after adding util/generic file access function
       # ex: should transparently check for either local file, or AWS, CDN, etc
       jsCacheEditTime = File.mtime(get_view_js_cache_path()).to_i

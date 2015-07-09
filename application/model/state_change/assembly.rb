@@ -8,7 +8,7 @@ module DTK; class StateChange
         filter << [:neq, :basic_type, 'smoketest']
       end
       sp_hash = {
-        cols: DTK::Component::pending_changes_cols,
+        cols: DTK::Component.pending_changes_cols,
         filter: filter
       }
       state_change_mh = assembly.model_handle(:state_change)

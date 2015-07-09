@@ -72,7 +72,7 @@ module DTK
       node = sap_info[:node]
 
       sap_val = basic_type_info[:fn].call(sap_config_attr[:attribute_value], par_attr[:attribute_value])
-      sap_attr_row = Aux::hash_subset(basic_type_info, [{ sap: :ref }, { sap: :display_name }, :description, :semantic_type, :semantic_type_summary])
+      sap_attr_row = Aux.hash_subset(basic_type_info, [{ sap: :ref }, { sap: :display_name }, :description, :semantic_type, :semantic_type_summary])
       sap_attr_row.merge!(
          component_component_id: component[:id],
          value_derived: sap_val,

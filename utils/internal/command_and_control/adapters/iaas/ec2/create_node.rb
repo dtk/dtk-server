@@ -213,7 +213,7 @@ module DTK; module CommandAndControlAdapter
 
           def ec2_name_tag
             # TO-DO: move the tenant name definition to server configuration
-            tenant = ::DtkCommon::Aux::running_process_user()
+            tenant = ::DtkCommon::Aux.running_process_user()
             subs = {
               assembly: ec2_name_tag__get_assembly_name(),
               node: @node.get_field?(:display_name),

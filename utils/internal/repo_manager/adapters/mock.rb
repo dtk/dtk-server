@@ -22,7 +22,7 @@ module XYZ
     def self.create_repo_clone(repo_obj, opts)
       local_repo_dir = repo_obj[:local_dir]
       repo_name = repo_obj[:repo_name]
-      if File.exists?(local_repo_dir)
+      if File.exist?(local_repo_dir)
         if opts[:delete_if_exists]
           FileUtils.rm_rf local_repo_dir
         else

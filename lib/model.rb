@@ -195,12 +195,12 @@ module DTK
 
     def hash_subset(*cols)
       # set seed to model class w/o any keys
-      Aux::hash_subset(self, cols, seed: self.class.create_stub(model_handle()))
+      Aux.hash_subset(self, cols, seed: self.class.create_stub(model_handle()))
     end
 
     def hash_form_subset(*cols)
       # set seed to model class w/o any keys
-      Aux::hash_subset(self, cols, seed: {})
+      Aux.hash_subset(self, cols, seed: {})
     end
 
     module Delim
@@ -394,7 +394,7 @@ module DTK
       return ret if rows.empty?
       select_ds = SQL::ArrayDataset.create(db, rows, model_handle, opts[:convert] ? { convert_for_create: true } : {})
       override_attrs = {}
-      create_opts = Aux::hash_subset(opts, [:returning_sql_cols, :duplicate_refs])
+      create_opts = Aux.hash_subset(opts, [:returning_sql_cols, :duplicate_refs])
       ret_obj = opts[:ret_obj]
       if ret_obj
         create_opts[:returning_sql_cols] ||= ret_obj[:cols] || DefaultRetSqlCols

@@ -84,7 +84,7 @@ module XYZ
     end
 
     def self.add_to_subclass(sub)
-      subclass_name = Aux::demodulize(sub.to_s)
+      subclass_name = Aux.demodulize(sub.to_s)
       (@subclass_names ||= []).push(subclass_name).uniq!
     end
     class << self
@@ -131,7 +131,7 @@ module XYZ
 
   module ComponentType
     def self.ret_class(type)
-      klass_name = Aux::camelize(type.to_s)
+      klass_name = Aux.camelize(type.to_s)
       return nil unless ComponentTypeHierarchy.subclass_names().include?(klass_name)
       const_get(klass_name)
     end
@@ -150,7 +150,7 @@ module XYZ
     existing_subclass_names = ComponentTypeHierarchy.subclass_names()
     include TypeHierarchyDefMixin
     all_keys(TypeHierarchy).each do |key|
-      klass_name = Aux::camelize(key)
+      klass_name = Aux.camelize(key)
       unless existing_subclass_names.include?(klass_name)
         ComponentTypeHierarchy.add_to_subclass(const_set(klass_name, Class.new(ComponentTypeHierarchy)))
       end

@@ -22,7 +22,7 @@ new_module_metadata = "{:name=>\"puppetlabs-firewall\", :version=>\"0.0.2\", :so
 dtk_common = DtkCommon.new('', '')
 
 def get_metadata(module_name)
-  db_config = YAML::load(File.open('./config/config.yml'))
+  db_config = YAML.load(File.open('./config/config.yml'))
   ActiveRecord::Base.establish_connection(db_config['dtkserverdbconnection'])
   sql1 = "select id from module.component where ref = '#{module_name}'"
   module_id = ActiveRecord::Base.connection.execute(sql1)
@@ -32,7 +32,7 @@ def get_metadata(module_name)
 end
 
 def change_module_metadata(module_name, new_module_metadata)
-  db_config = YAML::load(File.open('./config/config.yml'))
+  db_config = YAML.load(File.open('./config/config.yml'))
   ActiveRecord::Base.establish_connection(db_config['dtkserverdbconnection'])
   sql1 = "select id from module.component where ref = '#{module_name}'"
   module_id = ActiveRecord::Base.connection.execute(sql1)

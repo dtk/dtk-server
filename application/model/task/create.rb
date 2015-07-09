@@ -162,7 +162,7 @@ module DTK; class Task
       main_task = create_new_task(task_mh, assembly_id: assembly_idh.get_id(), display_name: 'power_on_nodes', temporal_order: 'concurrent', commit_message: nil)
       opts.merge!(main_task: main_task)
 
-      assembly_config_changes = StateChange::Assembly::component_state_changes(assembly, component_type)
+      assembly_config_changes = StateChange::Assembly.component_state_changes(assembly, component_type)
       running_node_task = create_running_node_task_from_assembly(task_mh, assembly_config_changes, opts)
       # running_node_task = create_running_node_task(task_mh, assembly_config_changes)
 

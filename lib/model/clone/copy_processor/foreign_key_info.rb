@@ -29,7 +29,7 @@ module DTK
         return if @no_fk_processing
         @no_fk_processing = avoid_fk_processing?(model_handle, objs_info, opts)
         model_index = model_handle_info(model_handle)
-        model_index[:id_mappings] = model_index[:id_mappings] + objs_info.map { |x| Aux::hash_subset(x, [:id, :ancestor_id]) }
+        model_index[:id_mappings] = model_index[:id_mappings] + objs_info.map { |x| Aux.hash_subset(x, [:id, :ancestor_id]) }
       end
 
       def add_foreign_keys(model_handle, field_set)

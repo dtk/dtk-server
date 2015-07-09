@@ -327,12 +327,12 @@ module DTK
 
   class IDInfoRow < Hash
     def ret_id_handle
-      IDHandle[CONTEXT_ID => self[CONTEXT_ID], :guid => IDInfoTable::ret_guid_from_id_info(self), :model_name => self[:relation_type]]
+      IDHandle[CONTEXT_ID => self[CONTEXT_ID], :guid => IDInfoTable.ret_guid_from_id_info(self), :model_name => self[:relation_type]]
     end
 
     # TOTO rename to ret_id()
     def ret_db_id
-      IDInfoTable::db_id_from_guid(IDInfoTable::ret_guid_from_id_info(self))
+      IDInfoTable.db_id_from_guid(IDInfoTable.ret_guid_from_id_info(self))
     end
 
     def self.[](x)
@@ -376,9 +376,9 @@ module DTK
       column ID_INFO_TABLE[:parent_id], ID_TYPES[:id], default: 0
           end
         end
- ###### end: SchemaProcessing
+  ###### end: SchemaProcessing
 
- ###### Initial data
+  ###### Initial data
   # TODO: must make so that does not add if there already
   def add_top_factories?
     DB_REL_DEF.each do|key, db_info|
@@ -467,7 +467,7 @@ module DTK
           return update_top_instances(model_handle, returning_cols) if sample_parent_id.nil? || sample_parent_id == 0
           pairs_ds =  SQL::ArrayDataset.create(@db, returning_cols.map { |y| { pair_id: y[:id], pair_parent_id: y[:parent_id] || 0 } }, ModelHandle.new(model_handle[:c], :pairs)).sequel_ds
           parent_ds_wo_alias =  ds().select(:relation_id.as(:prt_relation_id), :relation_type.as(:prt_relation_type), :uri.as(:prt_uri))
-          parent_ds = SQL::aliased_expression(parent_ds_wo_alias, :parents)
+          parent_ds = SQL.aliased_expression(parent_ds_wo_alias, :parents)
 
           update_ds = ds_with_from(parent_ds).join(pairs_ds, pair_parent_id: :parents__prt_relation_id).where(pair_id: :relation_id)
 
@@ -531,8 +531,8 @@ module DTK
     unformated_rows.map { |unformated_row| format_row(unformated_row) }
   end
 
-         #### map the db representation of id to guid form
-         # currently set so to reflect that a db id is a guid; other possibilities are when guid is id_db_relation + db_id
+        #### map the db representation of id to guid form
+        # currently set so to reflect that a db id is a guid; other possibilities are when guid is id_db_relation + db_id
 
         def get_id_handles_matching_uris(parent_idh, fully_qual_uris)
           unformated_rows = ds().where(CONTEXT_ID => parent_idh[CONTEXT_ID], :uri => fully_qual_uris, :is_factory => false).all()

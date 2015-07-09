@@ -107,7 +107,7 @@ module XYZ
     private
 
     def error_type
-      Aux::underscore(Aux::demodulize(self.class.to_s)).to_sym
+      Aux.underscore(Aux.demodulize(self.class.to_s)).to_sym
     end
   end
 end

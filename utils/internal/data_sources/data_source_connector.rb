@@ -30,7 +30,7 @@ module XYZ
         file_path = File.expand_path(rel_path, File.dirname(__FILE__))
         require file_path
        rescue Exception => e
-        raise Error.new("Connector file to process object data source #{ds_name()} does not exist") unless File.exists?(file_path + '.rb')
+        raise Error.new("Connector file to process object data source #{ds_name()} does not exist") unless File.exist?(file_path + '.rb')
         raise e
       end
 

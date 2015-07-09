@@ -54,7 +54,7 @@ module DTK
       return if model_nm == :base_module
 
       model_def_fn = "#{R8::Config[:meta_templates_root]}/#{model_nm}/new/model_def.rb"
-      fail Error.new("cannot find model def file #{model_def_fn} for #{model_name()}") unless  File.exists?(model_def_fn)
+      fail Error.new("cannot find model def file #{model_def_fn} for #{model_name()}") unless  File.exist?(model_def_fn)
       begin
         eval(IO.read(model_def_fn))
        rescue Exception => e
@@ -200,7 +200,7 @@ module DTK
         # returns model_names
         concrete_models.map { |klass| ret_relation_type(klass) }
       end
-    #######
+      #######
 
       def set_global_db_rel_info
         DB_REL_DEF[@relation_type] = @db_rel

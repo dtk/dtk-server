@@ -10,7 +10,7 @@ module Ramaze::Helper
       end
 
       user_object  = CurrentSession.new.user_object()
-      CreateThread.defer_with_session(user_object, Ramaze::Current::session) do
+      CreateThread.defer_with_session(user_object, Ramaze::Current.session) do
         yield(body)
         body.succeed
       end
@@ -101,7 +101,7 @@ module Ramaze::Helper
     end
 
     def install_from_dtkn_helper(module_type)
-      remote_namespace, remote_module_name, version = Repo::Remote::split_qualified_name(ret_non_null_request_params(:remote_module_name))
+      remote_namespace, remote_module_name, version = Repo::Remote.split_qualified_name(ret_non_null_request_params(:remote_module_name))
       remote_params = remote_params_dtkn(module_type, remote_namespace, remote_module_name, version)
 
       local_namespace = remote_params.namespace
@@ -178,7 +178,7 @@ module Ramaze::Helper
 
     def default_local_namespace_name
       namespace_mh =  get_default_project().model_handle(:namespace)
-      namespace_obj = ::DTK::Namespace::default_namespace(namespace_mh)
+      namespace_obj = ::DTK::Namespace.default_namespace(namespace_mh)
       namespace_obj.get_field?(:display_name)
     end
 

@@ -131,7 +131,7 @@ module MCollective
       # Subscribe to a topic or queue
       def subscribe(source)
         unless @subscriptions.include?(source)
-          EM::defer do
+          EM.defer do
             Log.debug("Subscribing to #{source}")
             wait_until_connected?
             @connection.subscribe(source)
@@ -141,7 +141,7 @@ module MCollective
       end
 
       def subscribe_and_send(source, destination, body, params = {})
-        EM::defer do
+        EM.defer do
           wait_until_connected?
           unless @subscriptions.include?(source)
             Log.debug("Subscribing to #{source}")

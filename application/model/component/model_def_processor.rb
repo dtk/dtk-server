@@ -24,7 +24,7 @@ module DTK
     # returns the list of idhs that have been created or modified
     def self.create_or_modify_field_def(component, field_def)
       attr_mh = component.model_handle.create_childMH(:attribute)
-      attr_hash = Aux::hash_subset(field_def, CreateFields)
+      attr_hash = Aux.hash_subset(field_def, CreateFields)
       unless attr_hash[:display_name]
         fail Error.new('display_name required in field_def')
       end
@@ -40,7 +40,7 @@ module DTK
       # compute default
       default_assign = AttributeComplexType.ravel_raw_post_hash({ field_def_update['id'] => field_def_update['default'] }, :attribute, component[:id]).first
       attr_mh = component.model_handle.createMH(:attribute)
-      attr_hash = Aux::hash_subset(field_def_update, UpdateFields - %w(default i18n)).merge(default_assign)
+      attr_hash = Aux.hash_subset(field_def_update, UpdateFields - %w(default i18n)).merge(default_assign)
       Model.update_from_rows(attr_mh, [attr_hash], partial_value: true)
 
       field_def = field_def_update['field_def']
@@ -48,19 +48,19 @@ module DTK
       # TODO: if now if whether cahnged can be more efficient
       label = field_def_update['i18n']
       component.update_attribute_i18n_label(field_def['name'], label) if label
-      field_def.merge(Aux::hash_subset(field_def_update, UpdateFields))
+      field_def.merge(Aux.hash_subset(field_def_update, UpdateFields))
     end
     UpdateFields = %w(default description required, i18n)
 
     def self.convert_to_model_def_form(cmp_attrs_obj)
       component_i18n = cmp_attrs_obj.get_component_i18n_label()
-      ret = Aux::ordered_hash_subset(cmp_attrs_obj, ComponentMappings) { |v| v.is_a?(String) ? v.to_sym : v }
+      ret = Aux.ordered_hash_subset(cmp_attrs_obj, ComponentMappings) { |v| v.is_a?(String) ? v.to_sym : v }
 
       ret[:columns] = cmp_attrs_obj[:attributes].map do |attr|
         attr_i18n = cmp_attrs_obj.get_attribute_i18n_label(attr)
         seed = { i18n: attr_i18n, component_i18n: component_i18n }
         opts = { include_virtual_columns: true, seed: seed }
-        Aux::ordered_hash_subset(attr, ColumnMappings, opts) do |k, v|
+        Aux.ordered_hash_subset(attr, ColumnMappings, opts) do |k, v|
           convert_value_if_needed(k, v, attr)
         end
       end

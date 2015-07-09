@@ -216,7 +216,7 @@ module DTK
         else fail Error.new("Unexpected object type for impl_or_module_branch_obj (#{impl_or_module_branch_obj.class})")
         end
       info = get_dsl_file_raw_content_and_info(impl_obj, dsl_integer_version, format_type)
-      { hash_content: convert_to_hash(info[:content], info[:format_type]) }.merge(Aux::hash_subset(info, [:format_type, :dsl_filename]))
+      { hash_content: convert_to_hash(info[:content], info[:format_type]) }.merge(Aux.hash_subset(info, [:format_type, :dsl_filename]))
     end
 
     def self.get_dsl_file_raw_content_and_info(impl_obj, dsl_integer_version = nil, format_type = nil)

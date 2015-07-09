@@ -73,7 +73,7 @@ describe '(Repoman client integration) Test Case 17: NEG - delete-from-catalog n
     end
   end
 
- #User A is owner of module A and belongs to user group A which is set as user group on module (permissions: None/None/None)
+  #User A is owner of module A and belongs to user group A which is set as user group on module (permissions: None/None/None)
   context "Usergroup #{user_data[:usergroup]}, user #{user_data[:user]} and None/None/None permissions" do
     it "are set on module #{user_data[:module_name]}" do
       header.click_on_modules
@@ -90,7 +90,7 @@ describe '(Repoman client integration) Test Case 17: NEG - delete-from-catalog n
     include_context 'NEG - Delete component module from remote', dtk_common, user_data[:component_module], user_data[:namespace]
   end
 
- #User A is not owner of module A but belongs to user group A which is set as user group on module (permissions: D/None/None)
+  #User A is not owner of module A but belongs to user group A which is set as user group on module (permissions: D/None/None)
   context "Usergroup #{user_data[:usergroup]}, user #{user_data[:another_user]} and D/None/None permissions" do
     it "are set on module #{user_data[:module_name]}" do
       permissions[:user_d] = true

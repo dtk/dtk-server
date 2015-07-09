@@ -34,7 +34,7 @@ module XYZ
            key = MessageBusMsgOut.key(object_id, :attribute)
            @msg_bus_client.bind(unique_name, topic_name, :topic, key: key)
          }
-         R8EventLoop::graceful_stop()
+         R8EventLoop.graceful_stop()
        end
     end
 

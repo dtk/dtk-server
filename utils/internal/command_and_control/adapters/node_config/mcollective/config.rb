@@ -180,7 +180,7 @@ eos
           end
 
           def get_logstash_ca
-            File.open(R8::Config[:logstash][:ca_file_path], 'rb') { |f| f.read } if File.exists?(R8::Config[:logstash][:ca_file_path])
+            File.open(R8::Config[:logstash][:ca_file_path], 'rb') { |f| f.read } if File.exist?(R8::Config[:logstash][:ca_file_path])
           end
 
           USER_DATA_SH_ERB = <<eos

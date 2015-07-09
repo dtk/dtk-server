@@ -23,7 +23,7 @@ module DTK
     # assumption is that top_container_idh is in uri form
     # returns [library_idh,implementation_idh]
     def deprecate_create_file_assets_from_dir_els(top_container_idh, module_dir, module_name, config_agent_type)
-      library_impl_hash = Implementation::ret_library_implementation_hash(module_dir, module_name, config_agent_type)
+      library_impl_hash = Implementation.ret_library_implementation_hash(module_dir, module_name, config_agent_type)
       username = CurrentSession.new.get_username()
       users_private_lib_name = "private-#{username}"
       hash_content = {
@@ -52,8 +52,8 @@ module DTK
 
     # assumption is that container_id_handle is in uri form
     def import_objects_from_file(container_id_handle, json_file, opts = {})
-      fail Error.new("file given #{json_file} does not exist") unless File.exists?(json_file)
-      hash_content = Aux::hash_from_file_with_json(json_file)
+      fail Error.new("file given #{json_file} does not exist") unless File.exist?(json_file)
+      hash_content = Aux.hash_from_file_with_json(json_file)
       import_objects_from_hash(container_id_handle, hash_content, opts)
     end
 
@@ -163,7 +163,7 @@ module DTK
     end
 
     def add_implementations!(hash, version, library_ref, base_dir, impl_name = nil)
-      Implementation::add_implementations!(hash, version, library_ref, base_dir, impl_name)
+      Implementation.add_implementations!(hash, version, library_ref, base_dir, impl_name)
     end
 
     module Implementation

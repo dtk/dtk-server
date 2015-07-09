@@ -43,7 +43,7 @@ module DTK
     end
 
     def self.pp_form(type, obj)
-      msg = Aux::pp_form(obj)
+      msg = Aux.pp_form(obj)
       msg = include_caller_info?(type, msg)
       ramaze_log(type, msg)
       obj
@@ -56,7 +56,7 @@ module DTK
     def self.include_caller_info?(type, msg)
       if (Config[:include_caller] || []).include?(type)
         caller_depth = Config[:include_caller_depth] || 1
-        msg += "\n#{Aux::pp_form(caller[OffsetDepth...OffsetDepth + caller_depth])}\n"
+        msg += "\n#{Aux.pp_form(caller[OffsetDepth...OffsetDepth + caller_depth])}\n"
       end
       msg
     end

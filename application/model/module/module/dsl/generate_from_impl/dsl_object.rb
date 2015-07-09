@@ -270,7 +270,7 @@ module DTK; class ModuleDSL
         # TODO: deprecate
         def write_yaml(io)
           require 'yaml'
-          YAML::dump(yaml_form(), io)
+          YAML.dump(yaml_form(), io)
           io << "\n"
         end
 

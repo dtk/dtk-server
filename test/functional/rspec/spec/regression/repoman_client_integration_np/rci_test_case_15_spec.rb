@@ -69,7 +69,7 @@ describe '(Repoman client integration) Test Case 15: NEG - list --remote negativ
     include_context 'NEG - List remote modules', dtk_common, component_module
   end
 
- #User A is not owner of module A but belongs to user group A which is set as user group on module (permissions: R/None/None)
+  #User A is not owner of module A but belongs to user group A which is set as user group on module (permissions: R/None/None)
   context "Usergroup #{user_data[:usergroup]}, user #{user_data[:another_user]} and R/None/None permissions" do
     it "are set on module #{user_data[:module_name]}" do
       permissions[:user_r] = true
@@ -88,7 +88,7 @@ describe '(Repoman client integration) Test Case 15: NEG - list --remote negativ
     include_context 'NEG - List remote modules', dtk_common, component_module
   end
 
- #User A is not owner of module A but belongs to user group A which is not set as user group on module (permissions: R/R/None)
+  #User A is not owner of module A but belongs to user group A which is not set as user group on module (permissions: R/R/None)
   context "Usergroup #{user_data[:another_usergroup]}, user #{user_data[:another_user]} and R/R/None permissions" do
     it "are set on module #{user_data[:module_name]}" do
       permissions[:user_group_r] = true

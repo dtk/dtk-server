@@ -100,7 +100,7 @@ module DTK
 
     def self.create_or_modify_field_def(parent, field_def)
       attr_mh = parent.model_handle.create_childMH(:attribute)
-      attr_hash = Aux::hash_subset(field_def, CreateFields)
+      attr_hash = Aux.hash_subset(field_def, CreateFields)
       unless attr_hash[:display_name]
         fail Error.new('display_name required in field_def')
       end
@@ -394,7 +394,7 @@ module DTK
       ingress_objects = Model.get_objects(ModelHandle.new(id_handle[:c], :attribute_link), output_id: self[:id])
       return nil if ingress_objects.nil?
       ingress_objects.each do |input_obj|
-        fn = AttributeLink::ret_function_if_can_determine(input_obj, self)
+        fn = AttributeLink.ret_function_if_can_determine(input_obj, self)
         check_and_set_derived_rel_from_link_fn!(fn)
       end
     end

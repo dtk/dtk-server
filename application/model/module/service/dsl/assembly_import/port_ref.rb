@@ -98,7 +98,7 @@ module DTK; class ServiceModule
       end
 
       def raise_or_ret_error(err_class, args, opts = {})
-        opts_file_path = Aux::hash_subset(opts, [:file_path])
+        opts_file_path = Aux.hash_subset(opts, [:file_path])
         err = err_class.new(*args, opts_file_path)
         opts[:do_not_throw_error] ? err : fail(err)
       end

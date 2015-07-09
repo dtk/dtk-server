@@ -28,7 +28,7 @@ Lint/DefEndAlignment:
 # Offense count: 47
 # Cop supports --auto-correct.
 Lint/DeprecatedClassMethods:
-  Enabled: false
+  Enabled: true
 
 # Offense count: 6
 Lint/DuplicateMethods:
@@ -83,7 +83,7 @@ Lint/ShadowingOuterLocalVariable:
 # Offense count: 164
 # Cop supports --auto-correct.
 Lint/StringConversionInInterpolation:
-  Enabled: false
+  Enabled: true
 
 # Offense count: 1
 Lint/UnderscorePrefixedVariableName:
@@ -163,7 +163,7 @@ Style/AsciiComments:
 # Offense count: 46
 # Cop supports --auto-correct.
 Style/BlockEndNewline:
-  Enabled: false
+  Enabled: true
 
 # Offense count: 462
 # Cop supports --auto-correct.
@@ -184,12 +184,12 @@ Style/ClassAndModuleChildren:
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle, SupportedStyles.
 Style/ClassCheck:
-  Enabled: false
+  Enabled: true
 
 # Offense count: 8
 # Cop supports --auto-correct.
 Style/ClassMethods:
-  Enabled: false
+  Enabled: true
 
 # Offense count: 50
 Style/ClassVars:
@@ -203,18 +203,18 @@ Style/ClosingParenthesisIndentation:
 # Offense count: 137
 # Cop supports --auto-correct.
 Style/ColonMethodCall:
-  Enabled: false
+  Enabled: true
 
 # Offense count: 56
 # Cop supports --auto-correct.
 # Configuration parameters: Keywords.
 Style/CommentAnnotation:
-  Enabled: false
+  Enabled: true
 
 # Offense count: 295
 # Cop supports --auto-correct.
 Style/CommentIndentation:
-  Enabled: false
+  Enabled: true
 
 # Offense count: 331
 Style/ConstantName:

@@ -85,8 +85,8 @@ module XYZ
 
     class MetadataFromFile < Metadata
       def get(local_dir, &_block)
-         #TBD: these should probably be done in task preconidtion that is part of synchronous a prior arguement checking
-        fail Error.new("#{local_dir} does not exist") unless  File.exists?(local_dir)
+        #TBD: these should probably be done in task preconidtion that is part of synchronous a prior arguement checking
+        fail Error.new("#{local_dir} does not exist") unless  File.exist?(local_dir)
         fail Error.new("#{local_dir} is not a directory") unless  File.directory?(local_dir)
   Dir.foreach(local_dir) do |cookbook_name|
     next if !File.directory?(local_dir + '/' + cookbook_name) or cookbook_name =~ %r{^[.]}
@@ -112,7 +112,7 @@ module XYZ
 
       def get_cookbook_metadata(cookbook_name, local_dir)
   metadata_file = "#{local_dir}/#{cookbook_name}/metadata.json"
-  return nil unless File.exists?(metadata_file)
+  return nil unless File.exist?(metadata_file)
   ret = nil
   File.open(metadata_file) { |f| ret = JSON.parse(f.read) }
   format_metadata(ret)

@@ -138,7 +138,7 @@ module R8Tpl
     def ret_if_exists(path)
       return nil unless path
       case path.type
-        when :file then File.exists?(path) ? path : nil
+        when :file then File.exist?(path) ? path : nil
         when :db then path
         else
         Log.error('Unexpected type of path')

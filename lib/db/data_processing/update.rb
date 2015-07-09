@@ -32,7 +32,7 @@ module DTK
         unless respond_to?(:update_returning_sql)
           fail Error.new('have not implemented update_from_select with returning opt')
         end
-        ret_list_prefixed = opts[:returning_cols].map { |x| x.is_a?(Hash) ? { "#{select_prefix}__#{Aux::ret_key(x)}".to_sym => Aux::ret_value(x) } : "#{select_prefix}__#{x}".to_sym }
+        ret_list_prefixed = opts[:returning_cols].map { |x| x.is_a?(Hash) ? { "#{select_prefix}__#{Aux.ret_key(x)}".to_sym => Aux.ret_value(x) } : "#{select_prefix}__#{x}".to_sym }
         sql = update_returning_sql(update_ds, update_set_clause, ret_list_prefixed)
         ret = []
         fetch_raw_sql(sql) { |row| ret << row }
@@ -84,7 +84,7 @@ module DTK
         unless respond_to?(:update_returning_sql)
           fail Error.new('have not implemented update_from_select with returning opt')
         end
-        ret_list_prefixed = opts[:returning_cols].map { |x| x.is_a?(Hash) ? { "#{select_prefix}__#{Aux::ret_key(x)}".to_sym => Aux::ret_value(x) } : "#{select_prefix}__#{x}".to_sym }
+        ret_list_prefixed = opts[:returning_cols].map { |x| x.is_a?(Hash) ? { "#{select_prefix}__#{Aux.ret_key(x)}".to_sym => Aux.ret_value(x) } : "#{select_prefix}__#{x}".to_sym }
         sql = update_returning_sql(update_ds, update_set_clause, ret_list_prefixed)
         ret = []
         fetch_raw_sql(sql) { |row| ret << row }
@@ -117,7 +117,7 @@ module DTK
           # this means that need to update create_stack_array to indicate that there is a child that should have no elements
           create_stack_array.add_empty!(factory_id_info[:relation_type])
         end
-         #each assigns key should be qualified ref wrt factory_id
+        #each assigns key should be qualified ref wrt factory_id
         assigns.each_pair do |qualified_ref, child_assigns|
     child_uri = RestURI.ret_child_uri_from_qualified_ref(factory_id_info[:uri], qualified_ref)
           child_idh = IDHandle[c: c, uri: child_uri]

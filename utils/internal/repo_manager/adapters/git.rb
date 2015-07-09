@@ -14,7 +14,7 @@ module DTK
     def self.create_repo_clone(repo_obj, opts)
       local_repo_dir = repo_obj[:local_dir]
       repo_name = repo_obj[:repo_name]
-      if File.exists?(local_repo_dir)
+      if File.exist?(local_repo_dir)
         if opts[:delete_if_exists]
           FileUtils.rm_rf local_repo_dir
         else
@@ -36,10 +36,10 @@ module DTK
     # for binding to existing local repo
     def self.create(path, branch, opts = {})
       full_path = repo_full_path(path, opts)
-      if Aux::platform_is_linux?()
+      if Aux.platform_is_linux?()
         RepomanagerGitLinux.new(full_path, branch, opts)
       else
-        fail Error.new("platform #{Aux::platform} not treated")
+        fail Error.new("platform #{Aux.platform} not treated")
       end
     end
     def self.create_without_branch(path, opts = {})
@@ -124,7 +124,7 @@ module DTK
     def get_file_content(file_asset, opts = {})
       checkout(@branch) do
         if opts[:no_error_if_not_found]
-          unless File.exists?(file_asset[:path])
+          unless File.exist?(file_asset[:path])
             return nil
           end
         end
@@ -186,7 +186,7 @@ module DTK
     def delete_tree?(type, tree_path, opts = {})
       ret = nil
       checkout(@branch) do
-        ret = File.exists?(full_path(tree_path))
+        ret = File.exist?(full_path(tree_path))
         delete_tree(type, tree_path, opts.merge(no_checkout: true)) if ret
       end
       ret

@@ -34,7 +34,7 @@ module XYZ
       end
 
       def get_user_data_from_file(data_file_path)
-        @user_data_cache[:all] ||= Aux::hash_from_file_with_json(data_file_path)
+        @user_data_cache[:all] ||= Aux.hash_from_file_with_json(data_file_path)
       end
 
       def nested_path(_hash_all_data)

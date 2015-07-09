@@ -83,7 +83,7 @@ end
 unless dtk_model_yaml_path
   fail 'Path to model.dtk.yaml file must be given'
 end
-unless File.exists?(dtk_model_yaml_path)
+unless File.exist?(dtk_model_yaml_path)
   fail "File (#{dtk_model_yaml_path}) does not exist"
 end
 DTK::Utility.component_doc_generator(dtk_model_yaml_path)

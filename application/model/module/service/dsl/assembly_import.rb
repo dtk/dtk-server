@@ -215,7 +215,7 @@ module DTK; class ServiceModule
         parse = cmp_ref = nil
         begin
           parse = component_ref_parse(cmp_input)
-          cmp_ref = Aux::hash_subset(parse, [:component_type, :version, :display_name])
+          cmp_ref = Aux.hash_subset(parse, [:component_type, :version, :display_name])
           if cmp_ref[:version]
             cmp_ref[:has_override_version] = true
           end

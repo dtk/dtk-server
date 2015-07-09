@@ -90,7 +90,7 @@ module DTK
 
       def parse_key_value_file(file)
         ret = {}
-        fail ErrorUsage.new("Config file (#{file}) does not exists") unless File.exists?(file)
+        fail ErrorUsage.new("Config file (#{file}) does not exists") unless File.exist?(file)
         File.open(file).each do |line|
           # strip blank spaces, tabs etc off the end of all lines
           line.gsub!(/\s*$/, '')

@@ -34,7 +34,7 @@ class DtkCommon
   }
 
   def initialize(service_name, assembly_name)
-    config_yml = YAML::load(File.open(File.join(File.dirname(__FILE__), '..', 'config/config.yml')))
+    config_yml = YAML.load(File.open(File.join(File.dirname(__FILE__), '..', 'config/config.yml')))
 
     @service_name = service_name
     #Fixed current format of assembly name

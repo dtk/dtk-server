@@ -227,7 +227,7 @@ module DTK
       end
 
       def hash_from_file_with_json(file_name)
-        return nil unless File.exists?(file_name)
+        return nil unless File.exist?(file_name)
         ret = nil
         File.open(file_name) do |f|
           begin

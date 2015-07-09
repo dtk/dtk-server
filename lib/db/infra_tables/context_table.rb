@@ -6,7 +6,7 @@ module XYZ
         @db = db
       end
 
- ###### SchemaProcessing
+  ###### SchemaProcessing
   def create?
           @db.create_schema?(CONTEXT_TABLE[:schema])
 

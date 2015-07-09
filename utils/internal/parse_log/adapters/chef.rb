@@ -28,7 +28,7 @@ module XYZ
       private
 
       # order is important because of subsumption
-      Pattern =  Aux::ordered_hash(
+      Pattern =  Aux.ordered_hash(
         [{ debug: /DEBUG:/ },
          { error: /ERROR:/ },
          { info_error: /INFO: error:/ },
@@ -44,14 +44,14 @@ module XYZ
           if @complete
             if has_error?()
               error_segment = error_segment()
-              "complete with error\n" + (error_segment ? Aux::pp_form(error_segment) : '')
+              "complete with error\n" + (error_segment ? Aux.pp_form(error_segment) : '')
             else
               "complete and ok\n"
             end
           else
             if has_error?()
               error_segment = error_segment()
-              "incomplete with error\n" + (error_segment ? Aux::pp_form(error_segment) : '')
+              "incomplete with error\n" + (error_segment ? Aux.pp_form(error_segment) : '')
             else
               "incomplete and no error yet\n"
             end

@@ -69,7 +69,7 @@ module DTK; class Clone
             display_name = r[:display_name]
             r[:node_template_id] = (ndx_mapping_rows[display_name] || {})[:node_template_id]
             match = ndx_matches[display_name]
-            r.merge!(Aux::hash_subset(match, [:donot_clone, :target_refs_to_link, :target_refs_exist]))
+            r.merge!(Aux.hash_subset(match, [:donot_clone, :target_refs_to_link, :target_refs_exist]))
           end
         end
 

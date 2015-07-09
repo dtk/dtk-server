@@ -202,17 +202,17 @@ module DTK
       update_hash = {
         status: status,
         result: result,
-        ended_at: Aux::now_time_stamp()
+        ended_at: Aux.now_time_stamp()
       }
       update(update_hash)
     end
 
     def update_at_task_start(_opts = {})
-      update(status: 'executing', started_at: Aux::now_time_stamp())
+      update(status: 'executing', started_at: Aux.now_time_stamp())
     end
 
     def update_when_failed_preconditions(_failed_antecedent_tasks)
-      ts = Aux::now_time_stamp()
+      ts = Aux.now_time_stamp()
       update(status: 'preconditions_failed', started_at: ts, ended_at: ts)
       # TODO: put in context about failure in errors
     end

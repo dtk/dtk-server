@@ -3,12 +3,12 @@ unless json_source_path = ARGV[0]
   puts 'usage: json_to_yaml.rb PATH-TO-JSON-FILE [PATH-To-YAML] [--overwrite]'
   exit 1
 end
-unless File.exists?(json_source_path)
+unless File.exist?(json_source_path)
   puts "File (#{json_source_path}) does not exist"
   exit 1
 end
 yaml_file_path = ARGV[1] || json_source_path.gsub(/\.[^\.]+$/, '') + '.yaml'
-if File.exists?(yaml_file_path)
+if File.exist?(yaml_file_path)
   unless  ARGV[2] == '--overwrite'
     puts "File (#{yaml_file_path} exists; this fn overwrites it; either remove or use option flag --overwrite"
     exit 1

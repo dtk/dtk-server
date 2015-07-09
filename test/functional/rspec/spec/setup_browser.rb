@@ -47,7 +47,7 @@ def load_configs
     end
   end
   puts 'Loading RSpec configuration for: ' + env
-  full_config = YAML::load(File.open('./config/config.yml'))
+  full_config = YAML.load(File.open('./config/config.yml'))
   puts 'RSpec configuration: ' + full_config[env].to_s
 
   conf = Configuration.instance

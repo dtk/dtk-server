@@ -82,11 +82,11 @@ module XYZ
       end
 
       def set_updated_at!(update_set_clause)
-        update_set_clause[:updated_at] ||= Aux::now_time_stamp()
+        update_set_clause[:updated_at] ||= Aux.now_time_stamp()
       end
 
       def set_created_at!(update_set_clause)
-        update_set_clause[:created_at] ||= Aux::now_time_stamp()
+        update_set_clause[:created_at] ||= Aux.now_time_stamp()
       end
 
       # if any virtual columns need to remove and populate the actual table

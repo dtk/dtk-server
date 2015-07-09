@@ -51,7 +51,7 @@ module DTK
           nested = hash[top_key]
           if nested_info.is_a?(Array) && nested.is_a?(Hash)
             legal_nested_keys = nested_info
-            info = Aux::hash_subset(nested, legal_nested_keys)
+            info = Aux.hash_subset(nested, legal_nested_keys)
             ret[top_key] = info unless info.empty?
           else
             ret[top_key] = nested

@@ -6,7 +6,7 @@ module XYZ
     class << self
       @@cache = nil
       def set_cache_servers(server_list)
-         #TBD: hard wired port
+        #TBD: hard wired port
         if server_list.empty?
     @@cache = nil
           return nil

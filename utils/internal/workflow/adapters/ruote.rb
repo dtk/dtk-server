@@ -11,7 +11,7 @@ module DTK
           @running = true
 
           user_object  = ::DTK::CurrentSession.new.user_object()
-          @run_thread = CreateThread.defer_with_session(user_object, Ramaze::Current::session) { run }
+          @run_thread = CreateThread.defer_with_session(user_object, Ramaze::Current.session) { run }
         end
       end
 

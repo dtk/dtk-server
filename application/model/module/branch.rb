@@ -336,7 +336,7 @@ end
     # opts can have keys
     #  :sha - sha on base branch to branch from
     def create_new_branch_from_this_branch?(project, base_repo, new_version, opts = {})
-      branch_name = Location::Server::Local::workspace_branch_name(project, new_version)
+      branch_name = Location::Server::Local.workspace_branch_name(project, new_version)
       RepoManager.add_branch_and_push?(branch_name, opts, self)
       repo_for_version(base_repo, new_version)
     end

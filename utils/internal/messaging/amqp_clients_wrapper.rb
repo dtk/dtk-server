@@ -106,7 +106,7 @@ module XYZ
     def publish_with_callback(msg_bus_msg_out, publish_opts_x = {}, &callback_block)
       uuid = publish_opts_x[:uuid] || MessageBusClient.generate_unique_id()
       reply_timeout = publish_opts_x[:reply_timeout]
-      publish_opts = Aux::without_keys(publish_opts_x, [:uuid, :reply_timeout])
+      publish_opts = Aux.without_keys(publish_opts_x, [:uuid, :reply_timeout])
       fail Error.new('publish_with_callback whould not have opts[:reply_to] set') if publish_opts[:reply_to]
       publish_opts[:reply_to] = uuid
       response_queue = @client.subscribe_queue(uuid, auto_delete: true)

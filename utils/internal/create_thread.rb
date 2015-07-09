@@ -1,13 +1,13 @@
 module DTK
   module CreateThread
     def self.defer_with_session(user_object, current_session, &block)
-      Ramaze::defer(&wrap(user_object, current_session, &block))
+      Ramaze.defer(&wrap(user_object, current_session, &block))
     end
 
     private
 
     def self.defer(&block)
-      Ramaze::defer(&wrap(&block))
+      Ramaze.defer(&wrap(&block))
     end
 
     # wrap() - Added this part of code so if thread fails we will know imedietly. Helps with development,
@@ -29,7 +29,7 @@ module DTK
             #
 
             if current_session
-              current_session[:USER] = ::DTK::User::create_user_session_hash(user_object)
+              current_session[:USER] = ::DTK::User.create_user_session_hash(user_object)
             end
           end
 

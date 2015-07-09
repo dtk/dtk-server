@@ -18,7 +18,7 @@ module DTK; class Attribute
       attribute_rows.each do |r|
         id = r[:id]
         if ndx_existing_values[id].nil?
-          ndx_ch_attr_info[id] = Aux::hash_subset(r, [:id, val_field])
+          ndx_ch_attr_info[id] = Aux.hash_subset(r, [:id, val_field])
           next
         end
 
@@ -27,11 +27,11 @@ module DTK; class Attribute
         if r[:change_paths]
           r[:change_paths].each do |path|
             next if unravelled_value(new_val, path) == unravelled_value(existing_val, path)
-            ndx_ch_attr_info[id] ||= Aux::hash_subset(r, [:id, val_field]).merge(:change_paths => [], old_val_field => existing_val)
+            ndx_ch_attr_info[id] ||= Aux.hash_subset(r, [:id, val_field]).merge(:change_paths => [], old_val_field => existing_val)
             ndx_ch_attr_info[id][:change_paths] << path
           end
         elsif not (existing_val == new_val)
-          ndx_ch_attr_info[id] = Aux::hash_subset(r, [:id, val_field]).merge(old_val_field => existing_val)
+          ndx_ch_attr_info[id] = Aux.hash_subset(r, [:id, val_field]).merge(old_val_field => existing_val)
         end
       end
 
@@ -39,7 +39,7 @@ module DTK; class Attribute
       changed_attrs_info = ndx_ch_attr_info.values
 
       update_rows = changed_attrs_info.map do |r|
-        row = Aux::hash_subset(r, [:id, val_field])
+        row = Aux.hash_subset(r, [:id, val_field])
         row.merge!(is_instance_value: (val_field == :value_asserted))
         row
       end
@@ -85,7 +85,7 @@ module DTK; class Attribute
       end
 
       attrs_links_to_update = attr_link_rows.map do |r|
-        output_attr = Aux::hash_subset(r, scalar_attrs)
+        output_attr = Aux.hash_subset(r, scalar_attrs)
         {
           input_attribute: r[:input_attribute],
           output_attribute: output_attr,

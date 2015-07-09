@@ -25,19 +25,19 @@ module R8Tpl
       }
 
       def i18n_string(i18n, model_name, input_string, aux = nil)
-        return I18nAux::i18n_string_component(i18n, input_string, aux) if model_name == :component
-        return I18nAux::i18n_string_attribute(i18n, input_string, aux) if model_name == :attribute
+        return I18nAux.i18n_string_component(i18n, input_string, aux) if model_name == :component
+        return I18nAux.i18n_string_attribute(i18n, input_string, aux) if model_name == :attribute
         return input_string.to_s if model_name == :node
         Log.error("Unexpected model type #{model_name} in i18n string translation")
-        I18nAux::translate_input(i18n, model_name, input_string) || input_string.to_s
+        I18nAux.translate_input(i18n, model_name, input_string) || input_string.to_s
       end
 
       def get_i18n_port_name(i18n, port)
         # TODO: this has implcit assumption that port is associated with a certain attribute and component
         attr_name = port.link_def_name()
         cmp_name = port.component_name()
-        attr_i18n = I18nAux::i18n_string_attribute(i18n, attr_name) || attr_name
-        cmp_i18n = I18nAux::i18n_string_component(i18n, cmp_name) || cmp_name
+        attr_i18n = I18nAux.i18n_string_attribute(i18n, attr_name) || attr_name
+        cmp_i18n = I18nAux.i18n_string_component(i18n, cmp_name) || cmp_name
         # TODO: needs revision; also probably move to model/port
         if ['component_external', 'component_internal_external'].include?(port[:type])
           "#{cmp_i18n} / #{attr_i18n}"
@@ -97,7 +97,7 @@ module R8Tpl
 
         content = {}
         file_name = "#{R8::Config[:i18n_base_dir]}/#{model_name}/#{language}.rb"
-        if File.exists?(file_name)
+        if File.exist?(file_name)
           content = eval(IO.read(file_name))
           #        else
           #          file_name = "#{R8::Config[:i18n_root]}/#{R8::Config[language]}.rb"
@@ -105,7 +105,7 @@ module R8Tpl
         end
 
         file_name = "#{R8::Config[:i18n_base_dir]}/#{model_name}/#{language}.options.rb"
-        if File.exists?(file_name)
+        if File.exist?(file_name)
           content[:options_list] = eval(IO.read(file_name))
           #        else
           #          file_name = "#{R8::Config[:i18n_root]}/#{R8::Config[language]}.rb"
@@ -127,7 +127,7 @@ module R8Tpl
 
         content = {}
         file_name = "#{R8::Config[:meta_base_dir]}/#{model_name}/model_def.rb"
-        if File.exists?(file_name)
+        if File.exist?(file_name)
           content = eval(IO.read(file_name))
         end
 
@@ -166,7 +166,7 @@ module R8Tpl
         unless (Cache[:app])
           content = {}
           file_name = "#{R8::Config[:meta_base_dir]}/app_def.rb"
-          if File.exists?(file_name)
+          if File.exist?(file_name)
             content = eval(IO.read(file_name))
           end
 

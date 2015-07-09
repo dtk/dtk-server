@@ -85,7 +85,7 @@ module DTK
       end
 
       # actual create of new attribute_links
-      rows_for_array_ds = rows_to_create.map { |row| Aux::hash_subset(row, row.keys - remove_keys) }
+      rows_for_array_ds = rows_to_create.map { |row| Aux.hash_subset(row, row.keys - remove_keys) }
       select_ds = SQL::ArrayDataset.create(db, rows_for_array_ds, attr_link_mh, convert_for_create: true)
       override_attrs = {}
       field_set = FieldSet.new(model_name, rows_for_array_ds.first.keys)

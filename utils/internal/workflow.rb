@@ -61,7 +61,7 @@ module DTK
       R8EM.start_em_for_passenger?()
 
       user_object  = CurrentSession.new.user_object()
-      CreateThread.defer_with_session(user_object, Ramaze::Current::session) do
+      CreateThread.defer_with_session(user_object, Ramaze::Current.session) do
         #  pp [:new_thread_from_defer, Thread.current, Thread.list]
         fail Error.new('not implemented: putting block in reactor loop when not using eventmachine web server') unless R8EM.reactor_running?
         begin

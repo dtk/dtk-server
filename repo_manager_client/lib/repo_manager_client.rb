@@ -466,7 +466,7 @@ module DTK
     end
 
     def dtk_instance_repo_username
-      ::DtkCommon::Aux::dtk_instance_repo_username()
+      ::DtkCommon::Aux.dtk_instance_repo_username()
     end
 
     def user_params(username, rsa_pub_key = nil, rsa_key_name = nil)

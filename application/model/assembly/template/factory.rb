@@ -336,7 +336,7 @@ module DTK
         cmp_refs = node[:components].inject({}) { |h, cmp| h.merge(create_component_ref_content(cmp)) }
         ports = (node[:ports] || []).inject({}) { |h, p| h.merge(create_port_content(p)) }
         node_attrs = (node[:attributes] || []).inject({}) { |h, a| h.merge(create_node_attribute_content(a)) }
-        node_hash = Aux::hash_subset(node, [:display_name, :node_binding_rs_id])
+        node_hash = Aux.hash_subset(node, [:display_name, :node_binding_rs_id])
         node_type =
           if node[:display_name].eql?('assembly_wide')
             'assembly_wide'
@@ -355,20 +355,20 @@ module DTK
 
       def create_port_content(port)
         port_ref = qualified_ref(port)
-        port_hash = Aux::hash_subset(port, [:display_name, :description, :type, :direction, :link_type, :component_type])
+        port_hash = Aux.hash_subset(port, [:display_name, :description, :type, :direction, :link_type, :component_type])
         port_hash.merge!(link_def_id: port[:link_def][:ancestor_id]) if port[:link_def]
         { port_ref => port_hash }
       end
 
       def create_node_attribute_content(attr)
         attr_ref = attr[:display_name]
-        attr_hash = Aux::hash_subset(attr, [:display_name, :value_asserted, :value_derived, :data_type])
+        attr_hash = Aux.hash_subset(attr, [:display_name, :value_asserted, :value_derived, :data_type])
         { attr_ref => attr_hash }
       end
 
       def create_component_ref_content(cmp)
         cmp_ref_ref = ComponentRef.ref_from_component_hash(cmp)
-        cmp_ref_hash = Aux::hash_subset(cmp, [:display_name, :description, :component_type])
+        cmp_ref_hash = Aux.hash_subset(cmp, [:display_name, :description, :component_type])
         cmp_template_id = cmp[:ancestor_id]
         cmp_ref_hash.merge!(component_template_id: cmp_template_id)
         attrs = cmp[:non_default_attributes]

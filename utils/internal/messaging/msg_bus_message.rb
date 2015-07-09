@@ -4,11 +4,11 @@ module XYZ
        @body.inspect
     end
     def self.unmarshall_from_wire(raw_msg)
-      unmarshalled_hash = Aux::unmarshal_from_wire(raw_msg)
+      unmarshalled_hash = Aux.unmarshal_from_wire(raw_msg)
       MessageBusMsgIn.new(unmarshalled_hash)
     end
     def self.unmarshall_from_wire2(raw_header, raw_msg)
-      unmarshalled_hash = Aux::unmarshal_from_wire(raw_msg)
+      unmarshalled_hash = Aux.unmarshal_from_wire(raw_msg)
       [MessageBusTransactionInfo.new(raw_header, unmarshalled_hash),
        MessageBusMsgIn.new(unmarshalled_hash)]
     end
@@ -44,7 +44,7 @@ module XYZ
           hash_body[k] = v
         end
       end
-      [Aux::marshal_to_wire(hash_body), raw_publish_opts]
+      [Aux.marshal_to_wire(hash_body), raw_publish_opts]
     end
 
     # type can be :attribute or :node

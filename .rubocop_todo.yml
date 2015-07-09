@@ -25,11 +25,6 @@ Lint/BlockAlignment:
 Lint/DefEndAlignment:
   Enabled: false
 
-# Offense count: 47
-# Cop supports --auto-correct.
-Lint/DeprecatedClassMethods:
-  Enabled: true
-
 # Offense count: 6
 Lint/DuplicateMethods:
   Enabled: false
@@ -79,11 +74,6 @@ Lint/RescueException:
 # Offense count: 30
 Lint/ShadowingOuterLocalVariable:
   Enabled: false
-
-# Offense count: 164
-# Cop supports --auto-correct.
-Lint/StringConversionInInterpolation:
-  Enabled: true
 
 # Offense count: 1
 Lint/UnderscorePrefixedVariableName:
@@ -160,11 +150,6 @@ Style/AccessorMethodName:
 Style/AsciiComments:
   Enabled: false
 
-# Offense count: 46
-# Cop supports --auto-correct.
-Style/BlockEndNewline:
-  Enabled: true
-
 # Offense count: 462
 # Cop supports --auto-correct.
 # Configuration parameters: IndentWhenRelativeTo, SupportedStyles, IndentOneStep.
@@ -180,17 +165,6 @@ Style/ClassAndModuleCamelCase:
 Style/ClassAndModuleChildren:
   Enabled: false
 
-# Offense count: 576
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, SupportedStyles.
-Style/ClassCheck:
-  Enabled: true
-
-# Offense count: 8
-# Cop supports --auto-correct.
-Style/ClassMethods:
-  Enabled: true
-
 # Offense count: 50
 Style/ClassVars:
   Enabled: false
@@ -199,22 +173,6 @@ Style/ClassVars:
 # Cop supports --auto-correct.
 Style/ClosingParenthesisIndentation:
   Enabled: false
-
-# Offense count: 137
-# Cop supports --auto-correct.
-Style/ColonMethodCall:
-  Enabled: true
-
-# Offense count: 56
-# Cop supports --auto-correct.
-# Configuration parameters: Keywords.
-Style/CommentAnnotation:
-  Enabled: true
-
-# Offense count: 295
-# Cop supports --auto-correct.
-Style/CommentIndentation:
-  Enabled: true
 
 # Offense count: 331
 Style/ConstantName:

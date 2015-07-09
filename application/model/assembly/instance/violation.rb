@@ -290,7 +290,7 @@ module DTK
         end
 
         def description
-          "There are #{@running} nodes currently running in builtin target. Unable to create #{@new} new nodes beacuse it will exceed number of nodes allowed in builtin target (#{TARGET_BUILTIN_NODE_LIMIT})"
+          "There are #{@running} nodes currently running in builtin target. Unable to create #{@new} new nodes because it will exceed number of nodes allowed in builtin target (#{TARGET_BUILTIN_NODE_LIMIT})"
         end
       end
     end

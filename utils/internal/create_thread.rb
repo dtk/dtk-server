@@ -15,7 +15,7 @@ module DTK
     # ignored or this call
 
     def self.wrap(user_object = nil, current_session, &_block)
-      return lambda do
+      lambda do
         begin
           # this part of code sets session information to make sure that newly created thread keeps its session
           # this was necessery due to concurency issues

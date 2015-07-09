@@ -62,7 +62,7 @@ module DTK; class ServiceNodeGroup
       ndx_ng_cmps = ndx_cmps[node_group_id] || {}
       ng_cmp_ids = ndx_ng_cmps.keys
       if restricted_cmps = opts[:node_group_components]
-        ng_cmp_ids = ng_cmp_ids & restricted_cmps.map(&:id)
+        ng_cmp_ids &= restricted_cmps.map(&:id)
       end
 
       return ret if ng_cmp_ids.empty?

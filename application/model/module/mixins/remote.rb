@@ -22,7 +22,7 @@ module DTK; module ModuleMixins
           else
             message = "Conflicts with already installed module (#{local_params.pp_module_name()})"
             message += '. To ignore this conflict and use installed module please use -i switch (import-dtkn REMOTE-SERVICE-NAME -i).' if opts[:additional_message]
-            raise ErrorUsage.new(message)
+            fail ErrorUsage.new(message)
           end
         end
       end
@@ -40,7 +40,7 @@ module DTK; module ModuleMixins
         # case on whether the module is created already
         if module_obj
           # TODO: ModuleBranch::Location: since repo has remote_ref in it must get appopriate repo
-          raise Error.new('TODO: ModuleBranch::Location; need to right this')
+          fail Error.new('TODO: ModuleBranch::Location; need to right this')
           repo_with_branch = module_obj.get_repo!()
         else
           # TODO: ModuleBranch::Location: see if this is necessary
@@ -95,7 +95,7 @@ module DTK; module ModuleMixins
         repos.each do |repo|
           # we remove remote repos
           unless repo_remote_db = RepoRemote.get_remote_repo(repo.model_handle(:repo_remote), repo.id, remote.module_name, remote.namespace)
-            raise ErrorUsage.new("Remote component/service (#{remote.pp_module_name()}) does not exist")
+            fail ErrorUsage.new("Remote component/service (#{remote.pp_module_name()}) does not exist")
           end
 
           repo.unlink_remote(remote)
@@ -121,7 +121,7 @@ module DTK; module ModuleMixins
     def list_remote_diffs(version = nil)
       local_branch = get_module_branch_matching_version(version)
       unless default_remote_repo = RepoRemote.default_from_module_branch?(local_branch)
-        raise ErrorUsage.new("Module '#{module_name()}' is not linked to remote repo!")
+        fail ErrorUsage.new("Module '#{module_name()}' is not linked to remote repo!")
       end
 
       remote_branch = default_remote_repo.remote_dtkn_location(get_project(), module_type(), module_name())
@@ -161,7 +161,7 @@ module DTK; module ModuleMixins
       repo_remote_handler = Repo::Remote.new(remote)
       remote_module_info = repo_remote_handler.get_remote_module_info?(
         client_rsa_pub_key,           raise_error: true,
-          module_refs_content: module_refs_content)
+                                      module_refs_content: module_refs_content)
 
       # we also check if user has required permissions
       # TODO: [Haris] We ignore access rights and force them on calls, this will need ot be refactored since it is security risk
@@ -204,7 +204,7 @@ module DTK; module ModuleMixins
       local = local_params.create_local(project)
 
       unless module_branch_obj = self.class.get_module_branch_from_local(local)
-        raise Error.new('Cannot find module_branch_obj from local')
+        fail Error.new('Cannot find module_branch_obj from local')
       end
 
       publish_preprocess_raise_error?(module_branch_obj)
@@ -234,9 +234,9 @@ module DTK; module ModuleMixins
 
     def raise_error_when_not_properly_linked(action, remote)
       if action == :push
-        raise ErrorUsage.new("Cannot push module (#{module_name()}) to remote namespace (#{remote.namespace}) because it is currently not linked to it")
+        fail ErrorUsage.new("Cannot push module (#{module_name()}) to remote namespace (#{remote.namespace}) because it is currently not linked to it")
       else #action == :pull
-        raise ErrorUsage.new("Cannot pull module (#{module_name()}) from remote namespace (#{remote.namespace}) because it is currently not linked to it")
+        fail ErrorUsage.new("Cannot pull module (#{module_name()}) from remote namespace (#{remote.namespace}) because it is currently not linked to it")
       end
     end
   end

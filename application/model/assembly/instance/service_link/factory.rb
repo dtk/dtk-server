@@ -22,7 +22,7 @@ module DTK
             if pl_matches.size == 1
               port_link =  pl_matches.first
             elsif pl_matches.size > 1
-              raise Error.new("Unexpected result that matches more than one port link (#{pl_matches.inspect})")
+              fail Error.new("Unexpected result that matches more than one port link (#{pl_matches.inspect})")
             end
           end
           port_link ||= create_new_port_and_attr_links(input_port, output_port)

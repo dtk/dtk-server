@@ -25,7 +25,7 @@ module XYZ
           else #is model handle
             "model handle with type(#{model_or_id_handle[:model_name]})"
           end
-        raise Error.new("model_or_id_handle[:group_id] not set for #{bad_item}")
+        fail Error.new("model_or_id_handle[:group_id] not set for #{bad_item}")
       end
       assigns.merge!(group_id: model_or_id_handle[:group_id])
       # remove if in overrides or null val

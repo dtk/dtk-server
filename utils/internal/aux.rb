@@ -66,7 +66,7 @@ module DTK
       def stop_for_testing?(stop_point)
         if stop_for_testing = R8::Config[:stop_for_testing]
           if stop_for_testing[stop_point]
-            raise Error.new("stop for testing at #{stop_point}")
+            fail Error.new("stop for testing at #{stop_point}")
           end
         end
       end
@@ -76,7 +76,7 @@ module DTK
         types = opts[:types] || (opts[:type] && [opts[:type]]) || [RandomGenerate::DefaultType]
         charset = types.inject('') do |str, type|
           unless cs = RandomGenerate::CharSet[type]
-            raise Error.new("Type (#{type.inspect}) not treated")
+            fail Error.new("Type (#{type.inspect}) not treated")
           end
           str + cs
         end
@@ -203,7 +203,7 @@ module DTK
           when :yaml
             YamlHelper.dump_simple_form(hash_content)
           else
-            raise Error.new("Format (#{format_type}) is not treated")
+            fail Error.new("Format (#{format_type}) is not treated")
         end
       end
 
@@ -211,7 +211,7 @@ module DTK
         if file_path =~ /\.(json|yaml)$/
           Regexp.last_match(1).to_sym
         else
-          raise Error.new("Unexpected meta file path name (#{path})")
+          fail Error.new("Unexpected meta file path name (#{path})")
         end
       end
 
@@ -222,7 +222,7 @@ module DTK
           when :yaml
             YamlHelper.parse(content, opts)
           else
-            raise Error.new("Format (#{format_type}) is not treated")
+            fail Error.new("Format (#{format_type}) is not treated")
         end
       end
 
@@ -346,12 +346,10 @@ module DTK
       end
       # changes all keys to ":" form
       def convert_to_hash_symbol_form(json_or_scalar)
-        begin
-          convert_to_symbol_form_aux(JSON.parse(json_or_scalar))
-         rescue
-          # primarily to handle scalars
-          json_or_scalar
-        end
+        convert_to_symbol_form_aux(JSON.parse(json_or_scalar))
+       rescue
+        # primarily to handle scalars
+        json_or_scalar
       end
 
       def convert_to_symbol_form_aux(item)

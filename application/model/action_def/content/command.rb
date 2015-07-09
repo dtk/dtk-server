@@ -6,7 +6,7 @@ module DTK; class ActionDef; class Content
 
     def self.parse(serialized_command)
       Syscall.parse?(serialized_command) || FilePositioning.parse?(serialized_command) || RubyFunction.parse?(serialized_command) ||
-        raise(Error.new("Parse Error: #{serialized_command.inspect}")) # TODO: bring in dtk model parsing parse error class
+        fail(Error.new("Parse Error: #{serialized_command.inspect}")) # TODO: bring in dtk model parsing parse error class
     end
 
     def syscall?

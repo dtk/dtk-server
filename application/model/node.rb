@@ -188,7 +188,7 @@ module DTK
       if assembly_id = get_field?(:assembly_id)
         sp_hash = {
         cols: cols || [:id, :group_id, :display_name],
-          filter: [:eq, :id, assembly_id]
+        filter: [:eq, :id, assembly_id]
         }
         Assembly::Instance.get_objs(model_handle(:assembly_instance), sp_hash).first
       end
@@ -243,7 +243,7 @@ module DTK
         node_name = name
       end
       unless legal_display_name?(node_name)
-        raise ErrorNameInvalid.new(node_name, :node)
+        fail ErrorNameInvalid.new(node_name, :node)
       end
       [node_name, assembly_name]
     end
@@ -285,7 +285,7 @@ module DTK
        when :attributes
         get_attributes_print_form()
        else
-        raise Error.new("TODO: not implemented yet: processing of info_about(#{about})")
+        fail Error.new("TODO: not implemented yet: processing of info_about(#{about})")
       end
     end
 
@@ -331,7 +331,7 @@ module DTK
       component_template.update_with_clone_info!()
 
       if module_branch = component_template[:module_branch]
-        raise ErrorUsage.new("You are not allowed to add component '#{component_template[:display_name]}' that belongs to test-module.") if module_branch[:type].eql?('test_module')
+        fail ErrorUsage.new("You are not allowed to add component '#{component_template[:display_name]}' that belongs to test-module.") if module_branch[:type].eql?('test_module')
       end
 
       override_attrs = { locked_sha: component_template.get_current_sha!() }
@@ -344,7 +344,7 @@ module DTK
           if component_title
             # Just doing check here when there is a title, and not treating singletones
             # because there is later constraint that picks up the singleton components
-            raise ErrorUsage.new("Component (#{matching_cmp.print_form()}) already exists")
+            fail ErrorUsage.new("Component (#{matching_cmp.print_form()}) already exists")
           end
         end
       end
@@ -371,7 +371,7 @@ module DTK
         filter: [:and, [:eq, :id, component_idh.get_id()], [:eq, :node_node_id, id()]]
       }
       unless Model.get_obj(model_handle(:component), sp_hash)
-        raise ErrorIdInvalid.new(component_idh.get_id(), :component)
+        fail ErrorIdInvalid.new(component_idh.get_id(), :component)
       end
       Model.delete_instance(component_idh)
     end
@@ -391,7 +391,7 @@ module DTK
     def self.check_valid_id__node_member(model_handle, id, assembly_id)
       assembly = NodeGroupRelation.get_node_member_assembly?(model_handle.createIDH(id: id))
       unless assembly && assembly.id == assembly_id
-        raise ErrorIdInvalid.new(id, pp_object_type())
+        fail ErrorIdInvalid.new(id, pp_object_type())
       end
       id
     end
@@ -400,7 +400,7 @@ module DTK
     def self.name_to_id(model_handle, name, assembly_id = nil)
       node_name, assembly_name = parse_user_friendly_name(name)
       unless legal_display_name?(node_name)
-        raise ErrorNameInvalid.new(node_name, :node)
+        fail ErrorNameInvalid.new(node_name, :node)
       end
       assembly_id ||= assembly_name && Assembly::Instance.name_to_id(model_handle.createMH(:component), assembly_name)
       sp_hash =  {
@@ -424,10 +424,10 @@ module DTK
     def get_and_update_status!
       # shortcut
       if key?(:is_deployed)
-        return  Type::Node.staged if not self[:is_deployed]
+        return  Type::Node.staged unless self[:is_deployed]
       end
       update_obj!(:is_deployed, :external_ref, :operational_status)
-      return  Type::Node.staged if not self[:is_deployed]
+      return  Type::Node.staged unless self[:is_deployed]
       get_and_update_operational_status!()
     end
 
@@ -480,7 +480,7 @@ module DTK
     end
     def self.pbuilderid(node)
       unless ret = CommandAndControl.pbuilderid(node)
-        raise Error.new("Node (#{node.get_field?(:display_name)}) with id (#{node.id}) does not have an #{PBuilderIDPrintName}")
+        fail Error.new("Node (#{node.get_field?(:display_name)}) with id (#{node.id}) does not have an #{PBuilderIDPrintName}")
       end
       ret
     end

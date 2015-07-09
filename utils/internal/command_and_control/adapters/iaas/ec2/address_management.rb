@@ -44,7 +44,7 @@ module DTK; module CommandAndControlAdapter
         end
 
         # in case there was no record created we raise error
-        raise Error, "Not able to set DNS hostname for node with ID '#{node[:id]}" if record.nil?
+        fail Error, "Not able to set DNS hostname for node with ID '#{node[:id]}" if record.nil?
 
         # if all sucess we update the database
         node.update(hostname_external_ref: node[:hostname_external_ref])

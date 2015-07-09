@@ -3,7 +3,7 @@ module XYZ
     def create_view_meta_from_layout_def(view_type, layout_def)
       case view_type
         when :edit then ViewMetaProcessorInternals.create_from_layout_def__edit(layout_def)
-        else raise Error.new("not implemented for view type #{view_type}")
+        else fail Error.new("not implemented for view type #{view_type}")
       end
     end
 

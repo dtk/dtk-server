@@ -21,7 +21,7 @@ module DTK; class Attribute
           af = ret_filter(pattern, :attribute)
           # attribute must have simple form
           unless af.is_a?(Array) && af.size == 3 && af[0..1] == [:eq, :display_name]
-            raise Error.new("cannot create new attribute from attribute pattern #{pattern}")
+            fail Error.new("cannot create new attribute from attribute pattern #{pattern}")
           end
 
           attr_properties = opts[:attribute_properties] || {}
@@ -29,7 +29,7 @@ module DTK; class Attribute
 
           unless attr_properties.empty?
             if attr_properties[:dynamic]
-              raise ErrorUsage.new('Illegal to include the :dynamic option on an assembly level attribute')
+              fail ErrorUsage.new('Illegal to include the :dynamic option on an assembly level attribute')
             elsif required = attr_properties[:required]
               field_def.merge!('required' => required)
             end

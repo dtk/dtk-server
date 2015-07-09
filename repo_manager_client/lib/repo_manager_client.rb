@@ -62,7 +62,7 @@ module DTK
         when 'node'
           response = list_node_modules(CurrentSession.catalog_username, client_rsa_pub_key)
         else
-          raise ErrorUsage.new("Provided module type '#{filter[:type]}' is not valid")
+          fail ErrorUsage.new("Provided module type '#{filter[:type]}' is not valid")
         end
 
       response
@@ -217,7 +217,7 @@ module DTK
     def add_client_access(client_rsa_pub_key, client_rsa_key_name)
       response = post_rest_request_data(
         '/v1/users/add_access',
-         user_params(CurrentSession.catalog_username, client_rsa_pub_key, client_rsa_key_name),
+        user_params(CurrentSession.catalog_username, client_rsa_pub_key, client_rsa_key_name),
         raise_error: true
       )
 
@@ -231,7 +231,7 @@ module DTK
 
       tenant_response = post_rest_request_data(route, body, raise_error: true)
 
-      return tenant_response
+      tenant_response
     end
 
     def validate_catalog_credentials(username, password)
@@ -291,7 +291,7 @@ module DTK
         when 'node', 'node_module'
           return '/v1/node_modules'
         else
-          raise ErrorUsage.new("Provided module type '#{params_hash[:type]}' is not valid")
+          fail ErrorUsage.new("Provided module type '#{params_hash[:type]}' is not valid")
         end
     end
 
@@ -310,7 +310,7 @@ module DTK
         when 'node'
           return '/v1/node_module'
         else
-          raise ErrorUsage.new("Provided module type '#{params_hash[:type]}' is not valid")
+          fail ErrorUsage.new("Provided module type '#{params_hash[:type]}' is not valid")
         end
     end
 
@@ -342,13 +342,13 @@ module DTK
         msg = error_msg(response)
         code = error_code(response)
         if is_internal_error?(response)
-          raise Error.new(msg)
+          fail Error.new(msg)
         elsif code == NAME_NOT_ALLOWED_CODE
           error = ErrorUsage.new(msg)
           error.add_tag!(:raise_error)
-          raise error
+          fail error
         else
-          raise ErrorUsage.new("Repo Manager error: #{msg}")
+          fail ErrorUsage.new("Repo Manager error: #{msg}")
         end
       else
         return response.data
@@ -356,13 +356,13 @@ module DTK
     end
 
     def get_repo_user(ssh_rsa_pub_key)
-      raise ErrorUsage.new('Provided RSA pub key missing') if ssh_rsa_pub_key.nil?
+      fail ErrorUsage.new('Provided RSA pub key missing') if ssh_rsa_pub_key.nil?
       mh = ModelHandle.create_from_user(CurrentSession.new.get_user_object(), :repo_user)
       RepoUser.match_by_ssh_rsa_pub_key!(mh, ssh_rsa_pub_key)
     end
 
     def get_repo_user_by_username(username)
-      raise ErrorUsage.new('Provided repo client username is missing') if username.empty?
+      fail ErrorUsage.new('Provided repo client username is missing') if username.empty?
       mh = ModelHandle.create_from_user(CurrentSession.new.get_user_object(), :repo_user)
       RepoUser.get_by_repo_username(mh, username)
     end
@@ -427,7 +427,7 @@ module DTK
     def login_to_repoman
       unless CurrentSession.are_catalog_credentilas_set?
         err = ErrorUsage.new('Catalog credentials are not set, you can set them via account context')
-        raise err.add_tag!(:raise_error)
+        fail err.add_tag!(:raise_error)
       end
 
       response = handle_error(raise_error: true) do
@@ -495,7 +495,7 @@ module DTK
     end
 
     def user_params_delegated_client(client_rsa_pub_key, params_hash)
-      raise ErrorUsage.new('Missing client RSA pub key!') unless client_rsa_pub_key
+      fail ErrorUsage.new('Missing client RSA pub key!') unless client_rsa_pub_key
 
       repo_user = get_repo_user(client_rsa_pub_key)
 

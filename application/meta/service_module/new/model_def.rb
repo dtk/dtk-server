@@ -66,7 +66,7 @@ assembly_nodes  =
      model_name: :node,
      convert: true,
      join_type: :inner,
-         join_cond: { assembly_id: :assembly__id },
+     join_cond: { assembly_id: :assembly__id },
      cols: [:id, :group_id, :display_name]
    }
   ]
@@ -166,7 +166,7 @@ assembly_nodes  =
       hidden: true,
       remote_dependencies: assembly_nodes
      },
-     component_refs: {
+    component_refs: {
       type: :json,
       hidden: true,
       remote_dependencies:        assembly_nodes +

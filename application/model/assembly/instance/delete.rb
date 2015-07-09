@@ -9,7 +9,7 @@ module DTK; class  Assembly
         end
         # cannot delete workspaces
         if workspace = assembly_idhs.find { |idh| Workspace.is_workspace?(idh.create_object()) }
-          raise ErrorUsage.new('Cannot delete a workspace')
+          fail ErrorUsage.new('Cannot delete a workspace')
         end
         Delete.contents(assembly_idhs, opts)
         delete_instances(assembly_idhs)
@@ -25,7 +25,7 @@ module DTK; class  Assembly
         nodes = Delete.get_nodes_simple(model_handle(:node), [id()])
         # TODO: DTK-1857
         if nodes.find(&:is_node_group?)
-          raise ErrorUsage.new('destroy_and_reset_nodes not supported for service instances with node groups')
+          fail ErrorUsage.new('destroy_and_reset_nodes not supported for service instances with node groups')
         end
         target_idh = get_target.id_handle()
         nodes.map { |node| node.destroy_and_reset(target_idh) }
@@ -36,7 +36,7 @@ module DTK; class  Assembly
         # TODO: check if cleaning up dangling links when assembly node deleted
         if node.is_node_group?
           node.update_object!(:display_name)
-          raise ErrorUsage.new("Node with name '#{node[:display_name]}' does not exist. If you want to delete node group you can use 'delete-node-group node-group-name'")
+          fail ErrorUsage.new("Node with name '#{node[:display_name]}' does not exist. If you want to delete node group you can use 'delete-node-group node-group-name'")
         end
 
         if node_group = is_node_group_member?(node_idh)
@@ -54,7 +54,7 @@ module DTK; class  Assembly
 
         unless node_group.is_node_group?
           node_group.update_object!(:display_name)
-          raise ErrorUsage.new("Node group with name '#{node_group[:display_name]}' does not exist")
+          fail ErrorUsage.new("Node group with name '#{node_group[:display_name]}' does not exist")
         end
 
         node_group = node_group.create_obj_optional_subclass()
@@ -73,7 +73,7 @@ module DTK; class  Assembly
           }
 
           unless node = Model.get_obj(model_handle(:node), sp_hash)
-            raise ErrorIdInvalid.new(node_id, :node)
+            fail ErrorIdInvalid.new(node_id, :node)
           end
           component_filter << [:eq, :node_node_id, node_id]
         end
@@ -86,7 +86,7 @@ module DTK; class  Assembly
         }
         component = Component::Instance.get_obj(model_handle(:component), sp_hash)
         unless component
-          raise ErrorIdInvalid.new(component_idh.get_id(), :component)
+          fail ErrorIdInvalid.new(component_idh.get_id(), :component)
         end
         node ||= component_idh.createIDH(model_name: :node, id: component[:node_node_id]).create_object()
         ret = nil

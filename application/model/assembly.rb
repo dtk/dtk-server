@@ -62,9 +62,9 @@ module DTK
         when 1
           matches.first
         when 0
-          raise ErrorUsage.new("Cannot find component link#{error_message_condition(opts[:ret_match_info])}")
+          fail ErrorUsage.new("Cannot find component link#{error_message_condition(opts[:ret_match_info])}")
         else
-          raise ErrorUsage.new("Multiple matching component links#{error_message_condition(opts[:ret_match_info])}")
+          fail ErrorUsage.new("Multiple matching component links#{error_message_condition(opts[:ret_match_info])}")
       end
     end
 
@@ -104,7 +104,7 @@ module DTK
         lambda { |r| r[:input_port][:component_id] == input_component_id }
       elsif Aux.has_only_these_keys?(filter, [:service_type, :input_component_id, :output_component_id])
         unless input_component_id = filter[:input_component_id]
-          raise Error.new("Unexpected filter (#{filter.inspect})")
+          fail Error.new("Unexpected filter (#{filter.inspect})")
         end
         output_component_id = filter[:output_component_id]
         service_type = filter[:service_type]
@@ -118,7 +118,7 @@ module DTK
             (output_component_id.nil? || (r[:output_port][:component_id] == output_component_id))
         end
       else
-        raise Error.new("Unexpected filter (#{filter.inspect})")
+        fail Error.new("Unexpected filter (#{filter.inspect})")
       end
     end
     private :port_link_filter_lambda_form

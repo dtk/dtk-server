@@ -6,8 +6,8 @@ module TimeoutMonkeyPatch
     def self.timeout(sec, klass = nil, &block)
       return TimerAdapterClass.timeout(sec, klass, &block) if TimerAdapterClass
 
-      return yield if sec == nil or sec.zero?
-      raise ThreadError, 'timeout within critical session' if Thread.critical
+      return yield if sec.nil? or sec.zero?
+      fail ThreadError, 'timeout within critical session' if Thread.critical
       exception = klass || Class.new(ExitException)
 
       begin

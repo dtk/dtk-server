@@ -68,7 +68,7 @@ module XYZ
     # helper fn
     def component_or_node_display
       search_object = ret_search_object_in_request()
-      raise Error.new('no search object in request') unless search_object
+      fail Error.new('no search object in request') unless search_object
 
       model_list = Model.get_objects_from_search_object(search_object)
 
@@ -82,7 +82,7 @@ module XYZ
       tpl.assign("_#{model_name()}", _model_var)
       tpl.assign("#{model_name()}_list", model_list)
 
-      return { content: tpl.render() }
+      { content: tpl.render() }
     end
   end
 end

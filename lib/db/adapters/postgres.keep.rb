@@ -51,10 +51,10 @@ module XYZ
 
     def create_function_zzz_ret_id?
       o =  ID_TYPES[:id] # fn output
-      raise Error::NotImplemented.new('create_function_zzz_ret_id?') if !(o == :bigint && ID_TYPES[:context_id] == :integer && ID_TYPES[:local_id] == :integer)
+      fail Error::NotImplemented.new('create_function_zzz_ret_id?') unless (o == :bigint && ID_TYPES[:context_id] == :integer && ID_TYPES[:local_id] == :integer)
       create_function?({ schema: :top, fn: :zzz_ret_id },
-        'SELECT CASE WHEN $1 = 1 THEN $2::bigint ELSE (2147483648::bigint * ($1 -1)::bigint) + $2::bigint end',
-        returns: :bigint, behavior: :IMMUTABLE, args: [{ _context_id: :integer }, { _local_id: :integer }])
+                       'SELECT CASE WHEN $1 = 1 THEN $2::bigint ELSE (2147483648::bigint * ($1 -1)::bigint) + $2::bigint end',
+                       returns: :bigint, behavior: :IMMUTABLE, args: [{ _context_id: :integer }, { _local_id: :integer }])
     end
 
     def create_element_update_trigger?
@@ -65,22 +65,22 @@ module XYZ
       parent_id = ID_INFO_TABLE[:parent_id].to_s
 
       create_function? ELEMENT_UPDATE_TRIGGER,
-         "BEGIN
-            IF TG_OP = 'INSERT' THEN
-              SELECT INTO new.id top.zzz_ret_id(NEW.#{c},NEW.local_id);
-              INSERT INTO #{uri_rel} (#{uri_id},#{uri_local_id},#{c},relation_name,ref,ref_num)
-              VALUES (NEW.id,NEW.local_id,NEW.#{c},TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME,NEW.ref,NEW.ref_num);
-              RETURN NEW;
-            ELSIF TG_OP = 'UPDATE' THEN
-        --TBD: not implemented
-            RETURN NEW;
-            END IF;
-            -- else TG_OP = DELETE
-            DELETE FROM #{uri_rel}
-            WHERE #{uri_id} = OLD.id OR #{parent_id} = OLD.id;
-            RETURN OLD;
-         END",
-   returns: 'trigger', language: 'plpgsql'
+                       "BEGIN
+                          IF TG_OP = 'INSERT' THEN
+                            SELECT INTO new.id top.zzz_ret_id(NEW.#{c},NEW.local_id);
+                            INSERT INTO #{uri_rel} (#{uri_id},#{uri_local_id},#{c},relation_name,ref,ref_num)
+                            VALUES (NEW.id,NEW.local_id,NEW.#{c},TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME,NEW.ref,NEW.ref_num);
+                            RETURN NEW;
+                          ELSIF TG_OP = 'UPDATE' THEN
+                      --TBD: not implemented
+                          RETURN NEW;
+                          END IF;
+                          -- else TG_OP = DELETE
+                          DELETE FROM #{uri_rel}
+                          WHERE #{uri_id} = OLD.id OR #{parent_id} = OLD.id;
+                          RETURN OLD;
+                       END",
+                       returns: 'trigger', language: 'plpgsql'
     end
 
     def create_table_common_fields_trigger?(db_rel)
@@ -102,7 +102,7 @@ module XYZ
     end
 
     def create_trigger?(db_rel, trigger_name, trigger_fn, opts = {})
-      create_trigger(db_rel, trigger_name, trigger_fn, opts) if !trigger_exists?(db_rel, trigger_name)
+      create_trigger(db_rel, trigger_name, trigger_fn, opts) unless trigger_exists?(db_rel, trigger_name)
       nil
     end
 
@@ -125,7 +125,7 @@ module XYZ
     end
 
     def create_language?(language_name)
-      create_language(language_name) if !language_exists?(language_name)
+      create_language(language_name) unless language_exists?(language_name)
       nil
     end
 
@@ -143,7 +143,7 @@ module XYZ
     end
 
     def create_function?(db_fn, definition, opts = {})
-      create_function(db_fn, definition, opts) if !function_exists?(db_fn)
+      create_function(db_fn, definition, opts) unless function_exists?(db_fn)
       nil
     end
 
@@ -183,7 +183,7 @@ module XYZ
             9223372036854775807
         end
 
-      raise Error::NotImplemented.new("sequence for type #{type}") if max_value.nil?
+      fail Error::NotImplemented.new("sequence for type #{type}") if max_value.nil?
 
       seq_qualified_name = fully_qualified_fn_name(seq_name)
       db_run "CREATE SEQUENCE #{seq_qualified_name}

@@ -174,7 +174,7 @@ module R8Tpl
      # TODO: figure out handling of overrides
      #      require $GLOBALS['ctrl']->getAppName().'/objects' . $this->objRef->getmodel_name() . '/meta/view.'.$this->profile.'.'.$this->viewName.'.php');
      # require 'some path to require'
-     raise XYZ::Error::NotImplemented.new()
+     fail XYZ::Error::NotImplemented.new()
     end
   end
 
@@ -183,9 +183,9 @@ module R8Tpl
     cache_path = ret_existing_view_path(:cache)
     return nil unless cache_path
     meta_view_path = ret_existing_view_path(view_path_type() == :db ? :meta_db : :meta)
-    raise XYZ::Error.new('to generate cache appropriate meta file must exist') unless  meta_view_path
+    fail XYZ::Error.new('to generate cache appropriate meta file must exist') unless  meta_view_path
     system_view_path = ret_existing_view_path(:system)
-    raise XYZ::Error.new('to generate cache appropriate system file must exist') unless  system_view_path
+    fail XYZ::Error.new('to generate cache appropriate system file must exist') unless  system_view_path
 
     if not R8::Config[:dev_mode].nil? or R8::Config[:dev_mode] == false
       cache_edit_time = cache_path.edit_time_as_int()
@@ -299,7 +299,7 @@ module R8Tpl
 
         field_hash.each do |field_name, field_meta|
           field_meta[:field_name] = field_name
-          if (!field_meta[:id].nil?) then field_meta[:id] = field_meta[:field_name] end
+          unless (field_meta[:id].nil?) then field_meta[:id] = field_meta[:field_name] end
           field_meta[:model_name] = @model_name
           field_handler.addValidation(@form_id, field_meta)
         end
@@ -753,7 +753,7 @@ module R8Tpl
     if @js_cache_path.nil?
       @js_cache_path = "#{R8::Config[:js_file_write_path]}/#{@profile}.#{@view_name}.js"
     end
-    return @js_cache_path
+    @js_cache_path
   end
 
   # This will check to see if the JS form file exists and isnt stale compare to the TPL and other factors

@@ -19,7 +19,7 @@ module XYZ
       def create(container_handle_id, ref, hash_content = {})
         factory_id_handle = get_factory_id_handle(container_handle_id)
         id_handle = get_child_id_handle_from_qualified_ref(factory_id_handle, ref)
-        raise Error.new("data source #{ref} exists already") if exists? id_handle
+        fail Error.new("data source #{ref} exists already") if exists? id_handle
 
         hash_with_defaults = fill_in_defaults(ref.to_sym, hash_content)
         create_from_hash(container_handle_id, data_source: { ref => hash_with_defaults })
@@ -68,8 +68,8 @@ module XYZ
 
     def initialize(hash_scalar_values, c, relation_type)
       super(hash_scalar_values, c, relation_type)
-      raise Error.new(':obj_type should be in hash_scalar_values') if hash_scalar_values[:obj_type].nil?
-      raise Error.new(':ds_name should be in hash_scalar_values') if hash_scalar_values[:ds_name].nil?
+      fail Error.new(':obj_type should be in hash_scalar_values') if hash_scalar_values[:obj_type].nil?
+      fail Error.new(':ds_name should be in hash_scalar_values') if hash_scalar_values[:ds_name].nil?
       # default is to place in container that the data source root sets in
       # TBD: logic to override if @objects_location set
       default_container_obj = get_parent_object().get_parent_object()

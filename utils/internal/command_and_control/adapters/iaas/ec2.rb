@@ -36,7 +36,7 @@ module DTK
           if region = target.iaas_properties.hash()[:region]
             err_msg << " (ec2: #{region})"
           end
-          raise ErrorUsage.new(err_msg)
+          fail ErrorUsage.new(err_msg)
         end
       end
 
@@ -56,7 +56,7 @@ module DTK
         donot_stop_nodes = nodes.select { |n| marked_donot_stop?(n) }
         unless donot_stop_nodes.empty?
           node_names = donot_stop_nodes.map { |n| n.get_field?(:display_name) }
-          raise ErrorUsage.new("Cannot stop the nodes (#{node_names.join(',')})")
+          fail ErrorUsage.new("Cannot stop the nodes (#{node_names.join(',')})")
         end
 
         nodes.each do |node|
@@ -73,7 +73,7 @@ module DTK
       def self.get_availability_zones(iaas_properties, region, opts = {})
         connection = opts[:connection] || get_connection_from_iaas_properties(iaas_properties, region)
         response = connection.describe_availability_zones
-        raise ErrorUsage.new('Unable to retreive availability zones!') unless response.status == 200
+        fail ErrorUsage.new('Unable to retreive availability zones!') unless response.status == 200
         response.body['availabilityZoneInfo'].map { |z| z['zoneName'] } || []
       end
 
@@ -115,13 +115,10 @@ module DTK
         end
 
         def invalid_credentials
-          begin
-            # as simple test see if can describe availability_zones
-            Ec2.get_availability_zones(@iaas_properties, @region, connection: @connection)
-           rescue => e
-            Log.info_pp(['Error_from get_availability_zones', e])
-            raise ErrorUsage.new('Invalid EC2 credentials')
-          end
+          Ec2.get_availability_zones(@iaas_properties, @region, connection: @connection)
+         rescue => e
+          Log.info_pp(['Error_from get_availability_zones', e])
+          raise ErrorUsage.new('Invalid EC2 credentials')
         end
 
         def invalid_subnet(subnet)
@@ -196,7 +193,7 @@ module DTK
             CloudConnect::EC2.new.get_compute_params().merge(region: region)
           else
             unless iaas_prop_hash[:key] && iaas_prop_hash[:secret]
-              raise Error.new('Unexpected that no builtin target does not have needed fields')
+              fail Error.new('Unexpected that no builtin target does not have needed fields')
               ret = {
                 aws_access_key_id: iaas_prop_hash[:key],
                 aws_secret_access_key: iaas_prop_hash[:secret]

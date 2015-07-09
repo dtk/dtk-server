@@ -84,18 +84,16 @@ module DTK
 
     # TODO: just temp until we get rid of need to convert keys to symbols; right now default is to do so
     def self.ret_json_hash(raw_value, col_info, opts = {})
-      begin
-        hash = JSON.parse(raw_value)
-        if (col_info.key?(:ret_keys_as_symbols) && col_info[:ret_keys_as_symbols].to_s == 'false') ||
-           (opts.key?(:ret_keys_as_symbols) && opts[:ret_keys_as_symbols].to_s == 'false')
-          hash
-        else
-          ret_keys_as_symbols(hash)
-        end
-      rescue Exception
-        # primarily to handle scalars
-        raw_value
+      hash = JSON.parse(raw_value)
+      if (col_info.key?(:ret_keys_as_symbols) && col_info[:ret_keys_as_symbols].to_s == 'false') ||
+         (opts.key?(:ret_keys_as_symbols) && opts[:ret_keys_as_symbols].to_s == 'false')
+        hash
+      else
+        ret_keys_as_symbols(hash)
       end
+    rescue Exception
+      # primarily to handle scalars
+      raw_value
     end
 
     def self.parent_field(parent_model_name, model_name, opts = {})

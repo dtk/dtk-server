@@ -35,11 +35,11 @@ module DTK; class AttributeLink
     end
 
     def internal_hash_form(_opts = {})
-      raise Error.new('Should not be called')
+      fail Error.new('Should not be called')
     end
 
     def value(_opts = {})
-      raise Error.new('Should not be called')
+      fail Error.new('Should not be called')
     end
 
     private
@@ -55,11 +55,9 @@ module DTK; class AttributeLink
     end
 
     def self.klass(name)
-      begin
-        const_get(Aux.camelize(name))
-       rescue
-        raise Error.new("Illegal function name (#{name}")
-      end
+      const_get(Aux.camelize(name))
+     rescue
+      raise Error.new("Illegal function name (#{name}")
     end
 
     def self.name
@@ -68,7 +66,7 @@ module DTK; class AttributeLink
 
     def self.function_name(function_def)
      Base.function_name?(function_def) || WithArgs.function_name?(function_def) ||
-        raise(Error.new("Function def has illegal form: #{function_def.inspect}"))
+        fail(Error.new("Function def has illegal form: #{function_def.inspect}"))
     end
   end
 end; end

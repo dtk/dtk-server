@@ -163,11 +163,11 @@ module DTK; class LinkDef
         ret[:type] = 'component_attribute'
         ret[:component_type] = Regexp.last_match(1)
       else
-        raise Error.new("unexpected form (#{term_x.inspect})")
+        fail Error.new("unexpected form (#{term_x.inspect})")
       end
 
       unless split.size > 1
-        raise Error.new("unexpected form (#{term_x.inspect})")
+        fail Error.new("unexpected form (#{term_x.inspect})")
       end
       if split[1] =~ AttributeTermRE
         ret[:attribute_name] = Regexp.last_match(1)
@@ -175,7 +175,7 @@ module DTK; class LinkDef
       elsif split[1] =~ /\$\{(.+)\}/
         ret[:attribute_name] = Regexp.last_match(1)
       else
-        raise Error.new("unexpected form (#{term_x.inspect})")
+        fail Error.new("unexpected form (#{term_x.inspect})")
       end
 
       if split.size > 2

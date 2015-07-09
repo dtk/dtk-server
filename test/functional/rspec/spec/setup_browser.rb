@@ -56,7 +56,7 @@ def load_configs
   conf.username = full_config[env]['account']['username']
   conf.password = full_config[env]['account']['password']
   conf.headless = full_config[env]['headless']
-  return conf
+  conf
 end
 
 def load_headless(full_host)
@@ -69,7 +69,7 @@ def load_headless(full_host)
   @homepage = HomePage.new(session)
   @homepage.goto_homepage(full_host)
   puts 'Opening home page: ' + full_host
-  return @homepage
+  @homepage
 end
 
 def load_browser(full_host, target_browser)
@@ -82,5 +82,5 @@ def load_browser(full_host, target_browser)
   @homepage = HomePage.new(session)
   @homepage.goto_homepage(full_host)
   puts 'Opening home page: ' + full_host
-  return @homepage
+  @homepage
 end

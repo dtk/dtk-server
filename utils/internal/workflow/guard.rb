@@ -38,7 +38,7 @@ module DTK; class Workflow
         }
         aug_port_links = Model.get_objs(assembly.model_handle(:port_link), sp_hash)
         pp aug_port_links
-        raise Error.new('Got here; need to bring in task info and look at that to find component and node; node is not below')
+        fail Error.new('Got here; need to bring in task info and look at that to find component and node; node is not below')
 
         aug_port_links.map do |pl|
           before = DirIndex[pl[:temporal_order].to_sym][:before_index]
@@ -109,15 +109,15 @@ module DTK; class Workflow
       def self.unset_guarded_attr__array_append?(guarded_attr_val, link)
         if input_map = link[:index_map]
           unless input_map.size == 1
-            raise Error.new('Not treating index map with more than one member')
+            fail Error.new('Not treating index map with more than one member')
           end
           input_index = input_map.first[:input]
           unless input_index.size == 1
-            raise Error.new('Not treating input index with more than one member')
+            fail Error.new('Not treating input index with more than one member')
           end
           input_num = input_index.first
           unless input_num.is_a?(Fixnum)
-            raise Error.new('Not treating input index that is non-numeric')
+            fail Error.new('Not treating input index that is non-numeric')
           end
           guarded_attr_val.is_a?(Array) && guarded_attr_val[input_num].nil?
         else

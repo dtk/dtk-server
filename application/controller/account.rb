@@ -38,12 +38,12 @@ module DTK
       end
 
       if username && !username.eql?(username.match(PUB_KEY_NAME_REGEX)[0])
-        raise DTK::Error, "Invalid format of pub key name, characters allower are: '#{PUB_KEY_NAME_REGEX.source.gsub('\\', '')}'"
+        fail DTK::Error, "Invalid format of pub key name, characters allower are: '#{PUB_KEY_NAME_REGEX.source.gsub('\\', '')}'"
       end
 
       # we do this check in add user direct as well but for simplicity we will duplicate it here as well
       if RepoUser.find_by_pub_key(model_handle_with_private_group(), rsa_pub_key)
-        raise ErrorUsage, RepoUser::SSH_KEY_EXISTS
+        fail ErrorUsage, RepoUser::SSH_KEY_EXISTS
       end
 
       begin

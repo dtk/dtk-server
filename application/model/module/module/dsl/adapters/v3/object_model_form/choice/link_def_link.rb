@@ -55,7 +55,7 @@ module DTK; class ModuleDSL; class V3
 
       def raise_error(link_def_link, err_msg_fragment)
         err_msg = "The following link defs section on component '?1' #{err_msg_fragment}: ?2"
-        raise ParsingError.new(err_msg, base_cmp_print_form(), dep_cmp_print_form() => link_def_link)
+        fail ParsingError.new(err_msg, base_cmp_print_form(), dep_cmp_print_form() => link_def_link)
       end
 
       def link_def_link_type(link_info)
@@ -63,7 +63,7 @@ module DTK; class ModuleDSL; class V3
           case loc
           when 'local' then 'internal'
           when 'remote' then 'external'
-          else raise ParsingError.new('Ill-formed dependency location type (?1)', loc)
+          else fail ParsingError.new('Ill-formed dependency location type (?1)', loc)
           end
         end
       end

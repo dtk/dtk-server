@@ -164,7 +164,7 @@ module MCollective
         return @config.pluginconf[opt] if @config.pluginconf.include?(opt)
         return default if default
 
-        raise("No #{env} environment or plugin.#{opt} configuration option given")
+        fail("No #{env} environment or plugin.#{opt} configuration option given")
       end
 
       # looks for a config option, accepts an optional default
@@ -174,7 +174,7 @@ module MCollective
         return @config.pluginconf[opt] if @config.pluginconf.include?(opt)
         return default if default
 
-        raise("No plugin.#{opt} configuration option given")
+        fail("No plugin.#{opt} configuration option given")
       end
 
       # gets a boolean option from the config, supports y/n/true/false/1/0

@@ -133,7 +133,7 @@ module DTK; class Component
             module_name: Component.module_name(el.component_type),
             namespaces: matches.map { |m| m[:namespace] }.compact # compact just to be safe
           }
-          raise ServiceModule::ParsingError::AmbiguousModuleRef.new(error_params)
+          fail ServiceModule::ParsingError::AmbiguousModuleRef.new(error_params)
         end
       end
       unless unmatched.empty?()
@@ -149,9 +149,9 @@ module DTK; class Component
           }
         end
         if opts[:service_instance_module]
-          raise ServiceModule::ParsingError::RemovedServiceInstanceCmpRef.new(cmp_refs, opts)
+          fail ServiceModule::ParsingError::RemovedServiceInstanceCmpRef.new(cmp_refs, opts)
         else
-          raise ServiceModule::ParsingError::DanglingComponentRefs.new(cmp_refs, opts)
+          fail ServiceModule::ParsingError::DanglingComponentRefs.new(cmp_refs, opts)
         end
       end
       ret
@@ -197,7 +197,7 @@ module DTK; class Component
             return ret
           end
         end
-        raise ErrorIdInvalid.new(id, pp_object_type())
+        fail ErrorIdInvalid.new(id, pp_object_type())
       else
         check_valid_id_aux(model_handle, id, version_or_versions)
       end
@@ -222,7 +222,7 @@ module DTK; class Component
             return ret
           end
         end
-        raise ErrorNameDoesNotExist.new(name, pp_object_type())
+        fail ErrorNameDoesNotExist.new(name, pp_object_type())
       else
         name_to_id_aux(model_handle, name, version_or_versions)
       end
@@ -262,7 +262,7 @@ module DTK; class Component
       end
       unless cmp_templates.size == 1
         possible_names = cmp_templates.map { |r| r.display_name_print_form(namespace_prefix: true) }.join(',')
-        raise ErrorUsage.new("Multiple components with different namespaces match; pick one from: #{possible_names}")
+        fail ErrorUsage.new("Multiple components with different namespaces match; pick one from: #{possible_names}")
       end
       ret_cmp = cmp_templates.first
 
@@ -275,7 +275,7 @@ module DTK; class Component
         ret_cmp_ns = ret_cmp[:namespace][:display_name]
         cmp_mod_ns = cmp_mod[:namespace_name]
         if ret_cmp_ns != cmp_mod_ns
-          raise ErrorUsage.new("Unable to add component from (#{ret_cmp_ns}:#{ret_cmp_mod}) because you are already using components from following component modules: #{cmp_mod_ns}:#{cmp_mod[:display_name]}")
+          fail ErrorUsage.new("Unable to add component from (#{ret_cmp_ns}:#{ret_cmp_mod}) because you are already using components from following component modules: #{cmp_mod_ns}:#{cmp_mod[:display_name]}")
         end
       end
       ret_cmp
@@ -331,7 +331,7 @@ module DTK; class Component
   module TemplateMixin
     def update_default(attribute_name, val, field_to_match = :display_name)
       tmpl_attr_obj =  get_virtual_attribute(attribute_name, [:id, :value_asserted], field_to_match)
-      raise Error.new("cannot find attribute #{attribute_name} on component template") unless tmpl_attr_obj
+      fail Error.new("cannot find attribute #{attribute_name} on component template") unless tmpl_attr_obj
       update(updated: true)
       tmpl_attr_obj.update(value_asserted: val)
       # update any instance that points to this template, which does not have an instance value asserted

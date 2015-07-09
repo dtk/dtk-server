@@ -11,7 +11,7 @@ module DTK
         elsif object.is_a?(Hash)
           new(object)
         else
-          raise Error.new("Unexpected object type (#{object.class})")
+          fail Error.new("Unexpected object type (#{object.class})")
         end
       end
 
@@ -23,7 +23,7 @@ module DTK
         unless err_msgs.empty?
           err_msg = err_msgs.join(' and ').capitalize
           if opts[:raise_error]
-            raise ErrorUsage.new(err_msg)
+            fail ErrorUsage.new(err_msg)
           else
             Log.error(err_msg)
             return ret

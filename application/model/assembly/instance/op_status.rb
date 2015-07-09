@@ -96,7 +96,7 @@ module DTK; class  Assembly; class Instance
         return nodes, false, "There are no #{status_pattern} nodes for assembly '#{assembly_name}'."
         end
 
-        return filtered_nodes, true, nil
+        [filtered_nodes, true, nil]
       end
 
       # TODO: collapse above and below

@@ -2,7 +2,7 @@ module WorkspaceMixin
   def get_workspace_id
     response = send_request('/rest/assembly/list_with_workspace', {})
     workspace = response['data'].find { |x| x['display_name'] == 'workspace' }['id']
-    return workspace
+    workspace
   end
 
   def purge_content(service_id)
@@ -17,6 +17,6 @@ module WorkspaceMixin
       puts 'Content has not been purged successfully!'
     end
     puts ''
-    return content_purged
+    content_purged
   end
 end

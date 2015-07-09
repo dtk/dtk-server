@@ -16,7 +16,7 @@ module DTK
           end
           add_errors(obj)
         else
-          raise Error.new("Unexpected object type (#{obj.class})")
+          fail Error.new("Unexpected object type (#{obj.class})")
         end
         self
       end

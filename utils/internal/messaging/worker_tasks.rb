@@ -44,7 +44,7 @@ module XYZ
         when :task_set
           WorkerTaskSet.create(input_msg, opts)
         else
-         raise Error.new("#{type} is not a legal worker task type")
+         fail Error.new("#{type} is not a legal worker task type")
       end
     end
     def process_task_finished
@@ -78,15 +78,15 @@ module XYZ
     private
 
     def reply_to_caller
-      raise Error.new('cannot call reply_to_caller() if caller_channel not set') unless @caller_channel
-      raise Error.new('cannot call reply_to_caller() if msg_bus_client not set') unless @msg_bus_client
+      fail Error.new('cannot call reply_to_caller() if caller_channel not set') unless @caller_channel
+      fail Error.new('cannot call reply_to_caller() if msg_bus_client not set') unless @msg_bus_client
       reply_queue = @msg_bus_client.publish_queue(@caller_channel, passive: true)
       input_msg_reply = ProcessorMsg.create({ msg_type: :task })
       # TBD: stub; want to strip out a number of these fields
       # only send a subset of task info
       task = WorkerTaskWireSubset.new(self)
       reply_queue.publish(input_msg_reply.marshal_to_message_bus_msg(),
-        { message_id: @caller_channel, task: task })
+                          { message_id: @caller_channel, task: task })
     end
   end
 
@@ -100,7 +100,7 @@ module XYZ
   when :sequential
           WorkerTaskSetSequential.new(input_msg, opts)
  else
-          raise Error.new("#{temporal_sequencing} is an illegal temporal sequencing type")
+          fail Error.new("#{temporal_sequencing} is an illegal temporal sequencing type")
       end
     end
 
@@ -119,7 +119,7 @@ module XYZ
       task.set_so_can_run_concurrently if self.is_a?(WorkerTaskSetConcurrent)
       @subtasks << task
       task.parent_task = self
-      @num_tasks_not_complete = @num_tasks_not_complete + 1
+      @num_tasks_not_complete += 1
     end
 
     def add_routing_info(opts)
@@ -142,7 +142,7 @@ module XYZ
     end
 
     def process_child_task_finished
-      @num_tasks_not_complete = @num_tasks_not_complete - 1
+      @num_tasks_not_complete -= 1
       if @num_tasks_not_complete < 1
         #        Log.debug_pp [:finished,WorkerTaskWireSubset.new(self)]
         Log.debug_pp [:finished, WorkerTaskWireSubset.new(self).flatten()]
@@ -162,7 +162,7 @@ module XYZ
     end
 
     def process_child_task_finished
-      @num_tasks_not_complete = @num_tasks_not_complete - 1
+      @num_tasks_not_complete -= 1
       if @num_tasks_not_complete < 1
         #        Log.debug_pp [:finished,WorkerTaskWireSubset.new(self)]
         Log.debug_pp [:finished, WorkerTaskWireSubset.new(self).flatten()]
@@ -244,30 +244,28 @@ module XYZ
     end
 
     def execute
-      begin
-        queue_or_exchange = ret_queue_or_exchange()
-        @status = :started
-        msg_bus_msg_out = @input_msg.marshal_to_message_bus_msg()
-        Log.debug_pp [:sending_to,
-                      @queue_name ? "queue #{@queue_name}" : "exchange #{@exchange_name}",
-                      msg_bus_msg_out]
-        queue_or_exchange.publish_with_callback(msg_bus_msg_out, @publish_opts) do |trans_info, msg_bus_msg_in|
-          Log.debug_pp [:received_from, trans_info, msg_bus_msg_in]
-          @delegated_task = trans_info[:task]
-          process_task_finished()
-        end
-       rescue Error::AMQP::QueueDoesNotExist => e
-        if @input_msg.is_a?(ProcessorMsg) and @input_msg.msg_type == :execute_on_node
-          @errors << WorkerTaskErrorNodeNotConnected.new(e.queue_name.to_i())
-        else
-          @errors << WorkerTaskError.new(e)
-        end
-        process_task_finished()
-       rescue Exception => e
-        @errors << WorkerTaskError.new(e)
-        #       Log.debug_pp [:error,e,e.backtrace]
+      queue_or_exchange = ret_queue_or_exchange()
+      @status = :started
+      msg_bus_msg_out = @input_msg.marshal_to_message_bus_msg()
+      Log.debug_pp [:sending_to,
+                    @queue_name ? "queue #{@queue_name}" : "exchange #{@exchange_name}",
+                    msg_bus_msg_out]
+      queue_or_exchange.publish_with_callback(msg_bus_msg_out, @publish_opts) do |trans_info, msg_bus_msg_in|
+        Log.debug_pp [:received_from, trans_info, msg_bus_msg_in]
+        @delegated_task = trans_info[:task]
         process_task_finished()
       end
+     rescue Error::AMQP::QueueDoesNotExist => e
+      if @input_msg.is_a?(ProcessorMsg) and @input_msg.msg_type == :execute_on_node
+        @errors << WorkerTaskErrorNodeNotConnected.new(e.queue_name.to_i())
+      else
+        @errors << WorkerTaskError.new(e)
+      end
+      process_task_finished()
+     rescue Exception => e
+      @errors << WorkerTaskError.new(e)
+      #       Log.debug_pp [:error,e,e.backtrace]
+      process_task_finished()
     end
 
     private

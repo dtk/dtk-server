@@ -92,10 +92,10 @@ end
           RepoManager.hard_reset_to_branch(branch_name_to_merge_from, self)
           ret.merge!(fast_forward_change: false)
         else
-          raise ErrorUsage.new('There is a merge conflict! Cannot push changes without using the --force option; THIS OPTION WILL WIPE OUT CHANGES IN THE BASE COMPONENT MODULE')
+          fail ErrorUsage.new('There is a merge conflict! Cannot push changes without using the --force option; THIS OPTION WILL WIPE OUT CHANGES IN THE BASE COMPONENT MODULE')
         end
       elsif result != :changed
-        raise Error.new('Unexpected result from fast_foward_merge_from_branch')
+        fail Error.new('Unexpected result from fast_foward_merge_from_branch')
       end
 
       self[:current_sha] =  diffs.b_sha
@@ -130,7 +130,7 @@ end
       else
         merge_result = RepoManager.fast_foward_pull(self[:branch], force, self)
         if merge_result == :merge_needed
-          raise Error.new("Merge problem exists between multiple clients editting the module (#{get_module().pp_module_name()})")
+          fail Error.new("Merge problem exists between multiple clients editting the module (#{get_module().pp_module_name()})")
         end
         set_sha(commit_sha)
         true
@@ -277,7 +277,7 @@ end
     def dsl_format_type_form_path(path)
       extension = (path =~ /\.([^\.]+$)/; Regexp.last_match(1))
       unless ret = FormatTypeFromExtension[extension]
-        raise Error.new("Cannot find format type from file path (#{path})")
+        fail Error.new("Cannot find format type from file path (#{path})")
       end
       ret
     end
@@ -500,7 +500,7 @@ end
       case module_type
         when :service_module then :service_id
         when :component_module then :component_id
-        else raise Error.new("Unexected module type (#{module_type})")
+        else fail Error.new("Unexected module type (#{module_type})")
       end
     end
     def module_id_col(module_type)

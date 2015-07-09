@@ -165,9 +165,9 @@ module DTK
       if R8::Config[:repo][:workspace][:use_local_clones]
         klass.create_repo_clone(repo_obj, opts)
       elsif R8::Config[:repo][:workspace][:update_bare_repo]
-        raise Error.new('Have not implemented yet: R8::Config[:repo][:workspace][:update_bare_repo]')
+        fail Error.new('Have not implemented yet: R8::Config[:repo][:workspace][:update_bare_repo]')
       else
-        raise Error.new('Should not reach here!')
+        fail Error.new('Should not reach here!')
       end
     end
 
@@ -204,7 +204,7 @@ module DTK
     ##########
     def self.get_adapter_repo(context)
       repo_dir, branch = ret_repo_dir_and_branch(context)
-      raise Error.new('cannot find branch in context') unless branch
+      fail Error.new('cannot find branch in context') unless branch
       CachedRepoObjects[repo_dir] ||= {}
       CachedRepoObjects[repo_dir][branch] ||= load_and_create(repo_dir, branch)
     end
@@ -247,7 +247,7 @@ module DTK
     def self.load_and_return_adapter_class
       return @cached_adapter_class if @cached_adapter_class
       adapter_name = (R8::Config[:repo] || {})[:type]
-      raise Error.new('No repo adapter specified') unless adapter_name
+      fail Error.new('No repo adapter specified') unless adapter_name
       @cached_adapter_class = DynamicLoader.load_and_return_adapter_class('repo_manager', adapter_name)
     end
 

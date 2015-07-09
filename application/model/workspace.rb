@@ -52,7 +52,7 @@ module DTK
       current_target = get_target()
       if current_target && current_target.id == target.id
         if mode == :direct
-          raise ErrorUsage::Warning.new("Target is already set to #{target.get_field?(:display_name)}")
+          fail ErrorUsage::Warning.new("Target is already set to #{target.get_field?(:display_name)}")
         end
         return
       end
@@ -61,7 +61,7 @@ module DTK
       unless op_status_all_pending?()
         case mode
          when :direct
-          raise ErrorUsage.new("The command 'set-target' can only be invoked before the workspace has been converged (i.e., is in 'pending' state)")
+          fail ErrorUsage.new("The command 'set-target' can only be invoked before the workspace has been converged (i.e., is in 'pending' state)")
          when :from_set_default_target
           # treated as no op (keep workspace as is)
           update = false
@@ -69,7 +69,7 @@ module DTK
           # want to update so deleting target does not have foreign key that causes the workspace object to be deleted
           update = true
          else
-          raise Error.new("Unexpected mode '#{mode}'")
+          fail Error.new("Unexpected mode '#{mode}'")
         end
       end
       if update

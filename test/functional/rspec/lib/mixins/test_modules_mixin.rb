@@ -10,7 +10,7 @@ module TestModulesMixin
       puts 'Test module delete response:'
       pretty_print_JSON(delete_response)
 
-      if (delete_response['status'] == 'ok' && test_modules_list['data'].select { |x| x['module_name'] == nil })
+      if (delete_response['status'] == 'ok' && test_modules_list['data'].select { |x| x['module_name'].nil? })
         puts "Test module #{test_module_to_delete} deleted successfully"
         test_module_deleted = true
       else
@@ -22,7 +22,7 @@ module TestModulesMixin
       test_module_deleted = false
     end
     puts ''
-    return test_module_deleted
+    test_module_deleted
   end
 
   def list_test_modules_with_filter(namespace)
@@ -42,7 +42,7 @@ module TestModulesMixin
       end
     end
     puts ''
-    return test_modules_retrieved
+    test_modules_retrieved
   end
 
   def list_remote_test_modules_with_filter(namespace)
@@ -62,6 +62,6 @@ module TestModulesMixin
       end
     end
     puts ''
-    return test_modules_retrieved
+    test_modules_retrieved
   end
 end

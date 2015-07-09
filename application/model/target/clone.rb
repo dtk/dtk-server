@@ -38,7 +38,7 @@ module DTK
         if assembly = clone_copy_output.assembly?(subclass_object: true)
           assembly(target, assembly, clone_copy_output, opts)
         else
-          raise Error.new('Not implemented clone of non assembly component to target')
+          fail Error.new('Not implemented clone of non assembly component to target')
         end
       end
 
@@ -102,7 +102,7 @@ module DTK
           end
           new_h[key.to_s] = value
         end
-        return new_h
+        new_h
       end
 
       def self.create_state_changes_for_create_node?(target, nodes)

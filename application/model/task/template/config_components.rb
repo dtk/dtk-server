@@ -72,11 +72,11 @@ module DTK; class Task
 
       def self.raise_error_if_unsupported_action_types(action_types)
         unless action_types.include?(:assembly)
-          raise Error.new('Not supported when action types does not contain :assembly')
+          fail Error.new('Not supported when action types does not contain :assembly')
         end
         illegal_action_types = (action_types - [:assembly, :node_centric])
         unless illegal_action_types.empty?
-          raise Error.new("Illegal action type(s) (#{illegal_action_types.join(',')})")
+          fail Error.new("Illegal action type(s) (#{illegal_action_types.join(',')})")
         end
       end
       def self.node_centric_first_stage?

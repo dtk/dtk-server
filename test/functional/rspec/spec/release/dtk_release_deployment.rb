@@ -49,12 +49,12 @@ begin
         if service_converged == true
           puts "#{service_name} service deployed!"
         else
-          raise "[ERROR] #{service_name} service was not deployed successfully!"
+          fail "[ERROR] #{service_name} service was not deployed successfully!"
         end
     else
-        raise '[ERROR] Some of the attributes are not set correctly. Will not proceed with converge process!'
+        fail '[ERROR] Some of the attributes are not set correctly. Will not proceed with converge process!'
     end
   else
-    raise "[ERROR] #{service_name} service is not staged and therefore deployment of DTK artifacts will not continue!"
+    fail "[ERROR] #{service_name} service is not staged and therefore deployment of DTK artifacts will not continue!"
   end
 end

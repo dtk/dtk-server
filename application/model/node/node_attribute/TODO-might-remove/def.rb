@@ -36,7 +36,7 @@ module DTK; class Node
       def self.object(canonical_name = nil)
         unless ret = (canonical_name ? @@index_by_canonical_name[canonical_name] : @@interpreted_def[self])
           index = canonical_name || self
-          raise Error.new("Bad index given (#{index.inspect}")
+          fail Error.new("Bad index given (#{index.inspect}")
         end
         ret
       end

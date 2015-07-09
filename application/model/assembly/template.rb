@@ -27,7 +27,7 @@ module DTK; class Assembly
       # unless is_dsl_parsed = service_module.dsl_parsed?()
       service_module_branch = service_module.get_workspace_module_branch()
       unless is_dsl_parsed = service_module_branch.dsl_parsed?()
-        raise ErrorUsage.new("An assembly template from an unparsed service-module ('#{service_module}') cannot be staged")
+        fail ErrorUsage.new("An assembly template from an unparsed service-module ('#{service_module}') cannot be staged")
       end
 
       # including :description here because it is not a field that gets copied by clone copy processor
@@ -176,7 +176,7 @@ module DTK; class Assembly
        when :nodes
         List.list_nodes(self)
        else
-        raise Error.new("TODO: not implemented yet: processing of info_about(#{about})")
+        fail Error.new("TODO: not implemented yet: processing of info_about(#{about})")
       end
     end
 
@@ -203,7 +203,7 @@ module DTK; class Assembly
       elsif detail_level == 'nodes'
         :template_stub_nodes
       else
-        raise Error.new("not implemented list_virtual_column at detail level (#{detail_level})")
+        fail Error.new("not implemented list_virtual_column at detail level (#{detail_level})")
       end
     end
 
@@ -241,13 +241,13 @@ module DTK; class Assembly
       augmented_sp_hash =
         if parts.size == 1
           { cols: [:id, :component_type],
-           filter: [:and,
+            filter: [:and,
                     [:eq, :component_type, pp_name_to_component_type(parts[0])],
                     [:eq, :type, 'composite'],
                     [:neq, :project_project_id, nil]]
           }
         else
-        raise ErrorNameInvalid.new(name, pp_object_type())
+        fail ErrorNameInvalid.new(name, pp_object_type())
       end
       name_to_id_helper(model_handle, name, augmented_sp_hash)
     end

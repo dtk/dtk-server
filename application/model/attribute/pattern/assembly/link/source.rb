@@ -6,7 +6,7 @@ module DTK; class Attribute::Pattern
         attr_term, fn, node_cmp_type = Simple.parse(source_attr_term) ||
                        VarEmbeddedInText.parse(source_attr_term)
         unless attr_term
-          raise ErrorUsage::Parsing::Term.new(source_attr_term, :source_attribute)
+          fail ErrorUsage::Parsing::Term.new(source_attr_term, :source_attribute)
         end
         attr_pattern = super(base_object, attr_term)
         if node_cmp_type
@@ -32,9 +32,9 @@ module DTK; class Attribute::Pattern
       def initialize(attr_pattern, fn, attr_term)
         attr_idhs = attr_pattern.attribute_idhs
         if attr_idhs.empty?
-          raise ErrorUsage.new("The term (#{attr_term}) does not match an attribute")
+          fail ErrorUsage.new("The term (#{attr_term}) does not match an attribute")
         elsif attr_idhs.size > 1
-          raise ErrorUsage.new('Source attribute term must match just one, not multiple attributes')
+          fail ErrorUsage.new('Source attribute term must match just one, not multiple attributes')
         end
         @attribute_pattern = attr_pattern
         @fn = fn

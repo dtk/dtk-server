@@ -50,7 +50,7 @@ module DTK; class Task; class Template
       def delete_action!(action_match)
         node_id = action_match.action.node_id
         unless node_action = self[node_id]
-          raise Error.new('Unexepected that no node action can be found')
+          fail Error.new('Unexepected that no node action can be found')
         end
         if :empty == node_action.delete_action!(action_match)
           delete(node_id)
@@ -60,7 +60,7 @@ module DTK; class Task; class Template
 
       def splice_in_action!(action_match, insert_point)
         unless node_id = action_match.insert_action.node_id
-          raise Error.new('Unexepected that node_id is nil')
+          fail Error.new('Unexepected that node_id is nil')
         end
         case insert_point
           when :end_last_execution_block
@@ -71,10 +71,10 @@ module DTK; class Task; class Template
             end
           when :before_action_pos
             unless node_action = self[node_id]
-              raise Error.new("Illegal node_id (#{action_match.node_id})")
+              fail Error.new("Illegal node_id (#{action_match.node_id})")
             end
             node_action.splice_in_action!(action_match, insert_point)
-          else raise Error.new("Unexpected insert_point (#{insert_point})")
+          else fail Error.new("Unexpected insert_point (#{insert_point})")
         end
       end
       # TODO: have above subsume below
@@ -120,14 +120,14 @@ module DTK; class Task; class Template
         ret = normalized_content.inject(new(serialized_content[:name])) do |h, serialized_node_actions|
           unless node_name = Constant.matches?(serialized_node_actions, :Node)
             if Constant.matches?(serialized_node_actions, :Nodes)
-              raise ParsingError.new("Within nested subtask only '#{Constant::Node}' and not '#{Constant::Nodes}' keyword can be used")
+              fail ParsingError.new("Within nested subtask only '#{Constant::Node}' and not '#{Constant::Nodes}' keyword can be used")
             end
-            raise ParsingError.new('Missing node reference in: ?1', serialized_node_actions)
+            fail ParsingError.new('Missing node reference in: ?1', serialized_node_actions)
           end
           node_id = 0 #dummy value when just used for parsing
           if action_list
             unless node_id = action_list.find_matching_node_id(node_name)
-              raise ParsingError.new("The following element(s) cannot be resolved with respect to the assembly's nodes and components: ?1", serialized_content)
+              fail ParsingError.new("The following element(s) cannot be resolved with respect to the assembly's nodes and components: ?1", serialized_content)
             end
           end
           node_actions = parse_and_reify_node_actions?(serialized_node_actions, node_name, node_id, action_list, opts)

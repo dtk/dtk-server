@@ -55,7 +55,7 @@ module DTK; class ModuleDSL; class V3
         link_def_links.inject([]) do |a, link|
           unless link.is_a?(Hash)
             err_msg = "The following link defs section on component '?1' is ill-formed: ?2"
-            raise ParsingError.new(err_msg, component_print_form(base_cmp), dep_cmp_name => link_def_links)
+            fail ParsingError.new(err_msg, component_print_form(base_cmp), dep_cmp_name => link_def_links)
           end
           a + convert_link_def_link(link, dep_cmp_name, base_cmp, opts)
         end

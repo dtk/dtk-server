@@ -110,7 +110,7 @@ module XYZ
       tests = Model.get_objs(default_project.model_handle(:test_module), cols: columns)
 
       components = modules + services + tests
-      raise 'No data to migrate, exiting ...' if components.empty?
+      fail 'No data to migrate, exiting ...' if components.empty?
 
       components.each do |e|
         next if e[:display_name].eql?('.workspace')
@@ -155,9 +155,9 @@ module XYZ
             old_repo.remove_group('tenants')
 
             repos_changes.store(old_repo_name,               new_repo_name: new_repo_name,
-              old_dir: "/home/#{tenant_name}/r8server-repo/#{old_repo_name}",
-              new_dir: "/home/#{tenant_name}/r8server-repo/#{new_repo_name}",
-              branch_name: "workspace-private-#{username}"
+                                                             old_dir: "/home/#{tenant_name}/r8server-repo/#{old_repo_name}",
+                                                             new_dir: "/home/#{tenant_name}/r8server-repo/#{new_repo_name}",
+                                                             branch_name: "workspace-private-#{username}"
                                )
 
             e[:repo].update(

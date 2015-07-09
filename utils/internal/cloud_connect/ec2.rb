@@ -60,7 +60,7 @@ module DTK
           end
         end # => 10 times loop end
 
-        raise Error, "Node (Instance ID: '#{instance_id}') not ready after #{tries * WAIT_FOR_NODE} seconds."
+        fail Error, "Node (Instance ID: '#{instance_id}') not ready after #{tries * WAIT_FOR_NODE} seconds."
       end
 
       def server_stop(instance_id)
@@ -89,7 +89,7 @@ module DTK
 
       def check_for_key_pair(name)
         unless key_pair = @conn.key_pairs.get(name)
-          raise ErrorUsage.new("Not able to find IAAS keypair with name '#{name}' aborting action, please create necessery keypair")
+          fail ErrorUsage.new("Not able to find IAAS keypair with name '#{name}' aborting action, please create necessery keypair")
           # key_pair = @conn.key_pairs.create(:name => name)
         end
         key_pair
@@ -105,7 +105,7 @@ module DTK
             avail_subnets = subnets.map { |s| hash_form(s)[:subnet_id] }
             err_msg << "; set the target to use one of the available subnets: #{avail_subnets.join(', ')}"
           end
-          raise ErrorUsage.new(err_msg)
+          fail ErrorUsage.new(err_msg)
         end
         subnet_obj.subnet_id
       end
@@ -113,7 +113,7 @@ module DTK
       def check_for_security_group(name, _description = nil)
         unless sc = @conn.security_groups.get(name)
           # sc = @conn.security_groups.create(:name => name, :description => description)
-          raise ErrorUsage.new("Not able to find IAAS security group with name '#{name}' aborting action, please create necessery security group")
+          fail ErrorUsage.new("Not able to find IAAS security group with name '#{name}' aborting action, please create necessery security group")
         end
         sc
       end
@@ -163,12 +163,10 @@ module DTK
       end
 
       def wrap_servers_get(id)
-        begin
-          lock_ec2_call { @conn.servers.get(id) }
-        rescue Fog::Compute::AWS::Error => e
-          Log.info("fog error: #{e.message}")
-          nil
-        end
+        lock_ec2_call { @conn.servers.get(id) }
+      rescue Fog::Compute::AWS::Error => e
+        Log.info("fog error: #{e.message}")
+        nil
       end
     end
   end

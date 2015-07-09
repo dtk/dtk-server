@@ -20,7 +20,7 @@ module DTK; class StateChange
       last_level = pending_changes_one_level_raw(target_mh, [target_idh], opts)
       ret = []
       state_change_mh = target_mh.create_childMH(:state_change)
-      while not last_level.empty?
+      until last_level.empty?
         ret += last_level
         last_level = pending_changes_one_level_raw(state_change_mh, last_level.map(&:id_handle), opts)
       end

@@ -76,7 +76,7 @@ module DTK
 
     def get_children_model_names(opts = {})
       ret = db_rel[:one_to_many] || []
-      ret = ret - (db_rel[:one_to_many_clone_omit] || []) if opts[:clone_context]
+      ret -= (db_rel[:one_to_many_clone_omit] || []) if opts[:clone_context]
       ret
     end
 
@@ -85,7 +85,7 @@ module DTK
     end
 
     def raise_has_illegal_form(x)
-      raise Error.new("#{x.inspect} has incorrect form to be an id handle")
+      fail Error.new("#{x.inspect} has incorrect form to be an id handle")
     end
   end; end
 
@@ -284,7 +284,7 @@ module DTK
 
     def create_object_from_hash(hash, opts = {})
       unless hash[:id]
-        raise Error.new('hash must contain:id key')
+        fail Error.new('hash must contain:id key')
       end
       idh = createIDH(id: hash[:id])
       model_name =
@@ -410,7 +410,7 @@ module DTK
     c = id_handle[:c]
     return get_row_from_uri(id_handle[:uri], c, opts) if id_handle[:uri]
     return get_row_from_guid(id_handle[:guid], opts) if id_handle[:guid]
-    raise Error.new('no uri or guid given') if opts[:raise_error]
+    fail Error.new('no uri or guid given') if opts[:raise_error]
           nil
         end
 
@@ -422,7 +422,7 @@ module DTK
             end
             error_msg = "URI #{uri} is not in id table"
             if opts[:raise_error]
-              raise Error.new(error_msg)
+              fail Error.new(error_msg)
             elsif opts[:log_error]
               Log.error(error_msg)
             end
@@ -447,7 +447,7 @@ module DTK
           # NOTE: contingent on id scheme where guid uniquely picks out row
           ds = ds().where(ID_INFO_TABLE[:id] => db_id_from_guid(guid))
      if ds.empty?
-            raise Error::NotFound.new(:guid, guid) if opts[:raise_error]
+            fail Error::NotFound.new(:guid, guid) if opts[:raise_error]
             return nil
           end
     return nil if ds.empty?
@@ -473,9 +473,9 @@ module DTK
 
           uri = SQL::ColRef.concat { |o| [:prt_uri, "/#{model_handle[:model_name]}/", :ref, o.case { [[{ ref_num: nil }, ''], o.concat('-', :ref_num)] }] }
           update_ds.update(uri: uri,
-             relation_type: model_handle[:model_name].to_s,
-             parent_id: :pair_parent_id,
-             parent_relation_type: :prt_relation_type)
+                           relation_type: model_handle[:model_name].to_s,
+                           parent_id: :pair_parent_id,
+                           parent_relation_type: :prt_relation_type)
         end
 
         def update_top_instances(model_handle, returning_cols)
@@ -491,10 +491,10 @@ module DTK
     prt = parent_relation_type.nil? ? TOP_RELATION_TYPE.to_s : parent_relation_type.to_s
     uri_id = ds().where(ID_INFO_TABLE[:id] => id, :relation_name => rel_qn).
                  update(uri: uri, relation_type: relation_type.to_s,
-                  parent_id: parent_id,
-            parent_relation_type: prt,
-            is_factory: false)
-    raise Error.new('error while processing uri table update') if uri_id.nil?
+                        parent_id: parent_id,
+                        parent_relation_type: prt,
+                        is_factory: false)
+    fail Error.new('error while processing uri table update') if uri_id.nil?
     uri_id
         end
 
@@ -503,10 +503,10 @@ module DTK
     ds().insert(
            CONTEXT_ID => c,
            :uri => factory_uri,
-     :relation_type => child_type.to_s,
-     :parent_id => id,
-     :parent_relation_type => relation_type.to_s,
-     :is_factory => true)
+           :relation_type => child_type.to_s,
+           :parent_id => id,
+           :parent_relation_type => relation_type.to_s,
+           :is_factory => true)
     nil
   end
 

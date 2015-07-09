@@ -22,11 +22,11 @@ module DTK
         }
         nodes = Model.get_objs(model_handle(:node_group_relation), sp_hash).map { |r| r[:service_node_group] }
         unless nodes.size == 1
-          raise Error.new("Unexpected that rows.size (#{nodes.size}) does not equal 1")
+          fail Error.new("Unexpected that rows.size (#{nodes.size}) does not equal 1")
         end
         ret = nodes.first
         unless ret.is_node_group?()
-          raise Error.new("Unexpected that node (#{ret.inspect}) connected to node group member (#{get_field?(:display_name)}) is not a node group")
+          fail Error.new("Unexpected that node (#{ret.inspect}) connected to node group member (#{get_field?(:display_name)}) is not a node group")
         end
         @service_node_group = ServiceNodeGroup.create_as(ret)
       end

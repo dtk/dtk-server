@@ -30,7 +30,7 @@ module XYZ
     def self.create(type, attr)
       klass = AttrValTypeMap[type.to_sym]
       if klass then klass.new(type, attr)
-      else raise Error.new("attribute value type (#{type}) not treated")
+      else fail Error.new("attribute value type (#{type}) not treated")
       end
     end
 
@@ -80,7 +80,7 @@ module XYZ
         elsif self[:required] then :required
         else :not_required
        end
-      raise Error.new('Cannot detect type of attribute') unless type
+      fail Error.new('Cannot detect type of attribute') unless type
       AttrValType.create(type, self)
     end
   end

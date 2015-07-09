@@ -86,7 +86,7 @@ module DTK
       def self.list_aux__simple(assembly_rows, opts = {})
         ndx_ret = {}
         if opts[:detail_level] == 'components'
-          raise Error.new('list assembly templates at component level not treated')
+          fail Error.new('list assembly templates at component level not treated')
         end
         include_nodes = ['nodes'].include?(opts[:detail_level])
         pp_opts = Aux.hash_subset(opts, [:no_module_prefix, :version_suffix])

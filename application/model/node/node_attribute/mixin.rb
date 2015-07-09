@@ -34,7 +34,7 @@ module DTK; class Node
           when :required_unset_attributes
             get_attributes_print_form_aux(lambda { |a| a.required_unset_attribute?() })
           else
-            raise Error.new("not treating filter (#{filter}) in Assembly::Instance#get_attributes_print_form")
+            fail Error.new("not treating filter (#{filter}) in Assembly::Instance#get_attributes_print_form")
           end
         else
           get_attributes_print_form_aux()
@@ -87,7 +87,7 @@ module DTK; class Node
              convert: true,
              join_type: :inner,
              filter: [:eq, attr_assign.keys.first, attr_assign.values.first],
-           join_cond: { component_component_id: :component__id },
+             join_cond: { component_component_id: :component__id },
              cols: cols.include?(:component_component_id) ? cols : cols + [:component_component_id]
            }]
         row = Model.get_objects_from_join_array(model_handle.createMH(:component), base_sp_hash, join_array).first
@@ -132,10 +132,10 @@ module DTK; class Node
       def check_and_ret_title_attribute_name?(component_template, component_title)
         title_attr_name = component_template.get_title_attribute_name?()
         if component_title && title_attr_name.nil?
-          raise ErrorUsage.new("Component (#{component_template.component_type_print_form()}) is given a title, but should not have one")
+          fail ErrorUsage.new("Component (#{component_template.component_type_print_form()}) is given a title, but should not have one")
         elsif component_title.nil? && title_attr_name
           cmp_name = component_template.component_type_print_form()
-          raise ErrorUsage.new("Component (#{cmp_name}) needs a title; use form #{cmp_name}[TITLE]")
+          fail ErrorUsage.new("Component (#{cmp_name}) needs a title; use form #{cmp_name}[TITLE]")
         end
         title_attr_name
       end

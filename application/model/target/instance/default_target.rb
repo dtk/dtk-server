@@ -20,7 +20,7 @@ module DTK; class Target
         return ret unless target
 
         if current_default_target && (current_default_target.id == target.id)
-          raise ErrorUsage::Warning.new("Default target is already set to #{current_default_target[:display_name]}")
+          fail ErrorUsage::Warning.new("Default target is already set to #{current_default_target[:display_name]}")
         end
 
         Model.Transaction do

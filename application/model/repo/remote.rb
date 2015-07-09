@@ -21,7 +21,7 @@ module DTK
       end
 
       def repoman_client
-        return client
+        client
       end
 
       def add_client_access(client_rsa_pub_key, client_rsa_key_name)
@@ -112,10 +112,10 @@ module DTK
 
         if remote.version
           # TODO: ModuleBranch::Location:
-          raise Error.new('Not versions not implemented')
+          fail Error.new('Not versions not implemented')
           versions = branch_names_to_versions_stripped(ret[:branches])
           unless versions && versions.include?(remote.version)
-            raise ErrorUsage.new("Remote module (#{remote.pp_module_name()}}) does not have version (#{remote.version || 'CURRENT'})")
+            fail ErrorUsage.new("Remote module (#{remote.pp_module_name()}}) does not have version (#{remote.version || 'CURRENT'})")
           end
         end
         ret
@@ -135,7 +135,7 @@ module DTK
 
       def remote
         unless @remote
-          raise Error.new('Should not be called if @remote is nill')
+          fail Error.new('Should not be called if @remote is nill')
         end
         @remote
       end
@@ -222,7 +222,7 @@ module DTK
       # example:
       # returns namespace, name, version (optional)
       def self.split_qualified_name(qualified_name, opts = {})
-        raise ErrorUsage.new('Please provide module name to publish') if qualified_name.nil? || qualified_name.empty?
+        fail ErrorUsage.new('Please provide module name to publish') if qualified_name.nil? || qualified_name.empty?
         namespace = opts[:namespace] || default_namespace()
 
         split = qualified_name.split('/')
@@ -231,7 +231,7 @@ module DTK
          when 2, 3 then split
          else
           qualified_name = 'NOT PROVIDED' if qualified_name.nil? || qualified_name.empty?
-          raise ErrorUsage.new("Module remote name (#{qualified_name}) ill-formed. Must be of form 'name', 'namespace/name' or 'name/namespace/version'")
+          fail ErrorUsage.new("Module remote name (#{qualified_name}) ill-formed. Must be of form 'name', 'namespace/name' or 'name/namespace/version'")
         end
       end
 

@@ -59,7 +59,7 @@ module DTK; class ModuleDSL; class V3
 
       def set_single_possible_link!(ndx, hash_value)
         unless @possible_link.empty?
-          raise Error.new('Unexpected that @possible_link is not empty when adding an element')
+          fail Error.new('Unexpected that @possible_link is not empty when adding an element')
         end
         @possible_link.merge!(ndx => hash_value)
       end
@@ -75,7 +75,7 @@ module DTK; class ModuleDSL; class V3
       def ret_single_possible_link(sizes = nil)
         sizes = Array(sizes || [0, 1])
         unless sizes.include?(@possible_link.size)
-          raise Error.new("Unexpected that @possible_link does not have size in (#{sizes.join(',')})")
+          fail Error.new("Unexpected that @possible_link does not have size in (#{sizes.join(',')})")
         end
         @possible_link
       end
@@ -113,7 +113,7 @@ module DTK; class ModuleDSL; class V3
             # this relies on assumption that if in dsl there is no location given for dep, it is set to location local
             if remote_dep_choice = dep_choices.find(&:remote_location?)
               error_msg = "The following dependency on component '?base_cmp' has a remote location, but there is no matching link def: ?dep"
-              raise ParsingError::Dependency.create(error_msg, remote_dep_choice)
+              fail ParsingError::Dependency.create(error_msg, remote_dep_choice)
             else
               dep_choices.each(&:set_to_local_location_as_default)
             end
@@ -139,7 +139,7 @@ module DTK; class ModuleDSL; class V3
                 base_cmp_name = ldl_choice.base_cmp_print_form()
                 dep_cmp_name = ldl_choice.dep_cmp_print_form()
                 error_msg = "The link def segment on ?1: ?2\nreferences a dependency name (?3) that does not exist.\n"
-                raise ParsingError.new(error_msg, base_cmp_name, { dep_cmp_name => ldl_choice.print_form }, dep_name)
+                fail ParsingError.new(error_msg, base_cmp_name, { dep_cmp_name => ldl_choice.print_form }, dep_name)
               end
               ldl_choice.required = false
               ndx = dep_name

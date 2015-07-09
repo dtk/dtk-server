@@ -27,7 +27,7 @@ module DTK; class Task
       ret = ''
       task_mh = assembly.model_handle(:task)
       unless task = Task.get_top_level_most_recent_task(task_mh, [:eq, :assembly_id, assembly.id()])
-        raise ErrorUsage.new("No tasks found for '#{assembly.display_name_print_form()}'")
+        fail ErrorUsage.new("No tasks found for '#{assembly.display_name_print_form()}'")
       end
       # TODO: more efficienct would be to be able to do withone call and filter on action_label in get_all_subtasks_with_logs()
       subtasks = task.get_all_subtasks_with_logs()
@@ -39,7 +39,7 @@ module DTK; class Task
 
       log_entries = Model.get_objs(task_log_mh, sp_hash)
       if log_entries.empty?
-        raise ErrorUsage.new("Task action with identifier '#{action_label}' does not exist for this service instance.")
+        fail ErrorUsage.new("Task action with identifier '#{action_label}' does not exist for this service instance.")
       end
       ordered_log_entries = log_entries.sort { |a, b| (a[:position] || 0) <=> (b[:position] || 0) }
       ordered_log_entries.each do |l|

@@ -63,11 +63,11 @@ module DTK; class Node
 
       def self.raise_error_if_invalid_os(os)
         if os.nil?
-          raise ErrorUsage.new('Operating system must be given')
+          fail ErrorUsage.new('Operating system must be given')
         end
         os = os.to_sym
         unless LegalOSs.include?(os)
-          raise ErrorUsage.new("OS parameter (#{os}) is invalid; legal values are: #{LegalOSs.join(',')}")
+          fail ErrorUsage.new("OS parameter (#{os}) is invalid; legal values are: #{LegalOSs.join(',')}")
         end
         os
       end
@@ -77,7 +77,7 @@ module DTK; class Node
       def self.raise_error_if_invalid_size_array(size_array)
         size_array ||= ['t1.micro'] #TODO: stub
         if size_array.nil?
-          raise ErrorUsage.new('One or more image sizes must be given')
+          fail ErrorUsage.new('One or more image sizes must be given')
         end
         # size_array.each{|image_size|CommandAndControl.raise_error_if_invalid_image_size(image_size,target)}
         size_array

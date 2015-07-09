@@ -14,11 +14,11 @@ module DTK
         end
 
         unless domain = ::R8::Config[:dns][:r8][:domain]
-          raise Error.new('Server config variable (dns.r8.domain) has not been set')
+          fail Error.new('Server config variable (dns.r8.domain) has not been set')
         end
 
         unless tenant = ::R8::Config[:dns][:r8][:tenant_name]
-          raise Error.new('Server config variable (dns.r8.tenant_name) has not been set')
+          fail Error.new('Server config variable (dns.r8.tenant_name) has not been set')
         end
 
         dns_info = {

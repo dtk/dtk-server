@@ -51,7 +51,7 @@ module DTK
             description = port[:description]
           end
         else
-          raise Error.new("Unexpected object type (#{object.class})")
+          fail Error.new("Unexpected object type (#{object.class})")
         end
 
         ret = {

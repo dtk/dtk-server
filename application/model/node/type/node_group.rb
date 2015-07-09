@@ -15,7 +15,7 @@ module DTK; class Node
         case type.to_sym
         when :node_group_stub, :node_group_staged then :service_node_group
         when :node_group_instance then :node_group
-        else raise Error.new("Unexpected node group type (#{type})")
+        else fail Error.new("Unexpected node group type (#{type})")
         end
       end
 

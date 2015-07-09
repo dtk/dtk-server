@@ -17,7 +17,7 @@
          convert: true,
          join_type: :inner,
          join_cond: { id: :task_id },
-        cols: [:id, :display_name]
+         cols: [:id, :display_name]
        }]
     }
   }

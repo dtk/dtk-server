@@ -57,7 +57,7 @@ module DTK; class LinkDef::Link
         if num_ngs == 0
           return nil
         elsif num_ngs == 2
-          raise ErrorUsage.new('Not treating links between components that are both on node groups')
+          fail ErrorUsage.new('Not treating links between components that are both on node groups')
         end
         # determine if this manifests as single of multiple links; if single link just pass nil
         # when this is called there is one node group and one node
@@ -65,10 +65,10 @@ module DTK; class LinkDef::Link
 
         # if reach here @output_attr_obj.on_node_group?
         if @output_attr_obj.is_array?() && @output_path.nil?
-          raise ErrorUsage.new("Not treating attribute mappings from an array attribute on a node group (#{@output_attr_obj.pp_form()})")
+          fail ErrorUsage.new("Not treating attribute mappings from an array attribute on a node group (#{@output_attr_obj.pp_form()})")
         end
         if @output_attr_obj.is_node_attribute?() && !@input_attr_obj.is_array?()
-          raise ErrorUsage.new("Node attributes on node groups (#{@output_attr_obj.pp_form()}) must connect to an array attribute, not '#{@input_attr_obj.pp_form()}'")
+          fail ErrorUsage.new("Node attributes on node groups (#{@output_attr_obj.pp_form()}) must connect to an array attribute, not '#{@input_attr_obj.pp_form()}'")
         end
         true
       end

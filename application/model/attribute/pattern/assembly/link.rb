@@ -30,16 +30,16 @@ module DTK; class Attribute::Pattern
         assembly_idh = assembly.id_handle()
         target_attr_pattern = Target.create_attr_pattern(assembly, target_attr_term)
         if target_attr_pattern.attribute_idhs.empty?
-          raise ErrorUsage.new("No matching attribute to target term (#{target_attr_term})")
+          fail ErrorUsage.new("No matching attribute to target term (#{target_attr_term})")
         end
         source_is_antecdent = !target_attr_pattern.is_antecedent?()
         source_attr_pattern = Source.create_attr_pattern(assembly, source_attr_term, source_is_antecdent)
         unless source_component_instance = source_attr_pattern.component_instance
-          raise DSLNotSupported::LinkToNonComponent.new()
+          fail DSLNotSupported::LinkToNonComponent.new()
         end
         source_component_instance = source_attr_pattern.component_instance
         if source_component_instance[:component_type] == target_attr_pattern.component_instance[:component_type]
-          raise DSLNotSupported::LinkBetweenSameComponentTypes.new(source_component_instance)
+          fail DSLNotSupported::LinkBetweenSameComponentTypes.new(source_component_instance)
         end
 
         # TODO: need to do more checking and processing to include:
@@ -65,7 +65,7 @@ module DTK; class Attribute::Pattern
 
       def self.determine_dep_and_antec_components(target_attr_pattern, source_attr_pattern)
         unless target_cmp = target_attr_pattern.component_instance()
-          raise Error.new('Unexpected that target_attr_pattern.component() is nil')
+          fail Error.new('Unexpected that target_attr_pattern.component() is nil')
         end
         source_cmp = source_attr_pattern.component_instance()
 

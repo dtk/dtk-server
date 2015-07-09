@@ -87,7 +87,7 @@ module DTK; class  Assembly
           empty_assem_nodes = true
           :instance_nodes_and_cmps_summary
         else
-          raise Error.new("not implemented list_virtual_column at detail level (#{detail_level})")
+          fail Error.new("not implemented list_virtual_column at detail level (#{detail_level})")
         end
       [col, empty_assem_nodes]
     end
@@ -101,7 +101,7 @@ module DTK; class  Assembly
 
       # check if node has been added already
       if get_node?(check)
-        raise ErrorUsage.new("Node (#{node_name}) already belongs to #{pp_object_type} (#{get_field?(:display_name)})")
+        fail ErrorUsage.new("Node (#{node_name}) already belongs to #{pp_object_type} (#{get_field?(:display_name)})")
       end
 
       target = get_target()
@@ -120,7 +120,7 @@ module DTK; class  Assembly
     def add_node_group(node_group_name, node_binding_rs, cardinality)
       # check if node has been added already
       if get_node?([:eq, :display_name, node_group_name])
-        raise ErrorUsage.new("Node (#{node_group_name}) already belongs to #{pp_object_type} (#{get_field?(:display_name)})")
+        fail ErrorUsage.new("Node (#{node_group_name}) already belongs to #{pp_object_type} (#{get_field?(:display_name)})")
       end
 
       target = get_target()
@@ -166,9 +166,9 @@ module DTK; class  Assembly
 
         unless node = Model.get_obj(model_handle(:node), sp_hash)
           if node_group = is_node_group_member?(node_idh)
-            raise ErrorUsage.new("Not implemented: adding a component to a node group member; a component can only be added to the node group (#{node_group[:display_name]}) itself")
+            fail ErrorUsage.new("Not implemented: adding a component to a node group member; a component can only be added to the node group (#{node_group[:display_name]}) itself")
           else
-            raise ErrorIdInvalid.new(node_idh.get_id(), :node)
+            fail ErrorIdInvalid.new(node_idh.get_id(), :node)
           end
         end
       else
@@ -249,7 +249,7 @@ module DTK; class  Assembly
       project = service_module.get_project()
       node_idhs = get_nodes().map(&:id_handle)
       if node_idhs.empty?
-        raise ErrorUsage.new("Cannot find any nodes associated with assembly (#{get_field?(:display_name)})")
+        fail ErrorUsage.new("Cannot find any nodes associated with assembly (#{get_field?(:display_name)})")
       end
       Assembly::Template.create_or_update_from_instance(project, node_idhs, template_name, service_module_name)
     end
@@ -292,20 +292,20 @@ module DTK; class  Assembly
       augmented_sp_hash =
         if parts.size == 1
           { cols: [:id],
-           filter: [:and,
+            filter: [:and,
                     [:eq, :display_name, parts[0]],
                     [:eq, :type, 'composite'],
                     [:neq, :datacenter_datacenter_id, nil]]
           }
         elsif parts.size == 2
           { cols: [:id, :component_type, :target],
-           filter: [:and,
+            filter: [:and,
                     [:eq, :display_name, parts[1]],
                     [:eq, :type, 'composite']],
-           post_filter: lambda { |r| r[:target][:display_name] == parts[0] }
+            post_filter: lambda { |r| r[:target][:display_name] == parts[0] }
           }
         else
-          raise ErrorNameInvalid.new(name, pp_object_type())
+          fail ErrorNameInvalid.new(name, pp_object_type())
         end
       name_to_id_helper(model_handle, name, augmented_sp_hash)
     end

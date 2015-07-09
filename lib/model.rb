@@ -171,7 +171,7 @@ module DTK
         if ret = models_to_add(model_name)
           @model_classes[model_name] = ret
         else
-          raise Error.new("Need to put model name (#{model_name}) in IndirectlyInheritedModels")
+          fail Error.new("Need to put model name (#{model_name}) in IndirectlyInheritedModels")
         end
       end
       ret
@@ -368,7 +368,7 @@ module DTK
     def update_hash_key(field, hash_key, hash_key_val)
       self[field] ||= {}
       self[field].merge!(hash_key => hash_key_val)
-      raise Error.new('Cannot execute update without the object having an id') unless id()
+      fail Error.new('Cannot execute update without the object having an id') unless id()
       self.class.update_from_rows(model_handle, [{ :id => id(), field => { hash_key => hash_key_val } }], partial_value: true)
     end
     # TODO: check calss to update with opts having :partial_value=>true to see whether shoudl use variant of update_hash_key instead
@@ -376,7 +376,7 @@ module DTK
     def update(scalar_assignments, opts = {})
       scalar_assignments = {} if model_handle[:model_name] == :node && scalar_assignments.key?(:hidden) && scalar_assignments.key?(:value_asserted)
       scalar_assignments.each { |k, v| self[k] = v }
-      raise Error.new('Cannot execute update without the object having an id') unless id()
+      fail Error.new('Cannot execute update without the object having an id') unless id()
       self.class.update_from_rows(model_handle, [scalar_assignments.merge(id: id())], opts)
     end
 
@@ -566,7 +566,7 @@ module DTK
       PerformanceService.log("TABLE=#{search_object[:search_pattern][:relation]}")
       PerformanceService.log('SQL=' + dataset.sequel_ds.sql.gsub(/"/, ''))
 
-      return ret_val
+      ret_val
     end
 
     def self.get_objects_from_join_array(model_handle, base_sp_hash, join_array, opts = {})

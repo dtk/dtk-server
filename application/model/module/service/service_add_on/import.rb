@@ -99,12 +99,12 @@ module DTK
       # returns [assembly,assembly_ref]
       def ret_assembly_info(field)
         unless name = hash_content[field.to_s]
-          raise ErrorUsage("Field (#{field}) not given in the service add-on file #{dsl_file}")
+          fail ErrorUsage("Field (#{field}) not given in the service add-on file #{dsl_file}")
         end
         unless assembly = @assemblies.find { |a| a[:display_name] == name }
           Log.error("Field (#{field}) has value (#{name}) which is not a valid assembly reference")
         end
-        raise Error.new('if use need to pass in service_module and call service_module.assembly_ref(name)')
+        fail Error.new('if use need to pass in service_module and call service_module.assembly_ref(name)')
         #        [assembly,ServiceModule.assembly_ref(module_name,name)]
       end
     end

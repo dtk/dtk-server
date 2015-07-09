@@ -13,7 +13,7 @@ module DTK
         }
         rows = get_objs(model_handle, sp_hash)
         unless port = rows.first
-          raise ErrorIdInvalid.new(id, pp_object_type())
+          fail ErrorIdInvalid.new(id, pp_object_type())
         end
         unless port[:node][:assembly_id] == opts[:assembly_idh].get_id()
           Raise ErrorUsage.new("Port with id (#{id}) does not belong to assembly")
@@ -27,13 +27,13 @@ module DTK
     # name should be of form <node>/<component>, like server/rsyslog::server
     def self.name_to_id(model_handle, name, opts = {})
       unless opts[:assembly_idh] && opts[:connection_type]
-        raise Error.new("Unexpected options given in Port.name_to_id (#{opts.inspect}")
+        fail Error.new("Unexpected options given in Port.name_to_id (#{opts.inspect}")
       end
       assembly_id = opts[:assembly_idh].get_id()
       conn_type = opts[:connection_type]
       node_display_name, poss_port_display_names = Port.parse_to_ret_display_name(name, conn_type, opts)
       unless node_display_name
-        raise ErrorUsage.new("Port name (#{name}) is ill-formed")
+        fail ErrorUsage.new("Port name (#{name}) is ill-formed")
       end
       augmented_sp_hash = {
         cols: [:id, :node],
@@ -104,7 +104,7 @@ module DTK
     # TODO: this should be deprecated;
     def ref_num
       #      self[:display_name].split(RefDelim)[3].to_i
-      raise Error.new('using deprecated method port#ref_num')
+      fail Error.new('using deprecated method port#ref_num')
     end
 
     def parse_port_display_name
@@ -148,7 +148,7 @@ module DTK
       elsif port_display_name =~ ParseRegex[:without_title]
         ret.merge!(port_type: Regexp.last_match(1), component_type: Regexp.last_match(2), link_def_ref: Regexp.last_match(3))
       else
-        raise Error.new("unexpected display name (#{port_display_name})")
+        fail Error.new("unexpected display name (#{port_display_name})")
       end
 
       component_type = ret[:component_type]
@@ -202,7 +202,7 @@ module DTK
           end
         end
         unless cmp_match
-          raise Error.new("Cannot find matching component for cloned port with id (#{port[:id]})")
+          fail Error.new("Cannot find matching component for cloned port with id (#{port[:id]})")
         end
         cmp_id = cmp_match[:id]
         el = { id: port[:id], component_id: cmp_id }

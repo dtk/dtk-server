@@ -114,7 +114,7 @@ module DTK
           when :attribute then 'setting'
           when :component then 'install_component'
           when :node then 'create_node'
-          else raise Error::NotImplemented.new("when object type is #{object_model_name}")
+          else fail Error::NotImplemented.new("when object type is #{object_model_name}")
         end
       end
 

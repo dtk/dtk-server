@@ -2,7 +2,7 @@ module Ramaze::Helper
   module Rest
     def rest_response
       unless @ctrl_results.is_a?(BundleAndReturnHelper::ControllerResultsRest)
-        raise Error.new("controller results are in wrong form; it should have 'rest' form")
+        fail Error.new("controller results are in wrong form; it should have 'rest' form")
       end
 
       JSON.generate(@ctrl_results)
@@ -16,7 +16,7 @@ module Ramaze::Helper
         data =
           case encode_format
             when :yaml then encode_into_yaml(data)
-            else raise Error.new("Unexpected encode format (#{encode_format})")
+            else fail Error.new("Unexpected encode format (#{encode_format})")
           end
       end
 
@@ -47,7 +47,7 @@ module Ramaze::Helper
 
     def rest_validate_response(message, actions_needed)
       RestResponse.new(status: :notok,
-        validation:           {
+                       validation:           {
             message: message,
             actions_needed: actions_needed
           })

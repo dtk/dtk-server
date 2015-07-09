@@ -30,10 +30,10 @@ module DTK; class LinkDef
       # TODO: need to check if has contraint
       ret = nil
       return ret if possible_links.empty?
-      raise Error.new('only select_first stratagy currently implemented') unless strategy[:select_first]
+      fail Error.new('only select_first stratagy currently implemented') unless strategy[:select_first]
       ret = possible_links.first
       if ret[:type] == 'internal_external'
-        raise Error.new('only strategy internal_external_becomes_internal implemented') unless stratagy[:internal_external_becomes_internal]
+        fail Error.new('only strategy internal_external_becomes_internal implemented') unless stratagy[:internal_external_becomes_internal]
       end
       link_base_cmp.update_object!(:component_type)
       ret.merge(local_component_type: link_base_cmp[:component_type])

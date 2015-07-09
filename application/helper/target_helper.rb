@@ -9,7 +9,7 @@ module Ramaze::Helper
       # check iaas type is valid
       supported_types = ::R8::Config[:ec2][:iaas_type][:supported]
       unless supported_types.include?(iaas_type.to_s.downcase)
-        raise ::DTK::ErrorUsage.new("Invalid iaas type '#{iaas_type}', supported types (#{supported_types.join(', ')})")
+        fail ::DTK::ErrorUsage.new("Invalid iaas type '#{iaas_type}', supported types (#{supported_types.join(', ')})")
       end
       iaas_type
     end

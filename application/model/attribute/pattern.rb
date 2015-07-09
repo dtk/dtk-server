@@ -21,7 +21,7 @@ module DTK; class Attribute
     AttrRegexp = Regexp.new("node[^\/]*\/component#{Delim}\/(attribute.+$)")
 
     def self.raise_unexpected_pattern(pattern)
-      raise Error.new("Unexpected that pattern (#{pattern}) did not match")
+      fail Error.new("Unexpected that pattern (#{pattern}) did not match")
     end
     private_class_method :raise_unexpected_pattern
 
@@ -43,7 +43,7 @@ module DTK; class Attribute
         if semantic_data_type = attr_properties[:semantic_data_type]
           if value
             unless SemanticDatatype.is_valid?(semantic_data_type, value)
-              raise ErrorUsage.new("The value (#{value.inspect}) is not of type (#{semantic_data_type})")
+              fail ErrorUsage.new("The value (#{value.inspect}) is not of type (#{semantic_data_type})")
             end
           end
         end
@@ -67,14 +67,14 @@ module DTK; class Attribute
         unless opts[:create]
           attr_idhs.each do |attr_idh|
             unless pattern.valid_value?(value, attr_idh)
-              raise ErrorUsage.new("The value (#{value.inspect}) is not of type (#{pattern.semantic_data_type(attr_idh)})")
+              fail ErrorUsage.new("The value (#{value.inspect}) is not of type (#{pattern.semantic_data_type(attr_idh)})")
             end
           end
         end
 
         all_attr_idhs = attr_idhs
         unless ngm_attr_idhs.empty?
-          raise ErrorUsage.new('Not supported creating attributes on a node group') if opts[:create]
+          fail ErrorUsage.new('Not supported creating attributes on a node group') if opts[:create]
           all_attr_idhs += ngm_attr_idhs
         end
         all_attr_idhs.each do |idh|
@@ -89,9 +89,9 @@ module DTK; class Attribute
       # it should have at least one row or there is an error
       if attribute_rows.empty?
         if opts[:create]
-          raise ErrorUsage.new('Unable to create a new attribute')
+          fail ErrorUsage.new('Unable to create a new attribute')
         else
-          raise ErrorUsage.new('The attribute specified does not match an existing attribute in the assembly')
+          fail ErrorUsage.new('The attribute specified does not match an existing attribute in the assembly')
         end
       end
 
@@ -125,7 +125,7 @@ module DTK; class Attribute
       # else return node or component (assembly_wide) attribute
       if opts[:component_attribute]
         match = attributes.find { |attr| attr[:display_name].eql?("assembly_wide/#{pattern}") }
-        raise ErrorUsage.new("Service instance component attribute '#{pattern}' does not exist") unless match
+        fail ErrorUsage.new("Service instance component attribute '#{pattern}' does not exist") unless match
         av_pair[:pattern] = match[:display_name]
       else
         matching_attr = attributes.select { |attr| attr[:display_name].eql?(pattern) || attr[:display_name].eql?("assembly_wide/#{pattern}") }

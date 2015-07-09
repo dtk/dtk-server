@@ -19,7 +19,7 @@ module DTK; class AttributeLink
 
       # TODO: this returns nil if it is not (yet) processed by Function meaning its legacy or illegal
       unless hash_ret ||= legacy_internal_hash_form?()
-        raise Error::NotImplemented.new("propagate value not implemented yet for fn #{function}")
+        fail Error::NotImplemented.new("propagate value not implemented yet for fn #{function}")
       end
 
       hash_ret.is_a?(Output) ? hash_ret : Output.new(hash_ret)
@@ -50,7 +50,7 @@ module DTK; class AttributeLink
     def propagate_when_sap_config__l4
       output_v =
         if output_semantic_type().is_array?
-          raise Error::NotImplemented.new('propagate_when_sap_config__l4 when output has empty list') if output_value.empty?
+          fail Error::NotImplemented.new('propagate_when_sap_config__l4 when output has empty list') if output_value.empty?
           output_value
         else
           [output_value]
@@ -66,7 +66,7 @@ module DTK; class AttributeLink
           value += input_value.map { |iv| iv['host_address'] }.uniq.map { |addr| sap_config.merge('host_address' => addr) }
         end
       else #not input_semantic_type().is_array?
-        raise Error.new('propagate_when_sap_config__l4 does not support input scalar and output array with size > 1') if output_value.size > 1
+        fail Error.new('propagate_when_sap_config__l4 does not support input scalar and output array with size > 1') if output_value.size > 1
         value = output_v.first.merge('host_address' => input_value['host_address'])
       end
       { value_derived: value }
@@ -76,7 +76,7 @@ module DTK; class AttributeLink
     def propagate_when_host_address_ipv4
       output_v =
         if output_semantic_type().is_array?
-          raise Error::NotImplemented.new('propagate_when_host_address_ipv4 when output has empty list') if output_value.empty?
+          fail Error::NotImplemented.new('propagate_when_host_address_ipv4 when output has empty list') if output_value.empty?
           output_value
         else
           [output_value]
@@ -87,7 +87,7 @@ module DTK; class AttributeLink
         # cartesian product with host_address
         value = output_v.map { |host_address| input_value.map { |input_item| input_item.merge('host_address' => host_address) } }.flatten
       else #not input_semantic_type().is_array?
-        raise Error.new('propagate_when_host_address_ipv4 does not support input scalar and output array with size > 1') if output_value.size > 1
+        fail Error.new('propagate_when_host_address_ipv4 does not support input scalar and output array with size > 1') if output_value.size > 1
         value = output_v.first.merge('host_address' => input_value['host_address'])
       end
       { value_derived: value }
@@ -102,14 +102,14 @@ module DTK; class AttributeLink
     end
 
     def propagate_when_select_one
-      raise Error::NotImplemented.new('propagate_when_select_one when input has more than one elements') if output_value() && output_value().size > 1
+      fail Error::NotImplemented.new('propagate_when_select_one when input has more than one elements') if output_value() && output_value().size > 1
       { value_derived: output_value ? output_value().first : nil }
     end
 
     def ret_cartesian_product
       output_v =
         if output_semantic_type().is_array?
-          raise Error::NotImplemented.new('cartesian_product when output has empty list') if output_value.empty?
+          fail Error::NotImplemented.new('cartesian_product when output has empty list') if output_value.empty?
           output_value
         else
           [output_value]
@@ -122,7 +122,7 @@ module DTK; class AttributeLink
           value += input_value.map { |input_item| input_item.merge(sap_config) }
         end
       else #not input_semantic_type().is_array?
-        raise Error.new('cartesian_product does not support input scalar and output array with size > 1') if output_value.size > 1
+        fail Error.new('cartesian_product does not support input scalar and output array with size > 1') if output_value.size > 1
         value =  input_value.merge(output_v.first)
       end
       { value_derived: value }

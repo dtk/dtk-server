@@ -16,7 +16,7 @@ module DTK; class Task
            when :hash
             object
            else
-            raise Error.new('Unexpected CreateNode.initialize type')
+            fail Error.new('Unexpected CreateNode.initialize type')
           end
         super(type, hash, task_idh)
       end

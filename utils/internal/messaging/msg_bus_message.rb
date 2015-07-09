@@ -1,7 +1,7 @@
 module XYZ
   class MessageBusMsg
     def to_s
-       return @body.inspect
+       @body.inspect
     end
     def self.unmarshall_from_wire(raw_msg)
       unmarshalled_hash = Aux::unmarshal_from_wire(raw_msg)
@@ -17,8 +17,8 @@ module XYZ
     # input so processor_msg can be formed
     def parse
       { msg_type: @body[:msg_type],
-       msg_content: @body[:msg_content],
-       target_object_id: @body[:target_object_id] }
+        msg_content: @body[:msg_content],
+        target_object_id: @body[:target_object_id] }
     end
 
     private
@@ -55,12 +55,12 @@ module XYZ
         when :node
           'node'
         else
-         raise Error.new("unexpected type: #{type}")
+         fail Error.new("unexpected type: #{type}")
       end
     end
     def self.key(target_object_id, type)
-      raise Error.new("unexpected type: #{type}") unless [:attribute, :node].include?(type)
-      raise Error.new('missing target_object_id') if target_object_id.nil?
+      fail Error.new("unexpected type: #{type}") unless [:attribute, :node].include?(type)
+      fail Error.new('missing target_object_id') if target_object_id.nil?
       target_object_id.to_s
     end
   end

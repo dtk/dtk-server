@@ -60,7 +60,7 @@ module DTK
         include NestedWFMixin
         def follow_workflow
           pp [:debug_print, debug_summary()]
-          raise Error.new('fn must be written')
+          fail Error.new('fn must be written')
         end
       end
 
@@ -68,7 +68,7 @@ module DTK
         include NestedWFMixin
         def follow_workflow
           pp [:debug_print, debug_summary()]
-          raise Error.new('fn must be written')
+          fail Error.new('fn must be written')
         end
       end
     end

@@ -5,7 +5,7 @@ module DTK; class ModuleDSL; class V3
         ref = @aug_link_def.required(:link_type)
         link_def_links = @aug_link_def.required(:link_def_links)
         if link_def_links.empty?
-          raise Error.new('Unexpected that link_def_links is empty')
+          fail Error.new('Unexpected that link_def_links is empty')
         end
         opts_choice = {}
         if single_choice = (link_def_links.size == 1)

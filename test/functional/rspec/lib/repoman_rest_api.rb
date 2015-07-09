@@ -16,7 +16,7 @@ class RepomanRestApi
   end
 
   def send_request(endpoint, rest_method, args = {}, headers = {})
-    raise 'Incorrect REST method has been specified' unless ['GET', 'POST', 'DELETE'].include? rest_method
+    fail 'Incorrect REST method has been specified' unless ['GET', 'POST', 'DELETE'].include? rest_method
 
     if rest_method == 'GET'
       begin
@@ -48,54 +48,54 @@ class RepomanRestApi
   end
 
   def logout
-    return self.send_request('/v1/auth/logout', 'POST', {}, Authorization: "Token token=\"#{self.authorization_token}\"")
+    self.send_request('/v1/auth/logout', 'POST', {}, Authorization: "Token token=\"#{self.authorization_token}\"")
   end
 
   def get_repos_by_user(user)
-    return self.send_request("/users/#{user}/repos", 'GET', {}, Authorization: "Token token=\"#{self.authorization_token}\"")
+    self.send_request("/users/#{user}/repos", 'GET', {}, Authorization: "Token token=\"#{self.authorization_token}\"")
   end
 
   def check_if_user_exists(username, email)
-    return self.send_request('/users/check_exists', 'POST', { username: username, email: email }, Authorization: "Token token=\"#{self.authorization_token}\"") unless (username == nil || email == nil)
-    return self.send_request('/users/check_exists', 'POST', { username: username }, Authorization: "Token token=\"#{self.authorization_token}\"") if email == nil
-    return self.send_request('/users/check_exists', 'POST', { email: email }, Authorization: "Token token=\"#{self.authorization_token}\"") if username == nil
+    return self.send_request('/users/check_exists', 'POST', { username: username, email: email }, Authorization: "Token token=\"#{self.authorization_token}\"") unless (username.nil? || email.nil?)
+    return self.send_request('/users/check_exists', 'POST', { username: username }, Authorization: "Token token=\"#{self.authorization_token}\"") if email.nil?
+    return self.send_request('/users/check_exists', 'POST', { email: email }, Authorization: "Token token=\"#{self.authorization_token}\"") if username.nil?
   end
 
   def create_user(username, email, first_name, last_name)
-    return self.send_request('/users', 'POST', { username: username, email: email, first_name: first_name, last_name: last_name }, Authorization: "Token token=\"#{self.authorization_token}\"") unless (username == nil || email == nil)
-    return self.send_request('/users', 'POST', { username: username, first_name: first_name, last_name: last_name }, Authorization: "Token token=\"#{self.authorization_token}\"") if email == nil
-    return self.send_request('/users', 'POST', { email: email, first_name: first_name, last_name: last_name }, Authorization: "Token token=\"#{self.authorization_token}\"") if username == nil
+    return self.send_request('/users', 'POST', { username: username, email: email, first_name: first_name, last_name: last_name }, Authorization: "Token token=\"#{self.authorization_token}\"") unless (username.nil? || email.nil?)
+    return self.send_request('/users', 'POST', { username: username, first_name: first_name, last_name: last_name }, Authorization: "Token token=\"#{self.authorization_token}\"") if email.nil?
+    return self.send_request('/users', 'POST', { email: email, first_name: first_name, last_name: last_name }, Authorization: "Token token=\"#{self.authorization_token}\"") if username.nil?
   end
 
   def get_users
-    return self.send_request('/v1/users/list', 'GET', {}, Authorization: "Token token=\"#{self.authorization_token}\"")
+    self.send_request('/v1/users/list', 'GET', {}, Authorization: "Token token=\"#{self.authorization_token}\"")
   end
 
   def delete_user(user_id)
-    return self.send_request("/v1/users/#{user_id}", 'DELETE', {}, Authorization: "Token token=\"#{self.authorization_token}\"")
+    self.send_request("/v1/users/#{user_id}", 'DELETE', {}, Authorization: "Token token=\"#{self.authorization_token}\"")
   end
 
   def get_user_groups
-    return self.send_request('/v1/user_groups/list', 'GET', {}, Authorization: "Token token=\"#{self.authorization_token}\"")
+    self.send_request('/v1/user_groups/list', 'GET', {}, Authorization: "Token token=\"#{self.authorization_token}\"")
   end
 
   def delete_user_group(user_group_id)
-    return self.send_request("/v1/user_groups/#{user_group_id}", 'DELETE', {}, Authorization: "Token token=\"#{self.authorization_token}\"")
+    self.send_request("/v1/user_groups/#{user_group_id}", 'DELETE', {}, Authorization: "Token token=\"#{self.authorization_token}\"")
   end
 
   def get_namespaces
-    return self.send_request('/v1/namespaces/list', 'GET', {}, Authorization: "Token token=\"#{self.authorization_token}\"")
+    self.send_request('/v1/namespaces/list', 'GET', {}, Authorization: "Token token=\"#{self.authorization_token}\"")
   end
 
   def delete_namespace(namespace_id)
-    return self.send_request("/v1/namespaces/#{namespace_id}", 'DELETE', {}, Authorization: "Token token=\"#{self.authorization_token}\"")
+    self.send_request("/v1/namespaces/#{namespace_id}", 'DELETE', {}, Authorization: "Token token=\"#{self.authorization_token}\"")
   end
 
   def get_modules_by_namespace(namespace)
-    return self.send_request("/namespaces/#{namespace}/modules", 'GET', {}, Authorization: "Token token=\"#{self.authorization_token}\"")
+    self.send_request("/namespaces/#{namespace}/modules", 'GET', {}, Authorization: "Token token=\"#{self.authorization_token}\"")
   end
 
   def check_if_namespace_exists(namespace)
-    return self.send_request('/namespaces/check_exists', 'POST', { name: namespace }, Authorization: "Token token=\"#{self.authorization_token}\"")
+    self.send_request('/namespaces/check_exists', 'POST', { name: namespace }, Authorization: "Token token=\"#{self.authorization_token}\"")
   end
 end

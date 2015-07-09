@@ -42,7 +42,7 @@ def get_node_ec2_public_dns(service_name, node_name)
 
   if !node_info.nil?
     node_ec2_public_dns = node_info['external_ref']['ec2_public_address']
-    if !node_ec2_public_dns.nil?
+    unless node_ec2_public_dns.nil?
       puts 'Node ec2 public dns found!'
       puts ''
       return node_ec2_public_dns
@@ -70,9 +70,9 @@ def add_document_to_collection(mongodb_host, mongodb_port, database_name, collec
   id = collection.insert(document)
   puts "Document id: #{id}"
   puts "Collection added: #{collection.find.to_a}"
-  document_added = true if !collection.find('_id' => id).to_a.empty?
+  document_added = true unless collection.find('_id' => id).to_a.empty?
   puts ''
-  return document_added
+  document_added
 end
 
 def get_collection(mongodb_host, mongodb_port, database_name, collection_name)
@@ -88,12 +88,12 @@ def get_collection(mongodb_host, mongodb_port, database_name, collection_name)
   db = client.db(database_name)
   collection = db.collection(collection_name)
 
-  if !collection.find.to_a.empty?
+  unless collection.find.to_a.empty?
     collection_exists = true
     puts "Collection content: #{collection.find.to_a}"
   end
   puts ''
-  return collection_exists
+  collection_exists
 end
 
 describe '(Different Node Templates) Test Case 7: MongoDB - Master/Slave scenario' do

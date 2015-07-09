@@ -22,13 +22,13 @@ module DTK; class ServiceModule
           end
           new(hash)
         else
-          raise ParsingError.new("Ill-formed port ref (#{port_ref})", err_opts)
+          fail ParsingError.new("Ill-formed port ref (#{port_ref})", err_opts)
         end
       end
       def self.parse_component_link(input_node, input_cmp_name, component_link_hash, opts = {})
         err_opts = Opts.new(opts).slice(:file_path)
         unless component_link_hash.size == 1
-          raise ParsingError.new('Ill-formed component link ?1', component_link_hash, err_opts)
+          fail ParsingError.new('Ill-formed component link ?1', component_link_hash, err_opts)
         end
         link_def_ref = component_link_hash.keys.first
 
@@ -41,7 +41,7 @@ module DTK; class ServiceModule
           output = parsed_endpoint(output_node, output_cmp_name, link_def_ref)
           { input: input, output: output }
         else
-          raise ParsingError.new("Ill-formed component link ?file_path ?1\nIt should have form: \n  ?2", component_link_hash, ServiceLinkLegalForm, err_opts)
+          fail ParsingError.new("Ill-formed component link ?file_path ?1\nIt should have form: \n  ?2", component_link_hash, ServiceLinkLegalForm, err_opts)
         end
       end
       PortRefRegex = Regexp.new("(^.+)#{Seperators[:node_component]}(.+)#{Seperators[:component_link_def_ref]}(.+$)")
@@ -100,7 +100,7 @@ module DTK; class ServiceModule
       def raise_or_ret_error(err_class, args, opts = {})
         opts_file_path = Aux::hash_subset(opts, [:file_path])
         err = err_class.new(*args, opts_file_path)
-        opts[:do_not_throw_error] ? err : raise(err)
+        opts[:do_not_throw_error] ? err : fail(err)
       end
 
       class AddOn < self

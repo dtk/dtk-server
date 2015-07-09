@@ -57,7 +57,7 @@ module DTK; class Node
       def get_node_attribute_values(id_handle, opts = {})
   c = id_handle[:c]
         node_obj = get_object(id_handle, opts)
-        raise Error.new("node associated with (#{id_handle}) not found") if node_obj.nil?
+        fail Error.new("node associated with (#{id_handle}) not found") if node_obj.nil?
   ret = node_obj.get_direct_attribute_values(:value) || {}
 
   cmps = node_obj.get_objects_associated_components()

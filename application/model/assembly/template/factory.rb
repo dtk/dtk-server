@@ -8,15 +8,15 @@ module DTK
 
       def self.get_or_create_service_module(project, service_module_name, opts = {})
         unless namespace = opts[:namespace]
-          raise Error.new('Need to update code so that namespace passed in')
+          fail Error.new('Need to update code so that namespace passed in')
         end
         if service_module = get_service_module?(project, service_module_name, namespace)
           service_module
         else
-          raise ErrorUsage.new("Unable to create assembly because service module (#{namespace}:#{service_module_name}) clone exists on local machine but missing from server. You should import service module or delete local clone and try again.") if opts[:local_clone_dir_exists]
+          fail ErrorUsage.new("Unable to create assembly because service module (#{namespace}:#{service_module_name}) clone exists on local machine but missing from server. You should import service module or delete local clone and try again.") if opts[:local_clone_dir_exists]
 
           if opts[:mode] == :update
-            raise ErrorUsage.new("Service module (#{service_module_name}) does not exist")
+            fail ErrorUsage.new("Service module (#{service_module_name}) does not exist")
           end
 
           local_params = ModuleBranch::Location::LocalParams::Server.new(
@@ -81,7 +81,7 @@ module DTK
             err_msg << " Component module (#{el[:module_name]}) in instance has namespace (#{el[:instance_ns]}), but namespace (#{el[:template_ns]}) in service module\n"
           end
           err_msg << "Alternatives are to push to another service module or change the service module's #{ModuleRefs.meta_filename_path()} file"
-          raise ErrorUsage.new(err_msg)
+          fail ErrorUsage.new(err_msg)
         end
       end
 
@@ -99,12 +99,12 @@ module DTK
         assembly_mh = project_idh.create_childMH(:component)
         if ret = exists?(assembly_mh, service_module, assembly_name)
           if opts[:mode] == :create
-            raise ErrorUsage.new("Assembly (#{assembly_name}) already exists in service module (#{service_module_name})")
+            fail ErrorUsage.new("Assembly (#{assembly_name}) already exists in service module (#{service_module_name})")
           end
           ret.set_object_attributes!(project_idh, assembly_instance, service_module, service_module_branch)
         else
           if opts[:mode] == :update
-            raise ErrorUsage.new("Assembly (#{assembly_name}) does not exist in service module (#{service_module_name})")
+            fail ErrorUsage.new("Assembly (#{assembly_name}) does not exist in service module (#{service_module_name})")
           end
           assembly_mh = project_idh.create_childMH(:component)
           hash_values = {
@@ -136,7 +136,7 @@ module DTK
       def add_content_for_clone!
         node_idhs = assembly_instance.get_nodes().map(&:id_handle)
         if node_idhs.empty?
-          raise ErrorUsage.new("Cannot find any nodes associated with assembly (#{assembly_instance.get_field?(:display_name)})")
+          fail ErrorUsage.new("Cannot find any nodes associated with assembly (#{assembly_instance.get_field?(:display_name)})")
         end
 
         # 1) get a content object, 2) modify, and 3) persist
@@ -182,7 +182,7 @@ module DTK
 
         node_cmp_attr_rows = Model.get_objs(node_mh, sp_hash, keep_ref_cols: true)
         if node_cmp_attr_rows.empty?
-          raise ErrorUsage.new('No components in the nodes being grouped to be an assembly template')
+          fail ErrorUsage.new('No components in the nodes being grouped to be an assembly template')
         end
         cmp_scalar_cols = node_cmp_attr_rows.first[:component].keys - [:non_default_attr_candidate]
         @ndx_nodes = {}

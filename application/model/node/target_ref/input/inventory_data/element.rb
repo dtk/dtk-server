@@ -13,13 +13,13 @@ module DTK; class Node; class TargetRef
           replace(hash)
           @type = :physical
         else
-          raise Error.new("Unexpected ref for inventory data ref: #{ref}")
+          fail Error.new("Unexpected ref for inventory data ref: #{ref}")
         end
       end
 
       def target_ref_hash
         unless name = self['name'] || self['display_name']
-          raise Error.new("Unexpected that that element (#{inspect}) has no name field")
+          fail Error.new("Unexpected that that element (#{inspect}) has no name field")
         end
         ret_hash = merge('display_name' => ret_display_name(name))
 
@@ -29,7 +29,7 @@ module DTK; class Node; class TargetRef
         host_address = nil
         if @type == :physical
           unless host_address = external_ref['routable_host_address']
-            raise Error.new("Missing field input_node_hash['external_ref']['routable_host_address']")
+            fail Error.new("Missing field input_node_hash['external_ref']['routable_host_address']")
           end
         end
         params = { 'host_address' => host_address }

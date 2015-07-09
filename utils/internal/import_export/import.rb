@@ -52,7 +52,7 @@ module DTK
 
     # assumption is that container_id_handle is in uri form
     def import_objects_from_file(container_id_handle, json_file, opts = {})
-      raise Error.new("file given #{json_file} does not exist") unless File.exists?(json_file)
+      fail Error.new("file given #{json_file} does not exist") unless File.exists?(json_file)
       hash_content = Aux::hash_from_file_with_json(json_file)
       import_objects_from_hash(container_id_handle, hash_content, opts)
     end
@@ -123,7 +123,7 @@ module DTK
         r8meta[:files].each do |file|
           component_hash = YAML.load_file(file)
           repo, config_agent_type = (file =~ Regexp.new("([^/]+)/r8meta\.(.+)\.yml") && [Regexp.last_match(1), Regexp.last_match(2)])
-          raise Error.new('bad config agent type') unless config_agent_type
+          fail Error.new('bad config agent type') unless config_agent_type
           component_hash.each do |local_cmp_type, v|
             cmp_ref = "#{config_agent_type}-#{local_cmp_type}"
             # TODO: right now; links defs just have internal
@@ -158,7 +158,7 @@ module DTK
           end
         end
       else
-        raise Error.new("Format type #{format_type} not supported")
+        fail Error.new("Format type #{format_type} not supported")
       end
     end
 

@@ -69,7 +69,7 @@ module DTK; class AssemblyModule
     def self.modification_type_class(modification_type)
       case modification_type
         when :workflow then Workflow
-        else raise ErrorUsage.new("Modification type (#{modification_type}) is not supported")
+        else fail ErrorUsage.new("Modification type (#{modification_type}) is not supported")
       end
     end
 
@@ -77,7 +77,7 @@ module DTK; class AssemblyModule
       unless ret = assembly.get_service_module()
         assembly_name = assembly.display_name_print_form()
         return false if opts[:do_not_raise]
-        raise ErrorUsage.new("Assembly (#{assembly_name}) is not tied to a service")
+        fail ErrorUsage.new("Assembly (#{assembly_name}) is not tied to a service")
       end
       ret
     end

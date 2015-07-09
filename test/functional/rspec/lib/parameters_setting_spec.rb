@@ -55,7 +55,7 @@ shared_context 'Add component to service node' do |dtk_common, node_name, compon
     end
     # Check if component_added_array contains any element with false value.
     # That would indicate that particular component was not added successfully to the service node.
-    pass = true if !component_added_array.include? false
+    pass = true unless component_added_array.include? false
     pass.should eq(true)
   end
 end

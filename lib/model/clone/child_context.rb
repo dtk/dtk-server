@@ -43,7 +43,7 @@ module DTK; class Clone
           if old_par_id = row[old_parent_rel_col]
             { parent_id_col => row[:id], :old_par_id => old_par_id }
           else
-            raise Error.new("Column (#{old_parent_rel_col}) not found in objs_info")
+            fail Error.new("Column (#{old_parent_rel_col}) not found in objs_info")
           end
         end
         child_context_hash = {
@@ -71,7 +71,7 @@ module DTK; class Clone
     # parent_links has type InstanceTemplate::Links
     def self.create_from_parent_links(template_child_idhs, parent_links)
       if template_child_idhs.empty? || parent_links.empty?
-        raise Error.new('Should not be called with template_child_idhs.empty? or parent_links.empty?')
+        fail Error.new('Should not be called with template_child_idhs.empty? or parent_links.empty?')
       end
       child_mh = template_child_idhs.first.createMH()
       parent_id_col = child_mh.parent_id_field_name()
@@ -190,7 +190,7 @@ module DTK; class Clone
       include_list = opts[:include_list]
       model_handle.get_children_model_handles(clone_context: true).each do |child_mh|
         if include_list
-          next if not include_list.include?(child_mh[:model_name])
+          next unless include_list.include?(child_mh[:model_name])
         end
         block.call(child_mh)
       end

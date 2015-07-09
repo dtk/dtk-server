@@ -24,7 +24,7 @@ module XYZ
       rows = repo_user_acls.map do |acl|
         repo_username = acl[:repo_username]
         unless repo_user_obj = RepoUser.get_by_repo_username(repo_user_mh, repo_username)
-          raise Error.new("Unknown repo user (#{repo_username})")
+          fail Error.new("Unknown repo user (#{repo_username})")
         end
         ret_create_hash(repo_username, repo_id, repo_user_obj[:id], acl[:access_rights])
       end

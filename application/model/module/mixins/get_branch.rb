@@ -39,14 +39,14 @@ module DTK
 
         if module_rows.size == 0
           unless opts[:donot_raise_error]
-            raise ErrorUsage.new("Module #{pp_module_name(version)} does not exist")
+            fail ErrorUsage.new("Module #{pp_module_name(version)} does not exist")
           end
           return nil
         end
 
         # aggregate by remote_namespace, filtering by remote_namespace if remote_namespace is given
         unless module_obj = aggregate_by_remote_namespace(module_rows, opts)
-          raise ErrorUsage.new("The module (#{pp_module_name(version)}) is not tied to namespace '#{opts[:filter][:remote_namespace]}' on the repo manager")
+          fail ErrorUsage.new("The module (#{pp_module_name(version)}) is not tied to namespace '#{opts[:filter][:remote_namespace]}' on the repo manager")
         end
 
         ret = module_obj[:module_branch].merge(repo: module_obj[:repo], module_name: module_obj[:display_name], module_namespace: module_obj[:namespace][:display_name])
@@ -63,7 +63,7 @@ module DTK
           case type
           when :library then branches.reject { |r| r[:is_workspace] }
           when :workspace then branches.select { |r| r[:is_workspace] }
-          else raise Error.new("Unexpected type (#{type})")
+          else fail Error.new("Unexpected type (#{type})")
           end
       if matches.size > 1
         Error.new("Unexpected that there is more than one matching #{type} branches")
@@ -78,7 +78,7 @@ module DTK
         mb_mh = model_handle().create_childMH(:module_branch)
         sp_hash = {
         cols: ModuleBranch.common_columns(),
-          filter: [:and, [:eq, mb_mh.parent_id_field_name(), id()],
+        filter: [:and, [:eq, mb_mh.parent_id_field_name(), id()],
                    [:eq, :is_workspace, true],
                    [:eq, :version, ModuleBranch.version_field(version)]]
       }
@@ -113,7 +113,7 @@ module DTK
         elsif matches.size == 1
           matches.first
         elsif matches.size > 1
-          raise Error.new("Matched rows has unexpected size (#{matches.size}) since its is >1")
+          fail Error.new("Matched rows has unexpected size (#{matches.size}) since its is >1")
         end
       end
       # TODO: ModuleBranch::Location: deprecate below for above
@@ -130,7 +130,7 @@ module DTK
           matches.first
         elsif matches.size > 1
           Log.error_pp(['Matched rows:', matches])
-          raise Error.new("Matched rows has unexpected size (#{matches.size}) since its is >1")
+          fail Error.new("Matched rows has unexpected size (#{matches.size}) since its is >1")
         end
       end
 
@@ -148,14 +148,14 @@ module DTK
       def get_matching_module_branches(mh_or_idh, filter, post_filter = nil, opts = {})
         sp_hash = {
             cols: [:id, :display_name, :group_id, :module_branches],
-          filter: filter
+            filter: filter
         }
         rows = get_objs(mh_or_idh.create_childMH(module_type()), sp_hash).map do |r|
           r[:module_branch].merge(module_id: r[:id])
         end
         if rows.empty?
           return [] if opts[:no_error_if_does_not_exist]
-          raise ErrorUsage.new('Module does not exist')
+          fail ErrorUsage.new('Module does not exist')
         end
         post_filter ? rows.select { |r| post_filter.call(r) } : rows
       end

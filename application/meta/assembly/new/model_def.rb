@@ -226,7 +226,7 @@ end
          convert: true,
          join_type: :inner,
          join_cond: { id: :component__module_branch_id },
-          cols: [:id, :display_name, :group_id, :version, :current_sha, :service_id]
+         cols: [:id, :display_name, :group_id, :version, :current_sha, :service_id]
        },
                                    {
                                      model_name: :service_module,

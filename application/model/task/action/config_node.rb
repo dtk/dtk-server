@@ -143,7 +143,7 @@ module DTK; class Task
             # reflect this in cases for a3 in example a1 -external -> a2 -internal -> a3
             # so commenting out below and replacing with less stringent
             # if attr[:is_port] and not attr[:value_asserted]
-            if not attr[:value_asserted]
+            unless attr[:value_asserted]
               indexed_attrs_to_update[attr[:id]] = attr
             end
           end
@@ -206,7 +206,7 @@ module DTK; class Task
       end
 
       def config_agent_type
-        self[:config_agent_type] || raise(Error.new('self[:config_agent_type] should not be nil'))
+        self[:config_agent_type] || fail(Error.new('self[:config_agent_type] should not be nil'))
       end
 
       private
@@ -245,7 +245,7 @@ module DTK; class Task
             hash.merge!(assembly_idh: assembly_idh) if assembly_idh
             intra_node_stages = exec_blocks.intra_node_stages()
           else
-            raise Error.new('Unexpected ConfigNode.initialize type')
+            fail Error.new('Unexpected ConfigNode.initialize type')
           end
         super(type, hash, task_idh)
         # set_intra_node_stages must be done after super

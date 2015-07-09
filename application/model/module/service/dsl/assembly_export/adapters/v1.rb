@@ -66,7 +66,7 @@ module DTK
         p = Port.parse_port_display_name(port_ref)
         node_ref = (qualified_port_ref =~ Regexp.new('^/node/([^/]+)'); Regexp.last_match(1))
         unless matching_node = self[:node].find { |ref, _hash| ref == node_ref }
-          raise Error.new("Cannot find matching node for node ref #{node_ref})")
+          fail Error.new("Cannot find matching node for node ref #{node_ref})")
         end
         node_name = matching_node[1][:display_name]
         cmp_name = component_name_output_form(p[:component_type])

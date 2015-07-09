@@ -84,7 +84,7 @@ module DTK
        when :add
         create_from_rows(model_handle, rows)
        else
-        raise Error.new("Unexpected operation (#{operation})")
+        fail Error.new("Unexpected operation (#{operation})")
       end
     end
 
@@ -97,7 +97,7 @@ module DTK
         if self[:namespace_info].is_a?(String)
           self[:namespace_info]
         else
-          raise Error.new("Unexpected type in namespace_info: #{self[:namespace_info].class}")
+          fail Error.new("Unexpected type in namespace_info: #{self[:namespace_info].class}")
         end
       end
     end
@@ -139,7 +139,7 @@ module DTK
     def self.display_name(module_ref_hash)
       [:module_name].each do |key|
         if module_ref_hash[key].nil?
-          raise Error.new("Unexpected that module_ref_hash[#{key}] is nil")
+          fail Error.new("Unexpected that module_ref_hash[#{key}] is nil")
         end
       end
       module_ref_hash[:module_name]
@@ -148,7 +148,7 @@ module DTK
     def self.ref(module_ref_hash)
       [:module_type, :module_name].each do |key|
         if module_ref_hash[key].nil?
-          raise Error.new("Unexpected that module_ref_hash[#{key}] is nil")
+          fail Error.new("Unexpected that module_ref_hash[#{key}] is nil")
         end
       end
       "#{module_ref_hash[:module_type]}--#{module_ref_hash[:module_name]}"

@@ -110,7 +110,7 @@ module DTK; class Attribute; class UpdateDerivedValues
 
     def self.array_integer(input_index)
       array_integer?(input_index, no_error_msg: true) ||
-        raise(Error.new(error_msg_link_def_index(input_index)))
+        fail(Error.new(error_msg_link_def_index(input_index)))
     end
 
     def self.array_integer?(input_index, opts = {})

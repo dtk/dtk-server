@@ -90,7 +90,7 @@ module DTK
             next if defs_seen.include?(def_name)
             defs_seen << def_name
           end
-          ret = ret + deps
+          ret += deps
         end
         ret.empty? ? nil : ret
       end
@@ -115,7 +115,7 @@ module DTK
           if x.is_a?(Symbol) and x == :all
             FieldSetAll.new()
           elsif x.is_a?(Array)
-            raise Error.new('model_name is not given') unless model_name
+            fail Error.new('model_name is not given') unless model_name
             FieldSet.new(model_name, x)
           else
             x
@@ -177,7 +177,7 @@ module DTK
         deps = virtual_col_info[:remote_dependencies]
         return nil unless deps
         return [deps, nil] if deps.is_a?(Array)
-        return [deps.values.first, deps.keys.first]
+        [deps.values.first, deps.keys.first]
       end
 
       def parse_local_dependencies(virtual_col_info)

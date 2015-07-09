@@ -9,7 +9,7 @@ module DTK; class Task; class Template; class Stage
           if name = serialized_multinode_action[:name]
             msg << " in stage '#{name}'"
           end
-          raise ParsingError.new(msg)
+          fail ParsingError.new(msg)
         end
       end
 
@@ -38,7 +38,7 @@ module DTK; class Task; class Template; class Stage
         if Constant.matches?(multi_node_type, :AllApplicable)
           Applicable
         else
-          raise ParsingError.new("Illegal multi node type (#{multi_node_type}); #{Constant.its_legal_values(:AllApplicable)}")
+          fail ParsingError.new("Illegal multi node type (#{multi_node_type}); #{Constant.its_legal_values(:AllApplicable)}")
         end
       end
 

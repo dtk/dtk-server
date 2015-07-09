@@ -12,7 +12,7 @@ module DTK
             else
               "available versions: #{defined_versions.join(', ')}"
             end
-          raise ErrorUsage.new("Component module (#{cmp_module_name}) does not have version (#{component_version}) defined; #{version_info}")
+          fail ErrorUsage.new("Component module (#{cmp_module_name}) does not have version (#{component_version}) defined; #{version_info}")
         end
 
         cmp_module_refs = get_component_module_refs(service_version)

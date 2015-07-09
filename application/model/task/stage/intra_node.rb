@@ -6,7 +6,7 @@ module XYZ
 
          stages = []
          prev_deps_count = component_dependencies.size
-         while !(stage = generate_stage(component_dependencies)).empty?
+         until (stage = generate_stage(component_dependencies)).empty?
               # Checks for inter node dependency cycle and throws error if cycle present
               prev_deps_count = detect_internode_cycle(component_dependencies, prev_deps_count, state_change_list)
            stages << stage
@@ -15,7 +15,7 @@ module XYZ
         detect_internode_cycle(component_dependencies, prev_deps_count, state_change_list)
 
         # Amar TODO: save intranode stages
-        return stages
+        stages
       end
 
        private
@@ -35,7 +35,7 @@ module XYZ
           stage[parent] = children if (parents & children).empty?
         end
         stage.map { |k, _v| component_dependencies.delete(k) }
-        return stage
+        stage
       end
 
       def self.detect_internode_cycle(component_dependencies, prev_deps_count, state_change_list)
@@ -50,9 +50,9 @@ module XYZ
               cmp_dep_str << "#{cmp[:component][:display_name]}(ID: #{cmp[:component][:id]})" if cmp_ids.include?(cmp[:component][:id])
             end
             error_msg = "Intra-node components cycle detected on node '#{node_name}' (ID: #{node_id}) for components: #{cmp_dep_str.join(', ')}"
-            raise ErrorUsage.new(error_msg)
+            fail ErrorUsage.new(error_msg)
           end
-          return cur_deps_count
+          cur_deps_count
         end
     end
   end

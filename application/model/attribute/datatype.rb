@@ -87,7 +87,7 @@ module DTK; class Attribute
           # will be converted already
           raw_val
         else
-        raise Error.new("Unexpected Datatype (#{attr[:data_type]}) for attribute (#{attr.print_form()})")
+        fail Error.new("Unexpected Datatype (#{attr[:data_type]}) for attribute (#{attr.print_form()})")
       end
     end
 
@@ -134,7 +134,7 @@ module DTK; class Attribute
 
     def self.raise_error_msg(type, val, attr)
       val_print_form = (val.respond_to?(:to_s) ? val.to_s : val.inspect)
-      raise ErrorUsage.new("Unexpected #{type.to_s.capitalize} Value (#{val_print_form}) for attribute (#{attr.print_form}); use set-attribute to change its value")
+      fail ErrorUsage.new("Unexpected #{type.to_s.capitalize} Value (#{val_print_form}) for attribute (#{attr.print_form}); use set-attribute to change its value")
     end
 
     def self.ret_builtin_scalar_types

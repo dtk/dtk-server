@@ -61,7 +61,7 @@ class Fieldbase
       else
         field_string = self.get_field_edit_rtpl()
     end
-    return field_string
+    field_string
   end
 
   def get_field_display
@@ -74,7 +74,7 @@ class Fieldbase
       else
         field_string = self.get_field_display_rtpl
     end
-    return field_string
+    field_string
   end
 
   def get_field_list
@@ -87,7 +87,7 @@ class Fieldbase
       else
         field_string = self.get_field_list_rtpl
     end
-    return field_string
+    field_string
   end
 
   def add_class(class_to_add)

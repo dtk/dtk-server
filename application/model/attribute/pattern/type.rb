@@ -62,12 +62,12 @@ module DTK; class Attribute
         if attribute_idh
           attr_id = attribute_idh.get_id()
           unless match = @attribute_stacks.find { |as| as[:attribute].id == attr_id }
-            raise Error.new('Unexpceted that no match to attribute_id in attribute_stack')
+            fail Error.new('Unexpceted that no match to attribute_id in attribute_stack')
           end
           match
         else
           unless @attribute_stacks.size == 1
-            raise Error.new('attribute_stack() should only be called when @attribute_stacks.size == 1')
+            fail Error.new('attribute_stack() should only be called when @attribute_stacks.size == 1')
           end
           @attribute_stacks.first
         end
@@ -135,7 +135,7 @@ module DTK; class Attribute
           [:eq, :display_name, display_name]
         else
           # TODO: check why have :component_segment
-          raise ErrorUsage::Parsing::Term.new(term, :component_segment)
+          fail ErrorUsage::Parsing::Term.new(term, :component_segment)
         end
       end
     end

@@ -60,7 +60,7 @@ module DTK; class NodeGroup
       # get the node group ports that correspond to node_external_ports
       # TODO: this can be more efficient if made into ajoin
       ng_id = id()
-      raise Error.new('Need to check: semantics of :link_def_info has changed to use outer joins')
+      fail Error.new('Need to check: semantics of :link_def_info has changed to use outer joins')
       sp_hash = {
         cols: [:id, :link_def_info, :display_name],
         filter: [:and, [:eq, :node_node_id, ng_id], [:oneof, :display_name, node_external_ports.map { |r| r[:display_name] }]]

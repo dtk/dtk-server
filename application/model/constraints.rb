@@ -14,11 +14,11 @@ module XYZ
       violations = ret_violations(target)
       if opts[:raise_error_when_any_violation]
         all_violations = Violation::Expression(violations['error'], violations['warning'])
-        raise ErrorConstraintViolations.new(all_violations.pp_form)
+        fail ErrorConstraintViolations.new(all_violations.pp_form)
       elsif opts[:raise_error_when_error_violation]
         pp [:warnings, violations['warning'].pp_form]
         Violation.save(target_parent_obj, violations['warning'])
-        raise ErrorConstraintViolations.new(violations['error'].pp_form) unless violations['error'].empty?
+        fail ErrorConstraintViolations.new(violations['error'].pp_form) unless violations['error'].empty?
       else
         pp [:errors, violations['error'].pp_form]
         Violation.save(target_parent_obj, violations['error'])
@@ -112,7 +112,7 @@ module XYZ
       elsif dependency[:type] == 'component' && dependency[:component_component_id]
         ComponentConstraint.new(dependency)
       else
-        raise Error.new('unexpected dependency type')
+        fail Error.new('unexpected dependency type')
       end
     end
     def evaluate_given_target(target, opts = {})
@@ -182,7 +182,7 @@ module XYZ
 
     # overrwritten
     def update_object_from_info_gathered!(_object, _rows)
-      raise Error.new("not treating constraint update of object of type #{obj.class}")
+      fail Error.new("not treating constraint update of object of type #{obj.class}")
     end
   end
 
@@ -244,7 +244,7 @@ module XYZ
         elsif target['target_component_id_handle']
           target['target_component_id_handle'].get_containing_node_id()
         else
-          raise Error.new('unexpected target')
+          fail Error.new('unexpected target')
         end
       join_cond = { node_node_id: :node__id }
       join_array = ret_join_array(join_cond)

@@ -40,7 +40,7 @@ module DTK; class ActionDef; class Content
 
       def get_and_parse_template_content(local_dir, attr_val_pairs)
         template_path = "#{local_dir}/#{@command_line[:source]}"
-        raise Error, "Template file '#{template_path}' does not exist." unless File.exist?(template_path)
+        fail Error, "Template file '#{template_path}' does not exist." unless File.exist?(template_path)
 
         file_content = File.open(template_path).read
         substitute = !!@template_processor.needs_template_substitution?(file_content)

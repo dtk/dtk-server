@@ -120,7 +120,7 @@ module MCollective
                             hosts << host
                         end
 
-                        raise 'No hosts found for the STOMP connection pool' if hosts.size == 0
+                        fail 'No hosts found for the STOMP connection pool' if hosts.size == 0
 
                         connection = { hosts: hosts }
 
@@ -193,7 +193,7 @@ module MCollective
                 headers = {}
                 headers = { 'priority' => @msgpriority } if  (@msgpriority && @msgpriority > 0)
 
-                return headers
+                headers
             end
 
             # looks in the environment first then in the config file
@@ -205,7 +205,7 @@ module MCollective
                 return @config.pluginconf[opt] if @config.pluginconf.include?(opt)
                 return default if default
 
-                raise("No #{env} environment or plugin.#{opt} configuration option given")
+                fail("No #{env} environment or plugin.#{opt} configuration option given")
             end
 
             # looks for a config option, accepts an optional default
@@ -215,7 +215,7 @@ module MCollective
                 return @config.pluginconf[opt] if @config.pluginconf.include?(opt)
                 return default if default
 
-                raise("No plugin.#{opt} configuration option given")
+                fail("No plugin.#{opt} configuration option given")
             end
 
             # gets a boolean option from the config, supports y/n/true/false/1/0

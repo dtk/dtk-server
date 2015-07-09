@@ -13,7 +13,7 @@ module DTK
 
     class LinkToNonComponent < self
       def initialize(opts = {})
-        raise ErrorUsage.new('Only supported: Attribute linked to a component attribute', Opts.new(opts).slice(:file_path))
+        fail ErrorUsage.new('Only supported: Attribute linked to a component attribute', Opts.new(opts).slice(:file_path))
       end
     end
 
@@ -26,7 +26,7 @@ module DTK
 
       def base_msg(cmp_instance)
         cmp_type_print_form = cmp_instance.component_type_print_form()
-        raise ErrorUsage.new("Not supported: Attribute link involving same component type (#{cmp_type_print_form})")
+        fail ErrorUsage.new("Not supported: Attribute link involving same component type (#{cmp_type_print_form})")
       end
     end
   end

@@ -65,7 +65,7 @@ module DTK
             elsif namespace.is_a?(Hash)
               namespace_name = namespace[:display_name]
             else
-              raise Error.new('assembly_template[:namespace] is unexpected type')
+              fail Error.new('assembly_template[:namespace] is unexpected type')
             end
           end
 

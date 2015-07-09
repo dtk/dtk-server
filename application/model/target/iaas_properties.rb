@@ -61,7 +61,7 @@ module DTK
       def self.equal?(i2)
         case type()
           when :ec2 then Ec2.equal?(i2)
-          else raise Error.new("Unexpected iaas_properties type (#{type})")
+          else fail Error.new("Unexpected iaas_properties type (#{type})")
         end
       end
     end

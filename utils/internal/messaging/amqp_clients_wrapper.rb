@@ -41,7 +41,7 @@ module XYZ
    end
 
    def close_clients_connections(type)
-     raise Error.new("channel of type #{type} not treated") unless MessageBusClient.legal_channel_type?(type)
+     fail Error.new("channel of type #{type} not treated") unless MessageBusClient.legal_channel_type?(type)
      return nil if @native_clients[type].nil?
      @native_clients[type].close()
    end
@@ -91,7 +91,7 @@ module XYZ
          native_client.start()
          native_client
        else
-       raise Error.new("client of type #{type} not treated")
+       fail Error.new("client of type #{type} not treated")
      end
    end
    def self.legal_channel_type?(type)
@@ -107,7 +107,7 @@ module XYZ
       uuid = publish_opts_x[:uuid] || MessageBusClient.generate_unique_id()
       reply_timeout = publish_opts_x[:reply_timeout]
       publish_opts = Aux::without_keys(publish_opts_x, [:uuid, :reply_timeout])
-      raise Error.new('publish_with_callback whould not have opts[:reply_to] set') if publish_opts[:reply_to]
+      fail Error.new('publish_with_callback whould not have opts[:reply_to] set') if publish_opts[:reply_to]
       publish_opts[:reply_to] = uuid
       response_queue = @client.subscribe_queue(uuid, auto_delete: true)
 
@@ -262,7 +262,7 @@ module XYZ
     end
 
     def bind(exchange, opts = {})
-      raise Error.new('exchange is wrong type') unless exchange.is_a?(R8ExchangeBunny)
+      fail Error.new('exchange is wrong type') unless exchange.is_a?(R8ExchangeBunny)
       @native_queue.bind(exchange.native_exchange, opts)
     end
   end

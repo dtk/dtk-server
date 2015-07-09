@@ -169,7 +169,7 @@ module DTK
     end
 
     def is_status?(status)
-      return self[:status] == status || self[:subtasks].find { |subtask| subtask[:status] == status }
+      self[:status] == status || self[:subtasks].find { |subtask| subtask[:status] == status }
     end
 
     def add_errors(normalized_errors)
@@ -533,7 +533,7 @@ module DTK
 
      def executable_action(opts = {})
        unless @executable_action ||= self[:executable_action]
-         raise Error.new('executable_action should not be null') unless opts[:no_error_if_nil]
+         fail Error.new('executable_action should not be null') unless opts[:no_error_if_nil]
        end
        @executable_action
      end

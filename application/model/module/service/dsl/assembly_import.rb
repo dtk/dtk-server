@@ -76,10 +76,10 @@ module DTK; class ServiceModule
 
     def self.import_assembly_top(assembly_ref, assembly_hash, module_branch, module_name, opts = {})
       if assembly_hash.empty?
-        raise ParsingError.new('Empty assembly dsl file', opts_file_path(opts))
+        fail ParsingError.new('Empty assembly dsl file', opts_file_path(opts))
       end
       unless assembly_name = assembly_hash['name'] || opts[:default_assembly_name]
-        raise ParsingError.new('No name associated with assembly dsl file', opts_file_path(opts))
+        fail ParsingError.new('No name associated with assembly dsl file', opts_file_path(opts))
       end
 
       {
@@ -116,14 +116,14 @@ module DTK; class ServiceModule
       elsif nodes.is_a?(String) # corner case: single node with no attributes
         nodes = { nodes => {} }
       else
-        raise ParsingError.new('Nodes section is ill-formed', opts_file_path(opts))
+        fail ParsingError.new('Nodes section is ill-formed', opts_file_path(opts))
       end
       ret = nodes.inject({}) do |h, (node_hash_ref, node_hash)|
         node_hash ||= {}
         aggregate_errors.aggregate_errors!(h) do
           node_ref = assembly_template_node_ref(assembly_ref, node_hash_ref)
           unless (node_hash || {}).is_a?(Hash)
-            raise ParsingError.new("The content associated with key (#{node_hash_ref}) should be a hash representing assembly node info", opts_file_path(opts))
+            fail ParsingError.new("The content associated with key (#{node_hash_ref}) should be a hash representing assembly node info", opts_file_path(opts))
           end
           type, attributes = import_type_and_node_attributes(node_hash, opts)
           type = node_hash_ref.eql?('assembly_wide') ? 'assembly_wide' : type
@@ -255,7 +255,7 @@ module DTK; class ServiceModule
     def self.import_assembly_attributes(assembly_attrs_hash, opts = {})
       assembly_attrs_hash ||= {}
       unless assembly_attrs_hash.is_a?(Hash)
-        raise ParsingError.new('Assembly attribute(s) are ill-formed', opts_file_path(opts))
+        fail ParsingError.new('Assembly attribute(s) are ill-formed', opts_file_path(opts))
       end
       import_attributes_helper(assembly_attrs_hash)
     end
@@ -274,7 +274,7 @@ module DTK; class ServiceModule
     def self.import_node_attributes(node_attrs_hash, opts = {})
       node_attrs_hash ||= {}
       unless node_attrs_hash.is_a?(Hash)
-        raise ParsingError.new('Node attribute(s) are ill-formed', opts_file_path(opts))
+        fail ParsingError.new('Node attribute(s) are ill-formed', opts_file_path(opts))
       end
       # TODO: make sure that each node attribute is legal
       import_attributes_helper(node_attrs_hash)
@@ -344,7 +344,7 @@ module DTK; class ServiceModule
           "#{cmp_name}/#{attr_info[:display_name]}"
         end
         attribute = (bad_attrs.size == 1 ? 'attribute' : 'attributes')
-        raise ParsingError.new("Bad #{attribute} (#{bad_attrs_list.join(', ')}) in assembly template")
+        fail ParsingError.new("Bad #{attribute} (#{bad_attrs_list.join(', ')}) in assembly template")
       end
       ret
     end
@@ -370,7 +370,7 @@ module DTK; class ServiceModule
             err_msg << "(namespace: #{ns})"
           end
           err_msg << " is missing the title field attribute (usally 'name') or is configured to be a singleton; correct by editing this component module or removing title reference in assembly template)"
-          raise ParsingError.new(err_msg)
+          fail ParsingError.new(err_msg)
         end
       end
     end

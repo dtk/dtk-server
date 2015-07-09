@@ -18,7 +18,7 @@ module XYZ
 
         def self.type(source)
           ret = source['type'] || ('component' if source['required_component'])
-          raise Error.new('unexpected form for chef dependency') unless ret
+          fail Error.new('unexpected form for chef dependency') unless ret
           ret
         end
 
@@ -29,7 +29,7 @@ module XYZ
         def self.search_pattern(source)
           return source['search_pattern'] if source['search_pattern']
           component = source['required_component']
-          raise Error.new('unexpected form for userdata dependency') unless component
+          fail Error.new('unexpected form for userdata dependency') unless component
           XYZ::Constraints::Macro::RequiredComponent.search_pattern(component)
         end
 
@@ -37,7 +37,7 @@ module XYZ
           return source['description'] if source['description']
           required_cmp = source['required_component']
           base_cmp = source['parent_display_name']
-          raise Error.new('unexpected form for userdata dependency') unless required_cmp && base_cmp
+          fail Error.new('unexpected form for userdata dependency') unless required_cmp && base_cmp
           XYZ::Constraints::Macro::RequiredComponent.description(required_cmp, base_cmp)
         end
       end

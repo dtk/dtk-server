@@ -67,7 +67,7 @@ module DTK; class Task; class Template
       end
 
       def self.raise_action_ref_error(serialized_item)
-        raise ParsingError.new("The action reference (#{serialized_item.inspect}) is ill-formed")
+        fail ParsingError.new("The action reference (#{serialized_item.inspect}) is ill-formed")
       end
     end
   end

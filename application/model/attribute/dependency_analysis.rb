@@ -67,7 +67,7 @@ module XYZ
 
     def find_matching_output_attr__eq_indexed(aug_attr_list, _attr_in, link)
       ret = nil
-      if not (link[:index_map] || []).size == 1
+      unless (link[:index_map] || []).size == 1
         Log.error('not treating index maps with multiple elements')
         return ret
       end
@@ -149,15 +149,15 @@ module XYZ
       def self.unset_guarded_attr__array_append?(guarded_attr_val, link)
         if input_map = link[:index_map]
           unless input_map.size == 1
-            raise Error.new('Not treating index map with more than one member')
+            fail Error.new('Not treating index map with more than one member')
           end
           input_index = input_map.first[:input]
           unless input_index.size == 1
-            raise Error.new('Not treating input index with more than one member')
+            fail Error.new('Not treating input index with more than one member')
           end
           input_num = input_index.first
           unless input_num.is_a?(Fixnum)
-            raise Error.new('Not treating input index that is non-numeric')
+            fail Error.new('Not treating input index that is non-numeric')
           end
           guarded_attr_val.is_a?(Array) && guarded_attr_val[input_num].nil?
         else

@@ -12,7 +12,7 @@ module DTK
           if opts[:delete_if_exists]
             delete_server_repo(repo_name)
           else
-            raise Error.new("trying to create a repo (#{repo_name}) that exists already on gitolite server")
+            fail Error.new("trying to create a repo (#{repo_name}) that exists already on gitolite server")
           end
         end
 
@@ -72,7 +72,7 @@ module DTK
           elsif opts[:delete_if_exists]
             delete_user(username)
           else
-            raise Error.new("trying to create a user (#{username}) that exists already on gitolite server")
+            fail Error.new("trying to create a user (#{username}) that exists already on gitolite server")
           end
         end
 
@@ -131,7 +131,7 @@ module DTK
 
       # get gitolite_admin keydir location
       def get_keydir
-        return "#{admin_directory()}keydir"
+        "#{admin_directory()}keydir"
       end
 
       private
@@ -188,7 +188,7 @@ module DTK
         ret = []
         raw_content = admin_repo.get_file_content(path: repo_config_file_relative_path(repo_name))
         unless raw_content
-          raise Error.new("Repo (#{repo_name}) does not exist")
+          fail Error.new("Repo (#{repo_name}) does not exist")
         end
         # expections is that has form given by ConfigFileTemplate)
         raw_content.each_line do |l|
@@ -198,7 +198,7 @@ module DTK
             # we ignore this line
           elsif l =~ /^[ ]*repo[ ]+([^ ]+)/
             unless Regexp.last_match(1) == repo_name
-              raise Error.new("Parsing error: expected repo to be (${repo_name} in (#{l})")
+              fail Error.new("Parsing error: expected repo to be (${repo_name} in (#{l})")
             end
           elsif l =~ /[ ]*([^ ]+)[ ]*=[ ]*(.+)$/
             access_rights = Regexp.last_match(1)
@@ -209,7 +209,7 @@ module DTK
           elsif l.empty?
             # no op
           else
-            raise Error.new("Parsing error: (#{l})")
+            fail Error.new("Parsing error: (#{l})")
           end
         end
         ret
@@ -217,7 +217,7 @@ module DTK
 
       def validate_repo_module_name!(repo_name)
         unless repo_name.eql? repo_name.match(ALLOWED_CHARACTERS)[0]
-          raise Error.new("Illegal characters used in gitolite repo name (#{repo_name}). Letters, numbers and dashes only allowed.")
+          fail Error.new("Illegal characters used in gitolite repo name (#{repo_name}). Letters, numbers and dashes only allowed.")
         end
       end
 

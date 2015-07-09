@@ -86,7 +86,7 @@ module DTK
       assoc_assemblies = self.class.get_associated_target_instances(assembly_templates)
       unless assoc_assemblies.empty?
         assembly_names = assoc_assemblies.map { |a| a[:display_name] }
-        raise ErrorUsage.new("Cannot delete a service module if one or more of its service instances exist in a target (#{assembly_names.join(',')})")
+        fail ErrorUsage.new("Cannot delete a service module if one or more of its service instances exist in a target (#{assembly_names.join(',')})")
       end
       repos = get_repos()
       repos.each { |repo| RepoManager.delete_repo(repo) }
@@ -109,7 +109,7 @@ module DTK
         if opts[:no_error_if_does_not_exist]
           return ret
         else
-          raise ErrorUsage.new("Version '#{version}' for specified component module does not exist")
+          fail ErrorUsage.new("Version '#{version}' for specified component module does not exist")
         end
       end
 
@@ -118,7 +118,7 @@ module DTK
         assoc_assemblies = self.class.get_associated_target_instances(assembly_templates)
         unless assoc_assemblies.empty?
           assembly_names = assoc_assemblies.map { |a| a[:display_name] }
-          raise ErrorUsage.new("Cannot delete a service module if one or more of its service instances exist in a target (#{assembly_names.join(',')})")
+          fail ErrorUsage.new("Cannot delete a service module if one or more of its service instances exist in a target (#{assembly_names.join(',')})")
         end
         Assembly::Template.delete_assemblies_nodes(assembly_templates.map(&:id_handle))
       end
@@ -175,7 +175,7 @@ module DTK
       when :components
         assembly_templates = get_assembly_templates
       else
-        raise ErrorUsage.new("TODO: not implemented yet: processing of info_about(#{about})")
+        fail ErrorUsage.new("TODO: not implemented yet: processing of info_about(#{about})")
       end
     end
 
@@ -255,7 +255,7 @@ module DTK
       case rows.size
        when 0 then nil
        when 1 then rows.first
-       else raise ErrorUsage.new("Cannot find unique service module given service_module_name=#{name_or_id}")
+       else fail ErrorUsage.new("Cannot find unique service module given service_module_name=#{name_or_id}")
       end
     end
 
@@ -282,7 +282,7 @@ module DTK
     # returns either parsing error object or nil
     def install__process_dsl(repo, module_branch, local, opts = {})
       unless local.version.nil?
-        raise Error.new('Not implemented yet ServiceModule#import__dsl with version not equal to nil')
+        fail Error.new('Not implemented yet ServiceModule#import__dsl with version not equal to nil')
       end
       response = update_model_from_dsl(module_branch.merge(repo: repo), opts) #repo added to avoid lookup in update_model_from_dsl
       response if ParsingError.is_error?(response)
@@ -326,7 +326,7 @@ module DTK
     def publish_preprocess_raise_error?(module_branch_obj)
       # unless get_field?(:dsl_parsed)
       unless module_branch_obj.dsl_parsed?()
-        raise ErrorUsage.new('Unable to publish module that has parsing errors. Please fix errors and try to publish again.')
+        fail ErrorUsage.new('Unable to publish module that has parsing errors. Please fix errors and try to publish again.')
       end
 
       # get module info for every component in an assembly in the service module

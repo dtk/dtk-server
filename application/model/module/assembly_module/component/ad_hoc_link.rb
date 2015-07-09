@@ -9,7 +9,7 @@ module DTK; class AssemblyModule
       def update(parsed_adhoc_link_info)
         parsed_adhoc_links = parsed_adhoc_link_info.links
         unless  parsed_adhoc_links.size == 1
-          raise Error.new("Only implemented #{self}.update when parsed_adhoc_links.size == 1")
+          fail Error.new("Only implemented #{self}.update when parsed_adhoc_links.size == 1")
         end
         parsed_adhoc_link = parsed_adhoc_links.first
 

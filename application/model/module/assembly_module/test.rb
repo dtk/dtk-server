@@ -45,13 +45,13 @@ module DTK; class AssemblyModule
       unless branch = component_module.get_workspace_module_branch(am_version)
         component_module_id = component_module.id()
         if @assembly.get_component_modules().find { |r| r[:id] == component_module_id }
-          raise ErrorNoChangesToModule.new(@assembly, component_module)
+          fail ErrorNoChangesToModule.new(@assembly, component_module)
         else
-          raise ErrorNoComponentsInModule.new(@assembly, component_module)
+          fail ErrorNoComponentsInModule.new(@assembly, component_module)
         end
       end
       unless ancestor_branch = branch.get_ancestor_branch?()
-        raise Error.new('Cannot find ancestor branch')
+        fail Error.new('Cannot find ancestor branch')
       end
       branch_name = branch[:branch]
       ancestor_branch.merge_changes_and_update_model?(component_module, branch_name, opts)
@@ -107,7 +107,7 @@ module DTK; class AssemblyModule
                  [:eq, :node_node_id, nil],
                  [:eq, :component_type, cmp_template.get_field?(:component_type)]]
       }
-      Model.get_obj(cmp_template.model_handle(), sp_hash) || raise(Error.new('Unexpected that branch_cmp_template is nil'))
+      Model.get_obj(cmp_template.model_handle(), sp_hash) || fail(Error.new('Unexpected that branch_cmp_template is nil'))
     end
 
     def add_version_info!(modules_with_branches)

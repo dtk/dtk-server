@@ -90,7 +90,7 @@ module DTK
         agent_repo_dir = R8::Config[:node_agent_git_clone][:local_dir]
         node_commit_id = config_node[:node][:agent_git_commit_id]
         unless head_git_commit_id = context[:head_git_commit_id]
-          raise Error.new('Unexpected that opts[:head_git_commit_id ] is nil')
+          fail Error.new('Unexpected that opts[:head_git_commit_id ] is nil')
         end
         agents = {}
         name_regex = /\/agent\/(.+)/
@@ -150,10 +150,10 @@ module DTK
         node_repo_user = RepoUser.get_matching_repo_user(repo_user_mh, { type: :node }, [:ssh_rsa_private_key, :ssh_rsa_pub_key])
 
         unless node_repo_user && node_repo_user[:ssh_rsa_private_key]
-          raise Error.new('Cannot found ssh private key to authorize nodes')
+          fail Error.new('Cannot found ssh private key to authorize nodes')
         end
         unless node_repo_user[:ssh_rsa_pub_key]
-          raise Error.new('Cannot found ssh public key to authorize nodes')
+          fail Error.new('Cannot found ssh public key to authorize nodes')
         end
 
         pbuilderid = Node.pbuilderid(node)
@@ -200,7 +200,7 @@ module DTK
 
       def self.request__get_logs(task, nodes, callbacks, context)
         log_agent = context[:log_type] && LogAgents[context[:log_type].to_sym]
-        raise Error.new("cannot find a mcollective agent to get logs of type #{context[:log_type] || 'UNKNOWN'}") unless log_agent
+        fail Error.new("cannot find a mcollective agent to get logs of type #{context[:log_type] || 'UNKNOWN'}") unless log_agent
         ret = nodes.inject({}) { |h, n| h.merge(n[:id] => nil) }
         key = task[:executable_action_type] ? 'task_id' : 'top_task_id'
         params = { key: key, value: task.id_handle.get_id().to_s }
@@ -302,7 +302,7 @@ module DTK
 
       def self.mc_info_for_config_agent(config_agent)
         type = config_agent.type()
-        ConfigAgentTypeToMCInfo[type] || raise(Error.new("unexpected config adapter: #{type}"))
+        ConfigAgentTypeToMCInfo[type] || fail(Error.new("unexpected config adapter: #{type}"))
       end
       ConfigAgentTypeToMCInfo = {
         puppet: { agent: 'puppet_apply', action: 'run' },

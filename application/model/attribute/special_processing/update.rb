@@ -26,7 +26,7 @@ module DTK; class Attribute
           @attr.update_object!(:value_asserted, :node_node_id)
           existing_val = (@attr[:value_asserted] || 0).to_i
           if @new_val == existing_val
-            raise ErrorUsage.new("Value set equals existing value (#{existing_val})")
+            fail ErrorUsage.new("Value set equals existing value (#{existing_val})")
           end
           node_group = @attr.get_service_node_group(cols: [:id, :group_id, :display_name, :datacenter_datacenter_id, :assembly_id])
           if @new_val > existing_val
@@ -48,7 +48,7 @@ module DTK; class Attribute
             if region = target.iaas_properties.hash[:region]
               err_msg << " (region: #{region})"
             end
-            raise ErrorUsage.new(err_msg)
+            fail ErrorUsage.new(err_msg)
           end
           update_node!(node, image_id, os_type)
           if node.is_node_group?()

@@ -87,7 +87,7 @@ module DTK; class Task
           when :add_as_new_last_internode_stage
             new_internode_stage = Stage::InterNode.create_from_single_action(action_match.insert_action)
             self << new_internode_stage
-          else raise Error.new("Unexpected insert_point (#{insert_point})")
+          else fail Error.new("Unexpected insert_point (#{insert_point})")
         end
       end
       # TODO: have above subsume below
@@ -96,7 +96,7 @@ module DTK; class Task
           insert(0, *template_content)
         else
           unless template_content.size == 1
-            raise ErrorUsage.new('Can only splice in template content that has a single inter node stage')
+            fail ErrorUsage.new('Can only splice in template content that has a single inter node stage')
           end
           first.splice_in_at_beginning!(template_content.first)
         end
@@ -110,7 +110,7 @@ module DTK; class Task
           if opts[:allow_empty_task]
             return ret
           else
-            raise ErrorUsage.new('The task has no actions')
+            fail ErrorUsage.new('The task has no actions')
           end
         end
         # Dont put in sequential block if just single stage
@@ -213,7 +213,7 @@ module DTK; class Task
         elsif object.is_a?(SerializedContentArray)
           create_stages_from_serialized_content!(object, actions, opts)
         else
-          raise Error.new("create_stages! does not treat argument of type (#{object.class})")
+          fail Error.new("create_stages! does not treat argument of type (#{object.class})")
         end
       end
 
@@ -250,14 +250,14 @@ module DTK; class Task
         existing_num_stages = size()
         new_stages = []
         # before_index_hash gets destroyed in while loop
-        while not done
+        until done
           if before_index_hash.empty?
             done = true
           else
             stage_action_indexes = before_index_hash.ret_and_remove_actions_not_after_any!()
             if stage_action_indexes.empty?()
               # TODO: see if any other way there can be loops
-              raise ErrorUsage.new('Loop detected in temporal orders')
+              fail ErrorUsage.new('Loop detected in temporal orders')
             end
             internode_stage = stage_factory.create(stage_action_indexes)
             self << internode_stage

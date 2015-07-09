@@ -13,7 +13,7 @@ module ComponentModulesMixin
       puts "Unable to delete component module #{component_module} from remote"
     end
     puts ''
-    return component_module_deleted
+    component_module_deleted
   end
 
   def make_component_module_private(component_module)
@@ -28,7 +28,7 @@ module ComponentModulesMixin
       puts "Unable to set component module #{component_module} as private"
     end
     puts ''
-    return component_module_private
+    component_module_private
   end
 
   def make_component_module_public(component_module)
@@ -43,7 +43,7 @@ module ComponentModulesMixin
       puts "Unable to set component module #{component_module} as public"
     end
     puts ''
-    return component_module_public
+    component_module_public
   end
 
   def set_chmod_for_component_module(component_module, permission_set)
@@ -58,7 +58,7 @@ module ComponentModulesMixin
       puts "Unable to set chmod #{permission_set} for component module #{component_module}"
     end
     puts ''
-    return chmod_set
+    chmod_set
   end
 
   def add_collaborators(component_module, collaborators, collaborator_type)
@@ -89,7 +89,7 @@ module ComponentModulesMixin
       end
     end
     puts ''
-    return collaborators_added
+    collaborators_added
   end
 
   def remove_collaborators(component_module, collaborators, collaborator_type)
@@ -120,7 +120,7 @@ module ComponentModulesMixin
       end
     end
     puts ''
-    return collaborators_removed
+    collaborators_removed
   end
 
   def check_collaborators(component_module, collaborators, collaborator_type, filter)
@@ -145,7 +145,7 @@ module ComponentModulesMixin
     puts 'All collaborators exists in list of collaborators' if collaborators_exist == true
     puts 'All collaborators does not exist in list of collaborators' if collaborators_exist == false
     puts ''
-    return collaborators_exist
+    collaborators_exist
   end
 
   def check_if_component_module_visible_on_remote(component_module)
@@ -161,7 +161,7 @@ module ComponentModulesMixin
       puts "Component module #{component_module} is not visible"
     end
     puts ''
-    return component_module_visible
+    component_module_visible
   end
 
   def check_module_permissions(component_module, permissions_set)
@@ -182,7 +182,7 @@ module ComponentModulesMixin
       puts "Component module #{component_module} does not exist or it is not visible"
     end
     puts ''
-    return module_permissions_set
+    module_permissions_set
   end
 
   def check_if_component_module_exists(component_module_name)
@@ -197,7 +197,7 @@ module ComponentModulesMixin
       puts "Component module #{component_module_name} does not exist in module list"
     end
     puts ''
-    return component_module_exists
+    component_module_exists
   end
 
   def delete_component_module_from_remote(component_module_name, namespace)
@@ -223,7 +223,7 @@ module ComponentModulesMixin
       component_module_deleted = false
     end
     puts ''
-    return component_module_deleted
+    component_module_deleted
   end
 
   def get_component_module_components_list(component_module_name, filter_version)
@@ -244,8 +244,8 @@ module ComponentModulesMixin
           @component_module_name_list << x['display_name'] if x['version'] == filter_version
           puts "Component module component: #{x['display_name']}"
         else
-          @component_module_id_list << x['id'] if x['version'] == nil
-          @component_module_name_list << x['display_name'] if x['version'] == nil
+          @component_module_id_list << x['id'] if x['version'].nil?
+          @component_module_name_list << x['display_name'] if x['version'].nil?
           puts "Component module component: #{x['display_name']}"
         end
       end
@@ -277,7 +277,7 @@ module ComponentModulesMixin
       end
     end
     puts ''
-    return attribute_list
+    attribute_list
   end
 
   def get_component_module_attributes_list_by_component(component_module_name, component_name)
@@ -307,7 +307,7 @@ module ComponentModulesMixin
       end
     end
     puts ''
-    return attribute_list
+    attribute_list
   end
 
   def get_attribute_value_from_component_module(component_module_name, component_name, attribute_name)
@@ -324,7 +324,7 @@ module ComponentModulesMixin
     end
 
     puts ''
-    return attribute_value
+    attribute_value
   end
 
   def check_if_component_exists_in_component_module(component_module_name, filter_version, component_name)
@@ -358,7 +358,7 @@ module ComponentModulesMixin
       puts "Component names list does not include #{component_name}"
     end
     puts ''
-    return component_exists_in_component_module
+    component_exists_in_component_module
   end
 
   def delete_component_module(component_module_to_delete)
@@ -372,7 +372,7 @@ module ComponentModulesMixin
       puts 'Component module delete response:'
       pretty_print_JSON(delete_response)
 
-      if (delete_response['status'] == 'ok' && component_modules_list['data'].select { |x| x['module_name'] == nil })
+      if (delete_response['status'] == 'ok' && component_modules_list['data'].select { |x| x['module_name'].nil? })
         puts "Component module #{component_module_to_delete} deleted successfully"
         component_module_deleted = true
       else
@@ -384,7 +384,7 @@ module ComponentModulesMixin
       component_module_deleted = false
     end
     puts ''
-    return component_module_deleted
+    component_module_deleted
   end
 
   def create_new_component_module_version(component_module_name, version)
@@ -414,7 +414,7 @@ module ComponentModulesMixin
       component_module_versioned = false
     end
     puts ''
-    return component_module_versioned
+    component_module_versioned
   end
 
   def import_versioned_component_module_from_remote(component_module_name, version)
@@ -444,7 +444,7 @@ module ComponentModulesMixin
       component_module_imported = false
     end
     puts ''
-    return component_module_imported
+    component_module_imported
   end
 
   def list_component_modules_with_filter(namespace)
@@ -464,7 +464,7 @@ module ComponentModulesMixin
       end
     end
     puts ''
-    return component_modules_retrieved
+    component_modules_retrieved
   end
 
   def list_remote_component_modules_with_filter(namespace)
@@ -484,7 +484,7 @@ module ComponentModulesMixin
       end
     end
     puts ''
-    return component_modules_retrieved
+    component_modules_retrieved
   end
 
   def check_if_remote_exists(component_module, provider_name, ssh_repo_url)
@@ -500,7 +500,7 @@ module ComponentModulesMixin
       puts "Remote #{provider_name} has not been found for component module #{component_module} with repo url #{ssh_repo_url}"
     end
     puts ''
-    return remote_exists
+    remote_exists
   end
 
   def add_remote(component_module, provider_name, url)
@@ -515,7 +515,7 @@ module ComponentModulesMixin
       puts "Remote #{provider_name} with url #{url} has not been added to #{component_module} component module successfully"
     end
     puts ''
-    return remote_added
+    remote_added
   end
 
   def remove_remote(component_module, provider_name)
@@ -532,6 +532,6 @@ module ComponentModulesMixin
       puts "Remote #{provider_name} has not been deleted from #{component_module} component module successfully"
     end
     puts ''
-    return remote_removed
+    remote_removed
   end
 end

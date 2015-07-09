@@ -64,7 +64,7 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
       types = Array(types)
       puppet_ast_classes = Array(types).inject({}) { |h, t| h.merge(t => TreatedPuppetTypes[t]) }
       puppet_ast_classes.each do |type, klass|
-        raise Error.new("type #{type} not treated") if klass.nil?
+        fail Error.new("type #{type} not treated") if klass.nil?
         return type if ast_item.class == klass
       end
       nil
@@ -121,7 +121,7 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
               nil
               # TODO: should this be ignored?
             else
-              raise ParseError.new("Unexpected top level ast type (#{ast_item.class})")
+              fail ParseError.new("Unexpected top level ast type (#{ast_item.class})")
             end
           self[:children] << child if child
         end
@@ -145,7 +145,7 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
           elsif puppet_type?(ast_item, :definition)
             'definition'
           else
-            raise ParseError.new('unexpected type for ast_item')
+            fail ParseError.new('unexpected type for ast_item')
           end
         self[:type] = type
         self[:name] = ast_item.name
@@ -302,7 +302,7 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
         ret = ast_resource.type
         if ret == 'class'
           ast_title = ast_title(ast_resource)
-          raise ParseError.new("unexpected title ast type (#{ast_title.class})") unless puppet_type?(ast_title, AstTerm)
+          fail ParseError.new("unexpected title ast type (#{ast_title.class})") unless puppet_type?(ast_title, AstTerm)
           ret = ast_title.value
         end
         ret
@@ -422,7 +422,7 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
         ret = ast_rsc_ref.type
         if ret == 'Class'
           ast_title = ast_title(ast_rsc_ref)
-          raise ParseError.new("unexpected title ast type (#{ast_title.class})") unless puppet_type?(ast_title, AstTerm)
+          fail ParseError.new("unexpected title ast type (#{ast_title.class})") unless puppet_type?(ast_title, AstTerm)
           ret = ast_title.value
         end
         ret
@@ -430,11 +430,11 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
 
       def ast_title(ast_rsc_ref)
         unless ast_rsc_ref.title
-          raise ParseError.new('unexpected to not have title on resource reference')
+          fail ParseError.new('unexpected to not have title on resource reference')
         end
         children = ast_rsc_ref.title.children
         unless children.size == 1
-          raise ParseError.new('unexpected to have number of resource ref children neq to 1')
+          fail ParseError.new('unexpected to have number of resource ref children neq to 1')
         end
         children.first
       end
@@ -481,7 +481,7 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
         self[:query] =
           case type
            when :coll_expr then CollExprPS.create(query, opts)
-           else raise ParseError.new("Unexpected type (#{query.class}) in query argument of collection")
+           else fail ParseError.new("Unexpected type (#{query.class}) in query argument of collection")
         end
        super
       end
@@ -503,7 +503,7 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
         case coll_expr_ast.oper
           when '==' then CollExprAttributeExpressionPS.new(coll_expr_ast, opts)
           when 'and', 'or' then CollExprLogicalConnectivePS.new(coll_expr_ast, opts)
-          else raise ParseError.new("unexpected operation (#{coll_expr_ast.oper}) for collection expression")
+          else fail ParseError.new("unexpected operation (#{coll_expr_ast.oper}) for collection expression")
         end
       end
     end
@@ -521,7 +521,7 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
           value_ast = coll_expr_ast.test1
         end
         unless name && value_ast
-          raise ParseError.new('unexpected type for collection expression')
+          fail ParseError.new('unexpected type for collection expression')
         end
         self[:op] = '=='
         self[:name] = name
@@ -651,7 +651,7 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
          when :function then FunctionPS.new(ast_term, opts)
          when :ast_array then ArrayPS.new(ast_term, opts)
          when :ast_hash then HashPS.new(ast_term, opts)
-         else raise ParseError.new("type not treated as a term (#{ast_term.class})")
+         else fail ParseError.new("type not treated as a term (#{ast_term.class})")
         end
       end
       def data_type
@@ -826,7 +826,7 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
             elsif k.respond_to?(:to_s)
               k.to_s
             else
-              raise ParseError.new("unexpected hash key term (#{k.inspect})")
+              fail ParseError.new("unexpected hash key term (#{k.inspect})")
             end
           h.merge(key => TermPS.create(term_ast, opts))
         end

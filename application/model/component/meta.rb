@@ -72,7 +72,7 @@ module DTK
       virtual_column :view_def_key, type: :varchar, hidden: true, local_dependencies: [:id, :view_def_ref, :component_type]
 
     virtual_column :namespace_info, type: :json, hidden: true,
-        remote_dependencies:         [
+                                    remote_dependencies:         [
          { model_name: :module_branch,
            join_type: :inner,
            join_cond: { id: q(:component, :module_branch_id) },
@@ -100,22 +100,22 @@ module DTK
         }
 
         virtual_column :attributes, type: :json, hidden: true,
-        remote_dependencies:         [attributes_def.merge(
+                                    remote_dependencies:         [attributes_def.merge(
            cols: [:id, :display_name, :hidden, :description, id(:component), :attribute_value, :semantic_type, :semantic_type_summary, :data_type, :required, :dynamic, :cannot_change]
         )]
         virtual_column :attribute_values, type: :json, hidden: true,
-        remote_dependencies:         [attributes_def.merge(
+                                          remote_dependencies:         [attributes_def.merge(
            cols: [:id, :group_id, :display_name, :attribute_value]
         )]
 
         virtual_column :attributes_view_def_info, type: :json, hidden: true,
-        remote_dependencies:         [attributes_def.merge(
+                                                  remote_dependencies:         [attributes_def.merge(
            filter: [:eq, :hidden, false],
            cols: [:id, :display_name, :view_def_key, id(:component), :semantic_type, :semantic_type_summary, :data_type, :required, :dynamic, :cannot_change]
         )]
 
       virtual_column :dynamic_attributes, type: :json, hidden: true,
-        remote_dependencies:         [
+                                          remote_dependencies:         [
          { model_name: :attribute,
            convert: true,
            join_type: :inner,
@@ -126,7 +126,7 @@ module DTK
 
      # this wil match if the component has an attribute that uses the default field
      virtual_column :attribute_default_title_field, type: :json, hidden: true,
-        remote_dependencies:         [
+                                                    remote_dependencies:         [
          { model_name: :attribute,
            convert: true,
            join_type: :left_outer,
@@ -136,7 +136,7 @@ module DTK
          }]
 
     virtual_column :link_def_links, type: :json, hidden: true,
-        remote_dependencies:         [
+                                    remote_dependencies:         [
          { model_name: :link_def,
            convert: true,
            join_type: :inner,
@@ -153,7 +153,7 @@ module DTK
     ###### end of virtual columns related to attributes, ports, and link_defs
 
     virtual_column :library, type: :json, hidden: true,
-      remote_dependencies:       [
+                             remote_dependencies:       [
        {
          model_name: :library,
          join_type: :inner,
@@ -162,7 +162,7 @@ module DTK
        }]
 
     virtual_column :node, type: :json, hidden: true,
-      remote_dependencies:       [
+                          remote_dependencies:       [
        {
          model_name: :node,
          convert: true,
@@ -172,7 +172,7 @@ module DTK
        }]
 
     virtual_column :node_for_state_change_info, type: :json, hidden: true,
-      remote_dependencies:       [
+                                                remote_dependencies:       [
        {
          model_name: :node,
          convert: true,
@@ -183,7 +183,7 @@ module DTK
        }]
 
       virtual_column :implementation, type: :json, hidden: true,
-      remote_dependencies:         [
+                                      remote_dependencies:         [
          {
            model_name: :implementation,
            convert: true,
@@ -192,7 +192,7 @@ module DTK
            cols: Implementation.common_columns()
          }]
       virtual_column :implementation_file_paths, type: :json, hidden: true,
-      remote_dependencies:         [
+                                                 remote_dependencies:         [
          {
            model_name: :implementation,
            join_type: :inner,
@@ -208,7 +208,7 @@ module DTK
          }]
 
       virtual_column :module_name, type: :json, hidden: true,
-      remote_dependencies:         [
+                                   remote_dependencies:         [
          {
            model_name: :implementation,
            join_type: :inner,
@@ -218,7 +218,7 @@ module DTK
         ]
 
       virtual_column :module_branch, type: :json, hidden: true,
-      remote_dependencies:         [
+                                     remote_dependencies:         [
          {
            model_name: :module_branch,
            convert: true,
@@ -228,7 +228,7 @@ module DTK
          }]
 
       virtual_column :component_module, type: :json, hidden: true,
-      remote_dependencies:         [
+                                        remote_dependencies:         [
          {
            model_name: :module_branch,
            join_type: :inner,
@@ -244,7 +244,7 @@ module DTK
          }
         ]
         virtual_column :instance_component_template_parent, type: :json, hidden: true,
-        remote_dependencies:         [
+                                                            remote_dependencies:         [
          {
            model_name: :component,
            alias: :component_template,
@@ -255,7 +255,7 @@ module DTK
          }]
 
         virtual_column :dependencies, type: :json, hidden: true,
-        remote_dependencies:         [
+                                      remote_dependencies:         [
          {
            model_name: :dependency,
            alias: :dependencies,
@@ -267,7 +267,7 @@ module DTK
         ]
         # above is direct dependencies; below is inherited ones
         virtual_column :inherited_dependencies, type: :json, hidden: true,
-        remote_dependencies:         [
+                                                remote_dependencies:         [
          {
            model_name: :component,
            alias: :parent_component,
@@ -286,7 +286,7 @@ module DTK
         ]
 
         virtual_column :component_order_objs, type: :json, hidden: true,
-        remote_dependencies:         [
+                                              remote_dependencies:         [
          {
            model_name: :component_order,
            convert: true,
@@ -297,7 +297,7 @@ module DTK
         ]
         # above is direct dependencies; below is inheited ones
         virtual_column :inherited_component_order_objs, type: :json, hidden: true,
-        remote_dependencies:         [
+                                                        remote_dependencies:         [
          {
            model_name: :component,
            alias: :parent_component,
@@ -322,10 +322,10 @@ module DTK
         }
 
         virtual_column :node_assembly_parts, type: :json, hidden: true,
-        remote_dependencies: [node_assembly_parts]
+                                             remote_dependencies: [node_assembly_parts]
 
         virtual_column :node_assembly_parts_node_attrs, type: :json, hidden: true,
-        remote_dependencies:           [
+                                                        remote_dependencies:           [
            node_assembly_parts,
            {
              model_name: :attribute,
@@ -336,7 +336,7 @@ module DTK
            }
           ]
         virtual_column :node_assembly_parts_cmp_attrs, type: :json, hidden: true,
-        remote_dependencies:           [
+                                                       remote_dependencies:           [
            node_assembly_parts,
            {
              model_name: :component,
@@ -355,7 +355,7 @@ module DTK
           ]
 
         virtual_column :containing_node_id_info, type: :json, hidden: true,
-         remote_dependencies:          [
+                                                 remote_dependencies:          [
           {
             model_name: :component,
             alias: :parent_component,
@@ -366,7 +366,7 @@ module DTK
          ]
 
         virtual_column :has_pending_change, type: :boolean, hidden: true,
-         remote_dependencies:          [
+                                            remote_dependencies:          [
           {
             model_name: :state_change,
             # TODO: avoiding use of :component_component
@@ -383,7 +383,7 @@ module DTK
          ]
 
         virtual_column :sap_dependency_database, type: :json, hidden: true,
-        remote_dependencies:           [{
+                                                 remote_dependencies:           [{
              model_name: :attribute,
              convert: true,
              filter: [:and, [:eq, :semantic_type_summary, 'sap_config__db']],
@@ -418,7 +418,7 @@ module DTK
 
 
         virtual_column :layouts, type: :json, hidden: true,
-        remote_dependencies:           [{
+                                 remote_dependencies:           [{
              model_name: :layout,
              convert: true,
              join_type: :inner,
@@ -427,7 +427,7 @@ module DTK
            }]
 
         virtual_column :layouts_from_ancestor, type: :json, hidden: true,
-        remote_dependencies:           [{
+                                               remote_dependencies:           [{
              model_name: :component,
              alias: :template,
              join_type: :inner,

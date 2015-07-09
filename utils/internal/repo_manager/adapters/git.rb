@@ -18,7 +18,7 @@ module DTK
         if opts[:delete_if_exists]
           FileUtils.rm_rf local_repo_dir
         else
-          raise Error.new("trying to create a repo (#{repo_name}) that exists already on r8 server")
+          fail Error.new("trying to create a repo (#{repo_name}) that exists already on r8 server")
         end
       end
       local_repo = create_without_branch(local_repo_dir, absolute_path: true, repo_does_not_exist: true)
@@ -39,7 +39,7 @@ module DTK
       if Aux::platform_is_linux?()
         RepomanagerGitLinux.new(full_path, branch, opts)
       else
-        raise Error.new("platform #{Aux::platform} not treated")
+        fail Error.new("platform #{Aux::platform} not treated")
       end
     end
     def self.create_without_branch(path, opts = {})
@@ -64,7 +64,7 @@ module DTK
     def self.repo_server_ssh_rsa_fingerprint
       return @ssh_rsa_fingerprint if @ssh_rsa_fingerprint
       unless R8::Config[:git_server_on_dtk_server]
-        raise Error.new('Not implemented yet: repo_server_fingerprint when R8::Config[:git_server_on_dtk_server] is not true')
+        fail Error.new('Not implemented yet: repo_server_fingerprint when R8::Config[:git_server_on_dtk_server] is not true')
       end
       @ssh_rsa_fingerprint ||= `ssh-keyscan -H -t rsa #{repo_server_dns()}`
     end
@@ -207,7 +207,7 @@ module DTK
       case type
         when :file then git_command__rm(path)
          when :directory then git_command__rm_r(path)
-         else raise Error.new("Unexpected type (#{type})")
+         else fail Error.new("Unexpected type (#{type})")
       end
       commit(message)
       if opts[:push_changes]
@@ -267,7 +267,7 @@ module DTK
          when :equal then :no_change
          when :branchpoint, :local_ahead then :merge_needed
          when :local_behind then :changed
-         else raise Error.new("Unexpected merge relation (#{merge_rel})")
+         else fail Error.new("Unexpected merge relation (#{merge_rel})")
         end
 
       if force
@@ -294,7 +294,7 @@ module DTK
          when :equal then :no_change
          when :branchpoint, :local_ahead then :merge_needed
          when :local_behind then :changed
-         else raise Error.new("Unexpected merge relation (#{merge_rel})")
+         else fail Error.new("Unexpected merge relation (#{merge_rel})")
         end
       return ret unless ret == :changed
       checkout(@branch) do
@@ -516,7 +516,7 @@ module DTK
       else
         # need to checkout to some other branch since on branch taht is being deleted
         unless other_branch = get_branches().find { |br| br != @branch }
-          raise Error.new("Cannot delete the last remanining branch (#{@branch})")
+          fail Error.new("Cannot delete the last remanining branch (#{@branch})")
         end
         checkout(other_branch) do
           delete_branch_aux(remote_name)
@@ -573,7 +573,7 @@ module DTK
 
     def ref_matching_branch_name(type, branch_name)
       ref_matching_branch_name?(type, branch_name) ||
-        raise(Error.new("Cannot find #{type} branch (#{branch_name})"))
+        fail(Error.new("Cannot find #{type} branch (#{branch_name})"))
     end
 
     def ref_matching_branch_name?(type, branch_name)
@@ -581,7 +581,7 @@ module DTK
         case type
           when :local, :local_branch then @grit_repo.heads
           when :remote, :remote_branch then @grit_repo.remotes
-          else raise Error.new("Illegal branch type (#{type})")
+          else fail Error.new("Illegal branch type (#{type})")
         end
       refs.find { |r| r.name == branch_name }
     end
@@ -669,21 +669,19 @@ module DTK
       end
 
       def method_missing(name, *args, &block)
-        begin
-          @grit_git.send(name, *args, &block)
-        rescue ::Grit::Git::CommandFailed => e
-          # e.err empty is being interpretad as no error
-          if e.err.nil? || e.err.empty?
-            Log.info("Grit non zero exit status #{e.exitstatus} but grit err field is empty for command='#{e.command}'")
-          else
-            # write more info to server log, but to client return user friendly message
-            Log.info("Grit error: #{e.err} exitstatus=#{e.exitstatus}; command='#{e.command}'")
-            error_msg = "Grit error: #{e.err.strip()}"
-            raise ErrorUsage.new(error_msg)
-          end
-         rescue => e
-          raise e
+        @grit_git.send(name, *args, &block)
+      rescue ::Grit::Git::CommandFailed => e
+        # e.err empty is being interpretad as no error
+        if e.err.nil? || e.err.empty?
+          Log.info("Grit non zero exit status #{e.exitstatus} but grit err field is empty for command='#{e.command}'")
+        else
+          # write more info to server log, but to client return user friendly message
+          Log.info("Grit error: #{e.err} exitstatus=#{e.exitstatus}; command='#{e.command}'")
+          error_msg = "Grit error: #{e.err.strip()}"
+          raise ErrorUsage.new(error_msg)
         end
+       rescue => e
+        raise e
       end
 
       def respond_to?(name)

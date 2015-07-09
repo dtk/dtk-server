@@ -11,7 +11,7 @@ module DTK
             elsif object.is_a?(String) || object.is_a?(Symbol)
                variations.include?(object.to_s)
             else
-              raise Error.new("Unexpected object class (#{object.class})")
+              fail Error.new("Unexpected object class (#{object.class})")
             end
           end
         end
@@ -45,16 +45,14 @@ module DTK
 
         def variations(constant, opts = {})
           # use of self:: and self. are important because want to evalute wrt to module that pulls this in
-          begin
-            variations = self::Variations.const_get(constant.to_s)
-            string_variations = variations.map(&:to_s)
-            opts[:string_only] ? string_variations : string_variations + variations.map(&:to_sym)
-           rescue
-            # if Variations not defined
-            # self:: is important beacuse want to evalute wrt to module that pulss this in
-            term = self.const_get(constant.to_s)
-            opts[:string_only] ? [term.to_s] : [term.to_s, term.to_sym]
-          end
+          variations = self::Variations.const_get(constant.to_s)
+          string_variations = variations.map(&:to_s)
+          opts[:string_only] ? string_variations : string_variations + variations.map(&:to_sym)
+         rescue
+          # if Variations not defined
+          # self:: is important beacuse want to evalute wrt to module that pulss this in
+          term = self.const_get(constant.to_s)
+          opts[:string_only] ? [term.to_s] : [term.to_s, term.to_sym]
         end
 
         def hash_key_if_match?(hash, variations)

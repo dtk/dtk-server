@@ -25,7 +25,7 @@ module DTK; class Clone; class ChildContext
           if tr_match = ndx_tag_tr[tag]
             ndx_tag_stub_node[tag] = stub_node
           else
-            raise ErrorUsage.new("There is no node in inventory with tag (#{tag})")
+            fail ErrorUsage.new("There is no node in inventory with tag (#{tag})")
           end
         end
         ndx_tag_stub_node.inject([]) do |ret, (tag, stub_node)|
@@ -39,7 +39,7 @@ module DTK; class Clone; class ChildContext
         # assuming the free nodes are interchangable; pick one for each match
         num_free = free_nodes.size
         if stub_nodes.find(&:is_node_group?)
-          raise Error.new('Not implemented: looking for free nodes with a node group')
+          fail Error.new('Not implemented: looking for free nodes with a node group')
         end
         num_needed = stub_nodes.size
         if num_free < num_needed
@@ -80,7 +80,7 @@ module DTK; class Clone; class ChildContext
       def raise_error_need_more_nodes(num_free, num_needed)
         num  = (num_needed == 1 ? '1 free node is' : "#{num_needed} free nodes are")
         free = (num_free == 1 ? '1 is' : "#{num_free} are")
-        raise ErrorUsage.new("Cannot stage the assembly template because #{num} needed, but just #{free} available")
+        fail ErrorUsage.new("Cannot stage the assembly template because #{num} needed, but just #{free} available")
       end
 
       def hash_els(stub_node, target_refs)

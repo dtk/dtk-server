@@ -3,7 +3,7 @@ module XYZ
   class Extract
     class << self
       def into_directory(compressed_file, target_dir, opts = {})
-        raise Error.new("directory (#{target_dir}) does not exist") unless File.directory?(target_dir)
+        fail Error.new("directory (#{target_dir}) does not exist") unless File.directory?(target_dir)
         # TODO: rmove or make work with windows raise Error.new("directory (#{target_dir}) is not fully qualified") unless fully_qualified_dir_path?(target_dir)
         load_and_return_adapter_class(compressed_file).into_directory(compressed_file, target_dir, opts)
       end
@@ -24,7 +24,7 @@ module XYZ
         adapter_name =
           if compressed_file =~ /\.tar\.gz$/ then :tar_gz
           else
-            raise Error.new("not treating compressed file (#{compressed_file})")
+            fail Error.new("not treating compressed file (#{compressed_file})")
           end
         CachedAdapterClasses[adapter_name] ||= DynamicLoader.load_and_return_adapter_class('extract', adapter_name)
       end
@@ -46,7 +46,7 @@ module XYZ
         if filter.size == 1 && filter.keys.first == :modules
           not filter[:modules].include?(relative_path.split('/').first)
         else
-          raise Error.new("Not treating filter: #{filter.inspect}")
+          fail Error.new("Not treating filter: #{filter.inspect}")
         end
       end
     end

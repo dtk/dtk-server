@@ -8,14 +8,14 @@ module DTK; class Component
       # also if assert with less keys; it delete those ones omitted
       def self.create_or_update?(node, component_type, attr_hash)
         component_type = component_type.to_s
-        raise ErrorUsage.new("Not able to find 'key_name' in provided data, 'key_name' is required field") unless attr_hash[:key_name]
+        fail ErrorUsage.new("Not able to find 'key_name' in provided data, 'key_name' is required field") unless attr_hash[:key_name]
         internal_hash = HashForm.convert_to_internal(attr_hash[:key_name], component_type, node.id, attr_hash)
         update_from_hash_assignments(node.id_handle(), internal_hash)
         get_component(node, attr_hash[:key_name], component_type).id_handle()
       end
 
       def self.delete(node, component_type, attr_hash)
-        raise ErrorUsage.new("Not able to find 'key_name' in provided data, 'key_name' is required field") unless attr_hash[:key_name]
+        fail ErrorUsage.new("Not able to find 'key_name' in provided data, 'key_name' is required field") unless attr_hash[:key_name]
         cmp = get_component(node, attr_hash[:key_name], component_type.to_s)
 
         Model.delete_instance(cmp.id_handle()) if cmp

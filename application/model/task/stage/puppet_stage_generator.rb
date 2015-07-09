@@ -41,7 +41,7 @@ module XYZ
          scl_ret = scl_group.values
          scl_ret << scl_assembly
 
-         return cd_ret, scl_ret
+         [cd_ret, scl_ret]
       end
     end
   end

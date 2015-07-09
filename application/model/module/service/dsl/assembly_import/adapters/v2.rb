@@ -64,7 +64,7 @@ module DTK; class ServiceModule
           # its ok to delete from assembly_hash/workflow
           if assembly_action = workflow.delete('assembly_action')
             unless  assembly_action == 'create'
-              raise ErrorUsage.new("Unexpected workflow task action (#{assembly_action})")
+              fail ErrorUsage.new("Unexpected workflow task action (#{assembly_action})")
             end
           end
           task_template_ref = task_action = Task::Template.default_task_action()
@@ -131,7 +131,7 @@ module DTK; class ServiceModule
               Log.error('Not implemented yet have node bindings with explicit properties')
               {}
             else
-              raise ParsingError.new('Unexpected form of node binding', opts_file_path(opts))
+              fail ParsingError.new('Unexpected form of node binding', opts_file_path(opts))
             end
           h.merge(merge_hash)
         end
@@ -146,7 +146,7 @@ module DTK; class ServiceModule
             if ret.nil?
               err_msg << "\nThere is a nil value after this term"
             end
-            raise ParsingError.new(err_msg, cmp_input)
+            fail ParsingError.new(err_msg, cmp_input)
           end
         end
         ret

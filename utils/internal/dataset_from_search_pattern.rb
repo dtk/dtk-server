@@ -5,12 +5,12 @@ module XYZ
       class << self
         def create_dataset_from_search_object(search_object)
           search_pattern = search_object.search_pattern
-          raise Error.new('search pattern is nil') unless search_pattern
-          raise Error::NotImplemented.new("processing of search pattern of type #{search_pattern.class}") unless search_pattern.is_a?(SearchPatternSimple)
+          fail Error.new('search pattern is nil') unless search_pattern
+          fail Error::NotImplemented.new("processing of search pattern of type #{search_pattern.class}") unless search_pattern.is_a?(SearchPatternSimple)
           relation_in_search_pattern = search_pattern.find_key(:relation)
           mh_in_search_pattern = search_object.model_handle.createMH(model_name: relation_in_search_pattern)
 
-          raise Error.new("illegal model name (#{relation_in_search_pattern}) in search pattern") unless DB_REL_DEF[relation_in_search_pattern]
+          fail Error.new("illegal model name (#{relation_in_search_pattern}) in search pattern") unless DB_REL_DEF[relation_in_search_pattern]
 
           sequel_filter_wo_auth, vcol_sql_fns = SimpleSearchPattern::ret_sequel_filter_and_vcol_sql_fns(search_pattern, mh_in_search_pattern)
           sequel_filter = DB.augment_for_authorization(sequel_filter_wo_auth, mh_in_search_pattern)
@@ -122,7 +122,7 @@ module XYZ
             return nil if filter_hash.empty?
             vcol_sql_fns = {}
             sequel_filter = ret_sequel_filter(filter_hash, model_handle, vcol_sql_fns)
-            return [sequel_filter, vcol_sql_fns.empty? ? nil : vcol_sql_fns]
+            [sequel_filter, vcol_sql_fns.empty? ? nil : vcol_sql_fns]
           end
 
           def self.ret_filter_hash(search_pattern)
@@ -168,7 +168,7 @@ module XYZ
                  when :oneof
                   SQL.in(el_args[0], el_args[1])
                  else
-                  raise ErrorPatternNotImplemented.new(:comparison_op, el_op)
+                  fail ErrorPatternNotImplemented.new(:comparison_op, el_op)
                 end
               end
             end
@@ -179,7 +179,7 @@ module XYZ
               when :or
                 SQL.or(*and_list)
               else
-                raise Error.new("unexpected operator #{op}")
+                fail Error.new("unexpected operator #{op}")
             end
           end
 
@@ -226,12 +226,12 @@ module XYZ
                 # strip off model_name__ prefix and discard non matching prefixes
                 (qualified_col.to_s =~ Regexp.new('^(.+)__(.+)$')) ? (Regexp.last_match(1).to_sym == model_name ? Regexp.last_match(2).to_sym : nil) : qualified_col
               end.compact
-              cols_to_add = cols_to_add + cols_to_add_remote
+              cols_to_add += cols_to_add_remote
             end
 
             # this fn only adds real columns neededd by base_field set or vcol_sql_fns (vcols with alias processed in process_local_and_remote_dependencies
             cols_to_add_local = base_field_set.extra_local_columns(vcol_sql_fns)
-            cols_to_add = cols_to_add + cols_to_add_local if cols_to_add_local
+            cols_to_add += cols_to_add_local if cols_to_add_local
 
             processed_field_set = processed_field_set.with_added_cols(*cols_to_add)
             # always include id column

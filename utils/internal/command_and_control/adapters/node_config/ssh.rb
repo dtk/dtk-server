@@ -30,7 +30,7 @@ module DTK
         password = ssh_credentials[:ssh_password]
 
         unless callbacks = (opts[:receiver_context] || {})[:callbacks]
-          raise Error.new('Unexpected that no calls given')
+          fail Error.new('Unexpected that no calls given')
         end
 
         install_script = CommandAndControl.install_script(node)

@@ -9,7 +9,7 @@ module DTK
       # problems within transaction after do update; transaction is aborted if any errors found
       Transaction do
         node_module_dsl_obj = create_dsl_object_from_impl(impl_obj, opts)
-        raise node_module_dsl_obj if ParsingError.is_error?(node_module_dsl_obj)
+        fail node_module_dsl_obj if ParsingError.is_error?(node_module_dsl_obj)
 
         update_opts = { override_attrs: { 'module_branch_id' => module_branch_idh.get_id() } }
         update_opts.merge!(version: version) if version

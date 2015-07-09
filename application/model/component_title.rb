@@ -73,7 +73,7 @@ module DTK
       return nil unless component #convienence so dont have to check argument being passed is nil
       display_name = component[:display_name] || (component.is_a?(Component) && component.get_field?(:display_name))
       unless display_name
-        raise Error.new('Parameter (component) should have :display_name field')
+        fail Error.new('Parameter (component) should have :display_name field')
       end
       component_type, title = parse_component_display_name(display_name)
       title

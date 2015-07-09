@@ -115,7 +115,7 @@ module DTK
       PerformanceService.log("REQUEST_PARAMS=#{request.params.to_json}")
       if rest_request?
         unless (action_set || []).size == 1
-          raise Error.new('If rest response action set must just have one element')
+          fail Error.new('If rest response action set must just have one element')
         end
         PerformanceService.start('PERF_OPERATION_DUR')
         run_rest_action(action_set.first, parent_model_name)
@@ -154,7 +154,7 @@ module DTK
             ctrl_result[:content][index][:assign_type] = (ctrl_result[:content][index][:assign_type] || action[:assign_type] || dflt_assign_type).to_sym
 
             # set js with base cache uri path
-            ctrl_result[:content][index][:src] = "#{R8::Config[:base_js_cache_uri]}/#{ctrl_result[:content][index][:src]}" if !ctrl_result[:content][index][:src].nil?
+            ctrl_result[:content][index][:src] = "#{R8::Config[:base_js_cache_uri]}/#{ctrl_result[:content][index][:src]}" unless ctrl_result[:content][index][:src].nil?
           end
         end
 
@@ -227,7 +227,7 @@ module DTK
         variables: variables
       )
 
-      return a.call
+      a.call
     end
 
     def ret_search_object(processed_params, model_name, parent_model_name = nil)
@@ -283,7 +283,7 @@ module DTK
           ret[param_name] = nil
           Log.info("action set param #{param_name} not specfied in action set call")
         end
-        i = i + 1
+        i += 1
       end
       ret
     end

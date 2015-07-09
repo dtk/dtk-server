@@ -36,7 +36,7 @@ module DTK
        when 'match'
         match(target, opts)
        else
-        raise Error.new("Unexpected type (#{self[:type]}) in node binding ruleset")
+        fail Error.new("Unexpected type (#{self[:type]}) in node binding ruleset")
       end
     end
 
@@ -66,7 +66,7 @@ module DTK
     private
 
     def match(_target, _opts = {})
-      raise Error.new('TODO: not implemented yet')
+      fail Error.new('TODO: not implemented yet')
     end
 
     def clone(target, opts = {})
@@ -88,7 +88,7 @@ module DTK
         filter: [:and, [:eq, :node_binding_rs_id, id()], [:eq, :type, 'image']]
       }
       ret = Model.get_objs(id_handle.createMH(:node), sp_hash).find { |r| r[:external_ref][:image_id] == node_template_ref[:image_id] }
-      raise Error.new('Cannot find associated node template') unless ret
+      fail Error.new('Cannot find associated node template') unless ret
       ret
     end
   end

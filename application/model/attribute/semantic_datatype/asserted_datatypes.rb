@@ -46,7 +46,7 @@ module DTK; class Attribute
         elsif v.is_a?(FalseClass) || v == 'false'
           false
         else
-          raise Error.new("Bad boolean type (#{v.inspect})") #this should not be reached since v is validated before this fn called
+          fail Error.new("Bad boolean type (#{v.inspect})") #this should not be reached since v is validated before this fn called
         end
       }
     end

@@ -38,7 +38,7 @@ module DTK; class ModuleDSL; class V1
           case ext_ref['type']
           when 'puppet_class' then 'class_name'
           when 'puppet_definition' then 'definition_name'
-          else raise Error.new("unexpected component type (#{ext_ref['type']})")
+          else fail Error.new("unexpected component type (#{ext_ref['type']})")
           end
         # TODO: may need to append module name
         ret[ext_ref_key] = ext_ref['name']

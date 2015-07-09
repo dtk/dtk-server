@@ -34,7 +34,7 @@ class FieldR8
     field_obj = Kernel.const_get(fieldClass).new(field_meta)
     field_obj.set_includes(@r8_view_ref)
 
-    return field_obj.render(view_type, renderMode)
+    field_obj.render(view_type, renderMode)
   end
 
   # This adds the js exe call for the given field meta
@@ -71,7 +71,7 @@ class FieldR8
       'good' => 'Four',
     }
 =end
-    return options
+    options
   end
 
   private

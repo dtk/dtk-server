@@ -52,7 +52,7 @@ module DTK; class ConfigAgent
           ret << { version: normalize_to_three_parts(match[1]), constraint: '>=' }
           ret << { version: normalize_to_three_parts(match[1].to_i + 1), constraint: '<' }
         else
-          raise Error.new("error parsing version constraints string: #{versions_string})")
+          fail Error.new("error parsing version constraints string: #{versions_string})")
         end
         rest_string
       end

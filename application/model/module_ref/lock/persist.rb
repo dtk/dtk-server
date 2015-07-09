@@ -44,7 +44,7 @@ module DTK; class ModuleRef
 
       def self.raise_persistence_error(msg, module_ref_lock)
         unless msg =~ /:$/
-           msg = msg + ':'
+           msg += ':'
         end
         Log.error_pp([msg, module_ref_lock])
       end

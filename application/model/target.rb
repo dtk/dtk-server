@@ -57,7 +57,7 @@ module DTK
        when :nodes
          Node::TargetRef.list(self)
        else
-        raise Error.new("TODO: not implemented yet: processing of info_about(#{about})")
+        fail Error.new("TODO: not implemented yet: processing of info_about(#{about})")
       end
     end
 

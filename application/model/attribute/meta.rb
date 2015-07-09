@@ -20,7 +20,7 @@ module XYZ; class Attribute
       # TODO: not used yet column :value_actual, :json, :ret_keys_as_symbols => false
       # TODO: may rename attribute_value to desired_value
       virtual_column :attribute_value, type: :json, local_dependencies: [:value_asserted, :value_derived],
-        sql_fn: SQL::ColRef.coalesce(:value_asserted, :value_derived)
+                                       sql_fn: SQL::ColRef.coalesce(:value_asserted, :value_derived)
 
       # TODO: should collapse the semantic types
       # columns related to the data/semantic type
@@ -60,7 +60,7 @@ module XYZ; class Attribute
       one_to_many :dependency #for ports indicating what they can connect to
 
       virtual_column :dependencies, type: :json, hidden: true,
-        remote_dependencies:         [
+                                    remote_dependencies:         [
          {
            model_name: :dependency,
            alias: :dependencies,
@@ -71,7 +71,7 @@ module XYZ; class Attribute
          }]
 
       virtual_column :component_parent, type: :json, hidden: true,
-        remote_dependencies:         [
+                                        remote_dependencies:         [
          {
            model_name: :component,
            alias: :component_parent,
@@ -82,7 +82,7 @@ module XYZ; class Attribute
          }]
 
         virtual_column :component_module_parent, type: :json, hidden: true,
-          remote_dependencies:           [
+                                                 remote_dependencies:           [
            {
              model_name: :component,
              join_type: :inner,
@@ -99,7 +99,7 @@ module XYZ; class Attribute
 
       # finds both component parents with node and dircet node parent
       virtual_column :node_component_info, type: :json, hidden: true,
-        remote_dependencies:         [{
+                                           remote_dependencies:         [{
            model_name: :node,
            convert: true,
            alias: :direct_node,
@@ -124,7 +124,7 @@ module XYZ; class Attribute
                                       }]
 
       virtual_column :port_info, type: :boolean, hidden: true,
-      remote_dependencies:         [
+                                 remote_dependencies:         [
          {
            model_name: :port,
            alias: :port_external,
@@ -161,7 +161,7 @@ module XYZ; class Attribute
       virtual_column :qualified_attribute_name, type: :varchar, hidden: true #not giving dependences because assuming right base_object included in col list
 
       virtual_column :linked_attributes, type: :json, hidden: true,
-        remote_dependencies:         [
+                                         remote_dependencies:         [
          {
            model_name: :attribute_link,
            join_type: :inner,

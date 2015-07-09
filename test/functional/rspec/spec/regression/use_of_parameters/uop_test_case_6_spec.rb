@@ -51,7 +51,7 @@ def check_param_existance_on_node(dtk_common, node_name, param_name_list)
     param_check
   end
 
-  return param_check
+  param_check
 end
 
 def check_param_existance_on_attribute(dtk_common, node_name, param_name_list)
@@ -72,7 +72,7 @@ def check_param_existance_on_attribute(dtk_common, node_name, param_name_list)
     end
   end
 
-  return param_check
+  param_check
 end
 
 describe '(Use Of Parameters) Test Case 6: Check possibility to query list of nodes/components/attributes of particular service' do

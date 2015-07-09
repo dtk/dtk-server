@@ -130,7 +130,7 @@ module DTK; class ModuleDSL
             prefix = Regexp.last_match(1)
             unqual_name = Regexp.last_match(2)
             unless prefix == module_name
-              raise ErrorUsage::Parsing.new("Component (#{processed_name}) has a module name not equal to the base module name (#{module_name})")
+              fail ErrorUsage::Parsing.new("Component (#{processed_name}) has a module name not equal to the base module name (#{module_name})")
             end
             processed_name = "#{module_name}__#{unqual_name}"
           end
@@ -245,7 +245,7 @@ module DTK; class ModuleDSL
           case data[:type]
           when :foreign_dependency
             self[:name] = data[:name]
-          else raise Error.new("Unexpected dependency type (#{data[:type]})")
+          else fail Error.new("Unexpected dependency type (#{data[:type]})")
           end
         end
       end
@@ -257,7 +257,7 @@ module DTK; class ModuleDSL
           return if opts[:reify]
           case data[:type]
           when :imported_collection then initialize__imported_collection(data)
-          else raise Error.new("unexpeced link def type (#{data[:type]})")
+          else fail Error.new("unexpeced link def type (#{data[:type]})")
           end
         end
       end
@@ -324,7 +324,7 @@ module DTK; class ModuleDSL
           elsif parse_struct.is_imported_collection?()
             initialize__from_imported_collection(parse_struct)
           else
-            raise Error.new("Unexpected parse structure type (#{parse_struct.class})")
+            fail Error.new("Unexpected parse structure type (#{parse_struct.class})")
           end
         end
 

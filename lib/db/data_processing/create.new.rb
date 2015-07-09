@@ -63,7 +63,7 @@ module XYZ
             duplicate_count = sequel_select.join_table(:inner, ds, match_cols).count
             if duplicate_count > 0
               # TODO: make this a specfic error
-              raise Error.new("found #{duplicate_count} duplicates")
+              fail Error.new("found #{duplicate_count} duplicates")
             end
            when :allow
             ds_to_group = sequel_select.join_table(:inner, ds, match_cols, { table_alias: :existing })
@@ -100,7 +100,7 @@ module XYZ
         else
           ds.import(columns, sequel_select_with_cols)
           # TODO: need to get ids and set
-          raise Error.new('have not implemented create_from_select when db adapter does not support insert_returning_sql  not set')
+          fail Error.new('have not implemented create_from_select when db adapter does not support insert_returning_sql  not set')
         end
         ret
       end
@@ -195,7 +195,7 @@ module XYZ
           new_id = insert_into_db(factory_idh, db_rel, scalar_assignments.merge(merge_attrs))
         end
 
-  raise Error.new('error while inserting element') if new_id.nil?
+  fail Error.new('error while inserting element') if new_id.nil?
 
   new_uri  = RestURI::ret_new_uri(factory_idh[:uri], ref, ref_num)
 

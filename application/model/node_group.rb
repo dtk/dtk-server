@@ -137,7 +137,7 @@ module DTK
     def self.name_to_id(model_handle, name)
       sp_hash =  {
         cols: [:id],
-           filter: [:and,
+        filter: [:and,
                     [:eq, :display_name, name],
                     [:eq, :type, 'node_group_instance'],
                     [:neq, :datacenter_datacenter_id, nil]]
@@ -148,13 +148,13 @@ module DTK
     def self.id_to_name(model_handle, id)
       sp_hash =  {
         cols: [:display_name],
-           filter: [:and,
+        filter: [:and,
                     [:eq, :id, id],
                     [:eq, :type, 'node_group_instance'],
                     [:neq, :datacenter_datacenter_id, nil]]
       }
       rows_raw = get_objs(model_handle, sp_hash)
-      return rows_raw.first[:display_name]
+      rows_raw.first[:display_name]
     end
 
     def get_canonical_template_node
@@ -184,7 +184,7 @@ module DTK
           filter: [:and, [:eq, :node_id, node_id], [:eq, :node_group_id, ng_id]]
         }
         redundant_links = Model.get_objs(model_handle(:node_group_relation), sp_hash)
-        raise Error.new('Node already member of node group') unless redundant_links.empty?
+        fail Error.new('Node already member of node group') unless redundant_links.empty?
       end
       # create the node_group_relation item to indicate node group membership
       create_row = {

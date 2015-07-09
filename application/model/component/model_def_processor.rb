@@ -26,7 +26,7 @@ module DTK
       attr_mh = component.model_handle.create_childMH(:attribute)
       attr_hash = Aux::hash_subset(field_def, CreateFields)
       unless attr_hash[:display_name]
-        raise Error.new('display_name required in field_def')
+        fail Error.new('display_name required in field_def')
       end
       attr_hash[:ref] = attr_hash[:display_name]
       attr_hash[:semantic_data_type] ||= Attribute::SemanticDatatype.default().to_s

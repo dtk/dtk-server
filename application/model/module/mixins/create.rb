@@ -12,7 +12,7 @@ module DTK; module ModuleMixins
       module_exists = module_exists?(project_idh, module_name, namespace)
       if module_exists and not opts[:no_error_if_exists]
         full_module_name = Namespace.join_namespace(namespace, module_name)
-        raise ErrorUsage.new("Module (#{full_module_name}) cannot be created since it exists already")
+        fail ErrorUsage.new("Module (#{full_module_name}) cannot be created since it exists already")
       end
 
       create_opts = {
@@ -102,12 +102,12 @@ module DTK; module ModuleMixins
     # TODO: Marked for removal [Haris]
     def create_new_version(base_version, new_version, opts = {})
       unless aug_base_branch = get_augmented_workspace_branch(Opts.new(filter: { version: base_version }))
-        raise ErrorUsage.new("There is no module (#{pp_module_name()}) in the workspace")
+        fail ErrorUsage.new("There is no module (#{pp_module_name()}) in the workspace")
       end
 
       # make sure there is a not an existing branch that matches the new one
       if get_module_branch_matching_version(new_version)
-        raise ErrorUsage.new("Version exists already for module (#{pp_module_name(new_version)})")
+        fail ErrorUsage.new("Version exists already for module (#{pp_module_name(new_version)})")
       end
       opts_create_new_branch = Aux.hash_subset(opts, [:sha])
       repo_for_new_version = aug_base_branch.create_new_branch_from_this_branch?(get_project(), aug_base_branch[:repo], new_version, opts_create_new_branch)

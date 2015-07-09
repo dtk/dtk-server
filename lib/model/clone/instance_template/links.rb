@@ -12,13 +12,13 @@ module DTK; class Clone
 
       def template(instance)
         match = match_instance(instance)
-        match[:template] || raise(Error.new("Cannot find matching template for instance (#{instance.inspect})"))
+        match[:template] || fail(Error.new("Cannot find matching template for instance (#{instance.inspect})"))
       end
 
       def match_instance(instance)
         instance_id = instance.id
         unless match = find { |l| l.instance && l.instance.id == instance_id }
-          raise(Error.new("Cannot find match for instance (#{instance.inspect})"))
+          fail(Error.new("Cannot find match for instance (#{instance.inspect})"))
         end
         match
       end

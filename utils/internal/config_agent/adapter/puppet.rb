@@ -274,9 +274,9 @@ module DTK
               { 'type' => 'attribute' }
              when 'puppet_imported_collection'
               { 'type' => 'imported_collection',
-              'resource_type' =>  ext_ref[:resource_type] }
+                'resource_type' =>  ext_ref[:resource_type] }
              else
-              raise Error.new("unexpected attribute type (#{ext_ref[:type]})")
+              fail Error.new("unexpected attribute type (#{ext_ref[:type]})")
             end
         end
         size = array_form_path.size

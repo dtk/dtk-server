@@ -45,7 +45,7 @@ module XYZ
   return nil if addrs.nil?
   addrs.map {|addr, info|
     { addr: { address: addr, family: info['family'],
-                     info: info.reject { |k, _v| k == 'family' } } }
+              info: info.reject { |k, _v| k == 'family' } } }
         }
       end
 

@@ -417,16 +417,6 @@ Style/MultilineOperationIndentation:
 Style/MultilineTernaryOperator:
   Enabled: false
 
-# Offense count: 69
-# Cop supports --auto-correct.
-Style/NegatedIf:
-  Enabled: false
-
-# Offense count: 9
-# Cop supports --auto-correct.
-Style/NegatedWhile:
-  Enabled: false
-
 # Offense count: 7
 Style/NestedTernaryOperator:
   Enabled: false
@@ -436,16 +426,6 @@ Style/NestedTernaryOperator:
 Style/Next:
   Enabled: false
 
-# Offense count: 17
-# Cop supports --auto-correct.
-Style/NilComparison:
-  Enabled: false
-
-# Offense count: 8
-# Cop supports --auto-correct.
-# Configuration parameters: IncludeSemanticChanges.
-Style/NonNilCheck:
-  Enabled: false
 
 # Offense count: 145
 # Cop supports --auto-correct.
@@ -480,17 +460,6 @@ Style/Proc:
 Style/RaiseArgs:
   Enabled: false
 
-# Offense count: 24
-# Cop supports --auto-correct.
-Style/RedundantBegin:
-  Enabled: false
-
-# Offense count: 299
-# Cop supports --auto-correct.
-# Configuration parameters: AllowMultipleReturnValues.
-Style/RedundantReturn:
-  Enabled: false
-
 # Offense count: 275
 # Cop supports --auto-correct.
 Style/RedundantSelf:
@@ -506,23 +475,6 @@ Style/RegexpLiteral:
 Style/RescueModifier:
   Enabled: false
 
-# Offense count: 18
-# Cop supports --auto-correct.
-Style/SelfAssignment:
-  Enabled: false
-
-# Offense count: 34
-# Cop supports --auto-correct.
-# Configuration parameters: AllowAsExpressionSeparator.
-Style/Semicolon:
-  Enabled: false
-
-# Offense count: 1128
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, SupportedStyles.
-Style/SignalException:
-  Enabled: false
-
 # Offense count: 119
 # Configuration parameters: Methods.
 Style/SingleLineBlockParams:
@@ -531,12 +483,6 @@ Style/SingleLineBlockParams:
 # Offense count: 3
 # Cop supports --auto-correct.
 Style/SpecialGlobalVars:
-  Enabled: false
-
-# Offense count: 4
-# Cop supports --auto-correct.
-# Configuration parameters: ExactNameMatch, AllowPredicates, AllowDSLWriters, IgnoreClassMethods, Whitelist.
-Style/TrivialAccessors:
   Enabled: false
 
 # Offense count: 30

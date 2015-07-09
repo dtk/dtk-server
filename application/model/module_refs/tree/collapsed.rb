@@ -8,7 +8,7 @@ module DTK; class ModuleRefs
           @module_refs.each_pair do |module_name, subtree|
             if missing_module_ref = subtree.isa_missing_module_ref?()
               if opts[:raise_errors]
-                raise missing_module_ref.error()
+                fail missing_module_ref.error()
               else
                 next
               end
@@ -47,7 +47,7 @@ module DTK; class ModuleRefs
         if strategy == :pick_first_level
           choose_namespaces__pick_first_level!()
         else
-          raise Error.new("Currently not supporting namespace resolution strategy '#{strategy}'")
+          fail Error.new("Currently not supporting namespace resolution strategy '#{strategy}'")
         end
       end
       DefaultStrategy = :pick_first_level

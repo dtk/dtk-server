@@ -42,7 +42,7 @@ module DTK
             if v.is_a?(ModuleRef)
               h.merge(k.to_sym => ModuleRef.reify(mh, v))
             else
-              raise Error.new("Unexpected value associated with component module ref: #{v.inspect}")
+              fail Error.new("Unexpected value associated with component module ref: #{v.inspect}")
             end
           end
           #This comes from parsing the dsl file
@@ -52,14 +52,14 @@ module DTK
             h.merge(parse_form_module_name(r).to_sym => ModuleRef.reify(mh, internal_form))
           end
         else
-          raise Error.new("Unexpected input (#{object.class})")
+          fail Error.new("Unexpected input (#{object.class})")
         end
       end
 
       def self.parse_form_module_name(parse_form_hash)
         ret = parse_form_hash[:component_module]
         ErrorUsage::Parsing.raise_error_if_not(ret, String,
-         type: 'module name', for: 'component module ref')
+                                               type: 'module name', for: 'component module ref')
         ret
       end
 

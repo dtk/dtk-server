@@ -45,7 +45,7 @@ module DTK
         ret
       else
         response = (x ? x.inspect : 'nil')
-        raise Error.new("Unexpected response: #{response}")
+        fail Error.new("Unexpected response: #{response}")
       end
     end
 

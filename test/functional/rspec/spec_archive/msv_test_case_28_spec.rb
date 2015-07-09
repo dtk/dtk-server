@@ -25,7 +25,7 @@ def get_metadata(module_name)
   module_id = ActiveRecord::Base.connection.execute(sql1)
   sql2 = "select external_ref from module.branch where component_id = #{module_id.first['id']}"
   module_metadata = ActiveRecord::Base.connection.execute(sql2)
-  return module_metadata.first['external_ref']
+  module_metadata.first['external_ref']
 end
 
 describe '(Modules, Services and Versioning) Test Case 28: Import new module from git (does not have dependencies) and check ModuleFile metadata' do

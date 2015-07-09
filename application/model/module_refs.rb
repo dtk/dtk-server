@@ -42,7 +42,7 @@ module DTK
       ret = false
       cmp_modules_with_namespaces.each do |cmp_mod|
         [:display_name, :namespace_name].each do |key|
-          raise Error.new("Unexpected that cmp_modules_with_namespaces element does not have key: #{key}") unless cmp_mod[key]
+          fail Error.new("Unexpected that cmp_modules_with_namespaces element does not have key: #{key}") unless cmp_mod[key]
         end
         cmp_mod_name = cmp_mod[:display_name]
         unless component_module_ref?(cmp_mod_name)
@@ -173,7 +173,7 @@ module DTK
     end
     def self.meta_filename_path
       ServiceModule::DSLParser.default_rel_path?(:component_module_refs) ||
-        raise(Error.new('Unexpected that cannot compute a meta_filename_path for component_module_refs'))
+        fail(Error.new('Unexpected that cannot compute a meta_filename_path for component_module_refs'))
     end
 
     def dsl_hash_form
@@ -203,11 +203,11 @@ module DTK
     def project_idh
       return @project_idh if @project_idh
       unless service_id = @parent.get_field?(:service_id)
-        raise Error.new('Cannot find project from parent object')
+        fail Error.new('Cannot find project from parent object')
       end
       service_module = @parent.model_handle(:service_module).createIDH(id: service_id).create_object()
       unless project_id = service_module.get_field?(:project_project_id)
-        raise Error.new('Cannot find project from parent object')
+        fail Error.new('Cannot find project from parent object')
       end
       @parent.model_handle(:project).createIDH(id: project_id)
     end

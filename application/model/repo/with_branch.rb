@@ -12,7 +12,7 @@ module DTK
 
       def initial_sync_with_remote(remote, remote_repo_info)
         unless R8::Config[:repo][:workspace][:use_local_clones]
-          raise Error.new('Not implemented yet: initial_sync_with_remote_repo w/o local clones')
+          fail Error.new('Not implemented yet: initial_sync_with_remote_repo w/o local clones')
         end
 
         remote_url = remote.repo_url()
@@ -21,7 +21,7 @@ module DTK
 
         if remote_branches = remote_repo_info[:branches]
           unless remote_branches.include?(remote_branch)
-            raise ErrorUsage.new("Cannot find selected version on remote repo #{remote_repo_info[:full_name] || ''}")
+            fail ErrorUsage.new("Cannot find selected version on remote repo #{remote_repo_info[:full_name] || ''}")
           end
         end
         commit_sha = RepoManager.initial_sync_with_remote_repo(branch_name(), get_field?(:repo_name), remote_ref, remote_url, remote_branch)
@@ -55,7 +55,7 @@ module DTK
       end
       def branch_name
         unless ret = self[:branch_name]
-          raise Error.new("Unexpected that self[:branch_name] is null for: #{inspect()}")
+          fail Error.new("Unexpected that self[:branch_name] is null for: #{inspect()}")
         end
         ret
       end

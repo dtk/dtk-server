@@ -6,7 +6,7 @@ module DTK; class Task; class Template
 
       def initialize(component, opts = {})
         unless component[:node].is_a?(Node)
-          raise Error.new('ComponentAction.new must be given component argument with :node key')
+          fail Error.new('ComponentAction.new must be given component argument with :node key')
         end
         super(opts)
         @component = component
@@ -72,7 +72,7 @@ module DTK; class Task; class Template
           if filter.keys == [:source]
             return nil unless filter[:source] == source_type()
           else
-            raise Error.new("Not treating filter of form (#{filter.inspect})")
+            fail Error.new("Not treating filter of form (#{filter.inspect})")
           end
         end
         node_name = ((!opts[:no_node_name_prefix]) && component()[:node][:display_name])

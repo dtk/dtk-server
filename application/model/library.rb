@@ -81,10 +81,10 @@ module XYZ
         filter = [:eq, :library_library_id, id()]
         Node::Template.list(model_handle, filter: filter)
       when :components
-        raise Error.new('should not be reached')
+        fail Error.new('should not be reached')
       # Component::Template.list(model_handle,:library_idh => id_handle())
       else
-        raise Error.new("TODO: not implemented yet: processing of info_about(#{about})")
+        fail Error.new("TODO: not implemented yet: processing of info_about(#{about})")
       end.sort { |a, b| a[:display_name] <=> b[:display_name] }
     end
 
@@ -135,7 +135,7 @@ module XYZ
       elsif model_name == :node
         col = :node_assembly_parts_node_attrs
       else
-        raise Error.new("unexpected model_name #{model_name}")
+        fail Error.new("unexpected model_name #{model_name}")
       end
       sp_hash = {
         filter: [:and, [:eq, :id, new_id_handle.get_id()], [:eq, :type, 'composite']],

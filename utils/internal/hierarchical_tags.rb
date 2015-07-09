@@ -15,7 +15,7 @@ module DTK
         elsif obj.is_a?(Array) && !obj.find { |el| !el.is_a?(String) }
           obj.inject({}) { |h, k| h.merge(k.to_sym => nil) }
         else
-          raise Error.new("Illegal input to form hierarchical hash (#{obj.inspect})")
+          fail Error.new("Illegal input to form hierarchical hash (#{obj.inspect})")
         end
       replace(replace_hash)
     end

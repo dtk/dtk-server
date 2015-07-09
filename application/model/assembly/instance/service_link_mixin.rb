@@ -47,14 +47,14 @@ module DTK
           if matching_link_types.include?(dep_name)
             dep_name
           else
-            raise ErrorUsage.new("Specified dependency name (#{dep_name}) does not match any of the dependencies defined between component type (#{input_cmp_name}) and component type (#{output_cmp_name}): #{matching_link_types.join(',')}")
+            fail ErrorUsage.new("Specified dependency name (#{dep_name}) does not match any of the dependencies defined between component type (#{input_cmp_name}) and component type (#{output_cmp_name}): #{matching_link_types.join(',')}")
           end
         elsif matching_link_types.size == 1
           matching_link_types.first
         elsif matching_link_types.empty?
-          raise ErrorUsage.new("There are no dependencies defined between component type (#{input_cmp_name}) and component type (#{output_cmp_name})")
+          fail ErrorUsage.new("There are no dependencies defined between component type (#{input_cmp_name}) and component type (#{output_cmp_name})")
         else #matching_link_types.size > 1
-          raise ErrorUsage.new("Ambiguous which dependency between component type (#{input_cmp_name}) and component type (#{output_cmp_name}) selected; select one of #{matching_link_types.join(',')})")
+          fail ErrorUsage.new("Ambiguous which dependency between component type (#{input_cmp_name}) and component type (#{output_cmp_name}) selected; select one of #{matching_link_types.join(',')})")
         end
       end
     end

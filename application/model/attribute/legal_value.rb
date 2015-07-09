@@ -12,7 +12,7 @@ module DTK; class Attribute
         end
       end
       unless errors.empty?
-        raise errors
+        fail errors
       end
     end
     class Error < ErrorUsage

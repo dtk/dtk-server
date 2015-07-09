@@ -51,7 +51,7 @@ module XYZ
         def is_unfettered_security_group?(security_group)
           rules =  security_group[:ip_permissions]
           return nil unless rules
-          return true #TODO: stub
+          true #TODO: stub
           # TODO: need to replace; this is rule for right_aws, not fog rules.find{|x|x.has_key?(:group) and x[:group] == sg_name} ? true : nil
         end
       end

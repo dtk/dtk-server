@@ -12,7 +12,7 @@ module DTK
         ret = []
         cols_needed = (create_opts[:returning_sql_cols] || []) - create_override_attrs.keys
         unless missing = (cols_needed - [:ancestor_id]).empty?
-          raise Error.new("Not implemented: get_mapped_nodes returning cols (#{missing.join(',')})")
+          fail Error.new("Not implemented: get_mapped_nodes returning cols (#{missing.join(',')})")
         end
         sp_hash = {
           cols: [:id, :group_id, :ancestor_id],

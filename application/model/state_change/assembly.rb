@@ -56,7 +56,7 @@ module DTK; class StateChange
        when :power_on_node
         node_state_changes__power_on_nodes(assembly, target_idh, opts)
        else
-        raise Error.new("Unexpcted task_action_class (#{task_action_class})")
+        fail Error.new("Unexpcted task_action_class (#{task_action_class})")
       end
     end
 
@@ -71,7 +71,7 @@ module DTK; class StateChange
       target_mh = target_idh.createMH()
       last_level = pending_create_node(target_mh, [target_idh], added_filters: added_state_change_filters)
       state_change_mh = target_mh.create_childMH(:state_change)
-      while not last_level.empty?
+      until last_level.empty?
         ret += last_level
         last_level = pending_create_node(state_change_mh, last_level.map(&:id_handle))
       end
@@ -84,7 +84,7 @@ module DTK; class StateChange
     def self.node_state_changes__power_on_nodes(assembly, _target_idh, opts = {})
       ret = []
       unless opts[:just_leaf_nodes]
-        raise Error.new('Only supporting option :just_leaf_nodes')
+        fail Error.new('Only supporting option :just_leaf_nodes')
       end
       nodes = opts[:nodes] || assembly.get_leaf_nodes(cols: [:id, :display_name, :type, :external_ref, :admin_op_status])
       nodes_to_start = nodes.reject { |n| n[:admin_op_status] == 'running' }

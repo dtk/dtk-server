@@ -7,7 +7,7 @@ module DTK; class Attribute
         new_attr = create_attributes([cmp_template]).first
         if update_dsl = opts[:update_dsl]
           unless module_branch = update_dsl[:module_branch]
-            raise Error.new('If update_dsl is specified then module_branch must be provided')
+            fail Error.new('If update_dsl is specified then module_branch must be provided')
           end
           module_branch.incrementally_update_component_dsl([new_attr], component_template: cmp_template)
         end
@@ -34,7 +34,7 @@ module DTK; class Attribute
         ndx_nodes  = ret_matching_nodes(parent_idh).inject({}) { |h, r| h.merge(r[:id] => r) }
         if ndx_nodes.empty?
           if create_this_type?(opts)
-            raise ErrorUsage.new("Node name (#{pattern_node_name()}) in attribute does not match an existing node")
+            fail ErrorUsage.new("Node name (#{pattern_node_name()}) in attribute does not match an existing node")
           end
           return ret
         end
@@ -43,7 +43,7 @@ module DTK; class Attribute
         ndx_cmps = ret_matching_components(ndx_nodes.values, cmp_fragment).inject({}) { |h, r| h.merge(r[:id] => r) }
         if ndx_cmps.empty?
           if create_this_type?(opts)
-            raise ErrorUsage.new("Component name (#{pattern_component_name()}) in attribute does not match an existing component in node (#{pattern_node_name()})")
+            fail ErrorUsage.new("Component name (#{pattern_component_name()}) in attribute does not match an existing component in node (#{pattern_node_name()})")
           end
           return ret
         end

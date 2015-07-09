@@ -50,7 +50,7 @@ module DTK; class Task
         if component = hash[:component]
           unless component.is_a?(Component)
             unless task_idh
-              raise Error.new('If hash[:component] is not of type Component then task_idh must be supplied')
+              fail Error.new('If hash[:component] is not of type Component then task_idh must be supplied')
             end
             hash[:component] = Component.create_from_model_handle(component, task_idh.createMH(:component))
           end
@@ -80,7 +80,7 @@ module DTK; class Task
           node = state_change_list.first[:node]
           cmp_order = get_total_component_order(cmp_deps, node)
         else
-          raise Error.new('No intra node ordering strategy found')
+          fail Error.new('No intra node ordering strategy found')
         end
         component_actions = cmp_order.map do |(component_id, deps)|
           create_from_state_change(state_change_list.select { |a| a[:component][:id] == component_id }, deps)
@@ -117,7 +117,7 @@ module DTK; class Task
         cmp_order = generate_component_order(cmp_ids_with_deps)
         # update order in node table
         node.update_ordered_component_ids(cmp_order)
-        return cmp_order
+        cmp_order
       end
 
       # Amar: Checking if existing order in node table is consistent
@@ -135,7 +135,7 @@ module DTK; class Task
         rescue Exception => e
           return false
         end
-        return true
+        true
       end
 
       def self.get_cmp_ids_with_deps(cmp_deps)
@@ -156,7 +156,7 @@ module DTK; class Task
           non_null_deps = info[:component_dependencies].map { |ct| cmp_type_to_id[ct] }.compact
           h.merge(id => non_null_deps)
         end
-        return cmp_ids_with_deps.nil? ? {} : cmp_ids_with_deps
+        cmp_ids_with_deps.nil? ? {} : cmp_ids_with_deps
       end
 
       # returns array of form [component_id,deps]
@@ -229,7 +229,7 @@ module DTK; class Task
           (action_method || cmp).config_agent_type
         end.uniq
         if ca_types.find(&:nil?)
-          raise Error.new("Unexpected that nil is in config_agent_types: #{ca_types.inspect}")
+          fail Error.new("Unexpected that nil is in config_agent_types: #{ca_types.inspect}")
         end
 
         if ca_types.size == 1
@@ -237,7 +237,7 @@ module DTK; class Task
         elsif ca_types.empty?
           ConfigAgent::Type.default_symbol()
         else
-          raise ErrorUsage.new("Actions with different providers (#{ca_types.join(',')}) cannot be in the same workflow stage")
+          fail ErrorUsage.new("Actions with different providers (#{ca_types.join(',')}) cannot be in the same workflow stage")
         end
       end
       private_class_method :config_agent_type

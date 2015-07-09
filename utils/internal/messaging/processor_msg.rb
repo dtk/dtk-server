@@ -5,7 +5,7 @@ module XYZ
     attr_reader :msg_type, :msg_content, :target_object_id
     def initialize(hash)
       unless (illegal_keys = hash.keys - [:msg_type, :msg_content, :target_object_id]).empty?
-        raise Error.new("illegal key(s) (#{illegal_keys.join(', ')}) in ProcessorMsg.new")
+        fail Error.new("illegal key(s) (#{illegal_keys.join(', ')}) in ProcessorMsg.new")
       end
       @msg_type = hash[:msg_type]
       @msg_content = hash[:msg_content] || {}
@@ -27,7 +27,7 @@ module XYZ
     end
 
     def key
-      raise Error.new('missing target_object_id') if @target_object_id.nil?
+      fail Error.new('missing target_object_id') if @target_object_id.nil?
       type = ret_obj_type_assoc_with_msg_type(@msg_type)
       MessageBusMsgOut.key(@target_object_id, type)
     end
@@ -41,7 +41,7 @@ module XYZ
         when :execute_on_node
           :node
         else
-    raise Error.new("unexpected msg_type: #{msg_type}")
+    fail Error.new("unexpected msg_type: #{msg_type}")
       end
     end
   end

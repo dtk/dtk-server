@@ -48,10 +48,10 @@ module DTK; class NodeBindings
           n.get_field?(:display_name) == @node_name
         end
         unless matching_node_instance
-          raise ErrorUsage.new("Assembly (#{assembly_instance[:display_name]}) does not have node (#{@node_name})")
+          fail ErrorUsage.new("Assembly (#{assembly_instance[:display_name]}) does not have node (#{@node_name})")
         end
         unless matching_node_instance.get_field?(:type) == 'instance'
-          raise ErrorUsage.new("Assembly (#{assembly_instance[:display_name]}) node (#{@node_name}) cannot be matched because it is just staged")
+          fail ErrorUsage.new("Assembly (#{assembly_instance[:display_name]}) node (#{@node_name}) cannot be matched because it is just staged")
         end
         [assembly_instance, matching_node_instance]
       end

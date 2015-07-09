@@ -99,7 +99,7 @@ module DTK; class ConfigAgent; module Adapter
           case cmp_with_attrs['component_type']
            when 'class'
             cmp = cmp_with_attrs['name']
-            raise Error.new('No component name') unless cmp
+            fail Error.new('No component name') unless cmp
             if imp_stmt = needs_import_statement?(cmp, module_name)
               @class_lines << imp_stmt
             end
@@ -109,7 +109,7 @@ module DTK; class ConfigAgent; module Adapter
             @class_lines << "class {\"#{cmp}\": #{attr_str}}"
            when 'definition'
             unless defn_cmp = cmp_with_attrs['name']
-              raise ErrorUsage.new('No definition name')
+              fail ErrorUsage.new('No definition name')
             end
 
             name_attr = nil
@@ -122,7 +122,7 @@ module DTK; class ConfigAgent; module Adapter
               end
             end.compact
             unless name_attr
-              raise ErrorUsage.new("No name attribute for definition component (#{defn_cmp})")
+              fail ErrorUsage.new("No name attribute for definition component (#{defn_cmp})")
             end
 
             if use_anchors_for_class_wrappers?()
@@ -183,7 +183,7 @@ module DTK; class ConfigAgent; module Adapter
             case attr_info['type']
              when 'attribute'
               ret[attr_name] = val
-             else raise Error.new("unexpected attribute type (#{attr_info['type']})")
+             else fail Error.new("unexpected attribute type (#{attr_info['type']})")
             end
           end
           ret

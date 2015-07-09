@@ -34,7 +34,7 @@ class PerfLogParser
         custom_results << { measurement: k, measurement_perf: v }
       end
     end
-    return results, custom_results
+    [results, custom_results]
   end
 
   def self.get_field(line, regex)
@@ -107,7 +107,7 @@ class PerfLogParser
     end
 
     puts 'Parsing done.'
-    return results.values.sort { |a, b| a[:operation] <=> b[:operation] }, custom_results.values.sort { |a, b| a[:measurement] <=> b[:measurement] }
+    [results.values.sort { |a, b| a[:operation] <=> b[:operation] }, custom_results.values.sort { |a, b| a[:measurement] <=> b[:measurement] }]
   end
 
   def self.get_sql(results, operation, assembly, about)
@@ -130,10 +130,10 @@ class PerfLogParser
 
     def self.get_avg(tot, cnt)
       return tot if tot == 0
-      return ((tot / cnt) * 10.0).round() / 10.0
+      ((tot / cnt) * 10.0).round() / 10.0
     end
     def self.is_record_match(record, operation, assembly, about)
-      return record[:operation] == operation && record[:assembly_subtype] == assembly && record[:about] == about
+      record[:operation] == operation && record[:assembly_subtype] == assembly && record[:about] == about
     end
 end
 
@@ -233,7 +233,7 @@ class CLI
     help += output_format_custom % ['print [REGEX]', '- Prints results to console']
     help += output_format_custom % ['print_csv [PATH]', '- Prints results to CSV file']
     help += "\n\n"
-    return help
+    help
   end
 end
 

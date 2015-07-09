@@ -16,7 +16,7 @@ module DTK
           begin
             output_hash = execute_puppet_forge_call(pf_module_name, base_install_dir, puppet_version, force)
             unless 'success'.eql?(output_hash['result'])
-              raise ErrorUsage, "Puppet Forge Error: #{output_hash['error']['oneline']}"
+              fail ErrorUsage, "Puppet Forge Error: #{output_hash['error']['oneline']}"
             end
 
             module_dependencies = check_for_dependencies(base_install_dir, pf_module_name, output_hash)
@@ -64,8 +64,8 @@ module DTK
               dp_full_id += " (#{dp_version})" if dp_version
               dp['dependencies'] = nested_dependency_info[dp_name.gsub('-', '/')]
               ActiveSupport::HashWithIndifferentAccess.new(name: dp_name, module_name: dp_module_name,
-                module_namespace: dp_module_namespace, version: dp_version,
-                full_id: dp_full_id, module_type: 'component_module')
+                                                           module_namespace: dp_module_namespace, version: dp_version,
+                                                           full_id: dp_full_id, module_type: 'component_module')
             end
          end
         end
@@ -86,7 +86,7 @@ module DTK
 
         def raise_puppet_forge_error(output_err)
           puppet_forge_err = output_err.split(REMOVE_PATTERN).first
-          raise ErrorUsage, "Puppet Forge Error: #{puppet_forge_err}"
+          fail ErrorUsage, "Puppet Forge Error: #{puppet_forge_err}"
         end
 
         # hash with forge_name as key and value is an array with dependencies

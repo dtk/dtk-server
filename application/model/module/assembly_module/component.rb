@@ -20,7 +20,7 @@ module DTK; class AssemblyModule
       am_version = assembly_module_version()
 
       base_branch = component_module.get_workspace_branch_info()
-      raise ErrorNoChangesToModule.new(@assembly, component_module) unless base_branch
+      fail ErrorNoChangesToModule.new(@assembly, component_module) unless base_branch
 
       unless local_branch = component_module.get_workspace_module_branch(am_version)
         create_assembly_branch?(component_module, opts)
@@ -78,13 +78,13 @@ module DTK; class AssemblyModule
       unless branch = component_module.get_workspace_module_branch(am_version)
         component_module_id = component_module.id()
         if @assembly.get_component_modules().find { |r| r[:id] == component_module_id }
-          raise ErrorNoChangesToModule.new(@assembly, component_module)
+          fail ErrorNoChangesToModule.new(@assembly, component_module)
         else
-          raise ErrorNoComponentsInModule.new(@assembly, component_module)
+          fail ErrorNoComponentsInModule.new(@assembly, component_module)
         end
       end
       unless ancestor_branch = branch.get_ancestor_branch?()
-        raise Error.new('Cannot find ancestor branch')
+        fail Error.new('Cannot find ancestor branch')
       end
       branch_name = branch[:branch]
       ancestor_branch.merge_changes_and_update_model?(component_module, branch_name, opts)
@@ -107,7 +107,7 @@ module DTK; class AssemblyModule
       # TODO: DTK-2014; use modification of ModuleRefs::Lock that passs in module name that looking for
       module_refs_lock = ModuleRefs::Lock.get(assembly, types: types)
       unless namespace ||= module_refs_lock.matching_namespace?(module_name)
-        raise(ErrorUsage.new("No object of type component module with name (#{module_name}) exists"))
+        fail(ErrorUsage.new("No object of type component module with name (#{module_name}) exists"))
       end
       if opts[:ret_locked_branch_sha]
         opts[:ret_locked_branch_sha] = module_refs_lock.matching_locked_branch_sha?(module_name)
@@ -177,7 +177,7 @@ module DTK; class AssemblyModule
                  [:eq, :node_node_id, nil],
                  [:eq, :component_type, cmp_template.get_field?(:component_type)]]
       }
-      Model.get_obj(cmp_template.model_handle(), sp_hash) || raise(Error.new('Unexpected that branch_cmp_template is nil'))
+      Model.get_obj(cmp_template.model_handle(), sp_hash) || fail(Error.new('Unexpected that branch_cmp_template is nil'))
     end
 
     def get_applicable_component_instances(component_module, _opts = {})

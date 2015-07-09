@@ -31,7 +31,7 @@ module DTK
             missing << im unless ref_component_modules.include?(im.to_sym)
           end
 
-          raise ParsingError::MissingFromModuleRefs.new(modules: missing) unless missing.empty?
+          fail ParsingError::MissingFromModuleRefs.new(modules: missing) unless missing.empty?
         end
       end
 
@@ -54,7 +54,7 @@ module DTK
         cmp_template_ids_still_present = Model.get_objs(model_handle(:component), sp_hash).map { |r| r[:id] }
         referenced_cmp_templates = @snapshot.referenced_cmp_templates(cmp_template_ids_still_present)
         unless referenced_cmp_templates.empty?
-          raise ParsingError::RefComponentTemplates.new(referenced_cmp_templates)
+          fail ParsingError::RefComponentTemplates.new(referenced_cmp_templates)
         end
       end
 

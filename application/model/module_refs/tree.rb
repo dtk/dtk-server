@@ -46,7 +46,7 @@ module DTK
         end
 
         multi_ns.delete_if { |_k, v| v.size < 2 }
-        return missing, multi_ns
+        [missing, multi_ns]
       end
 
       def check_refs(refs, missing, multi_ns)
@@ -129,7 +129,7 @@ module DTK
           path = parent_path + [ns_module_name]
           if parent_path.include?(ns_module_name)
             recursive_loop = path.join(' -> ')
-            raise ErrorUsage.new("Module '#{ns_module_name}' is in a recursive loop: #{recursive_loop}")
+            fail ErrorUsage.new("Module '#{ns_module_name}' is in a recursive loop: #{recursive_loop}")
           end
           if child
             add_module_ref!(module_name, child)

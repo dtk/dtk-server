@@ -8,7 +8,7 @@ module DTK; class StateChange
       target_mh = target_idh.createMH()
       last_level = pending_create_node(target_mh, [target_idh], added_filters: [added_sc_filter])
       state_change_mh = target_mh.create_childMH(:state_change)
-      while not last_level.empty?
+      until last_level.empty?
         ret += last_level
         last_level = pending_create_node(state_change_mh, last_level.map(&:id_handle), added_filters: [added_sc_filter])
       end
@@ -79,7 +79,7 @@ module DTK; class StateChange
       # can be overrwitten
       def self.get_nodes_and_node_to_ng_index(mh, opts)
         unless nodes = opts[:nodes]
-          raise Error.new('Expecting opts[:nodes]')
+          fail Error.new('Expecting opts[:nodes]')
         end
         node_filter = opts[:node_filter] || DTK::Node::Filter::NodeList.new(nodes.map(&:id_handle))
         node_to_ng = DTK::NodeGroup.get_node_groups_containing_nodes(mh, node_filter)
@@ -94,14 +94,14 @@ module DTK; class StateChange
       # can be overrwitten
       def self.get_nodes_and_node_to_ng_index(mh, opts)
         unless node = opts[:node]
-          raise Error.new('Expecting opts[:nodes]')
+          fail Error.new('Expecting opts[:nodes]')
         end
         super(mh, nodes: [node])
       end
 
       def self.ret_node_sc_filter(_target_idh, opts)
         unless node = opts[:node]
-          raise Error.new('Expecting opts[:node]')
+          fail Error.new('Expecting opts[:node]')
         end
         [:eq, :node_id, node[:id]]
       end
@@ -112,7 +112,7 @@ module DTK; class StateChange
 
       def self.ret_node_sc_filter(_target_idh, opts)
         unless node_group = opts[:node_group]
-          raise Error.new('Expecting opts[:node_group]')
+          fail Error.new('Expecting opts[:node_group]')
         end
         nodes = node_group.get_node_group_members()
         (!nodes.empty?) && [:oneof, :node_id, nodes.map { |r| r[:id] }]
@@ -122,7 +122,7 @@ module DTK; class StateChange
       # this is for finding node - ng relation given a specific ng
       def self.get_nodes_and_node_to_ng_index(_mh, opts)
         unless node_group = opts[:node_group]
-          raise Error.new('Expecting opts[:node_group]')
+          fail Error.new('Expecting opts[:node_group]')
         end
         nodes = node_group.get_node_group_members()
         ng_id = node_group[:id]

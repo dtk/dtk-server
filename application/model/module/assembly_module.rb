@@ -21,7 +21,7 @@ module DTK
     def assembly_module_version(assembly = nil)
       assembly ||= @assembly
       unless assembly
-        raise Error.new('@assembly should not be null')
+        fail Error.new('@assembly should not be null')
       end
       self.class.assembly_module_version(assembly)
     end

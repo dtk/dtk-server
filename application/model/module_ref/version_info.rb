@@ -21,7 +21,7 @@ module DTK; class ModuleRef
            if ModuleVersion::Semantic.legal_format?(version_string)
              new(version_string)
            else
-            raise Error.new("Unexpected form of version string (#{version_string})")
+            fail Error.new("Unexpected form of version string (#{version_string})")
           end
         end
       end
@@ -36,7 +36,7 @@ module DTK; class ModuleRef
         if is_scalar?() then is_scalar?()
         elsif empty? then nil
         else
-          raise Error.new("Not treating the version type (#{ret.inspect})")
+          fail Error.new("Not treating the version type (#{ret.inspect})")
         end
       end
 
@@ -49,7 +49,7 @@ module DTK; class ModuleRef
           Log.info("Ignoring constraint of form (#{constraint.inspect})")
           new()
         else
-          raise Error.new("Constraint of form (#{constraint.inspect}) not treated")
+          fail Error.new("Constraint of form (#{constraint.inspect}) not treated")
         end
       end
 

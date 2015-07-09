@@ -119,7 +119,7 @@ module R8Tpl
         language = ((user && user.respond_to?(:language)) ? user.language : nil) || R8::Config[:default_language]
         return Cache[model_name][language][:options_list] if (Cache[model_name] && Cache[model_name][language] && Cache[model_name][language][:options_list])
 
-        return nil
+        nil
       end
 
       def get_model_defs(model_name)
@@ -163,7 +163,7 @@ module R8Tpl
       end
 
       def set_app_def
-        if (!Cache[:app])
+        unless (Cache[:app])
           content = {}
           file_name = "#{R8::Config[:meta_base_dir]}/app_def.rb"
           if File.exists?(file_name)

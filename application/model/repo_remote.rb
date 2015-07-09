@@ -91,11 +91,11 @@ module DTK
       repo_remotes = get_objs(repo_remote_mh, filter: [:and, [:eq, :display_name, repo_name], [:eq, :repo_id, repo_id]])
 
       unless repo_remotes.empty?
-        raise ErrorUsage, "Remote identifier '#{repo_name}' already exists"
+        fail ErrorUsage, "Remote identifier '#{repo_name}' already exists"
       end
 
       unless repo_url.match(/^git@.*:.*\.git\/?.*?$/)
-        raise ErrorUsage, 'We are sorry, we only support SSH remotes - provided URL does not seem to be proper SSH url'
+        fail ErrorUsage, 'We are sorry, we only support SSH remotes - provided URL does not seem to be proper SSH url'
       end
 
       remote_repo_create_hash = {
@@ -114,7 +114,7 @@ module DTK
       repo_remotes = get_objs(repo_remote_mh, filter: [:and, [:eq, :display_name, repo_name], [:eq, :repo_id, repo_id]])
 
       if repo_remotes.empty?
-        raise ErrorUsage, "Remote '#{repo_name}' not found"
+        fail ErrorUsage, "Remote '#{repo_name}' not found"
       end
 
       repo_remotes.each { |rr| rr.delete_instance(rr.id_handle) }
@@ -145,7 +145,7 @@ module DTK
     def self.set_default_remote(repo_remote_mh, repo_id, repo_name)
       repo_remote = get_obj(repo_remote_mh, filter: [:and, [:eq, :display_name, repo_name], [:eq, :repo_id, repo_id]])
 
-      raise ErrorUsage, "Not able to find remote '#{repo_name}', aborting action." unless repo_remote
+      fail ErrorUsage, "Not able to find remote '#{repo_name}', aborting action." unless repo_remote
 
       default_repo_remote = get_obj(repo_remote_mh, filter: [:and, [:eq, :is_default, true], [:eq, :repo_id, repo_id]])
 
@@ -224,7 +224,7 @@ module DTK
 
     def self.default_remote!(repo_remote_mh, repo_id)
       repo_remote = get_obj(repo_remote_mh, filter: [:and, [:eq, :is_default, true], [:eq, :repo_id, repo_id]])
-      raise ErrorUsage, 'Not able to find default remote for given repo!' unless repo_remote
+      fail ErrorUsage, 'Not able to find default remote for given repo!' unless repo_remote
       repo_remote
     end
 

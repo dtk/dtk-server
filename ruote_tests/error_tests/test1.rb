@@ -19,7 +19,7 @@ class ErrorParticipant
 
   def consume(_workitem)
     puts 'error'
-    raise 'Houston, something is wrong'
+    fail 'Houston, something is wrong'
   end
 end
 

@@ -4,11 +4,11 @@ require File.expand_path('processor_msg', File.dirname(__FILE__))
 module XYZ
   class MessageProcessor
     def process_message(_hash_message)
-      raise Error::NotImplemented.new("process_message for #{self.class}\n")
+      fail Error::NotImplemented.new("process_message for #{self.class}\n")
     end
 
     def object_id(_msg)
-      raise Error::NotImplemented.new("object_id for #{self.class}\n")
+      fail Error::NotImplemented.new("object_id for #{self.class}\n")
     end
   end
 
@@ -68,7 +68,7 @@ module XYZ
         @processors.each_key do |object_id|
           proc_msg = ProcessorMsg.create(
             { msg_type: :propagate_asserted_value,
-            target_object_id: object_id })
+              target_object_id: object_id })
     topic_name = proc_msg.topic()
     key = proc_msg.key()
           msg_bus_msg = proc_msg.marshal_to_message_bus_msg()

@@ -16,8 +16,8 @@ class Fieldtext < Fieldbase
 
     self.add_class(@default_class)
 
-    if (!field_meta[:rows].nil?) then @rows = field_meta[:rows] end
-    if (!field_meta[:cols].nil?) then @columns = field_meta[:cols] end
+    unless (field_meta[:rows].nil?) then @rows = field_meta[:rows] end
+    unless (field_meta[:cols].nil?) then @columns = field_meta[:cols] end
   end
 
   def get_field_edit
@@ -45,7 +45,7 @@ class Fieldtext < Fieldbase
           field_string = self.get_field_edit_textarea_rtpl()
       end
     end
-    return field_string
+    field_string
   end
 
   def get_field_display
@@ -73,7 +73,7 @@ class Fieldtext < Fieldbase
           field_string = self.get_field_display_textarea_rtpl()
       end
     end
-    return field_string
+    field_string
   end
 
   def get_field_list
@@ -101,7 +101,7 @@ class Fieldtext < Fieldbase
           field_string = self.get_field_list_textarea_rtpl();
       end
     end
-    return field_string
+    field_string
   end
 
   # This returns the Edit View of a input of type text in HTML form
@@ -109,7 +109,7 @@ class Fieldtext < Fieldbase
   def get_field_edit_text_html
     (@columns >= 1) ? size = 'size="' + @columns.to_s + '"' : size = ''
 
-    return '<input type="text" id="' + @id + '" name="' + @name + '" class="' + @class_txt + '" value="' + @value + '" ' + size + ' />'
+    '<input type="text" id="' + @id + '" name="' + @name + '" class="' + @class_txt + '" value="' + @value + '" ' + size + ' />'
   end
 
   # This returns the Edit View of a input of type text in Javascript form
@@ -118,7 +118,7 @@ class Fieldtext < Fieldbase
     # TODO: add JS rendering when generating JS fields class for client side rendering
     (@columns >= 1) ? size = 'size="' + @columns.to_s + '"' : size = ''
 
-    return '<JS NOT IMPLEMENT YET>'
+    '<JS NOT IMPLEMENT YET>'
   end
 
   # This returns the View of type edit for an field of type text in TPL/Smarty form
@@ -129,13 +129,13 @@ class Fieldtext < Fieldbase
     if @disabled == true then disabled = 'disabled="disabled"'
     else disabled = '' end
     name = @field_meta[:override_name] || @name
-    return '<input type="text" ' + disabled + ' id="' + @id + '" name="' + name + '" class="' + @class_txt + '" value="{%=' + @model_name + '[:' + @name + ']%}" ' + size + ' />'
+    '<input type="text" ' + disabled + ' id="' + @id + '" name="' + name + '" class="' + @class_txt + '" value="{%=' + @model_name + '[:' + @name + ']%}" ' + size + ' />'
   end
 
   # This returns the View of a input of type text in TPL/Smarty form
   # protected function
   def get_field_display_text_rtpl
-    return '{%=' + @model_name + '[:' + @name + ']%}'
+    '{%=' + @model_name + '[:' + @name + ']%}'
   end
 
   # This returns the View of type list for a field of type text in TPL/Smarty form
@@ -161,7 +161,7 @@ class Fieldtext < Fieldbase
   def getFieldEditTextTPL_KEEP
     (@columns >= 1) ? size = 'size="' + @columns.to_s + '"' : size = ''
 
-    return '<input type="text" id="{%=' + @model_name + '[:id]%}" name="{%=' + @model_name + '[:name]%}" class="{%=' + @model_name + '[:class]%}" value="{%=' + @model_name + '[:value]%}" size="{%=' + @model_name + '[:size]%}" />'
+    '<input type="text" id="{%=' + @model_name + '[:id]%}" name="{%=' + @model_name + '[:name]%}" class="{%=' + @model_name + '[:class]%}" value="{%=' + @model_name + '[:value]%}" size="{%=' + @model_name + '[:size]%}" />'
   end
 
   # This returns the Edit View of a textarea in HTML form
@@ -173,7 +173,7 @@ class Fieldtext < Fieldbase
 
     # TODO: re-examin how to set rows and cols, right now its coded into the element string and not in a smarty variable
     # for run-time rendering
-    return '<textarea id="' + @id + '" name="' + @name + '" class="' + @class_txt + '" ' + rows + ' ' + cols + '>' + @value + '</textarea>'
+    '<textarea id="' + @id + '" name="' + @name + '" class="' + @class_txt + '" ' + rows + ' ' + cols + '>' + @value + '</textarea>'
   end
 
   # This returns the Edit View of a textarea in Javascript form
@@ -183,7 +183,7 @@ class Fieldtext < Fieldbase
     (@columns >= 1) ? cols = ' cols="' + @columns.to_s + '"' : cols = ''
     (@rows >= 1) ? rows = 'rows="' + @rows.to_s + '"' : rows = ' rows="1"'
 
-    return '<JS NOT IMPLEMENT YET>'
+    '<JS NOT IMPLEMENT YET>'
   end
 
   # This returns the Edit View of a textarea in TPL/Smarty form
@@ -193,7 +193,7 @@ class Fieldtext < Fieldbase
     (@rows >= 1) ? rows = ' rows="' + @rows.to_s + '"' : rows = ' rows="1"'
     # TODO: re-examin how to set rows and cols, right now its coded into the element string and not in a smarty variable
     # for run-time rendering
-    return '<textarea id="' + @id + '" name="' + @name + '" class="' + @class_txt + '" ' + rows + ' ' + cols + '>{%=' + @model_name + '[:' + @name + ']%}</textarea>'
+    '<textarea id="' + @id + '" name="' + @name + '" class="' + @class_txt + '" ' + rows + ' ' + cols + '>{%=' + @model_name + '[:' + @name + ']%}</textarea>'
   end
 
   # This returns the View of a textarea in TPL/Smarty form
@@ -203,12 +203,12 @@ class Fieldtext < Fieldbase
     (@rows >= 1) ? rows = ' rows="' + @rows.to_s + '"' : rows = ' rows="1"'
 
     # TODO: add nl2br if switching away from showing inside of a disabled textarea
-    return '<textarea disabled="disabled" id="' + @id + '" name="' + @name + '" class="' + @class_txt + '" ' + rows + ' ' + cols + '>{%=' + @model_name + '[:' + @name + ']%}</textarea>'
+    '<textarea disabled="disabled" id="' + @id + '" name="' + @name + '" class="' + @class_txt + '" ' + rows + ' ' + cols + '>{%=' + @model_name + '[:' + @name + ']%}</textarea>'
   end
 
   # This returns the View of a textarea in TPL/Smarty form
   # protected function
   def get_field_list_textarea_rtpl
-    return '{%=model[row_num][:' + @name + ']%}'
+    '{%=model[row_num][:' + @name + ']%}'
   end
 end

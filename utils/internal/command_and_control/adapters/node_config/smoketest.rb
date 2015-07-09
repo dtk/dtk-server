@@ -12,7 +12,7 @@ module DTK
   class SSHDriverTest1
     def self.smoketest_start(_task_idh, _top_task_idh, task_action, opts)
       unless callbacks = (opts[:receiver_context] || {})[:callbacks]
-        raise Error.new('Unexpected that no calls given')
+        fail Error.new('Unexpected that no calls given')
       end
 
       if parent = (opts[:receiver_context] || {})[:parent]

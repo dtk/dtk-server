@@ -50,7 +50,7 @@ module DTK
           hash_content = content
           self[:content] = Content.parse(hash_content)
         else
-          raise Error.new("Unexpected class type (#{content.class}")
+          fail Error.new("Unexpected class type (#{content.class}")
         end
       end
       self[:content]

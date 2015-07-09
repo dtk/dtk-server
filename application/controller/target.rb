@@ -16,7 +16,7 @@ module DTK
         elsif subtype.eql? :template
           Target::Template.list(model_handle())
         else
-          raise ErrorUsage.new("Illegal subtype param (#{subtype})")
+          fail ErrorUsage.new("Illegal subtype param (#{subtype})")
         end
       rest_ok_response response
     end
@@ -62,7 +62,7 @@ module DTK
       iaas_properties[:region] ||= ret_request_params(:region)
 
       unless [:ec2_classic, :ec2_vpc].include?(target_type)
-        raise ErrorUsage.new("Target type '#{target_type}' is not supported")
+        fail ErrorUsage.new("Target type '#{target_type}' is not supported")
       end
       Target::Instance.create_target_ec2(project_idh, provider, target_type, iaas_properties, opts)
       rest_ok_response
@@ -104,7 +104,7 @@ module DTK
         target_instance = create_obj(:target_id, Target::Instance)
         response = Target::Instance.delete_and_destroy(target_instance)
        else
-        raise ErrorUsage.new("Illegal type '#{type}'")
+        fail ErrorUsage.new("Illegal type '#{type}'")
       end
       rest_ok_response response
     end

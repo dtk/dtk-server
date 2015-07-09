@@ -39,7 +39,7 @@ module DTK; class ConfigAgent; class Adapter::Puppet
           errors_cache = (errors_cache ? errors_cache : ParseErrorsCache.new(type())).add(error, Opts.new(file_path: file_path))
         end
       end
-      raise errors_cache.create_error() if errors_cache
+      fail errors_cache.create_error() if errors_cache
       ret
     end
 

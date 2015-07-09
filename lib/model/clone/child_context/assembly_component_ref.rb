@@ -51,7 +51,7 @@ module DTK; class Clone
           node = m[:node]
           old_par_id = node[:id]
           unless node_node_id = (parent_rels.find { |r| r[:old_par_id] == old_par_id } || {})[:node_node_id]
-            raise Error.new("Cannot find old_par_id #{old_par_id} in parent_rels")
+            fail Error.new("Cannot find old_par_id #{old_par_id} in parent_rels")
           end
           component_template = ndx_component_templates[m[:component_template_id]]
           component_template_id = component_template[:id]
@@ -87,7 +87,7 @@ module DTK; class Clone
         ret = Model.create_from_select(component_mh, field_set_to_copy, select_ds, create_override_attrs, aug_create_opts(create_opts))
         ret.each do |r|
           component_ref_id = ndx_to_find_cmp_ref_id[r[:node_node_id]][r[:display_name]]
-          raise Error.new('Variable component_ref_id should not be null') if component_ref_id.nil?
+          fail Error.new('Variable component_ref_id should not be null') if component_ref_id.nil?
           r.merge!(component_ref_id: component_ref_id, component_template_id: r[:ancestor_id])
         end
         ret

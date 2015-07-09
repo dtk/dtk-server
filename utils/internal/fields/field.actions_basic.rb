@@ -17,6 +17,6 @@ class Fieldactions_basic < Fieldbase
       field_string << '<a href="' << R8::Config[:base_uri] << '/xyz/' << action[:route] << '"' << target << '>' << label << '</a>'
     end
 
-    return field_string
+    field_string
   end
 end

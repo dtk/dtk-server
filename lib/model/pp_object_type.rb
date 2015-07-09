@@ -36,7 +36,7 @@ module DTK
               when :s then print_form
               when :p then make_plural(print_form)
               when :pos then make_plural(print_form, plural_or_singular: true)
-              else raise Error.new("Unexpected format (#{format})")
+              else fail Error.new("Unexpected format (#{format})")
             end
           end
         new(string)

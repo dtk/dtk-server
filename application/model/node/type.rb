@@ -15,7 +15,7 @@ module DTK; class Node
 
       def node_group_model_name
         unless is_node_group?()
-          raise Error.new('Should not be called if not a node group')
+          fail Error.new('Should not be called if not a node group')
         end
         Type::NodeGroup.model_name(get_field?(:type))
       end

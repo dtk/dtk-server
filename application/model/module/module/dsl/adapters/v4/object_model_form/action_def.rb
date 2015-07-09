@@ -57,14 +57,14 @@ module DTK; class ModuleDSL; class V4
       def raise_error_if_illegal_action_name(action_name)
         unless action_name =~ LegalActionNameRegex
           err_msg = "The action name '?1' on component '?2' has illegal characters"
-          raise ParsingError.new(err_msg, action_name, cmp_print_form())
+          fail ParsingError.new(err_msg, action_name, cmp_print_form())
         end
       end
       LegalActionNameRegex = /^[a-zA-Z0-9_-]+$/
 
       def raise_error_ill_formed(section_type, obj)
         err_msg = "The following #{section_type} on component '?1' is ill-formed: ?2"
-        raise ParsingError.new(err_msg, cmp_print_form(), obj)
+        fail ParsingError.new(err_msg, cmp_print_form(), obj)
       end
 
       def cmp_print_form

@@ -67,7 +67,7 @@ module DTK
 
       def self.field_info(name)
         unless ret = FieldInfo[name.to_sym]
-          raise Error.new("No node attribute with name (#{name})")
+          fail Error.new("No node attribute with name (#{name})")
         end
         ret
       end

@@ -38,7 +38,7 @@ module DTK; class Task; class Template
             execution_block(:last).splice_in_action!(action_match, :end)
           when :before_action_pos
             execution_block(action_match.execution_block_index()).splice_in_action!(action_match, insert_point)
-          else raise Error.new("Unexpected insert_point (#{insert_point})")
+          else fail Error.new("Unexpected insert_point (#{insert_point})")
         end
       end
       # TODO: have above subsume below
@@ -85,7 +85,7 @@ module DTK; class Task; class Template
         ret = []
         return ret if empty?()
         if find { |eb| !eb.is_a?(ExecutionBlock::Ordered) }
-          raise Error.new('The method ExecutionBlocks#intra_node_stages can only be called if all its elements are ordered')
+          fail Error.new('The method ExecutionBlocks#intra_node_stages can only be called if all its elements are ordered')
         end
         map(&:intra_node_stages)
       end

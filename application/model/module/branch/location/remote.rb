@@ -57,7 +57,7 @@ module DTK; class ModuleBranch
 
         def set_repo_name!(remote_repo_name)
           if @repo_name
-            raise Error.new('Not expected that @repo_name is non nil')
+            fail Error.new('Not expected that @repo_name is non nil')
           end
           @repo_name = remote_repo_name
           self
@@ -65,7 +65,7 @@ module DTK; class ModuleBranch
 
         def repo_name
           if @repo_name.nil?
-            raise Error.new('Not expected that @repo_name is nil')
+            fail Error.new('Not expected that @repo_name is nil')
           end
           @repo_name
         end

@@ -36,11 +36,11 @@ module R8Tpl
     attr_reader :model_name, :view_name, :view_model_ref, :user
 
     attr_accessor :tpl_path, :tpl_contents, :tpl_results, :tpl_file_handle,
-      :template_vars, :js_render_queue, :xhtml_document, :element_count, :ctrl_close_stack,
-      :indent, :num_indents, :panel_set_element_id,
-      :js_file_handle, :js_file_write_path, :js_tpl_callback, :js_file_name, :js_cache_dir,
-      :js_templating_on,
-      :root_js_element_var_name, :root_js_hash, :loop_vars, :ctrl_vars, :js_var_header
+                  :template_vars, :js_render_queue, :xhtml_document, :element_count, :ctrl_close_stack,
+                  :indent, :num_indents, :panel_set_element_id,
+                  :js_file_handle, :js_file_write_path, :js_tpl_callback, :js_file_name, :js_cache_dir,
+                  :js_templating_on,
+                  :root_js_element_var_name, :root_js_hash, :loop_vars, :ctrl_vars, :js_var_header
 
     def initialize(view_path, user, path_type = nil, *args)
       return new_initialize(*args) unless args.empty?
@@ -126,7 +126,7 @@ module R8Tpl
     end
 
     def js_templating_on?
-      return @js_templating_on
+      @js_templating_on
     end
 
     def assign(name, value = nil)
@@ -196,7 +196,7 @@ module R8Tpl
       #      if(!matches.nil?) then cleanStr << matches.post_match end
       cleanStr << matchStr
 
-      return cleanStr
+      cleanStr
     end
 
     def js_tpl_current?
@@ -225,7 +225,7 @@ module R8Tpl
 
   def render_js_dom_tree(nodeList, parentNode = nil)
     for node in nodeList do
-        if !node.cdata?
+        unless node.cdata?
           newJSNode = {
             jsElementVarName: node.name + @element_count.to_s,
             elementType: node.name.downcase,
@@ -329,7 +329,7 @@ module R8Tpl
         end
       end
     end
-    return @js_file_name
+    @js_file_name
   end
 
   def create_root_node
@@ -355,7 +355,7 @@ module R8Tpl
   end
 
   def create_element_js(elemName, jsElementVarName)
-    return 'var ' + jsElementVarName + '= document.createElement("' + elemName + '");'
+    'var ' + jsElementVarName + '= document.createElement("' + elemName + '");'
   end
 
   def add_attr_js(jsElementVarName, elementType, attrName, attrValue)
@@ -609,11 +609,11 @@ p "After Matched Value(s):"+matches.post_match
     # TODO: should make a config option to strip whitespace or not
     #    innerContent.strip!
     retVar = jsElementVarName + '.innerHTML = ' + innerContent + ';'
-    return retVar
+    retVar
   end
 
   def ret_create_element_js(tagName, jsElementVarName)
-    return 'var ' + jsElementVarName + '= document.createElement("' + tagName + '");'
+    'var ' + jsElementVarName + '= document.createElement("' + tagName + '");'
   end
 
   ##################BEGIN NEW TEMPLATE STUBS FOR VIEW HANDLING#################################
@@ -629,7 +629,7 @@ p "After Matched Value(s):"+matches.post_match
       @view_path = process_view_type(path_type, path)
       return @view_path if @view_path
     end
-    raise XYZ::Error.new("files needed to generate view for #{@model_name}/#{@view_name} are not present")
+    fail XYZ::Error.new("files needed to generate view for #{@model_name}/#{@view_name} are not present")
   end
 
   def process_view_type(path_type, path)
@@ -657,7 +657,7 @@ p "After Matched Value(s):"+matches.post_match
     tpl_file_handle = File.open(write_path, 'w')
     tpl_file_handle.write(tpl_content)
     tpl_file_handle.close
-    return true
+    true
   end
 end
 end
@@ -692,7 +692,7 @@ class TplVarParser
   def invalid?
     chr = @var_string[0].chr
     intMatch = Integer(chr) rescue false
-    if chr == nil || chr == '' then return true
+    if chr.nil? || chr == '' then return true
     elsif intMatch == true then return true
     else return false
     end
@@ -727,11 +727,11 @@ class TplVarParser
 
   def to_s
     # change this to return current representation of rendered hash variable
-    return @var_string
+    @var_string
   end
 
   def process
-    while !self.eov?
+    until self.eov?
       if self.atHashStart?
         self.setHashKey
       end
@@ -768,7 +768,7 @@ class TplVarParser
         end
       end
     end
-    return @js_var_header + "['" + @var_name.gsub('@', '') + "']"
+    @js_var_header + "['" + @var_name.gsub('@', '') + "']"
   end
 
   def atHashStart?
@@ -783,7 +783,7 @@ class TplVarParser
        return false
     end
 
-    return true
+    true
   end
 
   def getInnerVarString
@@ -796,7 +796,7 @@ class TplVarParser
       end
       self.advCur
     end
-    return innerStr
+    innerStr
   end
 
   def setHashKey
@@ -839,7 +839,7 @@ class TplVarParser
   end
 
   def eov?
-    return @eov
+    @eov
   end
 end
 end
@@ -892,14 +892,14 @@ class IfElsExpressionParser
 
   def to_s
     # change this to return current representation of rendered hash variable
-    return @expression_string
+    @expression_string
   end
 
   def process
     if (self.isComplex?) then
       # set any leading expression that exists
       leading_expression = ''
-      while !self.atExpressionStart?
+      until self.atExpressionStart?
         leading_expression << @char
         self.advCur
       end
@@ -913,7 +913,7 @@ class IfElsExpressionParser
 
       # set any trailing expression that exists
       trailing_expression = ''
-      while !self.eos?
+      until self.eos?
         trailing_expression << @char
         self.advCur
       end
@@ -987,7 +987,7 @@ class IfElsExpressionParser
       if num_open_expressions != 0 then inner_str << @char end
       self.advCur
     end
-    return inner_str
+    inner_str
   end
 
   def rewind
@@ -995,7 +995,7 @@ class IfElsExpressionParser
   end
 
   def eos?
-    return @eos
+    @eos
   end
 end
 
@@ -1025,21 +1025,21 @@ end
        content = []
        script_includes = @scriptIncludes +
          [{ tplCallback: @js_tpl_callback,
-           src: "js/#{@js_file_name}",
-           templateVars: @template_vars }]
+            src: "js/#{@js_file_name}",
+            templateVars: @template_vars }]
       else
         content = [{ content: @tpl_results, panel: @panel_set_element_id }]
         script_includes = @scriptIncludes
       end
 
       { script: @script,
-       cssIncludes: @cssIncludes,
-       errors: @errors,
-       forms: @forms,
-       views: @views,
-       content: content,
-       data: @data,
-       scriptIncludes: script_includes
+        cssIncludes: @cssIncludes,
+        errors: @errors,
+        forms: @forms,
+        views: @views,
+        content: content,
+        data: @data,
+        scriptIncludes: script_includes
       }
     end
   end

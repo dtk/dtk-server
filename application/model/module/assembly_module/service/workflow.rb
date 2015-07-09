@@ -38,7 +38,7 @@ module DTK; class AssemblyModule
           parse_errors = Task::Template::ConfigComponents.find_parse_errors(hash_content, @assembly)
           Task::Template.create_or_update_from_serialized_content?(@assembly.id_handle(), hash_content, @task_action)
         end
-        raise parse_errors if parse_errors
+        fail parse_errors if parse_errors
       end
 
       private

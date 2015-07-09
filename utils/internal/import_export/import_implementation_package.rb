@@ -35,20 +35,20 @@ module XYZ
         require 'yaml'
         ret = YAML.load_file(r8meta_file)
        else
-        raise Error.new("Type #{r8meta_type} not supported")
+        fail Error.new("Type #{r8meta_type} not supported")
       end
       ret
     end
 
     def self.find_r8meta_file(cmp_or_impl_name, r8meta_type)
       file_ext = TypeMapping[r8meta_type]
-      raise Error.new('illegal type extension') unless file_ext
+      fail Error.new('illegal type extension') unless file_ext
       repo = cmp_or_impl_name.gsub(/__.+$/, '')
       files = Dir.glob("#{R8::Config[:repo][:base_directory]}/#{repo}/r8meta.*.#{file_ext}")
       if files.empty?
-        raise Error.new('Cannot find valid r8meta file')
+        fail Error.new('Cannot find valid r8meta file')
       elsif files.size > 1
-        raise Error.new('Multiple r8meta files found')
+        fail Error.new('Multiple r8meta files found')
       end
       files.first
     end
@@ -64,7 +64,7 @@ module XYZ
                  [:eq, DB.parent_field(parent_idh[:model_name], :implementation), parent_idh.get_id()]]
       }
       rows = Model.get_objs(parent_idh.createMH(:implementation), sp_hash)
-      raise Error.new("Error in finding implementation for component #{component_name}") unless rows.size = 1
+      fail Error.new("Error in finding implementation for component #{component_name}") unless rows.size = 1
       component_hash.merge!(implementation_id: rows.first[:id])
     end
 

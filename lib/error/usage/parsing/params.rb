@@ -34,13 +34,13 @@ module DTK; class ErrorUsage
           if arg.is_a?(Params)
             # make sure that params,opts are at end
             unless i == (args.size - 1) || i == (args.size - 2)
-              raise Error.new("Args of type (#{arg.class}) must be one of last two args")
+              fail Error.new("Args of type (#{arg.class}) must be one of last two args")
             end
             params = arg
             substitute_params!(processed_msg, params)
           elsif arg.is_a?(Opts)
             unless i == (args.size - 1)
-              raise Error.new("Args of type (#{arg.class}) must be end")
+              fail Error.new("Args of type (#{arg.class}) must be end")
             end
             opts = arg
           else

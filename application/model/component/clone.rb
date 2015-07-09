@@ -46,7 +46,7 @@ module DTK
     end
 
     def source_clone_info_opts
-      raise Error.new('component#source_clone_info_opts is deprecated')
+      fail Error.new('component#source_clone_info_opts is deprecated')
       { ret_new_obj_with_cols: [:id, :implementation_id, :component_type, :version, :ancestor_id] }
     end
 

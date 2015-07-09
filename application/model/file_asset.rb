@@ -100,7 +100,7 @@ module DTK
       case self[:type]
         when 'puppet_file' then :puppet
         when 'chef_file' then :chef
-        else raise Error.new("Unexpected type (#{self[:type]})")
+        else fail Error.new("Unexpected type (#{self[:type]})")
       end
     end
 

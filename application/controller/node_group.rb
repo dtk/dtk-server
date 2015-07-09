@@ -46,7 +46,7 @@ module DTK
     def rest__get_attributes
       node_group = create_obj(:node_group_id)
       filter = ret_request_params(:filter)
-      filter = filter && filter.to_sym
+      filter &&= filter.to_sym
       rest_ok_response node_group.get_attributes_print_form(Opts.new(filter: filter))
     end
 
@@ -75,7 +75,7 @@ module DTK
       task = Task.create_from_node_group(node_group_idh, commit_msg)
       unless task
         node_group = node_group_idh.create_object().update_object!(:display_name)
-        raise ErrorUsage.new("No nodes belong to node group (#{node_group[:display_name]})")
+        fail ErrorUsage.new("No nodes belong to node group (#{node_group[:display_name]})")
       end
       task.save!()
       rest_ok_response task_id: task.id

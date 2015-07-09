@@ -34,7 +34,7 @@ def get_node_ec2_public_dns(service_name, node_name)
 
   if !node_info.nil?
     node_ec2_public_dns = node_info['external_ref']['ec2_public_address']
-    if !node_ec2_public_dns.nil?
+    unless node_ec2_public_dns.nil?
       puts 'Node ec2 public dns found!'
       puts ''
       return node_ec2_public_dns
@@ -58,9 +58,9 @@ def index_and_retrieve_document(elasticsearch_host, elasticsearch_http_port)
     document = es.search index: 'my_index', type: 'blog', body: { query: { match: { title: 'My*' } } }
     puts 'Retrieved document:'
     ap document
-    if !document.nil?
+    unless document.nil?
       query_result = document['hits']['hits'].find { |x| x['_index'].include?('my_index') && x['_type'].include?('blog') }
-      if !query_result.nil?
+      unless query_result.nil?
         puts 'Relevant document is retrieved!'
         puts ''
         document_retrieved = true
@@ -74,7 +74,7 @@ def index_and_retrieve_document(elasticsearch_host, elasticsearch_http_port)
     puts ''
   end
 
-  return document_retrieved
+  document_retrieved
 end
 
 describe '(Different Node Templates) Test Case 10: Elasticsearch - Simple scenario' do

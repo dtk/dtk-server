@@ -17,7 +17,7 @@ module DTK; class Clone; class ChildContext
         # for each node that is not new, check if there is componenst already on target nodes that match/conflict
         matches, conflicts = Component::ResourceMatching.find_matches_and_conflicts(aug_cmp_refs)
         unless conflicts.empty?
-          raise ErrorUsage.new('TODO: provide conflict message')
+          fail ErrorUsage.new('TODO: provide conflict message')
         end
         # remove the matches
         unless matches.empty?

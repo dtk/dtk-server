@@ -99,7 +99,7 @@ class DtkCommon
         final_log << line
       end
     end
-    return final_log
+    final_log
   end
 
   def send_request(path, body)
@@ -124,11 +124,11 @@ class DtkCommon
     else
       @error_message = ''
     end
-    return response_JSON
+    response_JSON
   end
 
   def pretty_print_JSON(json_content)
-    return ap json_content
+    ap json_content
   end
 
   def set_default_namespace(namespace)
@@ -141,7 +141,7 @@ class DtkCommon
     else
       puts 'Default namespace has not been set correctly!'
     end
-    return default_namespace_set
+    default_namespace_set
   end
 
   def set_catalog_credentials(catalog_username, catalog_password)
@@ -154,6 +154,6 @@ class DtkCommon
     else
       puts 'Catalog credentials has not been set correctly!'
     end
-    return catalog_credentials_set
+    catalog_credentials_set
   end
 end

@@ -28,7 +28,7 @@ def get_metadata(module_name)
   module_id = ActiveRecord::Base.connection.execute(sql1)
   sql2 = "select external_ref from module.branch where component_id = #{module_id.first['id']}"
   module_metadata = ActiveRecord::Base.connection.execute(sql2)
-  return module_metadata.first['external_ref']
+  module_metadata.first['external_ref']
 end
 
 def change_module_metadata(module_name, new_module_metadata)
@@ -38,7 +38,7 @@ def change_module_metadata(module_name, new_module_metadata)
   module_id = ActiveRecord::Base.connection.execute(sql1)
   sql2 = "update module.branch set external_ref = '#{new_module_metadata}' where component_id = #{module_id.first['id']}"
   module_metadata = ActiveRecord::Base.connection.execute(sql2)
-  return module_metadata
+  module_metadata
 end
 
 describe '(Modules, Services and Versioning) Test Case 31: NEG - Import Module A and Module B from git where Module B has dependency on Module A that is satisfied by name but not with version' do

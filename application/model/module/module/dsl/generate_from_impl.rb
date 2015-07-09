@@ -5,7 +5,7 @@ module DTK; class ModuleDSL
     def self.create(integer_version = nil)
       integer_version ||= ModuleDSL.default_integer_version()
       unless SupportedIntegerVersions.include?(integer_version)
-        raise Error.new("Unexpected integer version (#{integer_version})")
+        fail Error.new("Unexpected integer version (#{integer_version})")
       end
       new(integer_version)
     end
@@ -28,7 +28,7 @@ module DTK; class ModuleDSL
 
     def self.save_dsl_info(meta_info_hash, impl_mh)
       # TODO: check
-      raise Error.new("Need to cehck if meta_info_hash['version'] is right call")
+      fail Error.new("Need to cehck if meta_info_hash['version'] is right call")
       integer_version = meta_info_hash['version']
       config_agent_type = meta_info_hash['config_agent_type']
       module_name = meta_info_hash['module_name']

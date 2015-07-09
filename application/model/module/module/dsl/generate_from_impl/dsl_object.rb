@@ -105,15 +105,15 @@ module DTK; class ModuleDSL
       # dup used because yaml generation is upstream and dont want string refs
       def required_value(key)
         unless key?(key)
-          raise Error.new("meta object does not have key #{key}")
+          fail Error.new("meta object does not have key #{key}")
         end
 
         value_term = self[key]
-        raise Error.new("meta object with key #{key} is null") if value_term.nil?
+        fail Error.new("meta object with key #{key} is null") if value_term.nil?
         return value_term.dup unless value_term.is_a?(DSLTerm)
 
         unless value_term.is_known?()
-          raise Error.new("meta object with key #{key} has unknown value")
+          fail Error.new("meta object with key #{key} has unknown value")
         end
         value_term.value.dup
       end

@@ -16,7 +16,7 @@ module DTK; class Task
       unless not_running_nodes.empty?
         node_is = (not_running_nodes.size == 1 ? 'node is' : 'nodes are')
         node_names = not_running_nodes.map(&:display_name).join(',')
-        raise ErrorUsage.new("Cannot execute the action because the following #{node_is} not running: #{node_names}")
+        fail ErrorUsage.new("Cannot execute the action because the following #{node_is} not running: #{node_names}")
       end
       ret
     end
@@ -74,7 +74,7 @@ module DTK; class Task
           create_nodes_task = NodesTask.create_subtask(action_class, task_mh, node_scs)
         end
        else
-        raise Error.new("Unexpected component_type (#{component_type})")
+        fail Error.new("Unexpected component_type (#{component_type})")
       end
 
       opts_tt = opts.merge(component_type_filter: component_type)
@@ -82,7 +82,7 @@ module DTK; class Task
       stages_config_nodes_task = task_template_content.create_subtask_instances(task_mh, assembly.id_handle())
 
       if start_nodes_task.nil? && create_nodes_task.nil? && stages_config_nodes_task.empty?
-        raise ErrorUsage.new('There are no actions in the service instance')
+        fail ErrorUsage.new('There are no actions in the service instance')
       end
 
       ret.add_subtask(create_nodes_task) if create_nodes_task
@@ -308,7 +308,7 @@ module DTK; class Task
       # for powering on node with no components
       unless state_change_list and not state_change_list.empty?
         unless node = opts[:node]
-          raise Error.new('Expected that :node passed in as options')
+          fail Error.new('Expected that :node passed in as options')
         end
 
         executable_action = Action::PowerOnNode.create_from_node(node)
@@ -367,7 +367,7 @@ module DTK; class Task
       # for powering on node with no components
       unless state_change_list and not state_change_list.empty?
         unless node = opts[:node]
-          raise Error.new('Expected that :node passed in as options')
+          fail Error.new('Expected that :node passed in as options')
         end
         executable_action = Action::PowerOnNode.create_from_node(node)
         attr_mh = task_mh.createMH(:attribute)
@@ -403,7 +403,7 @@ module DTK; class Task
       all_actions = []
       if state_change_list.size == 1
         executable_action, error_msg = get_executable_action_from_state_change(state_change_list.first, assembly_idh, stage_index)
-        raise ErrorUsage.new(error_msg) unless executable_action
+        fail ErrorUsage.new(error_msg) unless executable_action
         all_actions << executable_action
         ret = create_new_task(task_mh, display_name: "config_node_stage#{stage_index}", temporal_order: 'concurrent')
         ret.add_subtask_from_hash(executable_action: executable_action)
@@ -419,7 +419,7 @@ module DTK; class Task
           all_actions << executable_action
           ret.add_subtask_from_hash(executable_action: executable_action)
         end
-        raise ErrorUsage.new("\n" + all_errors.join("\n")) unless all_errors.empty?
+        fail ErrorUsage.new("\n" + all_errors.join("\n")) unless all_errors.empty?
       end
       attr_mh = task_mh.createMH(:attribute)
       Action::ConfigNode.add_attributes!(attr_mh, all_actions)
@@ -446,7 +446,7 @@ module DTK; class Task
         end
         error_msg = "Intra-node components cycle detected on node '#{display_name}' (ID: #{id}) for components: #{component_names.join(', ')}"
       end
-      return executable_action, error_msg
+      [executable_action, error_msg]
     end
 
     def group_by_node_and_type(state_change_list)

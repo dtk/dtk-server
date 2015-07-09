@@ -15,14 +15,14 @@ module DTK
       queue = self[queue_id]
       response_results = nil
 
-      raise QueueNotFound.new(queue_id, self.available_ids) if queue.nil?
+      fail QueueNotFound.new(queue_id, self.available_ids) if queue.nil?
 
       unless queue.result.nil?
         response_results = queue.result
         delete(queue_id)
       end
 
-      return { result: response_results }
+      { result: response_results }
     end
 
     attr_accessor :id, :result

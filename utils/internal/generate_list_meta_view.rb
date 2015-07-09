@@ -17,7 +17,7 @@ module XYZ
         [
          { id: {
             required: true,
-             type: 'hidden'
+            type: 'hidden'
           } }
         ]
       end

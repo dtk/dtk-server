@@ -48,7 +48,7 @@ module DTK
       def raise_error_if_illegal_keys(keys)
         illegal_keys = keys - legal_keys
         unless illegal_keys.empty?
-          raise Error.new("Illegal keys (#{illegal_keys.join(',')})")
+          fail Error.new("Illegal keys (#{illegal_keys.join(',')})")
         end
       end
     end

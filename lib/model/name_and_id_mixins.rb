@@ -26,7 +26,7 @@ module DTK
         if rows.empty? && opts[:no_error_if_no_match]
           return nil
         end
-        raise ErrorIdInvalid.new(id, pp_object_type()) unless rows.size == 1
+        fail ErrorIdInvalid.new(id, pp_object_type()) unless rows.size == 1
         id
       end
 
@@ -46,10 +46,10 @@ module DTK
         rows = (post_filter ? rows_raw.select { |r| post_filter.call(r) } : rows_raw)
         if rows.size == 0
           unless opts[:no_error_if_no_match]
-            raise ErrorNameDoesNotExist.new(name, pp_object_type())
+            fail ErrorNameDoesNotExist.new(name, pp_object_type())
           end
         elsif rows.size > 2
-          raise ErrorNameAmbiguous.new(name, rows.map { |r| r[:id] }, pp_object_type())
+          fail ErrorNameAmbiguous.new(name, rows.map { |r| r[:id] }, pp_object_type())
         else
           rows.first[:id]
         end

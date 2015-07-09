@@ -68,8 +68,8 @@ module DTK; module CommandAndControlAdapter
             instance_id = response[:id]
             state = response[:state]
             updated_external_ref = external_ref.merge(instance_id: instance_id,
-              type: 'ec2_instance',
-              size: flavor_id)
+                                                      type: 'ec2_instance',
+                                                      size: flavor_id)
 
             Log.info("#{node_print_form()} with ec2 instance id #{instance_id}; waiting for it to be available")
             node_update_hash = {
@@ -97,7 +97,7 @@ module DTK; module CommandAndControlAdapter
         def create_ec2_instance
           response = nil
           unless ami = external_ref[:image_id]
-            raise ErrorUsage.new("Cannot find ami for node (#{@node[:display_name]})")
+            fail ErrorUsage.new("Cannot find ami for node (#{@node[:display_name]})")
           end
 
           conn = Ec2.conn(@node.get_target_iaas_credentials())

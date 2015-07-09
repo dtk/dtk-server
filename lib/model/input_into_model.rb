@@ -92,7 +92,7 @@ module XYZ
       elsif hash.key?(first.to_sym)
         key = first.to_sym
       else
-        raise Error.new("Unexpecetd path element (#{first})")
+        fail Error.new("Unexpecetd path element (#{first})")
       end
       if path.empty?
         if hash[key].nil?
@@ -179,7 +179,7 @@ module XYZ
       prefix_matches = []
       prefixes.each do|prefix|
   prefix =~ %r{^.+/(.+?)/(.+?$)}
-  raise Error unless prefix_ref = Regexp.last_match(2)
+  fail Error unless prefix_ref = Regexp.last_match(2)
         prefix_rt = Regexp.last_match(1)
   if relation_type_string == prefix_rt
     if ref == prefix_ref
@@ -190,10 +190,10 @@ module XYZ
         end
       end
       return prefix_matches[0] + stripped_uri if prefix_matches.size == 1
-      raise Error.new('not handling case where not exact, but or more prfix matches') if prefix_matches.size > 1
+      fail Error.new('not handling case where not exact, but or more prfix matches') if prefix_matches.size > 1
       # if container_uri is non null then uri_x can be wrt container_uri and this is assumed to be the case if reach here
       return container_uri + uri_x if container_uri
-      raise Error
+      fail Error
     end
 
     def fks_have_common_base(x, y)

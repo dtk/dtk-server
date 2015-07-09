@@ -97,7 +97,7 @@ module DTK; class Target
       end
 
       def process_jobs
-        while !@queue.empty?
+        until @queue.empty?
           job = nil
           job = @queue.pop
           job.worker.new.call(*job.params)
@@ -132,14 +132,14 @@ module DTK; class Target
         external_ref = node.get_external_ref()
 
         unless hostname = external_ref[:routable_host_address]
-          raise ErrorUsage.new("#{name_and_id(node)} is missing routable_host_address")
+          fail ErrorUsage.new("#{name_and_id(node)} is missing routable_host_address")
         end
         unless ssh_credentials = external_ref[:ssh_credentials]
-          raise ErrorUsage.new("#{name_and_id(node)} is missing ssh_credentials")
+          fail ErrorUsage.new("#{name_and_id(node)} is missing ssh_credentials")
         end
         [:ssh_user, :ssh_password].each do |ssh_attr|
           unless ssh_credentials[ssh_attr]
-            raise ErrorUsage.new("#{name_and_id(node)} is missing ssh_credentials field #{ssh_attr}")
+            fail ErrorUsage.new("#{name_and_id(node)} is missing ssh_credentials field #{ssh_attr}")
           end
         end
 
@@ -162,12 +162,12 @@ module DTK; class Target
         execute_ssh_command('rm -rf /tmp/dtk-node-agent', params)
 
         Net::SCP.upload!(params[:hostname], params[:user],
-          "#{message['install_script_file_path']}/#{message['install_script_file_name']}", '/tmp',
-          ssh: { password: params[:password], port: params[:port] }, recursive: true)
+                         "#{message['install_script_file_path']}/#{message['install_script_file_name']}", '/tmp',
+                         ssh: { password: params[:password], port: params[:port] }, recursive: true)
 
         Net::SCP.upload!(params[:hostname], params[:user],
-          message['dtk_node_agent_location'], '/tmp',
-          ssh: { password: params[:password], port: params[:port] }, recursive: true)
+                         message['dtk_node_agent_location'], '/tmp',
+                         ssh: { password: params[:password], port: params[:port] }, recursive: true)
 
         # perform installation
         install_command = params[:user].eql?('root') ? 'bash /tmp/dtk-node-agent/install_agent.sh' : 'sudo bash /tmp/dtk-node-agent/install_agent.sh'

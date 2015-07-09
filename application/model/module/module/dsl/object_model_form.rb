@@ -64,7 +64,7 @@ module DTK; class ModuleDSL
       def req(key)
         key = key.to_s
         unless key?(key)
-          raise ParsingError::MissingKey.new(key)
+          fail ParsingError::MissingKey.new(key)
         end
         self[key]
       end

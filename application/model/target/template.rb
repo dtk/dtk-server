@@ -15,7 +15,7 @@ module DTK
       def self.create_provider?(project_idh, iaas_type, provider_name, iaas_properties_hash, params_hash = {}, opts = {})
         if existing_provider = provider_exists?(project_idh, provider_name)
           if opts[:raise_error_if_exists]
-            raise ErrorUsage.new("Provider (#{provider_name}) exists already")
+            fail ErrorUsage.new("Provider (#{provider_name}) exists already")
           else
             return existing_provider
           end
@@ -55,7 +55,7 @@ module DTK
           unless assembly_instances.empty?
             assembly_names = assembly_instances.map { |a| a[:display_name] }.join(',')
             provider_name = provider.get_field?(:display_name)
-            raise ErrorUsage.new("Cannot delete provider '#{provider_name}' because service instance(s) (#{assembly_names}) are using one of its targets")
+            fail ErrorUsage.new("Cannot delete provider '#{provider_name}' because service instance(s) (#{assembly_names}) are using one of its targets")
           end
         end
 
@@ -124,7 +124,7 @@ module DTK
         if Aux.has_just_these_keys?(hash_params, [:region])
           "#{base_name()}-#{hash_params[:region]}"
         else
-          raise Error.new("Not implemented when hash_parsm keys are: #{hash_params.keys.join(',')}")
+          fail Error.new("Not implemented when hash_parsm keys are: #{hash_params.keys.join(',')}")
         end
       end
 

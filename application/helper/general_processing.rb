@@ -92,7 +92,7 @@ module Ramaze::Helper
 
       return true if request.params['iframe_upload'] == '1'
 
-      return (request.env['HTTP_X_REQUESTED_WITH'] && request.env['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest')
+      (request.env['HTTP_X_REQUESTED_WITH'] && request.env['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest')
     end
   end
 end

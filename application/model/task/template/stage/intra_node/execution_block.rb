@@ -64,7 +64,7 @@ module DTK; class Task; class Template
             self << action_match.insert_action
           when :before_action_pos
             insert(action_match.action_position - 1, action_match.insert_action)
-          else raise Error.new("Unexpected insert_point (#{insert_point})")
+          else fail Error.new("Unexpected insert_point (#{insert_point})")
         end
       end
 
@@ -120,7 +120,7 @@ module DTK; class Task; class Template
             # normalize from action form into ordered_component_form
             [{ Constant::ComponentGroup => Constant.matches?(serialized_eb, :Actions) }]
           else
-            raise ParsingError::WrongType.new(serialized_eb, lvs)
+            fail ParsingError::WrongType.new(serialized_eb, lvs)
           end
 
         component_group_num = 1
@@ -137,7 +137,7 @@ module DTK; class Task; class Template
             end
             component_group_num += 1
           else
-            raise ParsingError::WrongType.new(serialized_item, lvs)
+            fail ParsingError::WrongType.new(serialized_item, lvs)
           end
         end
         ret

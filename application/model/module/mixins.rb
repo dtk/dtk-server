@@ -41,7 +41,7 @@ module DTK
 
       rows = get_objs(sp_hash)
       unless match = GetBasicInfo.find_match(rows, opts)
-        raise Error.new('Unexpected that there is no info associated with module')
+        fail Error.new('Unexpected that there is no info associated with module')
       end
       match
     end
@@ -150,10 +150,10 @@ module DTK
       repos = get_repos()
 
       unless repos.size == 1
-        raise Error.new('unexpected that number of matching repos is not equal to 1')
+        fail Error.new('unexpected that number of matching repos is not equal to 1')
       end
 
-      return repos.first()
+      repos.first()
     end
 
     def get_repos
@@ -203,7 +203,7 @@ module DTK
       ret = nil
       # raw_module_rows should have morea than 1 row and should agree on all fields aside from :repo_remote
       if raw_module_rows.empty?()
-        raise Error.new('Unexepected that raw_module_rows is empty')
+        fail Error.new('Unexepected that raw_module_rows is empty')
       end
       namespace = (opts[:filter] || {})[:remote_namespace]
 
@@ -257,15 +257,15 @@ module DTK
     def name_to_id(model_handle, name_or_full_module_name, namespace = nil)
       namespace_x, name = Namespace.full_module_name_parts?(name_or_full_module_name)
       unless namespace ||= namespace_x
-        raise ErrorUsage.new('Cannot find namespace!')
+        fail ErrorUsage.new('Cannot find namespace!')
       end
 
       namespace_obj = Namespace.find_by_name(model_handle.createMH(:namespace), namespace)
-      raise ErrorUsage.new("Namespace (#{namespace_x}) does not exist!") unless namespace_obj
+      fail ErrorUsage.new("Namespace (#{namespace_x}) does not exist!") unless namespace_obj
 
       sp_hash = {
        cols: [:id],
-        filter: [:and, [:eq, :namespace_id, namespace_obj.id], [:eq, :display_name, name]]
+       filter: [:and, [:eq, :namespace_id, namespace_obj.id], [:eq, :display_name, name]]
       }
       name_to_id_helper(model_handle, name, sp_hash)
     end
@@ -417,14 +417,14 @@ module DTK
 
         repos.map { |repo| RepoUserAcl.update_model(repo, repo_user, DefaultAccessRights) }
       end
-      return match, repo_user
+      [match, repo_user]
     end
 
     DefaultAccessRights = 'RW+'
 
     def remove_user_direct_access(model_handle, username)
       repo_user = RepoUser.get_matching_repo_user(model_handle.createMH(:repo_user), username: username)
-      raise ErrorUsage.new("User '#{username}' does not exist") unless repo_user
+      fail ErrorUsage.new("User '#{username}' does not exist") unless repo_user
       # return unless repo_user
 
       model_name = model_handle[:model_name]
@@ -468,7 +468,7 @@ module DTK
       module_obj = module_exists?(project_idh, module_name, module_namespace)
 
       if module_obj
-        raise ErrorUsage.new(error_message)
+        fail ErrorUsage.new(error_message)
       end
 
       false
@@ -476,7 +476,7 @@ module DTK
 
     def module_exists?(project_idh, module_name, module_namespace)
       unless project_idh[:model_name] == :project
-        raise Error.new("MOD_RESTRUCT:  module_exists? should take a project, not a (#{project_idh[:model_name]})")
+        fail Error.new("MOD_RESTRUCT:  module_exists? should take a project, not a (#{project_idh[:model_name]})")
       end
 
       namespace_obj = Namespace.find_or_create(project_idh.createMH(:namespace), module_namespace)

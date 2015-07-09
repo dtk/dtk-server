@@ -312,7 +312,7 @@ module DTK
       def input_array_indexes
         ret = []
         self.map do |el|
-          raise Error.new('unexpected form in input_array_indexes') unless el[:input].is_singleton_array?()
+          fail Error.new('unexpected form in input_array_indexes') unless el[:input].is_singleton_array?()
           el[:input].first
         end
       end
@@ -468,11 +468,11 @@ module DTK
 
     def self.ret_function_endpoints_same_type(i, o)
       # TBD: more robust is allowing for example output to be "database", which matches with "postgresql" and also to have version info, etc
-      raise Error.new('mismatched input and output types') unless i[:type] == o[:type]
+      fail Error.new('mismatched input and output types') unless i[:type] == o[:type]
       return :equal if !i[:is_array] && !o[:is_array]
       return :equal if i[:is_array] && o[:is_array]
       return :concat if !i[:is_array] && o[:is_array]
-      raise Error.new('mismatched input and output types') if i[:is_array] && !o[:is_array]
+      fail Error.new('mismatched input and output types') if i[:is_array] && !o[:is_array]
       nil
     end
 

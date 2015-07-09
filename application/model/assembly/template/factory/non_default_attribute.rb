@@ -48,7 +48,7 @@ module DTK; class Assembly; class Template
           else
             component_type = Component.display_name_print_form(cmp_ref_hash[:component_type])
             module_name = Component.module_name(cmp_ref_hash[:component_type])
-            raise ErrorUsage.new("Attribute (#{non_def_attr[:display_name]}) does not exist in base component (#{component_type}); you may need to invoke push-module-updates #{module_name}")
+            fail ErrorUsage.new("Attribute (#{non_def_attr[:display_name]}) does not exist in base component (#{component_type}); you may need to invoke push-module-updates #{module_name}")
           end
           attr_override[non_def_attr[:ref]] = non_def_attr
         end

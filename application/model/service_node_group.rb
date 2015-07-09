@@ -35,7 +35,7 @@ module DTK
       Transaction do
         ndx_new_tr_idhs = TargetRef::Input::BaseNodes.create_linked_target_refs?(target, assembly, [self], new_cardinality: new_cardinality)
         unless new_tr_idhs = ndx_new_tr_idhs && ndx_new_tr_idhs[id()]
-          raise Error.new('Unexpected that new_tr_idhs is empty')
+          fail Error.new('Unexpected that new_tr_idhs is empty')
         end
 
         # add attribute mappings, cloning if needed
@@ -74,7 +74,7 @@ module DTK
       card = attribute.cardinality
       new_card = card - amount
       if new_card < 0
-        raise ErrorUsage.new("Existing cardinality (#{card}) is less than amount to decrease it by (#{amount})")
+        fail ErrorUsage.new("Existing cardinality (#{card}) is less than amount to decrease it by (#{amount})")
       end
       Node::NodeAttribute.create_or_set_attributes?([self], :cardinality, new_card)
       new_card
@@ -141,7 +141,7 @@ module DTK
         ndx_ret.merge!(n.id => n) if n.is_node_group?
       end
 
-      return (ndx_ret.empty? ? ndx_ret : ndx_ret.values)
+      (ndx_ret.empty? ? ndx_ret : ndx_ret.values)
     end
 
     def self.get_node_attributes_to_copy(node_group_idhs)

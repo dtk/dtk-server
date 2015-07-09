@@ -13,7 +13,7 @@ module DTK
         return ret if (node_bindings || []).empty?
 
         unless node_bindings.is_a?(Hash)
-          raise ErrorIllFormedTerm.new('node bindings', nil, 'is not a hash')
+          fail ErrorIllFormedTerm.new('node bindings', nil, 'is not a hash')
         end
         updates = node_bindings.each do |k, v|
           sub_assembly_node_id, sub_assembly_ref =  find_assembly_node_id_and_ref(k)
@@ -40,7 +40,7 @@ module DTK
           ref = assembly_template_node_ref(assembly_name, node_name)
           [match[:id], ref]
         else
-          raise ErrorParsing.new("Assembly node ref (#{assembly_node_ref}) does not match any existing assembly node ids")
+          fail ErrorParsing.new("Assembly node ref (#{assembly_node_ref}) does not match any existing assembly node ids")
         end
       end
 
@@ -50,7 +50,7 @@ module DTK
         if assembly_node_ref =~ Regexp.new('(^[^/]+)/([^/]+$)')
           [Regexp.last_match(1), Regexp.last_match(2)]
         else
-          raise ErrorIllFormedTerm.new('assembly node ref', assembly_node_ref)
+          fail ErrorIllFormedTerm.new('assembly node ref', assembly_node_ref)
         end
       end
     end

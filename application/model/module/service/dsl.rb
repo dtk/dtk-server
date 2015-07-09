@@ -19,7 +19,7 @@ module DTK
           if file_path = opts[:file_path]
             error_msg += " (#{file_path})"
           end
-          raise ErrorUsage.new(error_msg)
+          fail ErrorUsage.new(error_msg)
         end
         integer_version
       end
@@ -146,7 +146,7 @@ module DTK
         case format_type_default
         when 'json' then 'json'
         when 'yaml' then 'yaml'
-        else raise Error.new("Unexpected value for dsl.service.format_type.default: #{format_type_default}")
+        else fail Error.new("Unexpected value for dsl.service.format_type.default: #{format_type_default}")
         end
       end
     end
@@ -270,7 +270,7 @@ module DTK
           is = (instances.size == 1) ? 'is' : 'are'
           it = (templates.size == 1) ? 'it' : 'them'
 
-          raise ErrorUsage.new("Cannot delete assembly template(s) '#{templates.join(', ')}' because service instance(s) '#{instances.join(', ')}' #{is} referencing #{it}.")
+          fail ErrorUsage.new("Cannot delete assembly template(s) '#{templates.join(', ')}' because service instance(s) '#{instances.join(', ')}' #{is} referencing #{it}.")
         end
       end
 
@@ -304,7 +304,7 @@ module DTK
               ret << match[:path]
             else
               choices = variant_info.amp { |vi| vi[:path] }.join(', ')
-              raise ErrorUsage.new("Cannot decide between the following meta files to use (#{choices}); deleet all but desired one")
+              fail ErrorUsage.new("Cannot decide between the following meta files to use (#{choices}); deleet all but desired one")
             end
           end
         end

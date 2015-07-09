@@ -9,7 +9,7 @@ module DTK; class Attribute
         elsif parent_obj.is_a?(::DTK::Assembly)
           raise_error_if_not_assembly_attr_id(@id, parent_obj)
         else
-          raise Error.new("Unexpected parent object type (#{parent_obj.class})")
+          fail Error.new("Unexpected parent object type (#{parent_obj.class})")
         end
       end
 
@@ -34,13 +34,13 @@ module DTK; class Attribute
 
       def raise_error_if_not_node_attr_id(attr_id, node)
         unless node.get_node_and_component_attributes().find { |r| r[:id] == attr_id }
-          raise ErrorUsage.new("Illegal attribute id (#{attr_id}) for node")
+          fail ErrorUsage.new("Illegal attribute id (#{attr_id}) for node")
         end
       end
 
       def raise_error_if_not_assembly_attr_id(attr_id, assembly)
         unless assembly.get_attributes_all_levels().find { |r| r[:id] == attr_id }
-          raise ErrorUsage.new("Illegal attribute id (#{attr_id}) for assembly")
+          fail ErrorUsage.new("Illegal attribute id (#{attr_id}) for assembly")
         end
       end
     end

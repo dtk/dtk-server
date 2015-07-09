@@ -16,7 +16,7 @@ module R8
     end
 
     def method_missing(name, *_args, &_block)
-      raise "REST method '#{name}' is not supported via Reactor Routes."
+      fail "REST method '#{name}' is not supported via Reactor Routes."
     end
 
     def validate_route(rest_type, route)
@@ -43,9 +43,7 @@ module R8
       ReactorRoute.instance.mapper.validate_route(rest_type, route)
     end
 
-    def mapper
-      @mapper
-    end
+    attr_reader :mapper
 
     private
 

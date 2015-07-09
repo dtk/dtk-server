@@ -54,7 +54,7 @@ module DTK
       return if model_nm == :base_module
 
       model_def_fn = "#{R8::Config[:meta_templates_root]}/#{model_nm}/new/model_def.rb"
-      raise Error.new("cannot find model def file #{model_def_fn} for #{model_name()}") unless  File.exists?(model_def_fn)
+      fail Error.new("cannot find model def file #{model_def_fn} for #{model_name()}") unless  File.exists?(model_def_fn)
       begin
         eval(IO.read(model_def_fn))
        rescue Exception => e
@@ -367,7 +367,7 @@ module DTK
         cols.each { |col, col_info|
           if fk_rel = col_info[:foreign_key_rel_type]
             other_col_info = col_info.reject { |k, _v| k == :foreign_key_rel_type }
-            raise Error.new("#{fk_rel} is in foreign key DSL and does not exist") if DB_REL_DEF[fk_rel].nil?
+            fail Error.new("#{fk_rel} is in foreign key DSL and does not exist") if DB_REL_DEF[fk_rel].nil?
             @db.add_foreign_key? db_rel, col, DB_REL_DEF[fk_rel], other_col_info
           else
             other_col_info = col_info.reject { |k, _v| k == :type }

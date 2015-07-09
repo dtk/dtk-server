@@ -39,7 +39,7 @@ module XYZ
         when :chef_attribute
           process_external_ref__chef_attribute(external_ref, node, metadata)
         else
-          raise Error.new('not implemented yet')
+          fail Error.new('not implemented yet')
         end
       end
 
@@ -51,12 +51,12 @@ module XYZ
           search_pattern = Regexp.last_match(2)
           return Search.get_list(object_type, search_pattern).map(&:name)
         end
-        raise Error.new("search_pattern (#{external_ref['ref']}) has incorrect syntax")
+        fail Error.new("search_pattern (#{external_ref['ref']}) has incorrect syntax")
       end
 
       def process_external_ref__chef_node(external_ref)
         return Regexp.last_match(1) if external_ref['ref'] =~ %r{^node_name\[(.+)\]$}
-        raise Error.new("external reference (#{external_ref['ref']}) has incorrect syntax")
+        fail Error.new("external reference (#{external_ref['ref']}) has incorrect syntax")
       end
 
       def process_external_ref__chef_attribute(external_ref, node, metadata)
@@ -70,7 +70,7 @@ module XYZ
             return attr_info ? attr_info['default'] : nil
           end
         end
-        raise Error.new("external reference (#{external_ref['ref']}) has incorrect syntax")
+        fail Error.new("external reference (#{external_ref['ref']}) has incorrect syntax")
       end
 
       module NodeState

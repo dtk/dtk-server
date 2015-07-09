@@ -70,7 +70,7 @@ module DTK
 
       def create_obj_optional_subclass(model_handle, hash_row, subclass_model_name = nil)
         unless id = hash_row[:id]
-          raise Error.new("Hash (#{hash.inspect}) must have id key")
+          fail Error.new("Hash (#{hash.inspect}) must have id key")
         end
         idh = model_handle.createIDH(id: id)
         opts_model_name = (subclass_model_name ? { model_name: subclass_model_name } : {})

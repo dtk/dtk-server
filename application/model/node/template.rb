@@ -142,7 +142,7 @@ module DTK
       def self.find_matching_node_template(target, opts = {})
         if node_target = opts[:node_target]
           pp [:node_target, node_target]
-          raise Error.new('here need to write code that uses node_target to return results')
+          fail Error.new('here need to write code that uses node_target to return results')
         end
 
         node_binding_rs = opts[:node_binding_ruleset]
@@ -166,7 +166,7 @@ module DTK
           nb[:rules].find { |r| r[:node_template][:image_id] == old_image_id }
         end
         if matching_node_bindings.empty?
-          raise ErrorUsage.new("Cannot find reference to image_id (#{old_image_id})")
+          fail ErrorUsage.new("Cannot find reference to image_id (#{old_image_id})")
         end
 
         image_type = matching_node_bindings.first[:rules].first[:node_template][:type].to_sym

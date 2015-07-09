@@ -15,7 +15,7 @@ module Ramaze::Helper
 
     def user_object
       ret = user
-      if ret.class == nil
+      if ret.class.nil?
         if R8::Config[:development_test_user]
           c = ret_session_context_id()
           ret = @test_user ||= XYZ::User.get_user(ModelHandle.new(c, :user), R8::Config[:development_test_user])
@@ -58,7 +58,7 @@ module Ramaze::Helper
         if default_target = Target::Instance.get_default_target(model_handle(:target))
           default_target.id_handle()
         else
-          raise DTK::ErrorUsage.new("If an explicit target is not given (with option '-t TARGET'), this command uses the default target, but a default target has not been set")
+          fail DTK::ErrorUsage.new("If an explicit target is not given (with option '-t TARGET'), this command uses the default target, but a default target has not been set")
         end
       end
     end
@@ -66,9 +66,9 @@ module Ramaze::Helper
     def get_default_project
       projects = ::DTK::Project.get_all(model_handle(:project))
       if projects.empty?
-        raise DTK::Error.new('Cannot find any projects')
+        fail DTK::Error.new('Cannot find any projects')
       elsif projects.size > 1
-        raise DTK::Error.new('Not implemented yet: case when multiple projects')
+        fail DTK::Error.new('Not implemented yet: case when multiple projects')
       end
       projects.first
     end
@@ -194,7 +194,7 @@ module Ramaze::Helper
 
     def check_and_convert_filter_form(filter)
       ret = convert_filter_form(filter)
-      raise ErrorUsage.new("Filter having form (#{filter.inspect}) not treated") if ret.nil?
+      fail ErrorUsage.new("Filter having form (#{filter.inspect}) not treated") if ret.nil?
       ret
     end
 
@@ -384,7 +384,7 @@ module Ramaze::Helper
       elsif pattern
         ret = [{ pattern: pattern, value: value }]
       else
-        raise ::DTK::ErrorUsage.new('Missing parameters')
+        fail ::DTK::ErrorUsage.new('Missing parameters')
       end
       ret
     end
@@ -392,7 +392,7 @@ module Ramaze::Helper
     def node_binding_ruleset?(node_template_identifier_param, node_binding_identifier = nil)
       if node_binding_identifier ||= ret_request_params(node_template_identifier_param)
         unless node_binding_rs_id = NodeBindingRuleset.name_to_id(model_handle(:node_binding_ruleset), node_binding_identifier)
-          raise ::DTK::ErrorUsage.new("Illegal node template indentifier (#{node_binding_identifier})")
+          fail ::DTK::ErrorUsage.new("Illegal node template indentifier (#{node_binding_identifier})")
         end
         create_object_from_id(node_binding_rs_id, :node_binding_ruleset)
       end
@@ -401,7 +401,7 @@ module Ramaze::Helper
     def ret_component_template(param, opts = {})
       component_template, component_title = ret_component_template_and_title(param, opts)
       if component_title
-        raise ::DTK::ErrorUsage.new('Component title should not be given')
+        fail ::DTK::ErrorUsage.new('Component title should not be given')
       end
       component_template
     end
@@ -426,7 +426,7 @@ module Ramaze::Helper
     def raise_error_null_params?(*null_params)
       unless null_params.empty?
         error_msg = (null_params.size == 1 ? "Rest post parameter (#{null_params.first}) is missing" : "Rest post parameters (#{null_params.join(',')} are missing")
-        raise ErrorUsage.new(error_msg)
+        fail ErrorUsage.new(error_msg)
       end
     end
 

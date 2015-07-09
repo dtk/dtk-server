@@ -102,7 +102,7 @@ module DTK
       attr_mh = parent.model_handle.create_childMH(:attribute)
       attr_hash = Aux::hash_subset(field_def, CreateFields)
       unless attr_hash[:display_name]
-        raise Error.new('display_name required in field_def')
+        fail Error.new('display_name required in field_def')
       end
       attr_hash[:ref] = attr_hash[:display_name]
       attr_hash[:semantic_data_type] ||= SemanticDatatype.default().to_s
@@ -250,7 +250,7 @@ module DTK
     end
 
     def print_path(component)
-      return "cmp[#{component[:display_name].gsub('__', '::')}]/#{self[:display_name]}"
+      "cmp[#{component[:display_name].gsub('__', '::')}]/#{self[:display_name]}"
     end
 
     #=============
@@ -407,7 +407,7 @@ module DTK
         update(function: fn)
         return nil
       end
-      raise Error.new('mismatched link')
+      fail Error.new('mismatched link')
     end
 
     ### virtual column defs
@@ -419,7 +419,7 @@ module DTK
       return nil unless self[:is_array]
       return nil unless attr_value.is_a?(Array) #TBD: this should be error
       attr_value.each { |v| return true if v.nil? }
-      return nil
+      nil
     end
 
     def assoc_components_on_nodes
@@ -433,7 +433,7 @@ module DTK
             { node: n, component: parent_obj }
           end
         else
-          raise Error.new('unexpected parent of attribute')
+          fail Error.new('unexpected parent of attribute')
       end
     end
   end
@@ -458,10 +458,10 @@ module XYZ
       def sap_ref_from_sap(sap)
         return nil if sap.nil?
         # TBD: stubbed to only handle limited cases
-        raise Error::NotImplemented.new("sap to sap ref function where not type 'network'") unless sap[:network]
-        raise Error.new('network sap missing port number') unless sap[:network][:port]
-        raise Error.new('network sap missing addresses') unless sap[:network][:addresses]
-        raise Error::NotImplemented.new('saps with multiple IP addresses') unless sap[:network][:addresses].size == 1
+        fail Error::NotImplemented.new("sap to sap ref function where not type 'network'") unless sap[:network]
+        fail Error.new('network sap missing port number') unless sap[:network][:port]
+        fail Error.new('network sap missing addresses') unless sap[:network][:addresses]
+        fail Error::NotImplemented.new('saps with multiple IP addresses') unless sap[:network][:addresses].size == 1
         { network: {
            port: sap[:network][:port],
            address: sap[:network][:addresses][0]

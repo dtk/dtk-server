@@ -69,7 +69,7 @@ module DTK; class Clone
         match_el_array = component_types.map do |ct|
           DTK::Component::Template::MatchElement.new(
            component_type: ct,
-            version_field: version_field
+           version_field: version_field
           )
         end
         ndx_cmp_type_template = DTK::Component::Template.get_matching_elements(@project_idh, match_el_array, opts).inject({}) do |h, r|

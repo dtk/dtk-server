@@ -28,17 +28,15 @@ module DTK
     # block_for_err takes mustache_gem_err,string
     def bind_template_attributes_utility(string, attr_val_pairs)
       # using Mustache gem to extract attribute values; raise error if unbound attributes
-      begin
-        ::Mustache.raise_on_context_miss = true
-        ::Mustache.render(string, attr_val_pairs)
-      rescue ::Mustache::ContextMiss => mustache_gem_err
-        str_err = mustache_gem_err.message
-        if str_err =~ /^Can't find ([^\s]+) in/
-          missing_var = Regexp.last_match(1)
-          raise MustacheTemplateError::MissingVar.new(missing_var)
-        else
-          raise MustacheTemplateError.new(str_err)
-        end
+      ::Mustache.raise_on_context_miss = true
+      ::Mustache.render(string, attr_val_pairs)
+    rescue ::Mustache::ContextMiss => mustache_gem_err
+      str_err = mustache_gem_err.message
+      if str_err =~ /^Can't find ([^\s]+) in/
+        missing_var = Regexp.last_match(1)
+        raise MustacheTemplateError::MissingVar.new(missing_var)
+      else
+        raise MustacheTemplateError.new(str_err)
       end
     end
 

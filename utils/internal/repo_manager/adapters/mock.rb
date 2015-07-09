@@ -5,7 +5,7 @@ module XYZ
       new(path, branch, opts)
     end
     def initialize(path, branch, _opts = {})
-      raise Error.new("mock mode only supported when branch=='master'") unless  branch == 'master'
+      fail Error.new("mock mode only supported when branch=='master'") unless  branch == 'master'
       root = R8::Config[:repo][:base_directory]
       @path = "#{root}/#{path}"
     end
@@ -26,7 +26,7 @@ module XYZ
         if opts[:delete_if_exists]
           FileUtils.rm_rf local_repo_dir
         else
-          raise Error.new("trying to create a repo (#{repo_name}) that exists already on r8 server")
+          fail Error.new("trying to create a repo (#{repo_name}) that exists already on r8 server")
         end
       end
     end

@@ -6,7 +6,7 @@ module DTK; class Assembly; class Instance; module Get
           when :required_unset_attributes
             opts.merge!(filter_proc: FilterProc)
           else
-            raise Error.new("not treating filter (#{filter}) in Assembly::Instance#get_attributes_print_form")
+            fail Error.new("not treating filter (#{filter}) in Assembly::Instance#get_attributes_print_form")
         end
       end
       get_attributes_print_form_aux(opts)
@@ -15,7 +15,7 @@ module DTK; class Assembly; class Instance; module Get
       attr =
         if r.is_a?(Attribute) then r
         elsif r[:attribute] then r[:attribute]
-        else raise Error.new("Unexpected form for filtered element (#{r.inspect})")
+        else fail Error.new("Unexpected form for filtered element (#{r.inspect})")
         end
       attr.required_unset_attribute?()
     end

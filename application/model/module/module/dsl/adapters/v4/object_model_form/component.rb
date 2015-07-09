@@ -46,7 +46,7 @@ module DTK; class ModuleDSL; class V4
           end
         unless ret['external_ref']
           err_msg = "Cannot determine the create action in component '?1'"
-          raise ParsingError.new(err_msg, component_print_form(cmp))
+          fail ParsingError.new(err_msg, component_print_form(cmp))
         end
         ret
       end

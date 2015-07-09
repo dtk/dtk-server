@@ -35,7 +35,7 @@ module DTK; class BaseModule; class UpdateModule
           ret.merge!(hash_content: render_hash)
         end
       end
-      raise parsing_error if parsing_error
+      fail parsing_error if parsing_error
       ret
     end
   end

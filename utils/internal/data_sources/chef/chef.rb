@@ -31,7 +31,7 @@ module XYZ
 
           block.call(ds_hash.freeze)
         end
-        return HashMayNotBeComplete.new()
+        HashMayNotBeComplete.new()
       end
 
       def get_objects__component__recipe(&block)
@@ -40,7 +40,7 @@ module XYZ
             block.call(ds_hash)
           end
         end
-        return HashIsComplete.new({ type: 'template' }) #HashMayNotBeComplete.new()
+        HashIsComplete.new({ type: 'template' }) #HashMayNotBeComplete.new()
       end
 
       private
@@ -60,7 +60,7 @@ module XYZ
           attrs = get_attributes_with_values(recipe_name, metadata, node)
           ret[ref] = DataSourceUpdateHash.new(values.merge({ 'attributes' => attrs }))
         end
-        return ret
+        ret
       end
 
       def get_recipes_assoc_cookbook(cookbook_name)
@@ -184,9 +184,9 @@ module XYZ
         (metadata['services_info'] || []).map {|s| (s[:conditions] || []).map {|c| c[:to_monitor].map {|x|
               next unless x[:name]
               ret[x[:name]] = x.merge({ service_name: s[:canonical_service_name],
-                        condition_name: c[:name],
-                        condition_description: c[:description],
-                        enabled: true })
+                                        condition_name: c[:name],
+                                        condition_description: c[:description],
+                                        enabled: true })
             }}}
         ret
       end
@@ -300,7 +300,7 @@ module XYZ
             ret = v1[i] <=> v2[i]
             return ret unless ret == 0
           end
-          return 0
+          0
         end
 
         def >=(cv)

@@ -12,7 +12,7 @@ module DTK
       elsif obj.is_a?(Assembly)
         AssemblyModule.new(obj.get_field?(:display_name))
       else
-        raise Error.new("Unexpected object type passed to ModuleVersion.ret (#{obj.class})")
+        fail Error.new("Unexpected object type passed to ModuleVersion.ret (#{obj.class})")
       end
     end
 
@@ -30,7 +30,7 @@ module DTK
     def self.versions_same?(str1, str2)
       return true if (string_master_or_empty?(str1) && string_master_or_empty?(str2))
       # ignore prefix 'v' if present e.g. v4.2.3
-      return (str1 || '').gsub(/^v/, '').eql?((str2 || '').gsub(/^v/, ''))
+      (str1 || '').gsub(/^v/, '').eql?((str2 || '').gsub(/^v/, ''))
     end
 
     class Semantic < self
@@ -54,9 +54,9 @@ module DTK
         if rows.size == 1
            rows.first
         elsif rows.size == 0
-          raise Error.new("Unexpected that no assemblies associated with (#{inspect})")
+          fail Error.new("Unexpected that no assemblies associated with (#{inspect})")
         else
-          raise Error.new("Unexpected that #{rows.size} assemblies are associated with (#{inspect})")
+          fail Error.new("Unexpected that #{rows.size} assemblies are associated with (#{inspect})")
         end
       end
 

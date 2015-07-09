@@ -31,10 +31,10 @@ module DTK
     private
 
     def self.module_type
-      raise Error.new('Abstract method that should not be called')
+      fail Error.new('Abstract method that should not be called')
     end
     def self.module_class
-      raise Error.new('Abstract method that should not be called')
+      fail Error.new('Abstract method that should not be called')
     end
 
     class Output < Array
@@ -49,7 +49,7 @@ module DTK
             self << info.merge(component_module: component_module)
           end
         else
-          raise Error.new("Not implemented yet: Output parser for #{object.class}")
+          fail Error.new("Not implemented yet: Output parser for #{object.class}")
         end
       end
     end

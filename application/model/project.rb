@@ -6,7 +6,7 @@ module DTK
         filter: [:eq, :display_name, name]
       }
       unless get_objs(model_handle, sp_hash).empty?
-        raise Error.new("project with name #{name} exists already")
+        fail Error.new("project with name #{name} exists already")
       end
       row = {
         display_name: name,

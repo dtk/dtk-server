@@ -24,7 +24,7 @@ module Ramaze::Helper
         assembly_instance.id_handle().create_object(model_name: :assembly_workspace)
       else
         if opts[:only_workspace]
-          raise ::DTK::ErrorUsage.new('The command can ony be applied to a workspace')
+          fail ::DTK::ErrorUsage.new('The command can ony be applied to a workspace')
         end
         assembly_instance
       end
@@ -106,9 +106,9 @@ module Ramaze::Helper
           if matching_nodes.size == 1
             matching_nodes.first[:id]
           elsif matching_nodes.size > 2
-            raise ::DTK::ErrorNameAmbiguous.new(node_name_or_id, matching_nodes.map { |r| r[:id] }, :node)
+            fail ::DTK::ErrorNameAmbiguous.new(node_name_or_id, matching_nodes.map { |r| r[:id] }, :node)
           else
-            raise ::DTK::ErrorNameDoesNotExist.new(node_name_or_id, :node)
+            fail ::DTK::ErrorNameDoesNotExist.new(node_name_or_id, :node)
           end
 
         id_handle(matching_id, :node)
@@ -170,7 +170,7 @@ module Ramaze::Helper
       bad_settings = []
       param_settings.each do |param_setting|
         unless setting_name = param_setting['name']
-          raise ::DTK::ErrorUsage.new('Ill-formed service settings string')
+          fail ::DTK::ErrorUsage.new('Ill-formed service settings string')
         end
         if setting = ndx_existing_settings[setting_name]
           if parameters = param_setting['parameters']
@@ -182,7 +182,7 @@ module Ramaze::Helper
         end
       end
       unless bad_settings.empty?
-        raise ::DTK::ErrorUsage.new("Provided service settings (#{bad_settings.join(',')}) are not defined; legal settings are: #{ndx_existing_settings.keys.join(',')}")
+        fail ::DTK::ErrorUsage.new("Provided service settings (#{bad_settings.join(',')}) are not defined; legal settings are: #{ndx_existing_settings.keys.join(',')}")
       end
       ret
     end
@@ -210,7 +210,7 @@ module Ramaze::Helper
     yaml_content = ret_non_null_request_params(:settings_yaml_content)
     response = ::DTK::Aux.convert_to_hash(yaml_content, :yaml)
     process_attributes!(response)
-    raise response if response.is_a?(::DTK::Error)
+    fail response if response.is_a?(::DTK::Error)
     response
   end
 

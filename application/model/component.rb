@@ -59,7 +59,7 @@ module DTK
         if assembly_id = context[:assembly_id]
           filter = [:and, filter, [:eq, :assembly_id, assembly_id]]
         else
-          raise Error.new("Unexepected context (#{context.inspect})")
+          fail Error.new("Unexepected context (#{context.inspect})")
         end
       end
       check_valid_id_helper(model_handle, id, filter)
@@ -74,7 +74,7 @@ module DTK
         display_name = Component.display_name_from_user_friendly_name(name)
         node_name, cmp_type, cmp_title = ComponentTitle.parse_component_display_name(display_name, node_prefix: true)
         unless node_name
-          raise ErrorUsage.new("Ill-formed name for component (#{name}); it should have form NODE/CMP or NODE/MOD::CMP")
+          fail ErrorUsage.new("Ill-formed name for component (#{name}); it should have form NODE/CMP or NODE/MOD::CMP")
         end
         sp_hash = {
           cols: [:id, :node],
@@ -82,7 +82,7 @@ module DTK
         }
         name_to_id_helper(model_handle, name, sp_hash.merge(post_filter: lambda { |r| r[:node][:display_name] == node_name }))
       else
-        raise Error.new("Unexepected context (#{context.inspect})")
+        fail Error.new("Unexepected context (#{context.inspect})")
       end
     end
 
@@ -453,7 +453,7 @@ module DTK
             end
           end
 
-          raise ErrorUsage.new('Multiple components matching component name you provided. Please use namespace:component format to delete component!') if match_cmps.size > 1
+          fail ErrorUsage.new('Multiple components matching component name you provided. Please use namespace:component format to delete component!') if match_cmps.size > 1
           ret_cmp = match_cmps.first
         end
       end
@@ -474,7 +474,7 @@ module DTK
       components.each do |cmp|
         id = cmp[:id]
         if cmp[:extended_base]
-          raise Error.new('cmp[:implementation_id] must be set') unless cmp[:implementation_id]
+          fail Error.new('cmp[:implementation_id] must be set') unless cmp[:implementation_id]
           ext_cmps << cmp
           extended_base_id = cmp[:extended_base_id]
           base_cmp_info << { id: extended_base_id, node_node_id: cmp[:node_node_id], extended_base: cmp[:extended_base], implementation_id: cmp[:implementation_id] }
@@ -652,7 +652,7 @@ module DTK
     end
 
     def get_virtual_attributes_aux_base(attribute_names, cols, field_to_match = :display_name, _multiple_instance_clause = nil)
-      raise Error.new('Should not be called unless :component_type and :implementation_id are set') unless self[:component_type] && self[:implementation_id]
+      fail Error.new('Should not be called unless :component_type and :implementation_id are set') unless self[:component_type] && self[:implementation_id]
       component_id = self[:id]
       base_sp_hash = {
         model_name: :component,

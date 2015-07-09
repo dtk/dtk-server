@@ -19,7 +19,7 @@ module XYZ
       else
         update_if_needed!(type, to_add, columns, CONTEXT_ID, model_or_id_handle[:c])
       end
-      raise Error.new("model_or_id_handle[:group_id] not set for #{model_or_id_handle[:model_name]}") unless model_or_id_handle[:group_id] || [:user, :user_group, :user_group_relation].include?(model_or_id_handle[:model_name]) #TODO: temp until make sure that this is alwats set
+      fail Error.new("model_or_id_handle[:group_id] not set for #{model_or_id_handle[:model_name]}") unless model_or_id_handle[:group_id] || [:user, :user_group, :user_group_relation].include?(model_or_id_handle[:model_name]) #TODO: temp until make sure that this is alwats set
       update_if_needed!(type, to_add, columns, :group_id, model_or_id_handle[:group_id])
 
       scalar_assignments.merge(to_add)

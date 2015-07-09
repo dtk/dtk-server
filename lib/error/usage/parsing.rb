@@ -38,7 +38,7 @@ module DTK; class ErrorUsage
           { caller_info: true }
         elsif opts[:file_path]
           if opts.size > 1
-            raise Error.new('Not supported yet, need to cleanup so parent takes opts, rather than opts file path')
+            fail Error.new('Not supported yet, need to cleanup so parent takes opts, rather than opts file path')
           else
             opts[:file_path]
           end
@@ -69,10 +69,10 @@ module DTK; class ErrorUsage
       if v.nil?
         if err_params = opts[:err_params]
           err_msg = opts[:err_msg] || 'Value of (?1) should not be nil'
-          raise new(err_msg, err_params)
+          fail new(err_msg, err_params)
         else
           err_msg = opts[:err_msg] || 'Value should not be nil'
-          raise new(err_msg)
+          fail new(err_msg)
         end
       end
       v
@@ -89,7 +89,7 @@ module DTK; class ErrorUsage
           err_msg << '; it appears in ?context'
           err_params.merge!(context: context)
         end
-        raise new(err_msg, err_params)
+        fail new(err_msg, err_params)
       end
       obj
     end
@@ -97,7 +97,7 @@ module DTK; class ErrorUsage
     def self.raise_error_unless(object, legal_values_input_form = [], &legal_values_block)
       legal_values = LegalValues.reify(legal_values_input_form, &legal_values_block)
       unless legal_values.match?(object)
-        raise WrongType.new(object, legal_values, &legal_values_block)
+        fail WrongType.new(object, legal_values, &legal_values_block)
       end
       object
     end

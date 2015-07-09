@@ -33,7 +33,7 @@ module DTK; class Attribute
 
       def get_node(opts = {})
         unless node_node_id = get_field?(:node_node_id)
-          raise Error.new('get_node should not be called if attribute not on a node')
+          fail Error.new('get_node should not be called if attribute not on a node')
         end
         sp_hash = {
           cols: opts[:cols] || [:id, :group_id, :display_name],
@@ -72,7 +72,7 @@ module DTK; class Attribute
           }
 
           valid_attribute = Model.get_obj(mh, sp_hash)
-          raise ErrorUsage.new("Illegal identifier '#{identifier}' for component-module attribute") unless valid_attribute
+          fail ErrorUsage.new("Illegal identifier '#{identifier}' for component-module attribute") unless valid_attribute
         else
           # extracting component and attribute name from identifier
           # e.g. cmp[dtk_addons::rspec2db]/user => component_name = dtk_addons::rspec2db, attribute_name = user
@@ -83,7 +83,7 @@ module DTK; class Attribute
             param_attr_name = match_from_identifier[2].gsub(/::/, '__')
           end
 
-          raise ErrorUsage.new("Illegal identifier '#{identifier}' for component-module attribute") unless param_attr_name && param_cmp_name
+          fail ErrorUsage.new("Illegal identifier '#{identifier}' for component-module attribute") unless param_attr_name && param_cmp_name
 
           sp_hash = {
             # component_module_parent will return more info about attribute (component it belongs to and module branch which we can get component_module_id from)
@@ -110,7 +110,7 @@ end
             end
           end
 
-          raise ErrorUsage.new("Illegal identifier '#{identifier}' for component-module attribute") unless valid_attribute
+          fail ErrorUsage.new("Illegal identifier '#{identifier}' for component-module attribute") unless valid_attribute
         end
 
         valid_attribute

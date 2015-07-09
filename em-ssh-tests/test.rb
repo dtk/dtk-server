@@ -29,7 +29,7 @@ EM.run do
       # open a new channel and configure a minimal set of callbacks, then wait for the channel to finishes (closees).
       channel = ssh.open_channel do |ch|
         ch.exec '/usr/bin/ruby /home/rich/exec.rb' do |ch, success|
-          raise 'could not execute command' unless success
+          fail 'could not execute command' unless success
 
           # "on_data" is called when the process writes something to stdout
           ch.on_data do |_c, data|

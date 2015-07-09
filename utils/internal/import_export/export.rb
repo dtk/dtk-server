@@ -24,12 +24,12 @@ module XYZ
 
     def hash_content_for_single_target(target_id_handle, opts = {})
       target_id_info = get_row_from_id_handle(target_id_handle)
-      raise Error.new("Target given (#{target_id_handle}) does not exist") unless target_id_info
+      fail Error.new("Target given (#{target_id_handle}) does not exist") unless target_id_info
       prefix =
         if opts[:prefix_is_top] then '/'
         elsif target_id_info[:uri] =~ %r{(^/.+?/.+?)/.+$} then Regexp.last_match(1)
         elsif target_id_info[:uri] =~ %r{(^/.+/.+$)} then Regexp.last_match(1)
-        else raise Error.new
+        else fail Error.new
       end
       get_objs_opts = {
         depth: :deep,
@@ -46,14 +46,12 @@ module XYZ
     end
 
     def write_to_file(hash_content, json_file)
-      begin
-        f = File.open(json_file, 'w')
-        f.puts(JSON.pretty_generate(hash_content))
-      rescue Exception => err
-        raise Error.new("Error writing exported data to file #{json_file}: #{err}")
-      ensure
-         f.close
-      end
+      f = File.open(json_file, 'w')
+      f.puts(JSON.pretty_generate(hash_content))
+    rescue Exception => err
+      raise Error.new("Error writing exported data to file #{json_file}: #{err}")
+    ensure
+       f.close
     end
   end
 end

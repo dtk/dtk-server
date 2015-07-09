@@ -94,7 +94,7 @@ module DTK; class Clone
          when :match_tags
            mtr.match_tags(target, stub_nodes, assembly_template_idh)
          else
-          raise Error.new("Unexpected matching strategy (#{matching_strategy})")
+          fail Error.new("Unexpected matching strategy (#{matching_strategy})")
         end
       end
 
@@ -133,7 +133,7 @@ module DTK; class Clone
                 hash_el_when_create(node, node_template)
               end
             else
-             raise Error.new('Unexpected return value from match_or_create_node')
+             fail Error.new('Unexpected return value from match_or_create_node')
           end
         end
       end

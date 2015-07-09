@@ -32,10 +32,10 @@ module DTK; class Task; class Template
 
         def execution_block_index(action)
           unless source_type = action.source_type
-            raise Error.new("Cannot find source type for action (#{action.inspect})")
+            fail Error.new("Cannot find source type for action (#{action.inspect})")
           end
           unless ret = ExecBlockOrder[source_type]
-            raise Error.new("Not yet implemented, finding execution block order for action with source of type (#{source_type})")
+            fail Error.new("Not yet implemented, finding execution block order for action with source of type (#{source_type})")
           end
           ret
         end

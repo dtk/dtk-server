@@ -21,7 +21,7 @@ class R8Server
       case groupname
        when 'all' then UserGroup.get_all_group(user_group_mh)
        when 'private' then UserGroup.get_private_group(user_group_mh, username)
-       else raise "Group (#{groupname})not treated"
+       else fail "Group (#{groupname})not treated"
       end
     @user_mh[:group_id] = group_obj[:id]
   end

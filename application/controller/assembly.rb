@@ -86,7 +86,7 @@ module DTK
 
       if cmp_full_name && node_id
         component = Component.ret_component_with_namespace_for_node(cmp_mh, cmp_name, node_id, namespace, assembly)
-        raise ErrorUsage.new("Component with identifier (#{namespace.nil? ? '' : namespace + ':'}#{cmp_name}) does not exist!") unless component
+        fail ErrorUsage.new("Component with identifier (#{namespace.nil? ? '' : namespace + ':'}#{cmp_name}) does not exist!") unless component
 
         cmp_idh = component.id_handle()
       else
@@ -139,13 +139,13 @@ module DTK
       if format = ret_request_params(:format)
         format = format.to_sym
         unless SupportedFormats.include?(format)
-          raise ErrorUsage.new("Illegal format (#{format}) specified; it must be one of: #{SupportedFormats.join(',')}")
+          fail ErrorUsage.new("Illegal format (#{format}) specified; it must be one of: #{SupportedFormats.join(',')}")
         end
       end
 
       about = ret_non_null_request_params(:about).to_sym
       unless AboutEnum[subtype].include?(about)
-        raise ErrorUsage::BadParamValue.new(:about, AboutEnum[subtype])
+        fail ErrorUsage::BadParamValue.new(:about, AboutEnum[subtype])
       end
 
       opts = Opts.new(detail_level: detail_level)
@@ -222,7 +222,7 @@ module DTK
       assembly = ret_assembly_instance_object()
       unless top_task_id = ret_request_params(:task_id)
         unless top_task = get_most_recent_executing_task([:eq, :assembly_id, assembly.id()])
-          raise ErrorUsage.new('No running tasks found')
+          fail ErrorUsage.new('No running tasks found')
         end
         top_task_id = top_task.id()
       end
@@ -258,12 +258,12 @@ module DTK
 
             # TODO: support
             if opts[:create]
-              raise ErrorUsage.new('create-workflow is not yet supported')
+              fail ErrorUsage.new('create-workflow is not yet supported')
             end
 
             AssemblyModule::Service.prepare_for_edit(assembly, modification_type, opts)
           else
-            raise ErrorUsage.new("Illegal module_type #{module_type}")
+            fail ErrorUsage.new("Illegal module_type #{module_type}")
         end
 
       rest_ok_response response
@@ -274,7 +274,7 @@ module DTK
       module_type, module_name = ret_non_null_request_params(:module_type, :module_name)
 
       unless module_type.to_sym == :component_module
-        raise Error.new('promote_module_changes only treats component_module type')
+        fail Error.new('promote_module_changes only treats component_module type')
       end
 
       namespace = AssemblyModule::Component.validate_component_module_ret_namespace(assembly, module_name)
@@ -288,7 +288,7 @@ module DTK
       module_type, module_name = ret_non_null_request_params(:module_type, :module_name)
 
       unless module_type.to_sym == :component_module
-        raise Error.new('promote_module_changes only treats component_module type')
+        fail Error.new('promote_module_changes only treats component_module type')
       end
 
       namespace = AssemblyModule::Component.validate_component_module_ret_namespace(assembly, module_name)
@@ -356,16 +356,16 @@ module DTK
         if find_possible
           assembly.list_connections__possible()
         elsif find_missing
-          raise Error.new('Deprecated')
+          fail Error.new('Deprecated')
         else
-          raise Error.new('Deprecated')
+          fail Error.new('Deprecated')
         end
       rest_ok_response ret
     end
 
     def rest__get_attributes
       filter = ret_request_params(:filter)
-      filter = filter && filter.to_sym
+      filter &&= filter.to_sym
       assembly = ret_assembly_instance_object()
       rest_ok_response assembly.get_attributes_print_form(Opts.new(filter: filter))
     end
@@ -421,14 +421,14 @@ module DTK
 
       if semantic_data_type = ret_request_params(:datatype)
         unless Attribute::SemanticDatatype.isa?(semantic_data_type)
-          raise ErrorUsage.new("The term (#{semantic_data_type}) is not a valid data type")
+          fail ErrorUsage.new("The term (#{semantic_data_type}) is not a valid data type")
         end
         create_options.merge!(semantic_data_type: semantic_data_type)
       end
 
       unless create_options.empty?
         unless opts[:create]
-          raise ErrorUsage.new("Options (#{create_options.values.join(',')}) can only be given if :create is true")
+          fail ErrorUsage.new("Options (#{create_options.values.join(',')}) can only be given if :create is true")
         end
         opts.merge!(attribute_properties: create_options)
       end
@@ -452,7 +452,7 @@ module DTK
       assembly_template_name, service_module_name, module_namespace = get_template_and_service_names_params(assembly)
 
       if assembly_template_name.nil? || service_module_name.nil?
-        raise ErrorUsage.new('SERVICE-NAME/ASSEMBLY-NAME cannot be determined and must be explicitly given')
+        fail ErrorUsage.new('SERVICE-NAME/ASSEMBLY-NAME cannot be determined and must be explicitly given')
       end
       project = get_default_project()
       opts = ret_symbol_params_hash(:mode)
@@ -503,7 +503,7 @@ module DTK
 
       cmp_mh = assembly_idh.createMH(:component)
       unless aug_component_template = Component::Template.get_augmented_component_template(cmp_mh, cmp_name, namespace, assembly)
-        raise ErrorUsage.new("Component with identifier #{namespace.nil? ? '\'' : ('\'' + namespace + ':')}#{cmp_name}' does not exist!")
+        fail ErrorUsage.new("Component with identifier #{namespace.nil? ? '\'' : ('\'' + namespace + ':')}#{cmp_name}' does not exist!")
       end
 
       component_title = ret_component_title?(cmp_name)
@@ -533,7 +533,7 @@ module DTK
         assembly_id = ret_request_params(:assembly_id)
         service_module = ServiceModule.find(model_handle(:service_module), service_module_id)
         assembly_template = service_module.get_assembly_templates().find { |template| template[:display_name].eql?(assembly_id) || template[:id] == assembly_id.to_i }
-        raise ErrorUsage, "We are not able to find assembly '#{assembly_id}' for service module '#{service_module_id}'" unless assembly_template
+        fail ErrorUsage, "We are not able to find assembly '#{assembly_id}' for service module '#{service_module_id}'" unless assembly_template
       else
         assembly_template = ret_assembly_template_object()
       end
@@ -568,7 +568,7 @@ module DTK
         assembly_id = ret_request_params(:assembly_id)
         service_module = ServiceModule.find(model_handle(:service_module), service_module_id)
         assembly_template = service_module.get_assembly_templates().find { |template| template[:display_name].eql?(assembly_id) || template[:id] == assembly_id.to_i }
-        raise ErrorUsage, "We are not able to find assembly '#{assembly_id}' for service module '#{service_module_id}'" unless assembly_template
+        fail ErrorUsage, "We are not able to find assembly '#{assembly_id}' for service module '#{service_module_id}'" unless assembly_template
       else
         assembly_template = ret_assembly_template_object()
       end
@@ -638,7 +638,7 @@ module DTK
         case type
           when :component_type     then :ad_hoc_action_by_component_type
           when :component_instance then :ad_hoc_action_by_component_instance
-          else raise ErrorUsage.new("Illegal type (#{type})")
+          else fail ErrorUsage.new("Illegal type (#{type})")
         end
 
       response = Task::Template::Action::AdHoc.list(assembly, type)
@@ -676,7 +676,7 @@ module DTK
       end
 
       if assembly.are_nodes_running_in_task?()
-        raise ErrorUsage, 'Task is already running on requested nodes. Please wait until task is complete'
+        fail ErrorUsage, 'Task is already running on requested nodes. Please wait until task is complete'
       end
 
       opts = ret_params_hash(:commit_msg, :task_action, :task_params)
@@ -858,15 +858,15 @@ module DTK
         # need to put sanity checking in block under initiate_action_with_nodes
         if target_nodes_option = ret_request_params(:target_nodes)
           unless target_nodes_option.empty?
-            raise ErrorUsage.new('Not implemented when target nodes option given')
+            fail ErrorUsage.new('Not implemented when target nodes option given')
           end
         end
 
         if agent_action == :revoke_access && nodes.empty?
-          raise ErrorUsage.new("Access #{target_nodes.empty? ? '' : 'on given nodes'} is not granted to system user '#{system_user}' with name '#{key_name}'")
+          fail ErrorUsage.new("Access #{target_nodes.empty? ? '' : 'on given nodes'} is not granted to system user '#{system_user}' with name '#{key_name}'")
         end
         if agent_action == :grant_access && nodes.empty?
-          raise ErrorUsage.new("Nodes already have access to system user '#{system_user}' with name '#{key_name}'")
+          fail ErrorUsage.new("Nodes already have access to system user '#{system_user}' with name '#{key_name}'")
         end
       end
       rest_ok_response action_results_id: queue.id
@@ -933,7 +933,7 @@ module DTK
         assemblies << assembly
       end
 
-      return assemblies
+      assemblies
     end
   end
 end

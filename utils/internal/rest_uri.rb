@@ -6,10 +6,10 @@ module XYZ
           parent_uri = Regexp.last_match(1) == '' ? '/' : Regexp.last_match(1)
           relation_type = Regexp.last_match(2).to_sym
 
-    raise Error.new("invalid relation type '#{relation_type}'") if DB_REL_DEF[relation_type].nil?
+    fail Error.new("invalid relation type '#{relation_type}'") if DB_REL_DEF[relation_type].nil?
           [relation_type, parent_uri]
         else
-    raise Error.new("factory_uri (#{factory_uri}) in incorrect form")
+    fail Error.new("factory_uri (#{factory_uri}) in incorrect form")
         end
       end
 

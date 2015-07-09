@@ -84,7 +84,7 @@ module DTK
             end
           end
         end
-        raise Error.new('Unexpected form') if unexepected_form
+        fail Error.new('Unexpected form') if unexepected_form
       end
       ret = []
       # TODO: more efficienct is getting this in bulk
@@ -94,7 +94,7 @@ module DTK
           next unless  attr_val_info = info[:component].get_virtual_attribute(attr_info[:attr_name], [:attribute_value])
           # TODO: stubbed form treating
           match_cond = attr_info[:match_cond]
-          raise Error.new('Unexpected form') unless match_cond.size == 3 && match_cond[0] == :eq && match_cond[1] == :attribute_value
+          fail Error.new('Unexpected form') unless match_cond.size == 3 && match_cond[0] == :eq && match_cond[1] == :attribute_value
           if attr_val_info[:attribute_value] == match_cond[2]
             ret << info[:component].merge(component_order: attr_info[:component_order])
           end

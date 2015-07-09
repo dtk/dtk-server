@@ -200,7 +200,7 @@ module DTK
       about = ret_non_null_request_params(:about).to_sym
       component_template_id = ret_request_params(:component_template_id)
       unless AboutEnum.include?(about)
-        raise ErrorUsage::BadParamValue.new(:about, AboutEnum)
+        fail ErrorUsage::BadParamValue.new(:about, AboutEnum)
       end
       rest_ok_response component_module.info_about(about, component_template_id)
     end
@@ -229,7 +229,7 @@ module DTK
 
       # will raise exception if exists
       ComponentModule.if_module_exists!(project.id_handle(), module_name, namespace,
-        "Cannot install '#{namespace}:#{module_name}' since it already exists!"
+                                        "Cannot install '#{namespace}:#{module_name}' since it already exists!"
                                        )
 
       puppet_forge_local_copy = nil

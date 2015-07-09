@@ -36,15 +36,15 @@ describe '(Repoman Drupal API) Test Case 6: Get namespace and get all modules th
       ap response
       if response['status'] == 'ok'
         response['data'].each do |module_data|
-          modules_retrieved_correctly = false if !module_data.key?('id')
-          modules_retrieved_correctly = false if !module_data.key?('name')
-          modules_retrieved_correctly = false if !module_data.key?('namespace_id')
-          modules_retrieved_correctly = false if !module_data.key?('permission')
-          modules_retrieved_correctly = false if !module_data.key?('user_id')
-          modules_retrieved_correctly = false if !module_data.key?('namespace_name')
-          modules_retrieved_correctly = false if !module_data.key?('git_repo_name')
-          modules_retrieved_correctly = false if !module_data.key?('full_name')
-          modules_retrieved_correctly = false if !module_data.key?('pp_module_type')
+          modules_retrieved_correctly = false unless module_data.key?('id')
+          modules_retrieved_correctly = false unless module_data.key?('name')
+          modules_retrieved_correctly = false unless module_data.key?('namespace_id')
+          modules_retrieved_correctly = false unless module_data.key?('permission')
+          modules_retrieved_correctly = false unless module_data.key?('user_id')
+          modules_retrieved_correctly = false unless module_data.key?('namespace_name')
+          modules_retrieved_correctly = false unless module_data.key?('git_repo_name')
+          modules_retrieved_correctly = false unless module_data.key?('full_name')
+          modules_retrieved_correctly = false unless module_data.key?('pp_module_type')
         end
       end
       expect(modules_retrieved_correctly).to eq(true)
@@ -60,15 +60,15 @@ describe '(Repoman Drupal API) Test Case 6: Get namespace and get all modules th
       ap response
       if response['status'] == 'ok'
         response['data'].each do |module_data|
-          modules_retrieved_correctly = false if !module_data.key?('id')
-          modules_retrieved_correctly = false if !module_data.key?('name')
-          modules_retrieved_correctly = false if !module_data.key?('namespace_id')
-          modules_retrieved_correctly = false if !module_data.key?('permission')
-          modules_retrieved_correctly = false if !module_data.key?('user_id')
-          modules_retrieved_correctly = false if !module_data.key?('namespace_name')
-          modules_retrieved_correctly = false if !module_data.key?('git_repo_name')
-          modules_retrieved_correctly = false if !module_data.key?('full_name')
-          modules_retrieved_correctly = false if !module_data.key?('pp_module_type')
+          modules_retrieved_correctly = false unless module_data.key?('id')
+          modules_retrieved_correctly = false unless module_data.key?('name')
+          modules_retrieved_correctly = false unless module_data.key?('namespace_id')
+          modules_retrieved_correctly = false unless module_data.key?('permission')
+          modules_retrieved_correctly = false unless module_data.key?('user_id')
+          modules_retrieved_correctly = false unless module_data.key?('namespace_name')
+          modules_retrieved_correctly = false unless module_data.key?('git_repo_name')
+          modules_retrieved_correctly = false unless module_data.key?('full_name')
+          modules_retrieved_correctly = false unless module_data.key?('pp_module_type')
         end
       end
       expect(modules_retrieved_correctly).to eq(true)

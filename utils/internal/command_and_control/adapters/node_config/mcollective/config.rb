@@ -145,13 +145,13 @@ eos
               # TODO: will generalize so not just puppet
               puppet_version: puppet_version(node),
               pbuilderid: pbuilderid,
-        logstash_enable: R8::Config[:logstash][:enable],
+              logstash_enable: R8::Config[:logstash][:enable],
               logstash_ca: get_logstash_ca,
-        logstash_host: R8::Config[:logstash][:host],
-        logstash_port: R8::Config[:logstash][:port],
-        logstash_log_file_list: R8::Config[:logstash][:log_file_list],
-        logstash_config_file_path: R8::Config[:logstash][:config_file_path],
-        logstash_tag: R8::Config[:logstash][:tag]
+              logstash_host: R8::Config[:logstash][:host],
+              logstash_port: R8::Config[:logstash][:port],
+              logstash_log_file_list: R8::Config[:logstash][:log_file_list],
+              logstash_config_file_path: R8::Config[:logstash][:config_file_path],
+              logstash_tag: R8::Config[:logstash][:tag]
             )
           end
 

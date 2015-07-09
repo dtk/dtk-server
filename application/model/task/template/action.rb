@@ -25,7 +25,7 @@ module DTK; class Task; class Template
       elsif object.is_a?(Action)
         add_action_method?(object, opts)
       else
-        raise Error.new("Not yet implemented treatment of action of type {#{object.class})")
+        fail Error.new("Not yet implemented treatment of action of type {#{object.class})")
       end
     end
 
@@ -44,7 +44,7 @@ module DTK; class Task; class Template
         if opts[:skip_if_not_found]
           return ret
         else
-          raise ParsingError.new("The component reference '#{component_name_ref}' on node '#{node_name}' in the workflow is not in the assembly; either add it to the assembly or delete it from the workflow")
+          fail ParsingError.new("The component reference '#{component_name_ref}' on node '#{node_name}' in the workflow is not in the assembly; either add it to the assembly or delete it from the workflow")
         end
       end
 
@@ -67,7 +67,7 @@ module DTK; class Task; class Template
           legal_methods = action_defs.map { |ad| ad[:method_name] }
           err_msg << "; legal method names are: #{legal_methods.join(',')}"
         end
-        raise ParsingError.new(err_msg)
+        fail ParsingError.new(err_msg)
       end
     end
 

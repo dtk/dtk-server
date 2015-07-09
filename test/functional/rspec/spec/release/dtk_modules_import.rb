@@ -25,7 +25,7 @@ component_module_filesystem_location = '~/dtk/component_modules/internal'
 def delete_service_module_from_local(service_module_filesystem_location, service_module)
   deleted = false
   exists = `ls #{service_module_filesystem_location}/#{service_module}`
-  exists = true if !exists.include? ('No such file or directory')
+  exists = true unless exists.include? ('No such file or directory')
   if exists
     value = `rm -rf #{service_module_filesystem_location}/#{service_module}`
     deleted = !value.include?('cannot remove')
@@ -33,13 +33,13 @@ def delete_service_module_from_local(service_module_filesystem_location, service
   else
     deleted == true
   end
-  return deleted
+  deleted
 end
 
 def delete_component_module_from_local(component_module_filesystem_location, component_module)
   deleted = false
   exists = `ls #{component_module_filesystem_location}/#{component_module}`
-  exists = true if !exists.include? ('No such file or directory')
+  exists = true unless exists.include? ('No such file or directory')
   if exists
     value = `rm -rf #{component_module_filesystem_location}/#{component_module}`
     deleted = !value.include?('cannot remove')
@@ -47,7 +47,7 @@ def delete_component_module_from_local(component_module_filesystem_location, com
   else
     deleted == true
   end
-  return deleted
+  deleted
 end
 
 def install_service_module(service_module_remote)
@@ -57,7 +57,7 @@ def install_service_module(service_module_remote)
   pass = false if ((value.include? 'ERROR') || (value.include? 'exists on client'))
   puts "Import of remote service module #{service_module_remote} completed successfully!" if pass == true
   puts "Import of remote service module #{service_module_remote} did not complete successfully!" if pass == false
-  return pass
+  pass
 end
 
 def install_component_module(component_module_remote)
@@ -67,7 +67,7 @@ def install_component_module(component_module_remote)
   pass = false if ((value.include? 'ERROR') || (value.include? 'exists on client'))
   puts "Import of remote component module #{component_module_remote} completed successfully!" if pass == true
   puts "Import of remote component module #{component_module_remote} did not complete successfully!" if pass == false
-  return pass
+  pass
 end
 
 dtk_common = DtkCommon.new('', '')

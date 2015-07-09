@@ -16,7 +16,7 @@ class Action
            when :hash
             object
            else
-            raise Error.new('Unexpected InstallAgent.initialize type')
+            fail Error.new('Unexpected InstallAgent.initialize type')
           end
         super(type, hash, task_idh)
       end

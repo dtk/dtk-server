@@ -5,7 +5,7 @@ module DTK
         @dns_domain = dns_domain
         dns = Fog::DNS::AWS.new(get_compute_params(just_credentials: true))
         unless @r8zone = dns.zones().find { |z| z.domain.include? dns_domain }
-          raise ::DTK::Error.new("Bad dns_domain '#{dns_domain}'")
+          fail ::DTK::Error.new("Bad dns_domain '#{dns_domain}'")
         end
       end
 
@@ -27,7 +27,7 @@ module DTK
 
           # if this happens it means that we need to look into more Excon::Errors::SocketError,
           # at the moment this is erratic issue which happens from time to time
-          raise 'Not able to get DNS record after 5 re-tries, aborting process.'
+          fail 'Not able to get DNS record after 5 re-tries, aborting process.'
         end
       end
 

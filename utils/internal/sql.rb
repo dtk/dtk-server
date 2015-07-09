@@ -131,7 +131,7 @@ module XYZ
         # substitue in virtual col fn if it exists
         vcol_info = ((DB_REL_DEF[model_name] || {})[:virtual_columns] || {})[col]
         return where(col => value) unless vcol_info
-        raise Error.new("virtual column #{col} cannot appear in where clause unless it has a fn def") unless vcol_info[:sql_fn]
+        fail Error.new("virtual column #{col} cannot appear in where clause unless it has a fn def") unless vcol_info[:sql_fn]
         where(vcol_info[:sql_fn] => value)
       end
 
@@ -144,7 +144,7 @@ module XYZ
 
     module FilterPostProcessingMixin
       def add_filter_post_processing(filter)
-        raise ErrorPostProcFilterNotImpl.new(:filter, filter) unless (filter.is_a?(Array) && filter.first == :and)
+        fail ErrorPostProcFilterNotImpl.new(:filter, filter) unless (filter.is_a?(Array) && filter.first == :and)
         filter_fn = filter[1..filter.size - 1].map { |expr| parse_expression(expr) }.join(' and ')
         @filter_post_processing = lambda { |_obj| eval(filter_fn) }
       end
@@ -152,14 +152,14 @@ module XYZ
       private
 
       def parse_expression(expr)
-        raise ErrorPostProcFilterNotImpl.new(:expression, expr) unless expr.is_a?(Array) && expr.size == 3
+        fail ErrorPostProcFilterNotImpl.new(:expression, expr) unless expr.is_a?(Array) && expr.size == 3
         case expr[0]
          when :eq
           "(#{parse_term(expr[1])} == #{parse_term(expr[2])})"
          when 'match-prefix'.to_sym
           "(#{parse_term(expr[1])} =~ Regexp.new('^#{expr[2]}'))"
          else
-          raise ErrorPostProcFilterNotImpl.new(:operation, expr[0])
+          fail ErrorPostProcFilterNotImpl.new(:operation, expr[0])
         end
       end
 
@@ -175,7 +175,7 @@ module XYZ
         elsif x.is_a?(FalseClass)
           false
         else
-          raise Error.new("Unexpected term in post processing filter #{x.inspect}")
+          fail Error.new("Unexpected term in post processing filter #{x.inspect}")
         end
       end
       class ErrorPostProcFilterNotImpl < Error::NotImplemented
@@ -301,7 +301,7 @@ module XYZ
       end
 
       def initialize(db, rows, model_handle)
-        raise Error.new('ArrayDataset.new called with rows being empty') if rows.empty?
+        fail Error.new('ArrayDataset.new called with rows being empty') if rows.empty?
         aliaz = model_handle[:model_name]
         empty_sequel_ds = db.empty_dataset()
         sequel_ds = nil

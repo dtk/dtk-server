@@ -40,7 +40,7 @@ module XYZ
         response = rest_ok_response ActionResultsQueue.get_results(action_results_id, ret_only_if_complete, disable_post_processing)
       end
 
-      return response
+      response
     end
 
     #### create and delete actions ###
@@ -118,7 +118,7 @@ module XYZ
         return nodes, false, "There are no #{status_pattern} nodes with id '#{nodes.first[:id]}'"
       end
 
-      return nodes, true, nil
+      [nodes, true, nil]
     end
 
     #### end: create and delete actions ###
@@ -135,7 +135,7 @@ module XYZ
     def rest__info
       node, subtype = ret_node_params_object_and_subtype()
        unless subtype == :instance
-         raise ErrorUsage::BadParamValue.new(:subtype, subtype)
+         fail ErrorUsage::BadParamValue.new(:subtype, subtype)
        end
       rest_ok_response node.info(print_form: true), encode_into: :yaml
     end
@@ -144,7 +144,7 @@ module XYZ
       node, subtype = ret_node_params_object_and_subtype()
       about = ret_non_null_request_params(:about).to_sym
        unless AboutEnum[subtype].include?(about)
-         raise ErrorUsage::BadParamValue.new(:about, AboutEnum[subtype])
+         fail ErrorUsage::BadParamValue.new(:about, AboutEnum[subtype])
        end
       rest_ok_response node.info_about(about)
     end
@@ -180,7 +180,7 @@ module XYZ
     def rest__stage
       target = create_target_instance_with_default(:target_id)
       unless node_binding_rs = node_binding_ruleset?(:node_template_identifier)
-        raise ErrorUsage.new('Missing node template identifier')
+        fail ErrorUsage.new('Missing node template identifier')
       end
       opts = {}
       if node_name = ret_request_params(:name)
@@ -203,7 +203,7 @@ module XYZ
       node_idh = ret_request_param_id_handle(:node_id)
       commit_msg = ret_request_params(:commit_msg)
       unless task = Task.create_from_node(node_idh, commit_msg)
-        raise ErrorUsage.new('No changes to converge')
+        fail ErrorUsage.new('No changes to converge')
       end
       task.save!()
       rest_ok_response task_id: task.id

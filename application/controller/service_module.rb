@@ -142,7 +142,7 @@ module DTK
       service_module = create_obj(:service_module_id)
       about = ret_non_null_request_params(:about).to_sym
       unless AboutEnum.include?(about)
-        raise ErrorUsage::BadParamValue.new(:about, AboutEnum)
+        fail ErrorUsage::BadParamValue.new(:about, AboutEnum)
       end
       rest_ok_response service_module.info_about(about)
     end

@@ -47,7 +47,7 @@ module DTK
           am.each do |a|
             output << a[:output][:term_index]
           end
-          return output
+          output
         end
 
         def am_test_attr(am)
@@ -55,7 +55,7 @@ module DTK
           am.each do |a|
             output << a[:input][:term_index]
           end
-          return output
+          output
         end
       end
 

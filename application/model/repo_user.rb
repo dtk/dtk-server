@@ -58,7 +58,7 @@ module DTK
        case module_model_name
         when :component_module then has_direct_access?(:service_module)
         when :service_module then has_direct_access?(:component_module)
-        else raise Error.new("Illegal module model name (#{module_model_name})")
+        else fail Error.new("Illegal module model name (#{module_model_name})")
       end
     end
 
@@ -82,7 +82,7 @@ module DTK
       ret = find_by_pub_key(mh, ssh_rsa_pub_key)
 
       unless ret
-        raise ErrorUsage.new('The SSH public key for the client machine has not been registered, have you added SSH key for this client?')
+        fail ErrorUsage.new('The SSH public key for the client machine has not been registered, have you added SSH key for this client?')
       end
 
       ret
@@ -130,7 +130,7 @@ module DTK
           key_content = File.read("#{gitolite_admin_keydir}/#{key}")
           if (key_content == ssh_rsa_pub_key)
             Log.info("Provided RSA public key already exists for another user, other user's keydir (#{key})")
-            raise ErrorUsage.new(SSH_KEY_EXISTS)
+            fail ErrorUsage.new(SSH_KEY_EXISTS)
           end
         end
       else
@@ -140,7 +140,7 @@ module DTK
           return existing_users.first
          else
           if [:admin, :node].include?(repo_user_type)
-            raise Error.new("Unexpected to have multiple matches of repo user type (#{repo_user_type})")
+            fail Error.new("Unexpected to have multiple matches of repo user type (#{repo_user_type})")
           end
         end
       end
@@ -186,7 +186,7 @@ module DTK
       case module_model_name
        when :component_module then :component_module_direct_access
        when :service_module then :service_module_direct_access
-       else raise Error.new("Illegal module model name (#{module_model_name})")
+       else fail Error.new("Illegal module model name (#{module_model_name})")
       end
     end
 

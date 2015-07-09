@@ -127,7 +127,7 @@ module DTK
       about = ret_non_null_request_params(:about).to_sym
       component_template_id = ret_request_params(:component_template_id)
       unless AboutEnum.include?(about)
-        raise ErrorUsage::BadParamValue.new(:about, AboutEnum)
+        fail ErrorUsage::BadParamValue.new(:about, AboutEnum)
       end
       rest_ok_response node_module.info_about(about, component_template_id)
     end

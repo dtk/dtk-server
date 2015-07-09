@@ -29,7 +29,7 @@ module DTK; class ModuleDSL; class V3
         case link_def_link.required(:type)
           when 'internal' then 'local'
           when 'external' then 'remote'
-          else raise new Error.new("unexpected value for type (#{link_def_link.required(:type)})")
+          else fail new Error.new("unexpected value for type (#{link_def_link.required(:type)})")
         end
       end
 

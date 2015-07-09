@@ -31,11 +31,11 @@
       type: :json,
       hidden: true,
       remote_dependencies:       [{ model_name: :port,
-         alias: :input_port,
-         convert: true,
-         join_type: :inner,
-         join_cond: { id: :port_link__input_id },
-         cols: Port.common_columns()
+                                    alias: :input_port,
+                                    convert: true,
+                                    join_type: :inner,
+                                    join_cond: { id: :port_link__input_id },
+                                    cols: Port.common_columns()
        },
                                   {
                                     model_name: :port,
@@ -50,11 +50,11 @@
       type: :json,
       hidden: true,
       remote_dependencies:       [{ model_name: :port,
-         alias: :input_port,
-         convert: true,
-         join_type: :inner,
-         join_cond: { id: :port_link__input_id },
-         cols: Port.common_columns()
+                                    alias: :input_port,
+                                    convert: true,
+                                    join_type: :inner,
+                                    join_cond: { id: :port_link__input_id },
+                                    cols: Port.common_columns()
        },
                                   {
                                     model_name: :component,

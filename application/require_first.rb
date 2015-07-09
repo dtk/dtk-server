@@ -65,12 +65,12 @@ def dtk_require_dtk_common_file(common_library)
   elsif is_dtk_common_gem_installed?
     # already loaded so do not do anything
   else
-    raise DTK::Client::DtkError, 'Common directory/gem not found, please make sure that you have cloned dtk-common folder or installed dtk common gem!'
+    fail DTK::Client::DtkError, 'Common directory/gem not found, please make sure that you have cloned dtk-common folder or installed dtk common gem!'
   end
 end
 
 def gem_only_available?
-  return !determine_common_folder() && is_dtk_common_gem_installed?
+  !determine_common_folder() && is_dtk_common_gem_installed?
 end
 
 ##
@@ -78,13 +78,10 @@ end
 # logic from dtk_require_dtk_common will try to find commond folder.
 # DEVELOPER NOTE: Uninstall dtk-common gem when changing dtk-common to avoid re-building gem.
 def is_dtk_common_gem_installed?
-  begin
-    # if no exception gem is found
-    gem 'dtk-common'
-    return true
-  rescue Gem::LoadError
-    return false
-  end
+  gem 'dtk-common'
+  return true
+rescue Gem::LoadError
+  return false
 end
 
 ##
@@ -95,7 +92,7 @@ def determine_common_folder
     return folder if File.directory?(path)
   end
 
-  return nil
+  nil
 end
 ######
 

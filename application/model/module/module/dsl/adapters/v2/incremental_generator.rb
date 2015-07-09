@@ -11,7 +11,7 @@ module DTK; class ModuleDSL; class V2
       end
       def self.get_fragment(full_hash, cmp_type)
         unless ret = (full_hash['components'] || {})[hash_index(cmp_type)]
-          raise Error.new("Cannot find component (#{display_name_print_form(cmp_type)})")
+          fail Error.new("Cannot find component (#{display_name_print_form(cmp_type)})")
         end
         ret
       end
@@ -73,7 +73,7 @@ module DTK; class ModuleDSL; class V2
         ref = aug_link_def.required(:link_type)
         link_def_links = aug_link_def.required(:link_def_links)
         if link_def_links.empty?
-          raise Error.new('Unexpected that link_def_links is empty')
+          fail Error.new('Unexpected that link_def_links is empty')
         end
         opts_choice = {}
         if single_choice = (link_def_links.size == 1)
@@ -122,7 +122,7 @@ module DTK; class ModuleDSL; class V2
           case link_def_link.required(:type)
             when 'internal' then 'local'
             when 'external' then 'remote'
-            else raise new Error.new("unexpected value for type (#{link_def_link.required(:type)})")
+            else fail new Error.new("unexpected value for type (#{link_def_link.required(:type)})")
           end
         ret['location'] = location
         if (not link_def_link[:required].nil?) and not link_def_link[:required]
@@ -139,9 +139,9 @@ module DTK; class ModuleDSL; class V2
         input_attr, input_is_remote = mapping_attribute(:input, am, remote_cmp_type)
         output_attr, output_is_remote = mapping_attribute(:output, am, remote_cmp_type)
         if (!input_is_remote) && (!output_is_remote)
-          raise Error.new('Cannot determine attribute mapping direction; both do not match remote component type')
+          fail Error.new('Cannot determine attribute mapping direction; both do not match remote component type')
         elsif input_is_remote && output_is_remote
-          raise Error.new('Cannot determine attribute mapping direction; both match remote component type')
+          fail Error.new('Cannot determine attribute mapping direction; both match remote component type')
         elsif (!input_is_remote) && output_is_remote
           "$#{output_attr} -> #{input_attr}"
         else #input_is_remote and (!output_is_remote)
@@ -154,14 +154,14 @@ module DTK; class ModuleDSL; class V2
         case var.required(:type)
           when 'component_attribute' then mapping_attribute__component_type(var, remote_cmp_type)
           when 'node_attribute' then mapping_attribute__node_type(var)
-          else raise Error.new("Unexpected mapping-attribute type (#{var.required(:var)})")
+          else fail Error.new("Unexpected mapping-attribute type (#{var.required(:var)})")
         end
       end
 
       def mapping_attribute__component_type(var, remote_cmp_type)
         split = var.required(:term_index).split('.')
         unless split.size == 2
-          raise Error.new("Not yet implemented: treating component mapping-attribute of form (#{var.required(:term_index)})")
+          fail Error.new("Not yet implemented: treating component mapping-attribute of form (#{var.required(:term_index)})")
         end
         attr = var.required(:attribute_name)
         [attr, var.required(:component_type) == remote_cmp_type]
@@ -172,7 +172,7 @@ module DTK; class ModuleDSL; class V2
           attr = 'node.host_address'
           [attr, var.required(:node_name) == 'remote']
         else
-          raise Error.new("Not yet implemented: treating node mapping-attribute of form (#{var.required(:term_index)})")
+          fail Error.new("Not yet implemented: treating node mapping-attribute of form (#{var.required(:term_index)})")
         end
       end
     end

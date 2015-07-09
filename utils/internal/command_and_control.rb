@@ -199,7 +199,7 @@ module DTK
               when :ec2_instance then :ec2
               when :ec2_image then :ec2 #TODO: kept in because staged node has this type, which should be changed
               when :physical then :physical
-              else raise Error.new("iaas type (#{iaas_type}) not treated")
+              else fail Error.new("iaas type (#{iaas_type}) not treated")
             end
           when :target
             target =  val
@@ -207,16 +207,16 @@ module DTK
             case iaas_type
               when 'ec2' then :ec2
               when 'physical' then :physical
-              else raise Error.new("iaas type (#{iaas_type}) not treated")
+              else fail Error.new("iaas type (#{iaas_type}) not treated")
             end
           when :image_type
             image_type = val
             case image_type
               when :ec2_image then :ec2
-              else raise Error.new("image type (#{key_val[:image_type]}) not treated")
+              else fail Error.new("image type (#{key_val[:image_type]}) not treated")
             end
           else
-            raise Error.new("#{key_val.inspect} not treated")
+            fail Error.new("#{key_val.inspect} not treated")
         end
       adapter_type = :iaas
       load_for_aux(adapter_type, adapter_name)
@@ -231,7 +231,7 @@ module DTK
     def self.load_for(task_or_task_action)
       adapter_type, adapter_name = task_or_task_action.ret_command_and_control_adapter_info()
       adapter_name ||= R8::Config[:command_and_control][adapter_type][:type]
-      raise ErrorCannotLoadAdapter.new unless adapter_type && adapter_name
+      fail ErrorCannotLoadAdapter.new unless adapter_type && adapter_name
       load_for_aux(adapter_type, adapter_name)
     end
 

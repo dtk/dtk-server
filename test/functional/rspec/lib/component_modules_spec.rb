@@ -203,7 +203,7 @@ end
 shared_context 'Get component module components list' do |dtk_common, component_module_name|
   it "gets list of all components in #{component_module_name} component module" do
     # delete previous elements in array
-    dtk_common.component_module_id_list.delete_if { |x| x != nil }
+    dtk_common.component_module_id_list.delete_if { |x| !x.nil? }
     dtk_common.get_component_module_components_list(component_module_name, '')
     empty_list = dtk_common.component_module_id_list.empty?
     empty_list.should eq(false)
@@ -213,7 +213,7 @@ end
 shared_context 'NEG - Get component module components list' do |dtk_common, component_module_name|
   it "gets empty list of all components since #{component_module_name} component module does not exist" do
     # delete previous elements in array
-    dtk_common.component_module_id_list.delete_if { |x| x != nil }
+    dtk_common.component_module_id_list.delete_if { |x| !x.nil? }
     dtk_common.get_component_module_components_list(component_module_name, '')
     empty_list = dtk_common.component_module_id_list.empty?
     empty_list.should eq(true)
@@ -223,7 +223,7 @@ end
 shared_context 'Get versioned component module components list' do |dtk_common, component_module_name, version|
   it "gets list of all components for version #{version} of #{component_module_name} component module" do
     # delete previous elements in array
-    dtk_common.component_module_id_list.delete_if { |x| x != nil }
+    dtk_common.component_module_id_list.delete_if { |x| !x.nil? }
     dtk_common.get_component_module_components_list(component_module_name, version)
     empty_list = dtk_common.component_module_id_list.empty?
     empty_list.should eq(false)
@@ -472,7 +472,7 @@ shared_context 'Add includes to dtk.model.yaml' do |dtk_model_yaml_file_location
       `echo "- #{cmp}" >> #{dtk_model_yaml_file_location}`
      end
     value = `cat #{dtk_model_yaml_file_location} | grep includes`
-    pass = true if !value.empty?
+    pass = true unless value.empty?
     puts ''
     pass.should eq(true)
   end
@@ -658,7 +658,7 @@ shared_context 'Import module from puppet forge' do |puppet_forge_module_name, n
   it "imports #{puppet_forge_module_name} component module from Puppet Forge" do
     puts 'Import module from puppet forge:', '-------------------------------'
     pass = true
-    if namespace != nil
+    if !namespace.nil?
       module_name = puppet_forge_module_name.split('-').last
       value = `dtk component-module import-puppet-forge #{puppet_forge_module_name} #{namespace}/#{module_name}`
     else

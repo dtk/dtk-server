@@ -58,7 +58,7 @@ module DTK; class ModuleDSL; class V3
           elsif type =~ /^array\((.+)\)$/
             nested_type = Regexp.last_match(1)
           else
-            raise ParsingError.new('Ill-formed attribute data type (?1)', type)
+            fail ParsingError.new('Ill-formed attribute data type (?1)', type)
           end
           # TODO: this will be modified when clean up attribute properties for semantic dataype
           if AttributeSemanticType.isa?(nested_type)
@@ -75,7 +75,7 @@ module DTK; class ModuleDSL; class V3
         end
 
         unless attr_props['data_type']
-          raise ParsingError.new('Ill-formed attribute data type (?1)', type)
+          fail ParsingError.new('Ill-formed attribute data type (?1)', type)
         end
         attr_props
       end

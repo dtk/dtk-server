@@ -183,9 +183,7 @@ module DTK
       true
     end
 
-    def constraints
-      @constraints
-    end
+    attr_reader :constraints
   end
 
   # Used as input to db update from hash

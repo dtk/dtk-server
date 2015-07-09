@@ -28,7 +28,7 @@ module DTK; class Clone
     # must be overwritten; this method returns a hash where key is parent id and value is array of objects under this
     # parent; the objects are both instances and templates
     def get_ndx_objects(_parent_idhs)
-      raise Error.new('Abstract method that should be overwritten')
+      fail Error.new('Abstract method that should be overwritten')
     end
 
     # can be overwritten; used for detecting with an isnatnce and template are euqal and thus modification not needed
@@ -101,7 +101,7 @@ module DTK; class Clone
       if opts[:donot_allow_deletes]
         mn = instances.first.model_name
         instance_names = instances.map { |r| r[:display_name] }.join(',')
-        raise ErrorUsage.new("The change to the dtk.model.yaml for would case the #{mn} objects (#{instance_names}) to be deleted")
+        fail ErrorUsage.new("The change to the dtk.model.yaml for would case the #{mn} objects (#{instance_names}) to be deleted")
       else
         Model.delete_instances(instances.map(&:id_handle))
       end

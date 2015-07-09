@@ -4,7 +4,7 @@ module DTK; class BaseModule
       assembly_templates = get_associated_assembly_templates()
       unless assembly_templates.empty?
         assembly_names = assembly_templates.map { |a| a.display_name_print_form(include_namespace: true) }
-        raise ErrorUsage.new("Cannot delete the component module because the assembly template(s) (#{assembly_names.join(',')}) reference it")
+        fail ErrorUsage.new("Cannot delete the component module because the assembly template(s) (#{assembly_names.join(',')}) reference it")
       end
 
       components = get_associated_component_instances()
@@ -29,7 +29,7 @@ module DTK; class BaseModule
         if opts[:no_error_if_does_not_exist]
           return ret
         else
-          raise ErrorUsage.new("Version '#{version}' for specified component module does not exist")
+          fail ErrorUsage.new("Version '#{version}' for specified component module does not exist")
         end
       end
 
@@ -65,6 +65,6 @@ module DTK; class BaseModule
         end
         ref
       end
-      raise ErrorUsage.new("Cannot delete the component module because the following:\n  #{refs.join("\n  ")}")    end
+      fail ErrorUsage.new("Cannot delete the component module because the following:\n  #{refs.join("\n  ")}")    end
   end
 end; end

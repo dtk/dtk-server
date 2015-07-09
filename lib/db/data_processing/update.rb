@@ -30,7 +30,7 @@ module DTK
           return nil
         end
         unless respond_to?(:update_returning_sql)
-          raise Error.new('have not implemented update_from_select with returning opt')
+          fail Error.new('have not implemented update_from_select with returning opt')
         end
         ret_list_prefixed = opts[:returning_cols].map { |x| x.is_a?(Hash) ? { "#{select_prefix}__#{Aux::ret_key(x)}".to_sym => Aux::ret_value(x) } : "#{select_prefix}__#{x}".to_sym }
         sql = update_returning_sql(update_ds, update_set_clause, ret_list_prefixed)
@@ -82,7 +82,7 @@ module DTK
           return nil
         end
         unless respond_to?(:update_returning_sql)
-          raise Error.new('have not implemented update_from_select with returning opt')
+          fail Error.new('have not implemented update_from_select with returning opt')
         end
         ret_list_prefixed = opts[:returning_cols].map { |x| x.is_a?(Hash) ? { "#{select_prefix}__#{Aux::ret_key(x)}".to_sym => Aux::ret_value(x) } : "#{select_prefix}__#{x}".to_sym }
         sql = update_returning_sql(update_ds, update_set_clause, ret_list_prefixed)
@@ -143,14 +143,14 @@ module DTK
                   opts[:create_stack_array] << CreateStack.new(child_idh[:model_name], child_create_res[:id])
                 end
               end
-              new_uris = new_uris + create_results.map { |r| r[:uri] }
+              new_uris += create_results.map { |r| r[:uri] }
             end
           end
   end
         if delete_not_matching
           # at this point child_list will just have existing items; need to add new items
           new_child_ids = new_uris.map { |uri| IDHandle[c: c, uri: uri].get_id() }
-          child_id_list = child_id_list + new_child_ids
+          child_id_list += new_child_ids
           delete_not_matching_children(child_id_list, factory_id_info, assigns, create_stack_array, opts)
         end
         new_uris
@@ -186,7 +186,7 @@ module DTK
           #         factory_idh = IDHandle[:c => c, :uri => factory_uri, :is_factory => true]
           factory_idh = id_handle.createIDH(uri: factory_uri, is_factory: true)
           factory_id_info = IDInfoTable.get_row_from_id_handle factory_idh, create_factory_if_needed: true
-          new_uris = new_uris + update_from_hash_from_factory_id(factory_id_info, factory_idh, child_assigns, opts)
+          new_uris += update_from_hash_from_factory_id(factory_id_info, factory_idh, child_assigns, opts)
         end
         new_uris
       end

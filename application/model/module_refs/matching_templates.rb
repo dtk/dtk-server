@@ -33,13 +33,13 @@ module DTK
           unless cmp_type = r[:component_type] || (r[:component_template] || {})[:component_type]
             ref =  ComponentRef.print_form(r)
             ref = (ref ? "(#{ref})" : '')
-            raise Error.new("Component ref #{ref} must either point to a component template or have component_type set")
+            fail Error.new("Component ref #{ref} must either point to a component template or have component_type set")
           end
           cmp_template_id = r[:component_template_id]
           if r[:has_override_version]
             unless cmp_template_id
               unless r[:version]
-                raise Error.new('Component ref has override-version flag set, but no version')
+                fail Error.new('Component ref has override-version flag set, but no version')
               end
               (cmp_types_to_check[cmp_type] ||= ComponentTypeToCheck.new) << { pntr: r, version: r[:version] }
             end
@@ -109,7 +109,7 @@ module DTK
           end
         end
         unless reference_errors.empty?
-          raise ServiceModule::ParsingError::DanglingComponentRefs.new(reference_errors)
+          fail ServiceModule::ParsingError::DanglingComponentRefs.new(reference_errors)
         end
         update_module_refs_dsl?(mappings)
         ret
@@ -155,7 +155,7 @@ module DTK
         module_name_to_ns.each do |cmp_module_name, namespace|
           if component_module_ref = component_module_ref?(cmp_module_name)
             unless component_module_ref.namespace() == namespace
-              raise Error.new("Unexpected that at this point component_module_ref.namespace() (#{component_module_ref.namespace()}) not equal to namespace (#{namespace})")
+              fail Error.new("Unexpected that at this point component_module_ref.namespace() (#{component_module_ref.namespace()}) not equal to namespace (#{namespace})")
             end
           else
             new_cmp_moule_ref = {

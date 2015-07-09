@@ -184,7 +184,7 @@ module XYZ
     def ret_columns(hash_input)
       columns = find_key_from_input(:columns, hash_input) || find_key_from_input(:cols, hash_input)
       return [] if columns.nil? || columns.empty?
-      raise ErrorParsing.new(:columns, columns) unless columns.is_a?(Array)
+      fail ErrorParsing.new(:columns, columns) unless columns.is_a?(Array)
       # form will be an array with each term either token or {:foo => :alias};
       # TODO: right now only treating col as string or term
       columns.map do |col|
@@ -193,7 +193,7 @@ module XYZ
         elsif col.is_a?(Hash) && col.size == 1
           { ret_scalar(col.keys.first) => ret_symbol(Aux::ret_value(col)) }
         else
-          raise ErrorPatternNotImplemented.new(:column, col)
+          fail ErrorPatternNotImplemented.new(:column, col)
         end
       end
     end
@@ -246,13 +246,13 @@ module XYZ
     def ret_order_by(hash_input)
       order_by = find_key_from_input(:order_by, hash_input)
       return [] if order_by.nil? || order_by.empty?
-      raise ErrorParsing.new(:order_by, order_by) unless order_by.is_a?(Array)
+      fail ErrorParsing.new(:order_by, order_by) unless order_by.is_a?(Array)
       order_by.map do |el|
-        raise ErrorParsing.new(:order_by_element, el) unless el.is_a?(Hash) && el.size <= 2
+        fail ErrorParsing.new(:order_by_element, el) unless el.is_a?(Hash) && el.size <= 2
         field = (el.find { |k, _v| ret_symbol(k) == :field } || [nil, nil])[1]
-        raise ErrorParsing.new(:order_by_element, el) unless field
+        fail ErrorParsing.new(:order_by_element, el) unless field
         order = (el.find { |k, _v| ret_symbol(k) == :order } || [nil, 'ASC'])[1]
-        raise ErrorParsing.new(:order_by_order_direction, order) unless ['ASC', 'DESC'].include?(order)
+        fail ErrorParsing.new(:order_by_order_direction, order) unless ['ASC', 'DESC'].include?(order)
         { field: ret_symbol(field), order: order }
       end
     end
@@ -260,9 +260,9 @@ module XYZ
     def ret_paging(hash_input)
       paging = find_key_from_input(:paging, hash_input)
       return {} if paging.nil? || paging.empty?
-      raise ErrorParsing.new(:paging, paging) unless paging.is_a?(Hash) && paging.size <= 2
+      fail ErrorParsing.new(:paging, paging) unless paging.is_a?(Hash) && paging.size <= 2
       start = (paging.find { |k, _v| ret_symbol(k) == :start } || [nil, nil])[1]
-      raise ErrorParsing.new(:paging_start, paging) unless start
+      fail ErrorParsing.new(:paging_start, paging) unless start
       limit = (paging.find { |k, _v| ret_symbol(k) == :limit } || [nil, nil])[1]
       { start: start.to_i }.merge(limit ? { limit: limit.to_i } : {})
     end
@@ -276,7 +276,7 @@ module XYZ
     # converts if symbol still in string form; otehrwise keeps as string
     def ret_symbol(term_in_json)
       # TODO: short circuit if parsed already
-      raise ErrorParsing.new(:symbol, term_in_json) if [Array, Hash].detect { |t| term_in_json.is_a?(t) }
+      fail ErrorParsing.new(:symbol, term_in_json) if [Array, Hash].detect { |t| term_in_json.is_a?(t) }
 # TODO: remove patch
 return :eq if term_in_json == ':'
       # complexity due to handle case where have form :":columns"
@@ -284,7 +284,7 @@ return :eq if term_in_json == ':'
     end
 
     def ret_scalar(term_in_json)
-      raise ErrorParsing.new(:symbol, term_in_json) if [Array, Hash].detect { |t| term_in_json.is_a?(t) }
+      fail ErrorParsing.new(:symbol, term_in_json) if [Array, Hash].detect { |t| term_in_json.is_a?(t) }
       # complexity due to handle case where have form :":columns"
       return term_in_json.to_s.gsub(/^[:]+/, '').to_sym if term_in_json.is_a?(Symbol)
       return Regexp.last_match(1).to_sym if (term_in_json.is_a?(String) && term_in_json =~ /^[:]+(.+)/)

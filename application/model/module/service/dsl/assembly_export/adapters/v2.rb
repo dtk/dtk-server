@@ -47,7 +47,7 @@ module DTK
         # add in port links
         port_links(node_ref_to_name) do |in_parsed_port, out_parsed_port|
           unless matching_node = ret[:nodes][in_parsed_port[:node_name]]
-            raise Error.new('Cannot find matching node for input port')
+            fail Error.new('Cannot find matching node for input port')
           end
 
           cmps = matching_node[:components]
@@ -57,10 +57,10 @@ module DTK
               cmps[i] = add_component_link_to_cmp(cmps[i], out_parsed_port)
               found = true
             end
-            i = i + 1
+            i += 1
           end
           unless found
-            raise Error.new('Cannot find matching component for input port')
+            fail Error.new('Cannot find matching component for input port')
           end
         end
         ret

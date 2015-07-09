@@ -4,7 +4,7 @@ module DTK; class ModuleDSL; class V3
       def generate
         link_def_links = @aug_link_def.required(:link_def_links)
         if link_def_links.empty?
-          raise Error.new('Unexpected that link_def_links is empty')
+          fail Error.new('Unexpected that link_def_links is empty')
         end
         @aug_link_def[:link_def_links].inject(PossibleLinks.new) do |pl, link_def_link|
           cmp, link = choice_info(ObjectWrapper.new(link_def_link))

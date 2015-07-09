@@ -61,7 +61,7 @@ module DTK
     # parses and creates dsl_object form hash parsed in as target
     def self.create_from_file_obj_hash(impl_obj, dsl_filename, content, opts = {})
       unless isa_dsl_filename?(dsl_filename)
-        raise Error.new("The file path (#{dsl_filename}) does not refer to a dsl file name")
+        fail Error.new("The file path (#{dsl_filename}) does not refer to a dsl file name")
       end
       parsed_name = parse_dsl_filename(dsl_filename)
       opts[:file_path] = dsl_filename
@@ -90,7 +90,7 @@ module DTK
     def self.contains_dsl_file?(impl_obj, dsl_integer_version = nil, format_type = nil)
       dsl_integer_version ||= integer_version(dsl_integer_version)
       unless regexp = DSLFilenameRegexp[dsl_integer_version]
-        raise Error.new("Do not treat Component DSL version: #{dsl_integer_version}")
+        fail Error.new("Do not treat Component DSL version: #{dsl_integer_version}")
       end
       format_ext_regexp = (format_type && Regexp.new("\.(#{ExtensionToType[format_type.to_sym]}$)"))
       depth = 1
@@ -143,7 +143,7 @@ module DTK
           names << n_name if (ext_ref.key?('puppet_attribute') && ext_ref['puppet_attribute'].eql?('name'))
         end
       end
-      return names
+      names
     end
     # returns parsing_error if parsing error
 
@@ -158,14 +158,14 @@ module DTK
 
     def ref_integrity_snapshot
       unless @ref_integrity_snapshot
-        raise Error.new('Unexpected that @ref_integrity_snapshot is nil')
+        fail Error.new('Unexpected that @ref_integrity_snapshot is nil')
       end
       @ref_integrity_snapshot
     end
 
     def component_module
       unless @component_module
-        raise Error.new('Unexpected that @component_module is nil')
+        fail Error.new('Unexpected that @component_module is nil')
       end
       @component_module
     end
@@ -201,7 +201,7 @@ module DTK
         object_classes = augmented_objects.map(&:class).uniq
         unless object_classes.size == 1
           object_classes_print_form = object_classes.map(&:to_s).join(',')
-          raise Error.new("augmented_objects must have the same type rather than (#{object_classes_print_form})")
+          fail Error.new("augmented_objects must have the same type rather than (#{object_classes_print_form})")
         end
         object_classes.first
       end
@@ -213,7 +213,7 @@ module DTK
           impl_or_module_branch_obj
         elsif impl_or_module_branch_obj.is_a?(ModuleBranch)
           impl_or_module_branch_obj.get_implementation()
-        else raise Error.new("Unexpected object type for impl_or_module_branch_obj (#{impl_or_module_branch_obj.class})")
+        else fail Error.new("Unexpected object type for impl_or_module_branch_obj (#{impl_or_module_branch_obj.class})")
         end
       info = get_dsl_file_raw_content_and_info(impl_obj, dsl_integer_version, format_type)
       { hash_content: convert_to_hash(info[:content], info[:format_type]) }.merge(Aux::hash_subset(info, [:format_type, :dsl_filename]))
@@ -221,7 +221,7 @@ module DTK
 
     def self.get_dsl_file_raw_content_and_info(impl_obj, dsl_integer_version = nil, format_type = nil)
       unless dsl_filename = contains_dsl_file?(impl_obj, dsl_integer_version, format_type)
-        raise Error.new('Cannot find DSL file')
+        fail Error.new('Cannot find DSL file')
       end
       parsed_name = parse_dsl_filename(dsl_filename, dsl_integer_version)
       format_type ||= parsed_name[:format_type]
@@ -240,7 +240,7 @@ module DTK
       first_part = 'dtk.model'
       unless extension = TypeToExtension[format_type]
         legal_types = TypeToExtension.values.uniq.join(',')
-        raise Error.new("Illegal dsl_filename extension (#{format_type}); legal types are: #{legal_types}")
+        fail Error.new("Illegal dsl_filename extension (#{format_type}); legal types are: #{legal_types}")
       end
       "#{first_part}.#{extension}"
     end
@@ -248,7 +248,7 @@ module DTK
     def integer_version(version_specific_input_hash)
       version = version_specific_input_hash['dsl_version']
       unless integer_version = (version ? VersionToVersionInteger[version.to_s] : VersionIntegerWhenVersionMissing)
-        raise ErrorUsage.new("Illegal version (#{version}) found in meta file")
+        fail ErrorUsage.new("Illegal version (#{version}) found in meta file")
       end
       integer_version
     end
@@ -315,11 +315,11 @@ module DTK
         if filename =~ DSLFilenameRegexp[integer_version(dsl_integer_version)]
           file_extension = Regexp.last_match(1)
           unless format_type = ExtensionToType[file_extension]
-            raise Error.new("illegal file extension #{file_extension}")
+            fail Error.new("illegal file extension #{file_extension}")
           end
           { format_type: format_type }
         else
-          raise Error.new("Component filename (#{filename}) has illegal form")
+          fail Error.new("Component filename (#{filename}) has illegal form")
         end
       end
 
@@ -342,11 +342,9 @@ module DTK
       end
 
       def convert_to_hash(content, format_type, opts = {})
-        begin
-          Aux.convert_to_hash(content, format_type, opts)
-         rescue ArgumentError => e
-          raise ErrorUsage.new("Error parsing the component dsl file; #{e}")
-        end
+        Aux.convert_to_hash(content, format_type, opts)
+       rescue ArgumentError => e
+        raise ErrorUsage.new("Error parsing the component dsl file; #{e}")
       end
     end
   end

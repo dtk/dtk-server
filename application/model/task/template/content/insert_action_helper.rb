@@ -42,7 +42,7 @@ module DTK; class Task; class Template
         # default insert strategy is to put the new action in the latest existing internode stage at the latest point
         if insert_strategy
           unless ret = InsertStrategies[insert_strategy]
-            raise Error.new("Illegal insert action strategy (#{insert_strategy})")
+            fail Error.new("Illegal insert action strategy (#{insert_strategy})")
           end
           ret
         else

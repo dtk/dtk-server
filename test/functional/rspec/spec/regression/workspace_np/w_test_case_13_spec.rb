@@ -42,7 +42,7 @@ def converge_service_and_cancel_tasks(workspace_id)
   else task_status_response.to_s.include? 'failed'
     puts 'Converge process has not been cancelled successfully!'
   end
-  return tasks_cancelled
+  tasks_cancelled
 end
 
 describe '(Workspace) Test Case 13: Create one node, add component in it, converge workspace and cancel tasks while converge is in execution' do

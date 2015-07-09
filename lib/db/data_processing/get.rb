@@ -17,7 +17,7 @@ module XYZ
         end
 
         unless db_rel = DB_REL_DEF[model_name]
-          raise Error.new("Illegal model name (#{model_name})")
+          fail Error.new("Illegal model name (#{model_name})")
         end
 
         filter = DB.augment_for_authorization(where_clause, model_handle) #SQL.and({CONTEXT_ID => c},where_clause)

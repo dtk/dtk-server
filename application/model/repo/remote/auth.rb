@@ -77,7 +77,7 @@ module DTK; class Repo
         case rights
           when 'r' then R
           when 'rw' then RW
-          else raise ErrorUsage("Illegal access rights string '#{rights}'")
+          else fail ErrorUsage("Illegal access rights string '#{rights}'")
         end
       end
     end

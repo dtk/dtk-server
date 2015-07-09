@@ -87,7 +87,7 @@ module DTK; class  Assembly
         when :tasks
           list_tasks(opts)
         else
-          raise Error.new("TODO: not implemented yet: processing of info_about(#{about})")
+          fail Error.new("TODO: not implemented yet: processing of info_about(#{about})")
         end
       end
 

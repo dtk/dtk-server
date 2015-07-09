@@ -122,7 +122,7 @@ module DTK; class BaseModule
 
       # TODO: see if can simplify and make this an 'else' to opts[:update_from_includes above
       unless opts[:update_from_includes]
-        module_branch.set_dsl_parsed!(true) if !opts[:dsl_parsed_false]
+        module_branch.set_dsl_parsed!(true) unless opts[:dsl_parsed_false]
         return ret
       end
 

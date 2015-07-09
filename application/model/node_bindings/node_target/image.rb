@@ -13,13 +13,13 @@ module DTK; class NodeBindings
         ret = TargetSpecificInfo.new(self)
         if @image
           unless image_id = NodeImage.find_iaas_match(target, @image)
-            raise ErrorUsage.new("The image (#{@image}) in the node binding does not exist in the target (#{target.get_field?(:display_name)})")
+            fail ErrorUsage.new("The image (#{@image}) in the node binding does not exist in the target (#{target.get_field?(:display_name)})")
           end
           ret.image_id = image_id
         end
         if @size
           unless iaas_size = NodeImageAttribute::Size.find_iaas_match(target, @size)
-            raise ErrorUsage.new("The size (#{@size}) in the node binding is not valid in the target (#{target.get_field?(:display_name)})")
+            fail ErrorUsage.new("The size (#{@size}) in the node binding is not valid in the target (#{target.get_field?(:display_name)})")
           end
           ret.size = iaas_size
         end

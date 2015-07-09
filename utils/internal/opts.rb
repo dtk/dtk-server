@@ -33,7 +33,7 @@ module DTK
     def required(key)
       val  = self[key]
       if val.nil?
-        raise Error.new("Key (#{key}) is required as an option")
+        fail Error.new("Key (#{key}) is required as an option")
       end
       val
     end

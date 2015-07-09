@@ -10,7 +10,7 @@ module DTK; class ErrorUsage
         elsif input_form.is_a?(Class)
           Klass.new(input_form)
         else
-          raise Error.new("Legal value type's class (#{input_form.class}) is not supported")
+          fail Error.new("Legal value type's class (#{input_form.class}) is not supported")
         end
       end
 

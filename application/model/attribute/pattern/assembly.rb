@@ -14,7 +14,7 @@ module DTK; class Attribute
           case format
             when :simple then Simple
             when :canonical_form then CanonicalForm
-            else raise Error.new("Unexpected format (#{format})")
+            else fail Error.new("Unexpected format (#{format})")
           end
         klass.create(attr_term, opts)
       end
@@ -54,7 +54,7 @@ module DTK; class Attribute
           elsif attr_term =~ /^node[^\/]*\/attribute/
             Type::NodeLevel.new(attr_term)
           else
-            raise ErrorUsage::Parsing::Term.new(attr_term)
+            fail ErrorUsage::Parsing::Term.new(attr_term)
           end
         end
       end

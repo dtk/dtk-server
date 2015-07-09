@@ -37,7 +37,7 @@ users = client.list_users()
 
 user_match = users.select { |u| u['username'] == username }
 if user_match.size != 1
-  raise Error.new("Unexpected selet on users found (#{user_match.inspect}")
+  fail Error.new("Unexpected selet on users found (#{user_match.inspect}")
 end
 pp user_match.first
 pp client.delete_user(user_match.first['id'])

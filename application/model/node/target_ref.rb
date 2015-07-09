@@ -52,7 +52,7 @@ module DTK
             end
             ret
           else
-            raise Error.new("Unexpected type (#{type})")
+            fail Error.new("Unexpected type (#{type})")
         end
       end
       def self.node_member_index(target_ref)
@@ -180,7 +180,7 @@ module DTK
           idhs = filter[:node_group_relation_idhs]
           filter_field = :id
         else
-          raise Error.new("Unexpected filter: #{filter.inspect}")
+          fail Error.new("Unexpected filter: #{filter.inspect}")
         end
         if idhs.empty?
           return ret

@@ -118,7 +118,7 @@ module Ramaze::Helper
       dependency_warnings = []
 
       # check for missing module dependencies
-      if !do_not_raise
+      unless do_not_raise
         missing_modules, required_modules, dependency_warnings = module_class(module_type).get_required_and_missing_modules(project, remote_params, dtk_client_pub_key)
         # return missing modules if any
         return { missing_module_components: missing_modules, dependency_warnings: dependency_warnings, required_modules: required_modules } if !missing_modules.empty? || (!required_modules.empty? && !skip_auto_install)
@@ -144,7 +144,7 @@ module Ramaze::Helper
 
       # [Amar & Haris] this is temp restriction until rest of logic is properly fixed
       if local_module_name != remote_module_name
-        raise ErrorUsage.new("Publish with remote module name (#{remote_module_name}) not equal to local module name (#{local_module_name}) is currently not supported.")
+        fail ErrorUsage.new("Publish with remote module name (#{remote_module_name}) not equal to local module name (#{local_module_name}) is currently not supported.")
       end
 
       module_type = module_obj.module_type
@@ -212,7 +212,7 @@ module Ramaze::Helper
       param_module_name = ret_request_params(:module_name)
       pf_namespace, pf_module_name = ::DTK::PuppetForge.puppet_forge_namespace_and_module_name(pf_full_name)
       if param_module_name && param_module_name != pf_module_name
-        raise ErrorUsage.new("Install with module name (#{param_module_name}) not equal to puppet forge module name (#{pf_module_name}) is currently not supported.")
+        fail ErrorUsage.new("Install with module name (#{param_module_name}) not equal to puppet forge module name (#{pf_module_name}) is currently not supported.")
       end
       # default is to use namespace associated with puppet forge
       [ret_request_param_module_namespace?() || pf_namespace, pf_module_name]
@@ -221,7 +221,7 @@ module Ramaze::Helper
     def ret_assembly_template_idh
       assembly_template_id, subtype = ret_assembly_params_id_and_subtype()
       unless subtype == :template
-        raise ::DTK::Error.new("Unexpected that subtype has value (#{subtype})")
+        fail ::DTK::Error.new("Unexpected that subtype has value (#{subtype})")
       end
       id_handle(assembly_template_id, :assembly_template)
     end
@@ -285,7 +285,7 @@ module Ramaze::Helper
         when :service_module then ServiceModule
         when :test_module then TestModule
         when :node_module then NodeModule
-        else raise Error.new("Unexpected module_type (#{module_type})")
+        else fail Error.new("Unexpected module_type (#{module_type})")
       end
     end
 
@@ -301,7 +301,7 @@ module Ramaze::Helper
         when NodeModule
           return :node_module
         else
-          raise ErrorUsage.new("Module type '#{component_module}' is not valid")
+          fail ErrorUsage.new("Module type '#{component_module}' is not valid")
         end
     end
 
@@ -309,7 +309,7 @@ module Ramaze::Helper
       if remote_namespace.empty?
         linked_remote_repo = component_module.default_linked_remote_repo()
         remote_namespace   = linked_remote_repo ? linked_remote_repo[:repo_namespace] : nil
-        raise ErrorUsage.new('Not able to find linked remote namespace, please provide one') unless remote_namespace
+        fail ErrorUsage.new('Not able to find linked remote namespace, please provide one') unless remote_namespace
       end
       remote_namespace
     end

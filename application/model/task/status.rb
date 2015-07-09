@@ -32,7 +32,7 @@ module DTK
 
         unless task = Task.get_top_level_most_recent_task(task_mh, filter)
           task_obj = task_obj_idh.create_object().update_object!(:display_name)
-          raise ErrorUsage.new("No tasks found for #{task_obj_type} (#{task_obj[:display_name]})")
+          fail ErrorUsage.new("No tasks found for #{task_obj_type} (#{task_obj[:display_name]})")
         end
 
         task_structure = Task.get_hierarchical_structure(task_mh.createIDH(id: task[:id]))

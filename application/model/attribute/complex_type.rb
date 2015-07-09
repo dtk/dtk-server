@@ -22,7 +22,7 @@ module XYZ
     end
 
     def self.ravel_raw_post_hash(raw_post_hash, type, parent_id = nil)
-      raise Error.new("Unexpected type #{type}") unless type == :attribute  #TODO: may teat other types like component
+      fail Error.new("Unexpected type #{type}") unless type == :attribute  #TODO: may teat other types like component
       indexed_ret = {}
       ravel_raw_post_hash_attribute!(indexed_ret, raw_post_hash, parent_id)
       indexed_ret.values

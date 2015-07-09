@@ -69,7 +69,7 @@ module DTK; class Task; class Template
               action_list_display_form.sort { |a, b| a[type] <=> b[type] }
             when :component_type
               just_component_types(action_list_display_form).sort { |a, b| a[type] <=> b[type] }
-            else raise ErrorUsage.new("Illegal type (#{type})")
+            else fail ErrorUsage.new("Illegal type (#{type})")
           end
         end
 

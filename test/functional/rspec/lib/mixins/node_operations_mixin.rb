@@ -26,7 +26,7 @@ module NodeOperationsMixin
       puts "Some of the input parameters is incorrect or missing. Node name: #{node_name}, Attribute name: #{attribute_name_to_check}, Attribute value: #{attribute_value_to_check}"
     end
     puts ''
-    return attribute_check
+    attribute_check
   end
 
   def check_attribute_presence_in_components(service_id, node_name, component_name, attribute_name_to_check, attribute_value_to_check)
@@ -59,7 +59,7 @@ module NodeOperationsMixin
       puts "Some of the input parameters is incorrect or missing. Node name: #{node_name}, Component name: #{component_name}, Attribute name: #{attribute_name_to_check}, Attribute value: #{attribute_value_to_check}"
     end
     puts ''
-    return attribute_check
+    attribute_check
   end
 
   def check_params_presence_in_nodes(service_id, node_name, param_name_to_check, param_value_to_check)
@@ -85,7 +85,7 @@ module NodeOperationsMixin
       puts "Node with name #{node_name} does not exist!"
     end
     puts ''
-    return param_check
+    param_check
   end
 
   def check_components_presence_in_nodes(service_id, node_name, component_name_to_check)
@@ -104,7 +104,7 @@ module NodeOperationsMixin
       puts "Node with name #{node_name} or component with name #{component_name_to_check} does not exist!"
     end
     puts ''
-    return component_check
+    component_check
   end
 
   def delete_component_from_service(service_id, node_name, component_to_delete)
@@ -148,7 +148,7 @@ module NodeOperationsMixin
       puts "Component #{component_to_delete} does not exist on #{node_name} and therefore cannot be deleted!"
     end
     puts ''
-    return component_deleted
+    component_deleted
   end
 
   def stop_running_node(service_id, node_name)
@@ -166,7 +166,7 @@ module NodeOperationsMixin
       puts "Node #{node_name} was not stopped successfully!"
     end
     puts ''
-    return node_stopped
+    node_stopped
   end
 
   def start_running_node(service_id, node_name)
@@ -205,7 +205,7 @@ module NodeOperationsMixin
       puts "Start #{node_name} node is not completed successfully!"
     end
     puts ''
-    return node_started
+    node_started
   end
 
   def grep_node(service_id, node_name, log_location, grep_pattern)
@@ -247,7 +247,7 @@ module NodeOperationsMixin
       end
     end
     puts ''
-    return grep_pattern_found
+    grep_pattern_found
   end
 
   def delete_node(service_id, node_name)
@@ -263,7 +263,7 @@ module NodeOperationsMixin
       puts 'Node was not deleted successfully!'
     end
     puts ''
-    return node_deleted
+    node_deleted
   end
 
   def create_node(service_id, node_name, node_template)
@@ -294,7 +294,7 @@ module NodeOperationsMixin
       puts "Node #{node_name} does not exist!"
     end
     puts ''
-    return node_exists
+    node_exists
   end
 
   def add_component_to_service_node(service_id, node_name, component_id, namespace)
@@ -318,7 +318,7 @@ module NodeOperationsMixin
       end
     end
     puts ''
-    return component_added
+    component_added
   end
 
   def stage_node_template(node_name, staged_node_name)
@@ -373,7 +373,7 @@ module NodeOperationsMixin
       puts "Node with id #{node_id} does not exist!"
     end
     puts ''
-    return node_exists
+    node_exists
   end
 
   def converge_node(node_id)
@@ -418,7 +418,7 @@ module NodeOperationsMixin
       puts 'Node was not converged successfully!'
     end
     puts ''
-    return node_converged
+    node_converged
   end
 
   def destroy_node(node_id)
@@ -434,7 +434,7 @@ module NodeOperationsMixin
       puts 'Node was not deleted successfully!'
     end
     puts ''
-    return node_deleted
+    node_deleted
   end
 
   def add_component_to_node(node_id, component_name)
@@ -459,7 +459,7 @@ module NodeOperationsMixin
       puts "Component #{component_name} does not exist!"
     end
     puts ''
-    return component_added
+    component_added
   end
 
   def set_attribute_on_node(node_id, attribute_name, attribute_value)
@@ -486,7 +486,7 @@ module NodeOperationsMixin
       puts "Attribute #{attribute_name} does not exist on node!"
     end
     puts ''
-    return is_attribute_set
+    is_attribute_set
   end
 
   def check_get_netstats(node_id, port)
@@ -525,7 +525,7 @@ module NodeOperationsMixin
       end
     end
     puts ''
-    return netstats_check
+    netstats_check
   end
 
   def check_list_task_info_status(node_id, component_name)
@@ -552,7 +552,7 @@ module NodeOperationsMixin
       puts "List task info does not contain component #{component_name}"
     end
     puts ''
-    return list_task_info_check
+    list_task_info_check
   end
 
   def netstats_check_for_specific_node(service_id, node_name, port)
@@ -602,6 +602,6 @@ module NodeOperationsMixin
       end
     end
     puts ''
-    return netstats_check
+    netstats_check
   end
 end

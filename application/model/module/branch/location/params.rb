@@ -6,7 +6,7 @@ module DTK; class ModuleBranch
         ret = self[:module_name]
         if opts[:with_namespace]
           unless ns = module_namespace_name()
-            raise Error.new('Unexpected that self does not have namespace set')
+            fail Error.new('Unexpected that self does not have namespace set')
           end
           ret = Namespace.join_namespace(ns, ret)
         end
@@ -53,11 +53,11 @@ module DTK; class ModuleBranch
 
       def validate(params)
         unless (bad_keys = params.keys - all_keys()).empty?
-          raise Error.new("Illegal key(s): #{bad_keys.join(',')}")
+          fail Error.new("Illegal key(s): #{bad_keys.join(',')}")
         end
         missing_required = required_keys().select { |key| params[key].nil? }
         unless missing_required.empty?
-          raise Error.new("Required key(s): #{missing_required.join(',')}")
+          fail Error.new("Required key(s): #{missing_required.join(',')}")
         end
       end
 

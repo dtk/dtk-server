@@ -45,11 +45,11 @@ class Tenant
       end
     end
 
-    return response_JSON
+    response_JSON
   end
 
   def pretty_print_JSON(json_content)
-    return ap json_content
+    ap json_content
   end
 
   def stage_assembly(assembly_template, assembly_name)
@@ -85,7 +85,7 @@ class Tenant
       puts "Assembly template #{assembly_template} not found!"
     end
     puts ''
-    return assembly_id.to_i
+    assembly_id.to_i
   end
 
   def add_component_to_assembly_node(assembly_id, node_name, component_name)
@@ -104,7 +104,7 @@ class Tenant
       end
     end
     puts ''
-    return component_added
+    component_added
   end
 
   def set_attribute(assembly_id, attribute_name, attribute_value)
@@ -125,7 +125,7 @@ class Tenant
       is_attributes_set = true
     end
     puts ''
-    return is_attributes_set
+    is_attributes_set
   end
 
   def converge_assembly(assembly_id)
@@ -180,7 +180,7 @@ class Tenant
     end
 
     puts ''
-    return assembly_converged
+    assembly_converged
   end
 end
 

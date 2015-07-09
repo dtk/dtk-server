@@ -11,7 +11,7 @@ module ServiceModulesMixin
       puts "Service #{service_module_name} does not exist!"
     end
     puts ''
-    return service_module_exists
+    service_module_exists
   end
 
   def check_if_service_module_exists_on_remote(service_module_name, namespace)
@@ -28,7 +28,7 @@ module ServiceModulesMixin
       puts "Service module #{service_module_name} with namespace #{namespace} does not exist on remote repo!"
     end
     puts ''
-    return service_module_exists
+    service_module_exists
   end
 
   def delete_service_module(service_module_name)
@@ -58,7 +58,7 @@ module ServiceModulesMixin
       service_module_deleted = false
     end
     puts ''
-    return service_module_deleted
+    service_module_deleted
   end
 
   def delete_service_module_from_remote(service_module_name, namespace)
@@ -84,7 +84,7 @@ module ServiceModulesMixin
       service_module_deleted = false
     end
     puts ''
-    return service_module_deleted
+    service_module_deleted
   end
 
   def check_if_service_module_contains_assembly(service_module_name, assembly_name)
@@ -112,7 +112,7 @@ module ServiceModulesMixin
       service_module_contains_assembly = false
     end
     puts ''
-    return service_module_contains_assembly
+    service_module_contains_assembly
   end
 
   def check_component_modules_in_service_module(service_module_name, components_list_to_check)
@@ -135,14 +135,14 @@ module ServiceModulesMixin
         end
       end
 
-      if (!components_exist.include? false)
+      unless (components_exist.include? false)
         all_components_exist_in_service_module = true
         puts "All components #{components_list_to_check.inspect} exist in #{service_module_name} service module"
       end
     else
       puts "Service module #{service_module_name} does not exist in service module list."
     end
-    return all_components_exist_in_service_module
+    all_components_exist_in_service_module
   end
 
   def delete_assembly(assembly_name, namespace = nil)
@@ -165,7 +165,7 @@ module ServiceModulesMixin
       puts 'Assembly does not exist in assembly template list.'
     end
     puts ''
-    return assembly_deleted
+    assembly_deleted
   end
 
   def list_service_modules_with_filter(namespace)
@@ -185,7 +185,7 @@ module ServiceModulesMixin
       end
     end
     puts ''
-    return service_modules_retrieved
+    service_modules_retrieved
   end
 
   def list_remote_service_modules_with_filter(namespace)
@@ -205,6 +205,6 @@ module ServiceModulesMixin
       end
     end
     puts ''
-    return service_modules_retrieved
+    service_modules_retrieved
   end
 end

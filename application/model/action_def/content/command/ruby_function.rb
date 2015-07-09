@@ -43,7 +43,7 @@ module DTK; class ActionDef; class Content
           params = process_lambda_params(evaluated_fn, parsed_attrs)
           value = evaluated_fn.call(*params)
         else
-          raise Error.new('Currently only lambda functions are supported')
+          fail Error.new('Currently only lambda functions are supported')
         end
         value
       end

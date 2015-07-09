@@ -27,7 +27,7 @@ responseLogin = RestClient.post(ENDPOINT + '/rest/user/process_login', 'username
 
 opts = {
                  timeout: 20,
-            open_timeout: 5,
+                 open_timeout: 5,
                  cookies: {}
 }
 
@@ -58,7 +58,7 @@ def send_request(path, body, opts)
 
   end
 
-  return requestResponse
+  requestResponse
 end
 
 # Method for deleting assembly instances
@@ -299,7 +299,7 @@ def module_create(opts)
   ap `echo "n\n" | dtk module clone test_module`
 
   puts '', 'Checking if the module is cloned/restored correctly...'
-  if !File.exist?(File.expand_path('~/component_modules/test_module'))
+  unless File.exist?(File.expand_path('~/component_modules/test_module'))
     puts 'Test module not cloned correctly!'
     $success = false
   end

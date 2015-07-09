@@ -140,7 +140,7 @@ module DTK; class Component
 
     def get_component_template_parent
       unless row = get_obj(cols: [:instance_component_template_parent])
-        raise Error.new('Unexpected that get_component_template_parent() called and nil result')
+        fail Error.new('Unexpected that get_component_template_parent() called and nil result')
       end
       Component::Template.create_from_component(row[:component_template])
     end

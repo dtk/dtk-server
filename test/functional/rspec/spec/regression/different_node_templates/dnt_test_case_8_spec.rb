@@ -35,7 +35,7 @@ def get_node_ec2_public_dns(service_name, node_name)
 
   if !node_info.nil?
     node_ec2_public_dns = node_info['external_ref']['ec2_public_address']
-    if !node_ec2_public_dns.nil?
+    unless node_ec2_public_dns.nil?
       puts 'Node ec2 public dns found!'
       puts ''
       return node_ec2_public_dns

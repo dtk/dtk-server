@@ -68,7 +68,7 @@ module XYZ
             duplicate_count = select_info[:ds].join_table(:inner, ds, match_cols).count
             if duplicate_count > 0
               # TODO: make this a specfic error
-              raise Error.new("found #{duplicate_count} duplicates")
+              fail Error.new("found #{duplicate_count} duplicates")
             end
            when :allow
             ds_to_group = select_info[:ds].join_table(:inner, ds, match_cols, table_alias: :existing)
@@ -115,7 +115,7 @@ module XYZ
         else
           ds.import(columns, sequel_select_with_cols)
           # TODO: need to get ids and set
-          raise Error.new('have not implemented create_from_select when db adapter does not support insert_returning_sql  not set')
+          fail Error.new('have not implemented create_from_select when db adapter does not support insert_returning_sql  not set')
         end
         ret
       end
@@ -123,7 +123,7 @@ module XYZ
       def create_from_select_for_migrate(model_handle, field_set, select_ds)
         unless model_handle[:parent_model_name]
           unless [:repo, :datacenter, :library, :task, :repo_user, :repo_user_acl, :repo_remote].include?(model_handle[:model_name])
-            raise Error.new("missing :parent_model_name in model_handle (#{model_handle.inspect})")
+            fail Error.new("missing :parent_model_name in model_handle (#{model_handle.inspect})")
           end
         end
         parent_id_col = model_handle.parent_id_field_name()
@@ -144,7 +144,7 @@ module XYZ
         # fn tries to return ids depending on whether db adater supports returning_id
         ret = nil
         unless ds.respond_to?(:insert_returning_sql)
-          raise Error.new('Not supported')
+          fail Error.new('Not supported')
         end
 
         returning_sql_cols = [:id, :display_name, parent_id_col.as(:parent_id)]
@@ -269,7 +269,7 @@ module XYZ
 
   end
 
-  raise Error.new('error while inserting element') if new_id.nil?
+  fail Error.new('error while inserting element') if new_id.nil?
 
   new_uri  = RestURI::ret_new_uri(factory_idh[:uri], ref, ref_num)
 

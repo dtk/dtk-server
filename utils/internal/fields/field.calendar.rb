@@ -27,14 +27,14 @@ class Fieldcalendar < Fieldbase
   # This returns the Edit View of a input of type calendar in HTML form
   # protected function
   def get_field_edit_html
-    return '<HTML NOT IMPLEMENT YET>'
+    '<HTML NOT IMPLEMENT YET>'
   end
 
   # This returns the Edit View of a input of type calendar in Javascript form
   # protected function
   def get_field_edit_js
     # TODO: add JS rendering when generating JS fields class for client side rendering
-    return '<JS NOT IMPLEMENT YET>'
+    '<JS NOT IMPLEMENT YET>'
   end
 
   # This returns the View of type edit for an input of type calendar in TPL/Smarty form
@@ -65,7 +65,7 @@ class Fieldcalendar < Fieldbase
     #        )
     #    );
 
-    return '
+    '
     <input type="text" id="' + @id + '" name="' + @name + '" class="' + @class_txt + '" value="{%=' + @model_name + '[:' + @name + ']%}" ' + size + ' />
     <button type="button" id="' + btn_id + '" title="' + btn_title + '">
       <img src="core/images/calendarbutton.gif" width="18" height="18" alt="Calendar" />
@@ -76,28 +76,28 @@ class Fieldcalendar < Fieldbase
   # This returns the View of type view for an input of type calendar in TPL/Smarty form
   # protected function
   def get_field_display_rtpl
-    return '{%=' + @model_name + '[:' + @name + ']%}'
+    '{%=' + @model_name + '[:' + @name + ']%}'
   end
 
   def get_field_display_html
-    return @value
+    @value
   end
 
   def get_field_display_js
-    return '<JS DISPLAY NOT IMPLEMENTED YET>'
+    '<JS DISPLAY NOT IMPLEMENTED YET>'
   end
 
   # This returns the View of type list for an input of type calendar in TPL/Smarty form
   # protected function
   def get_field_list_rtpl
-    return '{%=' + @model_name + '[:' + @name + ']%}'
+    '{%=' + @model_name + '[:' + @name + ']%}'
   end
 
   def get_field_list_html
-    return @value
+    @value
   end
 
   def get_field_list_js
-    return '<JS NOT IMPLEMENTED YET>'
+    '<JS NOT IMPLEMENTED YET>'
   end
 end

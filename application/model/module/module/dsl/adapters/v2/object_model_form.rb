@@ -124,7 +124,7 @@ module DTK; class ModuleDSL; class V2
 
       def external_ref(input_hash, cmp)
         unless input_hash.is_a?(Hash) && input_hash.size == 1
-          raise ParsingError.new('Component (?1) external_ref is ill-formed (?2)', cmp, input_hash)
+          fail ParsingError.new('Component (?1) external_ref is ill-formed (?2)', cmp, input_hash)
         end
         type = input_hash.keys.first
         name_key =
@@ -132,7 +132,7 @@ module DTK; class ModuleDSL; class V2
             when 'puppet_class' then 'class_name'
             when 'puppet_definition' then 'definition_name'
             when 'serverspec_test' then 'test_name'
-            else raise ParsingError.new('Component (?1) external_ref has illegal type (?2)', cmp, type)
+            else fail ParsingError.new('Component (?1) external_ref has illegal type (?2)', cmp, type)
           end
         name = input_hash.values.first
         OutputHash.new('type' => type, name_key => name)
@@ -151,10 +151,10 @@ module DTK; class ModuleDSL; class V2
           if cmp_type = context[:component_type]
             cmp_name = component_print_form(cmp_type)
             err_params.merge!(component_name: cmp_name)
-            err_msg = err_msg + ' under component (?component_name)'
+            err_msg += ' under component (?component_name)'
           end
-          err_msg = err_msg + ' is ill-formed: ?incl_module_array'
-          raise ParsingError.new(err_msg, err_params)
+          err_msg += ' is ill-formed: ?incl_module_array'
+          fail ParsingError.new(err_msg, err_params)
         end
         ret = OutputHash.new
         incl_module_array.each do |incl_module|
@@ -167,7 +167,7 @@ module DTK; class ModuleDSL; class V2
               { 'display_name' => hash['module'], 'version_constraint' => version_constraint }
             end
           unless el
-            raise ParsingError.new('The include_module element (?1) is ill-formed', incl_module)
+            fail ParsingError.new('The include_module element (?1) is ill-formed', incl_module)
           end
           ref = el['display_name']
           ret.merge!(ref => el)
@@ -199,7 +199,7 @@ module DTK; class ModuleDSL; class V2
             end
           end
         unless no_error
-          raise ParsingError.new('The include_modules version key (?1) is ill-formed', version)
+          fail ParsingError.new('The include_modules version key (?1) is ill-formed', version)
         end
         version
       end
@@ -217,7 +217,7 @@ module DTK; class ModuleDSL; class V2
             attrs[name] = attribute_properties(cmp_type, name, info, opts)
           else
             cmp_name = component_print_form(cmp_type)
-            raise ParsingError.new('Ill-formed attributes section for component (?1): ?2', cmp_name, 'attributes' => in_attrs)
+            fail ParsingError.new('Ill-formed attributes section for component (?1): ?2', cmp_name, 'attributes' => in_attrs)
           end
         end
 
@@ -309,7 +309,7 @@ module DTK; class ModuleDSL; class V2
           end
         end
         unless attr_props['data_type']
-          raise ParsingError.new('Ill-formed attribute data type (?1)', type)
+          fail ParsingError.new('Ill-formed attribute data type (?1)', type)
         end
         attr_props
       end
@@ -391,7 +391,7 @@ module DTK; class ModuleDSL; class V2
           else
             base_cmp_name = component_print_form(base_cmp)
             err_msg = 'The following dependency on component (?1) is ill-formed: ?2'
-            raise ParsingError.new(err_msg, base_cmp_name, conn_ref => conn_info_x)
+            fail ParsingError.new(err_msg, base_cmp_name, conn_ref => conn_info_x)
           end
         if choices = conn_info['choices']
           opts_choice = opts.merge(conn_ref: conn_ref)
@@ -420,7 +420,7 @@ module DTK; class ModuleDSL; class V2
 
       def convert(dep_cmp_info, base_cmp, parent_info = {}, opts = {})
         unless dep_cmp_raw = dep_cmp_info['component'] || opts[:conn_ref]
-          raise ParsingError.new('Dependency possible connection (?1) is missing component key', dep_cmp_info)
+          fail ParsingError.new('Dependency possible connection (?1) is missing component key', dep_cmp_info)
         end
         dep_cmp = convert_to_internal_cmp_form(dep_cmp_raw)
         ret_info = { 'type' => link_type(dep_cmp_info, parent_info, opts) }
@@ -440,7 +440,7 @@ module DTK; class ModuleDSL; class V2
       def order(dep_cmp_info)
         if ret = dep_cmp_info['order']
           unless LegalOrderVals.include?(ret)
-            raise ParsingError.new("Value of order param (?1) is ill-formed; it should be one of (#{LegalOrderVals}.join(', '))", ret)
+            fail ParsingError.new("Value of order param (?1) is ill-formed; it should be one of (#{LegalOrderVals}.join(', '))", ret)
           end
           ret
         end
@@ -466,7 +466,7 @@ module DTK; class ModuleDSL; class V2
         case loc
          when 'local' then 'internal'
          when 'remote' then 'external'
-         else raise ParsingError.new('Ill-formed dependency location type (?1)', loc)
+         else fail ParsingError.new('Ill-formed dependency location type (?1)', loc)
         end
       end
 
@@ -483,7 +483,7 @@ module DTK; class ModuleDSL; class V2
           left = convert_attr_ref_base(base_attr, base_cmp, dep_attr, dep_cmp, :output, opts)
           right = convert_attr_ref_simple(dep_attr, :dep, dep_cmp, :input)
         else
-          raise ParsingError.new('Attribute mapping (?1) is ill-formed', input_am)
+          fail ParsingError.new('Attribute mapping (?1) is ill-formed', input_am)
         end
         { left => right }
       end
@@ -492,19 +492,19 @@ module DTK; class ModuleDSL; class V2
       def convert_attr_ref_simple(attr_ref, dep_or_base, cmp, input_or_output)
         if attr_ref =~ /(^[^.]+)\.([^.]+$)/
           if input_or_output == :input
-            raise ParsingError.new('Attribute reference (?1) is ill-formed', attr_ref)
+            fail ParsingError.new('Attribute reference (?1) is ill-formed', attr_ref)
           end
           prefix = Regexp.last_match(1)
           attr = Regexp.last_match(2)
           case prefix
           when '$node' then (dep_or_base == :dep) ? 'remote_node' : 'local_node'
-          else raise ParsingError.new('Attribute reference (?1) is ill-formed', attr_ref)
+          else fail ParsingError.new('Attribute reference (?1) is ill-formed', attr_ref)
           end + ".#{attr.gsub(/host_address$/, 'host_addresses_ipv4.0')}"
         else
           has_dollar_sign = has_variable?(attr_ref)
           if (input_or_output == :input && has_dollar_sign) ||
               (input_or_output == :output && !has_dollar_sign)
-            raise ParsingError.new('Attribute reference (?1) is ill-formed', attr_ref)
+            fail ParsingError.new('Attribute reference (?1) is ill-formed', attr_ref)
           end
           var_name = attr_ref
           # if dollar sign is first character and not embedded string than strip of dollar sign
@@ -541,7 +541,7 @@ module DTK; class ModuleDSL; class V2
           datatype = :json
         end
         unless constant_assign = (const && Attribute::Constant.create?(const, dep_attr_ref, dep_cmp, datatype))
-          raise ParsingError.new('Attribute reference (?1) is ill-formed', attr_ref)
+          fail ParsingError.new('Attribute reference (?1) is ill-formed', attr_ref)
         end
         constants = opts[:constants] ||= []
         unless constant_assign.is_in?(constants)

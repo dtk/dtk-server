@@ -13,7 +13,7 @@ module TargetMixin
       puts "Provider #{provider_name} does not exist!"
     end
     puts ''
-    return target_created
+    target_created
   end
 
   def check_if_target_exists_in_provider(provider_name, target_name)
@@ -36,7 +36,7 @@ module TargetMixin
       puts "Provider #{provider_name} does not exist!"
     end
     puts ''
-    return target_exists
+    target_exists
   end
 
   def delete_target_from_provider(target_name)
@@ -51,7 +51,7 @@ module TargetMixin
       puts "Target #{target_name} has not been deleted successfully!"
     end
     puts ''
-    return target_deleted
+    target_deleted
   end
 
   def check_if_assembly_exists_in_target(assembly_name, target_name)
@@ -66,7 +66,7 @@ module TargetMixin
       puts "Assembly #{assembly_name} does not exist in target #{target_name}!"
     end
     puts ''
-    return assembly_exists
+    assembly_exists
   end
 
   def check_if_node_exists_in_target(node_name, target_name)
@@ -81,7 +81,7 @@ module TargetMixin
       puts "Node #{node_name} does not exist in target #{target_name}!"
     end
     puts ''
-    return node_exists
+    node_exists
   end
 
   def stage_service_in_specific_target(target_name)

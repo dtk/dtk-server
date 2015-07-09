@@ -21,7 +21,7 @@ module DTK; class Task; class Template; class ConfigComponents
         else
           # raise error if explicit task_action is given and cant be found
           if task_action
-            raise TaskActionNotFoundError.new(task_action)
+            fail TaskActionNotFoundError.new(task_action)
           end
         end
       end

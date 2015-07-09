@@ -87,8 +87,8 @@ module XYZ
       subclass_name = Aux::demodulize(sub.to_s)
       (@subclass_names ||= []).push(subclass_name).uniq!
     end
-    def self.subclass_names
-      @subclass_names
+    class << self
+      attr_reader :subclass_names
     end
 
     def self.ret_basic_type

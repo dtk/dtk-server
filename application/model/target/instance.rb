@@ -31,7 +31,7 @@ module DTK
 
       def self.create_target_ec2(project_idh, provider, ec2_type, property_hash, opts = {})
         unless region = property_hash[:region]
-          raise ErrorUsage.new("Region is required for target created in '#{provider.get_field?(:iaas_type)}' provider type!")
+          fail ErrorUsage.new("Region is required for target created in '#{provider.get_field?(:iaas_type)}' provider type!")
         end
 
         target_name = opts[:target_name] || provider.default_target_name(region: region)
@@ -80,7 +80,7 @@ module DTK
           if opts[:raise_error_if_exists]
             existing_names = existing_targets.map { |et| et[:display_name] }.join(',')
             obj_type = pp_object_type(existing_targets.size)
-            raise ErrorUsage.new("The #{obj_type} (#{existing_names}) exist(s) already")
+            fail ErrorUsage.new("The #{obj_type} (#{existing_names}) exist(s) already")
           else
             create_rows.reject! do |r|
               parent_id = r[:parent_id]
@@ -139,7 +139,7 @@ module DTK
       def self.delete_and_destroy(target)
         response_obj = DeleteResponseObject.new(target)
         if target.is_builtin_target?()
-          raise ErrorUsage.new('Cannot delete the builtin target')
+          fail ErrorUsage.new('Cannot delete the builtin target')
         end
 
         target_mh              = target.model_handle()

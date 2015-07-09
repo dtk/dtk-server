@@ -161,18 +161,16 @@ module DTK
         end
 
         def execution_context_block(task, workitem, &_body)
-          begin
-            yield
-          rescue Exception => e
-            if task_is_active?(workitem) #this needed because, for example teher can be a pending polling task
-              event, errors = task.add_event_and_errors(:complete_failed, :server, [{ message: e.to_s }])
-              log_participant.end(:execution_context_trap, event: event, errors: errors, backtrace: e.backtrace)
-              task.update_at_task_completion('failed', errors: errors)
-              cancel_upstream_subtasks(workitem)
-              delete_task_info(workitem)
-            end
-            reply_to_engine(workitem)
+          yield
+        rescue Exception => e
+          if task_is_active?(workitem) #this needed because, for example teher can be a pending polling task
+            event, errors = task.add_event_and_errors(:complete_failed, :server, [{ message: e.to_s }])
+            log_participant.end(:execution_context_trap, event: event, errors: errors, backtrace: e.backtrace)
+            task.update_at_task_completion('failed', errors: errors)
+            cancel_upstream_subtasks(workitem)
+            delete_task_info(workitem)
           end
+          reply_to_engine(workitem)
         end
 
         def create_thread_in_callback_context(task, workitem, user_object, &body)
@@ -204,12 +202,9 @@ module DTK
 
         def cancel_upstream_subtasks(workitem)
           # begin-rescue block is required, as multiple concurrent subtasks can initiate this method and only first will do the canceling
-          begin
-            # Killing task to prevent upstream subtasks' execution
-            Workflow.kill(get_top_task_id(workitem))
-           rescue Exception => e
-            Log.error_pp(['exception when cancel_upstream_subtasks', e, e.backtrace[0..5]])
-          end
+          Workflow.kill(get_top_task_id(workitem))
+         rescue Exception => e
+          Log.error_pp(['exception when cancel_upstream_subtasks', e, e.backtrace[0..5]])
         end
       end
 

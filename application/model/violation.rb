@@ -34,7 +34,7 @@ module DTK
 
       viol_idhs_to_delete = []
       saved_violations.each do |v|
-        raise Error.new('Not treating expression form') unless constraint_hash = v[:expression][:constraint]
+        fail Error.new('Not treating expression form') unless constraint_hash = v[:expression][:constraint]
         constraint = Constraint.create(constraint_hash)
         vtttype = constraint[:target_type]
         target_idh = sample_idh.createIDH(model_name: vt_model_name(vtttype), id: constraint[:target_id])
@@ -55,7 +55,7 @@ module DTK
     def self.vt_model_name(vtttype)
       ret = VTModelName[vtttype]
       return ret if ret
-      raise Error.new("Unexpected violaition target type #{vtttype}")
+      fail Error.new("Unexpected violaition target type #{vtttype}")
     end
     VTModelName = {
       'target_node_id_handle' => :node
@@ -84,7 +84,7 @@ module DTK
       expression_list.each do |e|
         sample_constraint = e.is_a?(Constraint) ? e : e.constraint_list.first
         vt = e[:violation_target]
-        raise Error.new("target type #{vt[:type]} not treated") unless vt[:type] == 'target_node_id_handle'
+        fail Error.new("target type #{vt[:type]} not treated") unless vt[:type] == 'target_node_id_handle'
         description = e.is_a?(Constraint) ? e[:description] : e[:elements].map { |x| x[:description] }.join(' or ')
         ref = 'violation' #TODO: stub
         new_item = {
@@ -104,7 +104,7 @@ module DTK
     end
 
     def self.violation_expression_for_db(expr)
-      raise Error.new('Violation expression form not treated') unless expr.is_a?(Constraint)
+      fail Error.new('Violation expression form not treated') unless expr.is_a?(Constraint)
       {
         constraint: {
           type: expr[:type],
@@ -178,7 +178,7 @@ module DTK
         vt = exprs.first.violation_target
         exprs[1..exprs.size - 1].map do |e|
           unless vt == e[:violation_target]
-            raise Error.new('Not supported conjunction of expressions with different violation_targets')
+            fail Error.new('Not supported conjunction of expressions with different violation_targets')
           end
         end
         ret = new(vt, :and)

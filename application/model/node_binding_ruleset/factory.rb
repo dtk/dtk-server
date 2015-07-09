@@ -14,11 +14,11 @@ module DTK; class NodeBindingRuleset
 
       unless @os_type == matching_nbrs[:os_type]
         node_template_name = @top_factory.os_identifier
-        raise ErrorUsage.new("Node template (#{node_template_name}) exists already and must have os type: #{matching_nbrs[:os_type]}")
+        fail ErrorUsage.new("Node template (#{node_template_name}) exists already and must have os type: #{matching_nbrs[:os_type]}")
       end
       if matching_nbrs.find_matching_node_template(@top_factory.target)
         node_template_name = @top_factory.os_identifier
-        raise ErrorUsage.new("Node template (#{node_template_name}) with size #{@size} exists already")
+        fail ErrorUsage.new("Node template (#{node_template_name}) with size #{@size} exists already")
       end
       create_hash(existing_rules: matching_nbrs[:rules])
     end

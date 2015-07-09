@@ -18,7 +18,7 @@ module DTK
         def basetype(datatype)
           datatype = datatype.to_sym
           unless DataTypes.include?(datatype)
-            raise Error.new("Illegal datatype (#{datatype})")
+            fail Error.new("Illegal datatype (#{datatype})")
           end
           @datatype = datatype
         end
@@ -40,7 +40,7 @@ module DTK
                 v.to_s =~ validation
               end
             else
-              raise Error.new("Illegal validation argument (#{validation.inspect})")
+              fail Error.new("Illegal validation argument (#{validation.inspect})")
             end
         end
 
@@ -50,7 +50,7 @@ module DTK
 
         def build
           unless @datatype
-            raise Error.new('Datatype must be specified')
+            fail Error.new('Datatype must be specified')
           end
           self
         end

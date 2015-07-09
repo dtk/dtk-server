@@ -19,7 +19,7 @@ module DTK
           test_cmps = get_test_components_with_bindings()
           if test_cmps.empty?
             @error = 'Unable to execute tests. There are no links to test components!'
-            raise ::DTK::ErrorUsage
+            fail ::DTK::ErrorUsage
           end
 
           # Recognize if nodes are part of node group and map test components to nodes appropriately
@@ -46,7 +46,7 @@ module DTK
 
           test_instances = test_components.map do |test_cmp|
             unless version_context = ndx_version_contexts[test_cmp[:implementation_id]]
-              raise Error.new("Cannot find version context for #{test_cmp[:dispaly_name]}")
+              fail Error.new("Cannot find version context for #{test_cmp[:dispaly_name]}")
             end
             attrib_array = test_cmp[:attributes].map { |a| { a[:display_name].to_sym => a[:attribute_value] } }
             test_name = (test_cmp[:external_ref] || {})[:test_name]

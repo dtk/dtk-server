@@ -79,7 +79,7 @@ module AssemblyAndServiceOperationsMixin
       puts "#{info_to_check} does not exist in info output!"
     end
     puts ''
-    return info_exist
+    info_exist
   end
 
   def rename_service(service_id, new_service_name)
@@ -103,7 +103,7 @@ module AssemblyAndServiceOperationsMixin
       puts "Service with id #{service_id} does not exist!"
     end
     puts ''
-    return service_renamed
+    service_renamed
   end
 
   def create_attribute(service_id, attribute_name)
@@ -123,7 +123,7 @@ module AssemblyAndServiceOperationsMixin
       attributes_created = true
     end
     puts ''
-    return attributes_created
+    attributes_created
   end
 
   def check_if_attribute_exists(service_id, attribute_name)
@@ -142,7 +142,7 @@ module AssemblyAndServiceOperationsMixin
       puts "#{attribute_name} attribute does not exist!"
     end
     puts ''
-    return attribute_exists
+    attribute_exists
   end
 
   def link_attributes(service_id, source_attribute, target_attribute)
@@ -159,7 +159,7 @@ module AssemblyAndServiceOperationsMixin
       puts "Link between #{source_attribute} attribute and #{target_attribute} attribute is not established!"
     end
     puts ''
-    return attributes_linked
+    attributes_linked
   end
 
   def check_if_service_exists(service_id)
@@ -186,7 +186,7 @@ module AssemblyAndServiceOperationsMixin
       puts "Service with id #{service_id} does not exist!"
     end
     puts ''
-    return service_exists
+    service_exists
   end
 
   def list_specific_success_service(service_name)
@@ -194,7 +194,7 @@ module AssemblyAndServiceOperationsMixin
     service_list = send_request('/rest/assembly/list', subtype: 'instance', detail_level: 'nodes')
     success_services = service_list['data'].select { |x| x['display_name'] == service_name && x['execution_status'] == 'succeeded' }
     pretty_print_JSON(success_services)
-    return success_services
+    success_services
   end
 
   def list_specific_failed_service(service_name)
@@ -202,7 +202,7 @@ module AssemblyAndServiceOperationsMixin
     service_list = send_request('/rest/assembly/list', subtype: 'instance', detail_level: 'nodes')
     failed_services = service_list['data'].select { |x| x['display_name'] == service_name && x['execution_status'] == 'failed' }
     pretty_print_JSON(failed_services)
-    return failed_services
+    failed_services
   end
 
   def check_service_status(service_id, status_to_check)
@@ -243,7 +243,7 @@ module AssemblyAndServiceOperationsMixin
       end
     end
     puts ''
-    return service_exists
+    service_exists
   end
 
   def set_attribute(service_id, attribute_name, attribute_value)
@@ -265,7 +265,7 @@ module AssemblyAndServiceOperationsMixin
       is_attributes_set = true
     end
     puts ''
-    return is_attributes_set
+    is_attributes_set
   end
 
   def set_attribute_on_service_level_component(service_id, attribute_name, attribute_value)
@@ -287,7 +287,7 @@ module AssemblyAndServiceOperationsMixin
       is_attributes_set = true
     end
     puts ''
-    return is_attributes_set
+    is_attributes_set
   end
 
   def get_attribute_value(service_id, node_name, component_name, attribute_name)
@@ -305,7 +305,7 @@ module AssemblyAndServiceOperationsMixin
       puts "Some of the input parameters is incorrect or missing. Node name: #{node_name}, Component name: #{component_name}, Attribute name: #{attribute_name}"
     end
     puts ''
-    return attribute_value
+    attribute_value
   end
 
   def check_component_depedency(service_id, source_component, dependency_component, dependency_satisfied_by)
@@ -341,7 +341,7 @@ module AssemblyAndServiceOperationsMixin
     end
 
     puts ''
-    return dependency_found
+    dependency_found
   end
 
   def converge_service(service_id, max_num_of_retries = 15)
@@ -389,7 +389,7 @@ module AssemblyAndServiceOperationsMixin
     end
 
     puts ''
-    return service_converged
+    service_converged
   end
 
   def stop_running_service(service_id)
@@ -404,7 +404,7 @@ module AssemblyAndServiceOperationsMixin
       puts 'Service was not stopped successfully!'
     end
     puts ''
-    return service_stopped
+    service_stopped
   end
 
   def check_component_depedency(service_id, source_component, dependency_component, dependency_satisfied_by)
@@ -440,7 +440,7 @@ module AssemblyAndServiceOperationsMixin
     end
 
     puts ''
-    return dependency_found
+    dependency_found
   end
 
   def converge_service(service_id, max_num_of_retries = 15)
@@ -488,7 +488,7 @@ module AssemblyAndServiceOperationsMixin
     end
 
     puts ''
-    return service_converged
+    service_converged
   end
 
   def stop_running_service(service_id)
@@ -503,7 +503,7 @@ module AssemblyAndServiceOperationsMixin
       puts 'Service was not stopped successfully!'
     end
     puts ''
-    return service_stopped
+    service_stopped
   end
 
   def create_assembly_from_service(service_id, service_module_name, assembly_name, namespace = nil)
@@ -517,7 +517,7 @@ module AssemblyAndServiceOperationsMixin
       puts "Assembly #{assembly_name} was not created in service module #{service_module_name}"
     end
     puts ''
-    return assembly_created
+    assembly_created
   end
 
   def netstats_check(service_id, port)
@@ -564,7 +564,7 @@ module AssemblyAndServiceOperationsMixin
       end
     end
     puts ''
-    return netstats_check
+    netstats_check
   end
 
   def start_running_service(service_id)
@@ -601,7 +601,7 @@ module AssemblyAndServiceOperationsMixin
       puts 'Start instance is not completed successfully!'
     end
     puts ''
-    return service_started
+    service_started
   end
 
   def add_component_by_name_to_service_node(service_id, node_name, component_name)
@@ -627,7 +627,7 @@ module AssemblyAndServiceOperationsMixin
       end
     end
     puts ''
-    return component_added
+    component_added
   end
 
   def delete_and_destroy_service(service_id)
@@ -642,7 +642,7 @@ module AssemblyAndServiceOperationsMixin
       puts 'Service was not deleted successfully!'
     end
     puts ''
-    return service_deleted
+    service_deleted
   end
 
   def push_assembly_updates(service_id, service_module)
@@ -654,13 +654,13 @@ module AssemblyAndServiceOperationsMixin
       assembly_updated = true
     end
     puts ''
-    return assembly_updated
+    assembly_updated
   end
 
   def push_component_module_updates(service_id, component_module)
     puts 'Push component module updates:', '-------------------------------'
     response = send_request('/rest/assembly/promote_module_updates', assembly_id: service_id, module_name: component_module, module_type: 'component_module')
-    return response
+    response
   end
 
   def get_nodes(service_id)
@@ -669,7 +669,7 @@ module AssemblyAndServiceOperationsMixin
     nodes_list = nodes_list['data'].map! { |c| c['display_name'] }
     pretty_print_JSON(nodes_list)
     puts ''
-    return nodes_list
+    nodes_list
   end
 
   def get_components(service_id)
@@ -677,7 +677,7 @@ module AssemblyAndServiceOperationsMixin
     components_list = send_request('/rest/assembly/info_about', assembly_id: service_id, node_id: nil, component_id: nil, subtype: 'instance', about: 'components')
     components_list = components_list['data'].map! { |c| c['display_name'] }
     puts ''
-    return components_list
+    components_list
   end
 
   def get_cardinality(service_id, node_name)
@@ -687,7 +687,7 @@ module AssemblyAndServiceOperationsMixin
     puts content
     attributes = (content['nodes']["#{node_name}/"] || {})['attributes'] || {}
     puts ''
-    return attributes['cardinality'] && attributes['cardinality'].to_i
+    attributes['cardinality'] && attributes['cardinality'].to_i
   end
 
   def get_workflow_info(service_id)
@@ -696,7 +696,7 @@ module AssemblyAndServiceOperationsMixin
     content = YAML.load(workflow_info['data'])
     puts content
     puts ''
-    return content
+    content
   end
 
   def grant_access(service_id, system_user, rsa_pub_name, ssh_key)
@@ -704,7 +704,7 @@ module AssemblyAndServiceOperationsMixin
     response = send_request('/rest/assembly/initiate_ssh_pub_access', agent_action: :grant_access, assembly_id: service_id, system_user: system_user, rsa_pub_name: rsa_pub_name, rsa_pub_key: ssh_key)
     pretty_print_JSON(response)
     puts ''
-    return response
+    response
   end
 
   def revoke_access(service_id, system_user, rsa_pub_name, ssh_key)
@@ -714,7 +714,7 @@ module AssemblyAndServiceOperationsMixin
     response = send_request('/rest/assembly/get_action_results', action_results_id: resp['data']['action_results_id'], return_only_if_complete: true, disable_post_processing: true)
     puts response
     puts ''
-    return response
+    response
   end
 
   def list_ssh_access(service_id, system_user, rsa_pub_name, nodes)
@@ -724,7 +724,7 @@ module AssemblyAndServiceOperationsMixin
     pretty_print_JSON(response)
     list = response['data'].select { |x| x['attributes']['linux_user'] == system_user && x['attributes']['key_name'] == rsa_pub_name && (nodes.include? x['node_name']) }
     puts ''
-    return list.map! { |x| x['attributes']['key_name'] }
+    list.map! { |x| x['attributes']['key_name'] }
   end
 
   def get_task_action_output(service_id, action_id)
@@ -740,6 +740,6 @@ module AssemblyAndServiceOperationsMixin
       puts 'Task action details were not retrieved successfully!'
     end
     puts ''
-    return runs
+    runs
   end
 end

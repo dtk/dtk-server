@@ -32,7 +32,7 @@ module XYZ
       end
 
       def get_objects_just_dataset(model_handle, where_clause = nil, opts = {})
-        get_objects_scalar_columns(model_handle, where_clause, opts.merge({ return_just_sequel_dataset: true }))
+        get_objects_scalar_columns(model_handle, where_clause, opts.merge(return_just_sequel_dataset: true))
       end
 
       # TODO: may be able to optimze seeing that curerntly uses get_objects

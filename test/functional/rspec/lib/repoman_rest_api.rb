@@ -68,7 +68,7 @@ class RepomanRestApi
   end
 
   def get_users
-    return self.send_request('/v1/users/list', 'GET', {}, { Authorization: "Token token=\"#{self.authorization_token}\"" })
+    return self.send_request('/v1/users/list', 'GET', {}, Authorization: "Token token=\"#{self.authorization_token}\"")
   end
 
   def delete_user(user_id)
@@ -84,7 +84,7 @@ class RepomanRestApi
   end
 
   def get_namespaces
-    return self.send_request('/v1/namespaces/list', 'GET', {}, { Authorization: "Token token=\"#{self.authorization_token}\"" })
+    return self.send_request('/v1/namespaces/list', 'GET', {}, Authorization: "Token token=\"#{self.authorization_token}\"")
   end
 
   def delete_namespace(namespace_id)

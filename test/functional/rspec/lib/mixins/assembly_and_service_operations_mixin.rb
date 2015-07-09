@@ -149,7 +149,7 @@ module AssemblyAndServiceOperationsMixin
     puts 'Link attributes:', '----------------'
     attributes_linked = false
 
-    link_attributes_response = send_request('/rest/assembly/add_ad_hoc_attribute_links', { assembly_id: service_id, target_attribute_term: target_attribute, source_attribute_term: "$#{source_attribute}" })
+    link_attributes_response = send_request('/rest/assembly/add_ad_hoc_attribute_links', assembly_id: service_id, target_attribute_term: target_attribute, source_attribute_term: "$#{source_attribute}")
     pretty_print_JSON(link_attributes_response)
 
     if link_attributes_response['status'] == 'ok'

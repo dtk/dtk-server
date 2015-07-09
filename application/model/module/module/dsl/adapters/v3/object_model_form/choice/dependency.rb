@@ -38,7 +38,7 @@ module DTK; class ModuleDSL; class V3
           else
             base_cmp_name = component_print_form(base_cmp)
             err_msg = 'The following dependency on component (?1) is ill-formed: ?2'
-            raise ParsingError.new(err_msg, base_cmp_name, { conn_ref => conn_info_x })
+            raise ParsingError.new(err_msg, base_cmp_name, conn_ref => conn_info_x)
           end
         if choices = conn_info['choices']
           opts_choices = opts.merge(conn_ref: conn_ref)

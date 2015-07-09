@@ -100,7 +100,7 @@ module DTK
         # TODO: check that valid assigns
         id_handle = IDHandle[id_info: id_info]
         id_handle[:group_id] ||= id_handle_x[:group_id] if id_handle_x[:group_id]
-        modify_to_reflect_special_processing!(scalar_assigns, db_rel, :update, opts.merge({ id_handle: id_handle }))
+        modify_to_reflect_special_processing!(scalar_assigns, db_rel, :update, opts.merge(id_handle: id_handle))
         ds.update(scalar_assigns)
       end
 

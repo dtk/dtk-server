@@ -84,7 +84,7 @@ module DTK
 
       # url = type == :component_module ? '/v1/component_modules/chmod' : '/v1/service_modules/chmod'
       url_action = 'make_public'.eql?(chmod_action) ? '/make_public' : '/chmod'
-      url        = collection_route_from_type({ type: type }) + url_action
+      url        = collection_route_from_type(type: type) + url_action
 
       post_rest_request_data(
         url,
@@ -101,7 +101,7 @@ module DTK
         public_action: public_action
       }
 
-      url = collection_route_from_type({ type: type }) + '/confirm_make_public'
+      url = collection_route_from_type(type: type) + '/confirm_make_public'
       post_rest_request_data(
         url,
         request_params.merge(user_params_with_fingerprint(CurrentSession.catalog_username, client_rsa_pub_key)),
@@ -118,7 +118,7 @@ module DTK
       }
 
       # url = type == :component_module ? '/v1/component_modules/chown' : '/v1/service_modules/chown'
-      url = collection_route_from_type({ type: type }) + '/chown'
+      url = collection_route_from_type(type: type) + '/chown'
 
       post_rest_request_data(
         url,
@@ -138,7 +138,7 @@ module DTK
       }
 
       # url = type == :component_module ? '/v1/component_modules/collaboration' : '/v1/service_modules/collaboration'
-      url = collection_route_from_type({ type: type }) + '/collaboration'
+      url = collection_route_from_type(type: type) + '/collaboration'
 
       post_rest_request_data(
         url,
@@ -155,7 +155,7 @@ module DTK
       }
 
       # url = type == :component_module ? '/v1/component_modules/list_collaboration' : '/v1/service_modules/list_collaboration'
-      url = collection_route_from_type({ type: type }) + '/list_collaboration'
+      url = collection_route_from_type(type: type) + '/list_collaboration'
 
       response = post_rest_request_data(
         url,
@@ -199,7 +199,7 @@ module DTK
     end
 
     def get_components_info(params_hash, client_rsa_pub_key = nil)
-      route = collection_route_from_type({ type: params_hash[:type] }) + '/component_info'
+      route = collection_route_from_type(type: params_hash[:type]) + '/component_info'
       get_rest_request_data(route, user_params_delegated_client(client_rsa_pub_key, params_hash), raise_error: true)
     end
 

@@ -50,7 +50,7 @@ module DTK
       file_asset_mh = impl_obj.model_handle.create_childMH(:file_asset)
       new_file_asset_idh = create_from_row(file_asset_mh, hash)
       new_file_asset_obj = new_file_asset_idh.create_object().merge(hash)
-      RepoManager.add_file(new_file_asset_obj, content, { implementation: impl_obj })
+      RepoManager.add_file(new_file_asset_obj, content, implementation: impl_obj)
       unless opts[:is_metafile]
         impl_obj.create_pending_changes_and_clear_dynamic_attrs(new_file_asset_obj)
       end

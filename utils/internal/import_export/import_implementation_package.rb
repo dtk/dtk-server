@@ -21,7 +21,7 @@ module XYZ
     def self.add_or_update_component(parent_idh, component_name, opts = {})
       component_hash = get_r8meta_hash(component_name, opts)
       add_implementation_id!(component_hash, parent_idh, component_name)
-      Model.input_into_model(parent_idh, { 'component' => { component_name => component_hash } })
+      Model.input_into_model(parent_idh, 'component' => { component_name => component_hash })
     end
 
     private

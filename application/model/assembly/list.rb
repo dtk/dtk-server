@@ -13,7 +13,7 @@ module DTK
         Instance.get_last_task_run_status(assembly_rows, model_handle())
 
         if (node_id.to_s.empty? && component_id.to_s.empty? && attribute_id.to_s.empty?)
-          nodes_info = (is_template ? get_nodes() : get_nodes__expand_node_groups({ remove_node_groups: true }))
+          nodes_info = (is_template ? get_nodes() : get_nodes__expand_node_groups(remove_node_groups: true))
           nodes_info.reject! { |n| n[:type].eql?('assembly_wide') } if opts[:remove_assembly_wide_node]
           assembly_rows.first[:nodes] = nodes_info.sort { |a, b| a[:display_name] <=> b[:display_name] }
         end

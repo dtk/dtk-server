@@ -10,7 +10,7 @@ module DTK; module CommandAndControlAdapter
         end
         @last_time = time_part
 
-        "#{tenant_part}-#{time_part}-#{@num.to_s}"
+        "#{tenant_part}-#{user_part}-#{time_part}-#{@num.to_s}"
       end
 
       private
@@ -21,6 +21,10 @@ module DTK; module CommandAndControlAdapter
       
       def self.tenant_part
         ::DtkCommon::Aux::running_process_user()
+      end
+
+      def self.user_part
+        CurrentSession.get_username()
       end
 
     end

@@ -1,13 +1,13 @@
 module DTK; module CommandAndControlAdapter
   class Ec2::CreateNode; class Processor
     class CreateOptions < ::Hash
-      def initialize(target_ref,conn,ami)
+      def initialize(parent,conn,ami)
         super()
-        replace(image_id: ami,flavor_id: target_ref.flavor_id)
+        replace(image_id: ami,flavor_id: parent.flavor_id)
         @conn         = conn
-        @target       = target_ref.target
-        @node         = target_ref.node
-        @external_ref = target_ref.external_ref||{}
+        @target       = parent.target
+        @node         = parent.node
+        @external_ref = parent.external_ref||{}
       end
       
       def update_security_group!
@@ -82,7 +82,16 @@ module DTK; module CommandAndControlAdapter
         self[:user_data] ||= CommandAndControl.install_script(@node)
         self
       end
-      
+
+      def update_client_token?()
+        if client_token = @external_ref[:client_token]
+          self[:client_token] ||= client_token
+        else
+          Log.error_pp(["Unexpected that @external_ref does not have client_token",@node,@external_ref])
+        end
+        self
+      end
+
       private
       
       def ec2_name_tag
@@ -120,22 +129,7 @@ module DTK; module CommandAndControlAdapter
           end
         end
       end
-    end
-    
-    def get_node_status(instance_id)
-      ret = nil
-      begin 
-        target_aws_creds = node.get_target_iaas_credentials()
-        response = Ec2.conn(target_aws_creds).get_instance_status(instance_id)
-        ret = response[:status] && response[:status].to_sym
-      rescue => e
-        Log.error_pp([e,e.backtrace[0..10]])
-      end
-      ret
-    end
 
-    def node_print_form
-      "#{node[:display_name]} (#{node[:id]}"
     end
   end; end
 end; end

@@ -1,6 +1,7 @@
 module DTK
   module CommandAndControlAdapter
     class Ec2 < CommandAndControlIAAS
+      r8_nested_require('ec2','client_token')
       r8_nested_require('ec2','node_state')
       r8_nested_require('ec2','address_management')
       r8_nested_require('ec2','image')

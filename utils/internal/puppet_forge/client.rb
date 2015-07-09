@@ -35,7 +35,7 @@ module DTK
         def execute_puppet_forge_call(pf_module_name,base_install_dir,puppet_version=nil, force=false)
           command  = "puppet _#{PUPPET_VERSION}_ module install #{pf_module_name} --render-as json --target-dir #{base_install_dir} --modulepath #{base_install_dir}"
           command += " --version #{puppet_version}" if puppet_version && !puppet_version.empty?
-          command += " --force"              if force
+          command += ' --force'              if force
           output_s = nil
           output_err = nil
           Open3.popen3(command) do |_stdin, stdout, stderr, _wait_thr|

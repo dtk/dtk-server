@@ -29,7 +29,7 @@ module DTK; class ModuleRefs
 
     def namespace
       unless ret = self[:remote_namespace]
-        Log.error("namespace should not be called when self[:remote_namespace] is empty")
+        Log.error('namespace should not be called when self[:remote_namespace] is empty')
       end
       ret
     end

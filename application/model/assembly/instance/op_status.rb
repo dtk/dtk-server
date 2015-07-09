@@ -101,7 +101,7 @@ module DTK; class  Assembly; class Instance
 
       # TODO: collapse above and below
       def nodes_are_up?(nodes, status_pattern, opts={})
-        what = opts[:what]||"Command"
+        what = opts[:what]||'Command'
         # check if staged
         nodes.each do |node|
           if node.get_field?(:type) == Node::Type::Node.staged

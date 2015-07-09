@@ -21,7 +21,7 @@ module DTK; class Task
         each_internode_stage do |internode_stage,stage_index|
           task_hash = {
             display_name: internode_stage.name || DefaultNameProc.call(stage_index,size == 1),
-            temporal_order: "concurrent"
+            temporal_order: 'concurrent'
           }
           internode_stage_task = Task.create_stub(task_mh,task_hash)
           all_actions += internode_stage.add_subtasks!(internode_stage_task,stage_index,assembly_idh)
@@ -96,7 +96,7 @@ module DTK; class Task
           insert(0,*template_content)
         else
           unless template_content.size == 1
-            raise ErrorUsage.new("Can only splice in template content that has a single inter node stage")
+            raise ErrorUsage.new('Can only splice in template content that has a single inter node stage')
           end
           first.splice_in_at_beginning!(template_content.first)
         end
@@ -110,7 +110,7 @@ module DTK; class Task
           if opts[:allow_empty_task]
             return ret
           else
-            raise ErrorUsage.new("The task has no actions")
+            raise ErrorUsage.new('The task has no actions')
           end
         end
         # Dont put in sequential block if just single stage
@@ -257,7 +257,7 @@ module DTK; class Task
             stage_action_indexes = before_index_hash.ret_and_remove_actions_not_after_any!()
             if stage_action_indexes.empty?()
               # TODO: see if any other way there can be loops
-              raise ErrorUsage.new("Loop detected in temporal orders")
+              raise ErrorUsage.new('Loop detected in temporal orders')
             end
             internode_stage = stage_factory.create(stage_action_indexes)
             self << internode_stage

@@ -2,7 +2,7 @@
   schema: :state,
   table: :state_change,
   columns: {
-    status: {type: :varchar, default: "pending", size: 15},
+    status: {type: :varchar, default: 'pending', size: 15},
     type: {type: :varchar, size: 25},
     object_type: {type: :varchar, size: 15},
     change: {type: :json},

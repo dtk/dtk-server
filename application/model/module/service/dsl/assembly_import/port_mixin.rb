@@ -26,7 +26,7 @@ module DTK; class ServiceModule
           ports.each{|p|@ndx_ports[p[:id]] = p}
         end
         # Within import_port_links does the mark as complete for port links
-        Model.input_hash_content_into_model(@container_idh,"component" => db_updates_port_links)
+        Model.input_hash_content_into_model(@container_idh,'component' => db_updates_port_links)
       end
     end
 

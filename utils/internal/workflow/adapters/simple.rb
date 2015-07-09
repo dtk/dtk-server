@@ -20,12 +20,12 @@ module DTK
       def self.generate_workflow(top_task,task)
         if task[:executable_action]
           ExecutableAction.new(top_task,task)
-        elsif task[:temporal_order] == "sequential"
+        elsif task[:temporal_order] == 'sequential'
           Sequential.new(top_task,task)
-        elsif task[:temporal_order] == "concurrent"
+        elsif task[:temporal_order] == 'concurrent'
           Concurrent.new(top_task,task)
         else
-          Log.error("do not have rules to process task")
+          Log.error('do not have rules to process task')
         end
       end
 
@@ -60,7 +60,7 @@ module DTK
         include NestedWFMixin
         def follow_workflow
           pp [:debug_print,debug_summary()]
-          raise Error.new("fn must be written")
+          raise Error.new('fn must be written')
         end
       end
 
@@ -68,7 +68,7 @@ module DTK
         include NestedWFMixin
         def follow_workflow
           pp [:debug_print,debug_summary()]
-          raise Error.new("fn must be written")
+          raise Error.new('fn must be written')
         end
       end
     end

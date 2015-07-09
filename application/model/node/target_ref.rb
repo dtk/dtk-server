@@ -66,7 +66,7 @@ module DTK
           end
         end
         unless ret
-          Log.error("Unexpected cannot find an index number")
+          Log.error('Unexpected cannot find an index number')
         end
         ret
       end
@@ -257,7 +257,7 @@ module DTK
           cols: [:id, :display_name,:canonical_template_node_id],
           filter: [:oneof,:canonical_template_node_id,node_target_ref_idhs.map(&:get_id)]
         }
-Log.error("see why this is using :canonical_template_node_id and not node_group_relation")
+Log.error('see why this is using :canonical_template_node_id and not node_group_relation')
         node_mh = node_target_ref_idhs.first.createMH()
         get_objs(node_mh,sp_hash).each do |r|
           (ret[r[:canonical_template_node_id]] ||= []) << r

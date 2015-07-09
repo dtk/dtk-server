@@ -14,21 +14,21 @@ module DTK
       sql = ''
       cols = rows.first.keys()
       cols.each do |col|
-        sql << "," unless sql.empty?
-        sql << " unnest(ARRAY[#{rows.map{|row|ds.literal(row[col])}.join(",")}]) as #{col}"
+        sql << ',' unless sql.empty?
+        sql << " unnest(ARRAY[#{rows.map{|row|ds.literal(row[col])}.join(',')}]) as #{col}"
       end
       ds.select(::Sequel::LiteralString.new(sql))
     end
 
     def update_returning_sql(ds,update_set_clause,returning_list)
       sql = ds.update_sql(update_set_clause)
-      sql << " RETURNING " + returning_list.map do |x|
+      sql << ' RETURNING ' + returning_list.map do |x|
         if x.is_a?(Hash)
           "#{@db.literal(x.keys.first)} AS #{x.values.first}"
         else
           @db.literal(x)
         end
-      end.join(",")
+      end.join(',')
       sql
     end
 
@@ -55,9 +55,9 @@ module DTK
 
     def create_function_zzz_ret_id?
       o =  ID_TYPES[:id] # fn output
-      raise Error::NotImplemented.new("create_function_zzz_ret_id?") if !(o == :bigint && ID_TYPES[:context_id] == :integer && ID_TYPES[:local_id] == :integer)
+      raise Error::NotImplemented.new('create_function_zzz_ret_id?') if !(o == :bigint && ID_TYPES[:context_id] == :integer && ID_TYPES[:local_id] == :integer)
       create_function?({schema: :top,fn: :zzz_ret_id},
-        "SELECT CASE WHEN $1 = 1 THEN $2::bigint ELSE (2147483648::bigint * ($1 -1)::bigint) + $2::bigint end",
+        'SELECT CASE WHEN $1 = 1 THEN $2::bigint ELSE (2147483648::bigint * ($1 -1)::bigint) + $2::bigint end',
         returns: :bigint, behavior: :IMMUTABLE, args: [{_context_id: :integer}, {_local_id: :integer}])
     end
 
@@ -84,7 +84,7 @@ module DTK
             WHERE #{uri_id} = OLD.id OR #{parent_id} = OLD.id;
             RETURN OLD;
          END",
-   returns: "trigger", language: "plpgsql"
+   returns: 'trigger', language: 'plpgsql'
     end
 
     def create_table_common_fields_trigger?(db_rel)
@@ -173,7 +173,7 @@ module DTK
       if results.size == 0 && size.nil?
         return
       elsif results.size > 1
-        Log.error("Unexpected that size > 1")
+        Log.error('Unexpected that size > 1')
         return
       end
       existing_size = results.first && results.first[:character_maximum_length]
@@ -181,7 +181,7 @@ module DTK
         return
       end
       qualified_table = "#{db_rel[:schema]}.#{db_rel[:table]}"
-      varchar_type = (size ? "varchar(#{size})" : "varchar")
+      varchar_type = (size ? "varchar(#{size})" : 'varchar')
       sql = "ALTER TABLE #{qualified_table} ALTER COLUMN #{col_name} TYPE #{varchar_type}"
       db_run(sql)
       Log.info("Changed table (#{qualified_table}) varchar column (#{col_name}) from size #{existing_size} to #{size ? size.to_s : 'nil'}")
@@ -239,13 +239,13 @@ module DTK
     end
 
     def fully_qualified_fn_name(fn)
-      fn.is_a?(Hash) ? (fn[:schema].to_s +  "." + fn[:fn].to_s) : fn
+      fn.is_a?(Hash) ? (fn[:schema].to_s +  '.' + fn[:fn].to_s) : fn
     end
 
     public
 
     def fully_qualified_rel_name(rel)
-      rel.is_a?(Hash) ? (rel[:schema].to_s +  "." + rel[:table].to_s) : rel
+      rel.is_a?(Hash) ? (rel[:schema].to_s +  '.' + rel[:table].to_s) : rel
     end
 
     private

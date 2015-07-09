@@ -15,13 +15,13 @@ module DTK; class AttributeLink
       # violation in service instance
       LinkFunctionMatrix = {
         scalar: {
-          scalar: "eq", indexed: "eq_indexed", array: "array_append"
+          scalar: 'eq', indexed: 'eq_indexed', array: 'array_append'
         },
         indexed: {
-          scalar: "eq_indexed", indexed: "eq_indexed", array: "array_append"
+          scalar: 'eq_indexed', indexed: 'eq_indexed', array: 'array_append'
         },
         array: {
-          scalar: "select_one", indexed: "select_one", array: "eq"
+          scalar: 'select_one', indexed: 'select_one', array: 'eq'
         }
       }
 

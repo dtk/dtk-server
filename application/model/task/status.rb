@@ -6,7 +6,7 @@ module DTK
 
       def self.get_active_top_level_tasks(model_handle)
         # TODO: need protection so dont get stake tasks that never came out of executing mode
-        filter = [:and, [:eq,:status,"executing"],[:or,[:neq,:assembly_id,nil],[:neq,:node_id,nil]]]
+        filter = [:and, [:eq,:status,'executing'],[:or,[:neq,:assembly_id,nil],[:neq,:node_id,nil]]]
         Task.get_top_level_tasks(model_handle,filter)
       end
 
@@ -108,11 +108,11 @@ module DTK
           end
         end
         case self[:executable_action_type]
-        when "ConfigNode"
+        when 'ConfigNode'
           if ea = self[:executable_action]
             ret.merge!(Action::ConfigNode.status(ea,opts))
           end
-        when "CreateNode"
+        when 'CreateNode'
           if ea = self[:executable_action]
             ret.merge!(Action::CreateNode.status(ea,opts))
           end
@@ -130,7 +130,7 @@ module DTK
       def set_and_return_types!
         type =
           if self[:task_id].nil?
-          self[:display_name]||"commit_cfg_changes"
+          self[:display_name]||'commit_cfg_changes'
           elsif action_type = self[:executable_action_type]
             ActionTypeCodes[action_type.to_s]
           elsif self[:display_name]
@@ -141,7 +141,7 @@ module DTK
             if sample_st = subtasks.first
               if sample_st[:executable_action_type]
                 sample_type = ActionTypeCodes[sample_st[:executable_action_type]]
-                suffix = /config_node(\w.+)/.match(self[:display_name])[1] if sample_st[:executable_action_type] == "ConfigNode"
+                suffix = /config_node(\w.+)/.match(self[:display_name])[1] if sample_st[:executable_action_type] == 'ConfigNode'
                 sample_type && "#{sample_type}s#{suffix}" #make plural
               end
             end
@@ -152,8 +152,8 @@ module DTK
       end
 
       ActionTypeCodes = {
-        "ConfigNode" => "configure_node",
-        "CreateNode" => "create_node"
+        'ConfigNode' => 'configure_node',
+        'CreateNode' => 'create_node'
       }
 
       def hier_task_idhs
@@ -175,10 +175,10 @@ module DTK
         end
         action_type = self[:executable_action_type]
         case action_type
-        when "ConfigNode"
+        when 'ConfigNode'
           ret.add(self,:executable_action_type)
           ret.add(self,:executable_action?){|ea|Action::ConfigNode.pretty_print_hash(ea)}
-        when "CreateNode"
+        when 'CreateNode'
           ret.add(self,:executable_action_type)
           ret.add(self,:executable_action?){|ea|Action::CreateNode.pretty_print_hash(ea)}
         else

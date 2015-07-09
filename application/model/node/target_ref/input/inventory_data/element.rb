@@ -32,7 +32,7 @@ module DTK; class Node; class TargetRef
             raise Error.new("Missing field input_node_hash['external_ref']['routable_host_address']")
           end
         end
-        params = {"host_address" => host_address}
+        params = {'host_address' => host_address}
         ret_hash.merge!(Input.child_objects(params))
         {ret_ref(name) => ret_hash}
       end

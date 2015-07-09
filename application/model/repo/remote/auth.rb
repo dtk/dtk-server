@@ -59,24 +59,24 @@ module DTK; class Repo
     class AccessRights
       class R < self
         def self.remote_repo_form
-          "R"
+          'R'
         end
         def self.pp_form
-          "Read"
+          'Read'
         end
       end
       class RW < self
         def self.remote_repo_form
-          "RW+"
+          'RW+'
         end
          def self.pp_form
-          "Read/Write"
+          'Read/Write'
         end
       end
       def self.convert_from_string_form(rights)
         case rights
-          when "r" then R
-          when "rw" then RW
+          when 'r' then R
+          when 'rw' then RW
           else raise ErrorUsage("Illegal access rights string '#{rights}'")
         end
       end

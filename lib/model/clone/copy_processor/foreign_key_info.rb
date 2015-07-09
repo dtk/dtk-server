@@ -49,7 +49,7 @@ module DTK
 
       def avoid_fk_processing?(model_handle,objs_info,opts)
         return false unless opts[:top]
-        model_handle[:model_name] != :component || (objs_info.first||{})[:type] != "composite"
+        model_handle[:model_name] != :component || (objs_info.first||{})[:type] != 'composite'
       end
 
       def shift_foregn_keys_aux(model_handle,fk_col,id_mappings)

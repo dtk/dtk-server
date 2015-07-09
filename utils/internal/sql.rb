@@ -70,7 +70,7 @@ module XYZ
 
       # TODO: use SQL.cast
       def self.qualified_ref
-        [:ref,[[{ref_num: nil},""]].case(["-",:ref_num.cast(:text)].sql_string_join)].sql_string_join
+        [:ref,[[{ref_num: nil},'']].case(['-',:ref_num.cast(:text)].sql_string_join)].sql_string_join
       end
 
       def self.cast(expr,type)
@@ -145,7 +145,7 @@ module XYZ
     module FilterPostProcessingMixin
       def add_filter_post_processing(filter)
         raise ErrorPostProcFilterNotImpl.new(:filter,filter) unless (filter.is_a?(Array) && filter.first == :and)
-        filter_fn = filter[1..filter.size-1].map{|expr|parse_expression(expr)}.join(" and ")
+        filter_fn = filter[1..filter.size-1].map{|expr|parse_expression(expr)}.join(' and ')
         @filter_post_processing = lambda{|_obj|eval(filter_fn)}
       end
 
@@ -156,7 +156,7 @@ module XYZ
         case expr[0]
          when :eq
           "(#{parse_term(expr[1])} == #{parse_term(expr[2])})"
-         when "match-prefix".to_sym
+         when 'match-prefix'.to_sym
           "(#{parse_term(expr[1])} =~ Regexp.new('^#{expr[2]}'))"
          else
           raise ErrorPostProcFilterNotImpl.new(:operation,expr[0])
@@ -211,7 +211,7 @@ module XYZ
       include DatatsetGraphMixin
       include FilterPostProcessingMixin
       # TODO: needed to fully qualify Dataset; could this constraint be removed? by chaging expose?
-      post_hook = "lambda{|x|XYZ::SQL::Dataset.new(model_handle,x,@filter_post_processing)}"
+      post_hook = 'lambda{|x|XYZ::SQL::Dataset.new(model_handle,x,@filter_post_processing)}'
       expose_methods_from_internal_object :sequel_ds, %w{where select from_self for_update}, post_hook: post_hook
       expose_methods_from_internal_object :sequel_ds, %w{sql}
       def initialize(model_handle,sequel_ds,filter_post_processing=nil)
@@ -281,7 +281,7 @@ module XYZ
         cols_to_get = rows.first.reject{|k,v|not ((v.is_a?(Hash) || v.is_a?(Array)) && db.json_table_column?(k,db_rel))}.keys
         return ret if cols_to_get.empty?
         unless rows.first.key?(:id)
-          Log.error("partial value processing can only be handled when id is on each row")
+          Log.error('partial value processing can only be handled when id is on each row')
           return ret
         end
         where_clause = SQL.in(:id,rows.map{|r|r[:id]})
@@ -301,7 +301,7 @@ module XYZ
       end
 
       def initialize(db,rows,model_handle)
-        raise Error.new("ArrayDataset.new called with rows being empty") if rows.empty?
+        raise Error.new('ArrayDataset.new called with rows being empty') if rows.empty?
         aliaz = model_handle[:model_name]
         empty_sequel_ds = db.empty_dataset()
         sequel_ds = nil
@@ -320,7 +320,7 @@ module XYZ
       include DatatsetGraphMixin
       include FilterPostProcessingMixin
       # TODO: needed to fully qualify Dataset; could this constraint be removed? by chaging expose?
-      expose_methods_from_internal_object :sequel_ds, %w{where select from_self}, post_hook: "lambda{|x|XYZ::SQL::Graph.new(x,@model_name_info,@c,@filter_post_processing)}"
+      expose_methods_from_internal_object :sequel_ds, %w{where select from_self}, post_hook: 'lambda{|x|XYZ::SQL::Graph.new(x,@model_name_info,@c,@filter_post_processing)}'
       expose_methods_from_internal_object :sequel_ds, %w{sql}
       def initialize(sequel_ds,model_name_info,c,filter_post_processing=nil)
         @sequel_ds = sequel_ds

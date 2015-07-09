@@ -57,7 +57,7 @@ module DTK; class BaseModule; class UpdateModule
       serialize_info_hash.merge!(create_empty_module_refs: true)
       # TODO: for efficiency if have the parsed info can pass this to serialize_and_save_to_repo?
       if new_commit_sha = component_module_refs.serialize_and_save_to_repo?(serialize_info_hash)
-        msg = opts[:message]||"The module refs file was updated by the server"
+        msg = opts[:message]||'The module refs file was updated by the server'
         ModuleDSLInfo::UpdatedInfo.new(msg: msg,commit_sha: new_commit_sha)
       end
     end

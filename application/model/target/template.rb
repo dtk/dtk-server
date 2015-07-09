@@ -25,7 +25,7 @@ module DTK
 
         target_mh = project_idh.createMH(:target)
         display_name = provider_display_name(provider_name)
-        ref = display_name.downcase.gsub(/ /,"-")
+        ref = display_name.downcase.gsub(/ /,'-')
         create_row = {
           iaas_type: iaas_type.to_s,
           project_id: project_idh.get_id(),

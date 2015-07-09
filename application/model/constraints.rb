@@ -13,17 +13,17 @@ module XYZ
       target_parent_obj = target.values.first.get_parent_id_handle().create_object
       violations = ret_violations(target)
       if opts[:raise_error_when_any_violation]
-        all_violations = Violation::Expression(violations["error"],violations["warning"])
+        all_violations = Violation::Expression(violations['error'],violations['warning'])
         raise ErrorConstraintViolations.new(all_violations.pp_form)
       elsif opts[:raise_error_when_error_violation]
-        pp [:warnings, violations["warning"].pp_form]
-        Violation.save(target_parent_obj,violations["warning"])
-        raise ErrorConstraintViolations.new(violations["error"].pp_form) unless violations["error"].empty?
+        pp [:warnings, violations['warning'].pp_form]
+        Violation.save(target_parent_obj,violations['warning'])
+        raise ErrorConstraintViolations.new(violations['error'].pp_form) unless violations['error'].empty?
       else
-        pp [:errors, violations["error"].pp_form]
-        Violation.save(target_parent_obj,violations["error"])
-        pp [:warnings, violations["warning"].pp_form]
-        Violation.save(target_parent_obj,violations["warning"])
+        pp [:errors, violations['error'].pp_form]
+        Violation.save(target_parent_obj,violations['error'])
+        pp [:warnings, violations['warning'].pp_form]
+        Violation.save(target_parent_obj,violations['warning'])
       end
       ret
     end
@@ -50,11 +50,11 @@ module XYZ
     public
 
     def ret_violations(target)
-      ret = {"error" => Violation::Expression.new(target,@logical_op), "warning" => Violation::Expression.new(target,@logical_op)}
+      ret = {'error' => Violation::Expression.new(target,@logical_op), 'warning' => Violation::Expression.new(target,@logical_op)}
 
       self.each do |constraint|
         next if constraint.evaluate_given_target(target)
-        severity = constraint[:severity] || "error"
+        severity = constraint[:severity] || 'error'
         ret[severity] << constraint
       end
       ret
@@ -99,7 +99,7 @@ module XYZ
 
         def self.print_form(cmp_display_name)
           i18n = Model.i18n_string(component_i18n,:component,cmp_display_name)
-          i18n || cmp_display_name.split(name_delimiter()).map(&:capitalize).join(" ")
+          i18n || cmp_display_name.split(name_delimiter()).map(&:capitalize).join(' ')
         end
       end
     end
@@ -107,12 +107,12 @@ module XYZ
 
   class Constraint < HashObject
     def self.create(dependency)
-      if dependency[:type] == "attribute" && dependency[:attribute_attribute_id]
+      if dependency[:type] == 'attribute' && dependency[:attribute_attribute_id]
         PortConstraint.new(dependency)
-      elsif dependency[:type] == "component" && dependency[:component_component_id]
+      elsif dependency[:type] == 'component' && dependency[:component_component_id]
         ComponentConstraint.new(dependency)
       else
-        raise Error.new("unexpected dependency type")
+        raise Error.new('unexpected dependency type')
       end
     end
     def evaluate_given_target(target,opts={})
@@ -133,7 +133,7 @@ module XYZ
         user_friendly_type = Component.display_name_print_form(component_type)
         dep = {
           description: "Only one component of type #{user_friendly_type} can be on a node",
-          severity: "error",
+          severity: 'error',
           negate: true,
           search_pattern: {
             filter: [:eq, :component_type, component_type]
@@ -144,8 +144,8 @@ module XYZ
       def self.base_for_extension(extension_cmp_info)
         ext_name = extension_cmp_info[:component_type]
         dep = {
-          description: "Base component for extension#{ext_name ? " (#{ext_name})" : ""} not on node",
-          severity: "error",
+          description: "Base component for extension#{ext_name ? " (#{ext_name})" : ''} not on node",
+          severity: 'error',
           search_pattern: {
             filter: [:eq, :component_type, extension_cmp_info[:extended_base]]
           }
@@ -157,8 +157,8 @@ module XYZ
         eps = external_link_defs.remote_components
         # no search pattern means 'necessarily fail'
         dep = {
-          description: "Link must attach to node with a component of type (#{eps.join(", ")})",
-          severity: "error"
+          description: "Link must attach to node with a component of type (#{eps.join(', ')})",
+          severity: 'error'
         }
         PortConstraint.new(dep)
       end
@@ -239,12 +239,12 @@ module XYZ
     include ProcessVirtualComponentMixin
     def create_dataset(target)
       node_idh  =
-        if target["target_node_id_handle"]
-          target["target_node_id_handle"]
-        elsif target["target_component_id_handle"]
-          target["target_component_id_handle"].get_containing_node_id()
+        if target['target_node_id_handle']
+          target['target_node_id_handle']
+        elsif target['target_component_id_handle']
+          target['target_component_id_handle'].get_containing_node_id()
         else
-          raise Error.new("unexpected target")
+          raise Error.new('unexpected target')
         end
       join_cond = {node_node_id: :node__id}
       join_array = ret_join_array(join_cond)

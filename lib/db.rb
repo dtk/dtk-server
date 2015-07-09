@@ -47,8 +47,8 @@ module DTK
           # TBD: check that it is legal field
           col = order_by_el[:field]
           next unless col
-          dir = order_by_el[:order] == "DESC" ? "DESC" : "ASC"
-          ret = dir == "ASC" ? ds.order(col) : ds.reverse_order(col)
+          dir = order_by_el[:order] == 'DESC' ? 'DESC' : 'ASC'
+          ret = dir == 'ASC' ? ds.order(col) : ds.reverse_order(col)
         end
       end
       paging_opts =  opts[:page] || opts[:paging] #TBD: should switch over to just paging
@@ -65,7 +65,7 @@ module DTK
 
     def self.ret_qualified_ref_from_scalars(scalars)
       return nil if scalars[:ref].nil?
-      scalars[:ref].to_s + (scalars[:ref_num] ? "-" + scalars[:ref_num].to_s : "")
+      scalars[:ref].to_s + (scalars[:ref_num] ? '-' + scalars[:ref_num].to_s : '')
     end
 
     def self.create(db_params)
@@ -86,8 +86,8 @@ module DTK
     def self.ret_json_hash(raw_value,col_info,opts={})
       begin
         hash = JSON.parse(raw_value)
-        if (col_info.key?(:ret_keys_as_symbols) && col_info[:ret_keys_as_symbols].to_s == "false") ||
-           (opts.key?(:ret_keys_as_symbols) && opts[:ret_keys_as_symbols].to_s == "false")
+        if (col_info.key?(:ret_keys_as_symbols) && col_info[:ret_keys_as_symbols].to_s == 'false') ||
+           (opts.key?(:ret_keys_as_symbols) && opts[:ret_keys_as_symbols].to_s == 'false')
           hash
         else
           ret_keys_as_symbols(hash)
@@ -109,8 +109,8 @@ module DTK
     def self.ret_parent_id_field_name(parent_db_rel,db_rel)
       return nil unless parent_db_rel && db_rel
       parent_db_rel[:schema] == db_rel[:schema] ?
-        (parent_db_rel[:table].to_s + "_id").to_sym :
-        (parent_db_rel[:schema].to_s + "_" + parent_db_rel[:table].to_s + "_id").to_sym
+        (parent_db_rel[:table].to_s + '_id').to_sym :
+        (parent_db_rel[:schema].to_s + '_' + parent_db_rel[:table].to_s + '_id').to_sym
     end
     def ret_parent_id_field_name(parent_db_rel,db_rel)
       self.class.ret_parent_id_field_name(parent_db_rel,db_rel)
@@ -157,10 +157,10 @@ class DBRel < Hash
 
   def schema_table_symbol(table_alias=nil)
     table_no_alias =  self[:schema] == :public ?
-    self[:table] : (self[:schema].to_s +  "__" + self[:table].to_s).to_sym
+    self[:table] : (self[:schema].to_s +  '__' + self[:table].to_s).to_sym
 
     return table_no_alias if table_alias.nil?
-      (table_no_alias.to_s + "___" +  table_alias.to_s).to_sym
+      (table_no_alias.to_s + '___' +  table_alias.to_s).to_sym
     end
   end
 

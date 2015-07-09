@@ -35,7 +35,7 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
     def pp_form
       ret =  SimpleOrderedHash.new()
       # TODO: have each class optionally have klass.pp_key_order
-      ret[:r8class] = self[:r8class] || self.class.to_s.gsub("XYZ::Puppet::","").gsub(/PS$/,"").to_sym
+      ret[:r8class] = self[:r8class] || self.class.to_s.gsub('XYZ::Puppet::','').gsub(/PS$/,'').to_sym
       each do |k,v|
         next if k == :r8class
         ret[k] =
@@ -141,16 +141,16 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
       def initialize(ast_item,opts={})
         type =
           if puppet_type?(ast_item,:hostclass)
-            "class"
+            'class'
           elsif puppet_type?(ast_item,:definition)
-            "definition"
+            'definition'
           else
-            raise ParseError.new("unexpected type for ast_item")
+            raise ParseError.new('unexpected type for ast_item')
           end
         self[:type] = type
         self[:name] = ast_item.name
 
-        if type == "definition"
+        if type == 'definition'
           self[:only_one_per_node] = false
         end
 
@@ -196,10 +196,10 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
         if type = puppet_type?(ast_item,types_to_process())
           "parse__#{type}".to_sym
         elsif puppet_type?(ast_item,:definition)
-          Log.error("need to implement nested class definitions")
+          Log.error('need to implement nested class definitions')
           nil
         elsif puppet_type?(ast_item,:resource_defaults)
-          Log.error("check whether should ignore resource_defaults in class def")
+          Log.error('check whether should ignore resource_defaults in class def')
           nil
         else
           puppet_type = ast_item.class.to_s.split('::').last
@@ -240,8 +240,8 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
 
       def parse__function(ast_fn,opts)
         case ast_fn.name
-          when "require" then RequireStatementPS.create(ast_fn,opts)
-          when "include" then IncludeStatementPS.create(ast_fn,opts)
+          when 'require' then RequireStatementPS.create(ast_fn,opts)
+          when 'include' then IncludeStatementPS.create(ast_fn,opts)
           else
           nil #ignore all others
         end
@@ -283,7 +283,7 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
     class ResourcePS < self
       def self.builtin?(ast_resource)
         puppet_type = ::Puppet::Type.type(ast_resource.type)
-        puppet_type && puppet_type.to_s.gsub(/Puppet::Type::/,"").downcase.to_sym
+        puppet_type && puppet_type.to_s.gsub(/Puppet::Type::/,'').downcase.to_sym
       end
 
       private
@@ -300,7 +300,7 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
       end
       def name(ast_resource)
         ret = ast_resource.type
-        if ret == "class"
+        if ret == 'class'
           ast_title = ast_title(ast_resource)
           raise ParseError.new("unexpected title ast type (#{ast_title.class})") unless puppet_type?(ast_title,AstTerm)
           ret = ast_title.value
@@ -343,7 +343,7 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
       private
 
       def type(ast_resource)
-        ast_resource.type == "class" ? "definition" : "class"
+        ast_resource.type == 'class' ? 'definition' : 'class'
       end
     end
 
@@ -388,8 +388,8 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
       def self.create(ast_rsc_param,opts={})
         case ast_rsc_param.param
          # TODO: ccurrently throwing out require; this should be used to look for foreign resources
-         when "require" then nil
-         when "stage" then StageResourceParam.create(ast_rsc_param,opts)
+         when 'require' then nil
+         when 'stage' then StageResourceParam.create(ast_rsc_param,opts)
          else
           name = ast_rsc_param.param
           value_ast_term = ast_rsc_param.value
@@ -400,7 +400,7 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
 
     class ResourceTitlePS < ResourceParamPS
       def self.create(value_ast_term,opts={})
-        new("title",value_ast_term,value_ast_term,opts)
+        new('title',value_ast_term,value_ast_term,opts)
       end
     end
 
@@ -420,7 +420,7 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
 
       def name(ast_rsc_ref)
         ret = ast_rsc_ref.type
-        if ret == "Class"
+        if ret == 'Class'
           ast_title = ast_title(ast_rsc_ref)
           raise ParseError.new("unexpected title ast type (#{ast_title.class})") unless puppet_type?(ast_title,AstTerm)
           ret = ast_title.value
@@ -430,11 +430,11 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
 
       def ast_title(ast_rsc_ref)
         unless ast_rsc_ref.title
-          raise ParseError.new("unexpected to not have title on resource reference")
+          raise ParseError.new('unexpected to not have title on resource reference')
         end
         children = ast_rsc_ref.title.children
         unless children.size == 1
-          raise ParseError.new("unexpected to have number of resource ref children neq to 1")
+          raise ParseError.new('unexpected to have number of resource ref children neq to 1')
         end
         children.first
       end
@@ -458,7 +458,7 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
       end
 
       def self.create_name_attribute
-        new(["name"],required: true)
+        new(['name'],required: true)
       end
 
       private
@@ -501,8 +501,8 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
     class CollExprPS < self
       def self.create(coll_expr_ast,opts={})
         case coll_expr_ast.oper
-          when "==" then CollExprAttributeExpressionPS.new(coll_expr_ast,opts)
-          when "and", "or" then CollExprLogicalConnectivePS.new(coll_expr_ast,opts)
+          when '==' then CollExprAttributeExpressionPS.new(coll_expr_ast,opts)
+          when 'and', 'or' then CollExprLogicalConnectivePS.new(coll_expr_ast,opts)
           else raise ParseError.new("unexpected operation (#{coll_expr_ast.oper}) for collection expression")
         end
       end
@@ -521,9 +521,9 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
           value_ast = coll_expr_ast.test1
         end
         unless name && value_ast
-          raise ParseError.new("unexpected type for collection expression")
+          raise ParseError.new('unexpected type for collection expression')
         end
-        self[:op] = "=="
+        self[:op] = '=='
         self[:name] = name
         self[:value] = TermPS.create(value_ast,opts)
         super
@@ -534,12 +534,12 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
       end
 
       def structured_form
-        ["op",self[:op],self[:name],self[:value].structured_form()]
+        ['op',self[:op],self[:name],self[:value].structured_form()]
       end
 
       def match_exported?(exp_rsc_params)
         # TODO: treat ops other than  "=="
-        return nil unless self[:op] == "=="
+        return nil unless self[:op] == '=='
         matching_param = exp_rsc_params.find{|p|p[:name] == self[:name]}
         ret = matching_param && matching_param[:value].can_match?(self[:value])
         ret && ret.map{|x|x.merge(name: self[:name])}
@@ -561,18 +561,18 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
       end
 
       def structured_form
-        ["op",self[:op],self[:arg1].structured_form(),self[:arg2].structured_form()]
+        ['op',self[:op],self[:arg1].structured_form(),self[:arg2].structured_form()]
       end
 
       def match_exported?(exp_rsc_params)
         case self[:op]
-         when "and" then
+         when 'and' then
           if match1 = self[:arg1].match_exported?(exp_rsc_params)
             if match2 = self[:arg2].match_exported?(exp_rsc_params)
               match1 + match2
             end
           end
-         when "or"
+         when 'or'
           self[:arg1].match_exported?(exp_rsc_params) ||self[:arg2].match_exported?(exp_rsc_params)
         end
       end
@@ -655,7 +655,7 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
         end
       end
       def data_type
-        "string"
+        'string'
       end
 
       def set_default_value?
@@ -708,7 +708,7 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
       end
 
       def structured_form
-        ["variable",self[:value]]
+        ['variable',self[:value]]
       end
 
       def can_match?(ast_term)
@@ -757,7 +757,7 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
       end
 
       def data_type
-        "boolean"
+        'boolean'
       end
 
       def to_s(_opts={})
@@ -789,7 +789,7 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
         elements = self[:terms].map do |t|
           t.is_a?(TermPS) ? t.to_s(opts.merge(in_string: true)) : t.to_s
         end
-        "[#{elements.join(",")}]"
+        "[#{elements.join(',')}]"
       end
 
       def default_value(opts={})
@@ -893,11 +893,11 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
       def to_s(opts={})
         self[:terms].map do |t|
           t.is_a?(TermPS) ? t.to_s(opts.merge(in_string: true)) : t.to_s
-        end.join("")
+        end.join('')
       end
 
       def structured_form
-        ["fn","concat"] + self[:terms].map(&:structured_form)
+        ['fn','concat'] + self[:terms].map(&:structured_form)
       end
 
       def can_match?(ast_term)
@@ -926,16 +926,16 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
       def to_s(opts={})
         args = self[:terms].map do |t|
           t.is_a?(TermPS) ? t.to_s(opts.merge(in_string: true)) : t.to_s
-        end.join(",")
+        end.join(',')
         "#{self[:name]}(#{args})"
       end
 
        def structured_form
-         ["fn",self[:name]] + self[:terms].map(&:structured_form)
+         ['fn',self[:name]] + self[:terms].map(&:structured_form)
       end
 
       def template?
-        self[:name] == "template" ? self[:terms].first : nil
+        self[:name] == 'template' ? self[:terms].first : nil
       end
 
       def can_match?(ast_term)

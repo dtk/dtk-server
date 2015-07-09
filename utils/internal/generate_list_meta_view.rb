@@ -11,7 +11,7 @@ module XYZ
     end
     module Local
       def self.tr_class
-        "tr-dl"
+        'tr-dl'
       end
       def self.hidden_fields
         [
@@ -27,8 +27,8 @@ module XYZ
         (columns.empty? ? Model::FieldSet.default(relation).cols : columns).map do |col|
           {col => {
               type: ui_datatype(col,fieldset_types),
-              help: ""
-            }.merge(col == :display_name ? {objLink: true, objLinkView: "display"} : {}) #TODO: hard coded display name as one with links
+              help: ''
+            }.merge(col == :display_name ? {objLink: true, objLinkView: 'display'} : {}) #TODO: hard coded display name as one with links
           }
         end
       end

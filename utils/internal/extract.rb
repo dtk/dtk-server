@@ -17,7 +17,7 @@ module XYZ
       end
       # TODO: rmove or make work with windows
       def fully_qualified_dir_path?(path)
-        path[0,1] == "/"
+        path[0,1] == '/'
       end
 
       def load_and_return_adapter_class(compressed_file)
@@ -26,25 +26,25 @@ module XYZ
           else
             raise Error.new("not treating compressed file (#{compressed_file})")
           end
-        CachedAdapterClasses[adapter_name] ||= DynamicLoader.load_and_return_adapter_class("extract",adapter_name)
+        CachedAdapterClasses[adapter_name] ||= DynamicLoader.load_and_return_adapter_class('extract',adapter_name)
       end
       CachedAdapterClasses = {}
 
       def ret_relative_path(entry_name,opts)
         return entry_name unless strip_count = opts[:strip_prefix_count]
-        split = entry_name.split("/")
-        split[strip_count..split.size-strip_count].join("/")
+        split = entry_name.split('/')
+        split[strip_count..split.size-strip_count].join('/')
       end
 
       def skip(relative_path,opts)
         # strip out the empty top directory
         return true if relative_path.empty?
         # allows strip out .git directories
-        return true if relative_path.split("/").first == ".git"
+        return true if relative_path.split('/').first == '.git'
         return nil unless filter = opts[:filter]
         # TODO: starting very simple
         if filter.size == 1 && filter.keys.first == :modules
-          not filter[:modules].include?(relative_path.split("/").first)
+          not filter[:modules].include?(relative_path.split('/').first)
         else
           raise Error.new("Not treating filter: #{filter.inspect}")
         end

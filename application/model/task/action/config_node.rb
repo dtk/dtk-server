@@ -35,7 +35,7 @@ module DTK; class Task
 
       def is_first_inter_node_stage?
         inter_node_stage = inter_node_stage()
-        inter_node_stage.nil? || inter_node_stage == "1"
+        inter_node_stage.nil? || inter_node_stage == '1'
       end
 
       def self.status(object,opts)
@@ -206,7 +206,7 @@ module DTK; class Task
       end
 
       def config_agent_type
-        self[:config_agent_type] || raise(Error.new("self[:config_agent_type] should not be nil"))
+        self[:config_agent_type] || raise(Error.new('self[:config_agent_type] should not be nil'))
       end
 
       private
@@ -238,14 +238,14 @@ module DTK; class Task
             actions,config_agent_type = OnComponent.create_actions_from_execution_blocks(exec_blocks)
             hash = {
               node: exec_blocks.node(),
-              state_change_types: ["converge_component"],
+              state_change_types: ['converge_component'],
               config_agent_type: config_agent_type,
               component_actions: actions
             }
             hash.merge!(assembly_idh: assembly_idh) if assembly_idh
             intra_node_stages = exec_blocks.intra_node_stages()
           else
-            raise Error.new("Unexpected ConfigNode.initialize type")
+            raise Error.new('Unexpected ConfigNode.initialize type')
           end
         super(type,hash,task_idh)
         # set_intra_node_stages must be done after super

@@ -39,7 +39,7 @@ module R8Tpl
         attr_i18n = I18nAux::i18n_string_attribute(i18n,attr_name)||attr_name
         cmp_i18n = I18nAux::i18n_string_component(i18n,cmp_name)||cmp_name
         # TODO: needs revision; also probably move to model/port
-        if [ "component_external", "component_internal_external"].include?(port[:type])
+        if [ 'component_external', 'component_internal_external'].include?(port[:type])
           "#{cmp_i18n} / #{attr_i18n}"
         else
           "#{cmp_i18n} #{port.ref_num()} / #{attr_i18n}"
@@ -51,7 +51,7 @@ module R8Tpl
           string = translate_input(i18n,:component,input_string)
           return string if string
           # otherwise use the following heuristic
-          input_string.to_s.gsub(XYZ::Model::Delim::RegexpCommon, " ")
+          input_string.to_s.gsub(XYZ::Model::Delim::RegexpCommon, ' ')
         end
 
         def self.i18n_string_attribute(i18n,input_string,_component_type=nil)
@@ -72,11 +72,11 @@ module R8Tpl
 
         # returns first array index
         def self.ret_removed_array_index(input_string)
-          [input_string.to_s.sub(XYZ::Model::Delim::NumericIndexRegexp,""),$1 && $1.to_i]
+          [input_string.to_s.sub(XYZ::Model::Delim::NumericIndexRegexp,''),$1 && $1.to_i]
         end
 
         def self.capitalize_words(s)
-          s.scan(/\w+/).map(&:capitalize).join(" ")
+          s.scan(/\w+/).map(&:capitalize).join(' ')
         end
 
         def self.index_print_form(index)

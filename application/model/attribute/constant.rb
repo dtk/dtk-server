@@ -22,9 +22,9 @@ module DTK
         {'hidden' => true}
       end
 
-      ExternalRefType = "constant"
+      ExternalRefType = 'constant'
       def self.ret_external_ref
-        {"type" => ExternalRefType}
+        {'type' => ExternalRefType}
       end
       def self.is_constant?(external_ref)
         # this is specifically a symbol because external_ref's keys are symbols
@@ -46,7 +46,7 @@ module DTK
         @datatype = datatype.to_s
       end
 
-      ConstantDelim = "___"
+      ConstantDelim = '___'
       def attribute_name
         constant_val_for_attr_name = self.class.constant_val_for_attr_name(@constant)
         "#{ConstantDelim}constant#{ConstantDelim}#{@dependent_component}#{ConstantDelim}#{@dependent_attribute}#{ConstantDelim}#{constant_val_for_attr_name}"

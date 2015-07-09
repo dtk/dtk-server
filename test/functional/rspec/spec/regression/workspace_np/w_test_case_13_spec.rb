@@ -19,7 +19,7 @@ component_module_namespace = 'r8'
 dtk_common = DtkCommon.new('', '')
 
 def converge_service_and_cancel_tasks(workspace_id)
-  puts "Converge service and cancel tasks:", "----------------------------------"
+  puts 'Converge service and cancel tasks:', '----------------------------------'
   dtk_common = DtkCommon.new('', '')
   tasks_cancelled = false
 
@@ -37,42 +37,42 @@ def converge_service_and_cancel_tasks(workspace_id)
 
   if task_status_response.to_s.include? 'cancelled'
     tasks_cancelled = true
-    puts "Task execution status: cancelled"
-    puts "Converge process has been cancelled successfully!"
+    puts 'Task execution status: cancelled'
+    puts 'Converge process has been cancelled successfully!'
   else task_status_response.to_s.include? 'failed'
-    puts "Converge process has not been cancelled successfully!"
+    puts 'Converge process has not been cancelled successfully!'
   end
   return tasks_cancelled
 end
 
-describe "(Workspace) Test Case 13: Create one node, add component in it, converge workspace and cancel tasks while converge is in execution" do
+describe '(Workspace) Test Case 13: Create one node, add component in it, converge workspace and cancel tasks while converge is in execution' do
   before(:all) do
-    puts "**********************************************************************************************************************************",""
+    puts '**********************************************************************************************************************************',''
   end
 
-  context "Create node in workspace" do
-    include_context "Create node in workspace", dtk_common, node_name, node_template
+  context 'Create node in workspace' do
+    include_context 'Create node in workspace', dtk_common, node_name, node_template
   end
 
-  context "Add component to the node in workspace" do
-    include_context "Add component to the node in workspace", dtk_common, node_name, component_name, component_module_namespace
+  context 'Add component to the node in workspace' do
+    include_context 'Add component to the node in workspace', dtk_common, node_name, component_name, component_module_namespace
   end
 
-  context "Converge and cancel workspace" do
-    it "converges and then cancel workspace execution" do
-      puts "Converge and cancel task in workspace", "-------------------------------------"
+  context 'Converge and cancel workspace' do
+    it 'converges and then cancel workspace execution' do
+      puts 'Converge and cancel task in workspace', '-------------------------------------'
       workspace_id = dtk_common.get_workspace_id
       task_cancel = converge_service_and_cancel_tasks(workspace_id)
-      puts ""
+      puts ''
       task_cancel.should eq(true)
     end
   end
 
-  context "Purge workspace content" do
-    include_context "Purge workspace content", dtk_common
+  context 'Purge workspace content' do
+    include_context 'Purge workspace content', dtk_common
   end
 
   after(:all) do
-    puts "", ""
+    puts '', ''
   end
 end

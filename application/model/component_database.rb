@@ -12,7 +12,7 @@ module XYZ
              model_name: :attribute,
              join_type: :inner,
              alias: :db_component_name,
-             filter: [:eq, :display_name, "db_component"],
+             filter: [:eq, :display_name, 'db_component'],
              join_cond: {component_component_id: :component__id},
              cols: [:value_asserted,:component_component_id]
            },
@@ -29,7 +29,7 @@ module XYZ
         rows = Model.get_objects_from_join_array(db_server_component.model_handle,base_sp_hash,join_array)
         db_component = rows.first && rows.first[:db_component]
         unless db_component
-          Log.error("Cannot find the db component associated with the db server")
+          Log.error('Cannot find the db component associated with the db server')
           return nil
         end
         new_db_cmp_id = db_server_node.clone_into(db_component)

@@ -1,6 +1,6 @@
 module DTK
   class RepoUser < Model
-    SSH_KEY_EXISTS = "Provided RSA public key already exists for another user"
+    SSH_KEY_EXISTS = 'Provided RSA public key already exists for another user'
 
     ### Attributes ###
 
@@ -82,7 +82,7 @@ module DTK
       ret = find_by_pub_key(mh, ssh_rsa_pub_key)
 
       unless ret
-        raise ErrorUsage.new("The SSH public key for the client machine has not been registered, have you added SSH key for this client?")
+        raise ErrorUsage.new('The SSH public key for the client machine has not been registered, have you added SSH key for this client?')
       end
 
       ret
@@ -124,7 +124,7 @@ module DTK
         # get all public key files from gitolite_admin keydir
         # and raise exception if file with provided rsa_public_key exists already
         gitolite_admin_keydir = RepoManager.get_keydir()
-        pub_keys = Dir.entries(gitolite_admin_keydir).select{|key| key.to_s.include?(".pub")}
+        pub_keys = Dir.entries(gitolite_admin_keydir).select{|key| key.to_s.include?('.pub')}
 
         pub_keys.each do |key|
           key_content = File.read("#{gitolite_admin_keydir}/#{key}")
@@ -219,7 +219,7 @@ module DTK
           end
         end
         new_index = max+1
-        suffix = (new_index == 1 ? "" : "-#{new_index}")
+        suffix = (new_index == 1 ? '' : "-#{new_index}")
         username = CurrentSession.new.get_username()
         new_repo_username = "dtk-#{type}-#{username}#{suffix}"
       end

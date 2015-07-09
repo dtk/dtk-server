@@ -122,7 +122,7 @@ module DTK
     def get_repo!
       repos = get_repos()
       unless repos.size == 1
-        raise Error.new("unexpected that number of matching repos is not equal to 1")
+        raise Error.new('unexpected that number of matching repos is not equal to 1')
       end
 
       return repos.first()
@@ -145,7 +145,7 @@ module DTK
     def publish_preprocess_raise_error?(module_branch_obj)
       # unless get_field?(:dsl_parsed)
       unless module_branch_obj.dsl_parsed?()
-        raise ErrorUsage.new("Unable to publish module that has parsing errors. Please fix errors and try to publish again.")
+        raise ErrorUsage.new('Unable to publish module that has parsing errors. Please fix errors and try to publish again.')
       end
     end
   end

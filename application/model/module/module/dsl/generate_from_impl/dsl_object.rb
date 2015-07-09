@@ -11,11 +11,11 @@ module DTK; class ModuleDSL
       end
 
       def create_external_ref(name,type)
-        DSLObject::RenderHash.new([{"name" => name},{"type" => type}])
+        DSLObject::RenderHash.new([{'name' => name},{'type' => type}])
       end
 
       def sanitize_attribute(attr)
-        attr.gsub(/[^a-zA-Z0-9_-]/,"-")
+        attr.gsub(/[^a-zA-Z0-9_-]/,'-')
       end
 
       def t(term)
@@ -187,8 +187,8 @@ module DTK; class ModuleDSL
 
       def klass(type)
         version_class = ModuleDSL.load_and_return_version_adapter_class(integer_version())
-        cap_type = type.to_s.split("_").map(&:capitalize).join("")
-        version_class.const_get("DSLObject").const_get(cap_type)
+        cap_type = type.to_s.split('_').map(&:capitalize).join('')
+        version_class.const_get('DSLObject').const_get(cap_type)
       end
 
       # context
@@ -278,7 +278,7 @@ module DTK; class ModuleDSL
         def yaml_form(level=1)
           ret = RenderHash.new
           each do |k,v|
-            if level == 1 && k == "version"
+            if level == 1 && k == 'version'
               next
             end
             converted_val =

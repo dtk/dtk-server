@@ -19,7 +19,7 @@ module DTK
 
     #TODO: this should be moved to ec2 class because referencing R8::Config[:ec2]
     def get_compute_params(opts={})
-      ENV["FOG_RC"] ||= R8::Config[:ec2][:fog_credentials_path]
+      ENV['FOG_RC'] ||= R8::Config[:ec2][:fog_credentials_path]
       ret = Fog.credentials()
       unless opts[:just_credentials]
         if region = R8::Config[:ec2][:region]

@@ -115,7 +115,7 @@ module DTK
           if x.is_a?(Symbol) and x == :all
             FieldSetAll.new()
           elsif x.is_a?(Array)
-            raise Error.new("model_name is not given") unless model_name
+            raise Error.new('model_name is not given') unless model_name
             FieldSet.new(model_name,x)
           else
             x

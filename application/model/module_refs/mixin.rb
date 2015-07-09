@@ -8,7 +8,7 @@ module DTK
           defined_versions = component_module.get_module_branches().map(&:version_print_form).compact
           version_info =
             if defined_versions.empty?
-              "there are no versions loaded"
+              'there are no versions loaded'
             else
               "available versions: #{defined_versions.join(', ')}"
             end

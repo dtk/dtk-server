@@ -16,7 +16,7 @@ module DTK; class Task
            when :hash
             object
            else
-            raise Error.new("Unexpected CreateNode.initialize type")
+            raise Error.new('Unexpected CreateNode.initialize type')
           end
         super(type,hash,task_idh)
       end
@@ -38,10 +38,10 @@ module DTK; class Task
       end
 
       def self.stage_display_name
-        "create_nodes_stage"
+        'create_nodes_stage'
       end
       def self.task_display_name
-        "create_node"
+        'create_node'
       end
 
       def self.status(object,opts)
@@ -81,7 +81,7 @@ module DTK; class Task
         # TODO: hack
         ipv4_val = CommandAndControl.get_and_update_node_state!(self[:node],[:host_addresses_ipv4])
         return ret if ipv4_val.empty?
-        cmps = self[:node].get_objs(cols: [:components]).map{|r|r[:component][:display_name].gsub("__","::")}
+        cmps = self[:node].get_objs(cols: [:components]).map{|r|r[:component][:display_name].gsub('__','::')}
         ret = {node_components: {ipv4_val.values.first[0] => cmps}}
         if attr_names.delete(:host_addresses_ipv4)
           ret.merge!(ipv4_val)
@@ -156,10 +156,10 @@ module DTK; class Task
     # TODO: move common fns to NodeLevel and then have this inherit to NodeLevel
     class PowerOnNode < CreateNode
       def self.stage_display_name
-        "power_on_nodes_stage"
+        'power_on_nodes_stage'
       end
       def self.task_display_name
-        "power_on_node"
+        'power_on_node'
       end
     end
   end

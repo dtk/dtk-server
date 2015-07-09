@@ -29,7 +29,7 @@ module DTK
     # can clone if needed attributes on a service node group to its members
     def self.create_port_and_attr_links__clone_if_needed(target_idh,port_link_hash,opts={})
       unless link_def_context = get_link_def_context?(target_idh,port_link_hash)
-        raise PortLinkError.new("Illegal link")
+        raise PortLinkError.new('Illegal link')
       end
       port_link_to_create = port_link_hash.merge(temporal_order: link_def_context.temporal_order)
       port_link = nil
@@ -50,7 +50,7 @@ module DTK
     def create_attribute_links__clone_if_needed(parent_idh,opts={})
       update_obj!(:input_id,:output_id)
       unless link_def_context = get_link_def_context?(parent_idh)
-        raise PortLinkError.new("Illegal link")
+        raise PortLinkError.new('Illegal link')
       end
       if opts[:set_port_link_temporal_order]
         if temporal_order = link_def_context.temporal_order
@@ -106,13 +106,13 @@ module DTK
         filter: [:oneof, :id, [port_link_hash[:input_id],port_link_hash[:output_id]]]
       }
       ports_with_link_def_info = get_objs(parent_idh.createMH(:port),sp_hash)
-      local_port_cmp_rows = ports_with_link_def_info.select{|r|(r[:link_def]||{})[:local_or_remote] == "local"}
+      local_port_cmp_rows = ports_with_link_def_info.select{|r|(r[:link_def]||{})[:local_or_remote] == 'local'}
       return ret if local_port_cmp_rows.empty?
       local_port_cmp_info = local_port_cmp_rows.first #all elements wil agree on the parts aside from link_def_link
 
       remote_port_cmp_rows = ports_with_link_def_info.select{|r|r[:id] != local_port_cmp_info[:id]}
       if remote_port_cmp_rows.empty?
-        raise Error.new("Unexpected result that a remote port cannot be found")
+        raise Error.new('Unexpected result that a remote port cannot be found')
       end
       remote_port_cmp_info = remote_port_cmp_rows.first
 
@@ -126,9 +126,9 @@ module DTK
         possible_link = r[:link_def_link]||{}
         if possible_link[:remote_component_type] == remote_cmp_type
           if components_coreside
-            possible_link[:type] == "internal"
+            possible_link[:type] == 'internal'
           else
-            possible_link[:type] == "external"
+            possible_link[:type] == 'external'
           end
         end
       end
@@ -146,9 +146,9 @@ module DTK
       if rows.size == 1
         remote_cmp = rows.first
       elsif rows.empty?
-        raise Error.new("Unexpected that no remote component found")
+        raise Error.new('Unexpected that no remote component found')
       else
-        raise Error.new("Unexpected that getting remote port link component does not return unique element")
+        raise Error.new('Unexpected that getting remote port link component does not return unique element')
       end
       link_def_link = match[:link_def_link].merge!(local_component_type: local_cmp[:component_type])
 

@@ -13,7 +13,7 @@ module DTK
         return ret if (node_bindings||[]).empty?
 
         unless node_bindings.is_a?(Hash)
-          raise ErrorIllFormedTerm.new("node bindings",nil,"is not a hash")
+          raise ErrorIllFormedTerm.new('node bindings',nil,'is not a hash')
         end
         updates = node_bindings.each do |k,v|
           sub_assembly_node_id,sub_assembly_ref =  find_assembly_node_id_and_ref(k)
@@ -47,10 +47,10 @@ module DTK
       # returns [assembly_name,node_name]
       def parse_assembly_node_ref(assembly_node_ref)
         # TODO: should also check that assembly_name is the service add on assembly or sub assembly
-        if assembly_node_ref =~ Regexp.new("(^[^/]+)/([^/]+$)")
+        if assembly_node_ref =~ Regexp.new('(^[^/]+)/([^/]+$)')
           [$1,$2]
         else
-          raise ErrorIllFormedTerm.new("assembly node ref",assembly_node_ref)
+          raise ErrorIllFormedTerm.new('assembly node ref',assembly_node_ref)
         end
       end
     end

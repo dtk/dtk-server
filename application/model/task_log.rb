@@ -15,7 +15,7 @@ module XYZ
         # implicit assumption that only one log per task
         ret_info[task_id].merge!(task_log.slice({content: :log},:status,:type))
       end
-      incl_assoc_nodes = ret_info.values.reject{|t|t[:status] == "complete"}.map{|info|info[:node]}
+      incl_assoc_nodes = ret_info.values.reject{|t|t[:status] == 'complete'}.map{|info|info[:node]}
       unless incl_assoc_nodes.empty?
         # initiate defer task to get logs
         task_pbuilderid_index = incl_assoc_nodes.inject({}){|h,n|h.merge(Node.pbuilderid(n) => n[:task_id])}
@@ -29,7 +29,7 @@ module XYZ
               config_agent_type = config_agent_types[task_id]
               TaskLog.create_or_update(task_idh,config_agent_type.to_s,response[:log_content])
             else
-              Log.error("error response for request to get log")
+              Log.error('error response for request to get log')
               # TODO: put some subset of this in error msg
               pp msg
             end
@@ -42,7 +42,7 @@ module XYZ
 
     def self.create_or_update(task_idh,log_type,log_content)
       task_id = task_idh.get_id()
-      status = ParseLog.log_complete?(log_type,log_content) ? "complete" : "in_progress"
+      status = ParseLog.log_complete?(log_type,log_content) ? 'complete' : 'in_progress'
 
       # create if needed
       sp_hash = {

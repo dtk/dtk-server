@@ -20,12 +20,12 @@ module DTK
       missing_modules, found_modules = [], []
 
       required_modules.each do |r_module|
-        name      = r_module["module_name"]
-        type      = r_module["module_type"]
-        version   = r_module["version_info"]
-        url       = r_module["module_url"]
+        name      = r_module['module_name']
+        type      = r_module['module_type']
+        version   = r_module['version_info']
+        url       = r_module['module_url']
         # we support both fields for namespace
-        namespace = r_module["remote_namespace"]||r_module["module_namespace"]
+        namespace = r_module['remote_namespace']||r_module['module_namespace']
 
         i_modules = installed_modules(type.to_sym, project_idh)
 

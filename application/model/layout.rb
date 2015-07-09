@@ -2,7 +2,7 @@
 module XYZ
   class Layout < Model
     def self.save(parent_id_handle,layout_info)
-      name = "foo" #TODO: stub
+      name = 'foo' #TODO: stub
       hash = {
         display_name: name
       }.merge(layout_info)
@@ -60,7 +60,7 @@ module XYZ
       end
 
       def self.group_name(el)
-        group_i18n(el).gsub(/[^A-Za-z0-9_]/,"_")
+        group_i18n(el).gsub(/[^A-Za-z0-9_]/,'_')
       end
 
       def self.field_list__edit(el)
@@ -74,12 +74,12 @@ module XYZ
         }
       end
       def self.convert_type(data_type)
-        TypeConvert[data_type]||"text"
+        TypeConvert[data_type]||'text'
       end
       TypeConvert = {
-        "string" => "text",
-        "json" => "hash",
-        "integer" => "integer"
+        'string' => 'text',
+        'json' => 'hash',
+        'integer' => 'integer'
       }
     end
   end

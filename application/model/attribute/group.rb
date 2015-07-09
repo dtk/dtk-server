@@ -18,7 +18,7 @@ module XYZ
     # adds port type info and required
     def add_missing_info_for_group_attrs!(augmented_attr_list)
       dependency_analysis(augmented_attr_list) do |attr_in,_link,attr_out|
-        attr_in.merge!(port_type: "input")
+        attr_in.merge!(port_type: 'input')
         if attr_in[:required] && attr_out and not attr_out[:dynamic]
           attr_out.merge!(required: true)
         end
@@ -74,13 +74,13 @@ module XYZ
     def attribute_value_type
       type =
         # TODO: need to clean up special processing of sap__l4 because marked as output port but also input port (from internal connections)
-        if self[:semantic_type_summary] == "sap__l4" then :linked
+        if self[:semantic_type_summary] == 'sap__l4' then :linked
         elsif self[:dynamic] then :dynamic
-        elsif self[:port_type] == "input" then :linked
+        elsif self[:port_type] == 'input' then :linked
         elsif self[:required] then :required
         else :not_required
        end
-      raise Error.new("Cannot detect type of attribute") unless type
+      raise Error.new('Cannot detect type of attribute') unless type
       AttrValType.create(type,self)
     end
   end

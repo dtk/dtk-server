@@ -31,10 +31,10 @@ module DTK
     private
 
     def self.module_type
-      raise Error.new("Abstract method that should not be called")
+      raise Error.new('Abstract method that should not be called')
     end
     def self.module_class
-      raise Error.new("Abstract method that should not be called")
+      raise Error.new('Abstract method that should not be called')
     end
 
     class Output < Array

@@ -31,7 +31,7 @@ module DTK; class ConfigAgent
       def self.contains_metadata?(impl_obj, _provider = nil)
         depth = 2
         RepoManager.ls_r(depth,{file_only: true},impl_obj).find do |f|
-          f.eql?("metadata.json") || f.eql?("#{Puppet.provider_folder()}/metadata.json")
+          f.eql?('metadata.json') || f.eql?("#{Puppet.provider_folder()}/metadata.json")
         end
       end
 

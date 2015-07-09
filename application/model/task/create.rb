@@ -81,7 +81,7 @@ module DTK; class Task
       stages_config_nodes_task = task_template_content.create_subtask_instances(task_mh,assembly.id_handle())
 
       if start_nodes_task.nil? && create_nodes_task.nil? && stages_config_nodes_task.empty?
-        raise ErrorUsage.new("There are no actions in the service instance")
+        raise ErrorUsage.new('There are no actions in the service instance')
       end
 
       ret.add_subtask(create_nodes_task) if create_nodes_task
@@ -101,8 +101,8 @@ module DTK; class Task
     def self.create_top_level_task(task_mh,assembly,opts={})
       task_info_hash = {
         assembly_id: assembly.id,
-        display_name: opts[:task_action] || "assembly_converge",
-        temporal_order: "sequential"
+        display_name: opts[:task_action] || 'assembly_converge',
+        temporal_order: 'sequential'
       }
       if commit_msg = opts[:commit_msg]
         task_info_hash.merge!(commit_message: commit_msg)
@@ -138,7 +138,7 @@ module DTK; class Task
       def self.concurrent_subtask(action_class)
         {
           display_name: action_class.stage_display_name(),
-          temporal_order: "concurrent"
+          temporal_order: 'concurrent'
         }
       end
 
@@ -158,7 +158,7 @@ module DTK; class Task
       target_idh = target_idh_from_assembly(assembly)
       task_mh = target_idh.create_childMH(:task)
 
-      main_task = create_new_task(task_mh,assembly_id: assembly_idh.get_id(),display_name: "power_on_nodes", temporal_order: "concurrent",commit_message: nil)
+      main_task = create_new_task(task_mh,assembly_id: assembly_idh.get_id(),display_name: 'power_on_nodes', temporal_order: 'concurrent',commit_message: nil)
       opts.merge!(main_task: main_task)
 
       assembly_config_changes = StateChange::Assembly::component_state_changes(assembly,component_type)
@@ -184,7 +184,7 @@ module DTK; class Task
       config_nodes_changes = StateChange::NodeCentric::SingleNodeGroup.component_state_changes(node_mh,node_group: node_group)
       config_nodes_task = config_nodes_task(task_mh,config_nodes_changes)
 
-      ret = create_new_task(task_mh,temporal_order: "sequential",node_id: node_group_idh.get_id(),display_name: "node_group_converge", commit_message: commit_msg)
+      ret = create_new_task(task_mh,temporal_order: 'sequential',node_id: node_group_idh.get_id(),display_name: 'node_group_converge', commit_message: commit_msg)
       if create_nodes_task && config_nodes_task
         ret.add_subtask(create_nodes_task)
         ret.add_subtask(config_nodes_task)
@@ -212,7 +212,7 @@ module DTK; class Task
       config_nodes_changes = StateChange::NodeCentric::SingleNode.component_state_changes(node_mh,node: node)
       config_nodes_task = config_nodes_task(task_mh,config_nodes_changes)
 
-      ret = create_new_task(task_mh,temporal_order: "sequential",node_id: node_idh.get_id(),display_name: "node_converge", commit_message: commit_msg)
+      ret = create_new_task(task_mh,temporal_order: 'sequential',node_id: node_idh.get_id(),display_name: 'node_converge', commit_message: commit_msg)
       if create_nodes_task && config_nodes_task
         ret.add_subtask(create_nodes_task)
         ret.add_subtask(config_nodes_task)
@@ -236,7 +236,7 @@ module DTK; class Task
       power_on_nodes_changes = StateChange::NodeCentric::SingleNode.component_state_changes(node_mh,node: node)
       power_on_nodes_task = create_running_node_task(task_mh,power_on_nodes_changes, node: node)
 
-      ret = create_new_task(task_mh,temporal_order: "sequential",node_id: node_idh.get_id(),display_name: "node_converge", commit_message: commit_msg)
+      ret = create_new_task(task_mh,temporal_order: 'sequential',node_id: node_idh.get_id(),display_name: 'node_converge', commit_message: commit_msg)
       if power_on_nodes_task
         ret.add_subtask(power_on_nodes_task)
       else
@@ -260,12 +260,12 @@ module DTK; class Task
       create_nodes_task = create_nodes_task(task_mh,grouped_state_changes[Action::CreateNode])
       config_nodes_task = config_nodes_task(task_mh,grouped_state_changes[Action::ConfigNode])
       if create_nodes_task && config_nodes_task
-        ret = create_new_task(task_mh,temporal_order: "sequential")
+        ret = create_new_task(task_mh,temporal_order: 'sequential')
         ret.add_subtask(create_nodes_task)
         ret.add_subtask(config_nodes_task)
         ret
       else
-        ret = create_new_task(task_mh,temporal_order: "sequential")
+        ret = create_new_task(task_mh,temporal_order: 'sequential')
         ret.add_subtask(create_nodes_task||config_nodes_task) #only one wil be non null
         ret
       end
@@ -287,7 +287,7 @@ module DTK; class Task
         all_actions << executable_action
         ret = create_new_task(task_mh,executable_action: executable_action)
       else
-        ret = create_new_task(task_mh,display_name: "create_node_stage", temporal_order: "concurrent")
+        ret = create_new_task(task_mh,display_name: 'create_node_stage', temporal_order: 'concurrent')
         state_change_list.each do |sc|
           executable_action = Action::CreateNode.create_from_state_change(sc.first)
           all_actions << executable_action
@@ -307,13 +307,13 @@ module DTK; class Task
       # for powering on node with no components
       unless state_change_list and not state_change_list.empty?
         unless node = opts[:node]
-          raise Error.new("Expected that :node passed in as options")
+          raise Error.new('Expected that :node passed in as options')
         end
 
         executable_action = Action::PowerOnNode.create_from_node(node)
         attr_mh = task_mh.createMH(:attribute)
         Action::PowerOnNode.add_attributes!(attr_mh,[executable_action])
-        ret = create_new_task(task_mh,executable_action: executable_action, display_name: "power_on_node")
+        ret = create_new_task(task_mh,executable_action: executable_action, display_name: 'power_on_node')
         main_task.add_subtask(ret)
 
         return main_task
@@ -339,21 +339,21 @@ module DTK; class Task
         if state_change_list.size == 1
           executable_action = Action::PowerOnNode.create_from_state_change(state_change_list.first.first)
           all_actions << executable_action
-          ret = create_new_task(task_mh,executable_action: executable_action,display_name: "power_on_node")
+          ret = create_new_task(task_mh,executable_action: executable_action,display_name: 'power_on_node')
           main_task.add_subtask(ret)
         else
           # ret = create_new_task(task_mh,:display_name => "power_on_nodes", :temporal_order => "concurrent")
           state_change_list.each do |sc|
             executable_action = Action::PowerOnNode.create_from_state_change(sc.first)
             all_actions << executable_action
-            main_task.add_subtask_from_hash(executable_action: executable_action,display_name: "power_on_node")
+            main_task.add_subtask_from_hash(executable_action: executable_action,display_name: 'power_on_node')
           end
         end
       else
         nodes.each do |node|
           executable_action = Action::PowerOnNode.create_from_node(node)
           all_actions << executable_action
-          ret = create_new_task(task_mh,executable_action: executable_action, display_name: "power_on_node")
+          ret = create_new_task(task_mh,executable_action: executable_action, display_name: 'power_on_node')
           main_task.add_subtask(ret)
         end
       end
@@ -366,7 +366,7 @@ module DTK; class Task
       # for powering on node with no components
       unless state_change_list and not state_change_list.empty?
         unless node = opts[:node]
-          raise Error.new("Expected that :node passed in as options")
+          raise Error.new('Expected that :node passed in as options')
         end
         executable_action = Action::PowerOnNode.create_from_node(node)
         attr_mh = task_mh.createMH(:attribute)
@@ -382,7 +382,7 @@ module DTK; class Task
         all_actions << executable_action
         ret = create_new_task(task_mh,executable_action: executable_action)
       else
-        ret = create_new_task(task_mh,display_name: "create_node_stage", temporal_order: "concurrent")
+        ret = create_new_task(task_mh,display_name: 'create_node_stage', temporal_order: 'concurrent')
         state_change_list.each do |sc|
           executable_action = Action::PowerOnNode.create_from_state_change(sc.first)
           all_actions << executable_action
@@ -404,10 +404,10 @@ module DTK; class Task
         executable_action, error_msg = get_executable_action_from_state_change(state_change_list.first, assembly_idh, stage_index)
         raise ErrorUsage.new(error_msg) unless executable_action
         all_actions << executable_action
-        ret = create_new_task(task_mh,display_name: "config_node_stage#{stage_index}", temporal_order: "concurrent")
+        ret = create_new_task(task_mh,display_name: "config_node_stage#{stage_index}", temporal_order: 'concurrent')
         ret.add_subtask_from_hash(executable_action: executable_action)
       else
-        ret = create_new_task(task_mh,display_name: "config_node_stage#{stage_index}", temporal_order: "concurrent")
+        ret = create_new_task(task_mh,display_name: "config_node_stage#{stage_index}", temporal_order: 'concurrent')
         all_errors = []
         state_change_list.each do |sc|
           executable_action, error_msg = get_executable_action_from_state_change(sc, assembly_idh, stage_index)
@@ -466,11 +466,11 @@ module DTK; class Task
 
     def map_state_change_to_task_action(state_change)
       @mapping_sc_to_task_action ||= {
-        "create_node" => Action::CreateNode,
-        "install_component" => Action::ConfigNode,
-        "update_implementation" => Action::ConfigNode,
-        "converge_component" => Action::ConfigNode,
-        "setting" => Action::ConfigNode
+        'create_node' => Action::CreateNode,
+        'install_component' => Action::ConfigNode,
+        'update_implementation' => Action::ConfigNode,
+        'converge_component' => Action::ConfigNode,
+        'setting' => Action::ConfigNode
       }
       @mapping_sc_to_task_action[state_change]
     end

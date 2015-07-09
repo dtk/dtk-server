@@ -31,7 +31,7 @@ module DTK
     def index_map_aux(input_or_output)
       if index_map = get_field?(:index_map)
         unless index_map.size == 1
-          Log.error("Not treating item map with size greater than 1")
+          Log.error('Not treating item map with size greater than 1')
           return nil
         end
         ret = index_map.first[input_or_output]
@@ -201,14 +201,14 @@ module DTK
       attr_link_mh = node_group_id_handle.create_peerMH(:attribute_link)
       attr_link_parent_id_handle = node_group_id_handle.get_parent_id_handle()
       attr_link_parent_col = attr_link_mh.parent_id_field_name()
-      ref_prefix = "attribute_link:"
+      ref_prefix = 'attribute_link:'
       i1_ds = node_cmp_ds.select(
-         {SQL::ColRef.concat(ref_prefix,:input__id.cast(:text),"-",:output__id.cast(:text)) => :ref},
+         {SQL::ColRef.concat(ref_prefix,:input__id.cast(:text),'-',:output__id.cast(:text)) => :ref},
          {attr_link_parent_id_handle.get_id() => attr_link_parent_col},
          {input__id: :input_id},
          {output__id: :output_id},
-         {"member" => :type},
-         "eq" => :function)
+         {'member' => :type},
+         'eq' => :function)
       first_join_ds = i1_ds.join_table(:inner,node_attr_ds,{attr_parent_col => :id},table_alias: :input)
       attr_link_ds = first_join_ds.join_table(:inner,group_attr_ds,[:ref],table_alias: :output)
 
@@ -234,7 +234,7 @@ module DTK
            display_name: "link:#{sap_config_name}-#{sap_name}",
            input_id: sap_id,
            output_id: sap_config_id,
-           type: "internal",
+           type: 'internal',
            hidden: true,
            function: link_info[:sap_config_fn_name],
            node_node_id: node_id
@@ -244,7 +244,7 @@ module DTK
            display_name: "link:#{parent_attr_name}-#{sap_name}",
            input_id: sap_id,
            output_id: par_id,
-           type: "internal",
+           type: 'internal',
            hidden: true,
            function: link_info[:parent_fn_name],
            node_node_id: node_id
@@ -262,22 +262,22 @@ module DTK
         [
          {
            ref: "sap_config:#{sap_config_id}-#{new_sap_id}",
-           display_name: "link:sap_config-sap",
+           display_name: 'link:sap_config-sap',
            input_id: new_sap_id,
            output_id: sap_config_id,
-           type: "internal",
+           type: 'internal',
            hidden: true,
-           function: "sap_config__l4",
+           function: 'sap_config__l4',
            node_node_id: node_id
          },
          {
            ref: "host_address:#{ipv4_id}-#{new_sap_id}",
-           display_name: "link:host_address-sap",
+           display_name: 'link:host_address-sap',
            input_id: new_sap_id,
            output_id: ipv4_id,
-           type: "internal",
+           type: 'internal',
            hidden: true,
-           function: "host_address_ipv4",
+           function: 'host_address_ipv4',
            node_node_id: node_id
          }
         ]
@@ -312,7 +312,7 @@ module DTK
       def input_array_indexes
         ret = []
         self.map do |el|
-          raise Error.new("unexpected form in input_array_indexes") unless el[:input].is_singleton_array?()
+          raise Error.new('unexpected form in input_array_indexes') unless el[:input].is_singleton_array?()
           el[:input].first
         end
       end
@@ -351,14 +351,14 @@ module DTK
           if source.is_a?(Array)
             rest().take_slice(source[el])
           else
-            Log.error("array expected")
+            Log.error('array expected')
             nil
           end
         else
           if source.is_a?(Hash)
             rest().take_slice(source[el.to_s])
           else
-            Log.error("hash expected")
+            Log.error('hash expected')
             nil
           end
         end
@@ -376,7 +376,7 @@ module DTK
             ret[el] = rest().merge_into(ret[el],delta)
             ret
           else
-            Log.error("array expected")
+            Log.error('array expected')
             nil
           end
         else
@@ -384,7 +384,7 @@ module DTK
             ret = source || {}
             ret.merge(el.to_s => rest().merge_into(ret[el.to_s],delta))
           else
-            Log.error("hash expected")
+            Log.error('hash expected')
             nil
           end
         end
@@ -468,11 +468,11 @@ module DTK
 
     def self.ret_function_endpoints_same_type(i,o)
       # TBD: more robust is allowing for example output to be "database", which matches with "postgresql" and also to have version info, etc
-      raise Error.new("mismatched input and output types") unless i[:type] == o[:type]
+      raise Error.new('mismatched input and output types') unless i[:type] == o[:type]
       return :equal if !i[:is_array] && !o[:is_array]
       return :equal if i[:is_array] && o[:is_array]
       return :concat if !i[:is_array] && o[:is_array]
-      raise Error.new("mismatched input and output types") if i[:is_array] && !o[:is_array]
+      raise Error.new('mismatched input and output types') if i[:is_array] && !o[:is_array]
       nil
     end
 

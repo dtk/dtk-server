@@ -94,7 +94,7 @@ module XYZ
     def hash_for_json_generate
       ret = process_symbols(self)
       # TODO: would be nice to get rid of this hack
-      ret[":relation"] =  ret[":relation"] ? ret[":relation"].gsub(/^:/,"") : nil
+      ret[':relation'] =  ret[':relation'] ? ret[':relation'].gsub(/^:/,'') : nil
       ret
     end
 
@@ -241,7 +241,7 @@ module XYZ
       end
       ret
     end
-    FilterOperationsParsed = [:eq, :neq, :lt, :lte, :gt, :gte, "match-prefix".to_sym, :regex, :oneof]
+    FilterOperationsParsed = [:eq, :neq, :lt, :lte, :gt, :gte, 'match-prefix'.to_sym, :regex, :oneof]
 
     def ret_order_by(hash_input)
       order_by = find_key_from_input(:order_by,hash_input)
@@ -251,8 +251,8 @@ module XYZ
         raise ErrorParsing.new(:order_by_element,el) unless el.is_a?(Hash) && el.size <= 2
         field = (el.find{|k,_v|ret_symbol(k) == :field}||[nil,nil])[1]
         raise ErrorParsing.new(:order_by_element,el) unless field
-        order = (el.find{|k,_v|ret_symbol(k) == :order}||[nil,"ASC"])[1]
-        raise ErrorParsing.new(:order_by_order_direction,order) unless ["ASC","DESC"].include?(order)
+        order = (el.find{|k,_v|ret_symbol(k) == :order}||[nil,'ASC'])[1]
+        raise ErrorParsing.new(:order_by_order_direction,order) unless ['ASC','DESC'].include?(order)
         {field: ret_symbol(field), order: order}
       end
     end
@@ -278,7 +278,7 @@ module XYZ
       # TODO: short circuit if parsed already
       raise ErrorParsing.new(:symbol,term_in_json) if [Array,Hash].detect{|t|term_in_json.is_a?(t)}
 # TODO: remove patch
-return :eq if term_in_json == ":"
+return :eq if term_in_json == ':'
       # complexity due to handle case where have form :":columns"
       term_in_json.to_s.gsub(/^[:]+/,'').to_sym
     end

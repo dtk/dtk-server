@@ -1,7 +1,7 @@
 module XYZ
   class UserGroup < Model
     def self.all_groupname
-      "all"
+      'all'
     end
 
     def self.private_groupname(username)

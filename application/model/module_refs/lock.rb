@@ -92,10 +92,10 @@ module DTK
         ret = new(assembly_instance)
         collapsed.each_pair do |module_name,single_el_array|
           if single_el_array.empty?
-            Log.error("Unexpected that single_el_array is empty")
+            Log.error('Unexpected that single_el_array is empty')
           else
             if single_el_array.size > 1
-              Log.error("Unexpected that single_el_array has size > 1; picking first")
+              Log.error('Unexpected that single_el_array has size > 1; picking first')
             end
             ret[module_name] = ModuleRef::Lock.create_from_element(assembly_instance,single_el_array.first)
           end

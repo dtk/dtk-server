@@ -4,14 +4,14 @@ require './spec/setup_browser'
 require './lib/component_modules_spec'
 require './lib/dtk_common'
 
-component_module = "r8:java"
-permission_set_1 = "go+rwd"
+component_module = 'r8:java'
+permission_set_1 = 'go+rwd'
 user_data = {
-  usergroup: "bakir_test_group",
-  user: "dtk17-client",
-  module_name: "r8/java",
-  another_user: "bakir_test",
-  another_usergroup: "bakir_test"
+  usergroup: 'bakir_test_group',
+  user: 'dtk17-client',
+  module_name: 'r8/java',
+  another_user: 'bakir_test',
+  another_usergroup: 'bakir_test'
 }
 
 permissions = {
@@ -31,14 +31,14 @@ permissions = {
 
 dtk_common = DtkCommon.new('', '')
 
-describe "(Repoman client integration) Test Case 13: NEG - chmod go+rwd on module A (User A is not owner but belongs to User group A which is not set on module, intial permissions are: RWDP/R/R)" do
+describe '(Repoman client integration) Test Case 13: NEG - chmod go+rwd on module A (User A is not owner but belongs to User group A which is not set on module, intial permissions are: RWDP/R/R)' do
   let(:conf) { Configuration.instance }
   let(:header) { @homepage.get_header }
   let(:users) { @homepage.get_main.get_users }
   let(:modules) { @homepage.get_main.get_modules}
 
-  context "User is" do
-    it "logged in" do
+  context 'User is' do
+    it 'logged in' do
       @homepage.get_loginpage.login_user(conf.username, conf.password)
       homepage_header = header.get_homepage_header
       expect(homepage_header).to have_content('DTK')
@@ -67,16 +67,16 @@ describe "(Repoman client integration) Test Case 13: NEG - chmod go+rwd on modul
     end
   end
 
-  context "NEG - Chmod component module" do
-    include_context "NEG - Chmod component module", dtk_common, component_module, permission_set_1
+  context 'NEG - Chmod component module' do
+    include_context 'NEG - Chmod component module', dtk_common, component_module, permission_set_1
   end
 
   context "Usergroup #{user_data[:usergroup]}, user #{user_data[:user]} and RWDP/R/R permissions" do
-    include_context "Check module permissions", dtk_common, user_data[:module_name], "RWDP/R/R"
+    include_context 'Check module permissions', dtk_common, user_data[:module_name], 'RWDP/R/R'
   end
 
-  context "User is" do
-    it "logged out" do
+  context 'User is' do
+    it 'logged out' do
       startpage = @homepage.get_loginpage.logout_user
       expect(startpage).to have_content('DTK Admin Panel')
     end

@@ -26,7 +26,7 @@ module DTK; class ModuleDSL
       end
     end
 
-    ModCmpDelim = "__"
+    ModCmpDelim = '__'
     CmpPPDelim = '::'
     def convert_to_internal_cmp_form(cmp)
       self.class.convert_to_internal_cmp_form(cmp)

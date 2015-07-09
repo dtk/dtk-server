@@ -140,7 +140,7 @@ module DTK
       # user_friendly_name.gsub(/::/,"__")
       # using sub instead of gsub because we need only first :: to change to __
       # e.g. we have cmp "mysql::bindings::java" we want "mysql__bindings::java"
-      user_friendly_name.sub(/::/,"__")
+      user_friendly_name.sub(/::/,'__')
     end
 
     # TODO: these methods in this section need to be cleaned up and also possibly partitioned into Component::Instance and Component::Template
@@ -199,9 +199,9 @@ module DTK
     def self.display_name_print_form(display_name,opts=Opts.new)
       ret =
         if opts[:no_module_name]
-          display_name.gsub(/^.+__/,"")
+          display_name.gsub(/^.+__/,'')
         else
-          display_name.gsub(/__/,"::")
+          display_name.gsub(/__/,'::')
         end
 
       if namespace = opts[:namespace]
@@ -213,9 +213,9 @@ module DTK
 
     def self.component_type_print_form(component_type,opts=Opts.new)
       if opts[:no_module_name]
-        component_type.gsub(/^.+__/,"")
+        component_type.gsub(/^.+__/,'')
       else
-        component_type.gsub(/__/,"::")
+        component_type.gsub(/__/,'::')
       end
     end
     def component_type_print_form
@@ -307,7 +307,7 @@ module DTK
     end
 
     def connectivity_profile_internal
-      (self[:link_defs]||{})["internal"] || LinkDefsInternal.find(self[:component_type])
+      (self[:link_defs]||{})['internal'] || LinkDefsInternal.find(self[:component_type])
     end
 
     def multiple_instance_ref
@@ -334,7 +334,7 @@ module DTK
 
       create_row = {
         :ref => file_name,
-        :type => "config_file",
+        :type => 'config_file',
         :file_name => file_name,
         :display_name => file_name,
         parent_col => id(),
@@ -360,7 +360,7 @@ module DTK
     def get_config_file(file_name)
       sp_hash = {
         model_name: :file_asset,
-        filter: [:and, [:eq, :file_name, file_name], [:eq, :type, "config_file"]],
+        filter: [:and, [:eq, :file_name, file_name], [:eq, :type, 'config_file']],
         cols: [:id,:content]
       }
       get_children_from_sp_hash(:file_asset,sp_hash).first
@@ -371,7 +371,7 @@ module DTK
       cols << :content if opts[:include_content]
       sp_hash = {
         model_name: :file_asset,
-        filter: [:eq, :type, "config_file"],
+        filter: [:eq, :type, 'config_file'],
         cols: cols
       }
       get_children_from_sp_hash(:file_asset,sp_hash)
@@ -393,7 +393,7 @@ module DTK
 
     def is_extension?
       return false if self.is_a?(Assembly)
-      Log.error("this should not be called if :extended_base is not set") unless self.key?(:extended_base)
+      Log.error('this should not be called if :extended_base is not set') unless self.key?(:extended_base)
       self[:extended_base] ? true : false
     end
 
@@ -454,7 +454,7 @@ module DTK
             end
           end
 
-          raise ErrorUsage.new("Multiple components matching component name you provided. Please use namespace:component format to delete component!") if match_cmps.size > 1
+          raise ErrorUsage.new('Multiple components matching component name you provided. Please use namespace:component format to delete component!') if match_cmps.size > 1
           ret_cmp = match_cmps.first
         end
       end
@@ -475,7 +475,7 @@ module DTK
       components.each do |cmp|
         id = cmp[:id]
         if cmp[:extended_base]
-          raise Error.new("cmp[:implementation_id] must be set") unless cmp[:implementation_id]
+          raise Error.new('cmp[:implementation_id] must be set') unless cmp[:implementation_id]
           ext_cmps << cmp
           extended_base_id = cmp[:extended_base_id]
           base_cmp_info << {id: extended_base_id, node_node_id: cmp[:node_node_id], extended_base: cmp[:extended_base], implementation_id: cmp[:implementation_id]}
@@ -510,7 +510,7 @@ module DTK
     end
 
     def is_assembly?
-      "composite" == get_field?(:type)
+      'composite' == get_field?(:type)
     end
 
     def assembly?(_opts={})
@@ -534,12 +534,12 @@ module DTK
     end
 
     def update_component_i18n_label(label)
-      update_hash = {id: self[:id], i18n_labels: {i18n_language() => {"component" => label}}}
+      update_hash = {id: self[:id], i18n_labels: {i18n_language() => {'component' => label}}}
       Model.update_from_rows(model_handle,[update_hash],partial_value: true)
     end
 
     def update_attribute_i18n_label(attribute_name,label)
-      update_hash = {id: self[:id], i18n_labels: {i18n_language() => {"attributes" => {attribute_name => label}}}}
+      update_hash = {id: self[:id], i18n_labels: {i18n_language() => {'attributes' => {attribute_name => label}}}}
       Model.update_from_rows(model_handle,[update_hash],partial_value: true)
     end
 
@@ -565,7 +565,7 @@ module DTK
          }
         ]
       rows = Model.get_objects_from_join_array(model_handle(:implementation),base_sp_hash,join_array)
-      Log.error("get extension library shoudl only match one component") if rows.size > 1
+      Log.error('get extension library shoudl only match one component') if rows.size > 1
       rows.first && rows.first[:library_template]
     end
 
@@ -653,7 +653,7 @@ module DTK
     end
 
     def get_virtual_attributes_aux_base(attribute_names,cols,field_to_match=:display_name,_multiple_instance_clause=nil)
-      raise Error.new("Should not be called unless :component_type and :implementation_id are set") unless self[:component_type] && self[:implementation_id]
+      raise Error.new('Should not be called unless :component_type and :implementation_id are set') unless self[:component_type] && self[:implementation_id]
       component_id = self[:id]
       base_sp_hash = {
         model_name: :component,
@@ -786,7 +786,7 @@ module DTK
       # attribut ethat serves as the key
       # override_attrs[:display_name] ||= SQL::ColRef.qualified_ref
       into_node = (target_obj.model_handle[:model_name] == :node)
-      override_attrs[:type] ||= (into_node ? "instance" : "template")
+      override_attrs[:type] ||= (into_node ? 'instance' : 'template')
       override_attrs[:updated] ||= false
     end
 
@@ -847,12 +847,12 @@ module DTK
 
     def get_stored_attribute_i18n_label?(attribute)
       return nil unless self[:i18n_labels]
-      ((self[:i18n_labels][i18n_language()]||{})["attributes"]||{})[attribute[:display_name]]
+      ((self[:i18n_labels][i18n_language()]||{})['attributes']||{})[attribute[:display_name]]
     end
 
     def get_stored_component_i18n_label?
       return nil unless self[:i18n_labels]
-      ((self[:i18n_labels][i18n_language()]||{})["component"]||{})[self[:display_name]]
+      ((self[:i18n_labels][i18n_language()]||{})['component']||{})[self[:display_name]]
     end
   end
 end

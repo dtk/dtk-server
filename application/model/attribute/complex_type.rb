@@ -11,7 +11,7 @@ module XYZ
       ret = []
       attr_list.each do |attr|
         value = attr[:attribute_value]
-        if (value.nil? and not opts[:flatten_nil_value]) or not attr[:data_type] == "json"
+        if (value.nil? and not opts[:flatten_nil_value]) or not attr[:data_type] == 'json'
           ret << attr
         else
           nested_type_pat = SemanticTypeSchema.create_from_semantic_type(attr[:semantic_type])
@@ -165,10 +165,10 @@ module XYZ
         flatten_attribute_when_hash!(ret,value_obj,attr,nil,opts.merge(top_level: false))
       elsif value_obj && value_obj.is_a?(Array)
         flatten_attribute_when_array!(ret,value_obj,attr,nil,opts.merge(top_level: false))
-      elsif attr[:data_type] == "json" && opts[:top_level]
+      elsif attr[:data_type] == 'json' && opts[:top_level]
         ret << attr
       else
-        ret << attr.merge(attribute_value: value_obj,data_type: "json")
+        ret << attr.merge(attribute_value: value_obj,data_type: 'json')
       end
       nil
     end

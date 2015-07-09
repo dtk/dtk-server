@@ -12,47 +12,47 @@ module XYZ
 
       def format_metadata(metadata)
    return nil if metadata.nil?
-   return nil if metadata["name"].nil?
+   return nil if metadata['name'].nil?
    attributes = {}
    attributes_defs = {}
-   unless metadata["attributes"].nil?
-     metadata["attributes"].each{|recipe_ref,values|
+   unless metadata['attributes'].nil?
+     metadata['attributes'].each{|recipe_ref,values|
        #to strip of recipe name prefix if that is the case
-       ref_imploded = recipe_ref.split("/")
-       ref = ((ref_imploded[0] == metadata["name"] and ref_imploded.size > 1) ?
-         ref_imploded[1..ref_imploded.size-1].join("/") : recipe_ref).to_sym
-       data_type = case values["type"]
-         when "hash", "array"
-           "json"
+       ref_imploded = recipe_ref.split('/')
+       ref = ((ref_imploded[0] == metadata['name'] and ref_imploded.size > 1) ?
+         ref_imploded[1..ref_imploded.size-1].join('/') : recipe_ref).to_sym
+       data_type = case values['type']
+         when 'hash', 'array'
+           'json'
          else
-           values["type"]
+           values['type']
        end
        attributes[ref] = {
-         display_name: values["display_name"],
-         value_asserted: values["default"],
-               constraints: values["constraints"]
+         display_name: values['display_name'],
+         value_asserted: values['default'],
+               constraints: values['constraints']
              }
        attributes_defs[ref] = {
          external_attr_ref: recipe_ref.to_s,
-         port_type: values["port_type"],
-         semantic_type: values["semantic_type"] ?  values["semantic_type"].to_json : nil,
+         port_type: values['port_type'],
+         semantic_type: values['semantic_type'] ?  values['semantic_type'].to_json : nil,
          data_type: data_type,
-         display_name: values["display_name"],
-         description: values["description"],
-         default: values["default"],
-               constraints: values["constraints"]
+         display_name: values['display_name'],
+         description: values['description'],
+         default: values['default'],
+               constraints: values['constraints']
              }
      }
    end
          component_obj =
-           {metadata["name"].to_sym =>
-       {display_name: metadata["display_name"] ? metadata["display_name"] : metadata["name"],
-        description: metadata["description"],
+           {metadata['name'].to_sym =>
+       {display_name: metadata['display_name'] ? metadata['display_name'] : metadata['name'],
+        description: metadata['description'],
         attribute: attributes}}
          component_def_obj =
-           {metadata["name"].to_sym =>
-       {external_type: "chef_recipe",
-              external_cmp_ref: metadata["name"],
+           {metadata['name'].to_sym =>
+       {external_type: 'chef_recipe',
+              external_cmp_ref: metadata['name'],
         attribute_def: attributes_defs,
         uri: nil }}#stub
          [component_obj,component_def_obj]
@@ -73,13 +73,13 @@ module XYZ
       end
 
       def get_cookbook_list
-        get_rest("cookbooks").to_hash
+        get_rest('cookbooks').to_hash
       end
 
       def get_cookbook_metadata(cookbook_name)
         r = get_rest("cookbooks/#{cookbook_name}")
   return nil if r.nil?
-    format_metadata(r["metadata"])
+    format_metadata(r['metadata'])
       end
     end
 
@@ -89,7 +89,7 @@ module XYZ
         raise Error.new("#{local_dir} does not exist") unless  File.exists?(local_dir)
         raise Error.new("#{local_dir} is not a directory") unless  File.directory?(local_dir)
   Dir.foreach(local_dir) do |cookbook_name|
-    next if !File.directory?(local_dir+"/"+cookbook_name) or cookbook_name =~ %r{^[.]}
+    next if !File.directory?(local_dir+'/'+cookbook_name) or cookbook_name =~ %r{^[.]}
     component_obj = component_def_obj = nil
     begin
      component_obj,component_def_obj = get_cookbook_metadata(cookbook_name,local_dir)

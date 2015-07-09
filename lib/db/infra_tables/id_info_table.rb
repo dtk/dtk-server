@@ -25,7 +25,7 @@ module DTK
     end
 
     def create_top
-      IDHandle.new(reject{|k,_v|[:uri,:guid].include?(k)}.merge(uri: "/"))
+      IDHandle.new(reject{|k,_v|[:uri,:guid].include?(k)}.merge(uri: '/'))
     end
 
     # has form hash or if just symbol then its the attribute :model_name
@@ -61,14 +61,14 @@ module DTK
     end
 
     def to_s
-      model_name = "model_name=#{self[:model_name]||"UNKNOWN"}"
+      model_name = "model_name=#{self[:model_name]||'UNKNOWN'}"
       uri_or_guid =
         if is_a?(IDHandle)
           self[:guid] ? "; guid=#{self[:guid]}" : "; uri=#{self[:uri]}"
         else
-          ""
+          ''
         end
-      parent_model_name =  self[:parent_model_name] ? "; parent_model_name = #{self[:parent_model_name]}" : ""
+      parent_model_name =  self[:parent_model_name] ? "; parent_model_name = #{self[:parent_model_name]}" : ''
       "#{model_name}#{uri_or_guid}#{parent_model_name}"
     end
 
@@ -186,7 +186,7 @@ module DTK
     end
 
     def is_top?
-      self[:uri] == "/"
+      self[:uri] == '/'
     end
 
     def initialize(x,opts={})
@@ -284,7 +284,7 @@ module DTK
 
     def create_object_from_hash(hash,opts={})
       unless hash[:id]
-        raise Error.new("hash must contain:id key")
+        raise Error.new('hash must contain:id key')
       end
       idh = createIDH(id: hash[:id])
       model_name =
@@ -348,7 +348,7 @@ module DTK
     end
 
     def ret_qualified_ref
-      self[:ref].to_s + (self[:ref_num] ? "-" + self[:ref_num].to_s : "")
+      self[:ref].to_s + (self[:ref_num] ? '-' + self[:ref_num].to_s : '')
     end
   end
 
@@ -384,7 +384,7 @@ module DTK
     DB_REL_DEF.each do|key,db_info|
       if db_info[:many_to_one].nil? || db_info[:many_to_one].empty? ||
                (db_info[:many_to_one] ? db_info[:many_to_one] == [db_info[:relation_type]] : nil)
-        uri = "/" + key.to_s
+        uri = '/' + key.to_s
         context = 2 #TODO : hard wired
         if get_row_from_uri(uri,context).nil?
           Log.info("adding to top level factory for: #{key}")
@@ -410,7 +410,7 @@ module DTK
     c = id_handle[:c]
     return get_row_from_uri(id_handle[:uri],c,opts) if id_handle[:uri]
     return get_row_from_guid(id_handle[:guid],opts) if id_handle[:guid]
-    raise Error.new("no uri or guid given") if opts[:raise_error]
+    raise Error.new('no uri or guid given') if opts[:raise_error]
           nil
         end
 
@@ -471,7 +471,7 @@ module DTK
 
           update_ds = ds_with_from(parent_ds).join(pairs_ds,pair_parent_id: :parents__prt_relation_id).where(pair_id: :relation_id)
 
-          uri = SQL::ColRef.concat{|o|[:prt_uri,"/#{model_handle[:model_name]}/",:ref,o.case{[[{ref_num: nil},""],o.concat("-",:ref_num)]}]}
+          uri = SQL::ColRef.concat{|o|[:prt_uri,"/#{model_handle[:model_name]}/",:ref,o.case{[[{ref_num: nil},''],o.concat('-',:ref_num)]}]}
           update_ds.update(             uri: uri,
              relation_type: model_handle[:model_name].to_s,
              parent_id: :pair_parent_id,
@@ -480,7 +480,7 @@ module DTK
 
         def update_top_instances(model_handle,returning_cols)
           update_ds = ds().where(relation_id: returning_cols.map{|r|r[:id]})
-          uri = SQL::ColRef.concat{|o|["/#{model_handle[:model_name]}/",:ref,o.case{[[{ref_num: nil},""],o.concat("-",:ref_num)]}]}
+          uri = SQL::ColRef.concat{|o|["/#{model_handle[:model_name]}/",:ref,o.case{[[{ref_num: nil},''],o.concat('-',:ref_num)]}]}
           update_ds.update(uri: uri,relation_type: model_handle[:model_name].to_s)
         end
         # TODO: see if bug below to set :parent_relation_type when parent_relation_type.nil?, but not above
@@ -494,7 +494,7 @@ module DTK
                   parent_id: parent_id,
             parent_relation_type: prt,
             is_factory: false)
-    raise Error.new("error while processing uri table update") if uri_id.nil?
+    raise Error.new('error while processing uri table update') if uri_id.nil?
     uri_id
         end
 

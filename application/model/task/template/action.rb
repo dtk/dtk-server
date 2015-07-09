@@ -62,7 +62,7 @@ module DTK; class Task; class Template
       unless opts[:skip_if_not_found]
         err_msg = "The action method '#{method_name}' is not defined on component '#{component_name_ref}'"
         if action_defs.empty?
-          err_msg << "; there are no actions defiend on this component."
+          err_msg << '; there are no actions defiend on this component.'
         else
           legal_methods = action_defs.map{|ad|ad[:method_name]}
           err_msg << "; legal method names are: #{legal_methods.join(',')}"

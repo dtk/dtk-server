@@ -13,14 +13,14 @@ require Root + '/app'
 class R8Server
   include XYZ
   def initialize(username, opts={})
-    groupname = opts[:groupname]||"private"
+    groupname = opts[:groupname]||'private'
     @user_mh = model_handle(:user)
     @user_obj = User.create_user_in_groups?(user_mh,username,opts)
     user_group_mh = user_mh.createMH(:user_group)
     group_obj =
       case groupname
-       when "all" then UserGroup.get_all_group(user_group_mh)
-       when "private" then UserGroup.get_private_group(user_group_mh,username)
+       when 'all' then UserGroup.get_all_group(user_group_mh)
+       when 'private' then UserGroup.get_private_group(user_group_mh,username)
        else raise "Group (#{groupname})not treated"
       end
     @user_mh[:group_id] = group_obj[:id]
@@ -40,7 +40,7 @@ class R8Server
   def create_repo_user_for_nodes?
     repo_user_mh = pre_execute(:repo_user)
     unless RepoUser.get_matching_repo_user(repo_user_mh, type: :node)
-      new_key =  ::SSHKey.generate(type: "rsa")
+      new_key =  ::SSHKey.generate(type: 'rsa')
       ssh_rsa_keys = {
         public: new_key.ssh_public_key,
         private: new_key.private_key
@@ -67,7 +67,7 @@ class R8Server
   def create_public_library_nodes?
     container_idh = pre_execute(:top)
     hash_content = LibraryNodes.get_hash(in_library: 'public')
-    hash_content["library"]["public"]["display_name"] ||= "public"
+    hash_content['library']['public']['display_name'] ||= 'public'
     Model.import_objects_from_hash(container_idh,hash_content)
   end
 
@@ -79,23 +79,23 @@ class R8Server
   def create_users_private_target?(_import_file=nil,ec2_region=nil)
     container_idh = pre_execute(:top)
     users_ref = "private-#{username}"
-    json_content = PrivateTargetTemplate.result(project_ref: users_ref,target_ref: users_ref,ec2_region: ec2_region||"us-east-1")
+    json_content = PrivateTargetTemplate.result(project_ref: users_ref,target_ref: users_ref,ec2_region: ec2_region||'us-east-1')
     hash_content = JSON.parse(json_content)
     Model.import_objects_from_hash(container_idh,hash_content)
 
     # return idhs of new targets and new projects
     ret = {
-      target_idhs: ret_idhs("datacenter",hash_content,container_idh),
-      project_idhs: ret_idhs("project",hash_content,container_idh)
+      target_idhs: ret_idhs('datacenter',hash_content,container_idh),
+      project_idhs: ret_idhs('project',hash_content,container_idh)
     }
 
     # create workspace
     unless project_idh = ret[:project_idhs].first
-      Log.error("No project found so not creating a workspace")
+      Log.error('No project found so not creating a workspace')
       return ret
     end
     if ret[:project_idhs].size > 1
-      Log.error("Unexpected taht multiple projects found; pikcing arbirary one for workspace")
+      Log.error('Unexpected taht multiple projects found; pikcing arbirary one for workspace')
     end
     (ret[:target_idhs]||[]).each{|target_idh|Workspace.create?(target_idh,project_idh)}
 
@@ -135,13 +135,13 @@ eos
     template = File.open(template_path){|f|f.read}
     erubis = Erubis::Eruby.new(template)
     users_ref = "private-#{username}"
-    json_content = erubis.result(target_name: target_name,project_ref: users_ref,target_ref: target_name,ec2_region: ec2_region||"us-east-1")
+    json_content = erubis.result(target_name: target_name,project_ref: users_ref,target_ref: target_name,ec2_region: ec2_region||'us-east-1')
     hash_content = JSON.parse(json_content)
     Model.import_objects_from_hash(container_idh,hash_content)
 
     # return idhs of new targets
     {
-      target_idhs: ret_idhs("datacenter",hash_content,container_idh)
+      target_idhs: ret_idhs('datacenter',hash_content,container_idh)
     }
   end
 

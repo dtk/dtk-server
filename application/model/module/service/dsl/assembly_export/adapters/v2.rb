@@ -47,7 +47,7 @@ module DTK
         # add in port links
         port_links(node_ref_to_name) do |in_parsed_port,out_parsed_port|
           unless matching_node = ret[:nodes][in_parsed_port[:node_name]]
-            raise Error.new("Cannot find matching node for input port")
+            raise Error.new('Cannot find matching node for input port')
           end
 
           cmps = matching_node[:components]
@@ -60,7 +60,7 @@ module DTK
             i = i+1
           end
           unless found
-            raise Error.new("Cannot find matching component for input port")
+            raise Error.new('Cannot find matching component for input port')
           end
         end
         ret
@@ -74,8 +74,8 @@ module DTK
       def port_links(node_ref_to_name,&block)
         (self[:component]||{}).each_value do |cmp|
           (cmp[:port_link]||{}).each_value do |pl|
-            in_parsed_port = parse_port_ref(pl["*input_id"],node_ref_to_name)
-            out_parsed_port  = parse_port_ref(pl["*output_id"],node_ref_to_name)
+            in_parsed_port = parse_port_ref(pl['*input_id'],node_ref_to_name)
+            out_parsed_port  = parse_port_ref(pl['*output_id'],node_ref_to_name)
             block.call(in_parsed_port,out_parsed_port)
           end
         end
@@ -105,14 +105,14 @@ module DTK
 
       def workflow_hash
         if default_action_task_template = (assembly_hash()[:task_template]||{})[Task::Template.default_task_action()]
-          SimpleOrderedHash.new(assembly_action: "create").merge(default_action_task_template[:content])
+          SimpleOrderedHash.new(assembly_action: 'create').merge(default_action_task_template[:content])
         end
       end
 
       def parse_port_ref(qualified_port_ref,node_ref_to_name)
-        port_ref = qualified_port_ref.split("/").last
+        port_ref = qualified_port_ref.split('/').last
         p = Port.parse_port_display_name(port_ref)
-        node_ref = (qualified_port_ref =~ Regexp.new("^/node/([^/]+)");$1)
+        node_ref = (qualified_port_ref =~ Regexp.new('^/node/([^/]+)');$1)
         component_name = component_name_output_form(p[:component_type])
         ret = {node_name: node_ref_to_name[node_ref], component_name: component_name, link_def_ref: p[:link_def_ref]}
         if title = p[:title]

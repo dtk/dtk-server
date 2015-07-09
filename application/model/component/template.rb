@@ -32,7 +32,7 @@ module DTK; class Component
 
     def get_current_sha!
       unless module_branch = self[:module_branch]
-        Log.error("Unexpected that get_current_sha called on object when self[:module_branch] not set")
+        Log.error('Unexpected that get_current_sha called on object when self[:module_branch] not set')
         return nil
       end
       module_branch[:current_sha] || module_branch.update_current_sha_from_repo!()
@@ -161,7 +161,7 @@ module DTK; class Component
       assembly = opts[:assembly_instance]
       sp_hash = {
         cols: [:id, :type, :display_name, :description, :component_type, :version, :refnum, :module_branch_id],
-        filter: [:and, [:eq, :type, "template"],
+        filter: [:and, [:eq, :type, 'template'],
                  [:oneof, :version, filter_on_versions(assembly: assembly)],
                  [:eq, :project_project_id, project.id()]]
       }
@@ -207,7 +207,7 @@ module DTK; class Component
       filter =
         [:and,
          [:eq, :id, id],
-         [:eq, :type, "template"],
+         [:eq, :type, 'template'],
          [:eq, :node_node_id, nil],
          [:neq, :project_project_id, nil],
          [:eq,:version,version_field(version)]]

@@ -8,7 +8,7 @@ module DTK; class Task; class Template
       if action_list
         action_list.each do |a|
           unless i =  a.index
-            raise Error.new("An action list passed into ActionList.new must have actions with set indexes")
+            raise Error.new('An action list passed into ActionList.new must have actions with set indexes')
           end
           @action_index[i] = a
           self << a

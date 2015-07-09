@@ -21,7 +21,7 @@ module DTK
     def display_name_print_form(_opts={})
       cols_to_get = [:component_type,:display_name,:ref_name]
       update_object!(*cols_to_get)
-      component_type = self[:component_type] && self[:component_type].gsub(/__/,"::")
+      component_type = self[:component_type] && self[:component_type].gsub(/__/,'::')
       ret = component_type
       # handle component title
       if title = ComponentTitle.title?(self)

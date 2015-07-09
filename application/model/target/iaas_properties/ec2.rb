@@ -55,7 +55,7 @@ module DTK; class Target
           if keypair = @provider_iaas_props[:keypair]
             ret = ret.merge(keypair: keypair)
           else
-            raise ErrorUsage.new("The target and its parent provider are both missing a keypair")
+            raise ErrorUsage.new('The target and its parent provider are both missing a keypair')
           end
         end
 
@@ -65,12 +65,12 @@ module DTK; class Target
           elsif security_group_set = @provider_iaas_props[:security_group_set]
             ret = ret.merge(security_group_set: security_group_set)
           else
-            raise ErrorUsage.new("The target and its parent provider are both missing any security groups")
+            raise ErrorUsage.new('The target and its parent provider are both missing any security groups')
           end
         end
         # using @provider[:iaas_properties] because has credentials)
         unless props_with_creds = @provider[:iaas_properties]
-          Log.error("Unexpected that @provider[:iaas_properties] is nil")
+          Log.error('Unexpected that @provider[:iaas_properties] is nil')
           return ret
         end
         props_with_creds = props_with_creds.merge(target_property_hash)

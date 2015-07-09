@@ -12,7 +12,7 @@ module DTK
     def rest__list_ssh_keys
       username = ret_non_null_request_params(:username)
       model_handle = model_handle_with_private_group()
-      rest_ok_response RepoUser.get_matching_repo_users(model_handle.createMH(:repo_user), {type: 'client'}, username, ["username"])
+      rest_ok_response RepoUser.get_matching_repo_users(model_handle.createMH(:repo_user), {type: 'client'}, username, ['username'])
     end
 
     # we use this method to add user access to modules / servier / repo manager
@@ -55,8 +55,8 @@ module DTK
 
         # this is terrible practice but error/response classes are so tightly coupled to rest of the code
         # that I do not dare change them
-        if e.message.include?("Name has already been taken")
-          raise ErrorUsage, "Please choose a different name for your key, name has been taken"
+        if e.message.include?('Name has already been taken')
+          raise ErrorUsage, 'Please choose a different name for your key, name has been taken'
         end
 
         repoman_registration_error   = e.message

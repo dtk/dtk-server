@@ -9,7 +9,7 @@ module DTK
           if task_action.ruby_function_implementation?
             response = ConfigAgent.load(:ruby_function).execute(task_action)
           else
-            Log.error("Unexepected that task_action.ruby_function_implementation? is false")
+            Log.error('Unexepected that task_action.ruby_function_implementation? is false')
           end
         else
           Log.error("Not treating server execution of config_agent_type '#{config_agent_type}'")

@@ -50,7 +50,7 @@ module DTK; class Task
         if component = hash[:component]
           unless component.is_a?(Component)
             unless task_idh
-              raise Error.new("If hash[:component] is not of type Component then task_idh must be supplied")
+              raise Error.new('If hash[:component] is not of type Component then task_idh must be supplied')
             end
             hash[:component] = Component.create_from_model_handle(component,task_idh.createMH(:component))
           end
@@ -80,7 +80,7 @@ module DTK; class Task
           node = state_change_list.first[:node]
           cmp_order = get_total_component_order(cmp_deps, node)
         else
-          raise Error.new("No intra node ordering strategy found")
+          raise Error.new('No intra node ordering strategy found')
         end
         component_actions = cmp_order.map do |(component_id,deps)|
           create_from_state_change(state_change_list.select{|a|a[:component][:id] == component_id},deps)
@@ -176,7 +176,7 @@ module DTK; class Task
 
       def self.component_name(object)
         ret = (object[:component]||{})[:display_name]
-        ret && ret.gsub(/__/,"::")
+        ret && ret.gsub(/__/,'::')
       end
 
       def self.component_status(object,_opts)
@@ -254,7 +254,7 @@ module DTK; class Task
         hash.merge!(component_dependencies: deps) if deps
 
         # TODO: can get more sophsiticated and handle case where some components installed and other are incremental
-        incremental_change = !scs_same_cmp.find{|sc|not sc[:type] == "setting"}
+        incremental_change = !scs_same_cmp.find{|sc|not sc[:type] == 'setting'}
         if incremental_change
           hash.merge!(changed_attribute_ids: scs_same_cmp.map{|sc|sc[:attribute_id]})
         end

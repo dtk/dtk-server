@@ -10,7 +10,7 @@ module XYZ
           else
             target_id_handle_x.inject({}) do |res,target_id_handle|
               content = hash_content_for_single_target(target_id_handle,opts)
-              path = target_id_handle[:uri].gsub(Regexp.new("^/"),"").split("/")
+              path = target_id_handle[:uri].gsub(Regexp.new('^/'),'').split('/')
               HashObject.set_nested_value!(res,path,content)
               res
             end
@@ -26,7 +26,7 @@ module XYZ
       target_id_info = get_row_from_id_handle(target_id_handle)
       raise Error.new("Target given (#{target_id_handle}) does not exist") unless target_id_info
       prefix =
-        if opts[:prefix_is_top] then "/"
+        if opts[:prefix_is_top] then '/'
         elsif target_id_info[:uri] =~ %r{(^/.+?/.+?)/.+$} then $1
         elsif target_id_info[:uri] =~ %r{(^/.+/.+$)} then $1
         else raise Error.new
@@ -47,7 +47,7 @@ module XYZ
 
     def write_to_file(hash_content,json_file)
       begin
-        f = File.open(json_file,"w")
+        f = File.open(json_file,'w')
         f.puts(JSON.pretty_generate(hash_content))
       rescue Exception => err
         raise Error.new("Error writing exported data to file #{json_file}: #{err}")

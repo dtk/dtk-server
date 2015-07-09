@@ -133,7 +133,7 @@ module DTK; class Clone
                 hash_el_when_create(node,node_template)
               end
             else
-             raise Error.new("Unexpected return value from match_or_create_node")
+             raise Error.new('Unexpected return value from match_or_create_node')
           end
         end
       end

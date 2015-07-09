@@ -36,11 +36,11 @@ module DTK
         return CachedAdapterClasses[integer_version] if CachedAdapterClasses[integer_version]
         adapter_name = "v#{integer_version}"
         opts = {
-          class_name: {adapter_type: "AssemblyExport"},
+          class_name: {adapter_type: 'AssemblyExport'},
           subclass_adapter_name: true,
           base_class: ServiceModule
         }
-        CachedAdapterClasses[integer_version] = DynamicLoader.load_and_return_adapter_class("assembly_export",adapter_name,opts)
+        CachedAdapterClasses[integer_version] = DynamicLoader.load_and_return_adapter_class('assembly_export',adapter_name,opts)
       end
       CachedAdapterClasses = {}
 

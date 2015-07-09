@@ -16,7 +16,7 @@ module DTK; class ServiceSetting
             if body.is_a?(Hash)
               each_element(body,nested_attr_prefix,&block)
             else
-              Log.error_pp(["Unexpected form in AttributeSettings::HashForm.each_element:",key,body, "ignoring; should be caught in better parsing of settings"])
+              Log.error_pp(['Unexpected form in AttributeSettings::HashForm.each_element:',key,body, 'ignoring; should be caught in better parsing of settings'])
             end
           else
             attr = compose_attr(attr_prefix,key)

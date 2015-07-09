@@ -3,7 +3,7 @@ module DTK
   class DynamicLoader
     def self.load_and_return_adapter_class(adapter_type,adapter_name,opts={})
       begin
-        caller_dir = caller.first.gsub(/\/[^\/]+$/,"")
+        caller_dir = caller.first.gsub(/\/[^\/]+$/,'')
         Lock.synchronize{r8_nested_require_with_caller_dir(caller_dir,"#{adapter_type}/adapters",adapter_name)}
         type_part = convert?(adapter_type,:adapter_type,opts)
         name_part = convert?(adapter_name,:adapter_name,opts)
@@ -26,7 +26,7 @@ module DTK
     end
 
     def self.cap_form(x)
-      x.to_s.split("_").map(&:capitalize).join("")
+      x.to_s.split('_').map(&:capitalize).join('')
     end
   end
 end

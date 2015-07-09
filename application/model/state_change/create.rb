@@ -77,7 +77,7 @@ module DTK
         ret = {
           :ref => ref(model_name,item),
           :display_name => display_name(model_name,item),
-          :status => "pending",
+          :status => 'pending',
           :type =>  item[:type] || type(model_name),
           :object_type => model_name.to_s,
           object_id_col => new_item.get_id(),
@@ -94,12 +94,12 @@ module DTK
       def display_name(model_name,item)
         display_name_prefix =
           case model_name
-            when :attribute then "setting-attribute"
-            when :component then "install-component"
-            when :node then "create-node"
+            when :attribute then 'setting-attribute'
+            when :component then 'install-component'
+            when :node then 'create-node'
           end
         item_display_name = item[:new_item].get_field?(:display_name)
-        display_name_prefix + (item_display_name ? "(#{item_display_name})" : "")
+        display_name_prefix + (item_display_name ? "(#{item_display_name})" : '')
       end
 
       def ref(_model_name,item)
@@ -107,13 +107,13 @@ module DTK
         parent_id = item[:parent].get_id().to_s
         "#{RefPrefix}#{parent_id}--#{object_id}"
       end
-      RefPrefix = "state_change"
+      RefPrefix = 'state_change'
 
       def type(model_name)
         case model_name
-          when :attribute then "setting"
-          when :component then "install_component"
-          when :node then "create_node"
+          when :attribute then 'setting'
+          when :component then 'install_component'
+          when :node then 'create_node'
           else raise Error::NotImplemented.new("when object type is #{object_model_name}")
         end
       end
@@ -131,7 +131,7 @@ module DTK
           {
             new_item: r[:component].id_handle(),
             parent: sample_idh.createIDH(model_name: :datacenter, id: r[:datacenter_datacenter_id]),
-            type: "converge_component"
+            type: 'converge_component'
           }
         end
         pending_change_items(new_item_hashes)

@@ -39,8 +39,8 @@ module DTK; class StateChange
         [
          :and,
          [:oneof, parent_field_name,idh_list.map(&:get_id)],
-         [:eq, :type, "create_node"],
-         [:eq, :status, "pending"]]
+         [:eq, :type, 'create_node'],
+         [:eq, :status, 'pending']]
       filter += opts[:added_filters] if opts[:added_filters]
 
       sp_hash = {
@@ -75,8 +75,8 @@ module DTK; class StateChange
         cols: [:state_change_id],
         filter: [:and,
                  [:oneof, :state_change_id, ndx_found.keys],
-                 [:eq, :type, "create_node"],
-                 [:eq, :status, "pending"]]
+                 [:eq, :type, 'create_node'],
+                 [:eq, :status, 'pending']]
       }
 
       sc_mh = sc_idhs.first.createMH()
@@ -91,8 +91,8 @@ module DTK; class StateChange
       sp_hash = {
         filter: [:and,
                  [:oneof, parent_field_name,idh_list.map(&:get_id)],
-                 [:oneof, :type, ["install_component", "update_implementation","converge_component"]],
-                 [:eq, :status, "pending"]],
+                 [:oneof, :type, ['install_component', 'update_implementation','converge_component']],
+                 [:eq, :status, 'pending']],
         columns: [:id, :relative_order,:type,:changed_component,parent_field_name,:state_change_id].uniq
       }
       state_change_mh = parent_mh.createMH(:state_change)
@@ -105,8 +105,8 @@ module DTK; class StateChange
       sp_hash = {
         filter: [:and,
                  [:oneof, parent_field_name,idh_list.map(&:get_id)],
-                 [:eq, :type, "setting"],
-                 [:eq, :status, "pending"]],
+                 [:eq, :type, 'setting'],
+                 [:eq, :status, 'pending']],
         columns: [:id, :relative_order,:type,:changed_attribute,parent_field_name,:state_change_id].uniq
       }
       state_change_mh = parent_mh.createMH(:state_change)
@@ -121,7 +121,7 @@ module DTK; class StateChange
         unless component_index[cmp_id]
           component_index[cmp_id] = sc
         else
-          if sc[:type] == "install_component"
+          if sc[:type] == 'install_component'
             component_index[cmp_id] = sc
           end
         end
@@ -147,7 +147,7 @@ module DTK; class StateChange
       indexed_ret = {}
       # remove duplicates wrt component and process linked_ids
       state_changes.each do |sc|
-        if sc[:type] == "create_node"
+        if sc[:type] == 'create_node'
           indexed_ret[sc[:node][:id]] = augment_with_linked_id(sc,sc[:id])
           # TODO: ordering may do thsis anyway, but do we explicitly want to make sure if both setting adn isnatll use install as type
         elsif %w(setting install_component update_implementation converge_component).include?(sc[:type])

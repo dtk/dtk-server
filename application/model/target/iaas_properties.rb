@@ -45,7 +45,7 @@ module DTK
 
       def type
         unless ret = @target_instance.get_field?(:iaas_type)
-          Log.error("Expected that :iaas_type has a value")
+          Log.error('Expected that :iaas_type has a value')
         end
         ret && ret.to_sym
       end

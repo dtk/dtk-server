@@ -6,7 +6,7 @@ module DTK; class Task; class Template
 
       def initialize(component,opts={})
         unless component[:node].is_a?(Node)
-          raise Error.new("ComponentAction.new must be given component argument with :node key")
+          raise Error.new('ComponentAction.new must be given component argument with :node key')
         end
         super(opts)
         @component = component

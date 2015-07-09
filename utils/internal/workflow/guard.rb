@@ -38,7 +38,7 @@ module DTK; class Workflow
         }
         aug_port_links = Model.get_objs(assembly.model_handle(:port_link),sp_hash)
         pp aug_port_links
-        raise Error.new("Got here; need to bring in task info and look at that to find component and node; node is not below")
+        raise Error.new('Got here; need to bring in task info and look at that to find component and node; node is not below')
 
         aug_port_links.map do |pl|
           before = DirIndex[pl[:temporal_order].to_sym][:before_index]
@@ -87,7 +87,7 @@ module DTK; class Workflow
         end
 
         # TODO: not sure if still needed
-        guard_task_type = (guard_attr[:semantic_type_summary] == "sap__l4" && (guard_attr[:item_path]||[]).include?(:host_address)) ? Task::Action::CreateNode : Task::Action::ConfigNode
+        guard_task_type = (guard_attr[:semantic_type_summary] == 'sap__l4' && (guard_attr[:item_path]||[]).include?(:host_address)) ? Task::Action::CreateNode : Task::Action::ConfigNode
         # right now only using config node to config node guards
         return nil if guard_task_type == Task::Action::CreateNode
 
@@ -101,7 +101,7 @@ module DTK; class Workflow
         val = guarded_attr[:attribute_value]
         if val.nil?
           true
-        elsif link[:function] == "array_append"
+        elsif link[:function] == 'array_append'
           unset_guarded_attr__array_append?(val,link)
         end
       end
@@ -109,15 +109,15 @@ module DTK; class Workflow
       def self.unset_guarded_attr__array_append?(guarded_attr_val,link)
         if input_map = link[:index_map]
           unless input_map.size == 1
-            raise Error.new("Not treating index map with more than one member")
+            raise Error.new('Not treating index map with more than one member')
           end
           input_index = input_map.first[:input]
           unless input_index.size == 1
-            raise Error.new("Not treating input index with more than one member")
+            raise Error.new('Not treating input index with more than one member')
           end
           input_num = input_index.first
           unless input_num.is_a?(Fixnum)
-            raise Error.new("Not treating input index that is non-numeric")
+            raise Error.new('Not treating input index that is non-numeric')
           end
           guarded_attr_val.is_a?(Array) && guarded_attr_val[input_num].nil?
         else

@@ -226,7 +226,7 @@ module DTK
 
     def create_tenant_user(username, rsa_pub_key, rsa_key_name)
       # Create Tenant
-      route = "/v1/users/tenant"
+      route = '/v1/users/tenant'
       body = user_params(username, rsa_pub_key, rsa_key_name)
 
       tenant_response = post_rest_request_data(route,body,raise_error: true)
@@ -246,7 +246,7 @@ module DTK
 
     # This is more revokew access
     def delete_user(username, rsa_pub_key)
-      route = "/v1/users/remove_access"
+      route = '/v1/users/remove_access'
       body = user_params(username, rsa_pub_key)
       delete_rest_request_data(route,body, raise_error: true)
     end
@@ -255,8 +255,8 @@ module DTK
     ##  Legacy methods (Admin)
     #
 
-    def set_user_rights_in_repo(username,repo_name,access_rights="R")
-      route = "/rest/admin/set_user_rights_in_repo"
+    def set_user_rights_in_repo(username,repo_name,access_rights='R')
+      route = '/rest/admin/set_user_rights_in_repo'
       body = user_params(username).merge(repo_name: repo_name,access_rights: access_rights)
       post_rest_request_data(route,body,raise_error: true)
     end
@@ -356,13 +356,13 @@ module DTK
     end
 
     def get_repo_user(ssh_rsa_pub_key)
-      raise ErrorUsage.new("Provided RSA pub key missing") if ssh_rsa_pub_key.nil?
+      raise ErrorUsage.new('Provided RSA pub key missing') if ssh_rsa_pub_key.nil?
       mh = ModelHandle.create_from_user(CurrentSession.new.get_user_object(),:repo_user)
       RepoUser.match_by_ssh_rsa_pub_key!(mh,ssh_rsa_pub_key)
     end
 
     def get_repo_user_by_username(username)
-      raise ErrorUsage.new("Provided repo client username is missing") if username.empty?
+      raise ErrorUsage.new('Provided repo client username is missing') if username.empty?
       mh = ModelHandle.create_from_user(CurrentSession.new.get_user_object(),:repo_user)
       RepoUser.get_by_repo_username(mh,username)
     end
@@ -374,7 +374,7 @@ module DTK
     end
 
     def error_msg(response)
-      errors = response["errors"]
+      errors = response['errors']
       if response.is_a?(Common::Response::Error) && errors
         if errors.first && (errors.first['code'].eql?('unavailable') || errors.first['code'].eql?('RestClient::ServiceUnavailable'))
           'The DTK Repo service is currently down for maintenance'
@@ -384,7 +384,7 @@ module DTK
       else
         error_detail = nil
         if errors.is_a?(Array) && errors.size > 0
-          err_msgs = errors.map{|err|err["message"]}.compact
+          err_msgs = errors.map{|err|err['message']}.compact
           unless err_msgs.empty?
             error_detail = err_msgs.join(', ')
           end
@@ -394,13 +394,13 @@ module DTK
     end
 
     def error_code(response)
-      errors = response["errors"]
+      errors = response['errors']
       (errors.is_a?(Array) && errors.first) ? errors.first['code'] : 0
     end
 
     def include_error_code?(errors,code)
       !!errors.find do |el|
-        el.is_a?(Hash) && el["code"] == code
+        el.is_a?(Hash) && el['code'] == code
       end
     end
 
@@ -426,7 +426,7 @@ module DTK
 
     def login_to_repoman
       unless CurrentSession.are_catalog_credentilas_set?
-        err = ErrorUsage.new("Catalog credentials are not set, you can set them via account context")
+        err = ErrorUsage.new('Catalog credentials are not set, you can set them via account context')
         raise err.add_tag!(:raise_error)
       end
 
@@ -456,7 +456,7 @@ module DTK
         session_obj.set_repoman_session_id(token_id)
       end
       # adding auth information
-      opts.merge(headers: {"Authorization"=>"Token token=\"#{session_obj.repoman_session_id}\""})
+      opts.merge(headers: {'Authorization'=>"Token token=\"#{session_obj.repoman_session_id}\""})
     end
 
     if R8::Config.is_development_mode?
@@ -495,7 +495,7 @@ module DTK
     end
 
     def user_params_delegated_client(client_rsa_pub_key, params_hash)
-      raise ErrorUsage.new("Missing client RSA pub key!") unless client_rsa_pub_key
+      raise ErrorUsage.new('Missing client RSA pub key!') unless client_rsa_pub_key
 
       repo_user = get_repo_user(client_rsa_pub_key)
 
@@ -514,14 +514,14 @@ module DTK
       end
 
       def get_file_content(file_asset)
-        route = "/rest/repo/get_file_content"
+        route = '/rest/repo/get_file_content'
         body = {repo_name: @repo,path: file_asset[:path], branch: @branch}
         response_data = post_rest_request_data(route,body,log_error: true)
-        response_data["content"]
+        response_data['content']
       end
 
       def update_file_content(file_asset,content)
-        route = "/rest/repo/update_file_content"
+        route = '/rest/repo/update_file_content'
         body = {repo_name: @repo,path: file_asset[:path], branch: @branch, content: content}
         post_rest_request_data(route,body,raise_error: true)
       end

@@ -26,14 +26,14 @@ module DTK; class Attribute
       end
 
       def get_constraints!(opts={})
-        Log.error("opts not implemented yet") unless opts.empty?
+        Log.error('opts not implemented yet') unless opts.empty?
         dependency_list = get_objects_col_from_sp_hash({columns: [:dependencies]},:dependencies)
         Constraints.new(:or,dependency_list.map{|dep|Constraint.create(dep)})
       end
 
       def get_node(opts={})
         unless node_node_id = get_field?(:node_node_id)
-          raise Error.new("get_node should not be called if attribute not on a node")
+          raise Error.new('get_node should not be called if attribute not on a node')
         end
         sp_hash = {
           cols: opts[:cols]||[:id,:group_id,:display_name],

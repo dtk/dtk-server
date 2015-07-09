@@ -7,11 +7,11 @@ module XYZ
 
       def get_network_partition_ref(server)
         return nil unless server[:groups] and not server[:groups].empty?
-        server[:groups].sort.join("__")
+        server[:groups].sort.join('__')
       end
 
       def security_groups_from_network_partition_ref(ref)
-        ref.split("__")
+        ref.split('__')
       end
 
       # internal fns for mixin

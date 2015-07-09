@@ -24,15 +24,15 @@ module DTK
 
     def serialized_content
         #TODO: stub
-        {subtask_order: "sequential",
+        {subtask_order: 'sequential',
           subtasks:           [{
-             name: "component bigpetstore::spark_app[spark-1.3.1]",
-             node: "client",
-             ordered_components: ["bigpetstore::spark_app[spark-1.3.1]"]
+             name: 'component bigpetstore::spark_app[spark-1.3.1]',
+             node: 'client',
+             ordered_components: ['bigpetstore::spark_app[spark-1.3.1]']
            },
-                               {name: "run app bigpetstore::spark_app[spark-1.3.1]",
-                                 node: "client",
-                                 actions: ["bigpetstore::spark_app[spark-1.3.1].run_app"]
+                               {name: 'run app bigpetstore::spark_app[spark-1.3.1]',
+                                 node: 'client',
+                                 actions: ['bigpetstore::spark_app[spark-1.3.1].run_app']
                                }]
         }
     end

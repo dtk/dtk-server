@@ -85,7 +85,7 @@ module DTK
         ret.reject!{|f|not (f =~ regexp)}
         ret_with_removed_variants(ret).each do |meta_file|
           unless assembly_name = (if meta_file =~ regexp then $1; end)
-            raise Error.new("Cannot find assembly name")
+            raise Error.new('Cannot find assembly name')
           end
           block.call(meta_file,assembly_name)
         end

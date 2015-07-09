@@ -12,18 +12,18 @@ user_info = {
   namespace: 'test'
 }
 
-describe "(Repoman Drupal API) Test Case 2: Create user with only required params (username, email)" do
+describe '(Repoman Drupal API) Test Case 2: Create user with only required params (username, email)' do
   let(:repoman) { @repoman }
 
-  context "Login" do
-    it "passed successfully" do
+  context 'Login' do
+    it 'passed successfully' do
       repoman.login(login[:username],login[:password])
       expect(repoman.authorization_token).not_to be_empty
     end
   end
 
-  context "Create user with only required params (username, email)" do
-    it "creates user" do
+  context 'Create user with only required params (username, email)' do
+    it 'creates user' do
       user_created = false
       response = repoman.create_user(user_info[:username], user_info[:email], nil, nil)
       ap response
@@ -40,7 +40,7 @@ describe "(Repoman Drupal API) Test Case 2: Create user with only required param
   end
 
   context "Get all repos by username for previously created user #{user_info[:username]}" do
-    it "gets list of repos for created user" do
+    it 'gets list of repos for created user' do
       repos_retrieved = false
       response = repoman.get_repos_by_user(user_info[:username])
       ap response
@@ -49,8 +49,8 @@ describe "(Repoman Drupal API) Test Case 2: Create user with only required param
     end
    end
 
-  context "Delete private user group user_info[:user_group]" do
-    it "deletes user group" do
+  context 'Delete private user group user_info[:user_group]' do
+    it 'deletes user group' do
       user_group_deleted = false
       all_user_groups = repoman.get_user_groups
       user_group_id = all_user_groups['data'].find { |group| group['name'] == user_info[:user_group] }['id']
@@ -64,8 +64,8 @@ describe "(Repoman Drupal API) Test Case 2: Create user with only required param
     end
   end
 
-  context "Delete user user_info[:username]" do
-    it "deletes user" do
+  context 'Delete user user_info[:username]' do
+    it 'deletes user' do
       user_deleted = false
       all_users = repoman.get_users
       user_id = all_users['data'].find { |user| user['username'] == user_info[:username] }['id']
@@ -92,8 +92,8 @@ describe "(Repoman Drupal API) Test Case 2: Create user with only required param
     end
   end
 
-  context "Logout" do
-    it "passed successfully" do
+  context 'Logout' do
+    it 'passed successfully' do
       response = repoman.logout
       expect(response['data']['success']).to eq(true)
     end

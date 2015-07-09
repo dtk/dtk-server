@@ -16,7 +16,7 @@ module DTK
         end
 
         def object_type_string
-          to_s.split("::").last.gsub(/([a-z])([A-Z])/,'\1 \2').downcase
+          to_s.split('::').last.gsub(/([a-z])([A-Z])/,'\1 \2').downcase
         end
       end
 

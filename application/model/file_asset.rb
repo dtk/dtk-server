@@ -57,7 +57,7 @@ module DTK
     end
 
     def self.ret_create_hash(impl_obj,type,path,content=nil)
-      file_name = (path =~ Regexp.new("/([^/]+$)")) ? $1 : path
+      file_name = (path =~ Regexp.new('/([^/]+$)')) ? $1 : path
       {
         type: type,
         ref: file_asset_ref(path),
@@ -76,14 +76,14 @@ module DTK
     end
 
     def self.set_hierrachical_file_struct!(ret,file_asset,path=nil)
-      path ||= file_asset[:path].split("/")
+      path ||= file_asset[:path].split('/')
       if path.size == 1
-        ret << file_asset.merge(model_name: "file_asset")
+        ret << file_asset.merge(model_name: 'file_asset')
       else
-        dir = ret.find{|x|x[:display_name] == path[0] && x[:model_name] == "directory_asset"}
+        dir = ret.find{|x|x[:display_name] == path[0] && x[:model_name] == 'directory_asset'}
         unless dir
           dir = {
-            model_name: "directory_asset",
+            model_name: 'directory_asset',
             display_name: path[0]
           }
           ret << dir
@@ -98,8 +98,8 @@ module DTK
     def config_agent_type
       update_object!(:type)
       case self[:type]
-        when "puppet_file" then :puppet
-        when "chef_file" then :chef
+        when 'puppet_file' then :puppet
+        when 'chef_file' then :chef
         else raise Error.new("Unexpected type (#{self[:type]})")
       end
     end
@@ -107,7 +107,7 @@ module DTK
     private
 
    def self.file_asset_ref(path)
-     path.gsub(Regexp.new("/"),"_")
+     path.gsub(Regexp.new('/'),'_')
    end
 
    def cache_content?

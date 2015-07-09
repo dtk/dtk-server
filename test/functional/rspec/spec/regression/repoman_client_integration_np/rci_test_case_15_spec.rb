@@ -3,13 +3,13 @@ require './spec/setup_browser'
 require './lib/component_modules_spec'
 require './lib/dtk_common'
 
-component_module = "r8/java"
+component_module = 'r8/java'
 user_data = {
-  usergroup: "bakir_test_group",
-  user: "dtk17-client",
-  module_name: "r8/java",
-  another_usergroup: "bakir_test",
-  another_user: "bakir_test"
+  usergroup: 'bakir_test_group',
+  user: 'dtk17-client',
+  module_name: 'r8/java',
+  another_usergroup: 'bakir_test',
+  another_user: 'bakir_test'
 }
 
 permissions = {
@@ -29,14 +29,14 @@ permissions = {
 
 dtk_common = DtkCommon.new('', '')
 
-describe "(Repoman client integration) Test Case 15: NEG - list --remote negative scenarios where component module is not visible based on permissions set on the module" do
+describe '(Repoman client integration) Test Case 15: NEG - list --remote negative scenarios where component module is not visible based on permissions set on the module' do
   let(:conf) { Configuration.instance }
   let(:header) { @homepage.get_header }
   let(:users) { @homepage.get_main.get_users }
   let(:modules) { @homepage.get_main.get_modules}
 
-  context "User is" do
-    it "logged in" do
+  context 'User is' do
+    it 'logged in' do
       @homepage.get_loginpage.login_user(conf.username, conf.password)
       homepage_header = header.get_homepage_header
       expect(homepage_header).to have_content('DTK')
@@ -65,8 +65,8 @@ describe "(Repoman client integration) Test Case 15: NEG - list --remote negativ
     end
   end
 
-  context "NEG - List remote modules" do
-    include_context "NEG - List remote modules", dtk_common, component_module
+  context 'NEG - List remote modules' do
+    include_context 'NEG - List remote modules', dtk_common, component_module
   end
 
  #User A is not owner of module A but belongs to user group A which is set as user group on module (permissions: R/None/None)
@@ -84,8 +84,8 @@ describe "(Repoman client integration) Test Case 15: NEG - list --remote negativ
     end
   end
 
-  context "NEG - List remote modules" do
-    include_context "NEG - List remote modules", dtk_common, component_module
+  context 'NEG - List remote modules' do
+    include_context 'NEG - List remote modules', dtk_common, component_module
   end
 
  #User A is not owner of module A but belongs to user group A which is not set as user group on module (permissions: R/R/None)
@@ -104,12 +104,12 @@ describe "(Repoman client integration) Test Case 15: NEG - list --remote negativ
     end
   end
 
-  context "NEG - List remote modules" do
-    include_context "NEG - List remote modules", dtk_common, component_module
+  context 'NEG - List remote modules' do
+    include_context 'NEG - List remote modules', dtk_common, component_module
   end
 
-  context "User is" do
-    it "logged out" do
+  context 'User is' do
+    it 'logged out' do
       startpage = @homepage.get_loginpage.logout_user
       expect(startpage).to have_content('DTK Admin Panel')
     end

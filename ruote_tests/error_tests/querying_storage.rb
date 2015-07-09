@@ -17,8 +17,8 @@ class ErrorParticipant
   include Ruote::LocalParticipant
 
   def consume(_workitem)
-    puts "error"
-    raise "Houston, something is wrong"
+    puts 'error'
+    raise 'Houston, something is wrong'
   end
 end
 

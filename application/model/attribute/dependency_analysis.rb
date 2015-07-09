@@ -47,14 +47,14 @@ module XYZ
 
     def find_matching_output_attr(aug_attr_list,attr_in,link)
       # TODO: to make more efficient have other find_matching_output_attr__[link_fn]
-      return find_matching_output_attr__eq_indexed(aug_attr_list,attr_in,link) if link[:function] == "eq_indexed"
+      return find_matching_output_attr__eq_indexed(aug_attr_list,attr_in,link) if link[:function] == 'eq_indexed'
       output_id =  link[:output_id]
       aug_attr_list.find do |attr|
         if attr[:id] == output_id
           case link[:function]
-           when "eq" then true
-           when "array_append" then true
-           when "select_one"
+           when 'eq' then true
+           when 'array_append' then true
+           when 'select_one'
             out_item_path = attr[:item_path]
             out_item_path && (attr_in[:item_path] == out_item_path[1,out_item_path.size-1])
            else
@@ -68,7 +68,7 @@ module XYZ
     def find_matching_output_attr__eq_indexed(aug_attr_list,_attr_in,link)
       ret = nil
       if not (link[:index_map]||[]).size == 1
-        Log.error("not treating index maps with multiple elements")
+        Log.error('not treating index maps with multiple elements')
         return ret
       end
       link_output_index_map =  link[:index_map].first[:output]||[]
@@ -94,11 +94,11 @@ module XYZ
     def index_match(link,item_path)
       ret = nil
       case link[:function]
-       when "eq","array_append","select_one"
+       when 'eq','array_append','select_one'
         ret = true
-       when "eq_indexed"
+       when 'eq_indexed'
         if (link[:index_map]||[]).size > 1
-          Log.error("not treating index maps with multiple elements")
+          Log.error('not treating index maps with multiple elements')
         end
         if index_map = ((link[:index_map]||[]).first||{})[:input]
           if item_path.is_a?(Array) && index_map.size == item_path.size
@@ -126,7 +126,7 @@ module XYZ
         return nil unless guard_attr[:dynamic] && unset_guarded_attr?(guarded_attr,link)
 
         # TODO: clean up; not sure if still needed
-        guard_task_type = (guard_attr[:semantic_type_summary] == "sap__l4" && (guard_attr[:item_path]||[]).include?(:host_address)) ? Task::Action::CreateNode : Task::Action::ConfigNode
+        guard_task_type = (guard_attr[:semantic_type_summary] == 'sap__l4' && (guard_attr[:item_path]||[]).include?(:host_address)) ? Task::Action::CreateNode : Task::Action::ConfigNode
         # right now only using config node to config node guards
         return nil if guard_task_type == Task::Action::CreateNode
         true
@@ -139,7 +139,7 @@ module XYZ
         val = guarded_attr[:attribute_value]
         if val.nil?
           true
-        elsif link[:function] == "array_append"
+        elsif link[:function] == 'array_append'
           unset_guarded_attr__array_append?(val,link)
         end
       end
@@ -147,15 +147,15 @@ module XYZ
       def self.unset_guarded_attr__array_append?(guarded_attr_val,link)
         if input_map = link[:index_map]
           unless input_map.size == 1
-            raise Error.new("Not treating index map with more than one member")
+            raise Error.new('Not treating index map with more than one member')
           end
           input_index = input_map.first[:input]
           unless input_index.size == 1
-            raise Error.new("Not treating input index with more than one member")
+            raise Error.new('Not treating input index with more than one member')
           end
           input_num = input_index.first
           unless input_num.is_a?(Fixnum)
-            raise Error.new("Not treating input index that is non-numeric")
+            raise Error.new('Not treating input index that is non-numeric')
           end
           guarded_attr_val.is_a?(Array) && guarded_attr_val[input_num].nil?
         else

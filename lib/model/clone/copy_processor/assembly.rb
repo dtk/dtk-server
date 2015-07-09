@@ -44,7 +44,7 @@ module DTK
         end
 
         def get_nested_objects_top_level(model_handle,target_parent_mh,assembly_objs_info,recursive_override_attrs,&block)
-          raise Error.new("Not treating assembly_objs_info with more than 1 element") unless assembly_objs_info.size == 1
+          raise Error.new('Not treating assembly_objs_info with more than 1 element') unless assembly_objs_info.size == 1
           assembly_obj_info = assembly_objs_info.first
           get_nested_objects_top_level_aux(model_handle,target_parent_mh,assembly_obj_info,recursive_override_attrs,&block)
           override_attrs = {}

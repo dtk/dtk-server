@@ -24,7 +24,7 @@ module DTK
         ndx_ret = {}
         aug_attr_links.each do |link|
           a_link = link[:other_input_link]
-          if a_link[:type] == "external"
+          if a_link[:type] == 'external'
             input_attribute = link[:input_attribute]
             attr_id = input_attribute[:id]
             l = ndx_ret[attr_id] ||= UpdateDerivedValues::Delete::LinkInfo.new(input_attribute)

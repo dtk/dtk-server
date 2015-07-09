@@ -38,7 +38,7 @@ module DTK
         if assembly = clone_copy_output.assembly?(subclass_object: true)
           assembly(target,assembly,clone_copy_output,opts)
         else
-          raise Error.new("Not implemented clone of non assembly component to target")
+          raise Error.new('Not implemented clone of non assembly component to target')
         end
       end
 
@@ -129,7 +129,7 @@ module DTK
         new_items_hash = []
         ServiceNodeGroup.get_ndx_node_group_members(node_groups.map(&:id_handle)).each do |ng_id,node_members|
           unless ng_state_change_id = ndx_sc_ids[ng_id]
-            Log.eror("Unexpected that ndx_sc_ihs[ng_id] is null")
+            Log.eror('Unexpected that ndx_sc_ihs[ng_id] is null')
             next
           end
           ng_state_change_idh = sc_mh.createIDH(id: ng_state_change_id)

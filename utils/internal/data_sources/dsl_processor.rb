@@ -120,7 +120,7 @@ module XYZ
       @path = path ? Array.new(path) : []
     end
 
-    def [](a="*")
+    def [](a='*')
       self.class.new(@path +[a])
     end
 

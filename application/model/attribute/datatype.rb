@@ -54,13 +54,13 @@ module DTK; class Attribute
 
     def self.datatype_from_ruby_object(obj)
       if obj.is_a?(TrueClass) || obj.is_a?(FalseClass)
-        "boolean"
+        'boolean'
       elsif obj.is_a?(Fixnum)
-        "integer"
+        'integer'
       elsif obj.is_a?(Hash) || obj.is_a?(Array)
-        "json"
+        'json'
       else
-        "string"
+        'string'
       end
     end
 
@@ -68,22 +68,22 @@ module DTK; class Attribute
       attr_val_field = opts[:value_field]||:attribute_value
       raw_val = attr[attr_val_field]
       return nil if raw_val.nil?
-      case (attr[:data_type]||"string")
-        when "string"
+      case (attr[:data_type]||'string')
+        when 'string'
           raw_val
-        when "boolean"
+        when 'boolean'
           case raw_val.to_s
-            when "true" then true
-            when "false" then false
-            else raise_error_msg("boolean",raw_val,attr)
+            when 'true' then true
+            when 'false' then false
+            else raise_error_msg('boolean',raw_val,attr)
           end
-        when "integer"
+        when 'integer'
           if raw_val =~ /^[0-9]+$/
             raw_val.to_i
           else
-            raise_error_msg("integer",raw_val,attr)
+            raise_error_msg('integer',raw_val,attr)
           end
-        when "json"
+        when 'json'
           # will be converted already
           raw_val
         else
@@ -105,9 +105,9 @@ module DTK; class Attribute
       if ret_builtin_scalar_types().include?(datatype)
         ret[:data_type] = datatype
       else
-        ret[:data_type] = "json"
+        ret[:data_type] = 'json'
         ret[:semantic_type_summary] = datatype
-        ret[:semantic_type] = is_array ? {":array".to_sym => datatype} : datatype
+        ret[:semantic_type] = is_array ? {':array'.to_sym => datatype} : datatype
       end
       ret
     end
@@ -127,7 +127,7 @@ module DTK; class Attribute
     end
 
     def self.default
-      "string"
+      'string'
     end
 
     private
@@ -139,9 +139,9 @@ module DTK; class Attribute
 
     def self.ret_builtin_scalar_types
       [
-       "string",
-       "integer",
-       "boolean"
+       'string',
+       'integer',
+       'boolean'
       ]
     end
   end

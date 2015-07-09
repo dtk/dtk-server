@@ -45,7 +45,7 @@ module DTK
         private
 
         def errors_in_result?(result)
-          if result[:status] == "failed"
+          if result[:status] == 'failed'
             result[:error_object] ? [{message: result[:error_object].to_s}] : []
           end
         end

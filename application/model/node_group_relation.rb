@@ -46,7 +46,7 @@ module DTK
           end
         end
         if error
-          raise ErrorUsage.new("Cannot create a node group into spanning target if attached to spsecific nodes")
+          raise ErrorUsage.new('Cannot create a node group into spanning target if attached to spsecific nodes')
         end
       end
       display_name = "spans-target-#{target_id}"

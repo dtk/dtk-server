@@ -1,12 +1,12 @@
 module AssemblyAndServiceOperationsMixin
   def stage_service
     #Get list of assemblies, extract selected assembly, stage service and return its id
-    puts "Stage service:", "--------------"
+    puts 'Stage service:', '--------------'
     service_id = nil
     extract_id_regex = /id: (\d+)/
     assembly_list = send_request('/rest/assembly/list', subtype: 'template')
 
-    puts "List of avaliable assemblies: "
+    puts 'List of avaliable assemblies: '
     pretty_print_JSON(assembly_list)
     test_template = assembly_list['data'].find { |x| x['display_name'] == @assembly }
 
@@ -25,22 +25,22 @@ module AssemblyAndServiceOperationsMixin
         self.service_id = service_id_match[1].to_i
         puts "Service id for a staged service: #{self.service_id}"
       else
-        puts "Stage service didnt pass!"
+        puts 'Stage service didnt pass!'
       end
     else
       puts "Assembly #{@service_name} not found!"
     end
-    puts ""
+    puts ''
   end
 
   def stage_service_with_namespace(namespace)
     #Get list of assemblies, extract selected assembly, stage service and return its id
-    puts "Stage service:", "--------------"
+    puts 'Stage service:', '--------------'
     service_id = nil
     extract_id_regex = /id: (\d+)/
     assembly_list = send_request('/rest/assembly/list', subtype: 'template')
 
-    puts "List of avaliable assemblies: "
+    puts 'List of avaliable assemblies: '
     pretty_print_JSON(assembly_list)
     test_template = assembly_list['data'].find { |x| x['display_name'] == @assembly && x['namespace'] == namespace }
 
@@ -59,16 +59,16 @@ module AssemblyAndServiceOperationsMixin
         self.service_id = service_id_match[1].to_i
         puts "Service id for a staged service: #{self.service_id}"
       else
-        puts "Stage service didnt pass!"
+        puts 'Stage service didnt pass!'
       end
     else
       puts "Assembly #{@service_name} not found!"
     end
-    puts ""
+    puts ''
   end
 
   def check_service_info(service_id, info_to_check)
-    puts "Show service info:", "------------------"
+    puts 'Show service info:', '------------------'
     info_exist = false
     service_info_response = send_request('/rest/assembly/info', assembly_id: service_id, subtype: :instance)
     pretty_print_JSON(service_info_response)
@@ -78,12 +78,12 @@ module AssemblyAndServiceOperationsMixin
     else
       puts "#{info_to_check} does not exist in info output!"
     end
-    puts ""
+    puts ''
     return info_exist
   end
 
   def rename_service(service_id, new_service_name)
-    puts "Rename service:", "---------------"
+    puts 'Rename service:', '---------------'
     service_renamed = false
 
     service_list = send_request('/rest/assembly/list', detail_level: 'nodes', subtype: 'instance')
@@ -102,18 +102,18 @@ module AssemblyAndServiceOperationsMixin
     else
       puts "Service with id #{service_id} does not exist!"
     end
-    puts ""
+    puts ''
     return service_renamed
   end
 
   def create_attribute(service_id, attribute_name)
     #Create attribute
-    puts "Create attribute:", "-----------------"
+    puts 'Create attribute:', '-----------------'
     attributes_created = false
 
     create_attribute_response = send_request('/rest/assembly/set_attributes', assembly_id: service_id, create: true, pattern: attribute_name)
 
-    puts "List of service attributes:"
+    puts 'List of service attributes:'
     service_attributes = send_request('/rest/assembly/info_about', about: 'attributes', filter: nil, subtype: 'instance', assembly_id: service_id)
     pretty_print_JSON(service_attributes)
     extract_attribute = service_attributes['data'].find { |x| x['display_name'].include? attribute_name }['display_name']
@@ -122,15 +122,15 @@ module AssemblyAndServiceOperationsMixin
       puts "Creating #{attribute_name} attribute completed successfully!"
       attributes_created = true
     end
-    puts ""
+    puts ''
     return attributes_created
   end
 
   def check_if_attribute_exists(service_id, attribute_name)
-    puts "Check if attribute exists:", "--------------------------"
+    puts 'Check if attribute exists:', '--------------------------'
     attribute_exists = false
 
-    puts "List of service attributes:"
+    puts 'List of service attributes:'
     service_attributes = send_request('/rest/assembly/info_about', about: 'attributes', filter: nil, subtype: 'instance', assembly_id: service_id)
     pretty_print_JSON(service_attributes)
     extract_attribute = service_attributes['data'].find { |x| x['display_name'].include? attribute_name }['display_name']
@@ -141,12 +141,12 @@ module AssemblyAndServiceOperationsMixin
     else
       puts "#{attribute_name} attribute does not exist!"
     end
-    puts ""
+    puts ''
     return attribute_exists
   end
 
   def link_attributes(service_id, source_attribute, target_attribute)
-    puts "Link attributes:", "----------------"
+    puts 'Link attributes:', '----------------'
     attributes_linked = false
 
     link_attributes_response = send_request('/rest/assembly/add_ad_hoc_attribute_links', {assembly_id: service_id, target_attribute_term: target_attribute, source_attribute_term: "$#{source_attribute}"})
@@ -158,16 +158,16 @@ module AssemblyAndServiceOperationsMixin
     else
       puts "Link between #{source_attribute} attribute and #{target_attribute} attribute is not established!"
     end
-    puts ""
+    puts ''
     return attributes_linked
   end
 
   def check_if_service_exists(service_id)
     #Get list of existing services and check if staged service exists
-    puts "Check if service exists:", "------------------------"
+    puts 'Check if service exists:', '------------------------'
     service_exists = false
     service_list = send_request('/rest/assembly/list', detail_level: 'nodes', subtype: 'instance')
-    puts "List of all services and its content:"
+    puts 'List of all services and its content:'
     pretty_print_JSON(service_list)
     test_service = service_list['data'].select { |x| x['id'] == service_id }
 
@@ -185,12 +185,12 @@ module AssemblyAndServiceOperationsMixin
     else
       puts "Service with id #{service_id} does not exist!"
     end
-    puts ""
+    puts ''
     return service_exists
   end
 
   def list_specific_success_service(service_name)
-    puts "List success services:", "------------------------"
+    puts 'List success services:', '------------------------'
     service_list = send_request('/rest/assembly/list', subtype: 'instance', detail_level: 'nodes')
     success_services = service_list['data'].select { |x| x['display_name'] == service_name && x['execution_status'] == 'succeeded' }
     pretty_print_JSON(success_services)
@@ -198,7 +198,7 @@ module AssemblyAndServiceOperationsMixin
   end
 
   def list_specific_failed_service(service_name)
-    puts "List failed services:", "-------------------------"
+    puts 'List failed services:', '-------------------------'
     service_list = send_request('/rest/assembly/list', subtype: 'instance', detail_level: 'nodes')
     failed_services = service_list['data'].select { |x| x['display_name'] == service_name && x['execution_status'] == 'failed' }
     pretty_print_JSON(failed_services)
@@ -207,7 +207,7 @@ module AssemblyAndServiceOperationsMixin
 
   def check_service_status(service_id, status_to_check)
     #Get list of services and check if service exists and its status
-    puts "Check service status:", "---------------------"
+    puts 'Check service status:', '---------------------'
     service_exists = false
     end_loop = false
     count = 0
@@ -238,17 +238,17 @@ module AssemblyAndServiceOperationsMixin
       end
 
       if (count > max_num_of_retries)
-        puts "Max number of retries reached..."
+        puts 'Max number of retries reached...'
         end_loop = true
       end
     end
-    puts ""
+    puts ''
     return service_exists
   end
 
   def set_attribute(service_id, attribute_name, attribute_value)
     #Set attribute on particular service
-    puts "Set attribute:", "--------------"
+    puts 'Set attribute:', '--------------'
     is_attributes_set = false
 
     #Get attribute id for which value will be set
@@ -264,13 +264,13 @@ module AssemblyAndServiceOperationsMixin
       puts "Setting of attribute #{attribute_name} completed successfully!"
       is_attributes_set = true
     end
-    puts ""
+    puts ''
     return is_attributes_set
   end
 
   def set_attribute_on_service_level_component(service_id, attribute_name, attribute_value)
     #Set attribute on particular service
-    puts "Set attribute:", "--------------"
+    puts 'Set attribute:', '--------------'
     is_attributes_set = false
 
     #Get attribute id for which value will be set
@@ -286,13 +286,13 @@ module AssemblyAndServiceOperationsMixin
       puts "Setting of attribute #{attribute_name} completed successfully!"
       is_attributes_set = true
     end
-    puts ""
+    puts ''
     return is_attributes_set
   end
 
   def get_attribute_value(service_id, node_name, component_name, attribute_name)
-    puts "Get attribute value by name:", "----------------------------"
-    puts "List of service attributes:"
+    puts 'Get attribute value by name:', '----------------------------'
+    puts 'List of service attributes:'
     service_attributes = send_request('/rest/assembly/info_about', assembly_id: service_id, filter: nil, about: 'attributes', subtype: 'instance')
     pretty_print_JSON(service_attributes)
 
@@ -304,15 +304,15 @@ module AssemblyAndServiceOperationsMixin
     else
       puts "Some of the input parameters is incorrect or missing. Node name: #{node_name}, Component name: #{component_name}, Attribute name: #{attribute_name}"
     end
-    puts ""
+    puts ''
     return attribute_value
   end
 
   def check_component_depedency(service_id, source_component, dependency_component, dependency_satisfied_by)
-    puts "Check component dependency:", "---------------------------"
+    puts 'Check component dependency:', '---------------------------'
     dependency_found = false
 
-    puts "List service components with dependencies:"
+    puts 'List service components with dependencies:'
     components_list = send_request('/rest/assembly/info_about', assembly_id: service_id, filter: nil, about: 'components', subtype: 'instance', detail_to_include: [:component_dependencies])
     component = components_list['data'].find { |x| x['display_name'] == source_component}
 
@@ -340,17 +340,17 @@ module AssemblyAndServiceOperationsMixin
       puts "Component #{source_component} does not exist and therefore it does not have any dependencies"
     end
 
-    puts ""
+    puts ''
     return dependency_found
   end
 
   def converge_service(service_id, max_num_of_retries=15)
-    puts "Converge service:", "-----------------"
+    puts 'Converge service:', '-----------------'
     service_converged = false
     puts "Converge process for service with id #{service_id} started!"
     create_task_response = send_request('/rest/assembly/create_task', 'assembly_id' => service_id)
 
-    if (@error_message == "")
+    if (@error_message == '')
       task_id = create_task_response['data']['task_id']
       puts "Task id: #{task_id}"
       task_execute_response = send_request('/rest/task/execute', 'task_id' => task_id)
@@ -367,51 +367,51 @@ module AssemblyAndServiceOperationsMixin
           task_status = status
           service_converged = true
           puts "Task execution status: #{task_status}"
-          puts "Converge process finished successfully!"
+          puts 'Converge process finished successfully!'
         elsif (status.include? 'failed')
           task_status = status
-          puts "Error details on subtasks:"
+          puts 'Error details on subtasks:'
           ap response_task_status['data']['subtasks']
           puts "Task execution status: #{task_status}"
-          puts "Converge process was not finished successfully! Some tasks failed!"
+          puts 'Converge process was not finished successfully! Some tasks failed!'
           end_loop = true
         end
         puts "Task execution status: #{task_status}"
 
         if (count > max_num_of_retries)
-          puts "Max number of retries reached..."
-          puts "Converge process was not finished successfully!"
+          puts 'Max number of retries reached...'
+          puts 'Converge process was not finished successfully!'
           end_loop = true
         end
       end
     else
-      puts "Service was not converged successfully!"
+      puts 'Service was not converged successfully!'
     end
 
-    puts ""
+    puts ''
     return service_converged
   end
 
   def stop_running_service(service_id)
-    puts "Stop running service:", "---------------------"
+    puts 'Stop running service:', '---------------------'
     service_stopped = false
     stop_service_response = send_request('/rest/assembly/stop', assembly_id: service_id)
 
-    if (stop_service_response['data']['status'] == "ok")
-      puts "Service stopped successfully!"
+    if (stop_service_response['data']['status'] == 'ok')
+      puts 'Service stopped successfully!'
       service_stopped = true
     else
-      puts "Service was not stopped successfully!"
+      puts 'Service was not stopped successfully!'
     end
-    puts ""
+    puts ''
     return service_stopped
   end
 
   def check_component_depedency(service_id, source_component, dependency_component, dependency_satisfied_by)
-    puts "Check component dependency:", "---------------------------"
+    puts 'Check component dependency:', '---------------------------'
     dependency_found = false
 
-    puts "List service components with dependencies:"
+    puts 'List service components with dependencies:'
     components_list = send_request('/rest/assembly/info_about', assembly_id: service_id, filter: nil, about: 'components', subtype: 'instance', detail_to_include: [:component_dependencies])
     component = components_list['data'].find { |x| x['display_name'] == source_component}
 
@@ -439,17 +439,17 @@ module AssemblyAndServiceOperationsMixin
       puts "Component #{source_component} does not exist and therefore it does not have any dependencies"
     end
 
-    puts ""
+    puts ''
     return dependency_found
   end
 
   def converge_service(service_id, max_num_of_retries=15)
-    puts "Converge service:", "-----------------"
+    puts 'Converge service:', '-----------------'
     service_converged = false
     puts "Converge process for service with id #{service_id} started!"
     create_task_response = send_request('/rest/assembly/create_task', 'assembly_id' => service_id)
 
-    if (@error_message == "")
+    if (@error_message == '')
       task_id = create_task_response['data']['task_id']
       puts "Task id: #{task_id}"
       task_execute_response = send_request('/rest/task/execute', 'task_id' => task_id)
@@ -466,48 +466,48 @@ module AssemblyAndServiceOperationsMixin
           task_status = status
           service_converged = true
           puts "Task execution status: #{task_status}"
-          puts "Converge process finished successfully!"
+          puts 'Converge process finished successfully!'
         elsif (status.include? 'failed')
           task_status = status
-          puts "Error details on subtasks:"
+          puts 'Error details on subtasks:'
           ap response_task_status['data']['subtasks']
           puts "Task execution status: #{task_status}"
-          puts "Converge process was not finished successfully! Some tasks failed!"
+          puts 'Converge process was not finished successfully! Some tasks failed!'
           end_loop = true
         end
         puts "Task execution status: #{task_status}"
 
         if (count > max_num_of_retries)
-          puts "Max number of retries reached..."
-          puts "Converge process was not finished successfully!"
+          puts 'Max number of retries reached...'
+          puts 'Converge process was not finished successfully!'
           end_loop = true
         end
       end
     else
-      puts "Service was not converged successfully!"
+      puts 'Service was not converged successfully!'
     end
 
-    puts ""
+    puts ''
     return service_converged
   end
 
   def stop_running_service(service_id)
-    puts "Stop running service:", "---------------------"
+    puts 'Stop running service:', '---------------------'
     service_stopped = false
     stop_service_response = send_request('/rest/assembly/stop', assembly_id: service_id)
 
-    if (stop_service_response['data']['status'] == "ok")
-      puts "Service stopped successfully!"
+    if (stop_service_response['data']['status'] == 'ok')
+      puts 'Service stopped successfully!'
       service_stopped = true
     else
-      puts "Service was not stopped successfully!"
+      puts 'Service was not stopped successfully!'
     end
-    puts ""
+    puts ''
     return service_stopped
   end
 
   def create_assembly_from_service(service_id, service_module_name, assembly_name, namespace=nil)
-    puts "Create assembly from service:", "-----------------------------"
+    puts 'Create assembly from service:', '-----------------------------'
     assembly_created = false
     create_assembly_response = send_request('/rest/assembly/promote_to_template', service_module_name: service_module_name, assembly_id: service_id, assembly_template_name: assembly_name, namespace: namespace)
     if (create_assembly_response['status'] == 'ok')
@@ -516,12 +516,12 @@ module AssemblyAndServiceOperationsMixin
     else
       puts "Assembly #{assembly_name} was not created in service module #{service_module_name}"
     end
-    puts ""
+    puts ''
     return assembly_created
   end
 
   def netstats_check(service_id, port)
-    puts "Netstats check:", "---------------"
+    puts 'Netstats check:', '---------------'
      netstats_check = false
 
     end_loop = false
@@ -533,7 +533,7 @@ module AssemblyAndServiceOperationsMixin
       count += 1
 
       if (count > max_num_of_retries)
-        puts "Max number of retries for getting netstats reached..."
+        puts 'Max number of retries for getting netstats reached...'
         end_loop = true
       end
 
@@ -543,8 +543,8 @@ module AssemblyAndServiceOperationsMixin
 
       5.downto(1) do |_i|
         sleep 1
-        response = send_request('/rest/assembly/get_action_results', disable_post_processing: false, return_only_if_complete: true, action_results_id: action_results_id, sort_key: "port")
-        puts "Netstats check:"
+        response = send_request('/rest/assembly/get_action_results', disable_post_processing: false, return_only_if_complete: true, action_results_id: action_results_id, sort_key: 'port')
+        puts 'Netstats check:'
         pretty_print_JSON(response)
 
         if response['data']['is_complete']
@@ -563,12 +563,12 @@ module AssemblyAndServiceOperationsMixin
         end
       end
     end
-    puts ""
+    puts ''
     return netstats_check
   end
 
   def start_running_service(service_id)
-    puts "Start service:", "--------------"
+    puts 'Start service:', '--------------'
     service_started = false
     response = send_request('/rest/assembly/start', assembly_id: service_id, node_pattern: nil)
     pretty_print_JSON(response)
@@ -584,162 +584,162 @@ module AssemblyAndServiceOperationsMixin
         sleep 10
           count += 1
         response = send_request('/rest/assembly/info_about', assembly_id: service_id, subtype: 'instance', about: 'tasks')
-        puts "Start instance check:"
+        puts 'Start instance check:'
         status = response['data'].find { |x| x['status'] == 'executing'}
         pretty_print_JSON(status)
 
         if (count > max_num_of_retries)
-          puts "Max number of retries for starting instance reached..."
+          puts 'Max number of retries for starting instance reached...'
           end_loop = true
         elsif (status.nil?)
-          puts "Instance started!"
+          puts 'Instance started!'
           service_started = true
           end_loop = true
         end
       end
     else
-      puts "Start instance is not completed successfully!"
+      puts 'Start instance is not completed successfully!'
     end
-    puts ""
+    puts ''
     return service_started
   end
 
   def add_component_by_name_to_service_node(service_id, node_name, component_name)
-    puts "Add component to service:", "--------------------------"
+    puts 'Add component to service:', '--------------------------'
     component_added = false
     service_nodes = send_request('/rest/assembly/info_about', assembly_id: service_id, filter: nil, about: 'nodes', subtype: 'instance')
 
     if (service_nodes['data'].find { |x| x['display_name'] == node_name })
       puts "Node #{node_name} exists in service. Get node id..."
       node_id = service_nodes['data'].find { |x| x['display_name'] == node_name }['id']
-      component_add_response = send_request('/rest/assembly/add_component', node_id: node_id, component_template_id: component_name.split(":").last, assembly_id: service_id, namespace: component_name.split(":").first)
+      component_add_response = send_request('/rest/assembly/add_component', node_id: node_id, component_template_id: component_name.split(':').last, assembly_id: service_id, namespace: component_name.split(':').first)
 
       if (component_add_response['status'] == 'ok')
         puts "Component #{component_name} added to service!"
         component_added = true
       end
     else
-      component_add_response = send_request('/rest/assembly/add_component', node_id: nil, component_template_id: component_name.split(":").last, assembly_id: service_id, namespace: component_name.split(":").first)
+      component_add_response = send_request('/rest/assembly/add_component', node_id: nil, component_template_id: component_name.split(':').last, assembly_id: service_id, namespace: component_name.split(':').first)
 
       if (component_add_response['status'] == 'ok')
         puts "Component #{component_name} added to service!"
         component_added = true
       end
     end
-    puts ""
+    puts ''
     return component_added
   end
 
   def delete_and_destroy_service(service_id)
-    puts "Delete and destroy service:", "---------------------------"
+    puts 'Delete and destroy service:', '---------------------------'
     service_deleted = false
     delete_service_response = send_request('/rest/assembly/delete', assembly_id: service_id)
 
-    if (delete_service_response['status'] == "ok")
-      puts "Service deleted successfully!"
+    if (delete_service_response['status'] == 'ok')
+      puts 'Service deleted successfully!'
       service_deleted = true
     else
-      puts "Service was not deleted successfully!"
+      puts 'Service was not deleted successfully!'
     end
-    puts ""
+    puts ''
     return service_deleted
   end
 
   def push_assembly_updates(service_id, service_module)
-    puts "Push assembly updates:", "---------------------"
+    puts 'Push assembly updates:', '---------------------'
     assembly_updated = false
     response = send_request('/rest/assembly/promote_to_template', assembly_id: service_id, mode: 'update', use_module_namespace: true)
     pretty_print_JSON(response)
     if response['status'] == 'ok' && response['data']['full_module_name'] == service_module
       assembly_updated = true
     end
-    puts ""
+    puts ''
     return assembly_updated
   end
 
   def push_component_module_updates(service_id, component_module)
-    puts "Push component module updates:", "-------------------------------"
-    response = send_request('/rest/assembly/promote_module_updates', assembly_id: service_id, module_name: component_module, module_type: "component_module")
+    puts 'Push component module updates:', '-------------------------------'
+    response = send_request('/rest/assembly/promote_module_updates', assembly_id: service_id, module_name: component_module, module_type: 'component_module')
     return response
   end
 
   def get_nodes(service_id)
-    puts "Get all nodes from service:", "-----------------------------"
+    puts 'Get all nodes from service:', '-----------------------------'
     nodes_list = send_request('/rest/assembly/info_about', assembly_id: service_id, node_id: nil, component_id: nil, subtype: 'instance', about: 'nodes')
     nodes_list = nodes_list['data'].map! { |c| c['display_name'] }
     pretty_print_JSON(nodes_list)
-    puts ""
+    puts ''
     return nodes_list
   end
 
   def get_components(service_id)
-    puts "Get all components from service:", "-----------------------------"
+    puts 'Get all components from service:', '-----------------------------'
     components_list = send_request('/rest/assembly/info_about', assembly_id: service_id, node_id: nil, component_id: nil, subtype: 'instance', about: 'components')
     components_list = components_list['data'].map! { |c| c['display_name'] }
-    puts ""
+    puts ''
     return components_list
   end
 
   def get_cardinality(service_id, node_name)
-    puts "Get cardinality from service:", "-----------------------------"
+    puts 'Get cardinality from service:', '-----------------------------'
     cardinality = send_request('/rest/assembly/info_about', assembly_id: service_id, node_id: nil, component_id: nil, subtype: 'instance', about: 'attributes', format: 'yaml')
     content = YAML.load(cardinality['data'])
     puts content
-    attributes = (content["nodes"]["#{node_name}/"]||{})['attributes']||{}
-    puts ""
+    attributes = (content['nodes']["#{node_name}/"]||{})['attributes']||{}
+    puts ''
     return attributes['cardinality'] && attributes['cardinality'].to_i
   end
 
   def get_workflow_info(service_id)
-    puts "Get workflow info:", "----------------------"
+    puts 'Get workflow info:', '----------------------'
     workflow_info = send_request('/rest/assembly/info_about_task', assembly_id: service_id, subtype: 'instance')
     content = YAML.load(workflow_info['data'])
     puts content
-    puts ""
+    puts ''
     return content
   end
 
   def grant_access(service_id, system_user, rsa_pub_name, ssh_key)
-    puts "Grant access:", "-----------------"
+    puts 'Grant access:', '-----------------'
     response = send_request('/rest/assembly/initiate_ssh_pub_access', agent_action: :grant_access, assembly_id: service_id, system_user: system_user, rsa_pub_name: rsa_pub_name, rsa_pub_key: ssh_key)
     pretty_print_JSON(response)
-    puts ""
+    puts ''
     return response
   end
 
   def revoke_access(service_id, system_user, rsa_pub_name, ssh_key)
-    puts "Revoke access:", "-----------------"
+    puts 'Revoke access:', '-----------------'
     resp = send_request('/rest/assembly/initiate_ssh_pub_access', agent_action: :revoke_access, assembly_id: service_id, system_user: system_user, rsa_pub_name: rsa_pub_name, rsa_pub_key: ssh_key)
     pretty_print_JSON(resp)
     response = send_request('/rest/assembly/get_action_results', action_results_id: resp['data']['action_results_id'], return_only_if_complete: true, disable_post_processing: true)
     puts response
-    puts ""
+    puts ''
     return response
   end
 
   def list_ssh_access(service_id, system_user, rsa_pub_name, nodes)
-    puts "List ssh access:", "---------------------"
+    puts 'List ssh access:', '---------------------'
     sleep 5
     response = send_request('/rest/assembly/list_ssh_access', assembly_id: service_id)
     pretty_print_JSON(response)
     list = response['data'].select { |x| x['attributes']['linux_user'] == system_user && x['attributes']['key_name'] == rsa_pub_name && (nodes.include? x['node_name']) }
-    puts ""
+    puts ''
     return list.map! { |x| x['attributes']['key_name']}
   end
 
   def get_task_action_output(service_id, action_id)
-    puts "Get task action output:", "------------------------"
+    puts 'Get task action output:', '------------------------'
     response = send_request('/rest/assembly/task_action_detail', assembly_id: service_id, message_id: action_id)
     pretty_print_JSON(response)
     runs = {}
-    if response['status'] == "ok"
+    if response['status'] == 'ok'
       output = response['data']
-      output.gsub!("=","") if response['data'].include? "="
+      output.gsub!('=','') if response['data'].include? '='
       runs = output.split(/\n \n\n|\n\n\n|\n\n/)
     else
-      puts "Task action details were not retrieved successfully!"
+      puts 'Task action details were not retrieved successfully!'
     end
-    puts ""
+    puts ''
     return runs
   end
 end

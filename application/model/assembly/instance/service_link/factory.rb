@@ -83,7 +83,7 @@ module DTK
             if match = Model.get_obj(@input_cmp.model_handle(:link_def),sp_hash)
               link_def_stub[:id] =  match[:id]
             else
-              Log.error("Unexpected that input component does not have a matching link def")
+              Log.error('Unexpected that input component does not have a matching link def')
             end
           end
           link_def_stub

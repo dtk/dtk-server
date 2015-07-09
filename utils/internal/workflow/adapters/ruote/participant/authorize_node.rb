@@ -26,7 +26,7 @@ module DTK
                 CreateThread.defer_with_session(user_object, Ramaze::Current.session) do
                   PerformanceService.end_measurement(name(),object_id)
 
-                  result = msg[:body].merge("task_id" => task_id)
+                  result = msg[:body].merge('task_id' => task_id)
                   if errors = errors_in_result?(result)
                     event,errors = task.add_event_and_errors(:complete_failed,:agent_authorize_node,errors)
                     if event

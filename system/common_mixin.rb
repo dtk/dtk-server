@@ -141,7 +141,7 @@ module R8Tpl
         when :file then File.exists?(path) ? path : nil
         when :db then path
         else
-        Log.error("Unexpected type of path")
+        Log.error('Unexpected type of path')
         nil
       end
     end

@@ -129,7 +129,7 @@ module DTK
         elsif matches.size == 1
           matches.first
         elsif matches.size > 1
-          Log.error_pp(["Matched rows:",matches])
+          Log.error_pp(['Matched rows:',matches])
           raise Error.new("Matched rows has unexpected size (#{matches.size}) since its is >1")
         end
       end
@@ -155,7 +155,7 @@ module DTK
         end
         if rows.empty?
           return [] if opts[:no_error_if_does_not_exist]
-          raise ErrorUsage.new("Module does not exist")
+          raise ErrorUsage.new('Module does not exist')
         end
         post_filter ? rows.select{|r|post_filter.call(r)} : rows
       end

@@ -9,7 +9,7 @@ module DTK; class  Assembly
         end
         # cannot delete workspaces
         if workspace = assembly_idhs.find{|idh|Workspace.is_workspace?(idh.create_object())}
-          raise ErrorUsage.new("Cannot delete a workspace")
+          raise ErrorUsage.new('Cannot delete a workspace')
         end
         Delete.contents(assembly_idhs,opts)
         delete_instances(assembly_idhs)
@@ -25,7 +25,7 @@ module DTK; class  Assembly
         nodes = Delete.get_nodes_simple(model_handle(:node),[id()])
         # TODO: DTK-1857
         if nodes.find(&:is_node_group?)
-          raise ErrorUsage.new("destroy_and_reset_nodes not supported for service instances with node groups")
+          raise ErrorUsage.new('destroy_and_reset_nodes not supported for service instances with node groups')
         end
         target_idh = get_target.id_handle()
         nodes.map{|node|node.destroy_and_reset(target_idh)}

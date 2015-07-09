@@ -41,9 +41,9 @@ module DTK
     def basic_type
       if ea = self[:executable_action]
         ea[:decomposed_node_group] ? :decomposed_node_group : :executable_action
-      elsif self[:temporal_order] == "sequential"
+      elsif self[:temporal_order] == 'sequential'
         :sequential
-      elsif self[:temporal_order] == "concurrent"
+      elsif self[:temporal_order] == 'concurrent'
         :concurrent
       end
     end
@@ -140,7 +140,7 @@ module DTK
         type = event.delete(:type)||event_type
         row = {
           content: event.to_hash,
-          ref: "task_event",
+          ref: 'task_event',
           type: type.to_s,
           task_id: id()
         }
@@ -178,7 +178,7 @@ module DTK
       rows = normalized_errors.map do |err|
         {
           content: err,
-          ref: "task_error",
+          ref: 'task_error',
           task_id: id()
         }
       end
@@ -208,12 +208,12 @@ module DTK
     end
 
     def update_at_task_start(_opts={})
-      update(status: "executing", started_at: Aux::now_time_stamp())
+      update(status: 'executing', started_at: Aux::now_time_stamp())
     end
 
     def update_when_failed_preconditions(_failed_antecedent_tasks)
       ts = Aux::now_time_stamp()
-      update(status: "preconditions_failed", started_at: ts, ended_at: ts)
+      update(status: 'preconditions_failed', started_at: ts, ended_at: ts)
       # TODO: put in context about failure in errors
     end
 
@@ -243,16 +243,16 @@ module DTK
       # compute new parent status
       subtask_status_array = children_status.values
       parent_status =
-        if subtask_status_array.include?("executing") then "executing"
-        elsif subtask_status_array.include?("failed") then "failed"
-        elsif subtask_status_array.include?("cancelled") then "cancelled"
-        elsif not subtask_status_array.find{|s|s != "succeeded"} then "succeeded" #all succeeded
-        else "executing" #if reach here must be some created and some finished
+        if subtask_status_array.include?('executing') then 'executing'
+        elsif subtask_status_array.include?('failed') then 'failed'
+        elsif subtask_status_array.include?('cancelled') then 'cancelled'
+        elsif not subtask_status_array.find{|s|s != 'succeeded'} then 'succeeded' #all succeeded
+        else 'executing' #if reach here must be some created and some finished
        end
       unless parent_status == parent[:status]
         parent_updates.merge!(status: parent_status)
         # compute parent end time which can only change if parent changed to "failed" or "succeeded"
-        if ["failed","succeeded"].include?(parent_status) && child_hash[:ended_at]
+        if ['failed','succeeded'].include?(parent_status) && child_hash[:ended_at]
           parent_updates.merge!(ended_at: child_hash[:ended_at])
         end
       end
@@ -469,7 +469,7 @@ module DTK
     end
 
     def add_subtask_from_hash(hash)
-      defaults = {status: "created", action_on_failure: "abort"}
+      defaults = {status: 'created', action_on_failure: 'abort'}
       new_subtask = Task.new(defaults.merge(hash),c)
       add_subtask(new_subtask)
     end
@@ -500,7 +500,7 @@ module DTK
         [parent_id: parent_id, id: id, children_status: nil]
       else
         recursive_subtasks = subtasks.map{|st|st.set_and_ret_parents_and_children_status!(id)}.flatten
-        children_status = subtasks.inject({}){|h,st|h.merge(st.id() => "created")}
+        children_status = subtasks.inject({}){|h,st|h.merge(st.id() => 'created')}
         [parent_id: parent_id, id: id, children_status: children_status] + recursive_subtasks
       end
     end
@@ -533,7 +533,7 @@ module DTK
 
      def executable_action(opts={})
        unless @executable_action ||= self[:executable_action]
-         raise Error.new("executable_action should not be null") unless opts[:no_error_if_nil]
+         raise Error.new('executable_action should not be null') unless opts[:no_error_if_nil]
        end
        @executable_action
      end
@@ -543,16 +543,16 @@ module DTK
       ret = nil
       indexed_nodes = {}
       task_list.each do |t|
-        if t[:level] == "top"
+        if t[:level] == 'top'
           ret = t
-        elsif t[:level] == "node"
+        elsif t[:level] == 'node'
           indexed_nodes[t[:node_id]] = t
         end
       end
       task_list.each do |t|
-        if t[:level] == "node"
+        if t[:level] == 'node'
           ret[:children] << t
-        elsif t[:level] == "component"
+        elsif t[:level] == 'component'
           if indexed_nodes[t[:node_id]]
             indexed_nodes[t[:node_id]][:children] << t
           else
@@ -568,8 +568,8 @@ module DTK
 
     def render_top_task
       {task_id: id(),
-        level: "top",
-        type: "top",
+        level: 'top',
+        type: 'top',
         action_on_failure: self[:action_on_failure],
         children: []
       }
@@ -583,11 +583,11 @@ module DTK
         status: self[:status]
       }
       # order is important
-      if sc.include?("create_node") then Task.render_tasks_create_node(executable_action,common_vals)
-      elsif sc.include?("install_component") then Task.render_tasks_component_op("install_component",executable_action,common_vals)
-      elsif sc.include?("setting") then Task.render_tasks_setting(executable_action,common_vals)
-      elsif sc.include?("update_implementation") then Task.render_tasks_component_op("update_implementation",executable_action,common_vals)
-      elsif sc.include?("converge_component") then Task.render_tasks_component_op("converge_component",executable_action,common_vals)
+      if sc.include?('create_node') then Task.render_tasks_create_node(executable_action,common_vals)
+      elsif sc.include?('install_component') then Task.render_tasks_component_op('install_component',executable_action,common_vals)
+      elsif sc.include?('setting') then Task.render_tasks_setting(executable_action,common_vals)
+      elsif sc.include?('update_implementation') then Task.render_tasks_component_op('update_implementation',executable_action,common_vals)
+      elsif sc.include?('converge_component') then Task.render_tasks_component_op('converge_component',executable_action,common_vals)
       else
         Log.error("do not treat executable tasks of type(s) #{sc.join(',')}")
         nil
@@ -595,8 +595,8 @@ module DTK
     end
 
     def self.render_task_on_node(node_info)
-      {type: "on_node",
-        level: "node",
+      {type: 'on_node',
+        level: 'node',
         children: []
       }.merge(node_info)
     end
@@ -604,8 +604,8 @@ module DTK
     def self.render_tasks_create_node(executable_action,common_vals)
       node = executable_action[:node]
       task = {
-        type: "create_node",
-        level: "node",
+        type: 'create_node',
+        level: 'node',
         node_id: node[:id],
         node_name: node[:display_name],
         children: []
@@ -623,7 +623,7 @@ module DTK
         }
         task = {
           type: type,
-          level: "component",
+          level: 'component',
           node_id: node[:id],
           node_name: node[:display_name],
           component_basic_type: component[:basic_type]
@@ -640,11 +640,11 @@ module DTK
         component = component_action[:component]
         cmp_attrs = {
           component_id: component[:id],
-          component_name: component[:display_name].gsub(/::/,"_")
+          component_name: component[:display_name].gsub(/::/,'_')
         }
         task = {
-          type: "on_component",
-          level: "component",
+          type: 'on_component',
+          level: 'component',
           node_id: node[:id],
           node_name: node[:display_name],
           component_basic_type: component[:basic_type]
@@ -666,12 +666,12 @@ module DTK
       flattten_attrs.each do |a|
         val = a[:attribute_value]
         if val.nil?
-          next unless a[:port_type] == "input" && a[:required]
-          val = "DYNAMICALLY SET"
+          next unless a[:port_type] == 'input' && a[:required]
+          val = 'DYNAMICALLY SET'
         end
         attr_task = {
-          type: "setting",
-          level: "attribute",
+          type: 'setting',
+          level: 'attribute',
           attribute_id: a[:id],
           attribute_name: a[:display_name],
           attribute_value: val,

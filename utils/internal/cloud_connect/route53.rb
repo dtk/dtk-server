@@ -27,7 +27,7 @@ module DTK
 
           # if this happens it means that we need to look into more Excon::Errors::SocketError,
           # at the moment this is erratic issue which happens from time to time
-          raise "Not able to get DNS record after 5 re-tries, aborting process."
+          raise 'Not able to get DNS record after 5 re-tries, aborting process.'
         end
       end
 

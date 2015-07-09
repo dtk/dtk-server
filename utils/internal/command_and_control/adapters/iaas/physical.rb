@@ -43,7 +43,7 @@ module DTK
         node = task_action[:node]
         external_ref = node[:external_ref]||{}
 
-        {status: "succeeded",
+        {status: 'succeeded',
           node: {
             external_ref: external_ref
           }

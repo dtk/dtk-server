@@ -1,7 +1,7 @@
 # TODO: Marked for removal [Haris] - Probably needed but better check
 module DTK; class ModuleDSL
   class GenerateFromImpl
-    r8_nested_require("generate_from_impl","dsl_object")
+    r8_nested_require('generate_from_impl','dsl_object')
     def self.create(integer_version=nil)
       integer_version ||= ModuleDSL.default_integer_version()
       unless SupportedIntegerVersions.include?(integer_version)
@@ -29,15 +29,15 @@ module DTK; class ModuleDSL
     def self.save_dsl_info(meta_info_hash,impl_mh)
       # TODO: check
       raise Error.new("Need to cehck if meta_info_hash['version'] is right call")
-      integer_version = meta_info_hash["version"]
-      config_agent_type = meta_info_hash["config_agent_type"]
-      module_name = meta_info_hash["module_name"]
-      components = meta_info_hash["components"]
-      impl_id = meta_info_hash["implementation_id"]
+      integer_version = meta_info_hash['version']
+      config_agent_type = meta_info_hash['config_agent_type']
+      module_name = meta_info_hash['module_name']
+      components = meta_info_hash['components']
+      impl_id = meta_info_hash['implementation_id']
       module_hash = {
         required: true,
-        type: "module",
-        def: {"components" => components}
+        type: 'module',
+        def: {'components' => components}
       }
       impl_obj = impl_mh.createIDH(id: impl_id).create_object().update_object!(:id,:display_name,:type,:repo_id,:repo,:library_library_id)
       impl_idh = impl_obj.id_handle
@@ -50,7 +50,7 @@ module DTK; class ModuleDSL
 
       r8meta_path = "#{repo_obj[:local_dir]}/r8meta.#{config_agent_type}.yml"
       r8meta_hash.write_yaml(STDOUT)
-      File.open(r8meta_path,"w"){|f|r8meta_hash.write_yaml(f)}
+      File.open(r8meta_path,'w'){|f|r8meta_hash.write_yaml(f)}
 
       # this wil add any file_assets that have not been yet added (this will include the r8meta file
       impl_obj.create_file_assets_from_dir_els()

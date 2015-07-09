@@ -95,7 +95,7 @@ module DTK
       end
 
       unless repo_url.match(/^git@.*:.*\.git\/?.*?$/)
-        raise ErrorUsage, "We are sorry, we only support SSH remotes - provided URL does not seem to be proper SSH url"
+        raise ErrorUsage, 'We are sorry, we only support SSH remotes - provided URL does not seem to be proper SSH url'
       end
 
       remote_repo_create_hash = {
@@ -224,7 +224,7 @@ module DTK
 
     def self.default_remote!(repo_remote_mh, repo_id)
       repo_remote = get_obj(repo_remote_mh, filter: [:and, [:eq, :is_default, true], [:eq, :repo_id, repo_id]])
-      raise ErrorUsage, "Not able to find default remote for given repo!" unless repo_remote
+      raise ErrorUsage, 'Not able to find default remote for given repo!' unless repo_remote
       repo_remote
     end
 

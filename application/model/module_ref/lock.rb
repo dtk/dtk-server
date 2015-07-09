@@ -23,7 +23,7 @@ module DTK
       end
 
       def module_name
-        (@info && @info.module_name) || (Log.error_pp(["Unexpected that no module name",self]); nil)
+        (@info && @info.module_name) || (Log.error_pp(['Unexpected that no module name',self]); nil)
       end
 
       def self.create_from_element(assembly_instance,info)

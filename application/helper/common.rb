@@ -66,9 +66,9 @@ module Ramaze::Helper
     def get_default_project
       projects = ::DTK::Project.get_all(model_handle(:project))
       if projects.empty?
-        raise DTK::Error.new("Cannot find any projects")
+        raise DTK::Error.new('Cannot find any projects')
       elsif projects.size > 1
-        raise DTK::Error.new("Not implemented yet: case when multiple projects")
+        raise DTK::Error.new('Not implemented yet: case when multiple projects')
       end
       projects.first
     end
@@ -86,7 +86,7 @@ module Ramaze::Helper
     end
 
     def update_from_hash(id,hash,opts={})
-      idh = id_handle(id,model_name,hash["display_name"])
+      idh = id_handle(id,model_name,hash['display_name'])
       model_class(model_name).update_from_hash_assignments(idh,Aux.col_refs_to_keys(hash),opts)
     end
 
@@ -119,7 +119,7 @@ module Ramaze::Helper
 
     def top_id_handle(opts={})
       c = ret_session_context_id()
-      idh = IDHandle[c: c,uri: "/"]
+      idh = IDHandle[c: c,uri: '/']
       idh.merge!(group_id: opts[:group_id]) if opts[:group_id]
       idh
     end
@@ -144,8 +144,8 @@ module Ramaze::Helper
       # TODO: handle case when this is a get
       # TODO: filter fields to make sure real fields or treat virtual columns
       saved_search = ret_saved_search_in_request()
-      return nil unless (saved_search||{})["order_by"]
-      saved_search["order_by"].map{|x|{field: x["field"].to_sym, order: x["order"]}}
+      return nil unless (saved_search||{})['order_by']
+      saved_search['order_by'].map{|x|{field: x['field'].to_sym, order: x['order']}}
     end
 
     # TODO: just for testing
@@ -157,16 +157,16 @@ module Ramaze::Helper
       # TODO: might be taht query is optimzied by not having start being 0 included
       saved_search = ret_saved_search_in_request()
       # TODO: just for testing
-      if TestOveride && (saved_search||{})["start"].nil?
+      if TestOveride && (saved_search||{})['start'].nil?
         return {start: 0, limit: TestOveride, num_model_items: NumModelItemsDefault}
       end
       return nil unless saved_search
-      return nil unless saved_search["start"] || saved_search["limit"]
-      start = (saved_search["start"]||0).to_i
-      limit = (saved_search["limit"] || R8::Config[:page_limit] || LimitDefault).to_i
+      return nil unless saved_search['start'] || saved_search['limit']
+      start = (saved_search['start']||0).to_i
+      limit = (saved_search['limit'] || R8::Config[:page_limit] || LimitDefault).to_i
       # TODO: just for testing
       limit = TestOveride if TestOveride
-      num_model_items = (saved_search["num_model_items"] || NumModelItemsDefault)
+      num_model_items = (saved_search['num_model_items'] || NumModelItemsDefault)
       {start: start, limit: limit, num_model_items: num_model_items}
     end
 
@@ -176,13 +176,13 @@ module Ramaze::Helper
     end
 
     def ret_request_params_filter
-      json_form = (ret_request_params()||{})["search"]
+      json_form = (ret_request_params()||{})['search']
       search = convert_search_item_from_json(json_form)
-      search && check_and_convert_filter_form(search["filter"])
+      search && check_and_convert_filter_form(search['filter'])
     end
 
     def ret_saved_search_in_request
-      json_form = (ret_request_params()||{})["saved_search"]
+      json_form = (ret_request_params()||{})['saved_search']
       convert_search_item_from_json(json_form)
     end
 
@@ -226,9 +226,9 @@ module Ramaze::Helper
       query_string.scan(%r{([/A-Za-z0-9_]+)=([/A-Za-z0-9_]+)}) do
         key = $1.to_sym
         value = $2
-        if value == "true"
+        if value == 'true'
           ret[key] = true
-        elsif value == "false"
+        elsif value == 'false'
           ret[key] = false
         elsif value =~ /^[0-9]+$/
           ret[key] = value #should be converted into an integer
@@ -241,7 +241,7 @@ module Ramaze::Helper
     end
 
     def ret_query_string
-      request.env["QUERY_STRING"]
+      request.env['QUERY_STRING']
     end
 
     # TODO: these three methods below need some cleanup
@@ -337,7 +337,7 @@ module Ramaze::Helper
     end
 
     def boolean_form(v)
-      v.is_a?(TrueClass) || (v.is_a?(String) && v == "true")
+      v.is_a?(TrueClass) || (v.is_a?(String) && v == 'true')
     end
     private :boolean_form
 
@@ -392,7 +392,7 @@ module Ramaze::Helper
     def node_binding_ruleset?(node_template_identifier_param, node_binding_identifier=nil)
       if node_binding_identifier ||= ret_request_params(node_template_identifier_param)
         unless node_binding_rs_id = NodeBindingRuleset.name_to_id(model_handle(:node_binding_ruleset),node_binding_identifier)
-          raise ::DTK::ErrorUsage.new("Illegal node template indentifier (#{node_binding_identifier })")
+          raise ::DTK::ErrorUsage.new("Illegal node template indentifier (#{node_binding_identifier})")
         end
         create_object_from_id(node_binding_rs_id,:node_binding_ruleset)
       end
@@ -401,7 +401,7 @@ module Ramaze::Helper
     def ret_component_template(param,opts={})
       component_template,component_title = ret_component_template_and_title(param,opts)
       if component_title
-        raise ::DTK::ErrorUsage.new("Component title should not be given")
+        raise ::DTK::ErrorUsage.new('Component title should not be given')
       end
       component_template
     end
@@ -431,11 +431,11 @@ module Ramaze::Helper
     end
 
     def request_method_is_get?
-      request.env["REQUEST_METHOD"] == "GET"
+      request.env['REQUEST_METHOD'] == 'GET'
     end
 
     def request_method_is_post?
-      request.env["REQUEST_METHOD"] == "POST"
+      request.env['REQUEST_METHOD'] == 'POST'
     end
 
     # R8 functions
@@ -498,7 +498,7 @@ module Ramaze::Helper
 
    def model_name
      return @model_name if @model_name
-     model_name_x = Aux.demodulize(self.class.to_s).gsub(/Controller$/,"").downcase.to_sym
+     model_name_x = Aux.demodulize(self.class.to_s).gsub(/Controller$/,'').downcase.to_sym
      @model_name =  ConvertFromSubtypeModelName[model_name_x]||model_name_x
    end
 

@@ -26,8 +26,8 @@ module DTK; class Attribute
         attr_name = attr[:display_name]
         ret = "Attribute (#{attr}) has illegal value (#{new_val})"
         if legal_vals = info[:legal_values]
-          ident = " "*2;
-          sep = "--------------"
+          ident = ' '*2;
+          sep = '--------------'
           ret << "; legal values are: \n#{sep}\n#{ident}#{legal_vals.join("\n#{ident}")}"
           ret << "\n#{sep}\n"
         end

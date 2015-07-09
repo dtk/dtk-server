@@ -92,10 +92,10 @@ end
           RepoManager.hard_reset_to_branch(branch_name_to_merge_from,self)
           ret.merge!(fast_forward_change: false)
         else
-          raise ErrorUsage.new("There is a merge conflict! Cannot push changes without using the --force option; THIS OPTION WILL WIPE OUT CHANGES IN THE BASE COMPONENT MODULE")
+          raise ErrorUsage.new('There is a merge conflict! Cannot push changes without using the --force option; THIS OPTION WILL WIPE OUT CHANGES IN THE BASE COMPONENT MODULE')
         end
       elsif result != :changed
-        raise Error.new("Unexpected result from fast_foward_merge_from_branch")
+        raise Error.new('Unexpected result from fast_foward_merge_from_branch')
       end
 
       self[:current_sha] =  diffs.b_sha
@@ -280,8 +280,8 @@ end
     end
     private :dsl_format_type_form_path
     FormatTypeFromExtension = {
-      "json" => :json,
-      "yaml" => :yaml
+      'json' => :json,
+      'yaml' => :yaml
     }
 
     def push_changes_to_repo
@@ -290,7 +290,7 @@ end
     end
 
     def process_ambiguous_dependencies(ambiguous, hash_content)
-      content = ""
+      content = ''
       content << "---\ncomponent_modules:\n" if hash_content.empty?
 
       ambiguous.each do |module_name,namespaces|
@@ -308,7 +308,7 @@ end
     end
 
     def process_missing_dependencies(missing, hash_content)
-      content = ""
+      content = ''
       content << "---\ncomponent_modules:\n" if hash_content.empty?
 
       missing.each do |module_name|
@@ -443,7 +443,7 @@ end
 # TODO: temp until for source of bug where component rather than component_module put in for type
 if type == 'component'
   type = 'component_module'
-  Log.error_pp(["Bug :component from :component_module on",local,caller()[0..7]])
+  Log.error_pp(['Bug :component from :component_module on',local,caller()[0..7]])
 end
 
       assigns = {

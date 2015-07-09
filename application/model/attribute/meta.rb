@@ -129,7 +129,7 @@ module XYZ; class Attribute
            model_name: :port,
            alias: :port_external,
            join_type: :inner,
-           filter: [:eq,:type,"external"],
+           filter: [:eq,:type,'external'],
            join_cond: {external_attribute_id: q(:attribute,:id)},
            cols: [:id,:type,id(:node),:containing_port_id,:external_attribute_id,:ref]
          },
@@ -137,7 +137,7 @@ module XYZ; class Attribute
            model_name: :port,
            alias: :port_l4,
            join_type: :left_outer,
-           filter: [:eq,:type,"l4"],
+           filter: [:eq,:type,'l4'],
            join_cond: {id: q(:port_external,:containing_port_id)},
            cols: [:id,:type,id(:node),:containing_port_id,:external_attribute_id,:ref]
          }]

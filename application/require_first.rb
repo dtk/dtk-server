@@ -1,12 +1,12 @@
 def r8_require(*files_x)
   files = (files_x.first.is_a?(Array) ? files_x.first : files_x)
-  caller_dir = caller.first.gsub(/\/[^\/]+$/,"")
+  caller_dir = caller.first.gsub(/\/[^\/]+$/,'')
   files.each{|f|require File.expand_path(f,caller_dir)}
 end
 
 def r8_nested_require(dir,*files_x)
   files = (files_x.first.is_a?(Array) ? files_x.first : files_x)
-  caller_dir = caller.first.gsub(/\/[^\/]+$/,"")
+  caller_dir = caller.first.gsub(/\/[^\/]+$/,'')
   files.each{|f|require File.expand_path("#{dir}/#{f}",caller_dir)}
 end
 
@@ -21,13 +21,13 @@ end
 ##### TODO: deprecate forp above
 def dtk_require(*files_x)
   files = (files_x.first.is_a?(Array) ? files_x.first : files_x)
-  caller_dir = caller.first.gsub(/\/[^\/]+$/,"")
+  caller_dir = caller.first.gsub(/\/[^\/]+$/,'')
   files.each{|f|require File.expand_path(f,caller_dir)}
 end
 
 def dtk_nested_require(dir,*files_x)
   files = (files_x.first.is_a?(Array) ? files_x.first : files_x)
-  caller_dir = caller.first.gsub(/\/[^\/]+$/,"")
+  caller_dir = caller.first.gsub(/\/[^\/]+$/,'')
   files.each{|f|require File.expand_path("#{dir}/#{f}",caller_dir)}
 end
 
@@ -61,11 +61,11 @@ def dtk_require_dtk_common_file(common_library)
   common_folder = determine_common_folder()
 
   if common_folder
-    dtk_require("../../" + common_folder + "/lib/#{common_library}")
+    dtk_require('../../' + common_folder + "/lib/#{common_library}")
   elsif is_dtk_common_gem_installed?
     # already loaded so do not do anything
   else
-    raise DTK::Client::DtkError,"Common directory/gem not found, please make sure that you have cloned dtk-common folder or installed dtk common gem!"
+    raise DTK::Client::DtkError,'Common directory/gem not found, please make sure that you have cloned dtk-common folder or installed dtk common gem!'
   end
 end
 
@@ -102,7 +102,7 @@ end
 # TODO: deprecate of make thsi applicable to 1.9.3
 ##### for upgrading to ruby 1.9.2
 class Hash
-  if RUBY_VERSION == "1.9.2"
+  if RUBY_VERSION == '1.9.2'
     def select192(&block)
       select(&block)
     end

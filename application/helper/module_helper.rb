@@ -92,7 +92,7 @@ module Ramaze::Helper
 
     def pull_from_remote_helper(module_class)
       # TODO: need to clean this up; right now not called because of code on server; not to clean up term for :remote_repo
-      Log.error("Not expecting to call pull_from_remote_helper")
+      Log.error('Not expecting to call pull_from_remote_helper')
       local_module_name, remote_repo = ret_non_null_request_params(:module_name, :remote_repo)
       version = ret_request_params(:version)
       project = get_default_project()
@@ -309,7 +309,7 @@ module Ramaze::Helper
       if remote_namespace.empty?
         linked_remote_repo = component_module.default_linked_remote_repo()
         remote_namespace   = linked_remote_repo ? linked_remote_repo[:repo_namespace] : nil
-        raise ErrorUsage.new("Not able to find linked remote namespace, please provide one") unless remote_namespace
+        raise ErrorUsage.new('Not able to find linked remote namespace, please provide one') unless remote_namespace
       end
       remote_namespace
     end

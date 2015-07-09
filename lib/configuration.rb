@@ -27,7 +27,7 @@ module DTK
       user_specific_config = "#{BaseConfigDir}/#{process_user}/server.conf"
       File.file?(user_specific_config) ? user_specific_config : "#{BaseConfigDir}/server.conf"
     end
-    BaseConfigDir = "/etc/dtk"
+    BaseConfigDir = '/etc/dtk'
 
     def process_user
       Etc.getpwuid(Process.uid).name
@@ -50,16 +50,16 @@ module DTK
     end
 
     def update_config_value!(config_file_key,value)
-      internal_key = (Mappings[config_file_key]||config_file_key).split(".")
+      internal_key = (Mappings[config_file_key]||config_file_key).split('.')
       update_config_value_aux!(R8::Config,internal_key,value)
     end
 
     Mappings = {
-      "remote_repo.host" => "repo.remote.host",
-      "local_repo.host" => "repo.git.dns",
-      "db.host" => "database.hostname",
-      "db.name" => "database.name",
-      "mcollective.host" => "command_and_control.node_config.mcollective.host"
+      'remote_repo.host' => 'repo.remote.host',
+      'local_repo.host' => 'repo.git.dns',
+      'db.host' => 'database.hostname',
+      'db.name' => 'database.name',
+      'mcollective.host' => 'command_and_control.node_config.mcollective.host'
     }
 
     def update_config_value_aux!(base,internal_key,value)
@@ -93,7 +93,7 @@ module DTK
         raise ErrorUsage.new("Config file (#{file}) does not exists") unless File.exists?(file)
         File.open(file).each do |line|
           # strip blank spaces, tabs etc off the end of all lines
-          line.gsub!(/\s*$/, "")
+          line.gsub!(/\s*$/, '')
           unless line =~ /^#|^$/
             if (line =~ /(.+?)\s*=\s*(.+)/)
               key = $1

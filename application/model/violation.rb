@@ -7,7 +7,7 @@ module DTK
       component_actions.each do |action|
         AttributeComplexType.flatten_attribute_list(action[:attributes],flatten_nil_value: true).each do |attr|
           # TODO: need to distingusih between legitimate nil value and unset
-          if attr[:required] && attr[:attribute_value].nil? && (not attr[:port_type] == "input") && (not attr[:dynamic])
+          if attr[:required] && attr[:attribute_value].nil? && (not attr[:port_type] == 'input') && (not attr[:dynamic])
             aug_attr = attr.merge(nested_component: action[:component], node: action[:node])
             errors <<  MissingRequiredAttribute.new(aug_attr)
           end
@@ -34,7 +34,7 @@ module DTK
 
       viol_idhs_to_delete = []
       saved_violations.each do |v|
-        raise Error.new("Not treating expression form") unless constraint_hash = v[:expression][:constraint]
+        raise Error.new('Not treating expression form') unless constraint_hash = v[:expression][:constraint]
         constraint = Constraint.create(constraint_hash)
         vtttype = constraint[:target_type]
         target_idh = sample_idh.createIDH(model_name: vt_model_name(vtttype),id: constraint[:target_id])
@@ -58,7 +58,7 @@ module DTK
       raise Error.new("Unexpected violaition target type #{vtttype}")
     end
     VTModelName = {
-      "target_node_id_handle" => :node
+      'target_node_id_handle' => :node
     }
     def self.ret_expression_list(expression)
       return [] if expression[:elements].empty?
@@ -84,9 +84,9 @@ module DTK
       expression_list.each do |e|
         sample_constraint = e.is_a?(Constraint) ? e : e.constraint_list.first
         vt = e[:violation_target]
-        raise Error.new("target type #{vt[:type]} not treated") unless vt[:type] == "target_node_id_handle"
-        description = e.is_a?(Constraint) ? e[:description] : e[:elements].map{|x|x[:description]}.join(" or ")
-        ref = "violation" #TODO: stub
+        raise Error.new("target type #{vt[:type]} not treated") unless vt[:type] == 'target_node_id_handle'
+        description = e.is_a?(Constraint) ? e[:description] : e[:elements].map{|x|x[:description]}.join(' or ')
+        ref = 'violation' #TODO: stub
         new_item = {
           :ref => ref,
           parent_col => parent_id,
@@ -104,7 +104,7 @@ module DTK
     end
 
     def self.violation_expression_for_db(expr)
-      raise Error.new("Violation expression form not treated") unless expr.is_a?(Constraint)
+      raise Error.new('Violation expression form not treated') unless expr.is_a?(Constraint)
       {
         constraint: {
           type: expr[:type],
@@ -178,7 +178,7 @@ module DTK
         vt = exprs.first.violation_target
         exprs[1..exprs.size-1].map do |e|
           unless vt == e[:violation_target]
-            raise Error.new("Not supported conjunction of expressions with different violation_targets")
+            raise Error.new('Not supported conjunction of expressions with different violation_targets')
           end
         end
         ret = new(vt,:and)

@@ -65,7 +65,7 @@ module DTK; class ConfigAgent; class Adapter::Puppet
 
     def parse_given_file_content__manifest(file_content,opts={})
       synchronize_and_handle_puppet_globals({code: file_content, ignoreimport: false},opts) do
-        environment = "production"
+        environment = 'production'
         node_env = ::Puppet::Node::Environment.new(environment)
         known_resource_types = ::Puppet::Resource::TypeCollection.new(node_env)
         # needed to make more complicared because cannot call krt = ::Puppet::Node::Environment.new(environment).known_resource_types because perform_initial_import needs import set to false, but rest needs it set to true
@@ -75,8 +75,8 @@ module DTK; class ConfigAgent; class Adapter::Puppet
         ::Puppet[:ignoreimport] = true
         initial_import = parser.parse
 
-        known_resource_types.import_ast(initial_import,"")
-        krt_code = known_resource_types.hostclass("").code
+        known_resource_types.import_ast(initial_import,'')
+        krt_code = known_resource_types.hostclass('').code
         opts[:just_krt_code] ? krt_code : ParseStructure::TopPS.new(krt_code)
       end
     end
@@ -135,8 +135,8 @@ module DTK; class ConfigAgent; class Adapter::Puppet
 
     def strip_message(msg)
       ret = msg
-      ret = ret.gsub(/Could not parse for environment production: /,"")
-      ret = ret.gsub(/at [^ ]+:[0-9]+$/,"")
+      ret = ret.gsub(/Could not parse for environment production: /,'')
+      ret = ret.gsub(/at [^ ]+:[0-9]+$/,'')
       ret
     end
   end

@@ -17,14 +17,14 @@ class FieldR8
     end
 
     case(field_meta[:type])
-      when "select","radio"
+      when 'select','radio'
         field_meta[:options] = self.get_field_options(field_meta)
-      when "multiselect"
+      when 'multiselect'
         # if view of type edit add the []'s to allow for array to be returned in request for mult selects
         field_meta[:options] = self.get_field_options(field_meta)
         if(view_type == 'edit' || view_type == 'search') then field_meta[:name] << '[]' end
         # TODO: enhance this once profiles are implemented
-        load_field_file "field.select.rb"
+        load_field_file 'field.select.rb'
     end
 
     # TODO: enhance this once profiles are implemented
@@ -39,10 +39,10 @@ class FieldR8
 
   # This adds the js exe call for the given field meta
   def add_validation(_formId, field_meta)
-    (field_meta[:required] == true) ? required = "true" : required = "false"
+    (field_meta[:required] == true) ? required = 'true' : required = 'false'
 
     case(field_meta[:type])
-      when "radio","select"
+      when 'radio','select'
       # classRefId used b/c styling cant be applied to radio itself so applied to reference div wrapper
       #        content = 'R8.forms.addValidator("' + formId + '",{"id":"' + field_meta[:id] + '","classRefId":"' + field_meta[:id] + '-radio-wrapper","type":"' + field_meta[:type] + '","required":' + required + '});'
       else
@@ -82,6 +82,6 @@ class FieldR8
   def load_field_file(file_name)
     self.class.load_field_file(file_name)
   end
-  load_field_file("field.base.rb")
+  load_field_file('field.base.rb')
 end
 end

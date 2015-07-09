@@ -178,7 +178,7 @@ end
          convert: true,
          join_type: :inner,
          join_cond: {module_branch_id: q(:module_branch,:id)},
-         filter: [:eq,:type,"composite"],
+         filter: [:eq,:type,'composite'],
          cols: [:id,:group_id,:display_name]
        }]
     }

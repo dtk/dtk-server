@@ -57,7 +57,7 @@ module DTK; class Task; class Template
       def compute_before_after_relations!
         unless new_action_index = @new_action.index
           # if @new_action does not have an index it means that it is not in action list
-          Log.error("Cannot find action in action list; using no constraints")
+          Log.error('Cannot find action in action list; using no constraints')
           return
         end
 

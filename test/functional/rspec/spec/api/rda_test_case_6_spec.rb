@@ -9,17 +9,17 @@ namespace_info = {
   name: 'dtk17'
 }
 
-describe "(Repoman Drupal API) Test Case 6: Get namespace and get all modules that belong to this namespace by namespace name/id" do
+describe '(Repoman Drupal API) Test Case 6: Get namespace and get all modules that belong to this namespace by namespace name/id' do
   let(:repoman) { @repoman }
 
-  context "Login" do
-    it "passed successfully" do
+  context 'Login' do
+    it 'passed successfully' do
       repoman.login(login[:username],login[:password])
       expect(repoman.authorization_token).not_to be_empty
     end
   end
 
-  context "Check if namespace exists by namespace name" do
+  context 'Check if namespace exists by namespace name' do
     it "gets existing namespace by name #{namespace_info[:name]}" do
       namespace_exists = false
       response = repoman.check_if_namespace_exists(namespace_info[:name])
@@ -30,7 +30,7 @@ describe "(Repoman Drupal API) Test Case 6: Get namespace and get all modules th
   end
 
   context "Get all modules that belong to namespace by namespace name #{namespace_info[:name]}" do
-    it "gets all modules" do
+    it 'gets all modules' do
       modules_retrieved_correctly = true
       response = repoman.get_modules_by_namespace(namespace_info[:name])
       ap response
@@ -51,8 +51,8 @@ describe "(Repoman Drupal API) Test Case 6: Get namespace and get all modules th
     end
   end
 
-  context "Get all modules that belong to namespace by namespace id" do
-    it "gets all modules" do
+  context 'Get all modules that belong to namespace by namespace id' do
+    it 'gets all modules' do
       modules_retrieved_correctly = true
       all_namespaces = repoman.get_namespaces
       namespace_id = all_namespaces['data'].find { |namespace| namespace['name'] == namespace_info[:name] }['id']
@@ -75,8 +75,8 @@ describe "(Repoman Drupal API) Test Case 6: Get namespace and get all modules th
     end
   end
 
-  context "Logout" do
-    it "passed successfully" do
+  context 'Logout' do
+    it 'passed successfully' do
       response = repoman.logout
       expect(response['data']['success']).to eq(true)
     end

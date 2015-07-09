@@ -146,7 +146,7 @@ module DTK
       end
       rest_ok_response service_module.info_about(about)
     end
-    AboutEnum = ["assembly-templates".to_sym,:components]
+    AboutEnum = ['assembly-templates'.to_sym,:components]
 
     def rest__get_workspace_branch_info
       service_module = create_obj(:service_module_id)

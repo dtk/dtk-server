@@ -30,12 +30,12 @@ module DTK; class LinkDef
         if out_port[:port_info][:component_type] == cmp_type
           match =
             case self[:type]
-             when "external"
+             when 'external'
               in_aug_port[:node_node_id] != out_port[:node_node_id]
-             when "internal"
+             when 'internal'
               in_aug_port[:node_node_id] == out_port[:node_node_id]
              else
-              raise Error.new("unexpected type for LinkDef::Link object")
+              raise Error.new('unexpected type for LinkDef::Link object')
             end
           if match
             ret << {input_port: in_aug_port,output_port: out_port}
@@ -77,31 +77,31 @@ module DTK; class LinkDef
     class Event < HashObject
       def self.create(event,link_def_link)
         case event[:event_type]
-          when "extend_component" then EventExtendComponent.new(event,link_def_link)
+          when 'extend_component' then EventExtendComponent.new(event,link_def_link)
           else
-            raise Error.new("unexpecetd event type")
+            raise Error.new('unexpecetd event type')
         end
       end
       def process!(_context)
-        raise Error.new("Needs to be overwritten")
+        raise Error.new('Needs to be overwritten')
       end
     end
 
     class EventExtendComponent < Event
       def initialize(event,link_def_link)
-        base_cmp = link_def_link[event[:node] == "remote" ? :remote_component_type : :local_component_type]
+        base_cmp = link_def_link[event[:node] == 'remote' ? :remote_component_type : :local_component_type]
         super(event.merge(base_component: base_cmp))
       end
 
       def process!(context)
-        raise Error.new("deprecated context.find_component")
+        raise Error.new('deprecated context.find_component')
         # base_component = context.find_component(self[:base_component])
         raise Error.new("cannot find component with ref #{self[:base_component]} in context") unless base_component
         component_extension = base_component.get_extension_in_library(self[:extension_type])
         raise Error.new("cannot find library extension of type #{self[:extension_type]} to #{self[:base_component]} in library") unless component_extension
 
         # find node to clone it into
-        node = (self[:node] == "local") ? context.local_node : context.remote_node
+        node = (self[:node] == 'local') ? context.local_node : context.remote_node
         raise Error.new("cannot find node of type #{self[:node]} in context") unless node
 
         # clone component into node
@@ -119,8 +119,8 @@ module DTK; class LinkDef
       private
 
       def validate_top_level(hash)
-        raise Error.new("node is set incorrectly") if hash[:node] and not [:local,:remote].include?(hash[:node].to_sym)
-        raise Error.new("no extension_type is given") unless hash[:extension_type]
+        raise Error.new('node is set incorrectly') if hash[:node] and not [:local,:remote].include?(hash[:node].to_sym)
+        raise Error.new('no extension_type is given') unless hash[:extension_type]
       end
     end
   end

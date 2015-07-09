@@ -112,10 +112,10 @@ module DTK
 
         if remote.version
           # TODO: ModuleBranch::Location:
-          raise Error.new("Not versions not implemented")
+          raise Error.new('Not versions not implemented')
           versions = branch_names_to_versions_stripped(ret[:branches])
           unless versions && versions.include?(remote.version)
-            raise ErrorUsage.new("Remote module (#{remote.pp_module_name()}}) does not have version (#{remote.version||"CURRENT"})")
+            raise ErrorUsage.new("Remote module (#{remote.pp_module_name()}}) does not have version (#{remote.version||'CURRENT'})")
           end
         end
         ret
@@ -135,7 +135,7 @@ module DTK
 
       def remote
         unless @remote
-          raise Error.new("Should not be called if @remote is nill")
+          raise Error.new('Should not be called if @remote is nill')
         end
         @remote
       end
@@ -148,10 +148,10 @@ module DTK
 
         unsorted = remote_modules.map do |r|
           el = {}
-          last_updated = r['updated_at'] && Time.parse(r['updated_at']).strftime("%Y/%m/%d %H:%M:%S")
+          last_updated = r['updated_at'] && Time.parse(r['updated_at']).strftime('%Y/%m/%d %H:%M:%S')
           permission_string = "#{r['permission_hash']['user']}/#{r['permission_hash']['user_group']}/#{r['permission_hash']['other']}"
           el.merge!(display_name: r['full_name'], owner: r['owner_name'], group_owners: r['user_group_names'], permissions: permission_string, last_updated: last_updated)
-          if versions = branch_names_to_versions(r["branches"])
+          if versions = branch_names_to_versions(r['branches'])
             el.merge!(versions: versions)
           end
           el
@@ -162,7 +162,7 @@ module DTK
 
       def branch_names_to_versions(branch_names)
         return nil unless branch_names and not branch_names == [HeadBranchName]
-        (branch_names.include?(HeadBranchName) ? ["CURRENT"] : []) + branch_names.reject{|b|b == HeadBranchName}.sort
+        (branch_names.include?(HeadBranchName) ? ['CURRENT'] : []) + branch_names.reject{|b|b == HeadBranchName}.sort
       end
 
       #
@@ -178,14 +178,14 @@ module DTK
         self.class.version_to_branch_name(version)
       end
       def self.version_to_branch_name(version=nil)
-        Log.info_pp(["#TODO: ModuleBranch::Location: deprecating: version_to_branch_name",caller[0..4]])
+        Log.info_pp(['#TODO: ModuleBranch::Location: deprecating: version_to_branch_name',caller[0..4]])
         if version.nil? || version == HeadBranchName
           HeadBranchName
         else
           "v#{version}"
         end
       end
-      HeadBranchName = "master"
+      HeadBranchName = 'master'
 
       def default_remote_repo_base
         self.class.default_remote_repo_base()
@@ -214,7 +214,7 @@ module DTK
         self.default_user_namespace()
       end
 
-      DefaultsNamespace = "r8" #TODO: have this obtained from config file
+      DefaultsNamespace = 'r8' #TODO: have this obtained from config file
 
       # [Haris] We are not using r8 here since we will use tenant id, e.g. "dtk9" as default
       # DefaultsNamespace = self.default_user_namespace() #TODO: have this obtained from config file
@@ -222,15 +222,15 @@ module DTK
       # example:
       # returns namespace, name, version (optional)
       def self.split_qualified_name(qualified_name, opts={})
-        raise ErrorUsage.new("Please provide module name to publish") if qualified_name.nil? || qualified_name.empty?
+        raise ErrorUsage.new('Please provide module name to publish') if qualified_name.nil? || qualified_name.empty?
         namespace = opts[:namespace]||default_namespace()
 
-        split = qualified_name.split("/")
+        split = qualified_name.split('/')
         case split.size
          when 1 then [namespace,qualified_name]
          when 2,3 then split
          else
-          qualified_name = "NOT PROVIDED" if qualified_name.nil? || qualified_name.empty?
+          qualified_name = 'NOT PROVIDED' if qualified_name.nil? || qualified_name.empty?
           raise ErrorUsage.new("Module remote name (#{qualified_name}) ill-formed. Must be of form 'name', 'namespace/name' or 'name/namespace/version'")
         end
       end
@@ -240,7 +240,7 @@ module DTK
       attr_reader :client
 
       def type_for_remote_module(module_type)
-        module_type.to_s.gsub(/_module$/,"")
+        module_type.to_s.gsub(/_module$/,'')
       end
 
       def is_empty?(string_value)
@@ -261,7 +261,7 @@ module DTK
       end
 
       def dtk_instance_remote_repo_key_name
-        "dtk-instance-key"
+        'dtk-instance-key'
       end
 
       def get_end_user_remote_repo_username(mh,ssh_rsa_pub_key)

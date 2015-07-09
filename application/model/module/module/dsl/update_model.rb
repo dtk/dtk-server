@@ -34,18 +34,18 @@ module DTK; class ModuleDSL
           cmp_info.each do |k,v|
             case k
             # TODO: deprecate this case when remove v1
-            when "external_link_defs"
-              v.each{|ld|(ld["possible_links"]||[]).each{|pl|pl.values.first["type"] = "external"}} #TODO: temp hack to put in type = "external"
+            when 'external_link_defs'
+              v.each{|ld|(ld['possible_links']||[]).each{|pl|pl.values.first['type'] = 'external'}} #TODO: temp hack to put in type = "external"
               parsed_link_def = LinkDef.parse_serialized_form_local(v,config_agent_type,@remote_link_defs,cmp_ref)
-              (info["link_def"] ||= {}).merge!(parsed_link_def)
-            when "link_defs"
+              (info['link_def'] ||= {}).merge!(parsed_link_def)
+            when 'link_defs'
               parsed_link_def = LinkDef.parse_serialized_form_local(v,config_agent_type,@remote_link_defs,cmp_ref)
-              (info["link_def"] ||= {}).merge!(parsed_link_def)
+              (info['link_def'] ||= {}).merge!(parsed_link_def)
             else
               info[k] = v
             end
           end
-          info.merge!("implementation_id" => impl_id, "module_branch_id" => module_branch_id)
+          info.merge!('implementation_id' => impl_id, 'module_branch_id' => module_branch_id)
           h.merge(cmp_ref => info)
         end
       end
@@ -77,11 +77,11 @@ module DTK; class ModuleDSL
     end
 
     def modify_for_version_and_override_attrs(input_hash,version,override_attrs)
-      (override_attrs ||= {})["version"] ||= version
+      (override_attrs ||= {})['version'] ||= version
 
       input_hash.keys.inject({}) do |h,k|
         cmp_info = input_hash[k]
-        modified_cmp_info = cmp_info.merge(override_attrs).merge("display_name" => Component.name_with_version(cmp_info["display_name"],version))
+        modified_cmp_info = cmp_info.merge(override_attrs).merge('display_name' => Component.name_with_version(cmp_info['display_name'],version))
         h.merge(Component.ref_with_version(k,version) => modified_cmp_info)
       end
     end
@@ -110,7 +110,7 @@ module DTK; class ModuleDSL
 
     def create_parser_processor(dsl_integer_version,impl_idh,module_branch_idh,project_idh)
       klass = load_and_return_version_adapter_class(dsl_integer_version)
-      klass.const_get("Parser").new(impl_idh,module_branch_idh,project_idh)
+      klass.const_get('Parser').new(impl_idh,module_branch_idh,project_idh)
     end
 
     # This marks as complete applicable objects so if objects not present in cmps_input_hash they are deleted
@@ -122,7 +122,7 @@ module DTK; class ModuleDSL
       cmp_db_update_hash = cmps_input_hash.inject(DBUpdateHash.new) do |h,(ref,hash_assigns)|
         h.merge(ref => db_update_form_aux(:component,hash_assigns))
       end.mark_as_complete(mark_as_complete_constraint)
-      {"component" => cmp_db_update_hash.merge(non_complete_cmps_input_hash)}
+      {'component' => cmp_db_update_hash.merge(non_complete_cmps_input_hash)}
     end
 
     def db_update_form_aux(model_name,hash_assigns)

@@ -21,13 +21,13 @@ module DTK
 
         def get_params(workitem)
           task_info = get_task_info(workitem)
-          params = {"task_id" => workitem.params["task_id"]}
-          workflow = task_info["workflow"]
-          params.merge!("workflow" => workflow)
-          params.merge!("task" => task_info["task"])
-          params.merge!("action" => task_info["action"])
-          params.merge!("task_start" => workitem.params["task_start"])
-          params.merge!("task_end" => workitem.params["task_end"])
+          params = {'task_id' => workitem.params['task_id']}
+          workflow = task_info['workflow']
+          params.merge!('workflow' => workflow)
+          params.merge!('task' => task_info['task'])
+          params.merge!('action' => task_info['action'])
+          params.merge!('task_start' => workitem.params['task_start'])
+          params.merge!('task_end' => workitem.params['task_end'])
           params
         end
 
@@ -98,7 +98,7 @@ module DTK
         end
 
         def set_result_succeeded(workitem,new_result,task,action)
-          task.update_at_task_completion("succeeded",Task::Action::Result::Succeeded.new())
+          task.update_at_task_completion('succeeded',Task::Action::Result::Succeeded.new())
           action.update_state_change_status(task.model_handle,:completed)  #this updates pending state
           set_result_succeeded__stack(workitem,new_result,task,action)
         end
@@ -109,7 +109,7 @@ module DTK
           # Due to asyc calls, it was the only way I could figure out how to stop node detection task
           task[:executable_action][:node][:is_task_canceled] = true
 
-          task.update_at_task_completion("cancelled",Task::Action::Result::Cancelled.new())
+          task.update_at_task_completion('cancelled',Task::Action::Result::Cancelled.new())
         end
 
         def set_result_failed(_workitem,new_result,task)
@@ -128,11 +128,11 @@ module DTK
                 CommandAndControl::Error.new
               end
             end
-          task.update_at_task_completion("failed",Task::Action::Result::Failed.new(error))
+          task.update_at_task_completion('failed',Task::Action::Result::Failed.new(error))
         end
 
         def set_result_timeout(_workitem,_new_result,task)
-          task.update_at_task_completion("failed",Task::Action::Result::Failed.new(CommandAndControl::Error::Timeout.new))
+          task.update_at_task_completion('failed',Task::Action::Result::Failed.new(CommandAndControl::Error::Timeout.new))
         end
 
         protected
@@ -166,7 +166,7 @@ module DTK
             if task_is_active?(workitem) #this needed because, for example teher can be a pending polling task
               event,errors = task.add_event_and_errors(:complete_failed,:server,[{message: e.to_s}])
               log_participant.end(:execution_context_trap,event: event, errors: errors, backtrace: e.backtrace)
-              task.update_at_task_completion("failed",errors: errors)
+              task.update_at_task_completion('failed',errors: errors)
               cancel_upstream_subtasks(workitem)
               delete_task_info(workitem)
             end
@@ -182,7 +182,7 @@ module DTK
 
         # if use must coordinate with concurrence merge type
         def set_result_succeeded__stack(workitem,_new_result,_task,action)
-          workitem.fields["result"] = {action_completed: action.type}
+          workitem.fields['result'] = {action_completed: action.type}
         end
 
         def get_task_info(workitem)
@@ -194,7 +194,7 @@ module DTK
         end
 
         def get_top_task_id(workitem)
-          workitem.params["top_task_id"]
+          workitem.params['top_task_id']
         end
 
         def task_is_active?(workitem)
@@ -207,7 +207,7 @@ module DTK
             # Killing task to prevent upstream subtasks' execution
             Workflow.kill(get_top_task_id(workitem))
            rescue Exception => e
-            Log.error_pp(["exception when cancel_upstream_subtasks",e,e.backtrace[0..5]])
+            Log.error_pp(['exception when cancel_upstream_subtasks',e,e.backtrace[0..5]])
           end
         end
       end
@@ -234,12 +234,12 @@ module DTK
             sleep 1
             count -= 1
           end
-          pp "debug task finished"
+          pp 'debug task finished'
           reply_to_engine(workitem)
         end
 
         def cancel(_fei, _flavour)
-          pp "cancel called on debug task"
+          pp 'cancel called on debug task'
           # TODO: shut off loop not working
           p @is_on
           @is_on = false

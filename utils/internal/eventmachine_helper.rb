@@ -11,7 +11,7 @@ module XYZ
       if defined?(PhusionPassenger)
         unless reactor_running?()
           Thread.new { EventMachine.run }
-          puts "EventMachine has been started!"
+          puts 'EventMachine has been started!'
         end
       end
     end

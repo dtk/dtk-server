@@ -104,7 +104,7 @@ module DTK
     # TODO: this should be deprecated;
     def ref_num
       #      self[:display_name].split(RefDelim)[3].to_i
-      raise Error.new("using deprecated method port#ref_num")
+      raise Error.new('using deprecated method port#ref_num')
     end
 
     def parse_port_display_name
@@ -152,7 +152,7 @@ module DTK
       end
 
       component_type = ret[:component_type]
-      if component_type =~ Regexp.new("(^.+)__(.+$)")
+      if component_type =~ Regexp.new('(^.+)__(.+$)')
         ret.merge!(module: $1,component: $2)
       else
         ret.merge!(module: component_type,component: component_type)
@@ -167,13 +167,13 @@ module DTK
     # input is of form form <node>/<component>, like server/rsyslog::server
     # if error, returns nil
     def self.parse_to_ret_display_name(service_ref_name,conn_type,opts={})
-      if service_ref_name =~ Regexp.new("(^[^/]+)/([^/]+$)")
+      if service_ref_name =~ Regexp.new('(^[^/]+)/([^/]+$)')
         node_display_name = $1
         cmp_ref = $2
-        cmp_ref_internal_form = cmp_ref.gsub(/::/,"__")
-        dirs = (opts[:direction] ? [options[:direction]] : ["input","output"])
+        cmp_ref_internal_form = cmp_ref.gsub(/::/,'__')
+        dirs = (opts[:direction] ? [options[:direction]] : ['input','output'])
         int_or_ext = opts[:internal_or_external]
-        int_or_ext =  (int_or_ext ? [int_or_ext] : ["internal","external"])
+        int_or_ext =  (int_or_ext ? [int_or_ext] : ['internal','external'])
         poss_p_names = dirs.map do |dir|
           int_or_ext.map do |ie|
             "#{dir}#{RefDelim}component_#{ie}#{RefDelim}#{cmp_ref_internal_form}#{RefDelim}#{conn_type}"
@@ -221,12 +221,12 @@ module DTK
 
     def self.link_def_match?(ld,cmp_id,link_def_ref,dir)
       if ld[:component_component_id] ==  cmp_id &&
-          ld[:display_name].gsub(/^remote_/,"").gsub(/^local_/,"") == link_def_ref
+          ld[:display_name].gsub(/^remote_/,'').gsub(/^local_/,'') == link_def_ref
         if dir
           if ld[:display_name] =~ /^remote_/
-            dir.to_s == direction_from_local_remote("remote")
+            dir.to_s == direction_from_local_remote('remote')
           elsif ld[:display_name] =~ /^local_/
-            dir.to_s == direction_from_local_remote("local")
+            dir.to_s == direction_from_local_remote('local')
           end
         else
           true
@@ -240,7 +240,7 @@ module DTK
     end
 
     def self.strip_type(ref)
-      ref.gsub(Regexp.new("^[^_]+#{RefDelim}"),"")
+      ref.gsub(Regexp.new("^[^_]+#{RefDelim}"),'')
     end
 
     def self.add_type(type,stripped_ref)
@@ -253,7 +253,7 @@ module DTK
     def filter_and_process!(i18n,*types)
       unless types.empty?
         return nil unless types.include?(self[:type])
-        if types.include?("external") #TODO: this special case may go away
+        if types.include?('external') #TODO: this special case may go away
           return nil if self[:containing_port_id].nil?
         end
       end
@@ -278,9 +278,9 @@ module DTK
       component_type = component.get_field?(:component_type)
       type =
         if link_def[:has_external_link]
-          link_def[:has_internal_link] ? "component_internal_external" : "component_external"
+          link_def[:has_internal_link] ? 'component_internal_external' : 'component_external'
         else #will be just link_def[:has_internal_link]
-          "component_internal"
+          'component_internal'
         end
 
       # TODO: clean up direction to make it cleaner how you set it
@@ -308,7 +308,7 @@ module DTK
       }
       row.merge!(location_asserted: location_asserted) if location_asserted
       # TODO: not sure if we need opts[:remote_side]
-      unless dir == "output" || opts[:remote_side] || link_def[:id].nil?
+      unless dir == 'output' || opts[:remote_side] || link_def[:id].nil?
         row.merge!(link_def_id: link_def[:id])
       end
       row
@@ -321,13 +321,13 @@ module DTK
         # TODO: just heuristc for computing dir; also need to upport "<>" (bidirectional)
         if opts[:remote_side]
           case local_or_remote
-            when "local" then "output"
-            when "remote" then "input"
+            when 'local' then 'output'
+            when 'remote' then 'input'
           end
         else
           case local_or_remote
-            when "local" then "input"
-            when "remote" then "output"
+            when 'local' then 'input'
+            when 'remote' then 'output'
           end
         end
       end
@@ -338,10 +338,10 @@ module DTK
       end
       LocationMapping = {
         mysql__master: {
-          master_connection: "east"
+          master_connection: 'east'
         },
         mysql__slave: {
-          master_connection: "west"
+          master_connection: 'west'
         }
       }
 
@@ -352,15 +352,15 @@ module DTK
     def location
       return self[:location_asserted] if self[:location_asserted]
       # TODO: stub
-      return "east" if self[:display_name] =~ /nagios__server/
-      return "east" if self[:display_name] =~ /mysql__master/
-      return "west" if self[:display_name] =~ /nagios__client/
-      return "east" if self[:display_name] =~ /ganglia server/
-      return "west" if self[:display_name] =~ /ganglia monitor/
+      return 'east' if self[:display_name] =~ /nagios__server/
+      return 'east' if self[:display_name] =~ /mysql__master/
+      return 'west' if self[:display_name] =~ /nagios__client/
+      return 'east' if self[:display_name] =~ /ganglia server/
+      return 'west' if self[:display_name] =~ /ganglia monitor/
 
       case self[:direction]
-        when "output" then "north"
-        when "input" then "south"
+        when 'output' then 'north'
+        when 'input' then 'south'
       end
     end
   end

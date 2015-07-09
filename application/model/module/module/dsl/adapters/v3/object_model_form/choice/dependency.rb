@@ -40,20 +40,20 @@ module DTK; class ModuleDSL; class V3
             err_msg = 'The following dependency on component (?1) is ill-formed: ?2'
             raise ParsingError.new(err_msg,base_cmp_name,{conn_ref => conn_info_x})
           end
-        if choices = conn_info["choices"]
+        if choices = conn_info['choices']
           opts_choices = opts.merge(conn_ref: conn_ref)
           choices.map{|choice|convert_choice(raw,choice,base_cmp,conn_info,opts_choices)}
         else
-          dep_cmp_external_form = conn_info["component"]||conn_ref
+          dep_cmp_external_form = conn_info['component']||conn_ref
           parent_info = {}
-          dep_cmp_info = conn_info.merge("component" => dep_cmp_external_form)
+          dep_cmp_info = conn_info.merge('component' => dep_cmp_external_form)
           [convert_choice(raw,dep_cmp_info,base_cmp,parent_info,opts)]
         end
       end
 
       def self.convert_choice(raw,dep_cmp_info,base_cmp,parent_info={},opts={})
         opts_convert = {no_default_link_type: true}.merge(opts)
-        new(raw,dep_cmp_info["component"],base_cmp).convert(dep_cmp_info,base_cmp,parent_info,opts_convert)
+        new(raw,dep_cmp_info['component'],base_cmp).convert(dep_cmp_info,base_cmp,parent_info,opts_convert)
       end
     end
   end; end

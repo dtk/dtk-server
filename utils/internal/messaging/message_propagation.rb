@@ -16,7 +16,7 @@ module XYZ
   class Worker
     # if create two workers with same name they need to have same processors
     # TBD: direct queues are supposed to have less cpu demand so consider switch; question is that would create many exchanges; is that much overhead?
-    def initialize(unique_name="default")
+    def initialize(unique_name='default')
       @unique_name = unique_name
       @processors = {}
       @msg_bus_client = nil
@@ -40,8 +40,8 @@ module XYZ
 
     def start(host_addr,opts={})
       # TBD: check if best practice to put signal def in fn
-      Signal.trap('INT') { R8EventLoop.graceful_stop("stopped worker loop")}
-      Signal.trap('TERM'){ R8EventLoop.graceful_stop("stopped worker loop")}
+      Signal.trap('INT') { R8EventLoop.graceful_stop('stopped worker loop')}
+      Signal.trap('TERM'){ R8EventLoop.graceful_stop('stopped worker loop')}
 
       R8EventLoop.start(opts.merge(host: host_addr)) do
         @msg_bus_client = MessageBusClient.new()

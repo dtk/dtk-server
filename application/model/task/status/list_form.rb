@@ -20,13 +20,13 @@ module DTK; class Task; class Status
         level_2.each do |l2|
           level_2_ret = {}
           level_2_ret[:node_name] = l2[:executable_action][:node][:display_name]
-          if l2[:executable_action_type] == "CreateNode"
-            level_2_ret[:task_name] = "create_node"
+          if l2[:executable_action_type] == 'CreateNode'
+            level_2_ret[:task_name] = 'create_node'
             level_2_ret[:node_id] = l2[:executable_action][:node][:id]
             # Amar: Special case when 1 node present, to skip printing 'task1' on CLI for create_node_stage
-            level_1_ret[:task_name] = "create_node_stage" if l1[:subtasks].nil? && l1[:display_name].include?("task")
-          elsif l2[:executable_action_type] == "ConfigNode"
-            level_2_ret[:task_name] = "config_node"
+            level_1_ret[:task_name] = 'create_node_stage' if l1[:subtasks].nil? && l1[:display_name].include?('task')
+          elsif l2[:executable_action_type] == 'ConfigNode'
+            level_2_ret[:task_name] = 'config_node'
             level_2_ret[:components] = []
             level_3 = l2[:executable_action][:component_actions]
             level_3.each do |l3|
@@ -34,10 +34,10 @@ module DTK; class Task; class Status
               #       If two values are different, it means component came from node_group, and not from assembly instance
               #       Result is printing component source
               #       Check DTK-738 ticket for more details
-              source = "instance"
+              source = 'instance'
               unless l3[:component][:node_node_id] == l2[:executable_action][:node][:id]
                 node_group = NodeGroup.id_to_name(model_handle, l3[:component][:node_node_id])
-                source = "node_group"
+                source = 'node_group'
               end
               level_2_ret[:components] <<
               { component:                 {

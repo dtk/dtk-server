@@ -38,7 +38,7 @@ module DTK
 
           # end
         rescue Exception => e
-          Log.error_pp(["ERROR IN THREAD", e.message,e.backtrace])
+          Log.error_pp(['ERROR IN THREAD', e.message,e.backtrace])
         end
       end
     end

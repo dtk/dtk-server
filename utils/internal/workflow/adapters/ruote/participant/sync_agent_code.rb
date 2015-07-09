@@ -29,7 +29,7 @@ module DTK
                   # Amar: PERFORMANCE
                   PerformanceService.end_measurement(name(),object_id)
 
-                  result = msg[:body].merge("task_id" => task_id)
+                  result = msg[:body].merge('task_id' => task_id)
                   if result[:statuscode] != 0
                     event,errors = task.add_event_and_errors(:complete_failed,:config_agent,errors_in_result)
                     if event
@@ -58,7 +58,7 @@ module DTK
                 CreateThread.defer_with_session(user_object, Ramaze::Current.session) do
 ### DTK-1923 Temp workaround for https://reactor8.atlassian.net/browse/DTK-1923
 agent_commit_id_helper.update_node()
-result = {status: "ok"}
+result = {status: 'ok'}
 task.add_event(:complete_succeeded,result)
 log_participant.end(:timeout_override,task_id: task_id)
 set_result_succeeded(workitem,result,task,action) if task_end
@@ -68,9 +68,9 @@ unless R8::Config[:node_agent_git_clone][:no_delay_needed_on_server]
 end
 if false
                   result = {
-                    status: "timeout"
+                    status: 'timeout'
                   }
-                  event,errors = task.add_event_and_errors(:complete_timeout,:server,["timeout"])
+                  event,errors = task.add_event_and_errors(:complete_timeout,:server,['timeout'])
                   if event
                     log_participant.end(:timeout,task_id: task_id,event: event, errors: errors)
                   end

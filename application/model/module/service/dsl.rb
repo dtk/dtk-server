@@ -28,14 +28,14 @@ module DTK
         IntegerVersionToVersion[integer_version]
       end
       VersionToIntegerVersion  = {
-        "0.9.1" => 3,
-        "1.0.0" => 4
+        '0.9.1' => 3,
+        '1.0.0' => 4
       }
       IntegerVersionToVersion = {
         1 => nil, #1 and 2 do not have a version stamped in file
         2 => nil,
-        3 => "0.9.1",
-        4 => "1.0.0"
+        3 => '0.9.1',
+        4 => '1.0.0'
       }
     end
 
@@ -144,8 +144,8 @@ module DTK
       def dsl_files_format_type
         format_type_default = R8::Config[:dsl][:service][:format_type][:default]
         case format_type_default
-        when "json" then "json"
-        when "yaml" then "yaml"
+        when 'json' then 'json'
+        when 'yaml' then 'yaml'
         else raise Error.new("Unexpected value for dsl.service.format_type.default: #{format_type_default}")
         end
       end
@@ -165,7 +165,7 @@ module DTK
         parsed, component_module_refs = update_assemblies_from_dsl(module_branch,component_module_refs,opts)
         if new_commit_sha = component_module_refs.serialize_and_save_to_repo?()
           if opts[:ret_dsl_updated_info]
-            msg = "The module refs file was updated by the server"
+            msg = 'The module refs file was updated by the server'
             opts[:ret_dsl_updated_info] = ModuleDSLInfo::UpdatedInfo.new(msg: msg, commit_sha: new_commit_sha)
           end
         end

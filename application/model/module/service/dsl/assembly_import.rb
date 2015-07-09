@@ -7,7 +7,7 @@ module DTK; class ServiceModule
     extend FactoryObjectClassMixin
     def initialize(container_idh,module_branch,service_module,component_module_refs)
       @container_idh = container_idh
-      @db_updates_assemblies = DBUpdateHash.new("component" => DBUpdateHash.new,"node" => DBUpdateHash.new)
+      @db_updates_assemblies = DBUpdateHash.new('component' => DBUpdateHash.new,'node' => DBUpdateHash.new)
       @ndx_ports = {}
       @ndx_assembly_hashes = {} #indexed by ref
       @module_branch = module_branch
@@ -30,24 +30,24 @@ module DTK; class ServiceModule
           end
           aggregate_errors.aggregate_errors! do
             db_updates_cmp = version_proc_class.import_assembly_top(ref,assem,@module_branch,@module_name,opts)
-            @db_updates_assemblies["component"].merge!(db_updates_cmp)
+            @db_updates_assemblies['component'].merge!(db_updates_cmp)
 
             # parse_node_bindings_hash! with opts below
             # removes elements of node_bindings_hash that are not of form: {node => node_template}
             if db_updates_node_bindings = version_proc_class.parse_node_bindings_hash!(node_bindings_hash,remove_non_legacy: true)
-              db_updates_cmp.values.first.merge!("node_bindings" => db_updates_node_bindings.mark_as_complete())
+              db_updates_cmp.values.first.merge!('node_bindings' => db_updates_node_bindings.mark_as_complete())
             end
 
             # if bad node reference, return error and continue with module import
             imported_nodes = version_proc_class.import_nodes(@container_idh,@module_branch,ref,assem,node_bindings_hash,@component_module_refs,opts)
             return imported_nodes if ParsingError.is_error?(imported_nodes)
 
-            if workflow_hash = assem["workflow"]
+            if workflow_hash = assem['workflow']
               if parse_errors = Task::Template::ConfigComponents.find_parse_errors(workflow_hash)
                 return parse_errors
               end
             end
-            @db_updates_assemblies["node"].merge!(imported_nodes)
+            @db_updates_assemblies['node'].merge!(imported_nodes)
             @ndx_assembly_hashes[ref] ||= assem
             @ndx_version_proc_classes[ref] ||= version_proc_class
           end
@@ -59,38 +59,38 @@ module DTK; class ServiceModule
     def import
       module_branch_id = @module_branch[:id]
       mark_as_complete_cmp_constraint = {module_branch_id: module_branch_id} #so only delete extra components that belong to same module
-      @db_updates_assemblies["component"].mark_as_complete(mark_as_complete_cmp_constraint)
+      @db_updates_assemblies['component'].mark_as_complete(mark_as_complete_cmp_constraint)
       sp_hash = {
         cols: [:id],
         filter: [:eq,:module_branch_id, module_branch_id]
       }
       @existing_assembly_ids = Model.get_objs(@container_idh.createMH(:component),sp_hash).map{|r|r[:id]}
       mark_as_complete_node_constraint = {assembly_id: @existing_assembly_ids}
-      @db_updates_assemblies["node"].mark_as_complete(mark_as_complete_node_constraint,apply_recursively: true)
+      @db_updates_assemblies['node'].mark_as_complete(mark_as_complete_node_constraint,apply_recursively: true)
 
       Model.input_hash_content_into_model(@container_idh,@db_updates_assemblies)
 
       add_port_and_port_links()
-      @db_updates_assemblies["component"]
+      @db_updates_assemblies['component']
     end
 
     def self.import_assembly_top(assembly_ref,assembly_hash,module_branch,module_name,opts={})
       if assembly_hash.empty?
-        raise ParsingError.new("Empty assembly dsl file",opts_file_path(opts))
+        raise ParsingError.new('Empty assembly dsl file',opts_file_path(opts))
       end
-      unless assembly_name = assembly_hash["name"]||opts[:default_assembly_name]
-        raise ParsingError.new("No name associated with assembly dsl file",opts_file_path(opts))
+      unless assembly_name = assembly_hash['name']||opts[:default_assembly_name]
+        raise ParsingError.new('No name associated with assembly dsl file',opts_file_path(opts))
       end
 
       {
         assembly_ref => {
-          "display_name" => assembly_name,
-          "type" => "composite",
-          "description" => assembly_hash['description'],
-          "module_branch_id" => module_branch[:id],
-          "version" => module_branch.get_field?(:version),
-          "component_type" => Assembly.ret_component_type(module_name,assembly_name),
-          "attribute" => import_assembly_attributes(assembly_hash["attributes"],opts)
+          'display_name' => assembly_name,
+          'type' => 'composite',
+          'description' => assembly_hash['description'],
+          'module_branch_id' => module_branch[:id],
+          'version' => module_branch.get_field?(:version),
+          'component_type' => Assembly.ret_component_type(module_name,assembly_name),
+          'attribute' => import_assembly_attributes(assembly_hash['attributes'],opts)
         }
       }
     end
@@ -108,7 +108,7 @@ module DTK; class ServiceModule
       end
 
       aggregate_errors = ParsingError::Aggregate.new()
-      unless nodes = assembly_hash["nodes"]
+      unless nodes = assembly_hash['nodes']
         return {}
       end
       if nodes.is_a?(Hash)
@@ -116,7 +116,7 @@ module DTK; class ServiceModule
       elsif nodes.is_a?(String) # corner case: single node with no attributes
         nodes = {nodes => {}}
       else
-        raise ParsingError.new("Nodes section is ill-formed",opts_file_path(opts))
+        raise ParsingError.new('Nodes section is ill-formed',opts_file_path(opts))
       end
       ret = nodes.inject({}) do |h,(node_hash_ref,node_hash)|
         node_hash ||= {}
@@ -128,30 +128,30 @@ module DTK; class ServiceModule
           type,attributes = import_type_and_node_attributes(node_hash,opts)
           type = node_hash_ref.eql?('assembly_wide') ? 'assembly_wide' : type
           node_output = {
-            "display_name" => node_hash_ref,
-            "type" => type,
-            "attribute" => attributes,
-            "*assembly_id" => "/component/#{assembly_ref}"
+            'display_name' => node_hash_ref,
+            'type' => type,
+            'attribute' => attributes,
+            '*assembly_id' => "/component/#{assembly_ref}"
           }
 
           if nb_rs = node_to_nb_rs[node_hash_ref]
             if nb_rs_id = nb_rs_to_id[nb_rs]
-              node_output["node_binding_rs_id"] = nb_rs_id
+              node_output['node_binding_rs_id'] = nb_rs_id
             else
               # TODO: extend aggregate_errors.aggregate_errors to handle this
               # We want to import module still even if there are bad node references
               # we stop importing nodes when run into bad node reference but still continue with module import
-              return ParsingError::BadNodeReference.new(node_template: nb_rs,assembly: assembly_hash["name"])
+              return ParsingError::BadNodeReference.new(node_template: nb_rs,assembly: assembly_hash['name'])
             end
           else
-            node_output["node_binding_rs_id"] = nil
+            node_output['node_binding_rs_id'] = nil
           end
 
-          cmps_output = import_component_refs(container_idh,assembly_hash["name"],node_hash["components"],component_module_refs,opts)
+          cmps_output = import_component_refs(container_idh,assembly_hash['name'],node_hash['components'],component_module_refs,opts)
           return cmps_output if ParsingError.is_error?(cmps_output)
 
             unless cmps_output.empty?
-              node_output["component_ref"] = cmps_output
+              node_output['component_ref'] = cmps_output
             end
           h.merge(node_ref => node_output)
         end
@@ -174,11 +174,11 @@ module DTK; class ServiceModule
     private
 
     def determine_integer_version(hash_content,opts={})
-      if version = hash_content["dsl_version"]
+      if version = hash_content['dsl_version']
         ServiceModule::DSLVersionInfo.version_to_integer_version(version,opts)
-      elsif hash_content["assemblies"]
+      elsif hash_content['assemblies']
         1
-      elsif hash_content["assembly"]
+      elsif hash_content['assembly']
         2
       else
         ServiceModule::DSLVersionInfo.default_integer_version()
@@ -192,11 +192,11 @@ module DTK; class ServiceModule
       return CachedAdapterClasses[integer_version] if CachedAdapterClasses[integer_version]
       adapter_name = "v#{integer_version}"
       opts = {
-        class_name: {adapter_type: "AssemblyImport"},
+        class_name: {adapter_type: 'AssemblyImport'},
         subclass_adapter_name: true,
         base_class: ServiceModule
       }
-      CachedAdapterClasses[integer_version] = DynamicLoader.load_and_return_adapter_class("assembly_import",adapter_name,opts)
+      CachedAdapterClasses[integer_version] = DynamicLoader.load_and_return_adapter_class('assembly_import',adapter_name,opts)
     end
     CachedAdapterClasses = {}
 
@@ -255,7 +255,7 @@ module DTK; class ServiceModule
     def self.import_assembly_attributes(assembly_attrs_hash,opts={})
       assembly_attrs_hash ||= {}
       unless assembly_attrs_hash.is_a?(Hash)
-        raise ParsingError.new("Assembly attribute(s) are ill-formed",opts_file_path(opts))
+        raise ParsingError.new('Assembly attribute(s) are ill-formed',opts_file_path(opts))
       end
       import_attributes_helper(assembly_attrs_hash)
     end
@@ -264,9 +264,9 @@ module DTK; class ServiceModule
     # returns [type,attributes]
     def self.import_type_and_node_attributes(node_hash,opts={})
       type = Node::Type::Node.stub
-      attributes = import_node_attributes(node_hash["attributes"],opts)
-      if attr_type = attributes["type"]
-        attributes.delete("type")
+      attributes = import_node_attributes(node_hash['attributes'],opts)
+      if attr_type = attributes['type']
+        attributes.delete('type')
         type = Node::Type::NodeGroup.stub
       end
       [type,attributes]
@@ -274,7 +274,7 @@ module DTK; class ServiceModule
     def self.import_node_attributes(node_attrs_hash,opts={})
       node_attrs_hash ||= {}
       unless node_attrs_hash.is_a?(Hash)
-        raise ParsingError.new("Node attribute(s) are ill-formed",opts_file_path(opts))
+        raise ParsingError.new('Node attribute(s) are ill-formed',opts_file_path(opts))
       end
       # TODO: make sure that each node attribute is legal
       import_attributes_helper(node_attrs_hash)
@@ -284,9 +284,9 @@ module DTK; class ServiceModule
       attr_val_hash.each_pair do |attr_name,attr_val|
         ref = dispaly_name = attr_name
         ret[ref] = {
-          "display_name" => attr_name,
-          "value_asserted" => attr_val,
-          "data_type" => Attribute::Datatype.datatype_from_ruby_object(attr_val)
+          'display_name' => attr_name,
+          'value_asserted' => attr_val,
+          'data_type' => Attribute::Datatype.datatype_from_ruby_object(attr_val)
         }
       end
       ret.mark_as_complete()
@@ -343,7 +343,7 @@ module DTK; class ServiceModule
           cmp_name = Component.display_name_print_form(attr_info[:component_display_name])
           "#{cmp_name}/#{attr_info[:display_name]}"
         end
-        attribute = (bad_attrs.size == 1 ? "attribute" : "attributes")
+        attribute = (bad_attrs.size == 1 ? 'attribute' : 'attributes')
         raise ParsingError.new("Bad #{attribute} (#{bad_attrs_list.join(', ')}) in assembly template")
       end
       ret

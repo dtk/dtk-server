@@ -35,7 +35,7 @@ module DTK
       Transaction do
         ndx_new_tr_idhs = TargetRef::Input::BaseNodes.create_linked_target_refs?(target,assembly,[self],new_cardinality: new_cardinality)
         unless new_tr_idhs = ndx_new_tr_idhs && ndx_new_tr_idhs[id()]
-          raise Error.new("Unexpected that new_tr_idhs is empty")
+          raise Error.new('Unexpected that new_tr_idhs is empty')
         end
 
         # add attribute mappings, cloning if needed

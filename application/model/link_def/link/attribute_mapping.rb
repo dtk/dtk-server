@@ -21,7 +21,7 @@ module DTK
         input_attr_obj,input_path = get_context_attr_obj_with_path(err_msgs,:input,link_def_context)
         output_attr_obj,output_path = get_context_attr_obj_with_path(err_msgs,:output,link_def_context)
         unless err_msgs.empty?
-          err_msg = err_msgs.join(" and ").capitalize
+          err_msg = err_msgs.join(' and ').capitalize
           if opts[:raise_error]
             raise ErrorUsage.new(err_msg)
           else
@@ -64,7 +64,7 @@ module DTK
               "attribute matching link def term (#{attr_pp_form}) does not exist"
             else
               Log.error("unexpected that have no pp form for: #{inspect}")
-              "attribute matching link def term  does not exist"
+              'attribute matching link def term  does not exist'
             end
           err_msgs << err_msg
         end

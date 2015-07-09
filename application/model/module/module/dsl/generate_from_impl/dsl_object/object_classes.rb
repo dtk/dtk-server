@@ -16,8 +16,8 @@ module DTK; class ModuleDSL
 
         def render_hash_form(opts={})
           ret = RenderHash.new
-          ret.set_unless_nil("module",module_name?())
-          ret.set_unless_nil("dsl_version",ModuleDSL.version(integer_version()))
+          ret.set_unless_nil('module',module_name?())
+          ret.set_unless_nil('dsl_version',ModuleDSL.version(integer_version()))
           self[:components].each_element(skip_required_is_false: true) do |cmp|
             hash_key = render_cmp_ref(cmp.hash_key)
             unless (ScaffoldingStrategy[:ignore_components]||[]).include?(hash_key)
@@ -142,7 +142,7 @@ module DTK; class ModuleDSL
           type = "#{component_ps.config_agent_type}_#{component_ps[:type]}"
           external_ref = create_external_ref(component_ps[:name],type)
           self[:external_ref] = nailed(external_ref)
-          self[:basic_type] = t("service") #TODO: stub
+          self[:basic_type] = t('service') #TODO: stub
           self[:component_type] = t(processed_name)
           dependencies = dependencies(component_ps)
           if component_ps.key?(:only_one_per_node)
@@ -285,7 +285,7 @@ module DTK; class ModuleDSL
           self[:include] = true
           output_component = data[:attr_exp_rsc].parent.hash_key
           set_hash_key(output_component)
-          self[:type] = nailed("external")
+          self[:type] = nailed('external')
           StoreConfigHandler.add_attribute_mappings!(self,data)
         end
 
@@ -356,7 +356,7 @@ module DTK; class ModuleDSL
           set_label(name)
           self[:label] = t(name)
           self[:description] = unknown
-          self[:type] = t("string") #default that can be overriten
+          self[:type] = t('string') #default that can be overriten
           var_default = nil
           if default = attr_ps[:default]
             if default.set_default_value?()
@@ -374,7 +374,7 @@ module DTK; class ModuleDSL
 
           type = "#{config_agent_type}_attribute"
           ext_ref = create_external_ref(attr_ps[:name],type)
-          ext_ref.merge!("default_variable" => default.to_s) if var_default
+          ext_ref.merge!('default_variable' => default.to_s) if var_default
           self[:external_ref] = nailed(ext_ref)
         end
 
@@ -387,7 +387,7 @@ module DTK; class ModuleDSL
         end
 
         def set_external_ref_name(name)
-          self[:external_ref] && self[:external_ref]["name"] = name
+          self[:external_ref] && self[:external_ref]['name'] = name
         end
 
         def initialize__from_exported_resource(exp_rsc_ps)

@@ -64,8 +64,8 @@ module DTK; module CommandAndControlAdapter
         StateTranslation[op_status] || op_status
       end
       StateTranslation = {
-        "pending" => "starting",
-        "shutting-down" => "stopping"
+        'pending' => 'starting',
+        'shutting-down' => 'stopping'
       }
 
       private

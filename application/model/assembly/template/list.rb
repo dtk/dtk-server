@@ -5,7 +5,7 @@ module DTK
         assembly_mh = assembly_mh.createMH(:assembly_template) # to insure right mh type
         opts = opts.merge(cols: [:id, :group_id,:display_name,:component_type,:module_branch_id,:service_module,list_virtual_column?(opts[:detail_level])].compact)
         assembly_rows = get(assembly_mh,opts)
-        if opts[:detail_level] == "attributes"
+        if opts[:detail_level] == 'attributes'
           attr_rows = get_component_attributes(assembly_mh,assembly_rows)
           list_aux(assembly_rows,attr_rows,opts)
         else
@@ -85,10 +85,10 @@ module DTK
 
       def self.list_aux__simple(assembly_rows,opts={})
         ndx_ret = {}
-        if opts[:detail_level] == "components"
-          raise Error.new("list assembly templates at component level not treated")
+        if opts[:detail_level] == 'components'
+          raise Error.new('list assembly templates at component level not treated')
         end
-        include_nodes = ["nodes"].include?(opts[:detail_level])
+        include_nodes = ['nodes'].include?(opts[:detail_level])
         pp_opts = Aux.hash_subset(opts,[:no_module_prefix,:version_suffix])
         assembly_rows.each do |r|
           # TODO: hack to create a Assembly object (as opposed to row which is component); should be replaced by having

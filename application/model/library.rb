@@ -60,7 +60,7 @@ module XYZ
       private
 
       def users_private_library_name(_username)
-        "private"
+        'private'
       end
 
       def users_private_library_ref(username)
@@ -68,7 +68,7 @@ module XYZ
       end
 
       def public_library_name
-        "public"
+        'public'
       end
     end
 
@@ -81,7 +81,7 @@ module XYZ
         filter = [:eq, :library_library_id, id()]
         Node::Template.list(model_handle,filter: filter)
       when :components
-        raise Error.new("should not be reached")
+        raise Error.new('should not be reached')
       # Component::Template.list(model_handle,:library_idh => id_handle())
       else
         raise Error.new("TODO: not implemented yet: processing of info_about(#{about})")
@@ -107,7 +107,7 @@ module XYZ
 
     def clone_post_copy_hook__child_nodes(node_mh,node_hash_list,new_assembly_obj)
       rows = node_hash_list.map do |r|
-        ext_ref = r[:external_ref] && r[:external_ref].reject{|k,_v|k == :instance_id}.merge(type: "ec2_image")
+        ext_ref = r[:external_ref] && r[:external_ref].reject{|k,_v|k == :instance_id}.merge(type: 'ec2_image')
         update_row = {
           id: r[:id],
           external_ref: ext_ref,
@@ -138,7 +138,7 @@ module XYZ
         raise Error.new("unexpected model_name #{model_name}")
       end
       sp_hash = {
-        filter: [:and,[:eq, :id, new_id_handle.get_id()],[:eq, :type, "composite"]],
+        filter: [:and,[:eq, :id, new_id_handle.get_id()],[:eq, :type, 'composite']],
         columns: [col]
       }
       cmp_mh = new_id_handle.createMH(:component)

@@ -5,7 +5,7 @@ module XYZ
       return nil unless action
       if action.is_a?(Task::Action::PowerOnNode)
         # TODO: Look into this see if neccessery
-        Log.warn "TODO: >>>>>>>> CREATING POWER ON NODE EVEN <<<<<<<<< IMPLEMENTATION NEEDED"
+        Log.warn 'TODO: >>>>>>>> CREATING POWER ON NODE EVEN <<<<<<<<< IMPLEMENTATION NEEDED'
         nil
       elsif action.is_a?(Task::Action::CreateNode)
         case event_type
@@ -52,7 +52,7 @@ module XYZ
       # TODO: should encapsulate this at workflow or iaas level
       def self.is_no_op?(action)
         ext_ref = action[:node][:external_ref]
-        ext_ref[:type] == "ec2_instance" && ext_ref[:instance_id]
+        ext_ref[:type] == 'ec2_instance' && ext_ref[:instance_id]
       end
 
       def initialize(action)
@@ -60,13 +60,13 @@ module XYZ
         ext_ref = node[:external_ref]
         ext_ref_type = ext_ref[:type]
         hash = {
-          event: "initiating_create_node",
+          event: 'initiating_create_node',
           node_name: node[:display_name],
           node_type: ext_ref_type.to_s
         }
         # TODO: should encapsulate this in call to iaas sdapter
         case ext_ref_type
-        when "ec2_instance", "ec2_image" #TODO: may chaneg code so dont get ec2_image
+        when 'ec2_instance', 'ec2_image' #TODO: may chaneg code so dont get ec2_image
           hash.merge!(image_id: ext_ref[:image_id])
         else
           Log.error("external ref type #{ext_ref_type} not treated")
@@ -82,7 +82,7 @@ module XYZ
         ext_ref = node[:external_ref]
         ext_ref_type = ext_ref[:type]
         hash = {
-          event: "completed_create_node",
+          event: 'completed_create_node',
           node_name: node[:display_name],
           node_type: ext_ref_type.to_s,
           status: status
@@ -113,7 +113,7 @@ module XYZ
           {component_name: cmp_attrs[:component][:display_name]}.merge(attr_info)
         end
         hash = {
-          event: "initiating_config_node",
+          event: 'initiating_config_node',
           node_name: action[:node][:display_name],
           components: cmp_info
         }

@@ -34,11 +34,11 @@ module DTK; class Target
         install_script_file_name = "install_script_#{node[:id]}"
 
         servers << {
-          "dtk_node_agent_location" => "#{R8.app_user_home()}/dtk-node-agent",
-          "install_script_file_path" => install_script_file_path,
-          "install_script_file_name" => install_script_file_name,
-          "node" => node,
-          "mcollective_client" => mcollective_client
+          'dtk_node_agent_location' => "#{R8.app_user_home()}/dtk-node-agent",
+          'install_script_file_path' => install_script_file_path,
+          'install_script_file_name' => install_script_file_name,
+          'node' => node,
+          'mcollective_client' => mcollective_client
         }
 
         File.open("#{install_script_file_path}/#{install_script_file_name}", 'w') do |f|
@@ -125,8 +125,8 @@ module DTK; class Target
     class SshJob
       def call(message)
         Log.info_pp(['SshJob#call',:message,message[:node]])
-        node = message["node"]
-        mcollective_client = message["mcollective_client"]
+        node = message['node']
+        mcollective_client = message['mcollective_client']
         external_ref = node.get_external_ref()
 
         unless hostname = external_ref[:routable_host_address]
@@ -145,32 +145,32 @@ module DTK; class Target
           hostname: external_ref[:routable_host_address],
           user: ssh_credentials[:ssh_user],
           password: ssh_credentials[:ssh_password],
-          port: ssh_credentials[:port]||"22",
+          port: ssh_credentials[:port]||'22',
           id: node.id()
         }
 
         # just to test taht can connect
         begin
-          execute_ssh_command("ls /", params)
+          execute_ssh_command('ls /', params)
         rescue Exception => e
           Log.info_pp(['SshJob#call',:error,e, :params, params])
           return
         end
 
-        execute_ssh_command("rm -rf /tmp/dtk-node-agent", params)
+        execute_ssh_command('rm -rf /tmp/dtk-node-agent', params)
 
         Net::SCP.upload!(params[:hostname], params[:user],
-          "#{message["install_script_file_path"]}/#{message["install_script_file_name"]}", "/tmp",
+          "#{message['install_script_file_path']}/#{message['install_script_file_name']}", '/tmp',
           ssh: { password: params[:password], port: params[:port] }, recursive: true)
 
         Net::SCP.upload!(params[:hostname], params[:user],
-          message["dtk_node_agent_location"], "/tmp",
+          message['dtk_node_agent_location'], '/tmp',
           ssh: { password: params[:password], port: params[:port] }, recursive: true)
 
         # perform installation
-        install_command = params[:user].eql?('root') ? "bash /tmp/dtk-node-agent/install_agent.sh" : "sudo bash /tmp/dtk-node-agent/install_agent.sh"
+        install_command = params[:user].eql?('root') ? 'bash /tmp/dtk-node-agent/install_agent.sh' : 'sudo bash /tmp/dtk-node-agent/install_agent.sh'
         execute_ssh_command(install_command, params)
-        execute_ssh_command("rm -rf /tmp/dtk-node-agent", params)
+        execute_ssh_command('rm -rf /tmp/dtk-node-agent', params)
 
         install_script_command = params[:user].eql?('root') ? "bash /tmp/#{message['install_script_file_name']}" : "sudo bash /tmp/#{message['install_script_file_name']}"
         execute_ssh_command(install_script_command, params)
@@ -181,7 +181,7 @@ module DTK; class Target
 
         # send discover call filtered by 'pbuilderid'(node[:ref] == pbuilderid)
         # if empty array is returned, agent on node is not working as expected
-        filter = {"fact"=>[{fact: "pbuilderid",value: node[:ref],operator: "=="}], "cf_class"=>[], "agent"=>[], "identity"=>[], "compound"=>[]}
+        filter = {'fact'=>[{fact: 'pbuilderid',value: node[:ref],operator: '=='}], 'cf_class'=>[], 'agent'=>[], 'identity'=>[], 'compound'=>[]}
         discovered_data = CommandAndControl.discover(filter, 3, 1, mcollective_client)
 
         # set managed = true only if mcollective from node returns valid response

@@ -35,11 +35,11 @@ module DTK
       end
 
       def platform_is_linux?
-        RUBY_PLATFORM.downcase.include?("linux")
+        RUBY_PLATFORM.downcase.include?('linux')
       end
 
       def platform_is_windows?
-        RUBY_PLATFORM.downcase.include?("mswin") || RUBY_PLATFORM.downcase.include?("mingw")
+        RUBY_PLATFORM.downcase.include?('mswin') || RUBY_PLATFORM.downcase.include?('mingw')
       end
 
       def platform
@@ -252,13 +252,13 @@ module DTK
 
       def pp_form(obj)
         require 'pp'
-        x = ""
+        x = ''
         PP.pp obj, x
         x
       end
 
       def tokenize_bracket_name(x)
-        x.split("[").map{|y|y.gsub(/\]/,"")}
+        x.split('[').map{|y|y.gsub(/\]/,'')}
       end
 
       def put_in_bracket_form(token_array)
@@ -266,7 +266,7 @@ module DTK
           token_array[0]
         else
           first = token_array.shift
-          "#{first}[#{token_array.join("][")}]"
+          "#{first}[#{token_array.join('][')}]"
         end
       end
 
@@ -280,7 +280,7 @@ module DTK
 
       def underscore(str)
         str.gsub(/::/, '/').gsub(/([A-Z]+)([A-Z][a-z])/,'\1_\2').
-        gsub(/([a-z\d])([A-Z])/,'\1_\2').tr("-", "_").downcase
+        gsub(/([a-z\d])([A-Z])/,'\1_\2').tr('-', '_').downcase
       end
 
       def demodulize(str)

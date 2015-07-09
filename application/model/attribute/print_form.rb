@@ -12,7 +12,7 @@ module DTK
         ret = raw_attrs.map{|a|a.print_form(opts)}
         if opts.array(:detail_to_include).include?(:attribute_links)
           unless assembly = opts[:assembly]
-            raise Error.new("Unexpected to have opts[:assembly] nil")
+            raise Error.new('Unexpected to have opts[:assembly] nil')
           end
           PrintForm.augment_with_attribute_links!(ret,assembly,raw_attrs)
         end
@@ -102,13 +102,13 @@ module DTK
       LinkedToPuppetHeader = 'external_ref(puppet_header)'
 
       def attr_name_default
-        index_map_string = (@index_map ? @index_map.inspect() : "")
+        index_map_string = (@index_map ? @index_map.inspect() : '')
         "#{@aug_attr[:display_name]}#{index_map_string}"
       end
 
       def attr_name_special_processing
-        if @aug_attr[:semantic_type_summary] == "host_address_ipv4" && @index_map == [0]
-          "host_address"
+        if @aug_attr[:semantic_type_summary] == 'host_address_ipv4' && @index_map == [0]
+          'host_address'
         end
       end
 
@@ -132,14 +132,14 @@ module DTK
 
       DisplayNamePrefixFormats = {
         simple: {
-          assembly: "",
-          node: "$node/",
-          component: "$node/$component/"
+          assembly: '',
+          node: '$node/',
+          component: '$node/$component/'
         },
         canonical: {
-          assembly: "",
-          node: "node[$node]/",
-          component: "node[$node]/cmp[$component]/"
+          assembly: '',
+          node: 'node[$node]/',
+          component: 'node[$node]/cmp[$component]/'
         }
       }
 

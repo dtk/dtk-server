@@ -63,11 +63,11 @@ module DTK; class Component
                  [:eq,:component_component_id,cmp_idh.get_id()]]
       }
       unless title_attr = get_obj(cmp_idh.createMH(:attribute),sp_hash)
-        Log.error("Unexpected that cannot find the title attribute")
+        Log.error('Unexpected that cannot find the title attribute')
         return
       end
       if title_attr[:value_asserted]
-        Log.error("Unexpected that title attribute has value_asserted when set_title_attribute called")
+        Log.error('Unexpected that title attribute has value_asserted when set_title_attribute called')
       end
       title_attr.update(value_asserted: component_title,cannot_change: true,is_instance_value: true)
     end
@@ -140,7 +140,7 @@ module DTK; class Component
 
     def get_component_template_parent
       unless row = get_obj(cols: [:instance_component_template_parent])
-        raise Error.new("Unexpected that get_component_template_parent() called and nil result")
+        raise Error.new('Unexpected that get_component_template_parent() called and nil result')
       end
       Component::Template.create_from_component(row[:component_template])
     end
@@ -167,7 +167,7 @@ module DTK; class Component
     end
 
     def self.print_form(component, _namespace=nil)
-      ret = component.get_field?(:display_name).gsub(/__/,"::")
+      ret = component.get_field?(:display_name).gsub(/__/,'::')
       # removed namespace from list-components list (task DTK-1603)
       # ret = "#{namespace[:display_name]}/#{ret}" if namespace
 

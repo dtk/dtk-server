@@ -13,15 +13,15 @@ module XYZ
     attr_accessor :save_flag, :source
 
     def self.create_from_input_hash(input_hash,source,c)
-      raise Error.new("search object is ill-formed") unless is_valid?(input_hash)
-      sp = nil_if_empty(input_hash["search_pattern"])
+      raise Error.new('search object is ill-formed') unless is_valid?(input_hash)
+      sp = nil_if_empty(input_hash['search_pattern'])
       hash = {
-        id: nil_if_empty(input_hash["id"]),
-        display_name: nil_if_empty(input_hash["display_name"]),
+        id: nil_if_empty(input_hash['id']),
+        display_name: nil_if_empty(input_hash['display_name']),
         search_pattern: sp ? SearchPattern.create(sp) : nil
       }
       ret = SearchObject.new(hash,c)
-      ret.save_flag = input_hash["save"]
+      ret.save_flag = input_hash['save']
       ret.source = source
       ret
     end
@@ -40,10 +40,10 @@ module XYZ
       hash_for_json_sp = sp ? (sp.is_a?(SearchPattern) ? sp.hash_for_json_generate() : sp) : nil
 
       hash_for_json_generate = {
-        "display_name" => self[:display_name],
-        "relation" => self[:relation],
-        "id" => self[:id],
-        "search_pattern" => hash_for_json_sp
+        'display_name' => self[:display_name],
+        'relation' => self[:relation],
+        'id' => self[:id],
+        'search_pattern' => hash_for_json_sp
       }
       JSON.generate(hash_for_json_generate)
     end
@@ -82,17 +82,17 @@ module XYZ
       search_pattern_db =  search_pattern.ret_form_for_db()
       relation_db = (search_pattern||{})[:relation] ? search_pattern[:relation].to_s : nil
       if @id_handle
-        raise Error.new("saved search cannot be updated unless there is a name or search a pattern") unless search_pattern or name
+        raise Error.new('saved search cannot be updated unless there is a name or search a pattern') unless search_pattern or name
         hash_assignments = {}
         hash_assignments[:display_name] = name if name
         hash_assignments[:search_pattern] =  search_pattern_db if search_pattern_db
         hash_assignments[:relation] = relation_db if relation_db
         self.class.update_from_hash_assignments(@id_handle,hash_assignments)
       else
-        raise Error.new("saved search cannot be created if search_pattern or relation does not exist") unless search_pattern_db and relation_db
-        factory_idh = model_handle.createIDH(uri: "/search_object", is_factory: true)
+        raise Error.new('saved search cannot be created if search_pattern or relation does not exist') unless search_pattern_db and relation_db
+        factory_idh = model_handle.createIDH(uri: '/search_object', is_factory: true)
         hash_assignments = {
-          display_name: name || "search_object",
+          display_name: name || 'search_object',
           search_pattern: search_pattern_db,
           relation: relation_db
         }
@@ -109,7 +109,7 @@ module XYZ
     end
 
     def retrieve_from_saved_object!
-      raise Error.new("cannot update without an id") unless id()
+      raise Error.new('cannot update without an id') unless id()
       saved_object = self.class.get_objects(model_handle,{id: id()}).first
       raise Error.new("cannot find saved search with id (#{id})") unless saved_object
       saved_object.each do |k,v|
@@ -120,7 +120,7 @@ module XYZ
 
     def self.is_valid?(input_hash)
       # TODO: can do finer grain validation
-      (nil_if_empty(input_hash["id"]) or nil_if_empty(input_hash["search_pattern"])) ? true : nil
+      (nil_if_empty(input_hash['id']) or nil_if_empty(input_hash['search_pattern'])) ? true : nil
     end
 
     def db

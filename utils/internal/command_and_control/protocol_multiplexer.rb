@@ -40,7 +40,7 @@ module XYZ
           elsif callbacks
             callbacks.process_msg(msg,request_id)
           else
-            Log.error "max count or timeout reached: dropping msg"
+            Log.error 'max count or timeout reached: dropping msg'
           end
          rescue Exception => e
           # TODO: this is last resort trap; if this is reached the user will have to manually cancel the task
@@ -84,7 +84,7 @@ module XYZ
             if @count_info[request_id]
               count = @count_info[request_id] -= 1
             else
-              Log.error("@count_info[request_id] is null")
+              Log.error('@count_info[request_id] is null')
               return nil
             end
           end

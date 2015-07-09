@@ -4,19 +4,19 @@ require 'pp'
 STDOUT.sync = true
 
 # checks for windows/unix for chaining commands
-OS_COMMAND_CHAIN = RUBY_PLATFORM =~ /mswin|mingw|cygwin/ ? "&" : ";"
+OS_COMMAND_CHAIN = RUBY_PLATFORM =~ /mswin|mingw|cygwin/ ? '&' : ';'
 
 unless ARGV[0]
-  print "You need to pass version tag as param to script call"
+  print 'You need to pass version tag as param to script call'
   exit(1)
 end
 
-puts "WARNING!"
+puts 'WARNING!'
 puts
-puts "************* PROVIDED DATA *************"
+puts '************* PROVIDED DATA *************'
 puts " VERSION TAG:    #{ARGV[0]}"
-puts "*****************************************"
-puts "Make sure that provided data is correct, and press ENTER to continue OR CTRL^C to stop"
+puts '*****************************************'
+puts 'Make sure that provided data is correct, and press ENTER to continue OR CTRL^C to stop'
 a = $stdin.gets
 
 # ['dtk-common-repo','dtk-common',

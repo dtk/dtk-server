@@ -7,8 +7,8 @@
     module_name: {type: :varchar, size: 50},
     module_namespace: {type: :varchar, size: 50},
     parse_state: {type: :varchar, size: 25},
-    branch: {type: :varchar, size: 100, default: "master"},
-    version: {type: :varchar, size: 100, default: "master"},
+    branch: {type: :varchar, size: 100, default: 'master'},
+    version: {type: :varchar, size: 100, default: 'master'},
     updated: {type: :boolean, default: false},
     repo_id: {
       type: :bigint,

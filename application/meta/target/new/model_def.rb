@@ -85,7 +85,7 @@
          alias: :node_member,
          join_type: :inner,
          join_cond: {datacenter_datacenter_id: :datacenter__id},
-         filter: [:oneof, :type, ["staged","instance"]],
+         filter: [:oneof, :type, ['staged','instance']],
          cols: [:id,:group_id,:display_name,:type,:external_ref,:os_type]
        }]
     },

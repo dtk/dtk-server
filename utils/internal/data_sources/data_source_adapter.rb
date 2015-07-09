@@ -20,17 +20,17 @@ module XYZ
     private
 
     def load_ds_adapter_class
-      rel_path = "#{ds_name()}/#{obj_type()}#{source_obj_type() ? "__" + source_obj_type() : ""}"
+      rel_path = "#{ds_name()}/#{obj_type()}#{source_obj_type() ? '__' + source_obj_type() : ''}"
       begin
         file_path = File.expand_path(rel_path, File.dirname(__FILE__))
         require file_path
        rescue Exception => e
-        raise Error.new("Adapter file (#{file_path}.rb) to process object #{obj_type()} for data source #{ds_name()} #{source_obj_type() ? "(using source object #{source_obj_type()}) " : ""} does not exist") unless File.exists?(file_path + ".rb")
+        raise Error.new("Adapter file (#{file_path}.rb) to process object #{obj_type()} for data source #{ds_name()} #{source_obj_type() ? "(using source object #{source_obj_type()}) " : ''} does not exist") unless File.exists?(file_path + '.rb')
         raise e
       end
 
       base_class = DSNormalizer.const_get Aux.camelize(ds_name())
-      @ds_object_adapter_class = base_class.const_get Aux.camelize("#{obj_type()}#{source_obj_type() ? "_" + source_obj_type() : ""}")
+      @ds_object_adapter_class = base_class.const_get Aux.camelize("#{obj_type()}#{source_obj_type() ? '_' + source_obj_type() : ''}")
     end
 
     def normalize_and_update_db(container_id_handle,ds_hash,marked)

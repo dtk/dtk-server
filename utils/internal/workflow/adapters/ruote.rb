@@ -51,12 +51,12 @@ module DTK
           if errors.nil? || errors.empty?
             Log.info_pp :normal_completion
           else
-            Log.error "-------- intercepted errors ------"
+            Log.error '-------- intercepted errors ------'
             errors.each  do |e|
               Log.error_pp e.message
               Log.error_pp e.trace.split("\n")
             end
-            Log.error "-------- end: intercepted errors ------"
+            Log.error '-------- end: intercepted errors ------'
 
             # different ways to continue
             # one way is "fix error " ; engine.replay_at_error(err); engine.wait_for(@wfid)
@@ -64,7 +64,7 @@ module DTK
             # Engine.cancel_process(@wfid)
           end
          rescue Exception => e
-          Log.error_pp "error trap in ruote#execute"
+          Log.error_pp 'error trap in ruote#execute'
           Log.error_pp [e,e.backtrace[0..50]]
          # TODO: if do following Engine.cancel_process(@wfid), need to update task; somhow need to detrmine what task triggered this
          ensure

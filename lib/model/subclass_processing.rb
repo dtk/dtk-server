@@ -41,7 +41,7 @@ module DTK
         case model_name
           when :component
            type = get_object_scalar_column(id_handle,:type)
-           type == "composite" ? :assembly : model_name
+           type == 'composite' ? :assembly : model_name
           when :node
            type = get_object_scalar_column(id_handle,:type)
            %w{node_group_instance}.include?(type) ? :node_group : model_name

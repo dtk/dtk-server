@@ -10,15 +10,15 @@ module XYZ
         end
          class << self
             def unique_keys(source)
-              [source["qualified_ref"]]
+              [source['qualified_ref']]
             end
 
            def relative_distinguished_name(source)
-             source["ref"]
+             source['ref']
            end
 
            def display_name(source)
-             source["display_name"] || source["ref"]
+             source['display_name'] || source['ref']
            end
          end
       end

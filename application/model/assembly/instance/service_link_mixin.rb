@@ -18,7 +18,7 @@ module DTK
         output_ports = []
         unc_ports = []
         get_augmented_ports(mark_unconnected: true).each do |r|
-          if r[:direction] == "output"
+          if r[:direction] == 'output'
             output_ports << r
           elsif r[:unconnected]
             unc_ports << r

@@ -20,40 +20,40 @@ memory_size = 't1.micro'
 memory_size_attribute = 'memory_size'
 dtk_common = DtkCommon.new(service_name, assembly_name)
 
-describe "(Staging And Deploying Assemblies) Test Case 3: Deploy from assembly (stage and converge), stop the running instance (nodes) and then delete service" do
+describe '(Staging And Deploying Assemblies) Test Case 3: Deploy from assembly (stage and converge), stop the running instance (nodes) and then delete service' do
   before(:all) do
-    puts "****************************************************************************************************************************************************",""
+    puts '****************************************************************************************************************************************************',''
   end
 
   context "Stage service function on #{assembly_name} assembly" do
-    include_context "Stage", dtk_common
+    include_context 'Stage', dtk_common
   end
 
-  context "List services after stage" do
-    include_context "List services after stage", dtk_common
+  context 'List services after stage' do
+    include_context 'List services after stage', dtk_common
   end
 
-  context "Set os attribute function" do
-    include_context "Set attribute", dtk_common, os_attribute, os
+  context 'Set os attribute function' do
+    include_context 'Set attribute', dtk_common, os_attribute, os
   end
 
-  context "Set Memory attribute function" do
-    include_context "Set attribute", dtk_common, memory_size_attribute, memory_size
+  context 'Set Memory attribute function' do
+    include_context 'Set attribute', dtk_common, memory_size_attribute, memory_size
   end
 
-  context "Converge function" do
-    include_context "Converge", dtk_common
+  context 'Converge function' do
+    include_context 'Converge', dtk_common
   end
 
-  context "Stop service function" do
-    include_context "Stop service", dtk_common
+  context 'Stop service function' do
+    include_context 'Stop service', dtk_common
   end
 
-  context "Delete and destroy service function" do
-    include_context "Delete services", dtk_common
+  context 'Delete and destroy service function' do
+    include_context 'Delete services', dtk_common
   end
 
   after(:all) do
-    puts "", ""
+    puts '', ''
   end
 end

@@ -78,8 +78,8 @@ module XYZ
     private
 
     def reply_to_caller
-      raise Error.new("cannot call reply_to_caller() if caller_channel not set") unless @caller_channel
-      raise Error.new("cannot call reply_to_caller() if msg_bus_client not set") unless @msg_bus_client
+      raise Error.new('cannot call reply_to_caller() if caller_channel not set') unless @caller_channel
+      raise Error.new('cannot call reply_to_caller() if msg_bus_client not set') unless @msg_bus_client
       reply_queue = @msg_bus_client.publish_queue(@caller_channel,passive: true)
       input_msg_reply = ProcessorMsg.create({msg_type: :task})
       # TBD: stub; want to strip out a number of these fields

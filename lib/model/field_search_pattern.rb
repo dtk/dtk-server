@@ -16,7 +16,7 @@ module XYZ
           basic_type = @col_basic_types[name]
           next unless basic_type
           new_el =
-            if value.nil? || value == "UNSET"
+            if value.nil? || value == 'UNSET'
               {name => nil}
             else
               case basic_type
@@ -25,7 +25,7 @@ module XYZ
                when :numeric
                 process_numeric(name,value)
                when :boolean
-                {name => (value == 1 || value == "1") ? true : false}
+                {name => (value == 1 || value == '1') ? true : false}
               end
           end
           ret = SQL.and(ret,new_el)

@@ -14,7 +14,7 @@ assembly_name = 'dtk::release'
 namespace = 'internal'
 
 dtk_common = DtkCommon.new(service_name, assembly_name)
-config = YAML::load(File.open("./config/release.yml"))
+config = YAML::load(File.open('./config/release.yml'))
 
 # Stage service
 dtk_common.stage_service_with_namespace(namespace)
@@ -23,8 +23,8 @@ begin
   if dtk_common.check_if_service_exists(dtk_common.service_id)
     #Set attributes for service
     set_attributes_array = []
-    set_attributes_array << dtk_common.set_attribute(dtk_common.service_id, 'repo_manager/common_user/user', "git")
-    set_attributes_array << dtk_common.set_attribute(dtk_common.service_id, 'repo_manager/gitolite/gitolite_user', "git")
+    set_attributes_array << dtk_common.set_attribute(dtk_common.service_id, 'repo_manager/common_user/user', 'git')
+    set_attributes_array << dtk_common.set_attribute(dtk_common.service_id, 'repo_manager/gitolite/gitolite_user', 'git')
     set_attributes_array << dtk_common.set_attribute(dtk_common.service_id, 'repo_manager/dtk_repo_manager/smtp_username', config['properties']['smtp_username'])
     set_attributes_array << dtk_common.set_attribute(dtk_common.service_id, 'repo_manager/dtk_repo_manager/smtp_password', config['properties']['smtp_password'])
     set_attributes_array << dtk_common.set_attribute(dtk_common.service_id, 'tenant/dtk_addons::jenkins_swarm_client/name', config['properties']['jenkins_node'])
@@ -51,7 +51,7 @@ begin
           raise "[ERROR] #{service_name} service was not deployed successfully!"
         end
     else
-        raise "[ERROR] Some of the attributes are not set correctly. Will not proceed with converge process!"
+        raise '[ERROR] Some of the attributes are not set correctly. Will not proceed with converge process!'
     end
   else
     raise "[ERROR] #{service_name} service is not staged and therefore deployment of DTK artifacts will not continue!"

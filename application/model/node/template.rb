@@ -29,7 +29,7 @@ module DTK
           node_bindings = get_objs(model_handle.createMH(:node), sp_hash)
           unq_bindings = node_bindings.inject({}) { |tmp,nb| tmp.merge(nb[:node_binding_rs_id] => nb[:node_binding_ruleset])}
           node_bindings = unq_bindings.values
-        elsif opts[:is_list_all] && opts[:is_list_all].to_s == "true"
+        elsif opts[:is_list_all] && opts[:is_list_all].to_s == 'true'
           sp_hash = { cols: [:node_bindings], filter: [:neq, :datacenter_datacenter_id, nil]}
           node_bindings = get_objs(model_handle.createMH(:node), sp_hash)
           unq_bindings = node_bindings.inject({}) { |tmp,nb| tmp.merge(nb[:node_binding_rs_id] => nb[:node_binding_ruleset])}
@@ -72,7 +72,7 @@ module DTK
         public_library = get_public_library(model_handle)
         sp_hash = {
           cols: [:id,:os_identifier],
-          filter: [:and,[:eq,:type,"image"],[:eq,:library_library_id,public_library[:id]]]
+          filter: [:and,[:eq,:type,'image'],[:eq,:library_library_id,public_library[:id]]]
         }
         get_images(model_handle).map{|r|r[:os_identifier]}.compact.uniq
       end
@@ -81,7 +81,7 @@ module DTK
         public_library = Library.get_public_library(model_handle.createMH(:library))
         sp_hash = {
           cols: [:id,:group_id,:os_identifier,:external_ref],
-          filter: [:and,[:eq,:type,"image"],[:eq,:library_library_id,public_library[:id]]]
+          filter: [:and,[:eq,:type,'image'],[:eq,:library_library_id,public_library[:id]]]
         }
         get_objs(model_handle.createMH(:node),sp_hash)
       end
@@ -130,7 +130,7 @@ module DTK
         public_library = Library.get_public_library(model_handle.createMH(:library))
         sp_hash = {
           cols: [:id,:external_ref],
-          filter: [:and,[:eq,:type,"image"],[:eq,:library_library_id,public_library[:id]]]
+          filter: [:and,[:eq,:type,'image'],[:eq,:library_library_id,public_library[:id]]]
         }
         get_objs(model_handle.createMH(:node),sp_hash).map do |r|
           if external_ref = r[:external_ref]
@@ -142,7 +142,7 @@ module DTK
       def self.find_matching_node_template(target,opts={})
         if node_target = opts[:node_target]
           pp [:node_target,node_target]
-          raise Error.new("here need to write code that uses node_target to return results")
+          raise Error.new('here need to write code that uses node_target to return results')
         end
 
         node_binding_rs = opts[:node_binding_ruleset]
@@ -153,7 +153,7 @@ module DTK
       def self.null_node_template(model_handle)
         sp_hash = {
           cols: [:id,:group_id,:display_name],
-          filter: [:eq,:display_name, "null-node-template"]
+          filter: [:eq,:display_name, 'null-node-template']
         }
         node_mh = model_handle.createMH(:node)
         get_obj(node_mh,sp_hash)
@@ -191,7 +191,7 @@ module DTK
         # find and update nodes that are images
         sp_hash = {
           cols: [:id,:external_ref],
-          filter: [:eq, :type, "image"]
+          filter: [:eq, :type, 'image']
         }
         matching_images = get_objs(model_handle,sp_hash).select do |r|
           r[:external_ref][:image_id] == old_image_id

@@ -57,7 +57,7 @@ module DTK; class LinkDef::Link
         if num_ngs == 0
           return nil
         elsif num_ngs == 2
-          raise ErrorUsage.new("Not treating links between components that are both on node groups")
+          raise ErrorUsage.new('Not treating links between components that are both on node groups')
         end
         # determine if this manifests as single of multiple links; if single link just pass nil
         # when this is called there is one node group and one node

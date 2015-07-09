@@ -52,7 +52,7 @@ module DTK
         provider_id = provider.id
         create_rows = iaas_properties_array.map do |iaas_properties|
           display_name = iaas_properties.name
-          ref = display_name.downcase.gsub(/ /,"-")
+          ref = display_name.downcase.gsub(/ /,'-')
           specific_params = {
             parent_id: provider_id,
             ref: ref,
@@ -139,7 +139,7 @@ module DTK
       def self.delete_and_destroy(target)
         response_obj = DeleteResponseObject.new(target)
         if target.is_builtin_target?()
-          raise ErrorUsage.new("Cannot delete the builtin target")
+          raise ErrorUsage.new('Cannot delete the builtin target')
         end
 
         target_mh              = target.model_handle()
@@ -176,7 +176,7 @@ module DTK
 
       def self.set_default_target(target,opts={})
         current_default_target = DefaultTarget.set(target,opts)
-        ResponseInfo.info("Default target changed from ?current_default_target to ?new_default_target",
+        ResponseInfo.info('Default target changed from ?current_default_target to ?new_default_target',
                           current_default_target: current_default_target,
                           new_default_target: target)
       end

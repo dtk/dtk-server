@@ -109,16 +109,16 @@ module R8Tpl
       end
 
       case (view_type())
-        when "edit"
+        when 'edit'
           render_edit_tpl_cache()
           #       add_validation()
-        when "display"
+        when 'display'
           render_display_tpl_cache()
-        when "list"
+        when 'list'
           render_list_tpl_cache()
-        when "search"
+        when 'search'
           render_search_tpl_cache()
-        when "dock_display"
+        when 'dock_display'
           render_dock_display_tpl_cache()
         end
       self
@@ -183,9 +183,9 @@ module R8Tpl
     cache_path = ret_existing_view_path(:cache)
     return nil unless cache_path
     meta_view_path = ret_existing_view_path(view_path_type() == :db ? :meta_db : :meta)
-    raise XYZ::Error.new("to generate cache appropriate meta file must exist") unless  meta_view_path
+    raise XYZ::Error.new('to generate cache appropriate meta file must exist') unless  meta_view_path
     system_view_path = ret_existing_view_path(:system)
-    raise XYZ::Error.new("to generate cache appropriate system file must exist") unless  system_view_path
+    raise XYZ::Error.new('to generate cache appropriate system file must exist') unless  system_view_path
 
     if not R8::Config[:dev_mode].nil? or R8::Config[:dev_mode] == false
       cache_edit_time = cache_path.edit_time_as_int()
@@ -257,9 +257,9 @@ module R8Tpl
 
         # might move later, putting sorting code here
         # TODO: look for better way to do find fields taht should not have sorting
-        if (field_hash.values.first||{})[:type] == "actions_basic"
-          field_meta[:sort_call] = ""
-          field_meta[:sort_class] = ""
+        if (field_hash.values.first||{})[:type] == 'actions_basic'
+          field_meta[:sort_call] = ''
+          field_meta[:sort_class] = ''
         else
           field_meta[:sort_call] = "onclick=\"R8.Search.sort('{%=search_context%}','#{field_name}','{%=#{field_name}_order%}');\""
           field_meta[:sort_class] = "{%=#{field_name}_order_class%}"
@@ -380,11 +380,11 @@ module R8Tpl
             end
 
             rows[row_count][:cols][col_index][:class] = td_label_class
-            rows[row_count][:cols][col_index][:col_id] = field_meta[:name].to_s+"-label"
+            rows[row_count][:cols][col_index][:col_id] = field_meta[:name].to_s+'-label'
             col_index+=1
             rows[row_count][:cols][col_index] = {}
             # do field
-            rows[row_count][:cols][col_index][:col_id] = field_meta[:name].to_s+"-field"
+            rows[row_count][:cols][col_index][:col_id] = field_meta[:name].to_s+'-field'
             rows[row_count][:cols][col_index][:content] = field_handler.get_field(view_type(), field_meta, 'tpl')
             rows[row_count][:cols][col_index][:class] = td_field_class
           end
@@ -484,11 +484,11 @@ module R8Tpl
             end
 
             rows[row_count][:cols][col_index][:class] = td_label_class
-            rows[row_count][:cols][col_index][:col_id] = field_meta[:name].to_s+"-label"
+            rows[row_count][:cols][col_index][:col_id] = field_meta[:name].to_s+'-label'
             col_index+=1
             rows[row_count][:cols][col_index] = {}
             # do field
-            rows[row_count][:cols][col_index][:col_id] = field_meta[:name].to_s+"-field"
+            rows[row_count][:cols][col_index][:col_id] = field_meta[:name].to_s+'-field'
             rows[row_count][:cols][col_index][:content] = field_handler.get_field(view_type(), field_meta, 'tpl')
             rows[row_count][:cols][col_index][:class] = td_field_class
           end
@@ -613,11 +613,11 @@ module R8Tpl
             end
 
             rows[row_count][:cols][col_index][:class] = td_label_class
-            rows[row_count][:cols][col_index][:col_id] = field_meta[:name].to_s+"-label"
+            rows[row_count][:cols][col_index][:col_id] = field_meta[:name].to_s+'-label'
             col_index+=1
             rows[row_count][:cols][col_index] = {}
             # do field
-            rows[row_count][:cols][col_index][:col_id] = field_meta[:name].to_s+"-field"
+            rows[row_count][:cols][col_index][:col_id] = field_meta[:name].to_s+'-field'
             rows[row_count][:cols][col_index][:content] = field_handler.get_field(view_type(), field_meta, 'rtpl')
             rows[row_count][:cols][col_index][:class] = td_field_class
           end
@@ -717,11 +717,11 @@ module R8Tpl
             end
 
             rows[row_count][:cols][col_index][:class] = td_label_class
-            rows[row_count][:cols][col_index][:col_id] = field_meta[:name].to_s+"-label"
+            rows[row_count][:cols][col_index][:col_id] = field_meta[:name].to_s+'-label'
             col_index+=1
             rows[row_count][:cols][col_index] = {}
             # do field
-            rows[row_count][:cols][col_index][:col_id] = field_meta[:name].to_s+"-field"
+            rows[row_count][:cols][col_index][:col_id] = field_meta[:name].to_s+'-field'
             rows[row_count][:cols][col_index][:content] = field_handler.get_field(view_type(), field_meta, 'tpl')
             rows[row_count][:cols][col_index][:class] = td_field_class
           end
@@ -769,7 +769,7 @@ module R8Tpl
       # jsTpl should then be updated to reflect changes
       # TODO: switch this when functions moved to js compile class
       #      templateR8EditTime = File.mtime(getcwd()."/system/template.r8.php");
-      templateR8EditTime = File.mtime(Dir.pwd+"/template.rb")
+      templateR8EditTime = File.mtime(Dir.pwd+'/template.rb')
       if(jsCacheEditTime < templateR8EditTime || jsCacheEditTime < tplCacheEditTime) then
         return false
       else

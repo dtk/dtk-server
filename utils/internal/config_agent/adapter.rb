@@ -7,7 +7,7 @@ module DTK
         klass = self
         begin
           Lock.synchronize do
-            r8_nested_require("adapter",type)
+            r8_nested_require('adapter',type)
           end
           klass = const_get Aux.camelize(type.to_s)
         rescue LoadError

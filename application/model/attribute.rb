@@ -55,12 +55,12 @@ module DTK
     end
 
     def is_title_attribute?
-      get_field?(:display_name) == "name" || ext_ref_indicates_title?(get_field?(:external_ref))
+      get_field?(:display_name) == 'name' || ext_ref_indicates_title?(get_field?(:external_ref))
     end
 
     def ext_ref_indicates_title?(ext_ref)
       ret =
-        if ext_ref[:type] == "puppet_attribute"
+        if ext_ref[:type] == 'puppet_attribute'
           if path = ext_ref[:path]
             path =~ /\[name\]$/
           end
@@ -72,8 +72,8 @@ module DTK
     def config_agent_type
       external_ref_type = (self[:external_ref]||{})[:type]
       case external_ref_type
-       when "chef_attribute" then "chef"
-       when "puppet_attribute" then "puppet"
+       when 'chef_attribute' then 'chef'
+       when 'puppet_attribute' then 'puppet'
       end
     end
 
@@ -102,7 +102,7 @@ module DTK
       attr_mh = parent.model_handle.create_childMH(:attribute)
       attr_hash = Aux::hash_subset(field_def,CreateFields)
       unless attr_hash[:display_name]
-        raise Error.new("display_name required in field_def")
+        raise Error.new('display_name required in field_def')
       end
       attr_hash[:ref] = attr_hash[:display_name]
       attr_hash[:semantic_data_type] ||= SemanticDatatype.default().to_s
@@ -115,7 +115,7 @@ module DTK
     # TODO: collapse this and 4 fields used here
     def is_readonly?
       update_object!(*(VirtulaDependency.port_type()+[:read_only,:dynamic,:cannot_change]))
-      (self[:port_type] == "input") || self[:read_only] || self[:dynamic] || self[:cannot_change]
+      (self[:port_type] == 'input') || self[:read_only] || self[:dynamic] || self[:cannot_change]
     end
 
     def attribute_value
@@ -137,7 +137,7 @@ module DTK
     def port_type
       return self[:port_type_asserted] unless self[:port_type_asserted].nil?
       return nil unless self[:is_port]
-      return "output" if self[:dynamic]
+      return 'output' if self[:dynamic]
       return nil unless self[:semantic_type_summary]
       (AttributeSemantic::Info[self[:semantic_type_summary]]||{})[:port_type]
     end
@@ -145,7 +145,7 @@ module DTK
     def is_unset
       # care must be takedn so this is three-valued
       return true if attribute_value().nil?
-      return false unless self[:data_type] == "json"
+      return false unless self[:data_type] == 'json'
       return nil unless self[:semantic_type]
       has_req_fields = AttributeComplexType.has_required_fields_given_semantic_type?(attribute_value(),self[:semantic_type])
       return nil if has_req_fields.nil?
@@ -258,8 +258,8 @@ module DTK
       attr_port_info = []
       attr_link_rows_created.each do |row|
         # TODO: row[:type].nil? test need sto be changed if attribute link type default is no longer "external"
-        if row[:type].nil? || row[:type] == "external"
-          [["input",row[:input_id]],["output",row[:output_id]]].each do |(dir,id)|
+        if row[:type].nil? || row[:type] == 'external'
+          [['input',row[:input_id]],['output',row[:output_id]]].each do |(dir,id)|
             attr_port_info << {id: id, port_type_asserted: dir, is_port: true, is_external: true}
           end
         end
@@ -271,7 +271,7 @@ module DTK
       # port_type depends on :port_type_asserted,:is_port,:semantic_type_summary and :dynamic
       update_object!(:required,:value_derived,:value_asserted,:port_type_asserted,:is_port,:semantic_type_summary,:dynamic)
       if self[:required] && self[:attribute_value].nil? and not self[:dynamic]
-        if self[:port_type] == "input"
+        if self[:port_type] == 'input'
           not has_input_link?()
         else
           true
@@ -313,7 +313,7 @@ module DTK
     def qualified_attribute_name_aux(node_or_group_name=nil)
       cmp_name = self.key?(:component) ? self[:component][:display_name] : nil
       # strip what will be recipe name
-      cmp_el = cmp_name ? cmp_name.gsub(/::.+$/,"") : nil
+      cmp_el = cmp_name ? cmp_name.gsub(/::.+$/,'') : nil
       attr_name = self[:display_name]
       token_array = ([node_or_group_name,cmp_el] + Aux.tokenize_bracket_name(attr_name)).compact
       AttributeComplexType.serialze(token_array)
@@ -341,7 +341,7 @@ module DTK
       field_set = Model::FieldSet.new(:component,[:id,:display_name,:attributes])
       # TODO: allowing feature in until nest features in base services filter = [:and, [:eq, :component__id, component_id],[:eq, :basic_type,"service"]]
       filter = [:and, [:eq, :component__id, component_id]]
-      global_wc = {attribute__semantic_type_summary: "sap_config__l4"}
+      global_wc = {attribute__semantic_type_summary: 'sap_config__l4'}
       ds = SearchObject.create_from_field_set(field_set,cmp_id_handle[:c],filter).create_dataset().where(global_wc)
 
       # should only be one attribute matching (or none)
@@ -363,22 +363,22 @@ module DTK
         end
       end
 
-      description_prefix = (component[:display_name]||"").split("::").map(&:capitalize).join(" ")
-      description = description_prefix.empty? ? "Service Access Point" : "#{description_prefix} SAP"
+      description_prefix = (component[:display_name]||'').split('::').map(&:capitalize).join(' ')
+      description = description_prefix.empty? ? 'Service Access Point' : "#{description_prefix} SAP"
 
       new_sap_attr_rows =
         [{
-           ref: "sap__l4",
-           display_name: "sap__l4",
+           ref: 'sap__l4',
+           display_name: 'sap__l4',
            component_component_id: component_id,
            value_derived: new_sap_value_list,
            is_port: true,
            hidden: true,
-           data_type: "json",
+           data_type: 'json',
            description: description,
            # TODO: need the  => {"application" => service qualification)
-           semantic_type: {":array" => "sap__l4"},
-           semantic_type_summary: "sap__l4"
+           semantic_type: {':array' => 'sap__l4'},
+           semantic_type_summary: 'sap__l4'
          }]
 
       attr_mh = sap_config_attr_idh.createMH()
@@ -407,7 +407,7 @@ module DTK
         update(function: fn)
         return nil
       end
-      raise Error.new("mismatched link")
+      raise Error.new('mismatched link')
     end
 
     ### virtual column defs
@@ -433,7 +433,7 @@ module DTK
             {node: n, component: parent_obj}
           end
         else
-          raise Error.new("unexpected parent of attribute")
+          raise Error.new('unexpected parent of attribute')
       end
     end
   end
@@ -459,9 +459,9 @@ module XYZ
         return nil if sap.nil?
         # TBD: stubbed to only handle limited cases
         raise Error::NotImplemented.new("sap to sap ref function where not type 'network'") unless sap[:network]
-        raise Error.new("network sap missing port number") unless sap[:network][:port]
-        raise Error.new("network sap missing addresses") unless sap[:network][:addresses]
-        raise Error::NotImplemented.new("saps with multiple IP addresses") unless sap[:network][:addresses].size == 1
+        raise Error.new('network sap missing port number') unless sap[:network][:port]
+        raise Error.new('network sap missing addresses') unless sap[:network][:addresses]
+        raise Error::NotImplemented.new('saps with multiple IP addresses') unless sap[:network][:addresses].size == 1
         {network: {
            port: sap[:network][:port],
            address: sap[:network][:addresses][0]

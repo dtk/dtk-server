@@ -34,7 +34,7 @@ module DTK; class Attribute::Pattern
         if attr_idhs.empty?
           raise ErrorUsage.new("The term (#{attr_term}) does not match an attribute")
         elsif attr_idhs.size > 1
-          raise ErrorUsage.new("Source attribute term must match just one, not multiple attributes")
+          raise ErrorUsage.new('Source attribute term must match just one, not multiple attributes')
         end
         @attribute_pattern = attr_pattern
         @fn = fn

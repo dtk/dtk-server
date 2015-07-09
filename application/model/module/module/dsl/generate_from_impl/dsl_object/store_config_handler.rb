@@ -38,9 +38,9 @@ module DTK; class ModuleDSL; class GenerateFromImpl
         attr_meta[:include] = nailed(true)
         attr_meta[:field_name] = t(name)
         attr_meta[:description] = unknown
-        attr_meta[:type] = t("string") #TODO: stub
+        attr_meta[:type] = t('string') #TODO: stub
         attr_meta[:dynamic] = nailed(true)
-        ext_ref = create_external_ref(name,"puppet_exported_resource")
+        ext_ref = create_external_ref(name,'puppet_exported_resource')
         augment_ext_ref_for_output_attr!(ext_ref,exp_rsc_ps)
         attr_meta[:external_ref] = nailed(ext_ref)
       end
@@ -53,8 +53,8 @@ module DTK; class ModuleDSL; class GenerateFromImpl
         attr_meta[:include] = nailed(true)
         attr_meta[:field_name] = t(name)
         attr_meta[:description] = unknown
-        attr_meta[:type] = t("string") #TODO: stub
-        ext_ref = create_external_ref(name,"puppet_imported_collection")
+        attr_meta[:type] = t('string') #TODO: stub
+        ext_ref = create_external_ref(name,'puppet_imported_collection')
         augment_ext_ref_for_input_attr!(ext_ref,imp_coll_ps)
         attr_meta[:external_ref] = nailed(ext_ref)
       end
@@ -73,23 +73,23 @@ module DTK; class ModuleDSL; class GenerateFromImpl
       end
 
       def self.hash_key_for_output_attr(exp_rsc_ps)
-        title_param = (exp_rsc_ps[:parameters]||[]).find{|exp|exp[:name] == "title"}
+        title_param = (exp_rsc_ps[:parameters]||[]).find{|exp|exp[:name] == 'title'}
         sanitize_attribute("#{exp_rsc_ps[:name]}--#{title_param[:value].to_s(just_variable_name: true)}")
       end
       def self.augment_ext_ref_for_output_attr!(ext_ref,exp_rsc_ps)
-        title_param = (exp_rsc_ps[:parameters]||[]).find{|exp|exp[:name] == "title"}
-        ext_ref["resource_type"] = exp_rsc_ps[:name]
-        ext_ref["title_with_vars"] = title_param[:value].structured_form()
+        title_param = (exp_rsc_ps[:parameters]||[]).find{|exp|exp[:name] == 'title'}
+        ext_ref['resource_type'] = exp_rsc_ps[:name]
+        ext_ref['title_with_vars'] = title_param[:value].structured_form()
         ext_ref
       end
 
       def self.hash_key_for_input_attr(imp_coll_ps)
         attr_exprs = imp_coll_ps[:query].attribute_expressions()||[]
-        postfix = attr_exprs.map{|a|"#{a[:name]}__#{a[:value].to_s(just_variable_name: true)}"}.join("--")
+        postfix = attr_exprs.map{|a|"#{a[:name]}__#{a[:value].to_s(just_variable_name: true)}"}.join('--')
         sanitize_attribute("#{imp_coll_ps[:type]}--#{postfix}")
       end
       def self.augment_ext_ref_for_input_attr!(ext_ref,imp_coll_ps)
-        ext_ref["resource_type"] = imp_coll_ps[:type]
+        ext_ref['resource_type'] = imp_coll_ps[:type]
         # TODO: think can deprecate
         # ext_ref["import_coll_query"] = imp_coll_ps[:query].structured_form()
         ext_ref
@@ -103,7 +103,7 @@ module DTK; class ModuleDSL; class GenerateFromImpl
       end
 
       def self.content_variables_in_output_var(exp_rsc_ps,attr_meta)
-        content = (exp_rsc_ps[:parameters]||[]).find{|exp|exp[:name] == "content"}
+        content = (exp_rsc_ps[:parameters]||[]).find{|exp|exp[:name] == 'content'}
         return [] unless content && content[:value]
 
         if template = content[:value].template?()
@@ -120,7 +120,7 @@ module DTK; class ModuleDSL; class GenerateFromImpl
     class FileERH < StoreConfigHandler
       def self.process_extra_attr_mapping!(link_def_poss_link,match,data)
         attr_mappings = link_def_poss_link[:attribute_mappings] ||= MetaArray.new
-        return unless match[:name] == "tag" && match[:input_var].is_variable? && match[:output_var].is_variable?
+        return unless match[:name] == 'tag' && match[:input_var].is_variable? && match[:output_var].is_variable?
         input_component = data[:attr_imp_coll].parent.hash_key
         input = {component: input_component,attribute: match[:input_var][:value]}
         output_component = data[:attr_exp_rsc].parent.hash_key

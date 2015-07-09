@@ -18,12 +18,12 @@ module DTK
       def self.find_matching_node_binding_rule(node_binding_rules,target)
         node_binding_rules.find do |r|
           conditions = r[:conditions]
-          (conditions[:type] == "ec2_image") && (conditions[:region] == target[:iaas_properties][:region])
+          (conditions[:type] == 'ec2_image') && (conditions[:region] == target[:iaas_properties][:region])
         end
       end
 
       def self.references_image?(node_external_ref)
-        node_external_ref[:type] == "ec2_image" && node_external_ref[:image_id]
+        node_external_ref[:type] == 'ec2_image' && node_external_ref[:image_id]
       end
 
       def self.existing_image?(image_id,target)
@@ -73,8 +73,8 @@ module DTK
       def self.get_availability_zones(iaas_properties, region, opts={})
         connection = opts[:connection] || get_connection_from_iaas_properties(iaas_properties,region)
         response = connection.describe_availability_zones
-        raise ErrorUsage.new("Unable to retreive availability zones!") unless response.status == 200
-        response.body["availabilityZoneInfo"].map{|z| z['zoneName']}||[]
+        raise ErrorUsage.new('Unable to retreive availability zones!') unless response.status == 200
+        response.body['availabilityZoneInfo'].map{|z| z['zoneName']}||[]
       end
 
       def self.check_iaas_properties(iaas_properties,opts={})
@@ -119,8 +119,8 @@ module DTK
             # as simple test see if can describe availability_zones
             Ec2.get_availability_zones(@iaas_properties,@region,connection: @connection)
            rescue => e
-            Log.info_pp(["Error_from get_availability_zones",e])
-            raise ErrorUsage.new("Invalid EC2 credentials")
+            Log.info_pp(['Error_from get_availability_zones',e])
+            raise ErrorUsage.new('Invalid EC2 credentials')
           end
         end
 
@@ -196,7 +196,7 @@ module DTK
             CloudConnect::EC2.new.get_compute_params().merge(region: region)
           else
             unless iaas_prop_hash[:key] && iaas_prop_hash[:secret]
-              raise Error.new("Unexpected that no builtin target does not have needed fields")
+              raise Error.new('Unexpected that no builtin target does not have needed fields')
               ret = {
                 aws_access_key_id: iaas_prop_hash[:key],
                 aws_secret_access_key: iaas_prop_hash[:secret]

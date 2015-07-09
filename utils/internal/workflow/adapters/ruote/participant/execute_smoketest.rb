@@ -15,7 +15,7 @@ module DTK
                 end
                 inspect_agent_response(msg)
                 #CreateThread.defer_with_session(user_object, Ramaze::Current.session) do
-                PerformanceService.end_measurement("#{self.class.to_s.split("::").last}", self.object_id)
+                PerformanceService.end_measurement("#{self.class.to_s.split('::').last}", self.object_id)
                 task.add_event(:complete_succeeded,msg)
                 log_participant.end(:complete_succeeded,task_id: task_id)
                 set_result_succeeded(workitem,msg,task,action) if task_end
@@ -24,9 +24,9 @@ module DTK
                 #end
               end,
               on_timeout: proc do |_msg|
-                result = {status: "timeout"}
+                result = {status: 'timeout'}
 
-                event,errors = task.add_event_and_errors(:complete_timeout,:server,["timeout"])
+                event,errors = task.add_event_and_errors(:complete_timeout,:server,['timeout'])
                 pp ["task_complete_timeout #{action.class}", task_id,event,{errors: errors}] if event
                 set_result_timeout(workitem,result,task)
                 delete_task_info(workitem)

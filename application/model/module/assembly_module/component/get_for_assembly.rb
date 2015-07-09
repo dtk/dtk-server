@@ -84,7 +84,7 @@ module DTK; class AssemblyModule
 
         local_copy_els.each do |r|
           unless workspace_branch = ndx_workspace_branches[r[:id]]
-            Log.error("Unexpected that ndx_workspace_branches[r[:id]] is null")
+            Log.error('Unexpected that ndx_workspace_branches[r[:id]] is null')
             next
           end
           assembly_mod_branch = r[:module_branch]
@@ -95,7 +95,7 @@ module DTK; class AssemblyModule
             next
           end
           unless workspace_mod_sha = workspace_branch[:current_sha]
-            Log.error("Unexpected that workspace_mod_sha is nil")
+            Log.error('Unexpected that workspace_mod_sha is nil')
           end
           r[:local_copy_diff] = (assembly_mod_sha != workspace_mod_sha)
           # TODO: code to put in when

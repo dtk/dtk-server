@@ -8,11 +8,11 @@ module DTK
       def set_node_group_member_executable_action!(parent)
         ret = self
         unless ea = self[:executable_action]
-          Log.error("Unexpected that self does not have field :executable_action")
+          Log.error('Unexpected that self does not have field :executable_action')
           return ret
         end
         unless parent_ea = parent[:executable_action]
-          Log.error("Unexpected that parent does not have field :executable_action")
+          Log.error('Unexpected that parent does not have field :executable_action')
           return ret
         end
         ExecuteActionFieldsToCopy.each{|field|ea[field] = parent_ea[field]}
@@ -41,7 +41,7 @@ module DTK
           when :concurrent
             task.subtasks.map{|st|decompose!(st)}
           else
-            Log.error("do not have rules to process task")
+            Log.error('do not have rules to process task')
         end
       end
 
@@ -51,7 +51,7 @@ module DTK
         return unless ea.node_is_node_group?()
 
         #modify task so that it is a concurrent decomposed task
-        task[:temporal_order] = "concurrent"
+        task[:temporal_order] = 'concurrent'
         ea[:decomposed_node_group] = true
         task[:subtasks] = ea.nodes.map{|node|node_group_member(node,task)}
       end

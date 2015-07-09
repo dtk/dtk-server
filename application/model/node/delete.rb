@@ -6,7 +6,7 @@ module DTK; class Node
         if is_node_group?()
           # TODO: support this; one way is to case on whether it has any members and if not
           # allow it to be deleted; and if members indicate the syntax to delete an individual member"
-          raise ErrorUsage.new("Not supported: deleting a node group; its members can be deleted")
+          raise ErrorUsage.new('Not supported: deleting a node group; its members can be deleted')
         end
         if is_target_ref?
           destroy_and_delete__target_ref(opts)
@@ -16,10 +16,10 @@ module DTK; class Node
       end
 
       def destroy_and_reset(target_idh)
-         raise ErrorUsage.new("Command Not Supperetd")
+         raise ErrorUsage.new('Command Not Supperetd')
 # TODO: DTK-1857
 if is_node_group?() || is_target_ref?()
-  raise ErrorUsage.new("destroy_and_reset_nodes not supported for service instances with node groups")
+  raise ErrorUsage.new('destroy_and_reset_nodes not supported for service instances with node groups')
 end
 
         if CommandAndControl.destroy_node?(self,reset: true)
@@ -45,7 +45,7 @@ end
 
         if opts[:update_task_template]
           unless assembly = opts[:assembly]
-            raise Error.new("If update_task_template is set, :assembly must be given as an option")
+            raise Error.new('If update_task_template is set, :assembly must be given as an option')
           end
           update_task_templates_when_deleted_node?(assembly)
         end

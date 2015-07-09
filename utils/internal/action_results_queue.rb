@@ -43,10 +43,10 @@ module DTK
       }
       action_hash = action_hash()
       unless agent = action_hash[:agent]
-        raise Error.new("Unexpected that :agent is not in action_hash")
+        raise Error.new('Unexpected that :agent is not in action_hash')
       end
       unless method = action_hash[:method]
-        raise Error.new("Unexpected that :method is not in action_hash")
+        raise Error.new('Unexpected that :method is not in action_hash')
       end
       CommandAndControl.request__execute_action(agent,method,nodes,callbacks,params)
     end
@@ -164,7 +164,7 @@ module DTK
           valid_output = ic.iconv(output + ' ')[0..-2]
           data[:output] = ic.iconv(output + ' ')[0..-2]
         else
-          Log.warn "Skipping UTF-8 normalization since provided output does not have :data element."
+          Log.warn 'Skipping UTF-8 normalization since provided output does not have :data element.'
         end
         data
       end

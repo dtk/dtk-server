@@ -39,7 +39,7 @@ module DTK; class Assembly; class Instance
     #### get methods around components
     def get_component_info_for_action_list(opts={})
       get_field?(:display_name)
-      assembly_source = {type: "assembly", object: hash_subset(:id,:display_name)}
+      assembly_source = {type: 'assembly', object: hash_subset(:id,:display_name)}
       rows = get_objs_helper(:instance_component_list,:nested_component,opts.merge(augmented: true))
       Component::Instance.add_title_fields?(rows)
       Component::Instance.add_action_defs!(rows,cols: [:method_name])
@@ -72,8 +72,8 @@ module DTK; class Assembly; class Instance
 
       if opts[:filter_proc]
         rows.reject!{|r|!opts[:filter_proc].call(r)}
-      elsif opts[:filter_component] != ""
-        opts[:filter_component].sub!(/::/, "__")
+      elsif opts[:filter_component] != ''
+        opts[:filter_component].sub!(/::/, '__')
         rows.reject!{|r| r[:nested_component][:display_name] != opts[:filter_component] }
       end
 
@@ -170,7 +170,7 @@ module DTK; class Assembly; class Instance
       port_links = get_port_links()
       connected_ports =  port_links.map{|r|[r[:input_id],r[:output_id]]}.flatten.uniq
       aug_ports.each do |r|
-        if r[:direction] == "input"
+        if r[:direction] == 'input'
           r[:unconnected] = !connected_ports.include?(r[:id])
         end
       end
@@ -262,7 +262,7 @@ module DTK; class Assembly; class Instance
     def get(assembly_mh, opts={})
       target_idhs = (opts[:target_idh] ? [opts[:target_idh]] : opts[:target_idhs])
       target_filter = (target_idhs ? [:oneof, :datacenter_datacenter_id, target_idhs.map(&:get_id)] : [:neq, :datacenter_datacenter_id, nil])
-      filter = [:and, [:eq, :type, "composite"], target_filter,opts[:filter]].compact
+      filter = [:and, [:eq, :type, 'composite'], target_filter,opts[:filter]].compact
       sp_hash = {
         cols: opts[:cols]||[:id,:group_id,:display_name],
         filter: filter
@@ -273,7 +273,7 @@ module DTK; class Assembly; class Instance
     def get_info__flat_list(assembly_mh, opts={})
       target_idh = opts[:target_idh]
       target_filter = (target_idh ? [:eq, :datacenter_datacenter_id, target_idh.get_id()] : [:neq, :datacenter_datacenter_id, nil])
-      filter = [:and, [:eq, :type, "composite"], target_filter,opts[:filter]].compact
+      filter = [:and, [:eq, :type, 'composite'], target_filter,opts[:filter]].compact
       col,needs_empty_nodes = list_virtual_column?(opts[:detail_level])
       cols = [:id,:ref,:display_name,:group_id,:component_type,:version,:created_at,col].compact
       ret = get(assembly_mh,{cols: cols}.merge(opts))
@@ -342,7 +342,7 @@ module DTK; class Assembly; class Instance
       return ret if assembly_idhs.empty?
       sp_hash = {
         cols: [:id,:group_id,:display_name],
-        filter: [:and,[:oneof,:assembly_id,assembly_idhs.map(&:get_id)],[:eq,:type,"composite"]]
+        filter: [:and,[:oneof,:assembly_id,assembly_idhs.map(&:get_id)],[:eq,:type,'composite']]
       }
       get_objs(assembly_idhs.first.createMH(),sp_hash).map(&:copy_as_assembly_instance)
     end

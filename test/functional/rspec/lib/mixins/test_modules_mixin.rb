@@ -1,13 +1,13 @@
 module TestModulesMixin
   def delete_test_module(test_module_to_delete)
-    puts "Delete test module:", "--------------------"
+    puts 'Delete test module:', '--------------------'
     test_module_deleted = false
     test_modules_list = send_request('/rest/test_module/list', {})
 
     if (test_modules_list['data'].find { |x| x['display_name'] == test_module_to_delete })
       puts "Test module #{test_module_to_delete} exists in test module list. Try to delete test module..."
       delete_response = send_request('/rest/test_module/delete', test_module_id: test_module_to_delete)
-      puts "Test module delete response:"
+      puts 'Test module delete response:'
       pretty_print_JSON(delete_response)
 
       if (delete_response['status'] == 'ok' && test_modules_list['data'].select { |x| x['module_name'] == nil })
@@ -21,12 +21,12 @@ module TestModulesMixin
       puts "Test module #{test_module_to_delete} does not exist in test module list and therefore cannot be deleted."
       test_module_deleted = false
     end
-    puts ""
+    puts ''
     return test_module_deleted
   end
 
   def list_test_modules_with_filter(namespace)
-    puts "List test modules with filter:", "---------------------------------"
+    puts 'List test modules with filter:', '---------------------------------'
     test_modules_retrieved = true
     test_modules_list = send_request('/rest/test_module/list', detail_to_include: [], module_namespace: namespace)
     pretty_print_JSON(test_modules_list)
@@ -41,12 +41,12 @@ module TestModulesMixin
         end
       end
     end
-    puts ""
+    puts ''
     return test_modules_retrieved
   end
 
   def list_remote_test_modules_with_filter(namespace)
-    puts "List remote test modules with filter:", "------------------------------------"
+    puts 'List remote test modules with filter:', '------------------------------------'
     test_modules_retrieved = true
     test_modules_list = send_request('/rest/test_module/list_remote', rsa_pub_key: self.ssh_key, module_namespace: namespace)
     pretty_print_JSON(test_modules_list)
@@ -61,7 +61,7 @@ module TestModulesMixin
         end
       end
     end
-    puts ""
+    puts ''
     return test_modules_retrieved
   end
 end

@@ -34,8 +34,8 @@ module DTK
 
         # add port links
         ret[:port_links] = self[:port_link].values.map do |pl|
-           input_qual_port_ref = pl["*input_id"]
-           output_qual_port_ref = pl["*output_id"]
+           input_qual_port_ref = pl['*input_id']
+           output_qual_port_ref = pl['*output_id']
            {port_output_form(input_qual_port_ref,:input) => port_output_form(output_qual_port_ref,:output)}
          end
         ret
@@ -62,9 +62,9 @@ module DTK
       def port_output_form(qualified_port_ref,_dir)
         # TODO: does this need fixing up in case a component can appear multiple times
         # TODO: assumption that port_ref == display_name
-        port_ref = qualified_port_ref.split("/").last
+        port_ref = qualified_port_ref.split('/').last
         p = Port.parse_port_display_name(port_ref)
-        node_ref = (qualified_port_ref =~ Regexp.new("^/node/([^/]+)");$1)
+        node_ref = (qualified_port_ref =~ Regexp.new('^/node/([^/]+)');$1)
         unless matching_node = self[:node].find{|ref,_hash|ref == node_ref}
           raise Error.new("Cannot find matching node for node ref #{node_ref})")
         end

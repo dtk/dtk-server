@@ -24,22 +24,22 @@ class Fieldtext < Fieldbase
     # if rows not greater then 1 its a normal type="text", else its a textarea
     if(@rows <=1) then
       case(@render_mode)
-        when "html"
+        when 'html'
           field_string = self.get_field_edit_text_html()
-        when "js"
+        when 'js'
           field_string = self.get_field_edit_text_js()
-        when "rtpl"
+        when 'rtpl'
           field_string = self.get_field_edit_text_rtpl()
         else
           field_string = self.get_field_edit_text_rtpl()
       end
     else
       case(@render_mode)
-        when "html"
+        when 'html'
           field_string = self.get_field_edit_text_area_html()
-        when "js"
+        when 'js'
           field_string = self.get_field_edit_textarea_js()
-        when "rtpl"
+        when 'rtpl'
           field_string = self.get_field_edit_textarea_rtpl()
         else
           field_string = self.get_field_edit_textarea_rtpl()
@@ -52,22 +52,22 @@ class Fieldtext < Fieldbase
     # if rows not greater then 1 its a normal type="text", else its a textarea
     if(@rows <=1) then
       case(@render_mode)
-        when "html"
+        when 'html'
           field_string = self.get_field_display_text_html()
-        when "js"
+        when 'js'
           field_string = self.get_field_display_text_js()
-        when "rtpl"
+        when 'rtpl'
           field_string = self.get_field_display_text_rtpl()
         else
           field_string = self.get_field_display_text_rtpl()
       end
     else
       case(@render_mode)
-        when "html"
+        when 'html'
           field_string = self.get_field_display_textarea_html()
-        when "js"
+        when 'js'
           field_string = self.get_field_display_textarea_js()
-        when "rtpl"
+        when 'rtpl'
           field_string = self.get_field_display_textarea_rtpl()
         else
           field_string = self.get_field_display_textarea_rtpl()
@@ -80,22 +80,22 @@ class Fieldtext < Fieldbase
     # if rows not greater then 1 its a normal type="text", else its a textarea
     if(@rows <=1) then
       case(@render_mode)
-        when "html"
+        when 'html'
           field_string = self.get_field_list_text_html()
-        when "js"
+        when 'js'
           field_string = self.get_field_list_text_js()
-        when "rtpl"
+        when 'rtpl'
           field_string = self.get_field_list_text_rtpl()
         else
           field_string = self.get_field_list_text_rtpl()
       end
     else
       case(@render_mode)
-        when "html"
+        when 'html'
           field_string = self.get_field_list_textarea_html()
-        when "js"
+        when 'js'
           field_string = self.get_field_list_textarea_js()
-        when "rtpl"
+        when 'rtpl'
           field_string = self.get_field_list_textarea_rtpl();
         else
           field_string = self.get_field_list_textarea_rtpl();

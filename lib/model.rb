@@ -122,10 +122,10 @@ module DTK
     end
 
     def self.pp_sql_debug(sql, title=nil)
-      title ||= "Debugging SQL, generated SQL: "
+      title ||= 'Debugging SQL, generated SQL: '
       puts "::::::: #{title} :: (START) => "
       puts sql.gsub('"','').gsub('SELECT', "\nSELECT")
-      puts "< = (END) :::::::"
+      puts '< = (END) :::::::'
     end
 
     #
@@ -136,7 +136,7 @@ module DTK
       result_col ||= virtual_attr
       rows = get_objs_helper(virtual_attr,result_col,opts)
       if rows.size > 1
-        filter = (opts[:sql_filter] ? " #{opts[:sql_filter]} " : "")
+        filter = (opts[:sql_filter] ? " #{opts[:sql_filter]} " : '')
         Log.error("call to get_obj for #{model_handle[:model_name]} (virtual_attr=#{virtual_attr}#{filter}) returned more than one row")
       end
       rows.first
@@ -204,7 +204,7 @@ module DTK
     end
 
     module Delim
-      Char = "_"
+      Char = '_'
       Common = "#{Char}#{Char}"
       NumericIndex = Char
       DisplayName = Common
@@ -368,7 +368,7 @@ module DTK
     def update_hash_key(field,hash_key,hash_key_val)
       self[field] ||= {}
       self[field].merge!(hash_key => hash_key_val)
-      raise Error.new("Cannot execute update without the object having an id") unless id()
+      raise Error.new('Cannot execute update without the object having an id') unless id()
       self.class.update_from_rows(model_handle,[{:id => id(),field => {hash_key => hash_key_val}}],partial_value: true)
     end
     # TODO: check calss to update with opts having :partial_value=>true to see whether shoudl use variant of update_hash_key instead
@@ -376,7 +376,7 @@ module DTK
     def update(scalar_assignments,opts={})
       scalar_assignments = {} if model_handle[:model_name] == :node && scalar_assignments.key?(:hidden) && scalar_assignments.key?(:value_asserted)
       scalar_assignments.each{|k,v| self[k] = v}
-      raise Error.new("Cannot execute update without the object having an id") unless id()
+      raise Error.new('Cannot execute update without the object having an id') unless id()
       self.class.update_from_rows(model_handle,[scalar_assignments.merge(id: id())],opts)
     end
 
@@ -550,21 +550,21 @@ module DTK
     end
 
     def self.get_objects_from_search_object(search_object,opts={})
-      PerformanceService.start("PERF_SQL", search_object.object_id)
+      PerformanceService.start('PERF_SQL', search_object.object_id)
       dataset = search_object.create_dataset()
 
       # [Haris] DEBUG SQL DEBUG HERE
       if debug_flag?
-        pp_sql_debug(dataset.sequel_ds.sql, "SELECT STATMENTS") if dataset
-        ap "OUTPUT: "
+        pp_sql_debug(dataset.sequel_ds.sql, 'SELECT STATMENTS') if dataset
+        ap 'OUTPUT: '
         ap dataset.all(opts) if dataset
       end
 
       ret_val = dataset ? dataset.all(opts) : nil
 
-      PerformanceService.end("PERF_SQL", search_object.object_id)
+      PerformanceService.end('PERF_SQL', search_object.object_id)
       PerformanceService.log("TABLE=#{search_object[:search_pattern][:relation]}")
-      PerformanceService.log("SQL="+dataset.sequel_ds.sql.gsub(/"/,''))
+      PerformanceService.log('SQL='+dataset.sequel_ds.sql.gsub(/"/,''))
 
       return ret_val
     end
@@ -681,7 +681,7 @@ module DTK
     end
 
     def get_objs_uniq(obj_col,col_in_result=nil)
-      col_in_result ||= obj_col.to_s.gsub(/s$/,"").to_sym
+      col_in_result ||= obj_col.to_s.gsub(/s$/,'').to_sym
       get_objs(cols: [obj_col]).inject({}) do |h,r|
         obj = r[col_in_result]
         id = obj[:id]
@@ -736,7 +736,7 @@ module DTK
     def self.get_objs(model_handle,sp_hash,opts={})
       model_name = model_handle[:model_name]
       hash = sp_hash.merge(relation: model_name)
-      search_object = SearchObject.create_from_input_hash({"search_pattern" => hash},model_name,model_handle[:c])
+      search_object = SearchObject.create_from_input_hash({'search_pattern' => hash},model_name,model_handle[:c])
 
       # TODO: putting this in here so we can remove :keep_ref_cols at top level
       opts_get_search_object = opts
@@ -761,7 +761,7 @@ module DTK
     def self.get_objects_from_sp_hash(model_handle,sp_hash,opts={})
       model_name = model_handle[:model_name]
       hash = sp_hash.merge(relation: model_name)
-      search_object = SearchObject.create_from_input_hash({"search_pattern" => hash},model_name,model_handle[:c])
+      search_object = SearchObject.create_from_input_hash({'search_pattern' => hash},model_name,model_handle[:c])
       get_objects_from_search_object(search_object,opts)
     end
 

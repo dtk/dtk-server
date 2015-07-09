@@ -11,10 +11,10 @@ module DTK
 
         def err_msg(ref_cmp_templates)
           msgs_per_cmp_template = msgs_per_cmp_template(ref_cmp_templates)
-          ident = "    "
+          ident = '    '
           ref_errors = ident + msgs_per_cmp_template.join("\n#{ident}")
           size = msgs_per_cmp_template.size
-          what = (size==1 ? "component template" : "component templates")
+          what = (size==1 ? 'component template' : 'component templates')
           "The result if the changes were made would be the following #{what}\n  would be deleted while still being referenced by existing assembly templates:\n#{ref_errors}"
         end
 

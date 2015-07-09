@@ -72,7 +72,7 @@ module DTK; class Task
 
       def self.raise_error_if_unsupported_action_types(action_types)
         unless action_types.include?(:assembly)
-          raise Error.new("Not supported when action types does not contain :assembly")
+          raise Error.new('Not supported when action types does not contain :assembly')
         end
         illegal_action_types = (action_types - [:assembly,:node_centric])
         unless illegal_action_types.empty?

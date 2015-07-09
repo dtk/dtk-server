@@ -36,13 +36,13 @@ class Fieldbase
     if(render_mode != '') then @render_mode = render_mode end
 
     case view_type.downcase
-      when "edit" then
+      when 'edit' then
         return self.get_field_edit
-      when "display" then
+      when 'display' then
         return self.get_field_display
-      when "list" then
+      when 'list' then
         return self.get_field_list
-      when "search" then
+      when 'search' then
         return (defined? self.get_field_search) ? self.get_field_search : self.get_field_edit
       # if getting to default then its calling a custom view
       else
@@ -53,9 +53,9 @@ class Fieldbase
 
   def get_field_edit
     case @render_mode
-      when "html" then
+      when 'html' then
         field_string = self.get_field_edit_html()
-      when "js" then
+      when 'js' then
         field_string = self.get_field_edit_js()
       #     when "rtpl" then
       else
@@ -66,9 +66,9 @@ class Fieldbase
 
   def get_field_display
     case @render_mode
-      when "html" then
+      when 'html' then
         field_string = self.get_field_display_html
-      when "js" then
+      when 'js' then
         field_string = self.get_field_display_js
       #      when "tpl" then
       else
@@ -79,9 +79,9 @@ class Fieldbase
 
   def get_field_list
     case @render_mode
-      when "html" then
+      when 'html' then
         field_string = self.get_field_list_html
-      when "js" then
+      when 'js' then
         field_string = self.get_field_list_js
       #      when "tpl" then
       else
@@ -107,7 +107,7 @@ class Fieldbase
     @class_txt = ''
 
     @classes.each do |the_class|
-        @class_txt << the_class << " "
+        @class_txt << the_class << ' '
     end
     @class_txt.strip!
   end

@@ -14,7 +14,7 @@ module DTK
 
     ###virtual columns
     def base_dir
-      self[:local_dir].gsub(/\/[^\/]+$/,"")
+      self[:local_dir].gsub(/\/[^\/]+$/,'')
     end
     ####
     def self.get_all_repo_names(model_handle)

@@ -9,7 +9,7 @@ module DTK; class ModuleDSL; class V3
 
     def context(input_hash)
       ret = super
-      if module_level_includes = input_hash["includes"]
+      if module_level_includes = input_hash['includes']
         ret.merge!(module_level_includes: module_level_includes)
       end
       ret

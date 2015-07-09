@@ -19,7 +19,7 @@ module DTK
       virtual_column :name, type: :varchar, local_dependencies: [:display_name]
       column :tags, :json
       # TODO: may change types; by virtue of being in alibrary we know about item; may need to distingusih between backed images versus barbones one; also may only treat node constraints with search objects
-      column :type, :varchar, size: 25, default: "instance" # Possible values are Node::Type.types
+      column :type, :varchar, size: 25, default: 'instance' # Possible values are Node::Type.types
       column :os_type, :varchar, size: 25
       column :os_identifier, :varchar, size: 50 #augments os_type to identify specifics about os. From os_identier given region one can find unique ami
       column :architecture, :varchar, size: 10 #e.g., 'i386'
@@ -176,7 +176,7 @@ module DTK
 
       virtual_column :output_attrs_to_l4_input_ports, type: :json, hidden: true,
         remote_dependencies:         [
-         lambda__segment_port.call([:id,id(:node),:containing_port_id,:external_attribute_id],{alias: :port_external_output,filter: [:eq,:type,"external"]}), #TODO: what about component_external
+         lambda__segment_port.call([:id,id(:node),:containing_port_id,:external_attribute_id],{alias: :port_external_output,filter: [:eq,:type,'external']}), #TODO: what about component_external
          {
            model_name: :port_link,
            alias: :port_link_l4,
@@ -187,7 +187,7 @@ module DTK
          { model_name: :port,
            alias: :port_l4_input,
            join_type: :inner,
-           filter: [:eq,:type,"l4"],
+           filter: [:eq,:type,'l4'],
            join_cond: {id: q(:port_link_l4,:input_id)},
            cols: [:id,id(:node)]
          }]
@@ -550,7 +550,7 @@ module DTK
           {
             model_name: :action,
             # TODO: avoiding use of :node__node
-            sequel_def: lambda{|ds|ds.where(state: "pending").join(:component__component,id: :component_id).group_and_count(:component__node_node_id)},
+            sequel_def: lambda{|ds|ds.where(state: 'pending').join(:component__component,id: :component_id).group_and_count(:component__node_node_id)},
             join_type: :left_outer,
             join_cond: {node_node_id: :node__id}
           }]
@@ -570,7 +570,7 @@ module DTK
          {
            model_name: :component,
            join_type: :inner,
-           filter: [:and, [:eq, :basic_type, "user"]],
+           filter: [:and, [:eq, :basic_type, 'user']],
            join_cond: {node_node_id: q(:node,:id)},
            cols: [:id,:node_node_id]
          },
@@ -636,7 +636,7 @@ module DTK
          {
            model_name: :component,
            join_type: :inner,
-           filter: [:eq, :specific_type, "monitoring_agent"],
+           filter: [:eq, :specific_type, 'monitoring_agent'],
            join_cond: {node_node_id: q(:node,:id)},
            cols: [:id,:node_node_id,:display_name]
          }

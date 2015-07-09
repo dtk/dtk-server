@@ -2,7 +2,7 @@ module DTK
   class Repo
     module ConnectionToRemoteClassMixin
       def remote_ref(remote_repo_base,remote_repo_namespace)
-        Log.info_pp(["#TODO: ModuleBranch::Location: deprecate: remote_ref",caller[0..4]])
+        Log.info_pp(['#TODO: ModuleBranch::Location: deprecate: remote_ref',caller[0..4]])
         "#{remote_repo_base}--#{remote_repo_namespace}"
       end
     end

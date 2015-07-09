@@ -55,7 +55,7 @@ if controller_line =~ /controller\/(.+)\.rb:.+`(.+)'/
   fn = $2
   controller = "#{model}##{fn}"
 end
-unless ["target#get_nodes_status"].include?(controller) #ignore list
+unless ['target#get_nodes_status'].include?(controller) #ignore list
   pp [:auth,model_handle[:model_name],controller]
 end
         #=end

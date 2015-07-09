@@ -10,8 +10,8 @@ module XYZ
               target[v.to_sym] = source[v.to_s]
             end
           end
-          if_exists(source["dependency"]) do
-            nested_definition :dependency, source["dependency"]
+          if_exists(source['dependency']) do
+            nested_definition :dependency, source['dependency']
           end
         end
 
@@ -20,11 +20,11 @@ module XYZ
         end
 
         def self.display_name(source)
-          source[:ref].split("/")
+          source[:ref].split('/')
         end
 
         def self.external_ref(source)
-          {type: "attribute", path: source[:ref]}
+          {type: 'attribute', path: source[:ref]}
         end
       end
     end

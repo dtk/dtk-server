@@ -51,7 +51,7 @@ module XYZ
         push_cmd = "git --git-dir=#{v[:old_dir]}/.git --work-tree=#{v[:old_dir]} push migrate_remote"
         puts `#{cmd}`
         puts `#{push_cmd}`
-        puts "Cloning new repo"
+        puts 'Cloning new repo'
         puts `git clone -b #{v[:branch_name]} #{new_url} #{v[:new_dir]}`
         gitoliteMng.delete_repo(k)
       end
@@ -78,7 +78,7 @@ module XYZ
 
     # TODO: this is specific migration; will have this subsumed and removed
     def migrate_data_new(opts, tenant_name, c=2)
-      ap "TENANT NAME" + tenant_name
+      ap 'TENANT NAME' + tenant_name
       # PREP VARS
       repos_changes = {}
       db = opts[:db]||DB.create(R8::Config[:database])
@@ -87,7 +87,7 @@ module XYZ
       git_tenant_name = tenant_name.gsub('dtk','git')
 
       # SETUP GITOLITE MANAGER
-      puts "Migrating data ... "
+      puts 'Migrating data ... '
       overriden_configuration = Gitolite::Configuration.new(
         'conf/repo-configs',
         'conf/group-defs',
@@ -110,7 +110,7 @@ module XYZ
       tests = Model.get_objs(default_project.model_handle(:test_module), cols: columns)
 
       components = modules + services + tests
-      raise "No data to migrate, exiting ..." if components.empty?
+      raise 'No data to migrate, exiting ...' if components.empty?
 
       components.each do |e|
         next if e[:display_name].eql?('.workspace')
@@ -145,8 +145,8 @@ module XYZ
             old_repo = gitoliteMng.open_repo(old_repo_name)
             new_repo = gitoliteMng.open_repo(new_repo_name)
 
-            old_repo.add_username_with_rights(git_tenant_name, "RW+")
-            old_repo.add_username_with_rights(admin_tenant_name, "RW+")
+            old_repo.add_username_with_rights(git_tenant_name, 'RW+')
+            old_repo.add_username_with_rights(admin_tenant_name, 'RW+')
 
             new_repo.rights_hash = old_repo.rights_hash
             new_repo.commit_messages = ["Preparing renaming: '#{old_repo.repo_dir_path}' > '#{new_repo.repo_dir_path}'"]
@@ -169,23 +169,23 @@ module XYZ
               remote_repo_name: e[:repo_remote] ? e[:repo_remote][:repo_name] : nil
             )
           else
-            puts "MISSSING USERNAME!!!!"
+            puts 'MISSSING USERNAME!!!!'
           end
         end
       end
 
       ap repos_changes
 
-      ap "THE PusH"
+      ap 'THE PusH'
       ap gitoliteMng.push()
 
-      ap "CLONE DATA"
+      ap 'CLONE DATA'
       clone_data(git_tenant_name, repos_changes, gitoliteMng)
 
-      ap "UPDATE IMPLEMENTATIONS"
+      ap 'UPDATE IMPLEMENTATIONS'
       update_all_implementations(c)
 
-      ap "MIGRATE DATE - FINISHED"
+      ap 'MIGRATE DATE - FINISHED'
     end
   end
 end

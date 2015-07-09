@@ -32,14 +32,14 @@ module DTK
         aug_cmp_refs.each do |r|
           unless cmp_type = r[:component_type]||(r[:component_template]||{})[:component_type]
             ref =  ComponentRef.print_form(r)
-            ref = (ref ? "(#{ref})" : "")
+            ref = (ref ? "(#{ref})" : '')
             raise Error.new("Component ref #{ref} must either point to a component template or have component_type set")
           end
           cmp_template_id = r[:component_template_id]
           if r[:has_override_version]
             unless cmp_template_id
               unless r[:version]
-                raise Error.new("Component ref has override-version flag set, but no version")
+                raise Error.new('Component ref has override-version flag set, but no version')
               end
               (cmp_types_to_check[cmp_type] ||= ComponentTypeToCheck.new) << {pntr: r, version: r[:version]}
             end
@@ -99,7 +99,7 @@ module DTK
               end
             elsif el[:required]
              # TODO: This should not be reached because if error then an error wil be raised by get_component_type_to_template_mappings? call
-             Log.error("TODO: may put back in logic to accrue errors; until then this should not be reached")
+             Log.error('TODO: may put back in logic to accrue errors; until then this should not be reached')
               #              cmp_ref = {
               #                :component_type => cmp_type,
               #                :version => cmp_type_info[:version]
@@ -160,7 +160,7 @@ module DTK
           else
             new_cmp_moule_ref = {
               module_name: cmp_module_name,
-              module_type: "component",
+              module_type: 'component',
               namespace_info: namespace
             }
             cmp_module_refs_to_add <<  new_cmp_moule_ref

@@ -26,7 +26,7 @@ module DTK
                   node.associate_elastic_ip?()
                   node.associate_persistent_dns?()
 
-                  action.get_and_propagate_dynamic_attributes(result,non_null_attributes: ["host_addresses_ipv4"])
+                  action.get_and_propagate_dynamic_attributes(result,non_null_attributes: ['host_addresses_ipv4'])
                   set_result_succeeded(workitem,result,task,action)
                   delete_task_info(workitem)
 

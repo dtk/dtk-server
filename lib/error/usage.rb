@@ -46,7 +46,7 @@ module DTK
       def msg(param,enum_vals)
         msg = "Paramater '#{param}' has an illegal value"
         if enum_vals
-          msg << "; most be one of (#{enum_vals.join(",")})"
+          msg << "; most be one of (#{enum_vals.join(',')})"
         end
         msg
       end
@@ -83,7 +83,7 @@ module DTK
       elsif @errors.size > 1
         "\n"+@errors.map(&:to_s).join("\n")
       else #no errors shoudl not be called
-        "No errors"
+        'No errors'
       end
     end
   end
@@ -144,16 +144,16 @@ module DTK
     private
 
     def msg(violations)
-      return ("constraint violation: " + violations) if violations.is_a?(String)
+      return ('constraint violation: ' + violations) if violations.is_a?(String)
       v_with_text = violations.compact
       if v_with_text.size < 2
-        return "constraint violations"
+        return 'constraint violations'
       elsif v_with_text.size == 2
         return "constraint violations: #{v_with_text[1]}"
       end
-      ret = "constraint violations: "
-      ret << (v_with_text.first == :or ? "(atleast) one of " : "")
-      ret << "(#{v_with_text[1..v_with_text.size-1].join(", ")})"
+      ret = 'constraint violations: '
+      ret << (v_with_text.first == :or ? '(atleast) one of ' : '')
+      ret << "(#{v_with_text[1..v_with_text.size-1].join(', ')})"
     end
   end
 

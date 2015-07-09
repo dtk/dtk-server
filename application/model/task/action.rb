@@ -24,12 +24,12 @@ module DTK; class Task
       end
       def self.create_from_hash(task_action_type,hash,task_idh=nil)
         case task_action_type
-          when "CreateNode"  then CreateNode.new(:hash,hash,task_idh)
-          when "ConfigNode"  then ConfigNode.new(:hash,hash,task_idh)
-          when "PowerOnNode" then PowerOnNode.new(:hash,hash,task_idh)
-          when "InstallAgent" then InstallAgent.new(:hash,hash,task_idh)
-          when "ExecuteSmoketest" then ExecuteSmoketest.new(:hash,hash,task_idh)
-          when "Hash" then InstallAgent.new(:hash,hash,task_idh) #RICH-WF; Aldin compensating form bug in task creation
+          when 'CreateNode'  then CreateNode.new(:hash,hash,task_idh)
+          when 'ConfigNode'  then ConfigNode.new(:hash,hash,task_idh)
+          when 'PowerOnNode' then PowerOnNode.new(:hash,hash,task_idh)
+          when 'InstallAgent' then InstallAgent.new(:hash,hash,task_idh)
+          when 'ExecuteSmoketest' then ExecuteSmoketest.new(:hash,hash,task_idh)
+          when 'Hash' then InstallAgent.new(:hash,hash,task_idh) #RICH-WF; Aldin compensating form bug in task creation
           else raise Error.new("Unexpected task_action_type (#{task_action_type})")
         end
       end
@@ -113,9 +113,9 @@ module DTK; class Task
         if values_non_null?(dyn_attr_val_info,non_null_attrs)
           dyn_attr_val_info
         elsif count > RetryMaxCount
-          raise Error.new("cannot get all attributes with keys (#{non_null_attrs.join(",")})")
+          raise Error.new("cannot get all attributes with keys (#{non_null_attrs.join(',')})")
         elsif block.nil?
-          raise Error.new("Unexpected that block.nil?")
+          raise Error.new('Unexpected that block.nil?')
         else
           sleep(RetrySleep)
           retry_get_dynamic_attributes(block.call(),non_null_attrs,count+1,&block)

@@ -18,7 +18,7 @@ module DTK; class Component
       return ret if include_modules.empty?()
 
       unless assembly_instance
-        Log.error("Unexpected that assembly_instance is nil in IncludeModule.get_matching_implementations; not putting in includes")
+        Log.error('Unexpected that assembly_instance is nil in IncludeModule.get_matching_implementations; not putting in includes')
         return ret
       end
 

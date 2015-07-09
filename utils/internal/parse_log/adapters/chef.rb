@@ -44,14 +44,14 @@ module XYZ
           if @complete
             if has_error?()
               error_segment = error_segment()
-              "complete with error\n" + (error_segment ? Aux::pp_form(error_segment) : "")
+              "complete with error\n" + (error_segment ? Aux::pp_form(error_segment) : '')
             else
               "complete and ok\n"
             end
           else
             if has_error?()
               error_segment = error_segment()
-              "incomplete with error\n" + (error_segment ? Aux::pp_form(error_segment) : "")
+              "incomplete with error\n" + (error_segment ? Aux::pp_form(error_segment) : '')
             else
               "incomplete and no error yet\n"
             end
@@ -158,7 +158,7 @@ module XYZ
           if segments_from_error.last.line =~ /Chef::Exceptions::Exec - (.+$)/
             @error_detail = "Exec error: #{$1}"
           else
-            @error_detail = "Exec error"
+            @error_detail = 'Exec error'
           end
           self.class.segments_to_check(segments_from_error).each do |segment|
             return if set_file_ref_and_error_lines!(segment)
@@ -199,9 +199,9 @@ module XYZ
 
         def parse!(segments_from_error,_prev_segment)
           if segments_from_error.last.line =~ /Chef::Mixin::Template::TemplateError - (.+$)/
-            @error_detail = "Template error: #{$1}".gsub(/ for #<Erubis::Context:[^>]+>/,"")
+            @error_detail = "Template error: #{$1}".gsub(/ for #<Erubis::Context:[^>]+>/,'')
           else
-            @error_detail = "Template error"
+            @error_detail = 'Template error'
           end
           self.class.lines_to_check(segments_from_error).each do |line|
             return if set_file_ref_and_error_lines!(line)
@@ -250,7 +250,7 @@ module XYZ
       class ErrorRecipe < ErrorChefLog
         def self.isa?(segments_from_error)
           line = segments_from_error.first.line
-          return true if line =~ Regexp.new("has had an error")
+          return true if line =~ Regexp.new('has had an error')
           lines_to_check(segments_from_error).each do |line|
             return true if line =~ Regexp.new("#{RecipeCache}[^/]+/recipes")
             return true if line =~ FromFilePat
@@ -260,13 +260,13 @@ module XYZ
 
         private
 
-        RecipeCache = "/var/chef/cookbooks/"
+        RecipeCache = '/var/chef/cookbooks/'
         FromFilePat = Regexp.new("#{RecipeCache}([^/]+)/recipes/([^:]+):([0-9]+):in `from_file'")
         def parse!(segments_from_error,_prev_segment)
           if segments_from_error.last.line =~ /DEBUG: Re-raising exception: (.+$)/
-            @error_detail = $1.gsub(/ for #<Chef::Recipe:[^>]+>/,"")
+            @error_detail = $1.gsub(/ for #<Chef::Recipe:[^>]+>/,'')
           else
-            @error_detail = "recipe error"
+            @error_detail = 'recipe error'
           end
           self.class.lines_to_check(segments_from_error).each do |line|
             if set_file_ref!(line)

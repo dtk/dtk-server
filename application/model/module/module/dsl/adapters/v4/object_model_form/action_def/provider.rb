@@ -31,7 +31,7 @@ module DTK; class ModuleDSL; class V4; class ObjectModelForm
 
       # gets overwritten
       def provider_specific_fields(_input_hash)
-        raise Error.new("should be overwritten")
+        raise Error.new('should be overwritten')
       end
 
       def self.provider_type(input_hash,context={})

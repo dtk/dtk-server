@@ -30,8 +30,8 @@ module XYZ
     def git_server_class
       return @git_server_class if @git_server_class
       adapter_name = ((R8::Config[:repo]||{})[:git]||{})[:server_type]
-      raise Error.new("No repo git server adapter specified") unless adapter_name
-      @git_server_class = DynamicLoader.load_and_return_adapter_class("manage_git_server",adapter_name)
+      raise Error.new('No repo git server adapter specified') unless adapter_name
+      @git_server_class = DynamicLoader.load_and_return_adapter_class('manage_git_server',adapter_name)
       @git_server_class.set_git_class(self)
     end
   end

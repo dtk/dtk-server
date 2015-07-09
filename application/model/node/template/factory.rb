@@ -49,7 +49,7 @@ module DTK; class Node
             'node_components' => NodeAttribute::DefaultValue.node_components()
           },
           :node_interface => {'eth0' => {type: 'ethernet', display_name: 'eth0'}},
-          "*node_binding_rs_id" => "/node_binding_ruleset/#{nbrs_factory.ref()}"
+          '*node_binding_rs_id' => "/node_binding_ruleset/#{nbrs_factory.ref()}"
         }
         {node_template_ref() => hash_body}
       end
@@ -63,7 +63,7 @@ module DTK; class Node
 
       def self.raise_error_if_invalid_os(os)
         if os.nil?
-          raise ErrorUsage.new("Operating system must be given")
+          raise ErrorUsage.new('Operating system must be given')
         end
         os = os.to_sym
         unless LegalOSs.include?(os)
@@ -77,7 +77,7 @@ module DTK; class Node
       def self.raise_error_if_invalid_size_array(size_array)
         size_array ||= ['t1.micro'] #TODO: stub
         if size_array.nil?
-          raise ErrorUsage.new("One or more image sizes must be given")
+          raise ErrorUsage.new('One or more image sizes must be given')
         end
         # size_array.each{|image_size|CommandAndControl.raise_error_if_invalid_image_size(image_size,target)}
         size_array

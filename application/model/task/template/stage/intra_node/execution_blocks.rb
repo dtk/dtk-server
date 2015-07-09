@@ -85,7 +85,7 @@ module DTK; class Task; class Template
         ret = []
         return ret if empty?()
         if find{|eb|!eb.is_a?(ExecutionBlock::Ordered)}
-          raise Error.new("The method ExecutionBlocks#intra_node_stages can only be called if all its elements are ordered")
+          raise Error.new('The method ExecutionBlocks#intra_node_stages can only be called if all its elements are ordered')
         end
         map(&:intra_node_stages)
       end

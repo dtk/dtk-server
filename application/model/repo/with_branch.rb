@@ -12,7 +12,7 @@ module DTK
 
       def initial_sync_with_remote(remote,remote_repo_info)
         unless R8::Config[:repo][:workspace][:use_local_clones]
-          raise Error.new("Not implemented yet: initial_sync_with_remote_repo w/o local clones")
+          raise Error.new('Not implemented yet: initial_sync_with_remote_repo w/o local clones')
         end
 
         remote_url = remote.repo_url()

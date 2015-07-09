@@ -5,7 +5,7 @@ module XYZ
       new(path,branch,opts)
     end
     def initialize(path,branch,_opts={})
-      raise Error.new("mock mode only supported when branch=='master'") unless  branch=="master"
+      raise Error.new("mock mode only supported when branch=='master'") unless  branch=='master'
       root = R8::Config[:repo][:base_directory]
       @path = "#{root}/#{path}"
     end

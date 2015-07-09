@@ -27,7 +27,7 @@ module XYZ
 
     def self.copy_file(entry,out_file_path)
       # TODO: for larger files need more increemntal way of doing this
-      File.open(out_file_path,"w") do |out_file|
+      File.open(out_file_path,'w') do |out_file|
         out_file << entry.read
         out_file.chmod(entry.mode)
       end

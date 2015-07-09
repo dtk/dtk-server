@@ -21,7 +21,7 @@ module DTK; module ModuleMixins
             return module_obj
           else
             message = "Conflicts with already installed module (#{local_params.pp_module_name()})"
-            message += ". To ignore this conflict and use installed module please use -i switch (import-dtkn REMOTE-SERVICE-NAME -i)." if opts[:additional_message]
+            message += '. To ignore this conflict and use installed module please use -i switch (import-dtkn REMOTE-SERVICE-NAME -i).' if opts[:additional_message]
             raise ErrorUsage.new(message)
           end
         end
@@ -40,7 +40,7 @@ module DTK; module ModuleMixins
         # case on whether the module is created already
         if module_obj
           # TODO: ModuleBranch::Location: since repo has remote_ref in it must get appopriate repo
-          raise Error.new("TODO: ModuleBranch::Location; need to right this")
+          raise Error.new('TODO: ModuleBranch::Location; need to right this')
           repo_with_branch = module_obj.get_repo!()
         else
           # TODO: ModuleBranch::Location: see if this is necessary
@@ -204,7 +204,7 @@ module DTK; module ModuleMixins
       local = local_params.create_local(project)
 
       unless module_branch_obj = self.class.get_module_branch_from_local(local)
-        raise Error.new("Cannot find module_branch_obj from local")
+        raise Error.new('Cannot find module_branch_obj from local')
       end
 
       publish_preprocess_raise_error?(module_branch_obj)

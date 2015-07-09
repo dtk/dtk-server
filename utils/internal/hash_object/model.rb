@@ -40,7 +40,7 @@ module DTK
       def self.nested_value_private!(hash,path)
         return nil unless hash.is_a?(Hash)
         f = path.shift
-        f = hash.keys.first if f == "*"
+        f = hash.keys.first if f == '*'
         return nil unless hash.key?(f)
         return hash[f] if path.length == 0
         nested_value_private!(hash[f],path)
@@ -48,7 +48,7 @@ module DTK
       def self.has_path_private!(hash,path)
         return nil unless hash.is_a?(Hash)
         f = path.shift
-        f = hash.keys.first if f == "*"
+        f = hash.keys.first if f == '*'
         return nil unless hash.key?(f)
         return hash.key?(f) if path.length == 0
         nested_value_private!(hash[f],path)

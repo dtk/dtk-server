@@ -3,9 +3,9 @@ module DTK; class StateChange
     def self.component_state_changes(assembly,component_type=nil)
       filter = [:and, [:eq, :assembly_id, assembly[:id]]]
       if (component_type == :smoketest)
-        filter << [:eq, :basic_type, "smoketest"]
+        filter << [:eq, :basic_type, 'smoketest']
       else
-        filter << [:neq, :basic_type, "smoketest"]
+        filter << [:neq, :basic_type, 'smoketest']
       end
       sp_hash = {
         cols: DTK::Component::pending_changes_cols,
@@ -16,7 +16,7 @@ module DTK; class StateChange
       changes = get_objs(assembly.model_handle(:component),sp_hash).map do |cmp|
         node = cmp.delete(:node)
         hash = {
-          type: "converge_component",
+          type: 'converge_component',
           component: cmp,
           node: node
         }
@@ -84,16 +84,16 @@ module DTK; class StateChange
     def self.node_state_changes__power_on_nodes(assembly,_target_idh,opts={})
       ret = []
       unless opts[:just_leaf_nodes]
-        raise Error.new("Only supporting option :just_leaf_nodes")
+        raise Error.new('Only supporting option :just_leaf_nodes')
       end
       nodes = opts[:nodes]||assembly.get_leaf_nodes(cols: [:id,:display_name,:type,:external_ref,:admin_op_status])
-      nodes_to_start = nodes.reject{|n|n[:admin_op_status] == "running"}
+      nodes_to_start = nodes.reject{|n|n[:admin_op_status] == 'running'}
       return ret if nodes_to_start.empty?
 
       state_change_mh = assembly.model_handle(:state_change)
       nodes_to_start.map do |node|
         hash = {
-          type: "power_on_node",
+          type: 'power_on_node',
           node: node
         }
         create_stub(state_change_mh,hash)

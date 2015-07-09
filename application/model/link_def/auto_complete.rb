@@ -16,7 +16,7 @@ module DTK; class LinkDef
         if link_def_link = choose_internal_link(link_def,link_def[:possible_links],link_def[:component],strategy)
           link_def_context = LinkDef::Context.create(link_def_link,node_link_defs_info)
           link_def_link.attribute_mappings.each do |attr_mapping|
-            attr_links << attr_mapping.ret_links__clone_if_needed(link_def_context).merge(type: "internal")
+            attr_links << attr_mapping.ret_links__clone_if_needed(link_def_context).merge(type: 'internal')
           end
         end
       end
@@ -30,10 +30,10 @@ module DTK; class LinkDef
       # TODO: need to check if has contraint
       ret = nil
       return ret if possible_links.empty?
-      raise Error.new("only select_first stratagy currently implemented") unless strategy[:select_first]
+      raise Error.new('only select_first stratagy currently implemented') unless strategy[:select_first]
       ret = possible_links.first
-      if ret[:type] == "internal_external"
-        raise Error.new("only strategy internal_external_becomes_internal implemented") unless stratagy[:internal_external_becomes_internal]
+      if ret[:type] == 'internal_external'
+        raise Error.new('only strategy internal_external_becomes_internal implemented') unless stratagy[:internal_external_becomes_internal]
       end
       link_base_cmp.update_object!(:component_type)
       ret.merge(local_component_type: link_base_cmp[:component_type])
@@ -56,13 +56,13 @@ module DTK; class LinkDef
       node_link_defs_info.each do |r|
         port = r[:port]
         if port.nil?
-          Log.info("TODO: Check if port.nil? is an error in .get_annotated_internal_link_defs")
+          Log.info('TODO: Check if port.nil? is an error in .get_annotated_internal_link_defs')
           next
         end
         link_def = r[:link_def]
         component = r[:component]
         if %w{component_internal component_internal_external}.include?(port[:type]) &&
-            link_def[:local_or_remote] == "local" and
+            link_def[:local_or_remote] == 'local' and
             not port[:connected]
           link_def_id = link_def[:id]
           relevant_link_def_ids << link_def_id
@@ -81,7 +81,7 @@ module DTK; class LinkDef
                  [:oneof, :link_def_id, relevant_link_def_ids],
                  [:or, [:eq,:remote_component_type,component_type],
                   [:oneof, :link_def_id,cmp_link_def_ids]]],
-        order_by: [{field: :position, order: "ASC"}]
+        order_by: [{field: :position, order: 'ASC'}]
       }
       poss_links = Model.get_objs(component.model_handle(:link_def_link),sp_hash)
       return ret if poss_links.empty?

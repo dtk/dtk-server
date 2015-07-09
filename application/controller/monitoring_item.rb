@@ -17,7 +17,7 @@ module XYZ
     # all nodes of that assembly will be stopped.
     #
     def rest__check_idle
-      prefix_log = "[CRON JOB]"
+      prefix_log = '[CRON JOB]'
 
       Log.info "#{prefix_log} Monitoring idle assemblies: START"
 
@@ -68,7 +68,7 @@ module XYZ
     # helper fn
     def component_or_node_display
       search_object = ret_search_object_in_request()
-      raise Error.new("no search object in request") unless search_object
+      raise Error.new('no search object in request') unless search_object
 
       model_list = Model.get_objects_from_search_object(search_object)
 

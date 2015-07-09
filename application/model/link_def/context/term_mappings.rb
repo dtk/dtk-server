@@ -95,7 +95,7 @@ module DTK
         each_value do |v|
           if v.is_a?(Value::NodeAttribute)
             unless node = node_mappings[v.node_ref.to_sym]
-              Log.error("cannot find node associated with node ref")
+              Log.error('cannot find node associated with node ref')
               next
             end
             a = (ret[node[:id]] ||= {node: node, attribute_info: []})[:attribute_info]

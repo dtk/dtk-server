@@ -30,7 +30,7 @@ module DTK; class ModuleRefs
 
       def fill_in_missing_information
         pp [:fill_in_missing_information,self]
-        raise Error.new("Need to write fill_in_missing_information")
+        raise Error.new('Need to write fill_in_missing_information')
       end
 
       private

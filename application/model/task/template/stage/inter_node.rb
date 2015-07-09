@@ -50,7 +50,7 @@ module DTK; class Task; class Template
       def delete_action!(action_match)
         node_id = action_match.action.node_id
         unless node_action = self[node_id]
-          raise Error.new("Unexepected that no node action can be found")
+          raise Error.new('Unexepected that no node action can be found')
         end
         if :empty == node_action.delete_action!(action_match)
           delete(node_id)
@@ -60,7 +60,7 @@ module DTK; class Task; class Template
 
       def splice_in_action!(action_match,insert_point)
         unless node_id = action_match.insert_action.node_id
-          raise Error.new("Unexepected that node_id is nil")
+          raise Error.new('Unexepected that node_id is nil')
         end
         case insert_point
           when :end_last_execution_block
@@ -122,7 +122,7 @@ module DTK; class Task; class Template
             if Constant.matches?(serialized_node_actions,:Nodes)
               raise ParsingError.new("Within nested subtask only '#{Constant::Node}' and not '#{Constant::Nodes}' keyword can be used")
             end
-            raise ParsingError.new("Missing node reference in: ?1",serialized_node_actions)
+            raise ParsingError.new('Missing node reference in: ?1',serialized_node_actions)
           end
           node_id = 0 #dummy value when just used for parsing
           if action_list

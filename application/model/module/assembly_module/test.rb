@@ -51,7 +51,7 @@ module DTK; class AssemblyModule
         end
       end
       unless ancestor_branch = branch.get_ancestor_branch?()
-        raise Error.new("Cannot find ancestor branch")
+        raise Error.new('Cannot find ancestor branch')
       end
       branch_name = branch[:branch]
       ancestor_branch.merge_changes_and_update_model?(component_module,branch_name,opts)
@@ -107,7 +107,7 @@ module DTK; class AssemblyModule
                  [:eq,:node_node_id,nil],
                  [:eq,:component_type,cmp_template.get_field?(:component_type)]]
       }
-      Model.get_obj(cmp_template.model_handle(),sp_hash) || raise(Error.new("Unexpected that branch_cmp_template is nil"))
+      Model.get_obj(cmp_template.model_handle(),sp_hash) || raise(Error.new('Unexpected that branch_cmp_template is nil'))
     end
 
     def add_version_info!(modules_with_branches)
@@ -135,16 +135,16 @@ module DTK; class AssemblyModule
 
       local_copy_els.each do |r|
         unless workspace_branch = ndx_workspace_branches[r[:id]]
-          Log.error("Unexpected that ndx_workspace_branchesr[r[:id]] is null")
+          Log.error('Unexpected that ndx_workspace_branchesr[r[:id]] is null')
           next
         end
         assembly_mod_branch = r[:module_branch]
         unless assembly_mod_sha = assembly_mod_branch[:current_sha]
-          Log.error("Unexpected that assembly_mod_sh is nil")
+          Log.error('Unexpected that assembly_mod_sh is nil')
           next
         end
         unless workspace_mod_sha = workspace_branch[:current_sha]
-          Log.error("Unexpected that workspace_mod_sha is nil")
+          Log.error('Unexpected that workspace_mod_sha is nil')
         end
         r[:local_copy_diff]  = (assembly_mod_sha != workspace_mod_sha)
         # TODO: code to put in when

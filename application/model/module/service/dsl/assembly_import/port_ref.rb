@@ -28,7 +28,7 @@ module DTK; class ServiceModule
       def self.parse_component_link(input_node,input_cmp_name,component_link_hash,opts={})
         err_opts = Opts.new(opts).slice(:file_path)
         unless component_link_hash.size == 1
-          raise ParsingError.new("Ill-formed component link ?1",component_link_hash,err_opts)
+          raise ParsingError.new('Ill-formed component link ?1',component_link_hash,err_opts)
         end
         link_def_ref = component_link_hash.keys.first
 
@@ -46,7 +46,7 @@ module DTK; class ServiceModule
       end
       PortRefRegex = Regexp.new("(^.+)#{Seperators[:node_component]}(.+)#{Seperators[:component_link_def_ref]}(.+$)")
       ServiceLinkTarget = Regexp.new("(^.+)#{Seperators[:node_component]}(.+$)")
-      ServiceLinkLegalForm = "LinkType: Node/Component"
+      ServiceLinkLegalForm = 'LinkType: Node/Component'
 
       # ports are augmented with field :parsed_port_name
       def matching_id(aug_ports,opts={})

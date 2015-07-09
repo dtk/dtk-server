@@ -50,7 +50,7 @@ module DTK
 
         def build
           unless @datatype
-            raise Error.new("Datatype must be specified")
+            raise Error.new('Datatype must be specified')
           end
           self
         end

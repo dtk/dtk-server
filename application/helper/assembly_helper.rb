@@ -24,7 +24,7 @@ module Ramaze::Helper
         assembly_instance.id_handle().create_object(model_name: :assembly_workspace)
       else
         if opts[:only_workspace]
-          raise ::DTK::ErrorUsage.new("The command can ony be applied to a workspace")
+          raise ::DTK::ErrorUsage.new('The command can ony be applied to a workspace')
         end
         assembly_instance
       end
@@ -122,7 +122,7 @@ module Ramaze::Helper
     # Returns: Returns array of node id handles
     #
     def ret_node_id_handles(node_name_param, assembly)
-      Log.error("check if works for node groups")
+      Log.error('check if works for node groups')
       # get nodes list (command seperated) from request
       target_nodes_str = ret_request_params(node_name_param)
       return [] unless target_nodes_str
@@ -170,7 +170,7 @@ module Ramaze::Helper
       bad_settings = []
       param_settings.each do |param_setting|
         unless setting_name = param_setting['name']
-          raise ::DTK::ErrorUsage.new("Ill-formed service settings string")
+          raise ::DTK::ErrorUsage.new('Ill-formed service settings string')
         end
         if setting = ndx_existing_settings[setting_name]
           if parameters = param_setting['parameters']

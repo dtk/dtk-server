@@ -48,7 +48,7 @@ module DTK; class BaseModule; class UpdateModule
           # add dsl file and create DTK module objects from the dsl
           add_dsl_to_impl_and_create_objects(dsl_created_info,project,impl_obj,module_branch_idh,version,opts)
         else
-          Log.error("Unexpected that opts[:commit_dsl] is false when opts[:scaffold_if_no_dsl] is true")
+          Log.error('Unexpected that opts[:commit_dsl] is false when opts[:scaffold_if_no_dsl] is true')
         end
       end
 

@@ -30,7 +30,7 @@ module XYZ
         unless model_handle[:parent_model_name]
           unless  (not Model.has_group_id_col?(model_handle)) ||
               [:repo,:datacenter,:library,:task,:repo_user,:repo_user_acl,:repo_remote,:namespace].include?(model_handle[:model_name])
-            Log.info_pp(["missing :parent_model_name in create_from_select", model_handle,caller[0..10]])
+            Log.info_pp(['missing :parent_model_name in create_from_select', model_handle,caller[0..10]])
           end
         end
 
@@ -103,7 +103,7 @@ module XYZ
           sql = ds.insert_returning_sql(returning_sql_cols,columns,sequel_select_with_cols)
 
           if Model.debug_flag?
-            Model.pp_sql_debug(sql, "INSERT STATMENT")
+            Model.pp_sql_debug(sql, 'INSERT STATMENT')
           end
 
           # TODO: benchmark point pp [:create_from_select,sql]
@@ -115,7 +115,7 @@ module XYZ
         else
           ds.import(columns,sequel_select_with_cols)
           # TODO: need to get ids and set
-          raise Error.new("have not implemented create_from_select when db adapter does not support insert_returning_sql  not set")
+          raise Error.new('have not implemented create_from_select when db adapter does not support insert_returning_sql  not set')
         end
         ret
       end
@@ -144,7 +144,7 @@ module XYZ
         # fn tries to return ids depending on whether db adater supports returning_id
         ret = nil
         unless ds.respond_to?(:insert_returning_sql)
-          raise Error.new("Not supported")
+          raise Error.new('Not supported')
         end
 
         returning_sql_cols = [:id,:display_name,parent_id_col.as(:parent_id)]
@@ -212,7 +212,7 @@ module XYZ
         if opts[:recursive_create]
           relation_type,parent_uri = RestURI.parse_factory_uri(factory_uri)
           parent_idh = uri_id_handle.createIDH(uri: parent_uri)
-          create_simple_instance?(parent_idh,opts) unless parent_uri == "/" || exists?(parent_idh)
+          create_simple_instance?(parent_idh,opts) unless parent_uri == '/' || exists?(parent_idh)
         end
         assignments = opts[:set_display_name] ? {display_name: ref} : {}
         factory_idh = uri_id_handle.createIDH(uri: factory_uri, is_factory: true)
@@ -248,7 +248,7 @@ module XYZ
   parent_id = nil
   parent_relation_type = nil
         c = factory_idh[:c]
-         if parent_uri == "/" ## if top level object
+         if parent_uri == '/' ## if top level object
           ref_num = compute_ref_num(db_rel,ref,c)
     #TBD check that the assignments are legal, or trap
     new_id = insert_into_db(factory_idh,db_rel,scalar_assignments.merge(ref_num: ref_num))
@@ -269,7 +269,7 @@ module XYZ
 
   end
 
-  raise Error.new("error while inserting element") if new_id.nil?
+  raise Error.new('error while inserting element') if new_id.nil?
 
   new_uri  = RestURI::ret_new_uri(factory_idh[:uri],ref,ref_num)
 

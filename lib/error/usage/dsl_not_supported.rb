@@ -13,7 +13,7 @@ module DTK
 
     class LinkToNonComponent < self
       def initialize(opts={})
-        raise ErrorUsage.new("Only supported: Attribute linked to a component attribute",Opts.new(opts).slice(:file_path))
+        raise ErrorUsage.new('Only supported: Attribute linked to a component attribute',Opts.new(opts).slice(:file_path))
       end
     end
 

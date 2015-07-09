@@ -46,7 +46,7 @@ module DTK; class Component
           is_rejected = rejected_bool
           results.each do |r|
             if node[:display_name] == r[:node_name]
-              if r[:attributes]["linux_user"].eql?(system_user) && r[:attributes]["key_name"].eql?(pub_name)
+              if r[:attributes]['linux_user'].eql?(system_user) && r[:attributes]['key_name'].eql?(pub_name)
                 is_rejected = !rejected_bool
               end
             end

@@ -4,7 +4,7 @@ module DTK
 
     module ViolationMixin
       def find_violations
-        nodes_and_cmps = get_info__flat_list(detail_level: "components").select{|r|r[:nested_component]}
+        nodes_and_cmps = get_info__flat_list(detail_level: 'components').select{|r|r[:nested_component]}
         cmps = nodes_and_cmps.map{|r|r[:nested_component]}
 
         unset_attr_viols = find_violations__unset_attrs()
@@ -44,7 +44,7 @@ module DTK
         # TODO: this is expensive in that it makes query for each constraint
         nodes_and_cmps.each do |r|
           if constraint_info = ndx_constraints[r[:nested_component][:id]]
-            constraint_scope = {"target_node_id_handle" => r[:node].id_handle()}
+            constraint_scope = {'target_node_id_handle' => r[:node].id_handle()}
             constraint_info[:constraints].each do |constraint|
               unless constraint.evaluate_given_target(constraint_scope)
                 ret << Violation::ComponentConstraint.new(constraint,r[:node])
@@ -70,21 +70,21 @@ module DTK
         return ret if cmps.empty?
 
         cmps.each do |cmp|
-          cmp_module_branch = get_parsed_info(cmp[:module_branch_id], "ComponentBranch")
+          cmp_module_branch = get_parsed_info(cmp[:module_branch_id], 'ComponentBranch')
           if cmp_module_branch && cmp_module_branch[:component_module]
-            ret << Violation::ComponentParsingError.new(cmp_module_branch[:component_module][:display_name], "Component") unless cmp_module_branch[:dsl_parsed]
+            ret << Violation::ComponentParsingError.new(cmp_module_branch[:component_module][:display_name], 'Component') unless cmp_module_branch[:dsl_parsed]
           end
         end
 
-        if service_module_branch = get_parsed_info(self[:module_branch_id], "ServiceBranch")
-          ret << Violation::ComponentParsingError.new(service_module_branch[:service_module][:display_name], "Service") unless service_module_branch[:dsl_parsed]
+        if service_module_branch = get_parsed_info(self[:module_branch_id], 'ServiceBranch')
+          ret << Violation::ComponentParsingError.new(service_module_branch[:service_module][:display_name], 'Service') unless service_module_branch[:dsl_parsed]
         end
 
         # if module_branch belongs to service instance assembly_module_version? will not be nil
         assembly_branch = AssemblyModule::Service.get_assembly_branch(self)
         if assembly_branch.assembly_module_version?
           # add violation if module_branch[:dsl_parsed] == false
-          ret << Violation::ComponentParsingError.new(self[:display_name], "Service instance") unless assembly_branch[:dsl_parsed]
+          ret << Violation::ComponentParsingError.new(self[:display_name], 'Service instance') unless assembly_branch[:dsl_parsed]
         end
 
         ret
@@ -148,9 +148,9 @@ module DTK
         ret = nil
         cols = [:id, :type, :component_id, :service_id, :dsl_parsed]
 
-        if type.to_s.eql?("ComponentBranch")
+        if type.to_s.eql?('ComponentBranch')
           cols << :component_module_info
-        elsif type.to_s.eql?("ServiceBranch")
+        elsif type.to_s.eql?('ServiceBranch')
           cols << :service_module
         end
 
@@ -162,9 +162,9 @@ module DTK
           return ret
         end
 
-        return branch if type.to_s.eql?("ComponentBranch") || type.to_s.eql?("ServiceBranch")
+        return branch if type.to_s.eql?('ComponentBranch') || type.to_s.eql?('ServiceBranch')
 
-        if (type == "Component")
+        if (type == 'Component')
           sp_cmp_hash = {
             cols: [:id, :display_name, :dsl_parsed],
             filter: [:eq, :id, branch[:component_id]]

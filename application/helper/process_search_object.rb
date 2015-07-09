@@ -30,7 +30,7 @@ module Ramaze::Helper
        relation: model_name()
      }
      hash_search_pattern.merge!(filter: filter) if filter
-     {"search_pattern" => hash_search_pattern}
+     {'search_pattern' => hash_search_pattern}
    end
 
    def ret_filter_when_get
@@ -40,17 +40,17 @@ module Ramaze::Helper
     end
 
     def ret_hash_search_object_in_action_set_params(action_set_params)
-      action_set_params["search"]
+      action_set_params['search']
     end
 
     def ret_hash_search_object_in_post
-      json_params = (ret_request_params()||{})["search"]
+      json_params = (ret_request_params()||{})['search']
       if json_params and not json_params.empty?
         search_pattern = JSON.parse(json_params)
         if rest_request?()
-          search_pattern["relation"] ||=  model_name()
+          search_pattern['relation'] ||=  model_name()
         end
-        {"search_pattern" => search_pattern}
+        {'search_pattern' => search_pattern}
       end
     end
   end

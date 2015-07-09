@@ -29,7 +29,7 @@ module DTK
       existing_paths = file_assets.map{|r|r[:path]}
       paths_to_add.reject!{|path|existing_paths.include?(path)}
       unless paths_to_add.empty?
-        type = "puppet_file" #TODO: hard coded
+        type = 'puppet_file' #TODO: hard coded
         create_rows =  paths_to_add.map{|path|FileAsset.ret_create_hash(self,type,path)}
         Model.create_from_rows(child_model_handle(:file_asset),create_rows)
       end
@@ -115,7 +115,7 @@ module DTK
       2 => /^dtk\.model\.([a-z_]+$)/,
       3 => /^module_refs\.([a-z]+$)/
     }
-    ExcludeFolders = ["puppet"]
+    ExcludeFolders = ['puppet']
 
     def repo_manager_context
       update_object!(:repo,:branch)
@@ -155,7 +155,7 @@ module DTK
       FileAsset.add(self,file_asset_type,path,content)
     end
     FileAssetType = {
-      chef_cookbook: "chef_file"
+      chef_cookbook: 'chef_file'
     }
 
     def add_model_specific_override_attrs!(override_attrs,_target_obj)
@@ -167,7 +167,7 @@ module DTK
       update(updated: true)
       # set updated for the project templates that point to this implemntation
       cmp_mh = model_handle(:component)
-      filter = [:and, [:eq, :implementation_id, id()], [:eq, :type, "template"]]
+      filter = [:and, [:eq, :implementation_id, id()], [:eq, :type, 'template']]
       Model.update_rows_meeting_filter(cmp_mh,{updated: true},filter)
     end
 
@@ -182,17 +182,17 @@ module DTK
       cmp_rows.each do |r|
         cmp_idh = r[:component].id_handle()
         parent_idh = cmp_idh.createIDH(model_name: :datacenter, id: r[:node][:datacenter_datacenter_id])
-        StateChange.create_pending_change_item(new_item: cmp_idh, parent: parent_idh, type: "update_implementation")
+        StateChange.create_pending_change_item(new_item: cmp_idh, parent: parent_idh, type: 'update_implementation')
       end
     end
 
     ImplementationType = {
-      puppet: "puppet_module",
-      chef: "chef_cookbook"
+      puppet: 'puppet_module',
+      chef: 'chef_cookbook'
     }
     ImplTypeToFileType = {
-      "puppet_module" => "puppet_file",
-      "chef_cookbook" => "chef_file"
+      'puppet_module' => 'puppet_file',
+      'chef_cookbook' => 'chef_file'
     }
 
     # ####### TODO below related to UI and may deprecate

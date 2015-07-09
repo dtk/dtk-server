@@ -51,7 +51,7 @@ module DTK; class  Assembly
       assembly_empty_nodes = {}
       target_idh = opts[:target_idh]
       target_filter = (target_idh ? [:eq, :datacenter_datacenter_id, target_idh.get_id()] : [:neq, :datacenter_datacenter_id, nil])
-      filter = [:and, [:eq, :type, "composite"], target_filter,opts[:filter]].compact
+      filter = [:and, [:eq, :type, 'composite'], target_filter,opts[:filter]].compact
       col,needs_empty_nodes = list_virtual_column?(opts[:detail_level])
       cols = [:id,:ref,:display_name,:group_id,:component_type,:version,:created_at,col].compact
       ret = get(assembly_mh,{cols: cols}.merge(opts))
@@ -79,11 +79,11 @@ module DTK; class  Assembly
       col =
         if detail_level.nil?
           nil
-        elsif detail_level == "nodes"
+        elsif detail_level == 'nodes'
           empty_assem_nodes = true
           # TODO: use below for component detail and introduce a more succinct one for nodes
           :instance_nodes_and_cmps_summary
-        elsif detail_level == "components"
+        elsif detail_level == 'components'
           empty_assem_nodes = true
           :instance_nodes_and_cmps_summary
         else
@@ -127,12 +127,12 @@ module DTK; class  Assembly
       node_template = Node::Template.find_matching_node_template(target, node_binding_ruleset: node_binding_rs)
 
       self.update_object!(:display_name)
-      ref = SQL::ColRef.concat("assembly--", "#{self[:display_name]}--#{node_group_name}")
+      ref = SQL::ColRef.concat('assembly--', "#{self[:display_name]}--#{node_group_name}")
 
       override_attrs = {
         display_name: node_group_name,
         assembly_id: id(),
-        type: "node_group_staged",
+        type: 'node_group_staged',
         ref: ref
       }
 
@@ -282,26 +282,26 @@ module DTK; class  Assembly
       filter =
         [:and,
          [:eq, :id, id],
-         [:eq, :type, "composite"],
+         [:eq, :type, 'composite'],
          [:neq, :datacenter_datacenter_id, nil]]
       check_valid_id_helper(model_handle,id,filter)
     end
 
     def self.name_to_id(model_handle,name)
-      parts = name.split("/")
+      parts = name.split('/')
       augmented_sp_hash =
         if parts.size == 1
           {cols: [:id],
            filter: [:and,
                     [:eq, :display_name, parts[0]],
-                    [:eq, :type, "composite"],
+                    [:eq, :type, 'composite'],
                     [:neq, :datacenter_datacenter_id, nil]]
           }
         elsif parts.size == 2
           {cols: [:id,:component_type,:target],
            filter: [:and,
                     [:eq, :display_name, parts[1]],
-                    [:eq, :type, "composite"]],
+                    [:eq, :type, 'composite']],
            post_filter: lambda{|r|r[:target][:display_name] ==  parts[0]}
           }
         else

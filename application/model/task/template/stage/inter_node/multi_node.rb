@@ -72,7 +72,7 @@ module DTK; class Task; class Template; class Stage
         CmpRefWithTitleRegexp = /(^[^\[]+)\[([^\]]+)\]$/
 
         def serialized_multi_node_type
-          "All_applicable"
+          'All_applicable'
         end
       end
     end

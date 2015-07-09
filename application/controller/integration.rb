@@ -7,7 +7,7 @@ module XYZ
 
       # Rich: You have other params in request in case you need them
 
-      ap " Sync Started"
+      ap ' Sync Started'
       ap username
       ap password
       ap email

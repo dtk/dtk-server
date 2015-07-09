@@ -8,7 +8,7 @@ module DTK
 
       def self.get_or_create_service_module(project,service_module_name,opts={})
         unless namespace = opts[:namespace]
-          raise Error.new("Need to update code so that namespace passed in")
+          raise Error.new('Need to update code so that namespace passed in')
         end
         if service_module = get_service_module?(project,service_module_name,namespace)
           service_module
@@ -111,7 +111,7 @@ module DTK
             project_project_id: project_idh.get_id(),
             ref: service_module.assembly_ref(assembly_name),
             display_name: assembly_name,
-            type: "composite",
+            type: 'composite',
             module_branch_id: service_module_branch[:id],
             component_type: Assembly.ret_component_type(service_module_name,assembly_name)
           }
@@ -272,7 +272,7 @@ module DTK
         sp_hash = {
           cols: [:id,:display_name,:group_id,:component_type,:project_project_id,:ref,:ui,:type,:module_branch_id],
           filter:           [:and,
-                             [:eq, :type, "composite"],
+                             [:eq, :type, 'composite'],
                              # Aldin: added ancestor_id==nil check to distinct between service instance (has ancestor_id) and assembly-template
                              # with same name (does not have ancestor_id)
                              [:eq, :ancestor_id, nil],
@@ -302,9 +302,9 @@ module DTK
         }
         port_link_ref = PortLink.port_link_ref(port_link_ref_info)
         port_link_hash = {
-          "*input_id" => "/node/#{in_node_ref}/port/#{in_port_ref}",
-          "*output_id" => "/node/#{out_node_ref}/port/#{out_port_ref}",
-          "*assembly_id" => "/component/#{assembly_ref}"
+          '*input_id' => "/node/#{in_node_ref}/port/#{in_port_ref}",
+          '*output_id' => "/node/#{out_node_ref}/port/#{out_port_ref}",
+          '*assembly_id' => "/component/#{assembly_ref}"
         }
         {port_link_ref => port_link_hash}
       end
@@ -344,7 +344,7 @@ module DTK
             node.is_node_group?() ? Node::Type::NodeGroup.stub : Node::Type::Node.stub
           end
         node_hash.merge!(
-          "*assembly_id" => "/component/#{self[:ref]}",
+          '*assembly_id' => "/component/#{self[:ref]}",
           :type          => node_type,
           :component_ref => cmp_refs,
           :port          => ports,

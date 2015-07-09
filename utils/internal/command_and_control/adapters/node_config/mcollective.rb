@@ -36,12 +36,12 @@ module DTK
         added_content = {
           task_id: task_idh.get_id(),
           top_task_id: top_task_idh.get_id(),
-          agent_git_details: {repo: "dtk-node-agent", branch: "" }
+          agent_git_details: {repo: 'dtk-node-agent', branch: '' }
         }
         msg_content.merge!(added_content)
 
         pbuilderid = Node.pbuilderid(config_node[:node])
-        filter = filter_single_fact("pbuilderid",pbuilderid)
+        filter = filter_single_fact('pbuilderid',pbuilderid)
         context = opts[:receiver_context]
         callbacks = context[:callbacks]
         mc_info = mc_info_for_config_agent(config_agent)
@@ -77,10 +77,10 @@ module DTK
       def self.initiate_cancelation(task_idh,top_task_idh,config_node,opts)
         msg_content = { task_id: task_idh.get_id(),top_task_id: top_task_idh.get_id() }
         pbuilderid = Node.pbuilderid(config_node[:node])
-        filter = filter_single_fact("pbuilderid",pbuilderid)
+        filter = filter_single_fact('pbuilderid',pbuilderid)
         context = opts[:receiver_context]
         callbacks = context[:callbacks]
-        async_agent_call("puppet_cancel","run",msg_content,filter,callbacks,context)
+        async_agent_call('puppet_cancel','run',msg_content,filter,callbacks,context)
       end
 
       # TODO: change signature to def self.async_execution(task_idh,top_task_idh,config_node,callbacks,context)
@@ -90,7 +90,7 @@ module DTK
         agent_repo_dir = R8::Config[:node_agent_git_clone][:local_dir]
         node_commit_id = config_node[:node][:agent_git_commit_id]
         unless head_git_commit_id = context[:head_git_commit_id]
-          raise Error.new("Unexpected that opts[:head_git_commit_id ] is nil")
+          raise Error.new('Unexpected that opts[:head_git_commit_id ] is nil')
         end
         agents = {}
         name_regex = /\/agent\/(.+)/
@@ -118,11 +118,11 @@ module DTK
 
         msg_content = { agent_files: agents }
         pbuilderid = Node.pbuilderid(config_node[:node])
-        filter = filter_single_fact("pbuilderid",pbuilderid)
+        filter = filter_single_fact('pbuilderid',pbuilderid)
         callbacks = context[:callbacks]
-        async_agent_call("dev_manager","inject_agent",msg_content,filter,callbacks,context)
+        async_agent_call('dev_manager','inject_agent',msg_content,filter,callbacks,context)
       end
-      MCAgentPluginDir = "mcollective_additions/plugins/v2.2/agent"
+      MCAgentPluginDir = 'mcollective_additions/plugins/v2.2/agent'
 
       def self.node_agent_git_clone_debug_mode_set_agents!(agents)
         debug_config = R8::Config[:node_agent_git_clone][:debug_mode]
@@ -150,14 +150,14 @@ module DTK
         node_repo_user = RepoUser.get_matching_repo_user(repo_user_mh, {type: :node}, [:ssh_rsa_private_key,:ssh_rsa_pub_key])
 
         unless node_repo_user && node_repo_user[:ssh_rsa_private_key]
-          raise Error.new("Cannot found ssh private key to authorize nodes")
+          raise Error.new('Cannot found ssh private key to authorize nodes')
         end
         unless node_repo_user[:ssh_rsa_pub_key]
-          raise Error.new("Cannot found ssh public key to authorize nodes")
+          raise Error.new('Cannot found ssh public key to authorize nodes')
         end
 
         pbuilderid = Node.pbuilderid(node)
-        filter = filter_single_fact("pbuilderid",pbuilderid)
+        filter = filter_single_fact('pbuilderid',pbuilderid)
 
         params = {
           agent_ssh_key_public: node_repo_user[:ssh_rsa_pub_key],
@@ -165,7 +165,7 @@ module DTK
           server_ssh_rsa_fingerprint: RepoManager.repo_server_ssh_rsa_fingerprint()
         }
         context = {timeout: DefaultTimeoutAuthNode}.merge(context_x)
-        async_agent_call("git_access","add_rsa_info",params,filter,callbacks,context)
+        async_agent_call('git_access','add_rsa_info',params,filter,callbacks,context)
       end
 
       DefaultTimeoutAuthNode = 60
@@ -191,24 +191,24 @@ module DTK
 
         context = {timeout: opts[:poll_cycle]||PollCycleDefault}.merge(rc)
         pbuilderid = Node.pbuilderid(node)
-        filter = filter_single_fact("pbuilderid",pbuilderid)
+        filter = filter_single_fact('pbuilderid',pbuilderid)
         params = nil
-        async_agent_call("discovery","ping",params,filter,callbacks,context)
+        async_agent_call('discovery','ping',params,filter,callbacks,context)
       end
       PollCycleDefault = 40
       PollCountDefault = 6
 
       def self.request__get_logs(task,nodes,callbacks,context)
         log_agent = context[:log_type] && LogAgents[context[:log_type].to_sym]
-        raise Error.new("cannot find a mcollective agent to get logs of type #{context[:log_type]||"UNKNOWN"}") unless log_agent
+        raise Error.new("cannot find a mcollective agent to get logs of type #{context[:log_type]||'UNKNOWN'}") unless log_agent
         ret = nodes.inject({}){|h,n|h.merge(n[:id] => nil)}
-        key = task[:executable_action_type] ? "task_id" : "top_task_id"
+        key = task[:executable_action_type] ? 'task_id' : 'top_task_id'
         params = {key: key, value: task.id_handle.get_id().to_s}
         pbuilderids = nodes.map{|n|Node.pbuilderid(n)}
         value_pattern = /^(#{pbuilderids.join('|')})$/
-        filter = filter_single_fact("pbuilderid",value_pattern)
+        filter = filter_single_fact('pbuilderid',value_pattern)
         async_context = {expected_count: pbuilderids.size, timeout: GetLogsTimeout}.merge(context)
-        async_agent_call(log_agent.to_s,"get",params,filter,callbacks,async_context)
+        async_agent_call(log_agent.to_s,'get',params,filter,callbacks,async_context)
       end
       LogAgents = {
         config_agent: :get_log_fragment
@@ -230,7 +230,7 @@ module DTK
           if config_agent.respond_to?(:action_results)
             config_agent.action_results(result,action)
           else
-            Log.error_pp(["Config agent does not have action_results defined:",config_agent])
+            Log.error_pp(['Config agent does not have action_results defined:',config_agent])
             nil
           end
         end
@@ -277,22 +277,22 @@ module DTK
 
       def self.async_agent_call(agent,method,params,filter_x,callbacks,context_x)
         msg = params ? handler.new_request(agent,method,params) : method
-        filter = BlankFilter.merge(filter_x).merge("agent" => [agent])
+        filter = BlankFilter.merge(filter_x).merge('agent' => [agent])
         context = context_x.merge(callbacks: callbacks)
         handler.sendreq_with_callback(msg,agent,context,filter)
       end
-      BlankFilter = {"identity"=>[], "fact"=>[], "agent"=>[], "cf_class"=>[]}
+      BlankFilter = {'identity'=>[], 'fact'=>[], 'agent'=>[], 'cf_class'=>[]}
       @@handler = nil
       def self.handler
         @@handler ||= Multiplexer.create(Config.mcollective_client())
       end
 
       def self.filter_single_fact(fact,value,operator=nil)
-        {"fact" => [format_fact_filter(fact,value,operator)]}
+        {'fact' => [format_fact_filter(fact,value,operator)]}
       end
       def self.format_fact_filter(fact,value,operator=nil)
         if operator.nil?
-          operator = value.is_a?(Regexp) ? "=~" : "=="
+          operator = value.is_a?(Regexp) ? '=~' : '=='
         end
         if value.is_a?(Regexp)
           value = "/#{value.source}/"

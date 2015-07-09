@@ -13,7 +13,7 @@ module XYZ
       end
 
       def get_node_list
-        get_rest("nodes").to_hash
+        get_rest('nodes').to_hash
       end
 
       def get_node_data(node_name)
@@ -28,13 +28,13 @@ module XYZ
   return nil if attrs.nil?
   #TBD: stubbed to just return interfaces
   attributes = {}
-        return {} unless attrs["network"]
-        return {} unless interfaces = attrs["network"]["interfaces"]
+        return {} unless attrs['network']
+        return {} unless interfaces = attrs['network']['interfaces']
   attributes[:node_interface] = {}
   interfaces.each{|int_name,int_config|
-    info = int_config.reject{|k,_v| k == "addresses"}
+    info = int_config.reject{|k,_v| k == 'addresses'}
           attributes[:node_interface][int_name.to_sym] = {info: info}
-          if addrs = format_node_addresses(int_config["addresses"])
+          if addrs = format_node_addresses(int_config['addresses'])
       attributes[:node_interface][int_name.to_sym][:node_interface_address] = addrs
           end
   }
@@ -44,8 +44,8 @@ module XYZ
       def format_node_addresses(addrs)
   return nil if addrs.nil?
   addrs.map{|addr,info|
-    {addr: {address: addr, family: info["family"],
-                     info: info.reject{|k,_v| k == "family"}}}
+    {addr: {address: addr, family: info['family'],
+                     info: info.reject{|k,_v| k == 'family'}}}
         }
       end
 
@@ -53,7 +53,7 @@ module XYZ
       def expand_node(name)
         if name =~ /./
           name = name.dup
-          name.gsub!(".", "_")
+          name.gsub!('.', '_')
         end
         name
       end

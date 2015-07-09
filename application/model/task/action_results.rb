@@ -3,7 +3,7 @@ module DTK; class Task
     module Mixin
       def add_action_results(result,action)
         unless action_results = CommandAndControl.node_action_results(result,action)
-          Log.error_pp(["Unexpected that cannot find data in results:",result])
+          Log.error_pp(['Unexpected that cannot find data in results:',result])
           return
         end
         # TODO: using task logs for storage; might introduce a new table

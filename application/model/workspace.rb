@@ -23,7 +23,7 @@ module DTK
       opts_get = Aux.hash_subset(opts,:cols).merge(filter: [:eq,:ref,AssemblyFields[:ref]])
       rows = Workspace.get(workspace_mh,opts_get)
       unless rows.size == 1
-        Log.error_pp(["Unexpected that get_workspace does not return 1 row",rows])
+        Log.error_pp(['Unexpected that get_workspace does not return 1 row',rows])
         return nil
       end
       rows.first

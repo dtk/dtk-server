@@ -8,7 +8,7 @@ module MCollective
         begin
           hosts = []
           Timeout.timeout(timeout) do
-            reqid = client.sendreq("ping", "discovery", filter)
+            reqid = client.sendreq('ping', 'discovery', filter)
             Log.debug("Waiting #{timeout} seconds for discovery replies to request #{reqid}")
 
             loop do
@@ -28,7 +28,7 @@ module MCollective
         rescue Exception => e
           raise
         ensure
-          client.unsubscribe("discovery", :reply)
+          client.unsubscribe('discovery', :reply)
         end
 
         hosts
@@ -52,9 +52,9 @@ module MCollective
     def r8_decode_receive(msg)
       begin
         msg = @security.decodemsg(msg)
-        msg[:senderid] = Digest::MD5.hexdigest(msg[:senderid]) if ENV.include?("MCOLLECTIVE_ANON")
+        msg[:senderid] = Digest::MD5.hexdigest(msg[:senderid]) if ENV.include?('MCOLLECTIVE_ANON')
       rescue Exception => e
-        Log.debug("decoding error")
+        Log.debug('decoding error')
         msg = nil
       end
       msg
@@ -79,7 +79,7 @@ module MCollective
       req = @security.encoderequest(@config.identity, msg, reqid, filter, agent, collective)
       topic = make_target(agent, :reply, collective)
       log_msg = "Sending request #{reqid} to topic #{target}"
-      if id_if_set = ((filter["fact"]||[]).first||{})[:value]
+      if id_if_set = ((filter['fact']||[]).first||{})[:value]
         log_msg << " with filter on id: #{id_if_set}"
       end
       Log.debug(log_msg)

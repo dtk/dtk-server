@@ -26,7 +26,7 @@ module DTK
       attr_mh = component.model_handle.create_childMH(:attribute)
       attr_hash = Aux::hash_subset(field_def,CreateFields)
       unless attr_hash[:display_name]
-        raise Error.new("display_name required in field_def")
+        raise Error.new('display_name required in field_def')
       end
       attr_hash[:ref] = attr_hash[:display_name]
       attr_hash[:semantic_data_type] ||= Attribute::SemanticDatatype.default().to_s
@@ -38,16 +38,16 @@ module DTK
 
     def self.update_field_def(component,field_def_update)
       # compute default
-      default_assign = AttributeComplexType.ravel_raw_post_hash({field_def_update["id"] => field_def_update["default"]},:attribute,component[:id]).first
+      default_assign = AttributeComplexType.ravel_raw_post_hash({field_def_update['id'] => field_def_update['default']},:attribute,component[:id]).first
       attr_mh = component.model_handle.createMH(:attribute)
       attr_hash = Aux::hash_subset(field_def_update,UpdateFields - %w{default i18n}).merge(default_assign)
       Model.update_from_rows(attr_mh,[attr_hash],partial_value: true)
 
-      field_def = field_def_update["field_def"]
+      field_def = field_def_update['field_def']
       # update label
       # TODO: if now if whether cahnged can be more efficient
-      label = field_def_update["i18n"]
-      component.update_attribute_i18n_label(field_def["name"],label) if label
+      label = field_def_update['i18n']
+      component.update_attribute_i18n_label(field_def['name'],label) if label
       field_def.merge(Aux::hash_subset(field_def_update,UpdateFields))
     end
     UpdateFields = %w{default description required, i18n}

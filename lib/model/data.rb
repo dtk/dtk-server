@@ -40,7 +40,7 @@ module XYZ
     end
 
     def to_s
-     return "UNKNOWN" if self[:display_name].nil?
+     return 'UNKNOWN' if self[:display_name].nil?
      self[:display_name]
     end
 

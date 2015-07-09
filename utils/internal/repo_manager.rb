@@ -61,7 +61,7 @@ module DTK
       repo_names.each do |repo_name|
         # TODO: change so this from Repo if want to put in hooks for per branch auth
         klass.get_branches(repo_name).each do |branch|
-          next if branch == "master"
+          next if branch == 'master'
           pp "deleting branch (#{branch}) in repo (#{repo_name})"
           context = {
             implementation: {
@@ -135,7 +135,7 @@ module DTK
       end
 
       def unlink_remote(repo_name,remote_name)
-        adapter_repo = get_adapter_repo(context(repo_name,"master"))
+        adapter_repo = get_adapter_repo(context(repo_name,'master'))
         adapter_repo.remove_remote?(remote_name)
       end
 
@@ -165,9 +165,9 @@ module DTK
       if R8::Config[:repo][:workspace][:use_local_clones]
         klass.create_repo_clone(repo_obj,opts)
       elsif R8::Config[:repo][:workspace][:update_bare_repo]
-        raise Error.new("Have not implemented yet: R8::Config[:repo][:workspace][:update_bare_repo]")
+        raise Error.new('Have not implemented yet: R8::Config[:repo][:workspace][:update_bare_repo]')
       else
-        raise Error.new("Should not reach here!")
+        raise Error.new('Should not reach here!')
       end
     end
 
@@ -194,7 +194,7 @@ module DTK
         repo_base_dir = R8::Config[:repo][:base_directory]
         if File.directory?(repo_base_dir)
           Dir.chdir(R8::Config[:repo][:base_directory]) do
-            Dir["*"].each{|local_repo_dir|FileUtils.rm_rf local_repo_dir}
+            Dir['*'].each{|local_repo_dir|FileUtils.rm_rf local_repo_dir}
           end
         end
       end
@@ -204,7 +204,7 @@ module DTK
     ##########
     def self.get_adapter_repo(context)
       repo_dir,branch = ret_repo_dir_and_branch(context)
-      raise Error.new("cannot find branch in context") unless branch
+      raise Error.new('cannot find branch in context') unless branch
       CachedRepoObjects[repo_dir] ||= {}
       CachedRepoObjects[repo_dir][branch] ||= load_and_create(repo_dir,branch)
     end
@@ -226,7 +226,7 @@ module DTK
       elsif context.is_a?(Repo)
         context.update_object!(:repo_name)
         repo_dir = context[:repo_name]
-        branch = "master"
+        branch = 'master'
       elsif context.is_a?(Implementation)
         context.update_object!(:repo,:branch)
         repo_dir = context[:repo]
@@ -238,7 +238,7 @@ module DTK
         # TODO: deprecate after replace use of this pattern
         # assume that it has hash with :implementation key
         # TODO: do we still need __top
-        repo_dir = (context[:implementation]||{})[:repo]||"__top"
+        repo_dir = (context[:implementation]||{})[:repo]||'__top'
         branch = (context[:implementation]||{})[:branch]
       end
       [repo_dir,branch]
@@ -247,8 +247,8 @@ module DTK
     def self.load_and_return_adapter_class
       return @cached_adapter_class if @cached_adapter_class
       adapter_name = (R8::Config[:repo]||{})[:type]
-      raise Error.new("No repo adapter specified") unless adapter_name
-      @cached_adapter_class = DynamicLoader.load_and_return_adapter_class("repo_manager",adapter_name)
+      raise Error.new('No repo adapter specified') unless adapter_name
+      @cached_adapter_class = DynamicLoader.load_and_return_adapter_class('repo_manager',adapter_name)
     end
 
     def self.load_and_create(repo_dir,branch)
@@ -264,8 +264,8 @@ module DTK
   class RemoteRepoManager < RepoManager
     def self.load_and_return_adapter_class
       return @cached_adapter_class if @cached_adapter_class
-      adapter_name = "remote_repo"
-      @cached_adapter_class = DynamicLoader.load_and_return_adapter_class("repo_manager",adapter_name)
+      adapter_name = 'remote_repo'
+      @cached_adapter_class = DynamicLoader.load_and_return_adapter_class('repo_manager',adapter_name)
     end
   end
 end

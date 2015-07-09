@@ -8,11 +8,11 @@ module R8
     end
 
     def get(entry)
-      @routes.merge!(transform_value("get",entry))
+      @routes.merge!(transform_value('get',entry))
     end
 
     def post(entry)
-      @routes.merge!(transform_value("post",entry))
+      @routes.merge!(transform_value('post',entry))
     end
 
     def method_missing(name,*_args,&_block)

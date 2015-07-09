@@ -10,14 +10,14 @@ module DTK
       embed = []
       main_table.each_with_index do |r,i|
         if jc = join_columns[i]
-          embed << r.merge("__jc" => jc)
+          embed << r.merge('__jc' => jc)
         else
           embed << r
         end
       end
       ret = []
       embed.sort(&main_table_sort).each do |r|
-        if jc = r.delete("__jc")
+        if jc = r.delete('__jc')
           ret << r.merge(jc.first)
           ret += jc[1..jc.size] if jc.size > 1
         else

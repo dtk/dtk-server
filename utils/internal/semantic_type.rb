@@ -50,20 +50,20 @@ module DTK
     Info =
       # L4 Saps adn sockets
       {
-      "sap_config__l4" => {
+      'sap_config__l4' => {
         syntax: {
-          "port" =>  {required: true, type: :integer},
-          "protocol" => {required: true, type: :string},
-          "binding_addr_constraints" => {type: :json}
+          'port' =>  {required: true, type: :integer},
+          'protocol' => {required: true, type: :string},
+          'binding_addr_constraints' => {type: :json}
         }
       },
-      "sap__l4" => {
+      'sap__l4' => {
         external: true,
-        port_type: "output",
+        port_type: 'output',
         syntax: {
-          "port" => {required: true, type: :integer},
-          "protocol" => {required: true, type: :string},
-          "host_address" => {required: true, dynamic: true, type: :string}
+          'port' => {required: true, type: :integer},
+          'protocol' => {required: true, type: :string},
+          'host_address' => {required: true, dynamic: true, type: :string}
         }
       },
       # rather than having or having two sap refs and user can remove or add to component
@@ -81,74 +81,74 @@ module DTK
       #           ]
       #         }
       #       },
-      "sap_ref__l4" => {
+      'sap_ref__l4' => {
         external: true,
-        port_type: "input",
+        port_type: 'input',
         syntax: {
-           "port" => {required: true, type: :integer},
-           "protocol" => {required: true, type: :string},
-           "host_address" => {required: true, type: :string}
+           'port' => {required: true, type: :integer},
+           'protocol' => {required: true, type: :string},
+           'host_address' => {required: true, type: :string}
         }
       },
 
-      "sap__socket" => {
+      'sap__socket' => {
         syntax: {
-          "socket_file" => {required: true, type: :string}
+          'socket_file' => {required: true, type: :string}
         }
       },
 
-      "db_user_access" => {
+      'db_user_access' => {
         external: true,
         # TODO: need to rexamine use of :port_type => "input" in light of having attributes that can be read only vs read/write depending
         # if they have alink; currently if marked as input then they are treated as readonly
         #        :port_type => "input",
         syntax: {
-          "username" => {required: true, type: :string},
-          "password" => {required: false, type: :string},
-          "inet_access" => {required: true, type: :boolean},
-          "client_host_addr" => {required: true, type: :string}
+          'username' => {required: true, type: :string},
+          'password' => {required: false, type: :string},
+          'inet_access' => {required: true, type: :boolean},
+          'client_host_addr' => {required: true, type: :string}
         }
       },
 
       # TODO: deprecate db ones in favor of above
       # DB params
-      "db_config" => {
+      'db_config' => {
         external: true,
-        port_type: "output",
+        port_type: 'output',
         syntax: {
-          "database" => {required: true, type: :string},
-          "username" => {required: true, type: :string},
-          "password" => {required: true, type: :string}
+          'database' => {required: true, type: :string},
+          'username' => {required: true, type: :string},
+          'password' => {required: true, type: :string}
         }
       },
-      "db_params" => {
+      'db_params' => {
         external: true,
-        port_type: "input",
+        port_type: 'input',
         syntax: {
-          "database" => {required: true, type: :string},
-          "username" => {required: true, type: :string},
-          "password" => {required: true, type: :string}
+          'database' => {required: true, type: :string},
+          'username' => {required: true, type: :string},
+          'password' => {required: true, type: :string}
         }
       },
-      "db_ref" => {
+      'db_ref' => {
         external: true,
-        port_type: "input"
+        port_type: 'input'
       },
 
-      "service_check_input" => {
-        port_type: "input"
+      'service_check_input' => {
+        port_type: 'input'
       },
 
       # TODO: may deprecate below
-      "sap_config__db" => {
+      'sap_config__db' => {
       },
-      "sap__db" => {
+      'sap__db' => {
         external: true,
-        port_type: "output"
+        port_type: 'output'
       },
-      "sap_ref__db" => {
+      'sap_ref__db' => {
         external: true,
-        port_type: "input"
+        port_type: 'input'
       }
     }
   end
@@ -196,7 +196,7 @@ module DTK
 
     def self.semantic_type_key(semantic_type)
       ret = (semantic_type.is_a?(Hash) ? semantic_type.keys.first : semantic_type).to_s
-      ret == ":array" ? :array : ret
+      ret == ':array' ? :array : ret
     end
 
     def self.ret_schema_from_semantic_type_aux!(ret,index,semantic_type)

@@ -20,7 +20,7 @@ module DTK
     end
 
     def self.object_type_string
-      "node template"
+      'node template'
     end
 
     def find_matching_node_template(target)
@@ -31,9 +31,9 @@ module DTK
     def clone_or_match(target,opts={})
       update_object!(:type,:rules,:ref)
       case self[:type]
-       when "clone"
+       when 'clone'
         clone(target,opts)
-       when "match"
+       when 'match'
         match(target,opts)
        else
         raise Error.new("Unexpected type (#{self[:type]}) in node binding ruleset")
@@ -66,7 +66,7 @@ module DTK
     private
 
     def match(_target,_opts={})
-      raise Error.new("TODO: not implemented yet")
+      raise Error.new('TODO: not implemented yet')
     end
 
     def clone(target,opts={})
@@ -85,10 +85,10 @@ module DTK
     def get_node_template(node_template_ref)
       sp_hash = {
         cols: [:id, :display_name, :external_ref, :group_id],
-        filter: [:and, [:eq,:node_binding_rs_id,id()], [:eq,:type,"image"]]
+        filter: [:and, [:eq,:node_binding_rs_id,id()], [:eq,:type,'image']]
       }
       ret = Model.get_objs(id_handle.createMH(:node),sp_hash).find{|r|r[:external_ref][:image_id] == node_template_ref[:image_id]}
-      raise Error.new("Cannot find associated node template") unless ret
+      raise Error.new('Cannot find associated node template') unless ret
       ret
     end
   end

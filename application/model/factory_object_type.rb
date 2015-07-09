@@ -11,7 +11,7 @@ module DTK
   module FactoryObjectMixin
     include FactoryObjectCommon
     def qualified_ref(obj_hash)
-      "#{obj_hash[:ref]}#{obj_hash[:ref_num] ? "-#{obj_hash[:ref_num]}" : ""}"
+      "#{obj_hash[:ref]}#{obj_hash[:ref_num] ? "-#{obj_hash[:ref_num]}" : ''}"
     end
 
     def id_handle_if_object_exists?

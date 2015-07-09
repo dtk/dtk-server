@@ -5,15 +5,15 @@ require './lib/component_modules_spec'
 require './lib/dtk_common'
 
 user_data = {
-  usergroup: "bakir_test_group",
-  user: "dtk17-client",
-  module_name: "r8/java"
+  usergroup: 'bakir_test_group',
+  user: 'dtk17-client',
+  module_name: 'r8/java'
 }
 
-component_module = "r8:java"
-user_names = "non_existing_user1,non_existing_user2"
-user_emails = "non_existing_user1@atlantbh.com,non_existing_user2@atlantbh.com"
-collaborator_type = "users"
+component_module = 'r8:java'
+user_names = 'non_existing_user1,non_existing_user2'
+user_emails = 'non_existing_user1@atlantbh.com,non_existing_user2@atlantbh.com'
+collaborator_type = 'users'
 
 permissions = {
   user_r: false,
@@ -32,14 +32,14 @@ permissions = {
 
 dtk_common = DtkCommon.new('', '')
 
-describe "(Repoman client integration) Test Case 20: NEG - add/remove collaborators by non-existing users and useremails (User A is owner and belongs to User group A which is set on module, intial permissions are: P/None/None)" do
+describe '(Repoman client integration) Test Case 20: NEG - add/remove collaborators by non-existing users and useremails (User A is owner and belongs to User group A which is set on module, intial permissions are: P/None/None)' do
   let(:conf) { Configuration.instance }
   let(:header) { @homepage.get_header }
   let(:users) { @homepage.get_main.get_users }
   let(:modules) { @homepage.get_main.get_modules}
 
-  context "User is" do
-    it "logged in" do
+  context 'User is' do
+    it 'logged in' do
       @homepage.get_loginpage.login_user(conf.username, conf.password)
       homepage_header = header.get_homepage_header
       expect(homepage_header).to have_content('DTK')
@@ -67,24 +67,24 @@ describe "(Repoman client integration) Test Case 20: NEG - add/remove collaborat
     end
   end
 
-  context "NEG - Add collaborators (user names) on module" do
-    include_context "NEG - Add collaborators on module", dtk_common, component_module, user_names, collaborator_type
+  context 'NEG - Add collaborators (user names) on module' do
+    include_context 'NEG - Add collaborators on module', dtk_common, component_module, user_names, collaborator_type
   end
 
-  context "NEG - Remove collaborators (user names) from module" do
-    include_context "NEG - Remove collaborators from module", dtk_common, component_module, user_names, collaborator_type
+  context 'NEG - Remove collaborators (user names) from module' do
+    include_context 'NEG - Remove collaborators from module', dtk_common, component_module, user_names, collaborator_type
   end
 
-  context "NEG - Add collaborators (user emails) on module" do
-    include_context "NEG - Add collaborators on module", dtk_common, component_module, user_emails, collaborator_type
+  context 'NEG - Add collaborators (user emails) on module' do
+    include_context 'NEG - Add collaborators on module', dtk_common, component_module, user_emails, collaborator_type
   end
 
-  context "NEG - Remove collaborators (user emails) from module" do
-    include_context "NEG - Remove collaborators from module", dtk_common, component_module, user_emails, collaborator_type
+  context 'NEG - Remove collaborators (user emails) from module' do
+    include_context 'NEG - Remove collaborators from module', dtk_common, component_module, user_emails, collaborator_type
   end
 
-  context "User is" do
-    it "logged out" do
+  context 'User is' do
+    it 'logged out' do
       startpage = @homepage.get_loginpage.logout_user
       expect(startpage).to have_content('DTK Admin Panel')
     end

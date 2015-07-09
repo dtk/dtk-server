@@ -180,7 +180,7 @@ module XYZ
     def rest__stage
       target = create_target_instance_with_default(:target_id)
       unless node_binding_rs = node_binding_ruleset?(:node_template_identifier)
-        raise ErrorUsage.new("Missing node template identifier")
+        raise ErrorUsage.new('Missing node template identifier')
       end
       opts = {}
       if node_name = ret_request_params(:name)
@@ -203,7 +203,7 @@ module XYZ
       node_idh = ret_request_param_id_handle(:node_id)
       commit_msg = ret_request_params(:commit_msg)
       unless task = Task.create_from_node(node_idh,commit_msg)
-        raise ErrorUsage.new("No changes to converge")
+        raise ErrorUsage.new('No changes to converge')
       end
       task.save!()
       rest_ok_response task_id: task.id

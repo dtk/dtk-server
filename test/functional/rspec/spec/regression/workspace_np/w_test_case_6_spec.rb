@@ -19,48 +19,48 @@ component_module_namespace = 'r8'
 
 dtk_common = DtkCommon.new('', '')
 
-describe "(Workspace) Test Case 6: Create one node, add two components in it (list components), delete one component (list components again) and purge workspace content" do
+describe '(Workspace) Test Case 6: Create one node, add two components in it (list components), delete one component (list components again) and purge workspace content' do
   before(:all) do
-    puts "**************************************************************************************************************************************************************",""
+    puts '**************************************************************************************************************************************************************',''
   end
 
-  context "Create node in workspace" do
-    include_context "Create node in workspace", dtk_common, node_name, node_template
+  context 'Create node in workspace' do
+    include_context 'Create node in workspace', dtk_common, node_name, node_template
   end
 
-  context "Add component to the node in workspace" do
-    include_context "Add component to the node in workspace", dtk_common, node_name, component_name_1, component_module_namespace
+  context 'Add component to the node in workspace' do
+    include_context 'Add component to the node in workspace', dtk_common, node_name, component_name_1, component_module_namespace
   end
 
-  context "Add component to the node in workspace" do
-    include_context "Add component to the node in workspace", dtk_common, node_name, component_name_2, component_module_namespace
+  context 'Add component to the node in workspace' do
+    include_context 'Add component to the node in workspace', dtk_common, node_name, component_name_2, component_module_namespace
   end
 
-  context "List components in workspace node" do
-    include_context "List components in workspace node", dtk_common, node_name, component_name_1
+  context 'List components in workspace node' do
+    include_context 'List components in workspace node', dtk_common, node_name, component_name_1
   end
 
-  context "List components in workspace node" do
-    include_context "List components in workspace node", dtk_common, node_name, component_name_2
+  context 'List components in workspace node' do
+    include_context 'List components in workspace node', dtk_common, node_name, component_name_2
   end
 
-  context "Delete component from workspace node" do
-    include_context "Delete component from workspace node", dtk_common, node_name, component_name_1
+  context 'Delete component from workspace node' do
+    include_context 'Delete component from workspace node', dtk_common, node_name, component_name_1
   end
 
-  context "NEG - List components in workspace node" do
-    include_context "NEG - List components in workspace node", dtk_common, node_name, component_name_1
+  context 'NEG - List components in workspace node' do
+    include_context 'NEG - List components in workspace node', dtk_common, node_name, component_name_1
   end
 
-  context "List components in workspace node" do
-    include_context "List components in workspace node", dtk_common, node_name, component_name_2
+  context 'List components in workspace node' do
+    include_context 'List components in workspace node', dtk_common, node_name, component_name_2
   end
 
-  context "Purge workspace content" do
-    include_context "Purge workspace content", dtk_common
+  context 'Purge workspace content' do
+    include_context 'Purge workspace content', dtk_common
   end
 
   after(:all) do
-    puts "", ""
+    puts '', ''
   end
 end

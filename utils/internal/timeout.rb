@@ -7,7 +7,7 @@ module TimeoutMonkeyPatch
       return TimerAdapterClass.timeout(sec,klass,&block) if TimerAdapterClass
 
       return yield if sec == nil or sec.zero?
-      raise ThreadError, "timeout within critical session" if Thread.critical
+      raise ThreadError, 'timeout within critical session' if Thread.critical
       exception = klass || Class.new(ExitException)
 
       begin
@@ -15,7 +15,7 @@ module TimeoutMonkeyPatch
         debug_print(:timeout_info,{timeout: sec, current_thread: x})
         y = Thread.start {
           sleep sec
-          x.raise exception, "execution expired" if x.alive?
+          x.raise exception, 'execution expired' if x.alive?
         }
         yield sec
         #    return true
@@ -46,17 +46,17 @@ module TimeoutMonkeyPatch
     # TODO: just treating system time adapter now
     if R8::Config[:timer]
       case (R8::Config[:timer][:type])
-       when "system_timer"
+       when 'system_timer'
         begin
           require 'system_timer'
           timer_adapter = SystemTimer
          rescue LoadError
-          Log.error("cannot find system timer adapter; using default (Timeout)")
+          Log.error('cannot find system timer adapter; using default (Timeout)')
         end
-       when "debug_timeout"
+       when 'debug_timeout'
         timer_adapter = nil
        else
-        Log.error("only treating now system_timer adapter")
+        Log.error('only treating now system_timer adapter')
       end
     end
     TimerAdapterClass = timer_adapter

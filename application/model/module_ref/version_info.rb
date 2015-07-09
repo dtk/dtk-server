@@ -44,7 +44,7 @@ module DTK; class ModuleRef
         if constraint.nil? then new()
         elsif constraint.is_a?(Constraint) then constraint
         elsif constraint.is_a?(String) then new(constraint)
-        elsif constraint.is_a?(Hash) && constraint.size == 1 && constraint.keys.first == "namespace"
+        elsif constraint.is_a?(Hash) && constraint.size == 1 && constraint.keys.first == 'namespace'
           # MOD_RESTRUCT: TODO: need to decide if depracting 'namespace' key
           Log.info("Ignoring constraint of form (#{constraint.inspect})")
           new()

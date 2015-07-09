@@ -59,7 +59,7 @@ module DTK
           if raw_va = mdl.delete(:version_array)
             unless raw_va.size == 1 && raw_va.first == DEFAULT_VERSION
               version_array = (raw_va.include?(DEFAULT_VERSION) ? [DEFAULT_VERSION] : []) + raw_va.reject{|v|v == DEFAULT_VERSION}.sort
-              mdl.merge!(versions: version_array.join(", "))
+              mdl.merge!(versions: version_array.join(', '))
             end
           end
           external_ref_source = mdl.delete(:external_ref_source)
@@ -107,7 +107,7 @@ module DTK
           end
 
         array << external_ref_source if external_ref_source
-        array << "*** NOT PUBLISHED ***" if opts[:not_published]
+        array << '*** NOT PUBLISHED ***' if opts[:not_published]
 
         array.join(JoinDelimiter)
       end

@@ -62,12 +62,12 @@ module DTK; class Attribute
         if attribute_idh
           attr_id = attribute_idh.get_id()
           unless match = @attribute_stacks.find{|as|as[:attribute].id == attr_id}
-            raise Error.new("Unexpceted that no match to attribute_id in attribute_stack")
+            raise Error.new('Unexpceted that no match to attribute_id in attribute_stack')
           end
           match
         else
           unless @attribute_stacks.size == 1
-            raise Error.new("attribute_stack() should only be called when @attribute_stacks.size == 1")
+            raise Error.new('attribute_stack() should only be called when @attribute_stacks.size == 1')
           end
           @attribute_stacks.first
         end
@@ -123,7 +123,7 @@ module DTK; class Attribute
         unless term = Pattern::Term.extract_term?(fragment)
           return nil #without qualification means all (no filter)
         end
-        if term == "*"
+        if term == '*'
           return nil
         end
         display_name = (type == :component ? ::DTK::Component::Instance.display_name_from_user_friendly_name(term) : term)

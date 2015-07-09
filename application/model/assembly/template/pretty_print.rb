@@ -65,14 +65,14 @@ module DTK
             elsif namespace.is_a?(Hash)
               namespace_name = namespace[:display_name]
             else
-              raise Error.new("assembly_template[:namespace] is unexpected type")
+              raise Error.new('assembly_template[:namespace] is unexpected type')
             end
           end
 
           if namespace_name
             module_name && Namespace.join_namespace(namespace_name, module_name)
           else
-            Log.error("Unexpected that opts[:include_namespace] is true and no namespace object in assembly")
+            Log.error('Unexpected that opts[:include_namespace] is true and no namespace object in assembly')
             module_name
           end
         end

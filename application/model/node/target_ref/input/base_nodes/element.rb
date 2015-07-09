@@ -24,7 +24,7 @@ module DTK; class Node; class TargetRef
       def target_ref_hash(_target,assembly)
         ret = {}
         unless display_name = @node.get_field?(:display_name)
-          raise Error.new("Unexpected that that node has no name field")
+          raise Error.new('Unexpected that that node has no name field')
         end
         external_ref = @node.external_ref
           (@offset...(@offset+@num_needed)).inject({}) do |h,index|

@@ -53,7 +53,7 @@ module DTK
         path
       else
         @root ||= R8::Config[:repo][:base_directory]
-        (path == "__top" ? @root : "#{@root}/#{path}")
+        (path == '__top' ? @root : "#{@root}/#{path}")
       end
     end
 
@@ -64,7 +64,7 @@ module DTK
     def self.repo_server_ssh_rsa_fingerprint
       return @ssh_rsa_fingerprint if @ssh_rsa_fingerprint
       unless R8::Config[:git_server_on_dtk_server]
-        raise Error.new("Not implemented yet: repo_server_fingerprint when R8::Config[:git_server_on_dtk_server] is not true")
+        raise Error.new('Not implemented yet: repo_server_fingerprint when R8::Config[:git_server_on_dtk_server] is not true')
       end
       @ssh_rsa_fingerprint ||= `ssh-keyscan -H -t rsa #{repo_server_dns()}`
     end
@@ -102,9 +102,9 @@ module DTK
     def ls_r(depth=nil,opts={})
       checkout(@branch) do
         if depth.nil? || (depth.is_a?(String) && depth == '*')
-          all_paths = Dir["**/*"]
+          all_paths = Dir['**/*']
         else
-          pattern = "*"
+          pattern = '*'
           all_paths = []
           depth.times do
             all_paths += Dir[pattern]
@@ -142,7 +142,7 @@ module DTK
     def add_all_files(branch=nil)
       branch ||= @branch
       checkout(branch) do
-        git_command__add(".")
+        git_command__add('.')
         message = "Adding . in #{branch}"
         commit(message)
       end
@@ -154,7 +154,7 @@ module DTK
       checkout(@branch) do
         path = file_asset[:path]
         recursive_create_dir?(path)
-        File.open(path,"w"){|f|f << content}
+        File.open(path,'w'){|f|f << content}
         # TODO: commiting because it looks like file change visible in otehr branches until commit
         commit_msg ||= "Adding #{path} in #{@branch}"
         git_command__add(path)
@@ -218,7 +218,7 @@ module DTK
 
     def update_file_content(file_asset,content)
       checkout(@branch) do
-        File.open(file_asset[:path],"w"){|f|f << content}
+        File.open(file_asset[:path],'w'){|f|f << content}
         # TODO: commiting because it looks like file change visible in otehr branches until commit
         message = "Updating #{file_asset[:path]} in #{@branch}"
         git_command__add(file_asset[:path])
@@ -370,7 +370,7 @@ module DTK
       if (type == :remote_branch && opts[:fetch_if_needed])
         # TODO: this fetches all branches on the remote; see if anyway to just fetch a specfic branch
         # ref will be of form remote_name/branch
-        git_command__fetch(ref.split("/").first)
+        git_command__fetch(ref.split('/').first)
       end
 
       other_sha = sha_matching_branch_name(type,ref)
@@ -608,7 +608,7 @@ module DTK
     end
 
     def git_command__empty_commit
-      commit("initial empty commit","--allow-empty")
+      commit('initial empty commit','--allow-empty')
     end
 
     def commit(message, *array_opts)
@@ -619,7 +619,7 @@ module DTK
     end
 
     def default_remote_name
-      "origin"
+      'origin'
     end
 
     # sets author if not set already for repo
@@ -653,11 +653,11 @@ module DTK
       # TODO: not sure why this does not work:
       # GitCommand.new(@grit_repo ? @grit_repo.git : Grit::Git.new(""))
       # only thing losing with below is visbility into failure on clone commands (where @grit_repo.nil? is true)
-      @grit_repo ? GitCommand.new(@grit_repo.git) : Grit::Git.new("")
+      @grit_repo ? GitCommand.new(@grit_repo.git) : Grit::Git.new('')
     end
 
     def recursive_create_dir?(path)
-      if path =~ Regexp.new("(^.+)/[^/]+$")
+      if path =~ Regexp.new('(^.+)/[^/]+$')
         dir = $1
         FileUtils.mkdir_p(dir)
       end
@@ -712,24 +712,24 @@ module DTK
     end
 
     def git_command__create_empty_branch(branch_name)
-      git_command.symbolic_ref(cmd_opts(),"HEAD","refs/heads/#{branch_name}")
+      git_command.symbolic_ref(cmd_opts(),'HEAD',"refs/heads/#{branch_name}")
     end
 
     def git_command__add(file_path)
       # put in -f to avoid error being thrown if try to add an ignored file
-      git_command.add(cmd_opts(),file_path,"-f")
+      git_command.add(cmd_opts(),file_path,'-f')
       # took out because could not pass in time out @grit_repo.add(file_path)
     end
 
     def git_command__rm(file_path)
       # git_command.rm uses form /usr/bin/git --git-dir=.. rm <file>; which does not delete the working directory file, so
       # need to use os comamdn to dleet file and just delete the file from the index
-      git_command.rm(cmd_opts(),"--cached",file_path)
+      git_command.rm(cmd_opts(),'--cached',file_path)
       FileUtils.rm_f full_path(file_path)
     end
 
     def git_command__rm_r(dir)
-      git_command.rm(cmd_opts(),"-r","--cached",dir)
+      git_command.rm(cmd_opts(),'-r','--cached',dir)
       FileUtils.rm_rf full_path(dir)
     end
 
@@ -738,11 +738,11 @@ module DTK
       FileUtils.mkdir_p(destination)
 
       files.each do |file|
-        git_command.mv(cmd_opts(), "--force", "#{source}/#{file}", "#{destination}/#{file}")
+        git_command.mv(cmd_opts(), '--force', "#{source}/#{file}", "#{destination}/#{file}")
       end
 
       folders.each do |folder|
-        git_command.mv(cmd_opts(), "--force", "#{source}/#{folder}", "#{destination}/")
+        git_command.mv(cmd_opts(), '--force', "#{source}/#{folder}", "#{destination}/")
         FileUtils.rmdir("#{source}/#{folder}")
       end
     end
@@ -760,7 +760,7 @@ module DTK
     end
 
     def git_command__fetch_all
-      git_command.fetch(cmd_opts(),"--all")
+      git_command.fetch(cmd_opts(),'--all')
     end
 
     # TODO: see what other commands needs mutex and whether mutex across what boundaries
@@ -820,7 +820,7 @@ module DTK
     end
 
     def git_command__delete_local_branch(branch_name)
-      git_command.branch(cmd_opts(),"-D",branch_name)
+      git_command.branch(cmd_opts(),'-D',branch_name)
     end
 
     def git_command__delete_remote_branch?(branch_name,remote_name=nil)

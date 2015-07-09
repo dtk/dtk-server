@@ -12,7 +12,7 @@ module XYZ
           end
 
           def description(security_groups)
-            "Group corresponding to ec2 security groups [#{security_groups.join(",")}]"
+            "Group corresponding to ec2 security groups [#{security_groups.join(',')}]"
           end
         end
       end

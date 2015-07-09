@@ -89,7 +89,7 @@ module DTK
       unravelled_ret.each do |r|
         target_id = r[:target][:id]
         unless target = ret_hash[target_id]
-          target = ret_hash[target_id] ||= r[:target].materialize!(Target.common_columns()).merge(model_name: "target")
+          target = ret_hash[target_id] ||= r[:target].materialize!(Target.common_columns()).merge(model_name: 'target')
         end
         nodes = target[:nodes] ||= {}
         next unless r[:node]

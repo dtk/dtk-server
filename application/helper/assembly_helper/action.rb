@@ -76,7 +76,7 @@ module Ramaze::Helper
                 end
               end
             end
-          ret || raise(::DTK::ErrorUsage.new("Unexpected form of node_pattern"))
+          ret || raise(::DTK::ErrorUsage.new('Unexpected form of node_pattern'))
         end
       end
 

@@ -100,7 +100,7 @@ module XYZ
         else
           ds.import(columns,sequel_select_with_cols)
           # TODO: need to get ids and set
-          raise Error.new("have not implemented create_from_select when db adapter does not support insert_returning_sql  not set")
+          raise Error.new('have not implemented create_from_select when db adapter does not support insert_returning_sql  not set')
         end
         ret
       end
@@ -138,7 +138,7 @@ module XYZ
         if opts[:recursive_create]
           relation_type,parent_uri = RestURI.parse_factory_uri(factory_uri)
           parent_idh = uri_id_handle.createIDH(uri: parent_uri)
-          create_simple_instance?(parent_idh,opts) unless parent_uri == "/" || exists?(parent_idh)
+          create_simple_instance?(parent_idh,opts) unless parent_uri == '/' || exists?(parent_idh)
         end
         assignments = opts[:set_display_name] ? {display_name: ref} : {}
         factory_idh = uri_id_handle.createIDH(uri: factory_uri, is_factory: true)
@@ -175,7 +175,7 @@ module XYZ
         parent_id = nil
         parent_relation_type = nil
         c = factory_idh[:c]
-        if parent_uri == "/" ## if top level object
+        if parent_uri == '/' ## if top level object
           ref_num = compute_ref_num(db_rel,ref,c)
           #TBD check that the assignments are legal, or trap
           new_id = insert_into_db(factory_idh,db_rel,scalar_assignments.merge(ref_num: ref_num))
@@ -195,7 +195,7 @@ module XYZ
           new_id = insert_into_db(factory_idh,db_rel,scalar_assignments.merge(merge_attrs))
         end
 
-  raise Error.new("error while inserting element") if new_id.nil?
+  raise Error.new('error while inserting element') if new_id.nil?
 
   new_uri  = RestURI::ret_new_uri(factory_idh[:uri],ref,ref_num)
 

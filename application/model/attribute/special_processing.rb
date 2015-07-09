@@ -20,7 +20,7 @@ module DTK; class Attribute
       if attr[:node_node_id] then :node
       elsif attr[:component_component_id] then :component
       else
-        Log.error("Unexepected that both :node_node_id and :component_component_id are nil")
+        Log.error('Unexepected that both :node_node_id and :component_component_id are nil')
         nil
       end
     end
@@ -70,7 +70,7 @@ module DTK; class Attribute
               end
             val && val > 0
           end,
-          legal_value_error_msg: "Value must be a positive integer",
+          legal_value_error_msg: 'Value must be a positive integer',
           proc: lambda{|a,v|Update::GroupCardinality.new(a,v).process()}
         }
       },

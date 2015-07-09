@@ -20,7 +20,7 @@ module DTK
             #switch to pointing to target ref if it exists
             unless tr_info.target_refs.empty?
               if tr_info.target_refs.size > 1
-                Log.error("Unexpected that tr_info.target_refs.size > 1")
+                Log.error('Unexpected that tr_info.target_refs.size > 1')
               end
               node = tr_info.target_refs.first
             end

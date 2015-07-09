@@ -30,7 +30,7 @@ module DTK
           return nil
         end
         unless respond_to?(:update_returning_sql)
-          raise Error.new("have not implemented update_from_select with returning opt")
+          raise Error.new('have not implemented update_from_select with returning opt')
         end
         ret_list_prefixed = opts[:returning_cols].map{|x|x.is_a?(Hash) ? {"#{select_prefix}__#{Aux::ret_key(x)}".to_sym => Aux::ret_value(x)} : "#{select_prefix}__#{x}".to_sym}
         sql = update_returning_sql(update_ds,update_set_clause,ret_list_prefixed)
@@ -82,7 +82,7 @@ module DTK
           return nil
         end
         unless respond_to?(:update_returning_sql)
-          raise Error.new("have not implemented update_from_select with returning opt")
+          raise Error.new('have not implemented update_from_select with returning opt')
         end
         ret_list_prefixed = opts[:returning_cols].map{|x|x.is_a?(Hash) ? {"#{select_prefix}__#{Aux::ret_key(x)}".to_sym => Aux::ret_value(x)} : "#{select_prefix}__#{x}".to_sym}
         sql = update_returning_sql(update_ds,update_set_clause,ret_list_prefixed)

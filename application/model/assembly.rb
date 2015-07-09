@@ -72,7 +72,7 @@ module DTK
       if clause = (match_info||{})[:clause]
         " with condition (#{clause})"
       else
-        ""
+        ''
       end
     end
     private :error_message_condition
@@ -127,7 +127,7 @@ module DTK
     def self.get_component_templates(assembly_mh,filter=nil)
       sp_hash = {
         cols: [:id, :display_name,:component_type,:component_templates],
-        filter: [:and, [:eq, :type, "composite"], [:neq, :library_library_id, nil], filter].compact
+        filter: [:and, [:eq, :type, 'composite'], [:neq, :library_library_id, nil], filter].compact
       }
       assembly_rows = get_objs(assembly_mh,sp_hash)
       assembly_rows.map{|r|r[:component_template]}

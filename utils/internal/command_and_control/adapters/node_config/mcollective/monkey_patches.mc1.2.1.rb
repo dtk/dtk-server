@@ -18,9 +18,9 @@ module MCollective
     def r8_decode_receive(msg)
       begin
         msg = @security.decodemsg(msg)
-        msg[:senderid] = Digest::MD5.hexdigest(msg[:senderid]) if ENV.include?("MCOLLECTIVE_ANON")
+        msg[:senderid] = Digest::MD5.hexdigest(msg[:senderid]) if ENV.include?('MCOLLECTIVE_ANON')
       rescue Exception => e
-        Log.debug("decoding error")
+        Log.debug('decoding error')
         msg = nil
       end
       msg

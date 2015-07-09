@@ -15,12 +15,12 @@ module DTK; class ModuleDSL; class V3
       end
 
       def convert(link_def_link,opts={})
-        in_attr_mappings = link_def_link["attribute_mappings"]
+        in_attr_mappings = link_def_link['attribute_mappings']
         if in_attr_mappings.nil?
-          err_msg_fragment = "is missing the attribute mappings section"
+          err_msg_fragment = 'is missing the attribute mappings section'
           raise_error(link_def_link,err_msg_fragment)
         elsif !in_attr_mappings.is_a?(Array)
-          err_msg_fragment = "is ill-formed"
+          err_msg_fragment = 'is ill-formed'
           raise_error(link_def_link,err_msg_fragment)
         end
 
@@ -33,20 +33,20 @@ module DTK; class ModuleDSL; class V3
           end
           return ret
         end
-        ret_info = {"type" => type.to_s}
+        ret_info = {'type' => type.to_s}
 
         # TODO: pass in order from what is on dependency
         if order = opts[:order]||order(link_def_link)
-          ret_info["order"] = order
+          ret_info['order'] = order
         end
 
-        ret_info["attribute_mappings"] = in_attr_mappings.map{|in_am|convert_attribute_mapping(in_am,base_cmp(),dep_cmp(),opts)}
+        ret_info['attribute_mappings'] = in_attr_mappings.map{|in_am|convert_attribute_mapping(in_am,base_cmp(),dep_cmp(),opts)}
 
         set_single_possible_link!(dep_cmp(),ret_info)
-        if @dependency_name = link_def_link["dependency_name"]
+        if @dependency_name = link_def_link['dependency_name']
           @explicit_dependency_ref = true
         else
-          @dependency_name = link_def_link["name"]
+          @dependency_name = link_def_link['name']
         end
         [self]
       end
@@ -59,11 +59,11 @@ module DTK; class ModuleDSL; class V3
       end
 
       def link_def_link_type(link_info)
-        if loc = link_info["location"]
+        if loc = link_info['location']
           case loc
-          when "local" then "internal"
-          when "remote" then "external"
-          else raise ParsingError.new("Ill-formed dependency location type (?1)",loc)
+          when 'local' then 'internal'
+          when 'remote' then 'external'
+          else raise ParsingError.new('Ill-formed dependency location type (?1)',loc)
           end
         end
       end

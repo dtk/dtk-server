@@ -4,7 +4,7 @@ module MCollective
     # monkey patch so that dont first load stomp
     class Base
       def self.inherited(klass)
-        PluginManager << {type: "connector_plugin", class: klass.to_s} unless klass == Stomp
+        PluginManager << {type: 'connector_plugin', class: klass.to_s} unless klass == Stomp
       end
     end
     require File.expand_path('stomp', File.dirname(__FILE__))
@@ -28,17 +28,17 @@ module MCollective
         end
 
         def receive
-          Log.error("Should not be called")
+          Log.error('Should not be called')
           nil
         end
 
         def publish(_msg)
-          Log.error("Should not be called")
+          Log.error('Should not be called')
           nil
         end
 
         def receive_msg msg
-          if msg.command == "CONNECTED"
+          if msg.command == 'CONNECTED'
             @connected = true
           else
             Stomp_em.process(msg)
@@ -69,7 +69,7 @@ module MCollective
       # TODO: write to use logic from super class
       def connect(_connector = ::Stomp::Connection)
         if @connection
-          Log.debug("Already connection, not re-initializing connection")
+          Log.debug('Already connection, not re-initializing connection')
           return
         end
         begin
@@ -79,14 +79,14 @@ module MCollective
           password = nil
           @@base64 = false
 
-          @@base64 = get_bool_option("stomp.base64", false)
-          @@msgpriority = get_option("stomp.priority", 0).to_i
+          @@base64 = get_bool_option('stomp.base64', false)
+          @@msgpriority = get_option('stomp.priority', 0).to_i
 
           # Maintain backward compat for older stomps
-          host = get_env_or_option("STOMP_SERVER", "stomp.host")
-          port = get_env_or_option("STOMP_PORT", "stomp.port", 6163).to_i
-          user = get_env_or_option("STOMP_USER", "stomp.user")
-          password = get_env_or_option("STOMP_PASSWORD", "stomp.password")
+          host = get_env_or_option('STOMP_SERVER', 'stomp.host')
+          port = get_env_or_option('STOMP_PORT', 'stomp.port', 6163).to_i
+          user = get_env_or_option('STOMP_USER', 'stomp.user')
+          password = get_env_or_option('STOMP_PASSWORD', 'stomp.password')
 
           # TODO: assume reactor is running already
           @connection = EM.connect host, port, StompClient, login: user, passcode: password
@@ -123,7 +123,7 @@ module MCollective
           @@multiplexer.process_response(msg,msg[:requestid])
         rescue => e
           puts e.backtrace[0..5]
-          Log.error("Something went wrong while processing the message; possibly an auth issue with MCollective")
+          Log.error('Something went wrong while processing the message; possibly an auth issue with MCollective')
         end
       end
 

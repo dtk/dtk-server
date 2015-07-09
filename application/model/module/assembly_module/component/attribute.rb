@@ -20,7 +20,7 @@ module DTK; class AssemblyModule
           pntr[:component_instances] << cmp
         end
         unless ndx_aug_cmp_templates.size == 1
-          raise Error.new("Not implemented yet when atttribute pattern is associated with more than one component template")
+          raise Error.new('Not implemented yet when atttribute pattern is associated with more than one component template')
         end
         cmp_template = ndx_aug_cmp_templates.values.first[:component_template]
 

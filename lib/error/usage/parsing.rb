@@ -38,7 +38,7 @@ module DTK; class ErrorUsage
           {caller_info: true}
         elsif opts[:file_path]
           if opts.size > 1
-            raise Error.new("Not supported yet, need to cleanup so parent takes opts, rather than opts file path")
+            raise Error.new('Not supported yet, need to cleanup so parent takes opts, rather than opts file path')
           else
             opts[:file_path]
           end
@@ -68,10 +68,10 @@ module DTK; class ErrorUsage
     def self.raise_error_if_value_nil(v,opts={})
       if v.nil?
         if err_params = opts[:err_params]
-          err_msg = opts[:err_msg] || "Value of (?1) should not be nil"
+          err_msg = opts[:err_msg] || 'Value of (?1) should not be nil'
           raise new(err_msg,err_params)
         else
-          err_msg = opts[:err_msg] || "Value should not be nil"
+          err_msg = opts[:err_msg] || 'Value should not be nil'
           raise new(err_msg)
         end
       end
@@ -86,7 +86,7 @@ module DTK; class ErrorUsage
         err_msg = opts[:err_msg] || "Ill-formed #{fragment_type} #{error_obj_ref(obj)}#{for_text}it should be a #{klass}"
         err_params = opts[:err_params] || Params.new(obj: obj)
         if context = opts[:context]
-          err_msg << "; it appears in ?context"
+          err_msg << '; it appears in ?context'
           err_params.merge!(context: context)
         end
         raise new(err_msg,err_params)
@@ -108,7 +108,7 @@ module DTK; class ErrorUsage
       if obj.is_a?(Hash) || obj.is_a?(Array)
         "?obj\n"
       else
-        "(?obj) "
+        '(?obj) '
       end
     end
 

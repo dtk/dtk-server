@@ -20,7 +20,7 @@ module DTK; class AssemblyModule
            rescue Task::Template::TaskActionNotFoundError => e
             raise e
            rescue => e
-            Log.info_pp(["trapped error in create_and_update_assembly_branch",e])
+            Log.info_pp(['trapped error in create_and_update_assembly_branch',e])
           end
         end
 

@@ -46,7 +46,7 @@ module DTK; class Attribute
         if matching_cmps.empty?
           raise ErrorUsage.new("Illegal component reference (#{component_type})")
         elsif matching_cmps.size > 1
-          raise Error.new("Unexpected that ret_matching_components wil return more than 1 match")
+          raise Error.new('Unexpected that ret_matching_components wil return more than 1 match')
         end
         attribute_stack()[:component] = matching_cmps.first
       end
@@ -63,7 +63,7 @@ module DTK; class Attribute
 
       def local_or_remote
         unless @local_or_remote
-          raise Error.new("local_or_remote() is caleld when @local_or_remote not set")
+          raise Error.new('local_or_remote() is caleld when @local_or_remote not set')
         end
         @local_or_remote
       end

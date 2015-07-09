@@ -14,7 +14,7 @@
     type: {
         type: 'select',
         size: 25,
-        default: "instance"
+        default: 'instance'
     },
     os: {
         type: 'text',

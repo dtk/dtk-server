@@ -308,7 +308,7 @@ module DTK
         cmp_module = Model.get_obj(model_handle(:component_module),sp_cmp_hash)
 
         # ret << NodeViolations::NodeComponentParsingError.new(cmp_module[:display_name], "Component") unless cmp_module[:dsl_parsed]
-        ret << NodeViolations::NodeComponentParsingError.new(cmp_module[:display_name], "Component") unless branch.dsl_parsed?()
+        ret << NodeViolations::NodeComponentParsingError.new(cmp_module[:display_name], 'Component') unless branch.dsl_parsed?()
       end
 
       ret
@@ -546,7 +546,7 @@ module DTK
       node_user_list.map do |u|
         attr = u[:attribute]
         val = attr[:value_asserted]||attr[:value_derived]
-        (val && attr[:display_name] == "username") ? {id: attr[:id], username: val, avatar_filename: 'generic-user-male.png'} : nil
+        (val && attr[:display_name] == 'username') ? {id: attr[:id], username: val, avatar_filename: 'generic-user-male.png'} : nil
       end.compact
     end
 
@@ -642,20 +642,20 @@ module DTK
 
       ndx_in_links = get_objs_in_set(id_handles,cols: [:id,:input_attribute_links_cmp]).inject({}) do |h,r|
         link = r[:attribute_link]
-        link[:type] == "external" ? h.merge(link[:id] => link) : h
+        link[:type] == 'external' ? h.merge(link[:id] => link) : h
       end
       ndx_in_links = get_objs_in_set(id_handles,cols: [:id,:input_attribute_links_node]).inject(ndx_in_links) do |h,r|
         link = r[:attribute_link]
-        link[:type] == "external" ? h.merge(link[:id] => link) : h
+        link[:type] == 'external' ? h.merge(link[:id] => link) : h
       end
 
       ndx_out_links = get_objs_in_set(id_handles,cols: [:id,:output_attribute_links_cmp]).inject({}) do |h,r|
         link = r[:attribute_link]
-        link[:type] == "external" ? h.merge(link[:id] => link) : h
+        link[:type] == 'external' ? h.merge(link[:id] => link) : h
       end
       ndx_out_links = get_objs_in_set(id_handles,cols: [:id,:output_attribute_links_node]).inject(ndx_out_links) do |h,r|
         link = r[:attribute_link]
-        link[:type] == "external" ? h.merge(link[:id] => link) : h
+        link[:type] == 'external' ? h.merge(link[:id] => link) : h
       end
 
       return ret if ndx_in_links.empty? && ndx_out_links.empty?

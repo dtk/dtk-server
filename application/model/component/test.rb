@@ -141,7 +141,7 @@ module DTK
         link_def_links = LinkDef.get_link_def_links(link_defs.map(&:id_handle),cols: cols)
         # remove any link def link not associated with a test
         # first remove any link that is not internal (link on same compoennt)
-        link_def_links.reject!{|ldl|ldl[:type] != "internal"}
+        link_def_links.reject!{|ldl|ldl[:type] != 'internal'}
         return ret if link_def_links.empty?
 
         possible_test_cmp_types = link_def_links.map{|ldl|ldl[:remote_component_type]}.uniq

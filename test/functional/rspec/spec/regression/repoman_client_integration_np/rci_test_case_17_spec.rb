@@ -4,14 +4,14 @@ require './lib/component_modules_spec'
 require './lib/dtk_common'
 
 user_data = {
-  usergroup: "bakir_test_group",
-  user: "dtk17-client",
-  module_name: "dtk17/bakir_test_module",
-  component_module: "bakir_test_module",
-  namespace: "dtk17",
-  component_module_filesystem_location: "~/dtk/component_modules/dtk17",
-  another_usergroup: "bakir_test",
-  another_user: "bakir_test"
+  usergroup: 'bakir_test_group',
+  user: 'dtk17-client',
+  module_name: 'dtk17/bakir_test_module',
+  component_module: 'bakir_test_module',
+  namespace: 'dtk17',
+  component_module_filesystem_location: '~/dtk/component_modules/dtk17',
+  another_usergroup: 'bakir_test',
+  another_user: 'bakir_test'
 }
 
 permissions = {
@@ -46,18 +46,18 @@ reverted_permissions = {
 
 dtk_common = DtkCommon.new('', '')
 
-describe "(Repoman client integration) Test Case 17: NEG - delete-from-catalog negative scenarios where it is not possible to delete component module from remote based on permissions set on the module" do
+describe '(Repoman client integration) Test Case 17: NEG - delete-from-catalog negative scenarios where it is not possible to delete component module from remote based on permissions set on the module' do
   let(:conf) { Configuration.instance }
   let(:header) { @homepage.get_header }
   let(:users) { @homepage.get_main.get_users }
   let(:modules) { @homepage.get_main.get_modules}
 
-  context "Import component module function" do
-    include_context "Import remote component module", user_data[:module_name]
+  context 'Import component module function' do
+    include_context 'Import remote component module', user_data[:module_name]
   end
 
-  context "User is" do
-    it "logged in" do
+  context 'User is' do
+    it 'logged in' do
       @homepage.get_loginpage.login_user(conf.username, conf.password)
       homepage_header = header.get_homepage_header
       expect(homepage_header).to have_content('DTK')
@@ -86,8 +86,8 @@ describe "(Repoman client integration) Test Case 17: NEG - delete-from-catalog n
     end
   end
 
-  context "NEG - Delete remote module" do
-    include_context "NEG - Delete component module from remote", dtk_common, user_data[:component_module], user_data[:namespace]
+  context 'NEG - Delete remote module' do
+    include_context 'NEG - Delete component module from remote', dtk_common, user_data[:component_module], user_data[:namespace]
   end
 
  #User A is not owner of module A but belongs to user group A which is set as user group on module (permissions: D/None/None)
@@ -105,16 +105,16 @@ describe "(Repoman client integration) Test Case 17: NEG - delete-from-catalog n
     end
   end
 
-  context "NEG - Delete remote module" do
-    include_context "NEG - Delete component module from remote", dtk_common, user_data[:component_module], user_data[:namespace]
+  context 'NEG - Delete remote module' do
+    include_context 'NEG - Delete component module from remote', dtk_common, user_data[:component_module], user_data[:namespace]
   end
 
-  context "Delete component module" do
-    include_context "Delete component module", dtk_common, user_data[:namespace] + ":" + user_data[:component_module]
+  context 'Delete component module' do
+    include_context 'Delete component module', dtk_common, user_data[:namespace] + ':' + user_data[:component_module]
   end
 
-  context "Delete component module from local filesystem" do
-    include_context "Delete component module from local filesystem", user_data[:component_module_filesystem_location], user_data[:component_module]
+  context 'Delete component module from local filesystem' do
+    include_context 'Delete component module from local filesystem', user_data[:component_module_filesystem_location], user_data[:component_module]
   end
 
   context "Usergroup #{user_data[:usergroup]}, user #{user_data[:user]} and RWDP/RWDP/RWDP permissions" do
@@ -128,8 +128,8 @@ describe "(Repoman client integration) Test Case 17: NEG - delete-from-catalog n
     end
   end
 
-  context "User is" do
-    it "logged out" do
+  context 'User is' do
+    it 'logged out' do
       startpage = @homepage.get_loginpage.logout_user
       expect(startpage).to have_content('DTK Admin Panel')
     end

@@ -128,7 +128,7 @@ module DTK; class Assembly
     def self.get_augmented_component_refs(mh,opts={})
       sp_hash = {
         cols: [:id, :display_name,:component_type,:module_branch_id,:augmented_component_refs],
-        filter: [:and, [:eq, :type, "composite"], [:neq, :project_project_id, nil], opts[:filter]].compact
+        filter: [:and, [:eq, :type, 'composite'], [:neq, :project_project_id, nil], opts[:filter]].compact
       }
       assembly_rows = get_objs(mh.createMH(:component),sp_hash)
 
@@ -187,7 +187,7 @@ module DTK; class Assembly
     def self.get(mh,opts={})
       sp_hash = {
         cols: opts[:cols] || [:id, :group_id,:display_name,:component_type,:module_branch_id, :description, :service_module],
-        filter: [:and, [:eq, :type, "composite"],
+        filter: [:and, [:eq, :type, 'composite'],
                  opts[:project_idh] ? [:eq,:project_project_id,opts[:project_idh].get_id()] : [:neq, :project_project_id,nil],
                  opts[:filter]
                    ].compact
@@ -200,7 +200,7 @@ module DTK; class Assembly
     def self.list_virtual_column?(detail_level=nil)
       if detail_level.nil?
         nil
-      elsif detail_level == "nodes"
+      elsif detail_level == 'nodes'
         :template_stub_nodes
       else
         raise Error.new("not implemented list_virtual_column at detail level (#{detail_level})")
@@ -232,18 +232,18 @@ module DTK; class Assembly
       filter =
         [:and,
          [:eq, :id, id],
-         [:eq, :type, "composite"],
+         [:eq, :type, 'composite'],
          [:neq, :project_project_id, nil]]
       check_valid_id_helper(model_handle,id,filter)
     end
     def self.name_to_id(model_handle,name)
-      parts = name.split("/")
+      parts = name.split('/')
       augmented_sp_hash =
         if parts.size == 1
           {cols: [:id,:component_type],
            filter: [:and,
                     [:eq, :component_type, pp_name_to_component_type(parts[0])],
-                    [:eq, :type, "composite"],
+                    [:eq, :type, 'composite'],
                     [:neq, :project_project_id, nil]]
           }
         else

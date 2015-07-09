@@ -42,7 +42,7 @@ module DTK
             node_ng_info[:component_ids].each do |cmp_id|
               el = ndx_cmps[cmp_id].merge(
                 node: node,
-                source: {type: "node_group", object: node_ng_info[:node_or_ng]}
+                source: {type: 'node_group', object: node_ng_info[:node_or_ng]}
               )
               ret << el
             end
@@ -53,7 +53,7 @@ module DTK
         ((ndx_node_ng_info[node[:id]]||{})[:component_ids]||[]).each do |cmp_id|
           el = ndx_cmps[cmp_id].merge(
             node: node,
-            source: {type: "node", object: node}
+            source: {type: 'node', object: node}
           )
           ret << el
         end
@@ -67,7 +67,7 @@ module DTK
         ref: display_name,
         display_name: display_name,
         datacenter_datacenter_id: target_idh.get_id(),
-        type: "node_group_instance"
+        type: 'node_group_instance'
       }
       ng_mh = target_idh.create_childMH(:node)
       new_ng_idh = create_from_row(ng_mh,create_row)
@@ -80,7 +80,7 @@ module DTK
     def self.list(model_handle)
       sp_hash = {
         cols: [:id, :display_name, :description],
-        filter: [:eq, :type, "node_group_instance"]
+        filter: [:eq, :type, 'node_group_instance']
       }
       get_objs(model_handle,sp_hash)
     end
@@ -129,7 +129,7 @@ module DTK
       filter =
         [:and,
          [:eq, :id, id],
-         [:eq, :type, "node_group_instance"],
+         [:eq, :type, 'node_group_instance'],
          [:neq, :datacenter_datacenter_id, nil]]
       check_valid_id_helper(model_handle,id,filter)
     end
@@ -139,7 +139,7 @@ module DTK
         cols: [:id],
            filter: [:and,
                     [:eq, :display_name, name],
-                    [:eq, :type, "node_group_instance"],
+                    [:eq, :type, 'node_group_instance'],
                     [:neq, :datacenter_datacenter_id, nil]]
       }
       name_to_id_helper(model_handle,name,sp_hash)
@@ -150,7 +150,7 @@ module DTK
         cols: [:display_name],
            filter: [:and,
                     [:eq, :id, id],
-                    [:eq, :type, "node_group_instance"],
+                    [:eq, :type, 'node_group_instance'],
                     [:neq, :datacenter_datacenter_id, nil]]
       }
       rows_raw = get_objs(model_handle,sp_hash)
@@ -184,7 +184,7 @@ module DTK
           filter: [:and, [:eq, :node_id, node_id], [:eq, :node_group_id, ng_id]]
         }
         redundant_links = Model.get_objs(model_handle(:node_group_relation),sp_hash)
-        raise Error.new("Node already member of node group") unless redundant_links.empty?
+        raise Error.new('Node already member of node group') unless redundant_links.empty?
       end
       # create the node_group_relation item to indicate node group membership
       create_row = {

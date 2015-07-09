@@ -24,19 +24,19 @@ module DTK; class ModuleDSL; class V3
       end
 
       def remote_location?
-        ret_single_possible_link_value()["type"] == "external"
+        ret_single_possible_link_value()['type'] == 'external'
       end
 
       def set_to_local_location_as_default
-        if ret_single_possible_link_value()["type"].nil?
-          update_single_possible_link_value("type" => "internal")
+        if ret_single_possible_link_value()['type'].nil?
+          update_single_possible_link_value('type' => 'internal')
         end
       end
 
       # returns [dependencies,link_defs]
       def self.deps_and_link_defs(input_hash,base_cmp,opts={})
-        ndx_dep_choices = Dependency.ndx_dep_choices(input_hash["dependencies"],base_cmp,opts)
-        ndx_link_def_links = LinkDef.ndx_link_def_links(input_hash["link_defs"],base_cmp,opts)
+        ndx_dep_choices = Dependency.ndx_dep_choices(input_hash['dependencies'],base_cmp,opts)
+        ndx_link_def_links = LinkDef.ndx_link_def_links(input_hash['link_defs'],base_cmp,opts)
         spliced_ndx_link_def_links = integrate_deps_and_link_defs!(ndx_dep_choices,ndx_link_def_links)
         dependencies = Dependency.dependencies?(ndx_dep_choices.values,base_cmp,opts)
         link_defs = LinkDef.link_defs?(spliced_ndx_link_def_links)
@@ -59,7 +59,7 @@ module DTK; class ModuleDSL; class V3
 
       def set_single_possible_link!(ndx,hash_value)
         unless @possible_link.empty?
-          raise Error.new("Unexpected that @possible_link is not empty when adding an element")
+          raise Error.new('Unexpected that @possible_link is not empty when adding an element')
         end
         @possible_link.merge!(ndx => hash_value)
       end
@@ -94,8 +94,8 @@ module DTK; class ModuleDSL; class V3
       end
 
       def matches_on_type?(hash_val1,hash_val2)
-        type1 = hash_val1["type"]
-        type2 = hash_val2["type"]
+        type1 = hash_val1['type']
+        type2 = hash_val2['type']
         type1.nil? || type2.nil? || type1 == type2
       end
 

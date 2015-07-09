@@ -6,7 +6,7 @@ module DTK; class ModuleBranch
         ret = self[:module_name]
         if opts[:with_namespace]
           unless ns = module_namespace_name()
-            raise Error.new("Unexpected that self does not have namespace set")
+            raise Error.new('Unexpected that self does not have namespace set')
           end
           ret = Namespace.join_namespace(ns, ret)
         end

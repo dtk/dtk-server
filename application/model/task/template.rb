@@ -1,7 +1,7 @@
 module DTK; class Task
   class Template < Model
     module ActionType
-      Create = "__create_action"
+      Create = '__create_action'
     end
 
     module Serialization

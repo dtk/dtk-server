@@ -106,7 +106,7 @@ module DTK
       end
 
       def namespace
-        namespace?() || (Log.error_pp(["Unexpected that no namespace_info for",self]); nil)
+        namespace?() || (Log.error_pp(['Unexpected that no namespace_info for',self]); nil)
       end
 
       def namespace?
@@ -181,7 +181,7 @@ module DTK
             parent_path = [namespace_model_name_path_el(child.namespace,module_name)]
             child.recursive_add_module_refs!(parent_path)
           else
-            Log.error_pp(["Unexpected that in get_top_level_children child can be nil",cmp_module_branches,assembly_branch])
+            Log.error_pp(['Unexpected that in get_top_level_children child can be nil',cmp_module_branches,assembly_branch])
           end
         end
         ret

@@ -69,16 +69,16 @@ module DTK
           ret[:message] = $1
         end
 
-        source = error_in_result["source"]
+        source = error_in_result['source']
         # working under assumption that stage assignment same as order in components
-        if source =~ Regexp.new("^/Stage\\[([0-9]+)\\]")
+        if source =~ Regexp.new('^/Stage\\[([0-9]+)\\]')
           index = ($1.to_i) -1
           if cmp_with_error = components[index]
             ret = error_in_result.inject({}) do |h,(k,v)|
-              ["source","tags","time"].include?(k) ? h : h.merge(k => v)
+              ['source','tags','time'].include?(k) ? h : h.merge(k => v)
             end
             if cmp_name = cmp_with_error[:display_name]
-              ret.merge!("component" => cmp_name)
+              ret.merge!('component' => cmp_name)
             end
           end
         end
@@ -94,7 +94,7 @@ module DTK
       end
 
       def ret_attribute_external_ref(hash)
-        module_name = hash[:component_type].gsub(/__.+$/,"")
+        module_name = hash[:component_type].gsub(/__.+$/,'')
         {
           type: "#{type}_attribute",
           path: "node[#{module_name}][#{hash[:field_name]}]"
@@ -125,15 +125,15 @@ module DTK
         assembly_attrs.map do |attr|
           val = ret_value(attr)
           # TODO: hack until can add data types
-          val = true if val == "true"
-          val = false if val == "false"
-          {"name" => attr[:display_name], "value" => val}
+          val = true if val == 'true'
+          val = false if val == 'false'
+          {'name' => attr[:display_name], 'value' => val}
         end
       end
 
       def components_with_attributes(config_node)
         cmp_actions = config_node.component_actions()
-        node_components = cmp_actions.map{|ca|(component_external_ref(ca[:component])||{})["name"]}.compact
+        node_components = cmp_actions.map{|ca|(component_external_ref(ca[:component])||{})['name']}.compact
         ndx_cmps = cmp_actions.inject({}) do |h,cmp_action|
           cmp = cmp_action[:component]
           h.merge(cmp[:id] => cmp)
@@ -152,20 +152,20 @@ module DTK
       def component_with_deps(action,ndx_components)
         cmp = action[:component]
         ret = component_external_ref(cmp)
-        module_name = ret["name"].gsub(/::.+$/,"")
-        ret.merge!("module_name" => module_name)
+        module_name = ret['name'].gsub(/::.+$/,'')
+        ret.merge!('module_name' => module_name)
         cmp_deps = action[:component_dependencies]
         return ret unless cmp_deps and not cmp_deps.empty?
-        ret.merge("component_dependencies" => cmp_deps.map{|cmp_id|component_external_ref(ndx_components[cmp_id])})
+        ret.merge('component_dependencies' => cmp_deps.map{|cmp_id|component_external_ref(ndx_components[cmp_id])})
       end
 
       def component_external_ref(component)
         ext_ref = component[:external_ref]
         case ext_ref[:type]
-         when "puppet_class"
-          {"component_type" => "class", "name" => ext_ref[:class_name], "id" => component[:id]}
-         when "puppet_definition"
-          {"component_type" => "definition", "name" => ext_ref[:definition_name], "id" => component[:id]}
+         when 'puppet_class'
+          {'component_type' => 'class', 'name' => ext_ref[:class_name], 'id' => component[:id]}
+         when 'puppet_definition'
+          {'component_type' => 'definition', 'name' => ext_ref[:definition_name], 'id' => component[:id]}
          else
           Log.error("unexepected external type #{ext_ref[:type]}")
           nil
@@ -184,13 +184,13 @@ module DTK
             # second clause is to handle case where theer is a default just in puppet and header and since not overwritten acts as dynamic attr
             if attr[:value_asserted].nil? && (attr[:dynamic] || ext_ref[:default_variable]) #TODO: the disjunct 'ext_ref[..]' can be deprecated
               dyn_attr = {name: array_form_path[1], id: attr[:id]}
-              if ext_ref[:type] == "puppet_exported_resource"
-                type = "exported_resource"
-                dyn_attr.merge!(type: "exported_resource", title_with_vars: ext_ref[:title_with_vars])
+              if ext_ref[:type] == 'puppet_exported_resource'
+                type = 'exported_resource'
+                dyn_attr.merge!(type: 'exported_resource', title_with_vars: ext_ref[:title_with_vars])
               elsif ext_ref[:default_variable]
-                dyn_attr.merge!(type: "default_variable")
+                dyn_attr.merge!(type: 'default_variable')
               else
-                dyn_attr.merge!(type: "dynamic")
+                dyn_attr.merge!(type: 'dynamic')
               end
               if is_connected_output_attribute?(attr)
                 dyn_attr.merge!(is_connected: true)
@@ -201,7 +201,7 @@ module DTK
               # info that is used to set the name param for the resource
               if rsc_name_path = attr[:external_ref][:name]
                 if rsc_name_val = nested_value(val,rsc_name_path)
-                  add_attribute!(ndx_attributes,[array_form_path[0],"name"],rsc_name_val,ext_ref)
+                  add_attribute!(ndx_attributes,[array_form_path[0],'name'],rsc_name_val,ext_ref)
                 end
               end
             elsif guard = internal_guards.find{|g|attr[:id] == g[:guarded][:attribute][:id]}
@@ -211,8 +211,8 @@ module DTK
           end
         end
         ret = {}
-        ret.merge!("attributes" => ndx_attributes.values) unless ndx_attributes.empty?
-        ret.merge!("dynamic_attributes" => dynamic_attrs) unless dynamic_attrs.empty?
+        ret.merge!('attributes' => ndx_attributes.values) unless ndx_attributes.empty?
+        ret.merge!('dynamic_attributes' => dynamic_attrs) unless dynamic_attrs.empty?
         ret
       end
 
@@ -222,12 +222,12 @@ module DTK
       end
 
       def ret_value(attr,node_components=nil)
-        return node_components if attr[:display_name] == "__node_components" && node_components #TODO: clean-up
+        return node_components if attr[:display_name] == '__node_components' && node_components #TODO: clean-up
         ret = attr[:attribute_value]
         case attr[:data_type]
-         when "boolean"
-          if ret == "true" then ret = true
-          elsif ret == "false" then ret = false
+         when 'boolean'
+          if ret == 'true' then ret = true
+          elsif ret == 'false' then ret = false
           end
         end
         ret
@@ -235,7 +235,7 @@ module DTK
 
       def find_reference_to_guard(guard,attributes)
         ret = nil
-        unless guard[:link][:function] == "eq"
+        unless guard[:link][:function] == 'eq'
           Log.error("not treating internal guards for link fn #{guard[:link][:function]}")
           return ret
         end
@@ -246,12 +246,12 @@ module DTK
         return nil unless var_name_path = (attr[:external_ref]||{})[:path]
         ref_array_form_path = to_array_form(var_name_path)
         # TODO: case on whether teh ref is computed in first stage or second stage
-        {"__ref" => ref_array_form_path}
+        {'__ref' => ref_array_form_path}
       end
 
       # TDOO: may want to better unify how name is passed heer with 'param' and otehr way by setting node path with name last element]
       def nested_value(val,rsc_name_path)
-        array_form = rsc_name_path.gsub(/^param\[/,"").gsub(/\]$/,"").split("][")
+        array_form = rsc_name_path.gsub(/^param\[/,'').gsub(/\]$/,'').split('][')
         nested_value_aux(val,array_form)
       end
 
@@ -270,21 +270,21 @@ module DTK
         unless ndx_attributes.key?(ndx)
           extra_info =
             case ext_ref[:type]
-             when "puppet_attribute"
-              {"type" => "attribute"}
-             when "puppet_imported_collection"
-              {"type" => "imported_collection",
-              "resource_type" =>  ext_ref[:resource_type]}
+             when 'puppet_attribute'
+              {'type' => 'attribute'}
+             when 'puppet_imported_collection'
+              {'type' => 'imported_collection',
+              'resource_type' =>  ext_ref[:resource_type]}
              else
               raise Error.new("unexpected attribute type (#{ext_ref[:type]})")
             end
         end
         size = array_form_path.size
         if size == 1
-          ndx_attributes[ndx] = {"name" => ndx, "value" => val}.merge(extra_info)
+          ndx_attributes[ndx] = {'name' => ndx, 'value' => val}.merge(extra_info)
         else
-          p = ndx_attributes[ndx] ||= {"name" => ndx, "value" => {}}.merge(extra_info)
-          add_attribute_aux!(p["value"],array_form_path[1..size-1],val)
+          p = ndx_attributes[ndx] ||= {'name' => ndx, 'value' => {}}.merge(extra_info)
+          add_attribute_aux!(p['value'],array_form_path[1..size-1],val)
         end
       end
 
@@ -304,7 +304,7 @@ module DTK
       # service[component][x1] or service[component][x1][x2] or ..
       def to_array_form(external_ref_path)
         # TODO: use regexp disjunction
-        external_ref_path.gsub(/^node\[/,"").gsub(/^service\[/,"").gsub(/\]$/,"").split("][")
+        external_ref_path.gsub(/^node\[/,'').gsub(/^service\[/,'').gsub(/\]$/,'').split('][')
       end
     end
   end

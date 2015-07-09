@@ -62,8 +62,8 @@ module XYZ
               end
             end
           else
-            Log.error("partial value should only be set for an update") unless opts[:partial_value]
-            Log.error("partial value should only be set when there is an id_handle in opts") unless opts[:id_handle]
+            Log.error('partial value should only be set for an update') unless opts[:partial_value]
+            Log.error('partial value should only be set when there is an id_handle in opts') unless opts[:id_handle]
           end
         end
 
@@ -101,7 +101,7 @@ module XYZ
         if sql_operation == :update
           real_cols = virtual_col_defs.values.map{|vc|vc[:path].first if vc[:path]}.compact.uniq
           unless id_handle
-            Log.info("id handle should not be nil")
+            Log.info('id handle should not be nil')
             return nil
           end
           object = get_object_scalar_columns(id_handle,Model::FieldSet.opt(real_cols,id_handle[:model_name]))

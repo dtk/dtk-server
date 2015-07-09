@@ -10,8 +10,8 @@ module DTK; module WorkflowAdapter; module RuoteGenerateProcessDefs
 
     def guard(task)
       participant = participants_for_tasks[task[:executable_action].class]
-      raise Error.new("cannot find participant for task") unless participant
-      ["listen",{"to"=>participant.to_s, "upon"=>"reply", "where"=>"${guard_id} == #{task.id()}"},[]]
+      raise Error.new('cannot find participant for task') unless participant
+      ['listen',{'to'=>participant.to_s, 'upon'=>'reply', 'where'=>"${guard_id} == #{task.id()}"},[]]
     end
 
     class Context
@@ -88,14 +88,14 @@ module DTK; module WorkflowAdapter; module RuoteGenerateProcessDefs
 
         def new_concurrent_context(task_list)
           unless @peer_tasks.empty?
-            raise ErrorUsage.new("nested concurrent under concurrent context not implemented")
+            raise ErrorUsage.new('nested concurrent under concurrent context not implemented')
           end
           self.class.new(@guards,@top_task_idh,task_list)
         end
 
         def new_sequential_context(_task)
           unless @peer_tasks.empty?
-            raise ErrorUsage.new("sequential under concurrent context not implemented")
+            raise ErrorUsage.new('sequential under concurrent context not implemented')
           end
           self
         end

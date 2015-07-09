@@ -4,16 +4,16 @@ module DTK
       class ExecuteOnNode < NodeParticipants
         def consume(workitem)
           params = get_params(workitem)
-          PerformanceService.start("#{self.class.to_s.split("::").last}", self.object_id)
+          PerformanceService.start("#{self.class.to_s.split('::').last}", self.object_id)
           task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
           top_task = workflow.top_task
           task.update_input_attributes!() if task_start
-          workitem.fields["guard_id"] = task_id # ${guard_id} is referenced if guard for execution of this
+          workitem.fields['guard_id'] = task_id # ${guard_id} is referenced if guard for execution of this
 
           failed_tasks = ret_failed_precondition_tasks(task,workflow.guards[:external])
           unless failed_tasks.empty?
             set_task_to_failed_preconditions(task,failed_tasks)
-            log_participant.event("precondition_failure", task_id: task_id)
+            log_participant.event('precondition_failure', task_id: task_id)
             delete_task_info(workitem)
             return reply_to_engine(workitem)
           end
@@ -32,9 +32,9 @@ module DTK
               on_msg_received: proc do |msg|
                 inspect_agent_response(msg)
                 CreateThread.defer_with_session(user_object, Ramaze::Current.session) do
-                  PerformanceService.end_measurement("#{self.class.to_s.split("::").last}", self.object_id)
+                  PerformanceService.end_measurement("#{self.class.to_s.split('::').last}", self.object_id)
 
-                  result = msg[:body].merge("task_id" => task_id)
+                  result = msg[:body].merge('task_id' => task_id)
                   if has_action_results?(task,result)
                     task.add_action_results(result,action)
                   end
@@ -46,9 +46,9 @@ module DTK
               on_timeout: proc do
                 CreateThread.defer_with_session(user_object, Ramaze::Current.session) do
                   result = {
-                    status: "timeout"
+                    status: 'timeout'
                   }
-                  event,errors = task.add_event_and_errors(:complete_timeout,:server,["timeout"])
+                  event,errors = task.add_event_and_errors(:complete_timeout,:server,['timeout'])
                   if event
                     log_participant.end(:timeout,task_id: task_id,event: event, errors: errors)
                   end
@@ -114,7 +114,7 @@ module DTK
           return ret if guard_task_idhs.empty?
           sp_hash = {
             cols: [:id,:status,:display_name],
-            filter: [:and, [:eq,:status,"failed"],[:oneof,:id,guard_task_idhs.map(&:get_id)]]
+            filter: [:and, [:eq,:status,'failed'],[:oneof,:id,guard_task_idhs.map(&:get_id)]]
           }
           Model.get_objs(task.model_handle,sp_hash)
         end

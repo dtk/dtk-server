@@ -12,7 +12,7 @@ module DTK
   class SSHDriverTest1
     def self.smoketest_start(_task_idh,_top_task_idh,task_action,opts)
       unless callbacks = (opts[:receiver_context]||{})[:callbacks]
-        raise Error.new("Unexpected that no calls given")
+        raise Error.new('Unexpected that no calls given')
       end
 
       if parent = (opts[:receiver_context]||{})[:parent]
@@ -30,7 +30,7 @@ module DTK
     end
 
     def self.test_cancel(_task_idh,_top_task_idh,_task_action,opts)
-      puts "===================== SSH CANCEL CALLED ===================="
+      puts '===================== SSH CANCEL CALLED ===================='
       callbacks = (opts[:receiver_context]||{})[:callbacks]
       # should not use EM.stop for cancel, need to find better solution
       # EM.stop
@@ -42,7 +42,7 @@ module DTK
         end.resume
       end
 
-      msg = {msg: "CANCEL"}
+      msg = {msg: 'CANCEL'}
       callbacks[:on_msg_received].call(msg)
     end
   end

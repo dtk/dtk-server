@@ -43,10 +43,10 @@ module DTK; class ConfigAgent; module Adapter
           exec_block << generate_stage_statements(stage_ids_exec_block.size)
           stage_ids_exec_block.each_with_index do |stage_ids, i|
             stage = i+1
-            exec_block << " " #space between stages
+            exec_block << ' ' #space between stages
             puppet_stage = PuppetStage.new(stage,@config_node,@import_statement_modules)
             Array(stage_ids).each do |cmp_id|
-              cmp_with_attrs = cmps_with_attrs.find { |cmp| cmp["id"] == cmp_id }
+              cmp_with_attrs = cmps_with_attrs.find { |cmp| cmp['id'] == cmp_id }
               puppet_stage.generate_manifest!(cmp_with_attrs)
             end
             puppet_stage.add_lines_for_stage!(exec_block)
@@ -66,7 +66,7 @@ module DTK; class ConfigAgent; module Adapter
         lines << generate_stage_statements(cmps_with_attrs.size)
         cmps_with_attrs.each_with_index do |cmp_with_attrs,i|
           stage = i+1
-          lines << " " #space between stages
+          lines << ' ' #space between stages
           PuppetStage.new(stage,@config_node,@import_statement_modules).generate_manifest!(cmp_with_attrs).add_lines_for_stage!(lines)
         end
 
@@ -77,7 +77,7 @@ module DTK; class ConfigAgent; module Adapter
       end
 
       def generate_stage_statements(size)
-        (1..size).map{|s|"stage{#{s}:}"}.join(" -> ")
+        (1..size).map{|s|"stage{#{s}:}"}.join(' -> ')
       end
 
       class PuppetStage < self
@@ -94,27 +94,27 @@ module DTK; class ConfigAgent; module Adapter
         end
 
         def generate_manifest!(cmp_with_attrs)
-          module_name = cmp_with_attrs["module_name"]
+          module_name = cmp_with_attrs['module_name']
           attrs = process_and_return_attr_name_val_pairs(cmp_with_attrs)
-          case cmp_with_attrs["component_type"]
-           when "class"
-            cmp = cmp_with_attrs["name"]
-            raise Error.new("No component name") unless cmp
+          case cmp_with_attrs['component_type']
+           when 'class'
+            cmp = cmp_with_attrs['name']
+            raise Error.new('No component name') unless cmp
             if imp_stmt = needs_import_statement?(cmp,module_name)
               @class_lines << imp_stmt
             end
             # TODO: see if need \" and quote form
             attr_str_array = attrs.map{|k,v|"#{k} => #{process_val(v)}"} + [stage_assign()]
-            attr_str = attr_str_array.join(", ")
+            attr_str = attr_str_array.join(', ')
             @class_lines << "class {\"#{cmp}\": #{attr_str}}"
-           when "definition"
-            unless defn_cmp = cmp_with_attrs["name"]
-              raise ErrorUsage.new("No definition name")
+           when 'definition'
+            unless defn_cmp = cmp_with_attrs['name']
+              raise ErrorUsage.new('No definition name')
             end
 
             name_attr = nil
             attr_str_array = attrs.map do |k,v|
-              if k == "name"
+              if k == 'name'
                 name_attr = quote_form(v)
                 nil
               else
@@ -129,7 +129,7 @@ module DTK; class ConfigAgent; module Adapter
               attr_str_array << "require => #{anchor_ref(:begin)}"
               attr_str_array << "before => #{anchor_ref(:end)}"
             end
-            attr_str = attr_str_array.join(", ")
+            attr_str = attr_str_array.join(', ')
             if imp_stmt = needs_import_statement?(defn_cmp,module_name)
               @def_lines << imp_stmt
             end
@@ -151,7 +151,7 @@ module DTK; class ConfigAgent; module Adapter
             if use_anchors_for_class_wrappers?()
               ret << "  #{anchor(:end)}"
             end
-            ret << "}"
+            ret << '}'
             ret << "class {\"#{class_wrapper}\": #{stage_assign}}"
           end
         end
@@ -175,15 +175,15 @@ module DTK; class ConfigAgent; module Adapter
         # removes imported collections and puts them on global array
         def process_and_return_attr_name_val_pairs(cmp_with_attrs)
           ret = {}
-          return ret unless attrs = cmp_with_attrs["attributes"]
-          cmp_name = cmp_with_attrs["name"]
+          return ret unless attrs = cmp_with_attrs['attributes']
+          cmp_name = cmp_with_attrs['name']
           attrs.each do |attr_info|
-            attr_name = attr_info["name"]
-            val = attr_info["value"]
-            case attr_info["type"]
-             when "attribute"
+            attr_name = attr_info['name']
+            val = attr_info['value']
+            case attr_info['type']
+             when 'attribute'
               ret[attr_name] = val
-             else raise Error.new("unexpected attribute type (#{attr_info["type"]})")
+             else raise Error.new("unexpected attribute type (#{attr_info['type']})")
             end
           end
           ret
@@ -232,13 +232,13 @@ module DTK; class ConfigAgent; module Adapter
       def get_attr_val_statements(cmps_with_attrs)
         ret = []
         cmps_with_attrs.each do |cmp_with_attrs|
-          (cmp_with_attrs["dynamic_attributes"]||[]).each do |dyn_attr|
+          (cmp_with_attrs['dynamic_attributes']||[]).each do |dyn_attr|
             # only include if the dynamic attribute is connected
             # TODO: this is mechanism used to avoid duplicate r8::export_variable declarations: making sure downstream that
             # definitions cannot be connected
             if dyn_attr[:is_connected]
-              if dyn_attr[:type] == "default_variable"
-                qualified_var = "#{cmp_with_attrs["name"]}::#{dyn_attr[:name]}"
+              if dyn_attr[:type] == 'default_variable'
+                qualified_var = "#{cmp_with_attrs['name']}::#{dyn_attr[:name]}"
                 ret << "r8::export_variable{'#{qualified_var}' :}"
               end
             end
@@ -258,8 +258,8 @@ module DTK; class ConfigAgent; module Adapter
           end
         end
         # a guarded val
-        if val.is_a?(Hash) && val.size == 1 && val.keys.first == "__ref"
-          "$#{val.values.join("::")}"
+        if val.is_a?(Hash) && val.size == 1 && val.keys.first == '__ref'
+          "$#{val.values.join('::')}"
         else
           quote_form(val)
         end
@@ -267,13 +267,13 @@ module DTK; class ConfigAgent; module Adapter
 
       def quote_form(obj)
         if obj.is_a?(Hash)
-          "{#{obj.map{|k,v|"#{quote_form(k)} => #{quote_form(v)}"}.join(",")}}"
+          "{#{obj.map{|k,v|"#{quote_form(k)} => #{quote_form(v)}"}.join(',')}}"
         elsif obj.is_a?(Array)
-          "[#{obj.map{|el|quote_form(el)}.join(",")}]"
+          "[#{obj.map{|el|quote_form(el)}.join(',')}]"
         elsif obj.is_a?(String)
           "\"#{obj}\""
         elsif obj.nil?
-          "nil"
+          'nil'
         else
           obj.to_s
         end

@@ -173,7 +173,7 @@ module DTK
     end
     def self.meta_filename_path
       ServiceModule::DSLParser.default_rel_path?(:component_module_refs) ||
-        raise(Error.new("Unexpected that cannot compute a meta_filename_path for component_module_refs"))
+        raise(Error.new('Unexpected that cannot compute a meta_filename_path for component_module_refs'))
     end
 
     def dsl_hash_form
@@ -203,11 +203,11 @@ module DTK
     def project_idh
       return @project_idh if @project_idh
       unless service_id = @parent.get_field?(:service_id)
-        raise Error.new("Cannot find project from parent object")
+        raise Error.new('Cannot find project from parent object')
       end
       service_module = @parent.model_handle(:service_module).createIDH(id: service_id).create_object()
       unless project_id = service_module.get_field?(:project_project_id)
-        raise Error.new("Cannot find project from parent object")
+        raise Error.new('Cannot find project from parent object')
       end
       @parent.model_handle(:project).createIDH(id: project_id)
     end

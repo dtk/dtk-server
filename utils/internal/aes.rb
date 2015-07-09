@@ -16,7 +16,7 @@ module AESCrypt
   #:arg: key => String
   #:arg: iv => String
   #:arg: cipher_type => String
-  def self.decrypt(encrypted_data, key, iv = nil, cipher_type = "AES-256-CBC")
+  def self.decrypt(encrypted_data, key, iv = nil, cipher_type = 'AES-256-CBC')
     aes = OpenSSL::Cipher::Cipher.new(cipher_type)
     aes.decrypt
     aes.key = key
@@ -35,7 +35,7 @@ module AESCrypt
   #:arg: key => String
   #:arg: iv => String
   #:arg: cipher_type => String
-  def self.encrypt(data, key, iv = nil, cipher_type = "AES-256-CBC")
+  def self.encrypt(data, key, iv = nil, cipher_type = 'AES-256-CBC')
     aes = OpenSSL::Cipher::Cipher.new(cipher_type)
     aes.encrypt
     aes.key = key

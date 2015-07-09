@@ -11,7 +11,7 @@ module DTK
         node_module_dsl_obj = create_dsl_object_from_impl(impl_obj, opts)
         raise node_module_dsl_obj if ParsingError.is_error?(node_module_dsl_obj)
 
-        update_opts = {override_attrs: {"module_branch_id" => module_branch_idh.get_id()}}
+        update_opts = {override_attrs: {'module_branch_id' => module_branch_idh.get_id()}}
         update_opts.merge!(version: version) if version
         node_module_dsl_obj.update_model(update_opts)
       end
@@ -50,10 +50,10 @@ module DTK
     end
     # Set for load_and_return_version_adapter_class
     def self.adapter_type
-      "NodeModuleDSL"
+      'NodeModuleDSL'
     end
     def self.adapter_dir
-      "node_module_dsl"
+      'node_module_dsl'
     end
   end
 end

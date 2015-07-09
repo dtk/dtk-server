@@ -251,7 +251,7 @@ module DTK
 
       def format_components_and_attributes(node,raw_row,ndx_attrs,opts)
         cmp_hash = list_aux__component_template(raw_row)
-        if cmp_type =  cmp_hash[:component_type] && cmp_hash[:component_type].gsub(/__/,"::")
+        if cmp_type =  cmp_hash[:component_type] && cmp_hash[:component_type].gsub(/__/,'::')
           cmp =
             if opts[:component_info]
               version = ModuleBranch.version_from_version_field(cmp_hash[:version])

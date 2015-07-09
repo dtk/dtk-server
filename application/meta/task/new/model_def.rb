@@ -2,11 +2,11 @@
   schema: :task,
   table: :task,
   columns: {
-    status: {type: :varchar, size: 20, default: "created"}, # = "created" | "executing" | "succeeded" | "failed" | "timed_out" | "preconditions_failed" | "canceled"
+    status: {type: :varchar, size: 20, default: 'created'}, # = "created" | "executing" | "succeeded" | "failed" | "timed_out" | "preconditions_failed" | "canceled"
     started_at: {type: :timestamp},
     ended_at: {type: :timestamp},
     result: {type: :json}, # gets serialized version of TaskAction::Result
-    action_on_failure: {type: :varchar, default: "abort"},
+    action_on_failure: {type: :varchar, default: 'abort'},
     commit_message: {type: :varchar}, #only on top level task
     temporal_order: {type: :varchar, size: 20}, # = "sequential" | "concurrent"
     position: {type: :integer, default: 1},

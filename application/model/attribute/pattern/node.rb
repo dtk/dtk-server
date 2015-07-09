@@ -5,7 +5,7 @@ module DTK; class Attribute
         if pattern =~ /^[0-9]+$/
           return Type::ExplicitId.new(pattern,node)
         end
-        split_term = pattern.split("/")
+        split_term = pattern.split('/')
         node_name = node.get_field?(:display_name)
         case split_term.size
           when 1

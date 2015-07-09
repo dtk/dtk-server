@@ -28,10 +28,10 @@ RSpec.configure do |config|
   #close browser after each test
   config.after(:all) do
     if @conf.headless
-      puts "Destroying Headless"
+      puts 'Destroying Headless'
       @headless.destroy
     else
-      puts "Closing browser"
+      puts 'Closing browser'
       @homepage.close
     end
   end
@@ -46,34 +46,34 @@ def load_configs
      env = line.strip
     end
   end
-  puts "Loading RSpec configuration for: " + env
+  puts 'Loading RSpec configuration for: ' + env
   full_config = YAML::load(File.open('./config/config.yml'))
-  puts "RSpec configuration: " + full_config[env].to_s
+  puts 'RSpec configuration: ' + full_config[env].to_s
 
   conf = Configuration.instance
-  conf.host = full_config[env]["environment"]["full_host"]
-  conf.browser = full_config[env]["target"]["browser"]
-  conf.username = full_config[env]["account"]["username"]
-  conf.password = full_config[env]["account"]["password"]
-  conf.headless = full_config[env]["headless"]
+  conf.host = full_config[env]['environment']['full_host']
+  conf.browser = full_config[env]['target']['browser']
+  conf.username = full_config[env]['account']['username']
+  conf.password = full_config[env]['account']['password']
+  conf.headless = full_config[env]['headless']
   return conf
 end
 
 def load_headless(full_host)
   require 'headless'
-  puts "Initializing browser, HEADLESS mode"
+  puts 'Initializing browser, HEADLESS mode'
   Capybara.default_driver = :webkit
   @headless = Headless.new
   @headless.start
   session = Capybara::Session.new :webkit
   @homepage = HomePage.new(session)
   @homepage.goto_homepage(full_host)
-  puts "Opening home page: " + full_host
+  puts 'Opening home page: ' + full_host
   return @homepage
 end
 
 def load_browser(full_host, target_browser)
-  puts "Initializing browser " + target_browser.to_s
+  puts 'Initializing browser ' + target_browser.to_s
   Capybara.register_driver :selenium do |app|
     Capybara::Selenium::Driver.new(app, browser: target_browser.to_sym)
   end
@@ -81,6 +81,6 @@ def load_browser(full_host, target_browser)
   session = Capybara::Session.new :selenium
   @homepage = HomePage.new(session)
   @homepage.goto_homepage(full_host)
-  puts "Opening home page: " + full_host
+  puts 'Opening home page: ' + full_host
   return @homepage
 end

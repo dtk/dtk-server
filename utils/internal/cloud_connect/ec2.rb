@@ -81,8 +81,8 @@ module DTK
         # Log.info "Checking instance with ID: '#{id}'"
         response = @conn.describe_instances('instance-id' => id)
         unless response.nil?
-          status = response.body["reservationSet"].first["instancesSet"].first["instanceState"]["name"].to_sym
-          launch_time = response.body["reservationSet"].first["instancesSet"].first["launchTime"]
+          status = response.body['reservationSet'].first['instancesSet'].first['instanceState']['name'].to_sym
+          launch_time = response.body['reservationSet'].first['instancesSet'].first['launchTime']
           { status: status, launch_time: launch_time, up_time_hours: ((Time.now - launch_time)/1.hour).round }
         end
       end
@@ -100,7 +100,7 @@ module DTK
         unless subnet_obj = subnets.get(subnet_id)
           err_msg = "Not able to find IAAS subnet with id '#{subnet_id}'"
           if subnets.empty?
-            err_msg << "; there are no subnets created in the vpc"
+            err_msg << '; there are no subnets created in the vpc'
           else
             avail_subnets = subnets.map{|s|hash_form(s)[:subnet_id]}
             err_msg << "; set the target to use one of the available subnets: #{avail_subnets.join(', ')}"

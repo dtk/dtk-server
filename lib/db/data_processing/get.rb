@@ -205,11 +205,11 @@ module XYZ
                 fk_id_info = IDInfoTable.get_row_from_guid(guid)
                 hash.delete(col)
                 # add a "*" form if opts[:fk_as_ref] is prefix
-                if opts[:fk_as_ref] == "/"
-                  hash[("*" + col.to_s).to_sym] = fk_id_info[:uri]
+                if opts[:fk_as_ref] == '/'
+                  hash[('*' + col.to_s).to_sym] = fk_id_info[:uri]
                 elsif fk_id_info[:uri] =~ Regexp.new("^#{opts[:fk_as_ref]}(/.+$)")
                   rebased_uri = $1
-                  hash[("*" + col.to_s).to_sym] = rebased_uri
+                  hash[('*' + col.to_s).to_sym] = rebased_uri
                 end
               end
             elsif col_info[:type] == :json

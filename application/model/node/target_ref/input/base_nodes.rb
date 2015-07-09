@@ -7,10 +7,10 @@ module DTK; class Node; class TargetRef
       def self.create_linked_target_ref?(target,node,assembly)
         ndx_node_target_ref_array = create_linked_target_refs?(target,assembly,[node])
         unless target_ref_array = ndx_node_target_ref_array[node[:id]]
-          raise Error.new("Unexpected that create_linked_target_ref does not return element matching node[:id]")
+          raise Error.new('Unexpected that create_linked_target_ref does not return element matching node[:id]')
         end
         unless target_ref_array.size == 1
-          raise Error.new("Unexpected that ndx_node_target_ref_array.size not equal 1")
+          raise Error.new('Unexpected that ndx_node_target_ref_array.size not equal 1')
         end
         target_ref = target_ref_array.first.create_object()
         # TODO: can be more efficienct and avoid calling below if create_linked_target_refs? finds as opposed to creates
@@ -46,7 +46,7 @@ module DTK; class Node; class TargetRef
               ret.merge!(node_id => target_ref_idhs)
             end
           else # num_needed < 0
-            Log.error("Unexpected that more target refs than needed")
+            Log.error('Unexpected that more target refs than needed')
             ret.merge!(node_id => target_ref_idhs)
           end
         end
@@ -78,7 +78,7 @@ module DTK; class Node; class TargetRef
         rows_to_update = attrs.map do |r|
           {id: r[:id], node_node_id: to_link_hash[r[:node_node_id]]}
         end
-        Log.error("need to also update top.id_info since parent field is being updated")
+        Log.error('need to also update top.id_info since parent field is being updated')
         Model.update_from_rows(attr_mh,rows_to_update)
       end
       # TODO: Step in fixing DTK-1739 is putting in this copy to possible replace above Not switching over yet
@@ -148,7 +148,7 @@ module DTK; class Node; class TargetRef
         Model.get_objs(ngr_mh,sp_hash).each do |ngr|
           node_group_id = ngr[:node_group_id]
           unless target_ref_attrs = ndx_ng_target_ref_attrs[ngr[:node_group_id]]
-            Log.error("Unexpected that node group id is not found in node_group_refs")
+            Log.error('Unexpected that node group id is not found in node_group_refs')
             next
           end
           add_target_ref_attrs!(create_rows,ngr[:target_ref],target_ref_attrs)

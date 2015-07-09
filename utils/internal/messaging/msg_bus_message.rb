@@ -51,16 +51,16 @@ module XYZ
     def self.topic(type)
       case type
         when :attribute
-          "default"
+          'default'
         when :node
-          "node"
+          'node'
         else
          raise Error.new("unexpected type: #{type}")
       end
     end
     def self.key(target_object_id,type)
       raise Error.new("unexpected type: #{type}") unless [:attribute,:node].include?(type)
-      raise Error.new("missing target_object_id") if target_object_id.nil?
+      raise Error.new('missing target_object_id') if target_object_id.nil?
       target_object_id.to_s
     end
   end

@@ -21,22 +21,22 @@ module DTK
         sub_assembly,sa_ref = ret_assembly_info(:add_on_sub_assembly)
         ao_input_hash = {
           display_name: type,
-          description: hash_content["description"],
+          description: hash_content['description'],
           type: type,
           sub_assembly_id: sub_assembly[:id]
         }
-        port_links = import_add_on_port_links(ports,hash_content["port_links"],assembly,sub_assembly)
+        port_links = import_add_on_port_links(ports,hash_content['port_links'],assembly,sub_assembly)
         unless port_links.empty?
           ao_input_hash.merge!(port_link: port_links)
         end
 
-        node_bindings = ServiceNodeBinding.import_add_on_node_bindings(@aug_assembly_nodes,hash_content["node_bindings"])
+        node_bindings = ServiceNodeBinding.import_add_on_node_bindings(@aug_assembly_nodes,hash_content['node_bindings'])
         unless node_bindings.empty?
           ao_input_hash.merge!(service_node_binding: node_bindings)
         end
 
         input_hash = {assembly_ref => {service_add_on: {type => ao_input_hash}}}
-        Model.import_objects_from_hash(container_idh,"component" =>  input_hash)
+        Model.import_objects_from_hash(container_idh,'component' =>  input_hash)
       end
 
       def self.dsl_filename_path_info
@@ -53,13 +53,13 @@ module DTK
         return ret if (add_on_port_links||[]).empty?
         assembly_list = [assembly,sub_assembly]
         add_on_port_links.each do |ao_pl_ref,ao_pl|
-          link = ao_pl["link"]
+          link = ao_pl['link']
           input_assembly,input_port = add_on_parse(link.values.first,assembly_list)
           output_assembly,output_port = add_on_parse(link.keys.first,assembly_list)
           input_id = input_port.matching_id(ports)
           output_id = output_port.matching_id(ports)
           output_is_local = (output_assembly == assembly[:display_name])
-          pl_hash = {"input_id" => input_id,"output_id" => output_id, "output_is_local" => output_is_local, "required" => ao_pl["required"]}
+          pl_hash = {'input_id' => input_id,'output_id' => output_id, 'output_is_local' => output_is_local, 'required' => ao_pl['required']}
           ret.merge!(ao_pl_ref => pl_hash)
         end
         ret
@@ -104,7 +104,7 @@ module DTK
         unless assembly = @assemblies.find{|a|a[:display_name] == name}
           Log.error("Field (#{field}) has value (#{name}) which is not a valid assembly reference")
         end
-        raise Error.new("if use need to pass in service_module and call service_module.assembly_ref(name)")
+        raise Error.new('if use need to pass in service_module and call service_module.assembly_ref(name)')
         #        [assembly,ServiceModule.assembly_ref(module_name,name)]
       end
     end

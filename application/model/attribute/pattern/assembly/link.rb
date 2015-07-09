@@ -65,7 +65,7 @@ module DTK; class Attribute::Pattern
 
       def self.determine_dep_and_antec_components(target_attr_pattern,source_attr_pattern)
         unless target_cmp = target_attr_pattern.component_instance()
-          raise Error.new("Unexpected that target_attr_pattern.component() is nil")
+          raise Error.new('Unexpected that target_attr_pattern.component() is nil')
         end
         source_cmp = source_attr_pattern.component_instance()
 

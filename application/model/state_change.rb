@@ -15,7 +15,7 @@ module DTK
       pending_changes.each do |ch|
         node_id = ch[:node][:id]
         node = ndx_ret[node_id] ||= {node_id: node_id, node_name: ch[:node][:display_name], node_changes: [], ndx_cmp_changes: {}}
-        if ch[:type] == "create_node"
+        if ch[:type] == 'create_node'
           node[:node_changes] << {name: ret_display_name(ch)}
         else
           cmp_id = ch[:component][:id]
@@ -57,9 +57,9 @@ module DTK
       node_name = flat_pending_ch[:node][:display_name]
       suffix =
         case type
-         when "create_node"
+         when 'create_node'
           node_name
-         when "install_component", "update_implementation"
+         when 'install_component', 'update_implementation'
           cmp_name = flat_pending_ch[:component][:display_name]
           "#{node_name}:#{cmp_name}"
          else

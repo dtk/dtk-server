@@ -44,9 +44,9 @@ module DTK; class Attribute
 
     def self.update_attribute_values_aux(type,attr_mh,update_deltas,opts={})
       case type
-        when "OutputArrayAppend"
+        when 'OutputArrayAppend'
           update_attribute_values_array_append(attr_mh,update_deltas,opts)
-        when "OutputPartial"
+        when 'OutputPartial'
           update_attribute_values_partial(attr_mh,update_deltas,opts)
         else
           update_attribute_values_simple(attr_mh,update_deltas,opts)

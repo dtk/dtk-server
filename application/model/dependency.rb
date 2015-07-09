@@ -23,8 +23,8 @@ module DTK
 
     # if this has simple filter, meaning test on same node as dependency then return it, normalizing to convert strings into symbols
     def simple_filter_triplet?
-      if filter = (self[:search_pattern]||{})[":filter".to_sym]
-        if self[:type] == "component" && filter.size == 3
+      if filter = (self[:search_pattern]||{})[':filter'.to_sym]
+        if self[:type] == 'component' && filter.size == 3
           logical_rel_string = filter[0]
           field_string = filter[1]
           if SimpleFilterRelationsToS.include?(logical_rel_string) && field_string =~ /^:/

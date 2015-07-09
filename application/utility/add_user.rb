@@ -5,13 +5,13 @@ require File.expand_path('common', File.dirname(__FILE__))
 options = {}
 OptionParser.new do |opts|
    #   opts.banner = "Usage: add_user.rb USERNAME [EC2-REGION] [--create-private [MODULE_SEED_LIST]]"
-   opts.banner = "Usage: add_user.rb USERNAME [EC2-REGION] [--password PASSWORD] [-f PARAM-FILE]"
+   opts.banner = 'Usage: add_user.rb USERNAME [EC2-REGION] [--password PASSWORD] [-f PARAM-FILE]'
 
   # Define the options, and what they do
   opts.on( '-p', '--password PASSWORD', "User's password") do |pw|
     options[:password] = pw
   end
-  opts.on( '-f', '--param-file PARAM-FILE', "File with parameters") do |path|
+  opts.on( '-f', '--param-file PARAM-FILE', 'File with parameters') do |path|
     require 'yaml'
     param_hash =
       begin

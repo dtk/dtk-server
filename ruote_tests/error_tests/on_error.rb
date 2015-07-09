@@ -17,8 +17,8 @@ class ErrorParticipant
   include Ruote::LocalParticipant
 
   def consume(_workitem)
-    puts "error"
-    raise "Houston, something is wrong"
+    puts 'error'
+    raise 'Houston, something is wrong'
   end
 end
 
@@ -26,7 +26,7 @@ class ErrorHandlerParticipant
   include Ruote::LocalParticipant
 
   def consume(workitem)
-puts "error handler"
+puts 'error handler'
 # pp Engine.process(Wfid)
 error = workitem.error
 pp [error.class,error]

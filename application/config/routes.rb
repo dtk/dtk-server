@@ -4,14 +4,14 @@ r8_require('../../utils/internal/routes/routes')
 
 R8::ReactorRoute.draw do
   # USER
-  post 'user/process_login'      => "user#process_login"
-  get  'user/process_logout'     => "user#process_logout"
+  post 'user/process_login'      => 'user#process_login'
+  get  'user/process_logout'     => 'user#process_logout'
 
   # MESSAGES
-  get  'messages/retrieve'       => "messages#retrieve"
+  get  'messages/retrieve'       => 'messages#retrieve'
 
   # INTEGRATION
-  post  'integration/spin_tenant' => "integration#spin_tenant"
+  post  'integration/spin_tenant' => 'integration#spin_tenant'
 
   # ACCOUNT
   post  'account/set_password' => 'account#set_password'

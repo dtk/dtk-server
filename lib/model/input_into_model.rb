@@ -35,12 +35,12 @@ module XYZ
     end
 
     def is_foreign_key_attr?(attr)
-      attr.is_a?(ForeignKeyAttr) || (attr.is_a?(String) && attr[0,1] == "*")
+      attr.is_a?(ForeignKeyAttr) || (attr.is_a?(String) && attr[0,1] == '*')
     end
 
     def foreign_key_attr_form(attr)
       return attr if attr.is_a?(ForeignKeyAttr)
-      ForeignKeyAttr.new(attr[0,1] == "*" ? attr[1,attr.size-1] : attr)
+      ForeignKeyAttr.new(attr[0,1] == '*' ? attr[1,attr.size-1] : attr)
     end
 
     class ForeignKeyAttr
@@ -59,10 +59,10 @@ module XYZ
       end
     end
 
-    def remove_fks_and_return_fks!(obj,fks,opts={},path="")
+    def remove_fks_and_return_fks!(obj,fks,opts={},path='')
       obj.each_pair do |k,v|
         if v.is_a?(Hash)
-    remove_fks_and_return_fks!(v,fks,opts,path + "/" + k.to_s)
+    remove_fks_and_return_fks!(v,fks,opts,path + '/' + k.to_s)
         elsif v.is_a?(Array)
     next
         elsif is_foreign_key_attr?(k)
@@ -76,7 +76,7 @@ module XYZ
 
     def insert_fks_back_in_hash!(hash,fks)
       fks.each do |string_path,fk_info|
-        path = string_path.split("/")
+        path = string_path.split('/')
         path.shift if path.first.empty?
         assign = fk_info.inject({}) do |h,(fk_attr,v)|
           h.merge("*#{fk_attr.attribute}" => v)
@@ -169,7 +169,7 @@ module XYZ
       elsif  uri_x =~ %r{^/(.+)/(.+$)}
          relation_type_string = $1
          ref = $2
-         stripped_uri = ""
+         stripped_uri = ''
       else
         # TODO: double check that everything that works heer is fine;being no op seems to work fine when uri_x is "" because it is referencing top level object like aproject
         # TODO: raise Error
@@ -190,14 +190,14 @@ module XYZ
         end
       end
       return prefix_matches[0] + stripped_uri if prefix_matches.size == 1
-      raise Error.new("not handling case where not exact, but or more prfix matches") if prefix_matches.size  > 1
+      raise Error.new('not handling case where not exact, but or more prfix matches') if prefix_matches.size  > 1
       # if container_uri is non null then uri_x can be wrt container_uri and this is assumed to be the case if reach here
       return container_uri + uri_x if container_uri
       raise Error
     end
 
     def fks_have_common_base(x,y)
-      x =~ Regexp.new("^" + y + "-[0-9]+$") || y =~ Regexp.new("^" + x + "-[0-9]+$")
+      x =~ Regexp.new('^' + y + '-[0-9]+$') || y =~ Regexp.new('^' + x + '-[0-9]+$')
     end
   end
 end

@@ -84,7 +84,7 @@ module DTK; class AssemblyModule
         end
       end
       unless ancestor_branch = branch.get_ancestor_branch?()
-        raise Error.new("Cannot find ancestor branch")
+        raise Error.new('Cannot find ancestor branch')
       end
       branch_name = branch[:branch]
       ancestor_branch.merge_changes_and_update_model?(component_module,branch_name,opts)
@@ -176,7 +176,7 @@ module DTK; class AssemblyModule
                  [:eq,:node_node_id,nil],
                  [:eq,:component_type,cmp_template.get_field?(:component_type)]]
       }
-      Model.get_obj(cmp_template.model_handle(),sp_hash) || raise(Error.new("Unexpected that branch_cmp_template is nil"))
+      Model.get_obj(cmp_template.model_handle(),sp_hash) || raise(Error.new('Unexpected that branch_cmp_template is nil'))
     end
 
     def get_applicable_component_instances(component_module,_opts={})

@@ -41,7 +41,7 @@ module DTK
 
       rows = get_objs(sp_hash)
       unless match = GetBasicInfo.find_match(rows,opts)
-        raise Error.new("Unexpected that there is no info associated with module")
+        raise Error.new('Unexpected that there is no info associated with module')
       end
       match
     end
@@ -90,21 +90,21 @@ module DTK
     #
 
     def local_and_remote_versions(client_rsa_pub_key = nil, opts={})
-      Log.error("TODO: see if namespace treatment must be updated")
+      Log.error('TODO: see if namespace treatment must be updated')
       module_name, remote_versions = nil, []
 
       # get local versions list
       local_versions = get_objs(cols: [:version_info]).map do |r|
         v = r[:module_branch].version()
-        v.nil? ? "CURRENT" : v
+        v.nil? ? 'CURRENT' : v
       end
       # get all remote modules versions, and take only versions for current component module name
       info = self.class.info(model_handle(), id(), opts)
       module_name = info[:remote_repos].first[:repo_name].gsub(/\*/,'').strip() unless info[:remote_repos].empty?
-      remote_versions = self.class.list_remotes(model_handle, client_rsa_pub_key).select{|r|r[:display_name]==module_name}.collect{|v_remote| ModuleBranch.version_from_version_field(v_remote[:versions])}.map!{|v| v.nil? ? "CURRENT" : v} if module_name
+      remote_versions = self.class.list_remotes(model_handle, client_rsa_pub_key).select{|r|r[:display_name]==module_name}.collect{|v_remote| ModuleBranch.version_from_version_field(v_remote[:versions])}.map!{|v| v.nil? ? 'CURRENT' : v} if module_name
 
-      local_hash  = {namespace: "local", versions: local_versions.flatten}
-      remote_hash = {namespace: "remote", versions: remote_versions}
+      local_hash  = {namespace: 'local', versions: local_versions.flatten}
+      remote_hash = {namespace: 'remote', versions: remote_versions}
 
       versions = [local_hash]
       versions << remote_hash unless remote_versions.empty?
@@ -149,7 +149,7 @@ module DTK
       repos = get_repos()
 
       unless repos.size == 1
-        raise Error.new("unexpected that number of matching repos is not equal to 1")
+        raise Error.new('unexpected that number of matching repos is not equal to 1')
       end
 
       return repos.first()
@@ -202,7 +202,7 @@ module DTK
       ret = nil
       # raw_module_rows should have morea than 1 row and should agree on all fields aside from :repo_remote
       if raw_module_rows.empty?()
-        raise Error.new("Unexepected that raw_module_rows is empty")
+        raise Error.new('Unexepected that raw_module_rows is empty')
       end
       namespace = (opts[:filter]||{})[:remote_namespace]
 
@@ -232,7 +232,7 @@ module DTK
     include ModuleMixins::GetBranchClassMixin
 
     def component_type
-      Log.info_pp(["#TODO: ModuleBranch::Location: deprecate for this being in ModuleBranch::Location local params",caller[0..4]])
+      Log.info_pp(['#TODO: ModuleBranch::Location: deprecate for this being in ModuleBranch::Location local params',caller[0..4]])
       case module_type()
        when :service_module
         :service_module
@@ -256,7 +256,7 @@ module DTK
     def name_to_id(model_handle,name_or_full_module_name,namespace=nil)
       namespace_x, name = Namespace.full_module_name_parts?(name_or_full_module_name)
       unless namespace ||= namespace_x
-        raise ErrorUsage.new("Cannot find namespace!")
+        raise ErrorUsage.new('Cannot find namespace!')
       end
 
       namespace_obj = Namespace.find_by_name(model_handle.createMH(:namespace), namespace)
@@ -311,7 +311,7 @@ module DTK
         # we switch to ascending order
         response.each_with_index do |e,i|
           display_name = (e[:repo_remote]||{})[:display_name]
-          prefix = ( i == 0 ? "*" : " ")
+          prefix = ( i == 0 ? '*' : ' ')
           namespaces << { repo_name: "#{prefix} #{display_name}" }
         end
       end
@@ -321,7 +321,7 @@ module DTK
       response = ModuleUtils::ListMethod.aggregate_detail(response,project_idh,model_type(),Opts.new(include_versions: true))
 
       ret = response.first || {}
-      ret[:versions] = "CURRENT" unless ret[:versions]
+      ret[:versions] = 'CURRENT' unless ret[:versions]
       ret.delete_if { |k,_v| [:repo,:module_branch,:repo_remote].include?(k) }
       # [Haris] Due to join condition with module.branch we can have situations where we have many versions
       # of module with same remote branch, with 'uniq' we iron that out
@@ -419,7 +419,7 @@ module DTK
       return match, repo_user
     end
 
-    DefaultAccessRights = "RW+"
+    DefaultAccessRights = 'RW+'
 
     def remove_user_direct_access(model_handle, username)
       repo_user = RepoUser.get_matching_repo_user(model_handle.createMH(:repo_user),username: username)

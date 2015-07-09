@@ -204,13 +204,13 @@ unless RUBY_VERSION =~ /^1\.9/ then ::Hash
     class OrderedHash < ::Hash
       def pretty_print(q)
         #      q.group(0, "#<OrderedHash", "}>") {
-        q.group(0,"","}") do
+        q.group(0,'','}') do
           #        q.breakable " "
-          q.text "{"
+          q.text '{'
           q.group(1) do
             q.seplist(self) do|pair|
               q.pp pair.first
-              q.text "=>"
+              q.text '=>'
               q.pp pair.last
             end
           end

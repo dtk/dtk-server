@@ -717,7 +717,7 @@ Style/SpaceInsideRangeLiteral:
 # Offense count: 1
 # Cop supports --auto-correct.
 Style/SpaceInsideStringInterpolation:
-  Enabled: false
+  Enabled: true
 
 # Offense count: 3
 # Cop supports --auto-correct.
@@ -728,34 +728,12 @@ Style/SpecialGlobalVars:
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle, SupportedStyles.
 Style/StringLiterals:
-  Enabled: false
+  Enabled: true
 
 # Offense count: 60
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle, SupportedStyles.
 Style/StringLiteralsInInterpolation:
-  Enabled: false
-
-# Offense count: 1
-# Cop supports --auto-correct.
-Style/SymbolLiteral:
-  Enabled: true
-
-# Offense count: 248
-# Cop supports --auto-correct.
-# Configuration parameters: IgnoredMethods.
-Style/SymbolProc:
-  Enabled: true
-
-# Offense count: 6811
-# Cop supports --auto-correct.
-Style/Tab:
-  Enabled: true
-
-# Offense count: 413
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, SupportedStyles.
-Style/TrailingBlankLines:
   Enabled: true
 
 # Offense count: 305

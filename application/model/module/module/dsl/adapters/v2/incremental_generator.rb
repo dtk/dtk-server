@@ -54,7 +54,7 @@ module DTK; class ModuleDSL; class V2
       def type(data_type,semantic_type)
         ret = data_type
         if semantic_type
-          unless semantic_type.is_a?(Hash) && semantic_type.size == 1 && semantic_type.keys.first == ":array"
+          unless semantic_type.is_a?(Hash) && semantic_type.size == 1 && semantic_type.keys.first == ':array'
             Log.error("Ignoring because unexpected semantic type (#{semantic_type})")
           else
             ret = "array(#{semantic_type.values.first})"
@@ -73,7 +73,7 @@ module DTK; class ModuleDSL; class V2
         ref = aug_link_def.required(:link_type)
         link_def_links = aug_link_def.required(:link_def_links)
         if link_def_links.empty?
-          raise Error.new("Unexpected that link_def_links is empty")
+          raise Error.new('Unexpected that link_def_links is empty')
         end
         opts_choice = {}
         if single_choice = (link_def_links.size == 1)
@@ -139,9 +139,9 @@ module DTK; class ModuleDSL; class V2
         input_attr,input_is_remote = mapping_attribute(:input,am,remote_cmp_type)
         output_attr,output_is_remote = mapping_attribute(:output,am,remote_cmp_type)
         if (!input_is_remote) && (!output_is_remote)
-          raise Error.new("Cannot determine attribute mapping direction; both do not match remote component type")
+          raise Error.new('Cannot determine attribute mapping direction; both do not match remote component type')
         elsif input_is_remote && output_is_remote
-          raise Error.new("Cannot determine attribute mapping direction; both match remote component type")
+          raise Error.new('Cannot determine attribute mapping direction; both match remote component type')
         elsif (!input_is_remote) && output_is_remote
           "$#{output_attr} -> #{input_attr}"
         else #input_is_remote and (!output_is_remote)

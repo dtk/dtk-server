@@ -5,7 +5,7 @@ r8_require('../../utils/performance_service')
 module DTK
   class ActionsetController < Controller
     def process(*route)
-      route_key = route[0..1].join("/")
+      route_key = route[0..1].join('/')
       action_set_params = route[2..route.size-1]||[]
       model_name = route[0].to_sym
 
@@ -24,16 +24,16 @@ module DTK
         respond(e, 403)
       end
 
-      unless route.first == "user"
+      unless route.first == 'user'
         unless logged_in?
           unless R8::Config[:session][:cookie][:disabled]
-            if request.cookies["dtk-user-info"]
+            if request.cookies['dtk-user-info']
               # Log.debug "Session cookie is beeing used to revive this session"
 
               # using cookie to take session information
               # composed data is consistent form user_id, expire timestamp, and tenant id
               # URL encoding is transfering + sign to ' ', so we correct that via gsub
-              cookie_data = Base64.decode64(request.cookies["dtk-user-info"].gsub(' ','+'))
+              cookie_data = Base64.decode64(request.cookies['dtk-user-info'].gsub(' ','+'))
               composed_data = ::AESCrypt.decrypt(cookie_data, ENCRYPTION_SALT, ENCRYPTION_SALT)
 
               user_id, time_integer, c = composed_data.split('_')
@@ -115,11 +115,11 @@ module DTK
       PerformanceService.log("REQUEST_PARAMS=#{request.params.to_json}")
       if rest_request?
         unless (action_set||[]).size == 1
-          raise Error.new("If rest response action set must just have one element")
+          raise Error.new('If rest response action set must just have one element')
         end
-        PerformanceService.start("PERF_OPERATION_DUR")
+        PerformanceService.start('PERF_OPERATION_DUR')
         run_rest_action(action_set.first,parent_model_name)
-        PerformanceService.end("PERF_OPERATION_DUR")
+        PerformanceService.end('PERF_OPERATION_DUR')
         return
       end
 
@@ -127,7 +127,7 @@ module DTK
 
       # Execute each of the actions in the action_set and set the returned content
       (action_set||[]).each do |action|
-        model,method = action[:route].split("/")
+        model,method = action[:route].split('/')
         method ||= :index
         action_namespace = "#{R8::Config[:application_name]}_#{model}_#{method}".to_sym
         result = call_action(action,parent_model_name)
@@ -167,7 +167,7 @@ module DTK
     end
 
     def run_rest_action(action,parent_model_name=nil)
-      model, method = action[:route].split("/")
+      model, method = action[:route].split('/')
       method ||= :index
       result = nil
       begin
@@ -197,7 +197,7 @@ module DTK
     end
 
     def call_action(action,parent_model_name=nil)
-      model,method = action[:route].split("/")
+      model,method = action[:route].split('/')
       controller_class = XYZ.const_get("#{model.capitalize}Controller")
       method ||= :index
       if rest_request?()
@@ -240,8 +240,8 @@ module DTK
         raw_pair = [el.keys.first,el.values.first]
         [:eq] +  raw_pair.map{|x| x == :parent_id ?  parent_id_field_name : x}
       end
-      {"search" => {
-          "search_pattern" => {
+      {'search' => {
+          'search_pattern' => {
             relation: model_name,
             filter: filter
           }
@@ -291,11 +291,11 @@ module DTK
     # TODO: lets finally kill off the xyz and move route loading into some sort of initialize or route setup call
     # enter the routes defined in config into Ramaze
 
-    Ramaze::Route["route_to_actionset"] = lambda do |path, _request|
-      if path =~ Regexp.new("^/xyz") and not path =~ Regexp.new("^/xyz/devtest")
-        path.gsub(Regexp.new("^/xyz"),"/xyz/actionset/process")
-      elsif path =~ Regexp.new("^/rest")
-        path.gsub(Regexp.new("^/rest"),"/xyz/actionset/process")
+    Ramaze::Route['route_to_actionset'] = lambda do |path, _request|
+      if path =~ Regexp.new('^/xyz') and not path =~ Regexp.new('^/xyz/devtest')
+        path.gsub(Regexp.new('^/xyz'),'/xyz/actionset/process')
+      elsif path =~ Regexp.new('^/rest')
+        path.gsub(Regexp.new('^/rest'),'/xyz/actionset/process')
       end
     end
   end

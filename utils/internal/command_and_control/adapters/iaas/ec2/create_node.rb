@@ -24,7 +24,7 @@ module DTK; module CommandAndControlAdapter
           single_run_responses.first
         else
           #TODO: just finds first error now
-          if first_error = single_run_responses.find{|r|r[:status] == "failed"}
+          if first_error = single_run_responses.find{|r|r[:status] == 'failed'}
             first_error
           else
             #assuming all ok responses are the same
@@ -61,14 +61,14 @@ module DTK; module CommandAndControlAdapter
           end
           if create_node
             response = create_ec2_instance()
-            if response[:status] == "failed"
+            if response[:status] == 'failed'
               return response
             end
 
             instance_id = response[:id]
             state = response[:state]
             updated_external_ref = external_ref.merge(              instance_id: instance_id,
-              type: "ec2_instance",
+              type: 'ec2_instance',
               size: flavor_id)
 
             Log.info("#{node_print_form()} with ec2 instance id #{instance_id}; waiting for it to be available")
@@ -77,15 +77,15 @@ module DTK; module CommandAndControlAdapter
               type: Node::Type.new_type_when_create_node(base_node),
               is_deployed: true,
               # TODO: better unify these below
-              operational_status: "starting",
-              admin_op_status: "pending"
+              operational_status: 'starting',
+              admin_op_status: 'pending'
             }
             Ec2.update_node!(node,node_update_hash)
           end
 
           process_addresses__first_boot?(node)
 
-          {status: "succeeded",
+          {status: 'succeeded',
             node: {
               external_ref: external_ref
             }
@@ -114,14 +114,14 @@ module DTK; module CommandAndControlAdapter
 
           begin
             response = conn.server_create(create_options)
-            response[:status] ||= "succeeded"
+            response[:status] ||= 'succeeded'
            rescue => e
             # append region to error message
             region = target.get_region() if target
             e.message << ". Region: '#{region}'." if region
 
             Log.error_pp([e,e.backtrace[0..10]])
-            return {status: "failed", error_object: e}
+            return {status: 'failed', error_object: e}
           end
           response
         end
@@ -146,7 +146,7 @@ module DTK; module CommandAndControlAdapter
           end
 
           def update_tags!
-            merge!(tags: {"Name" => ec2_name_tag()})
+            merge!(tags: {'Name' => ec2_name_tag()})
           end
 
           def update_key_name
@@ -175,7 +175,7 @@ module DTK; module CommandAndControlAdapter
             end
 
             unless iaas_properties = @target[:iaas_properties]
-              Log.error_pp(["Unexpected that @target does not have :iaas_properties",@target])
+              Log.error_pp(['Unexpected that @target does not have :iaas_properties',@target])
               return
             end
 
@@ -184,7 +184,7 @@ module DTK; module CommandAndControlAdapter
             end
 
             unless subnet = iaas_properties[:subnet]
-              Log.error_pp(["Unexpected that @target does not have :iaas_properties",@target])
+              Log.error_pp(['Unexpected that @target does not have :iaas_properties',@target])
               return
             end
 
@@ -242,7 +242,7 @@ module DTK; module CommandAndControlAdapter
               if node_ref =~ /^base_node_link--([^:]+):/
                 $1
               else
-                Log.error_pp(["Unexepected that cannot determine assembly name for node",@node])
+                Log.error_pp(['Unexepected that cannot determine assembly name for node',@node])
               end
             end
           end

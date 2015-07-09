@@ -20,7 +20,7 @@ module DTK
 
       def self.parse_and_reify(parse_input)
         unless parse_input.type?(Hash)
-          raise parse_input.error("Node Bindings section has an illegal form: ?input")
+          raise parse_input.error('Node Bindings section has an illegal form: ?input')
         end
 
         if parse_input.input.empty?

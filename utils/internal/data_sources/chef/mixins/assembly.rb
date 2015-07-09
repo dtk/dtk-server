@@ -4,8 +4,8 @@ module XYZ
       def normalize_attribute_values(target,attr_val_hash,node,metadata=nil)
         attr_val_hash.each do |key,value|
           if value.is_a?(Hash)
-            if value.key?("external_ref")
-              target[key] = process_external_ref(value["external_ref"],node,metadata)
+            if value.key?('external_ref')
+              target[key] = process_external_ref(value['external_ref'],node,metadata)
             else
               # TODO: this can be a Mash; should probably convert before hand to avoid patch below
               target[key] ||= HashObject::AutoViv.create()
@@ -29,7 +29,7 @@ module XYZ
 
       def process_external_ref(external_ref,node=nil,metadata=nil)
         return nil unless external_ref
-        case external_ref["type"].to_sym
+        case external_ref['type'].to_sym
         when :chef_search
           process_external_ref__chef_search(external_ref)
         when :chef_search_singleton
@@ -39,38 +39,38 @@ module XYZ
         when :chef_attribute
           process_external_ref__chef_attribute(external_ref,node,metadata)
         else
-          raise Error.new("not implemented yet")
+          raise Error.new('not implemented yet')
         end
       end
 
       private
 
       def process_external_ref__chef_search(external_ref)
-        if external_ref["ref"] =~ %r{^search\[(.+)\]\[(.+)\]$}
+        if external_ref['ref'] =~ %r{^search\[(.+)\]\[(.+)\]$}
           object_type = $1.to_sym
           search_pattern = $2
           return Search.get_list(object_type,search_pattern).map(&:name)
         end
-        raise Error.new("search_pattern (#{external_ref["ref"]}) has incorrect syntax")
+        raise Error.new("search_pattern (#{external_ref['ref']}) has incorrect syntax")
       end
 
       def process_external_ref__chef_node(external_ref)
-        return $1 if external_ref["ref"] =~ %r{^node_name\[(.+)\]$}
-        raise Error.new("external reference (#{external_ref["ref"]}) has incorrect syntax")
+        return $1 if external_ref['ref'] =~ %r{^node_name\[(.+)\]$}
+        raise Error.new("external reference (#{external_ref['ref']}) has incorrect syntax")
       end
 
       def process_external_ref__chef_attribute(external_ref,node,metadata)
-        if external_ref["ref"] =~ %r{^node\[(.+)\]$}
-          path = $1.split("][")
+        if external_ref['ref'] =~ %r{^node\[(.+)\]$}
+          path = $1.split('][')
           if node
             return NodeState.nested_value(node[path[0]],path[1..path.size-1])
           else
-            return nil unless metadata && metadata["attributes"]
-            attr_info = metadata["attributes"][path.join("/")]
-            return attr_info ? attr_info["default"] : nil
+            return nil unless metadata && metadata['attributes']
+            attr_info = metadata['attributes'][path.join('/')]
+            return attr_info ? attr_info['default'] : nil
           end
         end
-        raise Error.new("external reference (#{external_ref["ref"]}) has incorrect syntax")
+        raise Error.new("external reference (#{external_ref['ref']}) has incorrect syntax")
       end
 
       module NodeState

@@ -14,7 +14,7 @@ module DTK; class ConfigAgent
         content = RepoManager.get_file_content(modulefile_name,implementation: impl_obj)
         content.split("\n").each do |el|
           el.chomp!()
-          next if (el.start_with?("#") || el.empty?)
+          next if (el.start_with?('#') || el.empty?)
           el.gsub!(/\'/,'')
 
           next unless match = el.match(/(\S+)\s(.+)/)
@@ -34,7 +34,7 @@ module DTK; class ConfigAgent
       def self.contains_modulefile?(impl_obj)
        depth = 2
        RepoManager.ls_r(depth,{file_only: true},impl_obj).find do |f|
-          f.eql?("Modulefile") || f.eql?("#{Puppet.provider_folder()}/Modulefile")
+          f.eql?('Modulefile') || f.eql?("#{Puppet.provider_folder()}/Modulefile")
         end
       end
 

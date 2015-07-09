@@ -6,7 +6,7 @@ module DTK
       # check constraints
       unless opts[:no_constraint_checking]
         if constraints = workspace_cmp.get_constraints!(update_object: true)
-          target = {"target_node_id_handle" => node.id_handle_with_auth_info()}
+          target = {'target_node_id_handle' => node.id_handle_with_auth_info()}
           constraint_opts = {raise_error_when_error_violation: true, update_object: workspace_cmp}
           constraints.evaluate_given_target(target,constraint_opts)
         end
@@ -46,7 +46,7 @@ module DTK
     end
 
     def source_clone_info_opts
-      raise Error.new("component#source_clone_info_opts is deprecated")
+      raise Error.new('component#source_clone_info_opts is deprecated')
       {ret_new_obj_with_cols: [:id,:implementation_id,:component_type,:version,:ancestor_id]}
     end
 
@@ -78,7 +78,7 @@ module DTK
          value_derived: sap_val,
          is_port: true,
          hidden: true,
-         data_type: "json")
+         data_type: 'json')
 
       attr_mh = component_idh.createMH(model_name: :attribute, parent_model_name: :component)
       sap_attr_idh = self.class.create_from_row(attr_mh,sap_attr_row, convert: true)
@@ -98,16 +98,16 @@ module DTK
 
     # TODO: some of these are redendant of whats in sap_dependency_X like "sap__l4" and "sap__db"
     BasicTypeInfo = {
-      "database" => {
+      'database' => {
         sap_dependency: :sap_dependency_database,
-        sap: "sap__db",
-        sap_config: "sap_config__db",
-        sap_config_fn_name: "sap_config_conn__db",
-        parent_attr: "sap__l4",
-        parent_fn_name: "sap_conn__l4__db",
-        semantic_type: {":array" => "sap__db"}, #TODO: need the  => {"application" => service qualification)
-        semantic_type_summary: "sap__db",
-        description: "DB access point",
+        sap: 'sap__db',
+        sap_config: 'sap_config__db',
+        sap_config_fn_name: 'sap_config_conn__db',
+        parent_attr: 'sap__l4',
+        parent_fn_name: 'sap_conn__l4__db',
+        semantic_type: {':array' => 'sap__db'}, #TODO: need the  => {"application" => service qualification)
+        semantic_type_summary: 'sap__db',
+        description: 'DB access point',
         fn: lambda{|sap_config,par|compute_sap_db(sap_config,par)}
       }
     }

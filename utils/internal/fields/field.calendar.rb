@@ -15,13 +15,13 @@ class Fieldcalendar < Fieldbase
 
   def set_includes(r8_view_ref)
     super(r8_view_ref)
-    r8_view_ref.add_to_js_require("http://yui.yahooapis.com/2.7.0/build/element/element.js")
-    r8_view_ref.add_to_js_require("http://yui.yahooapis.com/2.7.0/build/button/button.js")
-    r8_view_ref.add_to_js_require("http://yui.yahooapis.com/2.7.0/build/calendar/calendar.js")
-    r8_view_ref.add_to_js_require("http://yui.yahooapis.com/2.7.0/build/container/container.js")
+    r8_view_ref.add_to_js_require('http://yui.yahooapis.com/2.7.0/build/element/element.js')
+    r8_view_ref.add_to_js_require('http://yui.yahooapis.com/2.7.0/build/button/button.js')
+    r8_view_ref.add_to_js_require('http://yui.yahooapis.com/2.7.0/build/calendar/calendar.js')
+    r8_view_ref.add_to_js_require('http://yui.yahooapis.com/2.7.0/build/container/container.js')
 
-    r8_view_ref.add_to_css_require("http://yui.yahooapis.com/2.7.0/build/container/assets/skins/sam/container.css");
-     r8_view_ref.add_to_css_require("core/css/yui-cal.css");
+    r8_view_ref.add_to_css_require('http://yui.yahooapis.com/2.7.0/build/container/assets/skins/sam/container.css');
+     r8_view_ref.add_to_css_require('core/css/yui-cal.css');
   end
 
   # This returns the Edit View of a input of type calendar in HTML form
@@ -41,7 +41,7 @@ class Fieldcalendar < Fieldbase
   # protected function
   def get_field_edit_rtpl
     case @cal_type
-      when"basic"
+      when'basic'
         return self.get_basic_edit_rtpl
     end
   end

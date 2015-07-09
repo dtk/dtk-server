@@ -32,7 +32,7 @@ module DTK; class ModuleDSL
 
     def component_fragment(full_hash,component_template)
       unless component_type = component_template && component_template.get_field?(:component_type)
-        raise Error.new("The method merge_fragment needs the context :component_template")
+        raise Error.new('The method merge_fragment needs the context :component_template')
       end
       component().get_fragment(full_hash,component_type)
     end

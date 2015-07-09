@@ -60,7 +60,7 @@ module DTK; class Clone
           # first index is the associated node instance, second is teh component template
           pntr = ndx_to_find_cmp_ref_id[ndx_node_stub_to_instance[old_par_id]] ||= {}
           if pntr[m[:display_name]]
-            Log.error("unexpected that multiple matches when creating ndx_to_find_cmp_ref_id")
+            Log.error('unexpected that multiple matches when creating ndx_to_find_cmp_ref_id')
           end
           pntr[m[:display_name]] = m[:id]
 
@@ -87,7 +87,7 @@ module DTK; class Clone
         ret = Model.create_from_select(component_mh,field_set_to_copy,select_ds,create_override_attrs,aug_create_opts(create_opts))
         ret.each do |r|
           component_ref_id = ndx_to_find_cmp_ref_id[r[:node_node_id]][r[:display_name]]
-          raise Error.new("Variable component_ref_id should not be null") if component_ref_id.nil?
+          raise Error.new('Variable component_ref_id should not be null') if component_ref_id.nil?
           r.merge!(component_ref_id: component_ref_id, component_template_id: r[:ancestor_id])
         end
         ret

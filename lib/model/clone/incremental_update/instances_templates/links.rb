@@ -10,7 +10,7 @@ module DTK; class Clone; class IncrementalUpdate
 
       def instance_model_handle
         unless link = first()
-          raise Error.new("Should not be called if this is empty")
+          raise Error.new('Should not be called if this is empty')
         end
         link.instance_model_handle()
       end

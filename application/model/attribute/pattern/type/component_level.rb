@@ -7,7 +7,7 @@ module DTK; class Attribute
         new_attr = create_attributes([cmp_template]).first
         if update_dsl = opts[:update_dsl]
           unless module_branch = update_dsl[:module_branch]
-            raise Error.new("If update_dsl is specified then module_branch must be provided")
+            raise Error.new('If update_dsl is specified then module_branch must be provided')
           end
           module_branch.incrementally_update_component_dsl([new_attr],component_template: cmp_template)
         end

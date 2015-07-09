@@ -14,11 +14,11 @@ module DTK
         end
 
         unless domain = ::R8::Config[:dns][:r8][:domain]
-          raise Error.new("Server config variable (dns.r8.domain) has not been set")
+          raise Error.new('Server config variable (dns.r8.domain) has not been set')
         end
 
         unless tenant = ::R8::Config[:dns][:r8][:tenant_name]
-          raise Error.new("Server config variable (dns.r8.tenant_name) has not been set")
+          raise Error.new('Server config variable (dns.r8.tenant_name) has not been set')
         end
 
         dns_info = {
@@ -42,7 +42,7 @@ module DTK
         end
         ret
       end
-      DefaultFormat = "${node}.${assembly}.${user}.${tenant}.${domain}"
+      DefaultFormat = '${node}.${assembly}.${user}.${tenant}.${domain}'
 
       def aug_node_when_dns_enabled?
         if aug_node = get_aug_node_when_dns_info?()
@@ -70,7 +70,7 @@ module DTK
           # TODO: dont think dns enabledment works with node groups
           @node.update_obj!(:display_name,:type)
           unless @node[:type] == 'target_ref'
-            Log.error_pp(["unexpected that that following node not tied to assembly",@node])
+            Log.error_pp(['unexpected that that following node not tied to assembly',@node])
           end
         end
 

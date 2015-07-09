@@ -78,7 +78,7 @@ module Ramaze::Helper
 
     def rest_request?
       # TODO: needs to be fixed up; issue is different envs (linux versus windows) give different values for request.env["REQUEST_URI"]
-      @rest_request ||= (request.env["REQUEST_URI"] =~ Regexp.new("/rest/") ? true : nil)
+      @rest_request ||= (request.env['REQUEST_URI'] =~ Regexp.new('/rest/') ? true : nil)
     end
 
     def ajax_request?
@@ -86,13 +86,13 @@ module Ramaze::Helper
     end
 
     def ajax_request_aux?
-      route_pieces = request.env["PATH_INFO"].split("/")
+      route_pieces = request.env['PATH_INFO'].split('/')
       last_piece = route_pieces[route_pieces.size-1]
       return true if /\.json/.match(last_piece)
 
-      return true if request.params["iframe_upload"] == "1"
+      return true if request.params['iframe_upload'] == '1'
 
-      return (request.env["HTTP_X_REQUESTED_WITH"] && request.env["HTTP_X_REQUESTED_WITH"]=="XMLHttpRequest" )
+      return (request.env['HTTP_X_REQUESTED_WITH'] && request.env['HTTP_X_REQUESTED_WITH']=='XMLHttpRequest' )
     end
   end
 end

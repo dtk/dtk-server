@@ -39,13 +39,13 @@ module DTK; module WorkflowAdapter
 
       def self.get_from_workitem(workitem)
         params = workitem.params
-        task_id = params["task_id"]
-        top_task_id = params["top_task_id"]
+        task_id = params['task_id']
+        top_task_id = params['top_task_id']
         opts = {}
-        if task_type = params["task_type"]
+        if task_type = params['task_type']
           opts.merge!(task_type: task_type)
         end
-        if override_node_id = params["override_node_id"]
+        if override_node_id = params['override_node_id']
           opts.merge!(override_node_id: override_node_id)
         end
         task_key(task_id,top_task_id,opts)

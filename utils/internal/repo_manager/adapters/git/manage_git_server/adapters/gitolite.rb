@@ -29,7 +29,7 @@ module DTK
       def delete_all_server_repos
         admin_repo.pull_changes()
         repo_config_files().each do |repo_conf|
-          repo_name = repo_conf.gsub(/\.conf/,"")
+          repo_name = repo_conf.gsub(/\.conf/,'')
           delete_server_repo(repo_name,do_not_pull_changes: true,do_not_push_changes: true)
         end
         admin_repo.push_changes()
@@ -49,7 +49,7 @@ module DTK
 
       def delete_bare_repo?(repo_name)
         unless R8::Config[:git_server_on_dtk_server]
-          Log.error("Not implemented yet: delete_bare_repo when R8::Config[:git_server_on_dtk_server] is not true")
+          Log.error('Not implemented yet: delete_bare_repo when R8::Config[:git_server_on_dtk_server] is not true')
           return
         end
         begin
@@ -94,11 +94,11 @@ module DTK
       end
 
       def remove_user_rights_in_repos(username,repo_names)
-        set_user_rights_in_repos(username,repo_names,"")
+        set_user_rights_in_repos(username,repo_names,'')
       end
 
       # access_rights="" means remove access rights
-      def set_user_rights_in_repos(username,repo_names,access_rights="R")
+      def set_user_rights_in_repos(username,repo_names,access_rights='R')
         repo_names = [repo_names] unless repo_names.is_a?(Array)
         updated_repos = []
 
@@ -141,7 +141,7 @@ module DTK
       end
 
       def admin_repo
-        @admin_repo ||= @git_class.create(admin_directory(),"master",absolute_path: true)
+        @admin_repo ||= @git_class.create(admin_directory(),'master',absolute_path: true)
       end
 
       def repo_user_public_key_relative_path(username)
@@ -149,7 +149,7 @@ module DTK
       end
 
       def repo_user_public_key_dir_relative_path
-        "keydir"
+        'keydir'
       end
 
       def repo_users_public_keys
@@ -158,13 +158,13 @@ module DTK
       end
 
       def ret_files_under_path(base_path)
-        paths = admin_repo.ls_r(base_path.split("/").size+1, files_only: true)
+        paths = admin_repo.ls_r(base_path.split('/').size+1, files_only: true)
         match_regexp = Regexp.new("^#{base_path}")
         paths.select{|p| p =~ match_regexp}
       end
 
       def repo_config_relative_path
-        "conf/repo-configs"
+        'conf/repo-configs'
       end
 
       def repo_config_directory
@@ -173,11 +173,11 @@ module DTK
 
       def repo_config_files
         return [] unless File.directory?(repo_config_directory)
-        Dir.chdir(repo_config_directory){Dir["*.conf"]}
+        Dir.chdir(repo_config_directory){Dir['*.conf']}
       end
 
       def repos_having_config_files
-        repo_config_files().map{|fn|fn.gsub(/\.conf/,"")}
+        repo_config_files().map{|fn|fn.gsub(/\.conf/,'')}
       end
 
       def repo_config_file_relative_path(repo_name)

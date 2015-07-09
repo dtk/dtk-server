@@ -12,9 +12,9 @@ module DTK; class Dependency
       source_attr_pattern = opts[:source_attr_pattern]
       target_attr_pattern = opts[:target_attr_pattern ]
       unless source_attr_pattern &&  target_attr_pattern
-        raise Error.new("Not implemented: when opts does not include :source_attr_pattern and :target_attr_pattern")
+        raise Error.new('Not implemented: when opts does not include :source_attr_pattern and :target_attr_pattern')
       end
-      external_or_internal = (target_attr_pattern.node().id() == source_attr_pattern.node().id() ? "internal" : "external")
+      external_or_internal = (target_attr_pattern.node().id() == source_attr_pattern.node().id() ? 'internal' : 'external')
       aug_link_defs = cmp_template.get_augmented_link_defs()
       if link_def_link = matching_link_def_link?(aug_link_defs,external_or_internal,antec_cmp_template)
         unless link_def_link.matching_attribute_mapping?(target_attr_pattern,source_attr_pattern)
@@ -87,7 +87,7 @@ module DTK; class Dependency
         end
       end
       if matches.size > 1
-        raise Error.new("Not implemented when matching_augmented_link_def? finds more than 1 match")
+        raise Error.new('Not implemented when matching_augmented_link_def? finds more than 1 match')
       end
       matches.first
     end
@@ -95,12 +95,12 @@ module DTK; class Dependency
     def self.create_link_def_and_link(external_or_internal,cmp_template,antec_cmp_template,am_serialized_form)
       antec_cmp_type = antec_cmp_template[:component_type]
       serialized_link_def =
-        {"type" => antec_cmp_template.display_name_print_form(),
-        "required"=>true,
-        "possible_links"=>
+        {'type' => antec_cmp_template.display_name_print_form(),
+        'required'=>true,
+        'possible_links'=>
         [{antec_cmp_type=>
-           {"type"=>external_or_internal.to_s,
-             "attribute_mappings"=> [am_serialized_form]
+           {'type'=>external_or_internal.to_s,
+             'attribute_mappings'=> [am_serialized_form]
            }
          }]
       }
@@ -112,7 +112,7 @@ module DTK; class Dependency
     def self.incrementally_update_component_dsl?(cmp_template,aug_link_defs,opts={})
       if update_dsl = opts[:update_dsl]
         unless module_branch = update_dsl[:module_branch]
-          raise Error.new("If update_dsl is specified then module_branch must be provided")
+          raise Error.new('If update_dsl is specified then module_branch must be provided')
         end
         module_branch.incrementally_update_component_dsl(aug_link_defs,component_template: cmp_template)
       end

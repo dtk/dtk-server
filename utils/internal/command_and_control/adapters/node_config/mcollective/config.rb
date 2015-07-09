@@ -29,7 +29,7 @@ module DTK
           config_file_content = mcollective_config_file()
           begin
             # TODO: see if can pass args and not need to use tempfile
-            config_file = Tempfile.new("client.cfg")
+            config_file = Tempfile.new('client.cfg')
             config_file.write(config_file_content)
             config_file.close
             ret = ::MCollective::Client.new(config_file.path)

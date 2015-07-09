@@ -1,16 +1,16 @@
 module DTK
   module ServiceDSLCommonMixin
     Seperators = {
-      module_component: "::", #TODO: if this changes need to change ModCompGsub
-      component_version: ":",
-      component_port: "/",
-      assembly_node: "/",
-      node_component: "/",
-      component_link_def_ref: "/",
+      module_component: '::', #TODO: if this changes need to change ModCompGsub
+      component_version: ':',
+      component_port: '/',
+      assembly_node: '/',
+      node_component: '/',
+      component_link_def_ref: '/',
       title_before: '[',
       title_after: ']'
     }
-    ModCompInternalSep = "__" #TODO: if this changes need to chage ModCompGsub[:sub]
+    ModCompInternalSep = '__' #TODO: if this changes need to chage ModCompGsub[:sub]
     ModCompGsub = {
       pattern: /(^[^:]+)::/,
       sub: '\1__'

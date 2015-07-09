@@ -18,7 +18,7 @@ module DTK
         def initiate
           test_cmps = get_test_components_with_bindings()
           if test_cmps.empty?
-            @error = "Unable to execute tests. There are no links to test components!"
+            @error = 'Unable to execute tests. There are no links to test components!'
             raise ::DTK::ErrorUsage
           end
 
@@ -27,7 +27,7 @@ module DTK
           test_components = []
           test_cmps.each do |tc|
             node_names.each do |node|
-              if node[:name].split("::").last.split(":").first == tc[:node_name]
+              if node[:name].split('::').last.split(':').first == tc[:node_name]
                 out = tc.dup
                 out[:node_name] = node[:name]
                 out[:node_id] = node[:id]
@@ -182,8 +182,8 @@ module DTK
             linked_test_array.each do |linked_test|
               var_mappings_hash = linked_test.var_mappings_hash
               k, v = var_mappings_hash.first
-              related_test_attribute = v.map { |x| x.split(".").last }
-              attribute_names = k.map { |x| x.split(".").last }
+              related_test_attribute = v.map { |x| x.split('.').last }
+              attribute_names = k.map { |x| x.split('.').last }
               test_component = linked_test.test_component
               # TODO: more efficient to get in bulk outside of test_params loop
               sp_hash = {
@@ -224,7 +224,7 @@ module DTK
           unless test_components.empty?
             TestModule::VersionContextInfo.get_in_hash_form(test_components,@assembly_instance)
           else
-            Log.error("Unexpected that test_components is empty")
+            Log.error('Unexpected that test_components is empty')
             nil
           end
         end
@@ -244,12 +244,12 @@ module DTK
           ret = Model.get_objs(nodes.first.model_handle(:component),sp_hash).map do |r|
             r[:component_template].merge(node_node_id: r[:node_node_id], component_instance_id: r[:id])
           end
-          if components.nil? || components.empty? or !components.include? "/"
+          if components.nil? || components.empty? or !components.include? '/'
             return ret
           end
 
           cmp_node_names = components.map do |name_pairs|
-            if name_pairs.include? "/"
+            if name_pairs.include? '/'
               split = name_pairs.split('/')
                 if split.size == 2
                   {node_name: split[0],component_name: Component.display_name_from_user_friendly_name(split[1])}

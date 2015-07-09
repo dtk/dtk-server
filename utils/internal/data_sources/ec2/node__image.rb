@@ -6,7 +6,7 @@ module XYZ
         extend MonitoringItemsClassMixin
 
         definitions do
-          target[:type] = "image"
+          target[:type] = 'image'
           target[:is_deployed] = true
           target[:display_name] = source[:id]
           target[:external_ref] = fn(:external_ref,source[:id])
@@ -21,13 +21,13 @@ module XYZ
 
           source_complete_for target[:attribute]
           prefix = target[:attribute][:host_addresses_ipv4]
-          prefix[:display_name] = "host_addresses_ipv4"
+          prefix[:display_name] = 'host_addresses_ipv4'
           prefix[:is_port] = true
           prefix[:read_only] = true
           prefix[:dynamic] = true
-          prefix[:data_type] = "json"
-          prefix[:semantic_type] = {":array" => "host_address_ipv4"}
-          prefix[:semantic_type_summary] = "host_address_ipv4"
+          prefix[:data_type] = 'json'
+          prefix[:semantic_type] = {':array' => 'host_address_ipv4'}
+          prefix[:semantic_type_summary] = 'host_address_ipv4'
           prefix[:value_asserted] = [nil]
         end
         class << self
@@ -40,7 +40,7 @@ module XYZ
           end
 
           def external_ref(image_id)
-            {"type" => "ec2_image", "image_id" => image_id}
+            {'type' => 'ec2_image', 'image_id' => image_id}
           end
         end
       end

@@ -2,17 +2,17 @@ module DTK; class ServiceModule
   class AssemblyImport
     class V2 < self
       def self.assembly_iterate(service_module,hash_content,&block)
-        assembly_hash = (hash_content["assembly"]||{}).merge(Aux::hash_subset(hash_content,["name","description","workflow"]))
-        assembly_ref = service_module.assembly_ref(hash_content["name"])
+        assembly_hash = (hash_content['assembly']||{}).merge(Aux::hash_subset(hash_content,['name','description','workflow']))
+        assembly_ref = service_module.assembly_ref(hash_content['name'])
         assemblies_hash = {assembly_ref => assembly_hash}
-        node_bindings_hash = hash_content["node_bindings"]
+        node_bindings_hash = hash_content['node_bindings']
         block.call(assemblies_hash,node_bindings_hash)
       end
 
       def self.import_assembly_top(assembly_ref,assembly_hash,module_branch,module_name,opts={})
         ret = super(assembly_ref,assembly_hash,module_branch,module_name,opts)
         ret_assembly_hash = ret.values.first
-        ret_assembly_hash.merge!("task_template" => import_task_templates(assembly_hash))
+        ret_assembly_hash.merge!('task_template' => import_task_templates(assembly_hash))
         ret
       end
 
@@ -41,14 +41,14 @@ module DTK; class ServiceModule
           }
           pl_ref = PortLink.port_link_ref(port_link_ref_info)
           pl_hash = {
-            "input_id" => input_port_hash[:id],
-            "output_id" => output_port_hash[:id],
-            "assembly_id" => assembly_idh.get_id()
+            'input_id' => input_port_hash[:id],
+            'output_id' => output_port_hash[:id],
+            'assembly_id' => assembly_idh.get_id()
           }
           h.merge(pl_ref => pl_hash)
         end
         port_links.mark_as_complete(assembly_id: @existing_assembly_ids)
-        {assembly_ref => {"port_link" => port_links}}
+        {assembly_ref => {'port_link' => port_links}}
       end
 
       private
@@ -60,18 +60,18 @@ module DTK; class ServiceModule
         # TODO: just treating the default action
         # TODO: enhance to parse the workflow, such as checking all components in workflow
         # are defined
-        if workflow = assembly_hash["workflow"]
+        if workflow = assembly_hash['workflow']
           # its ok to delete from assembly_hash/workflow
-          if assembly_action = workflow.delete("assembly_action")
-            unless  assembly_action == "create"
+          if assembly_action = workflow.delete('assembly_action')
+            unless  assembly_action == 'create'
               raise ErrorUsage.new("Unexpected workflow task action (#{assembly_action})")
             end
           end
           task_template_ref = task_action = Task::Template.default_task_action()
           update = {
             task_template_ref => {
-              "task_action" => task_action,
-              "content" => workflow
+              'task_action' => task_action,
+              'content' => workflow
             }
           }
           ret.merge!(update)
@@ -80,7 +80,7 @@ module DTK; class ServiceModule
       end
 
       def self.pp_port_ref(port_ref)
-        ret = "#{port_ref[:node]}/#{port_ref[:component_type].gsub(/__/,"::")}"
+        ret = "#{port_ref[:node]}/#{port_ref[:component_type].gsub(/__/,'::')}"
         if title = port_ref[:title]
           ret << "[#{title}]"
         end
@@ -104,13 +104,13 @@ module DTK; class ServiceModule
       # returns Array with each element being Hash with keys :parsed_component_link, :base_cmp_name
       def self.parse_component_links(assembly_hash,_opts={})
         ret = []
-        (assembly_hash["nodes"]||{}).each_pair do |input_node_name,node_hash|
-          components = node_hash["components"]||[]
+        (assembly_hash['nodes']||{}).each_pair do |input_node_name,node_hash|
+          components = node_hash['components']||[]
           components = [components] unless components.is_a?(Array)
           components.each do |base_cmp|
             if base_cmp.is_a?(Hash)
               base_cmp_name = base_cmp.keys.first
-              (base_cmp.values.first["service_links"]||{}).each_pair do |link_def_type,targets|
+              (base_cmp.values.first['service_links']||{}).each_pair do |link_def_type,targets|
                 Array(targets).each do |target|
                   component_link_hash = {link_def_type => target}
                   parsed_component_link = PortRef.parse_component_link(input_node_name,base_cmp_name,component_link_hash)
@@ -128,10 +128,10 @@ module DTK; class ServiceModule
           merge_hash =
             if v.is_a?(String) then {node => v}
             elsif v.is_a?(Hash)
-              Log.error("Not implemented yet have node bindings with explicit properties")
+              Log.error('Not implemented yet have node bindings with explicit properties')
               {}
             else
-              raise ParsingError.new("Unexpected form of node binding",opts_file_path(opts))
+              raise ParsingError.new('Unexpected form of node binding',opts_file_path(opts))
             end
           h.merge(merge_hash)
         end
@@ -153,7 +153,7 @@ module DTK; class ServiceModule
       end
 
       def self.ret_attribute_overrides(cmp_input)
-        ret_component_hash(cmp_input)["attributes"]||{}
+        ret_component_hash(cmp_input)['attributes']||{}
       end
     end
   end

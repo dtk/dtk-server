@@ -39,7 +39,7 @@ module DTK; class Clone; class ChildContext
         # assuming the free nodes are interchangable; pick one for each match
         num_free = free_nodes.size
         if stub_nodes.find(&:is_node_group?)
-          raise Error.new("Not implemented: looking for free nodes with a node group")
+          raise Error.new('Not implemented: looking for free nodes with a node group')
         end
         num_needed = stub_nodes.size
         if num_free < num_needed

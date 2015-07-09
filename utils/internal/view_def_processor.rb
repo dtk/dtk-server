@@ -34,14 +34,14 @@ module XYZ
 
     def self.convert_to_display_view_def_form(cmp_attrs_objs)
       ret = ActiveSupport::OrderedHash.new()
-      ret[:action] = ""
+      ret[:action] = ''
       ret[:hidden_fields] = hidden_fields(:display,cmp_attrs_objs)
       ret[:field_groups] = field_groups(:display,cmp_attrs_objs[:attributes])
       ret
     end
     def self.convert_to_edit_view_def_form(cmp_attrs_objs)
       ret = ActiveSupport::OrderedHash.new()
-      ret[:action] = ""
+      ret[:action] = ''
       ret[:hidden_fields] = hidden_fields(:edit,cmp_attrs_objs)
       ret[:field_groups] = field_groups(:edit,cmp_attrs_objs[:attributes])
       ret
@@ -150,12 +150,12 @@ module XYZ
     end
 
     def self.convert_type(data_type)
-      TypeConvert[data_type]||"text"
+      TypeConvert[data_type]||'text'
     end
     TypeConvert = {
-      "string" => "text",
-      "json" => "hash",
-      "integer" => "integer"
+      'string' => 'text',
+      'json' => 'hash',
+      'integer' => 'integer'
     }
   end
 end

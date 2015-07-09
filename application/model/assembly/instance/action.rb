@@ -46,7 +46,7 @@ module DTK
         def process_data!(data,node_info)
           ndx_ret = {}
           data.each do |r|
-            next unless r[:state] == "LISTEN" || r[:protocol] == "udp"
+            next unless r[:state] == 'LISTEN' || r[:protocol] == 'udp'
             if r[:local] =~ /(^.+):([0-9]+$)/
               address = $1
               port = $2.to_i

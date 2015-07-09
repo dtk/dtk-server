@@ -38,7 +38,7 @@ module DTK
 
         def children_hash_form(level,model_name)
           unless @include_children
-            Log.error("children should not be called on object with @include_children set to false")
+            Log.error('children should not be called on object with @include_children set to false')
             return []
           end
           (@children[level]||{})[model_name]||[]

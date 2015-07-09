@@ -35,11 +35,11 @@ module DTK; class AttributeLink
     end
 
     def internal_hash_form(_opts={})
-      raise Error.new("Should not be called")
+      raise Error.new('Should not be called')
     end
 
     def value(_opts={})
-      raise Error.new("Should not be called")
+      raise Error.new('Should not be called')
     end
 
     private

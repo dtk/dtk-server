@@ -5,7 +5,7 @@ module DTK; class ConfigAgent; module Adapter
         def action_results(result,_action)
           data = data_field_in_results(result)
           unless data.is_a?(Hash)
-            Log.error_pp(["Unexpected that data field is not a hash:",data])
+            Log.error_pp(['Unexpected that data field is not a hash:',data])
             return nil
           end
           data[:results]

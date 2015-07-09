@@ -161,11 +161,11 @@ module DTK
 
     def info_about(about)
       case about
-       when "assembly-templates".to_sym
+       when 'assembly-templates'.to_sym
         mb_idhs = get_objs(cols: [:module_branches]).map{|r|r[:module_branch].id_handle()}
         opts = {
           filter: [:oneof, :module_branch_id,mb_idhs.map(&:get_id)],
-          detail_level: "nodes",
+          detail_level: 'nodes',
           no_module_prefix: true
         }
         if project = get_project()
@@ -282,7 +282,7 @@ module DTK
     # returns either parsing error object or nil
     def install__process_dsl(repo,module_branch,local,opts = {})
       unless local.version.nil?
-        raise Error.new("Not implemented yet ServiceModule#import__dsl with version not equal to nil")
+        raise Error.new('Not implemented yet ServiceModule#import__dsl with version not equal to nil')
       end
       response = update_model_from_dsl(module_branch.merge(repo: repo), opts) #repo added to avoid lookup in update_model_from_dsl
       response if ParsingError.is_error?(response)
@@ -326,7 +326,7 @@ module DTK
     def publish_preprocess_raise_error?(module_branch_obj)
       # unless get_field?(:dsl_parsed)
       unless module_branch_obj.dsl_parsed?()
-        raise ErrorUsage.new("Unable to publish module that has parsing errors. Please fix errors and try to publish again.")
+        raise ErrorUsage.new('Unable to publish module that has parsing errors. Please fix errors and try to publish again.')
       end
 
       # get module info for every component in an assembly in the service module

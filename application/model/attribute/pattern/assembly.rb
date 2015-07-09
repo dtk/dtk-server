@@ -21,7 +21,7 @@ module DTK; class Attribute
 
       class Simple
         def self.create(attr_term,_opts={})
-          tokens = attr_term.split("/")
+          tokens = attr_term.split('/')
           case tokens.size
             when 1
               Type::AssemblyLevel.new(t(:attribute,tokens[0]))

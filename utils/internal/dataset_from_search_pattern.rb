@@ -5,7 +5,7 @@ module XYZ
       class << self
         def create_dataset_from_search_object(search_object)
           search_pattern = search_object.search_pattern
-          raise Error.new("search pattern is nil") unless search_pattern
+          raise Error.new('search pattern is nil') unless search_pattern
           raise Error::NotImplemented.new("processing of search pattern of type #{search_pattern.class}") unless search_pattern.is_a?(SearchPatternSimple)
           relation_in_search_pattern = search_pattern.find_key(:relation)
           mh_in_search_pattern = search_object.model_handle.createMH(model_name: relation_in_search_pattern)
@@ -161,7 +161,7 @@ module XYZ
                   el_args[0].to_s.lit > el_args[1].to_s.lit
                  when :gte
                   el_args[0].to_s.lit >= el_args[1].to_s.lit
-                 when "match-prefix".to_sym
+                 when 'match-prefix'.to_sym
                   Sequel::SQL::StringExpression.like(el_args[0],"#{el_args[1]}%",case_insensitive: true)
                  when :regex
                   Sequel::SQL::StringExpression.like(el_args[0],Regexp.new(el_args[1]),case_insensitive: true)
@@ -224,7 +224,7 @@ module XYZ
               cols_to_add_remote = remote_col_info.map do |r|
                 qualified_col = r[:join_cond].values.first
                 # strip off model_name__ prefix and discard non matching prefixes
-                (qualified_col.to_s =~ Regexp.new("^(.+)__(.+)$")) ? ($1.to_sym == model_name ? $2.to_sym : nil) : qualified_col
+                (qualified_col.to_s =~ Regexp.new('^(.+)__(.+)$')) ? ($1.to_sym == model_name ? $2.to_sym : nil) : qualified_col
               end.compact
               cols_to_add = cols_to_add + cols_to_add_remote
             end

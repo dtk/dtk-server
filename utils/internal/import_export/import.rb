@@ -7,9 +7,9 @@ module DTK
 
     def modify_uri_with_user_name(uri,username)
       return uri unless username
-      if uri =~ Regexp.new("^(/[^/]+/[^/]+)(/.+$)")
+      if uri =~ Regexp.new('^(/[^/]+/[^/]+)(/.+$)')
         "#{$1}-#{username}#{$2}"
-      elsif uri =~ Regexp.new("^/[^/]+/[^/]+$")
+      elsif uri =~ Regexp.new('^/[^/]+/[^/]+$')
         "#{uri}-#{username}"
       else
         uri
@@ -27,10 +27,10 @@ module DTK
       username = CurrentSession.new.get_username()
       users_private_lib_name = "private-#{username}"
       hash_content = {
-        "library" => {
+        'library' => {
           users_private_lib_name => {
-            "display_name" => users_private_lib_name,
-            "implementation" => library_impl_hash
+            'display_name' => users_private_lib_name,
+            'implementation' => library_impl_hash
           }
         }
       }
@@ -123,36 +123,36 @@ module DTK
         r8meta[:files].each do |file|
           component_hash = YAML.load_file(file)
           repo, config_agent_type = (file =~ Regexp.new("([^/]+)/r8meta\.(.+)\.yml") && [$1,$2])
-          raise Error.new("bad config agent type") unless config_agent_type
+          raise Error.new('bad config agent type') unless config_agent_type
           component_hash.each do |local_cmp_type,v|
             cmp_ref = "#{config_agent_type}-#{local_cmp_type}"
             # TODO: right now; links defs just have internal
-            if link_defs = v.delete("link_defs")
+            if link_defs = v.delete('link_defs')
               parsed_link_def = LinkDef.parse_serialized_form_local(link_defs,config_agent_type,remote_link_defs)
-              (v["link_def"] ||= {}).merge!(parsed_link_def)
+              (v['link_def'] ||= {}).merge!(parsed_link_def)
             end
             # TODO: when link_defs have externa;l deprecate below
-            if ext_link_defs = v.delete("external_link_defs")
+            if ext_link_defs = v.delete('external_link_defs')
               # TODO: temp hack to put in type = "external"
               ext_link_defs.each do |ld|
-                (ld["possible_links"]||[]).each{|pl|pl.values.first["type"] = "external"}
+                (ld['possible_links']||[]).each{|pl|pl.values.first['type'] = 'external'}
               end
               parsed_link_def = LinkDef.parse_serialized_form_local(ext_link_defs,config_agent_type,remote_link_defs)
-              (v["link_def"] ||= {}).merge!(parsed_link_def)
+              (v['link_def'] ||= {}).merge!(parsed_link_def)
               # TODO: deprecate below
-              v["link_defs"] ||= {}
-              v["link_defs"]["external"] = ext_link_defs
+              v['link_defs'] ||= {}
+              v['link_defs']['external'] = ext_link_defs
             end
-            hash["library"][library_ref]["component"][cmp_ref] = v.merge("repo" => repo)
+            hash['library'][library_ref]['component'][cmp_ref] = v.merge('repo' => repo)
           end
         end
         # process the link defs for remote components
         remote_link_defs.each do |remote_cmp_type,remote_link_def|
           config_agent_type = remote_link_def.values.first.delete(:config_agent_type)
           remote_cmp_ref = "#{config_agent_type}-#{remote_cmp_type}"
-          cmp_pointer = hash["library"][library_ref]["component"][remote_cmp_ref]
+          cmp_pointer = hash['library'][library_ref]['component'][remote_cmp_ref]
           if cmp_pointer
-            (cmp_pointer["link_def"] ||= {}).merge!(remote_link_def)
+            (cmp_pointer['link_def'] ||= {}).merge!(remote_link_def)
           else
             Log.error("link def references a remote component (#{remote_cmp_ref}) that does not exist")
           end
@@ -170,21 +170,21 @@ module DTK
       def self.add_implementations!(hash,version,library_ref,base_dir,impl_name=nil)
         file_paths = []
         Dir.chdir(base_dir) do
-          pattern = impl_name ? "#{impl_name}/**/*" : "**/*"
+          pattern = impl_name ? "#{impl_name}/**/*" : '**/*'
           file_paths = Dir[pattern].select{|item|File.file?(item)}
         end
         return if file_paths.empty?
 
         indexed_file_paths = {}
         file_paths.each do |file_path|
-          dir = file_path =~ Regexp.new("(^[^/]+)/") ? $1 : nil
+          dir = file_path =~ Regexp.new('(^[^/]+)/') ? $1 : nil
           (indexed_file_paths[dir] ||= []) << file_path
         end
         impl_repos = indexed_file_paths.keys
         return unless impl_repos
 
         # add implementation objects to hash
-        implementation_hash = hash["library"][library_ref]["implementation"] ||= {}
+        implementation_hash = hash['library'][library_ref]['implementation'] ||= {}
         impl_repos.each do |repo|
           next unless file_paths = indexed_file_paths[repo]
 
@@ -198,33 +198,33 @@ module DTK
           cmp_file_assets = file_paths.inject({}) do |h,file_path_x|
             # if repo is null then want ful file path; otherwise we have repo per repo and
             # want to strip off leading repo
-            file_path = repo ? file_path_x.gsub(Regexp.new("^#{repo}/"),"") : file_path_x
-            file_name = file_path =~ Regexp.new("/([^/]+$)") ? $1 : file_path
+            file_path = repo ? file_path_x.gsub(Regexp.new("^#{repo}/"),'') : file_path_x
+            file_name = file_path =~ Regexp.new('/([^/]+$)') ? $1 : file_path
             file_asset = {
               type: type[:file_type],
               display_name: file_name,
               file_name: file_name,
               path: file_path
             }
-            file_asset_ref = file_path.gsub(Regexp.new("/"),"_") #removing "/" since they confuse processing
+            file_asset_ref = file_path.gsub(Regexp.new('/'),'_') #removing "/" since they confuse processing
             h.merge(file_asset_ref => file_asset)
           end
           # TDOO: simple way of getting implementation
-          impl_name = repo.gsub(/^puppet[-_]/,"").gsub(/^chef[-_]/,"")
+          impl_name = repo.gsub(/^puppet[-_]/,'').gsub(/^chef[-_]/,'')
           implementation_hash[repo] = {
-            "display_name" => impl_name,
-            "type" => type[:implementation_type],
-            "version" => version,
-            "repo" => repo,
-            "file_asset" => cmp_file_assets
+            'display_name' => impl_name,
+            'type' => type[:implementation_type],
+            'version' => version,
+            'repo' => repo,
+            'file_asset' => cmp_file_assets
           }
         end
 
         # add foreign key to components that reference an implementation
-        components_hash = hash["library"][library_ref]["component"]
+        components_hash = hash['library'][library_ref]['component']
         components_hash.each_value do |cmp_info|
-          next unless repo = cmp_info["repo"]
-          cmp_info["*implementation_id"] = "/library/#{library_ref}/implementation/#{repo}"
+          next unless repo = cmp_info['repo']
+          cmp_info['*implementation_id'] = "/library/#{library_ref}/implementation/#{repo}"
         end
       end
 
@@ -232,42 +232,42 @@ module DTK
       def self.ret_library_implementation_hash(module_dir,module_name,config_agent_type)
         file_paths = []
         Dir.chdir(module_dir) do
-          pattern = "**/*"
+          pattern = '**/*'
           file_paths = Dir[pattern].select{|item|File.file?(item)}
         end
 
         file_type = "#{config_agent_type}_file"
         file_assets = file_paths.inject({}) do |h,file_path|
-          file_name = file_path =~ Regexp.new("/([^/]+$)") ? $1 : file_path
+          file_name = file_path =~ Regexp.new('/([^/]+$)') ? $1 : file_path
           file_asset = {
             type: file_type,
             display_name: file_name,
             file_name: file_name,
             path: file_path
           }
-          file_asset_ref = file_path.gsub(Regexp.new("/"),"_") #removing "/" since they confuse processing
+          file_asset_ref = file_path.gsub(Regexp.new('/'),'_') #removing "/" since they confuse processing
           h.merge(file_asset_ref => file_asset)
         end
-        repo = module_dir.split("/").last
+        repo = module_dir.split('/').last
         {repo => {
-            "display_name" => repo,
-            "parse_state" => "unparsed",
-            "module_name" => module_name,
-            "type" => config_agent_type.to_s,
-            "repo" => repo,
-            "file_asset" => file_assets
+            'display_name' => repo,
+            'parse_state' => 'unparsed',
+            'module_name' => module_name,
+            'type' => config_agent_type.to_s,
+            'repo' => repo,
+            'file_asset' => file_assets
           }
         }
       end
 
       class ImportChefType < HashObject
         def initialize
-          super(file_type: "chef_file", implementation_type: "chef_cookbook")
+          super(file_type: 'chef_file', implementation_type: 'chef_cookbook')
         end
       end
       class ImportPuppetType < HashObject
         def initialize
-          super(file_type: "puppet_file", implementation_type: "puppet_module")
+          super(file_type: 'puppet_file', implementation_type: 'puppet_module')
         end
       end
     end

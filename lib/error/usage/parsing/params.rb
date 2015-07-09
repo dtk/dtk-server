@@ -64,7 +64,7 @@ module DTK; class ErrorUsage
           $1
         end
       end
-      FreeVariable = Regexp.new("(\\?[0-9a-z_]+)")
+      FreeVariable = Regexp.new('(\\?[0-9a-z_]+)')
 
       private
 

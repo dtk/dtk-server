@@ -62,7 +62,7 @@ module DTK; class Repo
       private
 
       def path(r)
-        r["path"]||r[:path]
+        r['path']||r[:path]
       end
 
       def contains_a_dsl_filename?(files_info,opts={})

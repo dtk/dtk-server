@@ -7,34 +7,34 @@ module XYZ
         end
         DefaultChecks =
           [
-           {description: "ping",
-           display_name: "check_ping",
+           {description: 'ping',
+           display_name: 'check_ping',
            enabled: true
           },
 
-           {description: "Free Space All Disks",
-            display_name: "check_all_disks",
+           {description: 'Free Space All Disks',
+            display_name: 'check_all_disks',
             enabled: true
           },
-           {description: "Free Memory",
-            display_name: "check_mem",
+           {description: 'Free Memory',
+            display_name: 'check_mem',
             enabled: true
           },
 
-           {description: "Iostat",
-            display_name: "check_iostat",
+           {description: 'Iostat',
+            display_name: 'check_iostat',
             enabled: true
           },
-           {description: "Memory Profiler",
-            display_name: "check_memory_profiler",
+           {description: 'Memory Profiler',
+            display_name: 'check_memory_profiler',
             enabled: true
          },
-           {description: "SSH",
-            display_name: "check_ssh",
+           {description: 'SSH',
+            display_name: 'check_ssh',
             enabled: true
           },
-           {description: "Processes",
-            display_name: "check_local_procs",
+           {description: 'Processes',
+            display_name: 'check_local_procs',
             enabled: true
           }
           ]

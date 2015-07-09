@@ -10,7 +10,7 @@ module XYZ
     module ViewMetaProcessorInternals
       def self.create_from_layout_def__edit(layout_def)
         ret = ActiveSupport::OrderedHash.new()
-        ret[:action] = ""
+        ret[:action] = ''
         ret[:hidden_fields] = hidden_fields(:edit)
         ret[:field_groups] = field_groups(layout_def)
         ret

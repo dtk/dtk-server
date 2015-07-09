@@ -54,15 +54,15 @@ module DTK; class Task; class Status
       else
         ea = task[:executable_action]
         case task[:executable_action_type]
-          when "ConfigNode"
+          when 'ConfigNode'
             el.merge!(Task::Action::ConfigNode.status(ea,opts)) if ea
-          when "CreateNode"
+          when 'CreateNode'
             el.merge!(Task::Action::CreateNode.status(ea,opts)) if ea
-          when "PowerOnNode"
+          when 'PowerOnNode'
             el.merge!(Task::Action::PowerOnNode.status(ea,opts)) if ea
-          when "InstallAgent"
+          when 'InstallAgent'
           el.merge!(Task::Action::InstallAgent.status(ea,opts)) if ea
-          when "ExecuteSmoketest"
+          when 'ExecuteSmoketest'
             el.merge!(Task::Action::ExecuteSmoketest.status(ea,opts)) if ea
           end
       end
@@ -98,8 +98,8 @@ module DTK; class Task; class Status
           error[:message] = temp
         end
 
-        error_msg = (error[:component] ? "Component #{error[:component].gsub("__","::")}: " : "")
-        error_msg << (error[:message]||"error")
+        error_msg = (error[:component] ? "Component #{error[:component].gsub('__','::')}: " : '')
+        error_msg << (error[:message]||'error')
         ret[:message] << error_msg
         ret[:type] = error[:type]
       end
@@ -152,7 +152,7 @@ module DTK; class Task; class Status
 
         type
       else
-        task[:display_name]|| "top"
+        task[:display_name]|| 'top'
       end
     end
   end

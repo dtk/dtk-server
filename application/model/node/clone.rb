@@ -2,8 +2,8 @@ module DTK; class Node
   module Clone; module Mixin
     def add_model_specific_override_attrs!(override_attrs,_target_obj)
       override_attrs[:type] ||= Type::Node.staged
-      override_attrs[:ref] ||= SQL::ColRef.concat("s-",:ref)
-      override_attrs[:display_name] ||= SQL::ColRef.concat{|o|["s-",:display_name,o.case{[[{ref_num: nil},""],o.concat("-",:ref_num)]}]}
+      override_attrs[:ref] ||= SQL::ColRef.concat('s-',:ref)
+      override_attrs[:display_name] ||= SQL::ColRef.concat{|o|['s-',:display_name,o.case{[[{ref_num: nil},''],o.concat('-',:ref_num)]}]}
     end
 
     def source_clone_info_opts
@@ -103,9 +103,9 @@ module DTK; class Node
           ndx = "#{link_def[:id]}--#{remote_component_type}"
           unless ndx_ret[ndx]
             if link_def[:component_component_id] == component_id
-              ndx_ret[ndx] = r.merge(direction: "input")
+              ndx_ret[ndx] = r.merge(direction: 'input')
             elsif remote_component_type == component_type
-              ndx_ret[ndx] = r.merge(direction: "output")
+              ndx_ret[ndx] = r.merge(direction: 'output')
             end
           end
         end
@@ -130,13 +130,13 @@ module DTK; class Node
             create_rows << possible_port
           end
 
-          if r[:direction] == "input"
+          if r[:direction] == 'input'
             remote_cmp_type = r[:link_def_link][:remote_component_type]
             # TODO: need to see if this needs enhancement to treat components that take titles
             if remote_cmp = ndx_cmps[remote_cmp_type]
               remote_node = ndx_nodes[remote_cmp[:node_node_id]]
               # returns true if new port taht is added
-              possible_port = Port.ret_port_create_hash(link_def,remote_node,remote_cmp,direction: "output")
+              possible_port = Port.ret_port_create_hash(link_def,remote_node,remote_cmp,direction: 'output')
               if @existing_ports.add_if_does_not_exists?(possible_port)
                 create_rows << possible_port
               end
@@ -152,7 +152,7 @@ module DTK; class Node
         ret = []
         ndx_remote_cmp_types = {}
         node_link_defs_info.each do |r|
-          if r[:direction] == "input"
+          if r[:direction] == 'input'
             cmp_type = r[:link_def_link][:remote_component_type]
             ndx_remote_cmp_types[cmp_type] ||= true
           end
@@ -209,7 +209,7 @@ module DTK; class Node
         # TODO: more efficient way to do this; instead include all needed columns in :returning_sql_cols above
         port_mh = @node.child_model_handle(:port)
         external_port_idhs = ports.map do |port_hash|
-          port_mh.createIDH(id: port_hash[:id]) if ["component_internal_external","component_external"].include?(port_hash[:type])
+          port_mh.createIDH(id: port_hash[:id]) if ['component_internal_external','component_external'].include?(port_hash[:type])
         end.compact
 
         unless external_port_idhs.empty?

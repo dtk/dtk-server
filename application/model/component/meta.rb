@@ -18,7 +18,7 @@ module DTK
       column :updated, :boolean, default: false
 
       # columns related to type
-      column :type, :varchar, size: 15, default: "template" # instance | composite | template
+      column :type, :varchar, size: 15, default: 'template' # instance | composite | template
       # top level in component type hiererarchy
       column :basic_type, :varchar, size: 25 #service, application, language, application, extension, database, user
       # leaf type in component type
@@ -370,13 +370,13 @@ module DTK
           {
             model_name: :state_change,
             # TODO: avoiding use of :component_component
-            sequel_def: lambda{|ds|ds.where(state: "pending").join(:attribute__attribute,id: :attribute_id).group_and_count(:attribute__component_component_id)},
+            sequel_def: lambda{|ds|ds.where(state: 'pending').join(:attribute__attribute,id: :attribute_id).group_and_count(:attribute__component_component_id)},
             join_type: :left_outer,
             join_cond: {component_component_id: :component__id}
           },
           {
             model_name: :state_change,
-            sequel_def: lambda{|ds|ds.where(state: "pending").group_and_count(:component_id)},
+            sequel_def: lambda{|ds|ds.where(state: 'pending').group_and_count(:component_id)},
             join_type: :left_outer,
             join_cond: {component_id: :component__id}
             }
@@ -386,7 +386,7 @@ module DTK
         remote_dependencies:           [{
              model_name: :attribute,
              convert: true,
-             filter: [:and, [:eq, :semantic_type_summary, "sap_config__db"]],
+             filter: [:and, [:eq, :semantic_type_summary, 'sap_config__db']],
              join_type: :inner,
              join_cond: {component_component_id: q(:component,:id)},
              cols: [:id,:display_name,:value_asserted,:value_derived,id(:component)]
@@ -402,7 +402,7 @@ module DTK
                                           model_name: :attribute,
                                           alias: :parent_attribute,
                                           convert: true,
-                                          filter: [:and, [:eq,:display_name,"sap__l4"]],
+                                          filter: [:and, [:eq,:display_name,'sap__l4']],
                                           join_type: :inner,
                                           join_cond: {component_component_id: q(:parent_component,:id)},
                                           cols: [:id,:display_name,:value_asserted,:value_derived,id(:component)]

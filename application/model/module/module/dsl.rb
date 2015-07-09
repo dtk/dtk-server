@@ -34,7 +34,7 @@ module DTK
       # problems within transaction after do update; transaction is aborted if any errors found
       Model.Transaction do
         update_opts = {
-          override_attrs: {"module_branch_id" => @module_branch.id()},
+          override_attrs: {'module_branch_id' => @module_branch.id()},
           namespace: component_module().module_namespace()
         }
         update_opts.merge!(version: opts[:version]) if opts[:version]
@@ -158,14 +158,14 @@ module DTK
 
     def ref_integrity_snapshot
       unless @ref_integrity_snapshot
-        raise Error.new("Unexpected that @ref_integrity_snapshot is nil")
+        raise Error.new('Unexpected that @ref_integrity_snapshot is nil')
       end
       @ref_integrity_snapshot
     end
 
     def component_module
       unless @component_module
-        raise Error.new("Unexpected that @component_module is nil")
+        raise Error.new('Unexpected that @component_module is nil')
       end
       @component_module
     end
@@ -221,7 +221,7 @@ module DTK
 
     def self.get_dsl_file_raw_content_and_info(impl_obj,dsl_integer_version=nil,format_type=nil)
       unless dsl_filename = contains_dsl_file?(impl_obj,dsl_integer_version,format_type)
-        raise Error.new("Cannot find DSL file")
+        raise Error.new('Cannot find DSL file')
       end
       parsed_name = parse_dsl_filename(dsl_filename,dsl_integer_version)
       format_type ||= parsed_name[:format_type]
@@ -246,7 +246,7 @@ module DTK
     end
 
     def integer_version(version_specific_input_hash)
-      version = version_specific_input_hash["dsl_version"]
+      version = version_specific_input_hash['dsl_version']
       unless integer_version = (version ? VersionToVersionInteger[version.to_s] : VersionIntegerWhenVersionMissing)
         raise ErrorUsage.new("Illegal version (#{version}) found in meta file")
       end
@@ -254,9 +254,9 @@ module DTK
     end
     VersionIntegerWhenVersionMissing = 1
     VersionToVersionInteger = {
-      "0.9"   => 2,
-      "0.9.1" => 3,
-      "1.0.0" => 4
+      '0.9'   => 2,
+      '0.9.1' => 3,
+      '1.0.0' => 4
     }
     VersionIntegerToVersion = VersionToVersionInteger.inject({}) do |h,(v,vi)|
       h.merge(vi=>v)
@@ -271,8 +271,8 @@ module DTK
 
     VersionsTreated = DSLFilenameRegexp.keys
     ExtensionToType = {
-      "yaml" => :yaml,
-      "json" => :json
+      'yaml' => :yaml,
+      'json' => :json
     }
     TypeToExtension = ExtensionToType.inject({}){|h,(k,v)|h.merge(v => k)}
 
@@ -295,11 +295,11 @@ module DTK
       private
 
       def adapter_type
-        "ModuleDSL"
+        'ModuleDSL'
       end
 
       def adapter_dir
-        "dsl"
+        'dsl'
       end
 
       def Transaction(*args,&block)
@@ -326,13 +326,13 @@ module DTK
       # TODO: deprecate <config_agent_type>
       def ret_config_agent_type(input_hash)
         return input_hash if ParsingError.is_error?(input_hash)
-        if type = input_hash["module_type"]
+        if type = input_hash['module_type']
           case type
-           when "puppet_module" then ConfigAgent::Type::Symbol.puppet
+           when 'puppet_module' then ConfigAgent::Type::Symbol.puppet
            # Part of code to handle new serverspec type of module
-           when "serverspec" then ConfigAgent::Type::Symbol.serverspec
-           when "test" then ConfigAgent::Type::Symbol.test
-           when "node_module" then ConfigAgent::Type::Symbol.node_module
+           when 'serverspec' then ConfigAgent::Type::Symbol.serverspec
+           when 'test' then ConfigAgent::Type::Symbol.test
+           when 'node_module' then ConfigAgent::Type::Symbol.node_module
            else
              ParsingError.new("Unexpected module_type (#{type})")
           end

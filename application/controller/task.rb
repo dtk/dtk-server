@@ -27,23 +27,23 @@ module XYZ
 
       # process raw scope
       scope =
-        if scope_x["target_ids"]
+        if scope_x['target_ids']
           # TODO: stub
-        elsif scope_x["project_id"]
+        elsif scope_x['project_id']
           sp_hash = {
             cols: [:id],
-            filter: [:and, :project_project_id, scope_x["project_id"].to_i]
+            filter: [:and, :project_project_id, scope_x['project_id'].to_i]
            }
           target_ids = Model.get_objs(model_handle(:target),sp_hash).map{|r|r[:id]}
           {target_ids: target_ids}
         else
           # TODO: stub if scope by node_id
-          Log.info("node_id scope given (#{scope_x["node_id"]})") if scope_x["node_id"]
+          Log.info("node_id scope given (#{scope_x['node_id']})") if scope_x['node_id']
           target_ids = Model.get_objs(model_handle(:target),cols: [:id]).map{|r|r[:id]}
           {target_ids: target_ids}
         end
-      return Error.new("Only treating scope by target ids") unless target_scope = scope[:target_ids]
-      return Error.new("Only treating scope given by single target") unless target_scope.size == 1
+      return Error.new('Only treating scope by target ids') unless target_scope = scope[:target_ids]
+      return Error.new('Only treating scope given by single target') unless target_scope.size == 1
 
       target_idh = id_handle(target_scope.first,:target)
       pending_changes = StateChange.flat_list_pending_changes(target_idh)

@@ -222,7 +222,7 @@ module DTK
       assembly = ret_assembly_instance_object()
       unless top_task_id = ret_request_params(:task_id)
         unless top_task = get_most_recent_executing_task([:eq,:assembly_id,assembly.id()])
-          raise ErrorUsage.new("No running tasks found")
+          raise ErrorUsage.new('No running tasks found')
         end
         top_task_id = top_task.id()
       end
@@ -258,7 +258,7 @@ module DTK
 
             # TODO: support
             if opts[:create]
-              raise ErrorUsage.new("create-workflow is not yet supported")
+              raise ErrorUsage.new('create-workflow is not yet supported')
             end
 
             AssemblyModule::Service.prepare_for_edit(assembly,modification_type,opts)
@@ -274,7 +274,7 @@ module DTK
       module_type, module_name = ret_non_null_request_params(:module_type,:module_name)
 
       unless module_type.to_sym == :component_module
-        raise Error.new("promote_module_changes only treats component_module type")
+        raise Error.new('promote_module_changes only treats component_module type')
       end
 
       namespace = AssemblyModule::Component.validate_component_module_ret_namespace(assembly,module_name)
@@ -288,7 +288,7 @@ module DTK
       module_type, module_name = ret_non_null_request_params(:module_type,:module_name)
 
       unless module_type.to_sym == :component_module
-        raise Error.new("promote_module_changes only treats component_module type")
+        raise Error.new('promote_module_changes only treats component_module type')
       end
 
       namespace = AssemblyModule::Component.validate_component_module_ret_namespace(assembly,module_name)
@@ -356,9 +356,9 @@ module DTK
         if find_possible
           assembly.list_connections__possible()
         elsif find_missing
-          raise Error.new("Deprecated")
+          raise Error.new('Deprecated')
         else
-          raise Error.new("Deprecated")
+          raise Error.new('Deprecated')
         end
       rest_ok_response ret
     end
@@ -591,7 +591,7 @@ module DTK
         error_data = {
           violations: violation_table.uniq
         }
-        error_msg = "Assembly cannot be executed because of violations"
+        error_msg = 'Assembly cannot be executed because of violations'
         #        return rest_notok_response(:code => :assembly_violations, :message => error_msg, :data => error_data)
       end
 
@@ -676,7 +676,7 @@ module DTK
       end
 
       if assembly.are_nodes_running_in_task?()
-        raise ErrorUsage, "Task is already running on requested nodes. Please wait until task is complete"
+        raise ErrorUsage, 'Task is already running on requested nodes. Please wait until task is complete'
       end
 
       opts = ret_params_hash(:commit_msg,:task_action,:task_params)
@@ -687,7 +687,7 @@ module DTK
       task.save!()
 
       # TODO: clean up this part since this is doing more than creating task
-      nodes_to_start =  (opts[:ret_nodes]||[]).reject{|n|n[:admin_op_status] == "running"}
+      nodes_to_start =  (opts[:ret_nodes]||[]).reject{|n|n[:admin_op_status] == 'running'}
       unless nodes_to_start.empty?
         CreateThread.defer_with_session(CurrentSession.new.user_object(), Ramaze::Current::session) do
           # invoking command to start the nodes
@@ -779,7 +779,7 @@ module DTK
       node_pattern = ret_params_hash(:node_identifier)
 
       nodes = ret_matching_nodes(assembly, node_pattern)
-      nodes, is_valid, error_msg = assembly.nodes_are_up?(nodes, :running, what: "Tail")
+      nodes, is_valid, error_msg = assembly.nodes_are_up?(nodes, :running, what: 'Tail')
 
       unless is_valid
         Log.info(error_msg)
@@ -798,7 +798,7 @@ module DTK
       node_pattern = (np ? { node_identifier: np } : {})
 
       nodes = ret_matching_nodes(assembly, node_pattern)
-      nodes, is_valid, error_msg = assembly.nodes_are_up?(nodes, :running, what: "Grep")
+      nodes, is_valid, error_msg = assembly.nodes_are_up?(nodes, :running, what: 'Grep')
 
       unless is_valid
         Log.info(error_msg)
@@ -832,7 +832,7 @@ module DTK
       node_pattern = ret_params_hash(:node_id)
 
       nodes = ret_matching_nodes(assembly, node_pattern)
-      nodes, is_valid, error_msg = assembly.nodes_are_up?(nodes, :running, {what: "Get ps"})
+      nodes, is_valid, error_msg = assembly.nodes_are_up?(nodes, :running, {what: 'Get ps'})
 
       unless is_valid
         Log.info(error_msg)
@@ -857,7 +857,7 @@ module DTK
         # need to put sanity checking in block under initiate_action_with_nodes
         if target_nodes_option = ret_request_params(:target_nodes)
           unless target_nodes_option.empty?
-            raise ErrorUsage.new("Not implemented when target nodes option given")
+            raise ErrorUsage.new('Not implemented when target nodes option given')
           end
         end
 
@@ -884,7 +884,7 @@ module DTK
 
       # Filter only running nodes for this assembly
       nodes = assembly.get_leaf_nodes(cols: [:id,:display_name,:type,:external_ref,:hostname_external_ref, :admin_op_status])
-      nodes, is_valid, error_msg = assembly.nodes_are_up?(nodes, :running, what: "Serverspec tests")
+      nodes, is_valid, error_msg = assembly.nodes_are_up?(nodes, :running, what: 'Serverspec tests')
 
       unless is_valid
         Log.info(error_msg)
@@ -894,7 +894,7 @@ module DTK
       # Filter node if execute tests is started from the specific node
       nodes.select! { |node| node[:id] == node_id.to_i } unless node_id.nil?
       if nodes.empty?
-        return rest_ok_response(errors: "Unable to execute tests. Provided node is not valid!")
+        return rest_ok_response(errors: 'Unable to execute tests. Provided node is not valid!')
       end
 
       params = {nodes: nodes, component: component, agent_action: :execute_tests, project: project, assembly_instance: assembly}

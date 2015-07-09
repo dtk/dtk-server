@@ -21,7 +21,7 @@ module DTK
         if object.nil?
           true
         elsif object.is_a?(String)
-          object.casecmp("master").eql?(0) || object.casecmp("default").eql?(0)
+          object.casecmp('master').eql?(0) || object.casecmp('default').eql?(0)
         end
       !!ret
     end

@@ -50,10 +50,10 @@ module R8Tpl
       # TODO: clean up
       @model_name = @view_name = ''
       @saved_search_ref = nil
-      vp_parts = view_path.split("/")
+      vp_parts = view_path.split('/')
       # TODO: fidn better way to determine isa_saved_search
       if vp_parts.size == 2
-        if vp_parts[0] == "saved_search"
+        if vp_parts[0] == 'saved_search'
           @saved_search_ref = vp_parts[1]
           path_type ||= :cache
           @view_name = :list #TODO: should not be hard-wired
@@ -135,7 +135,7 @@ module R8Tpl
 
     def set_js_tpl_name(js_tpl_name)
       @js_tpl_callback = js_tpl_name
-      @js_file_name = js_tpl_name+".js"
+      @js_file_name = js_tpl_name+'.js'
       @js_templating_on = true
     end
 
@@ -175,7 +175,7 @@ module R8Tpl
 
     # private
     def tpl_xml_init(view_tpl_contents)
-      @tpl_contents << "<div>" << self.clean_tpl(view_tpl_contents) << "</div>"
+      @tpl_contents << '<div>' << self.clean_tpl(view_tpl_contents) << '</div>'
       @xhtml_document = Nokogiri::XML(@tpl_contents,nil,'xml')
       @root_js_element_var_name = @xhtml_document.root.name + '_tplroot'
     end
@@ -213,13 +213,13 @@ module R8Tpl
     tpl_xml_init(view_tpl_contents)
     #    js_queue_push('functionheader', "function " + @js_tpl_callback + "(" + @js_var_header + ",renderType) {")
     #    js_queue_push('functionheader', "function " + @js_tpl_callback + "(" + @js_var_header + ") {")
-    js_queue_push('functionheader', "R8.Rtpl['" + @js_tpl_callback + "'] = function(" + @js_var_header + ") {")
+    js_queue_push('functionheader', "R8.Rtpl['" + @js_tpl_callback + "'] = function(" + @js_var_header + ') {')
     # add local var ref for document object
-    js_queue_push('functionbody', "var doc = document;")
+    js_queue_push('functionbody', 'var doc = document;')
     create_root_node()
     render_js_dom_tree(@xhtml_document.root.children,@root_js_hash)
     set_js_return()
-    js_queue_push('functionclose', "}")
+    js_queue_push('functionclose', '}')
     write_js_to_file()
   end
 
@@ -260,7 +260,7 @@ module R8Tpl
           # make this check _dev or _production mode
           # this is temporary, maybe have a general function for adding comments
           if !node.cdata? && newJSNode[:elementType] != 'text'
-            self.js_queue_push('comment',"//end rendering for element " + newJSNode[:jsElementVarName])
+            self.js_queue_push('comment','//end rendering for element ' + newJSNode[:jsElementVarName])
           end
 
           if @ctrl_close_stack.length > 0
@@ -283,15 +283,15 @@ module R8Tpl
 
   def handle_indentation(js_line)
     case js_line[:type]
-      when "functionheader" then
+      when 'functionheader' then
           @num_indents +=1
-      when "forloopheader","ifheader","xhtmlAttrHead" then
+      when 'forloopheader','ifheader','xhtmlAttrHead' then
           self.set_indentation()
           @num_indents += 1
-      when "functionclose","forloopclose","ifclose","end","xhtmlAttrClose" then
+      when 'functionclose','forloopclose','ifclose','end','xhtmlAttrClose' then
           @num_indents -= 1
           self.set_indentation()
-      when "xhtmlAttrElse","elsif" then
+      when 'xhtmlAttrElse','elsif' then
           @num_indents -= 1
           self.set_indentation()
           @num_indents += 1
@@ -309,7 +309,7 @@ module R8Tpl
   end
 
   def write_js_to_file
-    js_cache_file_path = @js_file_write_path + "/" + @js_file_name
+    js_cache_file_path = @js_file_write_path + '/' + @js_file_name
 
     File.open(js_cache_file_path, 'w') do |js_file_handle|
       for js_line in @js_render_queue do
@@ -366,7 +366,7 @@ module R8Tpl
     if processedAttrValue == attrValue then processedAttrValue = '"' + processedAttrValue + '"' end
 
     case attrName
-      when "checked" then
+      when 'checked' then
         if(elementType == 'input') then
           self.js_queue_push('xhtmlAttrHead', 'if('+jsElementVarName+'.type==="checkbox") {')
           self.js_queue_push('ifheader', 'if('+processedAttrValue+' === 1 || '+processedAttrValue+' === "1") {')
@@ -382,13 +382,13 @@ module R8Tpl
         else
           self.js_queue_push('attribute', jsElementVarName+'.setAttribute("'+processedAttrName+'","'+processedAttrValue+'");')
         end
-      when "selected" then
+      when 'selected' then
         if(elementType == 'option') then
           self.js_queue_push('xhtmlAttrHead', 'if('+processedAttrValue+' === '+jsElementVarName+'.value) {')
           self.js_queue_push('xhtmlAttrBody', jsElementVarName+'.selected = true;')
           self.js_queue_push('xhtmlAttrClose', '}')
         end
-      when "multiselected" then
+      when 'multiselected' then
         if(elementType == 'option') then
           processedAttrValue.gsub!('[]', '')
           self.js_queue_push('forloopheader', 'for(var '+jsElementVarName+'Value in '+processedAttrValue+') {')
@@ -397,7 +397,7 @@ module R8Tpl
           self.js_queue_push('xhtmlAttrClose', '}')
           self.js_queue_push('forloopclose', '}')
         end
-      when "compact","declare","readonly","disabled","defer","ismap","nohref","noshade","nowrap","multiple","noresize" then
+      when 'compact','declare','readonly','disabled','defer','ismap','nohref','noshade','nowrap','multiple','noresize' then
           self.js_queue_push('attribute', jsElementVarName + '.setAttribute("' + processedAttrName + '",' + processedAttrValue + ');')
       else
           #          self.js_queue_push('attribute', jsElementVarName + '.setAttribute("' + self.check_for_tpl_vars(attrName) + '","' + self.check_for_tpl_vars(attrValue) + '");')
@@ -409,7 +409,7 @@ module R8Tpl
     childElementType.downcase!
     parentElementType.downcase!
     case parentElementType
-      when "select" then
+      when 'select' then
         if childElementType == 'option'
           self.js_queue_push('appendChild',parentJSElementVarName + '.add('+childJSElementVarName+',null);')
         else
@@ -524,7 +524,7 @@ p "After Matched Value(s):"+matches.post_match
 
 @ctrl_vars[@ctrl_vars.length-1][:iteratorVarParsed] = iteratorVar
 
-        jsContent = "for(var " + ctrlVarName + " in " + iteratorVar + ") { "
+        jsContent = 'for(var ' + ctrlVarName + ' in ' + iteratorVar + ') { '
         self.js_queue_push('forloopheader', jsContent)
       when 'if' then
         ifels_parser = R8Tpl::IfElsExpressionParser.new(ctrlStr,@js_var_header,@ctrl_vars)
@@ -572,7 +572,7 @@ p "After Matched Value(s):"+matches.post_match
         varParser.process
         iteratorVar = varParser.js_var_string
 
-        jsContent = "for(var " + ctrlVarName + " in " + iteratorVar + ") { "
+        jsContent = 'for(var ' + ctrlVarName + ' in ' + iteratorVar + ') { '
         self.js_queue_push('forloopheader', jsContent)
       # end else in case ctrlPieces[0] block
     end
@@ -593,7 +593,7 @@ p "After Matched Value(s):"+matches.post_match
       processedVarTxt = varParser.js_var_string
 
       if processedVarTxt != '' then
-        returnText == '' ? (returnText <<  processedVarTxt) : (returnText << " + " << processedVarTxt)
+        returnText == '' ? (returnText <<  processedVarTxt) : (returnText << ' + ' << processedVarTxt)
       end
 
       varPostMatchText = matches.post_match
@@ -744,7 +744,7 @@ class TplVarParser
     @js_var_string << self.getJSVarName
     @keys.each { |key|
       if key[:type] == 'literal' then @js_var_string << "['" << key[:txt] << "']"
-      elsif key[:type] == 'var' then @js_var_string << "[" << key[:txt] << "]"
+      elsif key[:type] == 'var' then @js_var_string << '[' << key[:txt] << ']'
       end
     }
   end
@@ -763,7 +763,7 @@ class TplVarParser
         if ctrl_var[:ctrlVarName] == @var_name then
           #          (return @js_var_header + "['" + ctrl_var[:iteratorVar] + "']["+@var_name+"]") :
           (@is_hash) ?
-          (return ctrl_var[:iteratorVarParsed] + "["+@var_name+"]") :
+          (return ctrl_var[:iteratorVarParsed] + '['+@var_name+']') :
           (return @var_name)
         end
       end
@@ -779,7 +779,7 @@ class TplVarParser
     intKey = Integer(@char) rescue false
     if intKey then return false end
     case @char
-    when '"',"'",":" then
+    when '"',"'",':' then
        return false
     end
 
@@ -1003,11 +1003,11 @@ end
     def initialize(js_tpl_name,css_require,js_require)
       super(nil)
       @js_tpl_callback = js_tpl_name
-      @js_file_name = js_tpl_name+".js"
+      @js_file_name = js_tpl_name+'.js'
        # TBD: canned for testing
        @script = [
           {
-           "content" => "var logoutArgs = {\"obj\" : \"user\",\"action\" : \"logout\"};"
+           'content' => "var logoutArgs = {\"obj\" : \"user\",\"action\" : \"logout\"};"
           }
        ]
        @cssIncludes = css_require || []

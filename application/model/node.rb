@@ -237,7 +237,8 @@ module DTK
     def self.parse_user_friendly_name(name)
       node_name = assembly_name = nil
       if name =~ Regexp.new("(^.+)#{AssemblyNodeNameSep}(.+$)")
-        node_name, assembly_name = [$2, $1]
+        node_name = Regexp.last_match(2)
+        assembly_name = Regexp.last_match(1)
       else
         node_name = name
       end

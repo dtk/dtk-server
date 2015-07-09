@@ -4,7 +4,7 @@ module DTK
       class SyncAgentCode < NodeParticipants
         def consume(workitem)
           params = get_params(workitem)
-          task_id, action, workflow, task, task_start, task_end = %w{task_id action workflow task task_start task_end}.map { |k| params[k] }
+          task_id, action, workflow, task, task_start, task_end = %w(task_id action workflow task task_start task_end).map { |k| params[k] }
           PerformanceService.start(name(), object_id)
 
           execution_context(task, workitem, task_start) do
@@ -115,7 +115,7 @@ end
 
           wi = workitem
           params = get_params(wi)
-          task_id, action, workflow, task, task_start, task_end = %w{task_id action workflow task task_start task_end}.map { |k| params[k] }
+          task_id, action, workflow, task, task_start, task_end = %w(task_id action workflow task task_start task_end).map { |k| params[k] }
           task.add_internal_guards!(workflow.guards[:internal])
           log_participant.canceling(task_id)
           delete_task_info(wi)

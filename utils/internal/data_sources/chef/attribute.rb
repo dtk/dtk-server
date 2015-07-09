@@ -66,8 +66,8 @@ module XYZ
 
         def self.required(required_value)
           return nil if required_value.nil?
-          return true if %w{true required}.include?(required_value.to_s)
-          return false if %w{false recommended optional}.include?(required_value.to_s)
+          return true if %w(true required).include?(required_value.to_s)
+          return false if %w(false recommended optional).include?(required_value.to_s)
           nil
         end
         def self.data_type(source)

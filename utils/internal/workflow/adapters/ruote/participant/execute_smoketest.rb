@@ -5,7 +5,7 @@ module DTK
         def consume(workitem)
           parent = nil
           params = get_params(workitem)
-          task_id, action, workflow, task, task_start, task_end = %w{task_id action workflow task task_start task_end}.map { |k| params[k] }
+          task_id, action, workflow, task, task_start, task_end = %w(task_id action workflow task task_start task_end).map { |k| params[k] }
           execution_context(task, workitem, task_start) do
             user_object  = CurrentSession.new.user_object()
             callbacks = {
@@ -57,7 +57,7 @@ module DTK
           return if flavour
           wi = workitem
           params = get_params(wi)
-          task_id, action, workflow, task, task_start, task_end = %w{task_id action workflow task task_start task_end}.map { |k| params[k] }
+          task_id, action, workflow, task, task_start, task_end = %w(task_id action workflow task task_start task_end).map { |k| params[k] }
           log_participant.canceling(task_id)
 
           callbacks = {

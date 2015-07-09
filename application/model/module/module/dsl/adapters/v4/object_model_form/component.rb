@@ -23,7 +23,8 @@ module DTK; class ModuleDSL; class V4
       end
 
       def set_action_def_and_external_ref!(ret, input_hash, cmp, _context = {})
-        create_action, function = nil, nil
+        create_action = nil
+        function = nil
         if action_def = ActionDef.new(cmp).convert_action_defs?(input_hash)
           if validate_action_def_function(action_def)
             function = action_def.delete_create_action!()

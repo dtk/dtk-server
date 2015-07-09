@@ -98,7 +98,10 @@ module DTK; class Attribute
           matching_attributes.each do |m_attr|
             if (external_ref = m_attr[:external_ref]) && (path = m_attr[:external_ref][:path])
               match = path.match(/.+\[(.*)\]\[(.*)\]/)
-              cmp_name, attr_name = match[1], match[2] if match
+              if match
+                cmp_name = match[1]
+                attr_name = match[2]
+end
 
               if module_branch = m_attr[:module_branch]
                 valid_attribute = m_attr if param_cmp_name.eql?(cmp_name) && param_attr_name.eql?(attr_name) && module_branch[:component_id].to_s.eql?(cmp_id)

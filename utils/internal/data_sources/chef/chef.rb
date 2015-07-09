@@ -21,7 +21,7 @@ module XYZ
 
       def get_objects__node(&block)
         get_nodes().each do |node_name, node|
-          node_properties = %w{node_display_name lsb}
+          node_properties = %w(node_display_name lsb)
           ds_hash = DataSourceUpdateHash.new({ 'node_name' => node_name })
           node_properties.each do |attr|
             next unless value = node[attr]
@@ -86,7 +86,7 @@ module XYZ
       end
 
       def normalized_recipe_name(recipe_name)
-        return $1 if recipe_name =~ /(^.+)::default/
+        return Regexp.last_match(1) if recipe_name =~ /(^.+)::default/
         recipe_name.gsub(/::/, Model::Delim::Common)
       end
 

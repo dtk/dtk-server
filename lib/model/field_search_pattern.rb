@@ -38,13 +38,13 @@ module XYZ
       def process_numeric(name, value)
         # TODO: may encapsulate undet SQL class
         if value =~ /^<=(.+)$/
-          name.to_s.lit <= $1
+          name.to_s.lit <= Regexp.last_match(1)
         elsif value =~ /^>=(.+)$/
-          name.to_s.lit >= $1
+          name.to_s.lit >= Regexp.last_match(1)
         elsif value =~ /^<(.+)$/
-          name.to_s.lit < $1
+          name.to_s.lit < Regexp.last_match(1)
         elsif value =~ /^>(.+)$/
-          name.to_s.lit > $1
+          name.to_s.lit > Regexp.last_match(1)
         else
           { name => value }
         end

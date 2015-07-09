@@ -6,7 +6,7 @@ module DTK
           params = get_params(workitem)
           PerformanceService.start("#{self.class.to_s.split('::').last}", self.object_id)
           # task_id,action,workflow,task = %w{task_id action workflow task}.map{|k|params[k]}
-          task_id, action, workflow, task, task_start, task_end = %w{task_id action workflow task task_start task_end}.map { |k| params[k] }
+          task_id, action, workflow, task, task_start, task_end = %w(task_id action workflow task task_start task_end).map { |k| params[k] }
           task.update_input_attributes!() if task_start
           user_object  = ::DTK::CurrentSession.new.user_object()
 
@@ -57,7 +57,7 @@ module DTK
 
           wi = workitem
           params = get_params(wi)
-          task_id, action, workflow, task, task_start, task_end = %w{task_id action workflow task task_start task_end}.map { |k| params[k] }
+          task_id, action, workflow, task, task_start, task_end = %w(task_id action workflow task task_start task_end).map { |k| params[k] }
           task.add_internal_guards!(workflow.guards[:internal])
           pp ["Canceling task #{action.class}: #{task_id}"]
           set_result_canceled(wi, task)

@@ -12,7 +12,8 @@ module DTK
 
   class SimpleActionQueue
     def self.get_results(queue_id)
-      queue, response_results = self[queue_id], nil
+      queue = self[queue_id]
+      response_results = nil
 
       raise QueueNotFound.new(queue_id, self.available_ids) if queue.nil?
 

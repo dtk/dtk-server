@@ -102,7 +102,7 @@ module DTK
       keys.each do |key|
         # if marked as optional skip if not present
         if key.to_s =~ /(^.+)\?$/
-          key = $1.to_sym
+          key = Regexp.last_match(1).to_sym
           next unless model_object[key]
         end
         # special treatment of :id

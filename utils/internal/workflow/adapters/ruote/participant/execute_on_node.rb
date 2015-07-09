@@ -5,7 +5,7 @@ module DTK
         def consume(workitem)
           params = get_params(workitem)
           PerformanceService.start("#{self.class.to_s.split('::').last}", self.object_id)
-          task_id, action, workflow, task, task_start, task_end = %w{task_id action workflow task task_start task_end}.map { |k| params[k] }
+          task_id, action, workflow, task, task_start, task_end = %w(task_id action workflow task task_start task_end).map { |k| params[k] }
           top_task = workflow.top_task
           task.update_input_attributes!() if task_start
           workitem.fields['guard_id'] = task_id # ${guard_id} is referenced if guard for execution of this
@@ -80,7 +80,7 @@ module DTK
           begin
             wi = workitem
             params = get_params(wi)
-            task_id, action, workflow, task, task_start, task_end = %w{task_id action workflow task task_start task_end}.map { |k| params[k] }
+            task_id, action, workflow, task, task_start, task_end = %w(task_id action workflow task task_start task_end).map { |k| params[k] }
             task.add_internal_guards!(workflow.guards[:internal])
             Log.info_pp(["Canceling task #{action.class}: #{task_id}"])
             callbacks = {

@@ -99,7 +99,7 @@ module DTK; class Attribute
       return ret unless datatype
       is_array = nil
       if datatype =~ /^array\((.+)\)$/
-        datatype = $1
+        datatype = Regexp.last_match(1)
         is_array = true
       end
       if ret_builtin_scalar_types().include?(datatype)

@@ -196,7 +196,10 @@ end
       unless files.empty?
         ambiguous_deps = opts[:ambiguous] || []
         missing_deps   = opts[:possibly_missing] || []
-        any_changes, new_cmp_refs, valid_existing, existing_names = false, nil, nil, []
+        any_changes = false
+        new_cmp_refs = nil
+        valid_existing = nil
+        existing_names = []
         files.each do |file_info|
           content = Aux.serialize(file_info[:hash_content], file_info[:format_type])
 
@@ -272,7 +275,7 @@ end
     end
 
     def dsl_format_type_form_path(path)
-      extension = (path =~ /\.([^\.]+$)/; $1)
+      extension = (path =~ /\.([^\.]+$)/; Regexp.last_match(1))
       unless ret = FormatTypeFromExtension[extension]
         raise Error.new("Cannot find format type from file path (#{path})")
       end

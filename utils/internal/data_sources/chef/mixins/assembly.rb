@@ -47,21 +47,21 @@ module XYZ
 
       def process_external_ref__chef_search(external_ref)
         if external_ref['ref'] =~ %r{^search\[(.+)\]\[(.+)\]$}
-          object_type = $1.to_sym
-          search_pattern = $2
+          object_type = Regexp.last_match(1).to_sym
+          search_pattern = Regexp.last_match(2)
           return Search.get_list(object_type, search_pattern).map(&:name)
         end
         raise Error.new("search_pattern (#{external_ref['ref']}) has incorrect syntax")
       end
 
       def process_external_ref__chef_node(external_ref)
-        return $1 if external_ref['ref'] =~ %r{^node_name\[(.+)\]$}
+        return Regexp.last_match(1) if external_ref['ref'] =~ %r{^node_name\[(.+)\]$}
         raise Error.new("external reference (#{external_ref['ref']}) has incorrect syntax")
       end
 
       def process_external_ref__chef_attribute(external_ref, node, metadata)
         if external_ref['ref'] =~ %r{^node\[(.+)\]$}
-          path = $1.split('][')
+          path = Regexp.last_match(1).split('][')
           if node
             return NodeState.nested_value(node[path[0]], path[1..path.size - 1])
           else

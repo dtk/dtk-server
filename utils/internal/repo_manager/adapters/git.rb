@@ -658,7 +658,7 @@ module DTK
 
     def recursive_create_dir?(path)
       if path =~ Regexp.new('(^.+)/[^/]+$')
-        dir = $1
+        dir = Regexp.last_match(1)
         FileUtils.mkdir_p(dir)
       end
     end

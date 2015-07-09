@@ -136,24 +136,24 @@ module DTK
       ret = {}
       # TODO: deprecate forms without input or output
       if port_display_name =~ Regexp.new("^input#{RefDelim}(.+$)")
-        port_display_name = $1
+        port_display_name = Regexp.last_match(1)
         ret.merge!(direction: :input)
       elsif port_display_name =~ Regexp.new("^output#{RefDelim}(.+$)")
-        port_display_name = $1
+        port_display_name = Regexp.last_match(1)
         ret.merge!(direction: :output)
       end
 
       if port_display_name =~ ParseRegex[:with_title]
-        ret.merge!(port_type: $1, component_type: $2, link_def_ref: $3, title: $4)
+        ret.merge!(port_type: Regexp.last_match(1), component_type: Regexp.last_match(2), link_def_ref: Regexp.last_match(3), title: Regexp.last_match(4))
       elsif port_display_name =~ ParseRegex[:without_title]
-        ret.merge!(port_type: $1, component_type: $2, link_def_ref: $3)
+        ret.merge!(port_type: Regexp.last_match(1), component_type: Regexp.last_match(2), link_def_ref: Regexp.last_match(3))
       else
         raise Error.new("unexpected display name (#{port_display_name})")
       end
 
       component_type = ret[:component_type]
       if component_type =~ Regexp.new('(^.+)__(.+$)')
-        ret.merge!(module: $1, component: $2)
+        ret.merge!(module: Regexp.last_match(1), component: Regexp.last_match(2))
       else
         ret.merge!(module: component_type, component: component_type)
       end
@@ -168,8 +168,8 @@ module DTK
     # if error, returns nil
     def self.parse_to_ret_display_name(service_ref_name, conn_type, opts = {})
       if service_ref_name =~ Regexp.new('(^[^/]+)/([^/]+$)')
-        node_display_name = $1
-        cmp_ref = $2
+        node_display_name = Regexp.last_match(1)
+        cmp_ref = Regexp.last_match(2)
         cmp_ref_internal_form = cmp_ref.gsub(/::/, '__')
         dirs = (opts[:direction] ? [options[:direction]] : ['input', 'output'])
         int_or_ext = opts[:internal_or_external]

@@ -54,8 +54,8 @@ module DTK; class LinkDef
 
         add_remote_link_def?(remote_link_defs, remote_component_type, link_def_type, possible_link_type)
 
-        has_external_internal[:has_internal_link] = true if %w{internal internal_external}.include?(possible_link_type)
-        has_external_internal[:has_external_link] = true if %w{external internal_external}.include?(possible_link_type)
+        has_external_internal[:has_internal_link] = true if %w(internal internal_external).include?(possible_link_type)
+        has_external_internal[:has_external_link] = true if %w(external internal_external).include?(possible_link_type)
 
         position += 1
         ref = "#{remote_component_type}___#{position}" #to make sure unqiue for case when same remote type
@@ -82,8 +82,8 @@ module DTK; class LinkDef
         local_or_remote: 'remote',
         link_type: link_def_type
       }
-      pointer[ref][:has_internal_link] = true if %w{internal internal_external}.include?(possible_link_type)
-      pointer[ref][:has_external_link] = true if %w{external internal_external}.include?(possible_link_type)
+      pointer[ref][:has_internal_link] = true if %w(internal internal_external).include?(possible_link_type)
+      pointer[ref][:has_external_link] = true if %w(external internal_external).include?(possible_link_type)
       if local_cmp_ref && pointer[ref][:has_external_link]
         pointer[ref].merge!(local_cmp_ref: local_cmp_ref)
       end
@@ -158,10 +158,10 @@ module DTK; class LinkDef
 
       if split[0] =~ NodeTermRE
         ret[:type] = 'node_attribute'
-        ret[:node_name] = $1
+        ret[:node_name] = Regexp.last_match(1)
       elsif split[0] =~ ComponentTermRE
         ret[:type] = 'component_attribute'
-        ret[:component_type] = $1
+        ret[:component_type] = Regexp.last_match(1)
       else
         raise Error.new("unexpected form (#{term_x.inspect})")
       end
@@ -170,10 +170,10 @@ module DTK; class LinkDef
         raise Error.new("unexpected form (#{term_x.inspect})")
       end
       if split[1] =~ AttributeTermRE
-        ret[:attribute_name] = $1
+        ret[:attribute_name] = Regexp.last_match(1)
       # ABC
       elsif split[1] =~ /\$\{(.+)\}/
-        ret[:attribute_name] = $1
+        ret[:attribute_name] = Regexp.last_match(1)
       else
         raise Error.new("unexpected form (#{term_x.inspect})")
       end

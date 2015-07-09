@@ -15,7 +15,7 @@ module DTK; class ServiceModule
 
         # TODO: may need to update this to handle port refs with titles
         if port_ref =~ PortRefRegex
-          node = $1; cmp_name = $2; link_def_ref = $3
+          node = Regexp.last_match(1); cmp_name = Regexp.last_match(2); link_def_ref = Regexp.last_match(3)
           hash = { node: node, component_type: component_type_internal_form(cmp_name), link_def_ref: link_def_ref }
           if assembly_id
             hash.merge!(assembly_id: assembly_id)
@@ -36,7 +36,7 @@ module DTK; class ServiceModule
         cmp_link_value = "assembly_wide#{Seperators[:node_component]}#{cmp_link_value}" unless cmp_link_value.include?(Seperators[:node_component])
 
         if cmp_link_value =~ ServiceLinkTarget
-          output_node = $1; output_cmp_name = $2
+          output_node = Regexp.last_match(1); output_cmp_name = Regexp.last_match(2)
           input = parsed_endpoint(input_node, input_cmp_name, link_def_ref)
           output = parsed_endpoint(output_node, output_cmp_name, link_def_ref)
           { input: input, output: output }
@@ -106,7 +106,8 @@ module DTK; class ServiceModule
       class AddOn < self
         # returns assembly ref, port_ref
         def self.parse(add_on_port_ref, assembly_list)
-          assembly_name, port_ref = (add_on_port_ref =~ AOPortRefRegex; [$1, $2])
+          assembly_name = add_on_port_ref =~ AOPortRefRegex
+          port_ref = [Regexp.last_match(1), Regexp.last_match(2)]
           unless assembly_match = assembly_list.find { |a| a[:display_name] == assembly_name }
             assembly_names = assembly_list.map { |a| a[:display_name] }
             Log.error("Assembly name in add-on port link (#{assembly_name}) is illegal; must be one of (#{assembly_names.join(',')})")

@@ -36,8 +36,8 @@ module DTK; class ServiceModule
         (node_bindings_hash || {}).inject({}) do |h, (ser_assem_node, v)|
           merge_hash = {}
           if ser_assem_node =~ Regexp.new("(^[^#{an_sep}]+)#{an_sep}(.+$)")
-            serialized_assembly_ref = $1
-            node = $2
+            serialized_assembly_ref = Regexp.last_match(1)
+            node = Regexp.last_match(2)
             if assembly_ref == internal_assembly_ref__without_version(serialized_assembly_ref)
               merge_hash = { node => v }
             end

@@ -313,7 +313,7 @@ module DTK
       # returns hash with keys: :format_type
       def parse_dsl_filename(filename, dsl_integer_version = nil)
         if filename =~ DSLFilenameRegexp[integer_version(dsl_integer_version)]
-          file_extension = $1
+          file_extension = Regexp.last_match(1)
           unless format_type = ExtensionToType[file_extension]
             raise Error.new("illegal file extension #{file_extension}")
           end

@@ -23,7 +23,7 @@ module DTK; class Attribute
         return ret if ndx_nodes.empty?
 
         pattern =~ /^node[^\/]*\/(attribute.+$)/
-        attr_fragment = attr_name_special_processing($1)
+        attr_fragment = attr_name_special_processing(Regexp.last_match(1))
         attrs = ret_matching_attributes(:node, ndx_nodes.values.map(&:id_handle), attr_fragment)
         if attrs.empty? && create_this_type?(opts)
           @created = true
@@ -57,7 +57,7 @@ module DTK; class Attribute
 
       def pattern_attribute_fragment
         pattern() =~ AttrRegexp
-        $1
+        Regexp.last_match(1)
       end
       AttrRegexp = /^node[^\/]*\/(attribute.+$)/
 

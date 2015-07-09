@@ -117,7 +117,7 @@ module DTK; class ConfigAgent; class Adapter::Puppet
 
     def find_file_path(msg)
       if msg =~ /at ([^ ]+):[0-9]+$/
-        $1
+        Regexp.last_match(1)
       end
     end
 
@@ -129,7 +129,7 @@ module DTK; class ConfigAgent; class Adapter::Puppet
 
     def  find_line(msg)
       if msg =~ /:([0-9]+$)/
-        $1
+        Regexp.last_match(1)
       end
     end
 

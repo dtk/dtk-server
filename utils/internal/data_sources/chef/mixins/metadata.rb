@@ -2,7 +2,7 @@ module XYZ
   module DSConnector
    module ChefMixinMetadata # TODO: unify with code in R8Cookbook
      SpecialMetaAttribute = '_meta_info'
-     SpecialMetaFields = %w{basic_types}
+     SpecialMetaFields = %w(basic_types)
      def process_raw_metadata!(metadata)
        special = (metadata['attributes'] || {})[SpecialMetaAttribute]
        return metadata unless special
@@ -15,7 +15,7 @@ module XYZ
        ret = ArrayObject.new
        return ret unless cookbook_meta
        cookbook_name = recipe_name.gsub(/::.+/, '')
-       meta = (eval($1) if cookbook_meta['long_description'] =~ /__(.+)__/m) #/m because there may be internal line breaks
+       meta = (eval(Regexp.last_match(1)) if cookbook_meta['long_description'] =~ /__(.+)__/m) #/m because there may be internal line breaks
        (meta || []).each do |meta_service_info|
          base_info = get_service_info(recipe_name, meta_service_info)
          next if base_info.empty?
@@ -42,7 +42,7 @@ module XYZ
      # returns [(normalized)attr_name,service_name]
      def get_attribute_and_service_names(attr_name)
        if attr_name =~ Regexp.new('^(.+)/_service/(.+?)/(.+)$')
-         ["#{$1}/#{$3}", $2]
+         ["#{Regexp.last_match(1)}/#{Regexp.last_match(3)}", Regexp.last_match(2)]
        else
          [attr_name, nil]
        end
@@ -54,7 +54,7 @@ module XYZ
        return nil unless transform
        return nil unless attr_info['recipes'].empty? || attr_info['recipes'].include?(recipe_name)
        if attr =~ Regexp.new("#{cookbook_name}/_service/#{service_name}/(.+)$")
-         key = $1
+         key = Regexp.last_match(1)
          set_attribute_transform_info(target['params'], key, transform)
        end
      end

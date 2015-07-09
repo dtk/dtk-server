@@ -66,13 +66,13 @@ module DTK
         # to remove duplicate errors"
 
         if ret[:message] && ret[:message] =~ /(^.+) on node [^ ]+$/
-          ret[:message] = $1
+          ret[:message] = Regexp.last_match(1)
         end
 
         source = error_in_result['source']
         # working under assumption that stage assignment same as order in components
         if source =~ Regexp.new('^/Stage\\[([0-9]+)\\]')
-          index = ($1.to_i) - 1
+          index = (Regexp.last_match(1).to_i) - 1
           if cmp_with_error = components[index]
             ret = error_in_result.inject({}) do |h, (k, v)|
               ['source', 'tags', 'time'].include?(k) ? h : h.merge(k => v)

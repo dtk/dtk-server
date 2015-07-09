@@ -45,7 +45,8 @@ module DTK
     end
 
     def self.create_linked_target_ref?(target, node, node_target)
-      assembly_instance, node_instance = node_target && node_target.find_matching_instance_info(target, node)
+      assembly_instance = node_target
+      node_instance = node_target.find_matching_instance_info(target, node)
       if node_instance
         Node::TargetRef::Input::BaseNodes.create_linked_target_ref?(target, node_instance, assembly_instance)
       end

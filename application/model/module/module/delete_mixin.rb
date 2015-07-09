@@ -56,7 +56,7 @@ module DTK; class BaseModule
         cmp_ref = r.display_name_print_form(node_prefix: true, namespace_prefix: true)
         ref =
           if cmp_ref =~ /(^[^\/]+)\/([^\/]+$)/
-            "Reference to '#{$2}' on node '#{$1}'"
+            "Reference to '#{Regexp.last_match(2)}' on node '#{Regexp.last_match(1)}'"
           else
             "Reference to '#{cmp_ref}'"
           end

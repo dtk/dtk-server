@@ -17,7 +17,8 @@ module DTK
       required_modules ||= []
       req_names = required_modules.collect { |m| m['module_name'] }
 
-      missing_modules, found_modules = [], []
+      missing_modules = []
+      found_modules = []
 
       required_modules.each do |r_module|
         name      = r_module['module_name']

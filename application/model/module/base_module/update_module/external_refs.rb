@@ -12,15 +12,22 @@ module DTK; class BaseModule
         parsed_dependencies = dependencies.map(&:parsed_form?).compact
         return ret if parsed_dependencies.empty?
 
-        all_match_hashes, all_inconsistent, all_possibly_missing, all_inconsistent_names = {}, [], [], []
-        all_ambiguous, all_ambiguous_ns, temp_existing = [], [], {}
+        all_match_hashes = {}
+        all_inconsistent = []
+        all_possibly_missing = []
+        all_inconsistent_names = []
+        all_ambiguous = []
+        all_ambiguous_ns = []
+        temp_existing = {}
         all_modules          = @module_class.get_all(project.id_handle()).map { |cmp_mod| ComponentModuleWrapper.new(cmp_mod) }
         existing_module_refs = get_existing_module_refs(module_branch)
 
         parsed_dependencies.each do |parsed_dependency|
           dep_name = parsed_dependency[:name].strip()
           version_constraints = parsed_dependency[:version_constraints]
-          match, inconsistent, possibly_missing = nil, nil, nil
+          match = nil
+          inconsistent = nil
+          possibly_missing = nil
 
           # if there is no component_modules or just this one in database, mark all dependencies as possibly missing
           base_module_id = @base_module.id()
@@ -38,7 +45,11 @@ module DTK; class BaseModule
                   matched_branch_version = branch_version.match(/(\d+\.\d+\.\d+)/)
                   branch_version = matched_branch_version[1]
 
-                  evaluated, br_version, constraint_op, req_version, required_version = false, nil, nil, nil, nil
+                  evaluated = false
+                  br_version = nil
+                  constraint_op = nil
+                  req_version = nil
+                  required_version = nil
                   if dep_name.eql?(branch_name)
                     # version_constraints.nil? || empty? means no version constraint
                     if version_constraints.nil? || version_constraints.empty?

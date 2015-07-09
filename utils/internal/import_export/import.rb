@@ -8,7 +8,7 @@ module DTK
     def modify_uri_with_user_name(uri, username)
       return uri unless username
       if uri =~ Regexp.new('^(/[^/]+/[^/]+)(/.+$)')
-        "#{$1}-#{username}#{$2}"
+        "#{Regexp.last_match(1)}-#{username}#{Regexp.last_match(2)}"
       elsif uri =~ Regexp.new('^/[^/]+/[^/]+$')
         "#{uri}-#{username}"
       else
@@ -122,7 +122,7 @@ module DTK
         remote_link_defs = {}
         r8meta[:files].each do |file|
           component_hash = YAML.load_file(file)
-          repo, config_agent_type = (file =~ Regexp.new("([^/]+)/r8meta\.(.+)\.yml") && [$1, $2])
+          repo, config_agent_type = (file =~ Regexp.new("([^/]+)/r8meta\.(.+)\.yml") && [Regexp.last_match(1), Regexp.last_match(2)])
           raise Error.new('bad config agent type') unless config_agent_type
           component_hash.each do |local_cmp_type, v|
             cmp_ref = "#{config_agent_type}-#{local_cmp_type}"
@@ -177,7 +177,7 @@ module DTK
 
         indexed_file_paths = {}
         file_paths.each do |file_path|
-          dir = file_path =~ Regexp.new('(^[^/]+)/') ? $1 : nil
+          dir = file_path =~ Regexp.new('(^[^/]+)/') ? Regexp.last_match(1) : nil
           (indexed_file_paths[dir] ||= []) << file_path
         end
         impl_repos = indexed_file_paths.keys
@@ -199,7 +199,7 @@ module DTK
             # if repo is null then want ful file path; otherwise we have repo per repo and
             # want to strip off leading repo
             file_path = repo ? file_path_x.gsub(Regexp.new("^#{repo}/"), '') : file_path_x
-            file_name = file_path =~ Regexp.new('/([^/]+$)') ? $1 : file_path
+            file_name = file_path =~ Regexp.new('/([^/]+$)') ? Regexp.last_match(1) : file_path
             file_asset = {
               type: type[:file_type],
               display_name: file_name,
@@ -238,7 +238,7 @@ module DTK
 
         file_type = "#{config_agent_type}_file"
         file_assets = file_paths.inject({}) do |h, file_path|
-          file_name = file_path =~ Regexp.new('/([^/]+$)') ? $1 : file_path
+          file_name = file_path =~ Regexp.new('/([^/]+$)') ? Regexp.last_match(1) : file_path
           file_asset = {
             type: file_type,
             display_name: file_name,

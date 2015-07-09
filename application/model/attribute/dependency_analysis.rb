@@ -114,7 +114,9 @@ module XYZ
 
     module GuardRel
       def self.needs_guard?(guard_rel)
-        guard_attr, guarded_attr, link = guard_rel[:guard_attr], guard_rel[:guarded_attr], guard_rel[:link]
+        guard_attr = guard_rel[:guard_attr]
+        guarded_attr = guard_rel[:guarded_attr]
+        link = guard_rel[:link]
         # guard_attr can be null if guard refers to node level attr
         # TODO: are there any other cases where it can be null; previous text said 'this can happen if guard attribute is in component that ran already'
         # TODO: below works if guard is node level attr

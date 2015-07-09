@@ -233,7 +233,9 @@ module DTK; class Component
     # :component_module
     # :namespace
     def self.get_augmented_component_template(cmp_mh, cmp_name, namespace, assembly)
-      ret_cmp, match_cmps, cmp_module_ids = nil, [], []
+      ret_cmp = nil
+      match_cmps = []
+      cmp_module_ids = []
       display_name = display_name_from_user_friendly_name(cmp_name)
       component_type, title =  ComponentTitle.parse_component_display_name(display_name)
       sp_hash = {

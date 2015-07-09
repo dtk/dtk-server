@@ -23,7 +23,7 @@ module DTK
         matches.each do |r|
           instance_name = r[:display_name]
           if instance_name =~ /-([0-9]+$)/
-            instance_index = $1.to_i
+            instance_index = Regexp.last_match(1).to_i
             if instance_index >= index
               index += 1
             end

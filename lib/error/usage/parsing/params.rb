@@ -61,7 +61,7 @@ module DTK; class ErrorUsage
       def self.any_free_vars?(msg)
         # only finds first free variable
         if msg =~ FreeVariable
-          $1
+          Regexp.last_match(1)
         end
       end
       FreeVariable = Regexp.new('(\\?[0-9a-z_]+)')

@@ -43,7 +43,7 @@ module DTK; class Attribute::Pattern
       module Simple
         def self.parse(source_term)
           if source_term =~ /^\$([a-zA-Z\-_0-9:\.\[\]\/]+$)/
-            attr_term_x = $1
+            attr_term_x = Regexp.last_match(1)
             fn = nil
             attr_term, node_cmp_type = strip_special_symbols(attr_term_x)
             [attr_term, fn, node_cmp_type]
@@ -69,9 +69,9 @@ module DTK; class Attribute::Pattern
         def self.parse(source_term)
           # TODO: change after fix stripping off of ""
           if source_term =~ /(^[^\$]*)\$\{([^\}]+)\}(.*)/
-            str_part1 = $1
-            attr_term = $2
-            str_part2 = $3
+            str_part1 = Regexp.last_match(1)
+            attr_term = Regexp.last_match(2)
+            str_part2 = Regexp.last_match(3)
             fn = {
               function: {
                 name: :var_embedded_in_text,

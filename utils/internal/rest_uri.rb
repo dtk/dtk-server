@@ -3,8 +3,8 @@ module XYZ
     class << self
       def parse_factory_uri(factory_uri)
         if factory_uri =~ %r{(.*)/(.+)}
-          parent_uri = $1 == '' ? '/' : $1
-          relation_type = $2.to_sym
+          parent_uri = Regexp.last_match(1) == '' ? '/' : Regexp.last_match(1)
+          relation_type = Regexp.last_match(2).to_sym
 
     raise Error.new("invalid relation type '#{relation_type}'") if DB_REL_DEF[relation_type].nil?
           [relation_type, parent_uri]
@@ -17,17 +17,17 @@ module XYZ
       def parse_instance_uri(instance_uri)
         instance_uri =~ %r{(.*)/(.+)} ?
           # instance_ref,factory_uri
-          [$2, $1] : nil
+          [Regexp.last_match(2), Regexp.last_match(1)] : nil
       end
 
       def ret_top_container_relation_type(uri)
         uri =~ %r{^/([^/]+)}
-        $1.to_sym
+        Regexp.last_match(1).to_sym
       end
 
       def ret_top_container_uri(uri)
         uri =~ %r{^(/[^/]+/[^/]+)/}
-        $1
+        Regexp.last_match(1)
       end
 
       def ret_relation_type_from_instance_uri(instance_uri)

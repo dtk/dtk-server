@@ -40,7 +40,7 @@ module DTK
       # compute default
       default_assign = AttributeComplexType.ravel_raw_post_hash({ field_def_update['id'] => field_def_update['default'] }, :attribute, component[:id]).first
       attr_mh = component.model_handle.createMH(:attribute)
-      attr_hash = Aux::hash_subset(field_def_update, UpdateFields - %w{default i18n}).merge(default_assign)
+      attr_hash = Aux::hash_subset(field_def_update, UpdateFields - %w(default i18n)).merge(default_assign)
       Model.update_from_rows(attr_mh, [attr_hash], partial_value: true)
 
       field_def = field_def_update['field_def']
@@ -50,7 +50,7 @@ module DTK
       component.update_attribute_i18n_label(field_def['name'], label) if label
       field_def.merge(Aux::hash_subset(field_def_update, UpdateFields))
     end
-    UpdateFields = %w{default description required, i18n}
+    UpdateFields = %w(default description required, i18n)
 
     def self.convert_to_model_def_form(cmp_attrs_obj)
       component_i18n = cmp_attrs_obj.get_component_i18n_label()

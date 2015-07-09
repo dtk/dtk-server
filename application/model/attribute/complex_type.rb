@@ -51,7 +51,8 @@ module XYZ
 
     def self.ravel_raw_post_hash_attribute!(ret, attributes_hash, parent_id = nil)
       attributes_hash.each do |k, attr_hash|
-        id, path = (k =~ AttrIdRegexp) && [$1.to_i, $2]
+        id = (k =~ AttrIdRegexp)
+        path = [Regexp.last_match(1).to_i, Regexp.last_match(2)]
         next unless id
         ret[id] ||= { id: id }
 
@@ -70,19 +71,23 @@ module XYZ
     AttrIdRegexp = Regexp.new("^#{TypeMapping[:attribute]}#{Delim::Common}([0-9]+)(.*$)")
 
     def self.ravel_raw_post_hash_attribute_aux!(ret, index, hash, path, change_path)
-      next_index, rest_path = (path =~ NumericIndexRegexp) && [$1.to_i, $2]
+      next_index = (path =~ NumericIndexRegexp)
+      rest_path = [Regexp.last_match(1).to_i, Regexp.last_match(2)]
       if path =~ NumericIndexRegexp
-        next_index, rest_path = [$1.to_i, $2]
+        next_index = Regexp.last_match(1).to_i
+        rest_path = Regexp.last_match(2)
         change_path << next_index
         ret[index] ||= ArrayObject.new
         # make sure that  ret[index] has enough rows
         ret[index] << nil while ret[index].size <= next_index
       elsif path =~ KeyWithRestRegexp
-        next_index, rest_path = [$1, $2]
+        next_index = Regexp.last_match(1)
+        rest_path = Regexp.last_match(2)
         change_path << next_index
         ret[index] ||= {}
       elsif path =~ KeyWORestRegexp
-        next_index, rest_path = [$1, '']
+        next_index = Regexp.last_match(1)
+        rest_path = ''
         change_path << next_index
         ret[index] ||= {}
       else

@@ -224,7 +224,7 @@ module XYZ
               cols_to_add_remote = remote_col_info.map do |r|
                 qualified_col = r[:join_cond].values.first
                 # strip off model_name__ prefix and discard non matching prefixes
-                (qualified_col.to_s =~ Regexp.new('^(.+)__(.+)$')) ? ($1.to_sym == model_name ? $2.to_sym : nil) : qualified_col
+                (qualified_col.to_s =~ Regexp.new('^(.+)__(.+)$')) ? (Regexp.last_match(1).to_sym == model_name ? Regexp.last_match(2).to_sym : nil) : qualified_col
               end.compact
               cols_to_add = cols_to_add + cols_to_add_remote
             end

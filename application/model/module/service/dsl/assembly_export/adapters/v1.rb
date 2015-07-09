@@ -64,7 +64,7 @@ module DTK
         # TODO: assumption that port_ref == display_name
         port_ref = qualified_port_ref.split('/').last
         p = Port.parse_port_display_name(port_ref)
-        node_ref = (qualified_port_ref =~ Regexp.new('^/node/([^/]+)'); $1)
+        node_ref = (qualified_port_ref =~ Regexp.new('^/node/([^/]+)'); Regexp.last_match(1))
         unless matching_node = self[:node].find { |ref, _hash| ref == node_ref }
           raise Error.new("Cannot find matching node for node ref #{node_ref})")
         end

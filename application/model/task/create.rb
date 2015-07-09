@@ -42,7 +42,8 @@ module DTK; class Task
       ret = create_top_level_task(task_mh, assembly, Aux.hash_subset(opts, [:commit_msg, :task_action]))
       assembly_nodes = assembly.get_leaf_nodes(cols: [:id, :display_name, :type, :external_ref, :admin_op_status])
 
-      start_nodes, create_nodes = [], []
+      start_nodes = []
+      create_nodes = []
       assembly_nodes.reject! { |n| n[:type].eql?('assembly_wide') }
       assembly_nodes.each do |a_node|
         if a_node[:admin_op_status].eql?('pending')

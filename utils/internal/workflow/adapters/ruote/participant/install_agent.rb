@@ -4,7 +4,7 @@ module DTK
       class InstallAgent < Top
         def consume(workitem)
           params = get_params(workitem)
-          task_id, action, workflow, task, task_start, task_end = %w{task_id action workflow task task_start task_end}.map { |k| params[k] }
+          task_id, action, workflow, task, task_start, task_end = %w(task_id action workflow task task_start task_end).map { |k| params[k] }
 
           parent   = nil
           subtasks = workflow.top_task[:subtasks]
@@ -65,7 +65,7 @@ module DTK
           return if flavour
           wi = workitem
           params = get_params(wi)
-          task_id, action, workflow, task, task_start, task_end = %w{task_id action workflow task task_start task_end}.map { |k| params[k] }
+          task_id, action, workflow, task, task_start, task_end = %w(task_id action workflow task task_start task_end).map { |k| params[k] }
           log_participant.canceling(task_id)
 
           callbacks = {

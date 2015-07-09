@@ -16,7 +16,7 @@ module DTK
       end
 
       def import
-        type = (dsl_file =~ DslRegExp; $1)
+        type = (dsl_file =~ DslRegExp; Regexp.last_match(1))
         assembly, assembly_ref = ret_assembly_info(:assembly)
         sub_assembly, sa_ref = ret_assembly_info(:add_on_sub_assembly)
         ao_input_hash = {

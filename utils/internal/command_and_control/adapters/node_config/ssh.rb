@@ -18,7 +18,8 @@ module DTK
   class SSHDriverTest1
     def self.test_start(_task_idh, _top_task_idh, task_action, opts)
       @connections = []
-      install_script_file_path, upload_error = nil, false
+      install_script_file_path = nil
+      upload_error = false
 
       if node = task_action[:node]
         external_ref = node[:external_ref]

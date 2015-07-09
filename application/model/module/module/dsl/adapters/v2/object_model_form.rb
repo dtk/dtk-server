@@ -302,7 +302,7 @@ module DTK; class ModuleDSL; class V2
         if AutomicTypes.include?(type)
           attr_props.merge!('data_type' => type)
         elsif type =~ /^array\((.+)\)$/
-          scalar_type = $1
+          scalar_type = Regexp.last_match(1)
           if ScalarTypes.include?(scalar_type)
             semantic_type = { ':array' => scalar_type }
             attr_props.merge!('data_type' => 'json', 'semantic_type_summary' => type, 'semantic_type' => semantic_type)
@@ -313,8 +313,8 @@ module DTK; class ModuleDSL; class V2
         end
         attr_props
       end
-      ScalarTypes = %w{integer string boolean}
-      AutomicTypes = ScalarTypes + %w{json}
+      ScalarTypes = %w(integer string boolean)
+      AutomicTypes = ScalarTypes + %w(json)
 
       # partitions into link_defs, "dependency", and "component_order"
       def add_dependent_components!(ret, input_hash, base_cmp, opts = {})
@@ -473,11 +473,13 @@ module DTK; class ModuleDSL; class V2
       def convert_attribute_mapping(input_am, base_cmp, dep_cmp, opts = {})
         # TODO: right now only treating constant on right hand side meaning only for <- case
         if input_am =~ /(^[^ ]+)[ ]*->[ ]*([^ ].*$)/
-          dep_attr, base_attr = [$1, $2]
+          dep_attr = Regexp.last_match(1)
+          base_attr = Regexp.last_match(2)
           left = convert_attr_ref_simple(dep_attr, :dep, dep_cmp, :output)
           right = convert_attr_ref_simple(base_attr, :base, base_cmp, :input)
         elsif input_am =~ /(^[^ ]+)[ ]*<-[ ]*([^ ].*$)/
-          dep_attr, base_attr = [$1, $2]
+          dep_attr = Regexp.last_match(1)
+          base_attr = Regexp.last_match(2)
           left = convert_attr_ref_base(base_attr, base_cmp, dep_attr, dep_cmp, :output, opts)
           right = convert_attr_ref_simple(dep_attr, :dep, dep_cmp, :input)
         else
@@ -492,8 +494,8 @@ module DTK; class ModuleDSL; class V2
           if input_or_output == :input
             raise ParsingError.new('Attribute reference (?1) is ill-formed', attr_ref)
           end
-          prefix = $1
-          attr = $2
+          prefix = Regexp.last_match(1)
+          attr = Regexp.last_match(2)
           case prefix
           when '$node' then (dep_or_base == :dep) ? 'remote_node' : 'local_node'
           else raise ParsingError.new('Attribute reference (?1) is ill-formed', attr_ref)
@@ -527,7 +529,7 @@ module DTK; class ModuleDSL; class V2
         datatype = :string
         const = nil
         if attr_ref =~ /^'(.+)'$/
-          const = $1
+          const = Regexp.last_match(1)
         elsif ['true', 'false'].include?(attr_ref)
           const = attr_ref
           datatype = :boolean

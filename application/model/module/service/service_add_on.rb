@@ -35,8 +35,8 @@ module DTK
       matching_instance_nums = []
       existing_sub_assemblies.each do |a|
         if a[:display_name] =~ Regexp.new("^#{name_prefix}(.*$)")
-          suffix = $1
-          suffix_num  = (suffix.empty? ? 1 : (suffix =~ /^-([0-9]+$)/; $1))
+          suffix = Regexp.last_match(1)
+          suffix_num  = (suffix.empty? ? 1 : (suffix =~ /^-([0-9]+$)/; Regexp.last_match(1)))
           matching_instance_nums << suffix_num.to_i
         end
       end

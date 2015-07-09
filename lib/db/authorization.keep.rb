@@ -51,8 +51,8 @@ module XYZ
 controller_line = caller.find { |x| x =~ /application\/controller/ }
 controller = controller_line
 if controller_line =~ /controller\/(.+)\.rb:.+`(.+)'/
-  model = $1
-  fn = $2
+  model = Regexp.last_match(1)
+  fn = Regexp.last_match(2)
   controller = "#{model}##{fn}"
 end
 unless ['target#get_nodes_status'].include?(controller) #ignore list

@@ -133,12 +133,12 @@ module XYZ
         def parse!(segments_from_error, _prev_segment)
           line = segments_from_error[1] && segments_from_error[1].line
           if line =~ /INFO: error: (.+$)/
-            @error_detail = $1
+            @error_detail = Regexp.last_match(1)
             return
           end
           line = segments_from_error[0].line
           if line =~ /ERROR: (.+$)/
-            @error_detail = $1
+            @error_detail = Regexp.last_match(1)
             return
           end
         end
@@ -156,7 +156,7 @@ module XYZ
 
         def parse!(segments_from_error, _prev_segment)
           if segments_from_error.last.line =~ /Chef::Exceptions::Exec - (.+$)/
-            @error_detail = "Exec error: #{$1}"
+            @error_detail = "Exec error: #{Regexp.last_match(1)}"
           else
             @error_detail = 'Exec error'
           end
@@ -171,9 +171,9 @@ module XYZ
 
         def set_file_ref_and_error_lines!(segment)
           if segment.line =~ /\((.+)::(.+) line ([0-9]+)\) had an error/
-            cookbook ||= $1
-            recipe_filename ||= "#{$2}.rb"
-            @error_line_num ||= $3.to_i
+            cookbook ||= Regexp.last_match(1)
+            recipe_filename ||= "#{Regexp.last_match(2)}.rb"
+            @error_line_num ||= Regexp.last_match(3).to_i
             @error_file_ref ||= ChefFileRef.recipe(cookbook, recipe_filename)
             started = nil
             (segment.aux_data || []).each do |l|
@@ -199,7 +199,7 @@ module XYZ
 
         def parse!(segments_from_error, _prev_segment)
           if segments_from_error.last.line =~ /Chef::Mixin::Template::TemplateError - (.+$)/
-            @error_detail = "Template error: #{$1}".gsub(/ for #<Erubis::Context:[^>]+>/, '')
+            @error_detail = "Template error: #{Regexp.last_match(1)}".gsub(/ for #<Erubis::Context:[^>]+>/, '')
           else
             @error_detail = 'Template error'
           end
@@ -214,9 +214,9 @@ module XYZ
 
         def set_file_ref_and_error_lines!(line)
           if line =~ /template\[([^\]]+)\] \((.+) line ([0-9]+)/
-            template_resource = $1
-            recipe = $2
-            reciple_line_num = $3
+            template_resource = Regexp.last_match(1)
+            recipe = Regexp.last_match(2)
+            reciple_line_num = Regexp.last_match(3)
             @error_lines << "template resource: #{template_resource}" if template_resource
             @error_lines << "called from recipe: #{recipe} line #{reciple_line_num}"
             true
@@ -236,7 +236,7 @@ module XYZ
         def parse!(segments_from_error, _prev_segment)
           line = segments_from_error[0].line
           if line =~ /ERROR: (.+$)/
-            @error_detail = $1
+            @error_detail = Regexp.last_match(1)
           end
           return unless segments_from_error.size > 2
           segment = segments_from_error[2]
@@ -264,7 +264,7 @@ module XYZ
         FromFilePat = Regexp.new("#{RecipeCache}([^/]+)/recipes/([^:]+):([0-9]+):in `from_file'")
         def parse!(segments_from_error, _prev_segment)
           if segments_from_error.last.line =~ /DEBUG: Re-raising exception: (.+$)/
-            @error_detail = $1.gsub(/ for #<Chef::Recipe:[^>]+>/, '')
+            @error_detail = Regexp.last_match(1).gsub(/ for #<Chef::Recipe:[^>]+>/, '')
           else
             @error_detail = 'recipe error'
           end
@@ -288,21 +288,21 @@ module XYZ
 
         def set_file_ref!(line)
           if line =~ FromFilePat
-            cookbook ||= $1
-            recipe_filename ||= $2
-            @error_line_num ||= $3.to_i
+            cookbook ||= Regexp.last_match(1)
+            recipe_filename ||= Regexp.last_match(2)
+            @error_line_num ||= Regexp.last_match(3).to_i
             @error_file_ref ||= ChefFileRef.recipe(cookbook, recipe_filename)
             true
           elsif line =~ Regexp.new("#{RecipeCache}([^/]+)/recipes/([^:]+):([0-9]+):")
-            cookbook ||= $1
-            recipe_filename ||= $2
-            @error_line_num ||= $3.to_i
+            cookbook ||= Regexp.last_match(1)
+            recipe_filename ||= Regexp.last_match(2)
+            @error_line_num ||= Regexp.last_match(3).to_i
             @error_file_ref ||= ChefFileRef.recipe(cookbook, recipe_filename)
             true
           elsif line =~ /\((.+)::(.+) line ([0-9]+)\) has had an error/
-            cookbook ||= $1
-            recipe_filename ||= "#{$2}.rb"
-            @error_line_num ||= $3.to_i
+            cookbook ||= Regexp.last_match(1)
+            recipe_filename ||= "#{Regexp.last_match(2)}.rb"
+            @error_line_num ||= Regexp.last_match(3).to_i
             @error_file_ref ||= ChefFileRef.recipe(cookbook, recipe_filename)
             true
           end
@@ -321,7 +321,7 @@ module XYZ
         def parse!(segments_from_error, _prev_segment)
           line = segments_from_error[1].line
           if line =~ /ArgumentError: (.+$)/
-            @error_detail = $1
+            @error_detail = Regexp.last_match(1)
           end
         end
       end
@@ -338,7 +338,7 @@ module XYZ
         def parse!(segments_from_error, _prev_segment)
           line = segments_from_error[1].line
           if line =~ /Chef::Exceptions::CookbookNotFound: (.+$)/
-            @error_detail = $1
+            @error_detail = Regexp.last_match(1)
           end
         end
       end
@@ -349,8 +349,8 @@ module XYZ
           if segment.line =~ /looking for template (.+) in cookbook :(.+$)/
             hash = {
               type: :template,
-              cookbook: $2,
-              file_name: $1
+              cookbook: Regexp.last_match(2),
+              file_name: Regexp.last_match(1)
             }
             self.new(hash)
           end

@@ -48,7 +48,7 @@ module DTK
       def parse_assembly_node_ref(assembly_node_ref)
         # TODO: should also check that assembly_name is the service add on assembly or sub assembly
         if assembly_node_ref =~ Regexp.new('(^[^/]+)/([^/]+$)')
-          [$1, $2]
+          [Regexp.last_match(1), Regexp.last_match(2)]
         else
           raise ErrorIllFormedTerm.new('assembly node ref', assembly_node_ref)
         end

@@ -585,7 +585,7 @@ module DTK
      :is_factory => unformated_row[:is_factory],
      :db_rel => unformated_row[:relation_name].nil? ? nil :
        (unformated_row[:relation_name] =~ %r{(.+)\.(.+)}) ?
-         DBRel[schema: $1.to_sym, table: $2.to_sym] :
+         DBRel[schema: Regexp.last_match(1).to_sym, table: Regexp.last_match(2).to_sym] :
          DBRel[schema: :public, table: unformated_row[:relation_name].to_sym]]
         end
 

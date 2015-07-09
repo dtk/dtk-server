@@ -28,7 +28,7 @@ module DTK
     def self.convert_hash(item)
       return item unless item.is_a?(Hash)
       item.inject({}) do |h, kv|
-        new_key = kv[0].to_s =~ /^:(.+$)/ ? $1.to_sym : kv[0].to_s
+        new_key = kv[0].to_s =~ /^:(.+$)/ ? Regexp.last_match(1).to_sym : kv[0].to_s
         h.merge(new_key =>  convert_hash(kv[1]))
       end
     end

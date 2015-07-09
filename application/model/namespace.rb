@@ -58,9 +58,11 @@ module DTK
     # returns [namespace,name]; namespace can be null if cant determine it
     def self.full_module_name_parts?(name_or_full_module_name)
       if name_or_full_module_name =~ Regexp.new("(^.+)#{namespace_delimiter()}(.+$)")
-        namespace, name = [$1, $2]
+        namespace = Regexp.last_match(1)
+        name = Regexp.last_match(2)
       else
-        namespace, name = [nil, name_or_full_module_name]
+        namespace = nil
+        name = name_or_full_module_name
       end
       [namespace, name]
     end

@@ -224,8 +224,8 @@ module Ramaze::Helper
       return ret unless query_string
       # TBD: not yet looking for errors in the query string
       query_string.scan(%r{([/A-Za-z0-9_]+)=([/A-Za-z0-9_]+)}) do
-        key = $1.to_sym
-        value = $2
+        key = Regexp.last_match(1).to_sym
+        value = Regexp.last_match(2)
         if value == 'true'
           ret[key] = true
         elsif value == 'false'

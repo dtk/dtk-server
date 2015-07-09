@@ -4,7 +4,7 @@ module XYZ
       class Node < Top
         definitions do
           target[:display_name] = fn(:display_name, source)
-          %w{tag disk_size ui}.each do |key|
+          %w(tag disk_size ui).each do |key|
             target[key.to_sym] = source[key]
           end
         end

@@ -96,8 +96,8 @@ module DTK
           line.gsub!(/\s*$/, '')
           unless line =~ /^#|^$/
             if (line =~ /(.+?)\s*=\s*(.+)/)
-              key = $1
-              val = $2
+              key = Regexp.last_match(1)
+              val = Regexp.last_match(2)
               ret[key] = val
             end
           end

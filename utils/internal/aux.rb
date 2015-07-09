@@ -209,7 +209,7 @@ module DTK
 
       def format_type(file_path)
         if file_path =~ /\.(json|yaml)$/
-          $1.to_sym
+          Regexp.last_match(1).to_sym
         else
           raise Error.new("Unexpected meta file path name (#{path})")
         end
@@ -434,15 +434,15 @@ module Kernel
   private
 
    def this_method
-     caller[0] =~ /`([^']*)'/ && $1
+     caller[0] =~ /`([^']*)'/ && Regexp.last_match(1)
    end
 
    def this_parent_method
-     caller[1] =~ /`([^']*)'/ && $1
+     caller[1] =~ /`([^']*)'/ && Regexp.last_match(1)
    end
 
    def this_parent_parent_method
-     caller[2] =~ /`([^']*)'/ && $1
+     caller[2] =~ /`([^']*)'/ && Regexp.last_match(1)
    end
 end
 

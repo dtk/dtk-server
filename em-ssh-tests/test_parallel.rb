@@ -35,7 +35,8 @@ EM.run do
     end
 
     connection.callback do |ssh|
-      install_script_file_path, upload_error = nil, false
+      install_script_file_path = nil
+      upload_error = false
 
       ssh.exec!('rm -rf /tmp/dtk-node-agent') do |_channel, stream, data|
         puts "#{conn_host}: #{data}" if stream == :stdout

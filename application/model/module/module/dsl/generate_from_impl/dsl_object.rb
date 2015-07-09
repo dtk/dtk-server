@@ -180,7 +180,7 @@ module DTK; class ModuleDSL
       ###utilities
       def is_foreign_component_name?(name)
         if name =~ /(^.+)::.+$/
-          prefix = $1
+          prefix = Regexp.last_match(1)
           prefix == module_name ? nil : true
         end
       end

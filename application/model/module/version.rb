@@ -65,7 +65,7 @@ module DTK
       end
       def self.create_from_string(str)
         if str =~ StringPattern
-          assembly_name = $1
+          assembly_name = Regexp.last_match(1)
           new(assembly_name)
         end
       end

@@ -140,7 +140,8 @@ module DTK
         def poll_to_detect_node_ready(workflow, node, callbacks)
           # num_poll_cycles => number of times we are going to poll given node
           # poll_cycles     => cycle of poll in seconds
-          num_poll_cycles, poll_cycle = 50, 6
+          num_poll_cycles = 50
+          poll_cycle = 6
           receiver_context = { callbacks: callbacks, expected_count: 1 }
           opts = { count: num_poll_cycles, poll_cycle: poll_cycle }
           workflow.poll_to_detect_node_ready(node, receiver_context, opts)

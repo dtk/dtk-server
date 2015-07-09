@@ -11,7 +11,7 @@ module DTK; class ServiceSetting
       def self.each_element(settings_hash, attr_prefix = nil, &block)
         settings_hash.each_pair do |key, body|
           if key =~ Regexp.new("(^.+)#{ContextDelim}$")
-            attr_part = $1
+            attr_part = Regexp.last_match(1)
             nested_attr_prefix = compose_attr(attr_prefix, attr_part)
             if body.is_a?(Hash)
               each_element(body, nested_attr_prefix, &block)

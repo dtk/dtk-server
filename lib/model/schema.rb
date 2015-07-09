@@ -323,8 +323,8 @@ module DTK
         (join_info[:join_cond] || {}).each_key do |k|
           local_col = k
           if k.to_s =~ /(^.+)__(.+$)/
-            next unless $1.to_sym = join_info[:model_name]
-            local_col = $2.to_sym
+            next unless Regexp.last_match(1).to_sym = join_info[:model_name]
+            local_col = Regexp.last_match(2).to_sym
           end
           join_info[:cols] << local_col unless join_info[:cols].include?(local_col)
         end

@@ -20,7 +20,7 @@ module DTK; class ActionDef; class Content
 
       def self.parse?(serialized_command)
         if serialized_command.is_a?(String) && serialized_command =~ Constant::Command::RunRegexp
-          command_line = $1
+          command_line = Regexp.last_match(1)
           new(serialized_command, command_line)
         elsif command_line = serialized_command.is_a?(Hash) && (serialized_command[:command] || serialized_command[:RUN])
           additional_options = {

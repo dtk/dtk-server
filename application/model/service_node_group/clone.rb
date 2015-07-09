@@ -41,7 +41,8 @@ module DTK; class ServiceNodeGroup
     # if opts[:node_group_components] then filter to only include components corresponding
     # to these node_group_components
     def self.determine_cloned_components(node_group, node_members, opts)
-      needs_cloning, cloned_components = [], []
+      needs_cloning = []
+      cloned_components = []
       ret = [needs_cloning, cloned_components]
       return ret if node_members.empty?()
       node_group_id = node_group.id()

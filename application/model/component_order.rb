@@ -75,7 +75,7 @@ module DTK
           eq_stmt =  cnd.values.first
           if eq_stmt.is_a?(Array) && eq_stmt[0] == ':eq'
             if cnd.values.first[1] =~ /:attribute\.(.+$)/ && eq_stmt[2]
-              attr_name = $1
+              attr_name = Regexp.last_match(1)
               val = eq_stmt[2]
               unexepected_form = false
               match_cond = [:eq, :attribute_value, val]

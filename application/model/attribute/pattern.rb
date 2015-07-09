@@ -6,13 +6,13 @@ module DTK; class Attribute
     r8_nested_require('pattern', 'term')
 
     def self.node_name
-      (pattern =~ NodeComponentRegexp ? $1 : raise_unexpected_pattern(pattern))
+      (pattern =~ NodeComponentRegexp ? Regexp.last_match(1) : raise_unexpected_pattern(pattern))
     end
     def self.component_fragment(pattern)
-      (pattern =~ NodeComponentRegexp ? $2 : raise_unexpected_pattern(pattern))
+      (pattern =~ NodeComponentRegexp ? Regexp.last_match(2) : raise_unexpected_pattern(pattern))
     end
     def self.attribute_fragment(pattern)
-      (pattern =~ AttrRegexp ? $1 : raise_unexpected_pattern(pattern))
+      (pattern =~ AttrRegexp ? Regexp.last_match(1) : raise_unexpected_pattern(pattern))
     end
     Delim = "#{Term::EscpLDelim}[^#{Term::EscpRDelim}]*#{Term::EscpRDelim}"
     DelimWithSelect = "#{Term::EscpLDelim}([^#{Term::EscpRDelim}]*)#{Term::EscpRDelim}"

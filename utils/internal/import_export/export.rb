@@ -27,8 +27,8 @@ module XYZ
       raise Error.new("Target given (#{target_id_handle}) does not exist") unless target_id_info
       prefix =
         if opts[:prefix_is_top] then '/'
-        elsif target_id_info[:uri] =~ %r{(^/.+?/.+?)/.+$} then $1
-        elsif target_id_info[:uri] =~ %r{(^/.+/.+$)} then $1
+        elsif target_id_info[:uri] =~ %r{(^/.+?/.+?)/.+$} then Regexp.last_match(1)
+        elsif target_id_info[:uri] =~ %r{(^/.+/.+$)} then Regexp.last_match(1)
         else raise Error.new
       end
       get_objs_opts = {

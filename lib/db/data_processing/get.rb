@@ -208,7 +208,7 @@ module XYZ
                 if opts[:fk_as_ref] == '/'
                   hash[('*' + col.to_s).to_sym] = fk_id_info[:uri]
                 elsif fk_id_info[:uri] =~ Regexp.new("^#{opts[:fk_as_ref]}(/.+$)")
-                  rebased_uri = $1
+                  rebased_uri = Regexp.last_match(1)
                   hash[('*' + col.to_s).to_sym] = rebased_uri
                 end
               end

@@ -72,7 +72,7 @@ module DTK; class Attribute
 
       def first_name_in_fragment(fragment)
         fragment =~ NameInFragmentRegexp
-        $1
+        Regexp.last_match(1)
       end
       NameInFragmentRegexp = /[^<]*<([^>]*)>/
     end

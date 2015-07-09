@@ -116,7 +116,8 @@ module DTK; class AssemblyModule
     end
 
     def self.list_remote_diffs(_model_handle, module_id, repo, module_branch, workspace_branch, opts)
-      diffs, diff = [], nil
+      diffs = []
+      diff = nil
       remote_repo_cols = [:id, :display_name, :version, :remote_repos, :dsl_parsed]
       project_idh      = opts[:project_idh]
 

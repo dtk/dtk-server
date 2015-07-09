@@ -91,7 +91,8 @@ module DTK
 
     def local_and_remote_versions(client_rsa_pub_key = nil, opts = {})
       Log.error('TODO: see if namespace treatment must be updated')
-      module_name, remote_versions = nil, []
+      module_name = nil
+      remote_versions = []
 
       # get local versions list
       local_versions = get_objs(cols: [:version_info]).map do |r|

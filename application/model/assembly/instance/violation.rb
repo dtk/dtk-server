@@ -127,7 +127,8 @@ module DTK
 
         # check if allowed number of nodes is exceeded (only for builtin target)
         if target.is_builtin_target?
-          new_nodes, current_nodes = [], []
+          new_nodes = []
+          current_nodes = []
 
           self.get_leaf_nodes().each do |l_node|
             # we need only nodes that are currently not running

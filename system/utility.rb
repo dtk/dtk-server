@@ -72,7 +72,7 @@ module R8Tpl
 
         # returns first array index
         def self.ret_removed_array_index(input_string)
-          [input_string.to_s.sub(XYZ::Model::Delim::NumericIndexRegexp, ''), $1 && $1.to_i]
+          [input_string.to_s.sub(XYZ::Model::Delim::NumericIndexRegexp, ''), Regexp.last_match(1) && Regexp.last_match(1).to_i]
         end
 
         def self.capitalize_words(s)

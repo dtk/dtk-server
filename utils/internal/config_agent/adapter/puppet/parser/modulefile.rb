@@ -8,7 +8,8 @@ module DTK; class ConfigAgent
           return ret
         end
 
-        content_hash, dependencies = {}, []
+        content_hash = {}
+        dependencies = []
         type = impl_obj[:type]
 
         content = RepoManager.get_file_content(modulefile_name, implementation: impl_obj)
@@ -18,7 +19,8 @@ module DTK; class ConfigAgent
           el.gsub!(/\'/, '')
 
           next unless match = el.match(/(\S+)\s(.+)/)
-          key, value = match[1], match[2]
+          key = match[1]
+          value = match[2]
           if key.to_s.eql?('dependency')
             dependencies << ExternalDependency.new(value)
           end

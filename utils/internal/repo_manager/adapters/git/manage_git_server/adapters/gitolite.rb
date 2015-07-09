@@ -197,12 +197,12 @@ module DTK
           if l =~ /^[ ]*include[ ]+.*/
             # we ignore this line
           elsif l =~ /^[ ]*repo[ ]+([^ ]+)/
-            unless $1 == repo_name
+            unless Regexp.last_match(1) == repo_name
               raise Error.new("Parsing error: expected repo to be (${repo_name} in (#{l})")
             end
           elsif l =~ /[ ]*([^ ]+)[ ]*=[ ]*(.+)$/
-            access_rights = $1
-            users = $2
+            access_rights = Regexp.last_match(1)
+            users = Regexp.last_match(2)
             users.scan(/[^ ]+/)  do |user|
               ret << { access_rights: access_rights, repo_username: user }
             end

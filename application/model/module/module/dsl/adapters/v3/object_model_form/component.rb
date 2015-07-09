@@ -56,7 +56,7 @@ module DTK; class ModuleDSL; class V3
           if type == 'array'
             type = 'array(string)'
           elsif type =~ /^array\((.+)\)$/
-            nested_type = $1
+            nested_type = Regexp.last_match(1)
           else
             raise ParsingError.new('Ill-formed attribute data type (?1)', type)
           end

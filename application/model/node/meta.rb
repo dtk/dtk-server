@@ -619,7 +619,7 @@ module DTK
         ]
 
       # TODO: just for testing
-      application_basic_types = %w{application service database language extension}
+      application_basic_types = %w(application service database language extension)
       # in dock 'applications means wider than basic_type == applicationsn
       virtual_column :applications, type: :json, hidden: true,
       remote_dependencies:         [

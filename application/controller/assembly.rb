@@ -850,7 +850,8 @@ module DTK
       target_nodes = ret_matching_nodes(assembly)
 
       # check existance of key and system user in database
-      system_user, key_name = params[:system_user], params[:rsa_pub_name]
+      system_user = params[:system_user]
+      key_name = params[:rsa_pub_name]
       nodes = Component::Instance::Interpreted.find_candidates(assembly, system_user, key_name, agent_action, target_nodes)
 
       queue = initiate_action_with_nodes(SSHAccess, nodes, params.merge(agent_action: agent_action)) do

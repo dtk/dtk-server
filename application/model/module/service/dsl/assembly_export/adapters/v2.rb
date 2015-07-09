@@ -112,7 +112,7 @@ module DTK
       def parse_port_ref(qualified_port_ref, node_ref_to_name)
         port_ref = qualified_port_ref.split('/').last
         p = Port.parse_port_display_name(port_ref)
-        node_ref = (qualified_port_ref =~ Regexp.new('^/node/([^/]+)'); $1)
+        node_ref = (qualified_port_ref =~ Regexp.new('^/node/([^/]+)'); Regexp.last_match(1))
         component_name = component_name_output_form(p[:component_type])
         ret = { node_name: node_ref_to_name[node_ref], component_name: component_name, link_def_ref: p[:link_def_ref] }
         if title = p[:title]

@@ -423,7 +423,8 @@ module DTK
     end
 
     def self.ret_component_with_namespace_for_node(cmp_mh, cmp_name, node_id, namespace, assembly)
-      ret_cmp, match_cmps = nil, []
+      ret_cmp = nil
+      match_cmps = []
       display_name = display_name_from_user_friendly_name(cmp_name)
       # display_name = cmp_name.gsub(/::/,"__")
       sp_hash = {

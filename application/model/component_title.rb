@@ -32,7 +32,8 @@ module DTK
       node_name = component_type = title = nil
       cmp_node_part = nil
       if cmp_display_name =~ ComponentTitleRegex
-        cmp_node_part, title = [$1, $2]
+        cmp_node_part = Regexp.last_match(1)
+        title = Regexp.last_match(2)
       else
         cmp_node_part = cmp_display_name
       end
@@ -43,7 +44,8 @@ module DTK
         ret = [component_type, title]
       else
         if cmp_node_part =~ SplitNodeComponentType
-          node_name, component_type = [$1, $2]
+          node_name = Regexp.last_match(1)
+          component_type = Regexp.last_match(2)
         else
           component_type = cmp_node_part
         end
@@ -61,7 +63,7 @@ module DTK
 
     def self.parse_title?(cmp_display_name)
       if cmp_display_name =~ ComponentTitleRegex
-        $2
+        Regexp.last_match(2)
       end
     end
     ComponentTitleRegex = /(^.+)\[(.+)\]$/

@@ -57,7 +57,7 @@ module DTK
     end
 
     def self.ret_create_hash(impl_obj, type, path, content = nil)
-      file_name = (path =~ Regexp.new('/([^/]+$)')) ? $1 : path
+      file_name = (path =~ Regexp.new('/([^/]+$)')) ? Regexp.last_match(1) : path
       {
         type: type,
         ref: file_asset_ref(path),

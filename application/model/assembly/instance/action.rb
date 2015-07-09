@@ -48,8 +48,8 @@ module DTK
           data.each do |r|
             next unless r[:state] == 'LISTEN' || r[:protocol] == 'udp'
             if r[:local] =~ /(^.+):([0-9]+$)/
-              address = $1
-              port = $2.to_i
+              address = Regexp.last_match(1)
+              port = Regexp.last_match(2).to_i
               next unless address =~ /^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$|::/
               ndx_ret["#{address}_#{port}"] ||= {
                 port: port,

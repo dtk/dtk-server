@@ -127,8 +127,8 @@ module DTK; class ModuleDSL
           processed_name = component_ps[:name]
          # if qualified name make sure matches module name
          if processed_name =~ /(^[^:]+)::(.+$)/
-            prefix = $1
-            unqual_name = $2
+            prefix = Regexp.last_match(1)
+            unqual_name = Regexp.last_match(2)
             unless prefix == module_name
               raise ErrorUsage::Parsing.new("Component (#{processed_name}) has a module name not equal to the base module name (#{module_name})")
             end

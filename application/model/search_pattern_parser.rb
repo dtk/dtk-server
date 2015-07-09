@@ -287,7 +287,7 @@ return :eq if term_in_json == ':'
       raise ErrorParsing.new(:symbol, term_in_json) if [Array, Hash].detect { |t| term_in_json.is_a?(t) }
       # complexity due to handle case where have form :":columns"
       return term_in_json.to_s.gsub(/^[:]+/, '').to_sym if term_in_json.is_a?(Symbol)
-      return $1.to_sym if (term_in_json.is_a?(String) && term_in_json =~ /^[:]+(.+)/)
+      return Regexp.last_match(1).to_sym if (term_in_json.is_a?(String) && term_in_json =~ /^[:]+(.+)/)
       term_in_json
     end
 

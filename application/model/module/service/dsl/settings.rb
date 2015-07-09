@@ -84,7 +84,7 @@ module DTK
         regexp = setting_dsl_path_info[:regexp]
         ret.reject! { |f| not (f =~ regexp) }
         ret_with_removed_variants(ret).each do |meta_file|
-          unless assembly_name = (if meta_file =~ regexp then $1; end)
+          unless assembly_name = (if meta_file =~ regexp then Regexp.last_match(1); end)
             raise Error.new('Cannot find assembly name')
           end
           block.call(meta_file, assembly_name)

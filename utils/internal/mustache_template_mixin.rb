@@ -34,7 +34,7 @@ module DTK
       rescue ::Mustache::ContextMiss => mustache_gem_err
         str_err = mustache_gem_err.message
         if str_err =~ /^Can't find ([^\s]+) in/
-          missing_var = $1
+          missing_var = Regexp.last_match(1)
           raise MustacheTemplateError::MissingVar.new(missing_var)
         else
           raise MustacheTemplateError.new(str_err)

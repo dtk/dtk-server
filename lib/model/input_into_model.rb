@@ -163,12 +163,12 @@ module XYZ
     def ret_rebased_uri(uri_x, prefixes, container_uri = nil)
       relation_type_string = stripped_uri = ref = nil
       if uri_x =~ %r{^/(.+?)/(.+?)(/.+$)}
-         relation_type_string = $1
-         ref = $2
-         stripped_uri = $3
+         relation_type_string = Regexp.last_match(1)
+         ref = Regexp.last_match(2)
+         stripped_uri = Regexp.last_match(3)
       elsif  uri_x =~ %r{^/(.+)/(.+$)}
-         relation_type_string = $1
-         ref = $2
+         relation_type_string = Regexp.last_match(1)
+         ref = Regexp.last_match(2)
          stripped_uri = ''
       else
         # TODO: double check that everything that works heer is fine;being no op seems to work fine when uri_x is "" because it is referencing top level object like aproject
@@ -179,8 +179,8 @@ module XYZ
       prefix_matches = []
       prefixes.each do|prefix|
   prefix =~ %r{^.+/(.+?)/(.+?$)}
-  raise Error unless prefix_ref = $2
-        prefix_rt = $1
+  raise Error unless prefix_ref = Regexp.last_match(2)
+        prefix_rt = Regexp.last_match(1)
   if relation_type_string == prefix_rt
     if ref == prefix_ref
       return prefix + stripped_uri

@@ -15,7 +15,9 @@ module DTK; class Target
     def install
       # we get all the nodes that are 'unmanaged', meaning they are physical nodes that does not have node agent installed
       unmanaged_nodes = @target.get_objs(cols: [:unmanaged_nodes]).map { |r| r[:node] }
-      servers, install_script, mcollective_client = [], nil, nil
+      servers = []
+      install_script = nil
+      mcollective_client = nil
 
       # TODO: better to use tempfile library; see how it is used in ../server/utils/internal/command_and_control/adapters/node_config/mcollective/config.rb
       install_script_file_path = "#{R8.app_user_home()}/install_script"

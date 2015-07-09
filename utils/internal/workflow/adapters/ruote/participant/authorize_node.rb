@@ -5,7 +5,7 @@ module DTK
         def consume(workitem)
           params = get_params(workitem)
           PerformanceService.start(name(), object_id)
-          task_id, action, workflow, task, task_start, task_end = %w{task_id action workflow task task_start task_end}.map { |k| params[k] }
+          task_id, action, workflow, task, task_start, task_end = %w(task_id action workflow task task_start task_end).map { |k| params[k] }
           task.update_input_attributes!() if task_start
 
           user_object  = CurrentSession.new.user_object()
@@ -72,7 +72,7 @@ module DTK
 
           wi = workitem
           params = get_params(wi)
-          task_id, action, workflow, task, task_start, task_end = %w{task_id action workflow task task_start task_end}.map { |k| params[k] }
+          task_id, action, workflow, task, task_start, task_end = %w(task_id action workflow task task_start task_end).map { |k| params[k] }
           task.add_internal_guards!(workflow.guards[:internal])
           log_participant.canceling(task_id)
           set_result_canceled(wi, task)

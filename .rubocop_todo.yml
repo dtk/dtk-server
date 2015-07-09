@@ -535,24 +535,24 @@ Style/OpMethod:
 # Offense count: 42
 # Cop supports --auto-correct.
 Style/ParallelAssignment:
-  Enabled: false
+  Enabled: true
 
 # Offense count: 171
 # Cop supports --auto-correct.
 # Configuration parameters: AllowSafeAssignment.
 Style/ParenthesesAroundCondition:
-  Enabled: false
+  Enabled: true
 
 # Offense count: 61
 # Cop supports --auto-correct.
 # Configuration parameters: PreferredDelimiters.
 Style/PercentLiteralDelimiters:
-  Enabled: false
+  Enabled: true
 
 # Offense count: 217
 # Cop supports --auto-correct.
 Style/PerlBackrefs:
-  Enabled: false
+  Enabled: true
 
 # Offense count: 138
 # Configuration parameters: NamePrefix, NamePrefixBlacklist.

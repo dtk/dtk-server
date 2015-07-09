@@ -61,7 +61,7 @@ module DTK; class LinkDef
         end
         link_def = r[:link_def]
         component = r[:component]
-        if %w{component_internal component_internal_external}.include?(port[:type]) &&
+        if %w(component_internal component_internal_external).include?(port[:type]) &&
             link_def[:local_or_remote] == 'local' and
             not port[:connected]
           link_def_id = link_def[:id]
@@ -77,7 +77,7 @@ module DTK; class LinkDef
       # internal_external have link_def_id in cmp_link_def_ids or remote_component_type == component_type
       sp_hash = {
         cols: [:link_def_id, :remote_component_type, :position, :content, :type],
-        filter: [:and, [:oneof, :type, %w{internal internal_external}],
+        filter: [:and, [:oneof, :type, %w(internal internal_external)],
                  [:oneof, :link_def_id, relevant_link_def_ids],
                  [:or, [:eq, :remote_component_type, component_type],
                   [:oneof, :link_def_id, cmp_link_def_ids]]],

@@ -31,7 +31,7 @@ module DTK
           return 'NODE'
         end
         if name =~ Regexp.new("^#{physical_node_prefix()}(.+$)")
-          $1
+          Regexp.last_match(1)
         else
           name
         end
@@ -62,7 +62,7 @@ module DTK
         ret = nil
         if display_name = target_ref.get_field?(:display_name)
           if display_name =~ Regexp.new("#{IndexDelim}([0-9]+$)")
-            ret = $1.to_i
+            ret = Regexp.last_match(1).to_i
           end
         end
         unless ret

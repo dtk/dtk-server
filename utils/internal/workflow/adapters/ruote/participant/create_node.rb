@@ -6,7 +6,7 @@ module DTK
         def consume(workitem)
           # LockforDebug.synchronize{pp [:in_consume, Thread.current, Thread.list];STDOUT.flush}
           params = get_params(workitem)
-          task_id, action, workflow, task, task_start, task_end = %w{task_id action workflow task task_start task_end}.map { |k| params[k] }
+          task_id, action, workflow, task, task_start, task_end = %w(task_id action workflow task task_start task_end).map { |k| params[k] }
           execution_context(task, workitem, task_start) do
             result = workflow.process_executable_action(task)
             if errors_in_result = errors_in_result?(result)
@@ -34,7 +34,7 @@ module DTK
 
           wi = workitem
           params = get_params(wi)
-          task_id, action, workflow, task, task_start, task_end = %w{task_id action workflow task task_start task_end}.map { |k| params[k] }
+          task_id, action, workflow, task, task_start, task_end = %w(task_id action workflow task task_start task_end).map { |k| params[k] }
           task.add_internal_guards!(workflow.guards[:internal])
           log_participant.canceling(task_id)
           set_result_canceled(wi, task)

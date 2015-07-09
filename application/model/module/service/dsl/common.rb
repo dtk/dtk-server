@@ -32,13 +32,13 @@ module DTK
       def self.component_ref_info(cmp_type_ext_form)
         ref = component_ref(cmp_type_ext_form)
         if ref =~ CmpVersionRegexp
-          type = $1; version = $2
+          type = Regexp.last_match(1); version = Regexp.last_match(2)
         else
           type = ref; version = nil
         end
         if type =~ DSLComponentTitleRegex
-          type = $1
-          title = $2
+          type = Regexp.last_match(1)
+          title = Regexp.last_match(2)
           ref = ComponentTitle.ref_with_title(type, title)
           display_name = ComponentTitle.display_name_with_title(type, title)
         end

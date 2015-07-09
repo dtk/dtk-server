@@ -44,7 +44,7 @@ module DTK
            type == 'composite' ? :assembly : model_name
           when :node
            type = get_object_scalar_column(id_handle, :type)
-           %w{node_group_instance}.include?(type) ? :node_group : model_name
+           %w(node_group_instance).include?(type) ? :node_group : model_name
           when :target
            :target
           else

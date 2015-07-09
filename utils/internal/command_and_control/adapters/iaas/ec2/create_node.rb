@@ -240,7 +240,7 @@ module DTK; module CommandAndControlAdapter
               node_ref = @node.get_field?(:ref)
               # looking for form base_node_link--ASSEMBLY::NODE-EDLEMENT-NAME
               if node_ref =~ /^base_node_link--([^:]+):/
-                $1
+                Regexp.last_match(1)
               else
                 Log.error_pp(['Unexepected that cannot determine assembly name for node', @node])
               end

@@ -243,7 +243,7 @@ module DTK
       def assembly_meta_file_paths(module_branch, &block)
         meta_files, regexp = ServiceModule.meta_files_and_regexp?(module_branch)
         ret_with_removed_variants(meta_files).each do |meta_file|
-          default_assembly_name = (if meta_file =~ regexp then $1; end)
+          default_assembly_name = (if meta_file =~ regexp then Regexp.last_match(1); end)
           block.call(meta_file, default_assembly_name)
         end
       end
@@ -280,7 +280,8 @@ module DTK
         common_paths = {}
         paths.each do |path|
           if path =~ /(^.+)\.([^\.]+$)/
-            all_but_type, type = $1, $2
+            all_but_type = Regexp.last_match(1)
+            type = Regexp.last_match(2)
             if common_paths[all_but_type]
               two_variants_found = true
             else

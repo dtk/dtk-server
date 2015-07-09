@@ -42,12 +42,12 @@ module DTK; class Task; class Template
       def self.has_explicit_method?(serialized_item)
         # case on whether has title
         if serialized_item =~ /(^[^\[]+)\[([^\]]+)\](.*$)/
-          cmp_with_title = "#{$1}[#{$2}]"
-          dot_method = $3
+          cmp_with_title = "#{Regexp.last_match(1)}[#{Regexp.last_match(2)}]"
+          dot_method = Regexp.last_match(3)
           if dot_method.empty?
             nil
           elsif dot_method =~ /^\.(.+$)/
-            method = $1
+            method = Regexp.last_match(1)
             { component_name_ref: cmp_with_title, method_name: method }
           else
             raise_action_ref_error(serialized_item)

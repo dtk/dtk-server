@@ -681,18 +681,15 @@ module DTK
 
       opts = ret_params_hash(:commit_msg, :task_action, :task_params)
       if assembly_is_stopped
-        opts.merge!(start_node_changes: true, ret_nodes: [])
+        opts.merge!(start_node_changes: true, ret_nodes_to_start: [])
       end
       task = Task.create_from_assembly_instance(assembly, opts)
       task.save!()
 
       # TODO: clean up this part since this is doing more than creating task
-      nodes_to_start =  (opts[:ret_nodes] || []).reject { |n| n[:admin_op_status] == 'running' }
-      unless nodes_to_start.empty?
-        CreateThread.defer_with_session(CurrentSession.new.user_object(), Ramaze::Current.session) do
-          # invoking command to start the nodes
-          CommandAndControl.start_instances(nodes_to_start)
-        end
+      # This triggres start while in task have particpants that look for completion
+      unless (opts[:ret_nodes_to_start]||[]).empty?
+        Node.start_instances(opts[:ret_nodes_to_start])
       end
 
       rest_ok_response task_id: task.id
@@ -727,15 +724,8 @@ module DTK
       task = Task.task_when_nodes_ready_from_assembly(assembly, :assembly, opts)
       task.save!()
 
-      # queue = SimpleActionQueue.new
+      Node.start_instances(nodes)
 
-      user_object  = CurrentSession.new.user_object()
-      CreateThread.defer_with_session(user_object, Ramaze::Current.session) do
-        # invoking command to start the nodes
-        CommandAndControl.start_instances(nodes)
-      end
-
-      # queue.set_result(:task_id => task.id)
       rest_ok_response task_id: task.id
     end
 

@@ -87,7 +87,17 @@ module DTK; class StateChange
         fail Error.new('Only supporting option :just_leaf_nodes')
       end
       nodes = opts[:nodes] || assembly.get_leaf_nodes(cols: [:id, :display_name, :type, :external_ref, :admin_op_status])
-      nodes_to_start = nodes.reject { |n| n[:admin_op_status] == 'running' }
+      # TODO: need (probably higher up in calling change to handle when op state is other then
+      nodes_to_start = nodes.select do |n| 
+        op_status = n.get_and_update_operational_status!
+        case op_status
+          when 'stopped' then true
+          when 'running' then false
+          else
+            Log.info("TODO: need to figure best way to treat power on when op status is '#{op_status}'")
+            true
+          end
+      end
       return ret if nodes_to_start.empty?
 
       state_change_mh = assembly.model_handle(:state_change)

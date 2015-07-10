@@ -421,6 +421,16 @@ module DTK
       update_external_ref_field(:git_authorized, bool_val)
     end
 
+    # TODO: should do this in the workflow
+    # right now workflow has start participate that waits for start
+    def self.start_instances(nodes)
+      user_object  = CurrentSession.new.user_object()
+      CreateThread.defer_with_session(user_object, Ramaze::Current.session) do
+        # invoking command to start the nodes
+        CommandAndControl.start_instances(nodes)
+      end
+    end
+
     def get_and_update_status!
       # shortcut
       if key?(:is_deployed)
@@ -440,6 +450,10 @@ module DTK
       if op_status
         unless self[:operational_status] == op_status
           update_operational_status!(op_status)
+          if op_status == 'stopped' # TODO: use Type methods
+            # clear the hostaddress info
+            attribute.clear_host_addresses()
+          end
         end
       end
       op_status || self[:operational_status]

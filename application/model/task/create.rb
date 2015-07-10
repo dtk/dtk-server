@@ -57,12 +57,12 @@ module DTK; class Task
        when :smoketest then nil # smoketest should not create a node
        when :service
         # start stopped nodes
-        if start_node = opts[:start_node_changes]
+        if opts[:start_node_changes]
           action_type = :power_on_node
           action_class = Action::PowerOnNode
           node_scs = StateChange::Assembly.node_state_changes(action_type, assembly, target_idh, just_leaf_nodes: true, nodes: start_nodes)
-          if nodes = opts[:ret_nodes]
-            node_scs.each { |sc| nodes << sc[:node] }
+          if opts[:ret_nodes_to_start]
+            node_scs.each { |sc| opts[:ret_nodes_to_start] << sc[:node] }
           end
           start_nodes_task = NodesTask.create_subtask(action_class, task_mh, node_scs)
         end

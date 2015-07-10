@@ -58,7 +58,7 @@ module DTK
       end
 
       update = true
-      unless op_status_all_pending?()
+      unless node_admin_status_all_pending?()
         case mode
          when :direct
           fail ErrorUsage.new("The command 'set-target' can only be invoked before the workspace has been converged (i.e., is in 'pending' state)")

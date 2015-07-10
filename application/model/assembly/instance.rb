@@ -9,7 +9,7 @@ module DTK; class  Assembly
     r8_nested_require('instance', 'get')
     r8_nested_require('instance', 'delete')
     r8_nested_require('instance', 'service_setting')
-    r8_nested_require('instance', 'op_status')
+    r8_nested_require('instance', 'node_status')
     include ServiceLinkMixin
     include ViolationMixin
     include ListMixin
@@ -18,8 +18,8 @@ module DTK; class  Assembly
     extend DeleteClassMixin
     include GetMixin
     extend GetClassMixin
-    include OpStatus::Mixin
-    extend OpStatus::ClassMixin
+    include NodeStatusMixin
+    include NodeStatusToFixMixin
 
     def self.create_from_id_handle(idh)
       idh.create_object(model_name: :assembly_instance)

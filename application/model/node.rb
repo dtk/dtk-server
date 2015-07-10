@@ -432,7 +432,10 @@ module DTK
     end
 
     def get_and_update_operational_status!
-      update_obj!(:external_ref, :operational_status)
+      update_obj!(:type, :external_ref, :operational_status)
+      if self[:type] == 'staged' # TODO: use Type methods
+        return self[:admin_op_status]
+      end
       op_status = CommandAndControl.get_node_operational_status(self)
       if op_status
         unless self[:operational_status] == op_status

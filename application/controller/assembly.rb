@@ -669,7 +669,7 @@ module DTK
 
     def rest__create_task
       assembly = ret_assembly_instance_object()
-      assembly_is_stopped = assembly.any_stopped_nodes?()
+      assembly_is_stopped = assembly.any_stopped_nodes?(:op)
 
       if assembly_is_stopped && ret_request_params(:start_assembly).nil?
         return rest_ok_response confirmation_message: true

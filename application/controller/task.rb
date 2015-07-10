@@ -1,4 +1,4 @@
-module XYZ
+module DTK
   class TaskController < AuthController
     helper :task_helper
 
@@ -16,7 +16,7 @@ module XYZ
         opts[:no_attributes] = true
       end
 
-      task_structure = Task.get_hierarchical_structure(id_handle(task_id))
+      task_structure = Task::Hierarchical.get(id_handle(task_id))
       state_info = task_structure.status_hash_form(opts)
       rest_ok_response state_info
     end
@@ -59,7 +59,7 @@ module XYZ
 
     def rest__execute
       task_id =  ret_non_null_request_params(:task_id)
-      task = Task.get_hierarchical_structure(id_handle(task_id))
+      task = Task::Hierarchical.get(id_handle(task_id))
       workflow = Workflow.create(task)
 Aux.stop_for_testing?(:converge) # TODO: for debugging
       workflow.defer_execution()

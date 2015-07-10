@@ -1,5 +1,6 @@
 module DTK
   class Task < Model
+    r8_nested_require('task','hierarchical')
     r8_nested_require('task','get')
     r8_nested_require('task','create')
     r8_nested_require('task','status')
@@ -9,6 +10,7 @@ module DTK
     r8_nested_require('task','node_group_processing')
     r8_nested_require('task','action_results')
     r8_nested_require('task','qualified_index')
+    include Hierarchical::Mixin
     include GetMixin
     extend GetClassMixin
     extend CreateClassMixin
@@ -215,42 +217,6 @@ module DTK
       self[:executable_action] &&= Action::OnNode.create_from_hash(self[:executable_action_type],self[:executable_action],id_handle)
     end
 
-    # self should be top level task
-    def get_hierarchical_structure()
-      self.class.get_hierarchical_structure(id_handle())
-    end
-    def self.get_hierarchical_structure(top_task_idh)
-      sp_hash = {
-        cols: Task.common_columns(),
-        filter: [:eq, :id, top_task_idh.get_id()]
-      }
-      top_task = get_objs(top_task_idh.createMH(),sp_hash).first
-      return nil unless top_task
-      flat_subtask_list = top_task.get_all_subtasks()
-      ndx_task_list = {top_task.id => top_task}
-      subtask_count = {}
-      subtask_indexes = {}
-      flat_subtask_list.each do |t|
-        ndx_task_list[t.id] = t
-        parent_id = t[:task_id]
-        subtask_count[parent_id] = (subtask_count[parent_id]||0) +1
-        subtask_indexes[t.id] = {parent_id: parent_id,index: t[:position]}
-      end
-
-      subtask_qualified_indexes = QualifiedIndex.compute!(subtask_indexes,top_task)
-
-      flat_subtask_list.each do |subtask|
-        subtask[QualifiedIndex::Field] = subtask_qualified_indexes[subtask[:id]][QualifiedIndex::Field]
-        parent_id = subtask[:task_id]
-        parent = ndx_task_list[parent_id]
-        if subtask.node_group_member?()
-          subtask.set_node_group_member_executable_action!(parent)
-        end
-        (parent[:subtasks] ||= Array.new(subtask_count[parent_id]))[subtask[:position]-1] = subtask
-      end
-      top_task
-    end
-
     def ret_command_and_control_adapter_info
       # TODO: stub
       [:node_config, nil]
@@ -261,7 +227,7 @@ module DTK
       save!()
       # TODO: this is simple but expensive way to get all teh embedded task ids filled out
       # can replace with targeted method that does just this
-      self.class.get_hierarchical_structure(id_handle())
+      Hierarchical.get(id_handle())
     end
 
     # persists to db this and its sub tasks

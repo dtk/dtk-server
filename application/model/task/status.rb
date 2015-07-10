@@ -30,7 +30,7 @@ module DTK
 
       def self.get_status_aux(ref_obj_idh,ref_obj_type,filter,opts={})
         top_level_task = get_top_level_most_recent_task(ref_obj_idh,ref_obj_type,filter)
-        task_structure = top_level_task.get_hierarchical_structure()
+        task_structure = Hierarchical.get(top_level_task.id_handle())
         status_opts = Hash.new.merge(:no_components => false, :no_attributes => true)
         status_opts.merge!(:summarize_node_groups => true) if (opts[:detail_level]||{})[:summarize_node_groups]
         case opts[:format]
@@ -127,10 +127,6 @@ module DTK
         ret
       end
 
-      def hier_task_idhs
-        [id_handle()] + subtasks.map{|r|r.hier_task_idhs()}.flatten
-      end
-
       # TODO: probably better to set when creating
       def set_and_return_types!
         type =
@@ -160,11 +156,6 @@ module DTK
         "ConfigNode" => "configure_node",
         "CreateNode" => "create_node"
       }
-
-      def hier_task_idhs
-        [id_handle()] + subtasks.map{|r|r.hier_task_idhs()}.flatten
-      end
-      protected :hier_task_idhs
 
       # for debugging
       def pretty_print_hash

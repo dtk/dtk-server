@@ -7,7 +7,8 @@ module DTK; class Task; class Status
 
       def hash_form
         pp @task
-        task_structure = @task.get_hierarchical_structure()
+        task_structure = Task::Hierarchical.get(@task.id_handle())
+pp [:test,task_structure.get_ndx_errors]
         leaf_subtasks = task_structure.get_leaf_subtasks()
         Log.info("stub for Status::StreamForm.status")
         

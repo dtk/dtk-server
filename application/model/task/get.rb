@@ -1,10 +1,24 @@
 module DTK; class Task
-  module Get              
-    dtk_nested_require('get','hierarchical')
-  end
-
   module GetMixin
-    include Get::HierarchicalMixin
+    def get_errors
+      sp_hash = {cols: [:content]}
+      get_children_objs(:task_error, sp_hash).map{|r|r[:content]}
+    end
+
+    def get_logs
+      ret = Hash.new
+      sp_hash = {cols: [:task_id, :display_name, :content, :parent_task]}
+      rows = get_children_objs(:task_log, sp_hash).sort{|a,b| a[:created_at] <=> b[:created_at]}
+      
+      rows.each do |r|
+        task_id = r[:task_id]
+        content = r[:content] || Hash.new
+        content.merge!({:label => r[:display_name], :task_name => r[:task][:display_name]})
+        ret[task_id] = (ret[task_id]||Array.new) + [content]
+      end
+      
+      ret
+    end
 
     def get_config_agent_type(executable_action=nil, opts={})
       executable_action ||= executable_action(opts)
@@ -19,8 +33,6 @@ module DTK; class Task
   end
 
   module GetClassMixin
-    include Get::HierarchicalClassMixin
-
     def get_top_level_most_recent_task(model_handle,filter=nil)
       # TODO: can be more efficient if do sql query with order and limit 1
       tasks = get_top_level_tasks(model_handle,filter).sort{|a,b| b[:updated_at] <=> a[:updated_at]}
@@ -70,6 +82,24 @@ module DTK; class Task
         content = r[:content]
         content.merge!({:label => r[:display_name], :task_name => r[:task][:display_name]})
         ret[task_id] = (ret[task_id]||Array.new) + [content]
+      end
+      ret
+    end
+
+    def get_all_subtasks(task_idhs,opts={})
+      ret = Array.new
+      id_handles = task_idhs
+      until id_handles.empty?
+        model_handle = id_handles.first.createMH()
+        sp_hash = {
+          :cols => opts[:cols] || Task.common_columns(), 
+          :filter => [:oneof, :task_id, id_handles.map{|idh|idh.get_id}]
+        }
+        next_level_objs = get_objs(model_handle,sp_hash).reject{|k,v|k == :subtasks}
+        next_level_objs.each{|st|st.reify!()}
+        id_handles = next_level_objs.map{|obj|obj.id_handle}
+        
+        ret += next_level_objs
       end
       ret
     end

@@ -2,6 +2,7 @@ module DTK; class Node
   class Type
     r8_nested_require('type', 'node')
     r8_nested_require('type', 'node_group')
+
     module Mixin
       def is_node?
         Type::Node.isa?(get_field?(:type))
@@ -11,6 +12,11 @@ module DTK; class Node
         # short circuit
         return true if (is_a?(NodeGroup) || is_a?(ServiceNodeGroup))
         Type::NodeGroup.isa?(get_field?(:type))
+      end
+
+      def is_staged?()
+        type = get_field?(:type)
+        Type::Node.is_staged?(type) or Type::NodeGroup.is_staged?(type)
       end
 
       def node_group_model_name

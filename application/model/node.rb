@@ -443,14 +443,14 @@ module DTK
 
     def get_and_update_operational_status!
       update_obj!(:type, :external_ref, :operational_status)
-      if self[:type] == 'staged' # TODO: use Type methods
+      if is_staged?()
         return self[:admin_op_status]
       end
       op_status = CommandAndControl.get_node_operational_status(self)
       if op_status
         unless self[:operational_status] == op_status
           update_operational_status!(op_status)
-          if op_status == 'stopped' # TODO: use Type methods
+          if op_status == 'stopped' 
             # clear the hostaddress info
             attribute.clear_host_addresses()
           end

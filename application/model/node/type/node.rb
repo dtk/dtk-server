@@ -15,8 +15,14 @@ module DTK; class Node
       Types.each do |type|
         class_eval("def self.#{type}(); '#{type}'; end")
       end
+
       def self.types
         Types
+      end
+
+      StagedTypes = [:staged,:target_ref_staged]
+      def self.is_staged?(type)
+        StagedTypes.include?(type.to_sym)
       end
     end
   end

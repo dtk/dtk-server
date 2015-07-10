@@ -8,16 +8,15 @@ module DTK; class  Assembly; class Instance
       end
     end
 
-    # TODO: check that below correctly since use get_nodes, rather than get_leaf_nodes
-    def node_status(type)
-      assembly_nodes = get_nodes(:admin_op_status)
-      NodeStatus.status(type,assembly_nodes)
-    end
-
-    # TODO: check that below correctly since use get_nodes, rather than get_leaf_nodes
     def node_admin_status_all_pending?()
       assembly_nodes = get_nodes(:admin_op_status)
       NodeStatus.status_all_pending?(:admin,assembly_nodes)
+    end
+  end
+
+  module NodeStatusClassMixin
+    def summary_node_status(type,assembly_nodes)
+      NodeStatus.summary_node_status(type,assembly_nodes)
     end
   end
 
@@ -28,7 +27,7 @@ module DTK; class  Assembly; class Instance
     #   'pending' - if all nodes are pending or no nodes
     #    nil - if cant tell
     # type will be :op or :admin
-    def self.assembly_status(type,assembly_nodes)
+    def self.summary_node_status(type,assembly_nodes)
       unless [:op,:admin].include?(type)
         raise Error.new("Illegal type (#{type})")
       end
@@ -50,7 +49,7 @@ module DTK; class  Assembly; class Instance
       stop_found ? 'stopped' : 'pending'
     end
 
-    def status_all_pending?(type,assembly_nodes)
+    def self.status_all_pending?(type,assembly_nodes)
       assembly_nodes.find do |node|
         status = node_status(type,node)
         status.nil? || status != 'pending'

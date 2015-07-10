@@ -19,6 +19,11 @@ module DTK; class Node
         end
       end
 
+      StagedTypes = [:staged]
+      def self.is_staged?(type)
+        StagedTypes.include?(type.to_sym)
+      end
+
       private
 
       def self.type_from_name(type_name)

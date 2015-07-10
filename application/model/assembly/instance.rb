@@ -19,6 +19,7 @@ module DTK; class  Assembly
     include GetMixin
     extend GetClassMixin
     include NodeStatusMixin
+    extend NodeStatusClassMixin
     include NodeStatusToFixMixin
 
     def self.create_from_id_handle(idh)

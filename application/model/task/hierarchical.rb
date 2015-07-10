@@ -9,7 +9,7 @@ module DTK
         }
         top_task = get_objs(top_task_idh.createMH(),sp_hash).first
         return nil unless top_task
-        flat_subtask_list = top_task.get_all_subtasks()
+        flat_subtask_list = top_task.get_and_reify_all_subtasks()
         ndx_task_list = {top_task.id => top_task}
         subtask_count = Hash.new
         subtask_indexes = Hash.new
@@ -41,10 +41,6 @@ module DTK
           self.class.get_ndx_errors(hierarchical_task_idhs())
         end
         
-        def get_ndx_logs
-          self.class.get_ndx_logs(hierarchical_task_idhs())
-        end
-        
         def get_associated_nodes
         ndx_nodes = Hash.new
           get_leaf_subtasks().each do |subtask|
@@ -64,8 +60,8 @@ module DTK
         end
 
         # recursively walks structure, but returns them in flat list
-        def get_all_subtasks(opts={})
-          self.class.get_all_subtasks([id_handle()],opts)
+        def get_and_reify_all_subtasks(opts={})
+          self.class.get_and_reify_all_subtasks([id_handle()],opts)
         end
 
         protected

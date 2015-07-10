@@ -16,9 +16,9 @@ module DTK
         model_handle = model_handle.createMH(:task)
         top_level_active = get_active_top_level_tasks(model_handle)
         return ret if top_level_active.empty?
-        # TODO: way to make call Task.get_all_subtasks faster
+        # TODO: way to make call Task.get_and_reify_all_subtasks faster
         ndx_ret = {}
-        Task.get_all_subtasks(top_level_active.map{|t|t.id_handle}).each do |sub_task|
+        Task.get_and_reify_all_subtasks(top_level_active.map{|t|t.id_handle}).each do |sub_task|
           if node = (sub_task[:executable_action] && sub_task[:executable_action][:node])
             ndx_ret[node[:id]] ||= node
           end

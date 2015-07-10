@@ -20,13 +20,20 @@ module DTK; class Task
       ret
     end
 
+    # self should be a top level task
+    def get_ordered_stage_level_tasks(start_stage,end_stage)
+      filter = [:oneof, :position, Array(start_stage..end_stage)]
+      stage_level_tasks = self.class.get_next_level_tasks([id_handle()], filter: filter)
+      stage_level_tasks.sort{|a,b|a[:position] <=> b[:position]}
+    end
+
     def get_config_agent_type(executable_action=nil, opts={})
       executable_action ||= executable_action(opts)
       executable_action.config_agent_type() if executable_action && executable_action.respond_to?('config_agent_type')
     end
     
     private
-    
+
     def get_config_agent
       ConfigAgent.load(get_config_agent_type())
     end   
@@ -53,11 +60,11 @@ module DTK; class Task
     end
 
     def get_ndx_errors(task_idhs)
-      ret = Array.new
+      ret = Hash.new
       return ret if task_idhs.empty?
       sp_hash = {
-        :cols => [:task_id,:content],
-        :filter => [:oneof,:task_id,task_idhs.map{|idh|idh.get_id()}]
+        cols:   [:task_id,:content],
+        filter: [:oneof,:task_id,task_idhs.map{|idh|idh.get_id()}]
       }
       task_error_mh = task_idhs.first.createMH(:task_error)
       ret = Hash.new
@@ -68,40 +75,31 @@ module DTK; class Task
       ret
     end
 
-    def get_ndx_logs(task_idhs)
+    # returns an array of tasks with task content reified 
+    def get_and_reify_all_subtasks(task_idhs,opts={})
       ret = Array.new
-      return ret if task_idhs.empty?
-      sp_hash = {
-        :cols => [:task_id, :content, :display_name, :parent_task],
-        :filter => [:oneof, :task_id, task_idhs.map{|idh|idh.get_id()}]
-      }
-      task_log_mh = task_idhs.first.createMH(:task_log)
-      ret = Hash.new
-      get_objs(task_log_mh, sp_hash).each do |r|
-        task_id = r[:task_id]
-        content = r[:content]
-        content.merge!({:label => r[:display_name], :task_name => r[:task][:display_name]})
-        ret[task_id] = (ret[task_id]||Array.new) + [content]
+      id_handles = task_idhs
+      until id_handles.empty?
+        next_level_objs = get_next_level_tasks(id_handles).reject{|k,v|k == :subtasks}.each{|st|st.reify!()}
+        id_handles = next_level_objs.map{|obj|obj.id_handle}
+        ret += next_level_objs
       end
       ret
     end
 
-    def get_all_subtasks(task_idhs,opts={})
+    def get_next_level_tasks(task_idhs,opts={})
       ret = Array.new
-      id_handles = task_idhs
-      until id_handles.empty?
-        model_handle = id_handles.first.createMH()
-        sp_hash = {
-          :cols => opts[:cols] || Task.common_columns(), 
-          :filter => [:oneof, :task_id, id_handles.map{|idh|idh.get_id}]
-        }
-        next_level_objs = get_objs(model_handle,sp_hash).reject{|k,v|k == :subtasks}
-        next_level_objs.each{|st|st.reify!()}
-        id_handles = next_level_objs.map{|obj|obj.id_handle}
-        
-        ret += next_level_objs
+      return ret if task_idhs.empty?
+      filter = [:oneof, :task_id, task_idhs.map{|idh|idh.get_id}]
+      if opts[:filter]
+        filter = [:and, filter, opts[:filter]]
       end
-      ret
+      sp_hash = {
+        cols:   opts[:cols] || common_columns(),
+        filter: filter
+      }
+      model_handle = task_idhs.first.createMH()
+      get_objs(model_handle,sp_hash)
     end
 
   end

@@ -2,18 +2,17 @@ module DTK; class Task; class Status
   class StreamForm
     class Element 
       r8_nested_require('element','task_start')
+      r8_nested_require('element','task_end')
       r8_nested_require('element','stage')
-      def initialize(type,task)
+      r8_nested_require('element','no_results')
+      def initialize(type,task=nil)
         @type = type
         @task = task
       end
       private :initialize
 
       def hash_form
-        {
-          type:       @type,
-          started_at: @task.get_field?(:started_at)
-        }
+        {type: @type}.merge(@task ? {started_at: @task.get_field?(:started_at)} : {})
       end
 
       def self.get_task_start_element(top_level_task)

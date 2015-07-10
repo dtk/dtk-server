@@ -134,7 +134,8 @@ module DTK
     def rest__get_workspace_branch_info
       component_module = create_obj(:component_module_id)
       version = ret_version()
-      rest_ok_response component_module.get_workspace_branch_info(version)
+      response = component_module.get_workspace_branch_info(version)
+      rest_ok_response response
     end
 
     def rest__info

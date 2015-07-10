@@ -200,9 +200,6 @@ module DTK
         # returns model_names
         concrete_models.map { |klass| ret_relation_type(klass) }
       end
-    #######
-
-    protected
 
       def ret_concrete_models(filter = nil)
         # ret = models.reject {|m|m.top? or not m.superclass == Model}

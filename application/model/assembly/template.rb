@@ -1,17 +1,17 @@
 module DTK; class Assembly
   class Template < self
-    r8_nested_require('template','factory')
-    r8_nested_require('template','list')
-    r8_nested_require('template','pretty_print')
+    r8_nested_require('template', 'factory')
+    r8_nested_require('template', 'list')
+    r8_nested_require('template', 'pretty_print')
     include PrettyPrint::Mixin
     extend PrettyPrint::ClassMixin
 
-    def get_objs(sp_hash,opts={})
-      super(sp_hash,opts.merge(model_handle: model_handle().createMH(:assembly_template)))
+    def get_objs(sp_hash, opts = {})
+      super(sp_hash, opts.merge(model_handle: model_handle().createMH(:assembly_template)))
     end
-    def self.get_objs(mh,sp_hash,opts={})
+    def self.get_objs(mh, sp_hash, opts = {})
       if mh[:model_name] == :assembly_template
-        get_these_objs(mh,sp_hash,opts)
+        get_these_objs(mh, sp_hash, opts)
       else
         super
       end
@@ -21,29 +21,29 @@ module DTK; class Assembly
       idh.create_object(model_name: :assembly_template)
     end
 
-    def stage(target,opts={})
+    def stage(target, opts = {})
       service_module = get_service_module()
 
       # unless is_dsl_parsed = service_module.dsl_parsed?()
       service_module_branch = service_module.get_workspace_module_branch()
       unless is_dsl_parsed = service_module_branch.dsl_parsed?()
-        raise ErrorUsage.new("An assembly template from an unparsed service-module ('#{service_module}') cannot be staged")
+        fail ErrorUsage.new("An assembly template from an unparsed service-module ('#{service_module}') cannot be staged")
       end
 
       # including :description here because it is not a field that gets copied by clone copy processor
-      override_attrs = {description: get_field?(:description)}
+      override_attrs = { description: get_field?(:description) }
       if assembly_name = opts[:assembly_name]
         override_attrs[:display_name] = assembly_name
       end
 
-      clone_opts = {ret_new_obj_with_cols: [:id,:type]}
+      clone_opts = { ret_new_obj_with_cols: [:id, :type] }
       if settings = opts[:service_settings]
         clone_opts.merge!(service_settings: settings)
       end
 
       new_assembly_obj = nil
       Transaction do
-        new_assembly_obj = target.clone_into(self,override_attrs,clone_opts)
+        new_assembly_obj = target.clone_into(self, override_attrs, clone_opts)
       end
 
       Assembly::Instance.create_subclass_object(new_assembly_obj)
@@ -63,29 +63,29 @@ module DTK; class Assembly
     end
 
     ### standard get methods
-    def get_nodes(opts={})
-      self.class.get_nodes([id_handle()],opts)
+    def get_nodes(opts = {})
+      self.class.get_nodes([id_handle()], opts)
     end
-    def self.get_nodes(assembly_idhs,opts={})
+    def self.get_nodes(assembly_idhs, opts = {})
       ret = []
       return ret if assembly_idhs.empty?()
       sp_hash = {
-        cols: opts[:cols]||[:id, :group_id, :display_name, :assembly_id],
-        filter: [:oneof, :assembly_id, assembly_idhs.map{|idh|idh.get_id()}]
+        cols: opts[:cols] || [:id, :group_id, :display_name, :assembly_id],
+        filter: [:oneof, :assembly_id, assembly_idhs.map(&:get_id)]
       }
       node_mh = assembly_idhs.first.createMH(:node)
-      get_objs(node_mh,sp_hash)
+      get_objs(node_mh, sp_hash)
     end
 
-    def self.get_ndx_assembly_names_to_ids(project_idh,service_module,assembly_names)
-      ndx_assembly_refs = assembly_names.inject({}){|h,n|h.merge(n => service_module.assembly_ref(n))}
+    def self.get_ndx_assembly_names_to_ids(project_idh, service_module, assembly_names)
+      ndx_assembly_refs = assembly_names.inject({}) { |h, n| h.merge(n => service_module.assembly_ref(n)) }
       sp_hash = {
-        cols: [:id,:group_id,:display_name,:ref],
-        filter: [:and,[:eq,:project_project_id,project_idh.get_id],[:oneof,:ref,ndx_assembly_refs.values]]
+        cols: [:id, :group_id, :display_name, :ref],
+        filter: [:and, [:eq, :project_project_id, project_idh.get_id], [:oneof, :ref, ndx_assembly_refs.values]]
       }
-      assembly_templates = get_objs(project_idh.createMH(:component),sp_hash,keep_ref_cols: true)
-      ndx_ref_ids = assembly_templates.inject({}){|h,r|h.merge(r[:ref] => r[:id])}
-      ndx_assembly_refs.inject({}) do |h,(name,ref)|
+      assembly_templates = get_objs(project_idh.createMH(:component), sp_hash, keep_ref_cols: true)
+      ndx_ref_ids = assembly_templates.inject({}) { |h, r| h.merge(r[:ref] => r[:id]) }
+      ndx_assembly_refs.inject({}) do |h, (name, ref)|
         id = ndx_ref_ids[ref]
         id ? h.merge(name => id) : h
       end
@@ -106,37 +106,37 @@ module DTK; class Assembly
       ret = {}
       return ret if assembly_templates.empty?
       sp_hash = {
-        cols: [:id,:group_id,:display_name,:module_branch_id,:assembly_template_namespace_info],
-        filter: [:oneof,:id,assembly_templates.map{|a|a.id()}]
+        cols: [:id, :group_id, :display_name, :module_branch_id, :assembly_template_namespace_info],
+        filter: [:oneof, :id, assembly_templates.map(&:id)]
       }
       mh = assembly_templates.first.model_handle()
-      get_objs(mh,sp_hash).inject({}) do |h,r|
+      get_objs(mh, sp_hash).inject({}) do |h, r|
         h.merge(r[:id] => r[:namespace])
       end
     end
     private_class_method :get_ndx_namespaces
 
-    def get_settings(opts={})
+    def get_settings(opts = {})
       sp_hash = {
-        cols: opts[:cols]||ServiceSetting.common_columns(),
+        cols: opts[:cols] || ServiceSetting.common_columns(),
         filter: [:eq, :component_component_id, id()]
       }
       service_setting_mh = model_handle(:service_setting)
-      Model.get_objs(service_setting_mh,sp_hash)
+      Model.get_objs(service_setting_mh, sp_hash)
     end
 
-    def self.get_augmented_component_refs(mh,opts={})
+    def self.get_augmented_component_refs(mh, opts = {})
       sp_hash = {
-        cols: [:id, :display_name,:component_type,:module_branch_id,:augmented_component_refs],
-        filter: [:and, [:eq, :type, "composite"], [:neq, :project_project_id, nil], opts[:filter]].compact
+        cols: [:id, :display_name, :component_type, :module_branch_id, :augmented_component_refs],
+        filter: [:and, [:eq, :type, 'composite'], [:neq, :project_project_id, nil], opts[:filter]].compact
       }
-      assembly_rows = get_objs(mh.createMH(:component),sp_hash)
+      assembly_rows = get_objs(mh.createMH(:component), sp_hash)
 
       # look for version contraints which are on a per component module basis
       aug_cmp_refs_ndx_by_vc = {}
       assembly_rows.each do |r|
         component_ref = r[:component_ref]
-        unless component_type = component_ref[:component_type]||(r[:component_template]||{})[:component_type]
+        unless component_type = component_ref[:component_type] || (r[:component_template] || {})[:component_type]
           Log.error("Component ref with id #{r[:id]}) does not have a component type associated with it")
         else
           service_module_name = service_module_name(r[:component_type])
@@ -148,35 +148,35 @@ module DTK; class Assembly
               component_module_refs: component_module_refs
             }
           end
-          aug_cmp_ref = r[:component_ref].merge(r.hash_subset(:component_template,:node))
+          aug_cmp_ref = r[:component_ref].merge(r.hash_subset(:component_template, :node))
           (pntr[:aug_cmp_refs] ||= []) << aug_cmp_ref
         end
       end
-      set_matching_opts = Aux.hash_subset(opts,[:force_compute_template_id])
+      set_matching_opts = Aux.hash_subset(opts, [:force_compute_template_id])
       aug_cmp_refs_ndx_by_vc.each_value do |r|
-        r[:component_module_refs].set_matching_component_template_info?(r[:aug_cmp_refs],set_matching_opts)
+        r[:component_module_refs].set_matching_component_template_info?(r[:aug_cmp_refs], set_matching_opts)
       end
-      aug_cmp_refs_ndx_by_vc.values.map{|r|r[:aug_cmp_refs]}.flatten
+      aug_cmp_refs_ndx_by_vc.values.map { |r| r[:aug_cmp_refs] }.flatten
     end
     ### end: standard get methods
 
     def self.service_module_name(component_type_field)
-      component_type_field.gsub(/__.+$/,'')
+      component_type_field.gsub(/__.+$/, '')
     end
     private_class_method :service_module_name
 
-    def self.list(assembly_mh,opts={})
-      List.list(assembly_mh,opts)
+    def self.list(assembly_mh, opts = {})
+      List.list(assembly_mh, opts)
     end
 
-    def info_about(about, _opts=Opts.new)
+    def info_about(about, _opts = Opts.new)
       case about
        when :components
         List.list_components(self)
        when :nodes
         List.list_nodes(self)
        else
-        raise Error.new("TODO: not implemented yet: processing of info_about(#{about})")
+        fail Error.new("TODO: not implemented yet: processing of info_about(#{about})")
       end
     end
 
@@ -184,26 +184,26 @@ module DTK; class Assembly
       List.list_modules(assembly_templates)
     end
 
-    def self.get(mh,opts={})
+    def self.get(mh, opts = {})
       sp_hash = {
-        cols: opts[:cols] || [:id, :group_id,:display_name,:component_type,:module_branch_id, :description, :service_module],
-        filter: [:and, [:eq, :type, "composite"],
-                 opts[:project_idh] ? [:eq,:project_project_id,opts[:project_idh].get_id()] : [:neq, :project_project_id,nil],
+        cols: opts[:cols] || [:id, :group_id, :display_name, :component_type, :module_branch_id, :description, :service_module],
+        filter: [:and, [:eq, :type, 'composite'],
+                 opts[:project_idh] ? [:eq, :project_project_id, opts[:project_idh].get_id()] : [:neq, :project_project_id, nil],
                  opts[:filter]
                    ].compact
       }
-      ret = get_these_objs(mh,sp_hash,keep_ref_cols: true)
-      ret.each{|r|r[:version] ||= (r[:module_branch]||{})[:version]}
+      ret = get_these_objs(mh, sp_hash, keep_ref_cols: true)
+      ret.each { |r| r[:version] ||= (r[:module_branch] || {})[:version] }
       ret
     end
 
-    def self.list_virtual_column?(detail_level=nil)
+    def self.list_virtual_column?(detail_level = nil)
       if detail_level.nil?
         nil
-      elsif detail_level == "nodes"
+      elsif detail_level == 'nodes'
         :template_stub_nodes
       else
-        raise Error.new("not implemented list_virtual_column at detail level (#{detail_level})")
+        fail Error.new("not implemented list_virtual_column at detail level (#{detail_level})")
       end
     end
 
@@ -224,46 +224,46 @@ module DTK; class Assembly
     def self.delete_assemblies_nodes(assembly_idhs)
       ret = []
       return ret if assembly_idhs.empty?
-      node_idhs = get_nodes(assembly_idhs).map{|n|n.id_handle()}
+      node_idhs = get_nodes(assembly_idhs).map(&:id_handle)
       Model.delete_instances(node_idhs)
     end
 
-    def self.check_valid_id(model_handle,id)
+    def self.check_valid_id(model_handle, id)
       filter =
         [:and,
          [:eq, :id, id],
-         [:eq, :type, "composite"],
+         [:eq, :type, 'composite'],
          [:neq, :project_project_id, nil]]
-      check_valid_id_helper(model_handle,id,filter)
+      check_valid_id_helper(model_handle, id, filter)
     end
-    def self.name_to_id(model_handle,name)
-      parts = name.split("/")
+    def self.name_to_id(model_handle, name)
+      parts = name.split('/')
       augmented_sp_hash =
         if parts.size == 1
-          {cols: [:id,:component_type],
-           filter: [:and,
-                    [:eq, :component_type, pp_name_to_component_type(parts[0])],
-                    [:eq, :type, "composite"],
-                    [:neq, :project_project_id, nil]]
+          { cols: [:id, :component_type],
+            filter: [:and,
+                     [:eq, :component_type, pp_name_to_component_type(parts[0])],
+                     [:eq, :type, 'composite'],
+                     [:neq, :project_project_id, nil]]
           }
         else
-        raise ErrorNameInvalid.new(name,pp_object_type())
+        fail ErrorNameInvalid.new(name, pp_object_type())
       end
-      name_to_id_helper(model_handle,name,augmented_sp_hash)
+      name_to_id_helper(model_handle, name, augmented_sp_hash)
     end
 
-    def self.get_service_module?(project,service_module_name,namespace)
+    def self.get_service_module?(project, service_module_name, namespace)
       ret = nil
       sp_hash = {
-        cols: [:id,:group_id,:display_name,:namespace],
-        filter: [:eq,:display_name,service_module_name]
+        cols: [:id, :group_id, :display_name, :namespace],
+        filter: [:eq, :display_name, service_module_name]
       }
-      get_objs(project.model_handle(:service_module),sp_hash).find{|r|r[:namespace][:display_name] == namespace}
+      get_objs(project.model_handle(:service_module), sp_hash).find { |r| r[:namespace][:display_name] == namespace }
     end
 
     # TODO: probably move to Assembly
-    def model_handle(mn=nil)
-      super(mn||:component)
+    def model_handle(mn = nil)
+      super(mn || :component)
     end
 
     private
@@ -275,7 +275,7 @@ module DTK; class Assembly
       component_type.split(ModuleTemplateSep)
     end
 
-    def self.component_type(service_module_name,template_name)
+    def self.component_type(service_module_name, template_name)
       "#{service_module_name}#{ModuleTemplateSep}#{template_name}"
     end
   end

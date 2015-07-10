@@ -21,32 +21,32 @@ component_module_filesystem_location = '~/dtk/component_modules/r8'
 
 dtk_common = DtkCommon.new('', '')
 
-describe "(Modules, Services and Versioning) Test Case 26: NEG - Import new service module but its referenced component module exists locally but not on server" do
+describe '(Modules, Services and Versioning) Test Case 26: NEG - Import new service module but its referenced component module exists locally but not on server' do
   before(:all) do
-    puts "*****************************************************************************************************************************************************",""
+    puts '*****************************************************************************************************************************************************', ''
   end
 
-  context "Import component module function" do
-    include_context "Import remote component module", component_module_namespace + "/" + component_module_name
+  context 'Import component module function' do
+    include_context 'Import remote component module', component_module_namespace + '/' + component_module_name
   end
 
-  context "Check if component module imported on local filesystem" do
-    include_context "Check component module imported on local filesystem", component_module_filesystem_location, component_module_name
+  context 'Check if component module imported on local filesystem' do
+    include_context 'Check component module imported on local filesystem', component_module_filesystem_location, component_module_name
   end
 
-  context "Delete component module" do
-    include_context "Delete component module", dtk_common, local_component_module_name
+  context 'Delete component module' do
+    include_context 'Delete component module', dtk_common, local_component_module_name
   end
 
-  context "Import service module function when referenced component module exists only on local filesystem" do
-    include_context "NEG - Import remote service module", dtk_common, service_module_namespace + "/" + service_module_name
+  context 'Import service module function when referenced component module exists only on local filesystem' do
+    include_context 'NEG - Import remote service module', dtk_common, service_module_namespace + '/' + service_module_name
   end
 
-  context "Delete component module from local filesystem" do
-    include_context "Delete component module from local filesystem", component_module_filesystem_location, component_module_name
+  context 'Delete component module from local filesystem' do
+    include_context 'Delete component module from local filesystem', component_module_filesystem_location, component_module_name
   end
 
   after(:all) do
-    puts "", ""
+    puts '', ''
   end
 end

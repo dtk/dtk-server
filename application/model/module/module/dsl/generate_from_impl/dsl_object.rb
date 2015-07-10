@@ -9,13 +9,13 @@ module DTK; class ModuleDSL
       def hash_key
         self[:id]
       end
-      
-      def create_external_ref(name,type)
-        DSLObject::RenderHash.new([{"name" => name},{"type" => type}])
+
+      def create_external_ref(name, type)
+        DSLObject::RenderHash.new([{ 'name' => name }, { 'type' => type }])
       end
-      
+
       def sanitize_attribute(attr)
-        attr.gsub(/[^a-zA-Z0-9_-]/,"-")
+        attr.gsub(/[^a-zA-Z0-9_-]/, '-')
       end
 
       def t(term)
@@ -34,15 +34,15 @@ module DTK; class ModuleDSL
       end
     end
 
-    r8_nested_require('dsl_object','store_config_handler')
+    r8_nested_require('dsl_object', 'store_config_handler')
     include StoreConfigHandlerMixin
 
     class DSLStructObject < SimpleOrderedHash
-      def initialize(type,content,opts={})
+      def initialize(type, content, opts = {})
         if opts[:reify]
-          super([{type: type.to_s},{required: opts[:required]},{def: content}])
+          super([{ type: type.to_s }, { required: opts[:required] }, { def: content }])
         else
-          super([{type: type.to_s},{required: nil},{def: content}])
+          super([{ type: type.to_s }, { required: nil }, { def: content }])
           self[:required] = content.delete(:include)
         end
       end
@@ -51,25 +51,25 @@ module DTK; class ModuleDSL
         self[:def].hash_key()
       end
 
-      def render_hash_form(opts={})
+      def render_hash_form(opts = {})
         self[:def].render_hash_form(opts)
       end
     end
 
     class DSLArray < Array
-      def each_element(opts={},&block)
+      def each_element(opts = {}, &block)
         each do |el|
           unless opts[:skip_required_is_false] && (not el.nil?) and not el
-            block.call(el[:def]) 
+            block.call(el[:def])
           end
         end
       end
 
-      def map_element(opts={},&block)
+      def map_element(opts = {}, &block)
         ret = []
         each do |el|
           unless opts[:skip_required_is_false] && (not el.nil?) and not el
-            ret << block.call(el[:def]) 
+            ret << block.call(el[:def])
           end
         end
         ret
@@ -77,16 +77,16 @@ module DTK; class ModuleDSL
 
       def  +(a2)
         ret = self.class.new
-        each{|x|ret << x}
-        a2.each{|x|ret << x}
+        each { |x| ret << x }
+        a2.each { |x| ret << x }
         ret
       end
     end
 
     class DSLObject < SimpleOrderedHash
-      r8_nested_require('dsl_object','object_classes')
+      r8_nested_require('dsl_object', 'object_classes')
       include CommonMixin
-      def initialize(context,opts={})
+      def initialize(context, opts = {})
         super()
         @context = context
         create_in_object_form(opts[:def]) if opts[:reify]
@@ -98,26 +98,26 @@ module DTK; class ModuleDSL
         ignore_components: ['params']
       }
 
-      def create(type,parse_struct,opts={})
-        DSLStructObject.new(type,klass(type).new(parse_struct,@context.merge(opts)))
+      def create(type, parse_struct, opts = {})
+        DSLStructObject.new(type, klass(type).new(parse_struct, @context.merge(opts)))
       end
 
       # dup used because yaml generation is upstream and dont want string refs
       def required_value(key)
         unless key?(key)
-          raise Error.new("meta object does not have key #{key}") 
+          fail Error.new("meta object does not have key #{key}")
         end
 
         value_term = self[key]
-        raise Error.new("meta object with key #{key} is null") if value_term.nil? 
+        fail Error.new("meta object with key #{key} is null") if value_term.nil?
         return value_term.dup unless value_term.is_a?(DSLTerm)
-        
+
         unless value_term.is_known?()
-          raise Error.new("meta object with key #{key} has unknown value")
+          fail Error.new("meta object with key #{key} has unknown value")
         end
         value_term.value.dup
       end
-      
+
       def value(key)
         value_term = self[key]
         return nil if value_term.nil?
@@ -131,9 +131,9 @@ module DTK; class ModuleDSL
 
       # functions to convert to object form
       def reify(hash)
-        type = index(hash,:type)
-        content = klass(type).new(nil,@context,reify: true, def: index(hash,:def))
-        DSLStructObject.new(type,content,reify: true, required: index(hash,:required))
+        type = index(hash, :type)
+        content = klass(type).new(nil, @context, reify: true, def: index(hash, :def))
+        DSLStructObject.new(type, content, reify: true, required: index(hash, :required))
       end
 
       private
@@ -144,7 +144,7 @@ module DTK; class ModuleDSL
         []
       end
 
-      def index(hash,key)
+      def index(hash, key)
         if hash.key?(key.to_s)
           hash[key.to_s]
         elsif hash.key?(key.to_sym)
@@ -152,20 +152,20 @@ module DTK; class ModuleDSL
         end
       end
 
-      def has_index?(hash,key)
+      def has_index?(hash, key)
         hash.key?(key.to_s) || hash.key?(key.to_sym)
       end
 
       def create_in_object_form(hash)
-        hash.each{|k,v|self[k.to_sym] = convert_value_if_needed(k,v)}
+        hash.each { |k, v| self[k.to_sym] = convert_value_if_needed(k, v) }
       end
-      
-      def convert_value_if_needed(key,val)
+
+      def convert_value_if_needed(key, val)
         return val unless object_attributes().include?(key.to_sym)
-        
+
         if val.is_a?(Array)
           ret = DSLArray.new
-          val.each{|el_val| ret << reify(el_val) if selected?(el_val)}
+          val.each { |el_val| ret << reify(el_val) if selected?(el_val) }
           ret
         else
           # TODO: no check for selcted here?
@@ -174,61 +174,61 @@ module DTK; class ModuleDSL
       end
 
       def selected?(hash)
-        index(hash,:selected) or not has_index?(hash,:selected) #default is 'selected'
+        index(hash, :selected) or not has_index?(hash, :selected) #default is 'selected'
       end
 
       ###utilities
       def is_foreign_component_name?(name)
         if name =~ /(^.+)::.+$/
-          prefix = $1
+          prefix = Regexp.last_match(1)
           prefix == module_name ? nil : true
         end
       end
-      
+
       def klass(type)
         version_class = ModuleDSL.load_and_return_version_adapter_class(integer_version())
-        cap_type = type.to_s.split("_").map{|t|t.capitalize}.join("")
-        version_class.const_get("DSLObject").const_get(cap_type)
+        cap_type = type.to_s.split('_').map(&:capitalize).join('')
+        version_class.const_get('DSLObject').const_get(cap_type)
       end
 
       # context
       def integer_version
-        (@context||{})[:integer_version]
+        (@context || {})[:integer_version]
       end
 
       def module_name
-        (@context||{})[:module_name]
+        (@context || {})[:module_name]
       end
 
       def config_agent_type
-        (@context||{})[:config_agent_type]
+        (@context || {})[:config_agent_type]
       end
 
       public
 
       def parent
-        (@context||{})[:parent]
+        (@context || {})[:parent]
       end
 
       def parent_source
-        (@context||{})[:parent_source]
+        (@context || {})[:parent_source]
       end
 
       def source_ref
-        (@context||{})[:source_ref]
+        (@context || {})[:source_ref]
       end
-  
+
       # TODO: may deprecate
       # handles intermediate state where objects may be unknown and just need users input
       class DSLTerm < SimpleHashObject
-        def initialize(value,state=:known)
+        def initialize(value, state = :known)
           self[:value] = value if state == :known
           self[:state] = state
         end
         def self.create_unknown
-          new(nil,:unknown)
+          new(nil, :unknown)
         end
-        
+
         def set_value(v)
           self[:state] = :known
           self[:value] = v
@@ -242,54 +242,54 @@ module DTK; class ModuleDSL
           self[:state] == :known
         end
       end
-      
+
       class VarMatches < Array
-        def add(input_var,output_var)
-          self << {input_var: input_var,output_var: output_var}
+        def add(input_var, output_var)
+          self << { input_var: input_var, output_var: output_var }
           self
         end
 
         def +(a2)
           ret = self.class.new
-          each{|x|ret << x}
-          a2.each{|x|ret << x}
+          each { |x| ret << x }
+          a2.each { |x| ret << x }
           ret
         end
       end
-      
+
       class RenderHash < SimpleOrderedHash
-        def serialize(format_type=nil)
+        def serialize(format_type = nil)
           format_type ||= ModuleDSL.default_format_type()
           if format_type == :yaml
-            Aux.serialize(yaml_form(),format_type)
+            Aux.serialize(yaml_form(), format_type)
           else
-            Aux.serialize(self,format_type)
+            Aux.serialize(self, format_type)
           end
         end
 
         # TODO: deprecate
         def write_yaml(io)
           require 'yaml'
-          YAML::dump(yaml_form(),io)
+          YAML.dump(yaml_form(), io)
           io << "\n"
         end
 
         # since yaml generator is being used want to remove references so dont generate yaml with labels
-        def yaml_form(level=1)
+        def yaml_form(level = 1)
           ret = RenderHash.new
-          each do |k,v|
-            if level == 1 && k == "version"
+          each do |k, v|
+            if level == 1 && k == 'version'
               next
             end
-            converted_val = 
+            converted_val =
               if v.is_a?(RenderHash)
-                v.yaml_form(level+1)
+                v.yaml_form(level + 1)
               elsif v.is_a?(Array)
-                v.map{|el|el.is_a?(RenderHash) ? el.yaml_form(level+1) : el.dup?}
-              else 
+                v.map { |el| el.is_a?(RenderHash) ? el.yaml_form(level + 1) : el.dup? }
+              else
                 v.dup?
               end
-            ret[k.dup?] = converted_val 
+            ret[k.dup?] = converted_val
           end
           ret
         end
@@ -297,4 +297,3 @@ module DTK; class ModuleDSL
     end
   end
 end; end
-

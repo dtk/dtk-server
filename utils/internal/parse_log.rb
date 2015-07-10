@@ -1,10 +1,10 @@
 module XYZ
   class ParseLog
-    
-    def self.parse(adapter_type,lines)
+
+    def self.parse(adapter_type, lines)
       get_adapter(adapter_type).parse(lines)
     end
-    def self.log_complete?(adapter_type,lines)
+    def self.log_complete?(adapter_type, lines)
       get_adapter(adapter_type).log_complete?(lines)
     end
 
@@ -16,10 +16,10 @@ module XYZ
     end
     Adapters = {}
     def self.get_adapter_aux(adapter_type)
-      r8_nested_require("parse_log","adapters/#{adapter_type}")
+      r8_nested_require('parse_log', "adapters/#{adapter_type}")
       XYZ::ParseLogAdapter.const_get adapter_type.to_s.capitalize
      rescue LoadError
-      raise Error.new("cannot find log parser adapter")
+      raise Error.new('cannot find log parser adapter')
     end
   end
 
@@ -36,17 +36,17 @@ module XYZ
     def hash_form
       {
         complete: @complete,
-        log_segments: map{|l|l.hash_form()}
+        log_segments: map(&:hash_form)
       }
     end
   end
 
-  class LogSegment 
-    def self.create(type,line)
-      LogSegmentGeneric.new(type,line)
+  class LogSegment
+    def self.create(type, line)
+      LogSegmentGeneric.new(type, line)
     end
     def hash_form
-      {type: type}
+      { type: type }
     end
     attr_reader :type
 
@@ -57,8 +57,8 @@ module XYZ
     end
   end
 
-  class LogSegmentGeneric < LogSegment 
-    attr_reader :line,:aux_data
+  class LogSegmentGeneric < LogSegment
+    attr_reader :line, :aux_data
     def hash_form
       added = {
         line: @line,
@@ -67,9 +67,9 @@ module XYZ
       super.merge(added)
     end
 
-    def initialize(type,line)
+    def initialize(type, line)
       super(type)
-      @line = line 
+      @line = line
       @aux_data = []
     end
 
@@ -79,7 +79,7 @@ module XYZ
   end
 
   class LogSegmentError < LogSegment
-    attr_reader :error_type,:error_file_ref,:error_line_num,:error_lines,:error_detail
+    attr_reader :error_type, :error_file_ref, :error_line_num, :error_lines, :error_detail
     def hash_form
       added = {
         error_type: @error_type,
@@ -107,7 +107,7 @@ module XYZ
     private
 
     def error_type
-      Aux::underscore(Aux::demodulize(self.class.to_s)).to_sym
+      Aux.underscore(Aux.demodulize(self.class.to_s)).to_sym
     end
   end
 end

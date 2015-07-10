@@ -1,7 +1,7 @@
 module DTK; class Node
   class Type
     class Node < self
-      Types = 
+      Types =
         [
          :stub,              # - in an assembly template
          :image,             # - corresponds to an IAAS, hyperviser or container image

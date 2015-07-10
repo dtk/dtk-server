@@ -1,19 +1,19 @@
 module DTK
   class Node < Model
-    r8_nested_require('node','meta')
+    r8_nested_require('node', 'meta')
     extend NodeMetaClassMixin
-    set_relation_name(:node,:node)
+    set_relation_name(:node, :node)
 
-    r8_nested_require('node','type')
-    r8_nested_require('node','template')
-    r8_nested_require('node','instance')
-    r8_nested_require('node','target_ref')
-    r8_nested_require('node','filter')
-    r8_nested_require('node','clone')
-    r8_nested_require('node','node_attribute')
-    r8_nested_require('node','external_ref')
-    r8_nested_require('node','delete')
-    r8_nested_require('node','dangling_link_mixin')
+    r8_nested_require('node', 'type')
+    r8_nested_require('node', 'template')
+    r8_nested_require('node', 'instance')
+    r8_nested_require('node', 'target_ref')
+    r8_nested_require('node', 'filter')
+    r8_nested_require('node', 'clone')
+    r8_nested_require('node', 'node_attribute')
+    r8_nested_require('node', 'external_ref')
+    r8_nested_require('node', 'delete')
+    r8_nested_require('node', 'dangling_link_mixin')
 
     include Type::Mixin
     include Clone::Mixin
@@ -51,7 +51,7 @@ module DTK
     end
     private :create_obj_subclass
 
-    def is_target_ref?(opts={})
+    def is_target_ref?(opts = {})
       TargetRef.types(opts).include?(get_field?(:type))
     end
 
@@ -86,8 +86,8 @@ module DTK
       end
     end
 
-    def self.create_from_model_handle(hash_scalar_values,model_handle,opts={})
-      ret = super(hash_scalar_values,model_handle)
+    def self.create_from_model_handle(hash_scalar_values, model_handle, opts = {})
+      ret = super(hash_scalar_values, model_handle)
       opts[:subclass] ? ret.create_obj_optional_subclass() : ret
     end
 
@@ -100,7 +100,7 @@ module DTK
     #######################
     # TODO: write as sql fn for efficiency
     def has_pending_change
-      ((get_field?(:action)||{})[:count]||0) > 0
+      ((get_field?(:action) || {})[:count] || 0) > 0
     end
 
     def status
@@ -116,7 +116,7 @@ module DTK
       get_field?(:display_name)
     end
 
-    def pp_name_and_id(opts={})
+    def pp_name_and_id(opts = {})
       first_word = (opts[:capitalize] ? 'Node' : 'node')
       "#{first_word} (#{name()}) with id (#{id})"
     end
@@ -124,17 +124,17 @@ module DTK
     ########
     def self.stop_instances(nodes)
       CommandAndControl.stop_instances(nodes)
-      nodes.each{|node|node.attribute.clear_host_addresses()}
+      nodes.each { |node| node.attribute.clear_host_addresses() }
     end
 
     #######################
     # standard get methods
     def get_target(additional_columns = [])
       sp_hash = {
-        cols: [:id,:group_id,:display_name] + additional_columns,
-        filter: [:eq,:id,target_id()]
+        cols: [:id, :group_id, :display_name] + additional_columns,
+        filter: [:eq, :id, target_id()]
       }
-      Target::Instance.get_obj(model_handle(:target_instance),sp_hash)
+      Target::Instance.get_obj(model_handle(:target_instance), sp_hash)
     end
 
     def get_target_iaas_type
@@ -147,7 +147,7 @@ module DTK
     end
 
     def self.get_violations(id_handles)
-      get_objs_in_set(id_handles,cols: [:violations]).map{|r|r[:violation]}
+      get_objs_in_set(id_handles, cols: [:violations]).map { |r| r[:violation] }
     end
 
     def get_project
@@ -155,7 +155,7 @@ module DTK
     end
 
     def self.get_ports(id_handles)
-      get_objs_in_set(id_handles,{cols: [:ports]},keep_ref_cols: true).map{|r|r[:port]}
+      get_objs_in_set(id_handles, { cols: [:ports] }, keep_ref_cols: true).map { |r| r[:port] }
     end
 
     def get_port_links
@@ -166,61 +166,61 @@ module DTK
       ret = []
       ports = get_ports(id_handles)
       return ret if ports.empty?()
-      port_ids = ports.map{|p|p[:id]}
+      port_ids = ports.map { |p| p[:id] }
       sp_hash = {
         cols: PortLink.common_columns(),
-        filter: [:or, [:oneof, :input_id, port_ids], [:oneof, :output_id, port_ids]] 
+        filter: [:or, [:oneof, :input_id, port_ids], [:oneof, :output_id, port_ids]]
       }
       port_link_mh = ports.first.model_handle(:port_link)
-      Model.get_objs(port_link_mh,sp_hash)
+      Model.get_objs(port_link_mh, sp_hash)
     end
 
     # TODO: gui based may remove
     def get_ports(*types)
       port_list = self.class.get_ports([id_handle])
-      i18n = get_i18n_mappings_for_models(:component,:attribute)
-      port_list.map{|port|port.filter_and_process!(i18n,*types)}.compact
+      i18n = get_i18n_mappings_for_models(:component, :attribute)
+      port_list.map { |port| port.filter_and_process!(i18n, *types) }.compact
     end
 
     ######### Model apis
 
-    def get_assembly?(cols=nil)
+    def get_assembly?(cols = nil)
       if assembly_id = get_field?(:assembly_id)
         sp_hash = {
-        cols: cols||[:id,:group_id,:display_name],
-          filter: [:eq,:id,assembly_id]
+        cols: cols || [:id, :group_id, :display_name],
+        filter: [:eq, :id, assembly_id]
         }
-        Assembly::Instance.get_objs(model_handle(:assembly_instance),sp_hash).first
+        Assembly::Instance.get_objs(model_handle(:assembly_instance), sp_hash).first
       end
     end
 
-    def self.list(model_handle,opts={})
-      target_filter = (opts[:target_idh] ? [:eq,:datacenter_datacenter_id,opts[:target_idh].get_id()] : [:neq,:datacenter_datacenter_id,nil])
-      filter = [:and, [:oneof, :type, [Type::Node.instance,Type::Node.staged,Type::Node.physical]], target_filter]
+    def self.list(model_handle, opts = {})
+      target_filter = (opts[:target_idh] ? [:eq, :datacenter_datacenter_id, opts[:target_idh].get_id()] : [:neq, :datacenter_datacenter_id, nil])
+      filter = [:and, [:oneof, :type, [Type::Node.instance, Type::Node.staged, Type::Node.physical]], target_filter]
       sp_hash = {
         cols: common_columns() + [:assemblies],
         filter: filter
       }
       cols_except_name = common_columns() - [:display_name]
-      get_objs(model_handle,sp_hash).map do |n|
+      get_objs(model_handle, sp_hash).map do |n|
         el = n.hash_subset(*cols_except_name)
-        assembly_name = (n[:assembly]||{})[:display_name]
-        el.merge(display_name: user_friendly_name(n[:display_name],assembly_name))
-      end.sort{|a,b|a[:display_name] <=> b[:display_name]}
+        assembly_name = (n[:assembly] || {})[:display_name]
+        el.merge(display_name: user_friendly_name(n[:display_name], assembly_name))
+      end.sort { |a, b| a[:display_name] <=> b[:display_name] }
     end
 
     def self.list_wo_assembly_nodes(model_handle)
-      filter = [:and, [:oneof, :type, [Type::Node.instance,Type::Node.staged]], [:eq, :assembly_id, nil]]
+      filter = [:and, [:oneof, :type, [Type::Node.instance, Type::Node.staged]], [:eq, :assembly_id, nil]]
       sp_hash = {
         cols: common_columns() + [:assemblies],
         filter: filter
       }
       cols_except_name = common_columns() - [:display_name]
-      get_objs(model_handle,sp_hash).map do |n|
+      get_objs(model_handle, sp_hash).map do |n|
         el = n.hash_subset(*cols_except_name)
-        assembly_name = (n[:assembly]||{})[:display_name]
-        el.merge(display_name: user_friendly_name(n[:display_name],assembly_name))
-      end.sort{|a,b|a[:display_name] <=> b[:display_name]}
+        assembly_name = (n[:assembly] || {})[:display_name]
+        el.merge(display_name: user_friendly_name(n[:display_name], assembly_name))
+      end.sort { |a, b| a[:display_name] <=> b[:display_name] }
     end
 
     def self.legal_display_name?(display_name)
@@ -228,7 +228,7 @@ module DTK
     end
     LegalDisplayName = /^[a-zA-Z0-9_:\[\]\.-]+$/
 
-    def self.user_friendly_name(node_name,assembly_name=nil)
+    def self.user_friendly_name(node_name, assembly_name = nil)
       assembly_name ? "#{assembly_name}::#{node_name}" : node_name
     end
     private_class_method :user_friendly_name
@@ -237,23 +237,24 @@ module DTK
     def self.parse_user_friendly_name(name)
       node_name = assembly_name = nil
       if name =~ Regexp.new("(^.+)#{AssemblyNodeNameSep}(.+$)")
-        node_name,assembly_name = [$2,$1]
+        node_name = Regexp.last_match(2)
+        assembly_name = Regexp.last_match(1)
       else
         node_name = name
       end
       unless legal_display_name?(node_name)
-        raise ErrorNameInvalid.new(node_name,:node)
+        fail ErrorNameInvalid.new(node_name, :node)
       end
-      [node_name,assembly_name]
+      [node_name, assembly_name]
     end
     private_class_method :parse_user_friendly_name
     AssemblyNodeNameSep = '::'
 
-    def info(opts={})
+    def info(opts = {})
       ret = get_obj(cols: InfoCols).hash_subset(*InfoCols)
       opts[:print_form] ? info_print_form_processing!(ret) : ret
     end
-    InfoCols = [:id,:display_name,:os_type,:type,:description,:status,:external_ref,:assembly_id]
+    InfoCols = [:id, :display_name, :os_type, :type, :description, :status, :external_ref, :assembly_id]
 
     def info_print_form_processing!(info_hash)
       if external_ref = info_hash[:external_ref]
@@ -275,21 +276,21 @@ module DTK
       self.class.sanitize!(self)
     end
 
-    def info_about(about,_opts={})
+    def info_about(about, _opts = {})
       case about
        when :components
-        get_objs(cols: [:components],keep_ref_cols: true).map do |r|
+        get_objs(cols: [:components], keep_ref_cols: true).map do |r|
           r[:component].convert_to_print_form!()
-        end.sort{|a,b|a[:display_name] <=> b[:display_name]}
+        end.sort { |a, b| a[:display_name] <=> b[:display_name] }
        when :attributes
         get_attributes_print_form()
        else
-        raise Error.new("TODO: not implemented yet: processing of info_about(#{about})")
+        fail Error.new("TODO: not implemented yet: processing of info_about(#{about})")
       end
     end
 
     def find_violations
-      cmps = get_objs(cols: [:components],keep_ref_cols: true)
+      cmps = get_objs(cols: [:components], keep_ref_cols: true)
 
       ret = []
       return ret if cmps.empty?
@@ -299,16 +300,16 @@ module DTK
           cols: [:id, :type, :component_id, :service_id],
           filter: [:eq, :id, cmp[:component][:module_branch_id]]
         }
-        branch = Model.get_obj(model_handle(:module_branch),sp_hash)
+        branch = Model.get_obj(model_handle(:module_branch), sp_hash)
 
         sp_cmp_hash = {
           cols: [:id, :display_name, :dsl_parsed],
           filter: [:eq, :id, branch[:component_id]]
         }
-        cmp_module = Model.get_obj(model_handle(:component_module),sp_cmp_hash)
+        cmp_module = Model.get_obj(model_handle(:component_module), sp_cmp_hash)
 
         # ret << NodeViolations::NodeComponentParsingError.new(cmp_module[:display_name], "Component") unless cmp_module[:dsl_parsed]
-        ret << NodeViolations::NodeComponentParsingError.new(cmp_module[:display_name], "Component") unless branch.dsl_parsed?()
+        ret << NodeViolations::NodeComponentParsingError.new(cmp_module[:display_name], 'Component') unless branch.dsl_parsed?()
       end
 
       ret
@@ -323,42 +324,42 @@ module DTK
     #  :namespace
     #  :component_title
     #  :idempotent
-    def add_component(component_template,opts={})
+    def add_component(component_template, opts = {})
       component_title =  opts[:component_title]
       namespace = opts[:namespace] || (component_template[:namespace] && component_template[:namespace][:display_name])
 
       component_template.update_with_clone_info!()
 
       if module_branch = component_template[:module_branch]
-        raise ErrorUsage.new("You are not allowed to add component '#{component_template[:display_name]}' that belongs to test-module.") if module_branch[:type].eql?('test_module')
+        fail ErrorUsage.new("You are not allowed to add component '#{component_template[:display_name]}' that belongs to test-module.") if module_branch[:type].eql?('test_module')
       end
 
-      override_attrs = {locked_sha: component_template.get_current_sha!()}
+      override_attrs = { locked_sha: component_template.get_current_sha!() }
 
       component_type = component_template.get_field?(:component_type)
-      if matching_cmp = Component::Instance.get_matching?(id_handle(),component_type,component_title)
-        if opts[:idempotent] 
+      if matching_cmp = Component::Instance.get_matching?(id_handle(), component_type, component_title)
+        if opts[:idempotent]
           return matching_cmp.id_handle()
         else
           if component_title
             # Just doing check here when there is a title, and not treating singletones
             # because there is later constraint that picks up the singleton components
-            raise ErrorUsage.new("Component (#{matching_cmp.print_form()}) already exists")
+            fail ErrorUsage.new("Component (#{matching_cmp.print_form()}) already exists")
           end
         end
       end
 
-      if title_attr_name = check_and_ret_title_attribute_name?(component_template,component_title)
+      if title_attr_name = check_and_ret_title_attribute_name?(component_template, component_title)
         override_attrs = {
-          ref: SQL::ColRef.cast(ComponentTitle.ref_with_title(component_type,component_title),:text),
-          display_name: SQL::ColRef.cast(ComponentTitle.display_name_with_title(component_type,component_title),:text)
+          ref: SQL::ColRef.cast(ComponentTitle.ref_with_title(component_type, component_title), :text),
+          display_name: SQL::ColRef.cast(ComponentTitle.display_name_with_title(component_type, component_title), :text)
         }
       end
-      clone_opts = {no_post_copy_hook: true, ret_new_obj_with_cols: [:id,:display_name], namespace: namespace}
-      new_cmp = clone_into(component_template,override_attrs,clone_opts)
+      clone_opts = { no_post_copy_hook: true, ret_new_obj_with_cols: [:id, :display_name], namespace: namespace }
+      new_cmp = clone_into(component_template, override_attrs, clone_opts)
       new_cmp_idh = new_cmp.id_handle()
       if title_attr_name
-        Component::Instance.set_title_attribute(new_cmp_idh,component_title,title_attr_name)
+        Component::Instance.set_title_attribute(new_cmp_idh, component_title, title_attr_name)
       end
       new_cmp_idh
     end
@@ -369,13 +370,13 @@ module DTK
         cols: [:id, :display_name],
         filter: [:and, [:eq, :id, component_idh.get_id()], [:eq, :node_node_id, id()]]
       }
-      unless Model.get_obj(model_handle(:component),sp_hash)
-        raise ErrorIdInvalid.new(component_idh.get_id(),:component)
+      unless Model.get_obj(model_handle(:component), sp_hash)
+        fail ErrorIdInvalid.new(component_idh.get_id(), :component)
       end
       Model.delete_instance(component_idh)
     end
 
-    def self.check_valid_id(model_handle,id,assembly_id=nil)
+    def self.check_valid_id(model_handle, id, assembly_id = nil)
       # filter does not include node group members
       filter =
         [:and,
@@ -383,33 +384,33 @@ module DTK
          [:neq, :datacenter_datacenter_id, nil],
          assembly_id && [:eq, :assembly_id, assembly_id]
         ].compact
-      opts = (assembly_id ? {no_error_if_no_match: true} : {})
-      check_valid_id_helper(model_handle,id,filter,opts) ||
-        check_valid_id__node_member(model_handle,id,assembly_id)
+      opts = (assembly_id ? { no_error_if_no_match: true } : {})
+      check_valid_id_helper(model_handle, id, filter, opts) ||
+        check_valid_id__node_member(model_handle, id, assembly_id)
     end
-    def self.check_valid_id__node_member(model_handle,id,assembly_id)
+    def self.check_valid_id__node_member(model_handle, id, assembly_id)
       assembly = NodeGroupRelation.get_node_member_assembly?(model_handle.createIDH(id: id))
       unless assembly && assembly.id == assembly_id
-        raise ErrorIdInvalid.new(id,pp_object_type()) 
+        fail ErrorIdInvalid.new(id, pp_object_type())
       end
       id
     end
     private_class_method :check_valid_id__node_member
 
-    def self.name_to_id(model_handle,name,assembly_id=nil)
+    def self.name_to_id(model_handle, name, assembly_id = nil)
       node_name, assembly_name = parse_user_friendly_name(name)
       unless legal_display_name?(node_name)
-        raise ErrorNameInvalid.new(node_name,:node)
+        fail ErrorNameInvalid.new(node_name, :node)
       end
-      assembly_id ||= assembly_name && Assembly::Instance.name_to_id(model_handle.createMH(:component),assembly_name)
+      assembly_id ||= assembly_name && Assembly::Instance.name_to_id(model_handle.createMH(:component), assembly_name)
       sp_hash =  {
-        cols: [:id,:assembly_id],
+        cols: [:id, :assembly_id],
         filter: [:and,
                  [:eq, :display_name, node_name],
                  [:neq, :datacenter_datacenter_id, nil],
                  [:eq, :assembly_id, assembly_id]]
       }
-      name_to_id_helper(model_handle,name,sp_hash)
+      name_to_id_helper(model_handle, name, sp_hash)
     end
 
     def git_authorized?
@@ -417,21 +418,24 @@ module DTK
     end
 
     def set_git_authorized(bool_val)
-      update_external_ref_field(:git_authorized,bool_val)
+      update_external_ref_field(:git_authorized, bool_val)
     end
 
     def get_and_update_status!
       # shortcut
       if key?(:is_deployed)
-        return  Type::Node.staged if not self[:is_deployed]
+        return  Type::Node.staged unless self[:is_deployed]
       end
-      update_obj!(:is_deployed,:external_ref,:operational_status)
-      return  Type::Node.staged if not self[:is_deployed]
+      update_obj!(:is_deployed, :external_ref, :operational_status)
+      return  Type::Node.staged unless self[:is_deployed]
       get_and_update_operational_status!()
     end
 
     def get_and_update_operational_status!
-      update_obj!(:external_ref,:operational_status)
+      update_obj!(:type, :external_ref, :operational_status)
+      if self[:type] == 'staged' # TODO: use Type methods
+        return self[:admin_op_status]
+      end
       op_status = CommandAndControl.get_node_operational_status(self)
       if op_status
         unless self[:operational_status] == op_status
@@ -458,11 +462,11 @@ module DTK
     end
 
     def get_external_ref
-      get_field?(:external_ref)||{}
+      get_field?(:external_ref) || {}
     end
 
     def get_admin_op_status
-      get_field?(:admin_op_status)||{}
+      get_field?(:admin_op_status) || {}
     end
 
     def get_iaas_type
@@ -479,7 +483,7 @@ module DTK
     end
     def self.pbuilderid(node)
       unless ret = CommandAndControl.pbuilderid(node)
-        raise Error.new("Node (#{node.get_field?(:display_name)}) with id (#{node.id}) does not have an #{PBuilderIDPrintName}")
+        fail Error.new("Node (#{node.get_field?(:display_name)}) with id (#{node.id}) does not have an #{PBuilderIDPrintName}")
       end
       ret
     end
@@ -494,7 +498,7 @@ module DTK
     end
 
     def get_hostname_external_ref
-      get_field?(:hostname_external_ref)||{}
+      get_field?(:hostname_external_ref) || {}
     end
     private :get_hostname_external_ref
 
@@ -513,7 +517,7 @@ module DTK
     # end of these may be depracted
 
     def self.get_output_attrs_to_l4_input_ports(id_handles)
-      rows = get_objs_in_set(id_handles,{cols: [:output_attrs_to_l4_input_ports]},keep_ref_cols: true)
+      rows = get_objs_in_set(id_handles, { cols: [:output_attrs_to_l4_input_ports] }, keep_ref_cols: true)
       return {} if rows.empty?
       # restructure so that get mapping from attribute_id to port
       ret = {}
@@ -529,10 +533,10 @@ module DTK
       datacenter_id_sym = datacenter[:id].to_s.to_sym
       node_id_sym = self[:id].to_s.to_sym
       # TODO: hack assumes that canm just take position from first node[:u1]
-      ((datacenter[:ui]||{})[:items]||{})[node_id_sym] || (self[:ui]||{})[datacenter_id_sym] || (self[:ui]||{}).values.first
+      ((datacenter[:ui] || {})[:items] || {})[node_id_sym] || (self[:ui] || {})[datacenter_id_sym] || (self[:ui] || {}).values.first
     end
 
-    def update_ui_info!(ui,datacenter)
+    def update_ui_info!(ui, datacenter)
       datacenter_id_sym = datacenter[:id].to_s.to_sym
       node_id_sym = self[:id].to_s.to_sym
       self[:ui] ||= {}
@@ -545,21 +549,21 @@ module DTK
       # TODO: just putting in username, not uid or gid
       node_user_list.map do |u|
         attr = u[:attribute]
-        val = attr[:value_asserted]||attr[:value_derived]
-        (val && attr[:display_name] == "username") ? {id: attr[:id], username: val, avatar_filename: 'generic-user-male.png'} : nil
+        val = attr[:value_asserted] || attr[:value_derived]
+        (val && attr[:display_name] == 'username') ? { id: attr[:id], username: val, avatar_filename: 'generic-user-male.png' } : nil
       end.compact
     end
 
     def get_applications
-      app_hash_list = get_objects_col_from_sp_hash({columns: [:applications]},:component)
+      app_hash_list = get_objects_col_from_sp_hash({ columns: [:applications] }, :component)
 
       i18n = get_i18n_mappings_for_models(:component)
       app_hash_list.map do |component|
         name = component[:display_name]
-        cmp_i18n = i18n_string(i18n,:component,name)
-        component_el = {id: component[:id], name: name, i18n: cmp_i18n}
-        component_icon_fn = ((component[:ui]||{})[:images]||{})[:tnail]
-        component_el.merge(component_icon_fn ? {component_icon_filename: component_icon_fn} : {})
+        cmp_i18n = i18n_string(i18n, :component, name)
+        component_el = { id: component[:id], name: name, i18n: cmp_i18n }
+        component_icon_fn = ((component[:ui] || {})[:images] || {})[:tnail]
+        component_el.merge(component_icon_fn ? { component_icon_filename: component_icon_fn } : {})
       end
     end
 
@@ -578,14 +582,14 @@ module DTK
     # Method will remove DNS information for node, this happens when we do not persistent
     # DNS and by stopping node we do not need to keep DNS information
     def strip_dns_info!
-      update(external_ref: self[:external_ref].merge(dns_name: nil, ec2_public_address: nil, private_dns_name: nil ))
+      update(external_ref: self[:external_ref].merge(dns_name: nil, ec2_public_address: nil, private_dns_name: nil))
     end
 
     def get_node_service_checks
       return [] if get_objects_from_sp_hash(columns: [:monitoring_agents]).empty?
 
       # TODO: i18n treatment of service check names
-      get_objects_col_from_sp_hash({columns: [:monitoring_items__node]},:monitoring_item)
+      get_objects_col_from_sp_hash({ columns: [:monitoring_items__node] }, :monitoring_item)
     end
 
     def get_component_service_checks
@@ -595,7 +599,7 @@ module DTK
 
       get_objects_from_sp_hash(columns: [:monitoring_items__component]).map do |r|
         cmp_name = r[:component][:display_name]
-        cmp_info = {component_name: cmp_name,component_i18n: i18n_string(i18n,:component,cmp_name) }
+        cmp_info = { component_name: cmp_name, component_i18n: i18n_string(i18n, :component, cmp_name) }
         r[:monitoring_item].merge(cmp_info)
       end
     end
@@ -605,91 +609,91 @@ module DTK
     def self.get_external_connected_links(id_handles)
       port_link_ret = get_conn_port_links(id_handles)
       attr_link_ret = get_conn_external_attr_links(id_handles)
-      [port_link_ret[0]+attr_link_ret[0],port_link_ret[1]+attr_link_ret[1]]
+      [port_link_ret[0] + attr_link_ret[0], port_link_ret[1] + attr_link_ret[1]]
     end
 
     # return ports links
     # returns [connected_links,dangling_links]
-    def self.get_conn_port_links(id_handles,_opts={})
-      ret = [[],[]]
+    def self.get_conn_port_links(id_handles, _opts = {})
+      ret = [[], []]
       in_port_cols = [:id, :display_name, :input_port_links]
       ndx_in_links = {}
-      get_objs_in_set(id_handles,columns: in_port_cols).each do |r|
+      get_objs_in_set(id_handles, columns: in_port_cols).each do |r|
         link = r[:port_link]
         ndx_in_links[link[:id]] = link
       end
 
       out_port_cols = [:id, :display_name, :output_port_links]
       ndx_out_links = {}
-      get_objs_in_set(id_handles,columns: out_port_cols).each do |r|
+      get_objs_in_set(id_handles, columns: out_port_cols).each do |r|
         link = r[:port_link]
         ndx_out_links[link[:id]] = link
       end
 
       return ret if ndx_in_links.empty? && ndx_out_links.empty?
 
-      connected_links = (ndx_in_links.keys & ndx_out_links.keys).map{|id|ndx_in_links[id]}
+      connected_links = (ndx_in_links.keys & ndx_out_links.keys).map { |id| ndx_in_links[id] }
 
-      dangling_links = (ndx_in_links.keys - ndx_out_links.keys).map{|id|ndx_in_links[id]}
-      dangling_links += (ndx_out_links.keys - ndx_in_links.keys).map{|id|ndx_out_links[id]}
-      [connected_links,dangling_links]
+      dangling_links = (ndx_in_links.keys - ndx_out_links.keys).map { |id| ndx_in_links[id] }
+      dangling_links += (ndx_out_links.keys - ndx_in_links.keys).map { |id| ndx_out_links[id] }
+      [connected_links, dangling_links]
     end
 
     # return externally connected attribute links
     # returns [connected_links,dangling_links]
     def self.get_conn_external_attr_links(id_handles)
-      ret = [[],[]]
+      ret = [[], []]
 
-      ndx_in_links = get_objs_in_set(id_handles,cols: [:id,:input_attribute_links_cmp]).inject({}) do |h,r|
+      ndx_in_links = get_objs_in_set(id_handles, cols: [:id, :input_attribute_links_cmp]).inject({}) do |h, r|
         link = r[:attribute_link]
-        link[:type] == "external" ? h.merge(link[:id] => link) : h
+        link[:type] == 'external' ? h.merge(link[:id] => link) : h
       end
-      ndx_in_links = get_objs_in_set(id_handles,cols: [:id,:input_attribute_links_node]).inject(ndx_in_links) do |h,r|
+      ndx_in_links = get_objs_in_set(id_handles, cols: [:id, :input_attribute_links_node]).inject(ndx_in_links) do |h, r|
         link = r[:attribute_link]
-        link[:type] == "external" ? h.merge(link[:id] => link) : h
+        link[:type] == 'external' ? h.merge(link[:id] => link) : h
       end
 
-      ndx_out_links = get_objs_in_set(id_handles,cols: [:id,:output_attribute_links_cmp]).inject({}) do |h,r|
+      ndx_out_links = get_objs_in_set(id_handles, cols: [:id, :output_attribute_links_cmp]).inject({}) do |h, r|
         link = r[:attribute_link]
-        link[:type] == "external" ? h.merge(link[:id] => link) : h
+        link[:type] == 'external' ? h.merge(link[:id] => link) : h
       end
-      ndx_out_links = get_objs_in_set(id_handles,cols: [:id,:output_attribute_links_node]).inject(ndx_out_links) do |h,r|
+      ndx_out_links = get_objs_in_set(id_handles, cols: [:id, :output_attribute_links_node]).inject(ndx_out_links) do |h, r|
         link = r[:attribute_link]
-        link[:type] == "external" ? h.merge(link[:id] => link) : h
+        link[:type] == 'external' ? h.merge(link[:id] => link) : h
       end
 
       return ret if ndx_in_links.empty? && ndx_out_links.empty?
 
-      connected_links = (ndx_in_links.keys & ndx_out_links.keys).map{|id|ndx_in_links[id]}
+      connected_links = (ndx_in_links.keys & ndx_out_links.keys).map { |id| ndx_in_links[id] }
 
-      dangling_links = (ndx_in_links.keys - ndx_out_links.keys).map{|id|ndx_in_links[id]}
-      dangling_links += (ndx_out_links.keys - ndx_in_links.keys).map{|id|ndx_out_links[id]}
-      [connected_links,dangling_links]
+      dangling_links = (ndx_in_links.keys - ndx_out_links.keys).map { |id| ndx_in_links[id] }
+      dangling_links += (ndx_out_links.keys - ndx_in_links.keys).map { |id| ndx_out_links[id] }
+      [connected_links, dangling_links]
     end
 
     # TODO: quick hack
     def self.get_wspace_display(id_handle)
       node_id = IDInfoTable.get_id_from_id_handle(id_handle)
       node_mh = id_handle.createMH(model_name: :node)
-      node = get_objects(node_mh,{id: node_id}).first
+      node = get_objects(node_mh, { id: node_id }).first
 
       component_mh = node_mh.createMH(model_name: :component)
-      component_ds = get_objects_just_dataset(component_mh,node_node_id: node_id)
-      attr_where_clause = {is_port: true}
+      component_ds = get_objects_just_dataset(component_mh, node_node_id: node_id)
+      attr_where_clause = { is_port: true }
       # TODO: can prune what fields included
       attr_fs = Model::FieldSet.default(:attribute).with_added_cols(:component_component_id)
       attribute_mh = node_mh.createMH(model_name: :attribute)
-      attribute_ds = get_objects_just_dataset(attribute_mh,attr_where_clause,FieldSet.opt(attr_fs))
-      components = component_ds.graph(:left_outer,attribute_ds,component_component_id: :id).all
+      attribute_ds = get_objects_just_dataset(attribute_mh, attr_where_clause, FieldSet.opt(attr_fs))
+      components = component_ds.graph(:left_outer, attribute_ds, component_component_id: :id).all
       node.merge(component: components)
     end
     #######################
 
     # TODO: should this be more generic and centralized?
     def get_objects_associated_components
-      assocs = Model.get_objects(ModelHandle.new(@c,:assoc_node_component),node_id: self[:id])
+      assocs = Model.get_objects(ModelHandle.new(@c, :assoc_node_component), node_id: self[:id])
       return [] if assocs.nil?
-      assocs.map{|assoc|Model.get_object(IDHandle[c: @c,guid: assoc[:component_id]])}
+      assocs.map { |assoc| Model.get_object(IDHandle[c: @c, guid: assoc[:component_id]]) }
     end
 
     def get_obj_with_common_cols
@@ -725,6 +729,3 @@ module XYZ
     end
   end
 end
-
-
-

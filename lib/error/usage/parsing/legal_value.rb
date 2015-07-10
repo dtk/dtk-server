@@ -2,7 +2,7 @@ module DTK; class ErrorUsage
   class Parsing
     class LegalValue
       # either input_form or legal_values_block will be nil
-      def self.reify(input_form,&legal_values_block)
+      def self.reify(input_form, &legal_values_block)
         if legal_values_block
           class_eval(&legal_values_block)
         elsif input_form.is_a?(LegalValue)
@@ -10,7 +10,7 @@ module DTK; class ErrorUsage
         elsif input_form.is_a?(Class)
           Klass.new(input_form)
         else
-          raise Error.new("Legal value type's class (#{input_form.class}) is not supported")
+          fail Error.new("Legal value type's class (#{input_form.class}) is not supported")
         end
       end
 
@@ -21,7 +21,7 @@ module DTK; class ErrorUsage
       def self.HashWithSingleKey(*keys)
         HashWithSingleKey.new(keys)
       end
-      
+
       class Klass < self
         def initialize(klass)
           @klass = klass
@@ -37,11 +37,11 @@ module DTK; class ErrorUsage
       end
       class HashWithKey
         def initialize(keys)
-          @keys = Array(keys).map{|k|k.to_s}
+          @keys = Array(keys).map(&:to_s)
         end
 
         def matches?(object)
-          object.is_a?(Hash) && !!object.keys.find{|k|@keys.include?(k.to_s)}
+          object.is_a?(Hash) && !!object.keys.find { |k| @keys.include?(k.to_s) }
         end
 
         def print_form
@@ -50,7 +50,7 @@ module DTK; class ErrorUsage
       end
       class HashWithSingleKey
         def initialize(keys)
-          @keys = Array(keys).map{|k|k.to_s}
+          @keys = Array(keys).map(&:to_s)
         end
 
         def matches?(object)

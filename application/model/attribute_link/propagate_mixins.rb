@@ -9,10 +9,10 @@ module DTK; class AttributeLink
         SemanticType.create_from_attribute(@input_attr)
       end
 
-      def output_value(opts={})
+      def output_value(opts = {})
         if opts.key?(:inner_value)
-          opts[:inner_value] 
-        else 
+          opts[:inner_value]
+        else
           @output_attr[:value_asserted] || @output_attr[:value_derived]
         end
       end
@@ -23,4 +23,3 @@ module DTK; class AttributeLink
     end
   end
 end; end
-

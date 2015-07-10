@@ -16,31 +16,31 @@ staged_node_name = 'dnt_test_case_4_instance'
 
 dtk_common = DtkCommon.new('', '')
 
-describe "(Different Node Templates) Test Case 4: Stage node template and converge it (simple)" do
+describe '(Different Node Templates) Test Case 4: Stage node template and converge it (simple)' do
   before(:all) do
-    puts "************************************************************************************"
-    puts "(Different Node Templates) Test Case 4: Stage node template and converge it (simple)"
-    puts "************************************************************************************"
-    puts ""
+    puts '************************************************************************************'
+    puts '(Different Node Templates) Test Case 4: Stage node template and converge it (simple)'
+    puts '************************************************************************************'
+    puts ''
   end
 
   context "Stage node template #{node_name} with name #{staged_node_name}" do
-    include_context "Stage node template", dtk_common, node_name, staged_node_name
+    include_context 'Stage node template', dtk_common, node_name, staged_node_name
   end
 
-  context "List nodes after stage" do
-    include_context "List nodes after stage", dtk_common, staged_node_name
-  end   
-
-  context "Converge node function" do
-    include_context "Converge node", dtk_common, staged_node_name
+  context 'List nodes after stage' do
+    include_context 'List nodes after stage', dtk_common, staged_node_name
   end
-  
-  context "Delete and destroy node function" do
-    include_context "Destroy node", dtk_common, staged_node_name
+
+  context 'Converge node function' do
+    include_context 'Converge node', dtk_common, staged_node_name
+  end
+
+  context 'Delete and destroy node function' do
+    include_context 'Destroy node', dtk_common, staged_node_name
   end
 
   after(:all) do
-    puts "", ""
+    puts '', ''
   end
 end

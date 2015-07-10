@@ -3,7 +3,7 @@ module DTK; class DB
     # classes that support recursive delete
     class CreateStackArray < Array
       def self.create?(assigns)
-        if assigns.is_a?(HashObject) && assigns.apply_recursively? 
+        if assigns.is_a?(HashObject) && assigns.apply_recursively?
           new()
         end
       end
@@ -12,13 +12,13 @@ module DTK; class DB
         ret = IndexedStackArray.new()
         level = 1
         each do |create_stack|
-          create_stack.add_to_index!(ret,level)
+          create_stack.add_to_index!(ret, level)
         end
         ret
       end
 
-      def add!(relation_type,id)
-        create_stack = CreateStack.new(relation_type,id)
+      def add!(relation_type, id)
+        create_stack = CreateStack.new(relation_type, id)
         self << create_stack
         create_stack
       end
@@ -29,7 +29,7 @@ module DTK; class DB
         create_stack
       end
     end
-    
+
     class CreateStackBase
       def initialize(relation_type)
         @relation_type = relation_type
@@ -42,31 +42,31 @@ module DTK; class DB
         super(relation_type)
       end
 
-      def add_to_index!(_indexed_create_stack,_level)
+      def add_to_index!(_indexed_create_stack, _level)
         # no op
       end
     end
-      
+
     class CreateStack < CreateStackBase
-      def initialize(relation_type,id)
+      def initialize(relation_type, id)
         super(relation_type)
         @id = id
         @children = CreateStackArray.new
       end
 
-      attr_reader :children,:id
-      
-      def add_to_index!(indexed_create_stack,level)
+      attr_reader :children, :id
+
+      def add_to_index!(indexed_create_stack, level)
         @children.each do |child_create_stack|
-          indexed_create_stack.add!(level,self,child_create_stack)
-          child_create_stack.add_to_index!(indexed_create_stack,level+1)
+          indexed_create_stack.add!(level, self, child_create_stack)
+          child_create_stack.add_to_index!(indexed_create_stack, level + 1)
         end
       end
     end
 
     # form index is [level][parent_type][child_type][parent_id] and value is array with elements children ids:
     class IndexedStackArray < Hash
-      def add!(level,parent_stack,child_stack)
+      def add!(level, parent_stack, child_stack)
         level_pntr = self[level] ||= {}
         parent_pntr = level_pntr[parent_stack.relation_type] ||= {}
         child_pntr = parent_pntr[child_stack.relation_type] ||= {}
@@ -75,12 +75,12 @@ module DTK; class DB
           pntr << child_stack.id
         end
       end
-      
+
       def each_parent_child_pair(&block)
         each_value do |l1|
-          l1.each do |parent_type,l2|
-            l2.each do |child_type,id_rels|
-              block.call(parent_type,child_type,id_rels)
+          l1.each do |parent_type, l2|
+            l2.each do |child_type, id_rels|
+              block.call(parent_type, child_type, id_rels)
             end
           end
         end

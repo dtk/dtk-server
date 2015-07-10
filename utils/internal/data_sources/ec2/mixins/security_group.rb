@@ -6,12 +6,12 @@ module XYZ
       end
 
       def get_network_partition_ref(server)
-        return nil unless server[:groups] and not server[:groups].empty? 
-        server[:groups].sort.join("__")
+        return nil unless server[:groups] and not server[:groups].empty?
+        server[:groups].sort.join('__')
       end
 
       def security_groups_from_network_partition_ref(ref)
-        ref.split("__")
+        ref.split('__')
       end
 
       # internal fns for mixin
@@ -25,7 +25,7 @@ module XYZ
 
           ret = DataSourceUpdateHash.new
           network_partition_names.each do |name|
-            network_partition = {name: name} #TODO: stub for putting more information in
+            network_partition = { name: name } #TODO: stub for putting more information in
             ret[name] = network_partition
           end
           ret
@@ -34,7 +34,7 @@ module XYZ
         private
 
         def get_network_partition_refs
-          @parent.get_servers().map{|s|s[:network_partition_ref]}.compact.uniq
+          @parent.get_servers().map { |s| s[:network_partition_ref] }.compact.uniq
         end
 
         def conn
@@ -45,13 +45,13 @@ module XYZ
         # TODO: factor this in
         def get_unfettered_security_groups
           security_groups = conn().security_groups_all()
-          security_groups.reject{|sg|not is_unfettered_security_group?(sg)}
+          security_groups.reject { |sg| not is_unfettered_security_group?(sg) }
         end
 
         def is_unfettered_security_group?(security_group)
           rules =  security_group[:ip_permissions]
           return nil unless rules
-          return true #TODO: stub
+          true #TODO: stub
           # TODO: need to replace; this is rule for right_aws, not fog rules.find{|x|x.has_key?(:group) and x[:group] == sg_name} ? true : nil
         end
       end

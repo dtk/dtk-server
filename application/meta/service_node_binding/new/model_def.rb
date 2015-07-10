@@ -15,5 +15,5 @@
       on_update: :cascade
     }
   },
-  many_to_one: [:service_add_on] 
+  many_to_one: [:service_add_on]
 }

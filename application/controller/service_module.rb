@@ -20,8 +20,8 @@ module DTK
     #### actions to interact with remote repos ###
     def rest__list_remote
       rsa_pub_key = ret_request_params(:rsa_pub_key)
-      datatype_opts = {datatype: :module_remote}
-      module_list = ServiceModule.list_remotes(model_handle,rsa_pub_key)
+      datatype_opts = { datatype: :module_remote }
+      module_list = ServiceModule.list_remotes(model_handle, rsa_pub_key)
       rest_ok_response filter_by_namespace(module_list), datatype_opts
     end
 
@@ -57,7 +57,7 @@ module DTK
       service_module = create_obj(:service_module_id)
       remote_repo = ret_remote_repo()
       version = ret_version()
-      rest_ok_response service_module.import_version(remote_repo,version)
+      rest_ok_response service_module.import_version(remote_repo, version)
     end
 
     # get remote_module_info; throws an access rights usage error if user does not have access
@@ -105,7 +105,7 @@ module DTK
 
       opts = Opts.new(project_idh: project.id_handle())
       if detail = ret_request_params(:detail_to_include)
-        opts.merge!(detail_to_include: detail.map{|r|r.to_sym})
+        opts.merge!(detail_to_include: detail.map(&:to_sym))
       end
 
       opts.merge!(remote_repo_base: remote_repo_base, diff: diff, namespace: namespace)
@@ -142,11 +142,11 @@ module DTK
       service_module = create_obj(:service_module_id)
       about = ret_non_null_request_params(:about).to_sym
       unless AboutEnum.include?(about)
-        raise ErrorUsage::BadParamValue.new(:about, AboutEnum)
+        fail ErrorUsage::BadParamValue.new(:about, AboutEnum)
       end
       rest_ok_response service_module.info_about(about)
     end
-    AboutEnum = ["assembly-templates".to_sym,:components]
+    AboutEnum = ['assembly-templates'.to_sym, :components]
 
     def rest__get_workspace_branch_info
       service_module = create_obj(:service_module_id)
@@ -161,7 +161,7 @@ module DTK
       project           = get_default_project()
       version           = nil #TODO: stub
 
-      opts_local_params = (namespace ? {namespace: namespace} : {})
+      opts_local_params = (namespace ? { namespace: namespace } : {})
       local_params = local_params(:service_module, module_name, opts_local_params)
 
       opts_create_mod = Opts.new(
@@ -193,8 +193,8 @@ module DTK
       opts = {}
       opts.merge!(namespace: remote_namespace) unless remote_namespace.empty?
 
-      remote_namespace,remote_module_name,version = Repo::Remote::split_qualified_name(ret_non_null_request_params(:remote_module_name), opts)
-      remote_params = remote_params_dtkn(:service_module,remote_namespace,remote_module_name,version)
+      remote_namespace, remote_module_name, version = Repo::Remote.split_qualified_name(ret_non_null_request_params(:remote_module_name), opts)
+      remote_params = remote_params_dtkn(:service_module, remote_namespace, remote_module_name, version)
 
       project = get_default_project()
       ServiceModule.delete_remote(project, remote_params, client_rsa_pub_key, force_delete)
@@ -223,7 +223,7 @@ module DTK
       opts = ret_params_hash(:task_action)
       opts.merge!(auto_update_module_refs: true) # TODO: might make this contingent
       if ret_request_param_boolean(:internal_trigger)
-        opts.merge!(do_not_raise: true )
+        opts.merge!(do_not_raise: true)
       end
       if mod_type = ret_request_params(:modification_type)
         opts.merge!(modification_type: mod_type.to_sym)
@@ -231,14 +231,14 @@ module DTK
       if ret_request_param_boolean(:force_parse)
         opts.merge!(force_parse: true)
       end
-      rest_ok_response service_module.update_model_from_clone_changes?(commit_sha,diffs_summary,version,opts)
+      rest_ok_response service_module.update_model_from_clone_changes?(commit_sha, diffs_summary, version, opts)
     end
 
     def rest__set_component_module_version
       service_module = create_obj(:service_module_id)
-      component_module = create_obj(:component_module_id,ComponentModule)
+      component_module = create_obj(:component_module_id, ComponentModule)
       version = ret_version()
-      clone_update_info = service_module.set_component_module_version(component_module,version)
+      clone_update_info = service_module.set_component_module_version(component_module, version)
       rest_ok_response clone_update_info
     end
 

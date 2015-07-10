@@ -1,29 +1,29 @@
-module DTK; class ServiceModule  
-  class AssemblyExport; class V4 
+module DTK; class ServiceModule
+  class AssemblyExport; class V4
     module WorkflowHash
       include Task::Template::Serialization
       def self.canonical_form(input_hash)
         ret = input_hash.class.new()
-        input_hash.each_pair do |k,info|
+        input_hash.each_pair do |k, info|
           # TODO: assuming that just one level workflow
           ret[k] =
             case k
              when :subtasks
-              info.map{|subtask|subtask_canonical_form(subtask)}
+              info.map { |subtask| subtask_canonical_form(subtask) }
              else
               info
             end
-        end  
+        end
         ret
       end
 
       def self.subtask_canonical_form(input_hash)
         ret = input_hash.class.new()
-        input_hash.each_pair do |k,info|
+        input_hash.each_pair do |k, info|
             # TODO: assuming that just one level workflow
             case k
              when :nodes
-              if  Constant.matches?(info,:AllApplicable)
+              if  Constant.matches?(info, :AllApplicable)
               # remove no op
               else
                 ret[k] = info

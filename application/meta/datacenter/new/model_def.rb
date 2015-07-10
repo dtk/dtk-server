@@ -27,7 +27,7 @@
       foreign_key_rel_type: :project,
       on_delete: :set_null,
       on_update: :set_null
-    },
+    }
   },
   one_to_many:   [
    :data_source,
@@ -49,8 +49,8 @@
          model_name: :node,
          convert: true,
          join_type: :inner,
-         join_cond: {datacenter_datacenter_id: :datacenter__id},
-         cols: [:id,:display_name,:ui,:type]
+         join_cond: { datacenter_datacenter_id: :datacenter__id },
+         cols: [:id, :display_name, :ui, :type]
        }]
     },
     violation_info: {
@@ -60,14 +60,14 @@
          model_name: :violation,
          convert: true,
          join_type: :inner,
-         join_cond: {datacenter_datacenter_id: :datacenter__id},
-         cols: [:id,:display_name,:severity,:description,:target_node_id,:updated_at]
+         join_cond: { datacenter_datacenter_id: :datacenter__id },
+         cols: [:id, :display_name, :severity, :description, :target_node_id, :updated_at]
        },
                                   {
                                     model_name: :node,
                                     join_type: :left_outer,
-                                    join_cond: {id: :violation__target_node_id},
-                                    cols: [:id,:display_name]
+                                    join_cond: { id: :violation__target_node_id },
+                                    cols: [:id, :display_name]
                                   }]
     }
   }

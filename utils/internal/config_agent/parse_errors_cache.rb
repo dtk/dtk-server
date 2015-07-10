@@ -7,16 +7,16 @@ module DTK
         @ndx_error_list = {}
       end
 
-      def add(obj,opts=Opts.new)
+      def add(obj, opts = Opts.new)
         if obj.is_a?(ParseError)
-          add_error(obj,opts)
+          add_error(obj, opts)
         elsif obj.is_a?(self.class)
           unless opts.empty?
             Log.error("Opts should be empty; it is set to: #{opts.inject}}")
           end
           add_errors(obj)
         else
-          raise Error.new("Unexpected object type (#{obj.class})")
+          fail Error.new("Unexpected object type (#{obj.class})")
         end
         self
       end
@@ -24,19 +24,19 @@ module DTK
       def create_error
         msg = "\n"
         num_errs = 0
-        @ndx_error_list.each_pair do |file_path,errors|
+        @ndx_error_list.each_pair do |file_path, errors|
           ident = IdentInitial
           if file_path
-            add_line!(msg,"In file #{file_path}:",ident)
+            add_line!(msg, "In file #{file_path}:", ident)
             ident += IdentIncrease
           end
           errors.each do |error|
             num_errs += 1
-            add_line!(msg,sentence_capitalize(error.to_s),ident)
+            add_line!(msg, sentence_capitalize(error.to_s), ident)
           end
         end
         opts = Opts.new(error_prefix: error_prefix(num_errs), log_error: false)
-        ErrorUsage::Parsing.new(msg,opts)
+        ErrorUsage::Parsing.new(msg, opts)
       end
       IdentInitial = 2
       IdentIncrease = 2
@@ -45,7 +45,7 @@ module DTK
 
       private
 
-      def add_error(error,opts=Opts.new)
+      def add_error(error, opts = Opts.new)
         # opts[:file_path] could be nil
         ndx = opts[:file_path]
         (@ndx_error_list[ndx] ||= []) << error
@@ -53,12 +53,12 @@ module DTK
       end
 
       def add_errors(errors)
-        errors.ndx_error_list.each_pair do |file_path,errors|
+        errors.ndx_error_list.each_pair do |file_path, errors|
           ndx = file_path
           opts = (file_path ? Opts.new(file_path: file_path) : Opts.new)
-          errors.each{|error|add_error(error,opts)}
+          errors.each { |error| add_error(error, opts) }
         end
-      end 
+      end
 
       def error_prefix(num_errs)
         error_or_errors = (num_errs > 1 ? 'errors' : 'error')

@@ -4,29 +4,28 @@
   has_ancestor_fields: true,
   field_defs: {
     updated_at: {
-        type: :json,
+        type: :json
     },
     attribute_value: {
-        type: :text,
+        type: :text
     },
     is_unset: {
-        type: :boolean,
+        type: :boolean
     },
     display_name: {
         type: :text,
         size: 50
     },
     parent_name: {
-        type: :text,
+        type: :text
     },
     read_only: {
-        type: :boolean,
+        type: :boolean
     },
     required: {
-        type: :boolean,
-    },
+        type: :boolean
+    }
   },
   relationships: {
   }
 }
-

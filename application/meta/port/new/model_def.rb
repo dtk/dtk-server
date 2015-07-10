@@ -10,7 +10,7 @@
       type: :varchar,
       size: 10
     },
-    connected: {type: :boolean},
+    connected: { type: :boolean },
     external_attribute_id: {
       type: :bigint,
       foreign_key_rel_type: :attribute,
@@ -56,7 +56,7 @@
     location: {
       type: :varchar,
       hidden: true,
-      local_dependencies: [:location_asserted,:direction,:display_name]
+      local_dependencies: [:location_asserted, :direction, :display_name]
     },
     name: {
       type: :varchar,
@@ -75,8 +75,8 @@
          model_name: :node,
          convert: true,
          join_type: :inner,
-         join_cond: {id: :port__node_node_id},
-         cols: [:id,:group_id,:display_name,:assembly_id]
+         join_cond: { id: :port__node_node_id },
+         cols: [:id, :group_id, :display_name, :assembly_id]
        }]
     },
     link_def_info: {
@@ -86,22 +86,22 @@
          model_name: :link_def,
          convert: true,
          join_type: :left_outer,
-         join_cond: {id: :port__link_def_id},
-         cols: [:id,:display_name,:component_component_id,:link_type,:has_external_link,:has_internal_link,:local_or_remote]
+         join_cond: { id: :port__link_def_id },
+         cols: [:id, :display_name, :component_component_id, :link_type, :has_external_link, :has_internal_link, :local_or_remote]
        },
                                   {
                                     model_name: :component,
                                     convert: true,
                                     join_type: :left_outer,
-                                    join_cond: {id: :link_def__component_component_id},
-                                    cols: [:id,:display_name,:component_type,:node_node_id,:implementation_id,:extended_base]
+                                    join_cond: { id: :link_def__component_component_id },
+                                    cols: [:id, :display_name, :component_type, :node_node_id, :implementation_id, :extended_base]
                                   },
                                   {
                                     model_name: :link_def_link,
                                     convert: true,
                                     join_type: :left_outer,
-                                    join_cond: {link_def_id: :link_def__id},
-                                    cols: [:id,:display_name,:remote_component_type,:position,:content,:type,:temporal_order]
+                                    join_cond: { link_def_id: :link_def__id },
+                                    cols: [:id, :display_name, :remote_component_type, :position, :content, :type, :temporal_order]
                                   }]
     },
     attribute: {
@@ -109,24 +109,24 @@
       hidden: true,
       remote_dependencies:       [{
          model_name: :attribute,
-         alias: :attribute_direct, 
+         alias: :attribute_direct,
          join_type: :left_outer,
-         join_cond: {id: :port__external_attribute_id},
-         cols: [:id,:display_name]
+         join_cond: { id: :port__external_attribute_id },
+         cols: [:id, :display_name]
        },
                                   {
                                     model_name: :port,
                                     alias: :port_nested,
                                     join_type: :left_outer,
-                                    join_cond: {containing_port_id: :port__id},
-                                    cols: [:id,:display_name,:external_attribute_id]
+                                    join_cond: { containing_port_id: :port__id },
+                                    cols: [:id, :display_name, :external_attribute_id]
                                   },
                                   {
                                     model_name: :attribute,
-                                    alias: :attribute_nested, 
+                                    alias: :attribute_nested,
                                     join_type: :left_outer,
-                                    join_cond: {id: :port_nested__external_attribute_id},
-                                    cols: [:id,:display_name]
+                                    join_cond: { id: :port_nested__external_attribute_id },
+                                    cols: [:id, :display_name]
                                   }]
     }
   }

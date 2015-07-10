@@ -2,21 +2,21 @@ r8_require('../../factory_object_type')
 module DTK
   class Assembly; class Template
     class Factory < self
-      r8_nested_require('factory','non_default_attribute')
+      r8_nested_require('factory', 'non_default_attribute')
       extend FactoryObjectClassMixin
       include FactoryObjectMixin
 
-      def self.get_or_create_service_module(project,service_module_name,opts={})
+      def self.get_or_create_service_module(project, service_module_name, opts = {})
         unless namespace = opts[:namespace]
-          raise Error.new("Need to update code so that namespace passed in")
+          fail Error.new('Need to update code so that namespace passed in')
         end
-        if service_module = get_service_module?(project,service_module_name,namespace)
+        if service_module = get_service_module?(project, service_module_name, namespace)
           service_module
         else
-          raise ErrorUsage.new("Unable to create assembly because service module (#{namespace}:#{service_module_name}) clone exists on local machine but missing from server. You should import service module or delete local clone and try again.") if opts[:local_clone_dir_exists]
+          fail ErrorUsage.new("Unable to create assembly because service module (#{namespace}:#{service_module_name}) clone exists on local machine but missing from server. You should import service module or delete local clone and try again.") if opts[:local_clone_dir_exists]
 
           if opts[:mode] == :update
-            raise ErrorUsage.new("Service module (#{service_module_name}) does not exist")
+            fail ErrorUsage.new("Service module (#{service_module_name}) does not exist")
           end
 
           local_params = ModuleBranch::Location::LocalParams::Server.new(
@@ -27,7 +27,7 @@ module DTK
           )
 
           # TODO: look to remove :config_agent_type
-          module_and_branch_info = ServiceModule.create_module(project,local_params,config_agent_type: ConfigAgent::Type.default_symbol)
+          module_and_branch_info = ServiceModule.create_module(project, local_params, config_agent_type: ConfigAgent::Type.default_symbol)
           module_and_branch_info[:module_idh].create_object()
         end
       end
@@ -44,9 +44,9 @@ module DTK
         create_assembly_template_aux()
       end
 
-      def set_object_attributes!(project_idh,assembly_instance,service_module,service_module_branch)
+      def set_object_attributes!(project_idh, assembly_instance, service_module, service_module_branch)
         @project_idh = project_idh
-        @assembly_instance = assembly_instance 
+        @assembly_instance = assembly_instance
         @service_module = service_module
         @service_module_branch = service_module_branch
         @assembly_component_modules = assembly_instance.get_component_modules(get_version_info: true)
@@ -81,7 +81,7 @@ module DTK
             err_msg << " Component module (#{el[:module_name]}) in instance has namespace (#{el[:instance_ns]}), but namespace (#{el[:template_ns]}) in service module\n"
           end
           err_msg << "Alternatives are to push to another service module or change the service module's #{ModuleRefs.meta_filename_path()} file"
-          raise ErrorUsage.new(err_msg)
+          fail ErrorUsage.new(err_msg)
         end
       end
 
@@ -97,27 +97,27 @@ module DTK
         project_idh = service_module.get_project().id_handle()
 
         assembly_mh = project_idh.create_childMH(:component)
-        if ret = exists?(assembly_mh,service_module,assembly_name)
+        if ret = exists?(assembly_mh, service_module, assembly_name)
           if opts[:mode] == :create
-            raise ErrorUsage.new("Assembly (#{assembly_name}) already exists in service module (#{service_module_name})")
+            fail ErrorUsage.new("Assembly (#{assembly_name}) already exists in service module (#{service_module_name})")
           end
-          ret.set_object_attributes!(project_idh,assembly_instance,service_module,service_module_branch)
+          ret.set_object_attributes!(project_idh, assembly_instance, service_module, service_module_branch)
         else
           if opts[:mode] == :update
-            raise ErrorUsage.new("Assembly (#{assembly_name}) does not exist in service module (#{service_module_name})")
+            fail ErrorUsage.new("Assembly (#{assembly_name}) does not exist in service module (#{service_module_name})")
           end
           assembly_mh = project_idh.create_childMH(:component)
           hash_values = {
             project_project_id: project_idh.get_id(),
             ref: service_module.assembly_ref(assembly_name),
             display_name: assembly_name,
-            type: "composite",
+            type: 'composite',
             module_branch_id: service_module_branch[:id],
-            component_type: Assembly.ret_component_type(service_module_name,assembly_name)
+            component_type: Assembly.ret_component_type(service_module_name, assembly_name)
           }
           hash_values.merge!(description: opts[:description]) if opts[:description]
-          ret = create(assembly_mh,hash_values)
-          ret.set_object_attributes!(project_idh,assembly_instance,service_module,service_module_branch)
+          ret = create(assembly_mh, hash_values)
+          ret.set_object_attributes!(project_idh, assembly_instance, service_module, service_module_branch)
         end
       end
 
@@ -127,7 +127,7 @@ module DTK
 
       private
 
-      attr_reader :project_idh,:service_module_branch
+      attr_reader :project_idh, :service_module_branch
 
       def project_uri
         @project_uri ||= @project_idh.get_uri()
@@ -136,7 +136,7 @@ module DTK
       def add_content_for_clone!
         node_idhs = assembly_instance.get_nodes().map(&:id_handle)
         if node_idhs.empty?
-          raise ErrorUsage.new("Cannot find any nodes associated with assembly (#{assembly_instance.get_field?(:display_name)})")
+          fail ErrorUsage.new("Cannot find any nodes associated with assembly (#{assembly_instance.get_field?(:display_name)})")
         end
 
         # 1) get a content object, 2) modify, and 3) persist
@@ -182,7 +182,7 @@ module DTK
 
         node_cmp_attr_rows = Model.get_objs(node_mh, sp_hash, keep_ref_cols: true)
         if node_cmp_attr_rows.empty?
-          raise ErrorUsage.new('No components in the nodes being grouped to be an assembly template')
+          fail ErrorUsage.new('No components in the nodes being grouped to be an assembly template')
         end
         cmp_scalar_cols = node_cmp_attr_rows.first[:component].keys - [:non_default_attr_candidate]
         @ndx_nodes = {}
@@ -200,7 +200,7 @@ module DTK
             matching_cmp = r[:component].hash_subset(*cmp_scalar_cols).merge(non_default_attributes: [])
             cmps << matching_cmp
           end
-          if attr_cand = r[:non_default_attr_candidate] 
+          if attr_cand = r[:non_default_attr_candidate]
             if non_default_attr = NonDefaultAttribute.isa?(attr_cand, matching_cmp)
               matching_cmp[:non_default_attributes] << non_default_attr
             end
@@ -218,10 +218,10 @@ module DTK
 
       # TODO: can collapse above and below; aboves looks like extra intermediate level
       def create_assembly_template_aux
-        nodes = self[:nodes].inject(DBUpdateHash.new){ |h, node| h.merge(create_node_content(node)) }
-        port_links = self[:port_links].inject(DBUpdateHash.new){ |h, pl| h.merge(create_port_link_content(pl)) }
-        task_templates = self[:task_templates].inject(DBUpdateHash.new){ |h, tt| h.merge(create_task_template_content(tt)) }
-        assembly_level_attributes = self[:assembly_level_attributes].inject(DBUpdateHash.new){ |h, a| h.merge(create_assembly_level_attributes(a)) }
+        nodes = self[:nodes].inject(DBUpdateHash.new) { |h, node| h.merge(create_node_content(node)) }
+        port_links = self[:port_links].inject(DBUpdateHash.new) { |h, pl| h.merge(create_port_link_content(pl)) }
+        task_templates = self[:task_templates].inject(DBUpdateHash.new) { |h, tt| h.merge(create_task_template_content(tt)) }
+        assembly_level_attributes = self[:assembly_level_attributes].inject(DBUpdateHash.new) { |h, a| h.merge(create_assembly_level_attributes(a)) }
 
         # only need to mark as complete if assembly template exists already
         if assembly_template_idh = id_handle_if_object_exists?()
@@ -245,7 +245,7 @@ module DTK
         assembly_hash.merge!(port_link: port_links) unless port_links.empty?
         @template_output.merge!(node: nodes, component: { assembly_ref => assembly_hash })
         module_refs_updated = @component_module_refs.update_object_if_needed!(@assembly_component_modules)
-        
+
         Transaction do
           @template_output.save_to_model()
           if module_refs_updated
@@ -258,28 +258,28 @@ module DTK
         end
       end
 
-      def self.exists?(assembly_mh,service_module,template_name)
+      def self.exists?(assembly_mh, service_module, template_name)
         ret = nil
         sp_hash = {
-          cols: [:id,:group_id,:display_name],
-          filter: [:and,[:eq,:service_id,service_module.id()]]
+          cols: [:id, :group_id, :display_name],
+          filter: [:and, [:eq, :service_id, service_module.id()]]
         }
-        module_branches = get_objs(service_module.model_handle(:module_branch),sp_hash)
+        module_branches = get_objs(service_module.model_handle(:module_branch), sp_hash)
         return ret if module_branches.empty?
 
         service_module_name = service_module.get_field?(:display_name)
-        component_type = component_type(service_module_name,template_name)
+        component_type = component_type(service_module_name, template_name)
         sp_hash = {
-          cols: [:id,:display_name,:group_id,:component_type,:project_project_id,:ref,:ui,:type,:module_branch_id],
+          cols: [:id, :display_name, :group_id, :component_type, :project_project_id, :ref, :ui, :type, :module_branch_id],
           filter:           [:and,
-                             [:eq, :type, "composite"],
+                             [:eq, :type, 'composite'],
                              # Aldin: added ancestor_id==nil check to distinct between service instance (has ancestor_id) and assembly-template
                              # with same name (does not have ancestor_id)
                              [:eq, :ancestor_id, nil],
                              [:eq, :component_type, component_type],
-                             [:oneof, :module_branch_id, module_branches.map{|r|r.id()}]]
+                             [:oneof, :module_branch_id, module_branches.map(&:id)]]
         }
-        if row = get_obj(assembly_mh,sp_hash,keep_ref_cols: true)
+        if row = get_obj(assembly_mh, sp_hash, keep_ref_cols: true)
           subclass_model(row) # so that what is returned is object of type Assembly::Template::Factory
         end
       end
@@ -302,23 +302,23 @@ module DTK
         }
         port_link_ref = PortLink.port_link_ref(port_link_ref_info)
         port_link_hash = {
-          "*input_id" => "/node/#{in_node_ref}/port/#{in_port_ref}",
-          "*output_id" => "/node/#{out_node_ref}/port/#{out_port_ref}",
-          "*assembly_id" => "/component/#{assembly_ref}"
+          '*input_id' => "/node/#{in_node_ref}/port/#{in_port_ref}",
+          '*output_id' => "/node/#{out_node_ref}/port/#{out_port_ref}",
+          '*assembly_id' => "/component/#{assembly_ref}"
         }
-        {port_link_ref => port_link_hash}
+        { port_link_ref => port_link_hash }
       end
 
       def get_ndx_target_port_refs(relative_port_refs_x)
-        relative_port_refs = relative_port_refs_x.map{|pr|pr.gsub(/^\//,'')}
-        IDInfoTable.get_ndx_ids_matching_relative_uris(@project_idh,project_uri(),relative_port_refs).inject({}) do |h,(k,v)|
+        relative_port_refs = relative_port_refs_x.map { |pr| pr.gsub(/^\//, '') }
+        IDInfoTable.get_ndx_ids_matching_relative_uris(@project_idh, project_uri(), relative_port_refs).inject({}) do |h, (k, v)|
           h.merge("/#{k}" => v)
         end
       end
 
       def create_task_template_content(task_template)
-        ref,create_hash = Task::Template.ref_and_create_hash(task_template[:content],task_template[:task_action])
-        {ref => create_hash}
+        ref, create_hash = Task::Template.ref_and_create_hash(task_template[:content], task_template[:task_action])
+        { ref => create_hash }
       end
 
       def create_assembly_level_attributes(attr)
@@ -326,17 +326,17 @@ module DTK
         create_hash = {
           display_name: display_name,
           value_asserted: attr[:attribute_value],
-          data_type: attr[:data_type]||Attribute::Datatype.default()
+          data_type: attr[:data_type] || Attribute::Datatype.default()
         }
-        {ref => create_hash}
+        { ref => create_hash }
       end
 
       def create_node_content(node)
         node_ref = node_ref(node)
-        cmp_refs = node[:components].inject({}){|h,cmp|h.merge(create_component_ref_content(cmp))}
-        ports = (node[:ports]||[]).inject({}){|h,p|h.merge(create_port_content(p))}
-        node_attrs = (node[:attributes]||[]).inject({}){|h,a|h.merge(create_node_attribute_content(a))}
-        node_hash = Aux::hash_subset(node,[:display_name,:node_binding_rs_id])
+        cmp_refs = node[:components].inject({}) { |h, cmp| h.merge(create_component_ref_content(cmp)) }
+        ports = (node[:ports] || []).inject({}) { |h, p| h.merge(create_port_content(p)) }
+        node_attrs = (node[:attributes] || []).inject({}) { |h, a| h.merge(create_node_attribute_content(a)) }
+        node_hash = Aux.hash_subset(node, [:display_name, :node_binding_rs_id])
         node_type =
           if node[:display_name].eql?('assembly_wide')
             'assembly_wide'
@@ -344,42 +344,42 @@ module DTK
             node.is_node_group?() ? Node::Type::NodeGroup.stub : Node::Type::Node.stub
           end
         node_hash.merge!(
-          "*assembly_id" => "/component/#{self[:ref]}",
+          '*assembly_id' => "/component/#{self[:ref]}",
           :type          => node_type,
-          :component_ref => cmp_refs, 
+          :component_ref => cmp_refs,
           :port          => ports,
           :attribute     => node_attrs
         )
-        {node_ref => node_hash}
+        { node_ref => node_hash }
       end
 
       def create_port_content(port)
         port_ref = qualified_ref(port)
-        port_hash = Aux::hash_subset(port,[:display_name,:description,:type,:direction,:link_type,:component_type])
+        port_hash = Aux.hash_subset(port, [:display_name, :description, :type, :direction, :link_type, :component_type])
         port_hash.merge!(link_def_id: port[:link_def][:ancestor_id]) if port[:link_def]
-        {port_ref => port_hash}
+        { port_ref => port_hash }
       end
 
       def create_node_attribute_content(attr)
         attr_ref = attr[:display_name]
-        attr_hash = Aux::hash_subset(attr,[:display_name,:value_asserted,:value_derived,:data_type])
-        {attr_ref => attr_hash}
+        attr_hash = Aux.hash_subset(attr, [:display_name, :value_asserted, :value_derived, :data_type])
+        { attr_ref => attr_hash }
       end
 
       def create_component_ref_content(cmp)
         cmp_ref_ref = ComponentRef.ref_from_component_hash(cmp)
-        cmp_ref_hash = Aux::hash_subset(cmp,[:display_name,:description,:component_type])
+        cmp_ref_hash = Aux.hash_subset(cmp, [:display_name, :description, :component_type])
         cmp_template_id = cmp[:ancestor_id]
         cmp_ref_hash.merge!(component_template_id: cmp_template_id)
         attrs = cmp[:non_default_attributes]
         unless attrs.nil? || attrs.empty?
-          NonDefaultAttribute.add_to_cmp_ref_hash!(cmp_ref_hash,self,attrs,cmp_template_id)
+          NonDefaultAttribute.add_to_cmp_ref_hash!(cmp_ref_hash, self, attrs, cmp_template_id)
         end
-        {cmp_ref_ref => cmp_ref_hash}
+        { cmp_ref_ref => cmp_ref_hash }
       end
 
       def node_ref(node)
-        assembly_template_node_ref(self[:ref],node[:display_name])
+        assembly_template_node_ref(self[:ref], node[:display_name])
       end
     end
   end; end

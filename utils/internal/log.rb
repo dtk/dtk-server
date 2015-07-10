@@ -13,50 +13,50 @@ end
 module DTK
   module Log
     def self.info(msg, _out = $stdout)
-      simple_form(:info,msg)
+      simple_form(:info, msg)
     end
     def self.debug(msg, _out = $stdout)
-      simple_form(:debug,msg)
+      simple_form(:debug, msg)
     end
     def self.error(msg, _out = $stdout)
-      simple_form(:error,msg)
+      simple_form(:error, msg)
     end
     def self.warn(msg, _out = $stdout)
-      simple_form(:warn,msg)
+      simple_form(:warn, msg)
     end
 
     def self.info_pp(obj, _out = $stdout)
-      pp_form(:info,obj)
+      pp_form(:info, obj)
     end
     def self.debug_pp(obj, _out = $stdout)
-      pp_form(:debug,obj)
+      pp_form(:debug, obj)
     end
     def self.error_pp(obj, _out = $stdout)
-      pp_form(:error,obj)
+      pp_form(:error, obj)
     end
 
     private
 
-    def self.simple_form(type,msg)
-      msg = include_caller_info?(type,msg)
-      ramaze_log(type,msg)
+    def self.simple_form(type, msg)
+      msg = include_caller_info?(type, msg)
+      ramaze_log(type, msg)
     end
 
-    def self.pp_form(type,obj)
-      msg = Aux::pp_form(obj)
-      msg = include_caller_info?(type,msg)
-      ramaze_log(type,msg)
+    def self.pp_form(type, obj)
+      msg = Aux.pp_form(obj)
+      msg = include_caller_info?(type, msg)
+      ramaze_log(type, msg)
       obj
     end
 
-    def self.ramaze_log(type,msg)
-      ::Ramaze::Log.send(type,msg)
+    def self.ramaze_log(type, msg)
+      ::Ramaze::Log.send(type, msg)
     end
 
-    def self.include_caller_info?(type,msg)
-      if (Config[:include_caller]||[]).include?(type)
+    def self.include_caller_info?(type, msg)
+      if (Config[:include_caller] || []).include?(type)
         caller_depth = Config[:include_caller_depth] || 1
-        msg += "\n#{Aux::pp_form(caller[OffsetDepth...OffsetDepth+caller_depth])}\n"
+        msg += "\n#{Aux.pp_form(caller[OffsetDepth...OffsetDepth + caller_depth])}\n"
       end
       msg
     end

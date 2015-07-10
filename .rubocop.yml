@@ -22,6 +22,11 @@ Style/ParenthesesAroundCondition:
 Style/DoubleNegation:
   Enabled: false
 
+
+# reactor8 specifics
+Style/AlignArray:
+  Enabled: false
+
 # tempeorary disabled due to bugs
 Metrics/ModuleLength:
   Enabled: false

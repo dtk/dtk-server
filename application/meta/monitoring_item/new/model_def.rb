@@ -24,5 +24,5 @@
       type: :json
     }
   },
-  many_to_one: [:component,:node]
+  many_to_one: [:component, :node]
 }

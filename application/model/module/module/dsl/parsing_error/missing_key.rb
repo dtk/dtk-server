@@ -1,6 +1,6 @@
 module DTK
   class ModuleDSL
-    class ParsingError 
+    class ParsingError
       class MissingKey < self
         def initialize(key)
           super("missing key (#{key})")

@@ -31,7 +31,7 @@ module DTK
       end
     end
 
-    def self.module_ref_field(module_name,namespace)
+    def self.module_ref_field(module_name, namespace)
       "#{namespace}#{namespace_delimiter()}#{module_name}"
     end
 
@@ -48,7 +48,7 @@ module DTK
 
     # if user for some reason set R8::Config[:repo][:local][:default_namespace] to '' we will use running_process_user() as namespace
     def self.default_namespace_name
-      CurrentSession.get_default_namespace()||R8::Config[:repo][:local][:default_namespace]||::DTK::Common::Aux.running_process_user()
+      CurrentSession.get_default_namespace() || R8::Config[:repo][:local][:default_namespace] || ::DTK::Common::Aux.running_process_user()
     end
 
     def self.join_namespace(namespace, name)
@@ -58,11 +58,13 @@ module DTK
     # returns [namespace,name]; namespace can be null if cant determine it
     def self.full_module_name_parts?(name_or_full_module_name)
       if name_or_full_module_name =~ Regexp.new("(^.+)#{namespace_delimiter()}(.+$)")
-        namespace,name = [$1,$2]
+        namespace = Regexp.last_match(1)
+        name = Regexp.last_match(2)
       else
-        namespace,name = [nil,name_or_full_module_name]
+        namespace = nil
+        name = name_or_full_module_name
       end
-      [namespace,name]
+      [namespace, name]
     end
 
     def self.find_by_name(namespace_mh, namespace_name)
@@ -72,13 +74,13 @@ module DTK
       }
 
       results = Model.get_objs(namespace_mh, sp_hash)
-      raise Error, "There should not be multiple namespaces with name '#{namespace_name}'" if results.size > 1
+      fail Error, "There should not be multiple namespaces with name '#{namespace_name}'" if results.size > 1
       results.first
     end
 
     def self.find_or_create(namespace_mh, namespace_name)
       namespace_name = namespace_name.is_a?(Namespace) ? namespace_name.display_name : namespace_name
-      raise Error, "You need to provide namespace name where creating object" if namespace_name.nil? || namespace_name.empty?
+      fail Error, 'You need to provide namespace name where creating object' if namespace_name.nil? || namespace_name.empty?
       namespace = self.find_by_name(namespace_mh, namespace_name)
 
       unless namespace
@@ -102,14 +104,14 @@ module DTK
     #
     # Create namespace object
     #
-    def self.create_new(namespace_mh, name, remote=nil)
+    def self.create_new(namespace_mh, name, remote = nil)
       idh = create_from_rows(namespace_mh,
-        [{
-          name: name,
-          display_name: name,
-          ref: name,
-          remote: remote
-        }]
+                             [{
+                               name: name,
+                               display_name: name,
+                               ref: name,
+                               remote: remote
+                             }]
                             ).first
 
       idh.create_object()

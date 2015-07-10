@@ -6,18 +6,18 @@ module XYZ
         ret = LogSegments.new
         current_segment = nil
         lines.each do |line|
-          next if Prune.find{|prune_pat| line =~ prune_pat}
-          if match = Pattern.find{|_k,pat|line =~ pat}
+          next if Prune.find { |prune_pat| line =~ prune_pat }
+          if match = Pattern.find { |_k, pat| line =~ pat }
             ret << current_segment if current_segment
-            current_segment = LogSegment.create(match[0],line)
+            current_segment = LogSegment.create(match[0], line)
           elsif current_segment
-            current_segment << line 
+            current_segment << line
           end
         end
         ret << current_segment if current_segment
         ret.post_process!()
       end
-      
+
       def self.log_complete?(lines)
         lines.reverse_each do |l|
           return true if l =~ /Finished catalog run/
@@ -30,16 +30,16 @@ module XYZ
 
       Prune =
         [
-         /\/File\[\//,
+         /\/File\[\//
         ]
 
       # order is important because of subsumption
-      Pattern =  Aux::ordered_hash(
+      Pattern =  Aux.ordered_hash(
         [
-         {debug: /\(debug\)/},
-         {info: /\(info\)/},
-         {notice: /\(notice\)/},
-         {error: /\(err\)/},
+         { debug: /\(debug\)/ },
+         { info: /\(info\)/ },
+         { notice: /\(notice\)/ },
+         { error: /\(err\)/ }
         ]
       )
 
@@ -51,14 +51,14 @@ module XYZ
           if @complete
             if has_error?()
               error_segment = error_segment()
-              "complete with error\n" + (error_segment ? Aux::pp_form(error_segment) : "")
+              "complete with error\n" + (error_segment ? Aux.pp_form(error_segment) : '')
             else
               "complete and ok\n"
             end
           else
             if has_error?()
               error_segment = error_segment()
-              "incomplete with error\n" + (error_segment ? Aux::pp_form(error_segment) : "")
+              "incomplete with error\n" + (error_segment ? Aux.pp_form(error_segment) : '')
             else
               "incomplete and no error yet\n"
             end
@@ -102,26 +102,26 @@ module XYZ
         end
 
         def find_error_position
-          each_with_index{|seg,i|return i if seg.type == :error}
+          each_with_index { |seg, i| return i if seg.type == :error }
           nil
         end
       end
 
       class ErrorPuppetLog < ::XYZ::LogSegmentError
-        def initialize(segments_from_error,prev_segment)
+        def initialize(segments_from_error, prev_segment)
           super()
-          parse!(segments_from_error,prev_segment)
+          parse!(segments_from_error, prev_segment)
         end
       end
 
-      class ErrorGeneric < ErrorPuppetLog 
+      class ErrorGeneric < ErrorPuppetLog
         def self.isa?(_segments_from_error)
           true
         end
 
         private
 
-        def parse!(_segments_from_error,_prev_segment)
+        def parse!(_segments_from_error, _prev_segment)
           # TODO: need sto be written
           ##@error_detail = ...
         end

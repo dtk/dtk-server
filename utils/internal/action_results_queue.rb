@@ -9,7 +9,7 @@ module DTK
     Lock = Mutex.new
     Queues = {}
     @@count = 0
-    def initialize(_opts={})
+    def initialize(_opts = {})
       Lock.synchronize do
         @indexes = []
         @@count += 1
@@ -21,38 +21,38 @@ module DTK
 
     ##
     # Initiates commmand on nodes
-    def initiate(nodes, params, _opts={})
-      indexes = nodes.map{|r|r[:id]}
+    def initiate(nodes, params, _opts = {})
+      indexes = nodes.map { |r| r[:id] }
       set_indexes!(indexes)
-      ndx_pbuilderid_to_node_info =  nodes.inject({}) do |h,n|
-        h.merge(n.pbuilderid => {id: n[:id], display_name: n.assembly_node_print_form()})
+      ndx_pbuilderid_to_node_info =  nodes.inject({}) do |h, n|
+        h.merge(n.pbuilderid => { id: n[:id], display_name: n.assembly_node_print_form() })
       end
 
       callbacks = {
         on_msg_received: proc do |msg|
           inspect_agent_response(msg)
-          response = CommandAndControl.parse_response__execute_action(nodes,msg)
+          response = CommandAndControl.parse_response__execute_action(nodes, msg)
 
             # if response and response[:pbuilderid]
             node_info = ndx_pbuilderid_to_node_info[response[:pbuilderid]]
             data = response[:data]
-            data = process_data!(data,node_info)
-            push(node_info[:id],data)
+            data = process_data!(data, node_info)
+            push(node_info[:id], data)
           # end
         end
       }
       action_hash = action_hash()
       unless agent = action_hash[:agent]
-        raise Error.new("Unexpected that :agent is not in action_hash")
+        fail Error.new('Unexpected that :agent is not in action_hash')
       end
       unless method = action_hash[:method]
-        raise Error.new("Unexpected that :method is not in action_hash")
+        fail Error.new('Unexpected that :method is not in action_hash')
       end
-      CommandAndControl.request__execute_action(agent,method,nodes,callbacks,params)
+      CommandAndControl.request__execute_action(agent, method, nodes, callbacks, params)
     end
 
     # can be overwritten
-    def process_data!(data,_node_info)
+    def process_data!(data, _node_info)
       Result.normalize_data_to_utf8_output!(data)
     end
     private :process_data!
@@ -60,7 +60,7 @@ module DTK
     # returns :is_complete => is_complete, :results => results
     # since action result queue post processing is specific to netstats results,
     # you can disable mentioned post processing via flag :disable_post_processing
-    def self.get_results(queue_id,ret_only_if_complete,disable_post_processing, sort_key = :port)
+    def self.get_results(queue_id, ret_only_if_complete, disable_post_processing, sort_key = :port)
       is_complete = results = nil
       unless ret_only_if_complete
         results = self[queue_id].ret_whatever_is_complete
@@ -77,7 +77,7 @@ module DTK
       end
 
       unless results.nil?
-        results.each do |_k,v|
+        results.each do |_k, v|
           disable_post_processing = true if v.is_a?(Hash)
         end
       end
@@ -103,7 +103,7 @@ module DTK
       Queues[queue_id.to_i]
     end
 
-    def push(index,el)
+    def push(index, el)
       @results[index] = el
     end
 
@@ -113,11 +113,11 @@ module DTK
     end
 
     def ret_whatever_is_complete
-      @indexes.inject({}){|h,i| h.merge(i => @results[i])}
+      @indexes.inject({}) { |h, i| h.merge(i => @results[i]) }
     end
 
     class Result
-      def initialize(node_name,data)
+      def initialize(node_name, data)
         @data = data
         @node_name = node_name
       end
@@ -131,15 +131,15 @@ module DTK
 
         ret = []
         # sort by node name and prune out keys with no results
-        pruned_sorted_keys = results.reject{|_k,v|v.nil?}.sort{|a,b|a[1].node_name <=> b[1].node_name}.map{|r|r.first}
+        pruned_sorted_keys = results.reject { |_k, v| v.nil? }.sort { |a, b| a[1].node_name <=> b[1].node_name }.map(&:first)
         pruned_sorted_keys.each do |node_id|
           result = results[node_id]
           node_name = result.node_name
           first = true
 
-          result.data.sort{|a,b|a[sort_key] <=> b[sort_key]}.each do |r|
+          result.data.sort { |a, b| a[sort_key] <=> b[sort_key] }.each do |r|
             if first
-              ret << r.merge(node_id: node_id,node_name: node_name)
+              ret << r.merge(node_id: node_id, node_name: node_name)
               first = false
             else
               ret << r
@@ -156,7 +156,7 @@ module DTK
       def self.normalize_data_to_utf8_output!(data)
         if data
           ic = Iconv.new('UTF-8//IGNORE', 'UTF-8')
-          output = data[:output]||''
+          output = data[:output] || ''
 
           # check if string
           return data unless output.is_a?(String)
@@ -164,7 +164,7 @@ module DTK
           valid_output = ic.iconv(output + ' ')[0..-2]
           data[:output] = ic.iconv(output + ' ')[0..-2]
         else
-          Log.warn "Skipping UTF-8 normalization since provided output does not have :data element."
+          Log.warn 'Skipping UTF-8 normalization since provided output does not have :data element.'
         end
         data
       end

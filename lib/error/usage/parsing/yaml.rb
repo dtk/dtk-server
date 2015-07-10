@@ -1,4 +1,4 @@
-module DTK; class ErrorUsage 
+module DTK; class ErrorUsage
   class Parsing
     class YAML < self
     end

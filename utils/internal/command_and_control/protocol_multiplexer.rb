@@ -1,7 +1,7 @@
 module XYZ
   module CommandAndControlAdapter
     class ProtocolMultiplexer
-      def initialize(protocol_handler=nil)
+      def initialize(protocol_handler = nil)
         # TODO: might put operations on @protocol_handler in mutex
         @protocol_handler = protocol_handler
         @callbacks_list = {}
@@ -15,13 +15,13 @@ module XYZ
       end
 
       # TODO: may model more closely to syntax of EM:defer future signature
-      def process_request(trigger,context)
+      def process_request(trigger, context)
         request_id = trigger[:generate_request_id].call(@protocol_handler)
         callbacks = Callbacks.create(context[:callbacks])
-        timeout = context[:timeout]||DefaultTimeout
-        expected_count = context[:expected_count]||ExpectedCountDefault
-        add_reqid_callbacks(request_id,callbacks,timeout,expected_count)
-        trigger[:send_message].call(@protocol_handler,request_id)
+        timeout = context[:timeout] || DefaultTimeout
+        expected_count = context[:expected_count] || ExpectedCountDefault
+        add_reqid_callbacks(request_id, callbacks, timeout, expected_count)
+        trigger[:send_message].call(@protocol_handler, request_id)
       end
 
       private
@@ -31,20 +31,20 @@ module XYZ
 
       public
 
-      def process_response(msg,request_id)
+      def process_response(msg, request_id)
         callbacks = nil
         begin
           callbacks = get_and_remove_reqid_callbacks?(request_id)
-          if (is_cancel_response(msg)) 
+          if (is_cancel_response(msg))
             callbacks.process_cancel()
           elsif callbacks
-            callbacks.process_msg(msg,request_id)
+            callbacks.process_msg(msg, request_id)
           else
-            Log.error "max count or timeout reached: dropping msg"
+            Log.error 'max count or timeout reached: dropping msg'
           end
          rescue Exception => e
           # TODO: this is last resort trap; if this is reached the user will have to manually cancel the task
-          Callbacks.process_error(callbacks,e)
+          Callbacks.process_error(callbacks, e)
         end
       end
 
@@ -58,33 +58,33 @@ module XYZ
       def process_request_timeout(request_id)
         callbacks = get_and_remove_reqid_callbacks(request_id)
         if callbacks
-          callbacks.process_timeout(request_id) 
+          callbacks.process_timeout(request_id)
         end
       end
 
-      def add_reqid_callbacks(request_id,callbacks,timeout,expected_count)
-        @lock.synchronize do 
-          timer = R8EM.add_timer(timeout){process_request_timeout(request_id)}
-          @callbacks_list[request_id] = callbacks.merge(timer: timer) 
+      def add_reqid_callbacks(request_id, callbacks, timeout, expected_count)
+        @lock.synchronize do
+          timer = R8EM.add_timer(timeout) { process_request_timeout(request_id) }
+          @callbacks_list[request_id] = callbacks.merge(timer: timer)
           @count_info[request_id] = expected_count
         end
       end
 
       def get_and_remove_reqid_callbacks(request_id)
-        get_and_remove_reqid_callbacks?(request_id,force_delete: true)
+        get_and_remove_reqid_callbacks?(request_id, force_delete: true)
       end
       #'?' because conditionally removes callbacks depending on count
-      def get_and_remove_reqid_callbacks?(request_id,opts={})
+      def get_and_remove_reqid_callbacks?(request_id, opts = {})
         ret = nil
         @lock.synchronize do
-          if opts[:force_delete] 
+          if opts[:force_delete]
             count = @count_info[request_id] = 0
           else
             # TODO: protection from obscure error
             if @count_info[request_id]
               count = @count_info[request_id] -= 1
             else
-              Log.error("@count_info[request_id] is null")
+              Log.error('@count_info[request_id] is null')
               return nil
             end
           end
@@ -103,17 +103,17 @@ module XYZ
           self.new(callbacks_info)
         end
 
-        def self.process_error(callbacks,error_obj)
+        def self.process_error(callbacks, error_obj)
           unless callbacks && callbacks.process_error(error_obj)
             Log.error("error in process_response: #{error_obj.inspect}")
             Log.error_pp(error_obj.backtrace)
           end
         end
 
-        def process_msg(msg,request_id)
+        def process_msg(msg, request_id)
           callback = self[:on_msg_received]
           if callback
-            callback.call(msg) 
+            callback.call(msg)
           else
             Log.error("could not find process msg callback for request_id #{request_id}")
           end
@@ -145,4 +145,3 @@ module XYZ
     end
   end
 end
-

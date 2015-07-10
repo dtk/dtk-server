@@ -6,6 +6,6 @@ module DTK
         @address = address
       end
     end
-    r8_nested_require('dns','r8')
+    r8_nested_require('dns', 'r8')
   end
 end

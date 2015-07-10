@@ -1,5 +1,5 @@
 module DTK; class Error
-  class AMQP 
+  class AMQP
     class QueueDoesNotExist < self
       attr_reader :queue_name
 

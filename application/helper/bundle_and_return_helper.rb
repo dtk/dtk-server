@@ -15,7 +15,7 @@ module Ramaze::Helper
         replace(as_run_list: [])
       end
 
-      def add(action_namespace,ctrl_result)
+      def add(action_namespace, ctrl_result)
         self[action_namespace] = ctrl_result
         self[:as_run_list] << action_namespace
       end
@@ -45,19 +45,19 @@ module Ramaze::Helper
     def ret_js_includes
       includes_ret = @js_includes
       @js_includes = []
-      return includes_ret
+      includes_ret
     end
 
     def ret_css_includes
       includes_ret = @css_includes
       @css_includes = []
-      return includes_ret
+      includes_ret
     end
 
     def ret_js_exe_list
       exe_list = @js_exe_list
       @js_exe_list = []
-      return exe_list
+      exe_list
     end
     ######
   end

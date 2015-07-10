@@ -17,20 +17,20 @@ module XYZ
     # all nodes of that assembly will be stopped.
     #
     def rest__check_idle
-      prefix_log = "[CRON JOB]"
- 
+      prefix_log = '[CRON JOB]'
+
       Log.info "#{prefix_log} Monitoring idle assemblies: START"
 
-      assemblies = Assembly::Instance.list(model_handle(:assembly),{})
+      assemblies = Assembly::Instance.list(model_handle(:assembly), {})
 
-      str_identifer = (assemblies.map { |a| a[:display_name]}).join(', ')
+      str_identifer = (assemblies.map { |a| a[:display_name] }).join(', ')
 
       Log.info "#{prefix_log} Monitoring assemblies: #{str_identifer}"
       aws_connection = CloudConnect::EC2.new
 
       # check statuses
       assemblies.each do |assembly|
-        
+
         nodes = Assembly::Instance.get_nodes([assembly.id_handle], :type)
         # flag to indicate if assembly nodes need to be stopped
         stop_this_assembly = false
@@ -52,7 +52,7 @@ module XYZ
 
         # if one of the nodees is running to long we stop all nodes
         if stop_this_assembly
-          str_identifer = (nodes.map { |n| n.name }).join(', ')
+          str_identifer = (nodes.map(&:name)).join(', ')
           Log.info "#{prefix_log} Stopping assembly '#{assembly[:display_name]}', with nodes: '#{str_identifer}'"
           CommandAndControl.stop_instances(nodes)
         end
@@ -68,21 +68,21 @@ module XYZ
     # helper fn
     def component_or_node_display
       search_object = ret_search_object_in_request()
-      raise Error.new("no search object in request") unless search_object
+      fail Error.new('no search object in request') unless search_object
 
       model_list = Model.get_objects_from_search_object(search_object)
 
       # TODO: should we be using default action name
       action_name = :list
-      tpl = R8Tpl::TemplateR8.new("#{model_name()}/#{action_name}",user_context())
+      tpl = R8Tpl::TemplateR8.new("#{model_name()}/#{action_name}", user_context())
       _model_var = {}
-      _model_var[:i18n] = get_model_i18n(model_name().to_s,user_context())
+      _model_var[:i18n] = get_model_i18n(model_name().to_s, user_context())
 
       set_template_defaults_for_list!(tpl)
-      tpl.assign("_#{model_name()}",_model_var)
-      tpl.assign("#{model_name()}_list",model_list)
+      tpl.assign("_#{model_name()}", _model_var)
+      tpl.assign("#{model_name()}_list", model_list)
 
-      return {content: tpl.render()}
+      { content: tpl.render() }
     end
   end
 end

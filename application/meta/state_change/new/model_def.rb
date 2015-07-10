@@ -2,11 +2,11 @@
   schema: :state,
   table: :state_change,
   columns: {
-    status: {type: :varchar, default: "pending", size: 15},
-    type: {type: :varchar, size: 25},
-    object_type: {type: :varchar, size: 15},
-    change: {type: :json},
-    change_paths: {type: :json},
+    status: { type: :varchar, default: 'pending', size: 15 },
+    type: { type: :varchar, size: 25 },
+    object_type: { type: :varchar, size: 15 },
+    change: { type: :json },
+    change_paths: { type: :json },
     attribute_id: {
       type: :bigint,
       foreign_key_rel_type: :attribute,
@@ -42,14 +42,14 @@
          model_name: :component,
          convert: true,
          join_type: :inner,
-         join_cond: {id: :state_change__component_id},
-         cols: [:id,:display_name,:basic_type,:external_ref,:node_node_id,:only_one_per_node,:extended_base_id,:implementation_id]
+         join_cond: { id: :state_change__component_id },
+         cols: [:id, :display_name, :basic_type, :external_ref, :node_node_id, :only_one_per_node, :extended_base_id, :implementation_id]
        },
                                   {
                                     model_name: :node,
                                     convert: true,
                                     join_type: :inner,
-                                    join_cond: {id: :component__node_node_id},
+                                    join_cond: { id: :component__node_node_id },
                                     cols: [:id, :display_name, :external_ref]
                                   }]
     },
@@ -59,21 +59,21 @@
       remote_dependencies:       [{
          model_name: :attribute,
          join_type: :inner,
-         join_cond: {id: :state_change__attribute_id},
+         join_cond: { id: :state_change__attribute_id },
          cols: [:id, :component_component_id, :display_name, :value_asserted]
        },
                                   {
                                     model_name: :component,
                                     convert: true,
                                     join_type: :inner,
-                                    join_cond: {id: :attribute__component_component_id},
-                                    cols: [:id,:display_name,:basic_type,:external_ref,:node_node_id,:only_one_per_node,:extended_base_id]
+                                    join_cond: { id: :attribute__component_component_id },
+                                    cols: [:id, :display_name, :basic_type, :external_ref, :node_node_id, :only_one_per_node, :extended_base_id]
                                   },
                                   {
                                     model_name: :node,
                                     convert: true,
                                     join_type: :inner,
-                                    join_cond: {id: :component__node_node_id},
+                                    join_cond: { id: :component__node_node_id },
                                     cols: [:id, :display_name, :external_ref]
                                   }]
     },
@@ -84,20 +84,20 @@
          model_name: :node,
          convert: true,
          join_type: :inner,
-         join_cond: {id: :state_change__node_id},
-         cols: [:id,:display_name,:type,:external_ref,:datacenter_datacenter_id,:ancestor_id]
+         join_cond: { id: :state_change__node_id },
+         cols: [:id, :display_name, :type, :external_ref, :datacenter_datacenter_id, :ancestor_id]
        },
                                   {
                                     model_name: :datacenter,
                                     join_type: :inner,
-                                    join_cond: {id: :node__datacenter_datacenter_id},
+                                    join_cond: { id: :node__datacenter_datacenter_id },
                                     cols: [:id, :display_name]
                                   }]
     },
     parent_name: {
       possible_parents: [:datacenter, :state_change]
     },
-    old_value: {path: [:change, :old]},
-    new_value: {path: [:change, :new]}
+    old_value: { path: [:change, :old] },
+    new_value: { path: [:change, :new] }
   }
 }

@@ -15,12 +15,12 @@ module DTK
 
       # local_params encapsulates local module branch params
       opts_local_params = (namespace ? { namespace: namespace } : {})
-      local_params = local_params(:component_module,module_name,opts_local_params)
+      local_params = local_params(:component_module, module_name, opts_local_params)
 
       opts_create_mod = Opts.new(
         config_agent_type: ret_config_agent_type()
       )
-      module_repo_info = ComponentModule.create_module(project,local_params,opts_create_mod)[:module_repo_info]
+      module_repo_info = ComponentModule.create_module(project, local_params, opts_create_mod)[:module_repo_info]
 
       # only when creating via import-git command
       git_url = ret_request_params(:module_git_url)
@@ -33,19 +33,19 @@ module DTK
 
     def rest__update_from_initial_create
       component_module = create_obj(:component_module_id)
-      repo_id,commit_sha = ret_non_null_request_params(:repo_id,:commit_sha)
+      repo_id, commit_sha = ret_non_null_request_params(:repo_id, :commit_sha)
       git_import = ret_request_params(:git_import)
-      repo_idh = id_handle(repo_id,:repo)
+      repo_idh = id_handle(repo_id, :repo)
       version = ret_version()
       scaffold = ret_request_params(:scaffold_if_no_dsl)
-      opts = {scaffold_if_no_dsl: scaffold, do_not_raise: true, process_provider_specific_dependencies: true}
+      opts = { scaffold_if_no_dsl: scaffold, do_not_raise: true, process_provider_specific_dependencies: true }
       opts.merge!(commit_dsl: true) if ret_request_params(:commit_dsl)
 
       response =
         if git_import
-          component_module.import_from_git(commit_sha,repo_idh,version,opts)
+          component_module.import_from_git(commit_sha, repo_idh, version, opts)
         else
-          component_module.import_from_file(commit_sha,repo_idh,version,opts)
+          component_module.import_from_file(commit_sha, repo_idh, version, opts)
         end
 
       rest_ok_response response
@@ -92,7 +92,7 @@ module DTK
       #    :inconsistent
       #    :possibly_missing
       #    :ambiguous
-      rest_ok_response component_module.update_model_from_clone_changes?(commit_sha,diffs_summary,version,opts)
+      rest_ok_response component_module.update_model_from_clone_changes?(commit_sha, diffs_summary, version, opts)
     end
 
     def rest__delete
@@ -121,7 +121,7 @@ module DTK
 
       opts = Opts.new(project_idh: project.id_handle())
       if detail = ret_request_params(:detail_to_include)
-        opts.merge!(detail_to_include: detail.map{|r|r.to_sym})
+        opts.merge!(detail_to_include: detail.map(&:to_sym))
       end
 
       opts.merge!(remote_repo_base: remote_repo_base, diff: diff, namespace: namespace)
@@ -134,7 +134,8 @@ module DTK
     def rest__get_workspace_branch_info
       component_module = create_obj(:component_module_id)
       version = ret_version()
-      rest_ok_response component_module.get_workspace_branch_info(version)
+      response = component_module.get_workspace_branch_info(version)
+      rest_ok_response response
     end
 
     def rest__info
@@ -200,7 +201,7 @@ module DTK
       about = ret_non_null_request_params(:about).to_sym
       component_template_id = ret_request_params(:component_template_id)
       unless AboutEnum.include?(about)
-        raise ErrorUsage::BadParamValue.new(:about,AboutEnum)
+        fail ErrorUsage::BadParamValue.new(:about, AboutEnum)
       end
       rest_ok_response component_module.info_about(about, component_template_id)
     end
@@ -223,13 +224,13 @@ module DTK
 
     def rest__install_puppet_forge_modules
       pf_full_name = ret_non_null_request_params(:puppetf_module_name)
-      namespace,module_name = ret_namespace_and_module_name_for_puppet_forge(pf_full_name)
+      namespace, module_name = ret_namespace_and_module_name_for_puppet_forge(pf_full_name)
       puppet_version  = ret_request_params_force_nil(:puppet_version)
       project = get_default_project()
 
       # will raise exception if exists
       ComponentModule.if_module_exists!(project.id_handle(), module_name, namespace,
-        "Cannot install '#{namespace}:#{module_name}' since it already exists!"
+                                        "Cannot install '#{namespace}:#{module_name}' since it already exists!"
                                        )
 
       puppet_forge_local_copy = nil
@@ -240,9 +241,9 @@ module DTK
         # This creates a temporary directory after using puppet forge client to import
         MessageQueue.store(:info, "Started puppet forge install of module '#{pf_full_name}' ...")
         puppet_forge_local_copy = PuppetForge::Client.install(pf_full_name, puppet_version)
-        opts = {config_agent_type: ret_config_agent_type()}
-        opts = namespace ? {base_namespace: namespace} : {}
-        MessageQueue.store(:info, "Puppet forge module installed, parsing content ...")
+        opts = { config_agent_type: ret_config_agent_type() }
+        opts = namespace ? { base_namespace: namespace } : {}
+        MessageQueue.store(:info, 'Puppet forge module installed, parsing content ...')
         install_info = ComponentModule.import_from_puppet_forge(project, puppet_forge_local_copy, opts)
       ensure
         puppet_forge_local_copy.delete_base_install_dir?() if puppet_forge_local_copy
@@ -255,7 +256,7 @@ module DTK
       component_module = create_obj(:component_module_id)
       remote_repo = ret_remote_repo()
       version = ret_version()
-      rest_ok_response component_module.import_version(remote_repo,version)
+      rest_ok_response component_module.import_version(remote_repo, version)
     end
 
     # TODO: ModuleBranch::Location: harmonize this signature with one for service module
@@ -267,7 +268,7 @@ module DTK
       opts = {}
       opts.merge!(namespace: remote_namespace) unless remote_namespace.empty?
 
-      remote_namespace, remote_module_name = Repo::Remote::split_qualified_name(ret_non_null_request_params(:remote_module_name), opts)
+      remote_namespace, remote_module_name = Repo::Remote.split_qualified_name(ret_non_null_request_params(:remote_module_name), opts)
       remote_params = remote_params_dtkn(:component_module, remote_namespace, remote_module_name)
 
       project = get_default_project()

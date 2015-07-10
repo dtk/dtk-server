@@ -1,5 +1,5 @@
 class Modules < Main
-    
+
   def click_on_edit_module(module_name)
     @session.fill_in 'search_term', with: module_name + "\n"
     @session.within(:table) do
@@ -14,7 +14,7 @@ class Modules < Main
   end
 
   def set_module_owner_user(user)
-    @session.select(user, from: "repo_client_dtk_open_struct_user_id")
+    @session.select(user, from: 'repo_client_dtk_open_struct_user_id')
   end
 
   def set_module_owner_group(usergroup)
@@ -22,7 +22,7 @@ class Modules < Main
     @session.check(usergroup)
     #overlapping elements issue in headless mode
     if Capybara.default_driver == :webkit
-      @session.find("//div/button[@class = \"multiselect dropdown-toggle btn btn-default\"]").trigger("click")
+      @session.find("//div/button[@class = \"multiselect dropdown-toggle btn btn-default\"]").trigger('click')
     else
       @session.find("//div/button[@class = \"multiselect dropdown-toggle btn btn-default\"]").click
     end
@@ -33,13 +33,13 @@ class Modules < Main
     @session.uncheck(usergroup)
     #overlapping elements issue in headless mode
     if Capybara.default_driver == :webkit
-      @session.find("//div/button[@class = \"multiselect dropdown-toggle btn btn-default\"]").trigger("click")
+      @session.find("//div/button[@class = \"multiselect dropdown-toggle btn btn-default\"]").trigger('click')
     else
       @session.find("//div/button[@class = \"multiselect dropdown-toggle btn btn-default\"]").click
     end
   end
 
-  def set_module_permissions(permissions={})
+  def set_module_permissions(permissions = {})
     permissions.each do |key, value|
       if value
         @session.check(key.to_s)

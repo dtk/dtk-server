@@ -11,11 +11,11 @@ module DTK
           end
         end
 
-        def self.install_script(node,bindings)
-          create().install_script(node,bindings)
+        def self.install_script(node, bindings)
+          create().install_script(node, bindings)
         end
-        def install_script(node,bindings)
-          all_bindings = install_script_bindings(node,bindings)
+        def install_script(node, bindings)
+          all_bindings = install_script_bindings(node, bindings)
           erubis_object(install_script_erb()).result(all_bindings)
         end
 
@@ -29,7 +29,7 @@ module DTK
           config_file_content = mcollective_config_file()
           begin
             # TODO: see if can pass args and not need to use tempfile
-            config_file = Tempfile.new("client.cfg")
+            config_file = Tempfile.new('client.cfg')
             config_file.write(config_file_content)
             config_file.close
             ret = ::MCollective::Client.new(config_file.path)
@@ -41,8 +41,8 @@ module DTK
         end
 
         def self.create
-          type = (R8::Config[:mcollective][:auth_type]||:default).to_sym
-          klass = 
+          type = (R8::Config[:mcollective][:auth_type] || :default).to_sym
+          klass =
             case type
             when :ssh then Ssh
             else Default
@@ -86,8 +86,8 @@ module DTK
           def install_script_erb
             USER_DATA_SH_ERB
           end
-          
-          def install_script_bindings(_node,bindings)
+
+          def install_script_bindings(_node, bindings)
             bindings
           end
 
@@ -127,11 +127,11 @@ eos
 
           private
 
-          def install_script_bindings(node,bindings)
+          def install_script_bindings(node, bindings)
             # TODO: clean up to have error checking
-            ssh_remote_public_key=File.open(R8::Config[:mcollective][:ssh][:remote][:public_key], 'rb') { |f| f.read }
-            ssh_remote_private_key=File.open(R8::Config[:mcollective][:ssh][:remote][:private_key], 'rb') { |f| f.read }
-            ssh_local_public_key=File.open(R8::Config[:mcollective][:ssh][:local][:public_key], 'rb') { |f| f.read }
+            ssh_remote_public_key = File.open(R8::Config[:mcollective][:ssh][:remote][:public_key], 'rb') { |f| f.read }
+            ssh_remote_private_key = File.open(R8::Config[:mcollective][:ssh][:remote][:private_key], 'rb') { |f| f.read }
+            ssh_local_public_key = File.open(R8::Config[:mcollective][:ssh][:local][:public_key], 'rb') { |f| f.read }
             pbuilderid = (node.pbuilderid() if node.get_iaas_type() == :physical)
             # order of merge does not matter; keys wont conflict
             bindings.merge(
@@ -142,16 +142,16 @@ eos
               mcollective_password: R8::Config[:mcollective][:password],
               mcollective_collective: R8::Config[:mcollective][:collective],
               mcollective_restart: mcollective_restart(node),
-              # TODO: will generalize so not just puppet                           
+              # TODO: will generalize so not just puppet
               puppet_version: puppet_version(node),
               pbuilderid: pbuilderid,
-	      logstash_enable: R8::Config[:logstash][:enable],
+              logstash_enable: R8::Config[:logstash][:enable],
               logstash_ca: get_logstash_ca,
-	      logstash_host: R8::Config[:logstash][:host],
-	      logstash_port: R8::Config[:logstash][:port],
-	      logstash_log_file_list: R8::Config[:logstash][:log_file_list],
-	      logstash_config_file_path: R8::Config[:logstash][:config_file_path],
-	      logstash_tag: R8::Config[:logstash][:tag]
+              logstash_host: R8::Config[:logstash][:host],
+              logstash_port: R8::Config[:logstash][:port],
+              logstash_log_file_list: R8::Config[:logstash][:log_file_list],
+              logstash_config_file_path: R8::Config[:logstash][:config_file_path],
+              logstash_tag: R8::Config[:logstash][:tag]
             )
           end
 
@@ -172,7 +172,7 @@ eos
           end
 
           def get_puppet_version(node)
-            node.attribute().puppet_version(raise_error_if_invalid: true)||''
+            node.attribute().puppet_version(raise_error_if_invalid: true) || ''
           end
 
           def install_script_erb
@@ -180,7 +180,7 @@ eos
           end
 
           def get_logstash_ca
-            File.open(R8::Config[:logstash][:ca_file_path], 'rb') { |f| f.read } if File.exists?(R8::Config[:logstash][:ca_file_path])
+            File.open(R8::Config[:logstash][:ca_file_path], 'rb') { |f| f.read } if File.exist?(R8::Config[:logstash][:ca_file_path])
           end
 
           USER_DATA_SH_ERB = <<eos
@@ -260,4 +260,3 @@ eos
     end
   end
 end
-

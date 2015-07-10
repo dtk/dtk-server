@@ -1,7 +1,7 @@
 module DTK; class Node
   class Type
-    r8_nested_require('type','node')
-    r8_nested_require('type','node_group')
+    r8_nested_require('type', 'node')
+    r8_nested_require('type', 'node_group')
     module Mixin
       def is_node?
         Type::Node.isa?(get_field?(:type))
@@ -15,7 +15,7 @@ module DTK; class Node
 
       def node_group_model_name
         unless is_node_group?()
-          raise Error.new("Should not be called if not a node group")
+          fail Error.new('Should not be called if not a node group')
         end
         Type::NodeGroup.model_name(get_field?(:type))
       end
@@ -27,10 +27,10 @@ module DTK; class Node
     def self.isa?(type)
       type && types().include?(type.to_sym)
     end
-    
+
     def self.new_type_when_create_node(node)
       type = node.get_field?(:type)
-        ret = 
+        ret =
         case type
         when Node.staged then Node.instance
         when Node.target_ref_staged then Node.target_ref

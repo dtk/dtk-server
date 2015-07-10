@@ -1,6 +1,6 @@
 module DTK
   module AutoImport
-    def get_required_and_missing_modules(project, remote_params, client_rsa_pub_key=nil)
+    def get_required_and_missing_modules(project, remote_params, client_rsa_pub_key = nil)
       remote = remote_params.create_remote(project)
       response = Repo::Remote.new(remote).get_remote_module_components(client_rsa_pub_key)
       opts = Opts.new(project_idh: project.id_handle())
@@ -11,31 +11,32 @@ module DTK
 
     # Method will check if given component modules are present on the system
     # returns [missing_modules, found_modules]
-    def cross_reference_modules(opts, required_modules, service_namespace=nil, dependency_warnings=nil)
+    def cross_reference_modules(opts, required_modules, service_namespace = nil, dependency_warnings = nil)
       project_idh = opts.required(:project_idh)
 
       required_modules ||= []
-      req_names = required_modules.collect { |m| m['module_name']}
+      req_names = required_modules.collect { |m| m['module_name'] }
 
-      missing_modules, found_modules = [], []
+      missing_modules = []
+      found_modules = []
 
       required_modules.each do |r_module|
-        name      = r_module["module_name"]
-        type      = r_module["module_type"]
-        version   = r_module["version_info"]
-        url       = r_module["module_url"]
+        name      = r_module['module_name']
+        type      = r_module['module_type']
+        version   = r_module['version_info']
+        url       = r_module['module_url']
         # we support both fields for namespace
-        namespace = r_module["remote_namespace"]||r_module["module_namespace"]
+        namespace = r_module['remote_namespace'] || r_module['module_namespace']
 
         i_modules = installed_modules(type.to_sym, project_idh)
 
         is_found = i_modules.find do |i_module|
           name.eql?(i_module.display_name) &&
-          ModuleVersion.versions_same?(version, i_module.fetch(:module_branch,{})[:version]) &&
+          ModuleVersion.versions_same?(version, i_module.fetch(:module_branch, {})[:version]) &&
           (namespace.nil? || namespace.eql?(i_module.module_namespace))
         end
 
-        data = data_element(name, namespace||service_namespace, type, version, url)
+        data = data_element(name, namespace || service_namespace, type, version, url)
 
         if is_found
           found_modules << data
@@ -94,11 +95,10 @@ module DTK
           filter: [:eq, :project_project_id, project_idh.get_id()]
         }
         mh = project_idh.createMH(type)
-        @cached_module_list[type] = get_objs(mh,sp_hash)
+        @cached_module_list[type] = get_objs(mh, sp_hash)
       end
 
       @cached_module_list[type]
     end
   end
 end
-

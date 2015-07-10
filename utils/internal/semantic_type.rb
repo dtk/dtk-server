@@ -27,8 +27,8 @@ module DTK
 
     def self.convert_hash(item)
       return item unless item.is_a?(Hash)
-      item.inject({}) do |h,kv|
-        new_key = kv[0].to_s =~ /^:(.+$)/ ? $1.to_sym : kv[0].to_s
+      item.inject({}) do |h, kv|
+        new_key = kv[0].to_s =~ /^:(.+$)/ ? Regexp.last_match(1).to_sym : kv[0].to_s
         h.merge(new_key =>  convert_hash(kv[1]))
       end
     end
@@ -50,28 +50,28 @@ module DTK
     Info =
       # L4 Saps adn sockets
       {
-      "sap_config__l4" => {
+      'sap_config__l4' => {
         syntax: {
-          "port" =>  {required: true, type: :integer},
-          "protocol" => {required: true, type: :string},
-          "binding_addr_constraints" => {type: :json}
+          'port' =>  { required: true, type: :integer },
+          'protocol' => { required: true, type: :string },
+          'binding_addr_constraints' => { type: :json }
         }
       },
-      "sap__l4" => {
+      'sap__l4' => {
         external: true,
-        port_type: "output",
+        port_type: 'output',
         syntax: {
-          "port" => {required: true, type: :integer},
-          "protocol" => {required: true, type: :string},
-          "host_address" => {required: true, dynamic: true, type: :string}
+          'port' => { required: true, type: :integer },
+          'protocol' => { required: true, type: :string },
+          'host_address' => { required: true, dynamic: true, type: :string }
         }
       },
       # rather than having or having two sap refs and user can remove or add to component
       #       "sap_ref__l4" => {
       #         :external => true,
-      #         :port_type => "input", 
-      #         :syntax => { 
-      #           :or => 
+      #         :port_type => "input",
+      #         :syntax => {
+      #           :or =>
       #           [{
       #              "port" => {:required => true, :type => :integer},
       #              "protocol" => {:required => true, :type => :string},
@@ -81,75 +81,75 @@ module DTK
       #           ]
       #         }
       #       },
-      "sap_ref__l4" => {
+      'sap_ref__l4' => {
         external: true,
-        port_type: "input", 
-        syntax: { 
-           "port" => {required: true, type: :integer},
-           "protocol" => {required: true, type: :string},
-           "host_address" => {required: true, type: :string}
-        }
-      },
-
-      "sap__socket" => {
+        port_type: 'input',
         syntax: {
-          "socket_file" => {required: true, type: :string}
+           'port' => { required: true, type: :integer },
+           'protocol' => { required: true, type: :string },
+           'host_address' => { required: true, type: :string }
         }
       },
 
-      "db_user_access" => {
+      'sap__socket' => {
+        syntax: {
+          'socket_file' => { required: true, type: :string }
+        }
+      },
+
+      'db_user_access' => {
         external: true,
         # TODO: need to rexamine use of :port_type => "input" in light of having attributes that can be read only vs read/write depending
-        # if they have alink; currently if marked as input then they are treated as readonly        
+        # if they have alink; currently if marked as input then they are treated as readonly
         #        :port_type => "input",
         syntax: {
-          "username" => {required: true, type: :string},
-          "password" => {required: false, type: :string},
-          "inet_access" => {required: true, type: :boolean},
-          "client_host_addr" => {required: true, type: :string}
+          'username' => { required: true, type: :string },
+          'password' => { required: false, type: :string },
+          'inet_access' => { required: true, type: :boolean },
+          'client_host_addr' => { required: true, type: :string }
         }
       },
 
       # TODO: deprecate db ones in favor of above
       # DB params
-      "db_config" => {
+      'db_config' => {
         external: true,
-        port_type: "output",
+        port_type: 'output',
         syntax: {
-          "database" => {required: true, type: :string},
-          "username" => {required: true, type: :string},
-          "password" => {required: true, type: :string}
+          'database' => { required: true, type: :string },
+          'username' => { required: true, type: :string },
+          'password' => { required: true, type: :string }
         }
       },
-      "db_params" => {
+      'db_params' => {
         external: true,
-        port_type: "input",
+        port_type: 'input',
         syntax: {
-          "database" => {required: true, type: :string},
-          "username" => {required: true, type: :string},
-          "password" => {required: true, type: :string}
+          'database' => { required: true, type: :string },
+          'username' => { required: true, type: :string },
+          'password' => { required: true, type: :string }
         }
       },
-      "db_ref" => {
+      'db_ref' => {
         external: true,
-        port_type: "input"
+        port_type: 'input'
       },
 
-      "service_check_input" => {
-        port_type: "input"
+      'service_check_input' => {
+        port_type: 'input'
       },
 
       # TODO: may deprecate below
-      "sap_config__db" => {
+      'sap_config__db' => {
       },
-      "sap__db" => {
+      'sap__db' => {
         external: true,
-        port_type: "output"
+        port_type: 'output'
       },
-      "sap_ref__db" => {
+      'sap_ref__db' => {
         external: true,
-        port_type: "input"
-      },
+        port_type: 'input'
+      }
     }
   end
 
@@ -162,7 +162,7 @@ module DTK
       return TranslationToSchema[key] if TranslationToSchema[key]
       return create_from_semantic_type(semantic_type) if semantic_type.is_a?(Hash)
     end
-    
+
     def self.create_from_semantic_type(semantic_type)
       return nil unless semantic_type
       key = semantic_type_key(semantic_type)
@@ -172,7 +172,7 @@ module DTK
       if semantic_type.is_a?(Hash)
         val = semantic_type.values.first
         return create_json_type() if val.is_a?(Hash) && val.keys.first == :application
-        ret_schema_from_semantic_type_aux!(ret,key,val)
+        ret_schema_from_semantic_type_aux!(ret, key, val)
       end
       return nil if ret.empty?
       ret.freeze
@@ -185,7 +185,7 @@ module DTK
     # returns [array_body_pattern, whether_can_be_empty]
     def parse_array
       # TODO: may have :array+ and :array* to distingusih whether array can be empty
-      [values.first,false]
+      [values.first, false]
     end
 
     def self.ret_scalar_defined_datatypes
@@ -196,15 +196,15 @@ module DTK
 
     def self.semantic_type_key(semantic_type)
       ret = (semantic_type.is_a?(Hash) ? semantic_type.keys.first : semantic_type).to_s
-      ret == ":array" ? :array : ret
+      ret == ':array' ? :array : ret
     end
 
-    def self.ret_schema_from_semantic_type_aux!(ret,index,semantic_type)
+    def self.ret_schema_from_semantic_type_aux!(ret, index, semantic_type)
       key = semantic_type_key(semantic_type)
       if TranslationToSchema[key]
         ret[index] = TranslationToSchema[key]
       elsif semantic_type.is_a?(Hash)
-        ret_schema_from_semantic_type_aux!(ret[index],key,semantic_type.values.first)        
+        ret_schema_from_semantic_type_aux!(ret[index], key, semantic_type.values.first)
       else
         ret[index] = create_json_type()
       end
@@ -214,6 +214,6 @@ module DTK
       SemanticTypeSchema.new(type: :json)
     end
 
-    TranslationToSchema = self.new(AttributeSemantic::Info.inject({}){|h,kv|h.merge(kv[0] => kv[1][:syntax])},true)
+    TranslationToSchema = self.new(AttributeSemantic::Info.inject({}) { |h, kv| h.merge(kv[0] => kv[1][:syntax]) }, true)
   end
 end

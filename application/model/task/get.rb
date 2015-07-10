@@ -27,7 +27,7 @@ module DTK; class Task
       stage_level_tasks.sort{|a,b|a[:position] <=> b[:position]}
     end
 
-    def get_config_agent_type(executable_action=nil, opts={})
+    def get_config_agent_type(executable_action = nil, opts = {})
       executable_action ||= executable_action(opts)
       executable_action.config_agent_type() if executable_action && executable_action.respond_to?('config_agent_type')
     end
@@ -36,27 +36,27 @@ module DTK; class Task
 
     def get_config_agent
       ConfigAgent.load(get_config_agent_type())
-    end   
+    end
   end
 
   module GetClassMixin
-    def get_top_level_most_recent_task(model_handle,filter=nil)
+    def get_top_level_most_recent_task(model_handle, filter = nil)
       # TODO: can be more efficient if do sql query with order and limit 1
-      tasks = get_top_level_tasks(model_handle,filter).sort{|a,b| b[:updated_at] <=> a[:updated_at]}
+      tasks = get_top_level_tasks(model_handle, filter).sort { |a, b| b[:updated_at] <=> a[:updated_at] }
       tasks && tasks.first
     end
 
-    def get_top_level_tasks(model_handle,filter=nil)
+    def get_top_level_tasks(model_handle, filter = nil)
       sp_hash = {
-        :cols => [:id,:group_id,:display_name,:status,:updated_at,:executable_action_type,:commit_message],
-        :filter => [:and,[:eq,:task_id,nil], #so this is a top level task
-                    filter].compact
+        cols: [:id, :group_id, :display_name, :status, :updated_at, :executable_action_type, :commit_message],
+        filter: [:and, [:eq, :task_id, nil], #so this is a top level task
+                 filter].compact
       }
-      get_objs(model_handle,sp_hash).reject{|k,v|k == :subtasks}
+      get_objs(model_handle, sp_hash).reject { |k, _v| k == :subtasks }
     end
 
     def get_most_recent_top_level_task(model_handle)
-      get_top_level_tasks(model_handle).sort{|a,b| b[:updated_at] <=> a[:updated_at]}.first
+      get_top_level_tasks(model_handle).sort { |a, b| b[:updated_at] <=> a[:updated_at] }.first
     end
 
     def get_ndx_errors(task_idhs)
@@ -67,10 +67,10 @@ module DTK; class Task
         filter: [:oneof,:task_id,task_idhs.map{|idh|idh.get_id()}]
       }
       task_error_mh = task_idhs.first.createMH(:task_error)
-      ret = Hash.new
-      get_objs(task_error_mh,sp_hash).each do |r|
+      ret = {}
+      get_objs(task_error_mh, sp_hash).each do |r|
         task_id = r[:task_id]
-        ret[task_id] = (ret[task_id]||Array.new) + [r[:content]]
+        ret[task_id] = (ret[task_id] || []) + [r[:content]]
       end
       ret
     end
@@ -101,6 +101,5 @@ module DTK; class Task
       model_handle = task_idhs.first.createMH()
       get_objs(model_handle,sp_hash)
     end
-
   end
 end; end

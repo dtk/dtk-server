@@ -4,11 +4,11 @@ module DTK
 
     module ViolationMixin
       def find_violations
-        nodes_and_cmps = get_info__flat_list(detail_level: "components").select{|r|r[:nested_component]}
-        cmps = nodes_and_cmps.map{|r|r[:nested_component]}
+        nodes_and_cmps = get_info__flat_list(detail_level: 'components').select { |r| r[:nested_component] }
+        cmps = nodes_and_cmps.map { |r| r[:nested_component] }
 
         unset_attr_viols = find_violations__unset_attrs()
-        cmp_constraint_viols = find_violations__cmp_constraints(nodes_and_cmps,cmps.map{|cmp|cmp.id_handle()})
+        cmp_constraint_viols = find_violations__cmp_constraints(nodes_and_cmps, cmps.map(&:id_handle))
         cmp_parsing_errors = find_violations__cmp_parsing_error(cmps)
         unconn_req_service_refs = find_violations__unconn_req_service_refs()
         mod_refs_viols = find_violations__module_refs(cmps)
@@ -20,10 +20,10 @@ module DTK
       private
 
       def find_violations__unset_attrs
-        filter_proc = lambda{|a|a.required_unset_attribute?()}
-        assembly_attr_viols = get_assembly_level_attributes(filter_proc).map{|a|Violation::ReqUnsetAttr.new(a,:assembly)}
-        filter_proc = lambda{|r|r[:attribute].required_unset_attribute?()}
-        component_attr_viols = get_augmented_nested_component_attributes(filter_proc).map{|a|Violation::ReqUnsetAttr.new(a,:component)}
+        filter_proc = lambda { |a| a.required_unset_attribute?() }
+        assembly_attr_viols = get_assembly_level_attributes(filter_proc).map { |a| Violation::ReqUnsetAttr.new(a, :assembly) }
+        filter_proc = lambda { |r| r[:attribute].required_unset_attribute?() }
+        component_attr_viols = get_augmented_nested_component_attributes(filter_proc).map { |a| Violation::ReqUnsetAttr.new(a, :component) }
 
         node_attributes = get_augmented_node_attributes(filter_proc)
         # remove attribute violations if assembly wide node
@@ -32,22 +32,22 @@ module DTK
             node[:type].eql?('assembly_wide')
           end
         end
-        node_attr_viols = node_attributes.map{|a|Violation::ReqUnsetAttr.new(a,:node)}
+        node_attr_viols = node_attributes.map { |a| Violation::ReqUnsetAttr.new(a, :node) }
 
         assembly_attr_viols + component_attr_viols + node_attr_viols
       end
 
-      def find_violations__cmp_constraints(nodes_and_cmps,cmp_idhs)
+      def find_violations__cmp_constraints(nodes_and_cmps, cmp_idhs)
         ret = []
         return ret if cmp_idhs.empty?
-        ndx_constraints = Component.get_ndx_constraints(cmp_idhs,when_evaluated: :after_cmp_added)
+        ndx_constraints = Component.get_ndx_constraints(cmp_idhs, when_evaluated: :after_cmp_added)
         # TODO: this is expensive in that it makes query for each constraint
         nodes_and_cmps.each do |r|
           if constraint_info = ndx_constraints[r[:nested_component][:id]]
-            constraint_scope = {"target_node_id_handle" => r[:node].id_handle()}
+            constraint_scope = { 'target_node_id_handle' => r[:node].id_handle() }
             constraint_info[:constraints].each do |constraint|
               unless constraint.evaluate_given_target(constraint_scope)
-                ret << Violation::ComponentConstraint.new(constraint,r[:node])
+                ret << Violation::ComponentConstraint.new(constraint, r[:node])
               end
             end
           end
@@ -70,21 +70,21 @@ module DTK
         return ret if cmps.empty?
 
         cmps.each do |cmp|
-          cmp_module_branch = get_parsed_info(cmp[:module_branch_id], "ComponentBranch")
+          cmp_module_branch = get_parsed_info(cmp[:module_branch_id], 'ComponentBranch')
           if cmp_module_branch && cmp_module_branch[:component_module]
-            ret << Violation::ComponentParsingError.new(cmp_module_branch[:component_module][:display_name], "Component") unless cmp_module_branch[:dsl_parsed]
+            ret << Violation::ComponentParsingError.new(cmp_module_branch[:component_module][:display_name], 'Component') unless cmp_module_branch[:dsl_parsed]
           end
         end
 
-        if service_module_branch = get_parsed_info(self[:module_branch_id], "ServiceBranch")
-          ret << Violation::ComponentParsingError.new(service_module_branch[:service_module][:display_name], "Service") unless service_module_branch[:dsl_parsed]
+        if service_module_branch = get_parsed_info(self[:module_branch_id], 'ServiceBranch')
+          ret << Violation::ComponentParsingError.new(service_module_branch[:service_module][:display_name], 'Service') unless service_module_branch[:dsl_parsed]
         end
 
         # if module_branch belongs to service instance assembly_module_version? will not be nil
         assembly_branch = AssemblyModule::Service.get_assembly_branch(self)
         if assembly_branch.assembly_module_version?
           # add violation if module_branch[:dsl_parsed] == false
-          ret << Violation::ComponentParsingError.new(self[:display_name], "Service instance") unless assembly_branch[:dsl_parsed]
+          ret << Violation::ComponentParsingError.new(self[:display_name], 'Service instance') unless assembly_branch[:dsl_parsed]
         end
 
         ret
@@ -96,7 +96,7 @@ module DTK
         return ret if cmps.empty?
 
         begin
-          module_refs_tree = ModuleRefs::Tree.create(self,components: cmps)
+          module_refs_tree = ModuleRefs::Tree.create(self, components: cmps)
         rescue ErrorUsage => e
           ret << Violation::HasItselfAsDependency.new(e.message)
           return ret
@@ -105,14 +105,14 @@ module DTK
         missing, multiple_ns = module_refs_tree.violations?
 
         unless missing.empty?
-          missing.each do |k,v|
-            ret << Violation::MissingIncludedModule.new(k,v)
+          missing.each do |k, v|
+            ret << Violation::MissingIncludedModule.new(k, v)
           end
         end
 
         unless multiple_ns.empty?
-          multiple_ns.each do |k,v|
-            ret << Violation::MultipleNamespacesIncluded.new(k,v)
+          multiple_ns.each do |k, v|
+            ret << Violation::MultipleNamespacesIncluded.new(k, v)
           end
         end
 
@@ -127,7 +127,8 @@ module DTK
 
         # check if allowed number of nodes is exceeded (only for builtin target)
         if target.is_builtin_target?
-          new_nodes, current_nodes = [], []
+          new_nodes = []
+          current_nodes = []
 
           self.get_leaf_nodes().each do |l_node|
             # we need only nodes that are currently not running
@@ -148,9 +149,9 @@ module DTK
         ret = nil
         cols = [:id, :type, :component_id, :service_id, :dsl_parsed]
 
-        if type.to_s.eql?("ComponentBranch")
+        if type.to_s.eql?('ComponentBranch')
           cols << :component_module_info
-        elsif type.to_s.eql?("ServiceBranch")
+        elsif type.to_s.eql?('ServiceBranch')
           cols << :service_module
         end
 
@@ -158,31 +159,31 @@ module DTK
           cols: cols,
           filter: [:eq, :id, module_branch_id]
         }
-        unless branch = Model.get_obj(model_handle(:module_branch),sp_hash)
+        unless branch = Model.get_obj(model_handle(:module_branch), sp_hash)
           return ret
         end
 
-        return branch if type.to_s.eql?("ComponentBranch") || type.to_s.eql?("ServiceBranch")
+        return branch if type.to_s.eql?('ComponentBranch') || type.to_s.eql?('ServiceBranch')
 
-        if (type == "Component")
+        if (type == 'Component')
           sp_cmp_hash = {
             cols: [:id, :display_name, :dsl_parsed],
             filter: [:eq, :id, branch[:component_id]]
           }
-          Model.get_obj(model_handle(:component_module),sp_cmp_hash)
+          Model.get_obj(model_handle(:component_module), sp_cmp_hash)
         else
           sp_cmp_hash = {
             cols: [:id, :display_name, :dsl_parsed],
             filter: [:eq, :id, branch[:service_id]]
           }
-          Model.get_obj(model_handle(:service_module),sp_cmp_hash)
+          Model.get_obj(model_handle(:service_module), sp_cmp_hash)
         end
       end
     end
 
-    class Violation 
+    class Violation
       class ReqUnsetAttr < self
-        def initialize(attr,type)
+        def initialize(attr, type)
           @attr_display_name = attr.print_form(Opts.new(level: type))[:display_name]
         end
 
@@ -195,7 +196,7 @@ module DTK
         end
       end
       class ComponentConstraint < self
-        def initialize(constraint,node)
+        def initialize(constraint, node)
           @constraint = constraint
           @node = node
         end
@@ -248,7 +249,7 @@ module DTK
 
         def description
           full_name = "#{@namespace}:#{@included_module}"
-          "Module '#{full_name}#{@version.nil? ? '' : '-'+@version}' is included in dsl, but not installed. Use 'print-includes' to see more details."
+          "Module '#{full_name}#{@version.nil? ? '' : '-' + @version}' is included in dsl, but not installed. Use 'print-includes' to see more details."
         end
       end
       class MultipleNamespacesIncluded < self

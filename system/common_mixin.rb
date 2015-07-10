@@ -39,19 +39,19 @@ module R8Tpl
     class VirtualModelRef < String
       public
 
-      def self.create(virtual_model_ref_str,view_type,user)
-        virtual_model_ref_str && self.new(virtual_model_ref_str,:virtual_object,view_type,user) #TODO: hard wiring :virtual_object
+      def self.create(virtual_model_ref_str, view_type, user)
+        virtual_model_ref_str && self.new(virtual_model_ref_str, :virtual_object, view_type, user) #TODO: hard wiring :virtual_object
       end
 
       private
 
-      def initialize(virtual_model_ref_str,type,view_type,user)
+      def initialize(virtual_model_ref_str, type, view_type, user)
         super(virtual_model_ref_str)
         @user = user
         @type = type
         @view_type = view_type
         @view_meta_id = nil
-        @edit_time = nil 
+        @edit_time = nil
       end
 
       public
@@ -71,7 +71,7 @@ module R8Tpl
       end
 
       def set_view_meta_info(*args)
-        @view_meta_id,@edit_time = args.empty? ? @user.create_object_from_id(db_id).get_view_meta_info(@view_type) : args
+        @view_meta_id, @edit_time = args.empty? ? @user.create_object_from_id(db_id).get_view_meta_info(@view_type) : args
       end
 
       private
@@ -80,7 +80,7 @@ module R8Tpl
         self.to_i
       end
     end
-    
+
     # TODO: temp until deprecate @saved_search_ref
     def virtual_model_ref
       @virtual_model_ref || @saved_search_ref
@@ -93,10 +93,10 @@ module R8Tpl
     # returns the appropriate view path
     # TODO: this bakes in some "ordering with a type; is this right place to put this?
     def ret_view_path(type)
-      case(type)
-       when :system 
+      case (type)
+       when :system
         ViewPathFile.new("#{R8::Config[:system_views_dir]}/#{@profile}.#{@view_name}.rtpl")
-       when :base 
+       when :base
         ViewPathFile.new("#{R8::Config[:base_views_dir]}/#{@model_name}/#{@profile}.#{@view_name}.rtpl")
        when :meta
         # first see if there is a meta template for specfic profile type; if not look for default;
@@ -106,7 +106,7 @@ module R8Tpl
         ViewPathFile.new("#{R8::Config[:meta_templates_root]}/#{@model_name}/view.default.#{@view_name}.rb")
        when :meta_db
          ViewPathDB.new(virtual_model_ref)
-       when :cache 
+       when :cache
         # TODO: fix so saved_search not hard coded
         if virtual_model_ref
           if virtual_model_ref_type() == :virtual_object
@@ -138,16 +138,16 @@ module R8Tpl
     def ret_if_exists(path)
       return nil unless path
       case path.type
-        when :file then File.exists?(path) ? path : nil
+        when :file then File.exist?(path) ? path : nil
         when :db then path
-        else 
-        Log.error("Unexpected type of path")
+        else
+        Log.error('Unexpected type of path')
         nil
       end
     end
 
-    def view_type(vn=nil)
-      ViewTranslations[(vn||@view_name).to_sym]
+    def view_type(vn = nil)
+      ViewTranslations[(vn || @view_name).to_sym]
     end
     ViewTranslations = {
       edit: 'edit',

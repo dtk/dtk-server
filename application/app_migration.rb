@@ -54,4 +54,3 @@ DBinstance = XYZ::DB.create_for_migrate()
 
 r8_require('model/init')
 r8_require('controller/init')
-

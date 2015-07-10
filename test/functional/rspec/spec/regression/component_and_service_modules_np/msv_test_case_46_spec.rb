@@ -10,211 +10,211 @@ require './lib/dtk_common'
 require './lib/service_modules_spec'
 require './lib/component_modules_spec'
 
-namespace = "r8"
-component_module_name_1 = "tomcat"
-component_module_1 = "r8:tomcat"
-component_module_name_2 = "concat"
-component_module_2 = "r8:concat"
-component_module_name_3 = "python"
-component_module_3 = "r8:python"
-component_module_name_4 = "docker"
-component_module_4 = "r8:docker"
-service_module_name = "test_service_module_2"
-service_module = "r8:test_service_module_2"
+namespace = 'r8'
+component_module_name_1 = 'tomcat'
+component_module_1 = 'r8:tomcat'
+component_module_name_2 = 'concat'
+component_module_2 = 'r8:concat'
+component_module_name_3 = 'python'
+component_module_3 = 'r8:python'
+component_module_name_4 = 'docker'
+component_module_4 = 'r8:docker'
+service_module_name = 'test_service_module_2'
+service_module = 'r8:test_service_module_2'
 r8_service_module_filesystem_location = '~/dtk/service_modules/r8'
 r8_component_module_filesystem_location = '~/dtk/component_modules/r8'
-file_for_change_location_1 = "./spec/regression/component_and_service_modules_np/resources/msv_test_case_46_1_module_refs.yaml"
-file_for_change_location_2 = "./spec/regression/component_and_service_modules_np/resources/msv_test_case_46_2_module_refs.yaml"
-dtk_model_yaml_file_location_1 = "~/dtk/component_modules/r8/tomcat/dtk.model.yaml"
-dtk_model_yaml_file_location_2 = "~/dtk/component_modules/r8/concat/dtk.model.yaml"
-file_for_add = "module_refs.yaml"
-file_for_remove = "module_refs.yaml"
+file_for_change_location_1 = './spec/regression/component_and_service_modules_np/resources/msv_test_case_46_1_module_refs.yaml'
+file_for_change_location_2 = './spec/regression/component_and_service_modules_np/resources/msv_test_case_46_2_module_refs.yaml'
+dtk_model_yaml_file_location_1 = '~/dtk/component_modules/r8/tomcat/dtk.model.yaml'
+dtk_model_yaml_file_location_2 = '~/dtk/component_modules/r8/concat/dtk.model.yaml'
+file_for_add = 'module_refs.yaml'
+file_for_remove = 'module_refs.yaml'
 
 dtk_common = DtkCommon.new('', '')
 
-describe "(Modules, Services and Versioning) Test Case 46: Install service module with dependency to two components and both of these components have dependency to two different components" do
+describe '(Modules, Services and Versioning) Test Case 46: Install service module with dependency to two components and both of these components have dependency to two different components' do
   before(:all) do
-    puts "**********************************************************************************************************************************************************************************",""
+    puts '**********************************************************************************************************************************************************************************', ''
   end
 
-  context "Import component module function" do
-    include_context "Import remote component module", namespace + "/" + component_module_name_1
+  context 'Import component module function' do
+    include_context 'Import remote component module', namespace + '/' + component_module_name_1
   end
 
-  context "Get component module components list" do
-    include_context "Get component module components list", dtk_common, component_module_1
+  context 'Get component module components list' do
+    include_context 'Get component module components list', dtk_common, component_module_1
   end
 
-  context "Import component module function" do
-    include_context "Import remote component module", namespace + "/" + component_module_name_2
+  context 'Import component module function' do
+    include_context 'Import remote component module', namespace + '/' + component_module_name_2
   end
 
-  context "Get component module components list" do
-    include_context "Get component module components list", dtk_common, component_module_2
+  context 'Get component module components list' do
+    include_context 'Get component module components list', dtk_common, component_module_2
   end
 
-  context "Import component module function" do
-    include_context "Import remote component module", namespace + "/" + component_module_name_3
+  context 'Import component module function' do
+    include_context 'Import remote component module', namespace + '/' + component_module_name_3
   end
 
-  context "Get component module components list" do
-    include_context "Get component module components list", dtk_common, component_module_3
+  context 'Get component module components list' do
+    include_context 'Get component module components list', dtk_common, component_module_3
   end
 
-  context "Import component module function" do
-    include_context "Import remote component module", namespace + "/" + component_module_name_4
+  context 'Import component module function' do
+    include_context 'Import remote component module', namespace + '/' + component_module_name_4
   end
 
-  context "Get component module components list" do
-    include_context "Get component module components list", dtk_common, component_module_4
+  context 'Get component module components list' do
+    include_context 'Get component module components list', dtk_common, component_module_4
   end
 
-  context "Add module_refs.yaml file" do
-    include_context "Add module_refs.yaml file", component_module_name_1, file_for_change_location_1, file_for_add, r8_component_module_filesystem_location
+  context 'Add module_refs.yaml file' do
+    include_context 'Add module_refs.yaml file', component_module_name_1, file_for_change_location_1, file_for_add, r8_component_module_filesystem_location
   end
 
-  context "Add module_refs.yaml file" do
-    include_context "Add module_refs.yaml file", component_module_name_2, file_for_change_location_2, file_for_add, r8_component_module_filesystem_location
+  context 'Add module_refs.yaml file' do
+    include_context 'Add module_refs.yaml file', component_module_name_2, file_for_change_location_2, file_for_add, r8_component_module_filesystem_location
   end
 
-  context "Add includes to dtk.model.yaml" do
-    include_context "Add includes to dtk.model.yaml", dtk_model_yaml_file_location_1, [component_module_name_3]
+  context 'Add includes to dtk.model.yaml' do
+    include_context 'Add includes to dtk.model.yaml', dtk_model_yaml_file_location_1, [component_module_name_3]
   end
 
-  context "Add includes to dtk.model.yaml" do
-    include_context "Add includes to dtk.model.yaml", dtk_model_yaml_file_location_2, [component_module_name_4]
+  context 'Add includes to dtk.model.yaml' do
+    include_context 'Add includes to dtk.model.yaml', dtk_model_yaml_file_location_2, [component_module_name_4]
   end
 
-  context "Push to remote changes for component module" do
-  	include_context "Push to remote changes for component module", dtk_common, component_module_1
+  context 'Push to remote changes for component module' do
+    include_context 'Push to remote changes for component module', dtk_common, component_module_1
   end
 
-  context "Push to remote changes for component module" do
-    include_context "Push to remote changes for component module", dtk_common, component_module_2
+  context 'Push to remote changes for component module' do
+    include_context 'Push to remote changes for component module', dtk_common, component_module_2
   end
 
-  context "Delete component module" do
-    include_context "Delete component module", dtk_common, component_module_1
+  context 'Delete component module' do
+    include_context 'Delete component module', dtk_common, component_module_1
   end
 
-  context "Delete component module from local filesystem" do
-    include_context "Delete component module from local filesystem", r8_component_module_filesystem_location, component_module_name_1
+  context 'Delete component module from local filesystem' do
+    include_context 'Delete component module from local filesystem', r8_component_module_filesystem_location, component_module_name_1
   end
 
-  context "Delete component module" do
-    include_context "Delete component module", dtk_common, component_module_2
+  context 'Delete component module' do
+    include_context 'Delete component module', dtk_common, component_module_2
   end
 
-  context "Delete component module from local filesystem" do
-    include_context "Delete component module from local filesystem", r8_component_module_filesystem_location, component_module_name_2
+  context 'Delete component module from local filesystem' do
+    include_context 'Delete component module from local filesystem', r8_component_module_filesystem_location, component_module_name_2
   end
 
-  context "Delete component module" do
-    include_context "Delete component module", dtk_common, component_module_3
+  context 'Delete component module' do
+    include_context 'Delete component module', dtk_common, component_module_3
   end
 
-  context "Delete component module from local filesystem" do
-    include_context "Delete component module from local filesystem", r8_component_module_filesystem_location, component_module_name_3
+  context 'Delete component module from local filesystem' do
+    include_context 'Delete component module from local filesystem', r8_component_module_filesystem_location, component_module_name_3
   end
 
-  context "Delete component module" do
-    include_context "Delete component module", dtk_common, component_module_4
+  context 'Delete component module' do
+    include_context 'Delete component module', dtk_common, component_module_4
   end
 
-  context "Delete component module from local filesystem" do
-    include_context "Delete component module from local filesystem", r8_component_module_filesystem_location, component_module_name_4
+  context 'Delete component module from local filesystem' do
+    include_context 'Delete component module from local filesystem', r8_component_module_filesystem_location, component_module_name_4
   end
 
-  context "Install service module function" do
-    include_context "Import remote service module", namespace + "/" + service_module_name
+  context 'Install service module function' do
+    include_context 'Import remote service module', namespace + '/' + service_module_name
   end
 
-  context "List all service modules" do
-    include_context "List all service modules", dtk_common, service_module
+  context 'List all service modules' do
+    include_context 'List all service modules', dtk_common, service_module
   end
 
-  context "Get component module components list" do
-    include_context "Get component module components list", dtk_common, component_module_1
+  context 'Get component module components list' do
+    include_context 'Get component module components list', dtk_common, component_module_1
   end
 
-  context "Get component module components list" do
-    include_context "Get component module components list", dtk_common, component_module_2
+  context 'Get component module components list' do
+    include_context 'Get component module components list', dtk_common, component_module_2
   end
 
-  context "Get component module components list" do
-    include_context "Get component module components list", dtk_common, component_module_3
+  context 'Get component module components list' do
+    include_context 'Get component module components list', dtk_common, component_module_3
   end
 
-  context "Get component module components list" do
-    include_context "Get component module components list", dtk_common, component_module_4
+  context 'Get component module components list' do
+    include_context 'Get component module components list', dtk_common, component_module_4
   end
 
   # Cleanup
-  context "Remove module_refs.yaml file" do
-    include_context "Remove module_refs.yaml file", component_module_name_1, file_for_remove, r8_component_module_filesystem_location
+  context 'Remove module_refs.yaml file' do
+    include_context 'Remove module_refs.yaml file', component_module_name_1, file_for_remove, r8_component_module_filesystem_location
   end
 
-  context "Remove module_refs.yaml file" do
-    include_context "Remove module_refs.yaml file", component_module_name_2, file_for_remove, r8_component_module_filesystem_location
+  context 'Remove module_refs.yaml file' do
+    include_context 'Remove module_refs.yaml file', component_module_name_2, file_for_remove, r8_component_module_filesystem_location
   end
 
-  context "Remove includes from dtk.model.yaml" do
-    include_context "Remove includes from dtk.model.yaml", dtk_model_yaml_file_location_1, [component_module_name_3]
+  context 'Remove includes from dtk.model.yaml' do
+    include_context 'Remove includes from dtk.model.yaml', dtk_model_yaml_file_location_1, [component_module_name_3]
   end
 
-  context "Remove includes from dtk.model.yaml" do
-    include_context "Remove includes from dtk.model.yaml", dtk_model_yaml_file_location_2, [component_module_name_4]
+  context 'Remove includes from dtk.model.yaml' do
+    include_context 'Remove includes from dtk.model.yaml', dtk_model_yaml_file_location_2, [component_module_name_4]
   end
 
-  context "Push to remote changes for component module" do
-  	include_context "Push to remote changes for component module", dtk_common, component_module_1
+  context 'Push to remote changes for component module' do
+    include_context 'Push to remote changes for component module', dtk_common, component_module_1
   end
 
-  context "Push to remote changes for component module" do
-    include_context "Push to remote changes for component module", dtk_common, component_module_2
+  context 'Push to remote changes for component module' do
+    include_context 'Push to remote changes for component module', dtk_common, component_module_2
   end
 
-  context "Delete service module" do
-    include_context "Delete service module", dtk_common, service_module
+  context 'Delete service module' do
+    include_context 'Delete service module', dtk_common, service_module
   end
 
-  context "Delete service module from local filesystem" do
-    include_context "Delete service module from local filesystem", r8_service_module_filesystem_location, service_module_name
+  context 'Delete service module from local filesystem' do
+    include_context 'Delete service module from local filesystem', r8_service_module_filesystem_location, service_module_name
   end
 
-  context "Delete component module" do
-    include_context "Delete component module", dtk_common, component_module_1
+  context 'Delete component module' do
+    include_context 'Delete component module', dtk_common, component_module_1
   end
 
-  context "Delete component module from local filesystem" do
-    include_context "Delete component module from local filesystem", r8_component_module_filesystem_location, component_module_name_1
+  context 'Delete component module from local filesystem' do
+    include_context 'Delete component module from local filesystem', r8_component_module_filesystem_location, component_module_name_1
   end
 
-  context "Delete component module" do
-    include_context "Delete component module", dtk_common, component_module_2
+  context 'Delete component module' do
+    include_context 'Delete component module', dtk_common, component_module_2
   end
 
-  context "Delete component module from local filesystem" do
-    include_context "Delete component module from local filesystem", r8_component_module_filesystem_location, component_module_name_2
+  context 'Delete component module from local filesystem' do
+    include_context 'Delete component module from local filesystem', r8_component_module_filesystem_location, component_module_name_2
   end
 
-  context "Delete component module" do
-    include_context "Delete component module", dtk_common, component_module_3
+  context 'Delete component module' do
+    include_context 'Delete component module', dtk_common, component_module_3
   end
 
-  context "Delete component module from local filesystem" do
-    include_context "Delete component module from local filesystem", r8_component_module_filesystem_location, component_module_name_3
+  context 'Delete component module from local filesystem' do
+    include_context 'Delete component module from local filesystem', r8_component_module_filesystem_location, component_module_name_3
   end
 
-  context "Delete component module" do
-    include_context "Delete component module", dtk_common, component_module_4
+  context 'Delete component module' do
+    include_context 'Delete component module', dtk_common, component_module_4
   end
 
-  context "Delete component module from local filesystem" do
-    include_context "Delete component module from local filesystem", r8_component_module_filesystem_location, component_module_name_4
+  context 'Delete component module from local filesystem' do
+    include_context 'Delete component module from local filesystem', r8_component_module_filesystem_location, component_module_name_4
   end
 
   after(:all) do
-    puts "", ""
+    puts '', ''
   end
 end

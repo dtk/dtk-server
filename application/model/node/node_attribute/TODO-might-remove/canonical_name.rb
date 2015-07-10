@@ -16,10 +16,10 @@ module DTK; class Node
           [
            'node_group.cardinality',
            'node_group.cardinality_max',
-           'node_agent.puppet.version',
+           'node_agent.puppet.version'
 
-          ].map{|n|self.new(n)} +
-        [PuppetVersion.new,RootDeviceSize.new]
+          ].map { |n| self.new(n) } +
+        [PuppetVersion.new, RootDeviceSize.new]
     end
   end
 end; end

@@ -8,15 +8,15 @@ module R8
     end
 
     def get(entry)
-      @routes.merge!(transform_value("get",entry))
+      @routes.merge!(transform_value('get', entry))
     end
 
     def post(entry)
-      @routes.merge!(transform_value("post",entry))
+      @routes.merge!(transform_value('post', entry))
     end
 
-    def method_missing(name,*_args,&_block)
-      raise "REST method '#{name}' is not supported via Reactor Routes."
+    def method_missing(name, *_args, &_block)
+      fail "REST method '#{name}' is not supported via Reactor Routes."
     end
 
     def validate_route(rest_type, route)
@@ -43,9 +43,7 @@ module R8
       ReactorRoute.instance.mapper.validate_route(rest_type, route)
     end
 
-    def mapper
-      @mapper
-    end
+    attr_reader :mapper
 
     private
 

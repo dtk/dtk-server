@@ -1,7 +1,7 @@
 module DTK; class AttributeLink
   class Function
     class VarEmbeddedInText < WithArgs
-      def value(opts={})
+      def value(opts = {})
         val = nil
         var = output_value(opts)
         # alternative sematics is to treat nil like var with empty string

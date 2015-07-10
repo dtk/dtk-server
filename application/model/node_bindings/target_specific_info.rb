@@ -1,7 +1,7 @@
 module DTK
   class NodeBindings
     class TargetSpecificInfo
-      attr_accessor :image_id,:size
+      attr_accessor :image_id, :size
       def initialize(node_target)
         @node_target = node_target
       end

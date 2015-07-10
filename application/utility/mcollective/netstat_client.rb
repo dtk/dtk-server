@@ -5,7 +5,7 @@ require 'pp'
 include MCollective::RPC
 def ret_params
 end
-mc = rpcclient("netstat")
+mc = rpcclient('netstat')
 
 pp mc.get_tcp_udp()
 mc.disconnect

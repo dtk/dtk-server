@@ -1,9 +1,9 @@
 module DTK; class ConfigAgent; module Adapter
   class DtkProvider < ConfigAgent
-    r8_nested_require('dtk_provider','interpret_results')
+    r8_nested_require('dtk_provider', 'interpret_results')
     include InterpretResults::Mixin
 
-    def ret_msg_content(config_node,opts={})
+    def ret_msg_content(config_node, opts = {})
       # TODO: right now noy using assembly attributes; if use, need way to distingusih between refernce to these and
       # reference to component attributes
       # assembly_attrs = assembly_attributes(config_node)
@@ -12,7 +12,7 @@ module DTK; class ConfigAgent; module Adapter
 
       ret = {
         action_agent_request: {
-          execution_list: commands,
+          execution_list: commands
         }
       }
 
@@ -29,7 +29,7 @@ module DTK; class ConfigAgent; module Adapter
 
     private
 
-    def commands(config_node,opts)
+    def commands(config_node, opts)
       ret = []
       config_node[:component_actions].each do |component_action|
         attr_val_pairs = nil
@@ -54,7 +54,7 @@ module DTK; class ConfigAgent; module Adapter
       ret
     end
 
-    def each_command_given_component_action(component_action,&block)
+    def each_command_given_component_action(component_action, &block)
       if action_def = component_action.action_def()
         action_def.commands().each do |command|
           block.call(command)
@@ -63,7 +63,7 @@ module DTK; class ConfigAgent; module Adapter
     end
 
     def attribute_value_pairs(component_action)
-      (component_action[:attributes]||[]).inject({}) do |h,attr|
+      (component_action[:attributes] || []).inject({}) do |h, attr|
         h.merge(attr[:display_name] => attr[:attribute_value])
       end
     end

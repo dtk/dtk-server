@@ -1,18 +1,18 @@
 module DTK
   module ServiceDSLCommonMixin
     Seperators = {
-      module_component: "::", #TODO: if this changes need to change ModCompGsub
-      component_version: ":",
-      component_port: "/",
-      assembly_node: "/",
-      node_component: "/",
-      component_link_def_ref: "/",
+      module_component: '::', #TODO: if this changes need to change ModCompGsub
+      component_version: ':',
+      component_port: '/',
+      assembly_node: '/',
+      node_component: '/',
+      component_link_def_ref: '/',
       title_before: '[',
-      title_after: ']',
+      title_after: ']'
     }
-    ModCompInternalSep = "__" #TODO: if this changes need to chage ModCompGsub[:sub]
+    ModCompInternalSep = '__' #TODO: if this changes need to chage ModCompGsub[:sub]
     ModCompGsub = {
-      pattern: /(^[^:]+)::/, 
+      pattern: /(^[^:]+)::/,
       sub: '\1__'
     }
     CmpVersionRegexp = Regexp.new("(^.+)#{Seperators[:component_version]}([0-9]+.+$)")
@@ -22,7 +22,7 @@ module DTK
 
     module InternalForm
       def self.component_ref(cmp_type_ext_form)
-        cmp_type_ext_form.gsub(ModCompGsub[:pattern],ModCompGsub[:sub])
+        cmp_type_ext_form.gsub(ModCompGsub[:pattern], ModCompGsub[:sub])
       end
 
       # returns hash with keys
@@ -32,17 +32,17 @@ module DTK
       def self.component_ref_info(cmp_type_ext_form)
         ref = component_ref(cmp_type_ext_form)
         if ref =~ CmpVersionRegexp
-          type = $1; version = $2
+          type = Regexp.last_match(1); version = Regexp.last_match(2)
         else
           type = ref; version = nil
         end
         if type =~ DSLComponentTitleRegex
-          type = $1
-          title = $2
-          ref = ComponentTitle.ref_with_title(type,title)
-          display_name = ComponentTitle.display_name_with_title(type,title)
+          type = Regexp.last_match(1)
+          title = Regexp.last_match(2)
+          ref = ComponentTitle.ref_with_title(type, title)
+          display_name = ComponentTitle.display_name_with_title(type, title)
         end
-        ret = {component_type: type}
+        ret = { component_type: type }
         ret.merge!(version: version) if version
         ret.merge!(title: title) if title
         ret

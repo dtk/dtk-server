@@ -4,9 +4,9 @@ root = File.expand_path('../', File.dirname(__FILE__))
 puts
 puts "\tWARNING!\tWARNING!\tWARNING!\tWARNING!"
 puts
-puts "Make sure that your run this script ONLY ONCE, multiple runs will cause data corruption. press ENTER key to continue OR CTRL^C to stop"
+puts 'Make sure that your run this script ONLY ONCE, multiple runs will cause data corruption. press ENTER key to continue OR CTRL^C to stop'
 a = $stdin.gets
-puts "Hashing passwords ... "
+puts 'Hashing passwords ... '
 
 require root + '/app'
 
@@ -25,4 +25,4 @@ end
 
 ::DTK::Model.update_from_rows(default_project.model_handle(:user), users)
 
-puts "Passwords have been hashed successfully!"
+puts 'Passwords have been hashed successfully!'

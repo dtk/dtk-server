@@ -2,15 +2,15 @@ require File.expand_path('../../utils/internal/opts', File.dirname(__FILE__))
 
 module DTK
   class ErrorUsage < Error
-    r8_nested_require('usage','parsing')
+    r8_nested_require('usage', 'parsing')
     # dsl_not_supported must be after parsing
-    r8_nested_require('usage','dsl_not_supported')
-    r8_nested_require('usage','warning')
+    r8_nested_require('usage', 'dsl_not_supported')
+    r8_nested_require('usage', 'warning')
 
     attr_reader :donot_log_error
-    def initialize(msg='',*args)
+    def initialize(msg = '', *args)
       @donot_log_error = (args.last.is_a?(::DTK::Opts) and args.last[:log_error] == false)
-      super(msg,*args)
+      super(msg, *args)
     end
 
     def add_tag!(tag)
@@ -20,33 +20,33 @@ module DTK
     end
 
     def has_tag?(tag)
-      (@tags||[]).include?(tag)
+      (@tags || []).include?(tag)
     end
 
     private
 
-    def add_line!(msg,line,ident=0)
+    def add_line!(msg, line, ident = 0)
       msg << "#{' ' * ident}#{line}\n"
     end
 
     def sentence_capitalize(line)
       split = line.split
       first = split.shift.capitalize
-      ([first]+split).join(' ')
+      ([first] + split).join(' ')
     end
 
     # TODO: make second argument be polymorphic to handle things like wrong type, wrong name
     class BadParamValue < self
-      def initialize(param,enum_vals=nil)
-        super(msg(param,enum_vals))
+      def initialize(param, enum_vals = nil)
+        super(msg(param, enum_vals))
       end
 
       private
 
-      def msg(param,enum_vals)
+      def msg(param, enum_vals)
         msg = "Paramater '#{param}' has an illegal value"
         if enum_vals
-          msg << "; most be one of (#{enum_vals.join(",")})"
+          msg << "; most be one of (#{enum_vals.join(',')})"
         end
         msg
       end
@@ -81,53 +81,53 @@ module DTK
       if @errors.size == 1
         @errors.first.to_s()
       elsif @errors.size > 1
-        "\n"+@errors.map{|err|err.to_s}.join("\n")
+        "\n" + @errors.map(&:to_s).join("\n")
       else #no errors shoudl not be called
-        "No errors"
+        'No errors'
       end
     end
   end
 
   # TODO: move over to use nested classeslike above
-  class ErrorIdInvalid <  ErrorUsage
-    def initialize(id,object_type)
-      super(msg(id,object_type))
+  class ErrorIdInvalid < ErrorUsage
+    def initialize(id, object_type)
+      super(msg(id, object_type))
     end
 
-     def msg(id,object_type)
+     def msg(id, object_type)
        "Illegal id (#{id}) for #{object_type}"
      end
   end
-  class ErrorNameInvalid <  ErrorUsage
-    def initialize(name,object_type)
-      super(msg(name,object_type))
+  class ErrorNameInvalid < ErrorUsage
+    def initialize(name, object_type)
+      super(msg(name, object_type))
     end
 
-     def msg(name,object_type)
+     def msg(name, object_type)
        "Illegal name (#{name}) for #{object_type}"
      end
   end
-  class ErrorNameAmbiguous <  ErrorUsage
-    def initialize(name,matching_ids,object_type)
-      super(msg(name,matching_ids,object_type))
+  class ErrorNameAmbiguous < ErrorUsage
+    def initialize(name, matching_ids, object_type)
+      super(msg(name, matching_ids, object_type))
     end
 
-     def msg(name,matching_ids,object_type)
+     def msg(name, matching_ids, object_type)
        "Ambiguous name (#{name}) for #{object_type} which matches ids: #{matching_ids.join(',')}"
      end
   end
-  class ErrorNameDoesNotExist <  ErrorUsage
-    def initialize(name,object_type,augment_string=nil)
-      super(msg(name,object_type,augment_string))
+  class ErrorNameDoesNotExist < ErrorUsage
+    def initialize(name, object_type, augment_string = nil)
+      super(msg(name, object_type, augment_string))
       @name_param = name
       @object_type = object_type
     end
 
     def qualify(augment_string)
-      self.class.new(@name_param,@object_type,augment_string)
+      self.class.new(@name_param, @object_type, augment_string)
     end
 
-    def msg(name,object_type,augment_string)
+    def msg(name, object_type, augment_string)
       msg = "No object of type #{object_type} with name (#{name}) exists"
       if augment_string
         msg << " #{augment_string}"
@@ -138,22 +138,22 @@ module DTK
 
   class ErrorConstraintViolations < ErrorUsage
     def initialize(violations)
-       super(msg(violations),:ConstraintViolations)
+       super(msg(violations), :ConstraintViolations)
     end
 
     private
 
     def msg(violations)
-      return ("constraint violation: " + violations) if violations.is_a?(String)
+      return ('constraint violation: ' + violations) if violations.is_a?(String)
       v_with_text = violations.compact
       if v_with_text.size < 2
-        return "constraint violations"
+        return 'constraint violations'
       elsif v_with_text.size == 2
         return "constraint violations: #{v_with_text[1]}"
       end
-      ret = "constraint violations: "
-      ret << (v_with_text.first == :or ? "(atleast) one of " : "")
-      ret << "(#{v_with_text[1..v_with_text.size-1].join(", ")})"
+      ret = 'constraint violations: '
+      ret << (v_with_text.first == :or ? '(atleast) one of ' : '')
+      ret << "(#{v_with_text[1..v_with_text.size - 1].join(', ')})"
     end
   end
 
@@ -165,11 +165,10 @@ module DTK
 
     def to_s
       ret = "following inputs are needed:\n"
-      @needed_inputs.each do |k,v|
+      @needed_inputs.each do |k, v|
         ret << "  #{k}: type=#{v[:type]}; description=#{v[:description]}\n"
       end
       ret
     end
   end
 end
-

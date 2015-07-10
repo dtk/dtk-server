@@ -10,21 +10,21 @@ module XYZ
       sql = ''
       cols = rows.first.keys()
       cols.each do |col|
-        sql << "," unless sql.empty?
-        sql << " unnest(ARRAY[#{rows.map{|row|ds.literal(row[col])}.join(",")}]) as #{col}"
+        sql << ',' unless sql.empty?
+        sql << " unnest(ARRAY[#{rows.map { |row| ds.literal(row[col]) }.join(',')}]) as #{col}"
       end
       ds.select(::Sequel::LiteralString.new(sql))
     end
 
-    def update_returning_sql(ds,update_set_clause,returning_list)
+    def update_returning_sql(ds, update_set_clause, returning_list)
       sql = ds.update_sql(update_set_clause)
-      sql << " RETURNING " + returning_list.map do |x| 
-        if x.is_a?(Hash) 
+      sql << ' RETURNING ' + returning_list.map do |x|
+        if x.is_a?(Hash)
           "#{@db.literal(x.keys.first)} AS #{x.values.first}"
         else
           @db.literal(x)
         end
-      end.join(",")
+      end.join(',')
       sql
     end
 
@@ -32,14 +32,14 @@ module XYZ
       create_language?(:plpgsql) # needed for triggers
       create_function_zzz_ret_id?()
       create_element_update_trigger?()
-      create_sequence?(TOP_LOCAL_ID_SEQ,ID_TYPES[:local_id]) 
-      
+      create_sequence?(TOP_LOCAL_ID_SEQ, ID_TYPES[:local_id])
+
       # custom functions
       create_custom_function__append_to_array_value?()
     end
 
     def create_table_common_extras?(db_rel)
-      create_table_common_fields_trigger?(db_rel) 
+      create_table_common_fields_trigger?(db_rel)
     end
 
     def ret_sequence_ref(seq_name)
@@ -47,14 +47,14 @@ module XYZ
       "nextval('#{seq_qualified_name}'::regclass)"
     end
 
-    protected     
+    protected
 
-    def create_function_zzz_ret_id? 
+    def create_function_zzz_ret_id?
       o =  ID_TYPES[:id] # fn output
-      raise Error::NotImplemented.new("create_function_zzz_ret_id?") if !(o == :bigint && ID_TYPES[:context_id] == :integer && ID_TYPES[:local_id] == :integer)
-      create_function?({schema: :top,fn: :zzz_ret_id},
-        "SELECT CASE WHEN $1 = 1 THEN $2::bigint ELSE (2147483648::bigint * ($1 -1)::bigint) + $2::bigint end",
-        returns: :bigint, behavior: :IMMUTABLE, args: [{_context_id: :integer}, {_local_id: :integer}])
+      fail Error::NotImplemented.new('create_function_zzz_ret_id?') unless (o == :bigint && ID_TYPES[:context_id] == :integer && ID_TYPES[:local_id] == :integer)
+      create_function?({ schema: :top, fn: :zzz_ret_id },
+                       'SELECT CASE WHEN $1 = 1 THEN $2::bigint ELSE (2147483648::bigint * ($1 -1)::bigint) + $2::bigint end',
+                       returns: :bigint, behavior: :IMMUTABLE, args: [{ _context_id: :integer }, { _local_id: :integer }])
     end
 
     def create_element_update_trigger?
@@ -65,44 +65,44 @@ module XYZ
       parent_id = ID_INFO_TABLE[:parent_id].to_s
 
       create_function? ELEMENT_UPDATE_TRIGGER,
-         "BEGIN
-            IF TG_OP = 'INSERT' THEN 
-              SELECT INTO new.id top.zzz_ret_id(NEW.#{c},NEW.local_id);
-              INSERT INTO #{uri_rel} (#{uri_id},#{uri_local_id},#{c},relation_name,ref,ref_num) 
-              VALUES (NEW.id,NEW.local_id,NEW.#{c},TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME,NEW.ref,NEW.ref_num);
-              RETURN NEW;
-            ELSIF TG_OP = 'UPDATE' THEN 
-	      --TBD: not implemented
-            RETURN NEW;
-            END IF;
-            -- else TG_OP = DELETE
-            DELETE FROM #{uri_rel}
-            WHERE #{uri_id} = OLD.id OR #{parent_id} = OLD.id;
-            RETURN OLD;
-         END",  
-	 returns: "trigger", language: "plpgsql"
+                       "BEGIN
+                          IF TG_OP = 'INSERT' THEN
+                            SELECT INTO new.id top.zzz_ret_id(NEW.#{c},NEW.local_id);
+                            INSERT INTO #{uri_rel} (#{uri_id},#{uri_local_id},#{c},relation_name,ref,ref_num)
+                            VALUES (NEW.id,NEW.local_id,NEW.#{c},TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME,NEW.ref,NEW.ref_num);
+                            RETURN NEW;
+                          ELSIF TG_OP = 'UPDATE' THEN
+                      --TBD: not implemented
+                          RETURN NEW;
+                          END IF;
+                          -- else TG_OP = DELETE
+                          DELETE FROM #{uri_rel}
+                          WHERE #{uri_id} = OLD.id OR #{parent_id} = OLD.id;
+                          RETURN OLD;
+                       END",
+                       returns: 'trigger', language: 'plpgsql'
     end
 
     def create_table_common_fields_trigger?(db_rel)
-      create_trigger?(db_rel,ELEMENT_UPDATE_TRIGGER[:fn],ELEMENT_UPDATE_TRIGGER,each_row: true)
+      create_trigger?(db_rel, ELEMENT_UPDATE_TRIGGER[:fn], ELEMENT_UPDATE_TRIGGER, each_row: true)
     end
 
-    def create_trigger(db_rel,trigger_name,db_fn,opts={})
+    def create_trigger(db_rel, trigger_name, db_fn, opts = {})
       trigger_fn = fully_qualified_fn_name(db_fn)
-      @db.create_trigger(db_rel.schema_table_symbol,trigger_name,trigger_fn,opts)
+      @db.create_trigger(db_rel.schema_table_symbol, trigger_name, trigger_fn, opts)
       nil
     end
 
-    def trigger_exists?(db_rel,trigger_name)
+    def trigger_exists?(db_rel, trigger_name)
       x = ret_schema_and_table(db_rel)
       query = "SELECT count(*) FROM pg_trigger t, pg_class r, pg_namespace s
          WHERE t.tgrelid = r.oid AND r.relnamespace = s.oid AND
-	       t.tgname = '#{trigger_name}' AND r.relname = '#{x[:table]}' AND s.nspname = '#{x[:schema]}'"
-      db_fetch(query) {|r| return r[:count] == 1 ? true : nil}
+         t.tgname = '#{trigger_name}' AND r.relname = '#{x[:table]}' AND s.nspname = '#{x[:schema]}'"
+      db_fetch(query) { |r| return r[:count] == 1 ? true : nil }
     end
 
-    def create_trigger?(db_rel,trigger_name,trigger_fn,opts={})
-      create_trigger(db_rel,trigger_name,trigger_fn,opts) if !trigger_exists?(db_rel,trigger_name)
+    def create_trigger?(db_rel, trigger_name, trigger_fn, opts = {})
+      create_trigger(db_rel, trigger_name, trigger_fn, opts) unless trigger_exists?(db_rel, trigger_name)
       nil
     end
 
@@ -112,20 +112,20 @@ module XYZ
     end
 
     def schema_exists?(schema_name)
-      @db.from(:pg_namespace).where(nspname: schema_name.to_s).empty? ?  nil : true
+      @db.from(:pg_namespace).where(nspname: schema_name.to_s).empty? ? nil : true
     end
 
     def create_language(language_name)
       @db.create_language(language_name)
       nil
     end
- 
+
     def language_exists?(language_name)
-      @db.from(:pg_language).where(lanname: language_name.to_s).empty? ?  nil : true
+      @db.from(:pg_language).where(lanname: language_name.to_s).empty? ? nil : true
     end
 
     def create_language?(language_name)
-      create_language(language_name) if !language_exists?(language_name)
+      create_language(language_name) unless language_exists?(language_name)
       nil
     end
 
@@ -134,64 +134,64 @@ module XYZ
       query = "SELECT count(*) FROM pg_proc, pg_namespace
            WHERE proname = '#{x[:fn]}' AND nspname = '#{x[:schema]}' AND
                   pg_proc.pronamespace = pg_namespace.oid"
-       db_fetch(query) {|r| return r[:count] == 1 ? true : nil}
+       db_fetch(query) { |r| return r[:count] == 1 ? true : nil }
     end
 
-    def create_function(db_fn,definition,opts={})
-      @db.create_function(fully_qualified_fn_name(db_fn),definition,opts)
-      nil
-    end 		   
-
-    def create_function?(db_fn,definition,opts={})
-      create_function(db_fn,definition,opts) if !function_exists?(db_fn)
+    def create_function(db_fn, definition, opts = {})
+      @db.create_function(fully_qualified_fn_name(db_fn), definition, opts)
       nil
     end
 
-    def column_exists?(db_rel,column)
+    def create_function?(db_fn, definition, opts = {})
+      create_function(db_fn, definition, opts) unless function_exists?(db_fn)
+      nil
+    end
+
+    def column_exists?(db_rel, column)
       r = ret_schema_and_table(db_rel)
       query = "SELECT count(*)
                FROM  pg_class rel, pg_namespace s, pg_attribute col
-               WHERE rel.relnamespace =  s.oid AND 
+               WHERE rel.relnamespace =  s.oid AND
                      s.nspname = '#{r[:schema]}' AND rel.relname = '#{r[:table]}' AND
                      col.attrelid = rel.oid AND
                      col.attname = '#{column}'"
-      db_fetch(query) {|r| return r[:count] == 1 ? true : nil}
+      db_fetch(query) { |r| return r[:count] == 1 ? true : nil }
     end
 
-    def foreign_key_exists?(db_rel,foreign_key_field,db_rel_pointed_to)
+    def foreign_key_exists?(db_rel, foreign_key_field, db_rel_pointed_to)
       r = ret_schema_and_table(db_rel)
       p = ret_schema_and_table(db_rel_pointed_to)
       query = "SELECT count(*)
-               FROM pg_constraint fk, pg_class rel, pg_class parent_rel, pg_attribute f, 
+               FROM pg_constraint fk, pg_class rel, pg_class parent_rel, pg_attribute f,
                     pg_namespace rel_s,pg_namespace parent_rel_s
                WHERE fk.contype = 'f' AND fk.conrelid = rel.oid AND
                      fk.confrelid = parent_rel.oid AND
                      fk.conkey[1] = f.attnum AND f.attrelid = rel.oid AND
                      rel.relnamespace =  rel_s.oid AND parent_rel.relnamespace = parent_rel_s.oid AND
                      rel_s.nspname = '#{r[:schema]}' AND rel.relname = '#{r[:table]}' AND
-		     parent_rel_s.nspname = '#{p[:schema]}' AND parent_rel.relname = '#{p[:table]}' AND
-		     f.attname = '#{foreign_key_field}'"
-      db_fetch(query) {|r| return r[:count] == 1 ? true : nil}
+         parent_rel_s.nspname = '#{p[:schema]}' AND parent_rel.relname = '#{p[:table]}' AND
+         f.attname = '#{foreign_key_field}'"
+      db_fetch(query) { |r| return r[:count] == 1 ? true : nil }
     end
 
-    def create_sequence(seq_name,type)
-      max_value = 
+    def create_sequence(seq_name, type)
+      max_value =
         case type
           when :integer
-            9223372036854775807 
+            9223372036854775807
           when :bigint
             9223372036854775807
-      	end
+        end
 
-      raise Error::NotImplemented.new("sequence for type #{type}") if max_value.nil?
+      fail Error::NotImplemented.new("sequence for type #{type}") if max_value.nil?
 
       seq_qualified_name = fully_qualified_fn_name(seq_name)
       db_run "CREATE SEQUENCE #{seq_qualified_name}
                INCREMENT 1
-  	       MINVALUE 1
-  	       MAXVALUE #{max_value}
-  	       START 1
-  	       CACHE 1"
+           MINVALUE 1
+           MAXVALUE #{max_value}
+           START 1
+           CACHE 1"
       nil
     end
 
@@ -201,41 +201,41 @@ module XYZ
                FROM  pg_class rel, pg_namespace s
                WHERE rel.relnamespace =  s.oid AND rel.relkind = 'S' AND
                      s.nspname = '#{r[:schema]}' AND rel.relname = '#{r[:fn]}'"
-     db_fetch(query) {|r| return r[:count] == 1 ? true : nil}
+     db_fetch(query) { |r| return r[:count] == 1 ? true : nil }
     end
 
-    def create_sequence?(seq_name,type)
-      create_sequence(seq_name,type) unless sequence_exists?(seq_name)
+    def create_sequence?(seq_name, type)
+      create_sequence(seq_name, type) unless sequence_exists?(seq_name)
     end
 
     def fully_qualified_fn_name(fn)
-      fn.is_a?(Hash) ? (fn[:schema].to_s +  "." + fn[:fn].to_s) : fn
+      fn.is_a?(Hash) ? (fn[:schema].to_s + '.' + fn[:fn].to_s) : fn
     end
 
     public
-    
+
     def fully_qualified_rel_name(rel)
-      rel.is_a?(Hash) ? (rel[:schema].to_s +  "." + rel[:table].to_s) : rel
+      rel.is_a?(Hash) ? (rel[:schema].to_s + '.' + rel[:table].to_s) : rel
     end
 
     private
 
-    def execute_function_aux(fn_name,*args)
+    def execute_function_aux(fn_name, *args)
       @db.get("#{FUNCTION_SCHEMA}.#{fn_name}".to_sym.sql_function(*args))
     end
 
     def ret_schema_and_table(rel)
-      rel.is_a?(Hash) ? rel : {schema: :public, table: rel}
+      rel.is_a?(Hash) ? rel : { schema: :public, table: rel }
     end
 
     def ret_schema_and_fn(fn)
-      fn.is_a?(Hash) ? fn : {schema: :public, fn: :fn}
+      fn.is_a?(Hash) ? fn : { schema: :public, fn: :fn }
     end
     #####custom functions
     def create_custom_function__append_to_array_value?
       fn_args =
         [
-         {schema: FUNCTION_SCHEMA,fn: :append_to_array_value},
+         { schema: FUNCTION_SCHEMA, fn: :append_to_array_value },
          "DECLARE
     arr varchar[];
     ret integer;
@@ -258,10 +258,10 @@ module XYZ
    RETURN ret;
   END",
          {
-           returns: :integer, 
-           language: "plpgsql",
-           behavior: :VOLATILE, 
-           args: [{_c: :integer}, {_id: ID_TYPES[:id]},{_vals_to_app: :varchar}]
+           returns: :integer,
+           language: 'plpgsql',
+           behavior: :VOLATILE,
+           args: [{ _c: :integer }, { _id: ID_TYPES[:id] }, { _vals_to_app: :varchar }]
          }
         ]
       create_function?(*fn_args)

@@ -17,11 +17,11 @@ module DTK; class ModuleRef
             object[:version_info]
           end
 
-         if version_string 
-           if ModuleVersion::Semantic.legal_format?(version_string)  
+         if version_string
+           if ModuleVersion::Semantic.legal_format?(version_string)
              new(version_string)
            else
-            raise Error.new("Unexpected form of version string (#{version_string})")
+            fail Error.new("Unexpected form of version string (#{version_string})")
           end
         end
       end
@@ -36,20 +36,20 @@ module DTK; class ModuleRef
         if is_scalar?() then is_scalar?()
         elsif empty? then nil
         else
-          raise Error.new("Not treating the version type (#{ret.inspect})")
+          fail Error.new("Not treating the version type (#{ret.inspect})")
         end
       end
 
-      def self.reify?(constraint=nil)
+      def self.reify?(constraint = nil)
         if constraint.nil? then new()
         elsif constraint.is_a?(Constraint) then constraint
         elsif constraint.is_a?(String) then new(constraint)
-        elsif constraint.is_a?(Hash) && constraint.size == 1 && constraint.keys.first == "namespace"
+        elsif constraint.is_a?(Hash) && constraint.size == 1 && constraint.keys.first == 'namespace'
           # MOD_RESTRUCT: TODO: need to decide if depracting 'namespace' key
           Log.info("Ignoring constraint of form (#{constraint.inspect})")
           new()
         else
-          raise Error.new("Constraint of form (#{constraint.inspect}) not treated")
+          fail Error.new("Constraint of form (#{constraint.inspect}) not treated")
         end
       end
 
@@ -79,7 +79,7 @@ module DTK; class ModuleRef
 
       private
 
-      def initialize(scalar=nil)
+      def initialize(scalar = nil)
         @type = (scalar ? :scalar : :empty)
         @value = scalar
       end

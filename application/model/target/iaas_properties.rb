@@ -1,9 +1,9 @@
 module DTK
   class Target
     class IAASProperties
-      r8_nested_require('iaas_properties','ec2')
+      r8_nested_require('iaas_properties', 'ec2')
       attr_reader :name
-      # IAASProperties.new will be called with 
+      # IAASProperties.new will be called with
       #  :name and :iaas_properties, or with
       # :target_instance
       def initialize(hash_args)
@@ -13,10 +13,10 @@ module DTK
       end
 
       def properties
-        iaas_properties()        
+        iaas_properties()
       end
 
-      def self.sanitize_and_modify_for_print_form!(type,iaas_properties)
+      def self.sanitize_and_modify_for_print_form!(type, iaas_properties)
         unless type.nil? || iaas_properties.nil?
           case type.to_sym
            when :ec2
@@ -26,7 +26,7 @@ module DTK
         end
       end
 
-      def self.more_specific_type?(type,iaas_properties)
+      def self.more_specific_type?(type, iaas_properties)
         unless type.nil? || iaas_properties.nil?
           case type.to_sym
           when :ec2
@@ -35,17 +35,17 @@ module DTK
         end
       end
 
-      def self.check(iaas_type,iaas_properties,opts={})
-        CommandAndControl.check_iaas_properties(iaas_type,iaas_properties,opts)
+      def self.check(iaas_type, iaas_properties, opts = {})
+        CommandAndControl.check_iaas_properties(iaas_type, iaas_properties, opts)
       end
-      
+
       def hash
         iaas_properties()
       end
 
       def type
         unless ret = @target_instance.get_field?(:iaas_type)
-          Log.error("Expected that :iaas_type has a value")
+          Log.error('Expected that :iaas_type has a value')
         end
         ret && ret.to_sym
       end
@@ -55,16 +55,15 @@ module DTK
       end
 
       def iaas_properties
-        @iaas_properties ||= (@target_instance && @target_instance.get_field?(:iaas_properties))||{}
+        @iaas_properties ||= (@target_instance && @target_instance.get_field?(:iaas_properties)) || {}
       end
 
       def self.equal?(i2)
         case type()
           when :ec2 then Ec2.equal?(i2)
-          else raise Error.new("Unexpected iaas_properties type (#{type})")
+          else fail Error.new("Unexpected iaas_properties type (#{type})")
         end
       end
     end
   end
 end
-

@@ -10,10 +10,10 @@ module DTK; class Node
           data_type: 'json',
           value_derived: [nil],
           semantic_type_summary: 'host_address_ipv4',
-          display_name: "host_addresses_ipv4",
+          display_name: 'host_addresses_ipv4',
           dynamic: true,
           hidden: true,
-          semantic_type: {':array'=>'host_address_ipv4'}
+          semantic_type: { ':array' => 'host_address_ipv4' }
         }
       end
 
@@ -26,7 +26,7 @@ module DTK; class Node
           data_type: 'string',
           display_name: 'fqdn',
           dynamic: true,
-          hidden: true,
+          hidden: true
         }
       end
 
@@ -39,7 +39,7 @@ module DTK; class Node
           data_type: 'json',
           display_name: 'node_components',
           dynamic: true,
-          hidden: true,
+          hidden: true
         }
       end
     end

@@ -7,16 +7,16 @@ module DTK
       #  ::YAML.dump(simple_form)
       yaml_dump(simple_form)
     end
-    
-    def self.parse(content,opts={})
+
+    def self.parse(content, opts = {})
       ret = {}
       if content.empty?
         ret
       else
-        begin 
+        begin
           ::YAML.load(content)
          rescue Exception => e
-          ErrorUsage::Parsing::YAML.new("YAML #{e} in file",opts[:file_path])
+          ErrorUsage::Parsing::YAML.new("YAML #{e} in file", opts[:file_path])
         end
       end
     end
@@ -26,16 +26,16 @@ module DTK
     def self.yaml_dump(o)
       visitor = Psych::Visitors::YAMLTree.new
       visitor << o
-      visitor.tree.yaml 
+      visitor.tree.yaml
     end
 
     def self.simple_form_aux(obj)
       if obj.is_a?(::Hash)
         ret = ::Hash.new
-        obj.each_pair{|k,v|ret[string_form(k.to_s)] = simple_form_aux(v)}
+        obj.each_pair { |k, v| ret[string_form(k.to_s)] = simple_form_aux(v) }
         ret
       elsif obj.is_a?(::Array)
-        obj.map{|el|simple_form_aux(el)}
+        obj.map { |el| simple_form_aux(el) }
       elsif obj.is_a?(::String)
         string_form(obj)
       elsif obj.is_a?(::Fixnum)
@@ -46,7 +46,7 @@ module DTK
         obj
       elsif obj.respond_to?(:to_s)
         string_form(obj.to_s)
-      else 
+      else
         string_form(obj.inspect)
       end
     end

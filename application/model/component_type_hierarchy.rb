@@ -7,14 +7,14 @@ module XYZ
         db_server: {
           postgres_db_server: {},
           mysql_db_server: {},
-          oracle_db_server: {},
+          oracle_db_server: {}
         },
         monitoring_server: {},
         monitoring_agent: {},
         msg_bus: {},
         memory_cache: {},
         load_balancer: {},
-        firewall: {},
+        firewall: {}
       },
 
       language: {
@@ -23,19 +23,19 @@ module XYZ
         perl: {},
         javascript: {},
         java: {},
-        clojure: {},
+        clojure: {}
       },
 
       application: {
         java_app: {
-          java_spring: {},
+          java_spring: {}
         },
         ruby_app: {
           ruby_rails: {},
           ruby_ramaze: {},
-          ruby_sinatra: {},
+          ruby_sinatra: {}
         },
-        php_app: {},
+        php_app: {}
       },
 
       extension: {},
@@ -43,7 +43,7 @@ module XYZ
       database: {
         postgres_db: {},
         mysql_db: {},
-        oracle_db: {},
+        oracle_db: {}
       },
 
       user: {}
@@ -64,7 +64,7 @@ module XYZ
       ret = []
       basic_type = component.update_object!(:basic_type)[:basic_type]
       return ret unless basic_type
-      TypeHierarchyPossLinkDefs[basic_type.to_sym]||[]
+      TypeHierarchyPossLinkDefs[basic_type.to_sym] || []
     end
 
     def self.basic_type(specific_type)
@@ -84,30 +84,30 @@ module XYZ
     end
 
     def self.add_to_subclass(sub)
-      subclass_name = Aux::demodulize(sub.to_s)
+      subclass_name = Aux.demodulize(sub.to_s)
       (@subclass_names ||= []).push(subclass_name).uniq!
     end
-    def self.subclass_names
-      @subclass_names
+    class << self
+      attr_reader :subclass_names
     end
 
     def self.ret_basic_type
-      @basic_type ||= TypeHierarchy.inject({}){|h,kv|h.merge(ret_basic_type_aux(kv[0],kv[1]))}
+      @basic_type ||= TypeHierarchy.inject({}) { |h, kv| h.merge(ret_basic_type_aux(kv[0], kv[1])) }
     end
 
-    def self.ret_basic_type_aux(basic_type,hier)
-      keys_in_hierarchy(hier).inject({}){|h,x| h.merge(x => basic_type)}
+    def self.ret_basic_type_aux(basic_type, hier)
+      keys_in_hierarchy(hier).inject({}) { |h, x| h.merge(x => basic_type) }
     end
 
     def self.keys_in_hierarchy(hier)
-      hier.inject([]){|a,kv|a + [kv[0]] + keys_in_hierarchy(kv[1])}
+      hier.inject([]) { |a, kv| a + [kv[0]] + keys_in_hierarchy(kv[1]) }
     end
 
-    def self.find_hierarchy_under_key(key,hier=TypeHierarchy)
+    def self.find_hierarchy_under_key(key, hier = TypeHierarchy)
       return nil if hier.empty?
       return hier[key] if hier[key]
       hier.values.each do |child|
-        ret = find_hierarchy_under_key(key,child)
+        ret = find_hierarchy_under_key(key, child)
         return ret if ret
       end
       nil
@@ -131,7 +131,7 @@ module XYZ
 
   module ComponentType
     def self.ret_class(type)
-      klass_name = Aux::camelize(type.to_s)
+      klass_name = Aux.camelize(type.to_s)
       return nil unless ComponentTypeHierarchy.subclass_names().include?(klass_name)
       const_get(klass_name)
     end
@@ -145,14 +145,14 @@ module XYZ
     # dynamically create all other classes not explicitly defined
     def self.all_keys(x)
       return [] unless x.is_a?(Hash)
-      x.keys + x.values.map{|el|all_keys(el)}.flatten
+      x.keys + x.values.map { |el| all_keys(el) }.flatten
     end
     existing_subclass_names = ComponentTypeHierarchy.subclass_names()
     include TypeHierarchyDefMixin
     all_keys(TypeHierarchy).each do |key|
-      klass_name = Aux::camelize(key)
+      klass_name = Aux.camelize(key)
       unless existing_subclass_names.include?(klass_name)
-        ComponentTypeHierarchy.add_to_subclass(const_set(klass_name,Class.new(ComponentTypeHierarchy)) )
+        ComponentTypeHierarchy.add_to_subclass(const_set(klass_name, Class.new(ComponentTypeHierarchy)))
       end
     end
   end

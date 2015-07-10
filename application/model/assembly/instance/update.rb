@@ -21,5 +21,5 @@ module DTK; class Assembly; class Instance
       class Delete < self
       end
     end
-  end                               
+  end
 end; end; end

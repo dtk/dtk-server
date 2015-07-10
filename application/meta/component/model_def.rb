@@ -22,20 +22,19 @@
         size: 15
     },
     has_pending_change: {
-        type: :boolean,
+        type: :boolean
     },
     version: {
         type: :text,
-        size: 25,
+        size: 25
     },
     uri: {
-        type: :text,
+        type: :text
     },
     ui: {
-        type: :json,
-    },
+        type: :json
+    }
   },
   relationships: {
   }
 }
-

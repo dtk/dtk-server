@@ -1,13 +1,13 @@
-module DTK; class Task 
+module DTK; class Task
   class Template
     class TemporalConstraint
-      r8_nested_require('temporal_constraint','config_component')
-      def initialize(before_action,after_action)
+      r8_nested_require('temporal_constraint', 'config_component')
+      def initialize(before_action, after_action)
         @before_action = before_action
         @after_action = after_action
       end
 
-      attr_reader :before_action,:after_action
+      attr_reader :before_action, :after_action
 
       # subclasses override
       def intra_node?

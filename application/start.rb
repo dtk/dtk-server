@@ -13,7 +13,7 @@ unless is_development
   Ramaze::Log.loggers = [rotating_logger]
   Ramaze::Log.level = Logger::DEBUG
 else
-  puts "**** DEVELOPMENT MODE - NO LOGS ****"
+  puts '**** DEVELOPMENT MODE - NO LOGS ****'
 end
 
 # require 'rack/contrib'

@@ -1,7 +1,7 @@
 module DTK; class ModuleRefs
   class Lock
     class MissingInformation < self
-      def initialize(assembly_instance,missing,complete,types,opts)
+      def initialize(assembly_instance, missing, complete, types, opts)
         super(assembly_instance)
         @missing = missing
         @complete = complete
@@ -12,30 +12,30 @@ module DTK; class ModuleRefs
       # types will be subset of [:locked_dependencies,:locked_branch_shas]
       # opts can have
       #  :with_module_branches - Boolean
-      def self.missing_information?(module_refs_lock,types,opts={})
+      def self.missing_information?(module_refs_lock, types, opts = {})
         # partition into rows that are missing info and ones that are not
         missing = {}
         complete = {}
-        module_refs_lock.each_pair do |module_name,module_ref_lock|
-          if el_missing_information?(module_ref_lock,types,opts)
+        module_refs_lock.each_pair do |module_name, module_ref_lock|
+          if el_missing_information?(module_ref_lock, types, opts)
             missing[module_name] = module_ref_lock
           else
             complete[module_name] = module_ref_lock
           end
         end
         unless missing.empty?
-          new(module_refs_lock.assembly_instance,missing,complete,types,opts)
+          new(module_refs_lock.assembly_instance, missing, complete, types, opts)
         end
       end
 
       def fill_in_missing_information
-        pp [:fill_in_missing_information,self]
-        raise Error.new("Need to write fill_in_missing_information")
+        pp [:fill_in_missing_information, self]
+        fail Error.new('Need to write fill_in_missing_information')
       end
 
       private
 
-      def self.el_missing_information?(module_ref_lock,types,opts={})
+      def self.el_missing_information?(module_ref_lock, types, opts = {})
         if types.include?(:locked_dependencies)
           unless info = module_ref_lock.info
             return true
@@ -48,7 +48,7 @@ module DTK; class ModuleRefs
         end
         if types.include?(:locked_branch_shas)
           unless module_ref_lock.locked_branch_sha
-            return true 
+            return true
           end
         end
         false
@@ -56,4 +56,3 @@ module DTK; class ModuleRefs
     end
   end
 end; end
-

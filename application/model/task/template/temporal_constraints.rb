@@ -1,17 +1,17 @@
-module DTK; class Task 
+module DTK; class Task
   class Template
     class TemporalConstraints < Array
-      r8_nested_require('temporal_constraints','config_components')
+      r8_nested_require('temporal_constraints', 'config_components')
 
       def +(temporal_contraints)
         ret = self.class.new(self)
-        temporal_contraints.each{|a|ret << a}
+        temporal_contraints.each { |a| ret << a }
         ret
       end
 
       def select(&body)
         ret = self.class.new()
-        each{|r|ret << r if body.call(r)}
+        each { |r| ret << r if body.call(r) }
         ret
       end
 
@@ -21,38 +21,38 @@ module DTK; class Task
       end
       # only uses a constraint if both members belong to action_list
       def create_before_index_hash(action_list)
-        action_indexes =  action_list.map{|a|a.index}
+        action_indexes =  action_list.map(&:index)
         ret = BeforeIndexHash.new(action_indexes)
         each do |constraint|
           after_action_index = constraint.after_action_index
-          before_action_index = constraint.before_action_index 
+          before_action_index = constraint.before_action_index
           if action_indexes.include?(after_action_index) && action_indexes.include?(before_action_index)
-            ret.add(after_action_index,before_action_index)
+            ret.add(after_action_index, before_action_index)
           end
         end
         ret
       end
-      
+
       private
 
-      def initialize(array=nil)
+      def initialize(array = nil)
         super()
-        array.each{|a|self << a} if array
+        array.each { |a| self << a } if array
         @after_relation = nil
       end
 
       class BeforeIndexHash < Hash
         def initialize(action_indexes)
           super()
-          action_indexes.each{|action_index|self[action_index] = {}}
+          action_indexes.each { |action_index| self[action_index] = {} }
         end
 
-        def add(after_action_index,before_action_index)
+        def add(after_action_index, before_action_index)
           self[after_action_index][before_action_index] = true
         end
-        
+
         def tsort_form
-          inject(TSortHash.new) do |h,(after_index,index_info)|
+          inject(TSortHash.new) do |h, (after_index, index_info)|
             h.merge(after_index => index_info.keys)
           end
         end
@@ -80,4 +80,3 @@ module DTK; class Task
     end
   end
 end; end
-

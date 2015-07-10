@@ -2,16 +2,16 @@ require 'ruote'
 module DTK
   module WorkflowAdapter
     class Ruote < DTK::Workflow
-      r8_nested_require('ruote','task_info')
-      r8_nested_require('ruote','participant')
-      r8_nested_require('ruote','generate_process_defs')
+      r8_nested_require('ruote', 'task_info')
+      r8_nested_require('ruote', 'participant')
+      r8_nested_require('ruote', 'generate_process_defs')
       class Worker < ::Ruote::Worker
         def run_in_thread
           Thread.abort_on_exception = true
           @running = true
 
           user_object  = ::DTK::CurrentSession.new.user_object()
-          @run_thread = CreateThread.defer_with_session(user_object, Ramaze::Current::session) { run }
+          @run_thread = CreateThread.defer_with_session(user_object, Ramaze::Current.session) { run }
         end
       end
 
@@ -23,7 +23,7 @@ module DTK
       # register all the classes
       ParticipantList = []
       ObjectSpace.each_object(Module) do |m|
-        next unless m.ancestors.include?(Top) &&  m != Top
+        next unless m.ancestors.include?(Top) && m != Top
         participant = Aux.underscore(Aux.demodulize(m.to_s)).to_sym
         ParticipantList << participant
         Engine.register_participant participant, m
@@ -51,12 +51,12 @@ module DTK
           if errors.nil? || errors.empty?
             Log.info_pp :normal_completion
           else
-            Log.error "-------- intercepted errors ------"
+            Log.error '-------- intercepted errors ------'
             errors.each  do |e|
               Log.error_pp e.message
               Log.error_pp e.trace.split("\n")
             end
-            Log.error "-------- end: intercepted errors ------"
+            Log.error '-------- end: intercepted errors ------'
 
             # different ways to continue
             # one way is "fix error " ; engine.replay_at_error(err); engine.wait_for(@wfid)
@@ -64,8 +64,8 @@ module DTK
             # Engine.cancel_process(@wfid)
           end
          rescue Exception => e
-          Log.error_pp "error trap in ruote#execute"
-          Log.error_pp [e,e.backtrace[0..50]]
+          Log.error_pp 'error trap in ruote#execute'
+          Log.error_pp [e, e.backtrace[0..50]]
          # TODO: if do following Engine.cancel_process(@wfid), need to update task; somhow need to detrmine what task triggered this
          ensure
           TaskInfo.clean(top_task_id)
@@ -81,7 +81,7 @@ module DTK
       end
 
       def process_def
-        @process_def ||= compute_process_def(@top_task,@guards[:external])
+        @process_def ||= compute_process_def(@top_task, @guards[:external])
       end
     end
   end

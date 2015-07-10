@@ -16,15 +16,15 @@ module XYZ
 
       return obj unless obj.is_a?(Hash) || obj.is_a?(Array)
       if obj.is_a?(Array)
-        obj.map{|x|ret_ordered_object(x)}
+        obj.map { |x| ret_ordered_object(x) }
       else
         ordered_hash = ActiveSupport::OrderedHash.new()
-        sorted_keys(obj.keys).each{|key|ordered_hash[key] = ret_ordered_object(obj[key])}
+        sorted_keys(obj.keys).each { |key| ordered_hash[key] = ret_ordered_object(obj[key]) }
         ordered_hash
       end
     end
     def self.sorted_keys(keys)
-      keys.sort{|a,b|a.to_s <=> b.to_s}
+      keys.sort { |a, b| a.to_s <=> b.to_s }
     end
   end
 end

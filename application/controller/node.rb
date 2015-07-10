@@ -37,17 +37,17 @@ module XYZ
       if ret_request_param_boolean(:using_simple_queue)
         respone  = rest_ok_response SimpleActionQueue.get_results(action_results_id)
       else
-        response = rest_ok_response ActionResultsQueue.get_results(action_results_id,ret_only_if_complete,disable_post_processing)
+        response = rest_ok_response ActionResultsQueue.get_results(action_results_id, ret_only_if_complete, disable_post_processing)
       end
 
-      return response
+      response
     end
 
     #### create and delete actions ###
     def rest__add_component
       node = create_node_obj(:node_id)
       component_template, component_title = ret_component_template_and_title(:component_template_name)
-      new_component_idh = node.add_component(component_template,component_title: component_title)
+      new_component_idh = node.add_component(component_template, component_title: component_title)
       rest_ok_response(component_id: new_component_idh.get_id())
     end
 
@@ -55,7 +55,7 @@ module XYZ
       node = create_node_obj(:node_id)
       # not checking here if component_id points to valid object; check is in delete_component
       component_id = ret_non_null_request_params(:component_id)
-      node.delete_component(id_handle(component_id,:component))
+      node.delete_component(id_handle(component_id, :component))
       rest_ok_response
     end
 
@@ -79,7 +79,7 @@ module XYZ
       queue = SimpleActionQueue.new
 
       user_object  = ::DTK::CurrentSession.new.user_object()
-      CreateThread.defer_with_session(user_object, Ramaze::Current::session) do
+      CreateThread.defer_with_session(user_object, Ramaze::Current.session) do
         # invoking command to start the nodes
         CommandAndControl.start_instances(nodes)
 
@@ -118,7 +118,7 @@ module XYZ
         return nodes, false, "There are no #{status_pattern} nodes with id '#{nodes.first[:id]}'"
       end
 
-      return nodes, true, nil
+      [nodes, true, nil]
     end
 
     #### end: create and delete actions ###
@@ -133,30 +133,30 @@ module XYZ
     end
 
     def rest__info
-      node,subtype = ret_node_params_object_and_subtype()
+      node, subtype = ret_node_params_object_and_subtype()
        unless subtype == :instance
-         raise ErrorUsage::BadParamValue.new(:subtype,subtype)
+         fail ErrorUsage::BadParamValue.new(:subtype, subtype)
        end
       rest_ok_response node.info(print_form: true), encode_into: :yaml
     end
 
     def rest__info_about
-      node,subtype = ret_node_params_object_and_subtype()
+      node, subtype = ret_node_params_object_and_subtype()
       about = ret_non_null_request_params(:about).to_sym
        unless AboutEnum[subtype].include?(about)
-         raise ErrorUsage::BadParamValue.new(:about,AboutEnum[subtype])
+         fail ErrorUsage::BadParamValue.new(:about, AboutEnum[subtype])
        end
       rest_ok_response node.info_about(about)
     end
     AboutEnum = {
-      instance: [:components,:attributes],
+      instance: [:components, :attributes],
       #      :template => [:nodes,:components,:targets]
     }
 
     def rest__get_attributes
       node = create_node_obj(:node_id)
       filter = ret_request_params(:filter)
-      opts = (filter ?  {filter: filter.to_sym} : {})
+      opts = (filter ? { filter: filter.to_sym } : {})
       rest_ok_response node.get_attributes_print_form(opts)
     end
 
@@ -180,13 +180,13 @@ module XYZ
     def rest__stage
       target = create_target_instance_with_default(:target_id)
       unless node_binding_rs = node_binding_ruleset?(:node_template_identifier)
-        raise ErrorUsage.new("Missing node template identifier")
+        fail ErrorUsage.new('Missing node template identifier')
       end
       opts = {}
       if node_name = ret_request_params(:name)
-        opts[:override_attrs] = {display_name: node_name}
+        opts[:override_attrs] = { display_name: node_name }
       end
-      node_instance_idh = node_binding_rs.clone_or_match(target,opts)
+      node_instance_idh = node_binding_rs.clone_or_match(target, opts)
       rest_ok_response node_id: node_instance_idh.get_id()
     end
 
@@ -194,16 +194,16 @@ module XYZ
       node = create_node_obj(:node_id)
       violation_objects = node.find_violations()
       violation_table = violation_objects.map do |v|
-        {type: v.type(),description: v.description()}
-      end.sort{|a,b|a[:type].to_s <=> b[:type].to_s}
+        { type: v.type(), description: v.description() }
+      end.sort { |a, b| a[:type].to_s <=> b[:type].to_s }
       rest_ok_response violation_table
     end
 
     def rest__create_task
       node_idh = ret_request_param_id_handle(:node_id)
       commit_msg = ret_request_params(:commit_msg)
-      unless task = Task.create_from_node(node_idh,commit_msg)
-        raise ErrorUsage.new("No changes to converge")
+      unless task = Task.create_from_node(node_idh, commit_msg)
+        fail ErrorUsage.new('No changes to converge')
       end
       task.save!()
       rest_ok_response task_id: task.id
@@ -211,22 +211,22 @@ module XYZ
 
     def rest__task_status
       node_idh = ret_request_param_id_handle(:node_id)
-      format = (ret_request_params(:format)||:hash).to_sym
-      rest_ok_response Task::Status::Node.get_status(node_idh,format: format)
+      format = (ret_request_params(:format) || :hash).to_sym
+      rest_ok_response Task::Status::Node.get_status(node_idh, format: format)
     end
     #### end: creates tasks to execute/converge assemblies and monitor status
 
     def rest__image_upgrade
-      old_image_id,new_image_id = ret_non_null_request_params(:old_image_id,:new_image_id)
-      Node::Template.image_upgrade(model_handle(),old_image_id,new_image_id)
+      old_image_id, new_image_id = ret_non_null_request_params(:old_image_id, :new_image_id)
+      Node::Template.image_upgrade(model_handle(), old_image_id, new_image_id)
       rest_ok_response
     end
 
     def rest__add_node_template
       target = create_target_instance_with_default(:target_id)
-      node_template_name,image_id = ret_non_null_request_params(:node_template_name,:image_id)
-      opts = ret_params_hash(:operating_system,:size_array)
-      Node::Template.create_or_update_node_template(target,node_template_name,image_id,opts)
+      node_template_name, image_id = ret_non_null_request_params(:node_template_name, :image_id)
+      opts = ret_params_hash(:operating_system, :size_array)
+      Node::Template.create_or_update_node_template(target, node_template_name, image_id, opts)
       rest_ok_response
     end
 
@@ -245,4 +245,3 @@ module XYZ
     end
   end
 end
-

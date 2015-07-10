@@ -1,5 +1,5 @@
 module DTK; class LinkDef::Context
-  class Value 
+  class Value
     module AttributeMixin
       def set_attribute_value!(attribute)
         @attribute = attribute
@@ -24,7 +24,7 @@ module DTK; class LinkDef::Context
       def service_node_group_cache
         ret = node()
         unless ret.is_node_group?()
-          raise Error.new("Shoud not be called if not node group")
+          fail Error.new('Shoud not be called if not node group')
         end
         ret
       end

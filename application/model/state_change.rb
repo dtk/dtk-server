@@ -1,9 +1,9 @@
 module DTK
   class StateChange < Model
-    r8_nested_require('state_change','get_pending_changes')
-    r8_nested_require('state_change','create')
-    r8_nested_require('state_change','assembly')
-    r8_nested_require('state_change','node_centric')
+    r8_nested_require('state_change', 'get_pending_changes')
+    r8_nested_require('state_change', 'create')
+    r8_nested_require('state_change', 'assembly')
+    r8_nested_require('state_change', 'node_centric')
 
     extend GetPendingChangesClassMixin
     extend CreateClassMixin
@@ -14,19 +14,19 @@ module DTK
       ndx_ret = {}
       pending_changes.each do |ch|
         node_id = ch[:node][:id]
-        node = ndx_ret[node_id] ||= {node_id: node_id, node_name: ch[:node][:display_name], node_changes: [], ndx_cmp_changes: {}} 
-        if ch[:type] == "create_node"
-          node[:node_changes] << {name: ret_display_name(ch)}
+        node = ndx_ret[node_id] ||= { node_id: node_id, node_name: ch[:node][:display_name], node_changes: [], ndx_cmp_changes: {} }
+        if ch[:type] == 'create_node'
+          node[:node_changes] << { name: ret_display_name(ch) }
         else
           cmp_id = ch[:component][:id]
-          cmp = node[:ndx_cmp_changes][cmp_id] ||= {component_id: cmp_id, component_name: ch[:component][:display_name], changes: []}
+          cmp = node[:ndx_cmp_changes][cmp_id] ||= { component_id: cmp_id, component_name: ch[:component][:display_name], changes: [] }
           # TODO: stub
           cmp[:changes] << ret_display_name(ch)
         end
       end
       ndx_ret.values.map do |n|
         changes = n[:node_changes] + n[:ndx_cmp_changes].values
-        el = {node_id: n[:node_id], node_name: n[:node_name]}
+        el = { node_id: n[:node_id], node_name: n[:node_name] }
         el.merge!(node_changes: n[:node_changes]) unless n[:node_changes].empty?
         el.merge!(component_changes: n[:ndx_cmp_changes].values) unless n[:ndx_cmp_changes].empty?
         el
@@ -36,7 +36,7 @@ module DTK
     # object processing and access functions
     #######################
     def on_node_config_agent_type
-      ret = (self[:component]||{})[:config_agent_type]
+      ret = (self[:component] || {})[:config_agent_type]
       ret && ret.to_sym
     end
 
@@ -46,20 +46,20 @@ module DTK
     end
 
     def self.state_changes_are_concurrent?(state_change_list)
-      rel_order = state_change_list.map{|x|x[:relative_order]}
+      rel_order = state_change_list.map { |x| x[:relative_order] }
       val = rel_order.shift
-      rel_order.each{|x|return nil unless x == val}
+      rel_order.each { |x| return nil unless x == val }
       true
     end
 
     def self.ret_display_name(flat_pending_ch)
       type = flat_pending_ch[:type]
       node_name = flat_pending_ch[:node][:display_name]
-      suffix = 
+      suffix =
         case type
-         when "create_node"
+         when 'create_node'
           node_name
-         when "install_component", "update_implementation"
+         when 'install_component', 'update_implementation'
           cmp_name = flat_pending_ch[:component][:display_name]
           "#{node_name}:#{cmp_name}"
          else

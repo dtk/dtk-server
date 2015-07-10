@@ -1,6 +1,6 @@
 module XYZ
   class NetworkPartition < Model
-    set_relation_name(:network,:partition)
+    set_relation_name(:network, :partition)
     class << self
       def up
         ds_column_defs :ds_key
@@ -12,7 +12,7 @@ module XYZ
   end
 
   class NetworkGateway < Model
-    set_relation_name(:network,:gateway)
+    set_relation_name(:network, :gateway)
     class << self
       def up
         ds_column_defs :ds_attributes, :ds_key
@@ -27,7 +27,7 @@ module XYZ
 
   # TBD: might move AddressAccessPoint to node or own model file
   class AddressAccessPoint < Model
-    set_relation_name(:network,:address_access_point)
+    set_relation_name(:network, :address_access_point)
     class << self
       def up
         column :network_address, :json #e.g., {:family : "ipv4, :address : "10.4.5.7"} allow family: "dns" :address"

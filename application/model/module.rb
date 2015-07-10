@@ -2,20 +2,20 @@
 # There is overlap between soem service module and otehr moduel code
 # Right now seems intuitive model is that we have
 # two types of modules: service module and the rest, the prime being the component module, and that for the rest there is much similarity
-# for the rest the classes used are 
+# for the rest the classes used are
 module DTK
   # order is important
-  r8_nested_require('module','mixins')
-  r8_nested_require('module','dsl_parser')
-  r8_nested_require('module','external_dependencies')
-  r8_nested_require('module','module_dsl_info') #TODO: this will get deprecated when all move over to update_module_output
-  r8_nested_require('module','update_module_output')
-  r8_nested_require('module','base_module')
-  r8_nested_require('module','component_module')
-  r8_nested_require('module','service')
-  r8_nested_require('module','test')
-  r8_nested_require('module','node')
-  r8_nested_require('module','branch')
-  r8_nested_require('module','version')
-  r8_nested_require('module','assembly_module')
+  r8_nested_require('module', 'mixins')
+  r8_nested_require('module', 'dsl_parser')
+  r8_nested_require('module', 'external_dependencies')
+  r8_nested_require('module', 'module_dsl_info') #TODO: this will get deprecated when all move over to update_module_output
+  r8_nested_require('module', 'update_module_output')
+  r8_nested_require('module', 'base_module')
+  r8_nested_require('module', 'component_module')
+  r8_nested_require('module', 'service')
+  r8_nested_require('module', 'test')
+  r8_nested_require('module', 'node')
+  r8_nested_require('module', 'branch')
+  r8_nested_require('module', 'version')
+  r8_nested_require('module', 'assembly_module')
 end

@@ -1,7 +1,7 @@
 module XYZ
   module DSNormalizer
     class Ec2
-      class NetworkPartition < Top 
+      class NetworkPartition < Top
         definitions do
           target[:display_name] = source[:name]
           target[:description] = source[:description]
@@ -15,4 +15,3 @@ module XYZ
     end
   end
 end
-

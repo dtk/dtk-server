@@ -8,19 +8,19 @@ module DTK; class ModuleBranch
 
       def initialize(local_params)
         super
-        @component_type = local_params[:component_type]||ret_component_type(local_params[:module_type])
+        @component_type = local_params[:component_type] || ret_component_type(local_params[:module_type])
       end
 
       class Server < self
         def create_local(project)
-          Location::Server::Local.new(project,self)
+          Location::Server::Local.new(project, self)
         end
       end
 
       private
 
       def legal_keys
-        [:module_type,:component_type?,:module_name,:version?,:namespace?,:source_name?]
+        [:module_type, :component_type?, :module_name, :version?, :namespace?, :source_name?]
       end
 
       def ret_component_type(_module_type)
@@ -39,7 +39,7 @@ module DTK; class ModuleBranch
 
     class Local < LocalParams
       attr_reader :project
-      def initialize(project,local_params)
+      def initialize(project, local_params)
         super(local_params)
         @project = project
       end

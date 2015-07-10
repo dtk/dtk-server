@@ -1,14 +1,14 @@
 require 'docile'
 module DTK
-  class Attribute 
+  class Attribute
     class SemanticDatatype
       module SemanticDatatypeClassMixin
         def all_types
-          @cache||{}
+          @cache || {}
         end
 
-        def Type(name,&block)
-          el = ::Docile.dsl_eval(new(name),&block).build
+        def Type(name, &block)
+          el = ::Docile.dsl_eval(new(name), &block).build
           @cache ||= {}
           @cache.merge!(name.to_sym => el)
         end
@@ -18,11 +18,11 @@ module DTK
         def basetype(datatype)
           datatype = datatype.to_sym
           unless DataTypes.include?(datatype)
-            raise Error.new("Illegal datatype (#{datatype})")
+            fail Error.new("Illegal datatype (#{datatype})")
           end
           @datatype = datatype
         end
-        DataTypes = [:json,:string,:integer,:integer,:boolean]
+        DataTypes = [:json, :string, :integer, :integer, :boolean]
 
         def parent(parent)
           @parent = parent.to_s
@@ -40,7 +40,7 @@ module DTK
                 v.to_s =~ validation
               end
             else
-              raise Error.new("Illegal validation argument (#{validation.inspect})")
+              fail Error.new("Illegal validation argument (#{validation.inspect})")
             end
         end
 
@@ -50,7 +50,7 @@ module DTK
 
         def build
           unless @datatype
-            raise Error.new("Datatype must be specified")
+            fail Error.new('Datatype must be specified')
           end
           self
         end

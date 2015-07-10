@@ -1,13 +1,13 @@
 module DTK; module CommandAndControlAdapter
   class Ec2::CreateNode; class Processor
     class CreateOptions < ::Hash
-      def initialize(parent,conn,ami)
+      def initialize(parent, conn, ami)
         super()
-        replace(image_id: ami,flavor_id: parent.flavor_id)
+        replace(image_id: ami, flavor_id: parent.flavor_id)
         @conn         = conn
         @target       = parent.target
         @node         = parent.node
-        @external_ref = parent.external_ref||{}
+        @external_ref = parent.external_ref || {}
       end
 
       def update_security_group!
@@ -20,7 +20,7 @@ module DTK; module CommandAndControlAdapter
       end
 
       def update_tags!
-        merge!(tags: {"Name" => ec2_name_tag()})
+        merge!(tags: { 'Name' => ec2_name_tag() })
       end
 
       def update_key_name
@@ -28,9 +28,9 @@ module DTK; module CommandAndControlAdapter
       end
 
       def update_availability_zone!
-        target_availability_zone = (@target[:iaas_properties]||{})[:availability_zone]
+        target_availability_zone = (@target[:iaas_properties] || {})[:availability_zone]
         avail_zone = @external_ref[:availability_zone] ||
-          (@target[:iaas_properties]||{})[:availability_zone] ||
+          (@target[:iaas_properties] || {})[:availability_zone] ||
           R8::Config[:ec2][:availability_zone]
         unless avail_zone.nil? || avail_zone == 'automatic'
           merge!(availability_zone: avail_zone)
@@ -49,7 +49,7 @@ module DTK; module CommandAndControlAdapter
         end
 
         unless iaas_properties = @target[:iaas_properties]
-          Log.error_pp(["Unexpected that @target does not have :iaas_properties",@target])
+          Log.error_pp(['Unexpected that @target does not have :iaas_properties', @target])
           return
         end
 
@@ -58,7 +58,7 @@ module DTK; module CommandAndControlAdapter
         end
 
         unless subnet = iaas_properties[:subnet]
-          Log.error_pp(["Unexpected that @target does not have :iaas_properties",@target])
+          Log.error_pp(['Unexpected that @target does not have :iaas_properties', @target])
           return
         end
 
@@ -68,7 +68,7 @@ module DTK; module CommandAndControlAdapter
       end
 
       def update_block_device_mapping!(image)
-        root_device_override_attrs = {'Ebs.DeleteOnTermination' => 'true'}
+        root_device_override_attrs = { 'Ebs.DeleteOnTermination' => 'true' }
         if root_device_size = @node.attribute.root_device_size()
           root_device_override_attrs.merge!('Ebs.VolumeSize' => root_device_size)
         end
@@ -87,7 +87,7 @@ module DTK; module CommandAndControlAdapter
         if client_token = @external_ref[:client_token]
           self[:client_token] ||= client_token
         else
-          Log.error_pp(["Unexpected that @external_ref does not have client_token", @node,@external_ref])
+          Log.error_pp(['Unexpected that @external_ref does not have client_token', @node, @external_ref])
         end
         self
       end
@@ -96,7 +96,7 @@ module DTK; module CommandAndControlAdapter
 
       def ec2_name_tag
         # TO-DO: move the tenant name definition to server configuration
-        tenant = ::DtkCommon::Aux::running_process_user()
+        tenant = ::DtkCommon::Aux.running_process_user()
         subs = {
           assembly: ec2_name_tag__get_assembly_name(),
           node: @node.get_field?(:display_name),
@@ -106,8 +106,8 @@ module DTK; module CommandAndControlAdapter
         }
         ret = Ec2NameTag[:tag].dup
         Ec2NameTag[:vars].each do |var|
-          val = subs[var]||var.to_s.upcase
-          ret.gsub!(Regexp.new("\\$\\{#{var}\\}"),val)
+          val = subs[var] || var.to_s.upcase
+          ret.gsub!(Regexp.new("\\$\\{#{var}\\}"), val)
         end
         ret
       end
@@ -124,13 +124,12 @@ module DTK; module CommandAndControlAdapter
           node_ref = @node.get_field?(:ref)
           # looking for form base_node_link--ASSEMBLY::NODE-EDLEMENT-NAME
           if node_ref =~ /^base_node_link--([^:]+):/
-            $1
+            Regexp.last_match(1)
           else
-            Log.error_pp(["Unexepected that cannot determine assembly name for node",@node])
+            Log.error_pp(['Unexepected that cannot determine assembly name for node', @node])
           end
         end
       end
-
     end
   end; end
 end; end

@@ -4,12 +4,12 @@ module DTK; class Clone
       private
 
       # TODO: put in equality test so that does not need to do the modify equal objects
-      def self.equal_so_no_modify?(_instance,_template)
+      def self.equal_so_no_modify?(_instance, _template)
         false
       end
 
       def get_ndx_objects(component_idhs)
-        ::DTK::Component::Dependency.get_nested_dependencies(component_idhs).inject({}) do |h,r|
+        ::DTK::Component::Dependency.get_nested_dependencies(component_idhs).inject({}) do |h, r|
           h.merge(r[:id] => r[:dependencies])
         end
       end

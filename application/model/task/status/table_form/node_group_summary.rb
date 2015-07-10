@@ -5,17 +5,17 @@ module DTK; class Task::Status
         @subtasks = subtasks
       end
 
-      def add_summary_info!(ng_table_el,&block_for_subtasks)
+      def add_summary_info!(ng_table_el, &block_for_subtasks)
         @block_for_subtasks = block_for_subtasks
         if status = ng_table_el[:status]
-          case status 
-           when "succeeded"
-            ng_table_el[:status] = status_when_succeeded() 
-           when "executing"
-            ng_table_el[:status] = status_when_executing() 
-           when "cancelled"
+          case status
+           when 'succeeded'
+            ng_table_el[:status] = status_when_succeeded()
+           when 'executing'
+            ng_table_el[:status] = status_when_executing()
+           when 'cancelled'
            # no op
-           when "failed"
+           when 'failed'
             ng_table_el[:status] = status_when_failed()
             errors = summarize_errors?()
             ng_table_el[:errors] = errors unless errors.empty?
@@ -29,15 +29,15 @@ module DTK; class Task::Status
       private
 
       def status_when_succeeded
-        status_with_subtask_size("succeeded")
+        status_with_subtask_size('succeeded')
       end
 
       def status_when_executing
-        status_when_aux("executing")
+        status_when_aux('executing')
       end
 
       def status_when_failed
-        status_when_aux("failed")
+        status_when_aux('failed')
       end
 
       def status_when_aux(status)
@@ -45,15 +45,15 @@ module DTK; class Task::Status
         if st_status_count.empty?
           status
         else
-          st_status_count.inject("") do |st,(status,count)|
-            status_string = status_with_subtask_size(status,count)
+          st_status_count.inject('') do |st, (status, count)|
+            status_string = status_with_subtask_size(status, count)
             st.empty? ? status_string : "#{st},#{status_string}"
           end
         end
       end
 
-      def status_with_subtask_size(status,count=nil)
-        "#{status}(#{(count||subtask_count())})"
+      def status_with_subtask_size(status, count = nil)
+        "#{status}(#{(count || subtask_count())})"
       end
 
       def subtask_count
@@ -61,7 +61,7 @@ module DTK; class Task::Status
       end
 
       def subtask_status_rows
-        @subtask_status_rows ||= (@block_for_subtasks && @block_for_subtasks.call())||[]
+        @subtask_status_rows ||= (@block_for_subtasks && @block_for_subtasks.call()) || []
       end
 
       def subtask_status_count
@@ -74,7 +74,7 @@ module DTK; class Task::Status
         end
         ret
       end
-      
+
       def summarize_errors?
         all_errors = []
         subtask_status_rows().each do |st|

@@ -10,34 +10,34 @@ module DTK; class Component
           pntr[:link_def_links] << r[:link_def_link]
         end
         ret =  ndx_ret.values()
-        ret.each{|r|r[:link_def_links].sort!{|a,b|a[:position] <=> b[:position]}}
+        ret.each { |r| r[:link_def_links].sort! { |a, b| a[:position] <=> b[:position] } }
         ret
       end
-      
+
       def get_node
         get_obj_helper(:node)
       end
     end
-    
+
     module ClassMixin
-      def get_include_modules(component_idhs,opts={})
-        get_component_children(component_idhs,IncludeModule,:component_include_module,opts)
+      def get_include_modules(component_idhs, opts = {})
+        get_component_children(component_idhs, IncludeModule, :component_include_module, opts)
       end
 
-      def get_attributes(component_idhs,opts={})
-        get_component_children(component_idhs,::DTK::Attribute,:attribute,opts)
+      def get_attributes(component_idhs, opts = {})
+        get_component_children(component_idhs, ::DTK::Attribute, :attribute, opts)
       end
 
       def get_implementations(component_idhs)
         ret = []
         return ret if component_idhs.empty?
         mh = component_idhs.first.createMH()
-        get_objs(mh,sp_hash([:implementation],:id, component_idhs)).map{|r|r[:implementation]}
+        get_objs(mh, sp_hash([:implementation], :id, component_idhs)).map { |r| r[:implementation] }
       end
 
       private
 
-      def get_component_children(component_idhs,child_class,child_model_name,opts={})
+      def get_component_children(component_idhs, child_class, child_model_name, opts = {})
         ret = []
         return ret if component_idhs.empty?
         mh = component_idhs.first.create_childMH(child_model_name)
@@ -45,17 +45,15 @@ module DTK; class Component
         if cols_plus = opts[:cols_plus]
           cols = (cols + opts[:cols_plus]).uniq
         end
-        get_objs(mh,sp_hash(cols,mh.parent_id_field_name,component_idhs))
+        get_objs(mh, sp_hash(cols, mh.parent_id_field_name, component_idhs))
       end
 
-      def sp_hash(cols,cmp_id_field,component_idhs)
+      def sp_hash(cols, cmp_id_field, component_idhs)
         {
           cols: cols,
-          filter: [:oneof, cmp_id_field, component_idhs.map{|idh|idh.get_id()}]
+          filter: [:oneof, cmp_id_field, component_idhs.map(&:get_id)]
         }
       end
     end
   end
 end; end
-
-

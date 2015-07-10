@@ -16,6 +16,6 @@ RSpec.configure do |config|
   # config.order = 'random'
   require './lib/repoman_rest_api'
   config.before(:all) do
-  	@repoman = RepomanRestApi.new
+    @repoman = RepomanRestApi.new
   end
 end

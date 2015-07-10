@@ -10,7 +10,7 @@ module DTK
       opts = Opts.new()
       opts.merge?(assembly_instance: assembly_instance)
       opts.merge?(ignore: ignore)
-      rest_ok_response Component::Template.list(project,opts)
+      rest_ok_response Component::Template.list(project, opts)
     end
   end
 end

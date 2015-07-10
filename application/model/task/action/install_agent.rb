@@ -1,8 +1,8 @@
 module DTK; class Task
 class Action
   class InstallAgent < PhysicalNode
-      def initialize(type,object,task_idh=nil,_assembly_idh=nil)
-        hash = 
+      def initialize(type, object, task_idh = nil, _assembly_idh = nil)
+        hash =
           case type
            when :state_change
             {
@@ -16,22 +16,22 @@ class Action
            when :hash
             object
            else
-            raise Error.new("Unexpected InstallAgent.initialize type")
+            fail Error.new('Unexpected InstallAgent.initialize type')
           end
-        super(type,hash,task_idh)
+        super(type, hash, task_idh)
       end
       private :initialize
 
-      def self.status(object,opts)
+      def self.status(object, opts)
         ret = PrettyPrintHash.new
-        ret[:node] = node_status(object,opts)
+        ret[:node] = node_status(object, opts)
         ret
       end
 
       # for debugging
       def self.pretty_print_hash(object)
         ret = PrettyPrintHash.new
-        ret[:node] = (object[:node]||{})[:display_name]
+        ret[:node] = (object[:node] || {})[:display_name]
         ret
       end
 
@@ -72,35 +72,35 @@ class Action
       end
 
       def attributes_to_set
-        self[:attributes].reject{|a| not a[:dynamic]}
+        self[:attributes].reject { |a| not a[:dynamic] }
       end
 
       def ret_command_and_control_adapter_info
-        [:node_config,:ssh]
+        [:node_config, :ssh]
         # [:iaas,R8::Config[:command_and_control][:iaas][:type].to_sym]
       end
 
-      def update_state_change_status(task_mh,status)
-        # no op if no associated state change 
+      def update_state_change_status(task_mh, status)
+        # no op if no associated state change
         if self[:state_change_id]
-          update_state_change_status_aux(task_mh,status,[self[:state_change_id]])
+          update_state_change_status_aux(task_mh, status, [self[:state_change_id]])
         end
       end
 
-      def self.add_attributes!(attr_mh,action_list)
+      def self.add_attributes!(attr_mh, action_list)
         ndx_actions = {}
-        action_list.each{|a|ndx_actions[a[:node][:id]] = a}
+        action_list.each { |a| ndx_actions[a[:node][:id]] = a }
         return nil if ndx_actions.empty?
 
-        parent_field_name = DB.parent_field(:node,:attribute)
+        parent_field_name = DB.parent_field(:node, :attribute)
         sp_hash = {
-          cols: [:id,:group_id,:display_name,parent_field_name,:external_ref,:attribute_value,:required,:dynamic],
+          cols: [:id, :group_id, :display_name, parent_field_name, :external_ref, :attribute_value, :required, :dynamic],
           filter: [:and,
                    [:eq, :dynamic, true],
                    [:oneof, parent_field_name, ndx_actions.keys]]
         }
 
-        attrs = Model.get_objs(attr_mh,sp_hash)
+        attrs = Model.get_objs(attr_mh, sp_hash)
 
         attrs.each do |attr|
           action = ndx_actions[attr[parent_field_name]]
@@ -114,15 +114,15 @@ class Action
 
     private
 
-      def self.node_status(object,_opts)
-        node = object[:node]||{}
-        ext_ref = node[:external_ref]||{}
-        kv_array = 
-          [{name: node_status__name(node)},
-           {id: node[:id]},
-           {type: ext_ref[:type]},
-           {image_id: ext_ref[:image_id]},
-           {size: ext_ref[:size]},
+      def self.node_status(object, _opts)
+        node = object[:node] || {}
+        ext_ref = node[:external_ref] || {}
+        kv_array =
+          [{ name: node_status__name(node) },
+           { id: node[:id] },
+           { type: ext_ref[:type] },
+           { image_id: ext_ref[:image_id] },
+           { size: ext_ref[:size] }
           ]
         PrettyPrintHash.new.set?(*kv_array)
       end

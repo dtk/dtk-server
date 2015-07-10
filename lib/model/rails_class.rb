@@ -7,7 +7,7 @@ module DTK
 
   module RailsClass
     def all
-      get_objs(resolve_mh(),{})
+      get_objs(resolve_mh(), {})
     end
 
     def create_simple(hash, user)
@@ -20,14 +20,14 @@ module DTK
 
     private
 
-    def resolve_mh(user=nil)
+    def resolve_mh(user = nil)
       mh = DTK::ModelHandle.new(DTK_C, model_handle_id(), nil, user)
       mh
     end
 
     def model_handle_id
       clazz_name = self.to_s.split('::').last
-      clazz_name.gsub(/(.)([A-Z])/,'\1_\2').downcase
+      clazz_name.gsub(/(.)([A-Z])/, '\1_\2').downcase
     end
   end
 end

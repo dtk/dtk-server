@@ -10,10 +10,9 @@ module DTK
         tasks = Task.get_top_level_tasks(model_handle).sort { |a, b| b[:updated_at] <=> a[:updated_at] }
         task_id = tasks.first[:id]
       end
-      opts = Task::Status::Opts.new
+      opts = Hash.new
       if detail_level == :summary
-        opts[:no_components] = true
-        opts[:no_attributes] = true
+        opts.merge!(no_components: true, no_attributes: true)
       end
 
       task_structure = Task::Hierarchical.get(id_handle(task_id))

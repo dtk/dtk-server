@@ -12,7 +12,7 @@ module DTK; class Task
         elsif start_index <= end_index
           ret += Element.get_stage_elements(top_level_task, start_index, end_index).map(&:hash_form)
         else
-          fail ErrorUsage.new("start_index (#{start_index} must be less than or equal to end_index (#{end_index})")
+          raise ErrorUsage.new("start_index (#{start_index} must be less than or equal to end_index (#{end_index})")
         end
         ret
       end

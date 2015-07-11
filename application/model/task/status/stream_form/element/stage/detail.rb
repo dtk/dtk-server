@@ -2,8 +2,9 @@ module DTK; class Task::Status::StreamForm::Element
   class Stage
     class Detail
       def initialize(stage_elements)
-        @elements = stage_elements
-        @subtasks = nil
+        @elements          = stage_elements
+        @stage_level_tasks = stage_elements.map{|el|el.task} 
+        @leaf_subtasks     = nil
       end
 
       attr_reader :elements
@@ -28,13 +29,20 @@ module DTK; class Task::Status::StreamForm::Element
       private
 
       def add_subtasks!
-        @subtasks = Array.new
-        # TODO: stub
+        @leaf_subtasks = Array.new
+        @stage_level_tasks.each_with_index do |task,i|
+          add_subtasks_to_stage_level_task!(task,i)
+        end
+      end
+
+      def add_subtasks_to_stage_level_task!(task, index)
+        hier_struct = Task::Hierarchical.get(task.id_handle())
+        @stage_level_tasks[index][:subtasks] = hier_struct[:subtasks]
       end
 
       def add_action_results!
-        if @subtasks.nil?
-          raise Error.new("@subtasks should be set")
+        if @leaf_subtasks.nil?
+          raise Error.new("@leaf_subtasks should be set")
         end
         #TODO: stub
 pp :add_action_results

@@ -1,7 +1,7 @@
 module Ramaze::Helper
   module TaskHelper
     def cancel_task(top_task_id)
-      task = ::DTK::Task::Hierarchical.get(id_handle(top_task_id,:task))
+      task = ::DTK::Task::Hierarchical.get_and_reify(id_handle(top_task_id,:task))
       ::DTK::Workflow.cancel(top_task_id, task)
     end
 

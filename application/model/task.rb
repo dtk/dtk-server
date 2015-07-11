@@ -227,7 +227,7 @@ module DTK
       save!()
       # TODO: this is simple but expensive way to get all teh embedded task ids filled out
       # can replace with targeted method that does just this
-      Hierarchical.get(id_handle())
+      Hierarchical.get_and_reify(id_handle())
     end
 
     # persists to db this and its sub tasks

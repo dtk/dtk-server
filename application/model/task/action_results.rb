@@ -29,8 +29,8 @@ module DTK; class Task
       unless task = Task.get_top_level_most_recent_task(task_mh, [:eq, :assembly_id, assembly.id()])
         fail ErrorUsage.new("No tasks found for '#{assembly.display_name_print_form()}'")
       end
-      # TODO: more efficienct would be to be able to do with one call and filter on action_label in get_and_reify_all_subtasks
-      subtasks = task.get_and_reify_all_subtasks(cols: [:id,:display_name])
+      # TODO: more efficienct would be to be able to do with one call and filter on action_label in get_all_subtasks
+      subtasks = task.get_all_subtasks(cols: [:id,:display_name])
       task_log_mh = task_mh.createMH(:task_log)
       sp_hash = {
         cols: [:id, :display_name, :content, :position],

@@ -15,7 +15,7 @@ module DTK
         opts.merge!(no_components: true, no_attributes: true)
       end
 
-      task_structure = Task::Hierarchical.get(id_handle(task_id))
+      task_structure = Task::Hierarchical.get_and_reify(id_handle(task_id))
       state_info = task_structure.status_hash_form(opts)
       rest_ok_response state_info
     end
@@ -58,7 +58,7 @@ module DTK
 
     def rest__execute
       task_id =  ret_non_null_request_params(:task_id)
-      task = Task::Hierarchical.get(id_handle(task_id))
+      task = Task::Hierarchical.get_and_reify(id_handle(task_id))
       workflow = Workflow.create(task)
 Aux.stop_for_testing?(:converge) # TODO: for debugging
       workflow.defer_execution()

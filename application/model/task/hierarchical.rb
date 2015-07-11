@@ -1,15 +1,18 @@
 module DTK
   class Task 
     class Hierarchical < self
-      # TODO: have this produce at all levels Task::Hierarchical rather than class objects
-      def self.get(top_task_idh)
+      def self.get_and_reify(top_task_idh)
+        get(top_task_idh, reify: true)
+      end
+
+      def self.get(top_task_idh, opts = {})
         sp_hash = {
           :cols => common_columns(),
           :filter => [:eq, :id, top_task_idh.get_id()]
         }
         top_task = get_objs(top_task_idh.createMH(),sp_hash).first
         return nil unless top_task
-        flat_subtask_list = top_task.get_and_reify_all_subtasks()
+        flat_subtask_list = top_task.get_all_subtasks(opts)
         ndx_task_list = {top_task.id => top_task}
         subtask_count = Hash.new
         subtask_indexes = Hash.new
@@ -34,7 +37,6 @@ module DTK
         top_task
       end
 
-      #TODO: when produce at all levels Task::Hierarchical can make these methods on Task::Hierarchical 
       module Mixin
         # indexed by task ids
         def get_ndx_errors
@@ -60,8 +62,8 @@ module DTK
         end
 
         # recursively walks structure, but returns them in flat list
-        def get_and_reify_all_subtasks(opts={})
-          self.class.get_and_reify_all_subtasks([id_handle()],opts)
+        def get_all_subtasks(opts={})
+          self.class.get_all_subtasks([id_handle()],opts)
         end
 
         protected

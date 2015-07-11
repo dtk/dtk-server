@@ -75,7 +75,8 @@ module DTK; class Task::Status::StreamForm::Element
     end
 
     def self.task_completed?(task)
-      !task.get_field?(:status).nil?
+      status = task.get_field?(:status)
+      !status.nil? and status != 'executing'
     end
 
     def self.task_ended_workflow?(task)

@@ -1,23 +1,64 @@
 module DTK; class Task::Status::StreamForm::Element
   class Stage
-    module Detail
-      def self.add_detail!(stage_elements, opts = {})
-        ret = stage_elements
-        return ret if stage_elements.empty?
+    class Detail
+      def initialize(stage_elements)
+        @elements = stage_elements
+        @subtasks = nil
+      end
+
+      attr_reader :elements
+
+      def self.add_detail!(stage_elements, hash_opts = {})
+        new(stage_elements).add_detail!(Opts.new(hash_opts)).elements
+      end
         
-        detail = opts[:element_detail]||{}
-        if detail[:action_results]
-          action_result_tasks = ActionResultTask.find_and_expand(stage_elements.map{|el|el.task})
+      def add_detail!(opts = Opts.new)
+        ret = self
+        return ret if @elements.empty?
+
+        if opts.add_subtasks?
+          add_subtasks!
+          if opts.add_action_results?
+            add_action_results!
+          end
         end
         ret
       end
 
-      module ActionResultTask
-        def self.find_and_expand(tasks)
-          #stub
-          pp :ActionResultTask
+      private
+
+      def add_subtasks!
+        @subtasks = Array.new
+        # TODO: stub
+      end
+
+      def add_action_results!
+        if @subtasks.nil?
+          raise Error.new("@subtasks should be set")
+        end
+        #TODO: stub
+pp :add_action_results
+      end
+
+      class Opts < ::Hash
+        def initialize(hash_opts = {})
+          super()
+          replace(hash_opts)
         end
 
+        def add_subtasks?
+          !([:action_results, :subtasks] & (detail().keys)).empty?
+        end
+
+        def add_action_results?
+          detail().has_key?(:action_results)
+        end
+
+        private
+          
+        def detail
+          self[:element_detail] || {}
+        end
       end
     end
   end

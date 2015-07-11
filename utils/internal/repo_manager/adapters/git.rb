@@ -79,12 +79,25 @@ module DTK
     end
 
     def self.repo_url(repo_name = nil)
-      @git_url ||= "ssh://#{R8::Config[:repo][:git][:server_username]}@#{repo_server_dns()}:#{R8::Config[:repo][:git][:port]}"
-      if repo_name
-        "#{@git_url}/#{repo_name}"
+      # TODO: patch until Haris looks at it DTK-2124
+      if (R8::Config[:repo][:git][:port]||'22').to_s == '22'
+        @git_url ||= "#{R8::Config[:repo][:git][:server_username]}@#{repo_server_dns()}"
+        if repo_name
+          "#{@git_url}:#{repo_name}"
+        else
+          @git_url
+        end
+
       else
-        @git_url
+
+        @git_url ||= "ssh://#{R8::Config[:repo][:git][:server_username]}@#{repo_server_dns()}:#{R8::Config[:repo][:git][:port]}"
+        if repo_name
+          "#{@git_url}/#{repo_name}"
+        else
+          @git_url
+        end
       end
+
     end
 
     def repo_url
@@ -92,7 +105,14 @@ module DTK
     end
 
     def create_local_repo(repo_name, opts = {})
-      remote_repo = "#{repo_url()}/#{repo_name}"
+      # TODO: patch until Haris looks at it DTK-2124
+      remote_repo = nil
+      if (R8::Config[:repo][:git][:port]||'22').to_s == '22'
+        remote_repo = "#{repo_url()}:#{repo_name}"
+      else
+        remote_repo = "#{repo_url()}/#{repo_name}"
+      end
+
       git_command__clone(remote_repo, @path)
       @grit_repo = Grit::Repo.new(@path)
       unless opts[:donot_create_master_branch]

@@ -6,11 +6,11 @@ module DTK; class Task
         ret = []
         start_index = integer(opts[:start_index], :start_index)
         end_index   = integer(opts[:end_index], :end_index)
-
         if start_index == 0 && end_index == 0
           ret << Element.get_task_start_element(top_level_task).hash_form()
         elsif start_index <= end_index
-          ret += Element.get_stage_elements(top_level_task, start_index, end_index).map(&:hash_form)
+          opts_stage = Aux.hash_subset(opts,[:element_details])
+          ret += Element.get_stage_elements(top_level_task, start_index, end_index, opts_stage).map(&:hash_form)
         else
           raise ErrorUsage.new("start_index (#{start_index} must be less than or equal to end_index (#{end_index})")
         end

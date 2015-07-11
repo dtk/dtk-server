@@ -750,9 +750,13 @@ module DTK
 
       response =
         if ret_request_params(:form) == 'stream_form'
+          element_detail = ret_request_params(:element_detail)||{}
+          # element_detail defaults
+          element_detail[:action_results] ||= true
           opts = {
-            end_index: ret_request_params(:end_index),
-            start_index: ret_request_params(:start_index)
+            end_index:      ret_request_params(:end_index),
+            start_index:    ret_request_params(:start_index),
+            element_detail: element_detail 
           }
           Task::Status::Assembly::StreamForm.get_status(assembly.id_handle, opts)
         else

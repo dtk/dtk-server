@@ -16,8 +16,8 @@ module DTK; class Task; class Status
         TaskStart.new(top_level_task)
       end
       
-      def self.get_stage_elements(top_level_task, start_index, end_index)
-        Stage.elements(top_level_task, start_index, end_index)
+      def self.get_stage_elements(top_level_task, start_index, end_index, opts={})
+        Stage.elements(top_level_task, start_index, end_index, opts)
       end
 
       attr_reader :type, :task

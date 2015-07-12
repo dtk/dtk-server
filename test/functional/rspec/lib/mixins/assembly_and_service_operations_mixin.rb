@@ -363,20 +363,22 @@ module AssemblyAndServiceOperationsMixin
 				count += 1
 				response_task_status = send_request('/rest/assembly/task_status', {'assembly_id'=> service_id})
 				status = response_task_status['data'].first['status']
-				if (status.include? 'succeeded')
-					task_status = status
-					service_converged = true
+				unless status.nil?
+					if (status.include? 'succeeded')
+						task_status = status
+						service_converged = true
+						puts "Task execution status: #{task_status}"
+						puts "Converge process finished successfully!"
+					elsif (status.include? 'failed')
+						task_status = status
+						puts "Error details on subtasks:"
+						ap response_task_status['data']['subtasks']
+						puts "Task execution status: #{task_status}"
+						puts "Converge process was not finished successfully! Some tasks failed!"
+						end_loop = true
+					end
 					puts "Task execution status: #{task_status}"
-					puts "Converge process finished successfully!"
-				elsif (status.include? 'failed')
-					task_status = status
-					puts "Error details on subtasks:"
-					ap response_task_status['data']['subtasks']
-					puts "Task execution status: #{task_status}"
-					puts "Converge process was not finished successfully! Some tasks failed!"
-					end_loop = true
 				end
-				puts "Task execution status: #{task_status}"
 
 				if (count > max_num_of_retries)
 					puts "Max number of retries reached..."
@@ -462,20 +464,22 @@ module AssemblyAndServiceOperationsMixin
 				count += 1
 				response_task_status = send_request('/rest/assembly/task_status', {'assembly_id'=> service_id})
 				status = response_task_status['data'].first['status']
-				if (status.include? 'succeeded')
-					task_status = status
-					service_converged = true
+				unless status.nil?
+					if (status.include? 'succeeded')
+						task_status = status
+						service_converged = true
+						puts "Task execution status: #{task_status}"
+						puts "Converge process finished successfully!"
+					elsif (status.include? 'failed')
+						task_status = status
+						puts "Error details on subtasks:"
+						ap response_task_status['data']['subtasks']
+						puts "Task execution status: #{task_status}"
+						puts "Converge process was not finished successfully! Some tasks failed!"
+						end_loop = true
+					end
 					puts "Task execution status: #{task_status}"
-					puts "Converge process finished successfully!"
-				elsif (status.include? 'failed')
-					task_status = status
-					puts "Error details on subtasks:"
-					ap response_task_status['data']['subtasks']
-					puts "Task execution status: #{task_status}"
-					puts "Converge process was not finished successfully! Some tasks failed!"
-					end_loop = true
 				end
-				puts "Task execution status: #{task_status}"
 
 				if (count > max_num_of_retries)
 					puts "Max number of retries reached..."

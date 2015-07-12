@@ -17,7 +17,7 @@ node_template = 'precise-micro'
 component_name = 'stdlib'
 component_module_namespace = 'r8'
 
-dtk_common = DtkCommon.new('', '')
+dtk_common = Common.new('', '')
 
 describe "(Workspace) Test Case 2: Create two nodes, add components in both of them, converge workspace and purge workspace content" do
 

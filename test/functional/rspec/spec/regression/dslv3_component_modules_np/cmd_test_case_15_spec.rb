@@ -18,7 +18,7 @@ file_for_change_location = "./spec/regression/dslv3_component_modules_np/resourc
 file_for_change = "dtk.model.yaml"
 attribute_value_hash = {"key1"=>nil}
 
-dtk_common = DtkCommon.new("", "")
+dtk_common = Common.new("", "")
 
 describe "(Component Module DSL) Test Case 15: dtk.model.yaml with hash type attribute that contains key without value" do
 

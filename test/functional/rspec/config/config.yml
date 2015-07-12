@@ -22,13 +22,26 @@ LINUX_ENV:
     username: 'dtk-admin'
     password: 'r8server'
   headless: true
+  poltergeist: false
 LOCAL_ENV:
   environment:
     full_host: 'https://admin.dtk.io'
   target:
-    os: 'Windows'
+    os: 'Linux'
     browser: 'chrome'
   account:
     username: 'dtk-admin'
     password: 'r8server'
   headless: false
+  poltergeist: false
+LINUX_ENV_POLTERGEIST:
+  environment:
+    full_host: 'https://admin.dtk.io'
+  target:
+    os: 'Linux'
+    browser: 'ff'
+  account:
+    username: 'dtk-admin'
+    password: 'r8server'
+  headless: false
+  poltergeist: true

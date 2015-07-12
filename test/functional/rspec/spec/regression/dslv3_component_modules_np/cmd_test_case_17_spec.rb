@@ -18,7 +18,7 @@ port_attr_value = "8080a"
 fail_message = "incorrect value for port type attribute: #{port_attr_value}"
 expected_error_message = "[ERROR] Attribute (port_attr) has default value (\"#{port_attr_value}\") that does not match its type (port)"
 
-dtk_common = DtkCommon.new("", "")
+dtk_common = Common.new("", "")
 
 describe "(Component Module DSL) Test Case 17: NEG - dtk.model.yaml with invalid port type attribute value" do
 

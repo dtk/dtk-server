@@ -19,7 +19,7 @@ region = "us-east-1"
 target_name = "#{provider_name}-#{region}"
 
 $assembly_id = 0
-dtk_common = DtkCommon.new(assembly_name, assembly_template)
+dtk_common = Common.new(assembly_name, assembly_template)
 
 describe "(Targets and Providers) Test Case 2: Add new target to existing provider, stage and converge assembly in this target and then delete target" do
 

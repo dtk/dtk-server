@@ -34,7 +34,7 @@ namespace = 'internal'
 component_module_filesystem_location = "~/dtk/component_modules"
 rvm_path = "/usr/local/rvm/wrappers/default/"
 
-dtk_common = DtkCommon.new(service_name, assembly_name)
+dtk_common = Common.new(service_name, assembly_name)
 dtk_common.server = tenant_server
 dtk_common.endpoint = "https://#{tenant_server}:443"
 dtk_common.username = tenant_username

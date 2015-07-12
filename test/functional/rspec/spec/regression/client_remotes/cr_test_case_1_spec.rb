@@ -18,7 +18,7 @@ default_filesystem_location = "~/dtk/component_modules"
 bitbucket_1_component_module_filesystem_location = "~/dtk/component_modules/bitbucket1"
 bitbucket_2_component_module_filesystem_location = "~/dtk/component_modules/bitbucket2"
 
-dtk_common = DtkCommon.new('', '')
+dtk_common = Common.new('', '')
 
 describe "(Client remotes) Test Case 1: Import from Bitbucket, check remotes, make changes and push-remote and make sure changes are pushed" do
 

@@ -14,7 +14,7 @@ STDOUT.sync = true
 provider_name = "test_provider-template"
 region = "us-east-1"
 target_name = "#{provider_name}-#{region}"
-dtk_common = DtkCommon.new('', '')
+dtk_common = Common.new('', '')
 
 describe "(Targets and Providers) Test Case 1: Add new target to existing provider, list targets and then delete target" do
 

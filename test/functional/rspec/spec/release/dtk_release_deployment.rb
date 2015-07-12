@@ -13,7 +13,7 @@ service_name = 'dtk_release_deployment'
 assembly_name = 'dtk::release'
 namespace = 'internal'
 
-dtk_common = DtkCommon.new(service_name, assembly_name)
+dtk_common = Common.new(service_name, assembly_name)
 config = YAML::load(File.open("./config/release.yml"))
 
 # Stage service

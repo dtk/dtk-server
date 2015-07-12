@@ -28,13 +28,13 @@ database_name = 'test'
 collection_name = 'test_collection'
 document = {"first_name" => "Bakir", "last_name" => "Jusufbegovic"}
 
-dtk_common = DtkCommon.new(service_name, assembly_name)
+dtk_common = Common.new(service_name, assembly_name)
 
 
 def get_node_ec2_public_dns(service_name, node_name)
 	puts "Get node ec2 public dns:", "------------------------"
 	node_ec2_public_dns = ""
-	dtk_common = DtkCommon.new('','')
+	dtk_common = Common.new('','')
 
 	info_response = dtk_common.send_request('/rest/assembly/info_about', {:assembly_id => service_name, :subtype => :instance, :about => "nodes"})
 	ap info_response

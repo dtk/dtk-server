@@ -16,7 +16,7 @@ namespace_to_import_2 = "test_namespace_2"
 namespace_component_module_filesystem_location_1 = "~/dtk/component_modules/test_namespace_1"
 namespace_component_module_filesystem_location_2 = "~/dtk/component_modules/test_namespace_2"
 
-dtk_common = DtkCommon.new('', '')
+dtk_common = Common.new('', '')
 
 describe "(Modules, Services and Versioning) Test Case 33: Import git to two different namespaces" do
 

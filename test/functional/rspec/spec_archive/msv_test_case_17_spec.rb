@@ -16,7 +16,7 @@ module_name = "ruby"
 module_filesystem_location = "~/component_modules"
 $assembly_id = 0
 
-dtk_common = DtkCommon.new('', '')
+dtk_common = Common.new('', '')
 
 describe "(Modules, Services and Versioning) Test Case 17: Import module from puppet forge" do
 

@@ -21,7 +21,7 @@ namespace_2 = "r8"
 component_module_filesystem_location = '~/dtk/component_modules/maestrodev'
 component_module_filesystem_location_2 = '~/dtk/component_modules/r8'
 grep_patterns_for_module_refs = ['wget:','namespace: maestrodev']
-dtk_common = DtkCommon.new('', '')
+dtk_common = Common.new('', '')
 
 describe "(Modules, Services and Versioning) Test Case 52: Import Puppet Forge (maven) but there are multiple (ambiguous) wget dependencies (maestrodev/wget, r8/wget)" do
 

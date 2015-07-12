@@ -15,7 +15,7 @@ node_name_1 = 'test1'
 node_name_2 = 'test2'
 node_template = 'precise-micro'
 
-dtk_common = DtkCommon.new('', '')
+dtk_common = Common.new('', '')
 
 describe "(Workspace) Test Case 5: Create two nodes (list nodes), delete one node (list nodes again) and purge workspace content" do
 

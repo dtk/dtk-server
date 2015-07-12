@@ -18,6 +18,8 @@ RSpec.configure do |config|
     @conf = load_configs
     if @conf.headless
       @homepage = load_headless(@conf.host)
+    elsif @conf.poltergeist
+      @homepage = load_poltergeist(@conf.host)
     else
       puts "Host: #{@conf.host}"
       puts "Browser: #{@conf.browser}"
@@ -25,11 +27,13 @@ RSpec.configure do |config|
     end
   end
 
-  #close browser after each test
   config.after(:all) do 
     if @conf.headless
       puts "Destroying Headless"
       @headless.destroy
+    elsif @conf.poltergeist
+      puts "Closing poltergeist"
+      @homepage.session.driver.quit
     else
       puts "Closing browser"
       @homepage.close 
@@ -56,6 +60,7 @@ def load_configs
   conf.username = full_config[env]["account"]["username"]
   conf.password = full_config[env]["account"]["password"]
   conf.headless = full_config[env]["headless"]
+  conf.poltergeist = full_config[env]["poltergeist"]
   return conf
 end
 
@@ -66,6 +71,20 @@ def load_headless(full_host)
   @headless = Headless.new
   @headless.start
   session = Capybara::Session.new :webkit
+  @homepage = HomePage.new(session)
+  @homepage.goto_homepage(full_host)
+  puts "Opening home page: " + full_host
+  return @homepage
+end
+
+def load_poltergeist(full_host)
+  require 'capybara/poltergeist'
+  puts "Initializing browser, POLTERGEIST mode"
+  Capybara.register_driver :poltergeist do |app|
+    Capybara::Poltergeist::Driver.new(app, :inspector => true)
+  end
+  Capybara.current_driver = :poltergeist
+  session = Capybara::Session.new :poltergeist
   @homepage = HomePage.new(session)
   @homepage.goto_homepage(full_host)
   puts "Opening home page: " + full_host

@@ -23,7 +23,7 @@ service_module_filesystem_location = '~/dtk/service_modules/dtk17'
 
 service_name = 'stda_test_case_14_instance'
 assembly_name = 'service_with_lambda::lambda'
-dtk_common = DtkCommon.new(service_name, assembly_name)
+dtk_common = Common.new(service_name, assembly_name)
 
 expected_output_1 = {
 	:command => "cat /tmp/test | grep 55",

@@ -10,7 +10,7 @@ class Users < Main
     @session.find("//div/button[@class = \"multiselect dropdown-toggle btn btn-default\"]").click
     @session.check(usergroup)
     #overlapping elements issue in headless mode
-    if Capybara.default_driver == :webkit
+    if Capybara.current_driver == :webkit || Capybara.current_driver == :poltergeist
       @session.find("//div/button[@class = \"multiselect dropdown-toggle btn btn-default\"]").trigger("click")
     else
       @session.find("//div/button[@class = \"multiselect dropdown-toggle btn btn-default\"]").click

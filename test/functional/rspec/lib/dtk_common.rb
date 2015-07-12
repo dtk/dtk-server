@@ -4,17 +4,18 @@ require 'pp'
 require 'json'
 require 'awesome_print'
 require 'yaml'
-require File.join(File.dirname(__FILE__), 'mixins/assembly_and_service_operations_mixin.rb')
-require File.join(File.dirname(__FILE__), 'mixins/node_operations_mixin.rb')
-require File.join(File.dirname(__FILE__), 'mixins/workspace_mixin.rb')
-require File.join(File.dirname(__FILE__), 'mixins/target_mixin.rb')
-require File.join(File.dirname(__FILE__), 'mixins/component_modules_mixin.rb')
-require File.join(File.dirname(__FILE__), 'mixins/service_modules_mixin.rb')
-require File.join(File.dirname(__FILE__), 'mixins/test_modules_mixin.rb')
+require File.expand_path('../client_access/dtk_client_accessor', __FILE__)
+require File.expand_path('../mixins/assembly_and_service_operations_mixin.rb', __FILE__)
+require File.expand_path('../mixins/node_operations_mixin.rb', __FILE__)
+require File.expand_path('../mixins/workspace_mixin.rb', __FILE__)
+require File.expand_path('../mixins/target_mixin.rb', __FILE__)
+require File.expand_path('../mixins/component_modules_mixin.rb', __FILE__)
+require File.expand_path('../mixins/service_modules_mixin.rb', __FILE__)
+require File.expand_path('../mixins/test_modules_mixin.rb', __FILE__)
 
 STDOUT.sync = true
 
-class DtkCommon
+class Common
 	include AssemblyAndServiceOperationsMixin
 	include NodeOperationsMixin
 	include WorkspaceMixin
@@ -39,7 +40,6 @@ class DtkCommon
 		@service_name = service_name
 		#Fixed current format of assembly name
 		@assembly = assembly_name.gsub!("::","/")
-
 		@server = config_yml['r8server']['server']
 		@port = config_yml['r8server']['port']
 		@endpoint = "#{@server}:#{@port}"
@@ -51,16 +51,15 @@ class DtkCommon
 		#used as placeholders for component ids/names for specific module that are accumulated
 		@component_module_id_list = Array.new()
 		@component_module_name_list = Array.new()
-                login
+    login
 	end
 
-        def login
-                #Login to dtk application
-                response_login = RestClient.post(@endpoint + '/rest/user/process_login', 'username' => @username, 'password' => @password, 'server_host' => @server, 'server_port' => @port)
-
-                $cookies = response_login.cookies
-                $opts[:cookies] = response_login.cookies
-        end
+	def login
+	  #Login to dtk application
+	  response_login = RestClient.post(@endpoint + '/rest/user/process_login', 'username' => @username, 'password' => @password, 'server_host' => @server, 'server_port' => @port)
+	  $cookies = response_login.cookies
+	  $opts[:cookies] = response_login.cookies
+	end
 
 	def server_log_print()
 		search_string = "Exiting!"
@@ -157,3 +156,4 @@ class DtkCommon
 	  return catalog_credentials_set
 	end
 end
+

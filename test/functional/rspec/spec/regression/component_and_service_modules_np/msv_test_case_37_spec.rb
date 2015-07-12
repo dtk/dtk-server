@@ -17,7 +17,7 @@ component_module = "r8:wget"
 git_ssh_repo_url = "git@github.com:maestrodev/puppet-wget.git"
 r8_component_module_filesystem_location = '~/dtk/component_modules/r8'
 
-dtk_common = DtkCommon.new('', '')
+dtk_common = Common.new('', '')
 
 describe "(Modules, Services and Versioning) Test Case 37: NEG - Install component module from r8 namespace, but local copy of this module already exists and it is in r8 namespace" do
 

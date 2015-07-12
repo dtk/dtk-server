@@ -3,7 +3,7 @@
 
 require './lib/dtk_common'
 
-dtk_common = DtkCommon.new('', '')
+dtk_common = Common.new('', '')
 services = dtk_common.list_specific_success_service("dtk_release_deployment_test")
 services.each do |s|
 	dtk_common.delete_and_destroy_service(s['id'])

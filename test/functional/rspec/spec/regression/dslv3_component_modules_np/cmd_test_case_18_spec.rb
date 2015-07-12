@@ -18,7 +18,7 @@ false_integer_value = "some_value"
 fail_message = "incorrect value for integer type attribute: #{false_integer_value}"
 expected_error_message = "[ERROR] Attribute (integer_attr) has default value (\"#{false_integer_value}\") that does not match its type (integer)"
 
-dtk_common = DtkCommon.new("", "")
+dtk_common = Common.new("", "")
 
 describe "(Component Module DSL) Test Case 18: NEG - dtk.model.yaml with invalid integer type attribute value" do
 

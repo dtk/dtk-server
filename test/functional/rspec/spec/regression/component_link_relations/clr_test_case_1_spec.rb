@@ -23,7 +23,7 @@ value_to_match_1 = 'nil'
 value_to_match_2 = 'ec2'
 attribute_name = 'upstream'
 
-dtk_common = DtkCommon.new(service_name, assembly_name)
+dtk_common = Common.new(service_name, assembly_name)
 
 describe "(Component link relations) Test Case 1: Simple link scenario - $node.host_address from sink component is passed to upstream attribute of source component" do
 

@@ -44,7 +44,7 @@ reverted_permissions = {
 	:other_p => true,
 }
 
-dtk_common = DtkCommon.new('', '')
+dtk_common = Common.new('', '')
 
 describe "(Repoman client integration) Test Case 17: NEG - delete-from-catalog negative scenarios where it is not possible to delete component module from remote based on permissions set on the module" do
 

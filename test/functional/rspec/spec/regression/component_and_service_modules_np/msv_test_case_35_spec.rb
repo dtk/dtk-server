@@ -17,7 +17,7 @@ new_namespace = "dtk17"
 r8_component_module_filesystem_location = '~/dtk/component_modules/r8'
 dtk17_component_module_filesystem_location = '~/dtk/component_modules/dtk17'
 
-dtk_common = DtkCommon.new('', '')
+dtk_common = Common.new('', '')
 
 describe "(Modules, Services and Versioning) Test Case 35: Install component module, publish to different namespace and install it again" do
 

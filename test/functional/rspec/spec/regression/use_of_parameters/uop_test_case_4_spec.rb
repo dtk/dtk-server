@@ -16,7 +16,7 @@ os = 'precise'
 memory_size = 't1.micro'
 node_name = 'node1'
 
-dtk_common = DtkCommon.new(service_name, assembly_name)
+dtk_common = Common.new(service_name, assembly_name)
 
 describe "(Use Of Parameters) Test Case 4: Add optional params on existing attributes in service nodes (values were not defined)" do
 

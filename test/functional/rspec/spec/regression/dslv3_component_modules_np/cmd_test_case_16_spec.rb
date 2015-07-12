@@ -20,7 +20,7 @@ attribute_value_2 = {"key1"=>"value1", "key2"=>"value2"}
 file_for_change_location = "./spec/regression/dslv3_component_modules_np/resources/cmd_test_case_16_dtk.model.yaml"
 file_for_change = "dtk.model.yaml"
 
-dtk_common = DtkCommon.new("", "")
+dtk_common = Common.new("", "")
 
 describe "(Component Module DSL) Test Case 16: dtk.model.yaml with hash type attribute that contains two key value pairs and hash type attribute where key contains array as value" do
 

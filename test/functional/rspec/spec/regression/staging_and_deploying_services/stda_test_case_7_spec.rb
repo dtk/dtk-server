@@ -18,7 +18,7 @@ nodes = ['slave:1','slave:2']
 components = ['slave/stdlib']
 expected_cardinality_before_delete = 2
 expected_cardinality_after_delete = 1
-dtk_common = DtkCommon.new(service_name, assembly_name)
+dtk_common = Common.new(service_name, assembly_name)
 
 describe "(Staging And Deploying Assemblies) Test Case 7: Stage simple node group example, list nodes, delete nodes, check cardinality, list nodes/components/attributes after delete" do
 

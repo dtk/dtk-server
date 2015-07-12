@@ -20,8 +20,8 @@ region = "us-east-1"
 target_name = "#{provider_name}-#{region}"
 
 $assembly_id = 0
-dtk_common = DtkCommon.new(assembly_name1, assembly_template)
-dtk_common2 = DtkCommon.new(assembly_name2, assembly_template)
+dtk_common = Common.new(assembly_name1, assembly_template)
+dtk_common2 = Common.new(assembly_name2, assembly_template)
 
 describe "(Targets and Providers) Test Case 3: Add new target to existing provider, stage two assemblies and check list of assemblies that belong to this target" do
 

@@ -19,7 +19,7 @@ node_name_2 = 'slave'
 puppet_log_location = '/var/log/puppet/last.log'
 puppet_grep_pattern = 'transaction'
 
-dtk_common = DtkCommon.new(service_name, assembly_name)
+dtk_common = Common.new(service_name, assembly_name)
 
 describe "(Different Node Templates) Test Case 9: Redis - Master/Slave scenario" do
 

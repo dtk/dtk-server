@@ -28,7 +28,7 @@ permissions = {
 	:other_p => true,
 }
 
-dtk_common = DtkCommon.new('', '')
+dtk_common = Common.new('', '')
 
 describe "(Repoman client integration) Test Case 11: chmod ugo+rwd and ugo-wd on module A (User A is owner and belongs to User group A which is set on module, intial permissions are: P/P/P, RWDP/RWDP/RWDP)" do
 

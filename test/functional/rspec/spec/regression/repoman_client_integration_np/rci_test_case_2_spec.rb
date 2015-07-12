@@ -27,7 +27,7 @@ permissions = {
 	:other_p => false,
 }
 
-dtk_common = DtkCommon.new('', '')
+dtk_common = Common.new('', '')
 
 describe "(Repoman client integration) Test Case 2: Make private module A (User A is not owner but belongs to User group A which is set on module, permissions: RWD/RWDP/RWD)" do
 

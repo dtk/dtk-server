@@ -25,7 +25,7 @@ assembly = 'workspace_assembly'
 assembly_name = 'bootstrap::workspace_assembly'
 service_name = 'w_test_case_10_instance'
 
-dtk_common = DtkCommon.new(service_name, assembly_name)
+dtk_common = Common.new(service_name, assembly_name)
 
 describe "(Workspace) Test Case 10: Create two nodes, add components in both of them, and create assembly from the workspace content in existing service module, stage and converge this assembly" do
 

@@ -30,7 +30,7 @@ local_default_namespace = 'dtk16'
 component_module_filesystem_location = "~/dtk/component_modules"
 rvm_path = "/usr/local/rvm/wrappers/default/"
 
-dtk_common = DtkCommon.new(service_name, assembly_name)
+dtk_common = Common.new(service_name, assembly_name)
 
 describe "DTK Server smoke test release" do
 

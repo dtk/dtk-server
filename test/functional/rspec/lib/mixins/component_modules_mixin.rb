@@ -1,8 +1,23 @@
 module ComponentModulesMixin
+	def pull_base_component_module(service_id, component_module_name)
+		puts "Pull base component module:", "-----------------------------"
+		changes_pulled = false
+		client = DtkClientAccessor.new
+		response = client.execute_command('service', 'service', service_id, [component_module_name], 'pull_base_component_module')
+		changes_pulled = true if response['status'] == 'ok'
+	end
+
+	def push_component_module_updates(service_id, component_module_name)
+		puts "Push component module updates:", "---------------------------------"
+		changes_pushed = false
+		client = DtkClientAccessor.new
+		response = client.execute_command('service', 'service', service_id, [component_module_name], 'push_component_module_updates')
+		changes_pushed = true if response['status'] == 'ok'
+	end
+
 	def delete_module_from_remote(component_module, namespace)
 		puts "Delete component module from remote:", "----------------------------------"
 		component_module_deleted = false
-
 		response = send_request('/rest/component_module/delete_remote', {:remote_module_name => component_module, :remote_module_namespace => namespace, :rsa_pub_key => self.ssh_key})
 
 		if response['status'] == 'ok'

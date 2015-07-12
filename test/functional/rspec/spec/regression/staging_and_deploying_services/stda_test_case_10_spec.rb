@@ -20,7 +20,7 @@ service_module = 'r8:mongodb_test'
 dependency_component = "slave/mongodb::mongodb_slave"
 dependency_name = 'master_conn'
 dependency_satisfied_by = ['master/mongodb']
-dtk_common = DtkCommon.new(service_name, assembly_name)
+dtk_common = Common.new(service_name, assembly_name)
 
 describe "(Staging And Deploying Assemblies) Test Case 10: Stage assembly, check workflow info, list components with deps, push assembly updates, push component module updates" do
 

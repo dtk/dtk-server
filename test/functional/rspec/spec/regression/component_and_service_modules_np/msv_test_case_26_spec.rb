@@ -19,7 +19,7 @@ local_component_module_name = 'r8:apache'
 service_module_filesystem_location = '~/dtk/service_modules/r8'
 component_module_filesystem_location = '~/dtk/component_modules/r8'
 
-dtk_common = DtkCommon.new('', '')
+dtk_common = Common.new('', '')
 
 describe "(Modules, Services and Versioning) Test Case 26: NEG - Import new service module but its referenced component module exists locally but not on server" do
 

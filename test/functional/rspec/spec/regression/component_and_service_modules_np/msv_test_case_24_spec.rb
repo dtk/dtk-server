@@ -22,7 +22,7 @@ service_module_filesystem_location = '~/dtk/service_modules/r8'
 component_module_filesystem_location = '~/dtk/component_modules/r8'
 components_list_to_check = ['apache','stdlib']
 
-dtk_common = DtkCommon.new('', '')
+dtk_common = Common.new('', '')
 
 describe "(Modules, Services and Versioning) Test Case 24: Import new service module but all component modules for that service module already exist on server and locally" do
 

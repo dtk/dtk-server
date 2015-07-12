@@ -17,7 +17,7 @@ component_name_1 = 'bootstrap::sink'
 component_name_2 = 'bootstrap::source'
 component_module_namespace = 'r8'
 
-dtk_common = DtkCommon.new('', '')
+dtk_common = Common.new('', '')
 
 describe "(Workspace) Test Case 6: Create one node, add two components in it (list components), delete one component (list components again) and purge workspace content" do
 

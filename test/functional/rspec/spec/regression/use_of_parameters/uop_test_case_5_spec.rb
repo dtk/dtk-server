@@ -18,7 +18,7 @@ node_name = 'node1'
 cent_os = "centos6.4"
 centos_memory_size = 'm1.small'
 
-dtk_common = DtkCommon.new(service_name, assembly_name)
+dtk_common = Common.new(service_name, assembly_name)
 
 describe "(Use Of Parameters) Test Case 5: Change optional params on existing attributes in service nodes (values were previously defined)" do
 

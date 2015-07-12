@@ -14,7 +14,7 @@ STDOUT.sync = true
 service_name = 'af_test_case_1_instance'
 service_module_namespace = "test"
 assembly_name = 'action_module::multiple-commands'
-dtk_common = DtkCommon.new(service_name, assembly_name)
+dtk_common = Common.new(service_name, assembly_name)
 
 expected_output_1_1 = {
 	:command => "ls -l /usr/share/mcollective",

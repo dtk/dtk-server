@@ -70,7 +70,7 @@ def install_component_module(component_module_remote)
   return pass
 end
 
-dtk_common = DtkCommon.new('', '')
+dtk_common = Common.new('', '')
 
 service_module_deleted = dtk_common.delete_service_module(service_module)
 service_module_deleted_local = delete_service_module_from_local(service_module_filesystem_location, service_module.split(":").last)

@@ -18,7 +18,7 @@ new_component_module_filesystem_location_1 = "~/dtk/test_modules/new_namespace_1
 new_component_module_filesystem_location_2 = "~/dtk/test_modules/new_namespace_2"
 local_component_module_filesystem_location = "~/dtk/test_modules/local"
 
-dtk_common = DtkCommon.new('', '')
+dtk_common = Common.new('', '')
 
 describe "(Modules, Services and Versioning) Test Case 34: Create test module in default namespace and in two different namespaces" do
 

@@ -35,7 +35,7 @@ puppet_file_name2 = "sink.pp"
 
 $assembly_id = 0
 
-dtk_common = DtkCommon.new(assembly_name, assembly_template)
+dtk_common = Common.new(assembly_name, assembly_template)
 
 describe "(Component Module DSL) Test Case 7: Converge assembly with modified module (added new component and new attribute)" do
 

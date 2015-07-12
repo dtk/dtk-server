@@ -19,7 +19,7 @@ git_ssh_repo_url_2 = "git@github.com:example42/puppet-yum.git"
 local_component_module_name_2 = "local:yum"
 component_module_filesystem_location = "~/dtk/component_modules/local"
 
-dtk_common = DtkCommon.new('', '')
+dtk_common = Common.new('', '')
 
 describe "(Modules, Services and Versioning) Test Case 29: Import component module A and then component module B when component module B has dependency on component module A" do
 

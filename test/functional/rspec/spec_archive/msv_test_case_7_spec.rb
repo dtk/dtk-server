@@ -17,7 +17,7 @@ module_namespace = "dtk17"
 module_filesystem_location = "~/dtk/component_modules"
 $assembly_id = 0
 
-dtk_common = DtkCommon.new(assembly_name, assembly_template)
+dtk_common = Common.new(assembly_name, assembly_template)
 
 describe "(Modules, Services and Versioning) Test Case 7: Import new module from remote repo and then import same version-ed module from remote" do
 

@@ -18,7 +18,7 @@ component_name = 'stdlib'
 component_module_namespace = 'r8'
 port_to_check = 22
 
-dtk_common = DtkCommon.new('', '')
+dtk_common = Common.new('', '')
 
 describe "(Workspace) Test Case 4: Create two nodes, add component in both of them, converge workspace and check netstats and task info output" do
 

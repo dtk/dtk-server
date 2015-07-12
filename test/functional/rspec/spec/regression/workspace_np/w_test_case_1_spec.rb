@@ -19,7 +19,7 @@ info_to_check_1 = 'ec2_public_address'
 info_to_check_2 = 'display_name: test'
 info_to_check_3 = 'stdlib'
 
-dtk_common = DtkCommon.new('', '')
+dtk_common = Common.new('', '')
 
 describe "(Workspace) Test Case 1: Create one node, add component in it, converge workspace, inspect info output and task output and purge workspace content" do
 

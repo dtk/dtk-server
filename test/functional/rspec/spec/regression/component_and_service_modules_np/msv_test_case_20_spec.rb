@@ -20,7 +20,7 @@ component_module_filesystem_location = '~/dtk/component_modules/r8'
 component_module_name = 'apache'
 local_component_module_name = 'r8:apache'
 
-dtk_common = DtkCommon.new('', '')
+dtk_common = Common.new('', '')
 
 describe "(Modules, Services and Versioning) Test Case 20: Import service module from remote repo and check its corresponding assemblies" do
 

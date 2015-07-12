@@ -21,7 +21,7 @@ component_module_namespace = "dtk17"
 local_component_module_name = "dtk17:test_module"
 component_module_filesystem_location = "~/dtk/component_modules/dtk17"
 
-dtk_common = DtkCommon.new(service_name, assembly_name)
+dtk_common = Common.new(service_name, assembly_name)
 
 describe "(Modules, Services and Versioning) Test Case 1: Import component module from remote and use this component in assembly" do
 

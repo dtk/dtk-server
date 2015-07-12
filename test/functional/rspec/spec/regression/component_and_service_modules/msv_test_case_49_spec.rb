@@ -18,7 +18,7 @@ dependency_component_module_name = "stahnma:epel"
 component_module_filesystem_location = '~/dtk/component_modules/test'
 dependency_component_module_filesystem_location = '~/dtk/component_modules/stahnma'
 grep_patterns_for_module_refs = ['epel:','namespace: stahnma']
-dtk_common = DtkCommon.new('', '')
+dtk_common = Common.new('', '')
 
 describe "(Modules, Services and Versioning) Test Case 49: Import puppet forge (erlang) with specifying namespace and check its dependencies are installed correctly" do
 

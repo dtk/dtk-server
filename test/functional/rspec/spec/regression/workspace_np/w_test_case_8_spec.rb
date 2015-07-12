@@ -23,7 +23,7 @@ local_service_module_name = 'r8:bootstrap'
 namespace = 'r8'
 assembly_name = 'workspace_assembly'
 
-dtk_common = DtkCommon.new('', '')
+dtk_common = Common.new('', '')
 
 describe "(Workspace) Test Case 8: Create two nodes, add components in both of them, and create assembly from the workspace content in existing service module" do
 

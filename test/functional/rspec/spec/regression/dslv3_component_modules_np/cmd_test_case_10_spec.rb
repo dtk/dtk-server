@@ -16,7 +16,7 @@ file_for_change_location = "./spec/regression/dslv3_component_modules_np/resourc
 file_for_change = "dtk.model.yaml"
 fail_message = "incorrect value for required field - falsee"
 expected_error_message = "ERROR"
-dtk_common = DtkCommon.new('', '')
+dtk_common = Common.new('', '')
 
 describe "(Component Module DSL) Test Case 10: NEG - Have attribute with required field set to - falsee in dtk.model.yaml file and push-clone-changes to server" do
 

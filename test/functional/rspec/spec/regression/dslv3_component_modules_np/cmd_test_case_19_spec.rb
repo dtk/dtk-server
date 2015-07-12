@@ -18,7 +18,7 @@ false_boolean_value = "falsee"
 fail_message = "incorrect value for boolean type attribute: #{false_boolean_value}"
 expected_error_message = "[ERROR] Attribute (boolean_attr) has default value (\"#{false_boolean_value}\") that does not match its type (boolean)"
 
-dtk_common = DtkCommon.new("", "")
+dtk_common = Common.new("", "")
 
 describe "(Component Module DSL) Test Case 19: NEG - dtk.model.yaml with invalid boolean type attribute value" do
 

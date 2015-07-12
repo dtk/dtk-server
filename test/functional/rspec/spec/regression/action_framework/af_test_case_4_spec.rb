@@ -14,7 +14,7 @@ STDOUT.sync = true
 service_name = 'af_test_case_4_instance'
 service_module_namespace = "test"
 assembly_name = 'action_module::node-group'
-dtk_common = DtkCommon.new(service_name, assembly_name)
+dtk_common = Common.new(service_name, assembly_name)
 
 expected_output_1 = {
 	:command => "/bin/sh /etc/puppet/modules/action_module/dtk/bash_tests/test_bash.sh",

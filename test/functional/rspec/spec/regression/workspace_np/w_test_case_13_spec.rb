@@ -16,11 +16,11 @@ node_template = 'precise-micro'
 component_name = 'stdlib'
 component_module_namespace = 'r8'
 
-dtk_common = DtkCommon.new('', '')
+dtk_common = Common.new('', '')
 
 def converge_service_and_cancel_tasks(workspace_id)
 	puts "Converge service and cancel tasks:", "----------------------------------"
-	dtk_common = DtkCommon.new('', '')
+	dtk_common = Common.new('', '')
 	tasks_cancelled = false
 
 	puts "Converge process for service with id #{workspace_id} started!"
@@ -32,7 +32,7 @@ def converge_service_and_cancel_tasks(workspace_id)
 	sleep 5
 
 	cancel_task_response = dtk_common.send_request('/rest/task/cancel_task', {:task_id => task_id})
-	task_status_response = dtk_common.send_request('/rest/task/status', {:task_id=> task_id})
+	task_status_response = dtk_common.send_request('/rest/assembly/task_status', {:assembly_id=> workspace_id})
 	ap task_execute_response
 
 	if task_status_response.to_s.include? 'cancelled'

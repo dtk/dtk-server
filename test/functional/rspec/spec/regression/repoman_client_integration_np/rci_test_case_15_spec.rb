@@ -27,7 +27,7 @@ permissions = {
 	:other_p => false,
 }
 
-dtk_common = DtkCommon.new('', '')
+dtk_common = Common.new('', '')
 
 describe "(Repoman client integration) Test Case 15: NEG - list --remote negative scenarios where component module is not visible based on permissions set on the module" do
 

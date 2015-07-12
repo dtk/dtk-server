@@ -361,8 +361,8 @@ module AssemblyAndServiceOperationsMixin
 			while ((task_status.include? 'executing') && (end_loop == false))
 				sleep 20
 				count += 1
-				response_task_status = send_request('/rest/task/status', {'task_id'=> task_id})
-				status = response_task_status['data']['status']
+				response_task_status = send_request('/rest/assembly/task_status', {'assembly_id'=> service_id})
+				status = response_task_status['data'].first['status']
 				if (status.include? 'succeeded')
 					task_status = status
 					service_converged = true
@@ -460,8 +460,8 @@ module AssemblyAndServiceOperationsMixin
 			while ((task_status.include? 'executing') && (end_loop == false))
 				sleep 20
 				count += 1
-				response_task_status = send_request('/rest/task/status', {'task_id'=> task_id})
-				status = response_task_status['data']['status']
+				response_task_status = send_request('/rest/assembly/task_status', {'assembly_id'=> service_id})
+				status = response_task_status['data'].first['status']
 				if (status.include? 'succeeded')
 					task_status = status
 					service_converged = true
@@ -741,5 +741,30 @@ module AssemblyAndServiceOperationsMixin
 		end
 		puts ""
 		return runs
+	end
+
+	def verify_flags(service_id, component_module_name, update_flag, update_saved_flag)
+		puts "Verify update and update saved flags:", "---------------------------------"
+		flags_verified = false
+		response = send_request('/rest/assembly/info_about', {:assembly_id=>service_id, :subtype=>:instance, :about=>'modules', :detail_to_include=>[:version_info]})
+		pretty_print_JSON(response)
+		component_module_details = response['data'].select { |x| x['display_name'] == component_module_name }.first
+		if !component_module_details.nil?
+			puts "Component module found! Check flags..."
+			pretty_print_JSON(component_module_details)
+			unless component_module_details.key?('local_copy') || component_module_details.key?('update_saved')
+				puts "Flags dont not exist in the output"
+			end
+			if component_module_details['local_copy'] == update_flag && component_module_details['update_saved'] == update_saved_flag
+				puts "Update and update saved flags match the comparison"
+				flags_verified = true
+			else
+				puts "Update and update saved flags does not match the comparison"
+			end
+		else
+			puts "Component module was not found!"
+		end
+		puts ""
+		flags_verified
 	end
 end

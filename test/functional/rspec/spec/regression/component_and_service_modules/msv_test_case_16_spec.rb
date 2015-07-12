@@ -15,7 +15,7 @@ component_module_name = "tftp"
 git_ssh_repo_url = "git@github.com:puppetlabs/puppetlabs-tftp.git-incorrect"
 local_component_module_name = "local:tftp"
 
-dtk_common = DtkCommon.new('', '')
+dtk_common = Common.new('', '')
 
 describe "(Modules, Services and Versioning) Test Case 16: NEG - Import component module from incorrect git repo url" do
 

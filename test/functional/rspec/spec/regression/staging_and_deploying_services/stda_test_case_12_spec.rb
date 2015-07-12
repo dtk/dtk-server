@@ -20,7 +20,7 @@ component_name = 'r8:ruby'
 components = ['ruby','test1/ruby']
 attribute_name = 'ruby/version'
 attribute_value = '2.1.2'
-dtk_common = DtkCommon.new(service_name, assembly_name)
+dtk_common = Common.new(service_name, assembly_name)
 
 describe "(Staging And Deploying Assemblies) Test Case 12: Ability to add and delete components on assembly level and set their attributes" do
 

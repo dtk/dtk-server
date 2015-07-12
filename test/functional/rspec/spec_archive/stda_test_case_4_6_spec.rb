@@ -15,7 +15,7 @@ STDOUT.sync = true
 service_name_1 = 'stda_test_case_4_instance'
 service_name_1_rename = 'stda_test_case_4_instance_rename'
 assembly_name = 'bootstrap::test1'
-dtk_common = DtkCommon.new(service_name_1, assembly_name)
+dtk_common = Common.new(service_name_1, assembly_name)
 
 describe "(Staging And Deploying Assemblies) Test Case 4 6: Renaming service and renaming it to workspace" do
 

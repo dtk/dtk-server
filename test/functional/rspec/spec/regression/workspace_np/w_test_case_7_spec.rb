@@ -14,7 +14,7 @@ STDOUT.sync = true
 attribute_name = 'test'
 attribute_value = '10'
 
-dtk_common = DtkCommon.new('', '')
+dtk_common = Common.new('', '')
 
 describe "(Workspace) Test Case 7: Create attribute on workspace (list attributes), set value for this attribute and then unset the value and purge workspace" do
 

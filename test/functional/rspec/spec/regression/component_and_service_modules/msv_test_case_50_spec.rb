@@ -16,7 +16,7 @@ dependency_module_name = "augeasproviders_core"
 dependency_component_module_name = "herculesteam:augeasproviders_core"
 component_module_filesystem_location = '~/dtk/component_modules/herculesteam'
 grep_patterns_for_module_refs = ['augeasproviders_core:','namespace: herculesteam']
-dtk_common = DtkCommon.new('', '')
+dtk_common = Common.new('', '')
 
 describe "(Modules, Services and Versioning) Test Case 50: Import puppet forge (augeasproviders_apache) without specifying namespace and check its dependencies are installed correctly" do
 

@@ -18,7 +18,7 @@ component_module_namespace = 'r8'
 puppet_log_location = '/var/log/puppet/last.log'
 grep_pattern = 'transaction'
 
-dtk_common = DtkCommon.new('', '')
+dtk_common = Common.new('', '')
 
 describe "(Workspace) Test Case 12: Create one node, add component in it, converge workspace and grep puppet log from node" do
 

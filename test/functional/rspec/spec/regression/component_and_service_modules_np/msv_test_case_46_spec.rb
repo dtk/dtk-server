@@ -30,7 +30,7 @@ dtk_model_yaml_file_location_2 = "~/dtk/component_modules/r8/concat/dtk.model.ya
 file_for_add = "module_refs.yaml"
 file_for_remove = "module_refs.yaml"
 
-dtk_common = DtkCommon.new('', '')
+dtk_common = Common.new('', '')
 
 describe "(Modules, Services and Versioning) Test Case 46: Install service module with dependency to two components and both of these components have dependency to two different components" do
 

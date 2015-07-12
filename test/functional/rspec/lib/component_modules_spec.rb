@@ -731,3 +731,49 @@ shared_context "NEG - Push to remote" do |component_module, provider_name, error
     expect(pass).to eq(true)
   end
 end
+
+shared_context "Pull base component module" do |dtk_common, component_module|
+  it "pulls changes from base component module to instance component module" do
+    changes_pulled = dtk_common.pull_base_component_module(dtk_common.service_id, component_module)
+    expect(changes_pulled).to eq(true)
+  end
+end
+
+shared_context "Push component module updates" do |dtk_common, component_module|
+  it "push changes from instance component module to base component module" do
+    changes_pushed = dtk_common.push_component_module_updates(dtk_common.service_id, component_module)
+    expect(changes_pushed).to eq(true)
+  end
+end
+
+shared_context "Make change on instance component" do |instance_component_filesystem_location, command_to_execute, command_to_verify, message|
+  it "makes change by executing command #{command_to_execute}" do
+    puts "Make change on instance component:", "------------------------------------"
+    pass = false
+    `cd #{instance_component_filesystem_location} && #{command_to_execute} && cd -`
+    value = `#{command_to_verify} #{instance_component_filesystem_location}/#{message}`
+    puts value
+    pass = true if value.include?(message)
+    expect(pass).to eq(true)
+  end
+end
+
+shared_context "Verify update/update saved flags" do |dtk_common, component_module_name, update_flag, update_saved_flag|
+  it "verifies that update = #{update_flag} and update_saved = #{update_saved_flag}" do
+    flags_verified = dtk_common.verify_flags(dtk_common.service_id, component_module_name, update_flag, update_saved_flag)
+    expect(flags_verified).to eq(true)
+  end
+end
+
+shared_context "Verify change on base component module" do |component_module_filesystem_location, component_module_name, command_to_verify, message|
+  it "verifies that change has been applied to component module by issueing command #{command_to_verify}" do
+    puts "Verify change on base component module:", "------------------------------------"
+    pass = false
+    value = `#{command_to_verify} #{component_module_filesystem_location}/#{component_module_name}/#{message}`
+    puts value
+    pass = true if !value.include?("No such file or directory")
+    expect(pass).to eq(true)
+  end
+end
+
+

@@ -25,7 +25,7 @@ attr_param_list = Array.new
 attr_param_list << 'memory_size'
 attr_param_list << 'os_identifier'
 
-dtk_common = DtkCommon.new(service_name, assembly_name)
+dtk_common = Common.new(service_name, assembly_name)
 
 def check_param_existance_on_node(dtk_common, node_name, param_name_list)
 	param_check = true

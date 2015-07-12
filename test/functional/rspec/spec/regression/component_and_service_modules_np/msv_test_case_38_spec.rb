@@ -19,7 +19,7 @@ r8_component_module_filesystem_location = '~/dtk/component_modules/r8'
 test_component_module_filesystem_location = '~/dtk/component_modules/test'
 test2_component_module_filesystem_location = '~/dtk/component_modules/test2'
 
-dtk_common = DtkCommon.new('', '')
+dtk_common = Common.new('', '')
 
 describe "(Modules, Services and Versioning) Test Case 38: Import to two different namespaces (component module)" do
 

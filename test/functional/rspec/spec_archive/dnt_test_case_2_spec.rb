@@ -16,7 +16,7 @@ assembly_name = 'bakir_test::bigtop_namenode'
 namenode_port = 8020
 namenode_web_port = 50070
 
-dtk_common = DtkCommon.new(service_name, assembly_name)
+dtk_common = Common.new(service_name, assembly_name)
 
 describe "(Different Node Templates) Test Case 2: (OS: CentOS, Namenode: BigTop) Check possibility to add OS and namenode components and deploy assembly" do
 

@@ -19,7 +19,7 @@ r8_service_module_filesystem_location = '~/dtk/service_modules/r8'
 test_service_module_filesystem_location = '~/dtk/service_modules/test'
 test2_service_module_filesystem_location = '~/dtk/service_modules/test2'
 
-dtk_common = DtkCommon.new('', '')
+dtk_common = Common.new('', '')
 
 describe "(Modules, Services and Versioning) Test Case 39: Import to two different namespaces (service module)" do
 

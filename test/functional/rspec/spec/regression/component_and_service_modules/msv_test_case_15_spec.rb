@@ -16,7 +16,7 @@ git_ssh_repo_url = "git@github.com:puppetlabs/puppetlabs-tftp.git"
 imported_component_module_name = "local:tftp"
 component_module_filesystem_location = "~/dtk/component_modules/local"
 
-dtk_common = DtkCommon.new('', '')
+dtk_common = Common.new('', '')
 
 describe "(Modules, Services and Versioning) Test Case 15: Import component module from git repo url" do
 

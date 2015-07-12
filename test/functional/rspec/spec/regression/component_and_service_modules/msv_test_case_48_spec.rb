@@ -13,7 +13,7 @@ require './lib/test_modules_spec'
 
 existing_modules_namespace_filter = "r8"
 non_existing_modules_namespace_filter = "non_existing_namespace"
-dtk_common = DtkCommon.new('', '')
+dtk_common = Common.new('', '')
 
 describe "(Modules, Services and Versioning) Test Case 48: List component, service and test modules on local and remote with filter" do
 

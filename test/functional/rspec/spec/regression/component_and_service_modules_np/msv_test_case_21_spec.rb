@@ -14,7 +14,7 @@ component_module_namespace = "r8"
 local_component_module_name = "r8:apache"
 component_module_filesystem_location = "~/dtk/component_modules/r8"
 
-dtk_common = DtkCommon.new('', '')
+dtk_common = Common.new('', '')
 
 describe "(Modules, Services and Versioning) Test Case 21: Ability to list components and all attributes from the specific component module" do
 

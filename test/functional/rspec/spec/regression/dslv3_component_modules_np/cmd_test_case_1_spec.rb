@@ -16,7 +16,7 @@ component_module_filesystem_location = "~/dtk/component_modules/dtk17"
 file_for_change_location = "./spec/regression/dslv3_component_modules_np/resources/cmd_test_case_1_dtk.model.yaml"
 file_for_change = "dtk.model.yaml"
 
-dtk_common = DtkCommon.new("", "")
+dtk_common = Common.new("", "")
 
 describe "(Component Module DSL) Test Case 1: Remove existing component from dtk.model.yaml file, push-clone-changes to server and list components to see the effect of remove" do
 

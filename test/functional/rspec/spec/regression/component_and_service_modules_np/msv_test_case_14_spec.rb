@@ -17,7 +17,7 @@ component_module_namespace = "r8"
 imported_component_module_name = "r8:apache"
 component_module_filesystem_location = "~/dtk/component_modules/r8"
 
-dtk_common = DtkCommon.new('', '')
+dtk_common = Common.new('', '')
 
 describe "(Modules, Services and Versioning) Test Case 14: Import component module from r8 repo and export to default tenant namespace" do
 

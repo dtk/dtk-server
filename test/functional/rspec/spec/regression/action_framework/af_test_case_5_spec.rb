@@ -14,7 +14,7 @@ STDOUT.sync = true
 service_name = 'af_test_case_5_instance'
 service_module_namespace = "test"
 assembly_name = 'action_module::file-positioning-and-clauses'
-dtk_common = DtkCommon.new(service_name, assembly_name)
+dtk_common = Common.new(service_name, assembly_name)
 
 expected_output_1 = {
 	:command => "mkdir /tmp/test1 && rm -rf /tmp/test1",

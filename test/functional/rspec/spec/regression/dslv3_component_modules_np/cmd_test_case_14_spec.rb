@@ -19,7 +19,7 @@ attribute_value = nil
 file_for_change_location = "./spec/regression/dslv3_component_modules_np/resources/cmd_test_case_14_dtk.model.yaml"
 file_for_change = "dtk.model.yaml"
 
-dtk_common = DtkCommon.new("", "")
+dtk_common = Common.new("", "")
 
 describe "(Component Module DSL) Test Case 14: dtk.model.yaml with empty array and hash type attribute" do
 

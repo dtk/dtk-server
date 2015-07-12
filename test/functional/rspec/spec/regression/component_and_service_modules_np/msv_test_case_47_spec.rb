@@ -25,7 +25,7 @@ file_for_change_location = "./spec/regression/component_and_service_modules_np/r
 file_for_add = "module_refs.yaml"
 file_for_remove = "module_refs.yaml"
 
-dtk_common = DtkCommon.new('', '')
+dtk_common = Common.new('', '')
 
 describe "(Modules, Services and Versioning) Test Case 47: Install service module with dependency to one component and that component has dependency to test component" do
 

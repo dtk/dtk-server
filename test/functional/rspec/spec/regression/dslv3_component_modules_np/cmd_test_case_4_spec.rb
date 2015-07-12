@@ -21,7 +21,7 @@ component_module_filesystem_location = "~/dtk/component_modules/dtk17"
 file_for_change_location = "./spec/regression/dslv3_component_modules_np/resources/cmd_test_case_4_dtk.model.yaml"
 file_for_change = "dtk.model.yaml"
 
-dtk_common = DtkCommon.new(service_name, assembly_name)
+dtk_common = Common.new(service_name, assembly_name)
 
 describe "(Component Module DSL) Test Case 4: Remove existing component attribute from dtk.model.yaml file, push-clone-changes to server and check if component attribute present" do
 

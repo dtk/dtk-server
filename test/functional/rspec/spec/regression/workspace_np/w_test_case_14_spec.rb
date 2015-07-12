@@ -17,7 +17,7 @@ node_template = 'precise-micro'
 component_name = 'stdlib'
 component_module_namespace = 'r8'
 
-dtk_common = DtkCommon.new('', '')
+dtk_common = Common.new('', '')
 
 describe "(Workspace) Test Case 14: Create two nodes, add components in it, converge, stop both nodes and then start again" do
 

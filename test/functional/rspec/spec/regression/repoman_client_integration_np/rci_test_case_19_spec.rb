@@ -30,7 +30,7 @@ permissions = {
 	:other_p => false,
 }
 
-dtk_common = DtkCommon.new('', '')
+dtk_common = Common.new('', '')
 
 describe "(Repoman client integration) Test Case 19: add/remove collaborators by users and useremails (User A is owner and belongs to User group A which is set on module, intial permissions are: P/None/None)" do
 

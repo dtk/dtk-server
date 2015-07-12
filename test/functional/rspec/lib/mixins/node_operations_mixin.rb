@@ -394,7 +394,7 @@ module NodeOperationsMixin
 			while task_status.include? 'executing' || end_loop == false
 				sleep 30
 				count += 1
-				response_task_status = send_request('/rest/task/status', {'task_id'=> task_id})
+				response_task_status = send_request('/rest/task/status', {'assembly'=> task_id})
 				status = response_task_status['data']['status']
 				if (status.include? 'succeeded')
 					task_status = status

@@ -14,7 +14,7 @@ local_component_module_name = 'dtk17:temp'
 component_module_filesystem_location = "~/dtk/component_modules/dtk17"
 file_for_change_location = "./spec/regression/dslv3_component_modules_np/resources/cmd_test_case_9_dtk.model.yaml"
 file_for_change = "dtk.model.yaml"
-dtk_common = DtkCommon.new('', '')
+dtk_common = Common.new('', '')
 
 describe "(Component Module DSL) Test Case 9: Add new attribute mapping in dependencies section in dtk.model.yaml file and push-clone-changes to server" do
 

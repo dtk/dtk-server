@@ -18,7 +18,7 @@ service_module_name = 'new_service'
 local_service_module_name = 'local:new_service'
 local_namespace = "local"
 
-dtk_common = DtkCommon.new(service_name, assembly_name)
+dtk_common = Common.new(service_name, assembly_name)
 
 describe "(Modules, Services and Versioning) Test Case 4: Get list of all assemblies for particular service module" do
 

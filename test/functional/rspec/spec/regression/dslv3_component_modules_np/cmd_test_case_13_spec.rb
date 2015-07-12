@@ -15,7 +15,7 @@ component_module_filesystem_location = "~/dtk/component_modules/dtk17"
 file_for_change_location = "./spec/regression/dslv3_component_modules_np/resources/cmd_test_case_13_dtk.model.yaml"
 file_for_change = "dtk.model.yaml"
 
-dtk_common = DtkCommon.new("", "")
+dtk_common = Common.new("", "")
 
 describe "(Component Module DSL) Test Case 13: dtk.model.yaml with all correct values for supported types (string, integer, boolean, hash, array, port)" do
 

@@ -14,7 +14,7 @@ STDOUT.sync = true
 node_name = 'precise-micro'
 staged_node_name = 'dnt_test_case_4_instance'
 
-dtk_common = DtkCommon.new('', '')
+dtk_common = Common.new('', '')
 
 describe "(Different Node Templates) Test Case 4: Stage node template and converge it (simple)" do
 

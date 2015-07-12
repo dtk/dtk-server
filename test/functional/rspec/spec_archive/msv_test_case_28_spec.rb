@@ -16,7 +16,7 @@ git_ssh_repo_url = "git@github.com:puppetlabs/puppetlabs-firewall.git"
 module_filesystem_location = "~/dtk/component_modules"
 $assembly_id = 0
 $metadata = ""
-dtk_common = DtkCommon.new('', '')
+dtk_common = Common.new('', '')
 
 def get_metadata(module_name)
 	db_config = YAML::load(File.open('./config/config.yml'))

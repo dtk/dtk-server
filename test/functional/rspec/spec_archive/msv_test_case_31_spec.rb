@@ -19,7 +19,7 @@ module_filesystem_location = "~/dtk/component_modules"
 $assembly_id = 0
 $metadata = ""
 new_module_metadata = "{:name=>\"puppetlabs-firewall\", :version=>\"0.0.2\", :source=>\"git://github.com/puppetlabs/puppetlabs-firewall.git\", :author=>\"puppetlabs\", :license=>\"ASL 2.0\", :summary=>\"Firewall Module\", :description=>\"Manages Firewalls such as iptables\", :project_page=>\"http://forge.puppetlabs.com/puppetlabs/firewall\"}"
-dtk_common = DtkCommon.new('', '')
+dtk_common = Common.new('', '')
 
 def get_metadata(module_name)
 	db_config = YAML::load(File.open('./config/config.yml'))

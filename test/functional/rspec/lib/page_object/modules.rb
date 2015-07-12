@@ -1,7 +1,7 @@
 class Modules < Main
-    
+
   def click_on_edit_module(module_name)
-    @session.fill_in 'search_term', :with => module_name + "\n"
+    @session.fill_in 'search_term', with: module_name + "\n"
     @session.within(:table) do
       @session.find("//tr[td[.=\"#{module_name}\"]]/td/a/span[.=\"Edit\"]").click
     end
@@ -14,7 +14,7 @@ class Modules < Main
   end
 
   def set_module_owner_user(user)
-    @session.select(user, :from => "repo_client_dtk_open_struct_user_id")
+    @session.select(user, from: 'repo_client_dtk_open_struct_user_id')
   end
 
   def set_module_owner_group(usergroup)
@@ -39,7 +39,7 @@ class Modules < Main
     end
   end
 
-  def set_module_permissions(permissions={})
+  def set_module_permissions(permissions = {})
     permissions.each do |key, value|
       if value
         @session.check(key.to_s)

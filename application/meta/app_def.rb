@@ -1,6 +1,6 @@
 
 {
-  :model_list=> [
+  model_list: [
     :attribute_link,
     :attribute,
     :component,

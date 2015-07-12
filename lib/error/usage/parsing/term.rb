@@ -1,7 +1,7 @@
-module DTK; class ErrorUsage 
+module DTK; class ErrorUsage
   class Parsing
     class Term < self
-      def initialize(term,type_as_symbol=nil)
+      def initialize(term, type_as_symbol = nil)
         msg =
           if type_as_symbol
             "Cannot parse #{type_print_form(type_as_symbol)} term: #{term}"
@@ -10,9 +10,11 @@ module DTK; class ErrorUsage
           end
           super(msg)
       end
-     private
+
+      private
+
       def type_print_form(type_as_symbol)
-        type_as_symbol.to_s.gsub(/_/,' ')
+        type_as_symbol.to_s.gsub(/_/, ' ')
       end
     end
   end

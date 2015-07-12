@@ -1,63 +1,66 @@
 # TODO: This needed to be simplified and cleaned up
 module DTK
   class HashObject < ::Hash
-    r8_nested_require('hash_object','model')
-    r8_nested_require('hash_object','auto_viv')
+    r8_nested_require('hash_object', 'model')
+    r8_nested_require('hash_object', 'auto_viv')
 
-    def initialize(initial_val=nil,convert_initial=false,&block)
+    def initialize(initial_val = nil, convert_initial = false, &block)
       block ? super(&block) : super()
       if initial_val
         replace(convert_initial ? convert_nested_hashes(initial_val) : initial_val)
       end
     end
-    
+
     def slice(*slice_keys)
-      slice_keys.inject(HashObject.new()) do |h,k|
-        if k.kind_of?(Hash)
+      slice_keys.inject(HashObject.new()) do |h, k|
+        if k.is_a?(Hash)
           source_key = k.keys.first
           target_key = k.values.first
-          self.has_key?(source_key) ? h.merge(target_key => self[source_key]) : h
+          self.key?(source_key) ? h.merge(target_key => self[source_key]) : h
         else
-          self.has_key?(k) ? h.merge(k => self[k]) : h
+          self.key?(k) ? h.merge(k => self[k]) : h
         end
       end
     end
 
-    def set?(k,v)
-      self[k] = v unless has_key?(k)
+    def set?(k, v)
+      self[k] = v unless key?(k)
     end
 
-    def is_complete?()
+    def is_complete?
       false
     end
-    def do_not_extend()
+
+    def do_not_extend
       false
     end
-   private
+
+    private
+
     # converts hashes that are not a HashObject or a child of HashObject
     def convert_nested_hashes(obj)
-      if obj.kind_of?(HashObject)
+      if obj.is_a?(HashObject)
         obj #no encoding needed
-      elsif obj.kind_of?(Hash)
+      elsif obj.is_a?(Hash)
         ret = self.class.new()
-        obj.each{|k,v| ret[k] = convert_nested_hashes(v)}
+        obj.each { |k, v| ret[k] = convert_nested_hashes(v) }
         ret
-      elsif obj.kind_of?(Array)
+      elsif obj.is_a?(Array)
         ret = ArrayClass().new
-        obj.each{|v|ret << convert_nested_hashes(v)}
+        obj.each { |v| ret << convert_nested_hashes(v) }
         ret
       else
-        obj        
+        obj
       end
     end
 
-    def ArrayClass()
+    def ArrayClass
       ::Array
     end
   end
 
   class SimpleHashObject < ::Hash
-    def initialize(initial_val=nil,&block)
+    def initialize(initial_val = nil, &block)
       block ? super(&block) : super()
       replace(initial_val) if initial_val
     end
@@ -71,14 +74,14 @@ module DTK
     end
 
   class SimpleOrderedHash < simple_ordered_hash_parent
-    def initialize(elements=[])
+    def initialize(elements = [])
       super()
-      elements = [elements] unless elements.kind_of?(Array)
-      elements.each{|el|self[el.keys.first] = el.values.first}
+      elements = [elements] unless elements.is_a?(Array)
+      elements.each { |el| self[el.keys.first] = el.values.first }
     end
-    
+
     # set unless value is nill
-    def set_unless_nil(k,v)
+    def set_unless_nil(k, v)
       self[k] = v unless v.nil?
     end
 
@@ -86,7 +89,7 @@ module DTK
       kv_array.each do |kv|
         k = kv.keys.first
         v = kv.values.first
-        set_unless_nil(k,v)
+        set_unless_nil(k, v)
       end
       self
     end
@@ -95,22 +98,22 @@ module DTK
   class PrettyPrintHash < SimpleOrderedHash
     # field with '?' suffix means optioanlly add depending on whether name present and non-null in source
     # if block is given then apply to source[name] rather than returning just source[name]
-    def add(model_object,*keys,&block)
+    def add(model_object, *keys, &block)
       keys.each do |key|
         # if marked as optional skip if not present
         if key.to_s =~ /(^.+)\?$/
-          key = $1.to_sym
+          key = Regexp.last_match(1).to_sym
           next unless model_object[key]
         end
         # special treatment of :id
-        val = (key == :id ? model_object.id : model_object[key]) 
+        val = (key == :id ? model_object.id : model_object[key])
         self[key] = (block ? block.call(val) : val)
       end
       self
     end
 
     def slice(*keys)
-      keys.inject(self.class.new){|h,k|h.merge(k => self[k])}
+      keys.inject(self.class.new) { |h, k| h.merge(k => self[k]) }
     end
   end
 
@@ -118,29 +121,29 @@ module DTK
   class TSortHash < ::Hash
     # defining tsort on this
     include TSort
-    def initialize(initial_val=nil)
+    def initialize(initial_val = nil)
       super()
       replace(initial_val) if initial_val
     end
-    alias tsort_each_node each_key
+    alias_method :tsort_each_node, :each_key
     def tsort_each_child(node, &block)
       fetch(node).each(&block)
     end
   end
 
   # Used as input to data source normalizer
-  class DataSourceUpdateHash < HashObject::AutoViv  
+  class DataSourceUpdateHash < HashObject::AutoViv
     # for efficiency not initializing @completeness_info = nil
-    def constraints()
+    def constraints
       @completeness_info ? @completeness_info.constraints : nil
     end
 
-    def is_complete?()
+    def is_complete?
       @completeness_info ? @completeness_info.is_complete? : nil
-    end    
+    end
 
     # TODO: may want to make :apply_recursively = true be the default
-    def mark_as_complete(constraints={},opts={})
+    def mark_as_complete(constraints = {}, opts = {})
       if constraints.empty?
         @completeness_info ||= HashIsComplete.new()
       else
@@ -150,7 +153,7 @@ module DTK
       self
     end
 
-    def apply_recursively?()
+    def apply_recursively?
       @apply_recursively
     end
 
@@ -158,34 +161,35 @@ module DTK
       @completeness_info = HashIsComplete.new(constraints)
       self
     end
-  end 
+  end
 
   class HashCompletnessInfo
-    def is_complete?()
+    def is_complete?
       false
     end
-    def constraints()
+
+    def constraints
       nil
     end
   end
   class HashMayNotBeComplete < HashCompletnessInfo
   end
   class HashIsComplete < HashCompletnessInfo
-    def initialize(constraints={})
+    def initialize(constraints = {})
       @constraints = constraints
     end
-    def is_complete?()
+
+    def is_complete?
       true
     end
-    def constraints()
-      @constraints
-    end
+
+    attr_reader :constraints
   end
 
-  # Used as input to db update from hash 
+  # Used as input to db update from hash
   class DBUpdateHash < DataSourceUpdateHash
     # for efficiency not initializing @do_not_extend = false
-    def do_not_extend()
+    def do_not_extend
       @do_not_extend ? true : false
     end
   end
@@ -198,20 +202,18 @@ unless RUBY_VERSION =~ /^1\.9/ then ::Hash
     class OrderedHash < ::Hash
       def pretty_print(q)
         #      q.group(0, "#<OrderedHash", "}>") {
-        q.group(0,"","}") {
+        q.group(0, '', '}') do
           #        q.breakable " "
-          q.text "{"
-          q.group(1) {
-            q.seplist(self) {|pair|
+          q.text '{'
+          q.group(1) do
+            q.seplist(self) do|pair|
               q.pp pair.first
-              q.text "=>"
+              q.text '=>'
               q.pp pair.last
-            }
-          }
-        }
+            end
+          end
+        end
       end
     end
   end
 end
-
-

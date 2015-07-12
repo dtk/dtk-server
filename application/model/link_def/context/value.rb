@@ -1,24 +1,24 @@
 module DTK
   class LinkDef::Context
-    class Value 
-      r8_nested_require('value','component')
-      r8_nested_require('value','attribute_mixin') # must be before component_attribute and node_attribute
-      r8_nested_require('value','component_attribute')
-      r8_nested_require('value','node_attribute')
+    class Value
+      r8_nested_require('value', 'component')
+      r8_nested_require('value', 'attribute_mixin') # must be before component_attribute and node_attribute
+      r8_nested_require('value', 'component_attribute')
+      r8_nested_require('value', 'node_attribute')
       attr_reader :component
       def initialize(component_ref)
         @component_ref = component_ref
         @component = nil
       end
-      
-      def self.create(term,opts={})
+
+      def self.create(term, opts = {})
         case term[:type].to_sym
          when :component
           Component.new(term)
          when :component_attribute
-          ComponentAttribute.new(term,opts)
+          ComponentAttribute.new(term, opts)
          when :node_attribute
-          NodeAttribute.new(term,opts)
+          NodeAttribute.new(term, opts)
          else
           Log.error("unexpected type #{type}")
           nil
@@ -26,16 +26,16 @@ module DTK
       end
 
       # can be overwritten
-      def is_node_attribute?()
+      def is_node_attribute?
         false
       end
 
       # can be overwritten
-      def get_ng_member_attributes__clone_if_needed(opts={})
-        Array.new
+      def get_ng_member_attributes__clone_if_needed(_opts = {})
+        []
       end
 
-      def set_component_remote_and_local_value!(link,cmp_mappings)
+      def set_component_remote_and_local_value!(link, cmp_mappings)
         return if @component_ref.nil? #would fire if this is a NodeAttribute
         if @component_ref == link[:local_component_type]
           @component = cmp_mappings[:local]
@@ -49,10 +49,10 @@ module DTK
       end
 
       # no op unless overwritetn
-      def update_component_attr_index!(component_attr_index)
+      def update_component_attr_index!(_component_attr_index)
       end
       # overwritten
-      def value()
+      def value
       end
     end
   end

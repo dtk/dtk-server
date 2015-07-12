@@ -1,7 +1,7 @@
 module DTK
   module PuppetForge
-    r8_nested_require('puppet_forge','client')
-    r8_nested_require('puppet_forge','local_copy')
+    r8_nested_require('puppet_forge', 'client')
+    r8_nested_require('puppet_forge', 'local_copy')
 
     # user and name sepparator used by puppetforge
     MODULE_NAME_SEPARATOR = '-'
@@ -15,13 +15,12 @@ module DTK
       puppet_forge_namespace_and_module_name(pf_module_name).last
     end
 
-    def self.index(namespace,name)
+    def self.index(namespace, name)
       "#{namespace}-#{name}"
     end
 
     class Module
-
-      attr_reader   :path, :name, :is_dependency
+      attr_reader :path, :name, :is_dependency
       attr_accessor :namespace, :dependencies, :id
 
       def initialize(hash, is_dependency = false, type = :component_module, dtk_version = nil)
@@ -40,8 +39,8 @@ module DTK
         @id            = nil
       end
 
-      def index()
-        PuppetForge.index(@namespace,@name)
+      def index
+        PuppetForge.index(@namespace, @name)
       end
 
       def default_local_module_name
@@ -52,20 +51,19 @@ module DTK
         @id = id
       end
 
-      def module_source_name()
+      def module_source_name
         @module
       end
 
       def to_h
         {
-          :name      => @name,
-          :namespace => @namespace,
-          :version   => @dtk_version,
-          :type      => @type,
-          :id        => @id
+          name: @name,
+          namespace: @namespace,
+          version: @dtk_version,
+          type: @type,
+          id: @id
         }
       end
-
     end
   end
 end

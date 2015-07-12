@@ -2,26 +2,27 @@ module DTK; class Task; class Status
   module TableForm
     DURATION_ACCURACY = 1
 
-    r8_nested_require('table_form','node_group_summary')
+    r8_nested_require('table_form', 'node_group_summary')
     module Mixin
       def status_table_form(opts)
-        TableForm.status_table_form_top(self,opts)
+        TableForm.status_table_form_top(self, opts)
       end
     end
 
-    def self.status(task_structure,opts={})
+    def self.status(task_structure, opts = {})
       task_structure.status_table_form(opts)
     end
 
-    def self.status_table_form_top(task,opts)
-      status_table_form(task,opts)
+    def self.status_table_form_top(task, opts)
+      status_table_form(task, opts)
     end
 
-   private
-    def self.status_table_form(task,opts,level=1,ndx_errors=nil)
-      ret = Array.new
+    private
+
+    def self.status_table_form(task, opts, level = 1, ndx_errors = nil)
+      ret = []
       task.set_and_return_types!()
-      el = task.hash_subset(:started_at,:ended_at)
+      el = task.hash_subset(:started_at, :ended_at)
 
       duration = el[:ended_at] - el[:started_at] if el[:ended_at] && el[:started_at]
       el[:duration] = "#{duration.round(DURATION_ACCURACY)}s" if duration
@@ -33,9 +34,9 @@ module DTK; class Task; class Status
       qualified_index = QualifiedIndex.string_form(task)
       # for space after qualified index if not empty
       qualified_index += ' ' unless qualified_index.empty?
-      type = element_type(task,level)
+      type = element_type(task, level)
       # putting idents in
-      el[:type]  = "#{' '*(2*(level-1))}#{qualified_index}#{type}"
+      el[:type]  = "#{' ' * (2 * (level - 1))}#{qualified_index}#{type}"
       el[:index], el[:sub_index] = qualified_index.split('.').collect(&:to_i)
       ndx_errors ||= task.get_ndx_errors()
       if ndx_errors[task[:id]]
@@ -53,16 +54,16 @@ module DTK; class Task; class Status
       else
         ea = task[:executable_action]
         case task[:executable_action_type]
-          when "ConfigNode"
-            el.merge!(Task::Action::ConfigNode.status(ea,opts)) if ea
-          when "CreateNode"
-            el.merge!(Task::Action::CreateNode.status(ea,opts)) if ea
-          when "PowerOnNode"
-            el.merge!(Task::Action::PowerOnNode.status(ea,opts)) if ea
-          when "InstallAgent"
-          el.merge!(Task::Action::InstallAgent.status(ea,opts)) if ea
-          when "ExecuteSmoketest"
-            el.merge!(Task::Action::ExecuteSmoketest.status(ea,opts)) if ea
+          when 'ConfigNode'
+            el.merge!(Task::Action::ConfigNode.status(ea, opts)) if ea
+          when 'CreateNode'
+            el.merge!(Task::Action::CreateNode.status(ea, opts)) if ea
+          when 'PowerOnNode'
+            el.merge!(Task::Action::PowerOnNode.status(ea, opts)) if ea
+          when 'InstallAgent'
+          el.merge!(Task::Action::InstallAgent.status(ea, opts)) if ea
+          when 'ExecuteSmoketest'
+            el.merge!(Task::Action::ExecuteSmoketest.status(ea, opts)) if ea
           end
       end
       ret << el
@@ -70,14 +71,14 @@ module DTK; class Task; class Status
       subtasks = task.subtasks()
       num_subtasks = subtasks.size
       if num_subtasks > 0
-        if opts[:summarize_node_groups] and (ea and ea[:node].is_node_group?())
+        if opts[:summarize_node_groups] && (ea && ea[:node].is_node_group?())
           NodeGroupSummary.new(subtasks).add_summary_info!(el) do
-            subtasks.map{|st|status_table_form(st,opts,level+1)}.flatten(1)
+            subtasks.flat_map { |st| status_table_form(st, opts, level + 1) }
           end
         else
-          ret += subtasks.sort{|a,b| (a[:position]||0) <=> (b[:position]||0)}.map do |st|
-            status_table_form(st,opts,level+1,ndx_errors)
-          end.flatten(1)
+          ret += subtasks.sort { |a, b| (a[:position] || 0) <=> (b[:position] || 0) }.flat_map do |st|
+            status_table_form(st, opts, level + 1, ndx_errors)
+          end
         end
       end
       ret
@@ -89,16 +90,16 @@ module DTK; class Task; class Status
         if ret
           ret[:message] << "\n\n"
         else
-          ret = {:message => String.new}
+          ret = { message: '' }
         end
 
         if error.is_a? String
-          error,temp = {},error
+          error, temp = {}, error
           error[:message] = temp
         end
 
-        error_msg = (error[:component] ? "Component #{error[:component].gsub("__","::")}: " : "")
-        error_msg << (error[:message]||"error")
+        error_msg = (error[:component] ? "Component #{error[:component].gsub('__', '::')}: " : '')
+        error_msg << (error[:message] || 'error')
         ret[:message] << error_msg
         ret[:type] = error[:type]
       end
@@ -111,11 +112,11 @@ module DTK; class Task; class Status
 
       logs.each do |log|
         unless ret
-          ret = {:message => String.new}
+          ret = { message: '' }
         end
 
         if log.is_a? String
-          log,temp = {},log
+          log, temp = {}, log
           log[:message] = temp
         end
 
@@ -130,12 +131,12 @@ module DTK; class Task; class Status
       ret
     end
 
-    def self.element_type(task,level)
+    def self.element_type(task, level)
       if level == 1
         task[:display_name]
       elsif type = task[:type]
-        node = (task[:executable_action]||{})[:node]
-        config_agent = task.get_config_agent_type(nil, {:no_error_if_nil => true})
+        node = (task[:executable_action] || {})[:node]
+        config_agent = task.get_config_agent_type(nil, no_error_if_nil: true)
 
         if config_agent == 'dtk_provider'
           if node && node.is_node_group?()
@@ -145,13 +146,13 @@ module DTK; class Task; class Status
           end
         end
 
-        if ['configure_node','create_node'].include?(type)
+        if ['configure_node', 'create_node'].include?(type)
           type = "#{type}group" if node && node.is_node_group?()
         end
 
         type
       else
-        task[:display_name]|| "top"
+        task[:display_name] || 'top'
       end
     end
   end

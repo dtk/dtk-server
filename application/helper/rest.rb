@@ -1,27 +1,27 @@
 module Ramaze::Helper
   module Rest
-    def rest_response()
-      unless @ctrl_results.kind_of?(BundleAndReturnHelper::ControllerResultsRest)
-        raise Error.new("controller results are in wrong form; it should have 'rest' form")
+    def rest_response
+      unless @ctrl_results.is_a?(BundleAndReturnHelper::ControllerResultsRest)
+        fail Error.new("controller results are in wrong form; it should have 'rest' form")
       end
 
       JSON.generate(@ctrl_results)
     end
 
-    def rest_ok_response(data=nil,opts={})
-      data ||= Hash.new
+    def rest_ok_response(data = nil, opts = {})
+      data ||= {}
       if encode_format = opts[:encode_into]
         # This might be a misnomer in taht payload is still a hash which then in RestResponse.new becomes json
         # for case of yaml, the data wil be a string formed by yaml encoding
         data =
           case encode_format
             when :yaml then encode_into_yaml(data)
-            else raise Error.new("Unexpected encode format (#{encode_format})")
+            else fail Error.new("Unexpected encode format (#{encode_format})")
           end
       end
 
-      payload = { :status => :ok, :data => data}
-      payload.merge!(:datatype => opts[:datatype]) if opts[:datatype]
+      payload = { status: :ok, data: data }
+      payload.merge!(datatype: opts[:datatype]) if opts[:datatype]
 
       # set custom messages in response
       [:info, :warn, :error].each do |msg_type|
@@ -46,39 +46,37 @@ module Ramaze::Helper
     #]
 
     def rest_validate_response(message, actions_needed)
-      RestResponse.new({
-        :status => :notok,
-        :validation =>
-          {
-            :message => message,
-            :actions_needed => actions_needed
-          }
-        })
+      RestResponse.new(status: :notok,
+                       validation:           {
+            message: message,
+            actions_needed: actions_needed
+          })
     end
 
-    def rest_notok_response(errors=[{:code => :error}])
-      if errors.kind_of?(Hash)
+    def rest_notok_response(errors = [{ code: :error }])
+      if errors.is_a?(Hash)
         errors = [errors]
       end
-      RestResponse.new(:status => :notok, :errors => errors)
+      RestResponse.new(status: :notok, errors: errors)
     end
 
-   private
-    def encode_into_yaml(data,opts={})
+    private
+
+    def encode_into_yaml(data, opts = {})
       data_to_encode = data
       if opts[:remove_null_keys]
         data_to_encode = remove_null_keys(data)
       end
-      ::DTK::Aux.serialize(data_to_encode,:yaml) + "\n"
+      ::DTK::Aux.serialize(data_to_encode, :yaml) + "\n"
     end
 
     def remove_null_keys(data)
-      if data.kind_of?(Hash)
-        ret = Hash.new
-        data.each_pair{|k,v|ret[k]=remove_null_keys(v) unless v.nil?}
+      if data.is_a?(Hash)
+        ret = {}
+        data.each_pair { |k, v| ret[k] = remove_null_keys(v) unless v.nil? }
         ret
-      elsif data.kind_of?(Array)
-        data.map{|el|remove_null_keys(el)}
+      elsif data.is_a?(Array)
+        data.map { |el| remove_null_keys(el) }
       else
         data
       end
@@ -88,10 +86,12 @@ module Ramaze::Helper
       def initialize(hash)
         replace(hash)
       end
+
       def is_ok?
         self[:status] == :ok
       end
-      def data()
+
+      def data
         self[:data]
       end
     end

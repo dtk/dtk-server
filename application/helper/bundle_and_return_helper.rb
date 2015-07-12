@@ -10,11 +10,12 @@ module Ramaze::Helper
     end
 
     class ControllerResultsWeb < ControllerResults
-      def initialize()
+      def initialize
         super
-        replace(:as_run_list => Array.new)
+        replace(as_run_list: [])
       end
-      def add(action_namespace,ctrl_result)
+
+      def add(action_namespace, ctrl_result)
         self[action_namespace] = ctrl_result
         self[:as_run_list] << action_namespace
       end
@@ -24,7 +25,7 @@ module Ramaze::Helper
       @css_includes << R8::Config[:base_css_uri] + '/' + css_name + '.css'
     end
 
-# TODO: augment with priority param when necessary
+    # TODO: augment with priority param when necessary
     def include_js(js_name)
       @js_includes << R8::Config[:base_js_uri] + '/' + js_name + '.js'
     end
@@ -41,23 +42,23 @@ module Ramaze::Helper
       @js_exe_list << js_content
     end
 
-    def ret_js_includes()
+    def ret_js_includes
       includes_ret = @js_includes
-      @js_includes = Array.new
-      return includes_ret
+      @js_includes = []
+      includes_ret
     end
 
-    def ret_css_includes()
+    def ret_css_includes
       includes_ret = @css_includes
-      @css_includes = Array.new
-      return includes_ret
+      @css_includes = []
+      includes_ret
     end
 
-    def ret_js_exe_list()
+    def ret_js_exe_list
       exe_list = @js_exe_list
-      @js_exe_list = Array.new
-      return exe_list
+      @js_exe_list = []
+      exe_list
     end
-######
+    ######
   end
 end

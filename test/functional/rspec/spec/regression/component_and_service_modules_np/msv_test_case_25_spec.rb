@@ -19,65 +19,64 @@ local_component_module_name2 = 'r8:stdlib'
 local_component_module_name3 = 'r8:apache'
 service_module_filesystem_location = '~/dtk/service_modules/r8'
 component_module_filesystem_location = '~/dtk/component_modules/r8'
-components_list_to_check = ['apache','stdlib']
+components_list_to_check = ['apache', 'stdlib']
 
 dtk_common = Common.new('', '')
 
-describe "(Modules, Services and Versioning) Test Case 25: Import new service module but some component modules already exists for that service module on server and locally" do
-
+describe '(Modules, Services and Versioning) Test Case 25: Import new service module but some component modules already exists for that service module on server and locally' do
   before(:all) do
-    puts "******************************************************************************************************************************************************************",""
+    puts '******************************************************************************************************************************************************************', ''
   end
 
-  context "Check that component module exists" do
-    include_context "Check if component module exists", dtk_common, local_component_module_name2
+  context 'Check that component module exists' do
+    include_context 'Check if component module exists', dtk_common, local_component_module_name2
   end
 
   context "Check if component module #{local_component_module_name2} imported on local filesystem" do
-    include_context "Check component module imported on local filesystem", component_module_filesystem_location, component_module_name2
+    include_context 'Check component module imported on local filesystem', component_module_filesystem_location, component_module_name2
   end
 
-  context "Import service module function" do
-    include_context "Import remote service module", service_module_namespace + "/" + service_module_name
+  context 'Import service module function' do
+    include_context 'Import remote service module', service_module_namespace + '/' + service_module_name
   end
 
-  context "List all service modules" do
-    include_context "List all service modules", dtk_common, local_service_module_name
+  context 'List all service modules' do
+    include_context 'List all service modules', dtk_common, local_service_module_name
   end
 
-  context "Check if service module imported on local filesystem" do
-    include_context "Check service module imported on local filesystem", service_module_filesystem_location, service_module_name
+  context 'Check if service module imported on local filesystem' do
+    include_context 'Check service module imported on local filesystem', service_module_filesystem_location, service_module_name
   end
 
-  context "Check component modules exist in service module" do
-    include_context "Check component modules in service module", dtk_common, local_service_module_name, components_list_to_check
+  context 'Check component modules exist in service module' do
+    include_context 'Check component modules in service module', dtk_common, local_service_module_name, components_list_to_check
   end
 
   context "Check that component module #{local_component_module_name3} exists (automatically imported with service module)" do
-    include_context "Check if component module exists", dtk_common, local_component_module_name3
+    include_context 'Check if component module exists', dtk_common, local_component_module_name3
   end
 
   context "Check if component module #{local_component_module_name3} imported on local filesystem" do
-    include_context "Check component module imported on local filesystem", component_module_filesystem_location, component_module_name3
+    include_context 'Check component module imported on local filesystem', component_module_filesystem_location, component_module_name3
   end
 
-  context "Delete service module function" do
-    include_context "Delete service module", dtk_common, local_service_module_name
+  context 'Delete service module function' do
+    include_context 'Delete service module', dtk_common, local_service_module_name
   end
 
-  context "Delete service module from local filesystem" do
-    include_context "Delete service module from local filesystem", service_module_filesystem_location, service_module_name
+  context 'Delete service module from local filesystem' do
+    include_context 'Delete service module from local filesystem', service_module_filesystem_location, service_module_name
   end
 
-  context "Delete component module" do
-    include_context "Delete component module", dtk_common, local_component_module_name3
+  context 'Delete component module' do
+    include_context 'Delete component module', dtk_common, local_component_module_name3
   end
 
-  context "Delete component module from local filesystem" do
-    include_context "Delete component module from local filesystem", component_module_filesystem_location, component_module_name3
+  context 'Delete component module from local filesystem' do
+    include_context 'Delete component module from local filesystem', component_module_filesystem_location, component_module_name3
   end
 
   after(:all) do
-    puts "", ""
+    puts '', ''
   end
 end

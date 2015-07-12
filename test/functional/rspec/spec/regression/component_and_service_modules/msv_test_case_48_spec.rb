@@ -15,61 +15,60 @@ existing_modules_namespace_filter = "r8"
 non_existing_modules_namespace_filter = "non_existing_namespace"
 dtk_common = Common.new('', '')
 
-describe "(Modules, Services and Versioning) Test Case 48: List component, service and test modules on local and remote with filter" do
-
+describe '(Modules, Services and Versioning) Test Case 48: List component, service and test modules on local and remote with filter' do
   before(:all) do
-    puts "*************************************************************************************************************************",""
+    puts '*************************************************************************************************************************', ''
   end
 
-  context "List component modules with filter" do
-    include_context "List component modules with filter", dtk_common, existing_modules_namespace_filter
+  context 'List component modules with filter' do
+    include_context 'List component modules with filter', dtk_common, existing_modules_namespace_filter
   end
 
-  context "List test modules with filter" do
-    include_context "List test modules with filter", dtk_common, existing_modules_namespace_filter
+  context 'List test modules with filter' do
+    include_context 'List test modules with filter', dtk_common, existing_modules_namespace_filter
   end
 
-  context "List service modules with filter" do
-    include_context "List service modules with filter", dtk_common, existing_modules_namespace_filter
+  context 'List service modules with filter' do
+    include_context 'List service modules with filter', dtk_common, existing_modules_namespace_filter
   end
 
-  context "List component modules with non existing filter" do
-    include_context "NEG - List component modules with filter", dtk_common, non_existing_modules_namespace_filter
+  context 'List component modules with non existing filter' do
+    include_context 'NEG - List component modules with filter', dtk_common, non_existing_modules_namespace_filter
   end
 
-  context "List test modules with non existing filter" do
-    include_context "NEG - List test modules with filter", dtk_common, non_existing_modules_namespace_filter
+  context 'List test modules with non existing filter' do
+    include_context 'NEG - List test modules with filter', dtk_common, non_existing_modules_namespace_filter
   end
 
-  context "List service modules with non existing filter" do
-    include_context "NEG - List service modules with filter", dtk_common, non_existing_modules_namespace_filter
+  context 'List service modules with non existing filter' do
+    include_context 'NEG - List service modules with filter', dtk_common, non_existing_modules_namespace_filter
   end
 
-  context "List component modules with filter on remote" do
-    include_context "List component modules with filter on remote", dtk_common, existing_modules_namespace_filter
+  context 'List component modules with filter on remote' do
+    include_context 'List component modules with filter on remote', dtk_common, existing_modules_namespace_filter
   end
 
-  context "List test modules with filter on remote" do
-    include_context "List test modules with filter on remote", dtk_common, existing_modules_namespace_filter
+  context 'List test modules with filter on remote' do
+    include_context 'List test modules with filter on remote', dtk_common, existing_modules_namespace_filter
   end
 
-  context "List service modules with filter on remote" do
-    include_context "List service modules with filter on remote", dtk_common, existing_modules_namespace_filter
+  context 'List service modules with filter on remote' do
+    include_context 'List service modules with filter on remote', dtk_common, existing_modules_namespace_filter
   end
 
-  context "List component modules with non existing filter on remote" do
-    include_context "NEG - List component modules with filter on remote", dtk_common, non_existing_modules_namespace_filter
+  context 'List component modules with non existing filter on remote' do
+    include_context 'NEG - List component modules with filter on remote', dtk_common, non_existing_modules_namespace_filter
   end
 
-  context "List test modules with non existing filter on remote" do
-    include_context "NEG - List test modules with filter on remote", dtk_common, non_existing_modules_namespace_filter
+  context 'List test modules with non existing filter on remote' do
+    include_context 'NEG - List test modules with filter on remote', dtk_common, non_existing_modules_namespace_filter
   end
 
-  context "List service modules with non existing filter on remote" do
-    include_context "NEG - List service modules with filter on remote", dtk_common, non_existing_modules_namespace_filter
+  context 'List service modules with non existing filter on remote' do
+    include_context 'NEG - List service modules with filter on remote', dtk_common, non_existing_modules_namespace_filter
   end
 
   after(:all) do
-    puts "", ""
+    puts '', ''
   end
 end

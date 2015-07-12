@@ -15,12 +15,10 @@ module DTK
       self.instance.queue_internal.async.store(message, CurrentSession.get_username(), type)
     end
 
-    def self.retrive()
+    def self.retrive
       self.instance.queue_internal.retrive(CurrentSession.get_username())
     end
-
   end
-
 
   class QueueInternal
     include Celluloid
@@ -35,7 +33,7 @@ module DTK
     end
 
     def store(message, session_username, type = :info)
-      @redis_queue.lpush  session_username, { :message => message, :type => type }.to_json
+      @redis_queue.lpush session_username, { message: message, type: type }.to_json
       @redis_queue.expire session_username, QUEUE_TTL
     end
 

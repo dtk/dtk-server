@@ -42,15 +42,14 @@ namespace :git do
   task :wrapper do
     Rake::Task['git:wrapper'].clear
     on release_roles(:all), in: :sequence do
-      execute :mkdir, "-p", "#{fetch(:tmp_dir)}/#{fetch(:application)}/"
-      execute :sudo, "chmod -R 777", "#{fetch(:tmp_dir)}/#{fetch(:application)}"
+      execute :mkdir, '-p', "#{fetch(:tmp_dir)}/#{fetch(:application)}/"
+      execute :sudo, 'chmod -R 777', "#{fetch(:tmp_dir)}/#{fetch(:application)}"
       upload! StringIO.new("#!/bin/sh -e\nexec /usr/bin/ssh -o PasswordAuthentication=no -o StrictHostKeyChecking=no \"$@\"\n"), "#{fetch(:tmp_dir)}/#{fetch(:application)}/git-ssh.sh"
     end
   end
 end
 
 namespace :deploy do
-
   desc 'Restart thin'
   task :restart do
     on roles(:app), in: :groups do |role|
@@ -100,5 +99,4 @@ namespace :deploy do
       execute "cd #{release_path}/application; ./utility/dbrebuild.rb"
     end
   end
-
 end

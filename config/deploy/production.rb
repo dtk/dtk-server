@@ -14,8 +14,8 @@
 # definition into the server list. The second argument
 # something that quacks like a hash can be used to set
 # extended properties on the server.
-server 'dtk1@dtk1.dtk.io', roles: %w{web app db}
-server 'dtk2@dtk2.dtk.io', roles: %w{web app db}
+server 'dtk1@dtk1.dtk.io', roles: %w(web app db)
+server 'dtk2@dtk2.dtk.io', roles: %w(web app db)
 
 # you can set custom ssh options
 # it's possible to pass any option but you need to keep in mind that net/ssh understand limited list of options
@@ -24,7 +24,7 @@ server 'dtk2@dtk2.dtk.io', roles: %w{web app db}
 set :ssh_options, {
   keys: %w(~/Dropbox/Store/testing_use1.pem),
   forward_agent: false,
-#    auth_methods: %w(password)
+  #    auth_methods: %w(password)
 }
 # and/or per server
 # server 'example.com',

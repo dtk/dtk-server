@@ -1,28 +1,29 @@
 module DTK
   class Error
     class ErrorNotFound < self
-      attr_reader :obj_type,:obj_value
-      def initialize(obj_type=nil,obj_value=nil)
+      attr_reader :obj_type, :obj_value
+      def initialize(obj_type = nil, obj_value = nil)
         @obj_type = obj_type
         @obj_value = obj_value
       end
-      def to_s()
+
+      def to_s
         if obj_type.nil?
-          "NotFound error:" 
+          'NotFound error:'
         elsif obj_value.nil?
-          "NotFound error: type = #{@obj_type.to_s}"
+          "NotFound error: type = #{@obj_type}"
         else
-          "NotFound error: #{@obj_type.to_s} = #{@obj_value.to_s}"
+          "NotFound error: #{@obj_type} = #{@obj_value}"
         end
       end
 
-      def to_hash()
+      def to_hash
         if obj_type.nil?
-          {:error => :NotFound}
+          { error: :NotFound }
         elsif obj_value.nil?
-          {:error => {:NotFound => {:type => @obj_type}}}
+          { error: { NotFound: { type: @obj_type } } }
         else
-          {:error => {:NotFound => {:type => @obj_type, :value => @obj_value}}}
+          { error: { NotFound: { type: @obj_type, value: @obj_value } } }
         end
       end
     end

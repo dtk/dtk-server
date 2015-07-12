@@ -1,5 +1,5 @@
 module DTK; class Error
-  class AMQP 
+  class AMQP
     class QueueDoesNotExist < self
       attr_reader :queue_name
 
@@ -7,7 +7,7 @@ module DTK; class Error
         @queue_name = queue_name
       end
 
-      def to_s()
+      def to_s
         "queue #{queue_name} does not exist"
       end
     end

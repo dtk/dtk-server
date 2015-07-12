@@ -7,13 +7,12 @@ require 'awesome_print'
 STDOUT.sync = true
 
 class Tenant
-
   attr_accessor :ENDPOINT, :tenant, :error_message
 
   $opts = {
-    :timeout => 100,
-    :open_timeout => 50,
-    :cookies => {}
+    timeout: 100,
+    open_timeout: 50,
+    cookies: {}
   }
 
   def initialize(server, port, username, password, tenant_number)
@@ -31,46 +30,46 @@ class Tenant
     response_JSON = JSON.parse(response)
 
     # If response contains errors, accumulate all errors to error_message
-    unless response_JSON["errors"].nil? 
-      @error_message = ""
-      response_JSON["errors"].each { |e| @error_message += "#{e['code']}: #{e['message']} "}
+    unless response_JSON['errors'].nil?
+      @error_message = ''
+      response_JSON['errors'].each { |e| @error_message += "#{e['code']}: #{e['message']} " }
     end
 
     # If response status notok, show error_message
-    if (response_JSON["status"] == "notok")
-      puts "", "Request failed!"
+    if (response_JSON['status'] == 'notok')
+      puts '', 'Request failed!'
       puts @error_message
-      unless response_JSON["errors"].first["backtrace"].nil? 
-        puts "", "Backtrace:"
-        pretty_print_JSON(response_JSON["errors"].first["backtrace"])
+      unless response_JSON['errors'].first['backtrace'].nil?
+        puts '', 'Backtrace:'
+        pretty_print_JSON(response_JSON['errors'].first['backtrace'])
       end
     end
 
-    return response_JSON
+    response_JSON
   end
 
   def pretty_print_JSON(json_content)
-    return ap json_content
+    ap json_content
   end
 
   def stage_assembly(assembly_template, assembly_name)
     # Get list of assembly templates, extract selected template, stage assembly and return its assembly id
-    puts "Stage assembly:", "---------------"
+    puts 'Stage assembly:', '---------------'
     assembly_id = nil
     extract_id_regex = /id: (\d+)/
-    assembly_template_list = send_request('/rest/assembly/list', {:subtype=>'template'})
- 
-    puts "List of avaliable assembly templates: "
+    assembly_template_list = send_request('/rest/assembly/list', subtype: 'template')
+
+    puts 'List of avaliable assembly templates: '
     pretty_print_JSON(assembly_template_list)
 
-    test_template = assembly_template_list['data'].select { |x| x['display_name'] == assembly_template }.first
+    test_template = assembly_template_list['data'].find { |x| x['display_name'] == assembly_template }
 
     if (!test_template.nil?)
       puts "Assembly template #{assembly_template} found!"
       template_assembly_id = test_template['id']
       puts "Assembly template id: #{template_assembly_id}"
 
-      stage_assembly_response = send_request('/rest/assembly/stage', {:assembly_id=>template_assembly_id, :name=>assembly_name}) 
+      stage_assembly_response = send_request('/rest/assembly/stage', assembly_id: template_assembly_id, name: assembly_name)
 
       pretty_print_JSON(stage_assembly_response)
 
@@ -80,65 +79,65 @@ class Tenant
         assembly_id = assembly_id_match[1]
         puts "Assembly id for a staged assembly: #{assembly_id}"
       else
-        puts "Stage assembly didnt pass!"
+        puts 'Stage assembly didnt pass!'
       end
     else
       puts "Assembly template #{assembly_template} not found!"
     end
-    puts ""
-    return assembly_id.to_i
+    puts ''
+    assembly_id.to_i
   end
 
   def add_component_to_assembly_node(assembly_id, node_name, component_name)
-    puts "Add component to assembly node:", "-------------------------------"
+    puts 'Add component to assembly node:', '-------------------------------'
     component_added = false
-    assembly_nodes = send_request('/rest/assembly/info_about', {:assembly_id=>assembly_id, :filter=>nil, :about=>'nodes', :subtype=>'instance'})
+    assembly_nodes = send_request('/rest/assembly/info_about', assembly_id: assembly_id, filter: nil, about: 'nodes', subtype: 'instance')
 
-    if (assembly_nodes['data'].select { |x| x['display_name'] == node_name }.first)
+    if (assembly_nodes['data'].find { |x| x['display_name'] == node_name })
       puts "Node #{node_name} exists in assembly. Get node id..."
-      node_id = assembly_nodes['data'].select { |x| x['display_name'] == node_name }.first['id']
-      component_add_response = send_request('/rest/assembly/add_component', {:node_id=>node_id, :component_template_id=>component_name, :assembly_id=>assembly_id})
+      node_id = assembly_nodes['data'].find { |x| x['display_name'] == node_name }['id']
+      component_add_response = send_request('/rest/assembly/add_component', node_id: node_id, component_template_id: component_name, assembly_id: assembly_id)
 
       if (component_add_response['status'] == 'ok')
         puts "Component #{component_name} added to assembly!"
         component_added = true
       end
     end
-    puts ""
-    return component_added
+    puts ''
+    component_added
   end
 
   def set_attribute(assembly_id, attribute_name, attribute_value)
     # Set attribute on particular assembly
-    puts "Set attribute:", "--------------"
+    puts 'Set attribute:', '--------------'
     is_attributes_set = false
 
     # Get attribute id for which value will be set
-    assembly_attributes = send_request('/rest/assembly/info_about', {:about=>'attributes', :filter=>nil, :subtype=>'instance', :assembly_id=>assembly_id})
+    assembly_attributes = send_request('/rest/assembly/info_about', about: 'attributes', filter: nil, subtype: 'instance', assembly_id: assembly_id)
     pretty_print_JSON(assembly_attributes)
-    attribute_id = assembly_attributes['data'].select { |x| x['display_name'].include? attribute_name }.first['id']
+    attribute_id = assembly_attributes['data'].find { |x| x['display_name'].include? attribute_name }['id']
 
     # Set attribute value for given attribute id
-    set_attribute_value_response = send_request('/rest/assembly/set_attributes', {:assembly_id=>assembly_id, :value=>attribute_value, :pattern=>attribute_id})
+    set_attribute_value_response = send_request('/rest/assembly/set_attributes', assembly_id: assembly_id, value: attribute_value, pattern: attribute_id)
 
     if (set_attribute_value_response['status'] == 'ok')
       puts "Setting of #{attribute_name} attribute completed successfully!"
       is_attributes_set = true
     end
-    puts ""
-    return is_attributes_set
+    puts ''
+    is_attributes_set
   end
 
   def converge_assembly(assembly_id)
-    puts "Converge assembly:", "------------------"
+    puts 'Converge assembly:', '------------------'
     assembly_converged = false
     puts "Converge process for assembly with id #{assembly_id} started!"
-    create_task_response = send_request('/rest/assembly/create_task', {'assembly_id' => assembly_id})
+    create_task_response = send_request('/rest/assembly/create_task', 'assembly_id' => assembly_id)
 
-    if (create_task_response['status'].include? "ok")
+    if (create_task_response['status'].include? 'ok')
       task_id = create_task_response['data']['task_id']
       puts "Task id: #{task_id}"
-      task_execute_response = send_request('/rest/task/execute', {'task_id' => task_id})
+      task_execute_response = send_request('/rest/task/execute', 'task_id' => task_id)
       end_loop = false
       count = 0
       max_num_of_retries = 30
@@ -147,23 +146,23 @@ class Tenant
       while task_status.include? 'executing' || end_loop == false
         sleep 20
         count += 1
-        response_task_status = send_request('/rest/task/status', {'task_id'=> task_id})
-        status = response_task_status['data']['status'] 
-        error_msg = response_task_status['data']['subtasks'].select { |x| x['type'].include? "configure_nodes"}.first['subtasks']
+        response_task_status = send_request('/rest/task/status', 'task_id' => task_id)
+        status = response_task_status['data']['status']
+        error_msg = response_task_status['data']['subtasks'].find { |x| x['type'].include? 'configure_nodes' }['subtasks']
 
         if (status.include? 'succeeded')
           task_status = status
           assembly_converged = true
-          puts "Converge process finished successfully!"
+          puts 'Converge process finished successfully!'
         end
 
         if (status.include? 'failed')
           task_status = status
           if (error_msg.to_s.include? 'timeout')
             assembly_converged = true
-            puts "Converge process finished successfully!"
+            puts 'Converge process finished successfully!'
           else
-            puts "Converge process was not finished successfully! Some tasks failed!"
+            puts 'Converge process was not finished successfully! Some tasks failed!'
             end_loop = true
           end
         end
@@ -171,17 +170,17 @@ class Tenant
         puts "Task execution status: #{task_status}"
 
         if (count > max_num_of_retries)
-          puts "Max number of retries reached..."
-          puts "Converge process was not finished successfully!"
-          end_loop = true 
+          puts 'Max number of retries reached...'
+          puts 'Converge process was not finished successfully!'
+          end_loop = true
         end
       end
     else
-      puts "Assembly was not converged successfully!"
+      puts 'Assembly was not converged successfully!'
     end
 
-    puts ""
-    return assembly_converged
+    puts ''
+    assembly_converged
   end
 end
 
@@ -196,8 +195,7 @@ tenant = ARGV[4]
 tenant_deploy = Tenant.new(host, port.to_i, user, pass, tenant)
 
 # Stage tenant assembly
-assembly_id = tenant_deploy.stage_assembly('dtk::tenant',"dtk#{tenant_deploy.tenant}tenant")
-
+assembly_id = tenant_deploy.stage_assembly('dtk::tenant', "dtk#{tenant_deploy.tenant}tenant")
 
 # Add needed component and set attributes
 set_attributes_array = []
@@ -222,10 +220,10 @@ set_attributes_array << tenant_deploy.set_attribute(assembly_id, 'tenant/thin/da
 if !set_attributes_array.include? false
   assembly_converged = tenant_deploy.converge_assembly(assembly_id)
   if assembly_converged == true
-    puts "Tenant assembly deployed!"
+    puts 'Tenant assembly deployed!'
   else
-    puts "[ERROR] Tenant assembly was not deployed successfully!"
+    puts '[ERROR] Tenant assembly was not deployed successfully!'
   end
 else
-  puts "[ERROR] Some of the attributes are not set correctly. Will not proceed with converge process!"
+  puts '[ERROR] Some of the attributes are not set correctly. Will not proceed with converge process!'
 end

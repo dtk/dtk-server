@@ -12,39 +12,39 @@ module DTK; class NodeBindings
       def find_target_specific_info(target)
         ret = TargetSpecificInfo.new(self)
         if @image
-          unless image_id = NodeImage.find_iaas_match(target,@image)
-            raise ErrorUsage.new("The image (#{@image}) in the node binding does not exist in the target (#{target.get_field?(:display_name)})")
+          unless image_id = NodeImage.find_iaas_match(target, @image)
+            fail ErrorUsage.new("The image (#{@image}) in the node binding does not exist in the target (#{target.get_field?(:display_name)})")
           end
           ret.image_id = image_id
         end
         if @size
-          unless iaas_size = NodeImageAttribute::Size.find_iaas_match(target,@size)
-            raise ErrorUsage.new("The size (#{@size}) in the node binding is not valid in the target (#{target.get_field?(:display_name)})")
+          unless iaas_size = NodeImageAttribute::Size.find_iaas_match(target, @size)
+            fail ErrorUsage.new("The size (#{@size}) in the node binding is not valid in the target (#{target.get_field?(:display_name)})")
           end
           ret.size = iaas_size
         end
         ret
       end
 
-      def hash_form()
-        {:type => type().to_s, :image => @image, :size => @size} 
+      def hash_form
+        { type: type().to_s, image: @image, size: @size }
       end
 
       Type = :image
       Fields = {
-        :image => {
-          :key => 'image',
-          :required => true
+        image: {
+          key: 'image',
+          required: true
         },
-        :size => {
-          :key => 'size'
+        size: {
+          key: 'size'
         }
       }
-      InputFormToInternal = Fields.inject(Hash.new){|h,(k,v)|h.merge(v[:key] => k)}
-      Allkeys = Fields.values.map{|f|f[:key]}
-      RequiredKeys =  Fields.values.select{|f|f[:required]}.map{|f|f[:key]}
+      InputFormToInternal = Fields.inject({}) { |h, (k, v)| h.merge(v[:key] => k) }
+      Allkeys = Fields.values.map { |f| f[:key] }
+      RequiredKeys =  Fields.values.select { |f| f[:required] }.map { |f| f[:key] }
 
-      def self.parse_and_reify(parse_input,opts={})
+      def self.parse_and_reify(parse_input, _opts = {})
         ret = nil
         if parse_input.type?(ContentField)
           input = parse_input.input
@@ -53,15 +53,15 @@ module DTK; class NodeBindings
           end
         elsif parse_input.type?(Hash)
           input = parse_input.input
-          if Aux.has_only_these_keys?(input,Allkeys) and ! RequiredKeys.find{|k| !input.has_key?(k)}
-            internal_form_hash = input.inject(Hash.new){|h,(k,v)|h.merge(InputFormToInternal[k] => v)} 
+          if Aux.has_only_these_keys?(input, Allkeys) && !RequiredKeys.find { |k| !input.key?(k) }
+            internal_form_hash = input.inject({}) { |h, (k, v)| h.merge(InputFormToInternal[k] => v) }
             ret = new(internal_form_hash)
           end
         end
         ret
       end
 
-      def match_or_create_node?(target)
+      def match_or_create_node?(_target)
         :create
       end
     end

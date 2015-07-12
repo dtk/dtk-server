@@ -2,11 +2,11 @@ module DTK; class Node
   module Delete
     module Mixin
       # This wil be called only when self is non node group (i.e., top level node or target ref)
-      def destroy_and_delete(opts={})
+      def destroy_and_delete(opts = {})
         if is_node_group?()
           # TODO: support this; one way is to case on whether it has any members and if not
           # allow it to be deleted; and if members indicate the syntax to delete an individual member"
-          raise ErrorUsage.new("Not supported: deleting a node group; its members can be deleted")
+          fail ErrorUsage.new('Not supported: deleting a node group; its members can be deleted')
         end
         if is_target_ref?
           destroy_and_delete__target_ref(opts)
@@ -16,26 +16,26 @@ module DTK; class Node
       end
 
       def destroy_and_reset(target_idh)
-         raise ErrorUsage.new("Command Not Supperetd")
+         fail ErrorUsage.new('Command Not Supperetd')
 # TODO: DTK-1857
-if is_node_group?() or is_target_ref?()
-  raise ErrorUsage.new("destroy_and_reset_nodes not supported for service instances with node groups")
+if is_node_group?() || is_target_ref?()
+  fail ErrorUsage.new('destroy_and_reset_nodes not supported for service instances with node groups')
 end
 
-        if CommandAndControl.destroy_node?(self,:reset => true)
+        if CommandAndControl.destroy_node?(self, reset: true)
           Model.delete_instance(target_ref.id_handle) if target_ref
-          StateChange.create_pending_change_item(:new_item => id_handle(), :parent => target_idh)
+          StateChange.create_pending_change_item(new_item: id_handle(), parent: target_idh)
         end
         update_agent_git_commit_id(nil)
         attribute.clear_host_addresses()
       end
-      
-      def delete_object(opts={})
+
+      def delete_object(opts = {})
         if target_ref_idh = opts[:delete_target_ref]
           Model.delete_instance(target_ref_idh)
         end
 
-        update_dangling_links() 
+        update_dangling_links()
 
         if is_target_ref?()
           # This wil be a node group member; need to bump down is assocaited node groups cardinality
@@ -45,7 +45,7 @@ end
 
         if opts[:update_task_template]
           unless assembly = opts[:assembly]
-            raise Error.new("If update_task_template is set, :assembly must be given as an option")
+            fail Error.new('If update_task_template is set, :assembly must be given as an option')
           end
           update_task_templates_when_deleted_node?(assembly)
         end
@@ -53,10 +53,11 @@ end
         true
       end
 
-     private
-      def destroy_and_delete__target_ref(opts={})
+      private
+
+      def destroy_and_delete__target_ref(opts = {})
         suceeeded = true
-        if is_target_ref?(:not_deletable=>true)
+        if is_target_ref?(not_deletable: true)
           # no op
           return suceeeded
         end
@@ -71,7 +72,7 @@ end
           true
         end
       end
-        
+
       def destroy_and_delete__top_level_node(opts)
         # see if there are any target refs this points to this
         # if none then destroy and delete
@@ -84,9 +85,9 @@ end
           target_ref_info = target_refs_info.first
           opts_delete = opts
           target_ref = target_ref_info.target_ref
-          if target_ref and target_ref_info.ref_count == 1
+          if target_ref && target_ref_info.ref_count == 1
             # this means to delete target ref also
-            opts_delete.merge(:delete_target_ref => target_ref.id_handle())
+            opts_delete.merge(delete_target_ref: target_ref.id_handle())
           end
           execute_destroy_and_delete(opts)
         else
@@ -95,7 +96,7 @@ end
         end
       end
 
-      def execute_destroy_and_delete(opts={})
+      def execute_destroy_and_delete(opts = {})
         suceeeded = CommandAndControl.destroy_node?(self)
         return false unless suceeeded
         delete_object(opts)
@@ -105,11 +106,11 @@ end
         # TODO: can be more efficient if have Task::Template method that takes node and deletes all teh nodes component in bulk
         sp_hash = {
           #:only_one_per_node,:ref are put in for info needed when getting title
-          :cols => [:id, :display_name, :node_node_id,:only_one_per_node,:ref],
-          :filter => [:eq, :node_node_id, id()]
+          cols: [:id, :display_name, :node_node_id, :only_one_per_node, :ref],
+          filter: [:eq, :node_node_id, id()]
         }
-        components = Component::Instance.get_objs(model_handle(:component),sp_hash)
-        components.map{|cmp|Task::Template::ConfigComponents.update_when_deleted_component?(assembly,self,cmp)}
+        components = Component::Instance.get_objs(model_handle(:component), sp_hash)
+        components.map { |cmp| Task::Template::ConfigComponents.update_when_deleted_component?(assembly, self, cmp) }
       end
     end
   end

@@ -5,20 +5,24 @@ module DTK; class ModuleBranch; class Location
 
       def get_linked_workspace_branch_obj?(module_obj)
         filter = {
-          :version => version,
-          :remote_namespace => namespace
+          version: version,
+          remote_namespace: namespace
         }
-        module_obj.get_augmented_workspace_branch(:filter => filter)
+        module_obj.get_augmented_workspace_branch(filter: filter)
       end
-     private
-      def ret_repo_url()
+
+      private
+
+      def ret_repo_url
         RepoManagerClient.repo_url_ssh_access(repo_name())
       end
-      def ret_remote_ref()
+
+      def ret_remote_ref
         "#{remote_repo_base}--#{namespace}"
       end
-      def ret_branch_name()
-        if version.nil? or version == HeadBranchName
+
+      def ret_branch_name
+        if version.nil? || version == HeadBranchName
           HeadBranchName
         else
           "v#{version}"

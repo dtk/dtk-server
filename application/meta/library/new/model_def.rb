@@ -1,18 +1,17 @@
 {
-  :schema=>:library,
-  :table=>:library,
-  :columns=>{
-    :ancestor_id=>{
-      :type=>:bigint,
-      :foreign_key_rel_type=>:library,
-      :on_delete=>:set_null,
-      :on_update=>:set_null
+  schema: :library,
+  table: :library,
+  columns: {
+    ancestor_id: {
+      type: :bigint,
+      foreign_key_rel_type: :library,
+      on_delete: :set_null,
+      on_update: :set_null
     }
   },
-  :virtual_columns=>{},
-  :many_to_one=>[],
-  :one_to_many=>
-  [
+  virtual_columns: {},
+  many_to_one: [],
+  one_to_many:   [
    :component,
    :node,
    :node_binding_ruleset,
@@ -27,7 +26,7 @@
    :constraints,
    :component_relation,
    :implementation,
-   :component_module,#MOD_RESTRUCT: may remove
+   :component_module, #MOD_RESTRUCT: may remove
    :service_module, #MOD_RESTRUCT: may remove
    :test_module, #MOD_RESTRUCT: may remove
    :node_module #MOD_RESTRUCT: may remove

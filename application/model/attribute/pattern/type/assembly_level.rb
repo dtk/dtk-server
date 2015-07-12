@@ -1,18 +1,18 @@
 module DTK; class Attribute
   class Pattern; class Type
     class AssemblyLevel < self
-      def type()
+      def type
         :assembly_level
       end
 
-      def attribute_idhs()
-        @attribute_stacks.map{|attr|attr[:attribute].id_handle()}
+      def attribute_idhs
+        @attribute_stacks.map { |attr| attr[:attribute].id_handle() }
       end
-      
-      def component_instance()
+
+      def component_instance
         nil
       end
-      
+
       def set_parent_and_attributes!(assembly_idh, opts = {})
         attributes = ret_matching_attributes(:component, [assembly_idh], pattern)
         # if does not exist then create the attribute if create option is true
@@ -21,7 +21,7 @@ module DTK; class Attribute
           af = ret_filter(pattern, :attribute)
           # attribute must have simple form
           unless af.is_a?(Array) && af.size == 3 && af[0..1] == [:eq, :display_name]
-            raise Error.new("cannot create new attribute from attribute pattern #{pattern}")
+            fail Error.new("cannot create new attribute from attribute pattern #{pattern}")
           end
 
           attr_properties = opts[:attribute_properties] || {}
@@ -29,7 +29,7 @@ module DTK; class Attribute
 
           unless attr_properties.empty?
             if attr_properties[:dynamic]
-              raise ErrorUsage.new('Illegal to include the :dynamic option on an assembly level attribute')
+              fail ErrorUsage.new('Illegal to include the :dynamic option on an assembly level attribute')
             elsif required = attr_properties[:required]
               field_def.merge!('required' => required)
             end
@@ -49,10 +49,10 @@ module DTK; class Attribute
         assembly = assembly_idh.create_object()
         assembly.update_object!(:display_name)
 
-        @attribute_stacks = attributes.map do |attr| 
+        @attribute_stacks = attributes.map do |attr|
           {
-            :assembly => assembly,
-            :attribute => attr
+            assembly: assembly,
+            attribute: attr
           }
         end
 

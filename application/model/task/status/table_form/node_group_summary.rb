@@ -4,17 +4,18 @@ module DTK; class Task::Status
       def initialize(subtasks)
         @subtasks = subtasks
       end
-      def add_summary_info!(ng_table_el,&block_for_subtasks)
+
+      def add_summary_info!(ng_table_el, &block_for_subtasks)
         @block_for_subtasks = block_for_subtasks
         if status = ng_table_el[:status]
-          case status 
-           when "succeeded"
-            ng_table_el[:status] = status_when_succeeded() 
-           when "executing"
-            ng_table_el[:status] = status_when_executing() 
-           when "cancelled"
-            # no op
-           when "failed"
+          case status
+           when 'succeeded'
+            ng_table_el[:status] = status_when_succeeded()
+           when 'executing'
+            ng_table_el[:status] = status_when_executing()
+           when 'cancelled'
+           # no op
+           when 'failed'
             ng_table_el[:status] = status_when_failed()
             errors = summarize_errors?()
             ng_table_el[:errors] = errors unless errors.empty?
@@ -25,17 +26,18 @@ module DTK; class Task::Status
         ng_table_el
       end
 
-     private
-      def status_when_succeeded()
-        status_with_subtask_size("succeeded")
+      private
+
+      def status_when_succeeded
+        status_with_subtask_size('succeeded')
       end
 
-      def status_when_executing()
-        status_when_aux("executing")
+      def status_when_executing
+        status_when_aux('executing')
       end
 
-      def status_when_failed()
-        status_when_aux("failed")
+      def status_when_failed
+        status_when_aux('failed')
       end
 
       def status_when_aux(status)
@@ -43,26 +45,27 @@ module DTK; class Task::Status
         if st_status_count.empty?
           status
         else
-          st_status_count.inject("") do |st,(status,count)|
-            status_string = status_with_subtask_size(status,count)
+          st_status_count.inject('') do |st, (status, count)|
+            status_string = status_with_subtask_size(status, count)
             st.empty? ? status_string : "#{st},#{status_string}"
           end
         end
       end
 
-      def status_with_subtask_size(status,count=nil)
-        "#{status}(#{(count||subtask_count()).to_s})"
+      def status_with_subtask_size(status, count = nil)
+        "#{status}(#{(count || subtask_count())})"
       end
-      def subtask_count()
+
+      def subtask_count
         @subtasks.size
       end
 
-      def subtask_status_rows()
-        @subtask_status_rows ||= (@block_for_subtasks && @block_for_subtasks.call())||[]
+      def subtask_status_rows
+        @subtask_status_rows ||= (@block_for_subtasks && @block_for_subtasks.call()) || []
       end
 
-      def subtask_status_count()
-        ret = Hash.new
+      def subtask_status_count
+        ret = {}
         subtask_status_rows().each do |subtask_table_el|
           if status = subtask_table_el[:status]
             ret[status] ||= 0
@@ -71,12 +74,12 @@ module DTK; class Task::Status
         end
         ret
       end
-      
-      def summarize_errors?()
-        all_errors = Array.new
+
+      def summarize_errors?
+        all_errors = []
         subtask_status_rows().each do |st|
           if errors = st[:errors]
-            if errors.kind_of?(Array)
+            if errors.is_a?(Array)
               all_errors += errors
             else
               all_errors << errors
@@ -88,10 +91,10 @@ module DTK; class Task::Status
 
       def summarize_errors(errors)
         # assuming all fields are the same except :message
-        msgs_found = Array.new
+        msgs_found = []
         errors.each do |err|
           msg = err[:message]
-          if msg and !msg.empty?
+          if msg && !msg.empty?
             unless msgs_found.include?(msg)
               msgs_found << msg
             end
@@ -101,7 +104,7 @@ module DTK; class Task::Status
           errors.first
         else
           summary_msg = (msgs_found.size == 1 ? msgs_found.first : "\n#{ErrIdent}#{msgs_found.join(ErrIdent)}")
-          errors.first.merge(:message => summary_msg)
+          errors.first.merge(message: summary_msg)
         end
       end
       ErrIdent = '  '

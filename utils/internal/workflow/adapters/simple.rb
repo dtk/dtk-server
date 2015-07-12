@@ -2,72 +2,73 @@
 module DTK
   module WorkflowAdapter
     class Simple < Workflow
-      def initialize(top_task,task=nil)
+      def initialize(top_task, task = nil)
         super(top_task)
-        @task = task||top_task
+        @task = task || top_task
       end
 
-      def execute(top_task_id)
-        workflow = self.class.generate_workflow(@top_task,@task)
+      def execute(_top_task_id)
+        workflow = self.class.generate_workflow(@top_task, @task)
         # RICH-WF: needs to be written by having each child class put in logic
         workflow.follow_workflow()
       end
 
-     private
+      private
+
       attr_reader :task
       # RICH-WF: this function can do the decomposition where there may be a base task that decomposes into multiple ones
-      def self.generate_workflow(top_task,task)
+      def self.generate_workflow(top_task, task)
         if task[:executable_action]
-          ExecutableAction.new(top_task,task)
-        elsif task[:temporal_order] == "sequential"
-          Sequential.new(top_task,task)
-        elsif task[:temporal_order] == "concurrent"
-          Concurrent.new(top_task,task)
+          ExecutableAction.new(top_task, task)
+        elsif task[:temporal_order] == 'sequential'
+          Sequential.new(top_task, task)
+        elsif task[:temporal_order] == 'concurrent'
+          Concurrent.new(top_task, task)
         else
-          Log.error("do not have rules to process task")
+          Log.error('do not have rules to process task')
         end
       end
 
       class ExecutableAction < self
-        def follow_workflow()
+        def follow_workflow
           #TODO: needs to call workflow#process_executable_action
-          process_executable_action(task,top_task_idh)
+          process_executable_action(task, top_task_idh)
         end
 
-        def debug_summary()
-          node = task[:executable_action][:node]||{}
+        def debug_summary
+          node = task[:executable_action][:node] || {}
           summary = {
-            :action_type => task[:executable_action_type],
-            :node => {:id => node[:id],:name => node[:display_name]}
+            action_type: task[:executable_action_type],
+            node: { id: node[:id], name: node[:display_name] }
           }
-          [self.class,summary]
+          [self.class, summary]
         end
       end
 
       module NestedWFMixin
-        def initialize(top_task,task)
+        def initialize(top_task, task)
           super
-          @children = task.subtasks.map{|sub_task|self.class.generate_workflow(@top_task,sub_task)}
+          @children = task.subtasks.map { |sub_task| self.class.generate_workflow(@top_task, sub_task) }
         end
         attr_reader :children
 
-        def debug_summary()
-          [self.class,@children.map{|wf|wf.debug_summary()}]
+        def debug_summary
+          [self.class, @children.map(&:debug_summary)]
         end
       end
       class Sequential < self
         include NestedWFMixin
-        def follow_workflow()
-          pp [:debug_print,debug_summary()]
-          raise Error.new("fn must be written")
+        def follow_workflow
+          pp [:debug_print, debug_summary()]
+          fail Error.new('fn must be written')
         end
       end
 
       class Concurrent < self
         include NestedWFMixin
-        def follow_workflow()
-          pp [:debug_print,debug_summary()]
-          raise Error.new("fn must be written")
+        def follow_workflow
+          pp [:debug_print, debug_summary()]
+          fail Error.new('fn must be written')
         end
       end
     end

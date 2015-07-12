@@ -17,7 +17,7 @@ unless is_development
   Ramaze::Log.loggers = [rotating_logger]
   Ramaze::Log.level = Logger::DEBUG
 else
-  puts "**** DEVELOPMENT MODE - NO LOGS ****"
+  puts '**** DEVELOPMENT MODE - NO LOGS ****'
 end
 
 class DTKServerTenant5
@@ -31,18 +31,15 @@ class DTKServerTenant5
   include ::NewRelic::Agent::Instrumentation::Rack
 end
 
-
 Ramaze.middleware! :dev do |m|
   m.use DTKServerTenant5
   m.run Ramaze.middleware
 end
 
-=begin
-TODO: use this when upgrade to Ramaze 2012.12.08
-Ramaze.middleware :dev do
-  use DTKServerTenantNew5
-  run Ramaze.core
-end
-=end
+# TODO: use this when upgrade to Ramaze 2012.12.08
+# Ramaze.middleware :dev do
+#   use DTKServerTenantNew5
+#   run Ramaze.core
+# end
 
-Ramaze.start(:adapter => :thin, :port => R8::Config[:server_port], :file => __FILE__)
+Ramaze.start(adapter: :thin, port: R8::Config[:server_port], file: __FILE__)

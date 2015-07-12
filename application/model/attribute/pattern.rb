@@ -1,19 +1,18 @@
 module DTK; class Attribute
-  class Pattern 
+  class Pattern
+    r8_nested_require('pattern', 'type')
+    r8_nested_require('pattern', 'assembly')
+    r8_nested_require('pattern', 'node')
+    r8_nested_require('pattern', 'term')
 
-    r8_nested_require('pattern','type')
-    r8_nested_require('pattern','assembly')
-    r8_nested_require('pattern','node')
-    r8_nested_require('pattern','term')
-
-    def self.node_name()
-      (pattern =~ NodeComponentRegexp ? $1 : raise_unexpected_pattern(pattern))
+    def self.node_name
+      (pattern =~ NodeComponentRegexp ? Regexp.last_match(1) : raise_unexpected_pattern(pattern))
     end
     def self.component_fragment(pattern)
-      (pattern =~ NodeComponentRegexp ? $2 : raise_unexpected_pattern(pattern))
+      (pattern =~ NodeComponentRegexp ? Regexp.last_match(2) : raise_unexpected_pattern(pattern))
     end
     def self.attribute_fragment(pattern)
-      (pattern =~ AttrRegexp ? $1 : raise_unexpected_pattern(pattern))
+      (pattern =~ AttrRegexp ? Regexp.last_match(1) : raise_unexpected_pattern(pattern))
     end
     Delim = "#{Term::EscpLDelim}[^#{Term::EscpRDelim}]*#{Term::EscpRDelim}"
     DelimWithSelect = "#{Term::EscpLDelim}([^#{Term::EscpRDelim}]*)#{Term::EscpRDelim}"
@@ -22,12 +21,12 @@ module DTK; class Attribute
     AttrRegexp = Regexp.new("node[^\/]*\/component#{Delim}\/(attribute.+$)")
 
     def self.raise_unexpected_pattern(pattern)
-      raise Error.new("Unexpected that pattern (#{pattern}) did not match")
+      fail Error.new("Unexpected that pattern (#{pattern}) did not match")
     end
     private_class_method :raise_unexpected_pattern
 
-    def self.create_attr_pattern(base_object,attr_term,opts={})
-      create(attr_term,base_object,opts).set_parent_and_attributes!(base_object.id_handle(),opts)
+    def self.create_attr_pattern(base_object, attr_term, opts = {})
+      create(attr_term, base_object, opts).set_parent_and_attributes!(base_object.id_handle(), opts)
     end
 
     # set_attributes can create or set attributes depending on options in opts
@@ -37,14 +36,14 @@ module DTK; class Attribute
       attribute_rows  = []
       ambiguous       = []
       attr_properties = opts[:attribute_properties] || {}
-      attributes      = base_object.list_attributes(Opts.new(:with_assembly_wide_node => true))
+      attributes      = base_object.list_attributes(Opts.new(with_assembly_wide_node: true))
 
       av_pairs.each do |av_pair|
         value = av_pair[:value]
         if semantic_data_type = attr_properties[:semantic_data_type]
           if value
             unless SemanticDatatype.is_valid?(semantic_data_type, value)
-              raise ErrorUsage.new("The value (#{value.inspect}) is not of type (#{semantic_data_type})")
+              fail ErrorUsage.new("The value (#{value.inspect}) is not of type (#{semantic_data_type})")
             end
           end
         end
@@ -68,31 +67,31 @@ module DTK; class Attribute
         unless opts[:create]
           attr_idhs.each do |attr_idh|
             unless pattern.valid_value?(value, attr_idh)
-              raise ErrorUsage.new("The value (#{value.inspect}) is not of type (#{pattern.semantic_data_type(attr_idh)})")
+              fail ErrorUsage.new("The value (#{value.inspect}) is not of type (#{pattern.semantic_data_type(attr_idh)})")
             end
           end
         end
 
         all_attr_idhs = attr_idhs
         unless ngm_attr_idhs.empty?
-          raise ErrorUsage.new('Not supported creating attributes on a node group') if opts[:create]
+          fail ErrorUsage.new('Not supported creating attributes on a node group') if opts[:create]
           all_attr_idhs += ngm_attr_idhs
         end
         all_attr_idhs.each do |idh|
-          attribute_rows << { :id => idh.get_id(), :value_asserted => value }.merge(attr_properties)
+          attribute_rows << { id: idh.get_id(), value_asserted: value }.merge(attr_properties)
         end
       end
 
       # return if ambiguous whether component or node attribute (node and component have same name)
-      return { :ambiguous => ambiguous } unless ambiguous.empty?
+      return { ambiguous: ambiguous } unless ambiguous.empty?
 
       # attribute_rows can have multiple rows if pattern decomposes into multiple attributes
       # it should have at least one row or there is an error
       if attribute_rows.empty?
         if opts[:create]
-          raise ErrorUsage.new('Unable to create a new attribute')
+          fail ErrorUsage.new('Unable to create a new attribute')
         else
-          raise ErrorUsage.new('The attribute specified does not match an existing attribute in the assembly')
+          fail ErrorUsage.new('The attribute specified does not match an existing attribute in the assembly')
         end
       end
 
@@ -100,11 +99,11 @@ module DTK; class Attribute
       attr_mh = base_object.model_handle(:attribute)
 
       sp_hash = {
-        :cols => [:id, :group_id, :display_name, :node_node_id, :component_component_id],
-        :filter => [:oneof, :id, attribute_rows.map { |a| a[:id] }]
+        cols: [:id, :group_id, :display_name, :node_node_id, :component_component_id],
+        filter: [:oneof, :id, attribute_rows.map { |a| a[:id] }]
       }
       existing_attrs = Model.get_objs(attr_mh, sp_hash, opts)
-      ndx_new_vals = attribute_rows.inject(Hash.new) { |h, r| h.merge(r[:id] => r[:value_asserted]) }
+      ndx_new_vals = attribute_rows.inject({}) { |h, r| h.merge(r[:id] => r[:value_asserted]) }
       LegalValue.raise_usage_errors?(existing_attrs, ndx_new_vals)
 
       SpecialProcessing::Update.handle_special_processing_attributes(existing_attrs, ndx_new_vals)
@@ -126,7 +125,7 @@ module DTK; class Attribute
       # else return node or component (assembly_wide) attribute
       if opts[:component_attribute]
         match = attributes.find { |attr| attr[:display_name].eql?("assembly_wide/#{pattern}") }
-        raise ErrorUsage.new("Service instance component attribute '#{pattern}' does not exist") unless match
+        fail ErrorUsage.new("Service instance component attribute '#{pattern}' does not exist") unless match
         av_pair[:pattern] = match[:display_name]
       else
         matching_attr = attributes.select { |attr| attr[:display_name].eql?(pattern) || attr[:display_name].eql?("assembly_wide/#{pattern}") }

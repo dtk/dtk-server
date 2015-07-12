@@ -3,7 +3,7 @@ module XYZ
     extend Innate::StateAccessor
     state_accessor :user_object, :auth_filters, :access_time, :repoman_session_id
 
-    def get_user_object()
+    def get_user_object
       user_object
     end
 
@@ -15,37 +15,37 @@ module XYZ
       self.access_time = a_time
     end
 
-    def last_access_time()
+    def last_access_time
       self.access_time
     end
 
-    def get_username()
+    def get_username
       get_user_object()[:username]
     end
 
-    def get_default_namespace()
+    def get_default_namespace
       get_user_object()[:default_namespace]
     end
 
-    def are_catalog_credentilas_set?()
+    def are_catalog_credentilas_set?
       !(get_user_object().catalog_username.nil? || get_user_object().catalog_password.nil?)
     end
 
-    def self.get_default_namespace()
+    def self.get_default_namespace
       CurrentSession.new.get_default_namespace()
     end
 
-    def self.get_username()
+    def self.get_username
        CurrentSession.new.get_username()
     end
 
-    def self.are_catalog_credentilas_set?()
+    def self.are_catalog_credentilas_set?
       CurrentSession.new.are_catalog_credentilas_set?()
     end
 
     def self.catalog_credentials
       usr_obj = CurrentSession.new.get_user_object()
-      { :username => usr_obj.catalog_username, :password => usr_obj.catalog_password, :pre_hashed => true }
+      { username: usr_obj.catalog_username, password: usr_obj.catalog_password, pre_hashed: true }
     end
 
     def self.catalog_username
@@ -56,7 +56,8 @@ module XYZ
       self.access_time = Time.now
       self.user_object = user_object
     end
-    def get_auth_filters()
+
+    def get_auth_filters
       auth_filters
     end
 

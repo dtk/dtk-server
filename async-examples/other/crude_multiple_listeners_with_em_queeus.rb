@@ -1,7 +1,7 @@
 require 'rubygems'
 require 'ramaze'
 require 'eventmachine'
-Queues = Hash.new
+Queues = {}
 
 class DeferrableBody
   include EventMachine::Deferrable
@@ -25,7 +25,7 @@ class MyController < Ramaze::Controller
     Queues[self] = q = EM::Queue.new
     # Get the headers out there asap, let the client know we're alive...
     EM.next_tick do
-      request.env['async.callback'].call [200, {'Content-Type' => 'text/plain'}, body]
+      request.env['async.callback'].call [200, { 'Content-Type' => 'text/plain' }, body]
     end
     q_pop_proc = proc{
       q.pop do |msg|
@@ -44,10 +44,10 @@ class MyController < Ramaze::Controller
 
   def send
     msg = request['msg']
-    Queues.each_value{|q|q.push(msg)}
+    Queues.each_value { |q| q.push(msg) }
     nil
   end
 end
 
 Ramaze::Log.level = Logger::WARN
-Ramaze.start(:adapter => :thin, :port => 3000, :file => __FILE__)
+Ramaze.start(adapter: :thin, port: 3000, file: __FILE__)

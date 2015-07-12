@@ -156,4 +156,3 @@ class Common
 	  return catalog_credentials_set
 	end
 end
-

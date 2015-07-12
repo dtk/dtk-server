@@ -4,7 +4,7 @@ module DTK; class Assembly; class Instance
       @assembly_idh = assembly_idh
     end
 
-    def assembly_instance()
+    def assembly_instance
       @assembly_idh.create_object()
     end
 
@@ -21,6 +21,5 @@ module DTK; class Assembly; class Instance
       class Delete < self
       end
     end
-
-  end                               
+  end
 end; end; end

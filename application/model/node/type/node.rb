@@ -1,7 +1,7 @@
 module DTK; class Node
   class Type
     class Node < self
-      Types = 
+      Types =
         [
          :stub,              # - in an assembly template
          :image,             # - corresponds to an IAAS, hyperviser or container image
@@ -15,8 +15,14 @@ module DTK; class Node
       Types.each do |type|
         class_eval("def self.#{type}(); '#{type}'; end")
       end
-      def self.types()
+
+      def self.types
         Types
+      end
+
+      StagedTypes = [:staged,:target_ref_staged]
+      def self.is_staged?(type)
+        StagedTypes.include?(type.to_sym)
       end
     end
   end

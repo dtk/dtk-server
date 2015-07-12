@@ -2,20 +2,21 @@ module DTK
   class NodeBindings
     class ParseInput
       attr_reader :input
-      def initialize(input,opts={})
+      def initialize(input, opts = {})
         @input = (opts[:content_field] ? ContentField.new(input) : input)
       end
+
       def child(input)
-        self.class.new(input,:content_field => @input.kind_of?(ContentField))
+        self.class.new(input, content_field: @input.is_a?(ContentField))
       end
 
       def type?(klass)
-        @input.kind_of?(klass)
+        @input.is_a?(klass)
       end
 
       def error(msg)
-        input_param = ErrorUsage::Parsing::Params.new(:input => @input)
-        ServiceModule::ParsingError.new(msg,input_param)
+        input_param = ErrorUsage::Parsing::Params.new(input: @input)
+        ServiceModule::ParsingError.new(msg, input_param)
       end
     end
 
@@ -27,4 +28,3 @@ module DTK
     end
   end
 end
-

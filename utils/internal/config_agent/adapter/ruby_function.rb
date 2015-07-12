@@ -19,14 +19,14 @@ module DTK; class ConfigAgent; module Adapter
         # remove internal object from error message;
         # e.g for "undefined local variable or method `name' for #<XYZ::ActionDef:0x0>" display "undefined local variable or method `name'"
         message = parse_exception_message(e.message)
-        rf_results = [{ :error => message }]
+        rf_results = [{ error: message }]
       rescue ScriptError => e
         # handle syntax errors in ruby_function dsl
         message = parse_exception_message(e.message)
-        rf_results = [{ :error => message }]
+        rf_results = [{ error: message }]
       rescue Exception => e
         message = parse_exception_message(e.message)
-        rf_results = [{ :error => message }]
+        rf_results = [{ error: message }]
       end
 
       parse_ruby_fn_results(rf_results, dynamic_attrs)

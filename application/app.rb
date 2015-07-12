@@ -13,7 +13,7 @@ require 'yaml'
 require 'looksee'
 
 # TODO: probably better way to do this; below makes sure that if program staretd in different directory than this, that still finds helpers
-helper_paths = Innate.options[:helpers_helper][:paths]||[]
+helper_paths = Innate.options[:helpers_helper][:paths] || []
 unless helper_paths.include?(File.dirname(__FILE__))
   Innate.options[:helpers_helper][:paths] = [File.dirname(__FILE__)] + helper_paths
 end
@@ -50,7 +50,6 @@ r8_require("#{SYSTEM_DIR}/utility")
 r8_require("#{SYSTEM_DIR}/common_mixin")
 r8_require("#{UTILS_BASE_DIR}/utils")
 
-
 r8_require("#{LIB_DIR}/model")
 r8_require("#{LIB_DIR}/response_info")
 
@@ -66,7 +65,7 @@ r8_require('config/routes.rb')
 
 # Here goes your database connection and options:
 r8_require("#{LIB_DIR}/db")
-DBinstance =::DTK::DB.create(R8::Config[:database])
+DBinstance = ::DTK::DB.create(R8::Config[:database])
 
 # removing memory caching for now, doesnt seem like it should be included here
 # require SYSTEM_DIR + '/cache'

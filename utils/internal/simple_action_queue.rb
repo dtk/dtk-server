@@ -1,38 +1,37 @@
 
 module DTK
-
   # One dimensional queue to support much simpler needs for queing simpler results.
   # Unlike ActionResultQueue there is no need to support multiple results from different
   # nodes.
   class QueueNotFound < Error
-
     def initialize(queue_id, available_ids)
       super("Simple Action queue could not find queue with ID #{queue_id}, available queues [#{available_ids.join(',')}]")
     end
-  
+
   end
 
   class SimpleActionQueue
     def self.get_results(queue_id)
-      queue, response_results = self[queue_id], nil
+      queue = self[queue_id]
+      response_results = nil
 
-      raise QueueNotFound.new(queue_id, self.available_ids) if queue.nil?
+      fail QueueNotFound.new(queue_id, self.available_ids) if queue.nil?
 
       unless queue.result.nil?
         response_results = queue.result
         delete(queue_id)
       end
-      
-      return { :result => response_results }
+
+      { result: response_results }
     end
 
     attr_accessor :id, :result
 
     Lock = Mutex.new
-    Queues = Hash.new
+    Queues = {}
     @@count = 0
 
-    def initialize()
+    def initialize
       Lock.synchronize do
         @@count += 1
         @id = @@count
@@ -61,4 +60,3 @@ module DTK
     end
   end
 end
-

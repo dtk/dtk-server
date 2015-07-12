@@ -4,12 +4,12 @@ module MCollective
     # monkey patch so that dont first load stomp
     class Base
       def self.inherited(klass)
-        PluginManager << {:type => "connector_plugin", :class => klass.to_s} unless klass == Stomp
+        PluginManager << { type: 'connector_plugin', class: klass.to_s } unless klass == Stomp
       end
     end
     require File.expand_path('stomp', File.dirname(__FILE__))
 
-    class Stomp_em<Stomp
+    class Stomp_em < Stomp
       # this is effectively a singleton, but not mixin in Singleton beacuse mcollective isstantiates with new
       # TODO: may look at making singleton and patching with making :new public, recognizing that will only be called once
       module StompClient
@@ -17,34 +17,35 @@ module MCollective
         def initialize(*args)
           super(*args)
           # TODO: if cannot fidn user and log this shoudl be error
-          conn_opts = (args.last.kind_of?(Hash))? args.last : {}
+          conn_opts = (args.last.is_a?(Hash)) ? args.last : {}
           @login = conn_opts[:login]
           @passcode = conn_opts[:passcode]
           @connected = false
         end
 
         def connection_completed
-          connect :login => @login, :passcode => @passcode
+          connect login: @login, passcode: @passcode
         end
 
         def receive
-          Log.error("Should not be called")
+          Log.error('Should not be called')
           nil
         end
-        def publish(msg)
-          Log.error("Should not be called")
+
+        def publish(_msg)
+          Log.error('Should not be called')
           nil
         end
 
         def receive_msg msg
-          if msg.command == "CONNECTED"
+          if msg.command == 'CONNECTED'
             @connected = true
           else
             Stomp_em.process(msg)
           end
         end
 
-        def is_connected?()
+        def is_connected?
           @connected
         end
       end
@@ -66,9 +67,9 @@ module MCollective
 
       # Connects to the Stomp middleware
       # TODO: write to use logic from super class
-      def connect(connector = ::Stomp::Connection)
+      def connect(_connector = ::Stomp::Connection)
         if @connection
-          Log.debug("Already connection, not re-initializing connection")
+          Log.debug('Already connection, not re-initializing connection')
           return
         end
         begin
@@ -78,17 +79,17 @@ module MCollective
           password = nil
           @@base64 = false
 
-          @@base64 = get_bool_option("stomp.base64", false)
-          @@msgpriority = get_option("stomp.priority", 0).to_i
+          @@base64 = get_bool_option('stomp.base64', false)
+          @@msgpriority = get_option('stomp.priority', 0).to_i
 
           # Maintain backward compat for older stomps
-          host = get_env_or_option("STOMP_SERVER", "stomp.host")
-          port = get_env_or_option("STOMP_PORT", "stomp.port", 6163).to_i
-          user = get_env_or_option("STOMP_USER", "stomp.user")
-          password = get_env_or_option("STOMP_PASSWORD", "stomp.password")
+          host = get_env_or_option('STOMP_SERVER', 'stomp.host')
+          port = get_env_or_option('STOMP_PORT', 'stomp.port', 6163).to_i
+          user = get_env_or_option('STOMP_USER', 'stomp.user')
+          password = get_env_or_option('STOMP_PASSWORD', 'stomp.password')
 
           # TODO: assume reactor is running already
-          @connection = EM.connect host, port, StompClient, :login => user, :passcode => password
+          @connection = EM.connect host, port, StompClient, login: user, passcode: password
           Log.debug("Connecting to #{host}:#{port}")
          rescue Exception => e
           pp e.backtrace[0..5]
@@ -104,28 +105,25 @@ module MCollective
         end
       end
 
-
       def self.process(msg)
         # STOMP puts the payload in the body variable, pass that
         # into the payload of MCollective::Request and discard all the
         # other headers etc that stomp provides
-=begin
-        raw_msg =
-
-  # 1.3.2 CHANGE
-          if @@base64
-            Request.new(SSL.base64_decode(msg.body))
-          else
-            Request.new(msg.body)
-          end
-=end
-        raw_msg = Message.new(msg.body, msg, :base64 => @base64, :headers => msg.headers)
+        #         raw_msg =
+        #
+        #   # 1.3.2 CHANGE
+        #           if @@base64
+        #             Request.new(SSL.base64_decode(msg.body))
+        #           else
+        #             Request.new(msg.body)
+        #           end
+        raw_msg = Message.new(msg.body, msg, base64: @base64, headers: msg.headers)
         msg = @@decode_context.r8_decode_receive(raw_msg)
         begin
-          @@multiplexer.process_response(msg,msg[:requestid])
+          @@multiplexer.process_response(msg, msg[:requestid])
         rescue => e
           puts e.backtrace[0..5]
-          Log.error("Something went wrong while processing the message; possibly an auth issue with MCollective")
+          Log.error('Something went wrong while processing the message; possibly an auth issue with MCollective')
         end
       end
 
@@ -133,7 +131,7 @@ module MCollective
       # Subscribe to a topic or queue
       def subscribe(source)
         unless @subscriptions.include?(source)
-          EM::defer do
+          EM.defer do
             Log.debug("Subscribing to #{source}")
             wait_until_connected?
             @connection.subscribe(source)
@@ -141,39 +139,42 @@ module MCollective
           end
         end
       end
-      def subscribe_and_send(source,destination,body,params={})
-        EM::defer do
+
+      def subscribe_and_send(source, destination, body, params = {})
+        EM.defer do
           wait_until_connected?
           unless @subscriptions.include?(source)
             Log.debug("Subscribing to #{source}")
             @connection.subscribe(source)
             @subscriptions << source
           end
-          @connection.send(destination,body,params)
+          @connection.send(destination, body, params)
         end
       end
 
       # Subscribe to a topic or queue
-      def unsubscribe(source)
+      def unsubscribe(_source)
         # TODO
       end
-     private
-      def get_env_or_option(env, opt, default=nil)
+
+      private
+
+      def get_env_or_option(env, opt, default = nil)
         return ENV[env] if ENV.include?(env)
         return @config.pluginconf[opt] if @config.pluginconf.include?(opt)
         return default if default
 
-        raise("No #{env} environment or plugin.#{opt} configuration option given")
+        fail("No #{env} environment or plugin.#{opt} configuration option given")
       end
 
       # looks for a config option, accepts an optional default
       #
       # raises an exception when it cant find a value anywhere
-      def get_option(opt, default=nil)
+      def get_option(opt, default = nil)
         return @config.pluginconf[opt] if @config.pluginconf.include?(opt)
         return default if default
 
-        raise("No plugin.#{opt} configuration option given")
+        fail("No plugin.#{opt} configuration option given")
       end
 
       # gets a boolean option from the config, supports y/n/true/false/1/0

@@ -1,15 +1,14 @@
 module Ramaze::Helper
   module RemotesHelper
-
     def info_git_remote(module_obj)
       info = module_obj.get_linked_remote_repos.collect do |a|
         provider_name = a.git_provider_name
         unless ::DTK::RepoRemote::DTKN_PROVIDER.eql?(provider_name)
           a.merge(
-            :url => a.git_remote_url,
-            :git_provider => provider_name,
-            :base_git_url => a.base_git_remote_url,
-            :base_git_location => a.base_git_remote_location
+            url: a.git_remote_url,
+            git_provider: provider_name,
+            base_git_url: a.base_git_remote_url,
+            base_git_location: a.base_git_remote_location
           )
         end
       end
@@ -39,6 +38,5 @@ module Ramaze::Helper
 
       rest_ok_response
     end
-
   end
 end

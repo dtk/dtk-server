@@ -13,6 +13,8 @@ module DTK; class Task::Status::StreamForm; class Element
       def add_nested_detail!()
         return if @subtasks.empty?
         pp :add_nested_detail
+        # TODO: stub below send everything
+        self[:subtasks] = @subtasks
       end
     end
   end

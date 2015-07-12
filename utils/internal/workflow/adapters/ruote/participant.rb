@@ -163,7 +163,7 @@ module DTK
         def execution_context_block(task, workitem, &_body)
           yield
         rescue Exception => e
-          if task_is_active?(workitem) #this needed because, for example teher can be a pending polling task
+          if task_is_active?(workitem) #this needed because, for example there can be a pending polling task
             event, errors = task.add_event_and_errors(:complete_failed, :server, [{ message: e.to_s }])
             log_participant.end(:execution_context_trap, event: event, errors: errors, backtrace: e.backtrace)
             task.update_at_task_completion('failed', errors: errors)

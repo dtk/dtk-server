@@ -7,15 +7,12 @@ module DTK; class Task::Status::StreamForm::Element
         @leaf_subtasks     = nil
       end
 
-      attr_reader :elements
-
       def self.add_detail!(stage_elements, hash_opts = {})
-        new(stage_elements).add_detail!(Opts.new(hash_opts)).elements
+        new(stage_elements).add_detail!(Opts.new(hash_opts))
       end
         
       def add_detail!(opts = Opts.new)
-        ret = self
-        return ret if @elements.empty?
+        return if @elements.empty?
 
         if opts.add_subtasks?
           add_subtasks!
@@ -23,7 +20,6 @@ module DTK; class Task::Status::StreamForm::Element
             add_action_results!
           end
         end
-        ret
       end
 
       private

@@ -1,15 +1,12 @@
 module DTK; class Task::Status::StreamForm::Element
   class Stage < self
     r8_nested_require('stage', 'detail')
+    r8_nested_require('stage', 'hash_form')
 
     def initialize(task)
       super(:stage, task)
     end
     
-    def hash_form
-      super().add_elements?(:status, :ended_at, :position)
-    end
-
     def self.elements(top_level_task, start_stage, end_stage, opts = {})
       ret = Array.new
       # Get the stage elements within range start_stage,end_stage
@@ -56,6 +53,9 @@ module DTK; class Task::Status::StreamForm::Element
         tasks.pop()
       end
 
+      # TODO: if end_plus_1_reached is true then want to patch the task/subtask state to go from
+      #       'executing' to 'succeeded' or 'failed'
+
       #compute state by looking at last task and whether end_plus_1_reached
       last_task = tasks.last
       state = 
@@ -68,7 +68,7 @@ module DTK; class Task::Status::StreamForm::Element
         end
 
       stage_elements = tasks.map{|task|new(task)}
-      [stage_elements,state]
+      [stage_elements, state]
     end
 
     def self.task_started(task)
@@ -86,4 +86,6 @@ module DTK; class Task::Status::StreamForm::Element
 
   end
 end; end
+
+
 

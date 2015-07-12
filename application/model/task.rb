@@ -10,7 +10,7 @@ module DTK
     r8_nested_require('task','node_group_processing')
     r8_nested_require('task','action_results')
     r8_nested_require('task','qualified_index')
-    include Hierarchical::Mixin
+    include HierarchicalMixin
     include GetMixin
     extend GetClassMixin
     extend CreateClassMixin

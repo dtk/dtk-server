@@ -86,20 +86,17 @@ module DTK
         fail ErrorUsage, "Task with id '#{task_id} is not executing"
       end
 
+      # This shuts down workflow from advancing; however there can be stragler callbascks coming in
       @@Lock.synchronize do
-        # If task is present in '@@active_workflows' ruote process will be cancelled,
-        # task status updated and resources cleaned up
-        # If task loaded from DB has status executing, but not present in '@@active_workflows'
-        # it means, unexpected server behavior (i.e. server restarted during converge),
-        # and only task status will get updated.
-        # Otherwise, raise error task not running.
         if @@active_workflows[task_id]
           @@active_workflows[task_id].cancel()
           @@active_workflows.delete(task_id)
         end
       end
+
       # update task status
       task.update_at_task_cancelled(Task::Action::Result::Cancelled.new())
+
     end
 
     def self.task_is_active?(task_id)

@@ -10,13 +10,10 @@ module DTK; class Task
       end
 
       def update_at_task_completion(status, result)
-        unless get_field?(:status) == 'cancelled'
-          update(status: status, result: result, ended_at: Aux.now_time_stamp())
-        end
+        update(status: status, result: result, ended_at: Aux.now_time_stamp())
       end
 
       # unlike update_at_task calss above this will be called on top level task
-      # TODO: need to clean up to make more sophisticated
       def update_at_task_cancelled(result)
         update_hash = { status: 'cancelled', result: result, ended_at: Aux.now_time_stamp() }
         update(update_hash)
@@ -29,15 +26,22 @@ module DTK; class Task
 
       RecursiveUpdateLock = Mutex.new
       def update(update_hash, opts = {})
-        unless opts[:nested]
-          # Top level call; want to lock ful recursive calls
-          RecursiveUpdateLock.synchronize do 
+
+        to_execute = proc do 
+          # dont overrite cancelled; this handles stragglers
+          unless update_hash.keys.include(:status) and get_field?(:status) == 'cancelled'
             super(update_hash)
+            merge!(update_hash)
             update_next_level(update_hash, opts)
           end
+        end
+
+        unless opts[:nested]
+          RecursiveUpdateLock.synchronize do 
+            to_execute.call()
+          end
         else
-          super(update_hash)
-          update_next_level(update_hash, opts)
+          to_execute.call()
         end
       end
 
@@ -87,3 +91,4 @@ module DTK; class Task
     end
   end
 end; end
+

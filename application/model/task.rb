@@ -61,6 +61,11 @@ module DTK
       end
     end
 
+    def has_status?(type)
+      Status::Type.has_status?(self, type)
+    end
+
+    # TODO: see if we can deprecate guarded_by
     # returns list (possibly empty) of subtask idhs that guard this
     def guarded_by(external_guards)
       ret = []

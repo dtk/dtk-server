@@ -1,6 +1,7 @@
 module DTK
   class Task
     class Status
+      r8_nested_require('status', 'type')
       r8_nested_require('status', 'table_form')
       r8_nested_require('status', 'list_form')
       r8_nested_require('status', 'stream_form')

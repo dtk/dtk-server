@@ -13,7 +13,7 @@ module DTK; class Task
         update(status: status, result: result, ended_at: Aux.now_time_stamp())
       end
 
-      # unlike update_at_task calss above this will be called on top level task
+      # unlike update_at_task class above this will be called on top level task
       def update_at_task_cancelled(result)
         update_hash = { status: 'cancelled', result: result, ended_at: Aux.now_time_stamp() }
         update(update_hash)
@@ -26,12 +26,9 @@ module DTK; class Task
 
       RecursiveUpdateLock = Mutex.new
       def update(update_hash, opts = {})
-
         to_execute = proc do 
-          # dont overrite cancelled; this handles stragglers
-          unless update_hash.keys.include(:status) and get_field?(:status) == 'cancelled'
+          unless donot_update?(update_hash)
             super(update_hash)
-            merge!(update_hash)
             update_next_level(update_hash, opts)
           end
         end
@@ -46,6 +43,12 @@ module DTK; class Task
       end
 
       private
+
+      def donot_update?(update_hash)
+        # if cancel is set in db then dont change values
+        status = update_hash[:status]
+        status and status != 'cancelled' and  get_field?(:status) == 'cancelled'
+      end
        
       def update_next_level(update_hash, opts = {})
         unless opts[:dont_update_parents] || (update_hash.keys & [:status, :started_at, :ended_at]).empty?
@@ -76,12 +79,15 @@ module DTK; class Task
           elsif not subtask_status_array.find { |s| s != 'succeeded' } then 'succeeded' #all succeeded
           else 'executing' #if reach here must be some created and some finished
           end
-        unless parent_status == parent[:status]
+# TODO: replace by better check;
+# problem is parent_status == parent[:status] but parent_updates can change
+#        unless parent_status == parent[:status]
+        unless false
           parent_updates.merge!(status: parent_status)
           # compute parent end time which can only change if parent changed to "failed" or "succeeded"
           if ['failed', 'succeeded'].include?(parent_status) && child_hash[:ended_at]
             parent_updates.merge!(ended_at: child_hash[:ended_at])
-            end
+          end
         end
         
         dont_update_parents = (parent_updates.keys - [:children_status]).empty?

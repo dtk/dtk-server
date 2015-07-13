@@ -487,8 +487,7 @@
       "duration",
       "started_at",
       "ended_at",
-      "errors",
-      "action"
+      "errors"
     ],
     "mapping": {
       "task_type": "dtk_type",
@@ -497,8 +496,7 @@
       "duration": "duration",
       "started_at": "started_at.get_date",
       "ended_at": "ended_at.get_date",
-      "errors": "errors.message",
-      "action": "logs.message"
+      "errors": "errors.message"
     }
   },
   "assembly_task_status": {

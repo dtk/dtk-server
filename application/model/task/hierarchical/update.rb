@@ -10,7 +10,9 @@ module DTK; class Task
       end
 
       def update_at_task_completion(status, result)
-        update(status: status, result: result, ended_at: Aux.now_time_stamp())
+        unless get_field?(:status) == 'cancelled'
+          update(status: status, result: result, ended_at: Aux.now_time_stamp())
+        end
       end
 
       # unlike update_at_task calss above this will be called on top level task

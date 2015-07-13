@@ -94,11 +94,7 @@ module DTK
     def create_local_repo(repo_name, opts = {})
       # TODO: patch until Haris looks at it DTK-2124
       remote_repo = nil
-      if (R8::Config[:repo][:git][:port]||'22').to_s == '22'
-        remote_repo = "#{repo_url()}:#{repo_name}"
-      else
-        remote_repo = "#{repo_url()}/#{repo_name}"
-      end
+      remote_repo = "#{repo_url()}/#{repo_name}"
 
       git_command__clone(remote_repo, @path)
       @grit_repo = Grit::Repo.new(@path)

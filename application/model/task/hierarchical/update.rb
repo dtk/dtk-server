@@ -1,36 +1,49 @@
 module DTK; class Task
   module HierarchicalMixin
     module UpdateMixin
-      # TODO: after remove from cancel; deprecate
-      def update_task_subtask_status(status, result)
-        subtasks.each do |subtask|
-          if child_subtasks = subtask.subtasks?
-            child_subtasks.each do |child_subtask|
-              child_subtask.update_at_task_completion(status, result)
-            end
-          end
-          subtask.update_at_task_completion(status, result)
-        end
-        update_at_task_completion(status, result)
+      def update_when_failed_preconditions(_failed_antecedent_tasks)
+        update(status: 'preconditions_failed', started_at: ts, ended_at:  Aux.now_time_stamp())
       end
-      
+
+      def update_at_task_start(_opts = {})
+        update(status: 'executing', started_at: Aux.now_time_stamp())
+      end
+
+      def update_at_task_completion(status, result)
+        update(status: status, result: result, ended_at: Aux.now_time_stamp())
+      end
+
+      # unlike update_at_task calss above this will be called on top level task
+      # TODO: need to clean up to make more sophisticated
+      def update_at_task_cancelled(result)
+        update_hash = { status: 'cancelled', result: result, ended_at: Aux.now_time_stamp() }
+        # find all leaf tasks that are still executing
+        executing_leaf_tasks = get_leaf_subtasks().select { |t| t[:status] == 'executing' }
+        if executing_leaf_tasks.empty?
+          # just update the top task
+          update(update_hash)
+        else
+          executing_leaf_tasks.each { |t| t.update(update_hash) }
+        end
+      end
+
       RecursiveUpdateLock = Mutex.new
       def update(update_hash, opts = {})
         unless opts[:nested]
           # Top level call; want to lock ful recursive calls
           RecursiveUpdateLock.synchronize do 
             super(update_hash)
-            update_recursive(update_hash, opts)
+            update_next_level(update_hash, opts)
           end
         else
           super(update_hash)
-          update_recursive(update_hash, opts)
+          update_next_level(update_hash, opts)
         end
       end
 
       private
        
-      def update_recursive(update_hash, opts = {})
+      def update_next_level(update_hash, opts = {})
         unless opts[:dont_update_parents] || (update_hash.keys & [:status, :started_at, :ended_at]).empty?
           if task_id = update_object!(:task_id)[:task_id]
             update_parents(update_hash.merge(task_id: task_id))

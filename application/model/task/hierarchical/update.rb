@@ -14,18 +14,21 @@ module DTK; class Task
       end
 
       # unlike update_at_task class above this will be called on top level task
+
+      RecursiveUpdateLock = Mutex.new
       def update_at_task_cancelled(result)
-        update_hash = { status: status(:cancelled), result: result, ended_at: now_time_stamp() }
-        update(update_hash)
-        # find all leaf tasks that are still executing
-        executing_leaf_tasks = get_leaf_subtasks().select { |t| t.has_status?(:executing) }
-        unless executing_leaf_tasks.empty?
-          executing_leaf_tasks.each { |t| t.update(update_hash) }
+        RecursiveUpdateLock.synchronize do
+          update_hash = { status: status(:cancelled), result: result, ended_at: now_time_stamp() }
+          update(update_hash, no_lock: true)
+          # find all leaf tasks that are still executing
+          executing_leaf_tasks = get_leaf_subtasks().select { |t| t.has_status?(:executing) }
+          unless executing_leaf_tasks.empty?
+            executing_leaf_tasks.each { |t| t.update(update_hash, no_lock: true) }
+          end
         end
       end
 
-      RecursiveUpdateLock = Mutex.new
-      # when called at top level (:nested is nil) then put the operations in amutex
+      # when called at top level (:no_lock is nil) then put the operations in a mutex
       def update(update_hash, opts = {})
         to_execute = proc do 
           unless donot_update?(update_hash)
@@ -33,12 +36,12 @@ module DTK; class Task
             update_next_level(update_hash, opts)
           end
         end
-        unless opts[:nested]
+        if opts[:no_lock]
+          to_execute.call()
+        else
           RecursiveUpdateLock.synchronize do 
             to_execute.call()
           end
-        else
-          to_execute.call()
         end
       end
 
@@ -87,8 +90,8 @@ module DTK; class Task
           new_parent_status = new_parent_status(children_status)
           unless new_parent_status == parent.get_field?(:status)
             parent_updates.merge!(status: new_parent_status)
-            # compute parent end time which can only change if there is a completion status
-            if has_task_completion_status?(new_parent_status) && child_hash[:ended_at]
+            # update parent end time if appropraite
+            if child_hash[:ended_at] and new_parent_status != Status::Type.executing
               parent_updates.merge!(ended_at: child_hash[:ended_at])
             end
           end
@@ -96,7 +99,7 @@ module DTK; class Task
         
         unless parent_updates.empty?
           dont_update_parents = (parent_updates.keys - [:children_status]).empty?
-          parent.update(parent_updates, nested: true, dont_update_parents: dont_update_parents)
+          parent.update(parent_updates, no_lock: true, dont_update_parents: dont_update_parents)
         end
       end
       
@@ -132,11 +135,6 @@ module DTK; class Task
           Status::Type.executing 
         end
       end
-      
-      def has_task_completion_status?(status)
-        includes_status?(CompletionStatusArray, status)
-      end
-      CompletionStatusArray = [:succeeded, :failed, :cancelled, :preconditions_failed]
 
       def includes_status?(status_array, status)
         Status::Type.includes_status?(status_array, status)

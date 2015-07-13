@@ -1,4 +1,4 @@
-module DTK; class Task::Status::StreamForm::Element
+module DTK; class Task::Status; class StreamForm::Element
   class Stage < self
     r8_nested_require('stage', 'detail')
     r8_nested_require('stage', 'hash_form')
@@ -78,15 +78,15 @@ module DTK; class Task::Status::StreamForm::Element
 
     def self.task_completed?(task)
       status = task.get_field?(:status)
-      !status.nil? and status != 'executing'
+      !status.nil? and status != Type.executing
     end
 
     def self.task_ended_workflow?(task)
-      ['failed','cancelled'].include?(task.get_field?(:status))
+      Type.is_workflow_ending_status?(task.get_field?(:status))
     end
 
   end
-end; end
+end; end; end
 
 
 

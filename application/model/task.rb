@@ -62,7 +62,7 @@ module DTK
     end
 
     def has_status?(type)
-      Status::Type.has_status?(self, type)
+      Status::Type.task_has_status?(self, type)
     end
 
     # TODO: see if we can deprecate guarded_by

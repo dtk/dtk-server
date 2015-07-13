@@ -271,6 +271,19 @@ end
       end
     end
 
+    def get_raw_file_content(path)
+      RepoManager.get_file_content({ path: path }, self, no_error_if_not_found: true)
+    end
+
+    def save_file_content_to_repo(path, array)
+      any_change = RepoManager.add_file({ path: path }, array, self)
+      any_changes = true if any_change
+      if any_changes
+        new_commit_sha = push_changes_to_repo()
+        new_commit_sha
+      end
+    end
+
     def dsl_format_type_form_path(path)
       extension = (path =~ /\.([^\.]+$)/; $1)
       unless ret = FormatTypeFromExtension[extension]

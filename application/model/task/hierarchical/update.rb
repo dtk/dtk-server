@@ -17,12 +17,10 @@ module DTK; class Task
       # TODO: need to clean up to make more sophisticated
       def update_at_task_cancelled(result)
         update_hash = { status: 'cancelled', result: result, ended_at: Aux.now_time_stamp() }
+        update(update_hash)
         # find all leaf tasks that are still executing
         executing_leaf_tasks = get_leaf_subtasks().select { |t| t[:status] == 'executing' }
-        if executing_leaf_tasks.empty?
-          # just update the top task
-          update(update_hash)
-        else
+        unless executing_leaf_tasks.empty?
           executing_leaf_tasks.each { |t| t.update(update_hash) }
         end
       end

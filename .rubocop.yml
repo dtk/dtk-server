@@ -1,5 +1,9 @@
 inherit_from: .rubocop_todo.yml
 
+AllCops:
+  Exclude:
+    - 'Gemfile*'
+
 # strict rules
 Style/WordArray:
   MinSize: 3

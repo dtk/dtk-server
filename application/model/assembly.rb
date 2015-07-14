@@ -167,16 +167,6 @@ module DTK
       assembly[:version] && ModuleBranch.version_from_version_field(assembly[:version])
     end
 
-    def are_nodes_running_in_task?
-      nodes = get_nodes(:id)
-      running_nodes = Task::Status::Assembly.get_active_nodes(model_handle())
-
-      return false if running_nodes.empty?
-      interrsecting_nodes = (running_nodes.map(&:id) & nodes.map(&:id))
-
-      !interrsecting_nodes.empty?
-    end
-
     def self.is_template?(assembly_idh)
       assembly_idh.create_object().is_template?()
     end

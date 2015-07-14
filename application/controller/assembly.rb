@@ -220,12 +220,15 @@ module DTK
 
     def rest__cancel_task
       assembly = ret_assembly_instance_object()
+
       unless top_task_id = ret_request_params(:task_id)
-        unless top_task = get_most_recent_executing_task(assembly)
+        if running_task = most_recent_task_is_executing?(assembly)
+          top_task_id = running_task.id()
+        else
           fail ErrorUsage.new('No running tasks found')
         end
-        top_task_id = top_task.id()
       end
+
       cancel_task(top_task_id)
       rest_ok_response task_id: top_task_id
     end
@@ -669,20 +672,20 @@ module DTK
 
     def rest__create_task
       assembly = ret_assembly_instance_object()
-      assembly_is_stopped = assembly.any_stopped_nodes?(:op)
+      opts     = ret_params_hash(:commit_msg, :task_action, :task_params)
 
-      if assembly_is_stopped && ret_request_params(:start_assembly).nil?
-        return rest_ok_response confirmation_message: true
-      end
+      if assembly.any_stopped_nodes?(:admin) 
+        if ret_request_params(:start_assembly).nil?
+          return rest_ok_response confirmation_message: true
+        end
 
-      if assembly.are_nodes_running_in_task?()
-        fail ErrorUsage, 'Task is already running on requested nodes. Please wait until task is complete'
-      end
-
-      opts = ret_params_hash(:commit_msg, :task_action, :task_params)
-      if assembly_is_stopped
         opts.merge!(start_nodes: true, ret_nodes_to_start: [])
+      else 
+        if running_task = most_recent_task_is_executing?(assembly) 
+          fail ErrorUsage, "Task with id '#{running_task.id}' is already running in assembly. Please wait until task is complete or cancel task."
+        end
       end
+
       task = Task.create_from_assembly_instance(assembly, opts)
       task.save!()
 
@@ -734,8 +737,8 @@ module DTK
       node_pattern = ret_request_params(:node_pattern)
 
       # cancel task if running on the assembly
-      if running_top_task = get_most_recent_executing_task(assembly)
-        cancel_task(running_top_task.id)
+      if running_task = most_recent_task_is_executing?(assembly)
+        cancel_task(running_task.id)
       end
 
       nodes, is_valid, error_msg = assembly.nodes_valid_for_stop_or_start(node_pattern, :running)

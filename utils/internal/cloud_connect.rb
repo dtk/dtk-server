@@ -8,10 +8,6 @@ class NilClass
 end
 ### end of monkey patch
 
-# Fog loads Excon
-# bumped up time out from 60 to 120
-Excon.defaults[:read_timeout] = 120
-
 module DTK
   class CloudConnect
     r8_nested_require('cloud_connect', 'ec2')
@@ -50,11 +46,13 @@ module DTK
     end
 
     # each service has its own mutex
-    LockRequest = {}
+    # LockRequest = {}
     def request_context(&_block)
+      # TODO: think no need to use a mutex
       # TODO: put up in here some handling of errors such as ones that should be handled by doing a retry
-      lock = LockRequest[self.class] ||= Mutex.new
-      lock.synchronize { yield }
+      # lock = LockRequest[self.class] ||= Mutex.new
+      # lock.synchronize { yield }
+      yield
     end
   end
 end

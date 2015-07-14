@@ -221,7 +221,7 @@ module DTK
     def rest__cancel_task
       assembly = ret_assembly_instance_object()
       unless top_task_id = ret_request_params(:task_id)
-        unless top_task = get_most_recent_executing_task([:eq, :assembly_id, assembly.id()])
+        unless top_task = get_most_recent_executing_task(assembly)
           fail ErrorUsage.new('No running tasks found')
         end
         top_task_id = top_task.id()
@@ -681,7 +681,7 @@ module DTK
 
       opts = ret_params_hash(:commit_msg, :task_action, :task_params)
       if assembly_is_stopped
-        opts.merge!(start_node_changes: true, ret_nodes_to_start: [])
+        opts.merge!(start_nodes: true, ret_nodes_to_start: [])
       end
       task = Task.create_from_assembly_instance(assembly, opts)
       task.save!()
@@ -733,6 +733,11 @@ module DTK
       assembly = ret_assembly_instance_object()
       node_pattern = ret_request_params(:node_pattern)
 
+      # cancel task if running on the assembly
+      if running_top_task = get_most_recent_executing_task(assembly)
+        cancel_task(running_top_task.id)
+      end
+
       nodes, is_valid, error_msg = assembly.nodes_valid_for_stop_or_start(node_pattern, :running)
 
       unless is_valid
@@ -741,8 +746,7 @@ module DTK
       end
 
       Node.stop_instances(nodes)
-
-      rest_ok_response status: :ok
+      rest_ok_response 
     end
 
     def rest__task_status

@@ -53,10 +53,10 @@ module DTK; class StateChange
       case task_action_type
        when :create_node
         node_state_changes__create_nodes(assembly, target_idh, opts)
-       when :power_on_node
-        node_state_changes__power_on_nodes(assembly, target_idh, opts)
+       when :wait_for_node
+        node_state_changes__wait_for_nodes(assembly, opts)
        else
-        fail Error.new("Unexpcted task_action_class (#{task_action_class})")
+        fail Error.new("Unexpcted task_action_type '#{task_action_type}'")
       end
     end
 
@@ -81,23 +81,25 @@ module DTK; class StateChange
       end
     end
 
-    def self.node_state_changes__power_on_nodes(assembly, _target_idh, opts = {})
+    def self.node_state_changes__wait_for_nodes(assembly, opts = {})
       ret = []
       unless opts[:just_leaf_nodes]
         fail Error.new('Only supporting option :just_leaf_nodes')
       end
       nodes = opts[:nodes] || assembly.get_leaf_nodes(cols: [:id, :display_name, :type, :external_ref, :admin_op_status])
-      # TODO: need (probably higher up in calling change to handle when op state is other then
-      nodes_to_start = nodes.select do |n| 
-        op_status = n.get_and_update_operational_status!
-        case op_status
-          when 'stopped' then true
-          when 'running' then false
-          else
-            Log.info("TODO: need to figure best way to treat power on when op status is '#{op_status}'")
-            true
-          end
-      end
+      # TODO: need to figure out if any advantage to filtering nodes
+      # nodes_to_start = nodes.select do |n| 
+      #  op_status = n.get_and_update_operational_status!
+      #  case op_status
+      #    when 'stopped' then true
+      #    when 'running' then false
+      #    else
+      #      Log.info("TODO: need to figure best way to treat power on when op status is '#{op_status}'")
+      #      true
+      #    end
+      #end
+      nodes_to_start = nodes
+
       return ret if nodes_to_start.empty?
 
       state_change_mh = assembly.model_handle(:state_change)

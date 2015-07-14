@@ -7,13 +7,10 @@ module Ramaze::Helper
       ::DTK::Workflow.cancel(top_task)
     end
 
-    def get_most_recent_executing_task(filter = nil)
-      aug_filter = [:and, filter, [:eq, :status, 'executing']].compact
-      get_most_recent_task(aug_filter)
-    end
-
-    def get_most_recent_task(filter = nil)
+    def get_most_recent_executing_task(assembly)
+      filter = [:and, [:eq, :assembly_id, assembly.id()], [:eq, :status, ::DTK::Task::Status::Type.executing]]
       ::DTK::Task.get_top_level_most_recent_task(model_handle(:task), filter)
     end
+
   end
 end

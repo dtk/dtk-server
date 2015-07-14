@@ -22,6 +22,15 @@ module DTK
         @hash = @node.get_field?(:external_ref) || {}
       end
 
+      def created?
+        # TODO: this is hard coded to EC2 convention where thereis a field :instance_id
+        !@hash[:instance_id].nil?
+      end
+
+      def dns_name?()
+        @hash[:dns_name]
+      end
+      
       def references_image?(target)
         CommandAndControl.references_image?(target, hash())
       end

@@ -21,7 +21,7 @@ module DTK; class Task
     end
 
     # self should be a top level task
-    def get_ordered_stage_level_tasks(start_stage,end_stage)
+    def get_ordered_stage_level_tasks(start_stage, end_stage)
       filter = [:oneof, :position, Array(start_stage..end_stage)]
       stage_level_tasks = self.class.get_next_level_tasks([id_handle()], filter: filter)
       stage_level_tasks.sort{|a,b|a[:position] <=> b[:position]}
@@ -75,19 +75,19 @@ module DTK; class Task
       ret
     end
 
-    # returns an array of tasks with task content reified 
-    def get_and_reify_all_subtasks(task_idhs,opts={})
+    # returns an array of tasks; if :reify is true, each task's content is reified 
+    def get_all_subtasks(task_idhs, opts = {})
       ret = Array.new
       id_handles = task_idhs
       until id_handles.empty?
-        next_level_objs = get_next_level_tasks(id_handles).reject{|k,v|k == :subtasks}.each{|st|st.reify!()}
+        next_level_objs = get_next_level_tasks(id_handles).reject{|k,v|k == :subtasks}.each{|st|opts[:reify] ? st.reify!() : st}
         id_handles = next_level_objs.map{|obj|obj.id_handle}
         ret += next_level_objs
       end
       ret
     end
 
-    def get_next_level_tasks(task_idhs,opts={})
+    def get_next_level_tasks(task_idhs, opts = {})
       ret = Array.new
       return ret if task_idhs.empty?
       filter = [:oneof, :task_id, task_idhs.map{|idh|idh.get_id}]
@@ -103,3 +103,4 @@ module DTK; class Task
     end
   end
 end; end
+

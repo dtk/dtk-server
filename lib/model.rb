@@ -631,6 +631,10 @@ module DTK
       end
     end
 
+    def get_field_from_db(field)
+      update_obj!(field)[field]
+    end
+
     # this returns field if exists, otherways gets it
     def get_field?(field)
       self[field] || update_obj!(field)[field]

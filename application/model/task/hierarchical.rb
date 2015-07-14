@@ -1,76 +1,68 @@
 module DTK
   class Task 
     class Hierarchical < self
-      # TODO: have this produce at all levels Task::Hierarchical rather than class objects
-      def self.get(top_task_idh)
-        sp_hash = {
-          :cols => common_columns(),
-          :filter => [:eq, :id, top_task_idh.get_id()]
-        }
-        top_task = get_objs(top_task_idh.createMH(),sp_hash).first
-        return nil unless top_task
-        flat_subtask_list = top_task.get_and_reify_all_subtasks()
-        ndx_task_list = {top_task.id => top_task}
-        subtask_count = Hash.new
-        subtask_indexes = Hash.new
-        flat_subtask_list.each do |t|
-          ndx_task_list[t.id] = t
-          parent_id = t[:task_id]
-          subtask_count[parent_id] = (subtask_count[parent_id]||0) +1
-          subtask_indexes[t.id] = {:parent_id => parent_id,:index => t[:position]}
+      r8_nested_require('hierarchical', 'get')
+      r8_nested_require('hierarchical', 'update')
+      r8_nested_require('hierarchical', 'persistence')
+      r8_nested_require('hierarchical', 'set_and_add')
+      extend GetClassMixin
+    end
+
+    module HierarchicalMixin
+      include GetMixin
+      include UpdateMixin
+      include PersistenceMixin
+      include SetAndAddMixin
+
+      def component_actions
+        if executable_action().is_a?(Action::ConfigNode)
+          action = executable_action()
+          action.component_actions().map { |ca| action[:node] ? ca.merge(node: action[:node]) : ca }
+        else
+          subtasks.map(&:component_actions).flatten
         end
-        
-        subtask_qualified_indexes = QualifiedIndex.compute!(subtask_indexes,top_task)
-        
-        flat_subtask_list.each do |subtask|
-          subtask[QualifiedIndex::Field] = subtask_qualified_indexes[subtask[:id]][QualifiedIndex::Field]
-          parent_id = subtask[:task_id]
-          parent = ndx_task_list[parent_id]
-          if subtask.node_group_member?()
-            subtask.set_node_group_member_executable_action!(parent)
-          end
-          (parent[:subtasks] ||= Array.new(subtask_count[parent_id]))[subtask[:position]-1] = subtask
+      end
+      
+      def node_level_actions
+        if executable_action().is_a?(Action::NodeLevel)
+          action = executable_action()
+          return action.component_actions().map { |ca| action[:node] ? ca.merge(node: action[:node]) : ca }
+        else
+          subtasks.map(&:node_level_actions).flatten
         end
-        top_task
+      end
+      
+      def unroll_tasks
+        [self] + subtasks.map(&:unroll_tasks).flatten
+      end
+      
+      def subtasks
+        self[:subtasks] || []
+      end
+      
+      def subtasks?
+        self[:subtasks]
+      end
+      
+      def render_form
+        # may be different forms; this is one that is organized by node_group, node, component, attribute
+        task_list = render_form_flat(true)
+        # TODO: not yet teating node_group
+        Task.render_group_by_node(task_list)
+      end
+      
+      protected
+      
+      def render_form_flat(top = false)
+        # prune out all (sub)tasks except for top and  executable
+        return render_executable_tasks() if executable_action(no_error_if_nil: true)
+        (top ? [render_top_task()] : []) + subtasks.map(&:render_form_flat).flatten
+      end
+      
+      def hierarchical_task_idhs
+        [id_handle()] + subtasks.map{|r|r.hierarchical_task_idhs()}.flatten
       end
 
-      #TODO: when produce at all levels Task::Hierarchical can make these methods on Task::Hierarchical 
-      module Mixin
-        # indexed by task ids
-        def get_ndx_errors
-          self.class.get_ndx_errors(hierarchical_task_idhs())
-        end
-        
-        def get_associated_nodes
-        ndx_nodes = Hash.new
-          get_leaf_subtasks().each do |subtask|
-            if node = (subtask[:executable_action]||{})[:node]
-              ndx_nodes[node.id()] ||= node
-            end
-          end
-          ndx_nodes.values
-        end
-        
-        def get_leaf_subtasks
-          if subtasks = self[:subtasks]
-            subtasks.inject(Array.new){|a,st|a+st.get_leaf_subtasks()}
-          else
-            [self]
-          end
-        end
-
-        # recursively walks structure, but returns them in flat list
-        def get_and_reify_all_subtasks(opts={})
-          self.class.get_and_reify_all_subtasks([id_handle()],opts)
-        end
-
-        protected
-
-        def hierarchical_task_idhs
-          [id_handle()] + subtasks.map{|r|r.hierarchical_task_idhs()}.flatten
-        end
-
-      end
     end
   end
 end

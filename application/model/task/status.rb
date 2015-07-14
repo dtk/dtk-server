@@ -1,38 +1,18 @@
 module DTK
   class Task
     class Status
+      r8_nested_require('status', 'type')
       r8_nested_require('status', 'table_form')
       r8_nested_require('status', 'list_form')
       r8_nested_require('status', 'stream_form')
-
-      def self.get_active_top_level_tasks(model_handle)
-        # TODO: need protection so dont get tasks that never came out of executing mode
-        filter = [:and, [:eq, :status, 'executing'], [:or, [:neq, :assembly_id, nil], [:neq, :node_id, nil]]]
-        Task.get_top_level_tasks(model_handle, filter)
-      end
-
-      def self.find_nodes_that_are_active(model_handle)
-        ret = []
-        model_handle = model_handle.createMH(:task)
-        top_level_active = get_active_top_level_tasks(model_handle)
-        return ret if top_level_active.empty?
-        # TODO: way to make call Task.get_and_reify_all_subtasks faster
-        ndx_ret = {}
-        Task.get_and_reify_all_subtasks(top_level_active.map{|t|t.id_handle}).each do |sub_task|
-          if node = (sub_task[:executable_action] && sub_task[:executable_action][:node])
-            ndx_ret[node[:id]] ||= node
-          end
-        end
-        ndx_ret.values
-      end
 
       private
 
       def self.get_status_aux(ref_obj_idh,ref_obj_type,filter,opts={})
         top_level_task = get_top_level_most_recent_task(ref_obj_idh,ref_obj_type,filter)
-        task_structure = Hierarchical.get(top_level_task.id_handle())
-        status_opts = Hash.new.merge(:no_components => false, :no_attributes => true)
-        status_opts.merge!(:summarize_node_groups => true) if (opts[:detail_level]||{})[:summarize_node_groups]
+        task_structure = Hierarchical.get(top_level_task.id_handle(), reify: true)
+        status_opts = Hash.new.merge(no_components: false, no_attributes: true)
+        status_opts.merge!(summarize_node_groups: true) if (opts[:detail_level]||{})[:summarize_node_groups]
         case opts[:format]
           when :table
             TableForm.status(task_structure, status_opts)
@@ -53,10 +33,6 @@ module DTK
       end
 
       class Assembly < self
-        def self.get_active_nodes(model_handle)
-          find_nodes_that_are_active(model_handle)
-        end
-
         def self.get_status(assembly_idh, opts = {})
           filter = [:eq, :assembly_id, assembly_idh.get_id()]
           get_status_aux(assembly_idh, :assembly, filter, opts)

@@ -80,7 +80,7 @@ module DTK; module CommandAndControlAdapter
         node.update_object!(:external_ref)
         instance_id = (node[:external_ref] || {})[:instance_id]
         unless instance_id
-          Log.error("get_node_state called when #{node_print_form(node)} does not have instance id")
+          Log.error("get_node_state called when #{node[:display_name]} (#{node[:id]}) does not have instance id")
           return nil
         end
         instance_id

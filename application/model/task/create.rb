@@ -23,6 +23,8 @@ module DTK; class Task
   end
 
   class Create
+    r8_nested_require('create', 'nodes_task')
+
     def self.create_for_ad_hoc_action(assembly, component, opts = {})
       ad_hoc_action = Template::Action::AdHoc.new(assembly, component, opts)
       task_action_name = ad_hoc_action.task_action_name()
@@ -42,37 +44,39 @@ module DTK; class Task
       ret = create_top_level_task(task_mh, assembly, Aux.hash_subset(opts, [:commit_msg, :task_action]))
       assembly_nodes = assembly.get_leaf_nodes(cols: [:id, :display_name, :type, :external_ref, :admin_op_status])
 
-      start_nodes = []
-      create_nodes = []
+      nodes_to_create = []
+      nodes_wait_for_start = []
       assembly_nodes.reject! { |n| n[:type].eql?('assembly_wide') }
-      assembly_nodes.each do |a_node|
-        if a_node[:admin_op_status].eql?('pending')
-          create_nodes << a_node
+      assembly_nodes.each do |node|
+        external_ref = node.external_ref
+        if !external_ref.created?
+          nodes_to_create << node
         else
-          start_nodes << a_node
+          if opts[:start_nodes]
+            nodes_wait_for_start << node
+            opts[:ret_nodes_to_start] << node
+          elsif external_ref.dns_name?.nil?
+            # this is handling case where task got stuck where there it is started but does not have a dns address yet
+            # by putting under nodes_wait_for_start there will be a wait intil get its address
+            nodes_wait_for_start << node
+          end
         end
       end
 
       case component_type
-       when :smoketest then nil # smoketest should not create a node
        when :service
         # start stopped nodes
-        if opts[:start_node_changes]
-          action_type = :power_on_node
-          action_class = Action::PowerOnNode
-          node_scs = StateChange::Assembly.node_state_changes(action_type, assembly, target_idh, just_leaf_nodes: true, nodes: start_nodes)
-          if opts[:ret_nodes_to_start]
-            node_scs.each { |sc| opts[:ret_nodes_to_start] << sc[:node] }
-          end
-          start_nodes_task = NodesTask.create_subtask(action_class, task_mh, node_scs)
+        unless nodes_wait_for_start.empty?
+          node_scs = StateChange::Assembly.node_state_changes(:wait_for_node, assembly, target_idh, just_leaf_nodes: true, nodes: nodes_wait_for_start)
+          # TODO: misnomer Action::PowerOnNode; they really just do 'wait until started' 
+          start_nodes_task = NodesTask.create_subtask(Action::PowerOnNode, task_mh, node_scs)
         end
         # create nodes
-        unless create_nodes.empty?
-          action_type = :create_node
-          action_class = Action::CreateNode
-          node_scs = StateChange::Assembly.node_state_changes(action_type, assembly, target_idh, just_leaf_nodes: true, nodes: create_nodes)
-          create_nodes_task = NodesTask.create_subtask(action_class, task_mh, node_scs)
+        unless nodes_to_create.empty?
+          node_scs = StateChange::Assembly.node_state_changes(:create_node, assembly, target_idh, just_leaf_nodes: true, nodes: nodes_to_create)
+          create_nodes_task = NodesTask.create_subtask(Action::CreateNode, task_mh, node_scs)
         end
+       when :smoketest then nil # smoketest should not create a node
        else
         fail Error.new("Unexpected component_type (#{component_type})")
       end
@@ -110,45 +114,6 @@ module DTK; class Task
       end
 
       create_new_task(task_mh, task_info_hash)
-    end
-
-    class NodesTask < self
-      def self.create_subtask(action_class, task_mh, state_change_list)
-        return nil unless state_change_list and not state_change_list.empty?
-        ret = nil
-        all_actions = []
-        if state_change_list.size == 1
-          executable_action = action_class.create_from_state_change(state_change_list.first)
-          all_actions << executable_action
-          ret = create_new_task(task_mh, subtask_hash(action_class, executable_action))
-        else
-          ret = create_new_task(task_mh, concurrent_subtask(action_class))
-          state_change_list.each do |sc|
-            executable_action = action_class.create_from_state_change(sc)
-            all_actions << executable_action
-            ret.add_subtask_from_hash(subtask_hash(action_class, executable_action))
-          end
-        end
-        attr_mh = task_mh.createMH(:attribute)
-        action_class.add_attributes!(attr_mh, all_actions)
-        ret
-      end
-
-      private
-
-      def self.concurrent_subtask(action_class)
-        {
-          display_name: action_class.stage_display_name(),
-          temporal_order: 'concurrent'
-        }
-      end
-
-      def self.subtask_hash(action_class, executable_action)
-        {
-          display_name: action_class.task_display_name(),
-          executable_action: executable_action
-        }
-      end
     end
   end
 

@@ -220,12 +220,15 @@ module DTK
 
     def rest__cancel_task
       assembly = ret_assembly_instance_object()
+
       unless top_task_id = ret_request_params(:task_id)
-        unless top_task = get_most_recent_executing_task([:eq, :assembly_id, assembly.id()])
+        if running_task = most_recent_task_is_executing?(assembly)
+          top_task_id = running_task.id()
+        else
           fail ErrorUsage.new('No running tasks found')
         end
-        top_task_id = top_task.id()
       end
+
       cancel_task(top_task_id)
       rest_ok_response task_id: top_task_id
     end
@@ -669,20 +672,22 @@ module DTK
 
     def rest__create_task
       assembly = ret_assembly_instance_object()
-      assembly_is_stopped = assembly.any_stopped_nodes?(:op)
+      opts     = ret_params_hash(:commit_msg, :task_action, :task_params)
 
-      if assembly_is_stopped && ret_request_params(:start_assembly).nil?
-        return rest_ok_response confirmation_message: true
+      # TODO: more expensive, but more rebost to check for operaitonally stopped as opposed to
+      #       just administratively stopped nodes (that is, use assembly.any_stopped_nodes?(:op))
+      if assembly.any_stopped_nodes?(:admin) 
+        if ret_request_params(:start_assembly).nil?
+          return rest_ok_response confirmation_message: true
+        end
+
+        opts.merge!(start_nodes: true, ret_nodes_to_start: [])
+      else 
+        if running_task = most_recent_task_is_executing?(assembly) 
+          fail ErrorUsage, "Task with id '#{running_task.id}' is already running in assembly. Please wait until task is complete or cancel task."
+        end
       end
 
-      if assembly.are_nodes_running_in_task?()
-        fail ErrorUsage, 'Task is already running on requested nodes. Please wait until task is complete'
-      end
-
-      opts = ret_params_hash(:commit_msg, :task_action, :task_params)
-      if assembly_is_stopped
-        opts.merge!(start_node_changes: true, ret_nodes_to_start: [])
-      end
       task = Task.create_from_assembly_instance(assembly, opts)
       task.save!()
 
@@ -733,6 +738,11 @@ module DTK
       assembly = ret_assembly_instance_object()
       node_pattern = ret_request_params(:node_pattern)
 
+      # cancel task if running on the assembly
+      if running_task = most_recent_task_is_executing?(assembly)
+        cancel_task(running_task.id)
+      end
+
       nodes, is_valid, error_msg = assembly.nodes_valid_for_stop_or_start(node_pattern, :running)
 
       unless is_valid
@@ -741,8 +751,7 @@ module DTK
       end
 
       Node.stop_instances(nodes)
-
-      rest_ok_response status: :ok
+      rest_ok_response 
     end
 
     def rest__task_status
@@ -750,9 +759,13 @@ module DTK
 
       response =
         if ret_request_params(:form) == 'stream_form'
+          element_detail = ret_request_params(:element_detail)||{}
+          # element_detail defaults
+          element_detail[:action_results] ||= true
           opts = {
-            end_index: ret_request_params(:end_index),
-            start_index: ret_request_params(:start_index)
+            end_index:      ret_request_params(:end_index),
+            start_index:    ret_request_params(:start_index),
+            element_detail: element_detail 
           }
           Task::Status::Assembly::StreamForm.get_status(assembly.id_handle, opts)
         else

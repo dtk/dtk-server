@@ -30,7 +30,7 @@ module DTK; class  Assembly
       opts_get_tasks = {}
       unless opts[:include_executing_task]
         opts_get_tasks[:filter_proc] = lambda do |r|
-          r[:task][:status] != 'executing'
+          !r[:task].has_status?(:executing)
         end
       end
       task_idhs = get_tasks(opts_get_tasks).map(&:id_handle)

@@ -5,7 +5,7 @@ class DTK::Task::Status::StreamForm::Element
     end
 
     def hash_form()
-      super.add_elements?(:status,:ended_at)
+      super.add_task_fields?(:status,:ended_at)
     end
   end
 end

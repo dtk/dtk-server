@@ -35,17 +35,14 @@ module DTK
     # Making ActiveWorkflow a class to facilitate debuging
     class ActiveWorkflow < Hash
       def delete(task_id)
-        # pp [:delete,task_id,caller[0..5]]
         super(task_id.to_i)
       end
 
       def [](task_id)
-        # pp [:get,task_id,caller[0..5]]
         super(task_id.to_i)
       end
 
       def []=(task_id, wf)
-        # pp [:set,task_id,caller[0..5]]
         super(task_id.to_i, wf)
       end
     end
@@ -83,23 +80,23 @@ module DTK
     end
     ######
 
-    def self.cancel(task_id, task)
+    def self.cancel(task)
+      task_id = task.id()
+      unless task.has_status?(:executing)
+        fail ErrorUsage, "Task with id '#{task_id}' is not executing"
+      end
+
+      # This shuts down workflow from advancing; however there can be stragler callbascks coming in
       @@Lock.synchronize do
-        # Amar: If task is present in '@@active_workflows' ruote process will be cancelled,
-        #       task status updated and resources cleaned up
-        #       If task loaded from DB has status executing, but not present in '@@active_workflows'
-        #       it means, unexpected server behavior (i.e. server restarted during converge),
-        #       and only task status will get updated.
-        #       Otherwise, raise error task not running.
         if @@active_workflows[task_id]
           @@active_workflows[task_id].cancel()
           @@active_workflows.delete(task_id)
-        elsif task && task.is_status?('executing')
-          task.update_task_subtask_status('cancelled', Task::Action::Result::Cancelled.new())
-        else
-          fail ErrorUsage, "No task running with TASK_ID: #{task_id}"
         end
       end
+
+      # update task status
+      task.update_at_task_cancelled(Task::Action::Result::Cancelled.new())
+
     end
 
     def self.task_is_active?(task_id)

@@ -9,13 +9,13 @@ module DTK; class Task::Status
         @block_for_subtasks = block_for_subtasks
         if status = ng_table_el[:status]
           case status
-           when 'succeeded'
+           when Type.succeeded
             ng_table_el[:status] = status_when_succeeded()
-           when 'executing'
+           when Type.executing
             ng_table_el[:status] = status_when_executing()
-           when 'cancelled'
+           when Type.cancelled
            # no op
-           when 'failed'
+           when Type.failed
             ng_table_el[:status] = status_when_failed()
             errors = summarize_errors?()
             ng_table_el[:errors] = errors unless errors.empty?
@@ -29,15 +29,15 @@ module DTK; class Task::Status
       private
 
       def status_when_succeeded
-        status_with_subtask_size('succeeded')
+        status_with_subtask_size(Type.succeeded)
       end
 
       def status_when_executing
-        status_when_aux('executing')
+        status_when_aux(Type.executing)
       end
 
       def status_when_failed
-        status_when_aux('failed')
+        status_when_aux(Type.failed)
       end
 
       def status_when_aux(status)

@@ -674,6 +674,8 @@ module DTK
       assembly = ret_assembly_instance_object()
       opts     = ret_params_hash(:commit_msg, :task_action, :task_params)
 
+      # TODO: more expensive, but more rebost to check for operaitonally stopped as opposed to
+      #       just administratively stopped nodes (that is, use assembly.any_stopped_nodes?(:op))
       if assembly.any_stopped_nodes?(:admin) 
         if ret_request_params(:start_assembly).nil?
           return rest_ok_response confirmation_message: true

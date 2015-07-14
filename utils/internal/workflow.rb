@@ -82,8 +82,8 @@ module DTK
 
     def self.cancel(task)
       task_id = task.id()
-      unless task.is_status?('executing')
-        fail ErrorUsage, "Task with id '#{task_id} is not executing"
+      unless task.has_status?(:executing)
+        fail ErrorUsage, "Task with id '#{task_id}' is not executing"
       end
 
       # This shuts down workflow from advancing; however there can be stragler callbascks coming in

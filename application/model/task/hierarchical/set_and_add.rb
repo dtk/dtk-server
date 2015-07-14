@@ -2,7 +2,7 @@ module DTK; class Task
   module HierarchicalMixin
     module SetAndAddMixin
       def add_subtask_from_hash(hash)
-        defaults = { status: 'created', action_on_failure: 'abort' }
+        defaults = { status: Status::Type.created, action_on_failure: 'abort' }
         new_subtask = Task.new(defaults.merge(hash), c)
         add_subtask(new_subtask)
       end
@@ -33,7 +33,7 @@ module DTK; class Task
           [parent_id: parent_id, id: id, children_status: nil]
         else
           recursive_subtasks = subtasks.map { |st| st.set_and_ret_parents_and_children_status!(id) }.flatten
-          children_status = subtasks.inject({}) { |h, st| h.merge(st.id() => 'created') }
+          children_status = subtasks.inject({}) { |h, st| h.merge(st.id() => Status::Type.created) }
           [parent_id: parent_id, id: id, children_status: children_status] + recursive_subtasks
         end
       end

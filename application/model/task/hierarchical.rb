@@ -14,10 +14,6 @@ module DTK
       include PersistenceMixin
       include SetAndAddMixin
 
-      def is_status?(status)
-        self[:status] == status || subtasks.find{ |subtask| subtask[:status] == status }
-      end
-      
       def component_actions
         if executable_action().is_a?(Action::ConfigNode)
           action = executable_action()

@@ -27,7 +27,7 @@ module DTK; class Task; class Status
       duration = el[:ended_at] - el[:started_at] if el[:ended_at] && el[:started_at]
       el[:duration] = "#{duration.round(DURATION_ACCURACY)}s" if duration
 
-      el[:status] = task[:status] unless task[:status] == 'created'
+      el[:status] = task[:status] unless task.has_status?(:created)
       el[:id] = task[:id]
       # For ALdin 'type' needs to be computed depeidningon whether it is a create node, craeet component or action
       # also can be different depending on whether it is a group

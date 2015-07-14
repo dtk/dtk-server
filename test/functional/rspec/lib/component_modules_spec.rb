@@ -739,6 +739,16 @@ shared_context "Pull base component module" do |dtk_common, component_module|
   end
 end
 
+shared_context "Push component module instance changes to server" do |dtk_common, instance_component_filesystem_location, component_module, assembly_name|
+  it "pushes changes" do
+    puts "Push component module instance changes to server:", "-------------------------------------------------"
+    `cd #{instance_component_filesystem_location} && git add .;git commit -m "test"; git push`
+    commit_sha = `cd #{instance_component_filesystem_location} && git rev-parse HEAD`
+    change_pushed = dtk_common.update_model_from_clone(component_module, assembly_name, commit_sha)
+    expect(change_pushed).to eq(true)
+  end
+end
+
 shared_context "Push component module updates" do |dtk_common, component_module|
   it "push changes from instance component module to base component module" do
     changes_pushed = dtk_common.push_component_module_updates(dtk_common.service_id, component_module)
@@ -758,6 +768,18 @@ shared_context "Make change on instance component" do |instance_component_filesy
   end
 end
 
+shared_context "Make change on base component module" do |component_module_filesystem_location, command_to_execute, command_to_verify, message|
+  it "makes change by executing command #{command_to_execute}" do
+    puts "Make change on base component module:", "-------------------------------------------"
+    pass = false
+    `cd #{component_module_filesystem_location} && #{command_to_execute} && cd -`
+    value = `#{command_to_verify} #{component_module_filesystem_location}/#{message}`
+    puts value
+    pass = true if value.include?(message)
+    expect(pass).to eq(true)
+  end
+end
+
 shared_context "Verify update/update saved flags" do |dtk_common, component_module_name, update_flag, update_saved_flag|
   it "verifies that update = #{update_flag} and update_saved = #{update_saved_flag}" do
     flags_verified = dtk_common.verify_flags(dtk_common.service_id, component_module_name, update_flag, update_saved_flag)
@@ -770,6 +792,17 @@ shared_context "Verify change on base component module" do |component_module_fil
     puts "Verify change on base component module:", "------------------------------------"
     pass = false
     value = `#{command_to_verify} #{component_module_filesystem_location}/#{component_module_name}/#{message}`
+    puts value
+    pass = true if !value.include?("No such file or directory")
+    expect(pass).to eq(true)
+  end
+end
+
+shared_context "Verify change on service instance component module" do |instance_component_filesystem_location, command_to_verify, message|
+  it "verifies that change has been applied to instance component module by issueing command #{command_to_verify}" do
+    puts "Verify change on service instance component module:", "----------------------------------------------"
+    pass = false
+    value = `#{command_to_verify} #{instance_component_filesystem_location}/#{message}`
     puts value
     pass = true if !value.include?("No such file or directory")
     expect(pass).to eq(true)

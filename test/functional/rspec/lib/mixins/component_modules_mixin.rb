@@ -4,6 +4,7 @@ module ComponentModulesMixin
 		changes_pulled = false
 		client = DtkClientAccessor.new
 		response = client.execute_command('service', 'service', service_id, [component_module_name], 'pull_base_component_module')
+		pretty_print_JSON(response)
 		changes_pulled = true if response['status'] == 'ok'
 	end
 
@@ -12,7 +13,22 @@ module ComponentModulesMixin
 		changes_pushed = false
 		client = DtkClientAccessor.new
 		response = client.execute_command('service', 'service', service_id, [component_module_name], 'push_component_module_updates')
+		pretty_print_JSON(response)
 		changes_pushed = true if response['status'] == 'ok'
+	end
+
+	def update_model_from_clone(component_module, assembly_name, commit_sha)
+		puts "Update model from clone:", "-------------------------"
+		model_updated = false
+		response = send_request('/rest/component_module/update_model_from_clone', {:component_module_id => component_module, :version => "assembly--#{assembly_name}", :assembly_module => true, :assembly_name => assembly_name, :commit_sha => commit_sha, :force_parse => true, :update_from_includes => true, :service_instance_module => true})
+		pretty_print_JSON(response)
+		if response['status'] == 'ok'
+			puts "Model updated"
+			model_updated = true
+		else
+			puts "Model is not updated"
+		end
+		model_updated
 	end
 
 	def delete_module_from_remote(component_module, namespace)

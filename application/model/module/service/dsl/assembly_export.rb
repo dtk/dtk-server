@@ -72,7 +72,7 @@ module DTK
           if str_line.eql?("''")
             assembly_file_content << "\n"
           elsif str_line.start_with?('!') && str_line.include?('#')
-            assembly_file_content << line.gsub(/- ! '(#*\s*\w*)'/,  '\1')
+            assembly_file_content << line.gsub(/- ! '(#.*)'/,  '\1')
           else
             assembly_file_content << line
           end

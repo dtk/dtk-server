@@ -129,8 +129,9 @@ module DTK
         if region = @iaas_props[:region]
           ret.merge!(region: region)
         end
-        ret
+        return ret
       end
+      @iaas_props
     end
 
     ### TODO end: these should be moved to IAAS-spefic location

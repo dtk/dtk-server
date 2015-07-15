@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-# Test Case 53: Check that changes on instance component can be pushed to base component module
+# Test Case 54: Check that changes on base component module can be pulled on instance component
 
 require 'rubygems'
 require 'rest_client'
@@ -11,7 +11,7 @@ require './lib/assembly_and_service_operations_spec'
 require './lib/component_modules_spec'
 require './lib/service_modules_spec'
 
-service_name = 'msv_test_case_53_instance'
+service_name = 'msv_test_case_54_instance'
 assembly_name = 'bootstrap::test'
 component_module_name = "stdlib"
 service_module_name = "bootstrap"
@@ -24,7 +24,7 @@ command_to_execute = "date > #{file_name}"
 command_to_verify = "ls"
 dtk_common = Common.new(service_name, assembly_name)
 
-describe "(Modules, Services and Versioning) Test Case 53: Check that changes on instance component can be pushed to base component module" do
+describe "(Modules, Services and Versioning) Test Case 54: Check that changes on base component module can be pulled on instance component" do
 
   before(:all) do
     puts "********************************************************************************************************************************",""
@@ -58,32 +58,20 @@ describe "(Modules, Services and Versioning) Test Case 53: Check that changes on
     include_context "List services after stage", dtk_common
   end
 
+  context "Make change on base component module" do
+    include_context "Make change on base component module", component_module_filesystem_location + "/" + component_module_name, command_to_execute, command_to_verify, file_name
+  end
+
+  context 'Push clone changes of component module from local copy to server' do
+    include_context 'Push clone changes to server', namespace + ":" + component_module_name, file_name
+  end
+
   context "Pull base component module" do
     include_context "Pull base component module", dtk_common, component_module_name
   end
 
-  context "Make change on instance component" do
-    include_context "Make change on instance component", instance_component_filesystem_location, command_to_execute, command_to_verify, file_name
-  end
-
-  context "Push component module instance changes to server" do
-    include_context "Push component module instance changes to server", dtk_common, instance_component_filesystem_location, namespace + ":" + component_module_name, service_name
-  end
-
-  #context "Verify update/update saved flags for instance component module" do
-  #  include_context "Verify update/update saved flags", dtk_common, component_module_name, true, false
-  #end
-
-  context "Push component module updates" do
-    include_context "Push component module updates", dtk_common, component_module_name
-  end
-
-  #context "Verify update/update saved flags for instance component module" do
-  #  include_context "Verify update/update saved flags", dtk_common, component_module_name, true, true
-  #end
-
-  context "Verify change on base component module" do
-    include_context "Verify change on base component module", component_module_filesystem_location, component_module_name, command_to_verify, file_name
+  context "Verify change on service instance component module" do
+    include_context "Verify change on service instance component module", instance_component_filesystem_location, command_to_verify, file_name
   end
 
   context "Delete and destroy service function" do

@@ -13,7 +13,7 @@ module DTK; class Task; class Status
       end
       private :initialize
 
-      attr_reader :type, :task
+      attr_reader :task
       def self.get_task_start_element(top_level_task)
         TaskStart.new(top_level_task)
       end
@@ -23,7 +23,7 @@ module DTK; class Task; class Status
       end
 
       def hash_form
-        self.class::HashForm.new(self)
+        self.class::HashForm.new(@type, @task)
       end
     end
   end

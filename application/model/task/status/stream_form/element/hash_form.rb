@@ -1,10 +1,10 @@
 module DTK; class Task::Status::StreamForm
   class Element
     class HashForm < ::Hash
-      def initialize(element)
-        @task = element.task
+      def initialize(type, task)
+        @task = task
         
-        replace(type: element.type)
+        replace(type: type)
         add_task_fields?(:started_at, :display_name)
       end
       

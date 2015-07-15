@@ -32,7 +32,7 @@ module DTK; class Task::Status::StreamForm::Element
 
       def leaf_subtasks(tasks, opts = {})
         tasks.inject([]) do |a, task|
-          if subtasks = task[:subtasks]
+          if subtasks = task.subtasks?
             if stage_level_task = opts[:add_subtasks_to]
               stage_level_task.merge!(subtasks: subtasks)
             end

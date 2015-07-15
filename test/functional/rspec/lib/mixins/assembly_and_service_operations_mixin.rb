@@ -365,120 +365,16 @@ module AssemblyAndServiceOperationsMixin
 				status = response_task_status['data'].first['status']
 				unless status.nil?
 					if (status.include? 'succeeded')
-						task_status = status
 						service_converged = true
-						puts "Task execution status: #{task_status}"
+						puts "Task execution status: #{status}"
 						puts "Converge process finished successfully!"
 					elsif (status.include? 'failed')
-						task_status = status
 						puts "Error details on subtasks:"
-						ap response_task_status['data']['subtasks']
-						puts "Task execution status: #{task_status}"
+						puts "Task execution status: #{status}"
 						puts "Converge process was not finished successfully! Some tasks failed!"
 						end_loop = true
 					end
-					puts "Task execution status: #{task_status}"
-				end
-
-				if (count > max_num_of_retries)
-					puts "Max number of retries reached..."
-					puts "Converge process was not finished successfully!"
-					end_loop = true 
-				end
-			end
-		else
-			puts "Service was not converged successfully!"
-		end
-
-		puts ""
-		return service_converged
-	end
-
-	def stop_running_service(service_id)
-		puts "Stop running service:", "---------------------"
-		service_stopped = false
-		stop_service_response = send_request('/rest/assembly/stop', {:assembly_id => service_id})
-
-		if (stop_service_response['data']['status'] == "ok")
-			puts "Service stopped successfully!"
-			service_stopped = true
-		else
-			puts "Service was not stopped successfully!"
-		end
-		puts ""
-		return service_stopped
-	end
-
-	def check_component_depedency(service_id, source_component, dependency_component, dependency_satisfied_by)
-		puts "Check component dependency:", "---------------------------"
-		dependency_found = false
-
-		puts "List service components with dependencies:"
-		components_list = send_request('/rest/assembly/info_about', {:assembly_id=>service_id, :filter=>nil, :about=>'components', :subtype=>'instance', :detail_to_include => [:component_dependencies]})
-		component = components_list['data'].select { |x| x['display_name'] == source_component}.first
-
-		if (!component.nil?)
-			puts "Component #{source_component} exists. Check its dependencies..."
-			if (component['depends_on'] == dependency_component)
-				dependency_satisfied_by.each do |dep|
-					if component['satisfied_by'].include? dep
-						dependency_found = true
-					else
-						dependency_found = false
-						break
-					end
-				end
-
-				if dependency_found == true
-					puts "Component #{source_component} has expected dependency component #{dependency_component} which is satisfied by #{dependency_satisfied_by}"
-				else
-					puts "Component #{source_component} does not have expected dependency component #{dependency_component} which is satisfied by #{dependency_satisfied_by}"
-				end
-			else
-				puts "Component #{source_component} does not have expected dependency component #{dependency_component}"
-			end
-		else
-			puts "Component #{source_component} does not exist and therefore it does not have any dependencies"
-		end
-
-		puts ""
-		return dependency_found
-	end
-
-	def converge_service(service_id, max_num_of_retries=15)
-		puts "Converge service:", "-----------------"
-		service_converged = false
-		puts "Converge process for service with id #{service_id} started!"
-		create_task_response = send_request('/rest/assembly/create_task', {'assembly_id' => service_id})
-
-		if (@error_message == "")
-			task_id = create_task_response['data']['task_id']
-			puts "Task id: #{task_id}"
-			task_execute_response = send_request('/rest/task/execute', {'task_id' => task_id})
-			end_loop = false
-			count = 0
-
-			task_status = 'executing'
-			while ((task_status.include? 'executing') && (end_loop == false))
-				sleep 20
-				count += 1
-				response_task_status = send_request('/rest/assembly/task_status', {'assembly_id'=> service_id})
-				status = response_task_status['data'].first['status']
-				unless status.nil?
-					if (status.include? 'succeeded')
-						task_status = status
-						service_converged = true
-						puts "Task execution status: #{task_status}"
-						puts "Converge process finished successfully!"
-					elsif (status.include? 'failed')
-						task_status = status
-						puts "Error details on subtasks:"
-						ap response_task_status['data']['subtasks']
-						puts "Task execution status: #{task_status}"
-						puts "Converge process was not finished successfully! Some tasks failed!"
-						end_loop = true
-					end
-					puts "Task execution status: #{task_status}"
+					puts "Task execution status: #{status}"
 				end
 
 				if (count > max_num_of_retries)
@@ -661,7 +557,7 @@ module AssemblyAndServiceOperationsMixin
 		return assembly_updated
 	end
 
-	def push_component_module_updates(service_id, component_module)
+	def push_component_module_updates_without_changes(service_id, component_module)
 		puts "Push component module updates:", "-------------------------------"
 		response = send_request('/rest/assembly/promote_module_updates', {:assembly_id=>service_id, :module_name => component_module, :module_type => "component_module" })
 		return response

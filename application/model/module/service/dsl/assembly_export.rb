@@ -1,6 +1,8 @@
 module DTK
   class ServiceModule
     class AssemblyExport < Hash
+      r8_nested_require('assembly_export', 'components_hash')
+
       attr_reader :factory
       def self.create(factory, container_idh, service_module_branch, integer_version = nil)
         integer_version ||= DSLVersionInfo.default_integer_version()
@@ -24,8 +26,59 @@ module DTK
       def serialize_and_save_to_repo?
         path = assembly_meta_filename_path()
         ordered_hash_serialized_content = serialize()
-        @service_module_branch.serialize_and_save_to_repo?(path, ordered_hash_serialized_content)
+
+        hash_assembly = ordered_hash_serialized_content[:assembly]
+        if hash_assembly && hash_assembly[:nodes]
+          serialized_assembly_file = serialize_assembly_parts(path, ordered_hash_serialized_content)
+          @service_module_branch.save_file_content_to_repo(path, serialized_assembly_file)
+        else
+          @service_module_branch.serialize_and_save_to_repo?(path, ordered_hash_serialized_content)
+        end
+
         path
+      end
+
+      def serialize_assembly_parts(path, hash)
+        raw_content = @service_module_branch.get_raw_file_content(path)
+        line_array  = []
+
+        raw_content.each_line do |line|
+          line_array << line
+        end
+
+        assembly_hash = { assembly: hash.delete(:assembly) }
+        workflow_hash = { workflow: hash.delete(:workflow) }
+
+        serialized_assembly_file = Aux.serialize(hash, :yaml)
+
+        components_hash       = ComponentsHash.new(line_array)
+        assembly_hash         = components_hash.parse_and_order_components_hash(assembly_hash)
+        assembly_string       = Aux.serialize(assembly_hash, :yaml).gsub("---\n", '')
+        assembly_file_content = add_empty_lines_and_comments(assembly_string)
+
+        serialized_assembly_file.concat(assembly_file_content)
+
+        workflow_string = Aux.serialize(workflow_hash, :yaml).gsub("---\n", '')
+        serialized_assembly_file.concat(workflow_string)
+
+        serialized_assembly_file
+      end
+
+      def add_empty_lines_and_comments(assembly_string)
+        assembly_file_content = ''
+
+        assembly_string.each_line do |line|
+          str_line = line.strip.gsub('- ', '')
+          if str_line.eql?("''")
+            assembly_file_content << "\n"
+          elsif str_line.start_with?('!') && str_line.include?('#')
+            assembly_file_content << line.gsub(/- ! '(#.*)'/,  '\1')
+          else
+            assembly_file_content << line
+          end
+        end
+
+        assembly_file_content
       end
 
       private

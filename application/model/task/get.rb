@@ -15,10 +15,8 @@ module DTK; class Task
         content.merge!({:label => r[:display_name], :task_name => r[:task][:display_name]})
         ret[task_id] = (ret[task_id]||Array.new) + [content]
       end
-
-pp [:get_logs,get_logs]      
+pp [:get_logs,ret]
       ret
-
     end
 
     # self should be a top level task
@@ -84,8 +82,9 @@ pp [:get_logs,get_logs]
       task_log_mh = task_idhs.first.createMH(:task_log)
       get_objs(task_log_mh, sp_hash).inject({}) do |h, r|
         task_id = r[:task_id]
+        content = r[:content]
         content.merge!(label: r[:display_name], task_name: r[:task][:display_name])
-        h.merge(task_id => (ret[task_id] || []) + r[:content])
+        h.merge(task_id => (ret[task_id] || []) + content)
       end
     end
 

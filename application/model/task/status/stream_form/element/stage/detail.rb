@@ -55,7 +55,8 @@ module DTK; class Task::Status::StreamForm::Element
           raise Error.new("@leaf_subtasks should be set")
         end
         return if @leaf_subtasks.empty?
-        
+        @action_results = Task.get_ndx_logs(@leaf_subtasks.map { |t| t.id_handle() })
+        pp [:action_results, @action_results]
       end
 
       class Opts < ::Hash

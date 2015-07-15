@@ -189,21 +189,7 @@ module DTK
       def self.target_non_default_aws_creds?(target)
         iaas_prop_hash = target.iaas_properties.hash()
         region = iaas_prop_hash[:region]
-        unless target.is_builtin_target?()
-          if region
-            CloudConnect::EC2.new.get_compute_params().merge(region: region)
-          else
-            unless iaas_prop_hash[:key] && iaas_prop_hash[:secret]
-              fail Error.new('Unexpected that no builtin target does not have needed fields')
-              ret = {
-                aws_access_key_id: iaas_prop_hash[:key],
-                aws_secret_access_key: iaas_prop_hash[:secret]
-              }
-              ret.merge!(region: region) if region
-              ret
-            end
-          end
-        end
+        target.get_aws_compute_params.merge(region: region)
       end
 
       # we can provide this methods set of aws_creds that will be used. We will not use this

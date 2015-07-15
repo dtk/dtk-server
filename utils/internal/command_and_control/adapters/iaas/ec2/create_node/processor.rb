@@ -102,7 +102,7 @@ module DTK; module CommandAndControlAdapter
           create_options.update_key_name()
           create_options.update_availability_zone!()
           create_options.update_vpc_info?()
-          create_options.update_block_device_mapping!(image(ami))
+          create_options.update_block_device_mapping!(image(ami, target: @node.get_target()))
           create_options.update_user_data!()
           create_options.update_client_token?()
 

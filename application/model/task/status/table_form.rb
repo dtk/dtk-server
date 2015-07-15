@@ -43,9 +43,10 @@ module DTK; class Task; class Status
         el[:errors] = format_errors(ndx_errors[task[:id]])
       end
 
-      task_logs = task.get_logs()
-      if task_logs && task_logs[task[:id]]
-        el[:logs] = format_logs(task_logs[task[:id]])
+      # TODO: on 7/14/2015 does not look like el[:logs] is being displayed. 
+      #       Also format_logs is just ignoring context and just leaving msg hat theer are results
+      if task_logs = task.get_logs?
+        el[:logs] = format_logs(task_logs)
       end
 
       ea = nil

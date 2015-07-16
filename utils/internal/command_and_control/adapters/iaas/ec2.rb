@@ -189,7 +189,10 @@ module DTK
       def self.target_non_default_aws_creds?(target)
         iaas_prop_hash = target.iaas_properties.hash()
         region = iaas_prop_hash[:region]
-        target.get_aws_compute_params.merge(region: region)
+
+        params = target.get_aws_compute_params
+        params.merge!(region: region) if params
+        params
       end
 
       # we can provide this methods set of aws_creds that will be used. We will not use this

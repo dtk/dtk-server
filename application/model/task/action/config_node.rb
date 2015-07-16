@@ -210,11 +210,28 @@ module DTK; class Task
       end
 
       def update_state_change_status(task_mh, status)
-        update_state_change_status_aux(task_mh, status, component_actions().map { |x| x[:state_change_pointer_ids] }.compact.flatten)
+        update_state_change_status_aux(task_mh, status, component_actions().map { |a| a[:state_change_pointer_ids] }.compact.flatten)
       end
 
       def config_agent_type
         self[:config_agent_type] || fail(Error.new('self[:config_agent_type] should not be nil'))
+      end
+
+      # TODO: hard wired that if there is a action_method?, there is just one
+      def action_method?
+        matches = component_actions.map do |a| 
+          if action_method = a.kind_of?(OnComponent) && a.action_method?
+            action_method
+          end
+        end.compact
+        if matches.size == 0
+          nil
+        elsif matches.size == 1
+          matches.first
+        else
+          Log.error_pp(['Unexpected that multiple actions found on exacutable action' , self])
+          nil
+        end
       end
 
       private

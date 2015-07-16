@@ -46,6 +46,7 @@ module DTK; class Task
         end
         ret
       end
+
       def self.create_from_hash(hash, task_idh = nil)
         if component = hash[:component]
           unless component.is_a?(Component)

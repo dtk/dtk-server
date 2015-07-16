@@ -26,7 +26,10 @@ module DTK; class Task::Status::StreamForm::Element
       # and returns the set of
       def add_subtasks_and_return_leaf_subtasks!
         @stage_level_tasks.inject([]) do |a, stage_level_task|
-          leaf_subtasks([Task::Hierarchical.get(stage_level_task.id_handle())], add_subtasks_to: stage_level_task)
+          # TODO: less expensive to not reify and instead when process executable action to
+          # just reify what is needed such as node 
+          hier_task = Task::Hierarchical.get(stage_level_task.id_handle(), reify: true)
+          leaf_subtasks([hier_task], add_subtasks_to: stage_level_task)
         end
       end
 

@@ -14,7 +14,7 @@ module DTK; class Task::Status
     def add_details!
       ExecutableAction.add_components_and_actions!(@ret_nested_hash, @leaf_task)
       set?(:action_results, action_results?())
-      # set(:errors, errors?())
+      set?(:errors, errors?())
       @ret_nested_hash
     end
     
@@ -26,6 +26,12 @@ module DTK; class Task::Status
       end
     end
     ActionResultFields = [:status, :stdout, :stderr, :description]
+
+    def errors?
+      if errors = @leaf_task[:errors]
+        errors
+      end
+    end
     
     def set?(key, value)
       unless value.nil?

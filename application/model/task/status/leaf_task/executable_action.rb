@@ -11,7 +11,7 @@ module DTK; class Task::Status
 
             # TODO: some complexity because :executable_action_type does not distinguish between
             #       config node and action method
-            @type = is_component_action_type? ? ComponentActionType : executable_action[:executable_action_type]
+            @type = is_component_action_type? ? ComponentActionType : @leaf_task[:executable_action_type]
           else
             Log.error("Unexpected that ea_class.respond_to?(:status) is false for '#{ea_class}'")
           end

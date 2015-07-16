@@ -21,6 +21,7 @@ class DTK::Task; class Status::StreamForm; class Element
       
       def set_nested_hash_subtasks!(ret_nested_hash,task)
         if subtasks = task.subtasks?
+pp [:lllllllllllllllllllllintermediate,task.keys]
           ret_nested_hash[:subtasks] = subtasks.map do |st| 
             set_nested_hash_subtasks!(self.class.create_nested_hash_form(st), st) 
           end

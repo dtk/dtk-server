@@ -1,9 +1,9 @@
-module DTK; class Task::Status
-  class LeafTask
+module DTK; class Task::Status; class HashOutput
+  class Detail
     class ExecutableAction < self
-      def initialize(ret_nested_hash, leaf_task)
+      def initialize(hash_output, task)
         super
-        if executable_action = @leaf_task[:executable_action]
+        if executable_action = @task[:executable_action]
           ea_class = executable_action.class
           if ea_class.respond_to?(:status)
             @executable_action = executable_action
@@ -11,7 +11,7 @@ module DTK; class Task::Status
 
             # TODO: some complexity because :executable_action_type does not distinguish between
             #       config node and action method
-            @type = is_component_action_type? ? ComponentActionType : @leaf_task[:executable_action_type]
+            @type = is_component_action_type? ? ComponentActionType : @task[:executable_action_type]
           else
             Log.error("Unexpected that ea_class.respond_to?(:status) is false for '#{ea_class}'")
           end
@@ -19,11 +19,11 @@ module DTK; class Task::Status
       end
       ComponentActionType = 'ComponentAction'
 
-      def self.add_components_and_actions!(ret_nested_hash, leaf_task)
-        new(ret_nested_hash, leaf_task).add_components_and_actions!
+      def self.add_components_and_actions?(hash_output, task)
+        new(hash_output, task).add_components_and_actions?
       end
 
-      def add_components_and_actions!
+      def add_components_and_actions?
         return unless @summary
         set?(:executable_action_type, @type)
         set?(:node, node?())
@@ -47,7 +47,7 @@ module DTK; class Task::Status
         name = (@summary[:node] || {})[:name]
         name && { name: name }
       end
-      
+
       def components?
         if component_names = @summary[:components]
           component_names.map { |cmp_name| { name: cmp_name } }
@@ -75,5 +75,5 @@ module DTK; class Task::Status
       
     end
   end
-end; end
+end; end; end
 

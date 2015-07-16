@@ -1,4 +1,4 @@
-module DTK; class Task::Status::StreamForm::Element
+module DTK; class Task::Status::StreamForm
   class Stage
     class Detail
       def initialize(stage_elements, hash_opts = {})

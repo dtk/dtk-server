@@ -1,4 +1,4 @@
-class DTK::Task::Status::StreamForm::Element
+class DTK::Task::Status::StreamForm
   class NoResults < self
     def initialize
       super(:no_results)

@@ -1,12 +1,11 @@
-module DTK; class Task::Status; class StreamForm::Element
+module DTK; class Task::Status; class StreamForm
   class Stage < self
     r8_nested_require('stage', 'detail')
-    r8_nested_require('stage', 'hash_form')
 
     def initialize(task)
       super(:stage, task)
     end
-    
+
     def self.elements(top_level_task, start_stage, end_stage, opts = {})
       ret = Array.new
       # Get the stage elements within range start_stage,end_stage
@@ -28,6 +27,14 @@ module DTK; class Task::Status; class StreamForm::Element
     end
 
     private
+
+    def hash_output_opts
+      { 
+        add_detail: true, 
+        task_fields: [:started_at, :ended_at, :status, :display_name],
+        task_fields_nested: [:started_at, :ended_at, :status] 
+      }
+    end    
 
     # returns [stage_elements,state] 
     # where state can be
@@ -52,7 +59,6 @@ module DTK; class Task::Status; class StreamForm::Element
         # pop because we gathered one more than end_stage
         tasks.pop()
       end
-
 
       #compute state by looking at last task and whether end_plus_1_reached
       last_task = tasks.last

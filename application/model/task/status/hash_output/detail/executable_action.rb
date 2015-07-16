@@ -42,10 +42,17 @@ module DTK; class Task::Status; class HashOutput
           @executable_action.action_method?
         end
       end
-      
+
       def node?
-        name = (@summary[:node] || {})[:name]
-        name && { name: name }
+        if node = @summary[:node]
+          if name = node[:name]
+            ret = { name: name }
+            if type =  node[:type]
+              ret.merge!(type: type)
+            end
+            ret
+          end
+        end
       end
 
       def components?

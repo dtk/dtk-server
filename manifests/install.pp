@@ -40,6 +40,12 @@ define dtk_client::install(
     group  => $dtk_client_unix_user,
     mode   => 700
   }
+ 
+  file { "/etc/sudoers.d/${dtk_client_unix_user}":
+    ensure  => 'present',
+    content => "${dtk_client_unix_user}  ALL=(ALL) NOPASSWD:ALL",
+    mode    => '0440'
+  }
 
   exec { "ssh-keygen":
     command => "ssh-keygen -t rsa -f ${ssh_path} -P ''",
@@ -78,6 +84,6 @@ define dtk_client::install(
     username => $dtk_client_unix_user,
   }
 
-  File["/home/${dtk_client_unix_user}/dtk"] -> File["/home/${dtk_client_unix_user}/dtk/.connection"] -> File["/home/${dtk_client_unix_user}/dtk/client.conf"]
+  File["/home/${dtk_client_unix_user}/dtk"] -> File["/home/${dtk_client_unix_user}/dtk/.connection"] -> File["/home/${dtk_client_unix_user}/dtk/client.conf"] -> File["/etc/sudoers.d/${dtk_client_unix_user}"]
 }
 

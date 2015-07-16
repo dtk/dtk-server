@@ -10,11 +10,13 @@ define common_user($user)
 
 define common_user::common_user_ssh_config($user)
 {
-  file { "/home/${user}/.ssh":
-    ensure => directory,
-    mode   => '0700',
-    owner  => $user,
-    group  => $user,
+  if ! defined(File["/home/${user}/.ssh"]) {
+    file { "/home/${user}/.ssh":
+      ensure => directory,
+      mode   => '0700',
+      owner  => $user,
+      group  => $user,
+    }
   }
 
   file { "/home/${user}/.ssh/config":

@@ -19,7 +19,7 @@ class dtk_addons::remote(
   }
 
   exec { 'establish_ssh_tunnel':
-    command => "nohup sshpass -p '${destination_password}' ssh -o StrictHostKeyChecking=no -L ${source_port}:localhost:${destination_port} ${destination_host} -l ${destination_user} -N &",
+    command => "nohup sshpass ssh -i /home/${source_user}/rsa_identity_dir/id_rsa -o StrictHostKeyChecking=no -L ${source_port}:localhost:${destination_port} ${destination_host} -l ${destination_user} -N &",
     user    => $source_user,
     path    => [ "/usr/local/bin/", "/bin/", "/usr/bin/"],
     require => Package['sshpass']

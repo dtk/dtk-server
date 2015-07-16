@@ -14,6 +14,7 @@ class dtk_addons::test_scripts_setup(
 
   exec { 'copy_test_scripts':
     command => "cp -r ${source} /home/${destination_user}",
+    user    => $destination_user,
     path    => ['/usr/bin','/usr/local/bin','/bin'],
   }
 
@@ -22,16 +23,6 @@ class dtk_addons::test_scripts_setup(
     owner   => $destination_user,
     content => template('dtk_addons/config.yml.erb'),
     require => Exec['copy_test_scripts']
-  }
-
-  package { 'rest-client':
-    ensure   => '1.6.8',
-    provider => 'gem',
-  }
-
-  package { 'awesome_print':
-    ensure   => '1.1.0',
-    provider => 'gem',
   }
 }
 

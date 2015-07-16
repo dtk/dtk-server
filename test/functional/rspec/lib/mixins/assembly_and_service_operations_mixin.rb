@@ -410,7 +410,7 @@ module AssemblyAndServiceOperationsMixin
 	def create_assembly_from_service(service_id, service_module_name, assembly_name, namespace=nil)
 		puts "Create assembly from service:", "-----------------------------"
 		assembly_created = false
-		create_assembly_response = send_request('/rest/assembly/promote_to_template', {:service_module_name=>service_module_name, :assembly_id=>service_id, :assembly_template_name=>assembly_name, :namespace=>namespace})
+		create_assembly_response = send_request('/rest/assembly/promote_to_template', {:service_module_name=>service_module_name, :mode=>:create, :assembly_id=>service_id, :assembly_template_name=>assembly_name, :namespace=>namespace})
 		if (create_assembly_response['status'] == 'ok')
 			puts "Assembly #{assembly_name} created in service module #{service_module_name}"
 			assembly_created = true

@@ -36,12 +36,12 @@ module DTK
       def self.create_or_update_from_instance(assembly_instance, service_module, assembly_name, opts = {})
         assembly_factory = create_assembly_factory(assembly_instance, service_module, assembly_name, opts)
         assembly_factory.raise_error_if_integrity_error()
-        assembly_factory.create_assembly_template()
+        assembly_factory.create_assembly_template(opts)
       end
 
-      def create_assembly_template
+      def create_assembly_template(opts = {})
         add_content_for_clone!()
-        create_assembly_template_aux()
+        create_assembly_template_aux(opts)
       end
 
       def set_object_attributes!(project_idh, assembly_instance, service_module, service_module_branch)
@@ -217,7 +217,7 @@ module DTK
       end
 
       # TODO: can collapse above and below; aboves looks like extra intermediate level
-      def create_assembly_template_aux
+      def create_assembly_template_aux(opts = {})
         nodes = self[:nodes].inject(DBUpdateHash.new) { |h, node| h.merge(create_node_content(node)) }
         port_links = self[:port_links].inject(DBUpdateHash.new) { |h, pl| h.merge(create_port_link_content(pl)) }
         task_templates = self[:task_templates].inject(DBUpdateHash.new) { |h, tt| h.merge(create_task_template_content(tt)) }
@@ -254,7 +254,7 @@ module DTK
           end
 
           # serialize_and_save_to_repo? returns new_commit_sha
-          @template_output.serialize_and_save_to_repo?()
+          @template_output.serialize_and_save_to_repo?(opts)
         end
       end
 

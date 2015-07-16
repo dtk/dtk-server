@@ -368,6 +368,7 @@ module AssemblyAndServiceOperationsMixin
 						service_converged = true
 						puts "Task execution status: #{status}"
 						puts "Converge process finished successfully!"
+						end_loop = true
 					elsif (status.include? 'failed')
 						puts "Error details on subtasks:"
 						puts "Task execution status: #{status}"

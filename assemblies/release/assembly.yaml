@@ -19,14 +19,11 @@ assembly:
       - dtk_client::resources:
           attributes:
             user: dtk16-client
-      - dtk_addons::rspec2db:
-          attributes:
-            user: dtk16-client
       - dtk_addons::remote:
           attributes:
             destination_host: backup.r8network.com
-            destination_user: dtk
-            source_user: dtk16-client
+            destination_user: ubuntu
+            source_user: dtk16
       - dtk_addons::jenkins_swarm_client:
           attributes:
             master: http://jenkins.r8network.com/
@@ -59,10 +56,6 @@ assembly:
             user: mcollective
             password: marionette
             subcollective: mcollective
-      - common_user::common_user_ssh_config:
-          attributes:
-            user: dtk16
-            name: tenant
       - dtk_postgresql::server
       - dtk_server::add_user:
           attributes:
@@ -104,6 +97,10 @@ assembly:
       - redis::instance:
           attributes:
             name: 6379
+      - common_user::common_user_ssh_config[dtk16]:
+          attributes:
+            user: dtk16
+            name: tenant
     repo_manager:
       components:
       - dtk
@@ -149,13 +146,12 @@ workflow:
     - logrotate::base
     - dtk_passenger
     - vcsrepo::include
-    - common_user::common_user_ssh_config[tenant]
+    - common_user::common_user_ssh_config[dtk16]
     - dtk_server::add_user[tenant]
     - dtk_nginx::base
     - dtk_nginx::vhost_for_tenant[dtk16]
     - dtk_client
     - dtk_client::resources
-    - dtk_addons::rspec2db
     - dtk_addons::remote
     - dtk_addons::test_scripts_setup
     - dtk_addons::jenkins_swarm_client

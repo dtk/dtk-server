@@ -2,8 +2,6 @@
 component_modules:
   common_user:
     namespace: internal
-  docker:
-    namespace: internal
   dtk:
     namespace: internal
   dtk_activemq:

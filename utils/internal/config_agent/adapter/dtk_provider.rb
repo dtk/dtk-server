@@ -8,10 +8,15 @@ module DTK; class ConfigAgent; module Adapter
       # reference to component attributes
       # assembly_attrs = assembly_attributes(config_node)
 
-      commands = commands(config_node, substitute_template_vars: true)
+      commands         = commands(config_node, substitute_template_vars: true)
+      component_action = config_node[:component_actions].first
+      action_name      = component_action[:action_method][:method_name]
+      cmp_module       = component_action[:component].get_field?(:component_module).full_module_name
 
       ret = {
         action_agent_request: {
+          action_name: action_name,
+          module_name: cmp_module,
           execution_list: commands
         }
       }

@@ -123,14 +123,15 @@ module DTK
 
     # returns aws params if pressent in iaas properties
     def get_aws_compute_params
+      ret = {}
       @iaas_props ||= get_iaas_properties()
       if @iaas_props && (aws_key = @iaas_props[:key]) && (aws_secret = @iaas_props[:secret])
-        ret = { aws_access_key_id: aws_key, aws_secret_access_key: aws_secret }
+        ret.merge!(aws_access_key_id: aws_key, aws_secret_access_key: aws_secret)
         if region = @iaas_props[:region]
           ret.merge!(region: region)
         end
-        ret
       end
+      ret
     end
 
     ### TODO end: these should be moved to IAAS-spefic location

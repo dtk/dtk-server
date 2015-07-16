@@ -762,6 +762,7 @@ module DTK
           element_detail = ret_request_params(:element_detail)||{}
           # element_detail defaults
           element_detail[:action_results] ||= true
+          element_detail[:errors] ||= true
           opts = {
             end_index:      ret_request_params(:end_index),
             start_index:    ret_request_params(:start_index),
@@ -775,7 +776,6 @@ module DTK
           }
           Task::Status::Assembly.get_status(assembly.id_handle, opts)
         end
-
 
       rest_ok_response response
     end

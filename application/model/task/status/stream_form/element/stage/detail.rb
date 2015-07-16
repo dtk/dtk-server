@@ -17,6 +17,9 @@ module DTK; class Task::Status::StreamForm::Element
           if opts.add_action_results?
             add_action_results!(ndx_leaf_subtasks)
           end
+          if opts.add_errors?
+            add_errors!(ndx_leaf_subtasks)
+          end
         end
       end
 
@@ -54,6 +57,14 @@ module DTK; class Task::Status::StreamForm::Element
         end
       end
 
+      def add_errors!(ndx_leaf_subtasks)
+        return if ndx_leaf_subtasks.empty?
+        ndx_errors = Task.get_ndx_errors(ndx_leaf_subtasks.values.map { |t| t.id_handle() })
+        ndx_errors.each_pair do |task_id, errors|
+          ndx_leaf_subtasks[task_id].merge!(errors: errors)
+        end
+      end
+
       class Opts < ::Hash
         def initialize(hash_opts = {})
           super()
@@ -61,11 +72,15 @@ module DTK; class Task::Status::StreamForm::Element
         end
 
         def add_subtasks?
-          !([:action_results, :subtasks] & (detail().keys)).empty?
+          !([:action_results, :errors, :subtasks] & (detail().keys)).empty?
         end
 
         def add_action_results?
           detail().has_key?(:action_results)
+        end
+
+        def add_errors?
+          detail().has_key?(:errors)
         end
 
         private

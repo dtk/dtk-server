@@ -1,12 +1,18 @@
 class dtk_repo_manager(
   $rails_env = 'production',
   $repoman_dns_address = 'repoman1.dtk.io',
+  $repoman_internal_dns_address = 'localhost',
+  $repoman_port = '443',
   $admin_dns_address   = 'admin1.dtk.io',
   # can also be branch or commit sha
   $repoman_tag = 'master',
   $repoman_admin_tag = 'master',
   $dtk_common_tag = 'master',
   $dtk_common_core_tag = 'master',
+  $smtp_username,
+  $smtp_password,
+  $smtp_hostname = 'email-smtp.us-east-1.amazonaws.com',
+  $smtp_port = '587',
 )
 {
   include dtk_repo_manager::params
@@ -28,6 +34,10 @@ class dtk_repo_manager(
   #$test_var =  $dtk_repo_manager::params::repo_info[admin][target_dir]
   $repo_target_dir = "${gitolite_user_homedir}/${dtk_repo_manager::params::repo_info[repo_manager][target_dir]}"
   $admin_target_dir = "${gitolite_user_homedir}/${dtk_repo_manager::params::repo_info[admin][target_dir]}"
+  $repo_env_file="${repo_target_dir}/.env"
+  $admin_env_file="${admin_target_dir}/.env"
+
+  $bundle_install_command = "${rvm_path}/wrappers/default/bundle install --without development"
  
   package { 'libpq-dev': 
     ensure => 'installed'
@@ -98,22 +108,33 @@ class dtk_repo_manager(
     vhost_cfg_append    => {
       'passenger_enabled' => 'on',
       'rails_env'         =>  $rails_env,
-      'passenger_env_var REPOMAN_HOST' => 'localhost',
-      'passenger_env_var REPOMAN_PORT' => '443',
+      #'passenger_env_var REPOMAN_HOST' => 'localhost',
+      #'passenger_env_var REPOMAN_PORT' => '443',
     },
     require => Class["dtk_repo_manager::passenger"],
   }
 
+  # put config in dotenv
+  file { $repo_env_file:
+    content => template("dtk_repo_manager/repoman_env.erb"),
+    require => Dtk_repo_manager::Github_repo[$dtk_repo_manager::params::repoman_repo],
+  }->
+  
   exec { "bundle_install":
-    command    => "/usr/local/rvm/wrappers/default/bundle install",
+    command    => $bundle_install_command,
     cwd        => $repo_target_dir,
     logoutput  => true,
     timeout    => 600,
     require    => [ Dtk_repo_manager::Github_repo[$dtk_repo_manager::params::repoman_repo], Dtk_repo_manager::Rvm[$rvm_ruby_version] ]
   }
 
+  file { $admin_env_file:
+    content => template("dtk_repo_manager/admin_env.erb"),
+    require => Dtk_repo_manager::Github_repo[$dtk_repo_manager::params::repoman_admin_repo],
+  }->
+
   exec { "bundle_install_admin":
-    command    => "/usr/local/rvm/wrappers/default/bundle install",
+    command    => $bundle_install_command,
     cwd        => $admin_target_dir,
     logoutput  => true,
     timeout    => 600,

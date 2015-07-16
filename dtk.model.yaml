@@ -12,6 +12,14 @@ components:
           type: string
           required: true
           default: repoman-test.dtk.io
+        repoman_internal_dns_address:
+          type: string
+          required: true
+          default: localhost
+        repoman_port:
+          type: string
+          required: true
+          default: 443
         admin_dns_address:
           type: string
           required: true
@@ -32,6 +40,20 @@ components:
           type: string
           required: true
           default: master
+        smtp_username:
+          type: string
+          required: true
+        smtp_password:
+          type: string
+          required: true
+        smtp_hostname:
+          type: string
+          required: true
+          default: email-smtp.us-east-1.amazonaws.com
+        smtp_port:
+          type: string
+          required: true
+          default: 587
       dependencies: 
       - dtk_postgresql::server
       - gitolite

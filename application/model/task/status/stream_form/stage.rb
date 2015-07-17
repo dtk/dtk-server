@@ -50,7 +50,11 @@ module DTK; class Task::Status; class StreamForm
     #   :task_ended 
     #   :all_reached
     #   :not_complete
+    # opts can have
+    #   :wait_for - values can be :end or :start
     def self.get_stage_elements(top_level_task, start_stage, end_stage, opts={})
+      wait_for_start = opts[:wait_for] == :start
+
       # get one more than the end_stage to check if at end and to be robust againts error where
       # the stage level state is not updated
       tasks = top_level_task.get_ordered_stage_level_tasks(start_stage, end_stage + 1)
@@ -62,7 +66,7 @@ module DTK; class Task::Status; class StreamForm
       # see if collected more than end_stage and pop it off
       end_plus_1_reached = false
       if tasks.size == 2 + end_stage - start_stage
-        if task_started(tasks.last)
+        if task_started?(tasks.last)
           end_plus_1_reached = true
         end
         # pop because we gathered one more than end_stage
@@ -79,7 +83,9 @@ module DTK; class Task::Status; class StreamForm
         elsif task_completed?(top_level_task)
           # This is for case such as all subtasks complete but top reflects task is cancelled
           :task_ended
-        else          
+        elsif wait_for_start and task_started?(top_level_task)
+          :all_reached
+        else
           :not_complete
         end
 
@@ -87,7 +93,7 @@ module DTK; class Task::Status; class StreamForm
       [stage_elements, state]
     end
 
-    def self.task_started(task)
+    def self.task_started?(task)
       !task.get_field?(:started_at).nil?
     end
 

@@ -25,7 +25,7 @@ module DTK; class Task
           opts_stage = Aux.hash_subset(opts, [:element_detail, :wait_for])
           ret += Stage.elements(top_level_task, start_index, end_index, opts_stage).map(&:hash_output)
         else
-          raise ErrorUsage.new("start_index (#{start_index} must be less than or equal to end_index (#{end_index})")
+          fail ErrorUsage.new("start_index (#{start_index} must be less than or equal to end_index (#{end_index})")
         end
         ret
       end

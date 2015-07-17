@@ -756,7 +756,6 @@ module DTK
 
     def rest__task_status
       assembly = ret_assembly_instance_object()
-
       response =
         if ret_request_params(:form) == 'stream_form'
           element_detail = ret_request_params(:element_detail)||{}
@@ -769,7 +768,7 @@ module DTK
             element_detail: element_detail
           }
           if wait_for = ret_request_params(:wait_for)
-            opts.merge!(wait_for: wait_for)
+            opts.merge!(wait_for: wait_for.to_sym)
           end
 
           Task::Status::Assembly::StreamForm.get_status(assembly.id_handle, opts)

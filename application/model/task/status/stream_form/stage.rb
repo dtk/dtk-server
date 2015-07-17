@@ -30,9 +30,9 @@ module DTK; class Task::Status; class StreamForm
 
     def hash_output_opts
       { 
-        add_detail: true, 
-        task_fields: [:started_at, :ended_at, :status, :display_name],
-        task_fields_nested: [:started_at, :ended_at, :status] 
+        add_detail:         true, 
+        task_fields:        [:started_at, :ended_at, :status, :position, :display_name],
+        task_fields_nested: [:started_at, :ended_at, :status, :position] 
       }
     end    
 

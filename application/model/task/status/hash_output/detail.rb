@@ -23,19 +23,29 @@ module DTK; class Task::Status
       
       def action_results?
         if action_results = @task[:action_results]
-          action_results.map { |a| Aux.hash_subset(a, ActionResultFields) }
+          ret = action_results.map do |a| 
+            Aux.hash_subset(a, ActionResultFields) 
+          end.compact
+          ret.empty? ? nil : ret
         end
       end
       ActionResultFields = [:status, :stdout, :stderr, :description]
       
       def errors?
         if errors = @task[:errors]
-          # TODO: stubs
-          pp [:llllllllllllllllllllll,errors]
-          errors
+          ret = errors.map do |e|
+            if e.kind_of?(String)
+              { message: e }
+            elsif e.kind_of?(Hash)
+              err_hash = Aux.hash_subset(e, ErrorFields)
+              err_hash.empty? ? nil : err_hash
+            end
+          end.compact
+          ret.empty? ? nil : ret
         end
       end
-      
+      ErrorFields = [:message, :type]
+
       def set?(key, value)
         unless value.nil?
           @hash_output[key] = value

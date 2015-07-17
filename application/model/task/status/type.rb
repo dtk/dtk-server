@@ -28,7 +28,7 @@ class DTK::Task::Status
 
 
     def self.is_workflow_ending_status?(status)
-      [:failed, :cancelled, :preconditions_failed].include?(check_status(status))
+      ['failed', 'cancelled', 'preconditions_failed'].include?(check_status(status))
     end
 
     private

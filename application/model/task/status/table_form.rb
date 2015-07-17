@@ -24,8 +24,10 @@ module DTK; class Task; class Status
       task.set_and_return_types!()
       el = task.hash_subset(:started_at, :ended_at)
 
-      duration = el[:ended_at] - el[:started_at] if el[:ended_at] && el[:started_at]
-      el[:duration] = "#{duration.round(DURATION_ACCURACY)}s" if duration
+      if el[:ended_at] and el[:started_at]
+        duration = el[:ended_at] - el[:started_at] 
+        el[:duration] = "#{duration.round(DURATION_ACCURACY)}s"
+      end
 
       el[:status] = task[:status] unless task.has_status?(:created)
       el[:id] = task[:id]

@@ -8,6 +8,8 @@ module DTK
         replace(type: type)
         if task_fields = opts[:task_fields]
           add_task_fields?(task_fields)
+          # set_duration? most be done after add_task_fields?
+          set_duration?
         end
         if opts[:add_detail]
           set_nested_hash_subtasks!(self, @task, nested_opts(opts))
@@ -15,6 +17,12 @@ module DTK
       end
 
       private
+
+      def set_duration?
+        if self[:ended_at] and self[:started_at]
+          self[:duration] = self[:ended_at] - self[:started_at] 
+        end
+      end
 
       def nested_opts(opts = {})
         ret = (opts.keys - [:task_field, :task_fields_nested]).inject({}) do |h, key|

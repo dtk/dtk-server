@@ -3,19 +3,11 @@ module DTK; class Task::Status; class HashOutput
     class ExecutableAction < self
       def initialize(hash_output, task)
         super
-        if executable_action = @task[:executable_action]
-          ea_class = executable_action.class
-          if ea_class.respond_to?(:status)
-            @executable_action = executable_action
-            @summary           = ea_class.status(executable_action, no_attributes: true)
-
-            # TODO: some complexity because :executable_action_type does not distinguish between
-            #       config node and action method
-            @type = is_component_action_type? ? ComponentActionType : @task[:executable_action_type]
-          else
-            Log.error("Unexpected that ea_class.respond_to?(:status) is false for '#{ea_class}'")
-          end
-        end
+        @executable_action = @task[:executable_action]
+        @summary = summary?()
+        # TODO: some complexity because :executable_action_type does not distinguish between
+        #       config node and action method
+        @type = is_component_action_type? ? ComponentActionType : @task[:executable_action_type]
       end
       ComponentActionType = 'ComponentAction'
 
@@ -32,7 +24,17 @@ module DTK; class Task::Status; class HashOutput
       end
 
       private
-      
+
+      def summary?()
+        if @executable_action
+          ea_class = @executable_action.class
+          # TODO: ea_class.status is misnomer; it creates info summary hash about executable_action
+          if ea_class.respond_to?(:status)
+            ea_class.status(@executable_action, no_attributes: true)
+          end
+        end
+      end
+
       def is_component_action_type?
         !!action_method?
       end

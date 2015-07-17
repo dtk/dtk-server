@@ -2,14 +2,14 @@ module DTK; class Task::Status; class StreamForm
   class Stage < self
     r8_nested_require('stage', 'detail')
 
-    def initialize(task)
-      super(:stage, task)
+    def initialize(task, opts = {})
+      super(type(opts), task)
     end
 
     def self.elements(top_level_task, start_stage, end_stage, opts = {})
       ret = Array.new
       # Get the stage elements within range start_stage,end_stage
-      stage_elements, state = get_stage_elements(top_level_task, start_stage, end_stage)
+      stage_elements, state = get_stage_elements(top_level_task, start_stage, end_stage, opts)
       Detail.add_detail!(stage_elements, opts)
       case state
         when :all_reached
@@ -28,6 +28,15 @@ module DTK; class Task::Status; class StreamForm
 
     private
 
+    def type(opts = {})
+      if wait_for = opts[:wait_for]
+        "#{BaseType}_#{wait_for}"
+      else
+        BaseType
+      end
+    end
+    BaseType = :stage
+
     def hash_output_opts
       { 
         add_detail:         true, 
@@ -41,13 +50,13 @@ module DTK; class Task::Status; class StreamForm
     #   :task_ended 
     #   :all_reached
     #   :not_complete
-    def self.get_stage_elements(top_level_task, start_stage, end_stage)
+    def self.get_stage_elements(top_level_task, start_stage, end_stage, opts={})
       # get one more than the end_stage to check if at end and to be robust againts error where
       # the stage level state is not updated
       tasks = top_level_task.get_ordered_stage_level_tasks(start_stage, end_stage + 1)
 
       if tasks.empty?
-        return([Array.new,:task_ended])
+        return([Array.new, :task_ended])
       end
 
       # see if collected more than end_stage and pop it off
@@ -74,7 +83,7 @@ module DTK; class Task::Status; class StreamForm
           :not_complete
         end
 
-      stage_elements = tasks.map{|task|new(task)}
+      stage_elements = tasks.map{ |task| new(task, opts) }
       [stage_elements, state]
     end
 

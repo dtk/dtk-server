@@ -768,6 +768,10 @@ module DTK
             start_index:    ret_request_params(:start_index),
             element_detail: element_detail
           }
+          if wait_for = ret_request_params(:wait_for)
+            opts.merge!(wait_for: wait_for)
+          end
+
           Task::Status::Assembly::StreamForm.get_status(assembly.id_handle, opts)
         else
           opts = {

@@ -7,7 +7,7 @@ class DTK::Task::Status::StreamForm
     private
 
     def hash_output_opts
-      { task_fields: [:started_at, :ended_at, :status] }
+      { task_fields: [:started_at, :display_name, :ended_at, :status] }
     end
   end
 end

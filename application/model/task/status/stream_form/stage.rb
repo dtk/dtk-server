@@ -76,15 +76,17 @@ module DTK; class Task::Status; class StreamForm
       #compute state by looking at last task and whether end_plus_1_reached
       last_task = tasks.last
       state = 
-        if task_ended_workflow?(last_task)
+        if wait_for_start and task_started?(top_level_task)
+          # if request is wait_for_start dont want to send :task_ended ebven though it
+          # might have; teh following call with :end wil catch this
+          :all_reached
+        elsif task_ended_workflow?(last_task)
           :task_ended
         elsif end_plus_1_reached or task_completed?(last_task)
           :all_reached
         elsif task_completed?(top_level_task)
           # This is for case such as all subtasks complete but top reflects task is cancelled
           :task_ended
-        elsif wait_for_start and task_started?(top_level_task)
-          :all_reached
         else
           :not_complete
         end

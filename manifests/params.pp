@@ -19,11 +19,11 @@ class dtk_postgresql::params()
 		  $server_data_dir = "/var/lib/postgresql/${version}/main"
 		  $hostname_argument = ""
 		  $external_pid_file = "/var/run/postgresql/${version}-main.pid" 
-		  $ssl = "true"
+		  $ssl = "on"
 		  $unix_socket_directory = "/var/run/postgresql"
 		}
 	}
 	
-	$server_user = "postgres"
-
+	$server_user = 'postgres'
+        $max_connections = '100'
 }

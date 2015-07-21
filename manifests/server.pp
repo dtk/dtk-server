@@ -1,13 +1,17 @@
-class dtk_postgresql::server()
+class dtk_postgresql::server
+(
+  $max_connections = $dtk_postgresql::params::max_connections,
+  $ssl = $dtk_postgresql::params::ssl
+) inherits dtk_postgresql::params
 {
-  include dtk_postgresql::params
+  #include dtk_postgresql::params
   $version = $dtk_postgresql::params::version
   $server_package = $dtk_postgresql::params::server_package
   $server_user = $dtk_postgresql::params::server_user
   $server_conf_dir = $dtk_postgresql::params::server_conf_dir 
   $server_data_dir = $dtk_postgresql::params::server_data_dir	
   $external_pid_file = $dtk_postgresql::params::external_pid_file
-  $ssl = $dtk_postgresql::params::ssl
+  #$ssl = $dtk_postgresql::params::ssl
   $unix_socket_directory = $dtk_postgresql::params::unix_socket_directory
   $postgresql_conf = "${server_conf_dir}/postgresql.conf"  
   $pg_hba_conf = "${server_conf_dir}/pg_hba.conf"  

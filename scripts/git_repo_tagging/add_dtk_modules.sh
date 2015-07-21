@@ -4,8 +4,15 @@
 # Output repo directory:
 output_dir=$1
 
+if [[ -z ${output_dir} ]]; then
+  echo "output_dir argument missing"
+  exit 1
+fi
+
 dtk_server="git@github.com:rich-reactor8/server.git"
 dtk_service_module_url="internal--sm--dtk"
+dtk_component_module_url_prefix="internal--cm--"
+dtk_repoman_url="git@dtknet.servicecatalog.it"
 
 apt_url="apt"
 common_user_url="common_user"
@@ -55,8 +62,10 @@ dtk_modules+=($vcsrepo_url)
 
 cd $output_dir && git clone $dtk_server && cd server && git submodule init && git submodule update
 for module in ${dtk_modules[@]}; do
-	cd dtk_modules/$module
-	git fetch && git merge origin/master 
-	cd ../..
+	#cd dtk_modules/$module
+	#git fetch && git merge origin/master
+  git subtree pull --prefix dtk_modules/${module} ${dtk_repoman_url}:${dtk_component_module_url_prefix}${module} master --squash -m "Updated module ${module}"
+	#cd ../..
 done
+git subtree pull --prefix dtk_modules/${dtk_service_module_url} ${dtk_repoman_url}:${dtk_service_module_url} master --squash -m "Updated dtk service module"
 git add .; git commit -m "Adding latest updates for dtk modules"; git push origin master

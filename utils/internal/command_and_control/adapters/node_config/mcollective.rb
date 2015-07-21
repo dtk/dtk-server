@@ -32,10 +32,13 @@ module DTK
           opts_ret_msg.merge!(assembly: assembly)
         end
 
-        msg_content = config_agent.ret_msg_content(config_node, opts_ret_msg)
+        task_id     = task_idh.get_id()
+        top_task_id = top_task_idh.get_id()
+        msg_content = config_agent.ret_msg_content(config_node, opts_ret_msg.merge!(task_id: task_id, top_task_id: top_task_id))
+
         added_content = {
-          task_id: task_idh.get_id(),
-          top_task_id: top_task_idh.get_id(),
+          task_id: task_id,
+          top_task_id: top_task_id,
           agent_git_details: { repo: 'dtk-node-agent', branch: '' }
         }
         msg_content.merge!(added_content)

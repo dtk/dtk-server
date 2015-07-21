@@ -23,16 +23,20 @@ module DTK
         Model.input_hash_content_into_model(@container_idh, self, preserve_input_hash: true)
       end
 
-      def serialize_and_save_to_repo?
+      def serialize_and_save_to_repo?(opts = {})
         path = assembly_meta_filename_path()
         ordered_hash_serialized_content = serialize()
 
-        hash_assembly = ordered_hash_serialized_content[:assembly]
-        if hash_assembly && hash_assembly[:nodes]
-          serialized_assembly_file = serialize_assembly_parts(path, ordered_hash_serialized_content)
-          @service_module_branch.save_file_content_to_repo(path, serialized_assembly_file)
-        else
+        if opts[:mode] && opts[:mode] == :create
           @service_module_branch.serialize_and_save_to_repo?(path, ordered_hash_serialized_content)
+        else
+          hash_assembly = ordered_hash_serialized_content[:assembly]
+          if hash_assembly && hash_assembly[:nodes]
+            serialized_assembly_file = serialize_assembly_parts(path, ordered_hash_serialized_content)
+            @service_module_branch.save_file_content_to_repo(path, serialized_assembly_file)
+          else
+            @service_module_branch.serialize_and_save_to_repo?(path, ordered_hash_serialized_content)
+          end
         end
 
         path

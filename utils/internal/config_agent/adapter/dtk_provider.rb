@@ -15,6 +15,8 @@ module DTK; class ConfigAgent; module Adapter
 
       ret = {
         action_agent_request: {
+          task_id: opts[:task_id],
+          top_task_id: opts[:top_task_id],
           action_name: action_name,
           module_name: cmp_module,
           execution_list: commands

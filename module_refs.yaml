@@ -1,0 +1,4 @@
+---
+component_modules:
+  stdlib:
+    namespace: internal

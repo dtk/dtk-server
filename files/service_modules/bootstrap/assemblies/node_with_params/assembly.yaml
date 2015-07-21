@@ -1,0 +1,9 @@
+---
+  name: node_with_params
+  dsl_version: 0.9.1
+  assembly: 
+    nodes: 
+      node1: 
+        components: 
+          - test_module::test
+

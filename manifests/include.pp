@@ -1,0 +1,2 @@
+class rvm::include() {
+}

@@ -676,14 +676,14 @@ module DTK
 
       # TODO: more expensive, but more rebost to check for operaitonally stopped as opposed to
       #       just administratively stopped nodes (that is, use assembly.any_stopped_nodes?(:op))
-      if assembly.any_stopped_nodes?(:admin) 
+      if assembly.any_stopped_nodes?(:admin)
         if ret_request_params(:start_assembly).nil?
           return rest_ok_response confirmation_message: true
         end
 
         opts.merge!(start_nodes: true, ret_nodes_to_start: [])
-      else 
-        if running_task = most_recent_task_is_executing?(assembly) 
+      else
+        if running_task = most_recent_task_is_executing?(assembly)
           fail ErrorUsage, "Task with id '#{running_task.id}' is already running in assembly. Please wait until task is complete or cancel task."
         end
       end
@@ -751,7 +751,7 @@ module DTK
       end
 
       Node.stop_instances(nodes)
-      rest_ok_response 
+      rest_ok_response
     end
 
     def rest__task_status
@@ -765,7 +765,7 @@ module DTK
           opts = {
             end_index:      ret_request_params(:end_index),
             start_index:    ret_request_params(:start_index),
-            element_detail: element_detail 
+            element_detail: element_detail
           }
           Task::Status::Assembly::StreamForm.get_status(assembly.id_handle, opts)
         else
@@ -862,6 +862,9 @@ module DTK
       params   = ret_params_hash(:rsa_pub_name, :rsa_pub_key, :system_user)
       agent_action = ret_non_null_request_params(:agent_action).to_sym
       target_nodes = ret_matching_nodes(assembly)
+
+      # stop if service staged
+      fail ErrorUsage.new('Nodes are not running, has service been started?') if assembly.node_admin_status_all_pending?()
 
       # check existance of key and system user in database
       system_user = params[:system_user]

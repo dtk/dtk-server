@@ -3,6 +3,7 @@ inherit_from: .rubocop_todo.yml
 AllCops:
   Exclude:
     - 'Gemfile*'
+    - 'dtk_modules/**'
 
 # strict rules
 Style/WordArray:

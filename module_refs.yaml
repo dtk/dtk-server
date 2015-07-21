@@ -1,0 +1,50 @@
+---
+component_modules:
+  common_user:
+    namespace: internal
+  dtk:
+    namespace: internal
+  dtk_activemq:
+    namespace: internal
+  dtk_addons:
+    namespace: internal
+  dtk_client:
+    namespace: internal
+  dtk_java:
+    namespace: internal
+  dtk_nginx:
+    namespace: internal
+  dtk_passenger:
+    namespace: internal
+  dtk_postgresql:
+    namespace: internal
+  dtk_repo_manager:
+    namespace: internal
+  dtk_rsyslog:
+    namespace: internal
+  dtk_server:
+    namespace: internal
+  dtk_thin:
+    namespace: internal
+  dtk_user:
+    namespace: internal
+  gitolite:
+    namespace: internal
+  logrotate:
+    namespace: internal
+  nginx:
+    namespace: internal
+  redis:
+    namespace: internal
+  rsyslog:
+    namespace: internal
+  rvm:
+    namespace: internal
+  stdlib:
+    namespace: internal
+  sysctl:
+    namespace: internal
+  thin:
+    namespace: internal
+  vcsrepo:
+    namespace: internal

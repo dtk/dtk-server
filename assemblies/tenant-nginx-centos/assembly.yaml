@@ -1,0 +1,83 @@
+---
+name: tenant-nginx-centos
+dsl_version: 0.9.1
+node_bindings:
+  tenant: centos6-medium
+assembly:
+  nodes:
+    tenant:
+      components:
+      - dtk
+      - dtk_server::add_user:
+          attributes:
+            tenant_db_user: dtk1
+            tenant_user: dtk1
+            name: dtk1
+      - dtk_server::base
+      - dtk_server::tenant:
+          attributes:
+            gitolite_user: git1
+            server_branch: master
+            tenant_user: dtk1
+            name: dtk1
+      - dtk_server::cron_idle_instances[dtk1]:
+          attributes:
+            tenant_password: r8server
+            name: dtk1
+      - gitolite:
+          attributes:
+            gitolite_user: git1
+            name: dtk1
+      - vcsrepo::include
+      - stdlib
+      - common_user:
+          attributes:
+            user: git1
+            name: dtk1
+      - dtk_java
+      - gitolite::admin_client:
+          attributes:
+            client_name: dtk1
+            gitolite_user: git1
+            name: dtk1
+      - dtk_server::ruby193install:
+          attributes:
+            install: true
+            name: dtk1
+      - dtk_nginx::vhost_for_tenant[dtk1]:
+          attributes:
+            instance_name: dtk1
+      - dtk_nginx::base
+      - common_user::common_user_ssh_config:
+          attributes:
+            user: dtk1
+            name: dtk1
+      - dtk_postgresql::server
+      - dtk_activemq
+      - dtk_postgresql::db:
+          attributes:
+            db_name: dtk1
+            name: dtk1
+workflow:
+  assembly_action: create
+  node: tenant
+  ordered_components:
+  - stdlib
+  - dtk
+  - dtk_java
+  - dtk_activemq
+  - common_user[dtk1]
+  - gitolite[dtk1]
+  - dtk_server::ruby193install[dtk1]
+  - dtk_server::base
+  - dtk_postgresql::server
+  - dtk_postgresql::db[dtk1]
+  - dtk_server::tenant[dtk1]
+  - gitolite::admin_client[dtk1]
+  - vcsrepo::include
+  - common_user::common_user_ssh_config[dtk1]
+  - dtk_server::add_user[dtk1]
+  - dtk_server::cron_idle_instances[dtk1]
+  - dtk_passenger
+  - dtk_nginx::base
+  - dtk_nginx::vhost_for_tenant[dtk1]

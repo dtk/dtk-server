@@ -1,0 +1,20 @@
+---
+component_modules:
+  apt:
+    namespace: internal
+  docker:
+    namespace: internal
+  dtk_nginx:
+    namespace: internal
+  dtk_user:
+    namespace: internal
+  gitolite:
+    namespace: internal
+  logrotate:
+    namespace: internal
+  rvm:
+    namespace: internal
+  sysctl:
+    namespace: internal
+  vcsrepo:
+    namespace: internal

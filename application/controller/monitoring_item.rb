@@ -36,7 +36,7 @@ module XYZ
       assemblies.each do |assembly|
 
         target = assembly.get_field?(:target)
-        target_instance = target.create_subclass_obj(target_instance)
+        target_instance = target.create_subclass_obj(:target_instance)
         aws_params = ::DTK::CommandAndControlAdapter::Ec2.target_non_default_aws_creds?(target_instance)
         aws_connection = ::DTK::CommandAndControlAdapter::Ec2.conn(aws_params)
 

@@ -1,3 +1,8 @@
+require File.expand_path('../../utils/internal', File.dirname(__FILE__))
+require File.expand_path('../../utils/internal/command_and_control/adapters/iaas/ec2', File.dirname(__FILE__))
+
+
+
 module XYZ
   class Monitoring_itemController < AuthController
     # limit (hours) how long can nodes run
@@ -26,10 +31,14 @@ module XYZ
       str_identifer = (assemblies.map { |a| a[:display_name] }).join(', ')
 
       Log.info "#{prefix_log} Monitoring assemblies: #{str_identifer}"
-      aws_connection = CloudConnect::EC2.new
 
       # check statuses
       assemblies.each do |assembly|
+
+        target = assembly.get_field?(:target)
+        target_instance = target.create_subclass_obj(target_instance)
+        aws_params = ::DTK::CommandAndControlAdapter::Ec2.target_non_default_aws_creds?(target_instance)
+        aws_connection = ::DTK::CommandAndControlAdapter::Ec2.conn(aws_params)
 
         nodes = Assembly::Instance.get_nodes([assembly.id_handle], :type)
         # flag to indicate if assembly nodes need to be stopped

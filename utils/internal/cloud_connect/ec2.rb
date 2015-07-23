@@ -2,13 +2,14 @@
 module DTK
   class CloudConnect
     class EC2 < self
+
       WAIT_FOR_NODE = 10 # seconds
 
       # TODO: find cleaner way than having multiple @conn objects
       def initialize(override_of_aws_params = nil)
         base_params = override_of_aws_params || get_compute_params()
         @conn = Fog::Compute::AWS.new(base_params)
-        @override_conns = OverrideConnectionOptions.inject({}) do |h, (k, conn_opts)|  
+        @override_conns = OverrideConnectionOptions.inject({}) do |h, (k, conn_opts)|
           h.merge(k => Fog::Compute::AWS.new(base_params.merge(connection_options: conn_opts)))
         end
       end

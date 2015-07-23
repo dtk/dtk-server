@@ -40,21 +40,14 @@ module XYZ
         aws_params = ::DTK::CommandAndControlAdapter::Ec2.target_non_default_aws_creds?(target_instance)
 
         unless aws_params[:aws_access_key_id]
-          # DEBUG SNIPPET >>> REMOVE <<<
-          require 'ap'
-          ap "TAKING DEFAULT TARGET"
           target_instance = Target::Instance.get_default_target(model_handle(:target))
           aws_params = ::DTK::CommandAndControlAdapter::Ec2.target_non_default_aws_creds?(target_instance)
         end
 
-        # DEBUG SNIPPET >>> REMOVE <<<
-        require 'ap'
-        ap aws_params
-
         begin
           aws_connection = ::DTK::CommandAndControlAdapter::Ec2.conn(aws_params)
         rescue Exception => e
-          Log.error("Not able to check assembly '#{assembly['display_name']}' using AWS credentials '#{aws_params}', error: " + e.message)
+          Log.error("Not able to check assembly '#{assembly[:display_name]}' using AWS credentials '#{aws_params}', error: " + e.message)
           next
         end
 

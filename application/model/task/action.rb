@@ -141,10 +141,13 @@ module DTK; class Task
         ret = PrettyPrintHash.new
         node = object[:node] || {}
         if name = node_status__name(node)
-          ret[:name] = name
+          ret.merge!(name: name)
+        end
+        if node.respond_to?(:is_node_group?) and node.is_node_group?
+          ret.merge!(type: 'group')
         end
         if id = node[:id]
-          ret[:id] = id
+          ret.merge!(id: id)
         end
         ret
       end

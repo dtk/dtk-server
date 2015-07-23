@@ -51,7 +51,7 @@ module DTK; class Task
         cmp_actions = ActionList::ConfigComponents.get(assembly, opts_action_list)
 
         # first see if there is a persistent serialized task template for assembly instance and that it should be used
-        opts_get_template = Aux.hash_subset(opts, [:task_params])
+        opts_get_template = Aux.hash_subset(opts, [:task_params, :serialized_form])
         if template_content = get_template_content_aux?(action_types, assembly, cmp_actions, task_action, opts_get_template)
           return template_content
         end

@@ -14,7 +14,10 @@ module DTK
         end
       end
       OverrideConnectionOptions = {
-        server_create: { read_timeout: 5, retry_limit: 15 }
+        # TODO: !!!! Something to monitor; was getting strange behavior when retry_limit is unset (meaning default 3) or higher number
+        #             Empirical testing shows this to work with Excon code; check if settin it to 1 takes another path through Excon code
+        #             If get Excon timeouts then can put in retry at this level; also can look at putting excon call in mutex
+        server_create: { read_timeout: 5, retry_limit: 1 }
       }
 
       def conn(key = nil)

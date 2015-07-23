@@ -23,8 +23,10 @@ class dtk_server::docker(
   $ec2_name_tag_format  = '${tenant}:${target}:${user}:${assembly}:${node}',
   $ec2_keypair          = 'testing_use1',
   $auth_to_repoman      = false,
-  $port = undef,
+  $port                 = undef,
   $docker_image,
+  $docker_email         = undef,
+  $docker_password_hash = undef,
   )
 {
 
@@ -143,9 +145,17 @@ class dtk_server::docker(
     pull_on_start   => true,
   }
 
+  if $docker_email != undef {
+    file { '/root/.dockercfg':
+      ensure  => present,
+      content => template('dtk_server/docker/dockercfg.erb'),
+      before => Docker::Run["dtk-${tenant_user}"],
+    }
+  }
+
   dtk_nginx::vhost_for_tenant {$tenant_user:
     instance_name => $tenant_user,
-    docker_tenant => true,
+    tenant_type   => 'docker',
     docker_socket => "${tenant_directory}/socket/nginx.sock",
   } 
 }

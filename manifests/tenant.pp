@@ -23,6 +23,8 @@ define dtk_server::tenant(
   $ec2_name_tag_format = '${tenant}:${target}:${user}:${assembly}:${node}',
   $ec2_keypair = 'testing_use1',
   $auth_to_repoman = false,
+  $clone_from_git = true,
+  $init_schema = true,
 ) 
 { 
   include dtk_server::params
@@ -75,24 +77,27 @@ define dtk_server::tenant(
    }  
   }
   
-  #rsa_identity for github
-  $rsa_identity_dir = "${app_homedir}/rsa_identity_dir"
-  dtk_server::tenant::ssh_config { $app_user:
-    tenant_user         => $app_user,
-    rsa_identity_dir    => $rsa_identity_dir,
-    app_user_homedir    => "/home/${app_user}",
-    tenant_user_pub_key => $tenant_user_pub_key,
-    require             => User[$app_user]
-  }
+  if $clone_from_git == true {
+    #rsa_identity for github
+    $rsa_identity_dir = "${app_homedir}/rsa_identity_dir"
+    dtk_server::tenant::ssh_config { $app_user:
+      tenant_user         => $app_user,
+      rsa_identity_dir    => $rsa_identity_dir,
+      app_user_homedir    => "/home/${app_user}",
+      tenant_user_pub_key => $tenant_user_pub_key,
+      require             => User[$app_user]
+    }
 
-  #git clone of DTK artifacts: server, common, common-core
-  dtk_server::github_repo { $server_repo_pref:
-    app_user         => $app_user,
-    app_user_homedir => $app_homedir,
-    branch           => $server_branch,
-    identity         => "${rsa_identity_dir}/id_rsa",
-    require          => Dtk_server::Tenant::Ssh_config[$app_user],
-    notify           => Exec["passenger_restart_${name}"],
+    #git clone of DTK artifacts: server, common, common-core
+    dtk_server::github_repo { $server_repo_pref:
+      app_user         => $app_user,
+      app_user_homedir => $app_homedir,
+      branch           => $server_branch,
+      identity         => "${rsa_identity_dir}/id_rsa",
+      require          => Dtk_server::Tenant::Ssh_config[$app_user],
+      before           => [Dtk_server::Bundler_gems_install[$server_gemfile_dir], File["${config_base}/${app_user}/nodes_info.json"]],
+      notify           => Exec["passenger_restart_${name}"],
+    }
   }
 
   $passenger_restart_file = "${app_homedir}/server/current/application/tmp/restart.txt"
@@ -104,7 +109,7 @@ define dtk_server::tenant(
   $server_gemfile_dir = "${app_homedir}/server/current" #TODO: get away from hard coding in 'server'
   dtk_server::bundler_gems_install { $server_gemfile_dir:
     app_user => $app_user,
-    require  => Dtk_server::Github_repo[$server_repo_pref]
+    #require  => Dtk_server::Github_repo[$server_repo_pref]
   }
 
   # generate an rvm wrapper for thin (and other executable gems)
@@ -137,7 +142,7 @@ define dtk_server::tenant(
   file  { "${config_base}/${app_user}/nodes_info.json":
     owner   => $app_user,
     source  => "${app_base}/nodes_info/public/nodes_info.json",
-    require => [File["${config_base}/${app_user}"],Dtk_server::Github_repo[$server_repo_pref]]
+    require => [File["${config_base}/${app_user}"]]
   }
 
   #Place to add .fog file with aws credentials
@@ -147,11 +152,13 @@ define dtk_server::tenant(
     require => File["${config_base}/${app_user}"],
     mode   => 600,
   }
-
-  dtk_server::tenant::schema_init{ $name:
-    tenant_user => $tenant_user,
-    app_homedir => $app_homedir,
-    require     => [File["${config_base}/${app_user}/server.conf"],Dtk_server::Bundler_gems_install[$server_gemfile_dir]]
+  
+  if $init_schema == true {
+    dtk_server::tenant::schema_init{ $name:
+      tenant_user => $tenant_user,
+      app_homedir => $app_homedir,
+      require     => [File["${config_base}/${app_user}/server.conf"],Dtk_server::Bundler_gems_install[$server_gemfile_dir]]
+    }
   }
 
   dtk_server::tenant::add_sudo_access{ $name: 

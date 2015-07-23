@@ -1,8 +1,17 @@
 ---
 module: dtk_server
-dsl_version: 0.9.1
+dsl_version: 1.0.0
 module_type: puppet_module
 components:
+    upgrade_test:
+      description: "Upgrade test"
+      external_ref:
+        puppet_class: stdlib
+      actions:
+        db_archive:
+          commands:
+          - RUN mkdir -p /backups/db_archive/{{ tenant_user }}
+          - RUN pg_dump -U postgres $(grep '^db.name' /etc/dtk/{{ tenant_user }}/server.conf | cut -d= -f2) | gzip > /backups/db_archive/{{ tenant_user }}/db.tgz
     base:
       description: "DTK Server"
       external_ref:
@@ -130,6 +139,27 @@ components:
       - dtk_user
       - rvm
       - logrotate
+      actions:
+        create:
+          puppet_class: stdlib
+        maintenance_on:
+          commands:
+          # put tenant in mauntenance mode
+          - RUN touch /home/{{ tenant_user }}/server/current/application/public/system_maintenance.html
+        db_archive:
+          commands:
+          # export current database to dump
+          - RUN mkdir -p /backups/db_archive/{{ tenant_user }}
+          - RUN pg_dump -U postgres $(grep '^db.name' /etc/dtk/{{ tenant_user }}/server.conf | cut -d= -f2) | gzip > /backups/db_archive/{{ tenant_user }}/db.tgz
+        smoke_test:
+          commands:
+          # run smoke test to verify upgrade
+          - RUN cd /home/{{ tenant_user }}/server/current/test/functional/rspec && bundle install --gemfile Gemfile.tools
+          - RUN cd /home/{{ tenant_user }}/server/current/test/functional/rspec && BUNDLE_GEMFILE=Gemfile.tools bundle exec rspec spec/release/dtk_release_smoke_test.rb
+        maintenance_off:
+          commands:
+          # put tenant out of mauntenance mode
+          - RUN rm /home/{{ tenant_user }}/server/current/application/public/system_maintenance.html
     docker:
       attributes:
         tenant_user:
@@ -198,6 +228,11 @@ components:
           type: string
           required: true
           default: 'dduvnjak/dtk:latest'
+        docker_email:
+          type: string
+        docker_password_hash:
+          type: string
+          description: "The hash of the docker registry password, found in ~/.dockercfg"
       external_ref:
         puppet_class: dtk_server::docker
       link_defs:
@@ -214,3 +249,4 @@ components:
       - docker
       - dtk_nginx
       - apt
+

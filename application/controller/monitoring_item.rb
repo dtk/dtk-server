@@ -51,7 +51,12 @@ module XYZ
         require 'ap'
         ap aws_params
 
-        aws_connection = ::DTK::CommandAndControlAdapter::Ec2.conn(aws_params)
+        begin
+          aws_connection = ::DTK::CommandAndControlAdapter::Ec2.conn(aws_params)
+        rescue Exception => e
+          Log.error("Not able to check assembly '#{assembly['display_name']}' using AWS credentials '#{aws_params}', error: " + e.message)
+          next
+        end
 
         nodes = Assembly::Instance.get_nodes([assembly.id_handle], :type)
         # flag to indicate if assembly nodes need to be stopped

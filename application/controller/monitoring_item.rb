@@ -38,6 +38,19 @@ module XYZ
         target = assembly.get_field?(:target)
         target_instance = target.create_subclass_obj(:target_instance)
         aws_params = ::DTK::CommandAndControlAdapter::Ec2.target_non_default_aws_creds?(target_instance)
+
+        unless aws_params[:aws_access_key_id]
+          # DEBUG SNIPPET >>> REMOVE <<<
+          require 'ap'
+          ap "TAKING DEFAULT TARGET"
+          target_instance = Target::Instance.get_default_target(model_handle(:target))
+          aws_params = ::DTK::CommandAndControlAdapter::Ec2.target_non_default_aws_creds?(target_instance)
+        end
+
+        # DEBUG SNIPPET >>> REMOVE <<<
+        require 'ap'
+        ap aws_params
+
         aws_connection = ::DTK::CommandAndControlAdapter::Ec2.conn(aws_params)
 
         nodes = Assembly::Instance.get_nodes([assembly.id_handle], :type)

@@ -143,6 +143,13 @@ module DTK
       end
     end
 
+    def move_file(source_name, destination_name, branch = nil)
+      branch ||= @branch
+      checkout(branch) do
+        git_command__mv_file(source_name, destination_name)
+      end
+    end
+
     def add_all_files(branch = nil)
       branch ||= @branch
       checkout(branch) do
@@ -169,6 +176,12 @@ module DTK
         end
       end
       ret
+    end
+
+    def file_changed_since_specified_sha(initial_service_module_sha, path)
+      diffs = diff(initial_service_module_sha)
+      diffs_summary = diffs.ret_summary()
+      diffs_summary.file_changed?(path)
     end
 
     def delete_file?(file_path, opts = {})
@@ -747,6 +760,10 @@ module DTK
         git_command.mv(cmd_opts(), '--force', "#{source}/#{folder}", "#{destination}/")
         FileUtils.rmdir("#{source}/#{folder}")
       end
+    end
+
+    def git_command__mv_file(source_name, destination_name)
+      git_command.mv(cmd_opts(), '--force', "#{source_name}", "#{destination_name}")
     end
 
     def git_command__remote_add(remote_name, remote_url)

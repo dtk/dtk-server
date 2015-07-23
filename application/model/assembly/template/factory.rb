@@ -218,6 +218,7 @@ module DTK
 
       # TODO: can collapse above and below; aboves looks like extra intermediate level
       def create_assembly_template_aux(opts = {})
+        ret = nil
         nodes = self[:nodes].inject(DBUpdateHash.new) { |h, node| h.merge(create_node_content(node)) }
         port_links = self[:port_links].inject(DBUpdateHash.new) { |h, pl| h.merge(create_port_link_content(pl)) }
         task_templates = self[:task_templates].inject(DBUpdateHash.new) { |h, tt| h.merge(create_task_template_content(tt)) }
@@ -247,6 +248,7 @@ module DTK
         module_refs_updated = @component_module_refs.update_object_if_needed!(@assembly_component_modules)
 
         Transaction do
+          ret = @template_output.check_merge_conflicts(@assembly_instance, @service_module_branch)
           @template_output.save_to_model()
           if module_refs_updated
             @component_module_refs.update() # update the object model
@@ -256,6 +258,8 @@ module DTK
           # serialize_and_save_to_repo? returns new_commit_sha
           @template_output.serialize_and_save_to_repo?(opts)
         end
+
+        ret
       end
 
       def self.exists?(assembly_mh, service_module, template_name)

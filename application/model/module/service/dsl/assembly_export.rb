@@ -16,6 +16,7 @@ module DTK
         @service_module_branch = service_module_branch
         @integer_version = integer_version
         @factory = factory
+        @serialized_assembly_file = nil
       end
       private :initialize
 
@@ -32,8 +33,8 @@ module DTK
         else
           hash_assembly = ordered_hash_serialized_content[:assembly]
           if hash_assembly && hash_assembly[:nodes]
-            serialized_assembly_file = serialize_assembly_parts(path, ordered_hash_serialized_content)
-            @service_module_branch.save_file_content_to_repo(path, serialized_assembly_file)
+            @serialized_assembly_file ||= serialize_assembly_parts(path, ordered_hash_serialized_content)
+            @service_module_branch.save_file_content_to_repo(path, @serialized_assembly_file)
           else
             @service_module_branch.serialize_and_save_to_repo?(path, ordered_hash_serialized_content)
           end
@@ -53,19 +54,19 @@ module DTK
         assembly_hash = { assembly: hash.delete(:assembly) }
         workflow_hash = { workflow: hash.delete(:workflow) }
 
-        serialized_assembly_file = Aux.serialize(hash, :yaml)
+        assembly_file = Aux.serialize(hash, :yaml)
 
         components_hash       = ComponentsHash.new(line_array)
         assembly_hash         = components_hash.parse_and_order_components_hash(assembly_hash)
         assembly_string       = Aux.serialize(assembly_hash, :yaml).gsub("---\n", '')
         assembly_file_content = add_empty_lines_and_comments(assembly_string)
 
-        serialized_assembly_file.concat(assembly_file_content)
+        assembly_file.concat(assembly_file_content)
 
         workflow_string = Aux.serialize(workflow_hash, :yaml).gsub("---\n", '')
-        serialized_assembly_file.concat(workflow_string)
+        assembly_file.concat(workflow_string)
 
-        serialized_assembly_file
+        assembly_file
       end
 
       def add_empty_lines_and_comments(assembly_string)
@@ -83,6 +84,28 @@ module DTK
         end
 
         assembly_file_content
+      end
+
+      def check_merge_conflicts(assembly_instance, service_module_branch)
+        assembly_instance.update_object!(:service_module_sha)
+        path = assembly_meta_filename_path()
+
+        initial_sha = assembly_instance[:service_module_sha]
+        current_sha = service_module_branch[:current_sha]
+
+        return if initial_sha.eql?(current_sha)
+
+        assembly_file_changed = RepoManager.file_changed_since_specified_sha(initial_sha, path, service_module_branch)
+        return unless assembly_file_changed
+
+        # move current assembly.yaml and create new one; also notify user
+        ordered_hash_serialized_content = serialize()
+        @serialized_assembly_file = serialize_assembly_parts(path, ordered_hash_serialized_content)
+
+        destination_name = "#{path}.dtk-backup"
+        RepoManager.move_file(path, destination_name, service_module_branch)
+
+        "New #{path} is generated from service instance content because we were not able to merge with existing one. Backup of old file has been stored at #{destination_name} so you can merge manually or you can delete backup files."
       end
 
       private

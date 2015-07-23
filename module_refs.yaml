@@ -1,0 +1,4 @@
+---
+component_modules:
+  apt:
+    namespace: internal

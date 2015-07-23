@@ -87,7 +87,7 @@
     "ami-efd10084": {
       "region": "us-east-1",
       "type": "amazon",
-      "os_type": "redhat",
+      "os_type": "amazon-linux",
       "display_name": "Amazon",
       "png": "amazon.png",
       "sizes": [
@@ -147,7 +147,7 @@
     "ami-c9fb098d": {
       "region": "us-west-1",
       "type": "amazon",
-      "os_type": "redhat",
+      "os_type": "amazon-linux",
       "display_name": "Amazon",
       "png": "amazon.png",
       "sizes": [
@@ -207,7 +207,7 @@
     "ami-ed9092dd": {
       "region": "us-west-2",
       "type": "amazon",
-      "os_type": "redhat",
+      "os_type": "amazon-linux",
       "display_name": "Amazon",
       "png": "amazon.png",
       "sizes": [
@@ -255,7 +255,7 @@
     "ami-bc0049cb": {
       "region": "eu-west-1",
       "type": "amazon",
-      "os_type": "redhat",
+      "os_type": "amazon-linux",
       "display_name": "Amazon",
       "png": "amazon.png",
       "sizes": [

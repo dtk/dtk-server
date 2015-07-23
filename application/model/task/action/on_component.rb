@@ -12,10 +12,14 @@ module DTK; class Task
         end
       end
 
+      def action_method?
+        self[:action_method]
+      end
+
       def action_def
         ret = nil
         component = self[:component]
-        unless action_def_ref = self[:action_method]
+        unless action_def_ref = action_method?
           Log.error("Component Action with following component id #{component[:id]} has no action_method")
           return ret
         end
@@ -46,6 +50,7 @@ module DTK; class Task
         end
         ret
       end
+
       def self.create_from_hash(hash, task_idh = nil)
         if component = hash[:component]
           unless component.is_a?(Component)

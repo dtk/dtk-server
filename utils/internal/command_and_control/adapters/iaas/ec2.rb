@@ -187,7 +187,8 @@ module DTK
       ExternalRefPendingCols = [:image_id, :type, :size, :region]
 
       def self.target_non_default_aws_creds?(target)
-        iaas_prop_hash = target.iaas_properties.hash()
+        iaas_prop_hash = target.iaas_properties
+        iaas_prop_hash = iaas_prop_hash.is_a?(Hash) ? iaas_prop_hash : iaas_prop_hash.hash()
         region = iaas_prop_hash[:region]
 
         params = target.get_aws_compute_params

@@ -24,8 +24,10 @@ module DTK; class Task; class Status
       task.set_and_return_types!()
       el = task.hash_subset(:started_at, :ended_at)
 
-      duration = el[:ended_at] - el[:started_at] if el[:ended_at] && el[:started_at]
-      el[:duration] = "#{duration.round(DURATION_ACCURACY)}s" if duration
+      if el[:ended_at] and el[:started_at]
+        duration = el[:ended_at] - el[:started_at] 
+        el[:duration] = "#{duration.round(DURATION_ACCURACY)}s"
+      end
 
       el[:status] = task[:status] unless task.has_status?(:created)
       el[:id] = task[:id]
@@ -43,9 +45,10 @@ module DTK; class Task; class Status
         el[:errors] = format_errors(ndx_errors[task[:id]])
       end
 
-      task_logs = task.get_logs()
-      if task_logs && task_logs[task[:id]]
-        el[:logs] = format_logs(task_logs[task[:id]])
+      # TODO: on 7/14/2015 does not look like el[:logs] is being displayed. 
+      #       Also format_logs is just ignoring context and just leaving msg hat theer are results
+      if task_logs = task.get_logs?
+        el[:logs] = format_logs(task_logs)
       end
 
       ea = nil

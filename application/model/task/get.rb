@@ -4,20 +4,9 @@ module DTK; class Task
       sp_hash = {cols: [:content]}
       get_children_objs(:task_error, sp_hash).map{|r|r[:content]}
     end
-
-    def get_logs
-      ret = Hash.new
-      sp_hash = {cols: [:task_id, :display_name, :content, :parent_task]}
-      rows = get_children_objs(:task_log, sp_hash).sort{|a,b| a[:created_at] <=> b[:created_at]}
-      
-      rows.each do |r|
-        task_id = r[:task_id]
-        content = r[:content] || Hash.new
-        content.merge!({:label => r[:display_name], :task_name => r[:task][:display_name]})
-        ret[task_id] = (ret[task_id]||Array.new) + [content]
-      end
-      
-      ret
+    # TODO: see why above does not leverage get_ndx_errors in contrast to below
+    def get_logs?
+      Task.get_ndx_logs([id_handle])[id]
     end
 
     # self should be a top level task
@@ -60,24 +49,40 @@ module DTK; class Task
     end
 
     def get_ndx_errors(task_idhs)
-      ret = Hash.new
+      ret = {}
       return ret if task_idhs.empty?
       sp_hash = {
-        cols:   [:task_id,:content],
-        filter: [:oneof,:task_id,task_idhs.map{|idh|idh.get_id()}]
+        cols:   [:task_id, :content],
+        filter: [:oneof, :task_id, task_idhs.map{ |idh| idh.get_id() }]
       }
       task_error_mh = task_idhs.first.createMH(:task_error)
-      ret = {}
       get_objs(task_error_mh, sp_hash).each do |r|
         task_id = r[:task_id]
-        ret[task_id] = (ret[task_id] || []) + [r[:content]]
+        (ret[task_id] ||= []) << r[:content]
+      end
+      ret
+    end
+
+    def get_ndx_logs(task_idhs)
+      ret = {}
+      return ret if task_idhs.empty?
+      sp_hash = {
+        cols:   [:task_id, :content, :display_name, :parent_task],
+        filter: [:oneof, :task_id, task_idhs.map{ |idh| idh.get_id() }]
+      }
+      task_log_mh = task_idhs.first.createMH(:task_log)
+
+      get_objs(task_log_mh, sp_hash).each do |r|
+        task_id = r[:task_id]
+        content = r[:content].merge(label: r[:display_name], task_name: r[:task][:display_name])
+        (ret[task_id] ||= []) << content
       end
       ret
     end
 
     # returns an array of tasks; if :reify is true, each task's content is reified 
     def get_all_subtasks(task_idhs, opts = {})
-      ret = Array.new
+      ret = []
       id_handles = task_idhs
       until id_handles.empty?
         next_level_objs = get_next_level_tasks(id_handles).reject{|k,v|k == :subtasks}.each{|st|opts[:reify] ? st.reify!() : st}
@@ -88,7 +93,7 @@ module DTK; class Task
     end
 
     def get_next_level_tasks(task_idhs, opts = {})
-      ret = Array.new
+      ret = []
       return ret if task_idhs.empty?
       filter = [:oneof, :task_id, task_idhs.map{|idh|idh.get_id}]
       if opts[:filter]

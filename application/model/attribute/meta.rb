@@ -56,7 +56,7 @@ module XYZ; class Attribute
       virtual_column :is_unset, type: :boolean, hidden: true, local_dependencies: [:value_asserted, :value_derived, :data_type, :semantic_type]
 
       virtual_column :parent_name, possible_parents: [:component, :node]
-      many_to_one :component, :node
+      many_to_one :component, :node, :action_def
       one_to_many :dependency #for ports indicating what they can connect to
 
       virtual_column :dependencies, type: :json, hidden: true,

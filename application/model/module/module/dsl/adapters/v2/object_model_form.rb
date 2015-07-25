@@ -2,6 +2,8 @@
 # TODO: does not check for extra attributes
 module DTK; class ModuleDSL; class V2
   class ObjectModelForm < ModuleDSL::ObjectModelForm
+    r8_nested_require('object_model_form', 'attribute_fields')
+
     def self.convert(input_hash)
       new.convert(input_hash)
     end
@@ -214,7 +216,7 @@ module DTK; class ModuleDSL; class V2
         attrs = OutputHash.new
         in_attrs.each_pair do |name, info|
           if info.is_a?(Hash)
-            attrs[name] = attribute_properties(cmp_type, name, info, opts)
+            attrs[name] = self.class::AttributeFields.attribute_fields(cmp_type, name, info, opts)
           else
             cmp_name = component_print_form(cmp_type)
             fail ParsingError.new('Ill-formed attributes section for component (?1): ?2', cmp_name, 'attributes' => in_attrs)
@@ -228,93 +230,6 @@ module DTK; class ModuleDSL; class V2
         end
         ret
       end
-
-      def attribute_properties(cmp_type, name, info, opts = {})
-        ret = OutputHash.new('display_name' => name)
-
-        side_effect_settings = {}
-        dynamic_default_variable = dynamic_default_variable?(info)
-
-        if dynamic_default_variable
-          side_effect_settings.merge!('dynamic' => true)
-        end
-
-        external_ref =
-          if opts[:constant_attribute] || info['constant']
-            side_effect_settings.merge!(Attribute::Constant.side_effect_settings())
-            Attribute::Constant.ret_external_ref()
-          else
-            type = 'puppet_attribute' #TODO: hard-wired
-            external_ref_name = (info['external_ref'] || {})[type] || name
-            {
-            'type' => type,
-            'path' => "node[#{cmp_type}][#{external_ref_name}]"
-          }.merge(dynamic_default_variable ? { 'default_variable' => true } : {})
-          end
-        ret.merge!('external_ref' => external_ref)
-
-        add_attr_data_type_attrs!(ret, info)
-
-        # setting even when nil so on change can cancel old value
-        ret['value_asserted'] = value_asserted(info, ret)
-
-        side_effect_settings.each_pair { |field, value| ret[field] ||= value }
-
-        AttributeProps.add_defaults_for_nils!(ret, info)
-
-        ret
-      end
-
-      module AttributeProps
-        def self.add_defaults_for_nils!(ret, info)
-            Fields.each do |field|
-            val = info[field.to_s]
-            ret[field] = val.nil? ? default(field) : val
-          end
-          ret
-        end
-
-        private
-
-        def self.default(field)
-         (Info[field] || {})[:default]
-        end
-
-        Info = {
-          description: { type: :string,  default: nil },
-          dynamic: { type: :boolean, default: false },
-          required: { type: :boolean, default: false },
-          hidden: { type: :boolean, default: false }
-        }
-        Fields = Info.keys
-      end
-
-      def dynamic_default_variable?(info)
-        !!(info['external_ref'] || {})['default_variable']
-      end
-
-      def value_asserted(info, _attr_props)
-        info['default']
-      end
-
-      def add_attr_data_type_attrs!(attr_props, info)
-        type = info.req(:type)
-        if AutomicTypes.include?(type)
-          attr_props.merge!('data_type' => type)
-        elsif type =~ /^array\((.+)\)$/
-          scalar_type = Regexp.last_match(1)
-          if ScalarTypes.include?(scalar_type)
-            semantic_type = { ':array' => scalar_type }
-            attr_props.merge!('data_type' => 'json', 'semantic_type_summary' => type, 'semantic_type' => semantic_type)
-          end
-        end
-        unless attr_props['data_type']
-          fail ParsingError.new('Ill-formed attribute data type (?1)', type)
-        end
-        attr_props
-      end
-      ScalarTypes = %w(integer string boolean)
-      AutomicTypes = ScalarTypes + %w(json)
 
       # partitions into link_defs, "dependency", and "component_order"
       def add_dependent_components!(ret, input_hash, base_cmp, opts = {})

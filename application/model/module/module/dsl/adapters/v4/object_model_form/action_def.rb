@@ -2,6 +2,8 @@ module DTK; class ModuleDSL; class V4
   class ObjectModelForm
     class ActionDef < self
       r8_nested_require('action_def', 'provider')
+      r8_nested_require('action_def', 'parameters')
+
       module Constant
         module Variations
         end
@@ -11,6 +13,8 @@ module DTK; class ModuleDSL; class V4
         Variations::ActionDefs = ['actions', 'action']
 
         Provider = 'provider'
+
+        Parameters = 'parameters'
       end
 
       def initialize(component_name)
@@ -51,6 +55,9 @@ module DTK; class ModuleDSL; class V4
           display_name: action_name,
           content: Provider.create(action_body, action_name: action_name, cmp_print_form: cmp_print_form())
         }
+        if parameters = Parameters.create?(action_body)
+          action_body_hash.merge!(parameters: parameters)
+        end
         { action_name => OutputHash.new(action_body_hash) }
       end
 

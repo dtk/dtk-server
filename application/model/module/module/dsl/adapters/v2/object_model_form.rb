@@ -21,13 +21,16 @@ module DTK; class ModuleDSL; class V2
     def context(_input_hash)
       {}
     end
-
     def component
       self.class::Component
     end
 
     def choice
       self.class::Choice
+    end
+
+    def attribute_fields(attr_name, attr_info, opts = {})
+      self.class::AttributeFields.convert(self, attr_name, attr_info, opts)
     end
 
     # returns a subset or hash for all keys listed; if an extyra keys then null signifying error condition is returned
@@ -214,9 +217,10 @@ module DTK; class ModuleDSL; class V2
         ParsingError.raise_error_if_not(in_attrs, Hash)
 
         attrs = OutputHash.new
-        in_attrs.each_pair do |name, info|
-          if info.is_a?(Hash)
-            attrs[name] = self.class::AttributeFields.attribute_fields(cmp_type, name, info, opts)
+        in_attrs.each_pair do |attr_name, attr_info|
+          if attr_info.is_a?(Hash)
+            opts_attr = { component_type: cmp_type }.merge(opts)
+            attrs[attr_name] = attribute_fields(attr_name, attr_info, opts_attr)
           else
             cmp_name = component_print_form(cmp_type)
             fail ParsingError.new('Ill-formed attributes section for component (?1): ?2', cmp_name, 'attributes' => in_attrs)

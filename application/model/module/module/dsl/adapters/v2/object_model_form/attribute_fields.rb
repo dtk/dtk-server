@@ -1,17 +1,25 @@
 module DTK; class ModuleDSL; class V2
   class ObjectModelForm
     class AttributeFields < self
-      def self.attribute_fields(cmp_type, name, info, opts = {})
+      def self.convert(parent, attr_name, info, opts = {})
         ret = OutputHash.new('display_name' => name)
         side_effect_settings = {}
-        opts_external_ref = opts
 
         if dynamic_default_variable?(info)
           side_effect_settings.merge!('dynamic' => true)
-          opts_external_ref = opts_external_ref.merge(dynamic_default_variable: true)
         end
 
-        ret.merge!('external_ref' => external_ref(cmp_type, name, info, opts_external_ref))
+        # set external refs
+        if parent.kind_of?(Component)
+          external_ref = 
+            if opts[:constant_attribute] || info['constant']
+              side_effect_settings.merge!(Attribute::Constant.side_effect_settings())
+              Attribute::Constant.ret_external_ref()
+            else
+              external_ref_component_not_constant(attr_name, info, opts)
+            end
+          ret.merge!('external_ref' => external_ref)
+        end
 
         add_attr_data_type_attrs!(ret, info)
 
@@ -31,19 +39,17 @@ module DTK; class ModuleDSL; class V2
         info['default'] == ExtRefDefaultPuppetHeader
       end
       ExtRefDefaultPuppetHeader = 'external_ref(puppet_header)'
-      
-      def self.external_ref(cmp_type, name, info, opts = {})
-        if opts[:constant_attribute] || info['constant']
-          side_effect_settings.merge!(Attribute::Constant.side_effect_settings())
-          Attribute::Constant.ret_external_ref()
-        else
-          type = 'puppet_attribute' #TODO: hard-wired
-          external_ref_name = (info['external_ref'] || {})[type] || name
-          {
-            'type' => type,
-            'path' => "node[#{cmp_type}][#{external_ref_name}]"
-          }.merge(opts[:dynamic_default_variable] ? { 'default_variable' => true } : {})
+
+      def self.external_ref_component_not_constant(attr_name, info, opts = {})
+        type = 'puppet_attribute' #TODO: hardwired; type and path probably not needed; ws put in for Chef 
+        unless cmp_type = opts[:component_type]
+          Log.error("Unexpected that opts[:component_type] is nil")
         end
+        external_ref_name = (info['external_ref'] || {})[type] || attr_name
+        {
+          'type' => type,
+          'path' => "node[#{cmp_type}][#{external_ref_name}]"
+        }.merge(opts[:dynamic_default_variable] ? { 'default_variable' => true } : {})
       end
       
       def self.add_attr_data_type_attrs!(attr_fields, info)

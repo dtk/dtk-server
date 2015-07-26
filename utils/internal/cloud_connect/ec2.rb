@@ -14,9 +14,7 @@ module DTK
         end
       end
       OverrideConnectionOptions = {
-        # TODO: !!!! Something to monitor; was getting strange behavior when retry_limit is unset (meaning default 3) or higher number
-        #             Empirical testing shows this to work with Excon code; check if settin it to 1 takes another path through Excon code
-        #             If get Excon timeouts then can put in retry at this level; also can look at putting excon call in mutex
+        # Setting retry_limit to 1, but using a mutex at a outer level to retry
         server_create: { read_timeout: 5, retry_limit: 1 }
       }
 
@@ -51,15 +49,28 @@ module DTK
         end
       end
 
+      ServerCreateRetries = 3
+      ServerCreateMutex = Mutex.new
       def server_create(options)
-        request_context do
-          hash_form(conn(:server_create).servers.create(options))
+        tries = ServerCreateRetries
+        ret = nil
+        while ret.nil? and tries > 0
+          ServerCreateMutex.synchronize do 
+            begin 
+              ret = hash_form(conn(:server_create).servers.create(options))
+             rescue ::Excon::Errors::Timeout => e
+              tries -= 1
+              Log.info_pp(["retrying server_create (retries = #{tries})",options[:client_token]]) if tries > 0
+            end
+          end
         end
+        ret || fail(ErrorUsage.new("Not able to create node; you can invoke again 'converge'"))
       end
 
       # TODO: cleanup
+      StartRetries = 10
       def server_start(instance_id)
-        (tries = 10).times do
+        (tries = StartRetries).times do
           begin
             ret = nil
             request_context do
@@ -79,6 +90,7 @@ module DTK
 
         fail Error, "Node (Instance ID: '#{instance_id}') not ready after #{tries * WAIT_FOR_NODE} seconds."
       end
+
 
       def server_stop(instance_id)
         request_context do

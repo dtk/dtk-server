@@ -54,6 +54,11 @@ module DTK
     end
 
     def info_about(about, cmp_id = nil)
+      # TODO: hack because cmp_id can be string 
+      if cmp_id 
+        cmp_id = (cmp_id.empty? ? nil : cmp_id.to_i)
+      end
+
       case about.to_sym
       when :components
         get_objs(cols: [:components]).map do |r|
@@ -65,16 +70,26 @@ module DTK
           end
         end.compact.sort { |a, b| "#{a[:version]}-#{a[:display_name]}" <=> "#{b[:version]}-#{b[:display_name]}" }
       when :attributes
-        results = get_objs(cols: [:attributes])
-        results.delete_if { |e| !(e[:component][:id] == cmp_id.to_i) } if cmp_id && !cmp_id.empty?
+        rows = get_objs(cols: [:attributes])
+        # if cmp_id given then only return thos matching this component id
+        rows.delete_if { |r| !(r[:component][:id] == cmp_id) } if cmp_id
+        # TODO: hack because cmp_id can be string 
 
-        # remove assembly branch attributes
-        results.delete_if { |e| e[:module_branch].assembly_module_version?() }
-
-        ret = results.inject([]) do |transformed, element|
-          attribute = element[:attribute]
-          branch = element[:module_branch]
-          transformed << { id: attribute[:id], display_name: attribute.print_path(element[:component]), value: attribute[:value_asserted], version: branch.version_print_form() }
+        ret = [] 
+        rows.each do |r|
+          attr   = r[:attribute]
+          branch = r[:module_branch]
+          # skip if assembly branch attributes or hidden
+          if attr[:hidden] or branch.assembly_module_version?()
+            next
+          end
+          el = { 
+            id:           attr[:id], 
+            display_name: attr.print_path(r[:component]), 
+            value:        attr[:value_asserted], 
+            version:      branch.version_print_form() 
+          }
+          ret << el
         end
         return ret.sort { |a, b| a[:display_name] <=> b[:display_name] }
       when :instances

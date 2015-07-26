@@ -29,8 +29,12 @@ module DTK; class ModuleDSL; class V2
       self.class::Choice
     end
 
+    def self.attribute_fields(attr_name, attr_info, opts = {})
+      self::AttributeFields.convert(self, attr_name, attr_info, opts)
+    end
+
     def attribute_fields(attr_name, attr_info, opts = {})
-      self.class::AttributeFields.convert(self, attr_name, attr_info, opts)
+      self.class.attribute_fields(attr_name, attr_info, opts)
     end
 
     # returns a subset or hash for all keys listed; if an extyra keys then null signifying error condition is returned

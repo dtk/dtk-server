@@ -46,6 +46,10 @@ module DTK; class ModuleDSL; class V4
         end
       end
 
+      def cmp_print_form
+        component_print_form(@component_name)
+      end
+
       private
 
       def convert_action_def(action_name, action_body)
@@ -55,8 +59,8 @@ module DTK; class ModuleDSL; class V4
           display_name: action_name,
           content: Provider.create(action_body, action_name: action_name, cmp_print_form: cmp_print_form())
         }
-        if parameters = Parameters.create?(action_body)
-          action_body_hash.merge!(parameters: parameters)
+        if parameters = Parameters.create?(self, action_body, :action_name => action_name)
+          action_body_hash.merge!('attribute' => parameters)
         end
         { action_name => OutputHash.new(action_body_hash) }
       end
@@ -74,9 +78,6 @@ module DTK; class ModuleDSL; class V4
         fail ParsingError.new(err_msg, cmp_print_form(), obj)
       end
 
-      def cmp_print_form
-        component_print_form(@component_name)
-      end
     end
   end
 end; end; end

@@ -2,7 +2,7 @@ module DTK; class ModuleDSL; class V2
   class ObjectModelForm
     class AttributeFields < self
       def self.convert(parent, attr_name, info, opts = {})
-        ret = OutputHash.new('display_name' => name)
+        ret = OutputHash.new('display_name' => attr_name)
         side_effect_settings = {}
 
         if dynamic_default_variable?(info)

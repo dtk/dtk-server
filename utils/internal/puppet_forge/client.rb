@@ -96,7 +96,13 @@ module DTK
           all_imported.inject({}) do |h, puppet_module|
             normalized_dependencies = []
             puppet_module.dependencies.each do |deps|
+
+              dependency_name = deps['name']
+              # incosistency in puppetlabs meta, is manually fixed here
+              dependency_name.gsub!('puppetlabs-', 'puppetlabs/')
+
               matching = all_imported.detect { |imported| imported.forge_name.eql?(deps['name']) }
+
               normalized_dependencies << {
                 # have to set 'module' and 'path' to be able to successfully create dependency
                 'module' => matching.forge_name.gsub('/', '-'),

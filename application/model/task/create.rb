@@ -128,12 +128,7 @@ module DTK; class Task
       opts.merge!(main_task: main_task)
 
       assembly_config_changes = StateChange::Assembly.component_state_changes(assembly, component_type)
-      running_node_task = create_running_node_task_from_assembly(task_mh, assembly_config_changes, opts)
-      # running_node_task = create_running_node_task(task_mh, assembly_config_changes)
-
-      # main_task.add_subtask(running_node_task)
-
-      running_node_task
+      create_running_node_task_from_assembly(task_mh, assembly_config_changes, opts)
     end
 
     #This is is the 'inventory node groups', not the node groups in the service instances'
@@ -253,7 +248,7 @@ module DTK; class Task
         all_actions << executable_action
         ret = create_new_task(task_mh, executable_action: executable_action)
       else
-        ret = create_new_task(task_mh, display_name: 'create_node_stage', temporal_order: 'concurrent')
+        ret = create_new_task(task_mh, display_name: 'create_node_stage', temporal_order: CreateNodeStageTemporalOrder)
         state_change_list.each do |sc|
           executable_action = Action::CreateNode.create_from_state_change(sc.first)
           all_actions << executable_action
@@ -264,6 +259,7 @@ module DTK; class Task
       Action::CreateNode.add_attributes!(attr_mh, all_actions)
       ret
     end
+    CreateNodeStageTemporalOrder = 'sequential'
 
     def create_running_node_task_from_assembly(task_mh, state_change_list, opts = {})
       main_task = opts[:main_task]
@@ -348,6 +344,7 @@ module DTK; class Task
         all_actions << executable_action
         ret = create_new_task(task_mh, executable_action: executable_action)
       else
+        # TODO: is create_new_task__create_node_stage() right?
         ret = create_new_task(task_mh, display_name: 'create_node_stage', temporal_order: 'concurrent')
         state_change_list.each do |sc|
           executable_action = Action::PowerOnNode.create_from_state_change(sc.first)

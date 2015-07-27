@@ -49,7 +49,7 @@ module DTK
         end
       end
 
-      ServerCreateRetries = 10
+      ServerCreateRetries = 5
       ServerCreateMutex = Mutex.new
       def server_create(options)
         tries = ServerCreateRetries

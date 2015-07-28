@@ -6,6 +6,7 @@ module DTK
     r8_nested_require('dsl', 'parser')
     r8_nested_require('dsl', 'parsing_error')
     r8_nested_require('dsl', 'settings')
+
     include SettingsMixin
 
     module DSLVersionInfo
@@ -92,6 +93,11 @@ module DTK
         "assemblies/#{assembly_name}/workflows/#{task_action}.#{file_type}"
       end
 
+      def service_module_workflow_meta_filename_path(module_branch)
+        meta_files, regexp = meta_files_and_regexp_aux?(WorkflowFilenamePathInfo, module_branch)
+        [meta_files, regexp]
+      end
+
       # returns [meta_files,regexp]
       def meta_files_and_regexp?(module_branch)
         meta_files, regexp, is_legacy_structure = meta_files_regexp_and_is_legacy?(module_branch)
@@ -127,11 +133,20 @@ module DTK
         path_depth: 3
       }
 
+      WorkflowFilenamePathInfo = {
+        regexp: Regexp.new("^workflows/(.*)\.dtk\.workflow\.(json|yaml)$"),
+        path_depth: 3
+      }
+
       def meta_file_assembly_name(meta_file_path)
         (meta_file_path.match(AssemblyFilenamePathInfo[:regexp]) || [])[1] ||
         (meta_file_path.match(AssemblyFilenamePathInfoLegacy[:regexp]) || [])[1]
       end
-      public :meta_file_assembly_name
+
+      def meta_file_workflow_name(meta_file_path)
+        (meta_file_path.match(WorkflowFilenamePathInfo[:regexp]) || [])[1]
+      end
+      public :meta_file_assembly_name, :meta_file_workflow_name
 
       # returns [meta_files, regexp]
       def meta_files_and_regexp_aux?(assembly_dsl_path_info, module_branch)
@@ -162,6 +177,9 @@ module DTK
         v_namespaces = validate_module_ref_namespaces(module_branch, component_module_refs)
         return v_namespaces if ParsingError.is_error?(v_namespaces)
 
+        service_module_workflows = update_workflows_from_dsl(module_branch)
+        return service_module_workflows if ParsingError.is_error?(service_module_workflows)
+
         parsed, component_module_refs = update_assemblies_from_dsl(module_branch, component_module_refs, opts)
         if new_commit_sha = component_module_refs.serialize_and_save_to_repo?()
           if opts[:ret_dsl_updated_info]
@@ -182,6 +200,33 @@ module DTK
 
       def update_component_module_refs(module_branch, opts = {})
         ModuleRefs::Parse.update_component_module_refs(ServiceModule, module_branch, opts)
+      end
+
+      def update_workflows_from_dsl(module_branch, opts = {})
+        task_templates = {}
+        aggregate_errors = ParsingError::Aggregate.new(error_cleanup: proc { error_cleanup() })
+        workflow_meta_file_paths(module_branch) do |meta_file, workflow_name|
+          aggregate_errors.aggregate_errors!()  do
+            file_content = RepoManager.get_file_content(meta_file, module_branch)
+            format_type = meta_file_format_type(meta_file)
+            opts.merge!(file_path: meta_file)
+
+            hash_content  = Aux.convert_to_hash(file_content, format_type, opts) || {}
+            check_for_nodes(hash_content)
+
+            integer_version = determine_integer_version(hash_content, opts)
+            version_proc_class = AssemblyImport.load_and_return_version_adapter_class(integer_version)
+
+            workflow_name ||= ServiceModule.meta_file_workflow_name(meta_file)
+            task_template = version_proc_class.import_task_templates(hash_content, service_module_workflow: true)
+            task_templates.merge!(task_template)
+          end
+        end
+
+        errors = aggregate_errors.raise_error?(do_not_raise: true)
+        return errors if errors.is_a?(ParsingError)
+
+        Model.input_hash_content_into_model(id_handle(), task_template: task_templates)
       end
 
       # returns[ parsed,new_component_module_refs]
@@ -247,6 +292,14 @@ module DTK
           block.call(meta_file, default_assembly_name)
         end
       end
+
+      def workflow_meta_file_paths(module_branch, &block)
+        meta_files, regexp = ServiceModule.service_module_workflow_meta_filename_path(module_branch)
+        ret_with_removed_variants(meta_files).each do |meta_file|
+          workflow_name = (if meta_file =~ regexp then Regexp.last_match(1); end)
+          block.call(meta_file, workflow_name)
+        end
+      end      
 
       def validate_service_instance_references(service_instances, module_branch)
         assembly_names = []
@@ -344,6 +397,24 @@ module DTK
           hash_content['assembly']['nodes'].merge!('assembly_wide' => { 'components' => assembly_wide_cmps })
         else
           hash_content['assembly']['nodes'] = { 'assembly_wide' => { 'components' => assembly_wide_cmps } }
+        end
+      end
+
+      def determine_integer_version(hash_content, opts = {})
+        if version = hash_content['dsl_version']
+          ServiceModule::DSLVersionInfo.version_to_integer_version(version, opts)
+        else
+          ServiceModule::DSLVersionInfo.default_integer_version()
+        end
+      end
+
+      def check_for_nodes(hash_content)
+        if workflow = hash_content['workflow']
+          raise ParsingError.new('Workflow dsl should not contain nodes') if workflow['node'] || workflow['nodes']
+          if subtasks = workflow['subtasks']
+            return unless subtasks.is_a?(Hash)
+            raise ParsingError.new('Workflow dsl should not contain nodes') if subtasks.key?('node') || subtasks.key?('nodes')
+          end
         end
       end
 

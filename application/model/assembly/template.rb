@@ -46,6 +46,15 @@ module DTK; class Assembly
         new_assembly_obj = target.clone_into(self, override_attrs, clone_opts)
       end
 
+      service_module_task_templates = service_module.get_task_templates
+      service_module_task_templates.each do |t_temp|
+        task_template = t_temp[:task_template]
+        serialized_content = task_template[:content]
+        task_action = task_template[:task_action]
+        ancestor_id = task_template[:id]
+        Task::Template.create_from_service_module(new_assembly_obj.id_handle(), serialized_content, task_action, ancestor_id)
+      end
+
       Assembly::Instance.create_subclass_object(new_assembly_obj)
     end
 

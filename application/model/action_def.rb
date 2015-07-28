@@ -11,22 +11,37 @@ module DTK
       extend Aux::ParsingingHelper::ClassMixin
       CreateActionName = 'create'
     end
+    
+    def self.get_action_def(id_handle, opts = {})
+      sp_hash = {
+        cols:   cols_from_opts(opts),
+        filter: [:eq, :id, id_handle.get_id]
+      }
+      ret = aggregate_parameters?(get_objs(id_handle.createMH, sp_hash), opts)
+      if ret.size == 1
+        ret.first
+      else
+        Log.error("Unexpected that size (#{ret.size.to_s}) != 1")
+        nil
+      end
+    end
 
     def self.get_ndx_action_defs(cmp_template_idhs, opts = {})
       ret = {}
       return ret if cmp_template_idhs.empty?
 
       sp_hash = {
-        cols: opts[:cols] ? (opts[:cols] + core_columns() + [:component_component_id]).uniq : common_columns(),
+        cols:   cols_from_opts(opts),
         filter: [:oneof, :component_component_id, cmp_template_idhs.map { |cmp| cmp.get_id {} }]
       }
       action_def_mh = cmp_template_idhs.first.createMH(:action_def)
-      get_objs(action_def_mh, sp_hash).each do |ad|
+      rows = get_objs(action_def_mh, sp_hash)
+      aggregate_parameters?(rows, opts).each do |ad|
         (ret[ad[:component_component_id]] ||= []) << ad
       end
       ret
     end
-    ColsToInclude = [:id, :group_id, :component_component_id]
+
 
     def commands
       parse_and_reify_content?().commands()
@@ -42,6 +57,27 @@ module DTK
     end
 
     private
+
+    def self.cols_from_opts(opts = {})
+      cols = (opts[:cols] ? (opts[:cols] + core_columns() + [:component_component_id]).uniq : common_columns())
+      opts[:with_parameters] ? cols + [:parameters] : cols
+    end
+
+    def self.aggregate_parameters?(rows, opts = {})
+      ret = rows
+      return ret unless opts[:with_parameters]
+
+      ndx_by_action_def = {}
+      rows.each do |r|
+        action_def_id = r[:id]
+        parameter = r.delete(:parameter)
+        pntr = ndx_by_action_def[action_def_id] ||= r.merge(parameters: [])
+        if parameter
+          pntr[:parameters] << parameter
+        end
+      end
+      ndx_by_action_def.values
+    end
 
     def parse_and_reify_content?
       content = get_field?(:content)

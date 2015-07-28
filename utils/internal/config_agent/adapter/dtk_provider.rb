@@ -4,10 +4,6 @@ module DTK; class ConfigAgent; module Adapter
     include InterpretResults::Mixin
 
     def ret_msg_content(config_node, opts = {})
-      # TODO: right now noy using assembly attributes; if use, need way to distingusih between refernce to these and
-      # reference to component attributes
-      # assembly_attrs = assembly_attributes(config_node)
-
       commands         = commands(config_node, substitute_template_vars: true)
       component_action = config_node[:component_actions].first
       action_name      = component_action[:action_method][:method_name]
@@ -39,34 +35,26 @@ module DTK; class ConfigAgent; module Adapter
     def commands(config_node, opts)
       ret = []
       config_node[:component_actions].each do |component_action|
-        attr_val_pairs = nil
-        each_command_given_component_action(component_action) do |command|
-          attr_val_pairs ||= attribute_value_pairs(component_action)
+        attr_val_pairs = attribute_value_pairs(component_action)
+        action_def = component_action.action_def(cols: [:content, :method_name], with_parameters: true)
+pp [:xxxxxxxxxx,:action_def,action_def]
+        # if stdout_and_stderr = true we return combined stdout and stderr in action results
+        stdout_and_stderr = stdout_and_stderr(action_def)
+
+        action_def.commands().each do |command|
           if opts[:substitute_template_vars] && command.needs_template_substitution?
             command.bind_template_attributes!(attr_val_pairs)
           end
-
-          # if stdout_and_stderr = true we return combined stdout and stderr in action results
-          # default value is true unless set otherwise in dsl
-          stdout_and_stderr = true
-          action_def = component_action.action_def
-
-          if content = action_def[:content]
-            stdout_and_stderr = content[:stdout_and_stderr] unless content[:stdout_and_stderr].nil?
-          end
-
-          parse_ret_actions(command, stdout_and_stderr, component_action, attr_val_pairs, ret)
+          ret << command_msg_form(command, stdout_and_stderr, component_action, attr_val_pairs)
         end
       end
       ret
     end
 
-    def each_command_given_component_action(component_action, &block)
-      if action_def = component_action.action_def()
-        action_def.commands().each do |command|
-          block.call(command)
-        end
-      end
+    def stdout_and_stderr(action_def)
+      # default value is true unless set otherwise in dsl
+      ret = (action_def[:content] || {})[:stdout_and_stderr]
+      ret.nil? ? true : ret
     end
 
     def attribute_value_pairs(component_action)
@@ -75,7 +63,7 @@ module DTK; class ConfigAgent; module Adapter
       end
     end
 
-    def parse_ret_actions(command, stdout_and_stderr, component_action, attr_val_pairs, ret)
+    def command_msg_form(command, stdout_and_stderr, component_action, attr_val_pairs)
       cmd_line = command.command_line
 
       if command.file_positioning?
@@ -96,7 +84,7 @@ module DTK; class ConfigAgent; module Adapter
         positioning.merge!(owner: command.owner) if command.owner
         positioning.merge!(mode: command.mode) if command.mode
 
-        ret << positioning
+        positioning
       else
         run_command = {
           type: command.type,
@@ -107,7 +95,7 @@ module DTK; class ConfigAgent; module Adapter
         run_command.merge!(unless: command.unless_condition) if command.unless_condition
         run_command.merge!(timeout: command.timeout) if command.timeout
 
-        ret << run_command
+        run_command
       end
     end
   end

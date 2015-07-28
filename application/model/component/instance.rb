@@ -101,7 +101,7 @@ module DTK; class Component
       ret
     end
 
-    def self.add_action_defs!(cmp_instances, opts = {})
+    def self.add_action_defs!(cmp_instances)
       # add action defs that are from the template it is linked to
       ndx_template_idhs = {}
       ndx_template_id_to_instances = {}
@@ -111,7 +111,7 @@ module DTK; class Component
         (ndx_template_id_to_instances[template_id] ||= []) << cmp_instance
       end
 
-      ActionDef.get_ndx_action_defs(ndx_template_idhs.values, opts).each_pair do |template_id, action_defs|
+      ActionDef.get_ndx_action_defs(ndx_template_idhs.values, cols: [:method_name]).each_pair do |template_id, action_defs|
         ndx_template_id_to_instances[template_id].each do |cmp_instance|
           cmp_instance[:action_defs] = action_defs
         end

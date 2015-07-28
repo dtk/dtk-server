@@ -16,25 +16,15 @@ module DTK; class Task
         self[:action_method]
       end
 
-      def action_def
+      def action_def(opts = {})
         ret = nil
         component = self[:component]
         unless action_def_ref = action_method?
           Log.error("Component Action with following component id #{component[:id]} has no action_method")
           return ret
         end
-        sp_hash = {
-          cols: [:id, :method_name, :content],
-          filter: [:eq, :id, action_def_ref[:action_def_id]]
-        }
-        action_def_mh = component.id_handle().create_childMH(:action_def)
-        action_defs = Model.get_objs(action_def_mh, sp_hash)
-        if action_defs.empty?
-          Log.error("Cannot find action def that matches with ref (#{action_def_ref.inspect})")
-          nil
-        else
-          action_defs.first
-        end
+        action_def_id_handle = component.model_handle(:action_def).createIDH(id: action_def_ref[:action_def_id])
+        ActionDef.get_action_def(action_def_id_handle, opts)
       end
 
       # for debugging

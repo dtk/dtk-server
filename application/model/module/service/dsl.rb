@@ -212,6 +212,8 @@ module DTK
             opts.merge!(file_path: meta_file)
 
             hash_content  = Aux.convert_to_hash(file_content, format_type, opts) || {}
+            return hash_content if ParsingError.is_error?(hash_content)
+
             check_for_nodes(hash_content)
 
             integer_version = determine_integer_version(hash_content, opts)

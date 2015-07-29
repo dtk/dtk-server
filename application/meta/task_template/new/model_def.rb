@@ -5,5 +5,5 @@
     content: { type: :json },
     task_action: { type: :varchar, size: 30 }
   },
-  many_to_one: [:component, :service_module]
+  many_to_one: [:component, :module_branch]
 }

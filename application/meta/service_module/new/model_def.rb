@@ -191,5 +191,5 @@ assembly_nodes  =
     }
   },
   many_to_one: [:project, :library], #MOD_RESTRUCT: may remove library as parent
-  one_to_many: [:module_branch, :task_template]
+  one_to_many: [:module_branch]
 }

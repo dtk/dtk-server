@@ -159,13 +159,6 @@ module DTK
       ndx_ret.values
     end
 
-    def get_task_templates
-      sp_hash = {
-        cols: [:task_templates]
-      }
-      get_objs(sp_hash, keep_ref_cols: true)
-    end
-
     def info_about(about)
       case about
        when 'assembly-templates'.to_sym

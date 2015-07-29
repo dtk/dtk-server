@@ -90,6 +90,14 @@ module DTK; class Task
         get_objs(assembly.model_handle(:task_template), sp_hash)
       end
 
+      def get_service_module_task_templates(module_branch, opts = {})
+        sp_hash = {
+          cols: opts[:cols] || common_columns(),
+          filter: [:eq, :module_branch_id, module_branch.id()]
+        }
+        get_objs(module_branch.model_handle(:task_template), sp_hash)
+      end
+
       def get_task_template(assembly, task_action = nil, opts = {})
         sp_hash = {
           cols: opts[:cols] || common_columns(),
@@ -154,13 +162,13 @@ module DTK; class Task
       end
     end
 
-    def self.create_from_service_module(assembly_idh, serialized_content, task_action, ancestor_id)
-      return if get_matching_task_template?(assembly_idh, task_action)
-      ref, create_hash = ref_and_create_hash(serialized_content, task_action)
-      create_hash.merge!(ref: ref, component_component_id: assembly_idh.get_id(), ancestor_id: ancestor_id)
-      task_template_mh = assembly_idh.create_childMH(:task_template)
-      create_from_row(task_template_mh, create_hash, convert: true)
-    end
+    # def self.create_from_service_module(assembly_idh, serialized_content, task_action, ancestor_id)
+    #   return if get_matching_task_template?(assembly_idh, task_action)
+    #   ref, create_hash = ref_and_create_hash(serialized_content, task_action)
+    #   create_hash.merge!(ref: ref, component_component_id: assembly_idh.get_id(), ancestor_id: ancestor_id)
+    #   task_template_mh = assembly_idh.create_childMH(:task_template)
+    #   create_from_row(task_template_mh, create_hash, convert: true)
+    # end
 
     def self.delete_task_template?(assembly_idh, task_action = nil)
       if task_template = get_matching_task_template?(assembly_idh, task_action)

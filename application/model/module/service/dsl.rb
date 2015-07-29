@@ -219,9 +219,6 @@ module DTK
             integer_version = determine_integer_version(hash_content, opts)
             version_proc_class = AssemblyImport.load_and_return_version_adapter_class(integer_version)
 
-            ## TODO: DTK-2163; Aldin, not sure how workflow_name i snon null and ever rest and even it is is, not sure how it is used
-            #        since once set dont see where it is used
-            workflow_name ||= ServiceModule.meta_file_workflow_name(meta_file)
             task_template = version_proc_class.import_task_templates(hash_content, service_module_workflow: true)
             task_templates.merge!(task_template)
           end
@@ -231,7 +228,7 @@ module DTK
         errors = aggregate_errors.raise_error?(do_not_raise: true)
         return errors if errors.is_a?(ParsingError)
 
-        Model.input_hash_content_into_model(id_handle(), task_template: task_templates)
+        Model.input_hash_content_into_model(module_branch.id_handle(), task_template: task_templates)
       end
 
       # returns[ parsed,new_component_module_refs]

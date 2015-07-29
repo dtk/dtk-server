@@ -75,6 +75,8 @@ module DTK
           settings.apply_settings(target, assembly)
         end
 
+        add_service_module_task_templates(assembly, clone_copy_output)
+
         begin
           ModuleRefs::Lock.compute(assembly, raise_errors: true).persist()
         rescue ModuleRef::Missing::Error => e
@@ -92,6 +94,18 @@ module DTK
         end
 
         StateChange.create_pending_change_items(component_new_items)
+      end
+
+      def self.add_service_module_task_templates(assembly, clone_copy_output)
+        module_branch_id = assembly.get_field?(:module_branch_id)
+        module_branch    = assembly.id_handle().createIDH(model_name: :module_branch, id: module_branch_id).create_object()
+        task_templates   = Task::Template.get_service_module_task_templates(module_branch)
+        assembly_templates = clone_copy_output.children_hash_form(1, :task_template)
+
+        # For Rich: this is part where I need to append task_templates (from service module level)
+        # to assembly_templates (already added to service instance)
+        puts task_templates
+        puts assembly_templates
       end
 
       def self.keys_to_string(hash)

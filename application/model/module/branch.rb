@@ -58,6 +58,13 @@ end
       get_module().module_name()
     end
 
+    def get_task_templates
+      sp_hash = {
+        cols: [:task_templates]
+      }
+      get_objs(sp_hash, keep_ref_cols: true)
+    end
+
     # deletes both local and remore branch
     def delete_instance_and_repo_branch
       RepoManager.delete_branch(self)

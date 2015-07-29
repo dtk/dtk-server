@@ -3,6 +3,9 @@
 r8_require('../../utils/internal/routes/routes')
 
 R8::ReactorRoute.draw do
+
+  get 'api/v1/service/:service_id' => 'v1::service#get'
+
   # USER
   post 'user/process_login'      => 'user#process_login'
   get 'user/process_logout'     => 'user#process_logout'

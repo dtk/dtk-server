@@ -101,7 +101,7 @@ module DTK
               # incosistency in puppetlabs meta, is manually fixed here
               dependency_name.gsub!('puppetlabs-', 'puppetlabs/')
 
-              matching = all_imported.detect { |imported| imported.forge_name.eql?(deps['name']) }
+              matching = all_imported.detect { |imported| imported.forge_name.eql?(dependency_name) }
 
               normalized_dependencies << {
                 # have to set 'module' and 'path' to be able to successfully create dependency

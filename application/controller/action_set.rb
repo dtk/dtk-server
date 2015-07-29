@@ -5,12 +5,13 @@ r8_require('../../utils/performance_service')
 module DTK
   class ActionsetController < Controller
     def process(*route)
-      route_key = route[0..1].join('/')
-      action_set_params = route[2..route.size - 1] || []
-      model_name = route[0].to_sym
+      route_key = route.join('/')
+      action_set_params = []
 
       route = R8::ReactorRoute.validate_route(request.request_method, route_key)
 
+      # DEBUG SNIPPET >>> REMOVE <<<
+      require (RUBY_VERSION.match(/1\.8\..*/) ? 'ruby-debug' : 'debugger');Debugger.start; debugger
       # return 404 Resource Not Found if route is not valid
       respond("#{route_key}!", 404) unless route
 
@@ -198,7 +199,8 @@ module DTK
 
     def call_action(action, parent_model_name = nil)
       model, method = action[:route].split('/')
-      controller_class = XYZ.const_get("#{model.capitalize}Controller")
+
+      controller_class = controller_clazz(model)
       method ||= :index
       if rest_request?()
         rest_variant = "rest__#{method}"
@@ -286,6 +288,17 @@ module DTK
         i += 1
       end
       ret
+    end
+
+    def controller_clazz(model_name)
+      clazz = DTK
+
+      if model_name.include?('::')
+        namespace, model_name = model_name.split('::')
+        clazz = clazz.const_get(namespace.capitalize)
+      end
+
+      clazz.const_get("#{model_name.capitalize}Controller")
     end
 
     # TODO: lets finally kill off the xyz and move route loading into some sort of initialize or route setup call

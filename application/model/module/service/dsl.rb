@@ -203,7 +203,7 @@ module DTK
       end
 
       def update_workflows_from_dsl(module_branch, opts = {})
-        task_templates = {}
+        task_templates = DBUpdateHash.new
         aggregate_errors = ParsingError::Aggregate.new(error_cleanup: proc { error_cleanup() })
         workflow_meta_file_paths(module_branch) do |meta_file, workflow_name|
           aggregate_errors.aggregate_errors!()  do
@@ -226,6 +226,7 @@ module DTK
             task_templates.merge!(task_template)
           end
         end
+        task_templates.mark_as_complete
 
         errors = aggregate_errors.raise_error?(do_not_raise: true)
         return errors if errors.is_a?(ParsingError)

@@ -12,7 +12,7 @@ module DTK; class ServiceModule
       def self.import_assembly_top(assembly_ref, assembly_hash, module_branch, module_name, opts = {})
         ret = super(assembly_ref, assembly_hash, module_branch, module_name, opts)
         ret_assembly_hash = ret.values.first
-        ret_assembly_hash.merge!('task_template' => import_task_templates(assembly_hash))
+        ret_assembly_hash.merge!('task_template' => import_task_templates(assembly_hash).mark_as_complete())
         ret
       end
 
@@ -55,6 +55,10 @@ module DTK; class ServiceModule
 
       include ServiceDSLCommonMixin
 
+      ## TODO: DTK-2163; Aldin; this will no longer be called since there is a import_task_templates for v4; having v1, v2, v3, etc
+      ## is away when we rev the dsl to use most of earlier parsing logic but override; 
+      ### so if any enhancements put here they instead should go in
+      ##  self.import_task_templates assembly_import/adapters/v4.rb
       def self.import_task_templates(assembly_hash, opts = {})
         ret = DBUpdateHash.new()
         # TODO: just treating the default action

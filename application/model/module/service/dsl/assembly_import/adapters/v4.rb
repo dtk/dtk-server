@@ -58,7 +58,7 @@ module DTK; class ServiceModule
           ret = workflows_with_actions.inject(ret) { |h, r| h.merge(parse_workflow(r[:workflow], r[:action], opts)) }
         end
 
-        ret.mark_as_complete()
+        ret
       end
 
       def self.parse_workflow(workflow_hash, workflow_action = nil, opts = {})

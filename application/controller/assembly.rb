@@ -218,6 +218,11 @@ module DTK
       rest_ok_response response, response_opts
     end
 
+    def rest__task_action_list
+      assembly = ret_assembly_instance_object()
+      rest_ok_response assembly.get_task_templates(set_display_names: true)
+    end
+
     def rest__cancel_task
       assembly = ret_assembly_instance_object()
 

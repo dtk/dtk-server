@@ -203,8 +203,10 @@ module DTK; class Assembly; class Instance
       Task::Template.get_task_actions(self)
     end
 
-    def get_task_templates
-      Task::Template.get_task_templates(self)
+    def get_task_templates(opts = {})
+      task_templates = Task::Template.get_task_templates(self)
+      task_templates.each {|task_t| task_t[:display_name] ||= task_t[:task_action] } if opts[:set_display_names]
+      task_templates
     end
 
     def get_task_template(task_action = nil, opts = {})

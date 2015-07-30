@@ -868,7 +868,7 @@ module DTK
       target_nodes = ret_matching_nodes(assembly)
 
       # stop if service staged
-      fail ErrorUsage.new('Nodes are not running, has service been started?') if assembly.node_admin_status_all_pending?()
+      fail ErrorUsage.new('Nodes are not running, has service been started?') unless assembly.node_admin_status_all_running?(target_nodes)
 
       # check existance of key and system user in database
       system_user = params[:system_user]

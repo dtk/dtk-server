@@ -4,13 +4,20 @@ module DTK; class  Assembly; class Instance
     # type will be :op or :admin
     def any_stopped_nodes?(type)
       !!get_leaf_nodes(cols: [:id, :admin_op_status, :external_ref, :operational_status]).find do |node| 
-        NodeStatus.node_status(type,node) == 'stopped' 
+        NodeStatus.node_status(type, node) == 'stopped'
       end
     end
 
     def node_admin_status_all_pending?()
       assembly_nodes = get_nodes(:admin_op_status)
       NodeStatus.status_all_pending?(:admin,assembly_nodes)
+    end
+
+    def node_admin_status_all_running?(nodes)
+      nodes.each do |node|
+        return unless NodeStatus.node_status(:admin, node) == 'running'
+      end
+      true
     end
   end
 

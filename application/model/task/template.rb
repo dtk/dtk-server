@@ -90,14 +90,6 @@ module DTK; class Task
         get_objs(assembly.model_handle(:task_template), sp_hash)
       end
 
-      def get_service_module_task_templates(module_branch, opts = {})
-        sp_hash = {
-          cols: opts[:cols] || common_columns(),
-          filter: [:eq, :module_branch_id, module_branch.id()]
-        }
-        get_objs(module_branch.model_handle(:task_template), sp_hash)
-      end
-
       def get_task_template(assembly, task_action = nil, opts = {})
         sp_hash = {
           cols: opts[:cols] || common_columns(),
@@ -132,7 +124,17 @@ module DTK; class Task
       ret
     end
 
-    # returns [ref,create_hash]
+    def self.clone_to_assembly(assembly, task_templates)
+      assembly_id = assembly.id
+      rows_to_add = task_templates.map do |t|
+        ref, create_hash = ref_and_create_hash(t[:content], t[:task_action])
+        create_hash.merge(:ref => ref, :component_component_id => assembly_id)
+      end
+      task_template_mh = assembly.model_handle(:task_template).merge(parent_model_name: :assembly_instance)
+      create_from_rows(task_template_mh, rows_to_add, convert: true)
+    end
+
+    # returns [ref, create_hash]
     def self.ref_and_create_hash(serialized_content, task_action = nil)
       task_action ||= default_task_action()
       ref = ref(task_action)

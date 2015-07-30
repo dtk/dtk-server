@@ -98,14 +98,18 @@ module DTK
 
       def self.add_service_module_task_templates(assembly, clone_copy_output)
         module_branch_id = assembly.get_field?(:module_branch_id)
-        module_branch    = assembly.id_handle().createIDH(model_name: :module_branch, id: module_branch_id).create_object()
-        task_templates   = Task::Template.get_service_module_task_templates(module_branch)
-        assembly_templates = clone_copy_output.children_hash_form(1, :task_template)
+        module_branch    = assembly.model_handle(:module_branch).createIDH(id: module_branch_id).create_object()
+        task_templates   = module_branch.get_service_module_task_templates
+        return if task_templates.empty?
 
-        # For Rich: this is part where I need to append task_templates (from service module level)
-        # to assembly_templates (already added to service instance)
-        puts task_templates
-        puts assembly_templates
+        # remove any service_level task_templates that match an assembly level one using :task_action as the key
+        assembly_task_templates = clone_copy_output.children_objects(1, :task_template, cols: [:task_action])
+        assembly_task_actions = assembly_task_templates.map { |t| t[:task_action] }
+        task_templates.reject! { |t| assembly_task_actions.include?(t) }
+        return if task_templates.empty?
+
+        Task::Template.clone_to_assembly(assembly, task_templates)
+
       end
 
       def self.keys_to_string(hash)

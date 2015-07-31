@@ -8,9 +8,9 @@ module DTK; class ServiceModule
       end
 
       def parse_and_order_components_hash(assembly_hash)
-        parsed_content = parse_existing_and_remove_unused()
+        cmps_first, parsed_content = parse_existing_and_remove_unused()
         nodes_content  = split_by_nodes(parsed_content)
-        order_nodes_hash(assembly_hash, nodes_content)
+        order_nodes_hash(assembly_hash, nodes_content, cmps_first)
       end
 
       private
@@ -20,9 +20,10 @@ module DTK; class ServiceModule
         new_array   = []
         node_name   = nil
         node_indent = nil
+        components_first = nil
 
         @raw_array.each do |el|
-          is_node = false
+          is_node = nil
           name    = el.strip
 
           if name.eql?('assembly:')
@@ -38,6 +39,7 @@ module DTK; class ServiceModule
               new_array << { name: name, content: el, node: node_name }
             else
               if last_name = new_array.last && new_array.last[:name]
+                components_first = true if name.eql?('components:') && node_name.nil?
                 if last_name.eql?('nodes:')
                   is_node     = true
                   node_name   = name
@@ -65,7 +67,7 @@ module DTK; class ServiceModule
           end
         end
 
-        new_array
+        [components_first, new_array]
       end
 
       def split_by_nodes(parsed_content)
@@ -83,11 +85,13 @@ module DTK; class ServiceModule
         { nodes: nodes_hash }
       end
 
-      def order_nodes_hash(assembly_hash, nodes_content)
+      def order_nodes_hash(assembly_hash, nodes_content, cmps_first)
         assembly_hash_nodes = assembly_hash[:assembly][:nodes]
         new_assembly_nodes  = {}
 
         nodes_content[:nodes].each do |k, v|
+          next if k.nil?
+
           node_name = k.chomp(':')
           assembly_node = assembly_hash_nodes.delete(node_name)
 
@@ -122,6 +126,7 @@ module DTK; class ServiceModule
         end
 
         assembly_hash[:assembly][:nodes] = new_assembly_nodes.merge(assembly_hash_nodes)
+        assembly_hash[:assembly][:nodes] = assembly_hash[:assembly].delete(:nodes) if cmps_first
         assembly_hash
       end
     end

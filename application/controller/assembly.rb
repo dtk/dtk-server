@@ -653,7 +653,7 @@ module DTK
       component = ret_component_instance(:component_id, assembly)
       opts = ret_params_hash(:method_name, :action_params)
 
-      # create task, raising user error if task wide preconditions dont hold, 
+      # create task, raising user error if task wide preconditions dont hold,
       # which in this case is mking sure all nodes in task are up
       task = Task.create_for_ad_hoc_action(assembly, component, opts)
       # saves to db and returns task with top level and sub task ids filled out

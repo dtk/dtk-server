@@ -312,7 +312,6 @@ module Ramaze::Helper
     private :ret_module_name_from_class
 
     def ret_request_params(*params)
-      return nil unless request_method_is_post?()
       return request.params if params.size == 0
       ret = params.map { |p| request.params[p.to_s] }
       ret.size == 1 ? ret.first : ret
@@ -342,7 +341,6 @@ module Ramaze::Helper
     private :boolean_form
 
     def ret_non_null_request_params(*params)
-      return nil unless request_method_is_post?()
       null_params = []
       ret = params.map do |p|
         unless val = request.params[p.to_s]

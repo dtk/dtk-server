@@ -8,12 +8,13 @@ module DTK
       route_key = route.join('/')
       action_set_params = []
 
-      route = R8::ReactorRoute.validate_route(request.request_method, route_key)
+      route, value_params = R8::ReactorRoute.validate_route(request.request_method, route_key)
 
-      # DEBUG SNIPPET >>> REMOVE <<<
-      require (RUBY_VERSION.match(/1\.8\..*/) ? 'ruby-debug' : 'debugger');Debugger.start; debugger
       # return 404 Resource Not Found if route is not valid
       respond("#{route_key}!", 404) unless route
+
+      # set URL param values in request params
+      request.params.merge!(value_params) if value_params
 
       # we set new model
       model_name = route.first.to_sym

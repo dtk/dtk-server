@@ -60,7 +60,7 @@ module DTK
       task_id =  ret_non_null_request_params(:task_id)
       task = Task::Hierarchical.get_and_reify(id_handle(task_id))
       workflow = Workflow.create(task)
-Aux.stop_for_testing?(:converge) # TODO: for debugging
+      Aux.stop_for_testing?(:converge) # TODO: for debugging
       workflow.defer_execution()
       rest_ok_response task_id: task_id
     end

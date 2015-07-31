@@ -8,6 +8,10 @@ module Ramaze::Helper
       id_handle(assembly_id, :component).create_object(model_name: (subtype == :instance) ? :assembly_instance : :assembly_template)
     end
 
+    def service_object
+      create_obj(:service_id, ::DTK::Assembly::Instance)
+    end
+
     def ret_assembly_params_object_and_subtype
       assembly_id, subtype = ret_assembly_params_id_and_subtype()
       obj = id_handle(assembly_id, :component).create_object(model_name: (subtype == :instance) ? :assembly_instance : :assembly_template)

@@ -4,7 +4,7 @@ module R8
 
   class Mapper
 
-    VALUE_PLACEHOLDER = '\w+'
+    VALUE_PLACEHOLDER = '(\w+)'
 
     def initialize
       @routes = {}
@@ -31,22 +31,42 @@ module R8
       end
     end
 
+    def delete(entry)
+      if entry.keys.first.match(/\:\w+/)
+        @regex_routes[:DELETE].merge!(transform_regex_value(entry))
+      else
+        @routes[:DELETE].merge!(transform_value(entry))
+      end
+    end
+
+
     def method_missing(name, *_args, &_block)
       fail "REST method '#{name}' is not supported via Reactor Routes."
     end
 
     def validate_route(rest_type, route)
+      http_protocol = rest_type.upcase.to_sym
       # we first check simple string paths for speed
-      found_route = @routes[rest_type.upcase.to_sym].fetch(route, nil)
+      found_route = @routes[http_protocol].fetch(route, nil)
 
       # we check now regex routes
       unless found_route
+        @regex_routes[http_protocol].each do |route_regex, route_values|
+          if matched = route.match(route_regex)
+            # we need to make sure this is a full match
+            if matched[0].eql?(route)
+              # lets build value hash
+              value_params = Hash[route_values[:params].zip(matched.captures)]
+              return [route_values[:path], value_params]
+            end
+          end
+        end
         # CODE GOES HERE
       end
 
-      return nil unless found_route
+      return [nil, nil] unless found_route
 
-      found_route[:path]
+      return [found_route[:path], nil]
     end
 
     private
@@ -64,7 +84,7 @@ module R8
       # we extract place holder to be matched later on
       entry_values = entry_values.collect do |ev|
         if ev.start_with?(':')
-          params_values << ev.gsub(':', '').to_sym
+          params_values << ev.gsub(':', '')
           VALUE_PLACEHOLDER
         else
           ev

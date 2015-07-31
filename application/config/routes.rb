@@ -3,8 +3,19 @@
 r8_require('../../utils/internal/routes/routes')
 
 R8::ReactorRoute.draw do
+  # V1 Namespace
+  get  'api/v1/service/:service_id'               => 'v1::service#info'
+  get  'api/v1/service/:service_id/nodes'         => 'v1::service#nodes'
+  get  'api/v1/service/:service_id/components'    => 'v1::service#components'
+  get  'api/v1/service/:service_id/tasks'         => 'v1::service#tasks'
+  get  'api/v1/service/:service_id/access_tokens' => 'v1::service#access_tokens'
 
-  get 'api/v1/service/:service_id' => 'v1::service#get'
+  post 'api/v1/service/:service_id/converge'        => 'v1::service#converge'
+  post 'api/v1/service/:service_id/start'           => 'v1::service#start'
+  post 'api/v1/service/:service_id/stop'            => 'v1::service#stop'
+  post 'api/v1/service/:service_id/create_assembly' => 'v1::service#create_assembly'
+
+  delete 'api/v1/service/:service_id' => 'v1::service#delete_destroy'
 
   # USER
   post 'user/process_login'      => 'user#process_login'
@@ -198,7 +209,7 @@ R8::ReactorRoute.draw do
   post 'library/info_about' => 'library#info_about'
 
   # METADATA
-  get 'metadata/get_metadata' => 'metadata#get_metadata'
+  get 'metadata/get_metadata/:metadata_file' => 'metadata#get_metadata'
 
   # MONITORING_ITEM
   post 'monitoring_item/check_idle' => 'monitoring_item#check_idle'

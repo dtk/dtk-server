@@ -289,7 +289,7 @@
     ],
     "mapping": {
       "id": "dtk_id",
-      "workflow_name": "task_action"
+      "workflow_name": "display_name"
     }
   },
   "ad_hoc_action_by_component_type": {

@@ -78,6 +78,11 @@ module DTK; class Task
       end
       DefaultTaskActionExternalName = 'create'
 
+      def task_action_external_name(task_action)
+        (task_action.nil? or task_action == default_task_action) ? default_task_action_external_name : task_action
+      end
+      private :task_action_external_name
+
       def get_task_actions(assembly)
         get_task_templates(assembly, cols: [:id, :group_id, :task_action])
       end
@@ -87,7 +92,11 @@ module DTK; class Task
           cols: opts[:cols] || common_columns(),
           filter: [:eq, :component_component_id, assembly.id()]
         }
-        get_objs(assembly.model_handle(:task_template), sp_hash)
+        ret = get_objs(assembly.model_handle(:task_template), sp_hash)
+        if opts[:set_display_names]
+          ret.each {|task_t| task_t[:display_name] ||= task_action_external_name(task_t[:task_action]) }
+        end
+        ret
       end
 
       def get_task_template(assembly, task_action = nil, opts = {})

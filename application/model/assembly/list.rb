@@ -1,6 +1,7 @@
 module DTK
   class Assembly
     module ListMixin
+      # TODO: clean up so when this method called is can only be integer or nil
       def info(node_id = nil, component_id = nil, attribute_id = nil, opts = {})
         is_template = is_a?(Template)
         opts.merge!(is_template: true) if is_template
@@ -10,7 +11,7 @@ module DTK
           cols: [:id, :display_name, :component_type, nested_virtual_attr]
         }
         assembly_rows = get_objs(sp_hash)
-        Instance.get_last_task_run_status(assembly_rows, model_handle())
+        Instance.add_last_task_run_status!(assembly_rows, model_handle())
 
         if (node_id.to_s.empty? && component_id.to_s.empty? && attribute_id.to_s.empty?)
           nodes_info = (is_template ? get_nodes() : get_nodes__expand_node_groups(remove_node_groups: true))
@@ -133,9 +134,11 @@ module DTK
 
           # if node group take only group members
           if r[:node] && r[:node].is_node_group?() && !opts[:is_template]
-            r[:nodes] = r.get_nodes__expand_node_groups(remove_node_groups: true, add_group_member_components: true) unless opts[:only_node_group_info]
-            r[:nodes].sort! { |a, b| a[:display_name] <=> b[:display_name] }
-            opts.merge!(add_group_member_components: true)
+            unless opts[:only_node_group_info]
+              r[:nodes] = r.get_nodes__expand_node_groups(remove_node_groups: true, add_group_member_components: true) 
+              r[:nodes].sort! { |a, b| a[:display_name] <=> b[:display_name] }
+              opts.merge!(add_group_member_components: true)
+            end
           end
 
           if r[:nodes]

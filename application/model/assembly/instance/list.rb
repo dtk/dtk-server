@@ -36,14 +36,6 @@ module DTK; class  Assembly
         add_last_task_run_status!(assembly_rows, assembly_mh)
       end
 
-      private
-
-      def list_aux__no_details(assembly_rows)
-        assembly_rows.map do |r|
-          r.prune_with_values(display_name: pretty_print_name(r))
-        end
-      end
-
       def add_last_task_run_status!(assembly_rows, assembly_mh)
         sp_hash = {
           cols: [:id, :started_at, :assembly_id, :status],
@@ -69,6 +61,14 @@ module DTK; class  Assembly
           end
         end
         assembly_rows
+      end
+
+      private
+
+      def list_aux__no_details(assembly_rows)
+        assembly_rows.map do |r|
+          r.prune_with_values(display_name: pretty_print_name(r))
+        end
       end
     end
 

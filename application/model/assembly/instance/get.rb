@@ -204,33 +204,6 @@ module DTK; class Assembly; class Instance
       Task::Template.get_task_templates(self, opts)
     end
 
-    def get_task_template(task_action, opts = {})
-      Task::Template.get_task_template(self, task_action, opts)
-    end
-
-    def get_task_templates_with_serialized_content
-      ret = []
-
-      opts = {
-        component_type_filter: :service,
-        serialization_form: { filter: { source: :assembly }, allow_empty_task: true }
-      }
-
-      # TODO: only returning now the task templates for the default (assembly create action)
-      # this is done by setting task action as nil
-      task_action =  nil
-      if serialized_content = get_task_template(task_action, opts.merge(serialized_form: true))
-        action_task_template = get_task_template(task_action, cols: [:id, :group_id, :task_action])
-        action_task_template ||= Assembly::Instance.create_stub(model_handle(:task_template))
-        ret << action_task_template.merge(content: serialized_content)
-      end
-      ret
-    end
-
-    def get_parents_task_template(task_action = nil)
-      task_action ||= Task::Template.default_task_action()
-      get_objs_helper(:parents_task_templates, :task_template).find { |r| r[:task_action] == task_action }
-    end
     #### end: get methods around task templates
 
     def get_sub_assemblies

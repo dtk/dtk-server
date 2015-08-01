@@ -78,12 +78,37 @@ module DTK; class Task
       end
       DefaultTaskActionExternalName = 'create'
 
+      def get_task_templates(assembly, opts = {})
+        if opts[:serialized_form]
+          get_task_templates_serialized_form(assembly, opts)
+        else
+          get_task_templates_simple_form(assembly, opts)
+        end
+      end
+
+      def get_task_template(assembly, task_action, opts = {})
+        sp_hash = {
+          cols: opts[:cols] || common_columns(),
+          filter: [:and, [:eq, :component_component_id, assembly.id()],
+                   [:eq, :task_action, internal_task_action(task_action)]]
+        }
+        get_obj(assembly.model_handle(:task_template), sp_hash)
+      end
+
+      def get_serialized_content(assembly, task_action, opts = {})
+        opts_task_gen = opts.merge(task_action: task_action)
+        action_types = [:assembly]
+        ret = ConfigComponents.get_or_generate_template_content(action_types, assembly, opts_task_gen)
+        ret && ret.serialization_form(opts[:serialization_form] || {})
+      end
+
+      private
+
       def task_action_external_name(task_action)
         (task_action.nil? or task_action == default_task_action) ? default_task_action_external_name : task_action
       end
-      private :task_action_external_name
 
-      def get_task_templates(assembly, opts = {})
+      def get_task_templates_simple_form(assembly, opts = {})
         sp_hash = {
           cols: opts[:cols] || common_columns(),
           filter: [:eq, :component_component_id, assembly.id()]
@@ -95,32 +120,25 @@ module DTK; class Task
         ret
       end
 
-      def get_task_template(assembly, task_action, opts = {})
-        if opts[:serialized_form]
-          get_task_template_serialized_form(assembly, task_action, opts)
-        else
-          get_task_template_simple_form(assembly, task_action, opts)
+      def get_task_templates_serialized_form(assembly, opts = {})
+        ret = []
+
+        opts_serialized_content = {
+          component_type_filter: :service,
+          serialization_form: { filter: { source: :assembly }, allow_empty_task: true }
+        }.merge(opts)
+        
+        # TODO: do as part of DTK-2163
+        # TODO: only returning now the task templates for the default (assembly create action)
+        # this is done by setting task action as nil
+        task_action =  nil
+        if serialized_content = get_serialized_content(assembly, task_action, opts_serialized_content)
+          action_task_template = get_task_template(assembly, task_action, cols: [:id, :group_id, :task_action])
+          action_task_template ||= Assembly::Instance.create_stub(assembly.model_handle(:task_template))
+          ret << action_task_template.merge(content: serialized_content)
         end
+        ret
       end
-
-      private
-
-      def get_task_template_simple_form(assembly, task_action, opts = {})
-        sp_hash = {
-          cols: opts[:cols] || common_columns(),
-          filter: [:and, [:eq, :component_component_id, assembly.id()],
-                   [:eq, :task_action, internal_task_action(task_action)]]
-        }
-        get_obj(assembly.model_handle(:task_template), sp_hash)
-      end
-
-      def get_task_template_serialized_form(assembly, task_action, opts = {})
-        opts_task_gen = opts.merge(task_action: task_action)
-        action_types = [:assembly]
-        ret = ConfigComponents.get_or_generate_template_content(action_types, assembly, opts_task_gen)
-        ret && ret.serialization_form(opts[:serialization_form] || {})
-      end
-
 
       def internal_task_action(task_action = nil)
         ret = task_action

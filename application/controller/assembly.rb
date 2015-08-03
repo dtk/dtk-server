@@ -208,7 +208,7 @@ module DTK
     def rest__info_about_task
       assembly = ret_assembly_instance_object()
       task_action = ret_request_params(:task_action)
-      response = assembly.get_task_template_serialized_content(task_action)
+      response = Task::Template.get_serialized_content(assembly, task_action)
       response_opts = {}
       if response
         response_opts.merge!(encode_into: :yaml)
@@ -216,6 +216,11 @@ module DTK
         response = { message: "Task not yet generated for assembly (#{assembly.get_field?(:display_name)})" }
       end
       rest_ok_response response, response_opts
+    end
+
+    def rest__task_action_list
+      assembly = ret_assembly_instance_object()
+      rest_ok_response assembly.get_task_templates(set_display_names: true)
     end
 
     def rest__cancel_task

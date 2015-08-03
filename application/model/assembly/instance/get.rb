@@ -199,50 +199,11 @@ module DTK; class Assembly; class Instance
     end
 
     #### get methods around task templates
-    def get_task_actions
-      Task::Template.get_task_actions(self)
+
+    def get_task_templates(opts = {})
+      Task::Template.get_task_templates(self, opts)
     end
 
-    def get_task_templates
-      Task::Template.get_task_templates(self)
-    end
-
-    def get_task_template(task_action = nil, opts = {})
-      Task::Template.get_task_template(self, task_action, opts)
-    end
-
-    def get_task_template_serialized_content(task_action = nil, opts = {})
-      action_types = [:assembly] # TODO: action_types can be set to [:assembly,:node_centric] if treating inventory node groups
-      opts_task_gen = { serialized_form: true }.merge(opts)
-      opts_task_gen.merge!(task_action: task_action) if task_action
-
-      ret = Task::Template::ConfigComponents.get_or_generate_template_content(action_types, self, opts_task_gen)
-      ret && ret.serialization_form(opts[:serialization_form] || {})
-    end
-
-    def get_task_templates_with_serialized_content
-      ret = []
-
-      opts = {
-        component_type_filter: :service,
-        serialization_form: { filter: { source: :assembly }, allow_empty_task: true }
-      }
-
-      # TODO: only returning now the task templates for the default (assembly create action)
-      # this is done by setting task action as nil
-      task_action =  nil
-      if serialized_content = get_task_template_serialized_content(task_action, opts)
-        action_task_template = get_task_template(task_action, cols: [:id, :group_id, :task_action])
-        action_task_template ||= Assembly::Instance.create_stub(model_handle(:task_template))
-        ret << action_task_template.merge(content: serialized_content)
-      end
-      ret
-    end
-
-    def get_parents_task_template(task_action = nil)
-      task_action ||= Task::Template.default_task_action()
-      get_objs_helper(:parents_task_templates, :task_template).find { |r| r[:task_action] == task_action }
-    end
     #### end: get methods around task templates
 
     def get_sub_assemblies

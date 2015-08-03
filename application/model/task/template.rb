@@ -78,19 +78,15 @@ module DTK; class Task
       end
       DefaultTaskActionExternalName = 'create'
 
-      def get_task_actions(assembly)
-        get_task_templates(assembly, cols: [:id, :group_id, :task_action])
-      end
-
       def get_task_templates(assembly, opts = {})
-        sp_hash = {
-          cols: opts[:cols] || common_columns(),
-          filter: [:eq, :component_component_id, assembly.id()]
-        }
-        get_objs(assembly.model_handle(:task_template), sp_hash)
+        if opts[:serialized_form]
+          get_task_templates_serialized_form(assembly, opts)
+        else
+          get_task_templates_simple_form(assembly, opts)
+        end
       end
 
-      def get_task_template(assembly, task_action = nil, opts = {})
+      def get_task_template(assembly, task_action, opts = {})
         sp_hash = {
           cols: opts[:cols] || common_columns(),
           filter: [:and, [:eq, :component_component_id, assembly.id()],
@@ -99,7 +95,50 @@ module DTK; class Task
         get_obj(assembly.model_handle(:task_template), sp_hash)
       end
 
+      def get_serialized_content(assembly, task_action, opts = {})
+        opts_task_gen = opts.merge(task_action: task_action)
+        action_types = [:assembly]
+        ret = ConfigComponents.get_or_generate_template_content(action_types, assembly, opts_task_gen)
+        ret && ret.serialization_form(opts[:serialization_form] || {})
+      end
+
       private
+
+      def task_action_external_name(task_action)
+        (task_action.nil? or task_action == default_task_action) ? default_task_action_external_name : task_action
+      end
+
+      def get_task_templates_simple_form(assembly, opts = {})
+        sp_hash = {
+          cols: opts[:cols] || common_columns(),
+          filter: [:eq, :component_component_id, assembly.id()]
+        }
+        ret = get_objs(assembly.model_handle(:task_template), sp_hash)
+        if opts[:set_display_names]
+          ret.each {|task_t| task_t[:display_name] ||= task_action_external_name(task_t[:task_action]) }
+        end
+        ret
+      end
+
+      def get_task_templates_serialized_form(assembly, opts = {})
+        ret = []
+
+        opts_serialized_content = {
+          component_type_filter: :service,
+          serialization_form: { filter: { source: :assembly }, allow_empty_task: true }
+        }.merge(opts)
+        
+        # TODO: do as part of DTK-2163
+        # TODO: only returning now the task templates for the default (assembly create action)
+        # this is done by setting task action as nil
+        task_action =  nil
+        if serialized_content = get_serialized_content(assembly, task_action, opts_serialized_content)
+          action_task_template = get_task_template(assembly, task_action, cols: [:id, :group_id, :task_action])
+          action_task_template ||= Assembly::Instance.create_stub(assembly.model_handle(:task_template))
+          ret << action_task_template.merge(content: serialized_content)
+        end
+        ret
+      end
 
       def internal_task_action(task_action = nil)
         ret = task_action
@@ -124,7 +163,17 @@ module DTK; class Task
       ret
     end
 
-    # returns [ref,create_hash]
+    def self.clone_to_assembly(assembly, task_templates)
+      assembly_id = assembly.id
+      rows_to_add = task_templates.map do |t|
+        ref, create_hash = ref_and_create_hash(t[:content], t[:task_action])
+        create_hash.merge(:ref => ref, :component_component_id => assembly_id)
+      end
+      task_template_mh = assembly.model_handle(:task_template).merge(parent_model_name: :assembly_instance)
+      create_from_rows(task_template_mh, rows_to_add, convert: true)
+    end
+
+    # returns [ref, create_hash]
     def self.ref_and_create_hash(serialized_content, task_action = nil)
       task_action ||= default_task_action()
       ref = ref(task_action)
@@ -153,6 +202,14 @@ module DTK; class Task
         create_from_row(task_template_mh, create_hash, convert: true)
       end
     end
+
+    # def self.create_from_service_module(assembly_idh, serialized_content, task_action, ancestor_id)
+    #   return if get_matching_task_template?(assembly_idh, task_action)
+    #   ref, create_hash = ref_and_create_hash(serialized_content, task_action)
+    #   create_hash.merge!(ref: ref, component_component_id: assembly_idh.get_id(), ancestor_id: ancestor_id)
+    #   task_template_mh = assembly_idh.create_childMH(:task_template)
+    #   create_from_row(task_template_mh, create_hash, convert: true)
+    # end
 
     def self.delete_task_template?(assembly_idh, task_action = nil)
       if task_template = get_matching_task_template?(assembly_idh, task_action)

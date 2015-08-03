@@ -43,6 +43,14 @@ module DTK
       ModuleRepoInfo.new(repo, module_obj.module_name(), module_obj.id_handle(), self, opts)
     end
 
+    def get_service_module_task_templates(opts = {})
+      sp_hash = {
+        cols:   opts[:cols] || Task::Template.common_columns(),
+        filter: [:eq, :module_branch_id, id()]
+      }
+      Task::Template.get_objs(model_handle(:task_template), sp_hash)
+    end
+
     def get_module
       row = get_obj(cols: [:type, :parent_info])
       type = row[:type].to_sym
@@ -56,6 +64,13 @@ end
 
     def get_module_name
       get_module().module_name()
+    end
+
+    def get_task_templates
+      sp_hash = {
+        cols: [:task_templates]
+      }
+      get_objs(sp_hash, keep_ref_cols: true)
     end
 
     # deletes both local and remore branch

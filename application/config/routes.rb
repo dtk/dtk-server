@@ -84,6 +84,7 @@ R8::ReactorRoute.draw do
   post 'assembly/delete_node_group' => 'assembly#delete_node_group'
   post 'assembly/get_node_groups' => 'assembly#get_node_groups'
   post 'assembly/get_nodes_without_node_groups' => 'assembly#get_nodes_without_node_groups'
+  post 'assembly/task_action_list' => 'assembly#task_action_list'
 
   # ATTRIBUTE
   post 'attribute/set' => 'attribute#set'

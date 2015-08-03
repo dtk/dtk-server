@@ -177,7 +177,18 @@ assembly_nodes  =
           join_cond: { node_node_id: q(:node, :id) },
           cols: [:id, :group_id, :display_name, :component_type, :version, :has_override_version, :component_template_id]
         }]
-     }
+    },
+    task_templates: {
+      type: :json,
+      hidden: true,
+      remote_dependencies: [{
+        model_name: :task_template,
+        convert: true,
+        join_type: :inner,
+        join_cond: { module_service_id: :service_module__id },
+        cols: [:id, :ref, :group_id, :ancestor_id, :display_name, :task_action, :content, :component_component_id, :module_service_id]
+      }]
+    }
   },
   many_to_one: [:project, :library], #MOD_RESTRUCT: may remove library as parent
   one_to_many: [:module_branch]

@@ -41,7 +41,7 @@ module DTK; class ServiceModule
 
       private
 
-      def self.import_task_templates(assembly_hash)
+      def self.import_task_templates(assembly_hash, opts = {})
         ret = DBUpdateHash.new()
         workflows_with_actions =
           if workflow = Constant.matches?(assembly_hash, :Workflow)
@@ -55,19 +55,21 @@ module DTK; class ServiceModule
           end
 
         if workflows_with_actions
-          ret = workflows_with_actions.inject(ret) { |h, r| h.merge(parse_workflow(r[:workflow], r[:action])) }
+          ret = workflows_with_actions.inject(ret) { |h, r| h.merge(parse_workflow(r[:workflow], r[:action], opts)) }
         end
 
-        ret.mark_as_complete()
+        ret
       end
 
-      def self.parse_workflow(workflow_hash, workflow_action = nil)
+      def self.parse_workflow(workflow_hash, workflow_action = nil, opts = {})
         # we explicitly want to delete from workflow_hash; workflow_action can be nil
         action_under_key = workflow_hash.delete(Constant::WorkflowAction)
-
         workflow_action ||= action_under_key
-        if workflow_action.nil? || Constant.matches?(workflow_action, :CreateWorkflowAction)
-          workflow_action = Task::Template.default_task_action()
+
+        if opts[:service_module_workflow]
+          workflow_action = validate_service_module_workflow(workflow_hash, workflow_action)
+        else
+          workflow_action = Task::Template.default_task_action() if workflow_action.nil? || Constant.matches?(workflow_action, :CreateWorkflowAction)
         end
 
         task_template_ref = workflow_action
@@ -84,6 +86,19 @@ module DTK; class ServiceModule
           if base_tags = attr_info['tags'] || ([attr_info['tag']] if attr_info['tag'])
             add_attribute_tags(cmp_ref, attr_name, base_tags)
           end
+        end
+      end
+
+      def self.validate_service_module_workflow(workflow_hash, workflow_action)
+        fail ErrorUsage.new("Service module workflow cannot have 'assembly_action'.") if workflow_hash.key?('assembly_action')
+
+        if workflow_action
+          fail ErrorUsage.new("Service module workflow cannot have 'create' action.") if workflow_action.eql?('create')
+        else
+          name = workflow_hash['name']
+          fail ErrorUsage.new("Unexpected that service_module workflow does not have name parameter.") unless name
+          fail ErrorUsage.new("Service module workflow cannot have 'create' action.") if name.eql?('create')
+          name
         end
       end
 

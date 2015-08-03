@@ -20,6 +20,7 @@ module Ramaze::Helper
           c = ret_session_context_id()
           ret = @test_user ||= XYZ::User.get_user(ModelHandle.new(c, :user), R8::Config[:development_test_user])
         end
+        return nil
       end
       ret
     end

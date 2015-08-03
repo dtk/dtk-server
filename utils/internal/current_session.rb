@@ -1,4 +1,4 @@
-module XYZ
+module DTK
   class CurrentSession
     extend Innate::StateAccessor
     state_accessor :user_object, :auth_filters, :access_time, :repoman_session_id

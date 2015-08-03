@@ -20,10 +20,21 @@ module DTK
       model_name = route.first.to_sym
       # we rewrite route key to new mapped one
       route_key = route.join('/')
+
+      # we check cookie data
       begin
         ramaze_user = user_object()
       rescue ::Sequel::DatabaseDisconnectError, ::Sequel::DatabaseConnectionError => e
         respond(e, 403)
+      end
+
+      # we check simple http authentication now
+      if ramaze_user.nil?
+        # check requests for AUTHENTICATION HEADERS
+        simple_auth_login = false
+        simple_http_auth_creds = check_simple_http_authentication()
+        simple_auth_login = login_without_response(simple_http_auth_creds) if simple_http_auth_creds
+        ramaze_user = user_object() if simple_auth_login
       end
 
       unless route.first == 'user'

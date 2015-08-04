@@ -100,7 +100,7 @@ module DTK
         run_action_set(action_set)
       end
 
-      Log.info("USER -- : '#{ramaze_user[:username]}'")
+      Log.info("USER -- : '#{ramaze_user[:username]}'") if ramaze_user
     end
 
     private

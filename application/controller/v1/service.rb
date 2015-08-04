@@ -102,7 +102,27 @@ module DTK
 
       def rest__create_assembly
         service = service_object()
-        rest_ok_response
+        assembly_template_name, service_module_name, module_namespace = get_template_and_service_names_params(service)
+
+        if assembly_template_name.nil? || service_module_name.nil?
+          fail ErrorUsage.new('SERVICE-NAME/ASSEMBLY-NAME cannot be determined and must be explicitly given')
+        end
+
+        project = get_default_project()
+        opts = {mode: :create, local_clone_dir_exists: false }
+
+        if namespace = ret_request_params(:namespace)
+          opts.merge!(namespace: namespace)
+        elsif ret_request_params(:use_module_namespace)
+          opts.merge!(namespace: module_namespace)
+        end
+
+        if description = ret_request_params(:description)
+          opts.merge!(description: description)
+        end
+
+        service_module = Assembly::Template.create_or_update_from_instance(project, service, service_module_name, assembly_template_name, opts)
+        rest_ok_response service_module.ret_clone_update_info()
       end
 
       def rest__delete_destroy

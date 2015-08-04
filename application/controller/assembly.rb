@@ -457,6 +457,7 @@ module DTK
       if assembly_template_name.nil? || service_module_name.nil?
         fail ErrorUsage.new('SERVICE-NAME/ASSEMBLY-NAME cannot be determined and must be explicitly given')
       end
+
       project = get_default_project()
       opts = ret_symbol_params_hash(:mode)
 

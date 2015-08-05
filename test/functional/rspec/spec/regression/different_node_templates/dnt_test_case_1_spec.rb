@@ -16,7 +16,7 @@ service_name = 'dnt_test_case_1_instance'
 assembly_name = 'bootstrap::node_with_params'
 
 os_attribute = 'os_identifier'
-memory_size_attribute = 'memory_size'
+instance_size_attribute = 'instance_size'
 OS_Memory = Struct.new(:os, :memory)
 os_memory_array = [OS_Memory.new('precise', 't1.micro'), OS_Memory.new('rhel6', 't1.micro')]
 
@@ -44,7 +44,7 @@ describe '(Different Node Templates) Test Case 1: Stage existing assembly with O
     end
 
     context "For #{os} and #{memory} combination, set MEMORY_SIZE attribute" do
-      include_context 'Set attribute', dtk_common, memory_size_attribute, memory
+      include_context 'Set attribute', dtk_common, instance_size_attribute, memory
     end
 
     context "For #{os} and #{memory} combination, converge function" do

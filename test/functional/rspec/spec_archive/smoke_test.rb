@@ -160,10 +160,10 @@ def deploy_test_assembly(opts)
 
     attributes = JSON.parse(send_request('/rest/assembly/info_about', { subtype: 'instance', about: 'attributes', assembly_id: assemblyId, filter: nil }, opts))
 
-    memory_size_id = attributes['data'].find { |x| x['display_name'].include? 'memory_size' }['id']
+    instance_size_id = attributes['data'].find { |x| x['display_name'].include? 'instance_size' }['id']
     os_identifier_id = attributes['data'].find { |x| x['display_name'].include? 'os_identifier' }['id']
 
-    set_memory_attribute_response = send_request('/rest/assembly/set_attributes', { value: MEMORY_SIZE, pattern: memory_size_id, assembly_id: assemblyId }, opts)
+    set_memory_attribute_response = send_request('/rest/assembly/set_attributes', { value: MEMORY_SIZE, pattern: instance_size_id, assembly_id: assemblyId }, opts)
     ap set_memory_attribute_response
 
     set_os_identifier_attribute_response = send_request('/rest/assembly/set_attributes', { value: os_identifier, pattern: os_identifier_id, assembly_id: assemblyId }, opts)

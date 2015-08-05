@@ -16,8 +16,8 @@ service_name = 'stda_test_case_3_instance'
 assembly_name = 'bootstrap::node_with_params'
 os = 'precise'
 os_attribute = 'os_identifier'
-memory_size = 't1.micro'
-memory_size_attribute = 'memory_size'
+instance_size = 't1.micro'
+instance_size_attribute = 'instance_size'
 dtk_common = Common.new(service_name, assembly_name)
 
 describe '(Staging And Deploying Assemblies) Test Case 3: Deploy from assembly (stage and converge), stop the running instance (nodes) and then delete service' do
@@ -38,7 +38,7 @@ describe '(Staging And Deploying Assemblies) Test Case 3: Deploy from assembly (
   end
 
   context 'Set Memory attribute function' do
-    include_context 'Set attribute', dtk_common, memory_size_attribute, memory_size
+    include_context 'Set attribute', dtk_common, instance_size_attribute, instance_size
   end
 
   context 'Converge function' do

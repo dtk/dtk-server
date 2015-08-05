@@ -126,7 +126,7 @@ module DTK
       end
       private_class_method :get_node_binding_rulesets
 
-      def self.legal_memory_sizes(model_handle)
+      def self.legal_instance_sizes(model_handle)
         public_library = Library.get_public_library(model_handle.createMH(:library))
         sp_hash = {
           cols: [:id, :external_ref],

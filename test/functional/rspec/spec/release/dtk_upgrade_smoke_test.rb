@@ -21,8 +21,8 @@ service_name = 'dtk_release_smoke_test'
 assembly_name = 'test_service::node_with_params'
 os_templates = ['precise']
 os_attribute = 'os_identifier'
-memory_size = 't1.micro'
-memory_size_attribute = 'memory_size'
+instance_size = 't1.micro'
+instance_size_attribute = 'instance_size'
 node_name = 'node1'
 component_module_name = "test_module"
 local_component_module_name = 'internal:test_module'
@@ -72,7 +72,7 @@ describe "DTK Server smoke test release" do
     end
 
     context "Set memory size attribute function" do
-      include_context "Set attribute", dtk_common, memory_size_attribute, memory_size
+      include_context "Set attribute", dtk_common, instance_size_attribute, instance_size
     end
 
 #    context "Converge function" do

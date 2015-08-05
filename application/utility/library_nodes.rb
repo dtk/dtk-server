@@ -209,10 +209,10 @@ module XYZ
          'data_type' => 'string',
          'display_name' => 'os_identifier'
        },
-       'memory_size' => {
+       'instance_size' => {
          'required' => false,
          'data_type' => 'string',
-         'display_name' => 'memory_size'
+         'display_name' => 'instance_size'
        }
      }
    end

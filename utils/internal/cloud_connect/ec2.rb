@@ -49,14 +49,18 @@ module DTK
         end
       end
 
-      ServerCreateRetries = 5
+      SERVER_CREATE_RETRIES = 5
       ServerCreateMutex = Mutex.new
+
       def server_create(options)
-        tries = ServerCreateRetries
+        # we add tag to identify it as slave service instance
+        options[:tags] = options.fetch(:tags, Hash.new).merge('service.instance.ttl' => R8::Config[:ec2][:service_instance][:ttl])
+
+        tries = SERVER_CREATE_RETRIES
         ret = nil
         while ret.nil? and tries > 0
-          ServerCreateMutex.synchronize do 
-            begin 
+          ServerCreateMutex.synchronize do
+            begin
               Log.info("Start mutex server_create for #{options[:client_token]}")
               ret = hash_form(conn(:server_create).servers.create(options))
               Log.info("End mutex server_create for #{options[:client_token]}")
@@ -71,6 +75,7 @@ module DTK
 
       # TODO: cleanup
       StartRetries = 10
+
       def server_start(instance_id)
         (tries = StartRetries).times do
           begin

@@ -50,16 +50,12 @@ module DTK; class Assembly
     end
 
     def self.create_or_update_from_instance(project, assembly_instance, service_module_name, assembly_template_name, opts = {})
-      namespace = opts[:namespace] || Namespace.default_namespace_name
-      opts.merge!(namespace: namespace)
-
       service_module = Factory.get_or_create_service_module(project, service_module_name, opts)
       merge_message = Factory.create_or_update_from_instance(assembly_instance, service_module, assembly_template_name, opts)
+      service_module.merge!(merge_warning_message: merge_message) if merge_message
 
       service_module_branch = service_module.get_workspace_module_branch()
       service_module_branch.set_dsl_parsed!(true)
-
-      service_module.merge!(merge_warning_message: merge_message) if merge_message
 
       service_module
     end

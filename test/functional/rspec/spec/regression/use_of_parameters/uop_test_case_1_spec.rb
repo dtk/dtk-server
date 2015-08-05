@@ -18,9 +18,9 @@ service_module_name = 'bootstrap'
 local_namespace = 'r8'
 
 os_attribute = 'os_identifier'
-memory_size_attribute = 'memory_size'
+instance_size_attribute = 'instance_size'
 os = 'precise'
-memory_size = 't1.micro'
+instance_size = 't1.micro'
 
 dtk_common = Common.new(service_name, assembly_name)
 dtk_common2 = Common.new(new_service_name, "#{service_module_name}::#{new_assembly}")
@@ -59,7 +59,7 @@ describe '(Use Of Parameters) Test Case 1: Check possibility to create assembly 
   end
 
   context 'Set memory size attribute function' do
-    include_context 'Set attribute', dtk_common2, memory_size_attribute, memory_size
+    include_context 'Set attribute', dtk_common2, instance_size_attribute, instance_size
   end
 
   context 'Converge function' do

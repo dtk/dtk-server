@@ -28,7 +28,7 @@ module DTK
     private :assembly_node_attribute
     MappingToAssemblyAttr = {
       image: :os_identifier,
-      size: :memory_size
+      size: :instance_size
     }
 
     def self.get_node_bindings(assembly_template_idh)

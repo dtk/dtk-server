@@ -13,7 +13,7 @@ require './lib/parameters_setting_spec'
 service_name = 'uop_test_case_6_instance'
 assembly_name = 'bootstrap::node_with_params'
 os = 'precise'
-memory_size = 't1.micro'
+instance_size = 't1.micro'
 node_name = 'node1'
 
 node_param_list = []
@@ -22,7 +22,7 @@ node_param_list << 'ec2_public_address'
 node_param_list << 'private_dns_name'
 
 attr_param_list = []
-attr_param_list << 'memory_size'
+attr_param_list << 'instance_size'
 attr_param_list << 'os_identifier'
 
 dtk_common = Common.new(service_name, assembly_name)
@@ -92,8 +92,8 @@ describe '(Use Of Parameters) Test Case 6: Check possibility to query list of no
     include_context 'Set attribute', dtk_common, 'os_identifier', os
   end
 
-  context 'Set memory_size attribute function' do
-    include_context 'Set attribute', dtk_common, 'memory_size', memory_size
+  context 'Set instance_size attribute function' do
+    include_context 'Set attribute', dtk_common, 'instance_size', instance_size
   end
 
   context 'Converge function' do
@@ -118,7 +118,7 @@ describe '(Use Of Parameters) Test Case 6: Check possibility to query list of no
   end
 
   context 'Check memory size param after converge' do
-    include_context 'Check param', dtk_common, node_name, 'external_ref', memory_size
+    include_context 'Check param', dtk_common, node_name, 'external_ref', instance_size
   end
 
   context 'Check component on node' do
@@ -126,7 +126,7 @@ describe '(Use Of Parameters) Test Case 6: Check possibility to query list of no
   end
 
   context 'Attribute params check function' do
-    it "checks if all attribute parameters (memory_size, os_identifier) exist on node #{node_name}" do
+    it "checks if all attribute parameters (instance_size, os_identifier) exist on node #{node_name}" do
       puts 'Check attribute params', '----------------------'
       param_existance = check_param_existance_on_attribute(dtk_common, node_name, attr_param_list)
       puts ''
@@ -138,8 +138,8 @@ describe '(Use Of Parameters) Test Case 6: Check possibility to query list of no
     include_context 'Check attribute', dtk_common, node_name, 'os_identifier', os
   end
 
-  context 'Check memory_size attribute after converge' do
-    include_context 'Check attribute', dtk_common, node_name, 'memory_size', memory_size
+  context 'Check instance_size attribute after converge' do
+    include_context 'Check attribute', dtk_common, node_name, 'instance_size', instance_size
   end
 
   context 'Delete and destroy service function' do

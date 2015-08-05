@@ -208,7 +208,7 @@ module DTK
     def rest__info_about_task
       assembly = ret_assembly_instance_object()
       task_action = ret_request_params(:task_action)
-      response = assembly.get_task_template_serialized_content(task_action)
+      response = Task::Template.get_serialized_content(assembly, task_action)
       response_opts = {}
       if response
         response_opts.merge!(encode_into: :yaml)
@@ -216,6 +216,11 @@ module DTK
         response = { message: "Task not yet generated for assembly (#{assembly.get_field?(:display_name)})" }
       end
       rest_ok_response response, response_opts
+    end
+
+    def rest__task_action_list
+      assembly = ret_assembly_instance_object()
+      rest_ok_response assembly.get_task_templates(set_display_names: true)
     end
 
     def rest__cancel_task
@@ -460,12 +465,10 @@ module DTK
 
       project = get_default_project()
       opts = ret_symbol_params_hash(:mode)
-
-      if namespace = ret_request_params(:namespace)
-        opts.merge!(namespace: namespace)
-      elsif ret_request_params(:use_module_namespace)
-        opts.merge!(namespace: module_namespace)
-      end
+      
+      namespace = ret_request_params(:namespace) ||
+        (ret_request_param_boolean(:use_module_namespace) ? module_namespace : Namespace.default_namespace_name)
+      opts.merge!(namespace: namespace)
 
       if description = ret_request_params(:description)
         opts.merge!(description: description)
@@ -869,7 +872,7 @@ module DTK
       target_nodes = ret_matching_nodes(assembly)
 
       # stop if service staged
-      fail ErrorUsage.new('Nodes are not running, has service been started?') if assembly.node_admin_status_all_pending?()
+      fail ErrorUsage.new('Nodes are not running, has service been started?') unless assembly.node_admin_status_all_running?(target_nodes)
 
       # check existance of key and system user in database
       system_user = params[:system_user]

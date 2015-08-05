@@ -1,0 +1,32 @@
+remote_repo.host = ${REPOMAN_HOSTNAME}
+repo.remote.new_client = true
+repo.remote.rest_port = ${REPOMAN_PORT}
+repo.remote.git_user = git
+repo.remote.tenant_name = dtk100
+
+dsl.service.integer_version.default = 4
+dsl.component.integer_version.default = 4
+
+server_public_dns = ${SERVER_HOSTNAME}
+local_repo.host = dtk100.dtk.io
+repo.git.dns = ${SERVER_HOSTNAME}
+db.host = localhost
+db.name = dtk100
+mcollective.host = ${SERVER_HOSTNAME}
+mcollective.ssh.local.public_key = /home/dtk100/rsa_identity_dir/mcollective_local.pub
+mcollective.ssh.local.private_key = /home/dtk100/rsa_identity_dir/mcollective_local
+mcollective.ssh.local.authorized_keys = /home/dtk100/rsa_identity_dir/authorized_keys
+mcollective.ssh.remote.public_key = /home/dtk100/rsa_identity_dir/mcollective_remote.pub
+mcollective.ssh.remote.private_key = /home/dtk100/rsa_identity_dir/mcollective_remote
+mcollective.auth_type = ssh
+mcollective.username = mcollective
+mcollective.password = marionette
+mcollective.collective = mcollective
+server_port = 443
+repo.git.gitolite.admin_directory = /home/dtk100/gitolite-admin/
+repo.git.server_username = git100
+ec2.keypair = testing_use1
+ec2.name_tag.format = ${tenant}-testenv/${assembly}/${node}--${target}
+workflow.temporal_coordination.intra_node = TOTAL_ORDER
+
+idle.up_time_hours = 4

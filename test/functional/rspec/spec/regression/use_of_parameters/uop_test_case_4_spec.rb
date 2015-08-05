@@ -13,7 +13,7 @@ require './lib/parameters_setting_spec'
 service_name = 'uop_test_case_4_instance'
 assembly_name = 'bootstrap::node_with_params'
 os = 'precise'
-memory_size = 't1.micro'
+instance_size = 't1.micro'
 node_name = 'node1'
 
 dtk_common = Common.new(service_name, assembly_name)
@@ -35,8 +35,8 @@ describe '(Use Of Parameters) Test Case 4: Add optional params on existing attri
     include_context 'Set attribute', dtk_common, 'os_identifier', os
   end
 
-  context 'Set memory_size attribute function' do
-    include_context 'Set attribute', dtk_common, 'memory_size', memory_size
+  context 'Set instance_size attribute function' do
+    include_context 'Set attribute', dtk_common, 'instance_size', instance_size
   end
 
   context 'Converge function' do
@@ -47,8 +47,8 @@ describe '(Use Of Parameters) Test Case 4: Add optional params on existing attri
     include_context 'Check attribute', dtk_common, node_name, 'os_identifier', os
   end
 
-  context 'Check memory_size attribute after converge' do
-    include_context 'Check attribute', dtk_common, node_name, 'memory_size', memory_size
+  context 'Check instance_size attribute after converge' do
+    include_context 'Check attribute', dtk_common, node_name, 'instance_size', instance_size
   end
 
   context 'Delete and destroy service function' do

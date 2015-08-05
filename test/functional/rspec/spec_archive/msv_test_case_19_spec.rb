@@ -21,8 +21,8 @@ assembly_template = 'bootstrap::node_with_params'
 $assembly_id = 0
 os = 'rh5.7-64'
 os_attribute = 'os_identifier'
-memory_size = 't1.micro'
-memory_size_attribute = 'memory_size'
+instance_size = 't1.micro'
+instance_size_attribute = 'instance_size'
 node_name = 'node1'
 
 dtk_common = Common.new(assembly_name, assembly_template)
@@ -55,7 +55,7 @@ describe '(Modules, Services and Versioning) Test Case 19: Import module from pu
   end
 
   context 'Set Memory attribute function' do
-    include_context 'Set attribute', dtk_common, memory_size_attribute, memory_size
+    include_context 'Set attribute', dtk_common, instance_size_attribute, instance_size
   end
 
   context 'Add component to assembly node' do

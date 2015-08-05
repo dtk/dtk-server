@@ -4,7 +4,6 @@ require 'pp'
 require 'json'
 require 'awesome_print'
 require 'yaml'
-require 'pry'
 
 class RepomanRestApi
   attr_reader :repoman_url

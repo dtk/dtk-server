@@ -13,10 +13,10 @@ require './lib/parameters_setting_spec'
 service_name = 'uop_test_case_5_instance'
 assembly_name = 'bootstrap::node_with_params'
 os = 'precise'
-memory_size = 't1.micro'
+instance_size = 't1.micro'
 node_name = 'node1'
 cent_os = 'centos6.4'
-centos_memory_size = 'm1.small'
+centos_instance_size = 'm1.small'
 
 dtk_common = Common.new(service_name, assembly_name)
 
@@ -37,8 +37,8 @@ describe '(Use Of Parameters) Test Case 5: Change optional params on existing at
     include_context 'Set attribute', dtk_common, 'os_identifier', os
   end
 
-  context 'Set memory_size attribute function' do
-    include_context 'Set attribute', dtk_common, 'memory_size', memory_size
+  context 'Set instance_size attribute function' do
+    include_context 'Set attribute', dtk_common, 'instance_size', instance_size
   end
 
   context 'Converge function' do
@@ -49,16 +49,16 @@ describe '(Use Of Parameters) Test Case 5: Change optional params on existing at
     include_context 'Check attribute', dtk_common, node_name, 'os_identifier', os
   end
 
-  context 'Check memory_size attribute after converge' do
-    include_context 'Check attribute', dtk_common, node_name, 'memory_size', memory_size
+  context 'Check instance_size attribute after converge' do
+    include_context 'Check attribute', dtk_common, node_name, 'instance_size', instance_size
   end
 
   context "Set os attribute function with different value #{cent_os}" do
     include_context 'Set attribute', dtk_common, 'os_identifier', cent_os
   end
 
-  context "Set memory_size attribute function with different value #{centos_memory_size}" do
-    include_context 'Set attribute', dtk_common, 'memory_size', centos_memory_size
+  context "Set instance_size attribute function with different value #{centos_instance_size}" do
+    include_context 'Set attribute', dtk_common, 'instance_size', centos_instance_size
   end
 
   context 'Converge function again' do
@@ -69,8 +69,8 @@ describe '(Use Of Parameters) Test Case 5: Change optional params on existing at
     include_context 'Check attribute', dtk_common, node_name, 'os_identifier', cent_os
   end
 
-  context 'Check changed memory_size attribute after converge' do
-    include_context 'Check attribute', dtk_common, node_name, 'memory_size', centos_memory_size
+  context 'Check changed instance_size attribute after converge' do
+    include_context 'Check attribute', dtk_common, node_name, 'instance_size', centos_instance_size
   end
 
   context 'Delete and destroy service function' do

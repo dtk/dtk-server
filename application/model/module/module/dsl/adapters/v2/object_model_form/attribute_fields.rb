@@ -1,7 +1,7 @@
 module DTK; class ModuleDSL; class V2
   class ObjectModelForm
     class AttributeFields < self
-      def self.convert(parent, attr_name, info, opts = {})
+      def self.convert(parent__class, attr_name, info, opts = {})
         ret = OutputHash.new('display_name' => attr_name)
         side_effect_settings = {}
 
@@ -10,7 +10,7 @@ module DTK; class ModuleDSL; class V2
         end
 
         # set external refs
-        if parent.kind_of?(Component)
+        if parent__class < Component
           external_ref = 
             if opts[:constant_attribute] || info['constant']
               side_effect_settings.merge!(Attribute::Constant.side_effect_settings())

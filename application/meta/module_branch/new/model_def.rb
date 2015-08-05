@@ -181,8 +181,19 @@ end
          filter: [:eq, :type, 'composite'],
          cols: [:id, :group_id, :display_name]
        }]
+    },
+    task_templates: {
+      type: :json,
+      hidden: true,
+      remote_dependencies: [{
+        model_name: :task_template,
+        convert: true,
+        join_type: :inner,
+        join_cond: { module_branch_id: :module_branch__id },
+        cols: [:id, :ref, :group_id, :ancestor_id, :display_name, :task_action, :content, :component_component_id, :module_service_id]
+      }]
     }
   },
   many_to_one: [:component_module, :service_module, :test_module, :node_module],
-  one_to_many: [:module_ref]
+  one_to_many: [:module_ref, :task_template]
 }

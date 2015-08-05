@@ -59,7 +59,7 @@ module DTK
         components_hash       = ComponentsHash.new(line_array)
         assembly_hash         = components_hash.parse_and_order_components_hash(assembly_hash)
         assembly_string       = Aux.serialize(assembly_hash, :yaml).gsub("---\n", '')
-        assembly_file_content = add_empty_lines_and_comments(assembly_string)
+        assembly_file_content = prettify_assembly_string(assembly_string)
 
         assembly_file.concat(assembly_file_content)
 
@@ -68,12 +68,14 @@ module DTK
 
         assembly_file
       end
-
-      def add_empty_lines_and_comments(assembly_string)
+      # add_empty_lines_and_comments
+      def prettify_assembly_string(assembly_string)
         assembly_file_content = ''
 
         assembly_string.each_line do |line|
+          line.gsub!('assembly_wide/', '') if line.include?('assembly_wide/')
           str_line = line.strip.gsub('- ', '')
+
           if str_line.eql?("''")
             assembly_file_content << "\n"
           elsif str_line.start_with?('!') && str_line.include?('#')

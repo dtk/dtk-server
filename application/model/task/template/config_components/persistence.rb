@@ -43,8 +43,8 @@ module DTK; class Task; class Template; class ConfigComponents
 
       private
 
-      def self.get_serialized_content_from_assembly(assembly, task_action = nil, opts = {})
-        ret = assembly.get_task_template(task_action)
+      def self.get_serialized_content_from_assembly(assembly, task_action, opts = {})
+        ret = Task::Template.get_task_template(assembly, task_action)
         ret && ret.serialized_content_hash_form(opts)
       end
 

@@ -66,7 +66,24 @@ module DTK
       unless R8::Config[:git_server_on_dtk_server]
         fail Error.new('Not implemented yet: repo_server_fingerprint when R8::Config[:git_server_on_dtk_server] is not true')
       end
-      @ssh_rsa_fingerprint ||= `ssh-keyscan -H -t rsa #{repo_server_dns()}`
+      @ssh_rsa_fingerprint ||= get_tenant_rsa_key()
+      @ssh_rsa_fingerprint
+    end
+
+    def self.get_tenant_rsa_key
+      result = nil
+      begin
+        number_of_retries ||= 3
+        result = `ssh-keyscan -H -t rsa #{repo_server_dns()}`
+        raise Exception, "Try again ssh keyscan" if result.empty?
+      rescue Exception
+        unless (tries -= 1).zero?
+          sleep(1)
+          retry
+        end
+        fail Error.new('Unable to retrieve usable host RSA key, aborting operation!')
+      end
+      result
     end
 
     #

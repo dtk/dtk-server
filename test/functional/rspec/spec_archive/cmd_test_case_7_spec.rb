@@ -14,9 +14,9 @@ require './lib/modules_spec'
 assembly_name = 'cmd_test_case_7_instance'
 assembly_template = 'bootstrap::node_with_params'
 os_attribute = 'os_identifier'
-memory_size_attribute = 'memory_size'
+instance_size_attribute = 'instance_size'
 os = 'precise'
-memory_size = 't1.micro'
+instance_size = 't1.micro'
 node_name = 'test1'
 component_name1 = 'temp::sink'
 component_name2 = 'temp::source'
@@ -98,7 +98,7 @@ describe '(Component Module DSL) Test Case 7: Converge assembly with modified mo
   end
 
   context 'Set memory size attribute function' do
-    include_context 'Set attribute', dtk_common, memory_size_attribute, memory_size
+    include_context 'Set attribute', dtk_common, instance_size_attribute, instance_size
   end
 
   context 'Add components to assembly node' do

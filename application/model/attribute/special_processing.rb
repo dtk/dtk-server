@@ -54,8 +54,8 @@ module DTK; class Attribute
 
     SpecialProcessingInfo = {
       node: {
-        memory_size: {
-          legal_values: lambda { |a| Node::Template.legal_memory_sizes(a.model_handle(:node)) },
+        instance_size: {
+          legal_values: lambda { |a| Node::Template.legal_instance_sizes(a.model_handle(:node)) },
           proc: lambda { |a, v| Update::MemorySize.new(a, v).process() }
         },
         os_identifier: {

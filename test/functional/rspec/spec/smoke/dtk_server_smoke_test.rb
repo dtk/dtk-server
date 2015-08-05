@@ -14,8 +14,8 @@ service_name = 'smoke_test_instance'
 assembly_name = 'bootstrap::node_with_params'
 os_templates = ['precise','rhel6']
 os_attribute = 'os_identifier'
-memory_size = 't1.micro'
-memory_size_attribute = 'memory_size'
+instance_size = 't1.micro'
+instance_size_attribute = 'instance_size'
 node_name = 'node1'
 component_module_name = "test_module"
 component_module_namespace = "dtk17"
@@ -56,7 +56,7 @@ describe "DTK Server smoke test" do
     end
 
     context "Set memory size attribute function" do
-      include_context "Set attribute", dtk_common, memory_size_attribute, memory_size
+      include_context "Set attribute", dtk_common, instance_size_attribute, instance_size
     end
 
     context "Add components from test module to service node" do

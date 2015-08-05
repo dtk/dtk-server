@@ -12,7 +12,7 @@ module DTK; class ServiceModule
       def self.import_assembly_top(assembly_ref, assembly_hash, module_branch, module_name, opts = {})
         ret = super(assembly_ref, assembly_hash, module_branch, module_name, opts)
         ret_assembly_hash = ret.values.first
-        ret_assembly_hash.merge!('task_template' => import_task_templates(assembly_hash))
+        ret_assembly_hash.merge!('task_template' => import_task_templates(assembly_hash).mark_as_complete())
         ret
       end
 
@@ -55,7 +55,7 @@ module DTK; class ServiceModule
 
       include ServiceDSLCommonMixin
 
-      def self.import_task_templates(assembly_hash)
+      def self.import_task_templates(assembly_hash, opts = {})
         ret = DBUpdateHash.new()
         # TODO: just treating the default action
         # TODO: enhance to parse the workflow, such as checking all components in workflow
@@ -67,7 +67,13 @@ module DTK; class ServiceModule
               fail ErrorUsage.new("Unexpected workflow task action (#{assembly_action})")
             end
           end
-          task_template_ref = task_action = Task::Template.default_task_action()
+
+          if opts[:service_module_workflow]
+            task_template_ref = task_action = validate_service_module_workflow(workflow)
+          else
+            task_template_ref = task_action = Task::Template.default_task_action()
+          end
+
           update = {
             task_template_ref => {
               'task_action' => task_action,
@@ -77,6 +83,13 @@ module DTK; class ServiceModule
           ret.merge!(update)
         end
         ret.mark_as_complete()
+      end
+
+      def self.validate_service_module_workflow(workflow)
+        name = workflow['name']
+        fail ErrorUsage.new("Unexpected that service_module workflow does not have name parameter.") unless name
+        fail ErrorUsage.new("Service module workflow cannot have 'create' action.") if name.eql?('create')
+        name
       end
 
       def self.pp_port_ref(port_ref)

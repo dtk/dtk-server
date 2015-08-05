@@ -259,7 +259,7 @@ module DTK; class Task
       Action::CreateNode.add_attributes!(attr_mh, all_actions)
       ret
     end
-    CreateNodeStageTemporalOrder = 'sequential'
+    CreateNodeStageTemporalOrder = 'concurrent'
 
     def create_running_node_task_from_assembly(task_mh, state_change_list, opts = {})
       main_task = opts[:main_task]

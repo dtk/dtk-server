@@ -464,12 +464,10 @@ module DTK
       end
       project = get_default_project()
       opts = ret_symbol_params_hash(:mode)
-
-      if namespace = ret_request_params(:namespace)
-        opts.merge!(namespace: namespace)
-      elsif ret_request_params(:use_module_namespace)
-        opts.merge!(namespace: module_namespace)
-      end
+      
+      namespace = ret_request_params(:namespace) ||
+        (ret_request_param_boolean(:use_module_namespace) ? module_namespace : Namespace.default_namespace_name)
+      opts.merge!(namespace: namespace)
 
       if description = ret_request_params(:description)
         opts.merge!(description: description)

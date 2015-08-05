@@ -245,16 +245,6 @@ module DTK; class  Assembly
       id_handle()
     end
 
-    def create_or_update_template(service_module, template_name)
-      service_module_name = service_module.get_field?(:display_name)
-      project = service_module.get_project()
-      node_idhs = get_nodes().map(&:id_handle)
-      if node_idhs.empty?
-        fail ErrorUsage.new("Cannot find any nodes associated with assembly (#{get_field?(:display_name)})")
-      end
-      Assembly::Template.create_or_update_from_instance(project, node_idhs, template_name, service_module_name)
-    end
-
     def set_attribute(attribute, value, opts = {})
       set_attributes([{ pattern: attribute, value: value }], opts)
     end

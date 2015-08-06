@@ -54,7 +54,8 @@ module DTK
 
       def server_create(options)
         # we add tag to identify it as slave service instance
-        options[:tags] = options.fetch(:tags, Hash.new).merge('service.instance.ttl' => R8::Config[:ec2][:service_instance][:ttl])
+        service_instance_ttl = R8::Config[:ec2][:service_instance][:ttl] || R8::Config[:idle][:up_time_hours]
+        options[:tags] = options.fetch(:tags, Hash.new).merge('service.instance.ttl' => service_instance_ttl)
 
         tries = SERVER_CREATE_RETRIES
         ret = nil

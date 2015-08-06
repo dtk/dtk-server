@@ -35,12 +35,14 @@ gem 'rugged', '0.17.0.b7'
 #  when '1.9.3' then gem 'rugged','0.19.0'
 #end
 
+group :development do
 case RUBY_VERSION
   when /1.8.7.*/ then
     gem 'ruby-debug', '0.10.4'
   else
     gem 'debugger'
     gem 'em-ssh', '0.6.5'
+end
 end
 
 # required to successfully run it

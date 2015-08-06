@@ -301,6 +301,3 @@ DEPENDENCIES
   sshkeyauth (= 0.0.11)
   stomp (= 1.1.9)
   thin
-
-BUNDLED WITH
-   1.10.3

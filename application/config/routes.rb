@@ -212,9 +212,6 @@ R8::ReactorRoute.draw do
   # METADATA
   get 'metadata/get_metadata/:metadata_file' => 'metadata#get_metadata'
 
-  # MONITORING_ITEM
-  post 'monitoring_item/check_idle' => 'monitoring_item#check_idle'
-
   # NODE TEMPLATE
   post 'node/list' => 'node#list'
   post 'node/image_upgrade' => 'node#image_upgrade'

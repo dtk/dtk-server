@@ -7,7 +7,6 @@ module DTK; class AssemblyModule
       new(assembly).prepare_for_edit(component_module)
     end
     def prepare_for_edit(component_module)
-      get_applicable_component_instances(component_module)
       create_assembly_branch?(component_module)
     end
 

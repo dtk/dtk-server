@@ -8,7 +8,6 @@ module DTK; class AssemblyModule
       new(assembly).prepare_for_edit(component_module, opts)
     end
     def prepare_for_edit(component_module, opts = {})
-      get_applicable_component_instances(component_module)
       create_assembly_branch?(component_module, opts)
     end
 
@@ -16,7 +15,6 @@ module DTK; class AssemblyModule
       new(assembly).component_module_workspace_info(component_module, opts)
     end
     def component_module_workspace_info(component_module, opts = {})
-      get_applicable_component_instances(component_module, raise_error_if_empty: true)
       am_version = assembly_module_version()
 
       base_branch = component_module.get_workspace_branch_info()
@@ -176,7 +174,7 @@ module DTK; class AssemblyModule
       Model.get_obj(cmp_template.model_handle(), sp_hash) || fail(Error.new('Unexpected that branch_cmp_template is nil'))
     end
 
-    def get_applicable_component_instances(component_module, _opts = {})
+    def get_applicable_component_instances(component_module)
       assembly_id = @assembly.id()
       component_module.get_associated_component_instances().select do |cmp|
         cmp[:assembly_id] == assembly_id

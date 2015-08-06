@@ -8,7 +8,7 @@ dsl.service.integer_version.default = 4
 dsl.component.integer_version.default = 4
 
 server_public_dns = ${SERVER_HOSTNAME}
-local_repo.host = dtk100.dtk.io
+local_repo.host = ${SERVER_HOSTNAME}
 repo.git.dns = ${SERVER_HOSTNAME}
 db.host = localhost
 db.name = dtk100

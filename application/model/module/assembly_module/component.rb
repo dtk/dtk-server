@@ -158,10 +158,12 @@ module DTK; class AssemblyModule
 new_branch = nil
 Model.Transaction do
       new_branch = component_module.create_new_version(base_version, am_version, opts)
-pp new_branch 
+#pp new_branch 
 new_branch.update_obj!(*ModuleBranch.common_columns())
-pp new_branch
-      ModuleRefs::Lock.update_for_new_module_branch(@assembly_instance, component_module, new_branch)
+pp [:new_branch, new_branch]
+pp [:get_module_refs_lock?, ModuleRefs::Lock.get_module_refs_lock?(@assembly)]
+pp [:compute,  ModuleRefs::Lock.compute(@assembly)]
+      ModuleRefs::Lock.update_for_new_module_branch(@assembly, component_module, new_branch)
 end
       new_branch
     end

@@ -83,7 +83,7 @@ module DTK
         ret
       end
 
-      private
+# TODO: for testing      private
 
       def self.get_module_refs_lock?(assembly_instance)
         module_ref_locks = ModuleRef::Lock.get(assembly_instance)

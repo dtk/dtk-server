@@ -2,7 +2,6 @@ module DTK; module ModuleMixins
   module Create
   end
   module Create::Class
-    # opts has key :config_agent_type
     def create_module(project, local_params, opts = {})
       local = local_params.create_local(project)
       namespace = local_params.namespace
@@ -35,13 +34,14 @@ module DTK; module ModuleMixins
       module_and_branch_info.merge(module_repo_info: module_repo_info(local_repo_obj, module_and_branch_info, opts_info))
     end
 
-    def create_module_and_branch_obj?(project, repo_idh, local, ancestor_branch_idh = nil)
+    # opts can have keys
+    #  :ancestor_branch_idh
+    #  :current_sha
+    def create_module_and_branch_obj?(project, repo_idh, local, opts = {})
       project_idh = project.id_handle()
       module_name = local.module_name
       namespace = Namespace.find_or_create(project.model_handle(:namespace), local.module_namespace_name)
       ref = local.module_name(with_namespace: true)
-      opts = {}
-      opts.merge!(ancestor_branch_idh: ancestor_branch_idh) if ancestor_branch_idh
       mb_create_hash = ModuleBranch.ret_create_hash(repo_idh, local, opts)
       version_field = mb_create_hash.values.first[:version]
 
@@ -100,7 +100,7 @@ module DTK; module ModuleMixins
   module Create::Instance
     # returns new module branch
     # opts can have keys:
-    #  :sha
+    #  :sha - this is base sha to branch from
     def create_new_version(base_version, new_version, opts = {})
       unless aug_base_branch = get_augmented_workspace_branch(Opts.new(filter: { version: base_version }))
         fail ErrorUsage.new("There is no module (#{pp_module_name()}) in the workspace")
@@ -110,9 +110,10 @@ module DTK; module ModuleMixins
       if get_module_branch_matching_version(new_version)
         fail ErrorUsage.new("Version exists already for module (#{pp_module_name(new_version)})")
       end
-      repo_for_new_version = aug_base_branch.create_new_branch_from_this_branch?(get_project(), aug_base_branch[:repo], new_version, Aux.hash_subset(opts, [:sha]))
-      opts_type_spec = opts.merge(ancestor_branch_idh: aug_base_branch.id_handle())
-      new_branch = create_new_version__type_specific(repo_for_new_version, new_version, opts_type_spec)
+      opts_repo_update = Aux.hash_subset(opts, [:sha])
+      new_version_repo, new_version_sha = aug_base_branch.create_new_branch_from_this_branch?(get_project(), aug_base_branch[:repo], new_version, opts_repo_update)
+      opts_create_branch = opts.merge(ancestor_branch_idh: aug_base_branch.id_handle(), current_sha: new_version_sha)
+      new_branch = create_new_version__type_specific(new_version_repo, new_version, opts_create_branch)
       ModuleRefs.clone_component_module_refs(aug_base_branch, new_branch)
       new_branch
     end

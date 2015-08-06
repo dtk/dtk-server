@@ -363,10 +363,13 @@ end
     # returns repo for new branch; this just creates repo branch and does not update object model
     # opts can have keys
     #  :sha - sha on base branch to branch from
+    #
+    # This method returns [new_branch_repo, new_branch_sha]
     def create_new_branch_from_this_branch?(project, base_repo, new_version, opts = {})
       branch_name = Location::Server::Local.workspace_branch_name(project, new_version)
-      RepoManager.add_branch_and_push?(branch_name, opts, self)
-      repo_for_version(base_repo, new_version)
+      new_branch_sha = RepoManager.add_branch_and_push?(branch_name, opts, self)
+      new_branch_repo = repo_for_version(base_repo, new_version)
+      [new_branch_repo, new_branch_sha]
     end
 
     def repo_for_version(base_repo, _version)
@@ -486,6 +489,7 @@ end
         version: version_field(local.version)
       }
       assigns.merge!(ancestor_id: ancestor_branch_idh.get_id()) if ancestor_branch_idh
+      assigns.merge!(current_sha: opts[:current_sha]) if opts[:current_sha] 
       ref = branch
       { ref => assigns }
     end

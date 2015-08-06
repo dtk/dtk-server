@@ -4,6 +4,8 @@ module DTK; class AssemblyModule
     r8_nested_require('component', 'attribute')
     r8_nested_require('component', 'get_for_assembly')
 
+    # opts can have keys
+    #  :sha
     def self.prepare_for_edit(assembly, component_module, opts = {})
       new(assembly).prepare_for_edit(component_module, opts)
     end
@@ -11,17 +13,20 @@ module DTK; class AssemblyModule
       create_assembly_branch?(component_module, opts)
     end
 
-    def self.component_module_workspace_info(assembly, component_module, opts = {})
-      new(assembly).component_module_workspace_info(component_module, opts)
+    # TODO: DTK-2206: Aldin; removed opts; double check these are not needed
+    def self.create_assembly_module_branch?(assembly, component_module)
+      new(assembly).create_assembly_module_branch?(component_module)
     end
-    def component_module_workspace_info(component_module, opts = {})
+    def create_assembly_module_branch?(component_module)
       am_version = assembly_module_version()
 
-      base_branch = component_module.get_workspace_branch_info()
-      fail ErrorNoChangesToModule.new(@assembly, component_module) unless base_branch
+      # TODO: DTK-2206: Aldin double check what this test is doing
+      unless base_branch = component_module.get_workspace_branch_info()
+        fail ErrorNoChangesToModule.new(@assembly, component_module)
+      end
 
       unless local_branch = component_module.get_workspace_module_branch(am_version)
-        create_assembly_branch?(component_module, opts)
+        create_assembly_branch?(component_module)
         local_branch = component_module.get_workspace_module_branch(am_version)
       end
 
@@ -133,22 +138,32 @@ module DTK; class AssemblyModule
 
     private
 
+    # opts can have keys
+    #  :sha
+    #  :ret_module_branch - Boolean
+    #  :module_branch_idh (required if ret_module_branch == true)
     def create_assembly_branch?(component_module, opts = {})
       am_version = assembly_module_version()
       unless component_module.get_workspace_module_branch(am_version)
-        create_assembly_branch(component_module, am_version, opts)
+        create_assembly_branch(component_module, am_version, Aux.hash_subset(opts, [:sha]))
       end
       ret = component_module.get_workspace_branch_info(am_version)
-      if opts[:ret_module_branch]
-        ret[:module_branch_idh].create_object()
-      else
-        ret
-      end
+      opts[:ret_module_branch] ? ret[:module_branch_idh].create_object() : ret
     end
 
+    # opts can have keys
+    #  :sha
     def create_assembly_branch(component_module, am_version, opts = {})
       base_version = nil
-      component_module.create_new_version(base_version, am_version, opts)
+new_branch = nil
+Model.Transaction do
+      new_branch = component_module.create_new_version(base_version, am_version, opts)
+pp new_branch 
+new_branch.update_obj!(*ModuleBranch.common_columns())
+pp new_branch
+      ModuleRefs::Lock.update_for_new_module_branch(@assembly_instance, component_module, new_branch)
+end
+      new_branch
     end
 
     def get_branch_template(module_branch, cmp_template)

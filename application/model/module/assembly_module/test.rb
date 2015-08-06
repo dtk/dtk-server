@@ -1,3 +1,6 @@
+# TODO: we may remove TestModule or instead just reuse the AssemblyModule::Component methods
+#       if we keep this in need to update this to reflect changes made to AssemblyModule::Component 
+#       changes to update MoudleRefs::Lock refernces
 module DTK; class AssemblyModule
   class TestModule < self
     r8_nested_require('component', 'ad_hoc_link')

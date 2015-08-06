@@ -159,6 +159,18 @@ module DTK
       ndx_ret.values
     end
 
+    def list_assembly_templates
+      templates_with_nodes = get_assembly_templates()
+      templates_with_nodes.each do |template|
+        nodes_size = 0
+        template[:nodes].each do |node|
+          nodes_size += node.is_node_group? ? node.attribute.cardinality : 1
+        end
+        template[:nodes_size] = nodes_size
+      end
+      templates_with_nodes
+    end
+
     def info_about(about)
       case about
        when 'assembly-templates'.to_sym

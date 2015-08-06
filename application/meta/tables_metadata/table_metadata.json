@@ -383,7 +383,7 @@
       "description"
     ],
     "mapping": {
-      "nodes": "nodes.size",
+      "nodes": "nodes_size",
       "assembly_name": "display_name",
       "id": "dtk_id",
       "description": "description"

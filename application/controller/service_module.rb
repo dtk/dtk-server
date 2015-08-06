@@ -27,7 +27,7 @@ module DTK
 
     def rest__list_assemblies
       service_module = create_obj(:service_module_id)
-      rest_ok_response service_module.get_assembly_templates()
+      rest_ok_response service_module.list_assembly_templates()
     end
 
     def rest__list_instances

@@ -2,12 +2,11 @@ module DTK; class AssemblyModule
   class Component
     class GetForAssembly < self
       def get_for_assembly(opts = {})
-        add_module_branches = opts[:get_version_info]
         ret = (opts[:recursive] ? get_with_branches_recursive(opts) : get_with_branches(opts))
-
-        add_version_info!(ret) if add_module_branches
-
-        # remove branches; they are no longer needed
+        if opts[:get_branch_relationship_info]
+          add_branch_relationship_info!(ret)
+        end
+        # remove branches since they are no longer needed
         ret.each { |r| r.delete(:module_branch) }
         ret
       end
@@ -48,7 +47,7 @@ module DTK; class AssemblyModule
       # TODO: make sure that where these two overlap they are consistent in namespace assignments
       def get_with_branches(opts = {})
         ndx_ret = {}
-        add_module_branches = opts[:get_version_info]
+        add_module_branches = opts[:get_branch_relationship_info]
         # there is a row for each component; assumption is that all rows belonging to same component with have same branch
         @assembly.get_objs(cols: [:instance_component_module_branches]).each do |r|
           component_module = r[:component_module]
@@ -60,7 +59,7 @@ module DTK; class AssemblyModule
       end
 
       # TODO: if this is derived from ModuleRefs::Lock can do this more efficienctly by having ModuleRefs::Lock have base branch
-      def add_version_info!(modules_with_branches)
+      def add_branch_relationship_info!(modules_with_branches)
         local_copy_els = []
         modules_with_branches.each do |r|
           if r[:module_branch].assembly_module_version?()

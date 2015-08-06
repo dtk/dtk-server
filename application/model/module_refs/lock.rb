@@ -23,7 +23,7 @@ module DTK
         get_or_compute(assembly_instance, opts[:types] || AllTypes, Aux.hash_subset(opts, [:with_module_branches]))
       end
 
-      # TODO: DTK-2014; use modification of ModuleRefs::Lock.get_or_compute(..) that passes in module_name so can filter there
+      # TODO: for efficiency can use modification of ModuleRefs::Lock.get_or_compute(..) that passes in module_name so can filter there
       def self.get_namespace?(assembly_instance, module_name)
         get_or_compute(assembly_instance, :locked_dependencies).matching_namespace?(module_name)
       end

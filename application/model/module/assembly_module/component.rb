@@ -50,7 +50,9 @@ module DTK; class AssemblyModule
 
     def delete_modules?
       am_version = assembly_module_version()
-      # do not want to use assembly.get_component_modules() to generate component_modules because there can be modules taht do not correspond to component instances
+      # TODO: re-evalaute this no that have ModuleRefs::locacked
+      # do not want to use assembly.get_component_modules() to generate component_modules because 
+      # there can be modules that do not correspond to component instances
       sp_hash = {
         cols: [:id, :group_id, :display_name, :component_id],
         filter: [:eq, :version, am_version]
@@ -58,7 +60,6 @@ module DTK; class AssemblyModule
       component_module_mh = @assembly.model_handle(:component_module)
       Model.get_objs(@assembly.model_handle(:module_branch), sp_hash).each do |r|
         unless r[:component_id]
-          #          Log.error("Unexpected that #{r.inspect} has :component_id nil; workaround is to delete this module branch")
           Model.delete_instance(r.id_handle())
           next
         end
@@ -74,12 +75,7 @@ module DTK; class AssemblyModule
     def promote_module_updates(component_module, opts = {})
       am_version = assembly_module_version()
       unless branch = component_module.get_workspace_module_branch(am_version)
-        component_module_id = component_module.id()
-        if @assembly.get_component_modules().find { |r| r[:id] == component_module_id }
-          fail ErrorNoChangesToModule.new(@assembly, component_module)
-        else
-          fail ErrorNoComponentsInModule.new(@assembly, component_module)
-        end
+        fail ErrorNoChangesToModule.new(@assembly, component_module)
       end
       unless ancestor_branch = branch.get_ancestor_branch?()
         fail Error.new('Cannot find ancestor branch')
@@ -137,14 +133,6 @@ module DTK; class AssemblyModule
 
     private
 
-    def get_for_assembly__augment_name_with_namespace!(cmp_modules)
-      return if cmp_modules.empty?
-      ndx_cmp_modules = cmp_modules.inject({}) { |h, m| h.merge(m[:id] => m) }
-      ComponentModule.ndx_full_module_names(cmp_modules.map(&:id_handle)).each_pair do |ndx, full_module_name|
-        ndx_cmp_modules[ndx][:display_name] = full_module_name
-      end
-    end
-
     def create_assembly_branch?(component_module, opts = {})
       am_version = assembly_module_version()
       unless component_module.get_workspace_module_branch(am_version)
@@ -195,12 +183,6 @@ module DTK; class AssemblyModule
         "Changes to component module (#{@module_name}) have not been made in assembly (#{@assembly_name})"
       end
     end
-    class ErrorNoComponentsInModule < ErrorComponentModule
-      private
 
-      def error_msg
-        "Assembly (#{@assembly_name}) does not have any components belonging to module (#{@module_name})"
-      end
-    end
   end
 end; end

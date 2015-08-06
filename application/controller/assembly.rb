@@ -126,7 +126,7 @@ module DTK
 
     def rest__get_component_modules
       assembly = ret_assembly_object()
-      rest_ok_response assembly.get_component_modules(get_version_info: true)
+      rest_ok_response assembly.get_component_modules(get_branch_relationship_info: true)
     end
 
     # TODO: may be cleaner if we break into list_nodes, list_components with some shared helper functions

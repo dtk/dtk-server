@@ -1,4 +1,4 @@
-FROM getdtk/baseimage:0.1
+FROM getdtk/baseimage:0.3
 MAINTAINER dduvnjak <dario@atlantbh.com>
 
 ENV tenant_user=dtk1

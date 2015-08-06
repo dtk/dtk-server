@@ -29,6 +29,7 @@ class dtk_stage3 {
   db_host => '/var/run/postgresql',
   clone_from_git => false,
   init_schema => false,
+  bundler_deployment => false,
 }
 }
 class {"dtk_stage3": stage => 3}

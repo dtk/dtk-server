@@ -224,7 +224,7 @@ module DTK; class AssemblyModule
       private
 
       def error_msg
-        "Changes to component module (#{@module_name}) have not been made in assembly (#{@assembly_name})"
+        "Changes to component module (#{@module_name}) have not been made in service instance '#{@assembly_name}'"
       end
     end
   end

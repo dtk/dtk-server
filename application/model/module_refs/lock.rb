@@ -20,19 +20,19 @@ module DTK
       #  :types (equal to or subset of AllTypes
       #   :with_module_branches - Boolean
       def self.get_all(assembly_instance, opts = {})
-        get(assembly_instance, opts[:types] || AllTypes, Aux.hash_subset(opts, [:with_module_branches]))
+        get_or_compute(assembly_instance, opts[:types] || AllTypes, Aux.hash_subset(opts, [:with_module_branches]))
       end
 
-      # TODO: DTK-2014; use modification of ModuleRefs::Lock.get(..) that passes in module_name so can filter there
+      # TODO: DTK-2014; use modification of ModuleRefs::Lock.get_or_compute(..) that passes in module_name so can filter there
       def self.get_namespace?(assembly_instance, module_name)
-        get(assembly_instance, :locked_dependencies).matching_namespace?(module_name)
+        get_or_compute(assembly_instance, :locked_dependencies).matching_namespace?(module_name)
       end
       def self.get_locked_branch_sha?(assembly_instance, module_name)
-        get(assembly_instance, :locked_branch_shas).matching_locked_branch_sha?(module_name)
+        get_or_compute(assembly_instance, :locked_branch_shas).matching_locked_branch_sha?(module_name)
       end
       # returns [namespace, locked_branch_sha]
       def self.get_namespace_and_locked_branch_sha?(assembly_instance, module_name)
-        module_refs_lock = get(assembly_instance, AllTypes)
+        module_refs_lock = get_or_compute(assembly_instance, AllTypes)
         [module_refs_lock.matching_namespace?(module_name), module_refs_lock.matching_locked_branch_sha?(module_name)]
       end
 
@@ -88,7 +88,7 @@ module DTK
 
       # opts can have keys
       #   :with_module_branches - Boolean
-      def self.get(assembly_instance, types, opts = {})
+      def self.get_or_compute(assembly_instance, types, opts = {})
         types = Array(types)
         # First check if persisted if not then compute it
         if persisted = get_module_refs_lock?(assembly_instance)

@@ -14,7 +14,7 @@ module DTK; class AssemblyModule
 
       private
 
-      # Finds, not just dircctly referenced component modules, but the recursive closure 
+      # Finds, not just directly referenced component modules, but the recursive closure 
       # taking into account all locked component module refs
       def get_with_branches_recursive(_opts = {})
         ret = []
@@ -59,7 +59,7 @@ module DTK; class AssemblyModule
         ndx_ret.values
       end
 
-      # TODO: is this is derived from ModuleRefs::Lock can do this more efficienctly by having ModuleRefs::Lock have base branch
+      # TODO: if this is derived from ModuleRefs::Lock can do this more efficienctly by having ModuleRefs::Lock have base branch
       def add_version_info!(modules_with_branches)
         local_copy_els = []
         modules_with_branches.each do |r|

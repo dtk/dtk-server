@@ -23,6 +23,10 @@ module DTK
         get_or_compute(assembly_instance, opts[:types] || AllTypes, Aux.hash_subset(opts, [:with_module_branches]))
       end
 
+      def self.get_implementations(assembly_instance, module_names)
+        get_or_compute(assembly_instance, :locked_dependencies).get_implementations(module_names)
+      end
+
       # TODO: for efficiency can use modification of ModuleRefs::Lock.get_or_compute(..) that passes in module_name so can filter there
       def self.get_namespace?(assembly_instance, module_name)
         get_or_compute(assembly_instance, :locked_dependencies).matching_namespace?(module_name)
@@ -59,7 +63,11 @@ module DTK
         (module_ref_lock = module_ref_lock(module_name)) && module_ref_lock.locked_branch_sha
       end
 
-      def matching_impls_with_children(module_names)
+      def elements
+        values().map { |module_ref_lock| module_ref_lock_element(module_ref_lock) }.compact
+      end
+
+      def get_implementations(module_names)
         ret = []
         module_names.each do |module_name|
           if element = element?(module_name)
@@ -69,10 +77,6 @@ module DTK
           end
         end
         ret
-      end
-
-      def elements
-        values().map { |module_ref_lock| module_ref_lock_element(module_ref_lock) }.compact
       end
 
       private

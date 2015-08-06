@@ -14,7 +14,7 @@ end
 # end
 
 # will use .fog file if env not set
-aws_conn = Fog::Compute::AWS.new(:aws_access_key_id => ENV['DTK_AWS_KEY_ID'], :aws_secret_access_key => ENV['DTK_AWS_KEY_SECRET'])
+aws_conn = Fog::Compute::AWS.new()
 
 aws_conn.servers.all('instance-state-name' => 'running', 'tag-key' => 'service.instance.ttl').each do |server_instance|
   status = instance_status(aws_conn, server_instance.id)

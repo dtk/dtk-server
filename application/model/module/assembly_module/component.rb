@@ -94,25 +94,21 @@ module DTK; class AssemblyModule
       GetForAssembly.new(assembly).get_for_assembly(opts)
     end
 
-    # opts can have
-    # :ret_lock_branch_sha - in which cas this wil be set to locked sha if it exists
-    def self.validate_component_module_ret_namespace(assembly, module_name, opts = {})
-      namespace, name = Namespace.full_module_name_parts?(module_name)
-      types = [:locked_dependencies]
-      if opts[:ret_locked_branch_sha]
-        types << :locked_branch_shas
+    # returns namespace if module_name exists in assembly
+    def self.get_namespace?(assembly, module_name)
+      Namespace.namespace?(module_name) || ModuleRefs::Lock.get_namespace?(assembly, module_name)
+    end
+
+    # returns [namespace, locked_branch_sha] if module_name exists in assembly
+    # namespace can at the same time that locked_branch_sha may be nil
+    def self.get_namespace_and_locked_branch_sha?(assembly, module_name)
+      locked_branch_sha = nil
+      if namespace = Namespace.namespace?(module_name)
+        locked_branch_sha = ModuleRefs::Lock.get_locked_branch_sha?(assembly, module_name)
       else
-        return namespace if namespace
+        namespace, locked_branch_sha = ModuleRefs::Lock.get_namespace_and_locked_branch_sha?(assembly, module_name)
       end
-      # TODO: DTK-2014; use modification of ModuleRefs::Lock that passs in module name that looking for
-      module_refs_lock = ModuleRefs::Lock.get(assembly, types: types)
-      unless namespace ||= module_refs_lock.matching_namespace?(module_name)
-        fail(ErrorUsage.new("No object of type component module with name (#{module_name}) exists"))
-      end
-      if opts[:ret_locked_branch_sha]
-        opts[:ret_locked_branch_sha] = module_refs_lock.matching_locked_branch_sha?(module_name)
-      end
-      namespace
+      [namespace, locked_branch_sha]
     end
 
     def self.list_remote_diffs(_model_handle, module_id, repo, module_branch, workspace_branch, opts)

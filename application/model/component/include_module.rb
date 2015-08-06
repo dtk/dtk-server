@@ -27,7 +27,7 @@ module DTK; class Component
       # includes are indexed on components, so at first level get component modules, but then can only see what component modules
       # are includes using ModuleRefs::Lock
       ndx_ret = ret.inject({}) { |h, impl| h.merge(impl.id => impl) }
-      locked_module_refs = ModuleRefs::Lock.get(assembly_instance, types: [:locked_dependencies, :locked_branch_shas])
+      locked_module_refs = ModuleRefs::Lock.get_all(assembly_instance)
       included_impls = locked_module_refs.matching_impls_with_children(include_modules.map(&:module_name))
       ndx_ret = included_impls.inject(ndx_ret) { |h, impl| h.merge(impl.id => impl) }
       ndx_ret.values

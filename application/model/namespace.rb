@@ -67,6 +67,10 @@ module DTK
       [namespace, name]
     end
 
+    def self.namespace?(name_or_full_module_name)
+      full_module_name_parts?(name_or_full_module_name)[0]
+    end
+
     def self.find_by_name(namespace_mh, namespace_name)
       sp_hash = {
         cols: common_columns(),

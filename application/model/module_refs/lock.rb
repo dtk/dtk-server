@@ -15,28 +15,31 @@ module DTK
       end
 
       AllTypes = [:locked_dependencies, :locked_branch_shas]
-      # opts can have keys
+
+      # opts can have
+      #  :types (equal to or subset of AllTypes
       #   :with_module_branches - Boolean
-      #   :types subset of AllTypes
-      def self.get(assembly_instance, opts = {})
-        types = opts[:types] || AllTypes
-        opts_nested = Aux.hash_subset(opts, [:with_module_branches])
-        # First check if persisted if not then compute it
-        if persisted = (R8::Config[:module_refs_lock] || {})[:use_persistence] && get_module_refs_lock?(assembly_instance)
-          if missing_info = MissingInformation.missing_information?(persisted, types, opts_nested)
-            missing_info.fill_in_missing_information()
-          else
-            persisted
-          end
-        else
-          compute_elements(assembly_instance, types, opts_nested)
-        end
+      def self.get_all(assembly_instance, opts = {})
+        get(assembly_instance, opts[:types] || AllTypes, Aux.hash_subset(opts, [:with_module_branches]))
       end
 
+      # TODO: DTK-2014; use modification of ModuleRefs::Lock.get(..) that passes in module_name so can filter there
+      def self.get_namespace?(assembly_instance, module_name)
+        get(assembly_instance, :locked_dependencies).matching_namespace?(module_name)
+      end
+      def self.get_locked_branch_sha?(assembly_instance, module_name)
+        get(assembly_instance, :locked_branch_shas).matching_locked_branch_sha?(module_name)
+      end
+      # returns [namespace, locked_branch_sha]
+      def self.get_namespace_and_locked_branch_sha?(assembly_instance, module_name)
+        module_refs_lock = get(assembly_instance, AllTypes)
+        [module_refs_lock.matching_namespace?(module_name), module_refs_lock.matching_locked_branch_sha?(module_name)]
+      end
+
+      # opts can have keys
+      # :raise_errors - Boolean
       def self.compute(assembly_instance, opts = {})
-        types = opts[:types] || AllTypes
-        opts_nested = Aux.hash_subset(opts, [:with_module_branches])
-        compute_elements(assembly_instance, types, opts)
+        compute_elements(assembly_instance, AllTypes, opts)
       end
 
       def clear_locked_dependencies
@@ -83,6 +86,25 @@ module DTK
         end
       end
 
+      # opts can have keys
+      #   :with_module_branches - Boolean
+      def self.get(assembly_instance, types, opts = {})
+        types = Array(types)
+        # First check if persisted if not then compute it
+        if persisted = get_module_refs_lock?(assembly_instance)
+          if missing_info = MissingInformation.missing_information?(persisted, types, opts)
+            missing_info.fill_in_missing_information()
+          else
+            persisted
+          end
+        else
+          compute_elements(assembly_instance, types, opts)
+        end
+      end
+
+      # opts can have keys
+      # :with_module_branches - Boolean
+      # :raise_errors - Boolean
       def self.compute_elements(assembly_instance, types, opts = {})
         module_refs_tree = ModuleRefs::Tree.create(assembly_instance)
         collapsed = module_refs_tree.collapse(Aux.hash_subset(opts, [:raise_errors]))

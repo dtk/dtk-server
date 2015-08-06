@@ -254,12 +254,12 @@ module DTK
         case module_type.to_sym
           when :component_module
             module_name = ret_non_null_request_params(:module_name)
-            opts_validate = { ret_locked_branch_sha: true }
-            namespace = AssemblyModule::Component.validate_component_module_ret_namespace(assembly, module_name, opts_validate)
-            sha = opts_validate[:ret_locked_branch_sha]
+            namespace, sha = AssemblyModule::Component.get_namespace_and_locked_branch_sha?(assembly, module_name)
+            unless namespace
+              fail ErrorUsage.new("A component module with name '#{module_name}' does not exist")
+            end
             component_module = create_obj(:module_name, ComponentModule, namespace)
-            opts = (sha ? { sha: sha } : {})
-            AssemblyModule::Component.prepare_for_edit(assembly, component_module, opts)
+            AssemblyModule::Component.prepare_for_edit(assembly, component_module, sha ? {sha: sha } : {})
           when :service_module
             modification_type = ret_non_null_request_params(:modification_type).to_sym
             opts = ret_params_hash(:task_action, :create, :base_task_action)
@@ -285,7 +285,10 @@ module DTK
         fail Error.new('promote_module_changes only treats component_module type')
       end
 
-      namespace = AssemblyModule::Component.validate_component_module_ret_namespace(assembly, module_name)
+      unless namespace = AssemblyModule::Component.get_namespace?(assembly, module_name)
+        fail ErrorUsage.new("A component module with name '#{module_name}' does not exist")
+      end
+
       component_module = create_obj(:module_name, ComponentModule, namespace)
       opts = ret_boolean_params_hash(:force)
       rest_ok_response AssemblyModule::Component.promote_module_updates(assembly, component_module, opts)
@@ -299,7 +302,10 @@ module DTK
         fail Error.new('promote_module_changes only treats component_module type')
       end
 
-      namespace = AssemblyModule::Component.validate_component_module_ret_namespace(assembly, module_name)
+      unless namespace = AssemblyModule::Component.get_namespace?(assembly, module_name)
+        fail ErrorUsage.new("A component module with name '#{module_name}' does not exist")
+      end
+      
       component_module = create_obj(:module_name, ComponentModule, namespace)
       opts = ret_boolean_params_hash(:force)
 

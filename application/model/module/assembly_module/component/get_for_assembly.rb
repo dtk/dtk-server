@@ -44,7 +44,8 @@ module DTK; class AssemblyModule
         end
         ret
       end
-      # TODO: make sure that where these two overlap they are consistent in namespace assignments
+      # TODO: think we might want to deperacte below for above; 
+      #       if not make sure that where these two overlap they are consistent in namespace assignments
       def get_with_branches(opts = {})
         ndx_ret = {}
         add_module_branches = opts[:get_branch_relationship_info]

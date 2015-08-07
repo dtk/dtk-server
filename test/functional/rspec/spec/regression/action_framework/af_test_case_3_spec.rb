@@ -12,7 +12,7 @@ require './lib/assembly_and_service_operations_spec'
 STDOUT.sync = true
 
 service_name = 'af_test_case_3_instance'
-service_module_namespace = 'test'
+service_module_namespace = 'r8'
 assembly_name = 'action_module::multi-node-with-mustache'
 dtk_common = Common.new(service_name, assembly_name)
 

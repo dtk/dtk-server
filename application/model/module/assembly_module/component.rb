@@ -38,26 +38,28 @@ module DTK; class AssemblyModule
       new(assembly).finalize_edit(component_module, module_branch, opts)
     end
     def finalize_edit(component_module, module_branch, opts = {})
-      # recompute and presits the module ref locks
+      # Recompute and persist the module ref locks
       ModuleRefs::Lock.compute(@assembly).persist
+
+      # Update any impacted component instance
       cmp_instances = get_applicable_component_instances(component_module)
       project_idh = component_module.get_project().id_handle()
       begin
         Clone::IncrementalUpdate::Component.new(project_idh, module_branch).update?(cmp_instances, opts)
-      rescue Exception => e
+       rescue Exception => e
+        # TODO: DTK-2153: double check that below is still applicable and right
         if sha = opts[:current_branch_sha]
           repo = module_branch.get_repo()
           repo.hard_reset_branch_to_sha(module_branch, sha)
           module_branch.set_sha(sha)
         end
-
         raise e
       end
     end
 
     def delete_modules?
       am_version = assembly_module_version()
-      # TODO: re-evalaute this no that have ModuleRefs::locacked
+      # TODO: DTK-2153: re-evalaute this now that have ModuleRefs::locked
       # do not want to use assembly.get_component_modules() to generate component_modules because 
       # there can be modules that do not correspond to component instances
       sp_hash = {
@@ -91,8 +93,8 @@ module DTK; class AssemblyModule
       ancestor_branch.merge_changes_and_update_model?(component_module, branch_name, opts)
     end
 
-    def self.get_for_assembly(assembly, opts = {})
-      GetForAssembly.new(assembly).get_for_assembly(opts)
+    def self.get_for_assembly(assembly, mode, opts = {})
+      GetForAssembly.new(assembly).get_for_assembly(mode, opts)
     end
 
     # returns namespace if module_name exists in assembly

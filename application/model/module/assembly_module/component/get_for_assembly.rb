@@ -1,8 +1,19 @@
 module DTK; class AssemblyModule
   class Component
     class GetForAssembly < self
-      def get_for_assembly(opts = {})
-        ret = (opts[:recursive] ? get_with_branches_recursive(opts) : get_with_branches(opts))
+      # opts can have keys
+      #  :get_branch_relationship_info - Boolean
+      #
+      # mode is one of 
+      # :direct - only component modules directly included
+      # :recursive - directly connected and nested component modules 
+      def get_for_assembly(mode, opts = {})
+        ret =
+          case mode
+            when :direct    then get_with_branches(opts)
+            when :recursive then get_with_branches_recursive
+            else fail Error.new("Illegal mode '#{mode}'")
+          end
         if opts[:get_branch_relationship_info]
           add_branch_relationship_info!(ret)
         end
@@ -15,7 +26,7 @@ module DTK; class AssemblyModule
 
       # Finds, not just directly referenced component modules, but the recursive closure 
       # taking into account all locked component module refs
-      def get_with_branches_recursive(_opts = {})
+      def get_with_branches_recursive
         ret = []
         locked_module_refs = ModuleRefs::Lock.get_all(@assembly, with_module_branches: true, types: [:locked_dependencies])
         # get component modules by finding the component module id in locked_module_refs elements
@@ -44,8 +55,8 @@ module DTK; class AssemblyModule
         end
         ret
       end
-      # TODO: think we might want to deperacte below for above; 
-      #       if not make sure that where these two overlap they are consistent in namespace assignments
+      # TODO: DTK-2153: probably change so this aligns with
+      # with delete_modules? in ../component.rb
       def get_with_branches(opts = {})
         ndx_ret = {}
         add_module_branches = opts[:get_branch_relationship_info]

@@ -63,7 +63,7 @@ module DTK
     end
 
     def matching_component_module_namespace?(cmp_module_name)
-      if module_ref = component_module_ref?(cmp_module_name)
+      if module_ref = component_module_ref?(key(cmp_module_name))
         module_ref.namespace()
       end
     end

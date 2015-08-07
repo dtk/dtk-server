@@ -54,7 +54,10 @@ module DTK; class AssemblyModule
       ancestor_branch.merge_changes_and_update_model?(component_module, branch_name, opts)
     end
 
-    def self.get_for_assembly(assembly, opts = {})
+    def self.get_for_assembly(assembly, mode, opts = {})
+      unless mode == :direct
+        fail Error.new("only mode :direct is supported")
+      end
       new(assembly).get_for_assembly(opts)
     end
     def get_for_assembly(opts = {})

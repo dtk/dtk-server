@@ -38,6 +38,8 @@ module DTK; class AssemblyModule
       new(assembly).finalize_edit(component_module, module_branch, opts)
     end
     def finalize_edit(component_module, module_branch, opts = {})
+      # recompute and presits the module ref locks
+      ModuleRefs::Lock.compute(@assembly).persist
       cmp_instances = get_applicable_component_instances(component_module)
       project_idh = component_module.get_project().id_handle()
       begin
@@ -139,7 +141,7 @@ module DTK; class AssemblyModule
     private
 
     # opts can have keys
-    #  :sha
+    #  :sha - base sha to create branch from
     #  :ret_module_branch - Boolean
     #  :module_branch_idh (required if ret_module_branch == true)
     def create_assembly_branch?(component_module, opts = {})
@@ -152,20 +154,10 @@ module DTK; class AssemblyModule
     end
 
     # opts can have keys
-    #  :sha
+    #  :sha - base sha to create branch from
     def create_assembly_branch(component_module, am_version, opts = {})
       base_version = nil
-new_branch = nil
-Model.Transaction do
-      new_branch = component_module.create_new_version(base_version, am_version, opts)
-#pp new_branch 
-new_branch.update_obj!(*ModuleBranch.common_columns())
-pp [:new_branch, new_branch]
-pp [:get_module_refs_lock?, ModuleRefs::Lock.get_module_refs_lock?(@assembly)]
-pp [:compute,  ModuleRefs::Lock.compute(@assembly)]
-      ModuleRefs::Lock.update_for_new_module_branch(@assembly, component_module, new_branch)
-end
-      new_branch
+      component_module.create_new_version(base_version, am_version, opts)
     end
 
     def get_branch_template(module_branch, cmp_template)

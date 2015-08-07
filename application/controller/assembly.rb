@@ -294,9 +294,7 @@ module DTK
       rest_ok_response AssemblyModule::Component.promote_module_updates(assembly, component_module, opts)
     end
 
-    # TODO: DTK-2206: Aldin; This name 'get_component_module_info' is not intuitive; should be renamed
-    #       to reflect that this is being useds is prepare for pull into assembly module
-    def rest__get_component_module_info
+    def rest__prepare_for_pull_from_base
       assembly = ret_assembly_instance_object()
       module_type, module_name = ret_non_null_request_params(:module_type, :module_name)
 
@@ -309,10 +307,6 @@ module DTK
       end
       
       component_module = create_obj(:module_name, ComponentModule, namespace)
-      # TODO: DTK-2206: Aldin; took out passing in 'force' option; dont thing it is used in create_assembly_module_branch?
-      #       double check this is right
-      #  opts = ret_boolean_params_hash(:force)
-      #  branch_info = AssemblyModule::Component.create_assembly_module_branch?(assembly, component_module, opts)
       branch_info = AssemblyModule::Component.create_assembly_module_branch?(assembly, component_module)
       branch_info.merge!(assembly_name: assembly[:display_name])
 

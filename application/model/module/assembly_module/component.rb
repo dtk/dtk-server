@@ -13,14 +13,13 @@ module DTK; class AssemblyModule
       create_assembly_branch?(component_module, opts)
     end
 
-    # TODO: DTK-2206: Aldin; removed opts; double check these are not needed
     def self.create_assembly_module_branch?(assembly, component_module)
       new(assembly).create_assembly_module_branch?(component_module)
     end
     def create_assembly_module_branch?(component_module)
       am_version = assembly_module_version()
 
-      # TODO: DTK-2206: Aldin double check what this test is doing
+      # check if component module base branch exist; it being used to pull component module updates from
       unless base_branch = component_module.get_workspace_branch_info()
         fail ErrorNoChangesToModule.new(@assembly, component_module)
       end

@@ -2,7 +2,9 @@ module DTK; class AssemblyModule
   class Component < self
     r8_nested_require('component', 'ad_hoc_link')
     r8_nested_require('component', 'attribute')
-    r8_nested_require('component', 'get_for_assembly')
+    r8_nested_require('component', 'get')
+    include Get::Mixin
+    extend Get::ClassMixin
 
     # opts can have keys
     #  :sha
@@ -29,8 +31,7 @@ module DTK; class AssemblyModule
         local_branch = component_module.get_workspace_module_branch(am_version)
       end
 
-      base_branch.merge!(version: am_version, local_branch: local_branch[:display_name], current_branch_sha: local_branch[:current_sha])
-      base_branch
+      base_branch.merge(version: am_version, local_branch: local_branch[:display_name], current_branch_sha: local_branch[:current_sha])
     end
 
     def self.finalize_edit(assembly, component_module, module_branch, opts = {})
@@ -58,21 +59,21 @@ module DTK; class AssemblyModule
 
     def delete_modules?
       am_version = assembly_module_version()
-      # TODO: DTK-2153: re-evalaute this now that have ModuleRefs::locked
-      # do not want to use assembly.get_component_modules() to generate component_modules because 
-      # there can be modules that do not correspond to component instances
       sp_hash = {
         cols: [:id, :group_id, :display_name, :component_id],
         filter: [:eq, :version, am_version]
       }
       component_module_mh = @assembly.model_handle(:component_module)
-      Model.get_objs(@assembly.model_handle(:module_branch), sp_hash).each do |r|
-        unless r[:component_id]
-          Model.delete_instance(r.id_handle())
-          next
+
+      # iterate over any service or component module branch that has been created for the service instance
+      Model.get_objs(@assembly.model_handle(:module_branch), sp_hash).each do |module_branch|
+        # if module_branch[:component_id] is nil then this is a service module branch, otherwise it is a component module branch
+        if module_branch[:component_id].nil?
+          Model.delete_instance(module_branch.id_handle())
+        else
+          component_module = component_module_mh.createIDH(id: module_branch[:component_id]).create_object()
+          component_module.delete_version?(am_version)
         end
-        component_module = component_module_mh.createIDH(id: r[:component_id]).create_object()
-        component_module.delete_version?(am_version)
       end
     end
 
@@ -90,27 +91,6 @@ module DTK; class AssemblyModule
       end
       branch_name = branch[:branch]
       ancestor_branch.merge_changes_and_update_model?(component_module, branch_name, opts)
-    end
-
-    def self.get_for_assembly(assembly, mode, opts = {})
-      GetForAssembly.new(assembly).get_for_assembly(mode, opts)
-    end
-
-    # returns namespace if module_name exists in assembly
-    def self.get_namespace?(assembly, module_name)
-      Namespace.namespace?(module_name) || ModuleRefs::Lock.get_namespace?(assembly, module_name)
-    end
-
-    # returns [namespace, locked_branch_sha] if module_name exists in assembly
-    # namespace can at the same time that locked_branch_sha may be nil
-    def self.get_namespace_and_locked_branch_sha?(assembly, module_name)
-      locked_branch_sha = nil
-      if namespace = Namespace.namespace?(module_name)
-        locked_branch_sha = ModuleRefs::Lock.get_locked_branch_sha?(assembly, module_name)
-      else
-        namespace, locked_branch_sha = ModuleRefs::Lock.get_namespace_and_locked_branch_sha?(assembly, module_name)
-      end
-      [namespace, locked_branch_sha]
     end
 
     def self.list_remote_diffs(_model_handle, module_id, repo, module_branch, workspace_branch, opts)
@@ -159,24 +139,6 @@ module DTK; class AssemblyModule
     def create_assembly_branch(component_module, am_version, opts = {})
       base_version = nil
       component_module.create_new_version(base_version, am_version, opts)
-    end
-
-    def get_branch_template(module_branch, cmp_template)
-      sp_hash = {
-        cols: [:id, :group_id, :display_name, :component_type],
-        filter: [:and, [:eq, :module_branch_id, module_branch.id()],
-                 [:eq, :type, 'template'],
-                 [:eq, :node_node_id, nil],
-                 [:eq, :component_type, cmp_template.get_field?(:component_type)]]
-      }
-      Model.get_obj(cmp_template.model_handle(), sp_hash) || fail(Error.new('Unexpected that branch_cmp_template is nil'))
-    end
-
-    def get_applicable_component_instances(component_module)
-      assembly_id = @assembly.id()
-      component_module.get_associated_component_instances().select do |cmp|
-        cmp[:assembly_id] == assembly_id
-      end
     end
 
     class ErrorComponentModule < ErrorUsage

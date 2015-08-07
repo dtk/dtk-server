@@ -18,6 +18,7 @@ module DTK
         @assembly_instance = assembly_instance
       end
 
+      # TODO: locked depenedncies is minsomer; it is more like 'cached_dependencies'
       AllTypes = [:locked_dependencies, :locked_branch_shas]
 
       # opts can have

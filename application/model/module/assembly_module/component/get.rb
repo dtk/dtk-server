@@ -1,6 +1,49 @@
 module DTK; class AssemblyModule
   class Component
-    class GetForAssembly < self
+    class Get < self
+      module Mixin
+        def get_branch_template(module_branch, cmp_template)
+          sp_hash = {
+            cols: [:id, :group_id, :display_name, :component_type],
+            filter: [:and, [:eq, :module_branch_id, module_branch.id()],
+                     [:eq, :type, 'template'],
+                     [:eq, :node_node_id, nil],
+                     [:eq, :component_type, cmp_template.get_field?(:component_type)]]
+          }
+          Model.get_obj(cmp_template.model_handle(), sp_hash) || fail(Error.new('Unexpected that branch_cmp_template is nil'))
+        end
+            
+        def get_applicable_component_instances(component_module)
+          assembly_id = @assembly.id()
+          component_module.get_associated_component_instances().select do |cmp|
+            cmp[:assembly_id] == assembly_id
+          end
+        end
+      end
+
+      module ClassMixin
+        def get_for_assembly(assembly, mode, opts = {})
+          Get.new(assembly).get_for_assembly(mode, opts)
+        end
+        
+        # returns namespace if module_name exists in assembly
+        def get_namespace?(assembly, module_name)
+          Namespace.namespace?(module_name) || ModuleRefs::Lock.get_namespace?(assembly, module_name)
+        end
+
+        # returns [namespace, locked_branch_sha] if module_name exists in assembly
+        # namespace can at the same time that locked_branch_sha may be nil
+        def get_namespace_and_locked_branch_sha?(assembly, module_name)
+          locked_branch_sha = nil
+          if namespace = Namespace.namespace?(module_name)
+            locked_branch_sha = ModuleRefs::Lock.get_locked_branch_sha?(assembly, module_name)
+          else
+            namespace, locked_branch_sha = ModuleRefs::Lock.get_namespace_and_locked_branch_sha?(assembly, module_name)
+          end
+          [namespace, locked_branch_sha]
+        end
+      end
+
       # opts can have keys
       #  :get_branch_relationship_info - Boolean
       #
@@ -10,8 +53,8 @@ module DTK; class AssemblyModule
       def get_for_assembly(mode, opts = {})
         ret =
           case mode
-            when :direct    then get_with_branches(opts)
-            when :recursive then get_with_branches_recursive
+            when :direct    then get_with_branches__direct(opts)
+            when :recursive then get_with_branches__recursive
             else fail Error.new("Illegal mode '#{mode}'")
           end
         if opts[:get_branch_relationship_info]
@@ -26,7 +69,7 @@ module DTK; class AssemblyModule
 
       # Finds, not just directly referenced component modules, but the recursive closure 
       # taking into account all locked component module refs
-      def get_with_branches_recursive
+      def get_with_branches__recursive
         ret = []
         locked_module_refs = ModuleRefs::Lock.get_all(@assembly, with_module_branches: true, types: [:locked_dependencies])
         # get component modules by finding the component module id in locked_module_refs elements
@@ -55,17 +98,28 @@ module DTK; class AssemblyModule
         end
         ret
       end
-      # TODO: DTK-2153: probably change so this aligns with
-      # with delete_modules? in ../component.rb
-      def get_with_branches(opts = {})
-        ndx_ret = {}
+
+      def get_with_branches__direct(opts = {})
         add_module_branches = opts[:get_branch_relationship_info]
-        # there is a row for each component; assumption is that all rows belonging to same component with have same branch
+        # there is a row for each component; assumption is that all rows belonging to same component wil match on all info
+        # being collected; so pruning out duplicates for same component_module
+        ndx_ret = {}
         @assembly.get_objs(cols: [:instance_component_module_branches]).each do |r|
           component_module = r[:component_module]
-          component_module.merge!(namespace_name: r[:namespace][:display_name]) if r[:namespace]
-          component_module.merge!(dsl_parsed: r[:module_branch][:dsl_parsed]) if r[:module_branch]
-          ndx_ret[component_module[:id]] ||= component_module.merge(add_module_branches ? r.hash_subset(:module_branch) : {})
+          ndx = component_module.id
+          next if ndx_ret[ndx]
+
+          if namespace = (r[:namespace] || {})[:display_name]
+            component_module.merge!(namespace_name: namespace)
+          end
+          if dsl_parsed = (r[:module_branch] || {})[:dsl_parsed]
+            component_module.merge!(dsl_parsed: dsl_parsed)
+          end
+          if add_module_branches
+            component_module.merge!(r.hash_subset(:module_branch))
+          end
+          
+          ndx_ret[ndx] = component_module
         end
         ndx_ret.values
       end

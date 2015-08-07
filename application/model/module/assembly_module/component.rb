@@ -38,9 +38,6 @@ module DTK; class AssemblyModule
       new(assembly).finalize_edit(component_module, module_branch, opts)
     end
     def finalize_edit(component_module, module_branch, opts = {})
-      # Recompute and persist the module ref locks
-      ModuleRefs::Lock.compute(@assembly).persist
-
       # Update any impacted component instance
       cmp_instances = get_applicable_component_instances(component_module)
       project_idh = component_module.get_project().id_handle()
@@ -55,6 +52,9 @@ module DTK; class AssemblyModule
         end
         raise e
       end
+      # Recompute and persist the module ref locks
+      # This must be done after any impacted component instances have been updated
+      ModuleRefs::Lock.compute(@assembly).persist
     end
 
     def delete_modules?

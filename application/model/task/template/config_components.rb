@@ -6,7 +6,8 @@ module DTK; class Task
       def self.update_when_added_component?(assembly, node, new_component, component_title, opts = {})
         # only updating the create action task template and only if it is persisted
         assembly_cmp_actions = ActionList::ConfigComponents.get(assembly)
-        if task_template_content = get_template_content_aux?([:assembly], assembly, assembly_cmp_actions, nil, opts)
+        task_action = DefaultTaskActionForUpdates
+        if task_template_content = get_template_content_aux?([:assembly], assembly, assembly_cmp_actions, task_action, opts)
           new_action = Action.create(new_component.merge(node: node, title: component_title))
           gen_constraints_proc = proc { TemporalConstraints::ConfigComponents.get(assembly, assembly_cmp_actions) }
           if updated_template_content = task_template_content.insert_action?(new_action, assembly_cmp_actions, gen_constraints_proc)
@@ -19,14 +20,17 @@ module DTK; class Task
         # TODO: currently only updating the create action task template and only if it is persisted
         # makes sense to also automtically delete component in other actions
         assembly_cmp_actions = ActionList::ConfigComponents.get(assembly)
-        if task_template_content = get_template_content_aux?([:assembly], assembly, assembly_cmp_actions)
+        task_action = DefaultTaskActionForUpdates
+        if task_template_content = get_template_content_aux?([:assembly], assembly, assembly_cmp_actions, task_action)
           action_to_delete = Action.create(component.add_title_field?().merge(node: node))
           if updated_template_content = task_template_content.delete_explicit_action?(action_to_delete, assembly_cmp_actions)
             Persistence::AssemblyActions.persist(assembly, updated_template_content)
           end
         end
       end
-
+      #TODO : this is hardwired
+      DefaultTaskActionForUpdates = nil
+      
       # TODO: do more accurate parse if assembly is non null
       def self.find_parse_errors(hash_content, assembly = nil)
         begin
@@ -83,19 +87,23 @@ module DTK; class Task
         true
       end
 
-      def self.get_template_content_aux?(action_types, assembly, cmp_actions, task_action = nil, opts = {})
+      def self.get_template_content_aux?(action_types, assembly, cmp_actions, task_action, opts = {})
         if assembly_action_content = Persistence::AssemblyActions.get_content_for(assembly, cmp_actions, task_action, opts)
           if action_types == [:assembly]
             assembly_action_content
           else #action_types has both and assembly and node_centric
-            node_centric_content = generate_from_temporal_contraints(:node_centric, assembly, cmp_actions)
-            if node_centric_content.empty?
-              assembly_action_content
-            else
-              opts_splice = (node_centric_first_stage?() ? { node_centric_first_stage: true } : {})
-              assembly_action_content.splice_in_at_beginning!(node_centric_content, opts_splice)
-            end
+            add_node_centric_steps(assembly_action_content, assembly, cmp_actions)
           end
+        end
+      end
+
+      def self.add_node_centric_steps(assembly_action_content, assembly, cmp_actions)
+        node_centric_content = generate_from_temporal_contraints(:node_centric, assembly, cmp_actions)
+        if node_centric_content.empty?
+          assembly_action_content
+        else
+          opts_splice = (node_centric_first_stage?() ? { node_centric_first_stage: true } : {})
+          assembly_action_content.splice_in_at_beginning!(node_centric_content, opts_splice)
         end
       end
 

@@ -128,14 +128,14 @@ module DTK; class Task
           serialization_form: { filter: { source: :assembly }, allow_empty_task: true }
         }.merge(opts)
         
-        # TODO: DTK-2209
-        # TODO: only returning now the task templates for the default (assembly create action)
-        # this is done by setting task action as nil
-        task_action =  nil
-        if serialized_content = get_serialized_content(assembly, task_action, opts_serialized_content)
-          action_task_template = get_task_template(assembly, task_action, cols: [:id, :group_id, :task_action])
-          action_task_template ||= Assembly::Instance.create_stub(assembly.model_handle(:task_template))
-          ret << action_task_template.merge(content: serialized_content)
+        # TODO: more efficient if bulked these up
+        get_task_templates_simple_form(assembly, cols: [:id, :task_action]).each do |task_template|
+          task_action = task_template[:task_action]
+          if serialized_content = get_serialized_content(assembly, task_action, opts_serialized_content)
+            action_task_template = get_task_template(assembly, task_action, cols: [:id, :group_id, :task_action])
+            action_task_template ||= Assembly::Instance.create_stub(assembly.model_handle(:task_template))
+            ret << action_task_template.merge(content: serialized_content)
+          end
         end
         ret
       end

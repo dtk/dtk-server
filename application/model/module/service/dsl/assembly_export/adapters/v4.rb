@@ -3,9 +3,11 @@ module DTK
     r8_require('v3')
     class V4 < V3
       r8_nested_require('v4', 'workflow_hash')
-      # update to support new canonical form where have action key word and nodes applicable is omitted
+
       def workflow_hash
-        WorkflowHash.canonical_form(super())
+        if task_template = assembly_hash()[:task_template]
+          WorkflowHash.workflow_hash(task_template)
+        end
       end
 
       def attr_overrides_output_form(non_def_attrs)

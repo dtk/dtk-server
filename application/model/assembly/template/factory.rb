@@ -8,7 +8,7 @@ module DTK
 
       def self.get_or_create_service_module(project, service_module_name, opts = {})
         unless namespace = opts[:namespace]
-          fail Error.new('Need to update code so that namespace passed in')
+          fail ErrorUsage.new("Namespace must be explicitly given using form: 'push-assembly-updates 'NAMESPACE:SERVICE-MODULE-NAME/ASSEMBLY-NAME'")
         end
         if service_module = get_service_module?(project, service_module_name, namespace)
           service_module

@@ -102,11 +102,11 @@ module DTK; class Task
         ret && ret.serialization_form(opts[:serialization_form] || {})
       end
 
-      private
-
       def task_action_external_name(task_action)
         (task_action.nil? or task_action == default_task_action) ? default_task_action_external_name : task_action
       end
+
+      private
 
       def get_task_templates_simple_form(assembly, opts = {})
         sp_hash = {

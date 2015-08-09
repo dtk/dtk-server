@@ -7,7 +7,7 @@ module DTK
         assembly_hash = assembly_output_hash()
         serialize_assembly_wide_node!(assembly_hash) if assembly_hash[:nodes].key?('assembly_wide')
         node_bindings_hash = node_bindings_output_hash()
-        workflow = workflow_hash()
+        workflows = workflow_hash()
         dsl_version = dsl_version?()
         description = assembly_description?()
         SimpleOrderedHash.new(
@@ -17,7 +17,7 @@ module DTK
             dsl_version && { dsl_version: dsl_version },
             node_bindings_hash.empty? ? nil : { node_bindings: node_bindings_hash },
             { assembly: assembly_hash },
-            workflow && { workflow: workflow }
+            workflows && { workflows: workflows }
           ].compact
         )
       end

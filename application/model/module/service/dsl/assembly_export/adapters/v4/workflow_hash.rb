@@ -2,38 +2,40 @@ module DTK; class ServiceModule
   class AssemblyExport; class V4
     module WorkflowHash
       include Task::Template::Serialization
-      def self.canonical_form(input_hash)
-        ret = input_hash.class.new()
-        input_hash.each_pair do |k, info|
-          # TODO: assuming that just one level workflow
-          ret[k] =
-            case k
-             when :subtasks
-              info.map { |subtask| subtask_canonical_form(subtask) }
-             else
-              info
-            end
+      
+      def self.workflow_hash(input_hash_task_templates)
+        input_hash_task_templates.inject(SimpleOrderedHash.new) do |h, (internal_task_action_name, input_hash)|
+          task_action_name = Task::Template.task_action_external_name(internal_task_action_name)
+          task_body = task_body(input_hash[:content])
+          h.merge(task_action_name => task_body)
         end
-        ret
       end
 
-      def self.subtask_canonical_form(input_hash)
-        ret = input_hash.class.new()
-        input_hash.each_pair do |k, info|
-            # TODO: assuming that just one level workflow
-            case k
-             when :nodes
-              if  Constant.matches?(info, :AllApplicable)
-              # remove no op
-              else
-                ret[k] = info
-              end
-             else
-              ret[k] = info
+      private
+
+      # TODO: in methods below  assuming that just one level workflow
+      def self.task_body(input_hash)
+        input_hash.inject(input_hash.class.new) do |h, (k, input_info)|
+          info =  
+            if k == :subtasks
+              input_info.map { |input_subtask| subtask(input_subtask) }
+            else
+              input_info
             end
+          h.merge(k => info) 
         end
-        ret
       end
+
+      def self.subtask(input_hash)
+        input_hash.inject(input_hash.class.new) do |h, (k, input_info)|
+          if k == :nodes and Constant.matches?(input_info, :AllApplicable)
+            h # omit input_info
+          else
+            h.merge(k => input_info)
+          end
+        end
+      end
+
     end
   end; end
 end; end

@@ -1,6 +1,6 @@
-module DTK; class ServiceModule
-  class AssemblyExport
-    class ComponentsHash
+module DTK; class ServiceModule; class AssemblyExport
+  module FoldIntoExisting
+    class AssemblySectionProc
       attr_reader :raw_array
 
       def initialize(raw_array = [])
@@ -131,4 +131,5 @@ module DTK; class ServiceModule
       end
     end
   end
-end; end
+end; end; end
+

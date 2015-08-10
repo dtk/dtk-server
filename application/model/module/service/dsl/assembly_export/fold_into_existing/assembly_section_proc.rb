@@ -28,7 +28,7 @@ module DTK; class ServiceModule; class AssemblyExport
 
           if name.eql?('assembly:')
             ignore = false
-          elsif name.eql?('workflow:')
+          elsif name.eql?('workflow:') or name.eql?('workflows:')
             ignore = true
           end
 

@@ -44,5 +44,5 @@ Next step is to start the docker container with the directory from above used as
 ```
 docker run -v /dtk:/host_volume -p 8080:80 -p 6163:6163 -p 2222:22 -i -t getdtk/server-full
 ```  
-After the container is up and running (will take a minute on the first start) you can connect to it using [dtk-client](https://github.com/rich-reactor8/dtk-client) using the same values as set in `dtk.config`.  
+After the container is up and running (will take a minute on the first start) you can connect to it via [dtk-client](https://github.com/rich-reactor8/dtk-client) using the same values as set in `dtk.config`.  
 Note that if you need to forward GIT SSH port to a different one, you can use the `-e GIT_PORT=2200` switch for example. 

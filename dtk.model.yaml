@@ -1,0 +1,252 @@
+---
+module: dtk_server
+dsl_version: 1.0.0
+module_type: puppet_module
+components:
+    upgrade_test:
+      description: "Upgrade test"
+      external_ref:
+        puppet_class: stdlib
+      actions:
+        db_archive:
+          commands:
+          - RUN mkdir -p /backups/db_archive/{{ tenant_user }}
+          - RUN pg_dump -U postgres $(grep '^db.name' /etc/dtk/{{ tenant_user }}/server.conf | cut -d= -f2) | gzip > /backups/db_archive/{{ tenant_user }}/db.tgz
+    base:
+      description: "DTK Server"
+      external_ref:
+        puppet_class: dtk_server::base
+      dependencies:
+      - gitolite
+      - dtk
+    ruby193install:
+      description: "Install ruby 1.9.3 on tenant"
+      external_ref:
+        puppet_definition: dtk_server::ruby193install
+      attributes:
+        name:
+          type: string
+        install:
+          description: "Install ruby 1.9.3 or not - use true to install"
+          type: string
+    add_user:
+      description: "Add user for tenant db"
+      external_ref:
+        puppet_definition: dtk_server::add_user
+      attributes:
+        name:
+          type: string
+        tenant_user:
+          description: "User on which tenant is installed"
+          type: string
+        tenant_user_password:
+          description: "User password"
+          type: string
+          default: r8server
+        tenant_db_user:
+          description: "User that will be used for connecting to tenant"
+          type: string
+    cron_idle_instances:
+      description: "Add a cron job for stopping idle instances"
+      external_ref:
+        puppet_definition: dtk_server::cron_idle_instances
+      attributes:
+        name:
+          type: string
+        tenant_password:
+          description: "Password for the tenant default user"
+          type: string
+    tenant:
+      description: "DTK Server"
+      external_ref:
+        puppet_definition: dtk_server::tenant
+      attributes:
+        update_hosts_file:
+          description: "Flag to update hosts file"
+          type: string
+          default: true
+        server_branch:
+          description: "Branch in server git repo to use"
+          type: string
+          default: master
+        name:
+          description: "User name"
+          type: string
+        tenant_user:
+          description: "User on which tenant is installed"
+          type: string
+          required: true
+        tenant_user_pub_key:
+          description: "Ssh pub key to add to tenant users' authorized_keys"
+          type: string
+          required: false
+        stomp_server_host:
+          description: "Stomp server host"
+          type: string
+        server_public_dns:
+          description: "Server public dns"
+          type: string
+        db_host:
+          description: "Database server host"
+          type: string
+        port:
+          description: "port that server runs on"
+          type: integer
+        gitolite_user:
+          description: "User name for gitolite server"
+          type: string
+          required: true
+        remote_repo_host:
+          description: "Repo manager host - to be set by dtk_repo_manager node host address"
+          type: string
+          required: true
+        remote_repo_port:
+          type: string
+          default: '443'
+        remote_repo_git_user:
+          type: string
+          default: git
+        local_repo_host:
+          description: "Local repo host"
+          type: string
+        activemq_user:
+          type: string
+          #default: mcollective
+        activemq_password:
+          type: string
+          default: marionette
+        activemq_subcollective:
+          type: string
+          default: mcollective
+        aws_access_key_id:
+          type: string
+          required: true
+        aws_secret_access_key:
+          type: string
+          required: true
+      dependencies:
+      - dtk_server::base
+      link_defs:
+      - dtk_repo_manager:
+        - location: remote
+          attribute_mappings:
+          - $node.host_address -> remote_repo_host
+      after:
+      - dtk_postgresql::db
+      includes:
+      - vcsrepo
+      - apt
+      - dtk_user
+      - rvm
+      - logrotate
+      actions:
+        create:
+          puppet_class: stdlib
+        maintenance_on:
+          commands:
+          # put tenant in mauntenance mode
+          - RUN touch /home/{{ tenant_user }}/server/current/application/public/system_maintenance.html
+        db_archive:
+          commands:
+          # export current database to dump
+          - RUN mkdir -p /backups/db_archive/{{ tenant_user }}
+          - RUN pg_dump -U postgres $(grep '^db.name' /etc/dtk/{{ tenant_user }}/server.conf | cut -d= -f2) | gzip > /backups/db_archive/{{ tenant_user }}/db.tgz
+        smoke_test:
+          commands:
+          # run smoke test to verify upgrade
+          - RUN cd /home/{{ tenant_user }}/server/current/test/functional/rspec && bundle install --gemfile Gemfile.tools
+          - RUN cd /home/{{ tenant_user }}/server/current/test/functional/rspec && BUNDLE_GEMFILE=Gemfile.tools bundle exec rspec spec/release/dtk_release_smoke_test.rb
+        maintenance_off:
+          commands:
+          # put tenant out of mauntenance mode
+          - RUN rm /home/{{ tenant_user }}/server/current/application/public/system_maintenance.html
+    docker:
+      attributes:
+        tenant_user:
+          type: string
+          required: true
+        tenant_internal:
+          type: string
+          default: dtk1
+        tenant_password:
+          type: string
+          default: r8server
+        stomp_server_host:
+          type: string
+        local_repo_host:
+          type: string
+        server_public_dns:
+          type: string
+        remote_repo_host:
+          type: string
+          required: true
+        remote_repo_port:
+          type: string
+        remote_repo_git_user:
+          type: string
+          default: git
+        remote_repo_username:
+          type: string
+        remote_repo_pass:
+          type: string
+        db_host:
+          type: string
+          default: '/var/run/postgresql'
+        db_name:
+          type: string
+        tenant_user_pub_key:
+          type: string
+        activemq_user:
+          type: string
+          #default: mcollective
+        activemq_password:
+          type: string
+          default: marionette
+        activemq_subcollective:
+          type: string
+          default: mcollective
+        activemq_use_hiera:
+          type: boolean
+          default: false
+        aws_access_key_id:
+          type: string
+          required: true
+        aws_secret_access_key:
+          type: string
+          required: true
+        ec2_name_tag_format:
+          type: string
+        ec2_keypair:
+          type: string
+        auth_to_repoman:
+          type: boolean
+        gitolite_host:
+          type: string
+        port:
+          type: string
+        docker_image:
+          type: string
+          required: true
+          default: 'dduvnjak/dtk:latest'
+        docker_email:
+          type: string
+        docker_password_hash:
+          type: string
+          description: "The hash of the docker registry password, found in ~/.dockercfg"
+      external_ref:
+        puppet_class: dtk_server::docker
+      link_defs:
+      - dtk_repo_manager:
+        - location: remote
+          attribute_mappings:
+          - $node.host_address -> remote_repo_host
+      after:
+      - dtk_postgresql::db
+      includes:
+      - vcsrepo
+      - sysctl
+      - gitolite
+      - docker
+      - dtk_nginx
+      - apt
+

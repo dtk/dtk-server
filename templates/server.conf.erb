@@ -1,0 +1,33 @@
+remote_repo.host = <%=@remote_repo_host%>
+repo.remote.new_client = true
+repo.remote.rest_port = <%=@remote_repo_port%>
+repo.remote.git_user = <%=@remote_repo_git_user%>
+repo.remote.tenant_name = <%= @tenant_user %>
+
+dsl.service.integer_version.default=4
+dsl.component.integer_version.default=4
+
+server_public_dns = <%=@server_public_dns%>
+local_repo.host = <%=@local_repo_host%>
+db.host = <%=@db_host%>
+db.name = <%= defined?(@db_name) ? @db_name : @tenant_user %>
+mcollective.host = <%=@stomp_server_host%>
+mcollective.ssh.local.public_key= <%= @rsa_identity_dir %>/mcollective_local.pub
+mcollective.ssh.local.private_key= <%= @rsa_identity_dir %>/mcollective_local
+mcollective.ssh.local.authorized_keys= <%= @rsa_identity_dir %>/authorized_keys
+mcollective.ssh.remote.public_key= <%= @rsa_identity_dir %>/mcollective_remote.pub
+mcollective.ssh.remote.private_key= <%= @rsa_identity_dir %>/mcollective_remote
+mcollective.auth_type=ssh
+mcollective.username= <%= @activemq_user %>
+mcollective.password= <%= @activemq_password_final %>
+mcollective.collective= <%= @activemq_subcollective_final %>
+server_port = <%=@port_val%>
+repo.git.gitolite.admin_directory = <%= @gitolite_admin_directory %>
+repo.git.server_username = <%= @gitolite_user %>
+ec2.keypair = <%= @ec2_keypair %>
+ec2.name_tag.format = <%= @ec2_name_tag_format %>
+workflow.temporal_coordination.intra_node = TOTAL_ORDER
+
+idle.up_time_hours = 2
+
+#puppet.version=3.3.2

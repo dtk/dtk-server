@@ -3,25 +3,31 @@ module DTK; class ServiceModule
     module FoldIntoExisting
       r8_nested_require('fold_into_existing', 'assembly_section_proc')
 
+      # TODO: DTK-2208 Aldin: I changed logic here to use teh oreder of high level sections in ordered_hash_new_content
+      #  to drive the high level order; then just for assembly section does it try to factor in comments, etc from existing assembly
+      #  dsl
       def self.fold_into_existing_assembly_dsl(raw_content_existing, ordered_hash_new_content)
         ret = "---\n"
         assembly_section_proc = nil
         workflow_added = false
         ordered_hash_new_content.each_pair do |section_name, section_content_hash|
+          section = { section_name => section_content_hash }
           text_section = 
             case section_name
              when :assembly
               assembly_section_proc ||= AssemblySectionProc.new(raw_content_existing.split("\n"))
-              convert_to_text__assembly_section(assembly_section_proc, section_content_hash)
+              convert_to_text__assembly_section(assembly_section_proc, section)
              when :workflow, :workflows
-              unless workflow_added
-                convert_to_text(section_name => section_content_hash)
+              if workflow_added
+                nil
+              else
                 workflow_added = true
+                convert_to_text(section)
               end
              else
-              convert_to_text(section_name => section_content_hash)
+              convert_to_text(section)
             end
-          ret.concat(text_section)
+          ret.concat(text_section) if text_section
         end
         ret
       end

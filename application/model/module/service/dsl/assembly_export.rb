@@ -30,45 +30,73 @@ module DTK
         assembly_dsl_path = assembly_meta_filename_path()
         serialized_content = serialize()
 
-        if opts[:mode] == :create
-          @service_module_branch.serialize_and_save_to_repo?(assembly_dsl_path, serialized_content)
+        # Check to determine whether shoudl generate assembly_dsl_path from serialized_content (from fresh)
+        # or whether it should use existing file to keep context like comments, spacing
+        # it should only use existing file as part of this if
+        # - this is an update (rather than a create operation)
+        # - serialized_content has an assembly section
+        # - the file 'assembly_dsl_path' exists
+        if opts[:mode] == :update and 
+            serialized_content_has_assembly_section?(serialized_content) and
+            file_exists?(assembly_dsl_path)
+          serialize_and_save_to_repo__fold_into_existing?(assembly_dsl_path, serialized_content)
         else
-          if (serialized_content[:assembly] || {})[:nodes]
-            @serialized_assembly_file ||= serialized_assembly_file(assembly_dsl_path, serialized_content)
-raise ErrorUsage.new
-            @service_module_branch.save_file_content_to_repo(assembly_dsl_path, @serialized_assembly_file)
-          else
-            @service_module_branch.serialize_and_save_to_repo?(assembly_dsl_path, serialized_content)
-          end
+          serialize_and_save_to_repo__fresh?(assembly_dsl_path, serialized_content)
         end
 
         assembly_dsl_path
       end
 
-      def check_merge_conflicts(assembly_instance, service_module_branch)
-        assembly_instance.update_object!(:service_module_sha)
+      def check_merge_conflicts(assembly_instance)
         assembly_dsl_path = assembly_meta_filename_path()
+        return unless file_exists?(assembly_dsl_path)
 
-        initial_sha = assembly_instance[:service_module_sha]
-        current_sha = service_module_branch[:current_sha]
+        initial_sha = assembly_instance.get_field?(:service_module_sha)
+        current_sha = @service_module_branch[:current_sha]
 
         return if initial_sha.eql?(current_sha)
 
-        assembly_file_changed = RepoManager.file_changed_since_specified_sha(initial_sha, assembly_dsl_path, service_module_branch)
-        return unless assembly_file_changed
+        return unless RepoManager.file_changed_since_specified_sha(initial_sha, assembly_dsl_path, @service_module_branch)
 
         # move current assembly.yaml and create new one; also notify user
-        @serialized_assembly_file = serialized_assembly_file(assembly_dsl_path, serialize())
+
+        # TODO: DTK-2208 Aldin: think if there is merge conflict then dont fold into existing file structure
+        # Commented out the call that was there (which has method name change to reflect refactoring)
+        # this should be double checked to see if this is right
+        #  @serialized_assembly_file = fold_into_existing_assembly_dsl(assembly_dsl_path, serialize())
 
         destination_name = "#{assembly_dsl_path}.dtk-backup"
-        RepoManager.move_file(assembly_dsl_path, destination_name, service_module_branch)
+        RepoManager.move_file(assembly_dsl_path, destination_name, @service_module_branch)
 
         "New #{assembly_dsl_path} is generated from service instance content because we were not able to merge with existing one. Backup of old file has been stored at #{destination_name} so you can merge manually or you can delete backup files."
       end
 
       private
+      
+      def file_exists?(path)
+        RepoManager.file_exists?(path, @service_module_branch)
+      end
 
-      def serialized_assembly_file(assembly_dsl_path, serialized_content)
+      def serialized_content_has_assembly_section?(serialized_content)
+        !(serialized_content[:assembly] || {})[:nodes].nil?
+      end
+
+      def serialize_and_save_to_repo__fresh?(assembly_dsl_path, serialized_content)
+        @service_module_branch.serialize_and_save_to_repo?(assembly_dsl_path, serialized_content)
+      end
+
+      def serialize_and_save_to_repo__fold_into_existing?(assembly_dsl_path, serialized_content)
+        begin
+          @serialized_assembly_file ||= fold_into_existing_assembly_dsl(assembly_dsl_path, serialized_content)
+          @service_module_branch.save_file_content_to_repo(assembly_dsl_path, @serialized_assembly_file)
+         rescue => e
+          #In case any error in routine to incrementally fold in to assembly we will just generate from new content (i.e., from fresh)
+          Log.error_pp([e])
+          serialize_and_save_to_repo__fresh?(assembly_dsl_path, serialized_content)
+        end
+      end
+
+      def fold_into_existing_assembly_dsl(assembly_dsl_path, serialized_content)
         raw_content_existing = @service_module_branch.get_raw_file_content(assembly_dsl_path)
         FoldIntoExisting.fold_into_existing_assembly_dsl(raw_content_existing, serialized_content)
       end

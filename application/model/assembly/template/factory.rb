@@ -248,7 +248,7 @@ module DTK
         module_refs_updated = @component_module_refs.update_object_if_needed!(@assembly_component_modules)
 
         Transaction do
-          ret = @template_output.check_merge_conflicts(@assembly_instance, @service_module_branch)
+          ret = @template_output.check_merge_conflicts(@assembly_instance)
           @template_output.save_to_model()
           if module_refs_updated
             @component_module_refs.update() # update the object model

@@ -153,6 +153,12 @@ module DTK
       end
     end
 
+    def file_exists?(file_path)
+      checkout(@branch) do
+        File.exist?(file_path)
+      end
+    end
+
     def move_content(source, destination, files, folders, branch = nil)
       branch ||= @branch
       checkout(branch) do

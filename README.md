@@ -1,4 +1,4 @@
-## Welcome to DTK Server
+## DTK Server
 
 ### Installation
 
@@ -32,3 +32,16 @@ Following are snippets that will introudce you to basic user of system and it's 
   end
 
   ::DTK::Model.update_from_rows(default_project.model_handle(:user), users)
+
+### Running the docker image  
+Select a directory on host which will be used by the docker container for persistance (e.g. `/dtk`), and populate a `dtk.config` inside it (e.g. `/dtk/dtk.config`):  
+```
+USERNAME=someuser
+PASSWORD=somepassword
+PUBLIC_ADDRESS=someuser.dtk.io
+```   
+Next step is to start the docker container with the directory from above used as a volume:  
+```
+docker run -v /dtk:/host_volume -p 8080:80 -p 6163:6163 -p 2222:22 -i -t getdtk/server-full
+```
+Note that if you need to forward GIT SSH port to a different one, you can use the `-e GIT_PORT=2200` switch for example. 

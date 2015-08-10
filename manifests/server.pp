@@ -16,6 +16,24 @@ class dtk_postgresql::server
   $postgresql_conf = "${server_conf_dir}/postgresql.conf"  
   $pg_hba_conf = "${server_conf_dir}/pg_hba.conf"  
 
+  include ::apt
+  # Here we have tried to replicate the instructions on the PostgreSQL site:
+  #
+  # http://www.postgresql.org/download/linux/debian/
+  #
+  apt::pin { 'apt.postgresql.org':
+    originator => 'apt.postgresql.org',
+    priority   => 500,
+  }->
+  apt::source { 'apt.postgresql.org':
+    location    => 'http://apt.postgresql.org/pub/repos/apt/',
+    release     => "${::lsbdistcodename}-pgdg",
+    repos       => "main ${version}",
+    key         => 'B97B0AFCAA1A47F044F244A07FCC7D46ACCC4CF8',
+    key_source  => 'https://www.postgresql.org/media/keys/ACCC4CF8.asc',
+    include_src => false,
+  }->
+
   package { $server_package: }
 
   file { $postgresql_conf:

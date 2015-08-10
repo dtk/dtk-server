@@ -1,4 +1,4 @@
-FROM getdtk/trusty-puppet
+FROM getdtk/trusty-puppet:0.1
 MAINTAINER dduvnjak <dario@atlantbh.com>
 
 RUN mkdir -p /etc/puppet/modules

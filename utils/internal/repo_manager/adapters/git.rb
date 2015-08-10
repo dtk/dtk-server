@@ -1,4 +1,4 @@
-# TODO: replace as many git checkout calls with eitehr qualified calss raw object model ops taht work in both clone and bare repos
+# TODO: replace as many git checkout calls with either qualified calls raw object model ops taht work in both clone and bare repos
 require 'grit'
 require 'fileutils'
 r8_nested_require('git', 'manage_git_server')
@@ -504,11 +504,14 @@ module DTK
       end
     end
 
+    # retruns sha of new branch
     def add_branch_and_push?(new_branch, opts = {})
+      new_branch_sha = nil
       add_branch?(new_branch, opts)
       checkout(opts[:sha] || new_branch) do
-        git_command__push(new_branch)
+        new_branch_sha = git_command__push(new_branch)
       end
+      new_branch_sha
     end
 
     def add_branch?(new_branch, opts = {})

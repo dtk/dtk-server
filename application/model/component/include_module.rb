@@ -8,7 +8,7 @@ module DTK; class Component
       get_field?(:display_name)
     end
 
-    # For all components in components, this method returns its implementation plus
+    # For all components in component_idhs, this method returns its implementation plus
     # does recursive anaysis to follow the components includes to find other components that must be included also
     def self.get_matching_implementations(assembly_instance, component_idhs)
       # TODO: check that  Component.get_implementations is consistent with what ModuleRefs::Lock returns
@@ -27,10 +27,10 @@ module DTK; class Component
       # includes are indexed on components, so at first level get component modules, but then can only see what component modules
       # are includes using ModuleRefs::Lock
       ndx_ret = ret.inject({}) { |h, impl| h.merge(impl.id => impl) }
-      locked_module_refs = ModuleRefs::Lock.get(assembly_instance, types: [:locked_dependencies, :locked_branch_shas])
-      included_impls = locked_module_refs.matching_impls_with_children(include_modules.map(&:module_name))
-      ndx_ret = included_impls.inject(ndx_ret) { |h, impl| h.merge(impl.id => impl) }
-      ndx_ret.values
+      module_names = include_modules.map(&:module_name)
+      included_impls = ModuleRefs::Lock.get_implementations(assembly_instance, module_names) 
+      # remove dups from included_impls
+      included_impls.inject(ndx_ret) { |h, impl| h.merge(impl.id => impl) }.values
     end
 
     private

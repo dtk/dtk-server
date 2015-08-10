@@ -12,7 +12,7 @@ require './lib/assembly_and_service_operations_spec'
 STDOUT.sync = true
 
 service_name = 'af_test_case_4_instance'
-service_module_namespace = 'test'
+service_module_namespace = 'r8'
 assembly_name = 'action_module::node-group'
 dtk_common = Common.new(service_name, assembly_name)
 

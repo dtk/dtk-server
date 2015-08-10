@@ -1,4 +1,3 @@
-# TODO: Marked for removal [Haris]
 module DTK; class AssemblyModule
   class Component
     class AdHocLink < self

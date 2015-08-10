@@ -1,3 +1,6 @@
+# TODO: we may remove TestModule or instead just reuse the AssemblyModule::Component methods
+#       if we keep this in need to update this to reflect changes made to AssemblyModule::Component 
+#       changes to update MoudleRefs::Lock refernces
 module DTK; class AssemblyModule
   class TestModule < self
     r8_nested_require('component', 'ad_hoc_link')
@@ -7,7 +10,6 @@ module DTK; class AssemblyModule
       new(assembly).prepare_for_edit(component_module)
     end
     def prepare_for_edit(component_module)
-      get_applicable_component_instances(component_module)
       create_assembly_branch?(component_module)
     end
 
@@ -43,12 +45,7 @@ module DTK; class AssemblyModule
     def promote_module_updates(component_module, opts = {})
       am_version = assembly_module_version()
       unless branch = component_module.get_workspace_module_branch(am_version)
-        component_module_id = component_module.id()
-        if @assembly.get_component_modules().find { |r| r[:id] == component_module_id }
-          fail ErrorNoChangesToModule.new(@assembly, component_module)
-        else
-          fail ErrorNoComponentsInModule.new(@assembly, component_module)
-        end
+        fail ErrorNoChangesToModule.new(@assembly, component_module)
       end
       unless ancestor_branch = branch.get_ancestor_branch?()
         fail Error.new('Cannot find ancestor branch')
@@ -57,20 +54,23 @@ module DTK; class AssemblyModule
       ancestor_branch.merge_changes_and_update_model?(component_module, branch_name, opts)
     end
 
-    def self.get_for_assembly(assembly, opts = {})
+    def self.get_for_assembly(assembly, mode, opts = {})
+      unless mode == :direct
+        fail Error.new("only mode :direct is supported")
+      end
       new(assembly).get_for_assembly(opts)
     end
     def get_for_assembly(opts = {})
       ndx_ret = {}
-      add_module_branches = opts[:get_version_info]
+      get_branch_relationship_info = opts[:get_branch_relationship_info]
       # there is a row for each component; assumption is that all rows belonging to same component with have same branch
       @assembly.get_objs(cols: [:instance_component_module_branches]).each do |r|
         component_module = r[:component_module]
-        ndx_ret[component_module[:id]] ||= component_module.merge(add_module_branches ? r.hash_subset(:module_branch) : {})
+        ndx_ret[component_module[:id]] ||= component_module.merge(get_branch_relationship_info ? r.hash_subset(:module_branch) : {})
       end
       ret = ndx_ret.values
-      if add_module_branches
-        add_version_info!(ret)
+      if get_branch_relationship_info
+        add_branch_relationship_info!(ret)
       end
 
       # remove branches; they are no longer needed
@@ -110,7 +110,7 @@ module DTK; class AssemblyModule
       Model.get_obj(cmp_template.model_handle(), sp_hash) || fail(Error.new('Unexpected that branch_cmp_template is nil'))
     end
 
-    def add_version_info!(modules_with_branches)
+    def add_branch_relationship_info!(modules_with_branches)
       local_copy_els = []
       modules_with_branches.each do |r|
         if r[:module_branch].assembly_module_version?()
@@ -230,14 +230,7 @@ module DTK; class AssemblyModule
       private
 
       def error_msg
-        "Changes to component module (#{@module_name}) have not been made in assembly (#{@assembly_name})"
-      end
-    end
-    class ErrorNoComponentsInModule < ErrorComponentModule
-      private
-
-      def error_msg
-        "Assembly (#{@assembly_name}) does not have any components belonging to module (#{@module_name})"
+        "Changes to component module (#{@module_name}) have not been made in service instance '#{@assembly_name}'"
       end
     end
   end

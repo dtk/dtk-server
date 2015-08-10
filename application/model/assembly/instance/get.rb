@@ -95,9 +95,17 @@ module DTK; class Assembly; class Instance
     #### end: get methods around components
 
     #### get methods around component modules
-    def get_component_modules(opts = {})
-      AssemblyModule::Component.get_for_assembly(self, opts)
+
+    # opts can have keys
+    #   :get_branch_relationship_info - Boolean
+    #
+    # mode is one of
+    # :direct - only component modules directly included
+    # :recursive - directly connected and nested component modules
+    def get_component_modules(mode, opts = {})
+      AssemblyModule::Component.get_for_assembly(self, mode, opts)
     end
+
     #### end: get methods around component modules
 
     #### get methods around nodes

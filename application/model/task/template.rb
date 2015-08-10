@@ -128,7 +128,7 @@ module DTK; class Task
           serialization_form: { filter: { source: :assembly }, allow_empty_task: true }
         }.merge(opts)
         
-        # TODO: do as part of DTK-2163
+        # TODO: DTK-2209
         # TODO: only returning now the task templates for the default (assembly create action)
         # this is done by setting task action as nil
         task_action =  nil

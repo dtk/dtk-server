@@ -2,18 +2,19 @@
 require './spec/setup_browser'
 require './lib/component_modules_spec'
 require './lib/dtk_common'
+require './lib/admin_panel_helper'
+require './lib/mixins/admin_panel_mixins'
 
-data={
-	usergroup: 'demo_group',
-	desc: 'Demo Group.',
-	edit_usergroup: 'edited_user_group',
-	edit_desc: 'Edit.'
-}
+group = UserGroup.new('demo_group','Demo Group.') 
+edited_group = UserGroup.new('edited_user_group','Edit.')
+
+
 
 describe "(Admin Panel UI) Usergroup Test Case 1: Simple create, update and delete usergroup scenario" do
   let(:conf) { Configuration.instance }
   let(:header) { @homepage.get_header }
-  let(:usergroups) { @homepage.get_main.get_usergroups }
+  let(:groups_panel) { @homepage.get_main.get_usergroups }
+ 
 
   context "User is" do
 	  it "logged in" do
@@ -25,58 +26,56 @@ describe "(Admin Panel UI) Usergroup Test Case 1: Simple create, update and dele
 
   context "Open the creation page" do
   	it "creation page opened" do
-  		usergroups.open_usergroup_create_page
+  		groups_panel.open_create_page
   	end
   end
 
-  context "Create Usergroup #{data[:usergroup]} with description #{data[:desc]}" do
+  context "Create Usergroup #{group.name} with description #{group.desc}" do
   	it "usergroup created" do
-  		usergroups.enter_usergroup_name(data[:usergroup])
-  		usergroups.enter_usergroup_desc(data[:desc])
-  		usergroups.create_usergroup
+  		groups_panel.enter_data(group.get_data)
+      groups_panel.press_create_button
   	end
   end
 
-  context "Search for Usergroup #{data[:usergroup]}" do
+  context "Search for Usergroup #{group.name}" do
   	it "usergroup found" do
-  		usergroups.search_for_usergroup(data[:usergroup])
-  		expect(usergroups.usergroup_exists?(data[:usergroup])).to eql(true)
+      groups_panel.search_for_object(group.name)
+  		expect(groups_panel.object_exists?(group.name)).to eql(true)
   	end
   end
 
-  context "Edit Usergroup #{data[:usergroup]} to #{data[:edit_usergroup]}" do
+  context "Edit Usergroup #{group.name} to #{edited_group.name}" do
   	it "usergroup edited" do
-  		usergroups.open_usergroup_edit_page(data[:usergroup])
-  		usergroups.enter_usergroup_name(data[:edit_usergroup])
-  		usergroups.enter_usergroup_desc(data[:edit_desc])
-  		usergroups.edit_usergroup
+      groups_panel.open_edit_page(group.name)
+      groups_panel.enter_data(edited_group.get_data)
+      groups_panel.press_edit_button
   	end
   end
 
-  context "Search for Usergroup #{data[:usergroup]}" do
+  context "Search for Usergroup #{group.name}" do
   	it "usergroup not found" do
-  		usergroups.search_for_usergroup(data[:usergroup])
-  		expect(usergroups.usergroup_exists?(data[:usergroup])).to eql(false)
+  		groups_panel.search_for_object(group.name)
+  		expect(groups_panel.object_exists?(group.name)).to eql(false)
   	end
   end
 
-  context "Search for Usergroup #{data[:edit_usergroup]}" do
+  context "Search for Usergroup #{edited_group.name}" do
     it "usergroup found" do
-      usergroups.search_for_usergroup(data[:edit_usergroup])
-      expect(usergroups.usergroup_exists?(data[:edit_usergroup])).to eql(true)
+      groups_panel.search_for_object(edited_group.name)
+      expect(groups_panel.object_exists?(edited_group.name)).to eql(true)
     end
   end
 
-  context "Delete Usergroup #{data[:edit_usergroup]}" do
+  context "Delete Usergroup #{edited_group.name}" do
     it "group deleted"  do
-      usergroups.delete_usergroup(data[:edit_usergroup])
+      groups_panel.press_delete_link(edited_group.name)
     end
   end
 
-  context "Search for Usergroup #{data[:edit_usergroup]}" do
+  context "Search for Usergroup #{edited_group.name}" do
     it "usergroup not found" do
-      usergroups.search_for_usergroup(data[:edit_usergroup])
-      expect(usergroups.usergroup_exists?(data[:edit_usergroup])).to eql(false)
+      groups_panel.search_for_object(edited_group.name)
+      expect(groups_panel.object_exists?(edited_group.name)).to eql(false)
     end
   end
 end

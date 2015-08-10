@@ -49,7 +49,7 @@ module DTK
         @assembly_instance = assembly_instance
         @service_module = service_module
         @service_module_branch = service_module_branch
-        @assembly_component_modules = assembly_instance.get_component_modules(get_version_info: true)
+        @assembly_component_modules = assembly_instance.get_component_modules(:direct)
         @component_module_refs = service_module.get_component_module_refs()
         self
       end

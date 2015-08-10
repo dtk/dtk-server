@@ -55,7 +55,7 @@ module DTK; class BaseModule
       end
 
       # returns the new module branch
-      # This is caledd when cerating a service insatnce specific component module
+      # This is caledd when creating a service instance specific component module
       def create_new_version__type_specific(repo_for_new_branch, new_version, opts = {})
         local = UpdateModule.ret_local(self, new_version)
         # TODO: this is expensive in that it creates new version by parsing the dsl and reading back in;

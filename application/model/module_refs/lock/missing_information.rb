@@ -1,3 +1,4 @@
+# TODO: thing we wil be able to deprecate this
 module DTK; class ModuleRefs
   class Lock
     class MissingInformation < self
@@ -9,7 +10,7 @@ module DTK; class ModuleRefs
         @opts = opts
       end
 
-      # types will be subset of [:locked_dependencies,:locked_branch_shas]
+      # types will be subset of [:locked_dependencies, :locked_branch_shas]
       # opts can have
       #  :with_module_branches - Boolean
       def self.missing_information?(module_refs_lock, types, opts = {})
@@ -26,11 +27,6 @@ module DTK; class ModuleRefs
         unless missing.empty?
           new(module_refs_lock.assembly_instance, missing, complete, types, opts)
         end
-      end
-
-      def fill_in_missing_information
-        pp [:fill_in_missing_information, self]
-        fail Error.new('Need to write fill_in_missing_information')
       end
 
       private

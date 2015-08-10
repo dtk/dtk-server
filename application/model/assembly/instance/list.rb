@@ -106,13 +106,13 @@ module DTK; class  Assembly
       end
 
       def list_component_modules(opts = Opts.new)
-        component_modules_opts = { recursive: true }
-        if get_version_info = opts.array(:detail_to_include).include?(:version_info)
+        opts_get = {}
+        if get_branch_relationship_info = opts.array(:detail_to_include).include?(:version_info)
           opts.set_datatype!(:assembly_component_module)
-          component_modules_opts.merge!(get_version_info: true)
+          opts_get.merge!(get_branch_relationship_info: true)
         end
-        unsorted_ret = get_component_modules(component_modules_opts)
-          if get_version_info
+        unsorted_ret = get_component_modules(:recursive, opts_get)
+          if get_branch_relationship_info
             unsorted_ret.each do |r|
             if r[:local_copy]
               branch_relationship     = r[:branch_relationship] || ''

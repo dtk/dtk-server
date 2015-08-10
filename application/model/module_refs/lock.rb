@@ -1,42 +1,54 @@
 module DTK
   class ModuleRefs
+    # This object and its associated table (module.module_ref_lock) captures
+    # The locked sha associated with the component module plus cached information on all the service instance's 
+    # direct and indirect module refs
+    #
+    # This object is hash of form
+    #  {MODULE_NAME1 => ModuleRef::Lock,
+    #   MODULE_NAME2 => ModuleRef::Lock,
+    #   ....
+    # }
     class Lock < Hash
       r8_nested_require('lock', 'missing_information')
 
-      # This object is hash of form
-      #  {MODULE_NAME1 => ModuleRef::Lock,
-      #   MODULE_NAME2 => ModuleRef::Lock,
-      #   ....
-      # }
       attr_reader :assembly_instance
       def initialize(assembly_instance)
         super()
         @assembly_instance = assembly_instance
       end
 
+      # TODO: locked depenedncies is minsomer; it is more like 'cached_dependencies'
       AllTypes = [:locked_dependencies, :locked_branch_shas]
-      # opts can have keys
+
+      # opts can have
+      #  :types (equal to or subset of AllTypes
       #   :with_module_branches - Boolean
-      #   :types subset of AllTypes
-      def self.get(assembly_instance, opts = {})
-        types = opts[:types] || AllTypes
-        opts_nested = Aux.hash_subset(opts, [:with_module_branches])
-        # First check if persisted if not then compute it
-        if persisted = (R8::Config[:module_refs_lock] || {})[:use_persistence] && get_module_refs_lock?(assembly_instance)
-          if missing_info = MissingInformation.missing_information?(persisted, types, opts_nested)
-            missing_info.fill_in_missing_information()
-          else
-            persisted
-          end
-        else
-          compute_elements(assembly_instance, types, opts_nested)
-        end
+      def self.get_all(assembly_instance, opts = {})
+        get(assembly_instance, opts[:types] || AllTypes, Aux.hash_subset(opts, [:with_module_branches]))
       end
 
+      def self.get_implementations(assembly_instance, module_names)
+        get(assembly_instance, :locked_dependencies).get_implementations(module_names)
+      end
+
+      # TODO: for efficiency can use modification of ModuleRefs::Lock.get(..) that passes in module_name so can filter there
+      def self.get_namespace?(assembly_instance, module_name)
+        get(assembly_instance, :locked_dependencies).matching_namespace?(module_name)
+      end
+      def self.get_locked_branch_sha?(assembly_instance, module_name)
+        get(assembly_instance, :locked_branch_shas).matching_locked_branch_sha?(module_name)
+      end
+      # returns [namespace, locked_branch_sha]
+      def self.get_namespace_and_locked_branch_sha?(assembly_instance, module_name)
+        module_refs_lock = get(assembly_instance, AllTypes)
+        [module_refs_lock.matching_namespace?(module_name), module_refs_lock.matching_locked_branch_sha?(module_name)]
+      end
+
+      # opts can have keys
+      # :raise_errors - Boolean
       def self.compute(assembly_instance, opts = {})
-        types = opts[:types] || AllTypes
-        opts_nested = Aux.hash_subset(opts, [:with_module_branches])
-        compute_elements(assembly_instance, types, opts)
+        compute_elements(assembly_instance, AllTypes, opts)
       end
 
       def clear_locked_dependencies
@@ -56,7 +68,11 @@ module DTK
         (module_ref_lock = module_ref_lock(module_name)) && module_ref_lock.locked_branch_sha
       end
 
-      def matching_impls_with_children(module_names)
+      def elements
+        values().map { |module_ref_lock| module_ref_lock_element(module_ref_lock) }.compact
+      end
+
+      def get_implementations(module_names)
         ret = []
         module_names.each do |module_name|
           if element = element?(module_name)
@@ -66,10 +82,6 @@ module DTK
           end
         end
         ret
-      end
-
-      def elements
-        values().map { |module_ref_lock| module_ref_lock_element(module_ref_lock) }.compact
       end
 
       private
@@ -83,6 +95,24 @@ module DTK
         end
       end
 
+      # opts can have keys
+      #   :with_module_branches - Boolean
+      def self.get(assembly_instance, types, opts = {})
+        types = Array(types)
+        if persisted = get_module_refs_lock?(assembly_instance)
+          if missing_info = MissingInformation.missing_information?(persisted, types, opts)
+            Log.error_pp(["Unexpected that there is info missing from ModuleRefs::Lock info must be computed for assembly", assembly_instance, missing_info])
+          end
+          persisted
+        else
+          Log.error_pp(["Unexpected that the ModuleRefs::Lock info must be computed for assembly", assembly_instance]) 
+          compute_elements(assembly_instance, types, opts)
+        end
+      end
+
+      # opts can have keys
+      # :with_module_branches - Boolean
+      # :raise_errors - Boolean
       def self.compute_elements(assembly_instance, types, opts = {})
         module_refs_tree = ModuleRefs::Tree.create(assembly_instance)
         collapsed = module_refs_tree.collapse(Aux.hash_subset(opts, [:raise_errors]))

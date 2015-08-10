@@ -15,8 +15,8 @@ assembly_name = 'bootstrap::node_with_params'
 os = 'precise'
 instance_size = 't1.micro'
 node_name = 'node1'
-cent_os = 'centos6.4'
-centos_instance_size = 'm1.small'
+rhel_os = 'rhel6'
+rhel_instance_size = 'm1.small'
 
 dtk_common = Common.new(service_name, assembly_name)
 
@@ -53,12 +53,12 @@ describe '(Use Of Parameters) Test Case 5: Change optional params on existing at
     include_context 'Check attribute', dtk_common, node_name, 'instance_size', instance_size
   end
 
-  context "Set os attribute function with different value #{cent_os}" do
-    include_context 'Set attribute', dtk_common, 'os_identifier', cent_os
+  context "Set os attribute function with different value #{rhel_os}" do
+    include_context 'Set attribute', dtk_common, 'os_identifier', rhel_os
   end
 
-  context "Set instance_size attribute function with different value #{centos_instance_size}" do
-    include_context 'Set attribute', dtk_common, 'instance_size', centos_instance_size
+  context "Set instance_size attribute function with different value #{rhel_instance_size}" do
+    include_context 'Set attribute', dtk_common, 'instance_size', rhel_instance_size
   end
 
   context 'Converge function again' do
@@ -66,11 +66,11 @@ describe '(Use Of Parameters) Test Case 5: Change optional params on existing at
   end
 
   context 'Check changed os attribute after converge' do
-    include_context 'Check attribute', dtk_common, node_name, 'os_identifier', cent_os
+    include_context 'Check attribute', dtk_common, node_name, 'os_identifier', rhel_os
   end
 
   context 'Check changed instance_size attribute after converge' do
-    include_context 'Check attribute', dtk_common, node_name, 'instance_size', centos_instance_size
+    include_context 'Check attribute', dtk_common, node_name, 'instance_size', rhel_instance_size
   end
 
   context 'Delete and destroy service function' do

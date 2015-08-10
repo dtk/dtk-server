@@ -12,7 +12,7 @@ require './lib/assembly_and_service_operations_spec'
 STDOUT.sync = true
 
 service_name = 'af_test_case_5_instance'
-service_module_namespace = 'test'
+service_module_namespace = 'r8'
 assembly_name = 'action_module::file-positioning-and-clauses'
 dtk_common = Common.new(service_name, assembly_name)
 
@@ -82,23 +82,23 @@ describe '(Action Framework) Test Case 5: Service with one node that contains cm
   end
 
   context 'Get task action details for action with successfull if command' do
-    include_context 'Get task action details', dtk_common, '3.1', [expected_output_1]
+    include_context 'Get task action details', dtk_common, '2.1', [expected_output_1]
   end
 
   context 'Get task action details for action with successfull unless command' do
-    include_context 'Get task action details', dtk_common, '4.1', [expected_output_2]
+    include_context 'Get task action details', dtk_common, '3.1', [expected_output_2]
   end
 
   context 'Get task action details for action with successfull create file command' do
-    include_context 'Get task action details', dtk_common, '5.1', [expected_output_3_1, expected_output_3_2, expected_output_3_3]
+    include_context 'Get task action details', dtk_common, '4.1', [expected_output_3_1, expected_output_3_2, expected_output_3_3]
   end
 
   context 'Get task action details for action with successfull create file with permissions command' do
-    include_context 'Get task action details', dtk_common, '6.1', [expected_output_4_1, expected_output_4_2]
+    include_context 'Get task action details', dtk_common, '5.1', [expected_output_4_1, expected_output_4_2]
   end
 
   context 'Get task action details for action with failed create command (fake permissions)' do
-    include_context 'Get task action details', dtk_common, '7.1', [expected_output_5]
+    include_context 'Get task action details', dtk_common, '6.1', [expected_output_5]
   end
 
   context 'Delete and destroy service function' do

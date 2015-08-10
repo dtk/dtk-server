@@ -67,4 +67,7 @@ class Users < Main
       info
   end
 
+  def save_edit_changes
+    @session.click_button('Edit User')
+  end
 end

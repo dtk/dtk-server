@@ -7,7 +7,7 @@ require './lib/dtk_common'
 component_module = 'r8:java'
 user_data = {
   usergroup: 'bakir_test_group',
-  user: 'dtk17-client',
+  user: '', # To be set later in the script
   another_user: 'bakir_test',
   module_name: 'r8/java',
   another_usergroup: 'bakir_test'
@@ -45,8 +45,9 @@ describe '(Repoman client integration) Test Case 10: NEG - Make public module A 
   end
 
   context "Usergroup #{user_data[:usergroup]}" do
-    it "is set for user #{user_data[:user]}" do
+    it "is set for user" do
       header.click_on_users
+      user_data[:user] = conf.repoman_user
       users.click_on_edit_user(user_data[:user])
       users.assign_user_group_for_user(user_data[:usergroup])
       users.save_edit_changes
@@ -62,7 +63,7 @@ describe '(Repoman client integration) Test Case 10: NEG - Make public module A 
       modules.unset_module_owner_group(user_data[:usergroup])
       modules.set_module_permissions(permissions)
       modules.save_edit_changes
-      sleep 5 #To have enough time to save changes
+      sleep 5 # To have enough time to save changes
     end
   end
 

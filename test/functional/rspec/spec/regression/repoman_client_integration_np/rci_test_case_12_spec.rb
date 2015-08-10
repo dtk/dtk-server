@@ -9,7 +9,7 @@ permission_set_1 = 'ugo+rwd'
 permission_set_2 = 'ugo-wd'
 user_data = {
   usergroup: 'bakir_test_group',
-  user: 'dtk17-client',
+  user: '',
   module_name: 'r8/java',
   another_user: 'bakir_test'
 }
@@ -46,8 +46,9 @@ describe '(Repoman client integration) Test Case 12: chmod ugo+rwd and ugo-wd on
   end
 
   context "Usergroup #{user_data[:usergroup]}" do
-    it "is set for user #{user_data[:user]}" do
+    it "is set for user" do
       header.click_on_users
+      user_data[:user] = conf.repoman_user
       users.click_on_edit_user(user_data[:user])
       users.assign_user_group_for_user(user_data[:usergroup])
       users.save_edit_changes

@@ -10,6 +10,7 @@ module DTK; class  Assembly
     r8_nested_require('instance', 'delete')
     r8_nested_require('instance', 'service_setting')
     r8_nested_require('instance', 'node_status')
+    r8_nested_require('instance', 'lock')
     include ServiceLinkMixin
     include ViolationMixin
     include ListMixin

@@ -36,14 +36,16 @@ module DTK
         # - this is an update (rather than a create operation)
         # - serialized_content has an assembly section
         # - the file 'assembly_dsl_path' exists
+        new_commit_sha = nil
         if opts[:mode] == :update and 
             serialized_content_has_assembly_section?(serialized_content) and
             file_exists?(assembly_dsl_path)
-          serialize_and_save_to_repo__fold_into_existing?(assembly_dsl_path, serialized_content)
+            new_commit_sha = serialize_and_save_to_repo__fold_into_existing?(assembly_dsl_path, serialized_content)
         else
-          serialize_and_save_to_repo__fresh?(assembly_dsl_path, serialized_content)
+          new_commit_sha = serialize_and_save_to_repo__fresh?(assembly_dsl_path, serialized_content)
         end
 
+        @factory.assembly_instance.update_from_hash_assignments(:service_module_sha => new_commit_sha) if new_commit_sha
         assembly_dsl_path
       end
 

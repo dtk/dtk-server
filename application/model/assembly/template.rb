@@ -46,7 +46,11 @@ module DTK; class Assembly
         new_assembly_obj = target.clone_into(self, override_attrs, clone_opts)
       end
 
-      Assembly::Instance.create_subclass_object(new_assembly_obj)
+      assembly_instance = Assembly::Instance.create_subclass_object(new_assembly_obj)
+      assembly_instance_lock = Assembly::Instance::Lock.create_from_element(assembly_instance, service_module)
+      assembly_instance_lock.save_to_model()
+
+      assembly_instance
     end
 
     def self.create_or_update_from_instance(project, assembly_instance, service_module_name, assembly_template_name, opts = {})

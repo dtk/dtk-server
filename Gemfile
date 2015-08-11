@@ -1,5 +1,7 @@
 source 'https://rubygems.org'
 
+ruby '1.9.3'
+
 # dtk gems
 #TODO: commented until we solve issue with nee to get latest versions from our geminabox not rubygems
 gem 'dtk-common', :github => 'rich-reactor8/dtk-common' #, :tag => '>= 0.5.15'

@@ -1,13 +1,13 @@
 GIT
   remote: git://github.com/rich-reactor8/dtk-common-repo.git
-  revision: c08a1077dd4ee9e84c6f0931b00dcd0b96d71843
+  revision: 84d3ae85224e849592e142759e5cae543d2b87e8
   specs:
     dtk-common-core (0.7.2)
       rest-client (= 1.6.7)
 
 GIT
   remote: git://github.com/rich-reactor8/dtk-common.git
-  revision: e15dccab847cdc9b18de08edd64c07d0b3d81ddc
+  revision: 2f1752b916083676d927f4d2059650852ba6a556
   specs:
     dtk-common (0.7.4)
       colorize (~> 0.5.8)
@@ -301,3 +301,6 @@ DEPENDENCIES
   sshkeyauth (= 0.0.11)
   stomp (= 1.1.9)
   thin
+
+BUNDLED WITH
+   1.10.6

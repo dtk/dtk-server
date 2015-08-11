@@ -59,6 +59,7 @@ def load_configs
   conf.browser = full_config[env]["target"]["browser"]
   conf.username = full_config[env]["account"]["username"]
   conf.password = full_config[env]["account"]["password"]
+  conf.repoman_user = full_config["r8server"]["repoman_user"]
   conf.headless = full_config[env]["headless"]
   conf.poltergeist = full_config[env]["poltergeist"]
   return conf

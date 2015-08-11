@@ -6,7 +6,7 @@ require './lib/dtk_common'
 
 user_data = {
   usergroup: 'bakir_test_group',
-  user: 'dtk17-client',
+  user: '',
   module_name: 'r8/java'
 }
 
@@ -47,8 +47,9 @@ describe '(Repoman client integration) Test Case 19: add/remove collaborators by
   end
 
   context "Usergroup #{user_data[:usergroup]}" do
-    it "is set for user #{user_data[:user]}" do
+    it "is set for user" do
       header.click_on_users
+      user_data[:user] = conf.repoman_user
       users.click_on_edit_user(user_data[:user])
       users.assign_user_group_for_user(user_data[:usergroup])
       users.save_edit_changes

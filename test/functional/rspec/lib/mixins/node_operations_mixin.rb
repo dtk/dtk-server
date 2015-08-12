@@ -159,7 +159,7 @@ module NodeOperationsMixin
 		node_id = node_list['data'].select { |x| x['display_name'] == node_name }.first['id']
 		stop_node_response = send_request('/rest/assembly/stop', {:assembly_id => service_id, :node_pattern => node_id})
 
-		if (stop_node_response['data']['status'] == "ok")
+		if (stop_node_response['status'] == "ok")
 			puts "Node #{node_name} stopped successfully!"
 			node_stopped = true
 		else

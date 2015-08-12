@@ -245,7 +245,7 @@ shared_context 'NEG - Revoke access before converge' do |dtk_common, system_user
   it 'does not revoke access because nodes are staged' do
     access_revoked = true
     response = dtk_common.revoke_access(dtk_common.service_id, system_user, rsa_pub_name, dtk_common.ssh_key)
-    unless response['data']['results']['error'].nil?
+    if response['status'] == 'notok'
       access_revoked = false
     end
     access_revoked.should eq(false)

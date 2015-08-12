@@ -397,7 +397,7 @@ module AssemblyAndServiceOperationsMixin
 		service_stopped = false
 		stop_service_response = send_request('/rest/assembly/stop', {:assembly_id => service_id})
 
-		if (stop_service_response['data']['status'] == "ok")
+		if (stop_service_response['status'] == "ok")
 			puts "Service stopped successfully!"
 			service_stopped = true
 		else
@@ -612,8 +612,13 @@ module AssemblyAndServiceOperationsMixin
 		puts "Revoke access:", "-----------------"
 		resp = send_request('/rest/assembly/initiate_ssh_pub_access', {:agent_action => :revoke_access, :assembly_id=>service_id, :system_user => system_user, :rsa_pub_name => rsa_pub_name, :rsa_pub_key => ssh_key})
 		pretty_print_JSON(resp)
-		response = send_request('/rest/assembly/get_action_results', {:action_results_id => resp['data']['action_results_id'], :return_only_if_complete => true, :disable_post_processing => true})
-		puts response
+		response = nil
+		if resp['status'] != 'notok'
+			response = send_request('/rest/assembly/get_action_results', {:action_results_id => resp['data']['action_results_id'], :return_only_if_complete => true, :disable_post_processing => true})
+			puts response
+		else
+			response = resp
+		end
 		puts ""
 		return response
 	end

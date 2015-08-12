@@ -6,11 +6,11 @@ define dtk_server::bundler_gems_install(
   $gemfile_dir = $name
   $vendor_dir  = "/var/lib/dtk-bundler-vendor"
   if $deployment == true {
-    $deployment_switch = "--deployment --path=${vendor_dir}"
+    $deployment_switch = "--deployment"
   }
 
   exec { "bundle install ${gemfile_dir}":
-    command   => "/usr/local/rvm/wrappers/default/bundle install --without development ${deployment_switch}",
+    command   => "/usr/local/rvm/wrappers/default/bundle install --without development ${deployment_switch} --path=${vendor_dir}",
     cwd       => $gemfile_dir,
     path      => ['/usr/bin','/usr/local/bin/', '/bin'],
     logoutput => 'on_failure',

@@ -5,11 +5,10 @@ require './lib/dtk_common'
 require './lib/usergroup_panel_spec'
 require './lib/admin_panel_helper'
 
-
-existing_group = UserGroup.new('demo_group','Usergroup description.') 
+num="2"
+existing_group = UserGroup.new('demo_group'+num,'Usergroup description.') 
 empty_group = UserGroup.new('','Usergroup description.')
-invalid_group= UserGroup.new('~!#$%','Usergroup description.')
-long_name_group= UserGroup.new('long','Usergroup description.')
+invalid_group= UserGroup.new('~!#$%!'+num,'Usergroup description.')
 
 describe "(Admin Panel UI) Usergroup Test Case 2: NEG - Create group with invalid values" do
     let(:conf) { Configuration.instance }
@@ -52,8 +51,11 @@ describe "(Admin Panel UI) Usergroup Test Case 2: NEG - Create group with invali
     end
 
 
-    context "Create Usergroup with a too long name ((250 chars)" do
+    context "Create Usergroup with a too long name (101 chars)" do
         it "will not create usergroup" do
+            long_name=invalid_group.get_too_long_name+num
+            long_name_group=UserGroup.new(long_name,"Usergroup description.")
+
             group_panel.enter_data(long_name_group.get_data)
             group_panel.press_create_button
             expect(group_panel.on_create_page?).to eql(true)

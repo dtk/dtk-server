@@ -6,14 +6,15 @@ require './lib/component_modules_spec'
 require './lib/dtk_common'
 require './lib/admin_panel_helper'
 
+num='6'
 
-first_group=UserGroup.new('demo_group1', 'Demo Group. 1')
-second_group=UserGroup.new('demo_group2', 'Demo Group. 2')
+first_group=UserGroup.new('demo_group1'+num, 'Demo Group. 1'+num)
+second_group=UserGroup.new('demo_group2'+num, 'Demo Group. 2'+num)
 
-user=User.new('demo_user','password','Demo','User','demo_user@mail.com','3','demo_group1')
-existing_user=User.new('existing_user','password','Demo','User','existing@mail.com','3','demo_group2')
-invalid_user=User.new('>.<','>>>>>>','>.<','>.<','@mail.com','-1','demo_group1')
-empty_user=User.new('', '', '', '', '', '', 'demo_group1')
+user=User.new('demo_user6'+num,'password','Demo','User','demo_user1'+num+'@mail.com','3','demo_group1'+num)
+existing_user=User.new('existing_user6'+num,'password','Demo','User','existing'+num+'2@mail.com','3','demo_group2'+num)
+invalid_user=User.new('>.<'+num,'>>>>>>','>.<','>.<','@'+num+'6mail.com','-1','demo_group1'+num)
+empty_user=User.new('', '', '', '', '', '', 'demo_group1'+num)
 
 
 describe "(Admin Panel UI) User Test Case 6: NEG - User edit textfield validation" do
@@ -51,12 +52,14 @@ describe "(Admin Panel UI) User Test Case 6: NEG - User edit textfield validatio
     context "Create user #{user.username}" do
     	it "created user" do
     		user.create_object(user_panel)
+            expect(user_panel.on_create_page?).to eql(false)
     	end
     end
 
     context "Create user #{existing_user.username}" do
     	it "created user" do
     		existing_user.create_object(user_panel)
+            expect(user_panel.on_create_page?).to eql(false)
     	end
     end
 

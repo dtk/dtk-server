@@ -5,8 +5,8 @@ require './lib/dtk_common'
 require './lib/admin_panel_helper'
 require './lib/mixins/admin_panel_mixins'
 
-group = UserGroup.new('demo_group','Demo Group.') 
-edited_group = UserGroup.new('edited_user_group','Edit.')
+group = UserGroup.new('demo_group1','Demo Group.') 
+edited_group = UserGroup.new('edited_user_group1','Edit.')
 
 
 

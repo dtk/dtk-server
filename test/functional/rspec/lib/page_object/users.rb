@@ -19,14 +19,24 @@ class Users < Main
 
   def open_user_edit_page(user)
       @session.within(:table) do
-        @session.find("//tr[td[.=\"#{user}\"]]/td/a/span[.=\"Edit\"]").click
+        if Capybara.current_driver == :webkit || Capybara.current_driver == :poltergeist
+            @session.find("//tr[td[.=\"#{user}\"]]/td/a/span[.=\"Edit\"]").trigger('click')
+        else
+            @session.find("//tr[td[.=\"#{user}\"]]/td/a/span[.=\"Edit\"]").click
+        end
       end
   end
 
   def uncheck_usergroup(group)
-      @session.find('//button[@class="multiselect dropdown-toggle btn btn-default"]').click
-      @session.uncheck(group)
-      @session.find('//button[@class="multiselect dropdown-toggle btn btn-default"]').click
+      if Capybara.current_driver == :webkit || Capybara.current_driver == :poltergeist
+          @session.find('//button[@class="multiselect dropdown-toggle btn btn-default"]').trigger('click')
+          @session.uncheck(group)
+          @session.find('//button[@class="multiselect dropdown-toggle btn btn-default"]').trigger('click')
+      else
+          @session.find('//button[@class="multiselect dropdown-toggle btn btn-default"]').click
+          @session.uncheck(group)
+          @session.find('//button[@class="multiselect dropdown-toggle btn btn-default"]').click
+      end
   end
 
   def enter_user_data(name, password, first, last, email, ns, group, edited=false)
@@ -39,9 +49,15 @@ class Users < Main
       @session.fill_in('Last Name', :with => last)
       @session.fill_in('Email', :with => email)
       @session.fill_in('Maximum namespaces', :with => ns)
-      @session.find('//button[@class="multiselect dropdown-toggle btn btn-default"]').click
-      @session.check(group)
-      @session.find('//button[@class="multiselect dropdown-toggle btn btn-default"]').click
+      if Capybara.current_driver == :webkit || Capybara.current_driver == :poltergeist
+          @session.find('//button[@class="multiselect dropdown-toggle btn btn-default"]').trigger('click')
+          @session.check(group)
+          @session.find('//button[@class="multiselect dropdown-toggle btn btn-default"]').trigger('click')
+      else 
+          @session.find('//button[@class="multiselect dropdown-toggle btn btn-default"]').click
+          @session.check(group)
+          @session.find('//button[@class="multiselect dropdown-toggle btn btn-default"]').click
+      end
   end
 
   def enter_user(user,edited=false)
@@ -69,5 +85,16 @@ class Users < Main
 
   def save_edit_changes
     @session.click_button('Edit User')
+  end
+
+    def get_table_row_data(name)
+      info={}
+      @session.within row_selector(name) do
+        info[:username]=@session.find('./td[1]').text
+        info[:tenant]=@session.find('./td[2]').text
+        info[:ns]=@session.find('./td[3]').text
+        info[:max_ns]=@session.find('./td[4]').text
+      end
+      info
   end
 end

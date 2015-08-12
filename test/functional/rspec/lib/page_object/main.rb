@@ -13,15 +13,27 @@ class Main < PageContainer
   end
 
   def press_create_button
-    @session.find(INPUT_SELECTOR).click
+    if Capybara.current_driver == :webkit || Capybara.current_driver == :poltergeist
+      @session.find(INPUT_SELECTOR).trigger("click")
+    else
+      @session.find(INPUT_SELECTOR).click
+    end
   end
 
   def press_edit_button
-    @session.find(INPUT_SELECTOR).click
+    if Capybara.current_driver == :webkit || Capybara.current_driver == :poltergeist
+      @session.find(INPUT_SELECTOR).trigger("click")
+    else
+      @session.find(INPUT_SELECTOR).click
+    end
   end
 
   def open_create_page
-    @session.find(BUTTON_SELECTOR).click
+    if Capybara.current_driver == :webkit || Capybara.current_driver == :poltergeist
+      @session.find(BUTTON_SELECTOR).trigger("click")
+    else
+      @session.find(BUTTON_SELECTOR).click
+    end
   end
 
   def open_edit_page(name)
@@ -39,7 +51,11 @@ class Main < PageContainer
       @session.click_link('Delete')
     end
     sleep 1
-    @session.driver.browser.switch_to.alert.accept
+    if Capybara.current_driver == :webkit || Capybara.current_driver == :poltergeist
+      @session.driver.alert_messages.last
+    else
+      @session.driver.browser.switch_to.alert.accept
+    end
   end
 
   def search_for_object(name)
@@ -53,6 +69,9 @@ class Main < PageContainer
   def enter_data(data, edit=false)
   end
 
+  def get_table_row_data(name) 
+
+  end
 
 
 

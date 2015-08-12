@@ -5,11 +5,12 @@ require './lib/dtk_common'
 require './lib/admin_panel_helper'
 
 
-group=UserGroup.new('demo_group1', 'Demo Group. ')
+num="5"
+group=UserGroup.new('demo_group1'+num, 'Demo Group. ')
 
-user=User.new('demo_user','password','Demo','User','demo_user@mail.com','3','demo_group1')
-invalid_user=User.new('>.<','>>>>>>','>.<','>.<','@mail.com','-1','demo_group1')
-empty_user=User.new('', '', '', '', '', '', 'demo_group1')
+user=User.new('demo_user1'+num,'password','Demo','User','demo_user'+num+'@mail.com','3','demo_group1'+num)
+invalid_user=User.new('>.<'+num,'>>>>>>','>.<','>.<','@mail.com','-1','demo_group1'+num)
+empty_user=User.new('', '', '', '', '', '', 'demo_group1'+num)
 
 
 
@@ -64,8 +65,8 @@ describe "(Admin Panel UI) User Test Case 5: NEG - Create user with invalid valu
 
     context "Create User with too long value in fields" do
     	it "will not create the user" do
-    		long_value=enter_data.get_too_long_name
-    		user_panel.enter_user_data(long_value, long_value, long_value, long_value, long_value, long_value, 'demo_group1')
+    		long_value=invalid_user.get_too_long_name+num
+    		user_panel.enter_user_data(long_value, long_value, long_value, long_value, long_value, long_value, 'demo_group1'+num)
     		user_panel.press_create_button
     		expect(user_panel.on_create_page?).to eql(true)
     	end

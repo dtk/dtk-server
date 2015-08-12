@@ -5,12 +5,12 @@ require './lib/component_modules_spec'
 require './lib/dtk_common'
 require './lib/admin_panel_helper'
 
+num='4'
+first_group=UserGroup.new('demo_group1'+num, 'Demo Group 1.')
+second_group=UserGroup.new('demo_group2'+num, 'Demo Group 2.')
 
-first_group=UserGroup.new('demo_group1', 'Demo Group 1.')
-second_group=UserGroup.new('demo_group2', 'Demo Group 2.')
-
-user=User.new('demo_user','password','Demo','User','demo_user@mail.com','3','demo_group1')
-edited_user=User.new('demo_user','edit_password', 'Mode','Reus','edit_user@gmail.com','5','demo_group2')
+user=User.new('demo_user1'+num,'password','Demo','User','demo_user1'+num+'@mail.com','3','demo_group1'+num)
+edited_user=User.new('demo_user1'+num,'edit_password', 'Mode','Reus','demo_user1'+num+'@mail.com','5','demo_group2'+num)
 
 
 
@@ -67,6 +67,14 @@ describe "(Admin Panel UI) User Test Case 4: Simple create, update and delete us
     	end
     end
 
+    context "Table row data" do
+        it "is correct" do
+            info=user_panel.get_table_row_data(user.username)
+            table_row_correct= info[:username]==user.username && info[:ns]==user.username && info[:max_ns]==user.ns
+            expect(table_row_correct).to eql(true)
+        end
+    end
+
     context "Open edit page for User #{user.username}" do
     	it "opened the edit page" do
     		user_panel.open_edit_page(user.username)
@@ -92,8 +100,8 @@ describe "(Admin Panel UI) User Test Case 4: Simple create, update and delete us
 
     context "Verify that User #{edited_user.username} was edited" do
     	it "verified user update" do
-    		info=user_panel.get_user_table_info(edited_user.username)
-    		expect(info[:ns]).to eql(edited_user.ns)
+    		info=user_panel.get_table_row_data(edited_user.username)
+    		expect(info[:max_ns]).to eql(edited_user.ns)
     	end
     end
 

@@ -54,18 +54,20 @@ class User < PanelObject
 	end
 
 	def get_data
-		{username: @username,
+		{
+			username: @username,
 			password: @password,
 			first: @first,
 			last: @last,
 			email: @email,
 			ns: @ns,
-			group: @group}
+			group: @group
+		}
 	end
 end
 
 
-class Namespace
+class Namespace < PanelObject
 	include AdminPanelMixin
 	attr_accessor :name
 	attr_accessor :owner
@@ -96,3 +98,40 @@ class Namespace
 	end	
 end
 
+class Modul < PanelObject
+	include AdminPanelMixin
+	attr_accessor :name
+	attr_accessor :type
+	attr_accessor :namespace
+	attr_accessor :owner
+	attr_accessor :group
+	attr_accessor :user_perm
+	attr_accessor :group_perm
+	attr_accessor :other_perm
+
+	def initialize(name, type, ns, owner, group, user_perm, group_perm, other_perm)
+		@name=name
+		@type=type
+		@namespace=ns
+		@owner=owner
+		@group=group
+		@user_perm=user_perm
+		@group_perm=group_perm
+		@other_perm=other_perm
+		@search_value=ns+'/'+name
+	end
+
+	def get_data
+		{
+			name: name,
+			type: type,
+			namespace: namespace,
+			owner: owner,
+			group: group,
+			user_perm: user_perm,
+			group_perm: group_perm,
+			other_perm: other_perm
+		}
+	end	
+
+end

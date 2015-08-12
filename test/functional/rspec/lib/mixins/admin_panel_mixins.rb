@@ -1,5 +1,5 @@
 module AdminPanelMixin
-		@@length = 254
+		@@length = 200
 
 
 	def delete_object(page)

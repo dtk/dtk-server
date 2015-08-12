@@ -4,12 +4,11 @@ require './lib/component_modules_spec'
 require './lib/dtk_common'
 require './lib/admin_panel_helper'
 
-
-first_group = UserGroup.new('demo_group1','Usergroup description.')
-second_group = UserGroup.new('demo_group2','Usergroup description.')
+num='3'
+first_group = UserGroup.new('demo_group1'+num,'Usergroup description.')
+second_group = UserGroup.new('demo_group2'+num,'Usergroup description.')
 empty_group = UserGroup.new('','Usergroup description.')
-invalid_char_group= UserGroup.new('~!#$%','Usergroup description.')
-long_name_group= UserGroup.new('long','Usergroup description.')
+invalid_char_group= UserGroup.new('~!#$%'+num,'Usergroup description.')
 
 
 describe "(Admin Panel UI) Usergroup Test Case 3: NEG - Edit group with invalid values" do
@@ -59,8 +58,11 @@ describe "(Admin Panel UI) Usergroup Test Case 3: NEG - Edit group with invalid 
         end 
     end
 
-    context "Edit Usergroup with a too long name (250 chars)" do
+    context "Edit Usergroup with a too long name (101 chars)" do
         it "will not update group" do
+          long_name=invalid_char_group.get_too_long_name+num
+          long_name_group=UserGroup.new(long_name,"Usergroup description.")
+
           group_panel.enter_data(long_name_group.get_data)
           group_panel.press_edit_button
           expect(group_panel.on_edit_page?).to eql(true)

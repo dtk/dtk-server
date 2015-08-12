@@ -1,5 +1,6 @@
 #Namespace Test Case 7: Simple create, update and delete namespace scenario
 
+
 require './spec/setup_browser'
 require './lib/component_modules_spec'
 require './lib/dtk_common'

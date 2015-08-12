@@ -17,7 +17,7 @@ second_ns=Namespace.new('demo_ns2'+num,'demo_user1'+num,'demo_group'+num,'RW','R
 invalid_owner_ns=Namespace.new('demo_ns1'+num,'demo_user2'+num,'demo_group'+num,'RW','RW','RW')
 
 empty_ns=Namespace.new('','','','','','')
-invalid_ns=Namespace.new('~!#$%æ«'+num,'demo_user1'+num,'demo_group'+num,'','','')
+invalid_ns=Namespace.new('!@#$%'+num,'demo_user1'+num,'demo_group'+num,'','','')
 
 
 describe "(Admin Panel UI) Test Case 9: NEG - Namespace edit textfield validation" do

@@ -1,5 +1,6 @@
 #User Test Case 5: NEG - Create namespace with invalid values"
 
+
 require './spec/setup_browser'
 require './lib/component_modules_spec'
 require './lib/dtk_common'
@@ -14,7 +15,7 @@ namespace=Namespace.new('demo_ns1'+num,'demo_user1'+num,'demo_group'+num,'RW','R
 invalid_owner_ns=Namespace.new('demo_ns1'+num,'demo_user2'+num,'demo_group'+num,'RW','RW','RW')
 
 empty_ns=Namespace.new('','','','','','')
-invalid_ns=Namespace.new('~!#$%æ«'+num,'demo_user1'+num,'demo_group'+num,'','','')
+invalid_ns=Namespace.new('!@#$%'+num,'demo_user1'+num,'demo_group'+num,'','','')
 
 
 describe "(Admin Panel UI) User Test Case 8: NEG - Create namespace with invalid values" do

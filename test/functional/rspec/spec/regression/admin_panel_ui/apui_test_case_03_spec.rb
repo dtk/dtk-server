@@ -1,4 +1,5 @@
 #Usergroup Test Case 3: NEG - Edit group with invalid values
+
 require './spec/setup_browser'
 require './lib/component_modules_spec'
 require './lib/dtk_common'
@@ -8,7 +9,7 @@ num='3'
 first_group = UserGroup.new('demo_group1'+num,'Usergroup description.')
 second_group = UserGroup.new('demo_group2'+num,'Usergroup description.')
 empty_group = UserGroup.new('','Usergroup description.')
-invalid_char_group= UserGroup.new('~!#$%'+num,'Usergroup description.')
+invalid_char_group= UserGroup.new('!@#$%'+num,'Usergroup description.')
 
 
 describe "(Admin Panel UI) Usergroup Test Case 3: NEG - Edit group with invalid values" do

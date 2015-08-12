@@ -1,4 +1,6 @@
 #Usergroup Test Case 2: NEG - Create group with invalid values
+
+
 require './spec/setup_browser'
 require './lib/component_modules_spec'
 require './lib/dtk_common'
@@ -8,7 +10,7 @@ require './lib/admin_panel_helper'
 num="2"
 existing_group = UserGroup.new('demo_group'+num,'Usergroup description.') 
 empty_group = UserGroup.new('','Usergroup description.')
-invalid_group= UserGroup.new('~!#$%!'+num,'Usergroup description.')
+invalid_group= UserGroup.new('!@#$%'+num,'Usergroup description.')
 
 describe "(Admin Panel UI) Usergroup Test Case 2: NEG - Create group with invalid values" do
     let(:conf) { Configuration.instance }

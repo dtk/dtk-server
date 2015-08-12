@@ -1,7 +1,7 @@
 module DTK; class Assembly; class Instance
   class Lock < Model
     def self.common_columns
-      [:id, :display_name, :group_id, :module_name, :module_namespace, :service_module_sha]
+      [:id, :display_name, :group_id, :module_name, :module_namespace, :service_module_sha, :created_at]
     end
 
     attr_accessor :assembly_instance, :service_module_name, :service_module_namespace, :service_module_sha
@@ -41,9 +41,9 @@ module DTK; class Assembly; class Instance
     def self.get(assembly_instance)
       sp_hash = {
         cols: Lock.common_columns(),
-        filter: [:eq, :component_component_id, assembly_instance.id]
+        filter: [:eq, :component_id, assembly_instance.id]
       }
-      Model.get_objs(assembly_instance.model_handle(:assembly_instance_lock), sp_hash)
+      Model.get_obj(assembly_instance.model_handle(:assembly_instance_lock), sp_hash)
     end
   end
 end; end; end

@@ -250,6 +250,7 @@ module DTK
         Transaction do
           ret = @template_output.check_merge_conflicts(@assembly_instance)
           @template_output.save_to_model()
+
           if module_refs_updated
             @component_module_refs.update() # update the object model
             @component_module_refs.serialize_and_save_to_repo?(update_module_refs: true)

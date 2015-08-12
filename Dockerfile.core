@@ -1,4 +1,4 @@
-FROM getdtk/precise-puppet:0.5
+FROM getdtk/trusty-puppet:0.1
 MAINTAINER dduvnjak <dario@atlantbh.com>
 
 RUN mkdir -p /etc/puppet
@@ -6,6 +6,13 @@ RUN mkdir -p /usr/share/dtk
 
 COPY dtk_modules /etc/puppet/modules
 COPY docker/tenant.pp /tenant.pp
+
+ENV tenant_user=dtk1
+RUN useradd -ms /bin/bash ${tenant_user}
+RUN mkdir -p /home/${tenant_user}/server
+RUN mkdir -p /home/${tenant_user}/.ssh
+COPY . /home/${tenant_user}/server/current
+RUN chown -R ${tenant_user}:${tenant_user} /home/${tenant_user}
 
 ADD docker/apply.sh apply.sh
 

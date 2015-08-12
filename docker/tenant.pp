@@ -42,6 +42,7 @@ class dtk_stage11 {
   server_public_dns => 'dario.dtk.io',
   db_host => 'dario.dtk.io',
   bundler_deployment => false,
+  clone_from_git => false,
 
 activemq_password => "marionette", activemq_subcollective => "mcollective", remote_repo_git_user => "git", update_hosts_file => "true", aws_access_key_id => "", aws_secret_access_key => "", remote_repo_port => "443", server_branch => "master", tenant_user => "dtk1", gitolite_user => "git1", remote_repo_host => "repoman1.internal.r8network.com"}
 }

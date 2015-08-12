@@ -58,7 +58,6 @@ class Namespaces < Main
 	end
 
 	def select_user(user, box="[user_id]")
-		@session.save_screenshot('/Users/adnan/pic1.png')	if Capybara.current_driver == :webkit || Capybara.current_driver == :poltergeist
 		@session.select(user, :from => box)
 	end
 
@@ -66,7 +65,6 @@ class Namespaces < Main
 		check_permissions('RW','RW','RW',true)
 		check_usergroup(group, true)
 		select_user('User not selected',EDIT_SELECT_BOX)
-		@session.save_screenshot('/Users/adnan/pic.png')	if Capybara.current_driver == :webkit || Capybara.current_driver == :poltergeist
 	end
 
 	def enter_ns_data(name, owner, group, user_perm, group_perm, other_perm, edited)

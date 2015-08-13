@@ -42,6 +42,13 @@ class Main < PageContainer
     end
   end
 
+  def get_all_results(name)
+    search_for_object(name)
+    sleep 0.5
+    results=@session.all("//div[@class='container']/table//tr/td[1]")
+    output=results.map {|x| x.text}
+  end
+
   def row_selector(name)
     return "//div[@class='container']/table//tr[td[text()='#{name}']]"
   end

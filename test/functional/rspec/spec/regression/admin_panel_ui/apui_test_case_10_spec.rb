@@ -6,9 +6,9 @@ require './lib/dtk_common'
 require './lib/admin_panel_helper'
 
 num='10'
-mod=Modul.new('ruby_module','Component','demo','adnan','adnan','RWDP','RWDP','RWDP')
-ns=Namespace.new('demo','adnan','adnan','RW','RW','RW')
-edited_mod=Modul.new('ruby_module','Component','demo','demo_user'+num,'demo_group'+num,'','','')
+mod=Modul.new('ruby_module','Component','abh','adnan','adnan','RWDP','RWDP','RWDP')
+ns=Namespace.new('abh','adnan','adnan','RW','RW','RW')
+edited_mod=Modul.new('ruby_module','Component','abh','demo_user'+num,'demo_group'+num,'','','')
 group=UserGroup.new('demo_group'+num, 'Demo Group.'+num)
 user=User.new('demo_user'+num,'password','Demo','User','demo_user'+num+'@mail.com','3','demo_group'+num)
 

@@ -16,16 +16,15 @@ module DTK
       end
 
       def rest__components
-        opts[:filter_proc] = Proc.new do |e|
-          if element_matches?(e, [:node, :id], node_id) &&
-              element_matches?(e, [:attribute, :component_component_id], component_id)
-            if additional_filter_proc.nil? || additional_filter_proc.call(e)
-              e
-            end
-          end
-        end
         service = service_object()
-        rest_ok_response service.info_about(:components)
+
+        opts = Opts.new(detail_level: nil)
+        opts[:filter_proc] = Proc.new do |e|
+          node = e[:node]
+          (!node.is_a?(Node)) || !Node::TargetRef.is_target_ref?(node)
+        end
+
+        rest_ok_response service.info_about(:components, opts)
       end
 
       def rest__tasks

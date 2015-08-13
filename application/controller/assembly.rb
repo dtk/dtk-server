@@ -132,6 +132,8 @@ module DTK
     # TODO: may be cleaner if we break into list_nodes, list_components with some shared helper functions
     def rest__info_about
       node_id, component_id, detail_level, detail_to_include = ret_request_params(:node_id, :component_id, :detail_level, :detail_to_include)
+      # DEBUG SNIPPET >>> REMOVE <<<
+      require (RUBY_VERSION.match(/1\.8\..*/) ? 'ruby-debug' : 'debugger');Debugger.start; debugger
       node_id = nil if node_id.is_a?(String) && node_id.empty?
       component_id = nil if component_id.is_a?(String) && component_id.empty?
       assembly, subtype = ret_assembly_params_object_and_subtype()
@@ -305,7 +307,7 @@ module DTK
       unless namespace = AssemblyModule::Component.get_namespace?(assembly, module_name)
         fail ErrorUsage.new("A component module with name '#{module_name}' does not exist")
       end
-      
+
       component_module = create_obj(:module_name, ComponentModule, namespace)
       branch_info = AssemblyModule::Component.create_assembly_module_branch?(assembly, component_module)
       branch_info.merge!(assembly_name: assembly[:display_name])
@@ -469,7 +471,7 @@ module DTK
 
       project = get_default_project()
       opts = ret_symbol_params_hash(:mode)
-      
+
       namespace = ret_request_params(:namespace) ||
         (ret_request_param_boolean(:use_module_namespace) ? module_namespace : Namespace.default_namespace_name)
       opts.merge!(namespace: namespace)

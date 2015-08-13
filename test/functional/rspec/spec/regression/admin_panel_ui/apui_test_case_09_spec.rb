@@ -12,7 +12,7 @@ user=User.new('demo_user1'+num,'password','Demo','User','demo_user1'+num+   '@ma
 ns_max_user=User.new('demo_user2'+num,'password','Demo','User','demo_user2'+num+'@mail.com','1','demo_group'+num)
 
 first_ns=Namespace.new('demo_ns1'+num,'demo_user1'+num,'demo_group'+num,'RW','RW','RW')
-second_ns=Namespace.new('demo_ns2'+num,'demo_user1'+num,'demo_group'+num,'RW','RW','RW')
+second_ns=Namespace.new('demo_ns2'+num,'demo_user2'+num,'demo_group'+num,'RW','RW','RW')
 
 invalid_owner_ns=Namespace.new('demo_ns1'+num,'demo_user2'+num,'demo_group'+num,'RW','RW','RW')
 
@@ -74,6 +74,7 @@ describe "(Admin Panel UI) Test Case 9: NEG - Namespace edit textfield validatio
     context "Create Namespace #{second_ns.name}" do
     	it "created namespace" do
     		second_ns.create_object(ns_panel)
+            expect(ns_panel.on_create_page?).to eql(false) 
     	end
     end
 

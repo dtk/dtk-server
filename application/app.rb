@@ -17,13 +17,15 @@ helper_paths = Innate.options[:helpers_helper][:paths] || []
 unless helper_paths.include?(File.dirname(__FILE__))
   Innate.options[:helpers_helper][:paths] = [File.dirname(__FILE__)] + helper_paths
 end
-trap 'TTIN' do
-  Thread.list.each do |thread|
-       puts "-------------------Thread TID-#{thread.object_id.to_s(36)}-----------------\n"
-    pp thread.backtrace[0..10]
-    puts "---------------------------------------------------------------------------\n"
-  end
-end
+
+# TODO: for testing; signal tido dump thread info
+#trap 'TTIN' do
+#  Thread.list.each do |thread|
+#    puts "------------------- Thread TID-#{thread.object_id.to_s} -----------------\n"
+#    pp thread.backtrace
+#    puts "---------------------------------------------------------------------------\n"
+#  end
+#end
 
 ##### temp until convert to DTK
 module XYZ

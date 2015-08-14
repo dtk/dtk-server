@@ -2,6 +2,7 @@
 module DTK
   class CloudConnect
     class EC2 < self
+      r8_nested_require('ec2', 'image_info_cache')
 
       WAIT_FOR_NODE = 10 # seconds
 
@@ -28,7 +29,9 @@ module DTK
       end
 
       def image_get(id)
-        hash_form(conn.images.get(id))
+        ImageInfoCache.get_or_set(:image_get, conn, id, mutex: true) do
+          hash_form(conn.images.get(id))
+        end
       end
 
       def servers_all

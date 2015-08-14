@@ -132,8 +132,6 @@ module DTK
     # TODO: may be cleaner if we break into list_nodes, list_components with some shared helper functions
     def rest__info_about
       node_id, component_id, detail_level, detail_to_include = ret_request_params(:node_id, :component_id, :detail_level, :detail_to_include)
-      # DEBUG SNIPPET >>> REMOVE <<<
-      require (RUBY_VERSION.match(/1\.8\..*/) ? 'ruby-debug' : 'debugger');Debugger.start; debugger
       node_id = nil if node_id.is_a?(String) && node_id.empty?
       component_id = nil if component_id.is_a?(String) && component_id.empty?
       assembly, subtype = ret_assembly_params_object_and_subtype()

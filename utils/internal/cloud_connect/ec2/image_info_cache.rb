@@ -2,14 +2,8 @@ module DTK; class CloudConnect
   class EC2
     class ImageInfoCache
       def initialize(type, conn)
-        @@cache ||= initialize_cache
-
-        @region = conn.region
-        @type  = type
-        unless type_info = @@cache[type]
-          fail Error.new("Caching of type '#{type}' not supported")
-        end
-        @region_info = type_info[@region] ||= {}
+        @type       = type
+        @cache_info = cache_info(type, conn)
       end
 
       def self.get_or_set(type, conn, image_id, opts = {}, &block)
@@ -34,33 +28,24 @@ module DTK; class CloudConnect
         image_get: {}
       }
 
+      def cache_info(type, _conn)
+        Cache[type] || fail(Error.new("Caching of type '#{type}' not supported"))
+      end
+
       def get_or_set_direct_call(image_id, &block)
         get?(image_id) || set(image_id, &block)
       end
 
-      def initialize_cache
-        Cache
-      end
-
-      def type_info(type)
-
-      end
-
       def get?(image_id)
- #       @region_info[image_id]
-        ret = @region_info[image_id]
-        if ret
-          Log.info_pp(["using image cache for",self, image_id])
+        if ret = @cache_info[image_id]
+          Log.info("Using image cache for #{@type}: image '#{image_id}'; thread '#{Aux.thread_id}'")
           ret
         end
       end
         
       def set(image_id, &block)
-#        @region_info[image_id] = yield
-        Log.info_pp(["setting image cache for",self, image_id])
-        ret = @region_info[image_id] = yield
-        Log.info_pp(["finished call", @@cache])
-        ret
+        Log.info("Setting image cache for #{@type}: image '#{image_id}'; thread '#{Aux.thread_id}'")
+        @cache_info[image_id] = yield
       end
     end
   end

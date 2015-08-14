@@ -65,12 +65,12 @@ module DTK
         while ret.nil? and tries > 0
           ServerCreateMutex.synchronize do
             begin
-              Log.info("Start mutex server_create for #{options[:client_token]}; thread #{Thread.current.object_id.to_s}")
+              Log.info("Start mutex server_create for #{options[:client_token]}; thread #{Aux.thread_id}")
               ret = hash_form(conn(:server_create).servers.create(options))
               Log.info("End mutex server_create for #{options[:client_token]}")
              rescue ::Excon::Errors::Timeout => e
               tries -= 1
-              Log.info("Retrying server_create (retries = #{tries}) for #{options[:client_token]}") if tries > 0
+              Log.info("Retrying server_create (retries_left = #{tries}) for #{options[:client_token]}") if tries > 0
             end
           end
         end

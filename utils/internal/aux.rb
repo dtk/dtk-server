@@ -46,6 +46,10 @@ module DTK
         RUBY_PLATFORM
       end
 
+      def thread_id
+        Thread.current.object_id
+      end
+
       def now_time_stamp
         SQL.now
         # TODO: change to use app server clock

@@ -59,6 +59,12 @@ module DTK
       ServiceNodeGroup::NodeGroupMember.node_group_member?(self)
     end
 
+    # should only be called if self is a node_group_member (it can stil have class DTK::Node
+    def node_group_name
+      ServiceNodeGroup::NodeGroupMember.node_group_name(self)
+    end
+
+    # should only be called if self is a node_group_member (it can stil have class DTK::Node
     def node_group_member_index
       ServiceNodeGroup::NodeGroupMember.node_group_member_index(self)
     end

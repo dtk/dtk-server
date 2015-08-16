@@ -55,21 +55,37 @@ module DTK
             fail Error.new("Unexpected type (#{type})")
         end
       end
+
       def self.node_member_index(target_ref)
+        node_group_name, node_member_index = split_node_group_name__node_member_index(target_ref)
+        unless node_member_index
+          Log.error('Unexpected cannot find an index number')
+        end
+        node_member_index
+      end
+
+      def self.node_group_name(target_ref)
+        node_group_name, node_member_index = split_node_group_name__node_member_index(target_ref)
+        unless node_group_name
+          Log.error('Unexpected cannot find an index number')
+        end
+        node_group_name
+      end
+
+      # returns [node_group_name, node_member_index]
+      def self.split_node_group_name__node_member_index(target_ref)
         if Type::Node.physical == target_ref.get_field?(:type)
           return nil
         end
-        ret = nil
         if display_name = target_ref.get_field?(:display_name)
-          if display_name =~ Regexp.new("#{IndexDelim}([0-9]+$)")
-            ret = Regexp.last_match(1).to_i
+          if display_name =~ Regexp.new("(^.+)#{IndexDelim}([0-9]+$)")
+            node_group_name   = $1
+            node_member_index = $2
+            [node_group_name, node_member_index]
           end
         end
-        unless ret
-          Log.error('Unexpected cannot find an index number')
-        end
-        ret
       end
+      private_class_method :split_node_group_name__node_member_index
 
       AssemblyDelim = '::'
       IndexDelim = ':'

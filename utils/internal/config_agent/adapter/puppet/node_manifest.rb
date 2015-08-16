@@ -217,14 +217,16 @@ module DTK; class ConfigAgent; module Adapter
 
       def add_dtk_globals!(lines)
         if node = @config_node[:node]
-          add_top_level_assignment!(lines, 'dtk_assembly_node', node.get_field?(:display_name))
-          node_type, index = 
+          node_name = node.get_field?(:display_name)
+          add_top_level_assignment!(lines, 'dtk_assembly_node', node_name)
+          node_type, base_name, index =
             if node.node_group_member?
-              ['node_group_member', node.node_group_member_index]
+              ['node_group_member', node.node_group_name, node.node_group_member_index]
             else
-              ['node', '']
+              ['node', node_name, '']
             end
           add_top_level_assignment!(lines, 'dtk_assembly_node_type', node_type)
+          add_top_level_assignment!(lines, 'dtk_assembly_node_base_name', base_name)
           add_top_level_assignment!(lines, 'dtk_assembly_node_index', index)
         end
       end

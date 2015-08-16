@@ -26,12 +26,12 @@ module DTK
       
       # This should only be called if node is a node_group_member although its class may not be NodeGroupMember
       def self.node_group_member_index(node)
-        if ret = node[:index]
-          ret
-        else
-          Log.error_pp(["Unexpected that following object is not node_group_member and has :index column",node])
-          nil
-        end
+        # using node[:index] is  shortcut
+        node[:index] || TargetRef.node_member_index(node)
+      end
+
+      def self.node_group_name(node)
+        TargetRef.node_group_name(node)
       end
 
       def has_service_node_group?

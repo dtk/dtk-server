@@ -6,8 +6,6 @@ module DTK; class ConfigAgent; module Adapter
         @config_node = config_node
       end
 
-      # TODO: cleaner to make cmps_with_attrs,assembly_attrs class attributes, but to do so would maen need to also
-      # modify PuppetStage
       def generate(cmps_with_attrs, assembly_attrs)
         # if intra node stages configured 'stages_ids' will not be nil,
         # if stages_ids is nil use generation with total ordering (old implementation)
@@ -22,8 +20,6 @@ module DTK; class ConfigAgent; module Adapter
 
       # this configuration switch is whether anchors are used in generating teh 'class wrapper' for putting definitions in stages
       UseAnchorsForClassWrapper = false
-      # TODO: best practice would be to use anchors so internal resources dont 'fall out', but to use this requires that stdlib is always include
-      # so turning off now
       def use_anchors_for_class_wrappers?
         UseAnchorsForClassWrapper
       end
@@ -222,6 +218,14 @@ module DTK; class ConfigAgent; module Adapter
       def add_dtk_globals!(lines)
         if node = @config_node[:node]
           add_top_level_assignment!(lines, 'dtk_assembly_node', node.get_field?(:display_name))
+          node_type, index = 
+            if node.node_group_member?
+              ['node_group_member', node.node_group_member_index]
+            else
+              ['node', '']
+            end
+          add_top_level_assignment!(lines, 'dtk_assembly_node_type', node_type)
+          add_top_level_assignment!(lines, 'dtk_assembly_node_index', index)
         end
       end
 

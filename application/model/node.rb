@@ -55,6 +55,14 @@ module DTK
       TargetRef.types(opts).include?(get_field?(:type))
     end
 
+    def node_group_member?
+      ServiceNodeGroup::NodeGroupMember.node_group_member?(self)
+    end
+
+    def node_group_member_index
+      ServiceNodeGroup::NodeGroupMember.node_group_member_index(self)
+    end
+
     def is_assembly_wide_node?
       update_object!(:type)
       self[:type].eql?('assembly_wide')

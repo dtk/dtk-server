@@ -12,9 +12,35 @@ module DTK
         # no op
       end
 
+      def self.node_group_member?(node)
+        if node.kind_of?(NodeGroupMember)
+          node
+        elsif node.is_target_ref?
+          # check if is linked to a service_node_group to distingusih it from otehr target_refs
+          node_group_member_obj = create_stub(node.model_handle(:node_group_member),node)
+          if node_group_member_obj.has_service_node_group?
+            node
+          end
+        end
+      end
+      
+      # This should only be called if node is a node_group_member although its class may not be NodeGroupMember
+      def self.node_group_member_index(node)
+        if ret = node[:index]
+          ret
+        else
+          Log.error_pp(["Unexpected that following object is not node_group_member and has :index column",node])
+          nil
+        end
+      end
+
+      def has_service_node_group?
+        service_node_group(raise_errors: false)
+      end
+
       private
 
-      def service_node_group
+      def service_node_group(opts = {})
         return @service_node_group if @service_node_group
         sp_hash = {
           cols: [:id, :service_node_group],
@@ -22,7 +48,9 @@ module DTK
         }
         nodes = Model.get_objs(model_handle(:node_group_relation), sp_hash).map { |r| r[:service_node_group] }
         unless nodes.size == 1
-          fail Error.new("Unexpected that rows.size (#{nodes.size}) does not equal 1")
+          if opts[:raise_errors].nil? or opts[:raise_errors]
+            fail Error.new("Unexpected that rows.size (#{nodes.size}) does not equal 1")
+          end
         end
         ret = nodes.first
         unless ret.is_node_group?()

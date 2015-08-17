@@ -11,9 +11,9 @@ module DTK
             node = task[:executable_action][:node]
             node.refresh_external_ref!()
             agent_commit_id_helper = AgentComitIdHelper.new(node)
-            if skip_sync = agent_commit_id_helper.skip_sync?()
+            if skip_sync = agent_commit_id_helper.skip_sync?
               set_result_succeeded(workitem, nil, task, action) if task_end
-              skip_reason = (skip_sync[:error] ? :skipped_because_of_error : :skipped_because_already_synced)
+              skip_reason = ((skip_sync.kind_of?(Hash) and skip_sync[:error]) ? :skipped_because_of_error : :skipped_because_already_synced)
               log_participant.end(skip_reason, task_id: task_id)
               delete_task_info(workitem)
               PerformanceService.end_measurement(name(), object_id)
@@ -128,12 +128,19 @@ end
             @node = node
             @head_git_commit_id = nil
           end
-          # returns nil of hash with Boolean key :error
+          # returns either
+          #  nil - if should not skip sync
+          #  true - if shoudl skip sync
+          #  hash with Boolean key :error
           def skip_sync?
+            if R8::Config[:node_agent_git_clone][:mode] == 'skip'
+              return true
+            end
             skip_sync = nil
             @head_git_commit_id = nil #nil means dont skip
             installed_agent_git_commit_id = @node.get_field?(:agent_git_commit_id)
             begin
+              # TODO: ran into obscure problem when github is down; below does not work
               @head_git_commit_id = AgentGritAdapter.get_head_git_commit_id()
               if R8::Config[:node_agent_git_clone][:mode] == 'debug'
                 installed_agent_git_commit_id = @node[:agent_git_commit_id] = nil

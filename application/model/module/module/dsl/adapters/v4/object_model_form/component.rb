@@ -45,7 +45,7 @@ module DTK; class ModuleDSL; class V4
           elsif function then external_ref_from_function?(function, cmp)
           end
         unless ret['external_ref']
-          err_msg = "Cannot determine the create action in component '?1'"
+          err_msg = "The mandatory 'create' action is not defined for component '?1'"
           fail ParsingError.new(err_msg, component_print_form(cmp))
         end
         ret
@@ -56,7 +56,7 @@ module DTK; class ModuleDSL; class V4
           if create_action[:content].respond_to?(:external_ref_from_create_action)
             external_ref(create_action[:content].external_ref_from_create_action(), cmp)
           elsif create_action[:content].respond_to?(:external_ref_from_bash_command)
-            ret['action_def'].merge!('create' => create_action)
+            (ret['action_def'] ||= {}).merge!('create' => create_action)
             create_action[:content].external_ref_from_bash_command()
           end
         end

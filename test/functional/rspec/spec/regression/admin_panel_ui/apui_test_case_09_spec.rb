@@ -97,7 +97,7 @@ describe "(Admin Panel UI) Test Case 9: NEG - Namespace edit textfield validatio
     		expect(ns_panel.on_edit_page?).to eql(true)
     	end
     end
-
+    
     context "Edit namespace with owner that has reached namespace limit" do
     	it "will not edit namespace" do
     		ns_panel.select_user(ns_max_user.username, ns_panel.select_box_selector)
@@ -143,7 +143,6 @@ describe "(Admin Panel UI) Test Case 9: NEG - Namespace edit textfield validatio
     	end
     end
 
-
     context "Delete User #{user.username}" do
     	it "deleted user" do
     		user.delete_object(user_panel)
@@ -155,5 +154,4 @@ describe "(Admin Panel UI) Test Case 9: NEG - Namespace edit textfield validatio
     		ns_max_user.delete_object(user_panel)
     	end
     end
-
 end

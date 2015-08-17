@@ -1,6 +1,4 @@
 #User Test Case 6: NEG - User edit textfield validation
-
-
 require './spec/setup_browser'
 require './lib/component_modules_spec'
 require './lib/dtk_common'
@@ -15,7 +13,6 @@ user=User.new('demo_user6'+num,'password','Demo','User','demo_user1'+num+'@mail.
 existing_user=User.new('existing_user6'+num,'password','Demo','User','existing'+num+'2@mail.com','3','demo_group2'+num)
 invalid_user=User.new('>.<'+num,'>>>>>>','>.<','>.<','@'+num+'6mail.com','-1','demo_group1'+num)
 empty_user=User.new('', '', '', '', '', '', 'demo_group1'+num)
-
 
 describe "(Admin Panel UI) User Test Case 6: NEG - User edit textfield validation" do
 	let(:conf) { Configuration.instance }

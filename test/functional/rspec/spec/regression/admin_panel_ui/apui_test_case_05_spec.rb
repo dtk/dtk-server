@@ -1,11 +1,8 @@
 #User Test Case 5: NEG - Create user with invalid values"
-
-
 require './spec/setup_browser'
 require './lib/component_modules_spec'
 require './lib/dtk_common'
 require './lib/admin_panel_helper'
-
 
 num="5"
 group=UserGroup.new('demo_group1'+num, 'Demo Group. ')
@@ -13,8 +10,6 @@ group=UserGroup.new('demo_group1'+num, 'Demo Group. ')
 user=User.new('demo_user1'+num,'password','Demo','User','demo_user'+num+'@mail.com','3','demo_group1'+num)
 invalid_user=User.new('>.<'+num,'>>>>>>','>.<','>.<','@mail.com','-1','demo_group1'+num)
 empty_user=User.new('', '', '', '', '', '', 'demo_group1'+num)
-
-
 
 describe "(Admin Panel UI) User Test Case 5: NEG - Create user with invalid values" do
 	let(:conf) { Configuration.instance }

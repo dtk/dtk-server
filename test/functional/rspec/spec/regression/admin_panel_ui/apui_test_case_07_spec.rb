@@ -1,6 +1,4 @@
 #Namespace Test Case 7: Simple create, update and delete namespace scenario
-
-
 require './spec/setup_browser'
 require './lib/component_modules_spec'
 require './lib/dtk_common'
@@ -17,8 +15,6 @@ second_user=User.new('demo_user2'+num,'password','Demo','User','demo_user2'+num+
 
 namespace=Namespace.new('demo_ns7','demo_user1'+num,'demo_group1'+num,'RW','RW','RW')
 edited_ns=Namespace.new('demo_ns7','demo_user2'+num,'demo_group2'+num,'','','')
-
-
 
 describe "(Admin Panel UI) Namespace Test Case 7: Simple create, update and delete namespace scenario" do
 	let(:conf) { Configuration.instance }
@@ -172,5 +168,4 @@ describe "(Admin Panel UI) Namespace Test Case 7: Simple create, update and dele
       		expect(second_group.delete_object(group_panel)).to eql(true)
    	 	end
    	end
-
 end

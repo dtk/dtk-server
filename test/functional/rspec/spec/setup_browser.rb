@@ -28,13 +28,10 @@ RSpec.configure do |config|
   end
 
   config.after(:all) do
-    if @conf.headless
-      puts 'Destroying Headless'
-      @headless.destroy
-    elsif @conf.poltergeist
+    if @conf.poltergeist
       puts "Closing poltergeist"
       @homepage.session.driver.quit
-    else
+    elsif @conf.headless == false
       puts 'Closing browser'
       @homepage.close
     end
@@ -69,7 +66,7 @@ def load_headless(full_host)
   require 'headless'
   puts 'Initializing browser, HEADLESS mode'
   Capybara.default_driver = :webkit
-  @headless = Headless.new
+  @headless = Headless.new(display: 100, reuse: true, destroy_at_exit: false)
   @headless.start
   session = Capybara::Session.new :webkit
   @homepage = HomePage.new(session)
@@ -89,7 +86,7 @@ def load_poltergeist(full_host)
   @homepage = HomePage.new(session)
   @homepage.goto_homepage(full_host)
   puts "Opening home page: " + full_host
-  return @homepage
+  @homepage
 end
 
 def load_browser(full_host, target_browser)

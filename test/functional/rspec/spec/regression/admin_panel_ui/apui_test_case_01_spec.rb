@@ -8,14 +8,11 @@ require './lib/mixins/admin_panel_mixins'
 group = UserGroup.new('demo_group1','Demo Group.') 
 edited_group = UserGroup.new('edited_user_group1','Edit.')
 
-
-
 describe "(Admin Panel UI) Usergroup Test Case 1: Simple create, update and delete usergroup scenario" do
   let(:conf) { Configuration.instance }
   let(:header) { @homepage.get_header }
   let(:groups_panel) { @homepage.get_main.get_usergroups }
  
-
   context "User is" do
 	  it "logged in" do
       @homepage.get_loginpage.login_user(conf.username, conf.password)

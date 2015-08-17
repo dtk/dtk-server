@@ -1,6 +1,4 @@
 #User Test Case 5: NEG - Create namespace with invalid values"
-
-
 require './spec/setup_browser'
 require './lib/component_modules_spec'
 require './lib/dtk_common'
@@ -16,7 +14,6 @@ invalid_owner_ns=Namespace.new('demo_ns1'+num,'demo_user2'+num,'demo_group'+num,
 
 empty_ns=Namespace.new('','','','','','')
 invalid_ns=Namespace.new('!@#$%'+num,'demo_user1'+num,'demo_group'+num,'','','')
-
 
 describe "(Admin Panel UI) User Test Case 8: NEG - Create namespace with invalid values" do
 	let(:conf) { Configuration.instance }
@@ -146,7 +143,6 @@ describe "(Admin Panel UI) User Test Case 8: NEG - Create namespace with invalid
     		header.click_on_users
     	end
     end
-
 
     context "Delete User #{user.username}" do
     	it "deleted user" do

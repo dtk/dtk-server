@@ -1,6 +1,4 @@
 #Usergroup Test Case 2: NEG - Create group with invalid values
-
-
 require './spec/setup_browser'
 require './lib/component_modules_spec'
 require './lib/dtk_common'
@@ -52,7 +50,6 @@ describe "(Admin Panel UI) Usergroup Test Case 2: NEG - Create group with invali
         end
     end
 
-
     context "Create Usergroup with a too long name (101 chars)" do
         it "will not create usergroup" do
             long_name=invalid_group.get_too_long_name+num
@@ -63,7 +60,6 @@ describe "(Admin Panel UI) Usergroup Test Case 2: NEG - Create group with invali
             expect(group_panel.on_create_page?).to eql(true)
         end
     end
-
 
     context "Create Usergroup with existing name (#{existing_group.name})" do 
        it "will not create usergroup" do

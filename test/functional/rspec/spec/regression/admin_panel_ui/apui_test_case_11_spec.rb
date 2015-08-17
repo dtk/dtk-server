@@ -1,13 +1,10 @@
 #Module Test Case 11: NEG - Edit deselect module owner, group and permissions and save edit changes
-
 require './spec/setup_browser'
 require './lib/component_modules_spec'
 require './lib/dtk_common'
 require './lib/admin_panel_helper'
 
-
 mod=Modul.new('postgres_module','Component','abh','adnan','adnan','RWDP','RWDP','RWDP')
-
 
 describe "(Admin Panel UI) Module Test Case 11: NEG - Edit deselect module owner, group and permissions and save edit changes" do
 	let(:conf) { Configuration.instance }

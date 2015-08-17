@@ -1,5 +1,4 @@
 #Module Test Case 10: Edit module owner, group and permissions
-
 require './spec/setup_browser'
 require './lib/component_modules_spec'
 require './lib/dtk_common'
@@ -11,7 +10,6 @@ ns=Namespace.new('abh','adnan','adnan','RW','RW','RW')
 edited_mod=Modul.new('ruby_module','Component','abh','demo_user'+num,'demo_group'+num,'','','')
 group=UserGroup.new('demo_group'+num, 'Demo Group.'+num)
 user=User.new('demo_user'+num,'password','Demo','User','demo_user'+num+'@mail.com','3','demo_group'+num)
-
 
 describe "(Admin Panel UI) Module Test Case 10: Edit module owner, group and permissions" do
 	let(:conf) { Configuration.instance }
@@ -107,8 +105,7 @@ describe "(Admin Panel UI) Module Test Case 10: Edit module owner, group and per
     	end
     end
 
-
-     context "Open Usergroups panel" do
+    context "Open Usergroups panel" do
     	it "opened panel" do
     		header.click_on_user_groups
     	end

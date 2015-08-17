@@ -1,6 +1,4 @@
 #User Test Case 4: Simple create, update and delete user scenario"
-
-
 require './spec/setup_browser'
 require './lib/component_modules_spec'
 require './lib/dtk_common'
@@ -12,8 +10,6 @@ second_group=UserGroup.new('demo_group2'+num, 'Demo Group 2.')
 
 user=User.new('demo_user1'+num,'password','Demo','User','demo_user1'+num+'@mail.com','3','demo_group1'+num)
 edited_user=User.new('demo_user1'+num,'edit_password', 'Mode','Reus','demo_user1'+num+'@mail.com','5','demo_group2'+num)
-
-
 
 describe "(Admin Panel UI) User Test Case 4: Simple create, update and delete user scenario" do
 	let(:conf) { Configuration.instance }
@@ -90,7 +86,6 @@ describe "(Admin Panel UI) User Test Case 4: Simple create, update and delete us
     		expect(user_panel.on_edit_page?).to eql(false)
     	end
     end
-
 
     context "Search for User #{edited_user.username}" do
     	it "found the user" do

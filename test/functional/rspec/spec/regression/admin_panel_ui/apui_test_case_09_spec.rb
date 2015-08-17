@@ -1,5 +1,4 @@
 #Namespace Test Case 9: NEG - Namespace edit textfield validation
-
 require './spec/setup_browser'
 require './lib/component_modules_spec'
 require './lib/dtk_common'
@@ -18,7 +17,6 @@ invalid_owner_ns=Namespace.new('demo_ns1'+num,'demo_user2'+num,'demo_group'+num,
 
 empty_ns=Namespace.new('','','','','','')
 invalid_ns=Namespace.new('!@#$%'+num,'demo_user1'+num,'demo_group'+num,'','','')
-
 
 describe "(Admin Panel UI) Test Case 9: NEG - Namespace edit textfield validation" do
 	let(:conf) { Configuration.instance }

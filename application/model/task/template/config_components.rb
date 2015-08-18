@@ -31,16 +31,41 @@ module DTK; class Task
       #TODO : this is hardwired
       DefaultTaskActionForUpdates = nil
       
-      # TODO: do more accurate parse if assembly is non null
-      def self.find_parse_errors(hash_content, assembly = nil)
+      # opts can have
+      #  :assembly
+      #  :workflow_action
+      #  :service_module_workflow - Boolean
+      def self.find_parse_error?(workflow_hash, opts = {})
+        ret = nil
+        workflow_action = opts[:workflow_action]
+        unless workflow_hash.kind_of?(Hash)
+          if workflow_action
+            return ParsingError.new("Workflow for action '?1' is ill-formed because it is not a hash: ?2", workflow_action, workflow_hash)
+          else
+            return ParsingError.new('Workflow is ill-formed because it is not a hash: ?1', workflow_hash)
+          end
+        end
+
+        if opts[:service_module_workflow]
+          unless workflow_action ||= workflow_hash['name']
+            return ParsingError.new("Unexpected that a service module workflow does not have a 'name' parameter.")
+          end
+          if workflow_hash.key?('assembly_action')
+            return ParsingError.new("Service module workflow cannot have 'assembly_action' key.") 
+          end
+          if workflow_action == 'create'
+            return ParsingError.new("Service module workflow cannot have a 'create' action.")
+          end
+        end
+
         begin
-          cmp_actions = (assembly && ActionList::ConfigComponents.get(assembly))
-          serialized_content = serialized_content_hash_form(Aux.convert_keys_to_symbols_recursive(hash_content))
+          cmp_actions = (opts[:assembly] && ActionList::ConfigComponents.get(opts[:assembly]))
+          serialized_content = serialized_content_hash_form(Aux.convert_keys_to_symbols_recursive(workflow_hash))
           Content.parse_and_reify(serialized_content, cmp_actions)
          rescue ParsingError => parse_error
           return parse_error
         end
-        nil
+        ret
      end
 
       # action_types is scalar or array with elements

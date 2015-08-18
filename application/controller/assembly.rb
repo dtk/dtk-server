@@ -683,7 +683,7 @@ module DTK
       assembly = ret_assembly_instance_object()
       opts     = ret_params_hash(:commit_msg, :task_action, :task_params)
 
-      # TODO: more expensive, but more rebost to check for operaitonally stopped as opposed to
+      # TODO: more expensive, but more rebost to check for operationally stopped as opposed to
       #       just administratively stopped nodes (that is, use assembly.any_stopped_nodes?(:op))
       if assembly.any_stopped_nodes?(:admin)
         if ret_request_params(:start_assembly).nil?
@@ -692,8 +692,10 @@ module DTK
 
         opts.merge!(start_nodes: true, ret_nodes_to_start: [])
       else
-        if running_task = most_recent_task_is_executing?(assembly)
-          fail ErrorUsage, "Task with id '#{running_task.id}' is already running in assembly. Please wait until task is complete or cancel task."
+        unless R8::Config[:debug][:disable_task_concurrent_check]
+          if running_task = most_recent_task_is_executing?(assembly)
+            fail ErrorUsage, "Task with id '#{running_task.id}' is already running in assembly. Please wait until task is complete or cancel task."
+          end
         end
       end
 

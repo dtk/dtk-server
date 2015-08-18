@@ -35,7 +35,7 @@ module DTK; class AssemblyModule
           format_type = Aux.format_type(file_path)
           hash_content = Aux.convert_to_hash(file_content, format_type)
           return hash_content if ServiceModule::ParsingError.is_error?(hash_content)
-          parse_errors = Task::Template::ConfigComponents.find_parse_errors(hash_content, @assembly)
+          parse_errors = Task::Template::ConfigComponents.find_parse_error?(hash_content, assembly: @assembly)
           Task::Template.create_or_update_from_serialized_content?(@assembly.id_handle(), hash_content, @task_action)
         end
         fail parse_errors if parse_errors

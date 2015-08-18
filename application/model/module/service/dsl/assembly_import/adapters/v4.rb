@@ -43,7 +43,7 @@ module DTK; class ServiceModule
 
       def self.import_task_templates(assembly_hash, opts = {})
         ret = DBUpdateHash.new()
-        workflows_with_actions =
+        workflows_to_parse =
           if workflow = Constant.matches?(assembly_hash, :Workflow)
             [{ workflow: workflow }]
           elsif workflows = Constant.matches?(assembly_hash, :Workflows)
@@ -54,27 +54,33 @@ module DTK; class ServiceModule
             end
           end
 
-        if workflows_with_actions
-          ret = workflows_with_actions.inject(ret) { |h, r| h.merge(parse_workflow(r[:workflow], r[:action], opts)) }
+        if workflows_to_parse
+          ret = workflows_to_parse.inject(ret) do  |h, r| 
+            workflow_hash = r[:workflow]
+            # we explicitly want to delete from workflow_hash; workflow_action can be nil
+            action_under_key = (workflow_hash.kind_of?(Hash) ? workflow_hash.delete(Constant::WorkflowAction) : nil)
+            workflow_action = r[:action] || action_under_key
+            parsed_workflow = parse_workflow(workflow_hash, workflow_action, opts)
+            h.merge(parsed_workflow)
+          end
         end
 
         ret
       end
 
-      def self.parse_workflow(workflow_hash, workflow_action = nil, opts = {})
-        # we explicitly want to delete from workflow_hash; workflow_action can be nil
-        action_under_key = workflow_hash.delete(Constant::WorkflowAction)
-        workflow_action ||= action_under_key
+      def self.parse_workflow(workflow_hash, workflow_action, opts = {})
+        raise_error_if_parsing_error(workflow_hash, workflow_action, opts)
+        
+        normalized_workflow_action = 
+          if opts[:service_module_workflow]
+            normalized_service_module_action(workflow_hash, workflow_action)
+          else
+            normalized_assembly_action(workflow_action)
+          end
 
-        if opts[:service_module_workflow]
-          workflow_action = validate_service_module_workflow(workflow_hash, workflow_action)
-        else
-          workflow_action = Task::Template.default_task_action() if workflow_action.nil? || Constant.matches?(workflow_action, :CreateWorkflowAction)
-        end
-
-        task_template_ref = workflow_action
+        task_template_ref = normalized_workflow_action
         task_template = {
-          'task_action' => workflow_action,
+          'task_action' => normalized_workflow_action,
           'content'     => workflow_hash
         }
         { task_template_ref => task_template }
@@ -89,16 +95,21 @@ module DTK; class ServiceModule
         end
       end
 
-      def self.validate_service_module_workflow(workflow_hash, workflow_action)
-        fail ErrorUsage.new("Service module workflow cannot have 'assembly_action'.") if workflow_hash.key?('assembly_action')
+      def self.raise_error_if_parsing_error(workflow_hash, workflow_action, opts = {})
+        if parse_errors = Task::Template::ConfigComponents.find_parse_error?(workflow_hash, {workflow_action: workflow_action}.merge(opts))
+          fail parse_errors
+        end
+      end
 
-        if workflow_action
-          fail ErrorUsage.new("Service module workflow cannot have 'create' action.") if workflow_action.eql?('create')
+      def self.normalized_service_module_action(workflow_hash, workflow_action)
+        workflow_action || workflow_hash['name']
+      end
+
+      def self.normalized_assembly_action(workflow_action)
+        if workflow_action.nil? or Constant.matches?(workflow_action, :CreateWorkflowAction)
+          Task::Template.default_task_action()
         else
-          name = workflow_hash['name']
-          fail ErrorUsage.new("Unexpected that service_module workflow does not have name parameter.") unless name
-          fail ErrorUsage.new("Service module workflow cannot have 'create' action.") if name.eql?('create')
-          name
+          workflow_action
         end
       end
 

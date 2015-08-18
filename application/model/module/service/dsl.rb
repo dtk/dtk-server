@@ -177,7 +177,7 @@ module DTK
         v_namespaces = validate_module_ref_namespaces(module_branch, component_module_refs)
         return v_namespaces if ParsingError.is_error?(v_namespaces)
 
-        service_module_workflows = update_workflows_from_dsl(module_branch)
+        service_module_workflows = update_service_module_workflows_from_dsl(module_branch)
         return service_module_workflows if ParsingError.is_error?(service_module_workflows)
 
         parsed, component_module_refs = update_assemblies_from_dsl(module_branch, component_module_refs, opts)
@@ -202,7 +202,7 @@ module DTK
         ModuleRefs::Parse.update_component_module_refs(ServiceModule, module_branch, opts)
       end
 
-      def update_workflows_from_dsl(module_branch, opts = {})
+      def update_service_module_workflows_from_dsl(module_branch, opts = {})
         task_templates = DBUpdateHash.new
         aggregate_errors = ParsingError::Aggregate.new(error_cleanup: proc { error_cleanup() })
         workflow_meta_file_paths(module_branch) do |meta_file, workflow_name|
@@ -212,7 +212,7 @@ module DTK
             opts.merge!(file_path: meta_file)
 
             hash_content  = Aux.convert_to_hash(file_content, format_type, opts) || {}
-            return hash_content if ParsingError.is_error?(hash_content)
+            fail hash_content if ParsingError.is_error?(hash_content)
 
             check_for_nodes(hash_content)
 

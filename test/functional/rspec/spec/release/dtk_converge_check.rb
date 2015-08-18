@@ -10,7 +10,7 @@ require './lib/dtk_common'
 STDOUT.sync = true
 
 service_name = "test_service" + Random.rand(1000).to_s
-assembly_name = 'spark::spark'
+assembly_name = ARGV[0]
 
 def converge_and_check_logs(dtk_common, service_id)
   puts "Converge service:", "-----------------"
@@ -34,7 +34,7 @@ def converge_and_check_logs(dtk_common, service_id)
       count += 1
       response_task_status = dtk_common.send_request('/rest/assembly/task_status', {'assembly_id'=> service_id})
       status = response_task_status['data'].select { |x| x['type'].include? "create_nodes_stage" }.first['status']
-      start_pattern_id = response_task_status['data'].select { |x| x['type'].include? "create_node" && x['sub_index'] == 1 }.first['id']
+      start_pattern_id = response_task_status['data'].select { |x| x["sub_index"] == 1 && (x["type"].include? "create_node") }.first['id']
 
       unless status.nil?
         if (status.include? 'succeeded')

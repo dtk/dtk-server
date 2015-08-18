@@ -61,6 +61,34 @@ class Common
 	  $opts[:cookies] = response_login.cookies
 	end
 
+	def get_server_log_for_specific_search_pattern(search_start_pattern, number_of_lines_after)
+		log_part_from_start_pattern = []
+		log_part = []
+		final_log = []
+
+		#read server log to an array
+		server_log = File.readlines(@server_log)
+		
+		#reverse server log and search for start pattern
+		server_log.reverse!
+		server_log.each do |line|
+			log_part_from_start_pattern << line
+			if line.include? search_start_pattern
+				break
+			end
+		end
+
+		# reverse server log again (back to normal) and print next N lines
+		log_part_from_start_pattern.reverse!
+		log_part_from_start_pattern.each_with_index do |line, index|
+    	if index < number_of_lines_after
+        log_part << log_part_from_start_pattern[index]
+    	end
+		end
+
+    log_part
+	end
+
 	def server_log_print()
 		search_string = "Exiting!"
 		log_part_from_last_restart = []

@@ -49,15 +49,20 @@ module DTK
         assembly_dsl_path
       end
 
-      def check_merge_conflicts(assembly_instance)
+      # if any messages to pass end user, this will return a string with the merge_message
+      def merge_conflicts?(assembly_instance)
+        ret = nil
         assembly_dsl_path = assembly_meta_filename_path()
-        return unless file_exists?(assembly_dsl_path)
+        return ret unless file_exists?(assembly_dsl_path)
 
         initial_sha = assembly_instance.get_field?(:service_module_sha)
         current_sha = @service_module_branch[:current_sha]
-        return if initial_sha.eql?(current_sha)
+        return ret if initial_sha.eql?(current_sha)
 
-        instance_lock = Assembly::Instance::Lock.get(assembly_instance)
+        unless instance_lock = Assembly::Instance::Lock.get(assembly_instance)
+          Log.info('Legacy can have Assembly::Instance::Lock.get(assembly_instance) be nil')
+          return ret 
+        end
         service_module_sha_timestamp = @service_module_branch.get_field?(:updated_at)
         instance_lock_sha_timestamp = instance_lock[:created_at]
 
@@ -65,7 +70,7 @@ module DTK
         assembly_instance_latest_change = assembly_branch ? assembly_branch.get_field?(:updated_at) : (assembly_instance.get_field?(:updated_at) || assembly_instance.get_field?(:created_at))
 
         # TODO: DTK-2208 need to compare above timestamps per Rich's comment in DTK-2208 ticket
-        return unless RepoManager.file_changed_since_specified_sha(initial_sha, assembly_dsl_path, @service_module_branch)
+        return ret unless RepoManager.file_changed_since_specified_sha(initial_sha, assembly_dsl_path, @service_module_branch)
 
         # move current assembly.yaml and create new one; also notify user
         destination_name = "#{assembly_dsl_path}.dtk-backup"

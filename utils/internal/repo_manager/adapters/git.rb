@@ -182,17 +182,17 @@ module DTK
       end
     end
 
+    # returns a Boolean: true if any change made
     def add_file(file_asset, content, commit_msg = nil)
       ret = false
+      commit_msg ||= "Adding file #{path}"
       content ||= ''
       checkout(@branch) do
         path = file_asset[:path]
         recursive_create_dir?(path)
         File.open(path, 'w') { |f| f << content }
-        # TODO: commiting because it looks like file change visible in otehr branches until commit
-        commit_msg ||= "Adding #{path} in #{@branch}"
         git_command__add(path)
-        # diff(nil) looks at diffs rt to the working dir
+        # diff(nil) looks at diffs with repsect to the working dir
         unless diff(nil).ret_summary().no_diffs?()
           commit(commit_msg)
           ret = true
@@ -208,7 +208,7 @@ module DTK
     end
 
     def delete_file?(file_path, opts = {})
-       delete_tree?(:file, file_path, opts)
+      delete_tree?(:file, file_path, opts)
     end
 
     def delete_file(file_path, opts = {})
@@ -259,7 +259,7 @@ module DTK
     def update_file_content(file_asset, content)
       checkout(@branch) do
         File.open(file_asset[:path], 'w') { |f| f << content }
-        # TODO: commiting because it looks like file change visible in otehr branches until commit
+        # TODO: commiting because it looks like file change visible in other branches until commit
         message = "Updating #{file_asset[:path]} in #{@branch}"
         git_command__add(file_asset[:path])
         commit(message)

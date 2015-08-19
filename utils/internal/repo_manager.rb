@@ -22,25 +22,31 @@ module DTK
         !!(defined_method?(name) || super)
       end
 
-      def get_file_content(file_obj_or_path, context, opts = {})
-        file_obj_or_path = { path: file_obj_or_path } if file_obj_or_path.is_a?(String)
-        get_adapter_repo(context).get_file_content(file_obj_or_path, opts)
+      def get_file_content(file_path_hash_or_string, context, opts = {})
+        file_path_hash = file_path_hash_form(file_path_hash_or_string)
+        get_adapter_repo(context).get_file_content(file_path_hash, opts)
       end
 
-      # signature is effectively def add_file(file_obj_or_path,content,commit_msg=nil,context)
+      # signature is 
+      # def add_file(file_path_hash_or_string, content, commit_msg=nil, context)
+      # returns a Boolean: true if any change made
       def add_file(*args)
         context = args.pop
-        file_obj_or_path, content, commit_msg = args
-        file_obj_or_path = { path: file_obj_or_path } if file_obj_or_path.is_a?(String)
-        get_adapter_repo(context).add_file(file_obj_or_path, content, commit_msg)
+        file_path_hash_or_string, content, commit_msg = args
+        file_path_hash = file_path_hash_form(file_path_hash_or_string)
+        get_adapter_repo(context).add_file(file_path_hash, content, commit_msg)
       end
 
-      def update_file_content(file_obj_or_path, content, context)
-        file_obj_or_path = { path: file_obj_or_path } if file_obj_or_path.is_a?(String)
-        get_adapter_repo(context).update_file_content(file_obj_or_path, content)
+      def update_file_content(file_path_hash_or_string, content, context)
+        file_path_hash = file_path_hash_form(file_path_hash_or_string)
+        get_adapter_repo(context).update_file_content(file_path_hash, content)
       end
 
       private
+
+      def file_path_hash_form(hash_or_string)
+        hash_or_string.is_a?(String) ? { path: hash_or_string } : hash_or_string
+      end
 
       def defined_method?(name)
         RepoMethods.include?(name) || !!class_if_admin_method?(name)

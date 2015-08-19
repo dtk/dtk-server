@@ -13,16 +13,21 @@ module DTK; class ServiceModule
 
       private
 
-      # TODO: in methods below  assuming that just one level workflow
+      # TODO: in methods below assuming that just one level workflow
+
       def self.task_body(input_hash)
         input_hash.inject(input_hash.class.new) do |h, (k, input_info)|
           info =  
-            if k == :subtasks
-              input_info.map { |input_subtask| subtask(input_subtask) }
-            else
+            case k
+              when :subtasks
+                input_info.map { |input_subtask| subtask(input_subtask) }
+              when :assembly_action
+                # no op
+                nil
+              else
               input_info
             end
-          h.merge(k => info) 
+          info ? h.merge(k => info) : h
         end
       end
 

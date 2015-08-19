@@ -44,7 +44,11 @@ module DTK
         create_assembly_template_aux(opts)
       end
 
-      def set_object_attributes!(project_idh, assembly_instance, service_module, service_module_branch)
+      def raise_error_if_integrity_error
+        raise_error_if_inconsistent_mod_refs()
+      end
+
+      def set_factory_properties!(project_idh, assembly_instance, service_module, service_module_branch)
         @project_idh = project_idh
         @assembly_instance = assembly_instance
         @service_module = service_module
@@ -54,11 +58,15 @@ module DTK
         self
       end
 
-      def raise_error_if_integrity_error
-        raise_error_if_inconsistent_mod_refs()
-      end
+      attr_reader :assembly_instance
 
       private
+
+      attr_reader :project_idh, :service_module_branch
+
+      def project_uri
+        @project_uri ||= @project_idh.get_uri()
+      end
 
       def raise_error_if_inconsistent_mod_refs
         mismatched_cmp_mods = []
@@ -101,7 +109,7 @@ module DTK
           if opts[:mode] == :create
             fail ErrorUsage.new("Assembly (#{assembly_name}) already exists in service module (#{service_module_name})")
           end
-          ret.set_object_attributes!(project_idh, assembly_instance, service_module, service_module_branch)
+          ret.set_factory_properties!(project_idh, assembly_instance, service_module, service_module_branch)
         else
           if opts[:mode] == :update
             fail ErrorUsage.new("Assembly (#{assembly_name}) does not exist in service module (#{service_module_name})")
@@ -117,20 +125,8 @@ module DTK
           }
           hash_values.merge!(description: opts[:description]) if opts[:description]
           ret = create(assembly_mh, hash_values)
-          ret.set_object_attributes!(project_idh, assembly_instance, service_module, service_module_branch)
+          ret.set_factory_properties!(project_idh, assembly_instance, service_module, service_module_branch)
         end
-      end
-
-      public
-
-      attr_reader :assembly_instance
-
-      private
-
-      attr_reader :project_idh, :service_module_branch
-
-      def project_uri
-        @project_uri ||= @project_idh.get_uri()
       end
 
       def add_content_for_clone!

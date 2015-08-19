@@ -193,7 +193,7 @@ end
       fragment_hash
     end
 
-    # updates repo if any changes and if so returns new commit_sha
+    # updates repo if any changes and if so returns new commit_sha; otherwise returns nil
     # args could be either file_path,hash_content,file_format(optional) or single element which is an array
     # having elements with keys :path, :hash_content, :format
     def serialize_and_save_to_repo?(*args)
@@ -283,8 +283,8 @@ end
           any_changes = true if any_change
         end
         if any_changes
-          new_commit_sha = push_changes_to_repo()
-          new_commit_sha
+          # returns new_commit_sha
+          push_changes_to_repo()
         end
       end
     end
@@ -293,12 +293,13 @@ end
       RepoManager.get_file_content({ path: path }, self, no_error_if_not_found: true)
     end
 
-    def save_file_content_to_repo(path, array)
-      any_change = RepoManager.add_file({ path: path }, array, self)
-      any_changes = true if any_change
-      if any_changes
-        new_commit_sha = push_changes_to_repo()
-        new_commit_sha
+    # returns new_commit_sha if no commit; else nil
+    # opts can have keys
+    #  :commit_msg
+    def save_file_content_to_repo?(path, file_content, opts = {})
+      if any_change = RepoManager.add_file(path, file_content, opts[:commit_msg], self)
+        # returns new_commit_sha
+        push_changes_to_repo()
       end
     end
 

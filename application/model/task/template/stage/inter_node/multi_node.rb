@@ -17,7 +17,7 @@ module DTK; class Task; class Template; class Stage
         if opts[:form] == :explicit_instances
           super
         else
-          serialized_form_with_name().merge(:nodes => serialized_multi_node_type(), Constant::OrderedComponents => @ordered_components)
+          serialized_form_with_name().merge(Constant::OrderedComponents => @ordered_components)
         end
       end
 
@@ -73,9 +73,6 @@ module DTK; class Task; class Template; class Stage
         end
         CmpRefWithTitleRegexp = /(^[^\[]+)\[([^\]]+)\]$/
 
-        def serialized_multi_node_type
-          'All_applicable'
-        end
       end
     end
   end

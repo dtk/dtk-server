@@ -84,14 +84,17 @@ module DTK
         !(serialized_content[:assembly] || {})[:nodes].nil?
       end
 
+      # returns new_commit_sha if no commit; else nil
       def serialize_and_save_to_repo__fresh?(assembly_dsl_path, serialized_content)
         @service_module_branch.serialize_and_save_to_repo?(assembly_dsl_path, serialized_content)
       end
 
+      # returns new_commit_sha if no commit; else nil
       def serialize_and_save_to_repo__fold_into_existing?(assembly_dsl_path, serialized_content)
         begin
           @serialized_assembly_file ||= fold_into_existing_assembly_dsl(assembly_dsl_path, serialized_content)
-          @service_module_branch.save_file_content_to_repo(assembly_dsl_path, @serialized_assembly_file)
+          commit_msg = "Update to assembly template with path #{assembly_dsl_path}"
+          @service_module_branch.save_file_content_to_repo?(assembly_dsl_path, @serialized_assembly_file, commit_msg: commit_msg)
          rescue => e
           #In case any error in routine to incrementally fold in to assembly we will just generate from new content (i.e., from fresh)
           Log.error_pp([e])
@@ -99,6 +102,7 @@ module DTK
         end
       end
 
+      # returns new_commit_sha if no commit; else nil
       def fold_into_existing_assembly_dsl(assembly_dsl_path, serialized_content)
         raw_content_existing = @service_module_branch.get_raw_file_content(assembly_dsl_path)
         FoldIntoExisting.fold_into_existing_assembly_dsl(raw_content_existing, serialized_content)

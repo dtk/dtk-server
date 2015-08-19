@@ -9,8 +9,11 @@ require './lib/dtk_common'
 
 STDOUT.sync = true
 
-service_name = "test_service" + Random.rand(1000).to_s
-assembly_name = ARGV[0]
+if ARGV[0].include? ","
+  assembly_names = ARGV[0].split(",")
+else
+  assembly_names = ARGV[0]
+end
 
 def converge_and_check_logs(dtk_common, service_id)
   puts "Converge service:", "-----------------"
@@ -61,7 +64,10 @@ def converge_and_check_logs(dtk_common, service_id)
   return nodes_created
 end
 
-dtk_common = Common.new(service_name, assembly_name)
-dtk_common.stage_service
-converge_and_check_logs(dtk_common, dtk_common.service_id)
-dtk_common.delete_and_destroy_service(dtk_common.service_id)
+assembly_names.each do |assembly_name|
+  service_name = "test_service" + Random.rand(1000).to_s
+  dtk_common = Common.new(service_name, assembly_name)
+  dtk_common.stage_service
+  converge_and_check_logs(dtk_common, dtk_common.service_id)
+  dtk_common.delete_and_destroy_service(dtk_common.service_id)
+end

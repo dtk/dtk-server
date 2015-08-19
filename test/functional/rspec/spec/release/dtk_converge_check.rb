@@ -49,14 +49,17 @@ def converge_and_check_logs(dtk_common, service_id, output_file)
     end
     log = dtk_common.get_server_log_for_specific_search_pattern("[\"start_action:\", \"CreateNode\", {:task_id=>#{start_pattern_id}}]", number_of_lines)
     File.open(output_file, "w+") do |f|
-      f.puts("SERVER LOG")
-      f.puts(">>>>>>>>>>")
-      log.each do |element| 
+      f.puts("SERVER LOG\n")
+      f.puts(">>>>>>>>>>\n")
+      log.each do |element|
         puts element
-        f.puts(element)
+        f.puts(element + "\n")
       end
-      f.puts("END OF SERVER LOG")
-      f.puts("<<<<<<<<<<<<<<<<<")
+      f.puts("END OF SERVER LOG\n")
+      f.puts("<<<<<<<<<<<<<<<<<\n")
+      f.puts("")
+      f.puts("")
+      f.puts("")
     end
   else
     puts "Service was not converged successfully!"

@@ -185,10 +185,10 @@ module DTK
     # returns a Boolean: true if any change made
     def add_file(file_asset, content, commit_msg = nil)
       ret = false
+      path = file_asset[:path]
       commit_msg ||= "Adding file #{path}"
       content ||= ''
       checkout(@branch) do
-        path = file_asset[:path]
         recursive_create_dir?(path)
         File.open(path, 'w') { |f| f << content }
         git_command__add(path)

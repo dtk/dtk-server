@@ -49,10 +49,12 @@ if [[ ! -d ${HOST_VOLUME}/postgresql/${PG_VERSION}/main ]]; then
   mkdir -p ${HOST_VOLUME}/postgresql/${PG_VERSION}/main
   chown -R postgres:postgres ${HOST_VOLUME}/postgresql/${PG_VERSION}
   su postgres -c "/usr/lib/postgresql/${PG_VERSION}/bin/initdb -D ${HOST_VOLUME}/postgresql/${PG_VERSION}/main"
-  su postgres -c "/usr/lib/postgresql/8.4/bin/postgres -D ${HOST_VOLUME}/postgresql/${PG_VERSION}/main &"
 fi
 
-sleep 5; psql -h /var/run/postgresql -U postgres -c 'CREATE DATABASE dtk1;'
+su postgres -c "/usr/lib/postgresql/8.4/bin/postgres -D ${HOST_VOLUME}/postgresql/${PG_VERSION}/main &"
+if [[ `psql -h /var/run/postgresql -U postgres -lqt | cut -d \| -f 1 | grep -w dtk1` ]]; then
+  sleep 5; psql -h /var/run/postgresql -U postgres -c 'CREATE DATABASE dtk1;'
+fi
 
 # reconfigure ssh
 if [[ ! -d ${HOST_VOLUME}/ssh ]]; then
@@ -97,8 +99,8 @@ ln -s ${HOST_VOLUME}/activemq/data /opt/activemq/data
 if [[ ! -d ${HOST_VOLUME}/activemq ]]; then
   mkdir -p ${HOST_VOLUME}/activemq/data
   rm -rf /opt/activemq/data
-  /opt/activemq/bin/activemq start &
 fi
+/opt/activemq/bin/activemq start &
 
 if [[ ! -f ${HOST_VOLUME}/init_done ]]; then
   envsubst < /addons/server.conf.template > /etc/dtk/${TENANT_USER}/server.conf

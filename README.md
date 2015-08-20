@@ -42,7 +42,15 @@ PUBLIC_ADDRESS=someuser.dtk.io
 ```   
 Next step is to start the docker container with the directory from above used as a volume:  
 ```
-docker run -v /dtk:/host_volume -p 8080:80 -p 6163:6163 -p 2222:22 -i -t getdtk/server-full
+docker run --name dtk -v /dtk:/host_volume -p 8080:80 -p 6163:6163 -p 2222:22 -d getdtk/server-full
 ```  
 After the container is up and running (will take a minute on the first start) you can connect to it via [dtk-client](https://github.com/rich-reactor8/dtk-client) using the same values as set in `dtk.config`.  
 Note that if you need to forward GIT SSH port to a different one, you can use the `-e GIT_PORT=2200` switch for example. 
+##### Upgrading the container
+To upgrade a running container with a newer image run:  
+```  
+docker pull getdtk/server-full
+docker stop dtk
+docker rm dtk
+docker run --name dtk -v /dtk:/host_volume -p 8080:80 -p 6163:6163 -p 2222:22 -d getdtk/server-full
+```  

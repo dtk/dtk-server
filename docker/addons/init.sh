@@ -52,8 +52,9 @@ if [[ ! -d ${HOST_VOLUME}/postgresql/${PG_VERSION}/main ]]; then
 fi
 
 su postgres -c "/usr/lib/postgresql/8.4/bin/postgres -D ${HOST_VOLUME}/postgresql/${PG_VERSION}/main &"
+sleep 5
 if [[ `psql -h /var/run/postgresql -U postgres -lqt | cut -d \| -f 1 | grep -w dtk1` ]]; then
-  sleep 5; psql -h /var/run/postgresql -U postgres -c 'CREATE DATABASE dtk1;'
+  psql -h /var/run/postgresql -U postgres -c 'CREATE DATABASE dtk1;'
 fi
 
 # reconfigure ssh

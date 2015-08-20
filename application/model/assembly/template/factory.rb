@@ -33,12 +33,14 @@ module DTK
       end
 
       # creates a new assembly template if it does not exist
+      # if any messages to pass end user, this will return a string with the merge_message
       def self.create_or_update_from_instance(assembly_instance, service_module, assembly_name, opts = {})
         assembly_factory = create_assembly_factory(assembly_instance, service_module, assembly_name, opts)
         assembly_factory.raise_error_if_integrity_error()
         assembly_factory.create_assembly_template(opts)
       end
 
+      # if any messages to pass end user, this will return a string with the merge_message
       def create_assembly_template(opts = {})
         add_content_for_clone!()
         create_assembly_template_aux(opts)
@@ -212,9 +214,9 @@ module DTK
         self
       end
 
-      # TODO: can collapse above and below; aboves looks like extra intermediate level
+      # if any messages to pass end user, this will return a string with the merge_message
       def create_assembly_template_aux(opts = {})
-        ret = nil
+        merge_message = nil
         nodes = self[:nodes].inject(DBUpdateHash.new) { |h, node| h.merge(create_node_content(node)) }
         port_links = self[:port_links].inject(DBUpdateHash.new) { |h, pl| h.merge(create_port_link_content(pl)) }
         task_templates = self[:task_templates].inject(DBUpdateHash.new) { |h, tt| h.merge(create_task_template_content(tt)) }
@@ -244,7 +246,9 @@ module DTK
         module_refs_updated = @component_module_refs.update_object_if_needed!(@assembly_component_modules)
 
         Transaction do
-          ret = @template_output.check_merge_conflicts(@assembly_instance)
+          # check merge_conflicts before updating
+          merge_message = @template_output.merge_conflicts?(@assembly_instance)
+
           @template_output.save_to_model()
 
           if module_refs_updated
@@ -256,7 +260,7 @@ module DTK
           @template_output.serialize_and_save_to_repo?(opts)
         end
 
-        ret
+        merge_message
       end
 
       def self.exists?(assembly_mh, service_module, template_name)

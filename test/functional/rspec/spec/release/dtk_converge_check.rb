@@ -8,11 +8,9 @@ require 'yaml'
 require './lib/dtk_common'
 
 STDOUT.sync = true
+assembly_names = ARGV[0].split(",")
 
-service_name = "test_service" + Random.rand(1000).to_s
-assembly_name = ARGV[0]
-
-def converge_and_check_logs(dtk_common, service_id)
+def converge_and_check_logs(dtk_common, service_id, output_file)
   puts "Converge service:", "-----------------"
   nodes_created = false
   puts "Converge process for service with id #{service_id} started!"
@@ -50,8 +48,18 @@ def converge_and_check_logs(dtk_common, service_id)
       end
     end
     log = dtk_common.get_server_log_for_specific_search_pattern("[\"start_action:\", \"CreateNode\", {:task_id=>#{start_pattern_id}}]", number_of_lines)
-    log.each do |x|
-      puts x
+    File.open(output_file, "a") do |f|
+      f.puts("SERVER LOG FOR ASSEMBLY #{dtk_common.assembly}\n")
+      f.puts("----------------------------------------------------------------------------------------\n")
+      log.each do |element|
+        puts element
+        f.puts(element)
+      end
+      f.puts("END OF SERVER LOG FOR ASSEMBLY #{dtk_common.assembly}\n")
+      f.puts("----------------------------------------------------------------------------------------\n")
+      f.puts("")
+      f.puts("")
+      f.puts("")
     end
   else
     puts "Service was not converged successfully!"
@@ -61,7 +69,10 @@ def converge_and_check_logs(dtk_common, service_id)
   return nodes_created
 end
 
-dtk_common = Common.new(service_name, assembly_name)
-dtk_common.stage_service
-converge_and_check_logs(dtk_common, dtk_common.service_id)
-dtk_common.delete_and_destroy_service(dtk_common.service_id)
+assembly_names.each do |assembly_name|
+  service_name = "test_service" + Random.rand(1000).to_s
+  dtk_common = Common.new(service_name, assembly_name)
+  dtk_common.stage_service
+  converge_and_check_logs(dtk_common, dtk_common.service_id, ARGV[1])
+  dtk_common.delete_and_destroy_service(dtk_common.service_id)
+end

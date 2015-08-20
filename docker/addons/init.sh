@@ -36,15 +36,13 @@ export USERNAME PASSWORD PUBLIC_ADDRESS GIT_PORT
 /usr/sbin/sshd -D &
 
 # set up log directories
-if [[ ! -d ${HOST_VOLUME}/logs ]]; then
-  mkdir -p ${HOST_VOLUME}/logs/nginx
-  rm -rf /var/log/nginx
-  ln -s ${HOST_VOLUME}/logs/nginx /var/log/nginx
-  mkdir -p ${HOST_VOLUME}/logs/app
-  rm -rf /home/${TENANT_USER}/server/current/application/log
-  chown -R ${TENANT_USER}:${TENANT_USER} ${HOST_VOLUME}/logs/app
-  ln -s ${HOST_VOLUME}/logs/app /home/${TENANT_USER}/server/current/application/log
-fi
+mkdir -p ${HOST_VOLUME}/logs/nginx
+rm -rf /var/log/nginx
+ln -s ${HOST_VOLUME}/logs/nginx /var/log/nginx
+mkdir -p ${HOST_VOLUME}/logs/app
+rm -rf /home/${TENANT_USER}/server/current/application/log
+chown -R ${TENANT_USER}:${TENANT_USER} ${HOST_VOLUME}/logs/app
+ln -s ${HOST_VOLUME}/logs/app /home/${TENANT_USER}/server/current/application/log
 
 # initialize the database and start postgres in background
 if [[ ! -d ${HOST_VOLUME}/postgresql/${PG_VERSION}/main ]]; then
@@ -76,6 +74,8 @@ if [[ ! -d ${HOST_VOLUME}/mcollective ]]; then
 fi
 
 # gitolite
+ln -s ${HOST_VOLUME}/gitolite/.gitolite /home/${TENANT_USER}/.gitolite
+ln -s ${HOST_VOLUME}/gitolite/repositories /home/${TENANT_USER}/repositories
 if [[ ! -d ${HOST_VOLUME}/gitolite/ ]]; then
   su - ${TENANT_USER} -c "git config --global user.email ${TENANT_USER}@localhost"
   su - ${TENANT_USER} -c "git config --global user.name ${TENANT_USER}"
@@ -83,8 +83,6 @@ if [[ ! -d ${HOST_VOLUME}/gitolite/ ]]; then
   mkdir -p ${HOST_VOLUME}/gitolite/bin
   mkdir -p ${HOST_VOLUME}/gitolite/.gitolite/logs
   mkdir ${HOST_VOLUME}/gitolite/repositories
-  ln -s ${HOST_VOLUME}/gitolite/.gitolite /home/${TENANT_USER}/.gitolite
-  ln -s ${HOST_VOLUME}/gitolite/repositories /home/${TENANT_USER}/repositories
   git clone git://github.com/sitaramc/gitolite ${HOST_VOLUME}/gitolite/src
   chown -R ${TENANT_USER}:${TENANT_USER} ${HOST_VOLUME}/gitolite
   su - ${TENANT_USER} -c "${HOST_VOLUME}/gitolite/src/install -ln ${HOST_VOLUME}/gitolite/bin/"
@@ -95,10 +93,10 @@ if [[ ! -d ${HOST_VOLUME}/gitolite/ ]]; then
 fi
 
 # activemq
+ln -s ${HOST_VOLUME}/activemq/data /opt/activemq/data
 if [[ ! -d ${HOST_VOLUME}/activemq ]]; then
   mkdir -p ${HOST_VOLUME}/activemq/data
   rm -rf /opt/activemq/data
-  ln -s ${HOST_VOLUME}/activemq/data /opt/activemq/data
   /opt/activemq/bin/activemq start &
 fi
 

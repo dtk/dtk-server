@@ -284,8 +284,10 @@ module DTK
         context = context_x.merge(callbacks: callbacks)
         handler.sendreq_with_callback(msg, agent, context, filter)
       end
+
       BlankFilter = { 'identity' => [], 'fact' => [], 'agent' => [], 'cf_class' => [] }
       @@handler = nil
+
       def self.handler
         @@handler ||= Multiplexer.create(Config.mcollective_client())
       end
@@ -293,6 +295,7 @@ module DTK
       def self.filter_single_fact(fact, value, operator = nil)
         { 'fact' => [format_fact_filter(fact, value, operator)] }
       end
+
       def self.format_fact_filter(fact, value, operator = nil)
         if operator.nil?
           operator = value.is_a?(Regexp) ? '=~' : '=='

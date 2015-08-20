@@ -77,7 +77,7 @@ module DTK
         result = `ssh-keyscan -H -t rsa #{repo_server_dns()}`
         raise Exception, "Try again ssh keyscan" if result.empty?
       rescue Exception
-        unless (tries -= 1).zero?
+        unless (number_of_retries -= 1).zero?
           sleep(1)
           retry
         end

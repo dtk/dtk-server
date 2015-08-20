@@ -54,7 +54,7 @@ module DTK; class AssemblyModule
       end
       # Recompute and persist the module ref locks
       # This must be done after any impacted component instances have been updated
-      ModuleRefs::Lock.compute(@assembly).persist
+      ModuleRefs::Lock.create_or_update(assembly)
     end
 
     def delete_modules?

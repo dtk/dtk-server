@@ -18,7 +18,7 @@ module DTK
         @assembly_instance = assembly_instance
       end
 
-      # TODO: locked depenedncies is minsomer; it is more like 'cached_dependencies'
+      # TODO: locked dependencies is minsomer; it is more like 'cached_dependencies'
       AllTypes = [:locked_dependencies, :locked_branch_shas]
 
       # opts can have
@@ -47,16 +47,12 @@ module DTK
 
       # opts can have keys
       # :raise_errors - Boolean
-      def self.compute(assembly_instance, opts = {})
-        compute_elements(assembly_instance, AllTypes, opts)
+      def self.create_or_update(assembly_instance, opts = {})
+        compute_elements(assembly_instance, AllTypes, opts).create_or_update
       end
 
-      def clear_locked_dependencies
-        ModuleRef::Lock.clear_locked_dependencies(self)
-      end
-
-      def persist
-        ModuleRef::Lock.persist(self)
+      def create_or_update
+        ModuleRef::Lock.create_or_update(self)
         self
       end
 

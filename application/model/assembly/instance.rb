@@ -180,8 +180,15 @@ module DTK; class  Assembly
       cmp_instance_idh = nil
 
       Transaction do
+        # add the component
         cmp_instance_idh = node.add_component(aug_cmp_template, opts.merge(component_title: component_title))
+
+        # update the mnodule refs
         add_component__update_component_module_refs?(aug_cmp_template[:component_module], aug_cmp_template[:namespace])
+
+        # recompute the locked module refs
+        ModuleRefs::Lock.create_or_update(self)
+
         unless opts[:donot_update_workflow]
           Task::Template::ConfigComponents.update_when_added_component?(self, node, cmp_instance_idh.create_object(), component_title, skip_if_not_found: true)
         end

@@ -92,8 +92,14 @@ module DTK; class  Assembly
         ret = nil
         Transaction do
           node.update_dangling_links(component_idhs: [component.id_handle()])
+          # TODO: update_when_deleted_component? and this method should have option not to update the 
+          # workflow
           Task::Template::ConfigComponents.update_when_deleted_component?(self, node, component)
+
           ret = Model.delete_instance(component_idh)
+
+          # recompute the locked module refs
+          ModuleRefs::Lock.create_or_update(self)
         end
         ret
       end

@@ -32,8 +32,8 @@ module DTK
         ret
       end
 
-      def self.persist(module_refs_lock)
-        Persist.persist(module_refs_lock)
+      def self.create_or_update(module_refs_lock)
+        Persist.create_or_update(module_refs_lock)
       end
 
       def self.get(assembly_instance)

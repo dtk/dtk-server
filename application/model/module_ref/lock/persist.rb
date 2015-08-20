@@ -1,7 +1,7 @@
 module DTK; class ModuleRef
   class Lock
     module Persist
-      def self.persist(module_refs_lock)
+      def self.create_or_update(module_refs_lock)
         db_update_hash = db_update_hash_all_elements(module_refs_lock)
         db_update_hash.mark_as_complete()
         assembly_instance_idh = module_refs_lock.assembly_instance.id_handle()

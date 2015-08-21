@@ -123,6 +123,10 @@ module DTK
         pbuilderid = Node.pbuilderid(config_node[:node])
         filter = filter_single_fact('pbuilderid', pbuilderid)
         callbacks = context[:callbacks]
+
+        msg_content.merge!(action_agent_remote_url:  R8::Config[:action_agent_sync][:remote_url])
+        msg_content.merge!(action_agent_branch:  R8::Config[:action_agent_sync][:branch])
+
         async_agent_call('dev_manager', 'inject_agent', msg_content, filter, callbacks, context)
       end
       MCAgentPluginDir = 'mcollective_additions/plugins/v2.2/agent'

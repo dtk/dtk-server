@@ -53,11 +53,7 @@ module DTK; class Task; class Template
       end
 
       def component_name
-        ret = @component.display_name_print_form()
-        if title = @component.has_title?()
-          ret << "[#{title}]"
-        end
-        ret
+        @component.display_name_print_form()
       end
 
       module List

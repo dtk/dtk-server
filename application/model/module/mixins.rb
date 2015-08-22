@@ -190,10 +190,10 @@ module DTK
       self.class.pp_module_name(module_name(), version)
     end
 
+    # TODO: think want to deprecate these since dsl_parsed is on module branch, not module
     def set_dsl_parsed!(boolean_val)
       update(dsl_parsed: boolean_val)
     end
-
     def dsl_parsed?
       get_field?(:dsl_parsed)
     end
@@ -288,13 +288,18 @@ module DTK
     end
 
     def info(target_mh, id, opts = {})
-      remote_repo_cols = [:id, :display_name, :version, :remote_repos, :dsl_parsed]
-      components_cols  = [:id, :display_name, :version, :dsl_parsed]
-      project_idh      = opts[:project_idh]
+      opts = Opts.new(filter: [:eq, :id, id], project_idh: opts[:project_idh], detail_to_include: [:remotes])
+      list(opts).first
+    end
+    
+=begin
+TODO: remove after incorporating in info above displaying of remotes; this was removed because it processed dsl_parsed incorrectly 
+    def info(target_mh, id, opts = {})
+      project_idh  = opts[:project_idh]
       namespaces = []
 
       sp_hash = {
-        cols: remote_repo_cols,
+        cols: [:id, :group_id, :display_name, :remote_repos],
         filter: [:eq, :id, id]
       }
 
@@ -302,7 +307,11 @@ module DTK
 
       # if there are no remotes just get component info
       if response.empty?
-        sp_hash[:cols] = components_cols
+        sp_hash = {
+          cols: [:id, :group_id, :display_name],
+          filter: [:eq, :id, id]
+        }
+
         response = get_objs(target_mh, sp_hash.merge(opts))
       else
         # we sort in ascending order, last remote is default one
@@ -330,19 +339,20 @@ module DTK
       ret.merge!(remote_repos: namespaces.uniq) if namespaces
       ret
     end
+=end
 
     def list(opts = opts.new)
       diff               = opts[:diff]
       namespace          = opts[:namespace]
+      filter             = opts[:filter]
       project_idh        = opts.required(:project_idh)
       remote_repo_base   = opts[:remote_repo_base]
       include_remotes    = opts.array(:detail_to_include).include?(:remotes)
       include_versions   = opts.array(:detail_to_include).include?(:versions)
       include_any_detail = ((include_remotes || include_versions) ? true : nil)
 
-      # cols = [:id, :display_name, :namespace_id, :dsl_parsed, :namespace, include_any_detail && :module_branches_with_repos].compact
       cols = [:id, :display_name, :namespace_id, :namespace, include_any_detail && :module_branches_with_repos].compact
-      unsorted_ret = get_all(project_idh, cols)
+      unsorted_ret = get_all(project_idh, cols: cols, filter: filter)
       unless include_versions
         # prune all but the base module branch
         unsorted_ret.reject! { |r| r[:module_branch] && r[:module_branch][:version] != ModuleBranch.version_field_default() }
@@ -375,11 +385,10 @@ module DTK
       unsorted_ret.sort { |a, b| a[:display_name] <=> b[:display_name] }
     end
 
-    def get_all(project_idh, cols = nil)
-      get_all_with_filter(project_idh, cols: cols)
-    end
-
-    def get_all_with_filter(project_idh, opts = {})
+    # opts can have keys
+    #  :cols
+    #  :filter
+    def get_all(project_idh, opts = {})
       filter = [:eq, :project_project_id, project_idh.get_id()]
       if opts[:filter]
         filter = [:and, filter, opts[:filter]]
@@ -453,36 +462,15 @@ module DTK
       ModuleRepoInfo.new(repo, info[:module_name], info[:module_idh], branch_obj, opts)
     end
 
-    # can be overwritten
-    # TODO: ModuleBranch::Location: deprecate
-    def module_specific_type(_config_agent_type)
-      module_type()
-    end
-    private :module_specific_type
-
     def pp_module_name(module_name, version = nil)
       version ? "#{module_name} (#{version})" : module_name
     end
 
-    def if_module_exists!(project_idh, module_name, module_namespace, error_message)
-      module_obj = module_exists?(project_idh, module_name, module_namespace)
-
-      if module_obj
-        fail ErrorUsage.new(error_message)
-      end
-
-      false
-    end
-
     def module_exists?(project_idh, module_name, module_namespace)
-      unless project_idh[:model_name] == :project
-        fail Error.new("MOD_RESTRUCT:  module_exists? should take a project, not a (#{project_idh[:model_name]})")
-      end
-
       namespace_obj = Namespace.find_or_create(project_idh.createMH(:namespace), module_namespace)
 
       sp_hash = {
-        cols: [:id, :display_name, :dsl_parsed],
+        cols: [:id, :group_id, :display_name],
         filter: [:and,
                  [:eq, :project_project_id, project_idh.get_id()],
                  [:eq, :display_name, module_name],
@@ -494,6 +482,12 @@ module DTK
     end
 
     private
+
+    # can be overwritten
+    # TODO: ModuleBranch::Location: deprecate
+    def module_specific_type(_config_agent_type)
+      module_type()
+    end
 
     def get_all_repos(mh)
       get_objs(mh, cols: [:repos]).inject({}) do |h, r|

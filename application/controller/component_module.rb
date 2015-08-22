@@ -229,9 +229,9 @@ module DTK
       project = get_default_project()
 
       # will raise exception if exists
-      ComponentModule.if_module_exists!(project.id_handle(), module_name, namespace,
-                                        "Cannot install '#{namespace}:#{module_name}' since it already exists!"
-                                       )
+      if ComponentModule.module_exists?(project.id_handle(), module_name, namespace)
+        fail ErrorUsage.new("Cannot install '#{namespace}:#{module_name}' because it already exists!")
+      end
 
       puppet_forge_local_copy = nil
       install_info = {}

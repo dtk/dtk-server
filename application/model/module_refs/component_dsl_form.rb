@@ -117,11 +117,7 @@ module DTK; class ModuleRefs
     private
 
     def self.get_matching_component_modules__dsl_form(project_idh, module_names)
-      opts = {
-        cols: [:namespace_id, :namespace],
-        filter: [:oneof, :display_name, module_names]
-      }
-      matching_modules = ComponentModule.get_all_with_filter(project_idh, opts)
+      matching_modules = ComponentModule.get_all(project_idh, cols: [:namespace_id, :namespace], filter: [:oneof, :display_name, module_names])
       matching_modules.map { |m| new(m[:display_name], m[:namespace][:name]) }
     end
   end

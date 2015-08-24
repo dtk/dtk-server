@@ -220,7 +220,13 @@ module DTK; class Task
       def create_stages_from_serialized_content!(serialized_content_array, actions, opts = {})
         serialized_content_array.each do |a|
           if stage = Stage::InterNode.parse_and_reify?(a, actions, opts)
-            self << stage
+            unless stage.empty?
+              self << stage
+            else
+              # TODO: might pass on option to indicate whether this should be error or not
+              # This is reache if component i snot on any nodes
+              Log.info_pp(["The following workflow stage has components not on any node",a])
+            end
           end
         end
       end

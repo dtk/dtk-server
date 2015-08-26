@@ -191,11 +191,8 @@ module DTK; class Task
       end
 
       def assembly_wide_component?
-        if node_type = (self[:node] || {})[:type]
-          node_type.eql?(AssemblyWideNodename)
-        end
+        Node.is_assembly_wide_node?(self[:node]) if self[:node]
       end
-      AssemblyWideNodename = 'assembly_wide'
 
       # returns [adapter_type,adapter_name]
       # adapter_name can be null-> default is used

@@ -169,7 +169,7 @@ module DTK
          convert: true,
          join_type: :inner,
          join_cond: { id: :component__node_node_id },
-         cols: [:id, :display_name, :group_id]
+         cols: [:id, :display_name, :group_id, :type]
        }]
 
     virtual_column :node_for_state_change_info, type: :json, hidden: true,

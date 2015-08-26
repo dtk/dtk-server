@@ -70,20 +70,18 @@ module DTK
       if context.empty?
         return name_to_id_default(model_handle, name)
       end
-      if assembly_id = context[:assembly_id]
-        display_name = Component.display_name_from_user_friendly_name(name)
-        node_name, cmp_type, cmp_title = ComponentTitle.parse_component_display_name(display_name, node_prefix: true)
-        unless node_name
-          fail ErrorUsage.new("Ill-formed name for component (#{name}); it should have form NODE/CMP or NODE/MOD::CMP")
-        end
-        sp_hash = {
-          cols: [:id, :node],
-          filter: [:and, Component::Instance.filter(cmp_type, cmp_title), [:eq, :assembly_id, assembly_id]]
-        }
-        name_to_id_helper(model_handle, name, sp_hash.merge(post_filter: lambda { |r| r[:node][:display_name] == node_name }))
-      else
+      unless assembly_id = context[:assembly_id]
         fail Error.new("Unexepected context (#{context.inspect})")
       end
+
+      display_name = Component.display_name_from_user_friendly_name(name)
+      # setting node_prefix to true, but node_name can be nil, meaning an assembly-wide component instance
+      node_name, cmp_type, cmp_title = ComponentTitle.parse_component_display_name(display_name, node_prefix: true)
+      sp_hash = {
+        cols: [:id, :node],
+        filter: [:and, Component::Instance.filter(cmp_type, cmp_title), [:eq, :assembly_id, assembly_id]]
+      }
+      name_to_id_helper(model_handle, name, sp_hash.merge(post_filter: lambda { |r| r[:node][:display_name] == node_name or r[:node].is_assembly_wide_node? }))
     end
 
     def get_node

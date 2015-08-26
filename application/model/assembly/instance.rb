@@ -97,9 +97,9 @@ module DTK; class  Assembly
 
     def add_node(node_name, node_binding_rs = nil, opts = {})
       # if assembly_wide node (used to add component directly on service_instance/assembly_template/workspace)
-      # check if type = 'assembly_wide'
+      # check if type = Node::Type::Node.assembly_wide
       # or check by name if regular node
-      check = opts[:assembly_wide] ? [:eq, :type, 'assembly_wide'] : [:eq, :display_name, node_name]
+      check = opts[:assembly_wide] ? [:eq, :type, Node::Type::Node.assembly_wide] : [:eq, :display_name, node_name]
 
       # check if node has been added already
       if get_node?(check)
@@ -211,7 +211,7 @@ module DTK; class  Assembly
     def create_assembly_wide_node?
       sp_hash = {
         cols: [:id, :display_name, :group_id, :ordered_component_ids],
-        filter: [:and, [:eq, :type, 'assembly_wide'], [:eq, :assembly_id, id()]]
+        filter: [:and, [:eq, :type, Node::Type::Node.assembly_wide], [:eq, :assembly_id, id()]]
       }
       node = Model.get_obj(model_handle(:node), sp_hash)
 
@@ -226,7 +226,7 @@ module DTK; class  Assembly
     def has_assembly_wide_node?
       sp_hash = {
         cols: [:id, :display_name, :group_id, :ordered_component_ids],
-        filter: [:and, [:eq, :type, 'assembly_wide'], [:eq, :assembly_id, id()]]
+        filter: [:and, [:eq, :type, Node::Type::Node.assembly_wide], [:eq, :assembly_id, id()]]
       }
       Model.get_obj(model_handle(:node), sp_hash)
     end

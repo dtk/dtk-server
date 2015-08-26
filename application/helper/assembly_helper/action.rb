@@ -51,9 +51,7 @@ module Ramaze::Helper
         # removing and empty or nil filters
         node_pattern = (node_pattern_x ? node_pattern_x.reject { |_k, v| v.nil? || v.empty? } : {})
 
-        # TODO: can handle more efficiently than getting all nodes and filtering
-        nodes = assembly.get_leaf_nodes()
-        nodes.delete_if { |node| node[:type].eql?('assembly_wide') }
+        nodes = assembly.get_leaf_nodes(remove_assembly_wide_node: true)
 
         if node_pattern.empty?
           nodes

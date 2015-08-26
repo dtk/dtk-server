@@ -344,7 +344,7 @@ module DTK
         node_hash = Aux.hash_subset(node, [:display_name, :node_binding_rs_id])
         node_type =
           if node[:display_name].eql?('assembly_wide')
-            'assembly_wide'
+            Node::Type::Node.assembly_wide
           else
             node.is_node_group?() ? Node::Type::NodeGroup.stub : Node::Type::Node.stub
           end

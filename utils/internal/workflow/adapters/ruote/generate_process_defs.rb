@@ -39,11 +39,7 @@ module DTK
             guards = ret_guards(guard_tasks)
           end
 
-          if node = action[:node]
-            assembly_wide_node = (node[:type] || '').eql?('assembly_wide')
-          end
-
-          if assembly_wide_node
+          if action[:node] and Node.is_assembly_wide_node?(action[:node])
             main = participant_executable_action(:execute_on_node, task, context, task_type: 'config_node', task_end: true, task_start: true)
             sequence([main])
           else

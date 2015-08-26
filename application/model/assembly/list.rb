@@ -15,7 +15,7 @@ module DTK
 
         if (node_id.to_s.empty? && component_id.to_s.empty? && attribute_id.to_s.empty?)
           nodes_info = (is_template ? get_nodes() : get_nodes__expand_node_groups(remove_node_groups: true))
-          nodes_info.reject! { |n| n[:type].eql?('assembly_wide') } if opts[:remove_assembly_wide_node]
+          nodes_info.reject! { |n| Node.is_assembly_wide_node?(n) } if opts[:remove_assembly_wide_node]
           assembly_rows.first[:nodes] = nodes_info.sort { |a, b| a[:display_name] <=> b[:display_name] }
         end
 
@@ -151,8 +151,8 @@ module DTK
 
         unsorted = ndx_ret.values.map do |r|
           nodes = r[:ndx_nodes].values
-          nodes.reject! { |n| n[:type].eql?('assembly_wide') } if opts[:remove_assembly_wide_node]
-          # TODO: this is mislaeding since admin not op status returned
+          nodes.reject! { |n| Node.is_assembly_wide_node?(n) } if opts[:remove_assembly_wide_node]
+          # TODO: this is misleading since admin not op status returned
           summary_node_status = (summary_node_status(:admin,nodes) if respond_to?(:summary_node_status))
           r.merge(op_status: summary_node_status, nodes: nodes).slice(:id, :display_name, :op_status, :last_task_run_status, :execution_status, :module_branch_id, :version, :assembly_template, :target, :nodes, :created_at, :keypair, :security_groups)
         end

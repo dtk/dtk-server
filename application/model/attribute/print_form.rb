@@ -122,7 +122,7 @@ module DTK
           format.gsub(/\$node/, node()[:display_name])
          when :component
           node = node()
-          if node[:type].eql?('assembly_wide') && !opts[:with_assembly_wide_node]
+          if Node.is_assembly_wide_node?(node) && !opts[:with_assembly_wide_node]
             format.gsub(/\$node\//, '').gsub(/\$component/, component().display_name_print_form())
           else
             format.gsub(/\$node/, node[:display_name]).gsub(/\$component/, component().display_name_print_form())

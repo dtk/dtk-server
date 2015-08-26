@@ -36,7 +36,7 @@ module DTK; class ServiceSetting
         ndx_attrs = {}
         all_attrs_struct.node_attrs.each do |node_attr|
           # do not display node_attributes for assembly_wide node
-          next if node_attr[:node][:type].eql?('assembly_wide')
+          next if Node.is_assembly_wide_node?(node_attr[:node])
 
           node_info = ndx_attrs[node_attr[:node][:display_name]] ||= { attrs: {}, cmps: {} }
           node_info[:attrs].merge!(node_attr[:display_name] => attribute_value(node_attr))
@@ -55,7 +55,7 @@ module DTK; class ServiceSetting
 
         # put node and component attributes in ret
         ndx_attrs.keys.sort().each do |node_name|
-          is_assembly_wide = all_attrs_struct.node_attrs.find { |node| node[:node][:type].eql?('assembly_wide') } if node_name.eql?('assembly_wide')
+          is_assembly_wide = all_attrs_struct.node_attrs.find { |a| Node.is_assembly_wide_node?(a[:node]) } if node_name.eql?('assembly_wide')
 
           if is_assembly_wide
             ret_node_pntr = ret['components'] = SimpleOrderedHash.new

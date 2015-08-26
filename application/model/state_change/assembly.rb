@@ -86,6 +86,7 @@ module DTK; class StateChange
       unless opts[:just_leaf_nodes]
         fail Error.new('Only supporting option :just_leaf_nodes')
       end
+      # TODO: should we have in call below the option: remove_assembly_wide_node: true
       nodes = opts[:nodes] || assembly.get_leaf_nodes(cols: [:id, :display_name, :type, :external_ref, :admin_op_status])
       # TODO: need to figure out if any advantage to filtering nodes
       # nodes_to_start = nodes.select do |n| 

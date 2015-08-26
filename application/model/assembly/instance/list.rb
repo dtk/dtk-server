@@ -140,6 +140,8 @@ module DTK; class  Assembly
           end
           node.sanitize!()
 
+          is_assembly_wide_node = node.is_assembly_wide_node?
+        
           # we set dtk-client-type since we need to distinguish between node / node-group
           is_node_group_member     = is_node_group_member?(node.id_handle())
 
@@ -147,10 +149,10 @@ module DTK; class  Assembly
           node[:dtk_client_type]   = node.is_node_group? ? :node_group : is_node_group_member ? :node_group_node : nil
 
           # remove node group or assembly wide node from list commands
-          node[:dtk_client_hidden] = node.is_node_group? || node[:type].eql?('assembly_wide')
+          node[:dtk_client_hidden] = node.is_node_group? || is_assembly_wide_node
 
           # remove assembly wide node from dtk context
-          node[:dtk_context_hidden] = node[:type].eql?('assembly_wide')
+          node[:dtk_context_hidden] = is_assembly_wide_node
         end
 
         nodes.sort { |a, b| a[:display_name] <=> b[:display_name] }
@@ -173,10 +175,9 @@ module DTK; class  Assembly
         node_cmp_name = opts[:node_cmp_name]
 
         cmps_print_form = aug_cmps.map do |r|
-          type           = r[:node][:type]
           namespace      = r[:namespace]
           node_name      = "#{r[:node][:display_name]}/"
-          hide_node_name = node_cmp_name || type.eql?('assembly_wide')
+          hide_node_name = node_cmp_name || Node.is_assembly_wide_node?(r[:node])
           display_name   = "#{hide_node_name ? '' : node_name}#{Component::Instance.print_form(r, namespace)}"
           r.hash_subset(:id).merge(display_name: display_name)
         end

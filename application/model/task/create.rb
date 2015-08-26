@@ -42,11 +42,12 @@ module DTK; class Task
       task_mh        = target_idh.create_childMH(:task)
 
       ret = create_top_level_task(task_mh, assembly, Aux.hash_subset(opts, [:commit_msg, :task_action]))
-      assembly_nodes = assembly.get_leaf_nodes(cols: [:id, :display_name, :type, :external_ref, :admin_op_status])
 
       nodes_to_create = []
       nodes_wait_for_start = []
-      assembly_nodes.reject! { |n| n[:type].eql?('assembly_wide') }
+
+      node_cols = [:id, :display_name, :type, :external_ref, :admin_op_status]
+      assembly_nodes = assembly.get_leaf_nodes(remove_assembly_wide_node: true, cols: node_cols) 
       assembly_nodes.each do |node|
         external_ref = node.external_ref
         if !external_ref.created?

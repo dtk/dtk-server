@@ -92,10 +92,7 @@ module DTK; class  Assembly; class Instance
     #   - error message in case it is not valid
     #
     def nodes_valid_for_stop_or_start(node_pattern, status_pattern)
-      nodes = get_leaf_nodes()
-      
-      # do not start/stop assembly wide nodes
-      nodes.delete_if { |n| n[:type].eql?('assembly_wide') }
+      nodes = get_leaf_nodes(remove_assembly_wide_node: true)
       
       # check for pattern
       unless node_pattern.nil? || node_pattern.empty?

@@ -109,6 +109,10 @@ module DTK; class Assembly; class Instance
     #### end: get methods around component modules
 
     #### get methods around nodes
+    # opts can have keys
+    #  :cols
+    #  :remove_node_groups
+    #  :remove_assembly_wide_node
     def get_leaf_nodes(opts = {})
       get_nodes__expand_node_groups(opts.merge(remove_node_groups: true))
     end
@@ -116,6 +120,9 @@ module DTK; class Assembly; class Instance
     def get_nodes__expand_node_groups(opts = {})
       cols = opts[:cols] || Node.common_columns()
       node_or_ngs = get_nodes(*cols)
+      if opts[:remove_assembly_wide_node]
+        node_or_ngs.reject!{ |n| n.is_assembly_wide_node? }
+      end
       ServiceNodeGroup.expand_with_node_group_members?(node_or_ngs, opts)
     end
 

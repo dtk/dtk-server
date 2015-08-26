@@ -29,7 +29,7 @@ module DTK
         # remove attribute violations if assembly wide node
         node_attributes.delete_if do |n_attr|
           if node = n_attr[:node]
-            node[:type].eql?('assembly_wide')
+            Node.is_assembly_wide_node?(node)
           end
         end
         node_attr_viols = node_attributes.map { |a| Violation::ReqUnsetAttr.new(a, :node) }
@@ -130,7 +130,7 @@ module DTK
           new_nodes = []
           current_nodes = []
 
-          self.get_leaf_nodes().each do |l_node|
+          get_leaf_nodes().each do |l_node|
             # we need only nodes that are currently not running
             new_nodes << l_node unless l_node[:admin_op_status] == 'running'
           end

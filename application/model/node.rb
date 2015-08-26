@@ -70,8 +70,13 @@ module DTK
     end
 
     def is_assembly_wide_node?
-      update_object!(:type)
-      self[:type].eql?('assembly_wide')
+      get_field?(:type) == self.class.assembly_wide_type
+    end
+    def self.is_assembly_wide_node?(node_hash)
+      node_hash[:type] == assembly_wide_type
+    end
+    def self.assembly_wide_type
+      @assembly_wide_type ||= Node::Type::Node.assembly_wide
     end
 
     def self.assembly_node_print_form?(obj)

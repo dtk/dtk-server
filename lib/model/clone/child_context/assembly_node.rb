@@ -149,7 +149,7 @@ module DTK; class Clone
       end
 
       def hash_el_when_create(node, node_template)
-        instance_type = node.is_assembly_wide_node?() ? 'assembly_wide' : node_class(node).staged
+        instance_type = node.is_assembly_wide_node?() ? node_class(node).assembly_wide : node_class(node).staged
         {
           instance_type: instance_type,
           node_stub_idh: node.id_handle,

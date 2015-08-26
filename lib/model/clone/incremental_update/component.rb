@@ -42,6 +42,7 @@ module DTK; class Clone
 
       def update_children(links)
         Dependency.new(links).update?()
+        # TODO: DTK-2068; put in logic to update component instances that are associated with componenttemplate with updated link defs 
         IncludeModule.new(links).update?()
         Attribute.new(links).update?()
       end

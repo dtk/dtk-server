@@ -72,9 +72,11 @@ module Ramaze::Helper
     def ret_component_instance(_param, assembly)
       ret_component_id_handle(:component_id, assembly).create_object()
     end
-
-    def ret_component_id_handle(param, assembly)
-      id = ret_component_id(param, assembly)
+    
+    # opts can have keys
+    #  :allow_external_component (Boolean) - allow component instance that is not in assembly
+    def ret_component_id_handle(param, assembly, opts={})
+      id = ret_component_id(param, assembly, opts)
       id_handle(id, :component_instance)
     end
 
@@ -84,8 +86,11 @@ module Ramaze::Helper
       end
     end
 
-    def ret_component_id(param, assembly)
-      ret_request_param_id(param, ::DTK::Component, assembly_id: assembly.id())
+    # opts can have keys
+    #  :allow_external_component (Boolean) - allow component instance that is not in assembly
+    def ret_component_id(param, assembly, opts = {})
+      opts_request = opts[:allow_external_component] ? {} : {assembly_id: assembly.id()}
+      ret_request_param_id(param, ::DTK::Component, opts_request)
     end
     private :ret_component_id
     ### end: methods to return components
@@ -142,8 +147,8 @@ module Ramaze::Helper
     #:service_link_id or
     #:service_type and :input_component_id or
     #:dependency_type, :input_component_id, and :output_component_id
-    def ret_port_link(assembly = nil)
-      assembly ||= ret_assembly_instance_object()
+    def ret_port_link()
+      assembly = ret_assembly_instance_object()
       if ret_request_params(:service_link_id)
         create_obj(:service_link_id, ::DTK::PortLink, assembly_idh: assembly.id_handle())
       else
@@ -152,7 +157,7 @@ module Ramaze::Helper
           filter.merge!(service_type: service_type)
         end
         if ret_request_params(:output_component_id)
-          filter.merge!(output_component_id: ret_component_id(:output_component_id, assembly))
+          filter.merge!(output_component_id: ret_component_id(:output_component_id, assembly, allow_external_component: true))
         end
         assembly.get_matching_port_link(filter)
       end

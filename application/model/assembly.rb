@@ -211,6 +211,14 @@ module DTK
       { nodes: ndx_nodes.values, port_links: port_links }
     end
 
+    def nodes
+      sp_hash = {
+        cols: [:id, :group_id, :display_name],
+        filter: [:eq, :assembly_id, get_field?(:id) ]
+      }
+      Model.get_objs(model_handle(:node), sp_hash)
+    end
+
     def is_assembly?
       true
     end
@@ -222,6 +230,7 @@ module DTK
         self
       end
     end
+
     def self.create_assembly_subclass_object(obj)
       obj.update_object!(:datacenter_datacenter_id)
       subclass_model_name = (obj[:datacenter_datacenter_id] ? :assembly_instance : :assembly_template)

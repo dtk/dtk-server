@@ -53,7 +53,7 @@ module DTK; class Task
             ndx_nodes[node.id()] ||= node
           end
         end
-        ndx_nodes.values
+        ndx_nodes.values.reject { |node| node.is_assembly_wide_node? }
       end
       
       def get_leaf_subtasks

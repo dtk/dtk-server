@@ -31,64 +31,85 @@ module DTK; class ServiceSetting
         attr_prefix ? "#{attr_prefix}#{AttrPartDelim}#{attr_part}" : attr_part.to_s
       end
 
+      # returns a SimpleOrderedHash object
       def self.render_in_hash_form(all_attrs_struct)
-        # merge the node and component attributes in a nested structure
-        ndx_attrs = {}
-        all_attrs_struct.node_attrs.each do |node_attr|
-          # do not display node_attributes for assembly_wide node
-          next if Node.is_assembly_wide_node?(node_attr[:node])
-
-          node_info = ndx_attrs[node_attr[:node][:display_name]] ||= { attrs: {}, cmps: {} }
-          node_info[:attrs].merge!(node_attr[:display_name] => attribute_value(node_attr))
-        end
-        all_attrs_struct.component_attrs.each do |cmp_attr|
-          node_info = ndx_attrs[cmp_attr[:node][:display_name]] ||= { attrs: {}, cmps: {} }
-          cmp_print_name = cmp_attr[:nested_component].display_name_print_form()
-          cmp_info = node_info[:cmps][cmp_print_name] ||= {}
-          cmp_info.merge!(cmp_attr[:display_name] => attribute_value(cmp_attr))
-        end
-
-        # put assembly attributes in ret
+        # put assembly level attributes in ret
         ret = all_attrs_struct.assembly_attrs.sort { |a, b| a[:display_name] <=> b[:display_name] }.inject(SimpleOrderedHash.new) do |h, attr|
           h.merge(attr[:display_name] => attribute_value(attr))
         end
 
-        # put node and component attributes in ret
-        ndx_attrs.keys.sort().each do |node_name|
-          is_assembly_wide = all_attrs_struct.node_attrs.find { |a| Node.is_assembly_wide_node?(a[:node]) } if node_name.eql?('assembly_wide')
+        ret.merge(render_in_hash_form__component_and_node_level(all_attrs_struct))
+      end
 
-          if is_assembly_wide
-            ret_node_pntr = ret['components'] = SimpleOrderedHash.new
-          else
-            ret['nodes'] ||= {}
-            ret_node_pntr = ret['nodes']["#{node_name}#{ContextDelim}"] = SimpleOrderedHash.new
+      def self.render_in_hash_form__component_and_node_level(all_attrs_struct)
+        ret = SimpleOrderedHash.new
+        # compute attributes indexed by node (ndx_attrs)
+        ndx_attrs = {} # attributes indexed by node name no asssembly wide attributes
+        attrs_assembly_wide = { cmps: {} } # for attributes on assembly wide components
+        all_attrs_struct.node_attrs.each do |node_attr|
+          node = node_attr[:node]
+          # do not display node_attributes for assembly_wide node
+          unless Node.is_assembly_wide_node?(node)
+            node_info = ndx_attrs[node[:display_name]] ||= { attrs: {}, cmps: {} }
+            node_info[:attrs].merge!(node_attr[:display_name] => attribute_value(node_attr))
           end
+        end
+        all_attrs_struct.component_attrs.each do |cmp_attr|
+          node = cmp_attr[:node]
+          info = 
+            if Node.is_assembly_wide_node?(node)
+              attrs_assembly_wide
+            else
+              ndx_attrs[node[:display_name]] ||= { attrs: {}, cmps: {} }
+            end
+          cmp_print_name = cmp_attr[:nested_component].display_name_print_form()
+          cmp_info = info[:cmps][cmp_print_name] ||= {}
+          cmp_info.merge!(cmp_attr[:display_name] => attribute_value(cmp_attr))
+        end
+
+        # process the attributes on the asssembly wide components
+        components = attrs_assembly_wide[:cmps]
+        unless components.empty?
+          ret['components'] = components.keys.sort.inject(SimpleOrderedHash.new) do |hash_cmp, cmp_name|
+            attrs = ordered_attribute_values(components[cmp_name])
+            hash_cmp.merge(component_display_key(cmp_name) => { 'attributes' => attrs })
+          end
+        end
+
+        # process the attributes directly on nodes or on components on nodes
+        ndx_attrs.keys.sort().each do |node_name|
+          ret_node_pntr = (ret['nodes'] ||= SimpleOrderedHash.new)[node_display_key(node_name)] = SimpleOrderedHash.new
 
           node_info = ndx_attrs[node_name]
-          node_info[:attrs].keys.sort.each do |attr_name|
-            ret_node_pntr['attributes'] ||= {}
-            ret_node_pntr['attributes'].merge!(attr_name => node_info[:attrs][attr_name])
+          ordered_node_attrs = ordered_attribute_values(node_info[:attrs])
+          unless ordered_node_attrs.empty?
+            ret_node_pntr['attributes'] = ordered_node_attrs 
           end
 
-          node_info[:cmps].keys.sort.each do |cmp_name|
-            if is_assembly_wide
-              ret_cmp_pntr = ret_node_pntr["#{cmp_name}#{ContextDelim}"] = SimpleOrderedHash.new
-            else
-              ret_node_pntr['components'] ||= {}
-              ret_cmp_pntr = ret_node_pntr['components']["#{cmp_name}#{ContextDelim}"] = SimpleOrderedHash.new
-            end
-            cmp_info = node_info[:cmps][cmp_name]
-            ret_cmp_pntr['attributes'] ||= {}
-            cmp_info.keys.sort.each do |attr_name|
-              ret_cmp_pntr['attributes'].merge!(attr_name => cmp_info[attr_name])
+          components = node_info[:cmps]
+          components.keys.sort.each do |cmp_name|
+            ordered_cmp_attrs = ordered_attribute_values(components[cmp_name])
+            unless ordered_cmp_attrs.empty?
+              ret_cmp_pntr = (ret_node_pntr['components'] ||= SimpleOrderedHash.new)[component_display_key(cmp_name)] = SimpleOrderedHash.new
+              ret_cmp_pntr['attributes'] = ordered_cmp_attrs
             end
           end
         end
-        return ret unless ret['components']
+        ret
+      end
 
-        # put assembly wide components on top
-        cmps = ret.delete('components')
-        ndx_ret = { 'components' => cmps }.merge(ret)
+      def self.ordered_attribute_values(attr_vals)
+        attr_vals.keys.sort.inject(SimpleOrderedHash.new) do |h, attr_name|
+          h.merge(attr_name => attr_vals[attr_name])
+        end
+      end
+
+      def self.component_display_key(cmp_name)
+        "#{cmp_name}#{ContextDelim}"
+      end
+
+      def self.node_display_key(node_name)
+        "#{node_name}#{ContextDelim}"
       end
 
       def self.attribute_value(attr)

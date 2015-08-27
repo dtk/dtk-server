@@ -1,6 +1,8 @@
 module DTK; class Attribute
   module PropagateChangesClassMixin
     # assume attribute_rows all have :value_asserted or all have :value_derived
+    # TODO: DTK-2226; partial_value is set by default to  true; updated update_and_propagate_dynamic_attributes so partial_value: false
+    #       see if this is right and whether other calls to update_and_propagate_attributes should set partial_value: false
     def update_and_propagate_attributes(attr_mh, attribute_rows, opts = {})
       ret = []
       return ret if attribute_rows.empty?
@@ -53,7 +55,7 @@ module DTK; class Attribute
 
     def update_and_propagate_dynamic_attributes(attr_mh, dyn_attr_val_info)
       attribute_rows = dyn_attr_val_info.map { |r| { :id => r[:id], dynamic_attribute_value_field() => r[:attribute_value] } }
-      update_and_propagate_attributes(attr_mh, attribute_rows, add_state_changes: false)
+      update_and_propagate_attributes(attr_mh, attribute_rows, add_state_changes: false, partial_value: false)
     end
 
     def propagate_and_optionally_add_state_changes(attr_mh, changed_attrs_info, opts = {})

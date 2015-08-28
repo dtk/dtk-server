@@ -1,16 +1,20 @@
+require 'json'
+
 module XYZ
   class DeveloperController < AuthController
     helper :node_helper
     helper :assembly_helper
 
-    def rest__update_action_agent()
-      service_name, branch_name = ret_request_params(:service_name, :branch_name)
+    def rest__run_agent()
+      agent_name, agent_method, agent_params = ret_request_params(:agent_name, :agent_method, :agent_params)
       service = ret_assembly_instance_object(:service_name)
+      agent_hash = JSON.parse(agent_params)
+      agent_hash = agent_hash.inject({}){|memo,(k,v)| memo[k.to_sym] = v; memo}
 
-      # DEBUG SNIPPET >>> REMOVE <<<
-      require (RUBY_VERSION.match(/1\.8\..*/) ? 'ruby-debug' : 'debugger');Debugger.start; debugger
+      Log.info("Running Agent #{agent_name}, method: #{agent_method} with params: ")
+      Log.info(agent_hash)
 
-      queue_id =initiate_agent(:dev_manager, :inject_agent, service.nodes, { action_agent_branch: branch_name, action_agent_remote_url: R8::Config[:action_agent_sync][:remote_url]})
+      queue_id = initiate_agent(agent_name.downcase.to_sym, agent_method.downcase.to_sym, service.nodes, agent_hash)
       rest_ok_response :action_results_id => queue_id
     end
 

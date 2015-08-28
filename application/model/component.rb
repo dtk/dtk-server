@@ -53,7 +53,7 @@ module DTK
     end
 
     def self.check_valid_id(model_handle, id, context = {})
-      # TODO: put in check to make sure component instance and not a compoennt template
+      # TODO: put in check to make sure component instance and not a component template
       filter = [:eq, :id, id]
       unless context.empty?
         if assembly_id = context[:assembly_id]
@@ -65,23 +65,60 @@ module DTK
       check_valid_id_helper(model_handle, id, filter)
     end
 
-    # just used for component instances; assumes that there is a node prefix in name
+    # The method name_to_id is just used for component instances;
+    # The possible forms for name are
+    #   node/component_name
+    #   node/module_name::component_name
+    #   component_name
+    #   module_name::component_name
+    # the later two are for assemble wide components
+    #
+    # context can have keys
+    #  :assembly_id
+    #  :allow_external_component (Boolean)
     def self.name_to_id(model_handle, name, context = {})
       if context.empty?
         return name_to_id_default(model_handle, name)
       end
-      unless assembly_id = context[:assembly_id]
-        fail Error.new("Unexepected context (#{context.inspect})")
-      end
+
+      assembly_id              = context[:assembly_id]
+      allow_external_component = context[:allow_external_component]
 
       display_name = Component.display_name_from_user_friendly_name(name)
       # setting node_prefix to true, but node_name can be nil, meaning an assembly-wide component instance
       node_name, cmp_type, cmp_title = ComponentTitle.parse_component_display_name(display_name, node_prefix: true)
+
+
+      filter_array = 
+        [ 
+         Component::Instance.filter(cmp_type, cmp_title),
+         (allow_external_component or assembly_id.nil?) ? nil : [:eq, :assembly_id, assembly_id]
+        ].compact
+      
       sp_hash = {
-        cols: [:id, :node],
-        filter: [:and, Component::Instance.filter(cmp_type, cmp_title), [:eq, :assembly_id, assembly_id]]
+        cols:   [:id, :node, :assembly_id],
+        filter: [:and] + filter_array
       }
-      name_to_id_helper(model_handle, name, sp_hash.merge(post_filter: lambda { |r| r[:node][:display_name] == node_name or r[:node].is_assembly_wide_node? }))
+      
+      rows = get_objs(model_handle, sp_hash).select do |r|
+        r[:node][:display_name] == node_name or r[:node].is_assembly_wide_node?
+      end
+      
+      case rows.size
+      when 1
+        rows.first[:id]
+      when 0
+        fail ErrorNameDoesNotExist.new(name, pp_object_type())
+      else # rows.size > 1
+        # if allow_external_component, favor a component instance in the service instance 
+        if allow_external_component and assembly_id
+          internal_to_assembly = rows.select { |r| r[:assembly_id] == assembly_id }
+          if internal_to_assembly.size == 1
+            return internal_to_assembly.first[:id]
+          end
+        end
+        fail ErrorNameAmbiguous.new(name, rows.map { |r| r[:id] }, pp_object_type())
+      end
     end
 
     def get_node

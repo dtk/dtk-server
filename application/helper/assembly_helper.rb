@@ -80,19 +80,20 @@ module Ramaze::Helper
       id_handle(id, :component_instance)
     end
 
+    # opts can have keys
+    #  :allow_external_component (Boolean) - allow component instance that is not in assembly
+    def ret_component_id(param, assembly, opts = {})
+      ret_request_param_id(param, ::DTK::Component, opts.merge(assembly_id: assembly.id()))
+    end
+    private :ret_component_id
+
+
     def ret_component_id?(param, assembly)
       if ret_request_params(param)
         ret_component_id(param, assembly)
       end
     end
 
-    # opts can have keys
-    #  :allow_external_component (Boolean) - allow component instance that is not in assembly
-    def ret_component_id(param, assembly, opts = {})
-      opts_request = opts[:allow_external_component] ? {} : {assembly_id: assembly.id()}
-      ret_request_param_id(param, ::DTK::Component, opts_request)
-    end
-    private :ret_component_id
     ### end: methods to return components
 
     def ret_node_id(node_name_param, assembly)

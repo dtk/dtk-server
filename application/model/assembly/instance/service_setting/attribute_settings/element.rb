@@ -46,7 +46,7 @@ module DTK; class ServiceSetting
 
       module RawValue
         def self.value(val)
-          (val.is_a?(::Hash) || val.is_a?(::Array)) ? val : val.to_s
+          (val.nil? or val.is_a?(::Hash) or val.is_a?(::Array)) ? val : val.to_s
         end
 
         def self.equal?(val1, val2)

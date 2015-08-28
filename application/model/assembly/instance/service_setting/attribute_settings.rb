@@ -7,7 +7,7 @@ module DTK
       def initialize(settings_hash = {})
         super()
         unless settings_hash.empty?
-          self.class.each_element(settings_hash) { |el| self << el }
+          HashForm.each_element(settings_hash) { |el| self << el }
         end
       end
 
@@ -20,14 +20,10 @@ module DTK
         attr_settings = new(settings_hash)
         # get all existing attributes to find just the diffs
         existing_attr_settings = all_assemblies_attribute_settings(assembly)
-        pruned_attr_settings = attr_settings.ret_just_diffs(existing_attr_settings)
+        pruned_attr_settings = ret_just_diffs(attr_settings, existing_attr_settings)
         unless pruned_attr_settings.empty?
           pruned_attr_settings.apply_settings(assembly)
         end
-      end
-
-      def self.each_element(settings_hash, attr_prefix = nil, &block)
-        HashForm.each_element(settings_hash, attr_prefix, &block)
       end
 
       def apply_settings(assembly)
@@ -36,12 +32,14 @@ module DTK
         assembly.set_attributes(av_pairs, opts_set)
       end
 
-      def ret_just_diffs(existing_attr_settings)
-        ret = self.class.new()
+      private
+
+      def self.ret_just_diffs(attr_settings, existing_attr_settings)
+        ret = new()
         ndx_attr_settings = existing_attr_settings.inject({}) do |h, el|
           h.merge(el.unique_index() => el)
         end
-        each do |el|
+        attr_settings.each do |el|
           match = ndx_attr_settings[el.unique_index()]
           unless match && el.equal_value?(match)
             ret << el
@@ -50,11 +48,10 @@ module DTK
         ret
       end
 
-      private
-
       def self.all_assemblies_attribute_settings(assembly, filter_proc = nil)
         new(HashForm.render(assembly.get_attributes_all_levels_struct(filter_proc)))
       end
+
     end
   end
 end

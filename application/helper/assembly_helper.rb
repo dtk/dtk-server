@@ -217,52 +217,18 @@ module Ramaze::Helper
 
   def ret_attribute_settings_hash
     yaml_content = ret_non_null_request_params(:settings_yaml_content)
-    response = ::DTK::Aux.convert_to_hash(yaml_content, :yaml)
-    process_attributes!(response)
-    fail response if response.is_a?(::DTK::Error)
-    response
+    ::DTK::Aux.convert_to_hash(yaml_content, :yaml)
   end
 
-  def process_attributes!(response)
-    # we are assigning assembly wide components to assembly wide node
-    response['assembly_wide/'] = response.delete('components') if response.key?('components')
-
-    nodes = response.delete('nodes') || {}
-    nodes.each do |n_name, node|
-      node_cmps = node.delete('components') || {}
-      nodes[n_name] = node_cmps
-      node_cmps.each do |cmp_name, n_cmp|
-        n_cmp_attrs = n_cmp.delete('attributes') || {}
-        nodes[n_name][cmp_name] = n_cmp_attrs
-      end
-
-      node_attrs = node.delete('attributes') || {}
-      nodes[n_name].merge!(node_attrs)
+  # checks element through set of fields
+  def element_matches?(element, path_array, element_id_val)
+    return true if (element_id_val.nil? || element_id_val.empty?)
+    return false if element.nil?
+    temp_element = element
+    path_array.each do |field|
+      temp_element = temp_element[field]
+      return false if temp_element.nil?
     end
-
-    assembly_wide = response.delete('assembly_wide/') || {}
-    assembly_wide.each do |cmp_name, n_cmp|
-      n_cmp_attrs = n_cmp.delete('attributes') || {}
-      assembly_wide[cmp_name] = n_cmp_attrs
-    end
-
-    response.merge!(nodes) if nodes
-    response.merge!(assembly_wide) if assembly_wide
-    response
+    temp_element == element_id_val.to_i
   end
-
-      def info_about_filter
-      end
-
-    # checks element through set of fields
-    def element_matches?(element, path_array, element_id_val)
-      return true if (element_id_val.nil? || element_id_val.empty?)
-      return false if element.nil?
-      temp_element = element
-        path_array.each do |field|
-        temp_element = temp_element[field]
-        return false if temp_element.nil?
-      end
-      temp_element == element_id_val.to_i
-    end
 end

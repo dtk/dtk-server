@@ -1,6 +1,6 @@
 {
   "nodes_info": {
-    "ami-1d47f876": {
+    "ami-d9e15bb2": {
       "region": "us-east-1",
       "type": "rhel6",
       "os_type": "redhat",
@@ -12,7 +12,7 @@
         "m1.medium"
       ]
     },
-    "ami-4947f822": {
+    "ami-39e15b52": {
       "region": "us-east-1",
       "type": "precise",
       "os_type": "ubuntu",
@@ -24,7 +24,7 @@
         "m1.medium"
       ]
     },
-    "ami-5b47f830": {
+    "ami-9de15bf6": {
       "region": "us-east-1",
       "type": "wheezy",
       "os_type": "debian",
@@ -36,7 +36,7 @@
         "m1.medium"
       ]
     },
-    "ami-6147f80a": {
+    "ami-5de15b36": {
       "region": "us-east-1",
       "type": "precise_hvm",
       "os_type": "ubuntu",
@@ -48,7 +48,7 @@
         "t2.medium"
       ]
     },
-    "ami-6547f80e": {
+    "ami-53e15b38": {
       "region": "us-east-1",
       "type": "trusty_hvm",
       "os_type": "ubuntu",
@@ -60,7 +60,7 @@
         "t2.medium"
       ]
     },
-    "ami-6747f80c": {
+    "ami-89e15be2": {
       "region": "us-east-1",
       "type": "wheezy_hvm",
       "os_type": "debian",
@@ -72,7 +72,7 @@
         "t2.medium"
       ]
     },
-    "ami-6b3f8000": {
+    "ami-0be15b60": {
       "region": "us-east-1",
       "type": "amazon",
       "os_type": "amazon-linux",
@@ -84,7 +84,7 @@
         "m1.medium"
       ]
     },
-    "ami-7547f81e": {
+    "ami-87e15bec": {
       "region": "us-east-1",
       "type": "trusty",
       "os_type": "ubuntu",
@@ -96,7 +96,7 @@
         "m1.medium"
       ]
     },
-    "ami-e146f98a": {
+    "ami-3be65c50": {
       "region": "us-east-1",
       "type": "rhel6_hvm",
       "os_type": "redhat",
@@ -108,7 +108,7 @@
         "t2.medium"
       ]
     },
-    "ami-01966e45": {
+    "ami-e16e96a5": {
       "region": "us-west-1",
       "type": "trusty",
       "os_type": "ubuntu",
@@ -120,7 +120,7 @@
         "m1.medium"
       ]
     },
-    "ami-03966e47": {
+    "ami-176e9653": {
       "region": "us-west-1",
       "type": "precise",
       "os_type": "ubuntu",
@@ -132,7 +132,7 @@
         "m1.medium"
       ]
     },
-    "ami-27966e63": {
+    "ami-c76e9683": {
       "region": "us-west-1",
       "type": "rhel6",
       "os_type": "redhat",
@@ -144,7 +144,7 @@
         "m1.medium"
       ]
     },
-    "ami-31966e75": {
+    "ami-9d6e96d9": {
       "region": "us-west-1",
       "type": "wheezy",
       "os_type": "debian",
@@ -156,7 +156,7 @@
         "m1.medium"
       ]
     },
-    "ami-87976fc3": {
+    "ami-c96e968d": {
       "region": "us-west-1",
       "type": "amazon",
       "os_type": "amazon-linux",
@@ -168,7 +168,7 @@
         "m1.medium"
       ]
     },
-    "ami-0f30263f": {
+    "ami-27b0a117": {
       "region": "us-west-2",
       "type": "rhel6",
       "os_type": "redhat",
@@ -180,7 +180,7 @@
         "m1.medium"
       ]
     },
-    "ami-17302627": {
+    "ami-01b0a131": {
       "region": "us-west-2",
       "type": "trusty",
       "os_type": "ubuntu",
@@ -192,7 +192,7 @@
         "m1.medium"
       ]
     },
-    "ami-19302629": {
+    "ami-cfb1a0ff": {
       "region": "us-west-2",
       "type": "precise",
       "os_type": "ubuntu",
@@ -204,7 +204,7 @@
         "m1.medium"
       ]
     },
-    "ami-7b30264b": {
+    "ami-69b0a159": {
       "region": "us-west-2",
       "type": "wheezy",
       "os_type": "debian",
@@ -216,7 +216,7 @@
         "m1.medium"
       ]
     },
-    "ami-a13e2891": {
+    "ami-15b0a125": {
       "region": "us-west-2",
       "type": "amazon",
       "os_type": "amazon-linux",
@@ -228,7 +228,7 @@
         "m1.medium"
       ]
     },
-    "ami-2288d055": {
+    "ami-8184def6": {
       "region": "eu-west-1",
       "type": "wheezy",
       "os_type": "debian",
@@ -240,7 +240,7 @@
         "m1.medium"
       ]
     },
-    "ami-4088d037": {
+    "ami-9984deee": {
       "region": "eu-west-1",
       "type": "rhel6",
       "os_type": "redhat",
@@ -252,7 +252,7 @@
         "m1.medium"
       ]
     },
-    "ami-7e8dd509": {
+    "ami-8184def6": {
       "region": "eu-west-1",
       "type": "amazon",
       "os_type": "amazon-linux",
@@ -264,7 +264,7 @@
         "m1.medium"
       ]
     },
-    "ami-8897cfff": {
+    "ami-c784deb0": {
       "region": "eu-west-1",
       "type": "precise",
       "os_type": "ubuntu",
@@ -276,7 +276,7 @@
         "m1.medium"
       ]
     },
-    "ami-8e97cff9": {
+    "ami-7f85df08": {
       "region": "eu-west-1",
       "type": "trusty",
       "os_type": "ubuntu",

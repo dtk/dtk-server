@@ -279,13 +279,20 @@ module Ramaze::Helper
       resolve_id_from_name_or_id(id_or_name, model_class, extra_context)
     end
 
+    def numeric_id?(id_or_name)
+      if id_or_name.is_a?(Fixnum)
+        id_or_name
+      elsif id_or_name.is_a?(String) and id_or_name =~ /^[0-9]+$/
+        id_or_name.to_i
+      end
+    end
+
     def resolve_id_from_name_or_id(id_or_name, model_class = nil, extra_context = nil)
       model_name = ret_module_name_from_class(model_class)
       model_class ||= model_class(model_name)
       model_handle = model_handle(model_name)
 
-      if id_or_name.is_a?(Fixnum) || id_or_name =~ /^[0-9]+$/
-        id = id_or_name.to_i
+      if id = numeric_id?(id_or_name)
         params = [model_handle, id]
         params << extra_context if extra_context
         model_class.check_valid_id(*params)

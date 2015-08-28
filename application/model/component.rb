@@ -52,16 +52,11 @@ module DTK
       ]
     end
 
+    # context can have keys
+    #  :assembly_id
+    #  :allow_external_component (Boolean)
     def self.check_valid_id(model_handle, id, context = {})
-      # TODO: put in check to make sure component instance and not a component template
-      filter = [:eq, :id, id]
-      unless context.empty?
-        if assembly_id = context[:assembly_id]
-          filter = [:and, filter, [:eq, :assembly_id, assembly_id]]
-        else
-          fail Error.new("Unexepected context (#{context.inspect})")
-        end
-      end
+      filter = add_assembly_id_clause?([:eq, :id, id], context)
       check_valid_id_helper(model_handle, id, filter)
     end
 
@@ -88,16 +83,9 @@ module DTK
       # setting node_prefix to true, but node_name can be nil, meaning an assembly-wide component instance
       node_name, cmp_type, cmp_title = ComponentTitle.parse_component_display_name(display_name, node_prefix: true)
 
-
-      filter_array = 
-        [ 
-         Component::Instance.filter(cmp_type, cmp_title),
-         (allow_external_component or assembly_id.nil?) ? nil : [:eq, :assembly_id, assembly_id]
-        ].compact
-      
       sp_hash = {
         cols:   [:id, :node, :assembly_id],
-        filter: [:and] + filter_array
+        filter: add_assembly_id_clause?(Component::Instance.filter(cmp_type, cmp_title), context)
       }
       
       rows = get_objs(model_handle, sp_hash).select do |r|
@@ -120,6 +108,20 @@ module DTK
         fail ErrorNameAmbiguous.new(name, rows.map { |r| r[:id] }, pp_object_type())
       end
     end
+
+    # context can have keys
+    #  :assembly_id
+    #  :allow_external_component (Boolean)
+    def self.add_assembly_id_clause?(base_filter, context = {})
+      ret = base_filter
+      if assembly_id = context[:assembly_id]
+        unless context[:allow_external_component ]
+          ret = [:and, ret, [:eq, :assembly_id, assembly_id]]
+        end
+      end
+      ret
+    end
+    private_class_method :add_assembly_id_clause?
 
     def get_node
       get_obj_helper(:node)

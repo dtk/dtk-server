@@ -106,7 +106,7 @@ module Ramaze::Helper
 
     def ret_node_or_group_member_id_handle(node_name_param, assembly)
       node_name_or_id = ret_non_null_request_params(:node_id)
-      if node_name_or_id =~ /^[0-9]+$/
+      if numeric_id?(node_name_or_id)
         ret_request_param_id_handle(node_name_param, ::DTK::Node, assembly.id())
       else
         nodes = assembly.info_about(:nodes)

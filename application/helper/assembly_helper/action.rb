@@ -67,7 +67,7 @@ module Ramaze::Helper
                 MatchingNodes.filter_by_id(nodes, node_id)
               when :node_identifier
                 node_identifier = node_pattern.values.first
-                if node_identifier =~ /^[0-9]+$/
+                if numeric_id?(node_identifier)
                   MatchingNodes.filter_by_id(nodes, node_identifier)
                 else
                   MatchingNodes.filter_by_name(nodes, node_identifier)

@@ -258,9 +258,9 @@ module AssemblyAndServiceOperationsMixin
 		#Set attribute value for given attribute id
 		set_attribute_value_response = send_request('/rest/assembly/set_attributes', {:assembly_id=>service_id, :value=>attribute_value, :pattern=>attribute_id})
 		service_attributes = send_request('/rest/assembly/info_about', {:about=>'attributes', :filter=>nil, :subtype=>'instance', :assembly_id=>service_id})
-		extract_attribute_value = attribute_id = service_attributes['data'].select { |x| x['display_name'].include? attribute_name }.first['value']
+		extract_attribute_value = service_attributes['data'].select { |x| x['value'] == attribute_value }.first['value']
 
-		if (extract_attribute_value == attribute_value)
+		if (extract_attribute_value != nil)
 			puts "Setting of attribute #{attribute_name} completed successfully!"
 			is_attributes_set = true
 		end

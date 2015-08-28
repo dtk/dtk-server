@@ -162,7 +162,7 @@ end
 shared_context 'Push component module updates without changes' do |dtk_common, component_module, assembly_name|
   it 'retrieves message that no changes have been made' do
     response = dtk_common.push_component_module_updates_without_changes(dtk_common.service_id, component_module)
-    response['errors'].first['message'].should eq("Changes to component module (#{component_module.split(':').last}) have not been made in assembly (#{assembly_name})")
+    response['errors'].first['message'].should eq("Changes to component module (#{component_module.split(':').last}) have not been made in service instance '#{assembly_name}'")
   end
 end
 

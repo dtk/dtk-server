@@ -72,9 +72,11 @@ module DTK; class Assembly; class Instance
 
       if opts[:filter_proc]
         rows.reject! { |r| !opts[:filter_proc].call(r) }
-      elsif opts[:filter_component] != ''
-        opts[:filter_component].sub!(/::/, '__')
-        rows.reject! { |r| r[:nested_component][:display_name] != opts[:filter_component] }
+
+      # TODO: this is just used by Component::Test.get_linked_tests, which might be deprecated        
+      elsif opts[:filter_component] and opts[:filter_component] != ''
+        filter_component = opts[:filter_component].sub(/::/, '__')
+        rows.reject! { |r| r[:nested_component][:display_name] != filter_component }
       end
 
       return ret if rows.empty?

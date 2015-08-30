@@ -6,8 +6,34 @@ class NilClass
    nil
   end
 end
-### end of monkey patch
+### end of monkey patch for fog
 
+# excon monkey patch
+require 'excon'
+module Excon
+  module Middleware
+    class Expects < Excon::Middleware::Base
+      def response_call(datum)
+        if datum.has_key?(:expects) && ![*datum[:expects]].include?(datum[:response][:status])
+          if datum[:response][:status] == 0
+            ::DTK::Log.error("Monkey batch Excon::Middleware::Expects, stats 0 = 200")
+            datum[:response][:status] = 200
+          else
+            raise(
+              Excon::Errors.status_error(
+                datum.reject {|key,value| key == :response},
+                Excon::Response.new(datum[:response])
+              )
+            )
+          end
+        end
+        @stack.response_call(datum)
+      end
+    end
+  end
+end
+
+## end excon monkey patch
 module DTK
   class CloudConnect
     r8_nested_require('cloud_connect', 'ec2')

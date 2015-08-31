@@ -139,6 +139,9 @@ module DTK; class Task
         end
       end
 
+      # opts can have keys:
+      #  :just_parse (Boolean)
+      #  ...
       def self.parse_and_reify(serialized_content, actions, opts = {})
         # normalize to handle case where single stage; test for single stage is whethet serialized_content[Field::TemporalOrder] == Constant::Sequential
         temporal_order = serialized_content[Field::TemporalOrder]
@@ -217,15 +220,21 @@ module DTK; class Task
         end
       end
 
+      # opts can have keys:
+      #  :just_parse (Boolean)
+      #  ...
       def create_stages_from_serialized_content!(serialized_content_array, actions, opts = {})
         serialized_content_array.each do |a|
           if stage = Stage::InterNode.parse_and_reify?(a, actions, opts)
             unless stage.empty?
               self << stage
             else
-              # TODO: might pass in option to indicate whether this should be error or not
-              # This is reached if component is not on any nodes
-              Log.info_pp(["The following workflow stage has components not on any node",a])
+              # if opts[:just_parse] then stage will be empty
+              unless opts[:just_parse]
+                # TODO: might pass in option to indicate whether this should raise error or not
+                # This is reached if component is not on any nodes
+                Log.info_pp(["The following workflow stage has components not on any node",a])
+              end
             end
           end
         end

@@ -21,8 +21,10 @@ module DTK; class Task; class Template; class Stage
         end
       end
 
-      def self.parse_and_reify(multi_node_type, serialized_multinode_action, action_list)
-        klass(multi_node_type).new(serialized_multinode_action).parse_and_reify!(action_list)
+      # opts can have keys:
+      #  :just_parse (Boolean)
+      def self.parse_and_reify(multi_node_type, serialized_multinode_action, action_list, opts = {})
+        klass(multi_node_type).new(serialized_multinode_action).parse_and_reify!(action_list, opts)
       end
 
       private
@@ -44,10 +46,21 @@ module DTK; class Task; class Template; class Stage
 
       # This is used to include all applicable classes
       class Applicable < self
-        # action_list can be nil for just parsing
-        def parse_and_reify!(action_list)
+        # opts can have keys:
+        #  :just_parse (Boolean)
+        def parse_and_reify!(action_list, opts ={})
           ret = self
-          return ret unless action_list
+
+          if action_list.nil?
+            if opts[:just_parse]
+              # This wil raise error if a parsing error
+              @ordered_components.each { |serialized_action| Action::WithMethod.parse(serialized_action) }
+            else
+              Log.error("Unexpected that action_list.nil? while opts[:just_parse] is not true")
+            end
+            return ret
+          end
+            
           info_per_node = {} #indexed by node_id
           @ordered_components.each do |serialized_action|
             cmp_ref, method_name = Action::WithMethod.parse(serialized_action)

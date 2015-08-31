@@ -223,8 +223,8 @@ module DTK; class Task
             unless stage.empty?
               self << stage
             else
-              # TODO: might pass on option to indicate whether this should be error or not
-              # This is reache if component i snot on any nodes
+              # TODO: might pass in option to indicate whether this should be error or not
+              # This is reached if component is not on any nodes
               Log.info_pp(["The following workflow stage has components not on any node",a])
             end
           end

@@ -70,7 +70,7 @@ module DTK
         new_links_defs = new_snapshot.link_defs.reject { |ld| snapshot_link_def_ids.include?(ld[:id]) }
         unless new_links_defs.empty?
           link_def_info = new_snapshot.create_link_def_info(new_links_defs)
-          ServiceModule::PortProcessing.create_assembly_template_ports?(link_def_info)
+          ServiceModule::AssemblyImport::PortProcessing.create_assembly_template_ports?(link_def_info)
         end
       end
 

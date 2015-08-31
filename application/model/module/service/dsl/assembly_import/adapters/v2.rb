@@ -27,10 +27,10 @@ module DTK; class ServiceModule
           opts_matching_port = opts.merge(do_not_throw_error: true, base_cmp_name: base_cmp_name)
 
           input_port_hash = input.matching_port(ports, opts_matching_port)
-          return input_port_hash if ParsingError.is_error?(input_port_hash)
+          fail input_port_hash if ParsingError.is_error?(input_port_hash)
 
           output_port_hash = output.matching_port(ports, opts_matching_port.merge(is_output: true))
-          return output_port_hash if ParsingError.is_error?(output_port_hash)
+          fail output_port_hash if ParsingError.is_error?(output_port_hash)
 
           port_link_ref_info =  {
             assembly_template_ref: assembly_idh.create_object().get_field?(:ref),

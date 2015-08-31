@@ -2,9 +2,9 @@
 module DTK; class ServiceModule
   class AssemblyImport
     r8_nested_require('assembly_import', 'port_ref')
-    r8_nested_require('assembly_import', 'port_mixin')
-    include PortMixin
+    r8_nested_require('assembly_import', 'port_processing')
     extend FactoryObjectClassMixin
+
     def initialize(container_idh, module_branch, service_module, component_module_refs)
       @container_idh = container_idh
       @db_updates_assemblies = DBUpdateHash.new('component' => DBUpdateHash.new, 'node' => DBUpdateHash.new)
@@ -18,6 +18,13 @@ module DTK; class ServiceModule
       @ndx_version_proc_classes = {}
       @ndx_assembly_file_paths = {}
     end
+
+    def ports
+      @ndx_ports.values()
+    end
+    
+    # Needed by AssemblyImport::Port
+    attr_reader :ndx_assembly_hashes, :container_idh, :ndx_version_proc_classes, :ndx_assembly_file_paths, :ndx_ports
 
     def process(_module_name, hash_content, opts = {})
       integer_version = determine_integer_version(hash_content, opts)
@@ -51,6 +58,7 @@ module DTK; class ServiceModule
       end
     end
 
+    # raises, rather than returns, parsing errors
     def import
       module_branch_id = @module_branch[:id]
       mark_as_complete_cmp_constraint = { module_branch_id: module_branch_id } #so only delete extra components that belong to same module
@@ -65,7 +73,7 @@ module DTK; class ServiceModule
 
       Model.input_hash_content_into_model(@container_idh, @db_updates_assemblies)
 
-      add_port_and_port_links()
+      PortProcessing.add_port_and_port_links(self)
       @db_updates_assemblies['component']
     end
 

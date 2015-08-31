@@ -202,7 +202,7 @@ module DTK
           end
         end
         unless cmp_match
-          fail Error.new("Cannot find matching component for cloned port with id (#{port[:id]})")
+          fail Error.new("Cannot find matching component for cloned port with id '#{port[:id]}' and parsed_port_name attributes: #{parsed_port_name.inspect}")
         end
         cmp_id = cmp_match[:id]
         el = { id: port[:id], component_id: cmp_id }

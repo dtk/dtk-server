@@ -205,12 +205,12 @@ module DTK
           end
         end
         update_hash = {
-          nodes: @ndx_nodes.values,
-          port_links: port_links,
-          assembly_level_attributes: assembly_level_attrs
+          nodes:                     @ndx_nodes.values,
+          port_links:                port_links,
+          assembly_level_attributes: assembly_level_attrs,
+          task_templates:            task_templates
         }
         merge!(update_hash)
-        merge!(task_templates: task_templates) unless task_templates.empty?
         self
       end
 

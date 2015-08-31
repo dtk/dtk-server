@@ -63,14 +63,11 @@ module DTK
           Log.info('Legacy can have Assembly::Instance::Lock.get(assembly_instance) be nil')
           return ret 
         end
-        service_module_sha_timestamp = @service_module_branch.get_field?(:updated_at)
-        instance_lock_sha_timestamp = instance_lock[:created_at]
 
         assembly_branch = AssemblyModule::Service.get_assembly_branch(assembly_instance)
         assembly_instance_latest_change = assembly_branch ? assembly_branch.get_field?(:updated_at) : (assembly_instance.get_field?(:updated_at) || assembly_instance.get_field?(:created_at))
 
-        # TODO: DTK-2208 need to compare above timestamps per Rich's comment in DTK-2208 ticket
-        return ret unless RepoManager.file_changed_since_specified_sha(initial_sha, assembly_dsl_path, @service_module_branch)
+        return ret unless file_changed_since_specified_sha(initial_sha, assembly_dsl_path, instance_lock, assembly_instance_latest_change)
 
         # move current assembly.yaml and create new one; also notify user
         destination_name = "#{assembly_dsl_path}.dtk-backup"
@@ -80,6 +77,17 @@ module DTK
       end
 
       private
+
+      def file_changed_since_specified_sha(initial_sha, assembly_dsl_path, instance_lock, assembly_instance_latest_change)
+        service_module_sha_timestamp = @service_module_branch.get_field?(:updated_at)
+        instance_lock_sha_timestamp  = instance_lock[:created_at]
+
+        if service_module_sha_timestamp && instance_lock_sha_timestamp
+          return if service_module_sha_timestamp.to_i <= instance_lock_sha_timestamp.to_i
+        end
+
+        RepoManager.file_changed_since_specified_sha(initial_sha, assembly_dsl_path, @service_module_branch)
+      end
       
       def file_exists?(path)
         RepoManager.file_exists?(path, @service_module_branch)

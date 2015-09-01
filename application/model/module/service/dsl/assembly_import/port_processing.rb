@@ -24,7 +24,7 @@ module DTK; class ServiceModule
         Model.input_hash_content_into_model(port.container_idh, 'component' => db_updates_port_links)
       end
 
-      def self.create_assembly_template_ports(link_defs_info, opts = {})
+      def self.create_assembly_template_ports?(link_defs_info, opts = {})
         create_assembly_template_ports__private?(link_defs_info, opts)
       end
       

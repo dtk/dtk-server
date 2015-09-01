@@ -94,7 +94,7 @@ end
               end
             }
             receiver_context = {
-              timeout: 5,
+              timeout: 60,
               callbacks: callbacks,
               head_git_commit_id: agent_commit_id_helper.head_git_commit_id,
               expected_count: 1

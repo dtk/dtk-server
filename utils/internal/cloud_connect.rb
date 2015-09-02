@@ -37,12 +37,12 @@ module DTK
           ret = x.data
         end
       end
-      if ret
-        ret
-      else
-        response = (x ? x.inspect : 'nil')
-        fail Error.new("Unexpected response: #{response}")
-      end
+      ret || hash_form__nil_error(x)
+    end
+
+    def hash_form__nil_error(x)
+      Log.error("Unexpected nil response")
+      nil
     end
 
     # each service has its own mutex

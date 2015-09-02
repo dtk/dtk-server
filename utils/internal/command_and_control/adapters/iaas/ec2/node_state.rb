@@ -57,9 +57,7 @@ module DTK; module CommandAndControlAdapter
       end
 
       def get_node_operational_status(node)
-        instance_id = get_instance_id_from_object(node)
-        # TODO: see if more targeted get to just get operational status
-        state = conn().server_get(instance_id)
+        state = get_node_state(node)
         op_status = state && state[:state]
         StateTranslation[op_status] || op_status
       end
@@ -70,10 +68,14 @@ module DTK; module CommandAndControlAdapter
 
       private
 
-      def raw_state_info!(node)
+      def get_node_state(node)
         if instance_id = get_instance_id_from_object(node)
-          node[:raw_ec2_state_info] ||= conn(node.get_target_iaas_credentials()).server_get(instance_id)
+          conn(node.get_target_iaas_credentials()).server_get(instance_id)
         end
+      end
+
+      def raw_state_info!(node)
+        node[:raw_ec2_state_info] ||=  get_node_state(node)
       end
 
       def get_instance_id_from_object(node)

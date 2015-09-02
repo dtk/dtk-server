@@ -14,6 +14,7 @@ module DTK
           h.merge(k => Fog::Compute::AWS.new(base_params.merge(connection_options: conn_opts)))
         end
       end
+
       OverrideConnectionOptions = {
         # Setting retry_limit to 1, but using a mutex at a outer level to retry
         server_create: { read_timeout: 5, retry_limit: 1 }
@@ -22,6 +23,7 @@ module DTK
       def conn(key = nil)
         key.nil? ? @conn : (@override_conns[key] || @conn)
       end
+
       private :conn
 
       def flavor_get(id)

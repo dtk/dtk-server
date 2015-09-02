@@ -2,6 +2,7 @@ module DTK; class ServiceModule
   class AssemblyExport
     module FoldIntoExisting
       r8_nested_require('fold_into_existing', 'assembly_section_proc')
+      r8_nested_require('fold_into_existing', 'node_bindings_section_proc')
 
       # TODO: DTK-2208 Aldin: I changed logic here to use teh oreder of high level sections in ordered_hash_new_content
       #  to drive the high level order; then just for assembly section does it try to factor in comments, etc from existing assembly
@@ -24,6 +25,9 @@ module DTK; class ServiceModule
                 workflow_added = true
                 convert_to_text(section)
               end
+             when :node_bindings
+              node_bindings_section_proc ||= NodeBindingsSectionProc.new(raw_content_existing.split("\n"))
+              convert_to_text__node_bindings_section(node_bindings_section_proc, section)
              else
               convert_to_text(section)
             end
@@ -41,6 +45,11 @@ module DTK; class ServiceModule
       def self.convert_to_text__assembly_section(assembly_section_proc, assembly_section_hash)
         processed_assembly_hash = assembly_section_proc.parse_and_order_components_hash(assembly_section_hash)
         prettify_assembly_string(convert_to_text(processed_assembly_hash))
+      end
+
+      def self.convert_to_text__node_bindings_section(node_bindings_section_proc, node_bindings_section_hash)
+        processed_node_bindings_hash = node_bindings_section_proc.parse_and_order_node_bindings_hash(node_bindings_section_hash)
+        prettify_assembly_string(convert_to_text(processed_node_bindings_hash))
       end
       
       # add_empty_lines_and_comments

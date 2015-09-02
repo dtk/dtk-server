@@ -28,7 +28,7 @@ R8::ReactorRoute.draw do
   post 'integration/spin_tenant' => 'integration#spin_tenant'
 
   # DEVELOPER
-  post 'developer/update_action_agent' => 'developer#update_action_agent'
+  post 'developer/run_agent' => 'developer#run_agent'
 
   # ACCOUNT
   post 'account/set_password' => 'account#set_password'

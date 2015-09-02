@@ -6,6 +6,8 @@ module XYZ
     helper :assembly_helper
 
     def rest__run_agent()
+      # DEBUG SNIPPET >>> REMOVE <<<
+      require (RUBY_VERSION.match(/1\.8\..*/) ? 'ruby-debug' : 'debugger');Debugger.start; debugger
       agent_name, agent_method, agent_params = ret_request_params(:agent_name, :agent_method, :agent_params)
       service = ret_assembly_instance_object(:service_name)
       agent_hash = JSON.parse(agent_params)

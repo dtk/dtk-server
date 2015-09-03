@@ -7,18 +7,14 @@ module DTK; class ServiceModule; class AssemblyExport
         @raw_array = raw_array
       end
 
-      def parse_and_order_node_bindings_hash(assembly_hash)
-        parsed_content = parse_existing_and_remove_unused_new()
-        order_nodes_hash_new(assembly_hash, parsed_content)
+      def parse_and_order_node_bindings_hash(node_bindings_hash)
+        parsed_content = parse_existing_and_remove_unused()
+        order_node_bindings_hash(node_bindings_hash, parsed_content)
       end
 
       private
 
-      def parse_existing_and_remove_unused_new
-        require 'debugger'
-        Debugger.wait_connection = true
-        Debugger.start_remote
-        debugger
+      def parse_existing_and_remove_unused
         ignore    = true
         new_array = []
 
@@ -27,6 +23,7 @@ module DTK; class ServiceModule; class AssemblyExport
 
           if name.eql?('node_bindings:')
             ignore = false
+            next
           elsif name.eql?('assembly:')
             ignore = true
           end
@@ -39,128 +36,22 @@ module DTK; class ServiceModule; class AssemblyExport
         new_array
       end
 
-      def order_nodes_hash_new(assembly_hash, parsed_content)
-        require 'debugger'
-        Debugger.wait_connection = true
-        Debugger.start_remote
-        debugger
-        ap parsed_content
-      end
+      def order_node_bindings_hash(node_bindings_hash, existing_node_bindings)
+        assembly_hash_node_bindings = node_bindings_hash[:node_bindings]
+        new_node_bindings = {}
 
-      def parse_existing_and_remove_unused
-        ignore      = true
-        new_array   = []
-        node_name   = nil
-        node_indent = nil
-        components_first = nil
+        existing_node_bindings.each do |existing_nb|
+          nb_name = existing_nb[:name].split(':').first
+          new_nb = assembly_hash_node_bindings.delete(nb_name)
 
-        @raw_array.each do |el|
-          is_node = nil
-          name    = el.strip
-
-          if name.eql?('assembly:')
-            ignore = false
-          elsif name.eql?('workflow:') or name.eql?('workflows:')
-            ignore = true
-          end
-
-          unless ignore
-            if name.empty? || name.start_with?('#')
-              new_array << { name: name, content: el, node: node_name }
-            elsif name.start_with?('- ')
-              new_array << { name: name, content: el, node: node_name }
-            else
-              if last_name = new_array.last && new_array.last[:name]
-                components_first = true if name.eql?('components:') && node_name.nil?
-                if last_name.eql?('nodes:')
-                  is_node     = true
-                  node_name   = name
-                  node_indent = el[/\A */].size
-                elsif node_indent
-                  if el[/\A */].size == node_indent
-                    is_node   = true
-                    node_name = name
-                  end
-                end
-
-                if last_name.strip.start_with?('- ') && !is_node
-                  content = new_array.last[:content]
-                  new_array.last[:content] = content + el
-                else
-                  if match = name.match(/(\w+:)\s*(\w+)/)
-                    name = match[1] if match[1] && match[2]
-                  end
-                  new_array << { name: name, content: el, node: node_name }
-                end
-              else
-                new_array << { name: name, content: el }
-              end
-            end
+          if new_nb
+            new_node_bindings.merge!(nb_name => new_nb)
           end
         end
 
-        [components_first, new_array]
+        { :node_bindings => new_node_bindings.merge(assembly_hash_node_bindings) }
       end
 
-      def split_by_nodes(parsed_content)
-        nodes_hash = {}
-        ignore     = true
-
-        parsed_content.each do |el|
-          ignore = false if el[:name].eql?('components:')
-          unless ignore
-            nodes_hash[el[:node]] = [] unless nodes_hash[el[:node]]
-            nodes_hash[el[:node]] << el[:name]
-          end
-        end
-
-        { nodes: nodes_hash }
-      end
-
-      def order_nodes_hash(assembly_hash, nodes_content, cmps_first)
-        assembly_hash_nodes = assembly_hash[:assembly][:nodes]
-        new_assembly_nodes  = {}
-
-        nodes_content[:nodes].each do |k, v|
-          next if k.nil?
-
-          node_name = k.chomp(':')
-          assembly_node = assembly_hash_nodes.delete(node_name)
-
-          if assembly_node
-            assembly_node_components     = assembly_node[:components]
-            new_assembly_node_components = []
-
-            unless assembly_node_components.empty?
-              v.each do |ex_cmp_name|
-                next if ex_cmp_name.eql?('components:') && v.index(ex_cmp_name) == 0
-
-                new_assembly_node_components << ex_cmp_name if ex_cmp_name.eql?('') || ex_cmp_name.start_with?('#')
-                ex_cmp_name_formatted = ex_cmp_name.chomp(':').gsub(/\A- /, '')
-
-                assembly_node_components.each do |an_cmp|
-                  if an_cmp.is_a?(String)
-                    new_assembly_node_components << assembly_node_components.delete(an_cmp) if ex_cmp_name_formatted.eql?(an_cmp)
-                  elsif an_cmp.is_a?(Hash)
-                    an_cmp_name = an_cmp.keys.first
-                    new_assembly_node_components << assembly_node_components.delete(an_cmp) if ex_cmp_name_formatted.eql?(an_cmp_name)
-                  else
-                    raise Error.new, 'Unknown component format'
-                  end
-                end
-              end
-            end
-
-            new_assembly_node_components.concat(assembly_node_components) unless assembly_node_components.empty?
-            assembly_node[:components] = new_assembly_node_components
-            new_assembly_nodes.merge!(node_name => assembly_node)
-          end
-        end
-
-        assembly_hash[:assembly][:nodes] = new_assembly_nodes.merge(assembly_hash_nodes)
-        assembly_hash[:assembly][:nodes] = assembly_hash[:assembly].delete(:nodes) if cmps_first
-        assembly_hash
-      end
     end
   end
 end; end; end

@@ -32,7 +32,9 @@ module DTK; class Task; class Template; class Stage
       ComponantOrActionConstants = [:OrderedComponents, :Components, :Actions]
       def components_or_actions(serialized_el)
         if match = ComponantOrActionConstants.find { |k| Constant.matches?(serialized_el, k) }
-          Constant.matches?(serialized_el, match)
+          if ret = Constant.matches?(serialized_el, match)
+            ret.kind_of?(Array) ? ret : [ret]
+          end
         end
       end
 

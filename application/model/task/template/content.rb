@@ -143,17 +143,35 @@ module DTK; class Task
       #  :just_parse (Boolean)
       #  ...
       def self.parse_and_reify(serialized_content, actions, opts = {})
-        # normalize to handle case where single stage; test for single stage is whethet serialized_content[Field::TemporalOrder] == Constant::Sequential
-        temporal_order = serialized_content[Field::TemporalOrder]
-        has_multi_internode_stages = (temporal_order && (temporal_order.to_sym == Constant::Sequential))
-        subtasks = serialized_content[Field::Subtasks]
+        # normalize to handle case where single stage, but not folded under subtasks
+
+        unless subtasks = Constant.matches?(serialized_content, :Subtasks) 
+          subtasks = [] if parse_and_reify__empty_subtasks?(serialized_content)
+        end
+
         normalized_subtasks =
           if subtasks
-            has_multi_internode_stages ? subtasks : [{ Field::Subtasks => subtasks }]
+            # TODO: make this test to see if has explicit multi stages more robust
+            has_multi_stages = (parse_and_reify__temporal_order?(serialized_content) == Constant::Sequential)
+            has_multi_stages ? subtasks : [{ Field::Subtasks => subtasks }]
           else
             [serialized_content]
           end
+
         new(SerializedContentArray.new(normalized_subtasks), actions, opts)
+      end
+
+      private
+
+      def self.parse_and_reify__temporal_order?(serialized_content)
+        if temporal_order = Constant.matches?(serialized_content, :TemporalOrder)
+          temporal_order.to_sym 
+        end
+      end
+
+      def self.parse_and_reify__empty_subtasks?(serialized_content)
+        # check if empty workflow by making sure it is not a stage directly not wrapped in subtask
+        !Constant.matches?(serialized_content, :Subtasks) and !Constant.matches?(serialized_content, :ComponentsOrActions)
       end
 
       class SerializedContentArray < Array

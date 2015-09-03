@@ -22,21 +22,28 @@ module DTK; class Task
         OrderedComponents = :ordered_components
         Components = :components
 
-        ## TODO: above are in old form
+        ## TODO: above are in old form and should be deprecated once all refernces are replaced
 
         Actions = 'actions'
+        Variations::Actions = %w(actions action)
 
         AllApplicable = 'All_applicable'
         Variations::AllApplicable = %w(All_applicable All All_Applicable AllApplicable)
 
         Node = 'node'
-        Variations::Node = ['node', 'node_group']
+        Variations::Node = %w(node node_group)
         NodeGroup = 'node_group'
 
         Nodes = 'nodes'
         Variations::Nodes = ['nodes'] #TODO: dont think we need this because single variation
 
         Subtasks = 'subtasks'
+
+        ComponentsOrActions = 'components'
+        Variations::ComponentsOrActions = %w(components component ordered_components ordered_component actions action)
+
+        TemporalOrder = 'subtask_order'
+
       end
 
       # TODO: if support ruby 1.8.7 need to make this fn of a hash class that perserves order

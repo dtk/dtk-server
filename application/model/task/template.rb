@@ -132,7 +132,7 @@ module DTK; class Task
 
         opts_serialized_content = {
           component_type_filter: :service,
-          serialization_form: { filter: { source: :assembly }, allow_empty_task: true }
+          serialization_form: { filter: { source: :assembly } }
         }.merge(opts)
         
         # TODO: more efficient if bulked these up

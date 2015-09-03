@@ -107,12 +107,9 @@ module DTK; class Task
         ret = nil
         subtasks = map { |internode_stage| internode_stage.serialization_form(opts) }.compact
         if subtasks.empty?()
-          if opts[:allow_empty_task]
-            return ret
-          else
-            fail ErrorUsage.new('The task has no actions')
-          end
+          return ret
         end
+
         # Dont put in sequential block if just single stage
         if subtasks.size == 1
           subtasks.first.delete(:name)

@@ -144,18 +144,6 @@
         "m1.medium"
       ]
     },
-    "ami-3b25de7f":{
-      "region":"us-west-1",
-      "type":"wheezy",
-      "os_type":"debian",
-      "display_name":"Wheezy",
-      "png":"wheezy.png",
-      "sizes":[
-        "t1.micro",
-        "m1.small",
-        "m1.medium"
-      ]
-    },
     "ami-e125dea5":{
       "region":"us-west-1",
       "type":"rhel6",

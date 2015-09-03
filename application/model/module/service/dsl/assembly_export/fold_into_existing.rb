@@ -28,6 +28,8 @@ module DTK; class ServiceModule
              when :node_bindings
               node_bindings_section_proc ||= NodeBindingsSectionProc.new(raw_content_existing.split("\n"))
               convert_to_text__node_bindings_section(node_bindings_section_proc, section)
+             when :description
+              convert_to_text__description(raw_content_existing.split("\n"), section)
              else
               convert_to_text(section)
             end
@@ -50,6 +52,14 @@ module DTK; class ServiceModule
       def self.convert_to_text__node_bindings_section(node_bindings_section_proc, node_bindings_section_hash)
         processed_node_bindings_hash = node_bindings_section_proc.parse_and_order_node_bindings_hash(node_bindings_section_hash)
         prettify_assembly_string(convert_to_text(processed_node_bindings_hash))
+      end
+
+      def self.convert_to_text__description(raw_content_existing, new_description)
+        raw_content_existing.each do |el|
+          name = el.split(':').first
+          return "#{el}\n" if name.eql?('description')
+        end
+        convert_to_text(new_description)
       end
       
       # add_empty_lines_and_comments

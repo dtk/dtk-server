@@ -65,4 +65,5 @@ components:
       - apt
       - nginx
       - logrotate
+      - dtk_passenger
       - dtk_secret

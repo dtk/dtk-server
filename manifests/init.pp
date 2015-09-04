@@ -60,9 +60,10 @@ class dtk_repo_manager(
 
   class { 'nginx::config':}
 
-  class { "dtk_repo_manager::passenger":
-     ruby_path => "${rvm_path}/wrappers/default/ruby",
-     require   => Dtk_repo_manager::Rvm[$rvm_ruby_version],
+
+  class { "dtk_passenger":
+    ruby_path => "${rvm_path}/wrappers/default/ruby",
+    require   => Dtk_repo_manager::Rvm[$rvm_ruby_version],
   }
 
   #repoman vhost
@@ -86,7 +87,7 @@ class dtk_repo_manager(
       'rails_env'               =>  $rails_env,
       'server_name'             => "localhost ${::ec2_public_hostname}",
     },
-    require => Class["dtk_repo_manager::passenger"],
+    require => Class["dtk_passenger"],
   }
 
   #admin vhost
@@ -111,7 +112,7 @@ class dtk_repo_manager(
       #'passenger_env_var REPOMAN_HOST' => 'localhost',
       #'passenger_env_var REPOMAN_PORT' => '443',
     },
-    require => Class["dtk_repo_manager::passenger"],
+    require => Class["dtk_passenger"],
   }
 
   # put config in dotenv

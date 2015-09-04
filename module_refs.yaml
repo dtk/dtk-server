@@ -2,6 +2,8 @@
 component_modules:
   apt:
     namespace: internal
+  dtk_passenger:
+    namespace: internal
   dtk_secret:
     namespace: internal
   logrotate:

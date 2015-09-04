@@ -158,8 +158,6 @@ module DTK; class Task
         new(SerializedContentArray.new(normalized_subtasks), actions, opts)
       end
 
-      private
-
       def self.parse_and_reify__temporal_order?(serialized_content)
         if temporal_order = Constant.matches?(serialized_content, :TemporalOrder)
           temporal_order.to_sym 

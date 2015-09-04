@@ -8,7 +8,7 @@ num='9'
 group=UserGroup.new('demo_group'+num, 'Demo Group.'+num)
 
 user=User.new('demo_user1'+num,'password','Demo','User','demo_user1'+num+   '@mail.com','3','demo_group'+num)
-ns_max_user=User.new('demo_user2'+num,'password','Demo','User','demo_user2'+num+'@mail.com','1','demo_group'+num)
+ns_max_user=User.new('demo_user2'+num,'password','Demo','User','demo_user2'+num+'@mail.com','2','demo_group'+num)
 
 first_ns=Namespace.new('demo_ns1'+num,'demo_user1'+num,'demo_group'+num,'RW','RW','RW')
 second_ns=Namespace.new('demo_ns2'+num,'demo_user2'+num,'demo_group'+num,'RW','RW','RW')

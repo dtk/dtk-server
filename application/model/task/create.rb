@@ -1,8 +1,11 @@
 #TODO: clean this file up; much cut and paste. moving methods we want to keep towards the top
 module DTK; class Task
   module CreateClassMixin
-    def create_from_assembly_instance(assembly, opts = {})
-      task = Create.create_from_assembly_instance(assembly, opts)
+    def create_from_assembly_instance?(assembly, opts = {})
+      ret = nil
+      unless task = Create.create_from_assembly_instance?(assembly, opts)
+        return ret
+      end
       #alters task if needed to decompose node groups into nodes
       NodeGroupProcessing.decompose_node_groups!(task)
     end
@@ -36,7 +39,7 @@ module DTK; class Task
       create_top_level_task(task_mh, assembly, task_action: task_action_name).add_subtasks(subtasks)
     end
 
-    def self.create_from_assembly_instance(assembly, opts = {})
+    def self.create_from_assembly_instance?(assembly, opts = {})
       component_type = opts[:component_type] || :service
       target_idh     = target_idh_from_assembly(assembly)
       task_mh        = target_idh.create_childMH(:task)
@@ -87,7 +90,8 @@ module DTK; class Task
       stages_config_nodes_task = task_template_content.create_subtask_instances(task_mh, assembly.id_handle())
 
       if start_nodes_task.nil? && create_nodes_task.nil? && stages_config_nodes_task.empty?
-        fail ErrorUsage.new('There are no actions in the service instance')
+        # means that no steps to execute
+        return nil
       end
 
       ret.add_subtask(create_nodes_task) if create_nodes_task

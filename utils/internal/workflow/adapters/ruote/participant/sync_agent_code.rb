@@ -56,28 +56,29 @@ module DTK
               end,
               on_timeout: proc do
                 CreateThread.defer_with_session(user_object, Ramaze::Current.session) do
-### DTK-1923 Temp workaround for https://reactor8.atlassian.net/browse/DTK-1923
-agent_commit_id_helper.update_node()
-result = { status: 'ok' }
-task.add_event(:complete_succeeded, result)
-log_participant.end(:timeout_override, task_id: task_id)
-set_result_succeeded(workitem, result, task, action) if task_end
-# If there was a change on agents, wait for node's mcollective process to restart
-unless R8::Config[:node_agent_git_clone][:no_delay_needed_on_server]
-  sleep(R8::Config[:node_agent_git_clone][:delay] || NodeAgentGitCloneDefaultDelay)
-end
-if false
-                  result = {
-                    status: 'timeout'
-                  }
-                  event, errors = task.add_event_and_errors(:complete_timeout, :server, ['timeout'])
-                  if event
-                    log_participant.end(:timeout, task_id: task_id, event: event, errors: errors)
+                  ### DTK-1923 Temp workaround for https://reactor8.atlassian.net/browse/DTK-1923
+                  agent_commit_id_helper.update_node()
+                  result = { status: 'ok' }
+                  task.add_event(:complete_succeeded, result)
+                  log_participant.end(:timeout_override, task_id: task_id)
+                  set_result_succeeded(workitem, result, task, action) if task_end
+                  # If there was a change on agents, wait for node's mcollective process to restart
+                  unless R8::Config[:node_agent_git_clone][:no_delay_needed_on_server]
+                    sleep(R8::Config[:node_agent_git_clone][:delay] || NodeAgentGitCloneDefaultDelay)
                   end
-                  #TODO: check why this commented out
-                  # cancel_upstream_subtasks(workitem)
-                  set_result_timeout(workitem, result, task)
-end
+
+                  if false
+                    result = {
+                      status: 'timeout'
+                    }
+                    event, errors = task.add_event_and_errors(:complete_timeout, :server, ['timeout'])
+                    if event
+                      log_participant.end(:timeout, task_id: task_id, event: event, errors: errors)
+                    end
+                    #TODO: check why this commented out
+                    # cancel_upstream_subtasks(workitem)
+                    set_result_timeout(workitem, result, task)
+                  end
                   #### end  DTK-1923 Temp workaround for https://reactor8.atlassian.net/browse/DTK-1923
 
                   delete_task_info(workitem)
@@ -94,7 +95,7 @@ end
               end
             }
             receiver_context = {
-              timeout: 5,
+              timeout: 60,
               callbacks: callbacks,
               head_git_commit_id: agent_commit_id_helper.head_git_commit_id,
               expected_count: 1
@@ -106,6 +107,7 @@ end
             end
           end
         end
+
         NodeAgentGitCloneDefaultDelay = 10
 
         # Ruote dispatch call to this method in case of user's cancel task request

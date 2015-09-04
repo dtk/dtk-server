@@ -96,8 +96,8 @@ module DTK; class ServiceModule
       end
 
       def self.raise_error_if_parsing_error(workflow_hash, workflow_action, opts = {})
-        if parse_errors = Task::Template::ConfigComponents.find_parse_error?(workflow_hash, {workflow_action: workflow_action}.merge(opts))
-          fail parse_errors
+        if parse_error = Task::Template::ConfigComponents.find_parse_error?(workflow_hash, {workflow_action: workflow_action}.merge(opts))
+          fail parse_error
         end
       end
 

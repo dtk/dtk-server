@@ -465,8 +465,8 @@ module DTK
       if is_staged?()
         return self[:admin_op_status]
       end
-      op_status = CommandAndControl.get_node_operational_status(self)
-      if op_status
+      
+      if op_status = CommandAndControl.get_node_operational_status(self)
         unless self[:operational_status] == op_status
           update_operational_status!(op_status)
           if op_status == 'stopped' 

@@ -1,5 +1,6 @@
 module DTK; module CommandAndControlAdapter
   class Ec2
+    # TODO: DTK-2238: to fix this jira item need to pass to conn(..) the target credentials
     module AddressManagementClassMixin
       def associate_elastic_ip(node)
         unless elastic_ip = node.elastic_ip()

@@ -68,7 +68,7 @@ describe "(Admin Panel UI) Usergroup Test Case 3: NEG - Edit group with invalid 
         end 
     end
 
-    context "Edit Usergroup with existing name (second_group.name)" do 
+    context "Edit Usergroup with existing name #{second_group.name}" do 
         it "will not update group" do
           group_panel.enter_data(second_group.get_data)
           group_panel.press_edit_button

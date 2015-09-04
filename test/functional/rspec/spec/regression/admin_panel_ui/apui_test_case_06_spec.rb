@@ -11,6 +11,7 @@ second_group=UserGroup.new('demo_group2'+num, 'Demo Group. 2'+num)
 
 user=User.new('demo_user6'+num,'password','Demo','User','demo_user1'+num+'@mail.com','3','demo_group1'+num)
 existing_user=User.new('existing_user6'+num,'password','Demo','User','existing'+num+'2@mail.com','3','demo_group2'+num)
+existing_email=User.new('demo_user6'+num,'password','Demo','User','existing'+num+'2@mail.com','3','demo_group1'+num)
 invalid_user=User.new('>.<'+num,'>>>>>>','>.<','>.<','@'+num+'6mail.com','-1','demo_group1'+num)
 empty_user=User.new('', '', '', '', '', '', 'demo_group1'+num)
 
@@ -83,9 +84,9 @@ describe "(Admin Panel UI) User Test Case 6: NEG - User edit textfield validatio
     	end
     end
 
-    context "Edit User with taken username" do
+    context "Edit User with taken email" do
     	it "will not udpate user" do
-    		user_panel.enter_data(existing_user.get_data,true)
+    		user_panel.enter_data(existing_email.get_data,true)
     		user_panel.press_edit_button
     		expect(user_panel.on_edit_page?).to eql(true)
     	end

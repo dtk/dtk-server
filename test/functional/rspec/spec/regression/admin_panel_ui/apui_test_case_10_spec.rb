@@ -46,6 +46,7 @@ describe "(Admin Panel UI) Module Test Case 10: Edit module owner, group and per
 
     context "Open Module Panel" do
     	it "opened module panel" do
+            sleep 10
     		header.click_on_modules
     	end
     end

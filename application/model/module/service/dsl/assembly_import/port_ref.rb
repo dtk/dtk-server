@@ -74,11 +74,26 @@ module DTK; class ServiceModule
       end
 
       def matching_port__error(opts = {})
-        if opts[:do_not_throw_error]
-          opts_err = Opts.new(opts).slice(:file_path)
-          ParsingError::BadComponentLink.new(self[:link_def_ref], opts[:base_cmp_name], opts_err)
-        else
+        unless opts[:do_not_throw_error]
           Error.new("Cannot find match to (#{self.inspect})")
+        end
+
+        link_def_ref  = self[:link_def_ref]
+        base_cmp_name = opts[:base_cmp_name]
+
+        opts_err = Opts.new(opts).slice(:file_path)
+        if opts[:is_output]
+          ParsingError::BadComponentLink::BadTarget.new(link_def_ref, base_cmp_name, target_component?, opts_err)
+        else
+          ParsingError::BadComponentLink::NoLinkDef.new(link_def_ref, base_cmp_name, opts_err)
+        end
+      end
+
+      def target_component?
+        if node = self[:node]
+          if component_type = self[:component_type]
+            "#{node}/#{Component.component_type_print_form(component_type)}"
+          end
         end
       end
 

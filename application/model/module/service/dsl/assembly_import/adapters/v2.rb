@@ -16,37 +16,28 @@ module DTK; class ServiceModule
         ret
       end
 
+      # TODO: DTK-2234: need to refine how dangling component links (port_links) are handled;
+      # options are:
+      # 1) throw an error
+      # 2) remove the dangling links and log console error
+      # 3) remove the dangling links, and send user warning
+      # 4) remove the dangling links, but store them in what would be a new dangling link table, which could be used for auto-complete
+      #    and late-binding; for this we need to determine if error raised is because link def not defined or because there is a pointer to a component
+      #    that does not exist; for former that would just be an error
+      # Implemnting initially 2 because easiest to implement and less 'disruptive' than 1
       def self.import_port_links(assembly_idh, assembly_ref, assembly_hash, ports, opts = {})
         # augment ports with parsed display_name
         augment_with_parsed_port_names!(ports)
-        port_links = parse_component_links(assembly_hash, opts).inject(DBUpdateHash.new) do |h, component_link_info|
-          parsed_component_link = component_link_info[:parsed_component_link]
-          base_cmp_name = component_link_info[:base_cmp_name]
-          input = parsed_component_link[:input]
-          output = parsed_component_link[:output]
-          opts_matching_port = opts.merge(do_not_throw_error: true, base_cmp_name: base_cmp_name)
-
-          input_port_hash = input.matching_port(ports, opts_matching_port)
-          return input_port_hash if ParsingError.is_error?(input_port_hash)
-
-          output_port_hash = output.matching_port(ports, opts_matching_port.merge(is_output: true))
-          return output_port_hash if ParsingError.is_error?(output_port_hash)
-
-          port_link_ref_info =  {
-            assembly_template_ref: assembly_idh.create_object().get_field?(:ref),
-            in_node_ref: input_port_hash[:node].get_field?(:ref),
-            in_port_ref: Port.ref_from_display_name(input_port_hash[:display_name]),
-            out_node_ref: output_port_hash[:node].get_field?(:ref),
-            out_port_ref: Port.ref_from_display_name(output_port_hash[:display_name])
-          }
-          pl_ref = PortLink.port_link_ref(port_link_ref_info)
-          pl_hash = {
-            'input_id' => input_port_hash[:id],
-            'output_id' => output_port_hash[:id],
-            'assembly_id' => assembly_idh.get_id()
-          }
-          h.merge(pl_ref => pl_hash)
+        port_links = DBUpdateHash.new
+        parse_component_links(assembly_hash, opts).each do |component_link_info|
+          error_or_nil, input_port_hash, output_port_hash = find_matching_port_info(component_link_info, ports, opts)
+          unless error_or_nil
+            port_links.merge!(port_link_to_add(assembly_idh, input_port_hash, output_port_hash))
+          else
+            Log.error_pp(error_or_nil)
+          end
         end
+
         port_links.mark_as_complete(assembly_id: @existing_assembly_ids)
         { assembly_ref => { 'port_link' => port_links } }
       end
@@ -54,6 +45,50 @@ module DTK; class ServiceModule
       private
 
       include ServiceDSLCommonMixin
+
+      # returns [error_or_nil, input_port_hash, output_port_hash]
+      # if error_or_nil s error then input_port_hash and/or output_port_hash can be nil
+      def self.find_matching_port_info(component_link_info, ports, opts = {})
+        error_or_nil = input_port_hash = output_port_hash = nil
+
+        base_cmp_name         = component_link_info[:base_cmp_name]
+        parsed_component_link = component_link_info[:parsed_component_link]
+        input                 = parsed_component_link[:input]
+        output                = parsed_component_link[:output]
+
+        opts_matching_port = opts.merge(do_not_throw_error: true, base_cmp_name: base_cmp_name)
+
+        input_port_hash = input.matching_port(ports, opts_matching_port)
+        if ParsingError.is_error?(input_port_hash)
+          error_or_nil = input_port_hash
+          return([error_or_nil, input_port_hash, output_port_hash])
+        end
+        
+        output_port_hash = output.matching_port(ports, opts_matching_port.merge(is_output: true))
+        if ParsingError.is_error?(output_port_hash)
+          error_or_nil = output_port_hash
+          return([error_or_nil, input_port_hash, output_port_hash])
+        end
+
+        [error_or_nil, input_port_hash, output_port_hash]
+      end
+
+      def self.port_link_to_add(assembly_idh, input_port_hash, output_port_hash)
+        port_link_ref_info =  {
+          assembly_template_ref: assembly_idh.create_object().get_field?(:ref),
+          in_node_ref:           input_port_hash[:node].get_field?(:ref),
+          in_port_ref:           Port.ref_from_display_name(input_port_hash[:display_name]),
+          out_node_ref:          output_port_hash[:node].get_field?(:ref),
+          out_port_ref:          Port.ref_from_display_name(output_port_hash[:display_name])
+        }
+        pl_ref = PortLink.port_link_ref(port_link_ref_info)
+        pl_hash = {
+          'input_id'    => input_port_hash[:id],
+          'output_id'   => output_port_hash[:id],
+          'assembly_id' => assembly_idh.get_id()
+        }
+        {pl_ref => pl_hash}
+      end
 
       def self.import_task_templates(assembly_hash, opts = {})
         ret = DBUpdateHash.new()

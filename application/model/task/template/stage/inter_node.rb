@@ -105,15 +105,25 @@ module DTK; class Task; class Template
           ret.merge(Field::TemporalOrder => Constant::Concurrent, Field::Subtasks => subtasks)
         end
       end
-      # action_list nil can be passed if just concerned with parsing
+
+      # opts can have keys:
+      #  :just_parse (Boolean)
+      #  ...
       def self.parse_and_reify?(serialized_content, action_list, opts = {})
         # content could be either
         # 1) a concurrent block with multiple nodes,
         # 2) a single node,
         # 3) a multi-node specification
 
+        # action_list nil can be passed if just concerned with parsing
+        if action_list.nil?
+          unless opts[:just_parse]
+            Log.error("Unexpected that action_list.nil? while opts[:just_parse] is not true")
+          end
+        end
+
         if multi_node_type = parse_and_reify_is_multi_node_type?(serialized_content)
-          return MultiNode.parse_and_reify(multi_node_type, serialized_content, action_list)
+          return MultiNode.parse_and_reify(multi_node_type, serialized_content, action_list, opts)
         end
 
         normalized_content = serialized_content[Field::Subtasks] || [serialized_content]

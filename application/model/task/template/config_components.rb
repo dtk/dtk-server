@@ -61,7 +61,7 @@ module DTK; class Task
         begin
           cmp_actions = (opts[:assembly] && ActionList::ConfigComponents.get(opts[:assembly]))
           serialized_content = serialized_content_hash_form(Aux.convert_keys_to_symbols_recursive(workflow_hash))
-          Content.parse_and_reify(serialized_content, cmp_actions)
+          Content.parse_and_reify(serialized_content, cmp_actions, just_parse: true)
          rescue ParsingError => parse_error
           return parse_error
         end

@@ -44,7 +44,13 @@ module DTK
           fail ErrorUsage, "Task with id '#{running_task.id}' is already running in assembly. Please wait until task is complete or cancel task."
         end
 
-        task = Task.create_from_assembly_instance(service, {})
+        unless task = Task.create_from_assembly_instance?(service, {})
+          # TODO: double check this is right
+          response =  {
+            message: "There are no steps in the workflow to execute"
+          }
+          return rest_ok_response(response)
+        end
         task.save!()
 
         workflow = Workflow.create(task)

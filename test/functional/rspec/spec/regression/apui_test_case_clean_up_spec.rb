@@ -34,9 +34,11 @@ describe "(Admin Panel UI) Test Script Clean up" do
 			results+=group_panel.get_all_results(too_long)
 			puts "Found #{results.length} matching results. "
 			results.each do |x|
+				puts "Deleting user group: #{x}"
 				group_panel.search_for_object(x)
 				group_panel.press_delete_link(x)
-			end 
+			end
+			puts " "
 			expect(results.length).to be > 0
 		end
 	end
@@ -55,9 +57,11 @@ describe "(Admin Panel UI) Test Script Clean up" do
 			results+=user_panel.get_all_results(too_long)
 			puts "Found #{results.length} matching results. "
 			results.each do |x|
+				puts "Deleting user: #{x}"
 				user_panel.search_for_object(x)
 				user_panel.press_delete_link(x)
 			end
+			puts " "
 			expect(results.length).to be > 0
 		end
 	end
@@ -75,9 +79,11 @@ describe "(Admin Panel UI) Test Script Clean up" do
 			results+=ns_panel.get_all_results(too_long)
 			puts "Found #{results.length} matching results. "
 			results.each do |x|
+				puts "Deleting namespace: #{x}"
 				ns_panel.search_for_object(x)
 				ns_panel.press_delete_link(x)
 			end
+			puts " "
 			expect(results.length).to be > 0 
 		end
 	end

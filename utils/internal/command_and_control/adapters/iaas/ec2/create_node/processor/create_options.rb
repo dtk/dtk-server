@@ -11,12 +11,17 @@ module DTK; module CommandAndControlAdapter
       end
 
       def update_security_group!
-        security_group = @target.get_security_group() ||
-          @target.get_security_group_set() ||
+        security_group = @target.get_security_group_set() ||
+          @target.get_security_group() ||
           @external_ref[:security_group_set] ||
           [R8::Config[:ec2][:security_group]] ||
           'default'
-        merge!(groups: security_group)
+
+        security_group_ids = get_security_group_ids(security_group)
+        merge!(security_group_ids: security_group_ids) unless security_group_ids.empty?
+
+        # TODO DTK-2231 Aldin check if groups needed when security_group_ids are available
+        merge!(groups: security_group.is_a?(Array) ? security_group : [security_group])
       end
 
       def update_tags!
@@ -93,6 +98,28 @@ module DTK; module CommandAndControlAdapter
       end
 
       private
+
+      def get_security_group_ids(security_group)
+        security_group_ids = []
+
+        if security_group.is_a?(Array)
+          security_group.each do |group|
+            group_id = check_for_security_group_id(group)
+            security_group_ids << group_id if group_id
+          end
+        else
+          group_id = check_for_security_group_id(security_group)
+          security_group_ids << group_id if group_id
+        end
+
+        security_group_ids
+      end
+
+      def check_for_security_group_id(security_group)
+        if check_security_group = @conn.check_for_security_group(security_group)
+          check_security_group.group_id
+        end
+      end
 
       def ec2_name_tag
         # TO-DO: move the tenant name definition to server configuration

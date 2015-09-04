@@ -23,11 +23,12 @@ module DTK; class ModuleDSL; class V4
       end
 
       def only_one_per_node(input_hash, external_ref)
-        if input_hash.has_key?('only_one_per_node')
-          input_hash['only_one_per_node']
-        else
-          external_ref['type'] != 'puppet_definition'
-        end
+        # if only_one_per_node is explicily given then use this value
+        ret = input_hash['only_one_per_node']
+        return ret unless ret.nil?
+        
+        # otherwise default is to make only_one_per_node true unless external_ref['type'] is set to 'puppet_definition'
+        external_ref['type'] != 'puppet_definition'
       end
 
       def set_action_def_and_external_ref!(ret, input_hash, cmp, _context = {})

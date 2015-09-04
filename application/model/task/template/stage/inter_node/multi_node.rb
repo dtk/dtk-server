@@ -4,7 +4,7 @@ module DTK; class Task; class Template; class Stage
       def initialize(serialized_multinode_action)
         super(serialized_multinode_action[:name])
         unless @ordered_components = components_or_actions(serialized_multinode_action)
-          all_legal = Constant.all_string_variations(*ComponantOrActionConstants).join(',')
+          all_legal = Constant.all_string_variations(:ComponentsOrActions).join(',')
           msg = "Missing Component or Action field (#{all_legal})"
           if name = serialized_multinode_action[:name]
             msg << " in stage '#{name}'"
@@ -29,12 +29,9 @@ module DTK; class Task; class Template; class Stage
 
       private
 
-      ComponantOrActionConstants = [:OrderedComponents, :Components, :Actions]
       def components_or_actions(serialized_el)
-        if match = ComponantOrActionConstants.find { |k| Constant.matches?(serialized_el, k) }
-          if ret = Constant.matches?(serialized_el, match)
-            ret.kind_of?(Array) ? ret : [ret]
-          end
+        if ret = Constant.matches?(serialized_el, :ComponentsOrActions)
+          ret.kind_of?(Array) ? ret : [ret]
         end
       end
 

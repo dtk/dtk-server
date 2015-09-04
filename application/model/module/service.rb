@@ -163,7 +163,7 @@ module DTK
       templates_with_nodes = get_assembly_templates()
       templates_with_nodes.each do |template|
         nodes_size = 0
-        template[:nodes].each do |node|
+        (template[:nodes] || []).each do |node|
           nodes_size += node.is_node_group? ? node.attribute.cardinality : 1
         end
         template[:nodes_size] = nodes_size

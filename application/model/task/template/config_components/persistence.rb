@@ -27,7 +27,7 @@ module DTK; class Task; class Template; class ConfigComponents
       end
 
       def self.persist(assembly, template_content, task_action = nil)
-        if serialized_content = template_content.serialization_form(allow_empty_task: true, filter: { source: :assembly })
+        if serialized_content = template_content.serialization_form(filter: { source: :assembly })
           task_template_idh = Template.create_or_update_from_serialized_content?(assembly.id_handle(), serialized_content, task_action)
           ReifiedObjectCache.add_or_update_item(task_template_idh, template_content)
         else

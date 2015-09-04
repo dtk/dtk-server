@@ -213,7 +213,7 @@ module DTK
       if response
         response_opts.merge!(encode_into: :yaml)
       else
-        response = { message: "Task not yet generated for assembly (#{assembly.get_field?(:display_name)})" }
+        response = { message: "Empty workflow, which will create service isntance nodes (if needed) with no additional configuration" }
       end
       rest_ok_response response, response_opts
     end
@@ -607,7 +607,9 @@ module DTK
       end
 
       # create task
-      task = Task.create_from_assembly_instance(assembly_instance, ret_params_hash(:commit_msg))
+      unless task = Task.create_from_assembly_instance?(assembly_instance, ret_params_hash(:commit_msg))
+        fail Error.new("There are no steps in the workflow to execute")
+      end
       # saves to db and returns task with top level and sub task ids filled out
       task = task.save_and_add_ids()
 
@@ -699,7 +701,10 @@ module DTK
         end
       end
 
-      task = Task.create_from_assembly_instance(assembly, opts)
+      unless task = Task.create_from_assembly_instance?(assembly, opts)
+        message = { message: "There are no steps in the workflow to execute" }
+        return rest_ok_response(message)
+      end
       task.save!()
 
       # TODO: clean up this part since this is doing more than creating task

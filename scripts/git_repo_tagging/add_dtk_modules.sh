@@ -35,9 +35,9 @@ stdlib_url="stdlib"
 sysctl_url="sysctl"
 thin_url="thin"
 vcsrepo_url="vcsrepo"
+docker_url="docker"
 
 dtk_modules=()
-dtk_modules+=($dtk_service_module_url)
 dtk_modules+=($apt_url)
 dtk_modules+=($common_user_url)
 dtk_modules+=($dtk_url)
@@ -59,6 +59,7 @@ dtk_modules+=($stdlib_url)
 dtk_modules+=($sysctl_url)
 dtk_modules+=($thin_url)
 dtk_modules+=($vcsrepo_url)
+dtk_modules+=($docker_url)
 
 cd $output_dir && git clone $dtk_server && cd server && git submodule init && git submodule update
 for module in ${dtk_modules[@]}; do

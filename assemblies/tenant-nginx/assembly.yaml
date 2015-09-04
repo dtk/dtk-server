@@ -1,6 +1,6 @@
 ---
 name: tenant-nginx
-dsl_version: 0.9.1
+dsl_version: 1.0.0
 node_bindings:
   tenant: precise-medium
 assembly:
@@ -60,27 +60,34 @@ assembly:
             db_name: dtk1
             name: dtk1
 workflow:
-  assembly_action: create
-  node: tenant
-  ordered_components:
-  - stdlib
-  - dtk
-  - dtk_java
-  - dtk_activemq
-  - common_user[dtk1]
-  - gitolite[dtk1]
-  - dtk_server::ruby193install[dtk1]
-  - dtk_server::base
-  - dtk_postgresql::server
-  - dtk_postgresql::db[dtk1]
-  - dtk_server::tenant[dtk1]
-  - gitolite::admin_client[dtk1]
-#  - thin[dtk1]
-  - vcsrepo::include
-  - common_user::common_user_ssh_config[dtk1]
-  - dtk_server::add_user[dtk1]
-  - dtk_server::cron_idle_instances[dtk1]
-  - dtk_passenger
-  - dtk_nginx::base
-  - dtk_nginx::vhost_for_tenant[dtk1]
+  subtask_order: sequential
+  subtasks:
+  - name: requirements
+    node: tenant
+    ordered_components:
+    - stdlib
+    - dtk
+    - dtk_java
+    - dtk_activemq
+    - common_user[dtk1]
+    - gitolite[dtk1]
+  - name: postgres and db
+    node: tenant
+    ordered_components:
+    - dtk_postgresql::server
+    - dtk_postgresql::db[dtk1]
+  - name: server 
+    node: tenant
+    ordered_components:
+    - dtk_server::ruby193install[dtk1]
+    - dtk_server::base
+    - dtk_server::tenant[dtk1]
+    - gitolite::admin_client[dtk1]
+    - vcsrepo::include
+    - common_user::common_user_ssh_config[dtk1]
+    - dtk_server::add_user[dtk1]
+    - dtk_server::cron_idle_instances[dtk1]
+    - dtk_passenger
+    - dtk_nginx::base
+    - dtk_nginx::vhost_for_tenant[dtk1]
 

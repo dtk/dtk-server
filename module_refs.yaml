@@ -2,6 +2,8 @@
 component_modules:
   common_user:
     namespace: internal
+  docker:
+    namespace: internal
   dtk:
     namespace: internal
   dtk_activemq:
@@ -21,6 +23,8 @@ component_modules:
   dtk_repo_manager:
     namespace: internal
   dtk_rsyslog:
+    namespace: internal
+  dtk_secret:
     namespace: internal
   dtk_server:
     namespace: internal

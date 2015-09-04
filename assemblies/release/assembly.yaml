@@ -1,6 +1,6 @@
 ---
 name: release
-dsl_version: 0.9.1
+dsl_version: 1.0.0
 node_bindings:
   repo_manager: precise-micro
   tenant: precise-medium
@@ -117,15 +117,20 @@ workflow:
   assembly_action: create
   subtask_order: sequential
   subtasks:
-  - node: repo_manager
+  - name: repo_man_requirements
+    node: repo_manager
     ordered_components:
     - stdlib
     - dtk
+    - dtk_postgresql::server
+  - name: repo_man_setup
+    node: repo_manager
+    ordered_components:
     - common_user[git]
     - gitolite[git]
-    - dtk_postgresql::server
     - dtk_repo_manager
-  - node: tenant
+  - name: tenant_requirements
+    node: tenant
     ordered_components:
     - stdlib
     - dtk
@@ -134,10 +139,16 @@ workflow:
     - common_user[tenant]
     - common_user[dtk16-client]
     - gitolite[tenant]
-    - dtk_server::ruby193install[tenant]
-    - dtk_server::base
+  - name: psql_and_db_setup
+    node: tenant
+    ordered_components: 
     - dtk_postgresql::server
     - dtk_postgresql::db[tenant]
+  - name: tenant_setup
+    node: tenant
+    ordered_components:    
+    - dtk_server::ruby193install[tenant]
+    - dtk_server::base
     - redis::install
     - redis::instance[6379]
     - dtk_server::tenant[tenant]

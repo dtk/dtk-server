@@ -1,0 +1,52 @@
+---
+name: tenant-docker
+description: tenant-docker
+dsl_version: 1.0.0
+node_bindings:
+  tenant: precise-medium
+assembly:
+  nodes:
+    tenant:
+      components:
+      - dtk
+      - stdlib
+      - vcsrepo::include
+      - sysctl::include
+      - dtk_java
+      - dtk_postgresql::server
+      - dtk_activemq
+      - dtk_postgresql::db[dtk1docker]:
+          attributes:
+            db_name: dtk1docker
+      - dtk_nginx::base
+      - docker
+      - dtk_server::docker:
+          attributes:
+            activemq_password: marionette
+            activemq_subcollective: mcollective
+            aws_access_key_id: ''
+            aws_secret_access_key: ''
+            db_host: /var/run/postgresql
+            db_name: dtk1docker
+            docker_email: dario@atlantbh.com
+            docker_image: getdtk/server:latest
+            docker_password_hash: ZGR1dm5qYWs6QXRsNG4rNzA=
+            remote_repo_git_user: git
+            remote_repo_host: ''
+            remote_repo_port: '443'
+            tenant_user: dtk1docker
+workflow:
+  assembly_action: create
+  node: tenant
+  ordered_components:
+  - dtk
+  - stdlib
+  - vcsrepo::include
+  - sysctl::include
+  - dtk_java
+  - dtk_activemq
+  - dtk_postgresql::server
+  - dtk_postgresql::db[dtk1docker]
+  - dtk_nginx::base
+  - docker
+  - dtk_server::docker

@@ -22,12 +22,17 @@ assembly:
           attributes:
             name: git
 workflow:
-  assembly_action: create
-  node: repo_manager
-  ordered_components:
-  - stdlib
-  - dtk
-  - common_user[git]
-  - gitolite[git]
-  - dtk_postgresql::server
-  - dtk_repo_manager
+  subtask_order: sequential
+  subtasks:
+  - name: requirements
+    node: repo_manager
+    ordered_components:
+    - stdlib
+    - dtk
+    - dtk_postgresql::server
+  - name: repo_man_setup
+    node: repo_manager
+    ordered_components:
+    - common_user[git]
+    - gitolite[git]
+    - dtk_repo_manager

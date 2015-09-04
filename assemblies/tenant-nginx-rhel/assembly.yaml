@@ -1,8 +1,8 @@
 ---
-name: tenant-nginx-centos
+name: tenant-nginx-rhel
 dsl_version: 0.9.1
 node_bindings:
-  tenant: centos6-medium
+  tenant: rhel6-medium
 assembly:
   nodes:
     tenant:

@@ -18,8 +18,16 @@ module DTK; class ModuleDSL; class V4
           add_attributes!(ret, cmp_type, ret_input_hash_with_constants(opts[:constants]), constant_attribute: true)
         end
         set_action_def_and_external_ref!(ret, input_hash, cmp, context)
-        ret.set_if_not_nil('only_one_per_node', only_one_per_node(ret['external_ref']))
+        ret.set_if_not_nil('only_one_per_node', only_one_per_node(input_hash, ret['external_ref']))
         ret
+      end
+
+      def only_one_per_node(input_hash, external_ref)
+        if input_hash.has_key?('only_one_per_node')
+          input_hash['only_one_per_node']
+        else
+          external_ref['type'] != 'puppet_definition'
+        end
       end
 
       def set_action_def_and_external_ref!(ret, input_hash, cmp, _context = {})

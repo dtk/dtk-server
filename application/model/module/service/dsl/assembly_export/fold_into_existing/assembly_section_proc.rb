@@ -21,6 +21,9 @@ module DTK; class ServiceModule; class AssemblyExport
         node_name   = nil
         node_indent = nil
         components_first = nil
+        component_links = false
+        component_links_indent = nil
+        component_name = nil
 
         @raw_array.each do |el|
           is_node = nil
@@ -51,10 +54,23 @@ module DTK; class ServiceModule; class AssemblyExport
                   end
                 end
 
-                if last_name.strip.start_with?('- ') && !is_node
-                  content = new_array.last[:content]
-                  new_array.last[:content] = content + el
+                if last_name.strip.start_with?('- ') && !is_node && !name.eql?('nodes:')
+                  if name.eql?('component_links:')
+                    component_name = last_name
+                    new_array << { name: name, content: el, node: node_name, component_name: component_name }
+                    component_links = true
+                  else
+                    content = new_array.last[:content]
+                    new_array.last[:content] = content + el
+                  end
+                elsif last_name.eql?('component_links:')
+                  component_links = true
+                  component_links_indent = el[/\A */].size
+                  new_array << { name: name, content: el, node: node_name, component_name: component_name }
+                elsif component_links && el[/\A */].size == component_links_indent
+                  new_array << { name: name, content: el, node: node_name, component_name: component_name }
                 else
+                  component_links = false
                   if match = name.match(/(\w+:)\s*(\w+)/)
                     name = match[1] if match[1] && match[2]
                   end

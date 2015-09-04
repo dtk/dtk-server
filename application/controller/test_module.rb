@@ -42,6 +42,10 @@ module DTK
       if ret_request_param_boolean(:force_parse)
         opts.merge!(force_parse: true)
       end
+      if generate_docs = ret_request_param_boolean(:generate_docs)
+        opts.merge!(generate_docs: generate_docs)
+      end
+
       dsl_created_info = test_module.update_model_from_clone_changes?(commit_sha, diffs_summary, version, opts)
       rest_ok_response dsl_created_info
     end

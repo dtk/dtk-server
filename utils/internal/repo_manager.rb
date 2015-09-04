@@ -27,7 +27,11 @@ module DTK
         get_adapter_repo(context).get_file_content(file_path_hash, opts)
       end
 
-      # signature is 
+      def files(context)
+        get_adapter_repo(context).ls_r()
+      end
+
+      # signature is
       # def add_file(file_path_hash_or_string, content, commit_msg=nil, context)
       # returns a Boolean: true if any change made
       def add_file(*args)
@@ -35,6 +39,10 @@ module DTK
         file_path_hash_or_string, content, commit_msg = args
         file_path_hash = file_path_hash_form(file_path_hash_or_string)
         get_adapter_repo(context).add_file(file_path_hash, content, commit_msg)
+      end
+
+      def add_file_simplified(context, file_path, content, commit_msg = "Adding file")
+        get_adapter_repo(context).add_file({ path: file_path }, content, commit_msg)
       end
 
       def update_file_content(file_path_hash_or_string, content, context)

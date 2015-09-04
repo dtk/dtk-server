@@ -1,8 +1,12 @@
 r8_require('../branch_names')
+r8_require('../documentation')
+
 module DTK
   class ModuleBranch < Model
     r8_nested_require('branch', 'location')
+
     include BranchNamesMixin
+    include Branch::DocumentationParsing
     extend BranchNamesClassMixin
 
     def self.common_columns
@@ -54,11 +58,12 @@ module DTK
     def get_module
       row = get_obj(cols: [:type, :parent_info])
       type = row[:type].to_sym
-# TODO: temp until for source of bug where component rather than component_module put in for type
-if type == :component
-  type = :component_module
-  Log.error("Bug :component from :component_module on (#{row.inspect})")
-end
+
+      # TODO: temp until for source of bug where component rather than component_module put in for type
+      if type == :component
+        type = :component_module
+        Log.error("Bug :component from :component_module on (#{row.inspect})")
+      end
       row[type]
     end
 
@@ -490,7 +495,7 @@ end
         version: version_field(local.version)
       }
       assigns.merge!(ancestor_id: ancestor_branch_idh.get_id()) if ancestor_branch_idh
-      assigns.merge!(current_sha: opts[:current_sha]) if opts[:current_sha] 
+      assigns.merge!(current_sha: opts[:current_sha]) if opts[:current_sha]
       ref = branch
       { ref => assigns }
     end

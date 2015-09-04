@@ -597,6 +597,7 @@ module DTK
     private
 
     attr_reader :grit_repo
+
     def initialize(path, branch, opts = {})
       @branch = branch
       @path = path

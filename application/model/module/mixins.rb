@@ -131,6 +131,9 @@ module DTK
       update_from_includes = opts[:update_from_includes]
       return unless pull_was_needed || parse_needed || update_from_includes
 
+      # we parse templates and persist them on git repo
+      module_branch.generate_and_persist_docs if opts[:generate_docs]
+
       opts_update = Aux.hash_subset(opts, [:do_not_raise, :modification_type, :force_parse, :auto_update_module_refs, :dsl_parsed_false, :update_module_refs_from_file, :update_from_includes, :current_branch_sha, :service_instance_module, :task_action])
       update_model_from_clone_changes(commit_sha, diffs_summary, module_branch, version, opts_update)
     end
@@ -292,9 +295,9 @@ module DTK
       opts = Opts.new(filter: [:eq, :id, id], project_idh: opts[:project_idh], detail_to_include: [:remotes])
       list(opts).first
     end
-    
+
 =begin
-TODO: remove after incorporating in info above displaying of remotes; this was removed because it processed dsl_parsed incorrectly 
+TODO: remove after incorporating in info above displaying of remotes; this was removed because it processed dsl_parsed incorrectly
     def info(target_mh, id, opts = {})
       project_idh  = opts[:project_idh]
       namespaces = []

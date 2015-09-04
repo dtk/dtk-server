@@ -79,6 +79,9 @@ module DTK
       if force = ret_request_params(:force)
         opts.merge!(force: force)
       end
+      if generate_docs = ret_request_param_boolean(:generate_docs)
+        opts.merge!(generate_docs: generate_docs)
+      end
 
       # the possible keys in response are with the subkeys that are used
       #  :dsl_parse_error: ModuleDSL::ParsingError obj

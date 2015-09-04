@@ -11,6 +11,7 @@ components:
     - dtk
     includes:
     - sysctl
+    - apt
   client:
     description: "Postgres client"
     external_ref:

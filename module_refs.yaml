@@ -1,4 +1,6 @@
 ---
 component_modules:
+  apt:
+    namespace: internal
   sysctl:
     namespace: internal

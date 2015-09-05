@@ -183,18 +183,36 @@ module DTK
     end
 
     # returns a Boolean: true if any change made
-    def add_file(file_asset, content, commit_msg = nil)
+    def add_files(file_path__content_array, commit_msg = nil)
+      ret = false
+      added_file_paths = []
+      file_path__content_array.each do |el|
+        path = el[:path]
+        if add_file({ path: path }, el[:content], nil, no_commit: true)
+          added_file_paths << path
+          ret = true
+        end
+      end
+      if ret
+        commit_msg ||= "Adding files: #{added_file_paths.join(', ')}"
+        checkout(@branch) { commit(commit_msg) }
+      end
+      ret
+    end
+
+    # returns a Boolean: true if any change made
+    def add_file(file_asset, content, commit_msg = nil, opts = {})
       ret = false
       path = file_asset[:path]
-      commit_msg ||= "Adding file #{path}"
+      commit_msg ||= "Adding file '#{path}'"
       content ||= ''
       checkout(@branch) do
         recursive_create_dir?(path)
         File.open(path, 'w') { |f| f << content }
         git_command__add(path)
-        # diff(nil) looks at diffs with repsect to the working dir
+        # diff(nil) looks at diffs with respect to the working dir
         unless diff(nil).ret_summary().no_diffs?()
-          commit(commit_msg)
+          commit(commit_msg) unless opts[:no_commit]
           ret = true
         end
       end

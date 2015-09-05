@@ -40,9 +40,9 @@ module DTK
         file_path_hash = file_path_hash_form(file_path_hash_or_string)
         get_adapter_repo(context).add_file(file_path_hash, content, commit_msg)
       end
-
-      def add_file_simplified(context, file_path, content, commit_msg = "Adding file")
-        get_adapter_repo(context).add_file({ path: file_path }, content, commit_msg)
+      
+      def add_files(context, file_path__content_array, commit_msg = nil)
+        get_adapter_repo(context).add_files(file_path__content_array, commit_msg)
       end
 
       def update_file_content(file_path_hash_or_string, content, context)

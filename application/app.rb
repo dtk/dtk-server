@@ -18,7 +18,7 @@ unless helper_paths.include?(File.dirname(__FILE__))
   Innate.options[:helpers_helper][:paths] = [File.dirname(__FILE__)] + helper_paths
 end
 
-# TODO: for testing; signal tido dump thread info
+# TODO: for testing; signal to dump thread info
 #trap 'TTIN' do
 #  Thread.list.each do |thread|
 #    puts "------------------- Thread TID-#{thread.object_id.to_s} -----------------\n"
@@ -61,6 +61,7 @@ r8_require("#{UTILS_BASE_DIR}/utils")
 
 r8_require("#{LIB_DIR}/model")
 r8_require("#{LIB_DIR}/response_info")
+r8_require("#{LIB_DIR}/doc_generator")
 
 r8_require('config/routes.rb')
 

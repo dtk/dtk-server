@@ -1,12 +1,10 @@
 r8_require('../branch_names')
-r8_require('../documentation')
 
 module DTK
   class ModuleBranch < Model
     r8_nested_require('branch', 'location')
 
     include BranchNamesMixin
-    include Branch::DocumentationParsing
     extend BranchNamesClassMixin
 
     def self.common_columns

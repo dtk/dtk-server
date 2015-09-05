@@ -131,8 +131,7 @@ module DTK
       update_from_includes = opts[:update_from_includes]
       return unless pull_was_needed || parse_needed || update_from_includes
 
-      # we parse templates and persist them on git repo
-      module_branch.generate_and_persist_docs if opts[:generate_docs]
+      generate_and_persist_docs(module_branch) if opts[:generate_docs]
 
       opts_update = Aux.hash_subset(opts, [:do_not_raise, :modification_type, :force_parse, :auto_update_module_refs, :dsl_parsed_false, :update_module_refs_from_file, :update_from_includes, :current_branch_sha, :service_instance_module, :task_action])
       update_model_from_clone_changes(commit_sha, diffs_summary, module_branch, version, opts_update)
@@ -224,6 +223,25 @@ module DTK
       end
 
       raw_module_rows.first.merge(repo_remotes: repo_remotes)
+    end
+
+    private
+
+    ##
+    # Generate documentations based on template files in docs/ folder. After than perisist that generated documentation to git repo
+    #
+    def generate_and_persist_docs(module_branch)
+      doc_generator = DocGenerator.new(module_branch).generate!
+      file_path__content_array = doc_generator.file_path__content_array
+      return if file_path__content_array.empty?
+      
+      # add and commit these files
+      final_doc_paths = doc_generator.file_paths
+      commit_msg = "Adding generated document files: #{final_doc_paths.join(', ')}"
+      RepoManager.add_files(module_branch, file_path__content_array, commit_msg)
+      
+      # finally we push these changes
+      RepoManager.push_changes(module_branch)
     end
   end
 

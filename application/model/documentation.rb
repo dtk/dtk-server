@@ -4,25 +4,20 @@ require 'active_support/core_ext/object/instance_variables'
 module DTK
   module Branch
     module DocumentationParsing
-
-      TEMPLATE_EXTENSIONS = 'tpl|md'
-      
-      DOC_FOLDER = 'documentation' # final generated documentation folder
-      DOC_EXTENSION = 'md'         # final generated documentation extension
-      
       ##
       # Generate documentations based on template files in docs/ folder. After than perisist that generated documentation to git repo
       #
       def generate_and_persist_docs
-        template_files = RepoManager.files(self).select { |f| f.match(/docs\/.*\.(#{TEMPLATE_EXTENSIONS})$/) }
-        return if template_files.empty?
+        doc_files = RepoManager.files(self).select { |f| SourceFile.match?(f) }
+        return if doc_files.empty?
         
         dtk_model_data = retrive_model_data
         
         # we generate documentation and persist it to module
         final_doc_paths = []
-        file_path__content_array = template_files.map do |file_path|
-          rendered_content = render(file_path, dtk_model_data)
+        file_path__content_array = doc_files.map do |file_path|
+          file_content = RepoManager.get_file_content(file_path, self)
+          rendered_content = (SourceFile.match?(file_path, :template) ? render(file_content, dtk_model_data) : file_content)
           final_doc_path   = final_document_path(file_path)
           final_doc_paths << final_doc_path
           { path: final_doc_path, content: rendered_content }
@@ -37,11 +32,11 @@ module DTK
       end
       
       private
-      
-      def find_templates
-        all_repo_files.select { |f| f.match(/.*\.(#{TEMPLATE_EXTENSIONS})$/) }
+
+      def final_document_path(source_file_path)
+        TargetFile.target_path_from_source_path(source_file_path)
       end
-      
+
       ##
       # Read 'dtk.model.yaml' into our domain model
       #
@@ -54,8 +49,7 @@ module DTK
       ###
       # Render and tidy up content, extra empty lines due to Mustache for loop behavior
       #
-      def render(file_path, model_data)
-        file_content = RepoManager.get_file_content(file_path, self)
+      def render(file_content, model_data)
         rendered_content = nil
         begin
           rendered_content = ::Mustache.render(file_content, model_data) || ''
@@ -65,15 +59,49 @@ module DTK
         rendered_content.gsub(/\|(\r?\n)+\|/m, "|\n|")
       end
       
-      ##
-      # Changes file name and destination, from template to final document
-      #
-      def final_document_path(file_path)
-        file_name = file_path.match(/([^\/]*)\..*$/)[1]         # extracts only name of the file, without extension
-        File.join(DOC_FOLDER, "#{file_name}.#{DOC_EXTENSION}")
+      module SourceFile
+        BaseDir = 'docs'
+        
+        module Extension 
+          Template = 'tpl'
+          Markdown = 'md'
+          All = [Template, Markdown]
+
+          def self.extension(type)
+            case type
+            when :all      then "(#{All.join('|')})"
+            when :template then Template
+            when :markdown then Markdown
+            else fail(Error, "Bad type '#{type}'")
+            end
+          end
+        end
+        
+        def self.match(path, type = :all)
+          ext = Extension.extension(type)
+          regexp = /#{BaseDir}\/(.+)\.(#{ext})$/
+          path.match(regexp)
+        end
+        def self.match?(path, type = :all)
+          !!match(path, type)
+        end
+      end
+
+      module TargetFile
+        BaseDir    = 'documentation'
+        Extension = 'md'
+        
+        ##
+        # Changes file name and destination, from template to final document
+        #
+        def self.target_path_from_source_path(source_file_path)
+          # removes doc sub folder and file extension
+          extracted_file_path = SourceFile.match(source_file_path)[1]   
+          File.join(BaseDir, "#{extracted_file_path}.#{Extension}")
+        end
       end
     end
-    
+      
     ###
     # DTK Model (.yaml) is not in mustache-friendly format, so we transform it in domain class bellow
     #

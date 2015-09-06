@@ -1,6 +1,3 @@
-require 'mustache'
-require 'active_support/core_ext/object/instance_variables'
-
 module DTK
   class DocGenerator
     r8_nested_require('doc_generator', 'domain')
@@ -35,7 +32,7 @@ module DTK
       @file_paths = []
       doc_files.each do |file_path|
         file_content = RepoManager.get_file_content(file_path, @module_branch)
-        rendered_content = (SourceFile.match?(file_path, :template) ? render(file_content, dtk_model_data) : file_content)
+        rendered_content = (SourceFile.match?(file_path, :template) ? render(file_content, file_path, dtk_model_data) : file_content)
         final_doc_path   = final_document_path(file_path)
         @file_paths << final_doc_path
         @file_path__content_array << { path: final_doc_path, content: rendered_content }
@@ -55,20 +52,14 @@ module DTK
     def retrive_model_data
       file_content = RepoManager.get_file_content('dtk.model.yaml', @module_branch)
       content = YAML.load(file_content)
-      Domain::Module.new(content.with_indifferent_access).instance_values
+      Domain.normalize(content)
     end
     
     ###
-    # Render and tidy up content, extra empty lines due to Mustache for loop behavior
+    # Render using Mustache template
     #
-    def render(file_content, model_data)
-      rendered_content = nil
-      begin
-        rendered_content = ::Mustache.render(file_content, model_data) || ''
-      rescue ::Mustache::Parser::SyntaxError => e
-        fail ErrorUsage, "Unable to parse Mustache template '#{file_path}':\n#{e.message}"
-      end
-      rendered_content.gsub(/\|(\r?\n)+\|/m, "|\n|")
+    def render(file_content, file_path, model_data)
+      MustacheTemplate.render(file_content, model_data, file_path: file_path, remove_empty_lines: true)
     end
     
     module SourceFile

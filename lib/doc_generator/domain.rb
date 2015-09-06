@@ -3,8 +3,16 @@ module DTK
     ###
     # DTK Model (.yaml) is not in mustache-friendly format, so we transform it in domain class bellow
     #
-    module Domain
-      class Module
+    class Domain
+      r8_nested_require('domain', 'active_support_instance_variables')
+      extend ActiveSupportInstanceVariablesMixin
+      include ActiveSupportInstanceVariablesMixin
+
+      def self.normalize(content)
+        active_support_instance_values(Module.new(active_support_with_indifferent_access(content)))
+      end
+      
+      class Module < self
         attr_accessor :name, :dsl_version, :type, :components
         
         def initialize(data)
@@ -13,12 +21,12 @@ module DTK
           @type = data[:module_type]
           @components = []
           (data[:components] || {}).each do |name, comp_data|
-            @components << Domain::Component.new(name, comp_data).instance_values
+            @components << active_support_instance_values(Domain::Component.new(name, comp_data))
           end
         end
       end
       
-      class Component
+      class Component < self
         attr_accessor :name, :attributes, :external_ref
         
         def initialize(name, data_hash)
@@ -26,12 +34,12 @@ module DTK
           @name = name
           @external_ref = data_hash[:external_ref]
           (data_hash[:attributes] || {}).each do |attr_name, comp_data|
-            @attributes << Domain::Attribute.new(attr_name, comp_data).instance_values
+            @attributes << active_support_instance_values(Domain::Attribute.new(attr_name, comp_data))
           end
         end
       end
       
-      class Attribute
+      class Attribute < self
         attr_accessor :name, :type, :required
         
         def initialize(name, data_hash)
@@ -44,4 +52,5 @@ module DTK
 
   end
 end
+
 

@@ -1,7 +1,5 @@
 module DTK; class Task; class Template
   class TaskParams
-    include MustacheTemplateMixin
-
     def initialize(task_params)
       @task_params = task_params
     end
@@ -27,18 +25,16 @@ module DTK; class Task; class Template
     private
 
     def substitute_vars_in_string(string)
-      unless needs_template_substitution?(string)
+      unless MustacheTemplate.needs_template_substitution?(string)
         return string
       end
 
       begin
-        bind_template_attributes_utility(string, @task_params)
+        MustacheTemplate.render(string, @task_params)
        rescue MustacheTemplateError::MissingVar => e
         ident = 4
         err_msg = "The variable '#{e.missing_var}' in the following workflow term is not set:\n#{' ' * ident}#{string}"
-        raise ErrorUsage.new(err_msg)
-       rescue MustacheTemplateError => e
-        raise ErrorUsage.new("Unbound variable in the workflow: #{e.error_message}")
+        fail ErrorUsage.new(err_msg)
       end
     end
   end

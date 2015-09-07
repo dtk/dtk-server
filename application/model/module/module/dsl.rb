@@ -24,11 +24,11 @@ module DTK
     end
     private :initialize
 
-    def raw_dsl_hash
+    def raw_hash
       @version_specific_input_hash 
     end
 
-    def version_normalized_dsl_hash
+    def version_normalized_hash
       @input_hash
     end
 

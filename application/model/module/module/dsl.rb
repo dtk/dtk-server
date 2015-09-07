@@ -12,16 +12,25 @@ module DTK
 
     attr_reader :input_hash, :project_idh, :module_branch
     def initialize(impl_idh, module_branch, version_specific_input_hash, opts = {})
-      @module_branch = module_branch
-      @input_hash = version_parse_check_and_normalize(version_specific_input_hash)
-      @impl_idh = impl_idh
-      @project_idh = impl_idh.get_parent_id_handle_with_auth_info()
-      @ref_integrity_snapshot = opts[:ref_integrity_snapshot]
-      @component_module = opts[:component_module]
+      @module_branch               = module_branch
+      @version_specific_input_hash = version_specific_input_hash
+      @input_hash                  = version_parse_check_and_normalize(version_specific_input_hash)
+      @impl_idh                    = impl_idh
+      @project_idh                 = impl_idh.get_parent_id_handle_with_auth_info()
+      @ref_integrity_snapshot      = opts[:ref_integrity_snapshot]
+      @component_module            = opts[:component_module]
       # TODO: deprecate <config_agent_type>
       @config_agent_type = ConfigAgent::Type.default_symbol
     end
     private :initialize
+
+    def raw_dsl_hash
+      @version_specific_input_hash 
+    end
+
+    def version_normalized_dsl_hash
+      @input_hash
+    end
 
     def self.parse_dsl(component_module, impl_obj, opts = {})
       ref_integrity_snapshot = RefIntegrity.snapshot_associated_assembly_templates(component_module)

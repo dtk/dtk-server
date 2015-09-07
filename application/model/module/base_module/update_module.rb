@@ -99,6 +99,8 @@ module DTK; class BaseModule
       dsl_obj = parse_dsl(impl_obj, opts.merge(config_agent_type: config_agent_type))
       return dsl_obj if is_parsing_error?(dsl_obj)
 
+      generate_and_persist_docs(module_branch, dsl_obj) if opts[:generate_docs]
+
       dsl_obj.update_model_with_ref_integrity_check(version: version)
 
       if opts[:update_from_includes]
@@ -152,6 +154,24 @@ module DTK; class BaseModule
     end
 
     private
+
+    ##
+    # Generate documentations based on template files in docs/ folder. After than perisist that generated documentation to git repo
+    #
+    def generate_and_persist_docs(module_branch, dsl_object)
+      doc_generator = DocGenerator.new(module_branch, dsl_object).generate!
+      file_path__content_array = doc_generator.file_path__content_array
+      return if file_path__content_array.empty?
+      
+      # add and commit these files
+      final_doc_paths = doc_generator.file_paths
+      commit_msg = "Adding generated document files: #{final_doc_paths.join(', ')}"
+      RepoManager.add_files(module_branch, file_path__content_array, commit_msg)
+      
+      # finally we push these changes
+      RepoManager.push_changes(module_branch)
+    end
+
 
     def klass
       case @module_class

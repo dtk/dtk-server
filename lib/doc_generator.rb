@@ -30,7 +30,7 @@ module DTK
       doc_files = RepoManager.files(@module_branch).select { |f| SourceFile.match?(f) }
       return self if doc_files.empty?
   
-      dsl_normalized_for_templates = Domain.normalize(@dsl_object)
+      dsl_normalized_for_templates = Domain.normalize_top(@dsl_object)
 pp [:dsl_normalized_for_templates, dsl_normalized_for_templates]      
       # we generate documentation and persist it to module
       @file_paths = []

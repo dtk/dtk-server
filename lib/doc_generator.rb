@@ -22,7 +22,9 @@ module DTK
     ##
     # Generate documentations based on template files in docs/ folder.
     #
-    def generate!
+    # opts can have key
+    #  :raise_error_on_missing_var (Boolean)
+    def generate!(opts = {})
       @file_path__content_array = []
       @file_paths = []
 
@@ -35,7 +37,7 @@ module DTK
       @file_paths = []
       doc_files.each do |file_path|
         file_content = RepoManager.get_file_content(file_path, @module_branch)
-        rendered_content = (SourceFile.match?(file_path, :template) ? render(file_content, file_path, dtk_model_data) : file_content)
+        rendered_content = (SourceFile.match?(file_path, :template) ? render(file_content, file_path, dtk_model_data, opts) : file_content)
         final_doc_path   = final_document_path(file_path)
         @file_paths << final_doc_path
         @file_path__content_array << { path: final_doc_path, content: rendered_content }
@@ -52,8 +54,11 @@ module DTK
     ###
     # Render using Mustache template
     #
-    def render(file_content, file_path, model_data)
-      MustacheTemplate.render(file_content, model_data, file_path: file_path, remove_empty_lines: true)
+    # opts can have key
+    #  :raise_error_on_missing_var (Boolean)
+    def render(file_content, file_path, model_data, opts)
+      opts_render = { file_path: file_path, remove_empty_lines: true }.merge(opts)
+      MustacheTemplate.render(file_content, model_data, opts_render)
     end
     
     module SourceFile

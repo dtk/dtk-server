@@ -13,10 +13,12 @@ module DTK
     # block_for_err takes mustache_gem_err,string
     # opts can have keys
     #   :file_path
-    #   :remove_empty_lines (Booelan)
+    #   :remove_empty_lines (Boolean)
+    #   :raise_error_on_missing_var (Boolean) - default is true
     def self.render(string, attr_val_pairs, opts={})
       begin
-        ::Mustache.raise_on_context_miss = true
+        missing_var_check = (opts[:raise_error_on_missing_var].nil? ? true : opts[:raise_error_on_missing_var])
+        ::Mustache.raise_on_context_miss = missing_var_check
         ret = ::Mustache.render(string, attr_val_pairs)
         if opts[:remove_empty_lines]
           # extra empty lines can be due to Mustache for loop behavior

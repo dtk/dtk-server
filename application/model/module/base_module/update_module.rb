@@ -159,7 +159,7 @@ module DTK; class BaseModule
     # Generate documentations based on template files in docs/ folder. After than perisist that generated documentation to git repo
     #
     def generate_and_persist_docs(module_branch, dsl_object)
-      doc_generator = DocGenerator.new(module_branch, dsl_object).generate!
+      doc_generator = DocGenerator.new(module_branch, dsl_object).generate!(raise_error_on_missing_var: false)
       file_path__content_array = doc_generator.file_path__content_array
       return if file_path__content_array.empty?
       

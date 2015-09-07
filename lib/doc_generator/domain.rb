@@ -7,7 +7,7 @@ module DTK
       def self.normalize(dsl_object)
         raw_input        = active_support_with_indifferent_access(dsl_object.raw_hash)
         normalized_input = active_support_with_indifferent_access(dsl_object.version_normalized_hash)
-        Module.normalize(raw_input[:module], raw_input, normalized_input)
+        { module: Module.normalize(raw_input[:module], raw_input, normalized_input)}
       end
 
       class BaseObject

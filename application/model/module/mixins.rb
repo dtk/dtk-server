@@ -12,7 +12,6 @@ module DTK
   #
   # Instance Mixins
   #
-
   module ModuleMixin
     include ModuleMixins::Remote::Instance
     include ModuleMixins::Create::Instance
@@ -123,16 +122,30 @@ module DTK
 
     def update_model_from_clone_changes?(commit_sha, diffs_summary, version, opts = {})
       # do pull and see if any changes need the model to be updated
-      force = opts[:force]
+      force         = opts[:force]
+      generate_docs = opts[:generate_docs]
+
       module_branch = get_workspace_module_branch(version)
       pull_was_needed = module_branch.pull_repo_changes?(commit_sha, force)
 
-      parse_needed = (opts[:force_parse] || opts[:generate_docs] || !module_branch.dsl_parsed?())
+      parse_needed = (opts[:force_parse] || generate_docs || !module_branch.dsl_parsed?())
       update_from_includes = opts[:update_from_includes]
       return unless pull_was_needed || parse_needed || update_from_includes
 
-      opts_update = Aux.hash_subset(opts, [:do_not_raise, :modification_type, :force_parse, :auto_update_module_refs, :dsl_parsed_false, :update_module_refs_from_file, :update_from_includes, :current_branch_sha, :service_instance_module, :task_action, :generate_docs])
-      update_model_from_clone_changes(commit_sha, diffs_summary, module_branch, version, opts_update)
+      # TODO: if need to generate docs, but nbot upadte the model can do somethin more efficient
+      # code below updates the model even if no change to dsl files
+      opts_update = Aux.hash_subset(opts, [:do_not_raise, :modification_type, :force_parse, :auto_update_module_refs, :dsl_parsed_false, :update_module_refs_from_file, :update_from_includes, :current_branch_sha, :service_instance_module, :task_action])
+      opts_update.merge!(ret_dsl_obj: {}) if generate_docs
+      ret = update_model_from_clone_changes(commit_sha, diffs_summary, module_branch, version, opts_update)
+      
+      if generate_docs
+        dsl_obj = opts_update[:ret_dsl_obj] || {}
+        if dsl_obj.kind_of?(Hash) and dsl_obj.empty?
+          fail Error, "Unexpected that opts_update[:ret_dsl_obj] is not set" 
+        end
+        generate_and_persist_docs(module_branch, dsl_obj)
+      end
+      ret
     end
 
     def get_project
@@ -223,7 +236,24 @@ module DTK
       raw_module_rows.first.merge(repo_remotes: repo_remotes)
     end
 
+    private
 
+    ##
+    # Generate documentations based on template files in docs/ folder. After than perisist that generated documentation to git repo
+    #
+    def generate_and_persist_docs(module_branch, dsl_object)
+      doc_generator = DocGenerator.new(module_branch, dsl_object).generate!(raise_error_on_missing_var: false)
+      file_path__content_array = doc_generator.file_path__content_array
+      return if file_path__content_array.empty?
+      
+      # add and commit these files
+      final_doc_paths = doc_generator.file_paths
+      commit_msg = "Adding generated document files: #{final_doc_paths.join(', ')}"
+      RepoManager.add_files(module_branch, file_path__content_array, commit_msg)
+      
+      # finally we push these changes
+      RepoManager.push_changes(module_branch)
+    end
   end
 
   #

@@ -21,6 +21,9 @@ module DTK; class ServiceModule; class AssemblyExport
         node_name   = nil
         node_indent = nil
         components_first = nil
+        component_links = false
+        component_links_indent = nil
+        component_name = nil
 
         @raw_array.each do |el|
           is_node = nil
@@ -51,10 +54,23 @@ module DTK; class ServiceModule; class AssemblyExport
                   end
                 end
 
-                if last_name.strip.start_with?('- ') && !is_node
-                  content = new_array.last[:content]
-                  new_array.last[:content] = content + el
+                if last_name.strip.start_with?('- ') && !is_node && !name.eql?('nodes:')
+                  if name.eql?('component_links:')
+                    component_name = last_name
+                    new_array << { node_name: node_name, component_name: component_name, name: name }
+                    component_links = true
+                  else
+                    content = new_array.last[:content]
+                    new_array.last[:content] = content + el
+                  end
+                elsif last_name.eql?('component_links:')
+                  component_links = true
+                  component_links_indent = el[/\A */].size
+                  new_array << { node_name: node_name, component_name: component_name, name: name }
+                elsif component_links && el[/\A */].size == component_links_indent
+                  new_array << { node_name: node_name, component_name: component_name, name: name }
                 else
+                  component_links = false
                   if match = name.match(/(\w+:)\s*(\w+)/)
                     name = match[1] if match[1] && match[2]
                   end
@@ -73,20 +89,30 @@ module DTK; class ServiceModule; class AssemblyExport
       def split_by_nodes(parsed_content)
         nodes_hash = {}
         ignore     = true
+        component_links = {}
 
         parsed_content.each do |el|
-          ignore = false if el[:name].eql?('components:')
+          name = el[:name]
+          ignore = false if name.eql?('components:') && el[:node]
           unless ignore
-            nodes_hash[el[:node]] = [] unless nodes_hash[el[:node]]
-            nodes_hash[el[:node]] << el[:name]
+            if el[:component_name]
+              component_name = el[:component_name].gsub(/^- /, '').chomp(':')
+              component_links[el[:node_name]] = {} unless component_links[el[:node_name]]
+              component_links[el[:node_name]][component_name] = [] unless component_links[el[:node_name]][component_name]
+              component_links[el[:node_name]][component_name] << name.strip.gsub(/^- /, '') unless name.eql?('component_links:')
+            else
+              nodes_hash[el[:node]] = [] unless nodes_hash[el[:node]]
+              nodes_hash[el[:node]] << name
+            end
           end
         end
 
-        { nodes: nodes_hash }
+        { nodes: nodes_hash, component_links: component_links }
       end
 
       def order_nodes_hash(assembly_hash, nodes_content, cmps_first)
         assembly_hash_nodes = assembly_hash[:assembly][:nodes]
+        existing_cmp_links  = nodes_content[:component_links]
         new_assembly_nodes  = {}
 
         nodes_content[:nodes].each do |k, v|
@@ -94,6 +120,7 @@ module DTK; class ServiceModule; class AssemblyExport
 
           node_name = k.chomp(':')
           assembly_node = assembly_hash_nodes.delete(node_name)
+          node_cmp_links = existing_cmp_links[k]
 
           if assembly_node
             assembly_node_components     = assembly_node[:components]
@@ -108,10 +135,17 @@ module DTK; class ServiceModule; class AssemblyExport
 
                 assembly_node_components.each do |an_cmp|
                   if an_cmp.is_a?(String)
-                    new_assembly_node_components << assembly_node_components.delete(an_cmp) if ex_cmp_name_formatted.eql?(an_cmp)
+                    if ex_cmp_name_formatted.eql?(an_cmp)
+                      existin_node_component = assembly_node_components.delete(an_cmp)
+                      new_assembly_node_components << existin_node_component
+                    end
                   elsif an_cmp.is_a?(Hash)
                     an_cmp_name = an_cmp.keys.first
-                    new_assembly_node_components << assembly_node_components.delete(an_cmp) if ex_cmp_name_formatted.eql?(an_cmp_name)
+                    if ex_cmp_name_formatted.eql?(an_cmp_name)
+                      existin_node_component = assembly_node_components.delete(an_cmp)
+                      order_component_links!(existin_node_component, node_cmp_links, an_cmp_name) if existin_node_component && node_cmp_links
+                      new_assembly_node_components << existin_node_component
+                    end
                   else
                     raise Error.new, 'Unknown component format'
                   end
@@ -128,6 +162,34 @@ module DTK; class ServiceModule; class AssemblyExport
         assembly_hash[:assembly][:nodes] = new_assembly_nodes.merge(assembly_hash_nodes)
         assembly_hash[:assembly][:nodes] = assembly_hash[:assembly].delete(:nodes) if cmps_first
         assembly_hash
+      end
+
+      def order_component_links!(existin_node_component, node_cmp_links, an_cmp)
+        return unless existin_node_component[an_cmp] && existin_node_component[an_cmp][:component_links]
+        existing_node_cmp_links = existin_node_component[an_cmp][:component_links]
+        new_cmp_links = {}
+
+        if cmp_links = existing_node_cmp_links && node_cmp_links[an_cmp]
+          cmp_links.each do |cmp_link|
+            if match = find_matching_cmp_links(cmp_link, existing_node_cmp_links)
+              new_cmp_links.merge!(match)
+            end
+          end
+        end
+
+        new_cmp_links.merge!(existing_node_cmp_links)
+        existin_node_component[an_cmp][:component_links] = new_cmp_links
+      end
+
+      def find_matching_cmp_links(cmp_link, existing_node_cmp_links)
+        matching_cmp = nil
+
+        existing_node_cmp_links.each do |k,v|
+          formatted_value = v.gsub('assembly_wide/', '')
+          matching_cmp = { k => existing_node_cmp_links.delete(k) } if cmp_link.eql?("#{k}: #{formatted_value}")
+        end
+
+        matching_cmp
       end
     end
   end

@@ -235,7 +235,22 @@ module DTK
         opts.merge!(generate_docs: generate_docs)
       end
 
-      rest_ok_response service_module.update_model_from_clone_changes?(commit_sha, diffs_summary, version, opts)
+      module_dsl_info = service_module.update_model_from_clone_changes?(commit_sha, diffs_summary, version, opts)
+      response = module_dsl_info.hash_subset(:dsl_parse_error, :dsl_updated_info, :dsl_created_info, :external_dependencies, :component_module_refs)
+      # the possible keys in response are (with the subkeys) are
+      #  :dsl_parse_error: 
+      #  :dsl_updated_info:
+      #    :msg
+      #    :commit_sha
+      #  :dsl_created_info
+      #    :path
+      #    :content - only if want this dsl file to be added on client side
+      #  :external_dependencies
+      #    :inconsistent
+      #    :possibly_missing
+      #    :ambiguous
+      #  :component_module_refs
+      rest_ok_response response
     end
 
     def rest__set_component_module_version

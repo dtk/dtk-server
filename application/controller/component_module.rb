@@ -83,7 +83,10 @@ module DTK
         opts.merge!(generate_docs: generate_docs)
       end
 
-      # the possible keys in response are with the subkeys that are used
+      module_dsl_info = component_module.update_model_from_clone_changes?(commit_sha, diffs_summary, version, opts)
+      response = module_dsl_info.hash_subset(:dsl_parse_error, :dsl_updated_info, :dsl_created_info, :external_dependencies, :component_module_refs)
+      # the possible keys in response are (with the subkeys) are
+      # the possible keys in module_dsl_info are (with the subkeys) are
       #  :dsl_parse_error: ModuleDSL::ParsingError obj
       #  :dsl_updated_info:
       #    :msg
@@ -95,7 +98,8 @@ module DTK
       #    :inconsistent
       #    :possibly_missing
       #    :ambiguous
-      rest_ok_response component_module.update_model_from_clone_changes?(commit_sha, diffs_summary, version, opts)
+      #  :component_module_refs
+      rest_ok_response response
     end
 
     def rest__delete

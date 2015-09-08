@@ -1,5 +1,6 @@
 module DTK; class BaseModule; class UpdateModule
   class CloneChanges < self
+    # returns DTK::ModuleDSLInfo object
     def update_from_clone_changes(_commit_sha, diffs_summary, module_branch, version, opts = {})
       ret = ModuleDSLInfo.new()
       opts.merge!(ret_dsl_updated_info: {})
@@ -41,6 +42,7 @@ module DTK; class BaseModule; class UpdateModule
 
       ret.set_external_dependencies?(opts[:external_dependencies])
       ret.dsl_created_info = dsl_created_info
+      ret.set_parsed_dsl?(opts[:ret_parsed_dsl])
       ret
     end
 

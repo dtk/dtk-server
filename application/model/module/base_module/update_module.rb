@@ -84,11 +84,12 @@ module DTK; class BaseModule
       create_needed_objects_and_dsl?(repo, ret_local(version))
     end
 
-    # only returns non nil if passring error; it traps parsing errors
+    # only returns non nil if parsing error; it traps parsing errors
     def parse_dsl_and_update_model_with_err_trap(impl_obj, module_branch_idh, version, opts = {})
       klass()::ParsingError.trap(only_return_error: true) { parse_dsl_and_update_model(impl_obj, module_branch_idh, version, opts) }
     end
 
+    # only returns non nil if parsing error; it traps parsing errors
     def parse_dsl_and_update_model(impl_obj, module_branch_idh, version, opts = {})
       ret = {}
       module_branch = module_branch_idh.create_object()

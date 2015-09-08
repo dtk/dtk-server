@@ -120,6 +120,7 @@ module DTK
       get_linked_remote_repos(is_default: true).first
     end
 
+    # this returns a DTK::ModuleDSLInfo object
     def update_model_from_clone_changes?(commit_sha, diffs_summary, version, opts = {})
       # do pull and see if any changes need the model to be updated
       force         = opts[:force]
@@ -132,20 +133,16 @@ module DTK
       update_from_includes = opts[:update_from_includes]
       return unless pull_was_needed || parse_needed || update_from_includes
 
-      # TODO: if need to generate docs, but nbot upadte the model can do somethin more efficient
-      # code below updates the model even if no change to dsl files
+      # TODO: if need to generate docs, but not upadte the model can do something more efficient
+      #       than code below, which class update to the model code even if no change to dsl files
+      #       Instead woudl just want to call the parse code
       opts_update = Aux.hash_subset(opts, [:do_not_raise, :modification_type, :force_parse, :auto_update_module_refs, :dsl_parsed_false, :update_module_refs_from_file, :update_from_includes, :current_branch_sha, :service_instance_module, :task_action])
       opts_update.merge!(ret_parsed_dsl: ParsedDSL.create(self)) if generate_docs
-      ret = update_model_from_clone_changes(commit_sha, diffs_summary, module_branch, version, opts_update)
+      module_dsl_info = update_model_from_clone_changes(commit_sha, diffs_summary, module_branch, version, opts_update)
       
-      if generate_docs
-        parsed_dsl = opts_update[:ret_parsed_dsl]
-        if parsed_dsl.empty?
-          fail Error, "Unexpected that opts_update[:ret_parsed_dsl] is not set" 
-        end
-        generate_and_persist_docs(module_branch, parsed_dsl)
-      end
-      ret
+      generate_and_persist_docs(module_branch, module_dsl_info.parsed_dsl) if generate_docs
+    
+      module_dsl_info
     end
 
     def get_project

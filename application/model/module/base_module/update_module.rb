@@ -99,7 +99,7 @@ module DTK; class BaseModule
       dsl_obj = parse_dsl(impl_obj, opts.merge(config_agent_type: config_agent_type))
       return dsl_obj if is_parsing_error?(dsl_obj)
 
-      opts[:ret_dsl_obj] = dsl_obj if opts[:ret_dsl_obj]
+      opts[:ret_parsed_dsl].add(dsl_obj) if opts[:ret_parsed_dsl]
 
       dsl_obj.update_model_with_ref_integrity_check(version: version)
 

@@ -59,9 +59,8 @@ r8_require("#{SYSTEM_DIR}/utility")
 r8_require("#{SYSTEM_DIR}/common_mixin")
 r8_require("#{UTILS_BASE_DIR}/utils")
 
-r8_require("#{LIB_DIR}/model")
-r8_require("#{LIB_DIR}/response_info")
-r8_require("#{LIB_DIR}/doc_generator")
+%w{model response_info doc_generator parsed_dsl}.each { |r| r8_require("#{LIB_DIR}/#{r}") }
+
 
 r8_require('config/routes.rb')
 

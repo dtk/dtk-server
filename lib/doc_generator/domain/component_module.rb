@@ -1,9 +1,9 @@
 module DTK; class DocGenerator
   class Domain
     class ComponentModule < self
-      def self.normalize_top(dsl_object)
-        raw_input        = active_support_with_indifferent_access(dsl_object.raw_hash)
-        normalized_input = active_support_with_indifferent_access(dsl_object.version_normalized_hash)
+      def self.normalize_top(parsed_dsl__component_module)
+        raw_input        = active_support_with_indifferent_access(parsed_dsl__component_module.raw_hash)
+        normalized_input = active_support_with_indifferent_access(parsed_dsl__component_module.version_normalized_hash)
         { :module => normalize(raw_input[:module], raw_input, normalized_input) }
       end
       

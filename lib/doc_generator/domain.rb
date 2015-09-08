@@ -6,11 +6,11 @@ module DTK
       
       extend ActiveSupportInstanceVariablesMixin
       
-      def self.normalize_top(dsl_object)
-        if dsl_object.kind_of?(ModuleDSL)
-          ComponentModule.normalize_top(dsl_object)
+      def self.normalize_top(parsed_dsl)
+        if parsed_dsl.kind_of?(ParsedDSL::ComponentModule)
+          ComponentModule.normalize_top(parsed_dsl)
         else
-          fail Error, "Normalize dsl object of type '#{dsl_object.class}' is not treated"
+          fail Error, "Normalize dsl object of type '#{parsed_dsl.class}' is not treated"
         end
       end
       

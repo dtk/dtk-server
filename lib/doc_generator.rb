@@ -2,9 +2,9 @@ module DTK
   class DocGenerator
     r8_nested_require('doc_generator', 'domain')
 
-    def initialize(module_branch, dsl_object)
+    def initialize(module_branch, parsed_dsl)
       @module_branch =  module_branch
-      @dsl_object    = dsl_object
+      @parsed_dsl    = parsed_dsl
 
       # outputs after generate! called
       @file_path__content_array = nil
@@ -30,7 +30,7 @@ module DTK
       doc_files = RepoManager.files(@module_branch).select { |f| SourceFile.match?(f) }
       return self if doc_files.empty?
   
-      dsl_normalized_for_templates = Domain.normalize_top(@dsl_object)
+      dsl_normalized_for_templates = Domain.normalize_top(@parsed_dsl)
 pp [:dsl_normalized_for_templates, dsl_normalized_for_templates]      
       # we generate documentation and persist it to module
       @file_paths = []

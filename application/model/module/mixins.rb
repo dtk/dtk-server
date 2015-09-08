@@ -135,15 +135,15 @@ module DTK
       # TODO: if need to generate docs, but nbot upadte the model can do somethin more efficient
       # code below updates the model even if no change to dsl files
       opts_update = Aux.hash_subset(opts, [:do_not_raise, :modification_type, :force_parse, :auto_update_module_refs, :dsl_parsed_false, :update_module_refs_from_file, :update_from_includes, :current_branch_sha, :service_instance_module, :task_action])
-      opts_update.merge!(ret_dsl_obj: {}) if generate_docs
+      opts_update.merge!(ret_parsed_dsl: ParsedDSL.create(self)) if generate_docs
       ret = update_model_from_clone_changes(commit_sha, diffs_summary, module_branch, version, opts_update)
       
       if generate_docs
-        dsl_obj = opts_update[:ret_dsl_obj] || {}
-        if dsl_obj.kind_of?(Hash) and dsl_obj.empty?
-          fail Error, "Unexpected that opts_update[:ret_dsl_obj] is not set" 
+        parsed_dsl = opts_update[:ret_parsed_dsl]
+        if parsed_dsl.empty?
+          fail Error, "Unexpected that opts_update[:ret_parsed_dsl] is not set" 
         end
-        generate_and_persist_docs(module_branch, dsl_obj)
+        generate_and_persist_docs(module_branch, parsed_dsl)
       end
       ret
     end
@@ -241,8 +241,8 @@ module DTK
     ##
     # Generate documentations based on template files in docs/ folder. After than perisist that generated documentation to git repo
     #
-    def generate_and_persist_docs(module_branch, dsl_object)
-      doc_generator = DocGenerator.new(module_branch, dsl_object).generate!(raise_error_on_missing_var: false)
+    def generate_and_persist_docs(module_branch, parsed_dsl)
+      doc_generator = DocGenerator.new(module_branch, parsed_dsl).generate!(raise_error_on_missing_var: false)
       file_path__content_array = doc_generator.file_path__content_array
       return if file_path__content_array.empty?
       

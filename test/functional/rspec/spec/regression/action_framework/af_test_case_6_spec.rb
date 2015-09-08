@@ -13,7 +13,7 @@ STDOUT.sync = true
 
 service_name = 'af_test_case_6_instance'
 service_module_namespace = 'r8'
-assembly_name = 'action_module::nohup-mcollective-log-tailing'
+assembly_name = 'action_module::nohup-log-tailing'
 dtk_common = Common.new(service_name, assembly_name)
 
 expected_output_1 = {

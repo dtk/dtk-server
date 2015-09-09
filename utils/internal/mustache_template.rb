@@ -5,7 +5,7 @@ module DTK
     def self.needs_template_substitution?(string)
       # will return true if string has mustache template attributes '{{ variable }}'
       if string
-        string =~ HasMustacheVarsRegExp
+        !!(string =~ HasMustacheVarsRegExp)
       end
     end
     HasMustacheVarsRegExp = /\{\{.+\}\}/

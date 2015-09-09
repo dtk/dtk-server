@@ -307,17 +307,17 @@ module DTK
       ret = ModuleDSLInfo.new()
       if version.is_a?(ModuleVersion::AssemblyModule)
         assembly = version.get_assembly(model_handle(:component))
-        response = update_model_from_dsl__assembly_module(assembly,module_branch, diffs_summary, opts)
-        if ParsingError.is_error?(response)
-          ret.dsl_parse_error = response 
+        error_or_nil = update_model_from_dsl__assembly_module(assembly,module_branch, diffs_summary, opts)
+        if ParsingError.is_error?(error_or_nil)
+          ret.dsl_parse_error = error_or_nil
         end
       else
         opts.merge!(ret_dsl_updated_info: {})
-        response = update_model_from_dsl(module_branch, opts)
-        if ParsingError.is_error?(response)
-          ret.dsl_parse_error = response
+        error_or_module_dsl_info = update_model_from_dsl(module_branch, opts)
+        if ParsingError.is_error?(error_or_module_dsl_info)
+          ret.dsl_parse_error = error_or_module_dsl_info
         else
-          ret.merge!(response)
+          ret.aggregate!(error_or_module_dsl_info)
         end
         # TODO: should this be done if there is a parsing error
         dsl_updated_info = opts[:ret_dsl_updated_info]

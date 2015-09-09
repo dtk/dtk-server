@@ -167,33 +167,37 @@ module DTK
     end
 
     module DSLMixin
-      # TODO: fix what update_model_from_dsl returns by looking at its usage
+      # Returns DTK::ModuleDSLInfo object or error
       def update_model_from_dsl(module_branch, opts = {})
         module_branch.set_dsl_parsed!(false)
 
-        component_module_refs = update_component_module_refs(module_branch, opts)
-        return component_module_refs if ParsingError.is_error?(component_module_refs)
+        module_refs = update_component_module_refs(module_branch, opts)
+        return module_refs if ParsingError.is_error?(module_refs)
 
-        v_namespaces = validate_module_ref_namespaces(module_branch, component_module_refs)
+        v_namespaces = validate_module_ref_namespaces(module_branch, module_refs)
         return v_namespaces if ParsingError.is_error?(v_namespaces)
 
         service_module_workflows = update_service_module_workflows_from_dsl(module_branch)
         return service_module_workflows if ParsingError.is_error?(service_module_workflows)
 
-        parsed, component_module_refs = update_assemblies_from_dsl(module_branch, component_module_refs, opts)
-        if new_commit_sha = component_module_refs.serialize_and_save_to_repo?()
+        assembly_tasks, module_refs = update_assemblies_from_dsl(module_branch, module_refs, opts)
+        if new_commit_sha = module_refs.serialize_and_save_to_repo?()
           if opts[:ret_dsl_updated_info]
             msg = 'The module refs file was updated by the server'
             opts[:ret_dsl_updated_info] = ModuleDSLInfo::UpdatedInfo.new(msg: msg, commit_sha: new_commit_sha)
           end
         end
-        return parsed if ParsingError.is_error?(parsed)
+        return assembly_tasks if ParsingError.is_error?(assembly_tasks)
 
         module_branch.set_dsl_parsed!(true)
 
-        # return component modules required by this service module
-        parsed.merge!(component_module_refs: component_module_refs.component_modules)
-        parsed
+        ret = ModuleDSLInfo.new
+        ret.component_module_refs = module_refs.component_modules
+
+        if parsed_dsl_handle = opts[:ret_parsed_dsl]
+          ret.set_parsed_dsl?(parsed_dsl_handle.add(module_refs: module_refs, assembly_tasks: assembly_tasks))
+        end 
+        ret
       end
 
       private
@@ -231,7 +235,7 @@ module DTK
         Model.input_hash_content_into_model(module_branch.id_handle(), task_template: task_templates)
       end
 
-      # returns[ parsed,new_component_module_refs]
+      # returns[ parsed, new_component_module_refs]
       def update_assemblies_from_dsl(module_branch, component_module_refs, opts = {})
         ret_cmr = component_module_refs
         project_idh = get_project.id_handle()
@@ -279,7 +283,7 @@ module DTK
         end
 
         if opts[:auto_update_module_refs]
-          # TODO: should also update teh contents of component module refs
+          # TODO: should also update the contents of component module refs
           ret_cmr = ModuleRefs.get_component_module_refs(module_branch)
         end
 

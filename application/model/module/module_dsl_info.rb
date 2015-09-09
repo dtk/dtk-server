@@ -5,6 +5,11 @@ module DTK
       replace(hash)
     end
 
+    def aggregate!(module_dsl_info)
+      fail Error, "Parameter has type '#{module_dsl_info.class}', not ModuleDSLInfo" unless module_dsl_info.kind_of?(ModuleDSLInfo)
+      merge!(module_dsl_info)
+    end
+
     def dsl_parse_error=(dsl_parse_error)
       self[:dsl_parse_error] = dsl_parse_error
     end
@@ -17,9 +22,12 @@ module DTK
       self[:dsl_updated_info] = dsl_updated_info
     end
 
+    def component_module_refs=(component_module_refs)
+      self[:component_module_refs] = component_module_refs
+    end
+
     def parsed_dsl
-#      raise_error_if_unset(:parsed_dsl)
-      Log.error("TODO: need to write fns that set this") if self[:parsed_dsl].nil?
+      raise_error_if_unset(:parsed_dsl)
       self[:parsed_dsl]
     end
     def set_parsed_dsl?(parsed_dsl)

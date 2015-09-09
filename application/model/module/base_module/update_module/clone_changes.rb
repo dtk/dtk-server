@@ -17,6 +17,7 @@ module DTK; class BaseModule; class UpdateModule
         if meta_file_changed = diffs_summary.meta_file_changed?()
           if e = parse_dsl_and_update_model(impl_obj, module_branch.id_handle(), version, opts)
             ret.dsl_parse_error = e
+            return ret
           end
         end
         assembly = version.get_assembly(@base_module.model_handle(:component))
@@ -26,7 +27,7 @@ module DTK; class BaseModule; class UpdateModule
         AssemblyModule::Component.finalize_edit(assembly, @base_module, module_branch, opts_finalize)
       elsif ModuleDSL.contains_dsl_file?(impl_obj)
         if opts[:force_parse] || diffs_summary.meta_file_changed?() || (module_branch.dsl_parsed?() == false)
-          if e = parse_dsl_and_update_model_with_err_trap(impl_obj, module_branch.id_handle(), version, opts)
+          if e = parse_dsl_and_update_model(impl_obj, module_branch.id_handle(), version, opts)
             ret.dsl_parse_error = e
           end
         end
@@ -48,9 +49,8 @@ module DTK; class BaseModule; class UpdateModule
 
     private
 
-   def parse_dsl_and_update_model(impl_obj, module_branch_idh, version, opts = {})
-     # need to return dsl_parse_error to display error message when push module updates from service instance
-     klass()::ParsingError.trap(only_return_error: true) { @base_module.parse_dsl_and_update_model(impl_obj, module_branch_idh, version, opts) }
-   end
+    def parse_dsl_and_update_model(impl_obj, module_branch_idh, version, opts = {})
+      klass()::ParsingError.trap(only_return_error: true) { @base_module.parse_dsl_and_update_model(impl_obj, module_branch_idh, version, opts) }
+    end
  end
 end; end; end

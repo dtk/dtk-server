@@ -292,9 +292,9 @@ module DTK
     end
 
     # returns either parsing error object or nil
-    def install__process_dsl(repo, module_branch, local, opts = {})
+    def process_dsl_and_ret_parsing_errors(repo, module_branch, local, opts = {})
       unless local.version.nil?
-        fail Error.new('Not implemented yet ServiceModule#import__dsl with version not equal to nil')
+        fail Error.new('Not implemented yet ServiceModule#process_dsl_and_ret_parsing_errors with version not equal to nil')
       end
       response = update_model_from_dsl(module_branch.merge(repo: repo), opts) #repo added to avoid lookup in update_model_from_dsl
       response if ParsingError.is_error?(response)
@@ -312,21 +312,21 @@ module DTK
     end
 
     # TODO: may want to fix up what this returns after fixing up what update_model_from_dsl returns
-    # returns dsl_info
     def update_model_from_clone_changes(_commit_sha, diffs_summary, module_branch, version, opts = {})
       if version.is_a?(ModuleVersion::AssemblyModule)
         assembly = version.get_assembly(model_handle(:component))
         opts_finalize = Aux.hash_subset(opts, [:task_action])
         AssemblyModule::Service.finalize_edit(assembly, opts[:modification_type], self, module_branch, diffs_summary, opts_finalize)
       else
+        ret = ModuleDSLInfo.new()
         opts.merge!(ret_dsl_updated_info: {})
         response = update_model_from_dsl(module_branch, opts)
-        ret = ModuleDSLInfo.new()
         if ParsingError.is_error?(response)
           ret.dsl_parse_error = response
         else
           ret.merge!(response)
         end
+        # TODO: should this be done if there is a parsing error
         dsl_updated_info = opts[:ret_dsl_updated_info]
         unless dsl_updated_info.empty?
           ret.dsl_updated_info = dsl_updated_info

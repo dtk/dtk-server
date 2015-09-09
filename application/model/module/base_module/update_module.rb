@@ -44,10 +44,10 @@ module DTK; class BaseModule
 
       # called when installing from dtkn catalog
       # returns nil or parsing error
-      def install__process_dsl(repo, module_branch, local, opts = {})
+      def process_dsl_and_ret_parsing_errors(repo, module_branch, local, opts = {})
         # Skipping module_ref_update since module being isntalled has this set already so just copy this in
         opts = { update_module_refs_from_file: true }.merge(opts)
-        UpdateModule.new(self).install__process_dsl(repo, module_branch, local, opts)
+        UpdateModule.new(self).process_dsl_and_ret_parsing_errors(repo, module_branch, local, opts)
       end
 
       def pull_from_remote__update_from_dsl(repo, module_and_branch_info, version = nil)
@@ -67,7 +67,7 @@ module DTK; class BaseModule
     end
     ####### end: mixin public methods #########
 
-    def install__process_dsl(repo, module_branch, local, opts = {})
+    def process_dsl_and_ret_parsing_errors(repo, module_branch, local, opts = {})
       response = create_needed_objects_and_dsl?(repo, local, opts)
       if is_parsing_error?(response)
         response
@@ -84,14 +84,10 @@ module DTK; class BaseModule
       create_needed_objects_and_dsl?(repo, ret_local(version))
     end
 
-    # only returns non nil if parsing error; it traps parsing errors
-    def parse_dsl_and_update_model_with_err_trap(impl_obj, module_branch_idh, version, opts = {})
-      klass()::ParsingError.trap(only_return_error: true) { parse_dsl_and_update_model(impl_obj, module_branch_idh, version, opts) }
-    end
 
     # only returns non nil if parsing error; it traps parsing errors
     def parse_dsl_and_update_model(impl_obj, module_branch_idh, version, opts = {})
-      ret = {}
+      ret = nil
       module_branch = module_branch_idh.create_object()
 
       module_branch.set_dsl_parsed!(false)
@@ -104,18 +100,30 @@ module DTK; class BaseModule
 
       dsl_obj.update_model_with_ref_integrity_check(version: version)
 
+      update_from_includes = {}
+      no_errors = true
       if opts[:update_from_includes]
-        ret = UpdateModuleRefs.new(dsl_obj, @base_module).validate_includes_and_update_module_refs()
-        return ret if is_parsing_error?(ret)
+        # Can be both parsing errors, in which case is_parsing_error?(update_from_includes) i strue
+        # or can be dependency errors in which case external_deps.any_errors?() is true
+        # If external_deps.any_errors?() error dont yet return so can execute UpdateModuleRefs.save_dsl?
+        update_from_includes = UpdateModuleRefs.new(dsl_obj, @base_module).validate_includes_and_update_module_refs()
+        return update_from_includes if is_parsing_error?(update_from_includes)
+
+        if external_deps = update_from_includes[:external_dependencies]
+          opts[:external_dependencies] = external_deps
+          if external_deps.any_errors?()
+            ret = update_from_includes 
+            no_errors = false
+          end
+        end
       end
 
-      external_deps = ret[:external_dependencies]
-
+      # TODO: double check if opts[:update_from_includes] and opts[:update_module_refs_from_file] mutually exclusive
       if opts[:update_module_refs_from_file]
         # updating module refs from the component_module_ref file
         ModuleRefs::Parse.update_component_module_refs(@module_class, module_branch)
       else
-        opts_save_dsl = Opts.create?(message?: ret[:message], external_dependencies?: external_deps)
+        opts_save_dsl = Opts.create?(message?: update_from_includes[:message], external_dependencies?: external_deps)
         if dsl_updated_info = UpdateModuleRefs.save_dsl?(module_branch, opts_save_dsl)
           if opts[:ret_dsl_updated_info]
             opts[:ret_dsl_updated_info] = dsl_updated_info
@@ -123,19 +131,16 @@ module DTK; class BaseModule
         end
       end
 
-      # TODO: see if can simplify and make this an 'else' to opts[:update_from_includes above
       unless opts[:update_from_includes]
         module_branch.set_dsl_parsed!(true) unless opts[:dsl_parsed_false]
         return ret
       end
 
-      no_errors = external_deps.nil? || !external_deps.any_errors?()
       if no_errors && !opts[:dsl_parsed_false]
         module_branch.set_dsl_parsed!(true)
       end
 
-      opts[:external_dependencies] = external_deps if external_deps
-      ret unless no_errors
+      ret
     end
 
     def self.ret_local(base_module, version)

@@ -39,7 +39,7 @@ module DTK; class BaseModule; class UpdateModule
 
       dsl_created_info = ModuleDSLInfo::CreatedInfo.new()
       if klass().contains_dsl_file?(impl_obj)
-        if err = parse_dsl_and_update_model_with_err_trap(impl_obj, module_branch_idh, version, opts.merge!(project: project))
+        if err = parse_dsl_and_update_model(impl_obj, module_branch_idh, version, opts.merge!(project: project))
           ret.merge!(dsl_parse_error: err)
         end
       elsif opts[:scaffold_if_no_dsl]

@@ -126,6 +126,7 @@ module DTK
       names = []
 
       components.each do |name, value|
+        value ||= {}
         # if component is 'puppet definition'
         if (value['external_ref'].is_a?(Hash) ? value['external_ref'] : {}).key?('puppet_definition')
           attributes = value['attributes']

@@ -5,6 +5,10 @@ module DTK; class ModuleDSL; class V4
 
       def body(input_hash, cmp, context = {})
         ret = OutputHash.new
+        unless input_hash
+          err_msg = "Missing definition for component '?1'"
+          fail ParsingError.new(err_msg, component_print_form(cmp))
+        end
         cmp_type = ret['display_name'] = ret['component_type'] = qualified_component(cmp)
         # version below refers to component brranch version not metafile version
         ret['version'] = ::DTK::Component.default_version()

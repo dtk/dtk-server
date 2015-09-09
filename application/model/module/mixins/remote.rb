@@ -1,10 +1,9 @@
 module DTK; module ModuleMixins
   module Remote
   end
-
   module Remote::Class
     # install from a dtkn repo; directly in this method handles the module/branch and repo level items
-    # and then calls install__process_dsl to handle model and implementaion/files parts depending on what type of module it is
+    # and then calls process_dsl_and_ret_parsing_errors to handle model and implementaion/files parts depending on what type of module it is
     def install(project, local_params, remote_params, client_rsa_pub_key, opts = {})
       version = remote_params.version
 
@@ -68,7 +67,7 @@ module DTK; module ModuleMixins
         if module_type == :component_module
           opts_process_dsl.merge!(set_external_refs: true)
         end
-        non_nil_if_parsing_error = module_obj.install__process_dsl(repo_with_branch, module_branch, local, opts_process_dsl)
+        non_nil_if_parsing_error = module_obj.process_dsl_and_ret_parsing_errors(repo_with_branch, module_branch, local, opts_process_dsl)
         module_branch.set_sha(commit_sha)
       end
       opts_info = { version: version, module_namespace: local_namespace }

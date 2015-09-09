@@ -282,15 +282,6 @@ module DTK
       get_objs(mh, sp_hash)
     end
 
-    # TODO: fix what this returns when fix what update_model_from_dsl returns
-    def pull_from_remote__update_from_dsl(repo, module_and_branch_info, _version = nil)
-      info = module_and_branch_info #for succinctness
-      module_branch_idh = info[:module_branch_idh]
-      module_branch = module_branch_idh.create_object().merge(repo: repo)
-
-      update_model_from_dsl(module_branch)
-    end
-
     # returns either parsing error object or nil
     def process_dsl_and_ret_parsing_errors(repo, module_branch, local, opts = {})
       unless local.version.nil?

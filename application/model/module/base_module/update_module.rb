@@ -50,10 +50,6 @@ module DTK; class BaseModule
         UpdateModule.new(self).process_dsl_and_ret_parsing_errors(repo, module_branch, local, opts)
       end
 
-      def pull_from_remote__update_from_dsl(repo, module_and_branch_info, version = nil)
-        UpdateModule.new(self).pull_from_remote__update_from_dsl(repo, module_and_branch_info, version)
-      end
-
       # returns the new module branch
       # This is caledd when creating a service instance specific component module
       def create_new_version__type_specific(repo_for_new_branch, new_version, opts = {})
@@ -76,14 +72,6 @@ module DTK; class BaseModule
         nil
       end
     end
-
-    def pull_from_remote__update_from_dsl(repo, module_and_branch_info, version = nil)
-      info = module_and_branch_info #for succinctness
-      module_branch_idh = info[:module_branch_idh]
-      module_branch = module_branch_idh.create_object().merge(repo: repo)
-      create_needed_objects_and_dsl?(repo, ret_local(version))
-    end
-
 
     # only returns non nil if parsing error; it traps parsing errors
     def parse_dsl_and_update_model(impl_obj, module_branch_idh, version, opts = {})

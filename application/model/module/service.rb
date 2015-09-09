@@ -311,14 +311,16 @@ module DTK
       module_branch_idh.create_object()
     end
 
-    # TODO: may want to fix up what this returns after fixing up what update_model_from_dsl returns
+    # Returns DTK::ModuleDSLInfo object
     def update_model_from_clone_changes(_commit_sha, diffs_summary, module_branch, version, opts = {})
+      ret = ModuleDSLInfo.new()
       if version.is_a?(ModuleVersion::AssemblyModule)
         assembly = version.get_assembly(model_handle(:component))
-        opts_finalize = Aux.hash_subset(opts, [:task_action])
-        AssemblyModule::Service.finalize_edit(assembly, opts[:modification_type], self, module_branch, diffs_summary, opts_finalize)
+        response = update_model_from_dsl__assembly_module(assembly,module_branch, diffs_summary, opts)
+        if ParsingError.is_error?(response)
+          ret.dsl_parse_error = response 
+        end
       else
-        ret = ModuleDSLInfo.new()
         opts.merge!(ret_dsl_updated_info: {})
         response = update_model_from_dsl(module_branch, opts)
         if ParsingError.is_error?(response)
@@ -331,7 +333,14 @@ module DTK
         unless dsl_updated_info.empty?
           ret.dsl_updated_info = dsl_updated_info
         end
-        ret
+      end
+      ret
+    end
+    
+    def update_model_from_dsl__assembly_module(assembly, module_branch, diffs_summary, opts = {})
+      opts_finalize = Aux.hash_subset(opts, [:task_action])
+      ParsingError.trap(only_return_error: true) do
+        AssemblyModule::Service.finalize_edit(assembly, opts[:modification_type], self, module_branch, diffs_summary, opts_finalize)
       end
     end
 

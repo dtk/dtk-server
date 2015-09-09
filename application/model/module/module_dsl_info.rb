@@ -18,7 +18,8 @@ module DTK
     end
 
     def parsed_dsl
-      raise_error_if_unset(:parsed_dsl)
+#      raise_error_if_unset(:parsed_dsl)
+      Log.error("TODO: need to write fns that set this") if self[:parsed_dsl].nil?
       self[:parsed_dsl]
     end
     def set_parsed_dsl?(parsed_dsl)

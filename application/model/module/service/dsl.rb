@@ -195,7 +195,12 @@ module DTK
         ret.component_module_refs = module_refs.component_modules
 
         if parsed_dsl_handle = opts[:ret_parsed_dsl]
-          ret.set_parsed_dsl?(parsed_dsl_handle.add(module_refs: module_refs, assembly_tasks: assembly_tasks))
+          parsed_dsl_update = {
+            display_name:   get_field?(:display_name),
+            module_refs:    module_refs, 
+            assembly_tasks: assembly_tasks
+          }
+          ret.set_parsed_dsl?(parsed_dsl_handle.add(parsed_dsl_update))
         end 
         ret
       end

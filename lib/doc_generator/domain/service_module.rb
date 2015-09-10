@@ -38,16 +38,16 @@ module DTK; class DocGenerator; class Domain
     module ModuleRef
     end
     class ModuleRef::Component < self
-      attr_reader :namespace, :module_name
       def initialize(input)
         @module_name = input.scalar(:module_name)
         @namespace   = input.scalar(:namespace_info)
       end
 
+      # a and b are hashes
       def self.compare(a,b) 
-        ret = (a.namespace || '') <=> (b.namespace || '')
+        ret = (a['namespace'] || '') <=> (b['namespace'] || '')
         if ret == 0
-          (a.module_name || '') <=> (b.module_name || '')
+          (a['module_name'] || '') <=> (b['module_name'] || '')
         end
         ret
       end

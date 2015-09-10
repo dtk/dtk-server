@@ -148,8 +148,7 @@ module DTK; class Task
 
         normalized_subtasks =
           if subtasks
-            # TODO: make this test to see if has explicit multi stages more robust
-            has_multi_stages = (parse_and_reify__temporal_order?(serialized_content) == Constant::Sequential)
+            has_multi_stages = (parse_and_reify__temporal_order(serialized_content) == Constant::Sequential)
             has_multi_stages ? subtasks : [{ Field::Subtasks => subtasks }]
           else
             [serialized_content]
@@ -158,9 +157,12 @@ module DTK; class Task
         new(SerializedContentArray.new(normalized_subtasks), actions, opts)
       end
 
-      def self.parse_and_reify__temporal_order?(serialized_content)
+      def self.parse_and_reify__temporal_order(serialized_content)
         if temporal_order = Constant.matches?(serialized_content, :TemporalOrder)
           temporal_order.to_sym 
+        else
+          # Default is Sequential
+          Constant::Sequential
         end
       end
 

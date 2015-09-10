@@ -235,7 +235,7 @@ module DTK
     def self.render_tasks_component_op(type, executable_action, common_vals)
       node = executable_action[:node]
       executable_action.component_actions().map do |component_action|
-        component = component_action[:component]
+        component = component_action.component
         cmp_attrs = {
           component_id: component[:id],
           component_name: component[:display_name]
@@ -256,7 +256,7 @@ module DTK
     def self.render_tasks_setting(executable_action, common_vals)
       node = executable_action[:node]
       executable_action.component_actions().map do |component_action|
-        component = component_action[:component]
+        component = component_action.component
         cmp_attrs = {
           component_id: component[:id],
           component_name: component[:display_name].gsub(/::/, '_')
@@ -275,8 +275,8 @@ module DTK
     end
 
     def self.add_attributes_to_component_task!(task, component_action, cmp_attrs)
-      attributes = component_action[:attributes]
-      return task unless attributes
+      attributes = component_action.attributes
+      return task if attributes.empty?
       keep_ids = component_action[:changed_attribute_ids]
       pruned_attrs = attributes.reject do |a|
         a[:hidden] || (keep_ids and not keep_ids.include?(a[:id]))

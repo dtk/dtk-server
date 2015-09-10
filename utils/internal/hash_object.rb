@@ -37,6 +37,10 @@ module DTK
 
     private
 
+    def assert_exists(key)
+      Log.error("The object of type '#{self.class}' should have key '#{key}'") unless has_key?(key)
+    end
+
     # converts hashes that are not a HashObject or a child of HashObject
     def convert_nested_hashes(obj)
       if obj.is_a?(HashObject)

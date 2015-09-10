@@ -6,8 +6,8 @@ module DTK; class ConfigAgent; module Adapter
     def ret_msg_content(config_node, opts = {})
       commands         = commands(config_node, substitute_template_vars: true)
       component_action = config_node[:component_actions].first
-      action_name      = component_action[:action_method][:method_name]
-      cmp_module       = component_action[:component].get_field?(:component_module).full_module_name
+      action_name      = component_action.method_name
+      cmp_module       = component_action.component_module_name
 
       ret = {
         action_agent_request: {
@@ -35,17 +35,16 @@ module DTK; class ConfigAgent; module Adapter
     def commands(config_node, opts)
       ret = []
       config_node[:component_actions].each do |component_action|
-        attr_val_pairs = attribute_value_pairs(component_action)
+        attr_and_param_vals = component_action.attribute_and_parameter_values
         action_def = component_action.action_def(cols: [:content, :method_name], with_parameters: true)
-pp [:xxxxxxxxxx,:action_def,action_def]
         # if stdout_and_stderr = true we return combined stdout and stderr in action results
         stdout_and_stderr = stdout_and_stderr(action_def)
 
         action_def.commands().each do |command|
           if opts[:substitute_template_vars] && command.needs_template_substitution?
-            command.bind_template_attributes!(attr_val_pairs)
+            command.bind_template_attributes!(attr_and_param_vals)
           end
-          ret << command_msg_form(command, stdout_and_stderr, component_action, attr_val_pairs)
+          ret << command_msg_form(command, stdout_and_stderr, component_action, attr_and_param_vals)
         end
       end
       ret
@@ -57,19 +56,13 @@ pp [:xxxxxxxxxx,:action_def,action_def]
       ret.nil? ? true : ret
     end
 
-    def attribute_value_pairs(component_action)
-      (component_action[:attributes] || []).inject({}) do |h, attr|
-        h.merge(attr[:display_name] => attr[:attribute_value])
-      end
-    end
-
-    def command_msg_form(command, stdout_and_stderr, component_action, attr_val_pairs)
+    def command_msg_form(command, stdout_and_stderr, component_action, attr_and_param_vals)
       cmd_line = command.command_line
 
       if command.file_positioning?
-        cmp_module = component_action[:component].get_field?(:component_module)
+        cmp_module = component_action.component_module
         repo_info  = cmp_module.get_workspace_repo
-        content    = command.get_and_parse_template_content(repo_info[:local_dir], attr_val_pairs)
+        content    = command.get_and_parse_template_content(repo_info[:local_dir], attr_and_param_vals)
 
         positioning = {
           type: command.type,

@@ -1,44 +1,62 @@
 module DTK; class Task
   class Action
     class OnComponent < HashObject
-      def self.status(object, opts)
-        if opts[:no_attributes]
-          component_name(object)
-        else
-          ret = PrettyPrintHash.new
-          ret[:component] = component_status(object, opts)
-          ret[:attributes] = attributes_status(object, opts) unless opts[:no_attributes]
-          ret
+      # OnComponent keys are
+      #   :component - Component object
+      #   :attributes - array of Attribute objects
+      #   :action_method
+      #   :parameters - attribute value hash
+
+      def component
+        assert_exists(:component)
+        self[:component]
+      end
+
+      def coponent_module
+        if component = component()
+          component.get_field?(:component_module)
         end
       end
 
+      def coponent_module_name
+        if component_module = component_module()
+          component_module.full_module_name
+        end
+      end
+
+      def action_method
+        assert_exists(:action_method)
+        self[:action_method]
+      end
       def action_method?
         self[:action_method]
       end
 
+      def method_name
+        (action_method || {})[:method_name]
+      end
+
+      def attributes
+        self[:attributes] || []
+      end
+
+      def parameters
+        self[:parameters] || {}
+      end
+
+      def attribute_and_parameter_values
+        parameters.merge(attributes.inject({}) { |h, attr| h.merge(attr[:display_name] => attr[:attribute_value]) })
+      end
+
       def action_def(opts = {})
         ret = nil
-        component = self[:component]
+        component = component()
         unless action_def_ref = action_method?
           Log.error("Component Action with following component id #{component[:id]} has no action_method")
           return ret
         end
         action_def_id_handle = component.model_handle(:action_def).createIDH(id: action_def_ref[:action_def_id])
         ActionDef.get_action_def(action_def_id_handle, opts)
-      end
-
-      # for debugging
-      def self.pretty_print_hash(object)
-        ret = PrettyPrintHash.new
-        ret[:component] = (object[:component] || {})[:display_name]
-
-        # TODO: should get attribute values from attribute object since task info can be stale
-
-        ret[:attributes]  = (object[:attributes] || []).map do |attr|
-          ret_attr = PrettyPrintHash.new
-          ret_attr.add(attr, :display_name, :value_asserted, :value_derived)
-        end
-        ret
       end
 
       def self.create_from_hash(hash, task_idh = nil)
@@ -57,6 +75,10 @@ module DTK; class Task
           end
         end
         new(hash)
+      end
+
+      def add_attribute!(attr)
+        self[:attributes] << attr
       end
 
       # returns component_actions,intra_node_stages
@@ -163,8 +185,29 @@ module DTK; class Task
         ordered_cmp_ids
       end
 
-      def add_attribute!(attr)
-        self[:attributes] << attr
+      def self.status(object, opts)
+        if opts[:no_attributes]
+          component_name(object)
+        else
+          ret = PrettyPrintHash.new
+          ret[:component] = component_status(object, opts)
+          ret[:attributes] = attributes_status(object, opts) unless opts[:no_attributes]
+          ret
+        end
+      end
+
+      # for debugging
+      def self.pretty_print_hash(object)
+        ret = PrettyPrintHash.new
+        ret[:component] = (object[:component] || {})[:display_name]
+
+        # TODO: should get attribute values from attribute object since task info can be stale
+
+        ret[:attributes]  = (object[:attributes] || []).map do |attr|
+          ret_attr = PrettyPrintHash.new
+          ret_attr.add(attr, :display_name, :value_asserted, :value_derived)
+        end
+        ret
       end
 
       private

@@ -21,6 +21,14 @@ module DTK
       def self.normalize(*args)
         active_support_instance_values(new(*args))
       end
+      
+      private
+      
+      def base(input)
+        @name        = input.scalar(:display_name)
+        @description = input.scalar(:description)
+      end
+
     end
   end
 end

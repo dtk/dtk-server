@@ -15,13 +15,6 @@ module DTK; class DocGenerator; class Domain
       @component_module_refs.sort! { |a,b| ModuleRef::Component.compare(a,b) }
     end
 
-    private
-    
-    def base(input)
-      @name         = input.scalar(:display_name)
-      @description  = input.scalar(:description)
-    end
-
     class Assembly < self
       def initialize(input)
         base(input)

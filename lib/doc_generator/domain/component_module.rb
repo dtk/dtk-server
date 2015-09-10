@@ -1,46 +1,42 @@
 module DTK; class DocGenerator; class Domain
   class ComponentModule < self
     def self.normalize_top(parsed_dsl__component_module)
-      raw_input        = active_support_with_indifferent_access(parsed_dsl__component_module.raw_hash)
-      normalized_input = active_support_with_indifferent_access(parsed_dsl__component_module.version_normalized_hash)
-      { :module => normalize(raw_input[:module], raw_input, normalized_input) }
+      dsl = parsed_dsl__component_module # for succinctness
+      input = Input.new(raw: dsl.raw_hash, normalized: dsl.version_normalized_hash)
+      { :module => normalize(input) }
     end
     
-    attr_accessor :name, :dsl_version, :components
-    
-    def initialize(name, raw_input, normalized_input = nil)
-      @name = raw_input[:module]
-      @dsl_version = raw_input[:dsl_version]
-      @components = []
-      (raw_input[:components] || {}).each do |cmp_name, raw_component|
-        @components << Component.normalize(cmp_name, raw_component)
-      end
+    def initialize(input)
+      raw_input = input.hash(:raw)
+      @name        = raw_input.scalar(:module)
+      @dsl_version = raw_input.scalar(:dsl_version)
+      @components  = raw_input.array(:components).map { |component| Component.normalize(raw_input(component)) }
     end
-    
+  
+    private
+
+    def raw_input(obj)
+      Input.new(raw: obj)
+    end
+
     class Component < self
-      attr_accessor :name, :attributes, :external_ref
-      
-      def initialize(name, raw_input, normalized_input = nil)
-        @attributes = []
-        @name = name
-        @external_ref = raw_input[:external_ref]
-        (raw_input[:attributes] || {}).each do |attr_name, raw_attr|
-          @attributes << Attribute.normalize(attr_name, raw_attr)
-        end
+      def initialize(input)
+        raw_input = input.hash(:raw)
+        base(raw_input)
+        @attributes = raw_input.array(:attributes).map { |attr| Attribute.normalize(raw_input(attr)) }
       end
     end
     
     class Attribute < self
-      attr_accessor :name, :type, :required
-      
-      def initialize(name, raw_input, normalized_input = nil)
-        @name = name
-        @type = raw_input[:type]
-        @required = raw_input[:required]
+      def initialize(input)
+        raw_input = input.hash(:raw)
+        base(raw_input)
+        @type = raw_input.scalar(:type)
+        @required = raw_input.scalar(:required)
       end
     end
-    
   end
+
 end; end; end
 
 

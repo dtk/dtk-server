@@ -104,7 +104,15 @@ module DTK
 
       def convert_keys_to_symbols_recursive(obj)
         if obj.is_a?(Hash)
-          obj.keys.inject({}) { |h, k| h.merge(k.to_sym => convert_keys_to_symbols_recursive(obj[k])) }
+          obj.keys.inject({}) do |h, k| 
+            # Complication due to fact that keys can be misformed, such as due to yaml parsing of form port: {{port}}
+            if k.respond_to?(:to_sym)
+              h.merge(k.to_sym => convert_keys_to_symbols_recursive(obj[k]))
+            else
+              Log.error_pp(["Unexpected hash key:",k])
+              h.merge(k => convert_keys_to_symbols_recursive(obj[k]))
+            end
+          end
         elsif obj.is_a?(Array)
           obj.map { |el| convert_keys_to_symbols_recursive(el) }
         else

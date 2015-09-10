@@ -34,11 +34,11 @@ expected_output_2_1 = {
   stderr: 'ls: cannot access /some/non/existing/location: No such file or directory'
 }
 
-expected_output_2_2 = {
-  command: 'cat /some/non/existing/file',
-  status: nil,
-  stderr: 'cat: /some/non/existing/file: No such file or directory'
-}
+#expected_output_2_2 = {
+#  command: 'cat /some/non/existing/file',
+#  status: nil,
+#  stderr: 'cat: /some/non/existing/file: No such file or directory'
+#}
 
 describe '(Action Framework) Test Case 1: Service with one node that contains cmp with actions with multiple commands in it' do
   before(:all) do
@@ -62,7 +62,7 @@ describe '(Action Framework) Test Case 1: Service with one node that contains cm
   end
 
   context 'Get task action details for action with two failure commands' do
-    include_context 'Get task action details', dtk_common, '4.1', [expected_output_2_1, expected_output_2_2]
+    include_context 'Get task action details', dtk_common, '4.1', [expected_output_2_1]
   end
 
   context 'Delete and destroy service function' do

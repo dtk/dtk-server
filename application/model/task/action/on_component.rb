@@ -12,13 +12,13 @@ module DTK; class Task
         self[:component]
       end
 
-      def coponent_module
+      def component_module
         if component = component()
           component.get_field?(:component_module)
         end
       end
 
-      def coponent_module_name
+      def component_module_name
         if component_module = component_module()
           component_module.full_module_name
         end

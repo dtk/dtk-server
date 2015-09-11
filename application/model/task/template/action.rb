@@ -42,7 +42,7 @@ module DTK; class Task; class Template
       method_name ||= set_bash_create_action(action_list, component_name_ref)
       
       unless action = action_list.find_matching_action(node_name, component_name_ref: component_name_ref)
-        raise_bad_component_name_ref(node_name, parsed) unless opts[:skip_if_not_found]
+        RaiseError.bad_component_name_ref(node_name, parsed) unless opts[:skip_if_not_found]
       else
         if cgn = opts[:component_group_num]
           action = action.in_component_group(cgn)
@@ -55,7 +55,7 @@ module DTK; class Task; class Template
           if action_def = action_defs.find { |ad| ad.get_field?(:method_name) == method_name }
             ret = create(action, action_def: action_def, params: params)
           else
-            raise_method_not_defined_error(parsed, action_defs) unless opts[:skip_if_not_found]
+            RaiseError.method_not_defined(parsed, action_defs) unless opts[:skip_if_not_found]
           end
         end
       end
@@ -94,20 +94,22 @@ module DTK; class Task; class Template
       end
     end
 
-    def raise_bad_component_name_ref(node_name, parsed)
-      err_msg = "The component reference '#{component_name_ref}' on node '#{node_name}' in the workflow is not in the assembly; either add it to the assembly or delete it from the workflow"
-      fail ParsingError, err_msg
-    end
-
-    def raise_method_not_defined_error(parsed, action_defs) 
-      err_msg = "The action method '#{parsed.method_name}' is not defined on component '#{parsed.component_name_ref}'"
-      if action_defs.empty?
-        err_msg << '; there are no actions defiend on this component.'
-      else
-        legal_methods = action_defs.map { |ad| ad[:method_name] }
-        err_msg << "; legal method names are: #{legal_methods.join(',')}"
+    module RaiseError
+      def self.bad_component_name_ref(node_name, parsed)
+        err_msg = "The component reference '#{parsed.component_name_ref}' on node '#{node_name}' in the workflow is not in the assembly; either add it to the assembly or delete it from the workflow"
+        fail ParsingError, err_msg
       end
-      fail ParsingError, err_msg
+
+      def self.method_not_defined(parsed, action_defs) 
+        err_msg = "The action method '#{parsed.method_name}' is not defined on component '#{parsed.component_name_ref}'"
+        if action_defs.empty?
+          err_msg << '; there are no actions defiend on this component.'
+        else
+          legal_methods = action_defs.map { |ad| ad[:method_name] }
+          err_msg << "; legal method names are: #{legal_methods.join(',')}"
+        end
+        fail ParsingError, err_msg
+      end
     end
 
   end

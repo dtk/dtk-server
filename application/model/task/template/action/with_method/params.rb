@@ -1,8 +1,8 @@
-module DTK; class Task::Template::Action::WithMethod
-  module Params
-    # Returns an attribute - value hash
+module DTK; class Task::Template; class Action::WithMethod
+  class Params < ::Hash
+    # Returns a Params object which is an attribute - value hash
     def self.parse(serialized_item)
-      ret = {}
+      ret = Params.new
       attr_val_array = serialized_item.split(',').map { |attr_val| parse_attribute_value_pair?(attr_val) }.compact
 
       # check for dups and convert to attribute value hash
@@ -24,9 +24,11 @@ module DTK; class Task::Template::Action::WithMethod
     # returns [attr_name, attr_value]
     def self.parse_attribute_value_pair?(attr_val)
       return nil if attr_val.empty?
+
       unless attr_val =~ /(^[^=]+)=([^=]+$)/
         fail ParsingError, "The parameter assignment (#{attr_val}) is ill-formed"
       end
+
       name = remove_preceding_and_trailing_spaces(Regexp.last_match(1))
       value = remove_preceding_and_trailing_spaces(Regexp.last_match(2))
       [name, value]
@@ -36,4 +38,5 @@ module DTK; class Task::Template::Action::WithMethod
       str.gsub(/^[ ]+/,'').gsub(/[ ]+$/,'')
     end
   end
-end; end
+end; end; end
+

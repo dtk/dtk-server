@@ -102,8 +102,12 @@ module DTK
         hash.keys.inject({}) { |h, k| h.merge(k.to_sym => hash[k]) }
       end
 
+      # This has special provision to compenstate for magling that yaml parsing can do
       def convert_keys_to_symbols_recursive(obj)
         if obj.is_a?(Hash)
+          if var_name = mangled_mustache_variable?(obj)
+            return "{{#{var_name}}}"
+          end
           obj.keys.inject({}) do |h, k| 
             # Complication due to fact that keys can be misformed, such as due to yaml parsing of form port: {{port}}
             if k.respond_to?(:to_sym)
@@ -119,6 +123,17 @@ module DTK
           obj
         end
       end
+
+      # returns variable name string of this is a mangled mustache_variable?, which would have form like {{"port"=>nil}=>nil}}
+      def mangled_mustache_variable?(hash)
+        if hash.size == 1 
+          key = hash.keys.first
+          if key.kind_of?(Hash) and key.size == 1 and key.values.first.nil?
+            key.keys.first
+          end
+        end
+      end
+      private :mangled_mustache_variable?
 
       def equal_sets(array1, array2)
         Set.new(array1) == Set.new(array2)
@@ -232,7 +247,8 @@ module DTK
           when :json
             json_parse(content, opts)
           when :yaml
-            YamlHelper.parse(content, opts)
+            ret = YamlHelper.parse(content, opts)
+            opts[:keys_in_symbol_form] ? convert_keys_to_symbols_recursive(ret) : ret
           else
             fail Error.new("Format (#{format_type}) is not treated")
         end

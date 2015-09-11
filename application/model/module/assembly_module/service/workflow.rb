@@ -33,9 +33,10 @@ module DTK; class AssemblyModule
         if diffs_summary.file_changed?(file_path)
           file_content = RepoManager.get_file_content(file_path, module_branch)
           format_type = Aux.format_type(file_path)
-          hash_content = Aux.convert_to_hash(file_content, format_type)
+          hash_content = Aux.convert_to_hash(file_content, format_type, keys_in_symbol_form: true)
           return hash_content if ServiceModule::ParsingError.is_error?(hash_content)
-          parse_error = Task::Template::ConfigComponents.find_parse_error?(hash_content, assembly: @assembly)
+          parse_error = Task::Template::ConfigComponents.find_parse_error?(hash_content, assembly: @assembly, keys_are_in_symbol_form: true)
+          # even if there is a parse error savings so user can go back and update what user justed edited
           Task::Template.create_or_update_from_serialized_content?(@assembly.id_handle(), hash_content, @task_action)
         end
         fail parse_error if parse_error

@@ -28,13 +28,13 @@ module DTK; class Task
           end
         end
       end
-      #TODO : this is hardwired
       DefaultTaskActionForUpdates = nil
       
       # opts can have
       #  :assembly
       #  :workflow_action
       #  :service_module_workflow - Boolean
+      #  :hash_in_key_form - Boolean
       def self.find_parse_error?(workflow_hash, opts = {})
         ret = nil
         workflow_action = opts[:workflow_action]
@@ -46,11 +46,13 @@ module DTK; class Task
           end
         end
 
+        workflow_hash = Aux.convert_keys_to_symbols_recursive(workflow_hash) unless opts[:keys_are_in_symbol_form]
+
         if opts[:service_module_workflow]
-          unless workflow_action ||= workflow_hash['name']
+          unless workflow_action ||= workflow_hash[:name]
             return ParsingError.new("Unexpected that a service module workflow does not have a 'name' parameter.")
           end
-          if workflow_hash.key?('assembly_action')
+          if workflow_hash.key?(:assembly_action)
             return ParsingError.new("Service module workflow cannot have 'assembly_action' key.") 
           end
           if workflow_action == 'create'
@@ -60,7 +62,7 @@ module DTK; class Task
 
         begin
           cmp_actions = (opts[:assembly] && ActionList::ConfigComponents.get(opts[:assembly]))
-          serialized_content = serialized_content_hash_form(Aux.convert_keys_to_symbols_recursive(workflow_hash))
+          serialized_content = serialized_content_hash_form(workflow_hash)
           Content.parse_and_reify(serialized_content, cmp_actions, just_parse: true)
          rescue ParsingError => parse_error
           return parse_error

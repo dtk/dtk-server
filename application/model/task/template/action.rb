@@ -33,8 +33,13 @@ module DTK; class Task; class Template
       # method_name could be nil
       ret = nil
 
-      component_ext_ref_type = nil
-      component_name_ref, method_name = WithMethod.parse(serialized_item)
+      parsed             = WithMethod.parse(serialized_item)
+      component_name_ref = parsed.component_name_ref
+      method_name        = parsed.method_name
+      params             = parsed.params
+
+pp [:debug,'params=',params] if params
+      
 
       # if component has external_ref[:type] = 'bash_command' it means it has bash command instead of puppet in create action
       # here we set bash create action to be executed instead of puppet_apply

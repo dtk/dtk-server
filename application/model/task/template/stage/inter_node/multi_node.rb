@@ -62,8 +62,14 @@ module DTK; class Task; class Template; class Stage
             
           info_per_node = {} #indexed by node_id
           @ordered_components.each do |serialized_action|
-            cmp_ref, method_name = Action::WithMethod.parse(serialized_action)
-            cmp_type = cmp_ref
+            parsed      = Action::WithMethod.parse(serialized_action)
+            cmp_ref     = parsed.component_name_ref
+            cmp_type    = cmp_ref
+            method_name = parsed.method_name
+            params      = parsed.params
+
+pp [:debug,'params=',params] if params
+
             cmp_title = nil
             if cmp_ref =~ CmpRefWithTitleRegexp
               cmp_type = Regexp.last_match(1)

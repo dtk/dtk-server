@@ -16,7 +16,7 @@ module DTK; class ServiceModule
           text_section = 
             case section_name
              when :assembly
-              assembly_section_proc ||= AssemblySectionProc.new(raw_content_existing.split("\n"))
+              assembly_section_proc ||= AssemblySectionProc.new(raw_content_existing)
               convert_to_text__assembly_section(assembly_section_proc, section)
              when :workflow, :workflows
               if workflow_added

@@ -69,36 +69,54 @@ module DTK; class ErrorUsage
       private
 
       def self.substitute_num!(msg, num, arg)
-        msg.gsub!(substitute_num_regexp(num), pp_format_arg(arg))
+        substitute_aux!(msg, num, arg)
       end
 
       def self.substitute_params!(msg, params)
-        params.each_pair do |param, val|
-          msg.gsub!(substitute_param_regexp(param), pp_format_arg(val))
+        params.each_pair do |param, arg|
+          substitute_aux!(msg, param, arg)
         end
         msg
       end
 
-      def self.pp_format_arg(arg)
-        if arg.is_a?(Array) || arg.is_a?(Hash)
-          format_type = DefaultNonScalarFormatType
-          "\n\n#{Aux.serialize(arg, format_type)}"
-        elsif arg.is_a?(String)
-          arg
-        elsif arg.is_a?(TrueClass) || arg.is_a?(FalseClass) || arg.is_a?(Fixnum) || arg.is_a?(Symbol)
-          arg.to_s
-        else
-          arg.inspect
+      def self.substitute_aux!(msg, index, arg)
+        string, is_complex = pp_format_arg(arg)
+        pattern = substitute_index_pattern(index)
+        if is_complex and msg =~ /#{pattern} /
+          # get rid of lines that start with a space
+          pattern = "#{pattern} "
         end
+        msg.gsub!(Regexp.new(pattern), string)
+      end
+      
+      def self.pp_format_arg(arg)
+        is_complex = false
+        string = 
+          if arg.is_a?(Array) || arg.is_a?(Hash)
+            is_complex = true
+            format_type = DefaultNonScalarFormatType
+            serialized = Aux.serialize(arg, format_type)
+            serialized.gsub!(/^---\n/,'') if format_type == :yaml
+            "\n\n#{serialized}\n"
+          elsif arg.is_a?(String)
+            arg
+          elsif arg.is_a?(TrueClass) || arg.is_a?(FalseClass) || arg.is_a?(Fixnum) || arg.is_a?(Symbol)
+            arg.to_s
+          else
+            arg.inspect
+          end
+        [string, is_complex]
       end
       DefaultNonScalarFormatType = :yaml
 
-
+      def self.substitute_index_pattern(index)
+        "\\?#{index}"
+      end
       def self.substitute_num_regexp(num)
-        Regexp.new("\\?#{num}")
+        Regexp.new(substitute_index_pattern(num))
       end
       def self.substitute_param_regexp(param)
-        Regexp.new("\\?#{param}")
+        Regexp.new(substitute_index_pattern(param))
       end
 
       def self.file_path_free_var?(msg)

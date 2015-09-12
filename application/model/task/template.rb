@@ -44,6 +44,8 @@ module DTK; class Task
 
         TemporalOrder = 'subtask_order'
 
+        ActionParams = 'params'
+        Variations::ActionParams = ['params', 'parameters']
       end
 
       # TODO: if support ruby 1.8.7 need to make this fn of a hash class that perserves order

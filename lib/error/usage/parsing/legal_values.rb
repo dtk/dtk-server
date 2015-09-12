@@ -8,19 +8,25 @@ module DTK; class ErrorUsage
         !!find { |el| el.matches?(object) }
       end
 
-      def error_message(object)
-        msg = "Parsing Error: Object (#{object_print_form(object)}) should have "
-        if size == 1
-          msg << "type (#{first.print_form()})"
-        else
-          msg << "a type from (#{map(&:print_form).join(',')})"
-        end
-        msg
+      # returns an array that is feed to constructor for errors; first elemet is a msg, otehr are objects
+      def error_message_and_params(object)
+        msg = "Parsing Error: The term ?1 should have "
+        legal_types = 
+          if size == 1
+            msg << "type '?2'."
+            first.print_form()
+          else
+            msg << "a type from '?2'."
+            map(&:print_form).join(', ')
+          end
+        [msg, object, legal_types]
       end
+
       def self.match?(object, input_form = nil, &legal_values_block)
         legal_val = LegalValue.reify(input_form, &legal_values_block)
         legal_val.matches?(object)
       end
+
       def add_and_match?(object, input_form = nil, &legal_values_block)
         legal_val = LegalValue.reify(input_form, &legal_values_block)
         self << legal_val
@@ -35,10 +41,6 @@ module DTK; class ErrorUsage
           array += LegalValue.reify(&legal_values_block)
         end
         super(array)
-      end
-
-      def object_print_form(object)
-        object.inspect()
       end
     end
   end

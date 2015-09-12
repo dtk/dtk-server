@@ -5,7 +5,7 @@ module DTK; class Task
       #   :component - Component object
       #   :attributes - array of Attribute objects
       #   :action_method
-      #   :parameters - attribute value hash
+      #   :params - attribute value hash
 
       def component
         assert_exists(:component)
@@ -40,12 +40,12 @@ module DTK; class Task
         self[:attributes] || []
       end
 
-      def parameters
-        self[:parameters] || {}
+      def params
+        self[:params] || {}
       end
 
       def attribute_and_parameter_values
-        parameters.merge(attributes.inject({}) { |h, attr| h.merge(attr[:display_name] => attr[:attribute_value]) })
+        params.merge(attributes.inject({}) { |h, attr| h.merge(attr[:display_name] => attr[:attribute_value]) })
       end
 
       def action_def(opts = {})
@@ -255,6 +255,9 @@ module DTK; class Task
           }
           if action_method
             hash.merge!(action_method: action_method)
+          end
+          if params =  cmp_hash[:params]
+            hash.merge!(params: params)
           end
           actions << new(hash)
         end

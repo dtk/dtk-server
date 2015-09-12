@@ -17,6 +17,10 @@ module DTK; class Task; class Template
         @method
       end
 
+      def params?
+        @params
+      end
+
       def method_missing(name, *args, &block)
         @action.send(name, *args, &block)
       end

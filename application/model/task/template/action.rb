@@ -76,8 +76,12 @@ module DTK; class Task; class Template
         action_method.method_name()
       end
     end
-    # this can be overwritten
+
+    # these can be overwritten
     def action_method?
+      nil
+    end
+    def params?
       nil
     end
 

@@ -26,8 +26,11 @@ module DTK; class Task; class Template
             cmp_hash.merge!(component_group_num: action.component_group_num)
           end
           if opts[:action_methods]
-            if action_method = action.action_method?()
+            if action_method = action.action_method?
               cmp_hash.merge!(action_method: action_method)
+            end
+            if params = action.params?
+              cmp_hash.merge!(params: params)
             end
           end
           cmp_hash

@@ -126,9 +126,7 @@ module DTK; class Task; class Template
         component_group_num = 1
         (ordered_items || []).each do |serialized_item|
           lvs = ParsingError::LegalValues.new()
-          if lvs.add_and_match?(serialized_item, String)
-            find_and_add_action!(ret, serialized_item, node_name, action_list, opts)
-          elsif lvs.add_and_match?(serialized_item) { HashWithSingleKey(Constant::ComponentGroup) }
+          if lvs.add_and_match?(serialized_item) { HashWithSingleKey(Constant::ComponentGroup) }
             component_group = serialized_item.values.first
             ParsingError.raise_error_unless(component_group, [String, Array])
             Array(component_group).each do |serialized_action|
@@ -136,6 +134,9 @@ module DTK; class Task; class Template
               find_and_add_action!(ret, serialized_action, node_name, action_list, opts.merge(component_group_num: component_group_num))
             end
             component_group_num += 1
+         # since matching on hsh, this has to go second; otehrwise it would subsume HashWithSingleKey
+          elsif lvs.add_and_match?(serialized_item, String) or lvs.add_and_match?(serialized_item, Hash) 
+            find_and_add_action!(ret, serialized_item, node_name, action_list, opts)
           else
             fail ParsingError::WrongType.new(serialized_item, lvs)
           end

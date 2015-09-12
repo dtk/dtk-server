@@ -5,9 +5,12 @@ module DTK; class Task; class Template
       r8_nested_require('with_method', 'params')
       include Serialization
 
-      def initialize(action, action_def)
+      # opts can have keys
+      #  :params
+      def initialize(action, action_def, opts = {})
         @action = action
         @method = ActionMethod.new(action_def)
+        @params = opts[:params]
       end
 
       def action_method?

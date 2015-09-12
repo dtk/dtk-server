@@ -83,8 +83,15 @@ module DTK; class Task; class Template
 
     private
 
+    # opts can have keys
+    #  :action_def
+    #  :params
     def self.add_action_method?(base_action, opts = {})
-      opts[:action_def] ? base_action.class::WithMethod.new(base_action, opts[:action_def]) : base_action
+      if action_def = opts[:action_def] 
+        base_action.class::WithMethod.new(base_action, action_def, Aux.hash_subset(opts,[:params]))
+      else 
+        base_action
+      end
     end
 
     def self.set_bash_create_action(action_list, component_name_ref)

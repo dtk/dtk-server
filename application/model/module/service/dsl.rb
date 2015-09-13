@@ -174,34 +174,34 @@ module DTK
         module_refs = update_component_module_refs(module_branch, opts)
         return module_refs if ParsingError.is_error?(module_refs)
 
-        v_namespaces = validate_module_ref_namespaces(module_branch, module_refs)
-        return v_namespaces if ParsingError.is_error?(v_namespaces)
+        namespaces = validate_module_ref_namespaces(module_branch, module_refs)
+        return namespaces if ParsingError.is_error?(namespaces)
 
         service_module_workflows = update_service_module_workflows_from_dsl(module_branch)
         return service_module_workflows if ParsingError.is_error?(service_module_workflows)
 
-        assembly_tasks, module_refs = update_assemblies_from_dsl(module_branch, module_refs, opts)
+        assembly_workflows, parsed_dsl, parsing_error = nil 
+        begin 
+          assembly_workflows, module_refs, parsed_dsl = update_assemblies_from_dsl(module_branch, module_refs, opts)
+         rescue => e
+          raise e unless ParsingError.is_error?(e)
+          parsing_error = e
+        end
+
         if new_commit_sha = module_refs.serialize_and_save_to_repo?()
           if opts[:ret_dsl_updated_info]
             msg = 'The module refs file was updated by the server'
             opts[:ret_dsl_updated_info] = ModuleDSLInfo::UpdatedInfo.new(msg: msg, commit_sha: new_commit_sha)
           end
         end
-        return assembly_tasks if ParsingError.is_error?(assembly_tasks)
+
+        return parsing_error if parsing_error
 
         module_branch.set_dsl_parsed!(true)
 
         ret = ModuleDSLInfo.new
         ret.component_module_refs = module_refs.component_modules
-
-        if parsed_dsl_handle = opts[:ret_parsed_dsl]
-          parsed_dsl_update = {
-            display_name:   get_field?(:display_name),
-            module_refs:    module_refs, 
-            assembly_tasks: assembly_tasks
-          }
-          ret.set_parsed_dsl?(parsed_dsl_handle.add(parsed_dsl_update))
-        end 
+        ret.set_parsed_dsl?(parsed_dsl)
         ret
       end
 
@@ -240,9 +240,9 @@ module DTK
         Model.input_hash_content_into_model(module_branch.id_handle(), task_template: task_templates)
       end
 
-      # returns[ parsed, new_component_module_refs]
-      def update_assemblies_from_dsl(module_branch, component_module_refs, opts = {})
-        ret_cmr = component_module_refs
+      # Returns [assembly_workflows, module_refs, parsed_dsl] or raise a parsing error
+      # module_refs can be an updated one from the passed in version
+      def update_assemblies_from_dsl(module_branch, module_refs, opts = {})
         project_idh = get_project.id_handle()
         module_name = module_name()
         module_branch_idh = module_branch.id_handle()
@@ -251,7 +251,7 @@ module DTK
         service_instances = get_assembly_instances()
         validate_service_instance_references(service_instances, module_branch) unless service_instances.empty?
 
-        assembly_import_helper = AssemblyImport.new(project_idh, module_branch, self, component_module_refs)
+        assembly_import_helper = AssemblyImport.new(project_idh, module_branch, self, module_refs)
         aggregate_errors = ParsingError::Aggregate.new(error_cleanup: proc { error_cleanup() })
         assembly_meta_file_paths(module_branch) do |meta_file, default_assembly_name|
           aggregate_errors.aggregate_errors!()  do
@@ -260,39 +260,65 @@ module DTK
             opts.merge!(file_path: meta_file, default_assembly_name: default_assembly_name)
 
             hash_content = Aux.convert_to_hash(file_content, format_type, opts) || {}
-            return [hash_content, ret_cmr] if ParsingError.is_error?(hash_content)
+            fail hash_content if ParsingError.is_error?(hash_content)
 
             # check if comp_name.dtk.assembly.yaml matches name in that file
             # only perform check for new service module structure
             unless self.class.is_legacy_service_module_structure?(module_branch)
               response = validate_name_for_assembly(meta_file, hash_content['name'])
-              return [response, ret_cmr] if ParsingError.is_error?(response)
+              fail response if ParsingError.is_error?(response)
             end
 
             # check if assembly_wide_components exist and add them to assembly_wide node
             parse_assembly_wide_components!(hash_content)
 
-            parsed = assembly_import_helper.process(module_name, hash_content, opts)
-            return [parsed, ret_cmr] if ParsingError.is_error?(parsed)
+            assembly_workflows = assembly_import_helper.process(module_name, hash_content, opts)
+            fail assembly_workflows if ParsingError.is_error?(assembly_workflows)
+
+            SetParsedDSL.set_assembly_raw_hash?(default_assembly_name, hash_content, opts)
           end
         end
-        errors = aggregate_errors.raise_error?(do_not_raise: true)
-        return [errors, ret_cmr] if errors.is_a?(ParsingError)
+        aggregate_errors.raise_error?()
 
-        parsed = assembly_import_helper.import()
+        assembly_workflows = assembly_import_helper.import()
 
         if response = create_setting_objects_from_dsl(project_idh, module_branch)
-          if ParsingError.is_error?(response)
-            return [response, ret_cmr]
-          end
+          fail response if ParsingError.is_error?(response)
         end
 
         if opts[:auto_update_module_refs]
-          # TODO: should also update the contents of component module refs
-          ret_cmr = ModuleRefs.get_component_module_refs(module_branch)
+          # TODO: should also update the contents ofmodule refs
+          module_refs = ModuleRefs.get_component_module_refs(module_branch)
         end
 
-        [parsed, ret_cmr]
+        parsed_dsl = SetParsedDSL.set_module_refs_and_workflows?(module_name, assembly_workflows, module_refs, opts)
+
+        [assembly_workflows, module_refs, parsed_dsl]
+      end
+
+      module SetParsedDSL
+        def self.set_assembly_raw_hash?(assembly_name, assembly_raw_hash, opts={})
+          set?(opts) { |parsed_dsl_handle| parsed_dsl_handle.add_assembly_raw_hash(assembly_name, assembly_raw_hash) }
+        end
+
+        def self.set_module_refs_and_workflows?(module_name, assembly_workflows, module_refs, opts = {})
+          set?(opts) do |parsed_dsl_handle|
+            parsed_dsl_update = {
+              display_name:       module_name,
+              module_refs:        module_refs, 
+              assembly_workflows: assembly_workflows
+            }
+            parsed_dsl_handle.add(parsed_dsl_update)
+          end 
+        end
+
+        private
+
+        def self.set?(opts = {}, &block)
+          if parsed_dsl_handle = opts[:ret_parsed_dsl]
+            block.call(parsed_dsl_handle)
+          end
+        end
       end
 
       # signature is assembly_meta_file_paths(module_branch) do |meta_file,default_assembly_name|

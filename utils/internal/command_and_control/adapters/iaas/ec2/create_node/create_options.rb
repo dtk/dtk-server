@@ -1,13 +1,29 @@
 module DTK; module CommandAndControlAdapter
-  class Ec2::CreateNode; class Processor
+  class Ec2::CreateNode
     class CreateOptions < ::Hash
-      def initialize(parent, conn, ami)
+      def initialize(parent, conn, ami, image)
         super()
         replace(image_id: ami, flavor_id: parent.flavor_id)
         @conn         = conn
         @target       = parent.target
         @node         = parent.node
         @external_ref = parent.external_ref || {}
+        @image        = image
+
+        finalize!
+      end
+
+      private
+
+      def finalize!
+        update_security_group!
+        update_tags!
+        update_key_name
+        update_availability_zone!
+        update_vpc_info?
+        update_block_device_mapping!
+        update_user_data!
+        update_client_token?
       end
 
       def update_security_group!
@@ -72,13 +88,13 @@ module DTK; module CommandAndControlAdapter
         merge!(subnet_id: subnet_id, associate_public_ip: associate_public_ip)
       end
 
-      def update_block_device_mapping!(image)
+      def update_block_device_mapping!
         root_device_override_attrs = { 'Ebs.DeleteOnTermination' => 'true' }
         if root_device_size = @node.attribute.root_device_size()
           root_device_override_attrs.merge!('Ebs.VolumeSize' => root_device_size)
         end
         # only add block_device_mapping if it was fully generated
-        if block_device_mapping = image.block_device_mapping?(root_device_override_attrs)
+        if block_device_mapping = @image.block_device_mapping?(root_device_override_attrs)
           merge!(block_device_mapping: block_device_mapping)
         end
       end
@@ -96,8 +112,6 @@ module DTK; module CommandAndControlAdapter
         end
         self
       end
-
-      private
 
       def get_security_group_ids(security_group)
         security_group_ids = []
@@ -158,5 +172,5 @@ module DTK; module CommandAndControlAdapter
         end
       end
     end
-  end; end
+  end
 end; end

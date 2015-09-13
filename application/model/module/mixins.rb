@@ -134,14 +134,16 @@ module DTK
       update_from_includes = opts[:update_from_includes]
       return ret unless pull_was_needed || parse_needed || update_from_includes
 
-      # TODO: if need to generate docs, but not upadte the model can do something more efficient
+      # TODO: if need to generate docs, but not update the model can do something more efficient
       #       than code below, which class update to the model code even if no change to dsl files
-      #       Instead woudl just want to call the parse code
+      #       Instead would just want to call the parse code
       opts_update = Aux.hash_subset(opts, [:do_not_raise, :modification_type, :force_parse, :auto_update_module_refs, :dsl_parsed_false, :update_module_refs_from_file, :update_from_includes, :current_branch_sha, :service_instance_module, :task_action])
       opts_update.merge!(ret_parsed_dsl: ParsedDSL.create(self)) if generate_docs
       ret = update_model_from_clone_changes(commit_sha, diffs_summary, module_branch, version, opts_update)
       
-      generate_and_persist_docs(module_branch, ret.parsed_dsl) if generate_docs
+      if generate_docs and ! ret[:dsl_parse_error]
+        generate_and_persist_docs(module_branch, ret.parsed_dsl)
+      end
     
       ret
     end

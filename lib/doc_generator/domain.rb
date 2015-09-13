@@ -21,7 +21,9 @@ module DTK
       def self.normalize(*args)
         active_support_instance_values(new(*args))
       end
-      
+
+      attr_reader :name
+
       private
       
       def base(input)
@@ -29,6 +31,9 @@ module DTK
         @description = input.scalar(:description)
       end
 
+      def raw_input(obj)
+        self.class::Input.raw_input(obj)
+      end
     end
   end
 end

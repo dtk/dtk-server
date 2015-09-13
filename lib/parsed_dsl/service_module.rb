@@ -9,7 +9,7 @@ module DTK
         @assembly_workflows  = nil
       end
 
-      attr_reader :display_name
+      attr_reader :display_name, :assembly_raw_hashes
 
       def component_module_refs
         (@module_refs && @module_refs.component_modules) || {}

@@ -1,30 +1,51 @@
 module DTK; class DocGenerator; class Domain
   class ServiceModule < self
+    r8_nested_require('service_module', 'input')
+    
     def self.normalize_top(parsed_dsl__service_module)
-      dsl = parsed_dsl__service_module # for succinctness
-      input_hash = {
-        display_name:          dsl.display_name,  
-        component_module_refs: dsl.component_module_refs, 
-        assembly_workflows:    dsl.assembly_workflows, 
-      }
-      input = Input.new(input_hash)
+      input = Input.create(parsed_dsl__service_module)
       { :module => normalize(input) }
     end
 
     def initialize(input)
       base(input)
-      @assemblies = input.array(:assembly_workflows).map { |assembly| Assembly.normalize(assembly) }
-
+      @assemblies = input.array__combine_assembly_info { |assembly| Assembly.normalize(assembly) }
       @component_module_refs = input.array(:component_module_refs).map { |cmr| ModuleRef::Component.normalize(cmr) }
       @component_module_refs.sort! { |a,b| ModuleRef::Component.compare(a,b) }
     end
 
     class Assembly < self
       def initialize(input)
+        raw_input_assembly = input.hash(:raw).hash(:assembly)
         base(input)
         @actions = input.array(:task_template).map { |action| Action.normalize(action) }
+        @components = raw_input_assembly.array(:components).map { |component| Component.normalize(raw_input(component)) }
+        @nodes = raw_input_assembly.array(:nodes).map do |node| 
+          unless node.scalar(:display_name) == 'assembly_wide'
+            Node.normalize(raw_input(node)) 
+          end
+        end.compact
       end
     end
+
+    class Node < self
+      def initialize(input)
+        raw_input = input.hash(:raw)
+        base(raw_input)
+        @components = raw_input.array(:components).map { |component| Component.normalize(raw_input(component)) }
+      end
+    end
+
+    class Component < self
+      def initialize(input)
+        raw_input = input.hash_or_scalar(:raw)
+        @name = name(raw_input)
+      end
+      private
+       def name(raw_input)
+         raw_input.kind_of?(Hash) ? raw_input.keys.first : raw_input
+       end
+     end
 
     class Action < self
       def initialize(input)

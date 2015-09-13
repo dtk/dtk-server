@@ -15,10 +15,6 @@ module DTK; class DocGenerator; class Domain
   
     private
 
-    def raw_input(obj)
-      Input.new(raw: obj)
-    end
-
     class Component < self
       def initialize(input)
         raw_input = input.hash(:raw)

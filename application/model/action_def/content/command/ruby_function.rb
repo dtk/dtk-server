@@ -19,7 +19,9 @@ module DTK; class ActionDef; class Content
               eval(fn)
             end.call
 
-            attr_id  = (attrs.find { |a| a[:display_name].eql?(d_attr.to_s) } || {})[:id]
+            unless attr_id  = (attrs.find { |a| a[:display_name].eql?(d_attr.to_s) } || {})[:id]
+              return { error: ErrorUsage.new("lambda function output var '#{d_attr}' is not declared as a component attribute") }
+            end
             attr_val = calculate_dyn_attr_value(evaluated_fn, attrs)
             dyn_attrs << { attribute_id: attr_id, attribute_val: attr_val }
           rescue SecurityError => e

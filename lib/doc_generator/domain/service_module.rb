@@ -19,7 +19,7 @@ module DTK; class DocGenerator; class Domain
         raw_input_assembly = input.hash(:raw).hash(:assembly)
         base(input)
         @actions = input.array(:task_template).map { |action| Action.normalize(action) }
-        @components = raw_input_assembly.array(:components).map { |component| Component.normalize(raw_input(component)) }
+      #  @components = raw_input_assembly.array(:components).map { |component| Component.normalize(raw_input(component)) }
         @nodes = raw_input_assembly.array(:nodes).map do |node| 
           unless node.scalar(:display_name) == 'assembly_wide'
             Node.normalize(raw_input(node)) 
@@ -32,7 +32,7 @@ module DTK; class DocGenerator; class Domain
       def initialize(input)
         raw_input = input.hash(:raw)
         base(raw_input)
-        @components = raw_input.array(:components).map { |component| Component.normalize(raw_input(component)) }
+       # @components = raw_input.array(:components).map { |component| Component.normalize(raw_input(component)) }
       end
     end
 
@@ -41,6 +41,7 @@ module DTK; class DocGenerator; class Domain
         raw_input = input.hash_or_scalar(:raw)
         @name = name(raw_input)
       end
+
       private
        def name(raw_input)
          raw_input.kind_of?(Hash) ? raw_input.keys.first : raw_input
@@ -49,7 +50,9 @@ module DTK; class DocGenerator; class Domain
 
     class Action < self
       def initialize(input)
+        input_content =  input.hash(:content)
         @name = Task::Template.task_action_external_name(input.scalar(:task_action))
+        @description = input_content.scalar(:description)
       end
     end
 

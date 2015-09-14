@@ -190,19 +190,15 @@ module DTK; class Task
         end
       end
 
-      def assembly_wide_component?
-        Node.is_assembly_wide_node?(self[:node]) if self[:node]
+      def execute_on_server?
+        ConfigAgent::Type.is_a?(config_agent_type, [:ruby_function, :no_op])
       end
 
-      # returns [adapter_type,adapter_name]
-      # adapter_name can be null-> default is used
+      # returns [adapter_type, adapter_name]
+      # adapter_name can be nil meaning default adapter should be used
       def ret_command_and_control_adapter_info
         adapter_type = :node_config
-        adapter_name =
-          if assembly_wide_component?()
-            # adapter_name indicating toe xecute on server, rather than dispatching to a node
-            :server
-          end
+        adapter_name = :server if execute_on_server?  
         [adapter_type, adapter_name]
       end
 

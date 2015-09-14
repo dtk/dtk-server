@@ -4,8 +4,7 @@ module DTK
       def self.execute(_task_idh, _top_task_idh, task_action)
         response = nil
         config_agent_type = task_action.config_agent_type
-        # DTK-2037: Aldin; clean up when we determine whether we use 'ruby_function' as the provider type instaed of dtk_provider
-        if ['dtk_provider'].include?(config_agent_type)
+        if ConfigAgent::Type.is_a?(config_agent_type, :ruby_function)
           if task_action.ruby_function_implementation?
             response = ConfigAgent.load(:ruby_function).execute(task_action)
           else

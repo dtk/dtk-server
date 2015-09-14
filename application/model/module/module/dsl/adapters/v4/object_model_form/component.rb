@@ -32,7 +32,7 @@ module DTK; class ModuleDSL; class V4
         return ret unless ret.nil?
         
         # otherwise default is to make only_one_per_node true unless external_ref['type'] is set to 'puppet_definition'
-        external_ref['type'] != 'puppet_definition'
+        (external_ref || {})['type'] != 'puppet_definition'
       end
 
       def set_action_def_and_external_ref!(ret, input_hash, cmp, _context = {})
@@ -52,15 +52,12 @@ module DTK; class ModuleDSL; class V4
 
         ret['action_def'] = { 'create' => function } if function
 
+        # If ret['external_ref'] is nil that means to use the 'no_op' config adapter
         ret['external_ref'] =
           if input_hash['external_ref'] then external_ref(input_hash['external_ref'], cmp) # this is for legacy
           elsif create_action then external_ref_from_create_action?(create_action, cmp, ret)
           elsif function then external_ref_from_function?(function, cmp)
           end
-        unless ret['external_ref']
-          err_msg = "The mandatory 'create' action is not defined for component '?1'"
-          fail ParsingError.new(err_msg, component_print_form(cmp))
-        end
         ret
       end
 

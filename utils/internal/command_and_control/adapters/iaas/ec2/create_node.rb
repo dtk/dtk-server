@@ -128,8 +128,9 @@ module DTK; module CommandAndControlAdapter
         
         conn = Ec2.conn(@node.get_target_iaas_credentials())
         
+pp Component::Domain::NIC.on_node?(@node)
         image = image(ami, target: @node.get_target)
-        create_options = CreateOptions.new(self, conn, ami, image)
+        create_options = CreateOptions.new(self, conn, image)
 
         pp [:debug_create_options, Aux.hash_subset(create_options, [:image_id, :flavor_id, :security_group_ids, :groups, :tags, :key_name, :subnet_id])]
         

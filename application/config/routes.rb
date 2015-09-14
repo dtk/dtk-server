@@ -225,7 +225,7 @@ R8::ReactorRoute.draw do
   post 'node/start' => 'node#start'
   post 'node/stop' => 'node#stop'
   # these commands right now should only be called wrt to assembly context
-  #   post  'node/find_violations' => 'node#find_violations'
+  # TODO: remove these from code and the methods that they only use
   #   post  'node/get_attributes' => 'node#get_attributes'
   #   post  'node/set_attributes' => 'node#set_attributes'
   #   post  'node/add_component' => 'node#add_component'

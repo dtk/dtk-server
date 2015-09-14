@@ -79,6 +79,18 @@ module DTK
       @assembly_wide_type ||= Node::Type::Node.assembly_wide
     end
 
+
+    # opts can have keys
+    #  :cols - component columns
+    #  :filter - filter on component
+    def get_components(opts = {})
+      sp_hash = {
+        cols: opts[:cols] || [:id, :group_id, :display_name, :component_type]
+      }
+      sp_hash.merge!(filter: opts[:filter]) if opts[:filter]
+      get_objs(model_handle(:component), sp_hash)
+    end
+
     def self.assembly_node_print_form?(obj)
       if obj.is_a?(Node)
         if obj.get_field?(:display_name)
@@ -306,32 +318,6 @@ module DTK
        else
         fail Error.new("TODO: not implemented yet: processing of info_about(#{about})")
       end
-    end
-
-    def find_violations
-      cmps = get_objs(cols: [:components], keep_ref_cols: true)
-
-      ret = []
-      return ret if cmps.empty?
-
-      cmps.each do |cmp|
-        sp_hash = {
-          cols: [:id, :type, :component_id, :service_id],
-          filter: [:eq, :id, cmp[:component][:module_branch_id]]
-        }
-        branch = Model.get_obj(model_handle(:module_branch), sp_hash)
-
-        sp_cmp_hash = {
-          cols: [:id, :display_name, :dsl_parsed],
-          filter: [:eq, :id, branch[:component_id]]
-        }
-        cmp_module = Model.get_obj(model_handle(:component_module), sp_cmp_hash)
-
-        # ret << NodeViolations::NodeComponentParsingError.new(cmp_module[:display_name], "Component") unless cmp_module[:dsl_parsed]
-        ret << NodeViolations::NodeComponentParsingError.new(cmp_module[:display_name], 'Component') unless branch.dsl_parsed?()
-      end
-
-      ret
     end
 
     #TODO: move to getting rid of namespace arg and using aug component template
@@ -618,25 +604,6 @@ module DTK
       update(external_ref: self[:external_ref].merge(dns_name: nil, ec2_public_address: nil, private_dns_name: nil))
     end
 
-    def get_node_service_checks
-      return [] if get_objects_from_sp_hash(columns: [:monitoring_agents]).empty?
-
-      # TODO: i18n treatment of service check names
-      get_objects_col_from_sp_hash({ columns: [:monitoring_items__node] }, :monitoring_item)
-    end
-
-    def get_component_service_checks
-      return [] if get_objects_from_sp_hash(columns: [:monitoring_agents]).empty?
-      # TODO: i18n treatment of service check names
-      i18n = get_i18n_mappings_for_models(:component)
-
-      get_objects_from_sp_hash(columns: [:monitoring_items__component]).map do |r|
-        cmp_name = r[:component][:display_name]
-        cmp_info = { component_name: cmp_name, component_i18n: i18n_string(i18n, :component, cmp_name) }
-        r[:monitoring_item].merge(cmp_info)
-      end
-    end
-
     # returns external attribute links and port links
     # returns [connected_links,dangling_links]
     def self.get_external_connected_links(id_handles)
@@ -733,32 +700,6 @@ module DTK
       common_cols =  self.class.common_columns()
       ret = get_objs(cols: common_cols).first
       ret.materialize!(common_cols)
-    end
-  end
-end
-
-module XYZ
-  class NodeInterface < Model
-    #    set_relation_name(:node,:interface)
-
-    ### object access functions
-    #######################
-  end
-
-  class NodeViolations
-    class NodeComponentParsingError < self
-      def initialize(component, type)
-        @component = component
-        @type = type
-      end
-
-      def type
-        :parsing_error
-      end
-
-      def description
-        "#{@type} '#{@component}' has syntax errors in DSL files."
-      end
     end
   end
 end

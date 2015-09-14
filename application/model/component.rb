@@ -11,6 +11,7 @@ module DTK
     r8_nested_require('component', 'test')
     r8_nested_require('component', 'resource_matching')
     r8_nested_require('component', 'include_module')
+    r8_nested_require('component', 'domain')
     include GetMethod::Mixin
     extend GetMethod::ClassMixin
     include Dependency::Mixin

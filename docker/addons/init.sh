@@ -65,6 +65,7 @@ if [[ ! -d ${HOST_VOLUME}/ssh ]]; then
   printf '%s\n    %s\n' 'Host *' "IdentityFile ${HOST_VOLUME}/ssh/id_rsa" >> /home/${TENANT_USER}/.ssh/config
   chown -R ${TENANT_USER}:${TENANT_USER} ${HOST_VOLUME}/ssh
 fi
+ln -sf {HOST_VOLUME}/ssh/id_rsa* /home/${TENANT_USER}/.ssh/
 
 # generate mcollective ssh keys
 if [[ ! -d ${HOST_VOLUME}/mcollective ]]; then

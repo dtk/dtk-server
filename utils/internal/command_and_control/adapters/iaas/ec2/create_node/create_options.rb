@@ -3,13 +3,13 @@ module DTK; module CommandAndControlAdapter
     class CreateOptions < ::Hash
       def initialize(parent, conn, image, opts ={})
         super()
+        replace(image_id: image.image_id, flavor_id: parent.flavor_id)
+
         @conn         = conn
         @target       = parent.target
         @node         = parent.node
         @external_ref = parent.external_ref 
         @image        = image
-
-        replace(image_id: external_ref[:image_id], flavor_id: parent.flavor_id)
 
         finalize!
       end

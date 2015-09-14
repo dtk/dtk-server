@@ -4,14 +4,16 @@ module DTK; class Component
     r8_nested_require('domain', 'nic')
 
     def initialize(component)
+      # component with attributes
       @component = component
     end
 
     def self.on_node?(node)
-      if component_filter = component_filter?
-        node.get_components(component_filter?).map { |component| new(component) }
+      if filter = component_filter?
+        # if there is a component filter then no need to do the is_a? check
+        node.get_components(filter: filter, with_attributes: true).map { |component| new(component) }
       else
-        node.get_components().map { |component| is_a?(component) }.compact
+        node.get_components(with_attributes: true).map { |component| is_a?(component) }.compact
       end
     end
 
@@ -31,7 +33,7 @@ module DTK; class Component
     end
 
     # this method can be overwritten
-    def component_filter?
+    def self.component_filter?
       nil
     end
 

@@ -79,16 +79,33 @@ module DTK
       @assembly_wide_type ||= Node::Type::Node.assembly_wide
     end
 
-
     # opts can have keys
     #  :cols - component columns
     #  :filter - filter on component
+    #  :with_attributes (Booelan)
     def get_components(opts = {})
+      filter = [:eq, :node_node_id, id]
+      if cmp_filter = opts[:filter]
+        filter = [:and, filter, cmp_filter]
+      end
+
       sp_hash = {
-        cols: opts[:cols] || [:id, :group_id, :display_name, :component_type]
+        cols:   opts[:cols] || [:id, :group_id, :display_name, :component_type],
+        filter: filter
       }
-      sp_hash.merge!(filter: opts[:filter]) if opts[:filter]
-      get_objs(model_handle(:component), sp_hash)
+      cmps = Model.get_objs(model_handle(:component), sp_hash)
+      return cmps unless opts[:with_attributes] and ! cmps.empty? 
+      
+      ndx_cmps = cmps.inject({}) { |h,r| h.merge(r.id => r) }
+      sp_hash = {
+        cols:   [:id, :group_id, :display_name, :attribute_value, :component_component_id],
+        filter: [:oneof, :component_component_id,  ndx_cmps.keys]
+      }
+      Model.get_objs(model_handle(:attribute), sp_hash).each do |attr|
+        cmp = ndx_cmps[attr[:component_component_id]]
+        (cmp[:attributes] ||= []) << attr
+      end      
+      ndx_cmps.values
     end
 
     def self.assembly_node_print_form?(obj)

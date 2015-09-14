@@ -7,7 +7,9 @@ module DTK; module CommandAndControlAdapter
     end
 
     class Image
+      attr_reader :image_id
       def initialize(image_id, opts = {})
+        @image_id = image_id
         aws_creds = nil
         if target = opts[:target]
           aws_creds = Ec2.target_non_default_aws_creds?(target)

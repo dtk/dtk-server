@@ -75,7 +75,7 @@ module DTK
       result = nil
       begin
         number_of_retries ||= 3
-        result = `ssh-keyscan -H -t rsa -p #{git_port} #{repo_server_dns()}`
+        result = `ssh-keyscan -H -p #{git_port} #{repo_server_dns()}`
         raise Exception, "Try again ssh keyscan" if result.empty?
       rescue Exception
         unless (number_of_retries -= 1).zero?

@@ -71,10 +71,11 @@ module DTK
     end
 
     def self.get_tenant_rsa_key
+      git_port = R8::Config[:repo][:git][:port]
       result = nil
       begin
         number_of_retries ||= 3
-        result = `ssh-keyscan -H -t rsa #{repo_server_dns()}`
+        result = `ssh-keyscan -H -t rsa -p #{git_port} #{repo_server_dns()}`
         raise Exception, "Try again ssh keyscan" if result.empty?
       rescue Exception
         unless (number_of_retries -= 1).zero?

@@ -182,14 +182,6 @@ module DTK; class Task
         task.update(bound_input_attrs: bound_input_attrs)
       end
 
-      def ruby_function_implementation?
-        component_actions = self[:component_actions] || []
-        unless component_actions.empty?
-          # check taht all elements have ruby function type
-          !component_actions.find { |a| 'ruby_function' != ((a[:component] || {})[:external_ref] || {})[:type] }
-        end
-      end
-
       def execute_on_server?
         ConfigAgent::Type.is_a?(config_agent_type, [:ruby_function, :no_op])
       end

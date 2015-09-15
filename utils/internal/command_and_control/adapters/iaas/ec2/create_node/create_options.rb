@@ -30,12 +30,9 @@ module DTK; module CommandAndControlAdapter
         update_client_token?
       end
 
-      def subnet_id_on_primary_nic_component?
-        @primary_nic && @primary_nic.subnet_id
-      end
-
       def update_security_group!
-        security_group = @target.get_security_group_set() ||
+        security_group = security_groups_on_primary_nic_component? ||
+          @target.get_security_group_set() ||
           @target.get_security_group() ||
           @external_ref[:security_group_set] ||
           [R8::Config[:ec2][:security_group]] ||
@@ -46,6 +43,10 @@ module DTK; module CommandAndControlAdapter
 
         # TODO DTK-2231 Aldin check if groups needed when security_group_ids are available
         merge!(groups: security_group.is_a?(Array) ? security_group : [security_group])
+      end
+
+      def security_groups_on_primary_nic_component?
+        @primary_nic && @primary_nic.security_groups
       end
 
       def update_tags!
@@ -105,6 +106,10 @@ module DTK; module CommandAndControlAdapter
         if block_device_mapping = @image.block_device_mapping?(root_device_override_attrs)
           merge!(block_device_mapping: block_device_mapping)
         end
+      end
+
+      def subnet_id_on_primary_nic_component?
+        @primary_nic && @primary_nic.subnet_id
       end
 
       def update_user_data!

@@ -135,7 +135,6 @@ module DTK; module CommandAndControlAdapter
         create_options = CreateOptions.new(self, conn, image, opts)
 
         pp [:debug_create_options, Aux.hash_subset(create_options, [:image_id, :flavor_id, :security_group_ids, :groups, :tags, :key_name, :subnet_id])]
-        fail ErrorUsage, 'here'
 
         begin
           response = conn.server_create(create_options)

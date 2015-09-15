@@ -9,7 +9,7 @@ module XYZ
         nil
       elsif action.is_a?(Task::Action::CreateNode)
         case event_type
-         when :start
+         when :start, :initialize_failed
           StartCreateNode.create_start?(action)
          when :complete_succeeded, :complete_failed, :complete_timeout
           CompleteCreateNode.create_complete?(action, event_type, result)

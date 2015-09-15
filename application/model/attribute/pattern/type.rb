@@ -25,11 +25,10 @@ module DTK; class Attribute
         @attribute_properties = attr_properties
       end
 
-      def valid_value?(value, attribute_idh = nil)
+      def valid_value?(str_value, attribute_idh = nil)
         attr = attribute_stack(attribute_idh)[:attribute]
         if semantic_data_type = attr[:semantic_data_type]
-          # value comes as array inside string "[1, 2, 3]"; using JSON.parse to convert it to [1, 2, 3]
-          value = JSON.parse(value) if semantic_data_type.eql?('array')
+          value = ConvertFromString.convert(str_value, semantic_data_type)
           SemanticDatatype.is_valid?(semantic_data_type, value)
         else
           # vacuously true
@@ -49,6 +48,17 @@ module DTK; class Attribute
       private
 
       attr_reader :pattern, :id
+
+      # unify with SemanticDatatype data-drive processing
+      module ConvertFromString
+        # TODO: stub
+        def self.convert(str_value, semantic_data_type)
+          if %w{array hash json}.include?(semantic_data_type)
+            fail ErrorUsage, "Use the 'edit-attribute' command to enter values for a non-scalar attribute"
+          end
+          str_value
+        end
+      end
 
       def create_this_type?(opts)
         if create = opts[:create]

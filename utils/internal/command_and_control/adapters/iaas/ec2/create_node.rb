@@ -132,11 +132,12 @@ module DTK; module CommandAndControlAdapter
         primary_nic = Component::Domain::NIC.get_primary_nic?(@node)
         image       = image(ami, target: @node.get_target)
         opts = (primary_nic ? { primary_nic: primary_nic} : {})
-        create_options = CreateOptions.new(self, conn, image, opts)
-
-        pp [:debug_create_options, Aux.hash_subset(create_options, [:image_id, :flavor_id, :security_group_ids, :groups, :tags, :key_name, :subnet_id])]
 
         begin
+          create_options = CreateOptions.new(self, conn, image, opts)
+pp [:debug_create_options, Aux.hash_subset(create_options, [:image_id, :flavor_id, :security_group_ids, :groups, :tags, :key_name, :subnet_id])]
+
+
           response = conn.server_create(create_options)
           response[:status] ||= 'succeeded'
         rescue => e
@@ -145,7 +146,7 @@ module DTK; module CommandAndControlAdapter
           e.message << ". Region: '#{region}'." if region
           
           Log.error_pp([e, e.backtrace[0..10]])
-          return { status: 'failed', error_object: e }
+          return { status: 'failed', error_object: e, type: 'user_error' }
         end
         response
       end

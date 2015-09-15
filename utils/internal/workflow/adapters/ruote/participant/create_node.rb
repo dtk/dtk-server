@@ -46,9 +46,13 @@ module DTK
 
         def errors_in_result?(result)
           if result[:status] == 'failed'
-            result[:error_object] ? [{ message: result[:error_object].to_s }] : []
+            error_object = result[:error_object] 
+            type = result[:type]
+            error = { message: error_object && error_object.to_s, type: type }.reject { |k,v| v.nil? }
+            error.empty? ? [] : [error]
           end
         end
+
       end
     end
   end

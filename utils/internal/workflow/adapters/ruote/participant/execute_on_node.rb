@@ -20,7 +20,6 @@ module DTK
 
           task.add_internal_guards!(workflow.guards[:internal])
           execution_context(task, workitem, task_start) do
-
             if action.execute_on_server?
               result = workflow.process_executable_action(task)
               process_action_result!(workitem, action, result, task, task_id, task_end)

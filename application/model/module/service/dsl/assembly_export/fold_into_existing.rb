@@ -45,7 +45,7 @@ module DTK; class ServiceModule
       end
       
       def self.convert_to_text__assembly_section(assembly_section_proc, assembly_section_hash)
-        processed_assembly_hash = assembly_section_proc.parse_and_order_components_hash(assembly_section_hash)
+        processed_assembly_hash = assembly_section_proc.parse_and_order_assembly_hash(assembly_section_hash)
         prettify_assembly_string(convert_to_text(processed_assembly_hash))
       end
 

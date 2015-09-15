@@ -87,11 +87,11 @@ module DTK; module CommandAndControlAdapter
 
       def update_subnet_id!(iaas_properties)
         # for subnet id; first look whether there is a primary nic component; then look at target default
-        unless subnet = (subnet_id_on_primary_nic_component? || iaas_properties[:subnet])
+        unless subnet_id = (subnet_id_on_primary_nic_component? || iaas_properties[:subnet])
           fail ErrorUsage, "There is no subnet id specified"
         end
 
-        subnet_id = @conn.check_for_subnet(subnet)
+        @conn.check_for_subnet(subnet_id)
         associate_public_ip = true #TODO: stub value
         merge!(subnet_id: subnet_id, associate_public_ip: associate_public_ip)
       end

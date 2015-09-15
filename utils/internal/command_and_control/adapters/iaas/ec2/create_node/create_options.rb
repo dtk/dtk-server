@@ -1,6 +1,8 @@
 module DTK; module CommandAndControlAdapter
   class Ec2::CreateNode
     class CreateOptions < ::Hash
+      # opts can have keys
+      #   :primary_nic 
       def initialize(parent, conn, image, opts ={})
         super()
         replace(image_id: image.image_id, flavor_id: parent.flavor_id)
@@ -10,6 +12,7 @@ module DTK; module CommandAndControlAdapter
         @node         = parent.node
         @external_ref = parent.external_ref 
         @image        = image
+        @primary_nic  = opts[:primary_nic]
 
         finalize!
       end
@@ -25,6 +28,10 @@ module DTK; module CommandAndControlAdapter
         update_block_device_mapping!
         update_user_data!
         update_client_token?
+      end
+
+      def subnet_id_on_primary_nic_component?
+        @primary_nic && @primary_nic.subnet_id
       end
 
       def update_security_group!
@@ -58,7 +65,7 @@ module DTK; module CommandAndControlAdapter
           merge!(availability_zone: avail_zone)
         end
       end
-
+      
       def update_vpc_info?
         if @target.is_builtin_target?()
           #TODO: we wil get rid of this special case and just put the info in builtin target
@@ -69,23 +76,23 @@ module DTK; module CommandAndControlAdapter
             return
           end
         end
-
+        
         unless iaas_properties = @target[:iaas_properties]
           Log.error_pp(['Unexpected that @target does not have :iaas_properties', @target])
           return
         end
+        
+        update_subnet_id!(iaas_properties) if iaas_properties[:ec2_type] == 'ec2_vpc'
+      end
 
-        unless iaas_properties[:ec2_type] == 'ec2_vpc'
-          return
-        end
-
-        unless subnet = iaas_properties[:subnet]
-          Log.error_pp(['Unexpected that @target does not have :iaas_properties', @target])
-          return
+      def update_subnet_id!(iaas_properties)
+        # for subnet id; first look whether there is a primary nic component; then look at target default
+        unless subnet = (subnet_id_on_primary_nic_component? || iaas_properties[:subnet])
+          fail ErrorUsage, "There is no subnet id specified"
         end
 
         subnet_id = @conn.check_for_subnet(subnet)
-        associate_public_ip = true #TODO: stub vale
+        associate_public_ip = true #TODO: stub value
         merge!(subnet_id: subnet_id, associate_public_ip: associate_public_ip)
       end
 

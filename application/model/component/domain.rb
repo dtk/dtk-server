@@ -5,37 +5,47 @@ module DTK; class Component
 
     def initialize(component)
       # component with attributes
-      @component = component
+      @component      = component
+      @component_type = self.class.component_type(component)
     end
 
     def self.on_node?(node)
       if filter = component_filter?
         # if there is a component filter then no need to do the is_a? check
-        node.get_components(filter: filter, with_attributes: true).map { |component| new(component) }
+        node.get_components(filter: filter, with_attributes: true).map { |component| create(component) }
       else
-        node.get_components(with_attributes: true).map { |component| is_a?(component) }.compact
+        node.get_components(with_attributes: true).map { |component| create(component) if is_a?(component) }.compact
       end
     end
 
-    def self.is_a?(component)
-      new(component).is_a?
-    end
-
-    # this method gets overwritten; returns the Domain subclass object if @component is of type associated with subclass
-    def is_a?
-      nil
-    end
-
     private
-
-    def self.type
-      self.class.to_s.split('::').first.to_sym
+    
+    # TODO: might want to find more robust way to determine which components are nics
+    def self.is_a?(component)
+      component_types.include?(component_type(component))
     end
 
-    # this method can be overwritten
+    def self.component_type(component)
+      component.get_field?(:component_type)
+    end
+
+    def self.create(component)
+      new(component)
+    end
+
     def self.component_filter?
-      nil
+      [:oneof, :component_type, component_types]
     end
 
+    def match_attribute_value?(attr_name)
+      attr_name = attr_name.to_s
+      if attr = attributes.find { |attr| attr_name == attr[:display_name] }
+        attr[:attribute_value]
+      end 
+    end
+
+    def attributes
+      @component[:attributes] || []
+    end
   end
 end; end

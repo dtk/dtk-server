@@ -93,19 +93,24 @@ module DTK
         cols:   opts[:cols] || [:id, :group_id, :display_name, :component_type],
         filter: filter
       }
-      cmps = Model.get_objs(model_handle(:component), sp_hash)
-      return cmps unless opts[:with_attributes] and ! cmps.empty? 
-      
-      ndx_cmps = cmps.inject({}) { |h,r| h.merge(r.id => r) }
+      components = Model.get_objs(model_handle(:component), sp_hash)
+      return components unless opts[:with_attributes] and ! components.empty? 
+
+      ndx_components = {}
+      components.each do |component|
+        component[:attributes] = []
+        ndx_components[component.id] = component
+      end
+
       sp_hash = {
         cols:   [:id, :group_id, :display_name, :attribute_value, :component_component_id],
-        filter: [:oneof, :component_component_id,  ndx_cmps.keys]
+        filter: [:oneof, :component_component_id,  ndx_components.keys]
       }
       Model.get_objs(model_handle(:attribute), sp_hash).each do |attr|
-        cmp = ndx_cmps[attr[:component_component_id]]
-        (cmp[:attributes] ||= []) << attr
+        component = ndx_components[attr[:component_component_id]]
+        component[:attributes] << attr
       end      
-      ndx_cmps.values
+      ndx_components.values
     end
 
     def self.assembly_node_print_form?(obj)

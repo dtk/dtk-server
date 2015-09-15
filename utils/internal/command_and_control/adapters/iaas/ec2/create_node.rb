@@ -128,12 +128,15 @@ module DTK; module CommandAndControlAdapter
         
         conn = Ec2.conn(@node.get_target_iaas_credentials())
         
-pp Component::Domain::NIC.on_node?(@node)
-        image = image(ami, target: @node.get_target)
-        create_options = CreateOptions.new(self, conn, image)
+        # primary_nic will be non nil only if explicit nic component is configured
+        primary_nic = Component::Domain::NIC.get_primary_nic?(@node)
+        image       = image(ami, target: @node.get_target)
+        opts = (primary_nic ? { primary_nic: primary_nic} : {})
+        create_options = CreateOptions.new(self, conn, image, opts)
 
         pp [:debug_create_options, Aux.hash_subset(create_options, [:image_id, :flavor_id, :security_group_ids, :groups, :tags, :key_name, :subnet_id])]
-        
+        fail ErrorUsage, 'here'
+
         begin
           response = conn.server_create(create_options)
           response[:status] ||= 'succeeded'

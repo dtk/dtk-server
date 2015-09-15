@@ -1,4 +1,4 @@
-FROM getdtk/baseimage:0.4
+FROM getdtk/baseimage:0.5
 MAINTAINER dduvnjak <dario@atlantbh.com>
 
 RUN mkdir -p /etc/puppet/modules

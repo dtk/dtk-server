@@ -16,7 +16,8 @@ RUN apt-get install -y \
   git cron \
   ruby ruby-dev \
   lsb-release openssh-server \
-  sudo curl supervisor postgresql-client libxslt-dev
+  sudo curl supervisor postgresql-client libxslt-dev \
+  gettext-base
 
 RUN mkdir -p /var/run/sshd
 

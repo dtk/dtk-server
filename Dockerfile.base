@@ -1,18 +1,16 @@
-FROM getdtk/trusty-puppet:0.1
+FROM getdtk/trusty-puppet:0.2
 MAINTAINER dduvnjak <dario@atlantbh.com>
 
 RUN mkdir -p /etc/puppet/modules
-
 COPY dtk_modules /etc/puppet/modules
-
 COPY docker/manifests /tmp/manifests
 
+RUN git clone https://github.com/rich-reactor8/dtk-node-agent /tmp/dtk-node-agent && \
+    mkdir -p /usr/share/mcollective/plugins/mcollective && \
+    cp -r /tmp/dtk-node-agent/mcollective_additions/plugins/v2.2/* /usr/share/mcollective/plugins/mcollective
+
 RUN puppet apply --debug /tmp/manifests/stage1.pp
-
 RUN puppet apply --debug /tmp/manifests/stage2.pp
-
 RUN puppet apply --debug /tmp/manifests/stage4.pp
-
-RUN apt-get -y install gettext-base
 
 RUN rm -rf /etc/puppet/modules /tmp/*

@@ -27,6 +27,9 @@ module DTK; class Task::Status::StreamForm
 
       # For each stage_level_task, this method computes its nested subtasks
       # and returns the set of
+      # TODO: DTK-2248: think this method or one that it calls is causing error
+      #       issue is when the "a + [task]" clause is retuned for leaf_subtasks;
+      #       subsequent merge! changes not updating @stage_level_tasks when errors added
       def add_subtasks_and_return_leaf_subtasks!
         @stage_level_tasks.inject([]) do |a, stage_level_task|
           # TODO: less expensive to not reify and instead when process executable action to

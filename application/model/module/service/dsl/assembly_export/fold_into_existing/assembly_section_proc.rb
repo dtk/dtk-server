@@ -51,7 +51,6 @@ module DTK; class ServiceModule; class AssemblyExport
           if cmp_match = assembly_hash_cmps.find{ |ah_cmp| ah_cmp.eql?(cmp_name) || (ah_cmp.is_a?(Hash) && ah_cmp[cmp_name]) }
             assembly_cmp = assembly_hash_cmps.delete(cmp_match)
             parsed_assembly_cmp = assembly_cmp.is_a?(String) ? assembly_cmp : parse_single_component_content(cmp_name, assembly_cmp, cmp)
-            ap parsed_assembly_cmp
             new_cmps << parsed_assembly_cmp
           end
         end
@@ -112,7 +111,7 @@ module DTK; class ServiceModule; class AssemblyExport
 
         new_hash_content['nodes'] = nodes_hash
         new_hash_content['components'] = cmps_hash
-        ap new_hash_content
+
         new_hash_content
       end
 
@@ -152,7 +151,6 @@ module DTK; class ServiceModule; class AssemblyExport
 
           is_equal_node_indent = node_indent && line[/\A */].size == node_indent
           if last.eql?('nodes:') || next_is_node || is_equal_node_indent
-            ap name
             if is_comment?(name)
               next_is_node = true
             else

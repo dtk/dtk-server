@@ -66,6 +66,24 @@ if [[ ! -d ${HOST_VOLUME}/ssh ]]; then
   chown -R ${TENANT_USER}:${TENANT_USER} ${HOST_VOLUME}/ssh
 fi
 ln -sf ${HOST_VOLUME}/ssh/id_rsa* /home/${TENANT_USER}/.ssh/
+SSH_HOST_KEY_DIR=${HOST_VOLUME}/ssh/host
+mkdir -p ${SSH_HOST_KEY_DIR}
+# generate SSH2 host keys, but only if they don't exist
+for type in rsa dsa ecdsa ed25519; do
+  fn="ssh_host_${type}_key"
+  f="${SSH_HOST_KEY_DIR}/ssh_host_${type}_key"
+
+  if [ -s "${f}" ]; then
+    echo "SSH2 '$type' key ($f) already exists; not regenerating."
+    continue
+  fi
+
+  echo "Generating SSH2 '$type' key ($f); this may take some time..."
+  yes | ssh-keygen -q -f "$f" -N '' -t "$type"
+  yes | ssh-keygen -l -f "${f}.pub"
+  ln -sfT "${f}" "/etc/ssh/${fn}"
+  ln -sfT "${f}".pub "/etc/ssh/${fn}".pub
+done
 
 # generate mcollective ssh keys
 if [[ ! -d ${HOST_VOLUME}/mcollective ]]; then

@@ -28,9 +28,11 @@ fi
 
 # set git port to default value of 2222, if not otherwise set
 GIT_PORT=${GIT_PORT-2222}
+# set repoman host to default value if not otherwise set
+REMOTE_REPO_HOST=${REMOTE_REPO_HOST-dtknet.servicecatalog.it}
 
 # export the variables
-export USERNAME PASSWORD PUBLIC_ADDRESS GIT_PORT
+export USERNAME PASSWORD PUBLIC_ADDRESS GIT_PORT REMOTE_REPO_HOST
 
 # start necessary services
 /usr/sbin/sshd -D &

@@ -76,6 +76,7 @@ module DTK
             mcollective_config_erubis_object().result(
               logfile: logfile(),
               stomp_host: Mcollective.server_host(),
+              stomp_port: Mcollective.server_port(),
               mcollective_username: R8::Config[:mcollective][:username],
               mcollective_password: R8::Config[:mcollective][:password],
               mcollective_collective: R8::Config[:mcollective][:collective])
@@ -116,6 +117,7 @@ eos
             mcollective_config_erubis_object().result(
               logfile: logfile(),
               stomp_host: Mcollective.server_host(),
+              stomp_port: Mcollective.server_port(),
               mcollective_ssh_local_public_key: R8::Config[:mcollective][:ssh][:local][:public_key],
               mcollective_ssh_local_private_key: R8::Config[:mcollective][:ssh][:local][:private_key],
               mcollective_ssh_local_authorized_keys: R8::Config[:mcollective][:ssh][:local][:authorized_keys],

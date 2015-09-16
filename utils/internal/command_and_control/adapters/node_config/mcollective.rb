@@ -11,6 +11,10 @@ module DTK
         R8::Config[:command_and_control][:node_config][:mcollective][:host]
       end
 
+      def self.server_port
+        R8::Config[:mcollective][:port]
+      end
+
       def self.discover(filter, timeout, limit, client)
         Config.discover(filter, timeout, limit, client)
       end

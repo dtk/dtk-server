@@ -1,6 +1,7 @@
 remote_repo.host = ${REMOTE_REPO_HOST}
 repo.remote.new_client = true
 repo.remote.rest_port = ${REMOTE_REPO_REST_PORT}
+# repo.remote.tenant_name =
 repo.remote.git_user = git
 
 dsl.service.integer_version.default=4
@@ -11,6 +12,7 @@ local_repo.host = ${PUBLIC_ADDRESS}
 db.host = /var/run/postgresql
 db.name = dtk1
 mcollective.host = ${PUBLIC_ADDRESS}
+mcollective.port = ${MCOLLECTIVE_PORT}
 mcollective.ssh.local.public_key= ${HOST_VOLUME}/mcollective/mcollective_local.pub
 mcollective.ssh.local.private_key= ${HOST_VOLUME}/mcollective/mcollective_local
 mcollective.ssh.local.authorized_keys= ${HOST_VOLUME}/mcollective/authorized_keys

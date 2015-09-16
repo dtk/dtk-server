@@ -31,9 +31,11 @@ GIT_PORT=${GIT_PORT-2222}
 # set repoman host and port to default values if not otherwise set
 REMOTE_REPO_HOST=${REMOTE_REPO_HOST-dtknet.servicecatalog.it}
 REMOTE_REPO_REST_PORT=${REMOTE_REPO_REST_PORT-7001}
+# set mco port to default if not otherwise set
+MCOLLECTIVE_PORT=${MCOLLECTIVE_PORT-6163}
 
 # export the variables
-export USERNAME PASSWORD PUBLIC_ADDRESS GIT_PORT REMOTE_REPO_HOST
+export USERNAME PASSWORD PUBLIC_ADDRESS GIT_PORT REMOTE_REPO_HOST REMOTE_REPO_REST_PORT MCOLLECTIVE_PORT
 
 # start necessary services
 /usr/sbin/sshd -D &

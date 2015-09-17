@@ -38,7 +38,8 @@ Select a directory on host which will be used by the docker container for persis
 ```
 USERNAME=someuser
 PASSWORD=somepassword
-PUBLIC_ADDRESS=someuser.dtk.io
+PUBLIC_ADDRESS=someinstance.dtk.io
+INSTANCE_NAME=someinstance
 ```   
 Next step is to start the docker container with the directory from above used as a volume:  
 ```

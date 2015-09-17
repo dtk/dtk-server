@@ -189,6 +189,7 @@ eos
 cat << EOF >> /etc/mcollective/server.cfg
 ---
 plugin.stomp.host = <%=node_config_server_host %>
+plugin.stomp.port = <%=stomp_port %>
 main_collective = <%=mcollective_collective %>
 collectives = <%=mcollective_collective %>
 

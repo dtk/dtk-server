@@ -144,6 +144,7 @@ eos
               mcollective_password: R8::Config[:mcollective][:password],
               mcollective_collective: R8::Config[:mcollective][:collective],
               mcollective_restart: mcollective_restart(node),
+              stomp_port: Mcollective.server_port(),
               # TODO: will generalize so not just puppet
               puppet_version: puppet_version(node),
               pbuilderid: pbuilderid,

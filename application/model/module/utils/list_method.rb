@@ -25,6 +25,7 @@ module DTK
           is_equal = nil
           not_published = nil
 
+          # if finding differences with the dtkn catalog
           if diff
             if default_remote_repo = RepoRemote.ret_default_remote_repo((ndx_repo_remotes || {}).values)
               remote = default_remote_repo.remote_dtkn_location(project, model_type, module_name)

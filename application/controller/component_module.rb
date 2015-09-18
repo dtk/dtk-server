@@ -299,17 +299,18 @@ module DTK
 
     def rest__info_git_remote
       component_module = create_obj(:component_module_id)
-      info_git_remote(component_module)
+      rest_ok_response RepoRemote.get_git_remotes(component_module)
     end
 
     def rest__add_git_remote
       component_module = create_obj(:component_module_id)
-      add_git_remote(component_module)
+      rest_ok_response add_git_remote(component_module)
     end
 
     def rest__remove_git_remote
       component_module = create_obj(:component_module_id)
       remove_git_remote(component_module)
+      rest_ok_response 
     end
   end
 end

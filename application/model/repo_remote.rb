@@ -22,11 +22,25 @@ module DTK
     RemoteRepoBase = :dtknet
     DefaultMarker = '*'
 
+    def self.get_git_remotes(module_obj)
+      module_obj.get_linked_remote_repos.collect do |a|
+        provider_name = a.remote_provider_name
+        unless is_dtkn_provider_name?(provider_name)
+          a.merge(
+            url: a.git_remote_url,
+            git_provider: provider_name,
+            base_git_url: a.base_git_remote_url,
+            base_git_location: a.base_git_remote_location
+          )
+        end
+      end.compact
+    end
+
     def self.repo_base
       RemoteRepoBase
     end
 
-    def self.git_provider_name(url_of_provider)
+    def self.remote_provider_name(url_of_provider)
       GIT_REPO_PROVIDERS.each do |provider|
         return provider if url_of_provider.match(/(@|\/)#{provider}/)
       end
@@ -38,12 +52,12 @@ module DTK
       RepoManagerClient.repo_url_ssh_access(get_field?(:repo_name))
     end
 
-    def git_provider_name
-      RepoRemote.git_provider_name(git_remote_url())
+    def remote_provider_name
+      RepoRemote.remote_provider_name(git_remote_url())
     end
 
     def is_dtkn_provider?
-      GIT_REPO_PROVIDERS.last.eql?(git_provider_name())
+      GIT_REPO_PROVIDERS.last.eql?(remote_provider_name())
     end
 
     def git_remote_url
@@ -82,7 +96,7 @@ module DTK
           repo_name = remote_url.split('/').last(2).join('-').gsub(/\.git/, '')
         end
         # example: hkraji-stdlib-github
-        "#{repo_name}-#{git_provider_name}"
+        "#{repo_name}-#{remote_provider_name}"
       end
     end
 
@@ -228,13 +242,24 @@ module DTK
       repo_remote
     end
 
+    def is_dtkn_provider?
+      self.class.is_dtkn_provider_name?(remote_provider_name)
+    end
+
     private
+
+    def self.is_dtkn_provider_name?(provider_name)
+      DTKN_PROVIDER.eql?(provider_name)
+    end
 
     # TODO: deprecate once all data is migrated so :is_default is marked
     def self.compute_default_remote_repo(repo_remotes)
+      repo_remotes ||= []
+      repo_remotes.reject! { |r| !r.is_dtkn_provider? }
       Log.info("Calling compute_default_remote_repo on (#{repo_remotes.map { |r| r.get_field?(:display_name) }.join(',')})")
+      
       unless (repo_remotes || []).empty?
-        # TODO: enhance so that default is one taht matche's user's default namespace
+        # TODO: enhance so that default is one taht matches user's default namespace
         # set on augmented_module_branch[:repo] fields associated with the default namespace
         # we sort descending by created date
         # default is the one which is the oldest

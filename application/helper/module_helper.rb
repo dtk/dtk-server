@@ -186,8 +186,7 @@ module Ramaze::Helper
     # if this is used; it is inserted by controller method
     def get_existing_default_namespace?(module_obj, version = nil)
       linked_remote_repos = module_obj.get_linked_remote_repos(filter: { version: version })
-      default_remote_repo = RepoRemote.ret_default_remote_repo(linked_remote_repos)
-      if default_remote_repo
+      if default_remote_repo = RepoRemote.default_repo_remote?(linked_remote_repos)
         Log.info("Found default namespace (#{default_remote_repo[:display_name]})")
         default_remote_repo[:repo_namespace]
       end

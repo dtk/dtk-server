@@ -27,7 +27,7 @@ module DTK
 
           # if finding differences with the dtkn catalog
           if diff
-            if default_remote_repo = RepoRemote.ret_default_remote_repo((ndx_repo_remotes || {}).values)
+            if default_remote_repo = RepoRemote.default_repo_remote?((ndx_repo_remotes || {}).values)
               remote = default_remote_repo.remote_dtkn_location(project, model_type, module_name)
               is_equal = r[:repo].ret_local_remote_diff(module_branch, remote)
             else
@@ -102,9 +102,12 @@ module DTK
           elsif repo_remotes.size == 1
             [repo_remotes.first.print_form(opts_pp)]
           else
-            default = RepoRemote.ret_default_remote_repo(repo_remotes)
-            repo_remotes.reject! { |r| r[:id] == default[:id] }
-            [default.print_form(opts_pp.merge(is_default_namespace: true))] + repo_remotes.map { |r| r.print_form(opts_pp) }
+            if default = RepoRemote.default_repo_remote?(repo_remotes)
+              repo_remotes.reject! { |r| r[:id] == default[:id] }
+              [default.print_form(opts_pp.merge(is_default_namespace: true))] + repo_remotes.map { |r| r.print_form(opts_pp) }
+            else
+              repo_remotes.map { |r| r.print_form(opts_pp) }
+            end
           end
 
         array << external_ref_source if external_ref_source

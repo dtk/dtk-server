@@ -2,7 +2,7 @@ module DTK
   class RepoRemote < Model
     def print_form(opts = Opts.new)
       ret = self[:display_name] || '' #'' just to be safe
-      ret = "#{DTKNCatalogPrefix}#{ret}" if opts[:dtkn_prefix]
+      ret = "#{remote_provider_name}://#{ret}" if opts[:provider_prefix]
       ret = "#{DefaultMarker}#{ret}" if opts[:is_default_namespace]
       ret
     end
@@ -19,7 +19,6 @@ module DTK
     #
     REMOTE_LOCATION_REGEX = /(.*\.git)(\/.*)$/
 
-    DTKNCatalogPrefix = 'dtkn://'
     RemoteRepoBase = :dtknet
     DefaultMarker = '*'
 
@@ -204,8 +203,7 @@ module DTK
     def self.default_repo_remote?(repo_remotes)
       # Making robust in case multiple ones marked default
       # and making robust for earlier bug where not dtkn modules can be marked default
-      repo_remotes ||= []
-      repo_remotes.reject! { |r| !r.is_dtkn_provider? }
+      repo_remotes = (repo_remotes || []).reject { |r| !r.is_dtkn_provider? }
 
       pruned = repo_remotes.select { |r| r.get_field?(:is_default) }
       if pruned.empty?

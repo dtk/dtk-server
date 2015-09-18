@@ -95,7 +95,7 @@ module DTK
       private
 
       def self.linked_remotes_print_form(repo_remotes, external_ref_source, opts = {})
-        opts_pp = Opts.new(dtkn_prefix: true)
+        opts_pp = Opts.new(provider_prefix: true)
         array =
           if repo_remotes.empty?
             []
@@ -103,15 +103,16 @@ module DTK
             [repo_remotes.first.print_form(opts_pp)]
           else
             if default = RepoRemote.default_repo_remote?(repo_remotes)
-              repo_remotes.reject! { |r| r[:id] == default[:id] }
-              [default.print_form(opts_pp.merge(is_default_namespace: true))] + repo_remotes.map { |r| r.print_form(opts_pp) }
+              # remove all non default dtkn_providers
+              repo_remotes.reject! { |r| r[:id] == default[:id] and r.is_dtkn_provider? }
+              [default.print_form(opts_pp)] + repo_remotes.map { |r| r.print_form(opts_pp) }
             else
               repo_remotes.map { |r| r.print_form(opts_pp) }
             end
           end
 
         array << external_ref_source if external_ref_source
-        array << '*** NOT PUBLISHED ***' if opts[:not_published]
+        array << '*** NOT PUBLISHED in DTKN ***' if opts[:not_published]
 
         array.join(JoinDelimiter)
       end

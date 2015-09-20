@@ -181,21 +181,24 @@ module DTK
           if var_name_path = ext_ref[:path]
             array_form_path = to_array_form(var_name_path)
             val = ret_value(attr, node_components)
-            # second clause is to handle case where theer is a default just in puppet and header and since not overwritten acts as dynamic attr
-            if attr[:value_asserted].nil? && (attr[:dynamic] || ext_ref[:default_variable]) #TODO: the disjunct 'ext_ref[..]' can be deprecated
-              dyn_attr = { name: array_form_path[1], id: attr[:id] }
-              if ext_ref[:type] == 'puppet_exported_resource'
-                type = 'exported_resource'
-                dyn_attr.merge!(type: 'exported_resource', title_with_vars: ext_ref[:title_with_vars])
-              elsif ext_ref[:default_variable]
-                dyn_attr.merge!(type: 'default_variable')
+            if attr[:dynamic] || ext_ref[:default_variable] #TODO: the disjunct 'ext_ref[..]' can be deprecated
+              if not attr[:value_asserted].nil?
+                # no up; this is case where user overrides the dynamic attribute by asserting a value
               else
-                dyn_attr.merge!(type: 'dynamic')
+                dyn_attr = { name: array_form_path[1], id: attr[:id] }
+                if ext_ref[:type] == 'puppet_exported_resource'
+                  type = 'exported_resource'
+                  dyn_attr.merge!(type: 'exported_resource', title_with_vars: ext_ref[:title_with_vars])
+                elsif ext_ref[:default_variable]
+                  dyn_attr.merge!(type: 'default_variable')
+                else
+                  dyn_attr.merge!(type: 'dynamic')
+                end
+                if is_connected_output_attribute?(attr)
+                  dyn_attr.merge!(is_connected: true)
+                end
+                dynamic_attrs << dyn_attr
               end
-              if is_connected_output_attribute?(attr)
-                dyn_attr.merge!(is_connected: true)
-              end
-              dynamic_attrs << dyn_attr
             elsif not val.nil?
               add_attribute!(ndx_attributes, array_form_path, val, ext_ref)
               # info that is used to set the name param for the resource

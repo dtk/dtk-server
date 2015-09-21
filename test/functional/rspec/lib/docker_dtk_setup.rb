@@ -49,14 +49,18 @@ else
 	puts "Failed to set #{target_name} as default target."
 end
 
+#set catalog credentials and ssh key
+credentials_status=dtk_common.send_request('/rest/account/set_catalog_credentials', username: catalog_user, password: catalog_pass, validate: true)
+ap credentials_status
+ssh_key_status=dtk_common.send_request('/rest/account/add_user_direct_access', rsa_pub_key: dtk_common.ssh_key, username: repo_user, first_registration: false)
+ap ssh_key_status
 # Pull r8:bootstrap component
 module_status=dtk_common.send_request('/rest/service_module/import', remote_module_name: service_module, local_module_name: local_module, rsa_pub_key: dtk_common.ssh_key, do_not_raise: true)
+ap module_status
 if module_status['status']=='ok' 
 	puts "Module #{service_module} pulled from remote repo!"
 else
 	puts "Failed to pull #{service_module} from remote repo."
 end
 
-credentials_status=dtk.common.send_request('/rest/account/set_catalog_credentials', username: catalog_user, password: catalog_pass, validate: true)
 
-ssh_key_status=dtk_common.send_request('/rest/account/add_user_direct_access', rsa_pub_key: dtk_common.ssh_key, username: repo_user, first_registration: false)

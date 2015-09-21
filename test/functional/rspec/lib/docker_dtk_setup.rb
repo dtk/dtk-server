@@ -24,8 +24,7 @@ local_module="bootstrap"
 
 # Create new provider
 provider_status=dtk_common.send_request('/rest/target/create_provider',  iaas_properties: {keypair: keypair_name, security_group: sg_name, key: config['properties']['aws_access_key_id'], secret: config['properties']['aws_secret_access_key']}, provider_name: provider_name, iaas_type: iaas_type, no_bootstrap: true)
-require 'pry'
-binding.pry
+
 if provider_status['status']=='ok' 
 	puts "Provider #{provider_name} created!"
 else
@@ -35,9 +34,17 @@ end
 # Create new target
 target_status=dtk_common.send_request('/rest/target/create', type: target_type, provider_id: provider_name, iaas_properties: { region: target_region }, target_name: target_name)
 if target_status['status']=='ok'  
-	puts "Provider #{target_name} created!"
+	puts "Target #{target_name} created!"
 else
-	puts "Failed to create provider #{target_name}."
+	puts "Failed to create target #{target_name}."
+end
+
+# Set default target
+default_target_status=dtk_common.send_request('/rest/target/set_default', target_id: target_name)
+if default_target_status['status']=='ok'  
+	puts "Target #{target_name} set as default target!"
+else
+	puts "Failed to set #{target_name} as default target."
 end
 
 # Pull r8:bootstrap component

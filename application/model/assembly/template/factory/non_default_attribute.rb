@@ -8,6 +8,7 @@ module DTK; class Assembly; class Template
         self[:attribute_value] = attr[:attribute_value] # virtual attributes do not work in Aux::hash_subset
         @is_title_attribute = ((not cmp[:only_one_per_node]) && attr.is_title_attribute?())
       end
+      private :initialize
 
       def self.isa?(attr, cmp)
         if isa_value_override?(attr) || !!base_tags?(attr)
@@ -18,20 +19,29 @@ module DTK; class Assembly; class Template
       def isa_value_override?
         self.class.isa_value_override?(self)
       end
-      def self.isa_value_override?(attr)
-        attr[:is_instance_value] && !attr[:attribute_value].nil?
-      end
 
       def base_tags?
         self.class.base_tags?(self)
       end
+
+      def self.add_to_cmp_ref_hash!(cmp_ref_hash, factory, non_def_attrs, cmp_template_id)
+        add_to_cmp_ref_hash_aux!(cmp_ref_hash, factory, non_def_attrs, cmp_template_id)
+      end
+
+      private
+
+      def self.isa_value_override?(attr)
+        # checking attr[:value_asserted] rather than attr[:attribute_value] because dont want to persist derived values
+        attr[:is_instance_value] && !attr[:value_asserted].nil?
+      end
+
       def self.base_tags?(attr)
         if attr[:tags] = HierarchicalTags.reify(attr[:tags])
           attr[:tags].base_tags?()
         end
       end
 
-      def self.add_to_cmp_ref_hash!(cmp_ref_hash, factory, non_def_attrs, cmp_template_id)
+      def self.add_to_cmp_ref_hash_aux!(cmp_ref_hash, factory, non_def_attrs, cmp_template_id)
         attr_names = non_def_attrs.map { |a| a[:display_name] }
         sp_hash = {
           cols: [:id, :display_name, :data_type, :semantic_data_type],

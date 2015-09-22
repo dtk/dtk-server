@@ -6,7 +6,6 @@ require 'pp'
 require 'json'
 require 'awesome_print'
 require './lib/dtk_common'
-require './lib/service_modules_spec'
 
 dtk_common = Common.new('', '')
 config = YAML::load(File.open("./config/release.yml"))
@@ -53,28 +52,10 @@ else
 	puts "Failed to set #{target_name} as default target."
 end
 
-#set catalog credentials and ssh key
+# Set catalog credentials and ssh key
 credentials_status=dtk_common.send_request('/rest/account/set_catalog_credentials', username: catalog_user, password: catalog_pass, validate: true)
 ssh_key_status=dtk_common.send_request('/rest/account/add_user_direct_access', rsa_pub_key: dtk_common.ssh_key, username: repo_user, first_registration: false)
 
-
+# Install r8:bootstrap servicem odule with required component modules
 `dtk service-module install #{service_module} --update-none -y`
-=begin
 
-
-# install component modules
-cmps.each do |cmp|
-	cmp_status=dtk_common.send_request('/rest/component_module/import', remote_module_name: "#{namespace}/#{cmp}", local_module: cmp, rsa_pub_key: dtk_common.ssh_key)
-end
-
-
-# install r8:bootstrap service module
-module_status=dtk_common.send_request('/rest/service_module/import', remote_module_name: service_module, local_module_name: local_module, rsa_pub_key: dtk_common.ssh_key, do_not_raise: true)
-
-if module_status['status']=='ok' 
-	puts "Module #{service_module} pulled from remote repo!"
-else
-	puts "Failed to pull #{service_module} from remote repo."
-end
-
-=end

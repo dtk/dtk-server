@@ -16,10 +16,8 @@ module DTK
         value_overrides = []
         attribute_info = []
         non_def_attrs.values.each do |attr|
-          if attr.isa_value_override?()
-            unless attr.is_title_attribute()
-              value_overrides << { attr[:display_name] => attr_value_output_form(attr, :attribute_value) }
-            end
+          unless attr.is_title_attribute()
+            value_overrides << { attr[:display_name] => attr_value_output_form(attr, :attribute_value) }
           end
           if base_tags = attr.base_tags?()
             attribute_info << { attr[:display_name] => attr_tags_setting(base_tags) }

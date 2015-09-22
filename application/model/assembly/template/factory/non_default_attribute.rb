@@ -16,10 +16,6 @@ module DTK; class Assembly; class Template
         end
       end
 
-      def isa_value_override?
-        self.class.isa_value_override?(self)
-      end
-
       def base_tags?
         self.class.base_tags?(self)
       end

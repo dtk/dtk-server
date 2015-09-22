@@ -57,5 +57,5 @@ credentials_status=dtk_common.send_request('/rest/account/set_catalog_credential
 ssh_key_status=dtk_common.send_request('/rest/account/add_user_direct_access', rsa_pub_key: dtk_common.ssh_key, username: repo_user, first_registration: false)
 
 # Install r8:bootstrap servicem odule with required component modules
-`dtk service-module install #{service_module} --update-none -y`
+system("dtk service-module install #{service_module} --update-none -y")
 

@@ -6,7 +6,7 @@ require 'pp'
 require 'json'
 require 'awesome_print'
 require './lib/dtk_common'
-
+require './lib/service_modules_spec'
 
 dtk_common = Common.new('', '')
 config = YAML::load(File.open("./config/release.yml"))
@@ -25,6 +25,8 @@ catalog_pass="r8server"
 repo_user="dtk17-docker-client"
 namespace="r8"
 cmps=["dtk","dtk_activemq","dtk_java","logrotate","stdlib"]
+
+
 
 # Create new provider
 provider_status=dtk_common.send_request('/rest/target/create_provider',  iaas_properties: {keypair: keypair_name, security_group: sg_name, key: config['properties']['aws_access_key_id'], secret: config['properties']['aws_secret_access_key']}, provider_name: provider_name, iaas_type: iaas_type, no_bootstrap: true)
@@ -56,14 +58,17 @@ credentials_status=dtk_common.send_request('/rest/account/set_catalog_credential
 ssh_key_status=dtk_common.send_request('/rest/account/add_user_direct_access', rsa_pub_key: dtk_common.ssh_key, username: repo_user, first_registration: false)
 
 
+`dtk service-module install #{service_module} --update-none -y`
+=begin
 
-# pull component modules
+
+# install component modules
 cmps.each do |cmp|
 	cmp_status=dtk_common.send_request('/rest/component_module/import', remote_module_name: "#{namespace}/#{cmp}", local_module: cmp, rsa_pub_key: dtk_common.ssh_key)
 end
 
 
-# Pull r8:bootstrap service module
+# install r8:bootstrap service module
 module_status=dtk_common.send_request('/rest/service_module/import', remote_module_name: service_module, local_module_name: local_module, rsa_pub_key: dtk_common.ssh_key, do_not_raise: true)
 
 if module_status['status']=='ok' 
@@ -72,4 +77,4 @@ else
 	puts "Failed to pull #{service_module} from remote repo."
 end
 
-
+=end

@@ -72,6 +72,18 @@
         "t2.medium"
       ]
     },
+    "ami-fd4480b9":{
+      "region":"us-west-1",
+      "type":"trusty_hvm",
+      "os_type":"ubuntu",
+      "display_name":"Trusty_hvm",
+      "png":"trusty_hvm.png",
+      "sizes":[
+        "t2.micro",
+        "t2.small",
+        "t2.medium"
+      ]
+    },
     "ami-95f794f0":{
       "region":"us-east-1",
       "type":"precise_hvm",

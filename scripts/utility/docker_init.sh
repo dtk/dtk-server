@@ -15,7 +15,7 @@ rm -rf /${CONTAINER}
 mkdir /${CONTAINER}
 
 ADDRESS=${1}
-USER=${2:-dtk33}
+USER=${2:-dtk17-docker}
 PASS=${3:-r8server}
 NAME="dtk-docker-${RANDOM}"
 

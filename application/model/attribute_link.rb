@@ -1,17 +1,12 @@
 module DTK
   class AttributeLink < Model
     r8_nested_require('attribute_link', 'propagate_mixins')
+    r8_nested_require('attribute_link', 'output')
     r8_nested_require('attribute_link', 'propagate_changes')
     r8_nested_require('attribute_link', 'function')
+    r8_nested_require('attribute_link', 'update_derived_values')
     r8_nested_require('attribute_link', 'propagate_processor')
     r8_nested_require('attribute_link', 'ad_hoc')
-
-    class Output < HashObject
-    end
-    class OutputArrayAppend < Output
-    end
-    class OutputPartial < Output
-    end
 
     def self.common_columns
       [:id, :group_id, :display_name, :input_id, :output_id, :type, :hidden, :function, :index_map, :assembly_id, :port_link_id]

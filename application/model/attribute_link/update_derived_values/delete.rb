@@ -1,28 +1,28 @@
-module DTK; class Attribute; class UpdateDerivedValues
+module DTK; class AttributeLink; class UpdateDerivedValues
   # for processing deleting of links
   class Delete < self
-    class LinkInfo
-      attr_reader :input_attribute, :deleted_links, :other_links
-      def initialize(input_attribute)
-        @input_attribute = input_attribute
-        @deleted_links = []
-        @other_links = []
-      end
+    r8_nested_require('delete', 'link_info')
 
-      def add_other_link!(link)
-        @other_links << link unless match?(@other_links, link)
+    def self.links_delete_info(aug_attr_links)
+      ndx_ret = {}
+      aug_attr_links.each do |link|
+        a_link = link[:other_input_link]
+        if a_link[:type] == 'external'
+          input_attribute = link[:input_attribute]
+          attr_id = input_attribute[:id]
+          l = ndx_ret[attr_id] ||= LinkInfo.new(input_attribute)
+          new_el = {
+            attribute_link_id: a_link[:id],
+            index_map: a_link[:index_map]
+          }
+          if a_link[:id] == link[:id]
+            l.add_deleted_link!(new_el)
+          else
+            l.add_other_link!(new_el)
+          end
+        end
       end
-
-      def add_deleted_link!(link)
-        @deleted_links << link unless match?(@deleted_links, link)
-      end
-
-      private
-
-      def match?(links, link)
-        attribute_link_id = link[:attribute_link_id]
-        links.find { |l| l[:attribute_link_id] == attribute_link_id }
-      end
+      ndx_ret.values
     end
 
     def self.update_attribute(attr_mh, link_info)

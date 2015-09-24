@@ -1,9 +1,9 @@
 module DTK; class AttributeLink
-  module PropagateChangesClassMixin
-    # hash top level with :input_attribute,:output_attribute,:attribute_link, :parent_idh (optional)
-    # with **_attribute having :id,:value_asserted,:value_derived,:semantic_type
+  module PropagateChanges
+    # hash top level with :input_attribute, :output_attribute, :attribute_link, :parent_idh (optional)
+    # with **_attribute having :id, :value_asserted, :value_derived, :semantic_type
     #  :attribute_link having :function, :input_id, :output_id, :index_map
-    def propagate(attr_mh, attrs_links_to_update)
+    def self.propagate_and_update_index_maps!(attrs_links_to_update, attr_mh)
       ret = {}
       # compute update deltas
       update_deltas = compute_update_deltas(attrs_links_to_update)
@@ -11,7 +11,7 @@ module DTK; class AttributeLink
       # make actual changes
       opts = { update_only_if_change: [:value_derived], returning_cols: [:id] }
 
-      changed_input_attrs = Attribute::UpdateDerivedValues.update(attr_mh, update_deltas, opts)
+      changed_input_attrs = Attribute.update_derived_values_and_index_maps(attr_mh, update_deltas, opts)
 
       # if no changes exit, otherwise recursively call propagate
       return ret if changed_input_attrs.empty?
@@ -22,7 +22,7 @@ module DTK; class AttributeLink
       end
 
       # compute direct changes and input for nested propagation
-      # TODO: may unifty with Attribute.create_change_hashes
+      # TODO: may unify with Attribute.create_change_hashes
       ndx_direct_change_hashes = changed_input_attrs.inject({}) do |h, r|
         id = r[:id]
         change = {
@@ -43,7 +43,7 @@ module DTK; class AttributeLink
 
     private
 
-    def compute_update_deltas(attrs_links_to_update)
+    def self.compute_update_deltas(attrs_links_to_update)
       attrs_links_to_update.map do |r|
         input_attr = r[:input_attribute]
         output_attr = r[:output_attribute]

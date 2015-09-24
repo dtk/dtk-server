@@ -13,7 +13,7 @@ module DTK; class AttributeLink
 
     include Propagate::Mixin
     def initialize(_function_def, propagate_proc)
-      # TODO: when get rid of lgacy fn processing can get rid of needing to copy all these vars
+      # TODO: when get rid of legacy fn processing can get rid of needing to copy all these vars
       @propagate_proc = propagate_proc
       @output_attr = propagate_proc.output_attr
       @index_map    = propagate_proc.index_map

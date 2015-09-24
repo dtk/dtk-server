@@ -11,8 +11,7 @@ module DTK; class AttributeLink
         LinkFunctionMatrix[output_type][input_type]
       end
       # first index is output type, second one is input type
-      # TODO: DTK-2062; thnk want to get rod of select_one and have an 'error' one that leads to
-      # violation in service instance
+      # TODO: DTK-2261; remove select_one
       LinkFunctionMatrix = {
         scalar: {
           scalar: 'eq', indexed: 'eq_indexed', array: 'array_append'
@@ -21,7 +20,7 @@ module DTK; class AttributeLink
           scalar: 'eq_indexed', indexed: 'eq_indexed', array: 'array_append'
         },
         array: {
-          scalar: 'select_one', indexed: 'select_one', array: 'eq'
+          scalar: 'eq_indexed', indexed: 'eq_indexed', array: 'eq'
         }
       }
 

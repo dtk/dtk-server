@@ -6,8 +6,6 @@ module DTK
     r8_nested_require('attribute_link', 'propagate_processor')
     r8_nested_require('attribute_link', 'ad_hoc')
 
-    extend PropagateChangesClassMixin
-
     class Output < HashObject
     end
     class OutputArrayAppend < Output
@@ -27,18 +25,6 @@ module DTK
     def input_index_map
       index_map_aux(:input)
     end
-
-    def index_map_aux(input_or_output)
-      if index_map = get_field?(:index_map)
-        unless index_map.size == 1
-          Log.error('Not treating item map with size greater than 1')
-          return nil
-        end
-        ret = index_map.first[input_or_output]
-        (!ret.empty?) && ret
-      end
-    end
-    private :index_map_aux
 
     ##########################  get links ##################
     def self.get_augmented(model_handle, filter)
@@ -100,17 +86,33 @@ module DTK
       # want to use auth_info from parent_idh in case more specific than target
       change_parent_idh = parent_idh.get_top_container_id_handle(:target, auth_info_from_self: true)
       # propagate attribute values
-      ndx_nested_change_hashes = propagate_from_create(attr_mh, attr_info, rows_to_create, change_parent_idh)
+      ndx_nested_change_hashes = propagate_from_create_and_update_index_maps(attr_mh, attr_info, rows_to_create, change_parent_idh)
       StateChange.create_pending_change_items(ndx_nested_change_hashes.values) unless opts[:donot_create_pending_changes]
     end
 
     def self.attribute_info_cols
       [:id, :attribute_value, :semantic_type_object, :component_parent]
     end
+    
+    def self.propagate_and_update_index_maps!(attrs_links_to_update, attr_mh)
+      PropagateChanges.propagate_and_update_index_maps!(attrs_links_to_update, attr_mh)
+    end
 
     private
 
-    def  self.propagate_from_create(attr_mh, attr_info, attr_links, change_parent_idh)
+    def index_map_aux(input_or_output)
+      if index_map = get_field?(:index_map)
+        unless index_map.size == 1
+          Log.error('Not treating item map with size greater than 1')
+          return nil
+        end
+        ret = index_map.first[input_or_output]
+        (!ret.empty?) && ret
+      end
+    end
+
+    # this propagates changes and updates each attribute link's index_map
+    def  self.propagate_from_create_and_update_index_maps(attr_mh, attr_info, attr_links, change_parent_idh)
       attrs_links_to_update = attr_links.map do |attr_link|
         input_attr = attr_info[attr_link[:input_id]]
         output_attr = attr_info[attr_link[:output_id]]
@@ -121,7 +123,7 @@ module DTK
           parent_idh: change_parent_idh
         }
       end
-      propagate(attr_mh, attrs_links_to_update)
+      propagate_and_update_index_maps!(attrs_links_to_update, attr_mh)
     end
 
     # mechanism to compensate for fact that cols are being added by processing fns to rows_to_create that

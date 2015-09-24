@@ -279,6 +279,10 @@ module DTK
       end
     end
 
+    def self.update_derived_values_and_index_maps(attr_mh, update_deltas, opts = {})
+      UpdateDerivedValues.update_attributes_and_index_maps(attr_mh, update_deltas, opts)
+    end
+
     private
 
     def has_input_link?

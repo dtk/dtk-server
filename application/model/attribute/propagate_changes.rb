@@ -95,8 +95,8 @@ module DTK; class Attribute
           parent_idh: output_id__parent_idhs[output_attr[:id]]
         }
       end
-      attr_mh = output_attr_idhs.first.createMH() #first is just a sample
-      AttributeLink.propagate(attr_mh, attrs_links_to_update)
+      attr_mh = output_attr_idhs.first.createMH() 
+      AttributeLink.propagate_and_update_index_maps!(attrs_links_to_update, attr_mh)
     end
 
     def clear_dynamic_attributes_and_their_dependents(attrs, opts = {})

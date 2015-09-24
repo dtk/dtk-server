@@ -2,31 +2,26 @@ module DTK; class Attribute
   class UpdateDerivedValues
     r8_nested_require('update_derived_values', 'delete')
 
-    def self.update(attr_mh, update_deltas, _opts = {})
-      ret = []
-      attr_ids = update_deltas.map { |r| r[:id] }
-      critical_section(attr_ids) do
-        ret = update_in_critical_section(attr_mh, update_deltas, opts = {})
+    def self.update_attributes_and_index_maps(attr_mh, update_deltas, opts = {})
+      critical_section do
+        update_in_critical_section(attr_mh, update_deltas, opts)
       end
-      ret
     end
 
     # links_delete_info has type array of Delete::LinkInfo
     def self.update_for_delete_links(attr_mh, links_delete_info)
-      ret = []
-      attr_ids = links_delete_info.map { |l| l.input_attribute[:id] }
-      critical_section(attr_ids) do
-        ret = links_delete_info.map { |link_info| Delete.update_attribute(attr_mh, link_info) }
+      critical_section do
+        links_delete_info.map { |link_info| Delete.update_attribute(attr_mh, link_info) }
       end
-      ret
     end
 
     private
 
     Lock = Mutex.new
-    def self.critical_section(_attr_ids, &_block)
-      # passing in attr_ids, but not using now; may use if better to lock on per attribute basis
-      Lock.synchronize { yield }
+    def self.critical_section
+      ret = nil
+      Lock.synchronize { ret = yield }
+      ret
     end
 
     def self.update_in_critical_section(attr_mh, update_deltas, opts = {})
@@ -38,11 +33,11 @@ module DTK; class Attribute
         h
       end
       ndx_update_deltas.map do |type, rows|
-        update_attribute_values_aux(type, attr_mh, rows, opts)
+        update_aux(type, attr_mh, rows, opts)
       end.flatten
     end
 
-    def self.update_attribute_values_aux(type, attr_mh, update_deltas, opts = {})
+    def self.update_aux(type, attr_mh, update_deltas, opts = {})
       case type
         when 'OutputArrayAppend'
           update_attribute_values_array_append(attr_mh, update_deltas, opts)

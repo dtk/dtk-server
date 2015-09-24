@@ -60,7 +60,7 @@ module DTK; class AttributeLink
     end
     
     class Partial < self
-      def self.update_attribute(attr_mh, partial_update_rows, _opts = {})
+      def self.update_attribute_values(attr_mh, partial_update_rows, _opts = {})
         index_map_list = partial_update_rows.map { |r| r[:index_map] unless r[:index_map_persisted] }.compact
         cmp_mh = attr_mh.createMH(:component)
         AttributeLink::IndexMap.resolve_input_paths!(index_map_list, cmp_mh)

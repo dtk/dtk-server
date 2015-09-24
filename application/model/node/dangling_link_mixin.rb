@@ -10,7 +10,7 @@ module DTK; class Node
           r[:attribute_link].merge(r.hash_subset(:input_attribute, :other_input_link))
         end
         attr_mh = model_handle_with_auth_info(:attribute)
-        AttributeeLink::UpdateDerivedValues.update_for_delete_links(attr_mh, aug_dangling_links, add_state_changes: true)
+        AttributeLink::UpdateDerivedValues.update_for_delete_links(attr_mh, aug_dangling_links, add_state_changes: true)
       end
 
       private

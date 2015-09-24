@@ -22,7 +22,7 @@ module DTK; class AttributeLink
       updated_attrs = critical_section { links_delete_info.map { |link_info| Delete.update_attribute(attr_mh, link_info) } } 
       
       # propagate these changes; if opts[::add_state_changes] then produce state changes
-      propagate_and_optionally_add_state_changes(attr_mh, updated_attrs, propagate_opts)
+      Attribute.propagate_and_optionally_add_state_changes(attr_mh, updated_attrs, propagate_opts)
     end
 
     private

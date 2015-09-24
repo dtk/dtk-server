@@ -17,7 +17,7 @@ module DTK
         aug_attr_links = get_augmented_attribute_links(port_link_idhs)
         attr_mh = port_link_idhs.first.createMH(:attribute)
         Model.Transaction do
-          AttributeeLink::UpdateDerivedValues.update_for_delete_links(attr_mh, aug_attr_links)
+          AttributeLink::UpdateDerivedValues.update_for_delete_links(attr_mh, aug_attr_links)
           port_link_idhs.map { |port_link_idh| Model.delete_instance(port_link_idh) }
         end
       end

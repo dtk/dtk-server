@@ -8,18 +8,22 @@ module DTK; class AttributeLink
         output_value = output_value(opts)
         if @index_map.nil? && (@input_path.nil? || @input_path.empty?) && (@output_path.nil? || @output_path.empty?)
           new_rows = output_value.nil? ? [nil] : (output_semantic_type().is_array? ? output_value : [output_value])
-          Output::ArrayAppend.new(array_slice: new_rows,
-                                attr_link_id: @attr_link_id)
+          hash = {
+            array_slice:  new_rows,
+            attr_link_id: @attr_link_id
+          }
+          UpdateDerivedValues::ArrayAppend.new(hash)
         else
-          index_map_persisted = @index_map ? true : false
-          index_map = @index_map || IndexMap.generate_from_paths(@input_path, @output_path)
-          Output::Partial.new(attr_link_id: @attr_link_id,
-                            output_value: output_value,
-                            index_map: index_map,
-                            index_map_persisted: index_map_persisted)
+          hash = {
+            attr_link_id:        @attr_link_id,
+            output_value:        output_value,
+            index_map:           @index_map || IndexMap.generate_from_paths(@input_path, @output_path),
+            index_map_persisted: @index_map ? true : false
+          }
+          UpdateDerivedValues::Partial.new(hash)
         end
       end
-
     end
   end
 end; end
+

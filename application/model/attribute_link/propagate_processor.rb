@@ -1,5 +1,6 @@
 module DTK; class AttributeLink
   # TODO: may fold into AttributeLink::Function              
+  #       this is bridge to legacy way of handlding updating values
   class PropagateProcessor
     r8_nested_require('propagate_processor', 'legacy')
     include Propagate::Mixin
@@ -24,7 +25,7 @@ module DTK; class AttributeLink
         fail Error::NotImplemented.new("propagate value not implemented yet for fn #{@function}")
       end
 
-      hash_ret.is_a?(Output) ? hash_ret : Output.new(hash_ret)
+      hash_ret.is_a?(UpdateDerivedValues) ? hash_ret : UpdateDerivedValues.new(hash_ret)
     end
 
   end

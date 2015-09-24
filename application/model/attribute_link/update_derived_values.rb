@@ -1,6 +1,8 @@
 module DTK; class AttributeLink
-  class UpdateDerivedValues
+  class UpdateDerivedValues < HashObject
     r8_nested_require('update_derived_values', 'delete')
+    r8_nested_require('update_derived_values', 'array_append')
+    r8_nested_require('update_derived_values', 'partial')
 
     def self.update_attributes_and_index_maps(attr_mh, update_deltas, opts = {})
       critical_section { update_in_critical_section(attr_mh, update_deltas, opts) }
@@ -51,7 +53,7 @@ module DTK; class AttributeLink
       if output_class.respond_to?(:update_attribute_values)
         output_class.update_attribute_values(attr_mh, update_deltas, opts)
       else
-        Output.update_attribute_values_simple(attr_mh, update_deltas, opts)
+        Simple.update_attribute_values(attr_mh, update_deltas, opts)
       end
     end
 

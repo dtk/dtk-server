@@ -3,7 +3,6 @@ module DTK
     r8_nested_require('attribute_link', 'propagate_mixins')
     r8_nested_require('attribute_link', 'propagate_changes')
     r8_nested_require('attribute_link', 'function')
-    r8_nested_require('attribute_link', 'output')
     r8_nested_require('attribute_link', 'update_derived_values')
     r8_nested_require('attribute_link', 'propagate_processor')
     r8_nested_require('attribute_link', 'ad_hoc')

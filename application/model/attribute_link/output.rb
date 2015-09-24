@@ -15,7 +15,7 @@ module DTK; class AttributeLink
       end
       ret
     end
-
+    
     class ArrayAppend < self
       # appends value to any array type; if the array does not exist already it creates it from fresh
       def self.update_attribute_values(attr_mh, array_slice_rows, _opts = {})
@@ -51,12 +51,11 @@ module DTK; class AttributeLink
           end
           ndx_attr_updates.values
         end
-
+        
         # update the index_maps on the links
         Model.update_from_rows(attr_mh.createMH(:attribute_link), attr_link_updates)
         ndx_ret.values
       end
-
     end
     
     class Partial < self

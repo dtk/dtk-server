@@ -35,10 +35,12 @@ module DTK; class AttributeLink
       ret
     end
 
+    # should be overwritten
     def internal_hash_form(_opts = {})
       fail Error.new('Should not be called')
     end
 
+    # should be overwritten
     def value(_opts = {})
       fail Error.new('Should not be called')
     end

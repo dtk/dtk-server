@@ -8,10 +8,13 @@ module DTK; class AttributeLink
       def self.base_link_function(input_attr, output_attr)
         input_type = attribute_index_type__input(input_attr)
         output_type = attribute_index_type__output(output_attr)
-        LinkFunctionMatrix[output_type][input_type]
+        unless ret = LinkFunctionMatrix[output_type][input_type]
+          fail ErrorUsage, error_message_bad_link(input_attr, output_attr, input_type, output_type)
+        end
+        ret
       end
       # first index is output type, second one is input type
-      # TODO: DTK-2261; remove select_one
+      # nil in column means not supported
       LinkFunctionMatrix = {
         scalar: {
           scalar: 'eq', indexed: 'eq_indexed', array: 'array_append'
@@ -20,11 +23,20 @@ module DTK; class AttributeLink
           scalar: 'eq_indexed', indexed: 'eq_indexed', array: 'array_append'
         },
         array: {
-          scalar: 'eq_indexed', indexed: 'eq_indexed', array: 'eq'
+          scalar: 'indexed_output', indexed: nil, array: 'eq'
         }
       }
 
       private
+
+      def self.error_message_bad_link(input_attr, output_attr, input_type, output_type)
+        input_attr_name = input_attr.get_field?(:display_name)
+        output_attr_name = output_attr.get_field?(:display_name)
+        "Not supported: Link that maps #{a_or_an(output_type)} attribute '#{output_attr_name}' to #{a_or_an(input_type)} attribute '#{input_attr_name}'"
+      end
+      def self.a_or_an(term)
+        [:indexed, :array].include?(term.to_sym) ? "an #{term}" : "a #{term}"
+      end
 
       def self.attribute_index_type__input(attr)
         # TODO: think may need to look at data type inside array

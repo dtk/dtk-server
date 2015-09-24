@@ -5,6 +5,7 @@ module DTK; class AttributeLink
     r8_nested_require('function', 'eq')
     r8_nested_require('function', 'eq_indexed')
     r8_nested_require('function', 'array_append')
+    r8_nested_require('function', 'indexed_output')
 
     # with_args must go before its children
     r8_nested_require('function', 'with_args')
@@ -51,7 +52,7 @@ module DTK; class AttributeLink
     end
 
     def self.function_class_names
-      @function_class_names = [Eq, EqIndexed, ArrayAppend, Composite, VarEmbeddedInText]
+      @function_class_names = [Eq, EqIndexed, ArrayAppend, Composite, VarEmbeddedInText, IndexedOutput]
     end
 
     def self.klass(name)

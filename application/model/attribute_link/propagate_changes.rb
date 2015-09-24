@@ -8,9 +8,8 @@ module DTK; class AttributeLink
       # compute update deltas
       update_deltas = compute_update_deltas(attrs_links_to_update)
 
-      # make actual changes
+      # update attributes and where necessary update attribute_link index_maps
       opts = { update_only_if_change: [:value_derived], returning_cols: [:id] }
-
       changed_input_attrs = Attribute.update_derived_values_and_index_maps(attr_mh, update_deltas, opts)
 
       # if no changes exit, otherwise recursively call propagate

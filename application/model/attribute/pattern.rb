@@ -41,7 +41,7 @@ module DTK; class Attribute
       av_pairs.each do |av_pair|
         value = av_pair[:value]
         if semantic_data_type = attr_properties[:semantic_data_type]
-          if value
+          unless value.nil?
             unless SemanticDatatype.is_valid?(semantic_data_type, value)
               fail ErrorUsage.new("The value (#{value.inspect}) is not of type (#{semantic_data_type})")
             end
@@ -66,7 +66,7 @@ module DTK; class Attribute
         # do not need to check value validity if opts[:create] (since checked already)
         unless opts[:create]
           attr_idhs.each do |attr_idh|
-            unless pattern.valid_value?(value, attr_idh)
+            unless value.nil? or pattern.valid_value?(value, attr_idh)
               fail ErrorUsage.new("The value (#{value.inspect}) is not of type (#{pattern.semantic_data_type(attr_idh)})")
             end
           end

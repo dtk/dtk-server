@@ -13,6 +13,8 @@ module XYZ
           Thread.new { EventMachine.run }
           puts 'EventMachine has been started!'
         end
+        # Potential fix for DTK-2235 "Intermittent thread error"
+        sleep(1) until reactor_running?()
       end
     end
 

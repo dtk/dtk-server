@@ -17,7 +17,8 @@ module DTK; class AttributeLink
     # :other_input_link - an atribute link that connects to :input_attribute attribute; can refer to same
     # link as self does
     #
-    def self.update_for_delete_links(attr_mh, aug_attr_links, propagate_opts = {})
+    # TODO: may change name to reflect this can update index_maps
+    def self.update_for_delete_links(attr_mh, aug_attr_links, opts = {})
       ret = []
       links_delete_info = Delete.links_delete_info(aug_attr_links)
       return ret if links_delete_info.empty?
@@ -26,7 +27,7 @@ module DTK; class AttributeLink
       updated_attrs = critical_section { links_delete_info.map { |link_info| Delete.update_attribute(attr_mh, link_info) } } 
       
       # propagate these changes; if opts[::add_state_changes] then produce state changes
-      Attribute.propagate_and_optionally_add_state_changes(attr_mh, updated_attrs, propagate_opts)
+      Attribute.propagate_and_optionally_add_state_changes(attr_mh, updated_attrs, opts)
     end
 
     private
@@ -51,9 +52,9 @@ module DTK; class AttributeLink
       end.flatten
     end
 
-    def self.update_aux(output_class, attr_mh, update_deltas, opts = {})
-      if output_class.respond_to?(:update_attribute_values)
-        output_class.update_attribute_values(attr_mh, update_deltas, opts)
+    def self.update_aux(update_delta_class, attr_mh, update_deltas, opts = {})
+      if update_delta_class.respond_to?(:update_attribute_values)
+        update_delta_class.update_attribute_values(attr_mh, update_deltas, opts)
       else
         Simple.update_attribute_values(attr_mh, update_deltas, opts)
       end

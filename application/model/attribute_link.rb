@@ -93,6 +93,10 @@ module DTK
       PropagateChanges.propagate_and_update_index_maps!(attrs_links_to_update, attr_mh)
     end
 
+    def self.update_for_delete_links(attr_mh, aug_attr_links, opts = {})
+      UpdateDelta.update_for_delete_links(attr_mh, aug_attr_links, opts)
+    end
+
     private
 
     def index_map_aux(input_or_output)

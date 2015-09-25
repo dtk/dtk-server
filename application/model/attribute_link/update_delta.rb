@@ -1,6 +1,7 @@
 module DTK; class AttributeLink
   class UpdateDelta < HashObject
     r8_nested_require('update_delta', 'delete')
+    r8_nested_require('update_delta', 'simple')
     r8_nested_require('update_delta', 'array_append')
     r8_nested_require('update_delta', 'indexed_output')
     r8_nested_require('update_delta', 'partial')

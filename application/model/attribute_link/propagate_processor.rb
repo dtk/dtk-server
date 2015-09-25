@@ -6,6 +6,10 @@ module DTK; class AttributeLink
     include Propagate::Mixin
     include LegacyMixin
 
+    def self.compute_update_deltas(attr_link, input_attr, output_attr)
+      new(attr_link, input_attr, output_attr).compute_update_deltas
+    end
+
     attr_reader :function, :index_map, :attr_link_id, :input_attr, :output_attr, :input_path, :output_path
     def initialize(attr_link, input_attr, output_attr)
       @function = attr_link[:function]
@@ -17,15 +21,14 @@ module DTK; class AttributeLink
       @output_path = attr_link[:output_path]
     end
 
-    # propagate from output var to input var
-    def propagate
+    def compute_update_deltas 
       hash_ret = Function.internal_hash_form?(@function, self)
 
       unless hash_ret ||= legacy_internal_hash_form?()
         fail Error::NotImplemented.new("propagate value not implemented yet for fn #{@function}")
       end
 
-      hash_ret.is_a?(UpdateDelta) ? hash_ret : UpdateDelta.new(hash_ret)
+      (hash_ret.is_a?(UpdateDelta) ? hash_ret : UpdateDelta.new(hash_ret)).merge(id: @input_attr[:id], source_output_id: @output_attr[:id])
     end
 
   end

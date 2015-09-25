@@ -70,7 +70,7 @@ module DTK
         end
         index_map_path = self[dir][:path]
         # TODO: if treat :create_component_index need to put in here process_unravel_path and process_create_component_index (from link_defs.rb)
-        [attr_object, index_map_path && AttributeLink::IndexMapPath.create_from_array(index_map_path)]
+        [attr_object, index_map_path && AttributeLink::IndexMap::Path.create_from_array(index_map_path)]
       end
 
       def pp_form(direction)

@@ -46,8 +46,7 @@ module DTK; class AttributeLink
       attrs_links_to_update.map do |r|
         input_attr = r[:input_attribute]
         output_attr = r[:output_attribute]
-        propagate_proc = PropagateProcessor.new(r[:attribute_link], input_attr, output_attr)
-        propagate_proc.propagate().merge(id: input_attr[:id], source_output_id: output_attr[:id])
+        PropagateProcessor.compute_update_deltas(r[:attribute_link], input_attr, output_attr)
       end
     end
   end

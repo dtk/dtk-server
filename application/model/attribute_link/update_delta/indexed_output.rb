@@ -15,7 +15,6 @@ module DTK; class AttributeLink
             attr_id = update_delta[:id]
             existing_val = ndx_existing_vals[attr_id] || []
             connected_index_maps = ndx_connected_index_maps[update_delta[:source_output_id]] || []
-            # TODO: stub logic to find the largest index
             output_index = connected_index_maps.size
             attr_link_update = {
               id: update_delta[:attr_link_id],

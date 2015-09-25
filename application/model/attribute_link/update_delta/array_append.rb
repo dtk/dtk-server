@@ -1,5 +1,5 @@
 module DTK; class AttributeLink
-  class UpdateDerivedValues
+  class UpdateDelta
     class ArrayAppend < self
       # appends value to any array type; if the array does not exist already it creates it from fresh
       def self.update_attribute_values(attr_mh, array_slice_rows, _opts = {})

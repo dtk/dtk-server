@@ -12,7 +12,7 @@ module DTK; class AttributeLink
             array_slice:  new_rows,
             attr_link_id: @attr_link_id
           }
-          UpdateDerivedValues::ArrayAppend.new(hash)
+          UpdateDelta::ArrayAppend.new(hash)
         else
           hash = {
             attr_link_id:        @attr_link_id,
@@ -20,7 +20,7 @@ module DTK; class AttributeLink
             index_map:           @index_map || IndexMap.generate_from_paths(@input_path, @output_path),
             index_map_persisted: @index_map ? true : false
           }
-          UpdateDerivedValues::Partial.new(hash)
+          UpdateDelta::Partial.new(hash)
         end
       end
     end

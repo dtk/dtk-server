@@ -1,8 +1,9 @@
 module DTK; class AttributeLink
-  class UpdateDerivedValues < HashObject
-    r8_nested_require('update_derived_values', 'delete')
-    r8_nested_require('update_derived_values', 'array_append')
-    r8_nested_require('update_derived_values', 'partial')
+  class UpdateDelta < HashObject
+    r8_nested_require('update_delta', 'delete')
+    r8_nested_require('update_delta', 'array_append')
+    r8_nested_require('update_delta', 'indexed_output')
+    r8_nested_require('update_delta', 'partial')
 
     def self.update_attributes_and_index_maps(attr_mh, update_deltas, opts = {})
       critical_section { update_in_critical_section(attr_mh, update_deltas, opts) }

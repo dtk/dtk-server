@@ -1,5 +1,5 @@
 module DTK; class AttributeLink
-  class UpdateDerivedValues
+  class UpdateDelta
     class Partial < self
       def self.update_attribute_values(attr_mh, partial_update_rows, _opts = {})
         index_map_list = partial_update_rows.map { |r| r[:index_map] unless r[:index_map_persisted] }.compact

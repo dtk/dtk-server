@@ -25,7 +25,7 @@ module DTK; class AttributeLink
         fail Error::NotImplemented.new("propagate value not implemented yet for fn #{@function}")
       end
 
-      hash_ret.is_a?(UpdateDerivedValues) ? hash_ret : UpdateDerivedValues.new(hash_ret)
+      hash_ret.is_a?(UpdateDelta) ? hash_ret : UpdateDelta.new(hash_ret)
     end
 
   end

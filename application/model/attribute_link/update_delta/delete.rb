@@ -1,4 +1,4 @@
-module DTK; class AttributeLink; class UpdateDerivedValues
+module DTK; class AttributeLink; class UpdateDelta
   # for processing deleting of links
   class Delete < self
     r8_nested_require('delete', 'link_info')

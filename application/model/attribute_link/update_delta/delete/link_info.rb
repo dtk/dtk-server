@@ -1,4 +1,4 @@
-module DTK; class AttributeLink; class UpdateDerivedValues
+module DTK; class AttributeLink; class UpdateDelta
   class Delete
     class LinkInfo
       attr_reader :input_attribute, :deleted_links, :other_links

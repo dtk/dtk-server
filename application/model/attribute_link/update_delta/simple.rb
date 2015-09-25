@@ -1,5 +1,5 @@
 module DTK; class AttributeLink
-  class UpdateDerivedValues
+  class UpdateDelta
     class Simple
       def self.update_attribute_values(attr_mh, update_hashes, _opts = {})
         ret = []

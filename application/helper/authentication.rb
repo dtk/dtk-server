@@ -30,7 +30,9 @@ module Ramaze::Helper
 
     def handle_and_return_authentication(cred, redirect_url = nil)
       begin
-        login_response = user_login(cred)
+        unless login_response = user_login(cred)
+          return respond("Unauthorized login", 403)
+        end
       rescue ::Sequel::DatabaseDisconnectError, ::Sequel::DatabaseConnectionError => e
         respond(e, 403)
       end

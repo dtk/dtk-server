@@ -3,7 +3,9 @@ module DTK; class Task; class Template; class Stage
     class MultiNode < self
       def initialize(serialized_multinode_action)
         super(serialized_multinode_action[:name])
-        unless @ordered_components = components_or_actions(serialized_multinode_action)
+        @ordered_components, @components_or_actions_key = components_or_actions(serialized_multinode_action)
+
+        unless @ordered_components 
           all_legal = Constant.all_string_variations(:ComponentsOrActions).join(',')
           msg = "Missing Component or Action field (#{all_legal})"
           if name = serialized_multinode_action[:name]
@@ -17,7 +19,7 @@ module DTK; class Task; class Template; class Stage
         if opts[:form] == :explicit_instances
           super
         else
-          serialized_form_with_name().merge(Constant::OrderedComponents => @ordered_components)
+          serialized_form_with_name().merge(@components_or_actions_key => @ordered_components)
         end
       end
 
@@ -29,9 +31,13 @@ module DTK; class Task; class Template; class Stage
 
       private
 
+      # returns [ordered_components, components_or_actions_key] if match; otherwise returns nil
       def components_or_actions(serialized_el)
-        if ret = Constant.matches?(serialized_el, :ComponentsOrActions)
-          ret.kind_of?(Array) ? ret : [ret]
+        if key_val = Constant.matching_key_and_value?(serialized_el, :ComponentsOrActions)
+          ordered_components = key_val.values.first
+          components_or_actions_key = key_val.keys.first
+          ordered_components = ordered_components.kind_of?(Array) ? ordered_components : [ordered_components]
+          [ordered_components, components_or_actions_key]
         end
       end
 

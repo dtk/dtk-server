@@ -5,7 +5,7 @@ module DTK; class Task; class Template; class Stage
         super(serialized_multinode_action[:name])
         @ordered_components, @components_or_actions_key = components_or_actions(serialized_multinode_action)
         unless @ordered_components 
-          fail Constant.error__missing_component_or_action_key(serialized_multinode_action, stage: serialized_multinode_action[:name]) 
+          fail ParsingError::MissingComponentOrActionKey.new(serialized_multinode_action, stage: serialized_multinode_action[:name]) 
         end
       end
 

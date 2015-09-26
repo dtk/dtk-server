@@ -112,21 +112,17 @@ module DTK; class Task; class Template
       def self.parse_and_reify(serialized_eb, node_name, action_list, opts = {})
         ret = new()
         return ret unless action_list
-        # TODO: replace by something similiar to model/task/template/stage/inter_node/multi_node.rb
-        lvs = ParsingError::LegalValues.new()
-        ordered_items =
-          if lvs.add_and_match?(serialized_eb) { HashWithKey(Constant::OrderedComponents) }
-            serialized_eb[Constant::OrderedComponents]
-          elsif lvs.add_and_match?(serialized_eb) { HashWithKey(Constant::Components) }
-            # normalize from component form into ordered_component_form
-            [{ Constant::ComponentGroup => serialized_eb[Constant::Components] }]
-          elsif lvs.add_and_match?(serialized_eb) { HashWithKey(Constant::Actions) }
-            # normalize from action form into ordered_component_form
-            [{ Constant::ComponentGroup => Constant.matches?(serialized_eb, :Actions) }]
-          else
-            fail ParsingError::WrongType.new(serialized_eb, lvs)
-          end
 
+        # Look for ComponentsOrActions, but special case on ordered components which is not nested under a ComponentGroup
+        unless ordered_items = Constant.matches?(serialized_eb, :OrderedComponents)
+          if components_or_actions = Constant.matches?(serialized_eb, :ComponentsOrActions)
+            ordered_items = [{ Constant::ComponentGroup => components_or_actions }]
+          else
+            fail ParsingError::MissingComponentOrActionKey.new(serialized_eb)
+          end
+        end
+
+        # TODO: convert below to using  Constant.matches? form
         component_group_num = 1
         (ordered_items || []).each do |serialized_item|
           lvs = ParsingError::LegalValues.new()

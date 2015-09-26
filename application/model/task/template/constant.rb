@@ -37,18 +37,6 @@ module DTK; class Task
         
         ActionParams = 'params'
         Variations::ActionParams = ['params', 'parameters']
-
-        def self.error__missing_component_or_action_key(serialized_el, opts = {})
-          all_legal = all_string_variations(:ComponentsOrActions).join(', ')
-          msg = ''
-          if stage = opts[:stage]
-            msg << "In stage '#{stage}', missing "
-          else
-            msg << 'Missing '
-          end
-          msg << "a component or action field (one of: #{all_legal}) in ?1"
-          ParsingError.new(msg, serialized_el)
-        end
       end
     end
   end

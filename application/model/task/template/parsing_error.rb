@@ -6,6 +6,22 @@ module DTK; class Task
         super(msg, *args)
       end
       ErrorPrefix = 'Workflow parsing error'
+
+      class MissingComponentOrActionKey < self
+        include Serialization
+
+        def initialize(serialized_el, opts = {})
+          all_legal = Constant.all_string_variations(:ComponentsOrActions).join(', ')
+          msg = ''
+          if stage = opts[:stage]
+            msg << "In stage '#{stage}', missing "
+          else
+            msg << 'Missing '
+          end
+          msg << "a component or action field (one of: #{all_legal}) in ?1"
+          super(msg, serialized_el)
+        end
+      end
     end
   end
 end; end

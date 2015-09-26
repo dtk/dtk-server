@@ -4,50 +4,14 @@ module DTK; class Task
       Create = '__create_action'
     end
 
+    # TODO: might not need to embed in Serialization
     module Serialization
+      r8_nested_require('template', 'constant')
       module Field
         Subtasks = :subtasks
         TemporalOrder = :subtask_order
         ExecutionBlocks = :exec_blocks
       end
-      module Constant
-        module Variations
-        end
-        extend Aux::ParsingingHelper::ClassMixin
-
-        ComponentGroup = :Component_group
-
-        Concurrent = :concurrent
-        Sequential = :sequential
-        OrderedComponents = :ordered_components
-        Components = :components
-
-        ## TODO: above are in old form and should be deprecated once all refernces are replaced
-
-        Actions = 'actions'
-        Variations::Actions = %w(actions action)
-
-        AllApplicable = 'All_applicable'
-        Variations::AllApplicable = %w(All_applicable All All_Applicable AllApplicable)
-
-        Node = 'node'
-        Variations::Node = %w(node node_group)
-        NodeGroup = 'node_group'
-
-        Nodes = 'nodes'
-        Variations::Nodes = ['nodes'] #TODO: dont think we need this because single variation
-
-        Subtasks = 'subtasks'
-
-        ComponentsOrActions = 'components'
-        Variations::ComponentsOrActions = %w(components component ordered_components ordered_component actions action)
-
-        TemporalOrder = 'subtask_order'
-
-        ActionParams = 'params'
-        Variations::ActionParams = ['params', 'parameters']
-      end
-
       # TODO: if support ruby 1.8.7 need to make this fn of a hash class that perserves order
       class OrderedHash < ::Hash
         def initialize(initial_val = nil)

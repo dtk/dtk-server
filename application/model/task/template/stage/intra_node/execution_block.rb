@@ -112,6 +112,7 @@ module DTK; class Task; class Template
       def self.parse_and_reify(serialized_eb, node_name, action_list, opts = {})
         ret = new()
         return ret unless action_list
+        # TODO: replace by something similiar to model/task/template/stage/inter_node/multi_node.rb
         lvs = ParsingError::LegalValues.new()
         ordered_items =
           if lvs.add_and_match?(serialized_eb) { HashWithKey(Constant::OrderedComponents) }

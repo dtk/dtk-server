@@ -4,14 +4,8 @@ module DTK; class Task; class Template; class Stage
       def initialize(serialized_multinode_action)
         super(serialized_multinode_action[:name])
         @ordered_components, @components_or_actions_key = components_or_actions(serialized_multinode_action)
-
         unless @ordered_components 
-          all_legal = Constant.all_string_variations(:ComponentsOrActions).join(',')
-          msg = "Missing Component or Action field (#{all_legal})"
-          if name = serialized_multinode_action[:name]
-            msg << " in stage '#{name}'"
-          end
-          fail ParsingError.new(msg)
+          fail Constant.error__missing_component_or_action_key(serialized_multinode_action, stage: serialized_multinode_action[:name]) 
         end
       end
 

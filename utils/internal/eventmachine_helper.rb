@@ -10,7 +10,12 @@ module XYZ
     def self.start_em_for_passenger?
       if defined?(PhusionPassenger)
         unless reactor_running?()
-          EventMachine.run
+          Thread.new { EventMachine.run }
+          Log.info 'EventMachine has been started! Waiting for it to be ready ...'
+
+          sleep(1) until reactor_running?()
+          Log.info 'EventMachine is ready!!'
+
         end
       end
     end

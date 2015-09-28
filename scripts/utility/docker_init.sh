@@ -11,13 +11,19 @@ REPO_PORT=443
 MCO_PORT=61663
 CONTAINER=dtk
 
-rm -rf /${CONTAINER}
-mkdir /${CONTAINER}
+
 
 ADDRESS=${1}
-USER=${2:-dtk17-docker}
-PASS=${3:-r8server}
+UPGRADE=${2}
+USER=${3:-dtk17-docker}
+PASS=${4:-r8server}
 NAME="dtk-docker-${RANDOM}"
+
+if [[ $UPGRADE -eq 0 ]]; then
+	rm -rf /${CONTAINER}
+	mkdir /${CONTAINER}
+	echo "Root Container director '/${$CONTAINER}' removed."
+fi
 
 echo -e "USERNAME=${USER}\nPASSWORD=${PASS}\nPUBLIC_ADDRESS=${ADDRESS}\nINSTANCE_NAME=${NAME}" > /${CONTAINER}/dtk.config
 

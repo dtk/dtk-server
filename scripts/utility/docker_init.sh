@@ -48,7 +48,7 @@ fi
 echo -e "Pulling the latest DTK - Server image \n"
 docker pull ${IMAGE}
 echo -e "\nStarting a new Docker Container: ${CONTAINER}"
-docker run -e REMOTE_REPO_HOST=${REPO_HOST} -e REMOTE_REPO_REST_PORT=${REPO_PORT} -e MCOLLECTIVE_PORT=${MCO_PORT} --name dtk -v /${CONTAINER}:/host_volume -p 8080:80 -p ${MCO_PORT}:6163 -p 2222:22 -d getdtk/server-full
+docker run -e REMOTE_REPO_HOST=${REPO_HOST} -e REMOTE_REPO_REST_PORT=${REPO_PORT} -e MCOLLECTIVE_PORT=${MCO_PORT} --name ${CONTAINER} -v /${CONTAINER}:/host_volume -p 8080:80 -p ${MCO_PORT}:6163 -p 2222:22 -d getdtk/server-full
 
 
 

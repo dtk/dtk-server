@@ -14,7 +14,7 @@ module XYZ
           Log.info 'EventMachine has been started! Waiting for it to be ready ...'
 
           sleep(1) until reactor_running?()
-          Log.info 'EventMachine is ready!!'
+          Log.info 'EventMachine is ready!'
 
         end
       end

@@ -23,7 +23,7 @@ NAME="dtk-docker-${RANDOM}"
 if [[ $UPGRADE -eq 0 ]]; then
 	rm -rf /${CONTAINER}
 	mkdir /${CONTAINER}
-	echo "Root Container director '/${$CONTAINER}' removed."
+	echo -e "Root Container directory /${CONTAINER} removed."
 fi
 
 echo -e "USERNAME=${USER}\nPASSWORD=${PASS}\nPUBLIC_ADDRESS=${ADDRESS}\nINSTANCE_NAME=${NAME}" > "/${CONTAINER}/dtk.config"

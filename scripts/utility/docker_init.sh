@@ -9,14 +9,15 @@ IMAGE=getdtk/server-full
 REPO_HOST=repoman1.internal.r8network.com
 REPO_PORT=443
 MCO_PORT=61663
-CONTAINER=dtk
+
 
 
 
 ADDRESS=${1}
 UPGRADE=${2}
-USER=${3:-dtk17-docker}
-PASS=${4:-r8server}
+CONTAINER=${3:-dtk}
+USER=${4:-dtk17-docker}
+PASS=${5:-r8server}
 NAME="dtk-docker-${RANDOM}"
 
 if [[ $UPGRADE -eq 0 ]]; then
@@ -47,4 +48,7 @@ fi
 echo -e "Pulling the latest DTK - Server image \n"
 docker pull ${IMAGE}
 echo -e "\nStarting a new Docker Container: ${CONTAINER}"
-docker run -e REMOTE_REPO_HOST=${REPO_HOST} -e REMOTE_REPO_REST_PORT=${REPO_PORT} -e MCOLLECTIVE_PORT=${MCO_PORT} --name dtk -v /dtk:/host_volume -p 8080:80 -p ${MCO_PORT}:6163 -p 2222:22 -d getdtk/server-full
+docker run -e REMOTE_REPO_HOST=${REPO_HOST} -e REMOTE_REPO_REST_PORT=${REPO_PORT} -e MCOLLECTIVE_PORT=${MCO_PORT} --name dtk -v /${CONTAINER}:/host_volume -p 8080:80 -p ${MCO_PORT}:6163 -p 2222:22 -d getdtk/server-full
+
+
+

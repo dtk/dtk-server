@@ -10,11 +10,8 @@ module XYZ
     def self.start_em_for_passenger?
       if defined?(PhusionPassenger)
         unless reactor_running?()
-          Thread.new { EventMachine.run }
-          puts 'EventMachine has been started!'
+          EventMachine.run
         end
-        # Potential fix for DTK-2235 "Intermittent thread error"
-        sleep(1) until reactor_running?()
       end
     end
 

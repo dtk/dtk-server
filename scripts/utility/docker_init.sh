@@ -20,9 +20,9 @@ HTTP_PORT=8080
 ADDRESS=${1}
 UPGRADE=${2}
 CONTAINER=${3:-dtk}
-USER=${4:-dtk17-docker}
-PASS=${5:-r8server}
-NAME="dtk-docker-${RANDOM}"
+NAME=${4:-dtk-docker-${RANDOM}}
+USER=${5:-dtk17-docker}
+PASS=${6:-r8server}
 
 if [[ $UPGRADE -eq 0 ]]; then
 	rm -rf /${CONTAINER}
@@ -31,7 +31,7 @@ if [[ $UPGRADE -eq 0 ]]; then
 fi
 
 echo -e "USERNAME=${USER}\nPASSWORD=${PASS}\nPUBLIC_ADDRESS=${ADDRESS}\nINSTANCE_NAME=${NAME}" > "/${CONTAINER}/dtk.config"
-echo "Creating dtk-server: ${NAME}"
+echo -e "Creating dtk-server: ${NAME} \n"
 
 docker ps | grep dtk > /dev/null
 RUNNING=$?

@@ -105,6 +105,7 @@ fi
 # gitolite
 ln -s ${HOST_VOLUME}/gitolite/.gitolite /home/${TENANT_USER}/.gitolite
 ln -s ${HOST_VOLUME}/gitolite/repositories /home/${TENANT_USER}/repositories
+ln -s ${HOST_VOLUME}/gitolite/gitolite-admin /home/${TENANT_USER}/gitolite-admin
 if [[ ! -d ${HOST_VOLUME}/gitolite/ ]]; then
   su - ${TENANT_USER} -c "git config --global user.email ${TENANT_USER}@localhost"
   su - ${TENANT_USER} -c "git config --global user.name ${TENANT_USER}"
@@ -116,7 +117,7 @@ if [[ ! -d ${HOST_VOLUME}/gitolite/ ]]; then
   chown -R ${TENANT_USER}:${TENANT_USER} ${HOST_VOLUME}/gitolite
   su - ${TENANT_USER} -c "${HOST_VOLUME}/gitolite/src/install -ln ${HOST_VOLUME}/gitolite/bin/"
   su - ${TENANT_USER} -c "${HOST_VOLUME}/gitolite/bin/gitolite setup -pk ${HOST_VOLUME}/ssh/dtk-admin-${TENANT_USER}.pub"
-  su - ${TENANT_USER} -c "git clone localhost:gitolite-admin /home/${TENANT_USER}/gitolite-admin"
+  su - ${TENANT_USER} -c "git clone localhost:gitolite-admin ${HOST_VOLUME}/gitolite/gitolite-admin"
   cp -r /addons/gitolite/conf/* /home/${TENANT_USER}/gitolite-admin/conf/
   su - ${TENANT_USER} -c "cd /home/${TENANT_USER}/gitolite-admin; git add .; git commit -a -m 'Initial commit'; git push"
 fi

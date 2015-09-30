@@ -65,15 +65,16 @@ if [[ ! `psql -h /var/run/postgresql -U postgres -lqt | cut -d \| -f 1 | grep -w
 fi
 
 # reconfigure ssh
+ln -sf ${HOST_VOLUME}/ssh /home/${TENANT_USER}/.ssh
 if [[ ! -d ${HOST_VOLUME}/ssh ]]; then
   mkdir -p ${HOST_VOLUME}/ssh
   ssh-keygen -t rsa -f ${HOST_VOLUME}/ssh/id_rsa -P ''
-  #echo "IdentityFile ${HOST_VOLUME}/ssh/id_rsa" >> /home/${TENANT_USER}/.ssh/config
+  echo "IdentityFile ${HOST_VOLUME}/ssh/id_rsa" >> /home/${TENANT_USER}/.ssh/config
   printf '%s\n    %s\n' 'Host *' "IdentityFile ${HOST_VOLUME}/ssh/id_rsa" >> /home/${TENANT_USER}/.ssh/config
   chown -R ${TENANT_USER}:${TENANT_USER} ${HOST_VOLUME}/ssh
 fi
-ln -sf ${HOST_VOLUME}/ssh/id_rsa* /home/${TENANT_USER}/.ssh/
-ln -sf ${HOST_VOLUME}/ssh/authorized_keys /home/${TENANT_USER}/.ssh/authorized_keys
+#ln -sf ${HOST_VOLUME}/ssh/id_rsa* /home/${TENANT_USER}/.ssh/
+#ln -sf ${HOST_VOLUME}/ssh/authorized_keys /home/${TENANT_USER}/.ssh/authorized_keys
 SSH_HOST_KEY_DIR=${HOST_VOLUME}/ssh/host
 mkdir -p ${SSH_HOST_KEY_DIR}
 # generate SSH2 host keys, but only if they don't exist

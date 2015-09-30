@@ -10,7 +10,7 @@ COPY docker/addons /addons
 ENV tenant_user=dtk1
 RUN useradd -ms /bin/bash ${tenant_user}
 RUN mkdir -p /home/${tenant_user}/server
-RUN mkdir -p /home/${tenant_user}/.ssh
+#RUN mkdir -p /home/${tenant_user}/.ssh
 COPY . /home/${tenant_user}/server/current
 RUN chown -R ${tenant_user}:${tenant_user} /home/${tenant_user}
 

@@ -73,7 +73,6 @@ if [[ ! -d ${HOST_VOLUME}/ssh ]]; then
   chown -R ${TENANT_USER}:${TENANT_USER} ${HOST_VOLUME}/ssh
 fi
 ln -sf ${HOST_VOLUME}/ssh/id_rsa* /home/${TENANT_USER}/.ssh/
-ln -sf ${HOST_VOLUME}/ssh/authorized_keys /home/${TENANT_USER}/.ssh/authorized_keys
 SSH_HOST_KEY_DIR=${HOST_VOLUME}/ssh/host
 mkdir -p ${SSH_HOST_KEY_DIR}
 # generate SSH2 host keys, but only if they don't exist

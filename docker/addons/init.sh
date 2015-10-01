@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+if [[ ${INIT_DEBUG} == true ]]; then
+  set -x
+fi
+
 PG_VERSION=8.4
 export HOST_VOLUME=/host_volume
 export TENANT_USER=dtk1
@@ -142,8 +146,11 @@ if [[ -f ${HOST_VOLUME}/dtk.config ]] && [[ ! -f ${HOST_VOLUME}/init_done ]]; th
   #touch ${HOST_VOLUME}/init_done
 fi
 
+if [[ ! -L /home/${TENANT_USER}/.ssh/authorized_keys ]]; then
+  # put authorized_keys on the host volume to preserve it
+  su - ${TENANT_USER} -c "mv /home/${TENANT_USER}/.ssh/authorized_keys ${HOST_VOLUME}/ssh/"
+  ln -s ${HOST_VOLUME}/ssh/authorized_keys /home/${TENANT_USER}/.ssh/authorized_keys
+fi
+
 /usr/sbin/nginx -g 'daemon off;'
-
-
-
 

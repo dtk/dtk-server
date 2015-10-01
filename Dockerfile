@@ -14,6 +14,7 @@ RUN mkdir -p /home/${tenant_user}/.ssh
 COPY . /home/${tenant_user}/server/current
 RUN chown -R ${tenant_user}:${tenant_user} /home/${tenant_user}
 
+RUN apt-get update
 RUN puppet apply --debug /tmp/manifests/stage3.pp
 
 RUN apt-get clean

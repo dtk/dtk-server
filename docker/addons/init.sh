@@ -65,7 +65,6 @@ if [[ ! `psql -h /var/run/postgresql -U postgres -lqt | cut -d \| -f 1 | grep -w
 fi
 
 # reconfigure ssh
-rm -rf /home/${TENANT_USER}/.ssh
 ln -sf ${HOST_VOLUME}/ssh /home/${TENANT_USER}/.ssh
 if [[ ! -d ${HOST_VOLUME}/ssh ]]; then
   mkdir -p ${HOST_VOLUME}/ssh

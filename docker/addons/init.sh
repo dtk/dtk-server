@@ -159,9 +159,7 @@ fi
 
 if [[ ! -L /home/${TENANT_USER}/.ssh/authorized_keys ]]; then
   # put authorized_keys on the host volume to preserve it
-  if [[ -f /home/${TENANT_USER}/.ssh/authorized_keys ]]; then
-    su - ${TENANT_USER} -c "mv /home/${TENANT_USER}/.ssh/authorized_keys ${HOST_VOLUME}/ssh/"
-  fi
+  su - ${TENANT_USER} -c "mv /home/${TENANT_USER}/.ssh/authorized_keys ${HOST_VOLUME}/ssh/"
   ln -s ${HOST_VOLUME}/ssh/authorized_keys /home/${TENANT_USER}/.ssh/authorized_keys
 fi
 

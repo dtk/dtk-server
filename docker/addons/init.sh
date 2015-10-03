@@ -125,7 +125,11 @@ if [[ ! -d ${HOST_VOLUME}/gitolite/ ]]; then
   cp -r /addons/gitolite/conf/* /home/${TENANT_USER}/gitolite-admin/conf/
   su - ${TENANT_USER} -c "cd /home/${TENANT_USER}/gitolite-admin; git add .; git commit -a -m 'Initial commit'; git push"
 fi
-
+# potential fix for auth keys
+su - ${TENANT_USER} -c "${HOST_VOLUME}/gitolite/bin/gitolite print-default-rc > ~/.gitolite.rc"
+su - ${TENANT_USER} -c 'sed -i "0,/# LOCAL_CODE/s//LOCAL_CODE/g" .gitolite.rc'
+su - ${TENANT_USER} -c "mkdir -p local/triggers"
+su - ${TENANT_USER} -c "echo -e '#!/bin/sh \n ln -sf /host_volume/ssh/authorized_keys ~/.ssh/' >> 'local/triggers/link-akf'"
 # activemq
 ln -s ${HOST_VOLUME}/activemq/data /opt/activemq/data
 if [[ ! -d ${HOST_VOLUME}/activemq ]]; then

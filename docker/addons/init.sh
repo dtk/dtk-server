@@ -126,6 +126,12 @@ if [[ ! -d ${HOST_VOLUME}/gitolite/ ]]; then
   su - ${TENANT_USER} -c "cd /home/${TENANT_USER}/gitolite-admin; git add .; git commit -a -m 'Initial commit'; git push"
 fi
 
+# create r8server-repo
+if [[ ! -d ${HOST_VOLUME}/r8server-repo/ ]]; then
+  mkdir -p ${HOST_VOLUME}/r8server-repo
+  chown -R ${TENANT_USER}:${TENANT_USER} ${HOST_VOLUME}/r8server-repo
+fi;
+
 # activemq
 ln -s ${HOST_VOLUME}/activemq/data /opt/activemq/data
 if [[ ! -d ${HOST_VOLUME}/activemq ]]; then

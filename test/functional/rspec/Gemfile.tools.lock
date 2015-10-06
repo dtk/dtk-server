@@ -10,7 +10,7 @@ GIT
 
 GIT
   remote: git@github.com:rich-reactor8/dtk-client.git
-  revision: a3710526e3a62203f13068537407abcd2747386d
+  revision: 6236fe2a4bd5cf501e81427fc2216503f5181f7c
   specs:
     dtk-client (0.7.6)
       awesome_print (= 1.1.0)

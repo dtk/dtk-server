@@ -299,6 +299,54 @@
         "m1.small",
         "m3.medium"
       ]
+    },
+    "ami-55440830":{
+      "region":"us-east-1",
+      "type":"amazon_hvm",
+      "os_type":"amazon-linux",
+      "display_name":"Amazon_hvm",
+      "png":"amazon_hvm.png",
+      "sizes":[
+        "t2.micro",
+        "t2.small",
+        "t2.medium"
+      ]
+    },
+    "ami-a18243e5":{
+      "region":"us-west-1",
+      "type":"amazon_hvm",
+      "os_type":"amazon-linux",
+      "display_name":"Amazon_hvm",
+      "png":"amazon_hvm.png",
+      "sizes":[
+        "t2.micro",
+        "t2.small",
+        "t2.medium"
+      ]
+    },
+    "ami-fa1bffc9":{
+      "region":"us-west-2",
+      "type":"amazon_hvm",
+      "os_type":"amazon-linux",
+      "display_name":"Amazon_hvm",
+      "png":"amazon_hvm.png",
+      "sizes":[
+        "t2.micro",
+        "t2.small",
+        "t2.medium"
+      ]
+    },
+    "ami-23655354":{
+      "region":"eu-west-1",
+      "type":"amazon_hvm",
+      "os_type":"amazon-linux",
+      "display_name":"Amazon_hvm",
+      "png":"amazon_hvm.png",
+      "sizes":[
+        "t2.micro",
+        "t2.small",
+        "t2.medium"
+      ]
     }
   }
 }

@@ -1,7 +1,7 @@
 module Ramaze::Helper
   module RemotesHelper
     def add_git_url(repo_remote_mh, repo_id, remote_url)
-      remote_name = ::DTK::RepoRemote.git_provider_name(remote_url)
+      remote_name = ::DTK::RepoRemote.remote_provider_name(remote_url)
       ::DTK::RepoRemote.create_git_remote(repo_remote_mh, repo_id, remote_name, remote_url)
     end
 

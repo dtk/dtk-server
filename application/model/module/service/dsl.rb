@@ -181,7 +181,7 @@ module DTK
         return service_module_workflows if ParsingError.is_error?(service_module_workflows)
 
         assembly_workflows, parsed_dsl, parsing_error = nil 
-        begin 
+        begin
           assembly_workflows, module_refs, parsed_dsl = update_assemblies_from_dsl(module_branch, module_refs, opts)
          rescue => e
           raise e unless ParsingError.is_error?(e)

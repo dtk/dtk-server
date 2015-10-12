@@ -148,6 +148,30 @@ module DTK
       ret
     end
 
+    def create_new_module_version(version, diffs_summary, opts = {})
+      ret = ModuleDSLInfo.new
+      # do pull and see if any changes need the model to be updated
+      force         = opts[:force]
+      generate_docs = opts[:generate_docs]
+
+      # create module branch for new version
+      module_branch = self.create_new_version(nil, version, opts)
+      pull_was_needed = true
+
+      parse_needed = (opts[:force_parse] || generate_docs || !module_branch.dsl_parsed?())
+      update_from_includes = opts[:update_from_includes]
+
+      opts_update = Aux.hash_subset(opts, [:do_not_raise, :modification_type, :force_parse, :auto_update_module_refs, :dsl_parsed_false, :update_module_refs_from_file, :update_from_includes, :current_branch_sha, :service_instance_module, :task_action])
+      opts_update.merge!(ret_parsed_dsl: ParsedDSL.create(self)) if generate_docs
+      ret = update_model_from_clone_changes(nil, diffs_summary, module_branch, version, opts_update)
+
+      if generate_docs and ! ret[:dsl_parse_error]
+        generate_and_persist_docs(module_branch, ret.parsed_dsl)
+      end
+
+      ret
+    end
+
     def get_project
       # caching
       return self[:project] if self[:project]

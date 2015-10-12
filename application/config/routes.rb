@@ -140,6 +140,8 @@ R8::ReactorRoute.draw do
   post 'component_module/list' => 'component_module#list'
   post 'component_module/install_puppet_forge_modules' => 'component_module#install_puppet_forge_modules'
   post 'component_module/list_remote_diffs' => 'component_module#list_remote_diffs'
+  post 'component_module/create_new_version' => 'component_module#create_new_version'
+
   # WORK WITH GIT REMOTES
   post 'component_module/info_git_remote'        => 'component_module#info_git_remote'
   post 'component_module/add_git_remote'         => 'component_module#add_git_remote'

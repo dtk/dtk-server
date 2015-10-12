@@ -303,6 +303,7 @@ R8::ReactorRoute.draw do
   post 'service_module/list_remote_diffs' => 'service_module#list_remote_diffs'
   post 'service_module/create_new_version' => 'service_module#create_new_version'
   post 'service_module/list_versions' => 'service_module#list_versions'
+
   # WORK WITH GIT REMOTES
   post 'service_module/info_git_remote'        => 'service_module#info_git_remote'
   post 'service_module/add_git_remote'         => 'service_module#add_git_remote'

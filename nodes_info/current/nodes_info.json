@@ -9,7 +9,7 @@
       "sizes":[
         "t2.micro",
         "t2.small",
-        "t2.medium"
+        "m3.medium"
       ]
     },
     "ami-bbfe9dde":{
@@ -69,7 +69,7 @@
       "sizes":[
         "t2.micro",
         "t2.small",
-        "t2.medium"
+        "m3.medium"
       ]
     },
     "ami-fd4480b9":{
@@ -81,7 +81,7 @@
       "sizes":[
         "t2.micro",
         "t2.small",
-        "t2.medium"
+        "m3.medium"
       ]
     },
     "ami-95f794f0":{
@@ -93,7 +93,7 @@
       "sizes":[
         "t2.micro",
         "t2.small",
-        "t2.medium"
+        "m3.medium"
       ]
     },
     "ami-9bf794fe":{
@@ -105,7 +105,7 @@
       "sizes":[
         "t2.micro",
         "t2.small",
-        "t2.medium"
+        "m3.medium"
       ]
     },
     "ami-fbf6959e":{
@@ -309,7 +309,7 @@
       "sizes":[
         "t2.micro",
         "t2.small",
-        "t2.medium"
+        "m3.medium"
       ]
     },
     "ami-a18243e5":{
@@ -321,7 +321,7 @@
       "sizes":[
         "t2.micro",
         "t2.small",
-        "t2.medium"
+        "m3.medium"
       ]
     },
     "ami-fa1bffc9":{
@@ -333,7 +333,7 @@
       "sizes":[
         "t2.micro",
         "t2.small",
-        "t2.medium"
+        "m3.medium"
       ]
     },
     "ami-23655354":{
@@ -345,7 +345,7 @@
       "sizes":[
         "t2.micro",
         "t2.small",
-        "t2.medium"
+        "m3.medium"
       ]
     }
   }

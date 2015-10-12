@@ -253,6 +253,27 @@ module DTK
       rest_ok_response response
     end
 
+    def rest__create_new_version
+      service_module = create_obj(:service_module_id)
+      version       = ret_version()
+      diffs_summary = ret_diffs_summary()
+
+      opts = {}
+      opts.merge!(force_parse: true)
+      opts.merge!(update_from_includes: true)
+      opts.merge!(force: true)
+
+      if ret_request_param_boolean(:internal_trigger)
+        opts.merge!(do_not_raise: true)
+      end
+
+      if generate_docs = ret_request_param_boolean(:generate_docs)
+        opts.merge!(generate_docs: generate_docs)
+      end
+
+      module_dsl_info = service_module.create_new_module_version(version, diffs_summary, opts)
+    end
+
     def rest__set_component_module_version
       service_module = create_obj(:service_module_id)
       component_module = create_obj(:component_module_id, ComponentModule)

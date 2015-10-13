@@ -103,16 +103,15 @@ module DTK
     end
 
     def dsl_hash_form
-      ret = Aux.hash_subset(self, DSLHashCols, only_non_nil: true)
-      if version_string = version_string()
-        ret.merge!(version_info: version_string)
+      ret = Aux.hash_subset(self, [])
+      if namespace = namespace()
+        ret.merge!(namespace: namespace)
       end
-      if ret[:version_info] && ret[:namespace_info].nil?
-        return ret[:version_info] # simple form
+      if version = version_string()
+        ret.merge!(version: version)
       end
       ret
     end
-    DSLHashCols = [:version_info, { namespace_info: :namespace }, :external_ref]
 
     private
 

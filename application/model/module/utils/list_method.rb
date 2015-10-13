@@ -40,7 +40,8 @@ module DTK
             r.delete(:module_branch)
             mdl = ndx_ret[ndx] = r
           end
-          mdl.merge!(is_equal: is_equal)
+
+          mdl.merge!(remote_relationship: is_equal)
           mdl.merge!(not_published: not_published)
 
           if opts[:include_versions]

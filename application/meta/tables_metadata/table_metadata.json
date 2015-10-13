@@ -229,13 +229,13 @@
       "id",
       "name",
       "linked_remote(s)",
-      "is_equal"
+      "remote_relationship"
     ],
     "mapping": {
       "id": "dtk_id",
       "name": "display_name",
       "linked_remote(s)": "linked_remotes",
-      "is_equal": "is_equal"
+      "remote_relationship": "remote_relationship"
     }
   },
   "module_remote": {

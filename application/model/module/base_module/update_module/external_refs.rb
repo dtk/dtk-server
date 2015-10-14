@@ -50,8 +50,16 @@ module DTK; class BaseModule
                   constraint_op = nil
                   req_version = nil
                   required_version = nil
+
+                  # there are two cases how dep_name can look like: puppetlabs-apt and puppetlabs/apt so covering both of them
                   if dep_name.eql?(branch_name)
-                    # version_constraints.nil? || empty? means no version constraint
+                    equal = true
+                  elsif dep_name.gsub('-','/').eql?(branch_name)
+                    dep_name.gsub!('-','/')
+                    equal = true
+                  end
+
+                  if equal
                     if version_constraints.nil? || version_constraints.empty?
                       evaluated = true
                     else

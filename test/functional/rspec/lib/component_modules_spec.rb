@@ -467,7 +467,7 @@ shared_context 'Add includes to dtk.model.yaml' do |dtk_model_yaml_file_location
   it 'adds includes to dtk.model.yaml file' do
     puts 'Add includes to dtk.model.yaml file:', '--------------------------------------'
     pass = false
-    `echo "includes:" >> #{dtk_model_yaml_file_location}`
+    `echo "\nincludes:" >> #{dtk_model_yaml_file_location}`
      component_module_names.each do |cmp|
       `echo "- #{cmp}" >> #{dtk_model_yaml_file_location}`
      end
@@ -482,13 +482,14 @@ shared_context 'Remove includes from dtk.model.yaml' do |dtk_model_yaml_file_loc
   it 'removes includes from dtk.model.yaml file' do
     puts 'Remove includes from dtk.model.yaml file:', '--------------------------------------'
     pass = false
-    `sed -i "s/includes://g" #{dtk_model_yaml_file_location}`
+    `sed -i "/includes:/d" #{dtk_model_yaml_file_location}`
      component_module_names.each do |cmp|
-      `sed -i "s/- #{cmp}//g" #{dtk_model_yaml_file_location}`
+      `sed -i "/- #{cmp}/d" #{dtk_model_yaml_file_location}`
      end
     value = `cat #{dtk_model_yaml_file_location} | grep includes`
     pass = true if value.empty?
     puts ''
+    `sed -i "/^\s*$/d" #{dtk_model_yaml_file_location}`
     pass.should eq(true)
   end
 end

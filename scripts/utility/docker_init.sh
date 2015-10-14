@@ -16,11 +16,12 @@ REPO_PORT=443
 MCO_PORT=61663
 SSH_PORT=2222
 HTTP_PORT=8080
+DOCKER_ID=$(date +%Y%m%d%H%M%S)
 
 ADDRESS=${1}
 UPGRADE=${2}
 CONTAINER=${3:-dtk}
-NAME=${4:-dtk-docker-${RANDOM}}
+NAME=${4:-dtk-docker-${DOCKER_ID}}
 USER=${5:-dtk17-docker}
 PASS=${6:-r8server}
 

@@ -112,7 +112,7 @@ module DTK
       # remote_b - remote_branch
       def get_loaded_and_remote_diffs(remote_r, repo_name, module_branch, remote_u, remote_b)
         adapter_repo = get_adapter_repo(context(repo_name, module_branch))
-        adapter_repo.is_different_than_remote?(remote_r, remote_u, remote_b)
+        adapter_repo.local_remote_relationship(remote_r, remote_u, remote_b)
       end
 
       def get_remote_diffs(remote_r, repo_name, module_branch, remote_u, remote_b)

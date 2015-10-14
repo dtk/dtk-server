@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+if [[ ${INIT_DEBUG} == true ]]; then
+  set -x
+fi
+
 PG_VERSION=8.4
 export HOST_VOLUME=/host_volume
 export TENANT_USER=dtk1
@@ -65,17 +69,14 @@ if [[ ! `psql -h /var/run/postgresql -U postgres -lqt | cut -d \| -f 1 | grep -w
 fi
 
 # reconfigure ssh
-rm -rf /home/${TENANT_USER}/.ssh
-ln -sf ${HOST_VOLUME}/ssh /home/${TENANT_USER}/.ssh
 if [[ ! -d ${HOST_VOLUME}/ssh ]]; then
   mkdir -p ${HOST_VOLUME}/ssh
   ssh-keygen -t rsa -f ${HOST_VOLUME}/ssh/id_rsa -P ''
-  echo "IdentityFile ${HOST_VOLUME}/ssh/id_rsa" >> /home/${TENANT_USER}/.ssh/config
+  #echo "IdentityFile ${HOST_VOLUME}/ssh/id_rsa" >> /home/${TENANT_USER}/.ssh/config
   printf '%s\n    %s\n' 'Host *' "IdentityFile ${HOST_VOLUME}/ssh/id_rsa" >> /home/${TENANT_USER}/.ssh/config
   chown -R ${TENANT_USER}:${TENANT_USER} ${HOST_VOLUME}/ssh
 fi
-#ln -sf ${HOST_VOLUME}/ssh/id_rsa* /home/${TENANT_USER}/.ssh/
-#ln -sf ${HOST_VOLUME}/ssh/authorized_keys /home/${TENANT_USER}/.ssh/authorized_keys
+ln -sf ${HOST_VOLUME}/ssh/id_rsa* /home/${TENANT_USER}/.ssh/
 SSH_HOST_KEY_DIR=${HOST_VOLUME}/ssh/host
 mkdir -p ${SSH_HOST_KEY_DIR}
 # generate SSH2 host keys, but only if they don't exist
@@ -125,6 +126,12 @@ if [[ ! -d ${HOST_VOLUME}/gitolite/ ]]; then
   su - ${TENANT_USER} -c "cd /home/${TENANT_USER}/gitolite-admin; git add .; git commit -a -m 'Initial commit'; git push"
 fi
 
+# create r8server-repo
+if [[ ! -d ${HOST_VOLUME}/r8server-repo/ ]]; then
+  mkdir -p ${HOST_VOLUME}/r8server-repo
+  chown -R ${TENANT_USER}:${TENANT_USER} ${HOST_VOLUME}/r8server-repo
+fi;
+
 # activemq
 ln -s ${HOST_VOLUME}/activemq/data /opt/activemq/data
 if [[ ! -d ${HOST_VOLUME}/activemq ]]; then
@@ -145,8 +152,22 @@ if [[ -f ${HOST_VOLUME}/dtk.config ]] && [[ ! -f ${HOST_VOLUME}/init_done ]]; th
   #touch ${HOST_VOLUME}/init_done
 fi
 
+
+# potential fix for auth keys
+if [[ ! -f "/home/dtk1/local/triggers/link-akf" ]]; then
+  su - ${TENANT_USER} -c "mkdir -p local/triggers"
+  su - ${TENANT_USER} -c "echo -e '#!/bin/sh \n cp ~/.ssh/authorized_keys /host_volume/ssh' >> 'local/triggers/link-akf'"
+  su - ${TENANT_USER} -c "chmod +x local/triggers/link-akf"
+  su - ${TENANT_USER} -c "${HOST_VOLUME}/gitolite/bin/gitolite print-default-rc > ~/.gitolite.rc"
+  su - ${TENANT_USER} -c 'sed -i "0,/# LOCAL_CODE/s//LOCAL_CODE/g" .gitolite.rc'
+  su - ${TENANT_USER} -c "sed -i  \"76iNON_CORE => 'ssh-authkeys POST_COMPILE link-akf',\" .gitolite.rc"
+fi
+
+if [[ ! -L /home/${TENANT_USER}/.ssh/authorized_keys ]]; then
+  # put authorized_keys on the host volume to preserve it
+  su - ${TENANT_USER} -c "mv /home/${TENANT_USER}/.ssh/authorized_keys ${HOST_VOLUME}/ssh/"
+  ln -s ${HOST_VOLUME}/ssh/authorized_keys /home/${TENANT_USER}/.ssh/authorized_keys
+fi
+
 /usr/sbin/nginx -g 'daemon off;'
-
-
-
 

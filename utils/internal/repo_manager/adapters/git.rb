@@ -454,7 +454,7 @@ module DTK
       end
     end
 
-    def is_different_than_remote?(remote_name, remote_url, remote_branch)
+    def local_remote_relationship(remote_name, remote_url, remote_branch)
       add_remote?(remote_name, remote_url)
       # TODO: dont think this is rescue needed any more because of the c
       # If fails to fetch remote, do initial sync to load remote repo name and try to fetch remote again
@@ -469,9 +469,17 @@ module DTK
       local_sha = sha_matching_branch_name(:local, @branch)
 
       if remote_sha == local_sha
-        true
+        'no change'
       else
-        !any_diffs?(local_sha, remote_sha)
+        # shas can be different but  they can have same content so do a git diff
+        unless any_diffs?(local_sha, remote_sha)
+          return 'no change'
+        end
+        # TODO: see if missing or mis-categorizing any condition below
+        if git_command__rev_list_contains?(local_sha, remote_sha) then 'local ahead'
+        elsif git_command__rev_list_contains?(remote_sha, local_sha) then 'remote ahead'
+        else 'merge needed'
+        end
       end
     end
 

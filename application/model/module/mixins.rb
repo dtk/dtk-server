@@ -84,6 +84,16 @@ module DTK
       end
     end
 
+    def list_versions(opts = {})
+      local_versions = get_objs(cols: [:version_info]).map do |r|
+        v = r[:module_branch].version()
+        v.nil? ? 'base' : v
+      end
+
+      local_versions.delete('base')
+      [{ versions: local_versions.flatten }]
+    end
+
     ##
     # Returns local and remote versions for module
     #

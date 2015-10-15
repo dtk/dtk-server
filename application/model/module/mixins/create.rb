@@ -67,14 +67,15 @@ module DTK; module ModuleMixins
     end
 
     # TODO: ModuleBranch::Location: deprecate below for above
-    def create_ws_module_and_branch_obj?(project, repo_idh, module_name, input_version, namespace, ancestor_branch_idh = nil)
+    def create_ws_module_and_branch_obj?(project, repo_idh, module_name, input_version, namespace, ancestor_branch_idh = nil, opts = {})
       project_idh = project.id_handle()
 
       ref = Namespace.join_namespace(namespace.display_name(), module_name)
       module_type = model_name.to_s
-      opts = { version: input_version }
-      opts.merge!(ancestor_branch_idh: ancestor_branch_idh) if ancestor_branch_idh
-      mb_create_hash = ModuleBranch.ret_workspace_create_hash(project, module_type, repo_idh, opts)
+      create_opts = { version: input_version }
+      create_opts.merge!(ancestor_branch_idh: ancestor_branch_idh) if ancestor_branch_idh
+      create_opts.merge!(frozen: opts[:frozen]) if opts[:frozen]
+      mb_create_hash = ModuleBranch.ret_workspace_create_hash(project, module_type, repo_idh, create_opts)
       version = mb_create_hash.values.first[:version]
 
       fields = {

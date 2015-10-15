@@ -66,6 +66,7 @@ end
     current_sha: { type: :varchar, size: 50 }, #indicates the sha of the branch that is currently synchronized with object model
     external_ref: { type: :text },
     dsl_parsed: { type: :boolean, default: true },
+    frozen: { type: :boolean, default: false },
     repo_id: {
       type: :bigint,
       foreign_key_rel_type: :repo,

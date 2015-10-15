@@ -154,6 +154,9 @@ module DTK
       force         = opts[:force]
       generate_docs = opts[:generate_docs]
 
+      # set frozen field in module branch object to true for new version
+      opts.merge!(frozen: true)
+
       # create module branch for new version
       module_branch = self.create_new_version(nil, version, opts)
       pull_was_needed = true

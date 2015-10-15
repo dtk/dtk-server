@@ -478,11 +478,12 @@ module DTK
       ancestor_branch_idh = opts[:ancestor_branch_idh]
       branch =  local.branch_name
       type = local.module_type.to_s
-# TODO: temp until for source of bug where component rather than component_module put in for type
-if type == 'component'
-  type = 'component_module'
-  Log.error_pp(['Bug :component from :component_module on', local, caller()[0..7]])
-end
+
+      # TODO: temp until for source of bug where component rather than component_module put in for type
+      if type == 'component'
+        type = 'component_module'
+        Log.error_pp(['Bug :component from :component_module on', local, caller()[0..7]])
+      end
 
       assigns = {
         display_name: branch,
@@ -494,6 +495,7 @@ end
       }
       assigns.merge!(ancestor_id: ancestor_branch_idh.get_id()) if ancestor_branch_idh
       assigns.merge!(current_sha: opts[:current_sha]) if opts[:current_sha]
+      assigns.merge!(frozen: opts[:frozen]) if opts[:frozen]
       ref = branch
       { ref => assigns }
     end
@@ -511,6 +513,7 @@ end
         version: version_field(version)
       }
       assigns.merge!(ancestor_id: ancestor_branch_idh.get_id()) if ancestor_branch_idh
+      assigns.merge!(frozen: opts[:frozen]) if opts[:frozen]
       ref = branch
       { ref => assigns }
     end

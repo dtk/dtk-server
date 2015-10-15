@@ -115,6 +115,14 @@ module DTK
       rest_ok_response ServiceModule.list(opts), datatype: datatype
     end
 
+    def rest__list_versions
+      service_module = create_obj(:service_module_id)
+      project = get_default_project()
+      opts = Opts.new(project_idh: project.id_handle())
+
+      rest_ok_response service_module.list_versions(opts)
+    end
+
     def rest__versions
       service_module = create_obj(:service_module_id)
       client_rsa_pub_key = ret_request_params(:rsa_pub_key)

@@ -194,6 +194,22 @@
       "dsl_parsed": "dsl_parsed"
     }
   },
+  "module_with_versions": {
+    "order": [
+      "id",
+      "name",
+      "remote(s)",
+      "dsl_parsed",
+      "version(s)"
+    ],
+    "mapping": {
+      "id": "dtk_id",
+      "name": "display_name",
+      "remote(s)": "linked_remotes",
+      "dsl_parsed": "dsl_parsed",
+      "version(s)": "versions"
+    }
+  },
   "assembly_component_module": {
     "order": [
       "id",
@@ -614,13 +630,11 @@
       "errors": "errors.message"
     }
   },
-  "module_version": {
+  "list_versions": {
     "order": [
-      "namespace",
       "version(s)"
     ],
     "mapping": {
-      "namespace": "namespace",
       "version(s)": "versions"
     }
   },

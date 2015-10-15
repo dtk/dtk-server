@@ -77,7 +77,7 @@ module DTK
          { model_name: :module_branch,
            join_type: :inner,
            join_cond: { id: q(:component, :module_branch_id) },
-           cols: [:id, :group_id, :component_id]
+           cols: [:id, :group_id, :component_id, :version]
          },
          { model_name: :component_module,
            convert: true,

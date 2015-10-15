@@ -216,12 +216,14 @@
     "order": [
       "id",
       "namespace",
-      "name"
+      "name",
+      "version"
     ],
     "mapping": {
       "id": "dtk_id",
       "namespace": "namespace_name",
-      "name": "display_name"
+      "name": "display_name",
+      "version": "version"
     }
   },
   "module_diff": {

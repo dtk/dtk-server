@@ -42,7 +42,8 @@ module DTK
       aug_cmp_templates.each do |r|
         component_module = r[:component_module]
         ndx = component_module[:id]
-        ndx_ret[ndx] ||= component_module.merge(namespace_name: r[:namespace][:display_name])
+        branch_version = version_print_form(r[:module_branch][:version])
+        ndx_ret[ndx] ||= component_module.merge({ namespace_name: r[:namespace][:display_name], version: branch_version })
       end
       ndx_ret.values
     end
@@ -53,6 +54,11 @@ module DTK
       elsif cmp_ref__obj_or_hash[:id]
         "id:#{cmp_ref__obj_or_hash[:id]})"
       end
+    end
+
+    def self.version_print_form(version)
+      version = 'base' if version.eql?('master')
+      version
     end
   end
 end

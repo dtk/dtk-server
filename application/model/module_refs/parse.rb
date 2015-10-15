@@ -6,7 +6,7 @@ module DTK
       end
 
       def self.update_component_module_refs_from_parse_objects(_module_class, module_branch, cmp_dsl_form_els)
-        hash_content = semantic_parse(module_branch, cmp_dsl_form_els)
+        hash_content = semantic_parse(module_branch, cmp_dsl_form_els, include_nil_version: true)
         return hash_content if hash_content.is_a?(ErrorUsage::Parsing)
         update(module_branch, hash_content)
         ModuleRefs.new(module_branch, hash_content, content_hash_form_is_reified: true)
@@ -20,10 +20,10 @@ module DTK
 
       private
 
-      def self.semantic_parse(branch, dsl_info)
+      def self.semantic_parse(branch, dsl_info, opts={})
         ret = nil
         begin
-          ret = reify_content(branch.model_handle(:model_ref), dsl_info)
+          ret = reify_content(branch.model_handle(:model_ref), dsl_info, opts)
          rescue ErrorUsage::Parsing => e
           return e
          rescue => e
@@ -34,7 +34,7 @@ module DTK
         ret
       end
 
-      def self.reify_content(mh, object)
+      def self.reify_content(mh, object, opts = {})
         return {} unless object
         # if Hash type then this comes from querying the model ref table
         if object.is_a?(Hash)
@@ -48,7 +48,7 @@ module DTK
           #This comes from parsing the dsl file
         elsif object.is_a?(ServiceModule::DSLParser::Output) || object.is_a?(ComponentDSLForm::Elements)
           object.inject({}) do |h, r|
-            internal_form = convert_parse_to_internal_form(r)
+            internal_form = convert_parse_to_internal_form(r, opts)
             h.merge(parse_form_module_name(r).to_sym => ModuleRef.reify(mh, internal_form))
           end
         else
@@ -63,7 +63,7 @@ module DTK
         ret
       end
 
-      def self.convert_parse_to_internal_form(parse_form_hash)
+      def self.convert_parse_to_internal_form(parse_form_hash, opts = {})
         ret = {
           module_name: parse_form_hash[:component_module],
           module_type: 'component'
@@ -72,7 +72,8 @@ module DTK
         if namespace_info = parse_form_hash[:remote_namespace]
           ret[:namespace_info] = namespace_info
         end
-        if version_info = parse_form_hash[:version_info]
+        version_info = parse_form_hash[:version_info]
+        if opts[:include_nil_version] or version_info
           ret[:version_info] = version_info
         end
 

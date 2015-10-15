@@ -122,13 +122,9 @@ module DTK
         parent.parent_id_field_name(:module_ref) => parent.id()
       }
       module_ref_hash_array.map do |module_ref_hash|
-        assigns =
-          if version_info = module_ref_hash[:version_info]
-            parent_id_assigns.merge(version_info: version_info.to_s)
-          else
-            assigns = parent_id_assigns
-          end
-        el = Aux.hash_subset(module_ref_hash, [:ref, :display_name, :module_name, :module_type, :namespace_info, :external_ref]).merge(assigns)
+        el = Aux.hash_subset(module_ref_hash, [:ref, :display_name, :module_name, :module_type, :namespace_info, :external_ref]).merge(parent_id_assigns)
+        version_info = module_ref_hash[:version_info]
+        el.merge!(version_info: version_info && version_info.to_s)
         el[:display_name] ||= display_name(el)
         el[:ref] ||= ref(el)
         el

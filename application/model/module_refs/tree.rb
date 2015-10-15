@@ -82,6 +82,9 @@ module DTK
         elsif isa_module_ref?()
           ret[:type] = 'ModuleRef'
           ret[:namespace] = namespace()
+          if version = version?()
+            ret[:version] = version
+          end
           if external_ref = external_ref?()
             ret[:external_ref]  = external_ref
           end
@@ -115,6 +118,13 @@ module DTK
         elsif @context.is_a?(ModuleRef::Missing)
           @context.namespace
         end
+      end
+
+      def version?
+        if @context.is_a?(ModuleRef)
+          @context[:version_info]
+        end
+        # TODO: DTK-2267; see if we want an 'eslif clause
       end
 
       def external_ref?

@@ -45,7 +45,8 @@ module DTK
           mdl.merge!(not_published: not_published)
 
           if opts[:include_versions]
-            (mdl[:version_array] ||= []) << module_branch.version_print_form(Opts.new(default_version_string: DEFAULT_VERSION))
+            version = module_branch.version_print_form(Opts.new(default_version_string: DEFAULT_VERSION))
+            (mdl[:version_array] ||= []) << version unless version.eql?('CURRENT') # module_branch.version_print_form(Opts.new(default_version_string: DEFAULT_VERSION))
           end
           if external_ref_source = module_branch.external_ref_source()
             mdl[:external_ref_source] = external_ref_source

@@ -54,4 +54,6 @@ docker pull getdtk/server-full
 docker stop dtk
 docker rm dtk
 docker run --name dtk -v /dtk:/host_volume -p 8080:80 -p 6163:6163 -p 2222:22 -d getdtk/server-full
-```  
+```
+### Connecting to Tenant inside container
+To connect to the tenant inside the docker container, you will have to set `secure_connection` to `false` in the dtk/client.conf file of the dtk-client directory and run the `dtk-shell` command. For the server address, tenant username and password, enter the same values that are set in the `dtk.config` file of the docker container host volume.

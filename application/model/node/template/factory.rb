@@ -67,12 +67,12 @@ module DTK; class Node
         end
         os = os.to_sym
         unless LegalOSs.include?(os)
-          fail ErrorUsage.new("OS parameter (#{os}) is invalid; legal values are: #{LegalOSs.join(',')}")
+          fail ErrorUsage.new("OS parameter (#{os}) is invalid; legal values are: #{LegalOSs.join(', ')}")
         end
         os
       end
       # TODO: sync with ../utils/internal/command_and_control/install_script.rb OSTemplates keys
-      LegalOSs = [:ubuntu, :redhat, :centos, :debian]
+      LegalOSs = %w{ubuntu redhat centos debian amazon-linux}.map { |os| os.to_sym }
 
       def self.raise_error_if_invalid_size_array(size_array)
         size_array ||= ['t1.micro'] #TODO: stub

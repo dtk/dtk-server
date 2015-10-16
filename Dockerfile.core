@@ -1,4 +1,4 @@
-FROM getdtk/trusty-puppet:0.1
+FROM getdtk/trusty-puppet:latest
 MAINTAINER dduvnjak <dario@atlantbh.com>
 
 RUN mkdir -p /etc/puppet

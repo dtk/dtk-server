@@ -1,6 +1,12 @@
 module DTK; class ModuleRefs
   class Tree
     class Collapsed < Hash
+      # TODO: DTK-2267: need to handle case where same namespace but different versions
+      # Must make sure that the method collapse does not remove all but the first version found
+      # Must Update choose_namespaces_and_versions! (which was renamed from choose_namespaces!)
+      # resolves conflict when multiple versions of same namespace/module pair by picking latest version
+      # if they can be ordered
+      
       module Mixin
         def collapse(opts = {})
           ret = Collapsed.new
@@ -33,6 +39,9 @@ module DTK; class ModuleRefs
               if external_ref = subtree.external_ref?()
                 opts_create.merge!(external_ref: external_ref)
               end
+              if version = subtree.version?
+                opts_create.merge!(version: version)
+              end
               (ret[module_name] ||= []) << ModuleRef::Lock::Info.new(namespace, module_name, level, opts_create)
             end
           end
@@ -42,7 +51,7 @@ module DTK; class ModuleRefs
 
       # opts[:stratagy] can be
       #  :pick_first_level - if multiple and have first level one then use that otherwise will randomly pick top one
-      def choose_namespaces!(opts = {})
+      def choose_namespaces_and_versions!(opts = {})
         strategy = opts[:strategy] || DefaultStrategy
         if strategy == :pick_first_level
           choose_namespaces__pick_first_level!()
@@ -68,6 +77,36 @@ module DTK; class ModuleRefs
       def impl_index(namespace, module_name)
         "#{namespace}:#{module_name}"
       end
+
+      # returns implementations indexed by impl_index
+      def get_relevant_ndx_implementations(assembly_instance)
+        disjuncts = []
+        each_element do |el|
+          disjunct =
+            [:and,
+             [:eq, :module_name, el.module_name],
+             [:eq, :module_namespace, el.namespace]
+            ]
+          disjuncts << disjunct
+        end
+        filter = ((disjuncts.size == 1) ? disjuncts.first : ([:or] + disjuncts))
+        sp_hash = {
+          cols: [:id, :group_id, :display_name, :repo, :repo_id, :branch, :module_name, :module_namespace, :version],
+          filter: filter
+        }
+        # get the implementations that meet sp_hash, but if have two matches for a module_name/module_namespace pair
+        # return just one that matches the assembly version
+        ret = {}
+        Model.get_objs(assembly_instance.model_handle(:implementation), sp_hash).each do |r|
+          ndx = impl_index(r[:module_namespace], r[:module_name])
+          # if ndx_ret[ndx], dont replace if what is there is the assembly branch
+          unless (ret[ndx] || {})[:version] == assembly_version_field
+            ret[ndx] = r
+          end
+        end
+        ret
+      end
+=begin
 
       # returns implementations indexed by impl_index
       def get_relevant_ndx_implementations(assembly_instance)
@@ -101,6 +140,7 @@ module DTK; class ModuleRefs
         ret
       end
       BaseVersion = nil
+=end
 
       def assembly_version(assembly_instance)
         ModuleVersion.ret(assembly_instance)

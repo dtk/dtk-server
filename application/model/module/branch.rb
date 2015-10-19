@@ -370,10 +370,10 @@ module DTK
     #
     # This method returns [new_branch_repo, new_branch_sha]
     def create_new_branch_from_this_branch?(project, base_repo, new_version, opts = {})
-      branch_name = Location::Server::Local.workspace_branch_name(project, new_version)
+      branch_name = Location::Server::Local.workspace_branch_name(project, new_version, opts)
       new_branch_sha = RepoManager.add_branch_and_push?(branch_name, opts, self)
       new_branch_repo = repo_for_version(base_repo, new_version)
-      [new_branch_repo, new_branch_sha]
+      [new_branch_repo, new_branch_sha, branch_name]
     end
 
     def repo_for_version(base_repo, _version)

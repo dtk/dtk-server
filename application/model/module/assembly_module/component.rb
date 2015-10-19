@@ -128,7 +128,7 @@ module DTK; class AssemblyModule
     def create_assembly_branch?(component_module, opts = {})
       am_version = assembly_module_version()
       unless component_module.get_workspace_module_branch(am_version)
-        create_assembly_branch(component_module, am_version, Aux.hash_subset(opts, [:sha]))
+        create_assembly_branch(component_module, am_version, Aux.hash_subset(opts, [:sha, :version_branch, :base_version, :checkout_branch]))
       end
       ret = component_module.get_workspace_branch_info(am_version)
       opts[:ret_module_branch] ? ret[:module_branch_idh].create_object() : ret
@@ -137,7 +137,7 @@ module DTK; class AssemblyModule
     # opts can have keys
     #  :sha - base sha to create branch from
     def create_assembly_branch(component_module, am_version, opts = {})
-      base_version = nil
+      base_version = opts[:base_version]
       component_module.create_new_version(base_version, am_version, opts)
     end
 

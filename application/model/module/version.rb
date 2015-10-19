@@ -16,8 +16,8 @@ module DTK
       end
     end
 
-    def self.assembly_module_version?(string)
-      AssemblyModule.legal_format?(string)
+    def self.assembly_module_version?(str)
+      AssemblyModule.legal_format?(str)
     end
 
     def self.string_master_or_empty?(object)
@@ -25,10 +25,12 @@ module DTK
         if object.nil?
           true
         elsif object.is_a?(String)
-          object.casecmp('master').eql?(0) || object.casecmp('default').eql?(0)
+          object.casecmp(MasterVersion).eql?(0) || object.casecmp('default').eql?(0)
         end
       !!ret
     end
+
+    MasterVersion = 'master'
 
     # Compares version, return true if same
     def self.versions_same?(str1, str2)
@@ -49,6 +51,17 @@ module DTK
     class AssemblyModule < self
       attr_reader :assembly_name
 
+      def match?(str)
+        str =~ @regexp
+      end
+
+      # TODO: DTK2267: need to see what format is for assembly module version with seamntic version
+      # for example is it "version part" followed by "-" followed by term that matches @regexp ?
+      def strip_assembly_module_part(str)
+        ret = str.gsub(@regexp, '')
+        ret.empty? ? MasterVersion : ret
+      end
+
       def get_assembly(mh)
         sp_hash = {
           cols: [:id, :group_id, :display_name],
@@ -67,6 +80,7 @@ module DTK
       def self.legal_format?(str)
         !!(str =~ StringPattern)
       end
+
       def self.create_from_string(str)
         if str =~ StringPattern
           assembly_name = Regexp.last_match(1)
@@ -78,8 +92,10 @@ module DTK
       private
 
       def initialize(assembly_name)
+        version_string = version_string(assembly_name)
         @assembly_name = assembly_name
-        super(version_string(assembly_name))
+        @regexp = Regexp.new("#{version_string}$")
+        super(version_string)
       end
 
       def version_string(assembly_name)

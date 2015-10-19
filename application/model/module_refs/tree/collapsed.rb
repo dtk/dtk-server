@@ -64,7 +64,8 @@ module DTK; class ModuleRefs
       def add_implementations!(assembly_instance)
         ndx_impls = get_relevant_ndx_implementations(assembly_instance)
         each_element do |el|
-          ndx = impl_index(el.namespace, el.module_name)
+          version = el.version || Implementation.version_field
+          ndx = impl_index(el.namespace, el.module_name, version)
           if impl = ndx_impls[ndx]
             el.implementation = impl
           end
@@ -73,10 +74,6 @@ module DTK; class ModuleRefs
       end
 
       private
-
-      def impl_index(namespace, module_name)
-        "#{namespace}:#{module_name}"
-      end
 
       # returns implementations indexed by impl_index
       def get_relevant_ndx_implementations(assembly_instance)
@@ -94,24 +91,43 @@ module DTK; class ModuleRefs
           cols: [:id, :group_id, :display_name, :repo, :repo_id, :branch, :module_name, :module_namespace, :version],
           filter: filter
         }
+
         # get the implementations that meet sp_hash, but if have two matches for a module_name/module_namespace pair
         # return just one that matches the assembly version
         ret = {}
-        Model.get_objs(assembly_instance.model_handle(:implementation), sp_hash).each do |r|
-          ndx = impl_index(r[:module_namespace], r[:module_name])
-          # if ndx_ret[ndx] has been set overwrite if version is associated with assembly version
-          unless ret[ndx] and has_assembly_module_version?(ret[ndx])
-            ret[ndx] = r
+        assembly_version = ModuleVersion.ret(assembly_instance)
+        Model.get_objs(assembly_instance.model_handle(:implementation), sp_hash).each do |impl|
+          # if version is an assembly_module_version, reject if not associated with this assembly
+          # else (a base version); reject if coresponding assembly_module_version has been saved already
+          version = impl[:version]
+          case version_type(version, assembly_version)
+           when :non_matching_assembly_module
+             # no op
+           when :matching_assembly_module
+            normalized_version = assembly_version.strip_assembly_module_part(version)
+            ndx = impl_index(impl[:module_namespace], impl[:module_name], normalized_version)
+            # '=' so will override
+            ret[ndx] = impl
+           when :base_version
+            ndx = impl_index(impl[:module_namespace], impl[:module_name], version)
+            ret[ndx] ||= impl
           end
         end
         ret
       end
-
-      def has_assembly_module_version?(impl)
-        if version = impl[:version] 
-          ModuleVersion.assembly_module_version?(version)
+      
+      def version_type(version, assembly_version)
+        unless ModuleVersion.assembly_module_version?(version)
+          :base_version
+        else
+          assembly_version.match?(version) ? :matching_assembly_module : :non_matching_assembly_module
         end
       end
+
+      def impl_index(namespace, module_name, version)
+        "#{namespace}:#{module_name}:#{version}"
+      end
+      BaseVersion = nil
 
       def choose_namespaces__pick_first_level!(_opts = {})
         each_pair do |module_name, els|

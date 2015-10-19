@@ -20,7 +20,7 @@ module DTK
       VersionFieldDefault
     end
 
-    def version_field(version)
+    def version_field(version = nil)
       version || VersionFieldDefault
     end
 

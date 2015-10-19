@@ -111,9 +111,9 @@ module DTK; module ModuleMixins
       if get_module_branch_matching_version(new_version)
         fail ErrorUsage.new("Version exists already for module (#{pp_module_name(new_version)})")
       end
-      opts_repo_update = Aux.hash_subset(opts, [:sha])
-      new_version_repo, new_version_sha = aug_base_branch.create_new_branch_from_this_branch?(get_project(), aug_base_branch[:repo], new_version, opts_repo_update)
-      opts_create_branch = opts.merge(ancestor_branch_idh: aug_base_branch.id_handle(), current_sha: new_version_sha)
+      opts_repo_update = Aux.hash_subset(opts, [:sha, :base_version, :version_branch, :checkout_branch])
+      new_version_repo, new_version_sha, new_branch_name = aug_base_branch.create_new_branch_from_this_branch?(get_project(), aug_base_branch[:repo], new_version, opts_repo_update)
+      opts_create_branch = opts.merge(ancestor_branch_idh: aug_base_branch.id_handle(), current_sha: new_version_sha, new_branch_name: new_branch_name)
       new_branch = create_new_version__type_specific(new_version_repo, new_version, opts_create_branch)
       ModuleRefs.clone_component_module_refs(aug_base_branch, new_branch)
       new_branch

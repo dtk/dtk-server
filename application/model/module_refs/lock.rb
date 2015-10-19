@@ -37,12 +37,13 @@ module DTK
         get(assembly_instance, :locked_dependencies).matching_namespace?(module_name)
       end
       def self.get_locked_branch_sha?(assembly_instance, module_name)
-        get(assembly_instance, :locked_branch_shas).matching_locked_branch_sha?(module_name)
+        module_ref = get(assembly_instance, :locked_branch_shas)
+        [module_ref.matching_locked_branch_sha?(module_name), module_ref.version_branch?(module_name)]
       end
       # returns [namespace, locked_branch_sha]
       def self.get_namespace_and_locked_branch_sha?(assembly_instance, module_name)
         module_refs_lock = get(assembly_instance, AllTypes)
-        [module_refs_lock.matching_namespace?(module_name), module_refs_lock.matching_locked_branch_sha?(module_name)]
+        [module_refs_lock.matching_namespace?(module_name), module_refs_lock.matching_locked_branch_sha?(module_name), module_refs_lock.version_branch?(module_name)]
       end
 
       # opts can have keys
@@ -62,6 +63,10 @@ module DTK
 
       def matching_locked_branch_sha?(module_name)
         (module_ref_lock = module_ref_lock(module_name)) && module_ref_lock.locked_branch_sha
+      end
+
+      def version_branch?(module_name)
+        (module_ref_lock = module_ref_lock(module_name)) && module_ref_lock[:info] && module_ref_lock[:info][:module_branch]
       end
 
       def elements

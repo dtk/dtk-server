@@ -541,7 +541,8 @@ module DTK
     def add_branch_and_push?(new_branch, opts = {})
       new_branch_sha = nil
       add_branch?(new_branch, opts)
-      checkout(opts[:sha] || new_branch) do
+      branch_or_sha = opts[:checkout_branch] ? new_branch : (opts[:sha] || new_branch)
+      checkout(branch_or_sha) do
         new_branch_sha = git_command__push(new_branch)
       end
       new_branch_sha

@@ -254,12 +254,18 @@ module DTK
         case module_type.to_sym
           when :component_module
             module_name = ret_non_null_request_params(:module_name)
-            namespace, sha = AssemblyModule::Component.get_namespace_and_locked_branch_sha?(assembly, module_name)
+            namespace, sha, version_branch = AssemblyModule::Component.get_namespace_and_locked_branch_sha?(assembly, module_name)
             unless namespace
               fail ErrorUsage.new("A component module with name '#{module_name}' does not exist")
             end
             component_module = create_obj(:module_name, ComponentModule, namespace)
-            AssemblyModule::Component.prepare_for_edit(assembly, component_module, sha ? {sha: sha } : {})
+            opts = {}
+            opts.merge!(sha: sha) if sha
+            if version_branch && !version_branch[:version].eql?('master')
+              opts.merge!(version_branch: version_branch[:branch], base_version: version_branch[:version], checkout_branch: true)
+            end
+            # AssemblyModule::Component.prepare_for_edit(assembly, component_module, sha ? {sha: sha } : {})
+            AssemblyModule::Component.prepare_for_edit(assembly, component_module, opts)
           when :service_module
             modification_type = ret_non_null_request_params(:modification_type).to_sym
             opts = ret_params_hash(:task_action, :create, :base_task_action)

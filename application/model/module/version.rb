@@ -16,6 +16,10 @@ module DTK
       end
     end
 
+    def self.assembly_module_version?(string)
+      AssemblyModule.legal_format?(string)
+    end
+
     def self.string_master_or_empty?(object)
       ret =
         if object.nil?

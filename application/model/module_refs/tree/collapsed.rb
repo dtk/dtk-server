@@ -99,51 +99,18 @@ module DTK; class ModuleRefs
         ret = {}
         Model.get_objs(assembly_instance.model_handle(:implementation), sp_hash).each do |r|
           ndx = impl_index(r[:module_namespace], r[:module_name])
-          # if ndx_ret[ndx], dont replace if what is there is the assembly branch
-          unless (ret[ndx] || {})[:version] == assembly_version_field
+          # if ndx_ret[ndx] has been set overwrite if version is associated with assembly version
+          unless ret[ndx] and has_assembly_module_version?(ret[ndx])
             ret[ndx] = r
           end
         end
         ret
       end
-=begin
 
-      # returns implementations indexed by impl_index
-      def get_relevant_ndx_implementations(assembly_instance)
-        base_version_field = Implementation.version_field(BaseVersion)
-        assembly_version_field = Implementation.version_field(assembly_version(assembly_instance))
-        disjuncts = []
-        each_element do |el|
-          disjunct =
-            [:and,
-             [:eq, :module_name, el.module_name],
-             [:eq, :module_namespace, el.namespace],
-             [:oneof, :version, [base_version_field, assembly_version_field]]
-            ]
-          disjuncts << disjunct
+      def has_assembly_module_version?(impl)
+        if version = impl[:version]
+          ModuleVersion.assembly_module_version?(version)
         end
-        filter = ((disjuncts.size == 1) ? disjuncts.first : ([:or] + disjuncts))
-        sp_hash = {
-          cols: [:id, :group_id, :display_name, :repo, :repo_id, :branch, :module_name, :module_namespace, :version],
-          filter: filter
-        }
-        # get the implementations that meet sp_hash, but if have two matches for a module_name/module_namespace pair
-        # return just one that matches the assembly version
-        ret = {}
-        Model.get_objs(assembly_instance.model_handle(:implementation), sp_hash).each do |r|
-          ndx = impl_index(r[:module_namespace], r[:module_name])
-          # if ndx_ret[ndx], dont replace if what is there is the assembly branch
-          unless (ret[ndx] || {})[:version] == assembly_version_field
-            ret[ndx] = r
-          end
-        end
-        ret
-      end
-      BaseVersion = nil
-=end
-
-      def assembly_version(assembly_instance)
-        ModuleVersion.ret(assembly_instance)
       end
 
       def choose_namespaces__pick_first_level!(_opts = {})

@@ -1,12 +1,13 @@
 module DTK; class ModuleRef
   class Lock
     class Info
-      attr_reader :namespace, :module_name, :level, :children_module_names, :external_ref
+      attr_reader :namespace, :module_name, :version, :level, :children_module_names, :external_ref
       attr_accessor :implementation, :module_branch
       def initialize(namespace, module_name, level, extra_fields = {})
         @namespace             = namespace
         @module_name           = module_name
         @level                 = level
+        @version               = extra_fields[:version]
         @children_module_names = extra_fields[:children_module_names] || []
         @implementation        = extra_fields[:implementation]
         @module_branch         = extra_fields[:module_branch]

@@ -124,7 +124,7 @@ module DTK
         if @context.is_a?(ModuleRef)
           @context[:version_info]
         end
-        # TODO: DTK-2267; see if we want an 'eslif clause 
+        # TODO: DTK-2267; see if we want an 'elsif clause 
       end
 
       def external_ref?

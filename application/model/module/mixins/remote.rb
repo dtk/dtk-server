@@ -197,7 +197,7 @@ module DTK; module ModuleMixins
 
     # publish to a remote repo
     # request_params: hash map containing remote_component_name, remote_component_namespace
-    def publish(local_params, remote_params, client_rsa_pub_key)
+    def publish(local_params, remote_params, client_rsa_pub_key, version = nil)
       project = get_project()
       remote = remote_params.create_remote(project)
       local = local_params.create_local(project)
@@ -210,7 +210,7 @@ module DTK; module ModuleMixins
 
       file_content = nil
       # we need to send Repoman information about modules and we do it here
-      module_branch = get_workspace_module_branch()
+      module_branch = get_workspace_module_branch(version)
       file_content = repo_file_content(module_branch, ModuleRefs.meta_filename_path())
 
       # create module on remote repo manager

@@ -141,6 +141,8 @@ module Ramaze::Helper
 
       namespace, remote_module_name, version = Repo::Remote.split_qualified_name(qualified_remote_name, opts)
       local_module_name = module_obj.module_name()
+      version_param = ret_request_params(:version)
+      version ||= version_param
 
       # [Amar & Haris] this is temp restriction until rest of logic is properly fixed
       if local_module_name != remote_module_name
@@ -151,7 +153,7 @@ module Ramaze::Helper
       remote_params = remote_params_dtkn(module_type, namespace, remote_module_name, version)
       namespace = module_obj.module_namespace()
       local_params = local_params(module_type, local_module_name, namespace: namespace, version: version)
-      module_obj.publish(local_params, remote_params, client_rsa_pub_key)
+      module_obj.publish(local_params, remote_params, client_rsa_pub_key, version)
     end
 
     # opts can have :version and :namespace

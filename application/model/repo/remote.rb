@@ -48,7 +48,7 @@ module DTK
       end
 
       def publish_to_remote(client_rsa_pub_key, module_refs_content = nil)
-        username        = dtk_instance_remote_repo_username()
+        username = dtk_instance_remote_repo_username()
 
         unless namespace = remote.namespace
           namespace = CurrentSession.new.get_user_object().get_namespace()
@@ -59,7 +59,8 @@ module DTK
           username: username,
           name: remote.module_name(),
           type: type_for_remote_module(remote.module_type),
-          namespace: namespace
+          namespace: namespace,
+          version: remote.version
         }
 
         params.merge!(module_refs_content: module_refs_content) unless is_empty?(module_refs_content)

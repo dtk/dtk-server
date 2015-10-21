@@ -1,0 +1,66 @@
+Test Cases for Componend and Service Module Versioning: 
+
+- Test Case 01: Import component module from local filesystem, version it and push it to remote
+	1. Import component module from local dir
+	2. Push it to remote repo
+	3. Create version of the component module
+	4. Push version to remote repo
+
+- Test Case 02: Install component module, version it and push it to remote
+	1. Install component module
+	2. Create component module version  
+	3. Push version to remote 
+
+- Test Case 03: Install component module version, create new version, push it to remote
+	1. Install component module version
+	2. Create new component module version
+	3. Push new version to remote
+
+- Test Case 04: Pull changes from remote to a versioned component module
+	1. List component module's version
+	2. List diffs changes from remote
+	3. Pull changes for the component module version
+
+- Test Case 05: Install versioned component module, add it to assembly, stage assembly to service and converge the service
+	1. Install component module version 
+	2. Stage assembly
+	3. Add versioned component to staged assembly
+	4. Converge the staged assembly
+
+- Test Case 06 (N): Create version of a component module that already exists
+	1. Install component module version
+	2. Create existing component module version
+		Expected Output: Message saying that said version already exists
+
+- Test Case 07 (N): Add a versioned component module to assembly that already has a version of that component module added
+	1. Install component module version
+	2. Create new component module version
+	3. Stage assebmly
+	4. Add versioned component module to staged assembly
+	5. Add new versioned component module to staged assembly
+		Expected Output:  Message saying that assembly already contains version of the component module
+
+- Test Case 08: Import component module version, make some change and push the changed component module version
+	1. Import component module version
+	2. Make some change
+	3. Push component module
+	4. Push changes to remote
+
+- Test Case 09: Install component module version, list components
+	1. Install component module version
+	2. List components
+
+- Test Case 10: Install component module, version it, clone version to local filesystem
+	1. Import component module version
+	2. Create new component module version
+	3. Clone it to local filesystem
+
+- Test Case 11 (N): Delete from catalog base module of a versioned component module
+	1. Delete from catalog base component module
+	Expected Output: Module cannot be deleted because it is versioned
+
+- Test Case 12 (N): Import component module from local filesystem, version it, publish version
+	1. Import component module from local filesystem
+	2. Create new component module version
+	3. Publsih created version to the remote repo 
+	Expected Output: Message saying taht base component module repository does not exist on remote repo

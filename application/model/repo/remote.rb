@@ -87,6 +87,27 @@ module DTK
       end
       private :raise_error_if_module_is_not_accessible
 
+      def check_remote_exist(client_rsa_pub_key, opts = {})
+        client_params = {
+          name: remote.module_name,
+          type: type_for_remote_module(remote.module_type),
+          namespace: remote.namespace,
+          rsa_pub_key: client_rsa_pub_key,
+          version: remote.version
+        }
+
+        ret = nil
+        begin
+          response_data = client.get_module_info(client_params)
+          ret = true
+        rescue Exception => e
+          return if e.has_tag?(:no_resource) && opts[:do_not_raise]
+          raise e
+        end
+
+        ret
+      end
+
       def get_remote_module_info?(client_rsa_pub_key, opts = {})
         client_params = {
           name: remote.module_name,

@@ -142,6 +142,7 @@ R8::ReactorRoute.draw do
   post 'component_module/list_remote_diffs' => 'component_module#list_remote_diffs'
   post 'component_module/create_new_version' => 'component_module#create_new_version'
   post 'component_module/list_versions' => 'component_module#list_versions'
+  post 'component_module/check_remote_exist' => 'component_module#check_remote_exist'
 
   # WORK WITH GIT REMOTES
   post 'component_module/info_git_remote'        => 'component_module#info_git_remote'

@@ -8,7 +8,7 @@ module DTK
     extend BranchNamesClassMixin
 
     def self.common_columns
-      [:id, :group_id, :display_name, :branch, :repo_id, :current_sha, :is_workspace, :type, :version, :ancestor_id, :external_ref, :dsl_parsed]
+      [:id, :group_id, :display_name, :branch, :repo_id, :current_sha, :is_workspace, :type, :version, :ancestor_id, :external_ref, :dsl_parsed, :frozen]
     end
 
     # TODO: should change type of self[:external_ref] to json

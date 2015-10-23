@@ -131,6 +131,28 @@ module Ramaze::Helper
       response.merge(namespace: remote_namespace, dependency_warnings: dependency_warnings)
     end
 
+    def check_remote_exist_helper(module_obj)
+      client_rsa_pub_key = ret_non_null_request_params(:rsa_pub_key)
+      qualified_remote_name = ret_request_params(:remote_component_name)
+
+      module_obj.update_object!(:display_name, :namespace)
+      opts = { namespace: module_obj[:namespace][:display_name] }
+      qualified_remote_name = module_obj[:display_name] if qualified_remote_name.to_s.empty?
+
+      namespace, remote_module_name, version = Repo::Remote.split_qualified_name(qualified_remote_name, opts)
+      local_module_name = module_obj.module_name()
+      version_param = ret_request_params(:version)
+      version ||= version_param
+
+      if local_module_name != remote_module_name
+        fail ErrorUsage.new("Publish with remote module name (#{remote_module_name}) not equal to local module name (#{local_module_name}) is currently not supported.")
+      end
+
+      module_type   = module_obj.module_type
+      remote_params = remote_params_dtkn(module_type, namespace, remote_module_name, version)
+      module_obj.check_remote_exist(remote_params, client_rsa_pub_key, version, do_not_raise: true)
+    end
+
     def publish_to_dtkn_helper(module_obj)
       client_rsa_pub_key = ret_non_null_request_params(:rsa_pub_key)
       qualified_remote_name = ret_request_params(:remote_component_name)

@@ -101,7 +101,7 @@ module DTK
           response_data = client.get_module_info(client_params)
           ret = true
         rescue Exception => e
-          return if e.has_tag?(:no_resource) && opts[:do_not_raise]
+          return if e.respond_to?(:has_tag?) && e.has_tag?(:no_resource) && opts[:do_not_raise]
           raise e
         end
 

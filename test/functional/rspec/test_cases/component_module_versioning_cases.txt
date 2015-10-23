@@ -1,4 +1,4 @@
-Test Cases for Componend and Service Module Versioning: 
+Test Cases for Component Module Versioning: 
 
 - Test Case 01: Import component module from local filesystem, version it and push it to remote
 	Precondition:
@@ -8,7 +8,7 @@ Test Cases for Componend and Service Module Versioning:
 		1. Import component module from local dir
 		2. Publish it to remote repo
 		3. Create version of the component module
-		4. Push version to remote repo (push-dtkn)
+		4. Push version to remote repo (publish)
 	Test cleanup:
 		- delete component module (tenant + locally)
 		- delete component module version (tenant + locally)
@@ -22,7 +22,7 @@ ________________________________________________________________________________
 	Test steps:
 		1. Install component module
 		2. Create component module version  
-		3. Push version to remote
+		3. Push version to remote (publish)
 	Test cleanup:
 		- delete component module (tenant + locally)
 		- delete component module version (tenant + locally)
@@ -37,7 +37,7 @@ ________________________________________________________________________________
 	Test steps:
 		1. Install component module version
 		2. Create new component module version
-		3. Push new version to remote
+		3. Push new version to remote (publish)
 	Test cleanup:
 		- delete new component module version: 0.0.2
 		- delete component module (tenant + locally)

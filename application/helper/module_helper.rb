@@ -102,6 +102,7 @@ module Ramaze::Helper
 
     def install_from_dtkn_helper(module_type)
       remote_namespace, remote_module_name, version = Repo::Remote.split_qualified_name(ret_non_null_request_params(:remote_module_name))
+      version ||= ret_request_params(:version)
       remote_params = remote_params_dtkn(module_type, remote_namespace, remote_module_name, version)
 
       local_namespace = remote_params.namespace

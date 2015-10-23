@@ -116,6 +116,7 @@ module DTK
           rsa_pub_key: client_rsa_pub_key
         }
 
+        client_params.merge!(version: remote.version) if remote.version
         client_params.merge!(module_refs_content: opts[:module_refs_content]) unless is_empty?(opts[:module_refs_content])
 
         ret = nil
@@ -134,8 +135,8 @@ module DTK
 
         if remote.version
           # TODO: ModuleBranch::Location:
-          fail Error.new('Not versions not implemented')
-          versions = branch_names_to_versions_stripped(ret[:branches])
+          # fail Error.new('Not versions not implemented')
+          versions = branch_names_to_versions_stripped(ret[:branches])||ret[:versions]
           unless versions && versions.include?(remote.version)
             fail ErrorUsage.new("Remote module (#{remote.pp_module_name()}}) does not have version (#{remote.version || 'CURRENT'})")
           end

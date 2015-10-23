@@ -46,6 +46,11 @@ module DTK
       rest_ok_response install_from_dtkn_helper(:service_module)
     end
 
+    def rest__check_remote_exist
+      service_module = create_obj(:service_module_id)
+      rest_ok_response check_remote_exist_helper(service_module)
+    end
+
     # TODO: rename; this is just called by publish
     def rest__export
       service_module = create_obj(:service_module_id)

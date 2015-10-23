@@ -252,6 +252,11 @@ module DTK
       rest_ok_response install_from_dtkn_helper(:component_module)
     end
 
+    def rest__check_remote_exist
+      component_module = create_obj(:component_module_id)
+      rest_ok_response check_remote_exist_helper(component_module)
+    end
+
     # TODO: rename; this is just called by publish
     def rest__export
       component_module = create_obj(:component_module_id)

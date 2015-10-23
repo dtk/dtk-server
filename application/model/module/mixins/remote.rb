@@ -195,6 +195,18 @@ module DTK; module ModuleMixins
       ret
     end
 
+    def check_remote_exist(remote_params, client_rsa_pub_key, version = nil, opts = {})
+      ret = {}
+      project = get_project()
+      remote = remote_params.create_remote(project)
+
+      remote_exist = Repo::Remote.new(remote).check_remote_exist(client_rsa_pub_key, opts)
+      module_branch = get_workspace_module_branch(version)
+      frozen = module_branch ? module_branch[:frozen] : false
+
+      ret.merge!(remote_exist: remote_exist, frozen: frozen)
+    end
+
     # publish to a remote repo
     # request_params: hash map containing remote_component_name, remote_component_namespace
     def publish(local_params, remote_params, client_rsa_pub_key, version = nil)
@@ -203,7 +215,7 @@ module DTK; module ModuleMixins
       local = local_params.create_local(project)
 
       unless module_branch_obj = self.class.get_module_branch_from_local(local)
-        fail Error.new('Cannot find module_branch_obj from local')
+        fail Error.new('You are trying to publish module version which does not exist locally!')
       end
 
       publish_preprocess_raise_error?(module_branch_obj)

@@ -316,6 +316,7 @@ module DTK
 
     UNAUTHORIZED_ERROR_CODE = 1001
     NAME_NOT_ALLOWED_CODE   = 1011
+    NO_RESOURCE             = 1000
 
     def handle_error(opts = {}, &rest_call_block)
       response = rest_call_block.call
@@ -346,6 +347,10 @@ module DTK
         elsif code == NAME_NOT_ALLOWED_CODE
           error = ErrorUsage.new(msg)
           error.add_tag!(:raise_error)
+          fail error
+        elsif code == NO_RESOURCE
+          error = ErrorUsage.new("Repo Manager error: #{msg}")
+          error.add_tag!(:no_resource)
           fail error
         else
           fail ErrorUsage.new("Repo Manager error: #{msg}")

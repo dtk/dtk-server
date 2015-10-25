@@ -63,9 +63,17 @@ module DTK; class AttributeLink
     def self.input_index(link_hash)
       input_output_index_aux(link_hash, :input)
     end
+    def input_index(link_hash)
+      self.class.input_index(link_hash)
+    end
+
     def self.output_index(link_hash)
       input_output_index_aux(link_hash, :output)
     end
+    def output_outdex(link_hash)
+      self.class.output_index(link_hash)
+    end
+
     def self.input_output_index_aux(link_hash, dir)
       ret = nil
       unless index_map = link_hash[:index_map]

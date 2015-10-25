@@ -1,6 +1,6 @@
 module DTK; class AttributeLink::UpdateDelta::Delete
-  class Null
-    class Integer < self
+  class Index
+    class Null < self
       # called when the last index being removed
       def process!
         input_attribute = @link_info.input_attribute

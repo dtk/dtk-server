@@ -413,7 +413,19 @@ module DTK; class ModuleDSL; class V2
       public :convert_attribute_mapping
 
       def convert_attr_ref_simple(attr_ref, dep_or_base, cmp, input_or_output)
-        if attr_ref =~ /(^[^.]+)\.([^.]+$)/
+        # Index processing first
+        index = nil 
+        if attr_ref =~ /(^[^\[]+)\[([^\]]+)\]$/
+          attr_ref = Regexp.last_match(1)
+          index = Regexp.last_match(2)
+        end
+        ret = convert_attr_ref_simple_aux(attr_ref, dep_or_base, cmp, input_or_output)
+        ret << ".#{index}" if index
+        ret
+      end
+
+      def convert_attr_ref_simple_aux(attr_ref, dep_or_base, cmp, input_or_output)
+        if attr_ref =~ /(^[^.]+)\.([^.]+$)/ 
           if input_or_output == :input
            raise_bad_attribute_ref_in_link_def(attr_ref)
           end

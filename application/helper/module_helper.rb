@@ -31,7 +31,14 @@ module Ramaze::Helper
       project = get_default_project()
       module_ref_content = ret_request_params(:module_ref_content)
 
-      module_obj.get_linked_remote_module_info(project, action, remote_params, rsa_pub_key, access_rights, module_ref_content)
+      linked_module_info = module_obj.get_linked_remote_module_info(project, action, remote_params, rsa_pub_key, access_rights, module_ref_content)
+
+      if version
+        workspace_branch = module_obj.get_workspace_branch_info(version)||{}
+        linked_module_info.merge!(frozen: workspace_branch[:frozen])
+      end
+
+      linked_module_info
     end
 
     def get_service_dependencies(module_type, remote_params, client_rsa_pub_key = nil)

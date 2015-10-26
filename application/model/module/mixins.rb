@@ -584,7 +584,8 @@ TODO: remove after incorporating in info above displaying of remotes; this was r
         module_branch_idh: branch_obj.id_handle(),
         repo_url: RepoManager.repo_url(repo_name),
         workspace_branch: branch_obj.get_field?(:branch),
-        branch_head_sha: RepoManager.branch_head_sha(branch_obj)
+        branch_head_sha: RepoManager.branch_head_sha(branch_obj),
+        frozen: branch_obj[:frozen]
       }
 
       if version = opts[:version]

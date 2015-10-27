@@ -65,7 +65,7 @@ module DTK
           cmp = r[:component]
           branch = r[:module_branch]
           unless branch.assembly_module_version?()
-            display_name = Component::Template.component_type_print_form(cmp[:component_type], Opts.new(no_module_name: true))
+            display_name = Component::Template.component_type_print_form(cmp[:display_name], Opts.new(no_module_name: true))
             { id: cmp[:id], display_name: display_name, version: branch.version_print_form() }
           end
         end.compact.sort { |a, b| "#{a[:version]}-#{a[:display_name]}" <=> "#{b[:version]}-#{b[:display_name]}" }

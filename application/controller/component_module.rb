@@ -120,7 +120,7 @@ module DTK
         opts.merge!(generate_docs: generate_docs)
       end
 
-      module_dsl_info = component_module.create_new_module_version(version, diffs_summary, opts)
+      rest_ok_response component_module.create_new_module_version(version, diffs_summary, opts)
     end
 
     def rest__delete

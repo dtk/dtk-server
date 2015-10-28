@@ -207,6 +207,7 @@ module DTK
       opts.merge!(namespace: remote_namespace) unless remote_namespace.empty?
 
       remote_namespace, remote_module_name, version = Repo::Remote.split_qualified_name(ret_non_null_request_params(:remote_module_name), opts)
+      version ||= ret_request_params(:version)
       remote_params = remote_params_dtkn(:service_module, remote_namespace, remote_module_name, version)
 
       project = get_default_project()

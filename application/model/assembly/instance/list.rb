@@ -184,8 +184,17 @@ module DTK; class  Assembly
       private :set_node_display_name!, :set_node_admin_op_status!
 
       def list_components(opts = Opts.new)
-        aug_cmps = get_augmented_components(opts)
-        cmps_print_form = aug_cmps.map { |aug_cmp| convert_to_component_print_form(aug_cmp, opts) }
+        aug_cmps      = get_augmented_components(opts)
+        node_cmp_name = opts[:node_cmp_name]
+
+        cmps_print_form = aug_cmps.map do |r|
+          namespace      = r[:namespace]
+          node_name      = "#{r[:node][:display_name]}/"
+          version        = r[:version]
+          hide_node_name = node_cmp_name || Node.is_assembly_wide_node?(r[:node])
+          display_name   = "#{hide_node_name ? '' : node_name}#{Component::Instance.print_form(r, namespace)}"
+          r.hash_subset(:id).merge(display_name: display_name, version: version)
+        end
 
         sort = proc { |a, b| a[:display_name] <=> b[:display_name] }
         if opts.array(:detail_to_include).include?(:component_dependencies)

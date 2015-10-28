@@ -243,7 +243,9 @@ module DTK; class Component
         cols: [:id, :group_id, :display_name, :module_branch_id, :type, :ref, :augmented_with_module_info, :version],
         filter: [:and,
                  [:eq, :type, 'template'],
-                 [:eq, :component_type, component_type],
+                 # [:eq, :component_type, component_type],
+                 # TODO: Aldin - using display name instead of component_type; revert if cause some side effects
+                 [:eq, :display_name, display_name],
                  [:neq, :project_project_id, nil],
                  [:oneof, :version, filter_on_versions(assembly: assembly, version: version)],
                  [:eq, :node_node_id, nil]]

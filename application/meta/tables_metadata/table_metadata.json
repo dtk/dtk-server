@@ -79,11 +79,13 @@
   "component": {
     "order": [
       "id",
-      "name"
+      "name",
+      "version"
     ],
     "mapping": {
       "id": "dtk_id",
-      "name": "display_name"
+      "name": "display_name",
+      "version": "version"
     }
   },
   "component_with_dependencies": {

@@ -10,7 +10,6 @@ module DTK; class AttributeLink::UpdateDelta::Delete
       
       IndexPositionInfo = Struct.new(:current_pos, :new_pos, :link)
       def splice_out!
-        ret = nil
         input_attribute = @link_info.input_attribute
 
         # for other links to facilitate renumbering maintain a renumbering_mapping
@@ -19,25 +18,20 @@ module DTK; class AttributeLink::UpdateDelta::Delete
           IndexPositionInfo.new(current_pos, current_pos, link)
         end
         
-        # will be interating over delete_positions; reversing order so dont have to renumber this
-        delete_positions = @link_info.deleted_links.map do |link|
-          integer_index(link)
-        end.sort { |a, b| b <=> a }
-        Model.select_process_and_update(@attr_mh, [:id, :value_derived], [input_attribute[:id]]) do |rows|
-        # will only be one row;
-          row = rows.first
-          val = row[:value_derived]
-          ret = { id: row[:id], old_value_derived: val.dup? }
+        # iterating over delete_positions; reversing order so dont have to renumber this
+        delete_positions = @link_info.deleted_links.map { |link| integer_index(link) }.sort { |a, b| b <=> a }
+
+        ret = update_attributes do |existing_array_attr_val|
+          new_val = existing_array_attr_val.dup?
           delete_positions.each do |pos_to_delete|
-            val.delete_at(pos_to_delete)
+            new_val.delete_at(pos_to_delete)
             index_pos_info_array.each do |other_link_info|
               if other_link_info.new_pos > pos_to_delete
                 other_link_info.new_pos -= 1
               end
             end
           end
-          ret.merge!(value_derived: val)
-          [row] #row with changed :value_derived
+          new_val
         end
         
         renumber_links?(index_pos_info_array)

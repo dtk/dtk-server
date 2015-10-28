@@ -116,7 +116,7 @@ module DTK
         array << external_ref_source if external_ref_source
         array << '*** NOT PUBLISHED in DTKN ***' if opts[:not_published]
 
-        array.join(JoinDelimiter)
+        array.uniq.join(JoinDelimiter)
       end
       JoinDelimiter = ', '
     end

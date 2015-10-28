@@ -177,9 +177,10 @@ module DTK; class  Assembly
         cmps_print_form = aug_cmps.map do |r|
           namespace      = r[:namespace]
           node_name      = "#{r[:node][:display_name]}/"
+          version        = r[:version]
           hide_node_name = node_cmp_name || Node.is_assembly_wide_node?(r[:node])
           display_name   = "#{hide_node_name ? '' : node_name}#{Component::Instance.print_form(r, namespace)}"
-          r.hash_subset(:id).merge(display_name: display_name)
+          r.hash_subset(:id).merge(display_name: display_name, version: version)
         end
 
         sort = proc { |a, b| a[:display_name] <=> b[:display_name] }

@@ -162,7 +162,8 @@ module DTK; class Component
       sp_hash = {
         cols: [:id, :type, :display_name, :description, :component_type, :version, :refnum, :module_branch_id],
         filter: [:and, [:eq, :type, 'template'],
-                 [:oneof, :version, filter_on_versions(assembly: assembly)],
+                 # had to remove this to display other versions beside master
+                 # [:oneof, :version, filter_on_versions(assembly: assembly)],
                  [:eq, :project_project_id, project.id()]]
       }
       cmps = get_objs(project.model_handle(:component), sp_hash, keep_ref_cols: true)
@@ -242,9 +243,11 @@ module DTK; class Component
         cols: [:id, :group_id, :display_name, :module_branch_id, :type, :ref, :augmented_with_module_info, :version],
         filter: [:and,
                  [:eq, :type, 'template'],
-                 [:eq, :component_type, component_type],
+                 # [:eq, :component_type, component_type],
+                 # TODO: Aldin - using display name instead of component_type; revert if cause some side effects
+                 [:eq, :display_name, display_name],
                  [:neq, :project_project_id, nil],
-                 [:oneof, :version, filter_on_versions(assembly: assembly)],
+                 # [:oneof, :version, filter_on_versions(assembly: assembly)],
                  [:eq, :node_node_id, nil]]
       }
       cmp_templates = get_objs(cmp_mh.createMH(:component_template), sp_hash, keep_ref_cols: true)

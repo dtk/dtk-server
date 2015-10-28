@@ -3,25 +3,25 @@ module DTK; class AttributeLink::UpdateDelta::Delete
     class Integer < self
       # splice out the values in input array from the deleted links and renumber on the other links
       def process!
-        splice_out
+        splice_out!
       end
 
       private
       
       IndexPositionInfo = Struct.new(:current_pos, :new_pos, :link)
-      def splice_out
+      def splice_out!
         ret = nil
         input_attribute = @link_info.input_attribute
 
         # for other links to facilitate renumbering maintain a renumbering_mapping
         index_pos_info_array = @link_info.other_links.map do |link|
-        current_pos = array_integer(input_index(link))
+        current_pos = integer_index(link)
           IndexPositionInfo.new(current_pos, current_pos, link)
         end
         
         # will be interating over delete_positions; reversing order so dont have to renumber this
         delete_positions = @link_info.deleted_links.map do |link|
-          array_integer(input_index(link))
+          integer_index(link)
         end.sort { |a, b| b <=> a }
         Model.select_process_and_update(@attr_mh, [:id, :value_derived], [input_attribute[:id]]) do |rows|
         # will only be one row;
@@ -59,7 +59,8 @@ module DTK; class AttributeLink::UpdateDelta::Delete
         end
       end
 
-      def array_integer(input_index)
+      def integer_index(link)
+        input_index = input_index(link)
         Index.index_has_type?(:integer, input_index) || Index.error_msg_link_def_index(input_index)
       end
 

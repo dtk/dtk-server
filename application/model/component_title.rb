@@ -41,7 +41,12 @@ module DTK
       ret = nil
       unless opts[:node_prefix]
         component_type = cmp_node_part
-        ret = [component_type, title]
+        if opts[:return_version]
+          component_type, version = validate_version(component_type)
+          ret = [component_type, title, version]
+        else
+          ret = [component_type, title]
+        end
       else
         if cmp_node_part =~ SplitNodeComponentType
           node_name = Regexp.last_match(1)
@@ -49,7 +54,12 @@ module DTK
         else
           component_type = cmp_node_part
         end
-        ret = [node_name, component_type, title]
+        if opts[:return_version]
+          component_type, version = validate_version(component_type)
+          ret = [node_name, component_type, title, version]
+        else
+          ret = [node_name, component_type, title]
+        end
       end
 
       if component_type =~ LegalComponentType
@@ -77,6 +87,13 @@ module DTK
       end
       component_type, title = parse_component_display_name(display_name)
       title
+    end
+
+    def self.validate_version(component_type)
+      if match = component_type.match(/(\w+)(\(\d{1,2}.\d{1,2}.\d{1,2}\))/)
+        return [match[1], match[2]]
+      end
+      return [component_type, nil]
     end
   end
 end

@@ -167,7 +167,7 @@ module DTK; class Component
     end
 
     def self.print_form(component, _namespace = nil)
-      ret = component.get_field?(:component_type).gsub(/__/, '::')
+      ret = component.get_field?(:display_name).gsub(/__/, '::')
       # removed namespace from list-components list (task DTK-1603)
       # ret = "#{namespace[:display_name]}/#{ret}" if namespace
       ret

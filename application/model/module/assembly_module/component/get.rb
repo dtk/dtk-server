@@ -89,10 +89,11 @@ module DTK; class AssemblyModule
         ret = Model.get_objs(@assembly.model_handle(:component_module), sp_hash)
         ret.each do |r|
           if el = els_ndx_by_cmp_mod_ids[r[:id]]
+            module_branch = el.module_branch
             to_add = {
               namespace_name: el.namespace,
-              dsl_parsed: (el.module_branch || {})[:dsl_parsed],
-              module_branch: el.module_branch
+              dsl_parsed: (module_branch || {})[:dsl_parsed],
+              module_branch: module_branch
             }
             r.merge!(to_add)
           end

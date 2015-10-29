@@ -62,7 +62,7 @@ module DTK; class AssemblyModule
           add_branch_relationship_info!(ret)
         end
         # remove branches since they are no longer needed
-        ret.each { |r| r.delete(:module_branch) }
+        # ret.each { |r| r.delete(:module_branch) }
         ret
       end
 

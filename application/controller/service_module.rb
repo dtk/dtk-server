@@ -41,6 +41,10 @@ module DTK
       rest_ok_response service_module.list_component_modules(opts)
     end
 
+    def rest__check_master_branch_exist
+      rest_ok_response check_master_branch_exist_helper(:service_module)
+    end
+
     # TODO: rename; this is just called by install; import ops call create route
     def rest__import
       rest_ok_response install_from_dtkn_helper(:service_module)

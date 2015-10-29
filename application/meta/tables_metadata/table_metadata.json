@@ -79,13 +79,11 @@
   "component": {
     "order": [
       "id",
-      "name",
-      "version"
+      "name"
     ],
     "mapping": {
       "id": "dtk_id",
-      "name": "display_name",
-      "version": "version"
+      "name": "display_name"
     }
   },
   "component_with_dependencies": {
@@ -215,19 +213,21 @@
   "assembly_component_module": {
     "order": [
       "id",
-      "namespace",
       "name",
+      "namespace",
       "updated",
       "update saved",
-      "dsl_parsed"
+      "dsl_parsed",
+      "version"
     ],
     "mapping": {
       "id": "dtk_id",
-      "namespace": "namespace_name",
       "name": "display_name",
+      "namespace": "namespace_name",
       "updated": "local_copy",
       "update saved": "update_saved",
-      "dsl_parsed": "dsl_parsed"
+      "dsl_parsed": "dsl_parsed",
+      "version": "display_version"
     }
   },
   "component_module": {

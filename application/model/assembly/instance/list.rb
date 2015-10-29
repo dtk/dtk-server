@@ -111,9 +111,21 @@ module DTK; class  Assembly
           opts.set_datatype!(:assembly_component_module)
           opts_get.merge!(get_branch_relationship_info: true)
         end
+
         unsorted_ret = get_component_modules(:recursive, opts_get)
+        unsorted_ret.each do |r|
+          module_branch = r[:module_branch]
+          version = module_branch[:version] if module_branch
+
+          if version.eql?('master') || version.match(/\A\d{1,2}\.\d{1,2}\.\d{1,2}\Z/)
+            r[:display_version] = version
+          else
+            if ancestor_version = (module_branch.get_ancestor_branch?||{})[:version]
+              r[:display_version] = ancestor_version
+            end
+          end
+
           if get_branch_relationship_info
-            unsorted_ret.each do |r|
             if r[:local_copy]
               branch_relationship     = r[:branch_relationship] || ''
               local_ahead_or_branchpt = branch_relationship.eql?(:local_ahead) || branch_relationship.eql?(:branchpoint)
@@ -121,6 +133,7 @@ module DTK; class  Assembly
             end
           end
         end
+
         unsorted_ret.sort { |a, b| a[:display_name] <=> b[:display_name] }
       end
 

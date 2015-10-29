@@ -246,6 +246,10 @@ module DTK
 
     AboutEnum = [:components, :attributes, :instances]
 
+    def rest__check_master_branch_exist
+      rest_ok_response check_master_branch_exist_helper(:component_module)
+    end
+
     #### end: list and info actions ###
 
     #### actions to interact with remote repos ###

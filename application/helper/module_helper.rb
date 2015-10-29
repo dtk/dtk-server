@@ -107,6 +107,16 @@ module Ramaze::Helper
       module_class.pull_from_remote(project, local_module_name, remote_repo, version)
     end
 
+    def check_master_branch_exist_helper(module_type)
+      local_namespace, local_module_name, version = Repo::Remote.split_qualified_name(ret_non_null_request_params(:remote_module_name))
+      project      = get_default_project()
+      local_params = local_params(module_type, local_module_name, namespace: local_namespace, version: version)
+      local        = local_params.create_local(project)
+      module_obj   = module_class(module_type).module_exists?(project.id_handle(), local_module_name, local_namespace)
+
+      module_obj.get_module_branch(local.branch_name) if module_obj
+    end
+
     def install_from_dtkn_helper(module_type)
       remote_namespace, remote_module_name, version = Repo::Remote.split_qualified_name(ret_non_null_request_params(:remote_module_name))
       version ||= ret_request_params(:version)

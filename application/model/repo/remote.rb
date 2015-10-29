@@ -79,6 +79,7 @@ module DTK
           type: type_for_remote_module(remote.module_type),
           force_delete: force_delete
         }
+        params.merge!(version: remote.version) if remote.version
         client.delete_module(params, client_rsa_pub_key)
       end
 

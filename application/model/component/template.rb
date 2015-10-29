@@ -238,16 +238,14 @@ module DTK; class Component
       match_cmps = []
       cmp_module_ids = []
       display_name = display_name_from_user_friendly_name(cmp_name)
-      component_type, title =  ComponentTitle.parse_component_display_name(display_name)
+      component_type, title, version =  ComponentTitle.parse_component_display_name(display_name, return_version: true)
       sp_hash = {
         cols: [:id, :group_id, :display_name, :module_branch_id, :type, :ref, :augmented_with_module_info, :version],
         filter: [:and,
                  [:eq, :type, 'template'],
-                 # [:eq, :component_type, component_type],
-                 # TODO: Aldin - using display name instead of component_type; revert if cause some side effects
-                 [:eq, :display_name, display_name],
+                 [:eq, :component_type, component_type],
                  [:neq, :project_project_id, nil],
-                 # [:oneof, :version, filter_on_versions(assembly: assembly)],
+                 [:oneof, :version, filter_on_versions(assembly: assembly, version: version)],
                  [:eq, :node_node_id, nil]]
       }
       cmp_templates = get_objs(cmp_mh.createMH(:component_template), sp_hash, keep_ref_cols: true)
@@ -265,7 +263,7 @@ module DTK; class Component
       end
       unless cmp_templates.size == 1
         possible_names = cmp_templates.map { |r| r.display_name_print_form(namespace_prefix: true) }.join(',')
-        fail ErrorUsage.new("Multiple components with different namespaces match; pick one from: #{possible_names}")
+        fail ErrorUsage.new("Multiple components with different namespaces or/and versions match. You have to specify namespace or version.")
       end
       ret_cmp = cmp_templates.first
 
@@ -280,6 +278,12 @@ module DTK; class Component
         if ret_cmp_ns != cmp_mod_ns
           fail ErrorUsage.new("Unable to add component from (#{ret_cmp_ns}:#{ret_cmp_mod}) because you are already using components from following component modules: #{cmp_mod_ns}:#{cmp_mod[:display_name]}")
         end
+
+        ret_cmp_version = ret_cmp[:version]
+        cmp_mod_version = cmp_mod[:module_branch][:version]
+        full_ret_cmp_name = (ret_cmp_version && ret_cmp_version!='master') ? "#{ret_cmp_ns}:#{ret_cmp_mod}:#{ret_cmp_version}" : "#{ret_cmp_ns}:#{ret_cmp_mod}"
+        full_cmp_mod_name = (cmp_mod_version && cmp_mod_version!='master') ? "#{cmp_mod_ns}:#{cmp_mod[:display_name]}:#{cmp_mod_version}" : "#{cmp_mod_ns}:#{cmp_mod[:display_name]}"
+        fail ErrorUsage.new("Unable to add component from (#{full_ret_cmp_name}) because you are already using components version: #{full_cmp_mod_name}") if ret_cmp_version != cmp_mod_version
       end
       ret_cmp
     end
@@ -290,8 +294,18 @@ module DTK; class Component
       ModuleVersion.ret(assembly)
     end
     def self.filter_on_versions(opts)
+      ret      = []
+      version  = opts[:version]
       assembly = opts[:assembly]
-      ['master', assembly && assembly_version(assembly)].compact
+
+      if version
+        ret << version.gsub!(/\(|\)/,'')
+      elsif assembly
+        ret << 'master'
+        ret << assembly_version(assembly)
+      end
+
+      ret.compact
     end
 
     # if title is in the name, this strips it off

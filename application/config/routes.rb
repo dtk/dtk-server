@@ -144,6 +144,7 @@ R8::ReactorRoute.draw do
   post 'component_module/list_versions' => 'component_module#list_versions'
   post 'component_module/check_remote_exist' => 'component_module#check_remote_exist'
   post 'component_module/check_master_branch_exist' => 'component_module#check_master_branch_exist'
+  post 'component_module/list_remote_versions' => 'component_module#list_remote_versions'
 
   # WORK WITH GIT REMOTES
   post 'component_module/info_git_remote'        => 'component_module#info_git_remote'
@@ -307,6 +308,7 @@ R8::ReactorRoute.draw do
   post 'service_module/list_versions' => 'service_module#list_versions'
   post 'service_module/check_remote_exist' => 'service_module#check_remote_exist'
   post 'service_module/check_master_branch_exist' => 'service_module#check_master_branch_exist'
+  post 'service_module/list_remote_versions' => 'service_module#list_remote_versions'
 
   # WORK WITH GIT REMOTES
   post 'service_module/info_git_remote'        => 'service_module#info_git_remote'

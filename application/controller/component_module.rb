@@ -225,6 +225,12 @@ module DTK
       rest_ok_response component_module.list_versions(opts)
     end
 
+    def rest__list_remote_versions
+      component_module = create_obj(:component_module_id)
+      client_rsa_pub_key = ret_request_params(:rsa_pub_key)
+      rest_ok_response component_module.list_remote_versions(client_rsa_pub_key)
+    end
+
     def rest__versions
       component_module = create_obj(:component_module_id)
       client_rsa_pub_key = ret_request_params(:rsa_pub_key)

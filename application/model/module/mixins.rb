@@ -94,6 +94,12 @@ module DTK
       [{ versions: local_versions.flatten }]
     end
 
+    def list_remote_versions(client_rsa_pub_key, opts = {})
+      module_name     = default_linked_remote_repo[:display_name]
+      remote_versions = self.class.list_remotes(model_handle, client_rsa_pub_key).select { |r| r[:display_name] == module_name }.collect { |v_remote| ModuleBranch.version_from_version_field(v_remote[:versions]) }.map! { |v| v.nil? ? 'CURRENT' : v } if module_name
+      [{ versions: remote_versions.flatten }]
+    end
+
     ##
     # Returns local and remote versions for module
     #

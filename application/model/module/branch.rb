@@ -493,9 +493,14 @@ module DTK
         type: local.module_type.to_s,
         version: version_field(local.version)
       }
+
       assigns.merge!(ancestor_id: ancestor_branch_idh.get_id()) if ancestor_branch_idh
       assigns.merge!(current_sha: opts[:current_sha]) if opts[:current_sha]
-      assigns.merge!(frozen: opts[:frozen]) if opts[:frozen]
+
+      # if installing specific component/service module version mark branch as frozen
+      is_frozen = opts[:frozen] || (local.version && !local.version.eql?('master'))
+      assigns.merge!(frozen: true) if is_frozen
+
       ref = branch
       { ref => assigns }
     end

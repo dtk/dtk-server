@@ -37,33 +37,25 @@ module DTK; module ModuleMixins
       # outside of transaction only doing read/check operations
       Transaction do
         # case on whether the module is created already
+        if module_obj
+          # TODO: ModuleBranch::Location: since repo has remote_ref in it must get appopriate repo
+          # fail Error.new('TODO: ModuleBranch::Location; need to right this')
+          repo = module_obj.get_repo!()
+          repo.merge!(branch_name: local_branch)
+          repo_with_branch = repo.create_subclass_obj(:repo_with_branch)
+        else
+          # TODO: ModuleBranch::Location: see if this is necessary
+          remote_repo_handler.authorize_dtk_instance(client_rsa_pub_key)
 
-        # TODO: commented out if else statement because we can have module_obj with multiple versions
-        # WAS
-          # if module_obj
-          #   # TODO: ModuleBranch::Location: since repo has remote_ref in it must get appopriate repo
-          #   fail Error.new('TODO: ModuleBranch::Location; need to right this')
-          #   repo_with_branch = module_obj.get_repo!()
-          # else
-          #   # TODO: ModuleBranch::Location: see if this is necessary
-          #   remote_repo_handler.authorize_dtk_instance(client_rsa_pub_key)
-
-          #   # create empty repo on local repo manager;
-          #   # need to make sure that tests above indicate whether module exists already since using :delete_if_exists
-          #   create_opts = {
-          #     donot_create_master_branch: true,
-          #     delete_if_exists: true
-          #     }
-          #   repo_user_acls = RepoUser.authorized_users_acls(project.id_handle())
-          #   repo_with_branch = Repo::WithBranch.create_workspace_repo(project.id_handle(), local, repo_user_acls, create_opts)
-          # end
-        # NOW
-        remote_repo_handler.authorize_dtk_instance(client_rsa_pub_key)
-        # create empty repo on local repo manager;
-        create_opts      = { donot_create_master_branch: true, delete_if_exists: true }
-        repo_user_acls   = RepoUser.authorized_users_acls(project.id_handle())
-        repo_with_branch = Repo::WithBranch.create_workspace_repo(project.id_handle(), local, repo_user_acls, create_opts)
-        #
+          # create empty repo on local repo manager;
+          # need to make sure that tests above indicate whether module exists already since using :delete_if_exists
+          create_opts = {
+            donot_create_master_branch: true,
+            delete_if_exists: true
+            }
+          repo_user_acls = RepoUser.authorized_users_acls(project.id_handle())
+          repo_with_branch = Repo::WithBranch.create_workspace_repo(project.id_handle(), local, repo_user_acls, create_opts)
+        end
 
         commit_sha = repo_with_branch.initial_sync_with_remote(remote, remote_repo_info)
         # create object in object model that corresponds to remote repo

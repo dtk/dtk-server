@@ -26,7 +26,7 @@ module DTK
           not_published = nil
 
           # if finding differences with the dtkn catalog
-          if diff
+          if diff && module_branch[:version].eql?('master')
             if default_remote_repo = RepoRemote.default_repo_remote?((ndx_repo_remotes || {}).values)
               remote = default_remote_repo.remote_dtkn_location(project, model_type, module_name)
               is_equal = r[:repo].ret_local_remote_diff(module_branch, remote)

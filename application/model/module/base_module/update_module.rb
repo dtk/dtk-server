@@ -78,8 +78,15 @@ module DTK; class BaseModule
       ret = nil
       module_branch = module_branch_idh.create_object()
 
+      if version && !version.eql?('') && !version.eql?('master')
+        unless version = ::DTK::ModuleVersion.ret(version)
+          fail ::DTK::ErrorUsage::BadVersionValue.new(remote_params.version)
+        end
+      end
+
       module_branch.set_dsl_parsed!(false)
       config_agent_type = opts[:config_agent_type] || config_agent_type_default()
+
       # TODO: for efficiency can change parse_dsl to take option opts[:dsl_created_info]
       dsl_obj = parse_dsl(impl_obj, opts.merge(config_agent_type: config_agent_type))
       return dsl_obj if is_parsing_error?(dsl_obj)

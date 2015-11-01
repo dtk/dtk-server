@@ -103,14 +103,21 @@ module DTK; class AssemblyModule
       remote_repo_cols = [:id, :display_name, :version, :remote_repos, :dsl_parsed]
       project_idh      = opts[:project_idh]
 
+      filter =
+        if ancestor_id = module_branch.get_field?(:ancestor_id)
+          [:eq, :id, ancestor_id]
+        else
+          [:and,
+           [:eq, :type, 'component_module'],
+           [:eq, :version, ModuleBranch.version_field_default()],
+           [:eq, :repo_id, repo.id()],
+           [:eq, :component_id, module_id]
+          ]
+        end
+
       sp_hash = {
         cols: [:id, :group_id, :display_name, :component_type],
-        filter: [:and,
-                 [:eq, :type, 'component_module'],
-                 [:eq, :version, ModuleBranch.version_field_default()],
-                 [:eq, :repo_id, repo.id()],
-                 [:eq, :component_id, module_id]
-                   ]
+        filter: filter
       }
       base_branch = Model.get_obj(module_branch.model_handle(), sp_hash)
       diff = repo.get_local_branches_diffs(module_branch, base_branch, workspace_branch)

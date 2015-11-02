@@ -312,6 +312,11 @@ module DTK
         fail ErrorUsage.new("A component module with name '#{module_name}' does not exist")
       end
 
+      _ns, _lck_sha, version_branch = AssemblyModule::Component.get_namespace_and_locked_branch_sha?(assembly, module_name)
+      if version_branch && version_branch[:frozen]
+        fail ErrorUsage.new("You are not allowed to pull changes for specific component module version!")
+      end
+
       component_module = create_obj(:module_name, ComponentModule, namespace)
       branch_info = AssemblyModule::Component.create_assembly_module_branch?(assembly, component_module)
       branch_info.merge!(assembly_name: assembly[:display_name])

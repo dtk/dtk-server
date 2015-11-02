@@ -91,8 +91,7 @@ module DTK; class AssemblyModule
       end
       branch_name = branch[:branch]
 
-      fail ErrorUsage.new("You are not allowed to update frozen branch '#{branch_name}'") if branch[:frozen]
-      fail ErrorUsage.new("You are not allowed to update frozen branch '#{ancestor_branch[:branch]}'") if ancestor_branch[:frozen]
+      fail ErrorUsage.new("You are not allowed to update specific component module version!") if branch[:frozen] || ancestor_branch[:frozen]
 
       ancestor_branch.merge_changes_and_update_model?(component_module, branch_name, opts)
     end

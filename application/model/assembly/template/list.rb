@@ -21,7 +21,7 @@ module DTK
         components.flatten
       end
 
-      def self.list_components(assembly_template)
+      def self.list_components(assembly_template, opts = {})
         sp_hash = {
           filter: [:eq, :id, assembly_template.id()]
         }
@@ -32,6 +32,11 @@ module DTK
           node_name    = r[:node].is_assembly_wide_node?() ? '' : "#{r[:node][:display_name]}/"
           display_name = "#{node_name}#{r.display_name_print_form()}"
           version = ModuleBranch.version_from_version_field(cmp_template[:version])
+
+          if opts[:name_with_version] && version && !version.eql?('master')
+            display_name = "#{display_name}(#{version})"
+          end
+
           cmp_template.hash_subset(:id).merge(display_name: display_name, version: version)
         end.sort { |a, b| a[:display_name] <=> b[:display_name] }
       end

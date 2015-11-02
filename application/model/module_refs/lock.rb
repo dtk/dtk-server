@@ -172,7 +172,7 @@ module DTK
 
         return ret if disjuncts.empty?
         sp_hash = {
-          cols: [:id, :group_id, :display_name, :component_id, :branch, :repo_id, :current_sha, :version, :dsl_parsed],
+          cols: [:id, :group_id, :display_name, :component_id, :branch, :repo_id, :current_sha, :version, :dsl_parsed, :frozen],
           filter: [:or] + disjuncts
         }
 

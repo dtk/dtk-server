@@ -177,7 +177,7 @@ module DTK; class Assembly
     def info_about(about, _opts = Opts.new)
       case about
        when :components
-        List.list_components(self)
+        List.list_components(self, name_with_version: true)
        when :nodes
         List.list_nodes(self)
        else

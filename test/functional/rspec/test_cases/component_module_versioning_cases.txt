@@ -1,9 +1,8 @@
 Test Cases for Component Module Versioning: 
 
-- Test Case 01: Import component module from local filesystem, version it and push it to remote
+- Test Case 01: Import component module from local filesystem, version it and publish it to remote
 	Precondition:
 		- component module on local filesystem: versioned_component_module
-		- component module version: 0.0.1
 	Test steps:
 		1. Import component module from local dir
 		2. Publish it to remote repo
@@ -18,40 +17,39 @@ ________________________________________________________________________________
 - Test Case 02: Install component module, version it and push it to remote
 	Precondition:
 		- component module present on repo: versioned_component_module
-		- component module version: 0.0.1
 	Test steps:
 		1. Install component module
-		2. Create component module version  
-		3. Push version to remote (publish)
+		2. Create component module version
+		3. List components (check that versioned components exist too)
+		4. Push version to remote (publish)
 	Test cleanup:
 		- delete component module (tenant + locally)
 		- delete component module version (tenant + locally)
-		- delete component module version from remote (* If the feature is implemented)
+		- delete component module version from remote
 ___________________________________________________________________________________________________________________
 
 - Test Case 03: Install component module version, create new version, push it to remote
 	Precondition:
 		- component module present on repo: versioned_component_module
 		- component module version present on repo: 0.0.1
-		- new component module version: 0.0.2
 	Test steps:
-		1. Install component module version
-		2. Create new component module version
+		1. Install component module version 0.0.1 (this installs master cmp module too)
+		2. Create new component module version 0.0.2
 		3. Push new version to remote (publish)
 	Test cleanup:
-		- delete new component module version: 0.0.2
+		- delete new component module version: 0.0.2 from remote
+		- delete new component module version: 0.0.2 from (tenant + locally)
 		- delete component module (tenant + locally)
 		- delete component module version (tenant + locally)
 ___________________________________________________________________________________________________________________
 
 - Test Case 04: Pull changes from remote to a versioned component module
 	Precondition:
-		- component module present on tenant and on repo: versioned_component_module
-		- component module version exists: 0.0.1
+		- component module version present on tenant and on repo (0.0.1)
 	Test steps:
 		1. List component module's version
-		2. List diffs changes from remote
-		3. Pull changes for the component module version
+		2. List diffs changes from remote (no changes)
+		3. Pull changes for the component module version (changes not pulled since they are equal)
 	Cleanup:
 		None.
 ___________________________________________________________________________________________________________________
@@ -77,72 +75,33 @@ ________________________________________________________________________________
 		- component module exists on repo: versioned_component_module
 		- component module version exists on repo: 0.0.1
 	Test steps:
-		1. Install component module version
-		2. Create existing component module version
+		1. Install component module version (0.0.1)
+		2. Create existing component module version (0.0.1)
 	Cleanup: 
-		- none
+		- delete component module (tenant + locally)
+		- delete component module version (tenant + locally)
 	Expected Error Message:
 		- Message saying that said version already exists
 ___________________________________________________________________________________________________________________
 
 - Test Case 07 (N): Add a versioned component module to assembly that already has a version of that component module added
 	Precondition:
-		- component module exists on repo: versioned_component_module
-		- component module version exists: 0.0.1
+		- component module version exists on tenant: 0.0.1
 		- service module exists on tenant
 	Test steps: 
-		1. Install component module version
-		2. Create new component module version
-		3. Stage assebmly
-		4. Add versioned component module to staged assembly
-		5. Add new versioned component module to staged assembly
+		1. Create new component module version (0.0.2)
+		2. Stage assebmly
+		3. Add versioned component module (0.0.1) to staged assembly
+		4. Add new versioned component module (0.0.2) to staged assembly
 	Clenup:
-		- remove the staged assembly 
+		- remove the staged assembly
+		- delete component module version (0.0.2) from tenant and locally
 	Expected Error Message:  
 		- Message saying that assembly already contains version of the component module
 ___________________________________________________________________________________________________________________
 
-- Test Case 08: Install component module version, make some change and push the changed component module version
-	Precondition:
-		- component module exists on repo: versioned_component_module
-		- component module version exists: 0.0.1
-	Test steps:
-		1. Install component module version
-		2. Make some change
-		3. Push component module changes to tenant
-		4. Push changes to remote (push dtkn)
-	Cleanup:
-		- delete changes form remote (potentialy not possible)
-		- delete component module (tenant + locally)
-		- delete component module version (tenant + locally)
-___________________________________________________________________________________________________________________
-
-- Test Case 09: Install component module version, list components
-	Precondition:
-		- component module exists on repo: versioned_component_module
-		- component module version exists: 0.0.1
-	Test steps:
-		1. Install component module version
-		2. List components
-	Cleanup:
-		- delete component module (tenant + locally)
-		- delete component module version (tenant + locally)
-___________________________________________________________________________________________________________________	
-- Test Case 10: Install component module, version it, check if version is cloned to local filesystem
-	Precondition:
-		- component module exists on repo: versioned_component_module
-		- component module version exists: 0.0.1
-	Test steps:
-		1. Import component module version
-		2. Create new component module version
-		3. Clone it to local filesystem
-	Cleanup:
-		- delete component module (tenant + locally)
-		- delete component module version (tenant + locally)
-___________________________________________________________________________________________________________________
-
-- Test Case 11 (N): Check if deleting base component module version from remote displays warning message
-	Reminder: Feature may not be implemented
+- Test Case 08 (N): Check if deleting base component module version from remote displays warning message
+	Reminder: Not yet decided how this will behave
 	Precondition:
 		- component module exists on repo: versioned_component_module
 		- component module versions exist
@@ -153,16 +112,116 @@ ________________________________________________________________________________
 		- none
 ___________________________________________________________________________________________________________________
 
-- Test Case 12 (N): Import component module from local filesystem, version it, publish version
+- Test Case 09: Import component module from local filesystem, version it, publish version
 	Precondition:
 		- component module exists locally
 		- component module does not exist on repo
 	Test steps:
 		1. Import component module from local filesystem
 		2. Create new component module version
-		3. Publsih created version to the remote repo 
+		3. Publish created version to the remote repo
 	Cleanup:
 		- delete component module (tenant + locally)
-		- delete component module version (tenant + locally)
-	Expected Error Message:
-		- Message saying taht base component module repository does not exist on remote repo
+		- delete component module version (tenant + locally) and from remote
+
+___________________________________________________________________________________________________________________
+
+- Test Case 10 (N): Add versioned component module to assembly and try to push component module updates
+	Precondition:
+		- versioned component module exists locally
+		- service module exists locally
+	Test steps:
+		1. Stage assembly from service module
+		2. Add versioned component module to assembly
+		3. Try to push component module updates but error should happen indicating that it is not possible to push versioned component modules (they are immutable)
+	Cleanup:
+		- delete staged service instance
+
+___________________________________________________________________________________________________________________
+
+- Test Case 11: Install component module (and its version), delete cloned cmp module and then try to clone again
+	Precondition:
+	  - component module and versioned component module exists on repo
+	Test steps:
+		1. Install component module and check it is cloned on local filesystem
+		2. Install component module version (0.0.1) and check it is cloned on local filesystem
+		3. Delete clone of component module from local filesystem and try to clone again
+	Cleanup:
+	  - delete component module (tenant + locally)
+	  - delete component module version (tenant + locally)
+
+___________________________________________________________________________________________________________________
+
+- Test Case 12: Add versioned component module to workspace and converge
+  Precondition:
+    - versioned component module exists on tenant
+  Test steps:
+    1. Create node in workspace
+    2. Add versioned component to workspace
+    3. Converge and verify it passed successfully
+  Cleanup:
+    - purge workspace
+
+___________________________________________________________________________________________________________________
+
+- Test Case 13: Add component module to workspace and then create new version and switch them in workspace
+  Precondition:
+    - component module exists on tenant
+  Test steps:
+    1. Create node in workspace
+    2. Add component to workspace
+    3. Create new version of component module (0.0.1)
+    4. Delete existing component from workspace
+    5. Add versioned component to workspace
+  Cleanup:
+    - purge workspace
+    - delete component module version (tenant + locally)
+
+___________________________________________________________________________________________________________________
+
+- Test Case 14 (N): Add component module to workspace and then create new version and try to add it to workspace too
+  Precondition:
+    - component module exists on tenant
+  Test steps:
+    1. Create node in workspace
+    2. Add component to workspace
+    3. Create new version of component module (0.0.1)
+    4. Try to add versioned component to workspace
+  Cleanup:
+    - purge workspace
+    - delete component module version (tenant + locally)
+  Expected error message:
+    - Message saying it is not possible to have multiple versions of same component on workspace
+
+___________________________________________________________________________________________________________________
+
+- Test Case 15: Import git component module from github, version it and push version back to the github repo
+  Precondition:
+    - component module exists on github as repo
+  Test steps:
+    1. Import git component module from github
+    2. Create new version of component module (0.0.1)
+    3. Push version back to the github repo
+    4. Delete versioned component module from tenant and local
+    5. Import git versioned component module from github
+  Cleanup:
+    - delete component module (tenant + locally)
+    - delete component module version (tenant + locally)
+    - delete new branch created on github repo for version
+
+___________________________________________________________________________________________________________________
+
+- Test Case 16: Import component module from bitbucket, version it and push version back to the bitbucket repo
+  Precondition:
+    - component module exists on bitbucket as repo
+  Test steps:
+    1. Import component module from bitbucket
+    2. Create new version of component module (0.0.1)
+    3. Push version back to the bitbucket repo
+    4. Delete versioned component module from tenant and local
+    5. Import versioned component module from bitbucket
+  Cleanup:
+    - delete component module (tenant + locally)
+    - delete component module version (tenant + locally)
+    - delete new branch created on bitbucket repo for version
+

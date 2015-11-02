@@ -3,9 +3,9 @@
 - Test Case 01: Install service module version, list assemblies
 	Precondition:
 		- service module exists on repo: versioned_service_module
-		- service module version exists: 0.0.1
+		- service module version exists on repo: 0.0.1
 	Test steps:
-		1. Install service module version
+		1. Install service module version (this installs base service module too)
 		2. List assemblies in service module
 	Cleanup:
 		- delete service module (tenant + locally)
@@ -15,35 +15,19 @@ ________________________________________________________________________________
 - Test Case 02: Install service module, version it, check if version is cloned to local filesystem
 	Precondition:
 		- service module exists on repo: versioned_service_module
-		- service module version exists: 0.0.1
-	Test steps:
-		1. Import service module version
-		2. Create new service module version
-		3. Clone it to local filesystem
-	Cleanup:
-		- delete service module (tenant + locally)
-		- delete service module version (tenant + locally)
-____________________________________________________________________________________________________________________
-
-- Test Case 03: Install service module version, make some change and push the changed service module version
-	Precondition:
-		- service module exists on repo: versioned_service_module
-		- service module version exists: 0.0.1
 	Test steps:
 		1. Install service module version
-		2. Make some change
-		3. Push service module changes to tenant
-		4. Push changes to remote (push dtkn)
+		2. Create new service module version
+		3. Check if new service module version is cloned to local filesystem
 	Cleanup:
-		- delete changes form remote (potentialy not possible)
 		- delete service module (tenant + locally)
 		- delete service module version (tenant + locally)
 ____________________________________________________________________________________________________________________
 
-- Test Case 04: Pull changes from remote to a versioned service module
+- Test Case 03: Pull changes from remote to a versioned service module
 	Precondition:
 		- service module present on tenant and on repo: versioned_service_module
-		- service module version exists: 0.0.1
+		- service module version exists on tenant and on repo: 0.0.1
 	Test steps:
 		1. List service module's version
 		2. List diffs changes from remote
@@ -52,7 +36,7 @@ ________________________________________________________________________________
 		None.
 ____________________________________________________________________________________________________________________
 
-- Test Case 05: Import service module from local filesystem, version it and push it to remote
+- Test Case 04: Import service module from local filesystem, version it and publish it to remote
 	Precondition:
 		- service module on local filesystem: versioned_service_module
 		- service module version: 0.0.1
@@ -64,10 +48,10 @@ ________________________________________________________________________________
 	Test cleanup:
 		- delete service module (tenant + locally)
 		- delete service module version (tenant + locally)
-		- delete service module from remote: versioned_service_module
+		- delete service module from remote and version
 ____________________________________________________________________________________________________________________
 
-- Test Case 06: Install service module, version it and push it to remote
+- Test Case 05: Install service module, version it and push it to remote
 	Precondition:
 		- service module present on repo: versioned_service_module
 		- service module version: 0.0.1
@@ -78,25 +62,24 @@ ________________________________________________________________________________
 	Test cleanup:
 		- delete service module (tenant + locally)
 		- delete service module version (tenant + locally)
-		- delete service module version from remote (* If the feature is implemented)
+		- delete service module version from remote
 ____________________________________________________________________________________________________________________
 
-- Test Case 07: Install service module version, create new version, push it to remote
+- Test Case 06: Install service module version, create new version, publish it to remote
 	Precondition:
 		- service module present on repo: versioned_service_module
 		- service module version present on repo: 0.0.1
-		- new service module version: 0.0.2
 	Test steps:
 		1. Install service module version
-		2. Create new service module version
+		2. Create new service module version (0.0.2)
 		3. Publish created version
 	Test cleanup:
 		- delete new service module version: 0.0.2
 		- delete service module (tenant + locally)
-		- delete service module version (tenant + locally)
+		- delete service module version 0.0.1 (tenant + locally)
 ___________________________________________________________________________________________________________________
 
-- Test Case 08 (N): Create version of a service module that already exists
+- Test Case 07 (N): Create version of a service module that already exists
 	Precondition:
 		- service module exists on repo: versioned_service_module
 		- service module version exists on repo: 0.0.1
@@ -106,11 +89,11 @@ ________________________________________________________________________________
 	Cleanup: 
 		- none
 	Expected Error Message:
-		- Message saying that said version already exists
+		- Message saying that version already exists
 ___________________________________________________________________________________________________________________
 
-
-- Test Case 09 (N): Import service module from local filesystem, version it, publish version
+- Test Case 08: Import service module from local filesystem, version it, publish version
+	Reminder: This will probably be possible
 	Precondition:
 		- service module exists locally
 		- service module does not exist on repo
@@ -121,12 +104,10 @@ ________________________________________________________________________________
 	Cleanup:
 		- delete service module (tenant + locally)
 		- delete service module version (tenant + locally)
-	Expected Error Message:
-		- Message saying taht base service module repository does not exist on remote repo
 ___________________________________________________________________________________________________________________
 
-- Test Case 10 (N): Check if deleting base service module version from remote displays warning message
-	Reminder: Feature may not be implemented
+- Test Case 09 (N): Check if deleting base service module version from remote displays warning message
+	Reminder: Not yet decided how this will behave
 	Precondition:
 		- service module exists on repo: versioned_service_module
 		- service module versions exist

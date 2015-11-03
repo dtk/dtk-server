@@ -197,7 +197,9 @@ module DTK
 
     def rest__delete
       service_module = create_obj(:service_module_id)
-      module_info = service_module.delete_object()
+      version        = ret_version()
+      module_info    = service_module.delete_version_or_module(version)
+      # module_info = service_module.delete_object()
       rest_ok_response module_info
     end
 
@@ -295,7 +297,7 @@ module DTK
         opts.merge!(generate_docs: generate_docs)
       end
 
-      module_dsl_info = service_module.create_new_module_version(version, diffs_summary, opts)
+      rest_ok_response service_module.create_new_module_version(version, diffs_summary, opts)
     end
 
     def rest__set_component_module_version

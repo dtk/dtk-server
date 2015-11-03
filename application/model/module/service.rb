@@ -128,6 +128,20 @@ module DTK
       ret
     end
 
+    def delete_version_or_module(version)
+      module_branches = get_module_branches()
+
+      if module_branches.size > 1
+        delete_version(version)
+      else
+        unless module_branch = get_module_branch_matching_version(version)
+          fail ErrorUsage.new("Version '#{version}' for specified service module does not exist!") if version
+          fail ErrorUsage.new("Base version for specified service module does not exist. You have to specify version you want to delete!")
+        end
+        delete_object()
+      end
+    end
+
     def get_assembly_instances
       assembly_templates = get_assembly_templates()
       assoc_assemblies = self.class.get_associated_target_instances(assembly_templates)

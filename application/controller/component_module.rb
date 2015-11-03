@@ -127,7 +127,8 @@ module DTK
 
     def rest__delete
       component_module = create_obj(:component_module_id)
-      module_info = component_module.delete_object()
+      version          = ret_version()
+      module_info      = component_module.delete_version_or_module(version)
       rest_ok_response module_info
     end
 

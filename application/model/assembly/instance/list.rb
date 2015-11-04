@@ -238,7 +238,7 @@ module DTK; class  Assembly
         # has lookup that includes each satisfied_by_component
         ret = cmps_with_print_form.inject({}) { |h, cmp| h.merge(cmp[:id] => cmp[:display_name]) }
 
-        # see if theer is any components that are nreferenced but not in ret
+        # see if there is any components that are referenced but not in ret
         needed_cmp_ids = []
         aug_cmps.each do |aug_cmp|
           if deps = aug_cmp[:dependencies]
@@ -253,6 +253,7 @@ module DTK; class  Assembly
 
         filter_array = needed_cmp_ids.map { |cmp_id| [:eq, :id, cmp_id] }
         filter = (filter_array.size == 1 ? filter_array.first : [:or] + filter_array)
+        # TODO: DTK-2247; the option :filter is not used in calling function plus list_components uses query that assumes that all components are on this assembly instance
         additional_cmps = list_components(Opts.new(filter: filter))
         additional_cmps.inject(ret) { |h, cmp| h.merge(cmp[:id] => cmp[:display_name]) }
       end

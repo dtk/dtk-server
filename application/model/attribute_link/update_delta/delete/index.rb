@@ -37,7 +37,9 @@ module DTK; class AttributeLink::UpdateDelta
           elsif index_has_type?(:key, input_index)
             Key
           else
-            fail Error, error_msg_link_def_index(input_index)
+            # TODO: check; this may not be an error; saw it happend on delete assembly
+            Log.error(error_msg_link_def_index(input_index))
+            Null
           end
         end
       end

@@ -282,6 +282,10 @@ module DTK
             content = "---\ncomponent_modules:\n" unless valid_existing
           end
 
+          # to avoid generating invalid module_refs.yaml double check if content is {} and set to component_modules:
+          c_hash = Aux.convert_to_hash(content, file_info[:format_type])
+          content = "---\ncomponent_modules:\n" if c_hash.empty?
+
           any_change = RepoManager.add_file({ path: file_info[:path] }, content, self)
           any_changes = true if any_change
         end

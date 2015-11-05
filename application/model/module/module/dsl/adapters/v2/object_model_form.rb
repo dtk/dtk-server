@@ -413,21 +413,33 @@ module DTK; class ModuleDSL; class V2
       public :convert_attribute_mapping
 
       def convert_attr_ref_simple(attr_ref, dep_or_base, cmp, input_or_output)
-        if attr_ref =~ /(^[^.]+)\.([^.]+$)/
+        # Index processing first
+        index = nil 
+        if attr_ref =~ /(^[^\[]+)\[([^\]]+)\]$/
+          attr_ref = Regexp.last_match(1)
+          index = Regexp.last_match(2)
+        end
+        ret = convert_attr_ref_simple_aux(attr_ref, dep_or_base, cmp, input_or_output)
+        ret << ".#{index}" if index
+        ret
+      end
+
+      def convert_attr_ref_simple_aux(attr_ref, dep_or_base, cmp, input_or_output)
+        if attr_ref =~ /(^[^.]+)\.([^.]+$)/ 
           if input_or_output == :input
-            fail ParsingError.new('Attribute reference (?1) is ill-formed', attr_ref)
+           raise_bad_attribute_ref_in_link_def(attr_ref)
           end
           prefix = Regexp.last_match(1)
           attr = Regexp.last_match(2)
           case prefix
-          when '$node' then (dep_or_base == :dep) ? 'remote_node' : 'local_node'
-          else fail ParsingError.new('Attribute reference (?1) is ill-formed', attr_ref)
+            when '$node' then (dep_or_base == :dep) ? 'remote_node' : 'local_node'
+            else raise_bad_attribute_ref_in_link_def(attr_ref)
           end + ".#{attr.gsub(/host_address$/, 'host_addresses_ipv4.0')}"
         else
           has_dollar_sign = has_variable?(attr_ref)
           if (input_or_output == :input && has_dollar_sign) ||
               (input_or_output == :output && !has_dollar_sign)
-            fail ParsingError.new('Attribute reference (?1) is ill-formed', attr_ref)
+           raise_bad_attribute_ref_in_link_def(attr_ref)
           end
           var_name = attr_ref
           # if dollar sign is first character and not embedded string than strip of dollar sign
@@ -464,13 +476,17 @@ module DTK; class ModuleDSL; class V2
           datatype = :json
         end
         unless constant_assign = (const && Attribute::Constant.create?(const, dep_attr_ref, dep_cmp, datatype))
-          fail ParsingError.new('Attribute reference (?1) is ill-formed', attr_ref)
+         raise_bad_attribute_ref_in_link_def(attr_ref)
         end
         constants = opts[:constants] ||= []
         unless constant_assign.is_in?(constants)
           constants << constant_assign
         end
         "#{convert_to_internal_cmp_form(base_cmp)}.#{constant_assign.attribute_name()}"
+      end
+
+      def raise_bad_attribute_ref_in_link_def(attr_ref)
+        fail ParsingError.new("Attribute reference '?1' in link_def is ill-formed", attr_ref)
       end
 
       # returns sanitized_attr_ref

@@ -171,16 +171,8 @@ module DTK; class  Assembly
       private :set_node_display_name!, :set_node_admin_op_status!
 
       def list_components(opts = Opts.new)
-        aug_cmps      = get_augmented_components(opts)
-        node_cmp_name = opts[:node_cmp_name]
-
-        cmps_print_form = aug_cmps.map do |r|
-          namespace      = r[:namespace]
-          node_name      = "#{r[:node][:display_name]}/"
-          hide_node_name = node_cmp_name || Node.is_assembly_wide_node?(r[:node])
-          display_name   = "#{hide_node_name ? '' : node_name}#{Component::Instance.print_form(r, namespace)}"
-          r.hash_subset(:id).merge(display_name: display_name)
-        end
+        aug_cmps = get_augmented_components(opts)
+        cmps_print_form = aug_cmps.map { |aug_cmp| convert_to_component_print_form(aug_cmp, opts) }
 
         sort = proc { |a, b| a[:display_name] <=> b[:display_name] }
         if opts.array(:detail_to_include).include?(:component_dependencies)
@@ -201,6 +193,15 @@ module DTK; class  Assembly
       end
 
       private
+
+      def convert_to_component_print_form(aug_cmp, opts = Opts.new)
+        node_cmp_name  = opts[:node_cmp_name]
+        namespace      = aug_cmp[:namespace]
+        node_name      = "#{aug_cmp[:node][:display_name]}/"
+        hide_node_name = node_cmp_name || Node.is_assembly_wide_node?(aug_cmp[:node])
+        display_name   = "#{hide_node_name ? '' : node_name}#{Component::Instance.print_form(aug_cmp, namespace)}"
+        aug_cmp.hash_subset(:id).merge(display_name: display_name)
+      end
 
       def list_tasks(_opts = {})
         tasks = []
@@ -238,7 +239,7 @@ module DTK; class  Assembly
         # has lookup that includes each satisfied_by_component
         ret = cmps_with_print_form.inject({}) { |h, cmp| h.merge(cmp[:id] => cmp[:display_name]) }
 
-        # see if theer is any components that are nreferenced but not in ret
+        # see if there is any components that are referenced but not in ret
         needed_cmp_ids = []
         aug_cmps.each do |aug_cmp|
           if deps = aug_cmp[:dependencies]
@@ -250,12 +251,41 @@ module DTK; class  Assembly
           end
         end
         return ret if needed_cmp_ids.empty?
-
-        filter_array = needed_cmp_ids.map { |cmp_id| [:eq, :id, cmp_id] }
-        filter = (filter_array.size == 1 ? filter_array.first : [:or] + filter_array)
-        additional_cmps = list_components(Opts.new(filter: filter))
+        additional_cmps = get_ndx_extra_component_display_names(needed_cmp_ids)
         additional_cmps.inject(ret) { |h, cmp| h.merge(cmp[:id] => cmp[:display_name]) }
       end
+
+      # these can be components that are not in this
+      def get_ndx_extra_component_display_names(cmp_ids)
+        ret = {}
+        sp_hash = {
+          cols:   [:id, :group_id, :display_name, :node, :assembly_id],
+          filter: [:oneof, :id, cmp_ids] 
+        }
+        aug_cmps = Component::Instance.get_objs(model_handle(:component_instance), sp_hash)
+        return ret if aug_cmps.empty?
+
+        ndx_cmps_to_assemblies = aug_cmps.inject({}) { |h, r| h.merge(r[:id] => r[:assembly_id]) }
+
+        sp_hash = {
+          cols:   [:id, :group_id, :display_name],
+          filter: [:oneof, :id, aug_cmps.map { |aug_cmp| ndx_cmps_to_assemblies.values.uniq }]
+        }
+        ndx_assembly_names = Assembly::Instance.get_objs(model_handle, sp_hash).inject({}) do |h, r| 
+          h.merge(r[:id] => r[:display_name]) 
+        end
+        
+        aug_cmps.map do | aug_cmp |
+          qualified_cmp_name = convert_to_component_print_form(aug_cmp)
+          if assembly_id = ndx_cmps_to_assemblies[aug_cmp[:id]]
+            unless assembly_id == id()
+              qualified_cmp_name = "#{qualified_cmp_name} (#{ndx_assembly_names[assembly_id]})"
+            end
+          end
+          { id: aug_cmp[:id], display_name: qualified_cmp_name}
+        end
+      end
+
     end
   end
 end; end

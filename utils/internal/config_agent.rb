@@ -33,5 +33,10 @@ module DTK
     def node_name(node)
       (node[:external_ref] || {})[:instance_id]
     end
+
+    # This can be overwritten
+    def interpret_error(error_in_result, _components)
+      error_in_result
+    end
   end
 end

@@ -12,7 +12,7 @@ require './lib/component_modules_spec'
 
 service_name = 'smoke_test_instance'
 assembly_name = 'bootstrap::node_with_params'
-os_templates = ['precise','rhel6']
+os_templates = ['trusty','amazon']
 os_attribute = 'os_identifier'
 instance_size = 't1.micro'
 instance_size_attribute = 'instance_size'

@@ -85,9 +85,11 @@ module DTK
     end
 
     def list_versions(opts = {})
-      local_versions = get_objs(cols: [:version_info]).map do |r|
+      local_versions = []
+      get_objs(cols: [:version_info]).each do |r|
+        next if r[:module_branch].assembly_module_version?
         v = r[:module_branch].version()
-        v.nil? ? 'base' : v
+        local_versions << (v.nil? ? 'base' : v)
       end
 
       local_versions.delete('base')

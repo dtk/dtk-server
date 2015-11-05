@@ -28,6 +28,7 @@ module DTK
     def self.initiate_task_action(task, top_task_idh, opts = {})
       new(task, top_task_idh).initiate(opts)
     end
+
     def initiate(opts = {})
       if opts[:cancel_task]
         klass.initiate_cancelation(task_idh, top_task_idh, task_action, opts)
@@ -157,7 +158,7 @@ module DTK
     end
 
     def self.request__execute_action(agent, action, nodes, callbacks, params = {})
-      klass = load_for_node_config()
+      klass = load_for_node_config(params[:protocol])
       klass.request__execute_action(agent, action, nodes, callbacks, params)
     end
 
@@ -166,8 +167,8 @@ module DTK
       klass.request_execute_action_per_node(agent, action, nodes_hash, callbacks)
     end
 
-    def self.parse_response__execute_action(nodes, msg)
-      klass = load_for_node_config()
+    def self.parse_response__execute_action(nodes, msg, params = {})
+      klass = load_for_node_config(params[:protocol])
       klass.parse_response__execute_action(nodes, msg)
     end
 
@@ -183,8 +184,8 @@ module DTK
 
     private
 
-    def self.load_for_node_config
-      adapter_name = R8::Config[:command_and_control][:node_config][:type]
+    def self.load_for_node_config(protocol_type = nil)
+      adapter_name = protocol_type || R8::Config[:command_and_control][:node_config][:type]
       load_for_aux(:node_config, adapter_name)
     end
 
@@ -236,9 +237,13 @@ module DTK
     end
 
     def self.load_for_aux(adapter_type, adapter_name)
+      # DEBUG SNIPPET >>> REMOVE <<<
+      require 'ap'
+      ap "#{adapter_type}/#{adapter_name}"
       Adapters[adapter_type] ||= {}
       return Adapters[adapter_type][adapter_name] if Adapters[adapter_type][adapter_name]
       begin
+
         r8_nested_require('command_and_control', "adapters/#{adapter_type}/#{adapter_name}")
         klass = CommandAndControlAdapter.const_get adapter_name.to_s.capitalize
         klass_or_instance = (instance_style_adapter?(adapter_type, adapter_name) ? klass.create_without_task() : klass)
@@ -249,8 +254,24 @@ module DTK
         raise e
       end
     end
+
+    def self.filter_single_fact(fact, value, operator = nil)
+      { 'fact' => [format_fact_filter(fact, value, operator)] }
+    end
+
+    def self.format_fact_filter(fact, value, operator = nil)
+      if operator.nil?
+        operator = value.is_a?(Regexp) ? '=~' : '=='
+      end
+      if value.is_a?(Regexp)
+        value = "/#{value.source}/"
+      end
+      { fact: fact, value: value.to_s, operator: operator }
+    end
+
     Adapters = {}
     Lock = Mutex.new
+
     # TODO: want to convert all adapters to new style to avoid setting stack error when adapter method not defined to have CommandAndControlAdapter self call instance
     def self.instance_style_adapter?(adapter_type, adapter_name)
       (InstanceStyleAdapters[adapter_type.to_sym] || []).include?(adapter_name.to_sym)
@@ -290,6 +311,18 @@ module DTK
   end
 
   class CommandAndControlNodeConfig < CommandAndControl
+
+    def self.mc_info_for_config_agent(config_agent)
+      type = config_agent.type()
+      ConfigAgentTypeToMCInfo[type] || fail(Error.new("unexpected config adapter: #{type}"))
+    end
+
+    ConfigAgentTypeToMCInfo = {
+      puppet: { agent: 'puppet_apply', action: 'run' },
+      dtk_provider: { agent: 'action_agent', action: 'run_command' },
+      chef: { agent: 'chef_solo', action: 'run' }
+    }
+
   end
 
   class CommandAndControlIAAS < CommandAndControl

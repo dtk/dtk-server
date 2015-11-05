@@ -33,7 +33,6 @@ module DTK
                 inspect_agent_response(msg)
                 CreateThread.defer_with_session(user_object, Ramaze::Current.session) do
                   PerformanceService.end_measurement("#{self.class.to_s.split('::').last}", self.object_id)
-
                   result = msg[:body].merge('task_id' => task_id)
                   if has_action_results?(task, result)
                     task.add_action_results(result, action)

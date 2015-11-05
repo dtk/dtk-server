@@ -186,11 +186,16 @@ module DTK; class Task
         ConfigAgent::Type.is_a?(config_agent_type, [:ruby_function, :no_op])
       end
 
+      def action_agent_call?
+        ConfigAgent::Type.is_a?(config_agent_type, [:dtk_provider])
+      end
+
       # returns [adapter_type, adapter_name]
       # adapter_name can be nil meaning default adapter should be used
       def ret_command_and_control_adapter_info
         adapter_type = :node_config
-        adapter_name = :server if execute_on_server?  
+        adapter_name = :server if execute_on_server?
+        adapter_name = :stomp  if action_agent_call?
         [adapter_type, adapter_name]
       end
 
@@ -204,7 +209,7 @@ module DTK; class Task
 
       # TODO: hard wired that if there is a action_method?, there is just one
       def action_method?
-        matches = component_actions.map do |a| 
+        matches = component_actions.map do |a|
           if action_method = a.kind_of?(OnComponent) && a.action_method?
             action_method
           end

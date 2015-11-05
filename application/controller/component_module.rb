@@ -20,10 +20,12 @@ module DTK
       opts_create_mod = Opts.new(
         config_agent_type: ret_config_agent_type()
       )
+
       module_repo_info = ComponentModule.create_module(project, local_params, opts_create_mod)[:module_repo_info]
 
       # only when creating via import-git command
       git_url = ret_request_params(:module_git_url)
+
       unless git_url.empty?
         add_git_url(project.model_handle(:repo_remote), module_repo_info[:repo_id], git_url)
       end
@@ -310,7 +312,7 @@ module DTK
     def rest__remove_git_remote
       component_module = create_obj(:component_module_id)
       remove_git_remote(component_module)
-      rest_ok_response 
+      rest_ok_response
     end
   end
 end

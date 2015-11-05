@@ -56,6 +56,9 @@ module XYZ
       end
 
       def process_request_timeout(request_id)
+        # DEBUG SNIPPET >>> REMOVE <<<
+        require 'ap'
+        ap "TIEMOUT !!!!"
         callbacks = get_and_remove_reqid_callbacks(request_id)
         if callbacks
           callbacks.process_timeout(request_id)

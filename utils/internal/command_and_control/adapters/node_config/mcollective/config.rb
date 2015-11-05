@@ -5,6 +5,7 @@ module DTK
         require 'tempfile'
         require 'erubis'
         Lock = Mutex.new
+
         def self.mcollective_client
           Lock.synchronize do
             @mcollective_client ||= create_mcollective_client()
@@ -14,6 +15,7 @@ module DTK
         def self.install_script(node, bindings)
           create().install_script(node, bindings)
         end
+
         def install_script(node, bindings)
           all_bindings = install_script_bindings(node, bindings)
           erubis_object(install_script_erb()).result(all_bindings)

@@ -29,6 +29,7 @@ module DTK
       end
 
       DefaultTimeout = 10
+
       def parse_response__execute_action(_nodes, msg)
         ret = {}
         # TODO: conditionalize on status

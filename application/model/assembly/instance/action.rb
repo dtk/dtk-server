@@ -30,6 +30,26 @@ module DTK
         end
       end
 
+      class GetArbiter < ActionResultsQueue
+        def action_hash
+          { agent: :action, method: :run_command }
+        end
+
+        def process_data!(data, node_info)
+          # DEBUG SNIPPET >>> REMOVE <<<
+          require 'ap'
+          ap "Processing data back"
+          ap data
+          ap "and here is node info aswell ..."
+          ap node_info
+          Result.new(node_info[:display_name], data)
+        end
+
+        def messaging_protocol
+          'stomp'
+        end
+      end
+
       class ActionAgent < ActionResultsQueue
         def action_hash
           { agent: :action_agent, method: :run_command }

@@ -6,7 +6,9 @@ module DTK
       r8_nested_require('mcollective', 'assembly_action')
       r8_nested_require('mcollective', 'multiplexer')
       r8_nested_require('mcollective', 'config')
-      extend AssemblyActionClassMixin
+
+      extend Mcollective::AssemblyActionClassMixin
+
       def self.server_host
         R8::Config[:command_and_control][:node_config][:mcollective][:host]
       end
@@ -302,29 +304,6 @@ module DTK
         @@handler ||= Multiplexer.create(Config.mcollective_client())
       end
 
-      def self.filter_single_fact(fact, value, operator = nil)
-        { 'fact' => [format_fact_filter(fact, value, operator)] }
-      end
-
-      def self.format_fact_filter(fact, value, operator = nil)
-        if operator.nil?
-          operator = value.is_a?(Regexp) ? '=~' : '=='
-        end
-        if value.is_a?(Regexp)
-          value = "/#{value.source}/"
-        end
-        { fact: fact, value: value.to_s, operator: operator }
-      end
-
-      def self.mc_info_for_config_agent(config_agent)
-        type = config_agent.type()
-        ConfigAgentTypeToMCInfo[type] || fail(Error.new("unexpected config adapter: #{type}"))
-      end
-      ConfigAgentTypeToMCInfo = {
-        puppet: { agent: 'puppet_apply', action: 'run' },
-        dtk_provider: { agent: 'action_agent', action: 'run_command' },
-        chef: { agent: 'chef_solo', action: 'run' }
-      }
     end
   end
 end

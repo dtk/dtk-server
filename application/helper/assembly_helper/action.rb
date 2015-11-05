@@ -33,6 +33,7 @@ module Ramaze::Helper
           rescue ::DTK::ErrorUsage => e
             action_queue.push(:error, e.message)
           end
+
           action_queue
         end
 

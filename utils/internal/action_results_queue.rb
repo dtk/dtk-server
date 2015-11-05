@@ -1,4 +1,6 @@
 require 'iconv'
+# important, due to issue with class loading make sure this class is loaded first
+r8_nested_require('command_and_control', 'adapters/node_config/mcollective')
 
 module DTK
   # cross threads may be seperate requests for new action results queue, but no locking on allocated instance
@@ -31,30 +33,37 @@ module DTK
       callbacks = {
         on_msg_received: proc do |msg|
           inspect_agent_response(msg)
-          response = CommandAndControl.parse_response__execute_action(nodes, msg)
+          response = CommandAndControl.parse_response__execute_action(nodes, msg, params)
 
-            # if response and response[:pbuilderid]
-            node_info = ndx_pbuilderid_to_node_info[response[:pbuilderid]]
-            data = response[:data]
-            data = process_data!(data, node_info)
-            push(node_info[:id], data)
-          # end
+          node_info = ndx_pbuilderid_to_node_info[response[:pbuilderid]]
+          data = response[:data]
+          data = process_data!(data, node_info)
+          push(node_info[:id], data)
         end
       }
       action_hash = action_hash()
-      unless agent = action_hash[:agent]
-        fail Error.new('Unexpected that :agent is not in action_hash')
-      end
-      unless method = action_hash[:method]
-        fail Error.new('Unexpected that :method is not in action_hash')
-      end
-      CommandAndControl.request__execute_action(agent, method, nodes, callbacks, params)
+
+      fail Error.new('Unexpected that :agent is not in action_hash')   unless action_hash[:agent]
+      fail Error.new('Unexpected that :method is not in action_hash') unless  action_hash[:method]
+
+      params.merge!(protocol: messaging_protocol())
+
+
+      # this will load adapter and proceed to send requests towards mcollective / stomp / ...
+      CommandAndControl.request__execute_action(action_hash[:agent], action_hash[:method], nodes, callbacks, params)
+    end
+
+    # can be overwritten
+    def messaging_protocol
+      # default: mcollective
+      R8::Config[:command_and_control][:node_config][:type]
     end
 
     # can be overwritten
     def process_data!(data, _node_info)
       Result.normalize_data_to_utf8_output!(data)
     end
+
     private :process_data!
 
     # returns :is_complete => is_complete, :results => results
@@ -129,6 +138,11 @@ module DTK
           return results
         end
 
+        # DEBUG SNIPPET >>> REMOVE <<<
+        require 'ap'
+        ap "Post Processing results"
+        ap results
+
         ret = []
         # sort by node name and prune out keys with no results
         pruned_sorted_keys = results.reject { |_k, v| v.nil? }.sort { |a, b| a[1].node_name <=> b[1].node_name }.map(&:first)
@@ -154,7 +168,7 @@ module DTK
       #
       # http://po-ru.com/diary/fixing-invalid-utf-8-in-ruby-revisited/
       def self.normalize_data_to_utf8_output!(data)
-        if data
+        if data && data.is_a?(Hash)
           ic = Iconv.new('UTF-8//IGNORE', 'UTF-8')
           output = data[:output] || ''
 
@@ -163,9 +177,8 @@ module DTK
 
           valid_output = ic.iconv(output + ' ')[0..-2]
           data[:output] = ic.iconv(output + ' ')[0..-2]
-        else
-          Log.warn 'Skipping UTF-8 normalization since provided output does not have :data element.'
         end
+
         data
       end
     end

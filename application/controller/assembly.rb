@@ -876,6 +876,13 @@ module DTK
       rest_ok_response action_results_id: queue.id
     end
 
+    def rest__initiate_get_arbiter
+      assembly = ret_assembly_instance_object()
+
+      queue = initiate_action(GetArbiter, assembly)
+      rest_ok_response action_results_id: queue.id
+    end
+
     def rest__initiate_ssh_pub_access
       assembly = ret_assembly_instance_object()
       params   = ret_params_hash(:rsa_pub_name, :rsa_pub_key, :system_user)

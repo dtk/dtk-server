@@ -3,6 +3,8 @@ module DTK; class ConfigAgent; module Adapter
     module InterpretResults
       module Mixin
         def action_results(result, _action)
+          # DEBUG SNIPPET >>> REMOVE <<<
+          require (RUBY_VERSION.match(/1\.8\..*/) ? 'ruby-debug' : 'debugger');Debugger.start; debugger
           data = data_field_in_results(result)
           unless data.is_a?(Hash)
             Log.error_pp(['Unexpected that data field is not a hash:', data])
@@ -47,7 +49,7 @@ module DTK; class ConfigAgent; module Adapter
 
         def data_field_in_results(result)
           # TODO: will be deprecating the [:data][:data] form
-          (result[:data] || {})[:data] || result[:data] || {}
+          result[:data] || {}
         end
       end
     end

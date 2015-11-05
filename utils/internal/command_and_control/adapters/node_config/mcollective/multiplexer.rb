@@ -4,6 +4,7 @@ module DTK
   module CommandAndControlAdapter; class Mcollective
     class Multiplexer < ProtocolMultiplexer
       include Singleton
+
       def self.create(mcollective_client)
         instance.set(mcollective_client)
       end

@@ -105,34 +105,36 @@ end
     parent_info: {
       type: :json,
       hidden: true,
-      remote_dependencies:       [{
-         model_name: :service_module,
-         convert: true,
-         join_type: :left_outer,
-         join_cond: { id: q(:module_branch, :service_id) },
-         cols: [:id, :group_id, :display_name]
-       },
-                                  {
-                                    model_name: :component_module,
-                                    convert: true,
-                                    join_type: :left_outer,
-                                    join_cond: { id: q(:module_branch, :component_id) },
-                                    cols: [:id, :group_id, :display_name]
-                                  },
-                                  {
-                                    model_name: :test_module,
-                                    convert: true,
-                                    join_type: :left_outer,
-                                    join_cond: { id: q(:module_branch, :test_id) },
-                                    cols: [:id, :group_id, :display_name]
-                                  },
-                                  {
-                                    model_name: :node_module,
-                                    convert: true,
-                                    join_type: :left_outer,
-                                    join_cond: { id: q(:module_branch, :node_id) },
-                                    cols: [:id, :group_id, :display_name]
-                                  }]
+      remote_dependencies:[
+        {
+          model_name: :service_module,
+          convert: true,
+          join_type: :left_outer,
+          join_cond: { id: q(:module_branch, :service_id) },
+          cols: [:id, :group_id, :display_name]
+        },
+        {
+          model_name: :component_module,
+          convert: true,
+          join_type: :left_outer,
+          join_cond: { id: q(:module_branch, :component_id) },
+          cols: [:id, :group_id, :display_name]
+        },
+        {
+          model_name: :test_module,
+          convert: true,
+          join_type: :left_outer,
+          join_cond: { id: q(:module_branch, :test_id) },
+          cols: [:id, :group_id, :display_name]
+        },
+        {
+          model_name: :node_module,
+          convert: true,
+          join_type: :left_outer,
+          join_cond: { id: q(:module_branch, :node_id) },
+          cols: [:id, :group_id, :display_name]
+        }
+      ]
     },
     component_module_info: {
       type: :json,

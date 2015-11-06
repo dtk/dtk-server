@@ -32,6 +32,25 @@ module DTK
       new(branch, content_hash_content)
     end
 
+    def self.get_module_refs_by_name_and_version(branch, ref_namespace, ref_name, ref_version = nil)
+      mh     = branch.model_handle(:module_ref)
+      filter = [:and, [:eq, :module_name, ref_name], [:eq, :namespace_info, ref_namespace], [:eq, :version_info, ref_version]]
+
+      component_sp_hash = {
+        cols: [:is_dependency_to_component_modules],
+        filter: filter
+      }
+      component_modules = Model.get_objs(mh, component_sp_hash)
+
+      service_sp_hash = {
+        cols: [:is_dependency_to_service_modules],
+        filter: filter
+      }
+      service_modules = Model.get_objs(mh, service_sp_hash)
+
+      [component_modules, service_modules]
+    end
+
     # returns true if an update made; this updates the ruby object
     # each element in the array cmp_modules_with_namespaces
     # is a component module object with the added field :namespace_name

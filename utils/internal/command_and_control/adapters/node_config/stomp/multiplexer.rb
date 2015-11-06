@@ -25,6 +25,9 @@ module DTK
           request_id: uuid
         })
 
+        ap "Real MEssage"
+        ap deliver_msg
+
         Base64.encode64(deliver_msg.to_yaml)
       end
 
@@ -36,8 +39,14 @@ module DTK
           @stomp_client.subscribe(R8::Config[:arbiter][:reply_topic]) do |msg|
             begin
               original_msg = decode64(msg.body)
-              request_id = original_msg[:body][:request_id]
-              @@callback_registry[request_id].process_msg(original_msg, request_id)
+              msg_request_id = original_msg[:body][:request_id]
+
+              # discard message if not the one requested
+              unless @@callback_registry[msg_request_id]
+                Log.info("Stomp message received with ID '#{msg_request_id}' is not for this tenant, and it is being ignored!")
+              else
+                @@callback_registry[msg_request_id].process_msg(original_msg, msg_request_id)
+              end
             rescue Exception => e
               ap "THREAD Exception #{e.message}"
             end

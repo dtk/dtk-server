@@ -34,6 +34,18 @@ module DTK
         ret
       end
 
+      def self.async_agent_call(agent, method, params, filter_x, callbacks, context_x)
+        msg = {
+          agent: agent,
+          method: method
+        }
+        msg.merge!(params[:action_agent_request]) if params[:action_agent_request]
+
+        filter = BlankFilter.merge(filter_x).merge('agent' => [agent])
+        context = context_x.merge(callbacks: callbacks)
+        handler.sendreq_with_callback(msg, agent, context, filter)
+      end
+
       def self.parse_response__execute_action(_nodes, msg)
         # we transform msg to be in format of mcollective
         mcollective_msg = {
@@ -97,8 +109,6 @@ module DTK
 
       # TODO: change signature to def self.async_execution(task_idh,top_task_idh,config_node,callbacks,context)
       def self.initiate_cancelation(task_idh, top_task_idh, config_node, opts)
-        # DEBUG SNIPPET >>> REMOVE <<<
-        require (RUBY_VERSION.match(/1\.8\..*/) ? 'ruby-debug' : 'debugger');Debugger.start; debugger
         msg_content = { task_id: task_idh.get_id(), top_task_id: top_task_idh.get_id() }
         pbuilderid = Node.pbuilderid(config_node[:node])
         filter = filter_single_fact('pbuilderid', pbuilderid)
@@ -117,6 +127,8 @@ module DTK
           end
         end
       end
+
+      # NOT USED SO FAR beloow
 
       def self.errors_in_node_action_result?(result, action = nil)
         # DEBUG SNIPPET >>> REMOVE <<<
@@ -155,18 +167,6 @@ module DTK
           end
         end
         answer_computed ? ret : errors_in_node_action_payload_default?(payload)
-      end
-
-      def self.async_agent_call(agent, method, params, filter_x, callbacks, context_x)
-        msg = {
-          agent: agent,
-          method: method
-        }
-        msg.merge!(params[:action_agent_request]) if params[:action_agent_request]
-
-        filter = BlankFilter.merge(filter_x).merge('agent' => [agent])
-        context = context_x.merge(callbacks: callbacks)
-        handler.sendreq_with_callback(msg, agent, context, filter)
       end
 
       BlankFilter = { 'identity' => [], 'fact' => [], 'agent' => [], 'cf_class' => [] }

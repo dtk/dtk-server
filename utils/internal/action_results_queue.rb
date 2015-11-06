@@ -138,11 +138,6 @@ module DTK
           return results
         end
 
-        # DEBUG SNIPPET >>> REMOVE <<<
-        require 'ap'
-        ap "Post Processing results"
-        ap results
-
         ret = []
         # sort by node name and prune out keys with no results
         pruned_sorted_keys = results.reject { |_k, v| v.nil? }.sort { |a, b| a[1].node_name <=> b[1].node_name }.map(&:first)

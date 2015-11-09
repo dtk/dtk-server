@@ -165,7 +165,7 @@ module DTK
       end
       private :remote
 
-      def list_module_info(type = nil, rsa_pub_key = nil)
+      def list_module_info(type = nil, rsa_pub_key = nil, opts = {})
         new_repo = R8::Config[:repo][:remote][:new_client]
         filter = type && { type: type_for_remote_module(type) }
         remote_modules = client.list_modules(filter, rsa_pub_key)
@@ -175,9 +175,8 @@ module DTK
           last_updated = r['updated_at'] && Time.parse(r['updated_at']).strftime('%Y/%m/%d %H:%M:%S')
           permission_string = "#{r['permission_hash']['user']}/#{r['permission_hash']['user_group']}/#{r['permission_hash']['other']}"
           el.merge!(display_name: r['full_name'], owner: r['owner_name'], group_owners: r['user_group_names'], permissions: permission_string, last_updated: last_updated)
-          if versions = branch_names_to_versions(r['branches'])
-            el.merge!(versions: versions)
-          end
+          versions = opts[:ret_versions_array] ? r['versions'] : branch_names_to_versions(r['branches'])
+          el.merge!(versions: versions) if versions
           el
         end
 

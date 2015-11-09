@@ -1,4 +1,5 @@
 module ComponentModulesVersionMixin
+
 	def check_component_module_version(component_module_name, version_name)
 		puts "List component module versions: ", "----------------------------------"
 		version_found = false
@@ -23,7 +24,7 @@ module ComponentModulesVersionMixin
 		  puts "Version #{version_name} exists on component module #{component_module_name} remote"
 			version_found = true
 		else
-      puts "Version #{version_name} does not exist on component module #{component_module_name} remote"
+      	puts "Version #{version_name} does not exist on component module #{component_module_name} remote"
 		end
 		puts ""
 		remote_version_found
@@ -81,61 +82,86 @@ module ComponentModulesVersionMixin
 		module_published
 	end
 
-  def create_component_module_version(component_module_name, component_module_version)
-  	puts 'Create component module version:', '--------------------------------'
-  	component_module_version_created = false
-  	component_modules_list = send_request('/rest/component_module/list', {})
-  	if (component_modules_list['data'].select { |x| x['display_name'] == component_module_name }.first)
-  		puts "Component modue #{component_module_name} exists in list. Try to create component module version #{component_module_version}..."
+  	def create_component_module_version(component_module_name, component_module_version)
+  		puts 'Create component module version:', '--------------------------------'
+  		component_module_version_created = false
+  		component_modules_list = send_request('/rest/component_module/list', {})
+  		if (component_modules_list['data'].select { |x| x['display_name'] == component_module_name }.first)
+  			puts "Component modue #{component_module_name} exists in list. Try to create component module version #{component_module_version}..."
 
-  		create_version_response = send_request('/rest/component_module/create_new_version', {component_module_id: component_module_name, version: component_module_version})
+  			create_version_response = send_request('/rest/component_module/create_new_version', {component_module_id: component_module_name, version: component_module_version})
 
-  		puts 'Component module create version response:'
-  		puts '-----------------------------------------'
-  		pretty_print_JSON(create_version_response)
+	  		puts 'Component module create version response:'
+  			puts '-----------------------------------------'
+  			pretty_print_JSON(create_version_response)
 
-  		if (create_version_response['status'] == 'ok')
-  			puts "Component module #{component_module_name} version #{component_module_version} created successfully"
-			component_module_version_created = true
+	  		if (create_version_response['status'] == 'ok')
+  				puts "Component module #{component_module_name} version #{component_module_version} created successfully"
+				component_module_version_created = true
+			else
+				puts "Component module #{component_module_name} version #{component_module_version} was not created successfully"
+				component_module_version_created = false
+			end
 		else
-			puts "Component module #{component_module_name} version #{component_module_version} was not created successfully"
+			puts "Component module #{component_module_name} does not exist in component module list and therefore cannot be versioned"
 			component_module_version_created = false
-		end
-	else
-		puts "Component module #{component_module_name} does not exist in component module list and therefore cannot be versioned"
-		component_module_version_created = false
+	  	end
+  		puts ''
+  		component_module_version_created
   	end
-  	puts ''
-  	component_module_version_created
-  end
 
-  def delete_component_module_version(component_module_name, component_module_version)
-  	puts 'Delete component module version:', '--------------------------------'
-  	component_module_version_deleted = false
-  	component_modules_list = send_request('/rest/component_module/list', {})
 
-  	if (component_modules_list['data'].select { |x| x['display_name'] == component_module_name }.first)
-  		puts "Component modue #{component_module_name} exists in list. Try to delete component module version #{component_module_version}..."
+ 	def delete_component_module_version(component_module_name, component_module_version)
+    	puts 'Delete component module version:', '--------------------------------'
+    	component_module_version_deleted = false
+    	component_modules_list = send_request('/rest/component_module/list', {})
 
-  		delete_version_response = send_request('/rest/component_module/delete', {component_module_id: component_module_name, version: component_module_version})
+    	if (component_modules_list['data'].select { |x| x['display_name'] == component_module_name }.first)
+    		puts "Component module #{component_module_name} exists in list. Try to delete component module version #{component_module_version}..."
 
-  		puts 'Component module delete version response:'
-  		puts '-----------------------------------------'
-  		pretty_print_JSON(delete_version_response)
+    		delete_version_resposne = send_request('/rest/component_module/delete', {component_module_id: component_module_name, version: component_module_version})
 
-  		if (delete_version_response['status'] == 'ok')
-  			puts "Component module #{component_module_name} version #{component_module_version} deleted successfully"
-			component_module_version_deleted = true
+    		puts 'Component module delete version response:'
+    		puts '-----------------------------------------'
+    		pretty_print_JSON(delete_version_resposne)
+
+    		if (delete_version_resposne['status'] == 'ok')
+    			puts "Component module #{component_module_name} version #{component_module_version} deleted successfully"
+				component_module_version_deleted = true
+			else
+				puts "Component module #{component_module_name} version #{component_module_version} was not deleted successfully"
+				component_module_version_deleted = false
+			end
 		else
-			puts "Component module #{component_module_name} version #{component_module_version} was not deleted successfully"
+			puts "Component module #{component_module_name} does not exist in component module list and therefore component module version cannot be deleted"
 			component_module_version_deleted = false
-		end
-	else
-		puts "Component module #{component_module_name} does not exist in component module list and therefore component module version cannot be deleted"
-		component_module_version_deleted = false
-  	end
+  		end
 
-  	puts ''
-  	component_module_version_deleted
-  end
+  		puts ''
+  		component_module_version_deleted
+    end
+
+    def delete_remote_component_module_version(component_module_name, component_module_namespace, component_module_version)
+    	puts "Delete component module version from remote:", "--------------------------------------------"
+     	component_module_version_deleted = false
+     	remote_component_modules_list = send_request('/rest/component_module/list_remote', {rsa_pub_key: self.ssh_key, diff: {}})
+
+     	if (remote_component_modules_list['data'].select { |x| x['display_name'] == "#{component_module_namespace}/#{component_module_name}" }.first)
+     		puts "Component module #{component_module_name} exists on remote. Try to delete component module version #{component_module_version}..."
+
+    		delete_remote_version_resposne = send_request('/rest/component_module/delete_remote', {rsa_pub_key: self.ssh_key, remote_module_name: component_module_name, remote_module_namespace: component_module_namespace, force_delete: false, version: component_module_version})
+ 			
+ 			if (delete_remote_version_resposne['status'] == 'ok')
+    			puts "Component module #{component_module_name} version #{component_module_version} deleted successfully"
+				component_module_version_deleted = true
+			else
+				puts "Component module #{component_module_name} version #{component_module_version} was not deleted successfully"
+				component_module_version_deleted = false
+			end
+		else
+			puts "Component module #{component_module_name} does not exist in component module list and therefore component module version cannot be deleted from remote"
+			component_module_version_deleted = false
+     	end
+    end
+
 end

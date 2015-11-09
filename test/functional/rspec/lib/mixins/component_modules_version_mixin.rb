@@ -166,12 +166,12 @@ module ComponentModulesVersionMixin
 
     def clone_component_module_version(component_module_name, component_module_version)
     	puts "Clone component module version", "-----------------------------"
-		component_module_version_cloned = false
+			component_module_version_cloned = false
 
-		client = DtkClientAccessor.new
-		response = client.execute_command_with_options('component_module', 'component_module', component_module_name, 'clone', {version: component_module_version}, [])
-		
-		pretty_print_JSON(response)
-		component_module_version_cloned = true if response['status'] == 'ok'
+			client = DtkClientAccessor.new
+			response = client.execute_command_with_options('component_module', 'component_module', component_module_name, 'clone', {version: component_module_version}, [])
+			
+			pretty_print_JSON(response)
+			component_module_version_cloned = true if response['status'] == 'ok'
     end
 end

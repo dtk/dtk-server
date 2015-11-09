@@ -107,8 +107,8 @@ module DTK; module ModuleMixins
       nil
     end
 
-    def list_remotes(_model_handle, rsa_pub_key = nil)
-      Repo::Remote.new.list_module_info(module_type(), rsa_pub_key)
+    def list_remotes(_model_handle, rsa_pub_key = nil, opts = {})
+      Repo::Remote.new.list_module_info(module_type(), rsa_pub_key, opts)
     end
 
     def create_repo_remote_object(repo, remote, remote_repo_name)

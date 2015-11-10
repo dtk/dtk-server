@@ -232,6 +232,7 @@ EOF
 
 <% if mcollective_restart %>
 /etc/init.d/mcollective* restart
+[ -x /etc/init.d/dtk-arbiter ] && /etc/init.d/dtk-arbiter restart
 <% end %>
 
 <% if logstash_enable %>

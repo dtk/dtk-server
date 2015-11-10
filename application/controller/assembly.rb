@@ -553,9 +553,19 @@ module DTK
       if assembly_name = ret_request_params(:name)
         opts[:assembly_name] = assembly_name
       end
+
       if service_settings = ret_settings_objects(assembly_template)
         opts[:service_settings] = service_settings
       end
+
+      if node_size = ret_request_params(:node_size)
+        opts[:node_size] = node_size
+      end
+
+      if os_type = ret_request_params(:os_type)
+        opts[:os_type] = os_type
+      end
+
       new_assembly_obj = assembly_template.stage(target, opts)
 
       response = {

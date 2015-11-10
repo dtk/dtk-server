@@ -66,12 +66,11 @@ module DTK; class Task; class Template
 
       def self.has_explicit_method__with_title?(serialized_item, opts = {})
         ret = nil
-        return ret unless serialized_item =~ /(^[^\[]+)\[([^\]]+)\](.*$)/
-        cmp_with_title = "#{Regexp.last_match(1)}[#{Regexp.last_match(2)}]"
-        dot_method = Regexp.last_match(3)
-        if dot_method.empty?
+        cmp_with_title, rest = has_component_title?(serialized_item)
+        return ret unless cmp_with_title
+        if rest.empty?
           nil
-        elsif dot_method =~ /^\.(.+$)/
+        elsif rest =~ /^\.(.+$)/
           if opts[:just_component_name_ref]
             ParseStruct.new(cmp_with_title, nil, nil)
           else
@@ -84,7 +83,8 @@ module DTK; class Task; class Template
       end
 
       def self.has_explicit_method__without_title?(serialized_item, opts = {})
-        split = serialized_item.split('.')
+        # first check to make sure that
+        split = split_taking_into_account_title(serialized_item)
         case split.size
         when 1
           nil
@@ -98,6 +98,25 @@ module DTK; class Task; class Template
           end
         else
           raise_action_ref_error(serialized_item)
+        end
+      end
+
+      # if there is atitle returns [cmp_with_title, rest] where rest is everyting after the title and can be empty
+      def self.has_component_title?(serialized_item)
+        if serialized_item =~ /(^[^\[]+)\[([^\]]+)\](.*$)/
+          cmp_with_title = "#{Regexp.last_match(1)}[#{Regexp.last_match(2)}]"
+          rest = Regexp.last_match(3)
+          [cmp_with_title, rest]
+        end
+      end
+
+      def self.split_taking_into_account_title(serialized_item)
+        # This provides for complication where there could be a '.' within title
+        cmp_with_title, rest = has_component_title?(serialized_item)
+        if cmp_with_title
+          rest.empty? ? [cmp_with_title] : [cmp_with_title, rest.gsub(/^\./, '')]
+        else
+          serialized_item.split('.')
         end
       end
 

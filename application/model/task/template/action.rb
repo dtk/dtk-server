@@ -114,7 +114,7 @@ module DTK; class Task; class Template
       def self.method_not_defined(parsed, action_defs) 
         err_msg = "The action method '#{parsed.method_name}' is not defined on component '#{parsed.component_name_ref}'"
         if action_defs.empty?
-          err_msg << '; there are no actions defiend on this component.'
+          err_msg << '; there are no actions defined on this component.'
         else
           legal_methods = action_defs.map { |ad| ad[:method_name] }
           err_msg << "; legal method names are: #{legal_methods.join(',')}"

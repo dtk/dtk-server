@@ -66,3 +66,88 @@ shared_context 'NEG - Publish versioned component module' do |dtk_common, compon
 		expect(component_module_published).to eq(false)
 	end
 end
+
+shared_contet 'Create component module version' do |dtk_common, component_module_name, version_name|
+	it 'creates component module #{component_module_name} version #{version_name}' do
+		component_module_version_created = dtk_common.create_component_module_version(component_module_name, version_name)
+		expect(component_module_version_created).to eq(true)
+	end
+end
+
+shared_context 'NEG - Create component module version' do |dtk_common, component_module_name, version_name|
+	it 'does ntot create component module #{component_module_name} version #{version_name}' do
+		component_module_version_created = dtk_common.create_component_module_version(component_module_name, version_name)
+		expect(component_module_version_created).to eq(true)
+	end
+end
+
+shared_context 'Delete component module version' do |dtk_common, component_module_name, version_name|
+	it 'deletes component module #{component_module_name} version #{version_name}' do
+		component_module_version_deleted = dtk_common.delete_component_module_version(component_module_name, version_name)
+		expect(component_module_version_deleted).to eq(true)
+	end
+end
+
+shared_context 'NEG - Delete component module version' do |dtk_common, component_module_name, version_name|
+	it 'does not delete component module #{component_module_name} version #{version_name}' do
+		component_module_version_deleted = dtk_common.delete_component_module_version(component_module_name, version_name)
+		expect(component_module_version_deleted).to eq(false)
+	end
+end
+
+shared_context 'Delete remote component module version' do |dtk_common, component_module_name, component_module_namespace, version_name|
+	it 'deletes remote component module #{component_module_name} version #{version_name}' do
+		remote_component_module_version_deleted = dtk_common.delete_remote_component_module_version(component_module_name, component_module_namespace, version_name)
+		expect(remote_component_module_version_deleted).to eq(true)
+	end
+end
+
+shared_context 'NEG - Delete remote component module version' do |dtk_common, component_module_name, version_name|
+	it 'does not delete remote component module #{component_module_name} version #{version_name}' do
+		remote_component_module_version_deleted = dtk_common.delete_remote_component_module_version(component_module_name, component_module_namespace, version_name)
+		expect(remote_component_module_version_deleted).to eq(false)
+	end
+end
+
+shared_context 'Clone component module version' do |dtk_common, component_module_name, version_name|
+	it 'clones component module #{component_module_name} version #{version_name}' do
+		component_module_version_cloned = dtk_common.clone_component_module_version(component_module_name, version_name)
+		expect(component_module_version_cloned).to eq(true)
+	end
+end
+
+shared_context 'NEG - Clone component module version' do |dtk_common, component_module_name, version_name|
+	it 'does not clone component module #{component_module_name} version #{version_name}' do
+		component_module_version_cloned = dtk_common.clone_component_module_version(component_module_name, version_name)
+		expect(component_module_version_cloned).to eq(false)
+	end
+end
+
+shared_context 'Install component module version' do |dtk_common, component_module_name, component_module_namespace, version_name|
+	it 'installs component module #{component_module_namespace}/#{component_module_name} version #{version_name} from remote' do
+		puts 'Install component module version from remote:', '---------------------------------------------'
+	    pass = true
+	    value = `dtk component-module install #{component_module_namespace}/#{component_module_name} -v #{version_name}`
+	    puts value
+	    pass = false if ((value.include? 'ERROR') || (value.include? 'exists on client') || (value.include? 'denied') || (value.include? 'Conflicts with existing server local module'))
+	    puts "Install of component module #{component_module_name} #{version_name} completed successfully!" if pass == true
+	    puts "Install of component module #{component_module_name} #{version_name} completed successfully" if pass == false
+	    puts ''
+	    expect(pass).to eq(true)
+	end
+end
+
+
+shared_context 'NEG - Install component module version' do |dtk_common, component_module_name, component_module_namespace, version_name|
+	it 'does not install component module #{component_module_namespace}/#{component_module_name} version #{version_name} from remote' do
+		puts 'Install component module version from remote:', '---------------------------------------------'
+	    pass = true
+	    value = `dtk component-module install #{component_module_namespace}/#{component_module_name} -v #{version_name}`
+	    puts value
+	    pass = true if ((value.include? 'ERROR') || (value.include? 'exists on client') || (value.include? 'denied') || (value.include? 'Conflicts with existing server local module'))
+	    puts "Install of component module #{component_module_name} #{version_name} was not successfull!" if pass == true
+	    puts "Install of component module #{component_module_name} #{version_name} was successfull even though it should not!" if pass == false
+	    puts ''
+	    expect(pass).to eq(true)
+	end
+end

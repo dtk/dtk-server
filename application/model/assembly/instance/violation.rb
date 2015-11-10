@@ -233,7 +233,7 @@ module DTK
         end
 
         def description
-          "#{@type} module '#{@component}' has parsing errors in its DSL file 'dtk.model.yaml'"
+          "#{@type} module '#{@component}' has one or more parsing errors."
         end
       end
       class MissingIncludedModule < self

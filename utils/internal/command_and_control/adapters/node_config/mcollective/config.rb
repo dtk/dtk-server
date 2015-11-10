@@ -154,7 +154,8 @@ eos
               logstash_port: R8::Config[:logstash][:port],
               logstash_log_file_list: R8::Config[:logstash][:log_file_list],
               logstash_config_file_path: R8::Config[:logstash][:config_file_path],
-              logstash_tag: R8::Config[:logstash][:tag]
+              logstash_tag: R8::Config[:logstash][:tag],
+              dtk_arbiter_update: R8::Config[:dtk_arbiter][:update]
             )
           end
 
@@ -228,6 +229,10 @@ EOF
 <% unless puppet_version.empty? %>
 /opt/puppet-omnibus/embedded/bin/gem uninstall -aIx puppet
 /opt/puppet-omnibus/embedded/bin/gem install puppet -v <%= puppet_version %> --no-rdoc --no-ri
+<% end %>
+
+<% if dtk_arbiter_update %>
+[ -x /usr/share/dtk/dtk-arbiter/update.sh ] && /usr/share/dtk/dtk-arbiter/update.sh
 <% end %>
 
 <% if mcollective_restart %>

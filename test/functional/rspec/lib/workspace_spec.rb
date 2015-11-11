@@ -52,6 +52,14 @@ shared_context 'Add component to the node in workspace' do |dtk_common, node_nam
   end
 end
 
+shared_context 'NEG - Add component to the node in workspace' do |dtk_common, node_name, component_name, namespace|
+  it "does not add #{component_name} component to #{node_name} node in workspace context" do
+    workspace_id = dtk_common.get_workspace_id
+    component_added = dtk_common.add_component_to_service_node(workspace_id, node_name, component_name, namespace)
+    component_added.should eq(false)
+  end
+end
+
 shared_context 'Workspace info' do |dtk_common, info_to_check|
   it "contains #{info_to_check}" do
     workspace_id = dtk_common.get_workspace_id

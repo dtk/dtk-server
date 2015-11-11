@@ -306,7 +306,8 @@ module NodeOperationsMixin
 		pretty_print_JSON(node_list)
 		node_id = node_list['data'].select { |x| x['display_name'] == node_name }.first['id']
 		component_add_response = send_request('/rest/assembly/add_component', {:assembly_id=>service_id, :node_id=>node_id, :component_template_id=>component_id, :namespace=>namespace})
-
+		pretty_print_JSON(component_add_response)
+		
 		if (component_add_response['status'] == 'ok')
 			component_list_response = send_request('/rest/assembly/info_about', {:assembly_id=>service_id, :about=>'components', :subtype=>'instance'})
 			component = component_list_response['data'].select {|x| x['id'] == component_add_response['data']['component_id']}

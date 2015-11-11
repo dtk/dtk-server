@@ -386,27 +386,6 @@ shared_context 'NEG - Delete component module from remote' do |dtk_common, compo
   end
 end
 
-shared_context 'Create new component module version' do |dtk_common, component_module_name, version|
-  it "creates new version #{version} for #{component_module_name} component module on server" do
-    component_module_versioned = dtk_common.create_new_module_version(component_module_name, version)
-    component_module_versioned.should eq(true)
-  end
-end
-
-shared_context 'Clone versioned component module' do |_dtk_common, component_module_name, module_version|
-  it "clones #{component_module_name} component module with version #{module_version} from server to local filesystem" do
-    puts 'Clone versioned component module:', '---------------------------------'
-    pass = false
-    value = `dtk component-module #{component_module_name} clone -v #{module_version} -n`
-    puts value
-    pass = value.include?('module_directory:')
-    puts "Versioned component module #{component_module_name} cloned successfully!" if pass == true
-    puts "Versioned component module #{component_module_name} was not cloned successfully!" if pass == false
-    puts ''
-    pass.should eq(true)
-  end
-end
-
 shared_context 'Push clone changes to server' do |component_module_name, file_for_change|
   it "pushes #{component_module_name} component module changes from local filesystem to server with changes on file #{file_for_change}" do
     puts 'Push clone changes to server:', '-----------------------------'
@@ -826,5 +805,3 @@ shared_context "Verify change on service instance component module" do |instance
     expect(pass).to eq(true)
   end
 end
-
-

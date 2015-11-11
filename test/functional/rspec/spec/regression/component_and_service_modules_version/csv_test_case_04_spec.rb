@@ -46,7 +46,7 @@ describe '(Component, service and versioning) Test Case 04: Install component mo
 	end
 
 	context "Delete component module version from remote repo" do
-		include_context "Delete remote component module version", dtk_common, component_module_fullname, component_module_version
+		include_context "Delete remote component module version", dtk_common, component_module_name, component_module_namespace, component_module_version
 	end
 
 	context "Delete all component module versions from server" do

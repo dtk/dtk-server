@@ -24,14 +24,10 @@ describe '(Component, service and versioning) Test Case 01: Import component mod
 	before(:all) do
     	puts '*********************************************************************************************************************************', ''
   	end
-  
-	context 'Copy component module from source to designated filesystem location' do
-		include_context 'Copy component module from source to destination', component_module_name, component_module_source, component_module_filesystem_location
-	end
-
-	context 'Import copied component module' do
-		include_context 'Import component module', "#{component_module_namespace}:#{component_module_name}" 
-	end
+  	
+  	context "Check if component module base version exists" do
+  		include_context 'Check if component module exists', dtk_common, component_module_fullname
+  	end
 
 	context 'Create new component module version' do
 		include_context 'Create component module version', dtk_common, component_module_fullname, component_module_version
@@ -67,14 +63,6 @@ describe '(Component, service and versioning) Test Case 01: Import component mod
 
 	context 'Check if the component module version was deleted successfully' do
 		include_context 'NEG - Check if component module version exists on server', dtk_common, component_module_fullname, component_module_version
-	end
-
-	context 'Delete base component module version' do
-		include_context 'Delete component module', dtk_common, component_module_fullname, component_module_version
-	end
-
-	context 'Delete component module from local filesystem' do
-		include_context 'Delete component module from local filesystem', component_module_filesystem_location, component_module_name
 	end
 
 	context 'Delete component module version from local filesystem' do

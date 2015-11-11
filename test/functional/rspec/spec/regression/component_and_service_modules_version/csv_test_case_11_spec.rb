@@ -12,7 +12,6 @@ require './lib/parameters_setting_spec'
 require './lib/component_modules_spec'
 require './lib/component_module_versions_spec'
 
-namespace = 'version'
 component_module_name = 'temp11'
 component_module_namespace = 'version'
 imported_component_module_name = 'version:temp11'
@@ -51,7 +50,7 @@ describe '(Component, service and versioning) Test Case 11: Install component mo
   end
 
   context 'Clone component module version' do
-    include_context 'Clone component module version', dtk_common, component_module_name, version
+    include_context 'Clone component module version', dtk_common, imported_component_module_name, version
   end
 
   context 'Delete component module' do
@@ -63,7 +62,7 @@ describe '(Component, service and versioning) Test Case 11: Install component mo
   end
 
   context 'Delete component module version' do
-    include_context 'Delete component module version', dtk_common, component_module_name, version
+    include_context 'Delete component module version', dtk_common, imported_component_module_name, version
   end
 
   context 'Delete component module version from local filesystem' do

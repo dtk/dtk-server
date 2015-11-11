@@ -29,7 +29,7 @@ dtk_common = Common.new('', '')
 
 describe '(Component, service and versioning) Test Case 14: NEG - Add component module to workspace and then create new version and try to add it to workspace too' do
   before(:all) do
-    puts '**************************************************************************************************************************************************', ''
+    puts '********************************************************************************************************************************************************', ''
   end
 
   context 'Create node in workspace' do
@@ -41,7 +41,7 @@ describe '(Component, service and versioning) Test Case 14: NEG - Add component 
   end
 
   context 'Create new component module version' do
-    include_context 'Create component module version', dtk_common, component_module_name, version
+    include_context 'Create component module version', dtk_common, imported_component_module_name, version
   end
 
   context 'NEG - Add versioned component to workspace' do
@@ -53,7 +53,7 @@ describe '(Component, service and versioning) Test Case 14: NEG - Add component 
   end
 
   context 'Delete component module version' do
-    include_context 'Delete component module version', dtk_common, component_module_name, version_name
+    include_context 'Delete component module version', dtk_common, imported_component_module_name, version
   end
 
   after(:all) do

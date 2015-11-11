@@ -41,7 +41,7 @@ describe '(Component, service and versioning) Test Case 13: Add component module
   end
 
   context 'Create new component module version' do
-    include_context 'Create component module version', dtk_common, component_module_name, version
+    include_context 'Create component module version', dtk_common, imported_component_module_name, version
   end
 
   context 'Delete existing component from workspace' do
@@ -57,7 +57,7 @@ describe '(Component, service and versioning) Test Case 13: Add component module
   end
 
   context 'Delete component module version' do
-    include_context 'Delete component module version', dtk_common, component_module_name, version_name
+    include_context 'Delete component module version', dtk_common, imported_component_module_name, version
   end
 
   after(:all) do

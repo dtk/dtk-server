@@ -11,7 +11,7 @@ require './lib/assembly_and_service_operations_spec'
 require './lib/component_modules_spec'
 require './lib/component_module_versions_spec'
 
-component_module_name = 'temp17'
+component_module_name = 'temp02'
 component_module_namespace = 'version'
 component_module_remote_name = "#{component_module_namespace}/#{component_module_name}"
 component_module_fullname = "#{component_module_namespace}:#{component_module_name}"

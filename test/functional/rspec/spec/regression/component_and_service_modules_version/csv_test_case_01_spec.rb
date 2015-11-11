@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-# Test Case 15: Import component module from local filesystem, version it and publish it to remote
+# Test Case 01: Import component module from local filesystem, version it and publish it to remote
 
 require 'rubygems'
 require 'rest_client'
@@ -20,7 +20,7 @@ component_module_filesystem_location = "~/dtk/component_modules/#{component_modu
 
 dtk_common = Common.new('', '')
 
-describe '(Component, service and versioning) Test Case 15: Import component module from local filesystem, version it and publish it to remote' do
+describe '(Component, service and versioning) Test Case 01: Import component module from local filesystem, version it and publish it to remote' do
 	before(:all) do
     	puts '*********************************************************************************************************************************', ''
   	end

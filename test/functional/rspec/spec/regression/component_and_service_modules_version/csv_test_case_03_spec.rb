@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-# Test Case 18 (N): Create version of a component module that already exists, is invalid format, or is left out
+# Test Case 03 (N): Create version of a component module that already exists, is invalid format, or is left out
 
 require 'rubygems'
 require 'rest_client'
@@ -22,7 +22,7 @@ component_module_filesystem_location = "~/dtk/component_modules/#{component_modu
 
 dtk_common = Common.new('', '')
 
-describe '(Component, service and versioning) Test Case 18 (N): Create version of a component module that already exists, is invalid format, or is left out' do
+describe '(Component, service and versioning) Test Case 03 (N): Create version of a component module that already exists, is invalid format, or is left out' do
 	before(:all) do
     	puts '*********************************************************************************************************************************', ''
   	end

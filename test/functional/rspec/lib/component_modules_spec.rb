@@ -342,6 +342,23 @@ shared_context 'Delete component module from remote repo' do |_dtk_common, compo
   end
 end
 
+shared_context 'Copy component module from source to destination' do |component_module_name, component_module_source, component_module_destination|
+  it "copies from #{component_module_source} to #{component_module_destination}" do
+    `mkdir -p #{component_module_destination}`
+    `cp -r #{component_module_source} #{component_module_destination}`
+    dtk_model_yaml_file = File.expand_path("#{component_module_destination}/#{component_module_name}/dtk.model.yaml")
+    expect(File.file?(dtk_model_yaml_file)).to eql(true)
+  end
+end
+
+shared_context 'Delete component module version from local filesystem' do |component_module_name, component_module_namespace, version, default_filesystem_location|
+  it "deletes #{component_module_namespace}:#{component_module_name} from #{default_filesystem_location}" do
+    component_module_dir = "#{default_filesystem_location}/#{component_module_namespace}/#{component_module_name}-#{version}"
+    `rm -rf #{component_module_dir}`
+    expect(File.directory?(component_module_dir)).to eql(false)
+  end
+end
+
 shared_context 'Delete component module from remote repo rvm' do |rvm_path, _dtk_common, component_module_name, namespace|
   it "deletes #{component_module_name} component module with #{namespace} namespace from remote repo" do
     puts 'Delete component module from remote:', '------------------------------------'

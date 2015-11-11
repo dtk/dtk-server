@@ -43,15 +43,6 @@ ________________________________________________________________________________
 		- delete component module version (tenant + locally)
 ___________________________________________________________________________________________________________________
 
-- Test Case 04: Pull changes from remote to a versioned component module
-	Precondition:
-		- component module version present on tenant and on repo (0.0.1)
-	Test steps:
-		1. List component module's version
-		2. List diffs changes from remote (no changes)
-		3. Pull changes for the component module version (changes not pulled since they are equal)
-	Cleanup:
-		None.
 ___________________________________________________________________________________________________________________
 
 - Test Case 05: Install versioned component module, add it to assembly, stage assembly to service and converge the service

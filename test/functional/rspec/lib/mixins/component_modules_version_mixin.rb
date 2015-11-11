@@ -20,6 +20,7 @@ module ComponentModulesVersionMixin
 		remote_version_found = false
 		remote_versions = send_request('/rest/component_module/list_remote_versions', {:component_module_id=>component_module_name, :rsa_pub_key => @ssh_key})
 		ap remote_versions
+
 		if remote_versions['data'][0]['versions'].include? version_name
 		  	puts "Version #{version_name} exists on component module #{component_module_name} remote"
 			remote_version_found = true

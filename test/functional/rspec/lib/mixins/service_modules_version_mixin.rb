@@ -87,7 +87,7 @@ module ServiceModulesVersionMixin
   		service_module_version_cloned = false
 
   		client = DtkClientAccessor.new
-  		response = client.execute_command_with_options('component_module', 'component_module', '', 'ls', {}, [])
+  		response = client.execute_command_with_options('component_module', 'component_module', '', 'list', {}, [])
   		response = client.execute_command_with_options('service_module', 'service_module', service_module_name, 'clone', {version: service_module_version}, [])
   			
   		pretty_print_JSON(response)

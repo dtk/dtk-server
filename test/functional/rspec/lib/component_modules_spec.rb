@@ -149,7 +149,7 @@ shared_context 'Import component module rvm' do |rvm_path, component_module_name
   end
 end
 
-shared_context 'Export component module' do |_dtk_common, component_module_name, namespace|
+shared_context 'Export component module' do |component_module_name, namespace|
   it "exports #{component_module_name} component module to #{namespace} namespace on remote repo" do
     puts 'Export component module:', '------------------------'
     pass = false
@@ -164,7 +164,7 @@ shared_context 'Export component module' do |_dtk_common, component_module_name,
   end
 end
 
-shared_context 'Export component module rvm' do |rvm_path, _dtk_common, component_module_name, namespace|
+shared_context 'Export component module rvm' do |rvm_path, component_module_name, namespace|
   it "exports #{component_module_name} component module to #{namespace} namespace on remote repo" do
     puts 'Export component module:', '------------------------'
     pass = false
@@ -329,7 +329,7 @@ shared_context 'Delete versioned component module from local filesystem' do |com
   end
 end
 
-shared_context 'Delete component module from remote repo' do |_dtk_common, component_module_name, namespace|
+shared_context 'Delete component module from remote repo' do |component_module_name, namespace|
   it "deletes #{component_module_name} component module with #{namespace} namespace from remote repo" do
     puts 'Delete component module from remote:', '------------------------------------'
     pass = false
@@ -423,6 +423,17 @@ shared_context 'Push to remote changes for component module' do |_dtk_common, co
     puts 'Push to remote didnt pass successfully!' if pass == false
     puts ''
     pass.should eq(true)
+  end
+end
+
+shared_context 'Create component module on local filesystem' do |component_module_filesystem_location, component_module_name, file_to_copy_location|
+  it "creates component module #{component_module_name} on local filesystem" do
+    puts "Create component module on local filesystem", "----------------------------------------"
+    pass = false
+      `mkdir #{component_module_filesystem_location}/#{component_module_name}`
+      `cp #{file_to_copy_location} #{component_module_filesystem_location}/#{component_module_name}/`
+    puts ''
+    expect(pass).to eq(true)
   end
 end
 

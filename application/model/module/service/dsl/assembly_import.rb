@@ -29,7 +29,7 @@ module DTK; class ServiceModule
     def process(_module_name, hash_content, opts = {})
       integer_version = determine_integer_version(hash_content, opts)
       version_proc_class = load_and_return_version_adapter_class(integer_version)
-      version_proc_class.assembly_iterate(@service_module, hash_content) do |assemblies_hash, node_bindings_hash|
+      version_proc_class.assembly_iterate(@service_module, hash_content, opts) do |assemblies_hash, node_bindings_hash|
         aggregate_errors = ParsingError::Aggregate.new()
         assemblies_hash.each do |ref, assem|
           if file_path = opts[:file_path]

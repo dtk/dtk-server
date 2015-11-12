@@ -85,14 +85,14 @@ module ServiceModulesVersionMixin
 
     def clone_service_module_version(service_module_name, service_module_version)
     	puts "Clone service module version", "-----------------------------"
-		service_module_version_cloned = false
+  		service_module_version_cloned = false
 
-		client = DtkClientAccessor.new
-		response = client.execute_command_with_options('component_module', 'component_module', '', '', {}, [])
-		response = client.execute_command_with_options('service_module', 'service_module', service_module_name, 'clone', {version: service_module_version}, [])
-			
-		pretty_print_JSON(response)
-		service_module_version_cloned = true if response['status'] == 'ok'
+  		client = DtkClientAccessor.new
+  		response = client.execute_command_with_options('component_module', 'component_module', '', 'ls', {}, [])
+  		response = client.execute_command_with_options('service_module', 'service_module', service_module_name, 'clone', {version: service_module_version}, [])
+  			
+  		pretty_print_JSON(response)
+  		service_module_version_cloned = true if response['status'] == 'ok'
     end
 
     def delete_all_service_module_versions(service_module_name)

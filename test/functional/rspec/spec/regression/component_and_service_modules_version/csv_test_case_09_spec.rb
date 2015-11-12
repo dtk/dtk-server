@@ -17,6 +17,7 @@ component_module_namespace = 'version'
 imported_component_module_name = 'version:temp09'
 component_module_filesystem_location = '~/dtk/component_modules/version'
 version = '0.0.1'
+file_name = 'csv_test_case_09_dtk.model.yaml'
 file_to_copy_location = './spec/regression/component_and_service_modules_version/resources/csv_test_case_09_dtk.model.yaml'
 
 dtk_common = Common.new('', '')
@@ -27,11 +28,11 @@ describe '(Component, service and versioning) Test Case 09: Import component mod
   end
 
   context 'Create component module on local filesystem' do
-    include_context 'Create component module on local filesystem', component_module_filesystem_location, component_module_name, file_to_copy_location
+    include_context 'Create component module on local filesystem', component_module_filesystem_location, component_module_name, file_to_copy_location, file_name
   end
 
   context 'Import component module' do
-    include_context 'Import component module', component_module_name
+    include_context 'Import component module', imported_component_module_name
   end
 
   context 'Get component module components list' do
@@ -56,10 +57,6 @@ describe '(Component, service and versioning) Test Case 09: Import component mod
 
   context 'Delete base component module from remote' do
     include_context 'Delete component module from remote repo', component_module_name, component_module_namespace
-  end
-
-  context "Delete component module version from remote repo" do
-    include_context "Delete remote component module version", dtk_common, component_module_name, component_module_namespace, component_module_new_version
   end
 
   context 'Check if component module version exists on remote' do

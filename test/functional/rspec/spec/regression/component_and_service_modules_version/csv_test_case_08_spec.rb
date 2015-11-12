@@ -62,7 +62,7 @@ describe '(Component, service and versioning) Test Case 08: Check if deleting ba
   end
 
   context 'Publish component module' do
-    include_context 'Export component module', component_module_name, component_module_namespace
+    include_context 'Export component module', imported_component_module_name, component_module_namespace
   end
 
   context "Delete all component module versions from server" do

@@ -91,14 +91,15 @@ ________________________________________________________________________________
 		- Message saying that assembly already contains version of the component module
 ___________________________________________________________________________________________________________________
 
-- Test Case 08 (N): Check if deleting base component module version from remote displays warning message
-	Reminder: Not yet decided how this will behave
+- Test Case 08: Check if deleting base component module version from remote will delete all versions
 	Precondition:
-		- component module exists on repo: versioned_component_module
-		- component module versions exist
+		- component module exists on tenant: versioned_component_module
+		- component module versions exist tenant
 	Test steps:
-	1. Delete from catalog base component module
-	2. Warning message appeared
+	1. Publish component module
+	2. Publish component module version
+	3. Delete from catalog base component module
+	4. Check that all versions are deleted
 	Cleanup:
 		- none
 ___________________________________________________________________________________________________________________

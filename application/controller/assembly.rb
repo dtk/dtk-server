@@ -472,7 +472,13 @@ module DTK
     #### actions to update and create assembly templates
     def rest__promote_to_template
       assembly = ret_assembly_instance_object()
-      assembly_template_name, service_module_name, module_namespace = get_template_and_service_names_params(assembly)
+
+      unless (ret_request_params(:assembly_template_name) && ret_request_params(:service_module_name))
+        assembly.update_object!(:version)
+        fail ErrorUsage.new("You are not allow to push updates to service module versions!") unless assembly[:version].eql?('master')
+      end
+
+      assembly_template_name, service_module_name, module_namespace = get_template_and_service_names_params(assembly, check_frozen_branches: true)
 
       if assembly_template_name.nil? || service_module_name.nil?
         fail ErrorUsage.new('SERVICE-NAME/ASSEMBLY-NAME cannot be determined and must be explicitly given')
@@ -493,7 +499,8 @@ module DTK
         opts.merge!(local_clone_dir_exists: local_clone_dir_exists)
       end
 
-      service_module = Assembly::Template.create_or_update_from_instance(project, assembly, service_module_name, assembly_template_name, opts)
+      # push-assembly-updates always update master branch
+      service_module = Assembly::Template.create_or_update_from_instance(project, assembly, service_module_name, assembly_template_name, opts.merge!(version: 'master'))
       rest_ok_response service_module.ret_clone_update_info()
     end
     #### end: actions to update and create assembly templates

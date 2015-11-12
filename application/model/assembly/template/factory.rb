@@ -107,7 +107,7 @@ module DTK
         project_idh = service_module.get_project().id_handle()
 
         assembly_mh = project_idh.create_childMH(:component)
-        if ret = exists?(assembly_mh, service_module, assembly_name)
+        if ret = exists?(assembly_mh, service_module, assembly_name, opts)
           if opts[:mode] == :create
             fail ErrorUsage.new("Assembly (#{assembly_name}) already exists in service module (#{service_module_name})")
           end
@@ -263,11 +263,13 @@ module DTK
         merge_message
       end
 
-      def self.exists?(assembly_mh, service_module, template_name)
+      def self.exists?(assembly_mh, service_module, template_name, opts = {})
         ret = nil
+        filter = [:and, [:eq, :service_id, service_module.id()]]
+        filter << [:eq, :version, opts[:version]] if opts[:version]
         sp_hash = {
           cols: [:id, :group_id, :display_name],
-          filter: [:and, [:eq, :service_id, service_module.id()]]
+          filter: filter
         }
         module_branches = get_objs(service_module.model_handle(:module_branch), sp_hash)
         return ret if module_branches.empty?

@@ -153,14 +153,12 @@ module DTK
       end
     end
 
-    def get_assembly_templates
+    def get_assembly_templates(opts = {})
       sp_hash = {
         cols: [:module_branches]
       }
       mb_idhs = get_objs(sp_hash).map { |r| r[:module_branch].id_handle() }
-      opts = {
-        filter: [:oneof, :module_branch_id, mb_idhs.map(&:get_id)]
-      }
+      opts.merge!(filter: [:oneof, :module_branch_id, mb_idhs.map(&:get_id)])
       if project = get_project()
         opts.merge!(project_idh: project.id_handle())
       end
@@ -173,8 +171,8 @@ module DTK
       ndx_ret.values
     end
 
-    def list_assembly_templates
-      templates_with_nodes = get_assembly_templates()
+    def list_assembly_templates(version = 'master')
+      templates_with_nodes = get_assembly_templates({version_filter: [:eq, :version, version]})
       templates_with_nodes.each do |template|
         nodes_size = 0
         (template[:nodes] || []).each do |node|

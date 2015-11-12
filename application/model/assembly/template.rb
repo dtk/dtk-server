@@ -194,7 +194,8 @@ module DTK; class Assembly
         cols: opts[:cols] || [:id, :group_id, :display_name, :component_type, :module_branch_id, :description, :service_module, :version],
         filter: [:and, [:eq, :type, 'composite'],
                  opts[:project_idh] ? [:eq, :project_project_id, opts[:project_idh].get_id()] : [:neq, :project_project_id, nil],
-                 opts[:filter]
+                 opts[:filter],
+                 opts[:version_filter]
                    ].compact
       }
       ret = get_these_objs(mh, sp_hash, keep_ref_cols: true)

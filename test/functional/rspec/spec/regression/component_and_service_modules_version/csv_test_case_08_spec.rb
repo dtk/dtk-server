@@ -65,20 +65,12 @@ describe '(Component, service and versioning) Test Case 08: Check if deleting ba
     include_context 'Export component module', component_module_name, component_module_namespace
   end
 
-  context 'Delete component module' do
-    include_context 'Delete component module', dtk_common, imported_component_module_name
+  context "Delete all component module versions from server" do
+    include_context "Delete all component module versions", dtk_common, imported_component_module_name
   end
 
-  context 'Delete component module version from local filesystem' do
-    include_context 'Delete component module from local filesystem', component_module_filesystem_location, component_module_name + "-" + version
-  end
-
-  context 'Delete component module version' do
-    include_context 'Delete component module version', dtk_common, imported_component_module_name, version
-  end
-
-  context 'Delete component module version from local filesystem' do
-    include_context 'Delete component module from local filesystem', component_module_filesystem_location, component_module_name + "-" + version
+  context "Delete all component module versions from local filesystem" do
+    include_context 'Delete all local component module versions', component_module_filesystem_location, component_module_name
   end
 
   after(:all) do

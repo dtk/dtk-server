@@ -426,12 +426,16 @@ shared_context 'Push to remote changes for component module' do |_dtk_common, co
   end
 end
 
-shared_context 'Create component module on local filesystem' do |component_module_filesystem_location, component_module_name, file_to_copy_location|
+shared_context 'Create component module on local filesystem' do |component_module_filesystem_location, component_module_name, file_to_copy_location, file_name|
   it "creates component module #{component_module_name} on local filesystem" do
     puts "Create component module on local filesystem", "----------------------------------------"
     pass = false
       `mkdir #{component_module_filesystem_location}/#{component_module_name}`
       `cp #{file_to_copy_location} #{component_module_filesystem_location}/#{component_module_name}/`
+      `mv #{component_module_filesystem_location}/#{component_module_name}/#{file_name} #{component_module_filesystem_location}/#{component_module_name}/dtk.model.yaml`
+    value = `ls #{component_module_filesystem_location}/#{component_module_name}/dtk.model.yaml`
+    puts value
+    pass = value.include?('dtk.model.yaml')
     puts ''
     expect(pass).to eq(true)
   end

@@ -67,7 +67,7 @@ describe '(Component, service and versioning) Test Case 09: Import component mod
   end
 
   context "Delete all component module versions from server" do
-    include_context "Delete all component module versions", dtk_common, component_module_fullname
+    include_context "Delete all component module versions", dtk_common, imported_component_module_name
   end
 
   context "Delete all component module versions from local filesystem" do

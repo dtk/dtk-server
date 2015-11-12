@@ -327,6 +327,7 @@ module DTK
         end
       else
         opts.merge!(ret_dsl_updated_info: {})
+        opts.merge!(module_version: version) if version
         error_or_module_dsl_info = update_model_from_dsl(module_branch, opts)
         if ParsingError.is_error?(error_or_module_dsl_info)
           ret.dsl_parse_error = error_or_module_dsl_info

@@ -552,10 +552,14 @@ module DTK
       # to element IDs. This "workaround" helps with that.
       if service_module_id = ret_request_params(:service_module_id)
         # this is name of assembly template
-        assembly_id = ret_request_params(:assembly_id)
-        service_module = ServiceModule.find(model_handle(:service_module), service_module_id)
-        assembly_template = service_module.get_assembly_templates().find { |template| template[:display_name].eql?(assembly_id) || template[:id] == assembly_id.to_i }
-        fail ErrorUsage, "We are not able to find assembly '#{assembly_id}' for service module '#{service_module_id}'" unless assembly_template
+        assembly_id        = ret_request_params(:assembly_id)
+        version            = ret_request_params(:version)
+        service_module     = ServiceModule.find(model_handle(:service_module), service_module_id)
+        module_name        = ret_request_params(:service_module_name)
+        assembly_version   = version||'master'
+        assembly_templates = service_module.get_assembly_templates().select { |template| (template[:display_name].eql?(assembly_id) || template[:id] == assembly_id.to_i) }
+        assembly_template  = assembly_templates.find{ |template| template[:version] == assembly_version }
+        fail ErrorUsage, "We are not able to find assembly '#{assembly_id}' for service module '#{module_name}'" unless assembly_template
       else
         assembly_template = ret_assembly_template_object()
       end

@@ -22,33 +22,7 @@ ________________________________________________________________________________
 	Cleanup:
 		- delete service module (tenant + locally)
 		- delete service module version (tenant + locally)
-____________________________________________________________________________________________________________________
 
-- Test Case 03: Pull changes from remote to a versioned service module
-	Precondition:
-		- service module present on tenant and on repo: versioned_service_module
-		- service module version exists on tenant and on repo: 0.0.1
-	Test steps:
-		1. List service module's version
-		2. List diffs changes from remote
-		3. Pull changes for the service module version
-	Cleanup:
-		None.
-____________________________________________________________________________________________________________________
-
-- Test Case 04: Import service module from local filesystem, version it and publish it to remote
-	Precondition:
-		- service module on local filesystem: versioned_service_module
-		- service module version: 0.0.1
-	Test steps:
-		1. Import service module from local dir
-		2. Publish it to remote repo
-		3. Create version of the service module
-		4. Push version to remote repo (publish)
-	Test cleanup:
-		- delete service module (tenant + locally)
-		- delete service module version (tenant + locally)
-		- delete service module from remote and version
 ____________________________________________________________________________________________________________________
 
 - Test Case 05: Install service module, version it and push it to remote
@@ -63,20 +37,7 @@ ________________________________________________________________________________
 		- delete service module (tenant + locally)
 		- delete service module version (tenant + locally)
 		- delete service module version from remote
-____________________________________________________________________________________________________________________
 
-- Test Case 06: Install service module version, create new version, publish it to remote
-	Precondition:
-		- service module present on repo: versioned_service_module
-		- service module version present on repo: 0.0.1
-	Test steps:
-		1. Install service module version
-		2. Create new service module version (0.0.2)
-		3. Publish created version
-	Test cleanup:
-		- delete new service module version: 0.0.2
-		- delete service module (tenant + locally)
-		- delete service module version 0.0.1 (tenant + locally)
 ___________________________________________________________________________________________________________________
 
 - Test Case 07 (N): Create version of a service module that already exists
@@ -105,14 +66,3 @@ ________________________________________________________________________________
 		- delete service module (tenant + locally)
 		- delete service module version (tenant + locally)
 ___________________________________________________________________________________________________________________
-
-- Test Case 09 (N): Check if deleting base service module version from remote displays warning message
-	Reminder: Not yet decided how this will behave
-	Precondition:
-		- service module exists on repo: versioned_service_module
-		- service module versions exist
-	Test steps:
-	1. Delete from catalog base service module
-	2. Warning message appeared
-	Cleanup:
-		- none

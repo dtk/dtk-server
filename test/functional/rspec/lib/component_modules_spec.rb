@@ -359,7 +359,7 @@ shared_context 'Delete component module version from local filesystem' do |compo
   end
 end
 
-shared_context 'Delete component module from remote repo rvm' do |rvm_path, _dtk_common, component_module_name, namespace|
+shared_context 'Delete component module from remote repo rvm' do |rvm_path, component_module_name, namespace|
   it "deletes #{component_module_name} component module with #{namespace} namespace from remote repo" do
     puts 'Delete component module from remote:', '------------------------------------'
     pass = false
@@ -412,7 +412,7 @@ shared_context 'NEG - Push clone changes to server' do |component_module_name, f
     end
 end
 
-shared_context 'Push to remote changes for component module' do |_dtk_common, component_module_name|
+shared_context 'Push to remote changes for component module' do |component_module_name|
   it "pushes #{component_module_name} component module changes from server to repoman" do
     puts 'Push to remote component module changes:', '-----------------------------------'
     pass = false

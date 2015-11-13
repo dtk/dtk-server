@@ -223,3 +223,18 @@ shared_context 'NEG - List service modules with filter on remote' do |dtk_common
     service_modules_retrieved.should eq(false)
   end
 end
+
+shared_context 'Create service module on local filesystem' do |service_module_filesystem_location, service_module_name, file_to_copy_location, file_name, assembly_name|
+  it "creates service module #{service_module_name} on local filesystem" do
+    puts "Create service module on local filesystem", "----------------------------------------"
+    pass = false
+      `mkdir -p #{service_module_filesystem_location}/#{service_module_name}/assemblies`
+      `cp #{file_to_copy_location} #{service_module_filesystem_location}/#{service_module_name}/assemblies/`
+      `mv #{service_module_filesystem_location}/#{service_module_name}/assemblies/#{file_name} #{service_module_filesystem_location}/#{service_module_name}/assemlbies/#{assembly_name}.dtk.assembly.yaml`
+    value = `ls #{service_module_filesystem_location}/#{service_module_name}/#{assembly_name}.dtk.assembly.yaml`
+    puts value
+    pass = value.include?("#{assembly_name}.dtk.assembly.yaml")
+    puts ''
+    expect(pass).to eq(true)
+  end
+end

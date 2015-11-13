@@ -66,3 +66,14 @@ ________________________________________________________________________________
 		- delete service module (tenant + locally)
 		- delete service module version (tenant + locally)
 ___________________________________________________________________________________________________________________
+
+- Test Case 09: Stage assembly, add versioned cmp as dependency, create new assembly and check that module_refs.yaml is updated correctly
+	Precondition:
+	 - service module and versioned cmp module already exist on server
+	Test steps:
+	1. Stage assembly
+	2. Add versioned cmp as dependency on service
+	3. Create new assembly from existing service in new service module
+	4. Check content of newly created service module and check that module_refs.yaml has versioned cmp as dependency
+	5. Delete staged assembly
+	6. Delete from server and locally newly created service module

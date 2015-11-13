@@ -217,3 +217,34 @@ ________________________________________________________________________________
     - delete component module version (tenant + locally)
     - delete new branch created on bitbucket repo for version
 
+___________________________________________________________________________________________________________________
+
+- Test Case 17: Install two component modules, add second cmp module version as dependency for first cmp module, delete both and install first cmp module
+	Precondition: 
+	- two cmp modules exist on remote repo and second is already versioned
+	Test steps:
+	1. Install two component modules
+	2. Add module_refs.yaml and include in first cmp module and add second cmp version as dependency, push changes
+	3. Publish (push dtkn) changes back to repo for first module and its version
+	4. Delete both modules from server and their versions
+	5. Install first cmp module and make sure that dependency cmp module version is installed to
+	6. Remove module_refs.yaml and include from first cmp module
+	7. Publish (push dtkn) changes back to repo
+	8. Delete both modules from server and their versions
+
+___________________________________________________________________________________________________________________
+
+- Test Case 18: Install two component modules, add second cmp module version as dependency for first cmp module, version first cmp module and install first versioned cmp module
+	Precondition:
+	- two cmp module exist on remote repo and second is already versioned
+	Test steps:
+	1. Install two component modules
+	2. Add module_refs.yaml and include in first cmp module and add second cmp version as dependency, push changes
+	3. Create new version from first cmp module
+	4. Publish (push dtkn) changes back to repo for first module and its version
+	5. Delete both modules from server and their versions
+	6. Install first cmp module version and make sure that dependency cmp module version is installed to
+	7. Remove module_refs.yaml and include from first cmp module
+	8. Delete created version for first cmp module
+	9. Publish (push dtkn) changes back to repo
+	10. Delete both modules from server and their versions

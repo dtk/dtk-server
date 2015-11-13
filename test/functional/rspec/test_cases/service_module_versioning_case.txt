@@ -79,7 +79,7 @@ ________________________________________________________________________________
 	6. Delete from server and locally newly created service module
 ___________________________________________________________________________________________________________________
 
-- Test Case 10: Install service module, stage assembly, add cmp module version as dependency, create new assembly, publish it, delete modules and check module_refs.yaml afer install
+- Test Case 10: Install service module, add cmp module version as dependency to module_refs.yaml, publish it, delete modules and install service module again and check that cmp module version is also installed
 	Precondition: 
 	- service module exists on remote repo
 	- component module version exists on repo
@@ -94,7 +94,7 @@ ________________________________________________________________________________
 	8. Delete both modules from server and their versions
 ___________________________________________________________________________________________________________________
 
-- Test Case 11: Install service modules, stage assembly, add cmp module version as dependency, create new assembly, create version and publish it, delete modules, install service module version and check module_refs. yaml
+- Test Case 11: Install service module, add cmp module version as dependency to module_refs.yaml, create new version of service module, publish it, delete modules and install service module version again and check that cmp module version is also installed
 Precondition: 
 	- service module exists on remote repo
 	- component module version exists on repo
@@ -107,4 +107,3 @@ Precondition:
 	6. Install service module version and make sure that correct component module version is installed
 	7. Delete service module version from remote
 	8. Delete both modules from server and their versions
-	9. Delete both modules from server and their versions

@@ -1,6 +1,5 @@
 #!/usr/bin/env ruby
-# Test Case 05: Install versioned component module, add it to assembly, stage assembly to service and converge the service
-
+# Test Case 06: Add a versioned component module to assembly that already has a version of that component module added
 require 'rubygems'
 require 'rest_client'
 require 'pp'
@@ -33,7 +32,7 @@ dtk_common = Common.new(service_name, "#{assembly_name}")
 dtk_common_new = Common.new(new_service_name, "#{service_module_name}::#{new_assembly}")
 
 
-describe '(Component, service and versioning) Test Case 05: Install versioned component module, add it to assembly, stage assembly to service and converge the service'  do
+describe '(Component, service and versioning) Test Case 06: Add a versioned component module to assembly that already has a version of that component module added'  do
 	before :all do
     	puts '*********************************************************************************************************************************', ''
 	end

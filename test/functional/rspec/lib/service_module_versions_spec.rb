@@ -43,7 +43,8 @@ shared_context 'NEG - Publish versioned service module' do |dtk_common, service_
 	it "does not publish/push service module #{service_module_name} since this version #{version_name} does not exist" do
 		service_module_published = dtk_common.publish_service_module_version(service_module_name, version_name)
 		expect(service_module_published).to eq(false)
-
+	end
+end
 shared_context 'Create service module version' do |dtk_common, service_module_name, version_name|
 	it "creates service module #{service_module_name} version #{version_name}" do
 		service_module_version_created = dtk_common.create_service_module_version(service_module_name, version_name)
@@ -104,7 +105,7 @@ shared_context 'Install service module version' do |service_module_name, service
 	it 'installs service module #{service_module_namespace}/#{service_module_name} version #{version_name} from remote' do
 		puts "Install service module version from remote:", "---------------------------------------------"
 	    pass = true
-	    value = `dtk service-module install #{service_module_namespace}/#{service_module_name} -v #{version_name}`
+	    value = `dtk service-module install #{service_module_namespace}/#{service_module_name} -v #{version_name} --update-none -y`
 	    puts value
 	    pass = false if ((value.include? 'ERROR') || (value.include? 'exists on client') || (value.include? 'denied') || (value.include? 'Conflicts with existing server local module'))
 	    puts "Install of service module #{service_module_name} #{version_name} completed successfully!" if pass == true
@@ -118,7 +119,7 @@ shared_context 'NEG - Install service module version' do |dtk_common, service_mo
 	it "does not install service module #{service_module_namespace}/#{service_module_name} version #{version_name} from remote" do
 		puts 'Install service module version from remote:', '---------------------------------------------'
 	    pass = true
-	    value = `dtk service-module install #{service_module_namespace}/#{service_module_name} -v #{version_name}`
+	    value = `dtk service-module install #{service_module_namespace}/#{service_module_name} -v #{version_name} --update-none -y`
 	    puts value
 	    pass = true if ((value.include? 'ERROR') || (value.include? 'exists on client') || (value.include? 'denied') || (value.include? 'Conflicts with existing server local module'))
 	    puts "Install of service module #{service_module_name} #{version_name} was not successfull!" if pass == true
@@ -165,5 +166,37 @@ shared_context 'NEG - Delete all local service module versions' do |service_modu
     	puts "Service module #{service_module_name} versions were not deleted from local filesystem successfully!" if passed == false
     	puts ''
     	expect(passed).to eql(false)
+	end
+end
+
+shared_context 'Check if service module verison is exists locally' do |service_module_filesystem_location, service_module_name, service_module_version|
+	it "checks that service module version exists on local filesystem" do
+		puts 'Check service module version exists on local filesystem:', '--------------------------------------------------'
+    	pass = false
+    	`ls #{service_module_filesystem_location}/#{service_module_name}-#{service_module_version}`
+    	pass = true if $?.exitstatus == 0
+    	if (pass == true)
+      		puts "Service module #{service_module_name} version #{service_module_version} exists on local filesystem!"
+    	else
+    	  	puts "Service module #{service_module_name} version #{service_module_version} does not exists on local filesystem!"
+    	end
+   	 	puts ''
+    	expect(pass).to eql(true)
+	end
+end
+
+shared_context 'NEG - Check if service module verison is exists locally' do |service_module_filesystem_location, service_module_name, service_module_version|
+	it "checks that service module version does not exist on local filesystem" do
+		puts 'Check service module version does not exist on local filesystem:', '--------------------------------------------------'
+    	pass = false
+    	`ls #{service_module_filesystem_location}/#{service_module_name}-#{service_module_version}`
+    	pass = true if $?.exitstatus == 0
+    	if (pass == true)
+      		puts "Service module #{service_module_name} version #{service_module_version} exists on local filesystem, but it shouldn't!"
+    	else
+    	  	puts "Service module #{service_module_name} version #{service_module_version} does not exists on local filesystem!"
+    	end
+   	 	puts ''
+    	expect(pass).to eql(false)
 	end
 end

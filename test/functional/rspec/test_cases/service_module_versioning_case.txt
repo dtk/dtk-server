@@ -77,3 +77,34 @@ ________________________________________________________________________________
 	4. Check content of newly created service module and check that module_refs.yaml has versioned cmp as dependency
 	5. Delete staged assembly
 	6. Delete from server and locally newly created service module
+___________________________________________________________________________________________________________________
+
+- Test Case 10: Install service module, stage assembly, add cmp module version as dependency, create new assembly, publish it, delete modules and check module_refs.yaml afer install
+	Precondition: 
+	- service module exists on remote repo
+	- component module version exists on repo
+	Test steps:
+	1. Install service module and component module version
+	2. Add module_refs.yaml service module and add component module version as dependency, push changes
+	3. Publish (push dtkn) changes back to repo for service module 
+	4. Delete service module and component module versions
+	5. Install service module and make sure that correct component module version is installed
+	6. Remove module_refs.yaml version line from service module
+	7. Publish (push dtkn) changes back to repo
+	8. Delete both modules from server and their versions
+___________________________________________________________________________________________________________________
+
+- Test Case 11: Install service modules, stage assembly, add cmp module version as dependency, create new assembly, create version and publish it, delete modules, install service module version and check module_refs. yaml
+Precondition: 
+	- service module exists on remote repo
+	- component module version exists on repo
+	Test steps:
+	1. Install service module and component module version
+	2. Add module_refs.yaml service module and add component module version as dependency, push changes
+	3. Create new service module version
+	4. Publish (push dtkn) version back to repo for service module 
+	5. Delete service module and component module versions
+	6. Install service module version and make sure that correct component module version is installed
+	7. Delete service module version from remote
+	8. Delete both modules from server and their versions
+	9. Delete both modules from server and their versions

@@ -1,0 +1,5 @@
+---
+component_modules:
+  temp22_2:
+    namespace: version
+    version: 0.0.1

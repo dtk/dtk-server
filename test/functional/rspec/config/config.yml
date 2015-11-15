@@ -1,12 +1,12 @@
 r8server:
-  server: https://adnan.dtk.io
+  server: https://dev17.dtk.io
   repoman: https://haris.dtk.io
   port: 443
-  username: dtk2
+  username: dtk17-client
   password: r8server
   log: /home/dtk17/server/application/log/production.log
-  ssh_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC0y1IXfKWVOn+ysen3o3jdr7Wb8+I0esgd21MtDTWRArmTwpb+BLNmCh63adsWTP5EUtegyRArBr/uEZ9Y0gQSqXD11mpyE5a2ACi1JHBDP53dR9LIUM7iceIEu6jxzbEd53TllJVWKwUGNALI0MdelS6kofF61O+IcA+dVFgYe8SwsDaBLLQ0Xh1UG7QI65qLhpoZ3jdWXW40zRvx/lG5Kee31t06VnsNta8C5N3cfRjkzarImtwTLCyJzgPtUQuSVaiCUhjppR7eje+cfNpC8QrcKV479Jjv/+ymuXfjNbAuXwmQ3B64PvWKvrz9GelAJiUdQeAqyqwRHQGIyHPV vagrant@vagrant-ubuntu-trusty-64"
-  repoman_user: adnan
+  ssh_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCkfRjIJPunPenoNwkCKtKWxwUdlk8TbCAJeF73F5LAeQAEW+ov/Jd0Ewb10plNrxqZsZ4S2hOqi9+5J8KMImLL94pLEDWmGZ+pcfpICleOoMz3is3ticF3INLgv5Vx/eioJoHXBvXXKxWrcBpz2C3eczDdtIa9++Js/JA/jQkRaAXLTkoiIfSwf/tbSNpYtF0xoWGWspqTvoBhJKuVhfOGhKtlUXI24FMy7I0kvOX66m4z+3/CN5xNkZ564uEMGMjrkUoEsPj1DvV4tiQZ7uEUlga1A9vYGmNLogpzqd8UtNLdt9plluV7p68VfLIlQrAGgil3sR3+lWldvUuU+YJL dtk17-client@dtk17-server"
+  repoman_user: dtk17-client
 dtkserverdbconnection:
   adapter: postgresql
   database: dtk17

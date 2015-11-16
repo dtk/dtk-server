@@ -156,7 +156,7 @@ shared_context 'Export component module' do |component_module_name, namespace|
     cmp_module = component_module_name.split(':').last
     value = `dtk component-module #{component_module_name} publish #{namespace}/#{cmp_module}`
     puts value
-    pass = true if value.include? 'Module has been successfully published'
+    pass = true if value.include? 'Status: OK'
     puts "Component module #{cmp_module} exported successfully!" if pass == true
     puts "Component module #{cmp_module} was not exported successfully!" if pass == false
     puts ''

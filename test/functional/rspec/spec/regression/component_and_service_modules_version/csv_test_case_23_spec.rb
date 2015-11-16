@@ -21,7 +21,7 @@ version = '0.0.1'
 file_for_change = 'module_refs.yaml'
 file_for_add = 'module_refs.yaml'
 file_for_remove = 'module_refs.yaml'
-file_for_change_location = './spec/regression/component_and_service_modules_version/resources/csv_test_case_23_module_refs.yaml'
+file_for_change_location = 'spec/regression/component_and_service_modules_version/resources/csv_test_case_23_module_refs.yaml'
 dtk_model_yaml_file_location = '~/dtk/component_modules/version/temp23_1/dtk.model.yaml'
 
 dtk_common = Common.new('', '')
@@ -52,11 +52,11 @@ describe '(Component, service and versioning) Test Case 23: Install two componen
   end
 
   context 'Add second cmp module version as dependency for first component module' do
-    include_context 'Add module_refs.yaml file', second_component_module_name, file_for_change_location, file_for_add, component_module_filesystem_location
+    include_context 'Add module_refs.yaml file', first_component_module_name, file_for_change_location, file_for_add, component_module_filesystem_location
   end
 
   context 'Add second cmp module version as dependency for first component module' do
-    include_context 'Add includes to dtk.model.yaml', dtk_model_yaml_file_location, second_component_module_name
+    include_context 'Add includes to dtk.model.yaml', dtk_model_yaml_file_location, [second_component_module_name]
   end
 
   context 'Push clone changes to server' do
@@ -92,7 +92,7 @@ describe '(Component, service and versioning) Test Case 23: Install two componen
   end
 
   context "Delete all component module versions from local filesystem" do
-    include_context 'Delete all local component module versions', component_module_filesystem_location, first_component_module_name
+    include_context 'Delete all local component module versions', component_module_filesystem_location, second_component_module_name
   end
 
   context "Install first component module version from remote" do
@@ -112,7 +112,7 @@ describe '(Component, service and versioning) Test Case 23: Install two componen
   end
 
   context 'Revert changes on first component module' do
-    include_context 'Remove module_refs.yaml file', second_component_module_name, file_for_remove, component_module_filesystem_location
+    include_context 'Remove module_refs.yaml file', first_component_module_name, file_for_remove, component_module_filesystem_location
   end
 
 	context 'Push clone changes to server' do
@@ -140,7 +140,7 @@ describe '(Component, service and versioning) Test Case 23: Install two componen
   end
 
   context "Delete all component module versions from local filesystem" do
-    include_context 'Delete all local component module versions', component_module_filesystem_location, first_component_module_name
+    include_context 'Delete all local component module versions', component_module_filesystem_location, second_component_module_name
   end 
 
 	after(:all) do

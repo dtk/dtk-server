@@ -1,6 +1,8 @@
 require 'singleton'
+require 'openssl'
 
 require File.expand_path('../../../protocol_multiplexer', File.dirname(__FILE__))
+require File.expand_path('../../../../ssh_cipher', File.dirname(__FILE__))
 
 module DTK
   module CommandAndControlAdapter
@@ -20,15 +22,11 @@ module DTK
         super(stomp_client)
       end
 
-      def create_message(uuid, msg, agent)
-        deliver_msg = msg.merge({
-          request_id: uuid
+      def create_message(uuid, msg, agent, pbuilderid)
+        msg.merge({
+          request_id: uuid,
+          pbuilderid: pbuilderid
         })
-
-        ap "Real MEssage"
-        ap deliver_msg
-
-        Base64.encode64(deliver_msg.to_yaml)
       end
 
       # heart of the system
@@ -38,7 +36,7 @@ module DTK
         @@listening_thread ||= Thread.new do
           @stomp_client.subscribe(R8::Config[:arbiter][:reply_topic]) do |msg|
             begin
-              original_msg = decode64(msg.body)
+              original_msg = decode(msg.body)
               msg_request_id = original_msg[:body][:request_id]
 
               # discard message if not the one requested
@@ -61,7 +59,9 @@ module DTK
         timeout = context_with_callbacks[:timeout] || DefaultTimeout
         expected_count = context_with_callbacks[:expected_count] || ExpectedCountDefault
 
-        @stomp_client.publish(R8::Config[:arbiter][:topic], create_message(request_id, msg, agent))
+        message = create_message(request_id, msg, agent, filter['fact'].first[:value])
+
+        @stomp_client.publish(R8::Config[:arbiter][:topic], encode(message))
 
         initialize_listener(request_id, callbacks)
 
@@ -70,9 +70,16 @@ module DTK
 
     private
 
-      def decode64(message)
-        decoded_message = Base64.decode64(message)
-        YAML.load(decoded_message)
+      def encode(message)
+        encrypted_message, ekey, esecret = SSHCipher.encrypt_sensitive(message)
+        Marshal.dump({ :payload => encrypted_message, :ekey => ekey, :esecret => esecret  })
+      end
+
+      def decode(message)
+        encrypted_message = Marshal.load(message)
+
+        decoded_message = SSHCipher.decrypt_sensitive(encrypted_message[:payload], encrypted_message[:ekey], encrypted_message[:esecret])
+        decoded_message
       end
 
     end

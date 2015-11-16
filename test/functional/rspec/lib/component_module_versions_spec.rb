@@ -124,7 +124,7 @@ shared_context 'NEG - Clone component module version' do |dtk_common, component_
 end
 
 shared_context 'Install component module version' do |component_module_name, component_module_namespace, version_name|
-	it 'installs component module #{component_module_namespace}/#{component_module_name} version #{version_name} from remote' do
+	it "installs component module #{component_module_namespace}/#{component_module_name} version #{version_name} from remote" do
 		puts "Install component module version from remote:", "---------------------------------------------"
 	    pass = true
 	    value = `dtk component-module install #{component_module_namespace}/#{component_module_name} -v #{version_name}`

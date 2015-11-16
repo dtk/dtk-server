@@ -120,7 +120,7 @@ shared_context 'Export service module' do |service_module_name, namespace|
     service_module = service_module_name.split(':').last
     value = `dtk service-module #{service_module_name} publish #{namespace}/#{service_module}`
     puts value
-    pass = true if (value.include? 'Module has been successfully published')
+    pass = true if value.include? 'Status: OK'
     puts "Publish of #{service_module} service module to #{namespace} namespace has been completed successfully!" if pass == true
     puts "Publish of #{service_module} service module to #{namespace} namespace did not complete successfully!" if pass == false
     puts ''
@@ -237,4 +237,31 @@ shared_context 'Create service module on local filesystem' do |service_module_fi
     puts ''
     expect(pass).to eq(true)
   end
+end
+
+
+shared_context 'Push local service module changes to server' do |service_module_name, file_for_change|
+  it "pushes #{service_module_name} service module changes from local filesystem to server with changes on file #{file_for_change}" do
+    puts 'Push clone changes to server:', '-----------------------------'
+    pass = false
+    value = `dtk service-module #{service_module_name} push`
+    puts value
+    pass = value.include?('Status: OK')
+    puts 'Clone changes pushed to server successfully!' if pass == true
+    puts 'Clone changes were not pushed to server successfully!' if pass == false
+    puts ''
+    pass.should eq(true)
+  end
+end
+
+shared_context 'NEG - Push local service module changes to server' do |service_module_name, fail_message, expected_error_message|
+  it "pushes #{service_module_name} service module changes from local filesystem to server but fails - reason: #{fail_message}" do
+      puts 'NEG - Push clone changes to server:', '-----------------------------------'
+      fail = false
+      value = `dtk service-module #{service_module_name} push`
+      puts value
+      fail = value.include?(expected_error_message)
+      puts ''
+      fail.should eq(true)
+    end
 end

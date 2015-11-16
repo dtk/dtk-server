@@ -131,8 +131,6 @@ module DTK
       # NOT USED SO FAR beloow
 
       def self.errors_in_node_action_result?(result, action = nil)
-        # DEBUG SNIPPET >>> REMOVE <<<
-        require (RUBY_VERSION.match(/1\.8\..*/) ? 'ruby-debug' : 'debugger');Debugger.start; debugger
         # result[:statuscode] is for mcollective agent errors and data is for errors for agent
         error_type = result[:error_type] || 'node agent error'
         if result[:statuscode] != 0
@@ -148,16 +146,12 @@ module DTK
       private
 
       def self.config_agent_for_action?(action)
-        # DEBUG SNIPPET >>> REMOVE <<<
-        require (RUBY_VERSION.match(/1\.8\..*/) ? 'ruby-debug' : 'debugger');Debugger.start; debugger
         if config_agent_type = action && action.config_agent_type
           ConfigAgent.load(config_agent_type)
         end
       end
 
       def self.errors_in_node_action_payload?(payload, action = nil)
-        # DEBUG SNIPPET >>> REMOVE <<<
-        require (RUBY_VERSION.match(/1\.8\..*/) ? 'ruby-debug' : 'debugger');Debugger.start; debugger
         ret = nil
         answer_computed = false
         if config_agent = config_agent_for_action?(action)

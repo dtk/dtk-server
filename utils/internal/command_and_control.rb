@@ -237,9 +237,6 @@ module DTK
     end
 
     def self.load_for_aux(adapter_type, adapter_name)
-      # DEBUG SNIPPET >>> REMOVE <<<
-      require 'ap'
-      ap "#{adapter_type}/#{adapter_name}"
       Adapters[adapter_type] ||= {}
       return Adapters[adapter_type][adapter_name] if Adapters[adapter_type][adapter_name]
       begin

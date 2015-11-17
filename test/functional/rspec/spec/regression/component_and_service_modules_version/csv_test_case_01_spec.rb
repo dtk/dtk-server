@@ -50,7 +50,7 @@ describe '(Component, service and versioning) Test Case 01: Import component mod
 	end
 
 	context 'Delete base component module version from remote' do
-		include_context 'Delete component module from remote repo', dtk_common, component_module_name, component_module_namespace
+		include_context 'Delete component module from remote repo', component_module_name, component_module_namespace
 	end
 
 	context 'Check if the component module version was deleted from remote' do

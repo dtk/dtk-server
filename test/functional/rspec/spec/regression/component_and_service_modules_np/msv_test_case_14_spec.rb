@@ -37,7 +37,7 @@ describe '(Modules, Services and Versioning) Test Case 14: Import component modu
   end
 
   context 'Export component module to default namespace' do
-    include_context 'Export component module', dtk_common, imported_component_module_name, namespace
+    include_context 'Export component module', imported_component_module_name, namespace
   end
 
   context 'Delete component module' do
@@ -49,7 +49,7 @@ describe '(Modules, Services and Versioning) Test Case 14: Import component modu
   end
 
   context 'Delete component module from remote' do
-    include_context 'Delete component module from remote repo', dtk_common, component_module_name, namespace
+    include_context 'Delete component module from remote repo', component_module_name, namespace
   end
 
   after(:all) do

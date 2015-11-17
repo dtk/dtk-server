@@ -72,7 +72,7 @@ describe "(Modules, Services and Versioning) Test Case 12: Export service module
   end
 
   context 'List all service modules on remote' do
-    include_context 'List all service modules on remote', dtk_common, service_module_name, namespace
+    include_context 'List all service modules on remote', service_module_name, namespace
   end
 
   context "Delete #{local_service_module_name} service module" do
@@ -80,7 +80,7 @@ describe "(Modules, Services and Versioning) Test Case 12: Export service module
   end
 
   context "Delete #{service_module_name} service module from remote" do
-    include_context 'Delete service module from remote repo', dtk_common, service_module_name, namespace
+    include_context 'Delete service module from remote repo', service_module_name, namespace
   end
 
   context "Delete #{imported_service_module_name} service module" do

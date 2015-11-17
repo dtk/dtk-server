@@ -54,7 +54,7 @@ shared_context 'NEG - Import remote service module' do |service_module_name|
     pass = false
     value = `dtk service-module install #{service_module_name} --update-none`
     puts value
-    pass = true if (value.include? 'exists on client')
+    pass = true if (value.include? 'is not empty')
     puts "Import of remote service module #{service_module_name} did not complete successfully because of the referenced component module that exists on local filesystem!" if pass == true
     puts "Import of remote service module #{service_module_name} completed successfully which is not expected!" if pass == false
     puts ''

@@ -89,7 +89,7 @@ describe '(Repoman client integration) Test Case 16: delete-from-catalog positiv
   end
 
   context 'Delete remote module' do
-    include_context 'Delete component module from remote', user_data[:component_module], user_data[:namespace]
+    include_context 'Delete component module from remote', dtk_common, user_data[:component_module], user_data[:namespace]
   end
 
   context 'Publish component module' do
@@ -113,7 +113,7 @@ describe '(Repoman client integration) Test Case 16: delete-from-catalog positiv
   end
 
   context 'Delete remote module' do
-    include_context 'Delete component module from remote', user_data[:component_module], user_data[:namespace]
+    include_context 'Delete component module from remote', dtk_common, user_data[:component_module], user_data[:namespace]
   end
 
   context 'Publish component module' do

@@ -68,6 +68,7 @@ describe '(Repoman client integration) Test Case 17: NEG - delete-from-catalog n
     it "is set for user" do
       header.click_on_users
       user_data[:user] = conf.repoman_user
+      users.search_for_object(user_data[:user])
       users.click_on_edit_user(user_data[:user])
       users.assign_user_group_for_user(user_data[:usergroup])
       users.save_edit_changes
@@ -88,7 +89,7 @@ describe '(Repoman client integration) Test Case 17: NEG - delete-from-catalog n
   end
 
   context 'NEG - Delete remote module' do
-    include_context 'NEG - Delete component module from remote', user_data[:component_module], user_data[:namespace]
+    include_context 'NEG - Delete component module from remote', dtk_common, user_data[:component_module], user_data[:namespace]
   end
 
   #User A is not owner of module A but belongs to user group A which is set as user group on module (permissions: D/None/None)
@@ -107,7 +108,7 @@ describe '(Repoman client integration) Test Case 17: NEG - delete-from-catalog n
   end
 
   context 'NEG - Delete remote module' do
-    include_context 'NEG - Delete component module from remote', user_data[:component_module], user_data[:namespace]
+    include_context 'NEG - Delete component module from remote', dtk_common, user_data[:component_module], user_data[:namespace]
   end
 
   context 'Delete component module' do

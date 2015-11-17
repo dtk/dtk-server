@@ -9,38 +9,51 @@ module DTK; class ServiceModule; class AssemblyExport
       end
 
       def parse_and_order_assembly_hash(assembly_hash)
-        cmps_first  = nil
-        nodes_first = nil
-
-        new_cmps_hash  = {}
-        new_nodes_hash = {}
-        parsed_cmps    = []
-        parsed_nodes   = {}
+        new_cmps_hash    = {}
+        new_nodes_hash   = {}
+        parsed_cmps      = []
+        parsed_nodes     = {}
+        new_hash_content = {}
 
         assembly_cmps  = assembly_hash[:assembly][:components]||[]
         assembly_nodes = assembly_hash[:assembly][:nodes]||{}
+        assembly_attrs = assembly_hash[:assembly][:attributes]||{}
 
         @existing_hash_content.each do |section_name, section_content|
           case section_name
            when 'components'
-            cmps_first  = true unless nodes_first
             parsed_cmps = parse_components(assembly_cmps, section_content)
+            new_hash_content.merge!('components' => parsed_cmps)
            when 'nodes'
-            nodes_first  = true unless cmps_first
             parsed_nodes = parse_nodes(assembly_nodes, section_content)
+            new_hash_content.merge!('nodes' => parsed_nodes)
+           when 'attributes'
+            parsed_attrs = parse_attributes(assembly_attrs, section_content)
+            new_hash_content.merge!('attributes' => parsed_attrs)
            else
-            raise Error.new, "Unhandled section #{section_name}!"
+            p "Unhandled section #{section_name}!"
           end
         end
 
-        new_cmps_hash.merge!('components' => parsed_cmps.concat(assembly_cmps)) unless parsed_cmps.empty? && assembly_cmps.empty?
-        new_nodes_hash.merge!('nodes' => parsed_nodes.merge(assembly_nodes)) unless parsed_nodes.empty? && assembly_nodes.empty?
+        new_hash_content.merge!('components' => assembly_cmps) if !assembly_cmps.empty? && new_hash_content['components'].nil?
+        new_hash_content.merge!('nodes' => assembly_nodes) if !assembly_nodes.empty? && new_hash_content['nodes'].nil?
+        new_hash_content.merge!('attributes' => assembly_attrs) if !assembly_attrs.empty? && new_hash_content['attributes'].nil?
 
-        new_hash_content = cmps_first ? new_cmps_hash.merge(new_nodes_hash) : new_nodes_hash.merge(new_cmps_hash)
         { 'assembly' => new_hash_content }
       end
 
       private
+
+      def parse_attributes(assembly_hash_attrs, existing_attrs)
+        new_attrs = {}
+        existing_attrs.each do |attr_name|
+          if attribute = assembly_hash_attrs.delete(attr_name)
+            new_attrs.merge!(attr_name => attribute)
+          end
+        end
+
+        new_attrs.merge(assembly_hash_attrs)
+      end
 
       def parse_components(assembly_hash_cmps, existing_cmps)
         new_cmps = []

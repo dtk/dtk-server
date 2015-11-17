@@ -30,6 +30,11 @@ module DTK
         assembly_dsl_path = assembly_meta_filename_path()
         serialized_content = serialize()
 
+        # if assembly part has assembly level components and nodes, make sure components are always in the first place
+        if assembly = serialized_content[:assembly]
+          assembly.merge!(nodes: assembly.delete(:nodes)) if assembly.has_key?(:components) && assembly.keys.first.to_s.eql?('nodes')
+        end
+
         # Check to determine whether shoudl generate assembly_dsl_path from serialized_content (from fresh)
         # or whether it should use existing file to keep context like comments, spacing
         # it should only use existing file as part of this if

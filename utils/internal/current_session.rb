@@ -28,7 +28,7 @@ module DTK
     end
 
     def are_catalog_credentilas_set?
-      !(get_user_object().catalog_username.nil? || get_user_object().catalog_password.nil?)
+      (get_user_object().catalog_username || get_user_object().catalog_password || R8::Config[:remote_repo][:public][:username])
     end
 
     def self.get_default_namespace
@@ -45,11 +45,11 @@ module DTK
 
     def self.catalog_credentials
       usr_obj = CurrentSession.new.get_user_object()
-      { username: usr_obj.catalog_username, password: usr_obj.catalog_password, pre_hashed: true }
+      { username: usr_obj.catalog_username || R8::Config[:remote_repo][:public][:username], password: usr_obj.catalog_password || R8::Config[:remote_repo][:public][:password], pre_hashed: true }
     end
 
     def self.catalog_username
-      catalog_credentials()[:username]
+      catalog_credentials()[:username] || R8::Config[:remote_repo][:public][:username]
     end
 
     def set_user_object(user_object)

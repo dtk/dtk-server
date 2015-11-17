@@ -68,7 +68,7 @@ describe "(Modules, Services and Versioning) Test Case 12: Export service module
   end
 
   context 'Export service module to default namespace' do
-    include_context 'Export service module', dtk_common, local_service_module_name, namespace
+    include_context 'Export service module', local_service_module_name, namespace
   end
 
   context 'List all service modules on remote' do

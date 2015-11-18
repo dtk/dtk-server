@@ -15,7 +15,7 @@ define dtk_server::bundler_gems_install(
     path      => ['/usr/bin','/usr/local/bin/', '/bin'],
     logoutput => 'on_failure',
 #    user      => $app_user,
-    timeout   => 500,
+    timeout   => 600,
     require   => File[$vendor_dir]
   }
 

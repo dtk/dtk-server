@@ -81,7 +81,8 @@ class dtk_server::docker(
                             "${tenant_directory}/.fog:/home/dtk1/.fog",
                             "${tenant_directory}/creds:/dtk-creds/creds",
                             "${tenant_directory}/home/gitolite-admin:/home/dtk1/gitolite-admin",
-                            "/var/run/postgresql/:/var/run/postgresql/"
+                            "/var/run/postgresql/:/var/run/postgresql/",
+                            "${rsa_identity_dir_host}:${rsa_identity_dir}"
                           ]
 
   file { $directory_list:
@@ -157,5 +158,10 @@ class dtk_server::docker(
     instance_name => $tenant_user,
     tenant_type   => 'docker',
     docker_socket => "${tenant_directory}/socket/nginx.sock",
-  } 
+  } ->
+  
+  exec { "update_hosts-${tenant_user}":
+     command => "/bin/echo \"127.0.0.1 ${tenant_user}.dtk.io\" >> /etc/hosts",
+     unless  => "/bin/grep -c \"127.0.0.1 ${tenant_user}.dtk.io\" /etc/hosts",
+   }  
 }

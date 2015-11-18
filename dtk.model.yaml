@@ -102,7 +102,7 @@ components:
           required: true
         remote_repo_port:
           type: string
-          default: '443'
+          required: true
         remote_repo_git_user:
           type: string
           default: git

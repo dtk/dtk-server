@@ -37,7 +37,7 @@ class dtk_repo_manager(
   $repo_env_file="${repo_target_dir}/.env"
   $admin_env_file="${admin_target_dir}/.env"
 
-  $bundle_install_command = "${rvm_path}/wrappers/default/bundle install --without development"
+  $bundle_install_command = "${rvm_path}/wrappers/default/bundle install --without development --deployment"
  
   package { 'libpq-dev': 
     ensure => 'installed'
@@ -152,7 +152,7 @@ class dtk_repo_manager(
 
   exec { "rake_db_create":
     command => "/usr/local/rvm/wrappers/default/rake db:create",
-    user  => $gitolite_user,
+    #user  => $gitolite_user,
     cwd     => $repo_target_dir,
     require => [Exec["bundle_install"], Package["nodejs"]],
   }
@@ -172,21 +172,21 @@ class dtk_repo_manager(
 
   exec { "rake_db_migrate":
     command => "/usr/local/rvm/wrappers/default/rake db:migrate",
-    user    => $gitolite_user,
+    #user    => $gitolite_user,
     cwd     => $repo_target_dir,
     require => Exec["run_postgresql_contrib_script"],
   }
 
   exec { "rake_db_seed":
     command => "/usr/local/rvm/wrappers/default/rake db:seed",
-    user    => $gitolite_user,
+    #user    => $gitolite_user,
     cwd     => $repo_target_dir,
     require => Exec["rake_db_migrate"],
   }
 
   exec { "rake_ci_create_user":
     command => "/usr/local/rvm/wrappers/default/rake ci:create_user['dtk16','fakedtk@dtk.io','password','test','test']",
-    user    => $gitolite_user,
+    #user    => $gitolite_user,
     cwd     => $repo_target_dir,
     require => Exec["rake_db_seed"],
   }
@@ -197,12 +197,19 @@ class dtk_repo_manager(
     require => Exec["rake_ci_create_user"],
   }
 
+  file { "/tmp/global-gitolite-manager.lock":
+    content => "",
+    ensure  => present,
+    owner    => $gitolite_user,
+    require => File["/etc/init.d/sidekiq"]
+  }
+
   service { "sidekiq":
     enable      => true,
     ensure      => running,
     #hasstatus   => true,
     hasrestart  => true,
-    require     => [ File["/etc/init.d/sidekiq"], Service["redis-server"] ],
+    require     => [ File["/etc/init.d/sidekiq"], Service["redis-server"], File["/tmp/global-gitolite-manager.lock"] ],
   }
 
   

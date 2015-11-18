@@ -3,7 +3,7 @@ name: tenant-docker
 description: tenant-docker
 dsl_version: 1.0.0
 node_bindings:
-  tenant: precise-medium
+  tenant: trusty-medium
 assembly:
   nodes:
     tenant:
@@ -32,21 +32,24 @@ assembly:
             docker_image: getdtk/server:latest
             docker_password_hash: ZGR1dm5qYWs6QXRsNG4rNzA=
             remote_repo_git_user: git
-            remote_repo_host: ''
-            remote_repo_port: '443'
             tenant_user: dtk1docker
 workflow:
-  assembly_action: create
-  node: tenant
-  ordered_components:
-  - dtk
-  - stdlib
-  - vcsrepo::include
-  - sysctl::include
-  - dtk_java
-  - dtk_activemq
-  - dtk_postgresql::server
-  - dtk_postgresql::db[dtk1docker]
-  - dtk_nginx::base
-  - docker
-  - dtk_server::docker
+  subtask_order: sequential
+  subtasks:
+  - name: service_setup
+    node: tenant
+    ordered_components:
+    - dtk
+    - stdlib
+    - vcsrepo::include
+    - sysctl::include
+    - dtk_java
+    - dtk_activemq
+    - dtk_postgresql::server
+    - dtk_postgresql::db[dtk1docker]
+  - name: docker_setup
+    node: tenant
+    ordered_components:
+    - dtk_nginx::base
+    - docker
+    - dtk_server::docker

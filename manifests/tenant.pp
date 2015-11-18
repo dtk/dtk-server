@@ -3,6 +3,7 @@ define dtk_server::tenant(
   $stomp_server_host = $::ec2_public_hostname,
   $local_repo_host   = $::ec2_public_hostname,
   $server_public_dns = $::ec2_public_hostname,
+  $stomp_server_port = '6163',
   $remote_repo_host,
   $remote_repo_port = '443',
   $remote_repo_git_user = 'git',

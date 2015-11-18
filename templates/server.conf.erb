@@ -14,7 +14,7 @@ local_repo.host = <%=@local_repo_host%>
 db.host = <%=@db_host%>
 db.name = <%= defined?(@db_name) ? @db_name : @tenant_user %>
 mcollective.host = <%=@stomp_server_host%>
-# mcollective.port = 6163
+mcollective.port = <%=@stomp_server_port%>
 mcollective.ssh.local.public_key= <%= @rsa_identity_dir %>/mcollective_local.pub
 mcollective.ssh.local.private_key= <%= @rsa_identity_dir %>/mcollective_local
 mcollective.ssh.local.authorized_keys= <%= @rsa_identity_dir %>/authorized_keys

@@ -83,6 +83,10 @@ components:
         stomp_server_host:
           description: "Stomp server host"
           type: string
+        stomp_server_port:
+          description: "Stomp server port"
+          type: string
+          default: 6163
         server_public_dns:
           description: "Server public dns"
           type: string
@@ -102,7 +106,7 @@ components:
           required: true
         remote_repo_port:
           type: string
-          required: true
+          default: 443
         remote_repo_git_user:
           type: string
           default: git

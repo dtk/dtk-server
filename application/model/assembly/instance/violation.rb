@@ -233,7 +233,7 @@ module DTK
         end
 
         def description
-          "#{@type} '#{@component}' has syntax errors in DSL files."
+          "#{@type} module '#{@component}' has one or more parsing errors."
         end
       end
       class MissingIncludedModule < self

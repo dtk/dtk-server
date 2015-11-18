@@ -37,7 +37,7 @@ describe '(Modules, Services and Versioning) Test Case 36: Install service modul
   end
 
   context 'Export service module to default namespace' do
-    include_context 'Export service module', dtk_common, service_module, new_namespace
+    include_context 'Export service module', service_module, new_namespace
   end
 
   context 'Import previously exported service module' do
@@ -69,7 +69,7 @@ describe '(Modules, Services and Versioning) Test Case 36: Install service modul
   end
 
   context 'Delete service module from remote' do
-    include_context 'Delete service module from remote repo', dtk_common, service_module_name, new_namespace
+    include_context 'Delete service module from remote repo', service_module_name, new_namespace
   end
 
   after(:all) do

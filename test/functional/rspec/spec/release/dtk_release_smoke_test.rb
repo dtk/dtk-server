@@ -55,11 +55,11 @@ describe "DTK Server smoke test release" do
   end
 
   context "Export component module to #{namespace} namespace" do
-    include_context "Export component module rvm", rvm_path, dtk_common, local_component_module_name, namespace
+    include_context "Export component module rvm", rvm_path, local_component_module_name, namespace
   end
 
   context "Export service module to #{namespace} namespace" do
-    include_context "Export service module rvm", rvm_path, dtk_common, local_service_module_name, namespace
+    include_context "Export service module rvm", rvm_path, local_service_module_name, namespace
   end
 
   context "Get component module components list" do
@@ -101,11 +101,11 @@ describe "DTK Server smoke test release" do
   end
 
   context "Delete #{component_module_name} component module from remote" do
-    include_context "Delete component module from remote repo rvm", rvm_path, dtk_common, component_module_name, namespace
+    include_context "Delete component module from remote repo rvm", rvm_path, component_module_name, namespace
   end
 
   context "Delete #{service_module_name} service module from remote" do
-    include_context "Delete service module from remote repo rvm", rvm_path, dtk_common, service_module_name, namespace
+    include_context "Delete service module from remote repo rvm", rvm_path, service_module_name, namespace
   end
 
   after(:all) do

@@ -29,7 +29,9 @@ module DTK
       end
 
       def component_link_output_target(parsed_port)
-        ret = "#{parsed_port[:node_name]}#{Seperators[:node_component]}#{parsed_port[:component_name]}"
+        node_name = parsed_port[:node_name]
+        ret = parsed_port[:component_name]
+        ret = "#{node_name}#{Seperators[:node_component]}#{ret}" unless node_name.eql?('assembly_wide')
         if title = parsed_port[:title]
           ret << "#{Seperators[:title_before]}#{title}#{Seperators[:title_after]}"
         end

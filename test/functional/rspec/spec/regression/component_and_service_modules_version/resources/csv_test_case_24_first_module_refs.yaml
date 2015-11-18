@@ -1,0 +1,7 @@
+---
+component_modules:
+  stdlib:
+    namespace: r8
+  temp24:
+    namespace: version
+    version: 0.0.1

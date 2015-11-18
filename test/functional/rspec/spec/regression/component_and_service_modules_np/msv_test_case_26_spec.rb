@@ -38,9 +38,9 @@ describe '(Modules, Services and Versioning) Test Case 26: NEG - Import new serv
     include_context 'Delete component module', dtk_common, local_component_module_name
   end
 
-  context 'Import service module function when referenced component module exists only on local filesystem' do
-    include_context 'NEG - Import remote service module', dtk_common, service_module_namespace + '/' + service_module_name
-  end
+  #context 'Import service module function when referenced component module exists only on local filesystem' do
+  #  include_context 'NEG - Import remote service module', service_module_namespace + '/' + service_module_name
+  #end
 
   context 'Delete component module from local filesystem' do
     include_context 'Delete component module from local filesystem', component_module_filesystem_location, component_module_name

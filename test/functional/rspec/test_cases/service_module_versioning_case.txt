@@ -22,33 +22,7 @@ ________________________________________________________________________________
 	Cleanup:
 		- delete service module (tenant + locally)
 		- delete service module version (tenant + locally)
-____________________________________________________________________________________________________________________
 
-- Test Case 03: Pull changes from remote to a versioned service module
-	Precondition:
-		- service module present on tenant and on repo: versioned_service_module
-		- service module version exists on tenant and on repo: 0.0.1
-	Test steps:
-		1. List service module's version
-		2. List diffs changes from remote
-		3. Pull changes for the service module version
-	Cleanup:
-		None.
-____________________________________________________________________________________________________________________
-
-- Test Case 04: Import service module from local filesystem, version it and publish it to remote
-	Precondition:
-		- service module on local filesystem: versioned_service_module
-		- service module version: 0.0.1
-	Test steps:
-		1. Import service module from local dir
-		2. Publish it to remote repo
-		3. Create version of the service module
-		4. Push version to remote repo (publish)
-	Test cleanup:
-		- delete service module (tenant + locally)
-		- delete service module version (tenant + locally)
-		- delete service module from remote and version
 ____________________________________________________________________________________________________________________
 
 - Test Case 05: Install service module, version it and push it to remote
@@ -63,20 +37,7 @@ ________________________________________________________________________________
 		- delete service module (tenant + locally)
 		- delete service module version (tenant + locally)
 		- delete service module version from remote
-____________________________________________________________________________________________________________________
 
-- Test Case 06: Install service module version, create new version, publish it to remote
-	Precondition:
-		- service module present on repo: versioned_service_module
-		- service module version present on repo: 0.0.1
-	Test steps:
-		1. Install service module version
-		2. Create new service module version (0.0.2)
-		3. Publish created version
-	Test cleanup:
-		- delete new service module version: 0.0.2
-		- delete service module (tenant + locally)
-		- delete service module version 0.0.1 (tenant + locally)
 ___________________________________________________________________________________________________________________
 
 - Test Case 07 (N): Create version of a service module that already exists
@@ -106,13 +67,43 @@ ________________________________________________________________________________
 		- delete service module version (tenant + locally)
 ___________________________________________________________________________________________________________________
 
-- Test Case 09 (N): Check if deleting base service module version from remote displays warning message
-	Reminder: Not yet decided how this will behave
+- Test Case 09: Stage assembly, add versioned cmp as dependency, create new assembly and check that module_refs.yaml is updated correctly
 	Precondition:
-		- service module exists on repo: versioned_service_module
-		- service module versions exist
+	 - service module and versioned cmp module already exist on server
 	Test steps:
-	1. Delete from catalog base service module
-	2. Warning message appeared
-	Cleanup:
-		- none
+	1. Stage assembly
+	2. Add versioned cmp as dependency on service
+	3. Create new assembly from existing service in new service module
+	4. Check content of newly created service module and check that module_refs.yaml has versioned cmp as dependency
+	5. Delete staged assembly
+	6. Delete from server and locally newly created service module
+___________________________________________________________________________________________________________________
+
+- Test Case 10: Install service module, add cmp module version as dependency to module_refs.yaml, publish it, delete modules and install service module again and check that cmp module version is also installed
+	Precondition: 
+	- service module exists on remote repo
+	- component module version exists on repo
+	Test steps:
+	1. Install service module and component module version
+	2. Add module_refs.yaml service module and add component module version as dependency, push changes
+	3. Publish (push dtkn) changes back to repo for service module 
+	4. Delete service module and component module versions
+	5. Install service module and make sure that correct component module version is installed
+	6. Remove module_refs.yaml version line from service module
+	7. Publish (push dtkn) changes back to repo
+	8. Delete both modules from server and their versions
+___________________________________________________________________________________________________________________
+
+- Test Case 11: Install service module, add cmp module version as dependency to module_refs.yaml, create new version of service module, publish it, delete modules and install service module version again and check that cmp module version is also installed
+Precondition: 
+	- service module exists on remote repo
+	- component module version exists on repo
+	Test steps:
+	1. Install service module and component module version
+	2. Add module_refs.yaml service module and add component module version as dependency, push changes
+	3. Create new service module version
+	4. Publish (push dtkn) version back to repo for service module 
+	5. Delete service module and component module versions
+	6. Install service module version and make sure that correct component module version is installed
+	7. Delete service module version from remote
+	8. Delete both modules from server and their versions

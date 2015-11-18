@@ -49,6 +49,7 @@ describe '(Repoman client integration) Test Case 13: NEG - chmod go+rwd on modul
     it "is set for user" do
       header.click_on_users
       user_data[:user] = conf.repoman_user
+      users.search_for_object(user_data[:user])
       users.click_on_edit_user(user_data[:user])
       users.assign_user_group_for_user(user_data[:usergroup])
       users.save_edit_changes

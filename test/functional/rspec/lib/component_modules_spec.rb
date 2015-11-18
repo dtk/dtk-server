@@ -149,14 +149,14 @@ shared_context 'Import component module rvm' do |rvm_path, component_module_name
   end
 end
 
-shared_context 'Export component module' do |_dtk_common, component_module_name, namespace|
+shared_context 'Export component module' do |component_module_name, namespace|
   it "exports #{component_module_name} component module to #{namespace} namespace on remote repo" do
     puts 'Export component module:', '------------------------'
     pass = false
     cmp_module = component_module_name.split(':').last
     value = `dtk component-module #{component_module_name} publish #{namespace}/#{cmp_module}`
     puts value
-    pass = true if value.include? 'Module has been successfully published'
+    pass = true if value.include? 'Status: OK'
     puts "Component module #{cmp_module} exported successfully!" if pass == true
     puts "Component module #{cmp_module} was not exported successfully!" if pass == false
     puts ''
@@ -164,7 +164,7 @@ shared_context 'Export component module' do |_dtk_common, component_module_name,
   end
 end
 
-shared_context 'Export component module rvm' do |rvm_path, _dtk_common, component_module_name, namespace|
+shared_context 'Export component module rvm' do |rvm_path, component_module_name, namespace|
   it "exports #{component_module_name} component module to #{namespace} namespace on remote repo" do
     puts 'Export component module:', '------------------------'
     pass = false
@@ -329,7 +329,7 @@ shared_context 'Delete versioned component module from local filesystem' do |com
   end
 end
 
-shared_context 'Delete component module from remote repo' do |_dtk_common, component_module_name, namespace|
+shared_context 'Delete component module from remote repo' do |component_module_name, namespace|
   it "deletes #{component_module_name} component module with #{namespace} namespace from remote repo" do
     puts 'Delete component module from remote:', '------------------------------------'
     pass = false
@@ -342,7 +342,24 @@ shared_context 'Delete component module from remote repo' do |_dtk_common, compo
   end
 end
 
-shared_context 'Delete component module from remote repo rvm' do |rvm_path, _dtk_common, component_module_name, namespace|
+shared_context 'Copy component module from source to destination' do |component_module_name, component_module_source, component_module_destination|
+  it "copies from #{component_module_source} to #{component_module_destination}" do
+    `mkdir -p #{component_module_destination}`
+    `cp -r #{component_module_source} #{component_module_destination}`
+    dtk_model_yaml_file = File.expand_path("#{component_module_destination}/#{component_module_name}/dtk.model.yaml")
+    expect(File.file?(dtk_model_yaml_file)).to eql(true)
+  end
+end
+
+shared_context 'Delete component module version from local filesystem' do |component_module_name, component_module_namespace, version, default_filesystem_location|
+  it "deletes #{component_module_namespace}:#{component_module_name} from #{default_filesystem_location}" do
+    component_module_dir = "#{default_filesystem_location}/#{component_module_namespace}/#{component_module_name}-#{version}"
+    `rm -rf #{component_module_dir}`
+    expect(File.directory?(component_module_dir)).to eql(false)
+  end
+end
+
+shared_context 'Delete component module from remote repo rvm' do |rvm_path, component_module_name, namespace|
   it "deletes #{component_module_name} component module with #{namespace} namespace from remote repo" do
     puts 'Delete component module from remote:', '------------------------------------'
     pass = false
@@ -366,27 +383,6 @@ shared_context 'NEG - Delete component module from remote' do |dtk_common, compo
   it "does not delete #{component_module_name} component module with #{namespace} namespace from remote repo" do
     module_deleted = dtk_common.delete_module_from_remote(component_module_name, namespace)
     module_deleted.should eq(false)
-  end
-end
-
-shared_context 'Create new component module version' do |dtk_common, component_module_name, version|
-  it "creates new version #{version} for #{component_module_name} component module on server" do
-    component_module_versioned = dtk_common.create_new_module_version(component_module_name, version)
-    component_module_versioned.should eq(true)
-  end
-end
-
-shared_context 'Clone versioned component module' do |_dtk_common, component_module_name, module_version|
-  it "clones #{component_module_name} component module with version #{module_version} from server to local filesystem" do
-    puts 'Clone versioned component module:', '---------------------------------'
-    pass = false
-    value = `dtk component-module #{component_module_name} clone -v #{module_version} -n`
-    puts value
-    pass = value.include?('module_directory:')
-    puts "Versioned component module #{component_module_name} cloned successfully!" if pass == true
-    puts "Versioned component module #{component_module_name} was not cloned successfully!" if pass == false
-    puts ''
-    pass.should eq(true)
   end
 end
 
@@ -416,7 +412,7 @@ shared_context 'NEG - Push clone changes to server' do |component_module_name, f
     end
 end
 
-shared_context 'Push to remote changes for component module' do |_dtk_common, component_module_name|
+shared_context 'Push to remote changes for component module' do |component_module_name|
   it "pushes #{component_module_name} component module changes from server to repoman" do
     puts 'Push to remote component module changes:', '-----------------------------------'
     pass = false
@@ -427,6 +423,21 @@ shared_context 'Push to remote changes for component module' do |_dtk_common, co
     puts 'Push to remote didnt pass successfully!' if pass == false
     puts ''
     pass.should eq(true)
+  end
+end
+
+shared_context 'Create component module on local filesystem' do |component_module_filesystem_location, component_module_name, file_to_copy_location, file_name|
+  it "creates component module #{component_module_name} on local filesystem" do
+    puts "Create component module on local filesystem", "----------------------------------------"
+    pass = false
+      `mkdir #{component_module_filesystem_location}/#{component_module_name}`
+      `cp #{file_to_copy_location} #{component_module_filesystem_location}/#{component_module_name}/`
+      `mv #{component_module_filesystem_location}/#{component_module_name}/#{file_name} #{component_module_filesystem_location}/#{component_module_name}/dtk.model.yaml`
+    value = `ls #{component_module_filesystem_location}/#{component_module_name}/dtk.model.yaml`
+    puts value
+    pass = value.include?('dtk.model.yaml')
+    puts ''
+    expect(pass).to eq(true)
   end
 end
 
@@ -809,5 +820,3 @@ shared_context "Verify change on service instance component module" do |instance
     expect(pass).to eq(true)
   end
 end
-
-

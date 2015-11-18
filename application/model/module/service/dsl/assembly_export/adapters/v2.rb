@@ -145,8 +145,10 @@ module DTK
           service_links = {}
           ret = { component_in_ret => { service_links: service_links } }
         end
-        output_target = "#{out_parsed_port[:node_name]}#{Seperators[:node_component]}#{out_parsed_port[:component_name]}"
-        link_def_ref = out_parsed_port[:link_def_ref]
+        node_name     = out_parsed_port[:node_name]
+        output_target = out_parsed_port[:component_name]
+        output_target = "#{node_name}#{Seperators[:node_component]}#{output_target}" unless node_name.eql?('assembly_wide')
+        link_def_ref  = out_parsed_port[:link_def_ref]
         if existing_links = service_links[link_def_ref]
           if existing_links.is_a?(Array)
             existing_links << output_target

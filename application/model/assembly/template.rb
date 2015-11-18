@@ -50,6 +50,9 @@ module DTK; class Assembly
       assembly_instance_lock = Assembly::Instance::Lock.create_from_element(assembly_instance, service_module)
       assembly_instance_lock.save_to_model()
 
+      # user can provide custom node-size and os-type attribute, we proccess them here and assign to nodes
+      set_custom_node_attributes(assembly_instance, opts) if opts[:node_size] || opts[:os_type]
+
       assembly_instance
     end
 
@@ -280,6 +283,45 @@ module DTK; class Assembly
     def self.component_type(service_module_name, template_name)
       "#{service_module_name}#{ModuleTemplateSep}#{template_name}"
     end
+
+    # node_size - master=m3.xlarge,slave=m3.large or m3.xlarge
+    # os_type   - precise
+    def set_custom_node_attributes(assembly_instance, opts)
+      av_pairs = []
+      assembly_nodes = assembly_instance.get_nodes.map{ |node| node[:display_name] }
+      unless assembly_nodes.empty?
+        node_size = opts[:node_size]
+        os_type   = opts[:os_type]
+        add_node_specific_attributes(assembly_nodes, av_pairs, node_size, os_type) if node_size || os_type
+        Attribute::Pattern::Assembly.set_attributes(assembly_instance, av_pairs, opts.merge!(create: true)) unless av_pairs.empty?
+      end
+    end
+
+    def add_node_specific_attributes(assembly_nodes, av_pairs, node_size_params, os_type_params)
+      if n_sizes = node_size_params.split(',')
+        added_nodes = []
+        n_sizes.each{ |n_size| parse_and_add_attribute(assembly_nodes, av_pairs, n_size, added_nodes, "instance_size") }
+      end
+      if os_types = os_type_params.split(',')
+        added_nodes = []
+        os_types.each{ |os_type| parse_and_add_attribute(assembly_nodes, av_pairs, os_type, added_nodes, "os_identifier") }
+      end
+    end
+
+    def parse_and_add_attribute(assembly_nodes, av_pairs, param, added_nodes, attribute)
+      if param.include?('=')
+        n_name, n_size = param.split('=')
+        added_nodes << n_name
+
+        fail ErrorUsage.new("Node '#{n_name}' specified in params does not exist in assembly template!") unless assembly_nodes.include?(n_name)
+        av_pairs << {pattern: "#{n_name}/#{attribute}", value: "#{n_size}"}
+      else
+        assembly_nodes.each do |assembly_node|
+          av_pairs << {pattern: "#{assembly_node}/#{attribute}", value: "#{param}"} unless added_nodes.include?(assembly_node)
+        end
+      end
+    end
+
   end
 end
 # TODO: hack to get around error in /home/dtk/server/system/model.rb:31:in `const_get

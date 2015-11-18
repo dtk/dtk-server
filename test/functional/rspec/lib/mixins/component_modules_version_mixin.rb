@@ -20,9 +20,10 @@ module ComponentModulesVersionMixin
 		remote_version_found = false
 		remote_versions = send_request('/rest/component_module/list_remote_versions', {:component_module_id=>component_module_name, :rsa_pub_key => @ssh_key})
 		ap remote_versions
+
 		if remote_versions['data'][0]['versions'].include? version_name
-		  puts "Version #{version_name} exists on component module #{component_module_name} remote"
-			version_found = true
+		  	puts "Version #{version_name} exists on component module #{component_module_name} remote"
+			remote_version_found = true
 		else
       	puts "Version #{version_name} does not exist on component module #{component_module_name} remote"
 		end
@@ -150,7 +151,9 @@ module ComponentModulesVersionMixin
      		puts "Component module #{component_module_name} exists on remote. Try to delete component module version #{component_module_version}..."
 
     		delete_remote_version_resposne = send_request('/rest/component_module/delete_remote', {rsa_pub_key: self.ssh_key, remote_module_name: component_module_name, remote_module_namespace: component_module_namespace, force_delete: false, version: component_module_version})
- 			
+ 			puts "/////"
+ 			ap delete_remote_version_resposne
+ 			puts "/////"
  			if (delete_remote_version_resposne['status'] == 'ok')
     			puts "Component module #{component_module_name} version #{component_module_version} deleted successfully"
 				component_module_version_deleted = true
@@ -162,16 +165,48 @@ module ComponentModulesVersionMixin
 			puts "Component module #{component_module_name} does not exist in component module list and therefore component module version cannot be deleted from remote"
 			component_module_version_deleted = false
      	end
+
+     	component_module_version_deleted
     end
 
     def clone_component_module_version(component_module_name, component_module_version)
     	puts "Clone component module version", "-----------------------------"
-			component_module_version_cloned = false
+		component_module_version_cloned = false
 
-			client = DtkClientAccessor.new
-			response = client.execute_command_with_options('component_module', 'component_module', component_module_name, 'clone', {version: component_module_version}, [])
+		client = DtkClientAccessor.new
+		response = client.execute_command_with_options('component_module', 'component_module', component_module_name, 'clone', {version: component_module_version}, [])
 			
-			pretty_print_JSON(response)
-			component_module_version_cloned = true if response['status'] == 'ok'
+		pretty_print_JSON(response)
+		component_module_version_cloned = true if response['status'] == 'ok'
     end
+
+    def delete_all_component_module_versions(component_module_name)
+    	puts 'Delete all component module versions:', '-------------------------------------'
+    	component_module_versions_deleted = false
+    	component_modules_list = send_request('/rest/component_module/list', {})
+
+    	if (component_modules_list['data'].select { |x| x['display_name'] == component_module_name }.first)
+    		puts "Component module #{component_module_name} exists in list. Try to delete component module versions..."
+
+    		delete_versions_resposne = send_request('/rest/component_module/delete', {component_module_id: component_module_name, delete_all_versions: true})
+
+    		puts 'Component module versions delete response:'
+    		puts '-----------------------------------------'
+    		pretty_print_JSON(delete_versions_resposne)
+
+    		if (delete_versions_resposne['status'] == 'ok')
+    			puts "Component module #{component_module_name} versions deleted successfully"
+				component_module_versions_deleted = true
+			else
+				puts "Component module #{component_module_name} versions were not deleted successfully"
+				component_module_versions_deleted = false
+			end
+		else
+			puts "Component module #{component_module_name} does not exist in component module list and therefore component module versiona cannot be deleted"
+			component_module_versions_deleted = false
+  		end
+
+  		puts ''
+  		component_module_versions_deleted
+    end    
 end

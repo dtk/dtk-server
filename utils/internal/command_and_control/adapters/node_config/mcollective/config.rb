@@ -157,7 +157,8 @@ eos
               logstash_log_file_list: R8::Config[:logstash][:log_file_list],
               logstash_config_file_path: R8::Config[:logstash][:config_file_path],
               logstash_tag: R8::Config[:logstash][:tag],
-              dtk_arbiter_update: R8::Config[:dtk_arbiter][:update]
+              arbiter_update: R8::Config[:arbiter][:update],
+              arbiter_topic: R8::Config[:arbiter][:id]
             )
           end
 
@@ -233,7 +234,15 @@ EOF
 /opt/puppet-omnibus/embedded/bin/gem install puppet -v <%= puppet_version %> --no-rdoc --no-ri
 <% end %>
 
-<% if dtk_arbiter_update %>
+cat << EOF > /etc/dtk-arbiter.cfg
+stomp_url = <%=node_config_server_host %>
+stomp_port = <%=stomp_port %>
+stomp_username = <%=mcollective_username %>
+stomp_password = <%=mcollective_password %>
+arbiter_topic = <%=arbiter_topic %>
+EOF
+
+<% if arbiter_update %>
 [ -x /usr/share/dtk/dtk-arbiter/update.sh ] && /usr/share/dtk/dtk-arbiter/update.sh
 <% end %>
 

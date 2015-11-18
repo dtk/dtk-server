@@ -27,7 +27,12 @@ module DTK
 
     def rest__list_assemblies
       service_module = create_obj(:service_module_id)
-      version        = ret_request_params(:version)||'master'
+      version = ret_request_params(:version)
+
+      # use latest version unless explicit version specified
+      version = compute_latest_version(service_module) unless version
+      version ||= 'master'
+
       rest_ok_response service_module.list_assembly_templates(version)
     end
 
@@ -175,6 +180,12 @@ module DTK
     def rest__get_workspace_branch_info
       service_module = create_obj(:service_module_id)
       version = ret_request_params(:version)
+
+      # use latest version if version option is not provided
+      if ret_request_params(:use_latest)
+        version = compute_latest_version(component_module) unless version
+      end
+
       rest_ok_response service_module.get_workspace_branch_info(version)
     end
 
@@ -203,10 +214,12 @@ module DTK
       if delete_all_versions
         module_info = service_module.delete_object()
       else
-        version        = ret_version()
-        module_info    = service_module.delete_version_or_module(version)
+        version     = ret_version()
+        version     = compute_latest_version(service_module) unless version
+        module_info = service_module.delete_version_or_module(version)
       end
-      # module_info = service_module.delete_object()
+
+      module_info.merge!(:version => version) if version && !delete_all_versions
       rest_ok_response module_info
     end
 

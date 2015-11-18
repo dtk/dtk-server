@@ -133,8 +133,11 @@ module DTK
         module_info = component_module.delete_object()
       else
         version     = ret_version()
+        version     = compute_latest_version(component_module) unless version
         module_info = component_module.delete_version_or_module(version)
       end
+
+      module_info.merge!(:version => version) if version && !delete_all_versions
       rest_ok_response module_info
     end
 
@@ -171,6 +174,12 @@ module DTK
     def rest__get_workspace_branch_info
       component_module = create_obj(:component_module_id)
       version = ret_version()
+
+      # use latest version if version option is not provided
+      if ret_request_params(:use_latest)
+        version = compute_latest_version(component_module) unless version
+      end
+
       response = component_module.get_workspace_branch_info(version)
       rest_ok_response response
     end

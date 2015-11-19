@@ -23,7 +23,7 @@ dtk_common = Common.new('', '')
 
 describe '(Component, service and versioning) Test Case 02: Install component module version, create new version, push it to remote' do
 	before(:all) do
-    	puts '*********************************************************************************************************************************', ''
+    	puts '*********************************************************************************************************************', ''
   	end
 
 	context "Install component module version from remote" do

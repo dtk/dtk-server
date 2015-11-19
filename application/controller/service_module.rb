@@ -243,9 +243,9 @@ module DTK
       remote_params = remote_params_dtkn(:service_module, remote_namespace, remote_module_name, version)
 
       project = get_default_project()
-      ServiceModule.delete_remote(project, remote_params, client_rsa_pub_key, force_delete)
+      response = ServiceModule.delete_remote(project, remote_params, client_rsa_pub_key, force_delete)
 
-      rest_ok_response
+      rest_ok_response response
     end
 
     #

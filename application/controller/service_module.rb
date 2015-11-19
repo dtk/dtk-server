@@ -183,7 +183,7 @@ module DTK
 
       # use latest version if version option is not provided
       if ret_request_params(:use_latest)
-        version = compute_latest_version(component_module) unless version
+        version = compute_latest_version(service_module) unless version
       end
 
       rest_ok_response service_module.get_workspace_branch_info(version)

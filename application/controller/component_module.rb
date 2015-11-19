@@ -340,9 +340,9 @@ module DTK
       remote_params = remote_params_dtkn(:component_module, remote_namespace, remote_module_name, version)
 
       project = get_default_project()
-      ComponentModule.delete_remote(project, remote_params, client_rsa_pub_key, force_delete)
+      response = ComponentModule.delete_remote(project, remote_params, client_rsa_pub_key, force_delete)
 
-      rest_ok_response
+      rest_ok_response response
     end
 
     def rest__list_remote

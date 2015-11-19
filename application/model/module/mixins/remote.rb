@@ -84,7 +84,7 @@ module DTK; module ModuleMixins
     def delete_remote(project, remote_params, client_rsa_pub_key, force_delete = false)
       remote = remote_params.create_remote(project)
       # delete module on remote repo manager
-      Repo::Remote.new(remote).delete_remote_module(client_rsa_pub_key, force_delete)
+      response = Repo::Remote.new(remote).delete_remote_module(client_rsa_pub_key, force_delete)
 
       # unlink any local repos that were linked to this remote module
       local_module_name = remote.module_name
@@ -104,7 +104,7 @@ module DTK; module ModuleMixins
           RepoRemote.delete_repos([repo_remote_db.id_handle()])
         end
       end
-      nil
+      response
     end
 
     def list_remotes(_model_handle, rsa_pub_key = nil, opts = {})

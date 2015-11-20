@@ -28,4 +28,12 @@ class Header < PageContainer
       @session.click_link('Modules')
     end
   end
+
+  def click_on_service_modules
+    @session.find("//ul[@class=\"dropdown-menu\"]//a[text()=\"Service Modules\"]").click
+  end
+
+  def click_on_component_modules
+    @session.find("//ul[@class=\"dropdown-menu\"]//a[text()=\"Component Modules\"]").click
+  end
 end

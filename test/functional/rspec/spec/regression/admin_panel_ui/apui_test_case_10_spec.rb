@@ -44,10 +44,10 @@ describe "(Admin Panel UI) Module Test Case 10: Edit module owner, group and per
     	end
     end
 
-    context "Open Module Panel" do
-    	it "opened module panel" do
+    context "Open Component Module Panel" do
+    	it "opened component module panel" do
             sleep 10
-    		header.click_on_modules
+    		header.click_on_component_modules
     	end
     end
 
@@ -123,7 +123,6 @@ describe "(Admin Panel UI) Module Test Case 10: Edit module owner, group and per
     		header.click_on_users
     	end
     end
-
 
     context "Delete User #{user.username}" do
     	it "deleted user" do

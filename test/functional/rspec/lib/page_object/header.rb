@@ -30,10 +30,16 @@ class Header < PageContainer
   end
 
   def click_on_service_modules
-    @session.find("//ul[@class=\"dropdown-menu\"]//a[text()=\"Service Modules\"]").click
+    @session.within(:header) do
+      @session.click_link("Modules")
+      @session.click_link("Component Modules")
+    end
   end
 
   def click_on_component_modules
-    @session.find("//ul[@class=\"dropdown-menu\"]//a[text()=\"Component Modules\"]").click
+    @session.within(:header) do
+      @session.click_link("Modules")
+      @session.click_link("Component Modules")
+    end
   end
 end

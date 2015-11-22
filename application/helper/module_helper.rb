@@ -117,6 +117,30 @@ module Ramaze::Helper
       module_obj.get_module_branch(local.branch_name) if module_obj
     end
 
+    def prepare_for_install_helper(module_type)
+      module_exist = false
+      remote_namespace, remote_module_name = Repo::Remote.split_qualified_name(ret_non_null_request_params(:remote_module_name))
+      project       = get_default_project()
+      remote_params = remote_params_dtkn(module_type, remote_namespace, remote_module_name, nil)
+      client_pub_key = ret_request_params(:rsa_pub_key)
+
+      local_namespace   = remote_params.namespace
+      local_module_name = ret_request_params(:local_module_name) || remote_params.module_name
+      local_params      = local_params(module_type, local_module_name, namespace: local_namespace, version: nil)
+      local             = local_params.create_local(project)
+      local_branch      = local.branch_name
+
+      if module_obj = module_class(module_type).module_exists?(project.id_handle(), local_module_name, local_namespace)
+        module_exist = true if module_obj.get_module_branch(local_branch)
+      end
+
+      remote = remote_params.create_remote(project)
+      remote_repo_info = Repo::Remote.new(remote).get_remote_module_info?(client_pub_key, raise_error: true)
+
+      remote_repo_info.merge!(head_installed: true) if module_exist
+      remote_repo_info
+    end
+
     def install_from_dtkn_helper(module_type)
       remote_namespace, remote_module_name, version = Repo::Remote.split_qualified_name(ret_non_null_request_params(:remote_module_name))
       version ||= ret_request_params(:version)

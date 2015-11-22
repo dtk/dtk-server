@@ -280,6 +280,10 @@ module DTK
       rest_ok_response install_from_dtkn_helper(:component_module)
     end
 
+    def rest__prepare_for_install_module()
+      rest_ok_response prepare_for_install_helper(:component_module)
+    end
+
     def rest__check_remote_exist
       component_module = create_obj(:component_module_id)
       rest_ok_response check_remote_exist_helper(component_module)

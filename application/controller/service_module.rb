@@ -56,6 +56,10 @@ module DTK
       rest_ok_response install_from_dtkn_helper(:service_module)
     end
 
+    def rest__prepare_for_install_module()
+      rest_ok_response prepare_for_install_helper(:service_module)
+    end
+
     def rest__check_remote_exist
       service_module = create_obj(:service_module_id)
       rest_ok_response check_remote_exist_helper(service_module)

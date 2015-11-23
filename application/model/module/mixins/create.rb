@@ -109,8 +109,9 @@ module DTK; module ModuleMixins
 
       # make sure there is a not an existing branch that matches the new one
       if get_module_branch_matching_version(new_version)
-        fail ErrorUsage.new("Version exists already for module (#{pp_module_name(new_version)})")
+        fail VersionExist.new(new_version, pp_module_name)
       end
+
       opts_repo_update = Aux.hash_subset(opts, [:sha, :base_version, :version_branch, :checkout_branch])
       new_version_repo, new_version_sha, new_branch_name = aug_base_branch.create_new_branch_from_this_branch?(get_project(), aug_base_branch[:repo], new_version, opts_repo_update)
       opts_create_branch = opts.merge(ancestor_branch_idh: aug_base_branch.id_handle(), current_sha: new_version_sha, new_branch_name: new_branch_name)

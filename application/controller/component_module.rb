@@ -122,6 +122,10 @@ module DTK
         opts.merge!(generate_docs: generate_docs)
       end
 
+      if do_not_raise_if_exist = ret_request_params(:do_not_raise_if_exist)
+        opts.merge!(do_not_raise_if_exist: do_not_raise_if_exist)
+      end
+
       rest_ok_response component_module.create_new_module_version(version, diffs_summary, opts)
     end
 

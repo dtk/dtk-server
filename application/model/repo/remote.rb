@@ -93,9 +93,9 @@ module DTK
           name: remote.module_name,
           type: type_for_remote_module(remote.module_type),
           namespace: remote.namespace,
-          rsa_pub_key: client_rsa_pub_key,
-          version: remote.version
+          rsa_pub_key: client_rsa_pub_key
         }
+        client_params.merge!(version: remote.version) if remote.version
 
         ret = nil
         begin

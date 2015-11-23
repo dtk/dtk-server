@@ -179,7 +179,14 @@ module DTK
       opts.merge!(frozen: true)
 
       # create module branch for new version
-      module_branch = self.create_new_version(nil, version, opts)
+      begin
+        module_branch = self.create_new_version(nil, version, opts)
+      rescue VersionExist => e
+        return {version_exist: true} if opts[:do_not_raise_if_exist]
+        fail e
+      rescue Exception => e
+        fail e
+      end
       pull_was_needed = true
 
       parse_needed = (opts[:force_parse] || generate_docs || !module_branch.dsl_parsed?())

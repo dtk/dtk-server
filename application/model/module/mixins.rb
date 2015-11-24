@@ -92,7 +92,7 @@ module DTK
         local_versions << (v.nil? ? 'base' : v)
       end
 
-      local_versions.delete('base')
+      local_versions.delete('base') unless opts[:include_base]
       [{ versions: local_versions.flatten }]
     end
 

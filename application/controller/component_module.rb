@@ -242,6 +242,10 @@ module DTK
       project = get_default_project()
       opts = Opts.new(project_idh: project.id_handle())
 
+      if include_base = ret_request_params(:include_base)
+        opts.merge!(:include_base => include_base)
+      end
+
       rest_ok_response component_module.list_versions(opts)
     end
 

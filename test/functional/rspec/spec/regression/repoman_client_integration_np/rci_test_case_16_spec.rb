@@ -78,7 +78,7 @@ describe '(Repoman client integration) Test Case 16: delete-from-catalog positiv
   #User A is owner of module A and belongs to user group A which is set as user group on module (permissions: D/D/D)
   context "Usergroup #{user_data[:usergroup]}, user #{user_data[:user]} and D/D/D permissions" do
     it "are set on module #{user_data[:module_name]}" do
-      header.click_on_modules
+      header.click_on_component_modules
       modules.click_on_edit_module(user_data[:module_name])
       modules.set_module_owner_user(user_data[:user])
       modules.set_module_owner_group(user_data[:usergroup])
@@ -102,7 +102,7 @@ describe '(Repoman client integration) Test Case 16: delete-from-catalog positiv
       permissions[:user_d] = false
       permissions[:other_d] = false
 
-      header.click_on_modules
+      header.click_on_component_modules
       modules.click_on_edit_module(user_data[:module_name])
       modules.set_module_owner_user(user_data[:another_user])
       modules.set_module_owner_group(user_data[:usergroup])
@@ -130,7 +130,7 @@ describe '(Repoman client integration) Test Case 16: delete-from-catalog positiv
 
   context "Usergroup #{user_data[:usergroup]}, user #{user_data[:user]} and RWDP/RWDP/RWDP permissions" do
     it "are reverted back on module #{user_data[:module_name]}" do
-      header.click_on_modules
+      header.click_on_component_modules
       modules.click_on_edit_module(user_data[:module_name])
       modules.set_module_owner_user(user_data[:user])
       modules.set_module_owner_group(user_data[:usergroup])

@@ -57,7 +57,7 @@ describe '(Repoman client integration) Test Case 14: list --remote positive scen
   #User A is owner of module A and belongs to user group A which is set as user group on module (permissions: R/R/R)
   context "Usergroup #{user_data[:usergroup]}, user #{user_data[:user]} and R/R/R permissions" do
     it "are set on module #{user_data[:module_name]}" do
-      header.click_on_modules
+      header.click_on_component_modules
       modules.click_on_edit_module(user_data[:module_name])
       modules.set_module_owner_user(user_data[:user])
       modules.set_module_owner_group(user_data[:usergroup])
@@ -77,7 +77,7 @@ describe '(Repoman client integration) Test Case 14: list --remote positive scen
       permissions[:user_r] = false
       permissions[:other_r] = false
 
-      header.click_on_modules
+      header.click_on_component_modules
       modules.click_on_edit_module(user_data[:module_name])
       modules.set_module_owner_user(user_data[:another_user])
       modules.set_module_owner_group(user_data[:usergroup])
@@ -97,7 +97,7 @@ describe '(Repoman client integration) Test Case 14: list --remote positive scen
       permissions[:user_group_r] = false
       permissions[:other_r] = true
 
-      header.click_on_modules
+      header.click_on_component_modules
       modules.click_on_edit_module(user_data[:module_name])
       modules.set_module_owner_user(user_data[:another_user])
       modules.set_module_owner_group(user_data[:another_usergroup])

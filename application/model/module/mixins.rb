@@ -85,24 +85,35 @@ module DTK
     end
 
     def list_versions(opts = {})
-      local_versions = []
+      local_versions  = []
+      parsed_versions = []
+
       get_objs(cols: [:version_info]).each do |r|
         next if r[:module_branch].assembly_module_version?
         v = r[:module_branch].version()
         local_versions << (v.nil? ? 'base' : v)
       end
 
-      local_versions.delete('base') unless opts[:include_base]
-      [{ versions: local_versions.flatten }]
+      base = local_versions.delete('base')
+      local_versions.sort!()
+
+      parsed_versions << base if opts[:include_base]
+      parsed_versions << local_versions
+
+      [{ versions: parsed_versions.flatten }]
     end
 
     def list_remote_versions(client_rsa_pub_key, opts = {})
       remote_versions = []
+      parsed_versions = []
       module_name     = (default_linked_remote_repo||{})[:display_name]
       remote_versions = self.class.list_remotes(model_handle, client_rsa_pub_key, ret_versions_array: true).select { |r| r[:display_name] == module_name }.collect { |v_remote| v_remote[:versions] }.flatten.sort if module_name
 
-      remote_versions.delete('master')
-      [{ versions: remote_versions }]
+      master = remote_versions.delete('master')
+      parsed_versions << 'base' if opts[:include_base] && master
+      parsed_versions << remote_versions
+
+      [{ versions: parsed_versions.flatten }]
     end
 
     ##

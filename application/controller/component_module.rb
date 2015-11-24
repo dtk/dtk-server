@@ -252,7 +252,13 @@ module DTK
     def rest__list_remote_versions
       component_module = create_obj(:component_module_id)
       client_rsa_pub_key = ret_request_params(:rsa_pub_key)
-      rest_ok_response component_module.list_remote_versions(client_rsa_pub_key)
+
+      opts = {}
+      if include_base = ret_request_params(:include_base)
+        opts.merge!(:include_base => include_base)
+      end
+
+      rest_ok_response component_module.list_remote_versions(client_rsa_pub_key, opts)
     end
 
     def rest__versions

@@ -139,12 +139,22 @@ module DTK
       project = get_default_project()
       opts = Opts.new(project_idh: project.id_handle())
 
+      if include_base = ret_request_params(:include_base)
+        opts.merge!(:include_base => include_base)
+      end
+
       rest_ok_response service_module.list_versions(opts)
     end
 
     def rest__list_remote_versions
       service_module = create_obj(:service_module_id)
       client_rsa_pub_key = ret_request_params(:rsa_pub_key)
+
+      opts = {}
+      if include_base = ret_request_params(:include_base)
+        opts.merge!(:include_base => include_base)
+      end
+
       rest_ok_response service_module.list_remote_versions(client_rsa_pub_key)
     end
 

@@ -174,7 +174,7 @@ module DTK
     def list_assembly_templates(version = 'master')
       version_filter =
         if version.eql?('master')
-          [:or, [:eq, :version, version], [:eq, :version, nil]]
+          [:or, [:eq, :version, version], [:eq, :version, nil], [:eq, :version, '']]
         else
           [:eq, :version, version]
         end

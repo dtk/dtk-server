@@ -172,7 +172,13 @@ module DTK
     end
 
     def list_assembly_templates(version = 'master')
-      templates_with_nodes = get_assembly_templates({version_filter: [:eq, :version, version]})
+      version_filter =
+        if version.eql?('master')
+          [:or, [:eq, :version, version], [:eq, :version, nil]]
+        else
+          [:eq, :version, version]
+        end
+      templates_with_nodes = get_assembly_templates({version_filter: version_filter})
       templates_with_nodes.each do |template|
         nodes_size = 0
         (template[:nodes] || []).each do |node|

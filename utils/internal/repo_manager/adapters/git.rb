@@ -543,7 +543,8 @@ module DTK
       add_branch?(new_branch, opts)
       branch_or_sha = opts[:checkout_branch] ? new_branch : (opts[:sha] || new_branch)
       checkout(branch_or_sha) do
-        new_branch_sha = git_command__push(new_branch)
+        # new_branch_sha = git_command__push(new_branch)
+        new_branch_sha = git_command__push(new_branch, nil, nil, force: true)
       end
       new_branch_sha
     end

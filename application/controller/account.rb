@@ -138,8 +138,6 @@ module DTK
       user_object    = CurrentSession.new.get_user_object()
       is_public_user = CurrentSession.is_remote_public_user?
 
-      # DEBUG SNIPPET >>> REMOVE <<<
-      require (RUBY_VERSION.match(/1\.8\..*/) ? 'ruby-debug' : 'debugger');Debugger.start; debugger
       # bellow method will throw error in case credentials are not valid
       password =  DataEncryption.hash_it(password)
       Repo::Remote.new.validate_catalog_credentials(username, password) if validate

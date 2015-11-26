@@ -214,6 +214,8 @@ module DTK; class Assembly
     end
 
     def self.delete_and_ret_module_repo_info(assembly_idh)
+      ServiceModule.check_service_instance_references(assembly_idh)
+
       # first delete the dsl files
       module_repo_info = ServiceModule.delete_assembly_dsl?(assembly_idh)
       # need to explicitly delete nodes, but not components since node's parents are not the assembly, while component's parents are the nodes

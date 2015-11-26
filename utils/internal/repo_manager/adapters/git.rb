@@ -374,7 +374,7 @@ module DTK
       add_remote?(remote_name, remote_url)
 
       # create branch with history from remote and not merge
-      git_command__create_empty_branch(@branch, use_branch_name: true)
+      git_command__create_empty_branch(@branch) #, use_branch_name: true)
       pull_changes(remote_name, remote_branch)
 
       # push to local

@@ -124,7 +124,8 @@ module DTK
       end
 
       id_handle = module_branch.id_handle()
-      module_branch.delete_instance(id_handle)
+      module_branch.delete_instance_and_repo_branch()
+      # module_branch.delete_instance(id_handle)
       ret
     end
 

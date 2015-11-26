@@ -1,9 +1,9 @@
 ---
-module: temp09
+module: temp08
 dsl_version: 1.0.0
 module_type: puppet_module
 components:
-  temp09:
+  temp08:
     actions:
       create:
-        puppet_class: temp09
+        puppet_class: temp08

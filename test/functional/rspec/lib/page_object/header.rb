@@ -28,4 +28,18 @@ class Header < PageContainer
       @session.click_link('Modules')
     end
   end
+
+  def click_on_service_modules
+    @session.within(:header) do
+      @session.click_link("Modules")
+      @session.click_link("Component Modules")
+    end
+  end
+
+  def click_on_component_modules
+    @session.within(:header) do
+      @session.click_link("Modules")
+      @session.click_link("Component Modules")
+    end
+  end
 end

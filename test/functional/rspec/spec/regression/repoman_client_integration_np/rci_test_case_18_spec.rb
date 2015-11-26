@@ -58,7 +58,7 @@ describe '(Repoman client integration) Test Case 18: add/remove collaborators by
 
   context "Usergroup #{user_data[:usergroup]}, user #{user_data[:user]} and P/P/P permissions" do
     it "are set on module #{user_data[:module_name]}" do
-      header.click_on_modules
+      header.click_on_component_modules
       modules.click_on_edit_module(user_data[:module_name])
       modules.set_module_owner_user(user_data[:user])
       modules.set_module_owner_group(user_data[:usergroup])

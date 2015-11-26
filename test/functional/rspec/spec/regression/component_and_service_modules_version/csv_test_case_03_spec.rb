@@ -24,7 +24,7 @@ dtk_common = Common.new('', '')
 
 describe '(Component, service and versioning) Test Case 03 (N): Create version of a component module that already exists, is invalid format, or is left out' do
 	before(:all) do
-    	puts '*********************************************************************************************************************************', ''
+    	puts '*********************************************************************************************************************************************', ''
   	end
 
 	context "Check if versioned component module exists on server" do

@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-# Test Case 25: Install service module, add cmp module version as dependency to module_refs.yaml, create new version of service module, publish it, delete modules and install service module version again and check that cmp module version is also installed
+# Test Case 19: Install service module, add cmp module version as dependency to module_refs.yaml, create new version of service module, publish it, delete modules and install service module version again and check that cmp module version is also installed
 
 require 'rubygems'
 require 'rest_client'
@@ -15,8 +15,8 @@ require './lib/service_modules_spec'
 
 service_module_namespace = 'version'
 component_module_namespace = 'version'
-service_module_name = 'temp_service_25'
-component_module_name = 'temp25'
+service_module_name = 'temp_service_19'
+component_module_name = 'temp19'
 assembly_name = 'test'
 full_service_module_name = "#{service_module_namespace}:#{service_module_name}"
 full_component_module_name = "#{component_module_namespace}:#{component_module_name}"
@@ -27,14 +27,14 @@ service_module_version = '0.0.1'
 file_for_change = 'module_refs.yaml'
 file_for_add = 'module_refs.yaml'
 file_for_remove = 'module_refs.yaml'
-file_for_change_location = 'spec/regression/component_and_service_modules_version/resources/csv_test_case_25_first_module_refs.yaml'
-file_for_restore_location = 'spec/regression/component_and_service_modules_version/resources/csv_test_case_25_second_module_refs.yaml'
+file_for_change_location = 'spec/regression/component_and_service_modules_version/resources/csv_test_case_19_first_module_refs.yaml'
+file_for_restore_location = 'spec/regression/component_and_service_modules_version/resources/csv_test_case_19_second_module_refs.yaml'
 assembly_yaml_file_location = "~/dtk/service_modules/#{service_module_namespace}/#{service_module_name}/assemblies/#{assembly_name}/assembly.yaml"
 module_refs_file_location = "~/dtk/service_modules/#{service_module_namespace}/#{service_module_name}/module_refs.yaml"
 
 dtk_common = Common.new('', '')
 
-describe '(Component, service and versioning) Test Case 25: Install service module, add cmp module version as dependency to module_refs.yaml, create new version of service module, publish it, delete modules and install service module version again and check that cmp module version is also installed' do
+describe '(Component, service and versioning) Test Case 19: Install service module, add cmp module version as dependency to module_refs.yaml, create new version of service module, publish it, delete modules and install service module version again and check that cmp module version is also installed' do
 	before(:all) do
 		puts '************************************************************************************************************************************************************************************************************', ''
 	end

@@ -21,9 +21,9 @@ describe "(Admin Panel UI) Module Test Case 11: NEG - Edit deselect module owner
     	end
   	end
 
-  	context "Open Module Panel" do
-    	it "opened module panel" do
-    		header.click_on_modules
+  	context "Open Service Module Panel" do
+    	it "opened service module panel" do
+    		header.click_on_service_modules
     	end
     end
 

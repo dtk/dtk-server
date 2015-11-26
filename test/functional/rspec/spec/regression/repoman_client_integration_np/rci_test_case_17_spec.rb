@@ -78,7 +78,7 @@ describe '(Repoman client integration) Test Case 17: NEG - delete-from-catalog n
   #User A is owner of module A and belongs to user group A which is set as user group on module (permissions: None/None/None)
   context "Usergroup #{user_data[:usergroup]}, user #{user_data[:user]} and None/None/None permissions" do
     it "are set on module #{user_data[:module_name]}" do
-      header.click_on_modules
+      header.click_on_component_modules
       modules.click_on_edit_module(user_data[:module_name])
       modules.set_module_owner_user(user_data[:user])
       modules.set_module_owner_group(user_data[:usergroup])
@@ -97,7 +97,7 @@ describe '(Repoman client integration) Test Case 17: NEG - delete-from-catalog n
     it "are set on module #{user_data[:module_name]}" do
       permissions[:user_d] = true
 
-      header.click_on_modules
+      header.click_on_component_modules
       modules.click_on_edit_module(user_data[:module_name])
       modules.set_module_owner_user(user_data[:another_user])
       modules.set_module_owner_group(user_data[:usergroup])
@@ -121,7 +121,7 @@ describe '(Repoman client integration) Test Case 17: NEG - delete-from-catalog n
 
   context "Usergroup #{user_data[:usergroup]}, user #{user_data[:user]} and RWDP/RWDP/RWDP permissions" do
     it "are reverted back on module #{user_data[:module_name]}" do
-      header.click_on_modules
+      header.click_on_component_modules
       modules.click_on_edit_module(user_data[:module_name])
       modules.set_module_owner_user(user_data[:user])
       modules.set_module_owner_group(user_data[:usergroup])

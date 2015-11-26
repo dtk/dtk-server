@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-# Test Case 12: Add versioned component module to workspace and converge
+# Test Case 12: NEG - Add component module to workspace and then create new version and try to add it to workspace too
 
 require 'rubygems'
 require 'rest_client'
@@ -23,13 +23,13 @@ component_module_name = 'stdlib'
 component_module_namespace = 'version'
 imported_component_module_name = 'version:stdlib'
 component_module_filesystem_location = '~/dtk/component_modules/version'
-version = '0.0.1'
+version = '2.0.0'
 
 dtk_common = Common.new('', '')
 
-describe '(Component, service and versioning) Test Case 12: Add versioned component module to workspace and converge' do
+describe '(Component, service and versioning) Test Case 12: NEG - Add component module to workspace and then create new version and try to add it to workspace too' do
   before(:all) do
-    puts '**********************************************************************************************************', ''
+    puts '********************************************************************************************************************************************************', ''
   end
 
   context 'Create node in workspace' do
@@ -37,19 +37,23 @@ describe '(Component, service and versioning) Test Case 12: Add versioned compon
   end
 
   context 'Add component to the node in workspace' do
-    include_context 'Add component to the node in workspace', dtk_common, node_name, component_name + "(#{version})", component_module_namespace
+    include_context 'Add component to the node in workspace', dtk_common, node_name, component_name, component_module_namespace
   end
 
-  context 'Converge workspace' do
-    include_context 'Converge workspace', dtk_common
+  context 'Create new component module version' do
+    include_context 'Create component module version', dtk_common, imported_component_module_name, version
   end
 
-  context "Check that port #{port_to_check}" do
-    include_context 'Check if port avaliable', dtk_common, port_to_check
+  context 'NEG - Add versioned component to workspace' do
+    include_context 'NEG - Add component to the node in workspace', dtk_common, node_name, component_name + "(#{version})", namespace
   end
 
   context 'Purge workspace content' do
     include_context 'Purge workspace content', dtk_common
+  end
+
+  context 'Delete component module version' do
+    include_context 'Delete component module version', dtk_common, imported_component_module_name, version
   end
 
   after(:all) do

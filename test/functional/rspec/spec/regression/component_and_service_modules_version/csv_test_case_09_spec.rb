@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-# Test Case 09: Import component module from local filesystem, version it, publish version
+# Test Case 09: Install component module and its version, check clone, delete and do clone again
 
 require 'rubygems'
 require 'rest_client'
@@ -17,58 +17,56 @@ component_module_namespace = 'version'
 imported_component_module_name = 'version:temp09'
 component_module_filesystem_location = '~/dtk/component_modules/version'
 version = '0.0.1'
-file_name = 'csv_test_case_09_dtk.model.yaml'
-file_to_copy_location = './spec/regression/component_and_service_modules_version/resources/csv_test_case_09_dtk.model.yaml'
 
 dtk_common = Common.new('', '')
 
-describe '(Component, service and versioning) Test Case 09: Import component module from local filesystem, version it, publish version' do
+describe '(Component, service and versioning) Test Case 09: Install component module and its version, check clone, delete and do clone again' do
   before(:all) do
-    puts '****************************************************************************************************************************', ''
+    puts '*********************************************************************************************************************************', ''
   end
 
-  context 'Create component module on local filesystem' do
-    include_context 'Create component module on local filesystem', component_module_filesystem_location, component_module_name, file_to_copy_location, file_name
-  end
-
-  context 'Import component module' do
-    include_context 'Import component module', imported_component_module_name
+  context 'Install component module' do
+    include_context 'Import remote component module', component_module_namespace + '/' + component_module_name
   end
 
   context 'Get component module components list' do
     include_context 'Get component module components list', dtk_common, imported_component_module_name
   end
 
-  context "Create new component module version" do
-    include_context "Create component module version", dtk_common, imported_component_module_name, version
+  context 'Check if component module imported on local filesystem' do
+    include_context 'Check component module imported on local filesystem', component_module_filesystem_location, component_module_name
   end
 
-  context "Check if the created component module version exists on server" do
-    include_context "Check if component module version exists on server", dtk_common, imported_component_module_name, version
+  context 'Install component module version' do
+    include_context 'Install component module version', component_module_name, component_module_namespace, version
   end
 
-  context "Publish new component module version to remote repo" do
-    include_context "Publish versioned component module", dtk_common, imported_component_module_name, version
+  context 'Check if component module version imported on local filesystem' do
+    include_context 'Check component module imported on local filesystem', component_module_filesystem_location, component_module_name + "-" + version
   end
 
-  context "Check if the component module was published to the remote repo" do
-    include_context "Check if component module version exists on remote", dtk_common, imported_component_module_name, version
+  context 'Delete component module version from local filesystem' do
+    include_context 'Delete component module from local filesystem', component_module_filesystem_location, component_module_name + "-" + version
   end
 
-  context 'Delete base component module from remote' do
-    include_context 'Delete component module from remote repo', component_module_name, component_module_namespace
+  context 'Clone component module version' do
+    include_context 'Clone component module version', dtk_common, imported_component_module_name, version
   end
 
-  context 'Check if component module version exists on remote' do
-    include_context 'NEG - Check if component module version exists on remote', dtk_common, imported_component_module_name, version
+  context 'Delete component module' do
+    include_context 'Delete component module', dtk_common, imported_component_module_name
   end
 
-  context "Delete all component module versions from server" do
-    include_context "Delete all component module versions", dtk_common, imported_component_module_name
+  context 'Delete component module from local filesystem' do
+    include_context 'Delete component module from local filesystem', component_module_filesystem_location, component_module_name
   end
 
-  context "Delete all component module versions from local filesystem" do
-    include_context 'Delete all local component module versions', component_module_filesystem_location, component_module_name
+  context 'Delete component module version' do
+    include_context 'Delete component module version', dtk_common, imported_component_module_name, version
+  end
+
+  context 'Delete component module version from local filesystem' do
+    include_context 'Delete component module from local filesystem', component_module_filesystem_location, component_module_name + "-" + version
   end
 
   after(:all) do

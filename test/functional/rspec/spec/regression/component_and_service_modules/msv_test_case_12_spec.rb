@@ -11,6 +11,8 @@ require './lib/assembly_and_service_operations_spec'
 require './lib/parameters_setting_spec'
 require './lib/service_modules_spec'
 require './lib/component_modules_spec'
+require './lib/component_module_versions_spec'
+require './lib/service_module_versions_spec'
 
 namespace = 'dtk17'
 existing_service_module_name = 'test_service'
@@ -21,6 +23,7 @@ component_module_filesystem_location = '~/dtk/component_modules/dtk17'
 service_filesystem_location = '~/dtk/service_modules/dtk17'
 default_service_filesystem_location = '~/dtk/service_modules'
 local_service_filesystem_location = '~/dtk/service_modules/local'
+version = '0.0.1'
 
 dtk_common = Common.new('', '')
 
@@ -67,32 +70,40 @@ describe "(Modules, Services and Versioning) Test Case 12: Export service module
     include_context 'Import service module', service_module_name
   end
 
-  context 'Export service module to default namespace' do
-    include_context 'Export service module', local_service_module_name, namespace
+  context 'Create new service module version' do
+    include_context 'Create service module version', dtk_common, local_service_module_name, version
+  end
+
+  context 'Publish service module version to remote repo' do
+    include_context 'Publish versioned service module', dtk_common, local_service_module_name, "#{namespace}/#{service_module_name}", version
   end
 
   context 'List all service modules on remote' do
     include_context 'List all service modules on remote', service_module_name, namespace
   end
 
-  context "Delete #{local_service_module_name} service module" do
-    include_context 'Delete service module', dtk_common, local_service_module_name
+  context 'Delete all service module version from server' do
+    include_context 'Delete all service module versions', dtk_common, local_service_module_name
+  end
+
+  context 'Delete all local service module version files' do
+    include_context 'Delete all local service module versions', local_service_filesystem_location, service_module_name
+  end
+
+  context 'Delete all service module version from server' do
+    include_context 'Delete all service module versions', dtk_common, imported_service_module_name
+  end
+
+  context 'Delete all local service module version files' do
+    include_context 'Delete all local service module versions', service_filesystem_location, existing_service_module_name
+  end
+
+  context 'Delete service module version from remote repo' do
+    include_context 'Delete remote service module version', dtk_common, service_module_name, namespace, version
   end
 
   context "Delete #{service_module_name} service module from remote" do
     include_context 'Delete service module from remote repo', service_module_name, namespace
-  end
-
-  context "Delete #{imported_service_module_name} service module" do
-    include_context 'Delete service module', dtk_common, imported_service_module_name
-  end
-
-  context "Delete #{service_module_name} service module from local filesystem" do
-    include_context 'Delete service module from local filesystem', local_service_filesystem_location, service_module_name
-  end
-
-  context "Delete #{existing_service_module_name} service module from local filesystem" do
-    include_context 'Delete service module from local filesystem', service_filesystem_location, existing_service_module_name
   end
 
   after(:all) do

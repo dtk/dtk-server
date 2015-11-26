@@ -2,6 +2,7 @@
 require './spec/setup_browser'
 require './lib/component_modules_spec'
 require './lib/dtk_common'
+require './lib/component_module_versions_spec'
 
 user_data = {
   usergroup: 'bakir_test_group',
@@ -11,7 +12,8 @@ user_data = {
   namespace: 'dtk17',
   component_module_filesystem_location: '~/dtk/component_modules/dtk17',
   another_usergroup: 'bakir_test',
-  another_user: 'bakir_test'
+  another_user: 'bakir_test',
+  version: '0.0.1'
 }
 
 permissions = {
@@ -92,8 +94,12 @@ describe '(Repoman client integration) Test Case 16: delete-from-catalog positiv
     include_context 'Delete component module from remote', dtk_common, user_data[:component_module], user_data[:namespace]
   end
 
-  context 'Publish component module' do
-    include_context 'Export component module', user_data[:namespace] + ':' + user_data[:component_module], user_data[:namespace]
+  context "Create new component module version" do
+    include_context "Create component module version", dtk_common, user_data[:namespace] + ':' + user_data[:component_module], user_data[:version]
+  end
+
+  context "Publish new component module version to remote repo" do
+    include_context "Publish versioned component module", dtk_common, user_data[:namespace] + ':' + user_data[:component_module], "#{user_data[:namespace]}/#{user_data[:component_module]}", user_data[:namespace]
   end
 
   #User A is not owner of module A but belongs to user group A which is set as user group on module (permissions: None/D/None)
@@ -112,20 +118,28 @@ describe '(Repoman client integration) Test Case 16: delete-from-catalog positiv
     end
   end
 
+  context "Delete new component module from remote repo" do
+    include_context "Delete remote component module version", dtk_common, user_data[:component_module], user_data[:namespace], user_data[:version]
+  end
+
   context 'Delete remote module' do
     include_context 'Delete component module from remote', dtk_common, user_data[:component_module], user_data[:namespace]
   end
 
-  context 'Publish component module' do
-    include_context 'Export component module', user_data[:namespace] + ':' + user_data[:component_module], user_data[:namespace]
+  context "Publish new component module version to remote repo" do
+    include_context "Publish versioned component module", dtk_common, user_data[:namespace] + ':' + user_data[:component_module], "#{user_data[:namespace]}/#{user_data[:component_module]}", user_data[:namespace]
   end
 
-  context 'Delete component module' do
-    include_context 'Delete component module', dtk_common, user_data[:namespace] + ':' + user_data[:component_module]
+  context "Delete new component module from remote repo" do
+    include_context "Delete remote component module version", dtk_common, user_data[:component_module], user_data[:namespace], user_data[:version]
   end
 
-  context 'Delete component module from local filesystem' do
-    include_context 'Delete component module from local filesystem', user_data[:component_module_filesystem_location], user_data[:component_module]
+  context "Delete all component module versions from server" do
+    include_context "Delete all component module versions", dtk_common, user_data[:namespace] + ':' + user_data[:component_module]
+  end
+
+  context "Delete all component module versions from local filesystem" do
+    include_context 'Delete all local component module versions', user_data[:component_module_filesystem_location], user_data[:component_module]
   end
 
   context "Usergroup #{user_data[:usergroup]}, user #{user_data[:user]} and RWDP/RWDP/RWDP permissions" do

@@ -134,24 +134,39 @@ module DTK
 
     def rest__set_catalog_credentials
       username, password = ret_non_null_request_params(:username, :password)
-      validate = ret_request_params(:validate)
+      validate = ret_request_param_boolean(:validate)
+      user_object    = CurrentSession.new.get_user_object()
+      is_public_user = CurrentSession.is_remote_public_user?
 
-      # if validate param is sent - validate if credentials exist on repo manager
-      # used when creating new user on client and setting catalog credentials in initial step
-      begin
-        password =  DataEncryption.hash_it(password)
-        Repo::Remote.new.validate_catalog_credentials(username, password) if validate
-      ensure
-        # regardless of validation we will set catalog credentials3
-        user_object = CurrentSession.new.get_user_object()
-        user_object.update(catalog_username: username, catalog_password: password)
-        session_obj = CurrentSession.new
-        session_obj.set_user_object(user_object)
-        # we invalidate the session for repoman
-        session_obj.set_repoman_session_id(nil)
+      # DEBUG SNIPPET >>> REMOVE <<<
+      require (RUBY_VERSION.match(/1\.8\..*/) ? 'ruby-debug' : 'debugger');Debugger.start; debugger
+      # bellow method will throw error in case credentials are not valid
+      password =  DataEncryption.hash_it(password)
+      Repo::Remote.new.validate_catalog_credentials(username, password) if validate
+
+      # we update user with new credentials
+      user_object.update(catalog_username: username, catalog_password: password)
+      session_obj = CurrentSession.new
+      session_obj.set_user_object(user_object)
+      # we invalidate the session for repoman
+      session_obj.set_repoman_session_id(nil)
+
+      # if user is public we "hijack" existing public keys
+      if is_public_user
+        user_object.remote_public_keys.each do |repo_user|
+          begin
+            # Add Repo Manager user
+            response = Repo::Remote.new.add_client_access(repo_user[:ssh_rsa_pub_key], repo_user[:display_name])
+          rescue DTK::Error => e
+            # we conditionally ignore it and we fix it later when calling repomanager
+            Log.warn("We were not able to hijack public key via Repo Manager, reason: #{e.message}")
+          end
+        end
       end
+
 
       rest_ok_response
     end
+
   end
 end

@@ -8,8 +8,10 @@ module XYZ
     def rest__run_agent()
       agent_name, agent_method, agent_params = ret_request_params(:agent_name, :agent_method, :agent_params)
       service = ret_assembly_instance_object(:service_name)
+
       agent_hash = JSON.parse(agent_params)
       agent_hash = agent_hash.inject({}){|memo,(k,v)| memo[k.to_sym] = v; memo}
+      agent_hash.merge!(:protocol => 'stomp')
 
       Log.info("Running Agent #{agent_name}, method: #{agent_method} with params: ")
       Log.info(agent_hash)
@@ -39,9 +41,9 @@ module XYZ
 
       callbacks = {
         :on_msg_received => proc do |msg|
-          response = CommandAndControl.parse_response__execute_action(nodes, msg)
+          response = CommandAndControl.parse_response__execute_action(nodes, msg, params)
 
-          if response and response[:pbuilderid] and response[:status] == :ok
+          if response and response[:pbuilderid]
             node_info = ndx_pbuilderid_to_node_info[response[:pbuilderid]]
             action_results_queue.push(node_info[:id],response[:data])
           end

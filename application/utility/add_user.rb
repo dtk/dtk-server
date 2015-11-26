@@ -26,11 +26,9 @@ OptionParser.new do |opts|
     end
   end
 end.parse!
+
 username = ARGV[0]
 ec2_region = ARGV[1]
-
-# default is that catalog_username is set to username
-options[:catalog_username] ||= username
 
 server = R8Server.new(username, options)
 server.create_repo_user_for_nodes?()

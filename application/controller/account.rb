@@ -128,7 +128,7 @@ module DTK
 
     def rest__check_catalog_credentials
       rest_ok_response(
-        catalog_credentials_set: CurrentSession.are_catalog_credentilas_set?
+        catalog_credentials_set: CurrentSession.are_catalog_credentials_seeded?
       )
     end
 

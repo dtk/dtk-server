@@ -27,6 +27,14 @@ module DTK
       get_user_object()[:default_namespace]
     end
 
+    ##
+    # This method is used to check if catalog credentials have been preseeded.
+    #
+
+    def are_catalog_credentials_seeded?
+      !!(get_user_object().catalog_username && get_user_object().catalog_password)
+    end
+
     def are_catalog_credentilas_set?
       (get_user_object().catalog_username || get_user_object().catalog_password || R8::Config[:remote_repo][:public][:username])
     end

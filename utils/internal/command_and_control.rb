@@ -186,6 +186,7 @@ module DTK
 
     def self.load_for_node_config(protocol_type = nil)
       adapter_name = protocol_type || R8::Config[:command_and_control][:node_config][:type]
+      Log.debug("Node config adapter chosen: #{adapter_name}")
       load_for_aux(:node_config, adapter_name)
     end
 

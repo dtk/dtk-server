@@ -28,6 +28,10 @@ module DTK
         commit_sha
       end
 
+      def delete_local_brach_only(branch_name)
+        RepoManager.delete_local_brach(branch_name, get_field?(:repo_name), branch_name())
+      end
+
       private
 
       def self.create_obj?(model_handle, local)

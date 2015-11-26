@@ -28,7 +28,7 @@ module DTK
     end
 
     ##
-    # This method is used to check if catalog credentials have been preseeded.
+    # This method is used to check if catalog credentials have been preseeded. This is used only on first startup of client.
     #
 
     def are_catalog_credentials_seeded?

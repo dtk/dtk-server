@@ -1,4 +1,5 @@
 require 'json'
+require 'active_support/core_ext/hash/keys'
 
 module XYZ
   class DeveloperController < AuthController
@@ -9,15 +10,33 @@ module XYZ
       agent_name, agent_method, agent_params = ret_request_params(:agent_name, :agent_method, :agent_params)
       service = ret_assembly_instance_object(:service_name)
 
+      params = {}
+
       agent_hash = JSON.parse(agent_params)
-      agent_hash = agent_hash.inject({}){|memo,(k,v)| memo[k.to_sym] = v; memo}
-      agent_hash.merge!(:protocol => 'stomp')
+      agent_hash = deep_convert(agent_hash)
+
+      params.merge!(:protocol => 'stomp')
+      params.merge!(:action_agent_request => agent_hash)
 
       Log.info("Running Agent #{agent_name}, method: #{agent_method} with params: ")
-      Log.info(agent_hash)
+      Log.info(params)
 
-      queue_id = initiate_agent(agent_name.downcase.to_sym, agent_method.downcase.to_sym, service.nodes, agent_hash)
+      queue_id = initiate_agent(agent_name.downcase.to_sym, agent_method.downcase.to_sym, service.nodes, params)
       rest_ok_response :action_results_id => queue_id
+    end
+
+
+    def deep_convert(element)
+      if    element.is_a?(Array)
+        element.collect { |e| deep_convert(e) }
+      elsif element.is_a?(Hash)
+        element.inject({}) do |new_hash,(k,v)|
+          new_hash[k.to_sym] = deep_convert(v)
+          new_hash
+        end
+      else
+        element
+      end
     end
 
 

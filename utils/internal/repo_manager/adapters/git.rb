@@ -374,7 +374,7 @@ module DTK
       add_remote?(remote_name, remote_url)
 
       # create branch with history from remote and not merge
-      git_command__create_empty_branch(@branch)
+      git_command__create_empty_branch(@branch, use_branch_name: true)
       pull_changes(remote_name, remote_branch)
 
       # push to local
@@ -596,6 +596,10 @@ module DTK
       end
     end
 
+    def delete_local_brach(branch_name)
+      git_command__delete_local_branch?(branch_name)
+    end
+
     def delete_branch_aux(remote_name = nil)
       git_command__delete_local_branch?(@branch)
       git_command__delete_remote_branch?(@branch, remote_name)
@@ -782,8 +786,9 @@ module DTK
       git_command.branch(cmd_opts(), branch_name)
     end
 
-    def git_command__create_empty_branch(branch_name)
-      git_command.symbolic_ref(cmd_opts(), 'HEAD', "refs/heads/#{branch_name}")
+    def git_command__create_empty_branch(branch_name, opts = {})
+      name = opts[:use_branch_name] ? "#{branch_name}" : 'HEAD'
+      git_command.symbolic_ref(cmd_opts(), name, "refs/heads/#{branch_name}")
     end
 
     def git_command__add(file_path)

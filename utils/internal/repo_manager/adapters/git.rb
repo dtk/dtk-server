@@ -371,6 +371,7 @@ module DTK
     end
 
     def initial_sync_with_remote_repo(remote_name, remote_url, remote_branch, opts = {})
+      force = false
       add_remote?(remote_name, remote_url)
 
       # initial branch from which we create new empty branch; first one is master but next one is version branch
@@ -380,10 +381,13 @@ module DTK
       git_command__create_empty_branch(@branch) #, use_branch_name: true)
 
       # when pulling version after base branch is pulled there are untracked changes in newly created empty branch
-      # we need to remove them with hard reset to branch which they come from
-      git_command__hard_reset(init_branch) if !init_branch.eql?('master') && opts[:hard_reset_on_pull_version]
+      # we need to add and commit them and then use pull --force to override them if not the same as remote files
+      if !init_branch.eql?('master') && opts[:hard_reset_on_pull_version]
+        force = true
+        add_all_files(@branch)
+      end
 
-      pull_changes(remote_name, remote_branch)
+      pull_changes(remote_name, remote_branch, force)
 
       # push to local
       push_changes()
@@ -518,10 +522,10 @@ module DTK
       git_command__push(@branch, opts[:remote_name], opts[:remote_branch], opts)
     end
 
-    def pull_changes(remote_name = nil, remote_branch = nil)
+    def pull_changes(remote_name = nil, remote_branch = nil, force = false)
       # note: even though generated git comamdn hash --git-dor set, need to chdir
       Dir.chdir(@path) do
-        git_command__pull(@branch, remote_branch || @branch, remote_name)
+        git_command__pull(@branch, remote_branch || @branch, remote_name, force)
       end
     end
 
@@ -873,9 +877,11 @@ module DTK
       !rev_list.split("\n").grep(index_sha).empty?
     end
 
-    def git_command__pull(local_branch, remote_branch, remote_name = nil)
+    def git_command__pull(local_branch, remote_branch, remote_name = nil, force = false)
       remote_name ||= default_remote_name()
-      git_command.pull(cmd_opts(), remote_name, "#{remote_branch}:#{local_branch}")#, '-f')
+      args = [cmd_opts(), remote_name, "#{remote_branch}:#{local_branch}"]
+      args << '-f' if force
+      git_command.pull(*args)
     end
 
     # MOD_RESTRUCT-NEW deprecate below

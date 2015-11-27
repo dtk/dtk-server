@@ -53,16 +53,16 @@ shared_context 'NEG - Add versioned component to service' do |dtk_common, namesp
 	end
 end
 
-shared_context 'Publish versioned component module' do |dtk_common, component_module_name, version_name|
+shared_context 'Publish versioned component module' do |dtk_common, component_module_name, remote_component_name, version_name|
 	it "publish/push component module #{component_module_name} with version #{version_name}" do
-		component_module_published = dtk_common.publish_component_module_version(component_module_name, version_name)
+		component_module_published = dtk_common.publish_component_module_version(component_module_name, remote_component_name, version_name)
 		expect(component_module_published).to eq(true)
 	end
 end
 
-shared_context 'NEG - Publish versioned component module' do |dtk_common, component_module_name, version_name|
+shared_context 'NEG - Publish versioned component module' do |dtk_common, component_module_name, remote_component_name, version_name|
 	it "does not publish/push component module #{component_module_name} since this version #{version_name} does not exist" do
-		component_module_published = dtk_common.publish_component_module_version(component_module_name, version_name)
+		component_module_published = dtk_common.publish_component_module_version(component_module_name, remote_component_name, version_name)
 		expect(component_module_published).to eq(false)
 	end
 end

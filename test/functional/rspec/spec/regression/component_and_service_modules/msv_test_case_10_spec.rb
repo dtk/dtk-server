@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-# Test Case 10: Export component module using full name #{component_module_name} to users default namespace and then delete it
+# Test Case 10: Publish component module using full name #{component_module_name} to users default namespace and then delete it
 
 require 'rubygems'
 require 'rest_client'
@@ -10,6 +10,7 @@ require './lib/dtk_common'
 require './lib/assembly_and_service_operations_spec'
 require './lib/parameters_setting_spec'
 require './lib/component_modules_spec'
+require './lib/component_module_versions_spec'
 
 existing_component_module_name = 'jmeter'
 component_module_namespace = 'r8'
@@ -22,10 +23,11 @@ default_filesystem_location = '~/dtk/component_modules'
 r8_component_module_filesystem_location = '~/dtk/component_modules/r8'
 dtk17_component_module_filesystem_location = '~/dtk/component_modules/dtk17'
 local_component_module_filesystem_location = '~/dtk/component_modules/local'
+version = "0.0.1"
 
 dtk_common = Common.new('', '')
 
-describe "(Modules, Services and Versioning) Test Case 10: Export component module using full name #{component_module_name} to users default namespace and then delete it" do
+describe "(Modules, Services and Versioning) Test Case 10: Publish component module using full name #{component_module_name} to users default namespace and then delete it" do
   before(:all) do
     puts '***************************************************************************************************************************************************************', ''
   end
@@ -59,16 +61,20 @@ describe "(Modules, Services and Versioning) Test Case 10: Export component modu
     include_context 'Import component module', component_module_name
   end
 
-  context 'Export component module to default namespace' do
-    include_context 'Export component module', local_component_module, namespace
+  context "Create new component module version" do
+    include_context "Create component module version", dtk_common, local_component_module, version
   end
 
-  context 'Delete component module' do
-    include_context 'Delete component module', dtk_common, local_component_module
+  context "Publish new component module version to remote repo" do
+    include_context "Publish versioned component module", dtk_common, local_component_module, "#{namespace}/#{component_module_name}", version
   end
 
-  context 'Delete component module from local filesystem' do
-    include_context 'Delete component module from local filesystem', local_component_module_filesystem_location, component_module_name
+  context "Delete all component module versions from server" do
+    include_context "Delete all component module versions", dtk_common, local_component_module
+  end
+
+  context "Delete all component module versions from local filesystem" do
+    include_context 'Delete all local component module versions', local_component_module_filesystem_location, component_module_name
   end
 
   context 'Delete old component module' do
@@ -87,18 +93,26 @@ describe "(Modules, Services and Versioning) Test Case 10: Export component modu
     include_context 'Check component module imported on local filesystem', dtk17_component_module_filesystem_location, component_module_name
   end
 
-  context 'Delete component module' do
-    include_context 'Delete component module', dtk_common, new_local_component_module
+  context 'Check if component module version imported on local filesystem' do
+    include_context 'Check component module imported on local filesystem', dtk17_component_module_filesystem_location, component_module_name + "-" + version
   end
 
-  context 'Delete component module from local filesystem' do
-    include_context 'Delete component module from local filesystem', dtk17_component_module_filesystem_location, component_module_name
+  context "Delete all component module versions from server" do
+    include_context "Delete all component module versions", dtk_common, new_local_component_module
   end
 
-  context 'Delete component module from remote' do
-    include_context 'Delete component module from remote repo', component_module_name, namespace
+  context "Delete all component module versions from local filesystem" do
+    include_context 'Delete all local component module versions', dtk17_component_module_filesystem_location, component_module_name
   end
 
+  context "Delete new component module from remote repo" do
+    include_context "Delete remote component module version", dtk_common, component_module_name, namespace, version
+  end
+
+  context 'Delete remote module' do
+    include_context 'Delete component module from remote', dtk_common, component_module_name, namespace
+  end
+  
   after(:all) do
     puts '', ''
   end

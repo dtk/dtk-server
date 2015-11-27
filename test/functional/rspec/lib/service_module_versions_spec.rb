@@ -32,16 +32,16 @@ shared_context 'NEG - Check if service module version exists on remote' do |dtk_
   end
 end
 
-shared_context 'Publish versioned service module' do |dtk_common, service_module_name, version_name|
+shared_context 'Publish versioned service module' do |dtk_common, service_module_name, remote_service_module_name, version_name|
 	it "publish/push service module #{service_module_name} with version #{version_name}" do
-		service_module_published = dtk_common.publish_service_module_version(service_module_name, version_name)
+		service_module_published = dtk_common.publish_service_module_version(service_module_name, remote_service_module_name, version_name)
 		expect(service_module_published).to eq(true)
 	end
 end
 
-shared_context 'NEG - Publish versioned service module' do |dtk_common, service_module_name, version_name|
+shared_context 'NEG - Publish versioned service module' do |dtk_common, service_module_name, remote_service_module_name, version_name|
 	it "does not publish/push service module #{service_module_name} since this version #{version_name} does not exist" do
-		service_module_published = dtk_common.publish_service_module_version(service_module_name, version_name)
+		service_module_published = dtk_common.publish_service_module_version(service_module_name, remote_service_module_name, version_name)
 		expect(service_module_published).to eq(false)
 	end
 end

@@ -28,7 +28,7 @@ module DTK
     end
 
     ##
-    # This method is used to check if catalog credentials have been preseeded.
+    # This method is used to check if catalog credentials have been preseeded. This is used only on first startup of client.
     #
 
     def are_catalog_credentials_seeded?
@@ -37,6 +37,10 @@ module DTK
 
     def are_catalog_credentilas_set?
       (get_user_object().catalog_username || get_user_object().catalog_password || R8::Config[:remote_repo][:public][:username])
+    end
+
+    def self.is_remote_public_user?
+      R8::Config[:remote_repo][:public][:username].eql?(catalog_username)
     end
 
     def self.get_default_namespace

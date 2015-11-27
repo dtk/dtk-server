@@ -155,10 +155,10 @@ module ServiceModulesVersionMixin
       remote_version_found
     end
 
-    def publish_service_module_version(service_module_name, version_name)
+    def publish_service_module_version(service_module_name, remote_service_module_name, version_name)
       puts "Publish service module version: ", "-----------------------------------"
       module_published = false
-      publish_response = send_request('/rest/service_module/export', {:service_module_id=>service_module_name, :rsa_pub_key=>ssh_key, :version=>version_name})
+      publish_response = send_request('/rest/service_module/export', {:service_module_id=>service_module_name, :remote_component_name => remote_service_module_name, :rsa_pub_key=>ssh_key, :version=>version_name})
       ap publish_response
       if publish_response['status'] == 'ok' && publish_response['data']['remote_repo_name'] == service_module_name.split(":").last
         puts "Service module #{service_module_name} has been published successfully!"

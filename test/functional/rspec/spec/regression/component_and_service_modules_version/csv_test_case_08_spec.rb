@@ -55,7 +55,11 @@ describe '(Component, service and versioning) Test Case 08: Import component mod
     include_context "Check if component module version exists on remote", dtk_common, imported_component_module_name, version
   end
 
-  context 'Delete base component module from remote' do
+  context 'Delete component module version from remote' do
+    include_context 'Delete remote component module version', dtk_common, component_module_name, component_module_namespace, version
+  end
+
+  context 'Delete base component module version from remote' do
     include_context 'Delete component module from remote repo', component_module_name, component_module_namespace
   end
 

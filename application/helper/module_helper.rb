@@ -167,6 +167,9 @@ module Ramaze::Helper
       end
 
       opts = { do_not_raise: do_not_raise, additional_message: additional_message, ignore_component_error: ignore_component_error }
+      if hard_reset_on_pull_version = ret_request_params(:hard_reset_on_pull_version)
+        opts.merge!(hard_reset_on_pull_version: hard_reset_on_pull_version)
+      end
       response = module_class(module_type).install(project, local_params, remote_params, dtk_client_pub_key, opts)
       return response if response[:does_not_exist]
 

@@ -57,7 +57,7 @@ module DTK; module ModuleMixins
           repo_with_branch = Repo::WithBranch.create_workspace_repo(project.id_handle(), local, repo_user_acls, create_opts)
         end
 
-        commit_sha = repo_with_branch.initial_sync_with_remote(remote, remote_repo_info)
+        commit_sha = repo_with_branch.initial_sync_with_remote(remote, remote_repo_info, opts)
         # create object in object model that corresponds to remote repo
         create_repo_remote_object(repo_with_branch, remote, remote_repo_info[:git_repo_name])
         module_and_branch_info = create_module_and_branch_obj?(project, repo_with_branch.id_handle(), local)

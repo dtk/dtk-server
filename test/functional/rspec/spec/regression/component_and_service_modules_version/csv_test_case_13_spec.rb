@@ -44,9 +44,10 @@ describe '(Component, service and versioning) Test Case 13: Install service modu
 	context "Check if created service module version exists locally" do
 		include_context 'Check if service module verison is exists locally', service_module_filesystem_location, service_module_name, service_module_version
 	end
-	context "Publish newly creatred service module to remote repo" do
-		include_context 'Publish versioned service module', dtk_common, service_module_fullname, service_module_version
-	end
+
+	context "Publish new component module version to remote repo" do
+    include_context "Publish versioned service module", dtk_common, service_module_fullname, service_module_remote_name, service_module_version
+  end
 
 	context "Check if published service module version exists on remote repo" do
 		include_context 'Check if service module version exists on remote', dtk_common, service_module_fullname, service_module_version

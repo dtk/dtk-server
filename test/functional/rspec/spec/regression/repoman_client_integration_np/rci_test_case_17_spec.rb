@@ -2,6 +2,7 @@
 require './spec/setup_browser'
 require './lib/component_modules_spec'
 require './lib/dtk_common'
+require './lib/component_module_versions_spec'
 
 user_data = {
   usergroup: 'bakir_test_group',
@@ -11,7 +12,8 @@ user_data = {
   namespace: 'dtk17',
   component_module_filesystem_location: '~/dtk/component_modules/dtk17',
   another_usergroup: 'bakir_test',
-  another_user: 'bakir_test'
+  another_user: 'bakir_test',
+  version: '0.0.1'
 }
 
 permissions = {
@@ -111,12 +113,12 @@ describe '(Repoman client integration) Test Case 17: NEG - delete-from-catalog n
     include_context 'NEG - Delete component module from remote', dtk_common, user_data[:component_module], user_data[:namespace]
   end
 
-  context 'Delete component module' do
-    include_context 'Delete component module', dtk_common, user_data[:namespace] + ':' + user_data[:component_module]
+  context "Delete all component module versions from server" do
+    include_context "Delete all component module versions", dtk_common, user_data[:namespace] + ':' + user_data[:component_module]
   end
 
-  context 'Delete component module from local filesystem' do
-    include_context 'Delete component module from local filesystem', user_data[:component_module_filesystem_location], user_data[:component_module]
+  context "Delete all component module versions from local filesystem" do
+    include_context 'Delete all local component module versions', user_data[:component_module_filesystem_location], user_data[:component_module]
   end
 
   context "Usergroup #{user_data[:usergroup]}, user #{user_data[:user]} and RWDP/RWDP/RWDP permissions" do

@@ -66,9 +66,9 @@ describe '(Component, service and versioning) Test Case 19: Install service modu
   context 'Create new service module version' do
     include_context 'Create service module version', dtk_common, full_service_module_name, service_module_version
   end
-=begin
+
   context 'Publish service module version to remote repo' do
-  	include_context 'Publish versioned service module', dtk_common, full_service_module_name, service_module_version
+  	include_context 'Publish versioned service module', dtk_common, full_service_module_name, "#{service_module_namespace}/#{service_module_name}", service_module_version
   end
 
   context 'Delete all service module version from server' do
@@ -114,7 +114,7 @@ describe '(Component, service and versioning) Test Case 19: Install service modu
   context "Delete all component module versions from local filesystem" do
     include_context 'Delete all local component module versions', component_module_filesystem_location, component_module_name
   end
-=end
+
   after(:all) do
     puts '', ''
   end

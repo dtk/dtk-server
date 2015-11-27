@@ -265,3 +265,17 @@ shared_context 'NEG - Push local service module changes to server' do |service_m
       fail.should eq(true)
     end
 end
+
+shared_context 'Push to remote changes for service module' do |service_module_name|
+  it "pushes #{service_module_name} service module changes from server to repoman" do
+    puts 'Push to remote service module changes:', '-----------------------------------'
+    pass = false
+    value = `dtk service-module #{service_module_name} push-dtkn`
+    puts value
+    pass = value.include?('Status: OK')
+    puts 'Push to remote passed successfully!' if pass == true
+    puts 'Push to remote didnt pass successfully!' if pass == false
+    puts ''
+    pass.should eq(true)
+  end
+end

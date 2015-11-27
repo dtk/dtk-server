@@ -68,10 +68,10 @@ module ComponentModulesVersionMixin
 		component_added_to_service
 	end
 
-	def publish_component_module_version(component_module_name, version_name)
+	def publish_component_module_version(component_module_name, remote_component_name, version_name)
 		puts "Publish component module version: ", "-----------------------------------"
 		module_published = false
-		publish_response = send_request('/rest/component_module/export', {:component_module_id=>component_module_name, :rsa_pub_key=>ssh_key, :version=>version_name})
+		publish_response = send_request('/rest/component_module/export', {:component_module_id=>component_module_name, :remote_component_name => remote_component_name, :rsa_pub_key=>ssh_key, :version=>version_name})
 		ap publish_response
 		if publish_response['status'] == 'ok' && publish_response['data']['remote_repo_name'] == component_module_name.split(":").last
 			puts "Component module #{component_module_name} has been published successfully!"
@@ -149,11 +149,7 @@ module ComponentModulesVersionMixin
 
      	if (remote_component_modules_list['data'].select { |x| x['display_name'] == "#{component_module_namespace}/#{component_module_name}" }.first)
      		puts "Component module #{component_module_name} exists on remote. Try to delete component module version #{component_module_version}..."
-
     		delete_remote_version_resposne = send_request('/rest/component_module/delete_remote', {rsa_pub_key: self.ssh_key, remote_module_name: component_module_name, remote_module_namespace: component_module_namespace, force_delete: false, version: component_module_version})
- 			puts "/////"
- 			ap delete_remote_version_resposne
- 			puts "/////"
  			if (delete_remote_version_resposne['status'] == 'ok')
     			puts "Component module #{component_module_name} version #{component_module_version} deleted successfully"
 				component_module_version_deleted = true

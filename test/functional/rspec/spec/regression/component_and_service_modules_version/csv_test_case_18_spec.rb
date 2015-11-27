@@ -62,8 +62,8 @@ describe '(Component, service and versioning) Test Case 18: Install service modu
   	include_context 'Push local service module changes to server', full_service_module_name, file_for_change
   end
 
-  context 'Push service module changes to remote repo' do
-  	include_context 'Export service module', full_service_module_name, service_module_namespace
+  context 'Push to remote changes for service module' do
+    include_context 'Push to remote changes for service module', full_service_module_name
   end
 
   context 'Delete service module from server' do
@@ -98,8 +98,8 @@ describe '(Component, service and versioning) Test Case 18: Install service modu
   	include_context 'Push local service module changes to server', full_service_module_name, file_for_change
   end
 
-  context 'Push service module changes to remote repo' do
-  	include_context 'Export service module', full_service_module_name, service_module_namespace
+  context 'Push to remote changes for service module' do
+    include_context 'Push to remote changes for service module', full_service_module_name
   end
 
   context 'Delete service module from server' do

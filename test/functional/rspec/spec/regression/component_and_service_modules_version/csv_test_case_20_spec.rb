@@ -27,8 +27,6 @@ service_name = 'csv_test_case_20_instance'
 new_assembly = 'csv_test_case_20_assembly'
 node_name = 'test'
 
-
-
 dtk_common = Common.new(service_name, "#{assembly_name}")
 dtk_common_new = Common.new(new_service_name, "#{service_module_name}::#{new_assembly}")
 

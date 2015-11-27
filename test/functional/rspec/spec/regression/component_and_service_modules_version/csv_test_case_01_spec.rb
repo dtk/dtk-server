@@ -36,10 +36,10 @@ describe '(Component, service and versioning) Test Case 01: Create component mod
 	context 'Check if the created version exists on server' do
 		include_context 'Check if component module version exists on server', dtk_common, component_module_fullname, component_module_version
 	end
-
-	context 'Publish component module version to the remote repo' do
-		include_context 'Publish versioned component module', dtk_common, component_module_fullname, component_module_version
-	end
+	
+	context "Publish new component module version to remote repo" do
+    include_context "Publish versioned component module", dtk_common, component_module_fullname, "#{component_module_namespace}/#{component_module_name}", component_module_version
+  end
 
 	context 'Check if the component module was published successfully' do
 		include_context 'Check if component module version exists on remote', dtk_common, component_module_fullname, component_module_version

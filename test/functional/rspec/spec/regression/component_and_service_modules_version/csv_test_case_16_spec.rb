@@ -63,8 +63,8 @@ describe '(Component, service and versioning) Test Case 16: Install two componen
   	include_context 'Push clone changes to server', first_full_component_module_name, file_for_change
   end
 
-  context 'Publish component module' do
-    include_context 'Export component module', first_full_component_module_name, component_module_namespace
+  context 'Push to remote changes for component module' do
+    include_context 'Push to remote changes for component module', first_full_component_module_name
   end
 
   context "Delete all component module versions from server" do
@@ -107,9 +107,9 @@ describe '(Component, service and versioning) Test Case 16: Install two componen
   	include_context 'Push clone changes to server', first_full_component_module_name, file_for_change
   end
 
-  context 'Publish component module' do
-    include_context 'Export component module', first_full_component_module_name, component_module_namespace
-  end 
+  context 'Push to remote changes for component module' do
+    include_context 'Push to remote changes for component module', first_full_component_module_name
+  end
   
   context "Delete all component module versions from server" do
     include_context "Delete all component module versions", dtk_common, first_full_component_module_name

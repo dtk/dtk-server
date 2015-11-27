@@ -71,12 +71,12 @@ describe '(Component, service and versioning) Test Case 17: Install two componen
     include_context "Check if component module version exists on server", dtk_common, first_full_component_module_name, version
   end
 
-  context 'Publish first component module' do
-    include_context 'Export component module', first_full_component_module_name, component_module_namespace
+  context 'Push to remote changes for first component module' do
+    include_context 'Push to remote changes for component module', first_full_component_module_name
   end
 
   context "Publish first component module version to remote repo" do
-    include_context "Publish versioned component module", dtk_common, first_full_component_module_name, version
+    include_context "Publish versioned component module", dtk_common, first_full_component_module_name, "#{component_module_namespace}/#{first_component_module_name}", version
   end
 
   context "Delete all component module versions from server" do
@@ -119,8 +119,8 @@ describe '(Component, service and versioning) Test Case 17: Install two componen
   	include_context 'Push clone changes to server', first_full_component_module_name, file_for_change
   end
 
-  context 'Publish component module' do
-    include_context 'Export component module', first_full_component_module_name, component_module_namespace
+  context 'Push to remote changes for first component module' do
+    include_context 'Push to remote changes for component module', first_full_component_module_name
   end
 
   context "Delete component module version from remote repo" do

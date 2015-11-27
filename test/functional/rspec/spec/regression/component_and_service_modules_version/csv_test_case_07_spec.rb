@@ -46,23 +46,19 @@ describe '(Component, service and versioning) Test Case 07: Check if deleting ba
   end
 
   context "Publish new component module version to remote repo" do
-    include_context "Publish versioned component module", dtk_common, imported_component_module_name, version
+    include_context "Publish versioned component module", dtk_common, imported_component_module_name, "#{component_module_namespace}/#{component_module_name}", version
   end
 
   context "Check if the component module was published to the remote repo" do
     include_context "Check if component module version exists on remote", dtk_common, imported_component_module_name, version
   end
 
-  context 'Delete base component module from remote' do
-    include_context 'Delete component module from remote repo', component_module_name, component_module_namespace
+  context "Delete new component module from remote repo" do
+    include_context "Delete remote component module version", dtk_common, component_module_name, component_module_namespace, version
   end
 
   context 'Check if component module version exists on remote' do
     include_context 'NEG - Check if component module version exists on remote', dtk_common, imported_component_module_name, version
-  end
-
-  context 'Publish component module' do
-    include_context 'Export component module', imported_component_module_name, component_module_namespace
   end
 
   context "Delete all component module versions from server" do

@@ -44,8 +44,8 @@ describe '(Component, service and versioning) Test Case 15: Import service modul
     include_context "Check if service module version exists on server", dtk_common, imported_service_module_name, version
   end
 
-  context "Publish new service module version to remote repo" do
-    include_context "Publish versioned service module", dtk_common, imported_service_module_name, version
+  context "Publish new component module version to remote repo" do
+    include_context "Publish versioned service module", dtk_common, imported_service_module_name, "#{service_module_namespace}/#{service_module_name}", version
   end
 
   context "Check if the service module was published to the remote repo" do

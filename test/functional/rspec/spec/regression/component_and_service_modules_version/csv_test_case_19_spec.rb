@@ -68,7 +68,7 @@ describe '(Component, service and versioning) Test Case 19: Install service modu
   end
 
   context 'Publish service module version to remote repo' do
-  	include_context 'Publish versioned service module', dtk_common, full_service_module_name, service_module_version
+  	include_context 'Publish versioned service module', dtk_common, full_service_module_name, "#{service_module_namespace}/#{service_module_name}", service_module_version
   end
 
   context 'Delete all service module version from server' do

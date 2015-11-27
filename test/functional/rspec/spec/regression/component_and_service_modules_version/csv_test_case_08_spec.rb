@@ -48,7 +48,7 @@ describe '(Component, service and versioning) Test Case 08: Import component mod
   end
 
   context "Publish new component module version to remote repo" do
-    include_context "Publish versioned component module", dtk_common, imported_component_module_name, version
+    include_context "Publish versioned component module", dtk_common, imported_component_module_name, "#{component_module_namespace}/#{component_module_name}", version
   end
 
   context "Check if the component module was published to the remote repo" do

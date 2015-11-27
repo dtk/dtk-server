@@ -37,10 +37,6 @@ describe '(Component, service and versioning) Test Case 09: Install component mo
     include_context 'Check component module imported on local filesystem', component_module_filesystem_location, component_module_name
   end
 
-  context 'Install component module version' do
-    include_context 'Install component module version', component_module_name, component_module_namespace, version
-  end
-
   context 'Check if component module version imported on local filesystem' do
     include_context 'Check component module imported on local filesystem', component_module_filesystem_location, component_module_name + "-" + version
   end
@@ -53,20 +49,20 @@ describe '(Component, service and versioning) Test Case 09: Install component mo
     include_context 'Clone component module version', dtk_common, imported_component_module_name, version
   end
 
-  context 'Delete component module' do
-    include_context 'Delete component module', dtk_common, imported_component_module_name
-  end
-
-  context 'Delete component module from local filesystem' do
-    include_context 'Delete component module from local filesystem', component_module_filesystem_location, component_module_name
-  end
-
   context 'Delete component module version' do
     include_context 'Delete component module version', dtk_common, imported_component_module_name, version
   end
 
   context 'Delete component module version from local filesystem' do
     include_context 'Delete component module from local filesystem', component_module_filesystem_location, component_module_name + "-" + version
+  end
+
+  context 'Delete component module' do
+    include_context 'Delete component module', dtk_common, imported_component_module_name
+  end
+
+  context 'Delete component module from local filesystem' do
+    include_context 'Delete component module from local filesystem', component_module_filesystem_location, component_module_name
   end
 
   after(:all) do

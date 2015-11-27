@@ -50,10 +50,6 @@ describe '(Modules, Services and Versioning) Test Case 35: Install component mod
     include_context 'Import remote component module', new_namespace + '/' + component_module_name
   end
 
-  context 'Get component module components list' do
-    include_context 'Get component module components list', dtk_common, new_component_module
-  end
-
   context 'Check if component module imported on local filesystem' do
     include_context 'Check component module imported on local filesystem', dtk17_component_module_filesystem_location, component_module_name
   end
@@ -78,8 +74,8 @@ describe '(Modules, Services and Versioning) Test Case 35: Install component mod
     include_context "Delete remote component module version", dtk_common, component_module_name, new_namespace, version
   end
 
-  context 'Delete component module from remote' do
-    include_context 'Delete component module from remote repo', component_module_name, new_namespace
+  context "Delete new component module from remote repo" do
+    include_context "Delete remote component module version", dtk_common, component_module_name, new_namespace, 'master'
   end
 
   after(:all) do

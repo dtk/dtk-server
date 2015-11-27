@@ -43,7 +43,7 @@ describe '(Modules, Services and Versioning) Test Case 36: Install service modul
   end
 
   context 'Publish service module version to remote repo' do
-    include_context 'Publish versioned service module', dtk_common, service_module, "#{namespace}/#{service_module_name}", version
+    include_context 'Publish versioned service module', dtk_common, service_module, "#{new_namespace}/#{service_module_name}", version
   end
 
   context 'Import previously published service module' do
@@ -78,8 +78,8 @@ describe '(Modules, Services and Versioning) Test Case 36: Install service modul
     include_context 'Delete remote service module version', dtk_common, service_module_name, new_namespace, version
   end
 
-  context "Delete #{service_module_name} service module from remote" do
-    include_context 'Delete service module from remote repo', service_module_name, new_namespace
+  context 'Delete service module version from remote repo' do
+    include_context 'Delete remote service module version', dtk_common, service_module_name, new_namespace, 'master'
   end
 
   after(:all) do

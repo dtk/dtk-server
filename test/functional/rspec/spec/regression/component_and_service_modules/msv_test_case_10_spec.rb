@@ -109,10 +109,10 @@ describe "(Modules, Services and Versioning) Test Case 10: Publish component mod
     include_context "Delete remote component module version", dtk_common, component_module_name, namespace, version
   end
 
-  context 'Delete component module from remote' do
-    include_context 'Delete component module from remote repo', component_module_name, namespace
+  context 'Delete remote module' do
+    include_context 'Delete component module from remote', dtk_common, component_module_name, namespace
   end
-
+  
   after(:all) do
     puts '', ''
   end

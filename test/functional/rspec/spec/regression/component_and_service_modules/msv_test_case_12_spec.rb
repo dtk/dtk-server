@@ -102,8 +102,8 @@ describe "(Modules, Services and Versioning) Test Case 12: Export service module
     include_context 'Delete remote service module version', dtk_common, service_module_name, namespace, version
   end
 
-  context "Delete #{service_module_name} service module from remote" do
-    include_context 'Delete service module from remote repo', service_module_name, namespace
+  context 'Delete service module version from remote repo' do
+    include_context 'Delete remote service module version', dtk_common, service_module_name, namespace, 'master'
   end
 
   after(:all) do

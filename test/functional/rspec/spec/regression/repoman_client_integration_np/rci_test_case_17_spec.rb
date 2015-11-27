@@ -2,6 +2,7 @@
 require './spec/setup_browser'
 require './lib/component_modules_spec'
 require './lib/dtk_common'
+require './lib/component_module_versions_spec'
 
 user_data = {
   usergroup: 'bakir_test_group',

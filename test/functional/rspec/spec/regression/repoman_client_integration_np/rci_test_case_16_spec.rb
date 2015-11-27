@@ -99,7 +99,7 @@ describe '(Repoman client integration) Test Case 16: delete-from-catalog positiv
   end
 
   context "Publish new component module version to remote repo" do
-    include_context "Publish versioned component module", dtk_common, user_data[:namespace] + ':' + user_data[:component_module], "#{user_data[:namespace]}/#{user_data[:component_module]}", user_data[:namespace]
+    include_context "Publish versioned component module", dtk_common, user_data[:namespace] + ':' + user_data[:component_module], "#{user_data[:namespace]}/#{user_data[:component_module]}", user_data[:version]
   end
 
   #User A is not owner of module A but belongs to user group A which is set as user group on module (permissions: None/D/None)
@@ -127,7 +127,7 @@ describe '(Repoman client integration) Test Case 16: delete-from-catalog positiv
   end
 
   context "Publish new component module version to remote repo" do
-    include_context "Publish versioned component module", dtk_common, user_data[:namespace] + ':' + user_data[:component_module], "#{user_data[:namespace]}/#{user_data[:component_module]}", user_data[:namespace]
+    include_context "Publish versioned component module", dtk_common, user_data[:namespace] + ':' + user_data[:component_module], "#{user_data[:namespace]}/#{user_data[:component_module]}", user_data[:version]
   end
 
   context "Delete new component module from remote repo" do

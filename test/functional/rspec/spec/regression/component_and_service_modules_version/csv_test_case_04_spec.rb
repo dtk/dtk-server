@@ -15,7 +15,7 @@ component_module_name = 'temp04'
 component_module_namespace = 'version'
 component_module_remote_name = "#{component_module_namespace}/#{component_module_name}"
 component_module_fullname = "#{component_module_namespace}:#{component_module_name}"
-component_module_version = '0.0.1'
+component_module_version = '0.0.2'
 component_module_filesystem_location = "~/dtk/component_modules/#{component_module_namespace}"
 
 dtk_common = Common.new('', '')

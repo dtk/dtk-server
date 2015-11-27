@@ -11,7 +11,7 @@ require './lib/assembly_and_service_operations_spec'
 require './lib/service_modules_spec'
 require './lib/service_module_versions_spec'
 
-service_module_name = 'temp_service'
+service_module_name = 'temp_service_13'
 service_module_namespace = 'version'
 service_module_fullname = "#{service_module_namespace}:#{service_module_name}"
 service_module_remote_name = "#{service_module_namespace}/#{service_module_name}"

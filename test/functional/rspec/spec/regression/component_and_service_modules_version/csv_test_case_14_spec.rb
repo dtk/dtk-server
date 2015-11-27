@@ -12,7 +12,7 @@ require './lib/parameters_setting_spec'
 require './lib/service_modules_spec'
 require './lib/service_module_versions_spec'
 
-service_module_name = 'temp_service'
+service_module_name = 'temp_service14'
 service_module_namespace = 'version'
 full_service_module_name = 'version:temp_service'
 service_module_filesystem_location = '~/dtk/service_modules/version'

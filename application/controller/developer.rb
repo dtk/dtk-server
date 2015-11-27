@@ -25,21 +25,6 @@ module XYZ
       rest_ok_response :action_results_id => queue_id
     end
 
-
-    def deep_convert(element)
-      if    element.is_a?(Array)
-        element.collect { |e| deep_convert(e) }
-      elsif element.is_a?(Hash)
-        element.inject({}) do |new_hash,(k,v)|
-          new_hash[k.to_sym] = deep_convert(v)
-          new_hash
-        end
-      else
-        element
-      end
-    end
-
-
   private
 
 
@@ -72,6 +57,12 @@ module XYZ
       CommandAndControl.request__execute_action(agent_name, agent_method, nodes, callbacks, params)
 
       action_results_queue.id
+    end
+
+    def deep_convert(element)
+      return element.collect { |e| deep_convert(e) } if element.is_a?(Array)
+      return element.inject({}) { |sh,(k,v)| sh[k.to_sym] = deep_convert(v); sh } if element.is_a?(Hash)
+      element
     end
 
   end

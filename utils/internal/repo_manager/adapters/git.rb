@@ -370,11 +370,19 @@ module DTK
       end
     end
 
-    def initial_sync_with_remote_repo(remote_name, remote_url, remote_branch, _opts = {})
+    def initial_sync_with_remote_repo(remote_name, remote_url, remote_branch, opts = {})
       add_remote?(remote_name, remote_url)
+
+      # initial branch from which we create new empty branch; first one is master but next one is version branch
+      init_branch = current_branch()
 
       # create branch with history from remote and not merge
       git_command__create_empty_branch(@branch) #, use_branch_name: true)
+
+      # when pulling version after base branch is pulled there are untracked changes in newly created empty branch
+      # we need to remove them with hard reset to branch which they come from
+      git_command__hard_reset(init_branch) if !init_branch.eql?('master') && opts[:hard_reset_on_pull_version]
+
       pull_changes(remote_name, remote_branch)
 
       # push to local
@@ -867,7 +875,7 @@ module DTK
 
     def git_command__pull(local_branch, remote_branch, remote_name = nil)
       remote_name ||= default_remote_name()
-      git_command.pull(cmd_opts(), remote_name, "#{remote_branch}:#{local_branch}")
+      git_command.pull(cmd_opts(), remote_name, "#{remote_branch}:#{local_branch}")#, '-f')
     end
 
     # MOD_RESTRUCT-NEW deprecate below

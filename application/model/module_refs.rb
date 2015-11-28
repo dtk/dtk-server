@@ -65,7 +65,7 @@ module DTK
         end
         cmp_mod_name = cmp_mod[:display_name]
         unless component_module_ref?(cmp_mod_name)
-          add_or_set_component_module_ref(cmp_mod_name, namespace_info: cmp_mod[:namespace_name])
+          add_or_set_component_module_ref(cmp_mod_name, {namespace_info: cmp_mod[:namespace_name], version_info: cmp_mod[:version_info]})
           ret = true
         end
       end

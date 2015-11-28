@@ -10,6 +10,8 @@ require './lib/dtk_common'
 require './lib/assembly_and_service_operations_spec'
 require './lib/component_modules_spec'
 require './lib/component_module_versions_spec'
+require './lib/service_modules_spec'
+require './lib/service_module_versions_spec'
 
 component_module_name = 'temp20'
 component_module_namespace = 'version'
@@ -38,9 +40,9 @@ dtk_common_new = Common.new(new_service_name, "#{service_module_name}::#{new_ass
 
 
 describe '(Component, service and versioning) Test Case 20: Stage assembly, add versioned cmp as dependency, create new assembly and check that module_refs.yaml is updated correctly'  do
-	before :all do
-    	puts '*********************************************************************************************************************************', ''
-	 end
+  before :all do
+    puts '*********************************************************************************************************************************', ''
+  end
 
   context "Stage service function on #{assembly_name} assembly" do
     include_context 'Stage', dtk_common
@@ -66,12 +68,12 @@ describe '(Component, service and versioning) Test Case 20: Stage assembly, add 
     include_context 'Clone service module', dtk_common, "#{service_module_namespace}:#{service_module_name}"
   end
 
-	context 'Check module_refs.yaml file of service module for versioned component module' do
-		include_context 'Check module_refs.yaml for imported module', service_module_filesystem_location + '/' + service_module_name, ["temp20","version: #{component_module_version}"]
-	end
+  context 'Check module_refs.yaml file of service module for versioned component module' do
+     include_context 'Check module_refs.yaml for imported module', service_module_filesystem_location + '/' + service_module_name, ["temp20","version: #{component_module_version}"]
+  end
 
-	context 'Delete assembly function' do
- 		include_context 'Delete assembly', dtk_common_new, "#{service_module_name}/#{new_assembly}", service_module_namespace
+  context 'Delete assembly function' do
+    include_context 'Delete assembly', dtk_common_new, "#{service_module_name}/#{new_assembly}", service_module_namespace
   end
 
   context 'Return old module_refs.yaml file' do
@@ -86,7 +88,7 @@ describe '(Component, service and versioning) Test Case 20: Stage assembly, add 
     include_context 'Delete all local service module versions', service_module_filesystem_location, service_module_name
   end
 
-    after(:all) do
-   	  puts '', ''
-    end
+  after(:all) do
+    puts '', ''
+  end
 end

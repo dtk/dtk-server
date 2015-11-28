@@ -22,7 +22,7 @@ class DtkClientAccessor
 
 	def execute_command_with_options(context_name, entity_name, id, command, options, params=[])
 		context_params = ::DTK::Shell::ContextParams.new(params)
-		context_params.forward_options(key.to_s => value.to_s)
+		context_params.forward_options(options)
 		context_params.add_context_to_params(context_name, entity_name, id)
 		puts context_params.inspect
 		response = ::DTK::Client::ContextRouter.routeTask(context_name, command, context_params, @connection)

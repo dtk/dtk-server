@@ -279,3 +279,17 @@ shared_context 'Push to remote changes for service module' do |service_module_na
     pass.should eq(true)
   end
 end
+
+shared_context 'Clone service module' do |dtk_common, service_module_name|
+  it "clones service module #{service_module_name}" do
+    service_module_cloned = dtk_common.clone_service_module(service_module_name)
+    expect(service_module_cloned).to eq(true)
+  end
+end
+
+shared_context 'NEG - Clone service module' do |dtk_common, service_module_name|
+  it "does not clone service module #{service_module_name}" do
+    service_module_version_cloned = dtk_common.clone_service_module(service_module_name)
+    expect(service_module_cloned).to eq(false)
+  end
+end

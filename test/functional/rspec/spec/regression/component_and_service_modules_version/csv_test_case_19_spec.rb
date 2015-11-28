@@ -39,7 +39,7 @@ describe '(Component, service and versioning) Test Case 19: Install service modu
 		puts '************************************************************************************************************************************************************************************************************', ''
 	end
 
-	context 'Install service module' do
+  context 'Install service module' do
     include_context 'Import remote service module', service_module_namespace + '/' + service_module_name
   end
 

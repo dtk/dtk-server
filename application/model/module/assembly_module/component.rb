@@ -148,6 +148,7 @@ module DTK; class AssemblyModule
     #  :sha - base sha to create branch from
     def create_assembly_branch(component_module, am_version, opts = {})
       base_version = opts[:base_version]
+      opts.merge!(inherit_frozen_from_base: true)
       component_module.create_new_version(base_version, am_version, opts)
     end
 

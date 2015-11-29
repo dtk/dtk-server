@@ -502,7 +502,7 @@ module DTK
       assigns.merge!(current_sha: opts[:current_sha]) if opts[:current_sha]
 
       # if installing specific component/service module version mark branch as frozen
-      is_frozen = opts[:frozen] || (local.version && !local.version.eql?('master'))
+      is_frozen = opts[:frozen].nil? ? (local.version && !local.version.eql?('master')) : opts[:frozen]
       assigns.merge!(frozen: true) if is_frozen
 
       ref = branch

@@ -200,6 +200,13 @@ module DTK; class  Assembly
       assembly_branch = AssemblyModule::Service.get_or_create_assembly_branch(self)
       assembly_branch.set_dsl_parsed!(true)
       component_module_refs = ModuleRefs.get_component_module_refs(assembly_branch)
+
+      # TODO: not sure if the best way to handle using different version of component module
+      # unless we delete existing it will not update if version is changed
+      cmp_modules = component_module_refs.component_modules
+      cmp_modules.delete(component_module[:display_name].to_sym)
+
+      version_info = nil if version_info == 'master'
       cmp_modules_with_namespaces = component_module.merge(namespace_name: namespace[:display_name], version_info: version_info)
       if update_needed = component_module_refs.update_object_if_needed!([cmp_modules_with_namespaces])
         # This saves teh upadte to the object model

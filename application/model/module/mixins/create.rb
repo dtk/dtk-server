@@ -115,6 +115,11 @@ module DTK; module ModuleMixins
       opts_repo_update = Aux.hash_subset(opts, [:sha, :base_version, :version_branch, :checkout_branch])
       new_version_repo, new_version_sha, new_branch_name = aug_base_branch.create_new_branch_from_this_branch?(get_project(), aug_base_branch[:repo], new_version, opts_repo_update)
       opts_create_branch = opts.merge(ancestor_branch_idh: aug_base_branch.id_handle(), current_sha: new_version_sha, new_branch_name: new_branch_name)
+
+      if opts[:inherit_frozen_from_base]
+        opts_create_branch.merge!(frozen: aug_base_branch[:frozen])
+      end
+
       new_branch = create_new_version__type_specific(new_version_repo, new_version, opts_create_branch)
       ModuleRefs.clone_component_module_refs(aug_base_branch, new_branch)
       new_branch

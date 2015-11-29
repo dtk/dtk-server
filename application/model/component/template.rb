@@ -233,7 +233,7 @@ module DTK; class Component
     # :module_branch
     # :component_module
     # :namespace
-    def self.get_augmented_component_template(cmp_mh, cmp_name, namespace, assembly)
+    def self.get_augmented_component_template(cmp_mh, cmp_name, namespace, assembly, opts = {})
       ret_cmp = nil
       match_cmps = []
       cmp_module_ids = []
@@ -259,7 +259,11 @@ module DTK; class Component
       # this case use service specfic one
       assembly_version = assembly_version(assembly)
       if cmp_templates.find { |cmp| cmp[:version] == assembly_version }
-        cmp_templates.select! { |cmp| cmp[:version] == assembly_version }
+        if opts[:use_base_template]
+          cmp_templates.reject! { |cmp| cmp[:version] == assembly_version }
+        else
+          cmp_templates.select! { |cmp| cmp[:version] == assembly_version }
+        end
       end
       unless cmp_templates.size == 1
         possible_names = cmp_templates.map { |r| r.display_name_print_form(namespace_prefix: true) }.join(',')

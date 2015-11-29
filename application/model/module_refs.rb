@@ -29,6 +29,12 @@ module DTK
       content_hash_content = ModuleRef.get_component_module_ref_array(branch).inject({}) do |h, r|
         h.merge(key(r[:module_name]) => r)
       end
+
+      # TODO: for some reason we do not support version to be set to 'master', instead we expect nil
+      content_hash_content.each do |k,v|
+        v[:version_info] = nil if v[:version_info] == 'master'
+      end
+
       new(branch, content_hash_content)
     end
 

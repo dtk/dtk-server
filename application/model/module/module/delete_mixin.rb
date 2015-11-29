@@ -90,6 +90,10 @@ module DTK; class BaseModule
 
     def raise_error_if_dependency(branch, version)
       components, services = ModuleRefs.get_module_refs_by_name_and_version(branch, module_namespace(), module_name(), version)
+
+      # remove self from dependencies (component modules can have self set as dependency)
+      components.reject!{ |cmp| cmp[:module_branch][:id] == branch[:id] }
+
       return if components.empty? && services.empty?
 
 

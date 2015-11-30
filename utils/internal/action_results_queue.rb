@@ -34,7 +34,6 @@ module DTK
         on_msg_received: proc do |msg|
           inspect_agent_response(msg)
           response = CommandAndControl.parse_response__execute_action(nodes, msg, params)
-
           node_info = ndx_pbuilderid_to_node_info[response[:pbuilderid]]
           data = response[:data]
           data = process_data!(data, node_info)

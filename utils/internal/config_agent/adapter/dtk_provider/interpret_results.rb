@@ -4,6 +4,10 @@ module DTK; class ConfigAgent; module Adapter
       module Mixin
         def action_results(result, _action)
           data = data_field_in_results(result)
+
+          # this is special case when we use STOMP adapter this will de facto once we remove mcollective
+          data = { :results => data } if data.is_a?(Array)
+
           unless data.is_a?(Hash)
             Log.error_pp(['Unexpected that data field is not a hash:', data])
             return nil
@@ -47,7 +51,7 @@ module DTK; class ConfigAgent; module Adapter
 
         def data_field_in_results(result)
           # TODO: will be deprecating the [:data][:data] form
-          result[:data] || {}
+          (result[:data] || {})[:data] || result[:data] || {}
         end
       end
     end

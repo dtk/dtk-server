@@ -23,11 +23,16 @@ module DTK
 
         def action_hash
           { agent: :ps, method: :get_ps }
+          #{ agent: :system_agent, method: :get_ps }
         end
 
         def process_data!(data, node_info)
           Result.new(node_info[:display_name], data.map { |r| node_info.merge(r) })
         end
+
+        # def messaging_protocol
+        #   'stomp'
+        # end
       end
 
       class GetArbiter < ActionResultsQueue
@@ -55,6 +60,7 @@ module DTK
 
         def action_hash
           { agent: :netstat, method: :get_tcp_udp }
+          # { agent: :system_agent, method: :get_tcp_udp }
         end
 
         def process_data!(data, node_info)
@@ -74,6 +80,10 @@ module DTK
           end
           Result.new(node_info[:display_name], ndx_ret.values)
         end
+
+        # def messaging_protocol
+        #   'stomp'
+        # end
       end
     end
   end

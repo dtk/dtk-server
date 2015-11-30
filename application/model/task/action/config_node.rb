@@ -195,7 +195,8 @@ module DTK; class Task
       def ret_command_and_control_adapter_info
         adapter_type = :node_config
         adapter_name = :server if execute_on_server?
-        adapter_name = :stomp  if action_agent_call?
+        # [Haris] Change STOMP to mcollective for action agent calls
+        # adapter_name = :stomp  if action_agent_call?
         [adapter_type, adapter_name]
       end
 

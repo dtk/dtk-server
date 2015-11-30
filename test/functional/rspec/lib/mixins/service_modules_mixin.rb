@@ -96,7 +96,7 @@ module ServiceModulesMixin
       puts "Service module exists in service module list. Try to find if #{assembly_name} assembly belongs to #{service_module_name} service module..."
       service_module_id = service_module_list['data'].find { |x| x['display_name'] == service_module_name }['id']
 
-      service_module_assembly_list = send_request('/rest/service_module/list_assemblies', service_module_id: service_module_id)
+      service_module_assembly_list = send_request('/rest/service_module/list_assemblies', service_module_id: service_module_id, version: "base")
       puts "List of assemblies that belong to service #{service_module_name}:"
       pretty_print_JSON(service_module_assembly_list)
 

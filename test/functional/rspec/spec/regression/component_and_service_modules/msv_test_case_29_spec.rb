@@ -43,19 +43,19 @@ describe '(Modules, Services and Versioning) Test Case 29: Import component modu
   end
 
   context 'Delete component module' do
-    include_context 'Delete component module', dtk_common, local_component_module_name_1
-  end
-
-  context 'Delete component module from local filesystem' do
-    include_context 'Delete component module from local filesystem', component_module_filesystem_location, component_module_name_1
-  end
-
-  context 'Delete component module' do
     include_context 'Delete component module', dtk_common, local_component_module_name_2
   end
 
   context 'Delete component module from local filesystem' do
     include_context 'Delete component module from local filesystem', component_module_filesystem_location, component_module_name_2
+  end
+
+  context 'Delete component module' do
+    include_context 'Delete component module', dtk_common, local_component_module_name_1
+  end
+
+  context 'Delete component module from local filesystem' do
+    include_context 'Delete component module from local filesystem', component_module_filesystem_location, component_module_name_1
   end
 
   after(:all) do

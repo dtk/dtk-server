@@ -29,16 +29,27 @@ module DTK
         namespace = r_module['remote_namespace'] || r_module['module_namespace']
 
         i_modules = installed_modules(type.to_sym, project_idh)
+        is_found  = false
 
-        is_found = i_modules.find do |i_module|
-          name.eql?(i_module.display_name) &&
-          ModuleVersion.versions_same?(version, i_module.fetch(:module_branch, {})[:version]) &&
-          (namespace.nil? || namespace.eql?(i_module.module_namespace))
+        i_modules.each do |i_module|
+          branches = i_module.get_module_branches
+          versions = []
+
+          if branches.size == 1
+            versions << branches.first[:version]
+          else
+            branches.each {|br| versions << br[:version] }
+          end
+
+          matching_version = match_versions(versions, version, i_module)
+          is_found = i_module if name.eql?(i_module.display_name) && matching_version && (namespace.nil? || namespace.eql?(i_module.module_namespace))
         end
 
         data = data_element(name, namespace || service_namespace, type, version, url)
 
         if is_found
+          branch = is_found.get_workspace_branch_info(version)
+          data.merge!(frozen: branch[:frozen])
           found_modules << data
         else
           missing_modules << data
@@ -99,6 +110,17 @@ module DTK
       end
 
       @cached_module_list[type]
+    end
+
+    def match_versions(versions, version, i_module)
+      if versions.empty?
+        ModuleVersion.versions_same?(version, i_module.fetch(:module_branch, {})[:version])
+      else
+        versions.each do |vr|
+          return true if ModuleVersion.versions_same?(version, vr)
+        end
+        false
+      end
     end
   end
 end

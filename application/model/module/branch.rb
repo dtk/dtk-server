@@ -8,7 +8,7 @@ module DTK
     extend BranchNamesClassMixin
 
     def self.common_columns
-      [:id, :group_id, :display_name, :branch, :repo_id, :current_sha, :is_workspace, :type, :version, :ancestor_id, :external_ref, :dsl_parsed]
+      [:id, :group_id, :display_name, :branch, :repo_id, :current_sha, :is_workspace, :type, :version, :ancestor_id, :external_ref, :dsl_parsed, :frozen]
     end
 
     # TODO: should change type of self[:external_ref] to json
@@ -282,6 +282,10 @@ module DTK
             content = "---\ncomponent_modules:\n" unless valid_existing
           end
 
+          # to avoid generating invalid module_refs.yaml double check if content is {} and set to component_modules:
+          c_hash = Aux.convert_to_hash(content, file_info[:format_type])
+          content = "---\ncomponent_modules:\n" if c_hash.empty?
+
           any_change = RepoManager.add_file({ path: file_info[:path] }, content, self)
           any_changes = true if any_change
         end
@@ -370,10 +374,10 @@ module DTK
     #
     # This method returns [new_branch_repo, new_branch_sha]
     def create_new_branch_from_this_branch?(project, base_repo, new_version, opts = {})
-      branch_name = Location::Server::Local.workspace_branch_name(project, new_version)
+      branch_name = Location::Server::Local.workspace_branch_name(project, new_version, opts)
       new_branch_sha = RepoManager.add_branch_and_push?(branch_name, opts, self)
       new_branch_repo = repo_for_version(base_repo, new_version)
-      [new_branch_repo, new_branch_sha]
+      [new_branch_repo, new_branch_sha, branch_name]
     end
 
     def repo_for_version(base_repo, _version)
@@ -478,11 +482,12 @@ module DTK
       ancestor_branch_idh = opts[:ancestor_branch_idh]
       branch =  local.branch_name
       type = local.module_type.to_s
-# TODO: temp until for source of bug where component rather than component_module put in for type
-if type == 'component'
-  type = 'component_module'
-  Log.error_pp(['Bug :component from :component_module on', local, caller()[0..7]])
-end
+
+      # TODO: temp until for source of bug where component rather than component_module put in for type
+      if type == 'component'
+        type = 'component_module'
+        Log.error_pp(['Bug :component from :component_module on', local, caller()[0..7]])
+      end
 
       assigns = {
         display_name: branch,
@@ -492,8 +497,14 @@ end
         type: local.module_type.to_s,
         version: version_field(local.version)
       }
+
       assigns.merge!(ancestor_id: ancestor_branch_idh.get_id()) if ancestor_branch_idh
       assigns.merge!(current_sha: opts[:current_sha]) if opts[:current_sha]
+
+      # if installing specific component/service module version mark branch as frozen
+      is_frozen = opts[:frozen].nil? ? (local.version && !local.version.eql?('master')) : opts[:frozen]
+      assigns.merge!(frozen: true) if is_frozen
+
       ref = branch
       { ref => assigns }
     end
@@ -511,6 +522,7 @@ end
         version: version_field(version)
       }
       assigns.merge!(ancestor_id: ancestor_branch_idh.get_id()) if ancestor_branch_idh
+      assigns.merge!(frozen: opts[:frozen]) if opts[:frozen]
       ref = branch
       { ref => assigns }
     end

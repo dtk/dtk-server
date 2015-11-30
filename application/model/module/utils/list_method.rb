@@ -26,7 +26,7 @@ module DTK
           not_published = nil
 
           # if finding differences with the dtkn catalog
-          if diff
+          if diff && module_branch[:version].eql?('master')
             if default_remote_repo = RepoRemote.default_repo_remote?((ndx_repo_remotes || {}).values)
               remote = default_remote_repo.remote_dtkn_location(project, model_type, module_name)
               is_equal = r[:repo].ret_local_remote_diff(module_branch, remote)
@@ -45,7 +45,8 @@ module DTK
           mdl.merge!(not_published: not_published)
 
           if opts[:include_versions]
-            (mdl[:version_array] ||= []) << module_branch.version_print_form(Opts.new(default_version_string: DEFAULT_VERSION))
+            version = module_branch.version_print_form(Opts.new(default_version_string: DEFAULT_VERSION))
+            (mdl[:version_array] ||= []) << version unless version.eql?('CURRENT') # module_branch.version_print_form(Opts.new(default_version_string: DEFAULT_VERSION))
           end
           if external_ref_source = module_branch.external_ref_source()
             mdl[:external_ref_source] = external_ref_source
@@ -115,7 +116,7 @@ module DTK
         array << external_ref_source if external_ref_source
         array << '*** NOT PUBLISHED in DTKN ***' if opts[:not_published]
 
-        array.join(JoinDelimiter)
+        array.uniq.join(JoinDelimiter)
       end
       JoinDelimiter = ', '
     end

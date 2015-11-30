@@ -34,6 +34,7 @@ module DTK
       self.class.delete_contents([id_handle()], opts)
       delete_assembly_level_attributes()
       delete_tasks()
+      delete_module_ref_locks()
     end
 
     # opts has :mode
@@ -95,6 +96,10 @@ module DTK
       assembly_attrs = get_assembly_level_attributes()
       return if assembly_attrs.empty?()
       Model.delete_instances(assembly_attrs.map(&:id_handle))
+    end
+
+    def delete_module_ref_locks()
+      ModuleRefs::Lock.create_or_update(self)
     end
 
     AssemblyFields = {

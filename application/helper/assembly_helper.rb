@@ -198,7 +198,7 @@ module Ramaze::Helper
     end
 
     # returns [assembly_template_name,service_module_name]; if cannot find one or both or these nil is returned in the associated element
-    def get_template_and_service_names_params(assembly)
+    def get_template_and_service_names_params(assembly, opts = {})
       assembly_template_name, service_module_name = ret_request_params(:assembly_template_name, :service_module_name)
       module_namespace = nil
       # either they both should be null or neither; however using 'or', rather than 'and' for robustness

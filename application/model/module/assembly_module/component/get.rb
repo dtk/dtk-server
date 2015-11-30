@@ -35,12 +35,13 @@ module DTK; class AssemblyModule
         # namespace can at the same time that locked_branch_sha may be nil
         def get_namespace_and_locked_branch_sha?(assembly, module_name)
           locked_branch_sha = nil
+          version_branch = nil
           if namespace = Namespace.namespace?(module_name)
-            locked_branch_sha = ModuleRefs::Lock.get_locked_branch_sha?(assembly, module_name)
+            locked_branch_sha, version_branch = ModuleRefs::Lock.get_locked_branch_sha?(assembly, module_name)
           else
-            namespace, locked_branch_sha = ModuleRefs::Lock.get_namespace_and_locked_branch_sha?(assembly, module_name)
+            namespace, locked_branch_sha, version_branch = ModuleRefs::Lock.get_namespace_and_locked_branch_sha?(assembly, module_name)
           end
-          [namespace, locked_branch_sha]
+          [namespace, locked_branch_sha, version_branch]
         end
       end
 
@@ -61,7 +62,7 @@ module DTK; class AssemblyModule
           add_branch_relationship_info!(ret)
         end
         # remove branches since they are no longer needed
-        ret.each { |r| r.delete(:module_branch) }
+        # ret.each { |r| r.delete(:module_branch) }
         ret
       end
 
@@ -88,10 +89,11 @@ module DTK; class AssemblyModule
         ret = Model.get_objs(@assembly.model_handle(:component_module), sp_hash)
         ret.each do |r|
           if el = els_ndx_by_cmp_mod_ids[r[:id]]
+            module_branch = el.module_branch
             to_add = {
               namespace_name: el.namespace,
-              dsl_parsed: (el.module_branch || {})[:dsl_parsed],
-              module_branch: el.module_branch
+              dsl_parsed: (module_branch || {})[:dsl_parsed],
+              module_branch: module_branch
             }
             r.merge!(to_add)
           end

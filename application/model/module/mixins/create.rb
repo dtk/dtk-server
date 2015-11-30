@@ -67,14 +67,15 @@ module DTK; module ModuleMixins
     end
 
     # TODO: ModuleBranch::Location: deprecate below for above
-    def create_ws_module_and_branch_obj?(project, repo_idh, module_name, input_version, namespace, ancestor_branch_idh = nil)
+    def create_ws_module_and_branch_obj?(project, repo_idh, module_name, input_version, namespace, ancestor_branch_idh = nil, opts = {})
       project_idh = project.id_handle()
 
       ref = Namespace.join_namespace(namespace.display_name(), module_name)
       module_type = model_name.to_s
-      opts = { version: input_version }
-      opts.merge!(ancestor_branch_idh: ancestor_branch_idh) if ancestor_branch_idh
-      mb_create_hash = ModuleBranch.ret_workspace_create_hash(project, module_type, repo_idh, opts)
+      create_opts = { version: input_version }
+      create_opts.merge!(ancestor_branch_idh: ancestor_branch_idh) if ancestor_branch_idh
+      create_opts.merge!(frozen: opts[:frozen]) if opts[:frozen]
+      mb_create_hash = ModuleBranch.ret_workspace_create_hash(project, module_type, repo_idh, create_opts)
       version = mb_create_hash.values.first[:version]
 
       fields = {
@@ -108,11 +109,17 @@ module DTK; module ModuleMixins
 
       # make sure there is a not an existing branch that matches the new one
       if get_module_branch_matching_version(new_version)
-        fail ErrorUsage.new("Version exists already for module (#{pp_module_name(new_version)})")
+        fail VersionExist.new(new_version, pp_module_name)
       end
-      opts_repo_update = Aux.hash_subset(opts, [:sha])
-      new_version_repo, new_version_sha = aug_base_branch.create_new_branch_from_this_branch?(get_project(), aug_base_branch[:repo], new_version, opts_repo_update)
-      opts_create_branch = opts.merge(ancestor_branch_idh: aug_base_branch.id_handle(), current_sha: new_version_sha)
+
+      opts_repo_update = Aux.hash_subset(opts, [:sha, :base_version, :version_branch, :checkout_branch])
+      new_version_repo, new_version_sha, new_branch_name = aug_base_branch.create_new_branch_from_this_branch?(get_project(), aug_base_branch[:repo], new_version, opts_repo_update)
+      opts_create_branch = opts.merge(ancestor_branch_idh: aug_base_branch.id_handle(), current_sha: new_version_sha, new_branch_name: new_branch_name)
+
+      if opts[:inherit_frozen_from_base]
+        opts_create_branch.merge!(frozen: aug_base_branch[:frozen])
+      end
+
       new_branch = create_new_version__type_specific(new_version_repo, new_version, opts_create_branch)
       ModuleRefs.clone_component_module_refs(aug_base_branch, new_branch)
       new_branch

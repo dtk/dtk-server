@@ -5,8 +5,8 @@ module DTK; class ModuleBranch
         super
       end
       class Local < Location::Local
-        def self.workspace_branch_name(project, version = nil)
-          ret_branch_name(project, version)
+        def self.workspace_branch_name(project, version = nil, opts = {})
+          ret_branch_name(project, version, opts)
         end
 
         def self.private_user_repo_name(username, module_type, module_name, module_namespace)
@@ -24,8 +24,8 @@ module DTK; class ModuleBranch
 
         private
 
-        def ret_branch_name
-          self.class.ret_branch_name(@project, version())
+        def ret_branch_name(opts = {})
+          self.class.ret_branch_name(@project, version(), opts)
         end
 
         def ret_private_user_repo_name
@@ -36,8 +36,9 @@ module DTK; class ModuleBranch
 
         #===== helper methods
 
-        def self.ret_branch_name(project, version)
-          user_prefix = "workspace-#{project.get_field?(:ref)}"
+        def self.ret_branch_name(project, version, opts = {})
+          # user_prefix = "workspace-#{project.get_field?(:ref)}"
+          user_prefix = opts[:version_branch]||"workspace-#{project.get_field?(:ref)}"
           if version.is_a?(ModuleVersion::AssemblyModule)
             assembly_suffix = "--assembly-#{version.assembly_name}"
             "#{user_prefix}#{assembly_suffix}"

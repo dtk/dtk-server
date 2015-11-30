@@ -162,7 +162,8 @@ module DTK; class Component
       sp_hash = {
         cols: [:id, :type, :display_name, :description, :component_type, :version, :refnum, :module_branch_id],
         filter: [:and, [:eq, :type, 'template'],
-                 [:oneof, :version, filter_on_versions(assembly: assembly)],
+                 # had to remove this to display other versions beside master
+                 # [:oneof, :version, filter_on_versions(assembly: assembly)],
                  [:eq, :project_project_id, project.id()]]
       }
       cmps = get_objs(project.model_handle(:component), sp_hash, keep_ref_cols: true)
@@ -232,19 +233,19 @@ module DTK; class Component
     # :module_branch
     # :component_module
     # :namespace
-    def self.get_augmented_component_template(cmp_mh, cmp_name, namespace, assembly)
+    def self.get_augmented_component_template(cmp_mh, cmp_name, namespace, assembly, opts = {})
       ret_cmp = nil
       match_cmps = []
       cmp_module_ids = []
       display_name = display_name_from_user_friendly_name(cmp_name)
-      component_type, title =  ComponentTitle.parse_component_display_name(display_name)
+      component_type, title, version =  ComponentTitle.parse_component_display_name(display_name, return_version: true)
       sp_hash = {
         cols: [:id, :group_id, :display_name, :module_branch_id, :type, :ref, :augmented_with_module_info, :version],
         filter: [:and,
                  [:eq, :type, 'template'],
                  [:eq, :component_type, component_type],
                  [:neq, :project_project_id, nil],
-                 [:oneof, :version, filter_on_versions(assembly: assembly)],
+                 [:oneof, :version, filter_on_versions(assembly: assembly, version: version)],
                  [:eq, :node_node_id, nil]]
       }
       cmp_templates = get_objs(cmp_mh.createMH(:component_template), sp_hash, keep_ref_cols: true)
@@ -258,11 +259,15 @@ module DTK; class Component
       # this case use service specfic one
       assembly_version = assembly_version(assembly)
       if cmp_templates.find { |cmp| cmp[:version] == assembly_version }
-        cmp_templates.select! { |cmp| cmp[:version] == assembly_version }
+        if opts[:use_base_template]
+          cmp_templates.reject! { |cmp| cmp[:version] == assembly_version }
+        else
+          cmp_templates.select! { |cmp| cmp[:version] == assembly_version }
+        end
       end
       unless cmp_templates.size == 1
         possible_names = cmp_templates.map { |r| r.display_name_print_form(namespace_prefix: true) }.join(',')
-        fail ErrorUsage.new("Multiple components with different namespaces match; pick one from: #{possible_names}")
+        fail ErrorUsage.new("Multiple components with different namespaces or/and versions match. You have to specify namespace or version.")
       end
       ret_cmp = cmp_templates.first
 
@@ -277,6 +282,12 @@ module DTK; class Component
         if ret_cmp_ns != cmp_mod_ns
           fail ErrorUsage.new("Unable to add component from (#{ret_cmp_ns}:#{ret_cmp_mod}) because you are already using components from following component modules: #{cmp_mod_ns}:#{cmp_mod[:display_name]}")
         end
+
+        ret_cmp_version = ret_cmp[:version]
+        cmp_mod_version = cmp_mod[:module_branch][:version]
+        full_ret_cmp_name = (ret_cmp_version && ret_cmp_version!='master') ? "#{ret_cmp_ns}:#{ret_cmp_mod}:#{ret_cmp_version}" : "#{ret_cmp_ns}:#{ret_cmp_mod}"
+        full_cmp_mod_name = (cmp_mod_version && cmp_mod_version!='master') ? "#{cmp_mod_ns}:#{cmp_mod[:display_name]}:#{cmp_mod_version}" : "#{cmp_mod_ns}:#{cmp_mod[:display_name]}"
+        fail ErrorUsage.new("Unable to add component from (#{full_ret_cmp_name}) because you are already using components version: #{full_cmp_mod_name}") if ret_cmp_version != cmp_mod_version
       end
       ret_cmp
     end
@@ -287,8 +298,18 @@ module DTK; class Component
       ModuleVersion.ret(assembly)
     end
     def self.filter_on_versions(opts)
+      ret      = []
+      version  = opts[:version]
       assembly = opts[:assembly]
-      ['master', assembly && assembly_version(assembly)].compact
+
+      if version
+        ret << version.gsub!(/\(|\)/,'')
+      elsif assembly
+        ret << 'master'
+        ret << assembly_version(assembly)
+      end
+
+      ret.compact
     end
 
     # if title is in the name, this strips it off

@@ -117,7 +117,7 @@ end
          convert: true,
          join_type: :inner,
          join_cond: { id: q(:component, :module_branch_id) },
-         cols: [:id, :display_name, :service_id]
+         cols: [:id, :display_name, :service_id, :version]
        },
        {
          model_name: :service_module,

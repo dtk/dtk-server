@@ -177,7 +177,7 @@ module DTK; class Assembly
     def info_about(about, _opts = Opts.new)
       case about
        when :components
-        List.list_components(self)
+        List.list_components(self, name_with_version: true)
        when :nodes
         List.list_nodes(self)
        else
@@ -191,10 +191,11 @@ module DTK; class Assembly
 
     def self.get(mh, opts = {})
       sp_hash = {
-        cols: opts[:cols] || [:id, :group_id, :display_name, :component_type, :module_branch_id, :description, :service_module],
+        cols: opts[:cols] || [:id, :group_id, :display_name, :component_type, :module_branch_id, :description, :service_module, :version],
         filter: [:and, [:eq, :type, 'composite'],
                  opts[:project_idh] ? [:eq, :project_project_id, opts[:project_idh].get_id()] : [:neq, :project_project_id, nil],
-                 opts[:filter]
+                 opts[:filter],
+                 opts[:version_filter]
                    ].compact
       }
       ret = get_these_objs(mh, sp_hash, keep_ref_cols: true)
@@ -213,6 +214,8 @@ module DTK; class Assembly
     end
 
     def self.delete_and_ret_module_repo_info(assembly_idh)
+      ServiceModule.check_service_instance_references(assembly_idh)
+
       # first delete the dsl files
       module_repo_info = ServiceModule.delete_assembly_dsl?(assembly_idh)
       # need to explicitly delete nodes, but not components since node's parents are not the assembly, while component's parents are the nodes

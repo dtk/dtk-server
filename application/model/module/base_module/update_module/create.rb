@@ -19,7 +19,7 @@ module DTK; class BaseModule; class UpdateModule
       }
       ret.merge!(ret_hash)
 
-      opts_create = Aux.hash_subset(opts, [:ancestor_branch_idh, :current_sha])
+      opts_create = Aux.hash_subset(opts, [:ancestor_branch_idh, :current_sha, :frozen])
       module_and_branch_info = @module_class.create_module_and_branch_obj?(project, repo.id_handle(), local, opts_create)
       module_branch_idh = module_and_branch_info[:module_branch_idh]
       module_branch = module_branch_idh.create_object()

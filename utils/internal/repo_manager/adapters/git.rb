@@ -370,12 +370,24 @@ module DTK
       end
     end
 
-    def initial_sync_with_remote_repo(remote_name, remote_url, remote_branch, _opts = {})
+    def initial_sync_with_remote_repo(remote_name, remote_url, remote_branch, opts = {})
+      force = false
       add_remote?(remote_name, remote_url)
 
+      # initial branch from which we create new empty branch; first one is master but next one is version branch
+      init_branch = current_branch()
+
       # create branch with history from remote and not merge
-      git_command__create_empty_branch(@branch)
-      pull_changes(remote_name, remote_branch)
+      git_command__create_empty_branch(@branch) #, use_branch_name: true)
+
+      # when pulling version after base branch is pulled there are untracked changes in newly created empty branch
+      # we need to add and commit them and then use pull --force to override them if not the same as remote files
+      if !init_branch.eql?('master') && opts[:hard_reset_on_pull_version]
+        force = true
+        add_all_files(@branch)
+      end
+
+      pull_changes(remote_name, remote_branch, force)
 
       # push to local
       push_changes()
@@ -510,10 +522,10 @@ module DTK
       git_command__push(@branch, opts[:remote_name], opts[:remote_branch], opts)
     end
 
-    def pull_changes(remote_name = nil, remote_branch = nil)
+    def pull_changes(remote_name = nil, remote_branch = nil, force = false)
       # note: even though generated git comamdn hash --git-dor set, need to chdir
       Dir.chdir(@path) do
-        git_command__pull(@branch, remote_branch || @branch, remote_name)
+        git_command__pull(@branch, remote_branch || @branch, remote_name, force)
       end
     end
 
@@ -541,8 +553,10 @@ module DTK
     def add_branch_and_push?(new_branch, opts = {})
       new_branch_sha = nil
       add_branch?(new_branch, opts)
-      checkout(opts[:sha] || new_branch) do
-        new_branch_sha = git_command__push(new_branch)
+      branch_or_sha = opts[:checkout_branch] ? new_branch : (opts[:sha] || new_branch)
+      checkout(branch_or_sha) do
+        # new_branch_sha = git_command__push(new_branch)
+        new_branch_sha = git_command__push(new_branch, nil, nil, force: true)
       end
       new_branch_sha
     end
@@ -592,6 +606,10 @@ module DTK
           delete_branch_aux(remote_name)
         end
       end
+    end
+
+    def delete_local_brach(branch_name)
+      git_command__delete_local_branch?(branch_name)
     end
 
     def delete_branch_aux(remote_name = nil)
@@ -780,8 +798,9 @@ module DTK
       git_command.branch(cmd_opts(), branch_name)
     end
 
-    def git_command__create_empty_branch(branch_name)
-      git_command.symbolic_ref(cmd_opts(), 'HEAD', "refs/heads/#{branch_name}")
+    def git_command__create_empty_branch(branch_name, opts = {})
+      name = opts[:use_branch_name] ? "#{branch_name}" : 'HEAD'
+      git_command.symbolic_ref(cmd_opts(), name, "refs/heads/#{branch_name}")
     end
 
     def git_command__add(file_path)
@@ -858,9 +877,11 @@ module DTK
       !rev_list.split("\n").grep(index_sha).empty?
     end
 
-    def git_command__pull(local_branch, remote_branch, remote_name = nil)
+    def git_command__pull(local_branch, remote_branch, remote_name = nil, force = false)
       remote_name ||= default_remote_name()
-      git_command.pull(cmd_opts(), remote_name, "#{remote_branch}:#{local_branch}")
+      args = [cmd_opts(), remote_name, "#{remote_branch}:#{local_branch}"]
+      args << '-f' if force
+      git_command.pull(*args)
     end
 
     # MOD_RESTRUCT-NEW deprecate below

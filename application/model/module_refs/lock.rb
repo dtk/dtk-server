@@ -37,12 +37,13 @@ module DTK
         get(assembly_instance, :locked_dependencies).matching_namespace?(module_name)
       end
       def self.get_locked_branch_sha?(assembly_instance, module_name)
-        get(assembly_instance, :locked_branch_shas).matching_locked_branch_sha?(module_name)
+        module_ref = get(assembly_instance, :locked_branch_shas)
+        [module_ref.matching_locked_branch_sha?(module_name), module_ref.version_branch?(module_name)]
       end
       # returns [namespace, locked_branch_sha]
       def self.get_namespace_and_locked_branch_sha?(assembly_instance, module_name)
         module_refs_lock = get(assembly_instance, AllTypes)
-        [module_refs_lock.matching_namespace?(module_name), module_refs_lock.matching_locked_branch_sha?(module_name)]
+        [module_refs_lock.matching_namespace?(module_name), module_refs_lock.matching_locked_branch_sha?(module_name), module_refs_lock.version_branch?(module_name)]
       end
 
       # opts can have keys
@@ -62,6 +63,10 @@ module DTK
 
       def matching_locked_branch_sha?(module_name)
         (module_ref_lock = module_ref_lock(module_name)) && module_ref_lock.locked_branch_sha
+      end
+
+      def version_branch?(module_name)
+        (module_ref_lock = module_ref_lock(module_name)) && module_ref_lock[:info] && module_ref_lock[:info][:module_branch]
       end
 
       def elements
@@ -112,7 +117,7 @@ module DTK
       def self.compute_elements(assembly_instance, types, opts = {})
         module_refs_tree = ModuleRefs::Tree.create(assembly_instance)
         collapsed = module_refs_tree.collapse(Aux.hash_subset(opts, [:raise_errors]))
-        collapsed.choose_namespaces!()
+        collapsed.choose_namespaces_and_versions!()
         collapsed.add_implementations!(assembly_instance)
 
         ret = new(assembly_instance)
@@ -167,7 +172,7 @@ module DTK
 
         return ret if disjuncts.empty?
         sp_hash = {
-          cols: [:id, :group_id, :display_name, :component_id, :branch, :repo_id, :current_sha, :version, :dsl_parsed],
+          cols: [:id, :group_id, :display_name, :component_id, :branch, :repo_id, :current_sha, :version, :dsl_parsed, :frozen],
           filter: [:or] + disjuncts
         }
 

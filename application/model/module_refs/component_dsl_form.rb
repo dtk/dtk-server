@@ -13,9 +13,9 @@ module DTK; class ModuleRefs
       end
     end
 
-    def initialize(component_module, namespace, external_ref = nil)
+    def initialize(component_module, namespace, external_ref = nil, version = nil)
       super()
-      replace(component_module: component_module, remote_namespace: namespace, external_ref: external_ref)
+      replace(component_module: component_module, remote_namespace: namespace, external_ref: external_ref, version_info: version)
     end
     private :initialize
 
@@ -45,16 +45,20 @@ module DTK; class ModuleRefs
       raw_cmp_mod_refs = Parse.get_component_module_refs_dsl_info(module_class, module_branch)
       return raw_cmp_mod_refs if raw_cmp_mod_refs.is_a?(ErrorUsage::Parsing)
       # put in parse_form
-      cmp_mod_refs = raw_cmp_mod_refs.map { |r| new(r[:component_module], r[:remote_namespace], r[:external_ref]) }
+      cmp_mod_refs = raw_cmp_mod_refs.map { |r| new(r[:component_module], r[:remote_namespace], r[:external_ref], r[:version_info]) }
 
       # prune out any that dont have namespace
       cmp_mod_refs.reject! { |cmr| !cmr.namespace? }
 
       # find component modules (in parse form) that matches a component module found in dsl or
       # in opts; module_names are the relevant modle names to return info about
-      module_names = (cmp_mod_refs.map(&:component_module) + (opts[:include_module_names] || [])).uniq
-      return ret if module_names.empty?
-      cmp_mods_dsl_form = get_matching_component_modules__dsl_form(project_idh, module_names)
+      # module_names = (cmp_mod_refs.map(&:component_module) + (opts[:include_module_names] || [])).uniq
+      modules         = cmp_mod_refs.map{|r| {:name => r[:component_module], :version => r[:version_info]}}
+      include_modules = (opts[:include_module_names]||[]).map{|r| {:name => r}}
+      modules << include_modules
+
+      return ret if modules.empty?
+      cmp_mods_dsl_form = get_matching_component_modules__dsl_form(project_idh, modules.flatten.uniq)
 
       # for each element in cmp_mod_refs that has a namespace see if it matches an existing component module
       # if not return an error
@@ -116,9 +120,22 @@ module DTK; class ModuleRefs
 
     private
 
-    def self.get_matching_component_modules__dsl_form(project_idh, module_names)
-      matching_modules = ComponentModule.get_all(project_idh, cols: [:namespace_id, :namespace], filter: [:oneof, :display_name, module_names])
-      matching_modules.map { |m| new(m[:display_name], m[:namespace][:name]) }
+    def self.get_matching_component_modules__dsl_form(project_idh, modules)
+      module_names = modules.map{|m| m[:name]}.uniq
+      found_modules = ComponentModule.get_all(project_idh, cols: [:namespace_id, :namespace, :version_info], filter: [:oneof, :display_name, module_names])
+
+      matching_modules = []
+      found_modules.each do |f_module|
+        f_version = f_module[:module_branch][:version]
+        modules.each do |m|
+          m_version = m[:version]||'master'
+          if m[:name].eql?(f_module[:display_name]) && m_version.eql?(f_version)
+            matching_modules << f_module
+          end
+        end
+      end
+
+      matching_modules.map { |m| new(m[:display_name], m[:namespace][:name], nil, m[:module_branch][:version]) }
     end
   end
 end; end

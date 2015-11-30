@@ -75,6 +75,22 @@ module DTK
         ret
       end
 
+      def check_service_instance_references(assembly_idh)
+        assembly = assembly_idh.create_object().update_object!(:display_name)
+        service_module = assembly.get_service_module()
+        service_instances = service_module.get_assembly_instances()
+
+        instance_refs = []
+        service_instances.each do |instance|
+          instance_refs << instance[:display_name] if instance[:ancestor_id] == assembly[:id]
+        end
+
+        unless instance_refs.empty?
+          is = (instance_refs.size == 1) ? 'is' : 'are'
+          fail ErrorUsage.new("Cannot delete assembly template '#{assembly[:display_name]}' because service instance(s) '#{instance_refs.join(', ')}' #{is} referencing it.")
+        end
+      end
+
       def assembly_meta_filename_path(assembly_name, module_branch)
         file_type = dsl_files_format_type()
         if is_legacy_service_module_structure?(module_branch)
@@ -181,7 +197,7 @@ module DTK
         return service_module_workflows if ParsingError.is_error?(service_module_workflows)
 
         assembly_workflows, parsed_dsl, parsing_error = nil 
-        begin 
+        begin
           assembly_workflows, module_refs, parsed_dsl = update_assemblies_from_dsl(module_branch, module_refs, opts)
          rescue => e
           raise e unless ParsingError.is_error?(e)
@@ -348,8 +364,10 @@ module DTK
 
         service_instances.each do |instance|
           if parent = instance.copy_as_assembly_instance.get_parent
-            parent_name = parent[:display_name]
-            assembly_names_with_templates.merge!(instance[:display_name] => parent_name) unless assembly_names.include?(parent_name)
+            if parent[:version] == module_branch[:version]
+              parent_name = parent[:display_name]
+              assembly_names_with_templates.merge!(instance[:display_name] => parent_name) unless assembly_names.include?(parent_name)
+            end
           end
         end
 

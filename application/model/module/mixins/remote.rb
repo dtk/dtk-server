@@ -39,8 +39,10 @@ module DTK; module ModuleMixins
         # case on whether the module is created already
         if module_obj
           # TODO: ModuleBranch::Location: since repo has remote_ref in it must get appopriate repo
-          fail Error.new('TODO: ModuleBranch::Location; need to right this')
-          repo_with_branch = module_obj.get_repo!()
+          # fail Error.new('TODO: ModuleBranch::Location; need to right this')
+          repo = module_obj.get_repo!()
+          repo.merge!(branch_name: local_branch)
+          repo_with_branch = repo.create_subclass_obj(:repo_with_branch)
         else
           # TODO: ModuleBranch::Location: see if this is necessary
           remote_repo_handler.authorize_dtk_instance(client_rsa_pub_key)
@@ -55,7 +57,7 @@ module DTK; module ModuleMixins
           repo_with_branch = Repo::WithBranch.create_workspace_repo(project.id_handle(), local, repo_user_acls, create_opts)
         end
 
-        commit_sha = repo_with_branch.initial_sync_with_remote(remote, remote_repo_info)
+        commit_sha = repo_with_branch.initial_sync_with_remote(remote, remote_repo_info, opts)
         # create object in object model that corresponds to remote repo
         create_repo_remote_object(repo_with_branch, remote, remote_repo_info[:git_repo_name])
         module_and_branch_info = create_module_and_branch_obj?(project, repo_with_branch.id_handle(), local)
@@ -73,6 +75,10 @@ module DTK; module ModuleMixins
       opts_info = { version: version, module_namespace: local_namespace }
       response = module_repo_info(repo_with_branch, module_and_branch_info, opts_info)
 
+      # TODO: not sure if needed
+      # delete master branch if not deleted after initial sync with remote
+      repo_with_branch.delete_local_brach_only('master')
+
       if ErrorUsage::Parsing.is_error?(non_nil_if_parsing_error)
         response[:dsl_parse_error] = non_nil_if_parsing_error
       end
@@ -82,7 +88,7 @@ module DTK; module ModuleMixins
     def delete_remote(project, remote_params, client_rsa_pub_key, force_delete = false)
       remote = remote_params.create_remote(project)
       # delete module on remote repo manager
-      Repo::Remote.new(remote).delete_remote_module(client_rsa_pub_key, force_delete)
+      response = Repo::Remote.new(remote).delete_remote_module(client_rsa_pub_key, force_delete)
 
       # unlink any local repos that were linked to this remote module
       local_module_name = remote.module_name
@@ -102,11 +108,11 @@ module DTK; module ModuleMixins
           RepoRemote.delete_repos([repo_remote_db.id_handle()])
         end
       end
-      nil
+      response
     end
 
-    def list_remotes(_model_handle, rsa_pub_key = nil)
-      Repo::Remote.new.list_module_info(module_type(), rsa_pub_key)
+    def list_remotes(_model_handle, rsa_pub_key = nil, opts = {})
+      Repo::Remote.new.list_module_info(module_type(), rsa_pub_key, opts)
     end
 
     def create_repo_remote_object(repo, remote, remote_repo_name)
@@ -195,22 +201,34 @@ module DTK; module ModuleMixins
       ret
     end
 
+    def check_remote_exist(remote_params, client_rsa_pub_key, version = nil, opts = {})
+      ret = {}
+      project = get_project()
+      remote = remote_params.create_remote(project)
+
+      remote_exist = Repo::Remote.new(remote).check_remote_exist(client_rsa_pub_key, opts)
+      module_branch = get_workspace_module_branch(version)
+      frozen = module_branch ? module_branch[:frozen] : false
+
+      ret.merge!(remote_exist: remote_exist, frozen: frozen)
+    end
+
     # publish to a remote repo
     # request_params: hash map containing remote_component_name, remote_component_namespace
-    def publish(local_params, remote_params, client_rsa_pub_key)
+    def publish(local_params, remote_params, client_rsa_pub_key, version = nil)
       project = get_project()
       remote = remote_params.create_remote(project)
       local = local_params.create_local(project)
 
       unless module_branch_obj = self.class.get_module_branch_from_local(local)
-        fail Error.new('Cannot find module_branch_obj from local')
+        fail Error.new('You are trying to publish module version which does not exist locally!')
       end
 
       publish_preprocess_raise_error?(module_branch_obj)
 
       file_content = nil
       # we need to send Repoman information about modules and we do it here
-      module_branch = get_workspace_module_branch()
+      module_branch = get_workspace_module_branch(version)
       file_content = repo_file_content(module_branch, ModuleRefs.meta_filename_path())
 
       # create module on remote repo manager

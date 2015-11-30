@@ -33,11 +33,31 @@ module DTK; class BaseModule
         end
       end
 
+      # check if this module is dependency to other component/service module
+      raise_error_if_dependency(module_branch, version)
+
       if implementation = module_branch.get_implementation()
         delete_instance(implementation.id_handle())
       end
+
       module_branch.delete_instance_and_repo_branch()
       ret
+    end
+
+    def delete_version_or_module(version)
+      module_branches = get_module_branches()
+
+      if module_branches.size > 1
+        delete_version(version)
+      else
+        unless module_branch = get_module_branch_matching_version(version)
+          fail ErrorUsage.new("Version '#{version}' for specified component module does not exist!") if version
+          fail ErrorUsage.new("Base version for specified component module does not exist. You have to specify version you want to delete!")
+        end
+        # check if this module is dependency to other component/service module
+        raise_error_if_dependency(module_branch, version)
+        delete_object()
+      end
     end
 
     private
@@ -65,6 +85,38 @@ module DTK; class BaseModule
         end
         ref
       end
-      fail ErrorUsage.new("Cannot delete the component module because the following:\n  #{refs.join("\n  ")}")    end
+      fail ErrorUsage.new("Cannot delete the component module because the following:\n  #{refs.join("\n  ")}")
+    end
+
+    def raise_error_if_dependency(branch, version)
+      components, services = ModuleRefs.get_module_refs_by_name_and_version(branch, module_namespace(), module_name(), version)
+
+      # remove self from dependencies (component modules can have self set as dependency)
+      components.reject!{ |cmp| cmp[:module_branch][:id] == branch[:id] }
+
+      return if components.empty? && services.empty?
+
+
+      refs = []
+      unless components.empty?
+        components.each do |cmp|
+          version = cmp[:module_branch][:version]
+          full_name = "#{cmp[:namespace][:display_name]}:#{cmp[:component_module][:display_name]}"
+          full_name << "(#{version})" if version && !version.eql?('master')
+          refs << "Reference to component module '#{full_name}'"
+        end
+      end
+
+      unless services.empty?
+        services.each do |srv|
+          version = srv[:module_branch][:version]
+          full_name = "#{srv[:namespace][:display_name]}:#{srv[:service_module][:display_name]}"
+          full_name << "(#{version})" if version && !version.eql?('master')
+          refs << "Reference to service module '#{full_name}'"
+        end
+      end
+
+      fail ErrorUsage.new("Cannot delete the component module because the following:\n  #{refs.join("\n  ")}")
+    end
   end
 end; end

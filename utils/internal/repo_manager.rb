@@ -95,6 +95,11 @@ module DTK
         adapter_repo.initial_sync_with_remote_repo(remote_name, remote_url, remote_branch, opts)
       end
 
+      def delete_local_brach(branch_name, repo_name, branch)
+        adapter_repo = get_adapter_repo(context(repo_name, branch))
+        adapter_repo.delete_local_brach(branch_name)
+      end
+
      def pull_from_remote_repo(branch, repo_name, remote_name, remote_url, remote_branch, opts = {})
         adapter_repo = get_adapter_repo(context(repo_name, branch))
         adapter_repo.pull_from_remote_repo(remote_name, remote_url, remote_branch, opts)

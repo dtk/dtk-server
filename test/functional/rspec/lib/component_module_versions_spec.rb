@@ -55,15 +55,29 @@ end
 
 shared_context 'Publish versioned component module' do |dtk_common, component_module_name, remote_component_name, version_name|
 	it "publish/push component module #{component_module_name} with version #{version_name}" do
-		component_module_published = dtk_common.publish_component_module_version(component_module_name, remote_component_name, version_name)
-		expect(component_module_published).to eq(true)
+		puts "Publish component module version to remote:", "-------------------------------------------"
+	    pass = false
+	    value = `dtk component-module #{component_module_name} publish #{remote_component_name} -v #{version_name}`
+	    puts value
+	    pass = true if (value.include? 'Status: OK')
+	    puts "Publish of component module #{component_module_name} #{version_name} completed successfully!" if pass == true
+	    puts "Publish of component module #{component_module_name} #{version_name} was not successfully" if pass == false
+	    puts ''
+	    expect(pass).to eq(true)
 	end
 end
 
 shared_context 'NEG - Publish versioned component module' do |dtk_common, component_module_name, remote_component_name, version_name|
 	it "does not publish/push component module #{component_module_name} since this version #{version_name} does not exist" do
-		component_module_published = dtk_common.publish_component_module_version(component_module_name, remote_component_name, version_name)
-		expect(component_module_published).to eq(false)
+		puts "Publish component module version to remote:", "-------------------------------------------"
+	    pass = true
+	    value = `dtk component-module #{component_module_name} publish #{remote_component_name} -v #{version_name}`
+	    puts value
+	    pass = false if (value.include? 'Status: OK')
+	    puts "Publish of component module #{component_module_name} #{version_name} was successfully, even though it should be!" if pass == false
+	    puts "Publish of component module #{component_module_name} #{version_name} was not successfully" if pass == true
+	    puts ''
+	    expect(pass).to eq(true)
 	end
 end
 

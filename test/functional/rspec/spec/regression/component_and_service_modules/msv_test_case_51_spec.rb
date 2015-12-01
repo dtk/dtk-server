@@ -16,7 +16,8 @@ dependency_module_name = 'deploy'
 dependency_component_module_name = 'mkrakowitzer:deploy'
 git_ssh_repo_url = 'git@github.com:mkrakowitzer/puppet-deploy.git'
 namespace = 'mkrakowitzer'
-component_module_filesystem_location = '~/dtk/component_modules/maestrodev'
+component_module_filesystem_location_1 = '~/dtk/component_modules/maestrodev'
+component_module_filesystem_location_2 = '~/dtk/component_modules/mkrakowitzer'
 grep_patterns_for_module_refs = ['deploy:','namespace: mkrakowitzer']
 dtk_common = Common.new('', '')
 
@@ -42,7 +43,7 @@ describe '(Modules, Services and Versioning) Test Case 51: Import puppet forge (
   end
 
   context 'Check module_refs.yaml for imported module' do
-    include_context 'Check module_refs.yaml for imported module', component_module_filesystem_location + '/' + module_name, grep_patterns_for_module_refs
+    include_context 'Check module_refs.yaml for imported module', component_module_filesystem_location_1 + '/' + module_name, grep_patterns_for_module_refs
   end
 
   context 'Delete component module' do
@@ -50,7 +51,7 @@ describe '(Modules, Services and Versioning) Test Case 51: Import puppet forge (
   end
 
   context 'Delete component module from local filesystem' do
-    include_context 'Delete component module from local filesystem', component_module_filesystem_location, module_name
+    include_context 'Delete component module from local filesystem', component_module_filesystem_location_1, module_name
   end
 
   context 'Delete component module' do
@@ -58,7 +59,7 @@ describe '(Modules, Services and Versioning) Test Case 51: Import puppet forge (
   end
 
   context 'Delete component module from local filesystem' do
-    include_context 'Delete component module from local filesystem', component_module_filesystem_location, dependency_module_name
+    include_context 'Delete component module from local filesystem', component_module_filesystem_location_2, dependency_module_name
   end
 
   after(:all) do

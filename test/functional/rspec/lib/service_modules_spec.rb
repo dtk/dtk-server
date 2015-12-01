@@ -293,3 +293,20 @@ shared_context 'NEG - Clone service module' do |dtk_common, service_module_name|
     expect(service_module_cloned).to eq(false)
   end
 end
+
+shared_context 'Add assembly.yaml file' do |service_module_filesystem_location, assembly_location, file_for_change_location, assembly_name|
+  it 'adds #{assembly_name} file' do
+    puts 'Add #{assembly_name} file:', '---------------------------'
+    pass = false
+    current_path = `pwd`
+      `cd #{service_module_filesystem_location}/;git pull;cd #{current_path}`
+      `cp #{file_for_change_location} #{service_module_filesystem_location}/#{assembly_location}/#{assembly_name}`
+      `cd #{service_module_filesystem_location}/#{assembly_location};mv *assembly.yaml #{assembly_name}`
+    value = `ls #{service_module_filesystem_location}/#{assembly_location}/#{assembly_name}`
+    pass = !value.include?('No such file or directory')
+    puts 'assembly.yaml has been added!' if pass == true
+    puts 'assembly.yaml has not been added!' if pass == false
+    puts ''
+    pass.should eq(true)
+  end
+end

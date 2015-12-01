@@ -114,13 +114,19 @@ module DTK; class AssemblyModule
           if namespace = (r[:namespace] || {})[:display_name]
             component_module.merge!(namespace_name: namespace)
           end
+
           if dsl_parsed = (r[:module_branch] || {})[:dsl_parsed]
             component_module.merge!(dsl_parsed: dsl_parsed)
           end
+
+          if version = (r[:module_branch] || {})[:version]
+            component_module.merge!(version_info: version)
+          end
+
           if add_module_branches
             component_module.merge!(r.hash_subset(:module_branch))
           end
-          
+
           ndx_ret[ndx] = component_module
         end
         ndx_ret.values

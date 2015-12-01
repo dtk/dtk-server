@@ -246,6 +246,10 @@ module DTK
         ret = "#{namespace}#{NamespaceDelim}#{ret}"
       end
 
+      if version = opts[:version]
+        ret = "#{ret}(#{version})" unless version.eql?('master')
+      end
+
       ret
     end
 
@@ -263,10 +267,12 @@ module DTK
     def convert_to_print_form!
       update_object!(:display_name, :version)
       component_type = component_type_print_form()
-      self[:display_name] = self.class.display_name_print_form(self[:display_name], namespace: self[:namespace])
-      if has_default_version?()
-        self[:version] = nil
-      end
+
+      opts = { namespace: self[:namespace] }
+      opts.merge!( version: self[:version] ) unless has_default_version?()
+      self[:display_name] = self.class.display_name_print_form(self[:display_name], opts)
+
+      self[:version] = nil if has_default_version?()
       self
     end
 

@@ -266,14 +266,16 @@
       "owner",
       "group owner(s)",
       "permissions",
-      "last_updated"
+      "last_updated",
+      "version(s)"
     ],
     "mapping": {
       "name": "display_name",
       "owner": "owner",
       "group owner(s)": "group_owners",
       "permissions": "permissions",
-      "last_updated": "last_updated"
+      "last_updated": "last_updated",
+      "version(s)": "versions"
     }
   },
   "library": {

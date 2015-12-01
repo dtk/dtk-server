@@ -176,7 +176,14 @@ module DTK
           permission_string = "#{r['permission_hash']['user']}/#{r['permission_hash']['user_group']}/#{r['permission_hash']['other']}"
           el.merge!(display_name: r['full_name'], owner: r['owner_name'], group_owners: r['user_group_names'], permissions: permission_string, last_updated: last_updated)
           versions = opts[:ret_versions_array] ? r['versions'] : branch_names_to_versions(r['branches'])
-          el.merge!(versions: versions) if versions
+
+          if versions && !versions.empty?
+            # substitute base with master
+            parsed_versions = []
+            versions.each{ |version| parsed_versions << (version.eql?('master') ? 'base' : version) }
+            el.merge!(versions: parsed_versions)
+          end
+
           el
         end
 

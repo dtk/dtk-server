@@ -36,8 +36,7 @@ shared_context 'Publish versioned service module' do |dtk_common, service_module
 	it "publish/push service module #{service_module_name} with version #{version_name}" do
 		puts "Publish service module version to remote:", "-------------------------------------------"
 	    pass = false
-	    module_name = service_module_name.split(':')[1] #exract 'module_name' from string 'namespace:module_name'
-	    value = `dtk service-module #{service_module_name} publish #{module_name} -v #{version_name}`
+	    value = `dtk service-module #{service_module_name} publish #{remote_service_module_name} -v #{version_name}`
 	    puts value
 	    pass = true if (value.include? 'Status: OK')
 	    puts "Publish of service module #{service_module_name} #{version_name} completed successfully!" if pass == true
@@ -51,8 +50,7 @@ shared_context 'NEG - Publish versioned service module' do |dtk_common, service_
 	it "does not publish/push service module #{service_module_name} since this version #{version_name} does not exist" do
 		puts "Publish service module version to remote:", "-------------------------------------------"
 	    pass = true
-	    module_name = service_module_name.split(':')[1] #exract 'module_name' from string 'namespace:module_name'
-	    value = `dtk service-module #{service_module_name} publish #{module_name} -v #{version_name}`
+	    value = `dtk service-module #{service_module_name} publish #{remote_service_module_name} -v #{version_name}`
 	    puts value
 	    pass = false if (value.include? 'Status: OK')
 	    puts "Publish of service module #{service_module_name} #{version_name} was successfully, even though it should be!y!" if pass == false

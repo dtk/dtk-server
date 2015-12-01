@@ -57,8 +57,7 @@ shared_context 'Publish versioned component module' do |dtk_common, component_mo
 	it "publish/push component module #{component_module_name} with version #{version_name}" do
 		puts "Publish component module version to remote:", "-------------------------------------------"
 	    pass = false
-	    module_name = component_module_name.split(':')[1]
-	    value = `dtk component-module #{component_module_name} publish #{module_name} -v #{version_name}`
+	    value = `dtk component-module #{component_module_name} publish #{remote_component_name} -v #{version_name}`
 	    puts value
 	    pass = true if (value.include? 'Status: OK')
 	    puts "Publish of component module #{component_module_name} #{version_name} completed successfully!" if pass == true
@@ -72,8 +71,7 @@ shared_context 'NEG - Publish versioned component module' do |dtk_common, compon
 	it "does not publish/push component module #{component_module_name} since this version #{version_name} does not exist" do
 		puts "Publish component module version to remote:", "-------------------------------------------"
 	    pass = true
-	    module_name = component_module_name.split(':')[1]
-	    value = `dtk component-module #{component_module_name} publish #{module_name} -v #{version_name}`
+	    value = `dtk component-module #{component_module_name} publish #{remote_component_name} -v #{version_name}`
 	    puts value
 	    pass = false if (value.include? 'Status: OK')
 	    puts "Publish of component module #{component_module_name} #{version_name} was successfully, even though it should be!" if pass == false

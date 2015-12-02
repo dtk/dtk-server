@@ -33,6 +33,15 @@ module AssemblyAndServiceOperationsMixin
 		puts ""
 	end
 
+       def get_components_versions(service_id)
+               puts "Get all component versions from service:", "-----------------------------"
+               components_list = send_request('/rest/assembly/info_about', {:assembly_id=>service_id, :node_id => nil, :component_id => nil, :subtype=>'instance', :about=>'components'})
+               components_list = components_list['data'].map! { |c| c['version'] }
+               puts ""
+               return components_list
+       end
+
+
 	def stage_service_with_namespace(namespace)
 		#Get list of assemblies, extract selected assembly, stage service and return its id
 		puts "Stage service:", "--------------"

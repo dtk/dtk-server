@@ -301,11 +301,11 @@ module DTK; class Assembly
     end
 
     def add_node_specific_attributes(assembly_nodes, av_pairs, node_size_params, os_type_params)
-      if n_sizes = node_size_params.split(',')
+      if n_sizes = node_size_params && node_size_params.split(',')
         added_nodes = []
         n_sizes.each{ |n_size| parse_and_add_attribute(assembly_nodes, av_pairs, n_size, added_nodes, "instance_size") }
       end
-      if os_types = os_type_params.split(',')
+      if os_types = os_type_params && os_type_params.split(',')
         added_nodes = []
         os_types.each{ |os_type| parse_and_add_attribute(assembly_nodes, av_pairs, os_type, added_nodes, "os_identifier") }
       end

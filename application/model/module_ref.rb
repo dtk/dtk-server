@@ -89,7 +89,7 @@ module DTK
     end
 
     def version_string
-      self[:version_info] && self[:version_info].version_string()
+      self[:version_info] && self[:version_info].respond_to?(:version_string) && self[:version_info].version_string()
     end
 
     def namespace

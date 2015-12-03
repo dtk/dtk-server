@@ -89,7 +89,8 @@ module DTK
     end
 
     def version_string
-      self[:version_info] && self[:version_info].respond_to?(:version_string) && self[:version_info].version_string()
+      # self[:version_info] && self[:version_info].respond_to?(:version_string) && self[:version_info].version_string()
+      self[:version_info] && self[:version_info].version_string()
     end
 
     def namespace
@@ -107,8 +108,10 @@ module DTK
       if namespace = namespace()
         ret.merge!(namespace: namespace)
       end
-      if version = version_string()
-        ret.merge!(version: version)
+      unless self[:version_info] == 'master'
+        if version = version_string()
+          ret.merge!(version: version)
+        end
       end
       ret
     end

@@ -108,19 +108,24 @@ module DTK; class AssemblyModule
         ndx_ret = {}
         @assembly.get_objs(cols: [:instance_component_module_branches]).each do |r|
           component_module = r[:component_module]
-          ndx = component_module.id
+          module_branch    = r[:module_branch]
+          ndx              = component_module.id
+
           next if ndx_ret[ndx]
 
           if namespace = (r[:namespace] || {})[:display_name]
             component_module.merge!(namespace_name: namespace)
           end
 
-          if dsl_parsed = (r[:module_branch] || {})[:dsl_parsed]
+          if dsl_parsed = (module_branch || {})[:dsl_parsed]
             component_module.merge!(dsl_parsed: dsl_parsed)
           end
 
-          if version = (r[:module_branch] || {})[:version]
-            component_module.merge!(version_info: version)
+          if version = (module_branch || {})[:version]
+            # there are cases when service instance component version is assembly version
+            # in that case we use ancestor component version (master or ##.##.##)
+            valid_version = get_valid_cmp_version(version, module_branch)
+            component_module.merge!(version_info: valid_version)
           end
 
           if add_module_branches
@@ -188,6 +193,16 @@ module DTK; class AssemblyModule
         end
 
         modules_with_branches
+      end
+
+      def get_valid_cmp_version(version, module_branch)
+        if ModuleVersion.assembly_module_version?(version)
+          ancestor_id = module_branch[:ancestor_id]
+          ancestor_idh = module_branch.id_handle().createIDH(id: ancestor_id, model_name: :module_branch)
+          ancestor_branch = ancestor_idh.create_object().update_object!(:version)
+          return ancestor_branch[:version] if ancestor_branch
+        end
+        version
       end
     end
   end

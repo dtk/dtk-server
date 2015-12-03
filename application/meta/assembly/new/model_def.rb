@@ -320,7 +320,7 @@ end
          convert: true,
          join_type: :inner,
          join_cond: { id: :nested_component__module_branch_id },
-         cols: [:id, :display_name, :group_id, :version, :current_sha, :component_id, :dsl_parsed]
+         cols: [:id, :display_name, :group_id, :version, :current_sha, :component_id, :dsl_parsed, :ancestor_id]
        },
        {
          model_name: :component_module,

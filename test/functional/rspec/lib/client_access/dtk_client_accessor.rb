@@ -24,7 +24,6 @@ class DtkClientAccessor
 		context_params = ::DTK::Shell::ContextParams.new(params)
 		context_params.forward_options(options)
 		context_params.add_context_to_params(context_name, entity_name, id)
-		puts context_params.inspect
 		response = ::DTK::Client::ContextRouter.routeTask(context_name, command, context_params, @connection)
 	end
 end

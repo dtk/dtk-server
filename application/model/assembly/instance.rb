@@ -284,6 +284,24 @@ module DTK; class  Assembly
       attr_patterns
     end
 
+    def self.exists?(model_handle, display_name)
+      result = self.find_by_name(model_handle, display_name)
+      !result.empty?
+    end
+
+    def self.find_by_name(model_handle, display_name)
+      sp_hash = {
+        cols:  [:id],
+        filter:
+        [:and,
+           [:eq, :display_name, display_name],
+           [:eq, :type, 'composite']
+        ]
+      }
+
+      get_objs(model_handle.createMH(:assembly_instance), sp_hash)
+    end
+
     def self.check_valid_id(model_handle, id)
       filter =
         [:and,

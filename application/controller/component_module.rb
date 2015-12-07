@@ -104,9 +104,44 @@ module DTK
       rest_ok_response response
     end
 
+    def rest__create_new_version
+      component_module = create_obj(:component_module_id)
+      version       = ret_version()
+      diffs_summary = ret_diffs_summary()
+
+      opts = {}
+      opts.merge!(force_parse: true)
+      opts.merge!(update_from_includes: true)
+      opts.merge!(force: true)
+
+      if ret_request_param_boolean(:internal_trigger)
+        opts.merge!(do_not_raise: true)
+      end
+
+      if generate_docs = ret_request_param_boolean(:generate_docs)
+        opts.merge!(generate_docs: generate_docs)
+      end
+
+      if do_not_raise_if_exist = ret_request_params(:do_not_raise_if_exist)
+        opts.merge!(do_not_raise_if_exist: do_not_raise_if_exist)
+      end
+
+      rest_ok_response component_module.create_new_module_version(version, diffs_summary, opts)
+    end
+
     def rest__delete
       component_module = create_obj(:component_module_id)
-      module_info = component_module.delete_object()
+      delete_all_versions = ret_request_params(:delete_all_versions)
+
+      if delete_all_versions
+        module_info = component_module.delete_object()
+      else
+        version     = ret_version()
+        version     = compute_latest_version(component_module) unless version
+        module_info = component_module.delete_version_or_module(version)
+      end
+
+      module_info.merge!(:version => version) if version && !delete_all_versions
       rest_ok_response module_info
     end
 
@@ -143,6 +178,12 @@ module DTK
     def rest__get_workspace_branch_info
       component_module = create_obj(:component_module_id)
       version = ret_version()
+
+      # use latest version if version option is not provided
+      if ret_request_params(:use_latest)
+        version = compute_latest_version(component_module) unless version
+      end
+
       response = component_module.get_workspace_branch_info(version)
       rest_ok_response response
     end
@@ -196,6 +237,30 @@ module DTK
       rest_ok_response response
     end
 
+    def rest__list_versions
+      component_module = create_obj(:component_module_id)
+      project = get_default_project()
+      opts = Opts.new(project_idh: project.id_handle())
+
+      if include_base = ret_request_params(:include_base)
+        opts.merge!(:include_base => include_base)
+      end
+
+      rest_ok_response component_module.list_versions(opts)
+    end
+
+    def rest__list_remote_versions
+      component_module = create_obj(:component_module_id)
+      client_rsa_pub_key = ret_request_params(:rsa_pub_key)
+
+      opts = {}
+      if include_base = ret_request_params(:include_base)
+        opts.merge!(:include_base => include_base)
+      end
+
+      rest_ok_response component_module.list_remote_versions(client_rsa_pub_key, opts)
+    end
+
     def rest__versions
       component_module = create_obj(:component_module_id)
       client_rsa_pub_key = ret_request_params(:rsa_pub_key)
@@ -217,12 +282,25 @@ module DTK
 
     AboutEnum = [:components, :attributes, :instances]
 
+    def rest__check_master_branch_exist
+      rest_ok_response check_master_branch_exist_helper(:component_module)
+    end
+
     #### end: list and info actions ###
 
     #### actions to interact with remote repos ###
     # TODO: rename; this is just called by install; import ops call create route
     def rest__import
       rest_ok_response install_from_dtkn_helper(:component_module)
+    end
+
+    def rest__prepare_for_install_module()
+      rest_ok_response prepare_for_install_helper(:component_module)
+    end
+
+    def rest__check_remote_exist
+      component_module = create_obj(:component_module_id)
+      rest_ok_response check_remote_exist_helper(component_module)
     end
 
     # TODO: rename; this is just called by publish
@@ -273,17 +351,18 @@ module DTK
       client_rsa_pub_key = ret_request_params(:rsa_pub_key)
       remote_namespace = ret_request_params(:remote_module_namespace)
       force_delete = ret_request_param_boolean(:force_delete)
+      version = ret_request_params(:version)
 
       opts = {}
       opts.merge!(namespace: remote_namespace) unless remote_namespace.empty?
 
       remote_namespace, remote_module_name = Repo::Remote.split_qualified_name(ret_non_null_request_params(:remote_module_name), opts)
-      remote_params = remote_params_dtkn(:component_module, remote_namespace, remote_module_name)
+      remote_params = remote_params_dtkn(:component_module, remote_namespace, remote_module_name, version)
 
       project = get_default_project()
-      ComponentModule.delete_remote(project, remote_params, client_rsa_pub_key, force_delete)
+      response = ComponentModule.delete_remote(project, remote_params, client_rsa_pub_key, force_delete)
 
-      rest_ok_response
+      rest_ok_response response
     end
 
     def rest__list_remote

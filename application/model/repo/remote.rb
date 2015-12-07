@@ -48,7 +48,7 @@ module DTK
       end
 
       def publish_to_remote(client_rsa_pub_key, module_refs_content = nil)
-        username        = dtk_instance_remote_repo_username()
+        username = dtk_instance_remote_repo_username()
 
         unless namespace = remote.namespace
           namespace = CurrentSession.new.get_user_object().get_namespace()
@@ -59,7 +59,8 @@ module DTK
           username: username,
           name: remote.module_name(),
           type: type_for_remote_module(remote.module_type),
-          namespace: namespace
+          namespace: namespace,
+          version: remote.version
         }
 
         params.merge!(module_refs_content: module_refs_content) unless is_empty?(module_refs_content)
@@ -78,6 +79,7 @@ module DTK
           type: type_for_remote_module(remote.module_type),
           force_delete: force_delete
         }
+        params.merge!(version: remote.version) if remote.version
         client.delete_module(params, client_rsa_pub_key)
       end
 
@@ -85,6 +87,27 @@ module DTK
         get_remote_module_info?(client_rsa_pub_key, raise_error: true)
       end
       private :raise_error_if_module_is_not_accessible
+
+      def check_remote_exist(client_rsa_pub_key, opts = {})
+        client_params = {
+          name: remote.module_name,
+          type: type_for_remote_module(remote.module_type),
+          namespace: remote.namespace,
+          rsa_pub_key: client_rsa_pub_key
+        }
+        client_params.merge!(version: remote.version) if remote.version
+
+        ret = nil
+        begin
+          response_data = client.get_module_info(client_params)
+          ret = true
+        rescue Exception => e
+          return if e.respond_to?(:has_tag?) && e.has_tag?(:no_resource) && opts[:do_not_raise]
+          raise e
+        end
+
+        ret
+      end
 
       def get_remote_module_info?(client_rsa_pub_key, opts = {})
         client_params = {
@@ -94,6 +117,7 @@ module DTK
           rsa_pub_key: client_rsa_pub_key
         }
 
+        client_params.merge!(version: remote.version) if remote.version
         client_params.merge!(module_refs_content: opts[:module_refs_content]) unless is_empty?(opts[:module_refs_content])
 
         ret = nil
@@ -112,8 +136,8 @@ module DTK
 
         if remote.version
           # TODO: ModuleBranch::Location:
-          fail Error.new('Not versions not implemented')
-          versions = branch_names_to_versions_stripped(ret[:branches])
+          # fail Error.new('Not versions not implemented')
+          versions = branch_names_to_versions_stripped(ret[:branches])||ret[:versions]
           unless versions && versions.include?(remote.version)
             fail ErrorUsage.new("Remote module (#{remote.pp_module_name()}}) does not have version (#{remote.version || 'CURRENT'})")
           end
@@ -141,7 +165,7 @@ module DTK
       end
       private :remote
 
-      def list_module_info(type = nil, rsa_pub_key = nil)
+      def list_module_info(type = nil, rsa_pub_key = nil, opts = {})
         new_repo = R8::Config[:repo][:remote][:new_client]
         filter = type && { type: type_for_remote_module(type) }
         remote_modules = client.list_modules(filter, rsa_pub_key)
@@ -151,9 +175,15 @@ module DTK
           last_updated = r['updated_at'] && Time.parse(r['updated_at']).strftime('%Y/%m/%d %H:%M:%S')
           permission_string = "#{r['permission_hash']['user']}/#{r['permission_hash']['user_group']}/#{r['permission_hash']['other']}"
           el.merge!(display_name: r['full_name'], owner: r['owner_name'], group_owners: r['user_group_names'], permissions: permission_string, last_updated: last_updated)
-          if versions = branch_names_to_versions(r['branches'])
-            el.merge!(versions: versions)
+          versions = opts[:ret_versions_array] ? r['versions'] : branch_names_to_versions(r['branches'])
+
+          if versions && !versions.empty?
+            # substitute base with master
+            parsed_versions = []
+            versions.each{ |version| parsed_versions << (version.eql?('master') ? 'base' : version) }
+            el.merge!(versions: parsed_versions)
           end
+
           el
         end
 

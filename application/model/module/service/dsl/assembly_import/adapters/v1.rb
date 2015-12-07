@@ -2,7 +2,7 @@
 module DTK; class ServiceModule
   class AssemblyImport
     class V1 < self
-      def self.assembly_iterate(service_module, hash_content, &block)
+      def self.assembly_iterate(service_module, hash_content, opts, &block)
         assemblies_hash = hash_content['assemblies'].values.inject({}) do |h, assembly_info|
           h.merge(service_module.assembly_ref(assembly_info['name']) => assembly_info)
         end

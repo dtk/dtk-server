@@ -184,7 +184,7 @@ module DTK; class  Assembly
         cmp_instance_idh = node.add_component(aug_cmp_template, opts.merge(component_title: component_title))
 
         # update the mnodule refs
-        add_component__update_component_module_refs?(aug_cmp_template[:component_module], aug_cmp_template[:namespace])
+        add_component__update_component_module_refs?(aug_cmp_template[:component_module], aug_cmp_template[:namespace], aug_cmp_template[:version])
 
         # recompute the locked module refs
         ModuleRefs::Lock.create_or_update(self)
@@ -196,11 +196,18 @@ module DTK; class  Assembly
       cmp_instance_idh
     end
 
-    def add_component__update_component_module_refs?(component_module, namespace)
+    def add_component__update_component_module_refs?(component_module, namespace, version_info = nil)
       assembly_branch = AssemblyModule::Service.get_or_create_assembly_branch(self)
       assembly_branch.set_dsl_parsed!(true)
       component_module_refs = ModuleRefs.get_component_module_refs(assembly_branch)
-      cmp_modules_with_namespaces = component_module.merge(namespace_name: namespace[:display_name])
+
+      # TODO: not sure if the best way to handle using different version of component module
+      # unless we delete existing it will not update if version is changed
+      cmp_modules = component_module_refs.component_modules
+      cmp_modules.delete(component_module[:display_name].to_sym)
+
+      version_info = nil if version_info == 'master'
+      cmp_modules_with_namespaces = component_module.merge(namespace_name: namespace[:display_name], version_info: version_info)
       if update_needed = component_module_refs.update_object_if_needed!([cmp_modules_with_namespaces])
         # This saves teh upadte to the object model
         component_module_refs.update()

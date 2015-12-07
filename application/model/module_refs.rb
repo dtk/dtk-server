@@ -29,7 +29,32 @@ module DTK
       content_hash_content = ModuleRef.get_component_module_ref_array(branch).inject({}) do |h, r|
         h.merge(key(r[:module_name]) => r)
       end
+
+      # TODO: for some reason we do not support version to be set to 'master', instead we expect nil
+      content_hash_content.each do |k,v|
+        v[:version_info] = nil if v[:version_info] == 'master'
+      end
+
       new(branch, content_hash_content)
+    end
+
+    def self.get_module_refs_by_name_and_version(branch, ref_namespace, ref_name, ref_version = nil)
+      mh     = branch.model_handle(:module_ref)
+      filter = [:and, [:eq, :module_name, ref_name], [:eq, :namespace_info, ref_namespace], [:eq, :version_info, ref_version]]
+
+      component_sp_hash = {
+        cols: [:is_dependency_to_component_modules],
+        filter: filter
+      }
+      component_modules = Model.get_objs(mh, component_sp_hash)
+
+      service_sp_hash = {
+        cols: [:is_dependency_to_service_modules],
+        filter: filter
+      }
+      service_modules = Model.get_objs(mh, service_sp_hash)
+
+      [component_modules, service_modules]
     end
 
     # returns true if an update made; this updates the ruby object
@@ -46,7 +71,7 @@ module DTK
         end
         cmp_mod_name = cmp_mod[:display_name]
         unless component_module_ref?(cmp_mod_name)
-          add_or_set_component_module_ref(cmp_mod_name, namespace_info: cmp_mod[:namespace_name])
+          add_or_set_component_module_ref(cmp_mod_name, {namespace_info: cmp_mod[:namespace_name], version_info: cmp_mod[:version_info]})
           ret = true
         end
       end

@@ -90,6 +90,9 @@ module DTK; class AssemblyModule
         fail Error.new('Cannot find ancestor branch')
       end
       branch_name = branch[:branch]
+
+      fail ErrorUsage.new("You are not allowed to update specific component module version!") if branch[:frozen] || ancestor_branch[:frozen]
+
       ancestor_branch.merge_changes_and_update_model?(component_module, branch_name, opts)
     end
 
@@ -99,14 +102,21 @@ module DTK; class AssemblyModule
       remote_repo_cols = [:id, :display_name, :version, :remote_repos, :dsl_parsed]
       project_idh      = opts[:project_idh]
 
+      filter =
+        if ancestor_id = module_branch.get_field?(:ancestor_id)
+          [:eq, :id, ancestor_id]
+        else
+          [:and,
+           [:eq, :type, 'component_module'],
+           [:eq, :version, ModuleBranch.version_field_default()],
+           [:eq, :repo_id, repo.id()],
+           [:eq, :component_id, module_id]
+          ]
+        end
+
       sp_hash = {
         cols: [:id, :group_id, :display_name, :component_type],
-        filter: [:and,
-                 [:eq, :type, 'component_module'],
-                 [:eq, :version, ModuleBranch.version_field_default()],
-                 [:eq, :repo_id, repo.id()],
-                 [:eq, :component_id, module_id]
-                   ]
+        filter: filter
       }
       base_branch = Model.get_obj(module_branch.model_handle(), sp_hash)
       diff = repo.get_local_branches_diffs(module_branch, base_branch, workspace_branch)
@@ -128,7 +138,7 @@ module DTK; class AssemblyModule
     def create_assembly_branch?(component_module, opts = {})
       am_version = assembly_module_version()
       unless component_module.get_workspace_module_branch(am_version)
-        create_assembly_branch(component_module, am_version, Aux.hash_subset(opts, [:sha]))
+        create_assembly_branch(component_module, am_version, Aux.hash_subset(opts, [:sha, :version_branch, :base_version, :checkout_branch]))
       end
       ret = component_module.get_workspace_branch_info(am_version)
       opts[:ret_module_branch] ? ret[:module_branch_idh].create_object() : ret
@@ -137,7 +147,8 @@ module DTK; class AssemblyModule
     # opts can have keys
     #  :sha - base sha to create branch from
     def create_assembly_branch(component_module, am_version, opts = {})
-      base_version = nil
+      base_version = opts[:base_version]
+      opts.merge!(inherit_frozen_from_base: true)
       component_module.create_new_version(base_version, am_version, opts)
     end
 

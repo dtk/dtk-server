@@ -98,6 +98,7 @@ module DTK
        "Illegal id (#{id}) for #{object_type}"
      end
   end
+
   class ErrorNameInvalid < ErrorUsage
     def initialize(name, object_type)
       super(msg(name, object_type))
@@ -107,6 +108,7 @@ module DTK
        "Illegal name (#{name}) for #{object_type}"
      end
   end
+
   class ErrorNameAmbiguous < ErrorUsage
     def initialize(name, matching_ids, object_type)
       super(msg(name, matching_ids, object_type))
@@ -116,6 +118,7 @@ module DTK
        "Ambiguous name (#{name}) for #{object_type} which matches ids: #{matching_ids.join(',')}"
      end
   end
+
   class ErrorNameDoesNotExist < ErrorUsage
     def initialize(name, object_type, augment_string = nil)
       super(msg(name, object_type, augment_string))
@@ -169,6 +172,16 @@ module DTK
         ret << "  #{k}: type=#{v[:type]}; description=#{v[:description]}\n"
       end
       ret
+    end
+  end
+
+  class VersionExist < ErrorUsage
+    def initialize(version, module_name)
+      super(msg(version, module_name))
+    end
+
+    def msg(version, module_name)
+      "Version '#{version}' exists already for module '#{module_name}'!"
     end
   end
 end

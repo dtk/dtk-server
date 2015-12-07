@@ -170,7 +170,6 @@ module DTK; class Component
       ret = component.get_field?(:display_name).gsub(/__/, '::')
       # removed namespace from list-components list (task DTK-1603)
       # ret = "#{namespace[:display_name]}/#{ret}" if namespace
-
       ret
     end
 

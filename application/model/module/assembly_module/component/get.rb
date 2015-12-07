@@ -35,12 +35,13 @@ module DTK; class AssemblyModule
         # namespace can at the same time that locked_branch_sha may be nil
         def get_namespace_and_locked_branch_sha?(assembly, module_name)
           locked_branch_sha = nil
+          version_branch = nil
           if namespace = Namespace.namespace?(module_name)
-            locked_branch_sha = ModuleRefs::Lock.get_locked_branch_sha?(assembly, module_name)
+            locked_branch_sha, version_branch = ModuleRefs::Lock.get_locked_branch_sha?(assembly, module_name)
           else
-            namespace, locked_branch_sha = ModuleRefs::Lock.get_namespace_and_locked_branch_sha?(assembly, module_name)
+            namespace, locked_branch_sha, version_branch = ModuleRefs::Lock.get_namespace_and_locked_branch_sha?(assembly, module_name)
           end
-          [namespace, locked_branch_sha]
+          [namespace, locked_branch_sha, version_branch]
         end
       end
 
@@ -61,7 +62,7 @@ module DTK; class AssemblyModule
           add_branch_relationship_info!(ret)
         end
         # remove branches since they are no longer needed
-        ret.each { |r| r.delete(:module_branch) }
+        # ret.each { |r| r.delete(:module_branch) }
         ret
       end
 
@@ -88,10 +89,11 @@ module DTK; class AssemblyModule
         ret = Model.get_objs(@assembly.model_handle(:component_module), sp_hash)
         ret.each do |r|
           if el = els_ndx_by_cmp_mod_ids[r[:id]]
+            module_branch = el.module_branch
             to_add = {
               namespace_name: el.namespace,
-              dsl_parsed: (el.module_branch || {})[:dsl_parsed],
-              module_branch: el.module_branch
+              dsl_parsed: (module_branch || {})[:dsl_parsed],
+              module_branch: module_branch
             }
             r.merge!(to_add)
           end
@@ -106,19 +108,30 @@ module DTK; class AssemblyModule
         ndx_ret = {}
         @assembly.get_objs(cols: [:instance_component_module_branches]).each do |r|
           component_module = r[:component_module]
-          ndx = component_module.id
+          module_branch    = r[:module_branch]
+          ndx              = component_module.id
+
           next if ndx_ret[ndx]
 
           if namespace = (r[:namespace] || {})[:display_name]
             component_module.merge!(namespace_name: namespace)
           end
-          if dsl_parsed = (r[:module_branch] || {})[:dsl_parsed]
+
+          if dsl_parsed = (module_branch || {})[:dsl_parsed]
             component_module.merge!(dsl_parsed: dsl_parsed)
           end
+
+          if version = (module_branch || {})[:version]
+            # there are cases when service instance component version is assembly version
+            # in that case we use ancestor component version (master or ##.##.##)
+            valid_version = get_valid_cmp_version(version, module_branch)
+            component_module.merge!(version_info: valid_version)
+          end
+
           if add_module_branches
             component_module.merge!(r.hash_subset(:module_branch))
           end
-          
+
           ndx_ret[ndx] = component_module
         end
         ndx_ret.values
@@ -180,6 +193,16 @@ module DTK; class AssemblyModule
         end
 
         modules_with_branches
+      end
+
+      def get_valid_cmp_version(version, module_branch)
+        if ModuleVersion.assembly_module_version?(version)
+          ancestor_id = module_branch[:ancestor_id]
+          ancestor_idh = module_branch.id_handle().createIDH(id: ancestor_id, model_name: :module_branch)
+          ancestor_branch = ancestor_idh.create_object().update_object!(:version)
+          return ancestor_branch[:version] if ancestor_branch
+        end
+        version
       end
     end
   end

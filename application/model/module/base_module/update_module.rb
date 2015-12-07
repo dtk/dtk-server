@@ -53,7 +53,7 @@ module DTK; class BaseModule
       # returns the new module branch
       # This is caledd when creating a service instance specific component module
       def create_new_version__type_specific(repo_for_new_branch, new_version, opts = {})
-        local = UpdateModule.ret_local(self, new_version)
+        local = UpdateModule.ret_local(self, new_version, opts)
         # TODO: this is expensive in that it creates new version by parsing the dsl and reading back in;
         # would be much less expsensive to clone from branch to branch
         opts_update = { update_module_refs_from_file: true }.merge(opts)
@@ -78,8 +78,15 @@ module DTK; class BaseModule
       ret = nil
       module_branch = module_branch_idh.create_object()
 
+      if version && !version.eql?('') && !version.eql?('master')
+        unless version = ::DTK::ModuleVersion.ret(version)
+          fail ::DTK::ErrorUsage::BadVersionValue.new(remote_params.version)
+        end
+      end
+
       module_branch.set_dsl_parsed!(false)
       config_agent_type = opts[:config_agent_type] || config_agent_type_default()
+
       # TODO: for efficiency can change parse_dsl to take option opts[:dsl_created_info]
       dsl_obj = parse_dsl(impl_obj, opts.merge(config_agent_type: config_agent_type))
       return dsl_obj if is_parsing_error?(dsl_obj)
@@ -131,14 +138,14 @@ module DTK; class BaseModule
       ret
     end
 
-    def self.ret_local(base_module, version)
+    def self.ret_local(base_module, version, opts = {})
       local_params = ModuleBranch::Location::LocalParams::Server.new(
         module_type: base_module.module_type(),
         module_name: base_module.module_name(),
         namespace: base_module.module_namespace(),
         version: version
       )
-      local_params.create_local(base_module.get_project())
+      local_params.create_local(base_module.get_project(), opts)
     end
 
     def add_dsl_to_impl_and_create_objects(dsl_created_info, project, impl_obj, module_branch_idh, version, opts = {})

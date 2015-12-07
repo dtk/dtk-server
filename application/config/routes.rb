@@ -142,6 +142,13 @@ R8::ReactorRoute.draw do
   post 'component_module/list' => 'component_module#list'
   post 'component_module/install_puppet_forge_modules' => 'component_module#install_puppet_forge_modules'
   post 'component_module/list_remote_diffs' => 'component_module#list_remote_diffs'
+  post 'component_module/create_new_version' => 'component_module#create_new_version'
+  post 'component_module/list_versions' => 'component_module#list_versions'
+  post 'component_module/check_remote_exist' => 'component_module#check_remote_exist'
+  post 'component_module/check_master_branch_exist' => 'component_module#check_master_branch_exist'
+  post 'component_module/list_remote_versions' => 'component_module#list_remote_versions'
+  post 'component_module/prepare_for_install_module' => 'component_module#prepare_for_install_module'
+
   # WORK WITH GIT REMOTES
   post 'component_module/info_git_remote'        => 'component_module#info_git_remote'
   post 'component_module/add_git_remote'         => 'component_module#add_git_remote'
@@ -300,6 +307,13 @@ R8::ReactorRoute.draw do
   post 'service_module/info' => 'service_module#info'
   post 'service_module/pull_from_remote' => 'service_module#pull_from_remote'
   post 'service_module/list_remote_diffs' => 'service_module#list_remote_diffs'
+  post 'service_module/create_new_version' => 'service_module#create_new_version'
+  post 'service_module/list_versions' => 'service_module#list_versions'
+  post 'service_module/check_remote_exist' => 'service_module#check_remote_exist'
+  post 'service_module/check_master_branch_exist' => 'service_module#check_master_branch_exist'
+  post 'service_module/list_remote_versions' => 'service_module#list_remote_versions'
+  post 'service_module/prepare_for_install_module' => 'service_module#prepare_for_install_module'
+
   # WORK WITH GIT REMOTES
   post 'service_module/info_git_remote'        => 'service_module#info_git_remote'
   post 'service_module/add_git_remote'         => 'service_module#add_git_remote'

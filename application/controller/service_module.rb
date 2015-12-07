@@ -27,7 +27,13 @@ module DTK
 
     def rest__list_assemblies
       service_module = create_obj(:service_module_id)
-      rest_ok_response service_module.list_assembly_templates()
+      version = ret_request_params(:version)
+
+      # use latest version unless explicit version specified
+      version = compute_latest_version(service_module) unless version
+      version ||= 'master'
+
+      rest_ok_response service_module.list_assembly_templates(version)
     end
 
     def rest__list_instances
@@ -41,9 +47,22 @@ module DTK
       rest_ok_response service_module.list_component_modules(opts)
     end
 
+    def rest__check_master_branch_exist
+      rest_ok_response check_master_branch_exist_helper(:service_module)
+    end
+
     # TODO: rename; this is just called by install; import ops call create route
     def rest__import
       rest_ok_response install_from_dtkn_helper(:service_module)
+    end
+
+    def rest__prepare_for_install_module()
+      rest_ok_response prepare_for_install_helper(:service_module)
+    end
+
+    def rest__check_remote_exist
+      service_module = create_obj(:service_module_id)
+      rest_ok_response check_remote_exist_helper(service_module)
     end
 
     # TODO: rename; this is just called by publish
@@ -115,6 +134,30 @@ module DTK
       rest_ok_response ServiceModule.list(opts), datatype: datatype
     end
 
+    def rest__list_versions
+      service_module = create_obj(:service_module_id)
+      project = get_default_project()
+      opts = Opts.new(project_idh: project.id_handle())
+
+      if include_base = ret_request_params(:include_base)
+        opts.merge!(:include_base => include_base)
+      end
+
+      rest_ok_response service_module.list_versions(opts)
+    end
+
+    def rest__list_remote_versions
+      service_module = create_obj(:service_module_id)
+      client_rsa_pub_key = ret_request_params(:rsa_pub_key)
+
+      opts = {}
+      if include_base = ret_request_params(:include_base)
+        opts.merge!(:include_base => include_base)
+      end
+
+      rest_ok_response service_module.list_remote_versions(client_rsa_pub_key)
+    end
+
     def rest__versions
       service_module = create_obj(:service_module_id)
       client_rsa_pub_key = ret_request_params(:rsa_pub_key)
@@ -151,6 +194,12 @@ module DTK
     def rest__get_workspace_branch_info
       service_module = create_obj(:service_module_id)
       version = ret_request_params(:version)
+
+      # use latest version if version option is not provided
+      if ret_request_params(:use_latest)
+        version = compute_latest_version(service_module) unless version
+      end
+
       rest_ok_response service_module.get_workspace_branch_info(version)
     end
 
@@ -174,7 +223,17 @@ module DTK
 
     def rest__delete
       service_module = create_obj(:service_module_id)
-      module_info = service_module.delete_object()
+      delete_all_versions = ret_request_params(:delete_all_versions)
+
+      if delete_all_versions
+        module_info = service_module.delete_object()
+      else
+        version     = ret_version()
+        version     = compute_latest_version(service_module) unless version
+        module_info = service_module.delete_version_or_module(version)
+      end
+
+      module_info.merge!(:version => version) if version && !delete_all_versions
       rest_ok_response module_info
     end
 
@@ -194,12 +253,13 @@ module DTK
       opts.merge!(namespace: remote_namespace) unless remote_namespace.empty?
 
       remote_namespace, remote_module_name, version = Repo::Remote.split_qualified_name(ret_non_null_request_params(:remote_module_name), opts)
+      version ||= ret_request_params(:version)
       remote_params = remote_params_dtkn(:service_module, remote_namespace, remote_module_name, version)
 
       project = get_default_project()
-      ServiceModule.delete_remote(project, remote_params, client_rsa_pub_key, force_delete)
+      response = ServiceModule.delete_remote(project, remote_params, client_rsa_pub_key, force_delete)
 
-      rest_ok_response
+      rest_ok_response response
     end
 
     #
@@ -251,6 +311,31 @@ module DTK
       #    :ambiguous
       #  :component_module_refs
       rest_ok_response response
+    end
+
+    def rest__create_new_version
+      service_module = create_obj(:service_module_id)
+      version       = ret_version()
+      diffs_summary = ret_diffs_summary()
+
+      opts = {}
+      opts.merge!(force_parse: true)
+      opts.merge!(update_from_includes: true)
+      opts.merge!(force: true)
+
+      if ret_request_param_boolean(:internal_trigger)
+        opts.merge!(do_not_raise: true)
+      end
+
+      if generate_docs = ret_request_param_boolean(:generate_docs)
+        opts.merge!(generate_docs: generate_docs)
+      end
+
+      if do_not_raise_if_exist = ret_request_params(:do_not_raise_if_exist)
+        opts.merge!(do_not_raise_if_exist: do_not_raise_if_exist)
+      end
+
+      rest_ok_response service_module.create_new_module_version(version, diffs_summary, opts)
     end
 
     def rest__set_component_module_version

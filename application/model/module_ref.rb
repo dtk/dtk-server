@@ -89,7 +89,7 @@ module DTK
     end
 
     def version_string
-      self[:version_info] && self[:version_info].version_string()
+      self[:version_info] && self[:version_info].respond_to?(:version_string) && self[:version_info].version_string()
     end
 
     def namespace
@@ -103,16 +103,15 @@ module DTK
     end
 
     def dsl_hash_form
-      ret = Aux.hash_subset(self, DSLHashCols, only_non_nil: true)
-      if version_string = version_string()
-        ret.merge!(version_info: version_string)
+      ret = Aux.hash_subset(self, [])
+      if namespace = namespace()
+        ret.merge!(namespace: namespace)
       end
-      if ret[:version_info] && ret[:namespace_info].nil?
-        return ret[:version_info] # simple form
+      if version = version_string()
+        ret.merge!(version: version)
       end
       ret
     end
-    DSLHashCols = [:version_info, { namespace_info: :namespace }, :external_ref]
 
     private
 
@@ -123,13 +122,9 @@ module DTK
         parent.parent_id_field_name(:module_ref) => parent.id()
       }
       module_ref_hash_array.map do |module_ref_hash|
-        assigns =
-          if version_info = module_ref_hash[:version_info]
-            parent_id_assigns.merge(version_info: version_info.to_s)
-          else
-            assigns = parent_id_assigns
-          end
-        el = Aux.hash_subset(module_ref_hash, [:ref, :display_name, :module_name, :module_type, :namespace_info, :external_ref]).merge(assigns)
+        el = Aux.hash_subset(module_ref_hash, [:ref, :display_name, :module_name, :module_type, :namespace_info, :external_ref]).merge(parent_id_assigns)
+        version_info = module_ref_hash[:version_info]
+        el.merge!(version_info: version_info && version_info.to_s)
         el[:display_name] ||= display_name(el)
         el[:ref] ||= ref(el)
         el

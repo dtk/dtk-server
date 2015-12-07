@@ -11,6 +11,21 @@ shared_context 'Stage' do |dtk_common|
   end
 end
 
+shared_context 'List components versions' do |dtk_common, components_versions_list|
+  it "gives list of all components on the service and matches them with given #{components_versions_list} input" do
+    components_versions_exist = true
+    components_versions_retrieved = dtk_common.get_components_versions(dtk_common.service_id)
+    puts components_versions_retrieved
+    components_versions_list.each do |c|
+      unless components_versions_retrieved.include? c
+        components_versions_exist = false
+        break
+      end
+    end
+    components_versions_exist.should eq(true)
+  end
+end
+
 shared_context 'Stage with namespace' do |dtk_common, namespace|
   it "stages #{dtk_common.service_name} service from assembly in namespace #{namespace}" do
     dtk_common.stage_service_with_namespace(namespace)

@@ -124,8 +124,23 @@ module DTK
       end
 
       id_handle = module_branch.id_handle()
-      module_branch.delete_instance(id_handle)
+      module_branch.delete_instance_and_repo_branch()
+      # module_branch.delete_instance(id_handle)
       ret
+    end
+
+    def delete_version_or_module(version)
+      module_branches = get_module_branches()
+
+      if module_branches.size > 1
+        delete_version(version)
+      else
+        unless module_branch = get_module_branch_matching_version(version)
+          fail ErrorUsage.new("Version '#{version}' for specified service module does not exist!") if version
+          fail ErrorUsage.new("Base version for specified service module does not exist. You have to specify version you want to delete!")
+        end
+        delete_object()
+      end
     end
 
     def get_assembly_instances
@@ -139,14 +154,12 @@ module DTK
       end
     end
 
-    def get_assembly_templates
+    def get_assembly_templates(opts = {})
       sp_hash = {
         cols: [:module_branches]
       }
       mb_idhs = get_objs(sp_hash).map { |r| r[:module_branch].id_handle() }
-      opts = {
-        filter: [:oneof, :module_branch_id, mb_idhs.map(&:get_id)]
-      }
+      opts.merge!(filter: [:oneof, :module_branch_id, mb_idhs.map(&:get_id)])
       if project = get_project()
         opts.merge!(project_idh: project.id_handle())
       end
@@ -159,8 +172,14 @@ module DTK
       ndx_ret.values
     end
 
-    def list_assembly_templates
-      templates_with_nodes = get_assembly_templates()
+    def list_assembly_templates(version = 'master')
+      version_filter =
+        if version.eql?('master') || version.eql?('base')
+          [:or, [:eq, :version, version], [:eq, :version, nil], [:eq, :version, ''], [:eq, :version, 'master']]
+        else
+          [:eq, :version, version]
+        end
+      templates_with_nodes = get_assembly_templates({version_filter: version_filter})
       templates_with_nodes.each do |template|
         nodes_size = 0
         (template[:nodes] || []).each do |node|
@@ -284,8 +303,12 @@ module DTK
 
     # returns either parsing error object or nil
     def process_dsl_and_ret_parsing_errors(repo, module_branch, local, opts = {})
-      unless local.version.nil?
-        fail Error.new('Not implemented yet ServiceModule#process_dsl_and_ret_parsing_errors with version not equal to nil')
+      # think we do not need this because now we can install service/component module versions
+      # unless local.version.nil?
+      #   fail Error.new('Not implemented yet ServiceModule#process_dsl_and_ret_parsing_errors with version not equal to nil')
+      # end
+      if version = local.version
+        opts.merge!(module_version: version)
       end
       response = update_model_from_dsl(module_branch.merge(repo: repo), opts) #repo added to avoid lookup in update_model_from_dsl
       response if ParsingError.is_error?(response)
@@ -294,10 +317,10 @@ module DTK
     private
 
     # returns the new module branch
-    def create_new_version__type_specific(repo_for_new_branch, new_version, _opts = {})
+    def create_new_version__type_specific(repo_for_new_branch, new_version, opts = {})
       project = get_project()
       repo_idh = repo_for_new_branch.id_handle()
-      module_and_branch_info = self.class.create_ws_module_and_branch_obj?(project, repo_idh, module_name(), new_version, module_namespace_obj())
+      module_and_branch_info = self.class.create_ws_module_and_branch_obj?(project, repo_idh, module_name(), new_version, module_namespace_obj(), nil, opts)
       module_branch_idh = module_and_branch_info[:module_branch_idh]
       module_branch_idh.create_object()
     end
@@ -313,6 +336,7 @@ module DTK
         end
       else
         opts.merge!(ret_dsl_updated_info: {})
+        opts.merge!(module_version: version) if version
         error_or_module_dsl_info = update_model_from_dsl(module_branch, opts)
         if ParsingError.is_error?(error_or_module_dsl_info)
           ret.dsl_parse_error = error_or_module_dsl_info

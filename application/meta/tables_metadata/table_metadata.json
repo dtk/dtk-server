@@ -79,11 +79,13 @@
   "component": {
     "order": [
       "id",
-      "name"
+      "name",
+      "version"
     ],
     "mapping": {
       "id": "dtk_id",
-      "name": "display_name"
+      "name": "display_name",
+      "version": "version"
     }
   },
   "component_with_dependencies": {
@@ -194,34 +196,54 @@
       "dsl_parsed": "dsl_parsed"
     }
   },
-  "assembly_component_module": {
+  "module_with_versions": {
     "order": [
       "id",
-      "namespace",
       "name",
-      "updated",
-      "update saved",
-      "dsl_parsed"
+      "remote(s)",
+      "dsl_parsed",
+      "version(s)"
     ],
     "mapping": {
       "id": "dtk_id",
-      "namespace": "namespace_name",
       "name": "display_name",
+      "remote(s)": "linked_remotes",
+      "dsl_parsed": "dsl_parsed",
+      "version(s)": "versions"
+    }
+  },
+  "assembly_component_module": {
+    "order": [
+      "id",
+      "name",
+      "namespace",
+      "updated",
+      "update saved",
+      "dsl_parsed",
+      "version"
+    ],
+    "mapping": {
+      "id": "dtk_id",
+      "name": "display_name",
+      "namespace": "namespace_name",
       "updated": "local_copy",
       "update saved": "update_saved",
-      "dsl_parsed": "dsl_parsed"
+      "dsl_parsed": "dsl_parsed",
+      "version": "display_version"
     }
   },
   "component_module": {
     "order": [
       "id",
       "namespace",
-      "name"
+      "name",
+      "version"
     ],
     "mapping": {
       "id": "dtk_id",
       "namespace": "namespace_name",
-      "name": "display_name"
+      "name": "display_name",
+      "version": "version"
     }
   },
   "module_diff": {
@@ -244,14 +266,16 @@
       "owner",
       "group owner(s)",
       "permissions",
-      "last_updated"
+      "last_updated",
+      "version(s)"
     ],
     "mapping": {
       "name": "display_name",
       "owner": "owner",
       "group owner(s)": "group_owners",
       "permissions": "permissions",
-      "last_updated": "last_updated"
+      "last_updated": "last_updated",
+      "version(s)": "versions"
     }
   },
   "library": {
@@ -612,13 +636,11 @@
       "errors": "errors.message"
     }
   },
-  "module_version": {
+  "list_versions": {
     "order": [
-      "namespace",
       "version(s)"
     ],
     "mapping": {
-      "namespace": "namespace",
       "version(s)": "versions"
     }
   },

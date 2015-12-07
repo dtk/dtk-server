@@ -84,6 +84,38 @@ module DTK
       end
     end
 
+    def list_versions(opts = {})
+      local_versions  = []
+      parsed_versions = []
+
+      get_objs(cols: [:version_info]).each do |r|
+        next if r[:module_branch].assembly_module_version?
+        v = r[:module_branch].version()
+        local_versions << (v.nil? ? 'base' : v)
+      end
+
+      base = local_versions.delete('base')
+      local_versions.sort!()
+
+      parsed_versions << base if opts[:include_base]
+      parsed_versions << local_versions
+
+      [{ versions: parsed_versions.flatten }]
+    end
+
+    def list_remote_versions(client_rsa_pub_key, opts = {})
+      remote_versions = []
+      parsed_versions = []
+      module_name     = (default_linked_remote_repo||{})[:display_name]
+      remote_versions = self.class.list_remotes(model_handle, client_rsa_pub_key, ret_versions_array: true).select { |r| r[:display_name] == module_name }.collect { |v_remote| v_remote[:versions] }.flatten.sort if module_name
+
+      master = remote_versions.delete('master')
+      parsed_versions << 'base' if opts[:include_base] && master
+      parsed_versions << remote_versions
+
+      [{ versions: parsed_versions.flatten }]
+    end
+
     ##
     # Returns local and remote versions for module
     #
@@ -145,6 +177,40 @@ module DTK
         generate_and_persist_docs(module_branch, ret.parsed_dsl)
       end
     
+      ret
+    end
+
+    def create_new_module_version(version, diffs_summary, opts = {})
+      ret = ModuleDSLInfo.new
+      # do pull and see if any changes need the model to be updated
+      force         = opts[:force]
+      generate_docs = opts[:generate_docs]
+
+      # set frozen field in module branch object to true for new version
+      opts.merge!(frozen: true)
+
+      # create module branch for new version
+      begin
+        module_branch = self.create_new_version(nil, version, opts)
+      rescue VersionExist => e
+        return {version_exist: true} if opts[:do_not_raise_if_exist]
+        fail e
+      rescue Exception => e
+        fail e
+      end
+      pull_was_needed = true
+
+      parse_needed = (opts[:force_parse] || generate_docs || !module_branch.dsl_parsed?())
+      update_from_includes = opts[:update_from_includes]
+
+      opts_update = Aux.hash_subset(opts, [:do_not_raise, :modification_type, :force_parse, :auto_update_module_refs, :dsl_parsed_false, :update_module_refs_from_file, :update_from_includes, :current_branch_sha, :service_instance_module, :task_action])
+      opts_update.merge!(ret_parsed_dsl: ParsedDSL.create(self)) if generate_docs
+      ret = update_model_from_clone_changes(nil, diffs_summary, module_branch, version, opts_update)
+
+      if generate_docs and ! ret[:dsl_parse_error]
+        generate_and_persist_docs(module_branch, ret.parsed_dsl)
+      end
+
       ret
     end
 
@@ -547,7 +613,8 @@ TODO: remove after incorporating in info above displaying of remotes; this was r
         module_branch_idh: branch_obj.id_handle(),
         repo_url: RepoManager.repo_url(repo_name),
         workspace_branch: branch_obj.get_field?(:branch),
-        branch_head_sha: RepoManager.branch_head_sha(branch_obj)
+        branch_head_sha: RepoManager.branch_head_sha(branch_obj),
+        frozen: branch_obj[:frozen]
       }
 
       if version = opts[:version]

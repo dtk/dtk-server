@@ -31,7 +31,14 @@ module Ramaze::Helper
       project = get_default_project()
       module_ref_content = ret_request_params(:module_ref_content)
 
-      module_obj.get_linked_remote_module_info(project, action, remote_params, rsa_pub_key, access_rights, module_ref_content)
+      linked_module_info = module_obj.get_linked_remote_module_info(project, action, remote_params, rsa_pub_key, access_rights, module_ref_content)
+
+      if version
+        workspace_branch = module_obj.get_workspace_branch_info(version)||{}
+        linked_module_info.merge!(frozen: workspace_branch[:frozen])
+      end
+
+      linked_module_info
     end
 
     def get_service_dependencies(module_type, remote_params, client_rsa_pub_key = nil)
@@ -100,8 +107,43 @@ module Ramaze::Helper
       module_class.pull_from_remote(project, local_module_name, remote_repo, version)
     end
 
+    def check_master_branch_exist_helper(module_type)
+      local_namespace, local_module_name, version = Repo::Remote.split_qualified_name(ret_non_null_request_params(:remote_module_name))
+      project      = get_default_project()
+      local_params = local_params(module_type, local_module_name, namespace: local_namespace, version: version)
+      local        = local_params.create_local(project)
+      module_obj   = module_class(module_type).module_exists?(project.id_handle(), local_module_name, local_namespace)
+
+      module_obj.get_module_branch(local.branch_name) if module_obj
+    end
+
+    def prepare_for_install_helper(module_type)
+      module_exist = false
+      remote_namespace, remote_module_name = Repo::Remote.split_qualified_name(ret_non_null_request_params(:remote_module_name))
+      project       = get_default_project()
+      remote_params = remote_params_dtkn(module_type, remote_namespace, remote_module_name, nil)
+      client_pub_key = ret_request_params(:rsa_pub_key)
+
+      local_namespace   = remote_params.namespace
+      local_module_name = ret_request_params(:local_module_name) || remote_params.module_name
+      local_params      = local_params(module_type, local_module_name, namespace: local_namespace, version: nil)
+      local             = local_params.create_local(project)
+      local_branch      = local.branch_name
+
+      if module_obj = module_class(module_type).module_exists?(project.id_handle(), local_module_name, local_namespace)
+        module_exist = true if module_obj.get_module_branch(local_branch)
+      end
+
+      remote = remote_params.create_remote(project)
+      remote_repo_info = Repo::Remote.new(remote).get_remote_module_info?(client_pub_key, raise_error: true)
+
+      remote_repo_info.merge!(head_installed: true) if module_exist
+      remote_repo_info
+    end
+
     def install_from_dtkn_helper(module_type)
       remote_namespace, remote_module_name, version = Repo::Remote.split_qualified_name(ret_non_null_request_params(:remote_module_name))
+      version ||= ret_request_params(:version)
       remote_params = remote_params_dtkn(module_type, remote_namespace, remote_module_name, version)
 
       local_namespace = remote_params.namespace
@@ -125,10 +167,43 @@ module Ramaze::Helper
       end
 
       opts = { do_not_raise: do_not_raise, additional_message: additional_message, ignore_component_error: ignore_component_error }
+      if hard_reset_on_pull_version = ret_request_params(:hard_reset_on_pull_version)
+        opts.merge!(hard_reset_on_pull_version: hard_reset_on_pull_version)
+      end
       response = module_class(module_type).install(project, local_params, remote_params, dtk_client_pub_key, opts)
       return response if response[:does_not_exist]
 
       response.merge(namespace: remote_namespace, dependency_warnings: dependency_warnings)
+    end
+
+    def check_remote_exist_helper(module_obj)
+      client_rsa_pub_key    = ret_non_null_request_params(:rsa_pub_key)
+      qualified_remote_name = ret_request_params(:remote_component_name)
+
+      module_obj.update_object!(:display_name, :namespace)
+      opts = { namespace: module_obj[:namespace][:display_name] }
+      qualified_remote_name = module_obj[:display_name] if qualified_remote_name.to_s.empty?
+
+      namespace, remote_module_name, version = Repo::Remote.split_qualified_name(qualified_remote_name, opts)
+      local_module_name = module_obj.module_name()
+      version_param = ret_request_params(:version)
+      version ||= version_param
+
+      # use latest version if version is not specified
+      if use_latest = !version && ret_request_params(:use_latest)
+        version = compute_latest_version(module_obj)
+      end
+
+      if local_module_name != remote_module_name
+        fail ErrorUsage.new("Publish with remote module name (#{remote_module_name}) not equal to local module name (#{local_module_name}) is currently not supported.")
+      end
+
+      module_type   = module_obj.module_type
+      remote_params = remote_params_dtkn(module_type, namespace, remote_module_name, version)
+      module_info = module_obj.check_remote_exist(remote_params, client_rsa_pub_key, version, do_not_raise: true)
+
+      module_info.merge!(version: version) if use_latest
+      module_info
     end
 
     def publish_to_dtkn_helper(module_obj)
@@ -141,6 +216,8 @@ module Ramaze::Helper
 
       namespace, remote_module_name, version = Repo::Remote.split_qualified_name(qualified_remote_name, opts)
       local_module_name = module_obj.module_name()
+      version_param = ret_request_params(:version)
+      version ||= version_param
 
       # [Amar & Haris] this is temp restriction until rest of logic is properly fixed
       if local_module_name != remote_module_name
@@ -151,7 +228,7 @@ module Ramaze::Helper
       remote_params = remote_params_dtkn(module_type, namespace, remote_module_name, version)
       namespace = module_obj.module_namespace()
       local_params = local_params(module_type, local_module_name, namespace: namespace, version: version)
-      module_obj.publish(local_params, remote_params, client_rsa_pub_key)
+      module_obj.publish(local_params, remote_params, client_rsa_pub_key, version)
     end
 
     # opts can have :version and :namespace

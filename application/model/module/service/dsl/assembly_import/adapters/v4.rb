@@ -24,9 +24,9 @@ module DTK; class ServiceModule
         Workflow = 'workflow'
       end
 
-      def self.assembly_iterate(service_module, hash_content, &block)
+      def self.assembly_iterate(service_module, hash_content, opts, &block)
         assembly_hash = (Constant.matches?(hash_content, :Assembly) || {}).merge(Constant.hash_subset(hash_content, AssemblyKeys))
-        assembly_ref = service_module.assembly_ref(Constant.matches?(hash_content, :Name))
+        assembly_ref = service_module.assembly_ref(Constant.matches?(hash_content, :Name), opts[:module_version])
         assemblies_hash = { assembly_ref => assembly_hash }
         node_bindings_hash = Constant.matches?(hash_content, :NodeBindings)
         block.call(assemblies_hash, node_bindings_hash)

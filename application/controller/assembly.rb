@@ -254,12 +254,18 @@ module DTK
         case module_type.to_sym
           when :component_module
             module_name = ret_non_null_request_params(:module_name)
-            namespace, sha = AssemblyModule::Component.get_namespace_and_locked_branch_sha?(assembly, module_name)
+            namespace, sha, version_branch = AssemblyModule::Component.get_namespace_and_locked_branch_sha?(assembly, module_name)
             unless namespace
               fail ErrorUsage.new("A component module with name '#{module_name}' does not exist")
             end
             component_module = create_obj(:module_name, ComponentModule, namespace)
-            AssemblyModule::Component.prepare_for_edit(assembly, component_module, sha ? {sha: sha } : {})
+            opts = {}
+            opts.merge!(sha: sha) if sha
+            if version_branch && !version_branch[:version].eql?('master')
+              opts.merge!(version_branch: version_branch[:branch], base_version: version_branch[:version], checkout_branch: true)
+            end
+            # AssemblyModule::Component.prepare_for_edit(assembly, component_module, sha ? {sha: sha } : {})
+            AssemblyModule::Component.prepare_for_edit(assembly, component_module, opts)
           when :service_module
             modification_type = ret_non_null_request_params(:modification_type).to_sym
             opts = ret_params_hash(:task_action, :create, :base_task_action)
@@ -304,6 +310,11 @@ module DTK
 
       unless namespace = AssemblyModule::Component.get_namespace?(assembly, module_name)
         fail ErrorUsage.new("A component module with name '#{module_name}' does not exist")
+      end
+
+      _ns, _lck_sha, version_branch = AssemblyModule::Component.get_namespace_and_locked_branch_sha?(assembly, module_name)
+      if version_branch && version_branch[:frozen]
+        fail ErrorUsage.new("You are not allowed to pull changes for specific component module version!")
       end
 
       component_module = create_obj(:module_name, ComponentModule, namespace)
@@ -461,7 +472,13 @@ module DTK
     #### actions to update and create assembly templates
     def rest__promote_to_template
       assembly = ret_assembly_instance_object()
-      assembly_template_name, service_module_name, module_namespace = get_template_and_service_names_params(assembly)
+
+      unless (ret_request_params(:assembly_template_name) && ret_request_params(:service_module_name))
+        assembly.update_object!(:version)
+        fail ErrorUsage.new("You are not allow to push updates to service module versions!") unless assembly[:version].eql?('master')
+      end
+
+      assembly_template_name, service_module_name, module_namespace = get_template_and_service_names_params(assembly, check_frozen_branches: true)
 
       if assembly_template_name.nil? || service_module_name.nil?
         fail ErrorUsage.new('SERVICE-NAME/ASSEMBLY-NAME cannot be determined and must be explicitly given')
@@ -482,7 +499,8 @@ module DTK
         opts.merge!(local_clone_dir_exists: local_clone_dir_exists)
       end
 
-      service_module = Assembly::Template.create_or_update_from_instance(project, assembly, service_module_name, assembly_template_name, opts)
+      # push-assembly-updates always update master branch
+      service_module = Assembly::Template.create_or_update_from_instance(project, assembly, service_module_name, assembly_template_name, opts.merge!(version: 'master'))
       rest_ok_response service_module.ret_clone_update_info()
     end
     #### end: actions to update and create assembly templates
@@ -513,7 +531,7 @@ module DTK
       assembly_idh = assembly.id_handle()
 
       cmp_mh = assembly_idh.createMH(:component)
-      unless aug_component_template = Component::Template.get_augmented_component_template(cmp_mh, cmp_name, namespace, assembly)
+      unless aug_component_template = Component::Template.get_augmented_component_template(cmp_mh, cmp_name, namespace, assembly, use_base_template: true)
         fail ErrorUsage.new("Component with identifier #{namespace.nil? ? '\'' : ('\'' + namespace + ':')}#{cmp_name}' does not exist!")
       end
 
@@ -541,10 +559,16 @@ module DTK
       # to element IDs. This "workaround" helps with that.
       if service_module_id = ret_request_params(:service_module_id)
         # this is name of assembly template
-        assembly_id = ret_request_params(:assembly_id)
-        service_module = ServiceModule.find(model_handle(:service_module), service_module_id)
-        assembly_template = service_module.get_assembly_templates().find { |template| template[:display_name].eql?(assembly_id) || template[:id] == assembly_id.to_i }
-        fail ErrorUsage, "We are not able to find assembly '#{assembly_id}' for service module '#{service_module_id}'" unless assembly_template
+        assembly_id        = ret_request_params(:assembly_id)
+        version            = ret_request_params(:version)
+        service_module     = ServiceModule.find(model_handle(:service_module), service_module_id)
+        # if we do not specify version use latest
+        version            = compute_latest_version(service_module) unless version
+        module_name        = ret_request_params(:service_module_name)
+        assembly_version   = version || 'master'
+        assembly_templates = service_module.get_assembly_templates().select { |template| (template[:display_name].eql?(assembly_id) || template[:id] == assembly_id.to_i) }
+        assembly_template  = assembly_templates.find{ |template| template[:version] == assembly_version }
+        fail ErrorUsage, "We are not able to find assembly '#{assembly_id}' for service module '#{module_name}'" unless assembly_template
       else
         assembly_template = ret_assembly_template_object()
       end

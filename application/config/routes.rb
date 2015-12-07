@@ -9,13 +9,15 @@ R8::ReactorRoute.draw do
   get  'api/v1/service/:service_id/components'    => 'v1::service#components'
   get  'api/v1/service/:service_id/tasks'         => 'v1::service#tasks'
   get  'api/v1/service/:service_id/access_tokens' => 'v1::service#access_tokens'
-
+  post  'api/v1/service/create'                     => 'v1::service#create'
   post 'api/v1/service/:service_id/converge'        => 'v1::service#converge'
   post 'api/v1/service/:service_id/start'           => 'v1::service#start'
   post 'api/v1/service/:service_id/stop'            => 'v1::service#stop'
   post 'api/v1/service/:service_id/create_assembly' => 'v1::service#create_assembly'
-
   delete 'api/v1/service/:service_id' => 'v1::service#delete_destroy'
+
+  post 'api/v1/auth/login' => 'v1::authorization#login'
+  post 'api/v1/auth/logout' => 'v1::authorization#logout'
 
   # USER
   post 'user/process_login'      => 'user#process_login'

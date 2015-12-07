@@ -89,7 +89,7 @@ shared_context 'Create component module version' do |dtk_common, component_modul
 end
 
 shared_context 'NEG - Create component module version' do |dtk_common, component_module_name, version_name|
-	it "does ntot create component module #{component_module_name} version #{version_name}" do
+	it "does not create component module #{component_module_name} version #{version_name}" do
 		component_module_version_created = dtk_common.create_component_module_version(component_module_name, version_name)
 		expect(component_module_version_created).to eq(false)
 	end

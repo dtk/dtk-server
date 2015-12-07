@@ -37,7 +37,7 @@ module DTK
         ramaze_user = user_object() if simple_auth_login
       end
 
-      unless route.first == 'user'
+      unless route.first == 'user' || route.last == 'login'
         unless logged_in?
           unless R8::Config[:session][:cookie][:disabled]
             if request.cookies['dtk-user-info']

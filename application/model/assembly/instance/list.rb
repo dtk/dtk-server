@@ -127,9 +127,13 @@ module DTK; class  Assembly
 
           if get_branch_relationship_info
             if r[:local_copy]
-              branch_relationship     = r[:branch_relationship] || ''
-              local_ahead_or_branchpt = branch_relationship.eql?(:local_ahead) || branch_relationship.eql?(:branchpoint)
-              r[:update_saved] = !(r[:local_copy_diff] && local_ahead_or_branchpt)
+              if module_branch[:frozen]
+                r[:update_saved] = "n/a"
+              else
+                branch_relationship     = r[:branch_relationship] || ''
+                local_ahead_or_branchpt = branch_relationship.eql?(:local_ahead) || branch_relationship.eql?(:branchpoint)
+                r[:update_saved] = !(r[:local_copy_diff] && local_ahead_or_branchpt)
+              end
             end
           end
         end

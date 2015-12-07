@@ -61,13 +61,30 @@ module DTK; class ModuleRefs
       end
       DefaultStrategy = :pick_first_level
 
-      def add_implementations!(assembly_instance)
+      def add_implementations!(assembly_instance, opts = {})
+        impl_module_name = nil
+        impl_module_id   = nil
+        if impl_obj = opts[:impl_obj]
+          impl_obj.update_object!(:module_name)
+          impl_module_id   = impl_obj[:id]
+          impl_module_name = impl_obj[:module_name]
+        end
+
         ndx_impls = get_relevant_ndx_implementations(assembly_instance)
         each_element do |el|
           version = el.version || Implementation.version_field
           ndx = impl_index(el.namespace, el.module_name, version)
-          if impl = ndx_impls[ndx]
-            el.implementation = impl
+
+          # this case will only be used when on client we do edit-component-module for versioned module
+          # and try to push changes to server (not to base module)
+          if impl_module_name && el.module_name.eql?(impl_module_name)
+            get_by_id = nil
+            ndx_impls.each{|_name, impl| (get_by_id = impl if impl[:id] == impl_module_id) }
+            el.implementation = get_by_id if get_by_id
+          else
+            if impl = ndx_impls[ndx]
+              el.implementation = impl
+            end
           end
         end
         self

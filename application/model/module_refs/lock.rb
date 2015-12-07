@@ -118,7 +118,7 @@ module DTK
         module_refs_tree = ModuleRefs::Tree.create(assembly_instance)
         collapsed = module_refs_tree.collapse(Aux.hash_subset(opts, [:raise_errors]))
         collapsed.choose_namespaces_and_versions!()
-        collapsed.add_implementations!(assembly_instance)
+        collapsed.add_implementations!(assembly_instance, opts)
 
         ret = new(assembly_instance)
         collapsed.each_pair do |module_name, single_el_array|

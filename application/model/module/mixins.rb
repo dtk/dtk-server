@@ -169,7 +169,7 @@ module DTK
       # TODO: if need to generate docs, but not update the model can do something more efficient
       #       than code below, which class update to the model code even if no change to dsl files
       #       Instead would just want to call the parse code
-      opts_update = Aux.hash_subset(opts, [:do_not_raise, :modification_type, :force_parse, :auto_update_module_refs, :dsl_parsed_false, :update_module_refs_from_file, :update_from_includes, :current_branch_sha, :service_instance_module, :task_action])
+      opts_update = Aux.hash_subset(opts, [:do_not_raise, :modification_type, :force_parse, :auto_update_module_refs, :dsl_parsed_false, :update_module_refs_from_file, :update_from_includes, :current_branch_sha, :service_instance_module, :task_action, :use_impl_id])
       opts_update.merge!(ret_parsed_dsl: ParsedDSL.create(self)) if generate_docs
       ret = update_model_from_clone_changes(commit_sha, diffs_summary, module_branch, version, opts_update)
       

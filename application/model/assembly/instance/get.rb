@@ -84,8 +84,18 @@ module DTK; class Assembly; class Instance
       components = []
       rows.each do |r|
         if cmp = r[:nested_component]
+          cmp.merge!(r.hash_subset(:node))
+
+          # if component in service instance is edited it will have assembly branch version
+          # we have to use ancestor branch version in list-components
+          if ModuleVersion.assembly_module_version?(cmp[:version])
+            module_branch   = r[:module_branch]
+            ancestor_branch = module_branch.get_ancestor_branch?()
+            cmp[:version]   = ancestor_branch[:version] if ancestor_branch[:version]
+          end
+
           # add node and namespace hash information to component hash
-          components << cmp.merge(r.hash_subset(:node)) #.merge!(r.hash_subset(:namespace)))
+          components << cmp #.merge(r.hash_subset(:node)) #.merge!(r.hash_subset(:namespace)))
         end
       end
 

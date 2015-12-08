@@ -159,16 +159,23 @@ module DTK; class Component
 
     def self.list(project, opts = {})
       assembly = opts[:assembly_instance]
+      filter   = [
+        :and,
+        [:eq, :type, 'template'],
+        # had to remove this to display other versions beside master
+        # [:oneof, :version, filter_on_versions(assembly: assembly)],
+        [:eq, :project_project_id, project.id()]
+      ]
+
       sp_hash = {
         cols: [:id, :type, :display_name, :description, :component_type, :version, :refnum, :module_branch_id],
-        filter: [:and, [:eq, :type, 'template'],
-                 # had to remove this to display other versions beside master
-                 # [:oneof, :version, filter_on_versions(assembly: assembly)],
-                 [:eq, :project_project_id, project.id()]]
+        filter: filter
       }
       cmps = get_objs(project.model_handle(:component), sp_hash, keep_ref_cols: true)
 
       ingore_type = opts[:ignore]
+      hide_assembly_cmps = opts[:hide_assembly_cmps]
+
       ret = []
       cmps.each do |r|
         sp_h = {
@@ -176,8 +183,9 @@ module DTK; class Component
           filter: [:eq, :id, r[:module_branch_id]]
         }
         m_branch = Model.get_obj(project.model_handle(:module_branch), sp_h)
-        # ret << r unless m_branch[:type].eql?(ingore_type)
-        if (m_branch && !m_branch[:type].eql?(ingore_type))
+
+        # with (hide_assembly_cmps && !ModuleVersion.assembly_module_version?(r[:version])) we eliminate assembly instance components
+        if (m_branch && !m_branch[:type].eql?(ingore_type) && (hide_assembly_cmps && !ModuleVersion.assembly_module_version?(r[:version])))
           branch_namespace = m_branch[:namespace]
           r[:namespace] = branch_namespace[:display_name]
           ret << r

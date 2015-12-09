@@ -164,12 +164,12 @@ shared_context 'Export component module' do |component_module_name, namespace|
   end
 end
 
-shared_context 'Export component module rvm' do |rvm_path, component_module_name, namespace|
+shared_context 'Export component module rvm' do |rvm_path, component_module_name, namespace, version|
   it "exports #{component_module_name} component module to #{namespace} namespace on remote repo" do
     puts 'Export component module:', '------------------------'
     pass = false
     cmp_module = component_module_name.split(':').last
-    value = `#{rvm_path}dtk component-module #{component_module_name} publish #{namespace}/#{cmp_module}`
+    value = `#{rvm_path}dtk component-module #{component_module_name} publish #{namespace}/#{cmp_module} -v #{version}`
     puts value
     pass = true if value.include? 'Module has been successfully published'
     puts "Component module #{cmp_module} exported successfully!" if pass == true

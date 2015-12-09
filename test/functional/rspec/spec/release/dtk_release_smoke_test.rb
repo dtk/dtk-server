@@ -10,7 +10,9 @@ require './lib/dtk_common'
 require './lib/assembly_and_service_operations_spec'
 require './lib/parameters_setting_spec'
 require './lib/component_modules_spec'
+require './lib/component_module_versions_spec'
 require './lib/service_modules_spec'
+require './lib/service_module_versions_spec'
 
 catalog_username = "dtk16"
 catalog_password = "password"
@@ -23,7 +25,9 @@ instance_size_attribute = 'instance_size'
 node_name = 'node1'
 component_module_name = "test_module"
 local_component_module_name = 'dtk16:test_module'
+component_module_version = "0.0.1"
 service_module_name = "bootstrap"
+service_module_version = "0.0.1"
 local_service_module_name = 'dtk16:bootstrap'
 namespace = 'dtk16'
 local_default_namespace = 'dtk16'
@@ -50,16 +54,24 @@ describe "DTK Server smoke test release" do
     include_context "Import component module rvm", rvm_path, component_module_name
   end
 
+  context "Create new component module version" do
+    include_context 'Create component module version', dtk_common, local_component_module_name, component_module_version
+  end
+
   context "Import new service module function" do
     include_context "Import service module rvm", rvm_path, service_module_name
   end
 
+  context "Create new service module version" do
+    include_context 'Create service module version', dtk_common, local_service_module_name, service_module_version
+  end
+
   context "Export component module to #{namespace} namespace" do
-    include_context "Export component module rvm", rvm_path, local_component_module_name, namespace
+    include_context "Publish versioned component module rvm", rvm_path, local_component_module_name, "#{namespace}/#{component_module_name}", component_module_version
   end
 
   context "Export service module to #{namespace} namespace" do
-    include_context "Export service module rvm", rvm_path, local_service_module_name, namespace
+    include_context "Publish versioned service module rvm", rvm_path, local_service_module_name, "#{namespace}/#{service_module_name}", service_module_version
   end
 
   context "Get component module components list" do
@@ -100,8 +112,16 @@ describe "DTK Server smoke test release" do
     include_context "Delete component module", dtk_common, local_component_module_name
   end
 
+  context 'Delete component module version from remote' do
+    include_context 'Delete remote component module version', dtk_common, local_component_module_name, component_module_namespace, component_module_version
+  end
+
   context "Delete #{component_module_name} component module from remote" do
     include_context "Delete component module from remote repo rvm", rvm_path, component_module_name, namespace
+  end
+
+  context 'Delete service module version from remote' do
+    include_context 'Delete remote service module version', dtk_common, local_service_module_name, service_module_namespace, service_module_version
   end
 
   context "Delete #{service_module_name} service module from remote" do

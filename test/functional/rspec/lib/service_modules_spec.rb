@@ -128,12 +128,12 @@ shared_context 'Export service module' do |service_module_name, namespace|
   end
 end
 
-shared_context 'Export service module rvm' do |rvm_path, service_module_name, namespace|
+shared_context 'Export service module rvm' do |rvm_path, service_module_name, namespace, version|
   it "exports #{service_module_name} service module to #{namespace} namespace on remote repo" do
     puts 'Export service module to remote:', '--------------------------------'
     pass = false
     service_module = service_module_name.split(':').last
-    value = `#{rvm_path}dtk service-module #{service_module_name} publish #{namespace}/#{service_module}`
+    value = `#{rvm_path}dtk service-module #{service_module_name} publish #{namespace}/#{service_module} -v #{version}`
     puts value
     pass = true if (value.include? 'Module has been successfully published')
     puts "Publish of #{service_module} service module to #{namespace} namespace has been completed successfully!" if pass == true

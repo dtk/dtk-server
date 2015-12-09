@@ -51,7 +51,7 @@ describe "DTK Server smoke test release" do
   end
 
   context "Import new component module function" do
-    include_context "Import component module rvm", rvm_path, component_module_name
+    include_context "Import component module rvm", rvm_path, local_component_module_name
   end
 
   context "Create new component module version" do
@@ -59,7 +59,7 @@ describe "DTK Server smoke test release" do
   end
 
   context "Import new service module function" do
-    include_context "Import service module rvm", rvm_path, service_module_name
+    include_context "Import service module rvm", rvm_path, local_service_module_name
   end
 
   context "Create new service module version" do
@@ -113,7 +113,7 @@ describe "DTK Server smoke test release" do
   end
 
   context 'Delete component module version from remote' do
-    include_context 'Delete remote component module version', dtk_common, local_component_module_name, component_module_namespace, component_module_version
+    include_context 'Delete remote component module version', dtk_common, local_component_module_name, local_default_namespace, component_module_version
   end
 
   context "Delete #{component_module_name} component module from remote" do
@@ -121,7 +121,7 @@ describe "DTK Server smoke test release" do
   end
 
   context 'Delete service module version from remote' do
-    include_context 'Delete remote service module version', dtk_common, local_service_module_name, service_module_namespace, service_module_version
+    include_context 'Delete remote service module version', dtk_common, local_service_module_name, local_default_namespace, service_module_version
   end
 
   context "Delete #{service_module_name} service module from remote" do

@@ -2,7 +2,8 @@ module WorkspaceMixin
   def get_workspace_id
     response = send_request('/rest/assembly/list_with_workspace', {})
     workspace = response['data'].find { |x| x['display_name'] == 'workspace' }['id']
-    workspace
+    workspace = "workspace" if workspace.nil?
+    workspace 
   end
 
   def purge_content(service_id)

@@ -67,11 +67,11 @@ describe "DTK Server smoke test release" do
   end
 
   context "Export component module to #{namespace} namespace" do
-    include_context "Publish versioned component module rvm", rvm_path, local_component_module_name, "#{namespace}/#{component_module_name}", component_module_version
+    include_context "Export component module rvm", rvm_path, local_component_module_name, local_default_namespace, component_module_version
   end
 
   context "Export service module to #{namespace} namespace" do
-    include_context "Publish versioned service module rvm", rvm_path, local_service_module_name, "#{namespace}/#{service_module_name}", service_module_version
+    include_context "Export service module rvm", rvm_path, local_service_module_name, local_default_namespace, service_module_version
   end
 
   context "Get component module components list" do
@@ -112,19 +112,19 @@ describe "DTK Server smoke test release" do
     include_context 'Delete all component module versions', dtk_common, local_component_module_name
   end
 
-  context 'Delete component module version from remote' do
-    include_context 'Delete remote component module version', dtk_common, local_component_module_name, local_default_namespace, component_module_version
-  end
-
-  context "Delete #{component_module_name} component module from remote" do
+  context "Delete #{component_module_name} component module version #{component_module_version} from remote" do
     include_context "Delete component module from remote repo rvm", rvm_path, component_module_name, namespace
   end
 
-  context 'Delete service module version from remote' do
-    include_context 'Delete remote service module version', dtk_common, local_service_module_name, local_default_namespace, service_module_version
+  context "Delete #{component_module_name} component module base version from remote" do
+    include_context "Delete component module from remote repo rvm", rvm_path, component_module_name, namespace
   end
 
-  context "Delete #{service_module_name} service module from remote" do
+    context "Delete #{service_module_name} service module version #{service_module_version} from remote" do
+    include_context "Delete service module from remote repo rvm", rvm_path, service_module_name, namespace
+  end
+
+  context "Delete #{service_module_name} service module base version from remote" do
     include_context "Delete service module from remote repo rvm", rvm_path, service_module_name, namespace
   end
 

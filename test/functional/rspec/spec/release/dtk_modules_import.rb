@@ -17,7 +17,7 @@ service_module_remote = 'internal/dtk'
 component_module_1 = 'internal/apt'
 component_module_2 = 'internal/dtk_user'
 component_module_3 = 'internal/rvm'
-component_modules = ['internal:apt', 'internal:common_user', 'internal:dtk', 'internal:dtk_activemq', 'internal:dtk_addons', 'internal:dtk_client', 'internal:dtk_java', 'internal:dtk_nginx', 'internal:dtk_postgresql', 'internal:dtk_repo_manager', 'internal:dtk_server', 'internal:dtk_thin', 'internal:dtk_user', 'internal:gitolite', 'internal:logrotate', 'internal:nginx', 'internal:rvm', 'internal:stdlib', 'internal:sysctl', 'internal:thin', 'internal:vcsrepo', 'internal:epel', 'internal:dtk_passenger', 'internal:redis', 'internal:dtk_secret']
+component_modules = [ 'internal:common_user', 'internal:dtk', 'internal:dtk_activemq', 'internal:dtk_addons', 'internal:dtk_client', 'internal:dtk_java', 'internal:dtk_postgresql', 'internal:dtk_repo_manager', 'internal:dtk_server', 'internal:dtk_thin', 'internal:dtk_user', 'internal:gitolite',  'internal:rvm', 'internal:sysctl', 'internal:thin', 'internal:vcsrepo', 'internal:epel', 'internal:dtk_passenger', 'internal:redis', 'internal:apt', 'internal:dtk_nginx', 'internal:nginx', 'internal:stdlib', 'internal:dtk_secret', 'internal:logrotate', 'internal:docker']
 
 service_module_filesystem_location = '~/dtk/service_modules/internal'
 component_module_filesystem_location = '~/dtk/component_modules/internal'
@@ -52,7 +52,7 @@ end
 
 def install_service_module(service_module_remote)
   pass = false
-  value = `dtk service-module install #{service_module_remote} -y`
+  value = `dtk service-module install #{service_module_remote} --update-none`
   puts value
   pass = false if ((value.include? 'ERROR') || (value.include? 'exists on client'))
   puts "Import of remote service module #{service_module_remote} completed successfully!" if pass == true
@@ -74,12 +74,12 @@ dtk_common = Common.new('', '')
 
 service_module_deleted = dtk_common.delete_service_module(service_module)
 service_module_deleted_local = delete_service_module_from_local(service_module_filesystem_location, service_module.split(':').last)
-if service_module_deleted && service_module_deleted_local
+#if service_module_deleted && service_module_deleted_local
   component_modules.each do |cmp|
     dtk_common.delete_component_module(cmp)
     delete_component_module_from_local(component_module_filesystem_location, cmp.split(':').last)
   end
-end
+#end
 
 install_service_module(service_module_remote)
 install_component_module(component_module_1)

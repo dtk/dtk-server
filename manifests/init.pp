@@ -239,6 +239,21 @@ class dtk_repo_manager(
   dtk_repo_manager::github_repo { $dtk_repo_manager::params::dtk_common_core_repo:
     repo_branch => $dtk_common_core_tag,
     require => Class['dtk_repo_manager::rsa_identity_dir']
+  } ->
+
+  exec { 'copy_gitolite_hooks':
+    command => "cp  ${gitolite_user_homedir}/repo_manager/script/gitolite/hooks/* ${gitolite_user_homedir}/.gitolite/hooks/common/",
+    path    => "/usr/local/bin/:/bin/",
+  } ->
+
+  exec { "gitolite_setup_hooks":
+    command => "gitolite setup",
+    path    => "${gitolite_user_homedir}/bin/gitolite",
+  } ->
+
+  exec { 'delete_gitolite_admin_hooks':
+    command => "rm ${gitolite_user_homedir}/repositories/gitolite-admin.git/hooks/post-receive",
+    path    => "/usr/local/bin/:/bin/",
   }
 
   # make sure logs are rotated

@@ -242,13 +242,14 @@ class dtk_repo_manager(
   } ->
 
   exec { 'copy_gitolite_hooks':
-    command => "cp  ${gitolite_user_homedir}/repo_manager/script/gitolite/hooks/* ${gitolite_user_homedir}/.gitolite/hooks/common/",
+    command => "cp ${gitolite_user_homedir}/repo_manager/script/gitolite/hooks/* ${gitolite_user_homedir}/.gitolite/hooks/common/",
     path    => "/usr/local/bin/:/bin/",
   } ->
 
+  $setup_cmd = "su - git -c \"${gitolite_user_homedir}/bin/gitolite setup -ho\""
   exec { "gitolite_setup_hooks":
-    command => "gitolite setup",
-    path    => "${gitolite_user_homedir}/bin/gitolite",
+    command => "${setup_cmd}",
+    path    => ['/bin']
   } ->
 
   exec { 'delete_gitolite_admin_hooks':

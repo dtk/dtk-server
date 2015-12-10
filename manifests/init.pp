@@ -235,6 +235,7 @@ class dtk_repo_manager(
     repo_branch => $dtk_common_tag,
     require => Class['dtk_repo_manager::rsa_identity_dir']
   }
+  $setup_cmd = "su - git -c \"${gitolite_user_homedir}/bin/gitolite setup -ho\""
 
   dtk_repo_manager::github_repo { $dtk_repo_manager::params::dtk_common_core_repo:
     repo_branch => $dtk_common_core_tag,
@@ -246,7 +247,6 @@ class dtk_repo_manager(
     path    => "/usr/local/bin/:/bin/",
   } ->
 
-  $setup_cmd = "su - git -c \"${gitolite_user_homedir}/bin/gitolite setup -ho\""
   exec { "gitolite_setup_hooks":
     command => "${setup_cmd}",
     path    => ['/bin']

@@ -67,20 +67,6 @@ shared_context 'Publish versioned component module' do |dtk_common, component_mo
 	end
 end
 
-shared_context 'Publish versioned component module rvm' do |rvm_path, component_module_name, remote_component_name, version_name|
-	it "publish/push component module #{component_module_name} with version #{version_name}" do
-		puts "Publish component module version to remote:", "-------------------------------------------"
-	    pass = false
-	    value = `#{rvm_path}dtk component-module #{component_module_name} publish #{remote_component_name} -v #{version_name}`
-	    puts value
-	    pass = true if (value.include? 'Status: OK')
-	    puts "Publish of component module #{component_module_name} #{version_name} completed successfully!" if pass == true
-	    puts "Publish of component module #{component_module_name} #{version_name} was not successfully" if pass == false
-	    puts ''
-	    expect(pass).to eq(true)
-	end
-end
-
 shared_context 'NEG - Publish versioned component module' do |dtk_common, component_module_name, remote_component_name, version_name|
 	it "does not publish/push component module #{component_module_name} since this version #{version_name} does not exist" do
 		puts "Publish component module version to remote:", "-------------------------------------------"

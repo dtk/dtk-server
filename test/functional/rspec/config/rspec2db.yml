@@ -9,3 +9,5 @@ dbconnection:
   password: jenkinspadrinorspecintegration
   host: backup.r8network.com
   port: 5432
+  pool: 5
+  reaping_frequency: 10

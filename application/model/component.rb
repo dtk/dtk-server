@@ -92,6 +92,10 @@ module DTK
       rows = get_objs(model_handle, sp_hash).select do |r|
         r[:node][:display_name] == node_name or r[:node].is_assembly_wide_node?
       end
+
+      if context[:filter_by_node] && node_name
+        rows.reject!{|cmp| cmp[:node][:display_name] != node_name}
+      end
       
       case rows.size
       when 1

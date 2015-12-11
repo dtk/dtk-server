@@ -76,7 +76,9 @@ module DTK; class  Assembly
       def info_about(about, opts = Opts.new)
         case about
         when :attributes
-          list_attributes(opts)
+          attributes = list_attributes(opts)
+          fail ErrorNameDoesNotExist.new(opts[:attribute_id], :attribute) if opts[:raise_if_no_attribute] && attributes.empty?
+          attributes
         when :components
           list_components(opts)
         when :nodes

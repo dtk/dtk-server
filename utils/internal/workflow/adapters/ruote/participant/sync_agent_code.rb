@@ -103,7 +103,7 @@ module DTK
             begin
               workflow.initiate_sync_agent_action(task, receiver_context)
              rescue Exception => e
-              e.backtrace
+              Log.error_pp([e, e.backtrace[0..20]])
             end
           end
         end

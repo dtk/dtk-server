@@ -186,6 +186,10 @@ module DTK
 
     def self.load_for_node_config(protocol_type = nil)
       adapter_name = protocol_type || R8::Config[:command_and_control][:node_config][:type]
+      # DEBUG SNIPPET >>> REMOVE <<<
+      require 'ap'
+      ap "HARDCODED heRE REMOVE!"
+      adapter_name = :stomp
       Log.debug("Node config adapter chosen: #{adapter_name}")
       load_for_aux(:node_config, adapter_name)
     end
@@ -233,6 +237,9 @@ module DTK
     def self.load_for(task_or_task_action)
       adapter_type, adapter_name = task_or_task_action.ret_command_and_control_adapter_info()
       adapter_name ||= R8::Config[:command_and_control][adapter_type][:type]
+      # DEBUG SNIPPET >>> REMOVE <<<
+      require 'ap'
+      ap " SDAPTER BE : #{adapter_name}"
       fail ErrorCannotLoadAdapter.new unless adapter_type && adapter_name
       load_for_aux(adapter_type, adapter_name)
     end

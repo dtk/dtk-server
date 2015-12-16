@@ -190,13 +190,17 @@ module DTK; class Task
         ConfigAgent::Type.is_a?(config_agent_type, [:dtk_provider])
       end
 
+      def puppet_agent_call?
+        ConfigAgent::Type.is_a?(config_agent_type, [:puppet])
+      end
+
       # returns [adapter_type, adapter_name]
       # adapter_name can be nil meaning default adapter should be used
       def ret_command_and_control_adapter_info
         adapter_type = :node_config
         adapter_name = :server if execute_on_server?
         # [Haris] Change STOMP to mcollective for action agent calls
-        # adapter_name = :stomp  if action_agent_call?
+        adapter_name = :stomp  if action_agent_call? || puppet_agent_call?
         [adapter_type, adapter_name]
       end
 

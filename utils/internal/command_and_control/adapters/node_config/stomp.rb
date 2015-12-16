@@ -2,10 +2,15 @@ r8_nested_require('stomp', 'multiplexer')
 r8_nested_require('mcollective', 'assembly_action')
 require 'stomp'
 
+r8_nested_require('mcollective', 'config')
+
+
 module DTK
   module CommandAndControlAdapter
     class Stomp < CommandAndControlNodeConfig
       extend Mcollective::AssemblyActionClassMixin
+
+      DEFAULT_TIMEOUT_AUTH_NODE = 60
 
       Lock = Mutex.new
 
@@ -15,6 +20,10 @@ module DTK
 
       def self.server_port
         R8::Config[:mcollective][:port]
+      end
+
+      def self.install_script(node, bindings)
+        Mcollective::Config.install_script(node, bindings)
       end
 
       def self.get_stomp_client
@@ -34,12 +43,66 @@ module DTK
         ret
       end
 
+      # TODO: change signature to poll_to_detect_node_ready(node,callbacks,context)
+      def self.poll_to_detect_node_ready(node, opts)
+        count = opts[:count] || PollCountDefault
+        rc = opts[:receiver_context]
+        callbacks = {
+          on_msg_received: proc do |msg|
+            # is_task_canceled is set from participant cancel method
+            rc[:callbacks][:on_msg_received].call(msg) unless (node[:is_task_canceled] || node[:is_task_failed])
+          end,
+          on_timeout: proc do
+            if count < 1
+              rc[:callbacks][:on_timeout].call
+            else
+              new_opts = opts.merge(count: count - 1)
+              poll_to_detect_node_ready(node, new_opts) unless (node[:is_task_canceled] || node[:is_task_failed])
+            end
+          end
+        }
+
+        context = { timeout: opts[:poll_cycle] || PollCycleDefault }.merge(rc)
+        pbuilderid = Node.pbuilderid(node)
+        filter = filter_single_fact('pbuilderid', pbuilderid)
+        async_agent_call('discovery', 'ping', {}, filter, callbacks, context)
+      end
+
+      def self.authorize_node(node, callbacks, context_x = {})
+        repo_user_mh = node.id_handle.createMH(:repo_user)
+
+        node_repo_user = RepoUser.get_matching_repo_user(repo_user_mh, { type: :node }, [:ssh_rsa_private_key, :ssh_rsa_pub_key])
+
+        unless node_repo_user && node_repo_user[:ssh_rsa_private_key]
+          fail Error.new('Cannot found ssh private key to authorize nodes')
+        end
+        unless node_repo_user[:ssh_rsa_pub_key]
+          fail Error.new('Cannot found ssh public key to authorize nodes')
+        end
+
+        pbuilderid = Node.pbuilderid(node)
+        filter = filter_single_fact('pbuilderid', pbuilderid)
+
+        params = {
+          agent_ssh_key_public: node_repo_user[:ssh_rsa_pub_key],
+          agent_ssh_key_private: node_repo_user[:ssh_rsa_private_key],
+          server_ssh_rsa_fingerprint: RepoManager.repo_server_ssh_rsa_fingerprint()
+        }
+        context = { timeout: DEFAULT_TIMEOUT_AUTH_NODE }.merge(context_x)
+        async_agent_call('git_access', 'add_rsa_info', params, filter, callbacks, context)
+      end
+
       def self.async_agent_call(agent, method, params, filter_x, callbacks, context_x)
+        # DEBUG SNIPPET >>> REMOVE <<<
+        require 'ap'
+        ap "STOMP CALL TO: #{agent}"
         msg = {
           agent: agent,
           method: method
         }
-        msg.merge!(params[:action_agent_request]) if params[:action_agent_request]
+
+        msg.merge!(params.delete(:action_agent_request)) if params[:action_agent_request]
+        msg.merge!(params)
 
         filter = BlankFilter.merge(filter_x).merge('agent' => [agent])
         context = context_x.merge(callbacks: callbacks)
@@ -170,6 +233,12 @@ module DTK
           end
         end
         answer_computed ? ret : errors_in_node_action_payload_default?(payload)
+      end
+
+      def self.errors_in_node_action_payload_default?(payload)
+        unless [:succeeded, :ok].include?(payload[:status])
+          payload[:error] ? [payload[:error]] : (payload[:errors] || [])
+        end
       end
 
       BlankFilter = { 'identity' => [], 'fact' => [], 'agent' => [], 'cf_class' => [] }

@@ -210,6 +210,7 @@ module DTK
         params = nil
         async_agent_call('discovery', 'ping', params, filter, callbacks, context)
       end
+
       PollCycleDefault = 40
       PollCountDefault = 6
 
@@ -291,6 +292,9 @@ module DTK
       end
 
       def self.async_agent_call(agent, method, params, filter_x, callbacks, context_x)
+        # DEBUG SNIPPET >>> REMOVE <<<
+        require 'ap'
+        ap "MCOLLECTIVE CALL TO: #{agent}"
         msg = params ? handler.new_request(agent, method, params) : method
         filter = BlankFilter.merge(filter_x).merge('agent' => [agent])
         context = context_x.merge(callbacks: callbacks)

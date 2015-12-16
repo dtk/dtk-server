@@ -39,6 +39,9 @@ module DTK
               original_msg = decode(msg.body)
               msg_request_id = original_msg[:body][:request_id]
 
+              # making sure that timeout threads do not run overtime
+              process_response(original_msg, msg_request_id)
+
               # discard message if not the one requested
               unless @@callback_registry[msg_request_id]
                 Log.info("Stomp message received with ID '#{msg_request_id}' is not for this tenant, and it is being ignored!")
@@ -53,19 +56,36 @@ module DTK
         end
       end
 
+      # def sendreq_with_callback(msg, agent, context_with_callbacks, filter = {})
+      #   request_id = ::MCollective::SSL.uuid.gsub("-", "")
+      #   callbacks = Callbacks.create(context_with_callbacks[:callbacks])
+
+      #   message = create_message(request_id, msg, agent, filter['fact'].first[:value])
+
+      #   @stomp_client.publish(R8::Config[:arbiter][:topic], encode(message))
+
+      #   initialize_listener(request_id, callbacks)
+
+      #   request_id
+      # end
+
       def sendreq_with_callback(msg, agent, context_with_callbacks, filter = {})
-        request_id = ::MCollective::SSL.uuid.gsub("-", "")
-        callbacks = Callbacks.create(context_with_callbacks[:callbacks])
-        timeout = context_with_callbacks[:timeout] || DefaultTimeout
-        expected_count = context_with_callbacks[:expected_count] || ExpectedCountDefault
+        trigger = {
+          generate_request_id: proc do |client|
+            ::MCollective::SSL.uuid.gsub("-", "")
+          end,
+          send_message: proc do |client, reqid|
+            message = create_message(reqid, msg, agent, filter['fact'].first[:value])
+            # DEBUG SNIPPET >>> REMOVE <<<
+            require 'ap'
+            ap "SENDING FROM CALLBACK: #{agent}"
+            client.publish(R8::Config[:arbiter][:topic], encode(message))
 
-        message = create_message(request_id, msg, agent, filter['fact'].first[:value])
+            initialize_listener(reqid, Callbacks.create(context_with_callbacks[:callbacks]))
+          end
+        }
 
-        @stomp_client.publish(R8::Config[:arbiter][:topic], encode(message))
-
-        initialize_listener(request_id, callbacks)
-
-        request_id
+        process_request(trigger, context_with_callbacks)
       end
 
     private

@@ -581,6 +581,8 @@ module DTK
         version            = ret_request_params(:version)
         service_module     = ServiceModule.find(model_handle(:service_module), service_module_id)
 
+        raise ErrorUsage.new("Unable to find service module for specified parameters: '#{service_module_id}'") unless service_module
+
         # if we do not specify version use latest
         version = compute_latest_version(service_module) unless version
 

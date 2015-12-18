@@ -65,6 +65,7 @@ module DTK
         context = { timeout: opts[:poll_cycle] || PollCycleDefault }.merge(rc)
         pbuilderid = Node.pbuilderid(node)
         filter = filter_single_fact('pbuilderid', pbuilderid)
+
         async_agent_call('discovery', 'ping', {}, filter, callbacks, context)
       end
 
@@ -93,9 +94,6 @@ module DTK
       end
 
       def self.async_agent_call(agent, method, params, filter_x, callbacks, context_x)
-        # DEBUG SNIPPET >>> REMOVE <<<
-        require 'ap'
-        ap "STOMP CALL TO: #{agent}"
         msg = {
           agent: agent,
           method: method

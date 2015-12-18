@@ -76,9 +76,6 @@ module DTK
           end,
           send_message: proc do |client, reqid|
             message = create_message(reqid, msg, agent, filter['fact'].first[:value])
-            # DEBUG SNIPPET >>> REMOVE <<<
-            require 'ap'
-            ap "SENDING FROM CALLBACK: #{agent}"
             client.publish(R8::Config[:arbiter][:topic], encode(message))
 
             initialize_listener(reqid, Callbacks.create(context_with_callbacks[:callbacks]))

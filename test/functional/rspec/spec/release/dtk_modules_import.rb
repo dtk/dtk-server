@@ -51,7 +51,7 @@ def delete_component_module_from_local(component_module_filesystem_location, com
 end
 
 def install_service_module(service_module_remote)
-  pass = false
+  pass = true
   value = `dtk service-module install #{service_module_remote} -y`
   puts value
   pass = false if ((value.include? 'ERROR') || (value.include? 'exists on client'))
@@ -61,7 +61,7 @@ def install_service_module(service_module_remote)
 end
 
 def install_component_module(component_module_remote)
-  pass = false
+  pass = true
   value = `dtk component-module install #{component_module_remote}`
   puts value
   pass = false if ((value.include? 'ERROR') || (value.include? 'exists on client'))

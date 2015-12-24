@@ -66,6 +66,11 @@ module DTK; class Task
       def get_dynamic_attributes(result)
         ret = []
         dyn_attrs = (result[:data] || {})[:dynamic_attributes]
+
+        if !dyn_attrs && result[:data]
+          dyn_attrs = result[:data][:data][:dynamic_attributes]
+        end
+
         return ret if dyn_attrs.nil? || dyn_attrs.empty?
         dyn_attrs.map { |a| { id: a[:attribute_id], attribute_value: sanitize_attribute_val(a[:attribute_val]) } }
       end

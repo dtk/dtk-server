@@ -32,6 +32,8 @@ module DTK
       # heart of the system
       def initialize_listener(request_id, callbacks)
         @@callback_registry[request_id] = callbacks
+        Log.info("Stomp message ID '#{request_id}' has been registered! Waiting for callback.")
+
 
         @@listening_thread ||= CreateThread.defer_with_session(CurrentSession.new.user_object(), Ramaze::Current.session) do
           @stomp_client.subscribe(R8::Config[:arbiter][:reply_topic]) do |msg|

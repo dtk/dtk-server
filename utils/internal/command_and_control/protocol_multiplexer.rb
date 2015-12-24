@@ -66,6 +66,9 @@ module XYZ
         @lock.synchronize do
           timer = R8EM.add_timer(timeout) { process_request_timeout(request_id) }
           @callbacks_list[request_id] = callbacks.merge(timer: timer)
+          # DEBUG SNIPPET >>> REMOVE <<<
+          require 'ap'
+          ap "ADDED REQUEST ID: #{request_id}"
           @count_info[request_id] = expected_count
         end
       end
@@ -90,6 +93,10 @@ module XYZ
           end
           if count == 0
             ret = @callbacks_list.delete(request_id)
+                      # DEBUG SNIPPET >>> REMOVE <<<
+          require 'ap'
+          ap "DELETE REQUEST ID: #{request_id}"
+
             ret.cancel_timer()
           elsif count > 0
             ret = @callbacks_list[request_id]
@@ -105,7 +112,7 @@ module XYZ
 
         def self.process_error(callbacks, error_obj)
           unless callbacks && callbacks.process_error(error_obj)
-            Log.error("error in process_response: #{error_obj.inspect}")
+            Log.error("Error in process_response: #{error_obj.inspect}")
             Log.error_pp(error_obj.backtrace)
           end
         end
@@ -115,7 +122,7 @@ module XYZ
           if callback
             callback.call(msg)
           else
-            Log.error("could not find process msg callback for request_id #{request_id}")
+            Log.error("Could not find process msg callback for request_id #{request_id}")
           end
         end
 

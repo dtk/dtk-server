@@ -4,6 +4,8 @@ require './lib/dtk_common'
 require './lib/admin_panel_helper'
 
 user='demo_user'
+existing_user = 'existing_user'
+existing_group = 'existing_group'
 group='demo_group'
 ns='demo_ns'
 
@@ -29,9 +31,10 @@ describe "(Admin Panel UI) Test Script Clean up" do
 
 	context "Search for '#{group}', '#{invalid_chars}', '#{too_long}' groups" do
 		it "and delete matching results" do
-			results=group_panel.get_all_results(group)
-			results+=group_panel.get_all_results(invalid_chars)
-			results+=group_panel.get_all_results(too_long)
+			results = group_panel.get_all_results(group)
+			results += group_panel.get_all_results(invalid_chars)
+			results += group_panel.get_all_results(too_long)
+			results += group_panel.get_all_results(existing_group)
 			puts "Found #{results.length} matching results. "
 			results.each do |x|
 				puts "Deleting user group: #{x}"
@@ -51,10 +54,11 @@ describe "(Admin Panel UI) Test Script Clean up" do
 
 	context "Search for '#{user}', '#{invalid_chars}', '#{invalid_user}' '#{too_long}' users" do
 		it "and delete matching results" do
-			results=user_panel.get_all_results(user)
-			results+=user_panel.get_all_results(invalid_chars)
-			results+=user_panel.get_all_results(invalid_user)
-			results+=user_panel.get_all_results(too_long)
+			results = user_panel.get_all_results(user)
+			results += user_panel.get_all_results(invalid_chars)
+			results += user_panel.get_all_results(invalid_user)
+			results += user_panel.get_all_results(too_long)
+			results += user_panel.get_all_results(existing_user)
 			puts "Found #{results.length} matching results. "
 			results.each do |x|
 				puts "Deleting user: #{x}"

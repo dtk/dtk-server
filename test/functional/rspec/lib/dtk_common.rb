@@ -4,7 +4,7 @@ require 'pp'
 require 'json'
 require 'awesome_print'
 require 'yaml'
-require File.expand_path('../client_access/dtk_client_accessor', __FILE__)
+#require File.expand_path('../client_access/dtk_client_accessor', __FILE__)
 require File.expand_path('../mixins/assembly_and_service_operations_mixin.rb', __FILE__)
 require File.expand_path('../mixins/node_operations_mixin.rb', __FILE__)
 require File.expand_path('../mixins/workspace_mixin.rb', __FILE__)
@@ -29,7 +29,7 @@ class Common
 	include ServiceModulesVersionMixin
 
 	attr_accessor :server, :port, :endpoint, :username, :password
-	attr_accessor :service_name, :service_id, :assembly, :node_id, :success, :error_message, :server_log, :ssh_key
+	attr_accessor :service_name, :service_id, :assembly, :node_id, :success, :error_message, :server_log, :ssh_key, :backtrace
 	attr_accessor :component_module_id_list, :component_module_name_list
 
 	$opts = {
@@ -150,7 +150,7 @@ class Common
 			puts @error_message
 			unless response_JSON["errors"].first["backtrace"].nil? 
 				puts "", "Backtrace:"
-				pretty_print_JSON(response_JSON["errors"].first["backtrace"])				
+				pretty_print_JSON(response_JSON["errors"].first["backtrace"])		
 			end
 		else
 			@error_message = ""

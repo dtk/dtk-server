@@ -4,7 +4,7 @@ require 'pp'
 require 'json'
 require 'awesome_print'
 require 'yaml'
-#require File.expand_path('../client_access/dtk_client_accessor', __FILE__)
+require File.expand_path('../client_access/dtk_client_accessor', __FILE__)
 require File.expand_path('../mixins/assembly_and_service_operations_mixin.rb', __FILE__)
 require File.expand_path('../mixins/node_operations_mixin.rb', __FILE__)
 require File.expand_path('../mixins/workspace_mixin.rb', __FILE__)

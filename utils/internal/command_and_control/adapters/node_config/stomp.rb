@@ -46,13 +46,25 @@ module DTK
       # TODO: change signature to poll_to_detect_node_ready(node,callbacks,context)
       def self.poll_to_detect_node_ready(node, opts)
         count = opts[:count] || PollCountDefault
+        # DEBUG SNIPPET >>> REMOVE <<<
+        require 'ap'
+        ap "STARTING WITH COUNT #{count}"
         rc = opts[:receiver_context]
         callbacks = {
           on_msg_received: proc do |msg|
+            # DEBUG SNIPPET >>> REMOVE <<<
+            require 'ap'
+            ap "POLLING MSG RECEIVED"
+            ap msg
             # is_task_canceled is set from participant cancel method
             rc[:callbacks][:on_msg_received].call(msg) unless (node[:is_task_canceled] || node[:is_task_failed])
           end,
           on_timeout: proc do
+            # DEBUG SNIPPET >>> REMOVE <<<
+            require 'ap'
+            ap "TIMEOUT ON POLLING counts left #{count}"
+            ap "CANCELED? : #{node[:is_task_canceled]}"
+            ap "FAILED? : #{node[:is_task_failed]}"
             if count < 1
               rc[:callbacks][:on_timeout].call
             else
@@ -98,6 +110,10 @@ module DTK
           agent: agent,
           method: method
         }
+
+        # DEBUG SNIPPET >>> REMOVE <<<
+        require 'ap'
+        ap "SENDING AGENT CALL #{agent} : #{method}"
 
         msg.merge!(params.delete(:action_agent_request)) if params[:action_agent_request]
         msg.merge!(params)

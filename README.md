@@ -8,6 +8,24 @@ Under development.
 
 Under development.
 
+#### ActiveMQ configuration
+
+We are using `mcollective` user for interaction between `dtk-server` and `dtk-arbiter` it is important to set topic `arbiter.>` for this communication.
+
+    <authorizationPlugin>
+    	<map>
+        	<authorizationMap>
+            	<authorizationEntries>
+            		<authorizationEntry queue=">" write="admins" read="admins" admin="admins" />
+					...
+					<authorizationEntry topic="arbiter.>" write="mcollective" read="mcollective" admin="mcollective" />
+					...
+                </authorizationEntries>
+              </authorizationMap>
+            </map>
+          </authorizationPlugin>
+        </plugins>
+
 ## DEV GUIDE
 
 Following are snippets that will introudce you to basic user of system and it's code base

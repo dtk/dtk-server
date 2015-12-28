@@ -380,7 +380,7 @@ module AssemblyAndServiceOperationsMixin
 						end_loop = true
 					elsif (status.include? 'failed')
 						puts "Error details on subtasks:"
-						ap response_task_status['data']['subtasks']
+						ap response_task_status['data']
 						response_task_status['data'].each do |error_message|
 						  unless error_message['errors'].nil?
 						  	puts error_message['errors']['message']

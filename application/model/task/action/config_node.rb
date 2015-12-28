@@ -66,6 +66,9 @@ module DTK; class Task
       def get_dynamic_attributes(result)
         ret = []
 
+        # this means there is no dynamic attributes
+        return ret if result.is_a?(Array)
+
         dyn_attrs = (result[:data] || {})[:dynamic_attributes]
 
         if !dyn_attrs && result[:data]

@@ -65,10 +65,11 @@ module DTK; class Task
 
       def get_dynamic_attributes(result)
         ret = []
+
         dyn_attrs = (result[:data] || {})[:dynamic_attributes]
 
         if !dyn_attrs && result[:data]
-          dyn_attrs = result[:data][:data][:dynamic_attributes]
+          dyn_attrs = result[:data][:data][:dynamic_attributes] rescue nil
         end
 
         return ret if dyn_attrs.nil? || dyn_attrs.empty?

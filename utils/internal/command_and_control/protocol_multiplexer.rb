@@ -77,7 +77,7 @@ module XYZ
       def add_reqid_callbacks(request_id, callbacks, timeout, expected_count)
         @lock.synchronize do
 
-          @callbacks_list[request_id] = callbacks.merge(timer: timer)
+          # @callbacks_list[request_id] = callbacks.merge(timer: timer)
           # DEBUG SNIPPET >>> REMOVE <<<
           require 'ap'
           ap "ADDED REQUEST ID: #{request_id}"

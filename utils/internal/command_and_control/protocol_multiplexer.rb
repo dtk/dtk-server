@@ -76,20 +76,16 @@ module XYZ
 
       def add_reqid_callbacks(request_id, callbacks, timeout, expected_count)
         @lock.synchronize do
-
-          # @callbacks_list[request_id] = callbacks.merge(timer: timer)
+          # DEBUG SNIPPET >>> REMOVE <<<
+          require 'ap'
+          ap "TIMEOUT ADDED WITH R8EM #{timeout}"
+          timer = R8EM.add_timer(timeout) { process_request_timeout(request_id) }
+          @callbacks_list[request_id] = callbacks.merge(timer: timer)
           # DEBUG SNIPPET >>> REMOVE <<<
           require 'ap'
           ap "ADDED REQUEST ID: #{request_id}"
           @count_info[request_id] = expected_count
         end
-
-        # DEBUG SNIPPET >>> REMOVE <<<
-        require 'ap'
-        ap "TIMEOUT ADDED WITH R8!EM #{timeout}"
-
-        timer = R8EM.add_timer(timeout) { process_request_timeout(request_id) }
-
       end
 
       def get_and_remove_reqid_callbacks(request_id)

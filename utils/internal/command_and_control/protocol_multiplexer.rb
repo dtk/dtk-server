@@ -78,7 +78,7 @@ module XYZ
         @lock.synchronize do
           # DEBUG SNIPPET >>> REMOVE <<<
           require 'ap'
-          ap "TIMEOUT ADDED WITH R8EM #{timeout}"
+          ap "TIMEOUT ADDED WITH R8!EM #{timeout}"
           timer = ::EM.add_timer(timeout) { process_request_timeout(request_id) }
           @callbacks_list[request_id] = callbacks.merge(timer: timer)
           # DEBUG SNIPPET >>> REMOVE <<<

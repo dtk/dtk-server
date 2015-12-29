@@ -35,8 +35,8 @@ module DTK
         Log.info("Stomp message ID '#{request_id}' has been registered! Waiting for callback.")
 
 
-        # @@listening_thread ||= CreateThread.defer_with_session(CurrentSession.new.user_object(), Ramaze::Current.session) do
-        @@listening_thread ||= Thread.new do
+        @@listening_thread ||= CreateThread.defer_with_session(CurrentSession.new.user_object(), Ramaze::Current.session) do
+        # @@listening_thread ||= Thread.new do
           # DEBUG SNIPPET >>> REMOVE <<<
           require 'ap'
           ap "CREATED LISTENING THREAD!!!!"

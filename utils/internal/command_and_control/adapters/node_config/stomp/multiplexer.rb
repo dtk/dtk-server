@@ -41,13 +41,14 @@ module DTK
           ap "CREATED LISTENING THREAD!!!!"
           @stomp_client.subscribe(R8::Config[:arbiter][:reply_topic]) do |msg|
 
-            # DEBUG SNIPPET >>> REMOVE <<<
-            require 'ap'
-            ap "RECIEVED MSG FROM ARBITER:"
-            ap msg
+
             begin
               original_msg = decode(msg.body)
               msg_request_id = original_msg[:body][:request_id]
+
+              # DEBUG SNIPPET >>> REMOVE <<<
+              require 'ap'
+              ap "RECIEVED MSG FROM ARBITER: #{msg_request_id}"
 
               # making sure that timeout threads do not run overtime
               process_response(original_msg, msg_request_id)

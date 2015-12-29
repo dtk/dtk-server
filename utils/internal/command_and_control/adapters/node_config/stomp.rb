@@ -78,6 +78,9 @@ module DTK
         pbuilderid = Node.pbuilderid(node)
         filter = filter_single_fact('pbuilderid', pbuilderid)
 
+
+        ap "SENDING ASYNC CALL ..."
+
         async_agent_call('discovery', 'ping', {}, filter, callbacks, context)
       end
 

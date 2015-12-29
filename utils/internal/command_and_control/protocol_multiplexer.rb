@@ -19,7 +19,12 @@ module XYZ
         request_id = trigger[:generate_request_id].call(@protocol_handler)
         callbacks = Callbacks.create(context[:callbacks])
         timeout = context[:timeout] || DefaultTimeout
+        # DEBUG SNIPPET >>> REMOVE <<<
+        require 'ap'
+        ap "SETING UP TIMEOUT #{timeout} from context #{context[:timeout]} or default #{DefaultTimeout}"
         expected_count = context[:expected_count] || ExpectedCountDefault
+        ap "SETING UP COUNT #{expected_count} from context #{context[:expected_count]} or default #{ExpectedCountDefault}"
+
         add_reqid_callbacks(request_id, callbacks, timeout, expected_count)
         trigger[:send_message].call(@protocol_handler, request_id)
       end
@@ -57,6 +62,10 @@ module XYZ
 
       def process_request_timeout(request_id)
         callbacks = get_and_remove_reqid_callbacks(request_id)
+        # DEBUG SNIPPET >>> REMOVE <<<
+        require 'ap'
+        ap "Processing timeout"
+        ap "Callbacks are here"
         if callbacks
           callbacks.process_timeout(request_id)
         end
@@ -64,6 +73,9 @@ module XYZ
 
       def add_reqid_callbacks(request_id, callbacks, timeout, expected_count)
         @lock.synchronize do
+          # DEBUG SNIPPET >>> REMOVE <<<
+          require 'ap'
+          ap "TIMEOUT ADDED WITH R8EM #{timeout}"
           timer = R8EM.add_timer(timeout) { process_request_timeout(request_id) }
           @callbacks_list[request_id] = callbacks.merge(timer: timer)
           # DEBUG SNIPPET >>> REMOVE <<<
@@ -127,6 +139,9 @@ module XYZ
         end
 
         def process_timeout(_request_id)
+          # DEBUG SNIPPET >>> REMOVE <<<
+          require 'ap'
+          ap "PROCESS TIEMOUT METHOD CALL IT NOW #{_request_id}"
           callback = self[:on_timeout]
           callback.call() if callback
         end

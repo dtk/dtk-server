@@ -12,7 +12,9 @@ module DTK
 
 
       @@listener_active = false
+      # this map is used to keep track of sent / received requirst_ids
       @@callback_registry = {}
+      @@callback_heartbeat_registry = {}
 
       def self.create(stomp_client)
         instance.set(stomp_client)
@@ -30,6 +32,11 @@ module DTK
         })
       end
 
+      def register_with_heartbeat_listener(pbuilderid, request_id)
+        @@callback_heartbeat_registry[pbuilderid] = request_id
+        Log.info("Stomp heartbeat message with pbuilderid '#{pbuilderid}' has been registered to request id '#{request_id}'. Waiting for callback.")
+      end
+
       def register_with_listener(request_id, callbacks)
         @@callback_registry[request_id] = callbacks
         Log.info("Stomp message ID '#{request_id}' has been registered! Waiting for callback.")
@@ -43,14 +50,23 @@ module DTK
         @@callback_registry
       end
 
+      def self.heartbeat_registry_entry(pbuilder_id)
+        @@callback_heartbeat_registry.delete(pbuilder_id)
+      end
+
       def sendreq_with_callback(msg, agent, context_with_callbacks, filter = {})
         trigger = {
           generate_request_id: proc do |client|
             ::MCollective::SSL.uuid.gsub("-", "")
           end,
           send_message: proc do |client, reqid|
-            message = create_message(reqid, msg, agent, filter['fact'].first[:value])
+            pbuilderid = filter['fact'].first[:value]
+
+            message = create_message(reqid, msg, agent, pbuilderid)
             client.publish(message)
+
+            # when heartbeat signal comes trough we need to map it to existing request id
+            register_with_heartbeat_listener(pbuilderid, reqid) if 'discovery'.eql?(agent)
 
             register_with_listener(reqid, Callbacks.create(context_with_callbacks[:callbacks]))
           end

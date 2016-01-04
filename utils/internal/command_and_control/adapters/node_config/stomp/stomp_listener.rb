@@ -2,9 +2,12 @@ module DTK
   module StompListener
     include EM::Protocols::Stomp
 
+    NUMBER_OF_RETRIES = 5
+
     def connection_completed
+      @number_of_retries ||= NUMBER_OF_RETRIES
+      Log.info("Establishing connection to STOMP server with credentials #{R8::Config[:mcollective][:username]} / #{R8::Config[:mcollective][:password]} ...")
       connect :login => R8::Config[:mcollective][:username], :passcode => R8::Config[:mcollective][:password]
-      Log.debug "Stomp Client, connection completed!"
     end
 
     def receive_msg msg
@@ -13,23 +16,43 @@ module DTK
         subscribe(R8::Config[:arbiter][:reply_topic])
         Log.debug "Connected to STOMP and subscribed to topic '#{R8::Config[:arbiter][:reply_topic]}'"
       elsif "ERROR".eql?(msg.command)
-        # error connecting to stomp
-        Log.error("Not able to connect to STOMP, reason: #{msg.header['message']}. Stopping listener now ...", nil)
-        raise "Not able to connect to STOMP, reason: #{msg.header['message']}. Stopping listener now ..."
+        #
+        # There seems to be a bug here so for now we can ignore this
+        #
+
+        # if @number_of_retries > 0
+        #   CommandAndControlAdapter::Stomp.get_stomp_client(true)
+        #   @number_of_retries = @number_of_retries - 1
+        #   Log.info("Re-trying connection to STOMP, re-tries left: #{@number_of_retries} ")
+        #   return
+        # end
+
+        # Log.error("Not able to connect to STOMP, reason: #{msg.header['message']}. Stopping listener now ...", nil)
+        # raise "Not able to connect to STOMP, reason: #{msg.header['message']}. Stopping listener now ..."
       else
         # decode message
-        Log.debug "Decoding message"
+        Log.debug "Recived message from stomp, decoding ..."
         original_msg = decode(msg.body)
-        msg_request_id = original_msg[:body][:request_id]
+        msg_request_id = original_msg[:requestid]
+        pbuilder_id    = original_msg[:pbuilderid]
+        is_heartbeat   = original_msg[:heartbeat]
+
+        # we map our heartbeat calls to requst IDs
+        if is_heartbeat
+          msg_request_id = CommandAndControlAdapter::StompMultiplexer.heartbeat_registry_entry(pbuilder_id)
+          Log.debug("Heartbeat message recived, and mapped from '#{pbuilder_id}' to request ID '#{msg_request_id}'")
+        end
 
         # making sure that timeout threads do not run overtime
         CommandAndControlAdapter::StompMultiplexer.process_response(original_msg, msg_request_id)
 
+        callbacks = CommandAndControlAdapter::StompMultiplexer.callback_registry[msg_request_id]
+
         # discard message if not the one requested
-        unless CommandAndControlAdapter::StompMultiplexer.callback_registry[msg_request_id]
+        unless callbacks
           Log.info("Stomp message received with ID '#{msg_request_id}' is not for this tenant, and it is being ignored!")
         else
-          CommandAndControlAdapter::StompMultiplexer.callback_registry[msg_request_id].process_msg(original_msg, msg_request_id)
+          callbacks.process_msg(original_msg, msg_request_id)
         end
       end
     end

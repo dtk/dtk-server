@@ -24,56 +24,35 @@ module DTK
         Mcollective::Config.install_script(node, bindings)
       end
 
-      def self.get_stomp_client
+      def self.get_stomp_client(force_init=false)
         Lock.synchronize do
+          @@stomp_client = nil if force_init
           @@stomp_client ||= create_stomp_client()
         end
       end
 
       def self.create_stomp_client
+        # DEBUG SNIPPET >>> REMOVE <<<
+        require 'ap'
+        ap "CREATING STOMP CLIENT!"
+        Log.info("Trying to connect to STOMP server at localhost:#{R8::Config[:mcollective][:port]} ...")
         ret = EM.connect 'localhost', R8::Config[:mcollective][:port], DTK::StompListener
         ret
       end
 
       # TODO: change signature to poll_to_detect_node_ready(node,callbacks,context)
       def self.poll_to_detect_node_ready(node, opts)
-        count = opts[:count] || PollCountDefault
-        # DEBUG SNIPPET >>> REMOVE <<<
-        require 'ap'
-        ap "STARTING WITH COUNT #{count}"
         rc = opts[:receiver_context]
         callbacks = {
           on_msg_received: proc do |msg|
-            # DEBUG SNIPPET >>> REMOVE <<<
-            require 'ap'
-            ap "POLLING MSG RECEIVED"
-            ap msg
-            # is_task_canceled is set from participant cancel method
             rc[:callbacks][:on_msg_received].call(msg) unless (node[:is_task_canceled] || node[:is_task_failed])
-          end,
-          on_timeout: proc do
-            # DEBUG SNIPPET >>> REMOVE <<<
-            require 'ap'
-            ap "TIMEOUT ON POLLING counts left #{count}"
-            ap "CANCELED? : #{node[:is_task_canceled]}"
-            ap "FAILED? : #{node[:is_task_failed]}"
-            if count < 1
-              rc[:callbacks][:on_timeout].call
-            else
-              new_opts = opts.merge(count: count - 1)
-              poll_to_detect_node_ready(node, new_opts) unless (node[:is_task_canceled] || node[:is_task_failed])
-            end
           end
         }
 
-        context = { timeout: opts[:poll_cycle] || PollCycleDefault }.merge(rc)
         pbuilderid = Node.pbuilderid(node)
         filter = filter_single_fact('pbuilderid', pbuilderid)
 
-
-        ap "SENDING ASYNC CALL ..."
-
-        async_agent_call('discovery', 'ping', {}, filter, callbacks, context)
+        async_agent_call('discovery', 'ping', {}, filter, callbacks, rc)
       end
 
       def self.authorize_node(node, callbacks, context_x = {})
@@ -105,10 +84,6 @@ module DTK
           agent: agent,
           method: method
         }
-
-        # DEBUG SNIPPET >>> REMOVE <<<
-        require 'ap'
-        ap "SENDING AGENT CALL #{agent} : #{method}"
 
         msg.merge!(params.delete(:action_agent_request)) if params[:action_agent_request]
         msg.merge!(params)

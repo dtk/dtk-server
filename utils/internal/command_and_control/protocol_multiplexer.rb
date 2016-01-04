@@ -19,12 +19,7 @@ module XYZ
         request_id = trigger[:generate_request_id].call(@protocol_handler)
         callbacks = Callbacks.create(context[:callbacks])
         timeout = context[:timeout] || DefaultTimeout
-        # DEBUG SNIPPET >>> REMOVE <<<
-        require 'ap'
-        ap "SETING UP TIMEOUT #{timeout} from context #{context[:timeout]} or default #{DefaultTimeout}"
         expected_count = context[:expected_count] || ExpectedCountDefault
-        ap "SETING UP COUNT #{expected_count} from context #{context[:expected_count]} or default #{ExpectedCountDefault}"
-
         add_reqid_callbacks(request_id, callbacks, timeout, expected_count)
         trigger[:send_message].call(@protocol_handler, request_id)
       end

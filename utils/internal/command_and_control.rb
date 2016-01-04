@@ -247,7 +247,7 @@ module DTK
         klass_or_instance = (instance_style_adapter?(adapter_type, adapter_name) ? klass.create_without_task() : klass)
         Adapters[adapter_type][adapter_name] =  klass_or_instance
        rescue LoadError => e
-        raise ErrorUsage.new("IAAS type ('#{adapter_name}') not supported!")
+        raise ErrorUsage.new("IAAS type ('#{adapter_name}') not supported! Reason #{e.message}!")
        rescue Exception => e
         raise e
       end

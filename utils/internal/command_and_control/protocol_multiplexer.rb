@@ -29,12 +29,8 @@ module XYZ
         trigger[:send_message].call(@protocol_handler, request_id)
       end
 
-      private
-
       DefaultTimeout = 30 * 60
       ExpectedCountDefault = 1
-
-      public
 
       def process_response(msg, request_id)
         callbacks = nil

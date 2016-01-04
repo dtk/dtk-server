@@ -1,9 +1,7 @@
 r8_nested_require('stomp', 'multiplexer')
 r8_nested_require('mcollective', 'assembly_action')
-require 'stomp'
-
 r8_nested_require('mcollective', 'config')
-
+r8_nested_require('stomp', 'stomp_listener')
 
 module DTK
   module CommandAndControlAdapter
@@ -33,13 +31,9 @@ module DTK
       end
 
       def self.create_stomp_client
-        configuration = {
-          stomp_username: R8::Config[:mcollective][:username],
-          stomp_password: R8::Config[:mcollective][:password],
-          stomp_host: 'localhost',
-          stomp_port: R8::Config[:mcollective][:port].to_i
-        }
-        ret = ::Stomp::Client.new(:hosts => [{:login => configuration[:stomp_username], :passcode => configuration[:stomp_password], :host => configuration[:stomp_host], :port => configuration[:stomp_port], :ssl => false}])
+        # DEBUG SNIPPET >>> REMOVE <<<
+        require (RUBY_VERSION.match(/1\.8\..*/) ? 'ruby-debug' : 'debugger');Debugger.start; debugger
+        ret = EM.connect 'localhost', R8::Config[:mcollective][:port], DTK::StompListener
         ret
       end
 

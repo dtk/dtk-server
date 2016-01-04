@@ -31,8 +31,6 @@ module DTK
       end
 
       def self.create_stomp_client
-        # DEBUG SNIPPET >>> REMOVE <<<
-        require (RUBY_VERSION.match(/1\.8\..*/) ? 'ruby-debug' : 'debugger');Debugger.start; debugger
         ret = EM.connect 'localhost', R8::Config[:mcollective][:port], DTK::StompListener
         ret
       end

@@ -12,10 +12,6 @@ module DTK
           execution_context(task, workitem, task_start) do
             callbacks = {
               on_msg_received: proc do |msg|
-                # DEBUG SNIPPET >>> REMOVE <<<
-                require 'ap'
-                ap "RECEIVED CALLBACK RDY: "
-                ap msg
                 inspect_agent_response(msg)
                 create_thread_in_callback_context(task, workitem, user_object) do
                   PerformanceService.end_measurement(name(), object_id)

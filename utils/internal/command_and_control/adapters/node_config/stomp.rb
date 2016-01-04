@@ -32,9 +32,6 @@ module DTK
       end
 
       def self.create_stomp_client
-        # DEBUG SNIPPET >>> REMOVE <<<
-        require 'ap'
-        ap "CREATING STOMP CLIENT!"
         Log.info("Trying to connect to STOMP server at localhost:#{R8::Config[:mcollective][:port]} ...")
         ret = EM.connect 'localhost', R8::Config[:mcollective][:port], DTK::StompListener
         ret

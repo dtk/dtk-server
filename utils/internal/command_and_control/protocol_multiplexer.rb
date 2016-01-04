@@ -52,14 +52,7 @@ module XYZ
       end
 
       def process_request_timeout(request_id)
-        # DEBUG SNIPPET >>> REMOVE <<<
-        require 'ap'
-        ap "ENTERED !!! Timeout"
         callbacks = get_and_remove_reqid_callbacks(request_id)
-        # DEBUG SNIPPET >>> REMOVE <<<
-        require 'ap'
-        ap "Processing timeout"
-        ap "Callbacks are here"
         if callbacks
           callbacks.process_timeout(request_id)
         end
@@ -67,14 +60,8 @@ module XYZ
 
       def add_reqid_callbacks(request_id, callbacks, timeout, expected_count)
         @lock.synchronize do
-          # DEBUG SNIPPET >>> REMOVE <<<
-          require 'ap'
-          ap "TIMEOUT ADDED WITH R8EM #{timeout}"
           timer = R8EM.add_timer(timeout) { process_request_timeout(request_id) }
           @callbacks_list[request_id] = callbacks.merge(timer: timer)
-          # DEBUG SNIPPET >>> REMOVE <<<
-          require 'ap'
-          ap "ADDED REQUEST ID: #{request_id}"
           @count_info[request_id] = expected_count
         end
       end
@@ -85,9 +72,6 @@ module XYZ
       #'?' because conditionally removes callbacks depending on count
       def get_and_remove_reqid_callbacks?(request_id, opts = {})
         ret = nil
-        # DEBUG SNIPPET >>> REMOVE <<<
-        require 'ap'
-        ap "REMOVING CALLBACKS"
         @lock.synchronize do
           if opts[:force_delete]
             count = @count_info[request_id] = 0
@@ -102,10 +86,6 @@ module XYZ
           end
           if count == 0
             ret = @callbacks_list.delete(request_id)
-                      # DEBUG SNIPPET >>> REMOVE <<<
-          require 'ap'
-          ap "DELETE REQUEST ID: #{request_id}"
-
             ret.cancel_timer()
           elsif count > 0
             ret = @callbacks_list[request_id]
@@ -136,9 +116,6 @@ module XYZ
         end
 
         def process_timeout(_request_id)
-          # DEBUG SNIPPET >>> REMOVE <<<
-          require 'ap'
-          ap "PROCESS TIEMOUT METHOD CALL IT NOW #{_request_id}"
           callback = self[:on_timeout]
           callback.call() if callback
         end

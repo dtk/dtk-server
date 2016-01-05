@@ -20,6 +20,11 @@ module XYZ
       end
     end
 
+    def self.connect(*args)
+      start_em_for_passenger?
+      ::EM.connect(*args)
+    end
+
     def self.reactor_running?
       ::EM.reactor_running?()
     end

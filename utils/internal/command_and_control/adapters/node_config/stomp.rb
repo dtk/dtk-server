@@ -33,7 +33,7 @@ module DTK
 
       def self.create_stomp_client
         Log.info("Trying to connect to STOMP server at #{R8::Config[:server_public_dns]}:#{R8::Config[:mcollective][:port]} ...")
-        ret = EM.connect  R8::Config[:server_public_dns], R8::Config[:mcollective][:port], DTK::StompListener
+        ret = R8EM.connect  R8::Config[:server_public_dns], R8::Config[:mcollective][:port], DTK::StompListener
         ret
       end
 

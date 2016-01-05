@@ -72,6 +72,7 @@ module XYZ
       #'?' because conditionally removes callbacks depending on count
       def get_and_remove_reqid_callbacks?(request_id, opts = {})
         ret = nil
+
         @lock.synchronize do
           if opts[:force_delete]
             count = @count_info[request_id] = 0

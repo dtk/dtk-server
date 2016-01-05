@@ -24,6 +24,9 @@ module DTK
     def self.warn(msg, _out = $stdout)
       simple_form(:warn, msg)
     end
+    def self.fatal(msg, _out = $stdout)
+      simple_form(:fatak, msg)
+    end
 
     def self.info_pp(obj, _out = $stdout)
       pp_form(:info, obj)

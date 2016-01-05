@@ -5,7 +5,9 @@ module DTK
     NUMBER_OF_RETRIES = 5
 
     def connection_completed
-      @number_of_retries ||= NUMBER_OF_RETRIES
+      # there is an issue with stomp connection, which results in ERROR thrown first time when connecting. This is something that can be ignore
+      # it looks like issue with EM stomp client since it does not effect functionaliy. After first error all seems to be working fine.
+      @first_error_bypass ||= true
       Log.info("Establishing connection to STOMP server with credentials #{R8::Config[:mcollective][:username]} / #{R8::Config[:mcollective][:password]} ...")
       connect :login => R8::Config[:mcollective][:username], :passcode => R8::Config[:mcollective][:password]
     end
@@ -19,6 +21,10 @@ module DTK
         #
         # There seems to be a bug here so for now we can ignore this
         #
+        if @first_error_bypass
+          @first_error_bypass = false
+          return
+        end
 
         # if @number_of_retries > 0
         #   CommandAndControlAdapter::Stomp.get_stomp_client(true)
@@ -27,12 +33,13 @@ module DTK
         #   return
         # end
 
-        # Log.error("Not able to connect to STOMP, reason: #{msg.header['message']}. Stopping listener now ...", nil)
-        # raise "Not able to connect to STOMP, reason: #{msg.header['message']}. Stopping listener now ..."
+        Log.error("Not able to connect to STOMP, reason: #{msg.header['message']}. Stopping listener now ...", nil)
+        raise "Not able to connect to STOMP, reason: #{msg.header['message']}. Stopping listener now ..."
       else
         # decode message
         Log.debug "Recived message from stomp, decoding ..."
         original_msg = decode(msg.body)
+
         msg_request_id = original_msg[:requestid]
         pbuilder_id    = original_msg[:pbuilderid]
         is_heartbeat   = original_msg[:heartbeat]

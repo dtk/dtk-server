@@ -1,6 +1,6 @@
 module DTK
   module StompListener
-    include EM::Protocols::Stomp
+
 
     NUMBER_OF_RETRIES = 5
 
@@ -37,7 +37,7 @@ module DTK
         Log.debug "Connected to STOMP and subscribed to topic '#{R8::Config[:arbiter][:reply_topic]}'"
       elsif "ERROR".eql?(msg.command)
         #
-        # There seems to be a bug here so for now we can ignore this
+        # There seems to be a bug here so for now we can ignore this on first pass, second pass will result in error
         #
 
         if @first_error_bypass
@@ -78,7 +78,6 @@ module DTK
 
     def publish(message)
       sleep(1) while !@stomp_rdy
-
       ##
       # Hack, to have ti working on passenger, since send was not working on passenger and we cannot figure out why
       #

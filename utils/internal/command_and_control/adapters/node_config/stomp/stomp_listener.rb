@@ -1,6 +1,6 @@
 module DTK
   module StompListener
-
+    include EM::Protocols::Stomp
 
     NUMBER_OF_RETRIES = 5
 

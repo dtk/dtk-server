@@ -7,7 +7,6 @@ module DTK
     def connection_completed
       # there is an issue with stomp connection, which results in ERROR thrown first time when connecting. This is something that can be ignore
       # it looks like issue with EM stomp client since it does not effect functionaliy. After first error all seems to be working fine.
-      @first_error_bypass ||= true
       @stomp_rdy = false
       Log.info("Establishing connection to STOMP server with credentials #{R8::Config[:mcollective][:username]} / #{R8::Config[:mcollective][:password]} ...")
       connect :login => R8::Config[:mcollective][:username], :passcode => R8::Config[:mcollective][:password]
@@ -36,16 +35,8 @@ module DTK
         @stomp_rdy = true
         Log.debug "Connected to STOMP and subscribed to topic '#{R8::Config[:arbiter][:reply_topic]}'"
       elsif "ERROR".eql?(msg.command)
-        #
-        # There seems to be a bug here so for now we can ignore this on first pass, second pass will result in error
-        #
-
-        if @first_error_bypass
-          @first_error_bypass = false
-          return
-        end
-
         Log.error("Not able to connect to STOMP, reason: #{msg.header['message']}. Stopping listener now ...", nil)
+         @stomp_rdy = true
         raise "Not able to connect to STOMP, reason: #{msg.header['message']}. Stopping listener now ..."
       else
         # decode message

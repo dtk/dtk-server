@@ -172,7 +172,7 @@ shared_context 'Stop workspace node' do |dtk_common, node_name|
   end
 end
 
-shared_context 'Grep log command' do |dtk_common, node_name, log_location, grep_pattern|
+shared_context 'Grep log command in workspace' do |dtk_common, node_name, log_location, grep_pattern|
   it "finds #{grep_pattern} pattern in #{log_location} log on converged node" do
     workspace_id = dtk_common.get_workspace_id
     grep_pattern_found = dtk_common.grep_node(workspace_id, node_name, log_location, grep_pattern)
@@ -180,7 +180,7 @@ shared_context 'Grep log command' do |dtk_common, node_name, log_location, grep_
   end
 end
 
-shared_context 'Check if port avaliable' do |dtk_common, port|
+shared_context 'Check if port avaliable in workspace' do |dtk_common, port|
   it 'is avaliable' do
     workspace_id = dtk_common.get_workspace_id
     netstat_response = dtk_common.netstats_check(workspace_id, port)
@@ -188,7 +188,7 @@ shared_context 'Check if port avaliable' do |dtk_common, port|
   end
 end
 
-shared_context 'Check if port avaliable on specific node' do |dtk_common, node_name, port|
+shared_context 'Check if port avaliable on specific node in workspace' do |dtk_common, node_name, port|
   it "is avaliable on #{node_name} node" do
     workspace_id = dtk_common.get_workspace_id
     netstat_response = dtk_common.netstats_check_for_specific_node(workspace_id, node_name, port)

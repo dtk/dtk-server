@@ -131,11 +131,22 @@ module DTK
 
     # TODO: may be cleaner if we break into list_nodes, list_components with some shared helper functions
     def rest__info_about
-      node_id, component_id, detail_level, detail_to_include = ret_request_params(:node_id, :component_id, :detail_level, :detail_to_include)
-      node_id = nil if node_id.is_a?(String) && node_id.empty?
-      component_id = nil if component_id.is_a?(String) && component_id.empty?
+      node_id, component_id, attribute_id, detail_level, detail_to_include = ret_request_params(:node_id, :component_id, :attribute_id, :detail_level, :detail_to_include)
       assembly, subtype = ret_assembly_params_object_and_subtype()
-      response_opts = {}
+      response_opts     = {}
+
+      node_id           = nil if node_id.is_a?(String) && node_id.empty?
+      component_id      = nil if component_id.is_a?(String) && component_id.empty?
+      attribute_id      = nil if attribute_id.is_a?(String) && attribute_id.empty?
+
+      if node_id && !(node_id =~ /^[0-9]+$/)
+        node_id = "#{ret_node_id(:node_id, assembly)}"
+      end
+
+      if component_id && !(component_id =~ /^[0-9]+$/)
+        component_id = "#{ret_component_id(:component_id, assembly, filter_by_node: true)}"
+      end
+
       if format = ret_request_params(:format)
         format = format.to_sym
         unless SupportedFormats.include?(format)
@@ -157,10 +168,13 @@ module DTK
           opts.merge!(truncate_attribute_values: true, mark_unset_required: true)
         end
 
+        opts.merge!(:raise_if_no_attribute => true, :attribute_id => attribute_id) if attribute_id
+
         additional_filter_opts = {
           tags: ret_request_params(:tags),
           editable: 'editable' == ret_request_params(:attribute_type)
         }
+
         additional_filter_proc = Proc.new do |e|
           attr = e[:attribute]
           (!attr.is_a?(Attribute)) || !attr.filter_when_listing?(additional_filter_opts)
@@ -177,12 +191,14 @@ module DTK
 
       opts[:filter_proc] = Proc.new do |e|
         if element_matches?(e, [:node, :id], node_id) &&
-            element_matches?(e, [:attribute, :component_component_id], component_id)
-          if additional_filter_proc.nil? || additional_filter_proc.call(e)
-            e
-          end
+            element_matches?(e, [:attribute, :component_component_id], component_id) &&
+              attribute_element_matches?(e, attribute_id)
+                if additional_filter_proc.nil? || additional_filter_proc.call(e)
+                  e
+                end
         end
       end
+
       opts.add_return_datatype!()
       if detail_to_include
         opts.merge!(detail_to_include: detail_to_include.map(&:to_sym))
@@ -193,14 +209,16 @@ module DTK
         opts.merge!(node_cmp_name: true)
       end
 
-      data = assembly.info_about(about, opts)
-      datatype = opts.get_datatype
+      data          = assembly.info_about(about, opts)
+      datatype      = opts.get_datatype
       response_opts = {}
+
       if format == :yaml
         response_opts.merge!(encode_into: :yaml)
       else
         response_opts.merge!(datatype: datatype)
       end
+
       rest_ok_response data, response_opts
     end
     SupportedFormats = [:yaml]
@@ -562,10 +580,14 @@ module DTK
         assembly_id        = ret_request_params(:assembly_id)
         version            = ret_request_params(:version)
         service_module     = ServiceModule.find(model_handle(:service_module), service_module_id)
+
+        raise ErrorUsage.new("Unable to find service module for specified parameters: '#{service_module_id}'") unless service_module
+
         # if we do not specify version use latest
-        version            = compute_latest_version(service_module) unless version
+        version = compute_latest_version(service_module) unless version
+
         module_name        = ret_request_params(:service_module_name)
-        assembly_version   = version || 'master'
+        assembly_version   = (version.nil? || version.eql?('base')) ? 'master' : version
         assembly_templates = service_module.get_assembly_templates().select { |template| (template[:display_name].eql?(assembly_id) || template[:id] == assembly_id.to_i) }
         assembly_template  = assembly_templates.find{ |template| template[:version] == assembly_version }
         fail ErrorUsage, "We are not able to find assembly '#{assembly_id}' for service module '#{module_name}'" unless assembly_template

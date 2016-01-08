@@ -380,6 +380,13 @@ module AssemblyAndServiceOperationsMixin
 						end_loop = true
 					elsif (status.include? 'failed')
 						puts "Error details on subtasks:"
+						ap response_task_status['data']
+						response_task_status['data'].each do |error_message|
+						  unless error_message['errors'].nil?
+						  	puts error_message['errors']['message']
+						  	puts error_message['errors']['type']
+						  end
+						end
 						puts "Task execution status: #{status}"
 						puts "Converge process was not finished successfully! Some tasks failed!"
 						end_loop = true

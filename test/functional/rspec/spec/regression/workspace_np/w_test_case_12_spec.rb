@@ -38,7 +38,7 @@ describe '(Workspace) Test Case 12: Create one node, add component in it, conver
   end
 
   context 'Grep command on puppet log' do
-    include_context 'Grep log command', dtk_common, node_name, puppet_log_location, grep_pattern
+    include_context 'Grep log command in workspace', dtk_common, node_name, puppet_log_location, grep_pattern
   end
 
   context 'Purge workspace content' do

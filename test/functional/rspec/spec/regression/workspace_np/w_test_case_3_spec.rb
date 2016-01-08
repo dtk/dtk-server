@@ -37,7 +37,7 @@ describe '(Workspace) Test Case 3: Create one node, add component in it, converg
   end
 
   context "Check that port #{port_to_check}" do
-    include_context 'Check if port avaliable', dtk_common, port_to_check
+    include_context 'Check if port avaliable in workspace', dtk_common, port_to_check
   end
 
   context 'Purge workspace content' do

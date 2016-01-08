@@ -232,4 +232,32 @@ module Ramaze::Helper
     end
     temp_element == element_id_val.to_i
   end
+
+  def attribute_element_matches?(element, attribute_name_id)
+    return true if (attribute_name_id.nil? || attribute_name_id.empty?)
+    return false if element.nil?
+
+    node      = element[:node]
+    component = element[:nested_component]
+    attribute = element[:attribute]
+
+    if attribute
+      return (attribute_name_id == attribute[:id]) if (attribute_name_id =~ /^[0-9]+$/)
+
+      attr_name = attribute[:display_name]
+      attr_name = "#{component[:display_name].gsub('__', '::')}/#{attr_name}" if component
+      attr_name = "#{node[:display_name]}/#{attr_name}" if node && !node[:display_name].eql?('assembly_wide')
+
+      return attribute_name_id.eql?(attr_name)
+    else
+      # this is the case when assembly level attribute
+      return false unless attribute_name_id && element
+
+      if (attribute_name_id =~ /^[0-9]+$/)
+        attribute_name_id == element[:id]
+      else
+        attribute_name_id == element[:display_name]
+      end
+    end
+  end
 end

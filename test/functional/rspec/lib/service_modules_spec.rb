@@ -20,20 +20,6 @@ shared_context 'Import service module' do |service_module_name|
   end
 end
 
-shared_context 'Import service module rvm' do |rvm_path, service_module_name|
-  it "imports #{service_module_name} service module from local filesystem to server" do
-    puts 'Import service module:', '----------------------'
-    pass = true
-    value = `#{rvm_path}dtk service-module import #{service_module_name}`
-    puts value
-    pass = false if ((value.include? 'ERROR') || (value.include? 'exists already'))
-    puts "Import of service module #{service_module_name} completed successfully!" if pass == true
-    puts "Import of service module #{service_module_name} did not complete successfully!" if pass == false
-    puts ''
-    pass.should eq(true)
-  end
-end
-
 shared_context 'Import remote service module' do |service_module_name|
   it "imports #{service_module_name} service module from remote repo" do
     puts 'Import remote service module:', '-----------------------------'
@@ -128,21 +114,6 @@ shared_context 'Export service module' do |service_module_name, namespace|
   end
 end
 
-shared_context 'Export service module rvm' do |rvm_path, service_module_name, namespace, version|
-  it "exports #{service_module_name} service module to #{namespace} namespace on remote repo" do
-    puts 'Export service module to remote:', '--------------------------------'
-    pass = false
-    service_module = service_module_name.split(':').last
-    value = `#{rvm_path}dtk service-module #{service_module_name} publish #{namespace}/#{service_module} -v #{version}`
-    puts value
-    pass = true if (value.include? 'Module has been successfully published')
-    puts "Publish of #{service_module} service module to #{namespace} namespace has been completed successfully!" if pass == true
-    puts "Publish of #{service_module} service module to #{namespace} namespace did not complete successfully!" if pass == false
-    puts ''
-    pass.should eq(true)
-  end
-end
-
 shared_context 'Check if assembly belongs to the service module' do |dtk_common, service_module_name, assembly_name|
   it "verifes that #{assembly_name} assembly is part of the #{service_module_name} service module" do
     assembly_exists_in_service_module = dtk_common.check_if_service_module_contains_assembly(service_module_name, assembly_name)
@@ -175,19 +146,6 @@ shared_context 'Delete service module from remote repo' do |service_module_name,
     puts 'Delete service module from remote (dtkn):', '-----------------------------------------'
     pass = false
     value = `dtk service-module delete-from-catalog #{namespace}/#{service_module_name} -y`
-    pass = true if (!value.include?('error') || !value.include?('cannot remove'))
-    puts "Service module #{service_module_name} deleted from remote (dtkn) successfully!" if pass == true
-    puts "Service module #{service_module_name} was not deleted from remote (dtkn) successfully!" if pass == false
-    puts ''
-    pass.should eq(true)
-  end
-end
-
-shared_context 'Delete service module from remote repo rvm' do |rvm_path, service_module_name, namespace|
-  it "deletes #{service_module_name} service module with #{namespace} namespace from remote repo" do
-    puts 'Delete service module from remote (dtkn):', '-----------------------------------------'
-    pass = false
-    value = `#{rvm_path}dtk service-module delete-from-catalog #{namespace}/#{service_module_name} -y`
     pass = true if (!value.include?('error') || !value.include?('cannot remove'))
     puts "Service module #{service_module_name} deleted from remote (dtkn) successfully!" if pass == true
     puts "Service module #{service_module_name} was not deleted from remote (dtkn) successfully!" if pass == false

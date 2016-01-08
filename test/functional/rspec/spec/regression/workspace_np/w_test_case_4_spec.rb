@@ -46,11 +46,11 @@ describe '(Workspace) Test Case 4: Create two nodes, add component in both of th
   end
 
   context "Check that port #{port_to_check}" do
-    include_context 'Check if port avaliable on specific node', dtk_common, node_name_1, port_to_check
+    include_context 'Check if port avaliable on specific node in workspace', dtk_common, node_name_1, port_to_check
   end
 
   context "Check that port #{port_to_check}" do
-    include_context 'Check if port avaliable on specific node', dtk_common, node_name_2, port_to_check
+    include_context 'Check if port avaliable on specific node in workspace', dtk_common, node_name_2, port_to_check
   end
 
   context 'Purge workspace content' do

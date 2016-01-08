@@ -66,7 +66,7 @@ class Main < PageContainer
   end
 
   def search_for_object(name)
-    @session.fill_in('Search', :with => name + "\n")
+    @session.fill_in('search_term', :with => name + "\n")
   end
 
   def object_exists?(name)

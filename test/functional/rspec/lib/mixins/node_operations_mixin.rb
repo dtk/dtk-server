@@ -403,9 +403,17 @@ module NodeOperationsMixin
 					puts "Converge process finished successfully!"
 				elsif (status.include? 'failed')
 					puts "Error details on subtasks:"
-					ap response_task_status['data']['subtasks']
+					ap response_task_status['data']
+					response_task_status['data'].each do |error_message|
+						unless error_message['errors'].nil?
+						  puts error_message['errors']['message']
+						  puts error_message['errors']['type']
+						end
+					end
 					task_status = status
 					puts "Converge process was not finished successfully! Some tasks failed!"
+					puts @error_message
+					puts @backtrace
 				end
 				puts "Task execution status: #{task_status}"
 

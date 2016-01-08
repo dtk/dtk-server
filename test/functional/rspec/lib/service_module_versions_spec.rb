@@ -46,20 +46,6 @@ shared_context 'Publish versioned service module' do |dtk_common, service_module
 	end
 end
 
-shared_context 'Publish versioned service module rvm' do |rvm_path, service_module_name, remote_service_module_name, version_name|
-	it "publish/push service module #{service_module_name} with version #{version_name}" do
-		puts "Publish service module version to remote:", "-------------------------------------------"
-	    pass = false
-	    value = `#{rvm_path}dtk service-module #{service_module_name} publish #{remote_service_module_name} -v #{version_name}`
-	    puts value
-	    pass = true if (value.include? 'Status: OK')
-	    puts "Publish of service module #{service_module_name} #{version_name} completed successfully!" if pass == true
-	    puts "Publish of service module #{service_module_name} #{version_name} was not successfully" if pass == false
-	    puts ''
-	    expect(pass).to eq(true)
-	end
-end
-
 shared_context 'NEG - Publish versioned service module' do |dtk_common, service_module_name, remote_service_module_name, version_name|
 	it "does not publish/push service module #{service_module_name} since this version #{version_name} does not exist" do
 		puts "Publish service module version to remote:", "-------------------------------------------"

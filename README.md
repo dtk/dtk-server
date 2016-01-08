@@ -10,7 +10,7 @@ Under development.
 
 #### ActiveMQ configuration
 
-We are using `mcollective` user for interaction between `dtk-server` and `dtk-arbiter` it is important to set topic `arbiter.>` for this communication.
+We are using `mcollective` user for interaction between `dtk-server` and `dtk-arbiter` it is important to set topic `arbiter.>` for this communication. You need to edit AMQ's configuration which can be found in `/opt/activemq/conf/activemq.xml`
 
     <authorizationPlugin>
     	<map>
@@ -25,6 +25,12 @@ We are using `mcollective` user for interaction between `dtk-server` and `dtk-ar
             </map>
           </authorizationPlugin>
         </plugins>
+
+After that make sure that you stop / start ActiveMQ (restart does not work).
+
+	sudo service activemq stop
+	sudo service activemq start
+
 
 ## DEV GUIDE
 
@@ -51,23 +57,23 @@ Following are snippets that will introudce you to basic user of system and it's 
 
   ::DTK::Model.update_from_rows(default_project.model_handle(:user), users)
 
-### Running the docker image  
-Select a directory on host which will be used by the docker container for persistance (e.g. `/dtk`), and populate a `dtk.config` inside it (e.g. `/dtk/dtk.config`):  
+### Running the docker image
+Select a directory on host which will be used by the docker container for persistance (e.g. `/dtk`), and populate a `dtk.config` inside it (e.g. `/dtk/dtk.config`):
 ```
 USERNAME=someuser
 PASSWORD=somepassword
 PUBLIC_ADDRESS=someinstance.dtk.io
 INSTANCE_NAME=someinstance
-```   
-Next step is to start the docker container with the directory from above used as a volume:  
+```
+Next step is to start the docker container with the directory from above used as a volume:
 ```
 docker run --name dtk -v /dtk:/host_volume -p 8080:80 -p 6163:6163 -p 2222:22 -d getdtk/server-full
-```  
-After the container is up and running (will take a minute on the first start) you can connect to it via [dtk-client](https://github.com/rich-reactor8/dtk-client) using the same values as set in `dtk.config`.  
-Note that if you need to forward GIT SSH port to a different one, you can use the `-e GIT_PORT=2200` switch for example. 
+```
+After the container is up and running (will take a minute on the first start) you can connect to it via [dtk-client](https://github.com/rich-reactor8/dtk-client) using the same values as set in `dtk.config`.
+Note that if you need to forward GIT SSH port to a different one, you can use the `-e GIT_PORT=2200` switch for example.
 ##### Upgrading the container
-To upgrade a running container with a newer image run:  
-```  
+To upgrade a running container with a newer image run:
+```
 docker pull getdtk/server-full
 docker stop dtk
 docker rm dtk

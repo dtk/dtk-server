@@ -50,8 +50,15 @@ module DTK
         # we map our heartbeat calls to requst IDs
         if is_heartbeat
           msg_request_id = CommandAndControlAdapter::StompMultiplexer.heartbeat_registry_entry(pbuilder_id)
-          Log.debug("Heartbeat message recived, and mapped from '#{pbuilder_id}' to request ID '#{msg_request_id}'")
+          if msg_request_id
+            Log.debug("Heartbeat message recived, and mapped from '#{pbuilder_id}' to request ID '#{msg_request_id}'")
+          else
+            Log.debug("Heartbeat message recived from '#{pbuilder_id}', dropping message since it could not be resolved to this tenant")
+            return
+          end
         end
+
+
 
         # making sure that timeout threads do not run overtime
         CommandAndControlAdapter::StompMultiplexer.process_response(original_msg, msg_request_id)

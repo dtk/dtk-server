@@ -295,8 +295,8 @@ shared_context 'Get task action details' do |dtk_common, action_id, expected_out
         else
           puts 'Returned stderr was not matched with expected one!'
           correct_task_action_outputs = false
-          break
         end
+        break
       else
         puts 'Returned task action details is not the expected one!'
         correct_task_action_outputs = false

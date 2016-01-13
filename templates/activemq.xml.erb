@@ -81,6 +81,7 @@
                     
                   <authorizationEntry topic="<%= subcollective %>.>" write="<%= user %>" read="<%= user %>" admin="<%= user %>" />
                   <authorizationEntry queue="<%= subcollective %>.>" write="<%= user %>" read="<%= user %>" admin="<%= user %>" />
+                  <authorizationEntry topic="<%= arbiter_topic %>.>" write="<%= user %>" read="<%= user %>" admin="<%= user %>" />
                   <!--
                     The advisory topics are part of ActiveMQ, and all users need access to them.
                     The "everyone" group is not special; you need to ensure every user is a member.

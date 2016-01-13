@@ -20,4 +20,6 @@ components:
         subcollective: 
           type: string
           default: mcollective
-
+        arbiter_topic:
+          type: string
+          default: arbiter

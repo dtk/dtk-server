@@ -1,7 +1,8 @@
 class dtk_activemq(
   $user       = 'mcollective',
   $password   = 'marionette',
-  $subcollective = 'mcollective' 
+  $subcollective = 'mcollective', 
+  $arbiter_topic = 'arbiter'
   ) {
   include dtk_activemq::params
   $app_dir = $dtk_activemq::params::app_dir
@@ -39,8 +40,8 @@ class dtk_activemq(
   }
 }
 
-class dtk_activemq::package()
-{
+class dtk_activemq::package() {
+
   include dtk_activemq::params
   $bin_tar_gz_file = $dtk_activemq::params::bin_tar_gz_file
   $bin_tar_gz_url =  $dtk_activemq::params::bin_tar_gz_url 

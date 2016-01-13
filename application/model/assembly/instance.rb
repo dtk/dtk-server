@@ -284,6 +284,115 @@ module DTK; class  Assembly
       attr_patterns
     end
 
+    def exec(params)
+      task_action = params[:task_action]
+
+      # if component action
+      if task_action && task_action.include?('.')
+        return execute_cmp_action(params, task_action)
+      end
+
+      skip_violations = params[:skip_violations]
+      unless skip_violations
+        violation_objects = find_violations()
+
+        violation_table = violation_objects.map do |v|
+          { type: v.type(), description: v.description() }
+        end.sort { |a, b| a[:type].to_s <=> b[:type].to_s }
+
+        return { violations: violation_table.uniq } unless violation_table.empty?
+      end
+
+      task = create_task(params)
+      return task if task.has_key?(:confirmation_message) || task.has_key?(:message)
+
+      execute_service_action(task[:task_id])
+    end
+
+    def create_task(opts)
+      if any_stopped_nodes?(:admin)
+        return { confirmation_message: true } if opts[:start_assembly].nil?
+        opts.merge!(start_nodes: true, ret_nodes_to_start: [])
+      else
+        unless R8::Config[:debug][:disable_task_concurrent_check]
+          if running_task = most_recent_task_is_executing?
+            fail ErrorUsage, "Task with id '#{running_task.id}' is already running in assembly. Please wait until task is complete or cancel task."
+          end
+        end
+      end
+
+      task = Task.create_from_assembly_instance?(self, opts)
+      return { message: "There are no steps in the workflow to execute" } unless task
+
+      task.save!()
+      Node.start_instances(opts[:ret_nodes_to_start]) unless (opts[:ret_nodes_to_start]||[]).empty?
+
+      return { task_id: task.id }
+    end
+
+    def execute_service_action(task_id)
+      task_idh = id_handle().createIDH(id: task_id, model_name: :task)
+      task     = Task::Hierarchical.get_and_reify(task_idh)
+      workflow = Workflow.create(task)
+      workflow.defer_execution()
+      return { task_id: task_id }
+    end
+
+    def execute_cmp_action(params, task_action)
+      component_id, method_name = task_action.split('.')
+      task_params = nil
+      component   = nil
+      node        = nil
+
+      task_params = params[:task_params]
+      node        = (task_params['node'] || task_params['nodes']) if task_params
+
+      if cmp_title = task_params && task_params['name']
+        component_id = "#{component_id}[#{cmp_title}]"
+      end
+
+      opts = Opts.new(filter_component: component_id)
+      augmented_cmps = get_augmented_components(opts)
+
+      message = "There are no components with '#{component_id}' identifier"
+      message += " on node '#{node}'" if node
+      fail ErrorUsage, "#{message}!" if augmented_cmps.empty?
+
+      if node
+        component = augmented_cmps.find{|cmp| cmp[:node][:display_name].eql?(node)}
+      else
+        component =
+          if augmented_cmps.size == 1
+            augmented_cmps.first
+          else
+            augmented_cmps.find{|cmp| cmp[:node][:display_name].eql?("assembly_wide")}
+          end
+      end
+
+      fail ErrorUsage, "#{message}!" unless component
+
+      opts = { method_name: method_name}
+      opts.merge!(task_params: task_params) if task_params
+
+      task = Task.create_for_ad_hoc_action(self, component, opts)
+      task = task.save_and_add_ids()
+
+      workflow = Workflow.create(task)
+      workflow.defer_execution()
+
+      {
+        assembly_instance_id: self.id(),
+        assembly_instance_name: self.display_name_print_form,
+        task_id: task.id()
+      }
+    end
+
+    def most_recent_task_is_executing?
+      if task = ::DTK::Task.get_top_level_most_recent_task(model_handle(:task), [:eq, :assembly_id, self.id()])
+        task.has_status?(:executing) && task
+      end
+    end
+
     def self.exists?(model_handle, display_name)
       result = self.find_by_name(model_handle, display_name)
       !result.empty?

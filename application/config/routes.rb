@@ -104,6 +104,8 @@ R8::ReactorRoute.draw do
   post 'assembly/get_node_groups' => 'assembly#get_node_groups'
   post 'assembly/get_nodes_without_node_groups' => 'assembly#get_nodes_without_node_groups'
   post 'assembly/task_action_list' => 'assembly#task_action_list'
+  post 'assembly/exec' => 'assembly#exec'
+  post 'assembly/exec_sync' => 'assembly#exec_sync'
 
   # ATTRIBUTE
   post 'attribute/set' => 'attribute#set'

@@ -316,6 +316,16 @@
       "workflow_name": "display_name"
     }
   },
+  "service_actions": {
+    "order": [
+      "action_name",
+      "action_type"
+    ],
+    "mapping": {
+      "action_name": "display_name",
+      "action_type": "action_type"
+    }
+  },
   "ad_hoc_action_by_component_type": {
     "order": [
       "component_type",

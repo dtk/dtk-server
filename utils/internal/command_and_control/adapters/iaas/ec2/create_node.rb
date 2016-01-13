@@ -12,7 +12,7 @@ module DTK; module CommandAndControlAdapter
         single_run_responses = create_node_object_per_node(task_action).map(&:run)
         aggregate_responses(single_run_responses)
       end
-      
+
       attr_reader :base_node, :node, :target, :flavor_id, :external_ref
       def initialize(base_node, node, target)
         @base_node    = base_node
@@ -21,7 +21,7 @@ module DTK; module CommandAndControlAdapter
         @external_ref = node[:external_ref] || {}
         @flavor_id    = @external_ref[:size] || R8::Config[:command_and_control][:iaas][:ec2][:default_image_size]
       end
-      
+
       def run
         run_aux()
       end
@@ -63,15 +63,15 @@ module DTK; module CommandAndControlAdapter
             Log.info("node already created with instance id #{instance_id}; waiting for it to be available")
           end
         end
-        
+
         if create_node
           generate_client_token?()
-          
+
           response = create_ec2_instance()
           if response[:status] == 'failed'
             return response
           end
-          
+
           instance_id = response[:id]
           state = response[:state]
           update_hash = {
@@ -94,7 +94,7 @@ module DTK; module CommandAndControlAdapter
         end
 
         process_addresses__first_boot?(@node)
-        
+
         { status: 'succeeded',
           node: {
             external_ref: @external_ref
@@ -111,7 +111,7 @@ module DTK; module CommandAndControlAdapter
           update_node!(external_ref: updated_external_ref)
         end
       end
-      
+
       def update_node!(node_update_hash)
         Ec2.update_node!(@node, node_update_hash)
         if er = node_update_hash[:external_ref]
@@ -119,15 +119,15 @@ module DTK; module CommandAndControlAdapter
         end
         @node.merge!(node_update_hash)
       end
-      
+
       def create_ec2_instance
         response = nil
         unless ami = @external_ref[:image_id]
           fail ErrorUsage.new("Cannot find ami for node (#{@node[:display_name]})")
         end
-        
+
         conn = Ec2.conn(@node.get_target_iaas_credentials())
-        
+
         # primary_nic will be non nil only if explicit nic component is configured
         primary_nic = Component::Domain::NIC.get_primary_nic?(@node)
         image       = image(ami, target: @node.get_target)
@@ -135,7 +135,7 @@ module DTK; module CommandAndControlAdapter
 
         begin
           create_options = CreateOptions.new(self, conn, image, opts)
-pp [:debug_create_options, Aux.hash_subset(create_options, [:image_id, :flavor_id, :security_group_ids, :groups, :tags, :key_name, :subnet_id])]
+          pp [:debug_create_options, Aux.hash_subset(create_options, [:image_id, :flavor_id, :security_group_ids, :groups, :tags, :key_name, :subnet_id])]
 
 
           response = conn.server_create(create_options)
@@ -144,13 +144,13 @@ pp [:debug_create_options, Aux.hash_subset(create_options, [:image_id, :flavor_i
           # append region to error message
           region = target.get_region() if target
           e.message << ". Region: '#{region}'." if region
-          
+
           Log.error_pp([e, e.backtrace[0..10]])
           return { status: 'failed', error_object: e, type: 'user_error' }
         end
         response
       end
-      
+
       def get_node_status(instance_id)
         ret = nil
         begin

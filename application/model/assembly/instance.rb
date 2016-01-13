@@ -287,9 +287,14 @@ module DTK; class  Assembly
     def exec(params)
       task_action = params[:task_action]
 
-      # if component action
-      if task_action && task_action.include?('.')
-        return execute_cmp_action(params, task_action)
+      # check if action is called on component or on service instance action
+      if task_action
+        component_id, method_name = task_action.split('.')
+        augmented_cmps = check_if_augmented_component(params, component_id)
+
+        if task_action.include?('.') || !augmented_cmps.empty?
+          return execute_cmp_action(params, component_id, method_name, augmented_cmps)
+        end
       end
 
       skip_violations = params[:skip_violations]
@@ -338,8 +343,7 @@ module DTK; class  Assembly
       return { task_id: task_id }
     end
 
-    def execute_cmp_action(params, task_action)
-      component_id, method_name = task_action.split('.')
+    def execute_cmp_action(params, component_id, method_name, augmented_cmps)
       task_params = nil
       component   = nil
       node        = nil
@@ -347,14 +351,7 @@ module DTK; class  Assembly
       task_params = params[:task_params]
       node        = (task_params['node'] || task_params['nodes']) if task_params
 
-      if cmp_title = task_params && task_params['name']
-        component_id = "#{component_id}[#{cmp_title}]"
-      end
-
-      opts = Opts.new(filter_component: component_id)
-      augmented_cmps = get_augmented_components(opts)
-
-      message = "There are no components with '#{component_id}' identifier"
+      message = "There are no components with identifier '#{component_id}'"
       message += " on node '#{node}'" if node
       fail ErrorUsage, "#{message}!" if augmented_cmps.empty?
 
@@ -371,7 +368,8 @@ module DTK; class  Assembly
 
       fail ErrorUsage, "#{message}!" unless component
 
-      opts = { method_name: method_name}
+      opts = {}
+      opts.merge!(method_name: method_name) if method_name
       opts.merge!(task_params: task_params) if task_params
 
       task = Task.create_for_ad_hoc_action(self, component, opts)
@@ -385,6 +383,17 @@ module DTK; class  Assembly
         assembly_instance_name: self.display_name_print_form,
         task_id: task.id()
       }
+    end
+
+    def check_if_augmented_component(params, component_id)
+      task_params = params[:task_params]
+
+      if cmp_title = task_params && task_params['name']
+        component_id = "#{component_id}[#{cmp_title}]"
+      end
+
+      opts = Opts.new(filter_component: component_id)
+      get_augmented_components(opts)
     end
 
     def most_recent_task_is_executing?

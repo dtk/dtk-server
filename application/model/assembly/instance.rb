@@ -23,6 +23,8 @@ module DTK; class  Assembly
     extend NodeStatusClassMixin
     include NodeStatusToFixMixin
 
+    ACTION_DELIMITER = '.'
+
     def self.create_from_id_handle(idh)
       idh.create_object(model_name: :assembly_instance)
     end
@@ -289,10 +291,10 @@ module DTK; class  Assembly
 
       # check if action is called on component or on service instance action
       if task_action
-        component_id, method_name = task_action.split('.')
+        component_id, method_name = task_action.split(ACTION_DELIMITER)
         augmented_cmps = check_if_augmented_component(params, component_id)
 
-        if task_action.include?('.') || !augmented_cmps.empty?
+        if task_action.include?(ACTION_DELIMITER) || !augmented_cmps.empty?
           return execute_cmp_action(params, component_id, method_name, augmented_cmps)
         end
       end

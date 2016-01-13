@@ -743,6 +743,11 @@ module DTK
       rest_ok_response assembly.exec(params_hash)
     end
 
+    def rest__list_actions
+      assembly = ret_assembly_instance_object()
+      rest_ok_response assembly.list_actions()
+    end
+
     def rest__create_task
       assembly = ret_assembly_instance_object()
       opts     = ret_params_hash(:commit_msg, :task_action, :task_params)

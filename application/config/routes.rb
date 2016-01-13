@@ -106,6 +106,7 @@ R8::ReactorRoute.draw do
   post 'assembly/task_action_list' => 'assembly#task_action_list'
   post 'assembly/exec' => 'assembly#exec'
   post 'assembly/exec_sync' => 'assembly#exec_sync'
+  post 'assembly/list_actions' => 'assembly#list_actions'
 
   # ATTRIBUTE
   post 'attribute/set' => 'attribute#set'

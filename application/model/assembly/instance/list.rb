@@ -220,6 +220,22 @@ module DTK; class  Assembly
         ModuleRefs::Tree.create(self).hash_form()
       end
 
+      def list_actions()
+        list = []
+
+        service_actions = get_task_templates(set_display_names: true)
+        service_actions.each do |service_action|
+          list << { display_name: service_action[:display_name], action_type: "service_action" }
+        end
+
+        component_actions = Task::Template::Action::AdHoc.list(self, :component_instance)
+        component_actions.each do |cmp_action|
+          list << { display_name: "#{cmp_action[:component_type]}.#{cmp_action[:method_name]}", action_type: "component_action" }
+        end
+
+        list
+      end
+
       private
 
       def convert_to_component_print_form(aug_cmp, opts = Opts.new)

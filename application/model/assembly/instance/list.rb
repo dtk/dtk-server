@@ -228,12 +228,49 @@ module DTK; class  Assembly
           list << { display_name: service_action[:display_name], action_type: "service_action" }
         end
 
+        components = get_augmented_components()
+        components.each do |component|
+          action_params    = []
+          component_action = component[:component_type].gsub('__', '::')
+          component_name   = component[:display_name].match(/.*(\[.*\])/)
+
+          if node = component[:node]
+            node_name = node[:display_name]
+            action_params << "node" if node_name && !node_name.eql?('assembly_wide')
+          end
+
+          action_params << "name*" if component_name
+
+          list << { display_name: component_action, action_type: "component_action", action_params: action_params.uniq.join(', ') }
+        end
+
         component_actions = Task::Template::Action::AdHoc.list(self, :component_instance)
         component_actions.each do |cmp_action|
-          list << { display_name: "#{cmp_action[:component_type]}.#{cmp_action[:method_name]}", action_type: "component_action" }
+          action_params = []
+
+          if component_instance = cmp_action[:component_instance]
+            if component_instance.include?('/')
+              node_name, cmp_name = component_instance.split('/')
+              action_params << "node" if node_name && !node_name.eql?('assembly_wide')
+            end
+
+            if component_instance.include?("[")
+              component_name = component_instance.match(/.*(\[.*\])/)
+              action_params << "name*" if component_name
+            end
+          end
+
+          list << { display_name: "#{cmp_action[:component_type]}.#{cmp_action[:method_name]}", action_type: "component_action", action_params: action_params.uniq.join(', ') }
         end
 
         list
+      end
+
+      def add_node_params_to_action_list(action_params, component)
+        if node = component[:node]
+          node_name = node[:display_name]
+          action_params << "node" unless node_name.eql?('assembly_wide')
+        end
       end
 
       private

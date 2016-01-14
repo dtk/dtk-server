@@ -263,7 +263,7 @@ module DTK; class  Assembly
           list << { display_name: "#{cmp_action[:component_type]}.#{cmp_action[:method_name]}", action_type: "component_action", action_params: action_params.uniq.join(', ') }
         end
 
-        list
+        list.uniq
       end
 
       def add_node_params_to_action_list(action_params, component)

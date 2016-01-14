@@ -23,37 +23,45 @@ module DTK
 
     module NodeGroupProcessing
       #replaces node groups with theit elements
-      def self.decompose_node_groups!(task)
-        decompose!(task)
+      def self.decompose_node_groups!(task, opts = {})
+        decompose!(task, opts)
         task
       end
 
       private
 
-      def self.decompose!(task)
+      def self.decompose!(task, opts = {})
         case task.basic_type()
           when :executable_action
-            decompose_executable_action!(task)
+            decompose_executable_action!(task, opts)
           when :decomposed_node_group
             #no op
           when :sequential
-            task.subtasks.map { |st| decompose!(st) }
+            task.subtasks.map { |st| decompose!(st, opts) }
           when :concurrent
-            task.subtasks.map { |st| decompose!(st) }
+            task.subtasks.map { |st| decompose!(st, opts) }
           else
             Log.error('do not have rules to process task')
         end
       end
 
-      def self.decompose_executable_action!(task)
+      def self.decompose_executable_action!(task, opts = {})
         # noop if this is not a node group that decomposes
         ea = task[:executable_action]
         return unless ea.node_is_node_group?()
 
-        #modify task so that it is a concurrent decomposed task
-        task[:temporal_order] = 'concurrent'
+        # modify task so that it is a concurrent decomposed task
+        task[:temporal_order]      = 'concurrent'
         ea[:decomposed_node_group] = true
-        task[:subtasks] = ea.nodes.map { |node| node_group_member(node, task) }
+        node_group_members         = ea.nodes
+
+        # used if user wants to execute action on one node group member only
+        if node_group_member = opts[:node_group_member]
+          node_group_members.reject!{ |node| node[:display_name] != node_group_member }
+          fail ErrorUsage.new("Specified node group member '#{node_group_member}' does not exist!") if node_group_members.empty?
+        end
+
+        task[:subtasks] = node_group_members.map { |node| node_group_member(node, task) }
       end
 
       def self.node_group_member(node, parent_task)

@@ -32,7 +32,18 @@ module DTK
 
       def image_get(id)
         ImageInfoCache.get_or_set(:image_get, conn, id, mutex: true) do
-          hash_form(conn.images.get(id))
+          begin
+            hash_form(conn.images.get(id))
+          rescue e
+            unless defined?(PhusionPassenger)
+              # DEBUG SNIPPET >>> REMOVE <<<
+              require (RUBY_VERSION.match(/1\.8\..*/) ? 'ruby-debug' : 'debugger');Debugger.start; Debugger
+              puts "debug mode"
+            end
+            # this is part of the code that I plan to use to troubleshoot images null pointer excpetion
+            # that happens from time to time (non-deterministic)
+            raise e
+          end
         end
       end
 
@@ -58,6 +69,7 @@ module DTK
       ServerCreateMutex = Mutex.new
 
       def server_create(options)
+
         # we add tag to identify it as slave service instance
         service_instance_ttl = R8::Config[:ec2][:service_instance][:ttl] || R8::Config[:idle][:up_time_hours]
         options[:tags] = options.fetch(:tags, Hash.new).merge('service.instance.ttl' => service_instance_ttl)

@@ -319,11 +319,13 @@
   "service_actions": {
     "order": [
       "action_name",
-      "action_type"
+      "action_type",
+      "action_params"
     ],
     "mapping": {
       "action_name": "display_name",
-      "action_type": "action_type"
+      "action_type": "action_type",
+      "action_params": "action_params"
     }
   },
   "ad_hoc_action_by_component_type": {

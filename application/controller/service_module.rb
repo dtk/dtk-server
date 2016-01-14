@@ -298,7 +298,7 @@ module DTK
       module_dsl_info = service_module.update_model_from_clone_changes?(commit_sha, diffs_summary, version, opts)
       response = module_dsl_info.hash_subset(:dsl_parse_error, :dsl_updated_info, :dsl_created_info, :external_dependencies, :component_module_refs)
       # the possible keys in response are (with the subkeys) are
-      #  :dsl_parse_error: 
+      #  :dsl_parse_error:
       #  :dsl_updated_info:
       #    :msg
       #    :commit_sha
@@ -359,7 +359,7 @@ module DTK
     def rest__remove_git_remote
       service_module = create_obj(:service_module_id)
       remove_git_remote(service_module)
-      rest_ok_response 
+      rest_ok_response
     end
   end
 end

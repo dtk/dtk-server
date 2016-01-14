@@ -134,6 +134,7 @@ module DTK
           { aws_access_key_id: aws_key, aws_secret_access_key: aws_secret }
         end
       end
+
       private_class_method :get_ec2_credentials
 
       # destroys the node if it exists

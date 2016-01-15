@@ -236,7 +236,11 @@ module DTK; class  Assembly
 
           if node = component[:node]
             node_name = node[:display_name]
-            action_params << "node" if node_name && !node_name.eql?('assembly_wide')
+
+            # ignore assembly wide components
+            next if node_name.eql?('assembly_wide')
+
+            action_params << "node" if node_name
           end
 
           action_params << "name*" if component_name
@@ -251,7 +255,11 @@ module DTK; class  Assembly
           if component_instance = cmp_action[:component_instance]
             if component_instance.include?('/')
               node_name, cmp_name = component_instance.split('/')
-              action_params << "node" if node_name && !node_name.eql?('assembly_wide')
+
+              # ignore assembly wide component actions
+              next if node_name.eql?('assembly_wide')
+
+              action_params << "node" if node_name
             end
 
             if component_instance.include?("[")

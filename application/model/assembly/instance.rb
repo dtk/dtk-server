@@ -349,6 +349,7 @@ module DTK; class  Assembly
       task_params = nil
       component   = nil
       node        = nil
+      task        = nil
 
       task_params = params[:task_params]
       node        = (task_params['node'] || task_params['nodes']) if task_params
@@ -357,24 +358,41 @@ module DTK; class  Assembly
       message += " on node '#{node}'" if node
       fail ErrorUsage, "#{message}!" if augmented_cmps.empty?
 
-      if node
-        component = augmented_cmps.find{|cmp| cmp[:node][:display_name].eql?(node)}
-      else
-        component =
-          if augmented_cmps.size == 1
-            augmented_cmps.first
-          else
-            augmented_cmps.find{|cmp| cmp[:node][:display_name].eql?("assembly_wide")}
-          end
-      end
-
-      fail ErrorUsage, "#{message}!" unless component
-
       opts = {}
       opts.merge!(method_name: method_name) if method_name
       opts.merge!(task_params: task_params) if task_params
 
-      task = Task.create_for_ad_hoc_action(self, component, opts)
+      if node
+        # if node has format node[id] it means use single node from node group
+        if node_match = node.include?('[') && node.match(/(.*)\[(.*)\]/)
+            node, node_id = $1, $2
+            opts.merge!(node_group_member: "#{node}:#{node_id}")
+        end
+
+        # filter component that belongs to specified node
+        component = augmented_cmps.find{|cmp| cmp[:node][:display_name].eql?(node)}
+        fail ErrorUsage, "#{message}!" unless component
+      else
+        if augmented_cmps.size == 1
+          component = augmented_cmps.first
+
+          # do not allow execution of service instance component actions
+          fail ErrorUsage, "You are not allowed to execute action on service instance component '#{component_id}'!" if (component[:node] && component[:node][:display_name].eql?('assembly_wide'))
+        else
+          # if multiple nodes have component sent by user then execute that component action on all nodes
+          task = Task.create_top_level(model_handle(:task), self, { task_action: "component_actions", temporal_order: 'concurrent' })
+
+          augmented_cmps.each do |cmp|
+            # skip execution of component actions on assembly wide node (service instance component)
+            next if (cmp[:node] && cmp[:node][:display_name].eql?('assembly_wide'))
+
+            subtask = Task.create_for_ad_hoc_action(self, cmp, opts)
+            task.add_subtask(subtask) if subtask
+          end
+        end
+      end
+
+      task = Task.create_for_ad_hoc_action(self, component, opts) if component
       task = task.save_and_add_ids()
 
       workflow = Workflow.create(task)

@@ -15,37 +15,6 @@ module XYZ
       agent_hash = JSON.parse(agent_params)
       agent_hash = deep_convert(agent_hash)
 
-      agent_hash.merge!(
-{:components_with_attributes=>
-  [{"component_type"=>"class",
-    "name"=>"stdlib",
-    "id"=>2147549352,
-    "module_name"=>"stdlib"}],
- :node_manifest=>
-  [["$extlookup_datadir = '/etc/puppet/manifests/extdata'",
-    "$extlookup_precedence = ['common']",
-    "$dtk_assembly_node = \"test1\"",
-    "$dtk_assembly_node_type = \"node\"",
-    "$dtk_assembly_node_base_name = \"test1\"",
-    "$dtk_assembly_node_index = \"\"",
-    "stage{1:}",
-    " ",
-    "class {\"stdlib\": stage => 1}"]],
- :inter_node_stage=>"1",
- :version_context=>
-  [{:id=>2147526308,
-    :repo=>"dtk16-r8-stdlib",
-    :branch=>"workspace-private-dtk16",
-    :implementation=>"stdlib",
-    :sha=>"d2b2e8a1242c79827c9352f9867598b0090913c5"}],
- :puppet_version=>nil,
- :service_id=>2147549347,
- :service_name=>"haris-demo",
- :task_id=>2147549363,
- :top_task_id=>2147549360,
- :agent_git_details=>{:repo=>"dtk-node-agent", :branch=>""}})
-
-
       params.merge!(:protocol => 'stomp')
       params.merge!(:action_agent_request => agent_hash)
 

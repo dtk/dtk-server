@@ -14,6 +14,7 @@ R8::ReactorRoute.draw do
   post   'api/v1/services/:service_id/start'           => 'v1::service#start'
   post   'api/v1/services/:service_id/stop'            => 'v1::service#stop'
   post   'api/v1/services/:service_id/create_assembly' => 'v1::service#create_assembly'
+  post   'api/v1/services/:service_id/:task_action'    => 'v1::service#exec'
   delete 'api/v1/services/:service_id'                 => 'v1::service#delete_destroy'
 
   post 'api/v1/auth/login' => 'v1::authorization#login'

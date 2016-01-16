@@ -294,6 +294,9 @@ module DTK; class  Assembly
         component_id, method_name = task_action.split(ACTION_DELIMITER)
         augmented_cmps = check_if_augmented_component(params, component_id)
 
+        # check if component and service level action with same name
+        check_if_ambiguous(component_id) unless augmented_cmps.empty?
+
         if task_action.include?(ACTION_DELIMITER) || !augmented_cmps.empty?
           return execute_cmp_action(params, component_id, method_name, augmented_cmps)
         end
@@ -413,7 +416,19 @@ module DTK; class  Assembly
       end
 
       opts = Opts.new(filter_component: component_id)
-      get_augmented_components(opts)
+      augmented_cmps = get_augmented_components(opts)
+
+      # filter out service instance components
+      augmented_cmps.reject!{ |cmp| cmp[:node][:display_name].eql?('assembly_wide') }
+      augmented_cmps
+    end
+
+    # check if service instance action with same name as component action and raise ambiguity error
+    def check_if_ambiguous(action_name)
+      service_actions = get_task_templates(set_display_names: true)
+      service_actions.reject!{ |action| !action[:display_name].eql?(action_name) }
+
+      fail ErrorUsage, "There is ambiguity between service instance action and component action with name '#{action_name}'!" unless service_actions.empty?
     end
 
     def most_recent_task_is_executing?

@@ -320,6 +320,10 @@ module DTK; class  Assembly
     end
 
     def create_task(opts)
+      if task_params = opts[:task_params]
+        fail ErrorUsage, "Node/nodes params are not supported for service instance actions!" if task_params.key?('node') || task_params.key?('nodes')
+      end
+
       if any_stopped_nodes?(:admin)
         return { confirmation_message: true } if opts[:start_assembly].nil?
         opts.merge!(start_nodes: true, ret_nodes_to_start: [])

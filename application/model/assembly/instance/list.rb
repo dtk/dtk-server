@@ -230,7 +230,7 @@ module DTK; class  Assembly
 
         components = get_augmented_components()
         components.each do |component|
-          action_params    = []
+          # action_params    = []
           component_action = component[:component_type].gsub('__', '::')
           component_name   = component[:display_name].match(/.*(\[.*\])/)
 
@@ -240,17 +240,17 @@ module DTK; class  Assembly
             # ignore assembly wide components
             next if node_name.eql?('assembly_wide')
 
-            action_params << "node" if node_name
+            # action_params << "node" if node_name
           end
 
-          action_params << "name*" if component_name
+          # action_params << "name*" if component_name
 
-          list << { display_name: component_action, action_type: "component_action", action_params: action_params.uniq.join(', ') }
+          list << { display_name: component_action, action_type: "component_action" } #, action_params: action_params.uniq.join(', ') }
         end
 
         component_actions = Task::Template::Action::AdHoc.list(self, :component_instance)
         component_actions.each do |cmp_action|
-          action_params = []
+          # action_params = []
 
           if component_instance = cmp_action[:component_instance]
             if component_instance.include?('/')
@@ -259,26 +259,19 @@ module DTK; class  Assembly
               # ignore assembly wide component actions
               next if node_name.eql?('assembly_wide')
 
-              action_params << "node" if node_name
+              # action_params << "node" if node_name
             end
 
             if component_instance.include?("[")
               component_name = component_instance.match(/.*(\[.*\])/)
-              action_params << "name*" if component_name
+              # action_params << "name*" if component_name
             end
           end
 
-          list << { display_name: "#{cmp_action[:component_type]}.#{cmp_action[:method_name]}", action_type: "component_action", action_params: action_params.uniq.join(', ') }
+          list << { display_name: "#{cmp_action[:component_type]}.#{cmp_action[:method_name]}", action_type: "component_action" } #, action_params: action_params.uniq.join(', ') }
         end
 
         list.uniq
-      end
-
-      def add_node_params_to_action_list(action_params, component)
-        if node = component[:node]
-          node_name = node[:display_name]
-          action_params << "node" unless node_name.eql?('assembly_wide')
-        end
       end
 
       private

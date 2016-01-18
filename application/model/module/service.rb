@@ -143,6 +143,19 @@ module DTK
       end
     end
 
+    def delete_versions_except_base()
+      ret = { module_name: module_name() }
+
+      module_branches = get_module_branches()
+      module_branches.reject!{ |branch| branch[:version].nil? || branch[:version].eql?('master') }
+
+      module_branches.each do |branch|
+        delete_version(branch[:version])
+      end
+
+      ret
+    end
+
     def get_assembly_instances
       assembly_templates = get_assembly_templates()
       assoc_assemblies = self.class.get_associated_target_instances(assembly_templates)

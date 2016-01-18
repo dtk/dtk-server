@@ -60,6 +60,19 @@ module DTK; class BaseModule
       end
     end
 
+    def delete_versions_except_base()
+      ret = { module_name: module_name() }
+
+      module_branches = get_module_branches()
+      module_branches.reject!{ |branch| branch[:version].nil? || branch[:version].eql?('master') }
+
+      module_branches.each do |branch|
+        delete_version(branch[:version])
+      end
+
+      ret
+    end
+
     private
 
     def raise_error_component_refs(components)

@@ -90,7 +90,7 @@ module DTK
         handler.sendreq_with_callback(msg, agent, context, filter)
       end
 
-      #r
+      #
       # Since I am switching to mcollective response I do not need this
       #
       # def self.parse_response__execute_action(_nodes, msg)

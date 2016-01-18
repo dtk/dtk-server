@@ -224,6 +224,13 @@ module DTK; class  Assembly
         list = []
 
         service_actions = get_task_templates(set_display_names: true)
+        create_action = service_actions.find{ |action| action[:display_name].eql?('create')}
+        if service_actions.empty? || create_action.nil?
+          # this will generate simple create action for service instance
+          Task::Template.get_serialized_content(self, nil)
+          service_actions = get_task_templates(set_display_names: true)
+        end
+
         service_actions.each do |service_action|
           list << { display_name: service_action[:display_name], action_type: "service_action" }
         end

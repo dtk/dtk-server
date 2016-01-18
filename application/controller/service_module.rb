@@ -224,9 +224,12 @@ module DTK
     def rest__delete
       service_module = create_obj(:service_module_id)
       delete_all_versions = ret_request_params(:delete_all_versions)
+      all_except_base = ret_request_params(:all_except_base)
 
       if delete_all_versions
         module_info = service_module.delete_object()
+      elsif all_except_base
+        module_info = service_module.delete_versions_except_base()
       else
         version     = ret_version()
         version     = compute_latest_version(service_module) unless version

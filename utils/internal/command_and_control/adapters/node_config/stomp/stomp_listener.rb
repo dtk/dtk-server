@@ -28,6 +28,11 @@ module DTK
       @backup_client = ::Stomp::Client.new(:hosts => [{:login => configuration[:stomp_username], :passcode => configuration[:stomp_password], :host => configuration[:stomp_host], :port => configuration[:stomp_port], :ssl => false}])
     end
 
+    def unbind
+      # called when connection completed
+      super
+    end
+
     def receive_msg msg
       if "CONNECTED".eql?(msg.command)
         # success connecting to stomp
@@ -75,7 +80,17 @@ module DTK
     end
 
     def publish(message)
-      sleep(1) while !@stomp_rdy
+      tries = NUMBER_OF_RETRIES
+
+      # we can timeout here, in case stomp not ready
+      while !@stomp_rdy
+        if tries == 0
+          raise Error, "We are not able to connect to STOMP server, aborting action!"
+        end
+
+        sleep(1)
+        tries -= 1
+      end
       ##
       # Hack, to have ti working on passenger, since send was not working on passenger and we cannot figure out why
       #

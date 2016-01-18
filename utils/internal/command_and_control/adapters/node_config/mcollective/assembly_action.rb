@@ -35,7 +35,7 @@ module DTK
         # TODO: conditionalize on status
         return ret.merge(status: :notok) unless body = msg[:body]
         payload = body[:data]
-        ret[:status] = (body[:statuscode] == 0 && payload && payload[:status] == :ok) ? :ok : :notok
+        ret[:status] = (body[:statuscode] == 0 && payload && (payload[:status] == :ok || payload[:status] == :succeeded)) ? :ok : :notok
         ret[:pbuilderid] = payload && payload[:pbuilderid]
 
         # not every time we encapsulate our response under :data key

@@ -238,7 +238,7 @@ module DTK; class  Assembly
         components = get_augmented_components()
         components.each do |component|
           # action_params    = []
-          component_action = component[:component_type].gsub('__', '::')
+          component_action = component[:display_name].gsub('__', '::')
           component_name   = component[:display_name].match(/.*(\[.*\])/)
 
           if node = component[:node]
@@ -275,7 +275,7 @@ module DTK; class  Assembly
             end
           end
 
-          list << { display_name: "#{cmp_action[:component_type]}.#{cmp_action[:method_name]}", action_type: "component_action" } #, action_params: action_params.uniq.join(', ') }
+          list << { display_name: "#{cmp_action[:display_name]}.#{cmp_action[:method_name]}", action_type: "component_action" } #, action_params: action_params.uniq.join(', ') }
         end
 
         list.uniq

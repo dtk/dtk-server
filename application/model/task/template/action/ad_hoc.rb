@@ -85,7 +85,8 @@ module DTK; class Task; class Template
               {
                 component_instance: type == :component_instance && component_action.display_name_print_form(node_prefix: true),
                 component_type: component_action.component_type_print_form(),
-                method_name: action_def.get_field?(:method_name)
+                method_name: action_def.get_field?(:method_name),
+                display_name: component_action.display_name_print_form()
               }
             end
           end

@@ -233,7 +233,7 @@ module DTK; class  Assembly
           end
 
           service_actions.each do |service_action|
-            list << { display_name: service_action[:display_name], action_type: "service_action" }
+            list << { display_name: service_action[:display_name], action_type: "service" }
           end
         end
 
@@ -323,13 +323,13 @@ module DTK; class  Assembly
               display_name = "#{display_name}[NAME]" if cmp_name && opts[:actions].nil?
             end
 
-            sorted_list << { display_name: display_name, action_type: "component_action" }
+            sorted_list << { display_name: display_name, action_type: "component" }
           else
             val_hash     = v.first
             display_name = val_hash[:component_action]
             display_name = "#{val_hash[:node]}/#{display_name}" if val_hash[:node]
             display_name = "#{display_name}[NAME]" if val_hash[:component_name] && opts[:actions].nil?
-            sorted_list << { display_name: display_name, action_type: "component_action" }
+            sorted_list << { display_name: display_name, action_type: "component" }
           end
         end
 

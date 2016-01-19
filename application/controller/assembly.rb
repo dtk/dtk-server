@@ -231,7 +231,7 @@ module DTK
       if response
         response_opts.merge!(encode_into: :yaml)
       else
-        response = { message: "Empty workflow, which will create service instance nodes (if needed) with no configuration steps" }
+        response = { message: "Empty action, which will create service instance nodes (if needed) with no configuration steps" }
       end
       rest_ok_response response, response_opts
     end

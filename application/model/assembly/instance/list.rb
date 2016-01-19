@@ -224,33 +224,35 @@ module DTK; class  Assembly
         list = []
 
         service_actions = get_task_templates(set_display_names: true)
+        create_action = service_actions.find{ |action| action[:display_name].eql?('create')}
+        if service_actions.empty? || create_action.nil?
+          # this will generate simple create action for service instance
+          Task::Template.get_serialized_content(self, nil)
+          service_actions = get_task_templates(set_display_names: true)
+        end
+
         service_actions.each do |service_action|
           list << { display_name: service_action[:display_name], action_type: "service_action" }
         end
 
         components = get_augmented_components()
+        component_list = []
         components.each do |component|
-          # action_params    = []
           component_action = component[:component_type].gsub('__', '::')
           component_name   = component[:display_name].match(/.*(\[.*\])/)
 
           if node = component[:node]
-            node_name = node[:display_name]
-
             # ignore assembly wide components
-            next if node_name.eql?('assembly_wide')
-
-            # action_params << "node" if node_name
+            next if node[:display_name].eql?('assembly_wide')
           end
 
-          # action_params << "name*" if component_name
-
-          list << { display_name: component_action, action_type: "component_action" } #, action_params: action_params.uniq.join(', ') }
+          component_action = "#{component_action}[NAME]" if component_name
+          list << { display_name: component_action, action_type: "component_action" }
         end
 
         component_actions = Task::Template::Action::AdHoc.list(self, :component_instance)
         component_actions.each do |cmp_action|
-          # action_params = []
+          name = cmp_action[:component_type]
 
           if component_instance = cmp_action[:component_instance]
             if component_instance.include?('/')
@@ -258,17 +260,16 @@ module DTK; class  Assembly
 
               # ignore assembly wide component actions
               next if node_name.eql?('assembly_wide')
-
-              # action_params << "node" if node_name
             end
 
             if component_instance.include?("[")
-              component_name = component_instance.match(/.*(\[.*\])/)
-              # action_params << "name*" if component_name
+              if component_name = component_instance.match(/.*(\[.*\])/)
+                name = "#{name}[NAME]"
+              end
             end
           end
 
-          list << { display_name: "#{cmp_action[:component_type]}.#{cmp_action[:method_name]}", action_type: "component_action" } #, action_params: action_params.uniq.join(', ') }
+          list << { display_name: "#{name}.#{cmp_action[:method_name]}", action_type: "component_action" }
         end
 
         list.uniq

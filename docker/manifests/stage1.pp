@@ -9,7 +9,7 @@ class {"dtk": stage => 2}
  
 class {"dtk_java": stage => 3}
  
-class {"dtk_activemq": user => "mcollective", password => "marionette", subcollective => "mcollective", stage => 4}
+class {"dtk_activemq": user => "mcollective", password => "marionette", subcollective => "mcollective", arbiter_topic => "arbiter", stage => 4}
  
 class dtk_stage5 {
   common_user {"dtk1": user => "git1"}

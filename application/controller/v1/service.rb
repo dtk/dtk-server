@@ -104,7 +104,7 @@ module DTK
         unless task = Task.create_from_assembly_instance?(service, {})
           # TODO: double check this is right
           response =  {
-            message: "There are no steps in the workflow to execute"
+            message: "There are no steps in the action to execute"
           }
           return rest_ok_response(response)
         end

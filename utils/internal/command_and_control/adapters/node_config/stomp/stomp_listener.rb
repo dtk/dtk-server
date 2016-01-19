@@ -63,19 +63,16 @@ module DTK
           end
         end
 
+        callbacks = CommandAndControlAdapter::StompMultiplexer.callback_registry[msg_request_id]
 
+        unless callbacks
+          # discard message if not the one requested
+          Log.info("Stomp message received with ID '#{msg_request_id}' is not for this tenant, and it is being ignored!")
+          return
+        end
 
         # making sure that timeout threads do not run overtime
         CommandAndControlAdapter::StompMultiplexer.process_response(original_msg, msg_request_id)
-
-        callbacks = CommandAndControlAdapter::StompMultiplexer.callback_registry[msg_request_id]
-
-        # discard message if not the one requested
-        unless callbacks
-          Log.info("Stomp message received with ID '#{msg_request_id}' is not for this tenant, and it is being ignored!")
-        else
-          callbacks.process_msg(original_msg, msg_request_id)
-        end
       end
     end
 

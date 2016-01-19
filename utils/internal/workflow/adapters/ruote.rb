@@ -37,7 +37,7 @@ module DTK
         Engine.kill_process(@wfid)
       end
 
-      TopTaskDefaultTimeOut = 60 * 20 # in seconds
+      TopTaskDefaultTimeOut = 60 * 60 # in seconds
 
       def execute(top_task_id)
         begin

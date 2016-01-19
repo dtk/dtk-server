@@ -76,27 +76,6 @@ module DTK; class  Assembly
       nodes
     end
 
-    # returns column plus whether need to pull in empty assembly nodes (assembly nodes w/o any components)
-    #[col,empty_assem_nodes]
-    def self.list_virtual_column?(detail_level = nil)
-      empty_assem_nodes = false
-      col =
-        if detail_level.nil?
-          nil
-        elsif detail_level == 'nodes'
-          empty_assem_nodes = true
-          # TODO: use below for component detail and introduce a more succinct one for nodes
-          :instance_nodes_and_cmps_summary
-        elsif detail_level == 'components'
-          empty_assem_nodes = true
-          :instance_nodes_and_cmps_summary
-        else
-          fail Error.new("not implemented list_virtual_column at detail level (#{detail_level})")
-        end
-      [col, empty_assem_nodes]
-    end
-    private_class_method :list_virtual_column?
-
     def add_node(node_name, node_binding_rs = nil, opts = {})
       # if assembly_wide node (used to add component directly on service_instance/assembly_template/workspace)
       # check if type = Node::Type::Node.assembly_wide
@@ -198,25 +177,6 @@ module DTK; class  Assembly
       cmp_instance_idh
     end
 
-    def add_component__update_component_module_refs?(component_module, namespace, version_info = nil)
-      assembly_branch = AssemblyModule::Service.get_or_create_assembly_branch(self)
-      assembly_branch.set_dsl_parsed!(true)
-      component_module_refs = ModuleRefs.get_component_module_refs(assembly_branch)
-
-      # TODO: not sure if the best way to handle using different version of component module
-      # unless we delete existing it will not update if version is changed
-      cmp_modules = component_module_refs.component_modules
-      cmp_modules.delete(component_module[:display_name].to_sym)
-
-      version_info = nil if version_info == 'master'
-      cmp_modules_with_namespaces = component_module.merge(namespace_name: namespace[:display_name], version_info: version_info)
-      if update_needed = component_module_refs.update_object_if_needed!([cmp_modules_with_namespaces])
-        # This saves teh upadte to the object model
-        component_module_refs.update()
-      end
-    end
-    private :add_component__update_component_module_refs?
-
     def create_assembly_wide_node?
       sp_hash = {
         cols: [:id, :display_name, :group_id, :ordered_component_ids],
@@ -239,17 +199,6 @@ module DTK; class  Assembly
       }
       Model.get_obj(model_handle(:node), sp_hash)
     end
-
-    #rturns a node group object if node_idh is a node group member of this assembly instance
-    def is_node_group_member?(node_idh)
-      sp_hash = {
-        cols: [:id, :display_name, :group_id, :node_members],
-        filter: [:eq, :assembly_id, id()]
-      }
-      node_id = node_idh.get_id()
-      Model.get_objs(model_handle(:node), sp_hash).find { |ng| ng[:node_member].id == node_id }
-    end
-    private :is_node_group_member?
 
     def add_assembly_template(assembly_template)
       target = get_target()
@@ -441,22 +390,8 @@ module DTK; class  Assembly
       end
     end
 
-    def self.exists?(model_handle, display_name)
-      result = self.find_by_name(model_handle, display_name)
-      !result.empty?
-    end
-
-    def self.find_by_name(model_handle, display_name)
-      sp_hash = {
-        cols:  [:id],
-        filter:
-        [:and,
-           [:eq, :display_name, display_name],
-           [:eq, :type, 'composite']
-        ]
-      }
-
-      get_objs(model_handle.createMH(:assembly_instance), sp_hash)
+    def self.exists?(target, display_name)
+      !!find_by_name?(target, display_name)
     end
 
     def self.check_valid_id(model_handle, id)
@@ -495,6 +430,69 @@ module DTK; class  Assembly
     def model_handle(mn = nil)
       super(mn || :component)
     end
+
+    private
+
+    # returns column plus whether need to pull in empty assembly nodes (assembly nodes w/o any components)
+    #[col,empty_assem_nodes]
+    def self.list_virtual_column?(detail_level = nil)
+      empty_assem_nodes = false
+      col =
+        if detail_level.nil?
+          nil
+        elsif detail_level == 'nodes'
+          empty_assem_nodes = true
+          # TODO: use below for component detail and introduce a more succinct one for nodes
+          :instance_nodes_and_cmps_summary
+        elsif detail_level == 'components'
+          empty_assem_nodes = true
+          :instance_nodes_and_cmps_summary
+        else
+          fail Error.new("not implemented list_virtual_column at detail level (#{detail_level})")
+        end
+      [col, empty_assem_nodes]
+    end
+
+    def self.find_by_name?(target, display_name)
+      sp_hash = {
+        cols:  [:id],
+        filter:  [:and,
+         [:eq, :display_name, display_name],
+         [:eq, :datacenter_datacenter_id, target.id],                  
+         [:eq, :type, 'composite']]
+      }
+      
+      get_obj(target.model_handle(:assembly_instance), sp_hash)
+    end
+
+    def add_component__update_component_module_refs?(component_module, namespace, version_info = nil)
+      assembly_branch = AssemblyModule::Service.get_or_create_assembly_branch(self)
+      assembly_branch.set_dsl_parsed!(true)
+      component_module_refs = ModuleRefs.get_component_module_refs(assembly_branch)
+
+      # TODO: not sure if the best way to handle using different version of component module
+      # unless we delete existing it will not update if version is changed
+      cmp_modules = component_module_refs.component_modules
+      cmp_modules.delete(component_module[:display_name].to_sym)
+
+      version_info = nil if version_info == 'master'
+      cmp_modules_with_namespaces = component_module.merge(namespace_name: namespace[:display_name], version_info: version_info)
+      if update_needed = component_module_refs.update_object_if_needed!([cmp_modules_with_namespaces])
+        # This saves teh upadte to the object model
+        component_module_refs.update()
+      end
+    end
+
+    #rturns a node group object if node_idh is a node group member of this assembly instance
+    def is_node_group_member?(node_idh)
+      sp_hash = {
+        cols: [:id, :display_name, :group_id, :node_members],
+        filter: [:eq, :assembly_id, id()]
+      }
+      node_id = node_idh.get_id()
+      Model.get_objs(model_handle(:node), sp_hash).find { |ng| ng[:node_member].id == node_id }
+    end
+
   end
 end
 # TODO: hack to get around error in lib/model.rb:31:in `const_get

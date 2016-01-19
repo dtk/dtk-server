@@ -1,6 +1,7 @@
 module DTK; class Repo
   class Diffs < Array
     attr_reader :a_sha, :b_sha
+
     def initialize(array_diff_hashes, a_sha, b_sha)
       super(array_diff_hashes.map { |hash| Diff.new(hash) })
       @a_sha = a_sha
@@ -16,9 +17,15 @@ module DTK; class Repo
     end
 
     class Summary < SimpleHashObject
+
+      DiffNames  = [:renamed, :added, :deleted, :modified]
+      DiffTypes  = DiffNames.map { |n| "files_#{n}".to_sym }
+      DiffIgnore = [:are_there_changes]
+
       def initialize(diffs_hash = nil)
         super()
         (diffs_hash || {}).each do |t, v|
+          next if DiffIgnore.include?(t.to_sym)
           t = t.to_sym
           if DiffTypes.include?(t)
             self[t] = v
@@ -56,8 +63,6 @@ module DTK; class Repo
       def paths_to_delete
         (self[:files_deleted] || []).map { |r| path(r) } + (self[:files_renamed] || []).map { |r| r[:old_path] }
       end
-      DiffNames = [:renamed, :added, :deleted, :modified]
-      DiffTypes = DiffNames.map { |n| "files_#{n}".to_sym }
 
       private
 

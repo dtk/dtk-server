@@ -370,10 +370,10 @@ module DTK; class  Assembly
       opts.merge!(task_params: task_params) if task_params
 
       if node
-        # if node has format node[id] it means use single node from node group
-        if node_match = node.include?('[') && node.match(/(.*)\[(.*)\]/)
-            node, node_id = $1, $2
-            opts.merge!(node_group_member: "#{node}:#{node_id}")
+        # if node has format node:id it means use single node from node group
+        if node_match = node.include?(':') && node.match(/([\w-]+)\:{1}(\d+)/)
+          opts.merge!(node_group_member: node)
+          node, node_id = $1, $2
         end
 
         # filter component that belongs to specified node

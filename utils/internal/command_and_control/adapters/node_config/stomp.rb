@@ -185,11 +185,14 @@ module DTK
 
       def self.errors_in_node_action_result?(result, action = nil)
         # result[:statuscode] is for mcollective agent errors and data is for errors for agent
-
         if result[:statuscode] != 0
           action_results = result[:data] ? result[:data][:data] : []
+
           errors = (action_results||[]).select { |r| r[:status] != 0 }.uniq
-          error_message = errors.collect { |r| "Command '#{r[:description]}' failed with status code #{r[:status]}, output: #{r[:stderr]}" }.join(', ')
+
+          error_message = errors.collect do |r|
+            r[:error] ? r[:error] : "Command '#{r[:description]}' failed with status code #{r[:status]}, output: #{r[:stderr]}"
+          end.join(', ')
 
           [{ message: error_message || "Node Error ocurred, cannot provide additional data" }]
         else

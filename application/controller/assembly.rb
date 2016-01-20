@@ -745,7 +745,8 @@ module DTK
 
     def rest__list_actions
       assembly = ret_assembly_instance_object()
-      rest_ok_response assembly.list_actions()
+      type     = ret_request_params(:type)
+      rest_ok_response assembly.list_actions(type)
     end
 
     def rest__create_task

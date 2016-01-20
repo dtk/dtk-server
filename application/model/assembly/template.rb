@@ -33,7 +33,7 @@ module DTK; class Assembly
       # including :description here because it is not a field that gets copied by clone copy processor
       override_attrs = { description: get_field?(:description), service_module_sha: service_module_branch[:current_sha] }
       if assembly_name = opts[:assembly_name]
-        fail ErrorUsage.new("Service '#{assembly_name}' already exists!") if Assembly::Instance.exists?(model_handle(), assembly_name)
+        fail ErrorUsage.new("Service '#{assembly_name}' already exists in target '#{target.get_field?(:display_name)}'") if Assembly::Instance.exists?(target, assembly_name)
         override_attrs[:display_name] = assembly_name
       end
 

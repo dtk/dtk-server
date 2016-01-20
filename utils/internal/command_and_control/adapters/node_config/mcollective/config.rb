@@ -158,6 +158,7 @@ eos
               logstash_config_file_path: R8::Config[:logstash][:config_file_path],
               logstash_tag: R8::Config[:logstash][:tag],
               arbiter_update: R8::Config[:arbiter][:update],
+              arbiter_branch: R8::Config[:arbiter][:branch],
               arbiter_topic: R8::Config[:arbiter][:id]
             )
           end
@@ -243,7 +244,7 @@ arbiter_topic = <%=arbiter_topic %>
 EOF
 
 <% if arbiter_update %>
-[ -x /usr/share/dtk/dtk-arbiter/update.sh ] && /usr/share/dtk/dtk-arbiter/update.sh
+[ -x /usr/share/dtk/dtk-arbiter/update.sh ] && /usr/share/dtk/dtk-arbiter/update.sh <%=arbiter_branch %>
 <% end %>
 
 <% if mcollective_restart %>

@@ -23,6 +23,9 @@ class Main < PageContainer
   def press_edit_button
     if Capybara.current_driver == :webkit || Capybara.current_driver == :poltergeist
       @session.find(INPUT_SELECTOR).trigger("click")
+      #fix for headless execution not opening edit page for namespaces
+      is_id = @session.current_url.split('/').last.to_i != 0
+      @session.visit(@session.current_url + '/edit') if @session.current_url.include?('namespaces') && is_id
     else
       @session.find(INPUT_SELECTOR).click
     end

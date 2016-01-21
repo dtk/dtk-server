@@ -42,17 +42,19 @@ module DTK; class Assembly
         clone_opts.merge!(service_settings: settings)
       end
 
-      new_assembly_obj = nil
+      new_assembly_obj  = nil
+      assembly_instance = nil
+
       Transaction do
         new_assembly_obj = target.clone_into(self, override_attrs, clone_opts)
+
+        assembly_instance = Assembly::Instance.create_subclass_object(new_assembly_obj)
+        assembly_instance_lock = Assembly::Instance::Lock.create_from_element(assembly_instance, service_module)
+        assembly_instance_lock.save_to_model()
+
+        # user can provide custom node-size and os-type attribute, we proccess them here and assign to nodes
+        set_custom_node_attributes(assembly_instance, opts) if opts[:node_size] || opts[:os_type]
       end
-
-      assembly_instance = Assembly::Instance.create_subclass_object(new_assembly_obj)
-      assembly_instance_lock = Assembly::Instance::Lock.create_from_element(assembly_instance, service_module)
-      assembly_instance_lock.save_to_model()
-
-      # user can provide custom node-size and os-type attribute, we proccess them here and assign to nodes
-      set_custom_node_attributes(assembly_instance, opts) if opts[:node_size] || opts[:os_type]
 
       assembly_instance
     end

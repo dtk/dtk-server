@@ -292,7 +292,7 @@ module DTK; class Component
         end
 
         ret_cmp_version = ret_cmp[:version]
-        cmp_mod_version = cmp_mod[:module_branch][:version]
+        cmp_mod_version = cmp_mod[:display_version]||cmp_mod[:module_branch][:version]
         full_ret_cmp_name = (ret_cmp_version && ret_cmp_version!='master') ? "#{ret_cmp_ns}:#{ret_cmp_mod}:#{ret_cmp_version}" : "#{ret_cmp_ns}:#{ret_cmp_mod}"
         full_cmp_mod_name = (cmp_mod_version && cmp_mod_version!='master') ? "#{cmp_mod_ns}:#{cmp_mod[:display_name]}:#{cmp_mod_version}" : "#{cmp_mod_ns}:#{cmp_mod[:display_name]}"
         fail ErrorUsage.new("Unable to add component from (#{full_ret_cmp_name}) because you are already using components version: #{full_cmp_mod_name}") if ret_cmp_version != cmp_mod_version

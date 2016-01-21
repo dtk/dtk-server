@@ -580,10 +580,14 @@ module DTK
         assembly_id        = ret_request_params(:assembly_id)
         version            = ret_request_params(:version)
         service_module     = ServiceModule.find(model_handle(:service_module), service_module_id)
+
+        raise ErrorUsage.new("Unable to find service module for specified parameters: '#{service_module_id}'") unless service_module
+
         # if we do not specify version use latest
-        version            = compute_latest_version(service_module) unless version
+        version = compute_latest_version(service_module) unless version
+
         module_name        = ret_request_params(:service_module_name)
-        assembly_version   = version || 'master'
+        assembly_version   = (version.nil? || version.eql?('base')) ? 'master' : version
         assembly_templates = service_module.get_assembly_templates().select { |template| (template[:display_name].eql?(assembly_id) || template[:id] == assembly_id.to_i) }
         assembly_template  = assembly_templates.find{ |template| template[:version] == assembly_version }
         fail ErrorUsage, "We are not able to find assembly '#{assembly_id}' for service module '#{module_name}'" unless assembly_template

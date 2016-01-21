@@ -14,7 +14,8 @@ module DTK; class ModuleRef
           if object.is_a?(String)
             ModuleVersion.string_master_or_empty?(object) ? DEFAULT_VERSION : object
           elsif object.is_a?(ModuleRef)
-            object[:version_info]
+            version_info = object[:version_info]
+            ModuleVersion.string_master_or_empty?(version_info) ? DEFAULT_VERSION : version_info
           end
 
          if version_string

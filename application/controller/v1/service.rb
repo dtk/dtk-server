@@ -55,6 +55,12 @@ module DTK
         rest_ok_response(response)
       end
 
+      def rest__exec
+        service    = service_object()
+        params_hash = ret_params_hash(:commit_msg, :task_action, :task_params, :start_assembly, :skip_violations)
+        rest_ok_response service.exec(params_hash)
+      end
+
       def rest__info
         service = service_object()
         rest_ok_response service.info
@@ -97,7 +103,7 @@ module DTK
         unless task = Task.create_from_assembly_instance?(service, {})
           # TODO: double check this is right
           response =  {
-            message: "There are no steps in the workflow to execute"
+            message: "There are no steps in the action to execute"
           }
           return rest_ok_response(response)
         end

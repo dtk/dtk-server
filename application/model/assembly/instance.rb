@@ -23,6 +23,8 @@ module DTK; class  Assembly
     extend NodeStatusClassMixin
     include NodeStatusToFixMixin
 
+    ACTION_DELIMITER = '.'
+
     def self.create_from_id_handle(idh)
       idh.create_object(model_name: :assembly_instance)
     end
@@ -282,6 +284,159 @@ module DTK; class  Assembly
         end
       end
       attr_patterns
+    end
+
+    def exec(params)
+      task_action = params[:task_action]
+
+      # check if action is called on component or on service instance action
+      if task_action
+        component_id, method_name = task_action.split(ACTION_DELIMITER)
+        augmented_cmps = check_if_augmented_component(params, component_id)
+
+        # check if component and service level action with same name
+        check_if_ambiguous(component_id) unless augmented_cmps.empty?
+
+        if task_action.include?(ACTION_DELIMITER) || !augmented_cmps.empty?
+          return execute_cmp_action(params, component_id, method_name, augmented_cmps)
+        end
+      end
+
+      skip_violations = params[:skip_violations]
+      unless skip_violations
+        violation_objects = find_violations()
+
+        violation_table = violation_objects.map do |v|
+          { type: v.type(), description: v.description() }
+        end.sort { |a, b| a[:type].to_s <=> b[:type].to_s }
+
+        return { violations: violation_table.uniq } unless violation_table.empty?
+      end
+
+      task = create_task(params)
+      return task if task.has_key?(:confirmation_message) || task.has_key?(:message)
+
+      execute_service_action(task[:task_id])
+    end
+
+    def create_task(opts)
+      if task_params = opts[:task_params]
+        fail ErrorUsage, "Node/nodes params are not supported for service instance actions!" if task_params.key?('node') || task_params.key?('nodes')
+      end
+
+      if any_stopped_nodes?(:admin)
+        return { confirmation_message: true } if opts[:start_assembly].nil?
+        opts.merge!(start_nodes: true, ret_nodes_to_start: [])
+      else
+        unless R8::Config[:debug][:disable_task_concurrent_check]
+          if running_task = most_recent_task_is_executing?
+            fail ErrorUsage, "Task with id '#{running_task.id}' is already running in assembly. Please wait until task is complete or cancel task."
+          end
+        end
+      end
+
+      task = Task.create_from_assembly_instance?(self, opts)
+      return { message: "There are no steps in the workflow to execute" } unless task
+
+      task.save!()
+      Node.start_instances(opts[:ret_nodes_to_start]) unless (opts[:ret_nodes_to_start]||[]).empty?
+
+      return { task_id: task.id }
+    end
+
+    def execute_service_action(task_id)
+      task_idh = id_handle().createIDH(id: task_id, model_name: :task)
+      task     = Task::Hierarchical.get_and_reify(task_idh)
+      workflow = Workflow.create(task)
+      workflow.defer_execution()
+      return { task_id: task_id }
+    end
+
+    def execute_cmp_action(params, component_id, method_name, augmented_cmps)
+      task_params = nil
+      component   = nil
+      node        = nil
+      task        = nil
+
+      task_params = params[:task_params]
+      node        = (task_params['node'] || task_params['nodes']) if task_params
+
+      message = "There are no components with identifier '#{component_id}'"
+      message += " on node '#{node}'" if node
+      fail ErrorUsage, "#{message}!" if augmented_cmps.empty?
+
+      opts = {}
+      opts.merge!(method_name: method_name) if method_name
+      opts.merge!(task_params: task_params) if task_params
+
+      if node
+        # if node has format node:id it means use single node from node group
+        if node_match = node.include?(':') && node.match(/([\w-]+)\:{1}(\d+)/)
+          opts.merge!(node_group_member: node)
+          node, node_id = $1, $2
+        end
+
+        component = augmented_cmps.find{|cmp| cmp[:node][:display_name].eql?(node)}
+        fail ErrorUsage, "#{message}!" unless component
+      else
+        if augmented_cmps.size == 1
+          component = augmented_cmps.first
+
+          # do not allow execution of service instance component actions
+          fail ErrorUsage, "You are not allowed to execute action on service instance component '#{component_id}'!" if (component[:node] && component[:node][:display_name].eql?('assembly_wide'))
+        else
+          task = Task.create_top_level(model_handle(:task), self, { task_action: "component_actions", temporal_order: 'concurrent' })
+
+          augmented_cmps.each do |cmp|
+            # skip execution of component actions on assembly wide node (service instance component)
+            next if (cmp[:node] && cmp[:node][:display_name].eql?('assembly_wide'))
+
+            subtask = Task.create_for_ad_hoc_action(self, cmp, opts)
+            task.add_subtask(subtask) if subtask
+          end
+        end
+      end
+
+      task = Task.create_for_ad_hoc_action(self, component, opts) if component
+      task = task.save_and_add_ids()
+
+      workflow = Workflow.create(task)
+      workflow.defer_execution()
+
+      {
+        assembly_instance_id: self.id(),
+        assembly_instance_name: self.display_name_print_form,
+        task_id: task.id()
+      }
+    end
+
+    def check_if_augmented_component(params, component_id)
+      task_params = params[:task_params]
+
+      if cmp_title = task_params && task_params['name']
+        component_id = "#{component_id}[#{cmp_title}]"
+      end
+
+      opts = Opts.new(filter_component: component_id)
+      augmented_cmps = get_augmented_components(opts)
+
+      # filter out service instance components
+      augmented_cmps.reject!{ |cmp| cmp[:node][:display_name].eql?('assembly_wide') }
+      augmented_cmps
+    end
+
+    # check if service instance action with same name as component action and raise ambiguity error
+    def check_if_ambiguous(action_name)
+      service_actions = get_task_templates(set_display_names: true)
+      service_actions.reject!{ |action| !action[:display_name].eql?(action_name) }
+
+      fail ErrorUsage, "There is ambiguity between service instance action and component action with name '#{action_name}'!" unless service_actions.empty?
+    end
+
+    def most_recent_task_is_executing?
+      if task = ::DTK::Task.get_top_level_most_recent_task(model_handle(:task), [:eq, :assembly_id, self.id()])
+        task.has_status?(:executing) && task
+      end
     end
 
     def self.exists?(model_handle, display_name)

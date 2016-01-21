@@ -34,6 +34,14 @@ module DTK; class ModuleRefs
       ret
     end
 
+    def version_info?
+      self[:version_info] && !version_info.eql?('master')
+    end
+
+    def version_info
+      self[:version_info]
+    end
+
     # returns a hash with keys component_module_name and value MatchedInfo
     # :match_type can be
     #   :dsl - match with element in dsl
@@ -107,15 +115,22 @@ module DTK; class ModuleRefs
     end
 
     def print_form
-      if ns = namespace?()
-        "#{ns}:#{component_module()}"
-      else
-        component_module()
+      ret =
+        if ns = namespace?()
+          "#{ns}:#{component_module()}"
+        else
+          component_module()
+        end
+
+      if version = version_info?() && version_info()
+        ret = "#{ret}(#{version})"
       end
+
+      ret
     end
 
     def match?(cmr)
-      namespace() == cmr.namespace() && component_module() == cmr.component_module()
+      namespace() == cmr.namespace() && component_module() == cmr.component_module() && version_info() == (cmr.version_info()||'master')
     end
 
     private

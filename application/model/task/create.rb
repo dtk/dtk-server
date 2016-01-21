@@ -12,7 +12,7 @@ module DTK; class Task
 
     def create_for_ad_hoc_action(assembly, component_idh, opts = {})
       task = Create.create_for_ad_hoc_action(assembly, component_idh, opts)
-      ret = NodeGroupProcessing.decompose_node_groups!(task)
+      ret = NodeGroupProcessing.decompose_node_groups!(task, opts)
 
       # raise error if any its nodes are not running
       not_running_nodes = ret.get_associated_nodes().select { |n| n.get_and_update_operational_status!() != 'running' }
@@ -22,6 +22,10 @@ module DTK; class Task
         fail ErrorUsage.new("Cannot execute the action because the following #{node_is} not running: #{node_names}")
       end
       ret
+    end
+
+    def create_top_level(task_mh, assembly, opts = {})
+      Create.create_top_level_task(task_mh, assembly, opts)
     end
   end
 
@@ -112,7 +116,7 @@ module DTK; class Task
       task_info_hash = {
         assembly_id: assembly.id,
         display_name: opts[:task_action] || 'assembly_converge',
-        temporal_order: 'sequential'
+        temporal_order: opts[:temporal_order] || 'sequential'
       }
       if commit_msg = opts[:commit_msg]
         task_info_hash.merge!(commit_message: commit_msg)

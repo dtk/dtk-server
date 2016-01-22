@@ -159,7 +159,8 @@ eos
               logstash_tag: R8::Config[:logstash][:tag],
               arbiter_update: R8::Config[:arbiter][:update],
               arbiter_branch: R8::Config[:arbiter][:branch],
-              arbiter_topic: R8::Config[:arbiter][:id]
+              arbiter_topic: R8::Config[:arbiter][:topic],
+              arbiter_queue: R8::Config[:arbiter][:queue]
             )
           end
 
@@ -241,6 +242,7 @@ stomp_port = <%=stomp_port %>
 stomp_username = <%=mcollective_username %>
 stomp_password = <%=mcollective_password %>
 arbiter_topic = <%=arbiter_topic %>
+arbiter_queue = <%=arbiter_queue %>
 EOF
 
 <% if arbiter_update %>

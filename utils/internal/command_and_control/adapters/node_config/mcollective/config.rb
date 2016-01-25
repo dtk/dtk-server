@@ -160,7 +160,9 @@ eos
               arbiter_update: R8::Config[:arbiter][:update],
               arbiter_branch: R8::Config[:arbiter][:branch],
               arbiter_topic: R8::Config[:arbiter][:topic],
-              arbiter_queue: R8::Config[:arbiter][:queue]
+              arbiter_queue: R8::Config[:arbiter][:queue],
+              arbiter_user: R8::Config[:arbiter][:user],
+              arbiter_password: R8::Config[:arbiter][:password]
             )
           end
 
@@ -239,8 +241,8 @@ EOF
 cat << EOF > /etc/dtk-arbiter.cfg
 stomp_url = <%=node_config_server_host %>
 stomp_port = <%=stomp_port %>
-stomp_username = <%=mcollective_username %>
-stomp_password = <%=mcollective_password %>
+stomp_username = <%=arbiter_user %>
+stomp_password = <%=arbiter_password %>
 arbiter_topic = <%=arbiter_topic %>
 arbiter_queue = <%=arbiter_queue %>
 EOF

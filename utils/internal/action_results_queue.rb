@@ -1,6 +1,4 @@
 require 'iconv'
-# important, due to issue with class loading make sure this class is loaded first
-r8_nested_require('command_and_control', 'adapters/node_config/mcollective')
 
 module DTK
   # cross threads may be seperate requests for new action results queue, but no locking on allocated instance
@@ -54,7 +52,6 @@ module DTK
 
     # can be overwritten
     def messaging_protocol
-      # default: mcollective
       R8::Config[:command_and_control][:node_config][:type]
     end
 

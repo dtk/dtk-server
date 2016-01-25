@@ -3,7 +3,6 @@ module XYZ
     helper :node_helper
     helper :rest_async
 
-    ### mcollective actions
     def rest__initiate_get_netstats
       node = create_node_obj(:node_id)
       queue = ActionResultsQueue.new

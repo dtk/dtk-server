@@ -11,9 +11,9 @@ module DTK
         r8_nested_require('participant', 'install_agent')
         r8_nested_require('participant', 'execute_smoketest')
         r8_nested_require('participant', 'detect_created_node_is_ready')
-        r8_nested_require('participant', 'mcollective_debug')
+        r8_nested_require('participant', 'stomp_debug')
 
-        include McollectiveDebug
+        include StompDebug
 
         def initialize(opts = nil)
           @opts = opts

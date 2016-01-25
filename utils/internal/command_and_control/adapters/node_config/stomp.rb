@@ -1,12 +1,12 @@
 r8_nested_require('stomp', 'multiplexer')
-r8_nested_require('mcollective', 'assembly_action')
-r8_nested_require('mcollective', 'config')
+r8_nested_require('messaging', 'assembly_action')
+r8_nested_require('messaging', 'config')
 r8_nested_require('stomp', 'stomp_listener')
 
 module DTK
   module CommandAndControlAdapter
     class Stomp < CommandAndControlNodeConfig
-      extend Mcollective::AssemblyActionClassMixin
+      extend Messaging::AssemblyActionClassMixin
 
       DEFAULT_TIMEOUT_AUTH_NODE = 60
 
@@ -21,7 +21,7 @@ module DTK
       end
 
       def self.install_script(node, bindings)
-        Mcollective::Config.install_script(node, bindings)
+        Messaging::Config.install_script(node, bindings)
       end
 
       def self.get_stomp_client(force_init=false)

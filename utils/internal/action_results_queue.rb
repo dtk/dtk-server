@@ -5,8 +5,8 @@ r8_nested_require('command_and_control', 'adapters/node_config/mcollective')
 module DTK
   # cross threads may be seperate requests for new action results queue, but no locking on allocated instance
   class ActionResultsQueue
-    r8_require('workflow/adapters/ruote/participant/mcollective_debug')
-    include McollectiveDebug
+    r8_require('workflow/adapters/ruote/participant/stomp_debug')
+    include StompDebug
 
     Lock = Mutex.new
     Queues = {}

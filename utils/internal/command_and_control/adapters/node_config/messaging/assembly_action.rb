@@ -1,5 +1,5 @@
 module DTK
-  class CommandAndControlAdapter::Mcollective
+  class CommandAndControlAdapter::Messaging
     module AssemblyActionClassMixin
       def request__execute_action(agent, action, nodes, callbacks, params = {})
         ret = nodes.inject({}) { |h, n| h.merge(n[:id] => nil) }

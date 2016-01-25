@@ -33,7 +33,7 @@ module XYZ
 
       # if nodes empty return error message, case where more nodes are matches should not happen
       if nodes.empty?
-        action_results_queue.push(:error, "No nodes provided for given action, aborting operation mcollective agent (#{agent_name.capitalize}##{agent_method})")
+        action_results_queue.push(:error, "No nodes provided for given action, aborting operation for arbiter agent (#{agent_name.capitalize}##{agent_method})")
         return
       end
 

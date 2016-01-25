@@ -1,6 +1,6 @@
 module DTK
   module CommandAndControlAdapter
-    class Mcollective
+    class Messaging
       class Config
         require 'tempfile'
         require 'erubis'
@@ -27,21 +27,6 @@ module DTK
 
         private
 
-        def self.create_mcollective_client
-          config_file_content = mcollective_config_file()
-          begin
-            # TODO: see if can pass args and not need to use tempfile
-            config_file = Tempfile.new('client.cfg')
-            config_file.write(config_file_content)
-            config_file.close
-            ret = ::MCollective::Client.new(config_file.path)
-            ret.options = {}
-            ret
-           ensure
-            config_file.unlink
-          end
-        end
-
         def self.create
           type = (R8::Config[:mcollective][:auth_type] || :default).to_sym
           klass =
@@ -54,10 +39,6 @@ module DTK
 
         def initialize(type)
           @type = type
-        end
-
-        def self.mcollective_config_file
-          create().mcollective_config_file()
         end
 
         def mcollective_config_erubis_object
@@ -74,15 +55,6 @@ module DTK
         end
 
         class Default < self
-          def mcollective_config_file
-            mcollective_config_erubis_object().result(
-              logfile: logfile(),
-              stomp_host: Mcollective.server_host(),
-              stomp_port: Mcollective.server_port(),
-              mcollective_username: R8::Config[:mcollective][:username],
-              mcollective_password: R8::Config[:mcollective][:password],
-              mcollective_collective: R8::Config[:mcollective][:collective])
-          end
 
           private
 
@@ -114,20 +86,6 @@ eos
         end
 
         class Ssh < self
-          # TODO: validate the R8::Config[:mcollective][:ssh] params
-          def mcollective_config_file
-            mcollective_config_erubis_object().result(
-              logfile: logfile(),
-              stomp_host: Mcollective.server_host(),
-              stomp_port: Mcollective.server_port(),
-              mcollective_ssh_local_public_key: R8::Config[:mcollective][:ssh][:local][:public_key],
-              mcollective_ssh_local_private_key: R8::Config[:mcollective][:ssh][:local][:private_key],
-              mcollective_ssh_local_authorized_keys: R8::Config[:mcollective][:ssh][:local][:authorized_keys],
-              mcollective_username: R8::Config[:mcollective][:username],
-              mcollective_password: R8::Config[:mcollective][:password],
-              mcollective_collective: R8::Config[:mcollective][:collective]
-            )
-          end
 
           private
 
@@ -146,7 +104,7 @@ eos
               mcollective_password: R8::Config[:mcollective][:password],
               mcollective_collective: R8::Config[:mcollective][:collective],
               mcollective_restart: mcollective_restart(node),
-              stomp_port: Mcollective.server_port(),
+              stomp_port: R8::Config[:mcollective][:port],
               # TODO: will generalize so not just puppet
               puppet_version: puppet_version(node),
               pbuilderid: pbuilderid,

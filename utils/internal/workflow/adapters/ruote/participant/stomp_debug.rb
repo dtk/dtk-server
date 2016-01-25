@@ -1,5 +1,5 @@
 module DTK
-  module McollectiveDebug
+  module StompDebug
     DEBUG_AGENT_RESPONSE = R8::Config[:debug][:arbiter]
 
     def inspect_agent_response(msg)

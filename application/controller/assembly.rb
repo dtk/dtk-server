@@ -1009,7 +1009,6 @@ module DTK
     end
 
     def rest__get_action_results
-      # TODO: to be safe need to garbage collect on ActionResultsQueue in case miss anything
       action_results_id = ret_non_null_request_params(:action_results_id)
       ret_only_if_complete = ret_request_param_boolean(:return_only_if_complete)
       disable_post_processing = ret_request_param_boolean(:disable_post_processing)
@@ -1026,7 +1025,6 @@ module DTK
         end
       end
     end
-    ### end: mcollective actions
 
     private
 

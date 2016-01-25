@@ -10,16 +10,16 @@ Under development.
 
 #### ActiveMQ configuration
 
-We are using `mcollective` user for interaction between `dtk-server` and `dtk-arbiter` it is important to set topic `arbiter.>` for this communication. You need to edit AMQ's configuration which can be found in `/opt/activemq/conf/activemq.xml`
+We are using `dtk-user` (e.g. dtk1, dtk2, ...) for interaction between `dtk-server` and `dtk-arbiter` it is important to set topic `arbiter.>` for this communication. You need to edit AMQ's configuration which can be found in `/opt/activemq/conf/activemq.xml`
 
     <authorizationPlugin>
     	<map>
         	<authorizationMap>
             	<authorizationEntries>
             		<authorizationEntry queue=">" write="admins" read="admins" admin="admins" />
-					...
-					<authorizationEntry topic="arbiter.>" write="mcollective" read="mcollective" admin="mcollective" />
-					...
+        					...
+        					<authorizationEntry topic="arbiter.>" write="dtk1" read="dtk1" admin="dtk1" />
+        					...
                 </authorizationEntries>
               </authorizationMap>
             </map>

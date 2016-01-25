@@ -38,7 +38,7 @@ module DTK
         # success connecting to stomp
         subscribe(R8::Config[:arbiter][:queue])
         @stomp_rdy = true
-        Log.debug "Connected to STOMP and subscribed to topic '#{R8::Config[:arbiter][:queue]}'"
+        Log.debug "Connected to STOMP and subscribed to queue '#{R8::Config[:arbiter][:queue]}'"
       elsif "ERROR".eql?(msg.command)
         Log.error("Not able to connect to STOMP, reason: #{msg.header['message']}. Stopping listener now ...", nil)
          @stomp_rdy = true

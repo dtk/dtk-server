@@ -13,4 +13,11 @@ RUN puppet apply --debug /tmp/manifests/stage1.pp
 RUN puppet apply --debug /tmp/manifests/stage2.pp
 RUN puppet apply --debug /tmp/manifests/stage4.pp
 
+
+RUN apt-get install -y libpq-dev
+COPY Gemfile* /tmp/
+WORKDIR '/tmp'
+RUN /usr/local/rvm/wrappers/default/bundle --without development --deployment --path=/var/lib/dtk-bundler-vendor
+
 RUN rm -rf /etc/puppet/modules /tmp/*
+

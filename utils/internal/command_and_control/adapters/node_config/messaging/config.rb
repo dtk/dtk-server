@@ -4,13 +4,8 @@ module DTK
       class Config
         require 'tempfile'
         require 'erubis'
-        Lock = Mutex.new
 
-        def self.mcollective_client
-          Lock.synchronize do
-            @mcollective_client ||= create_mcollective_client()
-          end
-        end
+        Lock = Mutex.new
 
         def self.install_script(node, bindings)
           create().install_script(node, bindings)
@@ -19,10 +14,6 @@ module DTK
         def install_script(node, bindings)
           all_bindings = install_script_bindings(node, bindings)
           erubis_object(install_script_erb()).result(all_bindings)
-        end
-
-        def self.discover(filter, timeout, limit, client)
-          ::MCollective::Discovery::Mc.discover(filter, timeout, limit, client)
         end
 
         private

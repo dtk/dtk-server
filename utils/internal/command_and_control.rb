@@ -58,11 +58,6 @@ module DTK
       klass.errors_in_node_action_result?(result, action)
     end
 
-    def self.get_mcollective_client
-      klass = load_for_node_config()
-      klass.get_mcollective_client()
-    end
-
     # This takes into account what is needed for the node_config_adapter
     def self.node_config_adapter_install_script(node, bindings)
       klass = load_for_node_config()

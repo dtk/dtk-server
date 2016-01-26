@@ -174,6 +174,7 @@ arbiter_topic = <%=arbiter_topic %>
 arbiter_queue = <%=arbiter_queue %>
 git_server = "<%=git_server_url %>"
 pbuilderid = <%= pbuilderid %>
+private_key = /etc/dtk/ssh/arbiter
 <% end %>
 EOF
 

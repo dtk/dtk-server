@@ -17,7 +17,7 @@ module DTK
       end
 
       def self.server_port
-        R8::Config[:stomp][:port]
+        (R8::Config[:stomp][:port]||'').to_i
       end
 
       def self.install_script(node, bindings)
@@ -32,8 +32,8 @@ module DTK
       end
 
       def self.create_stomp_client
-        Log.info("Trying to connect to STOMP server at #{R8::Config[:stomp][:host]}:#{R8::Config[:stomp][:port]} ...")
-        ret = R8EM.connect  R8::Config[:stomp][:host], R8::Config[:stomp][:port], DTK::StompListener
+        Log.info("Trying to connect to STOMP server at #{server_host}:#{server_port} ...")
+        ret = R8EM.connect  server_host, server_port, DTK::StompListener
         ret
       end
 

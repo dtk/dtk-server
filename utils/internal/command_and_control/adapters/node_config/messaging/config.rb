@@ -13,6 +13,8 @@ module DTK
 
         def install_script(node, bindings)
           all_bindings = install_script_bindings(node, bindings)
+          # DEBUG SNIPPET >>> REMOVE <<<
+          require (RUBY_VERSION.match(/1\.8\..*/) ? 'ruby-debug' : 'debugger');Debugger.start; debugger
           erubis_object(install_script_erb()).result(all_bindings)
         end
 
@@ -91,7 +93,6 @@ eos
               arbiter_ssh_remote_public_key: ssh_remote_public_key,
               arbiter_ssh_remote_private_key: ssh_remote_private_key,
               arbiter_ssh_local_public_key: ssh_local_public_key,
-              stomp_port: R8::Config[:arbiter][:port],
               # TODO: will generalize so not just puppet
               puppet_version: puppet_version(node),
               pbuilderid: pbuilderid,
@@ -107,6 +108,7 @@ eos
               arbiter_topic: R8::Config[:arbiter][:topic],
               arbiter_queue: R8::Config[:arbiter][:queue],
               stomp_host: R8::Config[:stomp][:host],
+              stomp_port: R8::Config[:stomp][:port],
               stomp_username: R8::Config[:stomp][:username],
               stomp_password: R8::Config[:stomp][:password]
             )
@@ -166,7 +168,7 @@ EOF
 /opt/puppet-omnibus/embedded/bin/gem install puppet -v <%= puppet_version %> --no-rdoc --no-ri
 <% end %>
 
-cat << EOF > /etc/dtk-arbiter.cfg
+cat << EOF > /etc/dtk/arbiter.cfg
 stomp_url = <%= stomp_host %>
 stomp_port = <%= stomp_port %>
 stomp_username = <%= stomp_username %>
@@ -176,7 +178,6 @@ arbiter_queue = <%= arbiter_queue %>
 git_server = "<%= git_server_url %>"
 pbuilderid = <%= pbuilderid %>
 private_key = /etc/dtk/ssh/arbiter
-<% end %>
 EOF
 
 <% if arbiter_update %>

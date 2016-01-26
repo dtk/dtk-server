@@ -13,8 +13,6 @@ module DTK
 
         def install_script(node, bindings)
           all_bindings = install_script_bindings(node, bindings)
-          # DEBUG SNIPPET >>> REMOVE <<<
-          require (RUBY_VERSION.match(/1\.8\..*/) ? 'ruby-debug' : 'debugger');Debugger.start; debugger
           erubis_object(install_script_erb()).result(all_bindings)
         end
 

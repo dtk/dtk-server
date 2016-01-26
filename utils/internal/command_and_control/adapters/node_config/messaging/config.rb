@@ -82,20 +82,16 @@ eos
 
           def install_script_bindings(node, bindings)
             # TODO: clean up to have error checking
-            ssh_remote_public_key = File.open(R8::Config[:mcollective][:ssh][:remote][:public_key], 'rb') { |f| f.read }
-            ssh_remote_private_key = File.open(R8::Config[:mcollective][:ssh][:remote][:private_key], 'rb') { |f| f.read }
-            ssh_local_public_key = File.open(R8::Config[:mcollective][:ssh][:local][:public_key], 'rb') { |f| f.read }
+            ssh_remote_public_key = File.open(R8::Config[:arbiter][:ssh][:remote][:public_key], 'rb') { |f| f.read }
+            ssh_remote_private_key = File.open(R8::Config[:arbiter][:ssh][:remote][:private_key], 'rb') { |f| f.read }
+            ssh_local_public_key = File.open(R8::Config[:arbiter][:ssh][:local][:public_key], 'rb') { |f| f.read }
             pbuilderid = (node.pbuilderid() if node.get_iaas_type() == :physical)
             # order of merge does not matter; keys wont conflict
             bindings.merge(
-              mcollective_ssh_remote_public_key: ssh_remote_public_key,
-              mcollective_ssh_remote_private_key: ssh_remote_private_key,
-              mcollective_ssh_local_public_key: ssh_local_public_key,
-              mcollective_username: R8::Config[:mcollective][:username],
-              mcollective_password: R8::Config[:mcollective][:password],
-              mcollective_collective: R8::Config[:mcollective][:collective],
-              mcollective_restart: mcollective_restart(node),
-              stomp_port: R8::Config[:mcollective][:port],
+              arbiter_ssh_remote_public_key: ssh_remote_public_key,
+              arbiter_ssh_remote_private_key: ssh_remote_private_key,
+              arbiter_ssh_local_public_key: ssh_local_public_key,
+              stomp_port: R8::Config[:arbiter][:port],
               # TODO: will generalize so not just puppet
               puppet_version: puppet_version(node),
               pbuilderid: pbuilderid,
@@ -144,37 +140,19 @@ eos
           end
 
           USER_DATA_SH_ERB = <<eos
-cat << EOF >> /etc/mcollective/server.cfg
----
-plugin.stomp.host = <%=node_config_server_host %>
-plugin.stomp.port = <%=stomp_port %>
-main_collective = <%=mcollective_collective %>
-collectives = <%=mcollective_collective %>
+mkdir -p /etc/dtk/ssh
+chmod 700 /etc/dtk/ssh
 
-plugin.stomp.user = <%=mcollective_username %>
-plugin.stomp.password = <%=mcollective_password %>
+cat << EOF > /etc/dtk/ssh/arbiter
+<%=arbiter_ssh_remote_private_key %>
 EOF
 
-cat << EOF > /etc/mcollective/facts.yaml
----
-git-server: "<%=git_server_url %>"
-<% if pbuilderid %>
-pbuilderid: <%= pbuilderid %>
-<% end %>
+cat << EOF > /etc/dtk/ssh/arbiter.pub
+<%=arbiter_ssh_remote_public_key %>
 EOF
 
-mkdir -p /etc/mcollective/ssh
-
-cat << EOF > /etc/mcollective/ssh/mcollective
-<%=mcollective_ssh_remote_private_key %>
-EOF
-
-cat << EOF > /etc/mcollective/ssh/mcollective.pub
-<%=mcollective_ssh_remote_public_key %>
-EOF
-
-cat << EOF > /etc/mcollective/ssh/authorized_keys
-<%=mcollective_ssh_local_public_key %>
+cat << EOF > /etc/dtk/ssh/authorized_keys
+<%=arbiter_ssh_local_public_key %>
 EOF
 
 ssh-keygen -f "/root/.ssh/known_hosts" -R <%=git_server_dns %>
@@ -194,15 +172,13 @@ stomp_username = <%=arbiter_username %>
 stomp_password = <%=arbiter_password %>
 arbiter_topic = <%=arbiter_topic %>
 arbiter_queue = <%=arbiter_queue %>
+git_server = "<%=git_server_url %>"
+pbuilderid = <%= pbuilderid %>
+<% end %>
 EOF
 
 <% if arbiter_update %>
 [ -x /usr/share/dtk/dtk-arbiter/update.sh ] && /usr/share/dtk/dtk-arbiter/update.sh <%=arbiter_branch %>
-<% end %>
-
-<% if mcollective_restart %>
-/etc/init.d/mcollective* restart
-[ -x /etc/init.d/dtk-arbiter ] && /etc/init.d/dtk-arbiter restart
 <% end %>
 
 <% if logstash_enable %>

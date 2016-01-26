@@ -11,7 +11,7 @@ module DTK
 
     def self.decrypt_sensitive(encrypted_data, encrypted_key, encrypted_iv)
       if encrypted_data
-        private_key = OpenSSL::PKey::RSA.new(File.read(R8::Config[:mcollective][:ssh][:remote][:private_key]),'')
+        private_key = OpenSSL::PKey::RSA.new(File.read(R8::Config[:arbiter][:ssh][:remote][:private_key]),'')
         cipher = OpenSSL::Cipher::Cipher.new('aes-256-cbc')
         cipher.decrypt
         cipher.key = private_key.private_decrypt(encrypted_key)
@@ -31,7 +31,7 @@ module DTK
     def self.encrypt_sensitive(message)
       plain_data = message.to_yaml
       if !plain_data.empty?
-        public_key = OpenSSL::PKey::RSA.new(File.read(R8::Config[:mcollective][:ssh][:remote][:private_key]),'').public_key
+        public_key = OpenSSL::PKey::RSA.new(File.read(R8::Config[:arbiter][:ssh][:remote][:private_key]),'').public_key
         cipher = OpenSSL::Cipher::Cipher.new('aes-256-cbc')
         cipher.encrypt
         cipher.key = random_key = cipher.random_key

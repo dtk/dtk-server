@@ -13,11 +13,11 @@ module DTK
       Lock = Mutex.new
 
       def self.server_host
-        R8::Config[:command_and_control][:node_config][:mcollective][:host]
+        R8::Config[:stomp][:host]
       end
 
       def self.server_port
-        R8::Config[:mcollective][:port]
+        R8::Config[:stomp][:port]
       end
 
       def self.install_script(node, bindings)
@@ -32,8 +32,8 @@ module DTK
       end
 
       def self.create_stomp_client
-        Log.info("Trying to connect to STOMP server at #{R8::Config[:server_public_dns]}:#{R8::Config[:mcollective][:port]} ...")
-        ret = R8EM.connect  R8::Config[:server_public_dns], R8::Config[:mcollective][:port], DTK::StompListener
+        Log.info("Trying to connect to STOMP server at #{R8::Config[:stomp][:host]}:#{R8::Config[:stomp][:port]} ...")
+        ret = R8EM.connect  R8::Config[:stomp][:host], R8::Config[:stomp][:port], DTK::StompListener
         ret
       end
 

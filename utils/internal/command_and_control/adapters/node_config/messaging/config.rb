@@ -19,7 +19,7 @@ module DTK
         private
 
         def self.create
-          type = (R8::Config[:mcollective][:auth_type] || :default).to_sym
+          type = (R8::Config[:arbiter][:auth_type] || :default).to_sym
           klass =
             case type
             when :ssh then Ssh

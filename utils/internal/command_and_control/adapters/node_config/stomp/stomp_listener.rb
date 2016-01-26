@@ -8,8 +8,8 @@ module DTK
       # there is an issue with stomp connection, which results in ERROR thrown first time when connecting. This is something that can be ignore
       # it looks like issue with EM stomp client since it does not effect functionaliy. After first error all seems to be working fine.
       @stomp_rdy = false
-      Log.info("Establishing connection to STOMP server with credentials #{R8::Config[:arbiter][:username]} / #{R8::Config[:arbiter][:password]} ...")
-      connect :login => R8::Config[:arbiter][:username], :passcode => R8::Config[:arbiter][:password]
+      Log.info("Establishing connection to STOMP server with credentials #{R8::Config[:stomp][:username]} / #{R8::Config[:stomp][:password]} ...")
+      connect :login => R8::Config[:stomp][:username], :passcode => R8::Config[:stomp][:password]
 
       if defined?(PhusionPassenger)
         Log.info("Created second STOMP client due to Passenger bug, this client will be used to sent AMQ messages.")
@@ -20,10 +20,10 @@ module DTK
 
     def create_second_client
       configuration = {
-        stomp_username: R8::Config[:arbiter][:username],
-        stomp_password: R8::Config[:arbiter][:password],
-        stomp_host: R8::Config[:server_public_dns],
-        stomp_port: R8::Config[:mcollective][:port].to_i
+        stomp_username: R8::Config[:stomp][:username],
+        stomp_password: R8::Config[:stomp][:password],
+        stomp_host: R8::Config[:stomp][:host],
+        stomp_port: R8::Config[:stomp][:port].to_i
       }
       @backup_client = ::Stomp::Client.new(:hosts => [{:login => configuration[:stomp_username], :passcode => configuration[:stomp_password], :host => configuration[:stomp_host], :port => configuration[:stomp_port], :ssl => false}])
     end

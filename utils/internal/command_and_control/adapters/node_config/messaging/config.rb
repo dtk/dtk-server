@@ -180,6 +180,7 @@ EOF
 
 <% if arbiter_update %>
 [ -x /usr/share/dtk/dtk-arbiter/update.sh ] && /usr/share/dtk/dtk-arbiter/update.sh <%=arbiter_branch %>
+[ -x /etc/init.d/dtk-arbiter ] && /etc/init.d/dtk-arbiter restart
 <% end %>
 
 <% if logstash_enable %>

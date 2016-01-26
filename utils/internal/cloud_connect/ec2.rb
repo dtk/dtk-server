@@ -165,12 +165,18 @@ module DTK
       end
 
       def check_for_security_group(name, _description = nil)
+        s_group = nil
         return unless conn.respond_to?(:security_groups)
-        unless sc = conn.security_groups.get(name)
-          # sc = conn.security_groups.create(:name => name, :description => description)
-          fail ErrorUsage.new("Not able to find IAAS security group with name '#{name}' aborting action, please create necessery security group")
+
+        security_groups = conn.security_groups
+        unless s_group = security_groups.get(name)
+          # if does not found by group name try search by group_id as well
+          unless s_group = security_groups.get_by_id(name)
+            fail ErrorUsage.new("Not able to find IAAS security group with name or id '#{name}' aborting action, please create necessery security group")
+          end
         end
-        sc
+
+        s_group
       end
 
       def allocate_elastic_ip

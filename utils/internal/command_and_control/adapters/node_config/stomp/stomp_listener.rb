@@ -8,7 +8,7 @@ module DTK
       # there is an issue with stomp connection, which results in ERROR thrown first time when connecting. This is something that can be ignore
       # it looks like issue with EM stomp client since it does not effect functionaliy. After first error all seems to be working fine.
       @stomp_rdy = false
-      Log.info("Establishing connection to STOMP server with credentials #{R8::Config[:stomp][:username]} / #{R8::Config[:stomp][:password]} ...")
+      Log.info("Establishing connection to STOMP server with credentials #{R8::Config[:stomp][:username]} / #{safe_print_stomp_password} ...")
       connect :login => R8::Config[:stomp][:username], :passcode => R8::Config[:stomp][:password]
 
       if defined?(PhusionPassenger)
@@ -99,6 +99,10 @@ module DTK
     end
 
   private
+
+    def safe_print_stomp_password
+      (R8::Config[:stomp][:password] || '').gsub(/./,'*')
+    end
 
     def encode(message)
       encrypted_message, ekey, esecret = SSHCipher.encrypt_sensitive(message)

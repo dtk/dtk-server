@@ -106,8 +106,9 @@ eos
               arbiter_branch: R8::Config[:arbiter][:branch],
               arbiter_topic: R8::Config[:arbiter][:topic],
               arbiter_queue: R8::Config[:arbiter][:queue],
-              arbiter_username: R8::Config[:arbiter][:username],
-              arbiter_password: R8::Config[:arbiter][:password]
+              stomp_host: R8::Config[:stomp][:host],
+              stomp_username: R8::Config[:stomp][:username],
+              stomp_password: R8::Config[:stomp][:password]
             )
           end
 
@@ -166,13 +167,13 @@ EOF
 <% end %>
 
 cat << EOF > /etc/dtk-arbiter.cfg
-stomp_url = <%=node_config_server_host %>
-stomp_port = <%=stomp_port %>
-stomp_username = <%=arbiter_username %>
-stomp_password = <%=arbiter_password %>
-arbiter_topic = <%=arbiter_topic %>
-arbiter_queue = <%=arbiter_queue %>
-git_server = "<%=git_server_url %>"
+stomp_url = <%= stomp_host %>
+stomp_port = <%= stomp_port %>
+stomp_username = <%= stomp_username %>
+stomp_password = <%= stomp_password %>
+arbiter_topic = <%= arbiter_topic %>
+arbiter_queue = <%= arbiter_queue %>
+git_server = "<%= git_server_url %>"
 pbuilderid = <%= pbuilderid %>
 private_key = /etc/dtk/ssh/arbiter
 <% end %>

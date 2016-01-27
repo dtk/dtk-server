@@ -121,7 +121,10 @@ module DTK
       end
 
       def version?
-        if @context.is_a?(ModuleRef)
+        # TODO: fix for DTK-2428, not sure if this will break anything else
+        if version = @module_branch && @module_branch[:version]
+          version.eql?('master') ? nil : version
+        elsif @context.is_a?(ModuleRef)
           @context[:version_info]
         end
         # TODO: DTK-2267; see if we want an 'elsif clause

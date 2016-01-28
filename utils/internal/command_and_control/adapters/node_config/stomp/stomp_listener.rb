@@ -3,8 +3,10 @@ module DTK
     include EM::Protocols::Stomp
 
     NUMBER_OF_RETRIES = 5
+    IDLE_RECONNECT_TIME = 90
 
     def connection_completed
+      @message_registry = {}
       # there is an issue with stomp connection, which results in ERROR thrown first time when connecting. This is something that can be ignore
       # it looks like issue with EM stomp client since it does not effect functionaliy. After first error all seems to be working fine.
       @stomp_rdy = false
@@ -50,6 +52,8 @@ module DTK
         pbuilder_id    = original_msg[:pbuilderid]
         is_heartbeat   = original_msg[:heartbeat]
 
+        deregister_incoming(msg_request_id)
+
         # decode message
         Log.debug "Recived message from STOMP, message id '#{msg_request_id}' from pbuilderid '#{pbuilder_id}' ..."
 
@@ -92,14 +96,42 @@ module DTK
       ##
       # Hack, to have ti working on passenger, since send was not working on passenger and we cannot figure out why
       #
+      register_outgoing(message[:request_id])
+
       if defined?(PhusionPassenger)
         @backup_client.publish(R8::Config[:arbiter][:topic], encode(message))
       else
         send(R8::Config[:arbiter][:topic], encode(message))
       end
+
+      R8EM.add_timer(IDLE_RECONNECT_TIME) { check_hanging_messages() }
     end
 
   private
+
+    def register_outgoing(request_id)
+      return unless request_id
+      @message_registry[request_id] = Time.now
+    end
+
+    def deregister_incoming(request_id)
+      return unless request_id
+      @message_registry.delete(request_id)
+    end
+
+    def check_hanging_messages
+      return if @message_registry.size == 0
+      current_time = Time.now
+      max_wait_time = current_time - @message_registry.values.max
+
+      if max_wait_time > (IDLE_RECONNECT_TIME - 10)
+        Log.info("STOMP listener has not received response for 60 seconds, we are restarting connection")
+        reconnect(R8::Config[:stomp][:host], R8::Config[:stomp][:port].to_i)
+        Log.info("STOMP connection has been restarted, waiting for a queue")
+      else
+        Log.debug("No STOMP pending messages for longer than '#{(IDLE_RECONNECT_TIME - 10)}'")
+      end
+    end
 
     def safe_print_stomp_password
       (R8::Config[:stomp][:password] || '').gsub(/./,'*')

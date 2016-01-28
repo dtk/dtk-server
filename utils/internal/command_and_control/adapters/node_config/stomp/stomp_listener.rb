@@ -44,13 +44,14 @@ module DTK
          @stomp_rdy = true
         raise "Not able to connect to STOMP, reason: #{msg.header['message']}. Stopping listener now ..."
       else
-        # decode message
-        Log.debug "Recived message from stomp, decoding ..."
         original_msg = decode(msg.body)
 
         msg_request_id = original_msg[:requestid]
         pbuilder_id    = original_msg[:pbuilderid]
         is_heartbeat   = original_msg[:heartbeat]
+
+        # decode message
+        Log.debug "Recived message from STOMP, message id '#{msg_request_id}' from pbuilderid '#{pbuilder_id}' ..."
 
         # we map our heartbeat calls to requst IDs
         if is_heartbeat

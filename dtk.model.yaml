@@ -119,15 +119,16 @@ components:
         activemq_password:
           type: string
           default: marionette
-        activemq_subcollective:
-          type: string
-          default: mcollective
         aws_access_key_id:
           type: string
           required: true
         aws_secret_access_key:
           type: string
           required: true
+        arbiter_topic:
+          type: string
+        arbiter_queue:
+          type: string
       dependencies:
       - dtk_server::base
       link_defs:
@@ -206,9 +207,6 @@ components:
         activemq_password:
           type: string
           default: marionette
-        activemq_subcollective:
-          type: string
-          default: mcollective
         activemq_use_hiera:
           type: boolean
           default: false

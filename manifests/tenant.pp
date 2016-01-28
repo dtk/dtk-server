@@ -1,32 +1,33 @@
 define dtk_server::tenant(
-  $update_hosts_file = 'true',
-  $stomp_server_host = $::ec2_public_hostname,
-  $local_repo_host   = $::ec2_public_hostname,
-  $server_public_dns = $::ec2_public_hostname,
-  $stomp_server_port = '6163',
+  $update_hosts_file    = 'true',
+  $stomp_server_host    = $::ec2_public_hostname,
+  $local_repo_host      = $::ec2_public_hostname,
+  $server_public_dns    = $::ec2_public_hostname,
+  $stomp_server_port    = '6163',
   $remote_repo_host,
-  $remote_repo_port = '443',
+  $remote_repo_port     = '443',
   $remote_repo_git_user = 'git',
   $remote_repo_username = undef,
-  $remote_repo_pass = undef,
-  $db_host           = 'localhost',
-  $server_branch = 'master',
+  $remote_repo_pass     = undef,
+  $db_host              = 'localhost',
+  $server_branch        = 'master',
   $port                 = undef,
   $gitolite_user,
   $tenant_user,
-  $tenant_user_pub_key = undef,
-  $activemq_user       = 'mcollective',
-  $activemq_password   = 'marionette',
-  $activemq_subcollective = 'mcollective',
-  $activemq_use_hiera = false,
+  $tenant_user_pub_key  = undef,
+  $activemq_use_hiera   = false,
+  $activemq_user        = 'UNSET',
+  $activemq_password    = 'marionette',
+  $arbiter_topic        = "UNSET",
+  $arbiter_queue        = "UNSET",
   $aws_access_key_id,
   $aws_secret_access_key,
-  $ec2_name_tag_format = '${tenant}:${target}:${user}:${assembly}:${node}',
-  $ec2_keypair = 'testing_use1',
-  $auth_to_repoman = false,
-  $clone_from_git = true,
-  $init_schema = true,
-  $bundler_deployment = true,
+  $ec2_name_tag_format  = '${tenant}:${target}:${user}:${assembly}:${node}',
+  $ec2_keypair          = 'testing_use1',
+  $auth_to_repoman      = false,
+  $clone_from_git       = true,
+  $init_schema          = true,
+  $bundler_deployment   = true
 ) 
 { 
   include dtk_server::params
@@ -39,14 +40,35 @@ define dtk_server::tenant(
   $common_repo_pref = "${tenant_user}${common_repo}"
   $common_core_repo_pref = "${tenant_user}${common_core_repo}"
 
+  if $arbiter_topic == 'UNSET' {
+    $arbiter_topic_final = "arbiter.${tenant_user}.broadcast"
+  }
+  else {
+    $arbiter_topic_final = $arbiter_topic
+  }
+
+  if $arbiter_queue == 'UNSET' {
+    $arbiter_queue_final = "arbiter.${tenant_user}.reply"
+  }
+  else {
+    $arbiter_queue_final = $arbiter_queue
+  }
+  
+  if $activemq_user == 'UNSET' {
+    $activemq_user_final = $tenant_user
+  }
+  else {
+    $activemq_user_final = $user
+  }
+
   if $activemq_use_hiera == true {
     $activemq_hiera_conf = hiera(activemq)
-    $activemq_user_final = $tenant_user
+#    $activemq_user_final = $tenant_user
     $activemq_password_final = $activemq_hiera_conf["$activemq_user"]['password']
     $activemq_subcollective_final = $activemq_hiera_conf["$activemq_user"]['subcollective']
   }
   else {
-    $activemq_user_final = $activemq_user
+#    $activemq_user_final = $activemq_user
     $activemq_password_final = $activemq_password
     $activemq_subcollective_final = $activemq_subcollective
   }
@@ -199,18 +221,18 @@ define dtk_server::tenant::ssh_config(
      source => 'puppet:///modules/dtk_server/ssh/id_rsa.pub'
    }
 
-   # setup ssh keys for mcollective
-   exec { "mcollective_local_key_${app_user}":
-     command => "ssh-keygen -f ${rsa_identity_dir}/mcollective_local -P ''",
+   # setup ssh keys for arbiter
+   exec { "arbiter_local_key_${app_user}":
+     command => "ssh-keygen -f ${rsa_identity_dir}/arbiter_local -P ''",
      user    => $app_user,
-     creates => ["${rsa_identity_dir}/mcollective_local", "${rsa_identity_dir}/mcollective_local.pub"],
+     creates => ["${rsa_identity_dir}/arbiter_local", "${rsa_identity_dir}/arbiter_local.pub"],
      require => File["$rsa_identity_dir"]
    }
 
-   exec { "mcollective_remote_key_${app_user}":
-     command => "ssh-keygen -f ${rsa_identity_dir}/mcollective_remote -P ''",
+   exec { "arbiter_remote_key_${app_user}":
+     command => "ssh-keygen -f ${rsa_identity_dir}/arbiter_remote -P ''",
      user    => $app_user,
-     creates => ["${rsa_identity_dir}/mcollective_remote", "${rsa_identity_dir}/mcollective_remote.pub"],
+     creates => ["${rsa_identity_dir}/arbiter_remote", "${rsa_identity_dir}/arbiter_remote.pub"],
      require => File["$rsa_identity_dir"]
    }
 
@@ -218,8 +240,8 @@ define dtk_server::tenant::ssh_config(
      ensure  => 'present',
      mode    => '0600',
      owner   => $app_user,
-     source  => "${rsa_identity_dir}/mcollective_remote.pub",
-     require => Exec["mcollective_remote_key_${app_user}"]
+     source  => "${rsa_identity_dir}/arbiter_remote.pub",
+     require => Exec["arbiter_remote_key_${app_user}"]
    }
 
    # CA cert for logstash-forwarder

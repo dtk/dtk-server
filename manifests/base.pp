@@ -13,35 +13,7 @@ class dtk_server::base() inherits dtk_server::params
 
   file { $config_base:
     ensure   => 'directory',
-  }
-
-  exec { 'mcollective-conn-plugin-dir':
-    command => "/bin/mkdir -p ${mcollective_plugins_dir}/mcollective/connector",
-    creates => "${mcollective_plugins_dir}/mcollective/connector",
-  }
-
-  exec { 'mcollective-security-plugin-dir':
-    command => "/bin/mkdir -p ${mcollective_plugins_dir}/mcollective/security",
-    creates => "${mcollective_plugins_dir}/mcollective/security",
-  }
-
-  file { "${mcollective_plugins_dir}/mcollective/connector/stomp_em.rb" :
-    ensure => 'present',
-    source => 'puppet:///modules/dtk_server/mcollective/connector/stomp_em.rb',
-    require => Exec['mcollective-conn-plugin-dir']
-  }   
-  
-  file { "${mcollective_plugins_dir}/mcollective/security/sshkey.rb" :
-    ensure => 'present',
-    source => 'puppet:///modules/dtk_server/mcollective/security/sshkey.rb',
-    require => Exec['mcollective-security-plugin-dir']
-  }   
-   
-  file { "${mcollective_plugins_dir}/mcollective/security/sshkey.ddl" :
-    ensure => 'present',
-    source => 'puppet:///modules/dtk_server/mcollective/security/sshkey.ddl',
-    require => Exec['mcollective-security-plugin-dir']
-  }   
+  }  
  
   dtk_server::git_repo_keyscan { $repo_hostnames: } 
 

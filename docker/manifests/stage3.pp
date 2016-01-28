@@ -18,7 +18,7 @@ class dtk_stage3 {
   remote_repo_port => "443", 
   remote_repo_git_user => "git", 
   activemq_password => "marionette", 
-  activemq_subcollective => "mcollective", 
+  activemq_user => "dtk1",
   tenant_user => "dtk1", 
   gitolite_user => "git1", 
   aws_secret_access_key => "", 

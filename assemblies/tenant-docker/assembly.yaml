@@ -23,7 +23,6 @@ assembly:
       - dtk_server::docker:
           attributes:
             activemq_password: marionette
-            activemq_subcollective: mcollective
             aws_access_key_id: ''
             aws_secret_access_key: ''
             db_host: /var/run/postgresql

@@ -53,9 +53,9 @@ assembly:
       - nginx::include
       - dtk_activemq:
           attributes:
-            user: mcollective
+            user: dtk16
             password: marionette
-            subcollective: mcollective
+            tenant_name: dtk16
       - dtk_postgresql::server
       - dtk_server::add_user:
           attributes:

@@ -96,14 +96,14 @@ for type in rsa dsa ecdsa ed25519; do
   ln -sfT "${f}".pub "/etc/ssh/${fn}".pub
 done
 
-# generate mcollective ssh keys
-if [[ ! -d ${HOST_VOLUME}/mcollective ]]; then
-  mkdir -p ${HOST_VOLUME}/mcollective
-  ssh-keygen -t rsa -f ${HOST_VOLUME}/mcollective/mcollective_local -P ''
-  ssh-keygen -t rsa -f ${HOST_VOLUME}/mcollective/mcollective_remote -P ''
-  cat ${HOST_VOLUME}/mcollective/mcollective_remote.pub > ${HOST_VOLUME}/mcollective/authorized_keys
-  chmod 600 ${HOST_VOLUME}/mcollective/authorized_keys
-  chown -R ${TENANT_USER}:${TENANT_USER} ${HOST_VOLUME}/mcollective
+# generate arbiter ssh keys
+if [[ ! -d ${HOST_VOLUME}/arbiter ]]; then
+  mkdir -p ${HOST_VOLUME}/arbiter
+  ssh-keygen -t rsa -f ${HOST_VOLUME}/arbiter/arbiter_local -P ''
+  ssh-keygen -t rsa -f ${HOST_VOLUME}/arbiter/arbiter_remote -P ''
+  cat ${HOST_VOLUME}/arbiter/arbiter_remote.pub > ${HOST_VOLUME}/arbiter/authorized_keys
+  chmod 600 ${HOST_VOLUME}/arbiter/authorized_keys
+  chown -R ${TENANT_USER}:${TENANT_USER} ${HOST_VOLUME}/arbiter
 fi
 
 # gitolite

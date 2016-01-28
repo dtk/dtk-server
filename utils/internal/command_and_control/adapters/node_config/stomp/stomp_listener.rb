@@ -3,10 +3,11 @@ module DTK
     include EM::Protocols::Stomp
 
     NUMBER_OF_RETRIES = 5
-    IDLE_RECONNECT_TIME = 90
+    IDLE_RECONNECT_TIME = 300
 
     def connection_completed
       @message_registry = {}
+      @sync_lock = Mutex.new
       # there is an issue with stomp connection, which results in ERROR thrown first time when connecting. This is something that can be ignore
       # it looks like issue with EM stomp client since it does not effect functionaliy. After first error all seems to be working fine.
       @stomp_rdy = false
@@ -121,15 +122,25 @@ module DTK
 
     def check_hanging_messages
       return if @message_registry.size == 0
-      current_time = Time.now
-      max_wait_time = current_time - @message_registry.values.max
 
-      if max_wait_time > (IDLE_RECONNECT_TIME - 10)
-        Log.info("STOMP listener has not received response for 60 seconds, we are restarting connection")
-        reconnect(R8::Config[:stomp][:host], R8::Config[:stomp][:port].to_i)
-        Log.info("STOMP connection has been restarted, waiting for a queue")
-      else
-        Log.debug("No STOMP pending messages for longer than '#{(IDLE_RECONNECT_TIME - 10)}'")
+      @sync_lock.synchronize do
+        current_time = Time.now
+
+        # return 2-element array with key and value
+        max_time = @message_registry.max_by { |k, v| v }
+
+        max_wait_time = current_time - max_time.last
+
+        if max_wait_time > (IDLE_RECONNECT_TIME - 10)
+          # to avoid repeatition we set max time
+          @message_registry[max_time.first] = Time.now
+
+          Log.info("STOMP listener has not received response for #{(IDLE_RECONNECT_TIME-10)} seconds, we are restarting connection")
+          reconnect(R8::Config[:stomp][:host], R8::Config[:stomp][:port].to_i)
+          Log.info("STOMP connection has been restarted, waiting for a queue")
+        else
+          Log.debug("No STOMP pending messages that are waiting more than '#{(IDLE_RECONNECT_TIME - 10)}'")
+        end
       end
     end
 

@@ -13,13 +13,13 @@ components:
       attributes: 
         user: 
           type: string
-          default: mcollective
         password: 
           type: string
           default: marionette
-        subcollective: 
+        tenant_name: 
           type: string
-          default: mcollective
+          default: dtk1
         arbiter_topic:
           type: string
-          default: arbiter
+        arbiter_queue:
+          type: string

@@ -36,8 +36,8 @@
         <destinationPolicy>
           <policyMap>
             <policyEntries>
-              <policyEntry topic=">" producerFlowControl="false"/>
-              <policyEntry queue="*.reply.>" gcInactiveDestinations="true" inactiveTimoutBeforeGC="300000" />
+              <!-- <policyEntry topic=">" producerFlowControl="false"/>
+              <policyEntry queue="*.reply.>" gcInactiveDestinations="true" inactiveTimoutBeforeGC="300000" /> -->
             </policyEntries>
           </policyMap>
         </destinationPolicy>
@@ -56,8 +56,8 @@
           -->
           <simpleAuthenticationPlugin>
             <users>
-              <authenticationUser username="<%= user %>" password="<%= password %>" groups="<%= user %>,everyone"/>
-              <authenticationUser username="admin" password="secret" groups="mcollective,admins,everyone"/>
+              <authenticationUser username="<%= user_final %>" password="<%= password %>" groups="<%= user_final %>,everyone, admins"/>
+              <!-- <authenticationUser username="admin" password="secret" groups="mcollective,admins,everyone"/> -->
             </users>
           </simpleAuthenticationPlugin>
 
@@ -79,9 +79,8 @@
                   <authorizationEntry queue=">" write="admins" read="admins" admin="admins" />
                   <authorizationEntry topic=">" write="admins" read="admins" admin="admins" />
                     
-                  <authorizationEntry topic="<%= subcollective %>.>" write="<%= user %>" read="<%= user %>" admin="<%= user %>" />
-                  <authorizationEntry queue="<%= subcollective %>.>" write="<%= user %>" read="<%= user %>" admin="<%= user %>" />
-                  <authorizationEntry topic="<%= arbiter_topic %>.>" write="<%= user %>" read="<%= user %>" admin="<%= user %>" />
+                  <authorizationEntry queue="<%= arbiter_queue_final %>.>" write="<%= user_final %>" read="<%= user_final %>" admin="<%= user_final %>" />
+                  <authorizationEntry topic="<%= arbiter_topic_final %>.>" write="<%= user_final %>" read="<%= user_final %>" admin="<%= user_final %>" />
                   <!--
                     The advisory topics are part of ActiveMQ, and all users need access to them.
                     The "everyone" group is not special; you need to ensure every user is a member.

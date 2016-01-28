@@ -1,11 +1,33 @@
 class dtk_activemq(
-  $user       = 'mcollective',
-  $password   = 'marionette',
-  $subcollective = 'mcollective', 
-  $arbiter_topic = 'arbiter'
+  $tenant_name    = 'dtk1',
+  $user           = 'UNSET',
+  $password       = 'marionette',
+  $arbiter_topic  = "UNSET",
+  $arbiter_queue  = "UNSET"
   ) {
   include dtk_activemq::params
   $app_dir = $dtk_activemq::params::app_dir
+
+  if $arbiter_topic == 'UNSET' {
+    $arbiter_topic_final = "arbiter.${tenant_name}.broadcast"
+  }
+  else {
+    $arbiter_topic_final = $arbiter_topic
+  }
+
+  if $arbiter_queue == 'UNSET' {
+    $arbiter_queue_final = "arbiter.${tenant_name}.reply"
+  }
+  else {
+    $arbiter_queue_final = $arbiter_queue
+  }
+  
+  if $user == 'UNSET' {
+    $user_final = $tenant_name
+  }
+  else {
+    $user_final = $user
+  }
 
   class { 'dtk_activemq::package': }
 

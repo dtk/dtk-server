@@ -276,7 +276,7 @@ module DTK; class ConfigAgent; module Adapter
           "{#{obj.map { |k, v| "#{quote_form(k)} => #{quote_form(v)}" }.join(',')}}"
         elsif obj.is_a?(Array)
           "[#{obj.map { |el| quote_form(el) }.join(',')}]"
-        elsif obj.is_a?(String)
+        elsif obj.is_a?(String) or obj.is_a?(Symbol)
           "\"#{obj}\""
         elsif obj.nil?
           'nil'

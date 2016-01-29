@@ -134,6 +134,7 @@ module DTK
         if max_wait_time > (IDLE_RECONNECT_TIME - 10)
           # to avoid repeatition we set max time
           @message_registry[max_time.first] = Time.now
+          R8EM.add_timer(IDLE_RECONNECT_TIME) { check_hanging_messages() }
 
           Log.info("STOMP listener has not received response for #{(IDLE_RECONNECT_TIME-10)} seconds, we are restarting connection")
           reconnect(R8::Config[:stomp][:host], R8::Config[:stomp][:port].to_i)

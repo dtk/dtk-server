@@ -40,6 +40,10 @@ MCOLLECTIVE_PORT=${MCOLLECTIVE_PORT-6163}
 # set instance name to default
 INSTANCE_NAME=${INSTANCE_NAME-dtk1}
 
+# set arbiter topic and queue
+ARBITER_TOPIC="/topic/arbiter.${TENANT_USER}.broadcast"
+ARBITER_QUEUE="/queue/arbiter.${TENANT_USER}.reply"
+
 # export the variables
 export USERNAME PASSWORD PUBLIC_ADDRESS GIT_PORT REMOTE_REPO_HOST REMOTE_REPO_REST_PORT MCOLLECTIVE_PORT INSTANCE_NAME
 
@@ -96,14 +100,15 @@ for type in rsa dsa ecdsa ed25519; do
   ln -sfT "${f}".pub "/etc/ssh/${fn}".pub
 done
 
-# generate mcollective ssh keys
-if [[ ! -d ${HOST_VOLUME}/mcollective ]]; then
-  mkdir -p ${HOST_VOLUME}/mcollective
-  ssh-keygen -t rsa -f ${HOST_VOLUME}/mcollective/mcollective_local -P ''
-  ssh-keygen -t rsa -f ${HOST_VOLUME}/mcollective/mcollective_remote -P ''
-  cat ${HOST_VOLUME}/mcollective/mcollective_remote.pub > ${HOST_VOLUME}/mcollective/authorized_keys
-  chmod 600 ${HOST_VOLUME}/mcollective/authorized_keys
-  chown -R ${TENANT_USER}:${TENANT_USER} ${HOST_VOLUME}/mcollective
+# generate arbiter ssh keys
+if [[ ! -d ${HOST_VOLUME}/arbiter ]]; then
+  mkdir -p ${HOST_VOLUME}/arbiter
+  ssh-keygen -t rsa -f ${HOST_VOLUME}/arbiter/arbiter_local -P ''
+  ssh-keygen -t rsa -f ${HOST_VOLUME}/arbiter/arbiter_remote -P ''
+  cat ${HOST_VOLUME}/arbiter/arbiter_remote.pub > ${HOST_VOLUME}/arbiter/authorized_keys
+  chmod 600 ${HOST_VOLUME}/arbiter/authorized_keys
+  chown -R ${TENANT_USER}:${TENANT_USER} ${HOST_VOLUME}/arbiter
+  # ln -s ${HOST_VOLUME}/arbiter /home/${TENANT_USER}/rsa_identity_dir
 fi
 
 # gitolite
@@ -139,6 +144,8 @@ if [[ ! -d ${HOST_VOLUME}/activemq ]]; then
   rm -rf /opt/activemq/data
 fi
 /opt/activemq/bin/activemq start &
+
+
 
 if [[ ! -f ${HOST_VOLUME}/init_done ]]; then
   envsubst < /addons/server.conf.template > /etc/dtk/${TENANT_USER}/server.conf

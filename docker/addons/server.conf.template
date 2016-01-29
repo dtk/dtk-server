@@ -12,17 +12,24 @@ server_public_dns = ${PUBLIC_ADDRESS}
 local_repo.host = ${PUBLIC_ADDRESS}
 db.host = /var/run/postgresql
 db.name = dtk1
-mcollective.host = ${PUBLIC_ADDRESS}
-mcollective.port = ${MCOLLECTIVE_PORT}
-mcollective.ssh.local.public_key= ${HOST_VOLUME}/mcollective/mcollective_local.pub
-mcollective.ssh.local.private_key= ${HOST_VOLUME}/mcollective/mcollective_local
-mcollective.ssh.local.authorized_keys= ${HOST_VOLUME}/mcollective/authorized_keys
-mcollective.ssh.remote.public_key= ${HOST_VOLUME}/mcollective/mcollective_remote.pub
-mcollective.ssh.remote.private_key= ${HOST_VOLUME}/mcollective/mcollective_remote
-mcollective.auth_type=ssh
-mcollective.username= mcollective
-mcollective.password= marionette
-mcollective.collective= mcollective
+
+stomp.host = ${PUBLIC_ADDRESS}
+stomp.port = ${MCOLLECTIVE_PORT}
+stomp.username= ${TENANT_USER}
+stomp.password= marionette
+stomp.collective= mcollective
+
+arbiter.ssh.local.public_key= ${HOST_VOLUME}/arbiter/arbiter_local.pub
+arbiter.ssh.local.private_key= ${HOST_VOLUME}/arbiter/arbiter_local
+arbiter.ssh.local.authorized_keys= ${HOST_VOLUME}/arbiter/authorized_keys
+arbiter.ssh.remote.public_key= ${HOST_VOLUME}/arbiter/arbiter_remote.pub
+arbiter.ssh.remote.private_key= ${HOST_VOLUME}/arbiter/arbiter_remote
+arbiter.auth_type=ssh
+
+arbiter.topic = ${ARBITER_TOPIC}
+arbiter.queue = ${ARBITER_QUEUE}
+
+
 server_port = 443
 repo.git.gitolite.admin_directory = /home/${TENANT_USER}/gitolite-admin/
 repo.git.server_username = ${TENANT_USER}

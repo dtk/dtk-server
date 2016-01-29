@@ -104,7 +104,7 @@ if [[ ! -d ${HOST_VOLUME}/arbiter ]]; then
   cat ${HOST_VOLUME}/arbiter/arbiter_remote.pub > ${HOST_VOLUME}/arbiter/authorized_keys
   chmod 600 ${HOST_VOLUME}/arbiter/authorized_keys
   chown -R ${TENANT_USER}:${TENANT_USER} ${HOST_VOLUME}/arbiter
-  ln -s ${HOST_VOLUME}/arbiter /home/${TENANT_USER}/rsa_identity_dir
+  # ln -s ${HOST_VOLUME}/arbiter /home/${TENANT_USER}/rsa_identity_dir
 fi
 
 # gitolite

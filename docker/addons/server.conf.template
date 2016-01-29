@@ -12,17 +12,24 @@ server_public_dns = ${PUBLIC_ADDRESS}
 local_repo.host = ${PUBLIC_ADDRESS}
 db.host = /var/run/postgresql
 db.name = dtk1
+
 stomp.host = ${PUBLIC_ADDRESS}
 stomp.port = ${MCOLLECTIVE_PORT}
-stomp.ssh.local.public_key= ${HOST_VOLUME}/arbiter/arbiter_local.pub
-stomp.ssh.local.private_key= ${HOST_VOLUME}/arbiter/arbiter_local
-stomp.ssh.local.authorized_keys= ${HOST_VOLUME}/arbiter/authorized_keys
-stomp.ssh.remote.public_key= ${HOST_VOLUME}/arbiter/arbiter_remote.pub
-stomp.ssh.remote.private_key= ${HOST_VOLUME}/arbiter/arbiter_remote
-stomp.auth_type=ssh
 stomp.username= ${TENANT_USER}
 stomp.password= marionette
 stomp.collective= mcollective
+
+arbiter.ssh.local.public_key= ${HOST_VOLUME}/arbiter/arbiter_local.pub
+arbiter.ssh.local.private_key= ${HOST_VOLUME}/arbiter/arbiter_local
+arbiter.ssh.local.authorized_keys= ${HOST_VOLUME}/arbiter/authorized_keys
+arbiter.ssh.remote.public_key= ${HOST_VOLUME}/arbiter/arbiter_remote.pub
+arbiter.ssh.remote.private_key= ${HOST_VOLUME}/arbiter/arbiter_remote
+arbiter.auth_type=ssh
+
+arbiter.topic = ${ARBITER_TOPIC_FINAL}
+arbiter.queue = ${ARBITER_QUEUE_FINAL}
+
+
 server_port = 443
 repo.git.gitolite.admin_directory = /home/${TENANT_USER}/gitolite-admin/
 repo.git.server_username = ${TENANT_USER}

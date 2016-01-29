@@ -40,6 +40,10 @@ MCOLLECTIVE_PORT=${MCOLLECTIVE_PORT-6163}
 # set instance name to default
 INSTANCE_NAME=${INSTANCE_NAME-dtk1}
 
+# set arbiter topic and queue
+ARBITER_TOPIC="/topic/arbiter.${TENANT_USER}.broadcast"
+ARBITER_QUEUE="/queue/arbiter.${TENANT_USER}.reply"
+
 # export the variables
 export USERNAME PASSWORD PUBLIC_ADDRESS GIT_PORT REMOTE_REPO_HOST REMOTE_REPO_REST_PORT MCOLLECTIVE_PORT INSTANCE_NAME
 
@@ -140,6 +144,8 @@ if [[ ! -d ${HOST_VOLUME}/activemq ]]; then
   rm -rf /opt/activemq/data
 fi
 /opt/activemq/bin/activemq start &
+
+
 
 if [[ ! -f ${HOST_VOLUME}/init_done ]]; then
   envsubst < /addons/server.conf.template > /etc/dtk/${TENANT_USER}/server.conf

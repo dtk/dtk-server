@@ -26,8 +26,8 @@ arbiter.ssh.remote.public_key= ${HOST_VOLUME}/arbiter/arbiter_remote.pub
 arbiter.ssh.remote.private_key= ${HOST_VOLUME}/arbiter/arbiter_remote
 arbiter.auth_type=ssh
 
-arbiter.topic = ${ARBITER_TOPIC_FINAL}
-arbiter.queue = ${ARBITER_QUEUE_FINAL}
+arbiter.topic = ${ARBITER_TOPIC}
+arbiter.queue = ${ARBITER_QUEUE}
 
 
 server_port = 443

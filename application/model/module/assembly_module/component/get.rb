@@ -157,8 +157,10 @@ module DTK; class AssemblyModule
 
         # get the associated master branch and see if there is any diff
         mod_idhs = local_copy_els.map(&:id_handle)
-        ndx_workspace_branches = ComponentModule.get_workspace_module_branches(mod_idhs).inject({}) do |h, r|
-          h.merge(r[:module_id] => r)
+
+        ndx_workspace_branches = {}
+        ComponentModule.get_workspace_module_branches(mod_idhs).each do |branch|
+          ndx_workspace_branches.merge!(branch[:module_id] => branch) if branch[:version].nil? || branch[:version].eql?('master')
         end
 
         local_copy_els.each do |r|

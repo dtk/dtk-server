@@ -3,7 +3,7 @@ module DTK
     include EM::Protocols::Stomp
 
     NUMBER_OF_RETRIES = 5
-    IDLE_RECONNECT_TIME = 300
+    IDLE_RECONNECT_TIME = 60
 
     def connection_completed
       @message_registry = {}

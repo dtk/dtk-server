@@ -112,11 +112,13 @@ module DTK
 
     def register_outgoing(request_id)
       return unless request_id
+      Log.info("Request ID: #{request_id} registered!")
       @message_registry[request_id] = Time.now
     end
 
     def deregister_incoming(request_id)
       return unless request_id
+      Log.info("Request ID: #{request_id} unregistered!")
       @message_registry.delete(request_id)
     end
 

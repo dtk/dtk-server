@@ -174,7 +174,11 @@ stomp_password = <%= stomp_password %>
 arbiter_topic = <%= arbiter_topic %>
 arbiter_queue = <%= arbiter_queue %>
 git_server = "<%= git_server_url %>"
+<% if pbuilderid %>
 pbuilderid = <%= pbuilderid %>
+<% else %>
+# pbuidlerid = 
+<% end %>
 private_key = /etc/dtk/ssh/arbiter
 EOF
 

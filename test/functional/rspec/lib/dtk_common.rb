@@ -39,7 +39,7 @@ class Common
 	}
 
 	def initialize(service_name, assembly_name)
-		config_yml = YAML::load(File.open(File.join(File.dirname(__FILE__), '..', "config/config.yml")))		
+		config_yml = YAML::load(File.open(File.join(File.dirname(__FILE__), '..', "config/config.yaml")))		
 
 		@service_name = service_name
 		#Fixed current format of assembly name
@@ -63,6 +63,10 @@ class Common
 	  response_login = RestClient.post(@endpoint + '/rest/user/process_login', 'username' => @username, 'password' => @password, 'server_host' => @server, 'server_port' => @port)
 	  $cookies = response_login.cookies
 	  $opts[:cookies] = response_login.cookies
+	end
+
+	def get_login_cookies
+		return $opts[:cookies]
 	end
 
 	def get_server_log_for_specific_search_pattern(search_start_pattern, number_of_lines_after)

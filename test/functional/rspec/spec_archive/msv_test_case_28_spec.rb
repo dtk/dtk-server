@@ -19,7 +19,7 @@ $metadata = ""
 dtk_common = Common.new('', '')
 
 def get_metadata(module_name)
-  db_config = YAML.load(File.open('./config/config.yml'))
+  db_config = YAML.load(File.open('./config/config.yaml'))
   ActiveRecord::Base.establish_connection(db_config['dtkserverdbconnection'])
   sql1 = "select id from module.component where ref = '#{module_name}'"
   module_id = ActiveRecord::Base.connection.execute(sql1)

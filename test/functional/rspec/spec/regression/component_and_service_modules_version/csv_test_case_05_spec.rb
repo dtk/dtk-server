@@ -69,16 +69,16 @@ describe '(Component, service and versioning) Test Case 05: Install versioned co
 	end
 
 	context 'List services after stage of new assembly' do
-  	include_context 'List services after stage', dtk_common_new
+    include_context 'List services after stage', dtk_common_new
 	end
 
-       context 'Check if component module is in the service components list' do
-               include_context 'List components', dtk_common_new, ["#{node_name}/#{component_module_name}"]
-        end
+  context 'Check if component module is in the service components list' do
+    include_context 'List components', dtk_common_new, ["#{node_name}/#{component_module_name}"]
+  end
 
-       context 'Check if component module version is in the service components versions list' do
-               include_context 'List components versions', dtk_common_new, ["#{component_module_version}"]
-       end
+  context 'Check if component module version is in the service components versions list' do
+    include_context 'List components versions', dtk_common_new, ["#{component_module_version}"]
+  end
 
 	context 'Delete and destroy service function' do
   	include_context 'Delete services', dtk_common_new

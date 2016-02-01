@@ -8,7 +8,7 @@ require 'awesome_print'
 require './lib/dtk_common'
 
 dtk_common = Common.new('', '')
-config = YAML::load(File.open("./config/release.yml"))
+config = YAML::load(File.open("./config/release.yaml"))
 provider_name="test_provider"
 keypair_name="testing_use1"
 sg_name="default"

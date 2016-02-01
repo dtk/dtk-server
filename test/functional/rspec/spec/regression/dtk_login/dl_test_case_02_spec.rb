@@ -1,4 +1,4 @@
-# Test Case 01: Login with new user that has DTK and catalog credentials
+# Test Case 02: Login with new user that has DTK but incorrect catalog credentials
 require 'rubygems'
 require 'rest_client'
 require 'pp'
@@ -14,13 +14,13 @@ namespace = "dtk17"
 component_module_name = "dtk17:temp"
 component_module_filesystem_location = '~/dtk/component_modules/dtk17'
 dtk_common = Common.new("", "")
-num = '01'
+num = '02'
 catalog_user = "dtk_login_"+num
 catalog_password = 'password'
 group = UserGroup.new('dtk_login_group_'+num, 'DTK login group')
 user = User.new(catalog_user,catalog_password,'DTK','Login','dtk_login_'+num+'@mail.com','3','dtk_login_group_'+num)
 
-describe "Test Case 01: Login with new user that has DTK and catalog credentials" do
+describe "Test Case 02: Login with new user that has DTK but incorrect catalog credentials" do
   let(:conf) { Configuration.instance }
   let(:header) { @homepage.get_header }
   let(:group_panel) { @homepage.get_main.get_usergroups }
@@ -61,13 +61,21 @@ describe "Test Case 01: Login with new user that has DTK and catalog credentials
 		end
 	end
 
-	context "Set catalog credentials" do
-    include_context "Set catalog credentials", dtk_common, catalog_user, catalog_password
+  context "Set incorrect catalog credentials" do
+    include_context "NEG - Set incorrect catalog credentials", dtk_common, catalog_user, catalog_password + "incorrect"
   end
 
 	context "List remote to check connectivity with repoman" do
-    include_context "List remote modules", dtk_common, "#{namespace}/#{component_module}"
+    include_context "NEG - List remote", "ERROR MESSAGE TO BE ADDED!"
 	end
+
+  context "Set catalog credentials" do
+    include_context "Set catalog credentials", dtk_common, catalog_user, catalog_password
+  end
+
+  context "List remote to check connectivity with repoman" do
+    include_context "List remote modules", dtk_common, "#{namespace}/#{component_module}"
+  end
 
 	context "Install component module" do
     include_context "Import remote component module", component_module_name

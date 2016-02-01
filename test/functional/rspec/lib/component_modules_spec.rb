@@ -533,6 +533,18 @@ shared_context 'NEG - List remote modules' do |dtk_common, component_module_name
   end
 end
 
+shared_context 'NEG - List remote' do |error_message|
+  it "does not work because ssh key is not added to repoman" do
+    puts "NEG - List remote:", "-------------------"
+    fail = false
+    value = `dtk component-module list --remote`
+    puts value
+    fail = value.include?(error_message)
+    puts ''
+    expect(fail).to eq(true)
+  end
+end
+
 shared_context 'Add collaborators on module' do |dtk_common, component_module_name, collaborators, collaborator_type|
   it "adds #{collaborators} collaborators to #{component_module_name} component module" do
     collaborators_added = dtk_common.add_collaborators(component_module_name, collaborators, collaborator_type)
@@ -593,6 +605,13 @@ shared_context 'Set catalog credentials' do |dtk_common, catalog_username, catal
   it "sets catalog credentials for user #{catalog_username}" do
     catalog_credentials_set = dtk_common.set_catalog_credentials(catalog_username, catalog_password)
     catalog_credentials_set.should eq(true)
+  end
+end
+
+shared_context 'NEG - Set incorrect catalog credentials' do |dtk_common, catalog_username, catalog_password|
+  it "does not set catalog credentials for user #{catalog_username}" do
+    catalog_credentials_set = dtk_common.set_catalog_credentials(catalog_username, catalog_password)
+    catalog_credentials_set.should eq(false)
   end
 end
 

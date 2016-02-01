@@ -166,5 +166,15 @@ module DTK
       rest_ok_response
     end
 
+    def rest__register_catalog_account
+      username, password, email = ret_non_null_request_params(:username, :password, :email)
+      first_name, last_name, activate_account = ret_request_params(:first_name, :last_name, :activate_account)
+
+      response = Repo::Remote.new.register_catalog_user(username, email, password, first_name, last_name)
+
+      rest_ok_response
+    end
+
+
   end
 end

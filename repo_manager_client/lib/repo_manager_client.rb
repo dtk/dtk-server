@@ -214,6 +214,22 @@ module DTK
       nil
     end
 
+    def register_catalog_user(username, email, password, first_name = nil, last_name = nil)
+      response = post_rest_request_data(
+          '/v1/users',
+          {
+            username: username,
+            email: email,
+            password: password,
+            first_name: first_name,
+            last_name: last_name
+          },
+          raise_error: true
+        )
+
+      response
+    end
+
     def add_client_access(client_rsa_pub_key, client_rsa_key_name)
       response = post_rest_request_data(
         '/v1/users/add_access',

@@ -1,18 +1,30 @@
 {
   "nodes_info": {
-    "ami-05104a6f": {
+    "ami-3066495a": {
       "region": "us-east-1",
-      "type": "precise_hvm",
-      "os_type": "ubuntu",
-      "display_name": "Precise_hvm",
-      "png": "precise_hvm.png",
+      "type": "amazon_hvm",
+      "os_type": "amazon-linux",
+      "display_name": "Amazon_hvm",
+      "png": "amazon_hvm.png",
       "sizes": [
         "t2.micro",
         "t2.small",
         "t2.medium"
       ]
     },
-    "ami-1113497b": {
+    "ami-33654a59": {
+      "region": "us-east-1",
+      "type": "precise",
+      "os_type": "ubuntu",
+      "display_name": "Precise",
+      "png": "precise.png",
+      "sizes": [
+        "t1.micro",
+        "m1.small",
+        "m3.medium"
+      ]
+    },
+    "ami-34654a5e": {
       "region": "us-east-1",
       "type": "trusty",
       "os_type": "ubuntu",
@@ -24,7 +36,31 @@
         "m3.medium"
       ]
     },
-    "ami-18104a72": {
+    "ami-5566493f": {
+      "region": "us-east-1",
+      "type": "precise_hvm",
+      "os_type": "ubuntu",
+      "display_name": "Precise_hvm",
+      "png": "precise_hvm.png",
+      "sizes": [
+        "t2.micro",
+        "t2.small",
+        "t2.medium"
+      ]
+    },
+    "ami-5f664935": {
+      "region": "us-east-1",
+      "type": "rhel6",
+      "os_type": "redhat",
+      "display_name": "Rhel6",
+      "png": "rhel6.png",
+      "sizes": [
+        "t1.micro",
+        "m1.small",
+        "m3.medium"
+      ]
+    },
+    "ami-8a6649e0": {
       "region": "us-east-1",
       "type": "wheezy_hvm",
       "os_type": "debian",
@@ -36,31 +72,7 @@
         "t2.medium"
       ]
     },
-    "ami-45114b2f": {
-      "region": "us-east-1",
-      "type": "rhel6",
-      "os_type": "redhat",
-      "display_name": "Rhel6",
-      "png": "rhel6.png",
-      "sizes": [
-        "t1.micro",
-        "m1.small",
-        "m3.medium"
-      ]
-    },
-    "ami-6413490e": {
-      "region": "us-east-1",
-      "type": "amazon",
-      "os_type": "amazon-linux",
-      "display_name": "Amazon",
-      "png": "amazon.png",
-      "sizes": [
-        "t1.micro",
-        "m1.small",
-        "m3.medium"
-      ]
-    },
-    "ami-7b134911": {
+    "ami-8e6649e4": {
       "region": "us-east-1",
       "type": "wheezy",
       "os_type": "debian",
@@ -72,43 +84,19 @@
         "m3.medium"
       ]
     },
-    "ami-7d134917": {
+    "ami-8f6649e5": {
       "region": "us-east-1",
-      "type": "amazon_hvm",
+      "type": "amazon",
       "os_type": "amazon-linux",
-      "display_name": "Amazon_hvm",
-      "png": "amazon_hvm.png",
-      "sizes": [
-        "t2.micro",
-        "t2.small",
-        "t2.medium"
-      ]
-    },
-    "ami-c0114baa": {
-      "region": "us-east-1",
-      "type": "rhel6_hvm",
-      "os_type": "redhat",
-      "display_name": "Rhel6_hvm",
-      "png": "rhel6_hvm.png",
-      "sizes": [
-        "t2.micro",
-        "t2.small",
-        "t2.medium"
-      ]
-    },
-    "ami-dc114bb6": {
-      "region": "us-east-1",
-      "type": "precise",
-      "os_type": "ubuntu",
-      "display_name": "Precise",
-      "png": "precise.png",
+      "display_name": "Amazon",
+      "png": "amazon.png",
       "sizes": [
         "t1.micro",
         "m1.small",
         "m3.medium"
       ]
     },
-    "ami-f1104a9b": {
+    "ami-b6654adc": {
       "region": "us-east-1",
       "type": "trusty_hvm",
       "os_type": "ubuntu",
@@ -120,44 +108,8 @@
         "t2.medium"
       ]
     },
-    "ami-5ad2a73a": {
-      "region": "us-west-1",
-      "type": "amazon_hvm",
-      "os_type": "amazon-linux",
-      "display_name": "Amazon_hvm",
-      "png": "amazon_hvm.png",
-      "sizes": [
-        "t2.micro",
-        "t2.small",
-        "t2.medium"
-      ]
-    },
-    "ami-88d1a4e8": {
-      "region": "us-west-1",
-      "type": "trusty",
-      "os_type": "ubuntu",
-      "display_name": "Trusty",
-      "png": "trusty.png",
-      "sizes": [
-        "t1.micro",
-        "m1.small",
-        "m3.medium"
-      ]
-    },
-    "ami-97d2a7f7": {
-      "region": "us-west-1",
-      "type": "rhel6",
-      "os_type": "redhat",
-      "display_name": "Rhel6",
-      "png": "rhel6.png",
-      "sizes": [
-        "t1.micro",
-        "m1.small",
-        "m3.medium"
-      ]
-    },
-    "ami-add2a7cd": {
-      "region": "us-west-1",
+    "ami-fb674891": {
+      "region": "us-east-1",
       "type": "rhel6_hvm",
       "os_type": "redhat",
       "display_name": "Rhel6_hvm",
@@ -168,7 +120,7 @@
         "t2.medium"
       ]
     },
-    "ami-b3dca9d3": {
+    "ami-08cbbc68": {
       "region": "us-west-1",
       "type": "trusty_hvm",
       "os_type": "ubuntu",
@@ -180,7 +132,7 @@
         "t2.medium"
       ]
     },
-    "ami-b6dca9d6": {
+    "ami-0dcbbc6d": {
       "region": "us-west-1",
       "type": "wheezy",
       "os_type": "debian",
@@ -192,19 +144,7 @@
         "m3.medium"
       ]
     },
-    "ami-d8d2a7b8": {
-      "region": "us-west-1",
-      "type": "amazon",
-      "os_type": "amazon-linux",
-      "display_name": "Amazon",
-      "png": "amazon.png",
-      "sizes": [
-        "t1.micro",
-        "m1.small",
-        "m3.medium"
-      ]
-    },
-    "ami-dbd3a6bb": {
+    "ami-27cabd47": {
       "region": "us-west-1",
       "type": "precise_hvm",
       "os_type": "ubuntu",
@@ -216,7 +156,31 @@
         "t2.medium"
       ]
     },
-    "ami-ddd3a6bd": {
+    "ami-2acabd4a": {
+      "region": "us-west-1",
+      "type": "amazon",
+      "os_type": "amazon-linux",
+      "display_name": "Amazon",
+      "png": "amazon.png",
+      "sizes": [
+        "t1.micro",
+        "m1.small",
+        "m3.medium"
+      ]
+    },
+    "ami-53cabd33": {
+      "region": "us-west-1",
+      "type": "rhel6",
+      "os_type": "redhat",
+      "display_name": "Rhel6",
+      "png": "rhel6.png",
+      "sizes": [
+        "t1.micro",
+        "m1.small",
+        "m3.medium"
+      ]
+    },
+    "ami-95c9bef5": {
       "region": "us-west-1",
       "type": "precise",
       "os_type": "ubuntu",
@@ -228,7 +192,43 @@
         "m3.medium"
       ]
     },
-    "ami-22091343": {
+    "ami-97c9bef7": {
+      "region": "us-west-1",
+      "type": "rhel6_hvm",
+      "os_type": "redhat",
+      "display_name": "Rhel6_hvm",
+      "png": "rhel6_hvm.png",
+      "sizes": [
+        "t2.micro",
+        "t2.small",
+        "t2.medium"
+      ]
+    },
+    "ami-cacabdaa": {
+      "region": "us-west-1",
+      "type": "trusty",
+      "os_type": "ubuntu",
+      "display_name": "Trusty",
+      "png": "trusty.png",
+      "sizes": [
+        "t1.micro",
+        "m1.small",
+        "m3.medium"
+      ]
+    },
+    "ami-cacbbcaa": {
+      "region": "us-west-1",
+      "type": "amazon_hvm",
+      "os_type": "amazon-linux",
+      "display_name": "Amazon_hvm",
+      "png": "amazon_hvm.png",
+      "sizes": [
+        "t2.micro",
+        "t2.small",
+        "t2.medium"
+      ]
+    },
+    "ami-22826442": {
       "region": "us-west-2",
       "type": "amazon",
       "os_type": "amazon-linux",
@@ -240,19 +240,31 @@
         "m3.medium"
       ]
     },
-    "ami-25091344": {
+    "ami-3e83655e": {
       "region": "us-west-2",
-      "type": "wheezy",
-      "os_type": "debian",
-      "display_name": "Wheezy",
-      "png": "wheezy.png",
+      "type": "precise",
+      "os_type": "ubuntu",
+      "display_name": "Precise",
+      "png": "precise.png",
       "sizes": [
         "t1.micro",
         "m1.small",
         "m3.medium"
       ]
     },
-    "ami-300c1651": {
+    "ami-5c82643c": {
+      "region": "us-west-2",
+      "type": "precise_hvm",
+      "os_type": "ubuntu",
+      "display_name": "Precise_hvm",
+      "png": "precise_hvm.png",
+      "sizes": [
+        "t2.micro",
+        "t2.small",
+        "t2.medium"
+      ]
+    },
+    "ami-66816706": {
       "region": "us-west-2",
       "type": "rhel6",
       "os_type": "redhat",
@@ -264,19 +276,7 @@
         "m3.medium"
       ]
     },
-    "ami-340c1655": {
-      "region": "us-west-2",
-      "type": "precise_hvm",
-      "os_type": "ubuntu",
-      "display_name": "Precise_hvm",
-      "png": "precise_hvm.png",
-      "sizes": [
-        "t2.micro",
-        "t2.small",
-        "t2.medium"
-      ]
-    },
-    "ami-360c1657": {
+    "ami-8a8660ea": {
       "region": "us-west-2",
       "type": "rhel6_hvm",
       "os_type": "redhat",
@@ -288,19 +288,19 @@
         "t2.medium"
       ]
     },
-    "ami-8c0c16ed": {
+    "ami-948761f4": {
       "region": "us-west-2",
-      "type": "trusty",
-      "os_type": "ubuntu",
-      "display_name": "Trusty",
-      "png": "trusty.png",
+      "type": "wheezy",
+      "os_type": "debian",
+      "display_name": "Wheezy",
+      "png": "wheezy.png",
       "sizes": [
         "t1.micro",
         "m1.small",
         "m3.medium"
       ]
     },
-    "ami-dd0c16bc": {
+    "ami-958761f5": {
       "region": "us-west-2",
       "type": "trusty_hvm",
       "os_type": "ubuntu",
@@ -312,19 +312,7 @@
         "t2.medium"
       ]
     },
-    "ami-e30d1782": {
-      "region": "us-west-2",
-      "type": "precise",
-      "os_type": "ubuntu",
-      "display_name": "Precise",
-      "png": "precise.png",
-      "sizes": [
-        "t1.micro",
-        "m1.small",
-        "m3.medium"
-      ]
-    },
-    "ami-ee0e148f": {
+    "ami-bb8563db": {
       "region": "us-west-2",
       "type": "amazon_hvm",
       "os_type": "amazon-linux",
@@ -336,7 +324,19 @@
         "t2.medium"
       ]
     },
-    "ami-0f12ba7c": {
+    "ami-c68761a6": {
+      "region": "us-west-2",
+      "type": "trusty",
+      "os_type": "ubuntu",
+      "display_name": "Trusty",
+      "png": "trusty.png",
+      "sizes": [
+        "t1.micro",
+        "m1.small",
+        "m3.medium"
+      ]
+    },
+    "ami-2cc3755f": {
       "region": "eu-west-1",
       "type": "trusty_hvm",
       "os_type": "ubuntu",
@@ -348,19 +348,55 @@
         "t2.medium"
       ]
     },
-    "ami-1811b96b": {
+    "ami-41c77132": {
       "region": "eu-west-1",
-      "type": "precise_hvm",
+      "type": "trusty",
       "os_type": "ubuntu",
-      "display_name": "Precise_hvm",
-      "png": "precise_hvm.png",
+      "display_name": "Trusty",
+      "png": "trusty.png",
+      "sizes": [
+        "t1.micro",
+        "m1.small",
+        "m3.medium"
+      ]
+    },
+    "ami-48c4723b": {
+      "region": "eu-west-1",
+      "type": "rhel6_hvm",
+      "os_type": "redhat",
+      "display_name": "Rhel6_hvm",
+      "png": "rhel6_hvm.png",
       "sizes": [
         "t2.micro",
         "t2.small",
         "t2.medium"
       ]
     },
-    "ami-3413bb47": {
+    "ami-7ac77109": {
+      "region": "eu-west-1",
+      "type": "amazon_hvm",
+      "os_type": "amazon-linux",
+      "display_name": "Amazon_hvm",
+      "png": "amazon_hvm.png",
+      "sizes": [
+        "t2.micro",
+        "t2.small",
+        "t2.medium"
+      ]
+    },
+    "ami-7ec2740d": {
+      "region": "eu-west-1",
+      "type": "rhel6",
+      "os_type": "redhat",
+      "display_name": "Rhel6",
+      "png": "rhel6.png",
+      "sizes": [
+        "t1.micro",
+        "m1.small",
+        "m3.medium"
+      ]
+    },
+    "ami-cfc670bc": {
       "region": "eu-west-1",
       "type": "precise",
       "os_type": "ubuntu",
@@ -372,7 +408,19 @@
         "m3.medium"
       ]
     },
-    "ami-441db537": {
+    "ami-d6d86ea5": {
+      "region": "eu-west-1",
+      "type": "precise_hvm",
+      "os_type": "ubuntu",
+      "display_name": "Precise_hvm",
+      "png": "precise_hvm.png",
+      "sizes": [
+        "t2.micro",
+        "t2.small",
+        "t2.medium"
+      ]
+    },
+    "ami-f2c67081": {
       "region": "eu-west-1",
       "type": "wheezy",
       "os_type": "debian",
@@ -384,60 +432,12 @@
         "m3.medium"
       ]
     },
-    "ami-5912ba2a": {
-      "region": "eu-west-1",
-      "type": "trusty",
-      "os_type": "ubuntu",
-      "display_name": "Trusty",
-      "png": "trusty.png",
-      "sizes": [
-        "t1.micro",
-        "m1.small",
-        "m3.medium"
-      ]
-    },
-    "ami-7214bc01": {
-      "region": "eu-west-1",
-      "type": "amazon_hvm",
-      "os_type": "amazon-linux",
-      "display_name": "Amazon_hvm",
-      "png": "amazon_hvm.png",
-      "sizes": [
-        "t2.micro",
-        "t2.small",
-        "t2.medium"
-      ]
-    },
-    "ami-7714bc04": {
-      "region": "eu-west-1",
-      "type": "rhel6_hvm",
-      "os_type": "redhat",
-      "display_name": "Rhel6_hvm",
-      "png": "rhel6_hvm.png",
-      "sizes": [
-        "t2.micro",
-        "t2.small",
-        "t2.medium"
-      ]
-    },
-    "ami-841fb7f7": {
+    "ami-f3c67080": {
       "region": "eu-west-1",
       "type": "amazon",
       "os_type": "amazon-linux",
       "display_name": "Amazon",
       "png": "amazon.png",
-      "sizes": [
-        "t1.micro",
-        "m1.small",
-        "m3.medium"
-      ]
-    },
-    "ami-ad12bade": {
-      "region": "eu-west-1",
-      "type": "rhel6",
-      "os_type": "redhat",
-      "display_name": "Rhel6",
-      "png": "rhel6.png",
       "sizes": [
         "t1.micro",
         "m1.small",

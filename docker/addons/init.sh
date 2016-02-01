@@ -178,3 +178,4 @@ fi
 
 /usr/sbin/nginx -g 'daemon off;'
 
+su - ${TENANT_USER} -c "touch server/current/application/tmp/restart.txr"

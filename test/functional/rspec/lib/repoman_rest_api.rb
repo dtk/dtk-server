@@ -10,7 +10,7 @@ class RepomanRestApi
   attr_accessor :authorization_token
 
   def initialize
-    config_yml = YAML.load(File.open('./config/config.yml'))
+    config_yml = YAML.load(File.open('./config/config.yaml'))
     @repoman_url = config_yml['r8server']['repoman']
   end
 

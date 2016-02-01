@@ -53,8 +53,6 @@ module DTK
         pbuilder_id    = original_msg[:pbuilderid]
         is_heartbeat   = original_msg[:heartbeat]
 
-        deregister_incoming(msg_request_id)
-
         # decode message
         Log.debug "Recived message from STOMP, message id '#{msg_request_id}' from pbuilderid '#{pbuilder_id}' ..."
 
@@ -68,6 +66,8 @@ module DTK
             return
           end
         end
+
+        deregister_incoming(msg_request_id)
 
         callbacks = CommandAndControlAdapter::StompMultiplexer.callback_registry[msg_request_id]
 

@@ -10,6 +10,7 @@ require './spec/setup_browser'
 require './lib/admin_panel_helper'
 
 component_module = "temp"
+namespace = "dtk17"
 component_module_name = "dtk17:temp"
 component_module_filesystem_location = '~/dtk/component_modules/dtk17'
 dtk_common = Common.new("", "")
@@ -54,12 +55,14 @@ describe "Test Case 01: Login with new user that has DTK and catalog credentials
 	
 	context "Initial DTK login" do
 		it "verifies successfull DTK login" do
-      puts dtk_common.get_login_cookies
+      cookies = dtk_common.get_login_cookies
+      expect(cookies["dtk-user-info"].length).to be > 10
+      expect(cookies["innate.sid"].length).to be > 10
 		end
 	end
 
 	context "List remote to check connectivity with repoman" do
-    include_context "List remote modules", dtk_common, 
+    include_context "List remote modules", dtk_common, "#{namespace}/#{component_module}"
 	end
 
 	context "Install component module" do
@@ -105,4 +108,5 @@ describe "Test Case 01: Login with new user that has DTK and catalog credentials
     	expect(group.delete_object(group_panel)).to eql(true)
     end
   end
+end
 end

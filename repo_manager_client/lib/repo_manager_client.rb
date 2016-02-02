@@ -230,10 +230,10 @@ module DTK
       response
     end
 
-    def add_client_access(client_rsa_pub_key, client_rsa_key_name)
+    def add_client_access(client_rsa_pub_key, client_rsa_key_name, force_access = false)
       response = post_rest_request_data(
         '/v1/users/add_access',
-        user_params(CurrentSession.catalog_username, client_rsa_pub_key, client_rsa_key_name),
+        user_params(CurrentSession.catalog_username, client_rsa_pub_key, client_rsa_key_name, { :force_access => force_access }),
         raise_error: true
       )
 
@@ -490,11 +490,14 @@ module DTK
       ::DtkCommon::Aux.dtk_instance_repo_username()
     end
 
-    def user_params(username, rsa_pub_key = nil, rsa_key_name = nil)
+    def user_params(username, rsa_pub_key = nil, rsa_key_name = nil, additional_params = {})
       ret = { username: username, dtk_instance_name: dtk_instance_repo_username() }
 
       rsa_pub_key ? ret.merge!(rsa_pub_key: rsa_pub_key) : ret
       rsa_key_name ? ret.merge!(rsa_key_name: rsa_key_name) : ret
+
+
+      ret.merge!(additional_params)
 
       ret
     end

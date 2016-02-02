@@ -284,6 +284,7 @@ module DTK
 
       unless repo_user[:repo_manager_direct_access]
         add_client_access(ssh_rsa_pub_key, repo_user[:username])
+        repo_user.update(:repo_manager_direct_access => true)
       end
 
       repo_user

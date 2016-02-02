@@ -158,6 +158,7 @@ module DTK
         begin
           # Add Repo Manager user
           response = Repo::Remote.new.add_client_access(repo_user[:ssh_rsa_pub_key], repo_user[:display_name], true)
+          repo_user.update(repo_manager_direct_access: true) if response
         rescue DTK::Error => e
           # we conditionally ignore it and we fix it later when calling repomanager
           Log.warn("We were not able to hijack public key via Repo Manager, reason: #{e.message}")

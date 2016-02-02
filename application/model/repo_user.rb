@@ -194,7 +194,7 @@ module DTK
 
     def self.get_existing_repo_users(repo_user_mh, filter_keys = {}, cols = nil)
       sp_hash = {
-        cols: cols ? (cols + [:id, :group_id]) : common_columns()
+        cols: cols ? (cols + [:id, :group_id, :repo_manager_direct_access]) : common_columns()
       }
       unless filter_keys.empty?
         filter_list = filter_keys.map { |k, v| [:eq, k, v.to_s] }

@@ -43,6 +43,10 @@ module DTK
       R8::Config[:remote_repo][:public][:username].eql?(catalog_username)
     end
 
+    def self.user_object
+      CurrentSession.new.get_user_object
+    end
+
     def self.get_default_namespace
       CurrentSession.new.get_default_namespace()
     end

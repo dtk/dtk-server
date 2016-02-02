@@ -24,8 +24,12 @@ module DTK
         client
       end
 
-      def add_client_access(client_rsa_pub_key, client_rsa_key_name)
-        response = client.add_client_access(client_rsa_pub_key, client_rsa_key_name)
+      def register_catalog_user(username, email, password, first_name = nil, last_name = nil)
+        client.register_catalog_user(username, email, password, first_name, last_name)
+      end
+
+      def add_client_access(client_rsa_pub_key, client_rsa_key_name, force_access = false)
+        response = client.add_client_access(client_rsa_pub_key, client_rsa_key_name, force_access)
         # we also make sure that tenant user is created
         create_tenant_user()
         response

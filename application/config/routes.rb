@@ -41,6 +41,7 @@ R8::ReactorRoute.draw do
   post 'account/set_default_namespace' => 'account#set_default_namespace'
   post 'account/set_catalog_credentials' => 'account#set_catalog_credentials'
   post 'account/check_catalog_credentials' => 'account#check_catalog_credentials'
+  post 'account/register_catalog_account' => 'account#register_catalog_account'
 
   # ASSEMBLY
   post 'assembly/promote_to_template' => 'assembly#promote_to_template'

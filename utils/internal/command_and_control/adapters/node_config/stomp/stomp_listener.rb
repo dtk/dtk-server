@@ -3,7 +3,7 @@ module DTK
     include EM::Protocols::Stomp
 
     NUMBER_OF_RETRIES = 5
-    IDLE_RECONNECT_TIME = 300
+    IDLE_RECONNECT_TIME = 60
 
     def connection_completed
       @message_registry = {}
@@ -53,8 +53,6 @@ module DTK
         pbuilder_id    = original_msg[:pbuilderid]
         is_heartbeat   = original_msg[:heartbeat]
 
-        deregister_incoming(msg_request_id)
-
         # decode message
         Log.debug "Recived message from STOMP, message id '#{msg_request_id}' from pbuilderid '#{pbuilder_id}' ..."
 
@@ -68,6 +66,8 @@ module DTK
             return
           end
         end
+
+        deregister_incoming(msg_request_id)
 
         callbacks = CommandAndControlAdapter::StompMultiplexer.callback_registry[msg_request_id]
 
@@ -112,11 +112,13 @@ module DTK
 
     def register_outgoing(request_id)
       return unless request_id
+      Log.info("Request ID: #{request_id} registered!")
       @message_registry[request_id] = Time.now
     end
 
     def deregister_incoming(request_id)
       return unless request_id
+      Log.info("Request ID: #{request_id} unregistered!")
       @message_registry.delete(request_id)
     end
 
@@ -134,6 +136,7 @@ module DTK
         if max_wait_time > (IDLE_RECONNECT_TIME - 10)
           # to avoid repeatition we set max time
           @message_registry[max_time.first] = Time.now
+          R8EM.add_timer(IDLE_RECONNECT_TIME) { check_hanging_messages() }
 
           Log.info("STOMP listener has not received response for #{(IDLE_RECONNECT_TIME-10)} seconds, we are restarting connection")
           reconnect(R8::Config[:stomp][:host], R8::Config[:stomp][:port].to_i)

@@ -12,7 +12,10 @@ module DTK
     def rest__list_ssh_keys
       username = ret_non_null_request_params(:username)
       model_handle = model_handle_with_private_group()
-      rest_ok_response RepoUser.get_matching_repo_users(model_handle.createMH(:repo_user), { type: 'client' }, username, ['username'])
+      # results = RepoUser.get_matching_repo_users(model_handle.createMH(:repo_user), { type: 'client' }, username, ['username'])
+      repo_keys = CurrentSession.new.user_object.public_keys
+      # we send current catalog user info in list ssh key table
+      rest_ok_response repo_keys.each { |ssh_key_obj|  ssh_key_obj.merge!(:current_catalog_username => CurrentSession.catalog_username) if ssh_key_obj.has_repoman_direct_access? }
     end
 
     # we use this method to add user access to modules / servier / repo manager
@@ -150,21 +153,31 @@ module DTK
       session_obj.set_repoman_session_id(nil)
 
       # if user is public we "hijack" existing public keys
-      if is_public_user
-        user_object.remote_public_keys.each do |repo_user|
-          begin
-            # Add Repo Manager user
-            response = Repo::Remote.new.add_client_access(repo_user[:ssh_rsa_pub_key], repo_user[:display_name])
-          rescue DTK::Error => e
-            # we conditionally ignore it and we fix it later when calling repomanager
-            Log.warn("We were not able to hijack public key via Repo Manager, reason: #{e.message}")
-          end
+      # if is_public_user
+      user_object.public_keys.each do |repo_user|
+        begin
+          # Add Repo Manager user
+          response = Repo::Remote.new.add_client_access(repo_user[:ssh_rsa_pub_key], repo_user[:display_name], true)
+          repo_user.update(repo_manager_direct_access: true) if response
+        rescue DTK::Error => e
+          # we conditionally ignore it and we fix it later when calling repomanager
+          Log.warn("We were not able to hijack public key via Repo Manager, reason: #{e.message}")
         end
       end
 
 
       rest_ok_response
     end
+
+    def rest__register_catalog_account
+      username, password, email = ret_non_null_request_params(:username, :password, :email)
+      first_name, last_name, activate_account = ret_request_params(:first_name, :last_name, :activate_account)
+
+      response = Repo::Remote.new.register_catalog_user(username, email, password, first_name, last_name)
+
+      rest_ok_response
+    end
+
 
   end
 end

@@ -13,10 +13,9 @@ module DTK
       username = ret_non_null_request_params(:username)
       model_handle = model_handle_with_private_group()
       # results = RepoUser.get_matching_repo_users(model_handle.createMH(:repo_user), { type: 'client' }, username, ['username'])
-      repo_keys = CurrentSession.new.user_object.remote_public_keys
-
+      repo_keys = CurrentSession.new.user_object.public_keys
       # we send current catalog user info in list ssh key table
-      rest_ok_response repo_keys.collect { |ssh_key_obj|  ssh_key_obj.merge!(:current_catalog_username => CurrentSession.catalog_username) }
+      rest_ok_response repo_keys.each { |ssh_key_obj|  ssh_key_obj.merge!(:current_catalog_username => CurrentSession.catalog_username) if ssh_key_obj.has_repoman_direct_access? }
     end
 
     # we use this method to add user access to modules / servier / repo manager
@@ -155,15 +154,13 @@ module DTK
 
       # if user is public we "hijack" existing public keys
       # if is_public_user
-      if true
-        user_object.remote_public_keys.each do |repo_user|
-          begin
-            # Add Repo Manager user
-            response = Repo::Remote.new.add_client_access(repo_user[:ssh_rsa_pub_key], repo_user[:display_name], true)
-          rescue DTK::Error => e
-            # we conditionally ignore it and we fix it later when calling repomanager
-            Log.warn("We were not able to hijack public key via Repo Manager, reason: #{e.message}")
-          end
+      user_object.public_keys.each do |repo_user|
+        begin
+          # Add Repo Manager user
+          response = Repo::Remote.new.add_client_access(repo_user[:ssh_rsa_pub_key], repo_user[:display_name], true)
+        rescue DTK::Error => e
+          # we conditionally ignore it and we fix it later when calling repomanager
+          Log.warn("We were not able to hijack public key via Repo Manager, reason: #{e.message}")
         end
       end
 

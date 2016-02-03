@@ -55,11 +55,13 @@ describe "Test Case 03: Login with new user that has DTK and correct catalog cre
   end
 
   context "Point dtk repoman to different url to mimic repoman down" do
-    `echo -e "localhost #{repoman_url}" >> /etc/hosts`
-    value = `cat /etc/hosts | grep #{repoman_url}`
-    pass = false
-    pass = true if value.include? repoman_url
-    expect(pass).to eq(true)
+    it "points to different repoman" do
+      `echo -e "localhost #{repoman_url}" >> /etc/hosts`
+      value = `cat /etc/hosts | grep #{repoman_url}`
+      pass = false
+      pass = true if value.include? repoman_url
+      expect(pass).to eq(true)
+    end
   end
 
   context "Add ssh key" do
@@ -79,11 +81,13 @@ describe "Test Case 03: Login with new user that has DTK and correct catalog cre
 	end
 
   context "Remove entry from /etc/hosts for repoman" do
-    `sed -i '$ d' /etc/hosts`
-    value = `cat /etc/hosts | grep #{repoman_url}`
-    pass = false
-    pass = true if !value.include? repoman_url
-    expect(pass).to eq(true)
+    it "removes invalid entry for repoman" do
+      `sed -i '$ d' /etc/hosts`
+      value = `cat /etc/hosts | grep #{repoman_url}`
+      pass = false
+      pass = true if !value.include? repoman_url
+      expect(pass).to eq(true)
+    end
   end
 
   # This automatically adds catalog credentials on repoman

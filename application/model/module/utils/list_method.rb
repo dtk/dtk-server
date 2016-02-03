@@ -18,22 +18,13 @@ module DTK
         ndx_ret = {}
         # aggregate
         branch_module_rows.each do |r|
-          module_branch = r[:module_branch]
-          module_name = r.module_name()
+          module_branch    = r[:module_branch]
+          module_name      = r.module_name()
           ndx_repo_remotes = r[:ndx_repo_remotes]
+          repo             = r[:repo]
           ndx = r[:id]
           is_equal = nil
           not_published = nil
-
-          # if finding differences with the dtkn catalog
-          if diff && module_branch[:version].eql?('master')
-            if default_remote_repo = RepoRemote.default_repo_remote?((ndx_repo_remotes || {}).values)
-              remote = default_remote_repo.remote_dtkn_location(project, model_type, module_name)
-              is_equal = r[:repo].ret_local_remote_diff(module_branch, remote)
-            else
-              not_published = true
-            end
-          end
 
           unless mdl = ndx_ret[ndx]
             r.delete(:repo)
@@ -41,12 +32,25 @@ module DTK
             mdl = ndx_ret[ndx] = r
           end
 
-          mdl.merge!(remote_relationship: is_equal)
-          mdl.merge!(not_published: not_published)
+          # if finding differences with the dtkn catalog
+          if diff && module_branch[:version].eql?('master')
+            if default_remote_repo = RepoRemote.default_repo_remote?((ndx_repo_remotes || {}).values)
+              remote = default_remote_repo.remote_dtkn_location(project, model_type, module_name)
+              is_equal = repo.ret_local_remote_diff(module_branch, remote)
+            elsif default_remote_repo = RepoRemote.default_from_module_branch?(module_branch)
+              remote = default_remote_repo.remote_dtkn_location(project, model_type, module_name)
+              is_equal = repo.ret_local_remote_diff(module_branch, remote)
+            else
+              not_published = true
+            end
+
+            mdl.merge!(remote_relationship: is_equal)
+            mdl.merge!(not_published: not_published)
+          end
 
           if opts[:include_versions]
             version = module_branch.version_print_form(Opts.new(default_version_string: DEFAULT_VERSION))
-            (mdl[:version_array] ||= []) << version unless version.eql?('CURRENT') # module_branch.version_print_form(Opts.new(default_version_string: DEFAULT_VERSION))
+            (mdl[:version_array] ||= []) << version unless version.eql?('CURRENT')
           end
           if external_ref_source = module_branch.external_ref_source()
             mdl[:external_ref_source] = external_ref_source

@@ -18,7 +18,7 @@ elasticsearch_http_port = 9200
 elasticsearch_tcp_port = 9300
 
 node_name = 'test1'
-puppet_log_location = '/var/log/puppet/last.log'
+puppet_log_location = '/usr/share/dtk/tasks/last-task/site-stage.log'
 puppet_grep_pattern = 'transaction'
 
 dtk_common = Common.new(service_name, assembly_name)

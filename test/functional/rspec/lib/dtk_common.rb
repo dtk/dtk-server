@@ -191,4 +191,17 @@ class Common
 	  end
 	  return catalog_credentials_set
 	end
+
+	def remove_direct_access(username)
+    puts "Remove direct ssh access:", "------------------------"
+    ssh_access_removed = false
+    response = send_request('/rest/account/remove_user_direct_access', {:username=>username})
+    if response['status'] == 'ok'
+    	puts "SSH access removed"
+    	ssh_access_removed = true
+    else
+      puts "SSH access has not been removed!"
+    end
+    return ssh_access_removed
+	end
 end

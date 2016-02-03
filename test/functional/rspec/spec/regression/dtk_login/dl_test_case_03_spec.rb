@@ -9,6 +9,7 @@ require './lib/component_modules_spec'
 require './spec/setup_browser'
 require './lib/admin_panel_helper'
 
+repoman_url = 'admin.dtk.io'
 component_module = "temp"
 namespace = "dtk17"
 component_module_name = "dtk17:temp"
@@ -54,7 +55,11 @@ describe "Test Case 03: Login with new user that has DTK and correct catalog cre
   end
 
   context "Point dtk repoman to different url to mimic repoman down" do
-    # To do: add logic that points repoman in /etc/hosts to localhost
+    `echo -e "localhost #{repoman_url}" >> /etc/hosts`
+    value = `cat /etc/hosts | grep #{repoman_url}`
+    pass = false
+    pass = true if value.include? repoman_url
+    expect(pass).to eq(true)
   end
 	
 	context "Initial DTK login" do
@@ -70,10 +75,14 @@ describe "Test Case 03: Login with new user that has DTK and correct catalog cre
 	end
 
   context "Remove entry from /etc/hosts for repoman" do
-    # To do: add logic that removes repoman from /etc/hosts
+    `sed -i '$ d' /etc/hosts`
+    value = `cat /etc/hosts | grep #{repoman_url}`
+    pass = false
+    pass = true if !value.include? repoman_url
+    expect(pass).to eq(true)
   end
 
-  # This should automatically add catalog credentials on repoman
+  # This automatically adds catalog credentials on repoman
   context "Set catalog credentials" do
     include_context "Set catalog credentials", dtk_common, catalog_user, catalog_password
   end
@@ -99,7 +108,7 @@ describe "Test Case 03: Login with new user that has DTK and correct catalog cre
   end
 
 	context "Delete ssh key from tenant" do
-    # To do : add logic
+    include_context 'Remove direct access', dtk_common, dtk_common.username + "-client"
 	end
 
   context "Open User panel" do

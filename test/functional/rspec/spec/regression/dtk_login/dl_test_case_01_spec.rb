@@ -86,7 +86,7 @@ describe "Test Case 01: Login with new user that has DTK and catalog credentials
   end
 
 	context "Delete ssh key from tenant" do
-    # To do : add logic
+    include_context 'Remove direct access', dtk_common, dtk_common.username + "-client"
 	end
 
   context "Open User panel" do

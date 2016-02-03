@@ -94,8 +94,8 @@ describe "Test Case 02: Login with new user that has DTK but incorrect catalog c
   end
 
 	context "Delete ssh key from tenant" do
-    # To do : add logic
-	end
+    include_context 'Remove direct access', dtk_common, dtk_common.username + "-client"
+  end
 
   context "Open User panel" do
     it "opened panel" do

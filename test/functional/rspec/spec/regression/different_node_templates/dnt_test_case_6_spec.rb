@@ -18,7 +18,7 @@ mongodb_instance_port = 27017
 mongodb_webconsole_port = 28017
 
 node_name = 'node1'
-puppet_log_location = '/var/log/puppet/last.log'
+puppet_log_location = '/usr/share/dtk/tasks/last-task/site-stage.log'
 puppet_grep_pattern = 'transaction'
 mongodb_log_location = '/var/log/mongodb/mongodb.log'
 mongodb_grep_pattern = '27017'

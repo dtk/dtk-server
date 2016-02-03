@@ -9,7 +9,7 @@ require './lib/component_modules_spec'
 require './spec/setup_browser'
 require './lib/admin_panel_helper'
 
-repoman_url = 'https://repoman1.internal.r8network.com'
+repoman_url = 'https://admin.dtk.io'
 component_module = "temp"
 namespace = "dtk17"
 component_module_name = "dtk17:temp"
@@ -75,7 +75,7 @@ describe "Test Case 03: Login with new user that has DTK and correct catalog cre
 	end
 
 	context "List remote to check connectivity with repoman" do
-    include_context "NEG - List remote", "ERROR MESSAGE TO BE ADDED!"
+    include_context "NEG - List remote", "[ERROR] Repo Manager error: User with username '#{catalog_user}' cannot be found"
 	end
 
   context "Remove entry from /etc/hosts for repoman" do

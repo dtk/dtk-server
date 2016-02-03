@@ -192,6 +192,19 @@ class Common
 	  return catalog_credentials_set
 	end
 
+	def add_direct_access(username, ssh_key)
+    puts "Add direct ssh access:", "------------------------"
+    ssh_access_added = false
+    response = send_request('/rest/account/add_user_direct_access', {:rsa_pub_key=>ssh_key, :username=>username})
+    if response['status'] == 'ok'
+    	puts "SSH access addded"
+    	ssh_access_added = true
+    else
+      puts "SSH access has been added!"
+    end
+    return ssh_access_added
+	end
+
 	def remove_direct_access(username)
     puts "Remove direct ssh access:", "------------------------"
     ssh_access_removed = false

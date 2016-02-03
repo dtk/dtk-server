@@ -615,6 +615,13 @@ shared_context 'NEG - Set incorrect catalog credentials' do |dtk_common, catalog
   end
 end
 
+shared_context 'Add direct access' do |dtk_common, username|
+  it "adds ssh access for keypair #{username}" do
+    ssh_access_added = dtk_common.add_direct_access(username, dtk_common.ssh_key)
+    expect(ssh_access_added).to eq(true)
+  end
+end
+
 shared_context 'Remove direct access' do |dtk_common, username|
   it "removes ssh access for keypair #{username}" do
     ssh_access_removed = dtk_common.remove_direct_access(username)

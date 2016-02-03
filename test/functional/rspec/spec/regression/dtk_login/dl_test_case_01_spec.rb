@@ -52,6 +52,10 @@ describe "Test Case 01: Login with new user that has DTK and catalog credentials
       expect(user_panel.on_create_page?).to eql(false)
     end
   end
+
+  context "Add ssh key" do
+    include_context 'Add direct access', dtk_common, dtk_common.username + "-client"
+	end
 	
 	context "Initial DTK login" do
 		it "verifies successfull DTK login" do

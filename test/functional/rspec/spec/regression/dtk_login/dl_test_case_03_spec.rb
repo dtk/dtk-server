@@ -9,7 +9,7 @@ require './lib/component_modules_spec'
 require './spec/setup_browser'
 require './lib/admin_panel_helper'
 
-repoman_url = 'admin.dtk.io'
+repoman_url = 'https://repoman1.internal.r8network.com'
 component_module = "temp"
 namespace = "dtk17"
 component_module_name = "dtk17:temp"
@@ -60,6 +60,10 @@ describe "Test Case 03: Login with new user that has DTK and correct catalog cre
     pass = false
     pass = true if value.include? repoman_url
     expect(pass).to eq(true)
+  end
+
+  context "Add ssh key" do
+    include_context 'Add direct access', dtk_common, dtk_common.username + "-client"
   end
 	
 	context "Initial DTK login" do

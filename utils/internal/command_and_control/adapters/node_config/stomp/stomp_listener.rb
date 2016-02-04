@@ -67,6 +67,8 @@ module DTK
           end
         end
 
+        deregister_incoming(msg_request_id)
+
         callbacks = CommandAndControlAdapter::StompMultiplexer.callback_registry[msg_request_id]
 
         unless callbacks
@@ -93,14 +95,53 @@ module DTK
         tries -= 1
       end
 
+      register_outgoing(message[:request_id])
+
       if defined?(PhusionPassenger)
         @backup_client.publish(R8::Config[:arbiter][:topic], encode(message))
       else
         send(R8::Config[:arbiter][:topic], encode(message))
       end
+
+      R8EM.add_timer(IDLE_RECONNECT_TIME) { check_hanging_messages() }
     end
 
   private
+
+    def register_outgoing(request_id)
+      return unless request_id
+      Log.info("Request ID: #{request_id} registered!")
+      @message_registry[request_id] = Time.now
+    end
+
+    def deregister_incoming(request_id)
+      return unless request_id
+      Log.info("Request ID: #{request_id} unregistered!")
+      @message_registry.delete(request_id)
+    end
+
+    def check_hanging_messages
+      return if @message_registry.size == 0
+
+      @sync_lock.synchronize do
+        current_time = Time.now
+
+        # return 2-element array with key and value
+        max_time = @message_registry.max_by { |k, v| v }
+        max_wait_time = current_time - max_time.last
+        if max_wait_time > (IDLE_RECONNECT_TIME - 10)
+          # to avoid repeatition we set max time
+          @message_registry[max_time.first] = Time.now
+          R8EM.add_timer(IDLE_RECONNECT_TIME) { check_hanging_messages() }
+
+          Log.info("STOMP listener has not received response for #{(IDLE_RECONNECT_TIME-10)} seconds, we are restarting connection")
+          reconnect(R8::Config[:stomp][:host], R8::Config[:stomp][:port].to_i)
+          Log.info("STOMP connection has been restarted, waiting for a queue")
+        else
+          Log.debug("No STOMP pending messages that are waiting more than '#{(IDLE_RECONNECT_TIME - 10)}'")
+        end
+      end
+    end
 
     def safe_print_stomp_password
       (R8::Config[:stomp][:password] || '').gsub(/./,'*')

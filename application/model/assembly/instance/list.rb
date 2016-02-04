@@ -248,24 +248,26 @@ module DTK; class  Assembly
 
             if node = component[:node]
               node_name = node[:display_name]
-              # ignore assembly wide components
-              next if node_name.eql?('assembly_wide')
+              # ignore assembly wide components, or components on node group members
+              next if node_name.eql?('assembly_wide') || node.is_target_ref?
             end
 
-            if cmps_list[component_action]
-              cmps_list[component_action] << { node: node_name, component_action: component_action, component_name: component_name}
+            if node && node.is_node_group?
+              node_group_member_actions = expand_node_group_members(component_action, component_name, node)
+              cmps_list[component_action] = (cmps_list[component_action]||[]) + node_group_member_actions unless node_group_member_actions.empty?
             else
-              cmps_list[component_action] = [{ node: node_name, component_action: component_action, component_name: component_name}]
+              cmps_list[component_action] = (cmps_list[component_action]||[]) + [{ node: node_name, component_action: component_action, component_name: component_name}]
             end
           end
 
           sorted_cmps_list = filter_components_by_nodes(cmps_list)
           list.concat(sorted_cmps_list)
 
-          component_actions = Task::Template::Action::AdHoc.list(self, :component_instance)
+          component_actions = Task::Template::Action::AdHoc.list(self, :component_instance, {return_nodes: true})
           cmp_actions_list  = {}
           component_actions.each do |cmp_action|
             name      = cmp_action[:component_type]
+            node      = cmp_action[:node]
             node_name = nil
             cmp_title = nil
 
@@ -285,10 +287,11 @@ module DTK; class  Assembly
             component_action = cmp_title ? "#{name}[NAME].#{cmp_action[:method_name]}" : "#{name}.#{cmp_action[:method_name]}"
             name             = "#{name}.#{cmp_action[:method_name]}"
 
-            if cmp_actions_list[name]
-              cmp_actions_list[name] << { node: node_name, component_action: component_action, component_name: cmp_title}
+            if node && node.is_node_group?
+              node_group_member_actions = expand_node_group_members(component_action, cmp_title, node)
+              cmp_actions_list[name] = (cmp_actions_list[name]||[]) + node_group_member_actions unless node_group_member_actions.empty?
             else
-              cmp_actions_list[name] = [{ node: node_name, component_action: component_action, component_name: cmp_title}]
+              cmp_actions_list[name] = (cmp_actions_list[name]||[]) + [{ node: node_name, component_action: component_action, component_name: cmp_title}]
             end
           end
 
@@ -297,6 +300,29 @@ module DTK; class  Assembly
         end
 
         list.uniq
+      end
+
+      # if there is node group in service instance, expand node group memebers and display them in list-actions
+      def expand_node_group_members(component_action, component_name, node)
+        actions = []
+
+        # add node group name to list action
+        actions << { node: node[:display_name], component_action: component_action, component_name: component_name }
+
+        members = node.get_node_group_members
+        members.sort_by! { |m| m[:index] }
+
+        if members.size <= 2
+          members.each do |member|
+            actions << { node: member[:display_name], component_action: component_action, component_name: component_name }
+          end
+        else
+          first_index = members.first[:index]
+          last_index = members.last[:index]
+          actions << { node: "#{node[:display_name]}:[#{first_index}-#{last_index}]", component_action: component_action, component_name: component_name }
+        end
+
+        actions
       end
 
       def filter_components_by_nodes(cmps_list, opts = {})

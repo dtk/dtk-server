@@ -20,8 +20,8 @@ module DTK; class Task; class Template
         ret
       end
 
-      def self.list(assembly, type)
-        List.list(get_action_list(assembly), type)
+      def self.list(assembly, type, opts = {})
+        List.list(get_action_list(assembly), type, opts)
       end
 
       private
@@ -57,8 +57,8 @@ module DTK; class Task; class Template
       end
 
       module List
-        def self.list(action_list, type)
-          action_list_display_form = action_list_display_form(action_list, type)
+        def self.list(action_list, type, opts = {})
+          action_list_display_form = action_list_display_form(action_list, type, opts)
 
           case type
             when :component_instance
@@ -71,23 +71,27 @@ module DTK; class Task; class Template
 
         private
 
-        def self.action_list_display_form(action_list, type)
+        def self.action_list_display_form(action_list, type, opts = {})
           action_list.inject([]) do |array, component_action|
-            array + action_display_form(component_action, type)
+            array + action_display_form(component_action, type, opts)
           end
         end
 
-        def self.action_display_form(component_action, type)
+        def self.action_display_form(component_action, type, opts = {})
           ret = []
           action_defs = component_action.action_defs()
           unless action_defs.empty?
-            ret = action_defs.map do |action_def|
-              {
+            action_defs.each do |action_def|
+              ac_def = {
                 component_instance: type == :component_instance && component_action.display_name_print_form(node_prefix: true),
                 component_type: component_action.component_type_print_form(),
                 method_name: action_def.get_field?(:method_name),
                 display_name: component_action.display_name_print_form()
               }
+              if node = opts[:return_nodes]&& component_action.node
+                ac_def.merge!(node: component_action.node)
+              end
+              ret << ac_def
             end
           end
           ret

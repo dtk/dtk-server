@@ -310,7 +310,7 @@ module DTK; class  Assembly
         actions << { node: node[:display_name], component_action: component_action, component_name: component_name }
 
         members = node.get_node_group_members
-        members.sort_by! { |m| m[:index] }
+        members.sort_by! { |m| m[:index].to_i }
 
         if members.size <= 2
           members.each do |member|

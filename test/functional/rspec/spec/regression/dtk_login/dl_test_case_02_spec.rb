@@ -52,6 +52,10 @@ describe "Test Case 02: Login with new user that has DTK but incorrect catalog c
       expect(user_panel.on_create_page?).to eql(false)
     end
   end
+
+  context "Add ssh key" do
+    include_context 'Add direct access', dtk_common, dtk_common.username + "-client"
+  end
 	
 	context "Initial DTK login" do
 		it "verifies successfull DTK login" do
@@ -94,8 +98,8 @@ describe "Test Case 02: Login with new user that has DTK but incorrect catalog c
   end
 
 	context "Delete ssh key from tenant" do
-    # To do : add logic
-	end
+    include_context 'Remove direct access', dtk_common, dtk_common.username + "-client"
+  end
 
   context "Open User panel" do
     it "opened panel" do

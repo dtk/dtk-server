@@ -99,8 +99,6 @@ module DTK
         action_set = compute_singleton_action_set(action_set_def, route_key, action_set_params)
         run_action_set(action_set)
       end
-
-      Log.info("USER -- : '#{ramaze_user[:username]}'") if ramaze_user
     end
 
     private

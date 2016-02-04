@@ -615,6 +615,20 @@ shared_context 'NEG - Set incorrect catalog credentials' do |dtk_common, catalog
   end
 end
 
+shared_context 'Add direct access' do |dtk_common, username|
+  it "adds ssh access for keypair #{username}" do
+    ssh_access_added = dtk_common.add_direct_access(username, dtk_common.ssh_key)
+    expect(ssh_access_added).to eq(true)
+  end
+end
+
+shared_context 'Remove direct access' do |dtk_common, username|
+  it "removes ssh access for keypair #{username}" do
+    ssh_access_removed = dtk_common.remove_direct_access(username)
+    expect(ssh_access_removed).to eq(true)
+  end
+end
+
 shared_context 'List component modules with filter' do |dtk_common, namespace|
   it "gets all modules from namespace #{namespace}" do
     component_modules_retrieved = dtk_common.list_component_modules_with_filter(namespace)

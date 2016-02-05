@@ -1,0 +1,16 @@
+properties:
+ jenkins_password:
+ server_password: r8server
+ aws_access_key_id: 
+ aws_secret_access_key: 
+ server: v0.7.10
+ dtk-repo-manager: v0.7.9
+ dtk-repoman-admin: v0.7.7
+ dtk-common: v0.7.6
+ dtk-common-repo: v0.7.3
+ dtk-client: v0.7.10
+ dtk-node-agent: v0.7.7
+ jenkins_node: release
+ release: true
+ smtp_username: test
+ smtp_password: test

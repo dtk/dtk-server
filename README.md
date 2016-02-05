@@ -81,3 +81,20 @@ docker run --name dtk -v /dtk:/host_volume -p 8080:80 -p 6163:6163 -p 2222:22 -d
 ```
 ### Connecting to Tenant inside container
 To connect to the tenant inside the docker container, you will have to set `secure_connection` to `false` in the dtk/client.conf file of the dtk-client directory and run the `dtk-shell` command. For the server address, tenant username and password, enter the same values that are set in the `dtk.config` file of the docker container host volume.
+
+
+## License
+
+dtk-server is copyright (C) 2010-2016 dtk contributors
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this work except in compliance with the License.
+You may obtain a copy of the License in the [LICENSE](LICENSE) file, or at:
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.

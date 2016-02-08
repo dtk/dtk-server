@@ -250,9 +250,9 @@ module DTK
       tenant_response
     end
 
-    def validate_catalog_credentials(username, password)
+    def validate_catalog_credentials!(username, password)
       response = handle_error(raise_error: true) do
-        RestClientWrapper.post("#{@rest_base_url}/v1/auth/login", username: username, password: password, pre_hashed: true)
+        RestClientWrapper.post("#{@rest_base_url}/v1/auth/login", username: username, password: password, pre_hashed: false)
       end
     end
 

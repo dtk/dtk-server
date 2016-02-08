@@ -35,7 +35,7 @@ end
 def r8_require_common_lib(*files_x)
   files_x.each { |file| dtk_require_dtk_common_file(file) }
 end
-##### TODO: deprecate forp above
+
 def dtk_require(*files_x)
   files = (files_x.first.is_a?(Array) ? files_x.first : files_x)
   caller_dir = caller.first.gsub(/\/[^\/]+$/, '')

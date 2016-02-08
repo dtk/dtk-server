@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 require 'singleton'
-require 'openssl'
+
 
 require File.expand_path('../../../protocol_multiplexer', File.dirname(__FILE__))
 require File.expand_path('../../../../ssh_cipher', File.dirname(__FILE__))

@@ -78,7 +78,7 @@ module DTK
 
     def self.catalog_credentials
       usr_obj = CurrentSession.new.get_user_object()
-      { username: usr_obj.catalog_username || R8::Config[:remote_repo][:public][:username], password: usr_obj.catalog_password || R8::Config[:remote_repo][:public][:password], pre_hashed: true }
+      { username: usr_obj.catalog_username || R8::Config[:remote_repo][:public][:username], password: usr_obj.catalog_password || R8::Config[:remote_repo][:public][:password], pre_hashed: false }
     end
 
     def self.catalog_username

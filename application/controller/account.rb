@@ -156,14 +156,15 @@ module DTK
       username, password = ret_non_null_request_params(:username, :password)
       validate = ret_request_param_boolean(:validate)
       user_object    = CurrentSession.new.get_user_object()
-      is_public_user = CurrentSession.is_remote_public_user?
 
-      # bellow method will throw error in case credentials are not valid
-      password =  DataEncryption.hash_it(password)
-      Repo::Remote.new.validate_catalog_credentials(username, password) if validate
+      # throws error in case of wrong validation
+      Repo::Remote.new.validate_catalog_credentials!(username, password) if validate
+
+      # if all ok we SSH encrypt our password
+      hashed_password =  SSHCipher.encrypt_password(password)
 
       # we update user with new credentials
-      user_object.update(catalog_username: username, catalog_password: password)
+      user_object.update(catalog_username: username, catalog_password: hashed_password)
       session_obj = CurrentSession.new
       session_obj.set_user_object(user_object)
       # we invalidate the session for repoman

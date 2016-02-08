@@ -64,20 +64,6 @@ describe '(Repoman Drupal API) Test Case 2: Create user with only required param
     end
   end
 
-  context 'Delete user user_info[:username]' do
-    it 'deletes user' do
-      user_deleted = false
-      all_users = repoman.get_users
-      user_id = all_users['data'].find { |user| user['username'] == user_info[:username] }['id']
-      response = repoman.delete_user(user_id)
-      ap response
-      if response['status'] == 'ok'
-        user_deleted = true if response['data']['success'] == true
-      end
-      expect(user_deleted).to eq(true)
-    end
-  end
-
   context "Delete user's namespace user_info[:namespace]" do
     it "deletes user's namespace" do
       namespace_deleted = false
@@ -89,6 +75,20 @@ describe '(Repoman Drupal API) Test Case 2: Create user with only required param
         namespace_deleted = true if response['data']['success'] == true
       end
       expect(namespace_deleted).to eq(true)
+    end
+  end
+
+  context 'Delete user user_info[:username]' do
+    it 'deletes user' do
+      user_deleted = false
+      all_users = repoman.get_users
+      user_id = all_users['data'].find { |user| user['username'] == user_info[:username] }['id']
+      response = repoman.delete_user(user_id)
+      ap response
+      if response['status'] == 'ok'
+        user_deleted = true if response['data']['success'] == true
+      end
+      expect(user_deleted).to eq(true)
     end
   end
 

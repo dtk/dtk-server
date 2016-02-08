@@ -1,13 +1,13 @@
 GIT
-  remote: git://github.com/rich-reactor8/dtk-common-repo.git
-  revision: 7f00f71b89b85e14542cb78c0c2bac5dfa66efea
+  remote: git://github.com/dtk/dtk-common-core.git
+  revision: d88fd248e993bb45cca3a7996e44bf6e8e1fd840
   specs:
     dtk-common-core (0.7.3)
       rest-client (= 1.6.7)
 
 GIT
-  remote: git://github.com/rich-reactor8/dtk-common.git
-  revision: 9dded7b6615051ce16c44ab3bd8d8863e0fbdfb5
+  remote: git://github.com/dtk/dtk-common.git
+  revision: 18d312092e9060f01d271a603ad4b0c9bef318b1
   specs:
     dtk-common (0.7.6)
       colorize (~> 0.5.8)

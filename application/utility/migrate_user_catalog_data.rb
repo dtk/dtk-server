@@ -38,7 +38,7 @@ users = ::DTK::Model.get_objs(default_project.model_handle(:user), { cols: [:id,
 
 users.each do |user|
   if user[:catalog_password]
-    user.update(catalog_password: ::DTK::DataEncryption.hash_it(user[:catalog_password]))
+    user.update(catalog_password: ::DTK::SSHCipher.encrypt_password(user[:catalog_password]))
   end
 end
 

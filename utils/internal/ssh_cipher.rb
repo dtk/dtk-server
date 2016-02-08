@@ -16,6 +16,7 @@
 # limitations under the License.
 #
 require 'openssl'
+require 'base64'
 require 'yaml'
 
 #
@@ -25,6 +26,17 @@ require 'yaml'
 
 module DTK
   class SSHCipher
+
+    def self.encrypt_password(plain_text_password)
+      public_key = OpenSSL::PKey::RSA.new(File.read(R8::Config[:encryption][:tenant][:private_key])).public_key
+      Base64.encode64(public_key.public_encrypt(plain_text_password))
+    end
+
+    def self.decrypt_password(hashed_password)
+      return nil unless hashed_password
+      private_key = OpenSSL::PKey::RSA.new(File.read(R8::Config[:encryption][:tenant][:private_key]))
+      private_key.private_decrypt(Base64.decode64(hashed_password))
+    end
 
     def self.decrypt_sensitive(encrypted_data, encrypted_key, encrypted_iv)
       if encrypted_data
@@ -42,8 +54,6 @@ module DTK
         ''
       end
     end
-
-    private
 
     def self.encrypt_sensitive(message)
       plain_data = message.to_yaml

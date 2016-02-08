@@ -96,6 +96,7 @@ R8::Config[:default_layout] = 'default'
 # Encryption info
 R8::Config[:encryption][:password_salt] = nil
 R8::Config[:encryption][:cookie_salt] = nil
+R8::Config[:encryption][:tenant][:private_key] = "#{R8.app_user_home()}/.ssh/id_rsa"
 
 R8::Config[:server_public_dns] = ::DTK::Common::Aux.get_ec2_public_dns()
 R8::Config[:server_port] = 7000
@@ -233,7 +234,7 @@ R8::Config[:stomp][:password] = 'marionette'
 R8::Config[:remote_repo][:authentication] = true
 # public user credentials, we use ore-hashed password
 R8::Config[:remote_repo][:public][:username] = 'dtk-public-user'
-R8::Config[:remote_repo][:public][:password] = nil
+R8::Config[:remote_repo][:public][:password] = 'r8server'
 
 # Debug flags
 R8::Config[:debug][:development_mode] = false

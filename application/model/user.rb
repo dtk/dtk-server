@@ -37,7 +37,7 @@ module XYZ
       user_hash = Aux.HashHelper(
         password: DataEncryption.hash_it(opts[:password] || random_generate_password()),
         default_namespace: opts[:namespace] || username,
-        catalog_password: DataEncryption.hash_it(opts[:catalog_password]),
+        catalog_password: SSHCipher.encrypt_password(opts[:catalog_password]),
         catalog_username: opts[:catalog_username]
       )
 
@@ -72,7 +72,8 @@ module XYZ
     end
 
     def catalog_password
-      self[:catalog_password] || self.update_obj!(:catalog_password)[:catalog_password]
+      hashed_password = self[:catalog_password] || self.update_obj!(:catalog_password)[:catalog_password]
+      ::DTK::SSHCipher.decrypt_password(hashed_password)
     end
 
     # TODO: temp
@@ -176,5 +177,6 @@ module XYZ
         }
       }
     end
+
   end
 end

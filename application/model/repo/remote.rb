@@ -56,8 +56,8 @@ module DTK
         client.remove_client_access(username)
       end
 
-      def validate_catalog_credentials(username, password)
-        client.validate_catalog_credentials(username, password)
+      def validate_catalog_credentials!(username, password)
+        client.validate_catalog_credentials!(username, password)
       end
 
       def create_tenant_user

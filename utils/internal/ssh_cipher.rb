@@ -28,6 +28,7 @@ module DTK
   class SSHCipher
 
     def self.encrypt_password(plain_text_password)
+      return nil unless plain_text_password
       public_key = OpenSSL::PKey::RSA.new(File.read(R8::Config[:encryption][:tenant][:private_key])).public_key
       Base64.encode64(public_key.public_encrypt(plain_text_password))
     end

@@ -2,8 +2,8 @@ source 'https://rubygems.org'
 
 # dtk gems
 #TODO: commented until we solve issue with nee to get latest versions from our geminabox not rubygems
-gem 'dtk-common', :github => 'rich-reactor8/dtk-common' #, :tag => '>= 0.5.15'
-gem 'dtk-common-core', :github => 'rich-reactor8/dtk-common-repo'
+gem 'dtk-common', :github => 'dtk/dtk-common'
+gem 'dtk-common-core', :github => 'dtk/dtk-common-core'
 
 # required to start a server
 gem 'bundler', '>= 1.1.5'
@@ -26,6 +26,8 @@ gem 'colorize', '~> 0.5.8'
 gem 'awesome_print', '1.1.0'
 gem 'celluloid'
 gem 'excon'
+# subdependency, need to lock it
+gem 'tins', '0.13.2'
 
 #TODO: moved back to 0.17.0.b7; looks like running into bug with 0.19.0 (7/27/13)
 gem 'rugged', '0.17.0.b7'
@@ -51,7 +53,7 @@ end
 # Version That will work, bumped it so we could
 # bump fog as well.
 # gem 'chef','~>0.10.2' BuMP CHEF!!!!
-gem 'chef'
+gem 'chef', '11.6.2'
 gem 'mcollective-client', '2.2.3'
 #gem 'puppet','2.7.6'
 gem 'puppet', '3.4.0'

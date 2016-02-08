@@ -8,8 +8,8 @@ login = {
 user_info = {
   username: 'test',
   email: 'test@r8network.com',
-  first_name: 'test_name',
-  last_name: 'test_last_name',
+  first_name: 'testname',
+  last_name: 'testlastname',
   user_group: 'test',
   namespace: 'test'
 }

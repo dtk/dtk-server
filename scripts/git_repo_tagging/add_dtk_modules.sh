@@ -86,6 +86,7 @@ git add .; git commit -m "Adding latest updates for dtk modules"; git push origi
 cd ../../..
 
 # Add repoman related dtk modules
-cd $output_dir && git clone $dtk_repo_manager && cd repo_manager && git submodule init && git submodule update
+cd $output_dir && git clone $dtk_repo_manager && cd dtk-repo-manager && git submodule init && git submodule update
 cd dtk_modules/$dtk_repo_manager_url
-git fetch && git merge origin/master
+git checkout master && git pull && cd ../..
+git add .; git commit -m "Adding latest updates for dtk modules"; git push origin master

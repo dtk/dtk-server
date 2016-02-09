@@ -20,16 +20,12 @@
 
 # Output repo directory:
 output_dir=$1
+dtk_server=$2
+dtk_repo_manager=$3
+dtk_repoman_url=$4
 
-if [[ -z ${output_dir} ]]; then
-  echo "output_dir argument missing"
-  exit 1
-fi
-
-dtk_server="git@github.com:rich-reactor8/server.git"
 dtk_service_module_url="internal--sm--dtk"
 dtk_component_module_url_prefix="internal--cm--"
-dtk_repoman_url="git@dtknet.servicecatalog.it"
 
 apt_url="apt"
 common_user_url="common_user"
@@ -40,7 +36,6 @@ dtk_client_url="dtk_client"
 dtk_java_url="dtk_java"
 dtk_nginx_url="dtk_nginx"
 dtk_postgresql_url="dtk_postgresql"
-dtk_repo_manager_url="dtk_repo_manager"
 dtk_server_url="dtk_server"
 dtk_thin_url="dtk_thin"
 dtk_user_url="dtk_user"
@@ -50,9 +45,10 @@ nginx_url="nginx"
 rvm_url="rvm"
 stdlib_url="stdlib"
 sysctl_url="sysctl"
-thin_url="thin"
+passenger_url="dtk_passenger"
 vcsrepo_url="vcsrepo"
 docker_url="docker"
+dtk_repo_manager_url="dtk_repo_manager"
 
 dtk_modules=()
 dtk_modules+=($apt_url)
@@ -64,7 +60,6 @@ dtk_modules+=($dtk_client_url)
 dtk_modules+=($dtk_java_url)
 dtk_modules+=($dtk_nginx_url)
 dtk_modules+=($dtk_postgresql_url)
-dtk_modules+=($dtk_repo_manager_url)
 dtk_modules+=($dtk_server_url)
 dtk_modules+=($dtk_thin_url)
 dtk_modules+=($dtk_user_url)
@@ -74,10 +69,11 @@ dtk_modules+=($nginx_url)
 dtk_modules+=($rvm_url)
 dtk_modules+=($stdlib_url)
 dtk_modules+=($sysctl_url)
-dtk_modules+=($thin_url)
+dtk_modules+=($passenger_url)
 dtk_modules+=($vcsrepo_url)
 dtk_modules+=($docker_url)
 
+# Add server related dtk modules
 cd $output_dir && git clone $dtk_server && cd server && git submodule init && git submodule update
 for module in ${dtk_modules[@]}; do
 	#cd dtk_modules/$module
@@ -87,3 +83,9 @@ for module in ${dtk_modules[@]}; do
 done
 git subtree pull --prefix dtk_modules/${dtk_service_module_url} ${dtk_repoman_url}:${dtk_service_module_url} master --squash -m "Updated dtk service module"
 git add .; git commit -m "Adding latest updates for dtk modules"; git push origin master
+cd ../../..
+
+# Add repoman related dtk modules
+cd $output_dir && git clone $dtk_repo_manager && cd repo_manager && git submodule init && git submodule update
+cd dtk_modules/$dtk_repo_manager_url
+git fetch && git merge origin/master

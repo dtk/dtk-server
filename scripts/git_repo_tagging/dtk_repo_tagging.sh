@@ -25,13 +25,13 @@ dtk_major_tag=$1
 output_dir=$2
 
 # DTK repos url
-dtk_client="git@github.com:rich-reactor8/dtk-client.git"
-dtk_common="git@github.com:rich-reactor8/dtk-common.git"
-dtk_common_core="git@github.com:rich-reactor8/dtk-common-repo.git"
-dtk_node_agent="git@github.com:rich-reactor8/dtk-node-agent.git"
-dtk_repo_manager="git@github.com:rich-reactor8/dtk-repo-manager.git"
-dtk_repo_manager_admin="git@github.com:rich-reactor8/dtk-repoman-admin.git"
-dtk_server="git@github.com:rich-reactor8/server.git"
+dtk_client="git@github.com:dtk/dtk-client.git"
+dtk_common="git@github.com:dtk/dtk-common.git"
+dtk_common_core="git@github.com:dtk/dtk-common-core.git"
+dtk_node_agent="git@github.com:dtk/dtk-node-agent.git"
+dtk_repo_manager="git@github.com:dtk/dtk-repo-manager.git"
+dtk_repo_manager_admin="git@github.com:dtk/dtk-repoman-admin.git"
+dtk_server="git@github.com:dtk/dtk-server.git"
 
 dtk_repos=()
 dtk_repos+=($dtk_common_core)

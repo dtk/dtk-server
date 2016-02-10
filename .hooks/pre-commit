@@ -1,0 +1,25 @@
+#!/bin/sh
+ 
+if git rev-parse --verify HEAD >/dev/null 2>&1
+then
+    against=HEAD
+else
+    # Initial commit: diff against an empty tree object
+    against=8e74e9fd87e7be098f8593b39cda5e20cbe37501dario
+fi
+ 
+# Redirect output to stderr.
+exec 1>&2
+ 
+# Check changed files for an AWS keys
+KEY_ID=$(git diff --cached --name-only -z $against | xargs -0 cat | perl -nle'print $& if m{(?<![A-Z0-9])[A-Z0-9]{20}(?![A-Z0-9])}')
+KEY=$(git diff --cached --name-only -z $against | xargs -0 cat | perl -nle'print $& if m{(?<![A-Z0-9])[A-Z0-9]{20}(?![A-Z0-9])}')
+ 
+if [ "$KEY_ID" != "" -o "$KEY" != "" ]; then
+    echo "Found patterns for AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY"
+    echo "Please check your code and remove API keys."
+    exit 1
+fi
+ 
+# Normal exit
+exit 0

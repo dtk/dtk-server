@@ -167,15 +167,27 @@ fi
 if [[ ! -f ${HOST_VOLUME}/init_done ]]; then
   envsubst < /addons/server.conf.template > /etc/dtk/${TENANT_USER}/server.conf
 fi
-# and put random salts in it
-if grep '^encryption.cookie_salt.*""' /etc/dtk/${TENANT_USER}/server.conf; then
-  salt=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 50`
-  sed -i "s|^encryption.cookie_salt.*\"\"|encryption.cookie_salt = \"${salt}\"|g" /etc/dtk/${TENANT_USER}/server.conf
+
+# generate salts
+if [[ ! -f ${HOST_VOLUME}/.cookie_salt ]]; then
+  cat /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 50 > ${HOST_VOLUME}/.cookie_salt
 fi
-if grep '^encryption.password_salt.*""' /etc/dtk/${TENANT_USER}/server.conf; then
-  salt=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 50`
-  sed -i "s|^encryption.password_salt.*\"\"|encryption.password_salt = \"${salt}\"|g" /etc/dtk/${TENANT_USER}/server.conf
+if [[ ! -f ${HOST_VOLUME}/.password_salt ]]; then
+  cat /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 50 > ${HOST_VOLUME}/.password_salt
 fi
+
+export COOKIE_SALT=`cat ${HOST_VOLUME}/.cookie_salt`
+export PASSWORD_SALT=`cat ${HOST_VOLUME}/.password_salt`
+
+# if grep '^encryption.cookie_salt.*""' /etc/dtk/${TENANT_USER}/server.conf; then
+#   salt=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 50`
+#   sed -i "s|^encryption.cookie_salt.*\"\"|encryption.cookie_salt = \"${salt}\"|g" /etc/dtk/${TENANT_USER}/server.conf
+
+# fi
+# if grep '^encryption.password_salt.*""' /etc/dtk/${TENANT_USER}/server.conf; then
+#   salt=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 50`
+#   sed -i "s|^encryption.password_salt.*\"\"|encryption.password_salt = \"${salt}\"|g" /etc/dtk/${TENANT_USER}/server.conf
+# fi
 
 # set up the tenant database and use
 su - ${TENANT_USER} -c "cd /home/${TENANT_USER}/server/current/application; bundle exec ./utility/dbrebuild.rb"

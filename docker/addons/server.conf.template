@@ -29,8 +29,8 @@ arbiter.auth_type=ssh
 arbiter.topic = ${ARBITER_TOPIC}
 arbiter.queue = ${ARBITER_QUEUE}
 
-encryption.cookie_salt   = ""
-encryption.password_salt = ""
+encryption.cookie_salt   = ${COOKIE_SALT}
+encryption.password_salt = ${PASSWORD_SALT}
 
 server_port = 443
 repo.git.gitolite.admin_directory = /home/${TENANT_USER}/gitolite-admin/

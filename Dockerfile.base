@@ -2,7 +2,7 @@ FROM getdtk/trusty-puppet:0.2
 MAINTAINER dduvnjak <dario@atlantbh.com>
 
 RUN mkdir -p /etc/puppet/modules
-COPY dtk_modules /etc/puppet/modules
+COPY dtk-provisioning/modules /etc/puppet/modules
 COPY docker/manifests /tmp/manifests
 
 RUN git clone https://github.com/rich-reactor8/dtk-node-agent /tmp/dtk-node-agent && \

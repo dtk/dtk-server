@@ -162,10 +162,18 @@ if [[ ! -d ${HOST_VOLUME}/activemq ]]; then
 fi
 /opt/activemq/bin/activemq start &
 
-
-
+# populate the configuration template
 if [[ ! -f ${HOST_VOLUME}/init_done ]]; then
   envsubst < /addons/server.conf.template > /etc/dtk/${TENANT_USER}/server.conf
+fi
+# and put random salts in it
+if grep '^encryption.cookie_salt.*""' /etc/dtk/${TENANT_USER}/server.conf; then
+  salt=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 50`
+  sed -i "s|^encryption.cookie_salt.*\"\"|encryption.cookie_salt = \"${salt}\"|g" /etc/dtk/${TENANT_USER}/server.conf
+fi
+if grep '^encryption.password_salt.*""' /etc/dtk/${TENANT_USER}/server.conf; then
+  salt=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 50`
+  sed -i "s|^encryption.password_salt.*\"\"|encryption.cookie_salt = \"${salt}\"|g" /etc/dtk/${TENANT_USER}/server.conf
 fi
 
 # set up the tenant database and use

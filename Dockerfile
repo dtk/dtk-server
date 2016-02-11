@@ -1,9 +1,9 @@
-FROM getdtk/baseimage:0.8
+FROM getdtk/baseimage:0.9
 MAINTAINER dduvnjak <dario@atlantbh.com>
 
 RUN mkdir -p /etc/puppet/modules
 
-COPY dtk_modules /etc/puppet/modules
+COPY dtk-provisioning/modules /etc/puppet/modules
 COPY docker/manifests /tmp/manifests
 COPY docker/addons /addons
 
@@ -17,7 +17,7 @@ RUN chown -R ${tenant_user}:${tenant_user} /home/${tenant_user}
 RUN apt-get update
 RUN puppet apply --debug /tmp/manifests/stage3.pp
 
-RUN apt-get clean
+RUN apt-get clean && apt-get autoclean && apt-get -y autoremove
 
 RUN rm -rf /etc/puppet/modules /tmp/* /var/lib/postgresql/ /var/lib/apt/lists/* /var/tmp/*
 

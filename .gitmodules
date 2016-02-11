@@ -1,0 +1,3 @@
+[submodule "dtk-provisioning"]
+	path = dtk-provisioning
+	url = https://github.com/dtk/dtk-provisioning

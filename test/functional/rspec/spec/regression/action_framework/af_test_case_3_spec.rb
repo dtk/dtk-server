@@ -17,19 +17,19 @@ assembly_name = 'action_module::multi-node-with-mustache'
 dtk_common = Common.new(service_name, assembly_name)
 
 expected_output_1 = {
-  command: 'ls /usr/share/mcollective',
+  command: 'ls /usr/share/dtk',
   status: 0,
   stderr: nil
 }
 
 expected_output_2_1 = {
-  command: 'ls -l /usr/share/mcollective',
+  command: 'ls -l /usr/share/dtk',
   status: 0,
   stderr: nil
 }
 
 expected_output_2_2 = {
-  command: 'ls -a /usr/share/mcollective',
+  command: 'ls -a /usr/share/dtk',
   status: 0,
   stderr: nil
 }

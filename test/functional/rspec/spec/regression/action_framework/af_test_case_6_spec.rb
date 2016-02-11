@@ -17,7 +17,7 @@ assembly_name = 'action_module::nohup-log-tailing'
 dtk_common = Common.new(service_name, assembly_name)
 
 expected_output_1 = {
-  command: 'nohup tail -f /var/log/mcollective.log',
+  command: 'nohup tail -f /var/log/dtk/dtk-arbiter.output',
   status: 0,
   stderr: nil
 }

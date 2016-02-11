@@ -17,7 +17,7 @@ assembly_name = 'action_module::multi-node-action'
 dtk_common = Common.new(service_name, assembly_name)
 
 expected_output_1 = {
-  command: 'ls -l /usr/share/mcollective',
+  command: 'ls -l /usr/share/dtk',
   status: 0,
   stderr: nil
 }

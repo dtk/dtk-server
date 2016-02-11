@@ -22,7 +22,8 @@
 output_dir=$1
 dtk_server=$2
 dtk_repo_manager=$3
-dtk_repoman_url=$4
+dtk_provisioning=$4
+dtk_repoman_url=$5
 
 dtk_service_module_url="internal--sm--dtk"
 dtk_component_module_url_prefix="internal--cm--"
@@ -73,17 +74,29 @@ dtk_modules+=($passenger_url)
 dtk_modules+=($vcsrepo_url)
 dtk_modules+=($docker_url)
 
+cd $output_dir
+
+# Add dtk modules as subtrees to dtk provisioning repo
+git clone $dtk_provisioning && cd dtk-provisioning
+for module in ${dtk_modules[@]}; do
+  git subtree pull --prefix modules/${module} ${dtk_repoman_url}:${dtk_component_module_url_prefix}${module} master --squash -m "Updated module ${module}"
+done
+git subtree pull --prefix modules/${dtk_repo_manager_url} ${dtk_repoman_url}:${dtk_repo_manager_url} master --squash -m "Updated dtk repo manager module"
+git subtree pull --prefix modules/${dtk_service_module_url} ${dtk_repoman_url}:${dtk_service_module_url} master --squash -m "Updated dtk service module"
+git add .; git commit -m "Adding latest updates for dtk modules"; git push origin master
+cd ..
+
 # Add server related dtk modules
-cd $output_dir && git clone $dtk_server && cd dtk-server && git submodule init && git submodule update
+git clone $dtk_server && cd dtk-server && git submodule init && git submodule update
 for module in ${dtk_modules[@]}; do
 	cd dtk-provisioning/$module
 	git checkout master && git pull && cd ../..
 done
 git add .; git commit -m "Adding latest updates for dtk modules"; git push origin master
-cd ../..
+cd ..
 
 # Add repoman related dtk modules
-cd $output_dir && git clone $dtk_repo_manager && cd dtk-repo-manager && git submodule init && git submodule update
+git clone $dtk_repo_manager && cd dtk-repo-manager && git submodule init && git submodule update
 cd dtk_modules/$dtk_repo_manager_url
 git checkout master && git pull && cd ../..
 git add .; git commit -m "Adding latest updates for dtk modules"; git push origin master

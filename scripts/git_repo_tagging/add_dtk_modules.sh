@@ -81,7 +81,6 @@ git clone $dtk_provisioning && cd dtk-provisioning
 for module in ${dtk_modules[@]}; do
   git subtree pull --prefix modules/${module} ${dtk_repoman_url}:${dtk_component_module_url_prefix}${module} master --squash -m "Updated module ${module}"
 done
-git subtree pull --prefix modules/${dtk_repo_manager_url} ${dtk_repoman_url}:${dtk_repo_manager_url} master --squash -m "Updated dtk repo manager module"
 git subtree pull --prefix modules/${dtk_service_module_url} ${dtk_repoman_url}:${dtk_service_module_url} master --squash -m "Updated dtk service module"
 git add .; git commit -m "Adding latest updates for dtk modules"; git push origin master
 cd ..
@@ -90,7 +89,7 @@ cd ..
 git clone $dtk_server && cd dtk-server && git submodule init && git submodule update
 for module in ${dtk_modules[@]}; do
 	cd dtk-provisioning/modules/$module
-	git checkout master && git pull && cd ../..
+	git checkout master && git pull && cd ..
 done
 git add .; git commit -m "Adding latest updates for dtk modules"; git push origin master
 cd ..

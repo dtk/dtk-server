@@ -163,11 +163,6 @@ if [[ ! -d ${HOST_VOLUME}/activemq ]]; then
 fi
 /opt/activemq/bin/activemq start &
 
-# populate the configuration template
-if [[ ! -f ${HOST_VOLUME}/init_done ]]; then
-  envsubst < /addons/server.conf.template > /etc/dtk/${TENANT_USER}/server.conf
-fi
-
 # generate salts
 if [[ ! -f ${HOST_VOLUME}/.cookie_salt ]]; then
   cat /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 50 > ${HOST_VOLUME}/.cookie_salt
@@ -178,6 +173,11 @@ fi
 
 export COOKIE_SALT=`cat ${HOST_VOLUME}/.cookie_salt`
 export PASSWORD_SALT=`cat ${HOST_VOLUME}/.password_salt`
+
+# populate the configuration template
+if [[ ! -f ${HOST_VOLUME}/init_done ]]; then
+  envsubst < /addons/server.conf.template > /etc/dtk/${TENANT_USER}/server.conf
+fi
 
 # if grep '^encryption.cookie_salt.*""' /etc/dtk/${TENANT_USER}/server.conf; then
 #   salt=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 50`

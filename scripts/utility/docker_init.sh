@@ -27,7 +27,7 @@ if [[ -z $2 ]]; then
     exit 1
 fi
 
-IMAGE=getdtk/server-full
+IMAGE=getdtk/dtk-server
 REPO_HOST=repoman1.internal.r8network.com
 REPO_PORT=443
 MCO_PORT=61663

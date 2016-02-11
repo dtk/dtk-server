@@ -74,16 +74,13 @@ dtk_modules+=($vcsrepo_url)
 dtk_modules+=($docker_url)
 
 # Add server related dtk modules
-cd $output_dir && git clone $dtk_server && cd server && git submodule init && git submodule update
+cd $output_dir && git clone $dtk_server && cd dtk-server && git submodule init && git submodule update
 for module in ${dtk_modules[@]}; do
-	#cd dtk_modules/$module
-	#git fetch && git merge origin/master
-  git subtree pull --prefix dtk_modules/${module} ${dtk_repoman_url}:${dtk_component_module_url_prefix}${module} master --squash -m "Updated module ${module}"
-	#cd ../..
+	cd dtk-provisioning/$module
+	git checkout master && git pull && cd ../..
 done
-git subtree pull --prefix dtk_modules/${dtk_service_module_url} ${dtk_repoman_url}:${dtk_service_module_url} master --squash -m "Updated dtk service module"
 git add .; git commit -m "Adding latest updates for dtk modules"; git push origin master
-cd ../../..
+cd ../..
 
 # Add repoman related dtk modules
 cd $output_dir && git clone $dtk_repo_manager && cd dtk-repo-manager && git submodule init && git submodule update

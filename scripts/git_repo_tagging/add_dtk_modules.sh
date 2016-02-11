@@ -89,7 +89,7 @@ cd ..
 git clone $dtk_server && cd dtk-server && git submodule init && git submodule update
 for module in ${dtk_modules[@]}; do
 	cd dtk-provisioning/modules/$module
-	git checkout master && git pull && cd ..
+	git checkout master && git pull && cd ../../..
 done
 git add .; git commit -m "Adding latest updates for dtk modules"; git push origin master
 cd ..

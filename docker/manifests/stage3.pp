@@ -30,6 +30,7 @@ class dtk_stage3 {
   clone_from_git => false,
   init_schema => false,
   bundler_deployment => false,
+  seed_salts => false,
 }
 }
 class {"dtk_stage3": stage => 3}

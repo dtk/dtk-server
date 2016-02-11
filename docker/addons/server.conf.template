@@ -29,11 +29,13 @@ arbiter.auth_type=ssh
 arbiter.topic = ${ARBITER_TOPIC}
 arbiter.queue = ${ARBITER_QUEUE}
 
+encryption.cookie_salt   = ""
+encryption.password_salt = ""
 
 server_port = 443
 repo.git.gitolite.admin_directory = /home/${TENANT_USER}/gitolite-admin/
 repo.git.server_username = ${TENANT_USER}
 repo.git.port = ${GIT_PORT}
-#ec2.keypair = 
-#ec2.name_tag.format = 
+#ec2.keypair =
+#ec2.name_tag.format =
 workflow.temporal_coordination.intra_node = TOTAL_ORDER

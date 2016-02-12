@@ -3,11 +3,11 @@ properties:
  server_password: r8server
  aws_access_key_id: 
  aws_secret_access_key: 
- server: v0.8.0
+ dtk-server: v0.8.0
  dtk-repo-manager: v0.8.0
- dtk-repoman-admin: v0.7.7
+ dtk-repo-manager-admin: v0.8.0
  dtk-common: v0.8.0
- dtk-common-repo: v0.7.3
+ dtk-common-core: v0.8.0
  dtk-client: v0.8.0
  dtk-node-agent: v0.8.0
  jenkins_node: release

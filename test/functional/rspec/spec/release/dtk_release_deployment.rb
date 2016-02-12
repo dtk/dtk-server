@@ -36,10 +36,10 @@ begin
 
     #Set tags that will be used to checkout correct versions of DTK artifacts for this release
     set_attributes_array << dtk_common.set_attribute(dtk_common.service_id, 'repo_manager/dtk_repo_manager/repoman_tag', config['properties']['dtk-repo-manager'])
-    set_attributes_array << dtk_common.set_attribute(dtk_common.service_id, 'repo_manager/dtk_repo_manager/repoman_admin_tag', config['properties']['dtk-repoman-admin'])
+    set_attributes_array << dtk_common.set_attribute(dtk_common.service_id, 'repo_manager/dtk_repo_manager/repoman_admin_tag', config['properties']['dtk-repo-manager-admin'])
     set_attributes_array << dtk_common.set_attribute(dtk_common.service_id, 'repo_manager/dtk_repo_manager/dtk_common_tag', config['properties']['dtk-common'])
-    set_attributes_array << dtk_common.set_attribute(dtk_common.service_id, 'repo_manager/dtk_repo_manager/dtk_common_core_tag', config['properties']['dtk-common-repo'])
-    set_attributes_array << dtk_common.set_attribute(dtk_common.service_id, 'tenant/dtk_server::tenant/server_branch', config['properties']['server'])
+    set_attributes_array << dtk_common.set_attribute(dtk_common.service_id, 'repo_manager/dtk_repo_manager/dtk_common_core_tag', config['properties']['dtk-common-core'])
+    set_attributes_array << dtk_common.set_attribute(dtk_common.service_id, 'tenant/dtk_server::tenant/server_branch', config['properties']['dtk-server'])
 
     #If all attribures have been set, proceed with dtk::release converge
     if !set_attributes_array.include? false

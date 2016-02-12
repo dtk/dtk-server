@@ -63,15 +63,15 @@ function set_release_yaml_file() {
 		cd $repo_name
 		tag=`git tag | tail -1`
 		cd ..
-		if [[ $repo_name == "server" ]]; then
+		if [[ $repo_name == "dtk-server" ]]; then
 			if [[ $dtk_major_tag == "not_set" ]]; then
 			  next_tag=`increase_version_number $tag`
-			  sed -i -e "s#server:.*#server: ${next_tag}#g" ./server/test/functional/rspec/config/release.yml
+			  sed -i -e "s#server:.*#server: ${next_tag}#g" ./dtk-server/test/functional/rspec/config/release.yml
 			else
-				sed -i -e "s#server:.*#server: ${dtk_major_tag}#g" ./server/test/functional/rspec/config/release.yml
+				sed -i -e "s#server:.*#server: ${dtk_major_tag}#g" ./dtk-server/test/functional/rspec/config/release.yml
 			fi
 		else
-			sed -i -e "s#${repo_name}:.*#${repo_name}: ${tag}#g" ./server/test/functional/rspec/config/release.yml
+			sed -i -e "s#${repo_name}:.*#${repo_name}: ${tag}#g" ./dtk-server/test/functional/rspec/config/release.yml
 		fi
 	done
 }
@@ -102,20 +102,20 @@ function tag_code() {
 			cd lib/$repo_name
 			sed -i -e 's/VERSION=".*"/VERSION="'${tag}'"/' version.rb
 			cd ../..
-      cd ../dtk-common-repo && dtk_common_core_tag=`git tag | tail -1` && cd ../$repo_name
+      cd ../dtk-common-core && dtk_common_core_tag=`git tag | tail -1` && cd ../$repo_name
       gemspec_tag=`echo $dtk_common_core_tag | sed 's/v//'`
 			sed -i -e "s/'dtk-common-core','.*'/'dtk-common-core','${gemspec_tag}'/" $repo_name.gemspec
 			git add .; git commit -m "bump version"; git push origin master
 			git tag $next_tag
 			git push --tags
-		elif [[ $repo_name == "dtk-common-repo" ]]; then
+		elif [[ $repo_name == "dtk-common-core" ]]; then
 			cd lib/dtk-common-core
 			sed -i -e 's/VERSION=".*"/VERSION="'${tag}'"/' version.rb
 			cd ../..
 			git add .; git commit -m "bump version"; git push origin master
 			git tag $next_tag
 		  git push --tags
-		elif [[ $repo_name == "server" ]]; then
+		elif [[ $repo_name == "dtk-server" ]]; then
 			set_release_yaml_file "not_set"
 			cd $repo_name
 			bundle update dtk-common # updates both dtk-common and dtk-common-core
@@ -149,13 +149,13 @@ function tag_code() {
 			cd lib/$repo_name
 			sed -i -e 's/VERSION=".*"/VERSION="'${tag}'"/' version.rb
 			cd ../..
-      cd ../dtk-common-repo && dtk_common_core_tag=`git tag | tail -1` && cd ../$repo_name
+      cd ../dtk-common-core && dtk_common_core_tag=`git tag | tail -1` && cd ../$repo_name
       gemspec_tag=`echo $dtk_common_core_tag | sed 's/v//'`
       sed -i -e "s/'dtk-common-core','.*'/'dtk-common-core','${gemspec_tag}'/" $repo_name.gemspec
 			git add .; git commit -m "bump version"; git push origin master
 			git tag $dtk_major_tag
 			git push --tags
-		elif [[ $repo_name == "dtk-common-repo" ]]; then
+		elif [[ $repo_name == "dtk-common-core" ]]; then
 			cd lib/dtk-common-core
 			sed -i -e 's/VERSION=".*"/VERSION="'${tag}'"/' version.rb
 			cd ../..
@@ -163,7 +163,7 @@ function tag_code() {
 			git tag $dtk_major_tag
 			git push --tags
 			export DTK_COMMON_CORE=$next_tag
-		elif [[ $repo_name == "server" ]]; then
+		elif [[ $repo_name == "dtk-server" ]]; then
 			set_release_yaml_file $dtk_major_tag
 			cd $repo_name
 			bundle update dtk-common

@@ -66,12 +66,12 @@ function set_release_yaml_file() {
 		if [[ $repo_name == "dtk-server" ]]; then
 			if [[ $dtk_major_tag == "not_set" ]]; then
 			  next_tag=`increase_version_number $tag`
-			  sed -i -e "s#server:.*#server: ${next_tag}#g" ./dtk-server/test/functional/rspec/config/release.yml
+			  sed -i -e "s#server:.*#server: ${next_tag}#g" ./dtk-server/test/functional/rspec/config/release.yaml
 			else
-				sed -i -e "s#server:.*#server: ${dtk_major_tag}#g" ./dtk-server/test/functional/rspec/config/release.yml
+				sed -i -e "s#server:.*#server: ${dtk_major_tag}#g" ./dtk-server/test/functional/rspec/config/release.yaml
 			fi
 		else
-			sed -i -e "s#${repo_name}:.*#${repo_name}: ${tag}#g" ./dtk-server/test/functional/rspec/config/release.yml
+			sed -i -e "s#${repo_name}:.*#${repo_name}: ${tag}#g" ./dtk-server/test/functional/rspec/config/release.yaml
 		fi
 	done
 }

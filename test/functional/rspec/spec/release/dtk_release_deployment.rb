@@ -33,6 +33,8 @@ begin
     set_attributes_array << dtk_common.set_attribute(dtk_common.service_id, 'tenant/dtk_client/release', config['properties']['release'].to_s)
     set_attributes_array << dtk_common.set_attribute(dtk_common.service_id, 'tenant/dtk_server::tenant/aws_access_key_id', config['properties']['aws_access_key_id'])
     set_attributes_array << dtk_common.set_attribute(dtk_common.service_id, 'tenant/dtk_server::tenant/aws_secret_access_key', config['properties']['aws_secret_access_key'])
+    set_attributes_array << dtk_common.set_attribute(dtk_common.service_id, 'repo_manager/dtk_repo_manager/smtp_username', config['properties']['smtp_username'])
+    set_attributes_array << dtk_common.set_attribute(dtk_common.service_id, 'repo_manager/dtk_repo_manager/smtp_password', config['properties']['smtp_password'])
 
     #Set tags that will be used to checkout correct versions of DTK artifacts for this release
     set_attributes_array << dtk_common.set_attribute(dtk_common.service_id, 'repo_manager/dtk_repo_manager/repoman_tag', config['properties']['dtk-repo-manager'])

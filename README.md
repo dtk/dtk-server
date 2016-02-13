@@ -16,7 +16,7 @@ Fastest way to deploy  DTK Server is with a Docker container. Docker image [getd
  
 - Pull the latest DTK Server Docker image with `docker pull getdtk/dtk-server`
 
-- Select a container root directory on host which will be used by the Docker container for persistence (e.g. `/dtk`), and create `dtk.config` (e.g. `/dtk/dtk.config`) with following content:
+- Select a container root directory on host which will be used by the Docker container for persistence (e.g. `/usr/share/docker/dtk`), and create `dtk.config` (e.g. `/usr/share/docker/dtk/dtk.config`) with following content:
 
    ```
 USERNAME=dtk-user
@@ -29,7 +29,7 @@ INSTANCE_NAME=dtk1
 Next step is to start the docker container with the directory from above used as a volume. The Docker container requires some ports to be forwared, for example: HTTP, ActiveMQ and SSH port. Example of starting a Docker container:  
    
 ```
-docker run --name dtk -v /dtk:/host_volume -p 8080:80 -p 6163:6163 -p 2222:22 -d getdtk/server-full   
+docker run --name dtk -v /usr/share/docker/dtk:/host_volume -p 8080:80 -p 6163:6163 -p 2222:22 -d getdtk/dtk-server  
 ```
 #### Connecting to DTK Server Docker container
 
@@ -49,7 +49,7 @@ To upgrade DTK container to a newer version, execute the following commands:
 docker pull getdtk/dtk-server # pull the latest image 
 docker stop dtk # stop the running container
 docker rm dtk # remove the container, container data will be perserved in container root directory 
-docker run --name dtk -v /dtk:/host_volume -p 8080:80 -p 6163:6163 -p 2222:22 -d getdtk/server-full # start the container 
+docker run --name dtk -v /usr/share/docker/dtk:/host_volume -p 8080:80 -p 6163:6163 -p 2222:22 -d getdtk/dtk-server # start the container 
 ```
 
 ___

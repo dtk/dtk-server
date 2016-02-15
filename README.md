@@ -23,6 +23,9 @@ USERNAME=dtk-user
 PASSWORD=somepassword
 PUBLIC_ADDRESS=<public address of the docker host>
 INSTANCE_NAME=dtk1
+## optionally set git user and email for install-client.sh script
+# GIT_EMAIL=
+# GIT_USER=
    ```  
 
 #### Starting the container
@@ -41,6 +44,13 @@ Unless you have SSL, after the prompt, values for `secure_connection` and `http_
 
 
 Note that if you need to forward GIT SSH port to a different one, you can use the `-e GIT_PORT=<desired_port>`.
+
+##### Installing DTK Client  
+Assuming the docker container was start as described above, DTK Client can be installed and configured automatically running the [install-client.sh](install-client.sh) script:  
+```
+./install-client.sh /usr/share/docker/dtk [user]
+```  
+`/usr/share/docker/dtk` is the path to `dtk.config` file. The optional `user` argument sets the user on your local machine where dtk-client gem will be installed (it defaults to 'dtk-client')  
 
 ##### Upgrading the container
 To upgrade DTK container to a newer version, execute the following commands:

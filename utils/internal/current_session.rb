@@ -72,6 +72,10 @@ module DTK
        CurrentSession.new.get_username()
     end
 
+    def self.are_catalog_credentials_seeded?
+      CurrentSession.new.are_catalog_credentials_seeded?
+    end
+
     def self.are_catalog_credentilas_set?
       CurrentSession.new.are_catalog_credentilas_set?()
     end

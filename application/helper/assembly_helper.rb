@@ -89,7 +89,7 @@ module Ramaze::Helper
     def ret_component_instance(_param, assembly)
       ret_component_id_handle(:component_id, assembly).create_object()
     end
-    
+
     # opts can have keys
     #  :allow_external_component (Boolean) - allow component instance that is not in assembly
     def ret_component_id_handle(param, assembly, opts={})

@@ -14,7 +14,7 @@ if [[ $# -lt 1 ]]; then
 fi 
 
 # set default value for user
-user=${2-dtk-user}
+user=${2-dtk-client}
 config_path=$1
 confdir=/home/${user}/dtk
 

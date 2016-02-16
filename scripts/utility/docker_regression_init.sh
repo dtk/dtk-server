@@ -31,7 +31,7 @@ HTTP_PORT=8080
 DOCKER_ID=$(date +%Y%m%d%H%M%S)
 
 ADDRESS=${1}
-CONTAINER=${2:-dtk}
+CONTAINER=${2:-/usr/share/docker/dtk}
 USER=${4:-dtk-docker}
 PASS=${5:-r8server}
 NAME=${6:-dtk-docker}

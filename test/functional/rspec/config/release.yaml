@@ -10,6 +10,8 @@ properties:
  dtk-common-core: v0.8.0
  dtk-client: v0.8.0
  dtk-node-agent: v0.8.0
+ dtk-provisioning: v0.8.0
+ dtk-arbiter: v0.8.0
  jenkins_node: release
  release: true
  smtp_username: test

@@ -35,6 +35,7 @@ CONTAINER=${2:-dtk}
 USER=${4:-dtk-docker}
 PASS=${5:-r8server}
 NAME=${6:-dtk-docker}
+VOLUME="/usr/share/docker/dtk"
 
 docker ps | grep [d]tk
 RUNNING=$?
@@ -59,4 +60,4 @@ if [[ $PULLED -eq 1 ]]; then
 fi
 
 echo -e "\nStarting a new Docker Container: ${CONTAINER}"
-docker run -e REMOTE_REPO_HOST=${REPO_HOST} -e REMOTE_REPO_REST_PORT=${REPO_PORT} -e MCOLLECTIVE_PORT=${MCO_PORT} --name ${CONTAINER} -v /${CONTAINER}:/host_volume -p ${HTTP_PORT}:80 -p ${MCO_PORT}:6163 -p ${SSH_PORT}:22 -d ${IMAGE}
+docker run -e REMOTE_REPO_HOST=${REPO_HOST} -e REMOTE_REPO_REST_PORT=${REPO_PORT} -e MCOLLECTIVE_PORT=${MCO_PORT} --name ${CONTAINER} -v ${VOLUME}:/host_volume -p ${HTTP_PORT}:80 -p ${MCO_PORT}:6163 -p ${SSH_PORT}:22 -d ${IMAGE}

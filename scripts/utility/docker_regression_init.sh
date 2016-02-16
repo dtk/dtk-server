@@ -22,28 +22,28 @@ if [[ -z $1 ]]; then
     exit 1
 fi
 
-IMAGE=getdtk/server-full
+IMAGE=getdtk/dtk-server
 REPO_HOST=repoman1.internal.r8network.com
 REPO_PORT=443
-MCO_PORT=61663
+MCO_PORT=6163
 SSH_PORT=2222
 HTTP_PORT=8080
 DOCKER_ID=$(date +%Y%m%d%H%M%S)
 
 ADDRESS=${1}
 CONTAINER=${2:-dtk}
-USER=${4:-docker}
+USER=${4:-dtk-docker}
 PASS=${5:-r8server}
-NAME=${6:-dtk-docker-${DOCKER_ID}}
+NAME=${6:-dtk-docker}
 
-docker ps | grep dtk > /dev/null
+docker ps | grep [d]tk
 RUNNING=$?
 if [[ $RUNNING -eq 0 ]]; then
     echo -e "Stoping Docker Container: ${CONTAINER}...\n"
     docker stop ${CONTAINER} > /dev/null
 fi
 
-docker ps -a | grep dtk > /dev/null
+docker ps -a | grep [d]tk > /dev/null
 EXISTS=$?
 if [[ $EXISTS -eq 0 ]]; then
     echo -e "Removing Docker Container: ${CONTAINER}...\n"
@@ -51,7 +51,7 @@ if [[ $EXISTS -eq 0 ]]; then
 fi
 
 echo -e "Pulling the latest DTK - Server image. \n"
-docker pull ${IMAGE} > /dev/null
+docker pull ${IMAGE}
 PULLED=$?
 if [[ $PULLED -eq 1 ]]; then
 	echo -e "Error while pulling image. \n"

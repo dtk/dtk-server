@@ -68,7 +68,7 @@ task_check_frequency=60           # check frequency for task status threads (sec
 tail_log_frequency=2              # assembly - frequency between requests (seconds)
 debug_task_frequency=5            # assembly - frequency between requests (seconds)
 auto_commit_changes=false         # autocommit for modules
-verbose_rest_calls=true     # logging of REST calls
+verbose_rest_calls=false          # logging of REST calls
 
 # if relative path is used we will use HOME + relative path, apsoluth path will override this
 module_location=component_modules

@@ -15,6 +15,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+# DEBUG SNIPPET >>> REMOVE <<<
+require 'ap'
+ap "EC2 LOADED"
+ap caller
+
 module DTK
   module CommandAndControlAdapter
     class Ec2 < CommandAndControlIAAS
@@ -189,7 +195,7 @@ module DTK
       end
       PerisistentIds =
         [
-         'i-23666703' #dtk router
+         'i-23666703' # dtk router
         ]
 
       def self.reset_node(node)

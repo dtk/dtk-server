@@ -194,7 +194,6 @@ module DTK; class  Assembly
         end
 
         aug_cmps = get_augmented_components(opts)
-        cmps_print_form = list_components(opts)
         LinkDef::AutoComplete.autocomplete_component_links(self, [component], aug_cmps)
       end
 

@@ -111,7 +111,7 @@ module DTK
         filter: filter
       }
       components = Model.get_objs(model_handle(:component), sp_hash)
-      return components unless opts[:with_attributes] and ! components.empty? 
+      return components unless opts[:with_attributes] and ! components.empty?
 
       ndx_components = {}
       components.each do |component|
@@ -126,7 +126,7 @@ module DTK
       Model.get_objs(model_handle(:attribute), sp_hash).each do |attr|
         component = ndx_components[attr[:component_component_id]]
         component[:attributes] << attr
-      end      
+      end
       ndx_components.values
     end
 
@@ -204,7 +204,12 @@ module DTK
         cols: [:id, :group_id, :display_name] + additional_columns,
         filter: [:eq, :id, target_id()]
       }
-      Target::Instance.get_obj(model_handle(:target_instance), sp_hash)
+      target_found = Target::Instance.get_obj(model_handle(:target_instance), sp_hash)
+
+      Log.info("Found and using target: ")
+      Log.info_pp(target_found)
+
+      target_found
     end
 
     def get_target_iaas_type
@@ -490,11 +495,11 @@ module DTK
       if is_staged?()
         return self[:admin_op_status]
       end
-      
+
       if op_status = CommandAndControl.get_node_operational_status(self)
         unless self[:operational_status] == op_status
           update_operational_status!(op_status)
-          if op_status == 'stopped' 
+          if op_status == 'stopped'
             # clear the hostaddress info
             attribute.clear_host_addresses()
           end

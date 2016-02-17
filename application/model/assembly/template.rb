@@ -73,6 +73,10 @@ module DTK; class Assembly
         set_custom_node_attributes(assembly_instance, opts) if opts[:node_size] || opts[:os_type]
       end
 
+      opts.merge!(detail_to_include: [:component_dependencies])
+      aug_cmps = assembly_instance.get_augmented_components(opts)
+      LinkDef::AutoComplete.autocomplete_component_links(assembly_instance, aug_cmps, aug_cmps)
+
       assembly_instance
     end
 

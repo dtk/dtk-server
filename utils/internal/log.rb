@@ -42,7 +42,7 @@ module DTK
       simple_form(:warn, msg)
     end
     def self.fatal(msg, _out = $stdout)
-      simple_form(:fatak, msg)
+      simple_form(:fatal, msg)
     end
 
     def self.info_pp(obj, _out = $stdout)

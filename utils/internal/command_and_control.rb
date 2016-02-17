@@ -24,6 +24,7 @@ module DTK
     def self.create_without_task
       new()
     end
+
     def initialize(task = nil, top_task_idh = nil)
       @top_task_idh = top_task_idh
       if task
@@ -250,6 +251,11 @@ module DTK
     end
 
     def self.load_for_aux(adapter_type, adapter_name)
+      # DEBUG SNIPPET >>> REMOVE <<<
+      require 'ap'
+      ap "harcoded for this bosch stuff"
+      ap caller
+
       Adapters[adapter_type] ||= {}
       return Adapters[adapter_type][adapter_name] if Adapters[adapter_type][adapter_name]
       begin

@@ -25,6 +25,7 @@ module DTK
 
       # TODO: find cleaner way than having multiple @conn objects
       def initialize(override_of_aws_params = nil)
+        Log.info("AWS credentials are provided by #{override_of_aws_params ? 'target' : 'fog credentials'}, setting up AWS connection ...")
         base_params = override_of_aws_params || get_compute_params()
         @conn = Fog::Compute::AWS.new(base_params)
         @override_conns = OverrideConnectionOptions.inject({}) do |h, (k, conn_opts)|

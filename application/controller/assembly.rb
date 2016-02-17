@@ -572,7 +572,7 @@ module DTK
 
       component_title = ret_component_title?(cmp_name)
       node_id         = ret_request_params(:node_id)
-      opts            = ret_boolean_params_hash(:idempotent, :donot_update_workflow)
+      opts            = Opts.new(ret_boolean_params_hash(:idempotent, :donot_update_workflow))
       node_idh        = node_id.empty? ? nil : ret_node_id_handle(:node_id, assembly)
 
       new_component_idh = assembly.add_component(node_idh, aug_component_template, component_title, opts)

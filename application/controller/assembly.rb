@@ -622,7 +622,7 @@ module DTK
         assembly_template = ret_assembly_template_object()
       end
 
-      opts = {}
+      opts = Opts.new
       if assembly_name = ret_request_params(:name)
         opts[:assembly_name] = assembly_name
       end

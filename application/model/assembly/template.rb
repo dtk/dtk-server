@@ -74,8 +74,11 @@ module DTK; class Assembly
       end
 
       opts.merge!(detail_to_include: [:component_dependencies])
-      aug_cmps = assembly_instance.get_augmented_components(opts)
-      LinkDef::AutoComplete.autocomplete_component_links(assembly_instance, aug_cmps, aug_cmps)
+
+      if opts[:auto_complete_links]
+        aug_cmps = assembly_instance.get_augmented_components(opts)
+        LinkDef::AutoComplete.autocomplete_component_links(assembly_instance, aug_cmps, aug_cmps)
+      end
 
       assembly_instance
     end

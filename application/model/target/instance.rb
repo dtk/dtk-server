@@ -240,6 +240,7 @@ module DTK
               provider[:iaas_type] = specific_iaas_type
             end
           end
+          t[:display_name] = "#{DefaultTargetMark}#{t[:display_name]}" if t[:is_default_target]
         end
         # sort by 1-whether default, 2-iaas_type, 3-display_name
         unsorted_rows.sort do |a, b|

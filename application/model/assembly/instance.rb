@@ -193,8 +193,10 @@ module DTK; class  Assembly
           Task::Template::ConfigComponents.update_when_added_component?(self, node, component, component_title, skip_if_not_found: true)
         end
 
-        aug_cmps = get_augmented_components(opts)
-        LinkDef::AutoComplete.autocomplete_component_links(self, [component], aug_cmps)
+        if opts[:auto_complete_links]
+          aug_cmps = get_augmented_components(opts)
+          LinkDef::AutoComplete.autocomplete_component_links(self, [component], aug_cmps)
+        end
       end
 
       cmp_instance_idh

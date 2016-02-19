@@ -143,6 +143,10 @@ R8::Config[:repo][:remote][:git_user] = 'git'
 R8::Config[:repo][:remote][:new_client]  = false
 R8::Config[:repo][:remote][:tenant_name] = nil
 
+# bosh setting
+R8::Config[:bosh][:host] = nil
+R8::Config[:bosh][:username] = nil
+R8::Config[:bosh][:password] = nil
 
 R8::Config[:node_agent_git_clone][:mode] = "off"
 R8::Config[:node_agent_git_clone][:local_dir] = "#{R8::Config[:repo][:base_directory]}/dtk-node-agent"

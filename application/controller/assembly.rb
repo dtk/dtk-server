@@ -588,6 +588,15 @@ module DTK
 
     def rest__stage
       target_id = ret_request_param_id_optional(:target_id, Target::Instance)
+
+      # when using stage -p parent-service, stage assembly into parent service target
+      if service_instance_id = ret_request_param_id_optional(:parent_service, Assembly::Instance)
+        service_instance = ret_id_handle_from_value(service_instance_id, Assembly::Instance).create_object(model_name: :assembly_instance)
+        service_instance.update_object!(:datacenter_datacenter_id)
+        parent_target_id = service_instance[:datacenter_datacenter_id]
+        target_id = parent_target_id if parent_target_id
+      end
+
       target = target_idh_with_default(target_id).create_object(model_name: :target_instance)
 
       # Special case to support Jenikins CLI orders, since we are not using shell we do not have access
@@ -631,6 +640,10 @@ module DTK
 
       if auto_complete_links = ret_request_params(:auto_complete_links)
         opts[:auto_complete_links] = auto_complete_links
+      end
+
+      if parent_service = ret_request_params(:parent_service)
+        opts[:parent_service] = parent_service
       end
 
       new_assembly_obj = assembly_template.stage(target, opts)

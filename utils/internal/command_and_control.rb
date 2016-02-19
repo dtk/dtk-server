@@ -251,11 +251,6 @@ module DTK
     end
 
     def self.load_for_aux(adapter_type, adapter_name)
-      # DEBUG SNIPPET >>> REMOVE <<<
-      require 'ap'
-      ap "harcoded for this bosch stuff"
-      ap caller
-
       Adapters[adapter_type] ||= {}
       return Adapters[adapter_type][adapter_name] if Adapters[adapter_type][adapter_name]
       begin

@@ -19,6 +19,7 @@ GEM
   specs:
     CFPropertyList (2.3.1)
     activesupport (3.0.20)
+    addressable (2.4.0)
     awesome_print (1.1.0)
     blankslate (2.1.2.4)
     builder (3.2.2)
@@ -281,6 +282,7 @@ PLATFORMS
 
 DEPENDENCIES
   activesupport (~> 3.0.0)
+  addressable
   awesome_print (= 1.1.0)
   bundler (>= 1.1.5)
   celluloid
@@ -315,6 +317,3 @@ DEPENDENCIES
   sshkeyauth (= 0.0.11)
   stomp (= 1.1.9)
   thin
-
-BUNDLED WITH
-   1.10.6

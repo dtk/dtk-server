@@ -80,7 +80,7 @@ backups_location=backups
 server_port=8080
 secure_connection_server_port=443
 secure_connection=false
-server_host=${PUBLIC_ADDRESS}
+server_host=localhost
 EOF
 
 cat <<EOF | $su_c "tee /home/${user}/dtk/.connection > /dev/null"

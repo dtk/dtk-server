@@ -28,12 +28,18 @@ module DTK
       private :initialize
 
       def self.create_if_matches?(input)
-        # first clause for input second is when it sobject alreddy
+        # first clause for when input from object; second is when its object alreddy
         if Aux.has_just_these_keys?(input, [IAASPropertiesDSLField])
           new(input[IAASPropertiesDSLField])
         elsif iaas_properties = input[IAASPropertiesObjectKey]
           new(iaas_properties)
         end
+      end
+
+      def find_matching_node_template(target)
+        ret = Node::Template.null_node_template(target.model_handle)
+        pp [:debug, self, ret]
+        ret
       end
       
       def hash_form

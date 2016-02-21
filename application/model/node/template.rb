@@ -158,13 +158,15 @@ module DTK
 
       def self.find_matching_node_template(target, opts = {})
         if node_target = opts[:node_target]
-          pp [:node_target, node_target]
-          fail Error.new('here need to write code that uses node_target to return results')
+          if node_target.respond_to?(:find_matching_node_template)
+            node_target.find_matching_node_template(target)
+          else
+            fail Error.new("No find_matching_node_template method for: #{node_target.inspect}")
+          end
+        else
+          node_binding_rs = opts[:node_binding_ruleset]
+          (node_binding_rs && node_binding_rs.find_matching_node_template(target)) || null_node_template(target.model_handle(:node))
         end
-
-        node_binding_rs = opts[:node_binding_ruleset]
-        ret = node_binding_rs && node_binding_rs.find_matching_node_template(target)
-        ret || null_node_template(target.model_handle(:node))
       end
 
       def self.null_node_template(model_handle)
@@ -175,7 +177,6 @@ module DTK
         node_mh = model_handle.createMH(:node)
         get_obj(node_mh, sp_hash)
       end
-      private_class_method :null_node_template
 
       def self.image_upgrade(model_handle, old_image_id, new_image_id)
         nb_mh = model_handle.createMH(:node_binding_ruleset)

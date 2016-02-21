@@ -160,11 +160,21 @@ module Ramaze::Helper
 
     def install_from_dtkn_helper(module_type)
       remote_namespace, remote_module_name, version = Repo::Remote.split_qualified_name(ret_non_null_request_params(:remote_module_name))
+      #TODO: temp work around for DTK-2472 where form of remote_module_name may be ns/mod version
+      if version.nil? and remote_module_name =~ /(^[^ ]+) ([^ ]+$)/
+        remote_module_name, version = [$1, $2]
+      end 
+
       version ||= ret_request_params(:version)
       remote_params = remote_params_dtkn(module_type, remote_namespace, remote_module_name, version)
 
       local_namespace = remote_params.namespace
       local_module_name = ret_request_params(:local_module_name) || remote_params.module_name
+      #TODO: temp work around for DTK-2472 where form of remote_module_name may be ns/mod version
+      if local_module_name =~ /(^[^ ]+) ([^ ]+$)/
+        local_module_name = $1
+      end
+
       project = get_default_project()
       dtk_client_pub_key = ret_request_params(:rsa_pub_key)
 

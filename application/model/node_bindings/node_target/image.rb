@@ -62,24 +62,37 @@ module DTK; class NodeBindings
       RequiredKeys =  Fields.values.select { |f| f[:required] }.map { |f| f[:key] }
 
       def self.parse_and_reify(parse_input, _opts = {})
-        ret = nil
         if parse_input.type?(ContentField)
           input = parse_input.input
           if input[:type].to_sym == Type
-            ret = new(input)
+            new(input)
           end
         elsif parse_input.type?(Hash)
           input = parse_input.input
           if Aux.has_only_these_keys?(input, Allkeys) && !RequiredKeys.find { |k| !input.key?(k) }
             internal_form_hash = input.inject({}) { |h, (k, v)| h.merge(InputFormToInternal[k] => v) }
-            ret = new(internal_form_hash)
+            new(internal_form_hash)
+          elsif Aux.has_only_these_keys?(input, [WithIAASProperties::Key])
+            WithIAASProperties.new(input[WithIAASProperties::Key])
           end
         end
-        ret
       end
 
       def match_or_create_node?(_target)
         :create
+      end
+
+      class WithIAASProperties < self
+        Key = 'iaas_properties'
+
+        def initialize(iaas_properties)
+          super({})
+          @iaas_properties = iaas_properties
+        end
+
+        def hash_form
+          super.merge(iaas_properties: @iaas_properties)
+        end
       end
     end
   end

@@ -70,18 +70,19 @@ module DTK
     # create target instance
     def rest__create
       provider        = create_obj(:provider_id, Target::Template)
-      iaas_properties = ret_non_null_request_params(:iaas_properties).inject({}) { |h, (k, v)| h.merge(k.to_sym => v) }
-      target_type     = (ret_request_params(:type) || :ec2_classic).to_sym
+      target_type     = ret_request_params(:type) 
       opts            = ret_params_hash(:target_name)
       project_idh     = get_default_project().id_handle()
 
-      #TODO: for legacy: can be removed when clients upgraded
-      iaas_properties[:region] ||= ret_request_params(:region)
-
-      unless [:ec2_classic, :ec2_vpc].include?(target_type)
-        fail ErrorUsage.new("Target type '#{target_type}' is not supported")
+      iaas_properties = nil
+      # if target_type is null that means generic target that can support multiple IAAS types
+      if target_type
+        target_type = target_type.to_sym
+        iaas_properties = ret_non_null_request_params(:iaas_properties).inject({}) { |h, (k, v)| h.merge(k.to_sym => v) }  
+        #TODO: for legacy: can be removed when clients upgraded
+        iaas_properties[:region] ||= ret_request_params(:region)
       end
-      Target::Instance.create_target_ec2(project_idh, provider, target_type, iaas_properties, opts)
+      Target::Instance.create_target(target_type, project_idh, provider, iaas_properties, opts)
       rest_ok_response
     end
 

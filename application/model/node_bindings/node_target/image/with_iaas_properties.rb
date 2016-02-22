@@ -32,13 +32,16 @@ module DTK
         @image_type = hash[:image_type]
       end
       private :initialize
+
       def hash_form
         super.merge(iaas_properties: @iaas_properties, image_type: @image_type)
       end
 
       def self.create_if_matches?(input)
         if input.kind_of?(ContentField) #content read from db to reify; must go before Hash test since this is a hash
-          new(input)
+          if input[:iaas_properties]
+            new(input)
+          end
         elsif input.kind_of?(Hash) # called if parsing from DSL
           if Aux.has_just_these_keys?(input, [DSLField::IAASProperties])
             iaas_properties = input[DSLField::IAASProperties]

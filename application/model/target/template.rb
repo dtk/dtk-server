@@ -29,6 +29,7 @@ module DTK
         get_these_objs(target_mh, sp_hash)
       end
 
+      # if iaas_type is nil means create a generic provider
       def self.create_provider?(project_idh, iaas_type, provider_name, iaas_properties_hash, params_hash = {}, opts = {})
         if existing_provider = provider_exists?(project_idh, provider_name)
           if opts[:raise_error_if_exists]
@@ -38,20 +39,20 @@ module DTK
           end
         end
 
-        iaas_properties = IAASProperties.check(iaas_type, iaas_properties_hash)
-
         target_mh = project_idh.createMH(:target)
         display_name = provider_display_name(provider_name)
         ref = display_name.downcase.gsub(/ /, '-')
         create_row = {
-          iaas_type: iaas_type.to_s,
           project_id: project_idh.get_id(),
           type: 'template',
           ref: ref,
           display_name: display_name,
           description: params_hash[:description],
-          iaas_properties: iaas_properties
         }
+        if iaas_type
+          iaas_properties = IAASProperties.check(iaas_type, iaas_properties_hash)
+          create_row.merge!(iaas_type: iaas_type.to_s, iaas_properties: iaas_properties)
+        end
         create_opts = { convert: true, ret_obj: { model_name: :target_template } }
         create_from_row(target_mh, create_row, create_opts)
       end

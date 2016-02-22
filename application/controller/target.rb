@@ -86,7 +86,7 @@ module DTK
     end
 
     def rest__create_provider
-      iaas_type       = ret_non_null_request_params(:iaas_type)
+      iaas_type       = ret_request_params(:iaas_type) # if nil means that its a generic provider
       provider_name   = ret_non_null_request_params(:provider_name)
       iaas_properties = ret_request_params(:iaas_properties)
       params_hash     = ret_params_hash(:description)

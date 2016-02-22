@@ -138,8 +138,9 @@ module DTK; class Clone
           node_target = node_bindings && node_bindings.has_node_target?(node.get_field?(:display_name))
           case match_or_create_node?(target, node, node_target, nb_ruleset)
             when :create
-              opts_fm = { node_binding_ruleset: nb_ruleset, node_target: node_target }
-              node_template = Node::Template.find_matching_node_template(target, opts_fm)
+              node_template = node_target ? 
+                Service::Target::Image.find_matching_node_template(node_target, target) :
+                Node::Template.find_matching_node_template(target, node_binding_ruleset: nb_ruleset)
               hash_el_when_create(node, node_template)
             when :match
               if target_ref = NodeBindings.create_linked_target_ref?(target, node, node_target)

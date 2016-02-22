@@ -19,6 +19,8 @@ module DTK
   class Service
     # Class for target service instances
     class Target < self
+      r8_nested_require('target', 'image')
+
       def initialize(target)
         # TODO: looking to migrate away from target object and move to everything being service instances
         @target = target # wrapper around target object

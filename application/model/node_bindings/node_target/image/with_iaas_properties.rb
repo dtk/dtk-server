@@ -16,36 +16,41 @@
 # limitations under the License.
 #
 module DTK
-  class NodeBindings::NodeTarget::Image
+  class NodeBindings; class NodeTarget::Image
+    # Class for node bindings with an explicity iaas_properties section                        
     class WithIAASProperties < self
-      IAASPropertiesDSLField = 'iaas_properties'
-      IAASPropertiesObjectKey = :iaas_properties      
+      module DSLField
+        IAASProperties = 'iaas_properties'
+        ImageType = 'image_type'
+      end
 
-      def initialize(iaas_properties)
+      attr_reader :image_type
+
+      def initialize(hash)
         super({})
-        @iaas_properties = iaas_properties
+        @iaas_properties = hash[:iaas_properties]
+        @image_type = hash[:image_type]
       end
       private :initialize
+      def hash_form
+        super.merge(iaas_properties: @iaas_properties, image_type: @image_type)
+      end
 
       def self.create_if_matches?(input)
-        # first clause for when input from object; second is when its object alreddy
-        if Aux.has_just_these_keys?(input, [IAASPropertiesDSLField])
-          new(input[IAASPropertiesDSLField])
-        elsif iaas_properties = input[IAASPropertiesObjectKey]
-          new(iaas_properties)
+        if input.kind_of?(ContentField) #content read from db to reify; must go before Hash test since this is a hash
+          new(input)
+        elsif input.kind_of?(Hash) # called if parsing from DSL
+          if Aux.has_just_these_keys?(input, [DSLField::IAASProperties])
+            iaas_properties = input[DSLField::IAASProperties]
+            image_type = iaas_properties[DSLField::ImageType]
+            new(iaas_properties: iaas_properties, image_type: image_type)
+          end
+        else
+          fail Error.new("Unexpected class for input: #{input.class}")
         end
       end
-
-      def find_matching_node_template(target)
-        ret = Node::Template.null_node_template(target.model_handle)
-        pp [:debug, self, ret]
-        ret
-      end
       
-      def hash_form
-        super.merge(iaas_properties: @iaas_properties)
-      end
     end
   end
-end
+end; end
 

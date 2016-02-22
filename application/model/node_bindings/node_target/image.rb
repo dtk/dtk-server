@@ -86,7 +86,6 @@ module DTK; class NodeBindings
         AllDSLFields = Fields.values.map { |f| f[:key] }
         RequiredDSLFields =  Fields.values.select { |f| f[:required] }.map { |f| f[:key] }
       end
-
     end
   end
 end; end

@@ -19,6 +19,13 @@ module DTK
   class Service::Target
     # Class for managing iaas images in a target service
     class Image 
+      def self.find_matching_node_template(node_target, target)
+        #TODO: stub
+        pp [:debug, 'Service::Target::Image', node_target]
+        # TODO: find in target the image associated with node_target; create if needed
+        # stub
+        Node::Template.null_node_template(target.model_handle)
+      end
     end
   end
 end

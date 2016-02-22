@@ -102,7 +102,7 @@ module DTK
         common_iaas_properties.delete_if { |k, _v| [:key, :secret].include?(k) }
 
         iaas_properties_list = regions.map do |region|
-          name = default_target_name(region: region)
+          name = default_target_name(:ec2, region: region)
           properties = common_iaas_properties.merge(region: region)
           IAASProperties.new(name: name, iaas_properties: properties)
         end
@@ -137,12 +137,17 @@ module DTK
         Target::Instance.get_objs(model_handle(:target_instance), sp_hash)
       end
 
-      # TODO: move to be processed by IAAS specfic
-      def default_target_name(hash_params)
-        if Aux.has_just_these_keys?(hash_params, [:region])
-          "#{base_name()}-#{hash_params[:region]}"
+      def default_target_name(iaas_type = nil, hash_params = {})
+        if iaas_type.nil?
+          base_name()
+        elsif iaas_type == :ec2
+          if Aux.has_just_these_keys?(hash_params, [:region])
+            "#{base_name()}-#{hash_params[:region]}"
+          else
+            fail Error.new("Not implemented when hash_parsm keys are: #{hash_params.keys.join(',')}")
+          end
         else
-          fail Error.new("Not implemented when hash_parsm keys are: #{hash_params.keys.join(',')}")
+          fail Error.new("type '#{iaas_type}' not supported")
         end
       end
 

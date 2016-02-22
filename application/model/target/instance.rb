@@ -46,18 +46,26 @@ module DTK
       # These properties are inherited ones for target instance: default provider -> target's provider -> target instance (most specific)
       InheritedProperties = [:iaas_type, :iaas_properties, :type, :description]
 
-      def self.create_target_ec2(project_idh, provider, ec2_type, property_hash, opts = {})
-        unless region = property_hash[:region]
-          fail ErrorUsage.new("Region is required for target created in '#{provider.get_field?(:iaas_type)}' provider type!")
-        end
+      def self.create_target(target_type, project_idh, provider, property_hash, opts = {})
+        target_name = opts[:target_name]
+        iaas_properties_array = []
 
-        target_name = opts[:target_name] || provider.default_target_name(region: region)
+        if target_type.nil? # means generic target
+          target_name ||= provider.default_target_name
+          iaas_properties_array = [IAASProperties.new(name: target_name)]
+        elsif [:ec2_classic, :ec2_vpc].include?(target_type)
+          unless region = property_hash[:region]
+            fail ErrorUsage.new("Region is required for target created in '#{provider.get_field?(:iaas_type)}' provider type!")
+          end
+          target_name ||= provider.default_target_name(:ec2, region: region)
+          # raises errors if problems with any params
+          iaas_properties_array = IAASProperties::Ec2.check_and_compute_needed_iaas_properties(target_name, target_type, provider, property_hash)
+        else
+          fail ErrorUsage.new("Target type '#{target_type}' is not supported")
+        end
 
         # proactively getting needed columns on provider
         provider.update_obj!(*InheritedProperties)
-
-        # raises errors if problems with any params
-        iaas_properties_array = IAASProperties::Ec2.check_and_compute_needed_iaas_properties(target_name, ec2_type, provider, property_hash)
 
         create_targets?(project_idh, provider, iaas_properties_array, raise_error_if_exists: true).first
       end
@@ -244,8 +252,8 @@ module DTK
         end
         # sort by 1-whether default, 2-iaas_type, 3-display_name
         unsorted_rows.sort do |a, b|
-          [a[:is_default_target] ? 0 : 1, a[:iaas_type], a[:display_name]] <=>
-          [b[:is_default_target] ? 0 : 1, b[:iaas_type], b[:display_name]]
+          [a[:is_default_target] ? 0 : 1, a[:iaas_type] || 'generic', a[:display_name]] <=>
+          [b[:is_default_target] ? 0 : 1, b[:iaas_type] || 'generic', b[:display_name]]
         end
       end
 

@@ -133,13 +133,15 @@ module DTK; class Clone
 
         node_bindings = NodeBindings.get_node_bindings(assembly_template_idh)
         node_mh = target.model_handle(:node)
+        target_service = Service::Target.create_from_target(target)
+
         node_info.map do |node|
           nb_ruleset = node[:node_binding_ruleset]
           node_target = node_bindings && node_bindings.has_node_target?(node.get_field?(:display_name))
           case match_or_create_node?(target, node, node_target, nb_ruleset)
             when :create
               node_template = node_target ? 
-                Service::Target::Image.find_matching_node_template(node_target, target) :
+                target_service.find_matching_node_template(node_target) :
                 Node::Template.find_matching_node_template(target, node_binding_ruleset: nb_ruleset)
               hash_el_when_create(node, node_template)
             when :match

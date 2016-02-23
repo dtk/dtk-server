@@ -32,6 +32,5 @@
       on_delete: :cascade,
       on_update: :cascade
     }
-  },
-  many_to_one: []
+  }
 }

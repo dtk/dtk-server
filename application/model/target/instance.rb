@@ -52,7 +52,7 @@ module DTK
 
         if target_type.nil? # means generic target
           target_name ||= provider.default_target_name
-          iaas_properties_array = [IAASProperties.new(name: target_name)]
+          iaas_properties_array = [IAASProperties.create_generic(target_name)]
         elsif [:ec2_classic, :ec2_vpc].include?(target_type)
           unless region = property_hash[:region]
             fail ErrorUsage.new("Region is required for target created in '#{provider.get_field?(:iaas_type)}' provider type!")

@@ -18,6 +18,12 @@
 module DTK; class Target
   class IAASProperties
     class Ec2 < self
+      module Type
+        Ec2        = IAASProperties::Ec2
+        Ec2Classic = :ec2_classic
+        Ec2Vpc     = :ec2_vpc
+      end
+
       def initialize(hash_args, provider = nil)
         super(hash_args)
         if provider
@@ -42,7 +48,7 @@ module DTK; class Target
         end
         ret
       end
-      Ec2TypesNeedingAZTargets = [:ec2_classic]
+      Ec2TypesNeedingAZTargets = [Type::Ec2Classic]
 
       def create_target_propeties(ec2_type, target_property_hash, params = {})
         iaas_properties = clone_and_check_manditory_params(target_property_hash)
@@ -56,7 +62,7 @@ module DTK; class Target
       end
 
       def self.equal?(i2)
-        i2.type == :ec2 &&
+        i2.type == Type::Ec2 &&
           iaas_properties[:region] == i2.iaas_properties[:region]
       end
 
@@ -91,7 +97,7 @@ module DTK; class Target
           return ret
         end
         props_with_creds = props_with_creds.merge(target_property_hash)
-        self.class.check(:ec2, props_with_creds, properties_to_check: PropertiesToCheck)
+        self.class.check(Type::Ec2, props_with_creds, properties_to_check: PropertiesToCheck)
 
         ret
       end
@@ -112,7 +118,7 @@ module DTK; class Target
       def self.more_specific_type?(iaas_properties)
         ec2_type = iaas_properties[:ec2_type]
         case ec2_type && ec2_type.to_sym
-          when :ec2_vpc then :ec2_vpc
+          when Type::Ec2Vpc then Type::Ec2Vpc
         end
       end
     end

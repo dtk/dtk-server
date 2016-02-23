@@ -18,12 +18,13 @@
 module DTK
   class Target
     class IAASProperties
-      r8_nested_require('iaas_properties', 'ec2')
-
       module Type
         Ec2     = :ec2
         Generic = :generic
       end
+      # r8_nested_require neds to go after the module def
+      r8_nested_require('iaas_properties', 'ec2')
+
 
       attr_reader :name
       # IAASProperties.new will be called with
@@ -71,10 +72,7 @@ module DTK
       end
 
       def type
-        unless ret = @target_instance.get_field?(:iaas_type)
-          Log.error('Expected that :iaas_type has a value')
-        end
-        ret && ret.to_sym
+        (@target_instance.get_field?(:iaas_type) || Type::Generic).to_sym
       end
 
       def supports_create_image?

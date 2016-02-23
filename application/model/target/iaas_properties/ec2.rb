@@ -19,7 +19,7 @@ module DTK; class Target
   class IAASProperties
     class Ec2 < self
       module Type
-        Ec2        = IAASProperties::Ec2
+        Ec2        = IAASProperties::Type::Ec2
         Ec2Classic = :ec2_classic
         Ec2Vpc     = :ec2_vpc
       end

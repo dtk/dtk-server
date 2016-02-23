@@ -19,12 +19,27 @@ module DTK
   class Service
     # Class for target service instances
     class Target < self
-      r8_nested_require('target', 'image')
+      r8_nested_require('target', 'node_template')
+      include NodeTemplate
 
-      def initialize(target)
-        # TODO: looking to migrate away from target object and move to everything being service instances
-        @target = target # wrapper around target object
+      def initialize(target_assembly_instance, target)
+        @service_instance = target_assembly_instance
+        @target = target
       end
+
+      # This function is used toi help bridge between using targets and service insatnces
+      # There are places in code where target is referenced, but we want to get a handle on a service isnatnce that has
+      def self.create_from_target(target)
+        # TODO: stub
+        new(find_assembly_instance_from_target(target), target)
+      end
+
+      private
+
+      def self.find_assembly_instance_from_target(target)
+        # TODO: stub
+      end
+
     end
   end
 end

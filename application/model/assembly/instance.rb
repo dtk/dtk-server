@@ -194,8 +194,7 @@ module DTK; class  Assembly
         end
 
         if opts[:auto_complete_links]
-          aug_cmps = get_augmented_components(opts)
-          LinkDef::AutoComplete.autocomplete_component_links(self, [component], aug_cmps)
+          LinkDef::AutoComplete.autocomplete_component_links(self, [component])
         end
       end
 

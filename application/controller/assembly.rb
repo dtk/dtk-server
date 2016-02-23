@@ -588,6 +588,7 @@ module DTK
 
     def rest__stage
       target_id = ret_request_param_id_optional(:target_id, Target::Instance)
+      opts      = Opts.new
 
       # when using stage -p parent-service, stage assembly into parent service target
       if service_instance_id = ret_request_param_id_optional(:parent_service, Assembly::Instance)
@@ -595,6 +596,7 @@ module DTK
         service_instance.update_object!(:datacenter_datacenter_id)
         parent_target_id = service_instance[:datacenter_datacenter_id]
         target_id = parent_target_id if parent_target_id
+        opts.merge!(parent_service_instance: service_instance)
       end
 
       target = target_idh_with_default(target_id).create_object(model_name: :target_instance)
@@ -621,7 +623,6 @@ module DTK
         assembly_template = ret_assembly_template_object()
       end
 
-      opts = Opts.new
       if assembly_name = ret_request_params(:name)
         opts[:assembly_name] = assembly_name
       end
@@ -646,6 +647,8 @@ module DTK
         opts[:parent_service] = parent_service
       end
 
+      project = get_default_project()
+      opts.merge!(project: project)
       new_assembly_obj = assembly_template.stage(target, opts)
 
       response = {

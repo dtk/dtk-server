@@ -17,6 +17,7 @@
 #
 module DTK; class Assembly
   class Template < self
+    r8_require('../service_associations')
     r8_nested_require('template', 'factory')
     r8_nested_require('template', 'list')
     r8_nested_require('template', 'pretty_print')
@@ -73,11 +74,14 @@ module DTK; class Assembly
         set_custom_node_attributes(assembly_instance, opts) if opts[:node_size] || opts[:os_type]
       end
 
-      opts.merge!(detail_to_include: [:component_dependencies])
+      if parent_service_instance = opts[:parent_service_instance]
+        ServiceAssociations.create(opts[:project], assembly_instance, parent_service_instance) if assembly_instance
+      end
 
+      opts.merge!(detail_to_include: [:component_dependencies])
       if opts[:auto_complete_links]
         aug_cmps = assembly_instance.get_augmented_components(opts)
-        LinkDef::AutoComplete.autocomplete_component_links(assembly_instance, aug_cmps, aug_cmps)
+        LinkDef::AutoComplete.autocomplete_component_links(assembly_instance, aug_cmps, opts)
       end
 
       assembly_instance

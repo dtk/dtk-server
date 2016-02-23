@@ -17,7 +17,16 @@
 #
 module DTK; class LinkDef
   class AutoComplete
-    def self.autocomplete_component_links(assembly, link_def_components, aug_cmps)
+    def self.autocomplete_component_links(assembly, link_def_components, opts = {})
+      aug_cmps = assembly.get_augmented_components(opts)
+
+      # if service instance is staged into service instance target,
+      # find matching components from parent target as well
+      if parent_service_instance = opts[:parent_service_instance]
+        parent_cmps = parent_service_instance.get_augmented_components(opts)
+        aug_cmps.concat(parent_cmps)
+      end
+
       link_def_components.each do |link_def_cmp|
         input_cmp_idh = link_def_cmp.id_handle()
         link_matching_components(assembly, input_cmp_idh, aug_cmps)

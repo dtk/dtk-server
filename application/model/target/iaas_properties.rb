@@ -19,6 +19,12 @@ module DTK
   class Target
     class IAASProperties
       r8_nested_require('iaas_properties', 'ec2')
+
+      module Type
+        Ec2     = :ec2
+        Generic = :generic
+      end
+
       attr_reader :name
       # IAASProperties.new will be called with
       #  :name and :iaas_properties, or with
@@ -29,6 +35,10 @@ module DTK
         @target_instance = hash_args[:target_instance]
       end
 
+      def self.create_generic(name)
+        new(name: name)
+      end
+
       def properties
         iaas_properties()
       end
@@ -36,7 +46,7 @@ module DTK
       def self.sanitize_and_modify_for_print_form!(type, iaas_properties)
         unless type.nil? || iaas_properties.nil?
           case type.to_sym
-           when :ec2
+           when Type::Ec2
             Ec2.sanitize!(iaas_properties)
             Ec2.modify_for_print_form!(iaas_properties)
           end
@@ -46,7 +56,7 @@ module DTK
       def self.more_specific_type?(type, iaas_properties)
         unless type.nil? || iaas_properties.nil?
           case type.to_sym
-          when :ec2
+          when Type::Ec2
             Ec2.more_specific_type?(iaas_properties)
           end
         end
@@ -68,7 +78,7 @@ module DTK
       end
 
       def supports_create_image?
-        [:ec2].include?(type())
+        [Type::Ec2, Type::Generic].include?(type())
       end
 
       def iaas_properties
@@ -77,7 +87,7 @@ module DTK
 
       def self.equal?(i2)
         case type()
-          when :ec2 then Ec2.equal?(i2)
+          when Type::Ec2 then Ec2.equal?(i2)
           else fail Error.new("Unexpected iaas_properties type (#{type})")
         end
       end

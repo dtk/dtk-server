@@ -443,6 +443,46 @@
         "m1.small",
         "m3.medium"
       ]
+    },
+    "ami-b40b4ede": {
+      "region": "us-east-1",
+      "type": "amazon_hvm",
+      "os_type": "amazon-linux",
+      "display_name": "Amazon_hvm",
+      "png": "amazon_hvm.png",
+      "sizes": [
+        "m4.large"
+      ]
+    },
+    "ami-36d00a45": {
+      "region": "eu-west-1",
+      "type": "amazon_hvm",
+      "os_type": "amazon-linux",
+      "display_name": "Amazon_hvm",
+      "png": "amazon_hvm.png",
+      "sizes": [
+        "m4.large"
+      ]
+    },
+    "ami-69b4da09": {
+      "region": "us-west-1",
+      "type": "amazon_hvm",
+      "os_type": "amazon-linux",
+      "display_name": "Amazon_hvm",
+      "png": "amazon_hvm.png",
+      "sizes": [
+        "m4.large"
+      ]
+    },
+    "ami-b0baabd1": {
+      "region": "us-west-2",
+      "type": "amazon_hvm",
+      "os_type": "amazon-linux",
+      "display_name": "Amazon_hvm",
+      "png": "amazon_hvm.png",
+      "sizes": [
+        "m4.large"
+      ]
     }
   }
 }

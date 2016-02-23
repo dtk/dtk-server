@@ -122,6 +122,7 @@ eos
               arbiter_branch: R8::Config[:arbiter][:branch],
               arbiter_topic: R8::Config[:arbiter][:topic],
               arbiter_queue: R8::Config[:arbiter][:queue],
+              arbiter_restart: arbiter_restart(node),
               stomp_host: R8::Config[:stomp][:host],
               stomp_port: R8::Config[:stomp][:port],
               stomp_username: R8::Config[:stomp][:username],
@@ -129,7 +130,7 @@ eos
             )
           end
 
-          def mcollective_restart(node)
+          def arbiter_restart(node)
             if OSNeedsRestart.include?(node[:os_type])
               true
             else
@@ -194,14 +195,16 @@ git_server = "<%= git_server_url %>"
 <% if pbuilderid %>
 pbuilderid = <%= pbuilderid %>
 <% else %>
-# pbuidlerid = 
+# pbuidlerid =
 <% end %>
 private_key = /etc/dtk/ssh/arbiter
 EOF
 
 <% if arbiter_update %>
 [ -x /usr/share/dtk/dtk-arbiter/update.sh ] && /usr/share/dtk/dtk-arbiter/update.sh <%=arbiter_branch %>
-[ -x /etc/init.d/dtk-arbiter ] && /etc/init.d/dtk-arbiter restart
+  <% if arbiter_restart %>
+    [ -x /etc/init.d/dtk-arbiter ] && /etc/init.d/dtk-arbiter restart
+  <% end %>
 <% end %>
 
 <% if logstash_enable %>

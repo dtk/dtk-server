@@ -767,8 +767,6 @@ module DTK
     end
 
     def rest__create_task
-      # DEBUG SNIPPET >>> REMOVE <<<
-      require (RUBY_VERSION.match(/1\.8\..*/) ? 'ruby-debug' : 'debugger');Debugger.start; debugger
       assembly = ret_assembly_instance_object()
       opts     = ret_params_hash(:commit_msg, :task_action, :task_params)
 

@@ -18,7 +18,7 @@
 module DTK; class NodeBindings
   class NodeTarget
     class Image < self
-      r8_nested_require('image', 'legal_fields')
+      r8_nested_require('image', 'term')
       r8_nested_require('image', 'with_iaas_properties')
 
       NodeTargetType = :image
@@ -35,8 +35,12 @@ module DTK; class NodeBindings
         super.merge(image_type: @image_type, image: @image, size: @size)
       end
 
-      def external_ref?
-        LegalFields.external_ref?(@image_type)
+      def node_external_ref?
+        Term.node_external_ref?(@image_type)
+      end
+      
+      def self.default_node_external_ref
+        Term.default_node_external_ref
       end
 
       # returns a TargetSpecificObject
@@ -69,7 +73,7 @@ module DTK; class NodeBindings
           end
         elsif parse_input.type?(Hash)
           input = parse_input.input
-          LegalFields.create_if_matches?(input) || WithIAASProperties.create_if_matches?(input)
+          Term.create_if_matches?(input) || WithIAASProperties.create_if_matches?(input)
         end
       end
     end

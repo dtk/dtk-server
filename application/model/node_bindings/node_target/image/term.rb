@@ -17,7 +17,7 @@
 #
 module DTK; class NodeBindings::NodeTarget
   class Image
-    module LegalFields
+    module Term
       def self.create_if_matches?(input)
         # TODO: if fail here on parsing pass or raise specfic error; rather than current behavior to pass nil
         #   Errors detected are: 
@@ -33,8 +33,12 @@ module DTK; class NodeBindings::NodeTarget
         end
       end
 
-      def self.external_ref?(image_type)      
-        { type: image_type }
+      def self.node_external_ref?(image_type)      
+        Fields[:image_type][:external_ref_map][image_type]
+      end
+
+      def self.default_node_external_ref
+        { type: 'ec2_instance' }
       end
 
       private
@@ -71,7 +75,7 @@ module DTK; class NodeBindings::NodeTarget
         image: {
           key: 'image',
           required: true
-      },
+        },
         size: {
           key: 'size'
         },
@@ -79,9 +83,10 @@ module DTK; class NodeBindings::NodeTarget
           key: 'type',
           default: 'ec2_image',
           canonical_values: ['ec2_image', 'bosh_stemcell'],
-          aliases: {'ec2' => 'ec2_image', 'bosh' => 'bosh_stemcell' }
+          aliases: {'ec2' => 'ec2_image', 'bosh' => 'bosh_stemcell' },
+          external_ref_map: {'ec2_image' => {type: 'ec2_instance'}, 'bosh_stemcell' => {type: 'bosh_instance'} }
         }
-    }
+      }
       InputFormToInternal = Fields.inject({}) { |h, (k, v)| h.merge(v[:key] => k) }
       AllDSLFields        = Fields.values.map { |f| f[:key] }
       RequiredDSLFields   = Fields.values.select { |f| f[:required] }.map { |f| f[:key] }

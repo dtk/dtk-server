@@ -69,7 +69,7 @@ module DTK; class Clone
         unless matches.empty?
           ndx_matches, ndx_mapping_rows = TemplateNodeMatch.ndx_mapping_info(matches)
 pp [ndx_matches, ndx_mapping_rows]
-raise 'here'
+
           mapping_ds = array_dataset(ndx_mapping_rows.values, :mapping)
 
           select_ds = ancestor_rel_ds.join_table(:inner, node_template_ds).join_table(:inner, mapping_ds, [:node_template_id])

@@ -31,6 +31,10 @@ module DTK; class NodeBindings
         @size       = hash[:size]
       end
 
+      def hash_form
+        super.merge(image_type: @image_type, image: @image, size: @size)
+      end
+
       # returns a TargetSpecificObject
       def find_target_specific_info(target)
         ret = TargetSpecificInfo.new(self)
@@ -47,10 +51,6 @@ module DTK; class NodeBindings
           ret.size = iaas_size
         end
         ret
-      end
-
-      def hash_form
-        { type: type().to_s, image: @image, size: @size }
       end
 
       def match_or_create_node?(_target)

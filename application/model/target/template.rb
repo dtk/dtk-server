@@ -52,6 +52,8 @@ module DTK
         if iaas_type
           iaas_properties = IAASProperties.check(iaas_type, iaas_properties_hash)
           create_row.merge!(iaas_type: iaas_type.to_s, iaas_properties: iaas_properties)
+        else
+          create_row.merge!(iaas_type: IAASProperties::Type::Generic.to_s)
         end
         create_opts = { convert: true, ret_obj: { model_name: :target_template } }
         create_from_row(target_mh, create_row, create_opts)

@@ -19,11 +19,11 @@ module DTK; class Clone
   class ChildContext
     class AssemblyNode < self
       r8_nested_require('assembly_node', 'match_target_refs')
-      r8_nested_require('assembly_node', 'template_node_match')
+      r8_nested_require('assembly_node', 'node_match')
 
-      # TODO: see if can remove refernce so this does not have to be public
+      # TODO: see if can remove reference so this does not have to be public
       def hash_el_when_match(node, target_ref, extra_fields = {})
-        TemplateNodeMatch.create__when_match(self, node, target_ref, extra_fields)
+        NodeMatch.hash__when_match(self, node, target_ref, extra_fields)
       end
 
       private
@@ -67,23 +67,38 @@ module DTK; class Clone
 
         # mapping from node stub to node template and overriding appropriate node template columns
         unless matches.empty?
-          ndx_matches, ndx_mapping_rows = TemplateNodeMatch.ndx_mapping_info(matches)
-pp [ndx_matches, ndx_mapping_rows]
-
-          mapping_ds = array_dataset(ndx_mapping_rows.values, :mapping)
+          ndx_node_matches = NodeMatch.ndx_node_matches(matches)
+          mappings = ndx_node_matches.values.map{ |m| m.mapping}
+          mapping_ds = array_dataset(mappings, :mapping)
 
           select_ds = ancestor_rel_ds.join_table(:inner, node_template_ds).join_table(:inner, mapping_ds, [:node_template_id])
           ret = Model.create_from_select(model_handle, field_set_to_copy, select_ds, create_override_attrs, create_opts)
 
+pp [1111, ret.map{|r|model_handle.createIDH(id: r[:id]).create_object().get_field?(:external_ref)}]
+          # update any external refs if any are set in ndx_node_matches
+          update_external_refs!(ret, ndx_node_matches)
+pp [2222, ret.map{|r|model_handle.createIDH(id: r[:id]).create_object().get_field?(:external_ref)}]
           ret.each do |r|
-            display_name = r[:display_name]
-            r[:node_template_id] = (ndx_mapping_rows[display_name] || {})[:node_template_id]
-            match = ndx_matches[display_name]
-            r.merge!(Aux.hash_subset(match, [:donot_clone, :target_refs_to_link, :target_refs_exist]))
+            if node_match = ndx_node_matches[r[:display_name]]
+              r[:node_template_id] = node_match.mapping[:node_template_id]
+              r.merge!(Aux.hash_subset(node_match.node, [:donot_clone, :target_refs_to_link, :target_refs_exist]))
+            end
           end
         end
-
         ret
+      end
+
+      def update_external_refs!(ret, ndx_node_matches)
+        ndx_id = ret.inject({}) { |h, r| h.merge(r[:display_name] => r[:id]) }
+        external_ref_rows = []
+        ndx_node_matches.each_pair do |ndx, node_match|
+          if external_ref = node_match.external_ref
+            external_ref_rows << { id: ndx_id[ndx], external_ref: external_ref }
+          end
+        end
+        unless external_ref_rows.empty?
+          Model.update_from_rows(model_handle, external_ref_rows, partial_value: true)
+        end
       end
 
       def find_target_ref_matches(target, assembly_template_idh)
@@ -121,17 +136,17 @@ pp [ndx_matches, ndx_mapping_rows]
           node_target = node_bindings && node_bindings.has_node_target?(node.get_field?(:display_name))
           case match_or_create_node?(target, node, node_target, nb_ruleset)
             when :create
-              node_template = node_target ? 
+              node_template = node_target ?
                 target_service.find_matching_node_template(node_target) :
                 Node::Template.find_matching_node_template(target, node_binding_ruleset: nb_ruleset)
-              TemplateNodeMatch.create__when_creating_node(self, node, node_template)
+              NodeMatch.hash__when_creating_node(self, node, node_template, node_target: node_target)
             when :match
               if target_ref = NodeBindings.create_linked_target_ref?(target, node, node_target)
-                TemplateNodeMatch.create__when_match(self, node, target_ref)
+                NodeMatch.hash__when_match(self, node, target_ref)
               else
                 Log.error('Temp logic as default if cannot find_matching_target_ref then create')
                 node_template = Node::Template.find_matching_node_template(target, node_binding_ruleset: nb_ruleset)
-                TemplateNodeMatch.create__when_creating_node(self, node, node_template)
+                NodeMatch.hash__when_creating_node(self, node, node_template)
               end
             else
              fail Error.new('Unexpected return value from match_or_create_node')

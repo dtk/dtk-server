@@ -21,7 +21,7 @@ LINUX_ENV:
     browser: 'ff'
   account:
     username: 'dtk-admin'
-    password: 'r8server'
+    password:
   headless: true
   poltergeist: false
 LOCAL_ENV:
@@ -32,7 +32,7 @@ LOCAL_ENV:
     browser: 'chrome'
   account:
     username: 'dtk-admin'
-    password: 'r8server'
+    password:
   headless: false
   poltergeist: false
 LINUX_ENV_POLTERGEIST:
@@ -43,6 +43,6 @@ LINUX_ENV_POLTERGEIST:
     browser: 'ff'
   account:
     username: 'dtk-admin'
-    password: 'r8server'
+    password:
   headless: false
   poltergeist: true

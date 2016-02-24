@@ -17,7 +17,7 @@
 #
 module DTK
   class NodeBindings; class NodeTarget::Image
-    # Class for node bindings with an explicity iaas_properties section                        
+    # Class for node bindings with an explicit iaas_properties section                        
     class WithIAASProperties < self
       module DSLField
         IAASProperties = 'iaas_properties'

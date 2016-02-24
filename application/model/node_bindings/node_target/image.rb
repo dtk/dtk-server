@@ -29,7 +29,6 @@ module DTK; class NodeBindings
         @image_type = hash[:image_type]
         @image      = hash[:image]
         @size       = hash[:size]
-pp self
       end
 
       # returns a TargetSpecificObject

@@ -70,7 +70,7 @@ module DTK; class Clone
           ndx_node_matches = NodeMatch.ndx_node_matches(matches)
           mappings = ndx_node_matches.values.map{ |m| m.mapping}
           mapping_ds = array_dataset(mappings, :mapping)
-          
+
           select_ds = ancestor_rel_ds.join_table(:inner, node_template_ds).join_table(:inner, mapping_ds, [:node_template_id])
           ret = Model.create_from_select(model_handle, field_set_to_copy, select_ds, create_override_attrs, create_opts)
 
@@ -136,7 +136,7 @@ pp [2222, ret.map{|r|model_handle.createIDH(id: r[:id]).create_object().get_fiel
           node_target = node_bindings && node_bindings.has_node_target?(node.get_field?(:display_name))
           case match_or_create_node?(target, node, node_target, nb_ruleset)
             when :create
-              node_template = node_target ? 
+              node_template = node_target ?
                 target_service.find_matching_node_template(node_target) :
                 Node::Template.find_matching_node_template(target, node_binding_ruleset: nb_ruleset)
               NodeMatch.hash__when_creating_node(self, node, node_template, node_target: node_target)

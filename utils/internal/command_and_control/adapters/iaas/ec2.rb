@@ -16,11 +16,6 @@
 # limitations under the License.
 #
 
-# DEBUG SNIPPET >>> REMOVE <<<
-require 'ap'
-ap "EC2 LOADED"
-ap caller
-
 module DTK
   module CommandAndControlAdapter
     class Ec2 < CommandAndControlIAAS

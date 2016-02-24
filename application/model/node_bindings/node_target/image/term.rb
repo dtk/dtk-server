@@ -20,7 +20,7 @@ module DTK; class NodeBindings::NodeTarget
     module Term
       def self.create_if_matches?(input)
         # TODO: if fail here on parsing pass or raise specfic error; rather than current behavior to pass nil
-        #   Errors detected are: 
+        #   Errors detected are:
         #   - missing required fields
         #   - illegal value
         if Aux.has_only_these_keys?(input, AllDSLFields) && !RequiredDSLFields.find { |k| !input.key?(k) }
@@ -55,7 +55,7 @@ module DTK; class NodeBindings::NodeTarget
       end
 
       def self.has_legal_values?(internal_form_hash)
-        first_violation = internal_form_hash.find do |key, value| 
+        first_violation = internal_form_hash.find do |key, value|
           # when reach here the values wil have been mapped to canonical values
           if legal_values = (Fields[key] || {})[:canonical_values]
             unless legal_values.include?(value)
@@ -70,7 +70,7 @@ module DTK; class NodeBindings::NodeTarget
       def self.fill_in_defaults!(internal_form_hash)
         DefaultValues.each_pair {|key, value| internal_form_hash[key] ||= value }
       end
-      
+
     Fields = {
         image: {
           key: 'image',

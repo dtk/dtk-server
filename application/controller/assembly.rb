@@ -590,9 +590,17 @@ module DTK
       target_id = ret_request_param_id_optional(:target_id, Target::Instance)
       target = target_idh_with_default(target_id).create_object(model_name: :target_instance)
 
+      service_module_id = nil
+
+      unless service_module_id = ret_request_params(:service_module_id)
+        if ret_request_params(:service_module_name)
+          service_module_id = create_obj(:service_module_name, ServiceModule).id
+        end
+      end
+
       # Special case to support Jenikins CLI orders, since we are not using shell we do not have access
       # to element IDs. This "workaround" helps with that.
-      if service_module_id = ret_request_params(:service_module_id)
+      if service_module_id
         # this is name of assembly template
         assembly_id        = ret_request_params(:assembly_id)
         version            = ret_request_params(:version)
@@ -757,6 +765,8 @@ module DTK
     def rest__exec
       assembly    = ret_assembly_instance_object()
       params_hash = ret_params_hash(:commit_msg, :task_action, :task_params, :start_assembly, :skip_violations)
+
+      params_hash[:task_params] = params_hash[:task_params].is_a?(String) ? Hash.new : params_hash[:task_params]
       rest_ok_response assembly.exec(params_hash)
     end
 

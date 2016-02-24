@@ -17,7 +17,7 @@ RSpec.configure do |config|
   config.before(:all) do
     @conf = load_configs
     if @conf.headless
-      @homepage = load_headless(@conf.host)
+      @homepage = load_headless(@conf.host, @conf.parallel)
     elsif @conf.poltergeist
       @homepage = load_poltergeist(@conf.host)
     else
@@ -59,13 +59,16 @@ def load_configs
   conf.repoman_user = full_config["r8server"]["repoman_user"]
   conf.headless = full_config[env]["headless"]
   conf.poltergeist = full_config[env]["poltergeist"]
+  conf.parallel = full_config[env]["parallel"]
   return conf
 end
 
-def load_headless(full_host)
+def load_headless(full_host, parallel = false)
   require 'headless'
   puts 'Initializing browser, HEADLESS mode'
   Capybara.default_driver = :webkit
+  port = Capybara.server_port || 9000
+  Capybara.server_port = port + rand(100) if parallel
   @headless = Headless.new(display: 100, reuse: true, destroy_at_exit: false)
   @headless.start
   session = Capybara::Session.new :webkit
